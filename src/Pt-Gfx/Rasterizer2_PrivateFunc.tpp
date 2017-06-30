@@ -32,7 +32,9 @@
 // Line rasterization functions
 //
 
-inline void Rasterizer2::rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
+inline void Rasterizer2::rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1, 
+                                                 Pt::int32_t x2, Pt::int32_t y2, 
+                                                 const Color& color, DrawLineMask* maskInOut)
 {
     // Check for horizontal line
     if(y1 == y2) {
@@ -63,10 +65,19 @@ inline void Rasterizer2::rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
-inline void Rasterizer2::rasterOnePixelSolidLine_F(float x1, float y1, float x2, float y2, const Color& color, DrawLineMask* maskInOut)
-{ rasterOnePixelSolidGLineSegmentXWAA_F(x1, y1, x2, y2, color, maskInOut); }
 
-inline void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
+inline void Rasterizer2::rasterOnePixelSolidLine_F(float x1, float y1, 
+                                                   float x2, float y2, 
+                                                   const Color& color, DrawLineMask* maskInOut)
+{ 
+    rasterOnePixelSolidGLineSegmentXWAA_F(x1, y1, x2, y2, color, maskInOut); 
+}
+
+
+inline void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, 
+                                                     Pt::int32_t x2, Pt::int32_t y2, 
+                                                     const Color& color, Pt::int32_t& fpiCtrInOut, 
+                                                     DrawLineMask* maskInOut)
 {
     // Check the size of the line
     const Pt::int32_t sizeX = abs(x2 - x1);
@@ -93,7 +104,12 @@ inline void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t
     }
 }
 
-inline void Rasterizer2::rasterOnePixelPatternedLine_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
+
+inline void Rasterizer2::rasterOnePixelPatternedLine_F(float x1, float y1, 
+                                                       float x2, float y2, 
+                                                       const Color& color, 
+                                                       Pt::int32_t& fpiCtrInOut, 
+                                                       DrawLineMask* maskInOut)
 {
     // Check the size of the line
     const float sizeX = ::fabs(x2 - x1);

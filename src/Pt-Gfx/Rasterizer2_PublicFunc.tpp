@@ -170,9 +170,73 @@ inline void Rasterizer2::drawNarrowPolyline(const BasicPoint<PointT>* points,
 }
 
 
-inline void Rasterizer2::drawNarrowPolyline2(const PointF* points, size_t pointCount)
+inline void Rasterizer2::drawNarrowPolyline2(const PointF* pointsF, size_t pointCount)
 {
+    std::vector<PointF> clipped(pointsF, pointsF + pointCount);
+    BasicClipShape<double>::clipPolyline(clipped, _currentClip);
 
+    std::vector<Point> points;
+    for(std::size_t i = 0; i < clipped.size(); ++i)
+    {
+        const PointF& pf = clipped[i];
+        const Pt::int32_t x = Pt::lround( pf.x() );
+        const Pt::int32_t y = Pt::lround( pf.y() );
+        points.push_back( Point(x, y) );
+    }
+
+    if(points.size() < 2) 
+        return;
+
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    bool solid = _pen.style() == Pen::Solid;
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+
+    // From point N to point (N + 1), successively
+    std::size_t pc1 = points.size() - 1;
+
+    for(std::size_t i = 0; i < pc1; ++i) 
+    {
+        if(solid) 
+            rasterOnePixelSolidLine(points[i].x(), points[i].y(), 
+                                    points[i + 1].x(), points[i + 1].y(), 
+                                    _pen.color(), &mask_nnp1);
+        else      
+            rasterOnePixelPatternedLine(points[i].x(), points[i].y(), 
+                                        points[i + 1].x(), points[i + 1].y(), 
+                                        _pen.color(), fpiCtrInOut, &mask_nnp1);
+    }
+}
+
+inline void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
+{
+    std::vector<PointF> clipped(pointsF, pointsF + pointCount);
+    BasicClipShape<double>::clipPolyline(clipped, _currentClip);
+
+    if(clipped.size() < 2) 
+        return;
+
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    bool solid = _pen.style() == Pen::Solid;
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+
+    // From point N to point (N + 1), successively
+    std::size_t pc1 = clipped.size() - 1;
+
+    for(std::size_t i = 0; i < pc1; ++i) 
+    {
+        if(solid) 
+            rasterOnePixelSolidLine_F(clipped[i].x(), clipped[i].y(), 
+                                      clipped[i + 1].x(), clipped[i + 1].y(), 
+                                      _pen.color(), &mask_nnp1);
+        else      
+            rasterOnePixelPatternedLine_F(clipped[i].x(), clipped[i].y(), 
+                                          clipped[i + 1].x(), clipped[i + 1].y(), 
+                                          _pen.color(), fpiCtrInOut, &mask_nnp1);
+    }
 }
 
 //

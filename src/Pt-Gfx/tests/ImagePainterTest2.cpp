@@ -183,7 +183,8 @@ void benchmarkWideLines()
     Pt::Gfx::ImagePainter2 imagePainter(image);
     imagePainter.setAntiAliasing(true);
 
-    imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 1 )  );
+    //imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 1 )  );
+    imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 8 )  );
     //imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 8, Pen::Dash )  );
 
     std::vector<PointF> polyline;

@@ -184,6 +184,8 @@ class Rasterizer2
 
         void drawNarrowPolyline2(const PointF* points, size_t pointCount);
 
+        void drawNarrowPath(const PointF* pointsF, size_t pointCount);
+
         void fillPolygon2( const PointF* ps, std::size_t n );
 
         void fillPolygons(const std::vector<Polygon>& polygons);

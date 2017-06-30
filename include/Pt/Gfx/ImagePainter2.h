@@ -145,8 +145,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         static std::vector<std::string> fontNames();
 
     private:
-        void drawWidePolyline(const PointF* ps, const size_t pointCount,
-                              bool autoClose, const int32_t* segmentIndexMarker);
+        void drawWidePolyline(const PointF* ps, const size_t pointCount);
 
         // USUSED
         void clipPolygonXXX(std::vector<PointF>& result, 

@@ -139,27 +139,33 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
 }
 
 
-void ImagePainter2::drawWidePolyline(const PointF* points, const size_t pointCount,
-                                     bool autoClose, const int32_t* segmentIndexMarker)
+void ImagePainter2::drawWidePolyline(const PointF* points, const size_t pointCount)
 {
-    std::vector<Polygon> polygons;
-
     //LineRenderer lr;
 
     // TODO: set pattern only once
     //if( _rasterizer->pen().style() != Pen::Solid )
     //    lr.setPattern( _rasterizer->pen().style() );
     
+    std::vector<Polygon> polygons;
     _lr->renderWidePolyline( polygons, points, pointCount, _rasterizer->pen() );
 
-    for(std::size_t n = 0; n < polygons.size(); ++n)
+    bool isSolid = _rasterizer->pen().style() == Pen::Solid;
+    bool isClosed = points[0] == points[pointCount - 1];
+
+    if( isSolid && isClosed )
     {
-        const std::vector<PointF>& pp = polygons[n].points();
-        _rasterizer->fillLine( &pp[0], pp.size() );
+        _rasterizer->fillPolyline( polygons );
+    }
+    else
+    {
+        for(std::size_t n = 0; n < polygons.size(); ++n)
+        {
+            const std::vector<PointF>& pp = polygons[n].points();
+            _rasterizer->fillLine( &pp[0], pp.size() );
+        }
     }
 }
-
-
 
 
 void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
@@ -200,6 +206,7 @@ void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1,
     if(!closingCap) generateLineButtCap(dst, x2, y2, -nx, -ny);
 }
 
+
 void ImagePainter2::deduplicatePointsF(std::vector<PointF>& dst, const PointF* src, const size_t pointCount)
 {
     // Check if there is no actual point
@@ -236,7 +243,6 @@ void ImagePainter2::deduplicatePointsF(std::vector<PointF>& dst, const PointF* s
         );
     }
 }
-
 
 
 void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, Pt::int32_t& piCtrInOut)
@@ -362,10 +368,12 @@ std::string ImagePainter2::defaultFont()
   return FreeType2::instance().defaultFont();
 }
 
+
 std::vector<std::string> ImagePainter2::fontNames()
 {
   return FreeType2::instance().fontNames();
 }
+
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image) )
@@ -427,16 +435,16 @@ void ImagePainter2::setClip(const RectF& clip)
 
 const Gfx::RectF& ImagePainter2::clip() const
 {
-  return _clip;
+    return _clip;
 }
 
 
 void ImagePainter2::setPen( const Pen& pen )
 {
-  _rasterizer->setPen(pen);
+    _rasterizer->setPen(pen);
 
-  if( pen.style() != Pen::Solid )
-      _lr->setPattern( pen.style() );
+    if( pen.style() != Pen::Solid )
+        _lr->setPattern( pen.style() );
 }
 
 
@@ -448,23 +456,25 @@ const Pen& ImagePainter2::pen() const
 
 void ImagePainter2::setBrush(const Brush& brush)
 {
-  _rasterizer->setBrush(brush);
+    _rasterizer->setBrush(brush);
 }
 
 
 const Brush& ImagePainter2::brush() const
 {
-  return _rasterizer->brush();
+    return _rasterizer->brush();
 }
+
 
 void ImagePainter2::setFont(const Font& font)
 {
-  _rasterizer->setFont( font );
+    _rasterizer->setFont( font );
 }
+
 
 const Font& ImagePainter2::font() const
 {
-  return _rasterizer->font();
+    return _rasterizer->font();
 }
 
 
@@ -475,6 +485,7 @@ void ImagePainter2::drawImage( const PointF& to, const Image& image )
     _rasterizer->drawImage(to_, image);
 
 }
+
 
 void ImagePainter2::drawImage( const PointF& to, const Image& image, const RectF& imageRect )
 {
@@ -499,13 +510,13 @@ void ImagePainter2::drawText( const PointF& to, const String& text )
 
 FontMetrics ImagePainter2::fontMetrics(const String& text) const
 {
-  return _rasterizer->fontMetrics( text );
+    return _rasterizer->fontMetrics( text );
 }
 
 
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
 {
-  return Rasterizer2::fontMetrics(font, text);
+    return Rasterizer2::fontMetrics(font, text);
 }
 
 
@@ -582,121 +593,17 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 }
 
 
-void ImagePainter2::drawRect( const RectF& rect )
-{
-    // Rasterize one-pixel rectangle
-    if(_rasterizer->pen().size() == 1) {
-        // Convert the points
-        const Point tl( lround(rect.topLeft    ().x()), lround(rect.topLeft    ().y()) );
-        const Point br( lround(rect.bottomRight().x()), lround(rect.bottomRight().y()) );
-        // Rasterize the rectangle
-        _rasterizer->strokeOnePixelRect(tl, br);
-        return;
-    }
-
-    // Generate and draw a polyline that represents the rectangle
-    const PointF pointsF[5] = {
-        rect.bottomLeft(), rect.bottomRight(), rect.topRight(), rect.topLeft(), rect.bottomLeft()
-    };
-
-    drawPolyline(pointsF, 5);
-}
-
-void ImagePainter2::fillRect( const RectF& rect )
-{
-    // Convert the points
-    const Point tl( lround(rect.topLeft    ().x()), lround(rect.topLeft    ().y()) );
-    const Point br( lround(rect.bottomRight().x()), lround(rect.bottomRight().y()) );
-
-    // Rasterize the rectangle
-    _rasterizer->fillRect(tl, br);
-}
-
-void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
-{
-    // Extract the coordinates
-    const float x1 = rect.topLeft    ().x();
-    const float y1 = rect.topLeft    ().y();
-    const float x2 = rect.bottomRight().x();
-    const float y2 = rect.bottomRight().y();
-
-    // Rasterize one-pixel round rectangle
-    if(_rasterizer->pen().size() == 1)
-    {
-        _rasterizer->strokeNarrowRoundedRect(rect, radius);
-        return;
-    }
-
-    // Generate a polygon that represents the rounded-rectangle
-    std::vector<PointF> pointsF;
-    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Pt::lround(ceil(_rasterizer->pen().size() * 0.5f)));
-
-    // Save the original pen and create a new pen with bevel join
-    const Pen orgPen = _rasterizer->pen();
-
-    Pen newPen = orgPen;
-    newPen.setJoinStyle(Pen::BevelJoin);
-
-    // Draw the polygon
-    _rasterizer->setPen(newPen);
-    drawThickPolyline_impl(pointsF.data(), pointsF.size(), true, 0);
-    _rasterizer->setPen(orgPen);
-}
-
-void ImagePainter2::fillRoundedRect( const RectF& rect, float radius )
-{
-    // Extract the coordinates
-    const float x1 = rect.topLeft    ().x();
-    const float y1 = rect.topLeft    ().y();
-    const float x2 = rect.bottomRight().x();
-    const float y2 = rect.bottomRight().y();
-
-    // Generate a polygon that represents the rounded-rectangle
-    std::vector<PointF> pointsF;
-    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Pt::lround(ceil(_rasterizer->pen().size() * 0.5f)));
-
-    _rasterizer->fillPolygon2( &pointsF[0], pointsF.size() );
-    return;
-
-    //// Use anti-aliasing
-    //if( _rasterizer->isAntiAliasing() ) {
-    //    // Remove duplicates
-    //    std::vector<PointF> points;
-    //    deduplicatePointsF(points, pointsF.data(), pointsF.size());
-    //    // Draw the polygon
-    //    _rasterizer->fillPolygon(points.data(), points.size());
-    //}
-
-    //// Do not use use anti-aliasing
-    //else {
-    //    // Round the points and remove duplicates
-    //    std::vector<Point> points;
-    //    cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-    //    // Draw the polygon
-    //    _rasterizer->fillPolygon(points.data(), points.size());
-    //}
-}
-
 void ImagePainter2::drawPolyline(const PointF* ps, const size_t pointCount)
 {
 #if 1
-    // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) 
-    {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, ps, pointCount);
-            
-        // Rasterize the polygon
-        bool autoClose = ps[0] == ps[pointCount - 1];
-           
-        _rasterizer->drawNarrowPolyline(points.data(), points.size(), autoClose);
-        return;
+    {          
+        _rasterizer->drawNarrowPolyline2(ps, pointCount);
     }
-
-    bool autoClose = ps[0] == ps[pointCount - 1];
-
-    drawWidePolyline(ps, pointCount, autoClose, 0);
+    else
+    {
+        drawWidePolyline(ps, pointCount);
+    }
 #else
     bool autoClose = false;
 
@@ -735,37 +642,66 @@ void ImagePainter2::drawPolyline(const PointF* ps, const size_t pointCount)
 #endif
 }
 
-void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount)
+
+void ImagePainter2::drawRect( const RectF& rect )
 {
-    // NOTE: enable the next two lines to use another internal API of the
-    //       polygon rasterizer
-
-#if 1
-
-    _rasterizer->fillPolygon2(ps, pointCount);
-
-#else
-
-    // Use anti-aliasing
-    if( _rasterizer->isAntiAliasing() ) {
-        // Remove duplicates
-        std::vector<PointF> pointsF;
-        deduplicatePointsF(pointsF, ps, pointCount);
-
-        // Rasterize the polygon
-        _rasterizer->fillPolygon(pointsF.data(), pointsF.size());
+    // Rasterize one-pixel rectangle
+    if(_rasterizer->pen().size() == 1) {
+        // Convert the points
+        const Point tl( lround(rect.topLeft    ().x()), lround(rect.topLeft    ().y()) );
+        const Point br( lround(rect.bottomRight().x()), lround(rect.bottomRight().y()) );
+        // Rasterize the rectangle
+        _rasterizer->strokeOnePixelRect(tl, br);
+        return;
     }
 
-    // Do not use use anti-aliasing
-    else {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, ps, pointCount);
-        // Rasterize the polygon
-        _rasterizer->fillPolygon(points.data(), points.size());
-    }
-#endif
+    // Generate and draw a polyline that represents the rectangle
+    const PointF pointsF[5] = {
+        rect.bottomLeft(), rect.bottomRight(), rect.topRight(), rect.topLeft(), rect.bottomLeft()
+    };
+
+    drawPolyline(pointsF, 5);
 }
+
+
+void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
+{
+    // Extract the coordinates
+    const float x1 = rect.topLeft    ().x();
+    const float y1 = rect.topLeft    ().y();
+    const float x2 = rect.bottomRight().x();
+    const float y2 = rect.bottomRight().y();
+
+    // Rasterize one-pixel round rectangle
+    if(_rasterizer->pen().size() == 1)
+    {
+        _rasterizer->strokeNarrowRoundedRect(rect, radius);
+        return;
+    }
+
+    // Generate a polygon that represents the rounded-rectangle
+    std::vector<PointF> pointsF;
+    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Pt::lround(ceil(_rasterizer->pen().size() * 0.5f)));
+
+    // Save the original pen and create a new pen with bevel join
+    const Pen orgPen = _rasterizer->pen();
+
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    // Draw the polygon
+    _rasterizer->setPen(newPen);
+    
+    //drawThickPolyline_impl(pointsF.data(), pointsF.size(), true, 0);
+
+    if( ! pointsF.empty() )
+        pointsF.push_back( pointsF.front() );
+
+    drawWidePolyline( pointsF.data(), pointsF.size() );
+    
+    _rasterizer->setPen(orgPen);
+}
+
 
 #if 1
 
@@ -821,7 +757,7 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
         
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
-        drawWidePolyline(pointsF.data(), pointsF.size(), false, 0);
+        drawWidePolyline(pointsF.data(), pointsF.size());
         _rasterizer->setPen(orgPen);
     }
 }
@@ -906,108 +842,6 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
 }
 
 #endif
-
-void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
-{
-    // Convert the points
-    const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
-    const Size  sz( lround(size   .width()), lround(size   .height()) );
-
-    // Rasterize the ellipse
-    _rasterizer->fillEllipse(tl, sz);
-}
-
-
-enum ClipMode
-{
-  Intersection, Union, Difference, Xor
-};
-
-
-void ImagePainter2::clipPolygonXXX(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion)
-{
-    ClipMode cm = Intersection;
-
-    // Working variables
-    ClipperLib::Clipper clipper;
-    ClipperLib::Path    cpath;
-    ClipperLib::Paths   cpresult;
-    size_t              startIndex;
-
-    // Separate and append the clipper polygons
-    startIndex = 0;
-    for(size_t i = 0; i <= clipRegion.size(); ++i) {
-        // Search for the end and/or separator points
-        if( i == clipRegion.size() || (clipRegion[i].x() > Painter::MaximumCoordinateF && clipRegion[i].y() > Painter::MaximumCoordinateF) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Append the polygon to the clipper
-            cpath.resize(curPC);
-            for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = lround( clipRegion[startIndex + j].x() * VecResScaleUp );
-                cpath[j].Y = lround( clipRegion[startIndex + j].y() * VecResScaleUp );
-            }
-            clipper.AddPath(cpath, ClipperLib::ptClip, true);
-            // Increment the start index
-            startIndex += curPC + 1;
-        }
-    }
-
-    // Separate and append the subject polygons
-    startIndex = 0;
-    for(size_t i = 0; i <= subject.size(); ++i) {
-        // Search for the end and/or separator points
-        if( i == subject.size() || (subject[i].x() > Painter::MaximumCoordinateF && subject[i].y() > Painter::MaximumCoordinateF) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Append the polygon to the clipper
-            cpath.resize(curPC);
-            for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = lround( subject[startIndex + j].x() * VecResScaleUp );
-                cpath[j].Y = lround( subject[startIndex + j].y() * VecResScaleUp );
-            }
-            clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
-            // Increment the start index
-            startIndex += curPC + 1;
-        }
-    }
-
-    // Perform clipping
-    result.clear();
-
-    switch(cm) {
-        case Intersection:
-            clipper.Execute(ClipperLib::ctIntersection, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        case Union:
-            clipper.Execute(ClipperLib::ctUnion,        cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        case Difference:
-            clipper.Execute(ClipperLib::ctDifference,   cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        case Xor:
-            clipper.Execute(ClipperLib::ctXor,          cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        default:
-            return;
-    }
-
-    // Combine back the result polygons
-    for(size_t i = 0; i < cpresult.size(); ++i) {
-        const ClipperLib::Path& curPath = cpresult[i];
-        if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
-        for(size_t j = 0; j < curPath.size(); ++j) {
-            result.push_back( PointF(
-                curPath[j].X * VecResScaleDn,
-                curPath[j].Y * VecResScaleDn
-            ) );
-        }
-    }
-}
 
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
@@ -1200,7 +1034,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
         
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
-        drawWidePolyline(pointsF.data(), pointsF.size(), false, 0);
+        drawWidePolyline(pointsF.data(), pointsF.size());
         _rasterizer->setPen(orgPen);
     }
 }
@@ -1390,6 +1224,114 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
 
 #endif
 
+
+void ImagePainter2::drawPath(const Path& path, float smoothness)
+{
+    // Convert the path to polyline points
+    std::vector<PointF> pointsF;
+    path.toPoints(pointsF, smoothness);
+
+    if(_rasterizer->pen().size() == 1) 
+    {          
+        _rasterizer->drawNarrowPath( &pointsF[0], pointsF.size() );
+    }
+    else
+    {
+        drawWidePolyline( &pointsF[0], pointsF.size() );
+    }
+}
+
+
+void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount)
+{
+    // NOTE: enable the next two lines to use another internal API of the
+    //       polygon rasterizer
+
+#if 1
+
+    _rasterizer->fillPolygon2(ps, pointCount);
+
+#else
+
+    // Use anti-aliasing
+    if( _rasterizer->isAntiAliasing() ) {
+        // Remove duplicates
+        std::vector<PointF> pointsF;
+        deduplicatePointsF(pointsF, ps, pointCount);
+
+        // Rasterize the polygon
+        _rasterizer->fillPolygon(pointsF.data(), pointsF.size());
+    }
+
+    // Do not use use anti-aliasing
+    else {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        cnvPointsFToPointsDeduplicate(points, ps, pointCount);
+        // Rasterize the polygon
+        _rasterizer->fillPolygon(points.data(), points.size());
+    }
+#endif
+}
+
+
+void ImagePainter2::fillRect( const RectF& rect )
+{
+    // Convert the points
+    const Point tl( lround(rect.topLeft    ().x()), lround(rect.topLeft    ().y()) );
+    const Point br( lround(rect.bottomRight().x()), lround(rect.bottomRight().y()) );
+
+    // Rasterize the rectangle
+    _rasterizer->fillRect(tl, br);
+}
+
+
+void ImagePainter2::fillRoundedRect( const RectF& rect, float radius )
+{
+    // Extract the coordinates
+    const float x1 = rect.topLeft    ().x();
+    const float y1 = rect.topLeft    ().y();
+    const float x2 = rect.bottomRight().x();
+    const float y2 = rect.bottomRight().y();
+
+    // Generate a polygon that represents the rounded-rectangle
+    std::vector<PointF> pointsF;
+    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Pt::lround(ceil(_rasterizer->pen().size() * 0.5f)));
+
+    _rasterizer->fillPolygon2( &pointsF[0], pointsF.size() );
+    return;
+
+    //// Use anti-aliasing
+    //if( _rasterizer->isAntiAliasing() ) {
+    //    // Remove duplicates
+    //    std::vector<PointF> points;
+    //    deduplicatePointsF(points, pointsF.data(), pointsF.size());
+    //    // Draw the polygon
+    //    _rasterizer->fillPolygon(points.data(), points.size());
+    //}
+
+    //// Do not use use anti-aliasing
+    //else {
+    //    // Round the points and remove duplicates
+    //    std::vector<Point> points;
+    //    cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+    //    // Draw the polygon
+    //    _rasterizer->fillPolygon(points.data(), points.size());
+    //}
+}
+
+
+void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
+{
+    // Convert the points
+    const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
+    const Size  sz( lround(size   .width()), lround(size   .height()) );
+
+    // Rasterize the ellipse
+    _rasterizer->fillEllipse(tl, sz);
+}
+
+
 void ImagePainter2::fillPie( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
      Point tl( lround(topLeft.x()), lround(topLeft.y()) );
@@ -1405,17 +1347,6 @@ void ImagePainter2::fillChord( const PointF& topLeft, const SizeF& size, float d
     const Size  sz( lround(size   .width()), lround(size.height()) );
 
      _rasterizer->fillArc(tl, sz, degBegin, degEnd, ArcMode::Chord);
-}
-
-
-void ImagePainter2::drawPath(const Path& path, float smoothness)
-{
-    // Convert the path to polyline points
-    std::vector<PointF> pointsF;
-    path.toPoints(pointsF, smoothness);
-
-    // Draw the polyline
-    drawPolyline(pointsF.data(), pointsF.size());
 }
 
 
@@ -2245,5 +2176,98 @@ bool ImagePainter2::intersectLine(bool& inLine, PointF& intersect, const PointF&
     return true;
 }
 
+
+enum ClipMode
+{
+  Intersection, Union, Difference, Xor
+};
+
+
+void ImagePainter2::clipPolygonXXX(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion)
+{
+    ClipMode cm = Intersection;
+
+    // Working variables
+    ClipperLib::Clipper clipper;
+    ClipperLib::Path    cpath;
+    ClipperLib::Paths   cpresult;
+    size_t              startIndex;
+
+    // Separate and append the clipper polygons
+    startIndex = 0;
+    for(size_t i = 0; i <= clipRegion.size(); ++i) {
+        // Search for the end and/or separator points
+        if( i == clipRegion.size() || (clipRegion[i].x() > Painter::MaximumCoordinateF && clipRegion[i].y() > Painter::MaximumCoordinateF) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Append the polygon to the clipper
+            cpath.resize(curPC);
+            for(size_t j = 0; j < curPC; ++j) {
+                cpath[j].X = lround( clipRegion[startIndex + j].x() * VecResScaleUp );
+                cpath[j].Y = lround( clipRegion[startIndex + j].y() * VecResScaleUp );
+            }
+            clipper.AddPath(cpath, ClipperLib::ptClip, true);
+            // Increment the start index
+            startIndex += curPC + 1;
+        }
+    }
+
+    // Separate and append the subject polygons
+    startIndex = 0;
+    for(size_t i = 0; i <= subject.size(); ++i) {
+        // Search for the end and/or separator points
+        if( i == subject.size() || (subject[i].x() > Painter::MaximumCoordinateF && subject[i].y() > Painter::MaximumCoordinateF) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Append the polygon to the clipper
+            cpath.resize(curPC);
+            for(size_t j = 0; j < curPC; ++j) {
+                cpath[j].X = lround( subject[startIndex + j].x() * VecResScaleUp );
+                cpath[j].Y = lround( subject[startIndex + j].y() * VecResScaleUp );
+            }
+            clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
+            // Increment the start index
+            startIndex += curPC + 1;
+        }
+    }
+
+    // Perform clipping
+    result.clear();
+
+    switch(cm) {
+        case Intersection:
+            clipper.Execute(ClipperLib::ctIntersection, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        case Union:
+            clipper.Execute(ClipperLib::ctUnion,        cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        case Difference:
+            clipper.Execute(ClipperLib::ctDifference,   cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        case Xor:
+            clipper.Execute(ClipperLib::ctXor,          cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        default:
+            return;
+    }
+
+    // Combine back the result polygons
+    for(size_t i = 0; i < cpresult.size(); ++i) {
+        const ClipperLib::Path& curPath = cpresult[i];
+        if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
+        for(size_t j = 0; j < curPath.size(); ++j) {
+            result.push_back( PointF(
+                curPath[j].X * VecResScaleDn,
+                curPath[j].Y * VecResScaleDn
+            ) );
+        }
+    }
+}
+
 } // namespace
+
 } // namespace

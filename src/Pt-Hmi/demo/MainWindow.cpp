@@ -233,14 +233,15 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //path.addEllipse( Pt::Gfx::SizeF(50, 100) );
     //path.transform(trans);
 
-    imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0) ) );
+    //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0) ) );
     //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10) );
-    //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10, Gfx::Pen::Dash) );
+    imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10, Gfx::Pen::Dash) );
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
     //imagePainter.fillPath(path);
+    //imagePainter.drawPath(path);
 
-    //imagePainter.drawRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
-    //                                              Pt::Gfx::SizeF(50, 50)), 10);
+    imagePainter.drawRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
+                                                 Pt::Gfx::SizeF(50, 50)), 10);
 
     std::vector<Gfx::PointF> polyline;
     polyline.push_back( Pt::Gfx::PointF(40, 40) );
@@ -249,13 +250,13 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     polyline.push_back( Pt::Gfx::PointF(650, 250) );
     polyline.push_back( Pt::Gfx::PointF(50, 50) );
 
-    imagePainter.fillPolygon( &polyline[0], polyline.size() );
-    imagePainter.drawPolyline( &polyline[0], polyline.size() );
+    //imagePainter.fillPolygon( &polyline[0], polyline.size() );
+    //imagePainter.drawPolyline( &polyline[0], polyline.size() );
 
     //imagePainter.drawLine(  Pt::Gfx::PointF(50, 50), Pt::Gfx::PointF(300, 290)  );
 
     //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
-    imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 1000));
+    //imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 1000));
 
     //imagePainter.drawPie(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 100), 20, 200);
 
