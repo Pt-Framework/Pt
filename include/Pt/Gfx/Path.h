@@ -193,8 +193,6 @@ class PT_GFX_API Path
         void addChord(const SizeF& size,  float degBegin, float degEnd);
 
         void transform(const Transform& transform);
-
-        void toPoints(std::vector<PointF>& dst, float smoothness = 1) const; 
         
         void toPolygons(std::vector<Polygon>& polygons, float smoothness = 1) const; 
 
