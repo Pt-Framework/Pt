@@ -63,7 +63,10 @@ namespace Gfx {
 // ======================================================================================
 
 FreeType2::~FreeType2()
-{ if(_manager) FTC_Manager_Done(_manager); }
+{ 
+    if(_manager) 
+        FTC_Manager_Done(_manager); 
+}
 
 const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType)
 {
@@ -71,11 +74,15 @@ const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, 
 
     FT_Face  face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
-    if(ferr && ferr != FT_Err_Out_Of_Memory) return FontMetrics(0, 0, 0, 0);
+    if(ferr && ferr != FT_Err_Out_Of_Memory) 
+        return FontMetrics(0, 0, 0, 0);
 
     FT_Int charMapIndex = 0;
-    for(Pt::int32_t n = 0; n < face->num_charmaps; ++n) {
-        if(face->charmap[n].encoding != FT_ENCODING_UNICODE) continue;
+    for(Pt::int32_t n = 0; n < face->num_charmaps; ++n) 
+    {
+        if(face->charmap[n].encoding != FT_ENCODING_UNICODE) 
+            continue;
+        
         charMapIndex = n;
         break;
     }
@@ -84,7 +91,7 @@ const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, 
     scaler.face_id = imageType->face_id;
     scaler.width   = imageType->width;
     scaler.height  = imageType->height;
-    scaler.pixel   = 1;                  // Set to 1 to ignore "scaler.x_res" and "scaler.y_res"
+    scaler.pixel   = 1; // Set to 1 to ignore "scaler.x_res" and "scaler.y_res"
 
     FT_Size size;
     FTC_Manager_LookupSize(_manager, &scaler, &size);
@@ -101,12 +108,15 @@ const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, 
                           std::numeric_limits<FT_Pos>::min()
                         };
 
-    for(String::const_iterator it = text.begin(); it != text.end(); ++it) {
-        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
-        if(!glyph_index) continue;
+    for(String::const_iterator it = text.begin(); it != text.end(); ++it) 
+    {
+        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, 
+                                                   charMapIndex, it->value());
+        if( ! glyph_index) 
+            continue;
 
         FTC_Node node;
-        if(FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node))
+        if( FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node) )
             continue;
 
         FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_PIXELS, &gbbox);
@@ -233,10 +243,11 @@ void FreeType2::pathFromChar(
     }
 }
 
-void FreeType2::draw(
-    Image& image, const Rect& clip, const Point& pos_, const Color& color,const CompositionMode& mode,
-    const String& text, FTC_FaceID faceId, FTC_ImageType imageType, bool mono, const Transform& t
-)
+void FreeType2::draw(Image& image, const Rect& clip, 
+                     const Point& pos_, const Color& color,
+                     const CompositionMode& mode,const String& text, 
+                     FTC_FaceID faceId, FTC_ImageType imageType, 
+                     bool mono, const Transform& t)
 {
     System::MutexLock lock(FreeType2::_mutex);
 
@@ -245,39 +256,6 @@ void FreeType2::draw(
     PointF posF(pos_.x(), pos_.y());
     posF = t * posF;
     Point pos((int) posF.x(), (int) posF.y());
-
-    FT_Matrix matrix;
-
-
-  //  const float angle   = 450.0 / 10.0f * Gfx::Math::DegToRad;
-//    const float cosinus = Gfx::Math::fastCos( angle ) * 0x10000L;
-//    const float sinus   = Gfx::Math::fastSin( angle ) * 0x10000L;
-
-//    matrix.xx = (FT_Fixed) ( cosinus);
-//    matrix.xy = (FT_Fixed) (-sinus  );
-//    matrix.yx = (FT_Fixed) ( sinus  );
-//    matrix.yy = (FT_Fixed) ( cosinus);
-    
-    matrix.xx = t.m11() * 0x10000L;
-    matrix.xy = t.m12() * 0x10000L;
-    matrix.yx = t.m21() * 0x10000L;;
-    matrix.yy = t.m22() * 0x10000L;; 
-
-    FT_Face  face = 0;
-    FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
-    if(ferr && ferr != FT_Err_Out_Of_Memory) return;
-
-    FT_Int charMapIndex = 0;
-    for(Pt::int32_t n = 0; n < face->num_charmaps; ++n) {
-        if(face->charmap[n].encoding == FT_ENCODING_UNICODE) {
-            charMapIndex = n;
-            break;
-        }
-    }
-
-    FT_Vector glyphPos;
-    glyphPos.x = (Pt::int32_t) pos.x() << 16;
-    glyphPos.y = (Pt::int32_t) pos.y() << 16;
 
     // Glyph data
     FTC_Node       node;
@@ -296,23 +274,55 @@ void FreeType2::draw(
     Pt::int32_t    height;
     Pt::int32_t    width;
     unsigned char* buffer;
+    
+    FT_Matrix matrix;
+    matrix.xx = t.m11() * 0x10000L;
+    matrix.xy = t.m12() * 0x10000L;
+    matrix.yx = t.m21() * 0x10000L;
+    matrix.yy = t.m22() * 0x10000L;
 
-    for(String::const_iterator it = text.begin(); it != text.end(); ++it) {
+    FT_Face  face = 0;
+    FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
+    if(ferr && ferr != FT_Err_Out_Of_Memory) 
+        return;
 
-        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
-        if(!glyph_index) continue;
-
-        if(t.isIdentity()) 
+    FT_Int charMapIndex = 0;
+    for(Pt::int32_t n = 0; n < face->num_charmaps; ++n) 
+    {
+        if(face->charmap[n].encoding == FT_ENCODING_UNICODE) 
         {
-            if(mono) imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;
-            else     imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL;
-            if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
+            charMapIndex = n;
+            break;
+        }
+    }
+
+    FT_Vector glyphPos;
+    glyphPos.x = (Pt::int32_t) pos.x() << 16;
+    glyphPos.y = (Pt::int32_t) pos.y() << 16;
+
+    for(String::const_iterator it = text.begin(); it != text.end(); ++it) 
+    {
+        FT_UInt glyph_index = FTC_CMapCache_Lookup( _charMapCache, faceId, 
+                                                    charMapIndex, it->value() );
+        if( ! glyph_index) 
+            continue;
+
+        if( t.isIdentity() ) 
+        {
+            if(mono) 
+                imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;
+            else     
+                imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL;
+            
+            if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, 
+                                    &smalGlyphBitmap, &node) )
                 continue;
 
             incX = smalGlyphBitmap->xadvance << 16;
             incY = smalGlyphBitmap->yadvance << 16;
 
-            if(FT_HAS_KERNING(face) && previous) {
+            if(FT_HAS_KERNING(face) && previous) 
+            {
                 FT_Vector delta;
                 FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
                 if(delta.x < incX && delta.y < incY) {
@@ -328,7 +338,8 @@ void FreeType2::draw(
             height = smalGlyphBitmap->height;
             buffer = smalGlyphBitmap->buffer;
         }
-        else {
+        else 
+        {
             if(mono) {
                 imageType->flags = FT_LOAD_TARGET_MONO;
 
@@ -339,7 +350,8 @@ void FreeType2::draw(
                 FT_Glyph_Transform( glyphCopy, &matrix, 0);
                 FT_Glyph_To_Bitmap( &glyphCopy, FT_RENDER_MODE_MONO, 0, 1 );
             }
-            else {
+            else 
+            {
                 imageType->flags = FT_LOAD_TARGET_NORMAL;
 
                 if(FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node))
@@ -582,25 +594,33 @@ void FreeType2::drawGlyph(
 
         // With anti-aliasing
         else {
-            for(Pt::int32_t x = ofsx; x < width; ++x, ++dsx) {
-                if(dsx < x1) continue;
-                if(dsx > x2) break;
+            for(Pt::int32_t x = ofsx; x < width; ++x, ++dsx) 
+            {
+                if(dsx < x1) 
+                    continue;
+                
+                if(dsx > x2) 
+                    break;
 
                 const unsigned char value = buffer[yOffset + x];
                 if(!value) continue;
 
                 Pixel pixel(image.view(), dsx, dsy);
 
-                if(mode == CompositionMode::SourceOver) {
+                if(mode == CompositionMode::SourceOver) 
+                {
                     pixelColor.setAlpha(color.alpha() * value / 255);
                     image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
                 }
-                else { // SourceCopy
-                    if(value != 255) {
+                else 
+                { // SourceCopy
+                    if(value != 255) 
+                    {
                         pixelColor.setAlpha(value * 257);
                         image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
                     }
-                    else {
+                    else 
+                    {
                         image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
                     }
                 }

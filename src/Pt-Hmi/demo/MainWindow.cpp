@@ -213,11 +213,11 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     
     Painter painter( surface() );
 
-    Gfx::ImagePainter::setDefaultFont("DejaVu Sans");
+    Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 800) );
     Gfx::ImagePainter2 imagePainter(image);
-    imagePainter.setAntiAliasing(true);
+    //imagePainter.setAntiAliasing(true);
 
     Pt::Gfx::Transform trans;
     trans.translate(-125, -150);     
@@ -238,11 +238,11 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10, Gfx::Pen::Dash) );
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
     
-    imagePainter.fillPath(path);
+    //imagePainter.fillPath(path);
     //imagePainter.drawPath(path);
 
-    imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
-                                                 Pt::Gfx::SizeF(50, 50)), 10);
+    //imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
+    //                                             Pt::Gfx::SizeF(50, 50)), 10);
 
     std::vector<Gfx::PointF> polyline;
     polyline.push_back( Pt::Gfx::PointF(40, 40) );
@@ -262,7 +262,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.drawArc(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 100), 20, 200);
 
 //    imagePainter.setFont( Pt::Gfx::Font("", 24) );
-//    imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello");
+    imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello", trans);
 
     painter.setClip(rect);
     painter.drawImage(Gfx::PointF(0, 0), image);

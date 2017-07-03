@@ -326,6 +326,7 @@
     <ClInclude Include="..\..\src\Pt-Gfx\DrawText.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Edge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\EdgeTable.h" />
+    <ClInclude Include="..\..\src\Pt-Gfx\Fixed.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\FreeType.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineEdge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineFace.h" />
@@ -535,6 +536,12 @@
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Arc.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Bezier.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Ellipse.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Line.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Polygon.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Rectangle.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb16Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb32Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Argb32Test.cpp" />

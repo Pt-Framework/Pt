@@ -43,10 +43,6 @@ DrawText::DrawText()
 // TODO: handle _clip.isNull() like no clipping
 , _clip( Point(0, 0), Size(999999, 999999) )
 {
-    _matrix.xx = 0;
-    _matrix.xy = 0;
-    _matrix.yx = 0;
-    _matrix.yy = 0;
 }
 
 
@@ -77,17 +73,23 @@ void DrawText::setFont(const Font& font)
     // setup the rotation matrix
     _fontAngle = font.angle() % 3600;
 
-    if ( _fontAngle < 0 )
+    if( _fontAngle < 0 )
         _fontAngle += 3600;
 
-    const double angle   = (_fontAngle / 10.0  *  3.14159) / 180.0 ;
-    const double cosinus = std::cos( angle ) * 0x10000L;
-    const double sinus   = std::sin( angle ) * 0x10000L;
+    const double angle   = (_fontAngle / 10.0  *  3.14159) / 180.0;
 
-    _matrix.xx = (FT_Fixed) std::ceil( cosinus );
-    _matrix.xy = (FT_Fixed) std::ceil( -sinus );
-    _matrix.yx = (FT_Fixed) std::ceil( sinus );
-    _matrix.yy = (FT_Fixed) std::ceil( cosinus );
+    if(angle > 0.1)
+    {
+        const double cosinus = std::cos( angle );
+        const double sinus   = std::sin( angle );
+
+        _transform.set( std::ceil(cosinus), std::ceil( -sinus ),
+                        std::ceil(sinus), std::ceil( cosinus ), 0, 0 );
+    }
+    else
+    {
+        _transform.reset();
+    }
 }
 
 
@@ -98,10 +100,11 @@ FontMetrics DrawText::fontMetrics(const String& text)
 
 
 void DrawText::draw(Image& image, const Color& color,
-                    const Point& pos, const String& text, const CompositionMode& mode)
+                    const Point& pos, const String& text, 
+                    const CompositionMode& mode)
 {
-    return FreeType::instance().draw(image, color, _fontAngle, pos, text,_clip, mode,
-                                     _matrix, _faceId, &_imageType);
+    return FreeType::instance().draw(image, color, pos, text,_clip, mode,
+                                     _transform, _faceId, &_imageType);
 }
 
 

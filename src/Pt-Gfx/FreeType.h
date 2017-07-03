@@ -53,6 +53,7 @@ class Color;
 class Image;
 class FontMetrics;
 class CompositionMode;
+class Transform;
 
 class FreeType : public Pt::Singleton<FreeType>
 {
@@ -76,16 +77,19 @@ class FreeType : public Pt::Singleton<FreeType>
         void setFontDir(const System::Path& path);
 
         FontMetrics fontMetrics(const String& text,
-                                FTC_FaceID faceId, FTC_ImageType imageType);
+                                FTC_FaceID faceId, 
+                                FTC_ImageType imageType);
 
         static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library,
                                     FT_Pointer request_data, FT_Face* face);
 
         FTC_FaceID findFaceId(const Font& font);
 
-        void draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
-                  const Point& pos, const String& text, const Rect& clip, const CompositionMode& mode,
-                  FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType);
+        void draw(Image& image, const Color& color,                   
+                  const Point& pos, const String& text, 
+                  const Rect& clip, const CompositionMode& mode,
+                  const Transform& transform, FTC_FaceID faceId, 
+                  FTC_ImageType imageType);
 
     protected:
         FreeType();
@@ -94,7 +98,8 @@ class FreeType : public Pt::Singleton<FreeType>
 
         void drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                        int bmPitch, int height, int width,
-                       const unsigned char* buffer, const Rect& clip, const CompositionMode& mode);
+                       const unsigned char* buffer, const Rect& clip, 
+                       const CompositionMode& mode);
 
     private:
         typedef std::set<System::Path*> Files;

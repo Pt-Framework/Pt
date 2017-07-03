@@ -64,7 +64,8 @@ class Image;
 class CompositionMode;
 class Transform;
 
-class FreeType2 {
+class FreeType2 
+{
     public:
         ~FreeType2();
 

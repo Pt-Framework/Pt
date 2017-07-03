@@ -41,6 +41,7 @@
 #include "FreeType.h"
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/String.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
@@ -112,7 +113,7 @@ class DrawText
   private:
         FTC_FaceID       _faceId;
         FTC_ImageTypeRec _imageType;
-        FT_Matrix        _matrix;
+        Transform        _transform;
 
         Pt::ssize_t      _fontAngle;
         Rect				     _clip;

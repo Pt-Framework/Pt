@@ -32,6 +32,7 @@
 #include "DejaVuSansItalic.h"
 #include "DejaVuSansBoldItalic.h"
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/System/Directory.h>
 #include <Pt/System/FileInfo.h>
@@ -165,7 +166,7 @@ void FreeType::setFontDir(const System::Path& path)
 FTC_FaceID FreeType::findFaceId(const Font& font)
 {
     // LOCK
-
+    
     Fonts::iterator it = _fonts.find(font);
     if( it == _fonts.end() )
         return 0;
@@ -201,12 +202,15 @@ FT_Error FreeType::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 
 
 FontMetrics FreeType::fontMetrics(const String& text,
-                                  FTC_FaceID faceId, FTC_ImageType imageType)
+                                  FTC_FaceID faceId, 
+                                  FTC_ImageType imageType)
 {
     // LOCK
 
     FT_Face face = 0;
-    FTC_Manager_LookupFace(_manager, faceId, &face);
+    FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
+    if(ferr) 
+        return FontMetrics(0, 0, 0, 0);
 
     FT_Int charMapIndex = 0;
     for(int n = 0; n < face->num_charmaps; ++n)
@@ -286,18 +290,23 @@ FontMetrics FreeType::fontMetrics(const String& text,
 }
 
 
-void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
-                    const Point& pos, const String& text, const Rect& clip, const CompositionMode& mode,
-                    FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType)
+void FreeType::draw(Image& image, const Color& color, 
+                    const Point& p, const String& text, 
+                    const Rect& clip, const CompositionMode& mode, 
+                    const Transform& t, FTC_FaceID faceId, 
+                    FTC_ImageType imageType)
 {
     // LOCK
 
-    FT_Vector      glyphPos;
-    FT_Vector      delta;
-    FT_UInt        previous = 0;
+    PointF posF(p.x(), p.y());
+    posF = t * posF;
+    Point pos( Pt::lround(posF.x()), 
+               Pt::lround(posF.y()) );
+
+    FTC_Node       node;
     FT_Glyph       glyph;
     FT_Glyph       glyphCopy = 0;
-    FTC_Node       node;
+    FT_UInt        previous = 0;
     FTC_SBit       smalGlyphBitmap;
     FT_BitmapGlyph glyphBitmap;
 
@@ -311,8 +320,16 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
     int            width;
     unsigned char* buffer;
 
+    FT_Matrix matrix;
+    matrix.xx = t.m11() * 0x10000L;
+    matrix.xy = t.m12() * 0x10000L;
+    matrix.yx = t.m21() * 0x10000L;
+    matrix.yy = t.m22() * 0x10000L;
+    
     FT_Face face = 0;
-    FTC_Manager_LookupFace(_manager, faceId, &face);
+    FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
+    if(ferr) 
+        return;
 
     FT_Int charMapIndex = 0;
     for(int n = 0; n < face->num_charmaps; ++n)
@@ -324,31 +341,34 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
         }
     }
 
+    FT_Vector glyphPos;
     glyphPos.x = (int) pos.x() << 16;
     glyphPos.y = (int) pos.y() << 16;
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
-        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
-
+        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, 
+                                                   charMapIndex, it->value());
         if( ! glyph_index )
             continue;
 
-        if( FT_HAS_KERNING(face) && previous )
+        if( t.isIdentity() ) 
         {
-            FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
-
-            glyphPos.x += delta.x;
-            glyphPos.y -= delta.y;
-        }
-
-        if( fontAngle == 0 )
-        {
-            if( FTC_SBitCache_Lookup( _bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node ) )
+            if( FTC_SBitCache_Lookup( _bitmapCache, imageType, glyph_index, 
+                                      &smalGlyphBitmap, &node ) )
                 continue;
 
             incX        = smalGlyphBitmap->xadvance << 16;
             incY        = smalGlyphBitmap->yadvance << 16;
+
+            if( FT_HAS_KERNING(face) && previous )
+            {
+                FT_Vector delta;
+                FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
+
+                glyphPos.x += delta.x;
+                glyphPos.y -= delta.y;
+            }
 
             left        = (glyphPos.x >> 16) + smalGlyphBitmap->left;
             top         = (glyphPos.y >> 16) - smalGlyphBitmap->top;
@@ -369,6 +389,16 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
 
             incX        = glyphCopy->advance.x;
             incY        = glyphCopy->advance.y;
+
+            if(FT_HAS_KERNING(face) && previous) 
+            {
+                FT_Vector delta;
+                FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
+    
+                glyphPos.x += delta.x;
+                glyphPos.y -= delta.y;
+
+            }
 
             left        = (glyphPos.x >> 16) + glyphBitmap->left;
             top         = (glyphPos.y >> 16) - glyphBitmap->top;
@@ -406,7 +436,8 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
 
 void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                          int bmPitch, int height, int width,
-                         const unsigned char* buffer, const Rect& clip, const CompositionMode& mode)
+                         const unsigned char* buffer, const Rect& clip, 
+                         const CompositionMode& mode)
 {
     const int clipRight  = clip.x() + clip.width();
     const int clipBottom = clip.y() + clip.height();
@@ -464,26 +495,17 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
             const int px = yOffset + x;
             unsigned char value = buffer[px];
 
-#if 0
-            if(value != 255)
-            {
-                pixelColor.setAlpha(value * 257);
-                image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
-            }
-            else
-            {
-                image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
-            }
-#else
             switch(mode)
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    if(value != 255) {
+                    if(value != 255) 
+                    {
                         pixelColor.setAlpha(value * 257);
                         image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
                     }
-                    else {
+                    else 
+                    {
                         image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
                     }
                     break;
@@ -493,11 +515,9 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                     image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
                     break;
             }
-#endif
         }
     }
 }
-
 
 } // namespace Gfx
 

@@ -1,5 +1,5 @@
 /* Copyright (C) 2017-2017 Aloysius Indrayanto
-   Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2006-2017 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -28,15 +28,11 @@
 */
 
 #include "Rasterizer2.h"
-
+#include "ClipShape.h"
 
 namespace Pt {
+
 namespace Gfx {
-
-
-// ======================================================================================
-// ===== Public Member Functions ========================================================
-// ======================================================================================
 
 //void Rasterizer2::strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount)
 //{
@@ -80,20 +76,15 @@ namespace Gfx {
 //    }
 //}
 
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
 // Based on: The Beauty of Bresenham's Algorithm
 //           http://members.chello.at/easyfilter/bresenham.html
 //           Original code by Alois Zingl, 2016
-void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t y1, 
-                                                     Pt::int32_t x2, Pt::int32_t y2, 
-                                                     Pt::int32_t x3, Pt::int32_t y3, 
-                                                     const Color& color, 
-                                                     Pt::int32_t* fpiCtrInOut, 
-                                                     DrawLineMask* maskInOut)
+void Rasterizer2::rasterNarrowQuadraticBezier(Pt::int32_t x1, Pt::int32_t y1, 
+                                              Pt::int32_t x2, Pt::int32_t y2, 
+                                              Pt::int32_t x3, Pt::int32_t y3, 
+                                              const Color& color, 
+                                              Pt::int32_t* fpiCtrInOut, 
+                                              DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -161,9 +152,9 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
     // Check if the curve is actually a straight line
     if(!cur) {
         if(fpiCtrInOut)
-            rasterOnePixelPatternedLine(x1, y1, x3, y3, color, *fpiCtrInOut, maskInOut);
+            rasterNarrowPatternedLine(x1, y1, x3, y3, color, *fpiCtrInOut, maskInOut);
         else
-            rasterOnePixelSolidLine(x1, y1, x3, y3, color, maskInOut);
+            rasterNarrowSolidLine(x1, y1, x3, y3, color, maskInOut);
         return;
     }
 
@@ -304,9 +295,9 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
         // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
             (*maskInOut)[0].set(x1, y1);
-            (*maskInOut)[1] = MAXIMUM_POINT;
+            (*maskInOut)[1] = maxPoint();
             (*maskInOut)[2].set(x3, y3);
-            (*maskInOut)[3] = MAXIMUM_POINT;
+            (*maskInOut)[3] = maxPoint();
         }
         // Draw the pixels
         do {
@@ -344,6 +335,6 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
     #undef XW_SET_PIXEL
 }
 
-
 } // namespace
+
 } // namespace

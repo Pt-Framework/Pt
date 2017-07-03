@@ -1,5 +1,5 @@
 /* Copyright (C) 2017-2017 Aloysius Indrayanto
-   Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2006-2017 Marc Boris Duerner
    Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -24,22 +24,350 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #include "Rasterizer2.h"
 
-
 namespace Pt {
+
 namespace Gfx {
 
+// Inspired by: Drawing Antialiased Circles and Ellipses
+//              http://create.stephan-brumme.com/antialiased-circle
+//              Original code by Stephan Brumme, 2011
+void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size, 
+                                  float degBegin, float degEnd, const ArcMode& arcMode)
+{
+    // IMPORTANT NOTES:
+    //     * The Y coordinate goes from low to high according to the coordinate system being used:
+    //           - cartesian coordinate system: from the horizontal axis (the X axis) to the top;
+    //           - computer  coordinate system: from the top of the screen to the bottom of the screen;
+    //       This will cause sign inversion for trigonometry-based calculations in the Y coordinate.
+    //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
+    //       something wrong will be drawn.
 
-// ======================================================================================
-// ===== Public Member Functions ========================================================
-// ======================================================================================
+    // Shall we draw an ellipse or arc?
+    const bool drawArc = (degBegin != 0) || (degEnd != 0);
 
-void Rasterizer2::fillArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode)
+    // Calculate the ellipse's parameters
+    const Pt::int32_t minX  = topLeft.x();
+    const Pt::int32_t minY  = topLeft.y();
+    const Pt::int32_t radX  = size.width () / 2;
+    const Pt::int32_t radY  = size.height() / 2;
+    const Pt::int32_t ctrX  = minX + radX;
+    const Pt::int32_t ctrY  = minY + radY;
+    const Pt::int32_t radX2 = radX * radX;
+    const Pt::int32_t radY2 = radY * radY;
+    const float       xyRat = (float) radX / (float) radY;
+
+    // Draw using solid pen?
+    const bool solid = (pen().style() == Pen::Solid);
+
+    // Calculate the scaling factor for retrieving alphas from the pattern buffer
+    const float pbScale = solid ? 1.0f : std::max(radX, radY) / (float) (64 / PATTERN_BUFFER_SCALE_FACTOR);
+
+    // Determine we need to scale the indexes to the pattern buffer
+    const bool scaleWP = (radX != radY);
+
+    // Drawing an arc requires more parameters and calculation
+    Pt::int32_t bx = 0, x1 = 0, x1d = MAXIMUM_COORD; // Begin point
+    Pt::int32_t by = 0, y1 = 0, y1d = MAXIMUM_COORD;
+    Pt::int32_t ex = 0, x2 = 0, x2d = MAXIMUM_COORD; // End point
+    Pt::int32_t ey = 0, y2 = 0, y2d = MAXIMUM_COORD;
+
+    if(drawArc) {
+        // Ensure that the begin angle is within the acceptable range
+        while(degBegin < -360) degBegin += 360;
+        while(degBegin >  360) degBegin -= 360;
+        // Ensure that the end angle is within the acceptable range
+        while(degEnd < -360) degEnd += 360;
+        while(degEnd >  360) degEnd -= 360;
+        // Calculate the approximate coordinate of the point which is located at the begin angle
+        const float rBeg = degToRad(degBegin);
+        bx = lround(ctrX + radX * std::cos(rBeg));
+        by = lround(ctrY - radY * std::sin(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
+        // Calculate the approximate coordinate of the point which is located at the end angle
+        const float rEnd = degToRad(degEnd);
+        ex = lround(ctrX + radX * std::cos(rEnd));
+        ey = lround(ctrY - radY * std::sin(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
+    }
+
+    // Top and bottom halves
+    const Pt::int32_t quartersX = Pt::lround( radX2 * invSqrtf(radX2 + radY2) );
+
+    for(Pt::int32_t x = 0; x <= quartersX; ++x) {
+        // Calculate the coordinate and alpha
+        const float       y     = radY * sqrt(1 - (float) x * x / radX2);
+        const float       error = y - floor(y);
+        const Pt::uint8_t alpha = lround(error * 255);
+        // Without anti-aliasing
+        if( ! _aaMode ) {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - x;
+            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t yt = ctrY - lround(y);
+            const Pt::int32_t yb = ctrY + lround(y);
+            // Arc
+            if(drawArc) {
+                // Draw the pixels
+                const bool mask[4] = {
+                    arcUtil_pointIsInsideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd, xyRat)
+                };
+                if(solid)
+                    stroke4Pixels(xl, yt, xr, yb, mask);
+                else {
+                    const Pt::uint8_t pba = scaleWP
+                                          ? patternBuffer1PAlphaPolar(x, y, pbScale, xyRat)
+                                          : patternBuffer1PAlphaPolar(x, y, pbScale       );
+                    if(pba) stroke4Pixels(xl, yt, xr, yb, mask);
+                }
+                // Determine the exact coordinates of the closing lines
+                if(arcMode == ArcMode::Open) continue;
+                if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+                if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+                if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+                if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+                if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+                if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+                if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+                if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            }
+            // Ellipse
+            else {
+                if(solid)
+                   stroke4Pixels(xl, yt, xr, yb);
+                else {
+                    const Pt::uint8_t pba = scaleWP
+                                          ? patternBuffer1PAlphaPolar(x, y, pbScale, xyRat)
+                                          : patternBuffer1PAlphaPolar(x, y, pbScale       );
+                    if(pba) stroke4Pixels(xl, yt, xr, yb);
+                }
+            }
+        }
+        // With anti-aliasing
+        else {
+            // Calculate the coordinates
+            const Pt::int32_t xl  = ctrX - x;
+            const Pt::int32_t xr  = ctrX + x;
+            const Pt::int32_t yt0 = ctrY - Pt::lround(floor(y));
+            const Pt::int32_t yb0 = ctrY + Pt::lround(floor(y));
+            const Pt::int32_t yt1 = ctrY - Pt::lround(floor(y)) - 1;
+            const Pt::int32_t yb1 = ctrY + Pt::lround(floor(y)) + 1;
+            // Arc
+            if(drawArc) {
+                // Draw the pixels
+                const bool mask0[4] = {
+                    arcUtil_pointIsInsideDegRange(xl, yt0, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xl, yb0, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr, yt0, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr, yb0, ctrX, ctrY, degBegin, degEnd, xyRat)
+                };
+                const bool mask1[4] = {
+                    arcUtil_pointIsInsideDegRange(xl, yt1, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xl, yb1, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr, yt1, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr, yb1, ctrX, ctrY, degBegin, degEnd, xyRat)
+                };
+                const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+                const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
+                if(solid) {
+                    stroke4Pixels(xl, yt0, xr, yb0, a0, mask0);
+                    stroke4Pixels(xl, yt1, xr, yb1, a1, mask1);
+                }
+                else {
+                    Pt::uint8_t pba0, pba1;
+                    if(scaleWP) patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
+                    stroke4Pixels(xl, yt0, xr, yb0, pba0, mask0);
+                    stroke4Pixels(xl, yt1, xr, yb1, pba1, mask1);
+                }
+                // Determine the exact coordinates of the closing lines
+                if(arcMode == ArcMode::Open) continue;
+                if(abs(xl  - bx) < x1d) { x1d = abs(xl  - bx); x1 = xl;  }
+                if(abs(xl  - ex) < x2d) { x2d = abs(xl  - ex); x2 = xl;  }
+                if(abs(xr  - bx) < x1d) { x1d = abs(xr  - bx); x1 = xr;  }
+                if(abs(xr  - ex) < x2d) { x2d = abs(xr  - ex); x2 = xr;  }
+                if(abs(yt0 - by) < y1d) { y1d = abs(yt0 - by); y1 = yt0; }
+                if(abs(yt0 - ey) < y2d) { y2d = abs(yt0 - ey); y2 = yt0; }
+                if(abs(yb0 - by) < y1d) { y1d = abs(yb0 - by); y1 = yb0; }
+                if(abs(yb0 - ey) < y2d) { y2d = abs(yb0 - ey); y2 = yb0; }
+                if(abs(yt1 - by) < y1d) { y1d = abs(yt1 - by); y1 = yt1; }
+                if(abs(yt1 - ey) < y2d) { y2d = abs(yt1 - ey); y2 = yt1; }
+                if(abs(yb1 - by) < y1d) { y1d = abs(yb1 - by); y1 = yb1; }
+                if(abs(yb1 - ey) < y2d) { y2d = abs(yb1 - ey); y2 = yb1; }
+            }
+            // Ellipse
+            else {
+                const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+                const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
+                if(solid) {
+                    stroke4Pixels(xl, yt0, xr, yb0, a0);
+                    stroke4Pixels(xl, yt1, xr, yb1, a1);
+                }
+                else {
+                    Pt::uint8_t pba0, pba1;
+                    if(scaleWP) patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
+                    stroke4Pixels(xl, yt0, xr, yb0, pba0);
+                    stroke4Pixels(xl, yt1, xr, yb1, pba1);
+                }
+            }
+        }
+    }
+
+    // Left and right halves
+    const Pt::int32_t quartersY = Pt::lround( radY2 * invSqrtf(radX2 + radY2) );
+
+    for(Pt::int32_t y = 0; y <= quartersY; ++y) {
+        // Calculate the coordinate and alpha
+        const float       x     = radX * sqrt(1 - (float) y * y / radY2);
+        const float       error = x - floor(x);
+        const Pt::uint8_t alpha = lround(error * 255);
+        // Without anti-aliasing
+        if( ! _aaMode ) {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - lround(x);
+            const Pt::int32_t xr = ctrX + lround(x);
+            const Pt::int32_t yt = ctrY - y;
+            const Pt::int32_t yb = ctrY + y;
+            // Arc
+            if(drawArc) {
+                // Draw the pixels
+                const bool mask[4] = {
+                    arcUtil_pointIsInsideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd, xyRat)
+                };
+                if(solid)
+                    stroke4Pixels(xl, yt, xr, yb, mask);
+                else {
+                    const Pt::uint8_t pba = scaleWP
+                                          ? patternBuffer1PAlphaPolar(x, y, pbScale, xyRat)
+                                          : patternBuffer1PAlphaPolar(x, y, pbScale       );
+                    if(pba) stroke4Pixels(xl, yt, xr, yb, mask);
+                }
+                // Determine the exact coordinates of the closing lines
+                if(arcMode == ArcMode::Open) continue;
+                if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+                if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+                if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+                if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+                if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+                if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+                if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+                if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            }
+            // Ellipse
+            else {
+                if(solid)
+                    stroke4Pixels(xl, yt, xr, yb);
+                else {
+                    const Pt::uint8_t pba = scaleWP
+                                          ? patternBuffer1PAlphaPolar(x, y, pbScale, xyRat)
+                                          : patternBuffer1PAlphaPolar(x, y, pbScale       );
+                    if(pba) stroke4Pixels(xl, yt, xr, yb);
+                }
+            }
+        }
+        // With anti-aliasing
+        else {
+            // Calculate the coordinates
+            const Pt::int32_t xl0 = ctrX - Pt::lround(floor(x));
+            const Pt::int32_t xr0 = ctrX + Pt::lround(floor(x));
+            const Pt::int32_t xl1 = ctrX - Pt::lround(floor(x)) - 1;
+            const Pt::int32_t xr1 = ctrX + Pt::lround(floor(x)) + 1;
+            const Pt::int32_t yt  = ctrY - y;
+            const Pt::int32_t yb  = ctrY + y;
+            // Arc
+            if(drawArc) {
+                // Draw the pixels
+                const bool mask0[4] = {
+                    arcUtil_pointIsInsideDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr0, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr0, yb, ctrX, ctrY, degBegin, degEnd, xyRat)
+                };
+                const bool mask1[4] = {
+                    arcUtil_pointIsInsideDegRange(xl1, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xl1, yb, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr1, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    arcUtil_pointIsInsideDegRange(xr1, yb, ctrX, ctrY, degBegin, degEnd, xyRat)
+                };
+                const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+                const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
+                if(solid) {
+                    stroke4Pixels(xl0, yt, xr0, yb, a0, mask0);
+                    stroke4Pixels(xl1, yt, xr1, yb, a1, mask1);
+                }
+                else {
+                    Pt::uint8_t pba0, pba1;
+                    if(scaleWP) patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
+                    stroke4Pixels(xl0, yt, xr0, yb, pba0, mask0);
+                    stroke4Pixels(xl1, yt, xr1, yb, pba1, mask1);
+                }
+                // Determine the exact coordinates of the closing lines
+                if(arcMode == ArcMode::Open) continue;
+                if(abs(xl0 - bx) < x1d) { x1d = abs(xl0 - bx); x1 = xl0; }
+                if(abs(xl0 - ex) < x2d) { x2d = abs(xl0 - ex); x2 = xl0; }
+                if(abs(xr0 - bx) < x1d) { x1d = abs(xr0 - bx); x1 = xr0; }
+                if(abs(xr0 - ex) < x2d) { x2d = abs(xr0 - ex); x2 = xr0; }
+                if(abs(xl1 - bx) < x1d) { x1d = abs(xl1 - bx); x1 = xl1; }
+                if(abs(xl1 - ex) < x2d) { x2d = abs(xl1 - ex); x2 = xl1; }
+                if(abs(xr1 - bx) < x1d) { x1d = abs(xr1 - bx); x1 = xr1; }
+                if(abs(xr1 - ex) < x2d) { x2d = abs(xr1 - ex); x2 = xr1; }
+                if(abs(yt  - by) < y1d) { y1d = abs(yt  - by); y1 = yt;  }
+                if(abs(yt  - ey) < y2d) { y2d = abs(yt  - ey); y2 = yt;  }
+                if(abs(yb  - by) < y1d) { y1d = abs(yb  - by); y1 = yb;  }
+                if(abs(yb  - ey) < y2d) { y2d = abs(yb  - ey); y2 = yb;  }
+            }
+            // Ellipse
+            else {
+                const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+                const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
+                if(solid) {
+                    stroke4Pixels(xl0, yt, xr0, yb, a0);
+                    stroke4Pixels(xl1, yt, xr1, yb, a1);
+                }
+                else {
+                    Pt::uint8_t pba0, pba1;
+                    if(scaleWP) patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
+                    stroke4Pixels(xl0, yt, xr0, yb, pba0);
+                    stroke4Pixels(xl1, yt, xr1, yb, pba1);
+                }
+            }
+        }
+    }
+
+    // Draw the arc's closing lines
+    if(drawArc) {
+        if(arcMode == ArcMode::Chord) {
+            const Point a(x1, y1);
+            const Point b(x2, y2);
+            drawNarrowLine(a, b, 0);
+        }
+        else if(arcMode == ArcMode::Pie) {
+            Rasterizer2::DrawLineMask mask;
+            const Point               a(bx,   by  );
+            const Point               b(ex,   ey  );
+            const Point               o(ctrX, ctrY);
+            memcpy(mask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+            drawNarrowLine(a, o, &mask);
+            drawNarrowLine(b, o, &mask);
+        }
+    }
+}
+
+
+void Rasterizer2::rasterArcArea(const Point& topLeft, const Size& size, 
+                                float degBegin, float degEnd, const ArcMode& arcMode)
 {
     // Update the gradient as needed
     if(_isGradient)
@@ -83,10 +411,6 @@ void Rasterizer2::fillArc(const Point& topLeft, const Size& size, float degBegin
 }
 
 
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
 void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
 {
     // Calculate points for the closing line
@@ -106,7 +430,7 @@ void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
     for(size_t i = 0; i < scanlines.size(); ++i) {
         const ScanlineElement32& sle = scanlines[i];
         if(sle.isNull()) continue;
-        rasterScanlineWithClipping(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
+        rasterScanlineClipped(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
     scanlines.clear();
@@ -119,12 +443,13 @@ void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
 
     // Draw the closing line
     Point maskInOut[4] = {
-        Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate,
-        Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate
+        maxPoint(), maxPoint(),
+        maxPoint(), maxPoint()
     };
 
     arcUtil_rasterClosingXWLine(fai, line, maskInOut);
 }
+
 
 void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
 {
@@ -154,14 +479,14 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
     for(size_t i = 0; i < scanlines1.size(); ++i) {
         const ScanlineElement32& sle = scanlines1[i];
         if(sle.isNull()) continue;
-        rasterScanlineWithClipping(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
+        rasterScanlineClipped(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
     for(size_t i = 0; i < scanlines2.size(); ++i) {
         const ScanlineElement32& sle = scanlines2[i];
         if(sle.isNull()) continue;
         if(!scanlines1[i].isNull() && sle.from >= scanlines1[i].from && sle.to <= scanlines1[i].to) continue;
-        rasterScanlineWithClipping(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
+        rasterScanlineClipped(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
     scanlines1.clear();
@@ -175,8 +500,8 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
 
     // Draw the closing lines
     Point maskInOut[4] = {
-        Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate,
-        Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate
+        maxPoint(), maxPoint(),
+        maxPoint(), maxPoint()
     };
 
     arcUtil_rasterClosingXWLine(fai, line2, maskInOut);
@@ -317,6 +642,7 @@ void Rasterizer2::arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const Filled
     }
 }
 
+
 void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const FilledArcInfo& fai, const ArcXWLineData& xwLine)
 {
     // Find the line's minimum and maximum Y coordinates
@@ -397,6 +723,7 @@ void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const Fil
         arcUtil_cropAndStoreScanlineForChord(scanlines, fai, xwLine, lineMinY, lineMaxY, xl, xr, yb);
     }
 }
+
 
 void Rasterizer2::arcUtil_cropAndStoreScanlineForChord(EAScanlines& scanlines, const FilledArcInfo& fai, const ArcXWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y)
 {
@@ -836,5 +1163,112 @@ void Rasterizer2::arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const Ar
 }
 
 
+void Rasterizer2::arcUtil_detXWLineDirection(ArcXWLineData& xwLineData)
+{
+    // Calculate the direction vector
+    const Pt::int32_t vx = xwLineData.x2 - xwLineData.x1; // Vector from the begin point to the end point
+    const Pt::int32_t vy = xwLineData.y2 - xwLineData.y1; //
+    const Pt::int32_t vz = 0;                             //
+    const Pt::int32_t rx = 0;                             // Vector from the point of origin (0, 0, 0) that points out of the monitor
+    const Pt::int32_t ry = 0;                             //
+    const Pt::int32_t rz = 1;                             //
+    const Pt::int32_t cx = vy * rz - vz * ry;             // Cross product of the above two vectors
+    const Pt::int32_t cy = vz * rx - vx * rz;             //
+  //const Pt::int32_t cz = vx * ry - vy * rx;             //
+
+    // Determine the direction that the line is facing to
+    xwLineData.faceT = cy < 0;
+    xwLineData.faceB = cy > 0;
+    xwLineData.faceL = cx < 0;
+    xwLineData.faceR = cx > 0;
+}
+
+
+bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio)
+{
+    // IMPORTANT NOTES:
+    //     * The Y coordinate goes from low to high according to the coordinate system being used:
+    //           - cartesian coordinate system: from the horizontal axis (the X axis) to the top;
+    //           - computer  coordinate system: from the top of the screen to the bottom of the screen;
+    //       This will cause sign inversion for trigonometry-based calculations in the Y coordinate.
+    //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
+    //       something wrong will be drawn.
+
+    const float angle = toPolar( (x - ctrX), -(y - ctrY) * xyRatio );
+
+    // Both begin and end angle are negative
+    if(degBegin < 0 && degEnd < 0) {
+        return angle >= (degBegin + 360) && angle <= (degEnd + 360);
+    }
+
+    // Begin angle is negative but end angle is positive
+    if(degBegin < 0 && degEnd >= 0) {
+        if(angle >= (degBegin + 360) && angle <= 360   ) return true;
+        if(angle >= 0                && angle <= degEnd) return true;
+        return false;
+    }
+
+    // Both begin and end angle are positive
+    return angle >= degBegin && angle <= degEnd;
+}
+
+
+Pt::uint8_t Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, Pt::uint8_t alpha, float degBegin, float degEnd, float xyRatio)
+{
+    // IMPORTANT NOTES:
+    //     * The Y coordinate goes from low to high according to the coordinate system being used:
+    //           - cartesian coordinate system: from the horizontal axis (the X axis) to the top;
+    //           - computer  coordinate system: from the top of the screen to the bottom of the screen;
+    //       This will cause sign inversion for trigonometry-based calculations in the Y coordinate.
+    //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
+    //       something wrong will be drawn.
+
+    const float relX  = x - ctrX;
+    const float relY  = y - ctrY;
+    const float relM  = std::max( ::fabs(relX), ::fabs(relY) );
+    const float angle = toPolar(relX, -relY * xyRatio);
+    const float limit = 100.0f / relM;
+
+    // Both begin and end angle are negative
+    if(degBegin < 0 && degEnd < 0) {
+        degBegin += 360;
+        degEnd   += 360;
+        if(angle >= degBegin && angle <= degEnd) {
+            const float db = angle  - degBegin;
+            const float de = degEnd - angle;
+            const float dm = std::min(db, de);
+            if(dm > limit) return alpha;
+            return (dm > limit) ? alpha : (alpha * dm / limit);
+        }
+        return 0;
+    }
+
+    // Begin angle is negative but end angle is positive
+    if(degBegin < 0 && degEnd >= 0) {
+        degBegin += 360;
+        if(angle >= degBegin && angle <= 360) {
+            const float dm = angle - degBegin;
+            if(dm > limit) return alpha;
+            return (dm > limit) ? alpha : (alpha * dm / limit);
+        }
+        if(angle >= 0  && angle <= degEnd) {
+            const float dm = degEnd - angle;
+            if(dm > limit) return alpha;
+            return (dm > limit) ? alpha : (alpha * dm / limit);
+        }
+        return 0;
+    }
+
+    // Both begin and end angle are positive
+    if(angle >= degBegin && angle <= degEnd) {
+        const float db = angle  - degBegin;
+        const float de = degEnd - angle;
+        const float dm = std::min(db, de);
+        return (dm > limit) ? alpha : (alpha * dm / limit);
+    }
+    return 0;
+}
+
 } // namespace
+
 } // namespace

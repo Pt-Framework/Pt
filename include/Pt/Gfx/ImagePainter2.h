@@ -83,7 +83,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         
         virtual void drawText(const PointF& to, const Pt::String& text);
 
-        //virtual void drawText(const PointF& to, const Pt::String& text, const Transform& t);
+        void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
         virtual FontMetrics fontMetrics(const Pt::String& text) const;
 
@@ -143,9 +143,9 @@ class PT_GFX_API ImagePainter2 : public Painter
 
     private:
         // USUSED
-        void clipPolygonXXX(std::vector<PointF>& result, 
-                            const std::vector<PointF>& subject, 
-                            const std::vector<PointF>& clipRegion);
+        //void clipPolygonXXX(std::vector<PointF>& result, 
+        //                    const std::vector<PointF>& subject, 
+        //                    const std::vector<PointF>& clipRegion);
 
     private:
       Rasterizer2* _rasterizer;

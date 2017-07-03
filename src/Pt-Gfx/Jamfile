@@ -49,9 +49,7 @@ PT_GFX_NEW_RASTERIZER_FILES = FreeType2.cpp
                               ImagePainter2.cpp
                               LineRenderer.cpp
                               Rasterizer2.cpp
-                              Rasterizer2_PixelScanline.cpp
                               Rasterizer2_Line.cpp
-                              Rasterizer2_PatternedLine.cpp
                               Rasterizer2_Rectangle.cpp
                               Rasterizer2_Polygon.cpp
                               Rasterizer2_Bezier.cpp
@@ -77,10 +75,10 @@ SharedLibrary Pt-Gfx : Color.cpp
                        JpegReader.cpp
                        FreeType.cpp
                        DrawText.cpp
-                       Painter.cpp
                        ImagePainter.cpp
                        Rasterizer.cpp
                        ClipPolygon.cpp
+                       Painter.cpp
                        Transform.cpp
                        $(PT_GFX_NEW_RASTERIZER_FILES)
                        ;

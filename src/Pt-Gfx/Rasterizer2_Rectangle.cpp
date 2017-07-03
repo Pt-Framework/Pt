@@ -1,5 +1,5 @@
 /* Copyright (C) 2017-2017 Aloysius Indrayanto
-   Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2006-2017 Marc Boris Duerner
    Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -24,22 +24,18 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #include "Rasterizer2.h"
-
+#include "ClipShape.h"
 
 namespace Pt {
+
 namespace Gfx {
 
-
-// ======================================================================================
-// ===== Public Member Functions ========================================================
-// ======================================================================================
-
-void Rasterizer2::strokeOnePixelRect(const Point& tl, const Point& br)
+void Rasterizer2::rasterNarrowRect(const Point& tl, const Point& br)
 {
     // Get the minimum and maximum coordinates
     Pt::int32_t minX = tl.x();
@@ -53,42 +49,127 @@ void Rasterizer2::strokeOnePixelRect(const Point& tl, const Point& br)
     if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
     if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
 
-    // Solid line
-    if(_pen.style() == Pen::Solid) {
+    if(_pen.style() == Pen::Solid) 
+    {
         // Draw the rectangle's horizontal lines
-        rasterOnePixelSolidHLineSegment(minX, maxX, minY, _pen.color(), 0);
-        rasterOnePixelSolidHLineSegment(minX, maxX, maxY, _pen.color(), 0);
+        rasterNarrowSolidHLineSegment(minX, maxX, minY, _pen.color(), 0);
+        rasterNarrowSolidHLineSegment(minX, maxX, maxY, _pen.color(), 0);
+        
         // Draw the rectangle's vertical lines
-        rasterOnePixelSolidVLineSegment(minX, minY + 1, maxY - 1, _pen.color(), 0);
-        rasterOnePixelSolidVLineSegment(maxX, minY + 1, maxY - 1, _pen.color(), 0);
+        rasterNarrowSolidVLineSegment(minX, minY + 1, maxY - 1, _pen.color(), 0);
+        rasterNarrowSolidVLineSegment(maxX, minY + 1, maxY - 1, _pen.color(), 0);
     }
-
-    // Patterned line
-    else {
+    else // Patterned line
+    {
         Pt::int32_t  fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
         DrawLineMask mask;
         memcpy(mask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
-        rasterOnePixelPatternedLine(minX, minY, maxX, minY, _pen.color(), fpiCtrInOut, &mask);
-        rasterOnePixelPatternedLine(maxX, minY, maxX, maxY, _pen.color(), fpiCtrInOut, &mask);
-        rasterOnePixelPatternedLine(maxX, maxY, minX, maxY, _pen.color(), fpiCtrInOut, &mask);
-        rasterOnePixelPatternedLine(minX, maxY, minX, minY, _pen.color(), fpiCtrInOut, &mask);
+        rasterNarrowPatternedLine(minX, minY, maxX, minY, _pen.color(), fpiCtrInOut, &mask);
+        rasterNarrowPatternedLine(maxX, minY, maxX, maxY, _pen.color(), fpiCtrInOut, &mask);
+        rasterNarrowPatternedLine(maxX, maxY, minX, maxY, _pen.color(), fpiCtrInOut, &mask);
+        rasterNarrowPatternedLine(minX, maxY, minX, minY, _pen.color(), fpiCtrInOut, &mask);
     }
 }
 
-void Rasterizer2::fillRect(const Point& tl, const Point& br)
-{
-    // Update the gradient as needed
-    if(_isGradient)
-        updateGradientBrush(br.x() - tl.x() + 1, br.y() - tl.y() + 1);
 
-    // Draw the rectangle
-    rasterRectArea(tl, br);
+void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
+{
+    const float x1 = rect.topLeft().x();
+    const float y1 = rect.topLeft().y();
+    const float x2 = rect.bottomRight().x();
+    const float y2 = rect.bottomRight().y();
+
+    // line end masks
+    DrawLineMask mask_zero;
+    memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    // pattern state
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+
+    // bottom left corner
+    rasterNarrowQuadraticBezier(
+        x1 + radius, y2,
+        x1         , y2,
+        x1         , y2 - radius,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // left staight line
+    rasterNarrowQuadraticBezier(
+        x1, y2 - radius,
+        x1, y1 + rect.height() / 2,
+        x1, y1 + radius,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // top left corner
+    rasterNarrowQuadraticBezier(
+        x1        , y1 + radius,
+        x1        , y1,
+        x1 + radius, y1,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // top straight line
+    rasterNarrowQuadraticBezier(
+        x1 + radius          , y1,
+        x1 + rect.width() / 2, y1,
+        x2 - radius          , y1,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // top right corner
+    rasterNarrowQuadraticBezier(
+        x2 - radius, y1,
+        x2         , y1,
+        x2         , y1 + radius,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // right straight line
+    rasterNarrowQuadraticBezier(
+        x2, y1 + radius,
+        x2, y1 + rect.height() / 2,
+        x2, y2 - radius,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // bottom right corner
+    rasterNarrowQuadraticBezier(
+        x2         , y2 - radius,
+        x2         , y2,
+        x2 - radius, y2,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // bottom straight line
+    rasterNarrowQuadraticBezier(
+        x2 - radius          , y2,
+        x1 + rect.width() / 2, y2,
+        x1 + radius          , y2,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
 }
 
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
 
 void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
 {
@@ -170,6 +251,6 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     }
 }
 
-
 } // namespace
+
 } // namespace

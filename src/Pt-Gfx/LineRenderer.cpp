@@ -1041,8 +1041,8 @@ void LineRenderer::satDPIProjMinMax(float& min, float& max,
                                     const PointF* points, size_t pointCount, 
                                     float px, float py)
 {
-    min =  Painter::MaximumCoordinate;
-    max = -Painter::MaximumCoordinate;
+    min =  Rasterizer2::MaxCoordinate;
+    max = -Rasterizer2::MaxCoordinate;
 
     for(size_t i = 0; i < pointCount; ++i) {
         const float val = points[i].x() * px + points[i].y() * py;

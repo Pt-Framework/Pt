@@ -52,7 +52,10 @@ DrawText2::DrawText2()
 }
 
 DrawText2::~DrawText2()
-{ if(_faceId) FreeType2::releaseInstance(_faceId); }
+{ 
+    if(_faceId) 
+        FreeType2::releaseInstance(_faceId); 
+}
 
 void DrawText2::setFont(const Font& font)
 {

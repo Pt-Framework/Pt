@@ -168,13 +168,23 @@ void ImagePainter2::drawImage(const PointF& toF, const Image& image,
 
 void ImagePainter2::drawText(const PointF& toF, const String& text)
 {
-
     Point to( Pt::lround(toF.x()), 
               Pt::lround(toF.y()) );
     
     Transform identity;
     _rasterizer->drawText(to, text, identity);
 }
+
+
+void ImagePainter2::drawText(const PointF& toF, const Pt::String& text, 
+                             const Transform& transform)
+{
+    Point to( Pt::lround(toF.x()), 
+              Pt::lround(toF.y()) );
+    
+    _rasterizer->drawText(to, text, transform);
+}
+
 
 
 FontMetrics ImagePainter2::fontMetrics(const String& text) const
@@ -314,96 +324,96 @@ std::vector<std::string> ImagePainter2::fontNames()
 }
 
 
-enum ClipMode
-{
-  Intersection, Union, Difference, Xor
-};
-
-
-void ImagePainter2::clipPolygonXXX(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion)
-{
-    ClipMode cm = Intersection;
-
-    // Working variables
-    ClipperLib::Clipper clipper;
-    ClipperLib::Path    cpath;
-    ClipperLib::Paths   cpresult;
-    size_t              startIndex;
-
-    // Separate and append the clipper polygons
-    startIndex = 0;
-    for(size_t i = 0; i <= clipRegion.size(); ++i) {
-        // Search for the end and/or separator points
-        if( i == clipRegion.size() || (clipRegion[i].x() > Painter::MaximumCoordinateF && clipRegion[i].y() > Painter::MaximumCoordinateF) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Append the polygon to the clipper
-            cpath.resize(curPC);
-            for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = lround( clipRegion[startIndex + j].x() * VecResScaleUp );
-                cpath[j].Y = lround( clipRegion[startIndex + j].y() * VecResScaleUp );
-            }
-            clipper.AddPath(cpath, ClipperLib::ptClip, true);
-            // Increment the start index
-            startIndex += curPC + 1;
-        }
-    }
-
-    // Separate and append the subject polygons
-    startIndex = 0;
-    for(size_t i = 0; i <= subject.size(); ++i) {
-        // Search for the end and/or separator points
-        if( i == subject.size() || (subject[i].x() > Painter::MaximumCoordinateF && subject[i].y() > Painter::MaximumCoordinateF) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Append the polygon to the clipper
-            cpath.resize(curPC);
-            for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = lround( subject[startIndex + j].x() * VecResScaleUp );
-                cpath[j].Y = lround( subject[startIndex + j].y() * VecResScaleUp );
-            }
-            clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
-            // Increment the start index
-            startIndex += curPC + 1;
-        }
-    }
-
-    // Perform clipping
-    result.clear();
-
-    switch(cm) {
-        case Intersection:
-            clipper.Execute(ClipperLib::ctIntersection, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        case Union:
-            clipper.Execute(ClipperLib::ctUnion,        cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        case Difference:
-            clipper.Execute(ClipperLib::ctDifference,   cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        case Xor:
-            clipper.Execute(ClipperLib::ctXor,          cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        default:
-            return;
-    }
-
-    // Combine back the result polygons
-    for(size_t i = 0; i < cpresult.size(); ++i) {
-        const ClipperLib::Path& curPath = cpresult[i];
-        if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
-        for(size_t j = 0; j < curPath.size(); ++j) {
-            result.push_back( PointF(
-                curPath[j].X * VecResScaleDn,
-                curPath[j].Y * VecResScaleDn
-            ) );
-        }
-    }
-}
+//enum ClipMode
+//{
+//  Intersection, Union, Difference, Xor
+//};
+//
+//
+//void ImagePainter2::clipPolygonXXX(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion)
+//{
+//    ClipMode cm = Intersection;
+//
+//    // Working variables
+//    ClipperLib::Clipper clipper;
+//    ClipperLib::Path    cpath;
+//    ClipperLib::Paths   cpresult;
+//    size_t              startIndex;
+//
+//    // Separate and append the clipper polygons
+//    startIndex = 0;
+//    for(size_t i = 0; i <= clipRegion.size(); ++i) {
+//        // Search for the end and/or separator points
+//        if( i == clipRegion.size() || (clipRegion[i].x() > Painter::MaximumCoordinateF && clipRegion[i].y() > Painter::MaximumCoordinateF) ) {
+//            // Calculate the number of points for this polygon
+//            const size_t curPC = i - startIndex;
+//            // Append the polygon to the clipper
+//            cpath.resize(curPC);
+//            for(size_t j = 0; j < curPC; ++j) {
+//                cpath[j].X = lround( clipRegion[startIndex + j].x() * VecResScaleUp );
+//                cpath[j].Y = lround( clipRegion[startIndex + j].y() * VecResScaleUp );
+//            }
+//            clipper.AddPath(cpath, ClipperLib::ptClip, true);
+//            // Increment the start index
+//            startIndex += curPC + 1;
+//        }
+//    }
+//
+//    // Separate and append the subject polygons
+//    startIndex = 0;
+//    for(size_t i = 0; i <= subject.size(); ++i) {
+//        // Search for the end and/or separator points
+//        if( i == subject.size() || (subject[i].x() > Painter::MaximumCoordinateF && subject[i].y() > Painter::MaximumCoordinateF) ) {
+//            // Calculate the number of points for this polygon
+//            const size_t curPC = i - startIndex;
+//            // Append the polygon to the clipper
+//            cpath.resize(curPC);
+//            for(size_t j = 0; j < curPC; ++j) {
+//                cpath[j].X = lround( subject[startIndex + j].x() * VecResScaleUp );
+//                cpath[j].Y = lround( subject[startIndex + j].y() * VecResScaleUp );
+//            }
+//            clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
+//            // Increment the start index
+//            startIndex += curPC + 1;
+//        }
+//    }
+//
+//    // Perform clipping
+//    result.clear();
+//
+//    switch(cm) {
+//        case Intersection:
+//            clipper.Execute(ClipperLib::ctIntersection, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+//            break;
+//
+//        case Union:
+//            clipper.Execute(ClipperLib::ctUnion,        cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+//            break;
+//
+//        case Difference:
+//            clipper.Execute(ClipperLib::ctDifference,   cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+//            break;
+//
+//        case Xor:
+//            clipper.Execute(ClipperLib::ctXor,          cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+//            break;
+//
+//        default:
+//            return;
+//    }
+//
+//    // Combine back the result polygons
+//    for(size_t i = 0; i < cpresult.size(); ++i) {
+//        const ClipperLib::Path& curPath = cpresult[i];
+//        if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
+//        for(size_t j = 0; j < curPath.size(); ++j) {
+//            result.push_back( PointF(
+//                curPath[j].X * VecResScaleDn,
+//                curPath[j].Y * VecResScaleDn
+//            ) );
+//        }
+//    }
+//}
 
 } // namespace
 
