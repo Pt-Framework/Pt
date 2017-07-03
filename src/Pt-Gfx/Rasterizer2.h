@@ -171,6 +171,8 @@ class Rasterizer2
 
         void fillPolygon(const PointF* ps, const size_t pointCount);
 
+        void fillPolygons(const std::vector<Polygon>& polygons);
+
         void fillRect(const RectF& rect);
 
         void fillRoundedRect(const RectF& rect, float radius);
@@ -219,9 +221,9 @@ class Rasterizer2
 
         void drawNarrowPath(const PointF* pointsF, size_t pointCount);
 
-        void fillPolygon2( const PointF* ps, std::size_t n );
 
-        void fillPolygons(const std::vector<Polygon>& polygons);
+
+        
 
         void rasterPolygonNoAA(const PointF* points, std::size_t pointCount,
                                const Color& color,
