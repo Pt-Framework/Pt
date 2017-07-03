@@ -332,6 +332,7 @@
     <ClInclude Include="..\..\src\Pt-Gfx\LineRenderer.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineSlope.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer.h" />
+    <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer2.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Span.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\ArrowCursor.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
@@ -533,6 +534,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb16Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb32Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Argb32Test.cpp" />
