@@ -123,12 +123,6 @@ void Painter::setClip(const Gfx::RectF& clip)
 }
 
 
-const Gfx::RectF& Painter::clip() const
-{
-    return _clip;
-}
-
-
 void Painter::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;

@@ -61,8 +61,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void setCompositionMode(const CompositionMode& mode);
 
-        virtual const Gfx::RectF& clip() const;
-
         virtual void setClip(const RectF& clip);
 
         virtual const Pen& pen() const;
@@ -149,7 +147,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 
     private:
       Rasterizer2* _rasterizer;
-      RectF        _clip;
 };
 
 } // namespace

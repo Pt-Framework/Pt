@@ -73,10 +73,6 @@ class PT_GFX_API Painter
         */
         virtual void setClip(const RectF& clip) = 0;
 
-        /** @brief Returns the current clipping rect.
-        */
-        virtual const RectF& clip() const = 0;
-
         /** @brief Sets the pen used to stroke lines.
         */
         virtual void setPen(const Pen& pen) = 0;

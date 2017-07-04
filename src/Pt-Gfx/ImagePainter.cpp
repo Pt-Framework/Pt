@@ -80,12 +80,6 @@ void ImagePainter::setCompositionMode(const CompositionMode& mode)
 }
 
 
-const Gfx::RectF& ImagePainter::clip() const
-{
-  return _clip;
-}
-
-
 void ImagePainter::setClip( const RectF& clipIn )
 {
   _rasterizer->setClip( round(clipIn) );

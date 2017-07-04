@@ -87,12 +87,6 @@ void ImagePainter2::setCompositionMode(const CompositionMode& mode)
 }
 
 
-const Gfx::RectF& ImagePainter2::clip() const
-{
-    return _clip;
-}
-
-
 void ImagePainter2::setClip(const RectF& clip)
 {
     Rect roundedClip( Point( lround( clip.x() ),
@@ -101,8 +95,6 @@ void ImagePainter2::setClip(const RectF& clip)
                              lround( clip.height() ) ) );
 
     _rasterizer->setClip(roundedClip);
-
-    _clip = clip;
 }
 
 
