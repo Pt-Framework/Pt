@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2016 Marc Boris Duerner
+/* Copyright (C) 2006-2017 Marc Boris Duerner
    Copyright (C) 2017-2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
@@ -27,7 +27,6 @@
   MA 02110-1301 USA
 */
 
-#include "ImageOperation2.h"
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <stdexcept>
@@ -46,12 +45,14 @@ Brush::Brush(const Color& color)
 {}
 
 
-Brush::Brush(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, TextureRotationMode mode)
-: _brushData( new BrushData(texture, offsetX, offsetY, rotDeg, colorFill, mode) )
+Brush::Brush(const Image& texture, 
+             Pt::int32_t offsetX, Pt::int32_t offsetY)
+: _brushData( new BrushData(texture, offsetX, offsetY) )
 {}
 
 
-Brush::Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
+Brush::Brush(const Color& from, const Color& to, GradientDirection g, 
+            float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 : _brushData( new BrushData(from, to, g, rotDeg, scale, ofsX, ofsY) )
 {}
 
@@ -81,7 +82,8 @@ const Color& Brush::color() const
 }
 
 
-void Brush::setGradient(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
+void Brush::setGradient(const Color& from, const Color& to, GradientDirection g, 
+                        float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
     // COW
     if(_brushData.refs() > 1) {
@@ -96,7 +98,8 @@ void Brush::setGradient(const Color& from, const Color& to, GradientDirection g,
 
 void Brush::setGradientRotation(float rotDeg)
 {
-    if(!_brushData->isGradient2D()) throw std::logic_error("brush error: not a 2D gradient");
+    if(!_brushData->isGradient2D()) 
+        throw std::logic_error("brush error: not a 2D gradient");
 
     // COW
     if(_brushData.refs() > 1) {
@@ -111,7 +114,8 @@ void Brush::setGradientRotation(float rotDeg)
 
 void Brush::setGradientScale(float scale)
 {
-    if(!_brushData->isGradient2D()) throw std::logic_error("brush error: not a 2D gradient");
+    if(!_brushData->isGradient2D()) 
+        throw std::logic_error("brush error: not a 2D gradient");
 
     // COW
     if(_brushData.refs() > 1) {
@@ -126,7 +130,8 @@ void Brush::setGradientScale(float scale)
 
 void Brush::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
-    if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
+    if(!_brushData->isGradient()) 
+        throw std::logic_error("brush error: not a gradient");
 
     // COW
     if(_brushData.refs() > 1) {
@@ -145,31 +150,18 @@ const Color& Brush::gradientColor() const
 }
 
 
-void Brush::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, TextureRotationMode mode)
+void Brush::setTexture(const Image& texture, 
+                       Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
     // COW
-    if(_brushData.refs() > 1) {
+    if(_brushData.refs() > 1) 
+    {
         SmartPtr<BrushData> brushData( new BrushData() );
         *brushData = *_brushData;
         _brushData = brushData;
     }
 
-    _brushData->setTexture(texture, offsetX, offsetY, rotDeg, colorFill, mode);
-}
-
-
-void Brush::setTextureRotation(float rotDeg, const Color& colorFill, TextureRotationMode mode)
-{
-    if(!_brushData->isTexture()) throw std::logic_error("brush error: not a texture");
-
-    // COW
-    if(_brushData.refs() > 1) {
-        SmartPtr<BrushData> brushData( new BrushData() );
-        *brushData = *_brushData;
-        _brushData = brushData;
-    }
-
-    _brushData->setTextureRotation(rotDeg, colorFill, mode);
+    _brushData->setTexture(texture, offsetX, offsetY);
 }
 
 
@@ -234,7 +226,9 @@ bool Brush::isNull() const
 
 
 
-BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
+BrushData::BrushData(const Color& from, const Color& to, 
+                     Brush::GradientDirection g, float rotDeg, float scale, 
+                     Pt::int32_t ofsX, Pt::int32_t ofsY)
 : _isNull       (false)
 , _color        (from)
 , _gradientColor(to)
@@ -243,7 +237,8 @@ BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirectio
 , _ofsX         (ofsX)
 , _ofsY         (ofsY)
 {
-    switch(g) {
+    switch(g) 
+    {
         case Brush::Horizontal  : _fillStyle = Brush::HorizontalGradient;  break;
         case Brush::Vertical    : _fillStyle = Brush::VerticalGradient;    break;
         case Brush::Linear      : _fillStyle = Brush::LinearGradient;      break;
@@ -254,9 +249,13 @@ BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirectio
     }
 }
 
-void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
+
+void BrushData::setGradient(const Color& from, const Color& to, 
+                          Brush::GradientDirection g, float rotDeg, 
+                          float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
-    switch(g) {
+    switch(g) 
+    {
         case Brush::Horizontal  : _fillStyle = Brush::HorizontalGradient;  break;
         case Brush::Vertical    : _fillStyle = Brush::VerticalGradient;    break;
         case Brush::Linear      : _fillStyle = Brush::LinearGradient;      break;
@@ -277,113 +276,123 @@ void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientD
     _texture       = Image();
 }
 
-void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, Brush::TextureRotationMode mode)
+
+void BrushData::setTexture(const Image& texture, 
+                           Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
     // The texture has no offset
-    if(!offsetX && !offsetY) {
+    if( ! offsetX && ! offsetY ) 
+    {
         _texture = texture;
     }
-
-    // The texture has offset
-    else {
+    else // The texture has offset
+    {
         // Prepare the destination texture
         _texture.reset(texture.format(), texture.size());
+        
         // Prepare the image painter
         // ### TODO: Use the new painter later! ###
-        ImagePainter ip(_texture);
-        ip.setCompositionMode(CompositionMode::SourceCopy);
+        ImagePainter painter(_texture);
+        painter.setCompositionMode(CompositionMode::SourceCopy);
+        
         // Calculate the source and destination coordinate
         Pt::int32_t sx, dx;
-        if(offsetX >= 0) {
+        if(offsetX >= 0) 
+        {
             sx = offsetX % texture.width();
             dx = 0;
         }
-        else {
+        else 
+        {
             sx = 0;
             dx = (-offsetX) % texture.width();
         }
+        
         Pt::int32_t sy, dy;
-        if(offsetY >= 0) {
+        if(offsetY >= 0) 
+        {
             sy = offsetY % texture.height();
             dy = 0;
         }
-        else {
+        else 
+        {
             sy = 0;
             dy = (-offsetY) % texture.height();
         }
+        
         // Draw on the main area
-        ip.drawImage(
-            PointF(dx, dy), texture,
-            RectF(PointF(sx, sy), SizeF(texture.width() - sx, texture.height() - sy))
-        );
-        // Positive offset
-        if(!dx && !dy) {
+        painter.drawImage( PointF(dx, dy), texture,
+                           RectF( PointF(sx, sy), 
+                                  SizeF(texture.width() - sx, texture.height() - sy)) );
+        
+        if( ! dx && ! dy) // positive offset
+        {
             // Draw on the right/top-right hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(texture.width() - sx, dy), texture,
                 RectF(PointF(0, sy), SizeF(texture.width() - sx, texture.height() - sy))
             );
             // Draw on the bottom/bottom-left hole
-            ip.drawImage(
+            painter.drawImage(
                  PointF(dx, texture.height() - sy), texture,
                  RectF(PointF(sx, 0), SizeF(texture.width() - sx, texture.height() - sy))
             );
             // Draw on the bottom-right hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(texture.width() - sx, texture.height() - sy), texture,
                 RectF(PointF(0, 0), SizeF(texture.width() - sx, texture.height() - sy))
             );
         }
-        // Negative offset
-        else if(!sx && !sy) {
+        else if(!sx && !sy) // negative offset
+        {
             // Draw on the left/bottom-left hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(0, dy), texture,
                 RectF(PointF(texture.width() - dx, 0), SizeF(dx, texture.height() - dy))
             );
             // Draw on the top/top-right hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(dx, 0), texture,
                 RectF(PointF(0, texture.height() - dy), SizeF(texture.width() - dx, dy))
             );
             // Draw on the left-top hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(0, 0), texture,
                 RectF(PointF(texture.width() - dx, texture.height() - dy), SizeF(dx, dy))
             );
         }
-        // Mixed offset
-        else if(!dx && !sy) {
+        else if( ! dx && ! sy) // Mixed offset
+        {
             // Draw on the top-left hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(0, 0), texture,
                 RectF(PointF(sx, texture.height() - dy), SizeF(texture.width() - sx, dy))
             );
             // Draw on the top-right hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(sx, 0), texture,
                 RectF(PointF(0, texture.height() - dy), SizeF(sx, dy))
             );
             // Draw on the bottom-right hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(sx, dy), texture,
                 RectF(PointF(0, 0), SizeF(sx, dy))
             );
         }
-        // Mixed offset
-        else if(!sx && !dy) {
+        else if( ! sx && ! dy ) // Mixed offset
+        {
             // Draw on the top-left hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(0, 0), texture,
                 RectF(PointF(texture.width() - dx, sy), SizeF(dx, texture.height() - sy))
             );
             // Draw on the bottom-left hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(0, sy), texture,
                 RectF(PointF(texture.width() - dx, 0), SizeF(dx, sy))
             );
             // Draw on the bottom-right hole
-            ip.drawImage(
+            painter.drawImage(
                 PointF(dx, sy), texture,
                 RectF(PointF(0, 0), SizeF(dx, sy))
             );
@@ -394,54 +403,8 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
     _ofsX      = offsetX;
     _ofsY      = offsetY;
     _isNull    = false;
-
-    _textureOrig.reset(_texture.format(), Size(0, 0));
-    setTextureRotation(rotDeg, colorFill, mode);
 }
-
-void BrushData::setTextureRotation(float rotDeg, const Color& colorFill, Brush::TextureRotationMode mode)
-{
-    if(_texture.format().pixelStride() != 4)
-        throw std::runtime_error("brush error: texture rotation is not supported with this image format (pixel stride != 4)");
-
-    if(_texture.padding())
-        throw std::runtime_error("brush error: texture rotation is not supported with this image format (padding != 0)");
-
-    // Copy and check the rotation angle
-    _rotDeg = rotDeg;
-    if(_rotDeg == 0.0f) return;
-
-    // Save the original texture as needed
-    if(_textureOrig.empty()) _textureOrig = _texture;
-
-    // Perform rotation
-    switch(mode) {
-        case Brush::BlockCrop:
-            ImageOperation2::blockRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateCrop);
-            break;
-
-        case Brush::BlockNoCrop:
-            ImageOperation2::blockRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateNoCrop);
-            break;
-
-        case Brush::BlockFit:
-            ImageOperation2::blockRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateFit);
-            break;
-
-        case Brush::BilinearCrop:
-            ImageOperation2::bilinearRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateCrop);
-            break;
-
-        case Brush::BilinearNoCrop:
-            ImageOperation2::bilinearRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateNoCrop);
-            break;
-
-        case Brush::BilinearFit:
-            ImageOperation2::bilinearRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateFit);
-            break;
-    }
-}
-
 
 } // namespace
+
 } // namespace

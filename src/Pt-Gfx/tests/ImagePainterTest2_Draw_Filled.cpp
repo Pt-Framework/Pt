@@ -108,13 +108,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     painter.drawText( PointF(330 + 220, 530 + 30), "XWAA" );
 
     // A polygon with holes
-    if(!brush2.isTexture())
-        painter.setBrush( brush2 );
-    else {
-        Brush tmp = brush2;
-        tmp.setTextureRotation(30, Color::fromRgb8(255, 0, 0, 255), Brush::BlockCrop);
-        painter.setBrush( tmp );
-    }
+    painter.setBrush( brush2 );
 
     const PointF poly4a[] = { // CCW
         // Outside
@@ -139,13 +133,9 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     painter.fillPolygon( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
     painter.drawText( PointF(730 - 200, 70), "NOAA" );
 
-    if(!brush2.isTexture())
-        painter.setBrush( brush2 );
-    else {
-        Brush tmp = brush2;
-        tmp.setTextureRotation(-30, Color::fromRgb8(255, 0, 0, 255), Brush::BilinearCrop);
-        painter.setBrush( tmp );
-    }
+
+    painter.setBrush( brush2 );
+
 
     const PointF poly4b[] = { // CCW
         // Outside
