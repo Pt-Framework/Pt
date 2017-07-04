@@ -302,25 +302,25 @@ void ImagePainter2::fillPath(const Path& path, float smoothness)
 
 void ImagePainter2::setFontDir(const Pt::System::Path& path)
 {
-  FreeType2::instance().setFontDir(path);
+  FreeType::instance().setFontDir(path);
 }
 
 
 void ImagePainter2::setDefaultFont(const std::string& f)
 {
-  FreeType2::instance().setDefaultFont(f);
+  FreeType::instance().setDefaultFont(f);
 }
 
 
 std::string ImagePainter2::defaultFont()
 {
-  return FreeType2::instance().defaultFont();
+  return FreeType::instance().defaultFont();
 }
 
 
 std::vector<std::string> ImagePainter2::fontNames()
 {
-  return FreeType2::instance().fontNames();
+  return FreeType::instance().fontNames();
 }
 
 

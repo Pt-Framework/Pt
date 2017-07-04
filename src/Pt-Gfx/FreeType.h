@@ -68,7 +68,9 @@ class FreeType : public Pt::Singleton<FreeType>
 
         ~FreeType();
 
-        std::string defaultFont() const;
+        const std::string& defaultFont() const;
+
+        FTC_FaceID defaultFace() const;
 
         void setDefaultFont(const std::string& font);
 
@@ -111,7 +113,8 @@ class FreeType : public Pt::Singleton<FreeType>
         FTC_CMapCache  _charMapCache;
         FTC_SBitCache  _bitmapCache;
         System::Path   _fontDir;
-        std::string    _defaultFont;
+        Font           _defaultFont;
+        FTC_FaceID     _defaultFace;
         Fonts          _fonts;
         Files          _files;
 };

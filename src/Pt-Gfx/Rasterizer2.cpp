@@ -89,7 +89,8 @@ Rasterizer2::Rasterizer2(Image& image)
 {
     updateClip();
 
-    // setup the image type
+    _faceId = FreeType::instance().defaultFace();
+
     _imageType.face_id = _faceId;
     _imageType.width   = 12;
     _imageType.height  = 12;
@@ -781,13 +782,6 @@ void Rasterizer2::drawImage(const Point& to, const Image& from, const Rect& from
 void Rasterizer2::drawText(const Point& to, const Pt::String& text, 
                            const Transform& transform)
 {
-    //DrawText2 dt;
-    //dt.setFont( Font("", 20) );
-    //dt.setClip(_currentClip);
-    //dt.draw(*_image, _pen.color(),to,text,_compositionMode,transform);
-
-    //setFont( Font("", 20) );
-
     FreeType::instance().draw(*_image, _pen.color(), to, text,
                                _currentClip, _compositionMode, 
                                transform, _faceId, &_imageType);
@@ -804,18 +798,7 @@ FontMetrics Rasterizer2::fontMetrics(const String& text) const
 
 FontMetrics Rasterizer2::fontMetrics(const Font& font, const Pt::String& text)
 {
-    FTC_FaceID faceId;
-    
-    if( font.name().empty() )
-    {
-        Font defaultFont(FreeType::instance().defaultFont(), font);
-
-        faceId = FreeType::instance().findFaceId(defaultFont);
-    }
-    else
-    {
-        faceId = FreeType::instance().findFaceId(font);
-    }
+    FTC_FaceID faceId = FreeType::instance().findFaceId(font);
 
     FTC_ImageTypeRec imageType;
     imageType.face_id = faceId;

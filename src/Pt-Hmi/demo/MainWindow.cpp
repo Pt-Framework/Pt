@@ -221,7 +221,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     Pt::Gfx::Transform trans;
     trans.translate(-125, -150);     
-    trans.rotateDeg(45);
+    trans.rotateDeg(90);
     trans.translate(125, 150);
     
     Pt::Gfx::Path path;    

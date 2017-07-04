@@ -41,12 +41,19 @@
 #include <limits>
 #include <iostream>
 
+namespace {
+
+static const unsigned DefaultFontSize = 12;
+static const unsigned DefaultFaceId = 0;
+
+} // namespace
+
 namespace Pt {
 
 namespace Gfx {
 
-
 FreeType::FreeType()
+: _defaultFace(DefaultFaceId)
 {
     if( FT_Init_FreeType( &_ft ) )
         throw std::runtime_error("FT_Init_FreeType");
@@ -76,18 +83,33 @@ FreeType::~FreeType()
 }
 
 
-std::string FreeType::defaultFont() const
+const std::string& FreeType::defaultFont() const
 {
     // LOCK
-    return _defaultFont;
+    
+    return _defaultFont.name();
+    
     // UNLOCK
 }
 
 
-void FreeType::setDefaultFont( const std::string& font )
+FTC_FaceID FreeType::defaultFace() const
 {
     // LOCK
-    _defaultFont = font;
+    
+    return _defaultFace;
+    
+    // UNLOCK
+}
+
+
+void FreeType::setDefaultFont(const std::string& font)
+{
+    // LOCK
+    
+    _defaultFont = Font(font, DefaultFontSize);
+    _defaultFace = findFaceId(_defaultFont);
+    
     // UNLOCK
 }
 
@@ -149,7 +171,7 @@ void FreeType::setFontDir(const System::Path& path)
             (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
             style = Font::BoldItalic;
 
-        Font font(face->family_name, 12, style);
+        Font font(face->family_name, DefaultFontSize, style);
 
         System::Path& fontPath = _fonts[font];
         fontPath = fp;
@@ -167,9 +189,16 @@ FTC_FaceID FreeType::findFaceId(const Font& font)
 {
     // LOCK
     
+    if( font.name().empty() )
+    {
+        return _defaultFace;
+    }
+
     Fonts::iterator it = _fonts.find(font);
     if( it == _fonts.end() )
-        return 0;
+    {
+        return DefaultFaceId;
+    }
 
     System::Path* path = &it->second;
     return reinterpret_cast<FTC_FaceID>(path);
@@ -188,10 +217,10 @@ FT_Error FreeType::fontRequest( FTC_FaceID faceId, FT_Library library,
 
 FT_Error FreeType::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 {
-    System::Path* path = reinterpret_cast<System::Path*>(faceId);
-
-    if(faceId == 0)
+    if(faceId == DefaultFaceId)
         return FT_New_Memory_Face(_ft, DejaVuSans, DejaVuSansSize, 0, face);
+
+    System::Path* path = reinterpret_cast<System::Path*>(faceId);
 
     // check if path is still valid
     if( _files.find(path) == _files.end() )
@@ -522,4 +551,3 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
 } // namespace Gfx
 
 } // namespace Pt
-
