@@ -45,7 +45,6 @@ if $(WITH_EXPERIMENTAL_GFX)
 PT_GFX_NEW_RASTERIZER_FILES = ImageOperation2_Scale32Bpp.cpp
                               ImageOperation2_Rotate32Bpp.cpp
                               ImagePainter2.cpp
-                              LineRenderer.cpp
                               Rasterizer2.cpp
                               Rasterizer2_Line.cpp
                               Rasterizer2_Rectangle.cpp
@@ -53,31 +52,32 @@ PT_GFX_NEW_RASTERIZER_FILES = ImageOperation2_Scale32Bpp.cpp
                               Rasterizer2_Bezier.cpp
                               Rasterizer2_Arc.cpp
                               Rasterizer2_Ellipse.cpp
-                              Path.cpp
                               clipper_aj$(SLASH)clipper.cpp
                               ;
 
-SharedLibrary Pt-Gfx : Color.cpp
-                       Pen.cpp
-                       Brush.cpp
-                       Image.cpp
-                       ImageFormat.cpp
-                       Argb32Format.cpp
+SharedLibrary Pt-Gfx : Argb32Format.cpp
                        Argb32Image.cpp
-                       Rgb32Format.cpp
-                       Rgb16Format.cpp
-                       Yuv12Format.cpp
+                       Brush.cpp
+                       ClipPolygon.cpp
+                       Color.cpp
+                       DrawText.cpp
                        Font.cpp
                        FontMetrics.cpp
-                       PngReader.cpp
-                       JpegReader.cpp
                        FreeType.cpp
-                       DrawText.cpp
+                       Image.cpp
+                       ImageFormat.cpp
                        ImagePainter.cpp
-                       Rasterizer.cpp
-                       ClipPolygon.cpp
+                       JpegReader.cpp
                        Painter.cpp
+                       Path.cpp
+                       Pen.cpp
+                       PngReader.cpp
+                       Polygonizer.cpp
+                       Rasterizer.cpp
+                       Rgb32Format.cpp
+                       Rgb16Format.cpp
                        Transform.cpp
+                       Yuv12Format.cpp
                        $(PT_GFX_NEW_RASTERIZER_FILES)
                        ;
 

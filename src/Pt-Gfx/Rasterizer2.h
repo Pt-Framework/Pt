@@ -33,7 +33,7 @@
 
 #include "ArcMode.h"
 #include "Fixed.h"
-#include "LineRenderer.h"
+#include "Polygonizer.h"
 #include "FreeType.h"
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/Path.h>
@@ -564,7 +564,7 @@ class Rasterizer2
 
     private:
         Image*           _image;
-        LineRenderer     _polygonizer;
+        Polygonizer      _polygonizer;
         
         CompositionMode  _compositionMode;
         bool             _aaMode;

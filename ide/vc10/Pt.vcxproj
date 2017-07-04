@@ -330,8 +330,8 @@
     <ClInclude Include="..\..\src\Pt-Gfx\FreeType.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineEdge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineFace.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\LineRenderer.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineSlope.h" />
+    <ClInclude Include="..\..\src\Pt-Gfx\Polygonizer.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer2.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Span.h" />
@@ -530,10 +530,10 @@
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter2.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\JpegReader.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\LineRenderer.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Path.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Polygonizer.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Arc.cpp" />

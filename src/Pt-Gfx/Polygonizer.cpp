@@ -27,7 +27,7 @@
   02110-1301 USA
 */
 
-#include "LineRenderer.h"
+#include "Polygonizer.h"
 #include "Rasterizer2.h" // FIXED constants
 
 #include "ArcMode.h"
@@ -76,11 +76,11 @@ struct PatternState
 };
 
 
-LineRenderer::LineRenderer()
+Polygonizer::Polygonizer()
 {
 }
 
-void LineRenderer::setPattern(const Pen::Style& style)
+void Polygonizer::setPattern(const Pen::Style& style)
 {
     // Predefined patterns
     static const Pt::uint64_t patternDot        = 0x8080808080808080; // 1000000010000000100000001000000010000000100000001000000010000000
@@ -123,7 +123,7 @@ void LineRenderer::setPattern(const Pen::Style& style)
 }
 
 
-void LineRenderer::renderRoundedRect(std::vector<Polygon>& polygons, 
+void Polygonizer::renderRoundedRect(std::vector<Polygon>& polygons, 
                                      const RectF& rect, float radius, const Pen& pen)
 {
     std::vector<PointF> pointsF;
@@ -136,7 +136,7 @@ void LineRenderer::renderRoundedRect(std::vector<Polygon>& polygons,
 }
 
 
-void LineRenderer::fillRoundedRect(std::vector<PointF>& pointsF, 
+void Polygonizer::fillRoundedRect(std::vector<PointF>& pointsF, 
                                    const RectF& rect, float radius)
 {
     renderRoundedRectPoints(pointsF, rect, radius, 10);
@@ -146,7 +146,7 @@ void LineRenderer::fillRoundedRect(std::vector<PointF>& pointsF,
 }
 
 
-void LineRenderer::renderRoundedRectPoints(std::vector<PointF>& dst, 
+void Polygonizer::renderRoundedRectPoints(std::vector<PointF>& dst, 
                                            const RectF& rect, float radius, 
                                            std::size_t penSize)
 {
@@ -210,7 +210,7 @@ void LineRenderer::renderRoundedRectPoints(std::vector<PointF>& dst,
     dst.push_back( PointF(x1, (y1 + y2) * 0.5f) );
 }
 
-void LineRenderer::renderEllipse(std::vector<Polygon>& polygons,
+void Polygonizer::renderEllipse(std::vector<Polygon>& polygons,
                                  const PointF& topLeft, const SizeF& size, 
                                  const Pen& pen)
 {
@@ -251,7 +251,7 @@ void LineRenderer::renderEllipse(std::vector<Polygon>& polygons,
 }
 
 
-void LineRenderer::renderEllipsePoints(std::vector<PointF>& dst, 
+void Polygonizer::renderEllipsePoints(std::vector<PointF>& dst, 
                                        Pt::int32_t radiusX, Pt::int32_t radiusY, 
                                        Pt::int32_t centerX, Pt::int32_t centerY, 
                                        size_t penSize)
@@ -286,7 +286,7 @@ void LineRenderer::renderEllipsePoints(std::vector<PointF>& dst,
 }
 
 
-void LineRenderer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMode,
+void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMode,
                              const PointF& topLeft, const SizeF& size, 
                              float degBegin, float degEnd, const Pen& pen)
 {    
@@ -439,7 +439,7 @@ void LineRenderer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcM
 }
 
 
-void LineRenderer::renderArcPoints(std::vector<PointF>& dst, 
+void Polygonizer::renderArcPoints(std::vector<PointF>& dst, 
                                    Pt::int32_t radiusX, Pt::int32_t radiusY, 
                                    Pt::int32_t centerX, Pt::int32_t centerY, 
                                    float degBegin, float degEnd, size_t penSize)
@@ -482,7 +482,7 @@ void LineRenderer::renderArcPoints(std::vector<PointF>& dst,
 }
 
 
-void LineRenderer::renderWidePolyline(std::vector<Polygon>& polygons,
+void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
                                       const PointF* points, const std::size_t n,
                                       const Pen& pen)
 {
@@ -515,7 +515,7 @@ void LineRenderer::renderWidePolyline(std::vector<Polygon>& polygons,
 //
 // Just as fast as calling renderWidePolyline with just two points...
 //
-void LineRenderer::renderWideLine(std::vector<Polygon>& polygons,
+void Polygonizer::renderWideLine(std::vector<Polygon>& polygons,
                                   const PointF& from, const PointF& to,
                                   const Pen& pen)
 {
@@ -539,7 +539,7 @@ void LineRenderer::renderWideLine(std::vector<Polygon>& polygons,
 }
 
 
-void LineRenderer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons, 
+void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons, 
                                                  const PointF* basePtr, size_t curPCnt,
                                                  const Pen& pen)
 {
@@ -626,7 +626,7 @@ void LineRenderer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
 }
 
 
-void LineRenderer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons, 
+void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons, 
                                                const PointF* basePtr, size_t curPCnt,
                                                const Pen& pen)
 {
@@ -689,7 +689,7 @@ void LineRenderer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
 }
 
 
-void LineRenderer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //pointsF
+void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //pointsF
                                             const PointF* src, size_t pointCount,
                                             const Pen& pen)
 {
@@ -739,7 +739,7 @@ void LineRenderer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //po
 }
 
 
-bool LineRenderer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen)
+bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen)
 {
     // Temporary buffer for the generated points
     std::vector<PointF> pointsF;
@@ -887,7 +887,7 @@ bool LineRenderer::sagPolygonPoints(PatternState& state, bool draw, const Pen& p
     return false;
 }
 
-void LineRenderer::sagGenerateSimpleLineSegment(PatternState& state, 
+void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state, 
                                                 float x1, float y1, 
                                                 float x2, float y2,
                                                 const Pen& pen)
@@ -985,7 +985,7 @@ void LineRenderer::sagGenerateSimpleLineSegment(PatternState& state,
 }
 
 
-bool LineRenderer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count, 
+bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count, 
                                              const PointF* poly2, size_t poly2Count)
 {
     // Evaluate using the first polygon's normals
@@ -1037,7 +1037,7 @@ bool LineRenderer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Co
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
 //           Article and original code by Kah Shiu Chong, 2012
-void LineRenderer::satDPIProjMinMax(float& min, float& max, 
+void Polygonizer::satDPIProjMinMax(float& min, float& max, 
                                     const PointF* points, size_t pointCount, 
                                     float px, float py)
 {
@@ -1052,7 +1052,7 @@ void LineRenderer::satDPIProjMinMax(float& min, float& max,
 }
 
 
-void LineRenderer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen)
+void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen)
 {
     // Generate a new thick polygon
     std::vector<Polygon> polygons;
@@ -1132,7 +1132,7 @@ void LineRenderer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pe
 }
 
 
-void LineRenderer::renderSolidLineSegment(std::vector<PointF>& dst, 
+void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst, 
                                           float x1, float y1, float x2, float y2, 
                                           const Pen& pen, bool openingCap, bool closingCap)
 {
@@ -1183,7 +1183,7 @@ void LineRenderer::renderSolidLineSegment(std::vector<PointF>& dst,
 }
 
 
-void LineRenderer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygons, 
+void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygons, 
                                                     float x1, float y1, 
                                                     float x2, float y2, 
                                                     Pt::int32_t& piCtrInOut,
@@ -1269,7 +1269,7 @@ void LineRenderer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygo
 }
 
 
-bool LineRenderer::joinClosedWidePolyline(std::vector<PointF>& outer, 
+bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer, 
                                           std::vector<PointF>& inner, 
                                           const std::vector<PointF>& segment, 
                                           const PointF& origMeetingPoint, const Pen& pen,
@@ -1401,7 +1401,7 @@ bool LineRenderer::joinClosedWidePolyline(std::vector<PointF>& outer,
 }
 
 
-bool LineRenderer::joinOpenWidePolyline(std::vector<PointF>& polygon, 
+bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon, 
                                          std::vector<PointF>& inner, 
                                          const std::vector<PointF>& segment, 
                                          const PointF& origMeetingPoint, 
@@ -1541,7 +1541,7 @@ bool LineRenderer::joinOpenWidePolyline(std::vector<PointF>& polygon,
 }
 
 
-void LineRenderer::combineLinePointsAndAddCaps(std::vector<PointF>& dst, 
+void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst, 
                                                const std::vector<PointF>& inner, 
                                                const std::vector<PointF>& outer, 
                                                Pen::CapStyle begCap, 
@@ -1712,21 +1712,21 @@ void LineRenderer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
 }
 
 
-void LineRenderer::renderLineButtCap(std::vector<PointF>& dst, float x, float y, float nx, float ny)
+void Polygonizer::renderLineButtCap(std::vector<PointF>& dst, float x, float y, float nx, float ny)
 {
     dst.push_back( PointF(x + nx, y + ny) );
     dst.push_back( PointF(x - nx, y - ny) );
 }
 
 
-void LineRenderer::renderLineSquareCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+void Polygonizer::renderLineSquareCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
 {
     dst.push_back( PointF(x - dx + nx, y - dy + ny) );
     dst.push_back( PointF(x - dx - nx, y - dy - ny) );
 }
 
 
-void LineRenderer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
+void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
 #if 0
     renderQuadraticBezierPoints(
@@ -1755,7 +1755,7 @@ void LineRenderer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y
 }
 
 
-void LineRenderer::renderLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+void Polygonizer::renderLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
 {
     dst.push_back( PointF(x + nx, y + ny) );
     dst.push_back( PointF(x - dx, y - dy) );
@@ -1763,7 +1763,7 @@ void LineRenderer::renderLineTriangularOutCap(std::vector<PointF>& dst, float x,
 }
 
 
-void LineRenderer::renderLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+void Polygonizer::renderLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
 {
     dst.push_back( PointF(x + nx - dx, y + ny - dy) );
     dst.push_back( PointF(x,           y          ) );
@@ -1771,7 +1771,7 @@ void LineRenderer::renderLineTriangularInCap(std::vector<PointF>& dst, float x, 
 }
 
 
-void LineRenderer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
+void Polygonizer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
 #if 0
     renderQuadraticBezierPoints(
@@ -1800,7 +1800,7 @@ void LineRenderer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, flo
 }
 
 
-void LineRenderer::renderLineArrow1Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+void Polygonizer::renderLineArrow1Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
 {
     dst.push_back( PointF(x + nx,        y + ny       ) );
     dst.push_back( PointF(x + nx * 2.0f, y + ny * 2.0f) );
@@ -1810,7 +1810,7 @@ void LineRenderer::renderLineArrow1Cap(std::vector<PointF>& dst, float x, float 
 }
 
 
-void LineRenderer::renderLineArrow2Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+void Polygonizer::renderLineArrow2Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
 {
     dst.push_back( PointF(x + dx * 0.5f + nx,        y + dy * 0.5f + ny       ) );
     dst.push_back( PointF(x + dx        + nx * 2.0f, y + dy        + ny * 2.0f) );
@@ -1823,7 +1823,7 @@ void LineRenderer::renderLineArrow2Cap(std::vector<PointF>& dst, float x, float 
 // Based on: Bitmap/Bézier curves/Quadratic
 //           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
 //           Last modified on February 17, 2017
-void LineRenderer::renderQuadraticBezierPoints(std::vector<PointF>& dst, 
+void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst, 
                                                  float x1, float y1, 
                                                  float x2, float y2, 
                                                  float x3, float y3, 
@@ -1875,7 +1875,7 @@ void LineRenderer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
 }
 
 
-void LineRenderer::calculateLineParams(float& wh, float& dx, float& dy, 
+void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy, 
                                        float& nx, float& ny, float x1, float y1, 
                                        float x2, float y2, size_t w)
 {
@@ -1902,7 +1902,7 @@ void LineRenderer::calculateLineParams(float& wh, float& dx, float& dy,
 }
 
 
-bool LineRenderer::intersectLine(bool& inLine, PointF& intersect, 
+bool Polygonizer::intersectLine(bool& inLine, PointF& intersect, 
                                  const PointF& line1a, const PointF& line1b, 
                                  const PointF& line2a, const PointF& line2b, size_t penSize)
 {

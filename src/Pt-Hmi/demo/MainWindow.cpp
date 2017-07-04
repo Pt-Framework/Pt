@@ -238,6 +238,8 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10, Gfx::Pen::Dash) );
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
     
+    //imagePainter.setClip( Gfx::RectF(50, 100, 50, 100) );
+
     //imagePainter.fillPath(path);
     //imagePainter.drawPath(path);
 
@@ -257,12 +259,12 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.drawLine(  Pt::Gfx::PointF(50, 50), Pt::Gfx::PointF(300, 290)  );
 
     //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
-    //imagePainter.drawEllipse(Pt::Gfx::PointF(200, 100), Pt::Gfx::SizeF(50, 150));
+    imagePainter.drawEllipse(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 150));
 
     //imagePainter.drawArc(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 100), 20, 200);
 
 //    imagePainter.setFont( Pt::Gfx::Font("", 24) );
-    imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello", trans);
+    //imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello", trans);
 
     painter.setClip(rect);
     painter.drawImage(Gfx::PointF(0, 0), image);

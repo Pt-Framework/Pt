@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_LINERENDERER_H
-#define PT_GFX_LINERENDERER_H
+#ifndef PT_GFX_POLYGONIZER_H
+#define PT_GFX_POLYGONIZER_H
  
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Point.h>
@@ -41,10 +41,10 @@ namespace Gfx {
 class ArcMode;
 class PatternState;
 
-class LineRenderer
+class Polygonizer
 {
     public:
-        LineRenderer();
+        Polygonizer();
         
         void setPattern(const Pen::Style& style);
 

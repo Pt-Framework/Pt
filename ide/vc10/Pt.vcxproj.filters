@@ -1485,13 +1485,13 @@
     <ClInclude Include="..\..\include\Pt\Hmi\SpinBox.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\LineRenderer.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer2.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Fixed.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\Polygonizer.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2768,9 +2768,6 @@
     <ClCompile Include="..\..\src\Pt\Atomicity.gcc.builtin.cpp">
       <Filter>Pt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\LineRenderer.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
@@ -2790,6 +2787,9 @@
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Bezier.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Polygonizer.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
