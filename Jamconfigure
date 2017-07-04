@@ -422,9 +422,109 @@ if ! $(WITH_CPU_SSE3)
     }
 }
 
+#############################################################################
+# SSSE3 instructions
+#############################################################################
+
+WITH_CPU_SSSE3 = [ CheckBuildC++ "#include <intrin.h>"
+                                "int main() {"
+                                "__m128i v1, v2;"
+                                "const __m128i r = _mm_shuffle_epi8(v1, v2);"
+                                "return 0; }"
+                                : ""
+                                : "" ] ;
+
+if $(WITH_CPU_SSSE3)
+{
+    PT_CPU_DEFINES += PT_CPU_SSSE3_MSVC ;
+}
+
+if ! $(WITH_CPU_SSSE3)
+{
+    WITH_CPU_SSSE3 = [ CheckBuildC++ "#include <x86intrin.h>"
+                                     "int main() {"
+                                     "__m128i v1, v2;"
+                                     "const __m128i r = _mm_shuffle_epi8(v1, v2);"
+                                     "return 0; }"
+                                     : ""
+                                     : "" ] ;
+
+    if $(WITH_CPU_SSSE3)
+    {
+        PT_CPU_DEFINES += PT_CPU_SSSE3_GNU ;
+    }
+}
+
+#############################################################################
+# AVX1 instructions
+#############################################################################
+
+WITH_CPU_AVX1 = [ CheckBuildC++ "#include <intrin.h>"
+                                "int main() {"
+                                "__m256i v;"
+                                "const __m256i r = _mm256_lddqu_si256(&v);"
+                                "return 0; }"
+                                : ""
+                                : "" ] ;
+
+if $(WITH_CPU_AVX1)
+{
+    PT_CPU_DEFINES += PT_CPU_AVX1_MSVC ;
+}
+
+if ! $(WITH_CPU_AVX1)
+{
+    WITH_CPU_AVX1 = [ CheckBuildC++ "#include <x86intrin.h>"
+                                    "int main() {"
+                                    "__m256i v;"
+                                    "const __m256i r = _mm256_lddqu_si256(&v);"
+                                    "return 0; }"
+                                    : ""
+                                    : "" ] ;
+
+    if $(WITH_CPU_AVX1)
+    {
+        PT_CPU_DEFINES += PT_CPU_AVX1_GNU ;
+    }
+}
+
+#############################################################################
+# AVX2 instructions
+#############################################################################
+
+WITH_CPU_AVX2 = [ CheckBuildC++ "#include <intrin.h>"
+                                "int main() {"
+                                "__m256i v1, v2;"
+                                "const __m256i r = _mm256_and_si256(v1, v2);"
+                                "return 0; }"
+                                : ""
+                                : "" ] ;
+
+if $(WITH_CPU_AVX2)
+{
+    PT_CPU_DEFINES += PT_CPU_AVX2_MSVC ;
+}
+
+if ! $(WITH_CPU_AVX2)
+{
+    WITH_CPU_AVX2 = [ CheckBuildC++ "#include <x86intrin.h>"
+                                    "int main() {"
+                                    "__m256i v1, v2;"
+                                    "const __m256i r = _mm256_and_si256(v1, v2);"
+                                    "return 0; }"
+                                    : ""
+                                    : "" ] ;
+
+    if $(WITH_CPU_AVX2)
+    {
+        PT_CPU_DEFINES += PT_CPU_AVX2_GNU ;
+    }
+}
 
 Configure PT_CPU_DEFINES ;
 EchoOption PT_CPU_DEFINES : "CPU architecture" ;
+
+Exit ; 
 
 #############################################################################
 # Atomic operations
