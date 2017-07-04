@@ -521,10 +521,25 @@ if ! $(WITH_CPU_AVX2)
     }
 }
 
+#############################################################################
+# NEON instructions
+#############################################################################
+
+WITH_CPU_NEON = [ CheckBuildC++ "#include <arm_neon.h>"
+                                "int main() {"
+                                "int32x4_t v1, v2;"
+                                "int32x4_t r = vandq_s32(v1, v2);"
+                                "return 0; }"
+                                : ""
+                                : "" ] ;
+
+if $(WITH_CPU_NEON)
+{
+    PT_CPU_DEFINES += PT_CPU_NEON_GNU ;
+}
+
 Configure PT_CPU_DEFINES ;
 EchoOption PT_CPU_DEFINES : "CPU architecture" ;
-
-Exit ; 
 
 #############################################################################
 # Atomic operations
