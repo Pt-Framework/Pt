@@ -81,9 +81,13 @@ class PT_GFX_API Brush
 
         Brush(const Color& color);
 
-        Brush(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFit);
+        Brush(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, 
+             float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), 
+             TextureRotationMode mode = BlockFit);
 
-        Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg = 0.0f, float scale = 1.0f, Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
+        Brush(const Color& from, const Color& to, GradientDirection g, 
+              float rotDeg = 0.0f, float scale = 1.0f, 
+              Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
 
         FillStyle fillStyle() const;
 
@@ -91,7 +95,9 @@ class PT_GFX_API Brush
 
         const Color& color() const;
 
-        void setGradient(const Color& from, const Color& to, GradientDirection g, float rotDeg = 0.0f, float scale = 1.0f, Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
+        void setGradient(const Color& from, const Color& to, GradientDirection g, 
+                         float rotDeg = 0.0f, float scale = 1.0f, 
+                         Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
 
         void setGradientRotation(float rotDeg = 0.0f);
 
@@ -101,9 +107,13 @@ class PT_GFX_API Brush
 
         const Color& gradientColor() const;
 
-        void setTexture(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFit);
+        void setTexture(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, 
+                        float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), 
+                        TextureRotationMode mode = BlockFit);
 
-        void setTextureRotation(float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFit);
+        void setTextureRotation(float rotDeg = 0.0f, 
+                                const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), 
+                                TextureRotationMode mode = BlockFit);
 
         const Image& texture() const;
 
