@@ -270,8 +270,8 @@ void LineRenderer::renderEllipsePoints(std::vector<PointF>& dst,
         const float angle = piDouble<float>() * i * nSegs1i;
         
         // Calculate the coordinate
-        const float x = centerX + radiusX * fastCos(angle);
-        const float y = centerY - radiusY * fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
+        const float x = centerX + radiusX * std::cos(angle);
+        const float y = centerY - radiusY * std::sin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
         
         // Store the coordinate only if it is different with the previous one
         if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) 
