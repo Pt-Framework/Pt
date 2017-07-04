@@ -29,7 +29,7 @@
 */
 
 #include "Rasterizer2.h"
-#include "FreeType2.h"
+#include "FreeType.h"
 #include "ArcMode.h"
 #include <Pt/Gfx/ImagePainter2.h>
 #include "clipper_aj/clipper.hpp"

@@ -29,7 +29,6 @@
 */
 
 #include "Rasterizer2.h"
-#include "DrawText2.h"
 #include "ClipShape.h"
 #include <Pt/Gfx/Transform.h>
 
