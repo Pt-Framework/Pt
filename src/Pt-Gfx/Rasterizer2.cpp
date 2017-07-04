@@ -1288,8 +1288,8 @@ void Rasterizer2::fillPath(const Path& path, float smoothness)
 
 
 void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, 
-                                   Pt::int32_t minX, Pt::int32_t minY, 
-                                   Pt::uint8_t alpha)
+                            Pt::int32_t minX, Pt::int32_t minY, 
+                            Pt::uint8_t alpha)
 {
     // Check the clipping
     if(!ClipShapeI::insideXRange(x, _currentClip)) return;
@@ -1373,7 +1373,9 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
     }
 }
 
-void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha)
+void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
+                                Pt::int32_t x2, Pt::int32_t y2, 
+                                Pt::uint8_t alpha)
 {
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
     const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
@@ -1401,7 +1403,9 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
     }
 }
 
-void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha, const bool mask[4])
+void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
+                                Pt::int32_t x2, Pt::int32_t y2, 
+                                Pt::uint8_t alpha, const bool mask[4])
 {
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
     const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
@@ -1429,7 +1433,9 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY)
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
+                              Pt::int32_t x2, Pt::int32_t y2, 
+                              Pt::int32_t minX, Pt::int32_t minY)
 {
     // Check the clipping
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
@@ -1484,7 +1490,10 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const bool mask[4])
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
+                              Pt::int32_t x2, Pt::int32_t y2, 
+                              Pt::int32_t minX, Pt::int32_t minY, 
+                              const bool mask[4])
 {
     // Check the clipping
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
@@ -1539,7 +1548,10 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha)
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
+                              Pt::int32_t x2, Pt::int32_t y2, 
+                              Pt::int32_t minX, Pt::int32_t minY, 
+                              Pt::uint8_t alpha)
 {
     // Check the clipping
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
@@ -1594,7 +1606,10 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha, const bool mask[4])
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
+                              Pt::int32_t x2, Pt::int32_t y2, 
+                              Pt::int32_t minX, Pt::int32_t minY, 
+                              Pt::uint8_t alpha, const bool mask[4])
 {
     // Check the clipping
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
@@ -1649,7 +1664,10 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const Pt::uint8_t alphaMask[4])
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
+                             Pt::int32_t x2, Pt::int32_t y2, 
+                             Pt::int32_t minX, Pt::int32_t minY, 
+                             const Pt::uint8_t alphaMask[4])
 {
     // Check the clipping
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);

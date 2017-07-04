@@ -357,6 +357,76 @@ Configure NETLIBS ;
 EchoOption NETLIBS : "Network libs" ;
 
 #############################################################################
+# SSE2 instructions
+#############################################################################
+
+WITH_CPU_SSE2 = [ CheckBuildC++ "#include <intrin.h>"
+                                "int main() {"
+                                "int v = 42;"
+                                "const __m128i r = _mm_set1_epi32(v);"
+                                "return 0; }"
+                                : ""
+                                : "" ] ;
+
+if $(WITH_CPU_SSE2)
+{
+    PT_CPU_DEFINES = PT_CPU_SSE2_MSVC ;
+}
+
+if ! $(WITH_CPU_SSE2)
+{
+    WITH_CPU_SSE2 = [ CheckBuildC++ "#include <x86intrin.h>"
+                                    "int main() {"
+                                    "int v = 42;"
+                                    "const __m128i r = _mm_set1_epi32(v);"
+                                    "return 0; }"
+                                    : ""
+                                    : "" ] ;
+
+    if $(WITH_CPU_SSE2)
+    {
+        PT_CPU_DEFINES = PT_CPU_SSE2_GNU ;
+    }
+}
+
+#############################################################################
+# SSE3 instructions
+#############################################################################
+
+WITH_CPU_SSE3 = [ CheckBuildC++ "#include <intrin.h>"
+                                "int main() {"
+                                "__m128i v;"
+                                "const __m128i r = _mm_lddqu_si128(&v);"
+                                "return 0; }"
+                                : ""
+                                : "" ] ;
+
+if $(WITH_CPU_SSE3)
+{
+    PT_CPU_DEFINES += PT_CPU_SSE3_MSVC ;
+}
+
+if ! $(WITH_CPU_SSE3)
+{
+    WITH_CPU_SSE3 = [ CheckBuildC++ "#include <x86intrin.h>"
+                                    "int main() {"
+                                    "__m128i v;"
+                                    "const __m128i r = _mm_lddqu_si128(&v);"
+                                    "return 0; }"
+                                    : ""
+                                    : "" ] ;
+
+    if $(WITH_CPU_SSE3)
+    {
+        PT_CPU_DEFINES += PT_CPU_SSE3_GNU ;
+    }
+}
+
+
+Configure PT_CPU_DEFINES ;
+EchoOption PT_CPU_DEFINES : "CPU architecture" ;
+
+#############################################################################
 # Atomic operations
 #############################################################################
 

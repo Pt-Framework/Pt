@@ -33,10 +33,9 @@
 #include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/ImageView.h>
 
-
 namespace Pt {
-namespace Gfx {
 
+namespace Gfx {
 
 Argb32Format::Argb32Format()
 : ImageFormat(4)
@@ -81,7 +80,7 @@ void Argb32Format::onSetPixel(Pixel& to, const Pixel& from,
 
 
 void Argb32Format::onSetPixel(Pixel& to, const ConstPixel& from,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const
+                              CompositionMode mode, Pt::uint8_t blendingAlpha) const
 {
     Argb32Model::assign(to.base(), from.base(), mode, blendingAlpha);
 }
@@ -215,6 +214,6 @@ void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
     }
 }
 
-
 } // namespace
+
 } // namespace

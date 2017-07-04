@@ -30,15 +30,14 @@
 #ifndef PT_GFX_ARGB32IMAGE_H
 #define PT_GFX_ARGB32IMAGE_H
 
-#include <Pt/Types.h>
-
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/BasicImage.h>
-
+#include <Pt/Types.h>
 
 namespace Pt {
+
 namespace Gfx {
 
 
@@ -148,7 +147,8 @@ class Argb32Model
         {
             switch(mode) {
                 default:
-                case CompositionMode::SourceCopy: {
+                case CompositionMode::SourceCopy: 
+                {
                     const Pt::uint32_t blendAlphaSrc = blendingAlpha;
                     const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
                     to[0] = (blendAlphaSrc * (c.blue () >> 8) + blendAlphaInv * to[0]) >> 8;
@@ -177,7 +177,8 @@ class Argb32Model
         {
             switch(mode) {
                 default:
-                case CompositionMode::SourceCopy: {
+                case CompositionMode::SourceCopy: 
+                {
                     const Pt::uint32_t blendAlphaSrc = blendingAlpha;
                     const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
                     to[0] = (blendAlphaSrc * from[0] + blendAlphaInv * to[0]) >> 8;
