@@ -136,7 +136,7 @@ MainWindow::MainWindow()
     _scrollView.setContent(_scrollContainer);
     
     _child2.setContent(&_scrollView);
-    _child2.show(true);
+    //_child2.show(true);
 
     add( _child1 );
 
@@ -165,7 +165,7 @@ MainWindow::MainWindow()
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30,30));
     _child1.resize( Gfx::SizeF(300, 600) );
-    _child1.show(true);
+    //_child1.show(true);
     
     // context menu   
     _menu.setName("All Music");
@@ -236,15 +236,22 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0) ) );
     imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10) );
     //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10, Gfx::Pen::Dash) );
+    
+    
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
+
+    imagePainter.setBrush( Gfx::Brush(Gfx::Color::fromRgb8(255, 0, 0), 
+                                      Gfx::Color::fromRgb8(0, 255, 0), 
+                                      Gfx::Brush::Radial, 
+                                      0.0f, 50, 30) );
     
     //imagePainter.setClip( Gfx::RectF(50, 100, 50, 100) );
 
     //imagePainter.fillPath(path);
     //imagePainter.drawPath(path);
 
-    //imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
-    //                                             Pt::Gfx::SizeF(50, 50)), 10);
+    imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
+                                                 Pt::Gfx::SizeF(200, 100)), 10);
 
     std::vector<Gfx::PointF> polyline;
     polyline.push_back( Pt::Gfx::PointF(40, 40) );
@@ -259,11 +266,11 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.drawLine(  Pt::Gfx::PointF(50, 50), Pt::Gfx::PointF(300, 290)  );
 
     //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
-    imagePainter.drawEllipse(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 150));
+    //imagePainter.drawEllipse(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 150));
 
     //imagePainter.drawArc(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 100), 20, 200);
 
-//    imagePainter.setFont( Pt::Gfx::Font("", 24) );
+    //imagePainter.setFont( Pt::Gfx::Font("", 24) );
     //imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello", trans);
 
     painter.setClip(rect);

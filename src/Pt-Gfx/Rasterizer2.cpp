@@ -434,8 +434,8 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width,
     const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
-    const float angle = _brush.rotation();
-    const float scale = _brush.scale();
+    const float angle = _brush.gradientAngle();
+    const float scale = 1.0;
 
     float ctrX, ctrY, xyRat, yxRat;
     updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
@@ -498,8 +498,8 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
     const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
-    const float angle = _brush.rotation();
-    const float scale = _brush.scale();
+    const float angle = _brush.gradientAngle();
+    const float scale = 1.0;
 
     float ctrX, ctrY, xyRat, yxRat;
     updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
@@ -539,6 +539,7 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
     }
 }
 
+#if 1
 void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, 
                                                           Pt::int32_t height)
 {
@@ -550,15 +551,15 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
     const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
-    const float scale = _brush.scale();
+    const float scale = 0.5;
 
-    float ctrX, ctrY, xyRat, yxRat;
-    updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
+    float centerX, centerY, xyRat, yxRat;
+    updateGradientBrush_getCtrRatXY(centerX, centerY, xyRat, yxRat, width, height);
 
     const float rrFac = 2.0f / scale / sqrt(xyRat * xyRat + yxRat * yxRat);
 
     // Calculate the inverse scaling factor
-    const float ilen = rrFac / sqrt(ctrX * ctrX + ctrY * ctrY);
+    const float ilen = rrFac / sqrt(centerX * centerX + centerY * centerY);
 
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();
@@ -566,12 +567,12 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
     for(Pt::int32_t y = 0; y < height; ++y) 
     {
         // Calculate the delta Y
-        const float dy = (y - ctrY) * xyRat;
+        const float dy = (y - centerY) * xyRat;
         
         for(Pt::int32_t x = 0; x < width; ++x) 
         {
             // Calculate the delta X
-            const float dx = (x - ctrX) * yxRat;
+            const float dx = (x - centerX) * yxRat;
             
             // Calculate the distance and blending factor
             const float dist = sqrt(dx * dx + dy * dy) * ilen;
@@ -586,6 +587,61 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
         }
     }
 }
+
+#else
+
+void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, 
+                                                          Pt::int32_t height)
+{
+    // Determine the start and end colors
+    Pt::uint8_t sc[4], ec[4];
+    updateGradientBrush_getStartEndColors(sc, ec);
+
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
+
+    float R = std::max(width, height);
+
+    float centerX = width / 2;
+    float centerY = height / 2;
+
+    float focusX = width / 4;
+    float focusY = height / 4;
+
+    float dxcf = std::abs(focusX - centerX);
+    float dycf = std::abs(focusY - centerY);
+    float cf = std::sqrt(dxcf * dxcf + dycf * dycf);
+
+    Pt::uint8_t* pixel = _brushBuffer.data();
+
+    for(Pt::int32_t y = 0; y < height; ++y) 
+    {
+        for(Pt::int32_t x = 0; x < width; ++x) 
+        {
+            float angleF = std::atan2(focusY - centerY, focusX - centerX) - 
+                           std::atan2(y - focusY, x - focusX);
+
+
+            
+            float dxfp = std::abs(x - focusX);
+            float dyfp = std::abs(y - focusY);
+            float fp = std::sqrt(dxfp * dxfp + dyfp * dyfp);
+
+            // Calculate the distance and blending factor
+            //const float dist = sqrt(dx * dx + dy * dy) * ilen;
+            //const float mf   = (dist >= 1.0f) ? 1.0f : dist;
+            //const float imf  = 1.0f - mf;
+            //
+            //// Put the pixel
+            //*pixel++ = (bs * mf + be * imf);
+            //*pixel++ = (gs * mf + ge * imf);
+            //*pixel++ = (rs * mf + re * imf);
+            //*pixel++ = (as * mf + ae * imf);
+        }
+    }
+}
+
+#endif
 
 void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt::int32_t height)
 {
@@ -611,8 +667,8 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 #endif
 
     // Extract and calculate the parameters
-    const float angle = _brush.rotation();
-    const float scale = _brush.scale();
+    const float angle = _brush.gradientAngle();
+    const float scale = 1.0;
 
     float ctrX, ctrY, xyRat, yxRat;
     updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
@@ -621,7 +677,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
     const float ang45 =  angle - floor(angle / 45.0f) * 45.0f;
     const float ang90 =  angle - floor(angle / 90.0f) * 90.0f;
     const bool  asym  = (xyRat != yxRat);
-    const bool  useAA = (_aaMode != AntiAliasingMode::None) && (ang90 >= 0.1f) && (asym || ang45 >= 0.1f);
+    const bool  useAA = (_aaMode) && (ang90 >= 0.1f) && (asym || ang45 >= 0.1f);
 #endif
 
     // Calculate the rotation
@@ -692,7 +748,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
                         const float dys = -(y + j - ijm2 - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
                         const float rxs = ( cval * dxs + sval * dys);
                         const float rys = (-sval * dxs + cval * dys);
-                        dist += (std::atan2(rys, rxs) + Gfx::Math::Pi) / Gfx::Math::PiMul2;
+                        dist += (std::atan2(rys, rxs) + pi<float>()) / piDouble<float>();
                     }
                 }
                 dist /= (ijm * ijm);
