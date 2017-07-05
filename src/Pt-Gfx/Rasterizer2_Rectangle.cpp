@@ -189,10 +189,12 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     const Pt::int32_t sizeX = maxX - minX + 1;
 
     // Draw the rectangle using texture (or gradient texture)
-    if(_isTexture) {
+    if(_isTexture) 
+    {
         const Pt::int32_t bw = _brushImage->width();
         const Pt::int32_t bh = _brushImage->height();
-        for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY) {
+        for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY) 
+        {
             Pt::int32_t iterX     = minX;
             Pt::int32_t spanWidth = sizeX;
             // Fill the spans
@@ -211,27 +213,33 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
                 iterX     += n;
             }
         }
+        
         return;
     }
 
     // Draw the rectangle using gradient
-    if(_isGradient) {
-        for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY) {
+    if(_isGradient) 
+    {
+        for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY) 
+        {
             Pt::int32_t iterX     = minX;
             Pt::int32_t spanWidth = sizeX;
-            // Fill the spans - vertical gradient
-            if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
+            
+            if(_brush.gradient() == Pt::Gfx::Brush::Vertical) 
+            {
                 const Pt::int32_t textureY = std::min<Pt::int32_t>(iterY - minY, _brushImage->height() - 1);
                 ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
                 Pixel             dstPixel(_image->view(), iterX, iterY);
                 _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
             }
-            // Fill the spans - horizontal gradient
-            else {
-                while(spanWidth > 0) {
+            else // Pt::Gfx::Brush::Horizontal
+            {
+                while(spanWidth > 0) 
+                {
                     const Pt::int32_t textureX = std::min<Pt::int32_t>(iterX - minX, _brushImage->width() - 1);
                     const Pt::int32_t n        = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - textureX);
-                    if(n) {
+                    if(n) 
+                    {
                         ConstPixel srcPixel(_brushImage->view(), textureX, 0);
                         Pixel      dstPixel(_image->view(), iterX, iterY);
                         _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
@@ -241,13 +249,16 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
                 }
             }
         }
+        
         return;
     }
 
     // Draw the rectangle using solid color
-    for(Pt::int32_t y = minY; y <= maxY; ++y) {
+    for(Pt::int32_t y = minY; y <= maxY; ++y) 
+    {
         Pixel pixel(_image->view(), minX, y);
-        _image->format().setPixels(pixel, _brush.color(), sizeX, _compositionMode);
+        _image->format().setPixels(pixel, _brush.color(), 
+                                   sizeX, _compositionMode);
     }
 }
 

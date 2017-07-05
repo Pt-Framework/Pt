@@ -169,8 +169,7 @@ class PainterImpl
                     break;     
                 }
                 
-                case Gfx::Brush::HorizontalGradient:
-                case Gfx::Brush::VerticalGradient:
+                case Gfx::Brush::Gradient:
                 {
                     _gradientBrush = true;
                     break;

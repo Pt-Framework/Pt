@@ -129,7 +129,10 @@ class Rasterizer
     void fillVerticalGradient( const Point& origin, const Point& pos,  int length );
     void fillHorizontalGradient( const Point& origin, const Point& pos,  int length );
     void fillTexture( const Point& origin, const Point& pos,  int length );
-    void createGradientTexture(Image& img, int width, int height,Pt::Gfx::Color gradientStart,  Pt::Gfx::Color gradientStop,  Pt::Gfx::Brush::FillStyle style);
+    //void createGradientTexture(Image& img, int width, int height,
+    //                           Pt::Gfx::Color gradientStart,
+    //                           Pt::Gfx::Color gradientStop, 
+    //                           Pt::Gfx::Brush::GradientDirection style);
     void clipSpan( int& x, int& y, int& length );
     void updateClip();
     void outputEdges(const ActiveEdgeTable& edges, const Point&  origin, int scalLine);

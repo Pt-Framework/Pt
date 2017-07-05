@@ -1,7 +1,7 @@
 template <typename PainterT>
-static size_t benchDrawText(int loopCount, bool rotated, CompositionMode cm, bool antiAliasingMode)
+static Pt::int64_t benchDrawText(int loopCount, bool rotated, CompositionMode cm, bool antiAliasingMode)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
@@ -35,9 +35,9 @@ static size_t benchDrawText(int loopCount, bool rotated, CompositionMode cm, boo
 }
 
 template <typename PainterT>
-static size_t benchDrawSolidLine(int loopCount, CompositionMode cm, bool antiAliasingMode)
+static Pt::int64_t benchDrawSolidLine(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
@@ -67,9 +67,9 @@ static size_t benchDrawSolidLine(int loopCount, CompositionMode cm, bool antiAli
 }
 
 template <typename PainterT>
-static size_t benchDrawPatternedLine(int loopCount, CompositionMode cm, bool antiAliasingMode)
+static Pt::int64_t benchDrawPatternedLine(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
@@ -103,9 +103,9 @@ static size_t benchDrawPatternedLine(int loopCount, CompositionMode cm, bool ant
 }
 
 template <typename PainterT>
-static size_t benchDrawRect(int loopCount, CompositionMode cm)
+static Pt::int64_t benchDrawRect(int loopCount, CompositionMode cm)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
@@ -135,9 +135,9 @@ static size_t benchDrawRect(int loopCount, CompositionMode cm)
 }
 
 template <typename PainterT>
-static size_t benchDrawEllipse(int loopCount, CompositionMode cm, bool antiAliasingMode)
+static Pt::int64_t benchDrawEllipse(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
@@ -169,9 +169,9 @@ static size_t benchDrawEllipse(int loopCount, CompositionMode cm, bool antiAlias
 }
 
 template <typename PainterT>
-static size_t benchDrawArc(int loopCount, CompositionMode cm, bool antiAliasingMode)
+static Pt::int64_t benchDrawArc(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
@@ -204,9 +204,9 @@ static size_t benchDrawArc(int loopCount, CompositionMode cm, bool antiAliasingM
 }
 
 template <typename PainterT>
-static size_t benchDrawQuadBezier(int loopCount, Pen::Style style, CompositionMode cm, bool antiAliasingMode, size_t penSize = 1)
+static Pt::int64_t benchDrawQuadBezier(int loopCount, Pen::Style style, CompositionMode cm, bool antiAliasingMode, size_t penSize = 1)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 

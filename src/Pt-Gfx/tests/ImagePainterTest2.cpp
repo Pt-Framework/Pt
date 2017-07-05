@@ -284,11 +284,13 @@ int main(int argc, char* args[])
 
     // Create the brushes used for drawing
     const Brush brushSolid1   (Color::fromRgb8(0, 255, 0, 175));
-    const Brush brushGradient1(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
+    const Brush brushGradient1 = Brush::verticalGradient(Color::fromRgb8(0, 255, 0, 175), 
+                                                         Color::fromRgb8(0, 0, 0, 175));
     const Brush brushTexture1 (textureWithTransBackground);
 
     const Brush brushSolid2   (Color::fromRgb8(0, 255, 255, 175));
-    const Brush brushGradient2(Color::fromRgb8(0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
+    const Brush brushGradient2 = Brush::horizontalGradient(Color::fromRgb8(0, 255, 255, 175), 
+                                                           Color::fromRgb8(0, 0, 0, 175));
     const Brush brushTexture2 (textureWithWhiteBackground);
 
     // benchmarkNarrowRoundedRect();
@@ -500,14 +502,14 @@ int main(int argc, char* args[])
 
     // Create the brushes used for benchmarking
     bmBrushSolid     = Brush(Color::fromRgb8(255, 255, 255, 175));
-    bmBrushGradientH = Brush(Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
-    bmBrushGradientV = Brush(Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical  );
+    bmBrushGradientH = Brush::horizontalGradient( Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175) );
+    bmBrushGradientV = Brush::verticalGradient( Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175) );
     bmBrushTextureT  = Brush(textureWithTransBackground);
     bmBrushTextureW  = Brush(textureWithWhiteBackground);
 
     // Benchmark
     char hexStr[33];
-    srand(time(NULL));
+    srand( unsigned(time(NULL)) );
     sprintf(hexStr, "%08x", rand());
 
     char   dateStr[19];

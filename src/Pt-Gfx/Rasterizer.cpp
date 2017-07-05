@@ -212,8 +212,7 @@ void Rasterizer::setBrush( const Brush& brush )
             }
             break;
 
-        case Brush::HorizontalGradient:
-        case Brush::VerticalGradient:
+        case Brush::Gradient:
             _isGradient = true;
             _brushImage = &_brushBuffer;
             break;
@@ -1923,42 +1922,45 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
   }
 
   if( (xpos + length) >= _clipRight )
-    length =  _clipRight - xpos;
+    length = _clipRight - xpos;
 }
 
 
-void Rasterizer::createGradientTexture(Image& texture, int width, int height,Pt::Gfx::Color gradientStart,  Pt::Gfx::Color gradientStop,  Pt::Gfx::Brush::FillStyle style)
-{
-    if( style == Pt::Gfx::Brush::HorizontalGradient )
-      texture.reset( _image->format(), Size(width, 1));
-    else
-      texture.reset( _image->format(), Size(1, height));
-
-    int length = texture.width() + texture.height() - 1;
-
-    Pt::uint8_t* pixel = texture.data();
-
-    for(int n = 0; n < length; ++n)
-    {
-        float f1 = (length - n) / float(length);
-        float f2 = n / float(length);
-
-        float r1 = gradientStart.red() * f1;
-        float r2 = gradientStop.red() * f2;
-
-        float g1 = gradientStart.green() * f1;
-        float g2 = gradientStop.green() * f2;
-
-        float b1 = gradientStart.blue() * f1;
-        float b2 = gradientStop.blue() * f2;
-
-        pixel[0] = 255;
-        pixel[1] = (r1 + r2) / 257;
-        pixel[2] = (g1 + g2) / 257;
-        pixel[3] = (b1 + b2) / 257;
-        pixel += 4;
-    }
-}
+//void Rasterizer::createGradientTexture(Image& texture, int width, int height,
+//                                       Pt::Gfx::Color gradientStart, 
+//                                       Pt::Gfx::Color gradientStop, 
+//                                       Pt::Gfx::Brush::GradientDirection style)
+//{
+//    if( style == Pt::Gfx::Brush::Horizontal )
+//      texture.reset( _image->format(), Size(width, 1));
+//    else
+//      texture.reset( _image->format(), Size(1, height));
+//
+//    int length = texture.width() + texture.height() - 1;
+//
+//    Pt::uint8_t* pixel = texture.data();
+//
+//    for(int n = 0; n < length; ++n)
+//    {
+//        float f1 = (length - n) / float(length);
+//        float f2 = n / float(length);
+//
+//        float r1 = gradientStart.red() * f1;
+//        float r2 = gradientStop.red() * f2;
+//
+//        float g1 = gradientStart.green() * f1;
+//        float g2 = gradientStop.green() * f2;
+//
+//        float b1 = gradientStart.blue() * f1;
+//        float b2 = gradientStop.blue() * f2;
+//
+//        pixel[0] = 255;
+//        pixel[1] = (r1 + r2) / 257;
+//        pixel[2] = (g1 + g2) / 257;
+//        pixel[3] = (b1 + b2) / 257;
+//        pixel += 4;
+//    }
+//}
 
 void Rasterizer::fillVerticalGradient( const Point& origin, const Point& pos,  int length )
 {
@@ -2008,21 +2010,21 @@ void Rasterizer::fill(const Point& origin, const Point& pos, int length)
 {
   switch( _brush.fillStyle() )
   {
-    case Brush::Texture:
-      fillTexture( origin, pos, length);
-    break;
-
-    case Brush::VerticalGradient:
-      fillVerticalGradient(origin, pos, length);
-    break;
-
-    case Brush::HorizontalGradient:
-      fillHorizontalGradient(origin, pos, length);
-    break;
-
+    default:
     case Brush::Solid:
-      fillSolid(pos,  length);
-    break;
+        fillSolid(pos, length);
+        break;
+
+    case Brush::Texture:
+        fillTexture(origin, pos, length);
+        break;
+
+    case Brush::Gradient:
+        if(_brush.gradient() == Brush::Vertical)
+            fillVerticalGradient(origin, pos, length);
+        else
+            fillHorizontalGradient(origin, pos, length);
+        break;
   }
 }
 
@@ -3208,18 +3210,18 @@ void Rasterizer::updateGradientBrush(int width, int height)
     Color gradientStart = _brush.color();
     Color gradientStop = _brush.gradientColor();
 
-    switch( _brush.fillStyle())
+    switch( _brush.gradient() )
     {
-        case Pt::Gfx::Brush::HorizontalGradient:
+        case Pt::Gfx::Brush::Horizontal:
           _brushBuffer.reset(_image->format(), Size(width, 1));
           height = 1;
-        break;
+          break;
 
-        case Pt::Gfx::Brush::VerticalGradient:
+        case Pt::Gfx::Brush::Vertical:
           _brushBuffer.reset(_image->format(), Size(1, height));
           width = 1;
           std::swap(gradientStart, gradientStop);
-        break;
+          break;
     }
 
     int length = width + height - 1;

@@ -1,7 +1,7 @@
 template <typename PainterT>
-static size_t benchDrawFillRect(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm)
+static Pt::int64_t benchDrawFillRect(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
@@ -30,9 +30,9 @@ static size_t benchDrawFillRect(int loopCount, const Brush& brush1, const Brush&
 }
 
 template <typename PainterT, bool USE_RANDOM>
-static size_t benchDrawFillPolygon(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, bool antiAliasingMode)
+static Pt::int64_t benchDrawFillPolygon(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, bool antiAliasingMode)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
@@ -101,9 +101,9 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brush1, const Bru
 }
 
 template <typename PainterT>
-static size_t benchDrawFillEllipse(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, bool antiAliasingMode)
+static Pt::int64_t benchDrawFillEllipse(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, bool antiAliasingMode)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
@@ -134,9 +134,9 @@ static size_t benchDrawFillEllipse(int loopCount, const Brush& brush1, const Bru
 }
 
 template <typename PainterT>
-static size_t benchDrawFillArc(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, bool antiAliasingMode)
+static Pt::int64_t benchDrawFillArc(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, bool antiAliasingMode)
 {
-    size_t sum = 0;
+    Pt::int64_t sum = 0;
 
     Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 

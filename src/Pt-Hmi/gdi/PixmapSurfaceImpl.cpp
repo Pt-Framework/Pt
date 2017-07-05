@@ -90,7 +90,7 @@ namespace {
 HBRUSH gradientBrush(HDC dc, int width, int height,
                      Pt::Gfx::Color gradientStart, 
                      Pt::Gfx::Color gradientStop, 
-                     Pt::Gfx::Brush::FillStyle style)
+                     Pt::Gfx::Brush::GradientStyle gradient)
 {
 
     BITMAPINFO bi;
@@ -104,12 +104,12 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
     bi.bmiHeader.biClrUsed      = 0;         // no color table
     bi.bmiHeader.biClrImportant = 0;         // no color table 
     
-    if( style == Pt::Gfx::Brush::HorizontalGradient )
+    if( gradient == Pt::Gfx::Brush::Horizontal )
     {
         bi.bmiHeader.biWidth    = width;
         bi.bmiHeader.biHeight   = 1;
     }
-    else // vertical
+    else // Pt::Gfx::Brush::Vertical
     {
         bi.bmiHeader.biWidth    = 1;
         bi.bmiHeader.biHeight   = height;
@@ -333,7 +333,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
     if( _painter->impl()->gradientBrush() )
     {
         _gradientBrush = true;
-        _gradientStyle = brush.fillStyle();
+        _gradient = brush.gradient();
         _gradientStart = brush.color();
         _gradientStop = brush.gradientColor();
 
@@ -415,7 +415,7 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 //        case Gfx::Brush::VerticalGradient:
 //        {
 //            _gradientBrush = true;
-//            _gradientStyle = brush.fillStyle();
+//            _gradient = brush.gradient();
 //            _gradientStart = brush.color();
 //            _gradientStop = brush.gradientColor();
 //
@@ -520,7 +520,7 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
     if(_gradientBrush)
     {
         HBRUSH brush = gradientBrush(_dc, lround(rect.width()), lround(rect.height()),
-                                     _gradientStart, _gradientStop, _gradientStyle);
+                                     _gradientStart, _gradientStop, _gradient);
 
         POINT brushOrigin = {0};
         SetBrushOrgEx(_dc, lround(rect.x()),  lround(rect.y()), &brushOrigin);
@@ -558,7 +558,7 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF
     if(_gradientBrush)
     {
         HBRUSH brush = gradientBrush(_dc, lround(size.width()), lround(size.height()),
-                                     _gradientStart, _gradientStop, _gradientStyle);
+                                     _gradientStart, _gradientStop, _gradient);
 
         oldBrush = SelectObject(_dc, brush);
 
@@ -637,7 +637,7 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
     if(_gradientBrush)
     {
         HBRUSH brush = gradientBrush(_dc, right - left, bottom - top,
-                                     _gradientStart, _gradientStop, _gradientStyle);
+                                     _gradientStart, _gradientStop, _gradient);
 
         oldBrush = SelectObject(_dc, brush);
 

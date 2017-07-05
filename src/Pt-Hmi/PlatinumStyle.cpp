@@ -623,9 +623,8 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
         Gfx::RectF iconStrip( Gfx::PointF(0, 0),
                               Gfx::SizeF(iconWidth, size.height()) );
                 
-         Gfx::Brush brush(brush.color(),
-                          Gfx::Color(65000, 65000, 65000), 
-                          Gfx::Brush::Vertical);
+         Gfx::Brush brush = Gfx::Brush::verticalGradient(brush.color(),
+                                                         Gfx::Color(65000, 65000, 65000) );
 
         painter.setBrush(brush);
         painter.fillRect(iconStrip);

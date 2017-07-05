@@ -44,20 +44,15 @@ class PT_GFX_API Brush
     public:
         enum FillStyle
         {
-            Solid               = 0,
-            Texture             = 1,
-            HorizontalGradient  = 2,
-            VerticalGradient    = 3,
-            LinearGradient      = 4,
-            RectangularGradient = 5,
-            RadialGradient      = 6,
-            ConicalGradient     = 7
+            Solid     = 0,
+            Texture   = 1,
+            Gradient  = 2,
         };
 
-        enum GradientDirection
+        enum GradientStyle
         {
-            Horizontal  = 0,
-            Vertical    = 1,
+            Horizontal  = 0, // only for old painters
+            Vertical    = 1, // only for old painters
             Linear      = 2,
             Rectangular = 3,
             Radial      = 4,
@@ -71,12 +66,23 @@ class PT_GFX_API Brush
 
         Brush(const Color& color);
 
-        Brush(const Image& texture, 
-              Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0);
+        Brush(const Image& texture, Pt::int32_t offX = 0, Pt::int32_t offY = 0);
 
-        Brush(const Color& from, const Color& to, GradientDirection g, 
-              float rotDeg = 0.0f, 
-              Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
+        static Brush verticalGradient(const Color& from, const Color& to);
+
+        static Brush horizontalGradient(const Color& from, const Color& to);
+
+        static Brush linearGradient(const Color& from, const Color& to, 
+                                    float angle = 0.0f);
+
+        static Brush radialGradient(const Color& from, const Color& to, 
+                                    const PointF& focus = PointF());
+
+        static Brush conicalGradient(const Color& from, const Color& to, 
+                                     float angle = 0.0f, const PointF& center = PointF());
+
+        static Brush rectangularGradient(const Color& from, const Color& to, 
+                                         float angle = 0.0f);
 
         FillStyle fillStyle() const;
 
@@ -84,26 +90,19 @@ class PT_GFX_API Brush
 
         const Color& color() const;
 
-        void setGradient(const Color& from, const Color& to, 
-                         GradientDirection g, float rotDeg = 0.0f,
-                         Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
-
-        // linear gradient
-        //void setGradient(const Color& from, const Color& to, float angle);
-
-        // radial gradient
-        //void setGradient(const Color& from, const Color& to, const PointF& focus);
-
-        void setGradientOffset(Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
+        GradientStyle gradient() const;
 
         const Color& gradientColor() const;
+
+        float gradientAngle() const;
 
         void setTexture(const Image& texture, 
                         Pt::int32_t offX = 0, Pt::int32_t offY = 0);
 
         const Image& texture() const;
 
-        float gradientAngle() const;
+        // TODO: offset for textures is the origin and needs to be
+        //       handled diferently in the painters
 
         Pt::int32_t offsetX() const;
 
@@ -111,13 +110,12 @@ class PT_GFX_API Brush
 
         bool isGradient() const;
 
-        bool isGradient1D() const;
-
-        bool isGradient2D() const;
-
         bool isTexture() const;
 
         bool isNull() const;
+
+    private:
+        Brush(BrushData* data);
 
     private:
         SmartPtr<BrushData> _brushData;
@@ -128,27 +126,25 @@ class BrushData
 {
     public:
         BrushData()
-        : _isNull   (true)
+        : _isNull(true)
         , _fillStyle(Brush::Solid)
-        , _color    (0, 0, 0)
+        , _color(0, 0, 0)
+        , _gradient(Brush::Horizontal)
         {}
 
         BrushData(const Color& color)
-        : _isNull   (false)
+        : _isNull(false)
         , _fillStyle(Brush::Solid)
-        , _color    (color)
-        , _texture  ()
+        , _color(color)
+        , _gradient(Brush::Horizontal)
         {}
 
         BrushData(const Image& texture, 
-                 Pt::int32_t offsetX, Pt::int32_t offsetY)
-        { 
-            setTexture(texture, offsetX, offsetY); 
-        }
+                 Pt::int32_t offsetX, Pt::int32_t offsetY);
 
+        // only for old Painter
         BrushData(const Color& from, const Color& to, 
-                  Brush::GradientDirection g, float angle, 
-                  Pt::int32_t ofsX, Pt::int32_t ofsY);
+                  Brush::GradientStyle g);
 
         ~BrushData()
         {}
@@ -168,18 +164,23 @@ class BrushData
         const Color& color() const
         { return _color; }
 
-        void setGradient(const Color& from, const Color& to, 
-                         Brush::GradientDirection g, float angle, 
-                         Pt::int32_t ofsX, Pt::int32_t ofsY);
+        void setLinearGradient(const Color& from, const Color& to, 
+                               float angle);
+
+        void setRadialGradient(const Color& from, const Color& to, 
+                               const PointF& focus);
+
+        void setConicalGradient(const Color& from, const Color& to, 
+                                const PointF& center, float angle);
+
+        void setRectangularGradient(const Color& from, const Color& to, 
+                                    float angle);
+
+        Brush::GradientStyle gradient() const
+        { return _gradient; }
 
         void setGradientAngle(float angle)
         { _gradientAngle = angle; }
-
-        void setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
-        {
-            _ofsX = ofsX;
-            _ofsY = ofsY;
-        }
 
         const Color& gradientColor() const
         { return _gradientColor; }
@@ -200,28 +201,7 @@ class BrushData
         { return _ofsY; }
 
         bool isGradient() const
-        {
-            return (_fillStyle != Brush::Solid  ) &&
-                   (_fillStyle != Brush::Texture);
-        }
-
-        bool isGradient1D() const
-        {
-            return (_fillStyle != Brush::Solid              ) &&
-                   (_fillStyle != Brush::Texture            ) &&
-                   (_fillStyle != Brush::LinearGradient     ) &&
-                   (_fillStyle != Brush::RectangularGradient) &&
-                   (_fillStyle != Brush::RadialGradient     ) &&
-                   (_fillStyle != Brush::ConicalGradient    );
-        }
-
-        bool isGradient2D() const
-        {
-            return (_fillStyle != Brush::Solid             ) &&
-                   (_fillStyle != Brush::Texture           ) &&
-                   (_fillStyle != Brush::HorizontalGradient) &&
-                   (_fillStyle != Brush::VerticalGradient  );
-        }
+        { return _fillStyle == Brush::Gradient; }
 
         bool isTexture() const
         { return _fillStyle == Brush::Texture; }
@@ -230,14 +210,15 @@ class BrushData
         { return _isNull; }
 
     private:
-        bool             _isNull;
-        Brush::FillStyle _fillStyle;
-        Color            _color;
-        Color            _gradientColor;
-        float            _gradientAngle;
-        Pt::int32_t      _ofsX;
-        Pt::int32_t      _ofsY;
-        Image            _texture;
+        bool                 _isNull;
+        Brush::FillStyle     _fillStyle;
+        Color                _color;
+        Brush::GradientStyle _gradient;
+        Color                _gradientColor;
+        float                _gradientAngle;
+        Pt::int32_t          _ofsX;
+        Pt::int32_t          _ofsY;
+        Image                _texture;
 };
 
 } // namespace

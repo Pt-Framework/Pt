@@ -19,7 +19,7 @@
 
 static void doBenchmark(CompositionMode cm)
 {
-    double time1, time2;
+    Pt::int64_t time1, time2;
 
     std::clog << "                                                       (Time) (Factor)" << std::endl;
     std::clog << "                                                       ------ --------" << std::endl;

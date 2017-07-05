@@ -232,10 +232,10 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     painter.fillRect( RectF(PointF(100, 220), SizeF(200, 100)) );
     painter.fillRect( RectF(PointF(400, 220), SizeF(200, 100)) );
 
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
+    painter.setBrush( Brush::horizontalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
     painter.fillRect( RectF(PointF(150, 270), SizeF(200, 100)) );
 
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
+    painter.setBrush( Brush::verticalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
     painter.fillRect( RectF(PointF(450, 270), SizeF(200, 100)) );
 
     // Texture
@@ -331,10 +331,10 @@ static void testDrawRoundRect(const char* title, Image& image, Painter& painter)
     ip2->fillRoundedRect( RectF(PointF(240,  20), SizeF(200, 100)), 10 );
 
     // Gradient
-    ip2->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
+    ip2->setBrush( Brush::horizontalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
     ip2->fillRoundedRect( RectF(PointF( 20, 160), SizeF(200, 100)), 10 );
 
-    ip2->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
+    ip2->setBrush( Brush::verticalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
     ip2->fillRoundedRect( RectF(PointF(240, 160), SizeF(200, 100)), 10 );
 
     // Texture

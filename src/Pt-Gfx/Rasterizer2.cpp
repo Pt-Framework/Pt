@@ -300,19 +300,14 @@ void Rasterizer2::setBrush( const Brush& brush )
             _isTexture = true;
             break;
 
-        case Brush::HorizontalGradient : /* Fallthrough */
-        case Brush::VerticalGradient   :
+        case Brush::Gradient:
             _isGradient = true;
             _brushImage = &_brushBuffer;
-            break;
-
-        case Brush::LinearGradient      : /* Fallthrough */
-        case Brush::RectangularGradient : /* Fallthrough */
-        case Brush::RadialGradient      : /* Fallthrough */
-        case Brush::ConicalGradient     :
-            _isGradient = true;
-            _isTexture  = true;
-            _brushImage = &_brushBuffer;
+            
+            _isTexture  = brush.gradient() == Brush::Linear ||
+                          brush.gradient() == Brush::Radial ||
+                          brush.gradient() == Brush::Conical ||
+                          brush.gradient() == Brush::Rectangular;
             break;
     }
 
@@ -332,52 +327,43 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     */
 
     // Resize the brush buffer and the start-end colors
-    switch( _brush.fillStyle() ) 
+    switch( _brush.gradient() ) 
     {
-        case Pt::Gfx::Brush::HorizontalGradient:
+        case Pt::Gfx::Brush::Horizontal:
             height = 1;
-            _brushBuffer.reset(_image->format(), Size(width, 1));
             break;
 
-        case Pt::Gfx::Brush::VerticalGradient:
+        case Pt::Gfx::Brush::Vertical:
             width = 1;
-            _brushBuffer.reset(_image->format(), Size(1, height));
-            break;
-
-        case Pt::Gfx::Brush::LinearGradient      : // Fallthrough
-        case Pt::Gfx::Brush::RectangularGradient : // Fallthrough
-        case Pt::Gfx::Brush::RadialGradient      : // Fallthrough
-        case Pt::Gfx::Brush::ConicalGradient     :
-            _brushBuffer.reset(_image->format(), Size(width, height));
             break;
 
         default:
-            return;
+            break;
     }
 
-    // Generate one-dimensional gradient
-    if(width == 1 || height == 1) 
-    {
-        updateGradientBrush_gen1DHorVerGradient(width, height);
-        return;
-    }
+    _brushBuffer.reset(_image->format(), Size(width, height));
 
     // Create two-dimensional gradient
-    switch( _brush.fillStyle() ) 
+    switch( _brush.gradient() ) 
     {
-        case Pt::Gfx::Brush::LinearGradient: 
+        case Pt::Gfx::Brush::Horizontal:
+        case Pt::Gfx::Brush::Vertical:
+            updateGradientBrush_gen1DHorVerGradient(width, height);
+            break;
+
+        case Pt::Gfx::Brush::Linear: 
             updateGradientBrush_gen2DLinearGradient(width, height); 
             break;
         
-        case Pt::Gfx::Brush::RectangularGradient: 
+        case Pt::Gfx::Brush::Rectangular: 
             updateGradientBrush_gen2DRectangularGradient(width, height); 
             break;
         
-        case Pt::Gfx::Brush::RadialGradient: 
+        case Pt::Gfx::Brush::Radial: 
             updateGradientBrush_gen2DRadialGradient(width, height); 
             break;
         
-        case Pt::Gfx::Brush::ConicalGradient: 
+        case Pt::Gfx::Brush::Conical: 
             updateGradientBrush_gen2DConicalGradient(width, height); 
             break;
         
@@ -551,7 +537,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
     const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
-    const float scale = 0.5;
+    const float scale = 1.0;
 
     float centerX, centerY, xyRat, yxRat;
     updateGradientBrush_getCtrRatXY(centerX, centerY, xyRat, yxRat, width, height);
@@ -576,9 +562,10 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
             
             // Calculate the distance and blending factor
             const float dist = sqrt(dx * dx + dy * dy) * ilen;
-            const float mf   = (dist >= 1.0f) ? 1.0f : dist;
+            float mf   = (dist >= 1.0f) ? 1.0f : dist;
+            //mf = sqrt(mf);
             const float imf  = 1.0f - mf;
-            
+
             // Put the pixel
             *pixel++ = (bs * mf + be * imf);
             *pixel++ = (gs * mf + ge * imf);
@@ -1839,14 +1826,14 @@ void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
         Pt::int32_t iterX     = iterL;
         Pt::int32_t spanWidth = iterR - iterL + 1;
         
-        if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) 
+        if(_brush.gradient() == Pt::Gfx::Brush::Vertical) 
         {
             const Pt::int32_t textureY = std::min<Pt::int32_t>(pixelY,  _brushImage->height() - 1);
             ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
             Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY);
             _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
         }
-        else // Pt::Gfx::Brush::HorizontalGradient
+        else // Pt::Gfx::Brush::Horizontal
         {
             while(spanWidth > 0) {
                 const Pt::int32_t tx = std::min<Pt::int32_t>(iterX,  _brushImage->width () -1);

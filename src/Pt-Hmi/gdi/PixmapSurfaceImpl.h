@@ -115,10 +115,10 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         HBITMAP        _oldBitmap;
         std::wstring   _text;
         
-        bool                  _gradientBrush;
-        Gfx::Brush::FillStyle _gradientStyle;
-        Gfx::Color            _gradientStart;
-        Gfx::Color            _gradientStop;
+        bool                      _gradientBrush;
+        Gfx::Brush::GradientStyle _gradient;
+        Gfx::Color                _gradientStart;
+        Gfx::Color                _gradientStop;
 };
 
 } // namespace
