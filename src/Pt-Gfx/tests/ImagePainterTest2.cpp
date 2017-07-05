@@ -63,7 +63,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -72,14 +72,14 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
 #define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
 #define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
@@ -284,12 +284,12 @@ int main(int argc, char* args[])
 
     // Create the brushes used for drawing
     const Brush brushSolid1   (Color::fromRgb8(0, 255, 0, 175));
-    const Brush brushGradient1 = Brush::verticalGradient(Color::fromRgb8(0, 255, 0, 175), 
+    const Brush brushGradient1 = Brush::verticalGradient(Color::fromRgb8(0, 255, 0, 175),
                                                          Color::fromRgb8(0, 0, 0, 175));
     const Brush brushTexture1 (textureWithTransBackground);
 
     const Brush brushSolid2   (Color::fromRgb8(0, 255, 255, 175));
-    const Brush brushGradient2 = Brush::horizontalGradient(Color::fromRgb8(0, 255, 255, 175), 
+    const Brush brushGradient2 = Brush::horizontalGradient(Color::fromRgb8(0, 255, 255, 175),
                                                            Color::fromRgb8(0, 0, 0, 175));
     const Brush brushTexture2 (textureWithWhiteBackground);
 

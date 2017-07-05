@@ -68,9 +68,9 @@ const Pt::uint8_t Rasterizer2::XWAA_WFILTER[256] = {
 
 
 const Rasterizer2::DrawLineMask Rasterizer2::NullLineMask = {
-    maxPoint(), 
-    maxPoint(), 
-    maxPoint(), 
+    maxPoint(),
+    maxPoint(),
+    maxPoint(),
     maxPoint()
 };
 
@@ -103,8 +103,8 @@ Rasterizer2::~Rasterizer2()
 
 
 bool Rasterizer2::isAntiAliasing() const
-{ 
-    return _aaMode; 
+{
+    return _aaMode;
 }
 
 
@@ -124,8 +124,8 @@ void Rasterizer2::setImage( Image& image )
 
 
 const ImageFormat& Rasterizer2::format() const
-{ 
-    return _image->format(); 
+{
+    return _image->format();
 }
 
 
@@ -156,7 +156,7 @@ void Rasterizer2::updatePenPattern()
     // Select the pattern
     Pt::uint64_t patternSel;
 
-    switch( _pen.style() ) 
+    switch( _pen.style() )
     {
         default:
         case Pen::Dot         : patternSel = patternDot;              break;
@@ -172,7 +172,7 @@ void Rasterizer2::updatePenPattern()
 
     // Generate the pattern
     bool previous = 0;
-    for(Pt::int8_t p = 0; p < 64; ++p) 
+    for(Pt::int8_t p = 0; p < 64; ++p)
     { // The pattern has 64 points
         // Get the pattern cell value
         const bool current = patternSel & ((Pt::uint64_t) 1 << p);
@@ -215,7 +215,7 @@ void Rasterizer2::updatePenPattern()
         }
     }
     // Transfom the pattern - with anti-aliasing
-    else 
+    else
     {
         for(size_t i = 0; i < gctr1P; ++i) {
             _patternBuffer1P[i] = XWAA_WFILTER[ 255 - _patternBuffer1P[i] ];
@@ -225,14 +225,14 @@ void Rasterizer2::updatePenPattern()
 
 
 Pt::uint8_t Rasterizer2::patternBuffer1PAlpha(Pt::int32_t idx) const
-{ 
-    return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ]; 
+{
+    return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ];
 }
 
 
 Pt::uint8_t Rasterizer2::patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale) const
-{ 
-    return patternBuffer1PAlpha( toPolar(x, y) * scale); 
+{
+    return patternBuffer1PAlpha( toPolar(x, y) * scale);
 }
 
 
@@ -255,8 +255,8 @@ void Rasterizer2::patternBuffer1PAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int
 
 
 void Rasterizer2::patternBuffer1PAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const
-{ 
-    patternBuffer1PAlpha(a0, a1, toPolar(x, y) * scale, alpha0, alpha1); 
+{
+    patternBuffer1PAlpha(a0, a1, toPolar(x, y) * scale, alpha0, alpha1);
 }
 
 
@@ -277,7 +277,7 @@ void Rasterizer2::setBrush( const Brush& brush )
     _isGradient = false;
     _isTexture  = false;
 
-    switch( brush.fillStyle() ) 
+    switch( brush.fillStyle() )
     {
         case Brush::Solid:
             _brushBuffer.reset( _image->format(), Size(64, 1) );
@@ -286,24 +286,24 @@ void Rasterizer2::setBrush( const Brush& brush )
             break;
 
         case Brush::Texture:
-            if( brush.texture().format() != _image->format() ) 
+            if( brush.texture().format() != _image->format() )
             {
                 _brushBuffer.reset( _image->format(), brush.texture().size() );
                 Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
                 _brushImage = &_brushBuffer;
             }
-            else 
+            else
             {
                 _brushImage = &_brush.texture();
             }
-            
+
             _isTexture = true;
             break;
 
         case Brush::Gradient:
             _isGradient = true;
             _brushImage = &_brushBuffer;
-            
+
             _isTexture  = brush.gradient() == Brush::Linear ||
                           brush.gradient() == Brush::Radial ||
                           brush.gradient() == Brush::Conical ||
@@ -327,7 +327,7 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     */
 
     // Resize the brush buffer and the start-end colors
-    switch( _brush.gradient() ) 
+    switch( _brush.gradient() )
     {
         case Pt::Gfx::Brush::Horizontal:
             height = 1;
@@ -344,30 +344,30 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     _brushBuffer.reset(_image->format(), Size(width, height));
 
     // Create two-dimensional gradient
-    switch( _brush.gradient() ) 
+    switch( _brush.gradient() )
     {
         case Pt::Gfx::Brush::Horizontal:
         case Pt::Gfx::Brush::Vertical:
             updateGradientBrush_gen1DHorVerGradient(width, height);
             break;
 
-        case Pt::Gfx::Brush::Linear: 
-            updateGradientBrush_gen2DLinearGradient(width, height); 
+        case Pt::Gfx::Brush::Linear:
+            updateGradientBrush_gen2DLinearGradient(width, height);
             break;
-        
-        case Pt::Gfx::Brush::Rectangular: 
-            updateGradientBrush_gen2DRectangularGradient(width, height); 
+
+        case Pt::Gfx::Brush::Rectangular:
+            updateGradientBrush_gen2DRectangularGradient(width, height);
             break;
-        
-        case Pt::Gfx::Brush::Radial: 
-            updateGradientBrush_gen2DRadialGradient(width, height); 
+
+        case Pt::Gfx::Brush::Radial:
+            updateGradientBrush_gen2DRadialGradient(width, height);
             break;
-        
-        case Pt::Gfx::Brush::Conical: 
-            updateGradientBrush_gen2DConicalGradient(width, height); 
+
+        case Pt::Gfx::Brush::Conical:
+            updateGradientBrush_gen2DConicalGradient(width, height);
             break;
-        
-        default: 
+
+        default:
             return;
     }
 }
@@ -409,7 +409,7 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
 }
 
 
-void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, 
+void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width,
                                                           Pt::int32_t height)
 {
     // Determine the start and end colors
@@ -526,7 +526,35 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
 }
 
 #if 1
-void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, 
+
+static inline float cie1931(float v)
+{
+    v *= 100.0f;
+    if(v <= 8.0f) return v / 902.3f;
+    return powf((v + 16.0f) / 116.0f, 3.0f);
+}
+
+static inline float sigmoid(float v)
+{
+    return 1.0f / (1.0f + expf(-v));
+}
+
+static inline float specific(float v)
+{
+    return v / sqrtf(1.0f + v * v);
+}
+
+static inline float expc(float v)
+{
+    return expf(-v * 1.5f) * -1.0f;
+}
+
+static inline float powc(float v)
+{
+    return powf(v, 0.8f) * 0.8f;
+}
+
+void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
                                                           Pt::int32_t height)
 {
     // Determine the start and end colors
@@ -550,21 +578,26 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();
 
-    for(Pt::int32_t y = 0; y < height; ++y) 
+    for(Pt::int32_t y = 0; y < height; ++y)
     {
         // Calculate the delta Y
         const float dy = (y - centerY) * xyRat;
-        
-        for(Pt::int32_t x = 0; x < width; ++x) 
+
+        for(Pt::int32_t x = 0; x < width; ++x)
         {
             // Calculate the delta X
             const float dx = (x - centerX) * yxRat;
-            
+
             // Calculate the distance and blending factor
-            const float dist = sqrt(dx * dx + dy * dy) * ilen;
-            float mf   = (dist >= 1.0f) ? 1.0f : dist;
-            //mf = sqrt(mf);
-            const float imf  = 1.0f - mf;
+            const float dist  = sqrt(dx * dx + dy * dy) * ilen;
+          //const float sdist = dist;
+          //const float sdist = cie1931 (dist); // I do not think it is this one
+          //const float sdist = sigmoid (dist); // I do not think it is this one
+          //const float sdist = specific(dist); // I do not think it is this one
+          //const float sdist = expc    (dist); // Probably this one?
+            const float sdist = powc    (dist); // Most likely this one?
+            const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
+            const float imf   = 1.0f - mf;
 
             // Put the pixel
             *pixel++ = (bs * mf + be * imf);
@@ -577,7 +610,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
 
 #else
 
-void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, 
+void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
                                                           Pt::int32_t height)
 {
     // Determine the start and end colors
@@ -601,15 +634,15 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
 
     Pt::uint8_t* pixel = _brushBuffer.data();
 
-    for(Pt::int32_t y = 0; y < height; ++y) 
+    for(Pt::int32_t y = 0; y < height; ++y)
     {
-        for(Pt::int32_t x = 0; x < width; ++x) 
+        for(Pt::int32_t x = 0; x < width; ++x)
         {
-            float angleF = std::atan2(focusY - centerY, focusX - centerX) - 
+            float angleF = std::atan2(focusY - centerY, focusX - centerX) -
                            std::atan2(y - focusY, x - focusX);
 
 
-            
+
             float dxfp = std::abs(x - focusX);
             float dyfp = std::abs(y - focusY);
             float fp = std::sqrt(dxfp * dxfp + dyfp * dyfp);
@@ -756,7 +789,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 }
 
 
-void Rasterizer2::updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4], 
+void Rasterizer2::updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4],
                                                         Pt::uint8_t rgbaEnd[4])
 {
     rgbaStart[0] = _brush.color().red  () / 257;
@@ -775,6 +808,9 @@ void Rasterizer2::updateGradientBrush_getCtrRatXY(float& ctrX, float& ctrY, floa
 {
     ctrX  = width  * 0.5f + _brush.offsetX();
     ctrY  = height * 0.5f + _brush.offsetY();
+
+    //ctrX += 20;
+    //ctrY += 20;
 
     xyRat = (ctrX > ctrY) ? (ctrX / ctrY) : 1.0f;
     yxRat = (ctrY > ctrX) ? (ctrY / ctrX) : 1.0f;
@@ -814,8 +850,8 @@ void Rasterizer2::setClip( const Rect& clip )
 void Rasterizer2::updateClip()
 {
     Rect imageRect( _image->size() );
-    
-    _currentClip = _clip.isNull() ? imageRect 
+
+    _currentClip = _clip.isNull() ? imageRect
                                   : _clip.intersect( imageRect );
 }
 
@@ -836,7 +872,7 @@ void Rasterizer2::drawImage(const Point& to, const Image& from, const Rect& from
     Rect fromClip(fromPos, _currentClip.size());
     fromClip = fromRect.intersect(fromClip);
 
-    if( fromClip.isNull() ) 
+    if( fromClip.isNull() )
         return;
 
     // Take account for smaller fromRect
@@ -846,11 +882,11 @@ void Rasterizer2::drawImage(const Point& to, const Image& from, const Rect& from
 }
 
 
-void Rasterizer2::drawText(const Point& to, const Pt::String& text, 
+void Rasterizer2::drawText(const Point& to, const Pt::String& text,
                            const Transform& transform)
 {
     FreeType::instance().draw(*_image, _pen.color(), to, text,
-                               _currentClip, _compositionMode, 
+                               _currentClip, _compositionMode,
                                transform, _faceId, &_imageType);
 }
 
@@ -912,7 +948,7 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
     Pt::int32_t x2 = b.x();
     Pt::int32_t y2 = b.y();
 
-    if( ! ClipShapeI::clipLine(x1, y1, x2, y2, _currentClip) ) 
+    if( ! ClipShapeI::clipLine(x1, y1, x2, y2, _currentClip) )
         return;
 
     // Find the minimum and maximum coordinates
@@ -939,8 +975,8 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
     // Check the size of the line
     const Pt::int32_t sizeX = maxX - minX + 1;
     const Pt::int32_t sizeY = maxY - minY + 1;
-    
-    if( ! sizeX && ! sizeY ) 
+
+    if( ! sizeX && ! sizeY )
         return;
 
     // Draw the line
@@ -948,7 +984,7 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
     {
         rasterNarrowSolidLine(x1, y1, x2, y2, _pen.color(), maskInOut);
     }
-    else 
+    else
     {
         Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
         rasterNarrowPatternedLine(x1, y1, x2, y2, _pen.color(), fpiCtrInOut, maskInOut);
@@ -958,8 +994,8 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
 
 void Rasterizer2::drawPolyline(const PointF* ps, const size_t pointCount)
 {
-    if(_pen.size() == 1) 
-    {          
+    if(_pen.size() == 1)
+    {
         drawNarrowPolyline(ps, pointCount);
     }
     else
@@ -983,7 +1019,7 @@ void Rasterizer2::drawNarrowPolyline(const PointF* pointsF, size_t pointCount)
         points.push_back( Point(x, y) );
     }
 
-    if(points.size() < 2) 
+    if(points.size() < 2)
         return;
 
     DrawLineMask mask_nnp1;
@@ -995,22 +1031,22 @@ void Rasterizer2::drawNarrowPolyline(const PointF* pointsF, size_t pointCount)
     // From point N to point (N + 1), successively
     std::size_t pc1 = points.size() - 1;
 
-    for(std::size_t i = 0; i < pc1; ++i) 
+    for(std::size_t i = 0; i < pc1; ++i)
     {
-        if(solid) 
-            rasterNarrowSolidLine(points[i].x(), points[i].y(), 
-                                  points[i + 1].x(), points[i + 1].y(), 
+        if(solid)
+            rasterNarrowSolidLine(points[i].x(), points[i].y(),
+                                  points[i + 1].x(), points[i + 1].y(),
                                   _pen.color(), &mask_nnp1);
-        else      
-            rasterNarrowPatternedLine(points[i].x(), points[i].y(), 
-                                      points[i + 1].x(), points[i + 1].y(), 
+        else
+            rasterNarrowPatternedLine(points[i].x(), points[i].y(),
+                                      points[i + 1].x(), points[i + 1].y(),
                                       _pen.color(), fpiCtrInOut, &mask_nnp1);
     }
 }
 
 
 void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount)
-{   
+{
     std::vector<Polygon> polygons;
     _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen);
 
@@ -1034,11 +1070,11 @@ void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount
 
 void Rasterizer2::drawRect(const RectF& rect)
 {
-    if(_pen.size() == 1) 
+    if(_pen.size() == 1)
     {
-        const Point tl( Pt::lround(rect.topLeft().x()), 
+        const Point tl( Pt::lround(rect.topLeft().x()),
                         Pt::lround(rect.topLeft().y()) );
-        const Point br( Pt::lround(rect.bottomRight().x()), 
+        const Point br( Pt::lround(rect.bottomRight().x()),
                         Pt::lround(rect.bottomRight().y()) );
 
         rasterNarrowRect(tl, br);
@@ -1046,10 +1082,10 @@ void Rasterizer2::drawRect(const RectF& rect)
     }
 
     const PointF pointsF[5] = {
-        rect.bottomLeft(), 
-        rect.bottomRight(), 
-        rect.topRight(), 
-        rect.topLeft(), 
+        rect.bottomLeft(),
+        rect.bottomRight(),
+        rect.topRight(),
+        rect.topLeft(),
         rect.bottomLeft()
     };
 
@@ -1064,7 +1100,7 @@ void Rasterizer2::drawRoundedRect(const RectF& rect, float radius)
         rasterNarrowRoundedRect(rect, radius);
         return;
     }
-    
+
     // use a new pen with bevel join
     Pen newPen = _pen;
     newPen.setJoinStyle(Pen::BevelJoin);
@@ -1078,12 +1114,12 @@ void Rasterizer2::drawRoundedRect(const RectF& rect, float radius)
 
 void Rasterizer2::drawEllipse(const PointF& topLeft, const SizeF& size)
 {
-    if(_pen.size() == 1) 
+    if(_pen.size() == 1)
     {
 
-        const Point tl( Pt::lround(topLeft.x()), 
+        const Point tl( Pt::lround(topLeft.x()),
                         Pt::lround(topLeft.y()) );
-        const Size  sz( Pt::lround(size.width()), 
+        const Size  sz( Pt::lround(size.width()),
                         Pt::lround(size.height()) );
 
         rasterNarrowArc(tl, sz, 0, 0, ArcMode::Open);
@@ -1098,7 +1134,7 @@ void Rasterizer2::drawEllipse(const PointF& topLeft, const SizeF& size)
     _polygonizer.renderEllipse(polygons, topLeft, size, newPen);
 
     bool isSolid = _pen.style() == Pen::Solid;
-    
+
     if( isSolid )
     {
         rasterWidePolyline(polygons);
@@ -1117,11 +1153,11 @@ void Rasterizer2::drawEllipse(const PointF& topLeft, const SizeF& size)
 void Rasterizer2::drawArc(const PointF& topLeft, const SizeF& size,
                           float degBegin, float degEnd, const ArcMode& arcMode)
 {
-    if(_pen.size() == 1) 
+    if(_pen.size() == 1)
     {
-        const Point tl( Pt::lround(topLeft.x()), 
+        const Point tl( Pt::lround(topLeft.x()),
                         Pt::lround(topLeft.y ()) );
-        const Size  sz( Pt::lround(size.width()), 
+        const Size  sz( Pt::lround(size.width()),
                         Pt::lround(size.height()) );
 
         rasterNarrowArc(tl, sz, degBegin, degEnd, arcMode);
@@ -1163,8 +1199,8 @@ void Rasterizer2::drawPath(const Path& path, float smoothness)
     {
         const std::vector<PointF>& pointsF = polygons[n].points();
 
-        if(_pen.size() == 1) 
-        {          
+        if(_pen.size() == 1)
+        {
             drawNarrowPath( &pointsF[0], pointsF.size() );
         }
         else
@@ -1180,7 +1216,7 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
     std::vector<PointF> clipped(pointsF, pointsF + pointCount);
     BasicClipShape<double>::clipPolyline(clipped, _currentClip);
 
-    if(clipped.size() < 2) 
+    if(clipped.size() < 2)
         return;
 
     DrawLineMask mask_nnp1;
@@ -1192,15 +1228,15 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
     // From point N to point (N + 1), successively
     std::size_t pc1 = clipped.size() - 1;
 
-    for(std::size_t i = 0; i < pc1; ++i) 
+    for(std::size_t i = 0; i < pc1; ++i)
     {
-        if(solid) 
-            rasterNarrowSolidLine_F(clipped[i].x(), clipped[i].y(), 
-                                    clipped[i + 1].x(), clipped[i + 1].y(), 
+        if(solid)
+            rasterNarrowSolidLine_F(clipped[i].x(), clipped[i].y(),
+                                    clipped[i + 1].x(), clipped[i + 1].y(),
                                     _pen.color(), &mask_nnp1);
-        else      
-            rasterNarrowPatternedLine_F(clipped[i].x(), clipped[i].y(), 
-                                        clipped[i + 1].x(), clipped[i + 1].y(), 
+        else
+            rasterNarrowPatternedLine_F(clipped[i].x(), clipped[i].y(),
+                                        clipped[i + 1].x(), clipped[i + 1].y(),
                                         _pen.color(), fpiCtrInOut, &mask_nnp1);
     }
 }
@@ -1287,9 +1323,9 @@ void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
 
 void Rasterizer2::fillRect(const RectF& rect)
 {
-    const Point tl( Pt::lround(rect.topLeft().x()), 
+    const Point tl( Pt::lround(rect.topLeft().x()),
                     Pt::lround(rect.topLeft().y()) );
-    const Point br( Pt::lround(rect.bottomRight().x()), 
+    const Point br( Pt::lround(rect.bottomRight().x()),
                     Pt::lround(rect.bottomRight().y()) );
 
     // Update the gradient as needed
@@ -1312,33 +1348,33 @@ void Rasterizer2::fillRoundedRect(const RectF& rect, float radius)
 
 void Rasterizer2::fillEllipse(const PointF& topLeft, const SizeF& size)
 {
-    const Point tl( Pt::lround(topLeft.x()), 
+    const Point tl( Pt::lround(topLeft.x()),
                     Pt::lround(topLeft.y ()) );
-    const Size  sz( Pt::lround(size.width()), 
+    const Size  sz( Pt::lround(size.width()),
                     Pt::lround(size.height()) );
 
     fillEllipse(tl, sz);
 }
 
 
-void Rasterizer2::fillPie(const PointF& topLeft, const SizeF& size, 
+void Rasterizer2::fillPie(const PointF& topLeft, const SizeF& size,
                           float degBegin, float degEnd)
 {
-     Point tl( Pt::lround(topLeft.x()), 
+     Point tl( Pt::lround(topLeft.x()),
                Pt::lround(topLeft.y()) );
-     Size  sz( Pt::lround(size.width()), 
+     Size  sz( Pt::lround(size.width()),
                Pt::lround(size.height()) );
 
      rasterArcArea(tl, sz, degBegin, degEnd, ArcMode::Pie);
 }
 
 
-void Rasterizer2::fillChord( const PointF& topLeft, const SizeF& size, 
+void Rasterizer2::fillChord( const PointF& topLeft, const SizeF& size,
                              float degBegin, float degEnd)
 {
-    const Point tl( Pt::lround(topLeft.x()), 
+    const Point tl( Pt::lround(topLeft.x()),
                     Pt::lround(topLeft.y()) );
-    const Size  sz( Pt::lround(size.width()), 
+    const Size  sz( Pt::lround(size.width()),
                     Pt::lround(size.height()) );
 
      rasterArcArea(tl, sz, degBegin, degEnd, ArcMode::Chord);
@@ -1355,8 +1391,8 @@ void Rasterizer2::fillPath(const Path& path, float smoothness)
 }
 
 
-void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, 
-                            Pt::int32_t minX, Pt::int32_t minY, 
+void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y,
+                            Pt::int32_t minX, Pt::int32_t minY,
                             Pt::uint8_t alpha)
 {
     // Check the clipping
@@ -1441,8 +1477,8 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
     }
 }
 
-void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                                Pt::int32_t x2, Pt::int32_t y2, 
+void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                                Pt::int32_t x2, Pt::int32_t y2,
                                 Pt::uint8_t alpha)
 {
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
@@ -1471,8 +1507,8 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
-void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                                Pt::int32_t x2, Pt::int32_t y2, 
+void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                                Pt::int32_t x2, Pt::int32_t y2,
                                 Pt::uint8_t alpha, const bool mask[4])
 {
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
@@ -1501,8 +1537,8 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                              Pt::int32_t x2, Pt::int32_t y2, 
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                              Pt::int32_t x2, Pt::int32_t y2,
                               Pt::int32_t minX, Pt::int32_t minY)
 {
     // Check the clipping
@@ -1558,9 +1594,9 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                              Pt::int32_t x2, Pt::int32_t y2, 
-                              Pt::int32_t minX, Pt::int32_t minY, 
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                              Pt::int32_t x2, Pt::int32_t y2,
+                              Pt::int32_t minX, Pt::int32_t minY,
                               const bool mask[4])
 {
     // Check the clipping
@@ -1616,9 +1652,9 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                              Pt::int32_t x2, Pt::int32_t y2, 
-                              Pt::int32_t minX, Pt::int32_t minY, 
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                              Pt::int32_t x2, Pt::int32_t y2,
+                              Pt::int32_t minX, Pt::int32_t minY,
                               Pt::uint8_t alpha)
 {
     // Check the clipping
@@ -1674,9 +1710,9 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                              Pt::int32_t x2, Pt::int32_t y2, 
-                              Pt::int32_t minX, Pt::int32_t minY, 
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                              Pt::int32_t x2, Pt::int32_t y2,
+                              Pt::int32_t minX, Pt::int32_t minY,
                               Pt::uint8_t alpha, const bool mask[4])
 {
     // Check the clipping
@@ -1732,9 +1768,9 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
-void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                             Pt::int32_t x2, Pt::int32_t y2, 
-                             Pt::int32_t minX, Pt::int32_t minY, 
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                             Pt::int32_t x2, Pt::int32_t y2,
+                             Pt::int32_t minX, Pt::int32_t minY,
                              const Pt::uint8_t alphaMask[4])
 {
     // Check the clipping
@@ -1790,15 +1826,15 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
-void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR, 
+void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
                                  Pt::int32_t pixelY,
-                                 Pt::int32_t minX,  
+                                 Pt::int32_t minX,
                                  Pt::int32_t minY,
                                  const Color& color)
 {
 
     // Draw the span using texture (or gradient texture)
-    if(_isTexture) 
+    if(_isTexture)
     {
         const Pt::int32_t bw        = _brushImage->width();
         const Pt::int32_t bh        = _brushImage->height();
@@ -1816,17 +1852,17 @@ void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
             spanWidth -= n;
             iterX     += n;
         }
-        
+
         return;
     }
 
     // Draw the span using gradient
-    if(_isGradient) 
+    if(_isGradient)
     {
         Pt::int32_t iterX     = iterL;
         Pt::int32_t spanWidth = iterR - iterL + 1;
-        
-        if(_brush.gradient() == Pt::Gfx::Brush::Vertical) 
+
+        if(_brush.gradient() == Pt::Gfx::Brush::Vertical)
         {
             const Pt::int32_t textureY = std::min<Pt::int32_t>(pixelY,  _brushImage->height() - 1);
             ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
@@ -1847,14 +1883,14 @@ void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
                 iterX     += n;
             }
         }
-        
+
         return;
     }
 
     // Draw the span using solid color
     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
     _image->format().setPixels(pixel, color, iterR - iterL + 1, _compositionMode);
-    
+
     //Pt::int32_t iterX     = iterL;
     //Pt::int32_t spanWidth = iterR - iterL + 1;
     //while(spanWidth > 0) {
@@ -1868,9 +1904,9 @@ void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
     //}
 }
 
-void Rasterizer2::rasterScanlineClipped(Pt::int32_t from, Pt::int32_t to, 
-                                        Pt::int32_t pixelY, 
-                                        Pt::int32_t minX, 
+void Rasterizer2::rasterScanlineClipped(Pt::int32_t from, Pt::int32_t to,
+                                        Pt::int32_t pixelY,
+                                        Pt::int32_t minX,
                                         Pt::int32_t minY)
 {
     // Check if the Y coordinate is outside the clipping region
