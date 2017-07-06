@@ -200,14 +200,16 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
         SizeInfo& rowPolicy = _rowSizes.at(row);
         std::size_t columns = _rows.at(row).size();
         
-        for(std::size_t col = 0; col != columns; ++col)
+        if(rowPolicy.mode() == TableLayout::Preferred)
         {
-            Widget* item = _rows.at(row).at(col);
-            if( ! item )
-                continue;
-            
-            if(rowPolicy.mode() == TableLayout::Preferred)
+            rowPolicy.setSize(0);
+
+            for(std::size_t col = 0; col != columns; ++col)
             {
+                Widget* item = _rows.at(row).at(col);
+                if( ! item )
+                    continue;
+            
                 double height = item->preferredSize().height() +
                                 item->margin().topBottom();
 
@@ -236,16 +238,19 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
     {
         SizeInfo& columnPolicy = _columnSizes.at(col);
         
-        for(std::size_t row = 0; row < _rows.size(); ++row)
+        if(columnPolicy.mode() == TableLayout::Preferred)
         {
-            Widget* item = _rows.at(row).at(col);
-            if( ! item )
-                continue;
+            columnPolicy.setSize(0);
 
-            if(columnPolicy.mode() == TableLayout::Preferred)
+            for(std::size_t row = 0; row < _rows.size(); ++row)
             {
+                Widget* item = _rows.at(row).at(col);
+                if( ! item )
+                    continue;
+
                 double width = item->preferredSize().width() + 
-                               item->margin().leftRight();
+                                item->margin().leftRight();
+                
                 width = std::max(columnPolicy.size(), width);
                 
                 columnPolicy.setSize(width);
