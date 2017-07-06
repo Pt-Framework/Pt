@@ -233,8 +233,64 @@ void benchmarkNarrowRoundedRect()
 // Main program
 //
 
+/*
+#include <x86intrin.h>
+
+inline Pt::int32_t test_lround_libc_lround(double v)
+{
+    return ::lround(v);
+}
+
+inline Pt::int32_t test_lround_libc_lrint(double v)
+{
+    return ::lrint(v);
+}
+
+inline Pt::int32_t test_lround_sse(double v)
+{
+    return _mm_cvtsd_si32(_mm_load_sd(&v));
+}
+
+inline Pt::int32_t test_lround_asm(double v)
+{
+    Pt::int32_t tmp;
+    __asm__ __volatile__ (
+        "fldl   %1\n\t"
+        "fistpl %0    "
+        : "=m"(tmp)
+        :  "m"(v)
+        : "memory"
+    );
+    return tmp;
+}
+
+inline Pt::int32_t test_lround_fallback(double v)
+{
+    Pt::int32_t tmp = static_cast<Pt::int32_t>(v);
+    tmp += (v - tmp >= 0.5) - (v - tmp <= -0.5);
+    return tmp;
+}
+*/
+
 int main(int argc, char* args[])
 {
+    /*
+    volatile double x = 578.5;
+    std::cout << "libc lround = " << test_lround_libc_lround(x) << std::endl;
+    std::cout << "libc lrint  = " << test_lround_libc_lrint (x) << std::endl;
+    std::cout << "sse         = " << test_lround_sse        (x) << std::endl;
+    std::cout << "asm         = " << test_lround_asm        (x) << std::endl;
+    std::cout << "fallback    = " << test_lround_fallback   (x) << std::endl;
+
+    // libc lround = 579
+    // libc lrint  = 578
+    // sse         = 578
+    // asm         = 578
+    // fallback    = 579
+
+    return 0;
+    */
+
     buildDir = args[0];
     buildDir = buildDir.dirName();
     if(buildDir.baseName() != "build")
