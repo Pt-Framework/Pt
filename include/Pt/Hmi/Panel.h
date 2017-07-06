@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/Alignment.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/SmartPtr.h>

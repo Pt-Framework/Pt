@@ -590,6 +590,8 @@ void Widget::measure(const SizePolicy& policy)
 {
     SizePolicy contentPolicy = _sizePolicy;
 
+    // use stricter size mode of parent and, if parent is fixed, 
+    // we also use the parents fixed width
     if( policy.horizontal() > _sizePolicy.horizontal() ||
         policy.horizontal() == SizePolicy::Fixed )
     {
@@ -597,6 +599,8 @@ void Widget::measure(const SizePolicy& policy)
         contentPolicy.setWidth( policy.width() );
     }
 
+    // use stricter size mode of parent and, if parent is fixed, 
+    // we also use the parents fixed height
     if( policy.vertical() > _sizePolicy.vertical() ||
         policy.vertical() == SizePolicy::Fixed )
     {
@@ -604,12 +608,14 @@ void Widget::measure(const SizePolicy& policy)
         contentPolicy.setHeight( policy.height() );
     }
 
+    // apply minimum height, unless the size mode is fixed
     if( contentPolicy.vertical() != SizePolicy::Fixed &&
         contentPolicy.height() < _minimumSize.height() )
     {
         contentPolicy.setHeight( _minimumSize.height() );
     }
 
+    // apply minimum width, unless the size mode is fixed
     if( contentPolicy.horizontal() != SizePolicy::Fixed &&
         contentPolicy.width() < _minimumSize.width() )
     {
@@ -632,15 +638,18 @@ void Widget::measure(const SizePolicy& policy)
             _preferredSize = onMeasure(contentPolicy);
         }
 
+        // use fixed height, if size mode is fixed
         if(contentPolicy.vertical() == SizePolicy::Fixed)
             _preferredSize.setHeight( contentPolicy.height() );
         else if( _preferredSize.height() < _minimumSize.height() )
             _preferredSize.setHeight( _minimumSize.height() );
 
+
         if(contentPolicy.vertical() == SizePolicy::Maximum)
             _preferredSize.setHeight( std::min( _preferredSize.height(),
                                                 contentPolicy.height() ) );
 
+        // use fixed width, if size mode is fixed
         if(contentPolicy.horizontal() == SizePolicy::Fixed)
             _preferredSize.setWidth( contentPolicy.width() );
         else if( _preferredSize.width() < _minimumSize.width() )
