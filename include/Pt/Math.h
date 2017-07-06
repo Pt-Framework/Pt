@@ -38,7 +38,7 @@
 #include <math.h> // hypot
 
 //#include <x86intrin.h>
-
+//#include <intrin.h>
 
 namespace Pt {
 
@@ -283,111 +283,113 @@ inline double hypot(double x, double y)
 #endif
 }
 
+
 /** @brief Rounds to nearest integer value.
 */
 inline Pt::int32_t lround(float x)
 {
-    //return ::lround(x);
-    //return _mm_cvtss_si32(_mm_load_ss(&x));
-
-#if __cplusplus == 201103L
+#if __cplusplus >= 201103L
 
     return std::lround(x);
 
-#elif (__STDC_VERSION__ >= 199409L)
-
-    return lround(x);
-
-#elif defined(_MSC_VER) && defined (_M_IX86)
-
-    Pt::int32_t tmp;
-    __asm fld x
-    __asm fistp tmp
-    return tmp;
-
-#elif ( defined(__GNUC__) || defined(__clang__) ) && \
-      ( defined(__i386) || defined(__x86_64__) )
-
-    Pt::int32_t tmp;
-    __asm__ __volatile__ (
-        "flds   %1\n\t"
-        "fistpl %0    "
-        : "=m"(tmp)
-        :  "m"(x)
-        : "memory"
-    );
-    return tmp;
-
-
-#elif ( defined(__GNUC__) || defined(__clang__) ) && \
-        defined(__arm__)
-
-    float       tmp;
-    Pt::int32_t res;
-    __asm__ __volatile__ ( "ftosis %0, %1" : "=w" (tmp) : "w" (x) );
-    __asm__ __volatile__ ( "fmrs   %0, %1" : "=r" (res) : "w" (tmp) );
-    return res;
-
-#else
+#elif (_MSC_VER < 1800)
 
     Pt::int32_t tmp = static_cast<Pt::int32_t>(x);
     tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
     return tmp;
 
+#else
+
+    return ::lround(x);
+
 #endif
+
+//
+// asm below uses bankers rounding
+//
+//#elif defined(_MSC_VER) && defined (_M_IX86)
+//
+//    Pt::int32_t tmp;
+//    __asm fld x
+//    __asm fistp tmp
+//    return tmp;
+//
+//#elif ( defined(__GNUC__) || defined(__clang__) ) &&
+//      ( defined(__i386) || defined(__x86_64__) )
+//
+//    Pt::int32_t tmp;
+//    __asm__ __volatile__ (
+//        "flds   %1\n\t"
+//        "fistpl %0    "
+//        : "=m"(tmp)
+//        :  "m"(x)
+//        : "memory"
+//    );
+//    return tmp;
+//
+//
+//#elif ( defined(__GNUC__) || defined(__clang__) ) &&
+//        defined(__arm__)
+//
+//    float       tmp;
+//    Pt::int32_t res;
+//    __asm__ __volatile__ ( "ftosis %0, %1" : "=w" (tmp) : "w" (x) );
+//    __asm__ __volatile__ ( "fmrs   %0, %1" : "=r" (res) : "w" (tmp) );
+//    return res;
+    
 }
 
 /** @brief Rounds to nearest integer value.
 */
 inline Pt::int32_t lround(double x)
 {
-    //return ::lround(x);
-    //return _mm_cvtsd_si32(_mm_load_sd(&x));
-
-#if __cplusplus == 201103L
+#if __cplusplus >= 201103L
 
     return std::lround(x);
 
-#elif (__STDC_VERSION__ >= 199409L)
-
-    return lround(x);
-
-#elif defined(_MSC_VER) || defined (_M_IX86)
-
-    Pt::int32_t tmp;
-    __asm fld x
-    __asm fistp tmp
-    return tmp;
-
-#elif ( defined(__GNUC__) || defined(__clang__) ) && \
-      ( defined(__i386) || defined(__x86_64__) )
-
-    Pt::int32_t tmp;
-    __asm__ __volatile__ (
-        "fldl   %1\n\t"
-        "fistpl %0    "
-        : "=m"(tmp)
-        :  "m"(x)
-        : "memory"
-    );
-    return tmp;
-
-#elif ( defined(__GNUC__) || defined(__clang__) ) && \
-        defined(__arm__)
-
-    float       tmp;
-    Pt::int32_t res;
-    __asm__ __volatile__ ( "ftosid %0, %P1" : "=w" (tmp) : "w" (x) );
-    __asm__ __volatile__ ( "fmrs   %0, %1"  : "=r" (res) : "w" (tmp) );
-    return res;
-
-#else
+#elif (_MSC_VER < 1800)
 
     Pt::int32_t tmp = static_cast<Pt::int32_t>(x);
     tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
     return tmp;
 
+#else
+
+    return ::lround(x);
+
 #endif
+
+//
+// asm below uses bankers rounding
+//
+//#elif defined(_MSC_VER) || defined (_M_IX86)
+//
+//    Pt::int32_t tmp;
+//    __asm fld x
+//    __asm fistp tmp
+//    return tmp;
+//
+//#elif ( defined(__GNUC__) || defined(__clang__) ) &&
+//      ( defined(__i386) || defined(__x86_64__) )
+//
+//    Pt::int32_t tmp;
+//    __asm__ __volatile__ (
+//        "fldl   %1\n\t"
+//        "fistpl %0    "
+//        : "=m"(tmp)
+//        :  "m"(x)
+//        : "memory"
+//    );
+//    return tmp;
+//
+//#elif ( defined(__GNUC__) || defined(__clang__) ) &&
+//        defined(__arm__)
+//
+//    float       tmp;
+//    Pt::int32_t res;
+//    __asm__ __volatile__ ( "ftosid %0, %P1" : "=w" (tmp) : "w" (x) );
+//    __asm__ __volatile__ ( "fmrs   %0, %1"  : "=r" (res) : "w" (tmp) );
+//    return res;
 }
 
 } // namespace Pt
