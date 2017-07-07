@@ -565,10 +565,25 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
     const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
-    const float scale = 1.0;
+    const float scale = 1.0f;
+    float centerX = 0.0f;
+    float centerY = 0.0f;
+    
+    if(_brush.positionMode() == Brush::Absolute)
+    {
+        centerX  = _brush.gradientFocus().x();
+        centerY  = _brush.gradientFocus().y();
+    }
+    else // Brush::Relative
+    {
+        centerX  = width  * _brush.gradientFocus().x();
+        centerY  = height * _brush.gradientFocus().y();
+    }
 
-    float centerX, centerY, xyRat, yxRat;
-    updateGradientBrush_getCtrRatXY(centerX, centerY, xyRat, yxRat, width, height);
+    // NOTE: centerX and centerY are now relative to topLeft
+
+    float xyRat = (centerX > centerY) ? (centerX / centerY) : 1.0f;
+    float yxRat = (centerY > centerX) ? (centerY / centerX) : 1.0f;
 
     const float rrFac = 2.0f / scale / sqrt(xyRat * xyRat + yxRat * yxRat);
 

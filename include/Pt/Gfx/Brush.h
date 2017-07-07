@@ -49,6 +49,12 @@ class PT_GFX_API Brush
             Gradient  = 2,
         };
 
+        enum PositionMode
+        {
+            Absolute = 0,
+            Relative = 1
+        };
+
         enum GradientStyle
         {
             Horizontal  = 0, // only for old painters
@@ -74,9 +80,16 @@ class PT_GFX_API Brush
 
         static Brush linearGradient(const Color& from, const Color& to, 
                                     float angle = 0.0f);
-
+        
+        /** @brief Constructs a absolute positioned radial gradient.
+        */
         static Brush radialGradient(const Color& from, const Color& to, 
-                                    const PointF& focus = PointF());
+                                    const PointF& focus);
+
+        /** @brief Constructs a relative positioned radial gradient.
+        */
+        static Brush radialGradient(const Color& from, const Color& to, 
+                                    float rx = 0.5, float ry = 0.5);
 
         static Brush conicalGradient(const Color& from, const Color& to, 
                                      float angle = 0.0f, const PointF& center = PointF());
@@ -85,6 +98,8 @@ class PT_GFX_API Brush
                                          float angle = 0.0f);
 
         FillStyle fillStyle() const;
+
+        PositionMode positionMode() const;
 
         void setColor(const Color& color);
 
@@ -95,6 +110,8 @@ class PT_GFX_API Brush
         const Color& gradientColor() const;
 
         float gradientAngle() const;
+
+        const PointF& gradientFocus() const;
 
         void setTexture(const Image& texture, 
                         Pt::int32_t offX = 0, Pt::int32_t offY = 0);
@@ -140,7 +157,7 @@ class BrushData
         {}
 
         BrushData(const Image& texture, 
-                 Pt::int32_t offsetX, Pt::int32_t offsetY);
+                  Pt::int32_t offsetX, Pt::int32_t offsetY);
 
         // only for old Painter
         BrushData(const Color& from, const Color& to, 
@@ -151,6 +168,9 @@ class BrushData
 
         Brush::FillStyle fillStyle() const
         { return _fillStyle; }
+
+        Brush::PositionMode positionMode() const
+        { return _positionMode; }
 
         void setColor(const Color& color)
         {
@@ -170,6 +190,9 @@ class BrushData
         void setRadialGradient(const Color& from, const Color& to, 
                                const PointF& focus);
 
+        void setRadialGradient(const Color& from, const Color& to, 
+                               float rx, float ry);
+
         void setConicalGradient(const Color& from, const Color& to, 
                                 const PointF& center, float angle);
 
@@ -179,11 +202,11 @@ class BrushData
         Brush::GradientStyle gradient() const
         { return _gradient; }
 
-        void setGradientAngle(float angle)
-        { _gradientAngle = angle; }
-
         const Color& gradientColor() const
         { return _gradientColor; }
+
+        const PointF& gradientFocus() const
+        { return _gradientFocus; }
 
         void setTexture(const Image& texture, 
                        Pt::int32_t offsetX, Pt::int32_t offsetY);
@@ -212,10 +235,12 @@ class BrushData
     private:
         bool                 _isNull;
         Brush::FillStyle     _fillStyle;
+        Brush::PositionMode  _positionMode;
         Color                _color;
         Brush::GradientStyle _gradient;
         Color                _gradientColor;
         float                _gradientAngle;
+        PointF               _gradientFocus;
         Pt::int32_t          _ofsX;
         Pt::int32_t          _ofsY;
         Image                _texture;

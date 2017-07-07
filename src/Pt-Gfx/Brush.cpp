@@ -88,6 +88,15 @@ Brush Brush::radialGradient(const Color& from, const Color& to,
 }
 
 
+Brush Brush::radialGradient(const Color& from, const Color& to, 
+                            float rx, float ry)
+{
+    BrushData* data = new BrushData();
+    data->setRadialGradient(from, to, rx, ry);
+    return Brush(data);
+}
+
+
 Brush Brush::conicalGradient(const Color& from, const Color& to, 
                              float angle, const PointF& center)
 {
@@ -109,6 +118,12 @@ Brush Brush::rectangularGradient(const Color& from, const Color& to,
 Brush::FillStyle Brush::fillStyle() const
 { 
     return _brushData->fillStyle(); 
+}
+
+
+Brush::PositionMode Brush::positionMode() const
+{
+    return _brushData->positionMode();
 }
 
 
@@ -145,6 +160,12 @@ const Color& Brush::gradientColor() const
 float Brush::gradientAngle() const
 { 
     return _brushData->gradientAngle(); 
+}
+
+
+const PointF& Brush::gradientFocus() const
+{
+    return _brushData->gradientFocus();
 }
 
 
@@ -206,6 +227,7 @@ BrushData::BrushData(const Image& texture,
                      Pt::int32_t offsetX, Pt::int32_t offsetY)
 : _isNull(true)
 , _fillStyle(Brush::Solid)
+, _positionMode(Brush::Relative)
 , _gradient(Brush::Horizontal)
 { 
     setTexture(texture, offsetX, offsetY); 
@@ -216,6 +238,7 @@ BrushData::BrushData(const Color& from, const Color& to,
                      Brush::GradientStyle g)
 : _isNull(false)
 , _fillStyle(Brush::Gradient)
+, _positionMode(Brush::Relative)
 , _color(from)
 , _gradient(g)
 , _gradientColor(to)
@@ -226,32 +249,53 @@ BrushData::BrushData(const Color& from, const Color& to,
 }
 
 
-void BrushData::setLinearGradient(const Color& from, 
-                                  const Color& to, float angle)
+void BrushData::setLinearGradient(const Color& from, const Color& to, 
+                                  float angle)
 {
     _isNull        = false;
     _fillStyle     = Brush::Gradient;
+    _positionMode  = Brush::Absolute; 
     _color         = from;
     _gradient      = Brush::Linear;
     _gradientColor = to;
     _gradientAngle = angle;
+    _gradientFocus.set(0.0, 0.0);
     _ofsX          = 0;
     _ofsY          = 0;
     _texture       = Image();
 }
 
 
-void BrushData::setRadialGradient(const Color& from, 
-                                  const Color& to, const PointF& focus)
+void BrushData::setRadialGradient(const Color& from, const Color& to, 
+                                  const PointF& focus)
 {
     _isNull        = false;
     _fillStyle     = Brush::Gradient;
+    _positionMode  = Brush::Absolute; 
     _color         = from;
     _gradient      = Brush::Radial;
     _gradientColor = to;
     _gradientAngle = 0.0f;
-    _ofsX          = Pt::lround( focus.x() );
-    _ofsY          = Pt::lround( focus.y() );
+    _gradientFocus = focus;
+    _ofsX          = 0;
+    _ofsY          = 0;
+    _texture       = Image();
+}
+
+
+void BrushData::setRadialGradient(const Color& from, const Color& to, 
+                                  float rx, float ry)
+{
+    _isNull        = false;
+    _fillStyle     = Brush::Gradient;
+    _positionMode  = Brush::Relative; 
+    _color         = from;
+    _gradient      = Brush::Radial;
+    _gradientColor = to;
+    _gradientAngle = 0.0f;
+    _gradientFocus.set(rx, ry);
+    _ofsX          = 0;
+    _ofsY          = 0;
     _texture       = Image();
 }
 
@@ -261,12 +305,14 @@ void BrushData::setConicalGradient(const Color& from, const Color& to,
 {
     _isNull        = false;
     _fillStyle     = Brush::Gradient;
+    _positionMode  = Brush::Absolute; 
     _color         = from;
     _gradient      = Brush::Conical;
     _gradientColor = to;
     _gradientAngle = angle;
-    _ofsX          = Pt::lround( center.x() );
-    _ofsY          = Pt::lround( center.y() );
+    _gradientFocus = center;
+    _ofsX          = 0;
+    _ofsY          = 0;
     _texture       = Image();
 }
 
@@ -276,10 +322,12 @@ void BrushData::setRectangularGradient(const Color& from, const Color& to,
 {
     _isNull        = false;
     _fillStyle     = Brush::Gradient;
+    _positionMode  = Brush::Absolute; 
     _color         = from;
     _gradient      = Brush::Rectangular;
     _gradientColor = to;
     _gradientAngle = angle;
+    _gradientFocus.set(0.0, 0.0);
     _ofsX          = 0;
     _ofsY          = 0;
     _texture       = Image();
@@ -408,10 +456,16 @@ void BrushData::setTexture(const Image& texture,
         }
     }
 
-    _fillStyle = Brush::Texture;
-    _ofsX      = offsetX;
-    _ofsY      = offsetY;
-    _isNull    = false;
+    _isNull        = false;
+    _fillStyle     = Brush::Texture;
+    _positionMode  = Brush::Absolute; 
+
+    _gradient      = Brush::Linear;
+    _gradientFocus.set(0.0, 0.0);
+    _gradientAngle = 0;
+    
+    _ofsX          = offsetX;
+    _ofsY          = offsetY;
 }
 
 } // namespace
