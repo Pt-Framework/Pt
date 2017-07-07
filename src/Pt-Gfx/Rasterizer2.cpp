@@ -684,18 +684,28 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
     const float hiLim = 0.75f;
 #endif
 
-    // Extract and calculate the parameters
-    const float angle = _brush.gradientAngle();
-    const float scale = 1.0;
+    // Calculate the focus point
+    float centerX = 0.0f;
+    float centerY = 0.0f;
 
-    float ctrX, ctrY, xyRat, yxRat;
-    updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
+    if(_brush.positionMode() == Brush::Absolute)
+    {
+        centerX = _brush.gradientFocus().x();
+        centerY = _brush.gradientFocus().y();
+    }
+    else // Brush::Relative
+    {
+        centerX = width  * _brush.gradientFocus().x();
+        centerY = height * _brush.gradientFocus().y();
+    }
+
+    // Get the rotation angle
+    const float angle = _brush.gradientAngle();
 
 #ifndef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
-    const float ang45 =  angle - floor(angle / 45.0f) * 45.0f;
-    const float ang90 =  angle - floor(angle / 90.0f) * 90.0f;
-    const bool  asym  = (xyRat != yxRat);
-    const bool  useAA = (_aaMode) && (ang90 >= 0.1f) && (asym || ang45 >= 0.1f);
+    // Determine if the transition area needs to be anti-aliased
+    const const float ang90 =  angle - floor(angle / 90.0f) * 90.0f;
+    const const bool  useAA = (_aaMode) && (ang90 >= 0.1f);
 #endif
 
     // Calculate the rotation
@@ -708,15 +718,15 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 
     for(Pt::int32_t y = 0; y < height; ++y) {
         // Calculate the delta Y
-        const float dy = -(y - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
+        const float dy = -(y - centerY); // Sign inversion due to differences between cartesian and computer coordinate systems
         for(Pt::int32_t x = 0; x < width; ++x) {
             // Calculate the delta X
-            const float dx = (x - ctrX) * yxRat;
+            const float dx = (x - centerX);
             // Calculate the rotated deltas
             const float ry = (-sval * dx + cval * dy);
             const float rx = ( cval * dx + sval * dy);
             // Calculate the distance
-            float dist = (std::atan2(ry, rx) + pi<float>()) / piDouble<float>() / scale;
+            float dist = (std::atan2(ry, rx) + pi<float>()) / piDouble<float>();
                  if(dist < 0.0f) dist = 0.0f;
             else if(dist > 1.0f) dist = 1.0f;
 #ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
@@ -762,8 +772,8 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
                 dist = 0.0f;
                 for(Pt::int32_t i = 0; i < ijm; ++i) {
                     for(Pt::int32_t j = 0; j < ijm; ++j) {
-                        const float dxs =  (x + i - ijm2 - ctrX) * yxRat;
-                        const float dys = -(y + j - ijm2 - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
+                        const float dxs =  (x + i - ijm2 - centerX);
+                        const float dys = -(y + j - ijm2 - centerY); // Sign inversion due to differences between cartesian and computer coordinate systems
                         const float rxs = ( cval * dxs + sval * dys);
                         const float rys = (-sval * dxs + cval * dys);
                         dist += (std::atan2(rys, rxs) + pi<float>()) / piDouble<float>();
@@ -799,16 +809,6 @@ void Rasterizer2::updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4]
     rgbaEnd [1] = _brush.gradientColor().green() / 257;
     rgbaEnd [2] = _brush.gradientColor().blue () / 257;
     rgbaEnd [3] = _brush.gradientColor().alpha() / 257;
-}
-
-
-void Rasterizer2::updateGradientBrush_getCtrRatXY(float& ctrX, float& ctrY, float &xyRat, float& yxRat, Pt::int32_t width, Pt::int32_t height)
-{
-    ctrX  = width  * 0.5f + _brush.offsetX();
-    ctrY  = height * 0.5f + _brush.offsetY();
-
-    xyRat = (ctrX > ctrY) ? (ctrX / ctrY) : 1.0f;
-    yxRat = (ctrY > ctrX) ? (ctrY / ctrX) : 1.0f;
 }
 
 

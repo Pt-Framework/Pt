@@ -71,10 +71,19 @@ Brush Brush::horizontalGradient(const Color& from, const Color& to)
 
 
 Brush Brush::linearGradient(const Color& from, const Color& to,
-                            float angle)
+                            const PointF& focus, float angle)
 {
     BrushData* data = new BrushData();
-    data->setLinearGradient(from, to, angle);
+    data->setLinearGradient(from, to, focus, angle);
+    return Brush(data);
+}
+
+
+Brush Brush::linearGradient(const Color& from, const Color& to,
+                            float rx, float ry, float angle)
+{
+    BrushData* data = new BrushData();
+    data->setLinearGradient(from, to, rx, ry, angle);
     return Brush(data);
 }
 
@@ -269,7 +278,24 @@ BrushData::BrushData(const Color& from, const Color& to,
 
 
 void BrushData::setLinearGradient(const Color& from, const Color& to,
-                                  float angle)
+                                  const PointF& focus, float angle)
+{
+    _isNull        = false;
+    _fillStyle     = Brush::Gradient;
+    _positionMode  = Brush::Absolute;
+    _color         = from;
+    _gradient      = Brush::Linear;
+    _gradientColor = to;
+    _gradientAngle = angle;
+    _gradientFocus = focus;
+    _ofsX          = 0;
+    _ofsY          = 0;
+    _texture       = Image();
+}
+
+
+void BrushData::setLinearGradient(const Color& from, const Color& to,
+                                  float rx, float ry, float angle)
 {
     _isNull        = false;
     _fillStyle     = Brush::Gradient;
@@ -278,7 +304,7 @@ void BrushData::setLinearGradient(const Color& from, const Color& to,
     _gradient      = Brush::Linear;
     _gradientColor = to;
     _gradientAngle = angle;
-    _gradientFocus.set(0.5, 0.5);
+    _gradientFocus.set(rx, ry);
     _ofsX          = 0;
     _ofsY          = 0;
     _texture       = Image();

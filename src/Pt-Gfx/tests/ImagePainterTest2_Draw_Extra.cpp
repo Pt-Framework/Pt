@@ -71,7 +71,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     // --- Part 1 ---
 
     // Rectangular gradient
-    painter.setBrush( Brush::rectangularGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175) ) );
+    painter.setBrush( Brush::rectangularGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.3f, 0.7f ) );
     painter.fillRect( RectF(PointF(20, 250), SizeF(100, 100)) );
 
     painter.setBrush( Brush::rectangularGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 30.0f) );
@@ -88,7 +88,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     painter.setBrush( Brush::conicalGradient( Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175) ) );
     painter.fillRect( RectF(PointF(20 + 600, 250), SizeF(100, 100)) );
 
-    painter.setBrush( Brush::conicalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 30.0f) );
+    painter.setBrush( Brush::conicalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.7f, 0.3f, 30.0f) );
     painter.fillRect( RectF(PointF(20 + 750, 250), SizeF(100, 100)) );
 
     // --- Part 2 ---
@@ -115,10 +115,10 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
     painter.fillRect( RectF(PointF(20 + 90, 250 + 135), SizeF(50, 50)) );
 
-    painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 15.0f) );
+    painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 15.0f) );
     painter.fillRect( RectF(PointF(20 + 90 + 180, 250 + 135), SizeF(50, 50)) );
 
-    painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), -15.0f) );
+    painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, -15.0f) );
     painter.fillRect( RectF(PointF(20 + 90 + 360, 250 + 135), SizeF(50, 50)) );
 
     painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );

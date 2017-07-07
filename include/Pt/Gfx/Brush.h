@@ -78,8 +78,10 @@ class PT_GFX_API Brush
 
         static Brush horizontalGradient(const Color& from, const Color& to);
 
+        /** @brief Constructs a absolute positioned linear gradient.
+        */
         static Brush linearGradient(const Color& from, const Color& to,
-                                    float angle = 0.0f);
+                                    const PointF& focus, float angle = 0.0f);
 
         /** @brief Constructs a absolute positioned radial gradient.
         */
@@ -95,6 +97,11 @@ class PT_GFX_API Brush
         */
         static Brush rectangularGradient(const Color& from, const Color& to,
                                          const PointF& focus, float angle = 0.0f);
+
+        /** @brief Constructs a relative positioned linear gradient.
+        */
+        static Brush linearGradient(const Color& from, const Color& to,
+                                    float rx = 0.5, float ry = 0.5, float angle = 0.0f);
 
         /** @brief Constructs a relative positioned rectangular gradient.
         */
@@ -199,7 +206,10 @@ class BrushData
         { return _color; }
 
         void setLinearGradient(const Color& from, const Color& to,
-                               float angle);
+                               const PointF& focus, float angle);
+
+        void setLinearGradient(const Color& from, const Color& to,
+                               float rx, float ry, float angle);
 
         void setRadialGradient(const Color& from, const Color& to,
                                const PointF& focus);
