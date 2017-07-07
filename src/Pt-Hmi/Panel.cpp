@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015-2017 Marc Boris Duerner 
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
@@ -39,7 +39,6 @@ namespace Hmi {
 
 Panel::Panel()
 : _content(0)
-, _layout( ImageLayout::None )
 , _hasBackground(false)
 , _hasFrame(false)
 , _hasRenderer(false)
@@ -52,6 +51,15 @@ Panel::~Panel()
 }
 
 
+void Panel::setImage(const Gfx::Image& image, Alignment align)
+{
+    _picture.set(image);
+    _imageAlignment = align;
+    
+    update();
+}   
+
+
 void Panel::setContent(Widget& widget)
 {
     if(_content)
@@ -60,7 +68,6 @@ void Panel::setContent(Widget& widget)
     _content = &widget;
     
     add(widget); 
-
 }
 
 
@@ -70,7 +77,6 @@ void Panel::onRemoveWidget(Widget& w)
 
     if(&w == _content)
         _content = 0;
-
 }
 
 
@@ -133,17 +139,6 @@ void Panel::setRenderer(PanelRenderer* renderer)
 
     invalidate();
 }
-
-
-void Panel::setImage(const Gfx::Image& image, ImageLayout layout)
-{
-    if(layout == ImageLayout::Strech || layout ==  ImageLayout::Zoom)
-        _image = image;
-            
-    _layout = layout;
-    _picture.set(image);
-    update();
-}   
 
 
 void Panel::onInvalidate()
@@ -213,39 +208,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                                     painter, rect, *brush);
     }
 
-    if( ! _picture.empty() )
-    {
-        const Gfx::SizeF& size = this->size();
-
-        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-
-        switch( _layout.type() )
-        {
-            default:
-                painter.drawPicture( Pt::Gfx::PointF(0,0), _picture );
-                break;
-
-            case ImageLayout::Tile:
-            {
-                for( double x = 0; x < size.width();  x += _picture.width() )
-                {
-                    for( double y = 0; y < size.height();  y += _picture.height() )
-                        painter.drawPicture(Gfx::PointF(x,y), _picture);
-                }
-                break;
-            }
-            
-            case ImageLayout::Center:
-            {
-                const double x = size.width()/2  - _picture.width()/2;
-                const double y = size.height()/2  - _picture.height()/2;
-                painter.drawPicture(Gfx::PointF(x, y), _picture);
-                break;
-            }
-        }
-
-        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
-    }  
+    onPaintContent(painter);
 
     const Gfx::Pen* pen = contour();
     if(pen)
@@ -256,45 +219,62 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void Panel::onResizeEvent(const ResizeEvent& ev)
+void Panel::onPaintContent(Painter& painter)
 {
-    Base::onResizeEvent(ev);
-
-    if( _picture.empty() || ev.size().width() < 1 || ev.size().height() < 1 )
+    if( ! _picture.empty() )
         return;
 
-    switch( _layout.type() )
+    Gfx::PointF imagePosition;
+        
+    double rightX = size().width() - _picture.width();
+    double bottomY = size().height() - _picture.height();
+        
+    double centerX = rightX / 2;
+    double centerY = bottomY / 2;
+
+    switch(_imageAlignment)
     {
-        case ImageLayout::Strech:
-        {
-            Gfx::Size newSize( (int) ev.size().width(), 
-                               (int)ev.size().height() );
+        case Alignment::TopLeft:
+            imagePosition.set(0.0, 0.0);
+            break;
 
-            Gfx::Image streched(_image.format(), newSize);
+        case Alignment::Top:
+            imagePosition.set(centerX, 0.0);
+            break;
             
-            Gfx::blockScale( _image.begin(),_image.width(), _image.height(),
-                             streched.begin(), streched.width(), streched.height() );
+        case Alignment::TopRight:
+            imagePosition.set(rightX, 0.0);
+            break;
 
-            _picture.set(streched);
-        }
-        break;
+        case Alignment::Left:
+            imagePosition.set(0.0, centerY);
+            break;
 
-        case ImageLayout::Zoom:
-        {
-            const double factor = ev.size().width() / _image.width();
-            
-            Pt::Gfx::Size newSize( ( size_t)(_image.width() * factor), 
-                                   (size_t)(_image.height() * factor) );
+        default:
+        case Alignment::Center:
+            imagePosition.set(centerX, centerY);
+            break;
 
-            Gfx::Image streched(_image.format(), newSize);
-            
-            Gfx::blockScale( _image.begin(),_image.width(), _image.height(),
-                             streched.begin(), streched.width(), streched.height() );
+        case Alignment::Right:
+            imagePosition.set(rightX, centerY);
+            break;
 
-            _picture.set(streched);
-        }
-        break;
-    }  
+        case Alignment::BottomLeft:
+            imagePosition.set(0.0, bottomY);
+            break;
+
+        case Alignment::Bottom:
+            imagePosition.set(centerX, bottomY);
+            break;
+
+        case Alignment::BottomRight:
+            imagePosition.set(rightX, bottomY);
+            break;
+    }
+
+    painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
+    painter.drawPicture(imagePosition, _picture);
+    painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
 }
 
 } // namespace

@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+/* Copyright (C) 2015-2017 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  
  This library is free software; you can redistribute it and/or
@@ -41,55 +41,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class PaintEvent;
-
-class ImageLayout
-{
-    public:
-        enum Type
-        {
-            None,
-            Tile,
-            Center,
-            Strech,
-            Zoom
-        };
-
-    public:
-        ImageLayout()
-        : _type(None)        
-        { }
-
-        ImageLayout(Type type)
-        : _type(type)        
-        { }
-
-        const ImageLayout& operator=(Type type)
-        {
-          _type = type;
-          return *this;
-        }
-
-        Type type() const
-        {
-            return _type;
-        }
-    
-        bool operator ==(const ImageLayout& l) const
-        {
-            return _type == l._type;
-        }
-
-        bool operator !=(const ImageLayout& l) const
-        {
-            return _type != l._type;
-        }
-
-    private:
-        Type _type;
-};
-
-
 class PT_HMI_API Panel : public Control
 {
     typedef Control Base;
@@ -99,17 +50,10 @@ class PT_HMI_API Panel : public Control
 
         virtual ~Panel();
    
-        //enum TileMode
-        //{
-        //    Tile,
-        //    Strech,
-        //    Zoom
-        //};
+        void setImage(const Gfx::Image& image, 
+                      Alignment align = Alignment::Center); 
 
-        // TODO: use TileMode and Alignment instead of ImageLayout
-        //       Tile seems to be the same as a Brush with an image
-
-        void setImage(const Gfx::Image& image, ImageLayout layout); 
+        void setContent(Widget& widget);
 
     public:
         const Gfx::Brush* background() const;
@@ -125,8 +69,6 @@ class PT_HMI_API Panel : public Control
         void setFrame(bool b);
 
         void setRenderer(PanelRenderer* renderer);
-        
-        void setContent(Widget& widget);
 
     protected:
         virtual void onRemoveWidget(Widget& w);
@@ -139,13 +81,10 @@ class PT_HMI_API Panel : public Control
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-    protected:
-        virtual void onResizeEvent(const ResizeEvent& ev);
+        virtual void onPaintContent(Painter& painter);
 
     private:
         Widget*                  _content;
-        Gfx::Image               _image;
-        ImageLayout              _layout;
 
         FacetPtr<PanelRenderer> _renderer;
         bool                    _hasRenderer;
@@ -157,6 +96,7 @@ class PT_HMI_API Panel : public Control
         bool                    _hasFrame;
 
         Picture                 _picture;
+        Alignment               _imageAlignment;
 };
 
 } // namespace
