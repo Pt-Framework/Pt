@@ -57,6 +57,10 @@ class PT_HMI_API ComboBox : public Control
 
         void setEditable(bool e);
 
+        bool isAccepted() const;
+
+        void setAccepted(bool a);
+
         const Pt::String& text() const;
 
         void setText(const Pt::String& str);
@@ -148,6 +152,8 @@ class PT_HMI_API ComboBox : public Control
         double        _maxHeight;
         double        _spacing;
         bool          _isEditable;
+        bool          _isAccepted;
+        bool          _isTextChanged;
         
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Brush>       _foreground;

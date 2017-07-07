@@ -37,6 +37,8 @@ ComboBox::ComboBox()
 : _maxHeight(500)
 , _spacing(2)
 , _isEditable(true)
+, _isAccepted(true)
+, _isTextChanged(false)
 , _hasRenderer(false)
 {
     setTextInput(_isEditable);
@@ -79,6 +81,27 @@ void ComboBox::setEditable(bool e)
     _isEditable = e;
     setTextInput(_isEditable);
     update();
+}
+
+
+bool ComboBox::isAccepted() const
+{
+    return _isAccepted;
+}
+
+
+void ComboBox::setAccepted(bool a)
+{
+    _isAccepted = a;
+    
+    if( ! a )
+    {
+        setFocusPolicy(Widget::KeepFocus);
+    }
+    else
+    {
+        setFocusPolicy(Widget::NormalFocus);
+    }
 }
 
 
@@ -432,10 +455,13 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
     else if( ev.key().code() == Pt::Hmi::Key::Return )
     {
         invalidate();
-        _returnPressed.send( _editor.text() );
+        
+        if( isAccepted() )
+            _returnPressed.send( _editor.text() );
     }
     else if( ev.key().code() == Pt::Hmi::Key::Delete )
     {
+        _isTextChanged = true;
         _editor.del();
         invalidate();
 
@@ -443,6 +469,7 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
+        _isTextChanged = true;
         _editor.backspace();
         invalidate();
 
@@ -453,6 +480,7 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
         Pt::Char ch = ev.unicode();
         if( Pt::isprint(ch) )
         {
+            _isTextChanged = true;
             _editor.insert(ch);
             invalidate();
 
@@ -526,11 +554,11 @@ void ComboBox::onFocusEvent(const FocusEvent& ev)
 
     if( ! ev.isFocused() )
     {
-        //if( isAccepted() && _isTextChanged)
-        //{
-        //    _isTextChanged = false;
-        //    _editingFinished.send(_text);
-        //}
+        if( isAccepted() && _isTextChanged)
+        {
+            _isTextChanged = false;
+            _editingFinished.send( _editor.text() );
+        }
     }
     else if(_isEditable)
     {
