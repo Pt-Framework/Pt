@@ -566,25 +566,23 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
 
     // Extract and calculate the parameters
     const float scale = 1.0f;
+
     float centerX = 0.0f;
     float centerY = 0.0f;
-    
+
     if(_brush.positionMode() == Brush::Absolute)
     {
-        centerX  = _brush.gradientFocus().x();
-        centerY  = _brush.gradientFocus().y();
+        centerX = _brush.gradientFocus().x();
+        centerY = _brush.gradientFocus().y();
     }
     else // Brush::Relative
     {
-        centerX  = width  * _brush.gradientFocus().x();
-        centerY  = height * _brush.gradientFocus().y();
+        centerX = width  * _brush.gradientFocus().x();
+        centerY = height * _brush.gradientFocus().y();
     }
-
-    // NOTE: centerX and centerY are now relative to topLeft
 
     float xyRat = (centerX > centerY) ? (centerX / centerY) : 1.0f;
     float yxRat = (centerY > centerX) ? (centerY / centerX) : 1.0f;
-
     const float rrFac = 2.0f / scale / sqrt(xyRat * xyRat + yxRat * yxRat);
 
     // Calculate the inverse scaling factor
@@ -823,9 +821,6 @@ void Rasterizer2::updateGradientBrush_getCtrRatXY(float& ctrX, float& ctrY, floa
 {
     ctrX  = width  * 0.5f + _brush.offsetX();
     ctrY  = height * 0.5f + _brush.offsetY();
-
-    //ctrX += 20;
-    //ctrY += 20;
 
     xyRat = (ctrX > ctrY) ? (ctrX / ctrY) : 1.0f;
     yxRat = (ctrY > ctrX) ? (ctrY / ctrX) : 1.0f;
