@@ -153,10 +153,10 @@ class Rasterizer2
 
         void fillEllipse(const PointF& topLeft, const SizeF& size);
 
-        void fillPie(const PointF& topLeft, const SizeF& size, 
+        void fillPie(const PointF& topLeft, const SizeF& size,
                      float degBegin, float degEnd);
 
-        void fillChord(const PointF& topLeft, const SizeF& size, 
+        void fillChord(const PointF& topLeft, const SizeF& size,
                         float degBegin, float degEnd);
 
         void fillPath(const Path& path, float smoothness);
@@ -170,26 +170,24 @@ class Rasterizer2
 
         void drawNarrowPath(const PointF* pointsF, size_t pointCount);
 
-    private:      
+    private:
         //
         // brushes
         //
-        
+
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
-        
+
         void updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt::int32_t height);
-        
+
         void updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt::int32_t height);
-        
+
         void updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width, Pt::int32_t height);
-        
+
         void updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt::int32_t height);
-        
+
         void updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt::int32_t height);
-        
+
         void updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4], Pt::uint8_t rgbaEnd[4]);
-        
-        void updateGradientBrush_getCtrRatXY(float& ctrX, float& ctrY, float &xyRat, float& yxRat, Pt::int32_t width, Pt::int32_t height);
 
         //
         // pen patterns
@@ -198,15 +196,15 @@ class Rasterizer2
         void updatePenPattern();
 
         Pt::uint8_t patternBuffer1PAlpha(Pt::int32_t idx) const;
-        
+
         Pt::uint8_t patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale) const;
-        
+
         Pt::uint8_t patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat) const;
 
         void patternBuffer1PAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const;
-        
+
         void patternBuffer1PAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const;
-        
+
         void patternBuffer1PAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const;
 
         //
@@ -227,85 +225,85 @@ class Rasterizer2
         // narrow lines
         //
 
-        void rasterNarrowSolidLine(Pt::int32_t x1, Pt::int32_t y1, 
-                                   Pt::int32_t x2, Pt::int32_t y2, 
+        void rasterNarrowSolidLine(Pt::int32_t x1, Pt::int32_t y1,
+                                   Pt::int32_t x2, Pt::int32_t y2,
                                    const Color& color, DrawLineMask* maskInOut);
 
-        void rasterNarrowSolidLine_F(float x1, float y1, 
-                                     float x2, float y2, 
+        void rasterNarrowSolidLine_F(float x1, float y1,
+                                     float x2, float y2,
                                      const Color& color, DrawLineMask* maskInOut);
-        
-        void rasterNarrowPatternedLine(Pt::int32_t x1, Pt::int32_t y1, 
-                                       Pt::int32_t x2, Pt::int32_t y2, 
-                                       const Color& color, Pt::int32_t& fpiCtrInOut, 
+
+        void rasterNarrowPatternedLine(Pt::int32_t x1, Pt::int32_t y1,
+                                       Pt::int32_t x2, Pt::int32_t y2,
+                                       const Color& color, Pt::int32_t& fpiCtrInOut,
                                        DrawLineMask* maskInOut);
 
-        void rasterNarrowPatternedLine_F(float x1, float y1, 
-                                         float x2, float y2, 
-                                         const Color& color, Pt::int32_t& fpiCtrInOut, 
+        void rasterNarrowPatternedLine_F(float x1, float y1,
+                                         float x2, float y2,
+                                         const Color& color, Pt::int32_t& fpiCtrInOut,
                                          DrawLineMask* maskInOut);
-        
+
         //
         // solid narrow lines
         //
 
-        void rasterNarrowSolidHLineSegment(Pt::int32_t x1, Pt::int32_t x2, 
-                                           Pt::int32_t y, const Color& color, 
+        void rasterNarrowSolidHLineSegment(Pt::int32_t x1, Pt::int32_t x2,
+                                           Pt::int32_t y, const Color& color,
                                            DrawLineMask* maskInOut);
 
-        void rasterNarrowSolidVLineSegment(Pt::int32_t x, Pt::int32_t y1, 
-                                           Pt::int32_t y2, const Color& color, 
+        void rasterNarrowSolidVLineSegment(Pt::int32_t x, Pt::int32_t y1,
+                                           Pt::int32_t y2, const Color& color,
                                            DrawLineMask* maskInOut);
 
-        void rasterNarrowSolidXLineSegment(Pt::int32_t x1, Pt::int32_t y1, 
-                                           Pt::int32_t x2, Pt::int32_t y2, 
+        void rasterNarrowSolidXLineSegment(Pt::int32_t x1, Pt::int32_t y1,
+                                           Pt::int32_t x2, Pt::int32_t y2,
                                            const Color& color, DrawLineMask* maskInOut);
 
-        void rasterNarrowSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, 
-                                               Pt::int32_t x2, Pt::int32_t y2, 
-                                               const Color& color, 
+        void rasterNarrowSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
+                                               Pt::int32_t x2, Pt::int32_t y2,
+                                               const Color& color,
                                                DrawLineMask* maskInOut);
-        
-        void rasterNarrowSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, 
-                                               Pt::int32_t x2, Pt::int32_t y2, 
-                                               const Color& color, 
+
+        void rasterNarrowSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
+                                               Pt::int32_t x2, Pt::int32_t y2,
+                                               const Color& color,
                                                DrawLineMask* maskInOut);
-        
-        void rasterNarrowSolidGLineSegmentXWAA_F(float x1, float y1, 
-                                                 float x2, float y2, 
-                                                 const Color& color, 
+
+        void rasterNarrowSolidGLineSegmentXWAA_F(float x1, float y1,
+                                                 float x2, float y2,
+                                                 const Color& color,
                                                  DrawLineMask* maskInOut);
-        
+
         //
         // solid patterned lines
         //
 
-        void rasterNarrowPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1, 
-                                               Pt::int32_t x2, Pt::int32_t y2, 
-                                               const Color& color, 
-                                               Pt::int32_t fpiCtrInc, 
-                                               Pt::int32_t& fpiCtrInOut, 
+        void rasterNarrowPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1,
+                                               Pt::int32_t x2, Pt::int32_t y2,
+                                               const Color& color,
+                                               Pt::int32_t fpiCtrInc,
+                                               Pt::int32_t& fpiCtrInOut,
                                                DrawLineMask* maskInOut);
 
-        void rasterNarrowPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, 
-                                                   Pt::int32_t x2, Pt::int32_t y2, 
-                                                   const Color& color, 
-                                                   Pt::int32_t fpiCtrInc, 
-                                                   Pt::int32_t& fpiCtrInOut, 
+        void rasterNarrowPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
+                                                   Pt::int32_t x2, Pt::int32_t y2,
+                                                   const Color& color,
+                                                   Pt::int32_t fpiCtrInc,
+                                                   Pt::int32_t& fpiCtrInOut,
                                                    DrawLineMask* maskInOut);
 
-        void rasterNarrowPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, 
-                                                   Pt::int32_t x2, Pt::int32_t y2, 
-                                                   const Color& color, 
-                                                   Pt::int32_t fpiCtrInc, 
-                                                   Pt::int32_t& fpiCtrInOut, 
+        void rasterNarrowPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
+                                                   Pt::int32_t x2, Pt::int32_t y2,
+                                                   const Color& color,
+                                                   Pt::int32_t fpiCtrInc,
+                                                   Pt::int32_t& fpiCtrInOut,
                                                    DrawLineMask* maskInOut);
 
-        void rasterNarrowPatternedGLineSegmentXWAA_F(float x1, float y1, 
-                                                     float x2, float y2, 
-                                                     const Color& color, 
-                                                     Pt::int32_t fpiCtrInc, 
-                                                     Pt::int32_t& fpiCtrInOut, 
+        void rasterNarrowPatternedGLineSegmentXWAA_F(float x1, float y1,
+                                                     float x2, float y2,
+                                                     const Color& color,
+                                                     Pt::int32_t fpiCtrInc,
+                                                     Pt::int32_t& fpiCtrInOut,
                                                      DrawLineMask* maskInOut);
 
         //
@@ -317,31 +315,31 @@ class Rasterizer2
                                Pt::int32_t minX, Pt::int32_t minY,
                                Pt::int32_t maxX, Pt::int32_t maxY);
 
-        void rasterPolygonsNoAA(const std::vector<Polygon>& polygons, 
-                                const Color& color, 
-                                Pt::int32_t minX, Pt::int32_t minY, 
+        void rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
+                                const Color& color,
+                                Pt::int32_t minX, Pt::int32_t minY,
                                 Pt::int32_t maxX, Pt::int32_t maxY);
 
-        void rasterPolygonXWAA(const PointF* ps, std::size_t pointCount, 
-                               const Color& color, 
-                               Pt::int32_t minX_, Pt::int32_t minY_, 
+        void rasterPolygonXWAA(const PointF* ps, std::size_t pointCount,
+                               const Color& color,
+                               Pt::int32_t minX_, Pt::int32_t minY_,
                                Pt::int32_t maxX_, Pt::int32_t maxY_);
 
-        void rasterPolygonsXWAA(const std::vector<Polygon>& polygons, 
-                                const Color& color, 
-                                Pt::int32_t minX, Pt::int32_t minY, 
+        void rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
+                                const Color& color,
+                                Pt::int32_t minX, Pt::int32_t minY,
                                 Pt::int32_t maxX, Pt::int32_t maxY);
 
-        void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, 
-                                   size_t polyCount, size_t totalPointCount, 
-                                   const Color& color, 
-                                   Pt::int32_t minX, Pt::int32_t minY, 
+        void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount,
+                                   size_t polyCount, size_t totalPointCount,
+                                   const Color& color,
+                                   Pt::int32_t minX, Pt::int32_t minY,
                                    Pt::int32_t maxX, Pt::int32_t maxY);
-        
-        void rasterPolygonAreaXWAA(const PointF* points, const size_t* pointCount, 
-                                   size_t polyCount, size_t totalPointCount, 
-                                   const Color& color, 
-                                   float minX, float minY, 
+
+        void rasterPolygonAreaXWAA(const PointF* points, const size_t* pointCount,
+                                   size_t polyCount, size_t totalPointCount,
+                                   const Color& color,
+                                   float minX, float minY,
                                    float maxX, float maxY);
 
         template <typename T>
@@ -360,19 +358,19 @@ class Rasterizer2
 
 
         typedef ScanlineElement<Pt::int16_t> ScanlineElement16;
-        
+
         typedef ScanlineElement<Pt::int32_t> ScanlineElement32;
 
         // Polygon scanlines (used for drawing filled polygons with XWAA)
         //     * The vector index specify the Y coordinate of the scanline
         //     * The vector element specify a set of "from" and "to" X coordinates
         typedef std::vector< std::vector<ScanlineElement16> > PolygonScanlines;
-        
-        void rasterPolygonBorderXWAA_F(float x1, float y1, 
-                                       float x2, float y2, 
-                                       const Color& color, 
-                                       Pt::int32_t minX, Pt::int32_t minY, 
-                                       const PolygonScanlines& exclusionZone, 
+
+        void rasterPolygonBorderXWAA_F(float x1, float y1,
+                                       float x2, float y2,
+                                       const Color& color,
+                                       Pt::int32_t minX, Pt::int32_t minY,
+                                       const PolygonScanlines& exclusionZone,
                                        DrawLineMask& maskInOut);
 
         //
@@ -397,18 +395,18 @@ class Rasterizer2
         // bezier curves
         //
 
-        void rasterNarrowQuadraticBezier(Pt::int32_t x1, Pt::int32_t y1, 
-                                        Pt::int32_t x2, Pt::int32_t y2, 
-                                        Pt::int32_t x3, Pt::int32_t y3, 
-                                        const Color& color, 
-                                        Pt::int32_t* fpiCtrInOut, 
+        void rasterNarrowQuadraticBezier(Pt::int32_t x1, Pt::int32_t y1,
+                                        Pt::int32_t x2, Pt::int32_t y2,
+                                        Pt::int32_t x3, Pt::int32_t y3,
+                                        const Color& color,
+                                        Pt::int32_t* fpiCtrInOut,
                                         DrawLineMask* maskInOut);
 
         //
         // arcs
         //
-        
-        struct FilledArcInfo 
+
+        struct FilledArcInfo
         {
             bool        antiAlias;    // A flag that indicate if the arc will be anti-aliased
 
@@ -429,7 +427,7 @@ class Rasterizer2
         };
 
         // Xiaolin Wu's anti-aliased line data structure
-        struct ArcXWLineData 
+        struct ArcXWLineData
         {
             // --- Point data sub-structure ---
             struct XWPoint {
@@ -470,107 +468,107 @@ class Rasterizer2
         //    * The vector element specify the "from" and "to" X coordinates
         typedef std::vector<ScanlineElement32> EAScanlines;
 
-        void rasterNarrowArc(const Point& topLeft, const Size& size, 
+        void rasterNarrowArc(const Point& topLeft, const Size& size,
                              float degBegin, float degEnd, const ArcMode& arcMode);
 
-        void rasterArcArea(const Point& topLeft, const Size& size, 
+        void rasterArcArea(const Point& topLeft, const Size& size,
                            float degBegin, float degEnd, const ArcMode& arcMode);
 
         void rasterArcAreaChord(FilledArcInfo& fai);
-        
+
         void rasterArcAreaPie(FilledArcInfo& fai);
 
         static void arcUtil_detXWLineDirection(ArcXWLineData& xwLineData);
-        
+
         static bool arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
-        
+
         static Pt::uint8_t arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, Pt::uint8_t alpha, float degBegin, float degEnd, float xyRatio);
-        
+
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
-        
+
         static void arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const FilledArcInfo& fai, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
-        
+
         static void arcUtil_genScanlinesForChord(EAScanlines& scanlines, const FilledArcInfo& fai, const ArcXWLineData& xwLine);
-        
+
         static void arcUtil_cropAndStoreScanlineForChord(EAScanlines& scanlines, const FilledArcInfo& fai, const ArcXWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
-        
+
         static void arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanlines& scanlines2, const FilledArcInfo& fai, const ArcXWLineData& xwLine1, const ArcXWLineData& xwLine2);
-        
+
         static void arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EAScanlines& scanlines2, const FilledArcInfo& fai, const ArcXWLineData& xwLine1, const ArcXWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
-        
+
         void arcUtil_rasterCircumferencePixels(FilledArcInfo& fai);
-        
+
         void arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const ArcXWLineData& xwLine, Point maskInOut[4]);
 
         //
         // pixel operations
         //
 
-        void fillPixel(Pt::int32_t x, Pt::int32_t y, 
-                       Pt::int32_t minX, Pt::int32_t minY, 
+        void fillPixel(Pt::int32_t x, Pt::int32_t y,
+                       Pt::int32_t minX, Pt::int32_t minY,
                        Pt::uint8_t alpha);
 
         // Mask layout for store4Pixels/fill4Pixels function variants that take mask as the last argument:
         //     Mask element        : #0         #1         #2         #3
         //     Affected coordinate : (x1, y1)   (x1, y2)   (x2, y1)   (x2, y2)
         // In this case, "true" means the pixel will be drawn and "false" means it will not be drawn
-        
-        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
+
+        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
                            Pt::int32_t x2, Pt::int32_t y2);
-        
-        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                           Pt::int32_t x2, Pt::int32_t y2, 
+
+        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                           Pt::int32_t x2, Pt::int32_t y2,
                            const bool mask[4]);
-        
-        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                           Pt::int32_t x2, Pt::int32_t y2, 
+
+        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                           Pt::int32_t x2, Pt::int32_t y2,
                            Pt::uint8_t alpha);
-        
-        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                           Pt::int32_t x2, Pt::int32_t y2, 
+
+        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                           Pt::int32_t x2, Pt::int32_t y2,
                            Pt::uint8_t alpha, const bool mask[4]);
 
-        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                         Pt::int32_t x2, Pt::int32_t y2, 
-                         Pt::int32_t minX, Pt::int32_t minY);
-        
-        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
+        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
                          Pt::int32_t x2, Pt::int32_t y2,
-                         Pt::int32_t minX, Pt::int32_t minY, 
+                         Pt::int32_t minX, Pt::int32_t minY);
+
+        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                         Pt::int32_t x2, Pt::int32_t y2,
+                         Pt::int32_t minX, Pt::int32_t minY,
                          const bool mask[4]);
-        
-        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                         Pt::int32_t x2, Pt::int32_t y2, 
-                         Pt::int32_t minX, Pt::int32_t minY, 
+
+        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                         Pt::int32_t x2, Pt::int32_t y2,
+                         Pt::int32_t minX, Pt::int32_t minY,
                          Pt::uint8_t alpha);
-        
-        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                         Pt::int32_t x2, Pt::int32_t y2, 
+
+        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                         Pt::int32_t x2, Pt::int32_t y2,
                          Pt::int32_t minX, Pt::int32_t minY,
                          Pt::uint8_t alpha, const bool mask[4]);
-        
-        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, 
-                         Pt::int32_t x2, Pt::int32_t y2, 
-                         Pt::int32_t minX, Pt::int32_t minY, 
+
+        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
+                         Pt::int32_t x2, Pt::int32_t y2,
+                         Pt::int32_t minX, Pt::int32_t minY,
                          const Pt::uint8_t alphaMask[4]);
 
-        void rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR, Pt::int32_t pixelY, 
+        void rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
                             Pt::int32_t  minX, Pt::int32_t minY, const Color& color);
 
-        void rasterScanlineClipped(Pt::int32_t from, Pt::int32_t to, 
-                                   Pt::int32_t pixelY, 
-                                   Pt::int32_t minX, 
+        void rasterScanlineClipped(Pt::int32_t from, Pt::int32_t to,
+                                   Pt::int32_t pixelY,
+                                   Pt::int32_t minX,
                                    Pt::int32_t minY);
 
     private:
         Image*           _image;
         Polygonizer      _polygonizer;
-        
+
         CompositionMode  _compositionMode;
         bool             _aaMode;
         bool             _isGradient;
         bool             _isTexture;
-        
+
         Brush            _brush;
         Image            _brushBuffer;
         ConstPixel       _brushPixel;
@@ -581,7 +579,7 @@ class Rasterizer2
         ConstPixel       _penPixel;
 
         // Pattern buffer for one-pixel line
-        Pt::uint8_t      _patternBuffer1P[PATTERN_BUFFER_NUM_OF_CELLS * 
+        Pt::uint8_t      _patternBuffer1P[PATTERN_BUFFER_NUM_OF_CELLS *
                                           PATTERN_BUFFER_SCALE_FACTOR];
         Font             _font;
         FTC_FaceID       _faceId;
