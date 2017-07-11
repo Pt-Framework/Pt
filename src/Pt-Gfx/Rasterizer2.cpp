@@ -710,6 +710,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
     const float dh     = fabs(height - centerY);
     const float radius = std::max( dw, dh );
     const float ilen   = 1.0f / radius;
+    const float scale  = radius / (std::max(width, height) * 0.5f);
 
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();
@@ -726,11 +727,11 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
 
             // Calculate the distance and blending factor
             const float dist  = sqrtf(dx * dx + dy * dy) * ilen;
-#if 1
+#if 0
             const float sdist = powf(dist, 0.8f);
 #else
             const float repcn = 3.0f;
-            const float sdist = fabs(sinf(repcn * 1.414f * piHalf<float>() * dist));
+            const float sdist = fabs(sinf(repcn * scale * 1.414f * piHalf<float>() * dist));
 #endif
             const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
             const float imf   = 1.0f - mf;
