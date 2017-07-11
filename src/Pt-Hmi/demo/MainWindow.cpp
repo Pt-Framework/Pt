@@ -243,7 +243,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.setBrush( Gfx::Brush::radialGradient(
                                      Gfx::Color::fromRgb8(255, 0, 0), 
                                      Gfx::Color::fromRgb8(0, 255, 0),
-                                     0.1f, 0.1f ) );
+                                     0.3f, 0.3f ) );
     
     //imagePainter.setClip( Gfx::RectF(50, 100, 50, 100) );
 
@@ -251,7 +251,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.drawPath(path);
 
     imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
-                                                 Pt::Gfx::SizeF(200, 100)), 10);
+                                                 Pt::Gfx::SizeF(100, 100)), 10);
 
     std::vector<Gfx::PointF> polyline;
     polyline.push_back( Pt::Gfx::PointF(40, 40) );
