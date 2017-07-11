@@ -42,41 +42,41 @@ namespace Gfx {
 #define D65_WHITEPOINT_Y 1.0
 #define D65_WHITEPOINT_Z 1.088754
 
-template <typename T>
+template <Pt::uint8_t F, typename T>
 static inline T logisticSigmoid(T v)
 {
     // https://en.wikipedia.org/wiki/Sigmoid_function
-    v *= 8.0;
-    v -= 4.0;
+    v *= (T) F * (T) 2.0;
+    v -= (T) F;
 
-    return 1.0 / ( 1.0 + exp(-v) );
+    return (T) 1.0 / ( (T) 1.0 + std::exp(-v) );
 }
 
 template <typename T>
 static inline T srgbGammaCorrection(T v)
 {
     // https://en.wikipedia.org/wiki/SRGB
-    return (v <= 0.0031306684425005883) ? ( 12.92 * v ) : ( 1.055 * pow(v, 0.416666666666666667) - 0.055 );
+    return (v <= (T) 0.0031306684425005883) ? ( (T) 12.92 * v ) : ( (T) 1.055 * std::pow(v, (T) 0.416666666666666667) - (T) 0.055 );
 }
 
 template <typename T>
 static inline T srgbInverseGammaCorrection(T v)
 {
     // https://en.wikipedia.org/wiki/SRGB
-    return (v <= 0.0404482362771076) ? ( v / 12.92 ) : pow( (v + 0.055) / 1.055, 2.4 );
+    return (v <= (T) 0.0404482362771076) ? ( v / (T) 12.92 ) : std::pow( (v + (T) 0.055) / (T) 1.055, (T) 2.4 );
 }
 
 template <typename T>
 static inline T labFunc(T v)
 {
     // https://en.wikipedia.org/wiki/Lab_color_space
-    return (v >= 8.85645167903563082e-3) ? pow( v, 0.333333333333333 ) : ( (841.0 / 108.0) * v + (4.0 / 29.0) );
+    return (v >= (T) 8.85645167903563082e-3) ? std::pow( v, (T) 0.333333333333333 ) : ( ((T) 841.0 / (T) 108.0) * v + ((T) 4.0 / (T) 29.0) );
 }
 
 template <typename T>
 static inline T labInvFunc(T v)
 {
-    return (v >= 0.206896551724137931) ? ( v * v * v ) : ( (108.0 / 841.0) * (v - (4.0 / 29.0)) );
+    return (v >= (T) 0.206896551724137931) ? ( v * v * v ) : ( ((T) 108.0 / (T) 841.0) * (v - ((T) 4.0 / (T) 29.0)) );
 }
 
 template <typename T>
@@ -89,9 +89,9 @@ static inline void cnvRgbToXyz(T* x, T* y, T* z, T r, T g, T b)
     g = srgbInverseGammaCorrection(g);
     b = srgbInverseGammaCorrection(b);
 
-    *x = 0.41239558896741421610 * r + 0.3575834307637148171 * g + 0.18049264738170157350 * b;
-    *y = 0.21258623078559555160 * r + 0.7151703037034108499 * g + 0.07220049864333622685 * b;
-    *z = 0.01929721549174694484 * r + 0.1191838645808485318 * g + 0.95049712513157976600 * b;
+    *x = (T) 0.41239558896741421610 * r + (T) 0.3575834307637148171 * g + (T) 0.18049264738170157350 * b;
+    *y = (T) 0.21258623078559555160 * r + (T) 0.7151703037034108499 * g + (T) 0.07220049864333622685 * b;
+    *z = (T) 0.01929721549174694484 * r + (T) 0.1191838645808485318 * g + (T) 0.95049712513157976600 * b;
 }
 
 template <typename T>
@@ -100,13 +100,13 @@ static inline void cnvXyzToRgb(T* r, T* g, T* b, T x, T y, T z)
     // https://en.wikipedia.org/wiki/SRGB
     // https://en.wikipedia.org/wiki/CIE_1931_color_space
 
-    T rs =  3.2406 * x - 1.5372 * y - 0.4986 * z;
-    T gs = -0.9689 * x + 1.8758 * y + 0.0415 * z;
-    T bs =  0.0557 * x - 0.2040 * y + 1.0570 * z;
+    T rs = (T)  3.2406 * x - (T) 1.5372 * y - (T) 0.4986 * z;
+    T gs = (T) -0.9689 * x + (T) 1.8758 * y + (T) 0.0415 * z;
+    T bs = (T)  0.0557 * x - (T) 0.2040 * y + (T) 1.0570 * z;
 
     T mins = std::min( std::min( rs, gs ), bs );
 
-    if(mins < 0.0) {
+    if(mins < (T) 0.0) {
         rs -= mins;
         gs -= mins;
         bs -= mins;
@@ -122,13 +122,13 @@ static inline void cnvXyzToLab(T* l, T* a, T* b, T x, T y, T z)
 {
     // https://en.wikipedia.org/wiki/Lab_color_space
 
-    x = labFunc(x / D65_WHITEPOINT_X);
-    y = labFunc(y / D65_WHITEPOINT_Y);
-    z = labFunc(z / D65_WHITEPOINT_Z);
+    x = labFunc(x / (T) D65_WHITEPOINT_X);
+    y = labFunc(y / (T) D65_WHITEPOINT_Y);
+    z = labFunc(z / (T) D65_WHITEPOINT_Z);
 
-    *l = 116.0 *  y - 16.0;
-    *a = 500.0 * (x - y);
-    *b = 200.0 * (y - z);
+    *l = (T) 116.0 *  y - (T) 16.0;
+    *a = (T) 500.0 * (x - y);
+    *b = (T) 200.0 * (y - z);
 }
 
 template <typename T>
@@ -136,11 +136,11 @@ static inline void cnvLabToXyz(T* x, T* y, T* z, T l, T a, T b)
 {
     // https://en.wikipedia.org/wiki/Lab_color_space
 
-    l = (l + 16.0) / 116.0;
+    l = (l + (T) 16.0) / (T) 116.0;
 
-    *y = D65_WHITEPOINT_Y * labInvFunc(l            );
-    *x = D65_WHITEPOINT_X * labInvFunc(l + a / 500.0);
-    *z = D65_WHITEPOINT_Z * labInvFunc(l - b / 200.0);
+    *y = (T) D65_WHITEPOINT_Y * labInvFunc(l            );
+    *x = (T) D65_WHITEPOINT_X * labInvFunc(l + a / (T) 500.0);
+    *z = (T) D65_WHITEPOINT_Z * labInvFunc(l - b / (T) 200.0);
 }
 
 template <typename T>
@@ -160,9 +160,9 @@ static inline void cnvLabToRgb(Pt::uint8_t* r_, Pt::uint8_t* g_, Pt::uint8_t* b_
 
     T rf, gf, bf;
     cnvXyzToRgb(&rf, &gf, &bf, x, y, z);
-    *r_ = rf * 255.0;
-    *g_ = gf * 255.0;
-    *b_ = bf * 255.0;
+    *r_ = rf * (T) 255.0;
+    *g_ = gf * (T) 255.0;
+    *b_ = bf * (T) 255.0;
 }
 
 
@@ -609,7 +609,7 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width,
         for(Pt::int32_t x = 0; x < width; ++x) {
             // Calculate the distance and blending factor
             const float dist = d * (x - p0);
-            const float mf   = logisticSigmoid( (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist ) );
+            const float mf   = logisticSigmoid<4>( (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist ) );
             const float imf  = 1.0f - mf;
             // Interpolate the color
             const float li = ls * mf + le * imf;
@@ -770,7 +770,7 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
             // Calculate the distance and blending factor
             const float dist  = (rx + ry) * ilen;
           //const float sdist = powf(dist, 0.8f);
-            const float sdist = logisticSigmoid(dist);
+            const float sdist = logisticSigmoid<3>(dist);
             const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
             const float imf   = 1.0f - mf;
 
@@ -922,11 +922,11 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
             const float dist  = sqrtf(dx * dx + dy * dy) * ilen;
 #if 1
           //const float sdist = powf(dist, 0.8f);
-            const float sdist = logisticSigmoid(dist);
+            const float sdist = logisticSigmoid<3>(dist);
 #else
             const float repcn = 3.0f;
             const float xdist = fabs(sinf(repcn * repscl * 1.414f * piHalf<float>() * dist));
-            const float sdist = logisticSigmoid(xdist);
+            const float sdist = logisticSigmoid<4>(xdist);
 #endif
             const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
             const float imf   = 1.0f - mf;
@@ -1144,7 +1144,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
             // Distance: 0.00f <= dist <= loLim --- blend from end color to middle color
             if(dist <= loLim) {
                 // Calculate the blending factor
-                const float mf   = logisticSigmoid( dist / loLim );
+                const float mf   = logisticSigmoid<4>( dist / loLim );
                 const float imf  = 1.0f - mf;
                 // Interpolate the color
                 const float li = le * mf + lm * imf;
@@ -1162,7 +1162,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
             // Distance: hiLim <= dist <= 1.00f --- blend from middle color to start color
             else if(dist >= hiLim) { //
                 // Calculate the blending factor
-                const float mf   = logisticSigmoid( (dist - hiLim) / loLim );
+                const float mf   = logisticSigmoid<4>( (dist - hiLim) / loLim );
                 const float imf  = 1.0f - mf;
                 // Interpolate the color
                 const float li = lm * mf + ls * imf;
@@ -1180,7 +1180,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
             // Distance: loLim < dist < hiLim --- blend from start color to end color
             else {
                 // Calculate the blending factor
-                const float mf   = logisticSigmoid( (dist - loLim) / (hiLim - loLim) );
+                const float mf   = logisticSigmoid<4>( (dist - loLim) / (hiLim - loLim) );
                 const float imf  = 1.0f - mf;
                 // Interpolate the color
                 const float li = ls * mf + le * imf;
@@ -1214,7 +1214,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
                 dist /= (ijm * ijm);
             }
             // Calculate the blending factor
-            const float mf   = logisticSigmoid( (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist ) );
+            const float mf   = logisticSigmoid<8>( (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist ) );
             const float imf  = 1.0f - mf;
             // Interpolate the color
             const float li = ls * mf + le * imf;
