@@ -676,6 +676,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
                                                           Pt::int32_t height)
 {
 #if 1
+
     // Determine the start and end colors
     Pt::uint8_t sc[4], ec[4];
     updateGradientBrush_getStartEndColors(sc, ec);
@@ -727,7 +728,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
 
             // Calculate the distance and blending factor
             const float dist  = sqrtf(dx * dx + dy * dy) * ilen;
-#if 0
+#if 1
             const float sdist = powf(dist, 0.8f);
 #else
             const float repcn = 3.0f;
@@ -794,13 +795,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
 
             // Calculate the distance and blending factor
             const float dist  = sqrtf(dx * dx + dy * dy) * ilen;
-#if 1
-            const float sdist = dist;
-#else
-            const float xdist = fabs(sinf(0.707f * piHalf<float>() * dist));
-            const float sdist = powf(xdist, 1.0f) * 0.99f;
-#endif
-            const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
+            const float mf    = (dist >= 1.0f) ? 1.0f : dist;
             const float imf   = 1.0f - mf;
 
             // Put the pixel
@@ -810,6 +805,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
             *pixel++ = (as * mf + ae * imf + 0.5f);
         }
     }
+
 #endif
 }
 
