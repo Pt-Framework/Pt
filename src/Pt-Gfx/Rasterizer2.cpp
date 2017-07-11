@@ -36,6 +36,127 @@ namespace Pt {
 
 namespace Gfx {
 
+
+// http://en.wikipedia.org/wiki/Lab_color_space
+#define D65_WHITEPOINT_X 0.950456
+#define D65_WHITEPOINT_Y 1.0
+#define D65_WHITEPOINT_Z 1.088754
+
+template <typename T>
+static inline T srgbGammaCorrection(T v)
+{
+    // http://en.wikipedia.org/wiki/SRGB
+    return (v <= 0.0031306684425005883) ? ( 12.92 * v ) : ( 1.055 * pow(v, 0.416666666666666667) - 0.055 );
+}
+
+template <typename T>
+static inline T srgbInverseGammaCorrection(T v)
+{
+    // http://en.wikipedia.org/wiki/SRGB
+    return (v <= 0.0404482362771076) ? ( v / 12.92 ) : pow( (v + 0.055) / 1.055, 2.4 );
+}
+
+template <typename T>
+static inline T labFunc(T v)
+{
+    // http://en.wikipedia.org/wiki/Lab_color_space
+    return (v >= 8.85645167903563082e-3) ? pow( v, 0.333333333333333 ) : ( (841.0 / 108.0) * v + (4.0 / 29.0) );
+}
+
+template <typename T>
+static inline T labInvFunc(T v)
+{
+    return (v >= 0.206896551724137931) ? ( v * v * v ) : ( (108.0 / 841.0) * (v - (4.0 / 29.0)) );
+}
+
+template <typename T>
+static inline void cnvRgbToXyz(T* x, T* y, T* z, T r, T g, T b)
+{
+    // http://en.wikipedia.org/wiki/SRGB
+    // http://en.wikipedia.org/wiki/CIE_1931_color_space
+
+    r = srgbInverseGammaCorrection(r);
+    g = srgbInverseGammaCorrection(g);
+    b = srgbInverseGammaCorrection(b);
+
+    *x = 0.41239558896741421610 * r + 0.3575834307637148171 * g + 0.18049264738170157350 * b;
+    *y = 0.21258623078559555160 * r + 0.7151703037034108499 * g + 0.07220049864333622685 * b;
+    *z = 0.01929721549174694484 * r + 0.1191838645808485318 * g + 0.95049712513157976600 * b;
+}
+
+template <typename T>
+static inline void cnvXyzToRgb(T* r, T* g, T* b, T x, T y, T z)
+{
+    // http://en.wikipedia.org/wiki/SRGB
+    // http://en.wikipedia.org/wiki/CIE_1931_color_space
+
+    T rs =  3.2406 * x - 1.5372 * y - 0.4986 * z;
+    T gs = -0.9689 * x + 1.8758 * y + 0.0415 * z;
+    T bs =  0.0557 * x - 0.2040 * y + 1.0570 * z;
+
+    T mins = std::min( std::min( rs, gs ), bs );
+
+    if(mins < 0.0) {
+        rs -= mins;
+        gs -= mins;
+        bs -= mins;
+    }
+
+    *r = srgbGammaCorrection(rs);
+    *g = srgbGammaCorrection(gs);
+    *b = srgbGammaCorrection(bs);
+}
+
+template <typename T>
+static inline void cnvXyzToLab(T* l, T* a, T* b, T x, T y, T z)
+{
+    // http://en.wikipedia.org/wiki/Lab_color_space
+
+    x = labFunc(x / D65_WHITEPOINT_X);
+    y = labFunc(y / D65_WHITEPOINT_Y);
+    z = labFunc(z / D65_WHITEPOINT_Z);
+
+    *l = 116.0 *  y - 16.0;
+    *a = 500.0 * (x - y);
+    *b = 200.0 * (y - z);
+}
+
+template <typename T>
+static inline void cnvLabToXyz(T* x, T* y, T* z, T l, T a, T b)
+{
+    // http://en.wikipedia.org/wiki/Lab_color_space
+
+    l = (l + 16.0) / 116.0;
+
+    *y = D65_WHITEPOINT_Y * labInvFunc(l            );
+    *x = D65_WHITEPOINT_X * labInvFunc(l + a / 500.0);
+    *z = D65_WHITEPOINT_Z * labInvFunc(l - b / 200.0);
+}
+
+template <typename T>
+static inline void cnvRgbToLab(T* l, T* a, T* b, Pt::uint8_t r_, Pt::uint8_t g_, Pt::uint8_t b_)
+{
+    T x, y, z;
+    cnvRgbToXyz(&x, &y, &z, (T) r_ / (T) 255.0, (T) g_ / (T) 255.0, (T) b_ / (T) 255.0);
+
+    cnvXyzToLab(l, a, b, x, y, z);
+}
+
+template <typename T>
+static inline void cnvLabToRgb(Pt::uint8_t* r_, Pt::uint8_t* g_, Pt::uint8_t* b_, T l, T a, T b)
+{
+    T x, y, z;
+    cnvLabToXyz(&x, &y, &z, l, a, b);
+
+    T rf, gf, bf;
+    cnvXyzToRgb(&rf, &gf, &bf, x, y, z);
+    *r_ = rf * 255.0;
+    *g_ = gf * 255.0;
+    *b_ = bf * 255.0;
+}
+
+
+
 // Weighting filter for Xiaolin Wu's anti-aliasing algorithm
 // Inspired by http://www.crbond.com/papers/anti_alias.pdf
 // y = 1.0 - pow( (x / 255.0), 1.88 )
@@ -550,9 +671,87 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
 }
 
 
+
 void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
                                                           Pt::int32_t height)
 {
+#if 1
+    // Determine the start and end colors
+    Pt::uint8_t sc[4], ec[4];
+    updateGradientBrush_getStartEndColors(sc, ec);
+
+    // Convert RGB to CIE LAB
+    float ls, as, bs;
+    cnvRgbToLab(&ls, &as, &bs, sc[0], sc[1], sc[2]);
+
+    float le, ae, be;
+    cnvRgbToLab(&le, &ae, &be, ec[0], ec[1], ec[2]);
+
+    const Pt::uint8_t os = sc[3];
+    const Pt::uint8_t oe = ec[3];
+
+    // Calculate the focus point
+    float centerX = 0.0f;
+    float centerY = 0.0f;
+
+    if(_brush.positionMode() == Brush::Absolute)
+    {
+        centerX = _brush.gradientFocus().x();
+        centerY = _brush.gradientFocus().y();
+    }
+    else // Brush::Relative
+    {
+        centerX = width  * _brush.gradientFocus().x();
+        centerY = height * _brush.gradientFocus().y();
+    }
+
+    // Calculate the inverse scaling factor
+    const float dw     = fabs(width  - centerX);
+    const float dh     = fabs(height - centerY);
+    const float radius = std::max( dw, dh );
+    const float ilen   = 1.0f / radius;
+
+    // Generate the gradient
+    Pt::uint8_t* pixel = _brushBuffer.data();
+
+    for(Pt::int32_t y = 0; y < height; ++y)
+    {
+        // Calculate the delta Y
+        const float dy = (y - centerY);
+
+        for(Pt::int32_t x = 0; x < width; ++x)
+        {
+            // Calculate the delta X
+            const float dx = (x - centerX);
+
+            // Calculate the distance and blending factor
+            const float dist  = sqrtf(dx * dx + dy * dy) * ilen;
+#if 1
+            const float sdist = powf(dist, 0.8f);
+#else
+            const float repcn = 3.0f;
+            const float sdist = fabs(sinf(repcn * 1.414f * piHalf<float>() * dist));
+#endif
+            const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
+            const float imf   = 1.0f - mf;
+
+            // Interpolate the color
+            const float li = ls * mf + le * imf;
+            const float ai = as * mf + ae * imf;
+            const float bi = bs * mf + be * imf;
+            // Convert CIE LAB to RGB
+            Pt::uint8_t r, g, b;
+            cnvLabToRgb(&r, &g, &b, li, ai, bi);
+            // Put the pixel
+            *pixel++ = b;
+            *pixel++ = g;
+            *pixel++ = r;
+            *pixel++ = os * mf + oe * imf;
+        }
+    }
+
+#else
+
     // Determine the start and end colors
     Pt::uint8_t sc[4], ec[4];
     updateGradientBrush_getStartEndColors(sc, ec);
@@ -594,17 +793,23 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
 
             // Calculate the distance and blending factor
             const float dist  = sqrtf(dx * dx + dy * dy) * ilen;
-            const float sdist = powf(dist, 0.8f) * 0.8f;
+#if 1
+            const float sdist = dist;
+#else
+            const float xdist = fabs(sinf(0.707f * piHalf<float>() * dist));
+            const float sdist = powf(xdist, 1.0f) * 0.99f;
+#endif
             const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
             const float imf   = 1.0f - mf;
 
             // Put the pixel
-            *pixel++ = (bs * mf + be * imf);
-            *pixel++ = (gs * mf + ge * imf);
-            *pixel++ = (rs * mf + re * imf);
-            *pixel++ = (as * mf + ae * imf);
+            *pixel++ = (bs * mf + be * imf + 0.5f);
+            *pixel++ = (gs * mf + ge * imf + 0.5f);
+            *pixel++ = (rs * mf + re * imf + 0.5f);
+            *pixel++ = (as * mf + ae * imf + 0.5f);
         }
     }
+#endif
 }
 
 /*
