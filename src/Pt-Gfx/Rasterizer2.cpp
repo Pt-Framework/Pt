@@ -925,7 +925,8 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
             const float sdist = logisticSigmoid(dist);
 #else
             const float repcn = 3.0f;
-            const float sdist = fabs(sinf(repcn * repscl * 1.414f * piHalf<float>() * dist));
+            const float xdist = fabs(sinf(repcn * repscl * 1.414f * piHalf<float>() * dist));
+            const float sdist = logisticSigmoid(xdist);
 #endif
             const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
             const float imf   = 1.0f - mf;
