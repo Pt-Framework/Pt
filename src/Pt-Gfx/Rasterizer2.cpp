@@ -991,34 +991,44 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
     Pt::uint8_t sc[4], ec[4], rc[4];
     updateGradientBrush_getStartEndColors(sc, ec);
 
-    // Calculate the focus point
-    float centerX = 0.0f;
-    float centerY = 0.0f;
-
-    if(_brush.positionMode() == Brush::Absolute) {
-        centerX = _brush.gradientFocus().x();
-        centerY = _brush.gradientFocus().y();
-    }
-    else { // Brush::Relative
-        centerX = width  * _brush.gradientFocus().x();
-        centerY = height * _brush.gradientFocus().y();
-    }
+    // Calculate the center point
+    const float centerX = width  * 0.5f;
+    const float centerY = height * 0.5f;
 
     // Calculate the inverse scaling factor
-    const float radius = std::max( width, height ) * 0.5f;
+    const float radius = std::max(centerX, centerY);
     const float ilen   = 1.0f / radius;
+
+    // Calculate the focus point
+    float focusX = 0.0f;
+    float focusY = 0.0f;
+
+    if(_brush.positionMode() == Brush::Absolute) {
+        focusX = _brush.gradientFocus().x();
+        focusY = _brush.gradientFocus().y();
+    }
+    else { // Brush::Relative
+        focusX = width  * _brush.gradientFocus().x();
+        focusY = height * _brush.gradientFocus().y();
+    }
 
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();
     for(Pt::int32_t y = 0; y < height; ++y) {
-        // Calculate the delta Y
-        const float dy = (y - centerY);
+        // Calculate the delta Y from the focus and center points
+        const float dy = y - focusY;
+        const float cy = y - centerY;
         for(Pt::int32_t x = 0; x < width; ++x) {
-            // Calculate the delta X
-            const float dx = (x - centerX);
-            // Calculate the distance and blending factor
-            const float dist  = sqrtf(dx * dx + dy * dy) * ilen;
-            const float mf    = (dist >= 1.0f) ? 1.0f : dist;
+            // Calculate the delta X from the focus and center points
+            const float dx = x - focusX;
+            const float cx = x - centerX;
+            // Calculate the inverse distance from the focus and points
+            float dist = 1.0f - sqrtf(dx * dx + dy * dy) * ilen;
+            float cent = 1.0f - sqrtf(cx * cx + cy * cy) * ilen;
+            if(dist < 0.0f) dist = 0.0f;
+            if(cent < 0.0f) cent = 0.0f;
+            // Calculate the blending factor
+            const float mf = 1.0f - dist * powf(cent, 0.25f);
             // Interpolate the color
             eqpLerp(rc, sc, ec, mf);
             // Put the pixel
@@ -1031,59 +1041,6 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
 
 #endif
 }
-
-/*
-void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
-                                                          Pt::int32_t height)
-{
-    // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4];
-    updateGradientBrush_getStartEndColors(sc, ec);
-
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
-
-    float R = std::max(width, height);
-
-    float centerX = width / 2;
-    float centerY = height / 2;
-
-    float focusX = width / 4;
-    float focusY = height / 4;
-
-    float dxcf = std::abs(focusX - centerX);
-    float dycf = std::abs(focusY - centerY);
-    float cf = std::sqrt(dxcf * dxcf + dycf * dycf);
-
-    Pt::uint8_t* pixel = _brushBuffer.data();
-
-    for(Pt::int32_t y = 0; y < height; ++y)
-    {
-        for(Pt::int32_t x = 0; x < width; ++x)
-        {
-            float angleF = std::atan2(focusY - centerY, focusX - centerX) -
-                           std::atan2(y - focusY, x - focusX);
-
-
-
-            float dxfp = std::abs(x - focusX);
-            float dyfp = std::abs(y - focusY);
-            float fp = std::sqrt(dxfp * dxfp + dyfp * dyfp);
-
-            // Calculate the distance and blending factor
-            //const float dist = sqrt(dx * dx + dy * dy) * ilen;
-            //const float mf   = (dist >= 1.0f) ? 1.0f : dist;
-            //const float imf  = 1.0f - mf;
-            //
-            //// Put the pixel
-            //*pixel++ = (bs * mf + be * imf);
-            //*pixel++ = (gs * mf + ge * imf);
-            //*pixel++ = (rs * mf + re * imf);
-            //*pixel++ = (as * mf + ae * imf);
-        }
-    }
-}
-*/
 
 
 void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt::int32_t height)
@@ -1403,10 +1360,10 @@ void Rasterizer2::updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4]
     rgbaStart[2] = _brush.color().blue () / 257;
     rgbaStart[3] = _brush.color().alpha() / 257;
 
-    rgbaEnd [0] = _brush.gradientColor().red  () / 257;
-    rgbaEnd [1] = _brush.gradientColor().green() / 257;
-    rgbaEnd [2] = _brush.gradientColor().blue () / 257;
-    rgbaEnd [3] = _brush.gradientColor().alpha() / 257;
+    rgbaEnd[0] = _brush.gradientColor().red  () / 257;
+    rgbaEnd[1] = _brush.gradientColor().green() / 257;
+    rgbaEnd[2] = _brush.gradientColor().blue () / 257;
+    rgbaEnd[3] = _brush.gradientColor().alpha() / 257;
 }
 
 
