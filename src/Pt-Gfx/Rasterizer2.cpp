@@ -42,6 +42,32 @@ namespace Gfx {
 #define D65_WHITEPOINT_Y 1.0
 #define D65_WHITEPOINT_Z 1.088754
 
+static inline void eqpLerp(Pt::uint8_t resRGBA[4], const Pt::uint8_t srcRGBA[4], const Pt::uint8_t dstRGBA[4], float mf)
+{
+    const float imf = 1.0f - mf;
+
+    const float srcPower = (float) srcRGBA[0] * srcRGBA[0] + (float) srcRGBA[1] * srcRGBA[1] + (float) srcRGBA[2] + srcRGBA[2];
+    const float dstPower = (float) dstRGBA[0] * dstRGBA[0] + (float) dstRGBA[1] * dstRGBA[1] + (float) dstRGBA[2] + dstRGBA[2];
+    const float resPower = srcPower * mf + dstPower * imf;
+
+    Pt::int32_t intR = srcRGBA[0] * mf + dstRGBA[0] * imf;
+    Pt::int32_t intG = srcRGBA[1] * mf + dstRGBA[1] * imf;
+    Pt::int32_t intB = srcRGBA[2] * mf + dstRGBA[2] * imf;
+    Pt::int32_t intA = srcRGBA[3] * mf + dstRGBA[3] * imf;
+
+    const float intP = (float) intR * intR + (float) intG * intG + (float) intB + intB;
+    const float mulF = sqrtf(resPower / intP);
+
+    intR = intR * mulF;
+    intG = intG * mulF;
+    intB = intB * mulF;
+
+    resRGBA[0] = (intR >= 255) ? 255 : intR;
+    resRGBA[1] = (intG >= 255) ? 255 : intG;
+    resRGBA[2] = (intB >= 255) ? 255 : intB;
+    resRGBA[3] = (intA >= 255) ? 255 : intA;
+}
+
 template <Pt::uint8_t F, typename T>
 static inline T logisticSigmoid(T v)
 {
@@ -869,10 +895,12 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
 }
 
 
+
+
 void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
                                                           Pt::int32_t height)
 {
-#if 1
+#if 0
 
     // ### USING CIE LAB INTERPOLATION ###
 
@@ -960,23 +988,18 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
     // ### USING RGB INTERPOLATION ###
 
     // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4];
+    Pt::uint8_t sc[4], ec[4], rc[4];
     updateGradientBrush_getStartEndColors(sc, ec);
-
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Calculate the focus point
     float centerX = 0.0f;
     float centerY = 0.0f;
 
-    if(_brush.positionMode() == Brush::Absolute)
-    {
+    if(_brush.positionMode() == Brush::Absolute) {
         centerX = _brush.gradientFocus().x();
         centerY = _brush.gradientFocus().y();
     }
-    else // Brush::Relative
-    {
+    else { // Brush::Relative
         centerX = width  * _brush.gradientFocus().x();
         centerY = height * _brush.gradientFocus().y();
     }
@@ -987,27 +1010,22 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
 
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();
-
-    for(Pt::int32_t y = 0; y < height; ++y)
-    {
+    for(Pt::int32_t y = 0; y < height; ++y) {
         // Calculate the delta Y
         const float dy = (y - centerY);
-
-        for(Pt::int32_t x = 0; x < width; ++x)
-        {
+        for(Pt::int32_t x = 0; x < width; ++x) {
             // Calculate the delta X
             const float dx = (x - centerX);
-
             // Calculate the distance and blending factor
             const float dist  = sqrtf(dx * dx + dy * dy) * ilen;
             const float mf    = (dist >= 1.0f) ? 1.0f : dist;
-            const float imf   = 1.0f - mf;
-
+            // Interpolate the color
+            eqpLerp(rc, sc, ec, mf);
             // Put the pixel
-            *pixel++ = (bs * mf + be * imf + 0.5f);
-            *pixel++ = (gs * mf + ge * imf + 0.5f);
-            *pixel++ = (rs * mf + re * imf + 0.5f);
-            *pixel++ = (as * mf + ae * imf + 0.5f);
+            *pixel++ = rc[2];
+            *pixel++ = rc[1];
+            *pixel++ = rc[0];
+            *pixel++ = rc[3];
         }
     }
 
