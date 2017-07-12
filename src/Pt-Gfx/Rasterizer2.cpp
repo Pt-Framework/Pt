@@ -75,20 +75,21 @@ static inline T logisticSigmoid(T v)
 }
 
 
+/*
 // Weighting filter for Xiaolin Wu's anti-aliasing algorithm
 // Inspired by http://www.crbond.com/papers/anti_alias.pdf
 // y = 1.0 - pow( (x / 255.0), 1.88 )
 //
-//lprintf("    static const Pt::uint8_t aaLUT[256] = {\n        ");
-//for(int c = 0, i = 0; i <= 255; ++i) {
-//    const double n = (float) i / 255.0;
-//    const double q = 1.0 - pow(n, 1.88);
-//    const int    a = q * 255.0; ++c;
-//    lprintf("%3d%c ", (a > 255) ? 255 : a, (i == 255) ? ' ' : ',');
-//    if(c >= 20) { c = 0; lprintf("\n        "); }
-//}
-//lprintf("\n    };\n\n"); exit(0);
-//
+lprintf("    static const Pt::uint8_t aaLUT[256] = {\n        ");
+for(int c = 0, i = 0; i <= 255; ++i) {
+    const double n = (float) i / 255.0;
+    const double q = 1.0 - pow(n, 1.88);
+    const int    a = q * 255.0; ++c;
+    lprintf("%3d%c ", (a > 255) ? 255 : a, (i == 255) ? ' ' : ',');
+    if(c >= 20) { c = 0; lprintf("\n        "); }
+}
+lprintf("\n    };\n\n"); exit(0);
+*/
 const Pt::uint8_t Rasterizer2::XWAA_WFILTER[256] = {
     255, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 253, 253, 253, 253, 253, 253,
     252, 252, 252, 252, 252, 251, 251, 251, 250, 250, 250, 250, 249, 249, 249, 248, 248, 248, 247, 247,
@@ -448,8 +449,7 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
 }
 
 
-void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width,
-                                                          Pt::int32_t height)
+void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt::int32_t height)
 {
     // Determine the start and end colors
     Pt::uint8_t sc[4], ec[4], rc[4];
@@ -550,23 +550,24 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();
     for(Pt::int32_t y = 0; y < height; ++y) {
-        // Calculate the delta Y from the focus and center points
+        // Calculate the delta Y from the focus point
         const float dy = y - focusY;
-        const float cy = y - centerY;
         for(Pt::int32_t x = 0; x < width; ++x) {
-            // Calculate the delta X from the focus and center points
+            // Calculate the delta X from the focus point
             const float dx = x - focusX;
-            const float cx = x - centerX;
             // Calculate the rotated deltas from the focus point
-            const float ry = fabs(-sval * dx + cval * dy);
-            const float rx = fabs( cval * dx + sval * dy);
-            // Calculate the inverse distance from the focus and center points
-            float dist = 1.0f - (rx + ry) * ilen;
-            float cent = 1.0f - (cx + cy) * ilen;
+            const float ry = -sval * dx + cval * dy;
+            const float rx =  cval * dx + sval * dy;
+            // Calculate the inverse distance from the focus point
+            float dist = 1.0f - ( fabs(rx) + fabs(ry) ) * ilen;
             if(dist < 0.0f) dist = 0.0f;
-            if(cent < 0.0f) cent = 0.0f;
+#if 0
+            // Perform gradient repeat
+            const float repcn = 3.0f;
+            dist = fabs( sinf( (repcn + 1.0f / sqrtf(2.0f)) * sqrtf(2.0f) * piHalf<float>() * dist ) );
+#endif
             // Calculate the blending factor
-            const float mf = 1.0f - dist * powf(cent, 0.25f);
+            const float mf = 1.0f - dist;
             // Interpolate the color
             eqpLerp(rc, sc, ec, mf);
             // Put the pixel
@@ -579,8 +580,7 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
 }
 
 
-void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
-                                                          Pt::int32_t height)
+void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt::int32_t height)
 {
     // Determine the start and end colors
     Pt::uint8_t sc[4], ec[4], rc[4];
@@ -622,8 +622,13 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
             float cent = 1.0f - sqrtf(cx * cx + cy * cy) * ilen;
             if(dist < 0.0f) dist = 0.0f;
             if(cent < 0.0f) cent = 0.0f;
+#if 0
+            // Perform gradient repeat
+            const float repcn = 3.0f;
+            dist = fabs( sinf( (repcn + 1.0f / sqrtf(2.0f)) * sqrtf(2.0f) * piHalf<float>() * dist ) );
+#endif
             // Calculate the blending factor
-            const float mf = 1.0f - dist * powf(cent, 0.25f);
+            const float mf = 1.0f - dist * powf(cent, 0.5f);
             // Interpolate the color
             eqpLerp(rc, sc, ec, mf);
             // Put the pixel
@@ -769,8 +774,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 }
 
 
-void Rasterizer2::updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4],
-                                                        Pt::uint8_t rgbaEnd[4])
+void Rasterizer2::updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4], Pt::uint8_t rgbaEnd[4])
 {
     rgbaStart[0] = _brush.color().red  () / 257;
     rgbaStart[1] = _brush.color().green() / 257;
