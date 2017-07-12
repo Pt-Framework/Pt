@@ -37,11 +37,6 @@ namespace Pt {
 namespace Gfx {
 
 
-// https://en.wikipedia.org/wiki/Lab_color_space
-#define D65_WHITEPOINT_X 0.950456
-#define D65_WHITEPOINT_Y 1.0
-#define D65_WHITEPOINT_Z 1.088754
-
 static inline void eqpLerp(Pt::uint8_t resRGBA[4], const Pt::uint8_t srcRGBA[4], const Pt::uint8_t dstRGBA[4], float mf)
 {
     const float imf = 1.0f - mf;
@@ -68,6 +63,7 @@ static inline void eqpLerp(Pt::uint8_t resRGBA[4], const Pt::uint8_t srcRGBA[4],
     resRGBA[3] = (intA >= 255) ? 255 : intA;
 }
 
+
 template <Pt::uint8_t F, typename T>
 static inline T logisticSigmoid(T v)
 {
@@ -77,120 +73,6 @@ static inline T logisticSigmoid(T v)
 
     return (T) 1.0 / ( (T) 1.0 + std::exp(-v) );
 }
-
-template <typename T>
-static inline T srgbGammaCorrection(T v)
-{
-    // https://en.wikipedia.org/wiki/SRGB
-    return (v <= (T) 0.0031306684425005883) ? ( (T) 12.92 * v ) : ( (T) 1.055 * std::pow(v, (T) 0.416666666666666667) - (T) 0.055 );
-}
-
-template <typename T>
-static inline T srgbInverseGammaCorrection(T v)
-{
-    // https://en.wikipedia.org/wiki/SRGB
-    return (v <= (T) 0.0404482362771076) ? ( v / (T) 12.92 ) : std::pow( (v + (T) 0.055) / (T) 1.055, (T) 2.4 );
-}
-
-template <typename T>
-static inline T labFunc(T v)
-{
-    // https://en.wikipedia.org/wiki/Lab_color_space
-    return (v >= (T) 8.85645167903563082e-3) ? std::pow( v, (T) 0.333333333333333 ) : ( ((T) 841.0 / (T) 108.0) * v + ((T) 4.0 / (T) 29.0) );
-}
-
-template <typename T>
-static inline T labInvFunc(T v)
-{
-    return (v >= (T) 0.206896551724137931) ? ( v * v * v ) : ( ((T) 108.0 / (T) 841.0) * (v - ((T) 4.0 / (T) 29.0)) );
-}
-
-template <typename T>
-static inline void cnvRgbToXyz(T* x, T* y, T* z, T r, T g, T b)
-{
-    // https://en.wikipedia.org/wiki/SRGB
-    // https://en.wikipedia.org/wiki/CIE_1931_color_space
-
-    r = srgbInverseGammaCorrection(r);
-    g = srgbInverseGammaCorrection(g);
-    b = srgbInverseGammaCorrection(b);
-
-    *x = (T) 0.41239558896741421610 * r + (T) 0.3575834307637148171 * g + (T) 0.18049264738170157350 * b;
-    *y = (T) 0.21258623078559555160 * r + (T) 0.7151703037034108499 * g + (T) 0.07220049864333622685 * b;
-    *z = (T) 0.01929721549174694484 * r + (T) 0.1191838645808485318 * g + (T) 0.95049712513157976600 * b;
-}
-
-template <typename T>
-static inline void cnvXyzToRgb(T* r, T* g, T* b, T x, T y, T z)
-{
-    // https://en.wikipedia.org/wiki/SRGB
-    // https://en.wikipedia.org/wiki/CIE_1931_color_space
-
-    T rs = (T)  3.2406 * x - (T) 1.5372 * y - (T) 0.4986 * z;
-    T gs = (T) -0.9689 * x + (T) 1.8758 * y + (T) 0.0415 * z;
-    T bs = (T)  0.0557 * x - (T) 0.2040 * y + (T) 1.0570 * z;
-
-    T mins = std::min( std::min( rs, gs ), bs );
-
-    if(mins < (T) 0.0) {
-        rs -= mins;
-        gs -= mins;
-        bs -= mins;
-    }
-
-    *r = srgbGammaCorrection(rs);
-    *g = srgbGammaCorrection(gs);
-    *b = srgbGammaCorrection(bs);
-}
-
-template <typename T>
-static inline void cnvXyzToLab(T* l, T* a, T* b, T x, T y, T z)
-{
-    // https://en.wikipedia.org/wiki/Lab_color_space
-
-    x = labFunc(x / (T) D65_WHITEPOINT_X);
-    y = labFunc(y / (T) D65_WHITEPOINT_Y);
-    z = labFunc(z / (T) D65_WHITEPOINT_Z);
-
-    *l = (T) 116.0 *  y - (T) 16.0;
-    *a = (T) 500.0 * (x - y);
-    *b = (T) 200.0 * (y - z);
-}
-
-template <typename T>
-static inline void cnvLabToXyz(T* x, T* y, T* z, T l, T a, T b)
-{
-    // https://en.wikipedia.org/wiki/Lab_color_space
-
-    l = (l + (T) 16.0) / (T) 116.0;
-
-    *y = (T) D65_WHITEPOINT_Y * labInvFunc(l            );
-    *x = (T) D65_WHITEPOINT_X * labInvFunc(l + a / (T) 500.0);
-    *z = (T) D65_WHITEPOINT_Z * labInvFunc(l - b / (T) 200.0);
-}
-
-template <typename T>
-static inline void cnvRgbToLab(T* l, T* a, T* b, Pt::uint8_t r_, Pt::uint8_t g_, Pt::uint8_t b_)
-{
-    T x, y, z;
-    cnvRgbToXyz(&x, &y, &z, (T) r_ / (T) 255.0, (T) g_ / (T) 255.0, (T) b_ / (T) 255.0);
-
-    cnvXyzToLab(l, a, b, x, y, z);
-}
-
-template <typename T>
-static inline void cnvLabToRgb(Pt::uint8_t* r_, Pt::uint8_t* g_, Pt::uint8_t* b_, T l, T a, T b)
-{
-    T x, y, z;
-    cnvLabToXyz(&x, &y, &z, l, a, b);
-
-    T rf, gf, bf;
-    cnvXyzToRgb(&rf, &gf, &bf, x, y, z);
-    *r_ = rf * (T) 255.0;
-    *g_ = gf * (T) 255.0;
-    *b_ = bf * (T) 255.0;
-}
-
 
 
 // Weighting filter for Xiaolin Wu's anti-aliasing algorithm
@@ -569,44 +451,28 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
 void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width,
                                                           Pt::int32_t height)
 {
-#if 1
-
-    // ### USING CIE LAB INTERPOLATION ###
-
     // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4];
+    Pt::uint8_t sc[4], ec[4], rc[4];
     updateGradientBrush_getStartEndColors(sc, ec);
 
-    // Convert RGB to CIE LAB
-    float ls, as, bs;
-    cnvRgbToLab(&ls, &as, &bs, sc[0], sc[1], sc[2]);
-
-    float le, ae, be;
-    cnvRgbToLab(&le, &ae, &be, ec[0], ec[1], ec[2]);
-
-    const Pt::uint8_t os = sc[3];
-    const Pt::uint8_t oe = ec[3];
-
     // Calculate the focus point
-    float centerX = 0.0f;
-    float centerY = 0.0f;
+    float focusX = 0.0f;
+    float focusY = 0.0f;
 
-    if(_brush.positionMode() == Brush::Absolute)
-    {
-        centerX = _brush.gradientFocus().x();
-        centerY = _brush.gradientFocus().y();
+    if(_brush.positionMode() == Brush::Absolute) {
+        focusX = _brush.gradientFocus().x();
+        focusY = _brush.gradientFocus().y();
     }
-    else // Brush::Relative
-    {
-        centerX = width  * _brush.gradientFocus().x();
-        centerY = height * _brush.gradientFocus().y();
+    else { // Brush::Relative
+        focusX = width  * _brush.gradientFocus().x();
+        focusY = height * _brush.gradientFocus().y();
     }
 
     // Calculate the rotation
     const float angl = _brush.gradientAngle() + 0.001f;
     const float rad  = angl * DegToRadF - piQuart<float>();
-    const float sval = ::sin(rad); // Gfx::Math::fastSin(rad);
-    const float cval = ::cos(rad); // Gfx::Math::fastCos(rad);
+    const float sval = ::sin(rad);
+    const float cval = ::cos(rad);
 
     // Define the reference line
     const float wq = sqrtf(width * width + height * height) * 0.25f;
@@ -616,93 +482,13 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width,
     const float y2 = -wq;
 
     // Determine the rotated reference line
-    const float rx1 = ( sval * x1 + cval * y1) + centerX;
-    const float ry1 = ( cval * x1 - sval * y1) + centerY;
-    const float rx2 = ( sval * x2 + cval * y2) + centerX;
-    const float ry2 = ( cval * x2 - sval * y2) + centerY;
+    const float rx1 = ( sval * x1 + cval * y1) + focusX;
+    const float ry1 = ( cval * x1 - sval * y1) + focusY;
+    const float rx2 = ( sval * x2 + cval * y2) + focusX;
+    const float ry2 = ( cval * x2 - sval * y2) + focusY;
 
     // Calculate the gradient of the rotated reference line
     const float rm = (ry2 - ry1) / (rx1 - rx2);
-
-    // Generate the gradient
-    Pt::uint8_t* pixel = _brushBuffer.data();
-
-    for(Pt::int32_t y = 0; y < height; ++y) {
-        // Calculate the scaling factor
-        float const p0 = rm * (y - ry1) + rx1;
-        float const p1 = rm * (y - ry2) + rx2;
-        float const d  = 1.0f / (p1 - p0);
-        for(Pt::int32_t x = 0; x < width; ++x) {
-            // Calculate the distance and blending factor
-            const float dist = d * (x - p0);
-            const float mf   = logisticSigmoid<4>( (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist ) );
-            const float imf  = 1.0f - mf;
-            // Interpolate the color
-            const float li = ls * mf + le * imf;
-            const float ai = as * mf + ae * imf;
-            const float bi = bs * mf + be * imf;
-            // Convert CIE LAB to RGB
-            Pt::uint8_t r, g, b;
-            cnvLabToRgb(&r, &g, &b, li, ai, bi);
-            // Put the pixel
-            *pixel++ = b;
-            *pixel++ = g;
-            *pixel++ = r;
-            *pixel++ = os * mf + oe * imf;
-        }
-    }
-
-#else
-
-    // ### USING RGB INTERPOLATION ###
-
-    // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4];
-    updateGradientBrush_getStartEndColors(sc, ec);
-
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
-
-    // Calculate the focus point
-    float centerX = 0.0f;
-    float centerY = 0.0f;
-
-    if(_brush.positionMode() == Brush::Absolute)
-    {
-        centerX = _brush.gradientFocus().x();
-        centerY = _brush.gradientFocus().y();
-    }
-    else // Brush::Relative
-    {
-        centerX = width  * _brush.gradientFocus().x();
-        centerY = height * _brush.gradientFocus().y();
-    }
-
-    // Calculate the rotation
-    const float angl = _brush.gradientAngle() + 0.001f;
-    const float rad  = angl * DegToRadF - piQuart<float>();
-    const float sval = ::sin(rad); // Gfx::Math::fastSin(rad);
-    const float cval = ::cos(rad); // Gfx::Math::fastCos(rad);
-
-    // Define the reference line
-    const float wq = sqrtf(width * width + height * height) * 0.25f;
-    const float x1 = -wq;
-    const float y1 =  wq;
-    const float x2 =  wq;
-    const float y2 = -wq;
-
-    // Determine the rotated reference line
-    const float rx1 = ( sval * x1 + cval * y1) + centerX;
-    const float ry1 = ( cval * x1 - sval * y1) + centerY;
-    const float rx2 = ( sval * x2 + cval * y2) + centerX;
-    const float ry2 = ( cval * x2 - sval * y2) + centerY;
-
-    // Calculate the gradient of the rotated reference line
-    const float rm = (ry2 - ry1) / (rx1 - rx2);
-
-    //static int qqq = -180; qqq += 180;
-    //setPen(Color::fromRgb8(255,255,255,255));
-    //strokeOnePixelLine(Point(20 + 90 + qqq + rx1, 250 + 135 + ry1), Point(20 + 90 + qqq + rx2, 250 + 135 + ry2), 0);
 
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();
@@ -716,277 +502,86 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width,
             // Calculate the distance and blending factor
             const float dist = d * (x - p0);
             const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
-            const float imf  = 1.0f - mf;
+            // Interpolate the color
+            eqpLerp(rc, sc, ec, mf);
             // Put the pixel
-            *pixel++ = (bs * mf + be * imf);
-            *pixel++ = (gs * mf + ge * imf);
-            *pixel++ = (rs * mf + re * imf);
-            *pixel++ = (as * mf + ae * imf);
+            *pixel++ = rc[2];
+            *pixel++ = rc[1];
+            *pixel++ = rc[0];
+            *pixel++ = rc[3];
         }
     }
-
-#endif
 }
 
 
 void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width, Pt::int32_t height)
 {
-#if 1
-
-    // ### USING CIE LAB INTERPOLATION ###
-
     // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4];
+    Pt::uint8_t sc[4], ec[4], rc[4];
     updateGradientBrush_getStartEndColors(sc, ec);
 
-    // Convert RGB to CIE LAB
-    float ls, as, bs;
-    cnvRgbToLab(&ls, &as, &bs, sc[0], sc[1], sc[2]);
-
-    float le, ae, be;
-    cnvRgbToLab(&le, &ae, &be, ec[0], ec[1], ec[2]);
-
-    const Pt::uint8_t os = sc[3];
-    const Pt::uint8_t oe = ec[3];
-
-    // Calculate the focus point
-    float centerX = 0.0f;
-    float centerY = 0.0f;
-
-    if(_brush.positionMode() == Brush::Absolute)
-    {
-        centerX = _brush.gradientFocus().x();
-        centerY = _brush.gradientFocus().y();
-    }
-    else // Brush::Relative
-    {
-        centerX = width  * _brush.gradientFocus().x();
-        centerY = height * _brush.gradientFocus().y();
-    }
+    // Calculate the center point
+    const float centerX = width  * 0.5f;
+    const float centerY = height * 0.5f;
 
     // Calculate the inverse scaling factor
-    const float dw     = fabs(width  - centerX);
-    const float dh     = fabs(height - centerY);
-    const float radius = std::max( dw, dh );
+    const float radius = std::max(centerX, centerY);
     const float ilen   = 1.0f / radius;
-    const float repscl = radius / (std::max(width, height) * 0.5f);
+
+    // Calculate the focus point
+    float focusX = 0.0f;
+    float focusY = 0.0f;
+
+    if(_brush.positionMode() == Brush::Absolute) {
+        focusX = _brush.gradientFocus().x();
+        focusY = _brush.gradientFocus().y();
+    }
+    else { // Brush::Relative
+        focusX = width  * _brush.gradientFocus().x();
+        focusY = height * _brush.gradientFocus().y();
+    }
 
     // Calculate the rotation
     const float angle = _brush.gradientAngle();
     const float rad   = -angle * DegToRadF;
-    const float sval  = ::sin(rad); // Gfx::Math::fastSin(rad);
-    const float cval  = ::cos(rad); // Gfx::Math::fastCos(rad);
+    const float sval  = ::sin(rad);
+    const float cval  = ::cos(rad);
 
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();
-
-    for(Pt::int32_t y = 0; y < height; ++y)
-    {
-        // Calculate the delta Y
-        const float dy = (y - centerY);
-
-        for(Pt::int32_t x = 0; x < width; ++x)
-        {
-            // Calculate the delta X
-            const float dx = (x - centerX);
-
-            // Calculate the rotated deltas
+    for(Pt::int32_t y = 0; y < height; ++y) {
+        // Calculate the delta Y from the focus and center points
+        const float dy = y - focusY;
+        const float cy = y - centerY;
+        for(Pt::int32_t x = 0; x < width; ++x) {
+            // Calculate the delta X from the focus and center points
+            const float dx = x - focusX;
+            const float cx = x - centerX;
+            // Calculate the rotated deltas from the focus point
             const float ry = fabs(-sval * dx + cval * dy);
             const float rx = fabs( cval * dx + sval * dy);
-
-            // Calculate the distance and blending factor
-            const float dist  = (rx + ry) * ilen;
-#if 1
-          //const float sdist = powf(dist, 0.8f);
-            const float sdist = logisticSigmoid<3>(dist);
-#else
-            const float repcn = 3.0f;
-            const float xdist = fabs(sinf(repcn * repscl * 1.414f * piHalf<float>() * dist));
-            const float sdist = logisticSigmoid<3>(xdist);
-#endif
-            const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
-            const float imf   = 1.0f - mf;
-
+            // Calculate the inverse distance from the focus and center points
+            float dist = 1.0f - (rx + ry) * ilen;
+            float cent = 1.0f - (cx + cy) * ilen;
+            if(dist < 0.0f) dist = 0.0f;
+            if(cent < 0.0f) cent = 0.0f;
+            // Calculate the blending factor
+            const float mf = 1.0f - dist * powf(cent, 0.25f);
             // Interpolate the color
-            const float li = ls * mf + le * imf;
-            const float ai = as * mf + ae * imf;
-            const float bi = bs * mf + be * imf;
-
-            // Convert CIE LAB to RGB
-            Pt::uint8_t r, g, b;
-            cnvLabToRgb(&r, &g, &b, li, ai, bi);
-
+            eqpLerp(rc, sc, ec, mf);
             // Put the pixel
-            *pixel++ = b;
-            *pixel++ = g;
-            *pixel++ = r;
-            *pixel++ = os * mf + oe * imf;
+            *pixel++ = rc[2];
+            *pixel++ = rc[1];
+            *pixel++ = rc[0];
+            *pixel++ = rc[3];
         }
     }
-
-#else
-
-    // ### USING RGB INTERPOLATION ###
-
-    // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4];
-    updateGradientBrush_getStartEndColors(sc, ec);
-
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
-
-    // Calculate the focus point
-    float centerX = 0.0f;
-    float centerY = 0.0f;
-
-    if(_brush.positionMode() == Brush::Absolute)
-    {
-        centerX = _brush.gradientFocus().x();
-        centerY = _brush.gradientFocus().y();
-    }
-    else // Brush::Relative
-    {
-        centerX = width  * _brush.gradientFocus().x();
-        centerY = height * _brush.gradientFocus().y();
-    }
-
-    // Calculate the inverse scaling factor
-    const float radius = std::max( width, height ) * 0.5f;
-    const float ilen   = 1.0f / radius;
-
-    // Calculate the rotation
-    const float angle = _brush.gradientAngle();
-    const float rad   = -angle * DegToRadF;
-    const float sval  = ::sin(rad); // Gfx::Math::fastSin(rad);
-    const float cval  = ::cos(rad); // Gfx::Math::fastCos(rad);
-
-    // Generate the gradient
-    Pt::uint8_t* pixel = _brushBuffer.data();
-
-    for(Pt::int32_t y = 0; y < height; ++y)
-    {
-        // Calculate the delta Y
-        const float dy = (y - centerY);
-
-        for(Pt::int32_t x = 0; x < width; ++x)
-        {
-            // Calculate the delta X
-            const float dx = (x - centerX);
-
-            // Calculate the rotated deltas
-            const float ry = fabs(-sval * dx + cval * dy);
-            const float rx = fabs( cval * dx + sval * dy);
-
-            // Calculate the distance and blending factor
-            const float dist  = (rx + ry) * ilen;
-            const float sdist = powf(dist, 0.8f);
-            const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
-            const float imf   = 1.0f - mf;
-
-            // Put the pixel
-            *pixel++ = (bs * mf + be * imf);
-            *pixel++ = (gs * mf + ge * imf);
-            *pixel++ = (rs * mf + re * imf);
-            *pixel++ = (as * mf + ae * imf);
-        }
-    }
-
-#endif
 }
-
-
 
 
 void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
                                                           Pt::int32_t height)
 {
-#if 0
-
-    // ### USING CIE LAB INTERPOLATION ###
-
-    // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4];
-    updateGradientBrush_getStartEndColors(sc, ec);
-
-    // Convert RGB to CIE LAB
-    float ls, as, bs;
-    cnvRgbToLab(&ls, &as, &bs, sc[0], sc[1], sc[2]);
-
-    float le, ae, be;
-    cnvRgbToLab(&le, &ae, &be, ec[0], ec[1], ec[2]);
-
-    const Pt::uint8_t os = sc[3];
-    const Pt::uint8_t oe = ec[3];
-
-    // Calculate the focus point
-    float centerX = 0.0f;
-    float centerY = 0.0f;
-
-    if(_brush.positionMode() == Brush::Absolute)
-    {
-        centerX = _brush.gradientFocus().x();
-        centerY = _brush.gradientFocus().y();
-    }
-    else // Brush::Relative
-    {
-        centerX = width  * _brush.gradientFocus().x();
-        centerY = height * _brush.gradientFocus().y();
-    }
-
-    // Calculate the inverse scaling factor
-    const float dw     = fabs(width  - centerX);
-    const float dh     = fabs(height - centerY);
-    const float radius = std::max( dw, dh );
-    const float ilen   = 1.0f / radius;
-    const float repscl = radius / (std::max(width, height) * 0.5f);
-
-    // Generate the gradient
-    Pt::uint8_t* pixel = _brushBuffer.data();
-
-    for(Pt::int32_t y = 0; y < height; ++y)
-    {
-        // Calculate the delta Y
-        const float dy = (y - centerY);
-
-        for(Pt::int32_t x = 0; x < width; ++x)
-        {
-            // Calculate the delta X
-            const float dx = (x - centerX);
-
-            // Calculate the distance and blending factor
-            const float dist  = sqrtf(dx * dx + dy * dy) * ilen;
-#if 1
-          //const float sdist = powf(dist, 0.8f);
-            const float sdist = logisticSigmoid<3>(dist);
-#else
-            const float repcn = 3.0f;
-            const float xdist = fabs(sinf(repcn * repscl * 1.414f * piHalf<float>() * dist));
-            const float sdist = logisticSigmoid<4>(xdist);
-#endif
-            const float mf    = (sdist >= 1.0f) ? 1.0f : sdist;
-            const float imf   = 1.0f - mf;
-
-            // Interpolate the color
-            const float li = ls * mf + le * imf;
-            const float ai = as * mf + ae * imf;
-            const float bi = bs * mf + be * imf;
-
-            // Convert CIE LAB to RGB
-            Pt::uint8_t r, g, b;
-            cnvLabToRgb(&r, &g, &b, li, ai, bi);
-
-            // Put the pixel
-            *pixel++ = b;
-            *pixel++ = g;
-            *pixel++ = r;
-            *pixel++ = os * mf + oe * imf;
-        }
-    }
-
-#else
-
-    // ### USING RGB INTERPOLATION ###
-
     // Determine the start and end colors
     Pt::uint8_t sc[4], ec[4], rc[4];
     updateGradientBrush_getStartEndColors(sc, ec);
@@ -1022,7 +617,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
             // Calculate the delta X from the focus and center points
             const float dx = x - focusX;
             const float cx = x - centerX;
-            // Calculate the inverse distance from the focus and points
+            // Calculate the inverse distance from the focus and center points
             float dist = 1.0f - sqrtf(dx * dx + dy * dy) * ilen;
             float cent = 1.0f - sqrtf(cx * cx + cy * cy) * ilen;
             if(dist < 0.0f) dist = 0.0f;
@@ -1038,8 +633,6 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width,
             *pixel++ = rc[3];
         }
     }
-
-#endif
 }
 
 
@@ -1047,30 +640,14 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 {
 #define CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
 
-#if 1
-
-    // ### USING CIE LAB INTERPOLATION ###
-
     // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4];
+    Pt::uint8_t sc[4], ec[4], rc[4];
     updateGradientBrush_getStartEndColors(sc, ec);
-
-    // Convert RGB to CIE LAB
-    float ls, as, bs;
-    cnvRgbToLab(&ls, &as, &bs, sc[0], sc[1], sc[2]);
-
-    float le, ae, be;
-    cnvRgbToLab(&le, &ae, &be, ec[0], ec[1], ec[2]);
-
-    const Pt::uint8_t os = sc[3];
-    const Pt::uint8_t oe = ec[3];
 
 #ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
     // Calculate the middle color from the start and end colors
-    const float       lm = ( ls + le ) * 0.5f;
-    const float       am = ( as + ae ) * 0.5f;
-    const float       bm = ( bs + be ) * 0.5f;
-    const Pt::uint8_t om = ((Pt::uint32_t) os + (Pt::uint32_t) oe) / 2;
+    Pt::uint8_t mc[4];
+    eqpLerp(mc, sc, ec, 0.5f);
 
     // Low and high limit for mixing color
     const float loLim = 0.25f;
@@ -1078,18 +655,16 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 #endif
 
     // Calculate the focus point
-    float centerX = 0.0f;
-    float centerY = 0.0f;
+    float focusX = 0.0f;
+    float focusY = 0.0f;
 
-    if(_brush.positionMode() == Brush::Absolute)
-    {
-        centerX = _brush.gradientFocus().x();
-        centerY = _brush.gradientFocus().y();
+    if(_brush.positionMode() == Brush::Absolute) {
+        focusX = _brush.gradientFocus().x();
+        focusY = _brush.gradientFocus().y();
     }
-    else // Brush::Relative
-    {
-        centerX = width  * _brush.gradientFocus().x();
-        centerY = height * _brush.gradientFocus().y();
+    else { // Brush::Relative
+        focusX = width  * _brush.gradientFocus().x();
+        focusY = height * _brush.gradientFocus().y();
     }
 
     // Get the rotation angle
@@ -1103,18 +678,18 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 
     // Calculate the rotation
     const float rad  = angle * DegToRadF - piHalf<float>();
-    const float sval = ::sin(rad); // Gfx::Math::fastSin(rad);
-    const float cval = ::cos(rad); // Gfx::Math::fastCos(rad);
+    const float sval = ::sin(rad);
+    const float cval = ::cos(rad);
 
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();
 
     for(Pt::int32_t y = 0; y < height; ++y) {
-        // Calculate the delta Y
-        const float dy = -(y - centerY); // Sign inversion due to differences between cartesian and computer coordinate systems
+        // Calculate the delta Y from the focus point
+        const float dy = -(y - focusY); // Sign inversion due to differences between cartesian and computer coordinate systems
         for(Pt::int32_t x = 0; x < width; ++x) {
-            // Calculate the delta X
-            const float dx = (x - centerX);
+            // Calculate the delta X from the focus point
+            const float dx = x - focusX;
             // Calculate the rotated deltas
             const float ry = (-sval * dx + cval * dy);
             const float rx = ( cval * dx + sval * dy);
@@ -1126,56 +701,38 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
             // Distance: 0.00f <= dist <= loLim --- blend from end color to middle color
             if(dist <= loLim) {
                 // Calculate the blending factor
-                const float mf   = logisticSigmoid<4>( dist / loLim );
-                const float imf  = 1.0f - mf;
+                const float mf = dist / loLim;
                 // Interpolate the color
-                const float li = le * mf + lm * imf;
-                const float ai = ae * mf + am * imf;
-                const float bi = be * mf + bm * imf;
-                // Convert CIE LAB to RGB
-                Pt::uint8_t r, g, b;
-                cnvLabToRgb(&r, &g, &b, li, ai, bi);
+                eqpLerp(rc, ec, mc, mf);
                 // Put the pixel
-                *pixel++ = b;
-                *pixel++ = g;
-                *pixel++ = r;
-                *pixel++ = oe * mf + om * imf;
+                *pixel++ = rc[2];
+                *pixel++ = rc[1];
+                *pixel++ = rc[0];
+                *pixel++ = rc[3];
             }
             // Distance: hiLim <= dist <= 1.00f --- blend from middle color to start color
             else if(dist >= hiLim) { //
                 // Calculate the blending factor
-                const float mf   = logisticSigmoid<4>( (dist - hiLim) / loLim );
-                const float imf  = 1.0f - mf;
+                const float mf = (dist - hiLim) / loLim;
                 // Interpolate the color
-                const float li = lm * mf + ls * imf;
-                const float ai = am * mf + as * imf;
-                const float bi = bm * mf + bs * imf;
-                // Convert CIE LAB to RGB
-                Pt::uint8_t r, g, b;
-                cnvLabToRgb(&r, &g, &b, li, ai, bi);
+                eqpLerp(rc, mc, sc, mf);
                 // Put the pixel
-                *pixel++ = b;
-                *pixel++ = g;
-                *pixel++ = r;
-                *pixel++ = om * mf + os * imf;
+                *pixel++ = rc[2];
+                *pixel++ = rc[1];
+                *pixel++ = rc[0];
+                *pixel++ = rc[3];
             }
             // Distance: loLim < dist < hiLim --- blend from start color to end color
             else {
                 // Calculate the blending factor
-                const float mf   = logisticSigmoid<4>( (dist - loLim) / (hiLim - loLim) );
-                const float imf  = 1.0f - mf;
+                const float mf = (dist - loLim) / (hiLim - loLim);
                 // Interpolate the color
-                const float li = ls * mf + le * imf;
-                const float ai = as * mf + ae * imf;
-                const float bi = bs * mf + be * imf;
-                // Convert CIE LAB to RGB
-                Pt::uint8_t r, g, b;
-                cnvLabToRgb(&r, &g, &b, li, ai, bi);
+                eqpLerp(rc, sc, ec, mf);
                 // Put the pixel
-                *pixel++ = b;
-                *pixel++ = g;
-                *pixel++ = r;
-                *pixel++ = os * mf + oe * imf;
+                *pixel++ = rc[2];
+                *pixel++ = rc[1];
+                *pixel++ = rc[0];
+                *pixel++ = rc[3];
             }
 #else
             // Anti-alias the distance
@@ -1186,8 +743,8 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
                 dist = 0.0f;
                 for(Pt::int32_t i = 0; i < ijm; ++i) {
                     for(Pt::int32_t j = 0; j < ijm; ++j) {
-                        const float dxs =  (x + i - ijm2 - centerX);
-                        const float dys = -(y + j - ijm2 - centerY); // Sign inversion due to differences between cartesian and computer coordinate systems
+                        const float dxs =  (x + i - ijm2 - focusX);
+                        const float dys = -(y + j - ijm2 - focusY); // Sign inversion due to differences between cartesian and computer coordinate systems
                         const float rxs = ( cval * dxs + sval * dys);
                         const float rys = (-sval * dxs + cval * dys);
                         dist += (std::atan2(rys, rxs) + pi<float>()) / piDouble<float>();
@@ -1196,157 +753,17 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
                 dist /= (ijm * ijm);
             }
             // Calculate the blending factor
-            const float mf   = logisticSigmoid<8>( (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist ) );
-            const float imf  = 1.0f - mf;
+            const float mf = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
             // Interpolate the color
-            const float li = ls * mf + le * imf;
-            const float ai = as * mf + ae * imf;
-            const float bi = bs * mf + be * imf;
-            // Convert CIE LAB to RGB
-            Pt::uint8_t r, g, b;
-            cnvLabToRgb(&r, &g, &b, li, ai, bi);
+            eqpLerp(rc, sc, ec, mf);
             // Put the pixel
-            *pixel++ = b;
-            *pixel++ = g;
-            *pixel++ = r;
-            *pixel++ = os * mf + oe * imf;
+            *pixel++ = rc[2];
+            *pixel++ = rc[1];
+            *pixel++ = rc[0];
+            *pixel++ = rc[3];
 #endif
         }
     }
-
-#else
-
-    // ### USING RGB INTERPOLATION ###
-
-    // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4];
-    updateGradientBrush_getStartEndColors(sc, ec);
-
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
-
-#ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
-    // Calculate the middle color from the start and end colors
-    const Pt::uint8_t rm = ((Pt::uint32_t) rs + (Pt::uint32_t) re) / 2;
-    const Pt::uint8_t gm = ((Pt::uint32_t) gs + (Pt::uint32_t) ge) / 2;
-    const Pt::uint8_t bm = ((Pt::uint32_t) bs + (Pt::uint32_t) be) / 2;
-    const Pt::uint8_t am = ((Pt::uint32_t) as + (Pt::uint32_t) ae) / 2;
-
-    // Low and high limit for mixing color
-    const float loLim = 0.25f;
-    const float hiLim = 0.75f;
-#endif
-
-    // Calculate the focus point
-    float centerX = 0.0f;
-    float centerY = 0.0f;
-
-    if(_brush.positionMode() == Brush::Absolute)
-    {
-        centerX = _brush.gradientFocus().x();
-        centerY = _brush.gradientFocus().y();
-    }
-    else // Brush::Relative
-    {
-        centerX = width  * _brush.gradientFocus().x();
-        centerY = height * _brush.gradientFocus().y();
-    }
-
-    // Get the rotation angle
-    const float angle = _brush.gradientAngle();
-
-#ifndef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
-    // Determine if the transition area needs to be anti-aliased
-    const float ang90 =  angle - floor(angle / 90.0f) * 90.0f;
-    const bool  useAA = (_aaMode) && (ang90 >= 0.1f);
-#endif
-
-    // Calculate the rotation
-    const float rad  = angle * DegToRadF - piHalf<float>();
-    const float sval = ::sin(rad); // Gfx::Math::fastSin(rad);
-    const float cval = ::cos(rad); // Gfx::Math::fastCos(rad);
-
-    // Generate the gradient
-    Pt::uint8_t* pixel = _brushBuffer.data();
-
-    for(Pt::int32_t y = 0; y < height; ++y) {
-        // Calculate the delta Y
-        const float dy = -(y - centerY); // Sign inversion due to differences between cartesian and computer coordinate systems
-        for(Pt::int32_t x = 0; x < width; ++x) {
-            // Calculate the delta X
-            const float dx = (x - centerX);
-            // Calculate the rotated deltas
-            const float ry = (-sval * dx + cval * dy);
-            const float rx = ( cval * dx + sval * dy);
-            // Calculate the distance
-            float dist = (std::atan2(ry, rx) + pi<float>()) / piDouble<float>();
-                 if(dist < 0.0f) dist = 0.0f;
-            else if(dist > 1.0f) dist = 1.0f;
-#ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
-            // Distance: 0.00f <= dist <= loLim --- blend from end color to middle color
-            if(dist <= loLim) {
-                // Calculate the blending factor
-                const float mf   = dist / loLim;
-                const float imf  = 1.0f - mf;
-                // Put the pixel
-                *pixel++ = (be * mf + bm * imf);
-                *pixel++ = (ge * mf + gm * imf);
-                *pixel++ = (re * mf + rm * imf);
-                *pixel++ = (ae * mf + am * imf);
-            }
-            // Distance: hiLim <= dist <= 1.00f --- blend from middle color to start color
-            else if(dist >= hiLim) { //
-                // Calculate the blending factor
-                const float mf   = (dist - hiLim) / loLim;
-                const float imf  = 1.0f - mf;
-                // Put the pixel
-                *pixel++ = (bm * mf + bs * imf);
-                *pixel++ = (gm * mf + gs * imf);
-                *pixel++ = (rm * mf + rs * imf);
-                *pixel++ = (am * mf + as * imf);
-            }
-            // Distance: loLim < dist < hiLim --- blend from start color to end color
-            else {
-                // Calculate the blending factor
-                const float mf   = (dist - loLim) / (hiLim - loLim);
-                const float imf  = 1.0f - mf;
-                // Put the pixel
-                *pixel++ = (bs * mf + be * imf);
-                *pixel++ = (gs * mf + ge * imf);
-                *pixel++ = (rs * mf + re * imf);
-                *pixel++ = (as * mf + ae * imf);
-            }
-#else
-            // Anti-alias the distance
-            if(useAA && (dist < 0.01f || dist > 0.99f)) {
-                const float       dd   = 4.0f - ceil( ( (dist < 0.5f) ? dist : (1.0f - dist) ) * 400 );
-                const Pt::int32_t ijm  = (dd <= 2.0f) ? 2 : dd;
-                const float       ijm2 = (ijm - 1) * 0.5f;
-                dist = 0.0f;
-                for(Pt::int32_t i = 0; i < ijm; ++i) {
-                    for(Pt::int32_t j = 0; j < ijm; ++j) {
-                        const float dxs =  (x + i - ijm2 - centerX);
-                        const float dys = -(y + j - ijm2 - centerY); // Sign inversion due to differences between cartesian and computer coordinate systems
-                        const float rxs = ( cval * dxs + sval * dys);
-                        const float rys = (-sval * dxs + cval * dys);
-                        dist += (std::atan2(rys, rxs) + pi<float>()) / piDouble<float>();
-                    }
-                }
-                dist /= (ijm * ijm);
-            }
-            // Calculate the blending factor
-            const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
-            const float imf  = 1.0f - mf;
-            // Put the pixel
-            *pixel++ = (bs * mf + be * imf);
-            *pixel++ = (gs * mf + ge * imf);
-            *pixel++ = (rs * mf + re * imf);
-            *pixel++ = (as * mf + ae * imf);
-#endif
-        }
-    }
-
-#endif
 
 #undef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
 }
