@@ -36,6 +36,16 @@ namespace Pt {
 
 namespace Gfx {
 
+static inline float triangle(float v)
+{
+    const float p = 0.5f;
+
+    const Pt::int32_t x = v * 1000.0f;
+    const Pt::int32_t m = p * 1000.0f;
+
+    return (1.0f / p) * (p - fabs( ( x % (2 * m) ) * 0.001f - p) );
+}
+
 
 static inline void eqpLerp(Pt::uint8_t resRGBA[4], const Pt::uint8_t srcRGBA[4], const Pt::uint8_t dstRGBA[4], float mf)
 {
@@ -553,7 +563,7 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
 #if 0
             // Perform gradient repeat
             const float repcn = 3.0f;
-            dist = fabs( sinf( (repcn + 1.0f / sqrtf(2.0f)) * sqrtf(2.0f) * piHalf<float>() * dist ) );
+            dist = triangle(repcn * dist);
 #endif
             // Calculate the blending factor
             const float mf = 1.0f - dist;
@@ -614,10 +624,11 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
 #if 0
             // Perform gradient repeat
             const float repcn = 3.0f;
-            dist = fabs( sinf( (repcn + 1.0f / sqrtf(2.0f)) * sqrtf(2.0f) * piHalf<float>() * dist ) );
+            dist = triangle(repcn * dist);
 #endif
             // Calculate the blending factor
-            const float mf = 1.0f - dist * powf(cent, 0.5f);
+            const float mf = 1.0f - ( dist + 4.0f * dist * powf(cent, 0.5f) ) * 0.2f;
+            //const float mf = 1.0f - dist * powf(cent, 0.5f);
             // Interpolate the color
             eqpLerp(rc, sc, ec, mf);
             // Put the pixel
