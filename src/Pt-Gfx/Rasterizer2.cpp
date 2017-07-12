@@ -64,17 +64,6 @@ static inline void eqpLerp(Pt::uint8_t resRGBA[4], const Pt::uint8_t srcRGBA[4],
 }
 
 
-template <Pt::uint8_t F, typename T>
-static inline T logisticSigmoid(T v)
-{
-    // https://en.wikipedia.org/wiki/Sigmoid_function
-    v *= (T) F * (T) 2.0;
-    v -= (T) F;
-
-    return (T) 1.0 / ( (T) 1.0 + std::exp(-v) );
-}
-
-
 /*
 // Weighting filter for Xiaolin Wu's anti-aliasing algorithm
 // Inspired by http://www.crbond.com/papers/anti_alias.pdf

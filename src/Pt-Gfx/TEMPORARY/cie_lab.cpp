@@ -115,3 +115,14 @@ static inline void cnvLabToRgb(Pt::uint8_t* r_, Pt::uint8_t* g_, Pt::uint8_t* b_
     *g_ = gf * (T) 255.0;
     *b_ = bf * (T) 255.0;
 }
+
+
+template <Pt::uint8_t F, typename T>
+static inline T logisticSigmoid(T v)
+{
+    // https://en.wikipedia.org/wiki/Sigmoid_function
+    v *= (T) F * (T) 2.0;
+    v -= (T) F;
+
+    return (T) 1.0 / ( (T) 1.0 + std::exp(-v) );
+}
