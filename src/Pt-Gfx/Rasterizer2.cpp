@@ -51,6 +51,10 @@ static inline void eqpLerp(Pt::uint8_t resRGBA[4], const Pt::uint8_t srcRGBA[4],
 {
     const float imf = 1.0f - mf;
 
+#if 1
+
+    // Equivalent-power linear interpolation
+
     const float srcPower = (float) srcRGBA[0] * srcRGBA[0] + (float) srcRGBA[1] * srcRGBA[1] + (float) srcRGBA[2] + srcRGBA[2];
     const float dstPower = (float) dstRGBA[0] * dstRGBA[0] + (float) dstRGBA[1] * dstRGBA[1] + (float) dstRGBA[2] + dstRGBA[2];
     const float resPower = srcPower * mf + dstPower * imf;
@@ -71,6 +75,17 @@ static inline void eqpLerp(Pt::uint8_t resRGBA[4], const Pt::uint8_t srcRGBA[4],
     resRGBA[1] = (intG >= 255) ? 255 : intG;
     resRGBA[2] = (intB >= 255) ? 255 : intB;
     resRGBA[3] = (intA >= 255) ? 255 : intA;
+
+#else
+
+    // Normal linear interpolation
+
+    resRGBA[0] = srcRGBA[0] * mf + dstRGBA[0] * imf;
+    resRGBA[1] = srcRGBA[1] * mf + dstRGBA[1] * imf;
+    resRGBA[2] = srcRGBA[2] * mf + dstRGBA[2] * imf;
+    resRGBA[3] = srcRGBA[3] * mf + dstRGBA[3] * imf;
+
+#endif
 }
 
 
