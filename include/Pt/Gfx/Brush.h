@@ -39,6 +39,58 @@ namespace Gfx {
 
 class BrushData;
 
+class ColorStop
+{
+    public:
+        ColorStop(float position, const Color& color)
+        : _position(position)
+        , _color(color)
+        {}
+
+        float position() const
+        { return _position; }
+
+        const Color& color() const
+        { return _color; }
+
+    private:
+        float _position;
+        Color _color;
+};
+
+
+class ColorStops
+{
+    public:
+        ColorStops()
+        {}
+
+        ~ColorStops()
+        {}
+
+        bool empty() const
+        { return _stops.empty(); }
+
+        std::size_t size() const
+        { return _stops.size(); }
+
+        void clear()
+        { _stops.clear(); }
+
+        void add(float position, const Color& color)
+        { _stops.push_back( ColorStop(position, color) ); }
+
+        const ColorStop& operator[] (std::size_t n)
+        { return _stops[n]; }
+
+        const ColorStop& back() const
+        { return _stops.back(); }
+
+    private:
+        std::vector<ColorStop> _stops;
+};
+
+
 class PT_GFX_API Brush
 {
     public:
@@ -60,9 +112,7 @@ class PT_GFX_API Brush
             Horizontal  = 0, // only for old painters
             Vertical    = 1, // only for old painters
             Linear      = 2,
-            Rectangular = 3,
-            Radial      = 4,
-            Conical     = 5
+            Radial      = 3
         };
 
     public:
@@ -78,45 +128,27 @@ class PT_GFX_API Brush
 
         static Brush horizontalGradient(const Color& from, const Color& to);
 
-        /** @brief Constructs a absolute positioned linear gradient.
+        /** @brief Constructs an absolute positioned linear gradient.
         */
         static Brush linearGradient(const Color& from, const Color& to,
                                     const PointF& focus, float angle = 0.0f);
-
-        /** @brief Constructs a absolute positioned radial gradient.
-        */
-        static Brush radialGradient(const Color& from, const Color& to,
-                                    const PointF& focus);
-
-        /** @brief Constructs a relative positioned radial gradient.
-        */
-        static Brush radialGradient(const Color& from, const Color& to,
-                                    float rx = 0.5, float ry = 0.5);
-
-        /** @brief Constructs a absolute positioned rectangular gradient.
-        */
-        static Brush rectangularGradient(const Color& from, const Color& to,
-                                         const PointF& focus, float angle = 0.0f);
 
         /** @brief Constructs a relative positioned linear gradient.
         */
         static Brush linearGradient(const Color& from, const Color& to,
                                     float rx = 0.5, float ry = 0.5, float angle = 0.0f);
 
-        /** @brief Constructs a relative positioned rectangular gradient.
+        /** @brief Constructs an absolute positioned radial gradient.
         */
-        static Brush rectangularGradient(const Color& from, const Color& to,
-                                         float rx = 0.5, float ry = 0.5, float angle = 0.0f);
+        static Brush radialGradient(const PointF& begin, float beginRadius,
+                                    const PointF& end, float endRadius,
+                                    const ColorStops& colorStops);
 
-        /** @brief Constructs a absolute positioned conical gradient.
+        /** @brief Constructs a relative positioned radial gradient.
         */
-        static Brush conicalGradient(const Color& from, const Color& to,
-                                     const PointF& focus, float angle = 0.0f);
-
-        /** @brief Constructs a relative positioned conical gradient.
-        */
-        static Brush conicalGradient(const Color& from, const Color& to,
-                                     float rx = 0.5, float ry = 0.5, float angle = 0.0f);
+        static Brush radialGradient(float beginX, float beginY, float beginRadius,
+                                    float endX, float endY, float endRadius,
+                                    const ColorStops& colorStops);
 
         FillStyle fillStyle() const;
 
@@ -128,11 +160,20 @@ class PT_GFX_API Brush
 
         GradientStyle gradient() const;
 
+        // remove when linear gradients use color stops
         const Color& gradientColor() const;
+
+        const ColorStops& gradientStops() const;
 
         float gradientAngle() const;
 
-        const PointF& gradientFocus() const;
+        const PointF& gradientBegin() const;
+
+        float gradientBeginRadius() const;
+
+        const PointF& gradientEnd() const;
+
+        float gradientEndRadius() const;
 
         void setTexture(const Image& texture,
                         Pt::int32_t offX = 0, Pt::int32_t offY = 0);
@@ -205,39 +246,49 @@ class BrushData
         const Color& color() const
         { return _color; }
 
+
+
         void setLinearGradient(const Color& from, const Color& to,
                                const PointF& focus, float angle);
 
         void setLinearGradient(const Color& from, const Color& to,
                                float rx, float ry, float angle);
 
-        void setRadialGradient(const Color& from, const Color& to,
-                               const PointF& focus);
 
-        void setRadialGradient(const Color& from, const Color& to,
-                               float rx, float ry);
+        // absolute positioned radial gradient
+        void setRadialGradient(const PointF& begin, float beginRadius,
+                               const PointF& end, float endRadius,
+                               const ColorStops& colorStops);
 
-        void setRectangularGradient(const Color& from, const Color& to,
-                                    const PointF& focus, float angle);
+        // relative positioned radial gradient
+        void setRadialGradient(float beginX, float beginY, float beginRadius,
+                               float endX, float endY, float endRadius,
+                               const ColorStops& colorStops);
+       
 
-        void setRectangularGradient(const Color& from, const Color& to,
-                                    float rx, float ry, float angle);
-
-        void setConicalGradient(const Color& from, const Color& to,
-                                const PointF& focus, float angle);
-
-        void setConicalGradient(const Color& from, const Color& to,
-                                float rx, float ry, float angle);
 
         Brush::GradientStyle gradient() const
         { return _gradient; }
 
+        // remove when linear gradients use color stops
         const Color& gradientColor() const
-        { return _gradientColor; }
+        { return _gradientStops.empty() ? _color : _gradientStops.back().color(); }
 
-        const PointF& gradientFocus() const
-        { return _gradientFocus; }
+        const ColorStops& gradientStops() const
+        { return _gradientStops; }
 
+        const PointF& gradientBegin() const
+        { return _gradientBegin; }
+
+        float gradientBeginRadius() const
+        { return _gradientBeginRadius; }
+
+        const PointF& gradientEnd() const
+        { return _gradientEnd; }
+        
+        float gradientEndRadius() const
+        { return _gradientEndRadius; }
+        
         void setTexture(const Image& texture,
                        Pt::int32_t offsetX, Pt::int32_t offsetY);
 
@@ -267,10 +318,15 @@ class BrushData
         Brush::FillStyle     _fillStyle;
         Brush::PositionMode  _positionMode;
         Color                _color;
+
         Brush::GradientStyle _gradient;
-        Color                _gradientColor;
+        ColorStops           _gradientStops;
         float                _gradientAngle;
-        PointF               _gradientFocus;
+        PointF               _gradientBegin;
+        float                _gradientBeginRadius;
+        PointF               _gradientEnd;
+        float                _gradientEndRadius;
+
         Pt::int32_t          _ofsX;
         Pt::int32_t          _ofsY;
         Image                _texture;

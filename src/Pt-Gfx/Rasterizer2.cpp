@@ -359,9 +359,7 @@ void Rasterizer2::setBrush( const Brush& brush )
             _brushImage = &_brushBuffer;
 
             _isTexture  = brush.gradient() == Brush::Linear ||
-                          brush.gradient() == Brush::Radial ||
-                          brush.gradient() == Brush::Conical ||
-                          brush.gradient() == Brush::Rectangular;
+                          brush.gradient() == Brush::Radial;
             break;
     }
 
@@ -409,16 +407,8 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             updateGradientBrush_gen2DLinearGradient(width, height);
             break;
 
-        case Pt::Gfx::Brush::Rectangular:
-            updateGradientBrush_gen2DRectangularGradient(width, height);
-            break;
-
         case Pt::Gfx::Brush::Radial:
             updateGradientBrush_gen2DRadialGradient(width, height);
-            break;
-
-        case Pt::Gfx::Brush::Conical:
-            updateGradientBrush_gen2DConicalGradient(width, height);
             break;
 
         default:
@@ -474,12 +464,12 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
     float focusY = 0.0f;
 
     if(_brush.positionMode() == Brush::Absolute) {
-        focusX = _brush.gradientFocus().x();
-        focusY = _brush.gradientFocus().y();
+        focusX = _brush.gradientBegin().x();
+        focusY = _brush.gradientBegin().y();
     }
     else { // Brush::Relative
-        focusX = width  * _brush.gradientFocus().x();
-        focusY = height * _brush.gradientFocus().y();
+        focusX = width  * _brush.gradientBegin().x();
+        focusY = height * _brush.gradientBegin().y();
     }
 
     // Calculate the rotation
@@ -547,12 +537,12 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
     float focusY = 0.0f;
 
     if(_brush.positionMode() == Brush::Absolute) {
-        focusX = _brush.gradientFocus().x();
-        focusY = _brush.gradientFocus().y();
+        focusX = _brush.gradientBegin().x();
+        focusY = _brush.gradientBegin().y();
     }
     else { // Brush::Relative
-        focusX = width  * _brush.gradientFocus().x();
-        focusY = height * _brush.gradientFocus().y();
+        focusX = width  * _brush.gradientBegin().x();
+        focusY = height * _brush.gradientBegin().y();
     }
 
     // Calculate the rotation
@@ -613,12 +603,12 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
     float focusY = 0.0f;
 
     if(_brush.positionMode() == Brush::Absolute) {
-        focusX = _brush.gradientFocus().x();
-        focusY = _brush.gradientFocus().y();
+        focusX = _brush.gradientBegin().x();
+        focusY = _brush.gradientBegin().y();
     }
     else { // Brush::Relative
-        focusX = width  * _brush.gradientFocus().x();
-        focusY = height * _brush.gradientFocus().y();
+        focusX = width  * _brush.gradientBegin().x();
+        focusY = height * _brush.gradientBegin().y();
     }
 
     // Generate the gradient
@@ -679,12 +669,12 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
     float focusY = 0.0f;
 
     if(_brush.positionMode() == Brush::Absolute) {
-        focusX = _brush.gradientFocus().x();
-        focusY = _brush.gradientFocus().y();
+        focusX = _brush.gradientBegin().x();
+        focusY = _brush.gradientBegin().y();
     }
     else { // Brush::Relative
-        focusX = width  * _brush.gradientFocus().x();
-        focusY = height * _brush.gradientFocus().y();
+        focusX = width  * _brush.gradientBegin().x();
+        focusY = height * _brush.gradientBegin().y();
     }
 
     // Get the rotation angle

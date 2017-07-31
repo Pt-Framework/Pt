@@ -240,10 +240,12 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
 
-    imagePainter.setBrush( Gfx::Brush::radialGradient(
-                                     Gfx::Color::fromRgb8(255, 0, 0), 
-                                     Gfx::Color::fromRgb8(0, 255, 0),
-                                     0.3f, 0.3f ) );
+    Gfx::ColorStops stops;
+    stops.add(0, Gfx::Color::fromRgb8(255, 0, 0));
+    stops.add(1.0, Gfx::Color::fromRgb8(0, 255, 0));
+
+    imagePainter.setBrush( Gfx::Brush::radialGradient(0.5, 0.5, 0,
+                                                      0.3f, 0.3f, 0.5, stops ) );
     
     //imagePainter.setClip( Gfx::RectF(50, 100, 50, 100) );
 
