@@ -531,61 +531,51 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
     float  begRad, endRad;
 
      if(_brush.positionMode() == Brush::Absolute) {
-        //begPos = _brush.gradientBegin();
-        //endPos = _brush.gradientEnd  ();
+        begPos = _brush.gradientBegin      ();
+        begRad = _brush.gradientBeginRadius();
 
-        //begRad = _brush.gradientBeginRadius();
-        //endRad = _brush.gradientEndRadius  ();
+        endPos = _brush.gradientEnd      ();
+        endRad = _brush.gradientEndRadius();
     }
     else { // Brush::Relative
-        begPos.set( _brush.gradientBegin().x() * width, _brush.gradientBegin().y() * height * 0.5f );
-        endPos.set( _brush.gradientEnd  ().x() * width, _brush.gradientEnd  ().y() * height * 0.5f );
+        begPos.set( _brush.gradientBegin().x() * width, _brush.gradientBegin().y() * height );
+        begRad =    _brush.gradientBeginRadius() * sqrtf(width * width + height * height);
 
-        begRad = _brush.gradientBeginRadius() * sqrtf(width * width + height * height);
-        endRad = _brush.gradientEndRadius  () * sqrtf(width * width + height * height);
+        endPos.set( _brush.gradientEnd().x() * width, _brush.gradientEnd  ().y() * height );
+        endRad =    _brush.gradientEndRadius() * sqrtf(width * width + height * height);
     }
-    //std::cout << begPos.x() << ", " << begPos.y() << " : " << begRad << std::endl;
-    //std::cout << endPos.x() << ", " << endPos.y() << " : " << endRad << std::endl;
 
     const float xDiff = endPos.x() - begPos.x();
     const float yDiff = endPos.y() - begPos.y();
     const float rDiff = endRad     - begRad;
-    //std::cout << xDiff << ", " << yDiff << " : " << rDiff << std::endl;
 
     const float a       = rDiff * rDiff - xDiff * xDiff - yDiff * yDiff;
     const float rBegDif = 2.0f * begRad * rDiff;
     const float rBegSqr = begRad * begRad;
-    //std::cout << a << ", " << rBegDif << ", " << rBegSqr << std::endl;
 
-    // Walk through the pixels and generate the gradient
+    // Calculate the number of pixels, get the pixel buffer, and prepare the interpolation buffer
     const Pt::int32_t  numPixels    = width * height;
           Pt::uint8_t* pixelBuffer  = _brushBuffer.data();
           Pt::uint8_t  bgra32Res[4] = { 0, 0, 0, 255 };
-    //std::cout << width << ", " << height << " : " << numPixels << std::endl;
 
+    // Walk through the pixels and generate the gradient
     for(Pt::int32_t i = 0; i < numPixels; ++i) {
+        // Calculate the coordinates and their deltas
         const Pt::int32_t x    = i % width;
         const Pt::int32_t y    = i / width;
-        //std::cout << x << ", " << y << std::endl;
-
         const float       dx   = x - begPos.x();
         const float       dy   = y - begPos.y();
-        //std::cout << dx << ", " << dy << std::endl;
-
+        // Claculate the discriminator
         const float       b    = rBegDif + 2.0f * (dx * xDiff + dy * yDiff);
         const float       c    = rBegSqr - dx * dx - dy * dy;
-        //std::cout << b << ", " << c << std::endl;
-
         const float       dscm = b * b - 4.0f * a * c;
-        //std::cout << dscm << std::endl;
-
-        // Interpolate the color
+        // Interpolate the color as needed
         if(dscm >= 0.0f) {
+            // Calculate the ratio
             float ratio = (-b + sqrtf(dscm)) / (2.0f * a);
-            //std::cout << ratio << std::endl;
-
                  if(ratio < 0.0f) ratio = 0.0f;
             else if(ratio > 1.0f) ratio = 1.0f;
+            // Interpolate the color
             colStops.calculateInterpolatedColorBGRA32(bgra32Res, ratio);
         }
         // Put the pixel
