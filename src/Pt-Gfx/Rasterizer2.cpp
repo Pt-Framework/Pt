@@ -473,7 +473,7 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
     }
 
     // Calculate the rotation
-    const float angl = _brush.gradientAngle() + 0.001f;
+    const float angl = 0.0; //TODO: _brush.gradientAngle() + 0.001f;
     const float rad  = angl * DegToRadF - piQuart<float>();
     const float sval = ::sin(rad);
     const float cval = ::cos(rad);
