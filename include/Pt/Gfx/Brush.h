@@ -45,6 +45,10 @@ class ColorStop
         ColorStop(float position, const Color& color)
         : _position(position)
         , _color(color)
+        , _r8(color.red  () / 257)
+        , _g8(color.green() / 257)
+        , _b8(color.blue () / 257)
+        , _a8(color.alpha() / 257)
         {}
 
         float position() const
@@ -53,9 +57,22 @@ class ColorStop
         const Color& color() const
         { return _color; }
 
+        const Pt::uint8_t r8() const
+        { return _r8; }
+
+        const Pt::uint8_t g8() const
+        { return _g8; }
+
+        const Pt::uint8_t b8() const
+        { return _b8; }
+
+        const Pt::uint8_t a8() const
+        { return _a8; }
+
     private:
-        float _position;
-        Color _color;
+        float       _position;
+        Color       _color;
+        Pt::uint8_t _r8, _g8, _b8, _a8;
 };
 
 
@@ -85,6 +102,8 @@ class ColorStops
 
         const ColorStop& back() const
         { return _stops.back(); }
+
+        void calculateInterpolatedColorRGBA32(Pt::uint8_t rgba32[4], const float position) const;
 
     private:
         std::vector<ColorStop> _stops;
@@ -264,7 +283,7 @@ class BrushData
         void setRadialGradient(float beginX, float beginY, float beginRadius,
                                float endX, float endY, float endRadius,
                                const ColorStops& colorStops);
-       
+
 
 
         Brush::GradientStyle gradient() const
@@ -285,10 +304,10 @@ class BrushData
 
         const PointF& gradientEnd() const
         { return _gradientEnd; }
-        
+
         float gradientEndRadius() const
         { return _gradientEndRadius; }
-        
+
         void setTexture(const Image& texture,
                        Pt::int32_t offsetX, Pt::int32_t offsetY);
 

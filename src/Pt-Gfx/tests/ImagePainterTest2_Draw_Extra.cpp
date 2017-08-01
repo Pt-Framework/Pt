@@ -68,6 +68,15 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->setPen(penText);
     ip2->drawText( PointF(70 + 600, 180), "Arrow-2" );
 
+    // Radial gradient
+    ColorStops stops;
+    stops.add(0.0, Color::fromRgb8(255, 0, 0, 175));
+    stops.add(1.0, Color::fromRgb8(0, 255, 0, 175));
+
+    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0.0, 0.5, 0.5, 0.5, stops) );
+    painter.fillRect( RectF(PointF(20, 250), SizeF(200, 200)) );
+
+/*
     // --- Part 1 ---
 
     // Rectangular gradient
@@ -82,12 +91,12 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     stops.add(0, Color::fromRgb8(255, 0, 0, 175));
     stops.add(1.0, Color::fromRgb8(0, 255, 0, 175));
 
-    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0, 
+    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0,
                                             0.5, 0.5, 0.5, stops) );
     painter.fillRect( RectF(PointF(20 + 300, 250), SizeF(100, 100)) );
 
     painter.setBrush( Brush::radialGradient(0.3f, 0.7f, 0,
-                                            0.5, 0.5, 0.5, 
+                                            0.5, 0.5, 0.5,
                                             stops) );
     painter.fillRect( RectF(PointF(20 + 450, 250), SizeF(100, 100)) );
 
@@ -108,7 +117,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     //painter.fillRect( RectF(PointF(20 + 180, 250 + 135), SizeF(50, 100)) );
 
     // Radial gradient
-    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0, 
+    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0,
                                             0.5, 0.5, 0.5, stops) );
     painter.fillRect( RectF(PointF(20 + 360, 250 + 135), SizeF(50, 100)) );
 
@@ -155,6 +164,8 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     //painter.setBrush( Brush::conicalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 30.0f) );
     //painter.fillRect( RectF(PointF(20 + 720, 250 + 270), SizeF(100, 50)) );
+
+    */
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

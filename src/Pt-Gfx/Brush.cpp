@@ -35,6 +35,15 @@ namespace Pt {
 
 namespace Gfx {
 
+void ColorStops::calculateInterpolatedColorRGBA32(Pt::uint8_t rgba32[4], const float position) const
+{
+    rgba32[0] = position * 255.0f;
+    rgba32[1] = position * 255.0f;
+    rgba32[2] = position * 255.0f;
+    rgba32[3] = 255;
+}
+
+
 Brush::Brush()
 : _brushData( new BrushData() )
 {}
@@ -103,7 +112,7 @@ Brush Brush::radialGradient(float beginX, float beginY, float beginRadius,
                             const ColorStops& colorStops)
 {
     BrushData* data = new BrushData();
-    data->setRadialGradient(beginX, beginY, beginRadius, 
+    data->setRadialGradient(beginX, beginY, beginRadius,
                             endX, endY, endRadius, colorStops);
     return Brush(data);
 }
@@ -153,8 +162,8 @@ const Color& Brush::gradientColor() const
 
 
 const ColorStops& Brush::gradientStops() const
-{ 
-    return _brushData->gradientStops(); 
+{
+    return _brushData->gradientStops();
 }
 
 
@@ -314,7 +323,7 @@ void BrushData::setRadialGradient(const PointF& begin, float beginRadius,
     _isNull        = false;
     _fillStyle     = Brush::Gradient;
     _positionMode  = Brush::Absolute;
-    
+
     _gradient      = Brush::Radial;
     _gradientStops = colorStops;
     _gradientAngle = 0.0f;
@@ -322,7 +331,7 @@ void BrushData::setRadialGradient(const PointF& begin, float beginRadius,
     _gradientBeginRadius = beginRadius;
     _gradientEnd = end;
     _gradientEndRadius = endRadius;
-    
+
     _ofsX          = 0;
     _ofsY          = 0;
     _texture       = Image();
