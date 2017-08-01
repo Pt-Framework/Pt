@@ -79,6 +79,7 @@ void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4], cons
     const float spos = (position - p1) / (p2 - p1);
 
     // Interpolate the color
+    // TODO: Use equivalent-power linear interpolation?
     bgra32Res[0] = b1 + (b2 - b1) * spos;
     bgra32Res[1] = g1 + (g2 - g1) * spos;
     bgra32Res[2] = r1 + (r2 - r1) * spos;
