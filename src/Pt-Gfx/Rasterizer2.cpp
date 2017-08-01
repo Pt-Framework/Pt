@@ -527,46 +527,72 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
     const ColorStops& colStops = _brush.gradientStops();
     if(colStops.empty()) return;
 
-    const PointF& begPos = _brush.gradientBegin();
-    const float   begRad = _brush.gradientBeginRadius();
+    PointF begPos, endPos;
+    float  begRad, endRad;
 
-    const PointF& endPos = _brush.gradientEnd();
-    const float   endRad = _brush.gradientEndRadius();
+     if(_brush.positionMode() == Brush::Absolute) {
+        //begPos = _brush.gradientBegin();
+        //endPos = _brush.gradientEnd  ();
+
+        //begRad = _brush.gradientBeginRadius();
+        //endRad = _brush.gradientEndRadius  ();
+    }
+    else { // Brush::Relative
+        begPos.set( _brush.gradientBegin().x() * width, _brush.gradientBegin().y() * height * 0.5f );
+        endPos.set( _brush.gradientEnd  ().x() * width, _brush.gradientEnd  ().y() * height * 0.5f );
+
+        begRad = _brush.gradientBeginRadius() * sqrtf(width * width + height * height);
+        endRad = _brush.gradientEndRadius  () * sqrtf(width * width + height * height);
+    }
+    //std::cout << begPos.x() << ", " << begPos.y() << " : " << begRad << std::endl;
+    //std::cout << endPos.x() << ", " << endPos.y() << " : " << endRad << std::endl;
 
     const float xDiff = endPos.x() - begPos.x();
     const float yDiff = endPos.y() - begPos.y();
     const float rDiff = endRad     - begRad;
+    //std::cout << xDiff << ", " << yDiff << " : " << rDiff << std::endl;
 
     const float a       = rDiff * rDiff - xDiff * xDiff - yDiff * yDiff;
     const float rBegDif = 2.0f * begRad * rDiff;
     const float rBegSqr = begRad * begRad;
+    //std::cout << a << ", " << rBegDif << ", " << rBegSqr << std::endl;
 
     // Walk through the pixels and generate the gradient
-
     const Pt::int32_t  numPixels    = width * height;
           Pt::uint8_t* pixelBuffer  = _brushBuffer.data();
-          Pt::uint8_t  rgba32Res[4] = { 0, 0, 0, 255 };
+          Pt::uint8_t  bgra32Res[4] = { 0, 0, 0, 255 };
+    //std::cout << width << ", " << height << " : " << numPixels << std::endl;
 
     for(Pt::int32_t i = 0; i < numPixels; ++i) {
         const Pt::int32_t x    = i % width;
         const Pt::int32_t y    = i / width;
+        //std::cout << x << ", " << y << std::endl;
+
         const float       dx   = x - begPos.x();
-        const float       dy   = y - endPos.y();
+        const float       dy   = y - begPos.y();
+        //std::cout << dx << ", " << dy << std::endl;
+
         const float       b    = rBegDif + 2.0f * (dx * xDiff + dy * yDiff);
         const float       c    = rBegSqr - dx * dx - dy * dy;
-        const float       dscm = b * b - 4 * a * c;
+        //std::cout << b << ", " << c << std::endl;
+
+        const float       dscm = b * b - 4.0f * a * c;
+        //std::cout << dscm << std::endl;
+
         // Interpolate the color
         if(dscm >= 0.0f) {
-            float ratio = (-b * sqrtf(dscm)) / (2.0f * a);
+            float ratio = (-b + sqrtf(dscm)) / (2.0f * a);
+            //std::cout << ratio << std::endl;
+
                  if(ratio < 0.0f) ratio = 0.0f;
             else if(ratio > 1.0f) ratio = 1.0f;
-            colStops.calculateInterpolatedColorRGBA32(rgba32Res, ratio);
+            colStops.calculateInterpolatedColorBGRA32(bgra32Res, ratio);
         }
         // Put the pixel
-        *pixelBuffer++ = 255;//rgba32Res[2];
-        *pixelBuffer++ = 255;//rgba32Res[1];
-        *pixelBuffer++ = 255;//rgba32Res[0];
-        *pixelBuffer++ = 255;//rgba32Res[3];
+        *pixelBuffer++ = bgra32Res[0];
+        *pixelBuffer++ = bgra32Res[1];
+        *pixelBuffer++ = bgra32Res[2];
+        *pixelBuffer++ = bgra32Res[3];
     }
 
     /*
@@ -614,44 +640,6 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
         gBuffer.push(g);
         bBuffer.push(b);
     }
-
-    //While converting floats to integer valued color values, apply Floyd-Steinberg dither.
-    for (i = 0; i<len/4; i++) {
-        nearestValue = ~~(rBuffer[i]);
-        quantError =rBuffer[i] - nearestValue;
-        rBuffer[i+1] += 7/16*quantError;
-        rBuffer[i-1+rectW] += 3/16*quantError;
-        rBuffer[i + rectW] += 5/16*quantError;
-        rBuffer[i+1 + rectW] += 1/16*quantError;
-
-        nearestValue = ~~(gBuffer[i]);
-        quantError =gBuffer[i] - nearestValue;
-        gBuffer[i+1] += 7/16*quantError;
-        gBuffer[i-1+rectW] += 3/16*quantError;
-        gBuffer[i + rectW] += 5/16*quantError;
-        gBuffer[i+1 + rectW] += 1/16*quantError;
-
-        nearestValue = ~~(bBuffer[i]);
-        quantError =bBuffer[i] - nearestValue;
-        bBuffer[i+1] += 7/16*quantError;
-        bBuffer[i-1+rectW] += 3/16*quantError;
-        bBuffer[i + rectW] += 5/16*quantError;
-        bBuffer[i+1 + rectW] += 1/16*quantError;
-    }
-
-    //copy to pixel data
-    for (i=0; i<len; i += 4) {
-        q = i/4;
-        pixelData[i] = ~~rBuffer[q];
-        pixelData[i+1] = ~~gBuffer[q];
-        pixelData[i+2] = ~~bBuffer[q];
-        pixelData[i+3] = 255;
-    }
-
-    ctx.putImageData(image,rectX0,rectY0);
-
-}
-
      */
 
 

@@ -103,7 +103,7 @@ class ColorStops
         const ColorStop& back() const
         { return _stops.back(); }
 
-        void calculateInterpolatedColorRGBA32(Pt::uint8_t rgba32[4], const float position) const;
+        void calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4], const float position) const;
 
     private:
         std::vector<ColorStop> _stops;

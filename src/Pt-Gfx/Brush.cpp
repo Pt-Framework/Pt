@@ -35,12 +35,12 @@ namespace Pt {
 
 namespace Gfx {
 
-void ColorStops::calculateInterpolatedColorRGBA32(Pt::uint8_t rgba32[4], const float position) const
+void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4], const float position) const
 {
-    rgba32[0] = position * 255.0f;
-    rgba32[1] = position * 255.0f;
-    rgba32[2] = position * 255.0f;
-    rgba32[3] = 255;
+    bgra32Res[0] = position * 255.0f;
+    bgra32Res[1] = position * 255.0f;
+    bgra32Res[2] = position * 255.0f;
+    bgra32Res[3] = 255;
 }
 
 

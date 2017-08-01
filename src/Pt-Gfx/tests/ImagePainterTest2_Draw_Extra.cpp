@@ -73,7 +73,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     stops.add(0.0, Color::fromRgb8(255, 0, 0, 175));
     stops.add(1.0, Color::fromRgb8(0, 255, 0, 175));
 
-    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0.0, 0.5, 0.5, 0.5, stops) );
+    painter.setBrush( Brush::radialGradient(0.75, 0.75, 0.0, 0.5, 0.25, 0.5, stops) );
     painter.fillRect( RectF(PointF(20, 250), SizeF(200, 200)) );
 
 /*
