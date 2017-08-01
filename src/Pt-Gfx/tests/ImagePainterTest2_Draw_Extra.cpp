@@ -68,14 +68,25 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->setPen(penText);
     ip2->drawText( PointF(70 + 600, 180), "Arrow-2" );
 
-    // Radial gradient
-    ColorStops stops;
-    stops.add(0.0, Color::fromRgb8(255, 0, 0, 175));
-    stops.add(1.0, Color::fromRgb8(0, 255, 0, 175));
+    // Color stops
+    ColorStops stops2;
+    stops2.add(0.0, Color::fromRgb8(255, 0, 0, 175));
+    stops2.add(1.0, Color::fromRgb8(0, 255, 0, 175));
 
-    //painter.setBrush( Brush::radialGradient(0.75, 0.75, 0.0, 0.5, 0.25, 0.5, stops) );
-    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0.0, 0.5, 0.5, 0.5, stops) );
-    painter.fillRect( RectF(PointF(20, 250), SizeF(200, 200)) );
+    ColorStops stops3;
+    stops3.add(0.1, Color::fromRgb8(255, 0, 0, 175));
+    stops3.add(0.5, Color::fromRgb8(0, 255, 0, 175));
+    stops3.add(0.9, Color::fromRgb8(0, 0, 255, 175));
+
+    // Radial gradients
+    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0.0, 0.5, 0.5, 0.5, stops2) );
+    painter.fillRect( RectF(PointF(20 + 150 * 0, 250), SizeF(100, 100)) );
+
+    painter.setBrush( Brush::radialGradient(0.75, 0.75, 0.0, 0.5, 0.25, 0.5, stops2) );
+    painter.fillRect( RectF(PointF(20 + 150 * 1, 250), SizeF(100, 100)) );
+
+    painter.setBrush( Brush::radialGradient(0.25, 0.75, 0.0, 0.5, 0.25, 0.5, stops3) );
+    painter.fillRect( RectF(PointF(20 + 150 * 2, 250), SizeF(100, 100)) );
 
 /*
     // --- Part 1 ---

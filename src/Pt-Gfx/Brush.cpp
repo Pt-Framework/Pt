@@ -37,10 +37,52 @@ namespace Gfx {
 
 void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4], const float position) const
 {
-    bgra32Res[0] = position * 255.0f;
-    bgra32Res[1] = position * 255.0f;
-    bgra32Res[2] = position * 255.0f;
-    bgra32Res[3] = 255;
+    // If the position is less or equal than the first position, then simply return the first color
+    if(position <= _stops[0].position()) {
+        bgra32Res[0] = _stops[0].b8();
+        bgra32Res[1] = _stops[0].g8();
+        bgra32Res[2] = _stops[0].r8();
+        bgra32Res[3] = _stops[0].a8();
+        return;
+    }
+
+    // If the position is greater or equal than the last position, then simply return the last color
+    if(position >= _stops.back().position()) {
+        bgra32Res[0] = _stops.back().b8();
+        bgra32Res[1] = _stops.back().g8();
+        bgra32Res[2] = _stops.back().r8();
+        bgra32Res[3] = _stops.back().a8();
+        return;
+    }
+
+    // Find out in what two stops the position is between
+    std::size_t stopIndex = 0;
+    while(true) {
+        if(position < _stops[stopIndex].position()) break;
+        ++stopIndex;
+    }
+
+    // Get the positions and colors
+    const float       p1 = _stops[stopIndex - 1]. position();
+    const Pt::uint8_t r1 = _stops[stopIndex - 1]. r8();
+    const Pt::uint8_t g1 = _stops[stopIndex - 1]. g8();
+    const Pt::uint8_t b1 = _stops[stopIndex - 1]. b8();
+    const Pt::uint8_t a1 = _stops[stopIndex - 1]. a8();
+
+    const float       p2 = _stops[stopIndex    ]. position();
+    const Pt::uint8_t r2 = _stops[stopIndex    ]. r8();
+    const Pt::uint8_t g2 = _stops[stopIndex    ]. g8();
+    const Pt::uint8_t b2 = _stops[stopIndex    ]. b8();
+    const Pt::uint8_t a2 = _stops[stopIndex    ]. a8();
+
+    // Scale the position
+    const float spos = (position - p1) / (p2 - p1);
+
+    // Interpolate the color
+    bgra32Res[0] = b1 + (b2 - b1) * spos;
+    bgra32Res[1] = g1 + (g2 - g1) * spos;
+    bgra32Res[2] = r1 + (r2 - r1) * spos;
+    bgra32Res[3] = a1 + (a2 - a1) * spos;
 }
 
 

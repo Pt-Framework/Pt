@@ -585,54 +585,6 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
         *pixelBuffer++ = bgra32Res[3];
     }
 
-    /*
-        if (discrim >= 0) {
-
-             //find out what two stops this is between
-            if (ratio == 1) {
-                stopNumber = this.colorStops.length-1;
-            }
-            else {
-                stopNumber = 0;
-                found = false;
-                while (!found) {
-                    found = (ratio < this.colorStops[stopNumber].ratio);
-                    if (!found) {
-                        stopNumber++;
-                    }
-                }
-            }
-
-            //calculate color.
-            r0 = this.colorStops[stopNumber-1].r;
-            g0 = this.colorStops[stopNumber-1].g;
-            b0 = this.colorStops[stopNumber-1].b;
-            r1 = this.colorStops[stopNumber].r;
-            g1 = this.colorStops[stopNumber].g;
-            b1 = this.colorStops[stopNumber].b;
-            ratio0 = this.colorStops[stopNumber-1].ratio;
-            ratio1 = this.colorStops[stopNumber].ratio;
-
-            f = (ratio-ratio0)/(ratio1-ratio0);
-            r = r0 + (r1 - r0)*f;
-            g = g0 + (g1 - g0)*f;
-            b = b0 + (b1 - b0)*f;
-        }
-
-        else {
-            r = r0;
-            g = g0;
-            b = b0;
-        }
-
-        //set color as float values in buffer arrays
-        rBuffer.push(r);
-        gBuffer.push(g);
-        bBuffer.push(b);
-    }
-     */
-
-
 /*
     // Determine the start and end colors
     Pt::uint8_t sc[4], ec[4], rc[4];

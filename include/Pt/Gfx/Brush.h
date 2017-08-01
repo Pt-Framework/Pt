@@ -94,6 +94,8 @@ class ColorStops
         void clear()
         { _stops.clear(); }
 
+        // TODO: Throw exception if the position < 0.0 or position > 1.0
+        // TODO: Throw exception if the positions are mixed up
         void add(float position, const Color& color)
         { _stops.push_back( ColorStop(position, color) ); }
 
