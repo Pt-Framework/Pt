@@ -392,7 +392,7 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
         }
     }
 
-    // Resize the brush buffer and the start-end colors as needed
+    // Resize the brush buffer
     switch( _brush.gradient() )
     {
         case Pt::Gfx::Brush::Horizontal:
@@ -466,89 +466,55 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
 //           Original code by Rectangle World, 2012
 void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt::int32_t height)
 {
+    // Get and check the color stops
+    // TODO: Shall we implicitly clear the image if there is no color stop?
     const ColorStops& colStops = _brush.gradientStops();
     if(colStops.empty()) return;
 
+    // Get the start and end parameters
     PointF begPos, endPos;
-    float  begRad, endRad;
 
     if(_brush.positionMode() == Brush::Absolute) {
         begPos = _brush.gradientBegin      ();
-        begRad = _brush.gradientBeginRadius();
-
         endPos = _brush.gradientEnd      ();
-        endRad = _brush.gradientEndRadius();
     }
     else { // Brush::Relative
         begPos.set( _brush.gradientBegin().x() * width, _brush.gradientBegin().y() * height );
-        begRad =    _brush.gradientBeginRadius() * sqrtf(width * width + height * height);
-
-        endPos.set( _brush.gradientEnd().x() * width, _brush.gradientEnd  ().y() * height );
-        endRad =    _brush.gradientEndRadius() * sqrtf(width * width + height * height);
+        endPos.set( _brush.gradientEnd  ().x() * width, _brush.gradientEnd  ().y() * height );
     }
 
-    /*
-    // Determine the start and end colors
-    Pt::uint8_t sc[4], ec[4], rc[4];
-    updateGradientBrush_getStartEndColors(sc, ec);
+    // Prepare some constants
+    const float xDiff = endPos.x() - begPos.x();
+    const float yDiff = endPos.y() - begPos.y();
+    const float sDiff = 1.0f / (xDiff * xDiff + yDiff * yDiff);
 
-    // Calculate the focus point
-    float focusX = 0.0f;
-    float focusY = 0.0f;
+    // TODO: Shall we implicitly clear the image if we have got invalid parameter(s)?
+    if(isinf(sDiff)) return;
 
-    if(_brush.positionMode() == Brush::Absolute) {
-        focusX = _brush.gradientBegin().x();
-        focusY = _brush.gradientBegin().y();
+    // Calculate the number of pixels, get the pixel buffer, and prepare the interpolation buffer
+    const Pt::int32_t  numPixels    = width * height;
+          Pt::uint8_t* pixelBuffer  = _brushBuffer.data();
+          Pt::uint8_t  bgra32Res[4] = { 0, 0, 0, 255 };
+
+    // Walk through the pixels and generate the gradient
+    for(Pt::int32_t i = 0; i < numPixels; ++i) {
+        // Calculate the coordinates and their deltas
+        const Pt::int32_t x    = i % width;
+        const Pt::int32_t y    = i / width;
+        const float       dx   = x - begPos.x();
+        const float       dy   = y - begPos.y();
+        // Calculate the ratio
+        float ratio = (xDiff * dx + yDiff * dy) * sDiff;
+             if(ratio < 0.0f) ratio = 0.0f;
+        else if(ratio > 1.0f) ratio = 1.0f;
+        // Interpolate the color
+        colStops.calculateInterpolatedColorBGRA32(bgra32Res, ratio);
+        // Put the pixel
+        *pixelBuffer++ = bgra32Res[0];
+        *pixelBuffer++ = bgra32Res[1];
+        *pixelBuffer++ = bgra32Res[2];
+        *pixelBuffer++ = bgra32Res[3];
     }
-    else { // Brush::Relative
-        focusX = width  * _brush.gradientBegin().x();
-        focusY = height * _brush.gradientBegin().y();
-    }
-
-    // Calculate the rotation
-    const float angl = 0.0; //TODO: _brush.gradientAngle() + 0.001f;
-    const float rad  = angl * DegToRadF - piQuart<float>();
-    const float sval = ::sin(rad);
-    const float cval = ::cos(rad);
-
-    // Define the reference line
-    const float wq = sqrtf(width * width + height * height) * 0.25f;
-    const float x1 = -wq;
-    const float y1 =  wq;
-    const float x2 =  wq;
-    const float y2 = -wq;
-
-    // Determine the rotated reference line
-    const float rx1 = ( sval * x1 + cval * y1) + focusX;
-    const float ry1 = ( cval * x1 - sval * y1) + focusY;
-    const float rx2 = ( sval * x2 + cval * y2) + focusX;
-    const float ry2 = ( cval * x2 - sval * y2) + focusY;
-
-    // Calculate the gradient of the rotated reference line
-    const float rm = (ry2 - ry1) / (rx1 - rx2);
-
-    // Generate the gradient
-    Pt::uint8_t* pixel = _brushBuffer.data();
-
-    for(Pt::int32_t y = 0; y < height; ++y) {
-        // Calculate the scaling factor
-        float const p0 = rm * (y - ry1) + rx1;
-        float const p1 = rm * (y - ry2) + rx2;
-        float const d  = 1.0f / (p1 - p0);
-        for(Pt::int32_t x = 0; x < width; ++x) {
-            // Calculate the distance and blending factor
-            const float dist = d * (x - p0);
-            const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
-            // Interpolate the color
-            eqpLerp(rc, sc, ec, mf);
-            // Put the pixel
-            *pixel++ = rc[2];
-            *pixel++ = rc[1];
-            *pixel++ = rc[0];
-            *pixel++ = rc[3];
-        }
-    }
-    */
 }
 
 
@@ -558,34 +524,42 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
 //           Original code by Rectangle World, 2013
 void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt::int32_t height)
 {
+    // Get and check the color stops
+    // TODO: Shall we implicitly clear the image if there is no color stop?
     const ColorStops& colStops = _brush.gradientStops();
     if(colStops.empty()) return;
 
+    // Get the start and end parameters
     PointF begPos, endPos;
     float  begRad, endRad;
 
     if(_brush.positionMode() == Brush::Absolute) {
-        begPos = _brush.gradientBegin      ();
-        begRad = _brush.gradientBeginRadius();
+        begPos = _brush.gradientBegin();
+        endPos = _brush.gradientEnd  ();
 
-        endPos = _brush.gradientEnd      ();
-        endRad = _brush.gradientEndRadius();
+        begRad = _brush.gradientBeginRadius();
+        endRad = _brush.gradientEndRadius  ();
     }
     else { // Brush::Relative
         begPos.set( _brush.gradientBegin().x() * width, _brush.gradientBegin().y() * height );
-        begRad =    _brush.gradientBeginRadius() * sqrtf(width * width + height * height);
+        endPos.set( _brush.gradientEnd  ().x() * width, _brush.gradientEnd  ().y() * height );
 
-        endPos.set( _brush.gradientEnd().x() * width, _brush.gradientEnd  ().y() * height );
-        endRad =    _brush.gradientEndRadius() * sqrtf(width * width + height * height);
+        begRad =    _brush.gradientBeginRadius() * sqrtf(width * width + height * height);
+        endRad =    _brush.gradientEndRadius  () * sqrtf(width * width + height * height);
     }
 
+    // Prepare some constants
     const float xDiff = endPos.x() - begPos.x();
     const float yDiff = endPos.y() - begPos.y();
     const float rDiff = endRad     - begRad;
 
     const float a       = rDiff * rDiff - xDiff * xDiff - yDiff * yDiff;
+    const float r2a     = 1.0f / (2.0f * a);
     const float rBegDif = 2.0f * begRad * rDiff;
     const float rBegSqr = begRad * begRad;
+
+    // TODO: Shall we implicitly clear the image if we have got invalid parameter(s)?
+    if(isinf(r2a)) return;
 
     // Calculate the number of pixels, get the pixel buffer, and prepare the interpolation buffer
     const Pt::int32_t  numPixels    = width * height;
@@ -606,7 +580,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
         // Interpolate the color as needed
         if(dscm >= 0.0f) {
             // Calculate the ratio
-            float ratio = (-b + sqrtf(dscm)) / (2.0f * a);
+            float ratio = (-b + sqrtf(dscm)) * r2a;
                  if(ratio < 0.0f) ratio = 0.0f;
             else if(ratio > 1.0f) ratio = 1.0f;
             // Interpolate the color

@@ -78,116 +78,35 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     stops3.add(0.5, Color::fromRgb8(0, 255, 0, 175));
     stops3.add(0.9, Color::fromRgb8(0, 0, 255, 175));
 
-    // Radial gradients
-    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0.0, 0.5, 0.5, 0.5, stops2) );
-    painter.fillRect( RectF(PointF(20 + 150 * 0, 250 + 150 * 0), SizeF(100, 100)) );
+    // 1D gradients
+    painter.setBrush( Brush::horizontalGradient(Color::fromRgb8(0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175)) );
+    painter.fillRect( RectF(PointF(20 + 130 * 0, 250 + 150 * 0), SizeF(100, 100)) );
 
-    painter.setBrush( Brush::radialGradient(0.75, 0.75, 0.0, 0.5, 0.25, 0.5, stops2) );
-    painter.fillRect( RectF(PointF(20 + 150 * 1, 250 + 150 * 0), SizeF(100, 100)) );
+    painter.setBrush( Brush::verticalGradient(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175)) );
+    painter.fillRect( RectF(PointF(20 + 130 * 1, 250 + 150 * 0), SizeF(100, 100)) );
 
-    painter.setBrush( Brush::radialGradient(0.25, 0.75, 0.0, 0.5, 0.25, 0.5, stops3) );
-    painter.fillRect( RectF(PointF(20 + 150 * 2, 250 + 150 * 0), SizeF(100, 100)) );
-
-    // Linear gradients
+    // 2D gradients (linear)
     painter.setBrush( Brush::linearGradient(0.0, 0.5, 1.0, 0.5, stops2) );
-    painter.fillRect( RectF(PointF(20 + 150 * 0, 250 + 150 * 1), SizeF(100, 100)) );
+    painter.fillRect( RectF(PointF(20 + 130 * 0, 250 + 150 * 1), SizeF(100, 100)) );
 
     painter.setBrush( Brush::linearGradient(0.5, 0.0, 0.5, 1.0, stops2) );
-    painter.fillRect( RectF(PointF(20 + 150 * 1, 250 + 150 * 1), SizeF(100, 100)) );
+    painter.fillRect( RectF(PointF(20 + 130 * 1, 250 + 150 * 1), SizeF(100, 100)) );
 
     painter.setBrush( Brush::linearGradient(0.1, 0.2, 1.0, 0.9, stops3) );
-    painter.fillRect( RectF(PointF(20 + 150 * 2, 250 + 150 * 1), SizeF(100, 100)) );
+    painter.fillRect( RectF(PointF(20 + 130 * 2, 250 + 150 * 1), SizeF(100, 100)) );
 
-/*
-    // --- Part 1 ---
+    painter.setBrush( Brush::linearGradient(0.7, 0.2, 0.5, 0.8, stops3) );
+    painter.fillRect( RectF(PointF(20 + 130 * 3, 250 + 150 * 1), SizeF(100, 100)) );
 
-    // Rectangular gradient
-    //painter.setBrush( Brush::rectangularGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.3f, 0.7f ) );
-    //painter.fillRect( RectF(PointF(20, 250), SizeF(100, 100)) );
+    // 2D gradients (radial)
+    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0.0, 0.5, 0.5, 0.5, stops2) );
+    painter.fillRect( RectF(PointF(20 + 130 * 4, 250 + 150 * 1), SizeF(100, 100)) );
 
-    //painter.setBrush( Brush::rectangularGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 30.0f) );
-    //painter.fillRect( RectF(PointF(20 + 150, 250), SizeF(100, 100)) );
+    painter.setBrush( Brush::radialGradient(0.75, 0.75, 0.0, 0.5, 0.25, 0.5, stops2) );
+    painter.fillRect( RectF(PointF(20 + 130 * 5, 250 + 150 * 1), SizeF(100, 100)) );
 
-    // Radial gradient
-    ColorStops stops;
-    stops.add(0, Color::fromRgb8(255, 0, 0, 175));
-    stops.add(1.0, Color::fromRgb8(0, 255, 0, 175));
-
-    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0,
-                                            0.5, 0.5, 0.5, stops) );
-    painter.fillRect( RectF(PointF(20 + 300, 250), SizeF(100, 100)) );
-
-    painter.setBrush( Brush::radialGradient(0.3f, 0.7f, 0,
-                                            0.5, 0.5, 0.5,
-                                            stops) );
-    painter.fillRect( RectF(PointF(20 + 450, 250), SizeF(100, 100)) );
-
-    // Conical gradient
-    //painter.setBrush( Brush::conicalGradient( Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175) ) );
-    //painter.fillRect( RectF(PointF(20 + 600, 250), SizeF(100, 100)) );
-
-    //painter.setBrush( Brush::conicalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.7f, 0.3f, 30.0f) );
-    //painter.fillRect( RectF(PointF(20 + 750, 250), SizeF(100, 100)) );
-
-    // --- Part 2 ---
-
-    // Rectangular gradient
-    //painter.setBrush( Brush::rectangularGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175) ) );
-    //painter.fillRect( RectF(PointF(20, 250 + 135), SizeF(50, 100)) );
-
-    //painter.setBrush( Brush::rectangularGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 30.0f) );
-    //painter.fillRect( RectF(PointF(20 + 180, 250 + 135), SizeF(50, 100)) );
-
-    // Radial gradient
-    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0,
-                                            0.5, 0.5, 0.5, stops) );
-    painter.fillRect( RectF(PointF(20 + 360, 250 + 135), SizeF(50, 100)) );
-
-    // Conical gradient
-    //painter.setBrush( Brush::conicalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
-    //painter.fillRect( RectF(PointF(20 + 540, 250 + 135), SizeF(50, 100)) );
-
-    //painter.setBrush( Brush::conicalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 30.0f) );
-    //painter.fillRect( RectF(PointF(20 + 720, 250 + 135), SizeF(50, 100)) );
-
-    // Linear gradient
-    painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
-    painter.fillRect( RectF(PointF(20 + 90, 250 + 135), SizeF(50, 50)) );
-
-    painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 15.0f) );
-    painter.fillRect( RectF(PointF(20 + 90 + 180, 250 + 135), SizeF(50, 50)) );
-
-    painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, -15.0f) );
-    painter.fillRect( RectF(PointF(20 + 90 + 360, 250 + 135), SizeF(50, 50)) );
-
-    painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
-    painter.fillRect( RectF(PointF(20 + 90 + 540, 250 + 135), SizeF(50, 100)) );
-
-    painter.setBrush( Brush::linearGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
-    painter.fillRect( RectF(PointF(20 + 90 + 720, 250 + 135), SizeF(100, 50)) );
-
-    // --- Part 3 ---
-
-    // Rectangular gradient
-    //painter.setBrush( Brush::rectangularGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
-    //painter.fillRect( RectF(PointF(20, 250 + 270), SizeF(100, 50)) );
-
-    //painter.setBrush( Brush::rectangularGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 30.0f) );
-    //painter.fillRect( RectF(PointF(20 + 180, 250 + 270), SizeF(100, 50)) );
-
-    // Radial gradient
-    painter.setBrush( Brush::radialGradient(0.5, 0.5, 0,
-                                            0.5, 0.5, 0.5, stops) );
-    painter.fillRect( RectF(PointF(20 + 360, 250 + 270), SizeF(100, 50)) );
-
-    // Conical gradient
-    //painter.setBrush( Brush::conicalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175)) );
-    //painter.fillRect( RectF(PointF(20 + 540, 250 + 270), SizeF(100, 50)) );
-
-    //painter.setBrush( Brush::conicalGradient(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), 0.5f, 0.5f, 30.0f) );
-    //painter.fillRect( RectF(PointF(20 + 720, 250 + 270), SizeF(100, 50)) );
-
-    */
+    painter.setBrush( Brush::radialGradient(0.25, 0.75, 0.0, 0.5, 0.25, 0.5, stops3) );
+    painter.fillRect( RectF(PointF(20 + 130 * 6, 250 + 150 * 1), SizeF(100, 100)) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

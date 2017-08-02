@@ -36,32 +36,32 @@ namespace Pt {
 
 namespace Gfx {
 
-struct PatternState 
+struct PatternState
 {
     std::vector<Polygon>& dstPolygons;  // Destination vector
     //size_t                dstPStart;  // Start index of the previous polygon in the above vector
     //size_t                dstPCount;  // The number of points of the previous polygon in the above vector
     //size_t                dstPCount0; // The number of points of the first polygon in the above vector
-                          
+
     const PointF*         srcPoints;  // Source points
     size_t                srcCount;   // The number of source points
-                          
+
     float                 cellSize;   // Cell size
     float                 patSegLen;  // Length of the currently processed "pattern" segment
-                          
+
     size_t                idx1;       // Index to the first point which is currently being processed;
                                       // the index to the second point is always (idx1 + 1)
-                          
+
     float                 px, py;     // Current interpolation coordinate (in-between the two points)
     float                 ex, ey;     // Current end coordinate (coordinate of the the second point)
     float                 uvx, uvy;   // Unit vector from the first point to the second point
     float                 cvx, cvy;   // Cell vector from the first point to the second point
     float                 remLen;     // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
-                          
+
     std::vector<PointF>   gather;     // Gathered polygon points
     float                 gatherLen;  // Length of the gathered points
 
-    PatternState(std::vector<Polygon>& polygons, 
+    PatternState(std::vector<Polygon>& polygons,
                  const PointF* src, size_t pointCount, size_t penSize)
     : dstPolygons(polygons)
     //, dstPStart(0)
@@ -92,7 +92,7 @@ void Polygonizer::setPattern(const Pen::Style& style)
     // Select the pattern
     Pt::uint64_t patternSel;
 
-    switch(style) 
+    switch(style)
     {
         default:
         case Pen::Dot         : patternSel = patternDot;              break;
@@ -109,10 +109,10 @@ void Polygonizer::setPattern(const Pen::Style& style)
 
     // Generate the pattern
     bool previous = 0;
-    for(Pt::int8_t p = 0; p < PatternCells; ++p) 
-    { 
+    for(Pt::int8_t p = 0; p < PatternCells; ++p)
+    {
         // The pattern has 64 points
-        
+
         // Get the pattern cell value
         const bool current = patternSel & ((Pt::uint64_t) 1 << p);
 
@@ -123,7 +123,7 @@ void Polygonizer::setPattern(const Pen::Style& style)
 }
 
 
-void Polygonizer::renderRoundedRect(std::vector<Polygon>& polygons, 
+void Polygonizer::renderRoundedRect(std::vector<Polygon>& polygons,
                                      const RectF& rect, float radius, const Pen& pen)
 {
     std::vector<PointF> pointsF;
@@ -136,7 +136,7 @@ void Polygonizer::renderRoundedRect(std::vector<Polygon>& polygons,
 }
 
 
-void Polygonizer::fillRoundedRect(std::vector<PointF>& pointsF, 
+void Polygonizer::fillRoundedRect(std::vector<PointF>& pointsF,
                                    const RectF& rect, float radius)
 {
     renderRoundedRectPoints(pointsF, rect, radius, 10);
@@ -146,8 +146,8 @@ void Polygonizer::fillRoundedRect(std::vector<PointF>& pointsF,
 }
 
 
-void Polygonizer::renderRoundedRectPoints(std::vector<PointF>& dst, 
-                                           const RectF& rect, float radius, 
+void Polygonizer::renderRoundedRectPoints(std::vector<PointF>& dst,
+                                           const RectF& rect, float radius,
                                            std::size_t penSize)
 {
     // TODO: penSize is actually a smoothness value
@@ -211,7 +211,7 @@ void Polygonizer::renderRoundedRectPoints(std::vector<PointF>& dst,
 }
 
 void Polygonizer::renderEllipse(std::vector<Polygon>& polygons,
-                                 const PointF& topLeft, const SizeF& size, 
+                                 const PointF& topLeft, const SizeF& size,
                                  const Pen& pen)
 {
     // Calculate the ellipse's parameters
@@ -221,21 +221,21 @@ void Polygonizer::renderEllipse(std::vector<Polygon>& polygons,
     const Pt::int32_t centerX  = topLeft.x() + radiusX;
     const Pt::int32_t centerY  = topLeft.y() + radiusY;
 
-    if(pen.style() == Pen::Solid) 
+    if(pen.style() == Pen::Solid)
     {
         // Calculate the additional ellipse's parameters
         const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
         const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
         const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
-        
+
         polygons.reserve(polygons.size() + 2);
 
         // Generate a polygon that approximates the ellipse
         polygons.resize(polygons.size() + 1);
         std::vector<PointF>& pointsOuter = polygons.back().points();
         renderEllipsePoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, 0);
-        
+
         polygons.resize(polygons.size() + 1);
         std::vector<PointF>& pointsInner = polygons.back().points();
         renderEllipsePoints(pointsInner, radiusXi, radiusYi, centerX, centerY, 0);
@@ -251,9 +251,9 @@ void Polygonizer::renderEllipse(std::vector<Polygon>& polygons,
 }
 
 
-void Polygonizer::renderEllipsePoints(std::vector<PointF>& dst, 
-                                       Pt::int32_t radiusX, Pt::int32_t radiusY, 
-                                       Pt::int32_t centerX, Pt::int32_t centerY, 
+void Polygonizer::renderEllipsePoints(std::vector<PointF>& dst,
+                                       Pt::int32_t radiusX, Pt::int32_t radiusY,
+                                       Pt::int32_t centerX, Pt::int32_t centerY,
                                        size_t penSize)
 {
     // Calculate the ellipse's parameters
@@ -265,31 +265,31 @@ void Polygonizer::renderEllipsePoints(std::vector<PointF>& dst,
     const float       nSegs1i = 1.0f / (nSegs - 1);
 
     // Generate a polygon that approximates the ellipse
-    for(Pt::int32_t i = 0; i < nSegs; ++i) 
+    for(Pt::int32_t i = 0; i < nSegs; ++i)
     {
         const float angle = piDouble<float>() * i * nSegs1i;
-        
+
         // Calculate the coordinate
         const float x = centerX + radiusX * std::cos(angle);
         const float y = centerY - radiusY * std::sin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
-        
+
         // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) 
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y )
             continue;
-        
+
         dst.push_back( PointF(x, y) );
     }
 
     // Discard the last point if it has the same coordinate with the first one
-    if(dst.back() == dst[0]) 
+    if(dst.back() == dst[0])
         dst.pop_back();
 }
 
 
 void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMode,
-                             const PointF& topLeft, const SizeF& size, 
+                             const PointF& topLeft, const SizeF& size,
                              float degBegin, float degEnd, const Pen& pen)
-{    
+{
     // Ensure that the begin angle is within the acceptable range
     while(degBegin < -360.0f) degBegin += 360.0f;
     while(degBegin >  360.0f) degBegin -= 360.0f;
@@ -319,9 +319,9 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
     const Pt::int32_t centerX = topLeft.x() + radiusX;
     const Pt::int32_t centerY = topLeft.y() + radiusY;
 
-    if(pen.style() == Pen::Solid) 
+    if(pen.style() == Pen::Solid)
     {
-        // Calculate the additional arc's parameters       
+        // Calculate the additional arc's parameters
         const Pt::int32_t radiusXo   = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
         const Pt::int32_t radiusXi   = ( size.width () - penSize ) / 2;
@@ -330,16 +330,16 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
         const Pt::int32_t centerYsub = lround(centerY - shiftYps);
         const Pt::int32_t centerXadd = lround(centerX + shiftXps);
         const Pt::int32_t centerYadd = lround(centerY + shiftYps);
-        
-        if(arcMode == ArcMode::Chord) 
+
+        if(arcMode == ArcMode::Chord)
         {
             // The arc's "outside" lines
             polygons.resize(polygons.size() + 1);
             std::vector<PointF>& pointsOuter = polygons.back().points();
-            
+
             renderArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
             pointsOuter.push_back( pointsOuter.front() );
-            
+
             // The arc's "inside" lines
             polygons.resize(polygons.size() + 1);
             std::vector<PointF>& pointsInner = polygons.back().points();
@@ -347,14 +347,14 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
             renderArcPoints(pointsInner, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
             pointsInner.push_back( pointsInner.front() );
         }
-        else if(arcMode == ArcMode::Pie) 
+        else if(arcMode == ArcMode::Pie)
         {
             // Calculate the adjusted angle
             const float odegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
             const float odegEnd   = (degEnd   < 0) ? (degEnd   - aafd) : (degEnd   + aafd);
             const float idegBegin = (degBegin < 0) ? (degBegin + aafd) : (degBegin - aafd);
             const float idegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
-            
+
             // The arc's "outside" lines
             polygons.resize(polygons.size() + 1);
             std::vector<PointF>& pointsOuter = polygons.back().points();
@@ -362,74 +362,74 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
             renderArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0);
             pointsOuter.push_back(PointF(centerXsub, centerYsub));
             pointsOuter.push_back( pointsOuter.front() );
-            
+
             // The arc's "inside" lines
             polygons.resize(polygons.size() + 1);
             std::vector<PointF>& pointsInner = polygons.back().points();
-            
+
             renderArcPoints(pointsInner, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, 0);
             pointsInner.push_back(PointF(centerXadd, centerYadd));
             pointsInner.push_back( pointsInner.front() );
         }
         else // ArcMode::Open
-        { 
+        {
             // The arc's "inside" and "outside" lines
             std::vector<PointF> inner, outer;
-        
-            if(pen.capStyle() == Pen::Arrow2Cap) 
+
+            if(pen.capStyle() == Pen::Arrow2Cap)
             {
                 // Calculate the adjusted angle
                 const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
                 const float adegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
-                
+
                 // Generate the points
                 renderArcPoints(inner, radiusXi, radiusYi, centerX, centerY, adegBegin, adegEnd, 0);
                 renderArcPoints(outer, radiusXo, radiusYo, centerX, centerY, adegBegin, adegEnd, 0);
             }
-            else 
+            else
             {
                 renderArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd, 0);
                 renderArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
             }
-            
+
             // Combine the arc's lines and add caps
             polygons.resize(polygons.size() + 1);
             std::vector<PointF>& pointsF = polygons.back().points();
-            
-            combineLinePointsAndAddCaps(pointsF, inner, outer, 
+
+            combineLinePointsAndAddCaps(pointsF, inner, outer,
                                         pen.capStyle(), pen.capStyle(), pen.size());
         }
     }
     else // Patterned
     {
         std::vector<PointF> pointsF;
-        
-        if(arcMode == ArcMode::Chord) 
+
+        if(arcMode == ArcMode::Chord)
         {
             renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, pen.size());
             pointsF.push_back( pointsF[0] );
         }
-        else if(arcMode == ArcMode::Pie) 
+        else if(arcMode == ArcMode::Pie)
         {
             pointsF.push_back( PointF(centerX, centerY) );
             renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, pen.size());
             pointsF.push_back( PointF(centerX, centerY) );
         }
         else // ArcMode::Open
-        { 
-            if(pen.capStyle() == Pen::Arrow2Cap) 
+        {
+            if(pen.capStyle() == Pen::Arrow2Cap)
             {
                 // Calculate the adjusted angle
                 const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
                 const float adegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
-                
+
                 // Generate the points
-                renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY, 
+                renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY,
                                   adegBegin, adegEnd, pen.size());
             }
-            else 
+            else
             {
-                renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY, 
+                renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY,
                                   degBegin, degEnd, pen.size());
             }
         }
@@ -439,9 +439,9 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
 }
 
 
-void Polygonizer::renderArcPoints(std::vector<PointF>& dst, 
-                                   Pt::int32_t radiusX, Pt::int32_t radiusY, 
-                                   Pt::int32_t centerX, Pt::int32_t centerY, 
+void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
+                                   Pt::int32_t radiusX, Pt::int32_t radiusY,
+                                   Pt::int32_t centerX, Pt::int32_t centerY,
                                    float degBegin, float degEnd, size_t penSize)
 {
     // Calculate the arc's parameters
@@ -460,24 +460,24 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
     const float fdegInc = (degDlt   * DegToRadF) * nSegs1i;
           float angle   =  degBegin * DegToRadF;
 
-    for(Pt::int32_t i = 0; i < nSegs; ++i) 
+    for(Pt::int32_t i = 0; i < nSegs; ++i)
     {
         // Calculate the coordinate
         const float x = centerX + radiusX * std::cos(angle);
         const float y = centerY - radiusY * std::sin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
-        
+
         // Update the angle
         angle += fdegInc;
-        
+
         // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) 
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y )
             continue;
 
         dst.push_back( PointF(x, y) );
     }
 
     // Discard the last point if it has the same coordinate with the first one
-    if(dst.back() == dst[0]) 
+    if(dst.back() == dst[0])
         dst.pop_back();
 }
 
@@ -495,12 +495,12 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
     bool isClosed = points[0] == points[n - 1];
 
     if(isSolid) // solid line
-    {       
-        if(isClosed) 
+    {
+        if(isClosed)
         {
             renderSolidClosedWidePolyline(polygons, points, n - 1, pen);
         }
-        else 
+        else
         {
             renderSolidOpenWidePolyline(polygons, points, n, pen);
         }
@@ -526,20 +526,20 @@ void Polygonizer::renderWideLine(std::vector<Polygon>& polygons,
         polygons.resize( polygons.size() + 1 );
         std::vector<PointF>& pointsF = polygons.back().points();
 
-        renderSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), 
+        renderSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(),
                                pen, true, true);
     }
     else
     {
         Pt::int32_t piCtrInOut = 0;
-        renderPatternedSingleLineSegment(polygons, 
-                                         from.x(), from.y(), 
+        renderPatternedSingleLineSegment(polygons,
+                                         from.x(), from.y(),
                                          to.x(), to.y(), piCtrInOut, pen);
     }
 }
 
 
-void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons, 
+void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
                                                  const PointF* basePtr, size_t curPCnt,
                                                  const Pen& pen)
 {
@@ -564,7 +564,7 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
     const PointF* ptrZero = basePtr;
 
     // Walk through the polygon's lines
-    for(size_t i = 0; i <= curPC1; ++i) 
+    for(size_t i = 0; i <= curPC1; ++i)
     {
         const PointF& from = *basePtr++;
         const PointF& to   = (i == curPC1) ? *ptrZero : *basePtr;
@@ -581,52 +581,52 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
             inSameSegment = false;
             ++segmentIndexMarker;
         }
-        
+
         // Generate and combine line segments
         pointsFSegment.clear();
 
-        renderSolidLineSegment(pointsFSegment, 
-                               from.x(), from.y(), 
-                               to.x(), to.y(), 
+        renderSolidLineSegment(pointsFSegment,
+                               from.x(), from.y(),
+                               to.x(), to.y(),
                                pen, false, false);
 
-        if( ! joinClosedWidePolyline(pointsFOuter, pointsFInner, 
+        if( ! joinClosedWidePolyline(pointsFOuter, pointsFInner,
                                      pointsFSegment, from, pen,
-                                     i == 1, false, inSameSegment) ) 
+                                     i == 1, false, inSameSegment) )
             return;
     }
 
     // reprocess the first and second segments to render the last join
-    
+
     const PointF& from = *ptrZero++;
     const PointF& to   = *ptrZero;
-    
+
     // Generate and combine line segments
     pointsFSegment.clear();
-    
-    renderSolidLineSegment(pointsFSegment, 
-                           from.x(), from.y(), 
-                           to.x(), to.y(), 
+
+    renderSolidLineSegment(pointsFSegment,
+                           from.x(), from.y(),
+                           to.x(), to.y(),
                            pen, false, false);
-    
-    if( ! joinClosedWidePolyline(pointsFOuter, pointsFInner, 
+
+    if( ! joinClosedWidePolyline(pointsFOuter, pointsFInner,
                                  pointsFSegment, from, pen,
                                  false, true, false) )
         return;
 
     // Combine the polygon data
-    if( pointsFOuter.empty() || pointsFInner.empty() ) 
+    if( pointsFOuter.empty() || pointsFInner.empty() )
         return;
 
     polygons.resize( polygons.size() + 1 );
     polygons.back().assign( &pointsFOuter[0], pointsFOuter.size() );
-    
+
     polygons.resize( polygons.size() + 1 );
     polygons.back().assign( &pointsFInner[0], pointsFInner.size() );
 }
 
 
-void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons, 
+void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                                const PointF* basePtr, size_t curPCnt,
                                                const Pen& pen)
 {
@@ -649,7 +649,7 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
     const size_t curPC2 = curPCnt - 2;
 
     // Walk through the polygon's lines
-    for(size_t i = 0; i < curPC1; ++i) 
+    for(size_t i = 0; i < curPC1; ++i)
     {
         // Get the coordinates
         const PointF& from = *basePtr++;
@@ -666,22 +666,22 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
             inSameSegment = false;
             ++segmentIndexMarker;
         }
-        
+
         // Generate and combine line segments
         pointsFSegment.clear();
-        
-        renderSolidLineSegment(pointsFSegment, from.x(), from.y(), 
+
+        renderSolidLineSegment(pointsFSegment, from.x(), from.y(),
                                  to.x(), to.y(), pen, i == 0, i == curPC2);
-        
-        if( ! joinOpenWidePolyline( pointsFPolygon, pointsFInner, 
+
+        if( ! joinOpenWidePolyline( pointsFPolygon, pointsFInner,
                                     pointsFSegment, from, pen, inSameSegment ) )
             return;
     }
 
     // Process and store the "inside" lines' points to the main polygon buffer in reverse
-    pointsFPolygon.insert( pointsFPolygon.end(), 
+    pointsFPolygon.insert( pointsFPolygon.end(),
                            pointsFInner.rbegin(), pointsFInner.rend() );
-    
+
     polygons.resize( polygons.size() + 1 );
     Polygon& polygon = polygons.back();
 
@@ -702,37 +702,37 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //poi
 
     // Loop until all the polygon's points are processed
     bool done = false;
-    while( ! done ) 
+    while( ! done )
     {
         // Calculate the "pattern" segment length
         const Pt::uint8_t refPat = pBuff[piCtrInOut];
         state.patSegLen = 0.0f;
-        for(;;) 
+        for(;;)
         {
             // Get and compare the pattern bit
             const Pt::uint8_t curPat = pBuff[piCtrInOut++];
-            
-            if(piCtrInOut >= PatternCells) 
+
+            if(piCtrInOut >= PatternCells)
                 piCtrInOut -= PatternCells;
-            
-            if(curPat == refPat) 
+
+            if(curPat == refPat)
             {
                 state.patSegLen += state.cellSize;
                 continue;
             }
-            
+
             // We have got a different pattern bit, exit to process the "pattern" segment
             --piCtrInOut;
-            if(piCtrInOut < 0) 
+            if(piCtrInOut < 0)
                 piCtrInOut += PatternCells;
-            
+
             break;
         }
-        
+
         // Bail out if the "pattern" segment is shorter than the cell size
-        if(state.patSegLen < state.cellSize) 
+        if(state.patSegLen < state.cellSize)
             return;
-        
+
         // Process the "pattern" segment
         done = sagPolygonPoints(state, !!refPat, pen);
     }
@@ -887,8 +887,8 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
     return false;
 }
 
-void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state, 
-                                                float x1, float y1, 
+void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
+                                                float x1, float y1,
                                                 float x2, float y2,
                                                 const Pen& pen)
 {
@@ -925,52 +925,52 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
     }
 
     // Check for intersection with the first polygons in the final destination buffer
-    if( ! state.dstPolygons.empty() ) 
+    if( ! state.dstPolygons.empty() )
     {
         // REVIEW
-        //bool r = satDetectPolygonCollision( &state.dstPoints[0], 
-        //                                    state.dstPCount0, 
+        //bool r = satDetectPolygonCollision( &state.dstPoints[0],
+        //                                    state.dstPCount0,
         //                                    pointsF.data(), pointsF.size() );
 
         const std::vector<PointF>& firstPolygon = state.dstPolygons[0].points();
-        bool r = satDetectPolygonCollision( &firstPolygon[0], 
-                                            firstPolygon.size(), 
+        bool r = satDetectPolygonCollision( &firstPolygon[0],
+                                            firstPolygon.size(),
                                             pointsF.data(), pointsF.size() );
-        if(r) 
+        if(r)
             return;
     }
     // REVIEW
-    //else  
+    //else
     //{
     //    state.dstPCount0 = pointsF.size();
     //}
 
     // Check for intersection with the previous polygons in the final destination buffer
-    
+
     // REVIEW
-    //if(state.dstPCount && state.dstPStart) 
-    if(state.dstPolygons.size() > 1) 
+    //if(state.dstPCount && state.dstPStart)
+    if(state.dstPolygons.size() > 1)
     {
         // REVIEW
-        //const bool r = satDetectPolygonCollision(&state.dstPoints[state.dstPStart], 
-        //                                         state.dstPCount, 
+        //const bool r = satDetectPolygonCollision(&state.dstPoints[state.dstPStart],
+        //                                         state.dstPCount,
         //                                         pointsF.data(), pointsF.size() );
-        
+
         const std::vector<PointF>& previousPolygon = state.dstPolygons.back().points();
 
-        const bool r = satDetectPolygonCollision(&previousPolygon[0], 
+        const bool r = satDetectPolygonCollision(&previousPolygon[0],
                                                  previousPolygon.size(),
                                                  pointsF.data(), pointsF.size() );
-        if(r) 
+        if(r)
             return;
     }
-    
+
     // REVIEW
     //state.dstPStart = state.dstPoints.size();
     //state.dstPCount = pointsF.size();
 
     //// Add polygon separator point as needed
-    //if( ! state.dstPoints.empty() ) 
+    //if( ! state.dstPoints.empty() )
     //{
     //    state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
     //    ++state.dstPStart;
@@ -985,7 +985,8 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 }
 
 
-bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count, 
+// TODO: !!! HAS BUG !!!
+bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
                                              const PointF* poly2, size_t poly2Count)
 {
     // Evaluate using the first polygon's normals
@@ -1037,8 +1038,8 @@ bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Cou
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
 //           Article and original code by Kah Shiu Chong, 2012
-void Polygonizer::satDPIProjMinMax(float& min, float& max, 
-                                    const PointF* points, size_t pointCount, 
+void Polygonizer::satDPIProjMinMax(float& min, float& max,
+                                    const PointF* points, size_t pointCount,
                                     float px, float py)
 {
     min =  Rasterizer2::MaxCoordinate;
@@ -1059,65 +1060,65 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
     renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen);
 
     // Exit here if the generated polygon does not actually have a meaningful number of points
-    
+
     // REVIEW: should this be size <= 2?
     //if(pointsF.size() < 2) return;
-    if(polygons.empty() || polygons[0].size() < 2) 
+    if(polygons.empty() || polygons[0].size() < 2)
         return;
 
     std::vector<PointF>& pointsF = polygons[0].points();
 
     // Check for intersection with the first polygons in the final destination buffer
-    
+
     // REVIEW
-    //if(state.dstPCount0) 
-    if( ! state.dstPolygons.empty() ) 
+    //if(state.dstPCount0)
+    if( ! state.dstPolygons.empty() )
     {
         // REVIEW
-        //bool r = satDetectPolygonCollision( &state.dstPoints[0], 
-        //                                    state.dstPCount0, 
+        //bool r = satDetectPolygonCollision( &state.dstPoints[0],
+        //                                    state.dstPCount0,
         //                                    pointsF.data(), pointsF.size() );
-        
+
         const std::vector<PointF>& firstPolygon = state.dstPolygons[0].points();
-        bool r = satDetectPolygonCollision( &firstPolygon[0], 
-                                            firstPolygon.size(), 
+        bool r = satDetectPolygonCollision( &firstPolygon[0],
+                                            firstPolygon.size(),
                                             pointsF.data(), pointsF.size() );
-        if(r) 
+        if(r)
             return;
     }
 
     // REVIEW
-    //else 
+    //else
     //{
     //    state.dstPCount0 = pointsF.size();
     //}
 
     // Check for intersection with the previous polygons in the final destination buffer
-    
+
     // REVIEW
-    //if(state.dstPCount && state.dstPStart) 
-    if(state.dstPolygons.size() > 1) 
+    //if(state.dstPCount && state.dstPStart)
+    if(state.dstPolygons.size() > 1)
     {
         // REVIEW
-        //bool r = satDetectPolygonCollision( &state.dstPoints[state.dstPStart], 
-        //                                    state.dstPCount, 
+        //bool r = satDetectPolygonCollision( &state.dstPoints[state.dstPStart],
+        //                                    state.dstPCount,
         //                                    pointsF.data(), pointsF.size() );
 
         const std::vector<PointF>& previousPolygon = state.dstPolygons.back().points();
 
-        bool r = satDetectPolygonCollision( &previousPolygon[0], 
+        bool r = satDetectPolygonCollision( &previousPolygon[0],
                                             previousPolygon.size(),
                                             pointsF.data(), pointsF.size() );
-        if(r) 
+        if(r)
             return;
     }
-    
+
     // REVIEW
     //state.dstPStart = state.dstPoints.size();
     //state.dstPCount = pointsF.size();
 
     // Add polygon separator point as needed
-    //if( ! state.dstPoints.empty() ) 
+    //if( ! state.dstPoints.empty() )
     //{
     //    state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
     //    ++state.dstPStart;
@@ -1125,15 +1126,15 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
 
     // REVIEW
     //state.dstPoints.insert(state.dstPoints.end(), pointsF.begin(), pointsF.end());
-    
+
     // append line segment polygon
     state.dstPolygons.resize(state.dstPolygons.size() + 1);
     state.dstPolygons.back().assign( &pointsF[0], pointsF.size());
 }
 
 
-void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst, 
-                                          float x1, float y1, float x2, float y2, 
+void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
+                                          float x1, float y1, float x2, float y2,
                                           const Pen& pen, bool openingCap, bool closingCap)
 {
     // Calculate the line's parameters
@@ -1142,11 +1143,11 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
     // Generate points (CCW)
-    
+
     // --- Begin point ---
-    if( openingCap ) 
+    if( openingCap )
     {
-        switch( pen.capStyle() ) 
+        switch( pen.capStyle() )
         {
             case Pen::SquareCap        : renderLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
             case Pen::RoundCap         : renderLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
@@ -1158,14 +1159,14 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
             default                    : openingCap = false;
         }
     }
-    
-    if( ! openingCap ) 
+
+    if( ! openingCap )
         renderLineButtCap(dst, x1, y1, nx, ny);
-    
+
     // --- End point ---
-    if(closingCap) 
+    if(closingCap)
     {
-        switch( pen.capStyle() ) 
+        switch( pen.capStyle() )
         {
             case Pen::SquareCap        : renderLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             case Pen::RoundCap         : renderLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
@@ -1177,19 +1178,19 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
             default                    : closingCap = false;
         }
     }
-    
-    if( ! closingCap ) 
+
+    if( ! closingCap )
         renderLineButtCap(dst, x2, y2, -nx, -ny);
 }
 
 
-void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygons, 
-                                                    float x1, float y1, 
-                                                    float x2, float y2, 
+void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygons,
+                                                    float x1, float y1,
+                                                    float x2, float y2,
                                                     Pt::int32_t& piCtrInOut,
                                                     const Pen& pen)
 {
-    
+
 
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
@@ -1209,7 +1210,7 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
     Pt::uint8_t prvPat = 0;
     float       xs     = x1;
     float       ys     = y1;
-    for(size_t i = 0; i <= nSegs; ++i) 
+    for(size_t i = 0; i <= nSegs; ++i)
     {
         // Get the pattern
         const Pt::uint8_t curPat = pBuff[piCtrInOut++];
@@ -1232,16 +1233,16 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
         // Update the coordinates
         xs += xInc;
         ys += yInc;
-        
+
         // Skip if we are not going to draw this segment
-        if( ! draw) 
+        if( ! draw)
             continue;
-                
+
         polygons.resize( polygons.size() + 1 );
         std::vector<PointF>& dst = polygons.back().points();
 
         // Generate points (CCW)
-        
+
         // --- Begin point ---
         switch(pen.capStyle()) {
             case Pen::SquareCap        : renderLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
@@ -1253,7 +1254,7 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
             case Pen::Arrow2Cap        : renderLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
             default                    : renderLineButtCap         (dst, x1, y1,             nx, ny); break;
         }
-        
+
         // --- End point ---
         switch(pen.capStyle()) {
             case Pen::SquareCap        : renderLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
@@ -1269,9 +1270,9 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
 }
 
 
-bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer, 
-                                          std::vector<PointF>& inner, 
-                                          const std::vector<PointF>& segment, 
+bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
+                                          std::vector<PointF>& inner,
+                                          const std::vector<PointF>& segment,
                                           const PointF& origMeetingPoint, const Pen& pen,
                                           bool isFirst, bool isLast, bool inSameSegment)
 {
@@ -1296,7 +1297,7 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
     // Intersect the "outside" lines
     bool   inLine;
     PointF intersect;
-    if( ! intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b, penSize) ) 
+    if( ! intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b, penSize) )
         return false;
 
     /*
@@ -1401,10 +1402,10 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
 }
 
 
-bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon, 
-                                         std::vector<PointF>& inner, 
-                                         const std::vector<PointF>& segment, 
-                                         const PointF& origMeetingPoint, 
+bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
+                                         std::vector<PointF>& inner,
+                                         const std::vector<PointF>& segment,
+                                         const PointF& origMeetingPoint,
                                          const Pen& pen,
                                          bool inSameSegment)
 {
@@ -1447,9 +1448,9 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
     */
 
     // Store the "outside" line's points to the main polygon buffer
-    const Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin 
+    const Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin
                                                          : pen.joinStyle();
-    
+
     switch(js1) {
         // No join
         case Pen::NoJoin:
@@ -1503,7 +1504,7 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
     */
 
     // Store the "inside" line's points to the auxiliary polygon buffer
-    const Pen::JoinStyle js2 = (inSameSegment || inLine) ? Pen::MiterJoin 
+    const Pen::JoinStyle js2 = (inSameSegment || inLine) ? Pen::MiterJoin
                                                          : pen.joinStyle();
     switch(js2) {
         // No join
@@ -1541,11 +1542,11 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
 }
 
 
-void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst, 
-                                               const std::vector<PointF>& inner, 
-                                               const std::vector<PointF>& outer, 
-                                               Pen::CapStyle begCap, 
-                                               Pen::CapStyle endCap, 
+void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
+                                               const std::vector<PointF>& inner,
+                                               const std::vector<PointF>& outer,
+                                               Pen::CapStyle begCap,
+                                               Pen::CapStyle endCap,
                                                size_t penSize)
 {
     // Calculate the end lines' parameters
@@ -1823,10 +1824,10 @@ void Polygonizer::renderLineArrow2Cap(std::vector<PointF>& dst, float x, float y
 // Based on: Bitmap/Bézier curves/Quadratic
 //           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
 //           Last modified on February 17, 2017
-void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst, 
-                                                 float x1, float y1, 
-                                                 float x2, float y2, 
-                                                 float x3, float y3, 
+void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
+                                                 float x1, float y1,
+                                                 float x2, float y2,
+                                                 float x3, float y3,
                                                  Pt::int32_t nSegs)
 {
     // Check if the points actually specify a straight line
@@ -1835,26 +1836,26 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
     const float xx = x1 - x2;
     const float yy = y1 - y2;
 
-    if( !(xx * sy - yy * sx) ) 
-    { 
+    if( !(xx * sy - yy * sx) )
+    {
         // Curvature
-        if( dst.empty() || dst.back().x() != x1 || dst.back().y() != y1 ) 
+        if( dst.empty() || dst.back().x() != x1 || dst.back().y() != y1 )
             dst.push_back( PointF(x1, y1) );
-        
-        if( dst.empty() || dst.back().x() != x3 || dst.back().y() != y3 ) 
+
+        if( dst.empty() || dst.back().x() != x3 || dst.back().y() != y3 )
             dst.push_back( PointF(x3, y3) );
-        
+
         return;
     }
 
     // Ensure that the number of segments are not too few
-    if(nSegs < 4) 
+    if(nSegs < 4)
         nSegs = 4;
 
     // Calculate the inverse multiplication factor
     const float nSegs1i = 1.0f / (nSegs - 1);
 
-    for(Pt::int32_t i = 0; i < nSegs; ++i) 
+    for(Pt::int32_t i = 0; i < nSegs; ++i)
     {
         // Calculate the coordinates
         const float t  = i * nSegs1i;
@@ -1864,19 +1865,19 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
         const float c  = t * t;
         const float x  = a * x1 + b * x2 + c * x3;
         const float y  = a * y1 + b * y2 + c * y3;
-        
+
         // Check if the coordinate is the same with the previous one
-        if( !dst.empty() && ( dst.back().x() == x && dst.back().y() == y ) ) 
+        if( !dst.empty() && ( dst.back().x() == x && dst.back().y() == y ) )
             continue;
-        
+
         // Store the coordinate
         dst.push_back( PointF(x, y) );
     }
 }
 
 
-void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy, 
-                                       float& nx, float& ny, float x1, float y1, 
+void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
+                                       float& nx, float& ny, float x1, float y1,
                                        float x2, float y2, size_t w)
 {
     // Line equation : 0 = aX + By + c
@@ -1902,8 +1903,8 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
 }
 
 
-bool Polygonizer::intersectLine(bool& inLine, PointF& intersect, 
-                                 const PointF& line1a, const PointF& line1b, 
+bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
+                                 const PointF& line1a, const PointF& line1b,
                                  const PointF& line2a, const PointF& line2b, size_t penSize)
 {
     // The first line

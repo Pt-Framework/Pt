@@ -38,8 +38,8 @@ namespace Gfx {
 void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
                                                   const float position) const
 {
-    // If the position is less or equal than the first position, then simply
-    // return the first color
+    // If the position is less than or equal to the first position,
+    // then simply return the first color
     if(position <= _stops[0].position()) {
         bgra32Res[0] = _stops[0].b8();
         bgra32Res[1] = _stops[0].g8();
@@ -48,8 +48,8 @@ void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
         return;
     }
 
-    // If the position is greater or equal than the last position, then simply
-    // return the last color
+    // If the position is greater than or equal to the last position,
+    // then simply return the first color
     if(position >= _stops.back().position()) {
         bgra32Res[0] = _stops.back().b8();
         bgra32Res[1] = _stops.back().g8();
@@ -60,9 +60,18 @@ void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
 
     // Find out in what two stops the position is between
     std::size_t stopIndex = 0;
-    while(true) {
+    while(stopIndex < _stops.size()) {
         if(position < _stops[stopIndex].position()) break;
         ++stopIndex;
+    }
+
+    // Should never happen, but just for safety
+    if(stopIndex == _stops.size()) {
+        bgra32Res[0] = _stops.back().b8();
+        bgra32Res[1] = _stops.back().g8();
+        bgra32Res[2] = _stops.back().r8();
+        bgra32Res[3] = _stops.back().a8();
+        return;
     }
 
     // Get the positions and colors
