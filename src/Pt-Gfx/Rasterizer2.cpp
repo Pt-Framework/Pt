@@ -434,22 +434,29 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt::int32_t height)
 {
     // Determine the start and end colors
-    const Pt::int32_t rs = _brush.color().red  () / 257;
-    const Pt::int32_t gs = _brush.color().green() / 257;
-    const Pt::int32_t bs = _brush.color().blue () / 257;
-    const Pt::int32_t as = _brush.color().alpha() / 257;
+    const ColorStops& colStops = _brush.gradientStops();
+    if( colStops.size() < 2 ) 
+        return;
 
-    const Pt::int32_t rd = ( _brush.gradientColor().red  () / 257 ) - rs;
-    const Pt::int32_t gd = ( _brush.gradientColor().green() / 257 ) - gs;
-    const Pt::int32_t bd = ( _brush.gradientColor().blue () / 257 ) - bs;
-    const Pt::int32_t ad = ( _brush.gradientColor().alpha() / 257 ) - as;
+    const Color& color1 = colStops[0].color();
+    const Pt::int32_t rs = color1.red  () / 257;
+    const Pt::int32_t gs = color1.green() / 257;
+    const Pt::int32_t bs = color1.blue () / 257;
+    const Pt::int32_t as = color1.alpha() / 257;
+
+    const Color& color2 = colStops[1].color();
+    const Pt::int32_t rd = ( color2.red  () / 257 ) - rs;
+    const Pt::int32_t gd = ( color2.green() / 257 ) - gs;
+    const Pt::int32_t bd = ( color2.blue () / 257 ) - bs;
+    const Pt::int32_t ad = ( color2.alpha() / 257 ) - as;
 
     // Generate the gradient
     const Pt::int32_t length = width + height - 1 - 1;
 
     Pt::uint8_t* pixel = _brushBuffer.data();
 
-    for(Pt::int32_t n = 0; n <= length; ++n) {
+    for(Pt::int32_t n = 0; n <= length; ++n) 
+    {
         const Pt::int32_t fi = (n <= 0) ? 0 : ( (n >= length) ? length : n );
         const Pt::int32_t fb = FIXED_POINT_FROM_INT(fi) / length;
         *pixel++ = bs + FIXED_POINT_TO_INT(bd * fb);
@@ -469,16 +476,19 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
     // Get and check the color stops
     // TODO: Shall we implicitly clear the image if there is no color stop?
     const ColorStops& colStops = _brush.gradientStops();
-    if(colStops.empty()) return;
+    if( colStops.empty() ) 
+        return;
 
     // Get the start and end parameters
     PointF begPos, endPos;
 
-    if(_brush.positionMode() == Brush::Absolute) {
-        begPos = _brush.gradientBegin      ();
-        endPos = _brush.gradientEnd      ();
+    if(_brush.positionMode() == Brush::Absolute) 
+    {
+        begPos = _brush.gradientBegin();
+        endPos = _brush.gradientEnd();
     }
-    else { // Brush::Relative
+    else // Brush::Relative
+    { 
         begPos.set( _brush.gradientBegin().x() * width, _brush.gradientBegin().y() * height );
         endPos.set( _brush.gradientEnd  ().x() * width, _brush.gradientEnd  ().y() * height );
     }
@@ -489,7 +499,8 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
     const float sDiff = 1.0f / (xDiff * xDiff + yDiff * yDiff);
 
     // TODO: Shall we implicitly clear the image if we have got invalid parameter(s)?
-    if(isinf(sDiff)) return;
+    if( xDiff == 0 && yDiff == 0 ) 
+        return;
 
     // Calculate the number of pixels, get the pixel buffer, and prepare the interpolation buffer
     const Pt::int32_t  numPixels    = width * height;
@@ -497,18 +508,22 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
           Pt::uint8_t  bgra32Res[4] = { 0, 0, 0, 255 };
 
     // Walk through the pixels and generate the gradient
-    for(Pt::int32_t i = 0; i < numPixels; ++i) {
+    for(Pt::int32_t i = 0; i < numPixels; ++i) 
+    {
         // Calculate the coordinates and their deltas
         const Pt::int32_t x    = i % width;
         const Pt::int32_t y    = i / width;
         const float       dx   = x - begPos.x();
         const float       dy   = y - begPos.y();
+        
         // Calculate the ratio
         float ratio = (xDiff * dx + yDiff * dy) * sDiff;
              if(ratio < 0.0f) ratio = 0.0f;
         else if(ratio > 1.0f) ratio = 1.0f;
+        
         // Interpolate the color
         colStops.calculateInterpolatedColorBGRA32(bgra32Res, ratio);
+        
         // Put the pixel
         *pixelBuffer++ = bgra32Res[0];
         *pixelBuffer++ = bgra32Res[1];
@@ -559,7 +574,8 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
     const float rBegSqr = begRad * begRad;
 
     // TODO: Shall we implicitly clear the image if we have got invalid parameter(s)?
-    if(isinf(r2a)) return;
+    if(a == 0) 
+        return;
 
     // Calculate the number of pixels, get the pixel buffer, and prepare the interpolation buffer
     const Pt::int32_t  numPixels    = width * height;

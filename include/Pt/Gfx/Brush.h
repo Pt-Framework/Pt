@@ -99,7 +99,7 @@ class ColorStops
         void add(float position, const Color& color)
         { _stops.push_back( ColorStop(position, color) ); }
 
-        const ColorStop& operator[] (std::size_t n)
+        const ColorStop& operator[] (std::size_t n) const
         { return _stops[n]; }
 
         const ColorStop& front() const
