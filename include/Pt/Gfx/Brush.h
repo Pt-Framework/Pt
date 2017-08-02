@@ -102,10 +102,13 @@ class ColorStops
         const ColorStop& operator[] (std::size_t n)
         { return _stops[n]; }
 
+        const ColorStop& front() const
+        { return _stops.front(); }
+
         const ColorStop& back() const
         { return _stops.back(); }
 
-        void calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4], 
+        void calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
                                               const float position) const;
 
     private:
@@ -201,7 +204,7 @@ class PT_GFX_API Brush
         /** @brief Radius of a radial gradient begin circle.
         */
         float gradientBeginRadius() const;
-        
+
         /** @brief End of a linear or radial gradient.
         */
         const PointF& gradientEnd() const;
@@ -272,7 +275,7 @@ class BrushData
         void setSolid(const Color& color);
 
         const Color& color() const
-        { return _color; }
+        { return _gradientStops.empty() ? _color : _gradientStops.front().color(); }
 
         // absolute positioned linear gradient
         void setLinearGradient(const PointF& begin, const PointF& end,

@@ -35,7 +35,7 @@ namespace Pt {
 
 namespace Gfx {
 
-void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4], 
+void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
                                                   const float position) const
 {
     // If the position is less or equal than the first position, then simply
@@ -82,7 +82,6 @@ void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
     const float spos = (position - p1) / (p2 - p1);
 
     // Interpolate the color
-    // TODO: Use equivalent-power linear interpolation?
     bgra32Res[0] = b1 + (b2 - b1) * spos;
     bgra32Res[1] = g1 + (g2 - g1) * spos;
     bgra32Res[2] = r1 + (r2 - r1) * spos;
@@ -351,7 +350,7 @@ void BrushData::setLinearGradient(const PointF& begin, const PointF& end,
     _gradientStops = colorStops;
     _gradientBegin = begin;
     _gradientEnd   = end;
-    
+
     _ofsX          = 0;
     _ofsY          = 0;
     _texture       = Image();
@@ -370,7 +369,7 @@ void BrushData::setLinearGradient(float beginX, float beginY,
     _gradientStops = colorStops;
     _gradientBegin.set(beginX, beginY);
     _gradientEnd.set(endX, endY);
-    
+
     _ofsX          = 0;
     _ofsY          = 0;
     _texture       = Image();

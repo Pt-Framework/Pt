@@ -183,8 +183,6 @@ class Rasterizer2
 
         void updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt::int32_t height);
 
-        void updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4], Pt::uint8_t rgbaEnd[4]);
-
         //
         // pen patterns
         //
