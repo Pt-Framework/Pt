@@ -80,13 +80,23 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     // Radial gradients
     painter.setBrush( Brush::radialGradient(0.5, 0.5, 0.0, 0.5, 0.5, 0.5, stops2) );
-    painter.fillRect( RectF(PointF(20 + 150 * 0, 250), SizeF(100, 100)) );
+    painter.fillRect( RectF(PointF(20 + 150 * 0, 250 + 150 * 0), SizeF(100, 100)) );
 
     painter.setBrush( Brush::radialGradient(0.75, 0.75, 0.0, 0.5, 0.25, 0.5, stops2) );
-    painter.fillRect( RectF(PointF(20 + 150 * 1, 250), SizeF(100, 100)) );
+    painter.fillRect( RectF(PointF(20 + 150 * 1, 250 + 150 * 0), SizeF(100, 100)) );
 
     painter.setBrush( Brush::radialGradient(0.25, 0.75, 0.0, 0.5, 0.25, 0.5, stops3) );
-    painter.fillRect( RectF(PointF(20 + 150 * 2, 250), SizeF(100, 100)) );
+    painter.fillRect( RectF(PointF(20 + 150 * 2, 250 + 150 * 0), SizeF(100, 100)) );
+
+    // Linear gradients
+    painter.setBrush( Brush::linearGradient(0.0, 0.5, 1.0, 0.5, stops2) );
+    painter.fillRect( RectF(PointF(20 + 150 * 0, 250 + 150 * 1), SizeF(100, 100)) );
+
+    painter.setBrush( Brush::linearGradient(0.5, 0.0, 0.5, 1.0, stops2) );
+    painter.fillRect( RectF(PointF(20 + 150 * 1, 250 + 150 * 1), SizeF(100, 100)) );
+
+    painter.setBrush( Brush::linearGradient(0.1, 0.2, 1.0, 0.9, stops3) );
+    painter.fillRect( RectF(PointF(20 + 150 * 2, 250 + 150 * 1), SizeF(100, 100)) );
 
 /*
     // --- Part 1 ---

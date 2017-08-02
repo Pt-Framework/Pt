@@ -321,7 +321,7 @@ BrushData::BrushData(const Color& from, const Color& to,
         _gradientBegin.set(0.0f, 0.5f);
         _gradientEnd.set(1.0f, 0.5f);
     }
-    else
+    else // Vertical
     {
         _gradientBegin.set(0.5f, 0.0f);
         _gradientEnd.set(0.5f, 1.0f);

@@ -460,8 +460,33 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
 }
 
 
+// Based on: Smooth HTML5 Canvas Gradients with Floyd-Steinberg Dithering
+//           http://rectangleworld.com/blog/archives/713
+//           http://rectangleworld.com/demos/DitheredGradient/DitheredGradientExample.html
+//           Original code by Rectangle World, 2012
 void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt::int32_t height)
 {
+    const ColorStops& colStops = _brush.gradientStops();
+    if(colStops.empty()) return;
+
+    PointF begPos, endPos;
+    float  begRad, endRad;
+
+    if(_brush.positionMode() == Brush::Absolute) {
+        begPos = _brush.gradientBegin      ();
+        begRad = _brush.gradientBeginRadius();
+
+        endPos = _brush.gradientEnd      ();
+        endRad = _brush.gradientEndRadius();
+    }
+    else { // Brush::Relative
+        begPos.set( _brush.gradientBegin().x() * width, _brush.gradientBegin().y() * height );
+        begRad =    _brush.gradientBeginRadius() * sqrtf(width * width + height * height);
+
+        endPos.set( _brush.gradientEnd().x() * width, _brush.gradientEnd  ().y() * height );
+        endRad =    _brush.gradientEndRadius() * sqrtf(width * width + height * height);
+    }
+
     /*
     // Determine the start and end colors
     Pt::uint8_t sc[4], ec[4], rc[4];
@@ -528,18 +553,18 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
 
 
 // Based on: Smooth HTML5 Canvas Radial Gradients with Dithering
+//           http://rectangleworld.com/blog/archives/833
 //           http://rectangleworld.com/demos/DitheredRadial/DitheredRadialExample.html
 //           Original code by Rectangle World, 2013
 void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt::int32_t height)
 {
-
     const ColorStops& colStops = _brush.gradientStops();
     if(colStops.empty()) return;
 
     PointF begPos, endPos;
     float  begRad, endRad;
 
-     if(_brush.positionMode() == Brush::Absolute) {
+    if(_brush.positionMode() == Brush::Absolute) {
         begPos = _brush.gradientBegin      ();
         begRad = _brush.gradientBeginRadius();
 
@@ -574,7 +599,7 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
         const Pt::int32_t y    = i / width;
         const float       dx   = x - begPos.x();
         const float       dy   = y - begPos.y();
-        // Claculate the discriminator
+        // Claculate the discriminant
         const float       b    = rBegDif + 2.0f * (dx * xDiff + dy * yDiff);
         const float       c    = rBegSqr - dx * dx - dy * dy;
         const float       dscm = b * b - 4.0f * a * c;
