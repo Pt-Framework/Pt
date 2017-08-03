@@ -36,59 +36,6 @@ namespace Pt {
 
 namespace Gfx {
 
-static inline float triangle(float v)
-{
-    const float p = 0.5f;
-
-    const Pt::int32_t x = v * 1000.0f;
-    const Pt::int32_t m = p * 1000.0f;
-
-    return (1.0f / p) * (p - fabs( ( x % (2 * m) ) * 0.001f - p) );
-}
-
-
-static inline void eqpLerp(Pt::uint8_t resRGBA[4], const Pt::uint8_t srcRGBA[4], const Pt::uint8_t dstRGBA[4], float mf)
-{
-    const float imf = 1.0f - mf;
-
-#if 1
-
-    // Equivalent-power linear interpolation
-
-    const float srcPower = (float) srcRGBA[0] * srcRGBA[0] + (float) srcRGBA[1] * srcRGBA[1] + (float) srcRGBA[2] + srcRGBA[2];
-    const float dstPower = (float) dstRGBA[0] * dstRGBA[0] + (float) dstRGBA[1] * dstRGBA[1] + (float) dstRGBA[2] + dstRGBA[2];
-    const float resPower = srcPower * mf + dstPower * imf;
-
-    Pt::int32_t intR = srcRGBA[0] * mf + dstRGBA[0] * imf;
-    Pt::int32_t intG = srcRGBA[1] * mf + dstRGBA[1] * imf;
-    Pt::int32_t intB = srcRGBA[2] * mf + dstRGBA[2] * imf;
-    Pt::int32_t intA = srcRGBA[3] * mf + dstRGBA[3] * imf;
-
-    const float intP = (float) intR * intR + (float) intG * intG + (float) intB + intB;
-    const float mulF = sqrtf(resPower / intP);
-
-    intR = intR * mulF;
-    intG = intG * mulF;
-    intB = intB * mulF;
-
-    resRGBA[0] = (intR >= 255) ? 255 : intR;
-    resRGBA[1] = (intG >= 255) ? 255 : intG;
-    resRGBA[2] = (intB >= 255) ? 255 : intB;
-    resRGBA[3] = (intA >= 255) ? 255 : intA;
-
-#else
-
-    // Normal linear interpolation
-
-    resRGBA[0] = srcRGBA[0] * mf + dstRGBA[0] * imf;
-    resRGBA[1] = srcRGBA[1] * mf + dstRGBA[1] * imf;
-    resRGBA[2] = srcRGBA[2] * mf + dstRGBA[2] * imf;
-    resRGBA[3] = srcRGBA[3] * mf + dstRGBA[3] * imf;
-
-#endif
-}
-
-
 /*
 // Weighting filter for Xiaolin Wu's anti-aliasing algorithm
 // Inspired by http://www.crbond.com/papers/anti_alias.pdf

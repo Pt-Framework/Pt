@@ -76,16 +76,16 @@ void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
 
     // Get the positions and colors
     const float       p1 = _stops[stopIndex - 1]. position();
-    const Pt::uint8_t r1 = _stops[stopIndex - 1]. r8();
-    const Pt::uint8_t g1 = _stops[stopIndex - 1]. g8();
-    const Pt::uint8_t b1 = _stops[stopIndex - 1]. b8();
-    const Pt::uint8_t a1 = _stops[stopIndex - 1]. a8();
+    const Pt::int32_t r1 = _stops[stopIndex - 1]. r8();
+    const Pt::int32_t g1 = _stops[stopIndex - 1]. g8();
+    const Pt::int32_t b1 = _stops[stopIndex - 1]. b8();
+    const Pt::int32_t a1 = _stops[stopIndex - 1]. a8();
 
     const float       p2 = _stops[stopIndex    ]. position();
-    const Pt::uint8_t r2 = _stops[stopIndex    ]. r8();
-    const Pt::uint8_t g2 = _stops[stopIndex    ]. g8();
-    const Pt::uint8_t b2 = _stops[stopIndex    ]. b8();
-    const Pt::uint8_t a2 = _stops[stopIndex    ]. a8();
+    const Pt::int32_t r2 = _stops[stopIndex    ]. r8();
+    const Pt::int32_t g2 = _stops[stopIndex    ]. g8();
+    const Pt::int32_t b2 = _stops[stopIndex    ]. b8();
+    const Pt::int32_t a2 = _stops[stopIndex    ]. a8();
 
     // Scale the position
     const float spos = (position - p1) / (p2 - p1);
@@ -128,17 +128,17 @@ void ColorStops::calculateInterpolatedColor(Color& res, const float position) co
     }
 
     // Get the positions and colors
-    const float        p1 = _stops[stopIndex - 1]. position     ();
-    const Pt::uint16_t r1 = _stops[stopIndex - 1]. color().red  ();
-    const Pt::uint16_t g1 = _stops[stopIndex - 1]. color().green();
-    const Pt::uint16_t b1 = _stops[stopIndex - 1]. color().blue ();
-    const Pt::uint16_t a1 = _stops[stopIndex - 1]. color().alpha();
+    const float       p1 = _stops[stopIndex - 1]. position     ();
+    const Pt::int32_t r1 = _stops[stopIndex - 1]. color().red  ();
+    const Pt::int32_t g1 = _stops[stopIndex - 1]. color().green();
+    const Pt::int32_t b1 = _stops[stopIndex - 1]. color().blue ();
+    const Pt::int32_t a1 = _stops[stopIndex - 1]. color().alpha();
 
-    const float        p2 = _stops[stopIndex    ]. position     ();
-    const Pt::uint16_t r2 = _stops[stopIndex    ]. color().red  ();
-    const Pt::uint16_t g2 = _stops[stopIndex    ]. color().green();
-    const Pt::uint16_t b2 = _stops[stopIndex    ]. color().blue ();
-    const Pt::uint16_t a2 = _stops[stopIndex    ]. color().alpha();
+    const float       p2 = _stops[stopIndex    ]. position     ();
+    const Pt::int32_t r2 = _stops[stopIndex    ]. color().red  ();
+    const Pt::int32_t g2 = _stops[stopIndex    ]. color().green();
+    const Pt::int32_t b2 = _stops[stopIndex    ]. color().blue ();
+    const Pt::int32_t a2 = _stops[stopIndex    ]. color().alpha();
 
     // Scale the position
     const float spos = (position - p1) / (p2 - p1);
