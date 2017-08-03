@@ -3,7 +3,7 @@
 
 static int writePNG(const char* filename, int width, int height, const Pt::uint8_t* argb8888Buff)
 {
-#if defined(PT_GFX_USE_ARM_CPU)
+#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
     // To minimize SVN pollution, do not save the resulting image when
     // running on secondary development/testing system
     (void) filename;
