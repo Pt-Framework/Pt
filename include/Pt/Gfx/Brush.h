@@ -111,6 +111,9 @@ class ColorStops
         void calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
                                               const float position) const;
 
+        void calculateInterpolatedColor(Color& res, const float position) const;
+
+
     private:
         std::vector<ColorStop> _stops;
 };

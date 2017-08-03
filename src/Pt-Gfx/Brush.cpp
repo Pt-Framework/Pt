@@ -98,6 +98,61 @@ void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
 }
 
 
+void ColorStops::calculateInterpolatedColor(Color& res, const float position) const
+{
+    // If the position is less than or equal to the first position,
+    // then simply return the first color
+    if(position <= _stops[0].position()) {
+        res = _stops[0].color();
+        return;
+    }
+
+    // If the position is greater than or equal to the last position,
+    // then simply return the first color
+    if(position >= _stops.back().position()) {;
+        res = _stops.back().color();
+        return;
+    }
+
+    // Find out in what two stops the position is between
+    std::size_t stopIndex = 0;
+    while(stopIndex < _stops.size()) {
+        if(position < _stops[stopIndex].position()) break;
+        ++stopIndex;
+    }
+
+    // Should never happen, but just for safety
+    if(stopIndex == _stops.size()) {
+        res = _stops.back().color();
+        return;
+    }
+
+    // Get the positions and colors
+    const float        p1 = _stops[stopIndex - 1]. position     ();
+    const Pt::uint16_t r1 = _stops[stopIndex - 1]. color().red  ();
+    const Pt::uint16_t g1 = _stops[stopIndex - 1]. color().green();
+    const Pt::uint16_t b1 = _stops[stopIndex - 1]. color().blue ();
+    const Pt::uint16_t a1 = _stops[stopIndex - 1]. color().alpha();
+
+    const float        p2 = _stops[stopIndex    ]. position     ();
+    const Pt::uint16_t r2 = _stops[stopIndex    ]. color().red  ();
+    const Pt::uint16_t g2 = _stops[stopIndex    ]. color().green();
+    const Pt::uint16_t b2 = _stops[stopIndex    ]. color().blue ();
+    const Pt::uint16_t a2 = _stops[stopIndex    ]. color().alpha();
+
+    // Scale the position
+    const float spos = (position - p1) / (p2 - p1);
+
+    // Return the interpolated the color
+    res = Color(
+        a1 + (a2 - a1) * spos,
+        r1 + (r2 - r1) * spos,
+        g1 + (g2 - g1) * spos,
+        b1 + (b2 - b1) * spos
+    );
+}
+
+
 Brush::Brush()
 : _brushData( new BrushData() )
 {}

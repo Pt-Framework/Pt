@@ -435,16 +435,47 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
 {
     // Determine the start and end colors
     const ColorStops& colStops = _brush.gradientStops();
-    if( colStops.size() < 2 ) 
+    if( colStops.size() < 2 )
         return;
 
     const Color& color1 = colStops[0].color();
+    const Color& color2 = colStops[1].color();
+
+#if 1
+
+    // Get the first and second colors
+    const Pt::int32_t rs = color1.red  ();
+    const Pt::int32_t gs = color1.green();
+    const Pt::int32_t bs = color1.blue ();
+    const Pt::int32_t as = color1.alpha();
+
+    const Pt::int32_t rd = color2.red  () - rs;
+    const Pt::int32_t gd = color2.green() - gs;
+    const Pt::int32_t bd = color2.blue () - bs;
+    const Pt::int32_t ad = color2.alpha() - as;
+
+    // Generate the gradient
+    const float       length = width + height - 1 - 1;
+          Pt::int32_t pixelPos = 0;
+
+    for(Image::PixelIterator pit = _brushBuffer.begin(); pit != _brushBuffer.end(); ++pit) {
+        // Calculate the interpolation factor
+        const float fb = (float) pixelPos / length;
+        ++pixelPos;
+        // Interpolate the color
+        const Color colRes(as + ad * fb, rs + rd * fb, gs + gd * fb, bs + bd * fb);
+        // Put the pixel
+        pit->assign(colRes, CompositionMode::SourceCopy);
+    }
+
+#else
+
+    // Get the first and second colors
     const Pt::int32_t rs = color1.red  () / 257;
     const Pt::int32_t gs = color1.green() / 257;
     const Pt::int32_t bs = color1.blue () / 257;
     const Pt::int32_t as = color1.alpha() / 257;
 
-    const Color& color2 = colStops[1].color();
     const Pt::int32_t rd = ( color2.red  () / 257 ) - rs;
     const Pt::int32_t gd = ( color2.green() / 257 ) - gs;
     const Pt::int32_t bd = ( color2.blue () / 257 ) - bs;
@@ -455,15 +486,19 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
 
     Pt::uint8_t* pixel = _brushBuffer.data();
 
-    for(Pt::int32_t n = 0; n <= length; ++n) 
+    for(Pt::int32_t n = 0; n <= length; ++n)
     {
+        // Calculate the ratio
         const Pt::int32_t fi = (n <= 0) ? 0 : ( (n >= length) ? length : n );
         const Pt::int32_t fb = FIXED_POINT_FROM_INT(fi) / length;
+        // Put the interpolated pixel
         *pixel++ = bs + FIXED_POINT_TO_INT(bd * fb);
         *pixel++ = gs + FIXED_POINT_TO_INT(gd * fb);
         *pixel++ = rs + FIXED_POINT_TO_INT(rd * fb);
         *pixel++ = as + FIXED_POINT_TO_INT(ad * fb);
     }
+
+#endif
 }
 
 
@@ -476,19 +511,19 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
     // Get and check the color stops
     // TODO: Shall we implicitly clear the image if there is no color stop?
     const ColorStops& colStops = _brush.gradientStops();
-    if( colStops.empty() ) 
+    if( colStops.empty() )
         return;
 
     // Get the start and end parameters
     PointF begPos, endPos;
 
-    if(_brush.positionMode() == Brush::Absolute) 
+    if(_brush.positionMode() == Brush::Absolute)
     {
         begPos = _brush.gradientBegin();
         endPos = _brush.gradientEnd();
     }
     else // Brush::Relative
-    { 
+    {
         begPos.set( _brush.gradientBegin().x() * width, _brush.gradientBegin().y() * height );
         endPos.set( _brush.gradientEnd  ().x() * width, _brush.gradientEnd  ().y() * height );
     }
@@ -499,8 +534,32 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
     const float sDiff = 1.0f / (xDiff * xDiff + yDiff * yDiff);
 
     // TODO: Shall we implicitly clear the image if we have got invalid parameter(s)?
-    if( xDiff == 0 && yDiff == 0 ) 
+    if( xDiff == 0.0f && yDiff == 0.0f )
         return;
+
+#if 1
+
+    // Prepare the interpolation buffer
+    Color colRes;
+
+    // Walk through the pixels and generate the gradient
+    for(Image::PixelIterator pit = _brushBuffer.begin(); pit != _brushBuffer.end(); ++pit) {
+        // Calculate the coordinates and their deltas
+        const Pt::int32_t x  = pit->x();
+        const Pt::int32_t y  = pit->y();
+        const float       dx = x - begPos.x();
+        const float       dy = y - begPos.y();
+        // Calculate the ratio
+        float ratio = (xDiff * dx + yDiff * dy) * sDiff;
+             if(ratio < 0.0f) ratio = 0.0f;
+        else if(ratio > 1.0f) ratio = 1.0f;
+        // Interpolate the color
+        colStops.calculateInterpolatedColor(colRes, ratio);
+        // Put the pixel
+        pit->assign(colRes, CompositionMode::SourceCopy);
+    }
+
+#else
 
     // Calculate the number of pixels, get the pixel buffer, and prepare the interpolation buffer
     const Pt::int32_t  numPixels    = width * height;
@@ -508,28 +567,27 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
           Pt::uint8_t  bgra32Res[4] = { 0, 0, 0, 255 };
 
     // Walk through the pixels and generate the gradient
-    for(Pt::int32_t i = 0; i < numPixels; ++i) 
+    for(Pt::int32_t i = 0; i < numPixels; ++i)
     {
         // Calculate the coordinates and their deltas
-        const Pt::int32_t x    = i % width;
-        const Pt::int32_t y    = i / width;
-        const float       dx   = x - begPos.x();
-        const float       dy   = y - begPos.y();
-        
+        const Pt::int32_t x  = i % width;
+        const Pt::int32_t y  = i / width;
+        const float       dx = x - begPos.x();
+        const float       dy = y - begPos.y();
         // Calculate the ratio
         float ratio = (xDiff * dx + yDiff * dy) * sDiff;
              if(ratio < 0.0f) ratio = 0.0f;
         else if(ratio > 1.0f) ratio = 1.0f;
-        
         // Interpolate the color
         colStops.calculateInterpolatedColorBGRA32(bgra32Res, ratio);
-        
         // Put the pixel
         *pixelBuffer++ = bgra32Res[0];
         *pixelBuffer++ = bgra32Res[1];
         *pixelBuffer++ = bgra32Res[2];
         *pixelBuffer++ = bgra32Res[3];
     }
+
+#endif
 }
 
 
@@ -574,8 +632,39 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
     const float rBegSqr = begRad * begRad;
 
     // TODO: Shall we implicitly clear the image if we have got invalid parameter(s)?
-    if(a == 0) 
+    if(a == 0.0f)
         return;
+
+#if 1
+
+    // Prepare the interpolation buffer
+    Color colRes;
+
+    // Walk through the pixels and generate the gradient
+    for(Image::PixelIterator pit = _brushBuffer.begin(); pit != _brushBuffer.end(); ++pit) {
+        // Calculate the coordinates and their deltas
+        const Pt::int32_t x  = pit->x();
+        const Pt::int32_t y  = pit->y();
+        const float       dx = x - begPos.x();
+        const float       dy = y - begPos.y();
+        // Claculate the discriminant
+        const float       b    = rBegDif + 2.0f * (dx * xDiff + dy * yDiff);
+        const float       c    = rBegSqr - dx * dx - dy * dy;
+        const float       dscm = b * b - 4.0f * a * c;
+        // Calculate the ratio and interpolate the color as needed
+        if(dscm >= 0.0f) {
+            // Calculate the ratio
+            float ratio = (-b + sqrtf(dscm)) * r2a;
+                 if(ratio < 0.0f) ratio = 0.0f;
+            else if(ratio > 1.0f) ratio = 1.0f;
+            // Interpolate the color
+            colStops.calculateInterpolatedColor(colRes, ratio);
+        }
+        // Put the pixel
+        pit->assign(colRes, CompositionMode::SourceCopy);
+    }
+
+#else
 
     // Calculate the number of pixels, get the pixel buffer, and prepare the interpolation buffer
     const Pt::int32_t  numPixels    = width * height;
@@ -585,15 +674,15 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
     // Walk through the pixels and generate the gradient
     for(Pt::int32_t i = 0; i < numPixels; ++i) {
         // Calculate the coordinates and their deltas
-        const Pt::int32_t x    = i % width;
-        const Pt::int32_t y    = i / width;
-        const float       dx   = x - begPos.x();
-        const float       dy   = y - begPos.y();
+        const Pt::int32_t x  = i % width;
+        const Pt::int32_t y  = i / width;
+        const float       dx = x - begPos.x();
+        const float       dy = y - begPos.y();
         // Claculate the discriminant
         const float       b    = rBegDif + 2.0f * (dx * xDiff + dy * yDiff);
         const float       c    = rBegSqr - dx * dx - dy * dy;
         const float       dscm = b * b - 4.0f * a * c;
-        // Interpolate the color as needed
+        // Calculate the ratio and interpolate the color as needed
         if(dscm >= 0.0f) {
             // Calculate the ratio
             float ratio = (-b + sqrtf(dscm)) * r2a;
@@ -608,6 +697,8 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
         *pixelBuffer++ = bgra32Res[2];
         *pixelBuffer++ = bgra32Res[3];
     }
+
+#endif
 }
 
 
