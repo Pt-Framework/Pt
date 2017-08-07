@@ -79,10 +79,12 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     stops3.add(0.9, Color::fromRgb8(0, 0, 255, 175));
 
     // 1D gradients
-    painter.setBrush( Brush::horizontalGradient(Color::fromRgb8(0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175)) );
+  //painter.setBrush( Brush::horizontalGradient(Color::fromRgb8(0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175)) );
+    painter.setBrush( Brush::horizontalGradient(stops3) );
     painter.fillRect( RectF(PointF(20 + 130 * 0, 250 + 150 * 0), SizeF(100, 100)) );
 
-    painter.setBrush( Brush::verticalGradient(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175)) );
+  //painter.setBrush( Brush::verticalGradient(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175)) );
+    painter.setBrush( Brush::verticalGradient(stops3) );
     painter.fillRect( RectF(PointF(20 + 130 * 1, 250 + 150 * 0), SizeF(100, 100)) );
 
     // 2D gradients (linear)

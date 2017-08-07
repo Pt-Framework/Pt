@@ -45,10 +45,6 @@ class ColorStop
         ColorStop(float position, const Color& color)
         : _position(position)
         , _color(color)
-        , _r8(color.red  () / 257)
-        , _g8(color.green() / 257)
-        , _b8(color.blue () / 257)
-        , _a8(color.alpha() / 257)
         {}
 
         float position() const
@@ -57,22 +53,9 @@ class ColorStop
         const Color& color() const
         { return _color; }
 
-        const Pt::uint8_t r8() const
-        { return _r8; }
-
-        const Pt::uint8_t g8() const
-        { return _g8; }
-
-        const Pt::uint8_t b8() const
-        { return _b8; }
-
-        const Pt::uint8_t a8() const
-        { return _a8; }
-
     private:
-        float       _position;
-        Color       _color;
-        Pt::uint8_t _r8, _g8, _b8, _a8;
+        float _position;
+        Color _color;
 };
 
 
@@ -107,9 +90,6 @@ class ColorStops
 
         const ColorStop& back() const
         { return _stops.back(); }
-
-        void calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
-                                              const float position) const;
 
         void calculateInterpolatedColor(Color& res, const float position) const;
 
@@ -155,6 +135,10 @@ class PT_GFX_API Brush
         static Brush verticalGradient(const Color& from, const Color& to);
 
         static Brush horizontalGradient(const Color& from, const Color& to);
+
+        static Brush verticalGradient(const ColorStops& colorStops);
+
+        static Brush horizontalGradient(const ColorStops& colorStops);
 
         /** @brief Constructs an absolute positioned linear gradient.
         */
@@ -279,6 +263,9 @@ class BrushData
 
         const Color& color() const
         { return _gradientStops.empty() ? _color : _gradientStops.front().color(); }
+
+        // 1D gradient
+        void set1DGradient(Brush::GradientStyle g, const ColorStops& colorStops);
 
         // absolute positioned linear gradient
         void setLinearGradient(const PointF& begin, const PointF& end,

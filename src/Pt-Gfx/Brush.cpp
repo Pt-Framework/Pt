@@ -35,69 +35,6 @@ namespace Pt {
 
 namespace Gfx {
 
-void ColorStops::calculateInterpolatedColorBGRA32(Pt::uint8_t bgra32Res[4],
-                                                  const float position) const
-{
-    // If the position is less than or equal to the first position,
-    // then simply return the first color
-    if(position <= _stops[0].position()) {
-        bgra32Res[0] = _stops[0].b8();
-        bgra32Res[1] = _stops[0].g8();
-        bgra32Res[2] = _stops[0].r8();
-        bgra32Res[3] = _stops[0].a8();
-        return;
-    }
-
-    // If the position is greater than or equal to the last position,
-    // then simply return the first color
-    if(position >= _stops.back().position()) {
-        bgra32Res[0] = _stops.back().b8();
-        bgra32Res[1] = _stops.back().g8();
-        bgra32Res[2] = _stops.back().r8();
-        bgra32Res[3] = _stops.back().a8();
-        return;
-    }
-
-    // Find out in what two stops the position is between
-    std::size_t stopIndex = 0;
-    while(stopIndex < _stops.size()) {
-        if(position < _stops[stopIndex].position()) break;
-        ++stopIndex;
-    }
-
-    // Should never happen, but just for safety
-    if(stopIndex == _stops.size()) {
-        bgra32Res[0] = _stops.back().b8();
-        bgra32Res[1] = _stops.back().g8();
-        bgra32Res[2] = _stops.back().r8();
-        bgra32Res[3] = _stops.back().a8();
-        return;
-    }
-
-    // Get the positions and colors
-    const float       p1 = _stops[stopIndex - 1]. position();
-    const Pt::int32_t r1 = _stops[stopIndex - 1]. r8();
-    const Pt::int32_t g1 = _stops[stopIndex - 1]. g8();
-    const Pt::int32_t b1 = _stops[stopIndex - 1]. b8();
-    const Pt::int32_t a1 = _stops[stopIndex - 1]. a8();
-
-    const float       p2 = _stops[stopIndex    ]. position();
-    const Pt::int32_t r2 = _stops[stopIndex    ]. r8();
-    const Pt::int32_t g2 = _stops[stopIndex    ]. g8();
-    const Pt::int32_t b2 = _stops[stopIndex    ]. b8();
-    const Pt::int32_t a2 = _stops[stopIndex    ]. a8();
-
-    // Scale the position
-    const float spos = (position - p1) / (p2 - p1);
-
-    // Interpolate the color
-    bgra32Res[0] = b1 + (b2 - b1) * spos;
-    bgra32Res[1] = g1 + (g2 - g1) * spos;
-    bgra32Res[2] = r1 + (r2 - r1) * spos;
-    bgra32Res[3] = a1 + (a2 - a1) * spos;
-}
-
-
 void ColorStops::calculateInterpolatedColor(Color& res, const float position) const
 {
     // If the position is less than or equal to the first position,
@@ -184,6 +121,22 @@ Brush Brush::verticalGradient(const Color& from, const Color& to)
 Brush Brush::horizontalGradient(const Color& from, const Color& to)
 {
     BrushData* data = new BrushData(from, to, Horizontal);
+    return Brush(data);
+}
+
+
+Brush Brush::verticalGradient(const ColorStops& colorStops)
+{
+    BrushData* data = new BrushData();
+    data->set1DGradient(Brush::Vertical, colorStops);
+    return Brush(data);
+}
+
+
+Brush Brush::horizontalGradient(const ColorStops& colorStops)
+{
+    BrushData* data = new BrushData();
+    data->set1DGradient(Brush::Horizontal, colorStops);
     return Brush(data);
 }
 
@@ -400,6 +353,21 @@ void BrushData::setSolid(const Color& color)
     _isNull    = false;
 
     _texture   = Image();
+}
+
+
+void BrushData::set1DGradient(Brush::GradientStyle g, const ColorStops& colorStops)
+{
+    _isNull        = false;
+    _fillStyle     = Brush::Gradient;
+    _positionMode  = Brush::Absolute;
+
+    _gradient      = g;
+    _gradientStops = colorStops;
+
+    _ofsX          = 0;
+    _ofsY          = 0;
+    _texture       = Image();
 }
 
 
