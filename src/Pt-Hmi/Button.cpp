@@ -160,8 +160,8 @@ bool Button::onMouseEvent(const MouseEvent& ev)
     {
         const Gfx::PointF& pos = ev.position();
 
-        bool inside = pos.x() > 0 && pos.x() <= size().width() &&
-                      pos.y() > 0 && pos.y() <= size().height();
+        bool inside = pos.x() >= 0 && pos.x() <= size().width() &&
+                      pos.y() >= 0 && pos.y() <= size().height();
 
         bool isClick = _onClickBegin && inside;
         

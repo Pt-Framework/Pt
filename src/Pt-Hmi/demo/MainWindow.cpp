@@ -114,21 +114,24 @@ MainWindow::MainWindow()
         _btns[n].setMargin(5);
 
         _btns[n].setText("Hallo");
-        _btns[n].clicked() += Pt::slot(*this, &MainWindow::onButton);
         
         _scrollContainer.addItem(_btns[n] );
     }
     
+    _btns[0].clicked() += Pt::slot(*this, &MainWindow::onButton);
+
     _bt2.setText("Ende");
+    _bt2.setName("endbut");
     _bt2.setMinimumHeight(50);
     _bt2.setPadding(5);
     _bt2.setMargin(5);
+    _bt2.clicked() += Pt::slot(Application::instance(), &Application::exit);
+
     _scrollContainer.addItem(_bt2);
     
     _scrollContainer.setPadding(5);
     _scrollContainer.setMargin(5);
 
-  
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize( Gfx::SizeF(500, 1100) );
     _scrollContainer.setSizePolicy(policy);
@@ -136,7 +139,7 @@ MainWindow::MainWindow()
     _scrollView.setContent(_scrollContainer);
     
     _child2.setContent(&_scrollView);
-    //_child2.show(true);
+    //_child2.show(true);  // SHOW DEMO WINDOW 2
 
     add( _child1 );
 
@@ -165,7 +168,7 @@ MainWindow::MainWindow()
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30,30));
     _child1.resize( Gfx::SizeF(300, 600) );
-    //_child1.show(true);
+    //_child1.show(true); // SHOW DEMO WINDOW 1
     
     // context menu   
     _menu.setName("All Music");
@@ -247,8 +250,13 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.setBrush( Gfx::Brush::radialGradient(0.25, 0.25, 0,
     //                                                  0.5f, 0.5f, 0.5, stops) );
  
-    imagePainter.setBrush( Gfx::Brush::linearGradient(0.0, 0.0,
-                                                      1.0, 1.0, stops) );
+    //imagePainter.setBrush( Gfx::Brush::linearGradient(0.0, 0.5,
+    //                                                  1.0, 0.5, stops) );
+ 
+    //imagePainter.setBrush( Gfx::Brush::linearGradient( Gfx::PointF(0, 10),
+    //                                                   Gfx::PointF(50, 10), stops) );
+
+    imagePainter.setBrush( Gfx::Brush::horizontalGradient(stops) );
     
     //imagePainter.setClip( Gfx::RectF(50, 100, 50, 100) );
 
@@ -285,7 +293,25 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
 void MainWindow::onButton()
 {
-    _btns[2].setMargin(10);
+    //_btns[2].setMargin(10);
+
+    Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
+    Pt::Hmi::Screen& screen = app.screen();
+    Pt::Hmi::Widget* w = &_bt2;
+
+    if( ! w  || ! w->parent() )
+        return;
+
+    Pt::Gfx::PointF pos = w->parent()->toScreen( w->position() );
+
+    Pt::Hmi::MouseEvent mev(0);
+    mev.setPosition(pos);
+    
+    mev.setPress();
+    app.sendMouseEvent(mev);
+
+    mev.setRelease();
+    app.sendMouseEvent(mev);
 }
 
 
@@ -297,7 +323,8 @@ bool MainWindow::onMouseEvent(const MouseEvent& ev)
     {
         Gfx::PointF menuPos = this->toScreen( ev.position() );
 
-        _menu.show(menuPos);
+        std::clog << std::endl;
+        //_menu.show(menuPos);
     }
 
     return true;

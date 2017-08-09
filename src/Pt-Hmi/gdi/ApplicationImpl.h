@@ -83,6 +83,8 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void sendKeyEvent(const KeyEvent& ev);
 
+        void sendMouseEvent(const MouseEvent& ev);
+
     protected:
         virtual void onAttachSelectable(System::Selectable&);
 

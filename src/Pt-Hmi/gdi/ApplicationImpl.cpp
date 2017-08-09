@@ -250,6 +250,38 @@ void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
 }
 
 
+void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
+{
+    POINT p = { ev.position().x(), 
+                ev.position().y() };
+
+    HWND h = WindowFromPoint(p);
+
+    Window* w = findWindow(h);
+    if( ! w )
+        return;
+
+    // screen to window coordinates
+    Gfx::PointF pos = w->fromScreen( ev.position() );
+
+    MouseEvent mev = ev;
+    mev.setPosition(pos);
+    mev.setId( w->vid() );
+    
+    if( ! _pointerInWindow )
+    {
+        Application::instance().setPointerWindow(w);
+        _pointerInWindow = true;
+    }
+
+    // TODO: call Application::processMouseEvent which returns true if the
+    //       event was consumed. If it returns false and the event was not
+    //       consumed call ApplicationImpl::dispatchMouseEvent
+
+    Application::instance().processMouseEvent(mev);
+}
+
+
 void ApplicationImpl::nextEvent()
 {
     waitNext();

@@ -44,45 +44,47 @@ class Window;
 
 class ApplicationImpl : public Pt::System::MainLoop
 {
-  public:
-    ApplicationImpl();
+    public:
+        ApplicationImpl();
 
-    virtual ~ApplicationImpl();
+        virtual ~ApplicationImpl();
 
-    void setCursor(const Cursor* cursor );
+        void setCursor(const Cursor* cursor );
 
-    const Cursor& cursor()
-    { return _cursor; }
+        const Cursor& cursor()
+        { return _cursor; }
 
-    void grabPointer(Window& grabber);
+        void grabPointer(Window& grabber);
 
-    void releasePointer(Window& grabber);
+        void releasePointer(Window& grabber);
 
-    void grabPointer(Widget& grabber);
+        void grabPointer(Widget& grabber);
 
-    void releasePointer(Widget& grabber);
+        void releasePointer(Widget& grabber);
 
-    void sendKeyEvent(const KeyEvent& ev);
+        void sendKeyEvent(const KeyEvent& ev);
+
+        void sendMouseEvent(const MouseEvent& ev);
     
-		FrameBuffer& frameBuffer()
-		{
-			return _frameBuffer;
-		}
+        FrameBuffer& frameBuffer()
+        {
+            return _frameBuffer;
+        }
 
-    void nextEvent();
+        void nextEvent();
 
-	private:
-    void onMouseEvent(const MouseEvent& ev);
+    private:
+        void onMouseEvent(const MouseEvent& ev);
 
-    void onTouchEvent(const TouchEvent& ev);
-		
-    void showConsole(bool s);
+        void onTouchEvent(const TouchEvent& ev);
 
-  private:
-		FrameBuffer                  _frameBuffer; 
-		std::vector<InputDevice*>    _inputDevices;
-    Cursor                       _cursor;
-    MouseEvent                   _lastMouse;
+        void showConsole(bool s);
+
+    private:
+        FrameBuffer                  _frameBuffer; 
+        std::vector<InputDevice*>    _inputDevices;
+        Cursor                       _cursor;
+        MouseEvent                   _lastMouse;
 };
 
 } // namespace

@@ -115,9 +115,13 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void removeInputMethod(InputMethod& im);
 
-        /** @brief Sends a key event to the active window.
+        /** @brief Emulates a key event.
         */
         void sendKeyEvent(const KeyEvent& ev);
+
+        /** @brief Emulates a mouse event.
+        */
+        void sendMouseEvent(const MouseEvent& ev);
 
         void invalidate();
 

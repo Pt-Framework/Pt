@@ -150,6 +150,12 @@ void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
 }
 
 
+void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
+{
+    onMouseEvent(ev);
+}
+
+
 void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 {
     MouseEvent mev = ev;

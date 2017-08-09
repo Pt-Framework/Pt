@@ -462,6 +462,12 @@ void Application::sendKeyEvent(const KeyEvent& ev)
 }
 
 
+void Application::sendMouseEvent(const MouseEvent& ev)
+{
+    _impl->sendMouseEvent(ev);
+}
+
+
 void Application::setCursor( const Cursor* cursor )
 {
     _impl->setCursor( cursor );
