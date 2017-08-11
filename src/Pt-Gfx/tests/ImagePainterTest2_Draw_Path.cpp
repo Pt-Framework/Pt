@@ -15,70 +15,91 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     Path      path;
     Transform transform;
 
-    path.moveTo( PointF(  0,   0) );
-    path.lineTo( PointF( 40,  70) );
-    path.lineTo( PointF( 80,  90) );
-    path.lineTo( PointF(100,  20) );
-    path.lineTo( PointF(  0,   0) );
+    path.moveTo( PointF( 0,  0) ); // Absolute size (100, 90)
+    path.lineTo( PointF(40, 70) );
+    path.lineTo( PointF(80, 89) );
+    path.lineTo( PointF(99, 20) );
+    path.lineTo( PointF( 0,  0) );
     path.close ();
 
-    //
-    transform.translate(100, 50);
+    // Reset the clip area
+    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+
+    // Outline - not clipped
+    transform.translate(100, 50);   // Absolute start position (100,  50)
     path.transform(transform);
     ip2->setPen(penThinSolid);
     ip2->drawPath(path);
 
-    transform.translate(100, -50);
+    transform.translate(100, -50);  // Absolute start position (300,  50)
     path.transform(transform);
     ip2->setPen(penThinDot);
     ip2->drawPath(path);
 
-    path.transform(transform);
+    path.transform(transform);      // Absolute start position (500,  50)
     ip2->setPen(penThickSolid);
     ip2->drawPath(path);
 
-    path.transform(transform);
+    path.transform(transform);      // Absolute start position (700,  50)
     ip2->setPen(penThickDot);
     ip2->drawPath(path);
 
-    //
-    transform.translate(-800, 200);
+    // Reset the clip area
+    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+
+    // Outline - clipped
+    transform.translate(-800, 200); // Absolute start position (100, 250)
     path.transform(transform);
     ip2->setPen(penThinSolid);
+    //ip2->setClip( RectF( PointF(110, 260), SizeF(80, 70) ) );
     ip2->drawPath(path);
 
-    transform.translate(800, -200);
+    transform.translate(800, -200); // Absolute start position (300, 250)
     path.transform(transform);
     ip2->setPen(penThinDot);
+    //ip2->setClip( RectF( PointF(310, 260), SizeF(80, 70) ) );
     ip2->drawPath(path);
 
-    path.transform(transform);
+    path.transform(transform);      // Absolute start position (500, 250)
     ip2->setPen(penThickSolid);
+    //ip2->setClip( RectF( PointF(510, 260), SizeF(80, 70) ) );
     ip2->drawPath(path);
 
-    path.transform(transform);
+    path.transform(transform);      // Absolute start position (700, 250)
     ip2->setPen(penThickDot);
+    //ip2->setClip( RectF( PointF(710, 260), SizeF(80, 70) ) );
     ip2->drawPath(path);
 
+    // Reset the clip area
+    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 
-    //
-    transform.translate(-800, 200);
+    // Filled - not clipped
+    transform.translate(-800, 200); // Absolute start position (100, 450)
     path.transform(transform);
     ip2->setBrush(brush1);
     ip2->fillPath(path);
 
-    transform.translate(800, -200);
+    transform.translate(800, -200); // Absolute start position (300, 450)
     path.transform(transform);
     ip2->setBrush(brush2);
     ip2->fillPath(path);
 
-    path.transform(transform);
+    // Reset the clip area
+    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+
+    // Filled - clipped
+    path.transform(transform);      // Absolute start position (500, 450)
     ip2->setBrush(brush1);
+    //ip2->setClip( RectF( PointF(510, 460), SizeF(80, 70) ) );
     ip2->fillPath(path);
 
-    path.transform(transform);
+    path.transform(transform);      // Absolute start position (700, 450)
     ip2->setBrush(brush2);
+    //ip2->setClip( RectF( PointF(710, 460), SizeF(80, 70) ) );
     ip2->fillPath(path);
+
+    // Reset the clip area
+    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 
