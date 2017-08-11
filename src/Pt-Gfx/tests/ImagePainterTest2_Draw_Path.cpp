@@ -1,3 +1,260 @@
+static void testDrawPath(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
+{
+    resetImage(image);
+
+    Pen penThinSolid ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
+    Pen penThinDot   ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
+    Pen penThickSolid( Pen(Color::fromRgb8(255, 191, 127, 175), 6, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
+    Pen penThickDot  ( Pen(Color::fromRgb8(255, 191, 127, 175), 6, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(!ip2) return;
+
+    ip2->setAntiAliasing(true);
+
+    Path      path;
+    Transform transform;
+
+    path.moveTo( PointF(  0,   0) );
+    path.lineTo( PointF( 40,  70) );
+    path.lineTo( PointF( 80,  90) );
+    path.lineTo( PointF(100,  20) );
+    path.lineTo( PointF(  0,   0) );
+    path.close ();
+
+    //
+    transform.translate(100, 50);
+    path.transform(transform);
+    ip2->setPen(penThinSolid);
+    ip2->drawPath(path);
+
+    transform.translate(100, -50);
+    path.transform(transform);
+    ip2->setPen(penThinDot);
+    ip2->drawPath(path);
+
+    path.transform(transform);
+    ip2->setPen(penThickSolid);
+    ip2->drawPath(path);
+
+    path.transform(transform);
+    ip2->setPen(penThickDot);
+    ip2->drawPath(path);
+
+    //
+    transform.translate(-800, 200);
+    path.transform(transform);
+    ip2->setPen(penThinSolid);
+    ip2->drawPath(path);
+
+    transform.translate(800, -200);
+    path.transform(transform);
+    ip2->setPen(penThinDot);
+    ip2->drawPath(path);
+
+    path.transform(transform);
+    ip2->setPen(penThickSolid);
+    ip2->drawPath(path);
+
+    path.transform(transform);
+    ip2->setPen(penThickDot);
+    ip2->drawPath(path);
+
+
+    //
+    transform.translate(-800, 200);
+    path.transform(transform);
+    ip2->setBrush(brush1);
+    ip2->fillPath(path);
+
+    transform.translate(800, -200);
+    path.transform(transform);
+    ip2->setBrush(brush2);
+    ip2->fillPath(path);
+
+    path.transform(transform);
+    ip2->setBrush(brush1);
+    ip2->fillPath(path);
+
+    path.transform(transform);
+    ip2->setBrush(brush2);
+    ip2->fillPath(path);
+
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+
+
+    /*
+    //
+    // Various shapes (top left part of the image)
+    //
+
+    // Create a new path
+    path.clear    ();
+    path.beginPath();
+    path.moveTo   (  0, 50); // CCW
+    path.lineTo   ( 50, 80);
+    path.lineTo   (100, 50);
+    path.lineTo   ( 30,  0);
+    path.endPath  ();
+
+    transform.translate(-50, -40);
+
+    // First row
+    testDrawPath_drawRow(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
+
+    // Second row
+    testDrawPath_drawRow(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
+
+    // Create a new path
+    path.clear            ();
+    path.beginPath        ();
+    path.moveTo           (       120, 70); // CCW
+    path.lineTo           (       100, 50);
+    path.lineTo           (        75, 50);
+    path.quadraticBezierTo(50, 0,  25, 50);
+    path.lineTo           (         0, 50);
+    path.lineTo           (       -20, 70);
+    path.endPath          ();
+
+    transform.identity();
+    transform.translate(-50, -35);
+    transform.scale(0.75f, 1.0f);
+
+    // Third row
+    testDrawPath_drawRow(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
+
+    // Create a new path
+    path.clear            ();
+    path.beginPath        ();
+    path.moveTo           (        120,  0); // CCW
+    path.lineTo           (        100, 20);
+    path.lineTo           (         75, 20);
+    path.quadraticBezierTo(50, 50,  25, 20);
+    path.lineTo           (          0, 20);
+    path.lineTo           (        -20,  0);
+    path.endPath          ();
+
+    // Fourth row
+    testDrawPath_drawRow(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
+
+    //
+    // Arcs (top right part of the image)
+    //
+
+    // Create a new path
+    path.clear    ();
+    path.beginPath();
+    path.moveTo   (120, 70    ); // CCW
+    path.lineTo   (100, 50    );
+    path.lineTo   ( 75, 50    );
+    path.arcTo    ( 25, 50, 50);
+    path.lineTo   ( 0,  50    );
+    path.lineTo   (-20, 70    );
+    path.endPath  ();
+
+    transform.identity();
+    transform.translate(-50, -25);
+    transform.scale(0.75f, 1.0f);
+
+    row = 0;
+    col = 6;
+
+    testDrawPath_drawCol(ip2, transform, path, row, col, penThinSolid, penThickSolid);
+
+    // Create a new path
+    path.clear    ();
+    path.beginPath();
+    path.moveTo   (120,  0     ); // CCW
+    path.lineTo   (100, 20     );
+    path.lineTo   ( 75, 20     );
+    path.arcTo    ( 25, 20, -50);
+    path.lineTo   ( 0,  20     );
+    path.lineTo   (-20,  0     );
+    path.endPath  ();
+
+    transform.identity();
+    transform.translate(-50, -25);
+    transform.scale(0.75f, 1.0f);
+
+    row = 1;
+    col = 6;
+
+    testDrawPath_drawCol(ip2, transform, path, row, col, penThinSolid, penThickSolid);
+
+    //
+    // Cubic bezier curves (bottom left part of the image)
+    //
+    row = 3;
+    col = 0;
+
+    // Create a new path
+    path.clear        ();
+    path.beginPath    ();
+    path.moveTo       (30, 50                ); // CCW
+    path.cubicBezierTo(20, 35,  5, 55,  0, 70);
+    path.endPath      ();
+    path.beginPath    ();
+    path.moveTo       (28, 28                );
+    path.cubicBezierTo( 7, 40, 44, 52, 44,  8);
+    path.endPath      ();
+
+    transform.identity();
+    transform.rotate(-25);
+    transform.scale(2.5, 2.5);
+
+#define DRAW_CB(PEN)                                           \
+    do {                                                       \
+        path.setTransform(transform);                          \
+        path.transform().translate(90 + 160 * col, 140 * row); \
+        ip2->setPen(PEN);                                      \
+        ip2->drawPath(path, false);                            \
+        ++col;                                                 \
+    } while(false)
+    DRAW_CB(penThinSolid );
+    DRAW_CB(penThinDot   );
+    DRAW_CB(penThickSolid);
+    DRAW_CB(penThickDot  );
+#undef DRAW_CB
+
+    //
+    // Demonstrating the effect of smoothness (bottom right part of the image)
+    //
+    row = 2;
+    col = 6;
+
+    // Create a new path
+    path.clear    ();
+    path.beginPath();
+    path.moveTo   ( 0.0, 2.0     ); // CCW
+    path.lineTo   ( 2.5, 2.0     );
+    path.arcTo    ( 7.5, 2.0, 5.0);
+    path.lineTo   (10.0, 2.0     );
+    path.endPath  ();
+
+    transform.identity();
+    transform.translate(-5.0, -2.5);
+    transform.scale(25, 25);
+
+    path.setTransform(transform);
+    path.transform().translate(60 + 130 * col, 150 * row);
+    ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
+    //ip2->fillPath(path, 0.05);
+    ip2->drawPath(path, false, 0.05f);
+    ++row;
+
+    path.setTransform(transform);
+    path.transform().translate(60 + 130 * col, 150 * row);
+    ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
+    //ip2->fillPath(path, 1);
+    ip2->drawPath(path, false, 1);
+
+    //ip2->setPen(Color::fromRgb8(255, 0, 0, 255));
+    //ip2->drawEllipse( PointF (60 + 130 * col - 2.5 * 25, 150 * row -0.5 * 25 - 125), SizeF(5 * 25, 2 * 5 * 25) );
+    */
+}
+
+
+/*
 static void testDrawPath_drawRow(
     ImagePainter2* ip2, Transform& transform, Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThinDot, const Pen& penThickSolid, const Pen& penThickDot,
@@ -474,3 +731,4 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
+*/

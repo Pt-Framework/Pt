@@ -67,7 +67,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         1
+#define TEST_SOURCEOVER                         0
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
@@ -89,9 +89,9 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_EXTRA                         1
+#define TEST_DRAW_EXTRA                         0
 
-#define TEST_DRAW_PATH                          0 // (including thick and filled)
+#define TEST_DRAW_PATH                          1 // (including thick and filled)
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 
 #define TEST_IMAGE_OPERATION                    0
@@ -170,7 +170,7 @@ Pt::System::Path buildDir;
 #include "ImagePainterTest2_Draw_Outline.cpp"
 #include "ImagePainterTest2_Draw_Filled.cpp"
 #include "ImagePainterTest2_Draw_Thick.cpp"
-//#include "ImagePainterTest2_Draw_Path.cpp"
+#include "ImagePainterTest2_Draw_Path.cpp"
 #include "ImagePainterTest2_Draw_Extra.cpp"
 //#include "ImagePainterTest2_ImageOperation.cpp"
 
@@ -519,15 +519,15 @@ int main(int argc, char* args[])
     }
 
     // Path (including thick and filled)
-    //if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH) {
-    //    painter2->setCompositionMode(CompositionMode::SourceCopy);
-    //    testDrawPath("Path - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient2, brushTexture1);
-    //}
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawPath("Path - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient2, brushTexture1);
+    }
 
-    //if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH) {
-    //    painter2->setCompositionMode(CompositionMode::SourceOver);
-    //    testDrawPath("Path - ImagePainter2 [SourceOver]", image, *painter2, brushGradient2, brushTexture1);
-    //}
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawPath("Path - ImagePainter2 [SourceOver]", image, *painter2, brushGradient2, brushTexture1);
+    }
 
     // Path clipping
     //if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH_CLIPPING) {
