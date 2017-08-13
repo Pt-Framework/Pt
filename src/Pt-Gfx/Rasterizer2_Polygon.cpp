@@ -74,6 +74,10 @@ void Rasterizer2::rasterPolygonAreaNoAA(const Point* points, const size_t* point
     // Loop through the rows of the image
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY)
     {
+        // Pixel-by-pixel clipping
+        if(pixelY < _currentClip.top   ()) continue;
+        if(pixelY > _currentClip.bottom()) continue;
+
         // Base pointer for the polygons
         const Point* curPointBase = points;
 
@@ -129,8 +133,17 @@ void Rasterizer2::rasterPolygonAreaNoAA(const Point* points, const size_t* point
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2)
         {
-            const Pt::int32_t from = nodeX[i    ];
-            const Pt::int32_t to   = nodeX[i + 1];
+            // Get the coordinate
+            Pt::int32_t from = nodeX[i    ];
+            Pt::int32_t to   = nodeX[i + 1];
+
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
+            if(to < from) continue;
+
+            // Draw the scanline
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
     }
@@ -162,26 +175,38 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
         scanlines.resize( (maxY - minY) + 1 + 4 );
 
     // Loop through the rows of the image
-    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
+    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY)
+    {
+        // Pixel-by-pixel clipping
+        if(pixelY < _currentClip.top   ()) continue;
+        if(pixelY > _currentClip.bottom()) continue;
+
         // Base pointer for the polygons
         const PointF* curPointBase = points;
+
         // Build a list of nodes using all the polygons
         Pt::int32_t nodes = 0;
-        for(size_t p = 0; p < polyCount; ++p) {
+        for(size_t p = 0; p < polyCount; ++p)
+        {
             // Get the current point count
             const size_t curPointCount = pointCount[p];
+
             // Loop through the points
             Pt::int32_t j = curPointCount - 1;
-            for(size_t i = 0; i < curPointCount; ++i) {
+            for(size_t i = 0; i < curPointCount; ++i)
+            {
                 // Get the coordinates
                 const float curXi = (curPointBase + i)->x();
                 const float curYi = (curPointBase + i)->y();
                 const float curXj = (curPointBase + j)->x();
                 const float curYj = (curPointBase + j)->y();
+
                 // Calculate the node's coordinate
-                if( ( pixelY >= curYi && pixelY < curYj ) || ( pixelY >= curYj && pixelY < curYi ) ) {
+                if( ( pixelY >= curYi && pixelY < curYj ) || ( pixelY >= curYj && pixelY < curYi ) )
+                {
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes >= nodeX.size()) return;
+
                     // Calculate the node's coordinate
                     const float deltaYp = pixelY - curYi;
                     const float deltaYj = curYj  - curYi;
@@ -189,31 +214,44 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
                     const float interXf = curXi  + (deltaYp) / deltaYj * deltaXj;
                     nodeX[nodes++] = interXf;
                 }
+
                 // Update the searching index
                 j = i;
             }
+
             // Increment the base pointer
             curPointBase += curPointCount;
         }
+
         // Skip if there is no node
         if(!nodes) continue;
+
         // Sort the nodes
         bubbleSortAscending(nodeX, nodes);
+
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Calculate the coordinate
 #if 1
-            const Pt::int32_t from = Pt::lround( ceil (nodeX[i    ]) );
-            const Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+            Pt::int32_t from = Pt::lround( ceil (nodeX[i    ]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
 #else
-            const Pt::int32_t from = Pt::lround( nodeX[i    ] );
-            const Pt::int32_t to   = Pt::lround( nodeX[i + 1] );
+            Pt::int32_t from = Pt::lround( nodeX[i    ] );
+            Pt::int32_t to   = Pt::lround( nodeX[i + 1] );
 #endif
+
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
             if(to < from) continue;
+
             // Store the scanline coordinate as needed
-            if(_compositionMode != CompositionMode::SourceCopy) {
+            if(_compositionMode != CompositionMode::SourceCopy)
+            {
                 scanlines[pixelY - minY + 1].push_back(ScanlineElement16(from, to));
             }
+
             // Draw the scanline
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
@@ -221,12 +259,14 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
 
     // Raster the anti-aliased outline
     const PointF* curPointBase = points;
-    for(size_t p = 0; p < polyCount; ++p) {
+    for(size_t p = 0; p < polyCount; ++p)
+    {
         // Mask
         DrawLineMask mask_zero;
         DrawLineMask mask_nnp1;
         memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
         memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
         // From point N to point (N + 1), successively
         const size_t pc1 = pointCount[p] - 1;
         for(size_t i = 0; i < pc1; ++i) {
@@ -237,6 +277,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
             );
             if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
         }
+
         // From the last point to the first point
         mask_zero[2] = mask_zero[0];
         mask_zero[3] = mask_zero[1];
@@ -247,6 +288,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
              curPointBase[0  ].x(), curPointBase[0  ].y(),
              color, minX, minY_ - 1, scanlines, mask_zero
         );
+
         // Increment the base pointer
         curPointBase += pointCount[p];
     }
@@ -284,6 +326,10 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
     {
+        // Pixel-by-pixel clipping
+        if(y < _currentClip.top   ()) continue;
+        if(y > _currentClip.bottom()) continue;
+
         // Build a list of nodes using all the polygons
         std::size_t nodes = 0;
 
@@ -328,10 +374,19 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         bubbleSortAscending(nodeX, nodes);
 
         // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2)
+        for(std::size_t i = 0; i < nodes; i += 2)
         {
-            const Pt::int32_t from = nodeX[i    ];
-            const Pt::int32_t to   = nodeX[i + 1];
+            // Get the coordinate
+            Pt::int32_t from = nodeX[i    ];
+            Pt::int32_t to   = nodeX[i + 1];
+
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
+            if(to < from) continue;
+
+            // Draw the scanline
             rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
         }
     }
@@ -379,6 +434,10 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
     {
+        // Pixel-by-pixel clipping
+        if(y < _currentClip.top   ()) continue;
+        if(y > _currentClip.bottom()) continue;
+
         // Build a list of nodes using all the polygons
         std::size_t nodes = 0;
         for(size_t p = 0; p < polygonPoints.size(); ++p)
@@ -426,10 +485,19 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
         bubbleSortAscending(nodeX, nodes);
 
         // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2)
+        for(std::size_t i = 0; i < nodes; i += 2)
         {
-            const Pt::int32_t from = nodeX[i    ];
-            const Pt::int32_t to   = nodeX[i + 1];
+            // Get the coordinate
+            Pt::int32_t from = nodeX[i    ];
+            Pt::int32_t to   = nodeX[i + 1];
+
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
+            if(to < from) continue;
+
+            // Draw the scanline
             rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
         }
     }
@@ -467,6 +535,10 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
     {
+        // Pixel-by-pixel clipping
+        if(y < _currentClip.top   ()) continue;
+        if(y > _currentClip.bottom()) continue;
+
         // Build a list of nodes using all the polygons
         std::size_t nodes = 0;
 
@@ -509,14 +581,17 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         bubbleSortAscending(nodeX, nodes);
 
         // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2)
+        for(std::size_t i = 0; i < nodes; i += 2)
         {
             // Calculate the coordinate
-            const Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            const Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+            Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
 
-            if(to < from)
-                continue;
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
+            if(to < from) continue;
 
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy)
@@ -607,8 +682,12 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
     {
+        // Pixel-by-pixel clipping
+        if(y < _currentClip.top   ()) continue;
+        if(y > _currentClip.bottom()) continue;
+
         // Build a list of nodes using all the polygons
-        Pt::int32_t nodes = 0;
+        std::size_t nodes = 0;
 
         for(size_t p = 0; p < polygons.size(); ++p)
         {
@@ -657,14 +736,17 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
         bubbleSortAscending(nodeX, nodes);
 
         // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2)
+        for(std::size_t i = 0; i < nodes; i += 2)
         {
             // Calculate the coordinate
-            const Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            const Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+            Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
 
-            if(to < from)
-                continue;
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
+            if(to < from) continue;
 
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy)

@@ -186,6 +186,7 @@ inline void BasicClipShape<T>::clipPolylineToEdge(std::vector<PointT>& out, cons
 template <typename T>
 inline void BasicClipShape<T>::clipPolygon(std::vector<PointT>& pio, const Rect& clippingArea)
 {
+    return;
     // If the clipping area is null or there is too few elements, simply clear the vector
     if(clippingArea.isNull() || pio.size() < 3) {
         pio.clear();

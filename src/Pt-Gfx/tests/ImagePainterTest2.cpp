@@ -67,7 +67,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         0
+#define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
@@ -91,7 +91,7 @@ using namespace Pt::Gfx;
 
 #define TEST_DRAW_EXTRA                         0
 
-#define TEST_DRAW_PATH                          1 // (including thick and filled)
+#define TEST_DRAW_PATH                          1 // (including thick and filled and rectangle clipping area)
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 
 #define TEST_IMAGE_OPERATION                    0
