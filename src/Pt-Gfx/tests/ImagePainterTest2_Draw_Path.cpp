@@ -1,11 +1,57 @@
+static void noclipDrawPath(ImagePainter2& ip2, const Path& path, const Pen* pen, const Brush* brush)
+{
+    if(pen) {
+        ip2.setPen(*pen);
+        ip2.drawPath(path);
+    }
+
+    if(brush) {
+        ip2.setBrush(*brush);
+        ip2.fillPath(path);
+    }
+}
+
+static void setClipRegionAndDrawPath(const Image& image, ImagePainter2& ip2, const RectF& clipRect, const Path& path, const Pen* pen, const Brush* brush)
+{
+#define __USE_CLIP__
+
+#ifdef __USE_CLIP__
+    // Set clip region
+    //ip2.setClip(clipRect);
+
+    // Draw the clip region
+    static const Pen clipBorder( Color::fromRgb8(255, 0, 0, 255) );
+    ip2.setPen(clipBorder);
+    ip2.drawRect(clipRect);
+#endif
+
+    // Draw the path
+    if(pen) {
+        ip2.setPen(*pen);
+        ip2.drawPath(path);
+    }
+
+    if(brush) {
+        ip2.setBrush(*brush);
+        ip2.fillPath(path);
+    }
+
+#ifdef __USE_CLIP__
+    // Reset the clip area
+    ip2.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+#undef __USE_CLIP__
+#endif
+}
+
+
 static void testDrawPath(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
 {
     resetImage(image);
 
-    Pen penThinSolid ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
-    Pen penThinDot   ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
-    Pen penThickSolid( Pen(Color::fromRgb8(255, 191, 127, 175), 6, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
-    Pen penThickDot  ( Pen(Color::fromRgb8(255, 191, 127, 175), 6, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
+    const Pen penThinSolid ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
+    const Pen penThinDot   ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
+    const Pen penThickSolid( Pen(Color::fromRgb8(255, 191, 127, 175), 6, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
+    const Pen penThickDot  ( Pen(Color::fromRgb8(255, 191, 127, 175), 6, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(!ip2) return;
@@ -22,84 +68,53 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path.lineTo( PointF( 0,  0) );
     path.close ();
 
-    // Reset the clip area
-    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
-
     // Outline - not clipped
     transform.translate(100, 50);   // Absolute start position (100,  50)
     path.transform(transform);
-    ip2->setPen(penThinSolid);
-    ip2->drawPath(path);
+    noclipDrawPath(*ip2, path, &penThinSolid, 0);
 
     transform.translate(100, -50);  // Absolute start position (300,  50)
     path.transform(transform);
-    ip2->setPen(penThinDot);
-    ip2->drawPath(path);
+    noclipDrawPath(*ip2, path, &penThinDot, 0);
 
     path.transform(transform);      // Absolute start position (500,  50)
-    ip2->setPen(penThickSolid);
-    ip2->drawPath(path);
+    noclipDrawPath(*ip2, path, &penThickSolid, 0);
 
     path.transform(transform);      // Absolute start position (700,  50)
-    ip2->setPen(penThickDot);
-    ip2->drawPath(path);
-
-    // Reset the clip area
-    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+    noclipDrawPath(*ip2, path, &penThickDot, 0);
 
     // Outline - clipped
     transform.translate(-800, 200); // Absolute start position (100, 250)
     path.transform(transform);
-    ip2->setPen(penThinSolid);
-    //ip2->setClip( RectF( PointF(110, 260), SizeF(80, 70) ) );
-    ip2->drawPath(path);
+    setClipRegionAndDrawPath(image, *ip2, RectF( PointF(110, 260), SizeF(80, 70) ), path, &penThinSolid, 0);
 
     transform.translate(800, -200); // Absolute start position (300, 250)
     path.transform(transform);
-    ip2->setPen(penThinDot);
-    //ip2->setClip( RectF( PointF(310, 260), SizeF(80, 70) ) );
-    ip2->drawPath(path);
+    setClipRegionAndDrawPath(image, *ip2, RectF( PointF(310, 260), SizeF(80, 70) ), path, &penThinDot, 0);
 
     path.transform(transform);      // Absolute start position (500, 250)
-    ip2->setPen(penThickSolid);
-    //ip2->setClip( RectF( PointF(510, 260), SizeF(80, 70) ) );
-    ip2->drawPath(path);
+    setClipRegionAndDrawPath(image, *ip2, RectF( PointF(510, 260), SizeF(80, 70) ), path, &penThickSolid, 0);
+
 
     path.transform(transform);      // Absolute start position (700, 250)
-    ip2->setPen(penThickDot);
-    //ip2->setClip( RectF( PointF(710, 260), SizeF(80, 70) ) );
-    ip2->drawPath(path);
-
-    // Reset the clip area
-    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+    setClipRegionAndDrawPath(image, *ip2, RectF( PointF(710, 260), SizeF(80, 70) ), path, &penThickDot, 0);
 
     // Filled - not clipped
     transform.translate(-800, 200); // Absolute start position (100, 450)
     path.transform(transform);
-    ip2->setBrush(brush1);
-    ip2->fillPath(path);
+    noclipDrawPath(*ip2, path, 0, &brush1);
 
     transform.translate(800, -200); // Absolute start position (300, 450)
     path.transform(transform);
-    ip2->setBrush(brush2);
-    ip2->fillPath(path);
-
-    // Reset the clip area
-    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+    noclipDrawPath(*ip2, path, 0, &brush2);
 
     // Filled - clipped
     path.transform(transform);      // Absolute start position (500, 450)
     ip2->setBrush(brush1);
-    //ip2->setClip( RectF( PointF(510, 460), SizeF(80, 70) ) );
-    ip2->fillPath(path);
+    setClipRegionAndDrawPath(image, *ip2, RectF( PointF(510, 460), SizeF(80, 70) ), path, 0, &brush1);
 
     path.transform(transform);      // Absolute start position (700, 450)
-    ip2->setBrush(brush2);
-    //ip2->setClip( RectF( PointF(710, 460), SizeF(80, 70) ) );
-    ip2->fillPath(path);
-
-    // Reset the clip area
-    ip2->setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+    setClipRegionAndDrawPath(image, *ip2, RectF( PointF(710, 460), SizeF(80, 70) ), path, 0, &brush2);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 
