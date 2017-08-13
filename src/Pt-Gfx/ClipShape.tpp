@@ -116,6 +116,7 @@ inline Pt::int32_t BasicClipShape<T>::csComputeOutcode(T x, T y, const Rect& cli
 }
 
 
+/*
 // ======================================================================================
 // ===== Clip Polyline ==================================================================
 // ======================================================================================
@@ -123,6 +124,7 @@ inline Pt::int32_t BasicClipShape<T>::csComputeOutcode(T x, T y, const Rect& cli
 template <typename T>
 inline void BasicClipShape<T>::clipPolyline(std::vector<PointT>& pio, const Rect& clippingArea)
 {
+    return;
     // If the clipping area is null or there is too few elements, simply clear the vector
     if(clippingArea.isNull() || pio.size() < 2) {
         pio.clear();
@@ -174,6 +176,7 @@ inline void BasicClipShape<T>::clipPolylineToEdge(std::vector<PointT>& out, cons
          if(sInside) out.push_back(s);
     else if(pInside) out.push_back(intersect(s, p, edge0, edge1));
 }
+*/
 
 
 // ======================================================================================

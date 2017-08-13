@@ -49,6 +49,7 @@ void Rasterizer2::rasterWideLine(const PointF* ps, std::size_t n)
     std::vector<PointF> clippedPolygon(ps, ps + n);
 
     BasicClipShape<double>::clipPolygon(clippedPolygon, _currentClip);
+    if(clippedPolygon.empty()) return;
 
     for(size_t j = 0; j < clippedPolygon.size(); ++j)
     {
@@ -97,12 +98,14 @@ void Rasterizer2::rasterWidePolyline(const std::vector<Polygon>& polygons)
     Pt::int32_t maxY = -MAXIMUM_COORD;
 
     std::vector<Polygon> clippedPolygons = polygons;
+    if(clippedPolygons.empty()) return;
 
     for(size_t i = 0; i < clippedPolygons.size(); ++i)
     {
         Polygon& polygon = clippedPolygons[i];
 
         BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
+        if(polygon.empty()) continue;
 
         for(size_t j = 0; j < polygon.size(); ++j)
         {
@@ -138,38 +141,38 @@ void Rasterizer2::rasterWidePolyline(const std::vector<Polygon>& polygons)
 }
 
 
-void Rasterizer2::rasterNarrowSolidLine(Pt::int32_t x1, Pt::int32_t y1, 
-                                               Pt::int32_t x2, Pt::int32_t y2, 
+void Rasterizer2::rasterNarrowSolidLine(Pt::int32_t x1, Pt::int32_t y1,
+                                               Pt::int32_t x2, Pt::int32_t y2,
                                                const Color& color, DrawLineMask* maskInOut)
 {
     // Check for horizontal line
-    if(y1 == y2) 
+    if(y1 == y2)
     {
         rasterNarrowSolidHLineSegment(x1, x2, y1, color, maskInOut);
         return;
     }
 
     // Check for vertical line
-    if(x1 == x2) 
+    if(x1 == x2)
     {
         rasterNarrowSolidVLineSegment(x1, y1, y2, color, maskInOut);
         return;
     }
 
     // Check for 45-degree line
-    if(abs(x2 - x1) == abs(y2 - y1)) 
+    if(abs(x2 - x1) == abs(y2 - y1))
     {
         rasterNarrowSolidXLineSegment(x1, y1, x2, y2, color, maskInOut);
         return;
     }
 
     // Generic line
-    if( ! _aaMode) 
+    if( ! _aaMode)
     {
         // Raster the line without using anti-aliasing
         rasterNarrowSolidGLineSegmentNoAA(x1, y1, x2, y2, color, maskInOut);
     }
-    else 
+    else
     {
         // Raster the line using anti-aliasing
         rasterNarrowSolidGLineSegmentXWAA(x1, y1, x2, y2, color, maskInOut);
@@ -177,19 +180,19 @@ void Rasterizer2::rasterNarrowSolidLine(Pt::int32_t x1, Pt::int32_t y1,
 }
 
 
-void Rasterizer2::rasterNarrowSolidLine_F(float x1, float y1, 
-                                          float x2, float y2, 
+void Rasterizer2::rasterNarrowSolidLine_F(float x1, float y1,
+                                          float x2, float y2,
                                           const Color& color, DrawLineMask* maskInOut)
-{ 
+{
     // TODO: without AA
 
-    rasterNarrowSolidGLineSegmentXWAA_F(x1, y1, x2, y2, color, maskInOut); 
+    rasterNarrowSolidGLineSegmentXWAA_F(x1, y1, x2, y2, color, maskInOut);
 }
 
 
-void Rasterizer2::rasterNarrowPatternedLine(Pt::int32_t x1, Pt::int32_t y1, 
-                                            Pt::int32_t x2, Pt::int32_t y2, 
-                                            const Color& color, Pt::int32_t& fpiCtrInOut, 
+void Rasterizer2::rasterNarrowPatternedLine(Pt::int32_t x1, Pt::int32_t y1,
+                                            Pt::int32_t x2, Pt::int32_t y2,
+                                            const Color& color, Pt::int32_t& fpiCtrInOut,
                                             DrawLineMask* maskInOut)
 {
     // Check the size of the line
@@ -218,10 +221,10 @@ void Rasterizer2::rasterNarrowPatternedLine(Pt::int32_t x1, Pt::int32_t y1,
 }
 
 
-void Rasterizer2::rasterNarrowPatternedLine_F(float x1, float y1, 
-                                              float x2, float y2, 
-                                              const Color& color, 
-                                              Pt::int32_t& fpiCtrInOut, 
+void Rasterizer2::rasterNarrowPatternedLine_F(float x1, float y1,
+                                              float x2, float y2,
+                                              const Color& color,
+                                              Pt::int32_t& fpiCtrInOut,
                                               DrawLineMask* maskInOut)
 {
     // Check the size of the line
@@ -231,8 +234,8 @@ void Rasterizer2::rasterNarrowPatternedLine_F(float x1, float y1,
     const float sizeL = sqrt(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = lround(FIXED_POINT_CONSTANT_ISQRT2 * 
-                                         PATTERN_BUFFER_SCALE_FACTOR * 
+    const Pt::int32_t fpiCtrInc = lround(FIXED_POINT_CONSTANT_ISQRT2 *
+                                         PATTERN_BUFFER_SCALE_FACTOR *
                                          sizeS / sizeL);
 
     // Rasterize line
@@ -370,9 +373,9 @@ void Rasterizer2::rasterNarrowSolidXLineSegment(Pt::int32_t x1, Pt::int32_t y1, 
 // Using algorithm from: Bresenham's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 //                       Last modified on February 21, 2017
-void Rasterizer2::rasterNarrowSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, 
-                                                    Pt::int32_t x2, Pt::int32_t y2, 
-                                                    const Color& color, 
+void Rasterizer2::rasterNarrowSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
+                                                    Pt::int32_t x2, Pt::int32_t y2,
+                                                    const Color& color,
                                                     DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
@@ -465,9 +468,9 @@ void Rasterizer2::rasterNarrowSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t 
 // Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
-void Rasterizer2::rasterNarrowSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, 
-                                                    Pt::int32_t x2, Pt::int32_t y2, 
-                                                    const Color& color, 
+void Rasterizer2::rasterNarrowSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
+                                                    Pt::int32_t x2, Pt::int32_t y2,
+                                                    const Color& color,
                                                     DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
@@ -605,9 +608,9 @@ void Rasterizer2::rasterNarrowSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t 
 // Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
-void Rasterizer2::rasterNarrowSolidGLineSegmentXWAA_F(float x1, float y1, 
-                                                      float x2, float y2, 
-                                                      const Color& color, 
+void Rasterizer2::rasterNarrowSolidGLineSegmentXWAA_F(float x1, float y1,
+                                                      float x2, float y2,
+                                                      const Color& color,
                                                       DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
@@ -749,11 +752,11 @@ void Rasterizer2::rasterNarrowSolidGLineSegmentXWAA_F(float x1, float y1,
 }
 
 
-void Rasterizer2::rasterNarrowPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1, 
-                                                    Pt::int32_t x2, Pt::int32_t y2, 
-                                                    const Color& color, 
-                                                    Pt::int32_t fpiCtrInc, 
-                                                    Pt::int32_t& fpiCtrInOut, 
+void Rasterizer2::rasterNarrowPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1,
+                                                    Pt::int32_t x2, Pt::int32_t y2,
+                                                    const Color& color,
+                                                    Pt::int32_t fpiCtrInc,
+                                                    Pt::int32_t& fpiCtrInOut,
                                                     DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
@@ -818,11 +821,11 @@ void Rasterizer2::rasterNarrowPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t 
 // Using algorithm from: Bresenham's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 //                       Last modified on February 21, 2017
-void Rasterizer2::rasterNarrowPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, 
-                                                        Pt::int32_t x2, Pt::int32_t y2, 
-                                                        const Color& color, 
-                                                        Pt::int32_t fpiCtrInc, 
-                                                        Pt::int32_t& fpiCtrInOut, 
+void Rasterizer2::rasterNarrowPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
+                                                        Pt::int32_t x2, Pt::int32_t y2,
+                                                        const Color& color,
+                                                        Pt::int32_t fpiCtrInc,
+                                                        Pt::int32_t& fpiCtrInOut,
                                                         DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
@@ -894,11 +897,11 @@ void Rasterizer2::rasterNarrowPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int3
 // Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
-void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, 
-                                                        Pt::int32_t x2, Pt::int32_t y2, 
-                                                        const Color& color, 
-                                                        Pt::int32_t fpiCtrInc, 
-                                                        Pt::int32_t& fpiCtrInOut, 
+void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
+                                                        Pt::int32_t x2, Pt::int32_t y2,
+                                                        const Color& color,
+                                                        Pt::int32_t fpiCtrInc,
+                                                        Pt::int32_t& fpiCtrInOut,
                                                         DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
@@ -1047,11 +1050,11 @@ void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int3
 // Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
-void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA_F(float x1, float y1, 
-                                                          float x2, float y2, 
-                                                          const Color& color, 
-                                                          Pt::int32_t fpiCtrInc, 
-                                                          Pt::int32_t& fpiCtrInOut, 
+void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA_F(float x1, float y1,
+                                                          float x2, float y2,
+                                                          const Color& color,
+                                                          Pt::int32_t fpiCtrInc,
+                                                          Pt::int32_t& fpiCtrInOut,
                                                           DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed

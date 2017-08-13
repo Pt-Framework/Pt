@@ -766,7 +766,9 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t pointCount)
 void Rasterizer2::drawNarrowPolyline(const PointF* pointsF, size_t pointCount)
 {
     std::vector<PointF> clipped(pointsF, pointsF + pointCount);
-    BasicClipShape<double>::clipPolyline(clipped, _currentClip);
+
+    //BasicClipShape<double>::clipPolyline(clipped, _currentClip);
+    //if(clipped.empty()) return;
 
     std::vector<Point> points;
     for(std::size_t i = 0; i < clipped.size(); ++i)
@@ -972,7 +974,9 @@ void Rasterizer2::drawPath(const Path& path, float smoothness)
 void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
 {
     std::vector<PointF> clipped(pointsF, pointsF + pointCount);
-    BasicClipShape<double>::clipPolyline(clipped, _currentClip);
+
+    //BasicClipShape<double>::clipPolyline(clipped, _currentClip);
+    //if(clipped.empty()) return;
 
     if(clipped.size() < 2)
         return;

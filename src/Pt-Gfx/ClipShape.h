@@ -71,7 +71,7 @@ class BasicClipShape {
         { return (clippingArea.bottom() < y) ? clippingArea.bottom() : y; }
 
         static inline bool clipLine(T& x0, T& y0, T& x1, T& y1, const Rect& clip);
-        static inline void clipPolyline(std::vector<PointT>& pio, const Rect& clippingArea);
+      //static inline void clipPolyline(std::vector<PointT>& pio, const Rect& clippingArea);
         static inline void clipPolygon(std::vector<PointT>& pio, const Rect& clippingArea);
 
     private:

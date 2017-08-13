@@ -722,11 +722,11 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
 // Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
-void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1, 
-                                            float x2, float y2, 
-                                            const Color& color, 
-                                            Pt::int32_t minX, Pt::int32_t minY, 
-                                            const PolygonScanlines& exclusionZone, 
+void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
+                                            float x2, float y2,
+                                            const Color& color,
+                                            Pt::int32_t minX, Pt::int32_t minY,
+                                            const PolygonScanlines& exclusionZone,
                                             DrawLineMask& maskInOut)
 {
     // Get the mask's coordinate
