@@ -119,6 +119,7 @@ static void testDrawThickLine_impl(
     }
     painter.setPen(penText); painter.drawText( PointF(320, 370 - 30), "Tri-Out" );
 
+    // ### TODO: PRODUCE LESS NUMBER OF SEGMENTS THAN "TRI-OUT" !!! ###
     painter.setPen(penICapBJoin);
     painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
     painter.drawLine( PointF(420, 430 - 30), PointF(500, 380 - 30) );
