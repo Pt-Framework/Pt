@@ -20,8 +20,8 @@ static void setClipRegionAndDrawPath(const Image& image, ImagePainter2& ip2, con
     ip2.setClip(clipRect);
 
     // Draw the clip region
-    static const Pen clipBorder( Color::fromRgb8(255, 0, 0, 255) );
-    ip2.setPen(clipBorder);
+    static const Pen clipBorderA( Color::fromRgb8(255, 0, 0, 255) );
+    ip2.setPen(clipBorderA);
     ip2.drawRect(clipRect);
 #endif
 
@@ -37,6 +37,18 @@ static void setClipRegionAndDrawPath(const Image& image, ImagePainter2& ip2, con
     }
 
 #ifdef __USE_CLIP__
+    // Save and replace the composition mode
+    const CompositionMode cm = ip2.compositionMode();
+    ip2.setCompositionMode(CompositionMode::SourceOver);
+
+    // Draw the clip region
+    static const Pen clipBorderB( Color::fromRgb8(255, 255, 255, 63) );
+    ip2.setPen(clipBorderB);
+    ip2.drawRect(clipRect);
+
+    // Restore the composition mode
+    ip2.setCompositionMode(cm);
+
     // Reset the clip area
     ip2.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 #undef __USE_CLIP__
