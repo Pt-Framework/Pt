@@ -49,7 +49,7 @@ static void setClipRegionAndDrawPath(const Image& image, ImagePainter2& ip2, con
     // Restore the composition mode
     ip2.setCompositionMode(cm);
 
-    // Reset the clip area
+    // Reset the clip region
     ip2.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 #undef __USE_CLIP__
 #endif
@@ -107,7 +107,6 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path.transform(transform);      // Absolute start position (500, 250)
     setClipRegionAndDrawPath(image, *ip2, RectF( PointF(510, 260), SizeF(80, 70) ), path, &penThickSolid, 0);
 
-
     path.transform(transform);      // Absolute start position (700, 250)
     setClipRegionAndDrawPath(image, *ip2, RectF( PointF(710, 260), SizeF(80, 70) ), path, &penThickDot, 0);
 
@@ -122,7 +121,6 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
     // Filled - clipped
     path.transform(transform);      // Absolute start position (500, 450)
-    ip2->setBrush(brush1);
     setClipRegionAndDrawPath(image, *ip2, RectF( PointF(510, 460), SizeF(80, 70) ), path, 0, &brush1);
 
     path.transform(transform);      // Absolute start position (700, 450)

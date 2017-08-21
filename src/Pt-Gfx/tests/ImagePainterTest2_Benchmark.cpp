@@ -14,12 +14,12 @@
 #include "ImagePainterTest2_Benchmark_Outline.cpp"
 #include "ImagePainterTest2_Benchmark_Filled.cpp"
 #include "ImagePainterTest2_Benchmark_Thick.cpp"
-//#include "ImagePainterTest2_Benchmark_Path.cpp"
+#include "ImagePainterTest2_Benchmark_Path.cpp"
 //#include "ImagePainterTest2_Benchmark_ImageOperation.cpp"
 
 static void doBenchmark(CompositionMode cm)
 {
-    Pt::int64_t time1, time2;
+    double time1, time2;
 
     std::clog << "                                                       (Time) (Factor)" << std::endl;
     std::clog << "                                                       ------ --------" << std::endl;
@@ -253,19 +253,19 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Path
-    //if(BENCHMARK_RESULT_HTML || BENCHMARK_PATH) {
-    //    time1 = benchDrawPath<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, false);
-    //    std::clog << "    Path NOAA (28 SHAPES, NO RASTER) @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
-    //    time2 = benchDrawPath<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, true);
-    //    std::clog << "    Path XWAA (28 SHAPES, NO RASTER) @ ImagePainter2 = " << std::setw(6) << time2
-    //              << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-    //    time1 = benchDrawPath<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, false);
-    //    std::clog << "    Path NOAA (28 SHAPES, /W RASTER) @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
-    //    time2 = benchDrawPath<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, true);
-    //    std::clog << "    Path XWAA (28 SHAPES, /W RASTER) @ ImagePainter2 = " << std::setw(6) << time2
-    //              << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-    //    std::clog << std::endl;
-    //}
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_PATH) {
+        time1 = benchDrawPath<ImagePainter2, false, false>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, false);
+        std::clog << "    Path NOAA (NO RASTER, NO CLIP)   @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawPath<ImagePainter2, false, true >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, true);
+        std::clog << "    Path XWAA (NO RASTER, /W CLIP)   @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time1 = benchDrawPath<ImagePainter2, true , false>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, false);
+        std::clog << "    Path NOAA (/W RASTER, NO CLIP)   @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawPath<ImagePainter2, true , true >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, true);
+        std::clog << "    Path XWAA (/W RASTER, /W CLIP)   @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
 
 }
 

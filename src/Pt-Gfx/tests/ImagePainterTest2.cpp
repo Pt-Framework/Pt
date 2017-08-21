@@ -63,7 +63,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -108,37 +108,37 @@ using namespace Pt::Gfx;
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0 // XXX
 
-#define BENCHMARK_SOLID_LINE                1
-#define BENCHMARK_PATTERNED_LINE            1
-#define BENCHMARK_SOLID_THICK_LINE          1
-#define BENCHMARK_PATTERNED_THICK_LINE      1
+#define BENCHMARK_SOLID_LINE                0
+#define BENCHMARK_PATTERNED_LINE            0
+#define BENCHMARK_SOLID_THICK_LINE          0
+#define BENCHMARK_PATTERNED_THICK_LINE      0
 
-#define BENCHMARK_RECTANGLE                 1
-#define BENCHMARK_ELLIPSE                   1
-#define BENCHMARK_ARC                       1
+#define BENCHMARK_RECTANGLE                 0
+#define BENCHMARK_ELLIPSE                   0
+#define BENCHMARK_ARC                       0
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0
 #define BENCHMARK_SOLID_THICK_BEZIER        0
 #define BENCHMARK_PATTERNED_THICK_BEZIER    0
 
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      1
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
+#define BENCHMARK_SOLID_FILLED_POLYGON      0
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
-#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   1
-#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    1
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
+#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
+#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
 
-#define BENCHMARK_SOLID_FILLED_ARC          1
-#define BENCHMARK_GRADIENT_FILLED_ARC       1
-#define BENCHMARK_TEXTURE_FILLED_ARC        1
+#define BENCHMARK_SOLID_FILLED_ARC          0
+#define BENCHMARK_GRADIENT_FILLED_ARC       0
+#define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      0
+#define BENCHMARK_PATH                      1 // (including thick and filled and rectangle clipping area)
 #define BENCHMARK_IMAGE_OPERATION           0
 
 // Configurations and objects
