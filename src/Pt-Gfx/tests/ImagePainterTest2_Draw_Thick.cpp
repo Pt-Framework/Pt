@@ -17,6 +17,22 @@ static void testDrawThickLine_impl(
     Pen penText( Color::fromRgb8(255,   0,   0, 175) );
     Pen penRef ( Color::fromRgb8(255, 127, 127, 127) );
 
+
+    Path      path;
+    Transform transform;
+
+    path.moveTo( PointF(  0,   0) );
+    path.lineTo( PointF( 80,  90) );
+    path.lineTo( PointF(-20, 120) );
+    path.lineTo( PointF( 10,  40) );
+    path.close ();
+
+    transform.translate(500, 20);
+    path.transform(transform);
+
+    ip2->setPen(penSCapBJoin);
+    ip2->drawPath(path);
+
     /*
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_S) );
     if(ip2) ip2->setAntiAliasing(false);
