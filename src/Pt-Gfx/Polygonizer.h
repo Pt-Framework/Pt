@@ -192,6 +192,8 @@ class Polygonizer
                            const PointF& line1a, const PointF& line1b,
                            const PointF& line2a, const PointF& line2b, size_t penSize);
 
+        static void sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, const std::vector<PointF>& poly1, const std::vector<PointF>& poly2);
+
     private:
         static const int PatternCells = 64;
         Pt::uint8_t _patternBufferMP[PatternCells];

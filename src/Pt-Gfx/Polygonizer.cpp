@@ -106,15 +106,14 @@ void Polygonizer::setPattern(const Pen::Style& style)
     }
 
     // Counter for generating the patterns
-    size_t gctr1P = 0;
+    //size_t gctr1P = 0;
     size_t gctrMP = 0;
 
     // Generate the pattern
-    bool previous = 0;
+    //bool previous = 0;
     for(Pt::int8_t p = 0; p < PatternCells; ++p)
     {
         // The pattern has 64 points
-
         // Get the pattern cell value
         const bool current = patternSel & ((Pt::uint64_t) 1 << p);
 
@@ -729,9 +728,13 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //poi
         // Process the "pattern" segment
         done = sagPolygonPoints(state, !!refPat, pen);
     }
+
+    //int NN = 3;
+    //if(polygons.size() > NN) polygons[NN].clear();
 }
 
 
+//
 // Based on: Collision Detection Using the Separating Axis Theorem
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
@@ -803,6 +806,10 @@ bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Cou
 
 bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen)
 {
+    //
+    // ### TODO: !!! BROKEN CORNER DUE TO DUPLICATED SEGMENT(S) !!! ###
+    //
+
     // Temporary buffer for the generated points
     std::vector<PointF> pointsF;
 
@@ -870,7 +877,6 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
                         state.py + state.cvy + state.uvy * state.patSegLen,
                         pen
                     );
-
                 }
                 else {
                     sagGenerateSimpleLineSegment(
@@ -911,6 +917,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         // Store the current interpolation coordinate to the "gather" buffer as needed
         if(state.gather.empty() || state.gather.back().x() != state.px || state.gather.back().y() != state.py) {
             state.gather.push_back(PointF(state.px, state.py));
+            continue;
         }
         // If the combined length is less than or equal to the "pattern" segment length, simply store the end coordinate
         if(state.gatherLen + state.remLen <= state.patSegLen) {
@@ -950,8 +957,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
 }
 
 
-
-static void combinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, const std::vector<PointF>& poly1, const std::vector<PointF>& poly2)
+void Polygonizer::sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, const std::vector<PointF>& poly1, const std::vector<PointF>& poly2)
 {
     // Constants
     const double VecResScaleUp = 64.0;
@@ -962,7 +968,7 @@ static void combinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, c
     ClipperLib::Path    cpath;
     ClipperLib::Paths   cpresult;
 
-    //
+    // Convert the 1st polygon data
     cpath.resize(poly1.size());
     for(size_t i = 0; i < poly1.size(); ++i) {
         cpath[i].X = lround( poly1[i].x() * VecResScaleUp );
@@ -970,7 +976,7 @@ static void combinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, c
     }
     clipper.AddPath(cpath, ClipperLib::ptClip, true);
 
-    //
+    // Convert the 2nd polygon data
     cpath.resize(poly2.size());
     for(size_t i = 0; i < poly2.size(); ++i) {
         cpath[i].X = lround( poly2[i].x() * VecResScaleUp );
@@ -978,16 +984,16 @@ static void combinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, c
     }
     clipper.AddPath(cpath, ClipperLib::ptSubject, true);
 
-    //
+    // Perform union operation on the two polygons
     cpath.clear();
     clipper.Execute(ClipperLib::ctUnion, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
 
     // Store back the resulting polygon(s)
     for(size_t i = 0; i < cpresult.size(); ++i) {
-        //
+        // Get the polygon
         const ClipperLib::Path& curPath = cpresult[i];
         std::vector<PointF>*    dstBuf  = 0;
-        //
+        // Select the destination buffer
         if(!i) {
             dstBuf = &prevPoly.points();
         }
@@ -995,9 +1001,9 @@ static void combinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, c
             allPolys.resize(allPolys.size() + 1);
             dstBuf = &allPolys.back().points();
         }
-        //
+        // Resize the destination buffer
         dstBuf->resize(curPath.size());
-        //
+        // Convert the polygon data
         for(size_t j = 0; j < curPath.size(); ++j) {
             (*dstBuf)[j].setX( curPath[j].X * VecResScaleDn );
             (*dstBuf)[j].setY( curPath[j].Y * VecResScaleDn );
@@ -1052,7 +1058,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
                                                   pointsF.data(), pointsF.size() );
         if(r) {
             // Combine them and exit this function
-            combinePolygons(state.dstPolygons, firstPolygon, firstPolygon.points(), pointsF);
+            sagCombinePolygons(state.dstPolygons, firstPolygon, firstPolygon.points(), pointsF);
             return;
         }
     }
@@ -1066,7 +1072,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
                                                   pointsF.data(), pointsF.size() );
         if(r) {
             // Combine them and exit this function
-            combinePolygons(state.dstPolygons, prevPolygon, prevPolygon.points(), pointsF);
+            sagCombinePolygons(state.dstPolygons, prevPolygon, prevPolygon.points(), pointsF);
             return;
         }
     }
@@ -1084,7 +1090,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
     renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen);
 
     // Exit here if the generated polygon does not actually have a meaningful number of points
-    if(polygons.empty() || polygons[0].size() <= 2)
+    if(polygons.empty() || polygons[0].size() < 3)
         return;
 
     std::vector<PointF>& pointsF = polygons[0].points();
@@ -1092,13 +1098,13 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
     // Check for intersection with the first polygons in the final destination buffer
     if( ! state.dstPolygons.empty() )
     {
-        const std::vector<PointF>& firstPolygon = state.dstPolygons[0].points();
+        Polygon& firstPolygon = state.dstPolygons[0];
 
-        bool r = satDetectPolygonCollision( &firstPolygon[0],
-                                            firstPolygon.size(),
-                                            pointsF.data(), pointsF.size() );
+        const bool r = satDetectPolygonCollision( &firstPolygon.points()[0], firstPolygon.points().size(),
+                                                  pointsF.data(), pointsF.size() );
         if(r) {
-            // TODO: Combine them here!
+            // Combine them and exit this function
+            sagCombinePolygons(state.dstPolygons, firstPolygon, firstPolygon.points(), pointsF);
             return;
         }
     }
@@ -1106,13 +1112,13 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
     // Check for intersection with the previous polygons in the final destination buffer
     if( state.dstPolygons.size() > 1 )
     {
-        const std::vector<PointF>& previousPolygon = state.dstPolygons.back().points();
+        Polygon& prevPolygon = state.dstPolygons.back();
 
-        bool r = satDetectPolygonCollision( &previousPolygon[0],
-                                            previousPolygon.size(),
-                                            pointsF.data(), pointsF.size() );
-        if(r) {
-            // TODO: Combine them here!
+        const bool r = satDetectPolygonCollision( &prevPolygon.points()[0], prevPolygon.points().size(),
+                                                  pointsF.data(), pointsF.size() );
+        if(true || r) {
+            // Combine them and exit this function
+            sagCombinePolygons(state.dstPolygons, prevPolygon, prevPolygon.points(), pointsF);
             return;
         }
     }
