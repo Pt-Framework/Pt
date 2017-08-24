@@ -32,6 +32,8 @@
 
 #include "ArcMode.h"
 
+#include "clipper_aj/clipper.hpp"
+
 namespace Pt {
 
 namespace Gfx {
@@ -948,10 +950,66 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
 }
 
 
+
+static void combinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, const std::vector<PointF>& poly1, const std::vector<PointF>& poly2)
+{
+    // Constants
+    const double VecResScaleUp = 64.0;
+    const double VecResScaleDn = 1.0 / 64.0;
+
+    // Working variables
+    ClipperLib::Clipper clipper;
+    ClipperLib::Path    cpath;
+    ClipperLib::Paths   cpresult;
+
+    //
+    cpath.resize(poly1.size());
+    for(size_t i = 0; i < poly1.size(); ++i) {
+        cpath[i].X = lround( poly1[i].x() * VecResScaleUp );
+        cpath[i].Y = lround( poly1[i].y() * VecResScaleUp );
+    }
+    clipper.AddPath(cpath, ClipperLib::ptClip, true);
+
+    //
+    cpath.resize(poly2.size());
+    for(size_t i = 0; i < poly2.size(); ++i) {
+        cpath[i].X = lround( poly2[i].x() * VecResScaleUp );
+        cpath[i].Y = lround( poly2[i].y() * VecResScaleUp );
+    }
+    clipper.AddPath(cpath, ClipperLib::ptSubject, true);
+
+    //
+    cpath.clear();
+    clipper.Execute(ClipperLib::ctUnion, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+
+    // Store back the resulting polygon(s)
+    for(size_t i = 0; i < cpresult.size(); ++i) {
+        //
+        const ClipperLib::Path& curPath = cpresult[i];
+        std::vector<PointF>*    dstBuf  = 0;
+        //
+        if(!i) {
+            dstBuf = &prevPoly.points();
+        }
+        else {
+            allPolys.resize(allPolys.size() + 1);
+            dstBuf = &allPolys.back().points();
+        }
+        //
+        dstBuf->resize(curPath.size());
+        //
+        for(size_t j = 0; j < curPath.size(); ++j) {
+            (*dstBuf)[j].setX( curPath[j].X * VecResScaleDn );
+            (*dstBuf)[j].setY( curPath[j].Y * VecResScaleDn );
+        }
+    }
+}
+
+
 void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
-                                                float x1, float y1,
-                                                float x2, float y2,
-                                                const Pen& pen)
+                                               float x1, float y1,
+                                               float x2, float y2,
+                                               const Pen& pen)
 {
     // Temporary buffer for the generated points
     std::vector<PointF> pointsF;
@@ -988,32 +1046,32 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
     // Check for intersection with the first polygons in the final destination buffer
     if( ! state.dstPolygons.empty() )
     {
-        const std::vector<PointF>& firstPolygon = state.dstPolygons[0].points();
+        Polygon& firstPolygon = state.dstPolygons[0];
 
-        bool r = satDetectPolygonCollision( &firstPolygon[0],
-                                            firstPolygon.size(),
-                                            pointsF.data(), pointsF.size() );
+        const bool r = satDetectPolygonCollision( &firstPolygon.points()[0], firstPolygon.points().size(),
+                                                  pointsF.data(), pointsF.size() );
         if(r) {
-            // TODO: Combine them here!
+            // Combine them and exit this function
+            combinePolygons(state.dstPolygons, firstPolygon, firstPolygon.points(), pointsF);
             return;
         }
     }
 
     // Check for intersection with the previous polygons in the final destination buffer
-    if(state.dstPolygons.size() > 1)
+    if( state.dstPolygons.size() > 1 )
     {
-        const std::vector<PointF>& previousPolygon = state.dstPolygons.back().points();
+        Polygon& prevPolygon = state.dstPolygons.back();
 
-        const bool r = satDetectPolygonCollision(&previousPolygon[0],
-                                                 previousPolygon.size(),
-                                                 pointsF.data(), pointsF.size() );
+        const bool r = satDetectPolygonCollision( &prevPolygon.points()[0], prevPolygon.points().size(),
+                                                  pointsF.data(), pointsF.size() );
         if(r) {
-            // TODO: Combine them here!
+            // Combine them and exit this function
+            combinePolygons(state.dstPolygons, prevPolygon, prevPolygon.points(), pointsF);
             return;
         }
     }
 
-    // append line segment polygon
+    // Simply append the segment to the polygon
     state.dstPolygons.resize(state.dstPolygons.size() + 1);
     state.dstPolygons.back().assign( &pointsF[0], pointsF.size());
 }
@@ -1046,7 +1104,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
     }
 
     // Check for intersection with the previous polygons in the final destination buffer
-    if(state.dstPolygons.size() > 1)
+    if( state.dstPolygons.size() > 1 )
     {
         const std::vector<PointF>& previousPolygon = state.dstPolygons.back().points();
 
@@ -1059,15 +1117,15 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         }
     }
 
-    // append line segment polygon
+    // Simply append the segment to the polygon
     state.dstPolygons.resize(state.dstPolygons.size() + 1);
     state.dstPolygons.back().assign( &pointsF[0], pointsF.size());
 }
 
 
 void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
-                                          float x1, float y1, float x2, float y2,
-                                          const Pen& pen, bool openingCap, bool closingCap)
+                                         float x1, float y1, float x2, float y2,
+                                         const Pen& pen, bool openingCap, bool closingCap)
 {
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
@@ -1117,10 +1175,10 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
 
 
 void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygons,
-                                                    float x1, float y1,
-                                                    float x2, float y2,
-                                                    Pt::int32_t& piCtrInOut,
-                                                    const Pen& pen)
+                                                   float x1, float y1,
+                                                   float x2, float y2,
+                                                   Pt::int32_t& piCtrInOut,
+                                                   const Pen& pen)
 {
 
 
@@ -1203,10 +1261,10 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
 
 
 bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
-                                          std::vector<PointF>& inner,
-                                          const std::vector<PointF>& segment,
-                                          const PointF& origMeetingPoint, const Pen& pen,
-                                          bool isFirst, bool isLast, bool inSameSegment)
+                                         std::vector<PointF>& inner,
+                                         const std::vector<PointF>& segment,
+                                         const PointF& origMeetingPoint, const Pen& pen,
+                                         bool isFirst, bool isLast, bool inSameSegment)
 {
     // If the main polygon buffer is still empty, simply copy the points
     if( outer.empty() ) {
@@ -1335,11 +1393,11 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
 
 
 bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
-                                         std::vector<PointF>& inner,
-                                         const std::vector<PointF>& segment,
-                                         const PointF& origMeetingPoint,
-                                         const Pen& pen,
-                                         bool inSameSegment)
+                                       std::vector<PointF>& inner,
+                                       const std::vector<PointF>& segment,
+                                       const PointF& origMeetingPoint,
+                                       const Pen& pen,
+                                       bool inSameSegment)
 {
     // If the main polygon buffer is still empty, simply copy the points
     if(polygon.empty()) {
@@ -1475,11 +1533,11 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
 
 
 void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
-                                               const std::vector<PointF>& inner,
-                                               const std::vector<PointF>& outer,
-                                               Pen::CapStyle begCap,
-                                               Pen::CapStyle endCap,
-                                               size_t penSize)
+                                              const std::vector<PointF>& inner,
+                                              const std::vector<PointF>& outer,
+                                              Pen::CapStyle begCap,
+                                              Pen::CapStyle endCap,
+                                              size_t penSize)
 {
     // Calculate the end lines' parameters
     const Pt::int32_t ox2a = outer[outer.size() - 1].x();
