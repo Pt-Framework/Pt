@@ -543,7 +543,7 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
                                                  const PointF* basePtr, size_t curPCnt,
                                                  const Pen& pen)
 {
-    Pt::int32_t* segmentIndexMarker = 0;
+    //Pt::int32_t* segmentIndexMarker = 0;
 
     // Prepare the buffers
     std::vector<PointF> pointsFOuter;
@@ -570,17 +570,12 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
         const PointF& to   = (i == curPC1) ? *ptrZero : *basePtr;
 
         // Check if the "to" point belongs to the same segment
+        //bool inSameSegment = segmentIndexMarker && (i != curPC1);
 
-        //
-        // ALOY: can this ever be true if segmentIndexMarker is null?
-        //
-
-        bool inSameSegment = segmentIndexMarker && (i != curPC1);
-
-        if(inSameSegment && *segmentIndexMarker < (Pt::int32_t) (i + 1)) {
-            inSameSegment = false;
-            ++segmentIndexMarker;
-        }
+        //if(inSameSegment && *segmentIndexMarker < (Pt::int32_t) (i + 1)) {
+        //    inSameSegment = false;
+        //    ++segmentIndexMarker;
+        //}
 
         // Generate and combine line segments
         pointsFSegment.clear();
@@ -592,7 +587,7 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
 
         if( ! joinClosedWidePolyline(pointsFOuter, pointsFInner,
                                      pointsFSegment, from, pen,
-                                     i == 1, false, inSameSegment) )
+                                     i == 1, false, false /*inSameSegment*/) )
             return;
     }
 
@@ -630,7 +625,7 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                                const PointF* basePtr, size_t curPCnt,
                                                const Pen& pen)
 {
-    Pt::int32_t* segmentIndexMarker = 0;
+    //Pt::int32_t* segmentIndexMarker = 0;
 
     // Prepare the buffers
     std::vector<PointF> pointsFPolygon;
@@ -655,17 +650,13 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
         const PointF& from = *basePtr++;
         const PointF& to   = *basePtr;
 
-        //
-        // ALOY: can this ever be true if segmentIndexMarker is null?
-        //
-
         // Check if the "to" point belongs to the same segment
-        bool inSameSegment = !!segmentIndexMarker;
+        //bool inSameSegment = !!segmentIndexMarker;
 
-        if(inSameSegment && *segmentIndexMarker < (Pt::int32_t) (i + 1)) {
-            inSameSegment = false;
-            ++segmentIndexMarker;
-        }
+        //if(inSameSegment && *segmentIndexMarker < (Pt::int32_t) (i + 1)) {
+        //    inSameSegment = false;
+        //    ++segmentIndexMarker;
+        //}
 
         // Generate and combine line segments
         pointsFSegment.clear();
@@ -674,7 +665,7 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                  to.x(), to.y(), pen, i == 0, i == curPC2);
 
         if( ! joinOpenWidePolyline( pointsFPolygon, pointsFInner,
-                                    pointsFSegment, from, pen, inSameSegment ) )
+                                    pointsFSegment, from, pen, false /*inSameSegment*/ ) )
             return;
     }
 
