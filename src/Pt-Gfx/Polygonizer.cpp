@@ -734,64 +734,64 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //poi
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
 //           Article and original code by Kah Shiu Chong, 2012
-void Polygonizer::satDPIProjMinMax(float& min, float& max,
-                                    const PointF* points, size_t pointCount,
-                                    float px, float py)
+void Polygonizer::satDPIProjMinMax(double& min, double& max,
+                                   const PointF* points, size_t pointCount,
+                                   double px, double py)
 {
-    min =  Rasterizer2::MaxCoordinate;
-    max = -Rasterizer2::MaxCoordinate;
+    min =  Rasterizer2::MaxCoordinateF * Rasterizer2::MaxCoordinateF;
+    max = -Rasterizer2::MaxCoordinateF * Rasterizer2::MaxCoordinateF;
 
     for(size_t i = 0; i < pointCount; ++i) {
-        const float val = points[i].x() * px + points[i].y() * py;
+        const double val = points[i].x() * px + points[i].y() * py;
         if(val > max) max = val;
         if(val < min) min = val;
     }
 }
 
 
+// Based on: Collision Detection Using the Separating Axis Theorem
+//           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
+//           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
+//           Article and original code by Kah Shiu Chong, 2012
 bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
-                                             const PointF* poly2, size_t poly2Count)
+                                            const PointF* poly2, size_t poly2Count)
 {
-    // TODO: !!! HAS BUG !!!
-
     // Evaluate using the first polygon's normals
-    for(size_t i = poly1Count; i >= 1; --i) {
+    for(size_t i = 0; i < poly1Count; ++i) {
         // Calculate the indexes
-        const size_t idx1 =                               (i - 1);
-        const size_t idx2 = (i == 1) ? (poly1Count - 1) : (i - 2);
+        const size_t idx1 = i;
+        const size_t idx2 = ( i == (poly1Count - 1) ) ? 0 : (i + 1);
         // Calculate the normals
-        const float dx = poly1[idx2].x() - poly1[idx1].x();
-        const float dy = poly1[idx2].y() - poly1[idx1].y();
-        const float nx =  dy;
-        const float ny = -dx;
+        const double dx = poly1[idx2].x() - poly1[idx1].x();
+        const double dy = poly1[idx2].y() - poly1[idx1].y();
+        const double nx =  dy;
+        const double ny = -dx;
         // Get the minimum and maximum projection values
-        float min1, max1, min2, max2;
+        double min1, max1, min2, max2;
         satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
         satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
         // Check if the polygon is separated
-        //lprintf("A: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
-        if(max1 < min2 || max2 < min1) return false;
-        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
+        if( max1 < min2 || max2 < min1 ) return false;
+        //if( fabs((min2 - max1) / max1) <= 0.001f || fabs((min1 - max2) / max2) <= 0.001f ) return false;
     }
 
-    // Calculate the second polygon's normals
-    for(size_t i = poly2Count; i >= 1; --i) {
+    // Evaluate using the second polygon's normals
+    for(size_t i = 0; i < poly1Count; ++i) {
         // Calculate the indexes
-        const size_t idx1 =                               (i - 1);
-        const size_t idx2 = (i == 1) ? (poly2Count - 1) : (i - 2);
+        const size_t idx1 = i;
+        const size_t idx2 = ( i == (poly2Count - 1) ) ? 0 : (i + 1);
         // Calculate the normals
-        const float dx = poly2[idx2].x() - poly2[idx1].x();
-        const float dy = poly2[idx2].y() - poly2[idx1].y();
-        const float nx =  dy;
-        const float ny = -dx;
+        const double dx = poly2[idx2].x() - poly2[idx1].x();
+        const double dy = poly2[idx2].y() - poly2[idx1].y();
+        const double nx =  dy;
+        const double ny = -dx;
         // Get the minimum and maximum projection values
-        float min1, max1, min2, max2;
+        double min1, max1, min2, max2;
         satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
         satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
         // Check if the polygon is separated
-        //lprintf("B: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
-        if(max1 < min2 || max2 < min1) return false;
-        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
+        if( max1 < min2 || max2 < min1 ) return false;
+        //if( fabs((min2 - max1) / max1) <= 0.001f || fabs((min1 - max2) / max2) <= 0.001f ) return false;
     }
 
     // There is a collision
@@ -993,8 +993,10 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
         bool r = satDetectPolygonCollision( &firstPolygon[0],
                                             firstPolygon.size(),
                                             pointsF.data(), pointsF.size() );
-        if(r)
+        if(r) {
+            // TODO: Combine them here!
             return;
+        }
     }
 
     // Check for intersection with the previous polygons in the final destination buffer
@@ -1005,8 +1007,10 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
         const bool r = satDetectPolygonCollision(&previousPolygon[0],
                                                  previousPolygon.size(),
                                                  pointsF.data(), pointsF.size() );
-        if(r)
+        if(r) {
+            // TODO: Combine them here!
             return;
+        }
     }
 
     // append line segment polygon
@@ -1035,8 +1039,10 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         bool r = satDetectPolygonCollision( &firstPolygon[0],
                                             firstPolygon.size(),
                                             pointsF.data(), pointsF.size() );
-        if(r)
+        if(r) {
+            // TODO: Combine them here!
             return;
+        }
     }
 
     // Check for intersection with the previous polygons in the final destination buffer
@@ -1047,8 +1053,10 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         bool r = satDetectPolygonCollision( &previousPolygon[0],
                                             previousPolygon.size(),
                                             pointsF.data(), pointsF.size() );
-        if(r)
+        if(r) {
+            // TODO: Combine them here!
             return;
+        }
     }
 
     // append line segment polygon

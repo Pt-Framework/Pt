@@ -43,7 +43,7 @@
 #include <Pt/Gfx/FontMetrics.h>
 
 // Coordinate limit
-#define MAXIMUM_COORD 32767
+#define MAXIMUM_COORD   32767
 #define MAXIMUM_COORD_F 32767.0f
 
 // Scaling factor and starting value for the pattern buffer
@@ -78,6 +78,11 @@ class Rasterizer2
 
         static Point maxPoint()
         { return Point(MaxCoordinate, MaxCoordinate); }
+
+        static const Pt::int32_t MaxCoordinateF = MAXIMUM_COORD_F;
+
+        static PointF maxPointF()
+        { return PointF(MaxCoordinateF, MaxCoordinateF); }
 
     public:
         Rasterizer2(Image& image);

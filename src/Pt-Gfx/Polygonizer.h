@@ -29,14 +29,14 @@
 
 #ifndef PT_GFX_POLYGONIZER_H
 #define PT_GFX_POLYGONIZER_H
- 
+
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Path.h> // Polygon
 
 namespace Pt {
 
-namespace Gfx { 
+namespace Gfx {
 
 class ArcMode;
 class PatternState;
@@ -45,24 +45,24 @@ class Polygonizer
 {
     public:
         Polygonizer();
-        
+
         void setPattern(const Pen::Style& style);
 
 
-        void renderRoundedRect(std::vector<Polygon>& polygons, 
-                               const RectF& rect, float radius, 
+        void renderRoundedRect(std::vector<Polygon>& polygons,
+                               const RectF& rect, float radius,
                                const Pen& pen);
 
-        void fillRoundedRect(std::vector<PointF>& points, 
+        void fillRoundedRect(std::vector<PointF>& points,
                              const RectF& rect, float radius);
 
 
         void renderEllipse(std::vector<Polygon>& polygons,
-                           const PointF& topLeft, const SizeF& size, 
+                           const PointF& topLeft, const SizeF& size,
                            const Pen& pen);
 
         void renderArc(std::vector<Polygon>& dst, const ArcMode& mode,
-                       const PointF& topLeft, const SizeF& size, 
+                       const PointF& topLeft, const SizeF& size,
                        float degBegin, float degEnd, const Pen& pen);
 
         void renderWidePolyline(std::vector<Polygon>& polygons,
@@ -74,29 +74,29 @@ class Polygonizer
                             const Pen& pen);
 
     private:
-        void renderRoundedRectPoints(std::vector<PointF>& dst, 
-                                     const RectF& rect, float radius, 
+        void renderRoundedRectPoints(std::vector<PointF>& dst,
+                                     const RectF& rect, float radius,
                                      std::size_t penSize);
 
-        void renderEllipsePoints(std::vector<PointF>& dst, 
-                                 Pt::int32_t radiusX, Pt::int32_t radiusY, 
-                                 Pt::int32_t centerX, Pt::int32_t centerY, 
+        void renderEllipsePoints(std::vector<PointF>& dst,
+                                 Pt::int32_t radiusX, Pt::int32_t radiusY,
+                                 Pt::int32_t centerX, Pt::int32_t centerY,
                                  size_t penSize);
 
-        void renderArcPoints(std::vector<PointF>& dst, 
-                             Pt::int32_t radiusX, Pt::int32_t radiusY, 
-                             Pt::int32_t centerX, Pt::int32_t centerY, 
+        void renderArcPoints(std::vector<PointF>& dst,
+                             Pt::int32_t radiusX, Pt::int32_t radiusY,
+                             Pt::int32_t centerX, Pt::int32_t centerY,
                              float degBegin, float degEnd, size_t penSize);
 
-        void renderSolidClosedWidePolyline(std::vector<Polygon>& polygons, 
+        void renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
                                            const PointF* basePtr, size_t curPCnt,
                                            const Pen& pen);
 
-        void renderSolidOpenWidePolyline(std::vector<Polygon>& polygons, 
+        void renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                          const PointF* basePtr, size_t curPCnt,
                                          const Pen& pen);
 
-        void renderDashedWidePolyLine(std::vector<Polygon>& polygons, 
+        void renderDashedWidePolyLine(std::vector<Polygon>& polygons,
                                       const PointF* src, size_t pointCount,
                                       const Pen& pen);
 
@@ -104,97 +104,97 @@ class Polygonizer
 
         bool sagPolygonPoints(PatternState& state, bool draw, const Pen& pen);
 
-        void sagGenerateSimpleLineSegment(PatternState& state, 
-                                          float x1, float y1, 
+        void sagGenerateSimpleLineSegment(PatternState& state,
+                                          float x1, float y1,
                                           float x2, float y2,
                                           const Pen& pen);
 
-        bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Count, 
+        bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
                                        const PointF* poly2, size_t poly2Count);
 
-        void satDPIProjMinMax(float& min, float& max, 
-                              const PointF* points, size_t pointCount, 
-                              float px, float py);
+        void satDPIProjMinMax(double& min, double& max,
+                              const PointF* points, size_t pointCount,
+                              double px, double py);
 
         void sagGeneratePolyLineSegment(PatternState& state, const Pen& pen);
 
-        void renderSolidLineSegment(std::vector<PointF>& dst, 
-                                    float x1, float y1, float x2, float y2, 
+        void renderSolidLineSegment(std::vector<PointF>& dst,
+                                    float x1, float y1, float x2, float y2,
                                     const Pen& pen, bool openingCap, bool closingCap);
 
-        void renderPatternedSingleLineSegment(std::vector<Polygon>& polygons, 
-                                              float x1, float y1, 
-                                              float x2, float y2, 
+        void renderPatternedSingleLineSegment(std::vector<Polygon>& polygons,
+                                              float x1, float y1,
+                                              float x2, float y2,
                                               Pt::int32_t& piCtrInOut,
                                               const Pen& pen);
 
-        bool joinClosedWidePolyline(std::vector<PointF>& outer, 
-                                    std::vector<PointF>& inner, 
-                                    const std::vector<PointF>& segment, 
+        bool joinClosedWidePolyline(std::vector<PointF>& outer,
+                                    std::vector<PointF>& inner,
+                                    const std::vector<PointF>& segment,
                                     const PointF& origMeetingPoint, const Pen& pen,
                                     bool isFirst, bool isLast, bool inSameSegment);
 
-        bool joinOpenWidePolyline(std::vector<PointF>& polygon, 
-                                  std::vector<PointF>& inner, 
-                                  const std::vector<PointF>& segment, 
+        bool joinOpenWidePolyline(std::vector<PointF>& polygon,
+                                  std::vector<PointF>& inner,
+                                  const std::vector<PointF>& segment,
                                   const PointF& origMeetingPoint, const Pen& pen,
                                   bool inSameSegment);
 
-        void combineLinePointsAndAddCaps(std::vector<PointF>& dst, 
-                                         const std::vector<PointF>& inner, 
-                                         const std::vector<PointF>& outer, 
-                                         Pen::CapStyle begCap, 
-                                         Pen::CapStyle endCap, 
+        void combineLinePointsAndAddCaps(std::vector<PointF>& dst,
+                                         const std::vector<PointF>& inner,
+                                         const std::vector<PointF>& outer,
+                                         Pen::CapStyle begCap,
+                                         Pen::CapStyle endCap,
                                          size_t penSize);
 
-        void renderLineButtCap(std::vector<PointF>& dst, 
+        void renderLineButtCap(std::vector<PointF>& dst,
                               float x, float y, float nx, float ny);
 
-        void renderLineSquareCap(std::vector<PointF>& dst, 
-                                float x, float y, float dx, float dy, 
+        void renderLineSquareCap(std::vector<PointF>& dst,
+                                float x, float y, float dx, float dy,
                                 float nx, float ny);
 
-        void renderLineRoundCap(std::vector<PointF>& dst, 
-                                float x, float y, float wh, 
+        void renderLineRoundCap(std::vector<PointF>& dst,
+                                float x, float y, float wh,
                                 float dx, float dy, float nx, float ny);
 
-        void renderLineTriangularOutCap(std::vector<PointF>& dst, 
-                                        float x, float y, float dx, float dy, 
+        void renderLineTriangularOutCap(std::vector<PointF>& dst,
+                                        float x, float y, float dx, float dy,
                                         float nx, float ny);
 
-        void renderLineTriangularInCap(std::vector<PointF>& dst, 
-                                       float x, float y, float dx, float dy, 
+        void renderLineTriangularInCap(std::vector<PointF>& dst,
+                                       float x, float y, float dx, float dy,
                                        float nx, float ny);
 
-        void renderLineRoundHoleCap(std::vector<PointF>& dst, 
-                                    float x, float y, float wh, 
+        void renderLineRoundHoleCap(std::vector<PointF>& dst,
+                                    float x, float y, float wh,
                                     float dx, float dy, float nx, float ny);
 
-        void renderLineArrow1Cap(std::vector<PointF>& dst, 
-                                 float x, float y, float dx, float dy, 
+        void renderLineArrow1Cap(std::vector<PointF>& dst,
+                                 float x, float y, float dx, float dy,
                                  float nx, float ny);
 
-        void renderLineArrow2Cap(std::vector<PointF>& dst, 
-                                 float x, float y, float dx, float dy, 
+        void renderLineArrow2Cap(std::vector<PointF>& dst,
+                                 float x, float y, float dx, float dy,
                                  float nx, float ny);
 
-        void renderQuadraticBezierPoints(std::vector<PointF>& dst, 
-                                         float x1, float y1, 
-                                         float x2, float y2, 
-                                         float x3, float y3, 
+        void renderQuadraticBezierPoints(std::vector<PointF>& dst,
+                                         float x1, float y1,
+                                         float x2, float y2,
+                                         float x3, float y3,
                                          Pt::int32_t nSegs);
 
-        void calculateLineParams(float& wh, float& dx, float& dy, 
-                                 float& nx, float& ny, float x1, float y1, 
+        void calculateLineParams(float& wh, float& dx, float& dy,
+                                 float& nx, float& ny, float x1, float y1,
                                  float x2, float y2, size_t w);
 
-        bool intersectLine(bool& inLine, PointF& intersect, 
-                           const PointF& line1a, const PointF& line1b, 
+        bool intersectLine(bool& inLine, PointF& intersect,
+                           const PointF& line1a, const PointF& line1b,
                            const PointF& line2a, const PointF& line2b, size_t penSize);
 
     private:
         static const int PatternCells = 64;
-        Pt::uint8_t _patternBufferMP[PatternCells]; 
+        Pt::uint8_t _patternBufferMP[PatternCells];
 };
 
 } //namespace
