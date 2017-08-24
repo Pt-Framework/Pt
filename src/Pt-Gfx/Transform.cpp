@@ -90,11 +90,11 @@ double Transform::dy() const
 
 void Transform::reset()
 {
-    _mdata[0][0] = 1; 
-    _mdata[0][1] = 0; 
+    _mdata[0][0] = 1;
+    _mdata[0][1] = 0;
     _mdata[0][2] = 0;
-    _mdata[1][0] = 0; 
-    _mdata[1][1] = 1; 
+    _mdata[1][0] = 0;
+    _mdata[1][1] = 1;
     _mdata[1][2] = 0;
     _isIdentity = true;
 }
@@ -110,8 +110,8 @@ void Transform::set(double m11, double m12,
     _mdata[1][0] = m21;
     _mdata[1][1] = m22;
     _mdata[1][2] = dy;
-            
-    _isIdentity = _mdata[0][0] == 1 && _mdata[0][1] == 0 && _mdata[0][2] == 0 && 
+
+    _isIdentity = _mdata[0][0] == 1 && _mdata[0][1] == 0 && _mdata[0][2] == 0 &&
                   _mdata[1][0] == 0 && _mdata[1][1] == 1 && _mdata[1][2] == 0;
 }
 
@@ -126,11 +126,11 @@ void Transform::translate(double x, double y)
     updateMatrix(n);
     _isIdentity = false;
 }
-        
-        
+
+
 void Transform::scale(double x, double y)
 {
-    if(x == 1 && y == 1) 
+    if(x == 1 && y == 1)
       return;
 
     MatrixData n;
@@ -160,7 +160,7 @@ void Transform::rotateDeg(double angle)
 
 
 void Transform::rotateRad(double r)
-{ 
+{
     MatrixData n;
 
     const double s = ::sin(r);
@@ -178,7 +178,7 @@ void Transform::shear(double sh, double sv)
 {
     //TODO: optimize this
     shearX(sh);
-    shearY(sv); 
+    shearY(sv);
 }
 
 
@@ -213,14 +213,14 @@ void Transform::shearY(double deg)
 
 
 bool Transform::operator==(const Transform& m) const
-{ 
-    return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) == 0; 
+{
+    return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) == 0;
 }
 
 
 bool Transform::operator!=(const Transform& m) const
 {
-   return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0; 
+   return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0;
 }
 
 
@@ -249,7 +249,7 @@ PointF Transform::operator*(const PointF& p) const
     return result;
 }
 
-        
+
 SizeF Transform::operator*(const SizeF& sz) const
 {
     SizeF result;
@@ -260,7 +260,7 @@ SizeF Transform::operator*(const SizeF& sz) const
     za = *this * za;
     zb = *this * zb;
     r  = *this * r;
-    
+
     const double dxa = za.x() - r.x();
     const double dya = za.y() - r.y();
     const double dxb = zb.x() - r.x();

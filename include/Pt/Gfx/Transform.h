@@ -39,7 +39,7 @@ namespace Gfx {
 
 /** @brief 2D transformation matrix.
   */
-class PT_GFX_API Transform 
+class PT_GFX_API Transform
 {
     public:
         Transform();
@@ -87,16 +87,16 @@ class PT_GFX_API Transform
         Transform& operator*=(const Transform& t);
 
         Transform operator*(const Transform& t) const;
-        
+
         PointF operator*(const PointF& p) const;
-        
+
         SizeF operator*(const SizeF& p) const;
 
     private:
       typedef double MatrixData[2][3];
 
       void updateMatrix(const MatrixData& m);
-  
+
     private:
         MatrixData _mdata;
         bool       _isIdentity;

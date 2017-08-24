@@ -487,13 +487,18 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
                                       const PointF* points, const std::size_t n,
                                       const Pen& pen)
 {
+    /*
+     * ### TODO ###
+     *     Due to problems with broken corner and self-intersecting polyline,
+     *     shall we simply remove the collision detection and use sagCombinePolygons()
+     *     for all the segments ???
+     */
+
     if( n < 2 )
         return;
 
-    //polygon.reserve( pointCount * 2 );
-
-    bool isSolid = pen.style() == Pen::Solid;
-    bool isClosed = points[0] == points[n - 1];
+    const bool isSolid  = pen.style() == Pen::Solid;
+    const bool isClosed = points[0] == points[n - 1];
 
     if(isSolid) // solid line
     {
@@ -520,7 +525,7 @@ void Polygonizer::renderWideLine(std::vector<Polygon>& polygons,
                                   const PointF& from, const PointF& to,
                                   const Pen& pen)
 {
-    bool isSolid = pen.style() == Pen::Solid;
+    const bool isSolid = pen.style() == Pen::Solid;
 
     if(isSolid)
     {
@@ -807,7 +812,7 @@ bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Cou
 bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen)
 {
     //
-    // ### TODO: !!! BROKEN CORNER DUE TO DUPLICATED SEGMENT(S) !!! ###
+    // ### TODO: !!! BROKEN CORNER !!! ###
     //
 
     // Temporary buffer for the generated points

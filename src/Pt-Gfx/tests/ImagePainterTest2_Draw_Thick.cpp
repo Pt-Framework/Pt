@@ -17,6 +17,9 @@ static void testDrawThickLine_impl(
     Pen penText( Color::fromRgb8(255,   0,   0, 175) );
     Pen penRef ( Color::fromRgb8(255, 127, 127, 127) );
 
+    ip2->setPen(penSCapBJoin);
+    //ip2->setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap) );
+
     // Test corner
     Path      path;
     Transform transform;
@@ -27,11 +30,22 @@ static void testDrawThickLine_impl(
     path.lineTo( PointF( 10,  40) );
     path.close ();
 
-    transform.translate(500, 20);
+    transform.translate(530, 20);
     path.transform(transform);
+    ip2->drawPath(path);
 
-    ip2->setPen(penSCapBJoin);
-    //ip2->setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap) );
+    // Test intersection
+    path.clear();
+    transform.reset();
+
+    path.moveTo( PointF(  0,   0) );
+    path.lineTo( PointF( 80,  80) );
+    path.lineTo( PointF(  0,  80) );
+    path.lineTo( PointF( 80,   0) );
+    path.close ();
+
+    transform.translate(530, 200);
+    path.transform(transform);
     ip2->drawPath(path);
 
     /*
