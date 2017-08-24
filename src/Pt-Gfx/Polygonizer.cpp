@@ -730,6 +730,75 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //poi
 }
 
 
+// Based on: Collision Detection Using the Separating Axis Theorem
+//           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
+//           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
+//           Article and original code by Kah Shiu Chong, 2012
+void Polygonizer::satDPIProjMinMax(float& min, float& max,
+                                    const PointF* points, size_t pointCount,
+                                    float px, float py)
+{
+    min =  Rasterizer2::MaxCoordinate;
+    max = -Rasterizer2::MaxCoordinate;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        const float val = points[i].x() * px + points[i].y() * py;
+        if(val > max) max = val;
+        if(val < min) min = val;
+    }
+}
+
+
+bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
+                                             const PointF* poly2, size_t poly2Count)
+{
+    // TODO: !!! HAS BUG !!!
+
+    // Evaluate using the first polygon's normals
+    for(size_t i = poly1Count; i >= 1; --i) {
+        // Calculate the indexes
+        const size_t idx1 =                               (i - 1);
+        const size_t idx2 = (i == 1) ? (poly1Count - 1) : (i - 2);
+        // Calculate the normals
+        const float dx = poly1[idx2].x() - poly1[idx1].x();
+        const float dy = poly1[idx2].y() - poly1[idx1].y();
+        const float nx =  dy;
+        const float ny = -dx;
+        // Get the minimum and maximum projection values
+        float min1, max1, min2, max2;
+        satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
+        satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
+        // Check if the polygon is separated
+        //lprintf("A: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
+        if(max1 < min2 || max2 < min1) return false;
+        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
+    }
+
+    // Calculate the second polygon's normals
+    for(size_t i = poly2Count; i >= 1; --i) {
+        // Calculate the indexes
+        const size_t idx1 =                               (i - 1);
+        const size_t idx2 = (i == 1) ? (poly2Count - 1) : (i - 2);
+        // Calculate the normals
+        const float dx = poly2[idx2].x() - poly2[idx1].x();
+        const float dy = poly2[idx2].y() - poly2[idx1].y();
+        const float nx =  dy;
+        const float ny = -dx;
+        // Get the minimum and maximum projection values
+        float min1, max1, min2, max2;
+        satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
+        satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
+        // Check if the polygon is separated
+        //lprintf("B: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
+        if(max1 < min2 || max2 < min1) return false;
+        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
+    }
+
+    // There is a collision
+    return true;
+}
+
+
 bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen)
 {
     // Temporary buffer for the generated points
@@ -832,7 +901,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         }
 
         // ------------------------------------------
-        // If we got herem it means:
+        // If we got here, it means:
         //     1. The remainder  length is not enough
         //     2. The "gathered" length is not enough
         // ------------------------------------------
@@ -878,6 +947,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
     return false;
 }
 
+
 void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
                                                 float x1, float y1,
                                                 float x2, float y2,
@@ -918,35 +988,18 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
     // Check for intersection with the first polygons in the final destination buffer
     if( ! state.dstPolygons.empty() )
     {
-        // REVIEW
-        //bool r = satDetectPolygonCollision( &state.dstPoints[0],
-        //                                    state.dstPCount0,
-        //                                    pointsF.data(), pointsF.size() );
-
         const std::vector<PointF>& firstPolygon = state.dstPolygons[0].points();
+
         bool r = satDetectPolygonCollision( &firstPolygon[0],
                                             firstPolygon.size(),
                                             pointsF.data(), pointsF.size() );
         if(r)
             return;
     }
-    // REVIEW
-    //else
-    //{
-    //    state.dstPCount0 = pointsF.size();
-    //}
 
     // Check for intersection with the previous polygons in the final destination buffer
-
-    // REVIEW
-    //if(state.dstPCount && state.dstPStart)
     if(state.dstPolygons.size() > 1)
     {
-        // REVIEW
-        //const bool r = satDetectPolygonCollision(&state.dstPoints[state.dstPStart],
-        //                                         state.dstPCount,
-        //                                         pointsF.data(), pointsF.size() );
-
         const std::vector<PointF>& previousPolygon = state.dstPolygons.back().points();
 
         const bool r = satDetectPolygonCollision(&previousPolygon[0],
@@ -956,91 +1009,9 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
             return;
     }
 
-    // REVIEW
-    //state.dstPStart = state.dstPoints.size();
-    //state.dstPCount = pointsF.size();
-
-    //// Add polygon separator point as needed
-    //if( ! state.dstPoints.empty() )
-    //{
-    //    state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
-    //    ++state.dstPStart;
-    //}
-
-    // Copy the points
-    //state.dstPoints.insert(state.dstPoints.end(), pointsF.begin(), pointsF.end());
-
     // append line segment polygon
     state.dstPolygons.resize(state.dstPolygons.size() + 1);
     state.dstPolygons.back().assign( &pointsF[0], pointsF.size());
-}
-
-
-// TODO: !!! HAS BUG !!!
-bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
-                                             const PointF* poly2, size_t poly2Count)
-{
-    // Evaluate using the first polygon's normals
-    for(size_t i = poly1Count; i >= 1; --i) {
-        // Calculate the indexes
-        const size_t idx1 =                               (i - 1);
-        const size_t idx2 = (i == 1) ? (poly1Count - 1) : (i - 2);
-        // Calculate the normals
-        const float dx = poly1[idx2].x() - poly1[idx1].x();
-        const float dy = poly1[idx2].y() - poly1[idx1].y();
-        const float nx =  dy;
-        const float ny = -dx;
-        // Get the minimum and maximum projection values
-        float min1, max1, min2, max2;
-        satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
-        satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
-        // Check if the polygon is separated
-        //lprintf("A: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
-        if(max1 < min2 || max2 < min1) return false;
-        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
-    }
-
-    // Calculate the second polygon's normals
-    for(size_t i = poly2Count; i >= 1; --i) {
-        // Calculate the indexes
-        const size_t idx1 =                               (i - 1);
-        const size_t idx2 = (i == 1) ? (poly2Count - 1) : (i - 2);
-        // Calculate the normals
-        const float dx = poly2[idx2].x() - poly2[idx1].x();
-        const float dy = poly2[idx2].y() - poly2[idx1].y();
-        const float nx =  dy;
-        const float ny = -dx;
-        // Get the minimum and maximum projection values
-        float min1, max1, min2, max2;
-        satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
-        satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
-        // Check if the polygon is separated
-        //lprintf("B: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
-        if(max1 < min2 || max2 < min1) return false;
-        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
-    }
-
-    // There is a collision
-    return true;
-}
-
-
-// Based on: Collision Detection Using the Separating Axis Theorem
-//           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
-//           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
-//           Article and original code by Kah Shiu Chong, 2012
-void Polygonizer::satDPIProjMinMax(float& min, float& max,
-                                    const PointF* points, size_t pointCount,
-                                    float px, float py)
-{
-    min =  Rasterizer2::MaxCoordinate;
-    max = -Rasterizer2::MaxCoordinate;
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        const float val = points[i].x() * px + points[i].y() * py;
-        if(val > max) max = val;
-        if(val < min) min = val;
-    }
 }
 
 
@@ -1051,26 +1022,16 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
     renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen);
 
     // Exit here if the generated polygon does not actually have a meaningful number of points
-
-    // REVIEW: should this be size <= 2?
-    //if(pointsF.size() < 2) return;
-    if(polygons.empty() || polygons[0].size() < 2)
+    if(polygons.empty() || polygons[0].size() <= 2)
         return;
 
     std::vector<PointF>& pointsF = polygons[0].points();
 
     // Check for intersection with the first polygons in the final destination buffer
-
-    // REVIEW
-    //if(state.dstPCount0)
     if( ! state.dstPolygons.empty() )
     {
-        // REVIEW
-        //bool r = satDetectPolygonCollision( &state.dstPoints[0],
-        //                                    state.dstPCount0,
-        //                                    pointsF.data(), pointsF.size() );
-
         const std::vector<PointF>& firstPolygon = state.dstPolygons[0].points();
+
         bool r = satDetectPolygonCollision( &firstPolygon[0],
                                             firstPolygon.size(),
                                             pointsF.data(), pointsF.size() );
@@ -1078,23 +1039,9 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
             return;
     }
 
-    // REVIEW
-    //else
-    //{
-    //    state.dstPCount0 = pointsF.size();
-    //}
-
     // Check for intersection with the previous polygons in the final destination buffer
-
-    // REVIEW
-    //if(state.dstPCount && state.dstPStart)
     if(state.dstPolygons.size() > 1)
     {
-        // REVIEW
-        //bool r = satDetectPolygonCollision( &state.dstPoints[state.dstPStart],
-        //                                    state.dstPCount,
-        //                                    pointsF.data(), pointsF.size() );
-
         const std::vector<PointF>& previousPolygon = state.dstPolygons.back().points();
 
         bool r = satDetectPolygonCollision( &previousPolygon[0],
@@ -1103,20 +1050,6 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         if(r)
             return;
     }
-
-    // REVIEW
-    //state.dstPStart = state.dstPoints.size();
-    //state.dstPCount = pointsF.size();
-
-    // Add polygon separator point as needed
-    //if( ! state.dstPoints.empty() )
-    //{
-    //    state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
-    //    ++state.dstPStart;
-    //}
-
-    // REVIEW
-    //state.dstPoints.insert(state.dstPoints.end(), pointsF.begin(), pointsF.end());
 
     // append line segment polygon
     state.dstPolygons.resize(state.dstPolygons.size() + 1);
