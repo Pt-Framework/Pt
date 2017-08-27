@@ -18,7 +18,6 @@ static void testDrawThickLine_impl(
     Pen penRef ( Color::fromRgb8(255, 127, 127, 127) );
 
     ip2->setPen(penSCapBJoin);
-    //ip2->setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap) );
 
     // Test corner
     Path      path;
@@ -46,6 +45,11 @@ static void testDrawThickLine_impl(
 
     transform.translate(530, 200);
     path.transform(transform);
+    ip2->drawPath(path);
+
+    transform.translate(-530, -50);
+    path.transform(transform);
+    ip2->setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap) );
     ip2->drawPath(path);
 
     /*

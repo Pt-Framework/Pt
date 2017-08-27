@@ -483,17 +483,118 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
 }
 
 
+enum NodeType {ntAny, ntOpen, ntClosed};
+
+static void AddPolyNodeToPaths(const ClipperLib::PolyNode& polynode, NodeType nodetype, ClipperLib::Paths& paths)
+{
+  bool match = true;
+
+  if (nodetype == ntClosed) match = !polynode.IsOpen();
+  else if (nodetype == ntOpen) return;
+
+  if (!polynode.Contour.empty() && match && !polynode.IsHole())
+    paths.push_back(polynode.Contour);
+
+  for (int i = 0; i < polynode.ChildCount(); ++i)
+    AddPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
+}
+
+
+void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons)
+{
+    // Constants
+    const double VecResScaleUp = 64.0;
+    const double VecResScaleDn = 1.0 / 64.0;
+
+#if 0
+
+    // Working variables
+    ClipperLib::Paths cpaths;
+
+    // Convert the polygons' data
+    cpaths.resize( polygons.size() );
+
+    for(size_t i = 0; i < polygons.size(); ++i) {
+
+        cpaths[i].resize( polygons[i].size() );
+
+        for(size_t j = 0; j < polygons[i].size(); ++j) {
+            cpaths[i][j].X = lround( polygons[i].points()[j].x() * VecResScaleUp );
+            cpaths[i][j].Y = lround( polygons[i].points()[j].y() * VecResScaleUp );
+        }
+    }
+
+    // Clean-up the polygons
+    ClipperLib::SimplifyPolygons(cpaths, ClipperLib::pftNonZero);
+    //ClipperLib::CleanPolygons(cpaths, 1.415);
+
+    // Convert back the polygons' data
+    polygons.resize( cpaths.size() );
+
+    for(size_t i = 0; i < cpaths.size(); ++i) {
+
+        polygons[i].points().resize( cpaths[i].size() );
+
+        for(size_t j = 0; j < cpaths[i].size(); ++j) {
+            polygons[i].points()[j].setX( cpaths[i][j].X * VecResScaleDn );
+            polygons[i].points()[j].setY( cpaths[i][j].Y * VecResScaleDn );
+        }
+    }
+
+#else
+
+    // Working variables
+    ClipperLib::Clipper clipper;
+    ClipperLib::Paths   cpaths;
+    ClipperLib::Path    cpath;
+
+    // Convert the polygons' data
+    for(size_t i = 0; i < polygons.size(); ++i) {
+
+        cpath.resize( polygons[i].size() );
+
+        for(size_t j = 0; j < polygons[i].size(); ++j) {
+            cpath[j].X = lround( polygons[i].points()[j].x() * VecResScaleUp );
+            cpath[j].Y = lround( polygons[i].points()[j].y() * VecResScaleUp );
+        }
+
+        clipper.AddPath(cpath, ClipperLib::ptSubject, true);
+    }
+
+    // Perform union operation on all the polygons
+    clipper.StrictlySimple(true);
+    
+    //clipper.Execute(ClipperLib::ctUnion, cpaths, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+    ClipperLib::PolyTree cptree;
+    clipper.Execute(ClipperLib::ctUnion, cptree, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+    cpaths.resize(0);
+    cpaths.reserve(cptree.Total());
+    AddPolyNodeToPaths(cptree, ntAny, cpaths);
+
+
+    // Convert back the polygons' data
+    polygons.resize( cpaths.size() );
+
+    for(size_t i = 0; i < cpaths.size(); ++i) {
+
+        polygons[i].points().resize( cpaths[i].size() );
+
+        for(size_t j = 0; j < cpaths[i].size(); ++j) {
+            polygons[i].points()[j].setX( cpaths[i][j].X * VecResScaleDn );
+            polygons[i].points()[j].setY( cpaths[i][j].Y * VecResScaleDn );
+        }
+    }
+
+#endif
+}
+
+
 void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
                                       const PointF* points, const std::size_t n,
                                       const Pen& pen)
 {
-    /*
-     * ### TODO ###
-     *     Due to problems with broken corner and self-intersecting polyline,
-     *     shall we simply remove the collision detection and use sagCombinePolygons()
-     *     for all the segments ???
-     */
-
     if( n < 2 )
         return;
 
@@ -515,6 +616,13 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
     {
         renderDashedWidePolyLine(polygons, points, n, pen);
     }
+
+    // Ensure that all the polygons are not self-intersecting, etc,
+    // TODO: * This seems to be the only working solution for broken corner and
+    //         self-intersecting polyline segments
+    //       * HOWEVER, it is TWICE AS SLOW than using satDetectPolygonCollision()
+    //         and sagCombinePolygons()
+    cleanupAllPolygons(polygons);
 }
 
 
@@ -744,6 +852,7 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //poi
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
 //           Article and original code by Kah Shiu Chong, 2012
+// ### NOTE: NOT WORKING PROPERLY, HENCE IT IS NOT USED FOR NOW ###
 void Polygonizer::satDPIProjMinMax(double& min, double& max,
                                    const PointF* points, size_t pointCount,
                                    double px, double py)
@@ -763,6 +872,7 @@ void Polygonizer::satDPIProjMinMax(double& min, double& max,
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
 //           Article and original code by Kah Shiu Chong, 2012
+// ### NOTE: NOT WORKING PROPERLY, HENCE IT IS NOT USED FOR NOW ###
 bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
                                             const PointF* poly2, size_t poly2Count)
 {
@@ -962,6 +1072,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
 }
 
 
+// ### NOTE: NOT WORKING PROPERLY, HENCE IT IS NOT USED FOR NOW ###
 void Polygonizer::sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, const std::vector<PointF>& poly1, const std::vector<PointF>& poly2)
 {
     // Constants
@@ -990,7 +1101,6 @@ void Polygonizer::sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& pr
     clipper.AddPath(cpath, ClipperLib::ptSubject, true);
 
     // Perform union operation on the two polygons
-    cpath.clear();
     clipper.Execute(ClipperLib::ctUnion, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
 
     // Store back the resulting polygon(s)
@@ -1054,6 +1164,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
         default                    : renderLineButtCap         (pointsF, x2, y2,               -nx, -ny); break;
     }
 
+    /*
     // Check for intersection with the first polygons in the final destination buffer
     if( ! state.dstPolygons.empty() )
     {
@@ -1081,6 +1192,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
             return;
         }
     }
+    */
 
     // Simply append the segment to the polygon
     state.dstPolygons.resize(state.dstPolygons.size() + 1);
@@ -1100,6 +1212,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
 
     std::vector<PointF>& pointsF = polygons[0].points();
 
+    /*
     // Check for intersection with the first polygons in the final destination buffer
     if( ! state.dstPolygons.empty() )
     {
@@ -1121,12 +1234,13 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
 
         const bool r = satDetectPolygonCollision( &prevPolygon.points()[0], prevPolygon.points().size(),
                                                   pointsF.data(), pointsF.size() );
-        if(true || r) {
+        if(r) {
             // Combine them and exit this function
             sagCombinePolygons(state.dstPolygons, prevPolygon, prevPolygon.points(), pointsF);
             return;
         }
     }
+    */
 
     // Simply append the segment to the polygon
     state.dstPolygons.resize(state.dstPolygons.size() + 1);

@@ -194,6 +194,8 @@ class Polygonizer
 
         static void sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, const std::vector<PointF>& poly1, const std::vector<PointF>& poly2);
 
+        static void cleanupAllPolygons(std::vector<Polygon>& polygons);
+
     private:
         static const int PatternCells = 64;
         Pt::uint8_t _patternBufferMP[PatternCells];
