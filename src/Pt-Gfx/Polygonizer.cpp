@@ -133,7 +133,7 @@ void Polygonizer::renderRoundedRect(std::vector<Polygon>& polygons,
     if( ! pointsF.empty() )
         pointsF.push_back( pointsF.front() );
 
-    renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen);
+    renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, pen.style() != Pen::Solid );
 }
 
 
@@ -483,24 +483,17 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
 }
 
 
-enum NodeType {ntAny, ntOpen, ntClosed};
-
-static void AddPolyNodeToPaths(const ClipperLib::PolyNode& polynode, NodeType nodetype, ClipperLib::Paths& paths)
+static inline void addPolyNodeToPaths(const ClipperLib::PolyNode& polynode, ClipperLib::Paths& paths)
 {
-  bool match = true;
+    if(!polynode.Contour.empty())// && !polynode.IsHole())
+        paths.push_back(polynode.Contour);
 
-  if (nodetype == ntClosed) match = !polynode.IsOpen();
-  else if (nodetype == ntOpen) return;
-
-  if (!polynode.Contour.empty() && match && !polynode.IsHole())
-    paths.push_back(polynode.Contour);
-
-  for (int i = 0; i < polynode.ChildCount(); ++i)
-    AddPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
+    for(int i = 0; i < polynode.ChildCount(); ++i)
+        addPolyNodeToPaths(*polynode.Childs[i], paths);
 }
 
 
-void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons)
+void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNonZeroFillingRule)
 {
     // Constants
     const double VecResScaleUp = 64.0;
@@ -544,9 +537,10 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons)
 #else
 
     // Working variables
-    ClipperLib::Clipper clipper;
-    ClipperLib::Paths   cpaths;
-    ClipperLib::Path    cpath;
+    ClipperLib::Clipper  clipper;
+    ClipperLib::PolyTree cptree;
+    ClipperLib::Paths    cpaths;
+    ClipperLib::Path     cpath;
 
     // Convert the polygons' data
     for(size_t i = 0; i < polygons.size(); ++i) {
@@ -563,16 +557,13 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons)
 
     // Perform union operation on all the polygons
     clipper.StrictlySimple(true);
-    
-    //clipper.Execute(ClipperLib::ctUnion, cpaths, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+    if(useNonZeroFillingRule)
+        clipper.Execute(ClipperLib::ctUnion, cptree, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+    else
+        clipper.Execute(ClipperLib::ctUnion, cptree, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
 
-    ClipperLib::PolyTree cptree;
-    clipper.Execute(ClipperLib::ctUnion, cptree, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
-
-    cpaths.resize(0);
     cpaths.reserve(cptree.Total());
-    AddPolyNodeToPaths(cptree, ntAny, cpaths);
-
+    addPolyNodeToPaths(cptree, cpaths);
 
     // Convert back the polygons' data
     polygons.resize( cpaths.size() );
@@ -593,7 +584,8 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons)
 
 void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
                                       const PointF* points, const std::size_t n,
-                                      const Pen& pen)
+                                      const Pen& pen,
+                                      bool useNonZeroFillingRule)
 {
     if( n < 2 )
         return;
@@ -622,7 +614,7 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
     //         self-intersecting polyline segments
     //       * HOWEVER, it is TWICE AS SLOW than using satDetectPolygonCollision()
     //         and sagCombinePolygons()
-    cleanupAllPolygons(polygons);
+    cleanupAllPolygons(polygons, useNonZeroFillingRule);
 }
 
 

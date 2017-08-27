@@ -52,6 +52,8 @@ static void testDrawThickLine_impl(
     ip2->setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap) );
     ip2->drawPath(path);
 
+#if 1
+
     /*
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_S) );
     if(ip2) ip2->setAntiAliasing(false);
@@ -397,6 +399,8 @@ static void testDrawThickLine_impl(
             //ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
         }
     }
+
+#endif
 
     // Done
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
