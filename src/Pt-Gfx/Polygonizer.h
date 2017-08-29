@@ -98,25 +98,27 @@ class Polygonizer
 
         void renderDashedWidePolyLine(std::vector<Polygon>& polygons,
                                       const PointF* src, size_t pointCount,
-                                      const Pen& pen);
+                                      const Pen& pen,
+                                      bool collisionDetection);
 
         void renderDashedWidePolyLine();
-
-        bool sagPolygonPoints(PatternState& state, bool draw, const Pen& pen);
-
-        void sagGenerateSimpleLineSegment(PatternState& state,
-                                          float x1, float y1,
-                                          float x2, float y2,
-                                          const Pen& pen);
-
-        bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
-                                       const PointF* poly2, size_t poly2Count);
 
         void satDPIProjMinMax(double& min, double& max,
                               const PointF* points, size_t pointCount,
                               double px, double py);
 
-        void sagGeneratePolyLineSegment(PatternState& state, const Pen& pen);
+        bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
+                                       const PointF* poly2, size_t poly2Count);
+
+        bool sagPolygonPoints(PatternState& state, bool draw, const Pen& pen, bool collisionDetection);
+
+        void sagGenerateSimpleLineSegment(PatternState& state,
+                                          float x1, float y1,
+                                          float x2, float y2,
+                                          const Pen& pen,
+                                          bool collisionDetection);
+
+        void sagGeneratePolyLineSegment(PatternState& state, const Pen& pen, bool collisionDetection);
 
         void renderSolidLineSegment(std::vector<PointF>& dst,
                                     float x1, float y1, float x2, float y2,

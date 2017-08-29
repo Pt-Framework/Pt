@@ -530,7 +530,7 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNon
 // Based on: Geometric Primitives
 //           http://algs4.cs.princeton.edu/91primitives
 //           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
-static inline int ccw3(const PointF& a, const PointF& b, const PointF& c)
+static inline double ccw3(const PointF& a, const PointF& b, const PointF& c)
 {
    return (b.x() - a.x()) * (c.y() - a.y()) - (c.x() - a.x()) * (b.y() - a.y());
 }
@@ -542,8 +542,9 @@ static inline int ccw3(const PointF& a, const PointF& b, const PointF& c)
 //           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
 static inline bool lineIntersecting(const PointF& ap, const PointF& aq, const PointF& bp, const PointF& bq)
 {
-   if( ccw3(ap, aq, bp) * ccw3(ap, aq, bq) > 0 ) return false;
-   if( ccw3(bp, bq, ap) * ccw3(bp, bq, aq) > 0 ) return false;
+   if( ccw3(ap, aq, bp) * ccw3(ap, aq, bq) >= 0.0 ) return false;
+   if( ccw3(bp, bq, ap) * ccw3(bp, bq, aq) >= 0.0 ) return false;
+
    return true;
 }
 
@@ -574,6 +575,7 @@ static inline bool selfIntersecting(const std::vector<PointF>& points)
     return selfIntersecting(&points[0], points.size());
 }
 
+
 static inline bool selfIntersecting(const std::vector<Polygon>& polygons)
 {
     for(size_t i = 0; i < polygons.size(); ++i) {
@@ -597,9 +599,6 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
 
     const bool isSelfIn = selfIntersecting(points, n);
 
-    //if(isSelfIn) return;
-
-
     if(isSolid) // solid line
     {
         if(isClosed)
@@ -613,15 +612,11 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
     }
     else // dashed line
     {
-        renderDashedWidePolyLine(polygons, points, n, pen);
+        renderDashedWidePolyLine(polygons, points, n, pen, !isSelfIn);
     }
 
-    // Ensure that all the polygons are not self-intersecting, etc,
-    // TODO: * This seems to be the only working solution for broken corner and
-    //         self-intersecting polyline segments
-    //       * HOWEVER, it is TWICE AS SLOW than using satDetectPolygonCollision()
-    //         and sagCombinePolygons()
-    cleanupAllPolygons(polygons, useNonZeroFillingRule);
+    // Ensure that all self-intersecting polygons are cleaned-up
+    if(isSelfIn) cleanupAllPolygons(polygons, useNonZeroFillingRule);
 }
 
 
@@ -793,9 +788,9 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
 }
 
 
-void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //pointsF
+void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
                                             const PointF* src, size_t pointCount,
-                                            const Pen& pen)
+                                            const Pen& pen, bool collisionDetection)
 {
     // Initialize the operational state
     PatternState state(polygons, src, pointCount, pen.size());
@@ -838,7 +833,7 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //poi
             return;
 
         // Process the "pattern" segment
-        done = sagPolygonPoints(state, !!refPat, pen);
+        done = sagPolygonPoints(state, !!refPat, pen, collisionDetection);
     }
 
     //int NN = 3;
@@ -851,7 +846,7 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //poi
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
 //           Article and original code by Kah Shiu Chong, 2012
-// ### NOTE: NOT WORKING PROPERLY, HENCE IT IS NOT USED FOR NOW ###
+// ### NOTE: MAY NOT WORK PROPERLY ###
 void Polygonizer::satDPIProjMinMax(double& min, double& max,
                                    const PointF* points, size_t pointCount,
                                    double px, double py)
@@ -871,7 +866,7 @@ void Polygonizer::satDPIProjMinMax(double& min, double& max,
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
 //           Article and original code by Kah Shiu Chong, 2012
-// ### NOTE: NOT WORKING PROPERLY, HENCE IT IS NOT USED FOR NOW ###
+// ### NOTE: MAY NOT WORK PROPERLY ###
 bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
                                             const PointF* poly2, size_t poly2Count)
 {
@@ -918,12 +913,8 @@ bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Cou
 }
 
 
-bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen)
+bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen, bool collisionDetection)
 {
-    //
-    // ### TODO: !!! BROKEN CORNER !!! ###
-    //
-
     // Temporary buffer for the generated points
     std::vector<PointF> pointsF;
 
@@ -968,7 +959,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
                         state.gather.back().y() + state.cvy
                     );
                 }
-                sagGeneratePolyLineSegment(state, pen);
+                sagGeneratePolyLineSegment(state, pen, collisionDetection);
             }
             // Reset the "pattern" segment length
             state.patSegLen = 0.0f;
@@ -989,7 +980,8 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
                         state.py,
                         state.px + state.cvx + state.uvx * state.patSegLen,
                         state.py + state.cvy + state.uvy * state.patSegLen,
-                        pen
+                        pen,
+                        collisionDetection
                     );
                 }
                 else {
@@ -999,7 +991,8 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
                         state.py,
                         state.px + state.uvx * state.patSegLen,
                         state.py + state.uvy * state.patSegLen,
-                        pen
+                        pen,
+                        collisionDetection
                     );
                 }
             }
@@ -1071,7 +1064,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
 }
 
 
-// ### NOTE: NOT WORKING PROPERLY, HENCE IT IS NOT USED FOR NOW ###
+// ### NOTE: MAY NOT WORK PROPERLY ###
 void Polygonizer::sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, const std::vector<PointF>& poly1, const std::vector<PointF>& poly2)
 {
     // Constants
@@ -1129,7 +1122,8 @@ void Polygonizer::sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& pr
 void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
                                                float x1, float y1,
                                                float x2, float y2,
-                                               const Pen& pen)
+                                               const Pen& pen,
+                                               bool collisionDetection)
 {
     // Temporary buffer for the generated points
     std::vector<PointF> pointsF;
@@ -1163,35 +1157,35 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
         default                    : renderLineButtCap         (pointsF, x2, y2,               -nx, -ny); break;
     }
 
-    /*
-    // Check for intersection with the first polygons in the final destination buffer
-    if( ! state.dstPolygons.empty() )
-    {
-        Polygon& firstPolygon = state.dstPolygons[0];
+    // Perform collision detection and polygon-segment combining as needed
+    if(collisionDetection) {
+        // Check for intersection with the first polygons in the final destination buffer
+        if( ! state.dstPolygons.empty() )
+        {
+            Polygon& firstPolygon = state.dstPolygons[0];
 
-        const bool r = satDetectPolygonCollision( &firstPolygon.points()[0], firstPolygon.points().size(),
-                                                  pointsF.data(), pointsF.size() );
-        if(r) {
-            // Combine them and exit this function
-            sagCombinePolygons(state.dstPolygons, firstPolygon, firstPolygon.points(), pointsF);
-            return;
+            const bool r = satDetectPolygonCollision( &firstPolygon.points()[0], firstPolygon.points().size(),
+                                                      pointsF.data(), pointsF.size() );
+            if(r) {
+                // Combine them and exit this function
+                sagCombinePolygons(state.dstPolygons, firstPolygon, firstPolygon.points(), pointsF);
+                return;
+            }
+        }
+        // Check for intersection with the previous polygons in the final destination buffer
+        if( state.dstPolygons.size() > 1 )
+        {
+            Polygon& prevPolygon = state.dstPolygons.back();
+
+            const bool r = satDetectPolygonCollision( &prevPolygon.points()[0], prevPolygon.points().size(),
+                                                      pointsF.data(), pointsF.size() );
+            if(r) {
+                // Combine them and exit this function
+                sagCombinePolygons(state.dstPolygons, prevPolygon, prevPolygon.points(), pointsF);
+                return;
+            }
         }
     }
-
-    // Check for intersection with the previous polygons in the final destination buffer
-    if( state.dstPolygons.size() > 1 )
-    {
-        Polygon& prevPolygon = state.dstPolygons.back();
-
-        const bool r = satDetectPolygonCollision( &prevPolygon.points()[0], prevPolygon.points().size(),
-                                                  pointsF.data(), pointsF.size() );
-        if(r) {
-            // Combine them and exit this function
-            sagCombinePolygons(state.dstPolygons, prevPolygon, prevPolygon.points(), pointsF);
-            return;
-        }
-    }
-    */
 
     // Simply append the segment to the polygon
     state.dstPolygons.resize(state.dstPolygons.size() + 1);
@@ -1199,7 +1193,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 }
 
 
-void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen)
+void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen, bool collisionDetection)
 {
     // Generate a new thick polygon
     std::vector<Polygon> polygons;
@@ -1211,35 +1205,35 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
 
     std::vector<PointF>& pointsF = polygons[0].points();
 
-    /*
-    // Check for intersection with the first polygons in the final destination buffer
-    if( ! state.dstPolygons.empty() )
-    {
-        Polygon& firstPolygon = state.dstPolygons[0];
+    // Perform collision detection and polygon-segment combining as needed
+    if(collisionDetection) {
+        // Check for intersection with the first polygons in the final destination buffer
+        if( ! state.dstPolygons.empty() )
+        {
+            Polygon& firstPolygon = state.dstPolygons[0];
 
-        const bool r = satDetectPolygonCollision( &firstPolygon.points()[0], firstPolygon.points().size(),
-                                                  pointsF.data(), pointsF.size() );
-        if(r) {
-            // Combine them and exit this function
-            sagCombinePolygons(state.dstPolygons, firstPolygon, firstPolygon.points(), pointsF);
-            return;
+            const bool r = satDetectPolygonCollision( &firstPolygon.points()[0], firstPolygon.points().size(),
+                                                      pointsF.data(), pointsF.size() );
+            if(r) {
+                // Combine them and exit this function
+                sagCombinePolygons(state.dstPolygons, firstPolygon, firstPolygon.points(), pointsF);
+                return;
+            }
+        }
+        // Check for intersection with the previous polygons in the final destination buffer
+        if( state.dstPolygons.size() > 1 )
+        {
+            Polygon& prevPolygon = state.dstPolygons.back();
+
+            const bool r = satDetectPolygonCollision( &prevPolygon.points()[0], prevPolygon.points().size(),
+                                                      pointsF.data(), pointsF.size() );
+            if(r) {
+                // Combine them and exit this function
+                sagCombinePolygons(state.dstPolygons, prevPolygon, prevPolygon.points(), pointsF);
+                return;
+            }
         }
     }
-
-    // Check for intersection with the previous polygons in the final destination buffer
-    if( state.dstPolygons.size() > 1 )
-    {
-        Polygon& prevPolygon = state.dstPolygons.back();
-
-        const bool r = satDetectPolygonCollision( &prevPolygon.points()[0], prevPolygon.points().size(),
-                                                  pointsF.data(), pointsF.size() );
-        if(r) {
-            // Combine them and exit this function
-            sagCombinePolygons(state.dstPolygons, prevPolygon, prevPolygon.points(), pointsF);
-            return;
-        }
-    }
-    */
 
     // Simply append the segment to the polygon
     state.dstPolygons.resize(state.dstPolygons.size() + 1);
