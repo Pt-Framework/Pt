@@ -67,7 +67,7 @@ class Polygonizer
 
         void renderWidePolyline(std::vector<Polygon>& polygons,
                                 const PointF* points, const std::size_t n,
-                                const Pen& pen, bool useNonZeroFillingRule = true);
+                                const Pen& pen, bool useNonZeroFillingRule);
 
         void renderWideLine(std::vector<Polygon>& polygons,
                             const PointF& from, const PointF& to,
@@ -196,9 +196,13 @@ class Polygonizer
 
         static void sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, const std::vector<PointF>& poly1, const std::vector<PointF>& poly2);
 
+        static void cleanupOnePolygon(std::vector<PointF>& polygon, bool useNonZeroFillingRule);
         static void cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNonZeroFillingRule);
 
     private:
+        static const double VecResScaleUp = 64.0;
+        static const double VecResScaleDn = 1.0 / 64.0;
+
         static const int PatternCells = 64;
         Pt::uint8_t _patternBufferMP[PatternCells];
 };

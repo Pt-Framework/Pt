@@ -33,6 +33,7 @@ static void testDrawThickLine_impl(
     path.transform(transform);
     ip2->drawPath(path);
 
+#if 1
     // Test intersection
     path.clear();
     transform.reset();
@@ -51,6 +52,7 @@ static void testDrawThickLine_impl(
     path.transform(transform);
     ip2->setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap) );
     ip2->drawPath(path);
+#endif
 
 #if 1
 

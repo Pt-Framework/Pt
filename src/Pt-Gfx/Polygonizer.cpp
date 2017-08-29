@@ -247,7 +247,7 @@ void Polygonizer::renderEllipse(std::vector<Polygon>& polygons,
         std::vector<PointF> pointsF;
         renderEllipsePoints(pointsF, radiusX, radiusY, centerX, centerY, pen.size());
 
-        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen );
+        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true );
     }
 }
 
@@ -435,7 +435,7 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
             }
         }
 
-        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen );
+        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true );
     }
 }
 
@@ -483,12 +483,44 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
 }
 
 
+void Polygonizer::cleanupOnePolygon(std::vector<PointF>& polygon, bool useNonZeroFillingRule)
+{
+    // Working variables
+    ClipperLib::Path  cpath;
+    ClipperLib::Paths cpaths;
+
+    // Convert the polygon's data
+    cpath.resize( polygon.size() );
+
+    for(size_t i = 0; i < polygon.size(); ++i) {
+        cpath[i].X = lround( polygon[i].x() * Polygonizer::VecResScaleUp );
+        cpath[i].Y = lround( polygon[i].y() * Polygonizer::VecResScaleUp );
+    }
+
+    // Simplify the polygon
+    if(useNonZeroFillingRule)
+        ClipperLib::SimplifyPolygon(cpath, cpaths, ClipperLib::pftNonZero);
+    else
+        ClipperLib::SimplifyPolygon(cpath, cpaths, ClipperLib::pftEvenOdd);
+
+    // Check if it produces zero polygon or more than one polygons
+    if(cpaths.size() != 1) {
+        polygon.clear();
+        return;
+    }
+
+    // Convert back the polygon's data
+    polygon.resize(cpaths[0].size());
+
+    for(size_t i = 0; i < cpaths[0].size(); ++i) {
+        polygon[i].setX( cpaths[0][i].X * Polygonizer::VecResScaleDn );
+        polygon[i].setY( cpaths[0][i].Y * Polygonizer::VecResScaleDn );
+    }
+}
+
+
 void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNonZeroFillingRule)
 {
-    // Constants
-    const double VecResScaleUp = 64.0;
-    const double VecResScaleDn = 1.0 / 64.0;
-
     // Working variables
     ClipperLib::Paths cpaths;
 
@@ -500,8 +532,8 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNon
         cpaths[i].resize( polygons[i].size() );
 
         for(size_t j = 0; j < polygons[i].size(); ++j) {
-            cpaths[i][j].X = lround( polygons[i].points()[j].x() * VecResScaleUp );
-            cpaths[i][j].Y = lround( polygons[i].points()[j].y() * VecResScaleUp );
+            cpaths[i][j].X = lround( polygons[i].points()[j].x() * Polygonizer::VecResScaleUp );
+            cpaths[i][j].Y = lround( polygons[i].points()[j].y() * Polygonizer::VecResScaleUp );
         }
     }
 
@@ -519,8 +551,8 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNon
         polygons[i].points().resize( cpaths[i].size() );
 
         for(size_t j = 0; j < cpaths[i].size(); ++j) {
-            polygons[i].points()[j].setX( cpaths[i][j].X * VecResScaleDn );
-            polygons[i].points()[j].setY( cpaths[i][j].Y * VecResScaleDn );
+            polygons[i].points()[j].setX( cpaths[i][j].X * Polygonizer::VecResScaleDn );
+            polygons[i].points()[j].setY( cpaths[i][j].Y * Polygonizer::VecResScaleDn );
         }
     }
 }
@@ -770,7 +802,7 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
         pointsFSegment.clear();
 
         renderSolidLineSegment(pointsFSegment, from.x(), from.y(),
-                                 to.x(), to.y(), pen, i == 0, i == curPC2);
+                               to.x(), to.y(), pen, i == 0, i == curPC2);
 
         if( ! joinOpenWidePolyline( pointsFPolygon, pointsFInner,
                                     pointsFSegment, from, pen, false /*inSameSegment*/ ) )
@@ -835,9 +867,6 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
         // Process the "pattern" segment
         done = sagPolygonPoints(state, !!refPat, pen, collisionDetection);
     }
-
-    //int NN = 3;
-    //if(polygons.size() > NN) polygons[NN].clear();
 }
 
 
@@ -846,7 +875,6 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
 //           Article and original code by Kah Shiu Chong, 2012
-// ### NOTE: MAY NOT WORK PROPERLY ###
 void Polygonizer::satDPIProjMinMax(double& min, double& max,
                                    const PointF* points, size_t pointCount,
                                    double px, double py)
@@ -866,7 +894,6 @@ void Polygonizer::satDPIProjMinMax(double& min, double& max,
 //           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
 //           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
 //           Article and original code by Kah Shiu Chong, 2012
-// ### NOTE: MAY NOT WORK PROPERLY ###
 bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
                                             const PointF* poly2, size_t poly2Count)
 {
@@ -886,7 +913,7 @@ bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Cou
         satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
         // Check if the polygon is separated
         if( max1 < min2 || max2 < min1 ) return false;
-        //if( fabs((min2 - max1) / max1) <= 0.001f || fabs((min1 - max2) / max2) <= 0.001f ) return false;
+        //if( fabs((min2 - max1) / max1) <= 0.003f || fabs((min1 - max2) / max2) <= 0.003f ) return false;
     }
 
     // Evaluate using the second polygon's normals
@@ -905,7 +932,7 @@ bool Polygonizer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Cou
         satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
         // Check if the polygon is separated
         if( max1 < min2 || max2 < min1 ) return false;
-        //if( fabs((min2 - max1) / max1) <= 0.001f || fabs((min1 - max2) / max2) <= 0.001f ) return false;
+        //if( fabs((min2 - max1) / max1) <= 0.003f || fabs((min1 - max2) / max2) <= 0.003f ) return false;
     }
 
     // There is a collision
@@ -1064,13 +1091,8 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
 }
 
 
-// ### NOTE: MAY NOT WORK PROPERLY ###
 void Polygonizer::sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& prevPoly, const std::vector<PointF>& poly1, const std::vector<PointF>& poly2)
 {
-    // Constants
-    const double VecResScaleUp = 64.0;
-    const double VecResScaleDn = 1.0 / 64.0;
-
     // Working variables
     ClipperLib::Clipper clipper;
     ClipperLib::Path    cpath;
@@ -1079,16 +1101,16 @@ void Polygonizer::sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& pr
     // Convert the 1st polygon data
     cpath.resize(poly1.size());
     for(size_t i = 0; i < poly1.size(); ++i) {
-        cpath[i].X = lround( poly1[i].x() * VecResScaleUp );
-        cpath[i].Y = lround( poly1[i].y() * VecResScaleUp );
+        cpath[i].X = lround( poly1[i].x() * Polygonizer::VecResScaleUp );
+        cpath[i].Y = lround( poly1[i].y() * Polygonizer::VecResScaleUp );
     }
     clipper.AddPath(cpath, ClipperLib::ptClip, true);
 
     // Convert the 2nd polygon data
     cpath.resize(poly2.size());
     for(size_t i = 0; i < poly2.size(); ++i) {
-        cpath[i].X = lround( poly2[i].x() * VecResScaleUp );
-        cpath[i].Y = lround( poly2[i].y() * VecResScaleUp );
+        cpath[i].X = lround( poly2[i].x() * Polygonizer::VecResScaleUp );
+        cpath[i].Y = lround( poly2[i].y() * Polygonizer::VecResScaleUp );
     }
     clipper.AddPath(cpath, ClipperLib::ptSubject, true);
 
@@ -1112,8 +1134,8 @@ void Polygonizer::sagCombinePolygons(std::vector<Polygon>& allPolys, Polygon& pr
         dstBuf->resize(curPath.size());
         // Convert the polygon data
         for(size_t j = 0; j < curPath.size(); ++j) {
-            (*dstBuf)[j].setX( curPath[j].X * VecResScaleDn );
-            (*dstBuf)[j].setY( curPath[j].Y * VecResScaleDn );
+            (*dstBuf)[j].setX( curPath[j].X * Polygonizer::VecResScaleDn );
+            (*dstBuf)[j].setY( curPath[j].Y * Polygonizer::VecResScaleDn );
         }
     }
 }
@@ -1289,6 +1311,13 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
 
     if( ! closingCap )
         renderLineButtCap(dst, x2, y2, -nx, -ny);
+
+    //cleanupOnePolygon(dst, true);
+    //return;
+
+    if(selfIntersecting(dst)) {
+        dst.clear();
+    }
 }
 
 
