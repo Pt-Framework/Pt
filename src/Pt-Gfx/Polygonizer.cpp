@@ -483,23 +483,11 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
 }
 
 
-static inline void addPolyNodeToPaths(const ClipperLib::PolyNode& polynode, ClipperLib::Paths& paths)
-{
-    if(!polynode.Contour.empty())// && !polynode.IsHole())
-        paths.push_back(polynode.Contour);
-
-    for(int i = 0; i < polynode.ChildCount(); ++i)
-        addPolyNodeToPaths(*polynode.Childs[i], paths);
-}
-
-
 void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNonZeroFillingRule)
 {
     // Constants
     const double VecResScaleUp = 64.0;
     const double VecResScaleDn = 1.0 / 64.0;
-
-#if 0
 
     // Working variables
     ClipperLib::Paths cpaths;
@@ -517,53 +505,11 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNon
         }
     }
 
-    // Clean-up the polygons
-    ClipperLib::SimplifyPolygons(cpaths, ClipperLib::pftNonZero);
-    //ClipperLib::CleanPolygons(cpaths, 1.415);
-
-    // Convert back the polygons' data
-    polygons.resize( cpaths.size() );
-
-    for(size_t i = 0; i < cpaths.size(); ++i) {
-
-        polygons[i].points().resize( cpaths[i].size() );
-
-        for(size_t j = 0; j < cpaths[i].size(); ++j) {
-            polygons[i].points()[j].setX( cpaths[i][j].X * VecResScaleDn );
-            polygons[i].points()[j].setY( cpaths[i][j].Y * VecResScaleDn );
-        }
-    }
-
-#else
-
-    // Working variables
-    ClipperLib::Clipper  clipper;
-    ClipperLib::PolyTree cptree;
-    ClipperLib::Paths    cpaths;
-    ClipperLib::Path     cpath;
-
-    // Convert the polygons' data
-    for(size_t i = 0; i < polygons.size(); ++i) {
-
-        cpath.resize( polygons[i].size() );
-
-        for(size_t j = 0; j < polygons[i].size(); ++j) {
-            cpath[j].X = lround( polygons[i].points()[j].x() * VecResScaleUp );
-            cpath[j].Y = lround( polygons[i].points()[j].y() * VecResScaleUp );
-        }
-
-        clipper.AddPath(cpath, ClipperLib::ptSubject, true);
-    }
-
-    // Perform union operation on all the polygons
-    clipper.StrictlySimple(true);
+    // Simplify the polygons
     if(useNonZeroFillingRule)
-        clipper.Execute(ClipperLib::ctUnion, cptree, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+        ClipperLib::SimplifyPolygons(cpaths, ClipperLib::pftNonZero);
     else
-        clipper.Execute(ClipperLib::ctUnion, cptree, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-
-    cpaths.reserve(cptree.Total());
-    addPolyNodeToPaths(cptree, cpaths);
+        ClipperLib::SimplifyPolygons(cpaths, ClipperLib::pftEvenOdd);
 
     // Convert back the polygons' data
     polygons.resize( cpaths.size() );
@@ -577,8 +523,64 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNon
             polygons[i].points()[j].setY( cpaths[i][j].Y * VecResScaleDn );
         }
     }
+}
 
-#endif
+
+//
+// Based on: Geometric Primitives
+//           http://algs4.cs.princeton.edu/91primitives
+//           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
+static inline int ccw3(const PointF& a, const PointF& b, const PointF& c)
+{
+   return (b.x() - a.x()) * (c.y() - a.y()) - (c.x() - a.x()) * (b.y() - a.y());
+}
+
+
+//
+// Based on: Geometric Primitives
+//           http://algs4.cs.princeton.edu/91primitives
+//           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
+static inline bool lineIntersecting(const PointF& ap, const PointF& aq, const PointF& bp, const PointF& bq)
+{
+   if( ccw3(ap, aq, bp) * ccw3(ap, aq, bq) > 0 ) return false;
+   if( ccw3(bp, bq, ap) * ccw3(bp, bq, aq) > 0 ) return false;
+   return true;
+}
+
+
+static inline bool selfIntersecting(const PointF* points, const size_t n)
+{
+    if(n <= 2) return false;
+
+    const size_t size1 = n - 1;
+    const size_t size2 = n - 2;
+
+    for(size_t i = 0; i < size2; ++i) {
+        const PointF& ap = points[i    ];
+        const PointF& aq = points[i + 1];
+        for(size_t j = i + 1; j < size1; ++j) {
+            const PointF& bp = points[j    ];
+            const PointF& bq = points[j + 1];
+            if( lineIntersecting(ap, aq, bp, bq) ) return true;
+        }
+    }
+
+    return false;
+}
+
+
+static inline bool selfIntersecting(const std::vector<PointF>& points)
+{
+    return selfIntersecting(&points[0], points.size());
+}
+
+static inline bool selfIntersecting(const std::vector<Polygon>& polygons)
+{
+    for(size_t i = 0; i < polygons.size(); ++i) {
+        if( selfIntersecting(polygons[i].points()) ) return true;
+    }
+
+    return false;
 }
 
 
@@ -592,6 +594,11 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
 
     const bool isSolid  = pen.style() == Pen::Solid;
     const bool isClosed = points[0] == points[n - 1];
+
+    const bool isSelfIn = selfIntersecting(points, n);
+
+    //if(isSelfIn) return;
+
 
     if(isSolid) // solid line
     {
