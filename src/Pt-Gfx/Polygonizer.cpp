@@ -588,6 +588,7 @@ static inline bool selfIntersecting(const PointF* points, const size_t n)
     const size_t size1 = n - 1;
     const size_t size2 = n - 2;
 
+    // Check the edges
     for(size_t i = 0; i < size2; ++i) {
         const PointF& ap = points[i    ];
         const PointF& aq = points[i + 1];
@@ -598,6 +599,16 @@ static inline bool selfIntersecting(const PointF* points, const size_t n)
         }
     }
 
+#if 0
+    // Check the last edge against the first edge
+    const PointF& ap = points[size2];
+    const PointF& aq = points[size1];
+    const PointF& bp = points[size1];
+    const PointF& bq = points[0    ];
+    if( lineIntersecting(ap, aq, bp, bq) ) return true;
+#endif
+
+    // No intersection
     return false;
 }
 
@@ -652,9 +663,7 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
 }
 
 
-//
 // Just as fast as calling renderWidePolyline with just two points...
-//
 void Polygonizer::renderWideLine(std::vector<Polygon>& polygons,
                                   const PointF& from, const PointF& to,
                                   const Pen& pen)
@@ -731,8 +740,7 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
             return;
     }
 
-    // reprocess the first and second segments to render the last join
-
+    // Reprocess the first and second segments to render the last join
     const PointF& from = *ptrZero++;
     const PointF& to   = *ptrZero;
 
@@ -1263,6 +1271,9 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
 }
 
 
+// ### TODO ###
+//    If the line segment's is short, it may produce a broken segment
+//    (due to overlapping caps)!!!
 void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
                                          float x1, float y1, float x2, float y2,
                                          const Pen& pen, bool openingCap, bool closingCap)
@@ -1271,6 +1282,7 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     float wh, dx, dy, nx, ny;
 
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
+
 
     // Generate points (CCW)
 
@@ -1312,12 +1324,9 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     if( ! closingCap )
         renderLineButtCap(dst, x2, y2, -nx, -ny);
 
-    //cleanupOnePolygon(dst, true);
-    //return;
-
-    if(selfIntersecting(dst)) {
-        dst.clear();
-    }
+    //if(selfIntersecting(dst)) {
+    //    cleanupOnePolygon(dst, false);
+    //}
 }
 
 
@@ -2013,9 +2022,12 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
 }
 
 
+// ### TODO ###
+//    If the line segment's is short, the calculated direction and normal vectors
+//    may produce a broken line segment (due to overlapping caps)!!!
 void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
-                                       float& nx, float& ny, float x1, float y1,
-                                       float x2, float y2, size_t w)
+                                      float& nx, float& ny, float x1, float y1,
+                                      float x2, float y2, size_t w)
 {
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
@@ -2023,9 +2035,12 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
     const float b = x1 - x2;
   //const float c = -(x1 * y2 - x2 * y1);
 
-    // Inverse line length
+    // Line length
     // NOTE: Gfx::Math::fastInvSqrt() will produce artifacts!
-    const float il = 1.0f / ::sqrtf(a * a + b * b);
+    const float ll =  ::sqrtf(a * a + b * b);
+
+    // Inverse line length
+    const float il = 1.0f / ll;
 
     // Half line width
     wh = (float) w * 0.5f;
