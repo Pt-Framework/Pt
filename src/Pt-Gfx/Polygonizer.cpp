@@ -78,6 +78,9 @@ struct PatternState
 };
 
 
+const double Polygonizer::VecResScaleUp = 64.0;
+const double Polygonizer::VecResScaleDn = 1.0 / 64.0;
+
 Polygonizer::Polygonizer()
 {
 }

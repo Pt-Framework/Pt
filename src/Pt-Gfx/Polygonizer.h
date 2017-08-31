@@ -200,10 +200,10 @@ class Polygonizer
         static void cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNonZeroFillingRule);
 
     private:
-        static const double VecResScaleUp = 64.0;
-        static const double VecResScaleDn = 1.0 / 64.0;
+        static const double VecResScaleUp;
+        static const double VecResScaleDn;
 
-        static const int PatternCells = 64;
+        enum { PatternCells = 64 };
         Pt::uint8_t _patternBufferMP[PatternCells];
 };
 
