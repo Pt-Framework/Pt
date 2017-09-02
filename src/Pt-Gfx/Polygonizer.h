@@ -94,7 +94,7 @@ class Polygonizer
 
         void renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                          const PointF* basePtr, size_t curPCnt,
-                                         const Pen& pen);
+                                         const Pen& pen, bool cleanUpSelfIntersection);
 
         void renderDashedWidePolyLine(std::vector<Polygon>& polygons,
                                       const PointF* src, size_t pointCount,

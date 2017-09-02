@@ -100,7 +100,7 @@ FontMetrics DrawText::fontMetrics(const String& text)
 
 
 void DrawText::draw(Image& image, const Color& color,
-                    const Point& pos, const String& text, 
+                    const Point& pos, const String& text,
                     const CompositionMode& mode)
 {
     return FreeType::instance().draw(image, color, pos, text,_clip, mode,

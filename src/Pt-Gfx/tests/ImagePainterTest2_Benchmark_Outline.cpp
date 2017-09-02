@@ -12,8 +12,7 @@ static Pt::int64_t benchDrawText(int loopCount, bool rotated, CompositionMode cm
     painter.setPen(pen);
 
     painter.setFontDir(FONT_DIR);
-    if(rotated) painter.setFont( Pt::Gfx::Font(FONT_SPEC_R) );
-    else        painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(ip2) ip2->setAntiAliasing(antiAliasingMode);
@@ -22,8 +21,18 @@ static Pt::int64_t benchDrawText(int loopCount, bool rotated, CompositionMode cm
         Pt::System::Clock clock;
         clock.start();
 
-        painter.drawText( PointF(100, 100), "Hello world!" );
-        painter.drawText( PointF(100, 150), "Hello world!" );
+        if(rotated && ip2) {
+            Transform t;
+            t.rotateDeg(-150.0);
+            t.translate(100.0, 100.0);
+            ip2->drawText( PointF(0, 0), "Hello world!", t );
+            t.translate(  0.0,  50.0);
+            ip2->drawText( PointF(0, 0), "Hello world!", t );
+        }
+        else {
+            painter.drawText( PointF(100, 100), "Hello world!" );
+            painter.drawText( PointF(100, 150), "Hello world!" );
+        }
 
         sum += clock.stop().toUSecs();
 

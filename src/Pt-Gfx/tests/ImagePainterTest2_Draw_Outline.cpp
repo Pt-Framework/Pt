@@ -40,13 +40,19 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF(781, 552), PointF( 10, 550) );
 
-    painter.setFont( Pt::Gfx::Font(FONT_SPEC_R) );
-    painter.setPen( Color::fromRgb8(0, 255, 255, 255) ); painter.drawText( PointF(100 + 200, 175 + 200), "Hello world!" );
-    painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100 + 200, 225 + 200), "Hello world!" );
-
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
+
     painter.setPen( Color::fromRgb8(0, 255, 255, 255) ); painter.drawText( PointF(100, 175), "Hello world!" );
     painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100, 225), "Hello world!" );
+
+    if(ip2) {
+        Transform t;
+        t.rotateDeg(-150.0);
+        t.translate(300.0, 375.0);
+        ip2->setPen( Color::fromRgb8(0, 255, 255, 255) ); ip2->drawText( PointF(0, 0), "Hello world!", t );
+        t.translate(  0.0,  50.0);
+        ip2->setPen( Color::fromRgb8(0, 255, 255, 175) ); ip2->drawText( PointF(0, 0), "Hello world!", t );
+    }
 
     //if(ip2) {
     //    const PointF bezier1a[] = { // CCW

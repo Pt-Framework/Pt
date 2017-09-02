@@ -66,7 +66,7 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
-#define TEST_SOURCECOPY                         0
+#define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
@@ -106,7 +106,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
 #define BENCHMARK_TEXT                      0
-#define BENCHMARK_ROTATED_TEXT              0 // XXX
+#define BENCHMARK_ROTATED_TEXT              1 // XXX
 
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
@@ -145,7 +145,6 @@ using namespace Pt::Gfx;
 Pt::System::Path FONT_DIR;
 #define FONT_SPEC_S "DejaVu Sans"  ,  12, Pt::Gfx::Font::BoldItalic,    0
 #define FONT_SPEC_N "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic,    0
-#define FONT_SPEC_R "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic, -150
 
 #define FONT_SPEC_H "DejaVu Serif" ,  92, Pt::Gfx::Font::Normal    ,    0
 #define FONT_SPEC_Q "QumpellkaNo12",  64, Pt::Gfx::Font::Normal    ,    0 /* OTF */

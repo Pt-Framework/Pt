@@ -86,9 +86,9 @@ FreeType::~FreeType()
 const std::string& FreeType::defaultFont() const
 {
     // LOCK
-    
+
     return _defaultFont.name();
-    
+
     // UNLOCK
 }
 
@@ -96,9 +96,9 @@ const std::string& FreeType::defaultFont() const
 FTC_FaceID FreeType::defaultFace() const
 {
     // LOCK
-    
+
     return _defaultFace;
-    
+
     // UNLOCK
 }
 
@@ -106,10 +106,10 @@ FTC_FaceID FreeType::defaultFace() const
 void FreeType::setDefaultFont(const std::string& font)
 {
     // LOCK
-    
+
     _defaultFont = Font(font, DefaultFontSize);
     _defaultFace = findFaceId(_defaultFont);
-    
+
     // UNLOCK
 }
 
@@ -188,7 +188,7 @@ void FreeType::setFontDir(const System::Path& path)
 FTC_FaceID FreeType::findFaceId(const Font& font)
 {
     // LOCK
-    
+
     if( font.name().empty() )
     {
         return _defaultFace;
@@ -231,14 +231,14 @@ FT_Error FreeType::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 
 
 FontMetrics FreeType::fontMetrics(const String& text,
-                                  FTC_FaceID faceId, 
+                                  FTC_FaceID faceId,
                                   FTC_ImageType imageType)
 {
     // LOCK
 
     FT_Face face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
-    if(ferr) 
+    if(ferr)
         return FontMetrics(0, 0, 0, 0);
 
     FT_Int charMapIndex = 0;
@@ -285,7 +285,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
         if( FT_HAS_KERNING(face) && previous )
         {
             FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
-            if(delta.x < glyph->advance.x && delta.y < glyph->advance.y) 
+            if(delta.x < glyph->advance.x && delta.y < glyph->advance.y)
             {
               pen_x += delta.x;
               pen_y -= delta.y;
@@ -319,17 +319,17 @@ FontMetrics FreeType::fontMetrics(const String& text,
 }
 
 
-void FreeType::draw(Image& image, const Color& color, 
-                    const Point& p, const String& text, 
-                    const Rect& clip, const CompositionMode& mode, 
-                    const Transform& t, FTC_FaceID faceId, 
+void FreeType::draw(Image& image, const Color& color,
+                    const Point& p, const String& text,
+                    const Rect& clip, const CompositionMode& mode,
+                    const Transform& t, FTC_FaceID faceId,
                     FTC_ImageType imageType)
 {
     // LOCK
 
     PointF posF(p.x(), p.y());
     posF = t * posF;
-    Point pos( Pt::lround(posF.x()), 
+    Point pos( Pt::lround(posF.x()),
                Pt::lround(posF.y()) );
 
     FTC_Node       node;
@@ -354,10 +354,10 @@ void FreeType::draw(Image& image, const Color& color,
     matrix.xy = t.m12() * 0x10000L;
     matrix.yx = t.m21() * 0x10000L;
     matrix.yy = t.m22() * 0x10000L;
-    
+
     FT_Face face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
-    if(ferr) 
+    if(ferr)
         return;
 
     FT_Int charMapIndex = 0;
@@ -376,14 +376,14 @@ void FreeType::draw(Image& image, const Color& color,
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
-        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, 
+        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId,
                                                    charMapIndex, it->value());
         if( ! glyph_index )
             continue;
 
-        if( t.isIdentity() ) 
+        if( t.isIdentity() )
         {
-            if( FTC_SBitCache_Lookup( _bitmapCache, imageType, glyph_index, 
+            if( FTC_SBitCache_Lookup( _bitmapCache, imageType, glyph_index,
                                       &smalGlyphBitmap, &node ) )
                 continue;
 
@@ -419,11 +419,11 @@ void FreeType::draw(Image& image, const Color& color,
             incX        = glyphCopy->advance.x;
             incY        = glyphCopy->advance.y;
 
-            if(FT_HAS_KERNING(face) && previous) 
+            if(FT_HAS_KERNING(face) && previous)
             {
                 FT_Vector delta;
                 FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
-    
+
                 glyphPos.x += delta.x;
                 glyphPos.y -= delta.y;
 
@@ -465,7 +465,7 @@ void FreeType::draw(Image& image, const Color& color,
 
 void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                          int bmPitch, int height, int width,
-                         const unsigned char* buffer, const Rect& clip, 
+                         const unsigned char* buffer, const Rect& clip,
                          const CompositionMode& mode)
 {
     const int clipRight  = clip.x() + clip.width();
@@ -528,12 +528,12 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    if(value != 255) 
+                    if(value != 255)
                     {
                         pixelColor.setAlpha(value * 257);
                         image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
                     }
-                    else 
+                    else
                     {
                         image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
                     }

@@ -653,7 +653,7 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
         }
         else
         {
-            renderSolidOpenWidePolyline(polygons, points, n, pen);
+            renderSolidOpenWidePolyline(polygons, points, n, pen, false);
         }
     }
     else // dashed line
@@ -773,8 +773,8 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
 
 
 void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
-                                               const PointF* basePtr, size_t curPCnt,
-                                               const Pen& pen)
+                                              const PointF* basePtr, size_t curPCnt,
+                                              const Pen& pen, bool cleanUpSelfIntersection)
 {
     //Pt::int32_t* segmentIndexMarker = 0;
 
@@ -820,10 +820,16 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
             return;
     }
 
-    // Process and store the "inside" lines' points to the main polygon buffer in reverse
+    // Process and store the "inside" lines
     pointsFPolygon.insert( pointsFPolygon.end(),
                            pointsFInner.rbegin(), pointsFInner.rend() );
 
+    // Clean-up self-intersection as needed
+    if(cleanUpSelfIntersection && selfIntersecting(pointsFPolygon)) {
+        cleanupOnePolygon(pointsFPolygon, true);
+    }
+
+    // Store the points to the main polygon buffer
     polygons.resize( polygons.size() + 1 );
     Polygon& polygon = polygons.back();
 
@@ -1230,7 +1236,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
 {
     // Generate a new thick polygon
     std::vector<Polygon> polygons;
-    renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen);
+    renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen, true);
 
     // Exit here if the generated polygon does not actually have a meaningful number of points
     if(polygons.empty() || polygons[0].size() < 3)
@@ -1274,9 +1280,6 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
 }
 
 
-// ### TODO ###
-//    If the line segment's is short, it may produce a broken segment
-//    (due to overlapping caps)!!!
 void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
                                          float x1, float y1, float x2, float y2,
                                          const Pen& pen, bool openingCap, bool closingCap)
@@ -1326,10 +1329,6 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
 
     if( ! closingCap )
         renderLineButtCap(dst, x2, y2, -nx, -ny);
-
-    //if(selfIntersecting(dst)) {
-    //    cleanupOnePolygon(dst, false);
-    //}
 }
 
 
@@ -1594,7 +1593,7 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
 
     inLine |= ( fabs(ochk1.x()) <= 0.8f && fabs(ochk1.y()) <= 0.8f ) || // For preventing artifacts
               ( fabs(ochk2.x()) <= 0.8f && fabs(ochk2.y()) <= 0.8f );
-    */
+    //*/
 
     // Store the "outside" line's points to the main polygon buffer
     const Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin
@@ -1650,7 +1649,7 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
 
     inLine |= ( fabs(ichk1.x()) <= 0.8f && fabs(ichk1.y()) <= 0.8f ) || // For preventing artifacts
               ( fabs(ichk2.x()) <= 0.8f && fabs(ichk2.y()) <= 0.8f );
-    */
+    //*/
 
     // Store the "inside" line's points to the auxiliary polygon buffer
     const Pen::JoinStyle js2 = (inSameSegment || inLine) ? Pen::MiterJoin
@@ -2025,9 +2024,6 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
 }
 
 
-// ### TODO ###
-//    If the line segment's is short, the calculated direction and normal vectors
-//    may produce a broken line segment (due to overlapping caps)!!!
 void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
                                       float& nx, float& ny, float x1, float y1,
                                       float x2, float y2, size_t w)
