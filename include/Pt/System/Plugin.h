@@ -187,6 +187,7 @@ class PluginManager
                 bool operator!=(const Iterator& it) const
                 { return _it != it._it; }
 
+            private:
                 //! @internal
                 typename PluginMap::const_iterator _it;
         };
