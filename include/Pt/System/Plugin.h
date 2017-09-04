@@ -198,6 +198,22 @@ class PluginManager
         : _iface( typeid(IfaceT) )
         { }
 
+        PluginManager(Pt::System::PluginId** plugins)
+        : _iface( typeid(IfaceT) )
+        { 
+            if( ! plugins)
+              return;
+            
+            for(; *plugins != 0; ++plugins)
+            {
+                if( (*plugins)->iface() == _iface )
+                {
+                    PluginT* p = (PluginT*)(*plugins);
+                    this->registerPlugin(*p);
+                }
+            }
+        }
+
         /** @brief Destructor.
         */
         ~PluginManager();
