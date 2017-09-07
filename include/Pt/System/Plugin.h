@@ -156,6 +156,8 @@ class PluginManager
         */
         class Iterator
         {
+            friend class PluginManager;
+
             public:
                 /** @brief Default Constructor.
                 */
