@@ -89,6 +89,7 @@ void loadIcon(Gfx::Image& icon)
 MainWindow::MainWindow()
 : _child1("Child 1")
 , _scrollContainer(Hmi::FlowLayout::Top)
+, _scrollContainer2(Hmi::FlowLayout::Top)
 {
     loadIcon(_icon);
     _picture.set(_icon);
@@ -118,6 +119,35 @@ MainWindow::MainWindow()
         _scrollContainer.addItem(_btns[n] );
     }
     
+
+
+    for(int n = 0; n < 20; ++n)
+    {
+        SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
+        policy.setWidth(100);
+        policy.setHeight(40);
+        _btns2[n].setSizePolicy(policy);
+
+        _btns2[n].setPadding(5);
+        _btns2[n].setMargin(5);
+
+        std::stringstream ss;
+        ss<<"Scroll2 "<< (n+1);
+
+        _btns2[n].setText(ss.str().c_str());
+        
+        _scrollContainer2.addItem(_btns2[n] );
+    }
+
+    _scrollView2.setScrollBars(true);
+    Pt::Hmi::SizePolicy spp(  SizePolicy::Fixed, SizePolicy::Fixed );
+     
+     spp.setSize(200,400);
+    _scrollView2.setSizePolicy(spp);
+
+
+    _scrollContainer.addItem(_scrollView2);
+
     _btns[0].clicked() += Pt::slot(*this, &MainWindow::onButton);
 
     _bt2.setText("Ende");
@@ -127,19 +157,29 @@ MainWindow::MainWindow()
     _bt2.setMargin(5);
     _bt2.clicked() += Pt::slot(Application::instance(), &Application::exit);
 
-    _scrollContainer.addItem(_bt2);
-    
+    _scrollContainer.addItem(_bt2);    
     _scrollContainer.setPadding(5);
     _scrollContainer.setMargin(5);
+    _scrollContainer2.setPadding(5);
+    _scrollContainer2.setMargin(5);
+
+    
 
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize( Gfx::SizeF(500, 1100) );
+
     _scrollContainer.setSizePolicy(policy);
 
+    SizePolicy policy2(SizePolicy::Fixed, SizePolicy::Fixed);
+    policy2.setSize( Gfx::SizeF(500, 600) );
+
+    _scrollContainer2.setSizePolicy(policy2);
+
+    _scrollView2.setContent(_scrollContainer2);
     _scrollView.setContent(_scrollContainer);
     
     _child2.setContent(&_scrollView);
-    //_child2.show(true);  // SHOW DEMO WINDOW 2
+    _child2.show(true);  // SHOW DEMO WINDOW 2
 
     add( _child1 );
 
@@ -168,7 +208,7 @@ MainWindow::MainWindow()
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30,30));
     _child1.resize( Gfx::SizeF(300, 600) );
-    //_child1.show(true); // SHOW DEMO WINDOW 1
+    _child1.show(true); // SHOW DEMO WINDOW 1
     
     // context menu   
     _menu.setName("All Music");
@@ -213,7 +253,7 @@ MainWindow::~MainWindow()
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
-    
+    /*
     Painter painter( surface() );
 
     Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
@@ -287,7 +327,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello", trans);
 
     painter.setClip(rect);
-    painter.drawImage(Gfx::PointF(0, 0), image);
+    painter.drawImage(Gfx::PointF(0, 0), image);*/
 }
 
 
