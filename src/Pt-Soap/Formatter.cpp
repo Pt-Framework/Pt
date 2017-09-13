@@ -524,7 +524,6 @@ bool Formatter::advance(const Pt::Xml::Node& node)
               _composer = _composer->beginDictKey();
             else
               _composer = _composer->beginDictValue();
-              
         }
 
         _onDictElement = false;
