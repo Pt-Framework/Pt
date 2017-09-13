@@ -186,6 +186,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             registerMethod("Double", *this, &PtXmlRpcTest::Double);
             registerMethod("String", *this, &PtXmlRpcTest::String);
             registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);
+            registerMethod("SoapMap", *this, &PtXmlRpcTest::SoapMap);
             registerMethod("SoapArray", *this, &PtXmlRpcTest::SoapArray);
             registerMethod("Array", *this, &PtXmlRpcTest::Array);
             registerMethod("ArrayBenchmark", *this, &PtXmlRpcTest::ArrayBenchmark);
@@ -618,9 +619,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         }
 
         ////////////////////////////////////////////////////////////
-        // SoapArray
+        // Soap
         //
-
         class CalcSoapServiceDeclaration: public Pt::Soap::ServiceDeclaration
         {
             public:
@@ -643,17 +643,90 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                         Pt::Soap::ArrayType _intArrayType;
                 };
 
+                class MapMultiply : public Pt::Soap::Operation
+                {
+                    public:
+                        MapMultiply()
+                        : Pt::Soap::Operation("multiplyMap", "multiplyMapResponse")
+                        , _intDictType("IntDictType", "IntDictElementType")
+                        {
+                            _intDictType.setElement("elem",
+                                                    "first", intType(),
+                                                    "second", intType() );
+
+                            addInput("a", _intDictType);
+
+                            setOutput("multiplyMapResult", intType());
+                        }
+
+                    private:
+                        Pt::Soap::DictType _intDictType;
+                };
+
                 CalcSoapServiceDeclaration()
                 : Pt::Soap::ServiceDeclaration("calc")
                 {
                     setTargetNamespace("http://tempuri.org/");
                     addOperation(_arrayMultiply);
+                    addOperation(_mapMultiply);
                 }
             
             private:
                 ArrayMultiply _arrayMultiply;
+                MapMultiply   _mapMultiply;
         };
 
+        ////////////////////////////////////////////////////////////
+        // SoapMap
+        //
+        void SoapMap()
+        {
+            CalcSoapServiceDeclaration serviceDecl;
+
+            Pt::Remoting::ServiceDefinition serviceDef;
+            serviceDef.registerProcedure("multiplyMap", *this, &PtXmlRpcTest::multiplySoapMap);
+
+            Pt::Soap::HttpService httpService(serviceDecl, serviceDef);
+            Pt::Http::MapUrl servlet("/" + serviceDecl.name(), httpService);
+            _server->addServlet(servlet);
+
+            Pt::Soap::HttpClient client(serviceDecl, *_loop);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
+            client.setTarget(ep, "/calc");
+
+            Pt::Remoting::RemoteProcedure<int, std::map<int, int> > multiply(client, "multiplyMap");
+            multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onMapMultiplyFinished);
+
+            std::map<int, int> m;
+            m[6] = 7;
+
+            multiply.begin(m);
+            
+            _loop->run();
+        }
+
+        int multiplySoapMap(const std::map<int, int>& a)
+        {
+            int r = 0;
+
+            std::map<int, int>::const_iterator it;
+            for(it = a.begin(); it != a.end(); ++it)
+            {
+              r += it->first * it->second;
+            }
+
+            return r;
+        }
+
+        void onMapMultiplyFinished(const Pt::Remoting::Result<int>& r)
+        {
+            PT_UNIT_ASSERT_EQUALS(r.get(), 42);
+            _loop->exit();
+        }
+
+        ////////////////////////////////////////////////////////////
+        // SoapArray
+        //
         void SoapArray()
         {
             CalcSoapServiceDeclaration serviceDecl;

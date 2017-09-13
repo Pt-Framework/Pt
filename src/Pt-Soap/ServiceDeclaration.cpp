@@ -167,9 +167,11 @@ StructType::~StructType()
 }
 
 
-void StructType::addParameter(const std::string& name, const Type& t)
+void StructType::addParameter(const std::string& name, const Type& t, bool optional)
 {
     Parameter param(name, t);
+    param.setOptional(optional);
+    
     _paramList.push_back(param);
 }
 
@@ -230,6 +232,91 @@ const Parameter* ArrayType::getParameter(const std::string& name) const
 { 
     return &_elem; 
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// DictElementType
+///////////////////////////////////////////////////////////////////////////////
+
+DictElementType::DictElementType(const std::string& name)
+: ComplexType(Type::DictElement, name)
+{ 
+}
+
+
+DictElementType::~DictElementType()
+{
+}
+
+
+void DictElementType::setKey(const std::string& name, const Type& type)
+{
+  _key.set(name, type);
+}
+
+
+void DictElementType::setValue(const std::string& name, const Type& type)
+{
+  _value.set(name, type);
+}
+
+
+const Parameter* DictElementType::getParameter(std::size_t n) const
+{ 
+    return n == 0 ? &_key :
+           n == 1 ? &_value : 0; 
+}
+
+
+const Parameter* DictElementType::getParameter(const std::string& name) const
+{
+    if(_key.name() == name)
+        return &_key;
+
+    if(_value.name() == name)
+        return &_value;
+
+    return 0; 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// DictType
+///////////////////////////////////////////////////////////////////////////////
+
+DictType::DictType(const std::string& typeName, const std::string& elemTypeName)
+: ComplexType(Type::Dict, typeName)
+, _elemType(elemTypeName)
+{ 
+}
+
+
+DictType::~DictType()
+{
+}
+
+
+void DictType::setElement(const std::string& elemName,
+                          const std::string& keyName, const Type& keyType, 
+                          const std::string& valueName, const Type& valueType)
+{
+  _elemType.setKey(keyName, keyType);
+  _elemType.setValue(valueName, valueType);
+
+  _elem.set(elemName, _elemType);
+}
+
+
+const Parameter* DictType::getParameter(std::size_t n) const
+{ 
+    return &_elem; 
+}
+
+
+const Parameter* DictType::getParameter(const std::string& name) const
+{ 
+    return &_elem; 
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Operation
@@ -426,8 +513,16 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
             }
             else
             {
-                os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\""
-                   << member->name() << "\" ";
+                if( member->isOptional() )
+                {
+                  os << "<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\""
+                     << member->name() << "\" ";
+                }
+                else
+                {
+                  os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\""
+                     << member->name() << "\" ";
+                }
             }
 
             if( member->type()->isSimple() )

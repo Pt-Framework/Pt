@@ -57,7 +57,9 @@ class Type : private NonCopyable
             Int = 4,
             Float = 5,
             String = 6,
-            Base64 = 7
+            Base64 = 7,
+            Dict = 8,
+            DictElement = 9
         };
     
     public:
@@ -147,6 +149,7 @@ class Parameter
     public:
         Parameter()
         : _type(0)
+        , _isOptional(false)
         {}
         
         Parameter(const std::string& name, const Type& t)
@@ -163,6 +166,16 @@ class Parameter
             _type = &t;
         }
 
+        bool isOptional() const
+        {
+          return _isOptional;
+        }
+
+        void setOptional(bool optional)
+        {
+          _isOptional = optional;
+        }
+
         const Type* type() const
         { return _type; }
 
@@ -172,6 +185,7 @@ class Parameter
     private:
         std::string _name;
         const Type* _type;
+        bool _isOptional;
 };
 
 
@@ -252,7 +266,7 @@ class PT_SOAP_API StructType : public ComplexType
 
         virtual ~StructType();
 
-        void addParameter(const std::string& name, const Type& param);
+        void addParameter(const std::string& name, const Type& param, bool optional = false);
 
         virtual const Parameter* getParameter(std::size_t n) const;
 
@@ -291,6 +305,58 @@ class PT_SOAP_API ArrayType : public ComplexType
 
     private:
         Parameter _elem;
+};
+
+
+class PT_SOAP_API DictElementType : public ComplexType
+{
+    public:
+        DictElementType(const std::string& name);
+
+        virtual ~DictElementType();
+
+        void setKey(const std::string& name, const Type& param);
+
+        void setValue(const std::string& name, const Type& param);
+
+        virtual const Parameter* getParameter(std::size_t n) const;
+
+        virtual const Parameter* getParameter(const std::string& name) const;
+
+        virtual std::size_t size() const
+        {
+            return 0;
+        }
+
+    private:
+        Parameter _key;
+        Parameter _value;
+};
+
+
+class PT_SOAP_API DictType : public ComplexType
+{
+    public:
+        DictType(const std::string& typeName, const std::string& elemTypeName);
+
+        virtual ~DictType();
+
+        void setElement(const std::string& elemName,
+                        const std::string& keyname, const Type& keyType, 
+                        const std::string& valueName, const Type& valueType);
+
+        virtual const Parameter* getParameter(std::size_t n) const;
+
+        virtual const Parameter* getParameter(const std::string& name) const;
+
+        virtual std::size_t size() const
+        {
+            return 1;
+        }
+
+    private:
+        DictElementType _elemType;
+        Parameter       _elem;
 };
 
 

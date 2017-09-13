@@ -128,6 +128,23 @@ class PT_SOAP_API Formatter : public Pt::Formatter
 
         void onFinishStruct();
 
+        virtual void onBeginDict(const char* name, const char* type,
+                                 const char* id);
+
+        virtual void onBeginDictElement();
+        
+        virtual void onBeginDictKey();
+        
+        virtual void onFinishDictKey();
+        
+        virtual void onBeginDictValue();
+        
+        virtual void onFinishDictValue();
+        
+        virtual void onFinishDictElement();
+        
+        virtual void onFinishDict();
+
     protected:
         void onBeginParse(Composer& composer);
 
@@ -145,6 +162,7 @@ class PT_SOAP_API Formatter : public Pt::Formatter
         };
 
         State _state;
+        bool _onDictElement;
         Xml::XmlReader* _reader;
         std::vector<const Parameter*> _paramStack;
         Composer* _composer;

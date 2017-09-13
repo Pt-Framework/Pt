@@ -127,6 +127,7 @@ namespace Soap {
 
 Formatter::Formatter(std::basic_ostream<Char>& os)
 : _state(OnBegin)
+, _onDictElement(false)
 , _reader(0)
 , _composer(0)
 , _os(&os)
@@ -387,10 +388,101 @@ void Formatter::onFinishStruct()
 }
 
 
+void Formatter::onBeginDict(const char* name, const char* type,
+                            const char* id)
+{
+    _str.assign( _paramStack.back()->name().c_str() );
+
+    *_os << '<';
+    Xml::xmlEncode(*_os, _str );
+    *_os << '>';
+}
+
+
+void Formatter::onBeginDictElement()
+{
+    const Parameter* param = _paramStack.back()->type()->getParameter(0);
+    if( ! param )
+        throw SerializationError("invalid dict type");
+
+    _paramStack.push_back(param);
+
+    _str.assign( param->name().c_str() );
+
+    *_os << '<';
+    Xml::xmlEncode(*_os, _str );
+    *_os << '>';
+}
+
+
+void Formatter::onBeginDictKey()
+{
+    const Parameter* param = _paramStack.back()->type()->getParameter(0);
+    if( ! param )
+        throw SerializationError("invalid dict type");
+
+    _paramStack.push_back(param);
+}
+
+
+void Formatter::onFinishDictKey()
+{
+    _paramStack.pop_back();
+
+    if( _paramStack.empty() )
+      throw SerializationError("invalid dict type");
+}
+
+
+void Formatter::onBeginDictValue()
+{
+    const Parameter* param = _paramStack.back()->type()->getParameter(1);
+    if( ! param )
+        throw SerializationError("invalid dict type");
+
+    _paramStack.push_back(param);
+}
+
+
+void Formatter::onFinishDictValue()
+{
+    _paramStack.pop_back();
+
+    if( _paramStack.empty() )
+      throw SerializationError("invalid dict type");
+}
+
+
+void Formatter::onFinishDictElement()
+{
+    _str.assign( _paramStack.back()->name().c_str() );
+
+    *_os << '<' << '/';
+    Xml::xmlEncode(*_os, _str );
+    *_os << '>';
+
+    _paramStack.pop_back();
+
+    if( _paramStack.empty() )
+        throw SerializationError("invalid dict type");
+}
+
+
+void Formatter::onFinishDict()
+{
+    _str.assign( _paramStack.back()->name().c_str() );
+
+    *_os << '<' << '/';
+    Xml::xmlEncode(*_os, _str );
+    *_os << '>';
+}
+
+
 void Formatter::onBeginParse(Composer& composer)
 {
     _str.clear();
     _state = OnBegin;
+    _onDictElement = false;
     _composer = &composer;
 }
 
@@ -422,6 +514,20 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         {
             _composer = _composer->beginElement();
         }
+        else if(typeId == Type::Dict)
+        {
+            _composer = _composer->beginDictElement();
+        }
+        else if(typeId == Type::DictElement)
+        {
+            if( ! _onDictElement )
+              _composer = _composer->beginDictKey();
+            else
+              _composer = _composer->beginDictValue();
+              
+        }
+
+        _onDictElement = false;
 
         const Parameter* child = _paramStack.back()->type()->getParameter( se.name().local().narrow() );
         if( ! child)
@@ -521,6 +627,11 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         _composer = _composer->finish();
 
         _paramStack.pop_back();
+
+        // handle dict element value in next start element
+        if( ! _paramStack.empty() )
+          if( _paramStack.back()->type()->typeId() == Type::DictElement )
+            _onDictElement = true;
 
         _state = OnEndElement;
     }
