@@ -116,7 +116,7 @@ void ComboBox::setText(const Pt::String& str)
     _editor.setText(str);
     invalidate();
 
-    _textEdited.send( _editor.text() );
+    _textChanged.send( _editor.text() );
 }
 
 
@@ -170,6 +170,12 @@ void ComboBox::showPopup()
 void ComboBox::hidePopup()
 {
     _popup.show(false);
+}
+
+
+Pt::Signal<const Pt::String&>& ComboBox::textChanged()
+{
+    return _textChanged;
 }
 
 

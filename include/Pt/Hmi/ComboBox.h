@@ -77,6 +77,12 @@ class PT_HMI_API ComboBox : public Control
 
         void hidePopup();
 
+        /** @brief Text has changed programmatically.
+        */
+        Pt::Signal<const Pt::String&>& textChanged();
+
+        /** @brief Text was edited by usr input.
+        */
         Pt::Signal<const Pt::String&>& textEdited();
 
         Pt::Signal<const Pt::String&>& returnPressed();
@@ -140,6 +146,7 @@ class PT_HMI_API ComboBox : public Control
         void processKeyEvent(const KeyEvent& ev);
 
     private:
+        Pt::Signal<const Pt::String&> _textChanged;
         Pt::Signal<const Pt::String&> _textEdited;
         Pt::Signal<const Pt::String&> _returnPressed;
         Pt::Signal<const Pt::String&> _editingFinished;
