@@ -212,7 +212,7 @@ class BindAdaptor<R, A1, Void, Void, Void> : public Callable<R>
 
 
 template <typename R, typename A1, typename A2, typename A3, typename A4>
-class BoundSlot : public BindAdaptor<R, A1, A2>::SlotBase
+class BoundSlot : public BindAdaptor<R, A1, A2, A3, A4>::SlotBase
 {
     public:
         template <typename T>
