@@ -128,6 +128,12 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Qt ] : $(PT_INSTALL_INCLUDES:BS) ;
 
+SubDir PT_TOP include Pt Hmi ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Hmi ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Hmi ] : $(PT_INSTALL_INCLUDES:BS) ;
+
 #############################################################################
 # Pt Build Targets
 #############################################################################
@@ -180,10 +186,10 @@ if $(PT_SYSTEM)
 		SubInclude PT_TOP src Pt-Hmi egl-test ;
 	}
 
-    if $(GUI)
-    {
-        #SubInclude PT_TOP src Pt-Gui ;
-    }
+    #if $(GUI)
+    #{
+    #    SubInclude PT_TOP src Pt-Gui ;
+    #}
 
     if $(WITH_MFC) = yes
     {

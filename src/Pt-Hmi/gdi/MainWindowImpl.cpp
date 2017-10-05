@@ -241,7 +241,7 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
     }
 
     HICON hIcon = ::CreateIcon(hInstance, icon.width(), icon.height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
-    SetClassLong(_hwnd, GCL_HICON, (LONG)hIcon);     
+    SetClassLongPtr(_hwnd, GCLP_HICON, reinterpret_cast<LONG_PTR>(hIcon));     
 }
 
 

@@ -5,7 +5,7 @@ if exist deploy\nt-vc10-x86-debug (
     call rmdir /s/q deploy\nt-vc10-x86-debug
 )
 
-call:Build -sCONFIG=nt-vc10-x86-debug --debug --with-openssl --with-mfc --with-qt5 -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
+call:Build -sCONFIG=nt-vc10-Win32-Debug --debug --with-openssl --with-mfc -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
 
 if %errorlevel% neq 0 (
     echo build failed
@@ -17,7 +17,7 @@ if exist deploy\nt-vc10-x86-release (
     call rmdir /s/q deploy\nt-vc10-x86-release
 )
 
-call:Build -sCONFIG=nt-vc10-x86-release --debug --with-openssl --with-mfc --with-qt5 --optimize -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
+call:Build -sCONFIG=nt-vc10-Win32-Release --debug --with-openssl --with-mfc --optimize -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
 
 if %errorlevel% neq 0 (
     echo build failed
@@ -29,7 +29,7 @@ if exist deploy\nt-vc10-x86_64-debug (
     call rmdir /s/q deploy\nt-vc10-x86_64-debug
 )
 
-call:Build -sCONFIG=nt-vc10-x86_64-debug --debug --with-openssl --with-mfc -sTOOLSET=vc10 -sTARGET_OSPLAT=x86_64
+call:Build -sCONFIG=nt-vc10-x64-Debug --debug --with-openssl --with-mfc -sTOOLSET=vc10 -sTARGET_OSPLAT=x86_64
 
 if %errorlevel% neq 0 (
     echo build failed
@@ -41,7 +41,7 @@ if exist deploy\nt-vc10-x86_64-release (
     call rmdir /s/q deploy\nt-vc10-x86_64-release
 )
 
-call:Build -sCONFIG=nt-vc10-x86_64-release --debug --with-openssl --with-mfc --optimize -sTOOLSET=vc10 -sTARGET_OSPLAT=x86_64
+call:Build -sCONFIG=nt-vc10-x64-Release --debug --with-openssl --with-mfc --optimize -sTOOLSET=vc10 -sTARGET_OSPLAT=x86_64
 
 if %errorlevel% neq 0 (
     echo build failed

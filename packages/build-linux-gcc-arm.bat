@@ -1,29 +1,29 @@
 @ECHO OFF
 
-if exist deploy\linux-gcc-arm-debug (
-    echo removing linux-gcc-arm-debug
-    call rmdir /s/q deploy\linux-gcc-arm-debug
+if exist deploy\linux-gcc-arm-Debug (
+    echo removing linux-gcc-arm-Debug
+    call rmdir /s/q deploy\linux-gcc-arm-Debug
 )
 
-call:Build -sCONFIG=linux-gcc-arm-debug --debug -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
+call:Build -sCONFIG=linux-gcc-arm-Debug --debug -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
 -sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2013_11_R1%\bin\arm-linux-gnueabihf-" ^
 -sLINKFLAGS="-Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2013_11_R1%\arm-linux-gnueabihf\lib\" -Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2013_11_R1%\arm-linux-gnueabihf\libarm-linux-gnueabihf\"" ^
---with-openssl --with-qt5 -sQT_LINKLIBS="-lQt5Core -lQt5Widgets -lQt5Gui -lGLESv2 -ldrm -ldrm_omap -lwayland-server -lEGL"
+--with-openssl 
 
 if %errorlevel% neq 0 (
     echo build failed
     goto :eof
 ) 
 
-if exist deploy\linux-gcc-arm-release (
-    echo removing linux-gcc-arm-release
-    call rmdir /s/q deploy\linux-gcc-arm-release
+if exist deploy\linux-gcc-arm-Release (
+    echo removing linux-gcc-arm-Release
+    call rmdir /s/q deploy\linux-gcc-arm-Release
 )
 
-call:Build -sCONFIG=linux-gcc-arm-release --debug --optimize -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
+call:Build -sCONFIG=linux-gcc-arm-Release --debug --optimize -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
 -sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2013_11_R1%\bin\arm-linux-gnueabihf-" ^
 -sLINKFLAGS="-Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2013_11_R1%\arm-linux-gnueabihf\lib\" -Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2013_11_R1%\arm-linux-gnueabihf\libarm-linux-gnueabihf\"" ^
---with-openssl --with-qt5 -sQT_LINKLIBS="-lQt5Core -lQt5Widgets -lQt5Gui -lGLESv2 -ldrm -ldrm_omap -lwayland-server -lEGL"
+--with-openssl 
 
 if %errorlevel% neq 0 (
     echo build failed
