@@ -37,7 +37,8 @@
 #include <Pt/Db/Value.h>
 #include <Pt/Db/Statement.h>
 #include <Pt/System/Thread.h>
-#include <stdlib.h>
+
+#include <stdlib.h>
 
 namespace {
 
@@ -85,7 +86,7 @@ namespace {
         if (priorCalls < 500)
         {
             // adding a random value here greatly reduces locking
-            if (pArg < 0)
+            if (pArg == 0)
             {
                 // mostly impossible, because the third argument is the database connection. So if the connection
                 // is lost, then no possibility to access the busy handler.

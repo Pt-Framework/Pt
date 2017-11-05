@@ -70,7 +70,7 @@ void CharTest::ToLower()
 
 void CharTest::ToUpper()
 {
-    Pt::Char ch(0xDF);
+    Pt::Char ch('a');
     Pt::Char u = Pt::toupper(ch);
     PT_UNIT_ASSERT(u == 65);
 }

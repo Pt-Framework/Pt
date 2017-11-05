@@ -1022,12 +1022,12 @@ if ! $(GUI) || GUI = "gdi"
 
 if ! $(GUI) || GUI = "cocoa"
 {
-    WITH_GUI = [ CheckBuildC++ "#include <CoreFoundation/CFRunLoop.h>"
-                               "int main() {"
-                               "CFRunLoopRef l = CFRunLoopGetMain();"
-                               "return 0; }"
-                             : ""
-                             : -framework AppKit -framework Foundation ] ;
+    #WITH_GUI = [ CheckBuildC++ "#include <CoreFoundation/CFRunLoop.h>"
+    #                           "int main() {"
+    #                           "CFRunLoopRef l = CFRunLoopGetMain();"
+    #                           "return 0; }"
+    #                         : ""
+    #                         : -framework AppKit -framework Foundation ] ;
 
     if $(WITH_GUI)
     {

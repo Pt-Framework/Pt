@@ -1054,7 +1054,9 @@
   /* there's a Mac-specific extended implementation of FT_New_Face() */
   /* in src/base/ftmac.c                                             */
 
-#ifndef FT_MACINTOSH
+// Pt: use normal font loading for Pt on MacOS
+// Pt: FT_MACINTOSH is defined in ftconfig.h
+//#ifndef FT_MACINTOSH
 
   /* documentation is in freetype.h */
 
@@ -1077,7 +1079,9 @@
     return FT_Open_Face( library, &args, face_index, aface );
   }
 
-#endif  /* !FT_MACINTOSH */
+// Pt: use normal font loading for Pt on MacOS
+// Pt: FT_MACINTOSH is defined in ftconfig.h
+//#endif  /* !FT_MACINTOSH */
 
 
   /* documentation is in freetype.h */
