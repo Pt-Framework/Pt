@@ -119,8 +119,6 @@ MainWindow::MainWindow()
         _scrollContainer.addItem(_btns[n] );
     }
     
-
-
     for(int n = 0; n < 20; ++n)
     {
         SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
@@ -145,7 +143,6 @@ MainWindow::MainWindow()
      spp.setSize(200,400);
     _scrollView2.setSizePolicy(spp);
 
-
     _scrollContainer.addItem(_scrollView2);
 
     _btns[0].clicked() += Pt::slot(*this, &MainWindow::onButton);
@@ -162,8 +159,6 @@ MainWindow::MainWindow()
     _scrollContainer.setMargin(5);
     _scrollContainer2.setPadding(5);
     _scrollContainer2.setMargin(5);
-
-    
 
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize( Gfx::SizeF(500, 1100) );

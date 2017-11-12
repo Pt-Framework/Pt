@@ -44,7 +44,7 @@
 namespace {
 
 static const unsigned DefaultFontSize = 12;
-static const unsigned DefaultFaceId = 0;
+static const FTC_FaceID DefaultFaceId = 0;
 
 } // namespace
 
@@ -218,7 +218,9 @@ FT_Error FreeType::fontRequest( FTC_FaceID faceId, FT_Library library,
 FT_Error FreeType::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 {
     if(faceId == DefaultFaceId)
+    {
         return FT_New_Memory_Face(_ft, DejaVuSans, DejaVuSansSize, 0, face);
+    }
 
     System::Path* path = reinterpret_cast<System::Path*>(faceId);
 
@@ -326,28 +328,14 @@ void FreeType::draw(Image& image, const Color& color,
                     FTC_ImageType imageType)
 {
     // LOCK
-
-    PointF posF(p.x(), p.y());
-    posF = t * posF;
+    
+    // apply translation here, FT uses a 2x2 matrix for the other transformations
+    PointF posF( p.x(), p.y() );
+    posF.addX( t.dx() );
+    posF.addY( t.dy() );
+    
     Point pos( Pt::lround(posF.x()),
                Pt::lround(posF.y()) );
-
-    FTC_Node       node;
-    FT_Glyph       glyph;
-    FT_Glyph       glyphCopy = 0;
-    FT_UInt        previous = 0;
-    FTC_SBit       smalGlyphBitmap;
-    FT_BitmapGlyph glyphBitmap;
-
-    //Glyph bitmap description
-    int            incX;
-    int            incY;
-    int            left;
-    int            top;
-    int            pitch;
-    int            height;
-    int            width;
-    unsigned char* buffer;
 
     FT_Matrix matrix;
     matrix.xx = t.m11() * 0x10000L;
@@ -374,59 +362,77 @@ void FreeType::draw(Image& image, const Color& color,
     glyphPos.x = (int) pos.x() << 16;
     glyphPos.y = (int) pos.y() << 16;
 
+    FT_UInt previousIndex = 0;
+    
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
-        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId,
+        FT_UInt glyphIndex = FTC_CMapCache_Lookup(_charMapCache, faceId,
                                                    charMapIndex, it->value());
-        if( ! glyph_index )
+        if( ! glyphIndex )
             continue;
+
+        int incX = 0;
+        int incY = 0;
+        FT_Glyph glyphCopy = 0;
+
+        int            left = 0;
+        int            top = 0;
+        int            pitch = 0;
+        int            height = 0;
+        int            width = 0;
+        unsigned char* buffer = 0;
 
         if( t.isIdentity() )
         {
-            if( FTC_SBitCache_Lookup( _bitmapCache, imageType, glyph_index,
-                                      &smalGlyphBitmap, &node ) )
+            FTC_Node node = 0;
+            FTC_SBit glyphBitmap = 0;
+            if( FTC_SBitCache_Lookup( _bitmapCache, imageType, glyphIndex,
+                                      &glyphBitmap, &node ) )
                 continue;
 
-            incX        = smalGlyphBitmap->xadvance << 16;
-            incY        = smalGlyphBitmap->yadvance << 16;
+            incX = glyphBitmap->xadvance << 16;
+            incY = glyphBitmap->yadvance << 16;
 
-            if( FT_HAS_KERNING(face) && previous )
+            if( FT_HAS_KERNING(face) && previousIndex )
             {
                 FT_Vector delta;
-                FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
+                FT_Get_Kerning(face, previousIndex, glyphIndex, FT_KERNING_DEFAULT, &delta);
 
                 glyphPos.x += delta.x;
                 glyphPos.y -= delta.y;
             }
 
-            left        = (glyphPos.x >> 16) + smalGlyphBitmap->left;
-            top         = (glyphPos.y >> 16) - smalGlyphBitmap->top;
-            pitch       = smalGlyphBitmap->pitch;
-            height      = smalGlyphBitmap->height;
-            width       = smalGlyphBitmap->width;
-            buffer      = smalGlyphBitmap->buffer;
+            left        = (glyphPos.x >> 16) + glyphBitmap->left;
+            top         = (glyphPos.y >> 16) - glyphBitmap->top;
+            pitch       = glyphBitmap->pitch;
+            height      = glyphBitmap->height;
+            width       = glyphBitmap->width;
+            buffer      = glyphBitmap->buffer;
         }
         else
         {
-            FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node);
+            FTC_Node node = 0;
+            FT_Glyph glyph = 0;
+            FT_Error err = FTC_ImageCache_Lookup(_imageCache, imageType, glyphIndex, &glyph, &node);
+            err += FT_Glyph_Copy(glyph, &glyphCopy);
+            
+            err += FT_Glyph_Transform(glyphCopy, &matrix, 0);
+            err += FT_Glyph_To_Bitmap(&glyphCopy, FT_RENDER_MODE_NORMAL,  0, 1);
+            if( err != 0)
+                continue;
 
-            FT_Glyph_Copy( glyph, &glyphCopy );
-            FT_Glyph_Transform( glyphCopy, &matrix, 0);
-            FT_Glyph_To_Bitmap( &glyphCopy, FT_RENDER_MODE_NORMAL,  0, 1 );
+            FT_BitmapGlyph glyphBitmap = reinterpret_cast<FT_BitmapGlyph>(glyphCopy);
 
-            glyphBitmap = (FT_BitmapGlyph) glyphCopy;
+            incX = glyphCopy->advance.x;
+            incY = glyphCopy->advance.y;
 
-            incX        = glyphCopy->advance.x;
-            incY        = glyphCopy->advance.y;
-
-            if(FT_HAS_KERNING(face) && previous)
+            if(FT_HAS_KERNING(face) && previousIndex)
             {
                 FT_Vector delta;
-                FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
+                FT_Get_Kerning(face, previousIndex, glyphIndex, FT_KERNING_DEFAULT, &delta);
 
                 glyphPos.x += delta.x;
                 glyphPos.y -= delta.y;
-
             }
 
             left        = (glyphPos.x >> 16) + glyphBitmap->left;
@@ -450,7 +456,8 @@ void FreeType::draw(Image& image, const Color& color,
 
         glyphPos.x  += incX;
         glyphPos.y  -= incY;
-        previous    = glyph_index;
+
+        previousIndex = glyphIndex;
 
         if(glyphCopy)
         {
@@ -481,7 +488,7 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
 
     int ofsx = 0;
 
-    if(xpos < clip.x() )
+    if( xpos < clip.x() )
     {
         ofsx = clip.x() - xpos;
         xpos =  clip.x();
@@ -489,7 +496,7 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
 
     int ofsy = 0;
 
-    if(ypos < clip.y())
+    if( ypos < clip.y() )
     {
         ofsy = clip.y() - ypos;
         ypos = clip.y();

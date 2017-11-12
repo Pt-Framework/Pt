@@ -145,17 +145,8 @@ void Transform::scale(double x, double y)
 
 void Transform::rotateDeg(double angle)
 {
-    MatrixData n;
-
     const double r = angle * (pi<double>() / 180);
-    const double s = ::sin(r);
-    const double c = ::cos(r);
-
-    n[0][0] =  c; n[0][1] = s; n[0][2] = 0;
-    n[1][0] = -s; n[1][1] = c; n[1][2] = 0;
-
-    updateMatrix(n);
-    _isIdentity = false;
+    rotateRad(r);
 }
 
 
@@ -166,8 +157,10 @@ void Transform::rotateRad(double r)
     const double s = ::sin(r);
     const double c = ::cos(r);
 
-    n[0][0] =  c; n[0][1] = s; n[0][2] = 0;
-    n[1][0] = -s; n[1][1] = c; n[1][2] = 0;
+    // TODO: flip the two sines to rotate counterclock-wise
+
+    n[0][0] = c; n[0][1] = s; n[0][2] = 0;
+    n[1][0] = -s; n[1][1] = c;  n[1][2] = 0;
 
     updateMatrix(n);
     _isIdentity = false;

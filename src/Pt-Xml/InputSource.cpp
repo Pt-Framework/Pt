@@ -888,7 +888,9 @@ void BinaryInputSource::reset(std::istream& is)
     reset();
 
     _is = &is;
-    _tbuf.attach(is); 
+    _tbuf.attach(is);
+
+    // VSC TEST
 }
 
 

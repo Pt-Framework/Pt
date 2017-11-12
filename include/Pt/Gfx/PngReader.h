@@ -77,6 +77,14 @@ class PT_GFX_API PngReader
         */
         Image& get();
 
+        /** @internal @brief TODO: move this to PngWriter.
+         */
+        void attach(std::ostream& is, Image& image);
+
+        /** @internal @brief TODO: move this to PngWriter.
+         */
+        void write();
+
     private:
         class PngReaderImpl* _impl;
 };
