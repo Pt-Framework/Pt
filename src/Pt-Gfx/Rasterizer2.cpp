@@ -594,7 +594,7 @@ void Rasterizer2::setFont(const Font& font)
     _imageType.face_id = _faceId;
     _imageType.width   = font.size();
     _imageType.height  = font.size();
-    _imageType.flags   =  FT_LOAD_DEFAULT;
+    _imageType.flags   = FT_LOAD_DEFAULT;
 }
 
 

@@ -56,7 +56,6 @@ void DrawText::setFont(const Font& font)
     if( font.name().empty() )
     {
         Font defaultFont(FreeType::instance().defaultFont(), font);
-
         _faceId = FreeType::instance().findFaceId(defaultFont);
     }
     else
@@ -68,30 +67,25 @@ void DrawText::setFont(const Font& font)
     _imageType.face_id = _faceId;
     _imageType.width   = font.size();
     _imageType.height  = font.size();
-    _imageType.flags   =  FT_LOAD_DEFAULT | FT_LOAD_RENDER;
+    _imageType.flags   = FT_LOAD_DEFAULT;
 
-    // setup the rotation matrix
+    // normalize the rotation angle
     _fontAngle = font.angle() % 3600;
-
     if( _fontAngle < 0 )
         _fontAngle += 3600;
 
-    const double angle   = (_fontAngle / 10.0  *  3.14159) / 180.0;
-
-    if(angle > 0.1)
+    // setup the rotation matrix
+    const double angle = _fontAngle / 10.0;
+    if(angle > 0.01)
     {
-        const double cosinus = std::cos( angle );
-        const double sinus   = std::sin( angle );
-
-        _transform.set( std::ceil(cosinus), std::ceil( -sinus ),
-                        std::ceil(sinus), std::ceil( cosinus ), 0, 0 );
+        _transform.rotateDeg(angle);
     }
     else
     {
         _transform.reset();
     }
 }
-
+ 
 
 FontMetrics DrawText::fontMetrics(const String& text)
 {

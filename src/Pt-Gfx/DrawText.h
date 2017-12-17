@@ -116,7 +116,7 @@ class DrawText
         Transform        _transform;
 
         Pt::ssize_t      _fontAngle;
-        Rect				     _clip;
+        Rect		     _clip;
 };
 
 }} //namespace
