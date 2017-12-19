@@ -152,7 +152,8 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt
     @ingroup Utilities
 */
 template <typename OutIterT, typename T, typename FormatT>
-OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision);
+OutIterT formatFloat(OutIterT it, T d, 
+                     const FormatT& fmt, int precision, bool fixed = false);
 
 /** @brief Formats a floating point value in default format.
 
@@ -166,7 +167,7 @@ OutIterT formatFloat(OutIterT it, T d);
     @ingroup Utilities
 */
 template <typename OutIterT, typename T>
-OutIterT formatFloat(OutIterT it, T d, int precision);
+OutIterT formatFloat(OutIterT it, T d, int precision, bool fixed = false);
 
 
 /** @brief Parses an integer value in a given format.
@@ -726,7 +727,8 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
 
 
 template <typename OutIterT, typename T, typename FormatT>
-inline OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision)
+inline OutIterT formatFloat(OutIterT it, T d, 
+                            const FormatT& fmt, int precision, bool fixed)
 {
     typedef typename FormatT::CharT CharT;
     CharT zero = fmt.toChar(0);
@@ -768,7 +770,8 @@ inline OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision)
     CharT fract[bufsize];
     int i = 0;
     int e = 0;
-    int fractSize = Pt::formatFloat(fract, bufsize, i, e, num, fmt, precision, false);
+    int fractSize = Pt::formatFloat(fract, bufsize, i, e, num, fmt, precision, fixed);
+    int fillSize = fractSize;
 
     int n = 0;
     if(e >= 0)
@@ -783,11 +786,21 @@ inline OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision)
         // show at least one digit after decimal point
         *it++ = (n < fractSize) ? fract[n] : zero;
         ++n;
+
+        // fill zeros to fixed precision
+        if(fixed)
+          fillSize = n + precision - 1;
     }
     else // e < 0
     {
         *it++ = zero;
         *it++ = fmt.point();
+
+        if(fixed)
+        {
+          e = std::max(-precision, e);
+          fillSize = precision + e;
+        }
 
         while(++e < 0)
             *it++ = zero;
@@ -795,7 +808,7 @@ inline OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision)
         *it++ = fmt.toChar(i);
     }
 
-    for(; n < fractSize; ++n)
+    for(; n < fillSize; ++n)
         *it++ = (n < fractSize) ?  fract[n] : zero;
 
     return it;
@@ -812,10 +825,10 @@ inline OutIterT formatFloat(OutIterT it, T d)
 
 
 template <typename OutIterT, typename T>
-OutIterT formatFloat(OutIterT it, T d, int precision)
+OutIterT formatFloat(OutIterT it, T d, int precision, bool fixed)
 {
     FloatFormat<char> fmt;
-    return formatFloat(it, d, fmt, precision);
+    return formatFloat(it, d, fmt, precision, fixed);
 }
 
 
