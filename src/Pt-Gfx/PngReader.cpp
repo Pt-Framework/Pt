@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan 
+/* Copyright (C) 2017 Marc Duerner 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -82,12 +82,6 @@ class PngReaderImpl
             _image = &image;
         }
 
-        void attach(std::ostream& os, Image& image)
-        {
-            _target = &os;
-            _image = &image;
-        }
-
         void detach()
         {
             _target = 0;
@@ -136,19 +130,24 @@ class PngReaderImpl
         Image* advance()
         {
             if( ! _target || ! _target->rdbuf() || ! _image )
-              return 0;
+                return 0;
 
             if( ! _pngRead )
             {
                 _pngRead = png_create_read_struct(PNG_LIBPNG_VER_STRING, 
                                                   NULL, &onPngError, &onPngWarning);
-                png_set_read_fn(_pngRead, this, onPngRead);
-                png_set_progressive_read_fn(_pngRead, this, &onPngInfo, &onPngRow, &onPngEnd);
+                if( ! _pngRead )
+                    throw IOError("png error");
 
                 _pngInfo = png_create_info_struct(_pngRead);
-
-                if( ! _pngRead || ! _pngInfo)
+                if( ! _pngInfo )
+                {
+                    png_destroy_read_struct(&_pngRead, &_pngInfo, (png_infopp)0);
                     throw IOError("png error");
+                }
+
+                png_set_read_fn(_pngRead, this, onPngRead);
+                png_set_progressive_read_fn(_pngRead, this, &onPngInfo, &onPngRow, &onPngEnd);
             }
 
             std::streamsize avail = _target->rdbuf()->in_avail();
@@ -353,95 +352,6 @@ class PngReaderImpl
             std::clog << msg << std::endl;
         }
 
-        void write()
-        {
-            if( ! _image )
-                throw IOError("png error");
-
-            //TODO: use ImagFormat API to ceonvert to required outpout format
-            if(_image->format().pixelStride() != 4)
-                throw IOError("invalid image format");
-            
-            // int         code     = 0;
-            // png_bytep   row      = 0;
-
-            png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 
-                                                          NULL, &onPngError, &onPngWarning);
-            if( ! png_ptr )
-                throw IOError("png error");
-
-            png_infop info_ptr = png_create_info_struct(png_ptr);
-            if( ! info_ptr )
-            {
-                png_destroy_write_struct(&png_ptr, 0);
-                throw IOError("png error");
-            }
-            
-            png_set_write_fn(png_ptr, this, &onPngWrite, &onPngFlush);
-
-            png_set_IHDR(png_ptr, info_ptr, 
-                         _image->width(), _image->height(), 8, 
-                         PNG_COLOR_TYPE_RGB, 
-                         PNG_INTERLACE_NONE, 
-                         PNG_COMPRESSION_TYPE_DEFAULT, 
-                         PNG_FILTER_TYPE_DEFAULT);
-        
-             png_write_info(png_ptr, info_ptr);
-        
-            // allocate memory for one row (3 bytes per pixel - RGB)
-            png_bytep row = (png_bytep) malloc(3 * _image->width() * sizeof(png_byte));
-                
-            Pt::uint8_t* data = _image->data();
-
-            // write image data
-            for(int y = 0; y < _image->height(); ++y) 
-            {
-                for (int x = 0; x < _image->width(); ++x) 
-                {
-                    row[x * 3 + 2] = *data++;
-                    row[x * 3 + 1] = *data++;
-                    row[x * 3 + 0] = *data++;
-                    ++data;
-                }
-                
-                png_write_row(png_ptr, row);
-            }
-        
-            png_write_end(png_ptr, info_ptr);
-        
-            png_destroy_write_struct(&png_ptr, &info_ptr);
-            free(row);
-        }
-
-        static void onPngWrite(png_structp png, png_bytep data, png_size_t length)
-        {
-            png_voidp p = png_get_io_ptr(png);
-            Pt::Gfx::PngReaderImpl* reader = static_cast<Pt::Gfx::PngReaderImpl*>(p);
-            reader->onWrite(png, data, length);
-        }
-
-        void onWrite(png_structp png, png_bytep data, png_size_t length)
-        {
-            const char* buffer = reinterpret_cast<const char*>(data);
-            std::streamsize n = static_cast<std::streamsize>(length);
-
-            //std::clog << "writing " << length << " bytes." << std::endl;
-            _target->rdbuf()->sputn(buffer, n);
-        }
-
-        static void onPngFlush(png_structp png)
-        {
-            png_voidp p = png_get_io_ptr(png);
-            Pt::Gfx::PngReaderImpl* reader = static_cast<Pt::Gfx::PngReaderImpl*>(p);
-            reader->onFlush(png);
-        }
-
-        static void onFlush(png_structp png)
-        {
-            //std::clog << "flushing buffer." << std::endl;
-            //_target->rdbuf()->sync();
-        }
-
     private:
         enum State 
         {
@@ -509,20 +419,6 @@ Image* PngReader::advance()
 Image& PngReader::get()
 {
     return _impl->get();
-}
-
-
-// TODO: PngWriter
-void PngReader::attach(std::ostream& os, Image& image)
-{
-    _impl->attach(os, image);
-}
-
-
-// TODO: PngWriter
-void PngReader::write()
-{
-    _impl->write();
 }
 
 } // namespace

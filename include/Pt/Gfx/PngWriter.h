@@ -26,8 +26,8 @@
  * MA  02110-1301  USA
  */
 
-#ifndef PT_GFX_PNGREADER_H
-#define PT_GFX_PNGREADER_H
+#ifndef PT_GFX_PNGWRITER_H
+#define PT_GFX_PNGWRITER_H
 
 #include <Pt/Gfx/Api.h>
 #include <iosfwd>
@@ -38,45 +38,49 @@ namespace Gfx {
 
 class Image;
 
-/** @brief Reader for PNG images.
+/** @brief Writer for PNG images.
 */
-class PT_GFX_API PngReader
+class PT_GFX_API PngWriter
 {
     public:
         /** @brief Default Constructor.
         */
-        PngReader();
+        PngWriter();
 
-        /** @brief Construct with target stream and image.
+        /** @brief Construct with target stream.
         */
-        PngReader(std::istream& is, Image& image);
+        PngWriter(std::ostream& is);
 
         /** @brief Destructor.
         */
-        ~PngReader();
+        ~PngWriter();
 
-        /** @brief Attach to target stream and image.
-        */
-        void attach(std::istream& is, Image& image);
+        /** @brief Attach to target stream.
+         */
+        void attach(std::ostream& is);
 
         /** @brief Detach from target stream.
         */
         void detach();
 
-        /** @brief Reset to begin new decompression.
+        /** @brief Reset to begin new compression.
         */
         void reset();
 
-        /** @brief Reads image data from the target stream.
+        /** @brief Begin compression of an image.
         */
-        Image* advance();
+        void beginWrite(Image& image);
 
-        /** @brief Reads the whole image from the stream.
+        /** @brief Advance compression af an image, returns true when finished.
         */
-        Image& get();
+        bool advance();
+
+        /** @brief Writes the whole image to the stream.
+         */
+        void write(Image& image);
 
     private:
-        class PngReaderImpl* _impl;
+        class PngWriterImpl* _impl;
 };
 
 } // namespace
