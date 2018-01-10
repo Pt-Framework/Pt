@@ -101,7 +101,7 @@ class FacetPtr
         FacetPtr& operator=(const FacetPtr& ptr)
         {
             if(this == &ptr)
-                return;
+                return *this;
 
             if(_facet)
             {
@@ -112,6 +112,8 @@ class FacetPtr
             _facet = ptr._facet;
             if( _facet )
                 _facet->ref();
+
+            return *this;
         }
 
         void reset(T* facet = 0)

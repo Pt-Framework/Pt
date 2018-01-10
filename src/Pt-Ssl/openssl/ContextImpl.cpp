@@ -71,11 +71,20 @@ void SSLInitImpl()
         SSL_load_error_strings();
         ERR_load_crypto_strings();
 
+        // TODO: for OpenSSL >= 1.1 use OPENSSL_init_ssl() and OPENSSL_init_crypto()
+
         int numLocks = CRYPTO_num_locks();
         sslmtx = new Pt::System::Mutex[numLocks];
 
-	      //CRYPTO_set_id_callback((unsigned long (*)())pthreads_thread_id);
-	      CRYPTO_set_locking_callback(pt_locking_callback_impl);
+        // enable multi-thread support after library initialisation for OpenSSL < 1.1
+	    CRYPTO_set_locking_callback(pt_locking_callback_impl);
+
+        // If the application does not register a thread id callback, then
+        // the system's default thread identifying API is used on windows
+        // and on all other platforms it uses the address of errno.
+
+        //CRYPTO_set_id_callback((unsigned long (*)())pthreads_thread_id);
+        //CRYPTO_THREADID_set_callback(threadId);
 
         //OpenSSL_add_all_algorithms();
         EVP_add_cipher(EVP_des_ede3_cfb());
@@ -107,19 +116,33 @@ void SSLInitImpl()
 
 void SSLExitImpl()
 {
-    if(0 == --ssl_init_counter) 
+    if(0 == --ssl_init_counter)
     {
         PT_LOG_INFO("OpenSSL library shutdown");
 
-        //FIPS_mode_set(0);
+        // disable multi-thread support for OpenSSL < 1.1
         CRYPTO_set_locking_callback(NULL);
         //CRYPTO_set_id_callback(NULL);
+        //CRYPTO_THREADID_set_callback(NULL);
+
+        // TODO: for OpenSSL >= 1.1 use OPENSSL_cleanup()
+
+        //FIPS_mode_set(0);
         //ENGINE_cleanup();
-        //CONF_modules_unload();
+        //CONF_modules_unload(1);
+
+        // unload error and crypto strings
         ERR_free_strings();
+
+        // remove all ciphers
         EVP_cleanup();
+
+        // clean up crypto
         CRYPTO_cleanup_all_ex_data();
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         ERR_remove_thread_state(NULL);
+#endif
 
         delete [] sslmtx;
         sslmtx = 0;
@@ -166,7 +189,7 @@ ContextImpl::ContextImpl(Protocol protocol)
     {
         case SSLv2: 
             // SSLv2_method is not available everywhere (check OPENSSL_NO_SSL2)
-            _ctx = SSL_CTX_new( SSLv23_method () ); 
+            _ctx = SSL_CTX_new( SSLv23_method() ); 
             break;
         
         case SSLv3or2: 
@@ -175,11 +198,18 @@ ContextImpl::ContextImpl(Protocol protocol)
 
         default:
         case SSLv3: 
-            _ctx = SSL_CTX_new( SSLv3_method () ); 
+            // SSLv3_method is not available everywhere (check OPENSSL_NO_SSL3)
+            _ctx = SSL_CTX_new( SSLv23_method() ); 
             break;
-        
-        case TLSv1: 
+
+        case TLSv1:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
             _ctx = SSL_CTX_new( TLSv1_method () ); 
+#else
+            _ctx = ::SSL_CTX_new(::TLS_method());
+            SSL_CTX_set_min_proto_version(_ctx, TLS1_VERSION);
+            SSL_CTX_set_max_proto_version(_ctx, TLS1_VERSION);
+#endif
             break;
     }
 
@@ -239,11 +269,17 @@ void ContextImpl::setProtocol(Protocol protocol)
 
         default:
         case SSLv3: 
-            SSL_CTX_set_ssl_version( _ctx, SSLv3_method() ); 
+            SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); 
             break;
-        
+
         case TLSv1: 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
             SSL_CTX_set_ssl_version( _ctx, TLSv1_method() ); 
+#else
+            SSL_CTX_set_ssl_version( _ctx, TLS_method());
+            SSL_CTX_set_min_proto_version(_ctx, TLS1_VERSION);
+            SSL_CTX_set_max_proto_version(_ctx, TLS1_VERSION);
+#endif
             break;
     }
 

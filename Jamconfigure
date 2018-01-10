@@ -675,7 +675,8 @@ if ! $(WITH_JPEG)
 {
     JPEG_LINKLIBS ?= -ljpeg ;
 
-    WITH_JPEG = [ CheckBuildC++ "#include <jpeglib.h>"
+    WITH_JPEG = [ CheckBuildC++ "#include <stdio.h>"
+                                "#include <jpeglib.h>"
                                 "int main() {"
                                 "struct jpeg_compress_struct cinfo;"
                                 "return 0; }"
@@ -713,6 +714,7 @@ if --with-freetype in $(ARGV)
 if ! $(WITH_FREETYPE)
 {
     FREETYPE_LINKLIBS ?= -lfreetype ;
+    FREETYPE_INCLUDES ?= /usr/include/freetype2 ;
 
     WITH_FREETYPE = [ CheckBuildC++ "#include <ft2build.h>"
                                     "#include FT_FREETYPE_H"
