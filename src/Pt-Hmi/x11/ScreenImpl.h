@@ -1,5 +1,4 @@
 /* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,7 +23,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA  02110-1301  USA
+  MA 02110-1301 USA
 */
 
 #ifndef Pt_Hmi_ScreenImpl_H
@@ -55,11 +54,11 @@ class ScreenImpl
 
         void init(WindowBase& w);
 
-        Gfx::SizeF size() const;
-
         void registerWindow(Window& w);
 
         void unregisterWindow(Window& w);
+
+        Gfx::SizeF size() const;
 
         void dispatchMouseEvent(const MouseEvent& ev);
 
@@ -90,6 +89,9 @@ class ScreenImpl
         void onActivate(Window& w);
 
         void onEnable(Window& w, bool enable);
+
+    private:
+        ApplicationImpl& _app;
 };
 
 } // namespace

@@ -92,7 +92,7 @@ class MainWindowImpl
     private:   
         HWND    _hwnd;
         Screen& _screen;
-        bool _isTopMost;
+        bool    _isTopMost;
 };
 
 } // namespace

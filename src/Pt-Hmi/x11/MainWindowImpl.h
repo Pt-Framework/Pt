@@ -1,23 +1,33 @@
-/*
-Copyright (C) 2013 Marc Boris Duerner                                 
-Copyright (C) 2013 Laurentiu-Gheorghe Crisan                          
-                                                                          
-This program is free software; you can redistribute it and/or modify  
-it under the terms of the GNU Library General Public License as       
-published by the Free Software Foundation; either version 2 of the    
-License, or (at your option) any later version.                       
-                                                                          
-This program is distributed in the hope that it will be useful,       
-but WITHOUT ANY WARRANTY; without even the implied warranty of        
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         
-GNU General Public License for more details.                          
-                                                                          
-You should have received a copy of the GNU Library General Public     
-License along with this program; if not, write to the                 
-Free Software Foundation, Inc.,                                       
-59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.*/
-#ifndef Pt_Hmi_ViewImpl_h
-#define Pt_Hmi_ViewImpl_h
+/* Copyright (C) 2013 Marc Boris Duerner
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+   
+   As a special exception, you may use this file as part of a free
+   software library without restriction. Specifically, if other files
+   instantiate templates or use macros or inline functions from this
+   file, or you compile this file and link it with other files to
+   produce an executable, this file does not by itself cause the
+   resulting executable to be covered by the GNU General Public
+   License. This exception does not however invalidate any other
+   reasons why the executable file might be covered by the GNU Library
+   General Public License.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   MA 02110-1301 USA
+*/
+
+#ifndef Pt_Hmi_MainWindowImpl_h
+#define Pt_Hmi_MainWindowImpl_h
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -30,68 +40,73 @@ Free Software Foundation, Inc.,
 #undef Above
 #undef Below
 
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Window.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
-#include <Pt/Hmi/Api.h>
+
 #include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/PointingEvent.h>
-#include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Window.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
 
-class WindowImpl :public Pt::Connectable
+namespace Hmi {
+
+class MainWindowImpl :public Pt::Connectable
 {
 	public:
-    WindowImpl(PaintSurface* surface);
-	  virtual ~WindowImpl();
+    	MainWindowImpl(Window::Type type);
+	  	
+		virtual ~MainWindowImpl();
 
-		void create();
-	
-		void destroy();
+		void setType(Window::Type type);
 
-		void show();
+		void show(bool visible);
 
-		void hide();
+		void activate();
 
-		void render();
+		void enable(bool e);
+
+        void move(const Gfx::PointF& pos);
+
+        void resize(const Gfx::SizeF& size);
+
+        void close();
+
+        void paint(const Gfx::RectF& rect);
+    
+        void setState(Window::State s);
+       
+        void setIcon(const Gfx::Image& p);
+    
+        void setMinimumSize(const Gfx::SizeF& s);
+    
+        void setMaximumSize(const Gfx::SizeF& s);
+
+        void setTitle( const std::string& t );
+
+        void setTopMost(bool e);
+
+        void grabPointer();
+
+		Window* window()
+		{ 
+			return _window; 
+		}
 
 		Pt::Signal<const Pt::Event&>& windowEvent()
 		{
 			return _windowEvent;
 		}
 
-		void setPosition(const Gfx::PointF& p);
-
-		void setSize(const Gfx::SizeF& size);
-
-		void showTitle(bool p);
-
-		void setCaption(const std::string& text);
-
-		void showMinimizedButton(bool p);
-  
-		void showMaximizeButton(bool p);
-  
-		void showSysMenu(bool p);
-
-		void setForceTopMost(bool force);
-  
-		void setWindowState(WindowState::Type p);
-  
-		void setBorder(WindowBorder::Type p);
-  
-		void showInTaskbar(bool p);
-  
-		void setIcon(const Pt::Gfx::ARgbImage& p);
-
-		void setEnable(bool e);	
    
 	private:
 		void onWindowEvent(XEvent& ev);	
@@ -103,12 +118,13 @@ class WindowImpl :public Pt::Connectable
 		void onConfigureNotify( XEvent& xev);
 
 	private:
-		void bringWindowToTop();
-		bool isWindowMinimized();
-		bool isWindowMaximazed();
-		void restoreWindow();
-		void minimizeWindow();
-		void maximizeWindow();
+		void create(Window::Type type);
+	
+		void destroy();
+		
+		bool isMinimized();
+		
+		bool isMaximazed();
 
 	private:
 		Atom AtomAppWake;
@@ -135,10 +151,10 @@ class WindowImpl :public Pt::Connectable
 		int _width;
 		int _height;
 		bool _showTitle;
-		std::string _title;
 };
 
-}}
+} // namespace
 
-#endif
+} // namespace
 
+#endif // include guard

@@ -24,17 +24,24 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA  02110-1301  USA
+ */
+ 
 #include "ApplicationImpl.h"
+
 #ifndef _AIX
 #include <X11/Xft/Xft.h>
 #endif
-#include "Pt/Hmi/Application.h"
-#include "Pt/SourceInfo.h"
+
+#include <Pt/Hmi/Application.h>
+#include <Pt/SourceInfo.h>
+
 #include <stdexcept>
 #include <vector>
 
 namespace Pt {
+    
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
@@ -43,8 +50,8 @@ ApplicationImpl::ApplicationImpl()
 , _dpi(1/92.0)
 {
     // Open a X11 display connection
-    if( ! _display)
-        throw std::runtime_error("Could not open X11 display." + PT_SOURCEINFO);
+    if( ! _display )
+        throw AccessFailed("X11 display");
 
     XSync(_display, false);
 
@@ -56,34 +63,47 @@ ApplicationImpl::ApplicationImpl()
 
     _xfd.setActive(*this);
     _xfd.begin();
-
     _xfd.flush();
 }
+
+
+ApplicationImpl::~ApplicationImpl()
+{
+    XSync(_display, true);
+    XCloseDisplay(_display);
+    _display = 0;
+}
+
 
 double ApplicationImpl::toUnit(int value)
 {
 	return value;
 }
 
+
 Pt::Gfx::PointF ApplicationImpl::toUnit(const Pt::Gfx::Point& value)
 {
 	return Pt::Gfx::PointF(value.x(),value.y()); 
 }
+
 
 Pt::Gfx::SizeF ApplicationImpl::toUnit(const Pt::Gfx::Size& value)
 {
 	return Pt::Gfx::SizeF(value.width(),value.height()); 
 }
 
+
 int ApplicationImpl::fromUnit(double value)
 {
 	return (int) value;
 }
 
+
 Pt::Gfx::Point ApplicationImpl::fromUnit(const Pt::Gfx::PointF& value)
 {
 	return Pt::Gfx::Point((int) value.x(), (int) value.y());
 }
+
 
 Pt::Gfx::Size ApplicationImpl::fromUnit(const Pt::Gfx::SizeF& value)
 {
@@ -95,6 +115,7 @@ double ApplicationImpl::unitSizeInch() const
 {
 	return _dpi;
 }
+
 
 double ApplicationImpl::unitSizeMm() const
 {
@@ -119,22 +140,13 @@ Pt::Gfx::Rect ApplicationImpl::fromUnit(const Pt::Gfx::RectF& value)
 	Pt::Gfx::Rect rect(Pt::Gfx::Point(value.x(), value.y()), Pt::Gfx::Size(value.width(), value.height()));
 	return rect;
 }
-  			
-void ApplicationImpl::showConsole(bool show)
-{
-}
+
 
 void ApplicationImpl::nextEvent()
 {
 	MainLoop::waitNext();
 }
 
-ApplicationImpl::~ApplicationImpl()
-{
-    XSync(_display, true);
-    XCloseDisplay(_display);
-    _display = NULL;
-}
+} // namespace
 
-}}
-
+} // namespace

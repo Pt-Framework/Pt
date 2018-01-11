@@ -1,5 +1,4 @@
 /* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -38,7 +37,8 @@ namespace Pt {
 
 namespace Hmi {
 
-ScreenImpl::ScreenImpl(ApplicationImpl&)
+ScreenImpl::ScreenImpl(ApplicationImpl& app)
+: _app(app)
 {
 }
 
@@ -57,12 +57,11 @@ void ScreenImpl::registerWindow(Window& w)
 {
 }
 
-
 void ScreenImpl::unregisterWindow(Window& w)
 {
 }
 
-        
+
 Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
 {
     return w.impl()->toScreen(pos);
@@ -136,24 +135,6 @@ void ScreenImpl::onShow(Window& w, bool visible)
 
 void ScreenImpl::onActivate(Window& w)
 {
-    //const std::vector<Window*>& windows = w.windows();
-    //
-    //std::vector<Window*>::const_iterator it;
-    //for(it = windows.begin(); it != windows.end(); ++it)
-    //{
-    //    if((*it)->isActive() && *it != &w)
-    //    {
-    //        ActivateEvent aev( (*it)->vid(), false );
-    //    }
-    //}
-
-    //Window* parent = w.parent();
-
-    //if(parent)
-    //    onActivate(*parent);
-
-    //ActivateEvent aev( w.vid(), true );
-    //Application::instance().loop().commitEvent(aev);
 }
 
 
@@ -164,12 +145,11 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 
 Gfx::SizeF ScreenImpl::size() const
 {
-  HWND hDesktop = GetDesktopWindow();
-  
-  RECT r;   
-  GetWindowRect(hDesktop, &r);
-  
-  return Gfx::SizeF(r.right, r.bottom);
+    Display* display = _app.display();
+    Screen * screen = DefaultScreenOfDisplay(display);
+    int w = WidthOfScreen(screen);
+    int h = HeightOfScreen(screen);
+    return Gfx::SizeF(w, h);
 }
 
 } // namespace

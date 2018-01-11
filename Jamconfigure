@@ -1008,7 +1008,7 @@ if $(WITH_QT)
 # GUI libraries and includes
 #############################################################################
 
-if ! $(GUI) || GUI = "gdi"
+if ! $(GUI) || $(GUI:L) = "gdi"
 {
     Load winui.jam ;
 
@@ -1022,7 +1022,7 @@ if ! $(GUI) || GUI = "gdi"
     }
 }
 
-if ! $(GUI) || GUI = "cocoa"
+if ! $(GUI) || $(GUI):L = "cocoa"
 {
     #WITH_GUI = [ CheckBuildC++ "#include <CoreFoundation/CFRunLoop.h>"
     #                           "int main() {"
@@ -1042,7 +1042,22 @@ if ! $(GUI) || GUI = "cocoa"
     #GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
 }
 
-if ! $(GUI)  || GUI = "x11"
+if ! $(GUI) || $(GUI:L) = "linux-fb"
+{
+    WITH_GUI = [ CheckBuildC++ "#include <linux/fb.h>"
+                               "int main() {"
+                               "struct fb_var_screeninfo si;"
+                               "return 0; }"
+                             : ""
+                             : "" ] ;
+
+    if $(WITH_GUI)
+    {
+        GUI = linux-fb ;
+    }
+}
+
+if ! $(GUI) || $(GUI:L) = "x11"
 {
     Load x11.jam ;
 
@@ -1055,24 +1070,9 @@ if ! $(GUI)  || GUI = "x11"
 
         if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
         {
-            #GUI = x11 ;
+            GUI = x11 ;
             GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
         }
-    }
-}
-
-if ! $(GUI) || GUI = "linux-fb"
-{
-    WITH_GUI = [ CheckBuildC++ "#include <linux/fb.h>"
-                               "int main() {"
-                               "struct fb_var_screeninfo si;"
-                               "return 0; }"
-                             : ""
-                             : "" ] ;
-
-    if $(WITH_GUI)
-    {
-        GUI = linux-fb ;
     }
 }
 
