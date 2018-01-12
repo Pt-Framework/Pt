@@ -32,8 +32,6 @@
 #include "PaintSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/Gfx/Rgb888Color.h>
-#include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
 
@@ -42,7 +40,7 @@
 #include <algorithm>
 
 #include <ctype.h>
-#include <assert>
+#include <cassert>
 
 namespace Pt { 
 
@@ -57,7 +55,8 @@ enum
 
 
 MainWindowImpl::MainWindowImpl(Window::Type type)
-: _surface( surface )
+: _app( Application::instance() )
+, _surface( surface )
 , _forceTopMost(false)
 , _x(20)
 , _y(20)
@@ -66,7 +65,6 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 , _showTitle(true)
 {
 	_mouseEvent.buttons().resize(3);
-	_app = Application::instance();
 	_display = _app.impl()->display();
 
 	AtomAppWake      = XInternAtom(_display, "PT_APP_WAKE",      false);
@@ -429,7 +427,7 @@ void MainWindowImpl::setState(Window::State s)
 }
 
 
-bool WindowImpl::isMinimized()
+bool MainWindowImpl::isMinimized()
 {
 	Atom actual_type;
 	int actual_format;
@@ -458,7 +456,7 @@ bool WindowImpl::isMinimized()
 }
 
     
-bool WindowImpl::isMaximized()
+bool MainWindowImpl::isMaximized()
 {
 	Atom actual_type;
 	int actual_format;
@@ -487,7 +485,7 @@ bool WindowImpl::isMaximized()
 }
 
 
-void WindowImpl::onPaint(XEvent& xev)
+void MainWindowImpl::onPaint(XEvent& xev)
 {
   ::Drawable from = _surface->impl()->drawable();
   Pt::Gfx::Size size = surface.size();
@@ -496,7 +494,7 @@ void WindowImpl::onPaint(XEvent& xev)
 }
 
 
-void WindowImpl::onWindowEvent(XEvent& ev)
+void MainWindowImpl::onWindowEvent(XEvent& ev)
 {	
 	if(ev.xany.window != _window)
 		return;
@@ -563,7 +561,7 @@ void WindowImpl::onWindowEvent(XEvent& ev)
 }
 
 
-void WindowImpl::onClientMessage(XEvent& xev)
+void MainWindowImpl::onClientMessage(XEvent& xev)
 {
 	if( xev.xclient.message_type == AtomWMProtocols ) 
 	{
@@ -573,7 +571,7 @@ void WindowImpl::onClientMessage(XEvent& xev)
 }
 
 
-void WindowImpl::onMotionNotify(XEvent& xev)
+void MainWindowImpl::onMotionNotify(XEvent& xev)
 {
 	Pt::Gfx::PointF pos = _app.toUnit( Pt::Gfx::Point( xev.xmotion.x, xev.xmotion.y ) );
 	_mouseEvent.setX( pos.x() );
@@ -583,7 +581,7 @@ void WindowImpl::onMotionNotify(XEvent& xev)
 }
 
 
-void WindowImpl::onMouseButtonPress(XEvent& xev)
+void MainWindowImpl::onMouseButtonPress(XEvent& xev)
 {
   int x = xev.xbutton.x;
   int y = xev.xbutton.y;
@@ -614,7 +612,7 @@ void WindowImpl::onMouseButtonPress(XEvent& xev)
 }
 
 
-void WindowImpl::onMouseButtonRelease(XEvent& xev)
+void MainWindowImpl::onMouseButtonRelease(XEvent& xev)
 {
   int  x = xev.xbutton.x;
   int  y = xev.xbutton.y;
@@ -646,7 +644,7 @@ void WindowImpl::onMouseButtonRelease(XEvent& xev)
 }
 
 
-void WindowImpl::onKeyEvent(XEvent& xev)
+void MainWindowImpl::onKeyEvent(XEvent& xev)
 {
 	if(KeyRelease == xev.xkey.type)
 		_keyEvent.setState(KeyEvent::KeyUp);
@@ -692,7 +690,7 @@ void WindowImpl::onKeyEvent(XEvent& xev)
 }
 
 
-void WindowImpl::onConfigureNotify( XEvent& xev)
+void MainWindowImpl::onConfigureNotify( XEvent& xev)
 {
   if(isWindowMinimized())    
 		_resizeEvent.setState( WindowState::Minimized );

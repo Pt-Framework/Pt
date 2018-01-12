@@ -32,7 +32,6 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
-#include <Windows.h>
 
 namespace Pt {
 

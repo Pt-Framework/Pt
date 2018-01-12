@@ -27,6 +27,9 @@
 */
 
 #include "PaintSurfaceImpl.h"
+#include "ApplicationImpl.h"
+
+#include <Pt/Hmi/Application.h>
 
 #ifndef _AIX
 #include <X11/Xft/Xft.h>
@@ -55,14 +58,14 @@ std::vector<std::string> PaintSurfaceImpl::fontNames()
     unsigned int screen = DefaultScreen(display);
     char* family = 0;
 
-    XftFontSet* fonts = XftListFonts(display, screen, 0, XFT_FAMILY, (char*)0 );
-    for(int i = 0; i < fonts->nfont; i++) 
+    XftFontSet* fontSet = XftListFonts(display, screen, 0, XFT_FAMILY, (char*)0 );
+    for(int i = 0; i < fontSet->nfont; i++) 
     {
-        if( XftPatternGetString(fonts->fonts[i], XFT_FAMILY, 0, &family) == XftResultMatch )
+        if( XftPatternGetString(fontSet->fonts[i], XFT_FAMILY, 0, &family) == XftResultMatch )
             fonts.push_back(family);
     }
     
-    XftFontSetDestroy(fonts);
+    XftFontSetDestroy(fontSet);
 #endif
 
     return fonts;

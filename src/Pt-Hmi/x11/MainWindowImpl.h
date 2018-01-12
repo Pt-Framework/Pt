@@ -69,6 +69,10 @@ class MainWindowImpl :public Pt::Connectable
 
 		void setType(Window::Type type);
 
+        Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+
+        Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
+
 		void show(bool visible);
 
 		void activate();
@@ -97,7 +101,7 @@ class MainWindowImpl :public Pt::Connectable
 
         void grabPointer();
 
-		Window& window()
+		::Window& window()
 		{ 
 			return _window; 
 		}
@@ -136,16 +140,14 @@ class MainWindowImpl :public Pt::Connectable
 		Pt::Hmi::PaintSurface*	     _surface;
 		Pt::Signal<const Pt::Event&> _windowEvent;
 		KeyEvent					 _keyEvent;
-		PointingEvent				 _pointerEvent;
+		MouseEvent                   _mouseEvent; 
 		ResizeEvent					 _resizeEvent;
-		PositionEvent				 _positionEvent;
 		ActivateEvent				 _activateEvent;
 		bool						 _forceTopMost;		
 		::Window  		    		 _window;
 		::GC 						 _brushGc;
 		::Display* 					 _display;
 		std::vector<char> 			 _pixelBuffer;
-		bool						 _forceTopMost;
 		int _x;
 		int _y;
 		int _width;

@@ -145,8 +145,8 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 
 Gfx::SizeF ScreenImpl::size() const
 {
-    Display* display = _app.display();
-    Screen * screen = DefaultScreenOfDisplay(display);
+    ::Display* display = _app.display();
+    ::Screen * screen = DefaultScreenOfDisplay(display);
     int w = WidthOfScreen(screen);
     int h = HeightOfScreen(screen);
     return Gfx::SizeF(w, h);

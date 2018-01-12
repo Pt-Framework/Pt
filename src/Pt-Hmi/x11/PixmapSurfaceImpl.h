@@ -57,6 +57,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         virtual ~PixmapSurfaceImpl();
 
+        void clear(const Gfx::Color& c);
+
         void resize(const Pt::Gfx::SizeF& size);
 
         const Pt::Gfx::SizeF& size() const;
@@ -64,6 +66,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         void begin(Painter& painter);  
         
         void finish();
+
+        const Gfx::ImageFormat& format() const;
 
         void setPen(const Gfx::Pen& pen);
 
