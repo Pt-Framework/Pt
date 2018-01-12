@@ -29,7 +29,6 @@
 
 #include "X11Fd.h"
 #include "ApplicationImpl.h"
-#include "posix/Selector.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/SourceInfo.h>

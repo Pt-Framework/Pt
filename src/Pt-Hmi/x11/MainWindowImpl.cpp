@@ -128,9 +128,17 @@ void MainWindowImpl::create(Window::Type type)
 	// None means parents cursor
     wattr.cursor = None;
 
-	// no WM interaction if True
-    wattr.override_redirect = False; 
-
+	// TODO: this is most likely wrong
+	if(type == Window::Pupup)
+	{
+		// no WM interaction if True
+		wattr.override_redirect = True; 
+	}
+	else // Window::Normal
+	{
+		wattr.override_redirect = False; 
+	}
+    
     // Determines which fields from XSetWindowAttributes are used
     unsigned long winMask = CWWinGravity|CWBitGravity|
 	                        CWBorderPixmap|CWBorderPixel|
@@ -138,12 +146,6 @@ void MainWindowImpl::create(Window::Type type)
                             CWCursor|CWOverrideRedirect|
 							CWColormap|CWBackingStore|
 							CWSaveUnder|CWBackPixmap;
-
-	if(type == Window::Pupup)
-	{
-		winMask |= CWOverrideRedirect;
-		wattr.override_redirect = True; 
-	}
 
     Window parentId = RootWindow(_display, screen);
 
@@ -185,44 +187,33 @@ void MainWindowImpl::destroy()
 
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 {
-	Bool XTranslateCoordinates(display, src_w, dest_w, src_x, src_y, dest_x_return, 
-                               dest_y_return, child_return)
-      Display *display;
-      Window src_w, dest_w;
-      int src_x, src_y;
-      int *dest_x_return, *dest_y_return;
-      Window *child_return;
+	Window root = DefaultRootWindow(_display);
+	int windowX = lround( windowPos.x() ); 
+    int windowY = lround( windowPos.y() );
+	int screenX = 0;
+	int screenY = 0;
+	Window child = 0;
 
-Arguments:
+	XTranslateCoordinates(_display, _window, root, 
+	                      windowX, windowY, screenX, screenY, child);
 
-display	Specifies the connection to the X server.
-src_w	Specifies the source window.
-dest_w	Specifies the destination window.
-src_x
-src_y	Specify the x and y coordinates within the source window.
-dest_x_return
-dest_y_return	Return the x and y coordinates within the destination window.
-child_return	Returns the child if the coordinates are contained in a mapped child of the destination window.
-
-
-
-    POINT p = { lround(windowPos.x()), 
-                lround(windowPos.y()) };
-
-    //ClientToScreen(_hwnd, &p);
-
-    return Gfx::PointF( p.x, p.y );
+    return Gfx::PointF(screenX, screenY);
 }
 
 
 Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
 {
-    POINT p = { lround(screenPos.x()), 
-                lround(screenPos.y()) };
+	Window root = DefaultRootWindow(_display);
+	int screenX = lround( screenPos.x() ); 
+    int screenY = lround( screenPos.y() );
+	int windowX = 0;
+	int windowY = 0;
+	Window child = 0;
 
-    //ScreenToClient(_hwnd, &p);
+	XTranslateCoordinates(_display, _window, root, 
+	                      screenX, screenY, windowX, windowY, child);
 
-    return Gfx::PointF( p.x, p.y );
+    return Gfx::PointF(windowX, windowY);
 }
 
 
@@ -243,12 +234,12 @@ void MainWindowImpl::close()
 
 void MainWindowImpl::paint(const Gfx::RectF& rect)
 {	
-  XEvent exppp;
-  memset(&exppp, 0, sizeof(exppp));
-  exppp.type = Expose;
-  exppp.xexpose.window = _window;
+  XEvent ev;
+  memset(&ev, 0, sizeof(ev));
+  ev.type = Expose;
+  ev.xexpose.window = _window;
 
-  XSendEvent(_display, _window, False, ExposureMask, &exppp);
+  XSendEvent(_display, _window, False, ExposureMask, &ev);
   XFlush(_display);
 }
 
@@ -257,7 +248,8 @@ void MainWindowImpl::show(bool visible)
 {	
 	if(visible)
 	{  	
-		setTopMost(_isTopMost);	
+		// TODO: does TOPMOST state survive a hide/show?
+		//setTopMost(_isTopMost);	
 		XMapWindow(_display, _window);
 	}
 	else
@@ -275,14 +267,14 @@ void MainWindowImpl::activate()
 }
 
 
-void MainWindowImpl::enable(bool e)
+void MainWindowImpl::enable(bool enabled)
 {
     XSetWindowAttributes wattr;
     memset(&wattr, 0, sizeof(wattr));
 
 	//XGetWindowAttributes(_display, _window, &wattr)
 
-	if(e)
+	if(enabled)
 	{
 		wattr.event_mask = StructureNotifyMask|ExposureMask|
 						   PropertyChangeMask|EnterWindowMask|
@@ -290,13 +282,15 @@ void MainWindowImpl::enable(bool e)
 						   KeyReleaseMask|KeymapStateMask|
 						   ButtonPressMask|ButtonReleaseMask|
 						   PointerMotionMask|FocusChangeMask;
+		wattr.override_redirect = False; 
 	}
 	else
 	{
 		wattr.event_mask = 0;
+		wattr.override_redirect = True; 
 	}
 
-    unsigned long winMask = CWEventMask;
+    unsigned long winMask = CWEventMask|CWOverrideRedirect;
 
 	XChangeWindowAttributes(_display, _window, winMask, &wattr);
 }
@@ -318,7 +312,7 @@ void MainWindowImpl::setTopMost(bool e)
 	event.xclient.send_event = True;
 
 	// the event originates from disp
-	event.xclient.display = disp;
+	event.xclient.display = _display;
 
 	// the window whose state will be modified
 	event.xclient.window = _window;
@@ -348,26 +342,19 @@ void MainWindowImpl::setTopMost(bool e)
 
 void MainWindowImpl::move(const Gfx::PointF& pos)
 {
-	XMoveResizeWindow(_display, _window,  
-	                  pos.x(), pos.y(), _width, _height);
-
-    _x = pos.x();
-    _y = pos.y();
+	XMoveWindow(_display, _window, pos.x(), pos.y());
 }
 
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
-    XMoveResizeWindow( _display, _window,  
-	                   _x, _y, size.width(), size.height() );
-    
-	_width = size.width();
-    _height = size.height();
+    XResizeWindow( _display, _window, size.width(), size.height() );
 }
 
 
 void MainWindowImpl::setType(Window::Type type)
 {
+	// TODO
 	std::clog << "Window::setType not implemented" << std::endl;
 }
 
@@ -375,6 +362,7 @@ void MainWindowImpl::setType(Window::Type type)
 void MainWindowImpl::setIcon(const Gfx::Image& icon)
 {
 	// TODO
+	std::clog << "Window::setIcon not implemented" << std::endl;
 }
 
 

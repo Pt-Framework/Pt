@@ -30,14 +30,17 @@
 #ifndef Pt_Hmi_PixmalSurfaceImpl_h
 #define Pt_Hmi_PixmalSurfaceImpl_h
 
+#include "PaintSurfaceImpl.h"
+
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
+
 #include <Windows.h>
-#include "PaintSurfaceImpl.h"
 
 namespace Pt {
+
 namespace Hmi {
 
 class PixmapSurfaceImpl : public PaintSurfaceImpl
@@ -73,7 +76,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
-        void drawText(const Gfx::PointF& to, const Pt::String& Text);
+        void drawText(const Gfx::PointF& to, const Pt::String& text);
 
         void drawRect(const Gfx::RectF& rectangle);
 
@@ -90,12 +93,14 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
         void drawSurface(const Gfx::PointF& toF, 
-                                 const PixmapSurface& pm,
-                                 const Gfx::RectF& pmRect);
+                         const PixmapSurface& pm,
+                         const Gfx::RectF& pmRect);
 
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
-        void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
+        void drawImage(const Gfx::PointF& to, 
+                       const Gfx::Image& image, 
+                       const Gfx::RectF& imgRect);
 
         void drawPicture(const Gfx::PointF& to, const Picture& pic);
 

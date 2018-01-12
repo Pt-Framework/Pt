@@ -235,7 +235,8 @@ class PainterImpl
             return _font;
         }
         
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text)
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
+                                            const Pt::String& text)
         {   
             HDC dc = GetDC(NULL);
 
@@ -259,7 +260,7 @@ class PainterImpl
             return Gfx::FontMetrics(tm.tmAscent, 
                                     tm.tmDescent, 
                                     textSize.cx, 
-                                     textSize.cy);
+                                    textSize.cy);
         }
         
         static std::string defaultFont()
@@ -267,12 +268,12 @@ class PainterImpl
             return getDefaultFont();
         }
 
-
         static void setDefaultFont(const std::string& f)
         {
             getDefaultFont() = f;
         }
 
+        // TODO: is this function ununsed?
         static std::string getSystemFont()
         {
             HDC dc = GetDC(NULL);

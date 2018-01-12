@@ -164,12 +164,12 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 
 Gfx::SizeF ScreenImpl::size() const
 {
-  HWND hDesktop = GetDesktopWindow();
-  
-  RECT r;   
-  GetWindowRect(hDesktop, &r);
-  
-  return Gfx::SizeF(r.right, r.bottom);
+    HWND hDesktop = GetDesktopWindow();
+
+    RECT r;   
+    GetWindowRect(hDesktop, &r);
+
+    return Gfx::SizeF(r.right, r.bottom);
 }
 
 } // namespace

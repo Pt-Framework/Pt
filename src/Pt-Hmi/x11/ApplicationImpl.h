@@ -86,7 +86,6 @@ class ApplicationImpl : public Pt::System::MainLoop
 
 		double resolutionDPI() const;
 		
-	
 		inline Pt::Signal<const Pt::Event&>& systemEvent()
 		{
 			return _systemEvent;

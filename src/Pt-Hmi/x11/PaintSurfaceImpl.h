@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2017 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,54 +23,33 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA 02110-1301 USA
  */
-#ifndef Pt_Hmi_PaintSurfaceImpl_h
-#define Pt_Hmi_PaintSurfaceImpl_h
 
-#include <Pt/Hmi/WidgetModel.h>
-#include <Pt/Hmi/Property.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <X11/X.h>
-#include <X11/Xlib.h>
+#ifndef Pt_Hmi_X11_PaintSurfaceImpl_h
+#define Pt_Hmi_X11_PaintSurfaceImpl_h
 
+#include <vector>
+#include <string>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
 
-class PainterImpl;
+namespace Hmi {
 
 class PaintSurfaceImpl
 {
-public:
-	PaintSurfaceImpl();
-	virtual ~PaintSurfaceImpl();
+    public:        
+        ~PaintSurfaceImpl();
 
-	Pt::Gfx::ARgbImage toImage();
-	
-	void resize(const Pt::Gfx::SizeF& size);
+        static std::vector<std::string> fontNames(); 
 
-	inline const Pt::Gfx::SizeF& size() const
-	{
-		return _size;
-	}
-
-    inline ::Drawable drawable()
-    {
-       return _drawable;
-    }
-
-private:
-    void create(const Pt::Gfx::SizeF& size);
-    void destroy();
-
-private:
-    Gfx::SizeF    _size;
-    ::Drawable _drawable;
+    protected:
+        PaintSurfaceImpl();
 };
 
-}}
+} // namespace
 
-#endif
+} // namespace
+
+#endif // include guard

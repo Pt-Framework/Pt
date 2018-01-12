@@ -41,6 +41,8 @@
 #undef Above
 #undef Below
 
+#include "posix/Selector.h"
+
 #include <Pt/Hmi/Api.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/System/MainLoop.h>

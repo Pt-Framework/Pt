@@ -199,28 +199,6 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 }
 
 
-const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
-{
-    return Gfx::ImageFormat::argb32();
-}
-
-
-void PixmapSurfaceImpl::begin(Painter& painter)
-{
-    _painter = &painter;
-}
-
-
-void PixmapSurfaceImpl::finish()
-{
-    _painter = 0;
-
-    SelectObject(_dc, _oldPen);
-    SelectObject(_dc, _oldBrush);
-    SelectObject(_dc, _oldFont);
-}
-
-
 void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 {
 }
@@ -247,6 +225,28 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 const Gfx::SizeF& PixmapSurfaceImpl::size() const
 {
     return _size;
+}
+
+
+void PixmapSurfaceImpl::begin(Painter& painter)
+{
+    _painter = &painter;
+}
+
+
+void PixmapSurfaceImpl::finish()
+{
+    _painter = 0;
+
+    SelectObject(_dc, _oldPen);
+    SelectObject(_dc, _oldBrush);
+    SelectObject(_dc, _oldFont);
+}
+
+
+const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+{
+    return Gfx::ImageFormat::argb32();
 }
 
 
@@ -478,7 +478,6 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
-  
     RECT rectangle;
     SetRect(&rectangle, lround(to.x()), lround(to.y()), lround(to.x()), lround(to.y()));
 
@@ -658,7 +657,8 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
 }
 
 
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
+                                    const PixmapSurface& surface)
 {
     const Gfx::Size size = Gfx::round(surface.size());
 
@@ -726,12 +726,13 @@ void PixmapSurfaceImpl::bitBlit( const Gfx::Point& to, size_t width, size_t heig
 }
 
 
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect)
+void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, 
+                                  const Gfx::Image& image, 
+                                  const Gfx::RectF& imgRect)
 {
-  //Todo:
+    // TODO
     throw std::runtime_error("not implemented");
 }
-
 
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
