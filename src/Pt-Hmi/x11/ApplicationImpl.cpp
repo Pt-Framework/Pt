@@ -59,7 +59,7 @@ ApplicationImpl::ApplicationImpl()
     ::Window root = XDefaultRootWindow(_display);
 
     // Set X11 to sync mode. Slow, for debugging only.
-    XSynchronize(_display, True);
+    //XSynchronize(_display, True);
 
     _xfd.setActive(*this);
     _xfd.begin();
