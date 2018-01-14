@@ -86,18 +86,51 @@ void X11Fd::close()
 }
 
 
-bool X11Fd::onRun()
-{
-    if( ! XPending(_display) )
-        return false;
+void X11Fd::flush()
+{ 
+    XSync(_display, False);
 
     while( XPending(_display) > 0 ) 
 	{
         XNextEvent(_display, &_xev);
-		Application::instance().impl()->WindowEvent.send(_xev);
+        XSync(_display, False);
+        if(_xev.xany.type == ConfigureNotify)
+            std::clog << "ConfigureNotify" << std::endl;
+        else
+            std::clog << "EVENT: " <<  _xev.xany.type << std::endl;
+
+		_eventReady.send(_xev);
+    }
+}
+
+
+bool X11Fd::onRun()
+{
+    std::clog << "X11Fd::onRun BEGIN" << std::endl;
+
+    Pt::System::Selector& selector = _loop->selector();
+    bool isAvail = selector.isReadable(&_ioh);
+    if( ! isAvail ) 
+        return isAvail;
+
+    selector.endRead(&_ioh);
+
+    while( XPending(_display) > 0 ) 
+	{
+        XNextEvent(_display, &_xev);
+        
+        if(_xev.xany.type == ConfigureNotify)
+            std::clog << "ConfigureNotify " <<  _xev.xany.type  << std::endl;
+        else
+            std::clog << "EVENT: " <<  _xev.xany.type << std::endl;
+
+		_eventReady.send(_xev);
     }
 
-    return true;
+    selector.beginRead(&_ioh);
+
+    std::clog << "X11Fd::onRun DONE" << std::endl;
+    return isAvail;
 }
 
 
@@ -118,5 +151,6 @@ void X11Fd::onDetach(System::EventLoop& loop)
     _loop = 0; 
 }
 
+} // namespace
 
-}}
+} // namespace

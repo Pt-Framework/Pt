@@ -37,6 +37,7 @@
 #include <limits>
 #include <cassert>
 #include <cstddef>
+#include <algorithm>
 
 #include <sys/types.h>
 #include <sys/epoll.h>
@@ -200,9 +201,9 @@ class SelectorImpl  : public Selector
                 epoll_event ev;
 
                 if(h->changed & IOHandle::Read)
-                    ev.events |= EPOLLIN;
+                    ev.events |= EPOLLIN|EPOLLET;
                 if(h->changed & IOHandle::Write)
-                    ev.events |= EPOLLOUT;
+                    ev.events |= EPOLLOUT|EPOLLET;
  
                 ev.data.ptr = h;
 

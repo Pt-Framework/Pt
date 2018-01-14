@@ -46,6 +46,8 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 
+struct _XftDraw;
+
 namespace Pt {
 
 namespace Hmi {
@@ -67,9 +69,17 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         void finish();
 
+        void setClip( const Gfx::RectF& clip);
+         
+        void setCompositionMode(const Gfx::CompositionMode& mode);
+
         const Gfx::ImageFormat& format() const;
 
         void setPen(const Gfx::Pen& pen);
+
+        void setBrush(const Gfx::Brush& brush);
+
+        void setFont(const Gfx::Font& font);
 
         Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
@@ -115,6 +125,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         Gfx::SizeF _size;
         Painter*   _painter;
         ::Drawable _drawable;
+        _XftDraw*  _xftDraw;
 };
 
 } // namespace

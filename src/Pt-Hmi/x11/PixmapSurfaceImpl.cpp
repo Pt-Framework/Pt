@@ -50,6 +50,7 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(10, 10)
 , _painter(0)
 , _drawable(0)
+, _xftDraw(0)
 {
 	create(_size);    
 }
@@ -66,12 +67,19 @@ void PixmapSurfaceImpl::create(const Pt::Gfx::SizeF& size)
     _size = size;
 
     Display* display = Application::instance().impl()->display();
-    unsigned int depth = DefaultDepth( display, DefaultScreen(display) );
+    unsigned int depth = XDefaultDepth( display, XDefaultScreen(display) );
     
     _drawable = XCreatePixmap(display, XDefaultRootWindow(display), 
                               lround(size.width()), lround(size.height()), depth);
-    
-    XSync(display, false);  
+
+#ifndef _AIX
+    unsigned int screen = XDefaultScreen(display);
+    ::Visual* visual = XDefaultVisual(display, screen);
+    Colormap colorMap = XDefaultColormap(display, screen);
+    _xftDraw = XftDrawCreate(display, _drawable, visual, colorMap);
+#endif  
+
+    XSync(display, False);
 }
 
 
@@ -79,6 +87,11 @@ void PixmapSurfaceImpl::destroy()
 {
     Display* display = Application::instance().impl()->display();
     
+#ifndef _AIX
+    XftDrawDestroy(_xftDraw);
+    _xftDraw = 0;
+#endif
+
     XFreePixmap(display, _drawable);
     
     _drawable = 0;
@@ -119,13 +132,48 @@ void PixmapSurfaceImpl::finish()
 }
 
 
+void PixmapSurfaceImpl::setClip(const Gfx::RectF& rectF)
+{
+    Gfx::Rect rect = round(rectF);
+
+    if( rect.isNull() )
+    {
+        XftDrawSetClipRectangles(_xftDraw, 0, 0, 0, 0);
+        return;
+    }
+
+    XRectangle xrect;
+    xrect.x      = rect.x();
+    xrect.y      = rect.y();
+    xrect.width  = rect.width();
+    xrect.height = rect.height();
+
+    XftDrawSetClipRectangles(_xftDraw, 0, 0, &xrect, 1);
+}
+
+
 const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 {
     return Gfx::ImageFormat::argb32();
 }
 
 
+void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
+{
+}
+
+
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
+{
+}
+
+
+void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
+{
+}
+
+
+void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 {
 }
 
@@ -176,9 +224,6 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 
     int toX = lround( to.x() );
     int toY = lround( to.y() );
-    
-    Display* display = Application::instance().impl()->display();
-
 
     Gfx::Color penColor = _painter->pen().color();
 #ifndef _AIX
@@ -190,13 +235,12 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     xftColor.color.alpha = 0xffff;
 
     XftFont* font = _painter->impl()->font();
-    XftDraw* draw = _painter->impl()->xftDraw();
 
-    XftDrawString32(draw, &xftColor, font, toX, toY, 
+    XftDrawString32(_xftDraw, &xftColor, font, toX, toY,
                     (XftChar32*) text.c_str(), text.size());
 #endif
 
-    XSync(display, false);    
+    //XSync(display, false);    
 }
 
 
@@ -233,6 +277,8 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rectF)
 
     XFillRectangle(display, _drawable, brushGc, 
                    rect.x(), rect.y(), rect.width(), rect.height());
+
+    XSync(display, False);
 }
 
 
@@ -341,7 +387,7 @@ void PixmapSurfaceImpl::drawSurface(const Pt::Gfx::PointF& toF,
     XCopyArea(display, from, _drawable, brushGc, 
             0, 0, size.width(), size.height(), to.x(), to.y() );
     
-    XSync(display, false);
+    //XSync(display, false);
 }
 
 
@@ -349,10 +395,10 @@ void PixmapSurfaceImpl::drawSurface(const Pt::Gfx::PointF& toF,
                                     const PixmapSurface& pm, 
                                     const Gfx::RectF& pmRect)
 {
-    if( ! _painter ) 
+    if( ! _painter )
         return; 
 
-	Display* display = Application::instance().impl()->display();
+    Display* display = Application::instance().impl()->display();
     GC& brushGc = _painter->impl()->brush();
 	::Drawable source = pm.pixmapImpl()->drawable();
 
@@ -365,7 +411,7 @@ void PixmapSurfaceImpl::drawSurface(const Pt::Gfx::PointF& toF,
               size.width(), size.height(), 
               to.x(), to.y() );
 	
-    XSync(display, false);        
+    //XSync(display, false);        
 }
 
 
@@ -393,7 +439,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
                0, 0, to.x(), to.y(), 
                rgb24Image.width(), rgb24Image.height() );
 
-    XSync(display, false);
+    //XSync(display, false);
     
     ximage->data = NULL;
     XDestroyImage(ximage); 

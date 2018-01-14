@@ -67,8 +67,10 @@ class X11Fd : public System::Selectable
 
         void close();
 
-        void flush()
-        { this->onRun(); }
+        void flush();
+
+        Pt::Signal<XEvent&>& eventReady()
+        { return _eventReady; }
         
     protected:
         virtual bool onRun();
@@ -84,6 +86,7 @@ class X11Fd : public System::Selectable
         XEvent _xev;
         Pt::System::IOHandle _ioh;
         Pt::System::EventLoop* _loop;
+        Pt::Signal<XEvent&> _eventReady; 
 };
 
 } // namespace

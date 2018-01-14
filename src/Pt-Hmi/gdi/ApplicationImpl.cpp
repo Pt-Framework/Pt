@@ -599,14 +599,12 @@ bool ApplicationImpl::onClose(Window& w)
     CloseEvent ev(id);
     w.processEvent(ev);
 
-    bool ignored = false;
-
     const Visual* v = Application::instance().findVisual(id);
     if( ! v )
-        return ignored;
+        return true;
         
-    ignored = ! w.isClosed();
-    return ignored;
+    bool isClosed = ! w.isClosed();
+    return isClosed;
 }
 
 

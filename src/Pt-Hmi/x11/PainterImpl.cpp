@@ -46,7 +46,7 @@ _XftFont* openFont(const Pt::Gfx::Font& font)
 {
 #ifndef _AIX
     Display* display = Pt::Hmi::Application::instance().impl()->display();
-    unsigned int screen = DefaultScreen(display);
+    unsigned int screen = XDefaultScreen(display);
     int slant = XFT_SLANT_ROMAN;
     int weight = XFT_WEIGHT_MEDIUM;
 
@@ -89,16 +89,19 @@ _XftFont* openFont(const Pt::Gfx::Font& font)
     mx.yx = sina;
     mx.yy = cosa;
 
-    const char* fontName = font.name().empty() ? Pt::Hmi::PainterImpl::defaultFont().c_str()
-                                               : font.name().c_str();
+    const char* fontName = font.name().empty() ? 
+          Pt::Hmi::PainterImpl::defaultFont().c_str()
+        : font.name().c_str();
 
-    return  XftFontOpen(display, screen,
-                        XFT_MATRIX, XftTypeMatrix, &mx,
-                        XFT_FAMILY, XftTypeString, fontName,
-                        XFT_SIZE, XftTypeDouble, double( font.size() ),
-                        XFT_SLANT, XftTypeInteger, slant,
-                        XFT_WEIGHT, XftTypeInteger, weight,
-                        NULL);
+    XftFont* xftFont = XftFontOpen(display, screen,
+                                   XFT_MATRIX, XftTypeMatrix, &mx,
+                                   XFT_FAMILY, XftTypeString, fontName,
+                                   XFT_SIZE, XftTypeDouble, double( font.size() ),
+                                   XFT_SLANT, XftTypeInteger, slant,
+                                   XFT_WEIGHT, XftTypeInteger, weight,
+                                   NULL);
+
+    return xftFont;
 #else
     return 0;
 #endif
@@ -113,7 +116,6 @@ namespace Hmi {
 PainterImpl::PainterImpl()
 : _penGc(0)
 , _brushGc(0)
-, _xftDraw(0)
 , _xftFont(0)
 {
     create();
@@ -129,17 +131,10 @@ PainterImpl::~PainterImpl()
 void PainterImpl::create()
 {
     Display* display = Application::instance().impl()->display();
-    unsigned int screen = DefaultScreen(display);
     ::Window root = XDefaultRootWindow(display);
 
     _penGc = XCreateGC(display, root, 0, NULL);
     _brushGc = XCreateGC(display, root, 0, NULL);
-
-#ifndef _AIX
-    ::Visual* visual = XDefaultVisual(display, screen);
-    Colormap colorMap = DefaultColormap(display, screen);
-    _xftDraw = XftDrawCreate(display, root, visual, colorMap);
-#endif  
 }
 
 
@@ -159,9 +154,6 @@ void PainterImpl::destroy()
         XftFontClose(display, _xftFont);
         _xftFont = 0;
     }
-
-    XftDrawDestroy(_xftDraw);
-    _xftDraw = 0;
 #endif
 }
 
@@ -286,19 +278,17 @@ void PainterImpl::setClip(const Gfx::RectF& rectF)
     {
         XSetClipRectangles(display, _penGc, 0, 0, 0, 0, Unsorted);
         XSetClipRectangles(display, _brushGc, 0, 0, 0, 0, Unsorted);
-        XftDrawSetClipRectangles(_xftDraw, 0, 0, 0, 0);
         return;
     }
 
     XRectangle xrect;
-    xrect.x = rect.x();
-    xrect.y = rect.y();
-    xrect.width = rect.width();
+    xrect.x      = rect.x();
+    xrect.y      = rect.y();
+    xrect.width  = rect.width();
     xrect.height = rect.height();
 
     XSetClipRectangles(display, _penGc, 0, 0, &xrect, 1, Unsorted);
     XSetClipRectangles(display, _brushGc, 0, 0, &xrect, 1, Unsorted);
-    XftDrawSetClipRectangles(_xftDraw, 0, 0, &xrect, 1);
 }
 
 
@@ -321,12 +311,6 @@ void PainterImpl::setFont(const Gfx::Font& font)
 _XftFont* PainterImpl::font()
 {
     return _xftFont;
-}
-
-
-_XftDraw* PainterImpl::xftDraw()
-{
-    return _xftDraw;
 }
 
 

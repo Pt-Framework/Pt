@@ -809,20 +809,20 @@ static const XKeySym2UCS xkeysym2ucs[] = {
 
 wchar_t keySymToUtf(int sym)
 {
-  // directly map latin-1 characters
+    // directly map latin-1 characters
     if((0x0020 <= sym && sym <= 0x007e) || (0x00a0 <= sym && sym <= 0x00ff)) {
         return sym;
     }
 
-  // key pad to Latin-1
+    // key pad to Latin-1
     if(0xffaa <= sym && sym <= 0xffb9)
         return sym - 0xff80;
 
-  // Also check for directly encoded 24-bit UCS characters
+    // Also check for directly encoded 24-bit UCS characters
     if( (sym & 0xff000000) == 0x01000000 )
         return sym & 0x00ffffff;
 
-  // Binary search in table
+    // Binary search in table
     size_t h = elemsize(xkeysym2ucs) - 1;
     size_t l = 0;
     size_t m;

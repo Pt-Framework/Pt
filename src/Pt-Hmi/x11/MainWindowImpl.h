@@ -32,13 +32,6 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
-#include <X11/cursorfont.h>
-
-// X11 defines these two globally, which conflicts with enum values in ptv/text/Char.h
-#undef Above
-#undef Below
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Window.h>
@@ -60,7 +53,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class MainWindowImpl :public Pt::Connectable
+class MainWindowImpl : public Pt::Connectable
 {
 	public:
     	MainWindowImpl(Window::Type type);
@@ -101,25 +94,27 @@ class MainWindowImpl :public Pt::Connectable
 
         void grabPointer();
 
+    public:
 		::Window& window()
 		{ 
 			return _window; 
 		}
 
-		Pt::Signal<const Pt::Event&>& windowEvent()
-		{
-			return _windowEvent;
-		}
+        int width() const
+        {
+            return _width;
+        }
 
-   
-	private:
-		void onWindowEvent(XEvent& ev);	
-		void onClientMessage(XEvent& xev);
-		void onMotionNotify(XEvent& xev); 
-		void onMouseButtonPress(XEvent& xev);
-		void onMouseButtonRelease(XEvent& xev);
-		void onKeyEvent(XEvent& xev);
-		void onConfigureNotify( XEvent& xev);
+        int height() const
+        {
+            return _height;
+        }
+
+        void setSize(int w, int h)
+        {
+            _width = w;
+            _height = h;
+        }
 
 	private:
 		void create(Window::Type type);
@@ -128,31 +123,13 @@ class MainWindowImpl :public Pt::Connectable
 		
 		bool isMinimized();
 		
-		bool isMaximazed();
+		bool isMaximized();
 
 	private:
-		Atom AtomAppWake;
-		Atom AtomWindowResize;
-		Atom AtomWindowMove;
-		Atom AtomWindowClosed;
-		Atom AtomWMProtocols;
-		Pt::Hmi::Application&        _app; 
-		Pt::Hmi::PaintSurface*	     _surface;
-		Pt::Signal<const Pt::Event&> _windowEvent;
-		KeyEvent					 _keyEvent;
-		MouseEvent                   _mouseEvent; 
-		ResizeEvent					 _resizeEvent;
-		ActivateEvent				 _activateEvent;
-		bool						 _forceTopMost;		
-		::Window  		    		 _window;
-		::GC 						 _brushGc;
-		::Display* 					 _display;
-		std::vector<char> 			 _pixelBuffer;
-		int _x;
-		int _y;
-		int _width;
-		int _height;
-		bool _showTitle;
+		::Window    _window;
+		::Display* 	_display;
+        int         _width;
+        int         _height;
 };
 
 } // namespace

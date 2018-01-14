@@ -34,7 +34,6 @@
 #include <X11/Xlib.h>
 
 struct _XftFont;
-struct _XftDraw;
 
 namespace Pt {
 
@@ -65,8 +64,6 @@ class PainterImpl
 
         _XftFont* font();
 
-        _XftDraw* xftDraw();
-
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
                                             const Pt::String& text);
 
@@ -96,7 +93,6 @@ class PainterImpl
     private:
         GC         _penGc;
         GC         _brushGc;
-        _XftDraw*  _xftDraw;
         _XftFont*  _xftFont;
 };
 

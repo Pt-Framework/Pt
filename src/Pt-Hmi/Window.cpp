@@ -769,6 +769,9 @@ void Window::onPaintBackground(const Gfx::RectF& rect)
 
 void Window::onPaintContent(const Gfx::RectF& rect)
 {
+    if(_impl)
+        std::clog << "Window::onPaintContent" << std::endl;
+    
     _windowManager.paint(_surface, rect);
 }
 
@@ -830,6 +833,9 @@ void Window::onShow( Window& w, bool visible )
 
 void Window::onShowEvent( const ShowEvent& ev )
 {
+    if(_impl)
+        std::clog << "Window::onShowEvent" << std::endl;
+    
     _visible = ev.visible();
 
     // TODO: release mouse when hidden?
@@ -992,6 +998,10 @@ void Window::onResize(Window& w, const Gfx::SizeF& to)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
+    if(_impl)
+        std::clog << "Window::onResizeEvent: " 
+                  << ev.size().width() << "x" << ev.size().height() << std::endl;
+
     _size = ev.size();
     _surface.resize(ev.size());
 

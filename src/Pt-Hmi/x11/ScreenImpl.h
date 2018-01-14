@@ -97,4 +97,4 @@ class ScreenImpl
 
 } // namespace
 
-#endif; // include guard
+#endif // include guard
