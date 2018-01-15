@@ -226,8 +226,8 @@ class PngWriterImpl
 
     private:
         std::ios*             _target;
-        png_struct_def*       _pngWrite;
-        png_info_def*         _pngInfo;
+        png_structp           _pngWrite;
+        png_infop             _pngInfo;
         Image*                _image;
         std::size_t           _row;
         std::vector<png_byte> _rowBuffer;
