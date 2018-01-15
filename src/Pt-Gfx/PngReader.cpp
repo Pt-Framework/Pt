@@ -363,8 +363,8 @@ class PngReaderImpl
     private:
         std::ios* _target;
         State _state;
-        png_struct_def* _pngRead;
-        png_info_def* _pngInfo;
+        png_structp _pngRead;
+        png_infop _pngInfo;
         char _buffer[2048];
         std::streamsize _bufferSize;
         Image* _image;
