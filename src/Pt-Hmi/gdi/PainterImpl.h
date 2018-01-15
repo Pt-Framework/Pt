@@ -273,19 +273,6 @@ class PainterImpl
             getDefaultFont() = f;
         }
 
-        // TODO: is this function ununsed?
-        static std::string getSystemFont()
-        {
-            HDC dc = GetDC(NULL);
-
-            std::vector<TCHAR> buffer(32);
-            GetTextFace(dc, buffer.size(), &buffer[0]);
-
-            ReleaseDC(NULL, dc);
-
-            return Pt::win32::toMultiByte(&buffer[0]);
-        }
-
         static std::string& getDefaultFont()
         { 
             static std::string _defaultFont;
@@ -359,8 +346,12 @@ class PainterImpl
             BYTE italic = font.style() == Pt::Gfx::Font::Italic || 
                           font.style() == Pt::Gfx::Font::BoldItalic;
 
+            HDC dc = GetDC(NULL);
+            int height = -MulDiv(font.size(), GetDeviceCaps(dc, LOGPIXELSY), 72);
+            ReleaseDC(NULL, dc);
+            
             LOGFONT lf;
-            lf.lfHeight         = -((int)font.size());         // converted to device units
+            lf.lfHeight         = height;                      // converted to device units    
             lf.lfWidth          = 0;                           // default width of the font
             lf.lfEscapement     = font.angle();                // escapement angle
             lf.lfOrientation    = 0;                           // orientation

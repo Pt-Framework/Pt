@@ -43,7 +43,7 @@ StyleOptions::StyleOptions()
 , _textBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255))
 , _textColor(Gfx::Color::fromRgb8(0, 0, 0))
 , _highlightedTextColor(Gfx::Color::fromRgb8(0, 0, 0))
-, _font(Gfx::Font("", 12))
+, _font(Gfx::Font("", 10))
 {
 }
 
