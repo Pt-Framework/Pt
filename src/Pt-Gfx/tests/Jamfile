@@ -59,7 +59,8 @@ if $(WITH_BUILTIN_LIBPNG)
 }
 else
 {
-    LinkFlags ImagePainterTest2 : $(PNG_LINKLIBS) ;
+    LinkFlags ImagePainterTest2 : $(PNG_LINKFLAGS) ;
+    LinkLibs ImagePainterTest2 : $(PNG_LINKLIBS) ;
 }
 
 if $(WITH_BUILTIN_ZLIB)
