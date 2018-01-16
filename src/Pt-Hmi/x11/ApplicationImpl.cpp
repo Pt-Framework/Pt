@@ -69,7 +69,7 @@ ApplicationImpl::ApplicationImpl()
     _paintGc = XCreateGC(_display, root, 0, NULL);
 
     _atomProtocols    = XInternAtom(_display, "WM_PROTOCOLS", false);
-	_atomDeleteWindow = XInternAtom(_display, "WM_DELETE_WINDOW", false);
+    _atomDeleteWindow = XInternAtom(_display, "WM_DELETE_WINDOW", false);
 }
 
 
@@ -126,9 +126,9 @@ void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
 
     // Arguments
 
-    // display	Specifies the connection to the X server.
-    // focus_return	Returns the focus window, PointerRoot, or None.
-    // revert_to_return	Returns the current focus state (RevertToParent, RevertToPointerRoot, or RevertToNone).
+    // display    Specifies the connection to the X server.
+    // focus_return    Returns the focus window, PointerRoot, or None.
+    // revert_to_return    Returns the current focus state (RevertToParent, RevertToPointerRoot, or RevertToNone).
 
     // KeyEvent kev = ev;
     // kev.setId( window->vid() );
@@ -155,7 +155,7 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 
 void ApplicationImpl::nextEvent()
 {
-	MainLoop::waitNext();
+    MainLoop::waitNext();
 }
 
 
@@ -234,14 +234,14 @@ void ApplicationImpl::onEvent(XEvent& ev)
             break;
 
         // case FocusOut:
-        // 	if( _forceTopMost )
-        // 		bringWindowToTop();
+        //     if( _forceTopMost )
+        //         bringWindowToTop();
         // break;
 
         case EnterNotify:    
             break;
 
-        case LeaveNotify:			
+        case LeaveNotify:            
             break;
 
         default:
@@ -286,14 +286,14 @@ void ApplicationImpl::onClientMessage(Window& window, XEvent& xev)
 {
     Pt::uint64_t id =  window.vid();
 
-	if( xev.xclient.message_type == _atomProtocols ) 
-	{
+    if( xev.xclient.message_type == _atomProtocols ) 
+    {
         if( (Atom) xev.xclient.data.l[0] == _atomDeleteWindow)
         {
             CloseEvent closeEvent(id);
             window.processEvent(closeEvent);
         }
-	}	
+    }    
 }
 
 
@@ -314,7 +314,7 @@ void ApplicationImpl::onMotionNotify(Window& window, XEvent& xev)
     std::size_t x = xev.xmotion.x;
     std::size_t y = xev.xmotion.y;
 
-	Pt::Gfx::PointF pos(x, y);
+    Pt::Gfx::PointF pos(x, y);
     _mouseEvent.setPosition(pos);
     _mouseEvent.setId( window.vid() );
     _mouseEvent.setMove();
@@ -435,30 +435,30 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
     // if( xev.xkey.state & Mod1Mask)
     //     modifiers |= MouseMoveEvent::AltDown;
 
-	switch(keySym) 
-	{
-		case XK_Control_L: 
-		case XK_Control_R: 
-			modifiers.add(Key::Control);
-		    break;
-
-		case XK_Alt_L: 
-		case XK_Alt_R:
-			modifiers.add(Key::Alt);
+    switch(keySym) 
+    {
+        case XK_Control_L: 
+        case XK_Control_R: 
+            modifiers.add(Key::Control);
             break;
 
-		case XK_Shift_L :
-		case XK_Shift_R :
-			modifiers.add(Key::Shift);
-		    break;
+        case XK_Alt_L: 
+        case XK_Alt_R:
+            modifiers.add(Key::Alt);
+            break;
+
+        case XK_Shift_L :
+        case XK_Shift_R :
+            modifiers.add(Key::Shift);
+            break;
 
         // TODO modifiers.add(Key::Meta);
 
-		default:
-		    break;
-	}		
-		
-	Pt::Char ch = KeyHandler::keySymToUtf(keySym);
+        default:
+            break;
+    }        
+        
+    Pt::Char ch = KeyHandler::keySymToUtf(keySym);
 
     //TODO: translate keySym to Key::Code
     Pt::uint32_t keyCode = Key::NoKey;

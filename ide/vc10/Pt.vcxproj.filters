@@ -1044,9 +1044,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\WindowImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1493,6 +1490,18 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Polygonizer.h">
       <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\PictureImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\ScreenImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2435,9 +2444,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\demo\MainWindow.cpp">
       <Filter>Pt-Hmi\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\WindowManager.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -2791,6 +2797,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Polygonizer.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\PictureImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

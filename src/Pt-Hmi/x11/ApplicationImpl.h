@@ -90,7 +90,7 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         void onEvent(XEvent& ev);
 
-		void onExpose(Window& window, XEvent& xev);
+        void onExpose(Window& window, XEvent& xev);
 
         void onClientMessage(Window& window, XEvent& xev);
 
@@ -108,8 +108,8 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     private:
         ::Display* _display;
-        X11Fd	   _xfd;
-		Atom       _atomProtocols;
+        X11Fd       _xfd;
+        Atom       _atomProtocols;
         Atom       _atomDeleteWindow;
         GC         _paintGc;
         MouseEvent _mouseEvent;

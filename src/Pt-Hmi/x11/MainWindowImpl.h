@@ -55,22 +55,22 @@ namespace Hmi {
 
 class MainWindowImpl : public Pt::Connectable
 {
-	public:
-    	MainWindowImpl(Window::Type type);
-	  	
-		virtual ~MainWindowImpl();
+    public:
+        MainWindowImpl(Window::Type type);
 
-		void setType(Window::Type type);
+        virtual ~MainWindowImpl();
+
+        void setType(Window::Type type);
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
-		void show(bool visible);
+        void show(bool visible);
 
-		void activate();
+        void activate();
 
-		void enable(bool e);
+        void enable(bool e);
 
         void move(const Gfx::PointF& pos);
 
@@ -95,10 +95,10 @@ class MainWindowImpl : public Pt::Connectable
         void grabPointer();
 
     public:
-		::Window& window()
-		{ 
-			return _window; 
-		}
+        ::Window& window()
+        { 
+            return _window; 
+        }
 
         int width() const
         {
@@ -116,18 +116,18 @@ class MainWindowImpl : public Pt::Connectable
             _height = h;
         }
 
-	private:
-		void create(Window::Type type);
-	
-		void destroy();
-		
-		bool isMinimized();
-		
-		bool isMaximized();
+    private:
+        void create(Window::Type type);
 
-	private:
-		::Window    _window;
-		::Display* 	_display;
+        void destroy();
+
+        bool isMinimized();
+
+        bool isMaximized();
+
+    private:
+        ::Window    _window;
+        ::Display*  _display;
         int         _width;
         int         _height;
 };

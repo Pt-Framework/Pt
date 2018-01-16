@@ -395,9 +395,12 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\KeyHandler.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\WindowImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\PictureImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h" />
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-Http\Connection.h" />
@@ -645,9 +648,12 @@
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\KeyHandler.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\PictureImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authenticator.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authorizer.cpp" />
