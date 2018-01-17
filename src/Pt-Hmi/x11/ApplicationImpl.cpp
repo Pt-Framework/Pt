@@ -68,8 +68,16 @@ ApplicationImpl::ApplicationImpl()
 
     _paintGc = XCreateGC(_display, root, 0, NULL);
 
-    _atomProtocols    = XInternAtom(_display, "WM_PROTOCOLS", false);
-    _atomDeleteWindow = XInternAtom(_display, "WM_DELETE_WINDOW", false);
+    _wmProtocols     = XInternAtom(_display, "WM_PROTOCOLS", False);
+    _wmDeleteWindow  = XInternAtom(_display, "WM_DELETE_WINDOW", False);
+    _wmChangeState = XInternAtom(_display, "WM_CHANGE_STATE", False);
+
+    //_netWmState = XInternAtom(_display, "_NET_WM_STATE", False);
+    //_netWmStateMaximizedVert = XInternAtom(_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+    //_netWmStateMaximizedHorz = XInternAtom(_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+    //_netWmStateHidden = XInternAtom(_display, "_NET_WM_STATE_HIDDEN", False);
+    //_netWmStateAbove = XInternAtom(_display, "_NET_WM_STATE_ABOVE", False);
+    //XSync(_display, False);
 }
 
 
@@ -252,33 +260,20 @@ void ApplicationImpl::onEvent(XEvent& ev)
 
 void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 {
-    //  std::clog << "Expose: " << window.size().width()
-    //            << "x" << window.size().height() << std::endl;
+    const size_t width = xev.xexpose.width;
+    const size_t height = xev.xexpose.height;
+    const size_t x = xev.xexpose.x;
+    const size_t y = xev.xexpose.y;
 
-    // const size_t width = xev.xexpose.width;
-    // const size_t height = xev.xexpose.height;
-    // const size_t x = xev.xexpose.x;
-    // const size_t y = xev.xexpose.y;
+    //std::clog << "   ### Expose: " << width << "x" << height << std::endl;
 
-    // Gfx::RectF rect( Gfx::PointF(x, y), 
-    //                  Gfx::SizeF(width, height) );
+    ::Drawable from = window.surface().pixmapImpl()->drawable();
+    ::Window to = window.impl()->window();
 
-    //PaintEvent pev( window.vid(), rect);
-    //Application::instance().loop().commitEvent(pev);
+    XCopyArea( _display, from, to, 
+               _paintGc, x, y, width, height, x, y);
 
-
-
-    // ::Drawable from = window.surface().pixmapImpl()->drawable();
-    // ::Window to = window.impl()->window();
-    // const Pt::Gfx::SizeF& size = window.surface().size();
-
-    // std::clog << "expose backbuffer to window: "
-    //           << size.width() << "x" << size.height() << std::endl;
-
-    // XCopyArea( _display, from, to, 
-    //            _paintGc, 0, 0, size.width(), size.height(), 0, 0);
-
-    // XSync(_display, False);
+    XSync(_display, False);
 }
 
 
@@ -286,9 +281,9 @@ void ApplicationImpl::onClientMessage(Window& window, XEvent& xev)
 {
     Pt::uint64_t id =  window.vid();
 
-    if( xev.xclient.message_type == _atomProtocols ) 
+    if( xev.xclient.message_type == _wmProtocols ) 
     {
-        if( (Atom) xev.xclient.data.l[0] == _atomDeleteWindow)
+        if( (Atom) xev.xclient.data.l[0] == _wmDeleteWindow)
         {
             CloseEvent closeEvent(id);
             window.processEvent(closeEvent);
@@ -299,7 +294,7 @@ void ApplicationImpl::onClientMessage(Window& window, XEvent& xev)
 
 void ApplicationImpl::onShow(Window& w, bool v)
 {
-    std::clog << "MapNotify: " << v << std::endl;
+    //std::clog << "   ### MapNotify: " << std::boolalpha << v << std::endl;
 
     ShowEvent sev(w.vid(), v);
     commitEvent( sev );
@@ -480,13 +475,11 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
 
 void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
 {
-    std::clog << "ConfigureNotify" << std::endl;
-
     // Use only last configure event for the window in queue
-    XPending(_display);
+    //XPending(_display);
         
-    while( XCheckTypedWindowEvent(_display, xev.xany.window, ConfigureNotify, &xev) )
-        ;
+    //while( XCheckTypedWindowEvent(_display, xev.xany.window, ConfigureNotify, &xev) )
+    //    ;
 
     // PropertyNotify:
     //
@@ -506,17 +499,19 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
     {
         window.impl()->setSize(width, height);
 
-        std::clog << "resize event: " << width << "x" << height << std::endl;
+        //std::clog << "   ### resize event: " << width << "x" << height << std::endl;
         Gfx::SizeF to(width, height);
+        
         ResizeEvent rev( window.vid(), to );
         commitEvent(rev);
 
-        window.update();
+        Gfx::RectF updateRect(Gfx::PointF(0,0), to);
+        window.update(updateRect);
     }
 
     if( window.position().x() != x || window.position().y() != y) 
     {
-        std::clog << "move event: " << x << "x" << y << std::endl;
+        //std::clog << "   ### move event: " << x << "x" << y << std::endl;
         Gfx::PointF to(x, y);
         MoveEvent ev(window.vid(), to);
         commitEvent( ev );  

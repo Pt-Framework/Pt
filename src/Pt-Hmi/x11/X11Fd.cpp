@@ -88,16 +88,14 @@ void X11Fd::close()
 
 void X11Fd::flush()
 { 
-    XSync(_display, False);
-
     while( XPending(_display) > 0 ) 
 	{
         XNextEvent(_display, &_xev);
-        XSync(_display, False);
-        if(_xev.xany.type == ConfigureNotify)
-            std::clog << "ConfigureNotify" << std::endl;
-        else
-            std::clog << "EVENT: " <<  _xev.xany.type << std::endl;
+
+        // if(_xev.xany.type == ConfigureNotify)
+        //     std::clog << "ConfigureNotify" << std::endl;
+        // else
+        //     std::clog << "EVENT: " <<  _xev.xany.type << std::endl;
 
 		_eventReady.send(_xev);
     }
@@ -106,30 +104,29 @@ void X11Fd::flush()
 
 bool X11Fd::onRun()
 {
-    std::clog << "X11Fd::onRun BEGIN" << std::endl;
+    //std::clog << "X11Fd::onRun BEGIN" << std::endl;
 
     Pt::System::Selector& selector = _loop->selector();
     bool isAvail = selector.isReadable(&_ioh);
     if( ! isAvail ) 
         return isAvail;
 
-    selector.endRead(&_ioh);
+    //selector.endRead(&_ioh);
 
     while( XPending(_display) > 0 ) 
 	{
         XNextEvent(_display, &_xev);
         
-        if(_xev.xany.type == ConfigureNotify)
-            std::clog << "ConfigureNotify " <<  _xev.xany.type  << std::endl;
-        else
-            std::clog << "EVENT: " <<  _xev.xany.type << std::endl;
+        // if(_xev.xany.type == ConfigureNotify)
+        //     std::clog << "ConfigureNotify " <<  _xev.xany.type  << std::endl;
+        // else
+        //     std::clog << "EVENT: " <<  _xev.xany.type << std::endl;
 
 		_eventReady.send(_xev);
     }
 
-    selector.beginRead(&_ioh);
+    //selector.beginRead(&_ioh);
 
-    std::clog << "X11Fd::onRun DONE" << std::endl;
     return isAvail;
 }
 

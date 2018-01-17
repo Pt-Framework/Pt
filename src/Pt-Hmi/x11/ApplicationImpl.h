@@ -77,10 +77,40 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         void nextEvent();
 
+        void processEvent(XEvent& xev)
+        { 
+            onEvent(xev); 
+        }
+
+    public:
         ::Display* display()
         { 
             return _display; 
         }
+
+        Atom wmProtocols() const
+        { return _wmProtocols; }
+
+        Atom wmDeleteWindow() const
+        { return _wmDeleteWindow; }
+
+        Atom wmChangeState() const
+        { return _wmChangeState; }
+
+        Atom netWmState() const
+        { return _netWmState; }
+
+        Atom netWmStateMaximizedVert() const
+        { return _netWmStateMaximizedVert; }
+
+        Atom netWmStateMaximizedHorz() const
+        { return _netWmStateMaximizedHorz; }
+
+        Atom netWmStateHidden() const
+        { return _netWmStateHidden; }
+
+        Atom netWmStateAbove() const
+        { return _netWmStateAbove; }
 
     protected:
         virtual void onRun();
@@ -109,8 +139,14 @@ class ApplicationImpl : public Pt::System::MainLoop
     private:
         ::Display* _display;
         X11Fd       _xfd;
-        Atom       _atomProtocols;
-        Atom       _atomDeleteWindow;
+        Atom       _wmProtocols;
+        Atom       _wmDeleteWindow;
+        Atom       _wmChangeState;
+        Atom       _netWmState;
+        Atom       _netWmStateMaximizedVert;
+        Atom       _netWmStateMaximizedHorz;
+        Atom       _netWmStateHidden;
+        Atom       _netWmStateAbove;
         GC         _paintGc;
         MouseEvent _mouseEvent;
         KeyEvent   _keyEvent;

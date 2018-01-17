@@ -80,7 +80,9 @@ void MainWindowImpl::create(Window::Type type)
                        KeyReleaseMask|KeymapStateMask|
                        ButtonPressMask|ButtonReleaseMask|
                        PointerMotionMask|FocusChangeMask|
-                       SubstructureNotifyMask;
+                       SubstructureNotifyMask|VisibilityChangeMask|
+                       FocusChangeMask|EnterWindowMask|
+                       LeaveWindowMask;
 
     wattr.do_not_propagate_mask = 0;/*KeyPressMask|KeyReleaseMask|
                                   ButtonPressMask| ButtonReleaseMask|
@@ -132,11 +134,10 @@ void MainWindowImpl::create(Window::Type type)
                             winMask, 
                             &wattr);
 
-    Atom atomDeleteWindow = XInternAtom(_display, "WM_DELETE_WINDOW", false);
-    XSetWMProtocols(_display, _window, &atomDeleteWindow, 1);
-    //XSync(_display, False);
+    //std::clog << std::hex << "XCreateWindow: " << _window << std::dec << std::endl;
 
-    XUnmapWindow(_display, _window);
+    Atom atomDeleteWindow = Application::instance().impl()->wmDeleteWindow();
+    XSetWMProtocols(_display, _window, &atomDeleteWindow, 1);
 }
 
 
@@ -147,8 +148,6 @@ void MainWindowImpl::destroy()
     
     XDestroyWindow(_display, _window);
     _window = 0;
-
-    //XSync(_display, False);
 }
 
 
@@ -191,43 +190,29 @@ void MainWindowImpl::close()
  
     ev.xclient.type         = ClientMessage;
     ev.xclient.window       = _window;
-    ev.xclient.message_type = XInternAtom(_display, "WM_PROTOCOLS", true);
+    ev.xclient.message_type = Application::instance().impl()->wmProtocols();
     ev.xclient.format       = 32;
-    ev.xclient.data.l[0]    = XInternAtom(_display, "WM_DELETE_WINDOW", false);
+    ev.xclient.data.l[0]    = Application::instance().impl()->wmDeleteWindow();
     ev.xclient.data.l[1]    = CurrentTime;
     XSendEvent(_display, _window, False, NoEventMask, &ev);
 }
 
 
-void MainWindowImpl::paint(const Gfx::RectF& rect)
+void MainWindowImpl::paint(const Gfx::RectF& rectF)
 {    
-    std::clog << "MainWindowImpl::paint" << std::endl;
+    //std::clog << "XMainWindowImpl::paint" << rectF.x() << ", " << rectF.y()
+    //          << " " << rectF.width() << "x" << rectF.height() << std::endl;
 
-    unsigned int screen = XDefaultScreen(_display);
+    Gfx::Rect rect = Gfx::round(rectF);
 
-    const std::vector<Window*>& windows = Application::instance().screen().windows();
+    XExposeEvent ev = { Expose, 0, True, _display, _window, 
+                       static_cast<int>( rect.x() ),
+                       static_cast<int>( rect.y() ),
+                       static_cast<int>( rect.width() ),
+                       static_cast<int>( rect.height() ),
+                       0 };
 
-    std::vector<Window*>::const_iterator it;
-    for(it = windows.begin(); it != windows.end(); ++it)
-    {
-        if( (*it)->impl() == this )
-        {
-            const Pt::Gfx::SizeF& size = (*it)->surface().size();
-
-            std::clog << "paint backbuffer to window: "
-                      << rect.width() << "x" << rect.height() << std::endl;
-    
-            ::Drawable from = (*it)->surface().pixmapImpl()->drawable();
-            ::Window to = _window;
-            
-
-             XCopyArea( _display, from, to, XDefaultGC(_display, screen), 
-                        0, 0, size.width(), size.height(), 0, 0);
-
-            XSync(_display, False);
-            break;
-        }
-    }
+    Application::instance().impl()->processEvent( (XEvent&)ev);
 }
 
 
@@ -237,18 +222,32 @@ void MainWindowImpl::show(bool visible)
     {      
         // TODO: does TOPMOST state survive a hide/show?
         //setTopMost(_isTopMost);    
-        std::clog << "show: map" << std::endl;
+
         XMapWindow(_display, _window);
+        XFlush(_display);
+        
+        static bool firstShow = true;
+        if(firstShow)
+        {
+            firstShow = false;
+
+            while(true) 
+            {
+                XEvent _xev;
+                XNextEvent(_display, &_xev);
+
+                Application::instance().impl()->processEvent(_xev);
+
+                if(_xev.xany.type == Expose)
+                    break;
+            }
+        }
     }
     else
     {
-        std::clog << "show: unmap" << std::endl;
         XUnmapWindow(_display, _window);
+        XFlush(_display);
     }
-    
-    XSync(_display, False);
-    XFlush(_display);
-    std::clog << "pending: " << XPending(_display) << std::endl;
 }
 
 
@@ -291,70 +290,57 @@ void MainWindowImpl::enable(bool enabled)
 
 void MainWindowImpl::setTopMost(bool topMost)
 {
-    std::clog << "setTopMost: " << topMost << std::endl;
+    // Atom wm_state = Application::instance().impl()->netWmState();
+    // Atom wm_state_above = Application::instance().impl()->netWmStateAbove();
 
-    Atom wm_state = XInternAtom(_display, "_NET_WM_STATE", False);
-    Atom wm_state_above = XInternAtom(_display, "_NET_WM_STATE_ABOVE", False);
+    // // ClientMessage event
+    // XEvent event;
+    // event.xclient.type = ClientMessage;
 
-    // ClientMessage event
-    XEvent event;
-    event.xclient.type = ClientMessage;
+    // // value unimportant in this case
+    // event.xclient.serial = 0;
 
-    // value unimportant in this case
-    event.xclient.serial = 0;
+    // // coming from a SendEvent request, so True
+    // event.xclient.send_event = True;
 
-    // coming from a SendEvent request, so True
-    event.xclient.send_event = True;
+    // // the event originates from disp
+    // event.xclient.display = _display;
 
-    // the event originates from disp
-    event.xclient.display = _display;
+    // // the window whose state will be modified
+    // event.xclient.window = _window;
 
-    // the window whose state will be modified
-    event.xclient.window = _window;
+    // // the component Atom being modified in the window
+    // event.xclient.message_type = wm_state;
 
-    // the component Atom being modified in the window
-    event.xclient.message_type = wm_state;
+    // // specifies that data.l will be used
+    // event.xclient.format = 32;
 
-    // specifies that data.l will be used
-    event.xclient.format = 32;
+    // // _NET_WM_STATE_ADD or _NET_WM_STATE_REMOVE
+    // event.xclient.data.l[0] = topMost ? _NET_WM_STATE_ADD 
+    //                                   : _NET_WM_STATE_REMOVE;
 
-    // _NET_WM_STATE_ADD or _NET_WM_STATE_REMOVE
-    event.xclient.data.l[0] = topMost ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
+    // // the atom being added
+    // event.xclient.data.l[1] = wm_state_above;
 
-    // the atom being added
-    event.xclient.data.l[1] = wm_state_above;
-
-    // unused
-    event.xclient.data.l[2] = 0;
-    event.xclient.data.l[3] = 0;
-    event.xclient.data.l[4] = 0;
+    // // unused
+    // event.xclient.data.l[2] = 0;
+    // event.xclient.data.l[3] = 0;
+    // event.xclient.data.l[4] = 0;
     
-    XSendEvent(_display, XDefaultRootWindow(_display), False,
-               SubstructureRedirectMask, &event);
+    // XSendEvent(_display, XDefaultRootWindow(_display), False,
+    //            SubstructureRedirectMask, &event);
 }
 
 
 void MainWindowImpl::move(const Gfx::PointF& pos)
 {
     XMoveWindow(_display, _window, pos.x(), pos.y());
-
-    std::clog << "move: " << pos.x() << "x" << pos.y() << std::endl;
-
-    XSync(_display, False);
-    std::clog << "pending: " << XPending(_display) << std::endl;
 }
 
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
     XResizeWindow( _display, _window, size.width(), size.height() );
-
-    std::clog << "resize: " << size.width() << "x" << size.height() << std::endl;
-
-    XSync(_display, False);
-    std::clog << "pending: " << XPending(_display) << std::endl;
-
-    // TODO: try to poll() here on ConnectionNumber fd
 }
 
 
@@ -397,38 +383,38 @@ void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 
 void MainWindowImpl::setState(Window::State s)
 {
-    XClientMessageEvent ev;
+    // XClientMessageEvent ev;
         
-    ev.type   = ClientMessage;
-    ev.window = _window;
-    ev.format = 32;
+    // ev.type   = ClientMessage;
+    // ev.window = _window;
+    // ev.format = 32;
 
-    switch(s)
-    {
-        default:
-        case Window::Normal:
-            ev.message_type = XInternAtom(_display, "WM_CHANGE_STATE", False);
-            ev.data.l[0] = NormalState;
-            break;
+    // switch(s)
+    // {
+    //     default:
+    //     case Window::Normal:
+    //         ev.message_type = Application::instance().impl()->wmChangeState();
+    //         ev.data.l[0] = NormalState;
+    //         break;
 
-        case Window::Minimized:
-            ev.message_type = XInternAtom(_display, "WM_CHANGE_STATE", False);
-            ev.data.l[0] = IconicState;
-            break;
+    //     case Window::Minimized:
+    //         ev.message_type = Application::instance().impl()->wmChangeState();
+    //         ev.data.l[0] = IconicState;
+    //         break;
 
-        case Window::Maximized:
-            ev.serial     = 0;
-            ev.send_event = True;
-            ev.message_type = XInternAtom(_display, "_NET_WM_STATE",False);
-            ev.data.l[0]  = (unsigned long)1;
-            ev.data.l[1]  = XInternAtom(_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-            ev.data.l[2]  = XInternAtom(_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-            break;
-    }
+    //     case Window::Maximized:
+    //         ev.serial     = 0;
+    //         ev.send_event = True;
+    //         ev.message_type = Application::instance().impl()->netWmState();
+    //         ev.data.l[0]  = 1ul;
+    //         ev.data.l[1]  = Application::instance().impl()->netWmStateMaximizedVert();
+    //         ev.data.l[2]  = Application::instance().impl()->netWmStateMaximizedHorz();
+    //         break;
+    // }
 
-    XSendEvent(_display, DefaultRootWindow(_display), 
-               False, SubstructureRedirectMask|SubstructureNotifyMask,
-               (XEvent *)&ev);    
+    // XSendEvent(_display, DefaultRootWindow(_display), 
+    //            False, SubstructureRedirectMask|SubstructureNotifyMask,
+    //            (XEvent *)&ev);    
 
     //if(s == Window::Maximized)
     //{
@@ -453,9 +439,9 @@ bool MainWindowImpl::isMinimized()
     int actual_format;
     unsigned long num_items, bytes_after;
     Atom* atoms = 0;        
-    Atom requestAtom = XInternAtom(_display,"_NET_WM_STATE", False);
-    Atom compareAtom = XInternAtom(_display,"_NET_WM_STATE_HIDDEN", False);
-        
+    Atom requestAtom = Application::instance().impl()->netWmState();
+    Atom compareAtom = Application::instance().impl()->netWmStateHidden();
+
     XGetWindowProperty(_display, _window, 
                        requestAtom, 0, 1024, False, XA_ATOM, 
                        &actual_type, &actual_format, 
@@ -482,8 +468,8 @@ bool MainWindowImpl::isMaximized()
     int actual_format;
     unsigned long num_items, bytes_after;
     Atom* atoms = 0;
-    Atom requestAtom = XInternAtom(_display,"_NET_WM_STATE", False);
-    Atom compareAtom = XInternAtom(_display,"_NET_WM_STATE_MAXIMIZED_HORZ", False);
+    Atom requestAtom = Application::instance().impl()->netWmState();
+    Atom compareAtom = Application::instance().impl()->netWmStateMaximizedHorz();
 
     XGetWindowProperty(_display, _window,
                        requestAtom, 0, 1024, False, XA_ATOM, 

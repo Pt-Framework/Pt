@@ -243,7 +243,7 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     //std::clog << std::endl;
     //_clock.start();
 
-    std::clog << "Screen::onUpdateEvent" << std::endl;
+    //std::clog << "Screen::onUpdateEvent" << std::endl;
 
     const Gfx::RectF& screenRect = ev.rect();
 
@@ -262,7 +262,7 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
 
 void Screen::onPaintEvent(const PaintEvent& ev)
 {
-    std::clog << "Screen::onPaintEvent" << std::endl;
+    //std::clog << "Screen::onPaintEvent" << std::endl;
     
     _impl->paint( ev.rect() );
 
