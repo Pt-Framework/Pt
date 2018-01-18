@@ -69,8 +69,16 @@ void PixmapSurfaceImpl::create(const Pt::Gfx::SizeF& size)
     Display* display = Application::instance().impl()->display();
     unsigned int depth = XDefaultDepth( display, XDefaultScreen(display) );
     
+    int width = lround( size.width() );
+    if(width <= 0) 
+        width = 1;
+    
+    int height = lround( size.height() );
+    if(height <= 0)
+        height = 1;
+
     _drawable = XCreatePixmap(display, XDefaultRootWindow(display), 
-                              lround(size.width()), lround(size.height()), depth);
+                              width, height, depth);
 
 #ifndef _AIX
     unsigned int screen = XDefaultScreen(display);

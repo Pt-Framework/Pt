@@ -88,6 +88,8 @@ void X11Fd::close()
 
 void X11Fd::flush()
 { 
+    // TODO: flush may not be neccessary
+
     while( XPending(_display) > 0 ) 
 	{
         XNextEvent(_display, &_xev);

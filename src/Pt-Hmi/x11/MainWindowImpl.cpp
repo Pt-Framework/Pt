@@ -111,7 +111,7 @@ void MainWindowImpl::create(Window::Type type)
     wattr.cursor = None;
 
     // no WM interaction if True
-    wattr.override_redirect = False;
+    wattr.override_redirect = type == Window::Popup ? True : False;
 
     // Determines which fields from XSetWindowAttributes are used
     unsigned long winMask = CWWinGravity|CWBitGravity|
@@ -224,7 +224,7 @@ void MainWindowImpl::show(bool visible)
         XMapWindow(_display, _window);
         XFlush(_display);
 
-        if( ! _hasFirstShow)
+        if( ! _hasFirstShow )
         {
             _hasFirstShow = true;
             XEvent xev;
@@ -348,12 +348,15 @@ void MainWindowImpl::setTopMost(bool topMost)
 
 void MainWindowImpl::move(const Gfx::PointF& pos)
 {
+    //std::clog  << "XMoveWindow: " << pos.x() << ", " << pos.y() << std::endl;
     XMoveWindow(_display, _window, pos.x(), pos.y());
 }
 
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
+    //std::clog  << "XResizeWindow: " << size.width() 
+    //           << "x" << size.height() << std::endl;
     XResizeWindow( _display, _window, size.width(), size.height() );
 }
 

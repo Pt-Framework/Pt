@@ -273,7 +273,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     XCopyArea( _display, from, to,
                _paintGc, x, y, width, height, x, y);
 
-    XSync(_display, False);
+    XFlush(_display);
 }
 
 
@@ -331,7 +331,6 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
 
     switch(xev.xbutton.button)
     {
-        default:
         case Button1:
             button = MouseEvent::Left;
             break;
@@ -344,11 +343,8 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
             button = MouseEvent::Right;
             break;
 
-        case Button4: // wheel up
-            break;
-
-        case Button5: // wheel down;
-            break;
+        default:
+            return;
     }
 
     Pt::Gfx::PointF pos(x, y);
@@ -373,7 +369,6 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
 
     switch(xev.xbutton.button)
     {
-        default:
         case Button1:
             button = MouseEvent::Left;
             break;
@@ -387,10 +382,23 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
             break;
 
         case Button4: // wheel up
-            break;
+        {
+            ScrollEvent sev( window.vid() );
+            sev.set(ScrollEvent::Vertical, 20);
+            commitEvent(sev);
+            return;
+        }
 
         case Button5: // wheel down;
-            break;
+        {
+            ScrollEvent sev( window.vid() );
+            sev.set(ScrollEvent::Vertical, -20);
+            commitEvent(sev);
+            return;
+        }
+
+        default:
+            return;
     }
 
     Pt::Gfx::PointF pos(x, y);
