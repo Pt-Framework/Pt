@@ -1,10 +1,10 @@
 /* Copyright (C) 2013 Marc Boris Duerner
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
    version 2.1 of the License, or (at your option) any later version.
-   
+
    As a special exception, you may use this file as part of a free
    software library without restriction. Specifically, if other files
    instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
    License. This exception does not however invalidate any other
    reasons why the executable file might be covered by the GNU Library
    General Public License.
-   
+
    This library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301 USA
 */
 
@@ -33,9 +33,9 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 
-namespace Pt { 
+namespace Pt {
 
-namespace Hmi { 
+namespace Hmi {
 
 enum
 {
@@ -104,13 +104,13 @@ void MainWindowImpl::create(Window::Type type)
     wattr.bit_gravity = ForgetGravity;
 
     // How to to reposition when parent resizes
-    wattr.win_gravity = NorthWestGravity; 
+    wattr.win_gravity = NorthWestGravity;
 
     // None means parents cursor
     wattr.cursor = None;
 
     // no WM interaction if True
-    wattr.override_redirect = False; 
+    wattr.override_redirect = False;
 
     // Determines which fields from XSetWindowAttributes are used
     unsigned long winMask = CWWinGravity|CWBitGravity|
@@ -123,15 +123,15 @@ void MainWindowImpl::create(Window::Type type)
     unsigned int borderWidth = 0;
 
     // Create the X11 window
-    _window = XCreateWindow(_display, 
-                            root, 
-                            0, 0, 
+    _window = XCreateWindow(_display,
+                            root,
+                            0, 0,
                             _width, _height,
-                            borderWidth, 
-                            XDefaultDepth(_display, screen), 
-                            InputOutput, 
-                            XDefaultVisual(_display, screen), 
-                            winMask, 
+                            borderWidth,
+                            XDefaultDepth(_display, screen),
+                            InputOutput,
+                            XDefaultVisual(_display, screen),
+                            winMask,
                             &wattr);
 
     //std::clog << std::hex << "XCreateWindow: " << _window << std::dec << std::endl;
@@ -145,7 +145,7 @@ void MainWindowImpl::destroy()
 {
     if( _window == 0)
         return;
-    
+
     XDestroyWindow(_display, _window);
     _window = 0;
 }
@@ -154,13 +154,13 @@ void MainWindowImpl::destroy()
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 {
     ::Window root = DefaultRootWindow(_display);
-    int windowX = lround( windowPos.x() ); 
+    int windowX = lround( windowPos.x() );
     int windowY = lround( windowPos.y() );
     int screenX = 0;
     int screenY = 0;
     ::Window child = 0;
 
-    XTranslateCoordinates(_display, _window, root, 
+    XTranslateCoordinates(_display, _window, root,
                           windowX, windowY, &screenX, &screenY, &child);
 
     return Gfx::PointF(screenX, screenY);
@@ -170,13 +170,13 @@ Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
 {
     ::Window root = DefaultRootWindow(_display);
-    int screenX = lround( screenPos.x() ); 
+    int screenX = lround( screenPos.x() );
     int screenY = lround( screenPos.y() );
     int windowX = 0;
     int windowY = 0;
     ::Window child = 0;
 
-    XTranslateCoordinates(_display, root, _window, 
+    XTranslateCoordinates(_display, root, _window,
                           screenX, screenY, &windowX, &windowY, &child);
 
     return Gfx::PointF(windowX, windowY);
@@ -187,7 +187,7 @@ void MainWindowImpl::close()
 {
     XEvent ev;
     memset(&ev, 0, sizeof (ev));
- 
+
     ev.xclient.type         = ClientMessage;
     ev.xclient.window       = _window;
     ev.xclient.message_type = Application::instance().impl()->wmProtocols();
@@ -199,13 +199,13 @@ void MainWindowImpl::close()
 
 
 void MainWindowImpl::paint(const Gfx::RectF& rectF)
-{    
+{
     //std::clog << "XMainWindowImpl::paint" << rectF.x() << ", " << rectF.y()
     //          << " " << rectF.width() << "x" << rectF.height() << std::endl;
 
     Gfx::Rect rect = Gfx::round(rectF);
 
-    XExposeEvent ev = { Expose, 0, True, _display, _window, 
+    XExposeEvent ev = { Expose, 0, True, _display, _window,
                        static_cast<int>( rect.x() ),
                        static_cast<int>( rect.y() ),
                        static_cast<int>( rect.width() ),
@@ -217,21 +217,40 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
 
 
 void MainWindowImpl::show(bool visible)
-{    
+{
     if(visible)
-    {      
+    {
         // TODO: does TOPMOST state survive a hide/show?
-        //setTopMost(_isTopMost);    
+        //setTopMost(_isTopMost);
 
         XMapWindow(_display, _window);
         XFlush(_display);
-        
+
+        // Bring the window to front
+        if(Application::instance().impl()->_netWmActiveWindow != None) {
+            XEvent xev;
+            memset(&xev, 0, sizeof(xev));
+            xev.type = ClientMessage;
+            xev.xclient.display      = _display;
+            xev.xclient.window       = _window;
+            xev.xclient.message_type = Application::instance().impl()->_netWmActiveWindow;
+            xev.xclient.format       = 32;
+            xev.xclient.data.l[0]    = 2L; /* 2 == Message from a window pager */
+            xev.xclient.data.l[1]    = CurrentTime;
+
+            XWindowAttributes wattr;
+            XGetWindowAttributes(_display, _window, &wattr);
+            XSendEvent(_display, DefaultRootWindow(_display), False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
+
+            XFlush(_display);
+        }
+
         static bool firstShow = true;
         if(firstShow)
         {
             firstShow = false;
 
-            while(true) 
+            while(true)
             {
                 XEvent _xev;
                 XNextEvent(_display, &_xev);
@@ -274,12 +293,12 @@ void MainWindowImpl::enable(bool enabled)
     //                        PointerMotionMask|FocusChangeMask|
     //                        SubstructureNotifyMask;
 
-    //     wattr.override_redirect = False; 
+    //     wattr.override_redirect = False;
     // }
     // else
     // {
     //     wattr.event_mask = 0;
-    //     wattr.override_redirect = False; 
+    //     wattr.override_redirect = False;
     // }
 
     // unsigned long winMask = CWEventMask|CWOverrideRedirect;
@@ -316,7 +335,7 @@ void MainWindowImpl::setTopMost(bool topMost)
     // event.xclient.format = 32;
 
     // // _NET_WM_STATE_ADD or _NET_WM_STATE_REMOVE
-    // event.xclient.data.l[0] = topMost ? _NET_WM_STATE_ADD 
+    // event.xclient.data.l[0] = topMost ? _NET_WM_STATE_ADD
     //                                   : _NET_WM_STATE_REMOVE;
 
     // // the atom being added
@@ -326,7 +345,7 @@ void MainWindowImpl::setTopMost(bool topMost)
     // event.xclient.data.l[2] = 0;
     // event.xclient.data.l[3] = 0;
     // event.xclient.data.l[4] = 0;
-    
+
     // XSendEvent(_display, XDefaultRootWindow(_display), False,
     //            SubstructureRedirectMask, &event);
 }
@@ -360,7 +379,7 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 
 void MainWindowImpl::setTitle(const std::string& text)
 {
-    XStoreName(_display, _window, text.c_str());    
+    XStoreName(_display, _window, text.c_str());
 }
 
 
@@ -384,7 +403,7 @@ void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 void MainWindowImpl::setState(Window::State s)
 {
     // XClientMessageEvent ev;
-        
+
     // ev.type   = ClientMessage;
     // ev.window = _window;
     // ev.format = 32;
@@ -412,9 +431,9 @@ void MainWindowImpl::setState(Window::State s)
     //         break;
     // }
 
-    // XSendEvent(_display, DefaultRootWindow(_display), 
+    // XSendEvent(_display, DefaultRootWindow(_display),
     //            False, SubstructureRedirectMask|SubstructureNotifyMask,
-    //            (XEvent *)&ev);    
+    //            (XEvent *)&ev);
 
     //if(s == Window::Maximized)
     //{
@@ -424,11 +443,11 @@ void MainWindowImpl::setState(Window::State s)
 
 void MainWindowImpl::grabPointer()
 {
-    XGrabPointer(_display, _window, True, 
+    XGrabPointer(_display, _window, True,
                  ButtonPressMask|ButtonReleaseMask|
                  PointerMotionMask,
                  GrabModeAsync,
-                 GrabModeAsync, 
+                 GrabModeAsync,
                  None, None, CurrentTime);
 }
 
@@ -438,16 +457,16 @@ bool MainWindowImpl::isMinimized()
     Atom actual_type;
     int actual_format;
     unsigned long num_items, bytes_after;
-    Atom* atoms = 0;        
+    Atom* atoms = 0;
     Atom requestAtom = Application::instance().impl()->netWmState();
     Atom compareAtom = Application::instance().impl()->netWmStateHidden();
 
-    XGetWindowProperty(_display, _window, 
-                       requestAtom, 0, 1024, False, XA_ATOM, 
-                       &actual_type, &actual_format, 
-                       &num_items, &bytes_after, 
+    XGetWindowProperty(_display, _window,
+                       requestAtom, 0, 1024, False, XA_ATOM,
+                       &actual_type, &actual_format,
+                       &num_items, &bytes_after,
                        (unsigned char**)&atoms);
-        
+
     for(unsigned long i = 0; i < num_items; ++i)
     {
         if(atoms[i]==compareAtom)
@@ -461,7 +480,7 @@ bool MainWindowImpl::isMinimized()
     return false;
 }
 
-    
+
 bool MainWindowImpl::isMaximized()
 {
     Atom actual_type;
@@ -472,11 +491,11 @@ bool MainWindowImpl::isMaximized()
     Atom compareAtom = Application::instance().impl()->netWmStateMaximizedHorz();
 
     XGetWindowProperty(_display, _window,
-                       requestAtom, 0, 1024, False, XA_ATOM, 
-                       &actual_type, &actual_format, 
-                       &num_items, &bytes_after, 
+                       requestAtom, 0, 1024, False, XA_ATOM,
+                       &actual_type, &actual_format,
+                       &num_items, &bytes_after,
                        (unsigned char**)&atoms);
-        
+
     for(unsigned long i = 0; i < num_items; ++i)
     {
         if( atoms[i] == compareAtom )

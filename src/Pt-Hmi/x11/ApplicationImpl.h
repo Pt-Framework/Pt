@@ -78,14 +78,14 @@ class ApplicationImpl : public Pt::System::MainLoop
         void nextEvent();
 
         void processEvent(XEvent& xev)
-        { 
-            onEvent(xev); 
+        {
+            onEvent(xev);
         }
 
     public:
         ::Display* display()
-        { 
-            return _display; 
+        {
+            return _display;
         }
 
         Atom wmProtocols() const
@@ -147,9 +147,13 @@ class ApplicationImpl : public Pt::System::MainLoop
         Atom       _netWmStateMaximizedHorz;
         Atom       _netWmStateHidden;
         Atom       _netWmStateAbove;
+        Atom       _netWmActiveWindow;
+
         GC         _paintGc;
         MouseEvent _mouseEvent;
         KeyEvent   _keyEvent;
+
+        friend class MainWindowImpl;
 };
 
 } // namespace

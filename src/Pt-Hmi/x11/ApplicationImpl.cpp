@@ -22,10 +22,10 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301  USA
  */
- 
+
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
 #include "PixmapSurfaceImpl.h"
@@ -40,7 +40,7 @@
 #include <Pt/SourceInfo.h>
 
 namespace Pt {
-    
+
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
@@ -70,7 +70,7 @@ ApplicationImpl::ApplicationImpl()
 
     _wmProtocols     = XInternAtom(_display, "WM_PROTOCOLS", False);
     _wmDeleteWindow  = XInternAtom(_display, "WM_DELETE_WINDOW", False);
-    _wmChangeState = XInternAtom(_display, "WM_CHANGE_STATE", False);
+    _wmChangeState   = XInternAtom(_display, "WM_CHANGE_STATE", False);
 
     //_netWmState = XInternAtom(_display, "_NET_WM_STATE", False);
     //_netWmStateMaximizedVert = XInternAtom(_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
@@ -78,6 +78,9 @@ ApplicationImpl::ApplicationImpl()
     //_netWmStateHidden = XInternAtom(_display, "_NET_WM_STATE_HIDDEN", False);
     //_netWmStateAbove = XInternAtom(_display, "_NET_WM_STATE_ABOVE", False);
     //XSync(_display, False);
+
+    _netWmActiveWindow = XInternAtom(_display, "_NET_ACTIVE_WINDOW", False);
+
 }
 
 
@@ -169,7 +172,7 @@ void ApplicationImpl::nextEvent()
 
 void ApplicationImpl::onRun()
 {
-    //_xfd.flush();    
+    //_xfd.flush();
     MainLoop::onRun();
 }
 
@@ -184,11 +187,11 @@ Window* ApplicationImpl::findWindow(::Window window)
 
         if( ! w->impl() )
             continue;
-        
+
         if( w->impl()->window() == window )
             return w;
     }
-    
+
     return 0;
 }
 
@@ -201,7 +204,7 @@ void ApplicationImpl::onEvent(XEvent& ev)
 
     switch( ev.xany.type )
     {
-        case ClientMessage:  
+        case ClientMessage:
             onClientMessage(*w, ev);
             break;
 
@@ -213,31 +216,31 @@ void ApplicationImpl::onEvent(XEvent& ev)
             onShow(*w, false);
             break;
 
-        case MotionNotify:   
+        case MotionNotify:
             onMotionNotify(*w, ev);
             break;
 
         case ButtonPress:
-            onButtonPress(*w, ev);     
+            onButtonPress(*w, ev);
             break;
 
-        case ButtonRelease:   
-            onButtonRelease(*w, ev);     
+        case ButtonRelease:
+            onButtonRelease(*w, ev);
             break;
 
-        case Expose:         
+        case Expose:
             onExpose(*w, ev);
             break;
 
-        case NoExpose: 
+        case NoExpose:
             break;
 
         case ConfigureNotify:
-            onConfigureNotify(*w, ev); 
-            break;           
-        
+            onConfigureNotify(*w, ev);
+            break;
+
         case KeyPress:
-        case KeyRelease:  
+        case KeyRelease:
             onKeyEvent(*w, ev);
             break;
 
@@ -246,10 +249,10 @@ void ApplicationImpl::onEvent(XEvent& ev)
         //         bringWindowToTop();
         // break;
 
-        case EnterNotify:    
+        case EnterNotify:
             break;
 
-        case LeaveNotify:            
+        case LeaveNotify:
             break;
 
         default:
@@ -270,7 +273,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     ::Drawable from = window.surface().pixmapImpl()->drawable();
     ::Window to = window.impl()->window();
 
-    XCopyArea( _display, from, to, 
+    XCopyArea( _display, from, to,
                _paintGc, x, y, width, height, x, y);
 
     XSync(_display, False);
@@ -281,14 +284,14 @@ void ApplicationImpl::onClientMessage(Window& window, XEvent& xev)
 {
     Pt::uint64_t id =  window.vid();
 
-    if( xev.xclient.message_type == _wmProtocols ) 
+    if( xev.xclient.message_type == _wmProtocols )
     {
         if( (Atom) xev.xclient.data.l[0] == _wmDeleteWindow)
         {
             CloseEvent closeEvent(id);
             window.processEvent(closeEvent);
         }
-    }    
+    }
 }
 
 
@@ -329,25 +332,25 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
     std::size_t y = xev.xbutton.y;
     MouseEvent::Button button = MouseEvent::Left;
 
-    switch(xev.xbutton.button) 
+    switch(xev.xbutton.button)
     {
         default:
-        case Button1: 
-            button = MouseEvent::Left; 
+        case Button1:
+            button = MouseEvent::Left;
             break;
-        
-        case Button2: 
-            button = MouseEvent::Middle; 
+
+        case Button2:
+            button = MouseEvent::Middle;
             break;
-        
-        case Button3: 
-            button = MouseEvent::Right; 
+
+        case Button3:
+            button = MouseEvent::Right;
             break;
 
         case Button4: // wheel up
             break;
-        
-        case Button5: // wheel down; 
+
+        case Button5: // wheel down;
             break;
     }
 
@@ -371,25 +374,25 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
     std::size_t y = xev.xbutton.y;
     MouseEvent::Button button = MouseEvent::Left;
 
-    switch(xev.xbutton.button) 
+    switch(xev.xbutton.button)
     {
         default:
-        case Button1: 
-            button = MouseEvent::Left; 
+        case Button1:
+            button = MouseEvent::Left;
             break;
-        
-        case Button2: 
-            button = MouseEvent::Middle; 
+
+        case Button2:
+            button = MouseEvent::Middle;
             break;
-        
-        case Button3: 
-            button = MouseEvent::Right; 
+
+        case Button3:
+            button = MouseEvent::Right;
             break;
 
         case Button4: // wheel up
             break;
-        
-        case Button5: // wheel down; 
+
+        case Button5: // wheel down;
             break;
     }
 
@@ -430,14 +433,14 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
     // if( xev.xkey.state & Mod1Mask)
     //     modifiers |= MouseMoveEvent::AltDown;
 
-    switch(keySym) 
+    switch(keySym)
     {
-        case XK_Control_L: 
-        case XK_Control_R: 
+        case XK_Control_L:
+        case XK_Control_R:
             modifiers.add(Key::Control);
             break;
 
-        case XK_Alt_L: 
+        case XK_Alt_L:
         case XK_Alt_R:
             modifiers.add(Key::Alt);
             break;
@@ -451,8 +454,8 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
 
         default:
             break;
-    }        
-        
+    }
+
     Pt::Char ch = KeyHandler::keySymToUtf(keySym);
 
     //TODO: translate keySym to Key::Code
@@ -466,7 +469,7 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
     if(isPress)
         _keyEvent.setPress(key, ch);
     else
-        _keyEvent.setRelease(key, ch); 
+        _keyEvent.setRelease(key, ch);
 
     _keyEvent.setId( window.vid() );
     commitEvent(_keyEvent);
@@ -477,13 +480,13 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
 {
     // Use only last configure event for the window in queue
     //XPending(_display);
-        
+
     //while( XCheckTypedWindowEvent(_display, xev.xany.window, ConfigureNotify, &xev) )
     //    ;
 
     // PropertyNotify:
     //
-    // if( isWindowMinimized() )    
+    // if( isWindowMinimized() )
     //     _resizeEvent.setState( WindowState::Minimized );
     // else if( isWindowMaximized() )
     //     _resizeEvent.setState( WindowState::Maximazed );
@@ -495,13 +498,13 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
     const int x      = xev.xconfigure.x;
     const int y      = xev.xconfigure.y;
 
-    if( window.impl()->width() != width || window.impl()->height() != height ) 
+    if( window.impl()->width() != width || window.impl()->height() != height )
     {
         window.impl()->setSize(width, height);
 
         //std::clog << "   ### resize event: " << width << "x" << height << std::endl;
         Gfx::SizeF to(width, height);
-        
+
         ResizeEvent rev( window.vid(), to );
         commitEvent(rev);
 
@@ -509,12 +512,12 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         window.update(updateRect);
     }
 
-    if( window.position().x() != x || window.position().y() != y) 
+    if( window.position().x() != x || window.position().y() != y)
     {
         //std::clog << "   ### move event: " << x << "x" << y << std::endl;
         Gfx::PointF to(x, y);
         MoveEvent ev(window.vid(), to);
-        commitEvent( ev );  
+        commitEvent( ev );
     }
 }
 
