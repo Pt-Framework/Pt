@@ -112,6 +112,9 @@ class ApplicationImpl : public Pt::System::MainLoop
         Atom netWmStateAbove() const
         { return _netWmStateAbove; }
 
+        Atom netWmActiveWindow() const
+        { return _netWmActiveWindow; }
+
     protected:
         virtual void onRun();
 
@@ -152,8 +155,6 @@ class ApplicationImpl : public Pt::System::MainLoop
         GC         _paintGc;
         MouseEvent _mouseEvent;
         KeyEvent   _keyEvent;
-
-        friend class MainWindowImpl;
 };
 
 } // namespace

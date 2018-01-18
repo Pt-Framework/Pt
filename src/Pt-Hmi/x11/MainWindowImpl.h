@@ -128,6 +128,7 @@ class MainWindowImpl : public Pt::Connectable
     private:
         ::Window    _window;
         ::Display*  _display;
+        bool        _hasFirstShow;
         int         _width;
         int         _height;
 };

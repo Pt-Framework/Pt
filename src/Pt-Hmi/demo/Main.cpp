@@ -18,6 +18,7 @@ int main(int argc, char* args[])
         Pt::Hmi::Demo::MainWindow    mainWindow1;
         mainWindow1.setTitle("Main 1");
         mainWindow1.show();
+        mainWindow1.activate();
 
         //Pt::Hmi::Label label1;
         //label1.setText("Label 1");

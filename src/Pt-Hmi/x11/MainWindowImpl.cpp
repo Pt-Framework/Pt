@@ -48,6 +48,7 @@ enum
 MainWindowImpl::MainWindowImpl(Window::Type type)
 : _window(None)
 , _display(0)
+, _hasFirstShow(false)
 , _width(240)
 , _height(160)
 {
@@ -220,44 +221,20 @@ void MainWindowImpl::show(bool visible)
 {
     if(visible)
     {
-        // TODO: does TOPMOST state survive a hide/show?
-        //setTopMost(_isTopMost);
-
         XMapWindow(_display, _window);
         XFlush(_display);
 
-        // Bring the window to front
-        if(Application::instance().impl()->_netWmActiveWindow != None) {
-            XEvent xev;
-            memset(&xev, 0, sizeof(xev));
-            xev.type = ClientMessage;
-            xev.xclient.display      = _display;
-            xev.xclient.window       = _window;
-            xev.xclient.message_type = Application::instance().impl()->_netWmActiveWindow;
-            xev.xclient.format       = 32;
-            xev.xclient.data.l[0]    = 2L; /* 2 == Message from a window pager */
-            xev.xclient.data.l[1]    = CurrentTime;
-
-            XWindowAttributes wattr;
-            XGetWindowAttributes(_display, _window, &wattr);
-            XSendEvent(_display, DefaultRootWindow(_display), False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
-
-            XFlush(_display);
-        }
-
-        static bool firstShow = true;
-        if(firstShow)
+        if( ! _hasFirstShow)
         {
-            firstShow = false;
+            _hasFirstShow = true;
+            XEvent xev;
 
             while(true)
             {
-                XEvent _xev;
-                XNextEvent(_display, &_xev);
+                XNextEvent(_display, &xev);
+                Application::instance().impl()->processEvent(xev);
 
-                Application::instance().impl()->processEvent(_xev);
-
-                if(_xev.xany.type == Expose)
+                if(xev.xany.type == Expose)
                     break;
             }
         }
@@ -273,6 +250,24 @@ void MainWindowImpl::show(bool visible)
 void MainWindowImpl::activate()
 {
     //XSetInputFocus(_display, _window, RevertToNone, CurrentTime);
+
+    XEvent xev;
+    memset(&xev, 0, sizeof(xev));
+    xev.type = ClientMessage;
+    xev.xclient.display      = _display;
+    xev.xclient.window       = _window;
+    xev.xclient.message_type = Application::instance().impl()->netWmActiveWindow();
+    xev.xclient.format       = 32;
+    xev.xclient.data.l[0]    = 2L; /* 2 == Message from a window pager */
+    xev.xclient.data.l[1]    = CurrentTime;
+
+    XWindowAttributes wattr;
+    XGetWindowAttributes(_display, _window, &wattr);
+    
+    XSendEvent(_display, XDefaultRootWindow(_display), 
+               False, SubstructureNotifyMask|SubstructureRedirectMask, &xev);
+
+    XFlush(_display);
 }
 
 

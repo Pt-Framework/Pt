@@ -72,15 +72,12 @@ ApplicationImpl::ApplicationImpl()
     _wmDeleteWindow  = XInternAtom(_display, "WM_DELETE_WINDOW", False);
     _wmChangeState   = XInternAtom(_display, "WM_CHANGE_STATE", False);
 
-    //_netWmState = XInternAtom(_display, "_NET_WM_STATE", False);
-    //_netWmStateMaximizedVert = XInternAtom(_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-    //_netWmStateMaximizedHorz = XInternAtom(_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-    //_netWmStateHidden = XInternAtom(_display, "_NET_WM_STATE_HIDDEN", False);
-    //_netWmStateAbove = XInternAtom(_display, "_NET_WM_STATE_ABOVE", False);
-    //XSync(_display, False);
-
+    _netWmState = XInternAtom(_display, "_NET_WM_STATE", False);
+    _netWmStateMaximizedVert = XInternAtom(_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+    _netWmStateMaximizedHorz = XInternAtom(_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+    _netWmStateHidden = XInternAtom(_display, "_NET_WM_STATE_HIDDEN", False);
+    _netWmStateAbove = XInternAtom(_display, "_NET_WM_STATE_ABOVE", False);
     _netWmActiveWindow = XInternAtom(_display, "_NET_ACTIVE_WINDOW", False);
-
 }
 
 
