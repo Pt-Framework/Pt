@@ -76,7 +76,7 @@ void Rgb32Format::onSetPixel(Pixel& pixel, const Color& c,
                          ( uint32_t(c.blue () & 0xFF) );
 
     Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>( pixel.base() );
-    *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)val);
+    *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)&val);
 }
 
 

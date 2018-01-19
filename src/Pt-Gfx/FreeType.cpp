@@ -44,7 +44,9 @@
 namespace {
 
 static const unsigned DefaultFontSize = 12;
-static const FTC_FaceID DefaultFaceId = 0;
+
+// some versions of freetype do not work with NULL
+static const FTC_FaceID DefaultFaceId = reinterpret_cast<FTC_FaceID>(1);
 
 } // namespace
 
@@ -152,7 +154,6 @@ void FreeType::setFontDir(const System::Path& path)
     for( ; it != end; ++it)
     {
         System::Path fp = _fontDir / it->path();
-        std::string gg = fp.toLocal();
 
         FT_Face face;
         FT_Error err = FT_New_Face(_ft, fp.toLocal().c_str(), 0, &face);
@@ -328,7 +329,7 @@ void FreeType::draw(Image& image, const Color& color,
                     FTC_ImageType imageType)
 {
     // LOCK
-    
+
     // apply translation here, FT uses a 2x2 matrix for the other transformations
     PointF posF( p.x(), p.y() );
     posF.addX( t.dx() );

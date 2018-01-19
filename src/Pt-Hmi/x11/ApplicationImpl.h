@@ -83,9 +83,19 @@ class ApplicationImpl : public Pt::System::MainLoop
         }
 
     public:
-        ::Display* display()
+        ::Display* display() const
         {
             return _display;
+        }
+
+        ::Visual* visual() const
+        {
+            return _visual;
+        }
+
+        int depth() const
+        {
+            return _depth;
         }
 
         Atom wmProtocols() const
@@ -141,7 +151,9 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     private:
         ::Display* _display;
-        X11Fd       _xfd;
+        ::Visual*  _visual;
+        int        _depth;
+        X11Fd      _xfd;
         Atom       _wmProtocols;
         Atom       _wmDeleteWindow;
         Atom       _wmChangeState;

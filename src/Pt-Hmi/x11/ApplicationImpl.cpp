@@ -45,6 +45,8 @@ namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
 : _display( XOpenDisplay(NULL) )
+, _visual(0)
+, _depth(0)
 , _xfd(_display)
 , _mouseEvent(0)
 , _keyEvent(0)
@@ -56,7 +58,18 @@ ApplicationImpl::ApplicationImpl()
 
     //XSync(_display, false);
 
+    unsigned int screen = XDefaultScreen(_display);
     ::Window root = XDefaultRootWindow(_display);
+
+    XVisualInfo visualInfo = {};
+    if( ! XMatchVisualInfo(_display, screen, 24, TrueColor, &visualInfo) )
+    {
+        assert(false);
+        throw std::runtime_error("invalid X11 visual");
+    }
+
+    _visual = visualInfo.visual;
+    _depth = visualInfo.depth;
 
     // Set X11 to sync mode. Slow, for debugging only.
     //XSynchronize(_display, True);
@@ -169,7 +182,6 @@ void ApplicationImpl::nextEvent()
 
 void ApplicationImpl::onRun()
 {
-    //_xfd.flush();
     MainLoop::onRun();
 }
 

@@ -579,16 +579,8 @@ void Rasterizer2::setFont(const Font& font)
 {
     _font = font;
 
-    if( font.name().empty() )
-    {
-        Font defaultFont(FreeType::instance().defaultFont(), font);
-
-        _faceId = FreeType::instance().findFaceId(defaultFont);
-    }
-    else
-    {
-        _faceId = FreeType::instance().findFaceId(font);
-    }
+    // findFaceId returns default font for emtpy font names
+    _faceId = FreeType::instance().findFaceId(font);
 
     // setup the image type
     _imageType.face_id = _faceId;

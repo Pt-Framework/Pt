@@ -35,6 +35,7 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <sstream>
@@ -248,81 +249,40 @@ MainWindow::~MainWindow()
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
-    /*
+
     Painter painter( surface() );
 
-    Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
-
-    Gfx::Image image( painter.format(), Gfx::Size(600, 800) );
+    Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
     Gfx::ImagePainter2 imagePainter(image);
-    //imagePainter.setAntiAliasing(true);
+
+    //Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
 
     Pt::Gfx::Transform trans;
-    trans.translate(-125, -150);     
-    trans.rotateDeg(90);
-    trans.translate(125, 150);
-    
-    Pt::Gfx::Path path;    
-    path.moveTo( Pt::Gfx::PointF(100, 100) );
-    path.addRoundedRect(Pt::Gfx::SizeF(50, 50), 10);
+    trans.rotateDeg(-45);
 
-    //path.moveTo( Pt::Gfx::PointF(110, 110) );
-    //path.addRoundedRect(Pt::Gfx::SizeF(30, 30), 10);
-    //path.addEllipse( Pt::Gfx::SizeF(50, 150) );
-    //path.transform(trans);
-
-    //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0) ) );
-    imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10) );
-    //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10, Gfx::Pen::Dash) );
-    
-    
-    imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
+    Gfx::Pen pen( Gfx::Color::fromRgb8(255, 200, 100), 2);
+    imagePainter.setPen(pen);
 
     Gfx::ColorStops stops;
     stops.add(0, Gfx::Color::fromRgb8(255, 0, 0));
     stops.add(1.0, Gfx::Color::fromRgb8(0, 255, 0));
-
-    //imagePainter.setBrush( Gfx::Brush::radialGradient(0.25, 0.25, 0,
-    //                                                  0.5f, 0.5f, 0.5, stops) );
- 
-    //imagePainter.setBrush( Gfx::Brush::linearGradient(0.0, 0.5,
-    //                                                  1.0, 0.5, stops) );
- 
-    //imagePainter.setBrush( Gfx::Brush::linearGradient( Gfx::PointF(0, 10),
-    //                                                   Gfx::PointF(50, 10), stops) );
-
-    imagePainter.setBrush( Gfx::Brush::horizontalGradient(stops) );
     
-    //imagePainter.setClip( Gfx::RectF(50, 100, 50, 100) );
+    //Gfx::Brush brush = Gfx::Brush::linearGradient(0.0, 0.5, 1.0, 0.5, stops) );
+    Gfx::Brush brush = Gfx::Brush::radialGradient(0.25, 0.25, 0, 0.5f, 0.5f, 0.5, stops);
+    imagePainter.setBrush(brush);
 
-    //imagePainter.fillPath(path);
-    //imagePainter.drawPath(path);
+    Pt::Gfx::Path path;    
+    path.moveTo( Pt::Gfx::PointF(20, 20) );
+    path.addRoundedRect(Pt::Gfx::SizeF(200, 200), 10);
 
-    imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
-                                                 Pt::Gfx::SizeF(100, 100)), 10);
+    imagePainter.fillPath(path);
+    imagePainter.drawPath(path);
 
-    std::vector<Gfx::PointF> polyline;
-    polyline.push_back( Pt::Gfx::PointF(40, 40) );
-    polyline.push_back( Pt::Gfx::PointF(300, 100) );
-    polyline.push_back( Pt::Gfx::PointF(50, 300) );
-    polyline.push_back( Pt::Gfx::PointF(650, 250) );
-    polyline.push_back( Pt::Gfx::PointF(50, 50) );
-
-    //imagePainter.fillPolygon( &polyline[0], polyline.size() );
-    //imagePainter.drawPolyline( &polyline[0], polyline.size() );
-
-    //imagePainter.drawLine(  Pt::Gfx::PointF(50, 50), Pt::Gfx::PointF(300, 290)  );
-
-    //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
-    //imagePainter.drawEllipse(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 150));
-
-    //imagePainter.drawArc(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 100), 20, 200);
-
-    //imagePainter.setFont( Pt::Gfx::Font("", 24) );
-    //imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello", trans);
+    imagePainter.setFont( Pt::Gfx::Font("", 32) );
+    imagePainter.drawText(Pt::Gfx::PointF(20, 260), "Hello World!", trans);
 
     painter.setClip(rect);
-    painter.drawImage(Gfx::PointF(0, 0), image);*/
+    painter.drawImage(Gfx::PointF(0, 0), image);
 }
 
 

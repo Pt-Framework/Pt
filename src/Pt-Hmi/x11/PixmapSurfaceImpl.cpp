@@ -67,7 +67,7 @@ void PixmapSurfaceImpl::create(const Pt::Gfx::SizeF& size)
     _size = size;
 
     Display* display = Application::instance().impl()->display();
-    unsigned int depth = XDefaultDepth( display, XDefaultScreen(display) );
+    int depth = Application::instance().impl()->depth();
     
     int width = lround( size.width() );
     if(width <= 0) 
@@ -81,8 +81,8 @@ void PixmapSurfaceImpl::create(const Pt::Gfx::SizeF& size)
                               width, height, depth);
 
 #ifndef _AIX
+    ::Visual* visual = Application::instance().impl()->visual();
     unsigned int screen = XDefaultScreen(display);
-    ::Visual* visual = XDefaultVisual(display, screen);
     Colormap colorMap = XDefaultColormap(display, screen);
     _xftDraw = XftDrawCreate(display, _drawable, visual, colorMap);
 #endif  
@@ -428,38 +428,44 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
     if( ! _painter ) 
         return; 
 
-    Gfx::Point to = Gfx::round(toF);
-
-    Display* display = Application::instance().impl()->display();
-    GC& brushGc = _painter->impl()->brush();
-    unsigned int screen = DefaultScreen(display);
-    ::Visual* visual = XDefaultVisual(display, screen);
-    int depth = XDefaultDepth(display, screen);
-
-    Gfx::Image rgb24Image( Gfx::ImageFormat::rgb32(), image.size() );
-    Gfx::copy( image.begin(), image.end(), rgb24Image.begin() );
-
-    XImage* ximage = XCreateImage(display, visual, depth, ZPixmap, 
-                                  0, NULL, image.width(), image.height(), 8, 0);
-    ximage->data = (char*) rgb24Image.data();
+    Pt::Gfx::RectF imageRect( Pt::Gfx::PointF(0, 0),
+                              Pt::Gfx::SizeF(image.width(), image.height()) );
     
-    XPutImage( display, _drawable, brushGc, ximage, 
-               0, 0, to.x(), to.y(), 
-               rgb24Image.width(), rgb24Image.height() );
-
-    //XSync(display, false);
-    
-    ximage->data = NULL;
-    XDestroyImage(ximage); 
+    drawImage(toF, image, imageRect);
 }
 
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, 
                                   const Gfx::Image& image, 
-                                  const Gfx::RectF& imgRect)
+                                  const Gfx::RectF& imgRectF)
 {
-    // TODO
-    throw std::runtime_error("not implemented");
+    if( ! _painter ) 
+        return; 
+
+    Display* display = Application::instance().impl()->display();
+    unsigned int screen = DefaultScreen(display);
+    ::Visual* visual = Application::instance().impl()->visual();
+    int depth = Application::instance().impl()->depth();
+
+    //std::clog << "XCreateImage" << std::endl;
+    XImage* ximage = XCreateImage(display, visual, depth, ZPixmap, 0, 
+                                  (char*)image.data(), 
+                                  image.width(), image.height(), 
+                                  32, 0);
+    
+    Gfx::Point to = Gfx::round(toF);
+    Gfx::Rect imageRect = Gfx::round(imgRectF);
+    GC& brushGc = _painter->impl()->brush();
+
+    //std::clog << "XPutImage" << to.x() << " " << to.y() << std::endl;
+    XPutImage( display, _drawable, brushGc, ximage, 
+               imageRect.x(), imageRect.y(), to.x(), to.y(), 
+               imageRect.width(), imageRect.height() );
+    
+    ximage->data = NULL;
+
+    //std::clog << "XDestroyImage" << std::endl;
+    XDestroyImage(ximage); 
 }
 
 void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& toF, const Picture& pic)

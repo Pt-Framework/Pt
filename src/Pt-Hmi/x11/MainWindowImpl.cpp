@@ -33,6 +33,8 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 
+#include <cassert>
+
 namespace Pt {
 
 namespace Hmi {
@@ -66,13 +68,15 @@ MainWindowImpl::~MainWindowImpl()
 
 void MainWindowImpl::create(Window::Type type)
 {
-   // Display and Screen are inited in Application
+    // Display and Screen are inited in Application
     unsigned int screen = XDefaultScreen(_display);
     ::Window root       = XRootWindow(_display, screen);
+    ::Visual* visual = Application::instance().impl()->visual();
+    int depth = Application::instance().impl()->depth();
 
     XSetWindowAttributes wattr;
     memset(&wattr, 0, sizeof(wattr));
-    wattr.colormap = DefaultColormap(_display, screen);
+    wattr.colormap = XDefaultColormap(_display, screen);
 
     // The events we want to receive
     wattr.event_mask = StructureNotifyMask|ExposureMask|
@@ -129,9 +133,9 @@ void MainWindowImpl::create(Window::Type type)
                             0, 0,
                             _width, _height,
                             borderWidth,
-                            XDefaultDepth(_display, screen),
+                            depth,
                             InputOutput,
-                            XDefaultVisual(_display, screen),
+                            visual,
                             winMask,
                             &wattr);
 
