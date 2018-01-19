@@ -273,32 +273,27 @@ void MainWindowImpl::activate()
 
 void MainWindowImpl::enable(bool enabled)
 {
-    // XSetWindowAttributes wattr;
-    // memset(&wattr, 0, sizeof(wattr));
+    //std::clog  << "XChangeWindowAttributes: " << enabled << std::endl;
 
-    // //XGetWindowAttributes(_display, _window, &wattr)
+    XSetWindowAttributes wattr;
 
-    // if(enabled)
-    // {
-    //     wattr.event_mask = StructureNotifyMask|ExposureMask|
-    //                        PropertyChangeMask|EnterWindowMask|
-    //                        LeaveWindowMask|KeyPressMask|
-    //                        KeyReleaseMask|KeymapStateMask|
-    //                        ButtonPressMask|ButtonReleaseMask|
-    //                        PointerMotionMask|FocusChangeMask|
-    //                        SubstructureNotifyMask;
+    if(enabled)
+    {
+        wattr.event_mask = StructureNotifyMask|ExposureMask|
+                           PropertyChangeMask|EnterWindowMask|
+                           LeaveWindowMask|KeyPressMask|
+                           KeyReleaseMask|KeymapStateMask|
+                           ButtonPressMask|ButtonReleaseMask|
+                           PointerMotionMask|FocusChangeMask|
+                           SubstructureNotifyMask;
+    }
+    else
+    {
+        wattr.event_mask = 0;
+    }
 
-    //     wattr.override_redirect = False;
-    // }
-    // else
-    // {
-    //     wattr.event_mask = 0;
-    //     wattr.override_redirect = False;
-    // }
-
-    // unsigned long winMask = CWEventMask|CWOverrideRedirect;
-
-    // XChangeWindowAttributes(_display, _window, winMask, &wattr);
+    XChangeWindowAttributes(_display, _window, CWEventMask, &wattr);
+    XFlush(_display);
 }
 
 
