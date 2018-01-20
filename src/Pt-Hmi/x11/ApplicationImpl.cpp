@@ -379,6 +379,8 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
     std::size_t y = xev.xbutton.y;
     MouseEvent::Button button = MouseEvent::Left;
 
+    // ev.xbutton.state contains pressed buttons
+
     switch(xev.xbutton.button)
     {
         case Button1:
@@ -431,55 +433,34 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
     bool isPress = KeyPress == xev.xkey.type;
 
     KeySym keySym = 0;
-    char buffer[20]; // For dummy since the X function wants it
+    char buffer[20];
     XLookupString(&xev.xkey, buffer, sizeof(buffer), &keySym, NULL);
 
     Key::Modifiers modifiers;
 
-    // int modifiers = 0;
-    // if( xev.xkey.state & ShiftMask)
-    //     modifiers |= MouseMoveEvent::ShiftDown;
-    // if( xev.xkey.state & Button1Mask)
-    //     modifiers |= MouseMoveEvent::LeftButtonDown;
-    // if( xev.xkey.state & Button3Mask)
-    //     modifiers |= MouseMoveEvent::RightButtonDown;
-    // if( xev.xkey.state & Button2Mask)
-    //     modifiers |= MouseMoveEvent::MiddleButtonDown;
-    // if( xev.xkey.state & ControlMask)
-    //     modifiers |= MouseMoveEvent::CtrlDown;
-    // if( xev.xkey.state & Mod1Mask)
-    //     modifiers |= MouseMoveEvent::AltDown;
-
-    switch(keySym)
+    if(xev.xkey.state & ShiftMask)
     {
-        case XK_Control_L:
-        case XK_Control_R:
-            modifiers.add(Key::Control);
-            break;
-
-        case XK_Alt_L:
-        case XK_Alt_R:
+        modifiers.add(Key::Shift);
+    }
+    if(xev.xkey.state & ControlMask)
+    {
+        modifiers.add(Key::Control);
+    }
+    if(xev.xkey.state & Mod1Mask)
+    {
+        modifiers.add(Key::Alt);
+    }
+    if(xev.xkey.state & Mod5Mask)
+    {
             modifiers.add(Key::Alt);
-            break;
-
-        case XK_Shift_L :
-        case XK_Shift_R :
-            modifiers.add(Key::Shift);
-            break;
-
-        // TODO modifiers.add(Key::Meta);
-
-        default:
-            break;
+    }
+    if(xev.xkey.state & Mod4Mask)
+    {
+           modifiers.add(Key::Meta);
     }
 
     Pt::Char ch = KeyHandler::keySymToUtf(keySym);
-
-    //TODO: translate keySym to Key::Code
-    Pt::uint32_t keyCode = Key::NoKey;
-
-    if(keySym == XK_A)
-        keyCode = Key::A;
+    Pt::uint32_t keyCode = KeyHandler::keySymToCode(keySym);
 
     Key key(modifiers, keyCode);
 

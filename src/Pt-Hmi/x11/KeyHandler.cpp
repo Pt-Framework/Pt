@@ -18,7 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "KeyHandler.h"
-#include <iostream>
+#include <Pt/Hmi/Key.h>
+
+#include <X11/keysym.h>
 
 namespace Pt {
 namespace Hmi {
@@ -839,6 +841,191 @@ wchar_t keySymToUtf(int sym)
 
     // No translation possible, yes returning 0 is correct!
      return 0;
+}
+
+Pt::uint32_t keySymToCode(int keySym)
+{
+    Pt::uint32_t keyCode = Key::NoKey;
+
+    switch(keySym)
+    {
+        case XK_BackSpace:     keyCode = Key::Backspace; break;
+        case XK_Tab:           keyCode = Key::Tab;       break;
+        case XK_ISO_Left_Tab:  keyCode = Key::Tab;       break;
+        case XK_Return:        keyCode = Key::Return;    break;
+        case XK_Escape:        keyCode = Key::Escape;    break;
+        case XK_space:         keyCode = Key::Space;     break;
+
+        case XK_0:  keyCode = Key::D0;   break;
+        case XK_1:  keyCode = Key::D1;   break;
+        case XK_2:  keyCode = Key::D2;   break;
+        case XK_3:  keyCode = Key::D3;   break;
+        case XK_4:  keyCode = Key::D4;   break;
+        case XK_5:  keyCode = Key::D5;   break;
+        case XK_6:  keyCode = Key::D6;   break;
+        case XK_7:  keyCode = Key::D7;   break;
+        case XK_8:  keyCode = Key::D8;   break;
+        case XK_9:  keyCode = Key::D9;   break;
+
+        case XK_a:  keyCode = Key::A;   break;
+        case XK_b:  keyCode = Key::B;   break;
+        case XK_c:  keyCode = Key::C;   break;
+        case XK_d:  keyCode = Key::D;   break;
+        case XK_e:  keyCode = Key::E;   break;
+        case XK_f:  keyCode = Key::F;   break;
+        case XK_g:  keyCode = Key::G;   break;
+        case XK_h:  keyCode = Key::H;   break;
+        case XK_i:  keyCode = Key::I;   break;
+        case XK_j:  keyCode = Key::J;   break;
+        case XK_k:  keyCode = Key::K;   break;
+        case XK_l:  keyCode = Key::L;   break;
+        case XK_m:  keyCode = Key::M;   break;
+        case XK_n:  keyCode = Key::N;   break;
+        case XK_o:  keyCode = Key::O;   break;
+        case XK_p:  keyCode = Key::P;   break;
+        case XK_q:  keyCode = Key::Q;   break;
+        case XK_r:  keyCode = Key::R;   break;
+        case XK_t:  keyCode = Key::T;   break;
+        case XK_s:  keyCode = Key::S;   break;
+        case XK_u:  keyCode = Key::U;   break;
+        case XK_v:  keyCode = Key::V;   break;
+        case XK_w:  keyCode = Key::W;   break;
+        case XK_x:  keyCode = Key::X;   break;
+        case XK_y:  keyCode = Key::Y;   break;
+        case XK_z:  keyCode = Key::Z;   break;
+        
+        case XK_A:  keyCode = Key::A;   break;
+        case XK_B:  keyCode = Key::B;   break;
+        case XK_C:  keyCode = Key::C;   break;
+        case XK_D:  keyCode = Key::D;   break;
+        case XK_E:  keyCode = Key::E;   break;
+        case XK_F:  keyCode = Key::F;   break;
+        case XK_G:  keyCode = Key::G;   break;
+        case XK_H:  keyCode = Key::H;   break;
+        case XK_I:  keyCode = Key::I;   break;
+        case XK_J:  keyCode = Key::J;   break;
+        case XK_K:  keyCode = Key::K;   break;
+        case XK_L:  keyCode = Key::L;   break;
+        case XK_M:  keyCode = Key::M;   break;
+        case XK_N:  keyCode = Key::N;   break;
+        case XK_O:  keyCode = Key::O;   break;
+        case XK_P:  keyCode = Key::P;   break;
+        case XK_Q:  keyCode = Key::Q;   break;
+        case XK_R:  keyCode = Key::R;   break;
+        case XK_S:  keyCode = Key::S;   break;
+        case XK_T:  keyCode = Key::T;   break;
+        case XK_U:  keyCode = Key::U;   break;
+        case XK_V:  keyCode = Key::V;   break;
+        case XK_W:  keyCode = Key::W;   break;
+        case XK_X:  keyCode = Key::X;   break;
+        case XK_Y:  keyCode = Key::Y;   break;
+        case XK_Z:  keyCode = Key::Z;   break;
+
+        case XK_Shift_L:   keyCode = Key::ShiftKey;    break;
+        case XK_Shift_R:   keyCode = Key::ShiftKey;    break;
+        case XK_Control_L: keyCode = Key::ControlKey;  break;
+        case XK_Control_R: keyCode = Key::ControlKey;  break;
+        case XK_Alt_L:     keyCode = Key::AltKey;      break;
+        case XK_Alt_R:     keyCode = Key::AltKey;      break;
+        case XK_Meta_L:    keyCode = Key::MetaKey;     break;
+        case XK_Meta_R:    keyCode = Key::MetaKey;     break;
+
+        case XK_Left:   keyCode = Key::ArrowLeft;   break;
+        case XK_Right:  keyCode = Key::ArrowRight;  break;
+        case XK_Up:     keyCode = Key::ArrowUp;     break;
+        case XK_Down:   keyCode = Key::ArrowDown;   break;
+
+        case XK_Num_Lock:  keyCode = Key::NumLock;     break;
+        case XK_KP_0:       keyCode = Key::NumPad0;     break;
+        case XK_KP_1:       keyCode = Key::NumPad1;     break;
+        case XK_KP_2:       keyCode = Key::NumPad2;     break;
+        case XK_KP_3:       keyCode = Key::NumPad3;     break;
+        case XK_KP_4:       keyCode = Key::NumPad4;     break;
+        case XK_KP_5:       keyCode = Key::NumPad5;     break;
+        case XK_KP_6:       keyCode = Key::NumPad6;     break;
+        case XK_KP_7:       keyCode = Key::NumPad7;     break;
+        case XK_KP_8:       keyCode = Key::NumPad8;     break;
+        case XK_KP_9:       keyCode = Key::NumPad9;     break;
+
+        case XK_KP_Multiply:   keyCode = Key::Multiply;   break;
+        case XK_KP_Add:        keyCode = Key::Add;        break;
+        case XK_KP_Divide:     keyCode = Key::Divide;     break;
+        case XK_KP_Subtract:   keyCode = Key::Subtract;   break;
+        case XK_KP_Separator:  keyCode = Key::Separator;  break;
+        case XK_KP_Decimal:    keyCode = Key::Decimal;    break;
+
+        case XK_F1:   keyCode = Key::F1;   break;
+        case XK_F2:   keyCode = Key::F2;   break;
+        case XK_F3:   keyCode = Key::F3;   break;
+        case XK_F4:   keyCode = Key::F4;   break;
+        case XK_F5:   keyCode = Key::F5;   break;
+        case XK_F6:   keyCode = Key::F6;   break;
+        case XK_F7:   keyCode = Key::F7;   break;
+        case XK_F8:   keyCode = Key::F8;   break;
+        case XK_F9:   keyCode = Key::F9;   break;
+        case XK_F10:  keyCode = Key::F10;  break;
+        case XK_F11:  keyCode = Key::F11;  break;
+        case XK_F12:  keyCode = Key::F12;  break;
+        case XK_F13:  keyCode = Key::F13;  break;
+        case XK_F14:  keyCode = Key::F14;  break;
+        case XK_F15:  keyCode = Key::F15;  break;
+        case XK_F16:  keyCode = Key::F16;  break;
+        case XK_F17:  keyCode = Key::F17;  break;
+        case XK_F18:  keyCode = Key::F18;  break;
+        case XK_F19:  keyCode = Key::F19;  break;
+        case XK_F20:  keyCode = Key::F20;  break;
+        case XK_F21:  keyCode = Key::F21;  break;
+        case XK_F22:  keyCode = Key::F22;  break;
+        case XK_F23:  keyCode = Key::F23;  break;
+        case XK_F24:  keyCode = Key::F24;  break;
+
+        case XK_Insert:            keyCode = Key::Insert;       break;
+        case XK_Delete:            keyCode = Key::Delete;       break;
+        case XK_Home:              keyCode = Key::Home;         break;
+        case XK_End:               keyCode = Key::End;          break;
+        case XK_Page_Up:           keyCode = Key::PageUp;       break;
+        case XK_Page_Down:         keyCode = Key::PageDown;     break;
+        case XK_Caps_Lock:         keyCode = Key::CapsLock;     break;
+        case XK_Print:             keyCode = Key::PrintScreen;  break;
+        case XK_Sys_Req:           keyCode = Key::SysReq;       break;
+        case XK_Scroll_Lock:       keyCode = Key::ScrollLock;   break;
+        case XK_Pause:             keyCode = Key::Pause;        break;
+        case XK_Break:             keyCode = Key::Break;        break;
+        case XK_Clear:             keyCode = Key::Clear;        break;
+        // Key::Sleep
+        case XK_Select:            keyCode = Key::Select;       break;
+        //Key::Print
+        case XK_Execute:           keyCode = Key::Execute;      break;
+        case XK_Help:              keyCode = Key::Help;         break;
+        case XK_Menu:              keyCode = Key::AppsMenu;     break;
+        case XK_Mode_switch:       keyCode = Key::ModeChange;   break;
+
+        // Key::Play             
+        // Key::Zoom                               
+        // Key::BrowserBack      
+        // Key::BrowserForward   
+        // Key::BrowserRefresh   
+        // Key::BrowserStop      
+        // Key::BrowserSearch    
+        // Key::BrowserFavorites 
+        // Key::BrowserHome      
+        // Key::VolumeMute       
+        // Key::VolumeDown       
+        // Key::VolumeUp         
+        // Key::MediaNext        
+        // Key::MediaPrev        
+        // Key::MediaStop        
+        // Key::MediaPlay        
+        // Key::LaunchMail       
+        // Key::LaunchMedia      
+        // Key::LaunchApp1       
+        // Key::LaunchApp2       
+
+        default:
+            break;
+    }
+
+    return keyCode;
 }
 
 }}}
