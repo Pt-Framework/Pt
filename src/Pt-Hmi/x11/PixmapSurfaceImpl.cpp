@@ -443,7 +443,6 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF,
         return; 
 
     Display* display = Application::instance().impl()->display();
-    unsigned int screen = DefaultScreen(display);
     ::Visual* visual = Application::instance().impl()->visual();
     int depth = Application::instance().impl()->depth();
 
