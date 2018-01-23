@@ -303,45 +303,25 @@ void MainWindowImpl::enable(bool enabled)
 
 void MainWindowImpl::setTopMost(bool topMost)
 {
-    // Atom wm_state = Application::instance().impl()->netWmState();
-    // Atom wm_state_above = Application::instance().impl()->netWmStateAbove();
+    //std::clog << "setTopMost: " << topMost << std::endl;
 
-    // // ClientMessage event
-    // XEvent event;
-    // event.xclient.type = ClientMessage;
+    XEvent ev;
+    ev.xclient.type = ClientMessage;
+    ev.xclient.serial = 0; // not important
+    ev.xclient.send_event = True;
+    ev.xclient.display = _display;
+    ev.xclient.window = _window; // modified window
+    ev.xclient.message_type = Application::instance().impl()->netWmState();
+    ev.xclient.format = 32; // use data.l
+    ev.xclient.data.l[0] = topMost ? _NET_WM_STATE_ADD
+                                   : _NET_WM_STATE_REMOVE;
+    ev.xclient.data.l[1] = Application::instance().impl()->netWmStateAbove();
+    ev.xclient.data.l[2] = 0;
+    ev.xclient.data.l[3] = 0;
+    ev.xclient.data.l[4] = 0;
 
-    // // value unimportant in this case
-    // event.xclient.serial = 0;
-
-    // // coming from a SendEvent request, so True
-    // event.xclient.send_event = True;
-
-    // // the event originates from disp
-    // event.xclient.display = _display;
-
-    // // the window whose state will be modified
-    // event.xclient.window = _window;
-
-    // // the component Atom being modified in the window
-    // event.xclient.message_type = wm_state;
-
-    // // specifies that data.l will be used
-    // event.xclient.format = 32;
-
-    // // _NET_WM_STATE_ADD or _NET_WM_STATE_REMOVE
-    // event.xclient.data.l[0] = topMost ? _NET_WM_STATE_ADD
-    //                                   : _NET_WM_STATE_REMOVE;
-
-    // // the atom being added
-    // event.xclient.data.l[1] = wm_state_above;
-
-    // // unused
-    // event.xclient.data.l[2] = 0;
-    // event.xclient.data.l[3] = 0;
-    // event.xclient.data.l[4] = 0;
-
-    // XSendEvent(_display, XDefaultRootWindow(_display), False,
-    //            SubstructureRedirectMask, &event);
+    XSendEvent(_display, XDefaultRootWindow(_display), False,
+               SubstructureRedirectMask, &ev);
 }
 
 
