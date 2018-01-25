@@ -39,14 +39,6 @@ namespace Pt {
 
 namespace Hmi {
 
-enum
-{
-  _NET_WM_STATE_REMOVE = 0,
-  _NET_WM_STATE_ADD    = 1,
-  _NET_WM_STATE_TOGGLE = 2
-};
-
-
 MainWindowImpl::MainWindowImpl(Window::Type type)
 : _window(None)
 , _display(0)
@@ -225,6 +217,7 @@ void MainWindowImpl::show(bool visible)
 {
     if(visible)
     {
+        //std::clog  << "XMapWindow" << std::endl;
         XMapWindow(_display, _window);
         XFlush(_display);
 
@@ -245,6 +238,7 @@ void MainWindowImpl::show(bool visible)
     }
     else
     {
+        //std::clog  << "XMapWindow" << std::endl;
         XUnmapWindow(_display, _window);
         XFlush(_display);
     }
@@ -305,6 +299,13 @@ void MainWindowImpl::setTopMost(bool topMost)
 {
     //std::clog << "setTopMost: " << topMost << std::endl;
 
+    enum
+    {
+    _NET_WM_STATE_REMOVE = 0,
+    _NET_WM_STATE_ADD    = 1,
+    _NET_WM_STATE_TOGGLE = 2
+    };
+
     XEvent ev;
     ev.xclient.type = ClientMessage;
     ev.xclient.serial = 0; // not important
@@ -342,15 +343,39 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 
 void MainWindowImpl::setType(Window::Type type)
 {
-    // TODO
-    std::clog << "Window::setType not implemented" << std::endl;
+    //std::clog << "XChangeWindowAttributes: " << type << std::endl;
+
+    XSetWindowAttributes swattr;
+    swattr.override_redirect = (type == Window::Popup) ? True : False;
+
+    XChangeWindowAttributes(_display, _window, CWOverrideRedirect, &swattr);
+
+    XWindowAttributes wattr;
+    XGetWindowAttributes(_display, _window, &wattr);
+
+    if(wattr.map_state != IsUnmapped)
+    {
+        XUnmapWindow(_display, _window);
+        XMapWindow(_display,_window);
+    }
 }
 
 
 void MainWindowImpl::setIcon(const Gfx::Image& icon)
 {
-    // TODO
-    std::clog << "Window::setIcon not implemented" << std::endl;
+    //std::clog << "XAllocWMHints" << std::endl;
+    
+    XWMHints* hints = XAllocWMHints();
+    if ( ! hints )
+        return;
+
+    hints->flags = IconPixmapHint | IconPositionHint;
+    hints->icon_pixmap = None;
+    hints->icon_x = 0;
+    hints->icon_y = 0;
+
+    XSetWMHints(_display, _window, hints);
+    XFree(hints);
 }
 
 
@@ -362,61 +387,69 @@ void MainWindowImpl::setTitle(const std::string& text)
 
 void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
-//    XSizeHints sh;
-//    memset(&sh, 0, sizeof(sh));
-//    sh.flags = PMinSize | PMaxSize;
-//    sh.min_width  = sh.max_width  = width;
-//    sh.min_height = sh.max_height = height;
-//    XSetStandardProperties(display, window, window_name, icon_name, icon_pixmap, argv, argc, hints)
+    XSizeHints hints;
+    memset(&hints, 0, sizeof(hints));
 
+    hints.flags = PMinSize;
+    hints.min_width  = lround( s.width() );
+    hints.min_height = lround( s.height() );
+
+    XSetWMNormalHints(_display, _window, &hints);
 }
 
 
 void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
+    XSizeHints hints;
+    memset(&hints, 0, sizeof(hints));
+
+    hints.flags = PMaxSize;
+    hints.max_width  = lround( s.width() );
+    hints.max_height = lround( s.height() );
+
+    XSetWMNormalHints(_display, _window, &hints);
 }
 
 
 void MainWindowImpl::setState(Window::State s)
 {
-    // XClientMessageEvent ev;
+    //std::clog  << "setState: " << s << std::endl;
 
-    // ev.type   = ClientMessage;
-    // ev.window = _window;
-    // ev.format = 32;
+    XClientMessageEvent ev;
+    ev.type       = ClientMessage;
+    ev.serial     = 0;
+    ev.window     = _window;
+    ev.format     = 32;
+    ev.send_event = True;
+    
+    switch(s)
+    {
+        default:
+        case Window::Normal:
+            ev.message_type = Application::instance().impl()->wmChangeState();
+            ev.data.l[0] = NormalState;
+            break;
 
-    // switch(s)
-    // {
-    //     default:
-    //     case Window::Normal:
-    //         ev.message_type = Application::instance().impl()->wmChangeState();
-    //         ev.data.l[0] = NormalState;
-    //         break;
+        case Window::Minimized:
+            ev.message_type = Application::instance().impl()->wmChangeState();
+            ev.data.l[0] = IconicState;
+            break;
 
-    //     case Window::Minimized:
-    //         ev.message_type = Application::instance().impl()->wmChangeState();
-    //         ev.data.l[0] = IconicState;
-    //         break;
+        case Window::Maximized:
+            ev.message_type = Application::instance().impl()->netWmState();
+            ev.data.l[0]  = 1ul;
+            ev.data.l[1]  = Application::instance().impl()->netWmStateMaximizedVert();
+            ev.data.l[2]  = Application::instance().impl()->netWmStateMaximizedHorz();
+            break;
+    }
 
-    //     case Window::Maximized:
-    //         ev.serial     = 0;
-    //         ev.send_event = True;
-    //         ev.message_type = Application::instance().impl()->netWmState();
-    //         ev.data.l[0]  = 1ul;
-    //         ev.data.l[1]  = Application::instance().impl()->netWmStateMaximizedVert();
-    //         ev.data.l[2]  = Application::instance().impl()->netWmStateMaximizedHorz();
-    //         break;
-    // }
+    XSendEvent(_display, XDefaultRootWindow(_display),False, 
+               SubstructureRedirectMask,
+               (XEvent*)&ev);
 
-    // XSendEvent(_display, DefaultRootWindow(_display),
-    //            False, SubstructureRedirectMask|SubstructureNotifyMask,
-    //            (XEvent *)&ev);
-
-    //if(s == Window::Maximized)
-    //{
-    //    XRaiseWindow(_display,_window);
-    //}
+    XFlush(_display);
 }
+
 
 void MainWindowImpl::grabPointer()
 {
@@ -446,7 +479,7 @@ bool MainWindowImpl::isMinimized()
 
     for(unsigned long i = 0; i < num_items; ++i)
     {
-        if(atoms[i]==compareAtom)
+        if(atoms[i] == compareAtom)
         {
             XFree(atoms);
             return true;

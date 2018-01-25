@@ -20,6 +20,8 @@ int main(int argc, char* args[])
         mainWindow1.show();
         mainWindow1.activate();
 
+        //mainWindow1.setType(Pt::Hmi::Window::Popup);
+        
         //Pt::Hmi::Label label1;
         //label1.setText("Label 1");
         //label1.setAlignment(Pt::Hmi::Alignment::Center);
