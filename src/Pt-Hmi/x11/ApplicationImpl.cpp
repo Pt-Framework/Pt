@@ -259,14 +259,32 @@ void ApplicationImpl::onEvent(XEvent& ev)
         // break;
 
         case EnterNotify:
+            onEnterNotify(*w, ev);
             break;
 
         case LeaveNotify:
+            onLeaveNotify(*w, ev);
             break;
 
         default:
             break;
     }
+}
+
+
+void ApplicationImpl::onEnterNotify(Window& window, XEvent& xev)
+{
+    //std::clog << "EnterNotify" << std::endl;
+    Application::instance().setPointerWindow(&window);
+}
+
+
+void ApplicationImpl::onLeaveNotify(Window& window, XEvent& xev)
+{
+    //std::clog << "LeaveNotify" << std::endl;
+
+    Application::instance().setCursor(0);
+    Application::instance().setPointerWindow(0);
 }
 
 

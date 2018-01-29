@@ -133,6 +133,10 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         void onEvent(XEvent& ev);
 
+        void onEnterNotify(Window& window, XEvent& xev);
+
+        void onLeaveNotify(Window& window, XEvent& xev);
+
         void onExpose(Window& window, XEvent& xev);
 
         void onClientMessage(Window& window, XEvent& xev);
