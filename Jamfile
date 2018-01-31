@@ -163,6 +163,11 @@ if $(WITH_BUILTIN_FREETYPE)
     SubInclude PT_TOP src freetype src ;
 }
 
+if $(WITH_MBEDTLS)
+{
+    SubInclude PT_TOP src mbedtls ;
+}
+
 if $(WITH_OPENSSL)
 {
     SubInclude PT_TOP src openssl ;
@@ -208,7 +213,7 @@ if $(PT_SYSTEM)
 
     if $(WITH_HMI) = yes
     {
-        SubInclude PT_TOP src Pt-Hmi ;		
+        SubInclude PT_TOP src Pt-Hmi ;
     }
 }
 
@@ -219,17 +224,17 @@ if $(PT_SYSTEM)
 PT_LSB_PACKAGE_ROOTDIR = [ FDirName opt Pt-1.0.1 ] ;
 PT_LSB_PACKAGE_LIBDIR = [ FDirName $(PT_LSB_PACKAGE_ROOTDIR) lib ] ;
 
-PT_LSB_PACKAGE_DESCRIPTION = Platinum (Pt) is a comprehensive C++ framework, 
+PT_LSB_PACKAGE_DESCRIPTION = Platinum (Pt) is a comprehensive C++ framework,
                              which allows developers to write high-performance
                              applications for many platforms with only one
                              codebase. ;
 
-LsbPackage Pt-devel : --license 'extended LGPL' 
-                      --version 1.0.1 --release 1 
-                      --group 'C++ Framework' 
-                      --package 'Pt Development Team' 
-                      --vendor 'Pt Development Team' 
-                      --summary 'Platinum (Pt) C++ Framework Development Package' 
+LsbPackage Pt-devel : --license 'extended LGPL'
+                      --version 1.0.1 --release 1
+                      --group 'C++ Framework'
+                      --package 'Pt Development Team'
+                      --vendor 'Pt Development Team'
+                      --summary 'Platinum (Pt) C++ Framework Development Package'
                       --description '$(PT_LSB_PACKAGE_DESCRIPTION:J=" ")' ;
 
 PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt ] ;
@@ -265,20 +270,20 @@ LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/XmlRpc : [ GLOB $(
 PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Gfx ] ;
 LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Gfx : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
 
-LsbPackage Pt : --license 'extended LGPL' 
-                --version 1.0.1 --release 1 
-                --group 'C++ Framework' 
-                --package 'Pt Development Team' 
-                --vendor 'Pt Development Team' 
-                --summary 'Platinum (Pt) C++ Framework Runtime Libraries' 
+LsbPackage Pt : --license 'extended LGPL'
+                --version 1.0.1 --release 1
+                --group 'C++ Framework'
+                --package 'Pt Development Team'
+                --vendor 'Pt Development Team'
+                --summary 'Platinum (Pt) C++ Framework Runtime Libraries'
                 --description '$(PT_LSB_PACKAGE_DESCRIPTION:J=" ")' ;
 
-LsbPackageAdd Pt : $(PT_LSB_PACKAGE_LIBDIR) : $(PRELIB)Pt$(SUFDLL) 
-                                              $(PRELIB)Pt-System$(SUFDLL) 
-                                              $(PRELIB)Pt-Net$(SUFDLL) 
-                                              $(PRELIB)Pt-Ssl$(SUFDLL) 
-                                              $(PRELIB)Pt-Http$(SUFDLL) 
-                                              $(PRELIB)Pt-Unit$(SUFDLL) 
+LsbPackageAdd Pt : $(PT_LSB_PACKAGE_LIBDIR) : $(PRELIB)Pt$(SUFDLL)
+                                              $(PRELIB)Pt-System$(SUFDLL)
+                                              $(PRELIB)Pt-Net$(SUFDLL)
+                                              $(PRELIB)Pt-Ssl$(SUFDLL)
+                                              $(PRELIB)Pt-Http$(SUFDLL)
+                                              $(PRELIB)Pt-Unit$(SUFDLL)
                                               $(PRELIB)Pt-Xml$(SUFDLL)
                                               $(PRELIB)Pt-Remoting$(SUFDLL)
                                               $(PRELIB)Pt-Soap$(SUFDLL)
