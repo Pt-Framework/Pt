@@ -59,8 +59,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     Painter painter(_surface);
 
     Gfx::RectF rect( Gfx::PointF(0, 0), _surface.size() );
-    Pt::Gfx::Color bgColor(65535 * 0.4f, 65535 * 0.3f, 65535 * 0.4f);
-    painter.setBrush( Gfx::Brush(bgColor) );
+    painter.setBrush( Gfx::Color(bgColor) );
     painter.fillRect(rect);
 
     updateScreen( Gfx::Rect( Gfx::Point(0,0), _frameBuffer.size()));
@@ -115,7 +114,7 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
 
     Painter painter(_surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-    painter.setBrush( Pt::Gfx::Color(65535*0.4f, 65535*0.3f, 65535*0.4f) );
+    painter.setBrush( Pt::Gfx::Color(0, 0, 0) );
     painter.fillRect(updateRect);
 
     _windowManager.paint(_surface, updateRect);
