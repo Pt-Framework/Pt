@@ -649,6 +649,26 @@ void SerializationInfo::setDict()
 }
 
 
+void SerializationInfo::setStruct()
+{
+    if(_type == SerializationInfo::Context)
+        return;
+
+    if( ! _isCompound )
+    {
+        this->clearValue();
+
+        _value.seq.first = 0;
+        _value.seq.last = 0;
+        _value.seq.size = 0;
+
+        _isCompound = true;
+    }
+
+    _type = Struct;
+}
+
+
 void SerializationInfo::setContextual(SerializationContext& ctx)
 {
     if(_type == Context)

@@ -176,6 +176,10 @@ class PT_API SerializationInfo
         */
         void setDict();
 
+        /** @brief Set to struct type.
+        */
+        void setStruct();
+
         /** @brief Returns the used context.
         */
         SerializationContext* context() const
