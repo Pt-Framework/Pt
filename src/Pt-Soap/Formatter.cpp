@@ -127,7 +127,6 @@ namespace Soap {
 
 Formatter::Formatter(std::basic_ostream<Char>& os)
 : _state(OnBegin)
-, _onDictElement(false)
 , _reader(0)
 , _composer(0)
 , _os(&os)
@@ -482,7 +481,6 @@ void Formatter::onBeginParse(Composer& composer)
 {
     _str.clear();
     _state = OnBegin;
-    _onDictElement = false;
     _composer = &composer;
 }
 
@@ -520,13 +518,11 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         }
         else if(typeId == Type::DictElement)
         {
-            if( ! _onDictElement )
+            if( _state != OnDictElement )
               _composer = _composer->beginDictKey();
             else
               _composer = _composer->beginDictValue();
         }
-
-        _onDictElement = false;
 
         const Parameter* child = _paramStack.back()->type()->getParameter( se.name().local().narrow() );
         if( ! child)
@@ -542,17 +538,17 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         const Type::TypeId typeId = _paramStack.back()->type()->typeId();
         if(typeId == Type::Bool)
         {
-                const Pt::String& strval = c.content();
-                bool value = false;
+            const Pt::String& strval = c.content();
+            bool value = false;
                 
-                if( strval == "1" || strval == "true")
-                    value = true;
-                else if(strval == "0" || strval == "false")
-                    value = false;
-                else
-                    throw SerializationError("invalid boolean parameter");
+            if( strval == "1" || strval == "true")
+                value = true;
+            else if(strval == "0" || strval == "false")
+                value = false;
+            else
+                throw SerializationError("invalid boolean parameter");
 
-                _composer->setBool(value);
+            _composer->setBool(value);
         }
         else if(typeId == Type::Int)
         {
@@ -627,12 +623,12 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         _paramStack.pop_back();
 
+        _state = OnEndElement;
+
         // handle dict element value in next start element
         if( ! _paramStack.empty() )
           if( _paramStack.back()->type()->typeId() == Type::DictElement )
-            _onDictElement = true;
-
-        _state = OnEndElement;
+            _state = OnDictElement;
     }
 
     return _paramStack.size() == 0;

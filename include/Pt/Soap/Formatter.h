@@ -158,11 +158,11 @@ class PT_SOAP_API Formatter : public Pt::Formatter
             OnBegin,
             OnStartElement,
             OnCharacters,
+            OnDictElement,
             OnEndElement
         };
 
         State _state;
-        bool _onDictElement;
         Xml::XmlReader* _reader;
         std::vector<const Parameter*> _paramStack;
         Composer* _composer;

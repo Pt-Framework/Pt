@@ -149,32 +149,19 @@ class Parameter
     public:
         Parameter()
         : _type(0)
-        , _isOptional(false)
+        , _min(1)
+        , _max(1)
         {}
         
         Parameter(const std::string& name, const Type& t)
         : _name(name)
         , _type(&t)
+        , _min(1)
+        , _max(1)
         { }
 
         virtual ~Parameter()
         {}
-
-        void set(const std::string& name, const Type& t)
-        {
-            _name = name;
-            _type = &t;
-        }
-
-        bool isOptional() const
-        {
-          return _isOptional;
-        }
-
-        void setOptional(bool optional)
-        {
-          _isOptional = optional;
-        }
 
         const Type* type() const
         { return _type; }
@@ -182,10 +169,33 @@ class Parameter
         const std::string& name() const
         { return _name; }
 
+        void set(const std::string& name, const Type& t)
+        {
+            _name = name;
+            _type = &t;
+        }
+
+        int minOccurs() const
+        {
+          return _min;
+        }
+
+        int maxOccurs() const
+        {
+          return _max;
+        }
+
+        void setOccurrence(int min, int max)
+        {
+          _min = min;
+          _max= max;
+        }
+
     private:
         std::string _name;
         const Type* _type;
-        bool _isOptional;
+        int _min;
+        int _max;
 };
 
 
@@ -266,7 +276,8 @@ class PT_SOAP_API StructType : public ComplexType
 
         virtual ~StructType();
 
-        void addParameter(const std::string& name, const Type& param, bool optional = false);
+        void addParameter(const std::string& name, const Type& param, 
+                          int minOccurence = 1, int maxOccurence = 1);
 
         virtual const Parameter* getParameter(std::size_t n) const;
 

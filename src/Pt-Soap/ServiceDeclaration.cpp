@@ -167,10 +167,11 @@ StructType::~StructType()
 }
 
 
-void StructType::addParameter(const std::string& name, const Type& t, bool optional)
+void StructType::addParameter(const std::string& name, const Type& t, 
+                              int minOccurence, int maxOccurence)
 {
     Parameter param(name, t);
-    param.setOptional(optional);
+    param.setOccurrence(minOccurence, maxOccurence);
     
     _paramList.push_back(param);
 }
@@ -513,16 +514,20 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
             }
             else
             {
-                if( member->isOptional() )
-                {
-                  os << "<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\""
-                     << member->name() << "\" ";
-                }
+                os << "<s:element minOccurs=\"";
+                if(member->minOccurs() < 0)
+                  os << "unbounded";
                 else
-                {
-                  os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\""
-                     << member->name() << "\" ";
-                }
+                  os << member->minOccurs();
+               
+                os << "\" maxOccurs=\"";
+                
+                if(member->maxOccurs() < 0)
+                  os << "unbounded";
+                else
+                  os << member->maxOccurs(); 
+                
+                os << "\" name=\"" << member->name() << "\" ";
             }
 
             if( member->type()->isSimple() )
