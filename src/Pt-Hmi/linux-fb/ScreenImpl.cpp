@@ -1,5 +1,5 @@
- /* 
-  Copyright (C) 2015 Marc Boris Duerner 
+ /*
+  Copyright (C) 2015 Marc Boris Duerner
   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -24,7 +24,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA  02110-1301  USA
 */
 
@@ -47,7 +47,7 @@
 namespace Pt {
 
 namespace Hmi {
-  
+
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _frameBuffer( app.frameBuffer() )
 , _cursorPos( 0,0 )
@@ -59,7 +59,8 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     Painter painter(_surface);
 
     Gfx::RectF rect( Gfx::PointF(0, 0), _surface.size() );
-    painter.setBrush( Gfx::Color(bgColor) );
+    painter.setBrush( Gfx::Color(0, 0, 0) );
+    //painter.setBrush( Gfx::Color(bgColor) );
     painter.fillRect(rect);
 
     updateScreen( Gfx::Rect( Gfx::Point(0,0), _frameBuffer.size()));
@@ -102,13 +103,13 @@ Gfx::Image& ScreenImpl::image()
 
 
 void ScreenImpl::paint(const Gfx::RectF& updateRect)
-{                
+{
     if( ! _cursorBackground.empty() )
     {
-        bitBlit( _cursorBackground.data(), 
-                 _cursorBackground.width(), 
-                 _cursorBackground.height(), 
-                 _cursorPos, 
+        bitBlit( _cursorBackground.data(),
+                 _cursorBackground.width(),
+                 _cursorBackground.height(),
+                 _cursorPos,
                  image().data(), CopyOp );
     }
 
@@ -122,13 +123,13 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
  //   std::clog << "screen update2: " << clock.stop().toUSecs() << " usecs." << std::endl;
   //  std::clog << "update area2 " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
   //            << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
-                  
+
     updateScreen( Gfx::round(updateRect) );
 }
 
 
 Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
-{     
+{
     const Gfx::SizeF& screenSize = size();
     const double touchWidth  = 800;
     const double touchHeight = 480;
@@ -145,7 +146,7 @@ Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
             pos.setY( std::floor(scaleY * posRaw.y()) );
             break;
         }
-        
+
         case FrameBuffer::Rotation90Degree:
         {
               double scaleX =  screenSize.width() / touchHeight;
@@ -166,7 +167,7 @@ void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
 
     if( ! _cursorBackground.empty() )
     {
-        bitBlit( _cursorBackground.data(),  _cursorBackground.width(), _cursorBackground.height(), 
+        bitBlit( _cursorBackground.data(),  _cursorBackground.width(), _cursorBackground.height(),
                  _cursorPos, (Pt::uint8_t*)image().data(), CopyOp );
 
        _frameBuffer.output( image().data(),Gfx::Rect( _cursorPos, _cursorBackground.size() ) );
@@ -175,14 +176,14 @@ void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
     const Cursor& cursor = Application::instance().impl()->cursor();
 
     if( cursor.width() != 0 )
-        _cursorPos = Gfx::Point( mev.x() - cursor.xHotspot(), 
+        _cursorPos = Gfx::Point( mev.x() - cursor.xHotspot(),
                                  mev.y() - cursor.yHotspot() );
 
     if( _drawCursor )
     {
       if( ! cursor.empty() )
-        updateScreen( Gfx::Rect(_cursorPos, 
-                                Gfx::Size(cursor.width(), 
+        updateScreen( Gfx::Rect(_cursorPos,
+                                Gfx::Size(cursor.width(),
                                           cursor.height())) );
     }
 }
@@ -269,7 +270,7 @@ void ScreenImpl::onShow(Window& w, bool visible)
 
 
 void ScreenImpl::onActivate(Window& w)
-{ 
+{
     _windowManager.onActivate(&w);
 }
 
@@ -281,20 +282,20 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 
 
 void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
-{    
+{
     const size_t pixelSizeInByte = _frameBuffer.pixelSize();
     const Gfx::Size& imageSize = image.size();
-    const size_t yMax = std::min<size_t>(pos.y() + imageSize.height(), _frameBuffer.height() );    
+    const size_t yMax = std::min<size_t>(pos.y() + imageSize.height(), _frameBuffer.height() );
 
-    size_t widthInPixel = (pos.x() + imageSize.width()) < _frameBuffer.width() ? imageSize.width() 
+    size_t widthInPixel = (pos.x() + imageSize.width()) < _frameBuffer.width() ? imageSize.width()
                                                                                : _frameBuffer.width() - pos.x();
     const size_t widthInByte = widthInPixel * pixelSizeInByte;
-    
+
     for( Pt::ssize_t y = pos.y(); y < yMax; ++y )
     {
-        size_t lineOffset = y * _frameBuffer.lineLength() + 
+        size_t lineOffset = y * _frameBuffer.lineLength() +
                             pos.x() * pixelSizeInByte;
-       
+
        Pt::uint8_t* pdata = image.data() + (y - pos.y()) * image.view().stride();
         memcpy( pdata, &buffer[lineOffset], widthInByte );
     }
@@ -308,17 +309,17 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
     if( cursor.width() == 0  || cursor.height() == 0 )
         return;
 
-    if( _cursorBackground.width() != cursor.width() || 
+    if( _cursorBackground.width() != cursor.width() ||
         _cursorBackground.height() != cursor.height() )
     {
         Gfx::Size size( cursor.width(), cursor.height() );
-        _cursorBackground.reset(_frameBuffer.format(), size); 
+        _cursorBackground.reset(_frameBuffer.format(), size);
     }
-    
+
     grabImage( buffer, _cursorPos, _cursorBackground );
-    
+
     bitBlit(&cursor.andRgb888()[0], cursor.width(), cursor.height(), _cursorPos, buffer, AndOp);
-    bitBlit(&cursor.xorRgb888()[0], cursor.width(), cursor.height(), _cursorPos, buffer, XorOp);    
+    bitBlit(&cursor.xorRgb888()[0], cursor.width(), cursor.height(), _cursorPos, buffer, XorOp);
 }
 
 
@@ -330,25 +331,25 @@ void ScreenImpl::updateScreen(const Gfx::Rect& r)
 }
 
 
-void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, 
+void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h,
                           const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op )
 {
     static const size_t planePixelSize = 4;
     const size_t bufferPixelSize = _frameBuffer.depth() / 8;
-    const size_t bufferWidth  = std::min<size_t>( pos.x() + w, _frameBuffer.width() ); 
-    const size_t bufferHeight = std::min<size_t>( pos.y() + h, _frameBuffer.height() ); 
+    const size_t bufferWidth  = std::min<size_t>( pos.x() + w, _frameBuffer.width() );
+    const size_t bufferHeight = std::min<size_t>( pos.y() + h, _frameBuffer.height() );
     size_t yCursor = 0;
-    size_t xCursor = 0;    
+    size_t xCursor = 0;
 
     for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
     {
         const size_t lineOffsetBuffer  = yBuffer * _frameBuffer.lineLength();
         const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
-        
+
         xCursor = 0;
 
         for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
-        {            
+        {
             Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
             const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
 
