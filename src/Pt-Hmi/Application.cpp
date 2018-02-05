@@ -307,7 +307,7 @@ void Application::processTouchEvent(const TouchEvent& ev)
         
         double delta = scrollTo.y() - _scrollFrom.y();
 
-        if( ! _onScroll && std::fabs(delta) > 8 )
+        if( ! _onScroll && std::fabs(delta) > 10 )
         {
             //std::clog << "SCROLL STARTED" << std::endl;
             _onScroll = true;
