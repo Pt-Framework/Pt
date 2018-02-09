@@ -234,6 +234,7 @@ struct MBState
 {
     MBState()
     : n(0)
+    , value()
     {}
 
     int n;
