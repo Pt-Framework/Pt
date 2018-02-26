@@ -255,6 +255,11 @@ void ConversionTest::StringToInt()
     str = L"-123456";
     Pt::parseInt( str.begin(), str.end(), value);
     PT_UNIT_ASSERT( value == -123456 );
+
+    str.clear();
+    bool ok = false;
+    Pt::parseInt( str.begin(), str.end(), value, ok);
+    PT_UNIT_ASSERT( ! ok );
 }
 
 

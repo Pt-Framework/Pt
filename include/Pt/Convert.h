@@ -847,6 +847,9 @@ InIterT getSign(InIterT it, InIterT end, bool& pos, const FormatT& fmt)
 {
     pos = true;
 
+    if(it == end)
+      return it;
+
     if( *it == fmt.minus() )
     {
         pos = false;
