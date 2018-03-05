@@ -603,8 +603,8 @@ regatom( parse_state* state, int *flagp )
         *flagp |= HASWIDTH|SIMPLE;
         break;
     case '[': {
-            register int classr;
-            register int classend;
+            //register int classr;
+            //register int classend;
 
             if (*state->regparse == '^') {    /* Complement of range. */
                 ret = regnode(state, ANYBUT);
@@ -619,8 +619,8 @@ regatom( parse_state* state, int *flagp )
                     if (*state->regparse == ']' || *state->regparse == '\0')
                         regc(state, '-');
                     else {
-                        classr = UCHARAT(state->regparse-2)+1;
-                        classend = UCHARAT(state->regparse);
+                        int classr = UCHARAT(state->regparse-2)+1;
+                        int classend = UCHARAT(state->regparse);
 
                         if (classr > classend+1)
                             FAIL("invalid [] range");

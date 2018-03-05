@@ -46,6 +46,7 @@ namespace System {
 
 FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
 : _device(dev)
+, _storeCount(0)
 {
 }
 

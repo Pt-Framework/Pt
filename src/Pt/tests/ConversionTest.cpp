@@ -206,27 +206,27 @@ void ConversionTest::IntToString()
     int value = 0;
     Pt::String str;
     Pt::formatInt(std::back_inserter(str), value);
-    PT_UNIT_ASSERT( str.substr(0, 4) == L"0" );
+    PT_UNIT_ASSERT( str.substr(0, 4) == "0" );
 
     value = 1;
     str.clear();
     Pt::formatInt(std::back_inserter(str), value);
-    PT_UNIT_ASSERT( str.substr(0, 8) == L"1" );
+    PT_UNIT_ASSERT( str.substr(0, 8) == "1" );
 
     value = -1;
     str.clear();
     Pt::formatInt(std::back_inserter(str), value);
-    PT_UNIT_ASSERT( str.substr(0, 12) == L"-1" );
+    PT_UNIT_ASSERT( str.substr(0, 12) == "-1" );
     
     value = 123456;
     str.clear();
     Pt::formatInt(std::back_inserter(str), value);
-    PT_UNIT_ASSERT( str.substr(0, 8) == L"123456" );
+    PT_UNIT_ASSERT( str.substr(0, 8) == "123456" );
     
     value = -123456;
     str.clear();
     Pt::formatInt(std::back_inserter(str), value);
-    PT_UNIT_ASSERT( str.substr(0, 12) == L"-123456" );
+    PT_UNIT_ASSERT( str.substr(0, 12) == "-123456" );
 }
 
 void ConversionTest::StringToInt()

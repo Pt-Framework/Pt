@@ -75,7 +75,7 @@ Library::Library(const Library& other)
 
 Library& Library::operator=(const Library& other)
 {
-    if(_impl == other._impl)
+    if(_impl == other._impl || this == &other)
         return *this;
 
     _path = other._path;

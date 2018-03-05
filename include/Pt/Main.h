@@ -76,7 +76,7 @@ int wmain(int argc, wchar_t* wargv[])
     {
         delete argv[n];
     }
-    delete argv;
+    delete [] argv;
 
     return ret;
 }

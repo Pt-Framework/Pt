@@ -900,6 +900,8 @@ class SettingsReader
         , _line(1)
         , _depth(0)
         , _isDotted(false)
+        , _token()
+        , _section()
         { }
 
         void parse(SerializationInfo& si);
@@ -944,21 +946,13 @@ class SettingsReader
 
     private:
         State* state;
-
         State* _beforeComment;
-
         SerializationInfo* _current;
-
         std::basic_istream<Pt::Char>* _is;
-
         size_t _line;
-
         size_t _depth;
-
         bool _isDotted;
-
         Pt::String _token;
-
         Pt::String _section;
 };
 

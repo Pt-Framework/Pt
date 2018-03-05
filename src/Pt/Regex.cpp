@@ -95,6 +95,9 @@ Regex::~Regex()
 
 Regex& Regex::operator=(const Regex& other)
 {
+    if(this == &other)
+      return *this;
+
     if(_expr && 0 == --_expr->regrefs)
     {
         std::free(_expr);

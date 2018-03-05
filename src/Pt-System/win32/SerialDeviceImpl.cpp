@@ -74,7 +74,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
 
     std::size_t err = GetLastError();
 
-    if( h == 0  || h == INVALID_HANDLE_VALUE )
+    if( h == INVALID_HANDLE_VALUE )
         throw AccessFailed(port_);
 
     this->setHandle(h);
@@ -369,7 +369,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
 
     h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 
-    if( h == 0  || h == INVALID_HANDLE_VALUE )
+    if( h == INVALID_HANDLE_VALUE )
         throw AccessFailed(port_);
 
     try

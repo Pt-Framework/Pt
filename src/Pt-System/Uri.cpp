@@ -137,7 +137,6 @@ Uri::Uri(const std::string& uri)
       state_fragment
     } state = state_0;
 
-    std::string token;
     bool hasPort = false;
 
     for(std::string::const_iterator it = uri.begin(); it != uri.end(); ++it)
@@ -274,7 +273,7 @@ Uri::Uri(const std::string& uri)
               }
               else if (std::isdigit(ch)
                     || (ch >= 'a' && ch <= 'f')
-                    || (ch >= 'F' && ch <= 'F'))
+                    || (ch >= 'A' && ch <= 'F'))
                 _host += ch;
               else
                 throwInvalid(uri);
@@ -285,7 +284,7 @@ Uri::Uri(const std::string& uri)
                 state = state_ipv6end;
               else if (std::isdigit(ch)
                     || (ch >= 'a' && ch <= 'f')
-                    || (ch >= 'F' && ch <= 'F')
+                    || (ch >= 'A' && ch <= 'F')
                     || ch == ':')
                 _host += ch;
               else

@@ -51,7 +51,8 @@ class Attribute
         /** @brief Default constructor.
         */
         Attribute()
-        : _namespace(0)
+        : _name(0)
+        , _namespace(0)
         { }
 
         /** @brief Returns the qualified name.

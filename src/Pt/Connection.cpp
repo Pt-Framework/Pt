@@ -76,6 +76,9 @@ Connection::~Connection()
 
 Connection& Connection::operator=(const Connection& connection)
 {
+    if(this == &connection)
+      return *this;
+
     if( _data && 0 == _data->unref() ) 
     {
         this->close();

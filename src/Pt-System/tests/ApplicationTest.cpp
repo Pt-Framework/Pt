@@ -46,6 +46,7 @@ class ApplicationTest : public Pt::Unit::TestSuite
     public:
         ApplicationTest()
         : Pt::Unit::TestSuite("ApplicationTest")
+        , _cnt(0)
         {
             //Pt::Unit::TestSuite::registerMethod( "SignalTest", *this, &ApplicationTest::SignalTest);
         }

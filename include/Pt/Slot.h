@@ -84,6 +84,9 @@ class BindAdaptorBase
         
         BindAdaptorBase& operator=(const BindAdaptorBase& b)
         {
+            if(this == &b)
+              return *this;
+
             Slot* s = b.slot().clone();
             delete _slot;
             _slot = s;
