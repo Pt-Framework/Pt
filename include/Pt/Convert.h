@@ -34,6 +34,7 @@
 #include <Pt/TypeTraits.h>
 #include <string>
 #include <limits>
+#include <algorithm>
 #include <iterator>
 #include <cctype>
 #include <cmath>
