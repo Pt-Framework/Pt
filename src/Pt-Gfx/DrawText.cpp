@@ -39,10 +39,11 @@ namespace Gfx {
 
 DrawText::DrawText()
 : _faceId(0)
-, _fontAngle(0)
+, _fontSize(10)
 // TODO: handle _clip.isNull() like no clipping
 , _clip( Point(0, 0), Size(999999, 999999) )
 {
+  _faceId = FreeType::instance().defaultFace();
 }
 
 
@@ -53,15 +54,10 @@ DrawText::~DrawText()
 
 void DrawText::setFont(const Font& font)
 {
-    if( font.name().empty() )
-    {
-        Font defaultFont(FreeType::instance().defaultFont(), font);
-        _faceId = FreeType::instance().findFaceId(defaultFont);
-    }
-    else
-    {
-        _faceId = FreeType::instance().findFaceId(font);
-    }
+    // findFaceId returns default font for emtpy font names
+    _faceId = FreeType::instance().findFaceId(font);
+
+    _fontSize = font.size();
 
     // setup the image type
     _imageType.face_id = _faceId;
@@ -70,12 +66,12 @@ void DrawText::setFont(const Font& font)
     _imageType.flags   = FT_LOAD_DEFAULT;
 
     // normalize the rotation angle
-    _fontAngle = font.angle() % 3600;
-    if( _fontAngle < 0 )
-        _fontAngle += 3600;
+    Pt::ssize_t fontAngle = font.angle() % 3600;
+    if( fontAngle < 0 )
+        fontAngle += 3600;
 
     // setup the rotation matrix
-    const double angle = _fontAngle / 10.0;
+    const double angle = fontAngle / 10.0;
     if(angle > 0.01)
     {
         _transform.rotateDeg(angle);
@@ -89,7 +85,7 @@ void DrawText::setFont(const Font& font)
 
 FontMetrics DrawText::fontMetrics(const String& text)
 {
-    return FreeType::instance().fontMetrics(text, _faceId, &_imageType);
+    return FreeType::instance().fontMetrics(text, _faceId, _fontSize);
 }
 
 
@@ -98,7 +94,7 @@ void DrawText::draw(Image& image, const Color& color,
                     const CompositionMode& mode)
 {
     return FreeType::instance().draw(image, color, pos, text,_clip, mode,
-                                     _transform, _faceId, &_imageType);
+                                     _transform, _faceId, _fontSize);
 }
 
 

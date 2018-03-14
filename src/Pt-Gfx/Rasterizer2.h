@@ -582,6 +582,7 @@ class Rasterizer2
                                           PATTERN_BUFFER_SCALE_FACTOR];
         Font             _font;
         FTC_FaceID       _faceId;
+        std::size_t      _fontSize;
         FTC_ImageTypeRec _imageType;
         Transform        _transform;
 

@@ -39,6 +39,7 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
 #include <Pt/Singleton.h>
+
 #include <string>
 #include <vector>
 #include <map>
@@ -80,7 +81,7 @@ class FreeType : public Pt::Singleton<FreeType>
 
         FontMetrics fontMetrics(const String& text,
                                 FTC_FaceID faceId, 
-                                FTC_ImageType imageType);
+                                std::size_t fontSize);
 
         static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library,
                                     FT_Pointer request_data, FT_Face* face);
@@ -91,7 +92,7 @@ class FreeType : public Pt::Singleton<FreeType>
                   const Point& pos, const String& text, 
                   const Rect& clip, const CompositionMode& mode,
                   const Transform& transform, FTC_FaceID faceId, 
-                  FTC_ImageType imageType);
+                  std::size_t fontSize);
 
     protected:
         FreeType();

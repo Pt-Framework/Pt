@@ -67,7 +67,7 @@ if %errorlevel% neq 0 (
     goto :eof
 ) 
 
-call jam -q -j4
+call jam -q
 call jam -q install
 
 if %errorlevel% neq 0 (

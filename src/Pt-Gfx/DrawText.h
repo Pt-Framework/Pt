@@ -71,17 +71,16 @@ class DrawText
         */
         ~DrawText();
 
-
         /** @brief Sets the text font
 
             @param font The text font
         */
         void setFont(const Font& font);
 
-				void setClip(const Rect& clip)
-				{
-					_clip = clip;
-				}
+        void setClip(const Rect& clip)
+        {
+            _clip = clip;
+        }
 
         /** @brief Calculate font metrics for text
 
@@ -104,7 +103,9 @@ class DrawText
             @param text The text to draw
             @param mode The composition mode of the text
         */
-        void draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode);
+        void draw(Image& image, const Color& color, 
+                  const Point& pos, const String& text, 
+                  const CompositionMode& mode);
 
     private:
         void drawGlyph(Image& image, const Color& color, int xpos, int ypos,
@@ -112,11 +113,10 @@ class DrawText
 
   private:
         FTC_FaceID       _faceId;
+        std::size_t      _fontSize;
         FTC_ImageTypeRec _imageType;
         Transform        _transform;
-
-        Pt::ssize_t      _fontAngle;
-        Rect		     _clip;
+        Rect             _clip;
 };
 
 }} //namespace

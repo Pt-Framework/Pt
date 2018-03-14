@@ -86,6 +86,7 @@ Rasterizer2::Rasterizer2(Image& image)
 , _brushImage(0)
 , _penPixel( _image->view(), 0, 0 )
 , _faceId(0)
+, _fontSize(10)
 {
     updateClip();
 
@@ -582,6 +583,8 @@ void Rasterizer2::setFont(const Font& font)
     // findFaceId returns default font for emtpy font names
     _faceId = FreeType::instance().findFaceId(font);
 
+    _fontSize = font.size();
+
     // setup the image type
     _imageType.face_id = _faceId;
     _imageType.width   = font.size();
@@ -637,15 +640,13 @@ void Rasterizer2::drawText(const Point& to, const Pt::String& text,
 {
     FreeType::instance().draw(*_image, _pen.color(), to, text,
                                _currentClip, _compositionMode,
-                               transform, _faceId, &_imageType);
+                               transform, _faceId, _fontSize);
 }
 
 
 FontMetrics Rasterizer2::fontMetrics(const String& text) const
 {
-    FTC_ImageType imageType = const_cast<FTC_ImageType>(&_imageType);
-
-    return FreeType::instance().fontMetrics(text, _faceId, imageType);
+    return FreeType::instance().fontMetrics(text, _faceId, _fontSize);
 }
 
 
@@ -653,13 +654,7 @@ FontMetrics Rasterizer2::fontMetrics(const Font& font, const Pt::String& text)
 {
     FTC_FaceID faceId = FreeType::instance().findFaceId(font);
 
-    FTC_ImageTypeRec imageType;
-    imageType.face_id = faceId;
-    imageType.width   = font.size();
-    imageType.height  = font.size();
-    imageType.flags   =  FT_LOAD_DEFAULT | FT_LOAD_RENDER;
-
-    return FreeType::instance().fontMetrics(text, faceId, &imageType);
+    return FreeType::instance().fontMetrics(text, faceId, font.size());
 }
 
 

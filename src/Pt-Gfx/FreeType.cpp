@@ -235,7 +235,7 @@ FT_Error FreeType::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 
 FontMetrics FreeType::fontMetrics(const String& text,
                                   FTC_FaceID faceId,
-                                  FTC_ImageType imageType)
+                                  std::size_t fontSize)
 {
     // LOCK
 
@@ -243,6 +243,15 @@ FontMetrics FreeType::fontMetrics(const String& text,
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
     if(ferr)
         return FontMetrics(0, 0, 0, 0);
+
+    // calculate total font height
+    double fontHeight = (face->height / double(face->ascender)) * fontSize;
+
+    FTC_ImageTypeRec imageType;
+    imageType.face_id = faceId;
+    imageType.height  = static_cast<unsigned>(fontHeight + 0.1);
+    imageType.width   = imageType.height;
+    imageType.flags   = FT_LOAD_DEFAULT;
 
     FT_Int charMapIndex = 0;
     for(int n = 0; n < face->num_charmaps; ++n)
@@ -255,9 +264,9 @@ FontMetrics FreeType::fontMetrics(const String& text,
     }
 
     FTC_ScalerRec scaler;
-    scaler.face_id = imageType->face_id;
-    scaler.width   = imageType->width;
-    scaler.height  = imageType->height;
+    scaler.face_id = imageType.face_id;
+    scaler.width   = imageType.width;
+    scaler.height  = imageType.height;
     scaler.pixel   = 1; // 1 means TRUE and scaler.x_res and scaler.y_res are ignored
 
     FT_Size size;
@@ -282,7 +291,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
             continue;
 
         FTC_Node node;
-        if( FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node) )
+        if( FTC_ImageCache_Lookup(_imageCache, &imageType, glyph_index, &glyph, &node) )
             continue;
 
         if( FT_HAS_KERNING(face) && previous )
@@ -326,17 +335,16 @@ void FreeType::draw(Image& image, const Color& color,
                     const Point& p, const String& text,
                     const Rect& clip, const CompositionMode& mode,
                     const Transform& t, FTC_FaceID faceId,
-                    FTC_ImageType imageType)
+                    std::size_t fontSize)
 {
     // LOCK
 
     // apply translation here, FT uses a 2x2 matrix for the other transformations
-    PointF posF( p.x(), p.y() );
-    posF.addX( t.dx() );
-    posF.addY( t.dy() );
+    PointF translatedPos( p.x(), p.y() );
+    translatedPos.addX( t.dx() );
+    translatedPos.addY( t.dy() );
     
-    Point pos( Pt::lround(posF.x()),
-               Pt::lround(posF.y()) );
+    Point pos = round(translatedPos);
 
     FT_Matrix matrix;
     matrix.xx = t.m11() * 0x10000L;
@@ -348,6 +356,15 @@ void FreeType::draw(Image& image, const Color& color,
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
     if(ferr)
         return;
+
+    // calculate total font height
+    double fontHeight = (face->height / double(face->ascender)) * fontSize;
+    
+    FTC_ImageTypeRec imageType;
+    imageType.face_id = faceId;
+    imageType.height  = static_cast<unsigned>(fontHeight + 0.1);
+    imageType.width   = imageType.height;
+    imageType.flags   = FT_LOAD_DEFAULT;
 
     FT_Int charMapIndex = 0;
     for(int n = 0; n < face->num_charmaps; ++n)
@@ -387,7 +404,7 @@ void FreeType::draw(Image& image, const Color& color,
         {
             FTC_Node node = 0;
             FTC_SBit glyphBitmap = 0;
-            if( FTC_SBitCache_Lookup( _bitmapCache, imageType, glyphIndex,
+            if( FTC_SBitCache_Lookup( _bitmapCache, &imageType, glyphIndex,
                                       &glyphBitmap, &node ) )
                 continue;
 
@@ -414,7 +431,7 @@ void FreeType::draw(Image& image, const Color& color,
         {
             FTC_Node node = 0;
             FT_Glyph glyph = 0;
-            FT_Error err = FTC_ImageCache_Lookup(_imageCache, imageType, glyphIndex, &glyph, &node);
+            FT_Error err = FTC_ImageCache_Lookup(_imageCache, &imageType, glyphIndex, &glyph, &node);
             err += FT_Glyph_Copy(glyph, &glyphCopy);
             
             err += FT_Glyph_Transform(glyphCopy, &matrix, 0);

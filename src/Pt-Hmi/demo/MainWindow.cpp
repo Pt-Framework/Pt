@@ -278,7 +278,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.fillPath(path);
     imagePainter.drawPath(path);
 
-    imagePainter.setFont( Pt::Gfx::Font("", 32) );
+    imagePainter.setFont( Pt::Gfx::Font("", 24) );
     imagePainter.drawText(Pt::Gfx::PointF(20, 260), "Hello World!", trans);
 
     painter.setClip(rect);

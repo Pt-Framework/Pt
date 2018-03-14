@@ -347,11 +347,16 @@ class PainterImpl
                           font.style() == Pt::Gfx::Font::BoldItalic;
 
             HDC dc = GetDC(NULL);
-            int height = -MulDiv(font.size(), GetDeviceCaps(dc, LOGPIXELSY), 72);
+            int logicalPPI = GetDeviceCaps(dc, LOGPIXELSY);
+            int height = MulDiv(font.size(), logicalPPI, 72);
             ReleaseDC(NULL, dc);
             
+            // If a negative value is used for lfHeight, the  a font is
+            // looked up by character size, which is only the ascent.
+            // Looking up fonts by ascent seems to be more portable.
+
             LOGFONT lf;
-            lf.lfHeight         = height;                      // converted to device units    
+            lf.lfHeight         = -height;                     // will be converted to device units    
             lf.lfWidth          = 0;                           // default width of the font
             lf.lfEscapement     = font.angle();                // escapement angle
             lf.lfOrientation    = 0;                           // orientation
