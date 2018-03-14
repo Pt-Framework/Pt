@@ -243,6 +243,8 @@ class PainterImpl
             HFONT newFont = getFont(font);
             HFONT oldFont = (HFONT)SelectObject(dc, newFont);
     
+            int logicalPPI = GetDeviceCaps(dc, LOGPIXELSY);
+
             SIZE textSize;
             TEXTMETRIC tm;
             GetTextMetrics(dc, &tm);
@@ -256,6 +258,16 @@ class PainterImpl
             DeleteObject(newFont);
 
             ReleaseDC(NULL, dc);
+
+            std::size_t ascent = MulDiv(tm.tmAscent, 72, logicalPPI);
+            std::size_t descent = MulDiv(tm.tmDescent, 72, logicalPPI);
+            std::size_t width = MulDiv(textSize.cx, 72, logicalPPI);
+            std::size_t height = MulDiv(textSize.cy, 72, logicalPPI);
+
+            //return Gfx::FontMetrics(ascent, 
+            //                        descent, 
+            //                        width, 
+            //                        height);
 
             return Gfx::FontMetrics(tm.tmAscent, 
                                     tm.tmDescent, 

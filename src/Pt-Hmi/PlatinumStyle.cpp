@@ -325,7 +325,7 @@ void PlatinumCheckBoxRenderer::onPrepare(const CheckBox& cb,
                                          Gfx::Pen& textPen,
                                          Gfx::SizeF& boxSize) const 
 {
-    boxSize.set( font.size(), font.size() );
+    boxSize.set( font.size() * 1.2, font.size() * 1.2 );
 }
 
 

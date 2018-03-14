@@ -453,9 +453,19 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
     
-    GetTextExtentPoint32W(_dc, 
-                          wtext.c_str(), wtext.size(), &textSize);
+    GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
     
+    int logicalPPI = GetDeviceCaps(_dc, LOGPIXELSY);
+
+    std::size_t ascent = MulDiv(tm.tmAscent, 72, logicalPPI);
+    std::size_t descent = MulDiv(tm.tmDescent, 72, logicalPPI);
+    std::size_t width = MulDiv(textSize.cx, 72, logicalPPI);
+    std::size_t height = MulDiv(textSize.cy, 72, logicalPPI);
+
+    //return Gfx::FontMetrics(ascent, 
+    //                        descent, 
+    //                        width, 
+    //                        height);
 
     return Gfx::FontMetrics(tm.tmAscent, 
                             tm.tmDescent, 

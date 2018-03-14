@@ -284,7 +284,7 @@ void LineEdit::setRenderer(LineEditRenderer* renderer)
 Gfx::SizeF LineEdit::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
-    double itemsHeight = _font.size() * 2;
+    double itemsHeight = _font.size() * 2.5;
 
     return Gfx::SizeF( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );

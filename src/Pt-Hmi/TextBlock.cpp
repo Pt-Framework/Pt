@@ -372,15 +372,20 @@ void TextBlock::addLine(const Pt::String& line,
                         const Gfx::Font& font, 
                         const Gfx::FontMetrics& tm)
 {
-    double lineHeight = font.size() * 1.2;
-    double lineOffset = (lineHeight - font.size()) / 2;
+    //double lineHeight = font.size() * 1.2;
+    //double lineOffset = (lineHeight - font.size()) / 2;
+    double lineHeight = tm.height();
+    double lineSpacing = font.size() / 3;
+
     double lineWidth = static_cast<double>( tm.width() );
 
     double lineX = 0;
     double lineY = _size.height();
 
-    if( ! _lines.empty() )
-        lineY += lineOffset;
+    bool firstLine = _lines.empty();
+
+    if( ! firstLine )
+        lineY += lineSpacing;
 
     _lines.resize(_lines.size() + 1);
     TextLine& textLine = _lines.back();
@@ -407,6 +412,9 @@ void TextBlock::addLine(const Pt::String& line,
 
     _size.setWidth( std::max(_size.width(), lineWidth) );
     _size.addHeight(lineHeight);
+
+    if( ! firstLine )
+        _size.addHeight(lineSpacing);
 }
 
 } // namespace

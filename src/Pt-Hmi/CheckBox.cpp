@@ -235,7 +235,7 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    double space = std::min<double>(_boxSize.width() / 2, _font.size() / 2);
+    double space = std::min<double>(_boxSize.width() / 2, _font.size() / 1.5);
 
     double boxX = space;
     double boxY = (size().height() - _boxSize.height()) / 2;

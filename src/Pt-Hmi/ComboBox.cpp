@@ -326,7 +326,7 @@ Gfx::SizeF ComboBox::onMeasure(const SizePolicy& policy)
 {
     // TODO: width of widest item?
     double itemsWidth = policy.width();
-    double itemsHeight = _font.size() * 2;
+    double itemsHeight = _font.size() * 2.5;
 
     return Gfx::SizeF( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );
