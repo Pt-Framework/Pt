@@ -239,40 +239,26 @@ class PainterImpl
                                             const Pt::String& text)
         {   
             HDC dc = GetDC(NULL);
-
             HFONT newFont = getFont(font);
-            HFONT oldFont = (HFONT)SelectObject(dc, newFont);
-    
-            int logicalPPI = GetDeviceCaps(dc, LOGPIXELSY);
+            HGDIOBJ oldFont = SelectObject(dc, newFont);
 
-            SIZE textSize;
             TEXTMETRIC tm;
             GetTextMetrics(dc, &tm);
 
             std::wstring wtext;
             text.toUtf16( std::back_inserter(wtext) );
     
+            SIZE textSize;
             GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
     
             SelectObject(dc, oldFont);
             DeleteObject(newFont);
-
             ReleaseDC(NULL, dc);
 
-            std::size_t ascent = MulDiv(tm.tmAscent, 72, logicalPPI);
-            std::size_t descent = MulDiv(tm.tmDescent, 72, logicalPPI);
-            std::size_t width = MulDiv(textSize.cx, 72, logicalPPI);
-            std::size_t height = MulDiv(textSize.cy, 72, logicalPPI);
-
-            //return Gfx::FontMetrics(ascent, 
-            //                        descent, 
-            //                        width, 
-            //                        height);
-
-            return Gfx::FontMetrics(tm.tmAscent, 
+            return Gfx::FontMetrics(tm.tmAscent - tm.tmInternalLeading, 
                                     tm.tmDescent, 
                                     textSize.cx, 
-                                    textSize.cy);
+                                    tm.tmHeight - tm.tmInternalLeading);
         }
         
         static std::string defaultFont()
@@ -363,7 +349,7 @@ class PainterImpl
             int height = MulDiv(font.size(), logicalPPI, 72);
             ReleaseDC(NULL, dc);
             
-            // If a negative value is used for lfHeight, the  a font is
+            // If a negative value is used for lfHeight, the font is
             // looked up by character size, which is only the ascent.
             // Looking up fonts by ascent seems to be more portable.
 

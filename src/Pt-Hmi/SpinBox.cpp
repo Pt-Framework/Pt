@@ -537,7 +537,7 @@ void SpinBox::setRenderer(SpinBoxRenderer* renderer)
 Gfx::SizeF SpinBox::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
-    double itemsHeight = _font.size() * 2;
+    double itemsHeight = _font.size() * 2.5;
 
     _downButton.measure(policy);
     _upButton.measure(policy);

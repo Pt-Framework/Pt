@@ -276,6 +276,7 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
+    double textHeight = fm.height() + fm.descent(); // use descent as additional spacing
     double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
     double itemsWidth = 0;
@@ -287,13 +288,13 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
         case Left:
         case Right:
             itemsWidth = fm.width() + spacing + pictureWidth;
-            itemsHeight = std::max<double>(fm.height(), pictureHeight);
+            itemsHeight = std::max<double>(textHeight, pictureHeight);
             break;
 
         case Top:
         case Bottom:
             itemsWidth = std::max<double>(fm.width(), pictureWidth);
-            itemsHeight = fm.height() + spacing + pictureHeight;
+            itemsHeight = textHeight + spacing + pictureHeight;
             break;  
     }
 

@@ -446,31 +446,19 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 {
-    SIZE textSize;
     TEXTMETRIC tm;
     GetTextMetrics(_dc, &tm);
 
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
     
+    SIZE textSize;
     GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
     
-    int logicalPPI = GetDeviceCaps(_dc, LOGPIXELSY);
-
-    std::size_t ascent = MulDiv(tm.tmAscent, 72, logicalPPI);
-    std::size_t descent = MulDiv(tm.tmDescent, 72, logicalPPI);
-    std::size_t width = MulDiv(textSize.cx, 72, logicalPPI);
-    std::size_t height = MulDiv(textSize.cy, 72, logicalPPI);
-
-    //return Gfx::FontMetrics(ascent, 
-    //                        descent, 
-    //                        width, 
-    //                        height);
-
-    return Gfx::FontMetrics(tm.tmAscent, 
+    return Gfx::FontMetrics(tm.tmAscent - tm.tmInternalLeading, 
                             tm.tmDescent, 
                             textSize.cx, 
-                            textSize.cy);
+                            tm.tmHeight - tm.tmInternalLeading);
 }
 
 

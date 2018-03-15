@@ -372,8 +372,6 @@ void TextBlock::addLine(const Pt::String& line,
                         const Gfx::Font& font, 
                         const Gfx::FontMetrics& tm)
 {
-    //double lineHeight = font.size() * 1.2;
-    //double lineOffset = (lineHeight - font.size()) / 2;
     double lineHeight = tm.height();
     double lineSpacing = font.size() / 3;
 
