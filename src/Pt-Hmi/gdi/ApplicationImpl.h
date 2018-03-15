@@ -115,11 +115,11 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         Window* findWindow(HWND h);
 
-        bool processMessage(HWND hwnd, unsigned int msg, 
+        bool processMessage(HWND hwnd, UINT msg, 
                             WPARAM wparam, LPARAM lparam);
   
-        static long CALLBACK wndProc(HWND hwnd, unsigned int message, 
-                                     unsigned int wParam, long lParam);
+        static long CALLBACK wndProc(HWND hwnd, UINT message, 
+                                     WPARAM wparam, LPARAM lparam);
 
         void onPaint(Window& w, HWND hwnd);
         

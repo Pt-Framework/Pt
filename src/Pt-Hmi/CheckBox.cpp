@@ -249,8 +249,12 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::FontMetrics tm = painter.fontMetrics( text() );
 
     double textX = space + _boxSize.width() + space;
-    double textY = (size().height() / 2) - (tm.height() / 2) + tm.ascent();
+    double textY = (size().height() / 2) - (tm.height() / 2) + 
+                   tm.ascent() + tm.descent() / 2;
+
     Gfx::PointF textPos(textX, textY);
+
+    
 
     Gfx::RectF mnemonicRect;
 

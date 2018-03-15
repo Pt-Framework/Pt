@@ -402,8 +402,8 @@ bool ApplicationImpl::waitNext()
 }
 
 
-long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int msg, 
-                                       unsigned int wparam, long lparam)
+long CALLBACK ApplicationImpl::wndProc(HWND hwnd, UINT msg, 
+                                       WPARAM wparam, LPARAM lparam)
 {
     Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
@@ -434,7 +434,7 @@ Window* ApplicationImpl::findWindow(HWND hwnd)
 }
 
 
-bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg, 
+bool ApplicationImpl::processMessage(HWND hwnd, UINT msg, 
                                      WPARAM wparam, LPARAM lparam)
 {
     bool handled = false;
