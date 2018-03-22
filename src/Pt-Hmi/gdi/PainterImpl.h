@@ -255,10 +255,10 @@ class PainterImpl
             DeleteObject(newFont);
             ReleaseDC(NULL, dc);
 
-            return Gfx::FontMetrics(tm.tmAscent - tm.tmInternalLeading, 
+            return Gfx::FontMetrics(tm.tmAscent, 
                                     tm.tmDescent, 
                                     textSize.cx, 
-                                    tm.tmHeight - tm.tmInternalLeading);
+                                    tm.tmHeight);
         }
         
         static std::string defaultFont()

@@ -455,10 +455,10 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     SIZE textSize;
     GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
     
-    return Gfx::FontMetrics(tm.tmAscent - tm.tmInternalLeading, 
+    return Gfx::FontMetrics(tm.tmAscent, 
                             tm.tmDescent, 
                             textSize.cx, 
-                            tm.tmHeight - tm.tmInternalLeading);
+                            tm.tmHeight);
 }
 
 
