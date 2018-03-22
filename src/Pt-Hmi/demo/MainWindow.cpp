@@ -290,6 +290,8 @@ void MainWindow::onButton()
 {
     //_btns[2].setMargin(10);
 
+    _tabView.setText(1, "New Tab");
+
     Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
     Pt::Hmi::Screen& screen = app.screen();
     Pt::Hmi::Widget* w = &_bt2;

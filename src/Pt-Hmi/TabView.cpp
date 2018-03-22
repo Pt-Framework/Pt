@@ -112,6 +112,18 @@ void TabBar::setCurrent(std::size_t n)
 }
 
 
+void TabBar::setText(std::size_t n, const Pt::String& title)
+{
+    if( n >= _tabs.size() )
+        return;
+
+    _tabs.at(n).setText(title);
+
+    relayout();
+    update();
+}
+
+
 void TabBar::setRenderer(TabViewRenderer* renderer)
 {
     _renderer.reset(renderer);
@@ -310,6 +322,12 @@ void TabView::setCurrent(std::size_t n)
 {
     _tabBar.setCurrent(n);
     _stack.setCurrent(n);
+}
+
+
+void TabView::setText(std::size_t n, const Pt::String& title)
+{
+    _tabBar.setText(n, title);
 }
 
 

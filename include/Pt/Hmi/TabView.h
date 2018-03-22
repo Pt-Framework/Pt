@@ -99,6 +99,8 @@ class PT_HMI_API TabBar : public Control
 
         void setCurrent(std::size_t n);
 
+        void setText(std::size_t n, const Pt::String& title);
+
         Pt::Signal<std::size_t>& currentChanged()
         { return _currentChanged; }
 
@@ -157,6 +159,8 @@ class PT_HMI_API TabView : public Control
         std::size_t current() const;
 
         void setCurrent(std::size_t n);
+
+        void setText(std::size_t n, const Pt::String& title);
 
     public:
         void setRenderer(TabViewRenderer* renderer);
