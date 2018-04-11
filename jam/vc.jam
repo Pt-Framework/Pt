@@ -257,7 +257,7 @@ rule Library-Build
     Clean clean : $(_target:S=.idb) ;
     
     local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
-    PDB on $(_objects) = $(_target:S=.pdb) ;
+    PDB on $(_objects:GBS) = $(_target:S=.pdb) ;
 
     Depends $(_objects) : first ;
 }
@@ -291,7 +291,7 @@ rule Main-Build
     Clean clean : $(_target:S=.exe.manifest) ;
     
     local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
-    PDB on $(_objects) = $(_target:S=.pdb) ;
+    PDB on $(_objects:GBS) = $(_target:S=.pdb) ;
     
     # embed manifest into exe
     if $(MT)
@@ -361,7 +361,7 @@ rule SharedLibrary-Build
     
     INSTALL_LIB on $(<) += $(_target:S=.lib) $(_target:S=.pdb) ;
     
-    PDB on $(_objects) = $(_target:S=.pdb) ;
+    PDB on $(_objects:GBS) = $(_target:S=.pdb) ;
     
     Depends $(_sources) : first ;
     Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
