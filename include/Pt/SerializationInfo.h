@@ -471,6 +471,10 @@ class PT_API SerializationInfo
         */
         void removeMember(const char* name);
 
+        /** @brief Remove a struct member.
+        */
+        void removeMember(const SerializationInfo& si);
+
         /** @brief Add a sequence element
         */
         SerializationInfo& addElement();

@@ -441,6 +441,9 @@ void SerializationInfo::format(Formatter& formatter) const
             SerializationInfo::ConstIterator end = this->end();
             for(it = this->begin(); it != end; ++it)
             {
+                if(it->type() == Void)
+                  continue;
+
                 formatter.beginElement();
                 it->format(formatter);
                 formatter.finishElement();
@@ -1816,46 +1819,90 @@ SerializationInfo& SerializationInfo::addMember(const LiteralPtr<char>& name)
 
 void SerializationInfo::removeMember(const char* name)
 {
-    if( _isCompound )
+    if( ! _isCompound )
+        return;
+
+    SerializationInfo* si = 0;
+    SerializationInfo* prev = 0;
+
+    for(SerializationInfo* it = _value.seq.first; it != 0; it = it->sibling())
     {
-        SerializationInfo* si = 0;
-        SerializationInfo* prev = 0;
-
-        for(SerializationInfo* it = _value.seq.first; it != 0; it = it->sibling())
+        if( 0 == std::strcmp(name, it->name()) )
         {
-            if( 0 == std::strcmp(name, it->name()) )
+            SerializationInfo* next = it->sibling();
+            if( prev )
             {
-                SerializationInfo* next = it->sibling();
-                if( prev )
-                {
-                    prev->setSibling( next );
-                }
-
-                if(it == _value.seq.first)
-                {
-                    _value.seq.first = next;
-                }
-
-                if(it == _value.seq.last)
-                {
-                    _value.seq.last = prev;
-                }
-
-                --_value.seq.size;
-                it->setSibling(0);
-                si = it;
-
-                if(_context)
-                    _context->push(si);
-                else
-                    delete si;
-
-               break;
+                prev->setSibling( next );
             }
 
-            prev = it;
+            if(it == _value.seq.first)
+            {
+                _value.seq.first = next;
+            }
+
+            if(it == _value.seq.last)
+            {
+                _value.seq.last = prev;
+            }
+
+            --_value.seq.size;
+            it->setSibling(0);
+            si = it;
+
+            if(_context)
+                _context->push(si);
+            else
+                delete si;
+
+            break;
         }
+
+        prev = it;
     }
+}
+
+
+void SerializationInfo::removeMember(const SerializationInfo& m)
+{
+    if( ! _isCompound )
+        return;
+
+    SerializationInfo* prev = 0;
+
+    for(SerializationInfo* it = _value.seq.first; it != 0; it = it->sibling())
+    {
+        if( &m == it )
+        {
+            SerializationInfo* next = it->sibling();
+            if( prev )
+            {
+                prev->setSibling( next );
+            }
+
+            if(it == _value.seq.first)
+            {
+                _value.seq.first = next;
+            }
+
+            if(it == _value.seq.last)
+            {
+                _value.seq.last = prev;
+            }
+
+            --_value.seq.size;
+            it->setSibling(0);
+
+            if(_context)
+                _context->push(it);
+            else
+                delete it;
+
+            break;
+        }
+
+        prev = it;
+    }
+
 }
 
 

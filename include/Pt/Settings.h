@@ -253,6 +253,16 @@ class PT_API Settings : private SerializationInfo
                         _si->removeMember(name);
                 }
 
+                /** @brief Removes a sub entry.
+                */
+                void removeEntry(const Entry& e)
+                {
+                    if( ! _si || ! e._si )
+                      return;
+
+                    _si->removeMember( *e._si );
+                }
+
                 /** @brief Begin of sub entries.
                 */
                 Entry begin() const
