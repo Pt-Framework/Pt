@@ -211,10 +211,25 @@ void FlowLayout::onLayoutLeft(const Gfx::RectF& rect, bool center)
 
 void FlowLayout::onLayoutRight(const Gfx::RectF& rect, bool center)
 {
+    double posRight  = rect.width() - padding().right();
+
+    if(center)
+    {
+        double itemsWidth = 0;
+
+        std::vector<Pt::Hmi::Widget*>::const_iterator it;
+        for(it = widgets().begin(); it != widgets().end(); ++it)
+        {
+          Widget* item = *it;
+          itemsWidth += item->preferredSize().width();
+          itemsWidth += item->margin().leftRight();
+        }
+
+        posRight -= (rect.width() - itemsWidth) / 2;
+    }
+
     std::vector<Widget*>::const_iterator it = widgets().begin();
     std::vector<Widget*>::const_iterator end = widgets().end();
-
-    double posRight  = rect.width() - padding().right();
 
     for( ; it != end; ++it)
     {
@@ -285,10 +300,25 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
 
 void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)
 {
+    double posTop = padding().top();
+    
+    if(center)
+    {
+        double itemsHeight = 0;
+
+        std::vector<Pt::Hmi::Widget*>::const_iterator it;
+        for(it = widgets().begin(); it != widgets().end(); ++it)
+        {
+          Widget* item = *it;
+          itemsHeight += item->preferredSize().height();
+          itemsHeight += item->margin().topBottom();
+        }
+
+        posTop = (rect.height() - itemsHeight) / 2;
+    }
+
     std::vector<Widget*>::const_iterator it = widgets().begin();
     std::vector<Widget*>::const_iterator end = widgets().end();
-
-    double posTop = padding().top();
 
     for( ; it != end; ++it)
     {
@@ -318,10 +348,25 @@ void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)
 
 void FlowLayout::onLayoutBottom(const Gfx::RectF& rect, bool center)
 {
+    double posBottom = rect.height() - padding().bottom();
+
+    if(center)
+    {
+        double itemsHeight = 0;
+
+        std::vector<Pt::Hmi::Widget*>::const_iterator it;
+        for(it = widgets().begin(); it != widgets().end(); ++it)
+        {
+          Widget* item = *it;
+          itemsHeight += item->preferredSize().height();
+          itemsHeight += item->margin().topBottom();
+        }
+
+        posBottom -= (rect.height() - itemsHeight) / 2;
+    }
+
     std::vector<Widget*>::const_iterator it = widgets().begin();
     std::vector<Widget*>::const_iterator end = widgets().end();
-
-    double posBottom = preferredSize().height() - padding().bottom();
 
     for( ; it != end; ++it)
     {
