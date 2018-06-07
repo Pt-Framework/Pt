@@ -7,8 +7,7 @@ if exist deploy\linux-gcc-arm-Debug (
 
 call:Build -sCONFIG=linux-gcc-arm-Debug --debug -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
 -sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2014_04_R1%\bin\arm-linux-gnueabihf-" ^
--sLINKFLAGS="-Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2014_04_R1%\arm-linux-gnueabihf\lib\" ^
--Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2014_04_R1%\arm-linux-gnueabihf\libarm-linux-gnueabihf\"" ^
+-sLINKFLAGS="-Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2014_04_R1%\arm-linux-gnueabihf\lib\" -Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2014_04_R1%\arm-linux-gnueabihf\libarm-linux-gnueabihf\"" ^
 --with-openssl 
 
 if %errorlevel% neq 0 (
@@ -23,8 +22,7 @@ if exist deploy\linux-gcc-arm-Release (
 
 call:Build -sCONFIG=linux-gcc-arm-Release --debug --optimize -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
 -sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2014_04_R1%\bin\arm-linux-gnueabihf-" ^
--sLINKFLAGS="-Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2014_04_R1%\arm-linux-gnueabihf\lib\" ^
--Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2014_04_R1%\arm-linux-gnueabihf\libarm-linux-gnueabihf\"" ^
+-sLINKFLAGS="-Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2014_04_R1%\arm-linux-gnueabihf\lib\" -Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2014_04_R1%\arm-linux-gnueabihf\libarm-linux-gnueabihf\"" ^
 --with-openssl 
 
 if %errorlevel% neq 0 (
