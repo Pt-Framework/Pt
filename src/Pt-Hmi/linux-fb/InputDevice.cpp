@@ -138,56 +138,51 @@ void InputDevice::onCancel()
 
 bool InputDevice::onRun()
 {
-    struct input_event evts[64];
-
-    int bytes = ::read(_ioh.fd, evts, sizeof(struct input_event) * 64);
-
-    if( bytes < (int) sizeof(struct input_event) )
+    size_t count = 0;
+    struct input_event ev;
+    size_t evSize = sizeof(struct input_event);
+    
+    for(;;)
     {
-        return false;
+      ssize_t n = ::read(_ioh.fd, &ev, evSize);
+      if(n <= 0)
+        break;
+
+      ++count;
+
+      //std::clog << "\ninput on fd: " << _ioh.fd << " #" << events 
+      //          << " type: " << ev.type << std::endl;
+
+      switch (ev.type)
+      {
+          case EV_KEY:
+          {
+              onKey(ev);
+              break;
+          }
+
+          case EV_REL:
+          {
+              onRelative(ev);
+              break;
+          }
+
+          case EV_ABS:
+          {
+              onAbsolute(ev);
+              break;
+          }
+      }
     }
-
-    // event sequence for touch events
-    //EV_KEY 330 1
-    //EV_ABS_X
-    //EV_ABS_Y
-    //EV_ABS_X
-    //EV_ABS_X
-    //EV_KEY 330 0
-
-    for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
-    {
-        struct input_event& ev = evts[i];
-
-        switch (ev.type)
-        {
-            case EV_KEY:
-            {
-                onKey(ev);
-                break;
-            }
-
-            case EV_REL:
-            {
-                onRelative(ev);
-                break;
-            }
-
-            case EV_ABS:
-            {
-                onAbsolute(ev);
-                break;
-            }
-        }
-    }
-
-    return true;
+    
+    return count > 0;
 }
 
 
 void InputDevice::onRelative(const input_event& ev)
 {
-    //std::clog << "EV_REL" << ev.value << std::endl;
+    //std::clog << "EV_REL " << ev.code << " " << ev.value << std::endl;
+
     _mouseEvent.setMove();
 
     if(ev.code == REL_X)
@@ -213,35 +208,54 @@ void InputDevice::onRelative(const input_event& ev)
 
 void InputDevice::onAbsolute(const input_event& ev)
 {
-    //std::clog << "EV_ABS " << ev.code << " " << ev.value << std::endl;
+    // event sequence for touch events
+    //EV_KEY 330 1
+    //EV_ABS_X
+    //EV_ABS_Y
+    //EV_ABS_X
+    //EV_ABS_X
+    //EV_KEY 330 0
 
     switch(ev.code)
     {
         case ABS_MT_SLOT:
         case ABS_MT_TRACKING_ID:
+        
         case ABS_MT_POSITION_Y:
+            //std::clog << "ABS_MT_POSITION_Y " << ev.value << std::endl;
+            return;
+        
         case ABS_MT_POSITION_X:
+            //std::clog << "ABS_MT_POSITION_X " << ev.value << std::endl;
+            return;
+        
         case ABS_MT_PRESSURE:
-          return;
+            //std::clog << "ABS_MT_PRESSURE " << ev.value << std::endl;
+            return;
 
         case ABS_X:
-            _touchEvent.setX(  (static_cast<double>(ev.value)));
+            //std::clog << "ABS_X " << ev.value << std::endl;
+            
+            _touchEvent.setX( static_cast<double>(ev.value) );
             _touchMove++;
-        break;
+            break;
 
         case ABS_Y:
-           _touchEvent.setY( static_cast<double>(ev.value));
+            //std::clog << "ABS_Y " << ev.value << std::endl;
+           
+            _touchEvent.setY( static_cast<double>(ev.value) );
             _touchMove++;
-        break;
+            break;
 
         case ABS_PRESSURE:
-        return;
+            //std::clog << "ABS_PRESSURE " << ev.value << std::endl;
+            return;
 
         default:
-           return;
+            return;
     }
 
-    if(_touchMove > 1)
+    if(_touchMove >= 2)
     {
         if(_touchMove == 2)
             _touchEvent.setPress();
@@ -255,7 +269,8 @@ void InputDevice::onAbsolute(const input_event& ev)
 
 void InputDevice::onKey(const input_event& ev)
 {
-    //std::clog << "EV_KEY " << ev.code << " " << ev.value << std::endl;
+    //std::clog << "EV_KEY on fd: " << _ioh.fd << " " 
+    //          << ev.code << " " << ev.value << std::endl;
     
     if( ev.code == 272)    
     {
@@ -279,14 +294,14 @@ void InputDevice::onKey(const input_event& ev)
         return;
     }
 
-    if(ev.code == 330)
+    if(ev.code == 330) // BTN_TOUCH
     {
         if( ev.value == 0  )
         {
             if(_touchMove == 0)
             {
-                _touchEvent.setPress();
-                _eventReady.send(_touchEvent);
+                std::clog << "WARNING: touch without position" << std::endl;
+                return;
             }
 
             _touchMove = 0;
