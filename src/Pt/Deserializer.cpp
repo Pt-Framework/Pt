@@ -37,6 +37,7 @@ Deserializer::Deserializer()
 , _current(0)
 , _mem(0)
 , _memsize(0)
+, _r0()
 {}
 
 
@@ -48,6 +49,8 @@ Deserializer::~Deserializer()
     }
 
     this->deallocate(_mem);
+
+    _r0.i = 0;
 }
 
 

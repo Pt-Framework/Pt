@@ -248,6 +248,15 @@ struct MBState
 
 namespace std {
 
+#if _LIBCPP_VERSION >= 5000
+
+template <>
+struct is_pod<Pt::Char> {
+    static const bool value = true;
+};
+
+#endif
+
 template<>
 struct char_traits<Pt::Char>
 {

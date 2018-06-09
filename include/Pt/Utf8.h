@@ -94,8 +94,8 @@ class PT_API Utf8Iterator
         */
         Utf8Iterator(const Utf8Iterator& other)
         : _utf8(other._utf8)
-        , _value(other._value)
         , _n(other._n)
+        , _value(other._value)
         {}
 
         /** @brief Assignment operator.
