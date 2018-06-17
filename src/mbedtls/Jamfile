@@ -1,17 +1,12 @@
-# ./jam.sh configure --with-experimental-gfx --with-hmi -sGUI=x11 -sOPTIM=-O2 --with-mbedtls
-
 SubDir PT_TOP src mbedtls ;
-SubDirHdrs $(PT_TOP)/src/mbedtls/include ;
+SubDirHdrs $(SSL_INCLUDES) ;
 SubDirObjects $(PT_OUTPUT_OBJECT) mbedtls ;
 
-MBEDTLS_SUBDIR        = [ FDirName $(PT_TOP) src mbedtls library ] ;
-MBEDTLS_SOURCE_FILES += [ GLOB $(MBEDTLS_SUBDIR) : *.c  ] ;
+MBEDTLS_SUBDIR   = [ FDirName $(PT_TOP) src mbedtls library ] ;
+MBEDTLS_SOURCES += [ GLOB $(MBEDTLS_SUBDIR) : *.c  ] ;
 
-
-Library mbedtls : $(MBEDTLS_SOURCE_FILES) ;
+Library mbedtls : $(MBEDTLS_SOURCES) ;
 MakeLocate mbedtls : $(PT_OUTPUT_TARGET) ;
-
-###
 
 Main selftest : test/selftest.c ;
 LinkLibraries selftest : mbedtls ;

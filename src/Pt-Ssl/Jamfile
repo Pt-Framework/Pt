@@ -29,6 +29,10 @@ if $(WITH_OPENSSL)
 {
     LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
 }
+else if $(WITH_MBEDTLS)
+{
+    LinkLibraries Pt-Ssl : mbedtls ;
+}
 else
 {
     LinkFlags Pt-Ssl : $(SSL_LINKFLAGS) ;

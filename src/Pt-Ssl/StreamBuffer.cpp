@@ -54,7 +54,8 @@ StreamBuffer::StreamBuffer(std::size_t bufferSize)
 }
 
 
-StreamBuffer::StreamBuffer(Context& ctx, std::ios& ios, OpenMode mode, std::size_t bufferSize)
+StreamBuffer::StreamBuffer(Context& ctx, std::ios& ios, 
+                            OpenMode mode, std::size_t bufferSize)
 : _connection(0)
 , _ibufferSize(bufferSize + _pbmax)
 , _ibuffer(0)

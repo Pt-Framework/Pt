@@ -224,6 +224,11 @@ bool Connection::readHandshake()
             if(evalErr)
                 throw HandshakeFailed("SSL handshake failed");
         
+            if(result == kSecTrustResultRecoverableTrustFailure)
+            {
+                std::clog << "kSecTrustResultRecoverableTrustFailure" << std::endl;
+            }
+            
             CFIndex count = SecTrustGetCertificateCount(trust);
             PT_LOG_DEBUG("SecTrustEvaluate: " << result << " certs: " << count);
             
