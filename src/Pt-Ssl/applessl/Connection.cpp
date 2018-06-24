@@ -220,10 +220,10 @@ bool Connection::readHandshake()
 #ifdef PT_IOS
     if(status == errSSLPeerAuthCompleted)
 #else
-    if(status == errSSLServerAuthCompleted)
+    if(status == errSSLServerAuthCompleted || status == errSSLClientAuthCompleted)
 #endif
     {
-        PT_LOG_DEBUG("authenticating peer");
+        PT_LOG_DEBUG("AUTHENTICATING peer");
 
         if( _ctx->verifyMode() != NoVerify )
         {
@@ -271,10 +271,13 @@ bool Connection::readHandshake()
             
             // SecTrustCreateWithCertificates(certs, policy, &trust);
 
+            CFIndex certCount = SecTrustGetCertificateCount(trust);
+            std::clog << "certs to check: " << certCount << std::endl;
+
             CFArrayRef caArr = _ctx->impl()->caCertificates();
             std::clog << "CA certs: " << CFArrayGetCount(caArr) << std::endl;
             SecTrustSetAnchorCertificates(trust, caArr);
-            SecTrustSetAnchorCertificatesOnly(trust, true);
+            //SecTrustSetAnchorCertificatesOnly(trust, true);
 
             OSStatus policyErr = SecTrustSetPolicies(trust, policies); 
             PT_LOG_DEBUG("SecTrustSetPolicies " << policyErr);

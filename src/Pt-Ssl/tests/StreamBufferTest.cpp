@@ -74,7 +74,7 @@ void StreamBufferTest::Handshake()
 
     const Pt::Ssl::Certificate* servCA = store.findCertificate("SGC Certificate Authority");
     PT_UNIT_ASSERT( servCA );
-    serverContext.addCACertificate(*servCA);
+    //serverContext.addCACertificate(*servCA);
 
     // Client context
     Pt::Ssl::Context clientContext(Pt::Ssl::TLSv1);
