@@ -277,7 +277,7 @@ bool Connection::readHandshake()
             CFArrayRef caArr = _ctx->impl()->caCertificates();
             std::clog << "CA certs: " << CFArrayGetCount(caArr) << std::endl;
             SecTrustSetAnchorCertificates(trust, caArr);
-            //SecTrustSetAnchorCertificatesOnly(trust, true);
+            SecTrustSetAnchorCertificatesOnly(trust, true);
 
             OSStatus policyErr = SecTrustSetPolicies(trust, policies); 
             PT_LOG_DEBUG("SecTrustSetPolicies " << policyErr);
