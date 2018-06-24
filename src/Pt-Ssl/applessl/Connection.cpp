@@ -49,6 +49,7 @@ Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 : _ctx(&ctx)
 , _context(0)
 , _ios(&ios)
+, _mode(omode)
 , _iocount(0)
 , _connected(false)
 , _wantRead(false)
@@ -59,65 +60,81 @@ Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 {
     Boolean isServer = (omode == Accept);
 
-    SSLNewContext(isServer, &_context);
-    
+    _context = SSLCreateContext(kCFAllocatorDefault, 
+                                isServer ? kSSLServerSide : kSSLClientSide,
+                                kSSLStreamType);
+
     SSLSetConnection(_context, (SSLConnectionRef) this);
 
     SSLSetIOFuncs(_context, 
                   &Connection::sslReadCallback, 
                   &Connection::sslWriteCallback);
    
-    SSLSetProtocolVersionEnabled(_context, kSSLProtocolAll, false);
+    //SSLSetProtocolVersionEnabled(_context, kSSLProtocolAll, false);
 
-    switch(_ctx->protocol()) 
+    SSLProtocol protocolMin = kSSLProtocol2;
+    SSLProtocol protocolMax = kTLSProtocolMaxSupported;
+    
+    switch( _ctx->protocol() ) 
     {
         case SSLv2:
-            SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
+            protocolMin = kSSLProtocol2;
+            protocolMax = kSSLProtocol2;
+            //SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
             break;
 
         case SSLv3or2:
-            SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
-            SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
+            //SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
+            //SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
+            protocolMin = kSSLProtocol2;
+            protocolMax = kSSLProtocol3;
             break;
 
         default:
         case SSLv3:
-            SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
+            //SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
+            protocolMin = kSSLProtocol3;
+            protocolMax = kSSLProtocol3;
             break;
       
         case TLSv1:
-            SSLSetProtocolVersionEnabled(_context, kTLSProtocol1, true);
+            //SSLSetProtocolVersionEnabled(_context, kTLSProtocol1, true);
+            protocolMin = kTLSProtocol11;
+            protocolMax = kTLSProtocol11;
             break;
     }
 
+    SSLSetProtocolVersionMin(_context, protocolMin);
+    SSLSetProtocolVersionMax(_context, protocolMax);
+
     if(isServer)
     {
-#ifdef PT_IOS
-        SSLSetEnableCertVerify(_context, false);
-        SSLSetSessionOption(_context, kSSLSessionOptionBreakOnClientAuth, true);
-#else
-        if(_ctx->verifyMode() == NoVerify)
-        {
-            SSLSetClientSideAuthenticate(_context, kNeverAuthenticate);
-        }
-        else if(_ctx->verifyMode() == TryVerify)
-        {
-            SSLSetClientSideAuthenticate(_context, kTryAuthenticate);
-        }
-        else if(_ctx->verifyMode() == AlwaysVerify)
-        {
-            SSLSetClientSideAuthenticate(_context, kAlwaysAuthenticate);
-        }
+//#ifdef PT_IOS
+        //SSLSetEnableCertVerify(_context, false);
+        SSLSetSessionOption(_context, kSSLSessionOptionBreakOnClientAuth, TRUE);
+// #else
+//         if(_ctx->verifyMode() == NoVerify)
+//         {
+//             SSLSetClientSideAuthenticate(_context, kNeverAuthenticate);
+//         }
+//         else if(_ctx->verifyMode() == TryVerify)
+//         {
+//             SSLSetClientSideAuthenticate(_context, kTryAuthenticate);
+//         }
+//         else if(_ctx->verifyMode() == AlwaysVerify)
+//         {
+//             SSLSetClientSideAuthenticate(_context, kAlwaysAuthenticate);
+//         }
         
-        CFArrayRef caArr = _ctx->impl()->caCertificates();
-        SSLSetCertificateAuthorities(_context, caArr, true);
-        SSLSetTrustedRoots(_context, caArr, true);
-#endif
+//         CFArrayRef caArr = _ctx->impl()->caCertificates();
+//         SSLSetCertificateAuthorities(_context, caArr, true);
+//         SSLSetTrustedRoots(_context, caArr, true);
+// #endif
     }
     else
     {
-        SSLSetEnableCertVerify(_context, false);
-        SSLSetSessionOption(_context, kSSLSessionOptionBreakOnServerAuth, true);
+        //SSLSetEnableCertVerify(_context, false);
+        SSLSetSessionOption(_context, kSSLSessionOptionBreakOnServerAuth, TRUE);
     }
 
     // certificates to present to peer
@@ -132,7 +149,7 @@ Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 
 Connection::~Connection()
 {
-    SSLDisposeContext(_context);
+    CFRelease(_context);
 }
 
 
@@ -195,7 +212,7 @@ bool Connection::readHandshake()
     
     if( status == noErr )
     {
-        PT_LOG_DEBUG("SSL handshake completed");
+        PT_LOG_DEBUG("SSL handshake completed " << this);
         _connected = true;
         return false;
     }
@@ -210,14 +227,57 @@ bool Connection::readHandshake()
 
         if( _ctx->verifyMode() != NoVerify )
         {
-            PT_LOG_DEBUG("evaluating trust");
-            
+            PT_LOG_DEBUG("evaluating trust " << this);
+        
+            char peerName[256];
+            size_t peerNameSize = 256;
+            SSLGetPeerDomainName(_context, peerName, &peerNameSize);
+            (std::clog << "PN: ") .write(peerName, peerNameSize) << std::endl;
+
+            CFStringRef pn = CFStringCreateWithBytes(kCFAllocatorDefault, 
+                                                     (const UInt8*)peerName, peerNameSize, 
+                                                     kCFStringEncodingUTF8, FALSE);
+
+            Boolean isServer = (_mode != Accept); // true on client side
+            SecPolicyRef policy = SecPolicyCreateSSL(isServer, pn);
+            //SecPolicyRef policy = SecPolicyCreateBasicX509();
+            PT_LOG_DEBUG("is server policy " << (isServer == TRUE));
+
+            //SecTrustRef origTrust = NULL;
             SecTrustRef trust = NULL;
             SSLCopyPeerTrust(_context, &trust);
 
+            CFMutableArrayRef policies = NULL;
+            policies = CFArrayCreateMutable(kCFAllocatorDefault, 1, &kCFTypeArrayCallBacks);
+            CFArrayAppendValue(policies, policy);
+
+            //OSStatus policyErr = SecTrustSetPolicies(trust, policies); 
+            //PT_LOG_DEBUG("SecTrustSetPolicies " << policyErr);
+
+            // CFIndex numberOfCerts = SecTrustGetCertificateCount(trust);
+            // std::clog << "numberOfCerts: " << numberOfCerts << std::endl;
+
+            // CFMutableArrayRef certs = NULL;
+            // certs = CFArrayCreateMutable(NULL,
+            //                             numberOfCerts,
+            //                             &kCFTypeArrayCallBacks);
+            // for (CFIndex index = 0; index < numberOfCerts; ++index) 
+            // {
+            //     SecCertificateRef cert;
+            //     cert = SecTrustGetCertificateAtIndex(trust, index);
+            //     CFArrayAppendValue(certs, cert);
+            // }
+
+            
+            // SecTrustCreateWithCertificates(certs, policy, &trust);
+
             CFArrayRef caArr = _ctx->impl()->caCertificates();
+            std::clog << "CA certs: " << CFArrayGetCount(caArr) << std::endl;
             SecTrustSetAnchorCertificates(trust, caArr);
             SecTrustSetAnchorCertificatesOnly(trust, true);
+
+            OSStatus policyErr = SecTrustSetPolicies(trust, policies); 
+            PT_LOG_DEBUG("SecTrustSetPolicies " << policyErr);
 
             SecTrustResultType result;
             OSStatus evalErr = SecTrustEvaluate(trust, &result);
@@ -226,15 +286,65 @@ bool Connection::readHandshake()
         
             if(result == kSecTrustResultRecoverableTrustFailure)
             {
-                std::clog << "kSecTrustResultRecoverableTrustFailure" << std::endl;
+                CFArrayRef items = SecTrustCopyProperties(trust);
+
+                CFIndex count = CFArrayGetCount(items);
+                for(CFIndex n = 0; n < count; ++n)
+                {
+                    std::clog << "error: ";
+                    CFDictionaryRef item = (CFDictionaryRef) CFArrayGetValueAtIndex(items, n);
+                    CFStringRef str = (CFStringRef) CFDictionaryGetValue(item, 
+                                                                kSecPropertyTypeWarning);
+                    if(! str) str = (CFStringRef) CFDictionaryGetValue(item, 
+                                                                kSecPropertyTypeError);
+                    if(! str) str = (CFStringRef) CFDictionaryGetValue(item, 
+                                                                kSecPropertyTypeSuccess);
+                    if(! str) str = (CFStringRef) CFDictionaryGetValue(item, 
+                                                                kSecPropertyTypeSection);
+                    if(! str) str = (CFStringRef) CFDictionaryGetValue(item, 
+                                                                kSecPropertyTypeDate);
+                    if(! str) str = (CFStringRef) CFDictionaryGetValue(item, 
+                                                                kSecPropertyTypeData);
+                    if(! str) str = (CFStringRef) CFDictionaryGetValue(item, 
+                                                                kSecPropertyTypeString);
+                    if(! str) str = (CFStringRef) CFDictionaryGetValue(item, 
+                                                                kSecPropertyTypeURL);
+                    if(! str) str = (CFStringRef) CFDictionaryGetValue(item, 
+                                                                kSecPropertyTypeTitle);
+
+                    if(str)
+                        std::clog << CFStringGetCStringPtr(str, kCFStringEncodingASCII);
+                        
+                    std::clog << std::endl;
+                }
             }
-            
+
             CFIndex count = SecTrustGetCertificateCount(trust);
             PT_LOG_DEBUG("SecTrustEvaluate: " << result << " certs: " << count);
-            
+
+            for(CFIndex n = 0; n < count; ++n)
+            {
+                SecCertificateRef cert = SecTrustGetCertificateAtIndex(trust, n);
+
+                CFStringRef cn;
+                SecCertificateCopyCommonName(cert, &cn);
+
+                char cnbuf[256];
+                CFStringGetCString(cn, cnbuf, 256, kCFStringEncodingUTF8);
+                std::clog << "CN: " << cnbuf << std::endl; 
+            }
+            //if(origTrust)
+            //    CFRelease(origTrust);
+
             if(trust)
                 CFRelease(trust);
             
+            //if(certs)
+            //    CFRelease(certs);
+
+            if(policy)
+                CFRelease(policy);
+
             // if peer presented no certificate, SecTrustGetCertificateCount
             // should return 0. If we require one because AlwaysVerify is
             // set, the handshake is considered to be failed

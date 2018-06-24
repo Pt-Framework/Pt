@@ -80,7 +80,7 @@ class CertificateImpl
 
         int serialNumber() const
         {
-            CFDataRef data = SecCertificateCopySerialNumber(_cert, NULL);
+            CFDataRef data = SecCertificateCopySerialNumberData(_cert, NULL);
             
             if( ! data )
                 return 0;

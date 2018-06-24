@@ -124,7 +124,7 @@ const char* StreamBuffer::currentCipher() const
 
 
 bool StreamBuffer::isConnected() const
-{ 
+{
     return _connection && _connection->connected(); 
 }
 

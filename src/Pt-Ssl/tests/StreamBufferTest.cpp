@@ -43,7 +43,7 @@ class StreamBufferTest : public Pt::Unit::TestSuite
         StreamBufferTest()
         : Pt::Unit::TestSuite("StreamBufferTest")
         {
-            Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Error);
+            Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Trace);
             this->registerMethod("Handshake", *this, &StreamBufferTest::Handshake);
         }
 
@@ -65,7 +65,7 @@ void StreamBufferTest::Handshake()
     store.loadPkcs12(caCerts, sizeof(caPkcs12), "123");
 
     // Server context
-    Pt::Ssl::Context serverContext;
+    Pt::Ssl::Context serverContext(Pt::Ssl::TLSv1);
     serverContext.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
     const Pt::Ssl::Certificate* servCert = store.findCertificate("SGC Mainframe");
@@ -77,7 +77,7 @@ void StreamBufferTest::Handshake()
     serverContext.addCACertificate(*servCA);
 
     // Client context
-    Pt::Ssl::Context clientContext;
+    Pt::Ssl::Context clientContext(Pt::Ssl::TLSv1);
     clientContext.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
     const Pt::Ssl::Certificate* clientCert = store.findCertificate("Atlantis Mainframe");

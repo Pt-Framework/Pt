@@ -84,6 +84,7 @@ class Connection
         std::ios* _ios;
         std::streamsize _maxImport;
         std::streamsize _iocount;
+        OpenMode _mode;
         bool _connected;
         bool _wantRead;
         bool _isReading;
