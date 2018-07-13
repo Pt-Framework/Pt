@@ -116,7 +116,7 @@ void ProcessImpl::start()
     {
         // check detach state
 
-        if (_procInfo.isDetached())
+        if( _procInfo.isDetached() )
         {
             _pid = fork();
             if( _pid < 0 )
@@ -135,54 +135,42 @@ void ProcessImpl::start()
 
         // redirect stdin
 
-        if (_procInfo.isStdInputClosed())
+        if( _procInfo.isStdInputClosed() )
         {
             std::fclose(stdin);
         }
-        else if (_procInfo.isStdInputRedirected())
+        else if( _procInfo.isStdInputRedirected() )
         {
             _stdinPipe->in().close();
-            _stdinPipe->impl()->redirectStdin();
+            _stdinPipe->impl()->out().redirect(0, true);
         }
-        //else if (_procInfo.stdInput())
-        //{
-            //dup2(_procInfo.stdInput()->ioimpl().fd(), STDIN_FILENO);
-        //}
 
         // redirect stdout
 
-        if (_procInfo.isStdOutputClosed())
+        if( _procInfo.isStdOutputClosed() )
         {
             std::fclose(stdout);
         }
-        else if (_procInfo.isStdOutputRedirected())
+        else if( _procInfo.isStdOutputRedirected() )
         {
             _stdoutPipe->out().close();
-            _stdoutPipe->impl()->redirectStdout();
+            _stdoutPipe->impl()->in().redirect(1, true);
         }
-        //else if (_procInfo.stdOutput())
-        //{
-            //dup2(_procInfo.stdOutput()->ioimpl().fd(), STDOUT_FILENO);
-        //}
 
         // redirect stderr
 
-        if (_procInfo.isStdErrorClosed())
+        if( _procInfo.isStdErrorClosed() )
         {
             std::fclose(stderr);
         }
-        else if (_procInfo.isStdErrorRedirected())
+        else if( _procInfo.isStdErrorRedirected() )
         {
-            _stderrPipe->impl()->redirectStderr();
+            _stderrPipe->impl()->in().redirect(2, true);
         }
-        else if (_procInfo.isStdErrorAsOutput())
+        else if( _procInfo.isStdErrorAsOutput() )
         {
-            _stdoutPipe->impl()->redirectStderr(false);
+            _stdoutPipe->impl()->in().redirect(2, false);
         }
-        //else if (_procInfo.stdError())
-        //{
-            //dup2(_procInfo.stdError()->ioimpl().fd(), STDERR_FILENO);
-        //}
 
         // exec
 

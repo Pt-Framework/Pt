@@ -153,15 +153,24 @@ void PipeIODevice::onSync() const
 
 void PipeIODevice::redirect(int newFd, bool close)
 {
-    int ret = ::dup2(fd(), newFd);
-    if (ret < 0)
-        throw SystemError("dup2");
+    // keep flags of the fd we redirect to i.e. stdin, stdout or stderr
+    int flags = fcntl(newFd, F_GETFL);
 
-    if (close)
+    int ret = ::dup2(fd(), newFd);
+    if(-1 == ret)
+        throw SystemError("dup2 failed");
+
+    ret = fcntl(newFd, F_SETFL, flags);
+    if(-1 == ret)
+        throw IOError("fcntl failed");
+
+    if(close)
     {
+        // close original fd
         IODevice::close();
-        // second arg is true, because FD_CLOEXEC should not be set on fds 0,1,2
-        _impl.open(newFd, true);
+
+        // close copied fd later
+        _impl.setFd(newFd);
     }
 }
 
@@ -196,21 +205,6 @@ const PipeIODevice& PipeImpl::out() const
 PipeIODevice& PipeImpl::in()
 {
     return _in;
-}
-
-void PipeImpl::redirectStdin(bool close)
-{
-    out().redirect(0, close);
-}
-
-void PipeImpl::redirectStdout(bool close)
-{
-    in().redirect(1, close);
-}
-
-void PipeImpl::redirectStderr(bool close)
-{
-    in().redirect(2, close);
 }
 
 } // namespace System

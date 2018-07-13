@@ -79,15 +79,15 @@ void IODeviceImpl::open(int fd, bool inherit)
     flags |= O_NONBLOCK ;
     int ret = fcntl(this->fd(), F_SETFL, flags);
     if(-1 == ret)
-        throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
-
+        throw IOError("fcntl O_NONBLOCK failed");
+    
     if ( ! inherit)
     {
         int flags = fcntl(this->fd(), F_GETFD);
         flags |= FD_CLOEXEC ;
         int ret = fcntl(this->fd(), F_SETFD, flags);
         if(-1 == ret)
-            throw IOError(PT_ERROR_MSG("Could not set FD_CLOEXEC"));
+            throw IOError("fcntl FD_CLOEXEC failed");
     }
 
     //if( loop )

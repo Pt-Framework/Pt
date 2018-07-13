@@ -72,6 +72,13 @@ namespace System {
             int fd() const
             { return _ioh.fd; }
 
+            int setFd(int fd)
+            {
+              int replaceFd = _ioh.fd;
+              _ioh.fd = fd;
+              return replaceFd;
+            }
+
             void setTimeout(std::size_t msecs)
             { _timeout = msecs; }
 
