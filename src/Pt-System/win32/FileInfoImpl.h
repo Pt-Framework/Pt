@@ -83,16 +83,26 @@ class FileInfoImpl
             return FileInfo::File;
         }
 
-        //static FileInfo::Type getType(DWORD attr)
-        //{
-        //    if(attr == 0xffffffff)
-        //        return FileInfo::Invalid;
+        static FileInfo::Type linkStatus(const Path& path)
+        {
+            DWORD attr = GetFileAttributesW( path.impl()->c_str() );
 
-        //    if(attr & FILE_ATTRIBUTE_DIRECTORY)
-        //        return FileInfo::Directory;
+            if(attr == 0xffffffff)
+            {
+                if( path.extension() == ".sys")
+                    return FileInfo::File;
 
-        //    return FileInfo::File;
-        //}
+                return FileInfo::Invalid;
+            }
+
+            if(attr & FILE_ATTRIBUTE_REPARSE_POINT)
+                return FileInfo::Link;
+
+            if(attr & FILE_ATTRIBUTE_DIRECTORY)
+                return FileInfo::Directory;
+
+            return FileInfo::File;
+        }
 
         static Pt::uint64_t size(const Path& path)
         {

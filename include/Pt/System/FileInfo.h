@@ -108,7 +108,8 @@ class PT_SYSTEM_API FileInfo
         {
             Invalid = 0,   //!< Invalid file type
             Directory = 1, //!< Directory
-            File = 2       //!< Regular file
+            File = 2,      //!< Regular file
+            Link = 4       //!< Symbolic link
         };
 
     public:
@@ -151,9 +152,14 @@ class PT_SYSTEM_API FileInfo
         Type type() const
         { return FileInfo::type(_path); }
 
+        bool isLink() const
+        { return FileInfo::isLink(_path); }
+
     public:
         //! @brief Returns the type of file at the \a path.
         static Type type(const Path& path);
+
+        static bool isLink(const Path& path);
 
         //! @brief Returns the size of the file in bytes.
         static Pt::uint64_t size(const Path& path);

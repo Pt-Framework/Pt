@@ -83,9 +83,19 @@ class FileInfoImpl
             return FileInfo::File;
         }
 
-        static FileInfo::Type getType(const struct stat& st)
+        static FileInfo::Type linkStatus(const Path& path)
         {
-            if( S_ISREG(st.st_mode) )
+            struct stat st;
+            if( 0 != ::lstat(path.impl()->c_str(), &st) )
+            {
+                return FileInfo::Invalid;
+            }
+
+            if( S_ISLNK(st.st_mode) )
+            {
+                return FileInfo::Link;
+            }
+            else if( S_ISREG(st.st_mode) )
             {
                 return FileInfo::File;
             }

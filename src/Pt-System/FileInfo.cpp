@@ -67,6 +67,12 @@ FileInfo::Type FileInfo::type(const Path& path)
 }
 
 
+bool FileInfo::isLink(const Path& path)
+{
+    return FileInfoImpl::linkStatus(path) == FileInfo::Link;
+}
+
+
 uint64_t FileInfo::size(const Path& path)
 {
     return FileInfoImpl::size(path);
