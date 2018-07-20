@@ -106,9 +106,13 @@ class TcpSocketImpl
 
     private:
         void connect();
+        
         bool beginConnect();
-        void setEventFlags(HANDLE ev, long events);
+        
+        void eventSelect(HANDLE ev, long events);
+        
         bool wait(std::size_t msecs);
+        
         int waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout);
 
     private:
@@ -122,6 +126,8 @@ class TcpSocketImpl
         WSABUF _receiveBuffer;
         bool _fdClose;
         long _eventFlags;
+        int _socketError;
+        std::size_t _bytesSent;
 };
 
 } // namespace Net

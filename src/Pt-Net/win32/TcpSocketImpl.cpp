@@ -49,10 +49,12 @@ namespace Net {
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : _errorPending(false)
 , _fd(INVALID_SOCKET)
-, _fdClose(false)
-, _eventFlags(FD_CLOSE)
 , _timeout(System::EventLoop::WaitInfinite)
 , _ioh(socket)
+, _fdClose(false)
+, _eventFlags(FD_CLOSE)
+, _socketError(0)
+, _bytesSent(0)
 {
 }
 
@@ -62,7 +64,7 @@ TcpSocketImpl::~TcpSocketImpl()
 }
 
 
-void TcpSocketImpl::setEventFlags(HANDLE ev, long events)
+void TcpSocketImpl::eventSelect(HANDLE ev, long events)
 {
     if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
     {
@@ -75,6 +77,8 @@ void TcpSocketImpl::setEventFlags(HANDLE ev, long events)
 void TcpSocketImpl::cancel(System::EventLoop& loop)
 {
     _errorPending = false;
+    _socketError = 0;
+    _bytesSent = 0;
 
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
@@ -86,7 +90,7 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
     if( _fd != INVALID_SOCKET )
     {
         PT_LOG_DEBUG("cancelling socket " << _fd);
-        this->setEventFlags(0, 0);
+        this->eventSelect(0, 0);
     }
 }
 
@@ -101,6 +105,8 @@ void TcpSocketImpl::close()
     _fd = INVALID_SOCKET;
     _fdClose = false;
     _errorPending = false;
+    _socketError = 0;
+    _bytesSent = 0;
 }
 
 
@@ -210,7 +216,7 @@ bool TcpSocketImpl::beginConnect()
         if( lastError == WSAEWOULDBLOCK || lastError == WSAEINPROGRESS )
         {
             _eventFlags |= FD_CONNECT;
-            setEventFlags(_ioh.handle(), _eventFlags);
+            eventSelect(_ioh.handle(), _eventFlags);
             PT_LOG_DEBUG("connect in progress");
             return false;
         }
@@ -229,7 +235,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     if(_fd != INVALID_SOCKET) 
     {
         _eventFlags &= ~FD_CONNECT;
-        setEventFlags(_ioh.handle(), _eventFlags);
+        eventSelect(_ioh.handle(), _eventFlags);
     }
     
     if(_errorPending)
@@ -238,12 +244,12 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     PT_LOG_INFO("async connect not yet ready socket=" << _fd);
 
     _eventFlags |= FD_CONNECT;
-    setEventFlags(_ioh.handle(), _eventFlags);
+    eventSelect(_ioh.handle(), _eventFlags);
 
     bool avail = this->wait(_timeout);
 
     _eventFlags &= ~FD_CONNECT;
-    setEventFlags(_ioh.handle(), _eventFlags);
+    eventSelect(_ioh.handle(), _eventFlags);
 
     if(avail)
     {
@@ -302,6 +308,10 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
     if(events.iErrorCode[s] == 0)
     {
         PT_LOG_DEBUG("connect was successful");
+
+        _eventFlags &= ~FD_CONNECT;
+        eventSelect(_ioh.handle(), _eventFlags);
+
         isConnected = true;
         return true;
     }
@@ -321,28 +331,6 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
     }
 
     return isConnected || _errorPending;
-}
-
-
-bool TcpSocketImpl::runWrite(System::EventLoop& loop)
-{
-    WSANETWORKEVENTS events;
-
-    if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
-        throw System::SystemError("WSAEnumNetworkEvents failed");
-
-    if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
-    {
-        _fdClose = true;
-        return true;
-    }
-
-    if( (events.lNetworkEvents & FD_WRITE) == FD_WRITE )
-    {
-        return true;
-    }
-
-    return false;
 }
 
 
@@ -366,40 +354,15 @@ bool TcpSocketImpl::wait(std::size_t msecs)
 }
 
 
-void TcpSocketImpl::localEndpoint(Endpoint& ep) const
-{
-    sockaddr_storage sockadr;
-    int l = sizeof(sockadr);
-    int ret = getsockname(_fd, (sockaddr*)&sockadr, &l);
-
-    if(ret == 0)
-        ep.impl()->init( (sockaddr*)&sockadr, l );
-    else
-        ep.clear();
-}
-
-
-void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
-{
-    sockaddr_storage sockadr;
-    int l = sizeof(sockadr);
-    int ret = getpeername(_fd, (sockaddr*)&sockadr, &l);
-
-    if(ret == 0)
-        ep.impl()->init( (sockaddr*)&sockadr, l );
-    else
-        ep.clear();
-}
-
-
-std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
+std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop, 
+                                     char* buffer, std::size_t n, bool& eof)
 {
     PT_LOG_DEBUG(_fd << " beginRead");
 
     if(_fdClose)
     {
         // FD_CLOSE can be posted at the same time as FD_READ, in which case
-        // all remaining data needs to be read forom the socket
+        // all remaining data needs to be read from the socket
         int len = ::recv(_fd, buffer, n, 0);
         if(len > 0)
             return len;
@@ -421,7 +384,7 @@ std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std:
     _receiveBuffer.buf = buffer;
     _receiveBuffer.len = n > maxLen ? maxLen : static_cast<ULONG>(n);
 
-    setEventFlags(_ioh.handle(), _eventFlags);
+    eventSelect(_ioh.handle(), _eventFlags);
     return 0;
 }
 
@@ -448,7 +411,8 @@ bool TcpSocketImpl::runRead(System::EventLoop& loop)
 }
 
 
-std::size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, std::size_t, bool& eof)
+std::size_t TcpSocketImpl::endRead(System::EventLoop& loop, 
+                                   char* buffer, std::size_t, bool& eof)
 {
     PT_LOG_DEBUG(_fd << " endRead");
     _eventFlags &= ~FD_READ;
@@ -465,7 +429,7 @@ std::size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, std::s
         if(err == WSAEWOULDBLOCK)
         {
             // set socket to blocking mode
-            setEventFlags(0, 0);
+            eventSelect(0, 0);
         
             u_long argp = 0;
             ::ioctlsocket(_fd, FIONBIO, &argp);
@@ -485,7 +449,7 @@ std::size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, std::s
         }
     }
 
-    setEventFlags(_ioh.handle(), _eventFlags);
+    eventSelect(_ioh.handle(), _eventFlags);
 
     return len;
 }
@@ -512,7 +476,8 @@ std::size_t TcpSocketImpl::read(char* buf, std::size_t n, bool& eof)
 }
 
 
-std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
+std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, 
+                                      const char* buffer, std::size_t n)
 {
     PT_LOG_DEBUG(_fd << " beginWrite");
 
@@ -521,71 +486,94 @@ std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffe
         loop.selector().enableOverlapped(_ioh);
     }
 
+    _socketError = 0;
+    _bytesSent = 0;
+
     ULONG maxLen = std::numeric_limits<ULONG>::max();
     _sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = n > maxLen ? maxLen : static_cast<ULONG>(n);
 
-    PT_LOG_DEBUG("previous FD_CLOSE:" << _fdClose);
+    _eventFlags |= FD_WRITE;
+    eventSelect(_ioh.handle(), _eventFlags);
 
-    DWORD numberOfBytesSent = 0;
-    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
-
-    if(rc == SOCKET_ERROR)
+    int len = send(_fd, _sendBuffer.buf, _sendBuffer.len, 0);
+    if(len < 0)
     {
+      if(WSAGetLastError() == WSAEWOULDBLOCK)
+      {
+        PT_LOG_DEBUG("WSAEWOULDBLOCK on " << _fd);
+        return 0;
+      }
+      else
+      {
         PT_LOG_DEBUG("socket error on " << _fd);
-        if(WSAGetLastError() == WSAEWOULDBLOCK)
-        {
-            PT_LOG_DEBUG("WSAEWOULDBLOCK on " << _fd);
-            _eventFlags |= FD_WRITE;
-            setEventFlags(_ioh.handle(), _eventFlags);
-            return 0;
-        }
-        else
-        {
-            throw System::IOError("WSASend");
-        }
+        throw System::IOError("send");
+      }
     }
 
-    PT_LOG_DEBUG(_fd << " beginWrite sent " << numberOfBytesSent << " of " << n << " bytes");
+    _eventFlags &= ~FD_WRITE;
+    eventSelect(_ioh.handle(), _eventFlags);
 
-    return numberOfBytesSent;
+    return static_cast<std::size_t>(len);
 }
 
 
-std::size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
+
+bool TcpSocketImpl::runWrite(System::EventLoop& loop)
+{
+  WSANETWORKEVENTS events;
+  int r =  WSAEnumNetworkEvents(_fd, NULL, &events);
+  if(r == SOCKET_ERROR)
+    throw System::SystemError("WSAEnumNetworkEvents failed");
+
+  if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
+  {
+    PT_LOG_DEBUG("FD_CLOSE on write:" << _fdClose);
+    _fdClose = true;
+    return true;
+  }
+
+  if( (events.lNetworkEvents & FD_WRITE) != FD_WRITE )
+    return false;
+
+  int ec = events.iErrorCode[FD_WRITE_BIT];
+  if(ec != 0)
+  {
+    _socketError = ec;
+    return true;
+  }
+
+  int len = send(_fd, _sendBuffer.buf, _sendBuffer.len, 0);
+  if(len < 0)
+  {
+    ec = WSAGetLastError();
+    if(ec == WSAEWOULDBLOCK)
+    {
+      OutputDebugString( "[TcpSocket] WSAEWOULDBLOCK\n");
+      return false;
+    }
+
+    _socketError = ec;
+    return true;
+  }
+
+  _bytesSent = static_cast<std::size_t>(len);
+  return true;
+}
+
+
+std::size_t TcpSocketImpl::endWrite(System::EventLoop& loop, 
+                                    const char* buffer, std::size_t n)
 {
     PT_LOG_DEBUG(_fd << " endWrite");
 
     _eventFlags &= ~FD_WRITE;
-    setEventFlags(0, 0);
+    eventSelect(_ioh.handle(), _eventFlags);
 
-    // set socket to blocking mode
-    //u_long argp = 0;
-    //::ioctlsocket(_fd, FIONBIO, &argp);
+    if(_socketError != 0)
+      throw System::IOError("send failed");
 
-    DWORD bytesSent = 0;
-    int rc = WSASend(_fd, &_sendBuffer, 1, &bytesSent, 0, NULL, NULL);
-
-    // TODO:
-    // we cannot blocking send data, because this could overflow the TCP
-    // buffer and noone will be able to read off data, if the reader is
-    // in the same process. Instead we throw IOPending below. It might
-    // be a good idea to give up the rule that a begin call with an immediate
-    // end call should behave like a blocking call.
-
-    // set socket to non-blocking mode
-    //argp = 1;
-    //::ioctlsocket(_fd, FIONBIO, &argp);
-
-    setEventFlags(_ioh.handle(), _eventFlags);
-
-    if(rc == SOCKET_ERROR)
-        throw System::IOError("WSASend");
-
-    if(bytesSent == 0 && n != 0)
-        throw IOError("WSA operation pending");
-
-    return bytesSent;
+    return _bytesSent;
 }
 
 
@@ -606,9 +594,38 @@ std::size_t TcpSocketImpl::write(const char* buffer, std::size_t n)
     DWORD numberOfBytesSent = 0;
     int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
     if(rc == SOCKET_ERROR)
-        throw System::IOError("WSASend");
+    {
+      int ec = WSAGetLastError();
+      throw System::IOError("WSASend");
+    }
 
     return numberOfBytesSent;
+}
+
+
+void TcpSocketImpl::localEndpoint(Endpoint& ep) const
+{
+    sockaddr_storage sockadr;
+    int l = sizeof(sockadr);
+    int ret = getsockname(_fd, (sockaddr*)&sockadr, &l);
+
+    if(ret == 0)
+        ep.impl()->init( (sockaddr*)&sockadr, l );
+    else
+        ep.clear();
+}
+
+
+void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
+{
+    sockaddr_storage sockadr;
+    int l = sizeof(sockadr);
+    int ret = getpeername(_fd, (sockaddr*)&sockadr, &l);
+
+    if(ret == 0)
+        ep.impl()->init( (sockaddr*)&sockadr, l );
+    else
+        ep.clear();
 }
 
 
