@@ -1,0 +1,107 @@
+if ! $(JAMBASE_TAR_JAM_INCLUDED) {
+JAMBASE_TAR_JAM_INCLUDED = true ;
+
+rule Tar
+{
+  local _tar = $(1) ;
+  local _files = $(2) ;
+  local _tmpdir = $(1:B)-tar ;
+
+  $(<)_type = "Tar" ;
+
+  Clean package-clean : $(_tar) ;
+  
+  Depends package : $(_tar) ;
+  
+  for local f in $(_files)
+  {
+    local _member = $(f:BSG=$(_tar)) ;
+
+    Depends $(_tar) : $(_member) ;
+    Depends $(_member) : $(f) ;
+    Depends $(_member) : $(_tmpdir) ;
+    MkDir $(_tmpdir) ;
+
+    ARCHIVE_RIGHTS on $(_member) = 0666 ;
+    ARCHIVE_NAME on $(_member) = $(_tar) ;
+    ARCHIVE_DIR on $(_member) = "" ;
+
+    if $(3)
+    {
+      ARCHIVE_DIR on $(_member) = [ FDirName $(3) ] ;
+    }
+
+    TarFile $(_member) : $(f) ;
+  }
+}
+
+
+rule Tar-MakeLocate
+{
+  local _tmpdir = $(1:B)-tar ;
+
+  _MakeLocate $(_tmpdir) : $(2) ;
+  _MakeLocate $(1) : $(2) ;
+}
+
+
+rule TarMode
+{
+  local _tar = $(1) ;
+  local _files = $(2) ;
+  local _rights = $(3) ;
+  
+  for local f in $(_files)
+  {
+    local _member = $(f:BSG=$(_tar)) ;
+    ARCHIVE_RIGHTS on $(_member) = $(_rights) ;
+  }
+}
+
+
+actions TarFile bind ARCHIVE_NAME
+{
+  set TMP_DIR=$(ARCHIVE_NAME:DB)-tar
+  set FILE_DIR=%TMP_DIR%\$(ARCHIVE_DIR)
+
+  if not exist "%FILE_DIR%" (
+    mkdir "%FILE_DIR%"
+  )
+
+  copy $(2) "%FILE_DIR%" > NUL
+  
+  set CURRENT_DIR=%cd%
+  
+  for /f "delims=" %%i in ("%CURRENT_DIR%") do (
+    set CURRENT_DIR=%%~pnxi
+  )
+    
+  cd "%TMP_DIR%"
+  
+  set FILE=$(2:BSD=$(ARCHIVE_DIR))
+  set FILE=%FILE:\=/%
+  
+  set ARCHIVE=%CURRENT_DIR%/$(ARCHIVE_NAME)
+  set ARCHIVE=%ARCHIVE:\=/%
+  
+  REM TODO: return with FAILURE if tar command fails
+  
+  if exist "%ARCHIVE%" (
+    tar rf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS)
+  ) else (
+    tar cf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS)
+  )
+}
+
+
+actions together Tar
+{
+  set TMP_DIR=$(1:DB)-tar
+  REM echo REMOVE %TMP_DIR%
+  
+  if exist "%TMP_DIR%" (
+    rd /s/q "%TMP_DIR%"
+  )
+}
+
+} # JAMBASE_TAR_JAM_INCLUDED

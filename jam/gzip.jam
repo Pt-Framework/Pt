@@ -1,0 +1,23 @@
+if ! $(JAMBASE_GZIP_JAM_INCLUDED) {
+JAMBASE_GZIP_JAM_INCLUDED = true ;
+
+rule GZip
+{
+  local _gzip = $(1).gz ;
+  local _file = $(1) ;
+  
+  Depends package : $(_gzip) ;
+  Depends $(_gzip) : $(_file) ;
+
+  Clean package-clean : $(_gzip) ;
+
+  GZip1 $(_gzip) : $(_file) ;
+}
+
+
+actions GZip1
+{
+  gzip -f $(2)
+}
+
+} # JAMBASE_GZIP_JAM_INCLUDED
