@@ -594,6 +594,22 @@ rule Main-LinkSharedLibraries
 }
 
 
+rule MakeFile
+{
+  local _line = $(2:J=" ") ;
+  NotFile $(_line) ;
+  MakeFile1 $(<) : $(_line) ;
+}
+
+
+rule MakeLine
+{
+  local _line = $(2:J=" ") ;
+  NotFile $(_line) ;
+  MakeLine1 $(<) : $(_line) ;
+}
+
+
 rule Main-MakeLocate
 {
     _MakeLocate $(<:S=$(SUFEXE)) : $(>) ;
@@ -1275,6 +1291,16 @@ actions existing Install
 #
 #    "$(LINK)" $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) 
 #}
+
+actions MakeFile1
+{
+  echo $(>) > $(<)
+}
+
+actions MakeLine1
+{
+  echo $(>) >> $(<)
+}
 
 actions MkDir1
 {
