@@ -61,6 +61,10 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Run operation if it is ready
         bool run();
 
+        //! @brief Returns the used event loop.
+        EventLoop* parent() const
+         { return _parent; }
+
         //! @internal
         Selectable* next()
         { return _next; }
