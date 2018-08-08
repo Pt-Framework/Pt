@@ -430,6 +430,8 @@ void Application::processMouseEvent(const MouseEvent& ev)
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
+        // TODO: dispatch to grabber widget if its in the IME window
+
         Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
         Gfx::PointF p = ime->fromScreen(screenPos);
         Gfx::RectF rect( ime->size() );
