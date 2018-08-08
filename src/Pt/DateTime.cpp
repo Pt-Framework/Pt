@@ -136,11 +136,15 @@ inline unsigned short getNumber4(const char* s)
 
 
 template <typename CharT>
-void dateTimeToString(std::basic_string<CharT>& str, const DateTime& dt)
+void dateTimeToString(std::basic_string<CharT>& str, 
+                      const DateTime& dt,
+                      int* utcOffset = 0)
 {
-    // format YYYY-MM-DD hh:mm:ss.sssss
+    // format YYYY-MM-DDThh:mm:ss.sss[+/-HH:MM]
     //        0....+....1....+....2....+
-    CharT ret[25];
+    CharT ret[32] = {0};
+    std::size_t retSize = 0;
+    
     unsigned int n = dt.date().year();
     ret[3] = '0' + n % 10;
     n /= 10;
@@ -165,14 +169,31 @@ void dateTimeToString(std::basic_string<CharT>& str, const DateTime& dt)
     ret[17] = static_cast<char>('0' + dt.time().second() / 10);
     ret[18] = '0' + dt.time().second() % 10;
     ret[19] = '.';
+    
     n = dt.time().msec();
     ret[22] = '0' + n % 10;
     n /= 10;
     ret[21] = '0' + n % 10;
     n /= 10;
     ret[20] = '0' + n % 10;
+    
+    retSize = 23;
 
-    str.assign(ret, 23);
+    if(utcOffset && *utcOffset != 0)
+    {
+        int hoursOffset = std::abs(*utcOffset) / 60;
+        int minutesOffset = std::abs(*utcOffset) % 60;
+        
+        ret[23] = *utcOffset < 0 ? '-' : '+';
+        ret[24] = static_cast<char>('0' + hoursOffset / 10);
+        ret[25] = '0' + hoursOffset % 10;
+        ret[26] = ':';
+        ret[27] = static_cast<char>('0' + minutesOffset / 10);
+        ret[28] = '0' + minutesOffset % 10;
+        retSize = 29;
+    }
+
+    str.assign(ret, retSize);
 }
 
 
@@ -184,7 +205,22 @@ std::string dateTimeToString(const DateTime& dt)
 }
 
 
+std::string dateTimeToString(const DateTime& dt, int* utcOffset)
+{
+    std::string str;
+    dateTimeToString(str, dt, utcOffset);
+    return str;
+}
+
+
 DateTime dateTimeFromString(const std::string& s)
+{
+    int* utcOffset = 0;
+    return dateTimeFromString(s, utcOffset);
+}
+
+
+DateTime dateTimeFromString(const std::string& s, int* utcOffset)
 {
     if (s.size() < 23
         || s.at(4) != '-'
@@ -196,6 +232,25 @@ DateTime dateTimeFromString(const std::string& s)
         throw ConversionError("Invalid DateTime format");
 
     const char* d = s.data();
+
+    if(utcOffset)
+    {
+        *utcOffset = 0;
+
+        if(s.size() > 23)
+        {
+            bool neg = s[23] == '-';
+        
+            if(s.size() > 25)
+                *utcOffset += getNumber2(d + 24) * 60;
+
+            if(s.size() > 28)
+                *utcOffset += getNumber2(d + 27);
+
+            if(neg) 
+                *utcOffset *= -1;
+        }
+    }
 
     return DateTime( getNumber4(d),
                      getNumber2(d + 5),

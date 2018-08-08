@@ -45,21 +45,23 @@ class DateTimeTest : public Pt::Unit::TestSuite
         DateTimeTest()
         : Pt::Unit::TestSuite("DateTimeTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &DateTimeTest::testAssign );
-            Pt::Unit::TestSuite::registerMethod( "testOperators", *this, &DateTimeTest::testOperators );
-            Pt::Unit::TestSuite::registerMethod( "testMsecsUnixEpoch", *this, &DateTimeTest::testMsecsUnixEpoch );
-            Pt::Unit::TestSuite::registerMethod( "testIsoConvert", *this, &DateTimeTest::testIsoConvert );
+            Pt::Unit::TestSuite::registerMethod( "Assign", *this, &DateTimeTest::Assign );
+            Pt::Unit::TestSuite::registerMethod( "Operators", *this, &DateTimeTest::Operators );
+            Pt::Unit::TestSuite::registerMethod( "MsecsUnixEpoch", *this, &DateTimeTest::MsecsUnixEpoch );
+            Pt::Unit::TestSuite::registerMethod( "Iso8601Convert", *this, &DateTimeTest::Iso8601Convert );
+            Pt::Unit::TestSuite::registerMethod( "Iso8601ConvertOffset", *this, &DateTimeTest::Iso8601ConvertOffset );
         }
 
     protected:
-        void testAssign();
-        void testOperators();
-        void testMsecsUnixEpoch();
-        void testIsoConvert();
+        void Assign();
+        void Operators();
+        void MsecsUnixEpoch();
+        void Iso8601Convert();
+        void Iso8601ConvertOffset();
 };
 
 
-void DateTimeTest::testAssign()
+void DateTimeTest::Assign()
 {
     Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
     PT_UNIT_ASSERT( dt.year()   == 2001 );
@@ -81,7 +83,7 @@ void DateTimeTest::testAssign()
 }
 
 
-void DateTimeTest::testOperators()
+void DateTimeTest::Operators()
 {
     Pt::DateTime dt(1998, 06, 27, 11, 45, 20, 800);
     Pt::Timespan timespan;
@@ -138,7 +140,7 @@ void DateTimeTest::testOperators()
 }
 
 
-void DateTimeTest::testMsecsUnixEpoch()
+void DateTimeTest::MsecsUnixEpoch()
 {
     //unsigned msecsSinceEpoch = 2000;
     //Pt::DateTime dt(1970, 1, 1);
@@ -210,11 +212,11 @@ void DateTimeTest::testMsecsUnixEpoch()
 }
 
 
-void DateTimeTest::testIsoConvert()
+void DateTimeTest::Iso8601Convert()
 {
     Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
     std::string isoString = dt.toIsoString();
-    PT_UNIT_ASSERT( isoString == "2001-11-15T12:45:23.956" );
+    PT_UNIT_ASSERT_EQUAL( isoString, "2001-11-15T12:45:23.956" );
 
     dt = Pt::DateTime::fromIsoString("1789-05-12T23:59:59.999");
     PT_UNIT_ASSERT( dt.year() == 1789 );
@@ -224,6 +226,28 @@ void DateTimeTest::testIsoConvert()
     PT_UNIT_ASSERT( dt.minute() == 59 );
     PT_UNIT_ASSERT( dt.second() == 59 );
     PT_UNIT_ASSERT( dt.msec() == 999 );
+}
+
+
+void DateTimeTest::Iso8601ConvertOffset()
+{
+    Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
+
+    int utcOffset = 165;
+    std::string isoString = dt.toIsoString(&utcOffset);
+    PT_UNIT_ASSERT_EQUAL( isoString, "2001-11-15T12:45:23.956+02:45" );
+
+    int utcOffset2 = 0;
+    dt = Pt::DateTime::fromIsoString("1789-05-12T23:59:59.999+01:15", &utcOffset2);
+
+    PT_UNIT_ASSERT( dt.year() == 1789 );
+    PT_UNIT_ASSERT( dt.month() == 5 );
+    PT_UNIT_ASSERT( dt.day() == 12 );
+    PT_UNIT_ASSERT( dt.hour() == 23 );
+    PT_UNIT_ASSERT( dt.minute() == 59 );
+    PT_UNIT_ASSERT( dt.second() == 59 );
+    PT_UNIT_ASSERT( dt.msec() == 999 );
+    PT_UNIT_ASSERT_EQUAL( utcOffset2, 75 );
 }
 
 Pt::Unit::RegisterTest<DateTimeTest> register_DateTimeTest;

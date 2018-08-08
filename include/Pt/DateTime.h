@@ -40,7 +40,13 @@ namespace Pt {
 PT_API std::string dateTimeToString(const DateTime& dt);
 
 //! @internal
+PT_API std::string dateTimeToString(const DateTime& dt, int* utcOffset);
+
+//! @internal
 PT_API DateTime dateTimeFromString(const std::string& s);
+
+//! @internal
+PT_API DateTime dateTimeFromString(const std::string& s, int* utcOffset);
 
 /** @brief Combined %Date and %Time value.
 
@@ -164,10 +170,20 @@ class DateTime
         std::string toIsoString() const
         { return dateTimeToString(*this); }
 
+        /** \brief Returns the date and time in ISO-format
+        */
+        std::string toIsoString(int* utcOffset) const
+        { return dateTimeToString(*this, utcOffset); }
+
         /** \brief Interprets a string as a date and time in ISO-format
         */
         static DateTime fromIsoString(const std::string& s)
         { return dateTimeFromString(s); }
+
+        /** \brief Interprets a string as a date and time in ISO-format
+        */
+        static DateTime fromIsoString(const std::string& s, int* utcOffset)
+        { return dateTimeFromString(s, utcOffset); }
 
         /** @brief Assignment by sum operator
         */
