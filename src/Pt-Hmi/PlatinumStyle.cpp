@@ -202,22 +202,18 @@ void PlatinumButtonRenderer::onPrepare(const PushButton& button,
 {
     if( button.isEnabled() )
     {
-        Gfx::Color buttonColor = foreground.color();
-
-        if( button.isHighlighted() )
-        {
-            buttonColor = brighten(buttonColor, 0.9f);
-        }
-
         if( button.isPressed() )
         {
-            buttonColor = brighten(buttonColor, 0.9f);
-
             if( button.isFlat() )
-                textPen = options.accentColor();
+                textPen = button.accentColor();
+            else
+                foreground = button.accentColor();
         }
-
-        foreground = buttonColor;
+        else if( button.isHighlighted() )
+        {
+            if( ! button.isFlat() )
+                foreground = button.highlightColor();
+        }
     }
 }
 
@@ -229,7 +225,7 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
 {
     if( button.isPressed() && button.isFlat() )
     {
-        Gfx::Color hightlightColor = options.accentColor();
+        Gfx::Color hightlightColor = button.accentColor();
 
         Gfx::Image highlightIcon = icon;
 

@@ -84,6 +84,14 @@ class PT_HMI_API PushButton : public Button
 
         void setContour(const Gfx::Pen& p);
 
+        const Gfx::Color& accentColor() const;
+        
+        void setAccentColor(const Gfx::Color& color);
+
+        const Gfx::Color& highlightColor() const;
+
+        void setHighlightColor(const Gfx::Color& c);
+
         const Gfx::Color& textColor() const;
 
         void setTextColor(const Gfx::Color& color);
@@ -141,6 +149,8 @@ class PT_HMI_API PushButton : public Button
 
         AutoPtr<Gfx::Brush>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
+        AutoPtr<Gfx::Color>       _accentColor;
+        AutoPtr<Gfx::Color>       _highlightColor;
         AutoPtr<Gfx::Color>       _textColor;
         AutoPtr<std::string>      _fontName;
         AutoPtr<std::size_t>      _fontSize;

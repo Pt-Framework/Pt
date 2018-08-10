@@ -254,7 +254,26 @@ Widget* Widget::findWidget(const Gfx::PointF& pos)
 }
 
 
-Widget* Widget::findWidget( const std::string& name )
+Widget* Widget::findWidget(Pt::uint64_t vid)
+{
+    std::vector<Widget*>::const_iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Widget* child = *it;
+
+        if( child->vid() == vid )
+            return child;
+
+        Widget* widget = child->findWidget(vid);
+        if( widget )
+            return widget;
+    }
+
+    return 0;
+}
+
+
+Widget* Widget::findWidget(const std::string& name)
 {
     std::vector<Widget*>::const_iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)

@@ -356,7 +356,7 @@ Widget* Window::findWidget(const Gfx::PointF& pos, bool input)
         Widget* widget = _mainWidget->findWidget(pos, input);
 
         if( ! input )
-        return widget ? widget : _mainWidget;
+          return widget ? widget : _mainWidget;
 
       if( widget && widget->acceptsInput() )
           return widget;
@@ -367,6 +367,7 @@ Widget* Window::findWidget(const Gfx::PointF& pos, bool input)
 
     return 0;
 }
+
 
 Widget* Window::findWidget(const Gfx::PointF& pos)
 {
@@ -383,6 +384,18 @@ Widget* Window::findWidget(const std::string& name)
         return _mainWidget;
 
     return _mainWidget->findWidget(name);
+}
+
+
+Widget* Window::findWidget(Pt::uint64_t vid)
+{
+    if( ! _mainWidget )
+        return 0;
+
+    if( _mainWidget->vid() == vid )
+        return _mainWidget;
+
+    return _mainWidget->findWidget(vid);
 }
 
 

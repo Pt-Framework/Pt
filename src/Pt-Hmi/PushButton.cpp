@@ -135,6 +135,35 @@ void PushButton::setContour(const Gfx::Pen& p)
 }
 
 
+const Gfx::Color& PushButton::accentColor() const
+{
+    return _accentColor ? *_accentColor
+                        : Application::instance().styleOptions().accentColor();
+}
+
+
+void PushButton::setAccentColor(const Gfx::Color& color)
+{
+    _accentColor.reset( new Gfx::Color(color) );
+    invalidate();
+}
+
+
+const Gfx::Color& PushButton::highlightColor() const
+{
+    return _highlightColor ? *_highlightColor
+                           : Application::instance().styleOptions().highlightColor();
+}
+
+
+void PushButton::setHighlightColor(const Gfx::Color& color)
+{
+    _highlightColor.reset( new Gfx::Color(color) );
+    invalidate();
+}
+
+
+
 const Gfx::Color& PushButton::textColor() const
 {
     return _textColor ? *_textColor
@@ -265,6 +294,8 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
     _foreground.reset( new Gfx::Brush(o.foreground()) );
     _contour.reset( new Gfx::Pen( o.contour() ) );
     _textColor.reset( new Gfx::Color( o.textColor() ) );
+    _accentColor.reset( new Gfx::Color( o.accentColor() ) );
+    _highlightColor.reset( new Gfx::Color( o.highlightColor() ) );
     _fontName.reset( new std::string( o.font().name() ) );
     _fontSize.reset( new std::size_t( o.font().size() ) );
     _fontStyle.reset( new Gfx::Font::Style( o.font().style() ) );

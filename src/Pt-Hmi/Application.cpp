@@ -155,7 +155,7 @@ const Widget* Application::pointerWidget() const
 }
 
 
-void Application::setPointerWidget( Widget* widget ) 
+void Application::setPointerWidget(Widget* widget) 
 {
     if( _pointerWidget == widget )
         return;
@@ -341,10 +341,25 @@ void Application::processTouchEvent(const TouchEvent& ev)
 
     TouchEvent tev = ev;
 
-    // IME window always has priority
+    // IME window has priority
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
+        // find grabber in IME window
+        for(std::vector<Visual*>::reverse_iterator it = _grabbers.rbegin(); 
+            it != _grabbers.rend(); ++it)
+        {
+            Widget* grabber = ime->findWidget( (*it)->vid() );
+            if(grabber)
+            {
+                Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
+                tev.setPosition( grabber->fromScreen(screenPos) );
+                tev.setId( grabber->vid() );
+                loop().commitEvent(tev);
+                return;
+            }
+        }
+
         Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
         Gfx::PointF p = ime->fromScreen(screenPos);
         Gfx::RectF rect( ime->size() );
@@ -357,6 +372,7 @@ void Application::processTouchEvent(const TouchEvent& ev)
         }
     }
 
+    // pointer grab has priority
     Visual* grabber = Application::instance().pointerGrabber();
     if(grabber)
     {
@@ -426,11 +442,24 @@ void Application::processMouseEvent(const MouseEvent& ev)
     
     MouseEvent mev = ev;
 
-    // IME window always has priority
+    // IME window has priority
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
-        // TODO: dispatch to grabber widget if its in the IME window
+        // find grabber in IME window
+        for(std::vector<Visual*>::reverse_iterator it = _grabbers.rbegin(); 
+            it != _grabbers.rend(); ++it)
+        {
+            Widget* grabber = ime->findWidget( (*it)->vid() );
+            if(grabber)
+            {
+                Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
+                mev.setPosition( grabber->fromScreen(screenPos) );
+                mev.setId( grabber->vid() );
+                loop().commitEvent(mev);
+                return;
+            }
+        }
 
         Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
         Gfx::PointF p = ime->fromScreen(screenPos);
@@ -444,6 +473,7 @@ void Application::processMouseEvent(const MouseEvent& ev)
         }
     }
 
+    // pointer grab has priority
     Visual* grabber = pointerGrabber();
     if(grabber)
     {

@@ -85,9 +85,11 @@ class PT_HMI_API Widget : public Visual
        
         const std::vector<Widget*>& widgets() const;
 
-        Widget* findWidget( const Gfx::PointF& pos );
+        Widget* findWidget(const Gfx::PointF& pos);
 
-        Widget* findWidget( const std::string& name );
+        Widget* findWidget(const std::string& name);
+
+        Widget* findWidget(Pt::uint64_t vid);
 
         bool acceptsInput() const;
 

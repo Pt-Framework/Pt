@@ -114,6 +114,8 @@ class PT_HMI_API Window : public WindowBase
 
     Widget* findWidget(const std::string& name);
 
+    Widget* findWidget(Pt::uint64_t vid);
+
     Widget* focusWidget();
 
     void focusNext();
