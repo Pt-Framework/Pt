@@ -378,6 +378,7 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
     if( ! sb)
         return 0;
 
+    PT_LOG_DEBUG("maxImport " << maxImport);
     if(maxImport == 0) 
         maxImport = sb->in_avail();
 

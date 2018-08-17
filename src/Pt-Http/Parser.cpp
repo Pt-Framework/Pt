@@ -127,7 +127,7 @@ namespace Http {
             state = &HeaderParser::state_error;
         }
 
-        while(avail > 0)
+        while(avail-- > 0)
         {
             if( parse(sb.sbumpc()) )
                 break;
