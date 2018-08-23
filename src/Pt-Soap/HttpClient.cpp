@@ -60,7 +60,8 @@ HttpClient::~HttpClient()
 
 void HttpClient::init()
 {
-    _client.request().header().set("Content-Type", "text/xml");
+    //_client.request().header().set("Content-Type", "text/xml");
+    _client.request().header().set("Content-Type", "application/soap+xml");
     _client.request().setMethod("POST");
 
     _client.requestSent() += Pt::slot(*this, &HttpClient::onRequest);
@@ -176,8 +177,8 @@ void HttpClient::onBeginInvoke()
     _client.request().discard();
 
     //--->
-    // prepare HTTP request
-    _client.request().header().set("SOAPAction", ""); // TODO: use targetNamespace/MethodName
+    // prepare HTTP request for SOAP 1.1
+    //_client.request().header().set("SOAPAction", ""); // TODO: use targetNamespace/MethodName
     //---<
     
     // format XML-RPC request
@@ -205,8 +206,8 @@ void HttpClient::onInvoke()
     _client.request().discard();
 
     //--->
-    // prepare HTTP request
-    _client.request().header().set("SOAPAction", ""); // TODO: use targetNamespace/MethodName
+    // prepare HTTP request for SOAP 1.1
+    // _client.request().header().set("SOAPAction", ""); // TODO: use targetNamespace/MethodName
     //---<
 
     // format XML-RPC request

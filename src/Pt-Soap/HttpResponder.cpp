@@ -119,7 +119,8 @@ void HttpResponder::onResult()
 
     if( _reply )
     {
-        _reply->header().set("Content-Type", "text/xml");
+        //_reply->header().set("Content-Type", "text/xml");
+        _reply->header().set("Content-Type", "application/soap+xml");
         beginResult(_reply->body() );
         advanceReply(*_reply);
     }
@@ -132,7 +133,8 @@ void HttpResponder::onFault(const Fault& fault)
 
     if( _reply )
     {
-        _reply->header().set("Content-Type", "text/xml");
+        //_reply->header().set("Content-Type", "text/xml");
+        _reply->header().set("Content-Type", "application/soap+xml");
         _reply->header().set("Connection", "close");
         beginFault(_reply->body(), fault );
         advanceReply(*_reply);

@@ -423,7 +423,7 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
     os << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl
        << "<wsdl:definitions xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\" " << std::endl
        << "    xmlns:tns=\"" <<  targetNamespace() << "\" " << std::endl
-       << "    xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\" " << std::endl
+       << "    xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap12/\" " << std::endl
        << "    xmlns:s=\"http://www.w3.org/2001/XMLSchema\" " << std::endl
        << "    xmlns:http=\"http://schemas.xmlsoap.org/wsdl/http/\" " << std::endl
        << "    targetNamespace=\""<<  targetNamespace() << "\" " << std::endl
@@ -573,7 +573,7 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
     }
     os << "</wsdl:portType>" << std::endl;
   
-    os << "<wsdl:binding name=\""  <<  _name  <<  "Soap11\" type=\"tns:"  <<  _name  <<  "\">" << std::endl;
+    os << "<wsdl:binding name=\""  <<  _name  <<  "Soap12\" type=\"tns:"  <<  _name  <<  "\">" << std::endl;
     os << "<soap:binding transport=\"http://schemas.xmlsoap.org/soap/http\" />" << std::endl;
 
     for( size_t i = 0; i < _operations.size(); ++i)
@@ -594,7 +594,7 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
     os << "</wsdl:binding>" << std::endl;
 
     os << "<wsdl:service name=\"" << _name << "\">" << std::endl;
-    os << "  <wsdl:port name=\"" <<  _name << "Soap11\" binding=\"tns:" << _name << "Soap11\">" << std::endl;
+    os << "  <wsdl:port name=\"" <<  _name << "Soap12\" binding=\"tns:" << _name << "Soap12\">" << std::endl;
     os << "  </wsdl:port>" << std::endl;
     os << "</wsdl:service>" << std::endl;
     

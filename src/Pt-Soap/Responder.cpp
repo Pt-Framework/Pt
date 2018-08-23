@@ -42,11 +42,19 @@ static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ',
     'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', '-', '8', '"', 
     '?', '>' };
 
-static const Pt::Char SOAP_REPLY_BEGIN[]  = { '<', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', ' ',
+static const Pt::Char SOAP_REPLY_BEGIN_1_1[]  = { '<', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', ' ',
                                                'x', 'm', 'l', 'n', 's', ':', 's', 'o', 'a', 'p', '=',
                                                '"', 'h', 't', 't', 'p', ':', '/', '/', 's', 'c', 'h', 'e', 'm', 'a', 's', '.', 
                                                'x', 'm', 'l', 's', 'o', 'a', 'p', '.', 'o', 'r', 'g', '/', 's', 'o', 'a', 'p', 
                                                '/', 'e', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '/', '"', '>',
+                                              '<', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>' };
+
+static const Pt::Char SOAP_REPLY_BEGIN[]  = { '<', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', ' ',
+                                               'x', 'm', 'l', 'n', 's', ':', 's', 'o', 'a', 'p', '=',
+                                               '"', 'h', 't', 't', 'p', ':', '/', '/', 
+                                               'w', 'w', 'w', '.', 'w', '3', '.', 'o', 'r', 'g', 
+                                               '/', '2', '0', '0', '3', '/', '0', '5', '/', 's', 'o', 'a', 'p', 
+                                               '-', 'e', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '"', '>',
                                               '<', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>' };
 
 static const Pt::Char SOAP_REPLY_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>',
@@ -66,7 +74,7 @@ static const Pt::Char SOAP_VALUE_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', '
 static const Pt::Char SOAP_REASON[]  = { '<', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 
-static const Pt::Char SOAP_TEXT[]  = { '<', 's', 'o', 'a', 'p', ':', 'T', 'e', 'x', 't', '>' };
+static const Pt::Char SOAP_TEXT[]  = { '<', 's', 'o', 'a', 'p', ':', 'T', 'e', 'x', 't', ' ', 'x', 'm', 'l', ':', 'l', 'a', 'n', 'g', '=', '"', 'e', 'n', '"', '>' };
 static const Pt::Char SOAP_TEXT_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'T', 'e', 'x', 't', '>' };
 
 } // namespace
