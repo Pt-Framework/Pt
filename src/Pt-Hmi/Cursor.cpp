@@ -22,7 +22,9 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Byteorder.h>
 #include <Pt/Gfx/PngReader.h>
@@ -37,11 +39,14 @@
 #include "WaitCursor.h"
 
 namespace Pt{
+
 namespace Hmi{
 
 Cursor::Cursor()
 : _width(0)
 , _height(0)
+, _xHotspot(0)
+, _yHotspot(0)
 {
 	
 }

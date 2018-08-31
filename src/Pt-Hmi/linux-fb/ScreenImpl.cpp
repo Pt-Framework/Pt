@@ -33,6 +33,7 @@
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
 #include "PaintSurfaceImpl.h"
+#include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
@@ -40,9 +41,12 @@
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/System/Clock.h>
+#include <Pt/System/Logger.h>
+
 #include <algorithm>
-#include "PixmapSurfaceImpl.h"
 #include <cmath>
+
+PT_LOG_DEFINE("Pt.Hmi.Screen")
 
 namespace Pt {
 
@@ -50,9 +54,9 @@ namespace Hmi {
 
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _frameBuffer( app.frameBuffer() )
-, _cursorPos( 0,0 )
+, _cursorPos(0, 0)
 , _dpi(96.0)
-, _drawCursor(true)
+, _drawCursor(false)
 {
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
 
@@ -62,7 +66,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     painter.setBrush( Gfx::Color(0, 0, 0) );
     painter.fillRect(rect);
 
-    updateScreen( Gfx::Rect( Gfx::Point(0,0), _frameBuffer.size()));
+    updateScreen( Gfx::Rect(Gfx::Point(0, 0), _frameBuffer.size()) );
 }
 
 
@@ -101,32 +105,6 @@ Gfx::Image& ScreenImpl::image()
 }
 
 
-void ScreenImpl::paint(const Gfx::RectF& updateRect)
-{
-    if( ! _cursorBackground.empty() )
-    {
-        bitBlit( _cursorBackground.data(),
-                 _cursorBackground.width(),
-                 _cursorBackground.height(),
-                 _cursorPos,
-                 image().data(), CopyOp );
-    }
-
-    Painter painter(_surface);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-    painter.setBrush( Pt::Gfx::Color(0, 0, 0) );
-    painter.fillRect(updateRect);
-
-    _windowManager.paint(_surface, updateRect);
-
- //   std::clog << "screen update2: " << clock.stop().toUSecs() << " usecs." << std::endl;
-  //  std::clog << "update area2 " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
-  //            << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
-
-    updateScreen( Gfx::round(updateRect) );
-}
-
-
 Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
 {
     const Gfx::SizeF& screenSize = size();
@@ -160,31 +138,76 @@ Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
 }
 
 
+void ScreenImpl::paint(const Gfx::RectF& updateRect)
+{
+    //
+    // erase previous cursor area in back buffer
+    //
+    if( ! _cursorBackground.empty() )
+    {
+        bitBlit( _cursorBackground.data(),
+                 _cursorBackground.width(),
+                 _cursorBackground.height(),
+                 _cursorPos,
+                 image().data(), CopyOp );
+    }
+
+    //
+    // repaint the update area
+    //
+    Painter painter(_surface);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+    painter.setBrush( Pt::Gfx::Color(0, 0, 0) );
+    painter.fillRect(updateRect);
+
+    _windowManager.paint(_surface, updateRect);
+
+    //std::clog << "screen update2: " << clock.stop().toUSecs() << " usecs." << std::endl;
+    //std::clog << "update area2: " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
+    //          << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
+
+    //
+    // update the screen including the cursor
+    //
+    updateScreen( Gfx::round(updateRect) );
+}
+
+
 void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
 {
     _drawCursor = true;
+    PT_LOG_INFO("cursor activated");
 
+    //
+    // erase previous cursor area on screen
+    //
     if( ! _cursorBackground.empty() )
     {
-        bitBlit( _cursorBackground.data(),  _cursorBackground.width(), _cursorBackground.height(),
+        
+        bitBlit( _cursorBackground.data(), 
+                 _cursorBackground.width(), _cursorBackground.height(),
                  _cursorPos, (Pt::uint8_t*)image().data(), CopyOp );
 
-       _frameBuffer.output( image().data(),Gfx::Rect( _cursorPos, _cursorBackground.size() ) );
+       // TODO: is this enough to clear the cursor area in the back buffer?
+       _frameBuffer.output( image().data(), 
+                            Gfx::Rect(_cursorPos, _cursorBackground.size()) );
     }
 
+    //
+    // calculate new cursor area
+    //
     const Cursor& cursor = Application::instance().impl()->cursor();
 
-    if( cursor.width() != 0 )
-        _cursorPos = Gfx::Point( mev.x() - cursor.xHotspot(),
-                                 mev.y() - cursor.yHotspot() );
+    _cursorPos = Gfx::Point( mev.x() - cursor.xHotspot(),
+                             mev.y() - cursor.yHotspot() );
 
-    if( _drawCursor )
-    {
-      if( ! cursor.empty() )
-        updateScreen( Gfx::Rect(_cursorPos,
-                                Gfx::Size(cursor.width(),
-                                          cursor.height())) );
-    }
+    Gfx::Rect cursorArea = Gfx::Rect(_cursorPos,
+                                     Gfx::Size(cursor.width(), cursor.height()));
+
+    //
+    // update the screen including the new cursor image
+    //
+    updateScreen(cursorArea);
 }
 
 
@@ -280,7 +303,44 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 }
 
 
-void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
+void ScreenImpl::updateScreen(const Gfx::Rect& r)
+{
+    if( _drawCursor )
+        drawCursor( image().data() );
+    
+    _frameBuffer.output( image().data(), r );
+}
+
+
+void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
+{
+    const Cursor& cursor = Application::instance().impl()->cursor();
+
+    if( cursor.empty() )
+        return;
+
+    if( _cursorBackground.width() != cursor.width() ||
+        _cursorBackground.height() != cursor.height() )
+    {
+        Gfx::Size size( cursor.width(), cursor.height() );
+        _cursorBackground.reset(_frameBuffer.format(), size);
+    }
+
+    // keep the of background of the cursor area
+    grabImage( buffer, _cursorPos, _cursorBackground );
+
+    // draw cursor to the buffer
+    bitBlit(&cursor.andRgb888()[0], cursor.width(), cursor.height(), 
+            _cursorPos, buffer, AndOp);
+    
+    bitBlit(&cursor.xorRgb888()[0], cursor.width(), cursor.height(), 
+            _cursorPos, buffer, XorOp);
+}
+
+
+void ScreenImpl::grabImage(const Pt::uint8_t* buffer, 
+                           const Gfx::Point& pos, 
+                           Gfx::Image& image)
 {
     const size_t pixelSizeInByte = _frameBuffer.pixelSize();
     const Gfx::Size& imageSize = image.size();
@@ -295,38 +355,9 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
         size_t lineOffset = y * _frameBuffer.lineLength() +
                             pos.x() * pixelSizeInByte;
 
-       Pt::uint8_t* pdata = image.data() + (y - pos.y()) * image.view().stride();
+        Pt::uint8_t* pdata = image.data() + (y - pos.y()) * image.view().stride();
         memcpy( pdata, &buffer[lineOffset], widthInByte );
     }
-}
-
-
-void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
-{
-    const Cursor& cursor = Application::instance().impl()->cursor();
-
-    if( cursor.width() == 0  || cursor.height() == 0 )
-        return;
-
-    if( _cursorBackground.width() != cursor.width() ||
-        _cursorBackground.height() != cursor.height() )
-    {
-        Gfx::Size size( cursor.width(), cursor.height() );
-        _cursorBackground.reset(_frameBuffer.format(), size);
-    }
-
-    grabImage( buffer, _cursorPos, _cursorBackground );
-
-    bitBlit(&cursor.andRgb888()[0], cursor.width(), cursor.height(), _cursorPos, buffer, AndOp);
-    bitBlit(&cursor.xorRgb888()[0], cursor.width(), cursor.height(), _cursorPos, buffer, XorOp);
-}
-
-
-void ScreenImpl::updateScreen(const Gfx::Rect& r)
-{
-    _drawCursor = false;
-    drawCursor( image().data() );
-    _frameBuffer.output( image().data(), r );
 }
 
 

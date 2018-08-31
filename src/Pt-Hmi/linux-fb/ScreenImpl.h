@@ -124,14 +124,16 @@ class ScreenImpl : public Pt::Connectable
             AndOp,
             XorOp
         };
-
-        void grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image);
- 
-        void bitBlit( const Pt::uint8_t* , size_t width, size_t height, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op );
-
-        void drawCursor( Pt::uint8_t* buffer );
-
+        
         void updateScreen(const Pt::Gfx::Rect& area);
+
+        void drawCursor(Pt::uint8_t* buffer);
+        
+        void grabImage(const Pt::uint8_t* buffer, const Gfx::Point& pos,
+                       Gfx::Image& image);
+ 
+        void bitBlit(const Pt::uint8_t* from, size_t width, size_t height, 
+                     const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op);
 
     private:
         FrameBuffer&  _frameBuffer;
