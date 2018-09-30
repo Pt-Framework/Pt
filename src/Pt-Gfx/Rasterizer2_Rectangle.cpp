@@ -184,6 +184,9 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     Rect rect(tl, br);
     rect = rect.intersect(_currentClip);
 
+    if (rect.isNull())
+        return;
+
     minX = rect.left();
     minY = rect.top();
     maxX = rect.right();
