@@ -1091,7 +1091,7 @@ if ! $(GUI) || $(GUI:L) = "x11"
 
         if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
         {
-            GUI = x11 ;
+            GUI = xorg ;
             GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
         }
     }

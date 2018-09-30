@@ -10,7 +10,7 @@ if $(GUI_INCLUDES)
     SubDirHdrs $(GUI_INCLUDES) ;
 }
 
-if $(GUI:L) = x11
+if $(GUI:L) = xorg || $(GUI:L) = x11
 {
     SubDirHdrs $(FREETYPE_INCLUDES) ;
     SubDirHdrs $(X11_INCLUDES) ;
