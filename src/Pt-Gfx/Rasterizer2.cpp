@@ -823,7 +823,9 @@ void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount
 
 void Rasterizer2::drawRect(const RectF& rect)
 {
-    if(_pen.size() == 1)
+    //REVIEW: clipping doesn't work
+
+   /* if(_pen.size() == 1)
     {
         const Point tl( Pt::lround(rect.topLeft().x()),
                         Pt::lround(rect.topLeft().y()) );
@@ -832,7 +834,7 @@ void Rasterizer2::drawRect(const RectF& rect)
 
         rasterNarrowRect(tl, br);
         return;
-    }
+    }*/
 
     const PointF pointsF[5] = {
         rect.bottomLeft(),
