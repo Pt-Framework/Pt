@@ -89,6 +89,11 @@ class PainterImpl
         {
             Gfx::ImagePainter::setDefaultFont(f);
         }
+
+        static void setFontDir(const Pt::System::Path& dir)
+        {
+            Gfx::ImagePainter::setFontDir(dir);
+        }
 };
 
 }  // namespace

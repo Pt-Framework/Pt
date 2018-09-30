@@ -593,6 +593,11 @@ ApplicationImpl* Application::impl()
 }
 
 
+void Application::setFontDir(const Pt::System::Path& dir)
+{
+    _impl->setFontDir(dir);
+}
+
 void Application::registerVisual( Visual& visual )
 {
     VisualMap::const_iterator it = _visuals.find( visual.vid() );

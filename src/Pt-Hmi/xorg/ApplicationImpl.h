@@ -62,6 +62,8 @@ class ApplicationImpl : public Pt::System::MainLoop
         virtual ~ApplicationImpl();
 
         void setCursor(const Cursor* cursor);
+        
+        void setFontDir(const Pt::System::Path& dir);
 
         void grabPointer(Window& grabber);
 

@@ -134,6 +134,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         ApplicationImpl* impl();
 
+        void setFontDir(const Pt::System::Path& dir);
+
     protected:
         void onResizeEvent(const ResizeEvent& ev);
 

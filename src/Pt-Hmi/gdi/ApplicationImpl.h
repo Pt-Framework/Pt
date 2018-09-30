@@ -73,6 +73,10 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void setCursor(const Cursor* cursor);
 
+        void setFontDir(const Pt::System::Path& dir)
+        {
+        }
+
         void grabPointer(Window& grabber);
 
         void releasePointer(Window& grabber);

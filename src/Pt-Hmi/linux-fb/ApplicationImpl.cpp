@@ -29,6 +29,7 @@
 
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
+#include "PainterImpl.h"
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/System/FileInfo.h>
@@ -105,6 +106,10 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
     _cursor = *cursor;
 }
 
+void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
+{
+    PainterImpl::setFontDir(dir);
+}
 
 void ApplicationImpl::grabPointer(Window& grabber)
 {

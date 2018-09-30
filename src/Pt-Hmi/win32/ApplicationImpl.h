@@ -85,6 +85,8 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void sendMouseEvent(const MouseEvent& ev);
 
+        void setFontDir(const Pt::System::Path& dir);
+
     protected:
         virtual void onAttachSelectable(System::Selectable&);
 

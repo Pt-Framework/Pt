@@ -158,7 +158,6 @@ ApplicationImpl::ApplicationImpl()
     RegisterClass(&winClass);
 
     PainterImpl::setFontDir(Pt::System::Path("C:\\Windows\\Fonts\\"));
-    PainterImpl::setDefaultFont("Courier New");
 }
 
 
@@ -170,6 +169,11 @@ ApplicationImpl::~ApplicationImpl()
     UnregisterClass("Pt-Hmi", _instanceHandle);
 }
 
+
+void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
+{
+    PainterImpl::setFontDir(dir);
+}
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
 {      

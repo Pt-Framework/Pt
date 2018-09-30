@@ -127,6 +127,9 @@
     <Filter Include="Pt-Hmi\win32">
       <UniqueIdentifier>{474bc573-d20c-4cd6-af07-ee7b27e994e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\xorg">
+      <UniqueIdentifier>{a778bad0-210f-4746-a155-f513e6568c2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1533,6 +1536,36 @@
     <ClInclude Include="..\..\src\Pt-Hmi\win32\win32.h">
       <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\ApplicationImpl.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\CursorImpl.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\KeyHandler.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\MainWindowImpl.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\PainterImpl.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\PaintSurfaceImpl.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\PictureImpl.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\PixmapSurfaceImpl.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\ScreenImpl.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\xorg\X11Fd.h">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2857,6 +2890,33 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ScreenImpl.cpp">
       <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\xorg\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\xorg\CursorImpl.cpp">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\xorg\KeyHandler.cpp">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\xorg\MainWindowImpl.cpp">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\xorg\PaintSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\xorg\PictureImpl.cpp">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\xorg\PixmapSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\xorg\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\xorg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\xorg\X11Fd.cpp">
+      <Filter>Pt-Hmi\xorg</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

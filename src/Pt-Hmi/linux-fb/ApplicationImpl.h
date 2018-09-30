@@ -51,6 +51,8 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         void setCursor(const Cursor* cursor );
 
+        void setFontDir(const Pt::System::Path& dir);
+
         const Cursor& cursor()
         { return _cursor; }
 
