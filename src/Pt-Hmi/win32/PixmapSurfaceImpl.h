@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include "PaintSurfaceImpl.h"
 
@@ -112,7 +113,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
     private:
         Gfx::SizeF            _size;
         Gfx::Image            _image;
-        Gfx::ImagePainter     _painter;
+        Gfx::ImagePainter2    _painter;
 };
 
 } // namespace

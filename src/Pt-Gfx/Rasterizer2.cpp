@@ -754,7 +754,7 @@ void Rasterizer2::drawNarrowPolyline(const PointF* pointsF, size_t pointCount)
 {
     std::vector<PointF> clipped(pointsF, pointsF + pointCount);
 
-    //BasicClipShape<double>::clipPolyline(clipped, _currentClip);
+    //BasicClipShape<double>::(clipped, _currentClip);
     //if(clipped.empty()) return;
 
     std::vector<Point> points;
@@ -779,15 +779,21 @@ void Rasterizer2::drawNarrowPolyline(const PointF* pointsF, size_t pointCount)
     std::size_t pc1 = points.size() - 1;
 
     for(std::size_t i = 0; i < pc1; ++i)
-    {
+    {   
+        //REVIEW: clipping
+        int x1 = points[i].x();
+        int y1 = points[i].y();
+        int x2 = points[i + 1].x();
+        int y2 = points[i + 1].y();
+            
+        if (!BasicClipShape<int>::clipLine(x1, y1, x2, y2, _currentClip))
+            continue;
+        //REVIEW: END
+
         if(solid)
-            rasterNarrowSolidLine(points[i].x(), points[i].y(),
-                                  points[i + 1].x(), points[i + 1].y(),
-                                  _pen.color(), &mask_nnp1);
+            rasterNarrowSolidLine(x1, y1,x2, y2, _pen.color(), &mask_nnp1);
         else
-            rasterNarrowPatternedLine(points[i].x(), points[i].y(),
-                                      points[i + 1].x(), points[i + 1].y(),
-                                      _pen.color(), fpiCtrInOut, &mask_nnp1);
+            rasterNarrowPatternedLine(x1,y1,x2, y2,_pen.color(), fpiCtrInOut, &mask_nnp1);
     }
 }
 
