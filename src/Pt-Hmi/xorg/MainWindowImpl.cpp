@@ -203,10 +203,10 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
     Gfx::Rect rect = Gfx::round(rectF);
 
     XExposeEvent ev = { Expose, 0, True, _display, _window,
-                       static_cast<int>( rect.x() ),
-                       static_cast<int>( rect.y() ),
-                       static_cast<int>( rect.width() ),
-                       static_cast<int>( rect.height() ),
+                       static_cast<int>( rect.x()),
+                       static_cast<int>( rect.y()),
+                       static_cast<int>( rect.width()),
+                       static_cast<int>( rect.height()),
                        0 };
 
     Application::instance().impl()->processEvent( (XEvent&)ev);

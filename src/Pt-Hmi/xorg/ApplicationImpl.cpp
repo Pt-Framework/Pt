@@ -31,7 +31,6 @@
 #include "PixmapSurfaceImpl.h"
 #include "KeyHandler.h"
 #include "PainterImpl.h"
-
 #ifndef _AIX
 #include <X11/Xft/Xft.h>
 #endif
@@ -110,12 +109,10 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 {
 }
 
-
 void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 {
-    PainterImpl::setFontDir(dir);
+   PainterImpl::setFontDir(dir);	
 }
-
 
 void ApplicationImpl::grabPointer(Window& grabber)
 {
@@ -297,13 +294,14 @@ void ApplicationImpl::onLeaveNotify(Window& window, XEvent& xev)
 
 void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 {
+   const Gfx::Image& image = window.surface().pixmapImpl()->image();
+
     const size_t width = xev.xexpose.width;
     const size_t height = xev.xexpose.height;
     const size_t x = xev.xexpose.x;
     const size_t y = xev.xexpose.y;
 
-    const Gfx::Image& image = window.surface().pixmapImpl()->image();
-
+    
     Display* display = Application::instance().impl()->display();
     ::Visual* visual = Application::instance().impl()->visual();
     int depth = Application::instance().impl()->depth();
