@@ -89,6 +89,7 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *p
 
 PaintSurfaceImpl::PaintSurfaceImpl()
 {
+
 }
 
 

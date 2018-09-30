@@ -250,6 +250,8 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
 
+    return;
+
     Painter painter( surface() );
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
@@ -262,6 +264,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     Gfx::Pen pen( Gfx::Color::fromRgb8(255, 200, 100), 2);
     imagePainter.setPen(pen);
+    imagePainter.setFontDir(Pt::System::Path("C:\\windows\\fonts\\"));
 
     Gfx::ColorStops stops;
     stops.add(0, Gfx::Color::fromRgb8(255, 0, 0));
@@ -278,7 +281,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.fillPath(path);
     imagePainter.drawPath(path);
 
-    imagePainter.setFont( Pt::Gfx::Font("", 24) );
+    imagePainter.setFont( Pt::Gfx::Font("Courier New", 24) );
     imagePainter.drawText(Pt::Gfx::PointF(20, 260), "Hello World!", trans);
 
     painter.setClip(rect);
