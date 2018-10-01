@@ -249,6 +249,8 @@ MainWindow::~MainWindow()
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
+    
+    return;
 
     Painter painter( surface() );
 
@@ -273,20 +275,14 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.setBrush(brush);
 
     Pt::Gfx::Path path;    
-   path.moveTo( Pt::Gfx::PointF(20, 20) );
+    path.moveTo( Pt::Gfx::PointF(20, 20) );
     path.addRoundedRect(Pt::Gfx::SizeF(200, 200), 10);
 
-//    imagePainter.fillPath(path);
-//    imagePainter.drawPath(path);
+    imagePainter.fillPath(path);
+    imagePainter.drawPath(path);
 
-    imagePainter.setFont( Pt::Gfx::Font("Courier New", 24) );
+    imagePainter.setFont( Pt::Gfx::Font("", 24) );
     imagePainter.drawText(Pt::Gfx::PointF(20, 260), "Hello World!", trans);
-    std::vector<Pt::Gfx::PointF> points;
-
-    points.push_back(Gfx::PointF(494.00000000000000 ,566.00000000000000));    
-    points.push_back(Gfx::PointF(494.00000000000000 ,603.00000000000000));
-
-    imagePainter.drawPolyline(&points[0], points.size());
 
     painter.setClip(rect);
     painter.drawImage(Gfx::PointF(0, 0), image);
