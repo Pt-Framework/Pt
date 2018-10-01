@@ -1029,7 +1029,7 @@ if $(WITH_QT)
 # GUI libraries and includes
 #############################################################################
 
-if ! $(GUI) || $(GUI:L) = "gdi"
+if ! $(GUI) || $(GUI:L) = "gdi" || $(GUI:L) = "win32"
 {
     Load winui.jam ;
 
@@ -1038,7 +1038,7 @@ if ! $(GUI) || $(GUI:L) = "gdi"
 
     if $(WITH_GDI) && $(WITH_WINUI)
     {
-        GUI = win32 ;
+        GUI ?= win32 ;
         GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
     }
 }
