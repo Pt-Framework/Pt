@@ -526,6 +526,10 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     PolygonScanlines scanlines;
 
     // REVIEW +2 or +4?
+    // INFO: * When using AA, more scanlines can be produced.
+    //       * In theory, +2 is enough, but when I worked on this code, sometimes more than +2 scanlines are produced
+    //         (which of course will lead to seg fault).
+    //       * It seems that there won't be more than +4 scanlines will be produced. So, I think +4 is safer here.
     //if(_compositionMode != CompositionMode::SourceCopy)
     //    scanlines.resize( (maxY - minY) + 1 + 2 );
 
@@ -673,6 +677,10 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
     PolygonScanlines scanlines;
 
     // REVIEW +2 or +4?
+    // INFO: * When using AA, more scanlines can be produced.
+    //       * In theory, +2 is enough, but when I worked on this code, sometimes more than +2 scanlines are produced
+    //         (which of course will lead to seg fault).
+    //       * It seems that there won't be more than +4 scanlines will be produced. So, I think +4 is safer here.
     //if(_compositionMode != CompositionMode::SourceCopy)
     //    scanlines.resize( (maxY - minY) + 1 + 2 );
 

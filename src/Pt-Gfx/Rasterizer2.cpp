@@ -779,16 +779,17 @@ void Rasterizer2::drawNarrowPolyline(const PointF* pointsF, size_t pointCount)
     std::size_t pc1 = points.size() - 1;
 
     for(std::size_t i = 0; i < pc1; ++i)
-    {   
-        //REVIEW: clipping
+    {
+        // REVIEW: clipping
+        // INFO: Looks correct :)
         int x1 = points[i].x();
         int y1 = points[i].y();
         int x2 = points[i + 1].x();
         int y2 = points[i + 1].y();
-            
+
         if (!BasicClipShape<int>::clipLine(x1, y1, x2, y2, _currentClip))
             continue;
-        //REVIEW: END
+        // REVIEW: END
 
         if(solid)
             rasterNarrowSolidLine(x1, y1,x2, y2, _pen.color(), &mask_nnp1);
@@ -823,8 +824,27 @@ void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount
 
 void Rasterizer2::drawRect(const RectF& rect)
 {
-    //REVIEW: clipping doesn't work
-
+    // REVIEW: clipping doesn't work
+    // INFO: This should work, but how if changing the implementation so:
+    //       1. We do not perform clipping here
+    //       2. Modify rasterNarrowRect() and replace these:
+    //             // Get the minimum and maximum coordinates
+    //             Pt::int32_t minX = tl.x();
+    //             Pt::int32_t minY = tl.y();
+    //             Pt::int32_t maxX = br.x();
+    //             Pt::int32_t maxY = br.y();
+    //             // Clip the coordinates
+    //             if(minX < _currentClip.left  ()) minX = _currentClip.left  ();
+    //             if(minY < _currentClip.top   ()) minY = _currentClip.top   ();
+    //             if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
+    //             if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
+    //         with something similar which is used in rasterRectArea():
+    //              Rect rect(tl, br);
+    //              rect = rect.intersect(_currentClip);
+    //         or, there could be a problem with Pt::lround(), or even maybe with what coordinates actually
+    //         stored in tl and br below (I am thinking that, it could be possible that the coordinates
+    //         stored/given to tl and br are somehow swapped by other code that calling this function?)
+    //
    /* if(_pen.size() == 1)
     {
         const Point tl( Pt::lround(rect.topLeft().x()),
