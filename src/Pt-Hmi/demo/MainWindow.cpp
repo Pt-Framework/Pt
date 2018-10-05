@@ -254,6 +254,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     Painter painter( surface() );
 
+    //Gfx::Image image( painter.format(), Gfx::Size(80, 300) );
     Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
     Gfx::ImagePainter2 imagePainter(image);
 
