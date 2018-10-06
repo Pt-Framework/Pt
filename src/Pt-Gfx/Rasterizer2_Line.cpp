@@ -199,6 +199,8 @@ void Rasterizer2::rasterNarrowPatternedLine(Pt::int32_t x1, Pt::int32_t y1,
     const Pt::int32_t sizeX = abs(x2 - x1);
     const Pt::int32_t sizeY = abs(y2 - y1);
     const Pt::int32_t sizeS = sizeX + sizeY;
+    if(!sizeS) return;
+
     const Pt::int32_t sizeL = sqrtf(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
@@ -231,6 +233,8 @@ void Rasterizer2::rasterNarrowPatternedLine_F(float x1, float y1,
     const float sizeX = ::fabs(x2 - x1);
     const float sizeY = ::fabs(y2 - y1);
     const float sizeS = sizeX + sizeY;
+    if(!sizeS) return;
+
     const float sizeL = sqrt(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
