@@ -357,7 +357,8 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
         frame->paint(surface, frameRect);
 
         Painter painter(surface);
-        painter.drawSurface(updateRect.topLeft(), w->surface(), clientRect); 
+        
+        painter.drawSurface(updateRect.topLeft(), w->surface(), clientRect);
     }
 }
 

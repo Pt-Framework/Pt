@@ -117,6 +117,8 @@ class PT_GFX_API Painter
         */
         virtual void drawText(const PointF& to, const Pt::String& text) = 0;
 
+        virtual void drawText(const PointF& to, const Pt::String& text, const Transform& t) = 0;
+
         /** @brief Draws the outline of a rectangle.
         */
         virtual void drawRect(const RectF& rect) = 0;

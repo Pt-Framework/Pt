@@ -124,6 +124,11 @@ void PaintRegion::drawText(const Gfx::PointF& toF, const Pt::String& text)
 }
 
 
+void PaintRegion::drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans)
+{
+    _surface->drawText(to + _area.topLeft(), text, trans);
+}
+
 void PaintRegion::drawRect(const Gfx::RectF& r)
 {
     Gfx::RectF rect(r);

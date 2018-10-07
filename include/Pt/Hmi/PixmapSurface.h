@@ -80,6 +80,8 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
+
         virtual void drawRect(const Gfx::RectF& rectangle);
 
         virtual void fillRect(const Gfx::RectF& rectangle);
@@ -110,7 +112,25 @@ class PT_HMI_API PixmapSurface : public PaintSurface
         virtual void onFinish();
 
     private:
+        Gfx::PointF toPhysical(const Gfx::PointF& p)
+        {
+            return Application::instance().screen().toPhysical(p);
+        }
+
+        Gfx::SizeF toPhysical(const Gfx::SizeF& s)
+        {
+            return Application::instance().screen().toPhysical(s);
+        }
+
+        Gfx::RectF toPhysical(const Gfx::RectF& r)
+        {
+            return Application::instance().screen().toPhysical(r);
+        }
+
+
+    private:
         PixmapSurfaceImpl* _impl;
+        Gfx::SizeF _logicSize;
 };
 
 } // namespace

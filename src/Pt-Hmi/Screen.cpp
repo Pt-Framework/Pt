@@ -41,6 +41,7 @@ namespace Hmi {
 Screen::Screen(ApplicationImpl& app)
 : _impl( new ScreenImpl(app) )
 , _updates(0)
+, _scaling(1)
 {
     _impl->init(*this);
 }
@@ -103,9 +104,14 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
+void Screen::setScaleFactor(unsigned scale)
+{
+    _scaling = scale;
+}
+
 Gfx::SizeF Screen::onSize() const
 {
-    return _impl->size();
+    return toLogical(_impl->size());
 }
 
 
@@ -141,15 +147,15 @@ Gfx::PointF Screen::onFromParent(const Window& w, const Gfx::PointF& pos) const
 
 void Screen::onResize(Window& w, const Gfx::SizeF& s)
 {
-    w.impl()->resize(s);
-    _impl->onResize(w, s);
+    w.impl()->resize(toPhysical(s));
+    _impl->onResize(w, toPhysical(s));
 }
 
 
 void Screen::onMove(Window& w, const Gfx::PointF& p)
 {   
-    w.impl()->move(p);
-    _impl->onMove(w, p);
+    w.impl()->move(toPhysical(p));
+    _impl->onMove(w, toPhysical(p));
 }
 
 

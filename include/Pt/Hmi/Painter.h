@@ -81,6 +81,8 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
+
         virtual void drawRect(const Gfx::RectF& rectangle);        
 
         virtual void fillRect(const Gfx::RectF& rectangle);

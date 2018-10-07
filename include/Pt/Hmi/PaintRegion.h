@@ -73,7 +73,9 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& text);
+
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans);
 
         virtual void drawRect(const Gfx::RectF& rectangle);
 

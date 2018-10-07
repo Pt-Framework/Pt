@@ -52,7 +52,8 @@ PixmapSurface::~PixmapSurface()
 
 void PixmapSurface::resize(const Gfx::SizeF& size)
 {
-    _impl->resize(size);
+    _logicSize = size;
+    _impl->resize(toPhysical(size));
 }
 
 
@@ -64,7 +65,7 @@ void PixmapSurface::clear(const Gfx::Color& c)
 
 const Gfx::SizeF& PixmapSurface::onSize() const
 {
-    return _impl->size();
+    return _logicSize;
 }
 
 
@@ -88,7 +89,9 @@ const Gfx::ImageFormat& PixmapSurface::format() const
 
 void PixmapSurface::setPen(const Gfx::Pen& pen)
 {
-    _impl->setPen(pen);
+    Gfx::Pen p = pen;
+    p.setSize(Application::instance().screen().scaleFactor() * pen.size());
+    _impl->setPen(p);
 }
 
 
@@ -106,7 +109,7 @@ void PixmapSurface::setFont(const Gfx::Font& font)
 
 void PixmapSurface::setClip( const Gfx::RectF& clip)
 {
-    _impl->setClip(clip);
+    _impl->setClip(toPhysical(clip));
 }
 
 
@@ -124,55 +127,82 @@ Gfx::FontMetrics PixmapSurface::fontMetrics(const Pt::String& text) const
 
 void PixmapSurface::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
-    _impl->drawLine(from, to);
+    
+    _impl->drawLine(toPhysical(from), toPhysical(to));
 }
 
 
 void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
-    _impl->drawText(to, text);
+    Gfx::Transform trans;
+    unsigned scaling = Application::instance().screen().scaleFactor();
+    trans.scale(scaling, scaling);
+
+    _impl->drawText(toPhysical(to), text, trans);
 }
+
+
+void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& t)
+{
+    unsigned scaling = Application::instance().screen().scaleFactor();
+    Gfx::Transform trans = t;
+
+    trans.scale(trans.m11() * scaling, trans.m22() * scaling);
+
+    _impl->drawText(toPhysical(to), text, trans);
+}
+
 
 
 void PixmapSurface::drawRect(const Gfx::RectF& r)
 {
-    _impl->drawRect(r);
+    _impl->drawRect(toPhysical(r));
 }
 
 
 void PixmapSurface::fillRect(const Gfx::RectF& r)
 {
-    _impl->fillRect(r);
+    _impl->fillRect(toPhysical(r));
 }
 
 
 void PixmapSurface::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    _impl->drawEllipse(topLeft, size);
+    _impl->drawEllipse(toPhysical(topLeft), toPhysical(size));
 }
 
 
 void PixmapSurface::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    _impl->fillEllipse(topLeft, size);
+    _impl->fillEllipse(toPhysical(topLeft), toPhysical(size));
 }
 
 
 void PixmapSurface::drawPolyline(const Gfx::PointF* points, size_t pointCount)
 {
-    _impl->drawPolyline(points, pointCount);
+    std::vector<Gfx::PointF> ps;
+
+    for (size_t i = 0; i < pointCount; ++i)
+        ps.push_back(toPhysical(points[i]));
+
+    _impl->drawPolyline(&ps[0], pointCount);
 }
 
 
 void PixmapSurface::fillPolygon(const Gfx::PointF* points, size_t pointCount)
 {
-    _impl->fillPolygon(points, pointCount);
+    std::vector<Gfx::PointF> ps;
+
+    for (size_t i = 0; i < pointCount; ++i)
+        ps.push_back(toPhysical(points[i]));
+
+    _impl->fillPolygon(&ps[0], pointCount);
 }
 
 
 void PixmapSurface::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
 {
-    _impl->drawSurface(to, surface);
+    _impl->drawSurface(toPhysical(to), surface);
 }
 
 
@@ -180,24 +210,24 @@ void PixmapSurface::drawSurface(const Gfx::PointF& to,
                                   const PixmapSurface& pm,
                                   const Gfx::RectF& pmRect)
 {
-    _impl->drawSurface(to, pm, pmRect);
+    _impl->drawSurface(toPhysical(to), pm, toPhysical(pmRect));
 }
 
 
 void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
-    _impl->drawImage(to, image);
+    _impl->drawImage(toPhysical(to), image);
 }
 
 void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r)
 {
-    _impl->drawImage(to, image, r);
+    _impl->drawImage(toPhysical(to), image, r);
 }
 
 
 void PixmapSurface::drawPicture(const Gfx::PointF& to, const Picture& pic)
 {
-    _impl->drawPicture(to , pic);
+    _impl->drawPicture(toPhysical(to) , pic);
 }
 
 

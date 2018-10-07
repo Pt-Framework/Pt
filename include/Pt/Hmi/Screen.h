@@ -67,6 +67,38 @@ class PT_HMI_API Screen : public WindowBase
   
         ScreenImpl* impl();
 
+        void setScaleFactor(unsigned scale);
+
+        unsigned scaleFactor() const
+        {
+            return _scaling;
+        }
+
+        Gfx::PointF toPhysical(const Gfx::PointF& p)const
+        {
+            Gfx::PointF point;
+            point.set(p.x() * _scaling, p.y() * _scaling);
+            return point;
+        }
+
+        Gfx::SizeF toPhysical(const Gfx::SizeF& s)const
+        {
+            Gfx::SizeF size(s.width()* _scaling, s.height() * _scaling);
+            return size;
+        }
+
+        Gfx::RectF toPhysical(const Gfx::RectF& r) const
+        {
+            Gfx::RectF rect(toPhysical(r.topLeft()), toPhysical(r.size()));
+            return rect;
+        }
+
+        Gfx::SizeF toLogical(const Gfx::SizeF& s) const
+        {
+            Gfx::SizeF size(s.width()/ _scaling, s.height() / _scaling);
+            return size;
+        }
+
     public:
         virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const;
 
@@ -119,6 +151,7 @@ class PT_HMI_API Screen : public WindowBase
         int                  _updates;
         std::vector<Window*> _windows;
         Pt::System::Clock    _clock;
+        unsigned             _scaling;
 };
 
 } // namespace

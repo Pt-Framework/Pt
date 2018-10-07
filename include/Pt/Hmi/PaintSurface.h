@@ -31,6 +31,7 @@
 #define Pt_Hmi_PaintSurface_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Pen.h>
@@ -38,6 +39,7 @@
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Transform.h>
 
 namespace Pt {
 
@@ -93,6 +95,8 @@ class PT_HMI_API PaintSurface
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to) = 0;
 
         virtual void drawText(const Gfx::PointF& to, const Pt::String& Text) = 0;
+
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans) = 0;
 
         virtual void drawRect(const Gfx::RectF& rectangle) = 0;
 
