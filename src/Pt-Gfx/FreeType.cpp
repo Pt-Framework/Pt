@@ -528,20 +528,20 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
     {
         yOffset = y * bmPitch;
 
-        if( dsy < clip.y() )
+        if( dsy < clip.y())
             continue;
 
-        if( dsy > y2 )
+        if( dsy >= y2 )
             break;
 
         dsx = xpos;
 
         for( Pt::int32_t x = ofsx; x < width; ++x, ++dsx )
-        {
-            if( dsx < clip.x() )
+        {            
+            if( dsx < clip.x())
                 continue;
 
-            if( dsx > x2 )
+            if( dsx >= x2 )
                 break;
 
             Pixel pixel(image.view(), dsx, dsy);
