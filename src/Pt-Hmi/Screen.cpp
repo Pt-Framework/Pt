@@ -135,13 +135,13 @@ ScreenImpl* Screen::impl()
 
 Gfx::PointF Screen::onToParent(const Window& w, const Gfx::PointF& pos) const
 {
-    return _impl->toParent(w, pos);
+    return toLogical(_impl->toParent(w, toPhysical(pos)));
 }
 
 
 Gfx::PointF Screen::onFromParent(const Window& w, const Gfx::PointF& pos) const
 {
-    return _impl->fromParent(w, pos);
+    return toLogical(_impl->fromParent(w, toPhysical(pos)));
 }
 
 
