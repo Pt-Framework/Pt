@@ -356,7 +356,9 @@ void ApplicationImpl::onMotionNotify(Window& window, XEvent& xev)
     std::size_t x = xev.xmotion.x;
     std::size_t y = xev.xmotion.y;
 
-    Pt::Gfx::PointF pos(x, y);
+    unsigned scaling = Application::instance().screen().scaleFactor();
+
+    Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition(pos);
     _mouseEvent.setId( window.vid() );
     _mouseEvent.setMove();
@@ -393,8 +395,9 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
         default:
             return;
     }
+    unsigned scaling = Application::instance().screen().scaleFactor();
 
-    Pt::Gfx::PointF pos(x, y);
+    Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition(pos);
     _mouseEvent.setPress(button);
     _mouseEvent.setId( window.vid() );
@@ -450,7 +453,9 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
             return;
     }
 
-    Pt::Gfx::PointF pos(x, y);
+    unsigned scaling = Application::instance().screen().scaleFactor();
+
+    Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition(pos);
     _mouseEvent.setRelease(button);
     _mouseEvent.setId( window.vid() );

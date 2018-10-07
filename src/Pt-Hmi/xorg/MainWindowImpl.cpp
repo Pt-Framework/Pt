@@ -199,8 +199,10 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
 {
     //std::clog << "XMainWindowImpl::paint" << rectF.x() << ", " << rectF.y()
     //          << " " << rectF.width() << "x" << rectF.height() << std::endl;
-
-    Gfx::Rect rect = Gfx::round(rectF);
+  
+    Gfx::RectF scaled = Application::instance().screen().toPhysical(rectF);
+	
+    Gfx::Rect rect = Gfx::round(scaled);
 
     XExposeEvent ev = { Expose, 0, True, _display, _window,
                        static_cast<int>( rect.x()),

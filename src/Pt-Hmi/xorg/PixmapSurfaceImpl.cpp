@@ -163,6 +163,12 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 }
 
 
+void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans)
+{
+    _painter.drawText(to, text, trans);
+}
+
+
 void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 {  
     _painter.drawRect(rect); 
