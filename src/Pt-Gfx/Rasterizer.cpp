@@ -2006,6 +2006,13 @@ void Rasterizer::strokeText( const Point& to, const Pt::String& text )
 }
 
 
+void Rasterizer::strokeText(const Point& to, const Pt::String& text, const Transform& trans)
+{
+    _text->setClip(_currentClip);
+    _text->draw(*_image, _pen.color(), to, text, _compositionMode, trans);
+}
+
+
 void Rasterizer::fill(const Point& origin, const Point& pos, int length)
 {
   switch( _brush.fillStyle() )

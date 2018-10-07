@@ -125,12 +125,15 @@ void Painter::setClip(const Gfx::RectF& clip)
 
 void Painter::setPen(const Gfx::Pen& pen)
 {
+    Gfx::Pen p = pen;
+    p.setSize(Application::instance().screen().scaleFactor() * pen.size());
+
     _pen = pen;
 
-    _impl->setPen(_pen);
+    _impl->setPen(p);
 
     if(_surface)
-        _surface->setPen(_pen);
+        _surface->setPen(p);
 }
 
 

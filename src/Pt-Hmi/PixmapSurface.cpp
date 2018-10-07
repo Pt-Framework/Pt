@@ -89,9 +89,7 @@ const Gfx::ImageFormat& PixmapSurface::format() const
 
 void PixmapSurface::setPen(const Gfx::Pen& pen)
 {
-    Gfx::Pen p = pen;
-    p.setSize(Application::instance().screen().scaleFactor() * pen.size());
-    _impl->setPen(p);
+    _impl->setPen(pen);
 }
 
 

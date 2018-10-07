@@ -113,6 +113,8 @@ class Rasterizer
 
     void strokeText( const Point& to, const Pt::String& text );
 
+    void strokeText(const Point& to, const Pt::String& text, const Transform& trans);
+
     void strokeEllipse( const Point& topLeft, const Size& size );
 
     void fillEllipse( const Point& topLeft, const Size& size );

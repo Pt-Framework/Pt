@@ -76,10 +76,7 @@ class PT_GFX_API ImagePainter : public Painter
 
     virtual void drawText(const PointF& to, const Pt::String& text );
 
-    virtual void drawText(const PointF& to, const Pt::String& text, const Transform& trans)
-    {
-        drawText(to, text);
-    }
+    virtual void drawText(const PointF& to, const Pt::String& text, const Transform& trans);
 
     virtual void drawRect(const RectF& rect);
 

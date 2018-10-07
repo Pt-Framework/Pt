@@ -98,6 +98,15 @@ void DrawText::draw(Image& image, const Color& color,
 }
 
 
+void DrawText::draw(Image& image, const Color& color,
+                    const Point& pos, const String& text,
+                    const CompositionMode& mode, const Transform& trans)
+{
+
+    return FreeType::instance().draw(image, color, pos, text, _clip, mode,
+        trans, _faceId, _fontSize);
+}
+
 } //namespace
 
 } //namespace

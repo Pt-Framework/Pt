@@ -138,7 +138,13 @@ void ImagePainter::drawLine(const PointF& from, const  PointF& to)
 
 void ImagePainter::drawText( const PointF& to, const String& text )
 {
-  _rasterizer->strokeText( round(to), text );
+    _rasterizer->strokeText( round(to), text );
+}
+
+
+void ImagePainter::drawText(const PointF& to, const Pt::String& text, const Transform& trans)
+{
+    _rasterizer->strokeText(round(to), text, trans);
 }
 
 

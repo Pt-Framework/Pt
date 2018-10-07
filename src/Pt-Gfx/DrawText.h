@@ -107,6 +107,10 @@ class DrawText
                   const Point& pos, const String& text, 
                   const CompositionMode& mode);
 
+        void draw(Image& image, const Color& color,
+            const Point& pos, const String& text,
+            const CompositionMode& mode, const Transform& trans);
+
     private:
         void drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                        int bmPitch, int height, int width, const unsigned char* buffer);
