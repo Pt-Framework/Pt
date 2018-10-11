@@ -92,7 +92,7 @@ MainWindow::MainWindow()
 , _scrollContainer(Hmi::FlowLayout::Top)
 , _scrollContainer2(Hmi::FlowLayout::Top)
 {
-    Application::instance().screen().setScaleFactor(2);
+    Application::instance().screen().setScaleFactor(1);
 
     loadIcon(_icon);
     _picture.set(_icon);
@@ -252,10 +252,11 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
     Painter painter( surface() );
-    return;
+    //return;
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
     Gfx::ImagePainter2 imagePainter(image);
+    imagePainter.setAntiAliasing(true);
 
     //Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
 
@@ -264,7 +265,6 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     Gfx::Pen pen( Gfx::Color::fromRgb8(255, 200, 100), 1);
     imagePainter.setPen(pen);
-    imagePainter.setFontDir(Pt::System::Path("C:\\windows\\fonts\\"));
 
     Gfx::ColorStops stops;
     stops.add(0, Gfx::Color::fromRgb8(255, 0, 0));
@@ -283,6 +283,15 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     imagePainter.setFont( Pt::Gfx::Font("", 24) );
     imagePainter.drawText(Pt::Gfx::PointF(20, 260), "Hello World!", trans);
+
+    Pt::Gfx::PointF triangle[4];
+    triangle[0] = Pt::Gfx::PointF(500, 500);
+    triangle[1] = Pt::Gfx::PointF(510, 500);
+    triangle[2] = Pt::Gfx::PointF(505, 505);
+    triangle[3] = Pt::Gfx::PointF(500, 500);
+
+    imagePainter.setBrush(Gfx::Color::fromRgb8(255, 0, 0));
+    imagePainter.fillPolygon(triangle, 4);
 
     painter.setClip(rect);
     painter.drawImage(Gfx::PointF(0, 0), image);
