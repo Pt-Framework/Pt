@@ -33,20 +33,30 @@ namespace Pt {
 
 namespace System {
 
-void ThreadImpl::init(const Callable<void>& cb)
+ThreadImpl::ThreadImpl()
+: _cb(0)
+, _handle(0)
+, _id(0)
 {
-    delete _cb;
-    _cb = cb.clone();
 }
 
 
-void ThreadImpl::close()
+ThreadImpl::~ThreadImpl()
 {
     if (_handle != 0) 
     {
         ::CloseHandle(_handle);
         _handle = 0;
     }
+
+    delete _cb;
+}
+
+
+void ThreadImpl::init(const Callable<void>& cb)
+{
+    delete _cb;
+    _cb = cb.clone();
 }
 
 
@@ -64,6 +74,16 @@ void ThreadImpl::start()
     {
         _id = 0;
         throw SystemError("Thread creation failed");
+    }
+}
+
+
+void ThreadImpl::detach()
+{ 
+    if (_handle != 0) 
+    {
+        ::CloseHandle(_handle);
+        _handle = 0;
     }
 }
 
@@ -87,6 +107,12 @@ void ThreadImpl::exit()
 #else
     _endthreadex(status);
 #endif
+}
+
+
+void ThreadImpl:: yield()
+{ 
+    sleep(0); 
 }
 
 

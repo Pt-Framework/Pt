@@ -49,31 +49,21 @@ namespace System {
     class ThreadImpl 
     {
         public:
-            ThreadImpl()
-            : _cb(0)
-            , _handle(0)
-            , _id(0)
-            {}
+            ThreadImpl();
 
-            ~ThreadImpl()
-            {
-                this->close();
-                delete _cb;
-            }
+            ~ThreadImpl();
 
             void init(const Callable<void>& cb);
 
             void start();
 
-            void detach()
-            { this->close(); }
+            void detach();
 
             void join();
 
             static void exit();
 
-            static void yield()
-            { sleep(0); }
+            static void yield();
 
             static void sleep(unsigned int ms);
 
@@ -88,9 +78,6 @@ namespace System {
                 if(cb) cb->call();
                 return 0;
             }
-
-        protected:
-            void close();
 
         private:
             const Callable<void>* _cb;

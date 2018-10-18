@@ -50,7 +50,7 @@ Thread::Thread(const Callable<void>& cb)
 , _impl(0)
 {
     _impl = new ThreadImpl();
-	_impl->init(cb);
+	  _impl->init(cb);
 }
 
 
@@ -145,7 +145,8 @@ bool Thread::joinNoThrow()
 
     try
     {
-        _impl->join();
+        if(_state == Running)
+            join();
     }
     catch(...)
     {
