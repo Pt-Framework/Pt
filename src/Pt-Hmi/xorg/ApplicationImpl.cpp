@@ -109,10 +109,18 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 {
 }
 
+
 void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 {
    PainterImpl::setFontDir(dir);	
 }
+
+
+Pt::Timespan ApplicationImpl::inactivityTime() const
+{
+  return Pt::Timespan(0);
+}	
+
 
 void ApplicationImpl::grabPointer(Window& grabber)
 {

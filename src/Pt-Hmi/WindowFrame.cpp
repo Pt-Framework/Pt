@@ -677,8 +677,11 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
         {
             Gfx::PointF pos = mev.position() - _clientRect.topLeft();
             MouseEvent mev2 = mev;
+            mev2.setId( window->vid() );
             mev2.setPosition(pos);
-            window->processEvent(mev2);
+            
+            //window->processEvent(mev2);
+            Application::instance().loop().commitEvent(mev2);
         }
 
         return false;
@@ -731,8 +734,11 @@ bool WindowFrame::onTouchEvent(const TouchEvent& tev)
         {
             Gfx::PointF pos = tev.position() - _clientRect.topLeft();
             TouchEvent tev2 = tev;
+            tev2.setId( window->vid() );
             tev2.setPosition(pos);
-            window->processEvent(tev2);
+
+            //window->processEvent(tev2);
+            Application::instance().loop().commitEvent(tev2);
         }
 
         return false;

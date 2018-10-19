@@ -32,8 +32,10 @@
 
 #include "InputDevice.h"
 #include "FrameBuffer.h"
+
 #include <Pt/Hmi/Visual.h>
 #include <Pt/System/MainLoop.h>
+#include <Pt/Timespan.h>
 
 namespace Pt {
 
@@ -55,6 +57,8 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         const Cursor& cursor()
         { return _cursor; }
+
+        Pt::Timespan inactivityTime() const;
 
         void grabPointer(Window& grabber);
 
@@ -86,6 +90,7 @@ class ApplicationImpl : public Pt::System::MainLoop
         FrameBuffer                  _frameBuffer; 
         std::vector<InputDevice*>    _inputDevices;
         Cursor                       _cursor;
+        Pt::DateTime                 _lastActivityTime;
         MouseEvent                   _lastMouse;
 };
 

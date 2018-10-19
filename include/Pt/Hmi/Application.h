@@ -99,6 +99,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void releasePointer(Widget& w);
 
+        Pt::Timespan inactivityTime() const;
+
         void setCursor(const Cursor* cursor = 0);
 
         const Style& style() const;

@@ -47,8 +47,8 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-
 #include <Pt/System/MainLoop.h>
+#include <Pt/Timespan.h>
 
 namespace Pt {
 
@@ -64,6 +64,8 @@ class ApplicationImpl : public Pt::System::MainLoop
         void setCursor(const Cursor* cursor);
         
         void setFontDir(const Pt::System::Path& dir);
+
+        Pt::Timespan inactivityTime() const;
 
         void grabPointer(Window& grabber);
 

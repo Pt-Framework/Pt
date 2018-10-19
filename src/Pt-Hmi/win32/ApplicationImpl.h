@@ -31,11 +31,15 @@
 #define Pt_Hmi_ApplicationImpl_h
 
 #include "win32/Selector.h"
+
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/Timespan.h>
+
 #include <vector>
+
 #include <windows.h>
 
 namespace Pt {
@@ -72,6 +76,8 @@ class ApplicationImpl : public Pt::System::EventLoop
         void nextEvent();
 
         void setCursor(const Cursor* cursor);
+
+        Pt::Timespan inactivityTime() const;
 
         void grabPointer(Window& grabber);
 

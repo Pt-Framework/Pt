@@ -110,6 +110,12 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
+Pt::Timespan ApplicationImpl::inactivityTime() const
+{
+  return Pt::Timespan(0);
+}	
+
+
 void ApplicationImpl::grabPointer(Window& grabber)
 {
     grabber.mainWindow().impl()->grabPointer();

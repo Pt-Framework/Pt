@@ -214,6 +214,17 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
+Pt::Timespan ApplicationImpl::inactivityTime() const
+{
+	LASTINPUTINFO info = { 0 };
+	info.cbSize = sizeof(info);
+	GetLastInputInfo(&info);
+
+  Pt::uint64_t msecs = info.dwTime;
+  return Pt::Timespan(msecs * 1000);
+}	
+
+
 void ApplicationImpl::grabPointer(Window& grabber)
 {
     grabber.mainWindow().impl()->grabPointer();
@@ -735,7 +746,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
 
     // TODO: call Application::processMouseEvent which returns true if the
     //       event was consumed. If it returns false and the event was not
-    //       consumed call ApplicationImpl::dispatchMouseEvent
+    //       consumed call ScreenImpl::dispatchMouseEvent
 
     Application::instance().processMouseEvent(_mouseEvent);
 }

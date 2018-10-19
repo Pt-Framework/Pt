@@ -85,6 +85,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
+        void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
+
         void drawRect(const Gfx::RectF& rectangle);
 
         void fillRect(const Gfx::RectF& rectangle);

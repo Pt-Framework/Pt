@@ -184,7 +184,13 @@ bool WindowManager::keyEvent(const KeyEvent& keyEvent)
         return false;
 
     if( w->isEnabled() )
-        w->processEvent(keyEvent);
+    {
+        KeyEvent kev = keyEvent;
+        kev.setId( w->vid() );
+        
+        //w->processEvent(keyEvent);
+        Application::instance().loop().commitEvent(kev);
+    }
 
     return true;
 }

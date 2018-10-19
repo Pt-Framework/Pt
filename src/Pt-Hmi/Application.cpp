@@ -500,6 +500,12 @@ void Application::sendMouseEvent(const MouseEvent& ev)
 }
 
 
+Pt::Timespan Application::inactivityTime() const
+{
+    return _impl->inactivityTime();
+}
+
+
 void Application::setCursor( const Cursor* cursor )
 {
     _impl->setCursor( cursor );

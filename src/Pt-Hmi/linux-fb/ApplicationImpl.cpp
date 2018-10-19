@@ -30,13 +30,18 @@
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
 #include "PainterImpl.h"
+
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/System/FileInfo.h>
+#include <Pt/System/Clock.h>
+#include <Pt/DateTime.h>
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <cmath>
+
 #include <fcntl.h>
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
@@ -47,7 +52,8 @@ namespace Pt {
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
-: _lastMouse(0)
+: _lastActivityTime( Pt::System::Clock::getSystemTime() )
+, _lastMouse(0)
 {           
     showConsole(false);
     
@@ -111,6 +117,7 @@ void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
     PainterImpl::setFontDir(dir);
 }
 
+
 void ApplicationImpl::grabPointer(Window& grabber)
 {
 }
@@ -149,8 +156,18 @@ void ApplicationImpl::releasePointer(Widget& grabber)
 }
 
 
+Pt::Timespan ApplicationImpl::inactivityTime() const
+{
+    Pt::DateTime now = Pt::System::Clock::getSystemTime();
+    Pt::Timespan inactivity = now - _lastActivityTime;
+    return inactivity;
+}	
+
+
 void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
 {
+    _lastActivityTime = Pt::System::Clock::getSystemTime();
+
     Application::instance().screen().impl()->dispatchKeyEvent(ev);
 }
 
@@ -163,6 +180,8 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 
 void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 {
+    _lastActivityTime = Pt::System::Clock::getSystemTime();
+    
     MouseEvent mev = ev;
     mev.setId( Application::instance().screen().vid() );
 
@@ -177,7 +196,7 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 
     // TODO: call Application::processMouseEvent which returns true if the
     //       event was consumed. If it returns false and the event was not
-    //       consumed call ApplicationImpl::dispatchMouseEvent
+    //       consumed call ScreenImpl::dispatchMouseEvent
 
     Application::instance().processMouseEvent(mev);
 }
@@ -185,6 +204,8 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 
 void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
 {
+    _lastActivityTime = Pt::System::Clock::getSystemTime();
+
     TouchEvent tev = ev;
     tev.setId( Application::instance().screen().vid() );
 

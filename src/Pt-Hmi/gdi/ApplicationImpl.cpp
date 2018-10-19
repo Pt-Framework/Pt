@@ -206,6 +206,20 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
+Pt::Timespan ApplicationImpl::inactivityTime() const
+{
+	LASTINPUTINFO info = { 0 };
+	info.cbSize = sizeof(info);
+	GetLastInputInfo(&info);
+
+  // GetTickCount() overflows like GetLastInputInfo() 
+  DWORD ticks = GetTickCount();
+  Pt::int64_t msecs = ticks - info.dwTime;
+  
+  return Pt::Timespan(msecs * 1000);
+}	
+
+
 void ApplicationImpl::grabPointer(Window& grabber)
 {
     grabber.mainWindow().impl()->grabPointer();
