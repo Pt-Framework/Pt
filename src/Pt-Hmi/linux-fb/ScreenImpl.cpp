@@ -60,7 +60,8 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 {
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
 
-    Painter painter(_surface);
+    Gfx::Image& background = _surface.pixmapImpl()->image();
+    Gfx::ImagePainter painter(background);
 
     Gfx::RectF rect( Gfx::PointF(0, 0), _surface.size() );
     painter.setBrush( Gfx::Color(0, 0, 0) );
