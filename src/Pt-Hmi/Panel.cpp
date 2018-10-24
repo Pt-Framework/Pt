@@ -60,6 +60,12 @@ void Panel::setImage(const Gfx::Image& image, Alignment align)
 }   
 
 
+Widget* Panel::content() const
+{
+  return _content;
+}
+
+
 void Panel::setContent(Widget& widget)
 {
     if(_content)
