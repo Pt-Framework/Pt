@@ -2044,6 +2044,9 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
     // Half line width
     wh = (float) w * 0.5f;
 
+    /// Working hack???
+    if(wh > 0.5f) wh -= 0.5f;
+
     // Direction vector
     dx = -b * il * wh;
     dy =  a * il * wh;

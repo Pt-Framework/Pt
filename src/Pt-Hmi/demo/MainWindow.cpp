@@ -1,10 +1,10 @@
 /* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -14,16 +14,16 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
- * MA  02110-1301  USA 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA  02110-1301  USA
 */
 
 #include "MainWindow.h"
@@ -62,12 +62,12 @@ void loadIcon(Gfx::Image& icon)
     Gfx::PngReader reader(*is, image);
     //std::istream* is = &ifs;
     //Gfx::JpegReader reader(*is, image);
-    
+
     reader.get();
 
     icon.reset(Pt::Gfx::ImageFormat::argb32(), image.size() );
     Gfx::copy(image.begin(), image.end(), icon.begin() );
-    
+
     for(size_t w = 0; w < icon.width(); ++ w )
     {
         for(size_t h = 0; h < icon.height(); ++h )
@@ -75,12 +75,12 @@ void loadIcon(Gfx::Image& icon)
             Gfx::Pixel pixel(icon.view(), w, h);
 
             Gfx::Color color = icon.format().getColor(pixel);
-         
-            if( color.red() >= 65535 && color.green() >= 65535 && color.blue() >= 65535 )				
+
+            if( color.red() >= 65535 && color.green() >= 65535 && color.blue() >= 65535 )
                 color.setAlpha(0);
             else
                 color.setAlpha(65535);
-                
+
             icon.format().setPixel(pixel, color, Gfx::CompositionMode::SourceCopy);
         }
     }
@@ -96,18 +96,18 @@ MainWindow::MainWindow()
 
     loadIcon(_icon);
     _picture.set(_icon);
-    
+
     setTitle("Main 1");
     move( Gfx::PointF(60, 60) );
-    resize( Gfx::SizeF(700, 900) ); 
-    
+    resize( Gfx::SizeF(700, 900) );
+
     //_child2.setTopMost(true);
     _child2.resize( Gfx::SizeF(550, 600) );
     add( _child2 );
-    
+
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(10, 10) );
-    
+
     for(int n = 0; n < 10; ++n)
     {
         SizePolicy policy(SizePolicy::Any, SizePolicy::Fixed);
@@ -118,10 +118,10 @@ MainWindow::MainWindow()
         _btns[n].setMargin(5);
 
         _btns[n].setText("Hallo");
-        
+
         _scrollContainer.addItem(_btns[n] );
     }
-    
+
     for(int n = 0; n < 20; ++n)
     {
         SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
@@ -136,13 +136,13 @@ MainWindow::MainWindow()
         ss<<"Scroll2 "<< (n+1);
 
         _btns2[n].setText(ss.str().c_str());
-        
+
         _scrollContainer2.addItem(_btns2[n] );
     }
 
     _scrollView2.setScrollBars(true);
     Pt::Hmi::SizePolicy spp(  SizePolicy::Fixed, SizePolicy::Fixed );
-     
+
      spp.setSize(200,400);
     _scrollView2.setSizePolicy(spp);
 
@@ -157,7 +157,7 @@ MainWindow::MainWindow()
     _bt2.setMargin(5);
     _bt2.clicked() += Pt::slot(Application::instance(), &Application::exit);
 
-    _scrollContainer.addItem(_bt2);    
+    _scrollContainer.addItem(_bt2);
     _scrollContainer.setPadding(5);
     _scrollContainer.setMargin(5);
     _scrollContainer2.setPadding(5);
@@ -175,7 +175,7 @@ MainWindow::MainWindow()
 
     _scrollView2.setContent(_scrollContainer2);
     _scrollView.setContent(_scrollContainer);
-    
+
     _child2.setContent(&_scrollView);
     ////_child2.show(true);  // SHOW DEMO WINDOW 2
 
@@ -186,11 +186,11 @@ MainWindow::MainWindow()
     _tabLabel1.setBackground( Gfx::Color::fromRgb8(200, 120, 100) );
     _tabLabel1.setContour( Gfx::Color::fromRgb8(120, 50, 50) );
     _tabLabel1.setMargin(5);
-    
+
     _tabLabel2.setText("Tab Label 2");
     _tabLabel2.setAlignment(Alignment::Center);
     _tabLabel2.setBackground( Gfx::Color::fromRgb8(100, 200, 120) );
-    
+
     _tabLabel3.setText("Tab Label 3");
     _tabLabel3.setAlignment(Alignment::Center);
     _tabLabel3.setBackground( Gfx::Color::fromRgb8(100, 120, 200) );
@@ -202,15 +202,15 @@ MainWindow::MainWindow()
     _tabView.setCurrent(0);
 
     _child1.setContent(&_tabView);
-    
+
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30,30));
     _child1.resize( Gfx::SizeF(300, 600) );
     ////_child1.show(true); // SHOW DEMO WINDOW 1
-    
-    // context menu   
+
+    // context menu
     _menu.setName("All Music");
-    
+
     _item1.setText("Heavy Metal");
     _item1.setIcon(_icon);
 
@@ -222,23 +222,23 @@ MainWindow::MainWindow()
     _menu.addItem(_item2);
 
     _item3.setText("Folk Music");
-    
+
     Key ctrlA(Key::Control, Key::A);
     _item3.setShortcut( &ctrlA );
     _menu.addItem(_item3);
 
     // context sub menu
     _subMenu.setName("Other Music");
-    
+
     _subItem1.setText("Vegetarian Progressive Grindcore");
     _subMenu.addItem(_subItem1);
-    
+
     _subItem2.setText("Super Black Metal");
     _subMenu.addItem(_subItem2);
 
     _subItem3.setText("Romanian Polka");
     _subMenu.addItem(_subItem3);
-    
+
     _menu.addMenu(_subMenu, "Other Music");
 }
 
@@ -263,21 +263,44 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     Pt::Gfx::Transform trans;
     trans.rotateDeg(-45);
 
-    Gfx::Pen pen( Gfx::Color::fromRgb8(255, 200, 100), 2);
-    imagePainter.setPen(pen);
 
-    imagePainter.drawLine( Pt::Gfx::PointF(300, 300), 
+
+    Gfx::Pen pen1( Gfx::Color::fromRgb8(255, 200, 100), 1);
+    imagePainter.setPen(pen1);
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 300),
                            Pt::Gfx::PointF(450, 300) );
+
+    Gfx::Pen pen2( Gfx::Color::fromRgb8(255, 200, 100), 2);
+    imagePainter.setPen(pen2);
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 320),
+                           Pt::Gfx::PointF(450, 320) );
+
+    Gfx::Pen pen3( Gfx::Color::fromRgb8(255, 200, 100), 3);
+    imagePainter.setPen(pen3);
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 340),
+                           Pt::Gfx::PointF(450, 340) );
+
+    Gfx::Pen pen4( Gfx::Color::fromRgb8(255, 200, 100), 4);
+    imagePainter.setPen(pen4);
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 360),
+                           Pt::Gfx::PointF(450, 360) );
+
+    Gfx::Pen pen5( Gfx::Color::fromRgb8(255, 200, 100), 5);
+    imagePainter.setPen(pen5);
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 380),
+                           Pt::Gfx::PointF(450, 380) );
+
+
 
     Gfx::ColorStops stops;
     stops.add(0, Gfx::Color::fromRgb8(255, 0, 0));
     stops.add(1.0, Gfx::Color::fromRgb8(0, 255, 0));
-    
+
     //Gfx::Brush brush = Gfx::Brush::linearGradient(0.0, 0.5, 1.0, 0.5, stops) );
     Gfx::Brush brush = Gfx::Brush::radialGradient(0.25, 0.25, 0, 0.5f, 0.5f, 0.5, stops);
     imagePainter.setBrush(brush);
 
-    Pt::Gfx::Path path;    
+    Pt::Gfx::Path path;
     path.moveTo( Pt::Gfx::PointF(20, 20) );
     path.addRoundedRect(Pt::Gfx::SizeF(200, 200), 10);
 
@@ -318,7 +341,7 @@ void MainWindow::onButton()
 
     Pt::Hmi::MouseEvent mev(0);
     mev.setPosition(pos);
-    
+
     mev.setPress();
     app.sendMouseEvent(mev);
 
