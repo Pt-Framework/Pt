@@ -269,26 +269,46 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.setPen(pen1);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 300),
                            Pt::Gfx::PointF(450, 300) );
+    imagePainter.drawLine( Pt::Gfx::PointF(500, 300),
+                           Pt::Gfx::PointF(500, 450) );
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 450),
+                           Pt::Gfx::PointF(400, 550) );
 
     Gfx::Pen pen2( Gfx::Color::fromRgb8(255, 200, 100), 2);
     imagePainter.setPen(pen2);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 320),
                            Pt::Gfx::PointF(450, 320) );
+    imagePainter.drawLine( Pt::Gfx::PointF(520, 300),
+                           Pt::Gfx::PointF(520, 450) );
+    imagePainter.drawLine( Pt::Gfx::PointF(320, 450),
+                           Pt::Gfx::PointF(420, 550) );
 
     Gfx::Pen pen3( Gfx::Color::fromRgb8(255, 200, 100), 3);
     imagePainter.setPen(pen3);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 340),
                            Pt::Gfx::PointF(450, 340) );
+    imagePainter.drawLine( Pt::Gfx::PointF(540, 300),
+                           Pt::Gfx::PointF(540, 450) );
+    imagePainter.drawLine( Pt::Gfx::PointF(340, 450),
+                           Pt::Gfx::PointF(440, 550) );
 
     Gfx::Pen pen4( Gfx::Color::fromRgb8(255, 200, 100), 4);
     imagePainter.setPen(pen4);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 360),
                            Pt::Gfx::PointF(450, 360) );
+    imagePainter.drawLine( Pt::Gfx::PointF(560, 300),
+                           Pt::Gfx::PointF(560, 450) );
+    imagePainter.drawLine( Pt::Gfx::PointF(360, 450),
+                           Pt::Gfx::PointF(460, 550) );
 
     Gfx::Pen pen5( Gfx::Color::fromRgb8(255, 200, 100), 5);
     imagePainter.setPen(pen5);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 380),
                            Pt::Gfx::PointF(450, 380) );
+    imagePainter.drawLine( Pt::Gfx::PointF(580, 300),
+                           Pt::Gfx::PointF(580, 450) );
+    imagePainter.drawLine( Pt::Gfx::PointF(380, 450),
+                           Pt::Gfx::PointF(480, 550) );
 
 
 
