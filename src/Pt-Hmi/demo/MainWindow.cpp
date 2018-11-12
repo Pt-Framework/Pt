@@ -204,9 +204,9 @@ MainWindow::MainWindow()
     _child1.setContent(&_tabView);
 
     //_child1.setTopMost(true);
-    _child1.move( Gfx::PointF(30,30));
+    _child1.move( Gfx::PointF(30, 620));
     _child1.resize( Gfx::SizeF(300, 600) );
-    ////_child1.show(true); // SHOW DEMO WINDOW 1
+    _child1.show(true); // SHOW DEMO WINDOW 1
 
     // context menu
     _menu.setName("All Music");
@@ -260,10 +260,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     //Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
 
-    Pt::Gfx::Transform trans;
-    trans.rotateDeg(-45);
-
-
+    //
+    // lines of various sizes
+    //
 
     Gfx::Pen pen1( Gfx::Color::fromRgb8(255, 200, 100), 1);
     imagePainter.setPen(pen1);
@@ -274,7 +273,10 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(300, 450),
                            Pt::Gfx::PointF(400, 550) );
 
-    Gfx::Pen pen2( Gfx::Color::fromRgb8(255, 200, 100), 2);
+    // NOTE: FlatCap instead of RoundCap works has correct line width
+    Gfx::Pen pen2( Gfx::Color::fromRgb8(255, 200, 100), 2,
+                   Gfx::Pen::Solid, Gfx::Pen::RoundCap);
+
     imagePainter.setPen(pen2);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 320),
                            Pt::Gfx::PointF(450, 320) );
@@ -310,7 +312,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(380, 450),
                            Pt::Gfx::PointF(480, 550) );
 
-
+    //
+    // gradient filled path
+    //
 
     Gfx::ColorStops stops;
     stops.add(0, Gfx::Color::fromRgb8(255, 0, 0));
@@ -319,6 +323,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //Gfx::Brush brush = Gfx::Brush::linearGradient(0.0, 0.5, 1.0, 0.5, stops) );
     Gfx::Brush brush = Gfx::Brush::radialGradient(0.25, 0.25, 0, 0.5f, 0.5f, 0.5, stops);
     imagePainter.setBrush(brush);
+
+    Pt::Gfx::Transform trans;
+    trans.rotateDeg(-45);
 
     Pt::Gfx::Path path;
     path.moveTo( Pt::Gfx::PointF(20, 20) );
