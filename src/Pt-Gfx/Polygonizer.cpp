@@ -1932,14 +1932,14 @@ void Polygonizer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, floa
         lround(x + nx - dx), lround(y + ny - dy),
         lround(x + nx     ), lround(y + ny     ),
         lround(x          ), lround(y          ),
-        Gfx::Math::zcint(wh * 0.5f)
+        Pt::lround(ceil(wh * 0.5f))
     );
     renderQuadraticBezierPoints(
         dst,
         lround(x          ), lround(y          ),
         lround(x - nx     ), lround(y - ny     ),
         lround(x - nx - dx), lround(y - ny - dy),
-        Gfx::Math::zcint(wh * 0.5f)
+        Pt::lround(ceil(wh * 0.5f))
     );
 #else
     renderQuadraticBezierPoints(
@@ -2001,11 +2001,11 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
     }
 
     // Ensure that the number of segments are not too few
-    if(nSegs < 4)
-        nSegs = 4;
+    if(nSegs < 5 /*4*/)
+        nSegs = 5 /*4*/;
 
     // Calculate the inverse multiplication factor
-    const float nSegs1i = 1.0f / (nSegs - 1);
+    const float nSegs1i = 1.0f / (nSegs /*- 1*/);
 
     for(Pt::int32_t i = 0; i < nSegs; ++i)
     {
@@ -2040,7 +2040,7 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
 
     // Line length
     // NOTE: Gfx::Math::fastInvSqrt() will produce artifacts!
-    const float ll =  ::sqrtf(a * a + b * b);
+    const float ll = ::sqrtf(a * a + b * b);
 
     // Inverse line length
     const float il = 1.0f / ll;
@@ -2048,20 +2048,19 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
     // Half line width
     wh = (float) w * 0.5f;
 
-    // Working hack???
-
+    // Adjust the half line width
     wh = floor(wh);
-    if( !(w & 1) && wh > 0.5f ) { // Even only
+    if( !(w & 1) && wh > 0.5f ) { // For lines with even widths only
         wh -= 0.5f;
     }
-
-    // Direction vector
-    dx = -b * il * wh;
-    dy =  a * il * wh;
 
     // Normal vector
     nx =  a * il * wh;
     ny =  b * il * wh;
+
+    // Direction vector
+    dx = -b * il * wh;
+    dy =  a * il * wh;
 }
 
 
