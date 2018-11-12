@@ -1287,7 +1287,11 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
+    //if(pen.capStyle() == Pen::RoundCap)
+      //  calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size() * 2);
+    //else
+        calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
+
 
 
     // Generate points (CCW)
@@ -1883,14 +1887,14 @@ void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y,
         lround(x + nx     ), lround(y + ny     ),
         lround(x + nx - dx), lround(y + ny - dy),
         lround(x      - dx), lround(y      - dy),
-        Gfx::Math::zcint(wh * 0.5f)
+        Pt::lround(ceil(wh * 0.5f))
     );
     renderQuadraticBezierPoints(
         dst,
         lround(x      - dx), lround(y      - dy),
         lround(x - nx - dx), lround(y - ny - dy),
         lround(x - nx     ), lround(y - ny     ),
-        Gfx::Math::zcint(wh * 0.5f)
+        Pt::lround(ceil(wh * 0.5f))
     );
 #else
     renderQuadraticBezierPoints(
@@ -2045,7 +2049,6 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
     wh = (float) w * 0.5f;
 
     // Working hack???
-    //if(wh > 0.5f) wh -= 0.5f;
 
     wh = floor(wh);
     if( !(w & 1) && wh > 0.5f ) { // Even only

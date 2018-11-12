@@ -273,10 +273,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(300, 450),
                            Pt::Gfx::PointF(400, 550) );
 
-    // NOTE: FlatCap instead of RoundCap works has correct line width
-    Gfx::Pen pen2( Gfx::Color::fromRgb8(255, 200, 100), 2,
-                   Gfx::Pen::Solid, Gfx::Pen::RoundCap);
-
+    Gfx::Pen pen2( Gfx::Color::fromRgb8(255, 200, 100), 2);
     imagePainter.setPen(pen2);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 320),
                            Pt::Gfx::PointF(450, 320) );
@@ -311,6 +308,25 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
                            Pt::Gfx::PointF(580, 450) );
     imagePainter.drawLine( Pt::Gfx::PointF(380, 450),
                            Pt::Gfx::PointF(480, 550) );
+
+    // NOTE: FlatCap instead of RoundCap works has correct line width
+    imagePainter.setPen(Gfx::Pen( Gfx::Color::fromRgb8(255, 200, 100), 1, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 300 - 200), Pt::Gfx::PointF(450, 300 - 200) );
+    imagePainter.drawLine( Pt::Gfx::PointF(300 - 200, 450), Pt::Gfx::PointF(400 - 200, 550) );
+    imagePainter.setPen(Gfx::Pen( Gfx::Color::fromRgb8(255, 200, 100), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 320 - 200), Pt::Gfx::PointF(450, 320 - 200) );
+    imagePainter.drawLine( Pt::Gfx::PointF(320 - 200, 450), Pt::Gfx::PointF(420 - 200, 550) );
+    imagePainter.setPen(Gfx::Pen( Gfx::Color::fromRgb8(255, 200, 100), 3, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 340 - 200), Pt::Gfx::PointF(450, 340 - 200) );
+    imagePainter.drawLine( Pt::Gfx::PointF(340 - 200, 450), Pt::Gfx::PointF(440 - 200, 550) );
+    imagePainter.setPen(Gfx::Pen( Gfx::Color::fromRgb8(255, 200, 100), 4, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 360 - 200), Pt::Gfx::PointF(450, 360 - 200) );
+    imagePainter.drawLine( Pt::Gfx::PointF(360 - 200, 450), Pt::Gfx::PointF(460 - 200, 550) );
+    imagePainter.setPen(Gfx::Pen( Gfx::Color::fromRgb8(255, 200, 100), 5, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 380 - 200), Pt::Gfx::PointF(450, 380 - 200) );
+    imagePainter.drawLine( Pt::Gfx::PointF(380 - 200, 450), Pt::Gfx::PointF(480 - 200, 550) );
+
+
 
     //
     // gradient filled path
