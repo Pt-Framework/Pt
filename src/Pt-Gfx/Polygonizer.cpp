@@ -1902,7 +1902,7 @@ void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y,
         (x + nx       ), (y + ny       ),
         (x - dx * 2.0f), (y - dy * 2.0f),
         (x - nx       ), (y - ny       ),
-        Pt::lround(ceil(wh)) - 1
+        (Pt::int32_t) ceil(wh) - 1
     );
 #endif
 }
@@ -1952,7 +1952,7 @@ void Polygonizer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, floa
         (x + nx - dx), (y + ny - dy),
         (x      + dx), (y      + dy),
         (x - nx - dx), (y - ny - dy),
-        Pt::lround(ceil(wh)) - 1
+        (Pt::int32_t) ceil(wh) - 1
     );
 #endif
 }
