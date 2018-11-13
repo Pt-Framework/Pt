@@ -357,8 +357,8 @@ void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 #else
 
     Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2, 
-                     Gfx::Pen::Solid, Gfx::Pen::RoundCap);
-                     //Gfx::Pen::Solid, Gfx::Pen::FlatCap);
+                     //Gfx::Pen::Solid, Gfx::Pen::RoundCap);
+                     Gfx::Pen::Solid, Gfx::Pen::FlatCap);
     painter.setPen(pen);
 
     Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(4, 4);
