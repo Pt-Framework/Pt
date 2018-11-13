@@ -309,7 +309,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(380, 450),
                            Pt::Gfx::PointF(480, 550) );
 
-    // NOTE: FlatCap instead of RoundCap works has correct line width
+    // NOTE: RoundCap tests
     imagePainter.setPen(Gfx::Pen( Gfx::Color::fromRgb8(255, 200, 100), 1, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine( Pt::Gfx::PointF(300, 300 - 200), Pt::Gfx::PointF(450, 300 - 200) );
     imagePainter.drawLine( Pt::Gfx::PointF(300 - 200, 450), Pt::Gfx::PointF(400 - 200, 550) );

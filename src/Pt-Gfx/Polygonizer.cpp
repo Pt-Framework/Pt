@@ -1170,7 +1170,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size(), pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::RoundHoleCap);
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size()/*, pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::RoundHoleCap*/);
 
     // Generate points (CCW)
     // --- Begin point ---
@@ -1287,7 +1287,7 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size(), pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::RoundHoleCap);
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size()/*, pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::RoundHoleCap*/);
 
     // Generate points (CCW)
 
@@ -1342,7 +1342,7 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size(), pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::RoundHoleCap);
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size()/*, pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::RoundHoleCap*/);
 
     // Get the pattern buffer and calculate the number of "pattern" segments
     const Pt::uint8_t* pBuff = _patternBufferMP;
@@ -1712,7 +1712,7 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
 
     // Calculate the line parameters
     float wh2, dx2, dy2, nx2, ny2;
-    calculateLineParams(wh2, dx2, dy2, nx2, ny2, x2a, y2a, x2b, y2b, penSize, endCap == Pen::RoundCap || endCap == Pen::RoundHoleCap);
+    calculateLineParams(wh2, dx2, dy2, nx2, ny2, x2a, y2a, x2b, y2b, penSize/*, endCap == Pen::RoundCap || endCap == Pen::RoundHoleCap*/);
 
     // Generate the end cap
     switch(endCap) {
@@ -1743,8 +1743,8 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
             // Calculate additional line parameters
             float wh2i, dx2i, dy2i, nx2i, ny2i;
             float wh2o, dx2o, dy2o, nx2o, ny2o;
-            calculateLineParams(wh2i, dx2i, dy2i, nx2i, ny2i, ix2a, iy2a, ix2b, iy2b, penSize, true);
-            calculateLineParams(wh2o, dx2o, dy2o, nx2o, ny2o, ox2a, oy2a, ox2b, oy2b, penSize, true);
+            calculateLineParams(wh2i, dx2i, dy2i, nx2i, ny2i, ix2a, iy2a, ix2b, iy2b, penSize/*, true*/);
+            calculateLineParams(wh2o, dx2o, dy2o, nx2o, ny2o, ox2a, oy2a, ox2b, oy2b, penSize/*, true*/);
             // Generate the points
             std::vector<PointF> tmp;
             renderQuadraticBezierPoints(tmp, ix2a - dx2i, iy2a - dy2i, x2a + dx2, y2a + dy2, ox2a - dx2o, oy2a - dy2o, penSize);
@@ -1792,7 +1792,7 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
 
     // Intersect the begin lines
     float wh1, dx1, dy1, nx1, ny1;
-    calculateLineParams(wh1, dx1, dy1, nx1, ny1, x1b, y1b, x1a, y1a, penSize, begCap == Pen::RoundCap || begCap == Pen::RoundHoleCap);
+    calculateLineParams(wh1, dx1, dy1, nx1, ny1, x1b, y1b, x1a, y1a, penSize/*, begCap == Pen::RoundCap || begCap == Pen::RoundHoleCap*/);
 
     // Generate the begin cap
     switch(begCap) {
@@ -1894,9 +1894,14 @@ void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y,
 #else
     renderQuadraticBezierPoints(
         dst,
+        /*
         lround(x + nx       ), lround(y + ny       ),
         lround(x - dx * 2.0f), lround(y - dy * 2.0f),
         lround(x - nx       ), lround(y - ny       ),
+        */
+        (x + nx       ), (y + ny       ),
+        (x - dx * 2.0f), (y - dy * 2.0f),
+        (x - nx       ), (y - ny       ),
         Pt::lround(ceil(wh)) - 1
     );
 #endif
@@ -1939,9 +1944,14 @@ void Polygonizer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, floa
 #else
     renderQuadraticBezierPoints(
         dst,
+        /*
         lround(x + nx - dx), lround(y + ny - dy),
         lround(x      + dx), lround(y      + dy),
         lround(x - nx - dx), lround(y - ny - dy),
+        */
+        (x + nx - dx), (y + ny - dy),
+        (x      + dx), (y      + dy),
+        (x - nx - dx), (y - ny - dy),
         Pt::lround(ceil(wh)) - 1
     );
 #endif
@@ -1992,15 +2002,19 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
         if( dst.empty() || dst.back().x() != x3 || dst.back().y() != y3 )
             dst.push_back( PointF(x3, y3) );
 
+        //std::cerr << "SL\n";
+
         return;
     }
 
     // Ensure that the number of segments are not too few
-    if(nSegs < 5 /*4*/)
-        nSegs = 5 /*4*/;
+    if(nSegs < 4)
+        nSegs = 4;
 
     // Calculate the inverse multiplication factor
-    const float nSegs1i = 1.0f / (nSegs /*- 1*/);
+    const float nSegs1i = 1.0f / (nSegs - 1);
+
+    //int q = 0;
 
     for(Pt::int32_t i = 0; i < nSegs; ++i)
     {
@@ -2019,13 +2033,16 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
 
         // Store the coordinate
         dst.push_back( PointF(x, y) );
+        //++q;
     }
+
+    //if(q < 4) std::cerr << "NP\n";
 }
 
 
 void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
                                       float& nx, float& ny, float x1, float y1,
-                                      float x2, float y2, size_t w, bool noHalfLineWidthAdjustment)
+                                      float x2, float y2, size_t w/*, bool useAlternativeHalfLineWidthAdjustment*/)
 {
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
@@ -2043,21 +2060,36 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
     // Half line width
     wh = (float) w * 0.5f;
 
-    // Adjust the half line width as needed
-    if(!noHalfLineWidthAdjustment) {
+    float whd = wh;
+    float whn = wh;
+
+    // Adjust the half line width
+    /*
+    if(useAlternativeHalfLineWidthAdjustment) {
+        whd = floor(whd);
+        //whn = floor(whn);
+        if( !(w & 1) ) { // For lines with even widths only
+            if( whd > 0.5f  ) whd -= 0.5f;
+            if( whn > 0.25f ) whn -= 0.25f;
+        }
+        wh = std::min(whd, whn);
+    }
+    else {
+        */
         wh = floor(wh);
         if( !(w & 1) && wh > 0.5f ) { // For lines with even widths only
             wh -= 0.5f;
         }
-    }
+        whd = whn = wh;
+    //}
 
-    // Normal vector
-    nx =  a * il * wh;
-    ny =  b * il * wh;
+    // Calculate the Direction vector
+    dx = -b * il * whd;
+    dy =  a * il * whd;
 
-    // Direction vector
-    dx = -b * il * wh;
-    dy =  a * il * wh;
+    // Calculate the normal vector
+    nx =  a * il * whn;
+    ny =  b * il * whn;
 }
 
 

@@ -188,7 +188,7 @@ class Polygonizer
 
         void calculateLineParams(float& wh, float& dx, float& dy,
                                  float& nx, float& ny, float x1, float y1,
-                                 float x2, float y2, size_t w, bool noHalfLineWidthAdjustment);
+                                 float x2, float y2, size_t w/*, bool useAlternativeHalfLineWidthAdjustment*/);
 
         bool intersectLine(bool& inLine, PointF& intersect,
                            const PointF& line1a, const PointF& line1b,
