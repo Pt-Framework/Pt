@@ -327,7 +327,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(380 - 200, 450), Pt::Gfx::PointF(480 - 200, 550) );
 
     // NOTE: like X from window-close button
-    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2, 
+    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2,
                      Gfx::Pen::Solid, Gfx::Pen::FlatCap);
     imagePainter.setPen(pen);
 

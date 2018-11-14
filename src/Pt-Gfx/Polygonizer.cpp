@@ -1876,32 +1876,35 @@ void Polygonizer::renderLineSquareCap(std::vector<PointF>& dst, float x, float y
 
 void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
+    // Hack for small-width lines?
+    if(wh <= 1.0f) {
+        renderLineTriangularOutCap(dst, x, y, dx, dy, nx, ny);
+        return;
+    }
+
 #if 0
+    // This one seems produce worse result
     renderQuadraticBezierPoints(
         dst,
-        lround(x + nx     ), lround(y + ny     ),
-        lround(x + nx - dx), lround(y + ny - dy),
-        lround(x      - dx), lround(y      - dy),
-        Pt::lround(ceil(wh * 0.5f))
+        roundf((x + nx     ) * 10.0f) * 0.1f, roundf((y + ny     ) * 10.0f) * 0.1f,
+        roundf((x + nx - dx) * 10.0f) * 0.1f, roundf((y + ny - dy) * 10.0f) * 0.1f,
+        roundf((x      - dx) * 10.0f) * 0.1f, roundf((y      - dy) * 10.0f) * 0.1f,
+        (Pt::int32_t) ceil(wh) - 1
     );
     renderQuadraticBezierPoints(
         dst,
-        lround(x      - dx), lround(y      - dy),
-        lround(x - nx - dx), lround(y - ny - dy),
-        lround(x - nx     ), lround(y - ny     ),
-        Pt::lround(ceil(wh * 0.5f))
+        roundf((x      - dx) * 10.0f) * 0.1f, roundf((y      - dy) * 10.0f) * 0.1f,
+        roundf((x - nx - dx) * 10.0f) * 0.1f, roundf((y - ny - dy) * 10.0f) * 0.1f,
+        roundf((x - nx     ) * 10.0f) * 0.1f, roundf((y - ny     ) * 10.0f) * 0.1f,
+        (Pt::int32_t) ceil(wh) - 1
     );
 #else
+    // This one seems produce better result
     renderQuadraticBezierPoints(
         dst,
-        /*
-        lround(x + nx       ), lround(y + ny       ),
-        lround(x - dx * 2.0f), lround(y - dy * 2.0f),
-        lround(x - nx       ), lround(y - ny       ),
-        */
-        (x + nx       ), (y + ny       ),
-        (x - dx * 2.0f), (y - dy * 2.0f),
-        (x - nx       ), (y - ny       ),
+        roundf((x + nx       ) * 10.0f) * 0.1f, roundf((y + ny       ) * 10.0f) * 0.1f,
+        roundf((x - dx * 2.0f) * 10.0f) * 0.1f, roundf((y - dy * 2.0f) * 10.0f) * 0.1f,
+        roundf((x - nx       ) * 10.0f) * 0.1f, roundf((y - ny       ) * 10.0f) * 0.1f,
         (Pt::int32_t) ceil(wh) - 1
     );
 #endif
@@ -1926,32 +1929,35 @@ void Polygonizer::renderLineTriangularInCap(std::vector<PointF>& dst, float x, f
 
 void Polygonizer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
+    // Hack for small-width lines?
+    if(wh <= 1.0f) {
+        renderLineTriangularInCap(dst, x, y, dx, dy, nx, ny);
+        return;
+    }
+
 #if 0
+    // This one seems produce worse result
     renderQuadraticBezierPoints(
         dst,
-        lround(x + nx - dx), lround(y + ny - dy),
-        lround(x + nx     ), lround(y + ny     ),
-        lround(x          ), lround(y          ),
-        Pt::lround(ceil(wh * 0.5f))
-    );
-    renderQuadraticBezierPoints(
-        dst,
-        lround(x          ), lround(y          ),
-        lround(x - nx     ), lround(y - ny     ),
-        lround(x - nx - dx), lround(y - ny - dy),
-        Pt::lround(ceil(wh * 0.5f))
+        roundf((x + nx - dx) * 10.0f) * 0.1f, roundf((y + ny - dy) * 10.0f) * 0.1f,
+        roundf((x      + dx) * 10.0f) * 0.1f, roundf((y      + dy) * 10.0f) * 0.1f,
+        roundf((x - nx - dx) * 10.0f) * 0.1f, roundf((y - ny - dy) * 10.0f) * 0.1f,
+        (Pt::int32_t) ceil(wh) - 1
     );
 #else
+    // This one seems produce better result
     renderQuadraticBezierPoints(
         dst,
-        /*
-        lround(x + nx - dx), lround(y + ny - dy),
-        lround(x      + dx), lround(y      + dy),
-        lround(x - nx - dx), lround(y - ny - dy),
-        */
-        (x + nx - dx), (y + ny - dy),
-        (x      + dx), (y      + dy),
-        (x - nx - dx), (y - ny - dy),
+        roundf((x + nx - dx) * 10.0f) * 0.1f, roundf((y + ny - dy) * 10.0f) * 0.1f,
+        roundf((x + nx     ) * 10.0f) * 0.1f, roundf((y + ny     ) * 10.0f) * 0.1f,
+        roundf((x          ) * 10.0f) * 0.1f, roundf((y          ) * 10.0f) * 0.1f,
+        (Pt::int32_t) ceil(wh) - 1
+    );
+    renderQuadraticBezierPoints(
+        dst,
+        roundf((x          ) * 10.0f) * 0.1f, roundf((y          ) * 10.0f) * 0.1f,
+        roundf((x - nx     ) * 10.0f) * 0.1f, roundf((y - ny     ) * 10.0f) * 0.1f,
+        roundf((x - nx - dx) * 10.0f) * 0.1f, roundf((y - ny - dy) * 10.0f) * 0.1f,
         (Pt::int32_t) ceil(wh) - 1
     );
 #endif
@@ -2002,8 +2008,6 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
         if( dst.empty() || dst.back().x() != x3 || dst.back().y() != y3 )
             dst.push_back( PointF(x3, y3) );
 
-        //std::cerr << "SL\n";
-
         return;
     }
 
@@ -2013,8 +2017,6 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
 
     // Calculate the inverse multiplication factor
     const float nSegs1i = 1.0f / (nSegs - 1);
-
-    //int q = 0;
 
     for(Pt::int32_t i = 0; i < nSegs; ++i)
     {
@@ -2033,10 +2035,7 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
 
         // Store the coordinate
         dst.push_back( PointF(x, y) );
-        //++q;
     }
-
-    //if(q < 4) std::cerr << "NP\n";
 }
 
 
@@ -2064,24 +2063,11 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
     float whn = wh;
 
     // Adjust the half line width
-    /*
-    if(useAlternativeHalfLineWidthAdjustment) {
-        whd = floor(whd);
-        //whn = floor(whn);
-        if( !(w & 1) ) { // For lines with even widths only
-            if( whd > 0.5f  ) whd -= 0.5f;
-            if( whn > 0.25f ) whn -= 0.25f;
-        }
-        wh = std::min(whd, whn);
+    wh = floor(wh);
+    if( !(w & 1) && wh > 0.5f ) { // For lines with even widths only
+        wh -= 0.5f;
     }
-    else {
-        */
-        wh = floor(wh);
-        if( !(w & 1) && wh > 0.5f ) { // For lines with even widths only
-            wh -= 0.5f;
-        }
-        whd = whn = wh;
-    //}
+    whd = whn = wh;
 
     // Calculate the Direction vector
     dx = -b * il * whd;
