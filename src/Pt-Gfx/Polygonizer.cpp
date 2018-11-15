@@ -1170,7 +1170,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size()/*, pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::RoundHoleCap*/);
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
     // Generate points (CCW)
     // --- Begin point ---
@@ -1342,7 +1342,7 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size()/*, pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::RoundHoleCap*/);
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
     // Get the pattern buffer and calculate the number of "pattern" segments
     const Pt::uint8_t* pBuff = _patternBufferMP;
@@ -1712,7 +1712,7 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
 
     // Calculate the line parameters
     float wh2, dx2, dy2, nx2, ny2;
-    calculateLineParams(wh2, dx2, dy2, nx2, ny2, x2a, y2a, x2b, y2b, penSize/*, endCap == Pen::RoundCap || endCap == Pen::RoundHoleCap*/);
+    calculateLineParams(wh2, dx2, dy2, nx2, ny2, x2a, y2a, x2b, y2b, penSize);
 
     // Generate the end cap
     switch(endCap) {
@@ -1743,8 +1743,8 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
             // Calculate additional line parameters
             float wh2i, dx2i, dy2i, nx2i, ny2i;
             float wh2o, dx2o, dy2o, nx2o, ny2o;
-            calculateLineParams(wh2i, dx2i, dy2i, nx2i, ny2i, ix2a, iy2a, ix2b, iy2b, penSize/*, true*/);
-            calculateLineParams(wh2o, dx2o, dy2o, nx2o, ny2o, ox2a, oy2a, ox2b, oy2b, penSize/*, true*/);
+            calculateLineParams(wh2i, dx2i, dy2i, nx2i, ny2i, ix2a, iy2a, ix2b, iy2b, penSize);
+            calculateLineParams(wh2o, dx2o, dy2o, nx2o, ny2o, ox2a, oy2a, ox2b, oy2b, penSize);
             // Generate the points
             std::vector<PointF> tmp;
             renderQuadraticBezierPoints(tmp, ix2a - dx2i, iy2a - dy2i, x2a + dx2, y2a + dy2, ox2a - dx2o, oy2a - dy2o, penSize);
@@ -1792,7 +1792,7 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
 
     // Intersect the begin lines
     float wh1, dx1, dy1, nx1, ny1;
-    calculateLineParams(wh1, dx1, dy1, nx1, ny1, x1b, y1b, x1a, y1a, penSize/*, begCap == Pen::RoundCap || begCap == Pen::RoundHoleCap*/);
+    calculateLineParams(wh1, dx1, dy1, nx1, ny1, x1b, y1b, x1a, y1a, penSize);
 
     // Generate the begin cap
     switch(begCap) {
@@ -1824,8 +1824,8 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
             // Calculate additional line parameters
             float wh1i, dx1i, dy1i, nx1i, ny1i;
             float wh1o, dx1o, dy1o, nx1o, ny1o;
-            calculateLineParams(wh1i, dx1i, dy1i, nx1i, ny1i, ix1a, iy1a, ix1b, iy1b, penSize, true);
-            calculateLineParams(wh1o, dx1o, dy1o, nx1o, ny1o, ox1a, oy1a, ox1b, oy1b, penSize, true);
+            calculateLineParams(wh1i, dx1i, dy1i, nx1i, ny1i, ix1a, iy1a, ix1b, iy1b, penSize);
+            calculateLineParams(wh1o, dx1o, dy1o, nx1o, ny1o, ox1a, oy1a, ox1b, oy1b, penSize);
             // Generate the points
             */
             std::vector<PointF> tmp;
