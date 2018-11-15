@@ -1182,7 +1182,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
         case Pen::RoundHoleCap     : renderLineRoundHoleCap    (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
         case Pen::Arrow1Cap        : renderLineArrow1Cap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
         case Pen::Arrow2Cap        : renderLineArrow2Cap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
-        default                    : renderLineButtCap         (pointsF, x1, y1,             nx, ny); break;
+        default                    : renderLineButtCap         (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
     }
     // --- End point ---
     switch(pen.capStyle()) {
@@ -1193,7 +1193,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
         case Pen::RoundHoleCap     : renderLineRoundHoleCap    (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
         case Pen::Arrow1Cap        : renderLineArrow1Cap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
         case Pen::Arrow2Cap        : renderLineArrow2Cap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
-        default                    : renderLineButtCap         (pointsF, x2, y2,               -nx, -ny); break;
+        default                    : renderLineButtCap         (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
     }
 
     // Perform collision detection and polygon-segment combining as needed
@@ -1308,7 +1308,7 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     }
 
     if( ! openingCap )
-        renderLineButtCap(dst, x1, y1, nx, ny);
+        renderLineButtCap(dst, x1, y1, wh, dx, dy, nx, ny);
 
     // --- End point ---
     if(closingCap)
@@ -1327,7 +1327,7 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     }
 
     if( ! closingCap )
-        renderLineButtCap(dst, x2, y2, -nx, -ny);
+        renderLineButtCap(dst, x2, y2, wh, -dx, -dy, -nx, -ny);
 }
 
 
@@ -1399,7 +1399,7 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
             case Pen::RoundHoleCap     : renderLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
             case Pen::Arrow1Cap        : renderLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
             case Pen::Arrow2Cap        : renderLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            default                    : renderLineButtCap         (dst, x1, y1,             nx, ny); break;
+            default                    : renderLineButtCap         (dst, x1, y1, wh, dx, dy, nx, ny); break;
         }
 
         // --- End point ---
@@ -1411,7 +1411,7 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
             case Pen::RoundHoleCap     : renderLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
             case Pen::Arrow1Cap        : renderLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             case Pen::Arrow2Cap        : renderLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            default                    : renderLineButtCap         (dst, x2, y2,               -nx, -ny); break;
+            default                    : renderLineButtCap         (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
         }
     }
 }
@@ -1860,8 +1860,14 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
 }
 
 
-void Polygonizer::renderLineButtCap(std::vector<PointF>& dst, float x, float y, float nx, float ny)
+void Polygonizer::renderLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
+    // Hack for small-width lines?
+    if(wh <= 1.0f) {
+        renderLineSquareCap(dst, x, y, dx, dy, nx, ny);
+        return;
+    }
+
     dst.push_back( PointF(x + nx, y + ny) );
     dst.push_back( PointF(x - nx, y - ny) );
 }
@@ -2041,7 +2047,7 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
 
 void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
                                       float& nx, float& ny, float x1, float y1,
-                                      float x2, float y2, size_t w/*, bool useAlternativeHalfLineWidthAdjustment*/)
+                                      float x2, float y2, size_t w)
 {
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
@@ -2056,26 +2062,22 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
     // Inverse line length
     const float il = 1.0f / ll;
 
-    // Half line width
+    // Half-line width
     wh = (float) w * 0.5f;
 
-    float whd = wh;
-    float whn = wh;
-
-    // Adjust the half line width
+    // Adjust the half-line width
     wh = floor(wh);
     if( !(w & 1) && wh > 0.5f ) { // For lines with even widths only
         wh -= 0.5f;
     }
-    whd = whn = wh;
 
     // Calculate the Direction vector
-    dx = -b * il * whd;
-    dy =  a * il * whd;
+    dx = -b * il * wh;
+    dy =  a * il * wh;
 
     // Calculate the normal vector
-    nx =  a * il * whn;
-    ny =  b * il * whn;
+    nx =  a * il * wh;
+    ny =  b * il * wh;
 }
 
 

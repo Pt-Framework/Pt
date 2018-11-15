@@ -150,7 +150,8 @@ class Polygonizer
                                          size_t penSize);
 
         void renderLineButtCap(std::vector<PointF>& dst,
-                              float x, float y, float nx, float ny);
+                              float x, float y, float wh,
+                              float dx, float dy, float nx, float ny);
 
         void renderLineSquareCap(std::vector<PointF>& dst,
                                 float x, float y, float dx, float dy,
@@ -188,7 +189,7 @@ class Polygonizer
 
         void calculateLineParams(float& wh, float& dx, float& dy,
                                  float& nx, float& ny, float x1, float y1,
-                                 float x2, float y2, size_t w/*, bool useAlternativeHalfLineWidthAdjustment*/);
+                                 float x2, float y2, size_t w);
 
         bool intersectLine(bool& inLine, PointF& intersect,
                            const PointF& line1a, const PointF& line1b,

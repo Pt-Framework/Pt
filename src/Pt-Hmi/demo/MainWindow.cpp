@@ -327,12 +327,17 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(380 - 200, 450), Pt::Gfx::PointF(480 - 200, 550) );
 
     // NOTE: like X from window-close button
-    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2,
-                     Gfx::Pen::Solid, Gfx::Pen::FlatCap);
-    imagePainter.setPen(pen);
-
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap));
     imagePainter.drawLine(Gfx::PointF(520, 520), Gfx::PointF(528, 528));
     imagePainter.drawLine(Gfx::PointF(528, 520), Gfx::PointF(520, 528));
+
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::SquareCap));
+    imagePainter.drawLine(Gfx::PointF(520 + 20, 520), Gfx::PointF(528 + 20, 528));
+    imagePainter.drawLine(Gfx::PointF(528 + 20, 520), Gfx::PointF(520 + 20, 528));
+
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.drawLine(Gfx::PointF(520 + 40, 520), Gfx::PointF(528 + 40, 528));
+    imagePainter.drawLine(Gfx::PointF(528 + 40, 520), Gfx::PointF(520 + 40, 528));
 
     //
     // gradient filled path
