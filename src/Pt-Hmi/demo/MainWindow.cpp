@@ -206,7 +206,7 @@ MainWindow::MainWindow()
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30, 620));
     _child1.resize( Gfx::SizeF(300, 600) );
-    _child1.show(true); // SHOW DEMO WINDOW 1
+    ////_child1.show(true); // SHOW DEMO WINDOW 1
 
     // context menu
     _menu.setName("All Music");
@@ -327,17 +327,30 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(380 - 200, 450), Pt::Gfx::PointF(480 - 200, 550) );
 
     // NOTE: like X from window-close button
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap));
-    imagePainter.drawLine(Gfx::PointF(520, 520), Gfx::PointF(528, 528));
-    imagePainter.drawLine(Gfx::PointF(528, 520), Gfx::PointF(520, 528));
+    //imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap));
+    //imagePainter.drawLine(Gfx::PointF(520, 520), Gfx::PointF(528, 528));
+    //imagePainter.drawLine(Gfx::PointF(528, 520), Gfx::PointF(520, 528));
 
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::SquareCap));
-    imagePainter.drawLine(Gfx::PointF(520 + 20, 520), Gfx::PointF(528 + 20, 528));
-    imagePainter.drawLine(Gfx::PointF(528 + 20, 520), Gfx::PointF(520 + 20, 528));
+    //imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::SquareCap));
+    //imagePainter.drawLine(Gfx::PointF(520 + 20, 520), Gfx::PointF(528 + 20, 528));
+    //imagePainter.drawLine(Gfx::PointF(528 + 20, 520), Gfx::PointF(520 + 20, 528));
 
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
-    imagePainter.drawLine(Gfx::PointF(520 + 40, 520), Gfx::PointF(528 + 40, 528));
-    imagePainter.drawLine(Gfx::PointF(528 + 40, 520), Gfx::PointF(520 + 40, 528));
+    //imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    //imagePainter.drawLine(Gfx::PointF(520 + 40, 520), Gfx::PointF(528 + 40, 528));
+    //imagePainter.drawLine(Gfx::PointF(528 + 40, 520), Gfx::PointF(520 + 40, 528));
+
+    //
+    // a polygon like a short flat capped line of width 2 from 520,520 to 528,528
+    //
+    Pt::Gfx::PointF linePolygon[5];
+    linePolygon[0] = Pt::Gfx::PointF(520.35357666015625, 519.64642333984375);
+    linePolygon[1] = Pt::Gfx::PointF(519.64642333984375, 520.35357666015625);
+    linePolygon[2] = Pt::Gfx::PointF(527.64642333984375, 528.35357666015625);
+    linePolygon[3] = Pt::Gfx::PointF(528.35357666015625, 527.64642333984375);
+    linePolygon[4] = Pt::Gfx::PointF(520.35357666015625, 519.64642333984375);
+
+    imagePainter.setBrush(Gfx::Color(65535, 65535, 65535));
+    imagePainter.fillPolygon(linePolygon, 5);
 
     //
     // gradient filled path
