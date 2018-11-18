@@ -52,34 +52,32 @@ namespace Pt {
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
-: _lastActivityTime( Pt::System::Clock::getSystemTime() )
+: _mouseDevice(0)
+, _lastActivityTime( Pt::System::Clock::getSystemTime() )
 , _lastMouse(0)
 {           
     showConsole(false);
     
-    _inputDevices.reserve(10);
+    std::string device = Pt::System::Application::getEnvVar("PT_KEYBOARD_DEVICE");
+    openInputDevice(device);
 
-    for(size_t i = 0; i < 10; ++i)
+    device = Pt::System::Application::getEnvVar("PT_MOUSE_DEVICE");
+    try
     {
-        System::Path deviceName("/dev/input/event");
-
-        std::ostringstream oss;
-        oss << i;
-        deviceName += oss.str().c_str();
-            
-        if( Pt::System::FileInfo::exists(deviceName) )
-        {
-            InputDevice* device = new InputDevice( deviceName.toLocal().c_str() );
-            device->setScreenLimit( _frameBuffer.size() );
-            device->setActive(*this);
-            device->begin();
-            device->eventReady() += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
-            device->eventReady() += Pt::slot(*this, &ApplicationImpl::onTouchEvent);
-
-            _inputDevices.push_back(device);
-            std::clog << "using: " << deviceName.toLocal() << std::endl;
-        }
+        _mouseDevice = new MouseDevice(device.c_str());
+        _mouseDevice->setScreenLimit(_frameBuffer.size());
+        _mouseDevice->setActive(*this);
+        _mouseDevice->begin();
+        _mouseDevice->eventReady() += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
+        std::clog << "using mouse: " << device << std::endl;
     }
+    catch (const std::exception& ex)
+    {
+        std::clog << "skipping mouse device: " << device << std::endl;
+    }
+
+    device = Pt::System::Application::getEnvVar("PT_TOUCH_DEVICE");
+    openInputDevice(device);
 }
 
 
@@ -91,8 +89,33 @@ ApplicationImpl::~ApplicationImpl()
         delete *it;
     }
 
+    delete _mouseDevice;
+
     showConsole(true);
 } 
+
+
+
+void ApplicationImpl::openInputDevice(const std::string& deviceName)
+{
+    try
+    {
+        InputDevice* device = new InputDevice(deviceName.c_str());
+        device->setScreenLimit(_frameBuffer.size());
+        device->setActive(*this);
+        device->begin();
+        device->eventReady() += Pt::slot(*this, &ApplicationImpl::onKeyEvent);
+        device->eventReady() += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
+        device->eventReady() += Pt::slot(*this, &ApplicationImpl::onTouchEvent);
+
+        _inputDevices.push_back(device);
+        std::clog << "using: " << deviceName << std::endl;
+    }
+    catch (const std::exception& ex)
+    {
+        std::clog << "skipping device: " << deviceName<< std::endl;
+    }
+}
 
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
@@ -181,16 +204,18 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 {
     _lastActivityTime = Pt::System::Clock::getSystemTime();
-    
+   
     MouseEvent mev = ev;
     mev.setId( Application::instance().screen().vid() );
 
     ScreenImpl* screen = Application::instance().screen().impl();
+    screen->drawCursor(ev);
     
-    Gfx::PointF pos = screen->screenPosition( ev.position() );
-    mev.setPosition(pos);
+    unsigned scaling = Application::instance().screen().scaleFactor();
 
-    screen->drawCursor(mev);
+    Gfx::PointF pos(ev.position().x()/scaling, 
+                    ev.position().y()/scaling);
+    mev.setPosition(pos);
 
     _lastMouse = mev;
 
@@ -215,6 +240,15 @@ void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
     tev.setPosition(pos);
 
     Application::instance().processTouchEvent(tev);
+}
+
+
+void ApplicationImpl::onKeyEvent(const KeyEvent& ev)
+{
+    //TODO: VID???
+    _lastActivityTime = Pt::System::Clock::getSystemTime();
+
+    Application::instance().screen().impl()->dispatchKeyEvent(ev);
 }
 
 

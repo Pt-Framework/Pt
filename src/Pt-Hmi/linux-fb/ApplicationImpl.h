@@ -31,6 +31,7 @@
 #define Pt_Hmi_ApplicationImpl_h
 
 #include "InputDevice.h"
+#include "MouseDevice.h"
 #include "FrameBuffer.h"
 
 #include <Pt/Hmi/Visual.h>
@@ -84,11 +85,16 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         void onTouchEvent(const TouchEvent& ev);
 
+        void onKeyEvent(const KeyEvent& ev);
+
         void showConsole(bool s);
+
+        void openInputDevice(const std::string& device);
 
     private:
         FrameBuffer                  _frameBuffer; 
         std::vector<InputDevice*>    _inputDevices;
+        MouseDevice*                 _mouseDevice;      
         Cursor                       _cursor;
         Pt::DateTime                 _lastActivityTime;
         MouseEvent                   _lastMouse;

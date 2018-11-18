@@ -177,14 +177,14 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
 void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
 {
     _drawCursor = true;
-    PT_LOG_INFO("cursor activated");
-
+ 
     //
     // erase previous cursor area on screen
     //
     if( ! _cursorBackground.empty() )
     {
-        
+        PT_LOG_DEBUG("erasing cursor image");
+
         bitBlit( _cursorBackground.data(), 
                  _cursorBackground.width(), _cursorBackground.height(),
                  _cursorPos, (Pt::uint8_t*)image().data(), CopyOp );
@@ -202,12 +202,15 @@ void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
     _cursorPos = Gfx::Point( mev.x() - cursor.xHotspot(),
                              mev.y() - cursor.yHotspot() );
 
+    PT_LOG_DEBUG("cursor hotspot position: " << _cursorPos.x() << "," << _cursorPos.y());
+
     Gfx::Rect cursorArea = Gfx::Rect(_cursorPos,
                                      Gfx::Size(cursor.width(), cursor.height()));
 
     //
     // update the screen including the new cursor image
     //
+    PT_LOG_DEBUG("update cursor area: " << cursor.width() << "x" << cursor.height());
     updateScreen(cursorArea);
 }
 
@@ -306,7 +309,7 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 
 void ScreenImpl::updateScreen(const Gfx::Rect& r)
 {
-    if( _drawCursor )
+    if(_drawCursor)
         drawCursor( image().data() );
     
     _frameBuffer.output( image().data(), r );
@@ -316,10 +319,12 @@ void ScreenImpl::updateScreen(const Gfx::Rect& r)
 void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 {
     const Cursor& cursor = Application::instance().impl()->cursor();
-
     if( cursor.empty() )
+    {
+        PT_LOG_DEBUG("no cursor image");
         return;
-
+    }
+    
     if( _cursorBackground.width() != cursor.width() ||
         _cursorBackground.height() != cursor.height() )
     {
@@ -328,9 +333,12 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
     }
 
     // keep the of background of the cursor area
+    PT_LOG_DEBUG("saving cursor background");
     grabImage( buffer, _cursorPos, _cursorBackground );
 
     // draw cursor to the buffer
+    PT_LOG_DEBUG("drawing cursor image");
+
     bitBlit(&cursor.andRgb888()[0], cursor.width(), cursor.height(), 
             _cursorPos, buffer, AndOp);
     
