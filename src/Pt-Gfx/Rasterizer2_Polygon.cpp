@@ -245,6 +245,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
             if(to   > _currentClip.right()) to   = _currentClip.right();
 
             if(to < from) continue;
+            //if( (to - from) < 1 ) continue;
 
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy)
@@ -513,6 +514,10 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                                     Pt::int32_t minX_, Pt::int32_t minY_,
                                     Pt::int32_t maxX_, Pt::int32_t maxY_)
 {
+    //for(std::size_t i = 0; i < pointCount; ++i) {
+    //    fprintf(stderr, "POLY: (%6.3f, %6.3f)\n", points[i].x(), points[i].y());
+    //}
+
     std::size_t totalPointCount = pointCount;
 
     // List of nodes that define the horizontal spans
@@ -596,6 +601,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             if(to   > _currentClip.right()) to   = _currentClip.right();
 
             if(to < from) continue;
+            //if( (to - from) < 1 ) continue;
 
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy)
@@ -755,6 +761,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
             if(to   > _currentClip.right()) to   = _currentClip.right();
 
             if(to < from) continue;
+            //if( (to - from) < 1 ) continue;
 
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy)
@@ -808,7 +815,6 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
     }
 }
 
-
 // Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
@@ -819,6 +825,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
                                             const PolygonScanlines& exclusionZone,
                                             DrawLineMask& maskInOut)
 {
+    //fprintf(stderr, "XWAA: (%6.3f, %6.3f) - (%6.3f, %6.3f)\n", x1, y1, x2, y2);
+
     // Get the mask's coordinate
     float mx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
     float my[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
@@ -923,7 +931,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
             // Calculate the alphas and coordinates
-            const Pt::int32_t fypxli = Pt::lround(floor(ypxli));
+            const Pt::int32_t fypxli = Pt::lround( floor(ypxli) );
             const Pt::int32_t fpart  = Pt::lround( (ypxli - fypxli) * 255.0f );
             const Pt::int32_t rfpart = 255 - fpart;
             const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
@@ -965,7 +973,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
             if(!exclusionZone.empty()) {
                 //std::cout << "B: " << y1 - minY << " " << exclusionZone.size() << std::endl;
                 for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[y1 - minY].begin(); it != exclusionZone[y1 - minY].end(); ++it) {
-                    if (x < it->from || x > it->to) continue;
+                    if (x <= it->from || x >= it->to) continue;
                     skipPixel = true;
                     break;
                 }
@@ -975,7 +983,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
             if(!exclusionZone.empty()) {
                 //std::cout << "C: " << y2 - minY << " " << exclusionZone.size() << std::endl;
                 for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[y2 - minY].begin(); it != exclusionZone[y2 - minY].end(); ++it) {
-                    if (x < it->from || x > it->to) continue;
+                    if (x <= it->from || x >= it->to) continue;
                     skipPixel = true;
                     break;
                 }

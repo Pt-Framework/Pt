@@ -1862,11 +1862,13 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
 
 void Polygonizer::renderLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
+#if 0
     // Hack for small-width lines?
     if(wh <= 1.0f) {
         renderLineSquareCap(dst, x, y, dx, dy, nx, ny);
         return;
     }
+#endif
 
     dst.push_back( PointF(x + nx, y + ny) );
     dst.push_back( PointF(x - nx, y - ny) );
@@ -1882,11 +1884,13 @@ void Polygonizer::renderLineSquareCap(std::vector<PointF>& dst, float x, float y
 
 void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
+#if 0
     // Hack for small-width lines?
     if(wh <= 1.0f) {
         renderLineTriangularOutCap(dst, x, y, dx, dy, nx, ny);
         return;
     }
+#endif
 
 #if 0
     // This one seems produce worse result
@@ -1935,11 +1939,13 @@ void Polygonizer::renderLineTriangularInCap(std::vector<PointF>& dst, float x, f
 
 void Polygonizer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
+#if 0
     // Hack for small-width lines?
     if(wh <= 1.0f) {
         renderLineTriangularInCap(dst, x, y, dx, dy, nx, ny);
         return;
     }
+#endif
 
 #if 0
     // This one seems produce worse result
@@ -2067,7 +2073,7 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
 
     // Adjust the half-line width
     wh = floor(wh);
-    if( !(w & 1) && wh > 0.5f ) { // For lines with even widths only
+    if( !(w & 1) && wh >= 0.5f ) { // For lines with even widths only
         wh -= 0.5f;
     }
 
