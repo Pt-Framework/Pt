@@ -1566,6 +1566,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\xorg\X11Fd.h">
       <Filter>Pt-Hmi\xorg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2917,6 +2920,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\xorg\X11Fd.cpp">
       <Filter>Pt-Hmi\xorg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

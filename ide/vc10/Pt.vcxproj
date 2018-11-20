@@ -383,6 +383,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h" />
@@ -624,6 +625,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.cpp" />

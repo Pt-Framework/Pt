@@ -135,27 +135,27 @@ ScreenImpl* Screen::impl()
 
 Gfx::PointF Screen::onToParent(const Window& w, const Gfx::PointF& pos) const
 {
-    return toLogical(_impl->toParent(w, toPhysical(pos)));
+    return _impl->toParent(w, pos);
 }
 
 
 Gfx::PointF Screen::onFromParent(const Window& w, const Gfx::PointF& pos) const
 {
-    return toLogical(_impl->fromParent(w, toPhysical(pos)));
+    return _impl->fromParent(w, pos);
 }
 
 
 void Screen::onResize(Window& w, const Gfx::SizeF& s)
 {
     w.impl()->resize(toPhysical(s));
-    _impl->onResize(w, toPhysical(s));
+    _impl->onResize(w, s);
 }
 
 
 void Screen::onMove(Window& w, const Gfx::PointF& p)
 {   
     w.impl()->move(toPhysical(p));
-    _impl->onMove(w, toPhysical(p));
+    _impl->onMove(w, p);
 }
 
 
