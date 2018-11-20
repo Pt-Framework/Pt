@@ -290,6 +290,15 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
 #else
 
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, 
+                                     Gfx::Pen::Solid, Gfx::Pen::FlatCap));
+
+    // this line begins at the same position as the next one, but is just longer
+    imagePainter.drawLine(Gfx::PointF(1, 1), Gfx::PointF(9, 9));
+
+    // this line begins at the same position as the previous one, but is just shorter
+    //imagePainter.drawLine(Gfx::PointF(1, 1), Gfx::PointF(6, 6));
+
     //Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
 
     //
