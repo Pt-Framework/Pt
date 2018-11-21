@@ -65,8 +65,6 @@ class ScreenImpl : public Pt::Connectable
             return _frameBuffer;
         }
 
-        Gfx::PointF screenPosition(const Gfx::PointF& posRaw);
-
         void drawCursor(const Pt::Hmi::MouseEvent& mev);
 
         Gfx::SizeF size() const

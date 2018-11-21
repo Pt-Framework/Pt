@@ -35,6 +35,8 @@
 #include <Pt/Gfx/Rgb32Format.h>
 #include <Pt/Gfx/Argb32Format.h>
 
+#include <sstream>
+
 #include <fcntl.h>
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
@@ -45,67 +47,83 @@ namespace Pt {
 
 namespace Hmi {
 
-  /*_fixedInfo.type;   // 0 -> Packed pixels
-                         // 1 -> Non interleaved planes
-                         // 2 -> Interleaved planes
-                         // 3 -> Text/attributes
-                         // 4 -> EGA/VGA planes
+/*
+    _fixedInfo.type;   // 0 -> Packed pixels
+                       // 1 -> Non interleaved planes
+                       // 2 -> Interleaved planes
+                       // 3 -> Text/attributes
+                       // 4 -> EGA/VGA planes
 
-    /_fixedInfo.visual; // 0 -> Mono (1=black, 0=white)
-                         // 1 -> Mono (1=white, 0=black)
-                         // 2 -> True color
-                         // 3 -> Pseudo color (like atari)
-                         // 4 -> Direct color
-                         // 5 -> Pseudo color readonly
+    _fixedInfo.visual; // 0 -> Mono (1=black, 0=white)
+                       // 1 -> Mono (1=white, 0=black)
+                       // 2 -> True color
+                       // 3 -> Pseudo color (like atari)
+                       // 4 -> Direct color
+                       // 5 -> Pseudo color readonly
 */
 
 FrameBuffer::FrameBuffer()
+: _fd(-1)
+, _rotation(Rotate0)
+, _bufferSize(0)
+, _buffer(0)
+, _format(0)
+, _lineSize(0)
+, _pixelSize(0)
 {           
     _fd = open ("/dev/fb0", O_RDWR);
-
     if(_fd < 0)
-        throw std::runtime_error("Could not open framebuffer device" + PT_SOURCEINFO);
+        throw std::runtime_error("Could not open framebuffer device");
 
     if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
-        throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
+        throw std::runtime_error("FBIOGET_VSCREENINFO failed");
 
-    // Get the fixed state
     if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
-        throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
+        throw std::runtime_error("FBIOGET_FSCREENINFO failed");
 
-    // Memory map the display
     _bufferSize = _fixedInfo.line_length * _screenInfo.yres;
-    _rotationBuffer.resize(_bufferSize);
-    _yoffset    = _screenInfo.yres;
-    _buffer     = (char*)  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
-    size_t stride = _fixedInfo.line_length - ( _screenInfo.xres *  depth() /8  );
-    _pixelSize = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;
-    
-    switch( _pixelSize )
+    _buffer     = (char*) mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
+
+    _lineSize = _fixedInfo.line_length;
+
+    switch(_screenInfo.bits_per_pixel)
     {
-        case 2:
-            _format = new Gfx::Rgb32Format();
-            break;
+        case 15:
+            throw std::runtime_error("RGB 565 not supported");
 
-        case 3:
-            _format = new Gfx::Rgb32Format();
-            break;
-
-        case 4:
-            _format =  new Gfx::Argb32Format();
+        case 16:
+            _format = new Gfx::Rgb16Format();
+            _pixelSize = 2;
             break;
 
         default:
+        case 24:
+        case 32:
             _format =  new Gfx::Argb32Format();
+            _pixelSize = 4;
             break;
     }
 
-    setRotation(Rotation90Degree);
-    std::clog<< "Sreen HW resolution (" << _screenInfo.xres<< "," << _screenInfo.yres << ") "
-             << "Pixel stride = " << _pixelSize << " Stride = " << stride
-             << " Buffer Size =" << _bufferSize << std::endl;
-    std::clog<< "Sreen VR resolution (" << width() << "," << height() << ") Pixel stride = "
-             << _pixelSize << " Stride = " << strideInBytes() << std::endl;
+    std::clog << "Screen info: " << _screenInfo.xres << "x" << _screenInfo.yres
+              << ", pixel size: " << _pixelSize << ", stride: " << strideSize()
+              << ", buffer size: " << _bufferSize << std::endl;
+
+    int rotval = 0;
+    std::string value = Pt::System::Application::getEnvVar("PT_FRAMEBUFFER_ROTATE");
+    std::istringstream iss(value);
+    iss >> rotval;
+    
+    switch(rotval)
+    {
+        default:
+        case 0:
+          setRotation(Rotate0);
+          break;
+
+        case 1:
+          setRotation(Rotate90);
+          break;
+    }
 }
 
 
@@ -117,70 +135,93 @@ FrameBuffer::~FrameBuffer()
     if(_fd > 0)
         ::close(_fd);
 
-  if( _format != 0)
-     delete _format;
+    if( _format != 0)
+        delete _format;
 } 
+
+
+void FrameBuffer::setRotation(Rotation r)
+{
+  _rotation = r;
+
+  switch(_rotation)
+  {
+    default:
+    case Rotate0:
+        _lineSize = _fixedInfo.line_length;
+        _rotationBuffer = std::vector<char>();
+        break;
+
+    case  Rotate90:
+        _lineSize =  _screenInfo.yres * _pixelSize;
+        _rotationBuffer.resize(_bufferSize);
+        break;
+  }
+
+  std::clog << "Screen rotation: " << width() << "x" << height() 
+            << ", pixel size: " << _pixelSize 
+            << ", stride: " << strideSize() << std::endl;
+}
+
 
 size_t FrameBuffer::width() const
 {
     switch( _rotation)
     {
-      default:
-        return _screenInfo.xres;
+        default:
+        case Rotate0:
+            return _screenInfo.xres;
 
-      case  Rotation90Degree:
-        return _screenInfo.yres; 
+        case  Rotate90:
+            return _screenInfo.yres; 
     }
 
     return 0;
 }
 
-
-size_t FrameBuffer::strideInBytes() const
-{
-    switch( _rotation)
-    {
-      case  Rotation90Degree:
-        return 0;
-    }
-
-    return  _fixedInfo.line_length - ( _screenInfo.xres *  depth() /8  );
-}
-
-size_t FrameBuffer::bufferSize() const
-{
-    switch( _rotation )
-    {
-      case Rotation90Degree:
-        return width()* height() * (depth() / 8);
-    }
-
-    return _bufferSize;
-}
 
 size_t FrameBuffer::height() const
 {
     switch( _rotation)
     {
-      default:
-        return _screenInfo.yres;
+        default:
+            case Rotate0:
+            return _screenInfo.yres;
 
-      case  Rotation90Degree:
-        return _screenInfo.xres; 
+        case Rotate90:
+            return _screenInfo.xres; 
     }
 
     return 0;
 }
 
+
+size_t FrameBuffer::strideSize() const
+{
+    switch(_rotation)
+    {
+        default:
+        case Rotate0:
+            return _fixedInfo.line_length - (_screenInfo.xres * _screenInfo.bits_per_pixel / 8);
+            break;
+
+        case Rotate90:
+            return 0;
+    }
+
+    return 0;
+}
+
+
 void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
 {
     switch( _rotation)
     {
-      case Rotation0Degree:
+      case Rotate0:
           memcpy( _buffer, frame, _bufferSize );
-      break;
+          break;
 
-      case Rotation90Degree:
+      case Rotate90:
       {
         const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));
         const int clipRight = clipArea.x() + clipArea.width();
@@ -198,11 +239,10 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
         }
 
         memcpy( _buffer, &_rotationBuffer[0], _rotationBuffer.size());
+        break;
       }
-      break;
     }
 }
-
 
 } // namespace
 

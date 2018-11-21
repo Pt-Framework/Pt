@@ -58,26 +58,33 @@ ApplicationImpl::ApplicationImpl()
 {           
     showConsole(false);
     
-    std::string device = Pt::System::Application::getEnvVar("PT_KEYBOARD_DEVICE");
-    openInputDevice(device);
+    std::string keyboard = Pt::System::Application::getEnvVar("PT_KEYBOARD_DEVICE");
+    openInputDevice(keyboard);
 
-    device = Pt::System::Application::getEnvVar("PT_MOUSE_DEVICE");
+    std::string mouse = Pt::System::Application::getEnvVar("PT_MOUSE_DEVICE");
+    std::string mouseTransform = Pt::System::Application::getEnvVar("PT_MOUSE_TRANSFORM");
+
     try
     {
-        _mouseDevice = new MouseDevice(device.c_str());
+        _mouseDevice = new MouseDevice(mouse.c_str());
         _mouseDevice->setScreenLimit(_frameBuffer.size());
         _mouseDevice->setActive(*this);
         _mouseDevice->begin();
         _mouseDevice->eventReady() += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
-        std::clog << "using mouse: " << device << std::endl;
+        std::clog << "using mouse: " << mouse << std::endl;
     }
-    catch (const std::exception& ex)
+    catch(const std::exception& ex)
     {
-        std::clog << "skipping mouse device: " << device << std::endl;
+        delete _mouseDevice;
+        _mouseDevice = 0;
+        std::clog << "skipping mouse device: " << mouse << std::endl;
     }
 
-    device = Pt::System::Application::getEnvVar("PT_TOUCH_DEVICE");
-    openInputDevice(device);
+    std::string touch = Pt::System::Application::getEnvVar("PT_TOUCH_DEVICE");
+    openInputDevice(touch);
+
+    // TODO: apply transformation in onTouchEvent()
+    std::string touchTransform = Pt::System::Application::getEnvVar("PT_TOUCH_TRANSFORM");
 }
 
 
@@ -93,7 +100,6 @@ ApplicationImpl::~ApplicationImpl()
 
     showConsole(true);
 } 
-
 
 
 void ApplicationImpl::openInputDevice(const std::string& deviceName)
@@ -134,6 +140,7 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
     _cursor = *cursor;
 }
+
 
 void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 {
@@ -213,8 +220,8 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
     
     unsigned scaling = Application::instance().screen().scaleFactor();
 
-    Gfx::PointF pos(ev.position().x()/scaling, 
-                    ev.position().y()/scaling);
+    Gfx::PointF pos(ev.position().x() / scaling, 
+                    ev.position().y() / scaling);
     mev.setPosition(pos);
 
     _lastMouse = mev;
@@ -227,6 +234,39 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 }
 
 
+//Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
+//{
+//    const Gfx::SizeF& screenSize = size();
+//    const double touchWidth  = 800;
+//    const double touchHeight = 480;
+//
+//    Gfx::PointF pos = posRaw;
+//
+//    switch( _frameBuffer.rotation() )
+//    {
+//        case FrameBuffer::Rotate0:
+//        {
+//            double scaleX =  screenSize.width() / touchWidth;
+//            double scaleY =  screenSize.height() / touchHeight;
+//            pos.setX( std::floor(scaleX * posRaw.x()) );
+//            pos.setY( std::floor(scaleY * posRaw.y()) );
+//            break;
+//        }
+//
+//        case FrameBuffer::Rotate90:
+//        {
+//              double scaleX =  screenSize.width() / touchHeight;
+//              double scaleY =  screenSize.height() / touchWidth;
+//              pos.setX( std::floor((touchHeight - posRaw.y()) * scaleX) );
+//              pos.setY( std::floor(posRaw.x() * scaleY) );
+//              break;
+//        }
+//    }
+//
+//    return pos;
+//}
+
+
 void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
 {
     _lastActivityTime = Pt::System::Clock::getSystemTime();
@@ -234,10 +274,11 @@ void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
     TouchEvent tev = ev;
     tev.setId( Application::instance().screen().vid() );
 
-    ScreenImpl* screen = Application::instance().screen().impl();
-
-    Gfx::PointF pos = screen->screenPosition( ev.position() );
-    tev.setPosition(pos);
+    // TODO: apply transformation from PT_TOUCH_TRANSFORM
+    
+    //ScreenImpl* screen = Application::instance().screen().impl();
+    //Gfx::PointF pos = screen->screenPosition( ev.position() );
+    //tev.setPosition(pos);
 
     Application::instance().processTouchEvent(tev);
 }

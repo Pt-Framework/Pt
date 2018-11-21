@@ -50,8 +50,8 @@ class FrameBuffer
     public:
         enum Rotation
         {
-            Rotation0Degree = 0, //0 - normal orientation (0 degree)
-            Rotation90Degree,    //1 - clockwise orientation (90 degrees)
+            Rotate0 = 0, //0 - normal orientation (0 degree)
+            Rotate90,    //1 - clockwise orientation (90 degrees)
         };
 
     public:
@@ -59,59 +59,43 @@ class FrameBuffer
 
         virtual ~FrameBuffer();
 
-        size_t width() const;
-
-        size_t height() const;
-
-        size_t depth() const
-        {
-            return _screenInfo.bits_per_pixel;
-        }
-
-        size_t strideInBytes() const;
-
-        
         const Gfx::ImageFormat& format() const 
         {
             return *_format;
         }
-
-        size_t bufferSize() const;
-
-        void setRotation(Rotation r )
-        {
-          _rotation = r;
-
-          switch( _rotation)
-          {
-            case  Rotation90Degree:
-              _lineLenght =  width() * (depth() / 8);
-            break;
-            default:
-              _lineLenght = _fixedInfo.line_length;
-            break;
-          }
-       }
 
         Rotation rotation() const
         {
           return _rotation;
         }
 
+        void setRotation(Rotation r);
+
+        size_t width() const;
+
+        size_t height() const;
+
         Gfx::Size size() const 
         {
             return Gfx::Size( width(), height() );
         }
 
-        size_t lineLength() const
+        size_t depth() const
         {
-            return _lineLenght;
+            return _screenInfo.bits_per_pixel;
         }
 
         size_t pixelSize() const
         {
-          return _pixelSize;
+            return _pixelSize;
         }
+
+        size_t lineSize() const
+        {
+            return _lineSize;
+        }
+
+        size_t strideSize() const;
 
         void output( const Pt::uint8_t* frame, const Gfx::Rect& area );
 
@@ -123,21 +107,23 @@ class FrameBuffer
 
       inline const Pt::uint8_t* pixelFrame(const Pt::uint8_t* frame, size_t w, size_t h)
       {
-          return &frame [_lineLenght * h + w * _pixelSize];
+          return &frame [_lineSize * h + w * _pixelSize];
       }
 
     private:
         int               _fd;
         fb_var_screeninfo _screenInfo;
         fb_fix_screeninfo _fixedInfo;
-        char*             _buffer;
-        size_t            _yoffset;
-        size_t            _bufferSize;
-        size_t            _depth;
-        Gfx::ImageFormat* _format;
+
         Rotation          _rotation;
         std::vector<char> _rotationBuffer;
-        size_t            _lineLenght;
+
+        size_t            _bufferSize;
+        char*             _buffer;
+        
+        Gfx::ImageFormat* _format;
+
+        size_t            _lineSize;
         size_t            _pixelSize;
 };
 

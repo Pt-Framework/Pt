@@ -58,7 +58,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _dpi(96.0)
 , _drawCursor(false)
 {
-    _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
+    _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideSize() );
 
     Gfx::Image& background = _surface.pixmapImpl()->image();
     Gfx::ImagePainter painter(background);
@@ -103,39 +103,6 @@ const Gfx::Image& ScreenImpl::image() const
 Gfx::Image& ScreenImpl::image()
 {
     return _surface.pixmapImpl()->image();
-}
-
-
-Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
-{
-    const Gfx::SizeF& screenSize = size();
-    const double touchWidth  = 800;
-    const double touchHeight = 480;
-
-    Gfx::PointF pos = posRaw;
-
-    switch( _frameBuffer.rotation() )
-    {
-        case FrameBuffer::Rotation0Degree:
-        {
-            double scaleX =  screenSize.width() / touchWidth;
-            double scaleY =  screenSize.height() / touchHeight;
-            pos.setX( std::floor(scaleX * posRaw.x()) );
-            pos.setY( std::floor(scaleY * posRaw.y()) );
-            break;
-        }
-
-        case FrameBuffer::Rotation90Degree:
-        {
-              double scaleX =  screenSize.width() / touchHeight;
-              double scaleY =  screenSize.height() / touchWidth;
-              pos.setX( std::floor((touchHeight - posRaw.y()) * scaleX) );
-              pos.setY( std::floor(posRaw.x() * scaleY) );
-              break;
-        }
-    }
-
-    return pos;
 }
 
 
@@ -361,7 +328,7 @@ void ScreenImpl::grabImage(const Pt::uint8_t* buffer,
 
     for( Pt::ssize_t y = pos.y(); y < yMax; ++y )
     {
-        size_t lineOffset = y * _frameBuffer.lineLength() +
+        size_t lineOffset = y * _frameBuffer.lineSize() +
                             pos.x() * pixelSizeInByte;
 
         Pt::uint8_t* pdata = image.data() + (y - pos.y()) * image.view().stride();
@@ -374,7 +341,7 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h,
                           const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op )
 {
     static const size_t planePixelSize = 4;
-    const size_t bufferPixelSize = _frameBuffer.depth() / 8;
+    const size_t bufferPixelSize = _frameBuffer.pixelSize();
     const size_t bufferWidth  = std::min<size_t>( pos.x() + w, _frameBuffer.width() );
     const size_t bufferHeight = std::min<size_t>( pos.y() + h, _frameBuffer.height() );
     size_t yCursor = 0;
@@ -382,7 +349,7 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h,
 
     for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
     {
-        const size_t lineOffsetBuffer  = yBuffer * _frameBuffer.lineLength();
+        const size_t lineOffsetBuffer  = yBuffer * _frameBuffer.lineSize();
         const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
 
         xCursor = 0;
