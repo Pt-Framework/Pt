@@ -258,7 +258,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     Gfx::ImagePainter2 imagePainter(image);
     imagePainter.setAntiAliasing(true);
 
-//#define TEST_POLYGON_RASTERIZER
+#define TEST_POLYGON_RASTERIZER
 
 #ifdef TEST_POLYGON_RASTERIZER
 
