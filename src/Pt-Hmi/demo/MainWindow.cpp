@@ -262,6 +262,19 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
 #ifdef TEST_POLYGON_RASTERIZER
 
+    // this line begins at the same position as the next one, but is just longer
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2,
+                                     Gfx::Pen::Solid, Gfx::Pen::FlatCap));
+    imagePainter.drawLine(Gfx::PointF(1, 1), Gfx::PointF(9, 9));
+
+    // this line begins at the same position as the previous one, but is just shorter
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(32767, 65535, 0, 0), 2,
+                                     Gfx::Pen::Solid, Gfx::Pen::FlatCap));
+    imagePainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    imagePainter.drawLine(Gfx::PointF(1, 1), Gfx::PointF(6, 6));
+    imagePainter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+/*
     //
     // a polygon like a short flat capped line of width 2 from 520,520 to 578,578
     //
@@ -287,17 +300,10 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine(Gfx::PointF(520 + 40, 520), Gfx::PointF(528 + 40, 528));
     imagePainter.drawLine(Gfx::PointF(528 + 40, 520), Gfx::PointF(520 + 40, 528));
+//*/
 
 #else
 
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, 
-                                     Gfx::Pen::Solid, Gfx::Pen::FlatCap));
-
-    // this line begins at the same position as the next one, but is just longer
-    imagePainter.drawLine(Gfx::PointF(1, 1), Gfx::PointF(9, 9));
-
-    // this line begins at the same position as the previous one, but is just shorter
-    //imagePainter.drawLine(Gfx::PointF(1, 1), Gfx::PointF(6, 6));
 
     //Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
 

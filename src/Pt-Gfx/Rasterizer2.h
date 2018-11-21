@@ -372,6 +372,13 @@ class Rasterizer2
                                        const PolygonScanlines& exclusionZone,
                                        DrawLineMask& maskInOut);
 
+        void rasterPolygonBorderXWAA_F2(float x1, float y1,
+                                       float x2, float y2,
+                                       const Color& color,
+                                       Pt::int32_t minX, Pt::int32_t minY,
+                                       const PolygonScanlines& exclusionZone,
+                                       DrawLineMask& maskInOut);
+
         //
         // rects
         //

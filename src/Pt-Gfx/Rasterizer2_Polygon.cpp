@@ -514,9 +514,9 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                                     Pt::int32_t minX_, Pt::int32_t minY_,
                                     Pt::int32_t maxX_, Pt::int32_t maxY_)
 {
-    //for(std::size_t i = 0; i < pointCount; ++i) {
-    //    fprintf(stderr, "POLY: (%6.3f, %6.3f)\n", points[i].x(), points[i].y());
-    //}
+    for(std::size_t i = 0; i < pointCount; ++i) {
+        fprintf(stderr, "POLY: (%6.3f, %6.3f)\n", points[i].x(), points[i].y());
+    }
 
     std::size_t totalPointCount = pointCount;
 
@@ -616,6 +616,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
     // Raster the anti-aliased outline
 
+#if 0
+
     // Mask
     DrawLineMask mask_zero;
     DrawLineMask mask_nnp1;
@@ -646,6 +648,30 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
           points[pc1].x(), points[pc1].y(),
           points[0].x(),   points[0].y(),
           color, minX, minY_ - 1, scanlines, mask_zero );
+
+#else
+
+    // Mask
+    DrawLineMask xwaaMask;
+    memcpy(xwaaMask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    // From point N to point (N + 1), successively
+    const size_t pc1 = pointCount - 1;
+
+    for(size_t i = 0; i < pc1; ++i)
+    {
+        rasterPolygonBorderXWAA_F2(
+            points[i].x(),     points[i].y(),
+            points[i + 1].x(), points[i + 1].y(),
+            color, minX, minY_ - 1, scanlines, xwaaMask );
+    }
+
+    rasterPolygonBorderXWAA_F2(
+          points[pc1].x(), points[pc1].y(),
+          points[0].x(),   points[0].y(),
+          color, minX, minY_ - 1, scanlines, xwaaMask );
+
+#endif
 
 }
 
@@ -1005,6 +1031,209 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
         maskInOut[2].set(lx[2], ly[2]);
         maskInOut[3].set(lx[3], ly[3]);
     }
+
+    // Undefine the helper macro
+    #undef XW_FILL_PIXEL
+}
+
+// Using algorithm from: Xiaolin Wu's Line Algorithm
+//                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
+//                       Last modified on January 19, 2017
+void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
+                                            float x2, float y2,
+                                            const Color& color,
+                                            Pt::int32_t minX, Pt::int32_t minY,
+                                            const PolygonScanlines& exclusionZone,
+                                            DrawLineMask& maskInOut)
+{
+    fprintf(stderr, "XWAA: (%6.3f, %6.3f) - (%6.3f, %6.3f)\n", x1, y1, x2, y2);
+
+    // Get the mask's coordinate
+    float mx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+    float my[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+
+    for(Pt::int32_t i = 0; i < 4; ++i) {
+        mx[i] = maskInOut[i].x();
+        my[i] = maskInOut[i].y();
+    }
+
+    Pt::int32_t pCnt  = 0;
+
+    // A helper macro to fill pixel
+    #define XW_FILL_PIXEL(X, Y, A)                                                     \
+        do {                                                                           \
+            /* Clip the point */                                                       \
+            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                \
+            /* Check if we should skip drawing the pixel */                            \
+            bool skipDrawing = false;                                                  \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                                       \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                           \
+                skipDrawing = true;                                                    \
+                break;                                                                 \
+            }                                                                          \
+            if(skipDrawing || !(A)) break;                                             \
+            /* Shift-store the mask's coordinates */                                   \
+            mx[2] = mx[3]; mx[3] = X;                                                  \
+            my[2] = my[3]; my[3] = Y;                                                  \
+            if(pCnt < 2) {                                                             \
+                if(mx[pCnt] < MAXIMUM_COORD_F) mx[pCnt] = X;                           \
+                if(my[pCnt] < MAXIMUM_COORD_F) my[pCnt] = Y;                           \
+                ++pCnt;                                                                \
+            }                                                                          \
+            /* Fill the pixel */                                                       \
+            if(_isTexture || _isGradient) {                                            \
+                const Pt::int32_t bw = _brushImage->width();                           \
+                const Pt::int32_t bh = _brushImage->height();                          \
+                const Pt::int32_t dx = std::max<Pt::int32_t>(X - minX, 0);             \
+                const Pt::int32_t dy = std::max<Pt::int32_t>(Y - minY, 0);             \
+                const Pt::int32_t tx = _isGradient ? std::min(bw - 1, dx) : (dx % bw); \
+                const Pt::int32_t ty = _isGradient ? std::min(bh - 1, dy) : (dy % bh); \
+                ConstPixel srcPixel(_brushImage->view(), tx, ty);                      \
+                Pixel      dstPixel(_image->view(), X, Y);                             \
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, A);    \
+            }                                                                          \
+            else { /* Solid */                                                         \
+                Pixel pixel(_image->view(), X, Y);                                     \
+                _image->format().setPixel(pixel, color, _compositionMode, A);          \
+            }                                                                          \
+        } while(false)
+
+    // Check if the start and end coordinates are the same
+    if(x1 == x2 && y1 == y2) {
+        // Draw the pixel
+        // TODO: How if the coordinates are not round???
+        XW_FILL_PIXEL( lround(x1), lround(y1), 255);
+        // Output the new mask
+        maskInOut[0].set(mx[0], my[0]);
+        maskInOut[1].set(mx[0], my[0]);
+        maskInOut[2].set(mx[0], my[0]);
+        maskInOut[3].set(mx[0], my[0]);
+        // Exit here
+        return;
+    }
+
+    // Copy the coordinates
+    float fx1 = x1;
+    float fy1 = y1;
+    float fx2 = x2;
+    float fy2 = y2;
+
+    // Swap the values as needed
+    const float deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+    const float deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+    const bool  steep  = deltaY > deltaX;
+
+    if(steep) {
+        std::swap(fx1, fy1);
+        std::swap(fx2, fy2);
+    }
+
+    const bool swapDir = (fx1 > fx2);
+
+    if(swapDir) {
+        std::swap(fx1, fx2);
+        std::swap(fy1, fy2);
+    }
+
+    // Handle the gradient, starting point, and ending point
+    const float       grad  = (fy2 - fy1) / (fx2 - fx1);
+    const Pt::int32_t xpxl1 = lround(fx1);
+    const Pt::int32_t xpxl2 = lround(fx2);
+    const float       ypxl  = fy1 + grad * (xpxl1 - fx1);
+
+    //fprintf(stderr, "FMTO: (%3d, %3d) %6.3f\n", xpxl1, xpxl2, ypxl);
+
+    // Draw the pixels
+    Pt::int32_t from  = xpxl1;
+    Pt::int32_t to    = xpxl2;
+    float       ypxli = ypxl;
+
+    if(steep) {
+//*
+        // Draw the pixels
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            // Calculate the alphas and coordinates
+            const Pt::int32_t fypxli = floor(ypxli);
+            const Pt::int32_t fpart  = Pt::lround( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t rfpart = 255 - fpart;
+            const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
+            const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
+            const Pt::int32_t x1 = fypxli;
+            const Pt::int32_t x2 = fypxli + 1;
+            const Pt::int32_t y  = i;
+            ypxli += grad;
+            // Draw the pixels as needed
+            bool skipPixel1 = false;
+            bool skipPixel2 = false;
+            if(!exclusionZone.empty()) {
+                //std::cout << "A: " << y - minY << " " << exclusionZone.size() << std::endl;
+                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[y - minY].begin(); it != exclusionZone[y - minY].end(); ++it) {
+                    if(x1 >= it->from && x1 <= it->to) skipPixel1 = true;
+                    if(x2 >= it->from && x2 <= it->to) skipPixel2 = true;
+                    if(skipPixel1 && skipPixel2) break;
+                }
+            }
+            if(!skipPixel1) {
+                fprintf(stderr, "PIXS: (%3d, %3d) %3d\n", x1, y, a1);
+                XW_FILL_PIXEL(x1, y, a1);
+            }
+            if(!skipPixel2) {
+                fprintf(stderr, "PIXS: (%3d, %3d) %3d\n", x2, y, a2);
+                XW_FILL_PIXEL(x2, y, a2);
+            }
+        }
+//*/
+    }
+    else {
+//*
+        // Draw the pixels
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            // Calculate the alphas and coordinates
+            const Pt::int32_t fypxli = floor(ypxli);
+            const Pt::int32_t fpart  = Pt::lround( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t rfpart = 255 - fpart;
+            const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
+            const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
+            const Pt::int32_t x  = i;
+            const Pt::int32_t y1 = ypxli;
+            const Pt::int32_t y2 = ypxli + 1;
+            ypxli += grad;
+            // Draw the pixels as needed
+            bool skipPixel = false;
+            if(!exclusionZone.empty()) {
+                //std::cout << "B: " << y1 - minY << " " << exclusionZone.size() << std::endl;
+                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[y1 - minY].begin(); it != exclusionZone[y1 - minY].end(); ++it) {
+                    if (x <= it->from || x >= it->to) continue;
+                    skipPixel = true;
+                    break;
+                }
+            }
+            if(!skipPixel) {
+                fprintf(stderr, "PIXN: (%3d, %3d) %3d\n", x, y1, a1);
+                XW_FILL_PIXEL(x, y1, a1);
+            }
+            skipPixel = false;
+            if(!exclusionZone.empty()) {
+                //std::cout << "C: " << y2 - minY << " " << exclusionZone.size() << std::endl;
+                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[y2 - minY].begin(); it != exclusionZone[y2 - minY].end(); ++it) {
+                    if (x <= it->from || x >= it->to) continue;
+                    skipPixel = true;
+                    break;
+                }
+            }
+            if(!skipPixel) {
+                fprintf(stderr, "PIXN: (%3d, %3d) %3d\n", x, y2, a2);
+                XW_FILL_PIXEL(x, y2, a2);
+            }
+        }
+//*/
+    }
+
+    // Output the new mask
+    maskInOut[0].set(mx[0], my[0]);
+    maskInOut[1].set(mx[1], my[1]);
+    maskInOut[2].set(mx[2], my[2]);
+    maskInOut[3].set(mx[3], my[3]);
 
     // Undefine the helper macro
     #undef XW_FILL_PIXEL
