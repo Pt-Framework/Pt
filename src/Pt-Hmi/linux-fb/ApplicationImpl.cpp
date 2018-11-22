@@ -33,6 +33,8 @@
 
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
+#include <Pt/Gfx/Transform.h>
+#include <Pt/System/Logger.h>
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/Clock.h>
 #include <Pt/DateTime.h>
@@ -47,6 +49,8 @@
 #include <sys/mman.h>
 #include <sys/kd.h>
 
+PT_LOG_DEFINE("Pt.Hmi.Application")
+
 namespace Pt {
 
 namespace Hmi {
@@ -59,7 +63,8 @@ ApplicationImpl::ApplicationImpl()
     showConsole(false);
     
     std::string keyboard = Pt::System::Application::getEnvVar("PT_KEYBOARD_DEVICE");
-    openInputDevice(keyboard);
+    if( ! keyboard.empty() )
+      openInputDevice(keyboard);
 
     std::string mouse = Pt::System::Application::getEnvVar("PT_MOUSE_DEVICE");
     std::string mouseTransform = Pt::System::Application::getEnvVar("PT_MOUSE_TRANSFORM");
@@ -81,10 +86,18 @@ ApplicationImpl::ApplicationImpl()
     }
 
     std::string touch = Pt::System::Application::getEnvVar("PT_TOUCH_DEVICE");
-    openInputDevice(touch);
+    if( ! touch.empty() )
+      openInputDevice(touch);
 
-    // TODO: apply transformation in onTouchEvent()
     std::string touchTransform = Pt::System::Application::getEnvVar("PT_TOUCH_TRANSFORM");
+    if( ! touchTransform.empty() )
+    {
+      std::istringstream iss(touchTransform);
+      float m11, m12, m21, m22, dx, dy;
+      iss >> m11 >> m12 >> dx >> m21 >> m22 >> dy;
+
+      _touchTransform.set(m11, m12, m21, m22, dx, dy);
+    }
 }
 
 
@@ -115,11 +128,11 @@ void ApplicationImpl::openInputDevice(const std::string& deviceName)
         device->eventReady() += Pt::slot(*this, &ApplicationImpl::onTouchEvent);
 
         _inputDevices.push_back(device);
-        std::clog << "using: " << deviceName << std::endl;
+        std::clog << "using input device: " << deviceName << std::endl;
     }
     catch (const std::exception& ex)
     {
-        std::clog << "skipping device: " << deviceName<< std::endl;
+        std::clog << "skipping input device: " << deviceName<< std::endl;
     }
 }
 
@@ -234,51 +247,20 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 }
 
 
-//Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
-//{
-//    const Gfx::SizeF& screenSize = size();
-//    const double touchWidth  = 800;
-//    const double touchHeight = 480;
-//
-//    Gfx::PointF pos = posRaw;
-//
-//    switch( _frameBuffer.rotation() )
-//    {
-//        case FrameBuffer::Rotate0:
-//        {
-//            double scaleX =  screenSize.width() / touchWidth;
-//            double scaleY =  screenSize.height() / touchHeight;
-//            pos.setX( std::floor(scaleX * posRaw.x()) );
-//            pos.setY( std::floor(scaleY * posRaw.y()) );
-//            break;
-//        }
-//
-//        case FrameBuffer::Rotate90:
-//        {
-//              double scaleX =  screenSize.width() / touchHeight;
-//              double scaleY =  screenSize.height() / touchWidth;
-//              pos.setX( std::floor((touchHeight - posRaw.y()) * scaleX) );
-//              pos.setY( std::floor(posRaw.x() * scaleY) );
-//              break;
-//        }
-//    }
-//
-//    return pos;
-//}
-
-
 void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
 {
     _lastActivityTime = Pt::System::Clock::getSystemTime();
+    
+    Pt::Gfx::PointF pos = _touchTransform * ev.position();
 
     TouchEvent tev = ev;
     tev.setId( Application::instance().screen().vid() );
+    tev.setPosition(pos);
 
-    // TODO: apply transformation from PT_TOUCH_TRANSFORM
-    
-    //ScreenImpl* screen = Application::instance().screen().impl();
-    //Gfx::PointF pos = screen->screenPosition( ev.position() );
-    //tev.setPosition(pos);
+    //std::clog << "raw touch: " << ev.position().x() << ", " 
+    //                           << ev.position().y() << std::endl;
+    //std::clog << "transformed touch: " << pos.x() << ", " 
+    //                                   << pos.y() << std::endl;
 
     Application::instance().processTouchEvent(tev);
 }

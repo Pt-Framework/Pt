@@ -71,18 +71,22 @@ FrameBuffer::FrameBuffer()
 , _lineSize(0)
 , _pixelSize(0)
 {           
-    _fd = open ("/dev/fb0", O_RDWR);
+    std::string fbdev = Pt::System::Application::getEnvVar("PT_FRAMEBUFFER_DEVICE");
+    if( fbdev.empty() )
+      fbdev = "/dev/fb0";
+
+    _fd = open(fbdev.c_str(), O_RDWR);
     if(_fd < 0)
-        throw std::runtime_error("Could not open framebuffer device");
+        throw std::runtime_error("invalid framebuffer device");
 
     if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
         throw std::runtime_error("FBIOGET_VSCREENINFO failed");
 
-    if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
+    if( 0 > ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) )
         throw std::runtime_error("FBIOGET_FSCREENINFO failed");
 
     _bufferSize = _fixedInfo.line_length * _screenInfo.yres;
-    _buffer     = (char*) mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
+    _buffer     = (char*) mmap(NULL, _bufferSize, PROT_READ|PROT_WRITE, MAP_SHARED, _fd, 0);
 
     _lineSize = _fixedInfo.line_length;
 
@@ -106,6 +110,7 @@ FrameBuffer::FrameBuffer()
 
     std::clog << "Screen info: " << _screenInfo.xres << "x" << _screenInfo.yres
               << ", pixel size: " << _pixelSize << ", stride: " << strideSize()
+              << ", depth: " << _screenInfo.bits_per_pixel
               << ", buffer size: " << _bufferSize << std::endl;
 
     int rotval = 0;

@@ -35,6 +35,7 @@
 #include "FrameBuffer.h"
 
 #include <Pt/Hmi/Visual.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Timespan.h>
 
@@ -94,7 +95,8 @@ class ApplicationImpl : public Pt::System::MainLoop
     private:
         FrameBuffer                  _frameBuffer; 
         std::vector<InputDevice*>    _inputDevices;
-        MouseDevice*                 _mouseDevice;      
+        MouseDevice*                 _mouseDevice;
+        Gfx::Transform               _touchTransform;      
         Cursor                       _cursor;
         Pt::DateTime                 _lastActivityTime;
         MouseEvent                   _lastMouse;
