@@ -177,7 +177,7 @@ MainWindow::MainWindow()
     _scrollView.setContent(_scrollContainer);
 
     _child2.setContent(&_scrollView);
-    ////_child2.show(true);  // SHOW DEMO WINDOW 2
+    _child2.show(true);  // SHOW DEMO WINDOW 2
 
     add( _child1 );
 
@@ -206,7 +206,7 @@ MainWindow::MainWindow()
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30, 620));
     _child1.resize( Gfx::SizeF(300, 600) );
-    ////_child1.show(true); // SHOW DEMO WINDOW 1
+    //_child1.show(true); // SHOW DEMO WINDOW 1
 
     // context menu
     _menu.setName("All Music");

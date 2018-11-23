@@ -1099,6 +1099,15 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                 }                                                                      \
             }                                                                          \
             if(skipDrawing || !(A)) break;                                             \
+            /* Update the output mask's coordinates * /                                \
+            if(swapDir) {                                                              \
+                lx[0] = lx[1]; lx[1] = X;                                              \
+                ly[0] = ly[1]; ly[1] = Y;                                              \
+            }                                                                          \
+            else {                                                                     \
+                lx[2] = lx[3]; lx[3] = X;                                              \
+                ly[2] = ly[3]; ly[3] = Y;                                              \
+            }*/                                                                        \
             /* Fill the pixel */                                                       \
             if(_isTexture || _isGradient) {                                            \
                 const Pt::int32_t bw = _brushImage->width();                           \
