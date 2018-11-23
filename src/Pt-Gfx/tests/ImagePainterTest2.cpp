@@ -29,6 +29,8 @@
 // svn propset svn:mime-type text/plain etc/images/*.svg
 //
 
+//#define WITH_EXPERIMENTAL_GFX
+
 #include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/BlockScale.h>
 #include <Pt/Gfx/ImagePainter2.h>
@@ -62,39 +64,39 @@
 using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
-#define DO_TEST_DRAW    1
+#define DO_TEST_DRAW    0
 #define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         1
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
-#define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           1 // (including bezier)
+#define TEST_DRAW_PATTERNED_LINE                1 // (including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
 #define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
 
-#define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
-#define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
+#define TEST_DRAW_OMPF_RECTANGLES               1 // (including thick and filled)
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled)
 
-#define TEST_DRAW_ELLIPSES_ARCS                 0
-#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
+#define TEST_DRAW_ELLIPSES_ARCS                 1
+#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     1
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      1
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       1
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
-#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
-#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
+#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
+#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 1
+#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  1
 
-#define TEST_DRAW_EXTRA                         0
+#define TEST_DRAW_EXTRA                         1
 
-#define TEST_DRAW_PATH                          0 // (including thick and filled and rectangle clipping area)
-#define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
+#define TEST_DRAW_PATH                          1 // (including thick and filled and rectangle clipping area)
+#define TEST_DRAW_PATH_CLIPPING                 1 // (including path-based text)
 
-#define TEST_IMAGE_OPERATION                    0
+#define TEST_IMAGE_OPERATION                    1
 
 // Detailed-test benchmark settings for Pt-Gfx
 #define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing)
@@ -106,7 +108,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
 #define BENCHMARK_TEXT                      0
-#define BENCHMARK_ROTATED_TEXT              1 // XXX
+#define BENCHMARK_ROTATED_TEXT              0 // XXX
 
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
@@ -126,9 +128,9 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      0
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
+#define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
 
 #define BENCHMARK_SOLID_FILLED_ELLIPSE      0
 #define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
@@ -138,7 +140,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      1 // (including thick and filled and rectangle clipping area)
+#define BENCHMARK_PATH                      0 // (including thick and filled and rectangle clipping area)
 #define BENCHMARK_IMAGE_OPERATION           0
 
 // Configurations and objects
@@ -293,8 +295,11 @@ int main(int argc, char* args[])
 
     buildDir = args[0];
     buildDir = buildDir.dirName();
+    std::cerr << buildDir.toLocal() << std::endl;
     if(buildDir.baseName() != "build")
       buildDir = buildDir.dirName();
+
+    buildDir = "../";
 
     // Determine fonts dir
     FONT_DIR = buildDir;
