@@ -1059,7 +1059,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     Pt::int32_t pCnt  = 0;
 
     // A helper macro to fill pixel
-    #define  PLOT(X, Y, A)                                                             \
+    #define  XW_FILL_PIXEL(X, Y, A)                                                    \
         do {                                                                           \
             /* Clip the point */                                                       \
             if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                \
@@ -1103,7 +1103,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     float fx1 = x2;
     float fy1 = y2;
 
-    // Swap the values as needed
+    // Swap the coordinates as needed
     const bool steep = ( fabs(fy1 - fy0) > fabs(fx1 - fx0) );
 
     if(steep) {
@@ -1139,8 +1139,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         const Pt::int32_t ix1 = ix0 + 1;
         const Pt::int32_t iy  = xpxl1;
         // Draw the pixels as needed
-        PLOT(ix0, iy, rfpart * xgap * 255.0f);
-        PLOT(ix1, iy,  fpart * xgap * 255.0f);
+        XW_FILL_PIXEL(ix0, iy, rfpart * xgap * 255.0f);
+        XW_FILL_PIXEL(ix1, iy,  fpart * xgap * 255.0f);
     }
     else {
         // Calculate the alphas and coordinates
@@ -1150,12 +1150,9 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         const Pt::int32_t iy0 = ypxl1;
         const Pt::int32_t iy1 = iy0 + 1;
         // Draw the pixels as needed
-        PLOT(ix, iy0, rfpart * xgap * 255.0f);
-        PLOT(ix, iy1,  fpart * xgap * 255.0f);
+        XW_FILL_PIXEL(ix, iy0, rfpart * xgap * 255.0f);
+        XW_FILL_PIXEL(ix, iy1,  fpart * xgap * 255.0f);
     }
-
-    //#define  FPART(X) ( yend - floor( yend ) )
-    //#define RFPART(X) ( 1.0f - FPART(yend) )
 
     float intery = yend + gradient; // first y-intersection for the main loop
 
@@ -1175,8 +1172,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         const Pt::int32_t ix1 = ix0 + 1;
         const Pt::int32_t iy  = xpxl2;
         // Draw the pixels as needed
-        PLOT(ix0, iy, rfpart * xgap * 255.0f);
-        PLOT(ix1, iy,  fpart * xgap * 255.0f);
+        XW_FILL_PIXEL(ix0, iy, rfpart * xgap * 255.0f);
+        XW_FILL_PIXEL(ix1, iy,  fpart * xgap * 255.0f);
     }
     else {
         // Calculate the alphas and coordinates
@@ -1186,8 +1183,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         const Pt::int32_t iy0 = ypxl2;
         const Pt::int32_t iy1 = iy0 + 1;
         // Draw the pixels as needed
-        PLOT(ix, iy0, rfpart * xgap * 255.0f);
-        PLOT(ix, iy1,  fpart * xgap * 255.0f);
+        XW_FILL_PIXEL(ix, iy0, rfpart * xgap * 255.0f);
+        XW_FILL_PIXEL(ix, iy1,  fpart * xgap * 255.0f);
     }
 
     // Main loop
@@ -1201,8 +1198,18 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             const Pt::int32_t iy  = x;
             intery = intery + gradient;
             // Draw the pixels as needed
-            PLOT(ix0, iy, rfpart);
-            PLOT(ix1, iy,  fpart);
+            // Draw the pixels as needed
+            bool skipPixel0 = false;
+            bool skipPixel1 = false;
+            if(!exclusionZone.empty()) {
+                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy - minY].begin(); it != exclusionZone[iy - minY].end(); ++it) {
+                    if(ix0 >= it->from && ix0 <= it->to) skipPixel0 = true;
+                    if(ix1 >= it->from && ix1 <= it->to) skipPixel1 = true;
+                    if(skipPixel0 && skipPixel1) break;
+                }
+            }
+            if(!skipPixel0) XW_FILL_PIXEL(ix0, iy, rfpart);
+            if(!skipPixel1) XW_FILL_PIXEL(ix1, iy,  fpart);
         }
     }
     else {
@@ -1215,10 +1222,36 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             const Pt::int32_t iy1 = iy0 + 1;
             intery = intery + gradient;
             // Draw the pixels as needed
-            PLOT(ix, iy0, rfpart);
-            PLOT(ix, iy1,  fpart);
+            // Draw the pixels as needed
+            bool skipPixel = false;
+            if(!exclusionZone.empty()) {
+                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy0 - minY].begin(); it != exclusionZone[iy0 - minY].end(); ++it) {
+                    if(ix <= it->from || ix >= it->to) continue;
+                    skipPixel = true;
+                    break;
+                }
+            }
+            if(!skipPixel) XW_FILL_PIXEL(ix, iy0, rfpart);
+            skipPixel = false;
+            if(!exclusionZone.empty()) {
+                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy1 - minY].begin(); it != exclusionZone[iy1 - minY].end(); ++it) {
+                    if (ix <= it->from || ix >= it->to) continue;
+                    skipPixel = true;
+                    break;
+                }
+            }
+            if(!skipPixel) XW_FILL_PIXEL(ix, iy1, fpart);
         }
     }
+
+    // Output the new mask
+    maskInOut[0].set(mx[0], my[0]);
+    maskInOut[1].set(mx[1], my[1]);
+    maskInOut[2].set(mx[2], my[2]);
+    maskInOut[3].set(mx[3], my[3]);
+
+    // Undefine the helper macro
+    #undef XW_FILL_PIXEL
 
 #endif
 
