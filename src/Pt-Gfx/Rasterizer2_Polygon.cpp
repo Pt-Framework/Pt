@@ -1058,10 +1058,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
 
     Pt::int32_t pCnt  = 0;
 
-    // Helper macros
-    #define  FPART(X) ( (X) - floor( (X) ) )
-    #define RFPART(X) ( 1.0f - FPART(X) )
-
+    // A helper macro to fill pixel
     #define  PLOT(X, Y, A)                                                             \
         do {                                                                           \
             /* Clip the point */                                                       \
@@ -1126,22 +1123,38 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     const float dy       = fy1 - fy0;
     const float gradient = (dx == 0.0f) ? 1.0f : (dy / dx);
 
+    #define  FPART(X) ( (X) - floor( (X) ) )
+    #define RFPART(X) ( 1.0f - FPART(X) )
+
+
     // Handle the first endpoint
     Pt::int32_t xend = lround(fx0);
     float       yend = fy0 + gradient * (xend - fx0);
-    float       xgap = RFPART(fx0 + 0.5f);
+    float       xgap = 1.0f - ( fx0 - (Pt::int32_t) fx0 );
+
+
 
     const Pt::int32_t xpxl1 = xend; // This will be used in the main loop
     const Pt::int32_t ypxl1 = floor(yend);
 
     if(steep) {
-        PLOT(ypxl1,     xpxl1, RFPART(yend) * xgap * 255.0f);
-        PLOT(ypxl1 + 1, xpxl1,  FPART(yend) * xgap * 255.0f);
+        // Calculate the alphas and coordinates
+        const float fpart  = FPART(yend) * xgap;
+        const float rfpart = RFPART(yend) * xgap;
+        const Pt::int32_t ix0 = ypxl1;
+        const Pt::int32_t ix1 = ix0 + 1;
+        const Pt::int32_t iy  = xpxl1;
+        // Draw the pixels as needed
+        PLOT(ix0, iy, rfpart * 255.0f);
+        PLOT(ix1, iy,  fpart * 255.0f);
     }
     else {
         PLOT(xpxl1, ypxl1,     RFPART(yend) * xgap * 255.0f);
         PLOT(xpxl1, ypxl1 + 1,  FPART(yend) * xgap * 255.0f);
     }
+
+    //#define  FPART(X) ( yend - floor( yend ) )
+    //#define RFPART(X) ( 1.0f - FPART(yend) )
 
     float intery = yend + gradient; // first y-intersection for the main loop
 
@@ -1166,7 +1179,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     if(steep) {
         for(Pt::int32_t x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
             // Calculate the alphas and coordinates
-            const Pt::int32_t fpart  = (intery - floor(intery)) * 255.0f;
+            const Pt::int32_t fpart  = ( intery - (Pt::int32_t) intery ) * 255.0f;
             const Pt::int32_t rfpart = 255 - fpart;
             const Pt::int32_t ix0 = floor(intery);
             const Pt::int32_t ix1 = ix0 + 1;
@@ -1180,7 +1193,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     else {
         for(Pt::int32_t x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
             // Calculate the alphas and coordinates
-            const Pt::int32_t fpart  = (intery - floor(intery)) * 255.0f;
+            const Pt::int32_t fpart  = ( intery - (Pt::int32_t) intery ) * 255.0f;
             const Pt::int32_t rfpart = 255 - fpart;
             const Pt::int32_t ix  = x;
             const Pt::int32_t iy0 = floor(intery);
