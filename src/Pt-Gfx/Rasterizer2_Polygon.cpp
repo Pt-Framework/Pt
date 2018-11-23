@@ -1058,6 +1058,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                                             const PolygonScanlines& exclusionZone,
                                             DrawLineMask& maskInOut)
 {
+    // NOTE: This function seems does not need to use the Rasterizer2::XWAA_WFILTER[]
+
     // Get the mask's coordinate
     float mx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
     float my[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
@@ -1159,8 +1161,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                 if(skipPixel0 && skipPixel1) break;
             }
         }
-        if(!skipPixel0) XW_FILL_PIXEL(ix0, iy, rfpart * xgap * 255.0f);
-        if(!skipPixel1) XW_FILL_PIXEL(ix1, iy,  fpart * xgap * 255.0f);
+        if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap * 255.0f));
+        if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap * 255.0f));
     }
     else {
         // Calculate the alphas and coordinates
@@ -1178,7 +1180,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                 break;
             }
         }
-        if(!skipPixel) XW_FILL_PIXEL(ix, iy0, rfpart * xgap * 255.0f);
+        if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap * 255.0f) );
         skipPixel = false;
         if(!exclusionZone.empty()) {
             for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy1 - minY].begin(); it != exclusionZone[iy1 - minY].end(); ++it) {
@@ -1187,7 +1189,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                 break;
             }
         }
-        if(!skipPixel) XW_FILL_PIXEL(ix, iy1, fpart * xgap * 255.0f);
+        if(!skipPixel) XW_FILL_PIXEL( ix, iy1, (Pt::int32_t) (fpart * xgap * 255.0f) );
     }
 
     // Calculate the first y-intersection for the main loop
@@ -1218,8 +1220,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                 if(skipPixel0 && skipPixel1) break;
             }
         }
-        if(!skipPixel0) XW_FILL_PIXEL(ix0, iy, rfpart * xgap * 255.0f);
-        if(!skipPixel1) XW_FILL_PIXEL(ix1, iy,  fpart * xgap * 255.0f);
+        if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap * 255.0f) );
+        if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap * 255.0f) );
     }
     else {
         // Calculate the alphas and coordinates
@@ -1237,7 +1239,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                 break;
             }
         }
-        if(!skipPixel) XW_FILL_PIXEL(ix, iy0, rfpart * xgap * 255.0f);
+        if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap * 255.0f) );
         skipPixel = false;
         if(!exclusionZone.empty()) {
             for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy1 - minY].begin(); it != exclusionZone[iy1 - minY].end(); ++it) {
@@ -1246,7 +1248,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                 break;
             }
         }
-        if(!skipPixel) XW_FILL_PIXEL(ix, iy1, fpart * xgap * 255.0f);
+        if(!skipPixel) XW_FILL_PIXEL( ix, iy1, (Pt::int32_t) (fpart * xgap * 255.0f) );
     }
 
     // Main loop
