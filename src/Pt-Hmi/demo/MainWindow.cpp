@@ -320,6 +320,8 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(300, 450),
                            Pt::Gfx::PointF(400, 550) );
 
+    Gfx::Pen penb( Gfx::Color::fromRgb8(255, 255, 255), 1);
+    imagePainter.setPen(penb);
     imagePainter.drawLine( Pt::Gfx::PointF(250, 450),
                            Pt::Gfx::PointF(380, 550) );
 
