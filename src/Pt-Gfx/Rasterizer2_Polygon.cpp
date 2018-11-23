@@ -1051,20 +1051,18 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     float mx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
     float my[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
 
-    //for(Pt::int32_t i = 0; i < 4; ++i) {
-    //    mx[i] = maskInOut[i].x();
-    //    my[i] = maskInOut[i].y();
-    //}
+    for(Pt::int32_t i = 0; i < 4; ++i) {
+        mx[i] = maskInOut[i].x();
+        my[i] = maskInOut[i].y();
+    }
 
     Pt::int32_t pCnt  = 0;
 
     // Helper macros
-    #define  IPART(X) floor( (X) )
-    #define  ROUND(X) floor( (X) + 0.5f )
     #define  FPART(X) ( (X) - floor( (X) ) )
     #define RFPART(X) ( 1.0f - FPART(X) )
 
-    #define  APLOT(X, Y, A)                                                             \
+    #define  PLOT(X, Y, A)                                                             \
         do {                                                                           \
             /* Clip the point */                                                       \
             if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                \
@@ -1102,12 +1100,6 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             }                                                                          \
         } while(false)
 
-    #define  PLOT(X, Y, A)                                                             \
-        do {                                                                           \
-                Pixel pixel(_image->view(), X, Y);                                     \
-                _image->format().setPixel(pixel, color, _compositionMode, A);          \
-        } while(false)
-
     // Copy the coordinates
     float fx0 = x1;
     float fy0 = y1;
@@ -1130,17 +1122,17 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     }
 
     // Calculate the gradient
-    float dx       = fx1 - fx0;
-    float dy       = fy1 - fy0;
-    float gradient = (dx == 0.0f) ? 1.0f : (dy / dx);
+    const float dx       = fx1 - fx0;
+    const float dy       = fy1 - fy0;
+    const float gradient = (dx == 0.0f) ? 1.0f : (dy / dx);
 
     // Handle the first endpoint
-    float xend = ROUND(fx0);
-    float yend = fy0 + gradient * (xend - fx0);
-    float xgap = RFPART(fx0 + 0.5f);
+    Pt::int32_t xend = lround(fx0);
+    float       yend = fy0 + gradient * (xend - fx0);
+    float       xgap = RFPART(fx0 + 0.5f);
 
-    float xpxl1 = xend; // This will be used in the main loop
-    float ypxl1 = IPART(yend);
+    const Pt::int32_t xpxl1 = xend; // This will be used in the main loop
+    const Pt::int32_t ypxl1 = floor(yend);
 
     if(steep) {
         PLOT(ypxl1,     xpxl1, RFPART(yend) * xgap * 255.0f);
@@ -1154,11 +1146,12 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     float intery = yend + gradient; // first y-intersection for the main loop
 
     // Handle the second endpoint
-    xend = ROUND(fx1);
+    xend = lround(fx1);
     yend = fy1 + gradient * (xend - fx1);
     xgap = FPART(fx1 + 0.5f);
-    float xpxl2 = xend; // This will be used in the main loop
-    float ypxl2 = IPART(yend);
+
+    const Pt::int32_t xpxl2 = xend; // This will be used in the main loop
+    const Pt::int32_t ypxl2 = floor(yend);
 
     if(steep) {
         PLOT(ypxl2,     xpxl2, RFPART(yend) * xgap * 255.0f);
@@ -1171,17 +1164,31 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
 
     // Main loop
     if(steep) {
-        for(float x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
-            PLOT(IPART(intery),     x, RFPART(intery) * 255.0f);
-            PLOT(IPART(intery) + 1, x,  FPART(intery) * 255.0f);
+        for(Pt::int32_t x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
+            // Calculate the alphas and coordinates
+            const Pt::int32_t fpart  = (intery - floor(intery)) * 255.0f;
+            const Pt::int32_t rfpart = 255 - fpart;
+            const Pt::int32_t ix0 = floor(intery);
+            const Pt::int32_t ix1 = ix0 + 1;
+            const Pt::int32_t iy  = x;
             intery = intery + gradient;
+            // Draw the pixels as needed
+            PLOT(ix0, iy, rfpart);
+            PLOT(ix1, iy,  fpart);
         }
     }
     else {
-        for(float x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
-            PLOT(x, IPART(intery),     RFPART(intery) * 255.0f);
-            PLOT(x, IPART(intery) + 1,  FPART(intery) * 255.0f);
+        for(Pt::int32_t x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
+            // Calculate the alphas and coordinates
+            const Pt::int32_t fpart  = (intery - floor(intery)) * 255.0f;
+            const Pt::int32_t rfpart = 255 - fpart;
+            const Pt::int32_t ix  = x;
+            const Pt::int32_t iy0 = floor(intery);
+            const Pt::int32_t iy1 = iy0 + 1;
             intery = intery + gradient;
+            // Draw the pixels as needed
+            PLOT(ix, iy0, rfpart);
+            PLOT(ix, iy1,  fpart);
         }
     }
 
@@ -1385,3 +1392,144 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
 } // namespace
 
 } // namespace
+
+
+#if 0
+    // Get the mask's coordinate
+    float mx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+    float my[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+
+    //for(Pt::int32_t i = 0; i < 4; ++i) {
+    //    mx[i] = maskInOut[i].x();
+    //    my[i] = maskInOut[i].y();
+    //}
+
+    Pt::int32_t pCnt  = 0;
+
+    // Helper macros
+    #define  IPART(X) floor( (X) )
+    #define  ROUND(X) floor( (X) + 0.5f )
+    #define  FPART(X) ( (X) - floor( (X) ) )
+    #define RFPART(X) ( 1.0f - FPART(X) )
+
+    #define  APLOT(X, Y, A)                                                             \
+        do {                                                                           \
+            /* Clip the point */                                                       \
+            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                \
+            /* Check if we should skip drawing the pixel */                            \
+            bool skipDrawing = false;                                                  \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                                       \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                           \
+                skipDrawing = true;                                                    \
+                break;                                                                 \
+            }                                                                          \
+            if(skipDrawing || !(A)) break;                                             \
+            /* Shift-store the mask's coordinates */                                   \
+            mx[2] = mx[3]; mx[3] = X;                                                  \
+            my[2] = my[3]; my[3] = Y;                                                  \
+            if(pCnt < 2) {                                                             \
+                if(mx[pCnt] == MAXIMUM_COORD_F) mx[pCnt] = X;                          \
+                if(my[pCnt] == MAXIMUM_COORD_F) my[pCnt] = Y;                          \
+                ++pCnt;                                                                \
+            }                                                                          \
+            /* Fill the pixel */                                                       \
+            if(_isTexture || _isGradient) {                                            \
+                const Pt::int32_t bw = _brushImage->width();                           \
+                const Pt::int32_t bh = _brushImage->height();                          \
+                const Pt::int32_t dx = std::max<Pt::int32_t>(X - minX, 0);             \
+                const Pt::int32_t dy = std::max<Pt::int32_t>(Y - minY, 0);             \
+                const Pt::int32_t tx = _isGradient ? std::min(bw - 1, dx) : (dx % bw); \
+                const Pt::int32_t ty = _isGradient ? std::min(bh - 1, dy) : (dy % bh); \
+                ConstPixel srcPixel(_brushImage->view(), tx, ty);                      \
+                Pixel      dstPixel(_image->view(), X, Y);                             \
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, A);    \
+            }                                                                          \
+            else { /* Solid */                                                         \
+                Pixel pixel(_image->view(), X, Y);                                     \
+                _image->format().setPixel(pixel, color, _compositionMode, A);          \
+            }                                                                          \
+        } while(false)
+
+    #define  PLOT(X, Y, A)                                                             \
+        do {                                                                           \
+                Pixel pixel(_image->view(), X, Y);                                     \
+                _image->format().setPixel(pixel, color, _compositionMode, A);          \
+        } while(false)
+
+    // Copy the coordinates
+    float fx0 = x1;
+    float fy0 = y1;
+    float fx1 = x2;
+    float fy1 = y2;
+
+    // Swap the values as needed
+    const bool steep = ( fabs(fy1 - fy0) > fabs(fx1 - fx0) );
+
+    if(steep) {
+        std::swap(fx0, fy0);
+        std::swap(fx1, fy1);
+    }
+
+    const bool swapDir = (fx0 > fx1);
+
+    if(swapDir) {
+        std::swap(fx0, fx1);
+        std::swap(fy0, fy1);
+    }
+
+    // Calculate the gradient
+    float dx       = fx1 - fx0;
+    float dy       = fy1 - fy0;
+    float gradient = (dx == 0.0f) ? 1.0f : (dy / dx);
+
+    // Handle the first endpoint
+    float xend = ROUND(fx0);
+    float yend = fy0 + gradient * (xend - fx0);
+    float xgap = RFPART(fx0 + 0.5f);
+
+    float xpxl1 = xend; // This will be used in the main loop
+    float ypxl1 = IPART(yend);
+
+    if(steep) {
+        PLOT(ypxl1,     xpxl1, RFPART(yend) * xgap * 255.0f);
+        PLOT(ypxl1 + 1, xpxl1,  FPART(yend) * xgap * 255.0f);
+    }
+    else {
+        PLOT(xpxl1, ypxl1,     RFPART(yend) * xgap * 255.0f);
+        PLOT(xpxl1, ypxl1 + 1,  FPART(yend) * xgap * 255.0f);
+    }
+
+    float intery = yend + gradient; // first y-intersection for the main loop
+
+    // Handle the second endpoint
+    xend = ROUND(fx1);
+    yend = fy1 + gradient * (xend - fx1);
+    xgap = FPART(fx1 + 0.5f);
+    float xpxl2 = xend; // This will be used in the main loop
+    float ypxl2 = IPART(yend);
+
+    if(steep) {
+        PLOT(ypxl2,     xpxl2, RFPART(yend) * xgap * 255.0f);
+        PLOT(ypxl2 + 1, xpxl2,  FPART(yend) * xgap * 255.0f);
+    }
+    else {
+        PLOT(xpxl2, ypxl2,    RFPART(yend) * xgap * 255.0f);
+        PLOT(xpxl2, ypxl2 + 1, FPART(yend) * xgap * 255.0f);
+    }
+
+    // Main loop
+    if(steep) {
+        for(float x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
+            PLOT(IPART(intery),     x, RFPART(intery) * 255.0f);
+            PLOT(IPART(intery) + 1, x,  FPART(intery) * 255.0f);
+            intery = intery + gradient;
+        }
+    }
+    else {
+        for(float x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
+            PLOT(x, IPART(intery),     RFPART(intery) * 255.0f);
+            PLOT(x, IPART(intery) + 1,  FPART(intery) * 255.0f);
+            intery = intery + gradient;
+        }
+    }
+#endif
