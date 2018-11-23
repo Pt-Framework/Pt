@@ -1123,34 +1123,35 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     const float dy       = fy1 - fy0;
     const float gradient = (dx == 0.0f) ? 1.0f : (dy / dx);
 
-    #define  FPART(X) ( (X) - floor( (X) ) )
-    #define RFPART(X) ( 1.0f - FPART(X) )
-
-
     // Handle the first endpoint
     Pt::int32_t xend = lround(fx0);
     float       yend = fy0 + gradient * (xend - fx0);
-    float       xgap = 1.0f - ( fx0 - (Pt::int32_t) fx0 );
-
-
+    float       xgap = 1.0f - ( (fx0 + 0.5f) - floor(fx0 + 0.5f) ); // Reverse fractional part
 
     const Pt::int32_t xpxl1 = xend; // This will be used in the main loop
     const Pt::int32_t ypxl1 = floor(yend);
 
     if(steep) {
         // Calculate the alphas and coordinates
-        const float fpart  = FPART(yend) * xgap;
-        const float rfpart = RFPART(yend) * xgap;
+        const float  fpart = yend - floor(yend);
+        const float rfpart = 1.0f - fpart;
         const Pt::int32_t ix0 = ypxl1;
         const Pt::int32_t ix1 = ix0 + 1;
         const Pt::int32_t iy  = xpxl1;
         // Draw the pixels as needed
-        PLOT(ix0, iy, rfpart * 255.0f);
-        PLOT(ix1, iy,  fpart * 255.0f);
+        PLOT(ix0, iy, rfpart * xgap * 255.0f);
+        PLOT(ix1, iy,  fpart * xgap * 255.0f);
     }
     else {
-        PLOT(xpxl1, ypxl1,     RFPART(yend) * xgap * 255.0f);
-        PLOT(xpxl1, ypxl1 + 1,  FPART(yend) * xgap * 255.0f);
+        // Calculate the alphas and coordinates
+        const float  fpart = yend - floor(yend);
+        const float rfpart = 1.0f - fpart;
+        const Pt::int32_t ix  = xpxl1;
+        const Pt::int32_t iy0 = ypxl1;
+        const Pt::int32_t iy1 = iy0 + 1;
+        // Draw the pixels as needed
+        PLOT(ix, iy0, rfpart * xgap * 255.0f);
+        PLOT(ix, iy1,  fpart * xgap * 255.0f);
     }
 
     //#define  FPART(X) ( yend - floor( yend ) )
@@ -1161,25 +1162,39 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     // Handle the second endpoint
     xend = lround(fx1);
     yend = fy1 + gradient * (xend - fx1);
-    xgap = FPART(fx1 + 0.5f);
+    xgap = (fx1 + 0.5f) - floor(fx1 + 0.5f); // Fractional part
 
     const Pt::int32_t xpxl2 = xend; // This will be used in the main loop
     const Pt::int32_t ypxl2 = floor(yend);
 
     if(steep) {
-        PLOT(ypxl2,     xpxl2, RFPART(yend) * xgap * 255.0f);
-        PLOT(ypxl2 + 1, xpxl2,  FPART(yend) * xgap * 255.0f);
+        // Calculate the alphas and coordinates
+        const float  fpart = yend - floor(yend);
+        const float rfpart = 1.0f - fpart;
+        const Pt::int32_t ix0 = ypxl2;
+        const Pt::int32_t ix1 = ix0 + 1;
+        const Pt::int32_t iy  = xpxl2;
+        // Draw the pixels as needed
+        PLOT(ix0, iy, rfpart * xgap * 255.0f);
+        PLOT(ix1, iy,  fpart * xgap * 255.0f);
     }
     else {
-        PLOT(xpxl2, ypxl2,    RFPART(yend) * xgap * 255.0f);
-        PLOT(xpxl2, ypxl2 + 1, FPART(yend) * xgap * 255.0f);
+        // Calculate the alphas and coordinates
+        const float  fpart = yend - floor(yend);
+        const float rfpart = 1.0f - fpart;
+        const Pt::int32_t ix  = xpxl2;
+        const Pt::int32_t iy0 = ypxl2;
+        const Pt::int32_t iy1 = iy0 + 1;
+        // Draw the pixels as needed
+        PLOT(ix, iy0, rfpart * xgap * 255.0f);
+        PLOT(ix, iy1,  fpart * xgap * 255.0f);
     }
 
     // Main loop
     if(steep) {
         for(Pt::int32_t x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
             // Calculate the alphas and coordinates
-            const Pt::int32_t fpart  = ( intery - (Pt::int32_t) intery ) * 255.0f;
+            const Pt::int32_t fpart  = (intery - floor(intery)) * 255.0f;
             const Pt::int32_t rfpart = 255 - fpart;
             const Pt::int32_t ix0 = floor(intery);
             const Pt::int32_t ix1 = ix0 + 1;
@@ -1193,7 +1208,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     else {
         for(Pt::int32_t x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
             // Calculate the alphas and coordinates
-            const Pt::int32_t fpart  = ( intery - (Pt::int32_t) intery ) * 255.0f;
+            const Pt::int32_t fpart  = (intery - floor(intery)) * 255.0f;
             const Pt::int32_t rfpart = 255 - fpart;
             const Pt::int32_t ix  = x;
             const Pt::int32_t iy0 = floor(intery);
