@@ -1055,22 +1055,23 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                                             const PolygonScanlines& exclusionZone,
                                             DrawLineMask& maskInOut)
 {
-    // NOTE: This implementation seems does not need to use the Rasterizer2::XWAA_WFILTER[]
+    // NOTE: This implementation does not need to use the Rasterizer2::XWAA_WFILTER[]
 
     // TODO: Does the other XWAA implementation will benefit from this more conservative apparoach?
-    //       (shall they be converted too?)
+    //       (shall they be converted too?). IMHO: they seems to work fine, so nope ;-)
 
-
-    // Get the mask's coordinate
-    float mx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
-    float my[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+    // Get the input mask's coordinate
+    float mx[4];
+    float my[4];
 
     for(Pt::int32_t i = 0; i < 4; ++i) {
         mx[i] = maskInOut[i].x();
         my[i] = maskInOut[i].y();
     }
 
-    Pt::int32_t pCnt  = 0;
+    // For storing the output mask's coordinate
+    float lx[4];
+    float ly[4];
 
     // A helper macro to fill pixel
     #define  XW_FILL_PIXEL(X, Y, A)                                                    \
@@ -1079,20 +1080,14 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                \
             /* Check if we should skip drawing the pixel */                            \
             bool skipDrawing = false;                                                  \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                       \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                           \
-                skipDrawing = true;                                                    \
-                break;                                                                 \
+            if(_compositionMode == CompositionMode::SourceOver) {                      \
+                for(Pt::int32_t j = 0; j < 4; ++j) {                                   \
+                    if( (X) != mx[j] || (Y) != my[j] ) continue;                       \
+                    skipDrawing = true;                                                \
+                    break;                                                             \
+                }                                                                      \
             }                                                                          \
             if(skipDrawing || !(A)) break;                                             \
-            /* Shift-store the mask's coordinates */                                   \
-            mx[2] = mx[3]; mx[3] = X;                                                  \
-            my[2] = my[3]; my[3] = Y;                                                  \
-            if(pCnt < 2) {                                                             \
-                if(mx[pCnt] == MAXIMUM_COORD_F) mx[pCnt] = X;                          \
-                if(my[pCnt] == MAXIMUM_COORD_F) my[pCnt] = Y;                          \
-                ++pCnt;                                                                \
-            }                                                                          \
             /* Fill the pixel */                                                       \
             if(_isTexture || _isGradient) {                                            \
                 const Pt::int32_t bw = _brushImage->width();                           \
@@ -1164,6 +1159,9 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         }
         if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap * 255.0f));
         if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap * 255.0f));
+        // Store the first endpoint coordinates as the output mask
+        lx[0] = ix0; ly[0] = iy;
+        lx[1] = ix1; ly[1] = iy;
     }
     else {
         // Calculate the alphas and coordinates
@@ -1191,6 +1189,9 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             }
         }
         if(!skipPixel) XW_FILL_PIXEL( ix, iy1, (Pt::int32_t) (fpart * xgap * 255.0f) );
+        // Store the first endpoint coordinates as the output mask
+        lx[0] = ix; ly[0] = iy0;
+        lx[1] = ix; ly[1] = iy1;
     }
 
     // Calculate the first y-intersection for the main loop
@@ -1223,6 +1224,9 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         }
         if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap * 255.0f) );
         if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap * 255.0f) );
+        // Store the second endpoint coordinates as the output mask
+        lx[2] = ix0; ly[2] = iy;
+        lx[3] = ix1; ly[3] = iy;
     }
     else {
         // Calculate the alphas and coordinates
@@ -1250,6 +1254,9 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             }
         }
         if(!skipPixel) XW_FILL_PIXEL( ix, iy1, (Pt::int32_t) (fpart * xgap * 255.0f) );
+        // Store the second endpoint coordinates as the output mask
+        lx[2] = ix; ly[2] = iy0;
+        lx[3] = ix; ly[3] = iy1;
     }
 
     // Main loop
@@ -1308,10 +1315,18 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     }
 
     // Output the new mask
-    maskInOut[0].set(mx[0], my[0]);
-    maskInOut[1].set(mx[1], my[1]);
-    maskInOut[2].set(mx[2], my[2]);
-    maskInOut[3].set(mx[3], my[3]);
+    if(swapDir) {
+        if(maskInOut[0].x() == MAXIMUM_COORD_F || maskInOut[0].y() == MAXIMUM_COORD_F) maskInOut[0].set(lx[2], ly[2]);
+        if(maskInOut[1].x() == MAXIMUM_COORD_F || maskInOut[1].y() == MAXIMUM_COORD_F) maskInOut[1].set(lx[3], ly[3]);
+                                                                                       maskInOut[2].set(lx[0], ly[0]);
+                                                                                       maskInOut[3].set(lx[1], ly[1]);
+    }
+    else {
+        if(maskInOut[0].x() == MAXIMUM_COORD_F || maskInOut[0].y() == MAXIMUM_COORD_F) maskInOut[0].set(lx[0], ly[0]);
+        if(maskInOut[1].x() == MAXIMUM_COORD_F || maskInOut[1].y() == MAXIMUM_COORD_F) maskInOut[1].set(lx[1], ly[1]);
+                                                                                       maskInOut[2].set(lx[2], ly[2]);
+                                                                                       maskInOut[3].set(lx[3], ly[3]);
+    }
 
     // Undefine the helper macro
     #undef XW_FILL_PIXEL
