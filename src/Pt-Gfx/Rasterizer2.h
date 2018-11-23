@@ -329,6 +329,9 @@ class Rasterizer2
                                 Pt::int32_t minX, Pt::int32_t minY,
                                 Pt::int32_t maxX, Pt::int32_t maxY);
 
+        /*
+        // REVIEW: Seems nothing actually uses these functions anymore?
+
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount,
                                    size_t polyCount, size_t totalPointCount,
                                    const Color& color,
@@ -340,6 +343,7 @@ class Rasterizer2
                                    const Color& color,
                                    float minX, float minY,
                                    float maxX, float maxY);
+        */
 
         template <typename T>
         struct ScanlineElement
@@ -365,12 +369,16 @@ class Rasterizer2
         //     * The vector element specify a set of "from" and "to" X coordinates
         typedef std::vector< std::vector<ScanlineElement16> > PolygonScanlines;
 
+        /*
+        // REVIEW: Seems nothing actually uses this function anymore?
+
         void rasterPolygonBorderXWAA_F(float x1, float y1,
                                        float x2, float y2,
                                        const Color& color,
                                        Pt::int32_t minX, Pt::int32_t minY,
                                        const PolygonScanlines& exclusionZone,
                                        DrawLineMask& maskInOut);
+        */
 
         void rasterPolygonBorderXWAA_F2(float x1, float y1,
                                        float x2, float y2,
