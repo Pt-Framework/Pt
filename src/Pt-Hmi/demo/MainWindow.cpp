@@ -320,6 +320,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(300, 450),
                            Pt::Gfx::PointF(400, 550) );
 
+    imagePainter.drawLine( Pt::Gfx::PointF(250, 450),
+                           Pt::Gfx::PointF(380, 550) );
+
     Gfx::Pen pen2( Gfx::Color::fromRgb8(255, 200, 100), 2);
     imagePainter.setPen(pen2);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 320),
@@ -373,7 +376,13 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(300, 380 - 200), Pt::Gfx::PointF(450, 380 - 200) );
     imagePainter.drawLine( Pt::Gfx::PointF(380 - 200, 450), Pt::Gfx::PointF(480 - 200, 550) );
 
-    // NOTE: like X from window-close button/
+    imagePainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    imagePainter.setPen(Gfx::Pen( Gfx::Color(32767, 65535, 65535, 65535), 5, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.drawLine( Pt::Gfx::PointF(300, 380 - 200 + 20), Pt::Gfx::PointF(450, 380 - 200 + 20) );
+    imagePainter.drawLine( Pt::Gfx::PointF(380 - 200 + 20, 450), Pt::Gfx::PointF(480 - 200 + 20, 550) );
+    imagePainter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    // NOTE: like X from window-close button
     imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap));
     imagePainter.drawLine(Gfx::PointF(520, 520), Gfx::PointF(528, 528));
     imagePainter.drawLine(Gfx::PointF(528, 520), Gfx::PointF(520, 528));

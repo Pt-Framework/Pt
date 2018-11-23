@@ -1058,7 +1058,11 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                                             const PolygonScanlines& exclusionZone,
                                             DrawLineMask& maskInOut)
 {
-    // NOTE: This function seems does not need to use the Rasterizer2::XWAA_WFILTER[]
+    // NOTE: This implementation seems does not need to use the Rasterizer2::XWAA_WFILTER[]
+
+    // TODO: Does the other XWAA implementation will benefit from this more conservative apparoach?
+    //       (shall they be converted too?)
+
 
     // Get the mask's coordinate
     float mx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
