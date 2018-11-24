@@ -364,7 +364,7 @@ void ApplicationImpl::onMotionNotify(Window& window, XEvent& xev)
     std::size_t x = xev.xmotion.x;
     std::size_t y = xev.xmotion.y;
 
-    unsigned scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().screen().scaleFactor();
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition(pos);
@@ -403,7 +403,7 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
         default:
             return;
     }
-    unsigned scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().screen().scaleFactor();
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition(pos);
@@ -461,7 +461,7 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
             return;
     }
 
-    unsigned scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().screen().scaleFactor();
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition(pos);
@@ -550,7 +550,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
 
         //std::clog << "   ### resize event: " << width << "x" << height << std::endl;
         Gfx::SizeF to(width, height);
-
+        to = Application::instance().screen().toLogical(to);
         ResizeEvent rev( window.vid(), to );
         commitEvent(rev);
 
@@ -562,6 +562,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
     {
         //std::clog << "   ### move event: " << x << "x" << y << std::endl;
         Gfx::PointF to(x, y);
+        to = Application::instance().screen().toLogical(to);
         MoveEvent ev(window.vid(), to);
         commitEvent( ev );
     }

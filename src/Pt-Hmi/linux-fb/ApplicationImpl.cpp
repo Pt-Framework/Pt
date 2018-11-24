@@ -231,7 +231,7 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
     ScreenImpl* screen = Application::instance().screen().impl();
     screen->drawCursor(ev);
     
-    unsigned scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().screen().scaleFactor();
 
     Gfx::PointF pos(ev.position().x() / scaling, 
                     ev.position().y() / scaling);
@@ -253,7 +253,7 @@ void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
 
     Pt::Gfx::PointF pos = _touchTransform * ev.position();
 
-    unsigned scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().screen().scaleFactor();
     Gfx::PointF scaledPos(pos.x() / scaling,pos.y() / scaling);
 
     TouchEvent tev = ev;
