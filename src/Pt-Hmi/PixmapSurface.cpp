@@ -133,7 +133,7 @@ void PixmapSurface::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
     Gfx::Transform trans;
-    unsigned scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().screen().scaleFactor();
     trans.scale(scaling, scaling);
 
     _impl->drawText(toPhysical(to), text, trans);
@@ -142,7 +142,7 @@ void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text)
 
 void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& t)
 {
-    unsigned scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().screen().scaleFactor();
     Gfx::Transform trans = t;
 
     trans.scale(trans.m11() * scaling, trans.m22() * scaling);

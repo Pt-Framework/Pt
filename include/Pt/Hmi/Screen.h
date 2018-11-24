@@ -67,9 +67,9 @@ class PT_HMI_API Screen : public WindowBase
   
         ScreenImpl* impl();
 
-        void setScaleFactor(unsigned scale);
+        void setScaleFactor(double scale);
 
-        unsigned scaleFactor() const
+        double scaleFactor() const
         {
             return _scaling;
         }
@@ -169,7 +169,7 @@ class PT_HMI_API Screen : public WindowBase
         int                  _updates;
         std::vector<Window*> _windows;
         Pt::System::Clock    _clock;
-        unsigned             _scaling;
+        double             _scaling;
 };
 
 } // namespace

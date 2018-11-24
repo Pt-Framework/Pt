@@ -104,7 +104,7 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
-void Screen::setScaleFactor(unsigned scale)
+void Screen::setScaleFactor(double scale)
 {
     _scaling = scale;
 }

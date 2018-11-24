@@ -732,7 +732,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     }
   
     
-    unsigned scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().screen().scaleFactor();
     Gfx::PointF pos(Gfx::PointF(xPos/scaling, yPos/scaling));
     
     _mouseEvent.setPosition(pos);

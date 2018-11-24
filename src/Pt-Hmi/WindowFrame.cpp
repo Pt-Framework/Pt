@@ -394,11 +394,13 @@ void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     // draw symbol
     //
     Gfx::PointF triangle[3];
-    triangle[0] = geometry().topLeft() + Gfx::PointF(4, 4);
-    triangle[1] = geometry().topRight() + Gfx::PointF(-2, 4);
-    Gfx::PointF mid(geometry().width() / 2, geometry().height() / 2);
-    mid.addY(1);
-    triangle[2] = geometry().topLeft() + mid;
+    triangle[0].set(4, 4);
+    triangle[1].set(geometry().width() - 4, 4);
+    triangle[2].set(geometry().width() / 2, geometry().height() / 2);
+
+    triangle[0] += geometry().topLeft();
+    triangle[1] += geometry().topLeft();
+    triangle[2] += geometry().topLeft();
 
     Gfx::Brush brush( Gfx::Color(65535,65535,65535) );
     painter.setBrush(brush);
