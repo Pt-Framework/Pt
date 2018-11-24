@@ -106,7 +106,16 @@ class PT_HMI_API Screen : public WindowBase
             return size;
         }
 
-        
+        virtual double toLogical(double n) const
+        {
+            return n / _scaling;
+        }
+
+        virtual double toPhysical(double n) const
+        {
+            return n * _scaling;
+        }
+
 
     public:
         virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const;

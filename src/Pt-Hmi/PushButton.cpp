@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -345,8 +346,9 @@ void PushButton::layoutContent()
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+
+    double pictureWidth = _iconSize.isNull() ? toLogical(_picture.width()) : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? toLogical( _picture.height()) : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
     double itemsHeight = fm.height() + spacing + pictureHeight;
 
@@ -393,8 +395,8 @@ void PushButton::layoutContent()
 
     if( ! _picture.empty() )
     {
-        double pictureXOff = (pictureWidth - _picture.width()) / 2;
-        double pictureYOff = (pictureHeight - _picture.height()) / 2;
+        double pictureXOff = (pictureWidth - toLogical(_picture.width())) / 2;
+        double pictureYOff = (pictureHeight - toLogical(_picture.height())) / 2;
 
         _iconPos.set(pictureX + pictureXOff, 
                      pictureY + pictureYOff);

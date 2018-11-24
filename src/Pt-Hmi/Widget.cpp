@@ -340,6 +340,24 @@ Gfx::PointF Widget::toScreen(const Gfx::PointF& pos) const
 }
 
 
+double Widget::toLogical(double n) const
+{
+    if (window())
+        return window()->toLogical(n);
+
+    return n;
+}
+
+
+double Widget::toPhysical(double n) const
+{
+    if (window())
+        return window()->toPhysical(n);
+
+    return n;
+}
+
+
 Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF widgetPos;

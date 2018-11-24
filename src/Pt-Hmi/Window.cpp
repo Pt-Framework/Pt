@@ -608,6 +608,18 @@ Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
     return p;
 }
 
+double Window::toLogical(double n) const
+{
+    return Application::instance().screen().toLogical(n);
+}
+
+
+double Window::toPhysical(double n) const
+{
+    return Application::instance().screen().toPhysical(n);
+}
+
+
 
 const Gfx::Brush& Window::background() const
 {

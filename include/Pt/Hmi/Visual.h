@@ -46,7 +46,7 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
     public:
         virtual ~Visual();
 
-        void processEvent(const Pt::Event& ev);    
+        void processEvent(const Pt::Event& ev);
 
         Pt::uint64_t vid() const
         {
@@ -66,6 +66,10 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         virtual Gfx::PointF toScreen(const Gfx::PointF& l) const = 0;
 
         virtual Gfx::PointF fromScreen(const Gfx::PointF& g) const = 0;
+
+        virtual double toLogical(double n) const = 0;
+
+        virtual double toPhysical(double n) const = 0;
 
     protected:
         Visual();
