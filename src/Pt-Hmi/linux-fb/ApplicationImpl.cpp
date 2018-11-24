@@ -250,12 +250,15 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
 {
     _lastActivityTime = Pt::System::Clock::getSystemTime();
-    
+
     Pt::Gfx::PointF pos = _touchTransform * ev.position();
+
+    unsigned scaling = Application::instance().screen().scaleFactor();
+    Gfx::PointF scaledPos(pos.x() / scaling,pos.y() / scaling);
 
     TouchEvent tev = ev;
     tev.setId( Application::instance().screen().vid() );
-    tev.setPosition(pos);
+    tev.setPosition(scaledPos);
 
     //std::clog << "raw touch: " << ev.position().x() << ", " 
     //                           << ev.position().y() << std::endl;
