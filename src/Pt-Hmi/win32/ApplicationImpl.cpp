@@ -759,7 +759,7 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
     int xPos = info.left;
     int yPos = info.top;
 
-    MoveEvent ev(w.vid(), Gfx::PointF(xPos, yPos) );
+    MoveEvent ev(w.vid(), Application::instance().screen().toLogical(Gfx::PointF(xPos, yPos)) );
     commitEvent( ev );          
 }
 
@@ -801,6 +801,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
     Gfx::SizeF to(width, height);
           
+    to = Application::instance().screen().toLogical(to);
     ResizeEvent rev(w.vid(), to);
     commitEvent(rev);
            

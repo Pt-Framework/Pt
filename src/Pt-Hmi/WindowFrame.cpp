@@ -216,37 +216,23 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     // Draw symbol
     //
 
-#ifdef WITH_NEW_RASTERIZER
-
-    std::vector<Gfx::PointF> points(9);
-
-    points[0] = geometry().bottomLeft() + Gfx::PointF(0 + 3,  0 - 3);
-    points[1] = geometry().bottomLeft() + Gfx::PointF(9 + 3,  0 - 3);
-    points[2] = geometry().bottomLeft() + Gfx::PointF(9 + 3, -1 - 3);
-    points[3] = geometry().bottomLeft() + Gfx::PointF(3 + 3, -2 - 3);
-    points[4] = geometry().bottomLeft() + Gfx::PointF(9 + 3, -7 - 3);
-    points[5] = geometry().bottomLeft() + Gfx::PointF(7 + 3, -9 - 3);
-    points[6] = geometry().bottomLeft() + Gfx::PointF(2 + 3, -3 - 3);
-    points[7] = geometry().bottomLeft() + Gfx::PointF(1 + 3, -9 - 3);
-    points[8] = geometry().bottomLeft() + Gfx::PointF(0 + 3, -9 - 3);
-
-    painter.setBrush(Gfx::Color(65535, 65535, 65535));
-    painter.fillPolygon(points.data(), points.size());
-
-#else
-
-    Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap);
+    Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap);
     painter.setPen(pen);
+    const double spacing = 4;
 
-    Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(5, 5);
-    Gfx::PointF tr = geometry().topRight() + Gfx::PointF(-4, 4);
-    Gfx::PointF br = geometry().bottomRight() - Gfx::PointF(4, 4);
-    Gfx::PointF bl = geometry().bottomLeft() - Gfx::PointF(-4, 4);
+    Gfx::PointF bl = Gfx::PointF(spacing, geometry().height() - 1 - spacing);
+    Gfx::PointF br = Gfx::PointF((geometry().width()-1)/2 + spacing/2, geometry().height() - 1 - spacing);
+    Gfx::PointF tl = Gfx::PointF(spacing, (geometry().height()-1)/2 - spacing/2);
+    Gfx::PointF tr = Gfx::PointF(geometry().width() - 1 - spacing, spacing);
+    
+    bl += geometry().topLeft();
+    br += geometry().topLeft();
+    tl += geometry().topLeft();
+    tr += geometry().topLeft();
+    
     painter.drawLine(bl, br);
     painter.drawLine(tl, bl);
     painter.drawLine(tr, bl);
-
-#endif
 }
 
 //
@@ -275,37 +261,26 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     // Draw symbol
     //
 
-#ifdef WITH_NEW_RASTERIZER
-
-    std::vector<Gfx::PointF> points(9);
-
-    points[0] = geometry().topRight() + Gfx::PointF( 0 - 3, 0 + 3);
-    points[1] = geometry().topRight() + Gfx::PointF(-9 - 3, 0 + 3);
-    points[2] = geometry().topRight() + Gfx::PointF(-9 - 3, 1 + 3);
-    points[3] = geometry().topRight() + Gfx::PointF(-3 - 3, 2 + 3);
-    points[4] = geometry().topRight() + Gfx::PointF(-9 - 3, 7 + 3);
-    points[5] = geometry().topRight() + Gfx::PointF(-7 - 3, 9 + 3);
-    points[6] = geometry().topRight() + Gfx::PointF(-2 - 3, 3 + 3);
-    points[7] = geometry().topRight() + Gfx::PointF(-1 - 3, 9 + 3);
-    points[8] = geometry().topRight() + Gfx::PointF( 0 - 3, 9 + 3);
-
-    painter.setBrush(Gfx::Color(65535, 65535, 65535));
-    painter.fillPolygon(points.data(), points.size());
-
-#else
-
-    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap);
+    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap);
     painter.setPen(pen);
+    const double spacing = 4;
+    const double width = geometry().width() - 1;
+    const double height = geometry().height() - 1;
 
-    Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(5, 5);
-    Gfx::PointF tr = geometry().topRight() + Gfx::PointF(-4, 4);
-    Gfx::PointF br = geometry().bottomRight() - Gfx::PointF(4, 4);
-    Gfx::PointF bl = geometry().bottomLeft() - Gfx::PointF(-4, 4);
+    Gfx::PointF bl = Gfx::PointF(spacing, height - spacing);
+    Gfx::PointF tl = Gfx::PointF(width / 2 - spacing/2, spacing);
+    Gfx::PointF tr = Gfx::PointF(width - spacing, spacing);
+    Gfx::PointF br = Gfx::PointF(width - spacing, height/2 + spacing / 2);
+
+    bl += geometry().topLeft();
+    tl += geometry().topLeft();
+    tr += geometry().topLeft();
+    br += geometry().topLeft();
+
     painter.drawLine(tl, tr);
     painter.drawLine(bl, tr);
     painter.drawLine(br, tr);
 
-#endif
 }
 
 //
