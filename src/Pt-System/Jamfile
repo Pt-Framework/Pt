@@ -24,6 +24,7 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           FileInfo.cpp
                           IOBuffer.cpp
                           IODevice.cpp
+                          IONotifier.cpp
                           Library.cpp
                           Logger.cpp
                           LogManager.cpp

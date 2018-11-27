@@ -120,13 +120,6 @@ class WakePipe
 
 struct IOHandle
 {
-    enum WaitFlags
-    {
-        Read = 1,
-        Write = 2,
-        Error = 4
-    };
-
     static const size_t InvalidId = static_cast<size_t>(-1);
 
     IOHandle(Selectable& sel, int fd)
@@ -180,6 +173,12 @@ class Selector
 
         virtual void cancel(IOHandle& h) = 0;
 
+        // used by IONotifier
+        virtual void beginWait(IOHandle* h, int flags) = 0;
+
+        // used by IONotifier
+        virtual int endWait(IOHandle* h) = 0;
+
         virtual void beginRead(IOHandle* h) = 0;
 
         virtual void endRead(IOHandle* h) = 0;
@@ -193,6 +192,9 @@ class Selector
         virtual bool isWritable(IOHandle* h) = 0;
 
         virtual bool isError(IOHandle* h) = 0;
+
+        // used by IONotifier
+        virtual bool isReady(IOHandle* h) = 0;
 };
 
 } //namespace System

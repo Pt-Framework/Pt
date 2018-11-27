@@ -65,9 +65,6 @@ UdpSocketImpl::~UdpSocketImpl()
 {
 //  assert(_rfds == 0);
 //  assert(_wfds == 0);
-
-    if(_sentry)
-        _sentry->detach();
 }
 
 

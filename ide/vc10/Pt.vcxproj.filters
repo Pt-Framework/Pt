@@ -1569,6 +1569,12 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IONotifier.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\IONotifierImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2923,6 +2929,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\IONotifier.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\IONotifierImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

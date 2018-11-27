@@ -34,34 +34,6 @@ namespace System {
 
     class IOHandle;
 
-    struct DestructionSentry
-    {
-        DestructionSentry(DestructionSentry*& sentry)
-        : _deleted(false)
-        , _sentry(sentry)
-        {
-           sentry = this;
-        }
-
-        ~DestructionSentry()
-        {
-            if( ! _deleted )
-                this->detach();
-        }
-
-        bool operator!() const
-        { return _deleted; }
-
-        void detach()
-        {
-            _sentry = 0;
-            _deleted = true;
-        }
-
-        bool _deleted;
-        DestructionSentry*& _sentry;
-    };
-
     class IODeviceImpl
     {
         public:
@@ -114,10 +86,9 @@ namespace System {
             static bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
 
         protected:
-            IOHandle _ioh;
+            IOHandle    _ioh;
             std::size_t _timeout;
-            DestructionSentry* _sentry;
-            bool _errorPending;
+            bool        _errorPending;
     };
 
 } //namespace System

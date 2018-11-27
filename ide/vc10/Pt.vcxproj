@@ -238,6 +238,7 @@
     <ClInclude Include="..\..\include\Pt\System\IOBuffer.h" />
     <ClInclude Include="..\..\include\Pt\System\IODevice.h" />
     <ClInclude Include="..\..\include\Pt\System\IOError.h" />
+    <ClInclude Include="..\..\include\Pt\System\IONotifier.h" />
     <ClInclude Include="..\..\include\Pt\System\IOStream.h" />
     <ClInclude Include="..\..\include\Pt\System\Library.h" />
     <ClInclude Include="..\..\include\Pt\System\LogChannel.h" />
@@ -462,6 +463,7 @@
     <ClInclude Include="..\..\src\Pt-System\win32\FileDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\FileInfoImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\IODeviceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-System\win32\IONotifierImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\LibraryImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\MainLoopImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\MutexImpl.h" />
@@ -783,6 +785,7 @@
     <ClCompile Include="..\..\src\Pt-System\IOBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-System\IODevice.cpp" />
     <ClCompile Include="..\..\src\Pt-System\IOError.cpp" />
+    <ClCompile Include="..\..\src\Pt-System\IONotifier.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Library.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Logger.cpp" />
     <ClCompile Include="..\..\src\Pt-System\LogManager.cpp" />
@@ -819,6 +822,7 @@
     <ClCompile Include="..\..\src\Pt-System\win32\DirectoryImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\FileDeviceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\IODeviceImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-System\win32\IONotifierImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\LibraryImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\MainLoopImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\MutexImpl.cpp" />

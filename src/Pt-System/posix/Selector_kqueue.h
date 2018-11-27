@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_SELECTOR_KQUEUE_H
 #define PT_SYSTEM_SELECTOR_KQUEUE_H
 
@@ -33,6 +34,7 @@
 #include "Pt/System/Clock.h"
 #include "Pt/System/EventLoop.h"
 #include "Pt/System/Selectable.h"
+#include "Pt/System/IONotifier.h"
 
 #include <vector>
 #include <set>
@@ -119,6 +121,17 @@ class SelectorImpl : public Selector
             h.ready = 0;
         }
 
+        void beginWait(IOHandle* h, int flags)
+        {
+
+        }
+
+        int endWait(IOHandle* h)
+        {
+            int flags = 0;
+            return flags;
+        }
+
         void beginRead(IOHandle* h)
         {
             bool isAdded = h->changed != h->events;
@@ -126,7 +139,7 @@ class SelectorImpl : public Selector
                 _changelist.push_back(h);
 
             h->id = 1;
-            h->changed |= IOHandle::Read;
+            h->changed |= IONotifier::Read;
         }
 
         void endRead(IOHandle* h)
@@ -136,7 +149,7 @@ class SelectorImpl : public Selector
                 _changelist.push_back(h);
 
             h->ready = 0;
-            h->changed &= ~IOHandle::Read;
+            h->changed &= ~IONotifier::Read;
         }
 
         void beginWrite(IOHandle* h)
@@ -146,7 +159,7 @@ class SelectorImpl : public Selector
                 _changelist.push_back(h);
 
             h->id = 1;
-            h->changed |= IOHandle::Write;
+            h->changed |= IONotifier::Write;
         }
 
         void endWrite(IOHandle* h)
@@ -156,17 +169,22 @@ class SelectorImpl : public Selector
                 _changelist.push_back(h);
 
             h->ready = 0;
-            h->changed &= ~IOHandle::Write;
+            h->changed &= ~IONotifier::Write;
         }
 
         bool isReadable(IOHandle* h)
         {
-            return h->ready & IOHandle::Read;
+            return h->ready & IONotifier::Read;
         }
 
         bool isWritable(IOHandle* h)
         {
-            return h->ready & IOHandle::Write;
+            return h->ready & IONotifier::Write;
+        }
+
+        bool isReady(IOHandle* h)
+        {
+            return false;
         }
 
         bool isError(IOHandle* h)
@@ -194,11 +212,13 @@ class SelectorImpl : public Selector
                 if(h->changed == h->events)
                     continue;
 
+                //TODO: EV_OOBAND like POLLPRI
+
                 struct kevent kev;
 
-                if(h->changed & IOHandle::Read)
+                if(h->changed & IONotifier::Read)
                 {
-                    if(0 == (h->events & IOHandle::Read))
+                    if(0 == (h->events & IONotifier::Read))
                     {
                         EV_SET(&kev, h->fd, EVFILT_READ, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
                         changedEvents.push_back(kev);
@@ -206,16 +226,16 @@ class SelectorImpl : public Selector
                 }
                 else
                 {
-                    if(h->events & IOHandle::Read)
+                    if(h->events & IONotifier::Read)
                     {
                         EV_SET(&kev, h->fd, EVFILT_READ, EV_DISABLE, 0, 0, h);
                         changedEvents.push_back(kev);
                     }
                 }
 
-                if(h->changed & IOHandle::Write)
+                if(h->changed & IONotifier::Write)
                 {
-                    if(0 == (h->events & IOHandle::Write))
+                    if(0 == (h->events & IONotifier::Write))
                     {
                         EV_SET(&kev, h->fd, EVFILT_WRITE, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
                         changedEvents.push_back(kev);
@@ -223,7 +243,7 @@ class SelectorImpl : public Selector
                 }
                 else
                 {
-                    if(h->events & IOHandle::Write)
+                    if(h->events & IONotifier::Write)
                     {
                         EV_SET(&kev, h->fd, EVFILT_WRITE, EV_DISABLE, 0, 0, h);
                         changedEvents.push_back(kev);
@@ -297,12 +317,12 @@ class SelectorImpl : public Selector
 
                     if(kev.filter & EVFILT_READ)
                     {
-                        h->ready |= IOHandle::Read;
+                        h->ready |= IONotifier::Read;
                     }
 
                     if(kev.filter & EVFILT_WRITE)
                     {
-                        h->ready |= IOHandle::Write;
+                        h->ready |= IONotifier::Write;
                     }
 
                     h->sel->run();

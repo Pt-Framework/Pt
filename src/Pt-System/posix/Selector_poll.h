@@ -32,6 +32,7 @@
 #include "Pt/System/Api.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Selectable.h"
+#include "Pt/System/IONotifier.h"
 
 #include <vector>
 #include <limits>
@@ -145,6 +146,41 @@ class SelectorImpl : public Selector
             return _pollfds[h->id];
         }
 
+        void beginWait(IOHandle* h, int flags)
+        {
+            pollfd& pfds = enablePoll(h);
+
+            if(flags & IONotifier::Read)
+              pfds.events |= POLLIN;
+
+            if(flags & IONotifier::Write)
+              pfds.events |= POLLOUT;
+
+            if(flags & IONotifier::Except)
+              pfds.events |= POLLPRI;
+        }
+
+        int endWait(IOHandle* h)
+        {
+            assert( h->isActive() );
+
+            pollfd& pfds = _pollfds[h->id];
+            
+            pfds.events = 0;
+
+            int flags = 0;
+            if(pfds.revents & POLLIN)
+              flags |= IONotifier::Read;
+            
+            if(pfds.revents & POLLOUT)
+              flags |= IONotifier::Write;
+            
+            if(pfds.revents & POLLPRI)
+              flags |= IONotifier::Except;
+
+            return flags;
+        }
+
         void beginRead(IOHandle* h)
         {
             enablePoll(h).events |= POLLIN;
@@ -181,6 +217,14 @@ class SelectorImpl : public Selector
                 return false;
 
             return _pollfds[h->id].revents & (POLLOUT|POLLHUP);
+        }
+
+        bool isReady(IOHandle* h)
+        {
+            if(h->id == IOHandle::InvalidId)
+                return false;
+
+            return _pollfds[h->id].revents & (POLLIN|POLLOUT|POLLHUP|POLLPRI);
         }
 
         bool isError(IOHandle* h)
