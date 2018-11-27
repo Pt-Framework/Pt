@@ -75,7 +75,7 @@ class PT_SYSTEM_API IONotifier : public Selectable
 
         virtual void onCancel();
 
-        virtual bool onRun() = 0;
+        virtual bool onRun();
 
     private:
         class IONotifierImpl* _impl;
