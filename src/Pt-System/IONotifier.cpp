@@ -59,6 +59,13 @@ IONotifier::~IONotifier()
 }
 
 
+void IONotifier::setFd(int fd)
+{
+    cancel();
+    _impl->setFd(fd);
+}
+
+
 void IONotifier::beginWait(int flags)
 {
     EventLoop* loop = this->loop();

@@ -56,6 +56,8 @@ class PT_SYSTEM_API IONotifier : public Selectable
 
         ~IONotifier();
 
+        void setFd(int fd);
+
         void beginWait(int flags);
 
         int endWait();
