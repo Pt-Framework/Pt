@@ -177,7 +177,7 @@ MainWindow::MainWindow()
     _scrollView.setContent(_scrollContainer);
 
     _child2.setContent(&_scrollView);
-    _child2.show(true);  // SHOW DEMO WINDOW 2
+    //_child2.show(true);  // SHOW DEMO WINDOW 2
 
     add( _child1 );
 
@@ -204,7 +204,7 @@ MainWindow::MainWindow()
     _child1.setContent(&_tabView);
 
     //_child1.setTopMost(true);
-    _child1.move( Gfx::PointF(30, 620));
+    _child1.move( Gfx::PointF(30, 30));
     _child1.resize( Gfx::SizeF(300, 600) );
     //_child1.show(true); // SHOW DEMO WINDOW 1
 
@@ -430,6 +430,11 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     imagePainter.setBrush(Gfx::Color::fromRgb8(255, 0, 0));
     imagePainter.fillPolygon(triangle, 4);
+
+    imagePainter.fillEllipse(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100));
+
+    imagePainter.setBrush(Gfx::Color::fromRgb8(255, 255, 0));
+    imagePainter.fillPie(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 0, 90);
 
 #endif
 
