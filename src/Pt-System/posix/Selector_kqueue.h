@@ -123,12 +123,43 @@ class SelectorImpl : public Selector
 
         void beginWait(IOHandle* h, int flags)
         {
+            bool isAdded = h->changed != h->events;
+            if( ! isAdded )
+                _changelist.push_back(h);
 
+            h->id = 1;
+
+            if(flags & IONotifier::Read)
+              h->changed |= IONotifier::Read;
+
+            if(flags & IONotifier::Write)
+              h->changed |= IONotifier::Write;
+
+            if(flags & IONotifier::Except)
+              h->changed |= IONotifier::Except;
         }
 
         int endWait(IOHandle* h)
         {
+            bool isAdded = h->changed != h->events;
+            if( ! isAdded )
+                _changelist.push_back(h);
+
             int flags = 0;
+            if(h->ready & IONotifier::Read)
+              flags |= IONotifier::Read;
+            
+            if(h->ready & IONotifier::Write)
+              flags |= IONotifier::Write;
+            
+            if(h->ready & IONotifier::Except)
+              flags |= IONotifier::Except;
+
+            h->ready = 0;
+            h->changed &= ~IONotifier::Read;
+            h->changed &= ~IONotifier::Write;
+            h->changed &= ~IONotifier::Except;
+            
             return flags;
         }
 
@@ -145,7 +176,7 @@ class SelectorImpl : public Selector
         void endRead(IOHandle* h)
         {   
             bool isAdded = h->changed != h->events;
-            if(! isAdded)
+            if( ! isAdded )
                 _changelist.push_back(h);
 
             h->ready = 0;
@@ -155,7 +186,7 @@ class SelectorImpl : public Selector
         void beginWrite(IOHandle* h)
         {
             bool isAdded = h->changed != h->events;
-            if(! isAdded)
+            if( ! isAdded )
                 _changelist.push_back(h);
 
             h->id = 1;
@@ -165,7 +196,7 @@ class SelectorImpl : public Selector
         void endWrite(IOHandle* h)
         {
             bool isAdded = h->changed != h->events;
-            if(! isAdded)
+            if( ! isAdded )
                 _changelist.push_back(h);
 
             h->ready = 0;
@@ -184,7 +215,9 @@ class SelectorImpl : public Selector
 
         bool isReady(IOHandle* h)
         {
-            return false;
+            return h->ready & IONotifier::Read ||
+                   h->ready & IONotifier::Write ||
+                   h->ready & IONotifier::Except;
         }
 
         bool isError(IOHandle* h)
@@ -211,8 +244,6 @@ class SelectorImpl : public Selector
         
                 if(h->changed == h->events)
                     continue;
-
-                //TODO: EV_OOBAND like POLLPRI
 
                 struct kevent kev;
 
@@ -246,6 +277,23 @@ class SelectorImpl : public Selector
                     if(h->events & IONotifier::Write)
                     {
                         EV_SET(&kev, h->fd, EVFILT_WRITE, EV_DISABLE, 0, 0, h);
+                        changedEvents.push_back(kev);
+                    }
+                }
+
+                if(h->changed & IONotifier::Except)
+                {
+                    if(0 == (h->events & IONotifier::Except))
+                    {
+                        EV_SET(&kev, h->fd, EV_OOBAND, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
+                        changedEvents.push_back(kev);
+                    }
+                }
+                else
+                {
+                    if(h->events & IONotifier::Except)
+                    {
+                        EV_SET(&kev, h->fd, EV_OOBAND, EV_DISABLE, 0, 0, h);
                         changedEvents.push_back(kev);
                     }
                 }
@@ -321,6 +369,11 @@ class SelectorImpl : public Selector
                     }
 
                     if(kev.filter & EVFILT_WRITE)
+                    {
+                        h->ready |= IONotifier::Write;
+                    }
+
+                    if(kev.filter & EV_OOBAND)
                     {
                         h->ready |= IONotifier::Write;
                     }
