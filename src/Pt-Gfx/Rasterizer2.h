@@ -369,7 +369,9 @@ class Rasterizer2
         //     * The vector element specify a set of "from" and "to" X coordinates
         typedef std::vector< std::vector<ScanlineElement16> > PolygonScanlines;
 
-#if 0
+//#define USE_OLD_POLYGON_XWAA
+
+#ifdef USE_OLD_POLYGON_XWAA
         // REVIEW: Seems nothing actually uses this function anymore?
 
         void rasterPolygonBorderXWAA_F(float x1, float y1,

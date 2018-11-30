@@ -614,7 +614,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     }
 
     // Raster the anti-aliased outline
-#if 0
+#ifdef USE_OLD_POLYGON_XWAA
     // Mask
     DrawLineMask mask_zero;
     DrawLineMask mask_nnp1;
@@ -801,7 +801,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
         if( polygon->size() < 2 )
             continue;
 
-#if 0
+#ifdef USE_OLD_POLYGON_XWAA
         // Mask
         DrawLineMask mask_zero;
         DrawLineMask mask_nnp1;
@@ -857,7 +857,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
 }
 
 
-#if 0
+#ifdef USE_OLD_POLYGON_XWAA
 
 // REVIEW: Seems nothing actually uses this function anymore?
 

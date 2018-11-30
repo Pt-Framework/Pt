@@ -436,6 +436,13 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.setBrush(Gfx::Color::fromRgb8(255, 255, 0));
     imagePainter.fillPie(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 0, 90);
 
+
+    imagePainter.setPen(Gfx::Color::fromRgb8(255, 0, 0));
+    imagePainter.drawEllipse(Pt::Gfx::PointF(200+300, 300-200), Pt::Gfx::SizeF(50, 100));
+
+    imagePainter.setPen(Gfx::Color::fromRgb8(255, 255, 0));
+    imagePainter.drawPie(Pt::Gfx::PointF(200+300, 300-200), Pt::Gfx::SizeF(50, 100), 0, 90);
+
 #endif
 
     painter.setClip(rect);
