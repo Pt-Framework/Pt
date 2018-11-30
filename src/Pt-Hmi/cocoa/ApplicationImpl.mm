@@ -90,6 +90,9 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
         h->ready = System::IOHandle::Write;
     }
 
+    // for OOB or POLLRI like events get file descriptor by caling 
+    // CFFileDescriptorGetNativeDescriptor() and call poll again
+
     System::Selectable* s = h->sel;
     s->run();
 }
