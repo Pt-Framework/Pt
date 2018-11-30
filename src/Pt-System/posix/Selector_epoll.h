@@ -32,6 +32,7 @@
 #include "Pt/System/Api.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Selectable.h"
+#include "Pt/System/IONotifier.h"
 
 #include <set>
 #include <limits>
@@ -108,6 +109,48 @@ class SelectorImpl  : public Selector
             h.ready = 0;
         }
 
+        void beginWait(IOHandle* h, int flags)
+        {
+            bool isAdded = h->changed != h->events;
+            if(! isAdded)
+                _changelist.push_back(h);
+
+            h->id = 1;
+
+            if(flags & IONotifier::Read)
+              h->changed |= IONotifier::Read;
+
+            if(flags & IONotifier::Write)
+              h->changed |= IONotifier::Write;
+
+            if(flags & IONotifier::Except)
+              h->changed |= IONotifier::Except;
+        }
+
+        int endWait(IOHandle* h)
+        {
+            bool isAdded = h->changed != h->events;
+            if(! isAdded)
+                _changelist.push_back(h);
+
+            int flags = 0;
+            if(h->ready & IONotifier::Read)
+              flags |= IONotifier::Read;
+            
+            if(h->ready & IONotifier::Write)
+              flags |= IONotifier::Write;
+            
+            if(h->ready & IONotifier::Except)
+              flags |= IONotifier::Except;
+
+            h->ready = 0;
+            h->changed &= ~IONotifier::Read;
+            h->changed &= ~IONotifier::Write;
+            h->changed &= ~IONotifier::Except;
+            
+            return flags;
+        }
+
         void beginRead(IOHandle* h)
         {
             bool isAdded = h->changed != h->events;
@@ -115,7 +158,7 @@ class SelectorImpl  : public Selector
                 _changelist.push_back(h);
 
             h->id = 1;
-            h->changed |= IOHandle::Read;
+            h->changed |= IONotifier::Read;
         }
 
         void endRead(IOHandle* h)
@@ -125,7 +168,7 @@ class SelectorImpl  : public Selector
                 _changelist.push_back(h);
 
             h->ready = 0;
-            h->changed &= ~IOHandle::Read;
+            h->changed &= ~IONotifier::Read;
         }
 
         void beginWrite(IOHandle* h)
@@ -135,7 +178,7 @@ class SelectorImpl  : public Selector
                 _changelist.push_back(h);
 
             h->id = 1;
-            h->changed |= IOHandle::Write;
+            h->changed |= IONotifier::Write;
         }
 
         void endWrite(IOHandle* h)
@@ -145,7 +188,7 @@ class SelectorImpl  : public Selector
                 _changelist.push_back(h);
 
             h->ready = 0;
-            h->changed &= ~IOHandle::Write;
+            h->changed &= ~IONotifier::Write;
         }
 
         bool isReadable(IOHandle* h)
@@ -155,7 +198,7 @@ class SelectorImpl  : public Selector
             if(isReady)
                 h->ev->events &= (EPOLLIN|EPOLLHUP);*/
 
-            return h->ready & IOHandle::Read;
+            return h->ready & IONotifier::Read;
         }
 
         bool isWritable(IOHandle* h)
@@ -165,7 +208,14 @@ class SelectorImpl  : public Selector
             if(isReady)
                 h->ev->events &= (EPOLLIN|EPOLLHUP);*/
 
-            return h->ready & IOHandle::Write;
+            return h->ready & IONotifier::Write;
+        }
+
+        bool isReady(IOHandle* h)
+        {
+            return h->ready & IONotifier::Read ||
+                   h->ready & IONotifier::Write ||
+                   h->ready & IONotifier::Except;
         }
 
         bool isError(IOHandle* h)
@@ -175,7 +225,9 @@ class SelectorImpl  : public Selector
             if(isReady)
                 h->ev->events &= EPOLLERR;*/
 
-            return h->ready & IOHandle::Error;
+            // currently unused
+            //return h->ready & IOHandle::Error;
+            return false;
         }
 
         void wake()
@@ -200,10 +252,12 @@ class SelectorImpl  : public Selector
 
                 epoll_event ev;
 
-                if(h->changed & IOHandle::Read)
+                if(h->changed & IONotifier::Read)
                     ev.events |= EPOLLIN|EPOLLET;
-                if(h->changed & IOHandle::Write)
+                if(h->changed & IONotifier::Write)
                     ev.events |= EPOLLOUT|EPOLLET;
+                if(h->changed & IONotifier::Except)
+                    ev.events |= EPOLLPRI|EPOLLET;
  
                 ev.data.ptr = h;
 
@@ -276,16 +330,22 @@ class SelectorImpl  : public Selector
 
                     if(ev.events & (EPOLLIN|EPOLLHUP))
                     {
-                        h->ready |= IOHandle::Read;
+                        h->ready |= IONotifier::Read;
                     }
                     if(ev.events & (EPOLLOUT|EPOLLHUP))
                     {
-                        h->ready |= IOHandle::Write;
+                        h->ready |= IONotifier::Write;
                     }
-                    if(ev.events & EPOLLERR)
+                    if(ev.events & EPOLLPRI)
                     {
-                        h->ready |= IOHandle::Error;
+                        h->ready |= IONotifier::Except;
                     }
+
+                    // currently unused
+                    //if(ev.events & EPOLLERR)
+                    //{
+                    //    h->ready |= IOHandle::Error;
+                    //}
 
                     h->sel->run();
                 }
