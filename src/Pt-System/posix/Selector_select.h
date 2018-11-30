@@ -32,6 +32,7 @@
 #include "Pt/System/Api.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Selectable.h"
+#include "Pt/System/IONotifier.h"
 
 #include <set>
 #include <cstddef>
@@ -121,6 +122,39 @@ class SelectorImpl : public Selector
             }
         }
 
+        void beginWait(IOHandle* h, int flags)
+        {
+            enableSelect(h);
+
+            if(flags & IONotifier::Read)
+              FD_SET(h->fd, &_rfds);
+
+            if(flags & IONotifier::Write)
+              FD_SET(h->fd, &_wfds);
+
+            if(flags & IONotifier::Except)
+              FD_SET(h->fd, &_efds);
+        }
+
+        int endWait(IOHandle* h)
+        {
+            int flags = 0;
+            if( FD_ISSET(h->fd, &_rfdsOut) )
+              flags |= IONotifier::Read;
+            
+            if( FD_ISSET(h->fd, &_wfdsOut) )
+              flags |= IONotifier::Write;
+            
+            if( FD_ISSET(h->fd, &_efdsOut) )
+              flags |= IONotifier::Except;
+
+            FD_CLR( h->fd, &_rfds );
+            FD_CLR( h->fd, &_wfds );
+            FD_CLR( h->fd, &_efds );
+
+            return flags;
+        }
+
         void beginRead(IOHandle* h)
         {
             enableSelect(h);
@@ -151,6 +185,13 @@ class SelectorImpl : public Selector
         bool isWritable(IOHandle* h)
         {
             return FD_ISSET(h->fd, &_wfdsOut);
+        }
+
+        bool isReady(IOHandle* h)
+        {
+            return FD_ISSET(h->fd, &_rfdsOut) || 
+                   FD_ISSET(h->fd, &_wfdsOut) || 
+                   FD_ISSET(h->fd, &_efdsOut);
         }
 
         bool isError(IOHandle* h)
