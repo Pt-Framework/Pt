@@ -142,8 +142,8 @@ void Rasterizer2::rasterWidePolyline(const std::vector<Polygon>& polygons)
 
 
 void Rasterizer2::rasterNarrowSolidLine(Pt::int32_t x1, Pt::int32_t y1,
-                                               Pt::int32_t x2, Pt::int32_t y2,
-                                               const Color& color, DrawLineMask* maskInOut)
+                                        Pt::int32_t x2, Pt::int32_t y2,
+                                        const Color& color, DrawLineMask* maskInOut)
 {
     // Check for horizontal line
     if(y1 == y2)

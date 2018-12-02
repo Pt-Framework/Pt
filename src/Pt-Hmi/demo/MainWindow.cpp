@@ -92,7 +92,8 @@ MainWindow::MainWindow()
 , _scrollContainer(Hmi::FlowLayout::Top)
 , _scrollContainer2(Hmi::FlowLayout::Top)
 {
-    Application::instance().screen().setScaleFactor(1);
+    Application::instance().screen().setScaleFactor(1.0f);
+    //Application::instance().screen().setScaleFactor(1.5f);
 
     loadIcon(_icon);
     _picture.set(_icon);
@@ -384,7 +385,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine( Pt::Gfx::PointF(380 - 200 + 20, 450), Pt::Gfx::PointF(480 - 200 + 20, 550) );
     imagePainter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
-    // NOTE: like X from window-close button
+    // NOTE: Like X from window-close button
     imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap));
     imagePainter.drawLine(Gfx::PointF(520, 520), Gfx::PointF(528, 528));
     imagePainter.drawLine(Gfx::PointF(528, 520), Gfx::PointF(520, 528));
@@ -398,7 +399,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.drawLine(Gfx::PointF(528 + 40, 520), Gfx::PointF(520 + 40, 528));
 
     //
-    // gradient filled path
+    // Gradient filled path
     //
 
     Gfx::ColorStops stops;

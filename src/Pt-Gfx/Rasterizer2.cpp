@@ -662,8 +662,8 @@ void Rasterizer2::drawLine(const PointF& from, const PointF& to)
 {
     if(_pen.size() == 1)
     {
-        Point a( lround(from.x()), lround(from.y()) );
-        Point b( lround(to  .x()), lround(to  .y()) );
+        Point a( ceil( from.x() ), ceil( from.y() ) );
+        Point b( ceil( to  .x() ), ceil( to  .y() ) );
 
         drawNarrowLine(a, b, 0);
         return;
