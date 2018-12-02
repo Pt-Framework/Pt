@@ -1884,10 +1884,12 @@ void Polygonizer::renderLineSquareCap(std::vector<PointF>& dst, float x, float y
 
 void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
-#if 0
+#if 1
     // Hack for small-width lines?
-    if(wh <= 1.0f) {
-        renderLineTriangularOutCap(dst, x, y, dx, dy, nx, ny);
+    if(wh <= 1.5f) {
+        dst.push_back( PointF(x + nx,        y + ny       ) );
+        dst.push_back( PointF(x - dx * 1.5f, y - dy * 1.5f) );
+        dst.push_back( PointF(x - nx,        y - ny       ) );
         return;
     }
 #endif
@@ -1939,10 +1941,12 @@ void Polygonizer::renderLineTriangularInCap(std::vector<PointF>& dst, float x, f
 
 void Polygonizer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
-#if 0
+#if 1
     // Hack for small-width lines?
-    if(wh <= 1.0f) {
-        renderLineTriangularInCap(dst, x, y, dx, dy, nx, ny);
+    if(wh <= 1.5f) {
+        dst.push_back( PointF(x + nx - dx * 1.5f, y + ny - dy * 1.5f) );
+        dst.push_back( PointF(x,           y          ) );
+        dst.push_back( PointF(x - nx - dx * 1.5f, y - ny - dy * 1.5f) );
         return;
     }
 #endif
