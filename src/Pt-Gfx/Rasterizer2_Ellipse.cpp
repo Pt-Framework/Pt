@@ -63,8 +63,8 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     const float       ctrX  = minX + radX;
     const float       ctrY  = minY + radY;
 
-  //  if( !(size.width () & 1) ) radX -= 0.5f; // Adjustment for even sizes
-   // if( !(size.height() & 1) ) radY -= 0.5f; // ---
+    if( !(size.width () & 1) ) radX -= 0.5f; // Adjustment for even sizes
+    if( !(size.height() & 1) ) radY -= 0.5f; // ---
 
     const float radX2 = radX * radX;
     const float radY2 = radY * radY;
