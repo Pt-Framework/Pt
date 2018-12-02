@@ -430,9 +430,9 @@ class Rasterizer2
             float       degEnd;       // End angle
 
             Pt::int32_t minX, minY;   // Top-left coordinate of the arc
-            Pt::int32_t ctrX, ctrY;   // Center coordinate of the arc
-            Pt::int32_t radX, radY;   // Radius of the arc
-            Pt::int32_t radX2, radY2; // Squared radius of the arc
+            float       ctrX, ctrY;   // Center coordinate of the arc
+            float       radX, radY;   // Radius of the arc
+            float       radX2, radY2; // Squared radius of the arc
             float       xyRat;        // Ratio of the X and Y radius
 
             Pt::int32_t x1, y1;       // Coordinate of the begin point

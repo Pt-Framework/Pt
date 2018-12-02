@@ -398,12 +398,19 @@ void Rasterizer2::rasterArcArea(const Point& topLeft, const Size& size,
 
     fai.minX      = topLeft.x();
     fai.minY      = topLeft.y();
-    fai.radX      = size.width () / 2;
-    fai.radY      = size.height() / 2;
-    fai.radX2     = fai.radX * fai.radX;
-    fai.radY2     = fai.radY * fai.radY;
+
+    fai.radX      = floor( size.width () / 2.0f );
+    fai.radY      = floor( size.height() / 2.0f );
+
     fai.ctrX      = fai.minX + fai.radX;
     fai.ctrY      = fai.minY + fai.radY;
+
+    if( !(size.width () & 1) ) fai.radX -= 0.5f; // Adjustment for even sizes
+    if( !(size.height() & 1) ) fai.radY -= 0.5f; // ---
+
+    fai.radX2     = fai.radX * fai.radX;
+    fai.radY2     = fai.radY * fai.radY;
+
     fai.xyRat     = (float) fai.radX / (float) fai.radY;
 
     fai.quartersX = Pt::lround( fai.radX2 * invSqrtf(fai.radX2 + fai.radY2) );
