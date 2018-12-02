@@ -434,19 +434,20 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.fillEllipse(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100));
 
     imagePainter.setBrush(Gfx::Color::fromRgb8(255, 255, 0));
-    imagePainter.fillPie(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 0, 90);
+    imagePainter.fillPie(Pt::Gfx::PointF(200 - 50, 300 - 50), Pt::Gfx::SizeF(50, 100), 0, 90);
 
     imagePainter.setPen(Gfx::Color::fromRgb8(255, 0, 0));
     imagePainter.drawEllipse(Pt::Gfx::PointF(200+300, 300-200), Pt::Gfx::SizeF(50, 100));
 
     imagePainter.setPen(Gfx::Color::fromRgb8(255, 255, 0));
-    imagePainter.drawPie(Pt::Gfx::PointF(200+300, 300-200), Pt::Gfx::SizeF(50, 100), 0, 90);
+    imagePainter.drawPie(Pt::Gfx::PointF(200 - 50 + 300, 300 - 50 - 200), Pt::Gfx::SizeF(50, 100), 0, 90);
 
     // line width compared to rect width
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 6.0) );
-    imagePainter.fillRect( Pt::Gfx::RectF( Pt::Gfx::PointF(220, 250), 
-                                           Pt::Gfx::SizeF(25.0, 6.0) ) );
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 1.0) );
+
+    imagePainter.fillRect( Pt::Gfx::RectF( Pt::Gfx::PointF(220, 250), Pt::Gfx::SizeF(25.0, 6.0) ) );
     imagePainter.fillCircle( Pt::Gfx::PointF(250, 250), 6.0);
+    imagePainter.drawCircle( Pt::Gfx::PointF(260, 250), 6.0);
 
 #endif
 

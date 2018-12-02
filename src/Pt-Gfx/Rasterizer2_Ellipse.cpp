@@ -24,7 +24,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -56,12 +56,18 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     // Calculate the ellipse's parameters
     const Pt::int32_t minX  = topLeft.x();
     const Pt::int32_t minY  = topLeft.y();
-    const Pt::int32_t radX  = size.width () / 2;
-    const Pt::int32_t radY  = size.height() / 2;
-    const Pt::int32_t ctrX  = minX + radX;
-    const Pt::int32_t ctrY  = minY + radY;
-    const Pt::int32_t radX2 = radX * radX;
-    const Pt::int32_t radY2 = radY * radY;
+
+          float       radX  = floor( size.width () / 2.0f );
+          float       radY  = floor( size.height() / 2.0f );
+
+    const float       ctrX  = minX + radX;
+    const float       ctrY  = minY + radY;
+
+  //  if( !(size.width () & 1) ) radX -= 0.5f; // Adjustment for even sizes
+   // if( !(size.height() & 1) ) radY -= 0.5f; // ---
+
+    const float radX2 = radX * radX;
+    const float radY2 = radY * radY;
 
     // === Process the scanlines ===
 
@@ -69,12 +75,12 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     EAScanlines scanlines(radY * 2 + 2);
 
     // Top and bottom halves
-    const Pt::int32_t quartersX = Pt::lround( radX2 * invSqrtf(radX2 + radY2) );
+    const Pt::int32_t quartersX = floor( radX2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
         // Calculate the coordinates
         const float       y   = radY * sqrt(1 - (float) x * x / radX2);
-        const Pt::int32_t fly = Pt::lround(floor(y));
+        const Pt::int32_t fly = floor(y);
         const Pt::int32_t x1  = ctrX - x;
         const Pt::int32_t x2  = ctrX + x;
         const Pt::int32_t y1  = ctrY - fly - minY + 1;
@@ -99,12 +105,12 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     }
 
     // Left and right halves
-    const Pt::int32_t quartersY = Pt::lround( radY2 * invSqrtf(radX2 + radY2) );
+    const Pt::int32_t quartersY = floor( radY2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
         // Calculate the coordinates
         const float       x   = radX * sqrt(1 - (float) y * y / radY2);
-        const Pt::int32_t flx = Pt::lround(floor(x));
+        const Pt::int32_t flx = floor(x);
         const Pt::int32_t x1  = ctrX - flx;
         const Pt::int32_t x2  = ctrX + flx;
         const Pt::int32_t y1  = ctrY - y - minY + 1;
@@ -143,7 +149,7 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
         // Calculate the Y coordinate and alpha
         const float       y     = radY * sqrt(1 - (float) x * x / radX2);
-        const Pt::int32_t fly   = Pt::lround(floor(y));
+        const Pt::int32_t fly   = floor(y);
         const float       error = y - fly;
         const Pt::uint8_t alpha = lround(error * 255);
         // Draw the pixels
@@ -158,7 +164,7 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
         // Calculate the X coordinate and alpha
         const float       x     = radX * sqrt(1 - (float) y * y / radY2);
-        const Pt::int32_t flx   = Pt::lround(floor(x));
+        const Pt::int32_t flx   = floor(x);
         const float       error = x - flx;
         const Pt::uint8_t alpha = lround(error * 255);
         // Draw the pixels

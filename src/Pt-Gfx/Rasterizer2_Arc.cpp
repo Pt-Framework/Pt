@@ -24,7 +24,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -37,7 +37,7 @@ namespace Gfx {
 // Inspired by: Drawing Antialiased Circles and Ellipses
 //              http://create.stephan-brumme.com/antialiased-circle
 //              Original code by Stephan Brumme, 2011
-void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size, 
+void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
                                   float degBegin, float degEnd, const ArcMode& arcMode)
 {
     // IMPORTANT NOTES:
@@ -54,13 +54,19 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     // Calculate the ellipse's parameters
     const Pt::int32_t minX  = topLeft.x();
     const Pt::int32_t minY  = topLeft.y();
-    const Pt::int32_t radX  = size.width () / 2;
-    const Pt::int32_t radY  = size.height() / 2;
-    const Pt::int32_t ctrX  = minX + radX;
-    const Pt::int32_t ctrY  = minY + radY;
-    const Pt::int32_t radX2 = radX * radX;
-    const Pt::int32_t radY2 = radY * radY;
-    const float       xyRat = (float) radX / (float) radY;
+
+          float       radX  = floor( size.width () / 2.0f );
+          float       radY  = floor( size.height() / 2.0f );
+
+    const float       ctrX  = minX + radX;
+    const float       ctrY  = minY + radY;
+
+  //  if( !(size.width () & 1) ) radX -= 0.5f; // Adjustment for even sizes
+  //  if( !(size.height() & 1) ) radY -= 0.5f; // ---
+
+    const float radX2 = radX * radX;
+    const float radY2 = radY * radY;
+    const float xyRat = radX / radY;
 
     // Draw using solid pen?
     const bool solid = (pen().style() == Pen::Solid);
@@ -366,7 +372,7 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
 }
 
 
-void Rasterizer2::rasterArcArea(const Point& topLeft, const Size& size, 
+void Rasterizer2::rasterArcArea(const Point& topLeft, const Size& size,
                                 float degBegin, float degEnd, const ArcMode& arcMode)
 {
     // Update the gradient as needed
