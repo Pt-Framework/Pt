@@ -1,6 +1,8 @@
 if ! $(JAMBASE_TAR_JAM_INCLUDED) {
 JAMBASE_TAR_JAM_INCLUDED = true ;
 
+TAR ?= tar ;
+
 rule Tar
 {
   local _tar = $(1) ;
@@ -87,9 +89,9 @@ actions TarFile bind ARCHIVE_NAME
   REM TODO: return with FAILURE if tar command fails
   
   if exist "%ARCHIVE%" (
-    tar rf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS)
+    $(TAR) rf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS)
   ) else (
-    tar cf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS)
+    $(TAR) cf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS)
   )
 }
 

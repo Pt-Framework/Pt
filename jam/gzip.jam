@@ -1,6 +1,8 @@
 if ! $(JAMBASE_GZIP_JAM_INCLUDED) {
 JAMBASE_GZIP_JAM_INCLUDED = true ;
 
+GZIP ?= gzip ;
+
 rule GZip
 {
   local _gzip = $(1).gz ;
@@ -17,7 +19,7 @@ rule GZip
 
 actions GZip1
 {
-  gzip -f $(2)
+  $(GZIP) -f $(2)
 }
 
 } # JAMBASE_GZIP_JAM_INCLUDED
