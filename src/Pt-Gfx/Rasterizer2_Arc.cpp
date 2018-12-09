@@ -623,8 +623,11 @@ void Rasterizer2::rasterArcArea(const Point& topLeft, const Size& size,
     fai.ctrX      = fai.minX + fai.radX;
     fai.ctrY      = fai.minY + fai.radY;
 
-    if( !(size.width () & 1) ) fai.radX -= 0.5f; // Adjustment for even sizes
-    if( !(size.height() & 1) ) fai.radY -= 0.5f; // ---
+    fai.wEven     = !(size.width () & 1);
+    fai.hEven     = !(size.height() & 1);
+
+    //if(fai.wEven) fai.radX -= 0.5f; // Adjustment for even sizes
+    //if(fai.hEven) fai.radY -= 0.5f; // ---
 
     fai.radX2     = fai.radX * fai.radX;
     fai.radY2     = fai.radY * fai.radY;
@@ -762,12 +765,18 @@ void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
+        // Adjustment for even width
+        Pt::int32_t sf = 0;
+        if(fai.wEven) {
+            if(x == 0) continue;
+            sf = 1;
+        }
         // Calculate the coordinate
         const float       y  = fai.radY * sqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t xl = fai.ctrX - x;
-        const Pt::int32_t xr = fai.ctrX + x;
+        const Pt::int32_t xr = fai.ctrX + x - sf;
         const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? Pt::lround(floor(y)) : lround(y) );
-        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Pt::lround(floor(y)) : lround(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Pt::lround(floor(y)) : lround(y) ) - sf;
         // Determine the exact coordinates of the closing lines
         if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); fai.x1 = xl; }
         if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); fai.x2 = xl; }
@@ -781,12 +790,18 @@ void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 
     // Left and right halves
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
+        // Adjustment for even height
+        Pt::int32_t sf = 0;
+        if(fai.hEven) {
+            if(y == 0) continue;
+            sf = 1;
+        }
         // Calculate the coordinate
         const float       x  = fai.radX * sqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? Pt::lround(floor(x)) : lround(x) );
-        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Pt::lround(floor(x)) : lround(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Pt::lround(floor(x)) : lround(x) ) - sf;
         const Pt::int32_t yt = fai.ctrY - y;
-        const Pt::int32_t yb = fai.ctrY + y;
+        const Pt::int32_t yb = fai.ctrY + y - sf;
         // Determine the exact coordinates of the closing lines
         if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); fai.x1 = xl; }
         if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); fai.x2 = xl; }
@@ -925,12 +940,18 @@ void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const Fil
 
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
+        // Adjustment for even width
+        Pt::int32_t sf = 0;
+        if(fai.wEven) {
+            if(x == 0) continue;
+            sf = 1;
+        }
         // Calculate the coordinate
         const float       y  = fai.radY * sqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? Pt::lround(floor(y)) : lround(y) );
-        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Pt::lround(floor(y)) : lround(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Pt::lround(floor(y)) : lround(y) ) - sf;
         const Pt::int32_t xl = fai.ctrX - x;
-        const Pt::int32_t xr = fai.ctrX + x;
+        const Pt::int32_t xr = fai.ctrX + x - sf;
         // Skip if the scanline will be completely outside the shape
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
@@ -941,12 +962,18 @@ void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const Fil
 
     // Left and right halves
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
+        // Adjustment for even height
+        Pt::int32_t sf = 0;
+        if(fai.hEven) {
+            if(y == 0) continue;
+            sf = 1;
+        }
         // Calculate the coordinate
         const float       x  = fai.radX * sqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t yt = fai.ctrY - y;
-        const Pt::int32_t yb = fai.ctrY + y;
+        const Pt::int32_t yb = fai.ctrY + y - sf;
         const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? Pt::lround(floor(x)) : lround(x) );
-        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Pt::lround(floor(x)) : lround(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Pt::lround(floor(x)) : lround(x) ) - sf;
         // Skip if the scanline will be completely outside the shape
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
@@ -1061,12 +1088,18 @@ void Rasterizer2::arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanline
 
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
+        // Adjustment for even width
+        Pt::int32_t sf = 0;
+        if(fai.wEven) {
+            if(x == 0) continue;
+            sf = 1;
+        }
         // Calculate the coordinate
         const float       y  = fai.radY * sqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? Pt::lround(floor(y)) : lround(y) );
-        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Pt::lround(floor(y)) : lround(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Pt::lround(floor(y)) : lround(y) ) - sf;
         const Pt::int32_t xl = fai.ctrX - x;
-        const Pt::int32_t xr = fai.ctrX + x;
+        const Pt::int32_t xr = fai.ctrX + x - sf;
         // Store/update the scanline coordinates
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt);
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yb);
@@ -1074,12 +1107,18 @@ void Rasterizer2::arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanline
 
     // Left and right halves
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
+        // Adjustment for even height
+        Pt::int32_t sf = 0;
+        if(fai.hEven) {
+            if(y == 0) continue;
+            sf = 1;
+        }
         // Calculate the coordinate
         const float       x  = fai.radX * sqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t yt = fai.ctrY - y;
-        const Pt::int32_t yb = fai.ctrY + y;
+        const Pt::int32_t yb = fai.ctrY + y - sf;
         const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? Pt::lround(floor(x)) : lround(x) );
-        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Pt::lround(floor(x)) : lround(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Pt::lround(floor(x)) : lround(x) ) - sf;
         // Store/update the scanline coordinates
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt);
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yb);
@@ -1251,6 +1290,12 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
 {
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
+        // Adjustment for even width
+        Pt::int32_t sf = 0;
+        if(fai.wEven) {
+            if(x == 0) continue;
+            sf = 1;
+        }
         // Calculate the Y coordinate and alpha
         const float       y     = fai.radY * sqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t fly   = Pt::lround(floor(y));
@@ -1258,9 +1303,9 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
         const Pt::uint8_t alpha = lround(error * 255);
         // Draw the pixels
         const Pt::int32_t x1 = fai.ctrX - x;
-        const Pt::int32_t x2 = fai.ctrX + x;
+        const Pt::int32_t x2 = fai.ctrX + x - sf;
         const Pt::int32_t y1 = fai.ctrY - fly - 1;
-        const Pt::int32_t y2 = fai.ctrY + fly + 1;
+        const Pt::int32_t y2 = fai.ctrY + fly + 1 - sf;
         const Pt::uint8_t alphas[4] = {
             arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
             arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
@@ -1272,6 +1317,12 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
 
     // Left and right halves
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
+        // Adjustment for even height
+        Pt::int32_t sf = 0;
+        if(fai.hEven) {
+            if(y == 0) continue;
+            sf = 1;
+        }
         // Calculate the X coordinate and alpha
         const float       x     = fai.radX * sqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t flx   = Pt::lround(floor(x));
@@ -1279,9 +1330,9 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
         const Pt::uint8_t alpha = lround(error * 255);
         // Draw the pixels
         const Pt::int32_t x1 = fai.ctrX - flx - 1;
-        const Pt::int32_t x2 = fai.ctrX + flx + 1;
+        const Pt::int32_t x2 = fai.ctrX + flx + 1 - sf;
         const Pt::int32_t y1 = fai.ctrY - y;
-        const Pt::int32_t y2 = fai.ctrY + y;
+        const Pt::int32_t y2 = fai.ctrY + y - sf;
         Pt::uint8_t alphas[4] = {
             arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
             arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),

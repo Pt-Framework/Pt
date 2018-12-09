@@ -433,7 +433,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.fillPolygon(triangle, 4);
 
     imagePainter.setBrush(Gfx::Color::fromRgb8(255, 0, 0));
-    imagePainter.fillEllipse(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100));
+    //imagePainter.fillEllipse(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100));
     imagePainter.setBrush(Gfx::Color::fromRgb8(255, 255, 0));
     imagePainter.fillPie(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 0, 90);
     imagePainter.setBrush(Gfx::Color::fromRgb8(0, 255, 0));

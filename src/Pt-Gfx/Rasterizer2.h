@@ -429,6 +429,9 @@ class Rasterizer2
             float       degBegin;     // Begin angle
             float       degEnd;       // End angle
 
+            bool        wEven;        // A flag that indicates if the width is even
+            bool        hEven;        // A flag that indicates if the height is even
+
             Pt::int32_t minX, minY;   // Top-left coordinate of the arc
             float       ctrX, ctrY;   // Center coordinate of the arc
             float       radX, radY;   // Radius of the arc
