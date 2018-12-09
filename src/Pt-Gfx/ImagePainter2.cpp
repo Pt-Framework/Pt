@@ -143,15 +143,15 @@ void ImagePainter2::drawImage(const PointF& to, const Image& image)
 }
 
 
-void ImagePainter2::drawImage(const PointF& toF, const Image& image, 
+void ImagePainter2::drawImage(const PointF& toF, const Image& image,
                               const RectF& rectF )
 {
-    Point to( Pt::lround(toF.x()), 
+    Point to( Pt::lround(toF.x()),
               Pt::lround(toF.y()) );
-    
-    Rect rect( Point( Pt::lround(rectF.x()), 
+
+    Rect rect( Point( Pt::lround(rectF.x()),
                       Pt::lround(rectF.y()) ),
-               Size( Pt::lround(rectF.width()), 
+               Size( Pt::lround(rectF.width()),
                      Pt::lround(rectF.height()) ) );
 
     _rasterizer->drawImage(to, image, rect);
@@ -160,20 +160,20 @@ void ImagePainter2::drawImage(const PointF& toF, const Image& image,
 
 void ImagePainter2::drawText(const PointF& toF, const String& text)
 {
-    Point to( Pt::lround(toF.x()), 
+    Point to( Pt::lround(toF.x()),
               Pt::lround(toF.y()) );
-    
+
     Transform identity;
     _rasterizer->drawText(to, text, identity);
 }
 
 
-void ImagePainter2::drawText(const PointF& toF, const Pt::String& text, 
+void ImagePainter2::drawText(const PointF& toF, const Pt::String& text,
                              const Transform& transform)
 {
-    Point to( Pt::lround(toF.x()), 
+    Point to( Pt::lround(toF.x()),
               Pt::lround(toF.y()) );
-    
+
     _rasterizer->drawText(to, text, transform);
 }
 
@@ -221,21 +221,21 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
 }
 
 
-void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, 
+void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size,
                             float degBegin, float degEnd)
 {
     _rasterizer->drawArc(topLeft, size, degBegin, degEnd, ArcMode::Open);
 }
 
 
-void ImagePainter2::drawChord(const PointF& topLeft, const SizeF& size, 
+void ImagePainter2::drawChord(const PointF& topLeft, const SizeF& size,
                               float degBegin, float degEnd)
 {
     _rasterizer->drawArc(topLeft, size, degBegin, degEnd, ArcMode::Chord);
 }
 
 
-void ImagePainter2::drawPie(const PointF& topLeft, const SizeF& size,  
+void ImagePainter2::drawPie(const PointF& topLeft, const SizeF& size,
                             float degBegin, float degEnd)
 {
     _rasterizer->drawArc(topLeft, size, degBegin, degEnd, ArcMode::Pie);
@@ -272,14 +272,14 @@ void ImagePainter2::fillEllipse(const PointF& topLeft, const SizeF& size)
 }
 
 
-void ImagePainter2::fillPie(const PointF& topLeft, const SizeF& size, 
+void ImagePainter2::fillPie(const PointF& topLeft, const SizeF& size,
                             float degBegin, float degEnd)
 {
      _rasterizer->fillPie(topLeft, size, degBegin, degEnd);
 }
 
 
-void ImagePainter2::fillChord(const PointF& topLeft, const SizeF& size, 
+void ImagePainter2::fillChord(const PointF& topLeft, const SizeF& size,
                               float degBegin, float degEnd)
 {
      _rasterizer->fillChord(topLeft, size, degBegin, degEnd);

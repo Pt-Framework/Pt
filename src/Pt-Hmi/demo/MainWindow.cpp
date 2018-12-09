@@ -456,6 +456,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     //fprintf(stderr, "AAAAA\n");
     imagePainter.drawCircle( Pt::Gfx::PointF(260, 250), 6.0);
+    imagePainter.drawCircle( Pt::Gfx::PointF(270, 250), 7.0);
+    imagePainter.drawCircle( Pt::Gfx::PointF(280, 250), 8.0);
+    imagePainter.drawCircle( Pt::Gfx::PointF(290, 250), 9.0);
 
 #endif
 

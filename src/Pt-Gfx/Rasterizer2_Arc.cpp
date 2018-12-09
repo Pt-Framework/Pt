@@ -232,8 +232,11 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     const float       ctrX  = minX + radX;
     const float       ctrY  = minY + radY;
 
-    if( !(size.width () & 1) ) radX -= 0.5f; // Adjustment for even sizes
-    if( !(size.height() & 1) ) radY -= 0.5f; // ---
+    const bool wEven = !(size.width () & 1);
+    const bool hEven = !(size.height() & 1);
+
+    //if( wEven ) radX -= 0.5f; // Adjustment for even sizes
+    //if( hEven ) radY -= 0.5f; // ---
 
     /*
           float       radX  = (size.width () - 1.0f) * 0.5f;
@@ -343,11 +346,17 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
         }
         // With anti-aliasing
         else {
+            // Adjustment for even width
+            Pt::int32_t sf = 0;
+            if(wEven) {
+                if(x == 0) continue;
+                sf = 1;
+            }
             // Calculate the coordinates
             const Pt::int32_t xl = ctrX - x;
-            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t xr = ctrX + x - sf;
             const float       yt = ctrY - y;
-            const float       yb = ctrY + y;
+            const float       yb = ctrY + y - sf;
             const Pt::int32_t yt0 = ceil (yt);
             const Pt::int32_t yb0 = floor(yb);
             const Pt::int32_t yt1 = floor(yt);
@@ -477,6 +486,12 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
         }
         // With anti-aliasing
         else {
+            // Adjustment for even height
+            Pt::int32_t sf = 0;
+            if(hEven) {
+                if(y == 0) continue;
+                sf = 1;
+            }
             // Calculate the coordinates
             /*
             const Pt::int32_t xl0 = ctrX - Pt::lround(floor(x));
@@ -485,13 +500,13 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
             const Pt::int32_t xr1 = ctrX + Pt::lround(floor(x)) + 1;
             */
             const float       xl  = ctrX - x;
-            const float       xr  = ctrX + x;
+            const float       xr  = ctrX + x - sf;
             const Pt::int32_t xl0 = ceil (xl);
             const Pt::int32_t xr0 = floor(xr);
             const Pt::int32_t xl1 = floor(xl);
             const Pt::int32_t xr1 = ceil (xr);
             const Pt::int32_t yt  = ctrY - y;
-            const Pt::int32_t yb  = ctrY + y;
+            const Pt::int32_t yb  = ctrY + y - sf;
             // Arc
             if(drawArc) {
                 // Draw the pixels
