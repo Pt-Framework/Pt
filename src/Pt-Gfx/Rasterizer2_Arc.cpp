@@ -226,8 +226,8 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     const Pt::int32_t minX  = topLeft.x();
     const Pt::int32_t minY  = topLeft.y();
 
-          float       radX  = floor( size.width () / 2.0f );
-          float       radY  = floor( size.height() / 2.0f );
+    const float       radX  = floor( size.width () / 2.0f );
+    const float       radY  = floor( size.height() / 2.0f );
 
     const float       ctrX  = minX + radX;
     const float       ctrY  = minY + radY;
@@ -572,11 +572,32 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     // Draw the arc's closing lines
     if(drawArc) {
         if(arcMode == ArcMode::Chord) {
+            // Adjustment for even sizes
+            if(wEven) {
+                if(x1 > ctrX) x1 -= 1;
+                if(x2 > ctrX) x2 -= 1;
+            }
+
+            if(hEven) {
+                if(y1 > ctrY) y1 -= 1;
+                if(y2 > ctrY) y2 -= 1;
+            }            // Draw it
             const Point a(x1, y1);
             const Point b(x2, y2);
             drawNarrowLine(a, b, 0);
         }
         else if(arcMode == ArcMode::Pie) {
+            // Adjustment for even sizes
+            if(wEven) {
+                if(bx > ctrX) bx -= 1;
+                if(ex > ctrX) ex -= 1;
+            }
+
+            if(hEven) {
+                if(by > ctrY) by -= 1;
+                if(ey > ctrY) ey -= 1;
+            }
+            // Draw it
             Rasterizer2::DrawLineMask mask;
             const Point               a(bx,   by  );
             const Point               b(ex,   ey  );
