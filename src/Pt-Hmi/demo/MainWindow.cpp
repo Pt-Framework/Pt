@@ -258,6 +258,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
     Gfx::ImagePainter2 imagePainter(image);
     imagePainter.setAntiAliasing(true);
+    //imagePainter.setAntiAliasing(false);
 
 //#define TEST_POLYGON_RASTERIZER
 
@@ -429,32 +430,33 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     triangle[2] = Pt::Gfx::PointF(505, 505);
     triangle[3] = Pt::Gfx::PointF(500, 500);
 
-    imagePainter.setBrush(Gfx::Color::fromRgb8(255, 0, 0));
+    // Ellipse et. all. and comparisons
+    //imagePainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    //imagePainter.setAntiAliasing(false);
+
+    imagePainter.setBrush(Gfx::Color(32767, 65535, 0, 0));
     imagePainter.fillPolygon(triangle, 4);
 
-    imagePainter.setBrush(Gfx::Color::fromRgb8(255, 0, 0));
-    imagePainter.fillEllipse(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100));
-    imagePainter.setBrush(Gfx::Color::fromRgb8(255, 255, 0));
-    imagePainter.fillPie(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 0, 90);
-    imagePainter.setBrush(Gfx::Color::fromRgb8(0, 255, 0));
-    imagePainter.fillChord(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 180, 270);
-
-    imagePainter.setPen(Gfx::Color::fromRgb8(255, 0, 0));
-    imagePainter.drawEllipse(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100));
-    imagePainter.setPen(Gfx::Color::fromRgb8(255, 255, 0));
-    imagePainter.drawPie(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100), 0, 90);
-    imagePainter.setPen(Gfx::Color::fromRgb8(0, 255, 0));
-    imagePainter.drawChord(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100), 180, 270);
-
-    // Line width compared to rect width
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(65535, 65535, 65535), 1.0) );
-
-    imagePainter.setBrush(Gfx::Color::fromRgb8(255, 255, 255));
+    imagePainter.setBrush(Gfx::Color(32767, 65535, 65535, 65535));
     imagePainter.fillRect( Pt::Gfx::RectF( Pt::Gfx::PointF(220, 250), Pt::Gfx::SizeF(25.0, 6.0) ) );
-
     imagePainter.fillCircle( Pt::Gfx::PointF(250, 250), 6.0);
 
+    imagePainter.setBrush(Gfx::Color(32767, 65535, 0, 0));
+    imagePainter.fillEllipse(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100));
+    imagePainter.setBrush(Gfx::Color(32767, 65535, 65535, 0));
+    imagePainter.fillPie(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 0, 90);
+    imagePainter.setBrush(Gfx::Color(32767, 0, 65535, 0));
+    imagePainter.fillChord(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 180, 270);
+
+    imagePainter.setPen(Gfx::Color(32767, 65535, 0, 0));
+    imagePainter.drawEllipse(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100));
+    imagePainter.setPen(Gfx::Color(32767, 65535, 65535, 0));
+    imagePainter.drawPie(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100), 0, 90);
+    imagePainter.setPen(Gfx::Color(32767, 0, 65535, 0));
+    imagePainter.drawChord(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100), 180, 270);
+
     //fprintf(stderr, "AAAAA\n");
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(32757, 65535, 65535, 65535), 1.0) );
     imagePainter.drawCircle( Pt::Gfx::PointF(260, 250), 6.0);
     imagePainter.drawCircle( Pt::Gfx::PointF(270, 250), 7.0);
     imagePainter.drawCircle( Pt::Gfx::PointF(280, 250), 8.0);

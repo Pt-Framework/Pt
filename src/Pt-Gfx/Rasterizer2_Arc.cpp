@@ -107,8 +107,7 @@ Pt::Gfx - CompositionMode::SourceOver
 void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
                                   float degBegin, float degEnd, const ArcMode& arcMode)
 {
-#if 0
-
+/*
     // Shall we draw an ellipse or arc?
     const bool drawArc = (degBegin != 0) || (degEnd != 0);
 
@@ -207,9 +206,7 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
         Pixel pixel(_image->view(), it->first.x, it->first.y);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode, it->second);
     }
-
-
-#else
+*/
 
     // IMPORTANT NOTES:
     //     * The Y coordinate goes from low to high according to the coordinate system being used:
@@ -226,8 +223,8 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     const Pt::int32_t minX  = topLeft.x();
     const Pt::int32_t minY  = topLeft.y();
 
-    const float       radX  = floor( size.width () / 2.0f );
-    const float       radY  = floor( size.height() / 2.0f );
+    const float       radX  = floor( size.width () * 0.5f );
+    const float       radY  = floor( size.height() * 0.5f );
 
     const float       ctrX  = minX + radX;
     const float       ctrY  = minY + radY;
@@ -283,6 +280,8 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     const Pt::int32_t quartersX = Pt::lround( radX2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
+        // Adjustment for even size
+        if(sfX && !x) continue;
         // Calculate the coordinate and alpha
         const float       y     = radY * sqrt(1 - (float) x * x / radX2);
         const float       error = y - floor(y);
@@ -291,9 +290,9 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
         if( ! _aaMode ) {
             // Calculate the coordinates
             const Pt::int32_t xl = ctrX - x;
-            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t xr = ctrX + x - sfX;
             const Pt::int32_t yt = ctrY - lround(y);
-            const Pt::int32_t yb = ctrY + lround(y);
+            const Pt::int32_t yb = ctrY + lround(y) - sfY;
             // Arc
             if(drawArc) {
                 // Draw the pixels
@@ -336,8 +335,6 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
         }
         // With anti-aliasing
         else {
-            // Adjustment for even size
-            if(sfX && !x) continue;
             // Calculate the coordinates
             const Pt::int32_t xl = ctrX - x;
             const Pt::int32_t xr = ctrX + x - sfX;
@@ -413,6 +410,8 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     const Pt::int32_t quartersY = Pt::lround( radY2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
+        // Adjustment for even size
+        if(sfY && !y) continue;
         // Calculate the coordinate and alpha
         const float       x     = radX * sqrt(1 - (float) y * y / radY2);
         const float       error = x - floor(x);
@@ -421,9 +420,9 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
         if( ! _aaMode ) {
             // Calculate the coordinates
             const Pt::int32_t xl = ctrX - lround(x);
-            const Pt::int32_t xr = ctrX + lround(x);
+            const Pt::int32_t xr = ctrX + lround(x) - sfX;
             const Pt::int32_t yt = ctrY - y;
-            const Pt::int32_t yb = ctrY + y;
+            const Pt::int32_t yb = ctrY + y - sfY;
             // Arc
             if(drawArc) {
                 // Draw the pixels
@@ -466,8 +465,6 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
         }
         // With anti-aliasing
         else {
-            // Adjustment for even size
-            if(sfY && !y) continue;
             const float       xl  = ctrX - x;
             const float       xr  = ctrX + x - sfX;
             const Pt::int32_t xl0 = ceil (xl);
@@ -576,8 +573,6 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
             drawNarrowLine(b, o, &mask);
         }
     }
-
-#endif
 }
 
 
@@ -607,8 +602,8 @@ void Rasterizer2::rasterArcArea(const Point& topLeft, const Size& size,
     fai.minX      = topLeft.x();
     fai.minY      = topLeft.y();
 
-    fai.radX      = floor( size.width () / 2.0f );
-    fai.radY      = floor( size.height() / 2.0f );
+    fai.radX      = floor( size.width () * 0.5f );
+    fai.radY      = floor( size.height() * 0.5f );
 
     fai.ctrX      = fai.minX + fai.radX;
     fai.ctrY      = fai.minY + fai.radY;
