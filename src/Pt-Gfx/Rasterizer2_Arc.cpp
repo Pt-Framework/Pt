@@ -232,10 +232,10 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     const float       ctrX  = minX + radX;
     const float       ctrY  = minY + radY;
 
-    const float radX2 = radX * radX;
-    const float radY2 = radY * radY;
+    const float       radX2 = radX * radX;
+    const float       radY2 = radY * radY;
 
-    const float xyRat = radX / radY;
+    const float       xyRat = radX / radY;
 
     // Adjustment for even sizes
     const bool        wEven = !(size.width () & 1);
@@ -1523,6 +1523,7 @@ Pt::uint8_t Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_
     }
     return 0;
 }
+
 
 } // namespace
 

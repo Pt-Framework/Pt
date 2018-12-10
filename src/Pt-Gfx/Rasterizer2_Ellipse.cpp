@@ -63,14 +63,15 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     const float       ctrX  = minX + radX;
     const float       ctrY  = minY + radY;
 
-    const bool wEven = !(size.width () & 1);
-    const bool hEven = !(size.height() & 1);
+    const float       radX2 = radX * radX;
+    const float       radY2 = radY * radY;
 
-    //if( wEven ) radX -= 0.5f; // Adjustment for even sizes
-    //if( hEven ) radY -= 0.5f; // ---
+    // Adjustment for even sizes
+    const bool        wEven = !(size.width () & 1);
+    const bool        hEven = !(size.height() & 1);
 
-    const float radX2 = radX * radX;
-    const float radY2 = radY * radY;
+    const Pt::int32_t sfX   = wEven ? 1 : 0;
+    const Pt::int32_t sfY   = hEven ? 1 : 0;
 
     // === Process the scanlines ===
 
@@ -81,19 +82,15 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     const Pt::int32_t quartersX = floor( radX2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
-        // Adjustment for even width
-        Pt::int32_t sf = 0;
-        if(wEven) {
-            if(x == 0) continue;
-            sf = 1;
-        }
+        // Adjustment for even size
+        if(sfX && !x) continue;
         // Calculate the coordinates
         const float       y   = radY * sqrt(1 - (float) x * x / radX2);
         const Pt::int32_t fly = floor(y);
         const Pt::int32_t x1  = ctrX - x;
-        const Pt::int32_t x2  = ctrX + x - sf;
+        const Pt::int32_t x2  = ctrX + x - sfX;
         const Pt::int32_t y1  = ctrY - fly - minY + 1;
-        const Pt::int32_t y2  = ctrY + fly - minY + 1 - sf;
+        const Pt::int32_t y2  = ctrY + fly - minY + 1 - sfY;
         // Store/update the scanline coordinates
         if(scanlines[y1].isNull()) { // Insert a new element
             scanlines[y1].from = x1;
@@ -117,19 +114,15 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     const Pt::int32_t quartersY = floor( radY2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
-        // Adjustment for even height
-        Pt::int32_t sf = 0;
-        if(hEven) {
-            if(y == 0) continue;
-            sf = 1;
-        }
+        // Adjustment for even size
+        if(sfY && !y) continue;
         // Calculate the coordinates
         const float       x   = radX * sqrt(1 - (float) y * y / radY2);
         const Pt::int32_t flx = floor(x);
         const Pt::int32_t x1  = ctrX - flx;
-        const Pt::int32_t x2  = ctrX + flx - sf;
+        const Pt::int32_t x2  = ctrX + flx - sfX;
         const Pt::int32_t y1  = ctrY - y - minY + 1;
-        const Pt::int32_t y2  = ctrY + y - minY + 1 - sf;
+        const Pt::int32_t y2  = ctrY + y - minY + 1 - sfY;
         // Store/update the scanline coordinates
         if(scanlines[y1].isNull()) { // Insert a new element
             scanlines[y1].from = x1;
@@ -162,12 +155,8 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
 
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
-        // Adjustment for even width
-        Pt::int32_t sf = 0;
-        if(wEven) {
-            if(x == 0) continue;
-            sf = 1;
-        }
+        // Adjustment for even size
+        if(sfX && !x) continue;
         // Calculate the Y coordinate and alpha
         const float       y     = radY * sqrt(1 - (float) x * x / radX2);
         const Pt::int32_t fly   = floor(y);
@@ -175,20 +164,16 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
         const Pt::uint8_t alpha = lround(error * 255);
         // Draw the pixels
         const Pt::int32_t x1 = ctrX - x;
-        const Pt::int32_t x2 = ctrX + x - sf;
+        const Pt::int32_t x2 = ctrX + x - sfX;
         const Pt::int32_t y1 = ctrY - fly - 1;
-        const Pt::int32_t y2 = ctrY + fly + 1 - sf;
+        const Pt::int32_t y2 = ctrY + fly + 1 - sfY;
         fill4Pixels(x1, y1, x2, y2, minX - 1, minY - 1, alpha);
     }
 
     // Left and right halves
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
-        // Adjustment for even height
-        Pt::int32_t sf = 0;
-        if(hEven) {
-            if(y == 0) continue;
-            sf = 1;
-        }
+        // Adjustment for even size
+        if(sfY && !y) continue;
         // Calculate the X coordinate and alpha
         const float       x     = radX * sqrt(1 - (float) y * y / radY2);
         const Pt::int32_t flx   = floor(x);
@@ -196,9 +181,9 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
         const Pt::uint8_t alpha = lround(error * 255);
         // Draw the pixels
         const Pt::int32_t x1 = ctrX - flx - 1;
-        const Pt::int32_t x2 = ctrX + flx + 1 - sf;
+        const Pt::int32_t x2 = ctrX + flx + 1 - sfX;
         const Pt::int32_t y1 = ctrY - y;
-        const Pt::int32_t y2 = ctrY + y - sf;
+        const Pt::int32_t y2 = ctrY + y - sfY;
         fill4Pixels(x1, y1, x2, y2, minX - 1, minY - 1, alpha);
     }
 }
