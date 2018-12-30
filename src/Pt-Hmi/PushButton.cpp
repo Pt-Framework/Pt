@@ -346,9 +346,10 @@ void PushButton::layoutContent()
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
+    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
 
-    double pictureWidth = _iconSize.isNull() ? toLogical(_picture.width()) : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? toLogical( _picture.height()) : _iconSize.height();
+    double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
     double itemsHeight = fm.height() + spacing + pictureHeight;
 
@@ -395,8 +396,8 @@ void PushButton::layoutContent()
 
     if( ! _picture.empty() )
     {
-        double pictureXOff = (pictureWidth - toLogical(_picture.width())) / 2;
-        double pictureYOff = (pictureHeight - toLogical(_picture.height())) / 2;
+        double pictureXOff = (pictureWidth - pictureSize.width()) / 2;
+        double pictureYOff = (pictureHeight - pictureSize.height()) / 2;
 
         _iconPos.set(pictureX + pictureXOff, 
                      pictureY + pictureYOff);

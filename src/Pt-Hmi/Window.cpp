@@ -608,17 +608,35 @@ Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
     return p;
 }
 
-double Window::toLogical(double n) const
+Gfx::PointF Window::toPhysical(const Gfx::PointF& p)const
 {
-    return Application::instance().screen().toLogical(n);
+    return Application::instance().screen().toPhysical(p);
 }
 
-
-double Window::toPhysical(double n) const
+Gfx::SizeF Window::toPhysical(const Gfx::SizeF& n)const
 {
     return Application::instance().screen().toPhysical(n);
 }
 
+Gfx::RectF Window::toPhysical(const Gfx::RectF& r) const
+{
+    return Application::instance().screen().toPhysical(r);
+}
+
+Gfx::PointF Window::toLogical(const Gfx::PointF& p) const
+{
+    return Application::instance().screen().toLogical(p);
+}
+
+Gfx::SizeF Window::toLogical(const Gfx::SizeF& n) const
+{
+    return Application::instance().screen().toLogical(n);
+}
+
+Gfx::RectF Window::toLogical(const Gfx::RectF& r) const
+{
+    return Application::instance().screen().toLogical(r);
+}
 
 
 const Gfx::Brush& Window::background() const

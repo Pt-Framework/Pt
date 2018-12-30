@@ -67,10 +67,6 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
 
         virtual Gfx::PointF fromScreen(const Gfx::PointF& g) const = 0;
 
-        virtual double toLogical(double n) const = 0;
-
-        virtual double toPhysical(double n) const = 0;
-
     protected:
         Visual();
         

@@ -340,16 +340,15 @@ Gfx::PointF Widget::toScreen(const Gfx::PointF& pos) const
 }
 
 
-double Widget::toLogical(double n) const
+Gfx::PointF Widget::toPhysical(const Gfx::PointF& p) const
 {
     if (window())
-        return window()->toLogical(n);
+        return window()->toPhysical(p);
 
-    return n;
+    return p;
 }
 
-
-double Widget::toPhysical(double n) const
+Gfx::SizeF Widget::toPhysical(const Gfx::SizeF& n) const
 {
     if (window())
         return window()->toPhysical(n);
@@ -357,6 +356,37 @@ double Widget::toPhysical(double n) const
     return n;
 }
 
+Gfx::RectF Widget::toPhysical(const Gfx::RectF& r) const
+{
+    if (window())
+        return window()->toPhysical(r);
+
+    return r;
+}
+
+Gfx::PointF Widget::toLogical(const Gfx::PointF& p) const
+{
+    if (window())
+        return window()->toLogical(p);
+
+    return p;
+}
+
+Gfx::SizeF Widget::toLogical(const Gfx::SizeF& n) const
+{
+    if (window())
+        return window()->toLogical(n);
+
+    return n;
+}
+
+Gfx::RectF Widget::toLogical(const Gfx::RectF& r) const
+{
+    if (window())
+        return window()->toLogical(r);
+
+    return r;
+}
 
 Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
 {

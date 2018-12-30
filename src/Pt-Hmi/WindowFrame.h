@@ -182,6 +182,18 @@ class WindowFrame : public Pt::Connectable
 
         Gfx::SizeF fromFrame(const Gfx::SizeF& size) const;
 
+        Gfx::PointF toPhysical(const Gfx::PointF& p)const;
+
+        Gfx::SizeF toPhysical(const Gfx::SizeF& s)const;
+
+        Gfx::RectF toPhysical(const Gfx::RectF& r) const;
+
+        Gfx::PointF toLogical(const Gfx::PointF& p) const;
+
+        Gfx::SizeF toLogical(const Gfx::SizeF& s) const;
+
+        Gfx::RectF toLogical(const Gfx::RectF& s) const;
+
         void update();
 
         void update(const Gfx::RectF& rect);

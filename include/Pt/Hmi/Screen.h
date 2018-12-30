@@ -77,7 +77,7 @@ class PT_HMI_API Screen : public WindowBase
         Gfx::PointF toPhysical(const Gfx::PointF& p)const
         {
             Gfx::PointF point;
-            point.set(p.x() * _scaling, p.y() * _scaling);
+            point.set(p.x() * _scaling, p.y()  * _scaling);
             return point;
         }
 
@@ -104,6 +104,12 @@ class PT_HMI_API Screen : public WindowBase
         {
             Gfx::SizeF size(s.width()/ _scaling, s.height() / _scaling);
             return size;
+        }
+
+        Gfx::RectF toLogical(const Gfx::RectF& s) const
+        {
+            Gfx::RectF rect(toLogical(s.topLeft()), toLogical(s.size()));
+            return rect;
         }
 
         virtual double toLogical(double n) const
