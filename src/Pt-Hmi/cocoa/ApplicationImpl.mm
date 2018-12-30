@@ -59,6 +59,7 @@
 
 
 namespace Pt {
+
 namespace Hmi {
 
 void MainLoopImplOnWake(void* p)
@@ -97,11 +98,13 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
     s->run();
 }
 
+
 ApplicationImpl::ApplicationImpl()
 : System::EventLoop()
 {
     init();
 }
+
 
 ApplicationImpl::~ApplicationImpl()
 {
@@ -120,10 +123,19 @@ ApplicationImpl::~ApplicationImpl()
     [NSApp release];
 }
 
+
 void ApplicationImpl::nextEvent()
 {
-    waitNext();
+    NSEvent* event = nil;
+
+    event = [NSApp nextEventMatchingMask: NSAnyEventMask
+                                untilDate: [NSDate distantFuture]
+                                    inMode: NSDefaultRunLoopMode
+                                    dequeue: YES];
+    
+    [NSApp sendEvent:event];
 }
+
 
 void ApplicationImpl::init()
 {
@@ -166,10 +178,12 @@ void ApplicationImpl::onAttachSelectable(System::Selectable& s)
     _selectables.insert(s);
 }
 
+
 void ApplicationImpl::onDetachSelectable(System::Selectable& s)
 {
     System::SelectableList::unlink(s);
 }
+
 
 void ApplicationImpl::onCancel(System::Selectable& s)
 { 
@@ -185,6 +199,7 @@ void ApplicationImpl::onCancel(System::Selectable& s)
     }
 }
 
+
 void ApplicationImpl::onReady(System::Selectable& s)
 {  
     System::MutexLock lock(_mutex);
@@ -193,12 +208,14 @@ void ApplicationImpl::onReady(System::Selectable& s)
     CFRunLoopSourceSignal(_wakeSource);
 }
 
+
 void ApplicationImpl::onRun()
 {
     // NOTE: instead of a master timer we could also iterate using
-   //         NSApp runUntil().
- [NSApp run];
+    //         NSApp runUntil().
+    [NSApp run];
 }
+
 
 void ApplicationImpl::onExit()
 {
@@ -206,12 +223,6 @@ void ApplicationImpl::onExit()
     wake();
 }
 
-void ApplicationImpl::onWake()
-{
-    CFRunLoopSourceSignal(_wakeSource);
-    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
-    CFRunLoopWakeUp(rl);
-}
 
 void ApplicationImpl::onCommitEvent(const Pt::Event& ev)
 {
@@ -223,24 +234,18 @@ void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
 {
     _eventQueue.pushEvent( ev );
 }
-    
-void ApplicationImpl::waitNext()
+
+
+void ApplicationImpl::onWake()
 {
-    NSEvent* event = nil;
-
-        event = [NSApp nextEventMatchingMask: NSAnyEventMask
-                                   untilDate: [NSDate distantFuture]
-                                      inMode: NSDefaultRunLoopMode
-                                     dequeue: YES];
-        
-        [NSApp sendEvent:event];
-
+    CFRunLoopSourceSignal(_wakeSource);
+    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+    CFRunLoopWakeUp(rl);
 }
     
 
-void ApplicationImpl::processEvents()
+void ApplicationImpl::onProcessEvents()
 { 
-    
     NSEvent* event = nil;
     
     //
@@ -298,10 +303,9 @@ void ApplicationImpl::processEvents()
                                       data2: 0];
         
         [NSApp postEvent: event atStart: false];
-      
     }
-
 }
+
 
 void ApplicationImpl::onAttachTimer(System::Timer& timer)
 { 
@@ -309,11 +313,13 @@ void ApplicationImpl::onAttachTimer(System::Timer& timer)
     this->processTimers();
 }
 
+
 void ApplicationImpl::onDetachTimer(System::Timer& timer)
 { 
     _timerQueue.removeTimer(timer);
     this->processTimers();
 }
+
 
 void ApplicationImpl::cancel(System::IOHandle& h)
 {
@@ -341,6 +347,7 @@ void ApplicationImpl::cancel(System::IOHandle& h)
     h.ready = 0;
     h.events = 0;
 }
+
 
 ApplicationImpl::IOEntry& ApplicationImpl::enableIOHandle(System::IOHandle* h)
 {
@@ -447,4 +454,3 @@ void ApplicationImpl::processTimers()
 }
 
 }}
-

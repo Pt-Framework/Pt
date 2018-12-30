@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner                                 *
- *   Copyright (c) 2014 Laurentiu-Gheorghe Crisan                          *
+ *   Copyright (C) 2014 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,49 +17,70 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Hmi_cocoa_PixmapImpl_h
-#define Pt_Hmi_cocoa_PixmapImpl_h
-
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ArgbImage.h>
-#include <CoreGraphics/CGBitmapContext.h>
-#ifdef __OBJC__
-    #import <AppKit/NSImage.h>
-    #import <AppKit/NSColor.h>
-#else
-    struct NSImage;
-#endif
+#include "PaintSurfaceImpl.h"
 
 namespace Pt {
+
 namespace Hmi {
 
-class PaintSurfaceImpl 
+PaintSurfaceImpl::PaintSurfaceImpl()
+: _size(10, 10)
 {
-    public:
-        PaintSurfaceImpl();            
+    create();
+}
 
-        virtual ~PaintSurfaceImpl();
 
-        void resize(const Pt::Gfx::SizeF& size);
+PaintSurfaceImpl::~PaintSurfaceImpl()
+{
+    destroy();
+}
 
-        inline const Gfx::SizeF& size() const
-        { return _size; }
 
-        inline CGContextRef context() const
-        { return _context; }
-
-		Pt::Gfx::ARgbImage toImage();
-
-    private:
-        void create();
+void PaintSurfaceImpl::destroy()
+{
+    if(_context == nullptr)
+        return;
     
-        void destroy();
+    CGContextRelease(_context);
+    _context = nullptr;
+}
+
+
+void PixmapSurfaceImpl::clear(const Gfx::Color& c)
+{
+}
+
+
+void PaintSurfaceImpl::create()
+{
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
-    private:
-        Pt::Gfx::SizeF _size;
-        CGContextRef _context;
-};
+    _context = CGBitmapContextCreate(nullptr, 
+                                     _size.width(), _size.height(), 
+                                     8, 0, colorSpace, 
+                                     kCGImageAlphaPremultipliedLast);
+    CGColorSpaceRelease(colorSpace);
+}
+    
+    
+void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
+{
+	_size = size;
+    
+    if( _size.width() ==  0)
+        _size.setWidth(20);
+    
+    if( _size.height() ==  0)
+        _size.setHeight(20);
+    
+    destroy();
+    create();
+}
+
+
+const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+{
+    return Gfx::ImageFormat::argb32();
+}
 
 }}
-
-#endif

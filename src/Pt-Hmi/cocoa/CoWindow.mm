@@ -23,9 +23,9 @@
 
 @implementation CoWindow
 
-- (void) setDevice : (Pt::Hmi::WindowImpl*) device
+- (void) setDevice: (Pt::Hmi::MainWindowImpl*) window
 {
-    _outDevice = device;
+    _window = window;
 }
 
 @end

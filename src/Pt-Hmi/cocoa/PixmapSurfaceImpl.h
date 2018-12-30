@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner                                 *
- *   Copyright (C) 2014 Laurentiu-Gheorghe Crisan                          *
+ *   Copyright (c) 2014 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,61 +17,54 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "PaintSurfaceImpl.h"
+
+#ifndef Pt_Hmi_PixmapSurfaceImpl_h
+#define Pt_Hmi_PixmapSurfaceImpl_h
+
+#include <Pt/Gfx/Size.h>
+
+#include <CoreGraphics/CGBitmapContext.h>
+
+#ifdef __OBJC__
+    #import <AppKit/NSImage.h>
+    #import <AppKit/NSColor.h>
+#else
+    struct NSImage;
+#endif
 
 namespace Pt {
+
 namespace Hmi {
 
-PaintSurfaceImpl::PaintSurfaceImpl()
-: _size(800, 600)
+class PixmapSurfaceImpl 
 {
-    create();
-}
+    public:
+        PaintSurfaceImpl();            
 
+        virtual ~PaintSurfaceImpl();
 
-PaintSurfaceImpl::~PaintSurfaceImpl()
-{
-    destroy();
-}
-    
-void PaintSurfaceImpl::destroy()
-{
-    if(  _context == nullptr)
-        return;
-    
-    CGContextRelease(_context);
-    _context = nullptr;
-}
-    
-void PaintSurfaceImpl::create()
-{
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    _context = CGBitmapContextCreate(nullptr, _size.width(), _size.height(), 8, 0, colorSpace, kCGImageAlphaPremultipliedLast);
-    CGColorSpaceRelease(colorSpace);
-}
-    
-    
-void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
-{
-	_size = size;
-    
-    if( _size.width() ==  0)
-        _size.setWidth(20);
-    
-    if( _size.height() ==  0)
-        _size.setHeight(20);
-    
-    destroy();
-    create();
-}
+        void clear(const Gfx::Color& c);
 
+        void resize(const Pt::Gfx::SizeF& size);
 
-Pt::Gfx::ARgbImage PaintSurfaceImpl::toImage()
-{
-	//TODO:
-	Pt::Gfx::ARgbImage image(800,600);
-	return image;
-}
+        inline const Gfx::SizeF& size() const
+        { return _size; }
+
+        const Gfx::ImageFormat& format() const;
+
+        inline CGContextRef context() const
+        { return _context; }
+
+    private:
+        void create();
+    
+        void destroy();
+    
+    private:
+        Pt::Gfx::SizeF _size;
+        CGContextRef _context;
+};
 
 }}
+
+#endif

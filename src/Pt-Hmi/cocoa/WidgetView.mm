@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2013 Marc Boris Dürner
+ * Copyright (C) 2013 Marc Boris Dï¿½rner
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,42 +22,56 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ MA  02110-1301  USA
+ */
+
 #import "WidgetView.h"
+#include "PaintSurfaceImpl.h"
+
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PointingEvent.h>
+
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
 #import <AppKit/NSTrackingArea.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include "PaintSurfaceImpl.h"
+
 #include <CoreGraphics/CoreGraphics.h>
 
 @implementation WidgetView
 
-- (WidgetView*) init : (Pt::Hmi::WindowImpl*) device
+- (WidgetView*) init : (Pt::Hmi::MainWindowImpl*) window
 {
     self = [super init];
-    _outDevice = device;
+    _window = window;
     
-    int opts = (NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved);
+    int opts = (NSTrackingActiveAlways | 
+                NSTrackingInVisibleRect | 
+                NSTrackingMouseEnteredAndExited | 
+                NSTrackingMouseMoved);
     
-    NSTrackingArea *area = [[NSTrackingArea alloc] initWithRect:[self bounds] options:opts owner:self userInfo:nil];
+    NSTrackingArea* area = [[NSTrackingArea alloc] initWithRect:[self bounds] 
+                                                   options:opts 
+                                                   owner:self 
+                                                   userInfo:nil];
     [self addTrackingArea:area];
     
     return self;
 }
+
 
 - (BOOL) acceptsFirstResponder
 {
     return TRUE;
 }
 
+
 - (void) flagsChanged:(NSEvent*)ev
 {
     unsigned int mod = [ev modifierFlags];
-    _outDevice->onSpezialKeyEvent(mod);
+    _window->onSpezialKeyEvent(mod);
 }
+
 
 - (void)keyDown:(NSEvent *)ev
 {
@@ -68,8 +82,9 @@
     if(character == 25)
         character = 9;
     
-    _outDevice->onKeyDown(character);
+    _window->onKeyDown(character);
 }
+
 
 - (void)keyUp:(NSEvent *)ev
 {
@@ -80,70 +95,74 @@
     if(character == 25)
         character = 9;
     
-    _outDevice->onKeyUp(character);
+    _window->onKeyUp(character);
 }
+
 
 - (void) drawRect:(NSRect)rect
 {
+    // Pt::Hmi::PixmapSurfaceImpl* impl = _window->paintSurface();
     
-    Pt::Hmi::PaintSurface* surface = _outDevice->paintSurface();
+    // CGContextRef context = impl->context();
     
-    Pt::Hmi::PaintSurfaceImpl* impl = surface->impl();
+    // CGImageRef image =  CGBitmapContextCreateImage(context);
     
-    CGContextRef context = impl->context();
-    
-    CGImageRef image =  CGBitmapContextCreateImage(context);
-    
-    CGContextRef currentContext = ( CGContextRef ) [[NSGraphicsContext currentContext] graphicsPort];
+    // CGContextRef currentContext = ( CGContextRef ) [[NSGraphicsContext currentContext] graphicsPort];
 
-    CGContextDrawImage(currentContext,rect,image);
+    // CGContextDrawImage(currentContext,rect,image);
     
-    CGImageRelease(image);
-
+    // CGImageRelease(image);
 }
+
 
 - (void)setFrameOrigin:(NSPoint)origin
 {
     [super setFrameOrigin:origin];
     
-    _outDevice->onPosition();
+    _window->onPosition();
 }
+
 
 - (void)setFrameSize:(NSSize)frameSize
 {
     [super setFrameSize:frameSize];
     
-    _outDevice->onSize();
+    _window->onSize();
 }
+
 
 - (void) mouseDown:(NSEvent*)ev
 {
     NSPoint mp = [ev locationInWindow];
-    _outDevice->onLMouseDown(mp.x,mp.y);
+    _window->onLMouseDown(mp.x,mp.y);
 }
+
 
 - (void) mouseUp:(NSEvent*)ev
 {
     NSPoint mp = [ev locationInWindow];
-    _outDevice->onLMouseUp(mp.x,mp.y);
+    _window->onLMouseUp(mp.x,mp.y);
 }
+
 
 - (void) mouseDragged:(NSEvent*)ev
 {
     
     NSPoint mp = [ev locationInWindow];
-    _outDevice->onMouseMove(mp.x,mp.y);
+    _window->onMouseMove(mp.x,mp.y);
 }
+
 
 - (void) mouseMoved:(NSEvent *)ev
 {
     NSPoint mp = [ev locationInWindow];
-    _outDevice->onMouseMove(mp.x,mp.y);
+    _window->onMouseMove(mp.x,mp.y);
 }
+
 
 - (BOOL) windowShouldClose:(id)window
 {
-    _outDevice->onClosing();
+    _window->onClosing();
 	return false;
 }
 

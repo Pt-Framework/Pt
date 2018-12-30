@@ -34,7 +34,6 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Region.h>
 #include <Pt/String.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gui/Api.h>

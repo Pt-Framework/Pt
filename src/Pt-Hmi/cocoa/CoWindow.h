@@ -17,17 +17,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "MainWindowImpl.h"
+
 #include <Pt/Hmi/Api.h>
-#include "WindowImpl.h"
-#import <AppKit/NSWindow.h>
 #include <Pt/Hmi/KeyEvent.h>
+
+#import <AppKit/NSWindow.h>
 
 @interface CoWindow : NSWindow
 {
-    Pt::Hmi::WindowImpl* _outDevice;
-    
+    Pt::Hmi::MainWindowImpl* _window;
 }
     
-- (void) setDevice:  (Pt::Hmi::WindowImpl*) device ;
+- (void) setDevice: (Pt::Hmi::MainWindowImpl*) window;
 
 @end

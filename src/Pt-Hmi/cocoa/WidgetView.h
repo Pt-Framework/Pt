@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2013 Marc Boris Dürner
+ * Copyright (C) 2013 Marc Boris Dï¿½rner
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,18 +22,22 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA  02110-1301  USA
+ * */
+
 #include <Pt/Hmi/Api.h>
-#include "WindowImpl.h"
+#include "MainWindowImpl.h"
+
 #import <AppKit/NSView.h>
 
 @interface WidgetView : NSView
 {
-    Pt::Hmi::WindowImpl* _outDevice;
+    Pt::Hmi::MainWindowImpl* _window;
     
 }
     
-- (WidgetView*) init:  (Pt::Hmi::WindowImpl*) device ;
+- (WidgetView*) init: (Pt::Hmi::MainWindowImpl*) window ;
 
 - (void) drawRect:(NSRect)rect;
 

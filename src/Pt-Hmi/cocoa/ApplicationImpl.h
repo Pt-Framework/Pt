@@ -28,19 +28,23 @@
 
 #include "posix/MainLoopImpl.h"
 
-#include <Pt/Gui/Api.h>
-#include <Pt/Gui/Event.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/Singleton.h>
-#include <Pt/Hmi/PointingEvent.h>
+
 #import <CoreFoundation/CFRunLoop.h>
 #import <CoreFoundation/CFFileDescriptor.h>
 
 namespace Pt {
+
 namespace Hmi {
 	
-class ApplicationImpl : public Pt::System::EventLoop , public System::Selector
+class Cursor;
+class Widget;
+class KeyEvent;
+
+class ApplicationImpl : public Pt::System::EventLoop, 
+                        public System::Selector
 {
 
 struct IOEntry
@@ -82,85 +86,41 @@ public:
 	ApplicationImpl();
 
 	virtual ~ApplicationImpl();
-
-	void processTimers();
    
 	void nextEvent();
 
-public:
-	inline System::Selector& selector()
+	System::Selector& selector()
 	{ 
 		return *this; 
 	}
-   
-    inline Pt::Signal<const Pt::Event&>& systemEvent()
-	{
-		return _systemEvent;
-	}
 
-	inline void showConsole(bool show = true)
-	{
-        //TODO:
-	}		
+    void setCursor(const Cursor* cursor)
+    {}
+
+    Pt::Timespan inactivityTime() const
+    { return Pt::Timespan(0); }
+
+    void grabPointer(Window& grabber)
+    {}
+
+    void releasePointer(Window& grabber)
+    {}
+
+    void grabPointer(Widget& grabber)
+    {}
     
-	double toUnit(int value)
-	{
-		return (double) value;
-	}
-		
-	Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value)
-	{
-		return Pt::Gfx::PointF((int) value.x(), (int)value.y());
-	}
-		
-	Pt::Gfx::SizeF toUnit(const Pt::Gfx::Size& value)
-	{
-		return Pt::Gfx::SizeF(value.width(), value.height());
-	}
+    void releasePointer(Widget& grabber)
+    {}
 
-	int fromUnit(double value)
-	{
-		return (int) value;
-	}
-		
-	Pt::Gfx::Point fromUnit(const Pt::Gfx::PointF& value)
-	{
-		return Pt::Gfx::Point((int)value.x(), (int) value.y());
-	}
-		
-	Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value)
-	{
-		return Pt::Gfx::Size((int)value.width(), (int)value.height()); 
-	}
+    void sendKeyEvent(const KeyEvent& ev)
+    {}
 
-    Pt::Gfx::Rect fromUnit(const Pt::Gfx::RectF& value)
-	{
-		return Pt::Gfx::Rect(Pt::Gfx::Point((int)value.x(), (int)value.y()), Pt::Gfx::Size((int)value.width(), (int)value.height()));
-	}
-    
-	double unitSizeInch() const
-	{
-		return 1/96.0;
-	}
-		
-	double unitSizeMm() const
-	{
-		return 1;
-	}
+    void sendMouseEvent(const MouseEvent& ev)
+    {}
 
-	void setResolution(double dpi)
-	{
-		_dpi = dpi;
-	}
-		
+    void setFontDir(const Pt::System::Path& dir)
+    {}
 
-	double resolutionDPI() const
-	{
-		return _dpi;
-	}
-
-	void processEvents();
-	
 protected:
     virtual void onAttachSelectable(System::Selectable&);
 
@@ -179,6 +139,8 @@ protected:
     virtual void onQueueEvent(const Pt::Event& event);
 
     virtual void onWake();
+
+    virtual void onProcessEvents();
 
     virtual void onAttachTimer(System::Timer& timer);
 
@@ -203,22 +165,22 @@ protected:
 
 private:
     void init();
+
     void waitNext();
+
+    void processTimers();
     
     IOEntry& enableIOHandle(System::IOHandle* h);
 
 private:
-    Pt::Signal<const Pt::Event&> _systemEvent;
-    System::Mutex _mutex;
-    System::SelectableList _selectables;
-    std::vector<IOEntry> _iotable;
+    System::Mutex                    _mutex;
+    System::SelectableList           _selectables;
+    std::vector<IOEntry>             _iotable;
     std::vector<System::Selectable*> _avail;
-    System::TimerQueue _timerQueue;
-    System::EventQueue _eventQueue;
-    CFRunLoopSourceRef _wakeSource;
-    CFRunLoopTimerRef _masterTimer;
-	double _dpi;
-    
+    System::TimerQueue               _timerQueue;
+    System::EventQueue               _eventQueue;
+    CFRunLoopSourceRef               _wakeSource;
+    CFRunLoopTimerRef                _masterTimer;
 };
 
 }}
