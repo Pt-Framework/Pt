@@ -33,8 +33,7 @@
 
 @interface WidgetView : NSView
 {
-    Pt::Hmi::MainWindowImpl* _window;
-    
+    Pt::Hmi::MainWindowImpl* _windowImpl;
 }
     
 - (WidgetView*) init: (Pt::Hmi::MainWindowImpl*) window ;

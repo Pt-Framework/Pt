@@ -595,9 +595,7 @@ class Key
                 case ShiftKey:   return "Shift";
                 case ControlKey: return "Ctrl";
                 case MetaKey:    return "Meta";
-
-                default:
-                    assert(false);
+                default:         return "";
             }
 
             return Pt::String();
@@ -610,7 +608,8 @@ class Key
 
 inline Key::Modifiers operator|(Key::Modifier m1, Key::Modifier m2)
 {
-    return Key::Modifiers(m1|m2);
+    Key::Modifiers m(m1);
+    return m|m2;
 }
 
 } // namespace

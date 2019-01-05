@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2013 Marc Boris Dürner
+ * Copyright (C) 2013 Marc Boris Dï¿½rner
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,24 +29,25 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Cursor.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
 
-    
-class CursorImpl
-{
+namespace Hmi {
 
-public:
-	CursorImpl();
-	virtual ~CursorImpl();
+// class CursorImpl
+// {
+// public:
+// 	CursorImpl();
+// 	virtual ~CursorImpl();
 
-	void setCursor(Cursors::Type c);
-	Cursors::Type getCursor() const;
+// 	void setCursor(Cursors::Type c);
+// 	Cursors::Type getCursor() const;
 
-private:
-	Cursors::Type _type;
-};
+// private:
+// 	Cursors::Type _type;
+// };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

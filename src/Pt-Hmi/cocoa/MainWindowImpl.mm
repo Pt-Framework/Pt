@@ -27,14 +27,12 @@
  * USA
  */
 
+#include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
 #include "WidgetView.h"
-#include "PaintSurfaceImpl.h"
 #include "CoWindow.h"
+
 #include <Pt/Hmi/Application.h>
-#include "ApplicationImpl.h"
-#include <Pt/Gfx/Rgb888Color.h>
-#include <Pt/Gfx/Rgb888Image.h>
 
 namespace Pt {
 
