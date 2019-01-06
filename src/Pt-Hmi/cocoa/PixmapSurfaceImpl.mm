@@ -114,10 +114,6 @@ void PixmapSurfaceImpl::begin(Painter& painter)
 void PixmapSurfaceImpl::finish()
 {
     _painter = 0;
-
-    //SelectObject(_dc, _oldPen);
-    //SelectObject(_dc, _oldBrush);
-    //SelectObject(_dc, _oldFont);
 }
 
 
@@ -255,6 +251,14 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
 
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
+    //TODO:
+//  // Drawing code
+//  CGContextRef  context = UIGraphicsGetCurrentContext();
+//  CGContextSelectFont(context, "Arial", 24, kCGEncodingFontSpecific);
+//  CGContextSetTextPosition(context,80,80);
+//  CGContextShowText(context, "hello", 6);
+  //not even this works
+//  CGContextShowTextAtPoint(context, 1,1, "hello", 6);
 }
 
 

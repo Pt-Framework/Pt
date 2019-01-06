@@ -38,8 +38,6 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/String.h>
 
-#include <vector>
-
 namespace Pt {
 
 namespace Hmi {
@@ -82,88 +80,13 @@ class PainterImpl
         
         static std::string defaultFont()
         {
-            return std::string();
+            return "sans-serif";
         }
 
         static void setDefaultFont(const std::string& f)
         {
         }
-
-        //static void setFontDir(const Pt::System::Path& path)
-        //{
-        //}
 };
-/*
-class PaintSurfaceImpl;
-class PaintSurface;
-
-class PainterImpl
-{
-    public:
-        PainterImpl(PaintSurfaceImpl* surface);
-
-        virtual ~PainterImpl();
-
-        void setPen(const Gfx::Pen& pen);
-
-        const Gfx::Pen& pen() const;
-
-        void setBrush(const Gfx::Brush& brush);
-
-        const Gfx::Brush& brush() const;
-
-        const Gfx::Font& font() const;
-
-        void setFont(const Gfx::Font& font);
-
-        Gfx::FontMetrics fontMetrics() const;
-
-        Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        const std::list<std::string>& fontFamilyNames();
-
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text);           
-
-        virtual void drawRect(const Gfx::RectF& rect);
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void drawPolyline(const Gfx::PointF* points, const size_t pointCount);
-
-        virtual void fillRect(const Gfx::RectF& rect);
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
-
-        virtual void drawSurface(const Gfx::PointF& to, PaintSurface& pm);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::ARgbImage& image);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRegion);
-
-        int depth()
-        {
-            return 0;
-        }
-    
-        void setSurface(PaintSurface& s);
-
-    
-        void addFontName(const std::string& fontName)
-        {
-        }
-    private:
-    Pt::Gfx::PointF tranPoint(const Pt::Gfx::PointF& p);
-	protected:
-        Gfx::Pen            _pen;
-        Gfx::Brush          _brush;
-        Gfx::Font           _font;
-        PaintSurfaceImpl*   _surface;
-};
-*/
 
 } // namespace
 
