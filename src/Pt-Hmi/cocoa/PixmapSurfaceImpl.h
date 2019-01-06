@@ -32,14 +32,15 @@
 
 #include "PaintSurfaceImpl.h"
 
-#include <Pt/Hmi/Picture.h>
-
+#include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Transform.h>
+#include <Pt/Gfx/FontMetrics.h>
 
 #include <CoreGraphics/CGBitmapContext.h>
 
@@ -65,6 +66,8 @@ namespace Pt {
 namespace Hmi {
 
 class Painter;
+class Picture;
+class PixmapSurface;
 
 class PixmapSurfaceImpl : public PaintSurfaceImpl
 {
@@ -96,6 +99,42 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         void setFont(const Gfx::Font& font);
 
         Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+
+        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+
+        void drawText(const Gfx::PointF& to, const Pt::String& text);
+
+        void drawText(const Gfx::PointF& to, const Pt::String& text, 
+                      const Gfx::Transform& trans);
+
+        void drawRect(const Gfx::RectF& rect);
+
+        void fillRect(const Gfx::RectF& rect);
+
+        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+
+        void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        void drawSurface(const Gfx::PointF& to, const PixmapSurface& surface);
+
+        void drawSurface(const Gfx::PointF& to, 
+                         const PixmapSurface& pm,
+                         const Gfx::RectF& pmRect);
+
+        void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+        void drawImage(const Gfx::PointF& to, 
+                       const Gfx::Image& image, 
+                       const Gfx::RectF& imgRect);
+
+        void drawPicture(const Gfx::PointF& to, const Picture& pic);
+
+
+        Pt::Gfx::PointF transform(const Pt::Gfx::PointF& p);
 
         CGContextRef context() const
         { return _context; }

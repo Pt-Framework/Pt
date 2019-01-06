@@ -29,6 +29,10 @@
 
 #include "PixmapSurfaceImpl.h"
 
+#include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/PixmapSurface.h>
+#include <Pt/Gfx/Argb32Format.h>
+
 namespace Pt {
 
 namespace Hmi {
@@ -44,9 +48,6 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 {
     destroy();
 }
-
-
-
 
 
 void PixmapSurfaceImpl::create()
@@ -238,6 +239,154 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 {
     return Gfx::FontMetrics(10, 10, 10, 10);
+}
+
+
+void PixmapSurfaceImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
+{
+    Gfx::PointF from = transform(f);
+    Gfx::PointF to = transform(t);
+    
+    CGContextMoveToPoint(_context, from.x(), from.y());
+    CGContextAddLineToPoint(_context, to.x(), to.y());
+    CGContextStrokePath(_context);
+}
+
+
+void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
+{
+}
+
+
+void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text, 
+                                 const Gfx::Transform& trans)
+{
+    drawText(to, text);
+}
+
+
+void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
+{
+    CGRect cgRect = CGRectMake(rect.x(), 
+                               _size.height() - rect.y() + rect.height(), 
+                               rect.width(), 
+                               rect.height());
+    
+    CGContextStrokeRect(_context,cgRect);
+}
+
+
+void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
+{
+    CGRect cgRect = CGRectMake(rect.x(), 
+                               _size.height() - rect.y() + rect.height(), 
+                               rect.width(), 
+                               rect.height());
+
+    CGContextFillRect(_context, cgRect);
+}
+
+
+Pt::Gfx::PointF PixmapSurfaceImpl::transform(const Pt::Gfx::PointF& p)
+{
+    return Pt::Gfx::PointF( p.x(), _size.height() - p.y() );
+}
+
+
+void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    //TODO
+}
+
+
+void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    //TODO
+}
+
+
+void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* p, size_t pointCount)
+{
+    std::vector<Gfx::PointF> points(pointCount);
+    
+    for( size_t i = 0; i < pointCount; ++i)
+        points[i] = transform(p[i]);
+    
+    CGContextMoveToPoint(_context, points[0].x(), points[0].y());
+    
+    for( size_t i = 1; i < pointCount; ++i)
+        CGContextAddLineToPoint(_context, points[i].x(), points[i].y());
+    
+    CGContextStrokePath(_context);
+}
+
+
+void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* p, size_t pointCount)
+{
+    std::vector<Gfx::PointF> points(pointCount);
+    
+    for( size_t i = 0; i < pointCount; ++i)
+        points[i] = transform(p[i]);
+    
+    CGContextMoveToPoint(_context, points[0].x(), points[0].y());
+    
+    for( size_t i = 1; i < pointCount; ++i)
+        CGContextAddLineToPoint(_context, points[i].x(), points[i].y());
+    
+    CGContextFillPath(_context);
+}
+
+
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& pm)
+{
+    CGImageRef image =  CGBitmapContextCreateImage( pm.pixmapImpl()->context() );
+    
+    CGRect rect = CGRectMake(to.x(), 
+                             _size.height() - to.y() + pm.size().height(), 
+                             pm.size().width(), 
+                             pm.size().height());
+    
+    CGContextDrawImage(_context, rect, image);
+
+    CGImageRelease(image);
+}
+
+
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
+                                    const PixmapSurface& pm,
+                                    const Gfx::RectF& pmRect)
+{
+    CGImageRef image =  CGBitmapContextCreateImage( pm.pixmapImpl()->context() );
+
+    // TODO: only draw pmRect
+
+    CGRect rect = CGRectMake(to.x(), 
+                             _size.height() - to.y() + pm.size().height(), 
+                             pm.size().width(), 
+                             pm.size().height());
+    
+    CGContextDrawImage(_context, rect, image);
+    CGImageRelease(image);
+}
+
+
+void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
+{
+    //TODO
+}
+
+
+void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, 
+                const Gfx::Image& image, 
+                const Gfx::RectF& imgRect)
+{
+    //TODO
+}
+
+
+void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
+{
+    //TODO
 }
 
 } // namespace
