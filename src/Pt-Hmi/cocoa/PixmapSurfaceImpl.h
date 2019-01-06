@@ -1,29 +1,57 @@
-/***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
- *   Copyright (c) 2014 Laurentiu-Gheorghe Crisan                          *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+ /* Copyright (C) 2015 Marc Boris Duerner 
+    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
 
-#ifndef Pt_Hmi_PixmapSurfaceImpl_h
-#define Pt_Hmi_PixmapSurfaceImpl_h
+#ifndef Pt_Hmi_cocoa_PixmapSurfaceImpl_h
+#define Pt_Hmi_cocoa_PixmapSurfaceImpl_h
+
+#include "PaintSurfaceImpl.h"
+
+#include <Pt/Hmi/Picture.h>
 
 #include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Color.h>
 
 #include <CoreGraphics/CGBitmapContext.h>
+
+#ifdef __OBJC__
+    #import <Foundation/NSGeometry.h>
+    #import <AppKit/NSGraphicsContext.h>
+    #import <AppKit/NSBezierPath.h>
+    #import <AppKit/NSImage.h>
+#else
+    struct NSBezierPath;
+    struct NSImage;
+#endif
 
 #ifdef __OBJC__
     #import <AppKit/NSImage.h>
@@ -36,23 +64,40 @@ namespace Pt {
 
 namespace Hmi {
 
-class PixmapSurfaceImpl 
+class Painter;
+
+class PixmapSurfaceImpl : public PaintSurfaceImpl
 {
     public:
-        PaintSurfaceImpl();            
+        PixmapSurfaceImpl();            
 
-        virtual ~PaintSurfaceImpl();
+        virtual ~PixmapSurfaceImpl();
 
         void clear(const Gfx::Color& c);
 
-        void resize(const Pt::Gfx::SizeF& size);
+        const Gfx::SizeF& size() const;
 
-        inline const Gfx::SizeF& size() const
-        { return _size; }
+        void resize(const Pt::Gfx::SizeF& size);
 
         const Gfx::ImageFormat& format() const;
 
-        inline CGContextRef context() const
+        void begin(Painter& painter);  
+        
+        void finish();
+
+        void setClip(const Gfx::RectF& clip);
+
+        void setCompositionMode(const Gfx::CompositionMode& mode);
+
+        void setPen(const Gfx::Pen& pen);
+
+        void setBrush(const Gfx::Brush& brush);
+
+        void setFont(const Gfx::Font& font);
+
+        Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+
+        CGContextRef context() const
         { return _context; }
 
     private:
@@ -62,9 +107,12 @@ class PixmapSurfaceImpl
     
     private:
         Pt::Gfx::SizeF _size;
-        CGContextRef _context;
+        Painter*       _painter;
+        CGContextRef   _context;
 };
 
-}}
+} // namespace
 
-#endif
+} // namespace
+
+#endif // include guard

@@ -1,31 +1,31 @@
-/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2013 Marc Boris Dürner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- * USA
- */
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  02110-1301 USA
+*/
 
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
@@ -33,6 +33,7 @@
 #include "CoWindow.h"
 
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt {
 
@@ -41,10 +42,10 @@ namespace Hmi {
 MainWindowImpl::MainWindowImpl(Window::Type type)
 : _windowStyle(0)
 , _owner(0)
+, _keyEvent(0)
+, _mouseEvent(0)
 , _topMost(false)
 {
-	_pointerEvent.buttons().resize(3);
-    
 	/* ToDO: Window position tracking timer. Use this:
 
 		NSWindowDidBecomeMainNotification 
@@ -58,7 +59,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 	_timer.setActive(Application::instance().loop());
     //TODO: remove timer for window position traking, 
     //      use position changed system event
-	_timer.timeout() += Pt::slot(*this, &WindowImpl::onPosition);
+	_timer.timeout() += Pt::slot(*this, &MainWindowImpl::onPosition);
 
 	_window = nil;
 	_view = [[WidgetView alloc] init: this ];
@@ -115,6 +116,7 @@ Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
 {
     NSPoint p = NSMakePoint(pos.x(), pos.y());
     p = [ _window convertPointToScreen: p ];
+    return Gfx::PointF(p.x, p.y);
 }
 
 
@@ -122,6 +124,7 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
 {
     NSPoint p = NSMakePoint(pos.x(), pos.y());
     p = [ _window convertPointFromScreen: p ];
+    return Gfx::PointF(p.x, p.y);
 }
 
 
@@ -202,18 +205,8 @@ void MainWindowImpl::setTitle(const std::string& text)
 {
 	_title = text;
 
-    //Title
-    if( _showtitle )
-	{ 
-		NSString* title = [NSString stringWithCString:_title.c_str() encoding:[NSString defaultCStringEncoding]];		    
-        [_window setTitle: title];
-	}
-    else
-	{
-		NSString* title = [NSString stringWithCString:"" encoding:[NSString defaultCStringEncoding]];		    
-        [_window setTitle: title];        
-	}
-
+	NSString* title = [NSString stringWithCString:_title.c_str() encoding:[NSString defaultCStringEncoding]];		    
+    [_window setTitle: title];
 }
 
 
@@ -227,22 +220,22 @@ void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 }
 
 
-void MainWindowImpl::setState(Window::State p)
+void MainWindowImpl::setState(Window::State s)
 {
-    switch(p)
+    switch(s)
     {
-        case Pt::Hmi::WindowState::Normal:
+        case Window::Normal:
             if([_window isMiniaturized])
                 [_window deminiaturize:_window];
-        break;
+            break;
             
-        case Pt::Hmi::WindowState::Maximazed:
+        case Window::Maximized:
             [_window setFrame: [[NSScreen mainScreen] frame] display:YES];
-        break;
+            break;
             
-        case Pt::Hmi::WindowState::Minimized:
+        case Window::Minimized:
             [_window miniaturize: _window];
-         break;
+            break;
     }
 }
 
@@ -348,7 +341,7 @@ void MainWindowImpl::onKeyDown(int keyCode)
 }
 
 
-void MainWindowImpl::onKeyUp(int key)
+void MainWindowImpl::onKeyUp(int keyCode)
 {
     Key::Modifiers modifiers;
     Key key(modifiers, keyCode);

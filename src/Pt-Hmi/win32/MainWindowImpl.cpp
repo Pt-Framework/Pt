@@ -268,15 +268,15 @@ void MainWindowImpl::setState(Window::State s)
     switch(s)
     {
         case Window::Normal:
-        break;
+            break;
 
         case Window::Maximized:
             style |= WS_MAXIMIZE;
-        break;
+            break;
 
-        case Pt::Hmi::Window::Minimized:
+        case Window::Minimized:
             style |= WS_MINIMIZE;
-        break;
+            break;
     }
 
     SetWindowLong(_hwnd, GWL_STYLE, style); 

@@ -1,28 +1,32 @@
-/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2013 Marc Boris Dürner
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ /* Copyright (C) 2015 Marc Boris Duerner 
+    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
 #import "ApplicationImpl.h"
 
 #import <AppKit/NSApplication.h>
@@ -82,13 +86,13 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
 
     if(flags & kCFFileDescriptorReadCallBack)
     {
-        h->events &= ~System::IOHandle::Read;
-        h->ready = System::IOHandle::Read;
+        h->events &= ~System::IONotifier::Read;
+        h->ready = System::IONotifier::Read;
     }
     else if(flags & kCFFileDescriptorWriteCallBack)
     {
-        h->events &= ~System::IOHandle::Write;
-        h->ready = System::IOHandle::Write;
+        h->events &= ~System::IONotifier::Write;
+        h->ready = System::IONotifier::Write;
     }
 
     // for OOB or POLLRI like events get file descriptor by caling 
@@ -380,64 +384,90 @@ ApplicationImpl::IOEntry& ApplicationImpl::enableIOHandle(System::IOHandle* h)
     return _iotable[h->id];
 }
 
+
+void ApplicationImpl::beginWait(System::IOHandle* h, int flags)
+{
+}
+
+
+int ApplicationImpl::endWait(System::IOHandle* h)
+{
+    return 0;
+}
+
+
 void ApplicationImpl::beginRead(System::IOHandle* h)
 {  
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
     CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
 
-    h->events = System::IOHandle::Read;
+    h->events = System::IONotifier::Read;
 }
+
 
 void ApplicationImpl::endRead(System::IOHandle* h)
 {
     // disable if callback wasn't called
-    if(h->events & System::IOHandle::Read)
+    if(h->events & System::IONotifier::Read)
     {
         CFFileDescriptorRef fdref = _iotable[h->id].fd;
         CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorReadCallBack);
     }
 
     h->ready = 0;
-    h->events &= ~System::IOHandle::Read;
+    h->events &= ~System::IONotifier::Read;
 }
+
 
 void ApplicationImpl::beginWrite(System::IOHandle* h)
 {  
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
     CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
 
-    h->events = System::IOHandle::Write;
+    h->events = System::IONotifier::Write;
 }
+
 
 void ApplicationImpl::endWrite(System::IOHandle* h)
 {
     // disable if callback wasn't called
-    if(h->events & System::IOHandle::Write)
+    if(h->events & System::IONotifier::Write)
     {
         CFFileDescriptorRef fdref = _iotable[h->id].fd;
         CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
     }
 
     h->ready = 0;
-    h->events &= ~System::IOHandle::Write;
+    h->events &= ~System::IONotifier::Write;
 }
+
 
 bool ApplicationImpl::isReadable(System::IOHandle* h)
 {  
-    bool isReady = h->ready == System::IOHandle::Read;
+    bool isReady = h->ready & System::IONotifier::Read;
     return isReady;
 }
 
+
 bool ApplicationImpl::isWritable(System::IOHandle* h)
 {
-    bool isReady = h->ready == System::IOHandle::Write;
+    bool isReady = h->ready & System::IONotifier::Write;
     return isReady;
+}
+
+
+bool ApplicationImpl::isReady(System::IOHandle* h)
+{
+    return h->ready & System::IONotifier::Read ||
+           h->ready & System::IONotifier::Write ||
+           h->ready & System::IONotifier::Except;
 }
 
 bool ApplicationImpl::isError(System::IOHandle* h)
 {
     return false;
 }
+
 
 void ApplicationImpl::processTimers()
 { 
@@ -453,4 +483,6 @@ void ApplicationImpl::processTimers()
     CFRunLoopTimerSetNextFireDate (_masterTimer, fireDate);
 }
 
-}}
+} // namespace
+
+} // namespace

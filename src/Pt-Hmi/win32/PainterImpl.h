@@ -40,7 +40,6 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
 
-
 namespace Pt {
 
 namespace Hmi {
@@ -75,7 +74,8 @@ class PainterImpl
         {
         }
         
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text)
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
+                                            const Pt::String& text)
         {   
             return Gfx::ImagePainter::fontMetrics(font, text); 
         }
@@ -96,8 +96,8 @@ class PainterImpl
         }
 };
 
-}  // namespace
+} // namespace
 
 } // namespace
 
-#endif
+#endif // include guard

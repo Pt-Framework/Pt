@@ -27,10 +27,8 @@
  */
 
 #import "WidgetView.h"
-#include "PaintSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/PointingEvent.h>
 
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
@@ -43,7 +41,7 @@
 - (WidgetView*) init : (Pt::Hmi::MainWindowImpl*) window
 {
     self = [super init];
-    _window = window;
+    _windowImpl = window;
     
     int opts = (NSTrackingActiveAlways | 
                 NSTrackingInVisibleRect | 
@@ -69,7 +67,7 @@
 - (void) flagsChanged:(NSEvent*)ev
 {
     unsigned int mod = [ev modifierFlags];
-    _window->onSpezialKeyEvent(mod);
+    _windowImpl->onSpezialKeyEvent(mod);
 }
 
 
@@ -82,7 +80,7 @@
     if(character == 25)
         character = 9;
     
-    _window->onKeyDown(character);
+    _windowImpl->onKeyDown(character);
 }
 
 
@@ -95,13 +93,13 @@
     if(character == 25)
         character = 9;
     
-    _window->onKeyUp(character);
+    _windowImpl->onKeyUp(character);
 }
 
 
 - (void) drawRect:(NSRect)rect
 {
-    // Pt::Hmi::PixmapSurfaceImpl* impl = _window->paintSurface();
+    // Pt::Hmi::PixmapSurfaceImpl* impl = _windowImpl->paintSurface();
     
     // CGContextRef context = impl->context();
     
@@ -119,7 +117,7 @@
 {
     [super setFrameOrigin:origin];
     
-    _window->onPosition();
+    _windowImpl->onPosition();
 }
 
 
@@ -127,21 +125,21 @@
 {
     [super setFrameSize:frameSize];
     
-    _window->onSize();
+    _windowImpl->onSize();
 }
 
 
 - (void) mouseDown:(NSEvent*)ev
 {
     NSPoint mp = [ev locationInWindow];
-    _window->onLMouseDown(mp.x,mp.y);
+    _windowImpl->onLMouseDown(mp.x,mp.y);
 }
 
 
 - (void) mouseUp:(NSEvent*)ev
 {
     NSPoint mp = [ev locationInWindow];
-    _window->onLMouseUp(mp.x,mp.y);
+    _windowImpl->onLMouseUp(mp.x,mp.y);
 }
 
 
@@ -149,20 +147,20 @@
 {
     
     NSPoint mp = [ev locationInWindow];
-    _window->onMouseMove(mp.x,mp.y);
+    _windowImpl->onMouseMove(mp.x,mp.y);
 }
 
 
 - (void) mouseMoved:(NSEvent *)ev
 {
     NSPoint mp = [ev locationInWindow];
-    _window->onMouseMove(mp.x,mp.y);
+    _windowImpl->onMouseMove(mp.x,mp.y);
 }
 
 
 - (BOOL) windowShouldClose:(id)window
 {
-    _window->onClosing();
+    _windowImpl->onClosing();
 	return false;
 }
 

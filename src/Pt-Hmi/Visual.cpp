@@ -37,13 +37,13 @@ namespace Hmi {
 Visual::Visual()
 : _vid( Application::instance().makeId()  )
 { 
-    Application::instance().registerVisual(*this );
+    Application::instance().registerVisual(*this);
 }
 
 
 Visual::~Visual()
 {
-    Application::instance().unregisterVisual(*this );
+    Application::instance().unregisterVisual(*this);
 }
 
         

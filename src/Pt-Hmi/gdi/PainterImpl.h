@@ -390,7 +390,7 @@ class PainterImpl
         HFONT  _font;
 };
 
-}  // namespace
+} // namespace
 
 } // namespace
 
