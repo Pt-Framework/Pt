@@ -42,51 +42,6 @@
 
 namespace {
 
-//DWORD getPenStyle(const Pt::Gfx::Pen& pen)
-//{
-//  using namespace Pt;
-//
-//#ifdef _WIN32_WCE
-//    DWORD penStyle = 0;
-//#else
-//    DWORD penStyle = PS_GEOMETRIC;
-//#endif
-//
-//    switch( pen.style() )
-//    {
-//        case Gfx::Pen::Solid:
-//            penStyle |= PS_SOLID;
-//        break;
-//        case Gfx::Pen::Dash:
-//            penStyle |= PS_DASH;
-//        break;
-//    }
-//
-//#ifndef _WIN32_WCE
-//    switch( pen.capStyle() )
-//    {
-//        case Gfx::Pen::RoundCap:
-//            penStyle |= PS_ENDCAP_ROUND;
-//        break;
-//        case Gfx::Pen::FlatCap:
-//            penStyle |= PS_ENDCAP_FLAT;
-//        break;
-//    }
-//
-//    switch( pen.joinStyle() )
-//    {
-//        case Gfx::Pen::RoundJoin:
-//             penStyle |= PS_JOIN_ROUND;
-//        break;
-//        case Gfx::Pen::BevelJoin:
-//             penStyle |= PS_JOIN_BEVEL;
-//        break;
-//    }
-//#endif
-//
-//    return penStyle;
-//}
-
 HBRUSH gradientBrush(HDC dc, int width, int height,
                      Pt::Gfx::Color gradientStart, 
                      Pt::Gfx::Color gradientStop, 
@@ -183,15 +138,6 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 
 PixmapSurfaceImpl::~PixmapSurfaceImpl()
 {
-    //HPEN pen = (HPEN)SelectObject(_dc, _oldPen);
-    //DeleteObject(pen);
-    
-    //HPEN brush = (HPEN)SelectObject(_dc, _oldBrush);
-    //DeleteObject(brush);
-
-    //HFONT font = (HFONT)SelectObject(_dc, _oldFont);
-    //DeleteObject(font);
-
     SelectObject(_dc, _oldBitmap);
 
     DeleteDC(_dc);
@@ -250,33 +196,10 @@ const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 }
 
 
-//void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
-//{
-//    if( clipRect.isNull() )
-//    {
-//        SelectClipRgn( _dc, NULL );
-//        return;
-//    }
-//
-//    Gfx::RectF rect = Application::instance().screen().fromUnit(clipRect);
-//
-//    HRGN hrgn = CreateRectRgn( rect.x(), 
-//                               rect.y(), 
-//                               rect.bottomRight().x() + 1, 
-//                               rect.bottomRight().y() + 1 );
-//
-//    SelectClipRgn(_dc, hrgn);
-//
-//    DeleteObject(hrgn);
-//
-//    _clip = clipRect;
-//}
-
-
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
     _painter->impl()->setClip(clipRect);
-
+    
     HRGN hrgn = _painter->impl()->clipRect();
 
     if(hrgn)
@@ -290,29 +213,6 @@ void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
 {
 
 }
-
-//void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
-//{
-//    DWORD penStyle = getPenStyle( pen );
-//    DWORD penColor = RGB( pen.color().red()  / 257, 
-//                          pen.color().green() / 257, 
-//                          pen.color().blue()  / 257 );
-//
-//#ifdef _WIN32_WCE
-//    HPEN newPen = CreatePen(penStyle, pen.size(), penColor);
-//#else
-//    LOGBRUSH brush;
-//    brush.lbStyle = BS_SOLID ;
-//    brush.lbColor = penColor;
-//
-//    HPEN newPen = ExtCreatePen(penStyle, pen.size(), &brush, 0, NULL);
-//#endif
-//
-//    HPEN oldPen = (HPEN) SelectObject(_dc, newPen);
-//    DeleteObject(oldPen);
-//
-//    SetTextColor(_dc, penColor);
-//}
 
 
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
@@ -356,92 +256,6 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 
     SetTextAlign(_dc, TA_BASELINE | TA_LEFT | TA_NOUPDATECP);
 }
-
-
-//void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
-//{
-//    _gradientBrush = false;
-//
-//    HBRUSH brushHandle = NULL;
-//    DWORD brushColor = RGB(brush.color().red() / 257, 
-//                           brush.color().green() / 257, 
-//                           brush.color().blue() / 257);
-//
-//    switch( brush.fillStyle() ) 
-//    {
-//        case Gfx::Brush::Solid: 
-//        {
-//            brushHandle = CreateSolidBrush(brushColor);
-//            break;
-//        }
-//
-//        case Gfx::Brush::Texture: 
-//        {
-//            const Gfx::Image& texture = brush.texture();
-//
-//            // use an empty brush for empty textures
-//            if(texture.width() == 0)
-//            {
-//                brushHandle = (HBRUSH) GetStockObject(NULL_BRUSH);
-//                break;
-//            }
-//
-//            BITMAPINFO bi;
-//            ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
-//
-//            bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);    
-//            bi.bmiHeader.biWidth        = texture.width();                // width
-//            bi.bmiHeader.biHeight       = -(ssize_t)texture.height();     // top-down image
-//            bi.bmiHeader.biPlanes       = 1;                              // always 1
-//            bi.bmiHeader.biBitCount     = texture.view().pixelStride()*8; // 32-bit
-//            bi.bmiHeader.biCompression  = BI_RGB;                         // uncompressed RGB
-//            bi.bmiHeader.biSizeImage    = 0;                              // automatic
-//            bi.bmiHeader.biClrUsed      = 0;                              // no color table
-//            bi.bmiHeader.biClrImportant = 0;                              // no color table
-//
-//            VOID* imageBits;
-//            HBITMAP bitmap = CreateDIBSection(_dc, &bi, 
-//                                              DIB_RGB_COLORS, &imageBits, NULL, 0);
-//            memcpy(imageBits, 
-//                    texture.data(), 
-//                    texture.width() * texture.height() * texture.view().pixelStride());
-//
-//            brushHandle = CreatePatternBrush(bitmap);
-//            DeleteObject(bitmap);
-//            break;     
-//        }
-//
-//        case Gfx::Brush::HorizontalGradient:
-//        case Gfx::Brush::VerticalGradient:
-//        {
-//            _gradientBrush = true;
-//            _gradient = brush.gradient();
-//            _gradientStart = brush.color();
-//            _gradientStop = brush.gradientColor();
-//
-//            // do not set a brush now, because the gradient brush pattern can
-//            // only be calculated later, when the fill area is known
-//            return;
-//        }
-//
-//        default:
-//            return;
-//    }
-//
-//    HGDIOBJ oldBrush = SelectObject(_dc, brushHandle);
-//    DeleteObject(oldBrush);
-//}
-
-
-//void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
-//{
-//    SetTextAlign(_dc, TA_BASELINE | TA_LEFT | TA_NOUPDATECP);
-//
-//    HFONT newFont = getFont(font);
-//
-//    HGDIOBJ oldFont = SelectObject(_dc, newFont);
-//    DeleteObject(oldFont);
-//}
 
 
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const

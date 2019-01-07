@@ -200,7 +200,6 @@ class PainterImpl
                 _clipRect = 0;
             }
 
-
             if( rect.isNull() )
                 return;
             

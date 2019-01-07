@@ -80,7 +80,7 @@ class PT_HMI_API PaintSurface
     protected:
         virtual const Gfx::ImageFormat& format() const = 0;
 
-        virtual void setClip(const Gfx::RectF& clip) = 0; 
+        virtual void setClip(const Gfx::RectF& clip) = 0;
 
         virtual void setCompositionMode(const Gfx::CompositionMode& mode) = 0;
 

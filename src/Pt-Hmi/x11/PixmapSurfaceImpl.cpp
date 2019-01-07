@@ -157,6 +157,8 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& rectF)
     xrect.height = rect.height();
 
     XftDrawSetClipRectangles(_xftDraw, 0, 0, &xrect, 1);
+
+    _painter->impl()->setClip(rectF);
 }
 
 

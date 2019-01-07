@@ -116,7 +116,7 @@ void Painter::setClip(const Gfx::RectF& clip)
 {
     _clip = clip;
 
-//    _impl->setClip(_clip);
+    // NOTE: cannot cache clip in _impl, because of surface transformation
 
     if(_surface)
         _surface->setClip(_clip);

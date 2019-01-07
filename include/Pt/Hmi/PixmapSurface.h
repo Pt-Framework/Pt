@@ -41,6 +41,7 @@
 #include <Pt/Hmi/PaintSurface.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class Picture;
