@@ -909,9 +909,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Qt\Api.h">
       <Filter>Pt-Qt</Filter>
     </ClInclude>
@@ -1046,9 +1043,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\demo\Dialog2.h">
       <Filter>Pt-Hmi\demo</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h">
       <Filter>Pt-Hmi</Filter>
@@ -1575,6 +1569,21 @@
     <ClInclude Include="..\..\src\Pt-System\win32\IONotifierImpl.h">
       <Filter>Pt-System\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PictureImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1673,9 +1682,6 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </None>
     <None Include="..\..\src\Pt-Qt\Jamfile">
       <Filter>Pt-Qt</Filter>
     </None>
@@ -1703,9 +1709,6 @@
     <None Include="..\..\src\Pt-Hmi\demo\Jamfile">
       <Filter>Pt-Hmi\demo</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\CoWindow.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
@@ -1716,6 +1719,12 @@
       <Filter>Pt-Gfx\tests</Filter>
     </None>
     <None Include="..\..\Jamfile" />
+    <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt\Atomicity.cpp">
@@ -2935,6 +2944,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\win32\IONotifierImpl.cpp">
       <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\PictureImpl.cpp">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\cocoa</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

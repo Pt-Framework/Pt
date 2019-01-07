@@ -119,14 +119,12 @@ void PixmapSurfaceImpl::finish()
 
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
-    // _painter->impl()->setClip(clipRect);
+    CGRect cgRect = CGRectMake(clipRect.x(), 
+                               _size.height() - clipRect.y() + clipRect.height(), 
+                               clipRect.width(), 
+                               clipRect.height());
 
-    // HRGN hrgn = _painter->impl()->clipRect();
-
-    // if(hrgn)
-    //     SelectClipRgn(_dc, hrgn);
-    // else
-    //     SelectClipRgn(_dc, NULL);
+    CGContextClipToRect(_context, cgRect);
 }
 
 
@@ -276,7 +274,7 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
                                rect.width(), 
                                rect.height());
     
-    CGContextStrokeRect(_context,cgRect);
+    CGContextStrokeRect(_context, cgRect);
 }
 
 
