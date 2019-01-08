@@ -57,100 +57,92 @@
 	struct NSGraphicsContext;
 #endif
 
-namespace Pt{
+namespace Pt {
 
-namespace Hmi{
+namespace Hmi {
 
 class MainWindowImpl : public Pt::Connectable
 {
-	public:
-		MainWindowImpl(Window::Type type);
+    public:
+        MainWindowImpl(Window::Type type);
 
-		virtual ~MainWindowImpl();
+        virtual ~MainWindowImpl();
 
-		NSView* view()
-		{ 
-			return _view;
-		}
-    
-		NSWindow* window()
-		{
-			return _window;
-		}
+        void setId(Window& w);
 
-		void setWindow(Window& w);
-
-		void setType(Window::Type type)
-		{}
+        void setType(Window::Type type)
+        {}
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
-		void show(bool v);
+        void show(bool v);
 
-		void close();
+        void close();
 
-		void paint(const Gfx::RectF& rect);
+        void paint(const Gfx::RectF& rect);
 
-		void activate();
+        void activate();
 
-		void enable(bool e);
+        void enable(bool e);
 
-		void setTopMost(bool e);
+        void setTopMost(bool e);
 
-		void move(const Gfx::PointF& p);
+        void move(const Gfx::PointF& p);
 
-		void resize(const Gfx::SizeF& size);
-		
-		void setIcon(const Gfx::Image& icon);
+        void resize(const Gfx::SizeF& size);
 
-		void setTitle(const std::string& text);
+        void setIcon(const Gfx::Image& icon);
 
-		void setMinimumSize(const Gfx::SizeF& s);
+        void setTitle(const std::string& text);
 
-		void setMaximumSize(const Gfx::SizeF& s);
+        void setMinimumSize(const Gfx::SizeF& s);
 
-		void setState(Window::State p);
+        void setMaximumSize(const Gfx::SizeF& s);
 
-		void grabPointer();
+        void setState(Window::State p);
 
-		// PixmapSurfaceImpl* paintSurface()
-		// {
-		// 	return _owner->surface().impl();
-		// }
-	
-	public:
-		void onSize();
-		void onPosition();
-		void onClosing();
-		void onMouseMove(double x,double y);
-		void onLMouseDown(double x, double y);
-		void onLMouseUp(double x, double y);
-		void onKeyDown(int key);
-		void onKeyUp(int key);
-		void onSpezialKeyEvent(unsigned int mask);
-		void onLostFocus();
+        void grabPointer();
+
+        NSView* view()
+        { 
+            return _view;
+        }
+
+        NSWindow* window()
+        {
+            return _window;
+        }
+
+    public:
+        void onSize();
+        void onPosition();
+        void onClosing();
+        void onMouseMove(double x,double y);
+        void onLMouseDown(double x, double y);
+        void onLMouseUp(double x, double y);
+        void onKeyDown(int key);
+        void onKeyUp(int key);
+        void onSpezialKeyEvent(unsigned int mask);
+        void onLostFocus();
     
-	private:
-		Pt::Gfx::PointF convertMousePosition(double x, double y);
+    private:
+        Pt::Gfx::PointF convertMousePosition(double x, double y);
 
-	private:
-		NSWindow*				     _window;
-		NSView*					     _view;
-		int                          _windowStyle;
-		Window*                      _owner;
+    private:
+        NSWindow*                _window;
+        NSView*                  _view;
+        int                      _windowStyle;
+        Pt::uint64_t             _id;
 
-		KeyEvent					 _keyEvent;
-		MouseEvent				     _mouseEvent;
-		//ResizeEvent			     _resizeEvent;
-		//MoveEvent				     _moveEvent;
-		//ActivateEvent				 _activateEvent;
-		Pt::System::Timer            _timer;
+        KeyEvent                 _keyEvent;
+        MouseEvent               _mouseEvent;
+        Pt::System::Timer        _timer;
 
-		int						     _level;
-		std::string		             _title;
-		bool	                     _topMost;
+        int                      _level;
+        std::string              _title;
+        bool                     _topMost;
 };
 
 } // namespace

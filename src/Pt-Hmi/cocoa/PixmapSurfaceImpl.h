@@ -133,7 +133,6 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
-
         Pt::Gfx::PointF transform(const Pt::Gfx::PointF& p);
 
         CGContextRef context() const

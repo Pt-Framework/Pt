@@ -82,21 +82,36 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
 {
     System::IOHandle* h = reinterpret_cast<System::IOHandle*>(p);
 
-    // call back is one-shot, so we do not have to disable it here
+    h->ready = 0;
 
     if(flags & kCFFileDescriptorReadCallBack)
     {
         h->events &= ~System::IONotifier::Read;
-        h->ready = System::IONotifier::Read;
+        h->ready |= System::IONotifier::Read;
     }
-    else if(flags & kCFFileDescriptorWriteCallBack)
+    
+    if(flags & kCFFileDescriptorWriteCallBack)
     {
         h->events &= ~System::IONotifier::Write;
-        h->ready = System::IONotifier::Write;
+        h->ready |= System::IONotifier::Write;
     }
 
-    // for OOB or POLLRI like events get file descriptor by caling 
-    // CFFileDescriptorGetNativeDescriptor() and call poll again
+    if(h->events & System::IONotifier::Except)
+    {
+        pollfd pfd;
+        pfd.fd = h->fd;
+        pfd.events = POLLPRI;
+        pfd.revents = 0;
+
+        int avail = ::poll(&pfd, 1, 0);
+        if( pfd.revents & POLLPRI )
+        {
+            h->events &= ~System::IONotifier::Except;
+            h->ready |= System::IONotifier::Except;
+        }
+    }
+
+    // NOTE: call back is one-shot, so we do not have to disable it here
 
     System::Selectable* s = h->sel;
     s->run();
@@ -364,8 +379,8 @@ ApplicationImpl::IOEntry& ApplicationImpl::enableIOHandle(System::IOHandle* h)
         ctx.release = NULL;
         ctx.copyDescription = NULL;
 
-        
-        CFFileDescriptorRef fdref = CFFileDescriptorCreate(kCFAllocatorDefault, h->fd, false, 
+        CFFileDescriptorRef fdref = CFFileDescriptorCreate(kCFAllocatorDefault, 
+                                                           h->fd, false, 
                                                            &MainLoopImplOnFd, &ctx);
 
         CFRunLoopSourceRef fdsource = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, fdref, 0);
@@ -387,12 +402,61 @@ ApplicationImpl::IOEntry& ApplicationImpl::enableIOHandle(System::IOHandle* h)
 
 void ApplicationImpl::beginWait(System::IOHandle* h, int flags)
 {
+    CFFileDescriptorRef fdref = enableIOHandle(h).fd;
+
+    if( flags & System::IONotifier::Read ||
+        flags & System::IONotifier::Except )
+    {
+        CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
+    }
+
+    if(flags & System::IONotifier::Write)
+    {
+        CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
+    }
+
+    h->events = 0;
+
+    if( flags & System::IONotifier::Read )
+    {
+        h->events |= System::IONotifier::Read;
+    }
+
+    if(flags & System::IONotifier::Write)
+    {
+        h->events |= System::IONotifier::Write;
+    }
+
+    if( flags & System::IONotifier::Except )
+    {
+        h->events |= System::IONotifier::Except;
+    }
 }
 
 
 int ApplicationImpl::endWait(System::IOHandle* h)
 {
-    return 0;
+    CFFileDescriptorRef fdref = _iotable[h->id].fd;
+
+    // disable in case callbacks weren't called
+    
+    if(h->events & System::IONotifier::Read ||
+       h->events & System::IONotifier::Except)
+    {
+        CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorReadCallBack);
+    }
+
+    if(h->events & System::IONotifier::Write)
+    {
+        CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
+    }
+
+    int flags = h->ready;
+
+    h->ready = 0;
+    h->events 0;
+
+    return flags;
 }
 
 
@@ -407,7 +471,7 @@ void ApplicationImpl::beginRead(System::IOHandle* h)
 
 void ApplicationImpl::endRead(System::IOHandle* h)
 {
-    // disable if callback wasn't called
+    // disable in case callback wasn't called
     if(h->events & System::IONotifier::Read)
     {
         CFFileDescriptorRef fdref = _iotable[h->id].fd;
@@ -430,7 +494,7 @@ void ApplicationImpl::beginWrite(System::IOHandle* h)
 
 void ApplicationImpl::endWrite(System::IOHandle* h)
 {
-    // disable if callback wasn't called
+    // disable in case callback wasn't called
     if(h->events & System::IONotifier::Write)
     {
         CFFileDescriptorRef fdref = _iotable[h->id].fd;
@@ -471,7 +535,7 @@ bool ApplicationImpl::isError(System::IOHandle* h)
 
 void ApplicationImpl::processTimers()
 { 
-    CFTimeInterval nextTimer = _timerQueue.processTimers();
+    std::size_t nextTimer = _timerQueue.processTimers();
 
     if(nextTimer == System::EventLoop::WaitInfinite)
     {
@@ -480,7 +544,7 @@ void ApplicationImpl::processTimers()
 
     CFTimeInterval interval = nextTimer / 1000.0;
     CFAbsoluteTime fireDate = CFAbsoluteTimeGetCurrent() + interval;
-    CFRunLoopTimerSetNextFireDate (_masterTimer, fireDate);
+    CFRunLoopTimerSetNextFireDate(_masterTimer, fireDate);
 }
 
 } // namespace

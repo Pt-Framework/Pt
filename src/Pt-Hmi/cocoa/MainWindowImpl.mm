@@ -40,36 +40,39 @@ namespace Pt {
 namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(Window::Type type)
-: _windowStyle(0)
-, _owner(0)
+: _window(0)
+, _view(0)
+, _windowStyle(0)
+, _id(0)
 , _keyEvent(0)
 , _mouseEvent(0)
+, _level(0)
 , _topMost(false)
 {
-	/* ToDO: Window position tracking timer. Use this:
+    /* TODO: Window position tracking timer. Use this:
 
-		NSWindowDidBecomeMainNotification 
-		NSWindowDidResignMainNotification 
-		NSWindowDidMoveNotification 
-		NSWindowDidResizeNotification
+        NSWindowDidBecomeMainNotification 
+        NSWindowDidResignMainNotification 
+        NSWindowDidMoveNotification 
+        NSWindowDidResizeNotification
 
-		in create().
-	*/
+        in create().
+    */
 
-	_timer.setActive(Application::instance().loop());
+    _timer.setActive(Application::instance().loop());
     //TODO: remove timer for window position traking, 
     //      use position changed system event
-	_timer.timeout() += Pt::slot(*this, &MainWindowImpl::onPosition);
+    _timer.timeout() += Pt::slot(*this, &MainWindowImpl::onPosition);
 
-	_window = nil;
-	_view = [[WidgetView alloc] init: this ];
+    _window = nil;
+    _view = [[WidgetView alloc] init: this ];
 
-	Gfx::PointF at(20, 20);
-	Gfx::SizeF size(400, 200);
+    Gfx::PointF at(20, 20);
+    Gfx::SizeF size(400, 200);
 
-	_windowStyle = NSTitledWindowMask | 
-                   NSClosableWindowMask | 
-                   NSMiniaturizableWindowMask | 
+    _windowStyle = NSTitledWindowMask |
+                   NSClosableWindowMask |
+                   NSMiniaturizableWindowMask |
                    NSResizableWindowMask;
     
     _window = [[CoWindow alloc] initWithContentRect:NSMakeRect(at.x(), 
@@ -79,16 +82,17 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
                                                     styleMask:_windowStyle 
                                                     backing:NSBackingStoreBuffered 
                                                     defer:NO];
-    
-	[_window setReleasedWhenClosed: NO];
-	[_window setAcceptsMouseMovedEvents:YES];
-	[_window setInitialFirstResponder: _view];
-	[_window setContentView: _view];    
-    
-	[_window makeKeyAndOrderFront:_window];
-	[_view setHidden:NO];
+
+    [_window setReleasedWhenClosed: NO];
+    [_window setAcceptsMouseMovedEvents:YES];
+    [_window setInitialFirstResponder: _view];
+    [_window setContentView: _view];    
+
+    [_window makeKeyAndOrderFront:_window];
+    [_view setHidden:NO];
+
     _level = [_window level];
-	_timer.start(100);
+    _timer.start(100);
 }
 
 
@@ -101,14 +105,14 @@ MainWindowImpl::~MainWindowImpl()
     [_window close];
     [_window release];
     [_view release];
-	_view = nil;
+    _view = nil;
     _window = nil;
 }
 
 
-void MainWindowImpl::setWindow(Window& w)
+void MainWindowImpl::setId(Pt::uint64_t id)
 {
-    _owner = &w;
+    _id = id;
 }
 
 
@@ -174,9 +178,9 @@ void MainWindowImpl::setTopMost(bool e)
 
 void MainWindowImpl::move(const Gfx::PointF& p)
 {
-	NSRect windowRect = [_window frame];
-    
-	int screenHeight = [[NSScreen mainScreen] frame].size.height;
+    NSRect windowRect = [_window frame];
+
+    int screenHeight = [[NSScreen mainScreen] frame].size.height;
 
     windowRect.origin.x = p.x();
     windowRect.origin.y = screenHeight - (p.y() + windowRect.size.height );
@@ -203,9 +207,10 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 
 void MainWindowImpl::setTitle(const std::string& text)
 {
-	_title = text;
+    _title = text;
 
-	NSString* title = [NSString stringWithCString:_title.c_str() encoding:[NSString defaultCStringEncoding]];		    
+    NSString* title = [NSString stringWithCString:_title.c_str() 
+                                encoding:[NSString defaultCStringEncoding]];
     [_window setTitle: title];
 }
 
@@ -228,11 +233,11 @@ void MainWindowImpl::setState(Window::State s)
             if([_window isMiniaturized])
                 [_window deminiaturize:_window];
             break;
-            
+
         case Window::Maximized:
             [_window setFrame: [[NSScreen mainScreen] frame] display:YES];
             break;
-            
+
         case Window::Minimized:
             [_window miniaturize: _window];
             break;
@@ -283,8 +288,8 @@ void MainWindowImpl::grabPointer()
 void MainWindowImpl::onLostFocus()
 {
     //TODO: call onLostFocus if the window lost focus
-	// if( _topMost )
-	// 	bringToFront();
+    // if( _topMost )
+    //     bringToFront();
 }
 
 
@@ -294,7 +299,7 @@ void MainWindowImpl::onLMouseUp(double x, double y)
     
     // _pointerEvent.buttons()[0].setState(DeviceButton::Released);
     // _pointerEvent.setX(pos.x());
-	// _pointerEvent.setY(pos.y());
+    // _pointerEvent.setY(pos.y());
     // _windowEvent.send(_pointerEvent);
 }
 
@@ -305,8 +310,8 @@ void MainWindowImpl::onLMouseDown(double x, double y)
     
     // _pointerEvent.buttons()[0].setState(DeviceButton::Pressed);
     // _pointerEvent.setX(pos.x());
-	// _pointerEvent.setY(pos.y());
-	// _windowEvent.send(_pointerEvent);
+    // _pointerEvent.setY(pos.y());
+    // _windowEvent.send(_pointerEvent);
 }
 
 
@@ -335,9 +340,9 @@ void MainWindowImpl::onKeyDown(int keyCode)
     Key key(modifiers, keyCode);
 
     _keyEvent.setPress(key, keyCode);
-    _keyEvent.setId( _owner->vid() );
-    
-	Application::instance().loop().commitEvent(_keyEvent);
+    _keyEvent.setId(_id);
+
+    Application::instance().loop().commitEvent(_keyEvent);
 }
 
 
@@ -347,9 +352,9 @@ void MainWindowImpl::onKeyUp(int keyCode)
     Key key(modifiers, keyCode);
 
     _keyEvent.setRelease(key, keyCode);
-    _keyEvent.setId( _owner->vid() );
-    
-	Application::instance().loop().commitEvent(_keyEvent);
+    _keyEvent.setId(_id);
+
+    Application::instance().loop().commitEvent(_keyEvent);
 }
 
 
@@ -367,20 +372,20 @@ void MainWindowImpl::onSpezialKeyEvent(unsigned int mask)
 void MainWindowImpl::onPosition()
 {
     // int screenHeight = [[NSScreen mainScreen] frame].size.height;
-    
+
     // //Window
     // NSRect windowRect = [_window frame];
     // Pt::Gfx::PointF pos(windowRect.origin.x,  (screenHeight - windowRect.origin.y - windowRect.size.height));
     
     // if( pos.x()  == _positionEvent.position().x() && pos.y()  == _positionEvent.position().y() )
     //     return;
-    
-	// _positionEvent.setPosition(pos);
-	
+
+    // _positionEvent.setPosition(pos);
+
     // _windowEvent.send( _positionEvent );
 }
-    
-    
+
+
 void MainWindowImpl::onSize()
 {   
 //     int screenHeight = [[NSScreen mainScreen] frame].size.height;
