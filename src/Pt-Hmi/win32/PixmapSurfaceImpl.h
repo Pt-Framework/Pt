@@ -37,6 +37,7 @@
 #include "PaintSurfaceImpl.h"
 
 namespace Pt {
+
 namespace Hmi {
 
 class PixmapSurfaceImpl : public PaintSurfaceImpl
@@ -64,7 +65,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         void finish();    
 
-        void resize(const Gfx::Size& size, size_t stride);
+        //void resize(const Gfx::Size& size, size_t stride);
 
         void resize(const Gfx::SizeF& size);    
 
@@ -122,4 +123,4 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
 }  // namespace
 
-#endif
+#endif // include guard

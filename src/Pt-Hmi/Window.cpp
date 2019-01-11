@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
+
 #include <cassert>
 
 namespace {
@@ -995,12 +996,19 @@ const Gfx::PointF& Window::position() const
 
 void Window::move(const Gfx::PointF& p)
 {
-   _position = p;
+    //
+    // align to physical pixel grid
+    //
+    Gfx::PointF physicalPosition = toPhysical(p);
+    physicalPosition.setX( round(physicalPosition.x()) );
+    physicalPosition.setY( round(physicalPosition.y()) );
+    
+    _position = toLogical(physicalPosition);
 
     if( ! _init )
         return;
 
-    _parent->onMove(*this, p);
+    _parent->onMove(*this, _position);
 }
 
 
@@ -1018,12 +1026,19 @@ void Window::onMoveEvent(const MoveEvent& ev)
 
 void Window::resize(const Gfx::SizeF& s)
 {
-    _size = s;
+    //
+    // align to physical pixel grid
+    //
+    Gfx::SizeF physicalSize = toPhysical(s);
+    physicalSize.setWidth( round(physicalSize.width()) );
+    physicalSize.setHeight( round(physicalSize.height()) );
+    
+    _size = toLogical(physicalSize);
 
     if( ! _init )
         return;
 
-    _parent->onResize(*this, s);
+    _parent->onResize(*this, _size);
 }
 
 
@@ -1036,7 +1051,7 @@ void Window::onResize(Window& w, const Gfx::SizeF& to)
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
     _size = ev.size();
-    _surface.resize(ev.size());
+    _surface.resize( ev.size() );
 
     //if(_mainWidget)
     //    _mainWidget->resize( ev.size() );

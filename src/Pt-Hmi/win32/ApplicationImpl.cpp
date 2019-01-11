@@ -800,12 +800,12 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     int height = HIWORD(lParam);
 
     Gfx::SizeF to(width, height);
-          
     to = Application::instance().screen().toLogical(to);
+    
     ResizeEvent rev(w.vid(), to);
     commitEvent(rev);
            
-    Gfx::RectF updateRect(Gfx::PointF(0,0), to);
+    Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
     w.update(updateRect);
             
     // windows starts a nested message loop during resizing, so the events

@@ -92,9 +92,6 @@ MainWindow::MainWindow()
 , _scrollContainer(Hmi::FlowLayout::Top)
 , _scrollContainer2(Hmi::FlowLayout::Top)
 {
-    Application::instance().screen().setScaleFactor(1.0f);
-    //Application::instance().screen().setScaleFactor(1.5f);
-
     loadIcon(_icon);
     _picture.set(_icon);
 

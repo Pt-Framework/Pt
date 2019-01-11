@@ -345,7 +345,7 @@ Gfx::PointF Widget::toPhysical(const Gfx::PointF& p) const
     if (window())
         return window()->toPhysical(p);
 
-    return p;
+    return Application::instance().screen().toPhysical(p);
 }
 
 Gfx::SizeF Widget::toPhysical(const Gfx::SizeF& n) const
@@ -353,7 +353,7 @@ Gfx::SizeF Widget::toPhysical(const Gfx::SizeF& n) const
     if (window())
         return window()->toPhysical(n);
 
-    return n;
+    return Application::instance().screen().toPhysical(n);
 }
 
 Gfx::RectF Widget::toPhysical(const Gfx::RectF& r) const
@@ -361,7 +361,7 @@ Gfx::RectF Widget::toPhysical(const Gfx::RectF& r) const
     if (window())
         return window()->toPhysical(r);
 
-    return r;
+    return Application::instance().screen().toPhysical(r);
 }
 
 Gfx::PointF Widget::toLogical(const Gfx::PointF& p) const
@@ -369,7 +369,7 @@ Gfx::PointF Widget::toLogical(const Gfx::PointF& p) const
     if (window())
         return window()->toLogical(p);
 
-    return p;
+    return Application::instance().screen().toLogical(p);
 }
 
 Gfx::SizeF Widget::toLogical(const Gfx::SizeF& n) const
@@ -377,7 +377,7 @@ Gfx::SizeF Widget::toLogical(const Gfx::SizeF& n) const
     if (window())
         return window()->toLogical(n);
 
-    return n;
+    return Application::instance().screen().toLogical(n);
 }
 
 Gfx::RectF Widget::toLogical(const Gfx::RectF& r) const
@@ -385,7 +385,7 @@ Gfx::RectF Widget::toLogical(const Gfx::RectF& r) const
     if (window())
         return window()->toLogical(r);
 
-    return r;
+    return Application::instance().screen().toLogical(r);
 }
 
 Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
@@ -735,8 +735,26 @@ Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
 }
 
 
-void Widget::layout(const Gfx::RectF& rect)
+void Widget::layout(const Gfx::RectF& r)
 {
+    //
+    // align to physical pixel grid
+    //
+    Gfx::PointF physicalPosition = toPhysical( r.topLeft() );
+    physicalPosition.setX( round(physicalPosition.x()) );
+    physicalPosition.setY( round(physicalPosition.y()) );
+    
+    Gfx::SizeF physicalSize = toPhysical(r.size());
+    physicalSize.setWidth( round(physicalSize.width()) );
+    physicalSize.setHeight( round(physicalSize.height()) );
+    
+    Gfx::PointF logicalPosition = toLogical(physicalPosition);
+    Gfx::SizeF logicalSize = toLogical(physicalSize);
+    Gfx::RectF rect(logicalPosition, logicalSize);
+
+    //
+    // layout this widget and its contents
+    //
     bool moved = rect.topLeft() != _position;
     bool resized = rect.size() != _size;
     bool isChanged = moved || resized || _isLayouting;
@@ -839,7 +857,7 @@ void Widget::repaint(const Gfx::RectF& rect)
                                                        this->size() ) );
 
     // TODO: remove this hack when Size is integer based
-    widgetRect.setHeight( std::floor(widgetRect.height() + 0.5) );
+    //widgetRect.setHeight( std::floor(widgetRect.height() + 0.5) );
 
     PaintEvent pev( vid(), widgetRect);
     Application::instance().loop().commitEvent(pev);
@@ -851,9 +869,14 @@ void Widget::repaint(const Gfx::RectF& rect)
     {
         Widget* w = (*it);
 
-        Gfx::RectF updateRect = w->geometry().intersect(rect);
-        if( updateRect.isNull() )
+        Gfx::RectF physicalGeometry = toPhysical( w->geometry() );
+        Gfx::RectF physicalRect = toPhysical(rect);
+
+        Gfx::RectF physicalUpdateRect = physicalGeometry.intersect(physicalRect);
+        if( physicalUpdateRect.isNull() )
             continue;
+
+        Gfx::RectF updateRect = toLogical(physicalUpdateRect);
 
         Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );
         updateRect.setOrigin(updatePos);
@@ -976,10 +999,14 @@ void Widget::move(const Gfx::PointF& pos)
     if(pos == _position)
         return;
 
-    _position = pos;
+    Gfx::PointF physicalPosition = toPhysical(pos);
+    physicalPosition.setX( round(physicalPosition.x()) );
+    physicalPosition.setY( round(physicalPosition.y()) );
+
+    _position = toLogical(physicalPosition);
 
     // relayout will not send a move event
-    MoveEvent mev(vid(), pos);
+    MoveEvent mev(vid(), _position);
     Application::instance().loop().commitEvent(mev);
 
     if( parent() )
