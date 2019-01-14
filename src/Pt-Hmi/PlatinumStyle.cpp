@@ -49,6 +49,8 @@
 #include <Pt/Hmi/SpinBox.h>
 #include <Pt/Hmi/TabView.h>
 
+#include <cmath>
+
 namespace {
 
 Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
@@ -261,15 +263,19 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
 
     if( button.hasFocus() )
     {
+        double offset = button.toPhysical(2);
+        offset = std::floor(offset);
+        button.toLogical(offset);
+
         Gfx::SizeF focusSize = button.size();
-        focusSize.addHeight(-4);
-        focusSize.addWidth(-4);
+        focusSize.subHeight(2 * offset);
+        focusSize.subWidth(2 * offset);
+
+        Gfx::RectF focusRect(Gfx::PointF(offset, offset), focusSize);
 
         Gfx::Pen focusPen(pen.color(), 1, Gfx::Pen::Dash);
         painter.setPen(focusPen);
-        
-        Gfx::RectF rect(Gfx::PointF(2,2), focusSize);
-        painter.drawRect(rect);
+        painter.drawRect(focusRect);
     }
 
     _baseRenderer.renderFrame(painter, borderRect, pen);
