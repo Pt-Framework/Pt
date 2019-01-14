@@ -263,9 +263,9 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
 
     if( button.hasFocus() )
     {
-        double offset = button.toPhysical(2);
+        double offset = button.toPhysical(2.0);
         offset = std::floor(offset);
-        button.toLogical(offset);
+        offset = button.toLogical(offset);
 
         Gfx::SizeF focusSize = button.size();
         focusSize.subHeight(2 * offset);
