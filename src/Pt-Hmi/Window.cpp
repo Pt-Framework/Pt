@@ -772,6 +772,8 @@ void Window::repaint()
 
     if( mainWidget() )
     {
+        // TODO: possibly use device units, because intersect() can not
+        //       consider logic sub-pixels
         Gfx::RectF updateRect = mainWidget()->geometry().intersect(_damageRect);
 
         if( ! updateRect.isNull() )
