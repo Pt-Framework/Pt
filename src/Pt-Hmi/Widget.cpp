@@ -869,18 +869,21 @@ void Widget::repaint(const Gfx::RectF& rect)
     {
         Widget* w = (*it);
 
-        Gfx::RectF physicalGeometry = toPhysical( w->geometry() );
-        Gfx::RectF physicalRect = toPhysical(rect);
+        // convert to device units
+        Gfx::RectF widgetRect = toPhysical( w->geometry() );
+        Gfx::RectF updateRect = toPhysical(rect);
 
-        Gfx::RectF physicalUpdateRect = physicalGeometry.intersect(physicalRect);
-        if( physicalUpdateRect.isNull() )
+        // clip widget update rect
+        updateRect = widgetRect.intersect(updateRect);
+        if( updateRect.isNull() )
             continue;
 
-        Gfx::RectF updateRect = toLogical(physicalUpdateRect);
+        // convert to logical units
+        updateRect = toLogical(updateRect);
 
+        // paint widget rect
         Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );
         updateRect.setOrigin(updatePos);
-
         w->repaint(updateRect);
     }
 }

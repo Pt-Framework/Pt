@@ -55,11 +55,11 @@ WindowManager::WindowManager()
 , _topMostWindow(0)
 , _borderWidth(4.0)
 , _titleHeight(20.0)
-, _inactiveColor(65535*0.68f, 65535 *0.70f, 65535 *0.75f)
+, _inactiveColor(65535 * 0.68f, 65535 * 0.70f, 65535 * 0.75f)
 , _activeColor(65535* 0.4f, 65535 *0.5f, 65535 *0.8f)
 , _textColor(65535, 65535, 65535)
-, _inactiveTextColor(65535*0.2f, 65535 *0.2f, 65535 *0.2f)
-{    
+, _inactiveTextColor(65535 * 0.2f, 65535 * 0.2f, 65535 * 0.2f)
+{
 }
 
 
@@ -348,22 +348,32 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
         if( ! w || ! w->isVisible() )
             continue; 
 
+        // convert to device units
+        Gfx::RectF updateRect = w->toPhysical(rect);
+        Gfx::RectF frameRect = w->toPhysical( frame->frameRect() );
+        Gfx::RectF clientRect = w->toPhysical( frame->clientRect() );
+
         // clip window frame rect
-        Gfx::RectF frameRect = frame->frameRect().intersect(rect);
+        frameRect = frameRect.intersect(updateRect);
         if( frameRect.isNull() )
             continue;
 
         // clip client rect
-        Gfx::RectF updateRect = frame->clientRect().intersect(rect);
+        updateRect = clientRect.intersect(updateRect);
 
-        // update rect in client coordinates
-        Gfx::PointF clientPos = w->fromParent( updateRect.topLeft() );
-        Gfx::RectF clientRect( clientPos, updateRect.size() );
+        // convert to logical units
+        updateRect = w->toLogical(updateRect);
+        frameRect = w->toLogical(frameRect);
 
+        // paint frame rect
         frame->paint(surface, frameRect);
 
+        // paint client rect
         Painter painter(surface);
-        painter.drawSurface(updateRect.topLeft(), w->surface(), clientRect);
+
+        Gfx::PointF surfacePos = w->fromParent( updateRect.topLeft() );
+        Gfx::RectF surfaceRect( surfacePos, updateRect.size() );
+        painter.drawSurface(updateRect.topLeft(), w->surface(), surfaceRect);
     }
 }
 
