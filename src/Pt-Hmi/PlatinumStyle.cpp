@@ -860,16 +860,25 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
                                             const Gfx::Font& font
                                          ) const
 {
-    
     const double barHeight = 3.0;
-    const double progressWidth = p.size().width() * p.progress();
-    const double boxY = p.size().height()/2 - barHeight/2;
+    const double boxY = p.size().height() / 2 - barHeight / 2;
 
-    Gfx::RectF boxRect( Gfx::PointF(0.0, boxY),
-                        Gfx::SizeF(p.size().width(), barHeight) );
+    Gfx::PointF boxPos = p.toPhysical( Gfx::PointF(0.0, boxY) );
+    boxPos.setX( lround(boxPos.x()) );
+    boxPos.setY( lround(boxPos.y()) );
 
-    Gfx::RectF progressRect( Gfx::PointF(0.0, boxY),
-                             Gfx::SizeF(progressWidth,barHeight) );
+    Gfx::SizeF boxSize = p.toPhysical( Gfx::SizeF(p.size().width(), barHeight) );
+    boxSize.setWidth( lround(boxSize.width()) );
+    boxSize.setHeight( lround(boxSize.height()) );
+    
+    Gfx::SizeF progressSize( boxSize.width() * p.progress(), 
+                             boxSize.height() );
+
+    Gfx::RectF boxRect(boxPos, boxSize);
+    boxRect = p.toLogical(boxRect);
+    
+    Gfx::RectF progressRect(boxPos, progressSize);
+    progressRect = p.toLogical(progressRect);
 
     painter.setBrush(background);
     painter.fillRect(boxRect);
@@ -878,8 +887,10 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
     painter.fillRect(progressRect);
 
     painter.setBrush(foreground);
-    painter.fillCircle(Gfx::PointF(progressWidth - barHeight/2, 
-                                   boxY), barHeight);
+    painter.fillEllipse( Gfx::PointF(progressRect.width() - barHeight / 2, 
+                                     progressRect.y()),
+                         Gfx::SizeF(progressRect.height(), 
+                                    progressRect.height()) );
 }
 
 
