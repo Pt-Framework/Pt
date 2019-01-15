@@ -335,11 +335,29 @@ void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
                                            const StyleOptions& options,
                                            Painter& painter, 
                                            const Gfx::RectF& rect,
-                                           const Gfx::RectF& boxRect,
+                                           const Gfx::RectF& box,
                                            const Gfx::Brush& brush,
                                            const Gfx::Pen& pen) const
 {
-    Gfx::Color checkColor = options.textColor();
+    Gfx::PointF boxPos = cb.toPhysical( box.topLeft() );
+    boxPos.setX( lround(boxPos.x()) );
+    boxPos.setY( lround(boxPos.y()) );
+
+    Gfx::SizeF boxSize = cb.toPhysical( box.size() );
+    boxSize.setWidth( lround(boxSize.width()) );
+    boxSize.setHeight( lround(boxSize.height()) );
+
+    double offset = std::ceil(boxSize.width() * 0.2);
+
+    Gfx::RectF boxRect(boxPos, boxSize);
+    
+    Gfx::RectF checkRect( Gfx::PointF(boxPos.x() + offset,
+                                      boxPos.y() + offset),
+                          Gfx::SizeF(boxSize.width() - 2 * offset,
+                                     boxSize.height() - 2 * offset) );
+    
+    boxRect = cb.toLogical(boxRect);
+    checkRect = cb.toLogical(checkRect);
 
     painter.setBrush(brush);
     painter.fillRect(boxRect);
@@ -349,15 +367,13 @@ void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
 
     if( cb.isChecked() )
     {
-        Gfx::PointF tl = boxRect.topLeft() + Gfx::PointF(2, 2);
-        Gfx::PointF br = boxRect.bottomRight() - Gfx::PointF(2, 2);
-        Gfx::PointF tr = boxRect.topRight() + Gfx::PointF(-2, 2);
-        Gfx::PointF bl = boxRect.bottomLeft() - Gfx::PointF(-2, 2);
+        painter.setBrush( options.textColor() );
+        painter.fillRect(checkRect);
 
-        Pt::Gfx::Pen pen(checkColor, 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap);
-        painter.setPen(pen);
-        painter.drawLine(tl, br);
-        painter.drawLine(tr, bl);
+        //Pt::Gfx::Pen pen(options.textColor(), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap);
+        //painter.setPen(pen);
+        //painter.drawLine(checkRect.topLeft(), checkRect.bottomRight());
+        //painter.drawLine(checkRect.topRight(), checkRect.bottomLeft());
     }
 }
 
