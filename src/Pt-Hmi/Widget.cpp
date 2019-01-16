@@ -406,6 +406,28 @@ Gfx::RectF Widget::toLogical(const Gfx::RectF& r) const
 }
 
 
+double Widget::align(double n) const
+{
+    double p = toPhysical(n);
+    p = lround(p);
+    return toLogical(p);
+}
+
+
+Gfx::RectF Widget::align(const Gfx::RectF& rect) const
+{
+    Gfx::PointF pos = toPhysical( rect.topLeft() );
+    pos.setX( lround(pos.x()) );
+    pos.setY( lround(pos.y()) );
+
+    Gfx::SizeF size = toPhysical( rect.size() );
+    size.setWidth( lround(size.width()) );
+    size.setHeight( lround(size.height()) );
+
+    return toLogical( Gfx::RectF(pos, size) );
+}
+
+
 Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF widgetPos;

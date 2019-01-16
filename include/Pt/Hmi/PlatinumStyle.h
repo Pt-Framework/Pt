@@ -56,12 +56,12 @@ class PlatinumRendererBase
         void renderFrame(Painter& painter, 
                          const Gfx::RectF& rect,
                          const Gfx::Pen& pen,
-                         double corner = 1.0) const;
+                         double corner) const;
 
         void renderPlane(Painter& painter,
                          const Gfx::RectF& rect,
                          const Gfx::Brush& brush,
-                         double corner = 1.0) const;
+                         double corner) const;
 };
 
 

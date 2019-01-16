@@ -282,6 +282,10 @@ class PT_HMI_API Widget : public Visual
 
         Gfx::RectF toLogical(const Gfx::RectF& s) const;
 
+        double align(double n) const;
+
+        Gfx::RectF align(const Gfx::RectF& rect) const;
+
     protected:
         void add(Widget& w);
 
