@@ -349,9 +349,9 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
             continue; 
 
         // convert to device units
-        Gfx::RectF updateRect = w->toPhysical(rect);
-        Gfx::RectF frameRect = w->toPhysical( frame->frameRect() );
-        Gfx::RectF clientRect = w->toPhysical( frame->clientRect() );
+        Gfx::RectF updateRect = surface.toPhysical(rect);
+        Gfx::RectF frameRect = surface.toPhysical( frame->frameRect() );
+        Gfx::RectF clientRect = surface.toPhysical( frame->clientRect() );
 
         // clip window frame rect
         frameRect = frameRect.intersect(updateRect);
@@ -362,8 +362,8 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
         updateRect = clientRect.intersect(updateRect);
 
         // convert to logical units
-        updateRect = w->toLogical(updateRect);
-        frameRect = w->toLogical(frameRect);
+        updateRect = surface.toLogical(updateRect);
+        frameRect = surface.toLogical(frameRect);
 
         // paint frame rect
         frame->paint(surface, frameRect);

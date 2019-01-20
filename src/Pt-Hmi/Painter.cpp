@@ -292,6 +292,67 @@ void Painter::setDefaultFont(std::string f)
     PaintSurface::setDefaultFont(f);
 }
 
+
+double Painter::toPhysical(double n) const
+{
+    return _surface ? _surface->toPhysical(n) : n;
+}
+
+
+Gfx::PointF Painter::toPhysical(const Gfx::PointF& p) const
+{
+    return _surface ?_surface->toPhysical(p) : p;
+}
+
+
+Gfx::SizeF Painter::toPhysical(const Gfx::SizeF& s) const
+{
+    return _surface ? _surface->toPhysical(s) : s;
+}
+
+
+Gfx::RectF Painter::toPhysical(const Gfx::RectF& r) const
+{
+    return _surface ? _surface->toPhysical(r) : r;
+}
+
+
+double Painter::toLogical(double n) const
+{
+    return _surface ? _surface->toLogical(n) : n;
+}
+
+
+Gfx::PointF Painter::toLogical(const Gfx::PointF& p) const
+{
+    return _surface ? _surface->toLogical(p) : p;
+}
+
+
+Gfx::SizeF Painter::toLogical(const Gfx::SizeF& s) const
+{
+    return _surface ? _surface->toLogical(s) : s;
+}
+
+
+Gfx::RectF Painter::toLogical(const Gfx::RectF& r) const
+{
+    return _surface ? _surface->toLogical(r) : r;
+}
+
+
+double Painter::align(double n) const
+{
+    return _surface ? _surface->align(n) : n;
+}
+
+
+Gfx::RectF Painter::align(const Gfx::RectF& rect) const
+{
+    return _surface ? _surface->align(rect) : rect;
+}
+
+
 } // namespace
 
 } // namespace

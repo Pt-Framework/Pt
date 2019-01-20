@@ -340,94 +340,6 @@ Gfx::PointF Widget::toScreen(const Gfx::PointF& pos) const
 }
 
 
-double Widget::toPhysical(double n) const
-{
-    return Application::instance().screen().toPhysical(n);
-}
-
-
-Gfx::PointF Widget::toPhysical(const Gfx::PointF& p) const
-{
-    if (window())
-        return window()->toPhysical(p);
-
-    return Application::instance().screen().toPhysical(p);
-}
-
-
-Gfx::SizeF Widget::toPhysical(const Gfx::SizeF& n) const
-{
-    if (window())
-        return window()->toPhysical(n);
-
-    return Application::instance().screen().toPhysical(n);
-}
-
-
-Gfx::RectF Widget::toPhysical(const Gfx::RectF& r) const
-{
-    if (window())
-        return window()->toPhysical(r);
-
-    return Application::instance().screen().toPhysical(r);
-}
-
-
-double Widget::toLogical(double n) const
-{
-    return Application::instance().screen().toLogical(n);
-}
-
-
-Gfx::PointF Widget::toLogical(const Gfx::PointF& p) const
-{
-    if (window())
-        return window()->toLogical(p);
-
-    return Application::instance().screen().toLogical(p);
-}
-
-
-Gfx::SizeF Widget::toLogical(const Gfx::SizeF& n) const
-{
-    if (window())
-        return window()->toLogical(n);
-
-    return Application::instance().screen().toLogical(n);
-}
-
-
-Gfx::RectF Widget::toLogical(const Gfx::RectF& r) const
-{
-    if (window())
-        return window()->toLogical(r);
-
-    return Application::instance().screen().toLogical(r);
-}
-
-
-double Widget::align(double n) const
-{
-    double p = toPhysical(n);
-    p = lround(p);
-    return toLogical(p);
-}
-
-
-Gfx::RectF Widget::align(const Gfx::RectF& rect) const
-{
-    Gfx::PointF pos = toPhysical( rect.topLeft() );
-    pos.setX( lround(pos.x()) );
-    pos.setY( lround(pos.y()) );
-
-    Gfx::SizeF size = toPhysical( rect.size() );
-    size.setWidth( lround(size.width()) );
-    size.setHeight( lround(size.height()) );
-
-    return toLogical( Gfx::RectF(pos, size) );
-}
-
-
 Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF widgetPos;
@@ -780,17 +692,7 @@ void Widget::layout(const Gfx::RectF& r)
     //
     // align to physical pixel grid
     //
-    Gfx::PointF physicalPosition = toPhysical( r.topLeft() );
-    physicalPosition.setX( round(physicalPosition.x()) );
-    physicalPosition.setY( round(physicalPosition.y()) );
-    
-    Gfx::SizeF physicalSize = toPhysical(r.size());
-    physicalSize.setWidth( round(physicalSize.width()) );
-    physicalSize.setHeight( round(physicalSize.height()) );
-    
-    Gfx::PointF logicalPosition = toLogical(physicalPosition);
-    Gfx::SizeF logicalSize = toLogical(physicalSize);
-    Gfx::RectF rect(logicalPosition, logicalSize);
+    Gfx::RectF rect = Application::instance().screen().align(r);
 
     //
     // layout this widget and its contents
@@ -904,14 +806,16 @@ void Widget::repaint(const Gfx::RectF& rect)
 
     const std::vector<Widget*>& widgets = this->widgets();
 
+    Screen& screen = Application::instance().screen();
+
     std::vector<Widget*>::const_iterator it;
     for(it = widgets.begin() ; it != widgets.end(); ++it)
     {
         Widget* w = (*it);
 
         // convert to device units
-        Gfx::RectF widgetRect = toPhysical( w->geometry() );
-        Gfx::RectF updateRect = toPhysical(rect);
+        Gfx::RectF widgetRect = screen.toPhysical( w->geometry() );
+        Gfx::RectF updateRect = screen.toPhysical(rect);
 
         // clip widget update rect
         updateRect = widgetRect.intersect(updateRect);
@@ -919,7 +823,7 @@ void Widget::repaint(const Gfx::RectF& rect)
             continue;
 
         // convert to logical units
-        updateRect = toLogical(updateRect);
+        updateRect = screen.toLogical(updateRect);
 
         // paint widget rect
         Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );
@@ -1042,11 +946,7 @@ void Widget::move(const Gfx::PointF& pos)
     if(pos == _position)
         return;
 
-    Gfx::PointF physicalPosition = toPhysical(pos);
-    physicalPosition.setX( round(physicalPosition.x()) );
-    physicalPosition.setY( round(physicalPosition.y()) );
-
-    _position = toLogical(physicalPosition);
+    _position = Application::instance().screen().align(pos);
 
     // relayout will not send a move event
     MoveEvent mev(vid(), _position);
@@ -1109,7 +1009,8 @@ const Spacing& Widget::margin() const
 
 void Widget::setMargin(const Spacing& s)
 {
-    _margin = s;
+
+    _margin = Application::instance().screen().align(s);
 
     if( parent() )
        parent()->relayout();
@@ -1136,7 +1037,7 @@ const Spacing& Widget::padding() const
 
 void Widget::setPadding( const Spacing& p )
 {
-    _padding = p;
+    _padding = Application::instance().screen().align(p);
     relayout();
 }
 

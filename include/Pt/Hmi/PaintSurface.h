@@ -63,6 +63,30 @@ class PT_HMI_API PaintSurface
 
         static void setDefaultFont(const std::string& f);
     
+        virtual double toPhysical(double n) const;
+
+        Gfx::PointF toPhysical(const Gfx::PointF& p) const;
+
+        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const;
+
+        Gfx::RectF toPhysical(const Gfx::RectF& r) const;
+
+        double toLogical(double n) const;
+
+        Gfx::PointF toLogical(const Gfx::PointF& p) const;
+
+        Gfx::SizeF toLogical(const Gfx::SizeF& s) const;
+
+        Gfx::RectF toLogical(const Gfx::RectF& s) const;
+
+        double align(double n) const;
+
+        Gfx::PointF& align(const Gfx::PointF& p) const;
+
+        Gfx::SizeF& align(const Gfx::SizeF& s) const;
+
+        Gfx::RectF align(const Gfx::RectF& rect) const;
+
     protected:
         PaintSurface();
 

@@ -172,10 +172,10 @@ void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // bottom right border
     //
-    Gfx::RectF nrect = _frame->toPhysical(_geometry);
-    Gfx::PointF bottomLeft = _frame->toLogical(nrect.bottomLeft());
-    Gfx::PointF bottomRight = _frame->toLogical(nrect.bottomRight());
-    Gfx::PointF topRight = _frame->toLogical(nrect.topRight());
+    Gfx::RectF nrect = painter.toPhysical(_geometry);
+    Gfx::PointF bottomLeft = painter.toLogical(nrect.bottomLeft());
+    Gfx::PointF bottomRight = painter.toLogical(nrect.bottomRight());
+    Gfx::PointF topRight = painter.toLogical(nrect.topRight());
 
 
     painter.setPen( Gfx::Pen(borderBottomRightColor, 1) );
@@ -511,37 +511,6 @@ Gfx::SizeF WindowFrame::fromFrame(const Gfx::SizeF& size) const
 
     return Gfx::SizeF(size.width() - offX, size.height() - offY);
 }
-
-Gfx::PointF WindowFrame::toPhysical(const Gfx::PointF& p)const
-{
-    return _window->toPhysical(p);
-}
-
-Gfx::SizeF WindowFrame::toPhysical(const Gfx::SizeF& n)const
-{
-    return _window->toPhysical(n);
-}
-
-Gfx::RectF WindowFrame::toPhysical(const Gfx::RectF& r) const
-{
-    return _window->toPhysical(r);
-}
-
-Gfx::PointF WindowFrame::toLogical(const Gfx::PointF& p) const
-{
-    return _window->toLogical(p);
-}
-
-Gfx::SizeF WindowFrame::toLogical(const Gfx::SizeF& n) const
-{
-    return _window->toLogical(n);
-}
-
-Gfx::RectF WindowFrame::toLogical(const Gfx::RectF& r) const
-{
-    return _window->toLogical(r);
-}
-
 
 void WindowFrame::onMenu()
 {

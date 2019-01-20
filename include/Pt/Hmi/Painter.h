@@ -101,6 +101,26 @@ class PT_HMI_API Painter : public Gfx::Painter
     
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imageRect);
 
+        double toPhysical(double n) const;
+
+        Gfx::PointF toPhysical(const Gfx::PointF& p) const;
+
+        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const;
+
+        Gfx::RectF toPhysical(const Gfx::RectF& r) const;
+
+        double toLogical(double n) const;
+
+        Gfx::PointF toLogical(const Gfx::PointF& p) const;
+
+        Gfx::SizeF toLogical(const Gfx::SizeF& s) const;
+
+        Gfx::RectF toLogical(const Gfx::RectF& s) const;
+
+        double align(double n) const;
+
+        Gfx::RectF align(const Gfx::RectF& rect) const;
+
     public:
         void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
 

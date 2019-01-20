@@ -609,36 +609,6 @@ Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
     return p;
 }
 
-Gfx::PointF Window::toPhysical(const Gfx::PointF& p)const
-{
-    return Application::instance().screen().toPhysical(p);
-}
-
-Gfx::SizeF Window::toPhysical(const Gfx::SizeF& n)const
-{
-    return Application::instance().screen().toPhysical(n);
-}
-
-Gfx::RectF Window::toPhysical(const Gfx::RectF& r) const
-{
-    return Application::instance().screen().toPhysical(r);
-}
-
-Gfx::PointF Window::toLogical(const Gfx::PointF& p) const
-{
-    return Application::instance().screen().toLogical(p);
-}
-
-Gfx::SizeF Window::toLogical(const Gfx::SizeF& n) const
-{
-    return Application::instance().screen().toLogical(n);
-}
-
-Gfx::RectF Window::toLogical(const Gfx::RectF& r) const
-{
-    return Application::instance().screen().toLogical(r);
-}
-
 
 const Gfx::Brush& Window::background() const
 {
@@ -1001,11 +971,7 @@ void Window::move(const Gfx::PointF& p)
     //
     // align to physical pixel grid
     //
-    Gfx::PointF physicalPosition = toPhysical(p);
-    physicalPosition.setX( round(physicalPosition.x()) );
-    physicalPosition.setY( round(physicalPosition.y()) );
-    
-    _position = toLogical(physicalPosition);
+    _position = _surface.align(p);
 
     if( ! _init )
         return;
@@ -1031,11 +997,7 @@ void Window::resize(const Gfx::SizeF& s)
     //
     // align to physical pixel grid
     //
-    Gfx::SizeF physicalSize = toPhysical(s);
-    physicalSize.setWidth( round(physicalSize.width()) );
-    physicalSize.setHeight( round(physicalSize.height()) );
-    
-    _size = toLogical(physicalSize);
+    _size =_surface.align(s);
 
     if( ! _init )
         return;

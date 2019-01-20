@@ -35,6 +35,7 @@
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Hmi/Spacing.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
@@ -121,6 +122,52 @@ class PT_HMI_API Screen : public WindowBase
         {
             return n * _scaling;
         }
+
+        double align(double n) const
+        {
+            double p = toPhysical(n);
+            p = lround(p);
+            return toLogical(p);
+        }
+
+        Gfx::PointF align(const Gfx::PointF& p) const
+        {
+            Gfx::PointF pos = toPhysical(p);
+            pos.setX(lround(pos.x()));
+            pos.setY(lround(pos.y()));
+            return toLogical(pos);
+        }
+
+        Gfx::SizeF align(const Gfx::SizeF& s) const
+        {
+            Gfx::SizeF size = toPhysical(s);
+            size.setWidth(lround(size.width()));
+            size.setHeight(lround(size.height()));
+            return toLogical(size);
+        }
+
+        Gfx::RectF align(const Gfx::RectF& rect) const
+        {
+            Gfx::PointF pos = toPhysical(rect.topLeft());
+            pos.setX(lround(pos.x()));
+            pos.setY(lround(pos.y()));
+
+            Gfx::SizeF size = toPhysical(rect.size());
+            size.setWidth(lround(size.width()));
+            size.setHeight(lround(size.height()));
+
+            return toLogical(Gfx::RectF(pos, size));
+        }
+
+        Spacing align(const Spacing& spacing) const
+        {
+            Spacing alignedSpacing( align(spacing.left()),
+                                    align(spacing.top()),
+                                    align(spacing.right()),
+                                    align(spacing.bottom()));
+            return alignedSpacing;
+        }
+       
 
     public:
         virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const;

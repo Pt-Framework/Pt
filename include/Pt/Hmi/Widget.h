@@ -266,25 +266,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
-        double toPhysical(double n) const;
-
-        Gfx::PointF toPhysical(const Gfx::PointF& p) const;
-
-        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const;
-
-        Gfx::RectF toPhysical(const Gfx::RectF& r) const;
-
-        double toLogical(double n) const;
-
-        Gfx::PointF toLogical(const Gfx::PointF& p) const;
-
-        Gfx::SizeF toLogical(const Gfx::SizeF& s) const;
-
-        Gfx::RectF toLogical(const Gfx::RectF& s) const;
-
-        double align(double n) const;
-
-        Gfx::RectF align(const Gfx::RectF& rect) const;
 
     protected:
         void add(Widget& w);

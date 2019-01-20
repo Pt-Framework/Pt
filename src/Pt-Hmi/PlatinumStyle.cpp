@@ -91,9 +91,6 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
                                        const Gfx::Pen& pen,
                                        double corner) const
 {
-    double pixelWidth = corner;
-    corner = pixelWidth;
-
     Gfx::PointF outline[9] = {};
 
     // top left
@@ -104,25 +101,25 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
     outline[1].setY(0);
 
     // top right
-    outline[2].setX(rect.width() - corner - pixelWidth);
+    outline[2].setX(rect.width() - 2*corner);
     outline[2].setY(0);
 
-    outline[3].setX(rect.width() - pixelWidth);
+    outline[3].setX(rect.width() - corner);
     outline[3].setY(corner);
 
     // bottom right
-    outline[4].setX(rect.width() - pixelWidth);
-    outline[4].setY(rect.height() - corner - pixelWidth);
+    outline[4].setX(rect.width() - corner);
+    outline[4].setY(rect.height() - 2*corner);
 
-    outline[5].setX(rect.width() - corner - pixelWidth);
-    outline[5].setY(rect.height() - pixelWidth);
+    outline[5].setX(rect.width() - 2*corner);
+    outline[5].setY(rect.height() - corner);
 
     // bottom left
     outline[6].setX(corner);
-    outline[6].setY(rect.height() - pixelWidth);
+    outline[6].setY(rect.height() - corner);
 
     outline[7].setX(0);
-    outline[7].setY(rect.height() - corner - pixelWidth);
+    outline[7].setY(rect.height() - 2*corner);
             
     outline[8] = outline[0];
     
@@ -136,9 +133,6 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
                                        const Gfx::Brush& brush,
                                        double corner) const
 {
-    double pixelWidth = corner;
-    corner = pixelWidth;
-
     Gfx::PointF outline[9] = {};
 
     // top left
@@ -149,25 +143,25 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
     outline[1].setY(0);
 
     // top right
-    outline[2].setX(rect.width() - corner - pixelWidth);
+    outline[2].setX(rect.width() - 2*corner);
     outline[2].setY(0);
 
-    outline[3].setX(rect.width() - pixelWidth);
+    outline[3].setX(rect.width() - corner);
     outline[3].setY(corner);
 
     // bottom right
-    outline[4].setX(rect.width() - pixelWidth);
-    outline[4].setY(rect.height() - corner - pixelWidth);
+    outline[4].setX(rect.width() - corner);
+    outline[4].setY(rect.height() - 2*corner);
 
-    outline[5].setX(rect.width() - corner - pixelWidth);
-    outline[5].setY(rect.height() - pixelWidth);
+    outline[5].setX(rect.width() - 2*corner);
+    outline[5].setY(rect.height() - corner);
 
     // bottom left
     outline[6].setX(corner);
-    outline[6].setY(rect.height() - pixelWidth);
+    outline[6].setY(rect.height() - corner);
 
     outline[7].setX(0);
-    outline[7].setY(rect.height() - corner - pixelWidth);
+    outline[7].setY(rect.height() - 2*corner);
             
     outline[8] = outline[0];
 
@@ -254,14 +248,16 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
                                                 const Gfx::Brush& brush,
                                                 const Gfx::Pen& pen) const 
 {
-    double pixelWidth = button.toLogical(1.0);
+    double physical = painter.toPhysical(1.0);
+    double alignPhysical = painter.align(physical);
+    double pixelWidth = painter.toLogical(alignPhysical);
 
     Gfx::RectF borderRect( button.size() );
     _baseRenderer.renderPlane(painter, borderRect, brush, pixelWidth);
 
     if( button.hasFocus() )
     {
-        double offset = button.align(2.0);
+        double offset = painter.align(2.0);
 
         Gfx::RectF focusRect( Gfx::PointF(offset, offset), 
                               Gfx::SizeF(button.size().width() - 2 * offset,
@@ -334,8 +330,8 @@ void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
                                            const Gfx::Brush& brush,
                                            const Gfx::Pen& pen) const
 {
-    Gfx::RectF boxRect = cb.align(box);
-    double offset = cb.align(box.width() * 0.2);
+    Gfx::RectF boxRect = painter.align(box);
+    double offset = painter.align(box.width() * 0.2);
 
     Gfx::RectF checkRect( Gfx::PointF(boxRect.x() + offset,
                                       boxRect.y() + offset),
@@ -418,7 +414,7 @@ void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
                                                const Gfx::Brush& brush) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
-    double pixelWidth = p.toLogical(1.0);
+    double pixelWidth = painter.toLogical(1.0);
 
     _baseRenderer.renderPlane(painter, borderRect, brush, pixelWidth);
 }
@@ -431,7 +427,7 @@ void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
                                           const Gfx::Pen& pen) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
-    double pixelWidth = p.toLogical(1.0);
+    double pixelWidth = painter.toLogical(1.0);
 
     _baseRenderer.renderFrame(painter, borderRect, pen, pixelWidth);
 }
@@ -467,7 +463,7 @@ void PlatinumLabelRenderer::onRenderBackground(const Label& l,
                                                const Gfx::Brush& brush) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
-    double pixelWidth = l.toLogical(1.0);
+    double pixelWidth = painter.toLogical(1.0);
 
     _baseRenderer.renderPlane(painter, borderRect, brush, pixelWidth);
 }
@@ -480,7 +476,7 @@ void PlatinumLabelRenderer::onRenderFrame(const Label& l,
                                           const Gfx::Pen& contour) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
-    double pixelWidth = l.toLogical(1.0);
+    double pixelWidth = painter.toLogical(1.0);
 
     _baseRenderer.renderFrame(painter, borderRect, contour, pixelWidth);
 }
@@ -866,11 +862,11 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
     const double barHeight = 3.0;
     const double boxY = p.size().height() / 2 - barHeight / 2;
 
-    Gfx::PointF boxPos = p.toPhysical( Gfx::PointF(0.0, boxY) );
+    Gfx::PointF boxPos = painter.toPhysical( Gfx::PointF(0.0, boxY) );
     boxPos.setX( lround(boxPos.x()) );
     boxPos.setY( lround(boxPos.y()) );
 
-    Gfx::SizeF boxSize = p.toPhysical( Gfx::SizeF(p.size().width(), barHeight) );
+    Gfx::SizeF boxSize = painter.toPhysical( Gfx::SizeF(p.size().width(), barHeight) );
     boxSize.setWidth( lround(boxSize.width()) );
     boxSize.setHeight( lround(boxSize.height()) );
     
@@ -878,10 +874,10 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
                              boxSize.height() );
 
     Gfx::RectF boxRect(boxPos, boxSize);
-    boxRect = p.toLogical(boxRect);
+    boxRect = painter.toLogical(boxRect);
     
     Gfx::RectF progressRect(boxPos, progressSize);
-    progressRect = p.toLogical(progressRect);
+    progressRect = painter.toLogical(progressRect);
 
     painter.setBrush(background);
     painter.fillRect(boxRect);
