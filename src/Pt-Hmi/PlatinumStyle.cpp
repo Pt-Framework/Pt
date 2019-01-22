@@ -248,20 +248,16 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
                                                 const Gfx::Brush& brush,
                                                 const Gfx::Pen& pen) const 
 {
-    double physical = painter.toPhysical(1.0);
-    double alignPhysical = painter.align(physical);
-    double pixelWidth = painter.toLogical(alignPhysical);
+    double offset = painter.align(1.0);
 
     Gfx::RectF borderRect( button.size() );
-    _baseRenderer.renderPlane(painter, borderRect, brush, pixelWidth);
+    _baseRenderer.renderPlane(painter, borderRect, brush, offset);
 
     if( button.hasFocus() )
     {
-        double offset = painter.align(2.0);
-
-        Gfx::RectF focusRect( Gfx::PointF(offset, offset), 
-                              Gfx::SizeF(button.size().width() - 2 * offset,
-                                          button.size().height() - 2 * offset) );
+        Gfx::RectF focusRect( Gfx::PointF(2 * offset, 2 * offset), 
+                              Gfx::SizeF(button.size().width() - (4 * offset),
+                                         button.size().height() - (4 * offset)) );
 
         Gfx::Pen focusPen(pen.color(), 1, Gfx::Pen::Dash);
         painter.setPen(focusPen);
@@ -269,7 +265,7 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
     }
 
     
-    _baseRenderer.renderFrame(painter, borderRect, pen, pixelWidth);
+    _baseRenderer.renderFrame(painter, borderRect, pen, offset);
 }
 
 
@@ -414,7 +410,7 @@ void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
                                                const Gfx::Brush& brush) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
-    double pixelWidth = painter.toLogical(1.0);
+    double pixelWidth = painter.align(1.0);
 
     _baseRenderer.renderPlane(painter, borderRect, brush, pixelWidth);
 }
@@ -427,7 +423,7 @@ void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
                                           const Gfx::Pen& pen) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
-    double pixelWidth = painter.toLogical(1.0);
+    double pixelWidth = painter.align(1.0);
 
     _baseRenderer.renderFrame(painter, borderRect, pen, pixelWidth);
 }
@@ -463,7 +459,7 @@ void PlatinumLabelRenderer::onRenderBackground(const Label& l,
                                                const Gfx::Brush& brush) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
-    double pixelWidth = painter.toLogical(1.0);
+    double pixelWidth = painter.align(1.0);
 
     _baseRenderer.renderPlane(painter, borderRect, brush, pixelWidth);
 }
@@ -476,7 +472,7 @@ void PlatinumLabelRenderer::onRenderFrame(const Label& l,
                                           const Gfx::Pen& contour) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
-    double pixelWidth = painter.toLogical(1.0);
+    double pixelWidth = painter.align(1.0);
 
     _baseRenderer.renderFrame(painter, borderRect, contour, pixelWidth);
 }
