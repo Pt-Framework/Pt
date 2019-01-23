@@ -347,11 +347,16 @@ double Painter::align(double n) const
 }
 
 
+Gfx::PointF Painter::align(const Gfx::PointF& p) const
+{
+    return _surface ? _surface->align(p) : p;
+}
+
+
 Gfx::RectF Painter::align(const Gfx::RectF& rect) const
 {
     return _surface ? _surface->align(rect) : rect;
 }
-
 
 } // namespace
 

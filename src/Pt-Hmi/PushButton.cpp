@@ -358,6 +358,8 @@ void PushButton::layoutContent()
     double textX = 0;
     double textY = 0;
 
+    Screen& screen = Application::instance().screen();
+
     switch(_direction)
     {
         default:
@@ -401,9 +403,12 @@ void PushButton::layoutContent()
 
         _iconPos.set(pictureX + pictureXOff, 
                      pictureY + pictureYOff);
+
+        _iconPos = screen.align(_iconPos);
     }
 
     _textPos.set(textX, textY);
+    _textPos = screen.align(_textPos);
 }
 
 

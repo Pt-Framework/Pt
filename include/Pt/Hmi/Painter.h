@@ -119,6 +119,8 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         double align(double n) const;
 
+        Gfx::PointF align(const Gfx::PointF& rect) const;
+
         Gfx::RectF align(const Gfx::RectF& rect) const;
 
     public:
