@@ -773,9 +773,7 @@ class SettingsReader
             virtual State* onComma(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
-                {
                     this->syntaxError(reader.line());
-                }
 
                 reader.enterMember();
                 return BeginStatement::instance();
@@ -783,6 +781,9 @@ class SettingsReader
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
+                if(reader.depth() > 0)
+                    this->syntaxError(reader.line());
+
                 reader.buildToken(c);
                 return BeginType::instance();
             }

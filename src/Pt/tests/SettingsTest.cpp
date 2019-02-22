@@ -67,10 +67,13 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Entry", *this, &SettingsTest::Entry );
             Pt::Unit::TestSuite::registerMethod( "ConstEntry", *this, &SettingsTest::ConstEntry );
 
+            Pt::Unit::TestSuite::registerMethod( "EmptyElements", *this, &SettingsTest::EmptyElements );
+
             //Pt::Unit::TestSuite::registerMethod( "Writer", *this, &SettingsTest::Writer );
         }
 
     protected:
+        void EmptyElements();
         void EscapeString();
         void Writer();
         void Comment();
@@ -490,6 +493,32 @@ void SettingsTest::ComplexNamedType()
 
     PT_UNIT_ASSERT( settings.entry("b").entry("blue").get(n) );
     PT_UNIT_ASSERT(6 == n);
+}
+
+void SettingsTest::EmptyElements()
+{
+    std::stringstream ss;
+    ss << "a=[\n";
+    ss << "b={},\n";
+    ss << "c=[]\n";
+    ss << "]\n";
+    ss << "x=[]\n";
+    ss << "y={}\n";
+
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
+    Pt::Settings settings;
+    settings.load(ts);
+
+    std::vector<int> v;
+    PT_UNIT_ASSERT( settings.entry("a").entry("b") );
+    PT_UNIT_ASSERT( settings.entry("a").entry("c").get(v) );
+    PT_UNIT_ASSERT( v.empty() );
+
+    PT_UNIT_ASSERT( settings.entry("x") );
+    PT_UNIT_ASSERT( settings.entry("x").get(v) );
+    PT_UNIT_ASSERT( v.empty() );
+
+    PT_UNIT_ASSERT( settings.entry("y") );
 }
 
 void SettingsTest::Section()
