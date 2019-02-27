@@ -21,7 +21,7 @@ int main ()
 
     cairo_set_operator  (c, CAIRO_OPERATOR_SOURCE);
     cairo_set_antialias (c, CAIRO_ANTIALIAS_DEFAULT);
-    cairo_set_line_width(c, 1);
+    cairo_set_line_width(c, 1.0);
 
     /* Draw something and write to PNG */
     cairo_set_source_rgba(c, 0.0, 0.0, 0.0, 1.0);
@@ -37,12 +37,20 @@ int main ()
     cairo_line_to(c, 11.5, 3.5);
     cairo_stroke (c);
 
-    cairo_move_to(c, 1.0, 1.0 + 20.0);
-    cairo_line_to(c, 3.0, 1.0 + 20.0);
+    cairo_move_to(c, 1.5, 21.5);
+    cairo_line_to(c, 3.5, 21.5);
     cairo_stroke (c);
 
-    cairo_move_to(c, 11.0, 1.0 + 20.0);
-    cairo_line_to(c, 11.0, 3.0 + 20.0);
+    cairo_move_to(c, 11.5, 21.5);
+    cairo_line_to(c, 11.5, 23.5);
+    cairo_stroke (c);
+
+    cairo_move_to(c, 1.5, 41.0);
+    cairo_line_to(c, 3.5, 41.0);
+    cairo_stroke (c);
+
+    cairo_move_to(c, 11.0, 41.5);
+    cairo_line_to(c, 11.0, 43.5);
     cairo_stroke (c);
 
     cairo_surface_write_to_png (cs, "CairoTest1.png");
@@ -61,12 +69,20 @@ int main ()
     cairo_line_to(c, 11.5, 4.0);
     cairo_stroke (c);
 
-    cairo_move_to(c, 1.0, 1.0 + 20);
-    cairo_line_to(c, 4.0, 1.0 + 20);
+    cairo_move_to(c, 1.0, 21.5);
+    cairo_line_to(c, 4.0, 21.5);
     cairo_stroke (c);
 
-    cairo_move_to(c, 11.0, 1.0 + 20);
-    cairo_line_to(c, 11.0, 4.0 + 20);
+    cairo_move_to(c, 11.5, 21.0);
+    cairo_line_to(c, 11.5, 24.0);
+    cairo_stroke (c);
+
+    cairo_move_to(c, 1.0, 41.0);
+    cairo_line_to(c, 4.0, 41.0);
+    cairo_stroke (c);
+
+    cairo_move_to(c, 11.0, 41.0);
+    cairo_line_to(c, 11.0, 44.0);
     cairo_stroke (c);
 
     cairo_surface_write_to_png (cs, "CairoTest2.png");
