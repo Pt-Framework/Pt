@@ -127,6 +127,7 @@ class PT_HMI_API Label : public Control
         bool                     _hasRenderer;
 
         Gfx::Pen  _textPen;
+        Gfx::Pen  _pen;
         Gfx::Font _font;
         Picture   _picture;
 };

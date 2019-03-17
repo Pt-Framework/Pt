@@ -131,77 +131,118 @@ FontMetrics ImagePainter::fontMetrics(const String& text) const
 
 void ImagePainter::drawLine(const PointF& from, const  PointF& to)
 {
-	Point points[] = { round(from) , round(to)  };
-	_rasterizer->stroke( points, 2);
+    Point points[2];
+    
+    points[0].set( Pt::lround(from.x() - 0.5), 
+                   Pt::lround(from.y() - 0.5) );
+
+    points[1].set( Pt::lround(to.x() - 0.5),
+                   Pt::lround(to.y() - 0.5) );
+
+    _rasterizer->stroke(points, 2);
 }
 
 
-void ImagePainter::drawText( const PointF& to, const String& text )
+void ImagePainter::drawText(const PointF& toF, const String& text)
 {
-    _rasterizer->strokeText( round(to), text );
+    Point to(round(toF));             
+
+    _rasterizer->strokeText(to, text);
 }
 
 
-void ImagePainter::drawText(const PointF& to, const Pt::String& text, const Transform& trans)
+void ImagePainter::drawText(const PointF& toF, const Pt::String& text, 
+                            const Transform& trans)
 {
-    _rasterizer->strokeText(round(to), text, trans);
+    Point to(round(toF));
+
+    _rasterizer->strokeText(to, text, trans);
 }
 
 
-void ImagePainter::drawRect( const  RectF& rect )
+void ImagePainter::drawRect(const RectF& r)
 {
-	Point points[5] = {   round(rect.topLeft()) ,
-                        round(rect.topRight()) ,
-                        round(rect.bottomRight()),
-                        round(rect.bottomLeft()),
-                        round(rect.topLeft()),
-                   };
+    RectF rect( r.left()   - 0.5, 
+                r.right()  - 0.5, 
+                r.top()    - 0.5, 
+                r.bottom() - 0.5 );
 
-	_rasterizer->stroke( points, 5);
+    Point points[5] = { round( rect.topLeft() ),
+                        round( rect.topRight() ),
+                        round( rect.bottomRight() ),
+                        round (rect.bottomLeft() ),
+                        round( rect.topLeft() ),
+                      };
+
+    _rasterizer->stroke(points, 5);
 }
 
 
-void ImagePainter::fillRect( const  RectF& r )
+void ImagePainter::fillRect(const RectF& r)
 {
-    _rasterizer->fillRect(round(r));
+    Rect rect( Pt::lround( r.left() ), 
+               Pt::lround( r.right() ), 
+               Pt::lround( r.top() ), 
+               Pt::lround( r.bottom() ) );
+
+    _rasterizer->fillRect(rect);
 }
 
 
-void ImagePainter::drawEllipse( const PointF& topLeft, const  SizeF& size )
+void ImagePainter::drawEllipse(const PointF& topLeftF, const SizeF& size)
 {
-  _rasterizer->strokeEllipse( round( topLeft ),  round(size) );
+    Point topLeft( Pt::lround(topLeftF.x() - 0.5),
+                   Pt::lround(topLeftF.y() - 0.5) );
+
+    Size s(lround(size.width() - 0.5), lround(size.height() - 0.5));
+
+    _rasterizer->strokeEllipse(topLeft,  s );
 }
 
 
-void ImagePainter::fillEllipse( const PointF& topLeft, const  SizeF& size )
+void ImagePainter::fillEllipse(const PointF& topLeftF, const SizeF& size)
 {
-   _rasterizer->fillEllipse(  round(topLeft),  round(size) );
+    Point topLeft(round(topLeftF));
+
+    Size s(round(size));
+
+    _rasterizer->fillEllipse(topLeft, s);
 }
 
 
-void ImagePainter::drawPolyline( const PointF* ps, const size_t pointCount )
+void ImagePainter::drawPolyline(const PointF* ps, const size_t n)
+{    
+    std::vector<Point> points(n);
+
+    for(size_t i = 0; i < n; ++i)
+    {
+        Point p( Pt::lround(ps[i].x() - 0.4999),
+                  Pt::lround(ps[i].y() - 0.4999) );
+        
+        points[i] = p;
+    }
+
+  _rasterizer->stroke( &points[0], points.size() );
+}
+
+
+void ImagePainter::fillPolygon(const PointF* ps, const size_t n)
 {
-  std::vector<Point> points(pointCount);
+    std::vector<Point> points(n);
 
-  for( size_t i = 0; i < pointCount; ++i)
-    points[i] = round(ps[i]);
+    for(size_t i = 0; i < n; ++i)
+    {
+        Point p( Pt::lround(ps[i].x() - 0.4999),
+                 Pt::lround(ps[i].y() - 0.4999) );
+        
+        points[i] = p;
+    }
 
-  _rasterizer->stroke(&points[0], points.size());
+    _rasterizer->fill( &points[0], points.size() );
 }
 
 
-void ImagePainter::fillPolygon( const PointF* ps, const size_t pointCount )
-{
-  std::vector<Point> points(pointCount);
-
-  for( size_t i = 0; i < pointCount; ++i)
-    points[i] = round(ps[i]);
-
-  _rasterizer->fill(&points[0], points.size());
-}
-
-
-void ImagePainter::drawImage( const PointF& to, const Image& image)
+void ImagePainter::drawImage(const PointF& to, const Image& image)
 {
   _rasterizer->image( round(to), image);
 }

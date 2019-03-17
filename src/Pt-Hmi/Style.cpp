@@ -304,9 +304,10 @@ LabelRenderer::~LabelRenderer()
 void LabelRenderer::prepare(const Label& l,
                             const StyleOptions& options,
                             Gfx::Font& font,
+                            Gfx::Pen& contour,
                             Gfx::Pen& textPen) const
 {
-    onPrepare(l, options, font, textPen);
+    onPrepare(l, options, font, contour, textPen);
 }
 
 

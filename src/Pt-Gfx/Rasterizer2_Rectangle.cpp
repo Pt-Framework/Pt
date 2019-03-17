@@ -173,36 +173,33 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
 
 void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
 {
-    // Get the minimum and maximum coordinates
-    Pt::int32_t minX = tl.x();
-    Pt::int32_t minY = tl.y();
-    Pt::int32_t maxX = br.x();
-    Pt::int32_t maxY = br.y();
-
     // Clip the coordinates
     // REVIEW: clipping
     // INFO: Looks correct :)
     Rect rect(tl, br);
-    rect = rect.intersect(_currentClip);
+
+    Rect clipRect(_currentClip.topLeft(), Size(_currentClip.width() + 1, _currentClip.height() + 1));
+   
+    rect = rect.intersect(clipRect);
 
     if (rect.isNull())
         return;
 
-    minX = rect.left();
-    minY = rect.top();
-    maxX = rect.right();
-    maxY = rect.bottom();
+    Pt::int32_t minX = rect.left();
+    Pt::int32_t minY = rect.top();
+    Pt::int32_t maxX = rect.right();
+    Pt::int32_t maxY = rect.bottom();
     // REVIEW: end
 
     // Calculate the width of the rectangle
-    const Pt::int32_t sizeX = maxX - minX + 1;
+    const Pt::int32_t sizeX = maxX - minX;
 
     // Draw the rectangle using texture (or gradient texture)
     if(_isTexture)
     {
         const Pt::int32_t bw = _brushImage->width();
         const Pt::int32_t bh = _brushImage->height();
-        for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY)
+        for(Pt::int32_t iterY = minY; iterY < maxY; ++iterY)
         {
             Pt::int32_t iterX     = minX;
             Pt::int32_t spanWidth = sizeX;
@@ -229,7 +226,7 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     // Draw the rectangle using gradient
     if(_isGradient)
     {
-        for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY)
+        for(Pt::int32_t iterY = minY; iterY < maxY; ++iterY)
         {
             Pt::int32_t iterX     = minX;
             Pt::int32_t spanWidth = sizeX;
@@ -263,7 +260,7 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     }
 
     // Draw the rectangle using solid color
-    for(Pt::int32_t y = minY; y <= maxY; ++y)
+    for(Pt::int32_t y = minY; y < maxY; ++y)
     {
         Pixel pixel(_image->view(), minX, y);
         _image->format().setPixels(pixel, _brush.color(),

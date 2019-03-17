@@ -155,6 +155,7 @@ void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Color backgroundColor = color();
     Gfx::Color borderTopLeftColor = light;
     Gfx::Color borderBottomRightColor = dark;
+    
     if(_isPressed)
     {
         backgroundColor = brighten(color(), 0.9f);
@@ -162,34 +163,52 @@ void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
         borderBottomRightColor = light;
     }
 
+    const size_t penSize = 1;
+    const double spacing = penSize / 2.0;
+
+    Gfx::RectF borderRect(_geometry.left() + spacing,
+                          _geometry.right() - spacing,
+                          _geometry.top() + spacing,
+                          _geometry.bottom() - spacing);
+    double offset = 0;
+
+    Gfx::PointF topLeft(borderRect.topLeft().x() + offset, 
+                        borderRect.topLeft().y() + offset);
+    Gfx::PointF bottomLeft(borderRect.bottomLeft().x() + offset, 
+                           borderRect.bottomLeft().y() - offset);
+    Gfx::PointF bottomRight(borderRect.bottomRight().x() - offset, 
+                            borderRect.bottomRight().y() - offset);
+    Gfx::PointF topRight(borderRect.topRight().x() - offset, 
+                         borderRect.topRight().y() + offset);
+    
     //
     // fill background
     //
     Gfx::Brush brush = backgroundColor;
     painter.setBrush(brush);
-    painter.fillRect(_geometry);
-
+    painter.fillRect(borderRect);
+  
     //
     // bottom right border
     //
-    Gfx::RectF nrect = painter.toPhysical(_geometry);
-    Gfx::PointF bottomLeft = painter.toLogical(nrect.bottomLeft());
-    Gfx::PointF bottomRight = painter.toLogical(nrect.bottomRight());
-    Gfx::PointF topRight = painter.toLogical(nrect.topRight());
+    Gfx::PointF points[3] = { bottomLeft, bottomRight, topRight };
 
+    painter.setPen( Gfx::Pen(borderBottomRightColor, penSize, 
+                             Gfx::Pen::Solid, Gfx::Pen::FlatCap, Gfx::Pen::MiterJoin) );
 
-    painter.setPen( Gfx::Pen(borderBottomRightColor, 1) );
-
-    painter.drawLine(topRight, bottomRight);
-
-    painter.drawLine(bottomLeft, bottomRight);
+    painter.drawPolyline(points, 3);
 
     //
     // top left border
-    //
-    painter.setPen( Gfx::Pen(borderTopLeftColor, 1) );
-    painter.drawLine(_geometry.topLeft(), _geometry.topRight() );
-    painter.drawLine(_geometry.topLeft(), _geometry.bottomLeft() );
+    //    
+    points[0] = topRight;
+    points[1] = topLeft;
+    points[2] = bottomLeft;
+
+    painter.setPen(Gfx::Pen(borderTopLeftColor, penSize, 
+                            Gfx::Pen::Solid, Gfx::Pen::FlatCap, Gfx::Pen::MiterJoin));
+
+    painter.drawPolyline(points, 3);
 }
 
 //
@@ -214,27 +233,16 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    //
-    // Draw symbol
-    //
+    double inset = painter.align(3.0);
+    double height = painter.align(2.0);
 
-    Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap);
-    painter.setPen(pen);
-    const double spacing = 4;
+    Gfx::RectF frameSymbol( geometry().left() + inset,
+                            geometry().right() - inset,
+                            geometry().bottom() - inset - height,
+                            geometry().bottom() - inset);
 
-    Gfx::PointF bl = Gfx::PointF(spacing, geometry().height() - 1 - spacing);
-    Gfx::PointF br = Gfx::PointF((geometry().width()-1)/2 + spacing/2, geometry().height() - 1 - spacing);
-    Gfx::PointF tl = Gfx::PointF(spacing, (geometry().height()-1)/2 - spacing/2);
-    Gfx::PointF tr = Gfx::PointF(geometry().width() - 1 - spacing, spacing);
-    
-    bl += geometry().topLeft();
-    br += geometry().topLeft();
-    tl += geometry().topLeft();
-    tr += geometry().topLeft();
-    
-    painter.drawLine(bl, br);
-    painter.drawLine(tl, bl);
-    painter.drawLine(tr, bl);
+    painter.setBrush( Gfx::Color(65535, 65535, 65535) );
+    painter.fillRect(frameSymbol);
 }
 
 //
@@ -259,30 +267,22 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    //
-    // Draw symbol
-    //
+    double inset = painter.align(3.0) + painter.toLogical(0.5);
 
-    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap);
+    Gfx::RectF frameSymbol( geometry().left() + inset,
+                            geometry().right() - inset,
+                            geometry().top() + inset,
+                            geometry().bottom() - inset);
+     
+    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 
+                     1, Gfx::Pen::Solid, Gfx::Pen::SquareCap, Gfx::Pen::MiterJoin);
     painter.setPen(pen);
-    const double spacing = 4;
-    const double width = geometry().width() - 1;
-    const double height = geometry().height() - 1;
+    painter.drawRect(frameSymbol);
 
-    Gfx::PointF bl = Gfx::PointF(spacing, height - spacing);
-    Gfx::PointF tl = Gfx::PointF(width / 2 - spacing/2, spacing);
-    Gfx::PointF tr = Gfx::PointF(width - spacing, spacing);
-    Gfx::PointF br = Gfx::PointF(width - spacing, height/2 + spacing / 2);
-
-    bl += geometry().topLeft();
-    tl += geometry().topLeft();
-    tr += geometry().topLeft();
-    br += geometry().topLeft();
-
-    painter.drawLine(tl, tr);
-    painter.drawLine(bl, tr);
-    painter.drawLine(br, tr);
-
+    frameSymbol.setHeight( painter.align(2.0) );
+    
+    painter.setBrush( Gfx::Color(65535, 65535, 65535) );
+    painter.fillRect(frameSymbol);
 }
 
 //
@@ -307,45 +307,39 @@ void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    //
-    // Draw symbol
-    //
+    double margin = painter.align(3.0);
+    double offset = painter.align(1.0);
+    double inset = painter.toLogical(0.5);
 
-#ifdef WITH_NEW_RASTERIZER
+    const Gfx::RectF& buttonRect = geometry();
 
-    std::vector<Gfx::PointF> points(12);
+    Gfx::PointF line1[] = { Gfx::PointF( buttonRect.topLeft().x() + margin + inset,
+                                         buttonRect.topLeft().y() + offset + margin + inset),
+                            
+                            Gfx::PointF( buttonRect.topLeft().x() + offset + margin + inset,
+                                         buttonRect.topLeft().y() + margin + inset ),
+                            
+                            Gfx::PointF( buttonRect.bottomRight().x() - margin - inset,
+                                         buttonRect.bottomRight().y() - offset - margin - inset),
+                            
+                            Gfx::PointF( buttonRect.bottomRight().x() - offset - margin - inset,
+                                         buttonRect.bottomRight().y() - margin - inset) };
 
-    points[ 0] = geometry().topRight() + Gfx::PointF( -2   - 3,  0   + 3);
-    points[ 1] = geometry().topRight() + Gfx::PointF( -4.5 - 3,  3.5 + 3);
-    points[ 2] = geometry().topRight() + Gfx::PointF( -7   - 3,  0   + 3);
-    points[ 3] = geometry().topRight() + Gfx::PointF( -9   - 3,  2   + 3);
-    points[ 4] = geometry().topRight() + Gfx::PointF( -5.5 - 3,  4.5 + 3);
-    points[ 5] = geometry().topRight() + Gfx::PointF( -9   - 3,  7   + 3);
-    points[ 6] = geometry().topRight() + Gfx::PointF( -7   - 3,  9   + 3);
-    points[ 7] = geometry().topRight() + Gfx::PointF( -4.5 - 3,  5.5 + 3);
-    points[ 8] = geometry().topRight() + Gfx::PointF( -2   - 3,  9   + 3);
-    points[ 9] = geometry().topRight() + Gfx::PointF(  0   - 3,  7   + 3);
-    points[10] = geometry().topRight() + Gfx::PointF( -3.5 - 3,  4.5 + 3);
-    points[11] = geometry().topRight() + Gfx::PointF(  0   - 3,  2   + 3);
+    Gfx::PointF line2[] = { Gfx::PointF( buttonRect.topRight().x() - offset - margin - inset,
+                                         buttonRect.topRight().y() + margin + inset ),
+                            
+                            Gfx::PointF( buttonRect.topRight().x() - margin - inset,
+                                         buttonRect.topRight().y() + offset + margin + inset ),
+                            
+                            Gfx::PointF( buttonRect.bottomLeft().x() + offset + margin + inset,
+                                         buttonRect.bottomLeft().y() - margin - inset),
+                            
+                            Gfx::PointF( buttonRect.bottomLeft().x() + margin + inset,
+                                         buttonRect.bottomLeft().y() - offset - margin - inset) };
 
-    painter.setBrush(Gfx::Color(65535, 65535, 65535));
-    painter.fillPolygon(points.data(), points.size());
-
-#else
-
-    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2, 
-                     //Gfx::Pen::Solid, Gfx::Pen::RoundCap);
-                     Gfx::Pen::Solid, Gfx::Pen::FlatCap);
-    painter.setPen(pen);
-
-    Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(4, 4);
-    Gfx::PointF br = geometry().bottomRight() - Gfx::PointF(4, 4);
-    Gfx::PointF tr = geometry().topRight() + Gfx::PointF(-4, 4);
-    Gfx::PointF bl = geometry().bottomLeft() - Gfx::PointF(-4, 4);
-    painter.drawLine(tl, br);
-    painter.drawLine(tr, bl);
-
-#endif
+    painter.setBrush( Gfx::Color(65535, 65535, 65535) );
+    painter.fillPolygon(line1, 4);
+    painter.fillPolygon(line2, 4);
 }
 
 //
@@ -367,21 +361,35 @@ void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    //
-    // draw symbol
-    //
-    Gfx::PointF triangle[3];
-    triangle[0].set(4, 4);
-    triangle[1].set(geometry().width() - 4, 4);
-    triangle[2].set(geometry().width() / 2, geometry().height() / 2);
+    double triangleWidth = geometry().height() / 2.0;
+    triangleWidth = painter.align(triangleWidth);
 
-    triangle[0] += geometry().topLeft();
-    triangle[1] += geometry().topLeft();
-    triangle[2] += geometry().topLeft();
+    // even number of pixels
+    double pixelWidth = painter.toLogical(1.0);
+    int pixelsPerWidth = Pt::lround(triangleWidth / pixelWidth);
+    if(pixelsPerWidth % 2 != 0)
+      triangleWidth += pixelWidth;
 
-    Gfx::Brush brush( Gfx::Color(65535,65535,65535) );
+    double triangleHeight = triangleWidth / 2.0;
+    triangleHeight = painter.align(triangleHeight);
+
+    double x = (geometry().width() - triangleWidth) / 2.0;
+    x = geometry().x() + painter.align(x);
+    
+    double y = (geometry().height() - triangleHeight) / 2.0;
+    y = geometry().y() + painter.align(y - 1);
+
+    Gfx::PointF triangle[4];
+    triangle[0] = Gfx::PointF(x, y);
+    triangle[1] = Gfx::PointF(x + triangleWidth, y);
+    triangle[2] = Gfx::PointF(x + triangleHeight, y + triangleHeight);
+    triangle[3] = Gfx::PointF(x, y);
+
+    Gfx::Brush brush( Gfx::Color(65535, 65535, 65535) );
     painter.setBrush(brush);
     painter.fillPolygon(triangle, 3);
+    painter.setPen(Gfx::Color::fromRgb8(255, 0, 0));
+    painter.drawPolyline(triangle, 4);
 }
 
 //
@@ -963,100 +971,108 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Brush brush(color);
     painter.setBrush(brush);
 
-    const double pixelWidth = surface.toLogical(1);
-
     Gfx::PointF pos = _window->position();
-
+    
     Gfx::RectF leftBorder( pos.x(),
-                           pos.x() + _borderWidth - pixelWidth,
+                           pos.x() + _borderWidth,
                            pos.y() + _borderWidth,
-                           pos.y() + _frameRect.height() - _borderWidth - pixelWidth);
+                           pos.y() + _frameRect.height() - _borderWidth);
     painter.fillRect(leftBorder);
 
     Gfx::RectF topBorder(pos.x(),
-                         pos.x() + _frameRect.width() - pixelWidth,
+                         pos.x() + _frameRect.width(),
                          pos.y(),
-                         pos.y() + _borderWidth - pixelWidth);
+                         pos.y() + _borderWidth);
 
     painter.fillRect(topBorder);
-
+    
     Gfx::RectF rightBorder(pos.x() + _frameRect.width() - _borderWidth,
-                           pos.x() + _frameRect.width() - pixelWidth,
+                           pos.x() + _frameRect.width(),
                            pos.y() + _borderWidth,
-                           pos.y() + _frameRect.height() - _borderWidth - pixelWidth);
+                           pos.y() + _frameRect.height() - _borderWidth);
     painter.fillRect(rightBorder);
 
+
     Gfx::RectF bottomBorder(pos.x(),
-                            pos.x() + _frameRect.width() - pixelWidth,
+                            pos.x() + _frameRect.width(),
                             pos.y() + _frameRect.height() - _borderWidth,
-                            pos.y() + _frameRect.height() - pixelWidth);
+                            pos.y() + _frameRect.height());
     painter.fillRect(bottomBorder);
 
     Gfx::RectF titleArea( pos.x() + _borderWidth,
-                          pos.x() + _frameRect.width() - _borderWidth - pixelWidth,
+                          pos.x() + _frameRect.width() - _borderWidth,
                           pos.y() + _borderWidth,
-                          pos.y() + _borderWidth + _titleHeight - pixelWidth);
+                          pos.y() + _borderWidth + _titleHeight);
 
     painter.fillRect(titleArea);
-    
+
+    const size_t penSize = 1;
+    const double offset = penSize / 2.0;
+
     //
     // light outer and inner border contour
     //
     Gfx::Color borderLight = brighten(color, 1.25f);
-    Gfx::Pen borderPenLight(borderLight, 1);
+    Gfx::Pen borderPenLight(borderLight, penSize);
 
     painter.setPen(borderPenLight);
-    painter.drawLine(pos,
-                     Gfx::PointF(pos.x() + _frameRect.width() - pixelWidth,
-                                 pos.y()) );
 
-    painter.drawLine(pos,
-                     Gfx::PointF(pos.x(),
-                                 pos.y() + _frameRect.height() - pixelWidth) );
+    // outer top
+    painter.drawLine(Gfx::PointF(pos.x(),
+                                 pos.y() + offset),
+                     Gfx::PointF(pos.x() + _frameRect.width(),
+                                 pos.y() + offset) );
+    // outer left
+    painter.drawLine(Gfx::PointF(pos.x() + offset, 
+                                 pos.y()),
+                     Gfx::PointF(pos.x() + offset,
+                                 pos.y() + _frameRect.height()) );
+
 
     // inner right
-    painter.drawLine( Gfx::PointF(pos.x() + _frameRect.width() - _borderWidth,
+    painter.drawLine( Gfx::PointF(pos.x() + _frameRect.width() - _borderWidth + offset,
                                   pos.y() + _borderWidth + _titleHeight),
-                      Gfx::PointF(pos.x() + _frameRect.width() - _borderWidth,
+                      Gfx::PointF(pos.x() + _frameRect.width() - _borderWidth + offset,
                                   pos.y() + _frameRect.height() - _borderWidth) );
 
     // inner bottom
     painter.drawLine( Gfx::PointF(pos.x() + _borderWidth,
-                                  pos.y() + _frameRect.height() - _borderWidth),
+                                  pos.y() + _frameRect.height() - _borderWidth + offset),
                       Gfx::PointF(pos.x() + _frameRect.width() - _borderWidth,
-                                  pos.y() + _frameRect.height() - _borderWidth) );
+                                  pos.y() + _frameRect.height() - _borderWidth + offset) );
 
     //
     // dark outer and inner border contour
     //
+    
     Gfx::Color borderDark = brighten(color, 0.75f);
-    Gfx::Pen borderPenDark(borderDark, 1);
+    Gfx::Pen borderPenDark(borderDark, penSize);
 
     painter.setPen(borderPenDark);
-
+    
     // outer bottom
     painter.drawLine( Gfx::PointF(pos.x(),
-                                  pos.y() + _frameRect.height() - pixelWidth),
-                      Gfx::PointF(pos.x() + _frameRect.width() - pixelWidth,
-                                  pos.y() + _frameRect.height() - pixelWidth) );
-
+                                  pos.y() + _frameRect.height() - offset),
+                      Gfx::PointF(pos.x() + _frameRect.width() - offset,
+                                  pos.y() + _frameRect.height() - offset) );
+    
     // outer right
-    painter.drawLine(Gfx::PointF( pos.x() + _frameRect.width() - pixelWidth,
+    painter.drawLine(Gfx::PointF( pos.x() + _frameRect.width() - offset,
                                   pos.y() ),
-                     Gfx::PointF(pos.x() + _frameRect.width() - pixelWidth,
-                                 pos.y() + _frameRect.height() - pixelWidth) );
-
+                     Gfx::PointF(pos.x() + _frameRect.width() - offset,
+                                 pos.y() + _frameRect.height() - offset) );
+    
     // inner left
-    painter.drawLine( Gfx::PointF(pos.x() + _borderWidth - pixelWidth,
-                                  pos.y() + _borderWidth + _titleHeight),
-                      Gfx::PointF(pos.x() + _borderWidth - pixelWidth,
+    painter.drawLine( Gfx::PointF(pos.x() + _borderWidth - offset,
+                                  pos.y() + _borderWidth + _titleHeight - offset),
+                      Gfx::PointF(pos.x() + _borderWidth - offset,
                                   pos.y() + _frameRect.height() - _borderWidth) );
 
     // inner top
-    painter.drawLine( Gfx::PointF(pos.x() + _borderWidth,
-                                  pos.y() + _borderWidth + _titleHeight - pixelWidth),
+    painter.drawLine( Gfx::PointF(pos.x() + _borderWidth - offset,
+                                  pos.y() + _borderWidth + _titleHeight - offset),
                       Gfx::PointF(pos.x() + _frameRect.width() - _borderWidth,
-                                  pos.y() + _borderWidth + _titleHeight - pixelWidth) );
+                                  pos.y() + _borderWidth + _titleHeight - offset) );
 
     //
     // title bar text
@@ -1092,28 +1108,29 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     double gripHeight = fm.ascent();
     double gripOffset = (_titleHeight + _borderWidth - gripHeight) / 2.0;
     double lineOffset = gripHeight / 3.0;
-
+    
     lineOffset = surface.align(lineOffset);
     gripOffset = surface.align(gripOffset);
 
     Gfx::PointF gripStart( textPos.x() + fm.width() + _borderWidth,
-                           pos.y() + gripOffset - pixelWidth);
+                           pos.y() + gripOffset - offset);
+
     Gfx::PointF gripEnd(pos.x() + _frameRect.width() - _borderWidth - 3 * _titleHeight,
-                        pos.y() + gripOffset - pixelWidth);
+                        pos.y() + gripOffset- offset);
 
     for(int n = 0; n < 4; ++n)
     {
         painter.setPen(gripPenLight);
         painter.drawLine(gripStart, gripEnd);
 
-        gripStart.setY(gripStart.y() + pixelWidth);
-        gripEnd.setY(gripEnd.y() + pixelWidth);
+        gripStart.setY(gripStart.y() + offset);
+        gripEnd.setY(gripEnd.y()+ offset);
 
         painter.setPen(gripPenDark);
         painter.drawLine(gripStart, gripEnd);
 
-        gripStart.setY(gripStart.y() + lineOffset - pixelWidth);
-        gripEnd.setY(gripEnd.y() + lineOffset - pixelWidth);
+        gripStart.setY(gripStart.y() + lineOffset - offset);
+        gripEnd.setY(gripEnd.y() + lineOffset - offset);
     }
 
     //

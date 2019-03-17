@@ -28,6 +28,8 @@
 
 #include <Pt/Hmi/TextBlock.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Screen.h>
 #include <cassert>
 
 namespace Pt {
@@ -372,10 +374,11 @@ void TextBlock::addLine(const Pt::String& line,
                         const Gfx::Font& font, 
                         const Gfx::FontMetrics& tm)
 {
-    double lineHeight = tm.height();
-    double lineSpacing = font.size() / 3;
+    Screen& screen = Application::instance().screen();
 
-    double lineWidth = static_cast<double>( tm.width() );
+    double lineWidth = screen.align( tm.width() );
+    double lineHeight = screen.align( tm.height() );
+    double lineSpacing = screen.align( font.size() / 3 );
 
     double lineX = 0;
     double lineY = _size.height();

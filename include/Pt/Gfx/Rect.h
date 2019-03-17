@@ -58,7 +58,7 @@ class BasicRect
 
         BasicRect(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
         : _p(p1)
-        , _s( p2.x() - p1.x() + 1, p2.y() - p1.y() + 1 )
+        , _s( p2.x() - p1.x(), p2.y() - p1.y())
         {                
         }
         
@@ -93,14 +93,14 @@ class BasicRect
         void set(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
         {
             this->setOrigin( p1 );
-            this->setWidth(p2.x() - p1.x() + 1);
-            this->setHeight(p2.y() - p1.y() + 1);
+            this->setWidth(p2.x() - p1.x() );
+            this->setHeight(p2.y() - p1.y());
         }
 
         void set(const T left, const T right, const T top, const T bottom)
         {
             _p = BasicPoint<T>( left, top );
-            _s = BasicSize<T>(  right - left + 1 , bottom - top  + 1);
+            _s = BasicSize<T>(  right - left , bottom - top );
         }
 
         void setOrigin(const BasicPoint<T>& p)
@@ -160,14 +160,15 @@ class BasicRect
 
         T right() const
         {
-            return _p.x() + _s.width() - 1;
+            return _p.x() + _s.width();
         }
 
         T bottom() const
         {
-            return _p.y() + _s.height() - 1;
+            return _p.y() + _s.height();
         }
-        
+
+       
         const BasicPoint<T>& topLeft() const
         { 
             return _p;
@@ -175,18 +176,18 @@ class BasicRect
 
         const BasicPoint<T> topRight() const
         { 
-            return BasicPoint<T>(this->x() + this->width() -1 , this->y()); 
+            return BasicPoint<T>(this->x() + this->width(), this->y()); 
         }
 
         const BasicPoint<T> bottomLeft() const
         { 
-            return BasicPoint<T>(this->x(), this->y() + this->height() -1); 
+            return BasicPoint<T>(this->x(), this->y() + this->height()); 
         }
 
         const BasicPoint<T> bottomRight() const
         { 
-            return BasicPoint<T>(this->x() + this->width() -1, 
-                                 this->y() + this->height() - 1); 
+            return BasicPoint<T>(this->x() + this->width(), 
+                                 this->y() + this->height() ); 
         }
 
         bool operator==(const BasicRect& other) const

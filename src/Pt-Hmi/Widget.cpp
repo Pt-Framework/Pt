@@ -579,6 +579,7 @@ const SizePolicy& Widget::sizePolicy() const
 void Widget::setSizePolicy(const SizePolicy& policy)
 {
     _sizePolicy = policy;
+    _sizePolicy.setSize( Application::instance().screen().align(policy.size()) );
 
     if( parent() )
         parent()->relayout();
@@ -813,17 +814,11 @@ void Widget::repaint(const Gfx::RectF& rect)
     {
         Widget* w = (*it);
 
-        // convert to device units
-        Gfx::RectF widgetRect = screen.toPhysical( w->geometry() );
-        Gfx::RectF updateRect = screen.toPhysical(rect);
-
         // clip widget update rect
-        updateRect = widgetRect.intersect(updateRect);
+        Gfx::RectF updateRect = w->geometry().intersect(rect);
+
         if( updateRect.isNull() )
             continue;
-
-        // convert to logical units
-        updateRect = screen.toLogical(updateRect);
 
         // paint widget rect
         Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );

@@ -38,7 +38,10 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Path.h>
 #include <Pt/String.h>
+
+#include <cstddef>
 
 namespace Pt {
 
@@ -62,6 +65,9 @@ class PlatinumRendererBase
                          const Gfx::RectF& rect,
                          const Gfx::Brush& brush,
                          double corner) const;
+
+    private:
+        static Gfx::Polygon toPolygon(const Gfx::RectF& rect, double inset, double corner);
 };
 
 
@@ -182,6 +188,7 @@ class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
         virtual void onPrepare(const Label& l,
                                const StyleOptions& options,
                                Gfx::Font& font,
+                               Gfx::Pen& contour,
                                Gfx::Pen& textPen) const;
 
         virtual void onRenderBackground(const Label& l,

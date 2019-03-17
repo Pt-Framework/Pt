@@ -36,6 +36,7 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Transform.h>
 #include <vector>
+#include <limits>
 
 namespace Pt {
 
@@ -56,6 +57,17 @@ class Polygon
         void assign(const PointF* ps, std::size_t n)
         {
             _points.assign(ps, ps+n);
+        }
+
+
+        const PointF& operator[](std::size_t n) const
+        {
+            return _points[n];
+        }
+
+        PointF& operator[](std::size_t n)
+        {
+            return _points[n];
         }
 
         const PointF& at(std::size_t n) const
@@ -98,6 +110,61 @@ class Polygon
             return _points;
         }
 
+       /* Polygon toPixel() const
+        {
+
+            double xmin = std::numeric_limits<double>::max();
+            double xmax = std::numeric_limits<double>::min();
+            double ymin = std::numeric_limits<double>::max();
+            double ymax = std::numeric_limits<double>::min();
+
+            for (size_t i = 0; i < _points.size(); ++i)
+            {
+                xmin = std::min(xmin, _points[i].x());
+                xmax = std::max(xmax, _points[i].x());
+                ymin = std::min(ymin, _points[i].y());
+                ymax = std::max(ymax, _points[i].y());
+            }
+
+            const double w2 = (xmax - xmin) / 2;
+            const double h2 = (ymax - ymin) / 2;
+            const double transx = xmin + w2;
+            const double transy = ymin + h2;
+            
+            Polygon polygon;
+
+            for (size_t i = 0; i < _points.size(); ++i)
+            {
+                PointF point = _points[i];
+            
+                point.addX(-transx);
+                point.addY(-transy);
+
+                const double distx = std::abs(point.x());
+
+                if (distx >= std::numeric_limits<double>::epsilon())
+                {
+                    const double xscale = (distx - 0.5) / distx;
+                    point.setX(point.x() * xscale);
+                }
+
+                point.addX(transx - 0.5);
+
+                const double disty = std::abs(point.y());
+
+                if (disty >= std::numeric_limits<double>::epsilon())
+                {
+                    const double yscale = (disty - 0.5) / disty;
+                    point.setY(point.y() * yscale);
+                }
+
+                point.addY(transy - 0.5);
+
+                polygon.push_back(point);
+            }
+            
+            return polygon;
+        }*/
     private:
         std::vector<PointF> _points;
 };

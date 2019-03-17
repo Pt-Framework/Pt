@@ -81,10 +81,10 @@ class PT_GFX_API ClipPolygon
         Point intersect( const Point& from,
                                    const Point& to,
                                    const Point& edge0,
-                                   Point& edge1 );
+                                   const Point& edge1 );
 
         bool inside( const Point& p, const Point& edge0,
-                     Point& edge1 );
+                     const Point& edge1 );
 };
 
 }

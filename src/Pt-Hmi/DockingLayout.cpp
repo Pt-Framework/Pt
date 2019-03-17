@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/DockingLayout.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -291,15 +292,21 @@ void DockingLayout::onLayout(const Gfx::RectF& rect)
 
             case DockingLayout::Bottom:
             {
-                posBottom -= (*it)->preferredSize().height() + (*it)->margin().bottom();   
-                   
+                //
+                // TODO: align preferred size also in all other cases
+                //
+                double preferredHeight = 
+                    Application::instance().screen().align( (*it)->preferredSize().height() );
+
+                posBottom -= preferredHeight + (*it)->margin().bottom(); 
+
                 double x = posLeft + (*it)->margin().left();
                 double y = posBottom;       
                   
                 posBottom -= (*it)->margin().top();                      
 
                 Gfx::SizeF itemSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
-                                     (*it)->preferredSize().height() );
+                                     preferredHeight );
 
                 Gfx::PointF pos(x, y);                   
                 (*it)->layout( pos, itemSize );              

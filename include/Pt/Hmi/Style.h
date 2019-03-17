@@ -41,7 +41,9 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/NonCopyable.h>
+
 #include <map>
+#include <cstddef>
 
 namespace Pt {
 
@@ -395,6 +397,7 @@ class PT_HMI_API LabelRenderer : public Style::Facet
         void prepare(const Label& l,
                      const StyleOptions& options,
                      Gfx::Font& font,
+                     Gfx::Pen& contour,
                      Gfx::Pen& textPen) const;
         
         void renderBackground(const Label& l,
@@ -422,6 +425,7 @@ class PT_HMI_API LabelRenderer : public Style::Facet
         virtual void onPrepare(const Label& l,
                                const StyleOptions& options,
                                Gfx::Font& font,
+                               Gfx::Pen& contour,
                                Gfx::Pen& textPen) const = 0;
 
         virtual void onRenderBackground(const Label& l,

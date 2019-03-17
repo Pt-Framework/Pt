@@ -393,13 +393,19 @@ void Label::onInvalidate()
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
+    const Gfx::Pen* pen = contour();
+    if(pen)
+    {
+        _pen = *pen;
+    }
+
     if( ! _hasRenderer )
         _renderer.reset( style.get<LabelRenderer>() );
     
     if( ! _renderer )
         return;
 
-    _renderer->prepare(*this, options, _font, _textPen);
+    _renderer->prepare(*this, options, _font, _pen, _textPen);
 
     if(_hasImage)
         layoutImage();
@@ -429,7 +435,7 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( pen )
     {
         _renderer->renderFrame(*this, options,
-                               painter, rect, *pen);
+                               painter, rect, _pen);
     }
     
     if(_hasImage)
@@ -444,9 +450,10 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         for(it = _textBlock.begin(); it != _textBlock.end(); ++it)
         {
             const Pt::String& lineText = it->text();
+            double ascent = it->ascent();
 
             Gfx::PointF pos = _textBlock.position() + it->position();
-            pos.addY( it->ascent() );
+            pos.addY(ascent);
 
             _renderer->renderText(*this, options,  painter, rect,
                                   lineText, pos, _font, _textPen);

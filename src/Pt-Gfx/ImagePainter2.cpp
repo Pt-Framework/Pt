@@ -89,11 +89,7 @@ void ImagePainter2::setCompositionMode(const CompositionMode& mode)
 
 void ImagePainter2::setClip(const RectF& clip)
 {
-    Rect roundedClip( Point( lround( clip.x() ),
-                             lround( clip.y() ) ),
-                      Size( lround( clip.width() ),
-                             lround( clip.height() ) ) );
-
+    Rect roundedClip(round(clip));
     _rasterizer->setClip(roundedClip);
 }
 
@@ -136,7 +132,7 @@ void ImagePainter2::setFont(const Font& font)
 
 void ImagePainter2::drawImage(const PointF& to, const Image& image)
 {
-    const Point to_( lround(to.x()), lround(to.y()) );
+    const Point to_( round(to) );
 
     _rasterizer->drawImage(to_, image);
 
@@ -146,13 +142,9 @@ void ImagePainter2::drawImage(const PointF& to, const Image& image)
 void ImagePainter2::drawImage(const PointF& toF, const Image& image,
                               const RectF& rectF )
 {
-    Point to( Pt::lround(toF.x()),
-              Pt::lround(toF.y()) );
+    Point to(round(toF));
 
-    Rect rect( Point( Pt::lround(rectF.x()),
-                      Pt::lround(rectF.y()) ),
-               Size( Pt::lround(rectF.width()),
-                     Pt::lround(rectF.height()) ) );
+    Rect rect(round(rectF));
 
     _rasterizer->drawImage(to, image, rect);
 
@@ -160,8 +152,7 @@ void ImagePainter2::drawImage(const PointF& toF, const Image& image,
 
 void ImagePainter2::drawText(const PointF& toF, const String& text)
 {
-    Point to( Pt::lround(toF.x()),
-              Pt::lround(toF.y()) );
+    Point to(round(toF));
 
     Transform identity;
     _rasterizer->drawText(to, text, identity);
@@ -171,8 +162,7 @@ void ImagePainter2::drawText(const PointF& toF, const String& text)
 void ImagePainter2::drawText(const PointF& toF, const Pt::String& text,
                              const Transform& transform)
 {
-    Point to( Pt::lround(toF.x()),
-              Pt::lround(toF.y()) );
+    Point to(round(toF));
 
     _rasterizer->drawText(to, text, transform);
 }

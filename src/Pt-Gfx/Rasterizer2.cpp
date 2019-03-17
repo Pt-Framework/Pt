@@ -31,6 +31,7 @@
 #include "Rasterizer2.h"
 #include "ClipShape.h"
 #include <Pt/Gfx/Transform.h>
+#include <Pt/Gfx/Path.h>
 
 namespace Pt {
 
@@ -597,6 +598,9 @@ void Rasterizer2::setClip( const Rect& clip )
 {
     _clip = clip;
     updateClip();
+
+    //TODO: clipping routines still assume offset by one
+    _currentClip = Rect(_currentClip.topLeft(), Size(_currentClip.width() - 1, _currentClip.height() - 1));
 }
 
 
@@ -638,8 +642,10 @@ void Rasterizer2::drawImage(const Point& to, const Image& from, const Rect& from
 void Rasterizer2::drawText(const Point& to, const Pt::String& text,
                            const Transform& transform)
 {
+    Rect clip(_currentClip.topLeft(), Size(_currentClip.width() + 1, _currentClip.height() + 1));
+
     FreeType::instance().draw(*_image, _pen.color(), to, text,
-                               _currentClip, _compositionMode,
+                                clip, _compositionMode,
                                transform, _faceId, _fontSize);
 }
 
@@ -660,17 +666,20 @@ FontMetrics Rasterizer2::fontMetrics(const Font& font, const Pt::String& text)
 
 void Rasterizer2::drawLine(const PointF& from, const PointF& to)
 {
+    PointF points[2];
+
+    points[0].set(from.x() - 0.5, from.y() - 0.5);
+    points[1].set(to.x() - 0.5, to.y() - 0.5);
+
     if(_pen.size() == 1)
     {
-        Point a( lround( from.x() ), lround( from.y() ) );
-        Point b( lround( to.x() ), lround( to.y() ) );
+        Point a( lround(points[0].x() ), lround(points[0].y() ) );
+        Point b( lround(points[1].x()), lround(points[1].y()) );
 
         drawNarrowLine(a, b, 0);
         return;
     }
-
-    PointF points[2] = { from, to };
-
+    
     std::vector<Polygon> polygons;
     _polygonizer.renderWidePolyline(polygons, points, 2, _pen, true);
 
@@ -679,8 +688,8 @@ void Rasterizer2::drawLine(const PointF& from, const PointF& to)
 
     for(std::size_t n = 0; n < polygons.size(); ++n)
     {
-        const std::vector<PointF>& polygon = polygons[n].points();
-        rasterWideLine( &polygon[0], polygon.size() );
+        const std::vector<PointF>& points = polygons[n].points();
+        rasterWideLine( &points[0], points.size() );
     }
 }
 
@@ -737,36 +746,33 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
 }
 
 
-void Rasterizer2::drawPolyline(const PointF* ps, const size_t pointCount)
+void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 {
+    std::vector<PointF> polygon(n);
+
+    for (size_t i = 0; i < polygon.size(); ++i)
+    {
+        polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
+                       Pt::lround(ps[i].y() - 0.4999));
+    }
+
     if(_pen.size() == 1)
     {
-        drawNarrowPolyline(ps, pointCount);
+        drawNarrowPolyline(&polygon[0], polygon.size());
     }
     else
     {
-        drawWidePolyline(ps, pointCount);
+        drawWidePolyline(&polygon[0], polygon.size());
     }
 }
 
 
-void Rasterizer2::drawNarrowPolyline(const PointF* pointsF, size_t pointCount)
-{
-    std::vector<PointF> clipped(pointsF, pointsF + pointCount);
-
+void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
+{    
     //BasicClipShape<double>::(clipped, _currentClip);
     //if(clipped.empty()) return;
 
-    std::vector<Point> points;
-    for(std::size_t i = 0; i < clipped.size(); ++i)
-    {
-        const PointF& pf = clipped[i];
-        const Pt::int32_t x = Pt::lround( pf.x() );
-        const Pt::int32_t y = Pt::lround( pf.y() );
-        points.push_back( Point(x, y) );
-    }
-
-    if(points.size() < 2)
+    if(pointCount < 2)
         return;
 
     DrawLineMask mask_nnp1;
@@ -776,12 +782,10 @@ void Rasterizer2::drawNarrowPolyline(const PointF* pointsF, size_t pointCount)
     Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
 
     // From point N to point (N + 1), successively
-    std::size_t pc1 = points.size() - 1;
-
+    std::size_t pc1 = pointCount - 1;
+    
     for(std::size_t i = 0; i < pc1; ++i)
     {
-        // REVIEW: clipping
-        // INFO: Looks correct :)
         int x1 = points[i].x();
         int y1 = points[i].y();
         int x2 = points[i + 1].x();
@@ -789,7 +793,6 @@ void Rasterizer2::drawNarrowPolyline(const PointF* pointsF, size_t pointCount)
 
         if (!BasicClipShape<int>::clipLine(x1, y1, x2, y2, _currentClip))
             continue;
-        // REVIEW: END
 
         if(solid)
             rasterNarrowSolidLine(x1, y1,x2, y2, _pen.color(), &mask_nnp1);
@@ -889,13 +892,14 @@ void Rasterizer2::drawRoundedRect(const RectF& rect, float radius)
 
 void Rasterizer2::drawEllipse(const PointF& topLeft, const SizeF& size)
 {
+    //TODO: Bug drawing ellipses with even sizes!
+
     if(_pen.size() == 1)
     {
+        const Point tl( Pt::lround(topLeft.x() - 0.5),
+                        Pt::lround(topLeft.y() - 0.5) );
 
-        const Point tl( Pt::lround(topLeft.x()),
-                        Pt::lround(topLeft.y()) );
-        const Size  sz( Pt::lround(size.width()),
-                        Pt::lround(size.height()) );
+        const Size sz(lround(size.width() - 0.5), lround(size.height() - 0.5));
 
         rasterNarrowArc(tl, sz, 0, 0, ArcMode::Open);
         return;
@@ -988,12 +992,10 @@ void Rasterizer2::drawPath(const Path& path, float smoothness)
 
 void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
 {
-    std::vector<PointF> clipped(pointsF, pointsF + pointCount);
-
     //BasicClipShape<double>::clipPolyline(clipped, _currentClip);
     //if(clipped.empty()) return;
 
-    if(clipped.size() < 2)
+    if(pointCount < 2)
         return;
 
     DrawLineMask mask_nnp1;
@@ -1003,17 +1005,17 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
     Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
 
     // From point N to point (N + 1), successively
-    std::size_t pc1 = clipped.size() - 1;
+    std::size_t pc1 = pointCount - 1;
 
     for(std::size_t i = 0; i < pc1; ++i)
     {
         if(solid)
-            rasterNarrowSolidLine_F(clipped[i].x(), clipped[i].y(),
-                                    clipped[i + 1].x(), clipped[i + 1].y(),
+            rasterNarrowSolidLine_F(pointsF[i].x(), pointsF[i].y(),
+                                    pointsF[i + 1].x(), pointsF[i + 1].y(),
                                     _pen.color(), &mask_nnp1);
         else
-            rasterNarrowPatternedLine_F(clipped[i].x(), clipped[i].y(),
-                                        clipped[i + 1].x(), clipped[i + 1].y(),
+            rasterNarrowPatternedLine_F(pointsF[i].x(), pointsF[i].y(),
+                                        pointsF[i + 1].x(), pointsF[i + 1].y(),
                                         _pen.color(), fpiCtrInOut, &mask_nnp1);
     }
 }
@@ -1021,19 +1023,25 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 {
+    std::vector<PointF> polygon(n);
+
+    for (size_t i = 0; i < polygon.size(); ++i)
+    {
+        polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
+                       Pt::lround(ps[i].y() - 0.4999));
+    }
+
     Pt::int32_t minX =  MAXIMUM_COORD;
     Pt::int32_t minY =  MAXIMUM_COORD;
     Pt::int32_t maxX = -MAXIMUM_COORD;
     Pt::int32_t maxY = -MAXIMUM_COORD;
 
-    std::vector<PointF> clippedPolygon(ps, ps + n);
+    BasicClipShape<double>::clipPolygon(polygon, _currentClip);
 
-    BasicClipShape<double>::clipPolygon(clippedPolygon, _currentClip);
-
-    for(size_t j = 0; j < clippedPolygon.size(); ++j)
+    for(size_t j = 0; j < polygon.size(); ++j)
     {
-        const double x = clippedPolygon[j].x();
-        const double y = clippedPolygon[j].y();
+        const double x = polygon[j].x();
+        const double y = polygon[j].y();
 
         if(x < minX) minX = x;
         if(y < minY) minY = y;
@@ -1046,12 +1054,12 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 
     if( this->isAntiAliasing() )
     {
-        rasterPolygonXWAA(&clippedPolygon[0], clippedPolygon.size(),
+        rasterPolygonXWAA(&polygon[0], polygon.size(),
                            _brush.color(), minX, minY, maxX, maxY);
     }
     else
     {
-        rasterPolygonNoAA(&clippedPolygon[0], clippedPolygon.size(),
+        rasterPolygonNoAA(&polygon[0], polygon.size(),
                            _brush.color(), minX, minY, maxX, maxY);
     }
 }
@@ -1100,14 +1108,15 @@ void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
 
 void Rasterizer2::fillRect(const RectF& rect)
 {
-    const Point tl( Pt::lround(rect.topLeft().x()),
-                    Pt::lround(rect.topLeft().y()) );
-    const Point br( Pt::lround(rect.bottomRight().x()),
-                    Pt::lround(rect.bottomRight().y()) );
+    const PointF& topLeft = rect.topLeft();
+    const PointF& bottomRight = rect.bottomRight();
+
+    const Point tl(round(topLeft));
+    const Point br(round(bottomRight));
 
     // Update the gradient as needed
     if(_isGradient)
-        updateGradientBrush(br.x() - tl.x() + 1, br.y() - tl.y() + 1);
+        updateGradientBrush(br.x() - tl.x(), br.y() - tl.y() );
 
     // Draw the rectangle
     rasterRectArea(tl, br);
@@ -1125,10 +1134,9 @@ void Rasterizer2::fillRoundedRect(const RectF& rect, float radius)
 
 void Rasterizer2::fillEllipse(const PointF& topLeft, const SizeF& size)
 {
-    const Point tl( Pt::lround(topLeft.x()),
-                    Pt::lround(topLeft.y ()) );
-    const Size  sz( Pt::lround(size.width()),
-                    Pt::lround(size.height()) );
+    const Point tl(round(topLeft));
+    
+    const Size  sz(round(size));
 
     fillEllipse(tl, sz);
 }
@@ -1137,10 +1145,9 @@ void Rasterizer2::fillEllipse(const PointF& topLeft, const SizeF& size)
 void Rasterizer2::fillPie(const PointF& topLeft, const SizeF& size,
                           float degBegin, float degEnd)
 {
-     Point tl( Pt::lround(topLeft.x()),
-               Pt::lround(topLeft.y()) );
-     Size  sz( Pt::lround(size.width()),
-               Pt::lround(size.height()) );
+    Point tl(round(topLeft));
+
+    Size  sz(round(size));
 
      rasterArcArea(tl, sz, degBegin, degEnd, ArcMode::Pie);
 }
@@ -1149,10 +1156,9 @@ void Rasterizer2::fillPie(const PointF& topLeft, const SizeF& size,
 void Rasterizer2::fillChord( const PointF& topLeft, const SizeF& size,
                              float degBegin, float degEnd)
 {
-    const Point tl( Pt::lround(topLeft.x()),
-                    Pt::lround(topLeft.y()) );
-    const Size  sz( Pt::lround(size.width()),
-                    Pt::lround(size.height()) );
+    const Point tl(round(topLeft));
+
+    const Size  sz(round(size));
 
      rasterArcArea(tl, sz, degBegin, degEnd, ArcMode::Chord);
 }
@@ -1164,7 +1170,6 @@ void Rasterizer2::fillPath(const Path& path, float smoothness)
     path.toPolygons(polygons, smoothness);
 
     fillPolygons(polygons);
-    return;
 }
 
 

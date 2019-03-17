@@ -3299,8 +3299,9 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
     std::vector<Point> points( pts, pts + pointCount );
 
     ClipPolygon clipper;
+    Rect clipRect(_currentClip.left(), _currentClip.right() - -1, _currentClip.top(), _currentClip.bottom() - 1);
 
-    clipper( points, _currentClip );
+    clipper( points, clipRect);
 
     // find unclipped origin coordinates
     Point origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );

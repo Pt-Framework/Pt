@@ -98,7 +98,7 @@ void ClipPolygon::clipEdge( const std::vector<Point>& in, std::vector<Point>& ou
 }
 
 
-Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& edge0, Point& edge1 )
+Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& edge0, const Point& edge1 )
 {
     Point p;
 
@@ -140,7 +140,7 @@ Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& e
 }
 
 
-bool ClipPolygon::inside( const Point& p, const Point& edge0, Point& edge1 )
+bool ClipPolygon::inside( const Point& p, const Point& edge0, const Point& edge1 )
 {
     if( edge0.x() == edge1.x())
     {  //Vertical
@@ -161,7 +161,7 @@ bool ClipPolygon::inside( const Point& p, const Point& edge0, Point& edge1 )
             return p.y() < edge0.y();
         }
         else
-        {//Left is inside.
+        {//Bottom is inside.
             return p.y() > edge0.y();
         }
     }
