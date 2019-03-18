@@ -189,24 +189,24 @@ void ImagePainter::fillRect(const RectF& r)
 }
 
 
-void ImagePainter::drawEllipse(const PointF& topLeftF, const SizeF& size)
+void ImagePainter::drawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
     Point topLeft( Pt::lround(topLeftF.x() - 0.5),
                    Pt::lround(topLeftF.y() - 0.5) );
 
-    Size s(lround(size.width() - 0.5), lround(size.height() - 0.5));
+    Size size( lround(sizeF.width() - 0.5), 
+               lround(sizeF.height() - 0.5) );
 
-    _rasterizer->strokeEllipse(topLeft,  s );
+    _rasterizer->strokeEllipse(topLeft,  size);
 }
 
 
-void ImagePainter::fillEllipse(const PointF& topLeftF, const SizeF& size)
+void ImagePainter::fillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
-    Point topLeft(round(topLeftF));
+    Point topLeft = round(topLeftF);
+    Size size = round(sizeF);
 
-    Size s(round(size));
-
-    _rasterizer->fillEllipse(topLeft, s);
+    _rasterizer->fillEllipse(topLeft, size);
 }
 
 
@@ -217,7 +217,7 @@ void ImagePainter::drawPolyline(const PointF* ps, const size_t n)
     for(size_t i = 0; i < n; ++i)
     {
         Point p( Pt::lround(ps[i].x() - 0.4999),
-                  Pt::lround(ps[i].y() - 0.4999) );
+                 Pt::lround(ps[i].y() - 0.4999) );
         
         points[i] = p;
     }

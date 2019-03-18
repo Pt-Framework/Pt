@@ -203,10 +203,11 @@ class PainterImpl
             if( rect.isNull() )
                 return;
             
+            // CreateRectRgn only includes the interior of the rect
             _clipRect = CreateRectRgn( rect.x(), 
                                        rect.y(), 
-                                       rect.bottomRight().x() + 1, 
-                                       rect.bottomRight().y() + 1 );
+                                       rect.bottomRight().x(), 
+                                       rect.bottomRight().y() );
         }
 
         HRGN clipRect() const
@@ -226,7 +227,12 @@ class PainterImpl
                 _font = 0;
             }
 
-            _font = getFont(font);
+            Screen& screen = Application::instance().screen();
+            std::size_t scaledSize = screen.scaleFactor() * font.size();
+            Gfx::Font f = Gfx::Font(font.name(), scaledSize, 
+                                    font.style(), font.angle());
+
+            _font = getFont(f);
         }
         
         HFONT font() const
@@ -237,8 +243,13 @@ class PainterImpl
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
                                             const Pt::String& text)
         {   
+            Screen& screen = Application::instance().screen();
+            std::size_t scaledSize = screen.scaleFactor() * font.size();
+            Gfx::Font f = Gfx::Font(font.name(), scaledSize, 
+                                    font.style(), font.angle());
+
             HDC dc = GetDC(NULL);
-            HFONT newFont = getFont(font);
+            HFONT newFont = getFont(f);
             HGDIOBJ oldFont = SelectObject(dc, newFont);
 
             TEXTMETRIC tm;
@@ -254,10 +265,10 @@ class PainterImpl
             DeleteObject(newFont);
             ReleaseDC(NULL, dc);
 
-            return Gfx::FontMetrics(tm.tmAscent, 
-                                    tm.tmDescent, 
-                                    textSize.cx, 
-                                    tm.tmHeight);
+            return Gfx::FontMetrics( lround(tm.tmAscent / screen.scaleFactor()), 
+                                     lround(tm.tmDescent / screen.scaleFactor()), 
+                                     lround(textSize.cx / screen.scaleFactor()), 
+                                     lround(tm.tmHeight / screen.scaleFactor()) );
         }
         
         static std::string defaultFont()

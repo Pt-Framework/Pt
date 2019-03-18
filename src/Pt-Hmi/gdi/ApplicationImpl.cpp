@@ -726,7 +726,10 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
         break;
     }
   
-    Gfx::PointF pos(xPos, yPos);
+    double scaling = Application::instance().screen().scaleFactor();
+
+    Gfx::PointF pos(Gfx::PointF(xPos / scaling, 
+                                yPos / scaling));
 
     _mouseEvent.setPosition(pos);
     _mouseEvent.setId( w.vid() );
@@ -749,10 +752,14 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
 { 
     RECT info;
     GetWindowRect(hwnd, &info);
-    int xPos = info.left;
-    int yPos = info.top;
+    
+    int x = info.left;
+    int y = info.top;
 
-    MoveEvent ev(w.vid(), Gfx::PointF(xPos, yPos) );
+    Gfx::PointF pos(x, y);
+    pos = Application::instance().screen().toLogical(pos);
+
+    MoveEvent ev(w.vid(), pos);
     commitEvent( ev );          
 }
 
@@ -793,7 +800,8 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     int height = HIWORD(lParam);
 
     Gfx::SizeF to(width, height);
-          
+    to = Application::instance().screen().toLogical(to);
+    
     ResizeEvent rev(w.vid(), to);
     commitEvent(rev);
            

@@ -123,7 +123,8 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 
     HDC screenDC = GetDC(NULL);
     _dc = CreateCompatibleDC(screenDC);
-    _bitmap = CreateCompatibleBitmap(screenDC, lround(_size.width()), lround(_size.height()));
+    _bitmap = CreateCompatibleBitmap(screenDC, lround(_size.width()), 
+                                               lround(_size.height()));
     ReleaseDC(NULL, screenDC);
 
     _oldPen    = (HPEN) GetCurrentObject(_dc, OBJ_PEN);
@@ -158,7 +159,8 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
     _size = size;
     
     HDC screenDC = GetDC(NULL);
-    HBITMAP bitmap = CreateCompatibleBitmap(screenDC, lround(_size.width()), lround(_size.height()));
+    HBITMAP bitmap = CreateCompatibleBitmap(screenDC, lround( _size.width() ), 
+                                                      lround( _size.height() ) );
     ReleaseDC(NULL, screenDC);
 
     SelectObject(_dc, bitmap);
@@ -269,20 +271,24 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     SIZE textSize;
     GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
     
-    return Gfx::FontMetrics(tm.tmAscent, 
-                            tm.tmDescent, 
-                            textSize.cx, 
-                            tm.tmHeight);
+    Screen& screen = Application::instance().screen();
+
+    return Gfx::FontMetrics( lround(tm.tmAscent / screen.scaleFactor()), 
+                             lround(tm.tmDescent / screen.scaleFactor()), 
+                             lround(textSize.cx / screen.scaleFactor()), 
+                             lround(tm.tmHeight / screen.scaleFactor()) );
 }
 
 
 void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     POINT points[2];
-    points[0].x = lround(from.x());
-    points[0].y = lround(from.y());
-    points[1].x = lround(to.x());
-    points[1].y = lround(to.y());
+    
+    points[0].x = lround( from.x() - 0.5 );
+    points[0].y = lround( from.y() - 0.5 );
+    
+    points[1].x = lround( to.x() - 0.5 );
+    points[1].y = lround( to.y() - 0.5 );
 
     Polyline(_dc, points, 2);
 }
@@ -291,7 +297,10 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
     RECT rectangle;
-    SetRect(&rectangle, lround(to.x()), lround(to.y()), lround(to.x()), lround(to.y()));
+    SetRect( &rectangle, lround(to.x() + 0.001), 
+                         lround(to.y() + 0.001), 
+                         lround(to.x() + 0.001), 
+                         lround(to.y() + 0.001) );
 
     _text.clear();
     text.toUtf16( std::back_inserter(_text) );    
@@ -303,17 +312,13 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 
 void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 {
-    if( Gfx::round( rect.size().width() ) == 1 && Gfx::round(rect.size().height()) == 1) 
-    {
-        // windows does not paint rectangles with a size of 1x1
-        // we draw a pixel (1|1) instead
-        drawLine(rect.topLeft(), rect.topLeft());
-        return;
-    }
-
-    HBRUSH originalBrush = (HBRUSH)SelectObject(_dc, GetStockObject(NULL_BRUSH));
+    HBRUSH originalBrush = (HBRUSH) SelectObject(_dc, GetStockObject(NULL_BRUSH));
     
-    Rectangle(_dc, lround(rect.left()), lround(rect.top()), lround(rect.right()+1), lround(rect.bottom()+1));
+    // the rectangle that is drawn excludes the bottom and right edges
+    Rectangle(_dc, lround(rect.left()   - 0.4999), 
+                   lround(rect.top()    - 0.4999), 
+                   lround(rect.right()  - 0.4999) + 1, 
+                   lround(rect.bottom() - 0.4999) + 1);
 
     SelectObject(_dc, originalBrush);
 }
@@ -321,12 +326,11 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 
 void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 {
- 
     RECT rectangle;
-    rectangle.left   =  lround(rect.left());
-    rectangle.top    =  lround(rect.top());
-    rectangle.right  =  lround(rect.right() + 1);    
-    rectangle.bottom =  lround(rect.bottom() + 1);
+    rectangle.left   =  lround( rect.left() );
+    rectangle.top    =  lround( rect.top() );
+    rectangle.right  =  lround( rect.right() + 0.001 );    
+    rectangle.bottom =  lround( rect.bottom() + 0.001 );
 
     if(_gradientBrush)
     {
@@ -352,9 +356,10 @@ void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF
 {
     HBRUSH originalBrush = (HBRUSH)SelectObject(_dc, GetStockObject(NULL_BRUSH));
 
-    Ellipse( _dc, lround(topLeft.x()),  lround(topLeft.y()), 
-             lround(topLeft.x() + size.width()), 
-             lround(topLeft.y()+  size.height()) );
+    Ellipse( _dc, lround( topLeft.x()),  
+                  lround( topLeft.y()), 
+                  lround( topLeft.x() + size.width() ), 
+                  lround( topLeft.y() + size.height() ) );
 
     SelectObject(_dc, originalBrush);
 }
@@ -368,8 +373,11 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF
 
     if(_gradientBrush)
     {
-        HBRUSH brush = gradientBrush(_dc, lround(size.width()), lround(size.height()),
-                                     _gradientStart, _gradientStop, _gradient);
+        HBRUSH brush = gradientBrush(_dc, lround( size.width() ), 
+                                          lround( size.height() ),
+                                          _gradientStart, 
+                                          _gradientStop, 
+                                          _gradient);
 
         oldBrush = SelectObject(_dc, brush);
 
@@ -378,10 +386,10 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF
 
     HPEN originalPen = (HPEN) SelectObject(_dc, GetStockObject(NULL_PEN));
 
-    Ellipse( _dc, lround(topLeft.x()),
-             lround(topLeft.y()),
-             lround(topLeft.x() + size.width()) + 1,
-             lround(topLeft.y() + size.height()) + 1 );
+    Ellipse( _dc, lround( topLeft.x() ),
+                  lround( topLeft.y() ),
+                  lround( topLeft.x() + size.width() ) + 1,
+                  lround( topLeft.y() + size.height() ) + 1 );
 
     SelectObject(_dc, originalPen);
 
@@ -395,24 +403,23 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF
 }
 
 
-void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
+void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* ps, const size_t n)
 {
-    std::vector<POINT> winPoints(pointCount);
+    std::vector<POINT> points(n);
 
-    for (size_t i = 0; i < pointCount; i++)
+    for(unsigned i = 0; i < n; i++)
     {
-        const Gfx::Point p = Gfx::round(points[i]);
-        winPoints[i].x = p.x();
-        winPoints[i].y = p.y();
+        points[i].x = Pt::lround(ps[i].x() - 0.4999);
+        points[i].y = Pt::lround(ps[i].y() - 0.4999);
     }
 
-    Polyline( _dc, &winPoints[0], pointCount );
+    Polyline( _dc, &points[0], points.size() );
 }
 
 
-void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
+void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* ps, const size_t n)
 {
-    if( ! pointCount ) 
+    if( ! n ) 
         return;
 
     POINT brushOrigin = {0};
@@ -422,13 +429,15 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
     int right = 0;
     int bottom = 0;
 
-    std::vector<POINT> winPoints(pointCount);
+    std::vector<POINT> points(n);
 
-    for(size_t i = 0; i < pointCount; i++)
+    for(size_t i = 0; i < n; i++)
     {
-        const Gfx::Point p = Gfx::round(points[i]);
-        winPoints[i].x = p.x();
-        winPoints[i].y = p.y();
+        Gfx::Point p( Pt::lround(ps[i].x() - 0.4999),
+                      Pt::lround(ps[i].y() - 0.4999) );
+
+        points[i].x = p.x();
+        points[i].y = p.y();
 
         if( p.y() < top)
             top = p.y();
@@ -456,7 +465,7 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
     }
 
     HPEN originalPen = (HPEN) SelectObject(_dc, GetStockObject(NULL_PEN));
-    Polygon(_dc, &winPoints[0], pointCount);
+    Polygon(_dc, &points[0], points.size());
     SelectObject(_dc, originalPen);
 
     if(_gradientBrush)
@@ -472,7 +481,7 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
                                     const PixmapSurface& surface)
 {
-    const Gfx::Size size = Gfx::round(surface.size());
+    const Gfx::Size size = Gfx::round( surface.size() );
 
     BitBlt( _dc, lround(to.x()), lround(to.y()), size.width(), size.height(), 
             surface.pixmapImpl()->deviceContext(), 0, 0, SRCCOPY);
@@ -555,7 +564,6 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
     const Pt::uint8_t* data = image.data();
 
     HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
-
     if (bitmap == NULL) 
     {
         BITMAPINFO bitmapInfo;

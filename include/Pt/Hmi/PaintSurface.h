@@ -81,9 +81,9 @@ class PT_HMI_API PaintSurface
 
         double align(double n) const;
 
-        Gfx::PointF& align(const Gfx::PointF& p) const;
+        Gfx::PointF align(const Gfx::PointF& p) const;
 
-        Gfx::SizeF& align(const Gfx::SizeF& s) const;
+        Gfx::SizeF align(const Gfx::SizeF& s) const;
 
         Gfx::RectF align(const Gfx::RectF& rect) const;
 

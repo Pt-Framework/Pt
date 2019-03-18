@@ -388,8 +388,9 @@ void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Brush brush( Gfx::Color(65535, 65535, 65535) );
     painter.setBrush(brush);
     painter.fillPolygon(triangle, 3);
-    painter.setPen(Gfx::Color::fromRgb8(255, 0, 0));
-    painter.drawPolyline(triangle, 4);
+    
+    //painter.setPen(Gfx::Color::fromRgb8(255, 0, 0));
+    //painter.drawPolyline(triangle, 4);
 }
 
 //

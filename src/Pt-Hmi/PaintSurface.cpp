@@ -134,13 +134,13 @@ double PaintSurface::align(double n) const
     return Application::instance().screen().align(n);
 }
 
-Gfx::PointF& PaintSurface::align(const Gfx::PointF& p) const
+Gfx::PointF PaintSurface::align(const Gfx::PointF& p) const
 {
     return Application::instance().screen().align(p);
 }
 
 
-Gfx::SizeF& PaintSurface::align(const Gfx::SizeF& s) const
+Gfx::SizeF PaintSurface::align(const Gfx::SizeF& s) const
 {
     return Application::instance().screen().align(s);
 }

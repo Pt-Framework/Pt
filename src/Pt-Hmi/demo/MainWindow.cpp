@@ -204,7 +204,7 @@ MainWindow::MainWindow()
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30, 30));
     _child1.resize( Gfx::SizeF(300, 600) );
-    //_child1.show(true); // SHOW DEMO WINDOW 1
+    _child1.show(true); // SHOW DEMO WINDOW 1
 
     // context menu
     _menu.setName("All Music");
@@ -249,8 +249,10 @@ MainWindow::~MainWindow()
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
+    return;
+
     Painter painter( surface() );
-    //return;
+    painter.setClip(rect);
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
     Gfx::ImagePainter2 imagePainter(image);
@@ -461,7 +463,6 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
 #endif
 
-    painter.setClip(rect);
     painter.drawImage(Gfx::PointF(0, 0), image);
 }
 
