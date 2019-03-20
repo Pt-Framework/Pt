@@ -284,11 +284,11 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     POINT points[2];
     
-    points[0].x = lround( from.x() - 0.5 );
-    points[0].y = lround( from.y() - 0.5 );
+    points[0].x = lround( from.x() - 0.4999 );
+    points[0].y = lround( from.y() - 0.4999 );
     
-    points[1].x = lround( to.x() - 0.5 );
-    points[1].y = lround( to.y() - 0.5 );
+    points[1].x = lround( to.x() - 0.4999 );
+    points[1].y = lround( to.y() - 0.4999 );
 
     Polyline(_dc, points, 2);
 }
@@ -297,6 +297,7 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
     RECT rectangle;
+
     SetRect( &rectangle, lround(to.x() + 0.001), 
                          lround(to.y() + 0.001), 
                          lround(to.x() + 0.001), 

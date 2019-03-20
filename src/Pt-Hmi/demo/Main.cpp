@@ -14,12 +14,12 @@ int main(int argc, char* args[])
         Pt::System::Logger::setLogLevel( "Pt.Hmi", Pt::System::Debug );
 
         Pt::Hmi::Application app;
-        app.screen().setScaleFactor(1.4);
+        app.screen().setScaleFactor(1.25);
 
-        Pt::Hmi::Demo::MainWindow    mainWindow1;
-        mainWindow1.setTitle("Main 1");
-        mainWindow1.show();
-        mainWindow1.activate();
+        Pt::Hmi::Demo::MainWindow window;
+        window.setTitle("Main 1");
+        window.show();
+        window.activate();
 
         app.run();
     }

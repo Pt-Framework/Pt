@@ -1008,7 +1008,8 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     painter.fillRect(titleArea);
 
     const size_t penSize = 1;
-    const double offset = penSize / 2.0;
+    unsigned scaledPenSize = static_cast<unsigned>( painter.toPhysical(penSize) );
+    const double offset = painter.toLogical(scaledPenSize) / 2.0;
 
     //
     // light outer and inner border contour
@@ -1028,7 +1029,6 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
                                  pos.y()),
                      Gfx::PointF(pos.x() + offset,
                                  pos.y() + _frameRect.height()) );
-
 
     // inner right
     painter.drawLine( Gfx::PointF(pos.x() + _frameRect.width() - _borderWidth + offset,
@@ -1106,32 +1106,32 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
                               color.blue() * 0.9f );
     Gfx::Pen gripPenDark(gripColorDark, 1);
 
-    double gripHeight = fm.ascent();
-    double gripOffset = (_titleHeight + _borderWidth - gripHeight) / 2.0;
-    double lineOffset = gripHeight / 3.0;
+    unsigned linePenSize = static_cast<unsigned>( painter.toPhysical(penSize) );
+    const double lineSize = painter.toLogical(linePenSize);
+
+    double lineOffset = painter.align(2.0);
+    double gripHeight = (8 * lineSize) + (3 * lineOffset);
     
-    lineOffset = surface.align(lineOffset);
-    gripOffset = surface.align(gripOffset);
-
-    Gfx::PointF gripStart( textPos.x() + fm.width() + _borderWidth,
-                           pos.y() + gripOffset - offset);
-
-    Gfx::PointF gripEnd(pos.x() + _frameRect.width() - _borderWidth - 3 * _titleHeight,
-                        pos.y() + gripOffset- offset);
+    double gripLeft = textPos.x() + fm.width() + _borderWidth;
+    double gripRight = pos.x() + _frameRect.width() - _borderWidth - 3 * _titleHeight;
+    double gripOffset = (_titleHeight + _borderWidth - gripHeight) / 2.0;
+    
+    double gripY = pos.y() + painter.align(gripOffset);
+    gripY += offset;
 
     for(int n = 0; n < 4; ++n)
     {
         painter.setPen(gripPenLight);
-        painter.drawLine(gripStart, gripEnd);
+        painter.drawLine( Gfx::PointF(gripLeft, gripY),
+                          Gfx::PointF(gripRight, gripY) );
 
-        gripStart.setY(gripStart.y() + offset);
-        gripEnd.setY(gripEnd.y()+ offset);
+        gripY += lineSize;
 
         painter.setPen(gripPenDark);
-        painter.drawLine(gripStart, gripEnd);
+        painter.drawLine( Gfx::PointF(gripLeft, gripY),
+                          Gfx::PointF(gripRight, gripY) );
 
-        gripStart.setY(gripStart.y() + lineOffset - offset);
-        gripEnd.setY(gripEnd.y() + lineOffset - offset);
+        gripY += lineOffset + lineSize;
     }
 
     //
