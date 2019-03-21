@@ -361,11 +361,12 @@ void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
+    double pixelWidth = painter.toLogical(1.0);
+
     double triangleWidth = geometry().height() / 2.0;
     triangleWidth = painter.align(triangleWidth);
 
     // even number of pixels
-    double pixelWidth = painter.toLogical(1.0);
     int pixelsPerWidth = Pt::lround(triangleWidth / pixelWidth);
     if(pixelsPerWidth % 2 != 0)
       triangleWidth += pixelWidth;

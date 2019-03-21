@@ -124,7 +124,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         HFONT          _oldFont;
         HBITMAP        _oldBitmap;
         std::wstring   _text;
-        
+
         bool                      _gradientBrush;
         Gfx::Brush::GradientStyle _gradient;
         Gfx::Color                _gradientStart;

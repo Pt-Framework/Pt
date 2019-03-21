@@ -1277,14 +1277,14 @@ void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb,
 {
     double buttonWidth = sb.size().height();
     double buttonHeight = sb.size().height();
+    double pixelWidth = painter.toLogical(1.0);
 
     double triangleWidth = buttonWidth / 2.9;
     triangleWidth = painter.align(triangleWidth);
 
     // even number of pixels
-    double pixelWidth = painter.toLogical(1.0);
-    int pixelsPerWidth = Pt::lround(triangleWidth / pixelWidth);
-    if(pixelsPerWidth % 2 != 0)
+    int widthPixels = Pt::lround(triangleWidth / pixelWidth);
+    if(widthPixels % 2 != 0)
       triangleWidth += pixelWidth;
 
     double triangleHeight = triangleWidth / 2.0;

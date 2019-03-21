@@ -116,7 +116,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
     private:
         Gfx::SizeF            _size;
         Gfx::Image            _image;
-        Gfx::ImagePainter2    _painter;
+        Gfx::ImagePainter     _painter;
 };
 
 } // namespace

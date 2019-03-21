@@ -96,8 +96,8 @@ MainWindow::MainWindow()
     _picture.set(_icon);
 
     setTitle("Main 1");
-    move( Gfx::PointF(60, 60) );
-    resize( Gfx::SizeF(700, 900) );
+    move( Gfx::PointF(10, 10) );
+    resize( Gfx::SizeF(500, 700) );
 
     //_child2.setTopMost(true);
     _child2.resize( Gfx::SizeF(550, 600) );
