@@ -465,9 +465,7 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* ps, const size_t n)
         SetBrushOrgEx(_dc, left, top, NULL);
     }
 
-    HPEN brushPen = _painter->impl()->brushPen();
-    HPEN originalPen = brushPen ? (HPEN) SelectObject(_dc, brushPen)
-                                : (HPEN) SelectObject(_dc, GetStockObject(NULL_PEN) );
+    HPEN originalPen = (HPEN) SelectObject(_dc, GetStockObject(NULL_PEN) );
     
     Polygon(_dc, &points[0], points.size());
     

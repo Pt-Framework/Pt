@@ -1111,30 +1111,42 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
                                               const Gfx::Pen& contour,
                                               const Gfx::Brush& foreground) const
 {
-    int indicatorWidth = static_cast<int>(cb.size().height()) / 3;
-    if(indicatorWidth % 2 == 0)
-        ++indicatorWidth;
+    double pixelWidth = painter.toLogical(1.0);
     
-    int indicatorHeight = indicatorWidth / 2 + 1;
-
-    double lineX = cb.size().width() - indicatorWidth * 2.5;
+    double buttonX = cb.size().width() - cb.size().height();
+    double buttonWidth = cb.size().height();
+    double buttonHeight = cb.size().height();
+    
+    double lineOffset = painter.align(5);
 
     painter.setPen(contour);
-    painter.drawLine( Gfx::PointF(lineX, 
-                                  indicatorHeight - 1),
-                      Gfx::PointF(lineX, 
-                                  cb.size().height() - indicatorHeight) );
+    painter.drawLine( Gfx::PointF(buttonX + pixelWidth, lineOffset),
+                      Gfx::PointF(buttonX + pixelWidth, cb.size().height() - lineOffset) );
 
+    double triangleWidth = buttonWidth / 3.0;
+    triangleWidth = painter.align(triangleWidth);
 
-    double x = cb.size().width() - indicatorWidth * 1.75;
-    double y = (cb.size().height() - indicatorHeight) / 2 + 1;
+    // even number of pixels
+    int widthPixels = Pt::lround(triangleWidth / pixelWidth);
+    if(widthPixels % 2 != 0)
+      triangleWidth += pixelWidth;
 
-    Gfx::PointF indicator[3] = { Gfx::PointF(x, y),
-                                 Gfx::PointF(x + indicatorWidth, y),
-                                 Gfx::PointF(x + indicatorHeight - 1, y + indicatorHeight) };
+    double triangleHeight = triangleWidth / 2.0;
+    triangleHeight = painter.align(triangleHeight);
+
+    double x = (buttonWidth - triangleWidth) / 2;
+    x = buttonX + painter.align(x);
+    
+    double y = (buttonHeight - triangleHeight) / 2;
+    y = painter.align(y);
+
+    Gfx::PointF triangle[3];
+    triangle[0] = Gfx::PointF(x, y);
+    triangle[1] = Gfx::PointF(x + triangleWidth, y);
+    triangle[2] = Gfx::PointF(x + triangleHeight, y + triangleHeight);
 
     painter.setBrush(foreground);
-    painter.fillPolygon(indicator, 3);
+    painter.fillPolygon(triangle, 3);
 }
 
 
@@ -1279,7 +1291,7 @@ void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb,
     double buttonHeight = sb.size().height();
     double pixelWidth = painter.toLogical(1.0);
 
-    double triangleWidth = buttonWidth / 2.9;
+    double triangleWidth = buttonWidth / 3;
     triangleWidth = painter.align(triangleWidth);
 
     // even number of pixels
@@ -1296,7 +1308,7 @@ void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb,
     double y = (buttonHeight - triangleHeight) / 2;
     y = painter.align(y);
 
-    Gfx::PointF triangle[3];
+    Gfx::PointF triangle[4];
 
     if( sb.type() == sb.Down)
     {
@@ -1311,8 +1323,13 @@ void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb,
         triangle[2] = Gfx::PointF(x, y + triangleHeight);
     }
 
+    triangle[3] = triangle[0];
+
     painter.setBrush(foreground);
     painter.fillPolygon(triangle, 3);
+    
+    painter.setPen(contour);
+    painter.drawPolyline(triangle, 4);
 }
 
 

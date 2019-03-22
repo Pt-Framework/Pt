@@ -53,7 +53,6 @@ class PainterImpl
         : _pen(0)
         , _penColor(0)
         , _brush(0)
-        , _brushPen(0)
         , _gradientBrush(false)
         , _clipRect(0)
         , _font(0)
@@ -66,9 +65,6 @@ class PainterImpl
 
             if(_brush)
                 DeleteObject(_brush);
-
-            if(_brushPen)
-                DeleteObject(_brushPen);
 
             if(_font)
                 DeleteObject(_font);
@@ -119,12 +115,7 @@ class PainterImpl
                 DeleteObject(_brush);
                 _brush = 0;
             }
-            
-            if(_brushPen)
-            {
-                DeleteObject(_brushPen);
-                _brushPen = 0;
-            }
+           
 
             _gradientBrush = false;
 
@@ -137,7 +128,6 @@ class PainterImpl
                 case Gfx::Brush::Solid: 
                 {
                     _brush = CreateSolidBrush(brushColor);
-                    _brushPen = CreatePen(PS_SOLID, 1, brushColor);
                     break;
                 }
 
@@ -189,11 +179,6 @@ class PainterImpl
                 default:
                     break;
             }
-        }
-
-        HPEN brushPen() const
-        {
-            return _brushPen;
         }
 
         HBRUSH brush() const
@@ -411,7 +396,6 @@ class PainterImpl
         HPEN   _pen;
         DWORD  _penColor;
         HBRUSH _brush;
-        HPEN   _brushPen;
         bool   _gradientBrush;
         HRGN   _clipRect;
         HFONT  _font;
