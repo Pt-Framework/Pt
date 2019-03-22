@@ -129,10 +129,17 @@ Gfx::RectF PaintSurface::toLogical(const Gfx::RectF& r) const
 }
 
 
+double PaintSurface::alignContour(size_t n) const
+{
+    return Application::instance().screen().alignContour(n);
+}
+
+
 double PaintSurface::align(double n) const
 {
     return Application::instance().screen().align(n);
 }
+
 
 Gfx::PointF PaintSurface::align(const Gfx::PointF& p) const
 {
@@ -150,7 +157,6 @@ Gfx::RectF PaintSurface::align(const Gfx::RectF& rect) const
 {
     return Application::instance().screen().align(rect);
 }
-
 
 } // namespace
 

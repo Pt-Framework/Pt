@@ -91,8 +91,7 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
                                        const Gfx::Pen& pen,
                                        double corner) const
 {
-    unsigned scaledPenSize = static_cast<unsigned>( painter.toPhysical( pen.size() ) );
-    const double inset = painter.toLogical(scaledPenSize) / 2;
+    double inset = painter.alignContour( pen.size() ) / 2;
 
     Gfx::Polygon polygon = toPolygon(rect, inset, corner);
 
@@ -238,27 +237,26 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
                                                 const Gfx::Brush& brush,
                                                 const Gfx::Pen& pen) const 
 {
-    double offset = painter.align(1.0);
-
+    double corner = painter.align(1.0);
+    
     Gfx::RectF borderRect( button.size() );
-    _baseRenderer.renderPlane(painter, borderRect, brush, offset);
+    _baseRenderer.renderPlane(painter, borderRect, brush, corner);
 
     if( button.hasFocus() )
     {
         double inset = painter.toLogical(0.5);
-        double focusOffset = 2 * offset + inset;
+        double focusOffset = painter.align(2.0) + inset;
 
-        Gfx::RectF focusRect( Gfx::PointF(focusOffset, focusOffset), 
-                              Gfx::SizeF(button.size().width() - 2 * focusOffset,
-                                         button.size().height() - 2 * focusOffset) );
+        Gfx::RectF focusRect( button.size() );
+        focusRect.shift(focusOffset, focusOffset);
+        focusRect.expand(-2 * focusOffset, -2 * focusOffset);
 
         Gfx::Pen focusPen(pen.color(), 1, Gfx::Pen::Dash);
         painter.setPen(focusPen);
         painter.drawRect(focusRect);
     }
 
-    
-    _baseRenderer.renderFrame(painter, borderRect, pen, offset);
+    _baseRenderer.renderFrame(painter, borderRect, pen, corner);
 }
 
 
@@ -278,9 +276,9 @@ void PlatinumButtonRenderer::onRenderText(const PushButton& button,
 
     if( ! mnemonic.isNull() )
     {
-        double menmonicY = textPos.y() + 1;
-        painter.drawLine( Gfx::PointF(mnemonic.left(), menmonicY), 
-                          Gfx::PointF(mnemonic.right(), menmonicY) );
+        double mnemonicY = textPos.y() + 1;
+        painter.drawLine( Gfx::PointF(mnemonic.left(), mnemonicY), 
+                          Gfx::PointF(mnemonic.right(), mnemonicY) );
     }
 }
 
@@ -325,17 +323,15 @@ void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
 
     double inset = painter.toLogical(0.5);
 
-    double checkOffset = painter.align(box.width() * 0.2);
+    double checkOffset = painter.alignContour(3);
 
-    Gfx::RectF checkRect( Gfx::PointF(boxRect.x() + checkOffset,
-                                      boxRect.y() + checkOffset),
-                          Gfx::SizeF(boxRect.width() - 2 * checkOffset,
-                                      boxRect.height() - 2 * checkOffset) );
+    Gfx::RectF checkRect = boxRect;
+    checkRect.shift(checkOffset, checkOffset);
+    checkRect.shrink(2 * checkOffset, 2 * checkOffset);
 
-    Gfx::RectF borderRect( Gfx::PointF(boxRect.x() + inset,
-                                       boxRect.y() + inset),
-                           Gfx::SizeF(boxRect.width() - 2 * inset,
-                                      boxRect.height() - 2 * inset) );
+    Gfx::RectF borderRect = boxRect;
+    borderRect.shift(inset, inset);
+    borderRect.shrink(2 * inset, 2 * inset);
 
     painter.setBrush(brush);
     painter.fillRect(boxRect);
@@ -407,10 +403,10 @@ void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
                                                const Gfx::RectF& rect,
                                                const Gfx::Brush& brush) const 
 {
-    Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
-    double pixelWidth = painter.align(1.0);
+    Gfx::RectF borderRect( p.size() );
+    double corner = painter.align(1.0);
 
-    _baseRenderer.renderPlane(painter, borderRect, brush, pixelWidth);
+    _baseRenderer.renderPlane(painter, borderRect, brush, corner);
 }
 
 
@@ -420,10 +416,10 @@ void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
                                           const Gfx::RectF& rect,
                                           const Gfx::Pen& pen) const 
 {
-    Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
-    double pixelWidth = painter.align(1.0);
+    Gfx::RectF borderRect( p.size() );
+    double corner = painter.align(1.0);
 
-    _baseRenderer.renderFrame(painter, borderRect, pen, pixelWidth);
+    _baseRenderer.renderFrame(painter, borderRect, pen, corner);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -457,10 +453,10 @@ void PlatinumLabelRenderer::onRenderBackground(const Label& label,
                                                const Gfx::RectF& rect,
                                                const Gfx::Brush& brush) const 
 {
-    Gfx::RectF borderRect( Gfx::PointF(0,0), label.size() );
-    double pixelWidth = painter.align(1);
+    Gfx::RectF borderRect( label.size() );
+    double corner = painter.align(1.0);
 
-    _baseRenderer.renderPlane(painter, borderRect, brush, pixelWidth);
+    _baseRenderer.renderPlane(painter, borderRect, brush, corner);
 }
 
 
@@ -470,14 +466,10 @@ void PlatinumLabelRenderer::onRenderFrame(const Label& label,
                                           const Gfx::RectF& rect,
                                           const Gfx::Pen& contour) const 
 {
-    double spacing = painter.align(1);
+    Gfx::RectF borderRect( label.size() );
+    double corner = painter.align(1.0); 
 
-    Gfx::PointF borderPosition(0, 0);
-
-    Gfx::RectF borderRect( borderPosition, 
-                           label.size() );
-
-    _baseRenderer.renderFrame(painter, borderRect, contour, spacing);
+    _baseRenderer.renderFrame(painter, borderRect, contour, corner);
 }
 
 
@@ -542,12 +534,11 @@ void PlatinumLineEditRenderer::onRenderBackground(const LineEdit& le,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& brush) const
 {
-    unsigned scaledPenSize = static_cast<unsigned>( painter.toPhysical( contour.size() ) );
-    const double offset = painter.toLogical(scaledPenSize) / 2;
+    const double inset = painter.alignContour( contour.size() ) / 2;
 
-    Gfx::RectF borderRect( Gfx::PointF(offset, offset), 
-                           Gfx::SizeF(le.size().width() - 2 * offset, 
-                                      le.size().height() - 2 * offset) );
+    Gfx::RectF borderRect( le.size() );
+    borderRect.shift(inset, inset);
+    borderRect.shrink(2 * inset, 2 * inset);
 
     painter.setBrush(brush);
     painter.fillRect(borderRect);

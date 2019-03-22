@@ -125,9 +125,25 @@ class PT_HMI_API Screen : public WindowBase
 
         double align(double n) const
         {
+            // better name: alignGrid()
+
             double p = toPhysical(n);
             p = lround(p);
             return toLogical(p);
+        }
+
+        double alignPixel(double n) const
+        {
+            double p = toPhysical(n);
+            p = lround(p + 0.5) - 0.5;
+            return toLogical(p);
+        }
+
+        double alignContour(size_t n) const
+        {
+          double p = toPhysical(n);
+          size_t m = static_cast<size_t>(p);
+          return toLogical(m);
         }
 
         Gfx::PointF align(const Gfx::PointF& p) const

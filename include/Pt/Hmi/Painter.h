@@ -117,6 +117,8 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         Gfx::RectF toLogical(const Gfx::RectF& s) const;
 
+        double alignContour(size_t n) const;
+
         double align(double n) const;
 
         Gfx::PointF align(const Gfx::PointF& rect) const;

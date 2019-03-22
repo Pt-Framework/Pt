@@ -200,6 +200,24 @@ class BasicRect
             return _p != other._p || _s != other._s;
         }
 
+        void shift(T dx, T dy)
+        {
+            _p.addX(dx);
+            _p.addY(dy);
+        }
+
+        void expand(T dw, T dh)
+        {
+            _s.addWidth(dw);
+            _s.addHeight(dh);
+        }
+
+        void shrink(T dw, T dh)
+        {
+            _s.addWidth(-dw);
+            _s.addHeight(-dh);
+        }
+
         void unify(const BasicRect<T>& rect)
         {
             if( rect.isNull() )

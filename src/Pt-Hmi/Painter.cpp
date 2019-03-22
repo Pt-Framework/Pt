@@ -341,6 +341,12 @@ Gfx::RectF Painter::toLogical(const Gfx::RectF& r) const
 }
 
 
+double Painter::alignContour(size_t n) const
+{
+    return _surface ? _surface->alignContour(n) : n;
+}
+
+
 double Painter::align(double n) const
 {
     return _surface ? _surface->align(n) : n;
