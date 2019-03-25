@@ -805,17 +805,27 @@ void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
                                          const Gfx::Brush& foreground,
                                          const Gfx::Pen& contour) const
 {
+    const double inset = painter.alignContour( contour.size() ) / 2;
+
+    Gfx::RectF borderRect = Gfx::RectF( s.size() );
+    borderRect.shift(inset, inset);
+    borderRect.shrink(2 * inset, 2 * inset);
+
+    Gfx::RectF gripRect =  handleRect;
+    gripRect.shift(inset, inset);
+    gripRect.shrink(2 * inset, 2 * inset);
+
     painter.setBrush(background);
     painter.fillRect(rect);
 
     painter.setPen(contour);
-    painter.drawRect( Gfx::RectF( s.size() ) );
+    painter.drawRect(borderRect);
 
     painter.setBrush(foreground);
-    painter.fillRect(handleRect);
+    painter.fillRect(gripRect);
 
     painter.setPen(contour);
-    painter.drawRect(handleRect);
+    painter.drawRect(gripRect);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -860,16 +870,15 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
     double boxY = p.size().height() / 2 - barHeight / 2;
     boxY = painter.align(boxY);
 
-    Gfx::PointF boxPos(0.0, boxY);
-    Gfx::SizeF boxSize(p.size().width(), barHeight);
-    Gfx::SizeF progressSize( boxSize.width() * p.progress(),
-                             boxSize.height() );
+    Gfx::PointF barPos(0.0, boxY);
+    Gfx::SizeF barSize(p.size().width(), barHeight);
+    Gfx::RectF barRect(barPos, barSize);
 
-    Gfx::RectF boxRect(boxPos, boxSize);
-    Gfx::RectF progressRect(boxPos, progressSize);
+    Gfx::SizeF progressSize( barSize.width() * p.progress(), barHeight );
+    Gfx::RectF progressRect(barPos, progressSize);
 
     painter.setBrush(background);
-    painter.fillRect(boxRect);
+    painter.fillRect(barRect);
 
     painter.setBrush(foreground);
     painter.fillRect(progressRect);
@@ -987,7 +996,11 @@ void PlatinumListBoxRenderer::onRenderFrame(const ListBox& lb,
                                             const Gfx::RectF& rect,
                                             const Gfx::Pen& pen) const 
 {
-    Gfx::RectF borderRect( lb.size() );
+    const double inset = painter.alignContour( pen.size() ) / 2;
+
+    Gfx::RectF borderRect = Gfx::RectF( lb.size() );
+    borderRect.shift(inset, inset);
+    borderRect.shrink(2 * inset, 2 * inset);
     
     painter.setPen(pen);
     painter.drawRect(borderRect);
@@ -1067,12 +1080,11 @@ void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& background) const
 {
-    unsigned scaledPenSize = static_cast<unsigned>( painter.toPhysical( contour.size() ) );
-    const double offset = painter.toLogical(scaledPenSize) / 2;
+    const double inset = painter.alignContour( contour.size() ) / 2;
 
-    Gfx::RectF borderRect( Gfx::PointF(offset, offset), 
-                           Gfx::SizeF(cb.size().width() - 2 * offset, 
-                                      cb.size().height() - 2 * offset) );
+    Gfx::RectF borderRect = Gfx::RectF( cb.size() );
+    borderRect.shift(inset, inset);
+    borderRect.shrink(2 * inset, 2 * inset);
 
     painter.setBrush(background);
     painter.fillRect(borderRect);
@@ -1085,13 +1097,9 @@ void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb,
 void PlatinumComboBoxRenderer::onPrepareLayout(const ComboBox& cb,
                                                Gfx::SizeF& buttonSize) const
 {
-    int indicatorWidth = static_cast<int>(cb.size().height()) / 3;
-    if(indicatorWidth % 2 == 0)
-        ++indicatorWidth;
-    
-    double width = indicatorWidth * 2.5;
-    double height = cb.size().height();
-    buttonSize = Gfx::SizeF(width, height);
+    double buttonWidth = cb.size().height();
+    double buttonHeight = cb.size().height();
+    buttonSize = Gfx::SizeF(buttonWidth, buttonHeight);
 }
 
 
@@ -1108,11 +1116,11 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
     double buttonWidth = cb.size().height();
     double buttonHeight = cb.size().height();
     
-    double lineOffset = painter.align(5);
+    double gap = painter.align(5);
 
     painter.setPen(contour);
-    painter.drawLine( Gfx::PointF(buttonX + pixelWidth, lineOffset),
-                      Gfx::PointF(buttonX + pixelWidth, cb.size().height() - lineOffset) );
+    painter.drawLine( Gfx::PointF(buttonX + pixelWidth, gap),
+                      Gfx::PointF(buttonX + pixelWidth, cb.size().height() - gap) );
 
     double triangleWidth = buttonWidth / 3.0;
     triangleWidth = painter.align(triangleWidth);
@@ -1254,8 +1262,7 @@ void PlatinumSpinBoxRenderer::onRenderBackground(const SpinBox& sb,
     double buttonWidth = sb.size().height();
     double boxWidth = sb.size().width() - 2 * buttonWidth;
 
-    unsigned scaledPenSize = static_cast<unsigned>( painter.toPhysical( contour.size() ) );
-    const double inset = painter.toLogical(scaledPenSize) / 2;
+    const double inset = painter.alignContour( contour.size() ) / 2;
 
     Gfx::RectF boxRect( Gfx::PointF(buttonWidth, 0), 
                         Gfx::SizeF(boxWidth, sb.size().height() ) );
