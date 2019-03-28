@@ -231,6 +231,24 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
 }
 
 
+void PushButton::click()
+{
+    onPressed();
+    onReleased();
+}
+
+
+void PushButton::setToggled(bool isToggled)
+{
+    setPressed(isToggled);
+
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if(_renderer)
+        _renderer->prepareIcon(*this, options, _icon, _picture);
+}
+
+
 void PushButton::onPressed()
 {
     Base::onPressed();
