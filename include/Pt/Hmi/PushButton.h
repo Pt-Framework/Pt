@@ -61,6 +61,10 @@ class PT_HMI_API PushButton : public Button
 
         virtual ~PushButton();
 
+        bool isPressed() const;
+
+        void setPressed(bool pressed);
+
         bool isToggle() const;
 
         void setToggle(bool toggle);
@@ -74,10 +78,6 @@ class PT_HMI_API PushButton : public Button
         void setFlat(bool f);
 
         void setLayout(Direction d);
-
-        void click();
-
-        void setToggled(bool isToggled);
 
     public:
         const Gfx::Brush& foreground() const;
@@ -140,6 +140,7 @@ class PT_HMI_API PushButton : public Button
 
     private:
         bool                      _isToggle;
+        bool                      _isPressed;
         bool                      _isBeingToggled;
         bool                      _isFlat;
         Direction                 _direction;

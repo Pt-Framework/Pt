@@ -96,16 +96,12 @@ void SpinBoxButton::setRenderer(SpinBoxRenderer* renderer)
 void SpinBoxButton::onPressed()
 {
     Base::onPressed();
-
-    setPressed(true);
 }
 
 
 void SpinBoxButton::onReleased()
 {
     Base::onReleased();
-
-    setPressed(false);
 
     clicked().send();
 }
@@ -114,8 +110,6 @@ void SpinBoxButton::onReleased()
 void SpinBoxButton::onCanceled()
 {
     Base::onCanceled();
-
-    setPressed(false);
 }
 
 

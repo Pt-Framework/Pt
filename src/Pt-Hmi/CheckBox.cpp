@@ -57,7 +57,6 @@ CheckBox::State CheckBox::state() const
 void CheckBox::setState(State s)
 {
     _state = s;
-    setPressed(s == Checked);
 }
 
 
@@ -176,7 +175,6 @@ void CheckBox::onReleased()
     else
         _state = Checked;
 
-    setPressed(_state == Checked);
     clicked().send();
 }
 
