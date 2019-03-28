@@ -79,10 +79,6 @@ class PT_HMI_API PushButton : public Button
 
         void setLayout(Direction d);
 
-        void click();
-
-        void setToggled(bool isToggled);
-
     public:
         const Gfx::Brush& foreground() const;
 
