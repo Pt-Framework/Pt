@@ -46,11 +46,11 @@ class PT_HMI_API Button : public Control
     
         virtual ~Button();
 
-        bool isPressed() const;
-
         const Pt::String& text() const;
 
         void setText(const Pt::String& t);
+
+        void click();
 
         Signal<>& clicked();
     
@@ -60,8 +60,6 @@ class PT_HMI_API Button : public Control
         virtual void onReleased();
 
         virtual void onCanceled();
-
-        void setPressed(bool pressed);
 
     protected:
         virtual void onMnemonic();

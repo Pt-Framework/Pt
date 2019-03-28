@@ -37,8 +37,7 @@ namespace Pt {
 namespace Hmi {
 
 Button::Button()
-: _isPressed(false)
-, _onClickBegin(false)
+: _onClickBegin(false)
 {
     setFocusPolicy(Widget::NormalFocus);
 }
@@ -46,19 +45,6 @@ Button::Button()
   
 Button::~Button()
 {
-}
-
-
-bool Button::isPressed() const
-{
-    return _isPressed;
-}
-
-
-void Button::setPressed(bool pressed)
-{
-    _isPressed = pressed;
-    invalidate();
 }
 
 
@@ -73,6 +59,13 @@ void Button::setText(const Pt::String& text)
     _text = Widget::setMnemonic(text);
     relayout();
     update();
+}
+
+
+void Button::click()
+{
+    onPressed();
+    onReleased();
 }
 
 

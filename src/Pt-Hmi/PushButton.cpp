@@ -39,6 +39,7 @@ namespace Hmi {
 
 PushButton::PushButton()
 : _isToggle(false)
+, _isPressed(false)
 , _isBeingToggled(false)
 , _isFlat(false)
 , _direction(Left)
@@ -164,7 +165,6 @@ void PushButton::setHighlightColor(const Gfx::Color& color)
 }
 
 
-
 const Gfx::Color& PushButton::textColor() const
 {
     return _textColor ? *_textColor
@@ -231,21 +231,22 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
 }
 
 
-void PushButton::click()
+bool PushButton::isPressed() const
 {
-    onPressed();
-    onReleased();
+    return _isPressed;
 }
 
 
-void PushButton::setToggled(bool isToggled)
+void PushButton::setPressed(bool pressed)
 {
-    setPressed(isToggled);
+    _isPressed = pressed;
 
     const StyleOptions& options = Application::instance().styleOptions();
 
     if(_renderer)
         _renderer->prepareIcon(*this, options, _icon, _picture);
+
+    invalidate();
 }
 
 
@@ -260,11 +261,6 @@ void PushButton::onPressed()
     }
     else
         setPressed(true);
-
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    if(_renderer)
-        _renderer->prepareIcon(*this, options, _icon, _picture);
 }
 
 
@@ -276,11 +272,6 @@ void PushButton::onReleased()
 
     if( ! isToggle() )
         setPressed(false);
-
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    if(_renderer)
-        _renderer->prepareIcon(*this, options, _icon, _picture);
 
     clicked().send();
 }
@@ -300,11 +291,6 @@ void PushButton::onCanceled()
     }
     else
         setPressed(false);
-
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    if(_renderer)
-        _renderer->prepareIcon(*this, options, _icon, _picture);
 }
 
 
