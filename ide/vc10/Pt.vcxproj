@@ -78,6 +78,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\FlowLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\GridLayout.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Icon.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\InputMethod.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\InvalidateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Key.h" />

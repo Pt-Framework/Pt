@@ -1584,6 +1584,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Icon.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
