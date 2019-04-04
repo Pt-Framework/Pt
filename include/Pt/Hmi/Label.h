@@ -35,6 +35,7 @@
 #include <Pt/Hmi/Adjustment.h>
 #include <Pt/Hmi/TextBlock.h>
 #include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/Icon.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 

@@ -26,45 +26,84 @@
    MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_Icon_h
-#define Pt_Hmi_Icon_h
-
-#include <Pt/Hmi/Api.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/System/Path.h>
-
-#include <map>
-#include <cstddef>
+#include <Pt/Hmi/Icon.h>
+#include <Pt/Gfx/PngReader.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Icon
+Icon::Icon()
 {
-    public:
-        Icon();
+}
 
-        ~Icon();
 
-        Icon(const Icon& icon);
+Icon::~Icon()
+{
+}
 
-        Icon& operator=(const Icon& icon);
 
-        bool empty() const;
+Icon::Icon(const Icon& icon)
+: _images(icon._images)
+{
+}
 
-        void clear();
 
-        void addImage(const Gfx::SizeF& size, const Pt::System::Path& path);
+Icon& Icon::operator=(const Icon& icon)
+{
+    _images = icon._images;
+    return *this;
+}
 
-        const Pt::System::Path* getImage(const Gfx::SizeF& area) const;
 
-    private:
-        std::map<Gfx::SizeF, Pt::System::Path> _images;
-};
+bool Icon::empty() const
+{ 
+    return _images.empty(); 
+}
+
+
+void Icon::clear()
+{ 
+    _images.clear(); 
+}
+
+
+void Icon::addImage(const Gfx::SizeF& size, const Pt::System::Path& path)
+{ 
+    _images[size] = path; 
+}
+
+
+const Pt::System::Path* Icon::getImage(const Gfx::SizeF& area) const
+{
+    std::map<Gfx::SizeF, Pt::System::Path>::const_iterator match = _images.end();
+
+    std::map<Gfx::SizeF, Pt::System::Path>::const_iterator it;
+    for(it = _images.begin(); it != _images.end(); ++it)
+    {
+        const Gfx::SizeF& size = it->first;
+                
+        if( size.width() <= area.width() && 
+            size.height() <= area.height() )
+        {
+            if( match == _images.end() )
+            {
+                match = it;
+            }
+            else
+            {
+                const Gfx::SizeF& matchSize = match->first;
+                double m = matchSize.width() * matchSize.height();
+                double n = size.width() * size.height();
+                if(n > m)
+                  match = it;
+            }
+        }
+    }
+
+    return match != _images.end() ? &match->second : 0; 
+}
 
 } // namespace
 
 } // namespace
-
-#endif

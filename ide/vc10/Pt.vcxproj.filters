@@ -2957,5 +2957,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.cpp">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Icon.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

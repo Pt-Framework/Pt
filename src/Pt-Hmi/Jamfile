@@ -31,6 +31,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
                        DockingLayout.cpp
                        FlowLayout.cpp
                        GridLayout.cpp
+                       Icon.cpp
                        InputMethod.cpp
                        Layout.cpp
                        LineEdit.cpp
@@ -49,13 +50,13 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
                        PixmapSurface.cpp
                        PlatinumStyle.cpp
                        Popup.cpp
-			           ProgressBar.cpp
+                       ProgressBar.cpp
                        PushButton.cpp
                        Screen.cpp 
                        ScrollBar.cpp
                        ScrollView.cpp
                        ScrollLayout.cpp
-			           Slider.cpp
+                       Slider.cpp
                        SpinBox.cpp
                        StackLayout.cpp
                        Style.cpp

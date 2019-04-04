@@ -132,25 +132,23 @@ class BasicSize {
         }
 
         bool operator==(const BasicSize& other) const
-        { return (_w == other._w && _h == other._h); }
+        { 
+            return (_w == other._w && _h == other._h); 
+        }
 
         bool operator!=(const BasicSize& other) const
-        { return (_w != other._w || _h != other._h); }
+        { 
+            return (_w != other._w || _h != other._h); 
+        }
 
         bool operator>(const BasicSize& other) const
         {
-            if ( _w < other._w || _h < other._h)
-                return false;
-
-            return ( (*this) != other );
+            return _h > other._h || (_h == other._h && _w > other._w);
         }
 
         bool operator<(const BasicSize& other) const
         {
-            if ( _w > other._w || _h > other._h )
-                return false;
-
-            return ( other != (*this) );
+            return _h < other._h || (_h == other._h && _w < other._w);
         }
 
     protected:
