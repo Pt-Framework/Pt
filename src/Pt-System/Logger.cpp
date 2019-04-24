@@ -57,6 +57,27 @@ Logger::~Logger()
 }
 
 
+void Logger::loadPlugin(const std::string& sym, const Path& path)
+{
+    // thread-safe
+    LogManager::instance().loadPlugin(sym, path);
+}
+
+
+void Logger::registerPlugin(Plugin<LogChannel>& plugin)
+{
+    // thread-safe
+    LogManager::instance().registerPlugin(plugin);
+}
+
+
+void Logger::unregisterPlugin(Plugin<LogChannel>& plugin)
+{
+    // thread-safe
+    LogManager::instance().unregisterPlugin(plugin);
+}
+
+
 LogTarget& Logger::initLogger(const std::string& name)
 {
     LogManager& lm = LogManager::get();
@@ -88,6 +109,7 @@ void Logger::init(const Settings& settings)
 
 void Logger::setPattern(const std::string& pattern)
 {
+    // thread-safe
     LogManager::instance().setPattern(pattern);
 }
 

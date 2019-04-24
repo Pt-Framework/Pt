@@ -56,6 +56,12 @@ class LogManager : private NonCopyable
     public:
         ~LogManager();
 
+        void loadPlugin(const std::string& sym, const Path& path);
+
+        void registerPlugin(Plugin<LogChannel>& plugin);
+
+        void unregisterPlugin(Plugin<LogChannel>& plugin);
+
         void init(const std::string& path);
         
         void init(const Settings& settings);

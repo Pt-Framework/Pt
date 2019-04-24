@@ -34,6 +34,7 @@
 #include <Pt/System/LogLevel.h>
 #include <Pt/System/LogTarget.h>
 #include <Pt/System/LogRecord.h>
+#include <Pt/System/Plugin.h>
 #include <Pt/NonCopyable.h>
 #include <string>
 
@@ -116,6 +117,18 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         /** @brief Destructor
         */
         ~Logger();
+
+        /** @brief Loads log channel plugins from a library.
+        */
+        static void loadPlugin(const std::string& sym, const Path& path);
+
+        /** @brief Registers a log channel plugin.
+        */
+        static void registerPlugin(Plugin<LogChannel>& plugin);
+
+        /** @brief Unregisters a log channel plugin.
+        */
+        static void unregisterPlugin(Plugin<LogChannel>& plugin);
 
         /** @brief Initialize logging targets with a settings file
 

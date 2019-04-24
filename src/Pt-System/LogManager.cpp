@@ -154,6 +154,24 @@ LogManager::~LogManager()
 }
 
 
+void LogManager::loadPlugin(const std::string& sym, const Path& path)
+{
+  _pluginManager.loadPlugin(sym, path);
+}
+
+
+void LogManager::registerPlugin(Plugin<LogChannel>& plugin)
+{
+  _pluginManager.registerPlugin(plugin);
+}
+
+
+void LogManager::unregisterPlugin(Plugin<LogChannel>& plugin)
+{
+  _pluginManager.unregisterPlugin(plugin);
+}
+
+
 void LogManager::init(const std::string& path)
 {
     Pt::System::RecursiveLock lock( _mutex );
