@@ -9,6 +9,26 @@ if $(WITH_MACH_CLOCK)
     SubDirC++Flags [ FDefines WITH_MACH_CLOCK ] ;
 }
 
+if $(WITH_POSIX_SELECT)
+{
+    SubDirC++Flags [ FDefines PT_WITH_POSIX_SELECT ] ;
+}
+
+if $(WITH_POSIX_POLL)
+{
+    SubDirC++Flags [ FDefines PT_WITH_POSIX_POLL ] ;
+}
+
+if $(WITH_BSD_KQUEUE)
+{
+    SubDirC++Flags [ FDefines PT_WITH_BSD_KQUEUE ] ;
+}
+
+if $(WITH_LINUX_EPOLL)
+{
+    SubDirC++Flags [ FDefines PT_WITH_LINUX_EPOLL ] ;
+}
+
 PT_SYSTEM_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-System $(PT_SYSTEM:L) ] ;
 PT_SYSTEM_IMPL += [ GLOB $(PT_SYSTEM_IMPL_SUBDIR) : *.cpp  ] ;
 

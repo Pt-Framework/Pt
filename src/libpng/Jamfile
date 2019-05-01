@@ -8,6 +8,8 @@ if $(ZLIB_INCLUDES)
     SubDirHdrs $(ZLIB_INCLUDES) ;
 }
 
+SubDirCcFlags [ FDefines PNG_ARM_NEON_OPT=0 ] ;
+
 Library png : png.c
               pngerror.c
               pngget.c

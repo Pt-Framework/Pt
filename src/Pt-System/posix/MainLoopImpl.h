@@ -36,16 +36,6 @@
 #include "Pt/Signal.h"
 #include <vector>
 
-#ifdef __APPLE__
-    #define PT_WITH_BSD_KQUEUE
-    //#define PT_WITH_POSIX_POLL
-#endif
-
-#ifdef __linux__
-    //#define PT_WITH_LINUX_EPOLL
-    #define PT_WITH_POSIX_POLL
-#endif
-
 #if defined (PT_WITH_LINUX_EPOLL)
     #include "Selector_epoll.h"
 #elif defined(PT_WITH_BSD_KQUEUE)

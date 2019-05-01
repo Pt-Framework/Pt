@@ -237,6 +237,60 @@ Configure PT_SYSTEM_LINKLIBS ;
 EchoOption PT_SYSTEM_LINKLIBS : "System linklibs" ;
 
 #############################################################################
+# I/O multiplexer
+#############################################################################
+
+if --with-posix-select in $(ARGV)
+{
+    WITH_SELECTOR = posix-select ;
+    WITH_POSIX_SELECT = yes ;
+    EchoOption --with-posix-select : "POSIX select" : $(WITH_POSIX_SELECT:E="no") ;
+    Configure WITH_POSIX_SELECT ;
+}
+
+
+if --with-posix-poll in $(ARGV)
+{
+    WITH_SELECTOR = posix-poll ;
+    WITH_POSIX_POLL = yes ;
+    EchoOption --with-posix-poll : "POSIX poll" : $(WITH_POSIX_POLL:E="no") ;
+    Configure WITH_POSIX_POLL ;
+}
+
+if --with-bsd-kqueue in $(ARGV)
+{
+    WITH_SELECTOR = bsd-kqueue ;
+    WITH_BSD_KQUEUE = yes ;
+    EchoOption --with-bsd-kqueue : "BSD kqueue" : $(WITH_BSD_KQUEUE:E="no") ;
+    Configure WITH_BSD_KQUEUE ;
+}
+
+if --with-linux-epoll in $(ARGV)
+{
+    WITH_SELECTOR = linux-epoll ;
+    WITH_LINUX_EPOLL = yes ;
+    EchoOption --with-linux-epoll : "Linux epoll" : $(WITH_LINUX_EPOLL:E="no") ;
+    Configure WITH_LINUX_EPOLL ;
+}
+
+if ! $(WITH_SELECTOR)
+{
+    if $(TARGET_OS) = "macosx"
+    {
+        WITH_BSD_KQUEUE = yes ;
+        EchoOption --with-bsd-kqueue : "BSD kqueue" : $(WITH_BSD_KQUEUE:E="no") ;
+        Configure WITH_BSD_KQUEUE ;
+    }
+
+    if $(TARGET_OS) = "linux"
+    {
+        WITH_POSIX_POLL = yes ;
+        EchoOption --with-posix-poll : "POSIX poll" : $(WITH_POSIX_POLL:E="no") ;
+        Configure WITH_POSIX_POLL ;
+    }
+}
+
+#############################################################################
 # Networking libraries and includes
 #############################################################################
 
