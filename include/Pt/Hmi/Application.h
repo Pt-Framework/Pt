@@ -50,13 +50,19 @@
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/PlatinumStyle.h>
+#include <Pt/SmartPtr.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/PngReader.h>
 #include <Pt/System/Application.h>
+#include <Pt/System/Path.h>
 #include <Pt/Hmi/InputMethod.h>
 
 namespace Pt {
 
+typedef SmartPtr<const Gfx::Image> ImagePtr;
+
 namespace Hmi {
+
 
 class ApplicationImpl;
 class Window;
@@ -138,6 +144,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setFontDir(const Pt::System::Path& dir);
 
+        ImagePtr loadImage(const System::Path& path);
+
     protected:
         void onResizeEvent(const ResizeEvent& ev);
 
@@ -208,6 +216,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         Gfx::PointF        _scrollFrom;
         bool               _onScroll;
+        Gfx::PngReader     _iconReader;
+        std::map<System::Path, ImagePtr> _iconCache;
 };
 
 } // namespace

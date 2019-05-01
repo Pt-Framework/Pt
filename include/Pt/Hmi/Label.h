@@ -62,6 +62,8 @@ class PT_HMI_API Label : public Control
         void setText(const Pt::String& text);
 
         void setImage(const Gfx::Image& image); 
+        
+        void setIcon(const Icon& icon, const Gfx::SizeF& iconSize);
 
     public:
         const Gfx::Brush* background() const;
@@ -114,7 +116,6 @@ class PT_HMI_API Label : public Control
         Adjustment  _adjustment;
         TextBlock   _textBlock;
 
-        Gfx::Image  _image;
         Gfx::PointF _imagePos;
         
         AutoPtr<Gfx::Brush>       _background;

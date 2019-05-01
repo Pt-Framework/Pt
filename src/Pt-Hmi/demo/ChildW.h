@@ -76,6 +76,7 @@ class ChildW : public Hmi::Window
         ProgressBar    _progressBar;
         Slider         _slider;
         SpinBox        _spinBox;
+        Label          _iconLabel;
 };
 
 } // namespace

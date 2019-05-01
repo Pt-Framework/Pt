@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/Icon.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Pen.h>
@@ -72,6 +73,8 @@ class PT_HMI_API PushButton : public Button
         void setIcon(const Gfx::Image& image);
 
         void setIconSize(const Gfx::SizeF& size);
+
+        void setIcon(const Icon& icon, const Gfx::SizeF& iconSize);       
 
         bool isFlat() const;
 

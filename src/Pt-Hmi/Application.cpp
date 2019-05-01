@@ -36,6 +36,7 @@
 #include <Pt/Hmi/InputMethod.h>
 #include <cmath>
 #include <cassert>
+#include <fstream>
 
 namespace Pt {
 
@@ -603,6 +604,31 @@ void Application::setFontDir(const Pt::System::Path& dir)
 {
     _impl->setFontDir(dir);
 }
+
+
+ImagePtr Application::loadImage(const System::Path& path)
+{   
+    std::map<System::Path, ImagePtr>::iterator it = _iconCache.find(path);
+
+    if (it != _iconCache.end())
+        return it->second;
+
+    std::clog << "load image: " << path.toLocal() << std::endl;
+    std::ifstream fs(path.toLocal().c_str(), std::ios::binary);
+
+    Gfx::Image* image = new Gfx::Image();
+
+    ImagePtr imagePtr(image);
+    
+    _iconReader.reset();
+    _iconReader.attach(fs, *image);
+    _iconReader.get();
+
+    _iconCache[path] = imagePtr;
+
+    return imagePtr;
+}
+
 
 void Application::registerVisual( Visual& visual )
 {

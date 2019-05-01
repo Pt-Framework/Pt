@@ -13,3 +13,7 @@ HMI_DEMO_SOURCES = Main.cpp
 Main Pt-Hmi-Demo : $(HMI_DEMO_SOURCES) ;
 LinkSharedLibraries Pt-Hmi-Demo : Pt Pt-System Pt-Gfx Pt-Net Pt-Hmi  ;
 MakeLocate Pt-Hmi-Demo : $(PT_OUTPUT_TARGET) ;
+
+PT_DEMO_ICONS_DIR = [ FDirName etc icons ] ;
+PT_DEMO_ICONS = [ GLOB $(PT_DEMO_ICONS_DIR) : *.png  ] ;
+Bulk $(PT_OUTPUT_TARGET) : $(PT_DEMO_ICONS) ;

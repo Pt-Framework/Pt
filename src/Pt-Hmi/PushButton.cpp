@@ -82,6 +82,24 @@ void PushButton::setIcon(const Gfx::Image& image)
 }
 
 
+void PushButton::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
+{
+    if (icon.empty())
+        return;
+
+    Application& app = Application::instance();
+
+    const Gfx::SizeF scaledSize = app.screen().toPhysical(iconSize);
+
+    const System::Path& path = icon.getImage(scaledSize);
+
+    ImagePtr imagePtr = app.loadImage(path);
+
+    setIconSize(iconSize);
+    setIcon(*imagePtr);
+}
+
+
 void PushButton::setIconSize(const Gfx::SizeF& size)
 {
     _iconSize = size;

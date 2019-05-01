@@ -57,7 +57,11 @@ class PT_HMI_API Icon
 
         void addImage(const Gfx::SizeF& size, const Pt::System::Path& path);
 
-        const Pt::System::Path* getImage(const Gfx::SizeF& area) const;
+        const Pt::System::Path& getImage(const Gfx::SizeF& area) const;
+
+        Gfx::SizeF minimumSize() const;
+
+        Gfx::SizeF maximumSize() const;
 
     private:
         std::map<Gfx::SizeF, Pt::System::Path> _images;
