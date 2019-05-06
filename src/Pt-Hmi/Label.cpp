@@ -86,17 +86,15 @@ void Label::setImage(const Gfx::Image& image)
 
 void Label::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
 {
-    if (icon.empty())
+    if( icon.empty() )
         return;
 
     Application& app = Application::instance();
 
     const Gfx::SizeF scaledSize = app.screen().toPhysical(iconSize);
-
     const System::Path& path = icon.getImage(scaledSize);
-
     ImagePtr imagePtr = app.loadImage(path);
-
+    
     setImage(*imagePtr);
 }
 

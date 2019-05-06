@@ -14,7 +14,7 @@ int main(int argc, char* args[])
         Pt::System::Logger::setLogLevel( "Pt.Hmi", Pt::System::Debug );
 
         Pt::Hmi::Application app;
-        app.screen().setScaleFactor(1.25);
+        app.screen().setScaleFactor(1.5);
 
         Pt::Hmi::Demo::MainWindow window;
         window.setTitle("Main 1");

@@ -74,12 +74,11 @@ ChildW::ChildW(const std::string& title)
     
     //Icon label
     Icon icon;
-    icon.addImage(Gfx::SizeF(16, 16), System::Path("test16x16.png"));
-    icon.addImage(Gfx::SizeF(24, 24), System::Path("test24x24.png"));
-    icon.addImage(Gfx::SizeF(32, 32), System::Path("test32x32.png"));
-    icon.addImage(Gfx::SizeF(48, 48), System::Path("test48x48.png"));
-    icon.addImage(Gfx::SizeF(64, 64), System::Path("test64x64.png"));
-
+    icon.addImage(Gfx::SizeF(16, 16), System::Path("test-16x16.png"));
+    icon.addImage(Gfx::SizeF(24, 24), System::Path("test-24x24.png"));
+    icon.addImage(Gfx::SizeF(32, 32), System::Path("test-32x32.png"));
+    icon.addImage(Gfx::SizeF(48, 48), System::Path("test-48x48.png"));
+    icon.addImage(Gfx::SizeF(64, 64), System::Path("test-64x64.png"));
 
     _iconLabel.setIcon(icon, icon.minimumSize());
     _iconLabel.setAlignment(Alignment::Bottom);
@@ -107,7 +106,7 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.setShortcut( &key );
     _toggleButton.move( Gfx::PointF(20,30) );
     _toggleButton.setMargin(5);
-    _toggleButton.setPadding(7);    
+    _toggleButton.setPadding(5);    
     _toggleButton.setIcon(icon, icon.minimumSize());
 
     //Dialog button
