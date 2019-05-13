@@ -341,12 +341,12 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WidgetView.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\AtesionIcon.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\ChildW.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\DemoImage.h" />
@@ -510,12 +510,11 @@
     <None Include="..\..\src\Pt-Gfx\Jamfile" />
     <None Include="..\..\src\Pt-Gfx\tests\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm" />
-    <None Include="..\..\src\Pt-Hmi\cocoa\CoWindow.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.mm" />
+    <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.mm" />
-    <None Include="..\..\src\Pt-Hmi\cocoa\WidgetView.mm" />
     <None Include="..\..\src\Pt-Hmi\demo\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\Jamfile" />
     <None Include="..\..\src\Pt-Http\Jamfile" />

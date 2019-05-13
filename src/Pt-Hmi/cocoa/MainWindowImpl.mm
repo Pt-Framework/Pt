@@ -29,8 +29,7 @@
 
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
-#include "WidgetView.h"
-#include "CoWindow.h"
+#include "MainWindowView.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
@@ -40,8 +39,8 @@ namespace Pt {
 namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(Window::Type type)
-: _window(0)
-, _view(0)
+: _window(nil)
+, _view(nil)
 , _windowStyle(0)
 , _id(0)
 , _keyEvent(0)
@@ -59,13 +58,14 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
         in create().
     */
 
-    _timer.setActive(Application::instance().loop());
     //TODO: remove timer for window position traking, 
     //      use position changed system event
+    
+    _timer.setActive(Application::instance().loop());
     _timer.timeout() += Pt::slot(*this, &MainWindowImpl::onPosition);
-
-    _window = nil;
-    _view = [[WidgetView alloc] init: this ];
+    _timer.start(100);
+    
+    _view = [[MainWindowView alloc] init: this ];
 
     Gfx::PointF at(20, 20);
     Gfx::SizeF size(400, 200);
@@ -75,7 +75,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
                    NSMiniaturizableWindowMask |
                    NSResizableWindowMask;
     
-    _window = [[CoWindow alloc] initWithContentRect:NSMakeRect(at.x(), 
+    _window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), 
                                                                at.y(), 
                                                                size.width(), 
                                                                size.height()) 
@@ -92,7 +92,6 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     [_view setHidden:NO];
 
     _level = [_window level];
-    _timer.start(100);
 }
 
 
@@ -192,7 +191,7 @@ void MainWindowImpl::move(const Gfx::PointF& p)
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
     //TODO: this is the client size
-	NSRect windowRect = [_window frame];
+    NSRect windowRect = [_window frame];
         
     windowRect.size.width = size.width();
     windowRect.size.height = size.height();
@@ -285,6 +284,76 @@ void MainWindowImpl::grabPointer()
 // }
 
 
+Window* MainWindowImpl::findWindow(NSWindow* wnd)
+{
+    const std::vector<Window*>& windows = Application::instance().screen().windows();
+
+    std::vector<Window*>::iterator it;
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        Window* window = *it;
+
+        if( window->impl() && window->impl()->window() == wnd )
+            return window;
+    }
+    
+    return 0;
+}
+
+
+void MainWindowImpl::onPaint(const NSRect& rect)
+{
+    Window* window = findWindow(NSWindow* wnd);
+    if( ! window )
+        return;
+
+    Pt::Hmi::PixmapSurfaceImpl* pixmap = window->surface().pixmapImpl();
+    CGContextRef pixmapContext = pixmap->context();
+    CGImageRef image = CGBitmapContextCreateImage(pixmapContext);
+
+    NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
+    CGContextRef currentContext = [graphicsContext CGContext];
+    
+    CGContextDrawImage(currentContext, rect, image);
+    CGImageRelease(image);
+}
+
+
+void MainWindowImpl::onKeyDown(int keyCode)
+{
+    Key::Modifiers modifiers;
+    Key key(modifiers, keyCode);
+
+    _keyEvent.setPress(key, keyCode);
+    _keyEvent.setId(_id);
+
+    Application::instance().loop().commitEvent(_keyEvent);
+}
+
+
+void MainWindowImpl::onKeyUp(int keyCode)
+{
+    Key::Modifiers modifiers;
+    Key key(modifiers, keyCode);
+
+    _keyEvent.setRelease(key, keyCode);
+    _keyEvent.setId(_id);
+
+    Application::instance().loop().commitEvent(_keyEvent);
+}
+
+
+void MainWindowImpl::onSpezialKeyEvent(unsigned int mask)
+{
+    // _keyEvent.setUnicode(0);
+    // _keyEvent.setAlt((mask & NSAlternateKeyMask) == NSAlternateKeyMask);
+    // _keyEvent.setShift(((mask & NSShiftKeyMask) == NSShiftKeyMask) | ((mask & NSAlphaShiftKeyMask) == NSAlphaShiftKeyMask));
+    // _keyEvent.setCtrl(((mask & NSControlKeyMask) == NSControlKeyMask) | ((mask & NSCommandKeyMask) == NSCommandKeyMask));
+    
+    // Application::instance().loop().commitEvent(_keyEvent);
+}
+
+
 void MainWindowImpl::onLostFocus()
 {
     //TODO: call onLostFocus if the window lost focus
@@ -331,41 +400,6 @@ Pt::Gfx::PointF MainWindowImpl::convertMousePosition(double x, double y)
     double gx = x;;
     double gy = windowRect.size.height - y -18;// TODO: determinat the correct client rect
     return Pt::Gfx::PointF(gx,gy);
-}
-
-
-void MainWindowImpl::onKeyDown(int keyCode)
-{
-    Key::Modifiers modifiers;
-    Key key(modifiers, keyCode);
-
-    _keyEvent.setPress(key, keyCode);
-    _keyEvent.setId(_id);
-
-    Application::instance().loop().commitEvent(_keyEvent);
-}
-
-
-void MainWindowImpl::onKeyUp(int keyCode)
-{
-    Key::Modifiers modifiers;
-    Key key(modifiers, keyCode);
-
-    _keyEvent.setRelease(key, keyCode);
-    _keyEvent.setId(_id);
-
-    Application::instance().loop().commitEvent(_keyEvent);
-}
-
-
-void MainWindowImpl::onSpezialKeyEvent(unsigned int mask)
-{
-    // _keyEvent.setUnicode(0);
-    // _keyEvent.setAlt((mask & NSAlternateKeyMask) == NSAlternateKeyMask);
-    // _keyEvent.setShift(((mask & NSShiftKeyMask) == NSShiftKeyMask) | ((mask & NSAlphaShiftKeyMask) == NSAlphaShiftKeyMask));
-    // _keyEvent.setCtrl(((mask & NSControlKeyMask) == NSControlKeyMask) | ((mask & NSCommandKeyMask) == NSCommandKeyMask));
-    
-    // Application::instance().loop().commitEvent(_keyEvent);
 }
     
     

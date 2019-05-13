@@ -68,7 +68,7 @@ class MainWindowImpl : public Pt::Connectable
 
         virtual ~MainWindowImpl();
 
-        void setId(Window& w);
+        void setId(Pt::uint64_t id);
 
         void setType(Window::Type type)
         {}
@@ -116,6 +116,7 @@ class MainWindowImpl : public Pt::Connectable
         }
 
     public:
+        void onPaint(const NSRect& rect);
         void onSize();
         void onPosition();
         void onClosing();
@@ -128,6 +129,7 @@ class MainWindowImpl : public Pt::Connectable
         void onLostFocus();
     
     private:
+        Window* findWindow(NSWindow* w);
         Pt::Gfx::PointF convertMousePosition(double x, double y);
 
     private:

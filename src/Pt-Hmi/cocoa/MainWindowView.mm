@@ -26,7 +26,7 @@
  MA  02110-1301  USA
  */
 
-#import "WidgetView.h"
+#import "MainWindowView.h"
 
 #include <Pt/Hmi/Application.h>
 
@@ -36,9 +36,9 @@
 
 #include <CoreGraphics/CoreGraphics.h>
 
-@implementation WidgetView
+@implementation MainWindowView
 
-- (WidgetView*) init : (Pt::Hmi::MainWindowImpl*) window
+- (MainWindowView*) init : (Pt::Hmi::MainWindowImpl*) window
 {
     self = [super init];
     _windowImpl = window;
@@ -71,7 +71,7 @@
 }
 
 
-- (void)keyDown:(NSEvent *)ev
+- (void) keyDown:(NSEvent *)ev
 {
     NSString* chars = [ev characters];
     unichar character = [chars characterAtIndex: 0];
@@ -84,7 +84,7 @@
 }
 
 
-- (void)keyUp:(NSEvent *)ev
+- (void) keyUp:(NSEvent *)ev
 {
     NSString* chars = [ev characters];
     unichar character = [chars characterAtIndex: 0];
@@ -99,17 +99,7 @@
 
 - (void) drawRect:(NSRect)rect
 {
-    // Pt::Hmi::PixmapSurfaceImpl* impl = _windowImpl->paintSurface();
-    
-    // CGContextRef context = impl->context();
-    
-    // CGImageRef image =  CGBitmapContextCreateImage(context);
-    
-    // CGContextRef currentContext = ( CGContextRef ) [[NSGraphicsContext currentContext] graphicsPort];
-
-    // CGContextDrawImage(currentContext,rect,image);
-    
-    // CGImageRelease(image);
+    _windowImpl->onPaint(rect);
 }
 
 

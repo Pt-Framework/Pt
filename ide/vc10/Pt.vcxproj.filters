@@ -855,9 +855,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WidgetView.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.h">
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
@@ -1587,6 +1584,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Icon.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1676,9 +1676,6 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\WidgetView.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
@@ -1712,9 +1709,6 @@
     <None Include="..\..\src\Pt-Hmi\demo\Jamfile">
       <Filter>Pt-Hmi\demo</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\CoWindow.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </None>
     <None Include="..\..\src\Pt-Gfx\Jamfile">
       <Filter>Pt-Gfx</Filter>
     </None>
@@ -1726,6 +1720,9 @@
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
   </ItemGroup>

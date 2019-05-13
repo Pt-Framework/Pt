@@ -31,7 +31,7 @@
 
 #import <AppKit/NSView.h>
 
-@interface WidgetView : NSView
+@interface MainWindowView : NSView
 {
     Pt::Hmi::MainWindowImpl* _windowImpl;
 }
