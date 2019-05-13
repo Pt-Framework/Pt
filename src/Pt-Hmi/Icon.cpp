@@ -73,21 +73,22 @@ void Icon::addImage(const Gfx::SizeF& size, const Pt::System::Path& path)
     _images[size] = path; 
 }
 
-const Pt::System::Path& Icon::getImage(const Gfx::SizeF& area) const
+
+const Pt::System::Path& Icon::getImage(const Gfx::SizeF& sizeF) const
 {
-    const Gfx::Size rounded = round(area);
+    const Gfx::Size size = round(sizeF);
 
     std::map<Gfx::SizeF, Pt::System::Path>::const_iterator match = _images.end();
 
     std::map<Gfx::SizeF, Pt::System::Path>::const_iterator it;
-    for (it = _images.begin(); it != _images.end(); ++it)
+    for(it = _images.begin(); it != _images.end(); ++it)
     {
-        const Gfx::SizeF& size = it->first;
+        const Gfx::SizeF& imageSize = it->first;
 
-        if (size.width() <= rounded.width() &&
-            size.height() <= rounded.height())
+        if( imageSize.width() <= size.width() &&
+            imageSize.height() <= size.height() )
         {
-            if (match == _images.end())
+            if( match == _images.end() )
             {
                 match = it;
             }
@@ -95,7 +96,7 @@ const Pt::System::Path& Icon::getImage(const Gfx::SizeF& area) const
             {
                 const Gfx::SizeF& matchSize = match->first;
                 double m = matchSize.width() * matchSize.height();
-                double n = size.width() * size.height();
+                double n = imageSize.width() * imageSize.height();
                 if (n > m)
                     match = it;
             }
@@ -113,16 +114,17 @@ const Pt::System::Path& Icon::getImage(const Gfx::SizeF& area) const
     return  match->second;
 }
 
+
 Gfx::SizeF Icon::minimumSize() const
 {
     return empty() ? Gfx::SizeF() : _images.begin()->first;
 }
 
+
 Gfx::SizeF Icon::maximumSize() const
 {
     return empty() ? Gfx::SizeF() : _images.rbegin()->first;
 }
-
 
 } // namespace
 
