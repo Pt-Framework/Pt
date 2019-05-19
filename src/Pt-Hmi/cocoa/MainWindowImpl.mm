@@ -30,6 +30,7 @@
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
 #include "MainWindowView.h"
+#include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
@@ -40,6 +41,7 @@ namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(Window::Type type)
 : _window(nil)
+, _controller(nil)
 , _view(nil)
 , _windowStyle(0)
 , _id(0)
@@ -70,10 +72,10 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     Gfx::PointF at(20, 20);
     Gfx::SizeF size(400, 200);
 
-    _windowStyle = NSTitledWindowMask |
-                   NSClosableWindowMask |
-                   NSMiniaturizableWindowMask |
-                   NSResizableWindowMask;
+    _windowStyle = NSWindowStyleMaskTitled |
+                   NSWindowStyleMaskClosable |
+                   NSWindowStyleMaskMiniaturizable |
+                   NSWindowStyleMaskResizable;
     
     _window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), 
                                                                at.y(), 
@@ -87,8 +89,11 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     [_window setAcceptsMouseMovedEvents:YES];
     [_window setInitialFirstResponder: _view];
     [_window setContentView: _view];    
-
     [_window makeKeyAndOrderFront:_window];
+
+    _controller = [[WindowController alloc] initWithWindow: _window];
+    [_window setDelegate: _controller];
+
     [_view setHidden:NO];
 
     _level = [_window level];
@@ -101,11 +106,18 @@ MainWindowImpl::~MainWindowImpl()
         return;
     
     _timer.stop();
+
     [_window close];
+
+     [_controller release];
+    _controller = nil;
+
     [_window release];
+    _window = nil;
+
     [_view release];
     _view = nil;
-    _window = nil;
+    
 }
 
 
@@ -288,7 +300,7 @@ Window* MainWindowImpl::findWindow(NSWindow* wnd)
 {
     const std::vector<Window*>& windows = Application::instance().screen().windows();
 
-    std::vector<Window*>::iterator it;
+    std::vector<Window*>::const_iterator it;
     for(it = windows.begin(); it != windows.end(); ++it)
     {
         Window* window = *it;
@@ -303,7 +315,7 @@ Window* MainWindowImpl::findWindow(NSWindow* wnd)
 
 void MainWindowImpl::onPaint(const NSRect& rect)
 {
-    Window* window = findWindow(NSWindow* wnd);
+    Window* window = findWindow(_window);
     if( ! window )
         return;
 

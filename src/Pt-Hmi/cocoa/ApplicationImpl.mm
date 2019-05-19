@@ -35,6 +35,8 @@
 #import <Foundation/NSAutoreleasePool.h>
 #import <Foundation/NSRunLoop.h>
 
+#include <poll.h>
+
 @interface PtGuiApplication : NSApplication
 {
     NSAutoreleasePool* pool;
@@ -104,7 +106,7 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
         pfd.revents = 0;
 
         int avail = ::poll(&pfd, 1, 0);
-        if( pfd.revents & POLLPRI )
+        if( avail > 0 && pfd.revents & POLLPRI )
         {
             h->events &= ~System::IONotifier::Except;
             h->ready |= System::IONotifier::Except;
@@ -147,7 +149,7 @@ void ApplicationImpl::nextEvent()
 {
     NSEvent* event = nil;
 
-    event = [NSApp nextEventMatchingMask: NSAnyEventMask
+    event = [NSApp nextEventMatchingMask: NSEventMaskAny
                                 untilDate: [NSDate distantFuture]
                                     inMode: NSDefaultRunLoopMode
                                     dequeue: YES];
@@ -272,7 +274,7 @@ void ApplicationImpl::onProcessEvents()
     //
     do {
         
-    event = [NSApp nextEventMatchingMask: NSAnyEventMask
+    event = [NSApp nextEventMatchingMask: NSEventMaskAny
                                untilDate: nil
                                   inMode: NSDefaultRunLoopMode
                                  dequeue: YES];
@@ -311,7 +313,7 @@ void ApplicationImpl::onProcessEvents()
         [NSApp stop: nil];
         
         // post fake event so NSApp notices the stop flag
-        event = [NSEvent otherEventWithType: NSApplicationDefined
+        event = [NSEvent otherEventWithType: NSEventTypeApplicationDefined
                                    location: NSMakePoint(0,0)
                               modifierFlags: 0
                                   timestamp: 0.0
@@ -454,7 +456,7 @@ int ApplicationImpl::endWait(System::IOHandle* h)
     int flags = h->ready;
 
     h->ready = 0;
-    h->events 0;
+    h->events = 0;
 
     return flags;
 }

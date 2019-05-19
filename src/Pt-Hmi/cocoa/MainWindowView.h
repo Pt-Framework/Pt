@@ -30,13 +30,23 @@
 #include "MainWindowImpl.h"
 
 #import <AppKit/NSView.h>
+#import <AppKit/NSWindowController.h>
+
+@interface WindowController : NSWindowController<NSWindowDelegate>
+    - (void)windowDidLoad;
+    - (BOOL)windowShouldClose:(id)sender;
+@end 
 
 @interface MainWindowView : NSView
 {
     Pt::Hmi::MainWindowImpl* _windowImpl;
 }
     
-- (WidgetView*) init: (Pt::Hmi::MainWindowImpl*) window ;
+- (MainWindowView*) init: (Pt::Hmi::MainWindowImpl*) window ;
+
+- (BOOL) acceptsFirstResponder;
+
+- (BOOL) acceptsFirstMouse:(NSEvent *)event;
 
 - (void) drawRect:(NSRect)rect;
 
@@ -54,12 +64,12 @@
 
 - (BOOL) windowShouldClose:(id)window;
 
-- (void) keyDown:(NSEvent *)ev;
-
-- (void) keyUp:(NSEvent *)ev;
+- (void)windowWillClose:(NSNotification *)notification;
 
 - (void) flagsChanged:(NSEvent*)ev;
 
-- (BOOL) acceptsFirstResponder;
+- (void) keyDown:(NSEvent *)ev;
+
+- (void) keyUp:(NSEvent *)ev;
 
 @end

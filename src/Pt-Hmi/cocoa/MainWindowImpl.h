@@ -48,13 +48,17 @@
     #import <AppKit/NSWindow.h>
     #import <AppKit/NSGraphicsContext.h>
     #import <AppKit/NSView.h>
-    #import <AppKit/NSScreen.h> 
+    #import <AppKit/NSScreen.h>
+    #import <AppKit/NSWindowController.h> 
+    @class WindowController;
 #else
 	struct NSRect;
 	struct NSView;
-  struct NSWindow;
+    struct NSWindow;
 	struct NSResponder;
 	struct NSGraphicsContext;
+    struct NSWindowController;
+    struct WindowController;
 #endif
 
 namespace Pt {
@@ -134,6 +138,7 @@ class MainWindowImpl : public Pt::Connectable
 
     private:
         NSWindow*                _window;
+        WindowController*      _controller;
         NSView*                  _view;
         int                      _windowStyle;
         Pt::uint64_t             _id;

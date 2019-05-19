@@ -36,6 +36,24 @@
 
 #include <CoreGraphics/CoreGraphics.h>
 
+@interface WindowController ()
+@end
+
+@implementation WindowController 
+
+- (void)windowDidLoad 
+{
+}
+
+- (BOOL)windowShouldClose:(id)sender 
+{
+    std::clog << "WINDOW SHOULD CLOSE (delegate)" << std::endl;
+    return FALSE;
+}
+
+@end 
+
+
 @implementation MainWindowView
 
 - (MainWindowView*) init : (Pt::Hmi::MainWindowImpl*) window
@@ -64,6 +82,12 @@
 }
 
 
+- (BOOL) acceptsFirstMouse:(NSEvent *)event;
+{
+    return TRUE;
+}
+
+
 - (void) flagsChanged:(NSEvent*)ev
 {
     unsigned int mod = [ev modifierFlags];
@@ -76,6 +100,8 @@
     NSString* chars = [ev characters];
     unichar character = [chars characterAtIndex: 0];
     
+    std::clog << "KEY DOWN: " << character << std::endl;
+
     //Emulate tab character on shift pressed.
     if(character == 25)
         character = 9;
@@ -89,6 +115,8 @@
     NSString* chars = [ev characters];
     unichar character = [chars characterAtIndex: 0];
     
+    std::clog << "KEY UP: " << character << std::endl;
+
     //Emulate tab charecter on shift pressed.
     if(character == 25)
         character = 9;
@@ -105,6 +133,8 @@
 
 - (void)setFrameOrigin:(NSPoint)origin
 {
+    std::clog << "FRAME ORIGIN" << std::endl;
+
     [super setFrameOrigin:origin];
     
     _windowImpl->onPosition();
@@ -113,6 +143,8 @@
 
 - (void)setFrameSize:(NSSize)frameSize
 {
+    std::clog << "FRAME SIZE" << std::endl;
+    
     [super setFrameSize:frameSize];
     
     _windowImpl->onSize();
@@ -121,6 +153,7 @@
 
 - (void) mouseDown:(NSEvent*)ev
 {
+    std::clog << "MOUSE DOWN" << std::endl;
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onLMouseDown(mp.x,mp.y);
 }
@@ -128,6 +161,7 @@
 
 - (void) mouseUp:(NSEvent*)ev
 {
+    std::clog << "MOUSE UP" << std::endl;
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onLMouseUp(mp.x,mp.y);
 }
@@ -135,7 +169,7 @@
 
 - (void) mouseDragged:(NSEvent*)ev
 {
-    
+    std::clog << "MOUSE DRAGGED" << std::endl;
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onMouseMove(mp.x,mp.y);
 }
@@ -150,8 +184,15 @@
 
 - (BOOL) windowShouldClose:(id)window
 {
+    std::clog << "WINDOW SHOULD CLOSE" << std::endl;
     _windowImpl->onClosing();
 	return false;
+}
+
+
+- (void)windowWillClose:(NSNotification *)notification
+{
+    std::clog << "WINDOW WILL CLOSE" << std::endl;
 }
 
 @end
