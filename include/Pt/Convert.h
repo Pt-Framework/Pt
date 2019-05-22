@@ -987,18 +987,15 @@ InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt, bool& ok)
     bool withFractional = false;
     for( ; it != end; ++it)
     {
-        if( *it == fmt.point() || fmt.isE(*it) )
+        if( *it == fmt.point() )
         {
-            if( *it == fmt.point() )
-            {
-                withFractional = true;
-                ++it;
-            }
+            withFractional = true;
+            ++it;
             break;
         }
         
         if( ! fmt.isDigit(*it) )
-            return it;
+            break;
 
         unsigned digit = fmt.toDigit(*it); 
         
@@ -1017,7 +1014,7 @@ InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt, bool& ok)
     }
 
     T base = 10.0;
-    if( withFractional)
+    if(withFractional)
     {
         // fractional part, ignore 0 digits after dot
         unsigned short fractDigits = 0;
