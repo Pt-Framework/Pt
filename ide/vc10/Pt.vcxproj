@@ -340,6 +340,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\ArrowCursor.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\Dummy.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h" />
@@ -583,6 +584,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\CheckBox.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\Dummy.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\cocoa\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.cpp" />

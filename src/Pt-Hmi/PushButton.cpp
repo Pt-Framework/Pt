@@ -90,11 +90,10 @@ void PushButton::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
     Application& app = Application::instance();
 
     const Gfx::SizeF scaledSize = app.screen().toPhysical(iconSize);
-    const System::Path& path = icon.getImage(scaledSize);
-    ImagePtr imagePtr = app.loadImage(path);
+    const Gfx::Image& image = icon.getImage(scaledSize);
 
     setIconSize(iconSize);
-    setIcon(*imagePtr);
+    setIcon(image);
 }
 
 
@@ -494,7 +493,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // button text including menomnic
     //
 
-    Gfx::RectF mnemonicRect;   
+    Gfx::RectF mnemonicRect;
     const Char* m = mnemonic();
     if(m)
     {

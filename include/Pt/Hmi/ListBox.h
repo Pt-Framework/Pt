@@ -34,6 +34,7 @@
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/FlowLayout.h>
 #include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/Icon.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/SmartPtr.h>
@@ -64,6 +65,8 @@ class PT_HMI_API ListBoxItem : public Button
         const Pt::String& text() const;
         
         void setIcon(const Gfx::Image& image);
+
+        void setIcon(const Icon& icon, const Gfx::SizeF& size);
 
         const Gfx::SizeF& iconSize() const
         { return _iconSize; }

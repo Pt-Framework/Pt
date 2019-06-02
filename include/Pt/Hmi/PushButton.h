@@ -74,7 +74,7 @@ class PT_HMI_API PushButton : public Button
 
         void setIconSize(const Gfx::SizeF& size);
 
-        void setIcon(const Icon& icon, const Gfx::SizeF& iconSize);       
+        void setIcon(const Icon& icon, const Gfx::SizeF& iconSize);
 
         bool isFlat() const;
 

@@ -112,8 +112,23 @@ void ListBoxItem::setIcon(const Gfx::Image& image)
 {
     _image = image;
     _picture.set(image);
-    
+
     invalidate();
+}
+
+
+void ListBoxItem::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
+{
+    if (icon.empty())
+        return;
+
+    Application& app = Application::instance();
+
+    const Gfx::SizeF scaledSize = app.screen().toPhysical(iconSize);
+    const Gfx::Image& image =  icon.getImage(scaledSize);
+
+    setIconSize(iconSize);
+    setIcon(image);
 }
 
 
@@ -334,7 +349,7 @@ void ListBoxItem::onPaintContent(Painter& painter)
     
     textX = pictureX + pictureWidth + spacing;
     textY = ((size().height() - fm.height()) / 2) + fm.ascent();
-            
+
     //
     // icon
     //
@@ -342,12 +357,8 @@ void ListBoxItem::onPaintContent(Painter& painter)
     if( ! _picture.empty() )
     {
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-        
-        double pictureXOff = (pictureWidth - _picture.width()) / 2;
-        double pictureYOff = (pictureHeight - _picture.height()) / 2;
 
-        Gfx::PointF picturePos(pictureX + pictureXOff, 
-                               pictureY + pictureYOff);
+        Gfx::PointF picturePos(pictureX, pictureY);
         painter.drawPicture(picturePos, _picture);
         
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
@@ -359,7 +370,7 @@ void ListBoxItem::onPaintContent(Painter& painter)
 
     Gfx::RectF mnemonicRect;
     Gfx::PointF textPos(textX, textY);
-    
+
     painter.drawText(textPos, _text);
 }
 

@@ -27,68 +27,142 @@
 */
 
 #include <Pt/Hmi/Icon.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/PngReader.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class IconImpl
+{
+    public:
+        IconImpl();
+
+        struct Entry
+        {
+            Entry(Gfx::Image i)
+                : image(i)
+            {
+            }
+
+            Entry(const System::Path& p)
+                :path(p)
+            {
+            }
+
+            Entry()
+            {
+            }
+
+            Gfx::Image   image;
+            System::Path path;
+        };
+
+        std::map<Gfx::SizeF, Entry> images;
+        size_t refCount;
+};
+
+
+IconImpl::IconImpl()
+: refCount(1)
+{
+
+}
+
 Icon::Icon()
+: _data(new IconImpl())
 {
 }
 
 
 Icon::~Icon()
 {
+    _data->refCount--;
+
+    if (_data->refCount == 0)
+        delete _data;
 }
 
 
 Icon::Icon(const Icon& icon)
-: _images(icon._images)
+: _data(icon._data)
 {
+    _data->refCount++;
 }
 
 
 Icon& Icon::operator=(const Icon& icon)
 {
-    _images = icon._images;
+    if (icon._data == this->_data)
+        return *this;
+
+    _data->refCount--;
+
+    if (_data->refCount == 0)
+        delete _data;
+
+    _data = icon._data;
+    _data->refCount++;
     return *this;
 }
 
 
 bool Icon::empty() const
 { 
-    return _images.empty(); 
+    return _data->images.empty();
 }
 
 
 void Icon::clear()
-{ 
-    _images.clear(); 
+{
+    if (_data->refCount > 1)
+    {
+        _data->refCount--;
+        _data = new IconImpl();
+    }
 }
 
 
-void Icon::addImage(const Gfx::SizeF& size, const Pt::System::Path& path)
-{ 
-    _images[size] = path; 
+void Icon::addImage(const Gfx::SizeF& size, const Gfx::Image& image)
+{
+    if (_data->refCount > 1)
+    {
+        _data->refCount--;
+        _data =  new IconImpl(*_data);
+    }
+
+    _data->images[size] = IconImpl::Entry(image);
+}
+
+void Icon::addImage(const Gfx::SizeF& size, const System::Path& path)
+{
+    if (_data->refCount > 1)
+    {
+        _data->refCount--;
+        _data = new IconImpl(*_data);
+    }
+
+    _data->images[size] = IconImpl::Entry(path);
 }
 
 
-const Pt::System::Path& Icon::getImage(const Gfx::SizeF& sizeF) const
+const Gfx::Image& Icon::getImage(const Gfx::SizeF& sizeF) const
 {
     const Gfx::Size size = round(sizeF);
 
-    std::map<Gfx::SizeF, Pt::System::Path>::const_iterator match = _images.end();
+    std::map<Gfx::SizeF, IconImpl::Entry>::iterator match = _data->images.end();
 
-    std::map<Gfx::SizeF, Pt::System::Path>::const_iterator it;
-    for(it = _images.begin(); it != _images.end(); ++it)
+    std::map<Gfx::SizeF, IconImpl::Entry>::iterator it;
+
+    for(it = _data->images.begin(); it != _data->images.end(); ++it)
     {
         const Gfx::SizeF& imageSize = it->first;
 
         if( imageSize.width() <= size.width() &&
             imageSize.height() <= size.height() )
         {
-            if( match == _images.end() )
+            if( match == _data->images.end() )
             {
                 match = it;
             }
@@ -103,27 +177,30 @@ const Pt::System::Path& Icon::getImage(const Gfx::SizeF& sizeF) const
         }
     }
 
-    if( match == _images.end() )
+    if( match == _data->images.end() )
     {
         if( empty() )
             throw std::logic_error("invalid icon");
 
-        match = _images.begin();
+        match = _data->images.begin();
     }
 
-    return  match->second;
+    if (match->second.image.empty())
+        Application::instance().loadImage(match->second.path, match->second.image);
+
+    return match->second.image;
 }
 
 
 Gfx::SizeF Icon::minimumSize() const
 {
-    return empty() ? Gfx::SizeF() : _images.begin()->first;
+    return empty() ? Gfx::SizeF() : _data->images.begin()->first;
 }
 
 
 Gfx::SizeF Icon::maximumSize() const
 {
-    return empty() ? Gfx::SizeF() : _images.rbegin()->first;
+    return empty() ? Gfx::SizeF() : _data->images.rbegin()->first;
 }
 
 } // namespace

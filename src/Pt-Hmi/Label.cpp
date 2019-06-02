@@ -92,10 +92,9 @@ void Label::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
     Application& app = Application::instance();
 
     const Gfx::SizeF scaledSize = app.screen().toPhysical(iconSize);
-    const System::Path& path = icon.getImage(scaledSize);
-    ImagePtr imagePtr = app.loadImage(path);
-    
-    setImage(*imagePtr);
+    const Gfx::Image& image = icon.getImage(scaledSize);
+
+    setImage(image);
 }
 
 

@@ -73,9 +73,6 @@ class MainWindow : public Pt::Hmi::Window
         ChildW _child1;
         Window _child2;
 
-        Gfx::Image _icon;
-        Picture   _picture;
-
         ScrollView _scrollView;
         FlowLayout _scrollContainer;
         

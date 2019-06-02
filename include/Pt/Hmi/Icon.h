@@ -31,7 +31,9 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/System/Path.h>
+#include <Pt/SmartPtr.h>
 
 #include <map>
 #include <cstddef>
@@ -39,6 +41,8 @@
 namespace Pt {
 
 namespace Hmi {
+
+class IconImpl;
 
 class PT_HMI_API Icon
 {
@@ -55,16 +59,18 @@ class PT_HMI_API Icon
 
         void clear();
 
-        void addImage(const Gfx::SizeF& size, const Pt::System::Path& path);
+        void addImage(const Gfx::SizeF& size, const Gfx::Image& image);
 
-        const Pt::System::Path& getImage(const Gfx::SizeF& area) const;
+        void addImage(const Gfx::SizeF& size, const System::Path& path);
+
+        const Gfx::Image& getImage(const Gfx::SizeF& area) const;
 
         Gfx::SizeF minimumSize() const;
 
         Gfx::SizeF maximumSize() const;
 
     private:
-        std::map<Gfx::SizeF, Pt::System::Path> _images;
+        mutable IconImpl* _data;
 };
 
 } // namespace

@@ -1587,6 +1587,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\Dummy.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2956,6 +2959,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Icon.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\Dummy.cpp">
+      <Filter>Pt-Hmi\cocoa</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

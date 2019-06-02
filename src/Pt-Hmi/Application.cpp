@@ -606,27 +606,13 @@ void Application::setFontDir(const Pt::System::Path& dir)
 }
 
 
-ImagePtr Application::loadImage(const System::Path& path)
-{   
-    std::map<System::Path, ImagePtr>::iterator it = _iconCache.find(path);
-
-    if( it != _iconCache.end() )
-        return it->second;
-
-    //std::clog << "loading image: " << path.toLocal() << std::endl;
+void Application::loadImage(const System::Path& path, Gfx::Image& image)
+{
     std::ifstream fs(path.toLocal().c_str(), std::ios::binary);
 
-    Gfx::Image* image = new Gfx::Image();
-
-    ImagePtr imagePtr(image);
-    
     _iconReader.reset();
-    _iconReader.attach(fs, *image);
+    _iconReader.attach(fs, image);
     _iconReader.get();
-
-    _iconCache[path] = imagePtr;
-
-    return imagePtr;
 }
 
 

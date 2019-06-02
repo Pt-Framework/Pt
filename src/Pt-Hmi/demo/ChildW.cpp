@@ -106,7 +106,7 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.setShortcut( &key );
     _toggleButton.move( Gfx::PointF(20,30) );
     _toggleButton.setMargin(5);
-    _toggleButton.setPadding(5);    
+    _toggleButton.setPadding(5);
     _toggleButton.setIcon(icon, icon.minimumSize());
 
     //Dialog button
@@ -167,6 +167,7 @@ ChildW::ChildW(const std::string& title)
         std::ostringstream oss;
         oss << "Item " << n;
         item->setText(oss.str().c_str());
+        item->setIcon(icon, icon.minimumSize());
 
         _comboBox.addItem(*item);
         _comboItems.push_back(item);
@@ -210,7 +211,7 @@ ChildW::ChildW(const std::string& title)
     _childView.addItem(_iconLabel, DockingLayout::Bottom);
     _childView.addItem(_buttonBar, DockingLayout::Bottom);
      
-    //_childWindow2.setMainWidget(&_closeButton);    
+    //_childWindow2.setMainWidget(&_closeButton);
     _childWindow2.move(Gfx::PointF(5, 40));
     _childWindow2.resize( Gfx::SizeF(250, 500) );
     _childWindow2.setTitle("Child of " + title);

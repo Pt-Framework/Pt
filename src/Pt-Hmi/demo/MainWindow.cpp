@@ -47,54 +47,12 @@ namespace Hmi {
 
 namespace Demo {
 
-void loadIcon(Gfx::Image& icon)
-{
-    const char* iconData = reinterpret_cast<const char*>(atesionIcon);
-    std::streamsize iconSize = sizeof(atesionIcon);
-
-    std::stringstream ss(std::ios::binary|std::ios::in|std::ios::out);
-    ss.write(iconData, iconSize);
-    ss.clear();
-    ss.seekg(0);
-
-    std::istream* is = &ss;
-    Gfx::Image image;
-    Gfx::PngReader reader(*is, image);
-    //std::istream* is = &ifs;
-    //Gfx::JpegReader reader(*is, image);
-
-    reader.get();
-
-    icon.reset(Pt::Gfx::ImageFormat::argb32(), image.size() );
-    Gfx::copy(image.begin(), image.end(), icon.begin() );
-
-    for(size_t w = 0; w < icon.width(); ++ w )
-    {
-        for(size_t h = 0; h < icon.height(); ++h )
-        {
-            Gfx::Pixel pixel(icon.view(), w, h);
-
-            Gfx::Color color = icon.format().getColor(pixel);
-
-            if( color.red() >= 65535 && color.green() >= 65535 && color.blue() >= 65535 )
-                color.setAlpha(0);
-            else
-                color.setAlpha(65535);
-
-            icon.format().setPixel(pixel, color, Gfx::CompositionMode::SourceCopy);
-        }
-    }
-}
-
 
 MainWindow::MainWindow()
 : _child1("Child 1")
 , _scrollContainer(Hmi::FlowLayout::Top)
 , _scrollContainer2(Hmi::FlowLayout::Top)
 {
-    loadIcon(_icon);
-    _picture.set(_icon);
-
     setTitle("Main 1");
     move( Gfx::PointF(10, 10) );
     resize( Gfx::SizeF(500, 700) );
@@ -210,7 +168,6 @@ MainWindow::MainWindow()
     _menu.setName("All Music");
 
     _item1.setText("Heavy Metal");
-    _item1.setIcon(_icon);
 
     Key f3(Key::F3);
     _item1.setShortcut( &f3 );
