@@ -33,6 +33,7 @@
 #include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Window.h>
 
 namespace Pt {
@@ -41,35 +42,18 @@ namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(Window::Type type)
 : _window(nil)
-, _controller(nil)
 , _view(nil)
 , _windowStyle(0)
 , _keyEvent(0)
 , _mouseEvent(0)
 , _level(0)
 , _topMost(false)
-{
-    /* TODO: Window position tracking timer. Use this:
+{   
+    MainWindowView* view = [[MainWindowView alloc] initWithImpl: this ];
+    _view = view;
 
-        NSWindowDidBecomeMainNotification 
-        NSWindowDidResignMainNotification 
-        NSWindowDidMoveNotification 
-        NSWindowDidResizeNotification
-
-        in create().
-    */
-
-    //TODO: remove timer for window position traking, 
-    //      use position changed system event
-    
-    _timer.setActive(Application::instance().loop());
-    _timer.timeout() += Pt::slot(*this, &MainWindowImpl::onPosition);
-    _timer.start(100);
-    
-    _view = [[MainWindowView alloc] init: this ];
-
-    Gfx::PointF at(20, 20);
-    Gfx::SizeF size(400, 200);
+    Gfx::PointF at(0, 0);
+    Gfx::SizeF size(100, 20);
 
     _windowStyle = NSWindowStyleMaskTitled |
                    NSWindowStyleMaskClosable |
@@ -86,14 +70,9 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 
     [_window setReleasedWhenClosed: NO];
     [_window setAcceptsMouseMovedEvents:YES];
-    [_window setInitialFirstResponder: _view];
-    [_window setContentView: _view];    
-    [_window makeKeyAndOrderFront:_window];
-
-    _controller = [[WindowController alloc] initWithImpl: this window:_window];
-    [_window setDelegate: _controller];
-
-    [_view setHidden:NO];
+    [_window setInitialFirstResponder: view];
+    [_window setContentView: view];    
+    [_window setDelegate: view];
 
     _level = [_window level];
 }
@@ -103,13 +82,8 @@ MainWindowImpl::~MainWindowImpl()
 {
     if( _window == nil )
         return;
-    
-    _timer.stop();
 
     [_window close];
-
-     [_controller release];
-    _controller = nil;
 
     [_window release];
     _window = nil;
@@ -139,19 +113,20 @@ void MainWindowImpl::show(bool v)
 {
     if(v)
     {
-        [ _window makeKeyAndOrderFront:_window ];
-        [ NSApp activateIgnoringOtherApps:YES ];
+        [_window makeKeyAndOrderFront:_window];
+        [_view setHidden:NO];
     }
     else
     {
-        [ _window orderOut:_window ];
+        [_window orderOut:_window];
+        [_view setHidden:YES];
     }
 }
 
 
 void MainWindowImpl::close()
 {
-    [ _window close ];
+    [_window close];
 }
 
 
@@ -175,7 +150,7 @@ void MainWindowImpl::enable(bool e)
 
 void MainWindowImpl::setTopMost(bool e)
 {
-    // TODO
+    [_window orderFront:_window];
 }
 
 
@@ -186,15 +161,15 @@ void MainWindowImpl::move(const Gfx::PointF& p)
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
 
     windowRect.origin.x = p.x();
-    windowRect.origin.y = screenHeight - (p.y() + windowRect.size.height );
+    windowRect.origin.y = screenHeight - p.y() + windowRect.size.height;
 
-    [_window setFrame:windowRect display:YES animate:NO];
+    NSPoint origin = NSMakePoint(p.x(), p.y());
+    [_window setFrameOrigin:origin];
 }
 
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
-    //TODO: this is the client size
     NSRect windowRect = [_window frame];
         
     windowRect.size.width = size.width();
@@ -361,7 +336,7 @@ void MainWindowImpl::onKeyUp(int keyCode)
 }
 
 
-void MainWindowImpl::onSpezialKeyEvent(unsigned int mask)
+void MainWindowImpl::onKeyModifier(unsigned int mask)
 {
     // _keyEvent.setUnicode(0);
     // _keyEvent.setAlt((mask & NSAlternateKeyMask) == NSAlternateKeyMask);

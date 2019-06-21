@@ -23,7 +23,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
- MA  02110-1301  USA
+ * MA  02110-1301  USA
  */
 
 #import "MainWindowView.h"
@@ -36,36 +36,10 @@
 
 #include <CoreGraphics/CoreGraphics.h>
 
-@interface WindowController ()
-@end
-
-@implementation WindowController 
-
-- (WindowController*) initWithImpl: (Pt::Hmi::MainWindowImpl*) window
-                      window: (NSWindow*) nswin
-{
-    self = [super initWithWindow: nswin];
-    _windowImpl = window;
-    
-    return self;
-}
-
-- (void)windowDidLoad 
-{
-}
-
-- (BOOL)windowShouldClose:(id)sender 
-{
-    _windowImpl->onClosing();
-    return FALSE;
-}
-
-@end 
-
 
 @implementation MainWindowView
 
-- (MainWindowView*) init : (Pt::Hmi::MainWindowImpl*) window
+- (MainWindowView*) initWithImpl: (Pt::Hmi::MainWindowImpl*) window
 {
     self = [super init];
     _windowImpl = window;
@@ -100,7 +74,7 @@
 - (void) flagsChanged:(NSEvent*)ev
 {
     unsigned int mod = [ev modifierFlags];
-    _windowImpl->onSpezialKeyEvent(mod);
+    _windowImpl->onKeyModifier(mod);
 }
 
 
@@ -142,7 +116,8 @@
 
 - (void)setFrameOrigin:(NSPoint)origin
 {
-    std::clog << "FRAME ORIGIN" << std::endl;
+    std::clog << "FRAME ORIGIN: " << origin.x << "," 
+                                  << origin.y << std::endl;
 
     [super setFrameOrigin:origin];
     
@@ -152,7 +127,8 @@
 
 - (void)setFrameSize:(NSSize)frameSize
 {
-    std::clog << "FRAME SIZE" << std::endl;
+    std::clog << "FRAME SIZE : " << frameSize.width << "x"
+                                 << frameSize.height << std::endl;
     
     [super setFrameSize:frameSize];
     
@@ -186,22 +162,41 @@
 
 - (void) mouseMoved:(NSEvent *)ev
 {
+    //std::clog << "MOUSE MOVED" << std::endl;
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onMouseMove(mp.x,mp.y);
 }
 
 
-- (BOOL) windowShouldClose:(id)window
+- (void) viewDidUnhide;
 {
-    std::clog << "WINDOW SHOULD CLOSE" << std::endl;
-    _windowImpl->onClosing();
-	return false;
+    std::clog << "# SHOW" << std::endl;
 }
 
 
-- (void)windowWillClose:(NSNotification *)notification
+- (void) viewDidHide;
 {
-    std::clog << "WINDOW WILL CLOSE" << std::endl;
+    std::clog << "# HIDE" << std::endl;
+}
+
+
+- (void) windowDidExpose: (NSNotification *) notification
+{
+    // only called for windows with nonretained backing store
+    std::clog << "EXPOSE" << std::endl;
+}
+
+
+- (void) windowDidMove: (NSNotification *) notification
+{
+    std::clog << "MOVE" << std::endl;
+}
+
+
+- (BOOL) windowShouldClose:(id)sender 
+{
+    _windowImpl->onClosing();
+    return FALSE;
 }
 
 @end

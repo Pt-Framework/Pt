@@ -27,11 +27,9 @@
   02110-1301 USA
 */
 
-#ifndef Pt_Hmi_ViewImpl_H
-#define Pt_Hmi_ViewImpl_H
+#ifndef PT_HMI_MAINWINDOW_IMPL_H
+#define PT_HMI_MAINWINDOW_IMPL_H
 
-#include <Pt/Connectable.h>
-#include <Pt/Signal.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/MouseEvent.h>
@@ -39,10 +37,8 @@
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/System/Timer.h>
-#include <map>
+#include <Pt/Connectable.h>
 
 #ifdef __OBJC__
     #import <AppKit/NSWindow.h>
@@ -50,7 +46,6 @@
     #import <AppKit/NSView.h>
     #import <AppKit/NSScreen.h>
     #import <AppKit/NSWindowController.h> 
-    @class WindowController;
 #else
 	struct NSRect;
 	struct NSView;
@@ -58,7 +53,6 @@
 	struct NSResponder;
 	struct NSGraphicsContext;
     struct NSWindowController;
-    struct WindowController;
 #endif
 
 namespace Pt {
@@ -129,22 +123,21 @@ class MainWindowImpl : public Pt::Connectable
         void onLMouseUp(double x, double y);
         void onKeyDown(int key);
         void onKeyUp(int key);
-        void onSpezialKeyEvent(unsigned int mask);
+        void onKeyModifier(unsigned int mask);
         void onLostFocus();
     
     private:
         Window* findWindow(NSWindow* w);
+        
         Pt::Gfx::PointF convertMousePosition(double x, double y);
 
     private:
         NSWindow*                _window;
-        WindowController*        _controller;
         NSView*                  _view;
         int                      _windowStyle;
 
         KeyEvent                 _keyEvent;
         MouseEvent               _mouseEvent;
-        Pt::System::Timer        _timer;
 
         int                      _level;
         std::string              _title;

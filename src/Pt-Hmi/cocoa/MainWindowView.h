@@ -32,27 +32,12 @@
 #import <AppKit/NSView.h>
 #import <AppKit/NSWindowController.h>
 
-@interface WindowController : NSWindowController<NSWindowDelegate>
-{
-    Pt::Hmi::MainWindowImpl* _windowImpl;
-}
-
-- (WindowController*) initWithImpl: (Pt::Hmi::MainWindowImpl*) window 
-                      window: (NSWindow*) nswin ;
-
-- (void)windowDidLoad;
-
-- (BOOL)windowShouldClose:(id)sender;
-
-@end 
-
-
-@interface MainWindowView : NSView
+@interface MainWindowView : NSView<NSWindowDelegate>
 {
     Pt::Hmi::MainWindowImpl* _windowImpl;
 }
     
-- (MainWindowView*) init: (Pt::Hmi::MainWindowImpl*) window ;
+- (MainWindowView*) initWithImpl: (Pt::Hmi::MainWindowImpl*) window ;
 
 - (BOOL) acceptsFirstResponder;
 
@@ -72,14 +57,20 @@
 
 - (void) mouseMoved:(NSEvent*)ev;
 
-- (BOOL) windowShouldClose:(id)window;
-
-- (void)windowWillClose:(NSNotification *)notification;
-
 - (void) flagsChanged:(NSEvent*)ev;
 
 - (void) keyDown:(NSEvent *)ev;
 
 - (void) keyUp:(NSEvent *)ev;
+
+- (void) viewDidUnhide;
+
+- (void) viewDidHide;
+
+- (void) windowDidExpose: (NSNotification *) notification;
+
+- (void) windowDidMove: (NSNotification *) notification;
+
+- (BOOL) windowShouldClose: (id) sender;
 
 @end
