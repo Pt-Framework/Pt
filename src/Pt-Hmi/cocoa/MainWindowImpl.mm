@@ -53,7 +53,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     _view = view;
 
     Gfx::PointF at(0, 0);
-    Gfx::SizeF size(100, 20);
+    Gfx::SizeF size(100, 50);
 
     _windowStyle = NSWindowStyleMaskTitled |
                    NSWindowStyleMaskClosable |
@@ -67,7 +67,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
                                                     styleMask:_windowStyle 
                                                     backing:NSBackingStoreBuffered 
                                                     defer:NO];
-
+    
     [_window setReleasedWhenClosed: NO];
     [_window setAcceptsMouseMovedEvents:YES];
     [_window setInitialFirstResponder: view];
@@ -113,13 +113,17 @@ void MainWindowImpl::show(bool v)
 {
     if(v)
     {
-        [_window makeKeyAndOrderFront:_window];
-        [_view setHidden:NO];
+        //[NSApp activateIgnoringOtherApps:YES];
+        //[_view setHidden:NO];
+
+        [_window orderFront: nil];
+        [_window makeKeyWindow];
+        [_window makeMainWindow];
     }
     else
     {
         [_window orderOut:_window];
-        [_view setHidden:YES];
+        //[_view setHidden:YES];
     }
 }
 
@@ -138,7 +142,8 @@ void MainWindowImpl::paint(const Gfx::RectF& rect)
 
 void MainWindowImpl::activate()
 {
-    [[NSApp mainWindow] makeKeyAndOrderFront:_window];
+    [_window makeKeyWindow];
+    [_window makeMainWindow];
 }
 
 
@@ -148,33 +153,43 @@ void MainWindowImpl::enable(bool e)
 }
 
 
-void MainWindowImpl::setTopMost(bool e)
+void MainWindowImpl::setTopMost(bool onTop)
 {
-    [_window orderFront:_window];
+    if(onTop)
+    {
+        [_window setLevel: NSMainMenuWindowLevel];
+    }
+    else
+    {
+        [_window setLevel: NSNormalWindowLevel];
+    }
 }
 
 
 void MainWindowImpl::move(const Gfx::PointF& p)
 {
-    NSRect windowRect = [_window frame];
+    CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
+    CGFloat windowHeight = [_window frame].size.height;
 
-    int screenHeight = [[NSScreen mainScreen] frame].size.height;
-
-    windowRect.origin.x = p.x();
-    windowRect.origin.y = screenHeight - p.y() + windowRect.size.height;
-
-    NSPoint origin = NSMakePoint(p.x(), p.y());
+    CGFloat y = screenHeight - p.y() - windowHeight;
+    NSPoint origin = NSMakePoint(p.x(), y);
+    
     [_window setFrameOrigin:origin];
 }
 
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
-    NSRect windowRect = [_window frame];
-        
-    windowRect.size.width = size.width();
-    windowRect.size.height = size.height();
-    [_window setFrame:windowRect display:YES animate:NO];
+    //TODO: use
+    //- (NSRect)contentRectForFrameRect:(NSRect)windowFrame
+    //- (NSRect)frameRectForContentRect:(NSRect)windowContent
+
+    NSRect rect = [_window frame];
+    rect.origin.y += rect.size.height - size.height();
+    rect.size.width = size.width();
+    rect.size.height = size.height();
+
+    [_window setFrame:rect display:YES animate:NO];
 }
 
 
@@ -396,24 +411,31 @@ Pt::Gfx::PointF MainWindowImpl::convertMousePosition(double x, double y)
 }
     
     
-void MainWindowImpl::onPosition()
+void MainWindowImpl::onMove()
 {
-    // int screenHeight = [[NSScreen mainScreen] frame].size.height;
+    Window* window = findWindow(_window);
+    if( ! window )
+        return;
 
-    // //Window
-    // NSRect windowRect = [_window frame];
-    // Pt::Gfx::PointF pos(windowRect.origin.x,  (screenHeight - windowRect.origin.y - windowRect.size.height));
-    
-    // if( pos.x()  == _positionEvent.position().x() && pos.y()  == _positionEvent.position().y() )
-    //     return;
+    Pt::uint64_t vid =  window->vid();
 
-    // _positionEvent.setPosition(pos);
+    CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
+    CGFloat windowHeight = [_window frame].size.height;
+    NSPoint origin = [_window frame].origin;
 
-    // _windowEvent.send( _positionEvent );
+    double x = origin.x;
+    double y = screenHeight - origin.y - windowHeight;
+    std::clog << "MOVE: " << x << "," << y << std::endl;
+
+    Pt::Gfx::PointF pos(x, y);
+    pos = Application::instance().screen().toLogical(pos);
+
+    MoveEvent ev(vid, pos);
+    Application::instance().impl()->commitEvent( ev );     
 }
 
 
-void MainWindowImpl::onSize()
+void MainWindowImpl::onResize(const NSSize& frameSize)
 {   
 //     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     
@@ -437,11 +459,19 @@ void MainWindowImpl::onSize()
 //         }
 //     }
 
-//    // TODO: determinate the correct client rect
-//     NSRect windowRect = [_window frame];
-//     _resizeEvent.setSize( Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height) );
+    Window* window = findWindow(_window);
+    if( ! window )
+        return;
 
-// 	_windowEvent.send( _resizeEvent );
+    Pt::uint64_t vid =  window->vid();
+
+    Gfx::SizeF to(frameSize.width, frameSize.height);
+
+    ResizeEvent rev(vid, to);
+    Application::instance().impl()->commitEvent(rev);
+           
+    Gfx::RectF updateRect(Gfx::PointF(0,0), to);
+    window->update(updateRect);
 }
 
 

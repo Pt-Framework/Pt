@@ -48,6 +48,8 @@
     #import <AppKit/NSWindowController.h> 
 #else
 	struct NSRect;
+    struct NSPoint;
+    struct NSSize;
 	struct NSView;
     struct NSWindow;
 	struct NSResponder;
@@ -115,8 +117,8 @@ class MainWindowImpl : public Pt::Connectable
 
     public:
         void onPaint(const NSRect& rect);
-        void onSize();
-        void onPosition();
+        void onMove();
+        void onResize(const NSSize& frameSize);
         void onClosing();
         void onMouseMove(double x,double y);
         void onLMouseDown(double x, double y);

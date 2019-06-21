@@ -121,7 +121,7 @@
 
     [super setFrameOrigin:origin];
     
-    _windowImpl->onPosition();
+    //_windowImpl->onMove(origin);
 }
 
 
@@ -132,7 +132,7 @@
     
     [super setFrameSize:frameSize];
     
-    _windowImpl->onSize();
+    _windowImpl->onResize(frameSize);
 }
 
 
@@ -189,7 +189,7 @@
 
 - (void) windowDidMove: (NSNotification *) notification
 {
-    std::clog << "MOVE" << std::endl;
+    _windowImpl->onMove();
 }
 
 

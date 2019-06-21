@@ -161,6 +161,7 @@ void ApplicationImpl::nextEvent()
 void ApplicationImpl::init()
 {
     [PtGuiApplication sharedApplication];
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
     [NSApp initPool];
 
     // NSRunLoop, CFRunLoop, CFFileDescriptor
@@ -190,7 +191,6 @@ void ApplicationImpl::init()
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
-    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 }
 
 
