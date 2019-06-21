@@ -138,10 +138,9 @@ class MainWindowImpl : public Pt::Connectable
 
     private:
         NSWindow*                _window;
-        WindowController*      _controller;
+        WindowController*        _controller;
         NSView*                  _view;
         int                      _windowStyle;
-        Pt::uint64_t             _id;
 
         KeyEvent                 _keyEvent;
         MouseEvent               _mouseEvent;

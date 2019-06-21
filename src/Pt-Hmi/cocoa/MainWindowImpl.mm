@@ -44,7 +44,6 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 , _controller(nil)
 , _view(nil)
 , _windowStyle(0)
-, _id(0)
 , _keyEvent(0)
 , _mouseEvent(0)
 , _level(0)
@@ -91,7 +90,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     [_window setContentView: _view];    
     [_window makeKeyAndOrderFront:_window];
 
-    _controller = [[WindowController alloc] initWithWindow: _window];
+    _controller = [[WindowController alloc] initWithImpl: this window:_window];
     [_window setDelegate: _controller];
 
     [_view setHidden:NO];
@@ -117,13 +116,6 @@ MainWindowImpl::~MainWindowImpl()
 
     [_view release];
     _view = nil;
-    
-}
-
-
-void MainWindowImpl::setId(Pt::uint64_t id)
-{
-    _id = id;
 }
 
 
@@ -319,6 +311,8 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     if( ! window )
         return;
 
+    std::clog << "PAINT" << std::endl;
+
     Pt::Hmi::PixmapSurfaceImpl* pixmap = window->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
     CGImageRef image = CGBitmapContextCreateImage(pixmapContext);
@@ -333,11 +327,17 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 
 void MainWindowImpl::onKeyDown(int keyCode)
 {
+    Window* window = findWindow(_window);
+    if( ! window )
+        return;
+
+    Pt::uint64_t vid =  window->vid();
+
     Key::Modifiers modifiers;
     Key key(modifiers, keyCode);
 
     _keyEvent.setPress(key, keyCode);
-    _keyEvent.setId(_id);
+    _keyEvent.setId(vid);
 
     Application::instance().loop().commitEvent(_keyEvent);
 }
@@ -345,11 +345,17 @@ void MainWindowImpl::onKeyDown(int keyCode)
 
 void MainWindowImpl::onKeyUp(int keyCode)
 {
+    Window* window = findWindow(_window);
+    if( ! window )
+        return;
+
+    Pt::uint64_t vid =  window->vid();
+
     Key::Modifiers modifiers;
     Key key(modifiers, keyCode);
 
     _keyEvent.setRelease(key, keyCode);
-    _keyEvent.setId(_id);
+    _keyEvent.setId(vid);
 
     Application::instance().loop().commitEvent(_keyEvent);
 }
@@ -466,10 +472,16 @@ void MainWindowImpl::onSize()
 
 void MainWindowImpl::onClosing()
 {
-	// CloseEvent closeEvent;
-	// _windowEvent.send( closeEvent );
+    Window* window = findWindow(_window);
+    if( ! window )
+        return;
+
+    Pt::uint64_t vid =  window->vid();
+
+    CloseEvent closeEvent(vid);
+    window->processEvent(closeEvent);
 }
     
-}
+} // namespace
 
-}
+} // namespace

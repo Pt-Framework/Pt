@@ -33,9 +33,19 @@
 #import <AppKit/NSWindowController.h>
 
 @interface WindowController : NSWindowController<NSWindowDelegate>
-    - (void)windowDidLoad;
-    - (BOOL)windowShouldClose:(id)sender;
+{
+    Pt::Hmi::MainWindowImpl* _windowImpl;
+}
+
+- (WindowController*) initWithImpl: (Pt::Hmi::MainWindowImpl*) window 
+                      window: (NSWindow*) nswin ;
+
+- (void)windowDidLoad;
+
+- (BOOL)windowShouldClose:(id)sender;
+
 @end 
+
 
 @interface MainWindowView : NSView
 {

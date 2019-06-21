@@ -41,13 +41,22 @@
 
 @implementation WindowController 
 
+- (WindowController*) initWithImpl: (Pt::Hmi::MainWindowImpl*) window
+                      window: (NSWindow*) nswin
+{
+    self = [super initWithWindow: nswin];
+    _windowImpl = window;
+    
+    return self;
+}
+
 - (void)windowDidLoad 
 {
 }
 
 - (BOOL)windowShouldClose:(id)sender 
 {
-    std::clog << "WINDOW SHOULD CLOSE (delegate)" << std::endl;
+    _windowImpl->onClosing();
     return FALSE;
 }
 

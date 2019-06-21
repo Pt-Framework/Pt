@@ -73,12 +73,15 @@ ChildW::ChildW(const std::string& title)
     setTitle(title);
     
     //Icon label
+    System::Path appdir( Application::instance().argv()[0] );
+    appdir = appdir.dirName();
+
     Icon icon;
-    icon.addImage(Gfx::SizeF(16, 16), System::Path("test-16x16.png"));
-    icon.addImage(Gfx::SizeF(24, 24), System::Path("test-24x24.png"));
-    icon.addImage(Gfx::SizeF(32, 32), System::Path("test-32x32.png"));
-    icon.addImage(Gfx::SizeF(48, 48), System::Path("test-48x48.png"));
-    icon.addImage(Gfx::SizeF(64, 64), System::Path("test-64x64.png"));
+    icon.addImage(Gfx::SizeF(16, 16), appdir / System::Path("test-16x16.png"));
+    icon.addImage(Gfx::SizeF(24, 24), appdir / System::Path("test-24x24.png"));
+    icon.addImage(Gfx::SizeF(32, 32), appdir / System::Path("test-32x32.png"));
+    icon.addImage(Gfx::SizeF(48, 48), appdir / System::Path("test-48x48.png"));
+    icon.addImage(Gfx::SizeF(64, 64), appdir / System::Path("test-64x64.png"));
 
     _iconLabel.setIcon(icon, icon.minimumSize());
     _iconLabel.setAlignment(Alignment::Bottom);

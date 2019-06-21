@@ -55,7 +55,6 @@ void ScreenImpl::init(WindowBase& w)
 
 void ScreenImpl::registerWindow(Window& w)
 {
-    w.impl()->setId( w.vid() );
 }
 
 
