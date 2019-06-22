@@ -170,13 +170,15 @@
 
 - (void) viewDidUnhide;
 {
-    std::clog << "# SHOW" << std::endl;
+    std::clog << "VIEW UNHIDE" << std::endl;
+    _windowImpl->onShow(true);
 }
 
 
 - (void) viewDidHide;
 {
-    std::clog << "# HIDE" << std::endl;
+    std::clog << "VIEW HIDE" << std::endl;
+    _windowImpl->onShow(false);
 }
 
 

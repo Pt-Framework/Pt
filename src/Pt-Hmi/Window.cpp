@@ -734,7 +734,7 @@ void Window::repaint()
 {      
     if( _damageRect.isNull() )
         return;
-    
+
     if( ! this->isVisible() )
         return;  
 

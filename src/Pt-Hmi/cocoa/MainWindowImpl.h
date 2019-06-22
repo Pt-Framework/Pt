@@ -117,6 +117,7 @@ class MainWindowImpl : public Pt::Connectable
 
     public:
         void onPaint(const NSRect& rect);
+        void onShow(bool v);
         void onMove();
         void onResize(const NSSize& frameSize);
         void onClosing();

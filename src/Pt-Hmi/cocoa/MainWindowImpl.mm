@@ -109,12 +109,14 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
 }
 
 
-void MainWindowImpl::show(bool v)
+void MainWindowImpl::show(bool visible)
 {
-    if(v)
+    std::clog << "SHOW: " << v << std::endl;
+
+    if(visible)
     {
         //[NSApp activateIgnoringOtherApps:YES];
-        //[_view setHidden:NO];
+        [_view setHidden:NO];
 
         [_window orderFront: nil];
         [_window makeKeyWindow];
@@ -123,7 +125,7 @@ void MainWindowImpl::show(bool v)
     else
     {
         [_window orderOut:_window];
-        //[_view setHidden:YES];
+        [_view setHidden:YES];
     }
 }
 
@@ -136,6 +138,7 @@ void MainWindowImpl::close()
 
 void MainWindowImpl::paint(const Gfx::RectF& rect)
 {
+    std::clog << "PAINT" << std::endl;
     [_view setNeedsDisplay:YES];
 }
 
@@ -301,7 +304,7 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     if( ! window )
         return;
 
-    std::clog << "PAINT" << std::endl;
+    std::clog << "ON PAINT" << std::endl;
 
     Pt::Hmi::PixmapSurfaceImpl* pixmap = window->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
@@ -410,7 +413,22 @@ Pt::Gfx::PointF MainWindowImpl::convertMousePosition(double x, double y)
     return Pt::Gfx::PointF(gx,gy);
 }
     
-    
+
+void MainWindowImpl::onShow(bool v)
+{
+    Window* window = findWindow(_window);
+    if( ! window )
+        return;
+
+    Pt::uint64_t vid =  window->vid();
+
+    ShowEvent sev(vid, v);
+    Application::instance().impl()->commitEvent(sev);
+
+    window->invalidate();
+}
+
+
 void MainWindowImpl::onMove()
 {
     Window* window = findWindow(_window);
