@@ -52,6 +52,9 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 
 void PixmapSurfaceImpl::create()
 {
+    std::clog << "pixmap: " << _size.width() << "x" 
+                            << _size.height() << std::endl;
+
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
     _context = CGBitmapContextCreate(nullptr, 
@@ -120,10 +123,11 @@ void PixmapSurfaceImpl::finish()
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
     CGRect cgRect = CGRectMake(clipRect.x(), 
-                               _size.height() - clipRect.y() + clipRect.height(), 
+                               _size.height() - clipRect.y() - clipRect.height(), 
                                clipRect.width(), 
                                clipRect.height());
-
+    
+    CGContextResetClip(_context);
     CGContextClipToRect(_context, cgRect);
 }
 
@@ -135,10 +139,11 @@ void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
 
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 {
-    CGContextSetRGBStrokeColor(_context, pen.color().red() / 257,
-                               pen.color().green() / 257,
-                               pen.color().blue() / 257,
-                               pen.color().alpha() / 257);
+    CGContextSetRGBStrokeColor(_context, 
+                               pen.color().red() / 65535.0,
+                               pen.color().green() / 65535.0,
+                               pen.color().blue() / 65535.0,
+                               pen.color().alpha() / 65535.0);
     
     CGContextSetLineWidth(_context, pen.size());
     
@@ -207,10 +212,10 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
         default:
         case Pt::Gfx::Brush::Solid:
             CGContextSetRGBFillColor(_context, 
-                                     brush.color().red() / 255.0, 
-                                     brush.color().green() / 255.0, 
-                                     brush.color().blue() / 255.0, 
-                                     brush.color().alpha() / 255.0);
+                                     brush.color().red() / 65535.0, 
+                                     brush.color().green() / 65535.0, 
+                                     brush.color().blue() / 65535.0, 
+                                     brush.color().alpha() / 65535.0);
             break;
             
         case Pt::Gfx::Brush::Texture:
@@ -270,7 +275,7 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text,
 void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 {
     CGRect cgRect = CGRectMake(rect.x(), 
-                               _size.height() - rect.y() + rect.height(), 
+                               _size.height() - rect.y() - rect.height(), 
                                rect.width(), 
                                rect.height());
     
@@ -281,11 +286,16 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 {
     CGRect cgRect = CGRectMake(rect.x(), 
-                               _size.height() - rect.y() + rect.height(), 
+                               _size.height() - rect.y() - rect.height(), 
                                rect.width(), 
                                rect.height());
 
     CGContextFillRect(_context, cgRect);
+
+    //std::clog << cgRect.size.width << "x" << cgRect.size.height << std::endl;
+
+    //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
+    //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
 }
 
 

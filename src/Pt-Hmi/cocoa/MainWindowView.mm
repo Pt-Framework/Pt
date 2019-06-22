@@ -120,7 +120,6 @@
                                   << origin.y << std::endl;
 
     [super setFrameOrigin:origin];
-    
     //_windowImpl->onMove(origin);
 }
 
@@ -199,6 +198,17 @@
 {
     _windowImpl->onClosing();
     return FALSE;
+}
+
+- (NSSize) windowWillResize: (NSWindow *) sender 
+                     toSize: (NSSize) frameSize
+
+
+{
+    //std::clog << "WINDOW RESIZE : " << frameSize.width << "x"
+    //                                << frameSize.height << std::endl;
+    
+    return frameSize;
 }
 
 @end

@@ -192,7 +192,7 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
     rect.size.width = size.width();
     rect.size.height = size.height();
 
-    [_window setFrame:rect display:YES animate:NO];
+    [_window setFrame:rect display:NO animate:NO];
 }
 
 
@@ -304,7 +304,8 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     if( ! window )
         return;
 
-    std::clog << "ON PAINT" << std::endl;
+    std::clog << "ON PAINT: " << rect.size.width << "x" 
+                              << rect.size.height << std::endl;
 
     Pt::Hmi::PixmapSurfaceImpl* pixmap = window->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
@@ -312,7 +313,7 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef currentContext = [graphicsContext CGContext];
-    
+
     CGContextDrawImage(currentContext, rect, image);
     CGImageRelease(image);
 }
@@ -490,6 +491,12 @@ void MainWindowImpl::onResize(const NSSize& frameSize)
            
     Gfx::RectF updateRect(Gfx::PointF(0,0), to);
     window->update(updateRect);
+
+    // cocoa performs a paint/display right after a window resize, so we
+    // need to process the window update now to avoid flicker
+    // 
+    // OR: override NSWwindow::setFrame to not perform a paint/display
+    Application::instance().impl()->processEvents();
 }
 
 

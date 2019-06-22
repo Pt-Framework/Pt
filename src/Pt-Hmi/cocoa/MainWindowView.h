@@ -73,4 +73,7 @@
 
 - (BOOL) windowShouldClose: (id) sender;
 
+- (NSSize) windowWillResize: (NSWindow *) sender 
+                     toSize: (NSSize) frameSize;
+
 @end
