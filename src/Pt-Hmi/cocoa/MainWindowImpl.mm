@@ -111,7 +111,7 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
 
 void MainWindowImpl::show(bool visible)
 {
-    std::clog << "SHOW: " << v << std::endl;
+    std::clog << "SHOW: " << visible << std::endl;
 
     if(visible)
     {

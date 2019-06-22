@@ -731,7 +731,7 @@ void Window::onLayout(const Gfx::RectF& rect)
 
 
 void Window::repaint()
-{      
+{
     if( _damageRect.isNull() )
         return;
 
