@@ -219,6 +219,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
             break;
             
         case Pt::Gfx::Brush::Texture:
+            // CGContextSetFillPattern
             break;
     }
 }
@@ -262,6 +263,41 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 //  CGContextShowText(context, "hello", 6);
   //not even this works
 //  CGContextShowTextAtPoint(context, 1,1, "hello", 6);
+
+
+//  CGContextSetTextDrawingMode(context, kCGTextFill);
+//  CGContextSetFillColorWithColor(context, color);
+//  CGAffineTransform matrix = CGAffineTransformMakeScale(1, -1);
+//
+//#if PLATFORM(IOS)
+//  CFStringRef fontName = CFSTR("Courier");
+//  CGFloat fontSize = 10;
+//#else
+//  CFStringRef fontName = CFSTR("Menlo");
+//  CGFloat fontSize = 11;
+//#endif
+//
+//  RetainPtr<CTFontRef> font = adoptCF(CTFontCreateWithName(fontName, fontSize, &matrix));
+//  CFTypeRef keys[] = { kCTFontAttributeName };
+//  CFTypeRef values[] = { font.get() };
+//  RetainPtr<CFDictionaryRef> attributes = adoptCF(CFDictionaryCreate(kCFAllocatorDefault, keys, values, 
+//                                                                    WTF_ARRAY_LENGTH(keys), 
+//                                                                    &kCFTypeDictionaryKeyCallBacks, 
+//                                                                    &kCFTypeDictionaryValueCallBacks));
+//  CString cstr = text.ascii();
+//
+//  RetainPtr<CFStringRef> string = adoptCF(CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
+//                                                                        reinterpret_cast<const UInt8*>(cstr.data()), 
+//                                                                        cstr.length(), 
+//                                                                        kCFStringEncodingASCII, false, kCFAllocatorNull));
+//
+//  RetainPtr<CFAttributedStringRef> attributedString = adoptCF(CFAttributedStringCreate(kCFAllocatorDefault, string.get(), attributes.get()));
+//  RetainPtr<CTLineRef> line = adoptCF(CTLineCreateWithAttributedString(attributedString.get()));
+//  CGPoint textPosition = CGContextGetTextPosition(context);
+//  CGContextSetTextPosition(context, x, y);
+//  CTLineDraw(line.get(), context);
+//  CGContextSetTextPosition(context, textPosition.x, textPosition.y);
+//  CGContextRestoreGState(context);
 }
 
 
