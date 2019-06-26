@@ -307,6 +307,9 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     std::clog << "ON PAINT: " << rect.size.width << "x" 
                               << rect.size.height << std::endl;
 
+    std::clog << "drawSurface: " <<  window->surface().pixmapImpl()->context()
+              << std::endl;
+
     Pt::Hmi::PixmapSurfaceImpl* pixmap = window->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
     CGImageRef image = CGBitmapContextCreateImage(pixmapContext);
