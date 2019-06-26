@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Argb32Format.h>
+#include <Pt/Utf8Codec.h>
 
 namespace Pt {
 
@@ -227,6 +228,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 
 void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 {
+    //CTFontCreateCopyWithSymbolicTraits
     CFStringRef fname = CFStringCreateWithCString(0, font.name().c_str(), kCFStringEncodingUTF8);
     CGFontRef fontRef = CGFontCreateWithFontName(fname);
     CGContextSetFont(_context, fontRef);
@@ -238,7 +240,14 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 {
-    return Gfx::FontMetrics(10, 10, 10, 10);
+    CGFloat ascent = 10.0;
+    CGFloat descent = 10.0;
+    double width = 10.0;
+    //width = CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
+    return Gfx::FontMetrics(static_cast<unsigned>(ascent), 
+                            static_cast<unsigned>(descent), 
+                            static_cast<unsigned>(width), 
+                            static_cast<unsigned>(ascent + descent) );
 }
 
 
@@ -255,49 +264,89 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
 
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
-    //TODO:
-//  // Drawing code
-//  CGContextRef  context = UIGraphicsGetCurrentContext();
-//  CGContextSelectFont(context, "Arial", 24, kCGEncodingFontSpecific);
-//  CGContextSetTextPosition(context,80,80);
-//  CGContextShowText(context, "hello", 6);
-  //not even this works
-//  CGContextShowTextAtPoint(context, 1,1, "hello", 6);
+  //CGContextSetTextDrawingMode(_context, kCGTextFill);
+
+  // Core Text uses a reference coordinate system with the origin on the bottom-left
+  // flip the coordinate system before drawing or the text will appear upside down
+  //CGContextTranslateCTM(context, 0, self.bounds.size.height);
+  //CGContextScaleCTM(context, 1.0, -1.0);
+
+  CGAffineTransform matrix = CGAffineTransformMakeScale(1, -1);
+  //CGAffineTransform matrix = &CGAffineTransformIdentity;
+
+  // iOS
+  //CFStringRef fontName = CFSTR("Courier");
+  //CGFloat fontSize = 10;
+
+  CFStringRef fontName = CFSTR("Menlo");
+  CGFloat fontSize = 11;
+  CTFontRef font = CTFontCreateWithName(fontName, fontSize, &matrix);
+  CGColorRef textColor = CGColorCreateGenericRGB(0.0, 0.0, 0.0, 1.0);
+
+  CFTypeRef keys[] = { kCTFontAttributeName, kCTForegroundColorAttributeName };
+  CFTypeRef values[] = { font, textColor };
+  CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, 
+                                                  keys, values, 2, 
+                                                  &kCFTypeDictionaryKeyCallBacks, 
+                                                  &kCFTypeDictionaryValueCallBacks);
+
+  std::string cstr = Utf8Codec::encode(text);
+
+  CFStringRef string = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
+                                                     reinterpret_cast<const UInt8*>( cstr.data() ), 
+                                                     cstr.length(), 
+                                                     kCFStringEncodingUTF8, 
+                                                     false, kCFAllocatorNull);
+
+  // CFAttributedStringCreateMutable
+  // CFAttributedStringReplaceString
+  // CFAttributedStringSetAttribute
+  CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, 
+                                                                    string, attributes);
+  CFRelease(string);
+  CFRelease(attributes);
+  CFRelease(textColor);
+  CFRelease(font);
+
+  // standard view coordinates
+  //CGContextSetTextMatrix(context, CGAffineTransformIdentity);  
+  // flipped coordinates
+  //CGContextSetTextMatrix(context, CGAffineTransformMakeScale(1.0, -1.0)); 
+
+  CTLineRef line = CTLineCreateWithAttributedString(attributedString);
+  CFRelease(attributedString);
+  //CGPoint textPosition = CGContextGetTextPosition(_context);
+  
+  CGContextSetTextPosition(_context, to.x(), to.y());
+  CTLineDraw(line, _context);
+  CFRelease(line);
+
+  //CGContextSetTextPosition(_context, textPosition.x, textPosition.y);
+  //CGContextRestoreGState(_context);
+
+  // ALTERNATIVE: CTRunDraw
 
 
-//  CGContextSetTextDrawingMode(context, kCGTextFill);
-//  CGContextSetFillColorWithColor(context, color);
-//  CGAffineTransform matrix = CGAffineTransformMakeScale(1, -1);
-//
-//#if PLATFORM(IOS)
-//  CFStringRef fontName = CFSTR("Courier");
-//  CGFloat fontSize = 10;
-//#else
-//  CFStringRef fontName = CFSTR("Menlo");
-//  CGFloat fontSize = 11;
-//#endif
-//
-//  RetainPtr<CTFontRef> font = adoptCF(CTFontCreateWithName(fontName, fontSize, &matrix));
-//  CFTypeRef keys[] = { kCTFontAttributeName };
-//  CFTypeRef values[] = { font.get() };
-//  RetainPtr<CFDictionaryRef> attributes = adoptCF(CFDictionaryCreate(kCFAllocatorDefault, keys, values, 
-//                                                                    WTF_ARRAY_LENGTH(keys), 
-//                                                                    &kCFTypeDictionaryKeyCallBacks, 
-//                                                                    &kCFTypeDictionaryValueCallBacks));
-//  CString cstr = text.ascii();
-//
-//  RetainPtr<CFStringRef> string = adoptCF(CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
-//                                                                        reinterpret_cast<const UInt8*>(cstr.data()), 
-//                                                                        cstr.length(), 
-//                                                                        kCFStringEncodingASCII, false, kCFAllocatorNull));
-//
-//  RetainPtr<CFAttributedStringRef> attributedString = adoptCF(CFAttributedStringCreate(kCFAllocatorDefault, string.get(), attributes.get()));
-//  RetainPtr<CTLineRef> line = adoptCF(CTLineCreateWithAttributedString(attributedString.get()));
-//  CGPoint textPosition = CGContextGetTextPosition(context);
-//  CGContextSetTextPosition(context, x, y);
-//  CTLineDraw(line.get(), context);
-//  CGContextSetTextPosition(context, textPosition.x, textPosition.y);
-//  CGContextRestoreGState(context);
+  //CTFontRef font = CTFontCreateWithName((__bridge CFStringRef)_fontName, _fontSize, 
+  //                                      &CGAffineTransformIdentity);
+  //CFStringRef keys[] = { kCTFontAttributeName, kCTForegroundColorAttributeName };
+  //CFTypeRef values[] = { font, _fillColor.CGColor };
+  
+  //CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, 
+  //                                                (const void**)&keys, (const void**)&values, 2, 
+  //                                                &kCFTypeDictionaryKeyCallBacks, 
+  //                                                &kCFTypeDictionaryValueCallBacks);
+  //CFAttributedStringRef attrString = CFAttributedStringCreate(kCFAllocatorDefault, 
+  //                                                            (__bridge CFStringRef)text, attributes);
+  //CFRelease(attributes);
+  //CFRelease(font);
+  //
+  //CTLineRef line = CTLineCreateWithAttributedString(attrString);
+  //CFRelease(attrString);
+  //CTLineDraw(line, context);
+
+  //float textWidth = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
+  //CGContextSetTextPosition(context, prevPosition.x + textWidth, prevPosition.y);
 }
 
 
@@ -390,7 +439,7 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& 
     CGImageRef image =  CGBitmapContextCreateImage( pm.pixmapImpl()->context() );
     
     CGRect rect = CGRectMake(to.x(), 
-                             _size.height() - to.y() + pm.size().height(), 
+                             _size.height() - to.y() - pm.size().height(), 
                              pm.size().width(), 
                              pm.size().height());
     
@@ -406,14 +455,19 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
 {
     CGImageRef image =  CGBitmapContextCreateImage( pm.pixmapImpl()->context() );
 
-    // TODO: only draw pmRect
+    CGRect subRect = CGRectMake(pmRect.left(), 
+                                pmRect.top(), 
+                                pmRect.size().width(), 
+                                pmRect.size().height());
+
+    CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
 
     CGRect rect = CGRectMake(to.x(), 
-                             _size.height() - to.y() + pm.size().height(), 
-                             pm.size().width(), 
-                             pm.size().height());
+                             _size.height() - to.y() - pmRect.size().height(), 
+                             pmRect.size().width(), 
+                             pmRect.size().height());
     
-    CGContextDrawImage(_context, rect, image);
+    CGContextDrawImage(_context, rect, subImage);
     CGImageRelease(image);
 }
 

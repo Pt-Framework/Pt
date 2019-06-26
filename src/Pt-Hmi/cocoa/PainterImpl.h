@@ -75,12 +75,12 @@ class PainterImpl
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
                                             const Pt::String& text)
         {   
-            return Gfx::FontMetrics(0, 0, 0, 0);; 
+            return Gfx::FontMetrics(0, 0, 0, 0); 
         }
         
         static std::string defaultFont()
         {
-            return "sans-serif";
+            return "Menlo";
         }
 
         static void setDefaultFont(const std::string& f)
