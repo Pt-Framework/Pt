@@ -28,6 +28,8 @@
 
 #include "PaintSurfaceImpl.h"
 
+#import <Foundation/Foundation.h>
+
 namespace Pt {
 
 namespace Hmi {
@@ -45,6 +47,19 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 std::vector<std::string> PaintSurfaceImpl::fontNames()
 {
     std::vector<std::string> fonts;
+
+#if PT_IOS
+    NSArray* fonts = [UIFont familyNames];
+#else
+    NSArray* families = [[NSFontManager sharedFontManager] availableFontFamilies];
+#endif
+
+    for (unsigned int i = 0; i < [families count]; ++i)
+    {
+        NSString* font = (NSString*)[families objectAtIndex: i];
+        fonts.push_back( [font UTF8String] );
+    }
+    
     return fonts;
 }
 

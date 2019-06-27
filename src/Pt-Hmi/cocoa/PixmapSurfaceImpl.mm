@@ -28,6 +28,7 @@
 */
 
 #include "PixmapSurfaceImpl.h"
+#include "PainterImpl.h"
 
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/PixmapSurface.h>
@@ -229,27 +230,89 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 {
     std::clog << "font: " <<  font.size() << std::endl;
-
-    //CTFontCreateCopyWithSymbolicTraits
-    CFStringRef fname = CFStringCreateWithCString(0, font.name().c_str(), kCFStringEncodingUTF8);
-    CGFontRef fontRef = CGFontCreateWithFontName(fname);
-    CGContextSetFont(_context, fontRef);
-    CGContextSetFontSize(_context, font.size());
-    CFRelease(fname);
-    CGFontRelease(fontRef);
 }
 
 
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 {
-    CGFloat ascent = 10.0;
-    CGFloat descent = 5.0;
-    double width = 60.0;
-    //width = CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
-    return Gfx::FontMetrics(static_cast<unsigned>(ascent), 
-                            static_cast<unsigned>(descent), 
-                            static_cast<unsigned>(width), 
-                            static_cast<unsigned>(ascent + descent) );
+    if( ! _painter )
+        return Gfx::FontMetrics();
+
+    CTFontRef font = _painter->impl()->ctfont();
+
+    return PainterImpl::fontMetrics(font, text);
+}
+
+
+void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
+{
+    if( ! _painter )
+        return;
+
+    CTFontRef font = _painter->impl()->ctfont();
+    const Gfx::Pen& pen = _painter->pen();
+
+    CGColorRef textColor = CGColorCreateGenericRGB(pen.color().red() / 65535.0,
+                                                   pen.color().green() / 65535.0,
+                                                   pen.color().blue() / 65535.0,
+                                                   pen.color().alpha() / 65535.0);
+
+    CFTypeRef keys[] = { kCTFontAttributeName, kCTForegroundColorAttributeName };
+    CFTypeRef values[] = { font, textColor };
+    CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, 
+                                                    keys, values, 2, 
+                                                    &kCFTypeDictionaryKeyCallBacks, 
+                                                    &kCFTypeDictionaryValueCallBacks);
+
+    std::string utf8String = Utf8Codec::encode(text);
+    const UInt8* stringData = reinterpret_cast<const UInt8*>( utf8String.c_str() );
+    CFStringRef string = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
+                                                       stringData, 
+                                                       utf8String.length(), 
+                                                       kCFStringEncodingUTF8, 
+                                                       false, 
+                                                       kCFAllocatorNull);
+
+    // OPTIMIZE: build attributed string on setFont and replace string in drawText
+    // CFAttributedStringCreateMutable
+    // CFAttributedStringReplaceString
+    // CFAttributedStringSetAttribute
+    CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, 
+                                                                      string, attributes);
+    CFRelease(string);
+    CFRelease(attributes);
+    CFRelease(textColor);
+    CFRelease(font);
+
+    CTLineRef line = CTLineCreateWithAttributedString(attributedString);
+    CFRelease(attributedString);
+    //CGPoint textPosition = CGContextGetTextPosition(_context);
+    
+    //CGContextSetTextDrawingMode(_context, kCGTextFill);
+
+    // either flip the coordinate system for iOS, or...
+    //CGContextTranslateCTM(_context, 0, _size.height());
+    //CGContextScaleCTM(_context, 1.0, -1.0);
+
+    // flip the text coordinate system for iOS
+    //CGContextSetTextMatrix(_context, CGAffineTransformMakeScale(1.0, -1.0)); 
+
+    CGContextSetTextPosition(_context, to.x(), _size.height() - to.y());
+    
+    CTLineDraw(line, _context);
+    CFRelease(line);
+
+    //CGContextSetTextPosition(_context, textPosition.x, textPosition.y);
+    //CGContextRestoreGState(_context);
+
+    // ALTERNATIVE: CTRunDraw
+}
+
+
+void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text, 
+                                 const Gfx::Transform& trans)
+{
+    drawText(to, text);
 }
 
 
@@ -261,95 +324,6 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
     CGContextMoveToPoint(_context, from.x(), from.y());
     CGContextAddLineToPoint(_context, to.x(), to.y());
     CGContextStrokePath(_context);
-}
-
-
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
-{
-    CGContextSetTextDrawingMode(_context, kCGTextFill);
-
-    // either flip the coordinate system for iOS, or...
-    //CGContextTranslateCTM(_context, 0, _size.height());
-    //CGContextScaleCTM(_context, 1.0, -1.0);
-
-    // flip the text coordinate system for iOS, or...
-    //CGContextSetTextMatrix(_context, CGAffineTransformMakeScale(1.0, -1.0)); 
-
-    // flip the font coordinate system for iOS
-    //CGAffineTransform matrix = CGAffineTransformMakeScale(1, -1);
-    CGAffineTransform matrix = CGAffineTransformIdentity;
-
-    CFStringRef fontName = CFSTR("Helvetica");
-    CGFloat fontSize = 12;
-    CTFontRef font = CTFontCreateWithName(fontName, fontSize, &matrix);
-    CGColorRef textColor = CGColorCreateGenericRGB(1.0, 1.0, 1.0, 1.0);
-
-    CFTypeRef keys[] = { kCTFontAttributeName, kCTForegroundColorAttributeName };
-    CFTypeRef values[] = { font, textColor };
-    CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, 
-                                                    keys, values, 2, 
-                                                    &kCFTypeDictionaryKeyCallBacks, 
-                                                    &kCFTypeDictionaryValueCallBacks);
-
-    std::string cstr = Utf8Codec::encode(text);
-
-    CFStringRef string = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
-                                                        reinterpret_cast<const UInt8*>( cstr.data() ), 
-                                                        cstr.length(), 
-                                                        kCFStringEncodingUTF8, 
-                                                        false, kCFAllocatorNull);
-
-    // CFAttributedStringCreateMutable
-    // CFAttributedStringReplaceString
-    // CFAttributedStringSetAttribute
-    CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, 
-                                                                        string, attributes);
-    CFRelease(string);
-    CFRelease(attributes);
-    CFRelease(textColor);
-    CFRelease(font);
-
-    CTLineRef line = CTLineCreateWithAttributedString(attributedString);
-    CFRelease(attributedString);
-    //CGPoint textPosition = CGContextGetTextPosition(_context);
-    
-    CGContextSetTextPosition(_context, to.x(), _size.height() - to.y());
-    CTLineDraw(line, _context);
-    CFRelease(line);
-
-    //CGContextSetTextPosition(_context, textPosition.x, textPosition.y);
-    //CGContextRestoreGState(_context);
-
-    // ALTERNATIVE: CTRunDraw
-
-
-    //CTFontRef font = CTFontCreateWithName((__bridge CFStringRef)_fontName, _fontSize, 
-    //                                      &CGAffineTransformIdentity);
-    //CFStringRef keys[] = { kCTFontAttributeName, kCTForegroundColorAttributeName };
-    //CFTypeRef values[] = { font, _fillColor.CGColor };
-    
-    //CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, 
-    //                                                (const void**)&keys, (const void**)&values, 2, 
-    //                                                &kCFTypeDictionaryKeyCallBacks, 
-    //                                                &kCFTypeDictionaryValueCallBacks);
-    //CFAttributedStringRef attrString = CFAttributedStringCreate(kCFAllocatorDefault, 
-    //                                                            (__bridge CFStringRef)text, attributes);
-    //CFRelease(attributes);
-    //CFRelease(font);
-    //
-    //CTLineRef line = CTLineCreateWithAttributedString(attrString);
-    //CFRelease(attrString);
-    //CTLineDraw(line, context);
-
-    //float textWidth = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
-    //CGContextSetTextPosition(context, prevPosition.x + textWidth, prevPosition.y);
-}
-
-
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text, 
-                                 const Gfx::Transform& trans)
-{
-    drawText(to, text);
 }
 
 

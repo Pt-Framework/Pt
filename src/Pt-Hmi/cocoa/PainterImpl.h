@@ -38,6 +38,8 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/String.h>
 
+#include <CoreText/CoreText.h>
+
 namespace Pt {
 
 namespace Hmi {
@@ -46,10 +48,13 @@ class PainterImpl
 {
     public:
         PainterImpl()
+        : _font(NULL)
         { }
 
         ~PainterImpl()
         {
+          if(_font)
+            CFRelease(_font);
         }
 
         void setPen(const Gfx::Pen& pen)
@@ -68,24 +73,114 @@ class PainterImpl
         {
         }
 
+        CTFontRef createCTFont(const Gfx::Font& font)
+        {
+            const UInt8* stringData = reinterpret_cast<const UInt8*>( font.name().c_str() );
+            CFStringRef fontName = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
+                                                                 stringData, 
+                                                                 font.name().length(), 
+                                                                 kCFStringEncodingUTF8, 
+                                                                 false, 
+                                                                 kCFAllocatorNull);
+            
+            // CoreText uses 96 points per inch, but the typographic convention
+            // is 72 dots per inch, so scale by 72.0 / 96.0
+            CGFloat fontSize = font.size() * (72.0 / 96.0);
+            
+            CGAffineTransform matrix = CGAffineTransformIdentity;
+            CTFontRef f = CTFontCreateWithName(fontName, fontSize, &matrix);
+            CFRelease(fontName);
+
+            // TODO: use CTFontCreateCopyWithSymbolicTraits for bold and italic
+
+            return f;
+        }
+
         void setFont(const Gfx::Font& font)
         {
+            CTFontRef f = createCTFont(font);
+
+            if(_font)
+              CFRelease(_font);
+
+            _font = f;
+        }
+
+        CTFontRef ctFont() const
+        {
+          return _font;
         }
         
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
                                             const Pt::String& text)
         {   
-            return Gfx::FontMetrics(10, 5, 60, 15); 
+            CTFontRef f = createCTFont(font);
+            Gfx::FontMetrics fm = fontMetrics(f, text);
+            CFRelease(f);
+
+            return fm;
         }
         
+        static Gfx::FontMetrics fontMetrics(CTFontRef font, 
+                                            const Pt::String& text)
+        {   
+            CFTypeRef keys[] = { kCTFontAttributeName };
+            CFTypeRef values[] = { font };
+            CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, 
+                                                            keys, values, 1, 
+                                                            &kCFTypeDictionaryKeyCallBacks, 
+                                                            &kCFTypeDictionaryValueCallBacks);
+
+            std::string utf8String = Utf8Codec::encode(text);
+            const UInt8* stringData = reinterpret_cast<const UInt8*>( utf8String.c_str() );
+            CFStringRef string = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
+                                                               stringData, 
+                                                               utf8String.length(), 
+                                                               kCFStringEncodingUTF8, 
+                                                               false, 
+                                                               kCFAllocatorNull);
+
+            CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, 
+                                                                              string, 
+                                                                              attributes);
+            CFRelease(string);
+            CFRelease(attributes);
+
+            CTLineRef line = CTLineCreateWithAttributedString(attributedString);
+            CFRelease(attributedString);
+    
+            CGFloat ascent = 10.0;
+            CGFloat descent = 5.0;
+            double width = CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
+            CFRelease(line);
+
+            return Gfx::FontMetrics( static_cast<unsigned>(ascent), 
+                                     static_cast<unsigned>(descent), 
+                                     static_cast<unsigned>(width), 
+                                     static_cast<unsigned>(ascent + descent) );
+        }
+
         static std::string defaultFont()
         {
-            return "Arial";
+            #if PT_IOS
+                //"Helvetica"
+                //"Times New Roman"
+                //"Courier New"
+                return "Helvetica";
+            #else
+                //"Lucida Grande"
+                //"Times New Roman"
+                //"Monaco"
+                return "Helvetica";
+            #endif
         }
 
         static void setDefaultFont(const std::string& f)
         {
         }
+
+    private:
+        CTFontRef _font;
 };
 
 } // namespace
