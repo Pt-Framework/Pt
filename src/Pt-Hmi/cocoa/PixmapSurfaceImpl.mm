@@ -30,6 +30,7 @@
 #include "PixmapSurfaceImpl.h"
 #include "PainterImpl.h"
 
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Argb32Format.h>
@@ -41,6 +42,7 @@ namespace Hmi {
 
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(10, 10)
+, _painter(0)
 {
     create();
 }
@@ -63,8 +65,8 @@ void PixmapSurfaceImpl::create()
 
     CGColorSpaceRelease(colorSpace);
 
-    std::clog << "pixmap: " << _context << " " << _size.width() << "x" 
-                            << _size.height() << std::endl;
+    //std::clog << "pixmap: " << _context << " " << _size.width() << "x" 
+    //                        << _size.height() << std::endl;
 }
 
 
@@ -128,9 +130,12 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
                                _size.height() - clipRect.y() - clipRect.height(), 
                                clipRect.width(), 
                                clipRect.height());
-    
+
     //CGContextResetClip(_context);
     //CGContextClipToRect(_context, cgRect);
+
+    //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
+    //CGContextFillRect (_context, cgRect);
 }
 
 
@@ -229,7 +234,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 
 void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 {
-    std::clog << "font: " <<  font.size() << std::endl;
+    
 }
 
 
@@ -238,8 +243,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     if( ! _painter )
         return Gfx::FontMetrics();
 
-    CTFontRef font = _painter->impl()->ctfont();
-
+    CTFontRef font = _painter->impl()->ctFont();
     return PainterImpl::fontMetrics(font, text);
 }
 
@@ -249,7 +253,7 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     if( ! _painter )
         return;
 
-    CTFontRef font = _painter->impl()->ctfont();
+    CTFontRef font = _painter->impl()->ctFont();
     const Gfx::Pen& pen = _painter->pen();
 
     CGColorRef textColor = CGColorCreateGenericRGB(pen.color().red() / 65535.0,
@@ -279,13 +283,10 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     // CFAttributedStringSetAttribute
     CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, 
                                                                       string, attributes);
-    CFRelease(string);
-    CFRelease(attributes);
-    CFRelease(textColor);
-    CFRelease(font);
+
 
     CTLineRef line = CTLineCreateWithAttributedString(attributedString);
-    CFRelease(attributedString);
+
     //CGPoint textPosition = CGContextGetTextPosition(_context);
     
     //CGContextSetTextDrawingMode(_context, kCGTextFill);
@@ -295,12 +296,16 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     //CGContextScaleCTM(_context, 1.0, -1.0);
 
     // flip the text coordinate system for iOS
-    //CGContextSetTextMatrix(_context, CGAffineTransformMakeScale(1.0, -1.0)); 
-
-    CGContextSetTextPosition(_context, to.x(), _size.height() - to.y());
+    //CGContextSetTextMatrix(_context, CGAffineTransformMakeScale(1.0, -1.0));
     
+    CGContextSetTextPosition(_context, to.x(), _size.height() - to.y());
     CTLineDraw(line, _context);
+    
     CFRelease(line);
+    CFRelease(attributedString);
+    CFRelease(string);
+    CFRelease(attributes);
+    CFRelease(textColor);
 
     //CGContextSetTextPosition(_context, textPosition.x, textPosition.y);
     //CGContextRestoreGState(_context);
@@ -340,8 +345,6 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 
 void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 {
-    std::clog << "fillRect: " <<  _context << std::endl;
-
     CGRect cgRect = CGRectMake(rect.x(), 
                                _size.height() - rect.y() - rect.height(), 
                                rect.width(), 

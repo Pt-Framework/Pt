@@ -28,6 +28,7 @@
 
 #include "PaintSurfaceImpl.h"
 
+#import <AppKit/NSFontManager.h>
 #import <Foundation/Foundation.h>
 
 namespace Pt {

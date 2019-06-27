@@ -37,6 +37,7 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/String.h>
+#include <Pt/Utf8Codec.h>
 
 #include <CoreText/CoreText.h>
 
@@ -47,9 +48,7 @@ namespace Hmi {
 class PainterImpl
 {
     public:
-        PainterImpl()
-        : _font(NULL)
-        { }
+        PainterImpl();
 
         ~PainterImpl()
         {
@@ -73,8 +72,13 @@ class PainterImpl
         {
         }
 
-        CTFontRef createCTFont(const Gfx::Font& font)
+        static CTFontRef createCTFont(const Gfx::Font& font)
         {
+            //std::clog << "font: " << font.name() 
+            //          << "size: " << font.size() << std::endl;
+
+            // TODO: handle empty font name as default font
+
             const UInt8* stringData = reinterpret_cast<const UInt8*>( font.name().c_str() );
             CFStringRef fontName = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
                                                                  stringData, 
@@ -82,17 +86,17 @@ class PainterImpl
                                                                  kCFStringEncodingUTF8, 
                                                                  false, 
                                                                  kCFAllocatorNull);
-            
+
             // CoreText uses 96 points per inch, but the typographic convention
-            // is 72 dots per inch, so scale by 72.0 / 96.0
-            CGFloat fontSize = font.size() * (72.0 / 96.0);
-            
+            // is 72 dots per inch, so scale by 96.0 / 72.0
+            CGFloat fontSize = static_cast<int>( font.size() * (96.0 / 72.0) );
+        
             CGAffineTransform matrix = CGAffineTransformIdentity;
             CTFontRef f = CTFontCreateWithName(fontName, fontSize, &matrix);
             CFRelease(fontName);
 
             // TODO: use CTFontCreateCopyWithSymbolicTraits for bold and italic
-
+            
             return f;
         }
 
@@ -143,16 +147,17 @@ class PainterImpl
             CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, 
                                                                               string, 
                                                                               attributes);
-            CFRelease(string);
-            CFRelease(attributes);
 
             CTLineRef line = CTLineCreateWithAttributedString(attributedString);
-            CFRelease(attributedString);
-    
+            
             CGFloat ascent = 10.0;
             CGFloat descent = 5.0;
             double width = CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
+            
             CFRelease(line);
+            CFRelease(attributedString);
+            CFRelease(string);
+            CFRelease(attributes);
 
             return Gfx::FontMetrics( static_cast<unsigned>(ascent), 
                                      static_cast<unsigned>(descent), 

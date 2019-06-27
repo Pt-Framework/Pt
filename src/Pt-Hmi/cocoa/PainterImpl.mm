@@ -33,6 +33,11 @@ namespace Pt {
 
 namespace Hmi {
 
+PainterImpl::PainterImpl()
+: _font(nil)
+{ 
+}
+
 } // namespace
 
 } // namespace
