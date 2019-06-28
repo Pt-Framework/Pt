@@ -138,7 +138,7 @@ void MainWindowImpl::close()
 
 void MainWindowImpl::paint(const Gfx::RectF& rect)
 {
-    std::clog << "PAINT" << std::endl;
+    //std::clog << "PAINT" << std::endl;
     [_view setNeedsDisplay:YES];
 }
 
@@ -184,16 +184,14 @@ void MainWindowImpl::move(const Gfx::PointF& p)
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
     NSRect frameRect = [_window frame];
-    NSRect contentRect = [_window contentRectForFrameRect:frameRect
-                                  styleMask:_windowStyle];
+    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
 
     contentRect.origin.y += contentRect.size.height - size.height();
     
     contentRect.size.width = size.width();
     contentRect.size.height = size.height();
 
-    frameRect = [_window frameRectForContentRect:contentRect
-                         styleMask:_windowStyle];
+    frameRect = [_window frameRectForContentRect:contentRect];
     [_window setFrame:frameRect display:NO animate:NO];
 }
 
@@ -306,11 +304,11 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     if( ! window )
         return;
 
-    std::clog << "ON PAINT: " << rect.size.width << "x" 
-                              << rect.size.height << std::endl;
-
-    std::clog << "drawSurface: " <<  window->surface().pixmapImpl()->context()
-              << std::endl;
+    //std::clog << "ON PAINT: " << rect.size.width << "x" 
+    //                          << rect.size.height << std::endl;
+    
+    //CGFloat bsf = [_window backingScaleFactor];
+    //std::clog << "backingScaleFactor: " << bsf << std::endl;
 
     Pt::Hmi::PixmapSurfaceImpl* pixmap = window->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
@@ -378,26 +376,45 @@ void MainWindowImpl::onLostFocus()
     //     bringToFront();
 }
 
-
-void MainWindowImpl::onLMouseUp(double x, double y)
+void MainWindowImpl::onLMouseDown(double x, double y)
 {
-    // Pt::Gfx::PointF pos = convertMousePosition(x,y);
-    
-    // _pointerEvent.buttons()[0].setState(DeviceButton::Released);
-    // _pointerEvent.setX(pos.x());
-    // _pointerEvent.setY(pos.y());
-    // _windowEvent.send(_pointerEvent);
+    std::clog << "MOUSE PRESS: " << x << ", " << y << std::endl;
+
+    Window* window = findWindow(_window);
+    if( ! window )
+        return;
+
+    Pt::uint64_t vid =  window->vid();
+
+    CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
+    Pt::Gfx::PointF pos(x, height - y);
+
+    _mouseEvent.setPress(MouseEvent::Left);
+    _mouseEvent.setPosition(pos);
+    _mouseEvent.setId(vid);
+
+    Application::instance().processMouseEvent(_mouseEvent);
 }
 
 
-void MainWindowImpl::onLMouseDown(double x, double y)
+void MainWindowImpl::onLMouseUp(double x, double y)
 {
-    // Pt::Gfx::PointF pos = convertMousePosition(x,y);
+    std::clog << "MOUSE RELEASE: " << x << ", " << y << std::endl;
+
+    Window* window = findWindow(_window);
+    if( ! window )
+        return;
+
+    Pt::uint64_t vid =  window->vid();
     
-    // _pointerEvent.buttons()[0].setState(DeviceButton::Pressed);
-    // _pointerEvent.setX(pos.x());
-    // _pointerEvent.setY(pos.y());
-    // _windowEvent.send(_pointerEvent);
+    CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
+    Pt::Gfx::PointF pos(x, height - y);
+
+    _mouseEvent.setRelease(MouseEvent::Left);
+    _mouseEvent.setPosition(pos);
+    _mouseEvent.setId(vid);
+
+    Application::instance().processMouseEvent(_mouseEvent);
 }
 
 
@@ -459,7 +476,7 @@ void MainWindowImpl::onMove()
 }
 
 
-void MainWindowImpl::onResize(const NSSize& frameSize)
+void MainWindowImpl::onResize(const NSSize& viewSize)
 {   
 //     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     
@@ -483,21 +500,17 @@ void MainWindowImpl::onResize(const NSSize& frameSize)
 //         }
 //     }
 
+    std::clog << "RESIZE: " << viewSize.width << "x" 
+                            << viewSize.height << std::endl;
+
     Window* window = findWindow(_window);
     if( ! window )
         return;
 
     Pt::uint64_t vid =  window->vid();
 
-    NSRect frameRect = NSRectMake(0.0, 0.0, 
-                                  frameSize.width, 
-                                  frameSize.height);
-
-    NSRect contentRect = [_window contentRectForFrameRect:frameRect
-                                  styleMask:_windowStyle ];
-
-    Gfx::SizeF to(contentRect.size.width, 
-                  contentRect.size.height);
+    Gfx::SizeF to(viewSize.width, 
+                  viewSize.height);
 
     ResizeEvent rev(vid, to);
     Application::instance().impl()->commitEvent(rev);

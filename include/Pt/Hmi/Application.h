@@ -73,6 +73,7 @@ class PT_HMI_API Application : public Pt::System::Application
     friend class Visual;
     friend class Window;
     friend class ApplicationImpl;
+    friend class MainWindowImpl;
 
     public:
         Application(int argc = 0, char** argv = 0);

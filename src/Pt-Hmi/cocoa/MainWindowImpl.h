@@ -45,7 +45,7 @@
     #import <AppKit/NSGraphicsContext.h>
     #import <AppKit/NSView.h>
     #import <AppKit/NSScreen.h>
-    #import <AppKit/NSWindowController.h> 
+    #import <AppKit/NSWindowController.h>
 #else
 	struct NSRect;
     struct NSPoint;
@@ -121,9 +121,9 @@ class MainWindowImpl : public Pt::Connectable
         void onMove();
         void onResize(const NSSize& frameSize);
         void onClosing();
-        void onMouseMove(double x,double y);
         void onLMouseDown(double x, double y);
         void onLMouseUp(double x, double y);
+        void onMouseMove(double x,double y);
         void onKeyDown(int key);
         void onKeyUp(int key);
         void onKeyModifier(unsigned int mask);

@@ -126,8 +126,8 @@
 
 - (void)setFrameSize:(NSSize)frameSize
 {
-    std::clog << "FRAME SIZE : " << frameSize.width << "x"
-                                 << frameSize.height << std::endl;
+    //std::clog << "FRAME SIZE : " << frameSize.width << "x"
+    //                             << frameSize.height << std::endl;
     
     [super setFrameSize:frameSize];
     
