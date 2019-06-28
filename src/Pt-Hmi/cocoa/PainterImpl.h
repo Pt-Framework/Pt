@@ -72,34 +72,6 @@ class PainterImpl
         {
         }
 
-        static CTFontRef createCTFont(const Gfx::Font& font)
-        {
-            //std::clog << "font: " << font.name() 
-            //          << "size: " << font.size() << std::endl;
-
-            // TODO: handle empty font name as default font
-
-            const UInt8* stringData = reinterpret_cast<const UInt8*>( font.name().c_str() );
-            CFStringRef fontName = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
-                                                                 stringData, 
-                                                                 font.name().length(), 
-                                                                 kCFStringEncodingUTF8, 
-                                                                 false, 
-                                                                 kCFAllocatorNull);
-
-            // CoreText uses 96 points per inch, but the typographic convention
-            // is 72 dots per inch, so scale by 96.0 / 72.0
-            CGFloat fontSize = static_cast<int>( font.size() * (96.0 / 72.0) );
-        
-            CGAffineTransform matrix = CGAffineTransformIdentity;
-            CTFontRef f = CTFontCreateWithName(fontName, fontSize, &matrix);
-            CFRelease(fontName);
-
-            // TODO: use CTFontCreateCopyWithSymbolicTraits for bold and italic
-            
-            return f;
-        }
-
         void setFont(const Gfx::Font& font)
         {
             CTFontRef f = createCTFont(font);
@@ -150,8 +122,8 @@ class PainterImpl
 
             CTLineRef line = CTLineCreateWithAttributedString(attributedString);
             
-            CGFloat ascent = 10.0;
-            CGFloat descent = 5.0;
+            CGFloat ascent = 0.0;
+            CGFloat descent = 0.0;
             double width = CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
             
             CFRelease(line);
@@ -165,23 +137,70 @@ class PainterImpl
                                      static_cast<unsigned>(ascent + descent) );
         }
 
+        static CTFontRef createCTFont(const Gfx::Font& font)
+        {
+            //std::clog << "font: " << font.name() 
+            //          << "size: " << font.size() << std::endl;
+
+            const UInt8* stringData = 0;
+            std::size_t stringSize = 0;
+            
+            if( font.name().empty() )
+            {
+                stringData = reinterpret_cast<const UInt8*>( getDefaultFont().c_str() );
+                stringSize = getDefaultFont().size();
+            }
+            else
+            {
+              stringData = reinterpret_cast<const UInt8*>( font.name().c_str() );
+              stringSize = font.name().size();
+            }
+
+            CFStringRef fontName = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
+                                                                 stringData, 
+                                                                 stringSize, 
+                                                                 kCFStringEncodingUTF8, 
+                                                                 false, 
+                                                                 kCFAllocatorNull);
+
+            // CoreText uses 96 points per inch, but the typographic convention
+            // is 72 dots per inch, so scale by 96.0 / 72.0
+            CGFloat fontSize = static_cast<int>( font.size() * (96.0 / 72.0) );
+        
+            CGAffineTransform matrix = CGAffineTransformIdentity;
+            CTFontRef f = CTFontCreateWithName(fontName, fontSize, &matrix);
+            CFRelease(fontName);
+
+            // TODO: use CTFontCreateCopyWithSymbolicTraits for bold and italic
+            
+            return f;
+        }
+
         static std::string defaultFont()
         {
-            #if PT_IOS
-                //"Helvetica"
-                //"Times New Roman"
-                //"Courier New"
-                return "Helvetica";
-            #else
-                //"Lucida Grande"
-                //"Times New Roman"
-                //"Monaco"
-                return "Helvetica";
-            #endif
+            return getDefaultFont();
         }
 
         static void setDefaultFont(const std::string& f)
         {
+            getDefaultFont() = f;
+        }
+
+        static std::string& getDefaultFont()
+        { 
+            #if PT_IOS
+                //"Helvetica"
+                //"Times New Roman"
+                //"Courier New"
+                static std::string _defaultFont = "Helvetica";
+            #else
+                //"Lucida Grande"
+                //"Times New Roman"
+                //"Monaco"
+                static std::string _defaultFont = "Helvetica";
+            #endif
+            
+            return _defaultFont; 
         }
 
     private:

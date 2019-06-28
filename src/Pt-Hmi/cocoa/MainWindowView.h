@@ -71,9 +71,11 @@
 
 - (void) windowDidMove: (NSNotification *) notification;
 
-- (BOOL) windowShouldClose: (id) sender;
+- (void) windowDidResize: (NSNotification *) notification;
 
 - (NSSize) windowWillResize: (NSWindow *) sender 
                      toSize: (NSSize) frameSize;
+
+- (BOOL) windowShouldClose: (id) sender;
 
 @end

@@ -29,6 +29,7 @@
 
 #include "PixmapSurfaceImpl.h"
 #include "PainterImpl.h"
+#include "PictureImpl.h"
 
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Picture.h>
@@ -284,7 +285,6 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, 
                                                                       string, attributes);
 
-
     CTLineRef line = CTLineCreateWithAttributedString(attributedString);
 
     //CGPoint textPosition = CGContextGetTextPosition(_context);
@@ -351,8 +351,6 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
                                rect.height());
 
     CGContextFillRect(_context, cgRect);
-
-    //std::clog << cgRect.size.width << "x" << cgRect.size.height << std::endl;
 
     //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
     //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
@@ -434,6 +432,7 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
                                     const PixmapSurface& pm,
                                     const Gfx::RectF& pmRect)
 {
+    //TODO
     drawSurface(to, pm);
     return;
 
@@ -458,13 +457,59 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
-    //TODO
+    //const Pt::uint8_t* data = image.data();
+    //std::size_t dataSize = image.format().imageSize( image.size(), image.padding() );
+
+    std::vector<Pt::uint8_t> imageData;
+    imageData.resize( image.width() * image.height() * 4 );
+
+    for( std::size_t y = 0; y < image.height(); ++y )
+    {
+        for( std::size_t x = 0; x < image.width(); ++x )
+        {
+            Gfx::ConstPixel pixel(image.view(), x, y);
+            Gfx::Color color = image.format().getColor(pixel);
+            
+            const Pt::uint8_t r = color.red() / 257;
+            const Pt::uint8_t g = color.green() / 257;
+            const Pt::uint8_t b = color.blue() / 257;
+            const Pt::uint8_t a = color.alpha() / 257;
+
+            imageData.push_back( (Pt::uint8_t) (a * b / 255) );
+            imageData.push_back( (Pt::uint8_t) (a * g / 255) );
+            imageData.push_back( (Pt::uint8_t) (a * r / 255) );
+            imageData.push_back( (Pt::uint8_t) (a ) );
+        }
+    }
+
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, 
+                                                              &imageData[0], 
+                                                              imageData.size(), 
+                                                              NULL);
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault|kCGImageAlphaPremultipliedLast;
+    
+    CGImageRef imageRef = CGImageCreate(image.width(), image.height(), 
+                                        8, 32, 4 * image.width(), 
+                                        colorSpace, bitmapInfo, provider, 
+                                        NULL, false, kCGRenderingIntentDefault);
+
+    CGRect contextRect = CGRectMake( to.x(), 
+                                     _size.height() - to.y() - image.height(), 
+                                     image.width(), 
+                                     image.height() );
+    
+    CGContextDrawImage(_context, contextRect, imageRef);
+
+    CFRelease(imageRef);
+    CFRelease(colorSpace);
+    CFRelease(provider);
 }
 
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, 
-                const Gfx::Image& image, 
-                const Gfx::RectF& imgRect)
+                                  const Gfx::Image& image, 
+                                  const Gfx::RectF& imgRect)
 {
     //TODO
 }
@@ -472,7 +517,13 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to,
 
 void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
 {
-    //TODO
+    const PictureImpl* picImpl = pic.impl();
+    const Gfx::Image& image = picImpl->image();
+
+    if( picImpl->empty() )
+        return;
+
+    drawImage(to, image);
 }
 
 } // namespace

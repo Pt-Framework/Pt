@@ -183,16 +183,18 @@ void MainWindowImpl::move(const Gfx::PointF& p)
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
-    //TODO: use
-    //- (NSRect)contentRectForFrameRect:(NSRect)windowFrame
-    //- (NSRect)frameRectForContentRect:(NSRect)windowContent
+    NSRect frameRect = [_window frame];
+    NSRect contentRect = [_window contentRectForFrameRect:frameRect
+                                  styleMask:_windowStyle];
 
-    NSRect rect = [_window frame];
-    rect.origin.y += rect.size.height - size.height();
-    rect.size.width = size.width();
-    rect.size.height = size.height();
+    contentRect.origin.y += contentRect.size.height - size.height();
+    
+    contentRect.size.width = size.width();
+    contentRect.size.height = size.height();
 
-    [_window setFrame:rect display:NO animate:NO];
+    frameRect = [_window frameRectForContentRect:contentRect
+                         styleMask:_windowStyle];
+    [_window setFrame:frameRect display:NO animate:NO];
 }
 
 
@@ -487,12 +489,20 @@ void MainWindowImpl::onResize(const NSSize& frameSize)
 
     Pt::uint64_t vid =  window->vid();
 
-    Gfx::SizeF to(frameSize.width, frameSize.height);
+    NSRect frameRect = NSRectMake(0.0, 0.0, 
+                                  frameSize.width, 
+                                  frameSize.height);
+
+    NSRect contentRect = [_window contentRectForFrameRect:frameRect
+                                  styleMask:_windowStyle ];
+
+    Gfx::SizeF to(contentRect.size.width, 
+                  contentRect.size.height);
 
     ResizeEvent rev(vid, to);
     Application::instance().impl()->commitEvent(rev);
            
-    Gfx::RectF updateRect(Gfx::PointF(0,0), to);
+    Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
     window->update(updateRect);
 
     // cocoa performs a paint/display right after a window resize, so we

@@ -194,12 +194,6 @@
 }
 
 
-- (BOOL) windowShouldClose:(id)sender 
-{
-    _windowImpl->onClosing();
-    return FALSE;
-}
-
 - (NSSize) windowWillResize: (NSWindow *) sender 
                      toSize: (NSSize) frameSize
 
@@ -209,6 +203,20 @@
     //                                << frameSize.height << std::endl;
     
     return frameSize;
+}
+
+
+- (void) windowDidResize: (NSNotification *) notification
+{
+    //std::clog << "WINDOW RESIZE : " << frameSize.width << "x"
+    //                                << frameSize.height << std::endl;
+}
+
+
+- (BOOL) windowShouldClose:(id)sender 
+{
+    _windowImpl->onClosing();
+    return FALSE;
 }
 
 @end
