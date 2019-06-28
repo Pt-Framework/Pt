@@ -127,16 +127,22 @@ void PixmapSurfaceImpl::finish()
 
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
-    CGRect cgRect = CGRectMake(clipRect.x(), 
-                               _size.height() - clipRect.y() - clipRect.height(), 
-                               clipRect.width(), 
-                               clipRect.height());
+    CGRect rect = CGRectMake(clipRect.x(), 
+                             _size.height() - clipRect.y() - clipRect.height(), 
+                             clipRect.width(), 
+                             clipRect.height());
 
     //CGContextResetClip(_context);
-    //CGContextClipToRect(_context, cgRect);
+    CGContextBeginPath(_context);
+    CGContextAddRect(_context, rect);
+    CGContextClip(_context);
+
+    //CGContextClipToRect(_context, rect);
+
+    //CGRect boundingRect = CGContextGetClipBoundingBox(_context);
 
     //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
-    //CGContextFillRect (_context, cgRect);
+    //CGContextFillRect (_context, rect);
 }
 
 
@@ -326,6 +332,9 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
     Gfx::PointF from = transform(f);
     Gfx::PointF to = transform(t);
     
+    std::clog << "drawLine: " << from.x() << ',' << from.y()
+              << " -> " << to.x() << ',' << to.y() << std::endl;
+
     CGContextMoveToPoint(_context, from.x(), from.y());
     CGContextAddLineToPoint(_context, to.x(), to.y());
     CGContextStrokePath(_context);
@@ -365,13 +374,41 @@ Pt::Gfx::PointF PixmapSurfaceImpl::transform(const Pt::Gfx::PointF& p)
 
 void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    //TODO
+    double scaleX = size.width() / size.height();
+    double centerX = (topLeft.x() + size.width() / 2.0) / scaleX;
+    double centerY = topLeft.y() + size.height() / 2;
+    double radius = size.height() / 2.0;
+
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGAffineTransform transform = CGAffineTransformMakeScale(scaleX, 1);
+    
+    CGPathAddArc(path, &transform,
+                 centerX, centerY, radius, 
+                 0, 2 * 3.1415927, false);
+   
+    CGContextBeginPath(_context);
+    CGContextStrokePath(path);
+    CGPathRelease(path);
 }
 
 
 void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    //TODO
+    double scaleX = size.width() / size.height();
+    double centerX = (topLeft.x() + size.width() / 2.0) / scaleX;
+    double centerY = topLeft.y() + size.height() / 2;
+    double radius = size.height() / 2.0;
+
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGAffineTransform transform = CGAffineTransformMakeScale(scaleX, 1);
+    
+    CGPathAddArc(path, &transform,
+                 centerX, centerY, radius, 
+                 0, 2 * 3.1415927, false);
+   
+    CGContextBeginPath(_context);
+    CGContextFillPath(path);
+    CGPathRelease(path);
 }
 
 
