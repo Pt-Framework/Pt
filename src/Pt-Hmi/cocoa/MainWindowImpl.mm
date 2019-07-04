@@ -194,8 +194,8 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     switch(type)
     {
         case Window::Popup:
-            _windowStyle = NSWindowStyleMaskTitled;// |
-                           //NSWindowStyleFullSizeContentView;
+            _windowStyle = NSWindowStyleMaskTitled | 
+                           NSWindowStyleMaskFullSizeContentView;
             break;
 
         default:
@@ -252,8 +252,8 @@ void MainWindowImpl::setType(Window::Type type)
     switch(type)
     {
         case Window::Popup:
-            _windowStyle = NSWindowStyleMaskTitled; // |
-                           //NSWindowStyleFullSizeContentView;
+            _windowStyle = NSWindowStyleMaskTitled |
+                           NSWindowStyleMaskFullSizeContentView;
             break;
 
         default:
@@ -636,31 +636,32 @@ void MainWindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
 
 void MainWindowImpl::onKeyModifier(unsigned int mask)
 {
-  _keyFlags = mask;
+    std::clog << "KEY MODIFIER: " << mask << std::endl;
+    _keyFlags = mask;
 
-  // TODO: are KeyEvents generated for the modifier keys themselves?
+    // TODO: are KeyEvents generated for the modifier keys themselves?
 
-  bool shift = (_keyFlags & NSEventModifierFlagShift) == NSEventModifierFlagShift;
-    
-  bool control = (_keyFlags & NSEventModifierFlagControl) == NSEventModifierFlagControl;
-    
-  bool alt = (_keyFlags & NSEventModifierFlagOption) == NSEventModifierFlagOption;
+    bool shift = (_keyFlags & NSEventModifierFlagShift) == NSEventModifierFlagShift;
 
-  bool meta = (_keyFlags & NSEventModifierFlagCommand) == NSEventModifierFlagCommand;
+    bool control = (_keyFlags & NSEventModifierFlagControl) == NSEventModifierFlagControl;
 
-  _keyModifiers.clear();
+    bool alt = (_keyFlags & NSEventModifierFlagOption) == NSEventModifierFlagOption;
 
-  if(shift)
-      _keyModifiers.add(Key::Shift);
+    bool meta = (_keyFlags & NSEventModifierFlagCommand) == NSEventModifierFlagCommand;
 
-  if(control)
-      _keyModifiers.add(Key::Control);
+    _keyModifiers.clear();
 
-  if(alt)
-      _keyModifiers.add(Key::Alt);
+    if(shift)
+        _keyModifiers.add(Key::Shift);
 
-  if(meta)
-      _keyModifiers.add(Key::Meta);
+    if(control)
+        _keyModifiers.add(Key::Control);
+
+    if(alt)
+        _keyModifiers.add(Key::Alt);
+
+    if(meta)
+        _keyModifiers.add(Key::Meta);
 }
 
 
@@ -675,7 +676,7 @@ void MainWindowImpl::onLMouseDown(double x, double y)
     Pt::uint64_t vid =  window->vid();
 
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
-    y -= height;
+    y = height - y;
 
     double scaling = Application::instance().screen().scaleFactor();
 
@@ -701,7 +702,7 @@ void MainWindowImpl::onLMouseUp(double x, double y)
     Pt::uint64_t vid =  window->vid();
     
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
-    y -= height;
+    y = height - y;
 
     double scaling = Application::instance().screen().scaleFactor();
 
@@ -727,7 +728,7 @@ void MainWindowImpl::onMouseMove(double x, double y)
     Pt::uint64_t vid =  window->vid();
     
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
-    y -= height;
+    y = height - y;
 
     double scaling = Application::instance().screen().scaleFactor();
 
