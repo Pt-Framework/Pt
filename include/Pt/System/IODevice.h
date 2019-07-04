@@ -220,7 +220,7 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         virtual std::size_t onWrite(const char* buffer, std::size_t count) = 0;
 
-        virtual std::size_t onPeek(char* buffer, std::size_t)
+        virtual std::size_t onPeek(char*, std::size_t)
         { return 0; }
 
         virtual bool onSeekable() const
