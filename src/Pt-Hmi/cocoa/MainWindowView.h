@@ -41,40 +41,44 @@
 
 - (BOOL) acceptsFirstResponder;
 
-- (BOOL) acceptsFirstMouse:(NSEvent *)event;
+- (BOOL) acceptsFirstMouse: (NSEvent *) ev;
 
-- (void) drawRect:(NSRect)rect;
+- (void) drawRect: (NSRect) rect;
 
-- (void) setFrameOrigin:(NSPoint)origin;
+- (void) setFrameOrigin: (NSPoint) origin;
 
-- (void) setFrameSize:(NSSize)frameSize;
+- (void) setFrameSize: (NSSize) frameSize;
 
-- (void) mouseDown:(NSEvent*)ev;
+- (void) mouseDown: (NSEvent*) ev;
 
-- (void) mouseUp:(NSEvent*)ev;
+- (void) mouseUp: (NSEvent*) ev;
 
-- (void) mouseDragged:(NSEvent*)ev;
+- (void) mouseDragged: (NSEvent*) ev;
 
-- (void) mouseMoved:(NSEvent*)ev;
+- (void) mouseMoved: (NSEvent*) ev;
 
-- (void) flagsChanged:(NSEvent*)ev;
+- (void) keyDown: (NSEvent*) ev;
 
-- (void) keyDown:(NSEvent *)ev;
+- (void) keyUp: (NSEvent*) ev;
 
-- (void) keyUp:(NSEvent *)ev;
+- (void) flagsChanged: (NSEvent*) ev;
 
 - (void) viewDidUnhide;
 
 - (void) viewDidHide;
 
-- (void) windowDidExpose: (NSNotification *) notification;
+- (void) windowDidExpose: (NSNotification*) notification;
 
-- (void) windowDidMove: (NSNotification *) notification;
+- (void) windowDidMove: (NSNotification*) notification;
 
-- (void) windowDidResize: (NSNotification *) notification;
-
-- (NSSize) windowWillResize: (NSWindow *) sender 
+- (NSSize) windowWillResize: (NSWindow*) sender 
                      toSize: (NSSize) frameSize;
+
+- (void) windowDidResize: (NSNotification*) notification;
+
+- (void) windowDidBecomeKey:(NSNotification*) notification;
+
+- (void) windowDidResignKey:(NSNotification*) notification;
 
 - (BOOL) windowShouldClose: (id) sender;
 

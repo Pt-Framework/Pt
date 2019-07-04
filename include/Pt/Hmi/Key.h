@@ -14,6 +14,7 @@ namespace Hmi {
 class Key
 {
     public:
+        // see also: https://w3c.github.io/uievents-code/
         enum Code
         {
             NoKey      = 0x0,

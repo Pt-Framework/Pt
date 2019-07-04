@@ -65,56 +65,78 @@
 }
 
 
-- (BOOL) acceptsFirstMouse:(NSEvent *)event;
+- (BOOL) acceptsFirstMouse: (NSEvent*) ev;
 {
     return TRUE;
 }
 
 
-- (void) flagsChanged:(NSEvent*)ev
+- (void) keyDown: (NSEvent*) ev
+{
+    NSString* chars = [ev characters];
+    unsigned keyCode = [ev keyCode];
+
+    // TODO: convert from UTF-16
+    unichar u16Char = [chars characterAtIndex: 0];
+
+    // tab character
+    if(keyCode == 48)
+        u16Char = 9;
+
+    // return character
+    if(keyCode == 36)
+        u16Char = 13;
+
+    // backspace character
+    if(keyCode == 51)
+        u16Char = 8;
+
+    Pt::Char ch(u16Char);
+    
+    _windowImpl->onKeyDown(keyCode, ch);
+}
+
+
+- (void) keyUp: (NSEvent*) ev
+{
+    NSString* chars = [ev characters];   
+    unsigned keyCode = [ev keyCode];
+
+    // TODO: convert from UTF-16
+    unichar u16Char = [chars characterAtIndex: 0];
+
+    // tab character
+    if(keyCode == 48)
+        u16Char = 9;
+
+    // return character
+    if(keyCode == 36)
+        u16Char = 13;
+
+    // backspace character
+    if(keyCode == 51)
+        u16Char = 8;
+
+    Pt::Char ch(u16Char);
+    
+    _windowImpl->onKeyUp(keyCode, ch);
+}
+
+
+- (void) flagsChanged: (NSEvent*) ev
 {
     unsigned int mod = [ev modifierFlags];
     _windowImpl->onKeyModifier(mod);
 }
 
 
-- (void) keyDown:(NSEvent *)ev
-{
-    NSString* chars = [ev characters];
-    unichar character = [chars characterAtIndex: 0];
-    
-    std::clog << "KEY DOWN: " << character << std::endl;
-
-    //Emulate tab character on shift pressed.
-    if(character == 25)
-        character = 9;
-    
-    _windowImpl->onKeyDown(character);
-}
-
-
-- (void) keyUp:(NSEvent *)ev
-{
-    NSString* chars = [ev characters];
-    unichar character = [chars characterAtIndex: 0];
-    
-    std::clog << "KEY UP: " << character << std::endl;
-
-    //Emulate tab charecter on shift pressed.
-    if(character == 25)
-        character = 9;
-    
-    _windowImpl->onKeyUp(character);
-}
-
-
-- (void) drawRect:(NSRect)rect
+- (void) drawRect: (NSRect) rect
 {
     _windowImpl->onPaint(rect);
 }
 
 
-- (void)setFrameOrigin:(NSPoint)origin
+- (void)setFrameOrigin: (NSPoint) origin
 {
     std::clog << "FRAME ORIGIN: " << origin.x << "," 
                                   << origin.y << std::endl;
@@ -124,7 +146,7 @@
 }
 
 
-- (void)setFrameSize:(NSSize)frameSize
+- (void) setFrameSize: (NSSize) frameSize
 {
     //std::clog << "FRAME SIZE : " << frameSize.width << "x"
     //                             << frameSize.height << std::endl;
@@ -135,7 +157,7 @@
 }
 
 
-- (void) mouseDown:(NSEvent*)ev
+- (void) mouseDown: (NSEvent*) ev
 {
     std::clog << "MOUSE DOWN" << std::endl;
     NSPoint mp = [ev locationInWindow];
@@ -143,7 +165,7 @@
 }
 
 
-- (void) mouseUp:(NSEvent*)ev
+- (void) mouseUp: (NSEvent*) ev
 {
     std::clog << "MOUSE UP" << std::endl;
     NSPoint mp = [ev locationInWindow];
@@ -151,7 +173,7 @@
 }
 
 
-- (void) mouseDragged:(NSEvent*)ev
+- (void) mouseDragged: (NSEvent*) ev
 {
     std::clog << "MOUSE DRAGGED" << std::endl;
     NSPoint mp = [ev locationInWindow];
@@ -159,7 +181,7 @@
 }
 
 
-- (void) mouseMoved:(NSEvent *)ev
+- (void) mouseMoved: (NSEvent *) ev
 {
     //std::clog << "MOUSE MOVED" << std::endl;
     NSPoint mp = [ev locationInWindow];
@@ -181,20 +203,20 @@
 }
 
 
-- (void) windowDidExpose: (NSNotification *) notification
+- (void) windowDidExpose: (NSNotification*) notification
 {
     // only called for windows with nonretained backing store
     std::clog << "EXPOSE" << std::endl;
 }
 
 
-- (void) windowDidMove: (NSNotification *) notification
+- (void) windowDidMove: (NSNotification*) notification
 {
     _windowImpl->onMove();
 }
 
 
-- (NSSize) windowWillResize: (NSWindow *) sender 
+- (NSSize) windowWillResize: (NSWindow*) sender 
                      toSize: (NSSize) frameSize
 
 
@@ -206,14 +228,26 @@
 }
 
 
-- (void) windowDidResize: (NSNotification *) notification
+- (void) windowDidResize: (NSNotification*) notification
 {
     //std::clog << "WINDOW RESIZE : " << frameSize.width << "x"
     //                                << frameSize.height << std::endl;
 }
 
 
-- (BOOL) windowShouldClose:(id)sender 
+- (void) windowDidBecomeKey:(NSNotification*) notification
+{
+    std::clog << "WINDOW BECAME KEY" << std::endl;
+}
+
+
+- (void) windowDidResignKey:(NSNotification*) notification
+{
+    std::clog << "WINDOW RESIGNED KEY" << std::endl;
+}
+
+
+- (BOOL) windowShouldClose: (id) sender 
 {
     _windowImpl->onClosing();
     return FALSE;

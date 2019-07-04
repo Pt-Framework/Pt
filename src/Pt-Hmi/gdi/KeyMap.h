@@ -83,16 +83,16 @@ static const Pt::uint32_t keyMap[] =
     Pt::Hmi::Key::Insert,            //  45   0x2D   VK_INSERT           
     Pt::Hmi::Key::Delete,            //  46   0x2E   VK_DELETE           
     Pt::Hmi::Key::Help,              //  47   0x2F   VK_HELP             
-    0,                                   //  48   0x30   VK_0              
-    0,                                   //  49   0x31   VK_1              
-    0,                                   //  50   0x32   VK_2              
-    0,                                   //  51   0x33   VK_3              
-    0,                                   //  52   0x34   VK_4              
-    0,                                   //  53   0x35   VK_5              
-    0,                                   //  54   0x36   VK_6              
-    0,                                   //  55   0x37   VK_7              
-    0,                                   //  56   0x38   VK_8              
-    0,                                   //  57   0x39   VK_9              
+    0,                               //  48   0x30   VK_0              
+    0,                               //  49   0x31   VK_1              
+    0,                               //  50   0x32   VK_2              
+    0,                               //  51   0x33   VK_3              
+    0,                               //  52   0x34   VK_4              
+    0,                               //  53   0x35   VK_5              
+    0,                               //  54   0x36   VK_6              
+    0,                               //  55   0x37   VK_7              
+    0,                               //  56   0x38   VK_8              
+    0,                               //  57   0x39   VK_9              
     Pt::Hmi::Key::Unknown,           //  58   0x3A
     Pt::Hmi::Key::Unknown,           //  59   0x3B
     Pt::Hmi::Key::Unknown,           //  60   0x3C
@@ -100,32 +100,32 @@ static const Pt::uint32_t keyMap[] =
     Pt::Hmi::Key::Unknown,           //  62   0x3E
     Pt::Hmi::Key::Unknown,           //  63   0x3F
     Pt::Hmi::Key::Unknown,           //  64   0x40
-    0,                                   //  65   0x41   VK_A              
-    0,                                   //  66   0x42   VK_B              
-    0,                                   //  67   0x43   VK_C              
-    0,                                   //  68   0x44   VK_D              
-    0,                                   //  69   0x45   VK_E              
-    0,                                   //  70   0x46   VK_F              
-    0,                                   //  71   0x47   VK_G              
-    0,                                   //  72   0x48   VK_H              
-    0,                                   //  73   0x49   VK_I              
-    0,                                   //  74   0x4A   VK_J              
-    0,                                   //  75   0x4B   VK_K              
-    0,                                   //  76   0x4C   VK_L              
-    0,                                   //  77   0x4D   VK_M              
-    0,                                   //  78   0x4E   VK_N              
-    0,                                   //  79   0x4F   VK_O              
-    0,                                   //  80   0x50   VK_P              
-    0,                                   //  81   0x51   VK_Q              
-    0,                                   //  82   0x52   VK_R              
-    0,                                   //  83   0x53   VK_S              
-    0,                                   //  84   0x54   VK_T              
-    0,                                   //  85   0x55   VK_U              
-    0,                                   //  86   0x56   VK_V              
-    0,                                   //  87   0x57   VK_W              
-    0,                                   //  88   0x58   VK_X              
-    0,                                   //  89   0x59   VK_Y              
-    0,                                   //  90   0x5A   VK_Z              
+    0,                               //  65   0x41   VK_A              
+    0,                               //  66   0x42   VK_B              
+    0,                               //  67   0x43   VK_C              
+    0,                               //  68   0x44   VK_D              
+    0,                               //  69   0x45   VK_E              
+    0,                               //  70   0x46   VK_F              
+    0,                               //  71   0x47   VK_G              
+    0,                               //  72   0x48   VK_H              
+    0,                               //  73   0x49   VK_I              
+    0,                               //  74   0x4A   VK_J              
+    0,                               //  75   0x4B   VK_K              
+    0,                               //  76   0x4C   VK_L              
+    0,                               //  77   0x4D   VK_M              
+    0,                               //  78   0x4E   VK_N              
+    0,                               //  79   0x4F   VK_O              
+    0,                               //  80   0x50   VK_P              
+    0,                               //  81   0x51   VK_Q              
+    0,                               //  82   0x52   VK_R              
+    0,                               //  83   0x53   VK_S              
+    0,                               //  84   0x54   VK_T              
+    0,                               //  85   0x55   VK_U              
+    0,                               //  86   0x56   VK_V              
+    0,                               //  87   0x57   VK_W              
+    0,                               //  88   0x58   VK_X              
+    0,                               //  89   0x59   VK_Y              
+    0,                               //  90   0x5A   VK_Z              
     Pt::Hmi::Key::Meta,              //  91   0x5B   VK_LWIN             
     Pt::Hmi::Key::Meta,              //  92   0x5C   VK_RWIN             
     Pt::Hmi::Key::AppsMenu,          //  93   0x5D   VK_APPS             
@@ -181,11 +181,11 @@ static const Pt::uint32_t keyMap[] =
     Pt::Hmi::Key::Unknown,           // 143   0x8F
     Pt::Hmi::Key::NumLock,           // 144   0x90   VK_NUMLOCK          
     Pt::Hmi::Key::ScrollLock,        // 145   0x91   VK_SCROLL           
-    0,                                   // 146   0x92   VK_OEM_FJ_JISHO     
-    0,                                   // 147   0x93   VK_OEM_FJ_MASSHOU   
-    0,                                   // 148   0x94   VK_OEM_FJ_TOUROKU   
-    0,                                   // 149   0x95   VK_OEM_FJ_LOYA  
-    0,                                   // 150   0x96   VK_OEM_FJ_ROYA  
+    0,                               // 146   0x92   VK_OEM_FJ_JISHO     
+    0,                               // 147   0x93   VK_OEM_FJ_MASSHOU   
+    0,                               // 148   0x94   VK_OEM_FJ_TOUROKU   
+    0,                               // 149   0x95   VK_OEM_FJ_LOYA  
+    0,                               // 150   0x96   VK_OEM_FJ_ROYA  
     Pt::Hmi::Key::Unknown,           // 151   0x97
     Pt::Hmi::Key::Unknown,           // 152   0x98
     Pt::Hmi::Key::Unknown,           // 153   0x99
@@ -221,13 +221,13 @@ static const Pt::uint32_t keyMap[] =
     Pt::Hmi::Key::LaunchApp2,        // 183   0xB7   VK_LAUNCH_APP2      
     Pt::Hmi::Key::Unknown,           // 184   0xB8
     Pt::Hmi::Key::Unknown,           // 185   0xB9
-    0,                                   // 186   0xBA   VK_OEM_1            
-    0,                                   // 187   0xBB   VK_OEM_PLUS         
-    0,                                   // 188   0xBC   VK_OEM_COMMA        
-    0,                                   // 189   0xBD   VK_OEM_MINUS        
-    0,                                   // 190   0xBE   VK_OEM_PERIOD       
-    0,                                   // 191   0xBF   VK_OEM_2            
-    0,                                   // 192   0xC0   VK_OEM_3            
+    0,                               // 186   0xBA   VK_OEM_1            
+    0,                               // 187   0xBB   VK_OEM_PLUS         
+    0,                               // 188   0xBC   VK_OEM_COMMA        
+    0,                               // 189   0xBD   VK_OEM_MINUS        
+    0,                               // 190   0xBE   VK_OEM_PERIOD       
+    0,                               // 191   0xBF   VK_OEM_2            
+    0,                               // 192   0xC0   VK_OEM_3            
     Pt::Hmi::Key::Unknown,           // 193   0xC1
     Pt::Hmi::Key::Unknown,           // 194   0xC2
     Pt::Hmi::Key::Unknown,           // 195   0xC3
@@ -254,14 +254,14 @@ static const Pt::uint32_t keyMap[] =
     Pt::Hmi::Key::Unknown,           // 216   0xD8
     Pt::Hmi::Key::Unknown,           // 217   0xD9
     Pt::Hmi::Key::Unknown,           // 218   0xDA
-    0,                                   // 219   0xDB   VK_OEM_4            
-    0,                                   // 220   0xDC   VK_OEM_5            
-    0,                                   // 221   0xDD   VK_OEM_6            
-    0,                                   // 222   0xDE   VK_OEM_7            
-    0,                                   // 223   0xDF   VK_OEM_8
+    0,                               // 219   0xDB   VK_OEM_4            
+    0,                               // 220   0xDC   VK_OEM_5            
+    0,                               // 221   0xDD   VK_OEM_6            
+    0,                               // 222   0xDE   VK_OEM_7            
+    0,                               // 223   0xDF   VK_OEM_8
     Pt::Hmi::Key::Unknown,           // 224   0xE0
     Pt::Hmi::Key::Unknown,           // 225   0xE1   VK_OEM_AX           
-    0,                                   // 226   0xE2   VK_OEM_102 ("<>" key)       
+    0,                               // 226   0xE2   VK_OEM_102 ("<>" key)       
     Pt::Hmi::Key::Unknown,           // 227   0xE3   VK_ICO_HELP         
     Pt::Hmi::Key::Unknown,           // 228   0xE4   VK_ICO_00           
     Pt::Hmi::Key::Unknown,           // 229   0xE5   VK_PROCESSKEY       

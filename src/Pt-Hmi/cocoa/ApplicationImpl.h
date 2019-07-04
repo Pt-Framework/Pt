@@ -111,17 +111,13 @@ class ApplicationImpl : public Pt::System::EventLoop,
         Pt::Timespan inactivityTime() const
         { return Pt::Timespan(0); }
 
-        void grabPointer(Window& grabber)
-        {}
+        void grabPointer(Window& grabber);
 
-        void releasePointer(Window& grabber)
-        {}
+        void releasePointer(Window& grabber);
 
-        void grabPointer(Widget& grabber)
-        {}
+        void grabPointer(Widget& grabber);
         
-        void releasePointer(Widget& grabber)
-        {}
+        void releasePointer(Widget& grabber);
 
         void sendKeyEvent(const KeyEvent& ev)
         {}

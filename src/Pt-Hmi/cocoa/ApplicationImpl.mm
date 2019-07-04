@@ -158,6 +158,30 @@ void ApplicationImpl::nextEvent()
 }
 
 
+void ApplicationImpl::grabPointer(Window& grabber)
+{
+  // pointer is always tracked, even if its outside the window
+}
+
+
+void ApplicationImpl::releasePointer(Window& grabber)
+{
+  // pointer is always tracked, even if its outside the window
+}
+
+
+void ApplicationImpl::grabPointer(Widget& grabber)
+{
+  // pointer is always tracked, even if its outside the window
+}
+  
+        
+void ApplicationImpl::releasePointer(Widget& grabber)
+{
+  // pointer is always tracked, even if its outside the window
+}
+
+
 void ApplicationImpl::init()
 {
     [PtGuiApplication sharedApplication];

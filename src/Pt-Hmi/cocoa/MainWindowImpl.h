@@ -47,13 +47,13 @@
     #import <AppKit/NSScreen.h>
     #import <AppKit/NSWindowController.h>
 #else
-	struct NSRect;
+    struct NSRect;
     struct NSPoint;
     struct NSSize;
-	struct NSView;
+    struct NSView;
     struct NSWindow;
-	struct NSResponder;
-	struct NSGraphicsContext;
+    struct NSResponder;
+    struct NSGraphicsContext;
     struct NSWindowController;
 #endif
 
@@ -68,10 +68,7 @@ class MainWindowImpl : public Pt::Connectable
 
         virtual ~MainWindowImpl();
 
-        void setId(Pt::uint64_t id);
-
-        void setType(Window::Type type)
-        {}
+        void setType(Window::Type type);
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
@@ -117,34 +114,42 @@ class MainWindowImpl : public Pt::Connectable
 
     public:
         void onPaint(const NSRect& rect);
+
         void onShow(bool v);
+
         void onMove();
+
         void onResize(const NSSize& frameSize);
+
         void onClosing();
-        void onLMouseDown(double x, double y);
-        void onLMouseUp(double x, double y);
-        void onMouseMove(double x,double y);
-        void onKeyDown(int key);
-        void onKeyUp(int key);
+
+        void onKeyDown(unsigned key, Pt::Char ch);
+
+        void onKeyUp(unsigned key, Pt::Char ch);
+
         void onKeyModifier(unsigned int mask);
-        void onLostFocus();
-    
+
+        void onLMouseDown(double x, double y);
+
+        void onLMouseUp(double x, double y);
+
+        void onMouseMove(double x, double y);
+
     private:
         Window* findWindow(NSWindow* w);
-        
-        Pt::Gfx::PointF convertMousePosition(double x, double y);
 
     private:
         NSWindow*                _window;
         NSView*                  _view;
         int                      _windowStyle;
 
+        unsigned                 _keyFlags;
+        Key::Modifiers           _keyModifiers;
         KeyEvent                 _keyEvent;
         MouseEvent               _mouseEvent;
 
         int                      _level;
         std::string              _title;
-        bool                     _topMost;
 };
 
 } // namespace
