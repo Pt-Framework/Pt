@@ -847,7 +847,7 @@ void Window::onShow( Window& w, bool visible )
 void Window::onShowEvent( const ShowEvent& ev )
 {
     _visible = ev.visible();
-
+    
     // TODO: release mouse when hidden?
 }
 

@@ -341,6 +341,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\Dummy.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\KeyMap.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h" />
@@ -379,6 +380,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\egl-test\TextureRect.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\egl-test\Vector.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\KeyMap.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h" />

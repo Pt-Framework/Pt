@@ -1590,6 +1590,12 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\Dummy.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\KeyMap.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\KeyMap.h">
+      <Filter>Pt-Hmi\gdi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

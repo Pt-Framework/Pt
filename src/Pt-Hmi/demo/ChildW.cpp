@@ -263,7 +263,6 @@ void ChildW::onShowDialog()
 
 void ChildW::onCheckBox()
 {
-    std::clog << "CHECKBOX CLICKED" << std::endl;
 }
 
 
