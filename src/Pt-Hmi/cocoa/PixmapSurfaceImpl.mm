@@ -44,6 +44,8 @@ namespace Hmi {
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(10, 10)
 , _painter(0)
+, _context(0)
+, _clipRect(CGRectNull)
 {
     create();
 }
@@ -59,7 +61,7 @@ void PixmapSurfaceImpl::create()
 {
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
-    _context = CGBitmapContextCreate(nullptr, 
+    _context = CGBitmapContextCreate(0, 
                                      _size.width(), _size.height(), 
                                      8, 0, colorSpace, 
                                      kCGImageAlphaPremultipliedLast);
@@ -73,11 +75,10 @@ void PixmapSurfaceImpl::create()
 
 void PixmapSurfaceImpl::destroy()
 {
-    if(_context == nullptr)
-        return;
+    if(_context)
+        CGContextRelease(_context);
     
-    CGContextRelease(_context);
-    _context = nullptr;
+    _context = 0;
 }
 
 
@@ -127,22 +128,45 @@ void PixmapSurfaceImpl::finish()
 
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
-    CGRect rect = CGRectMake(clipRect.x(), 
-                             _size.height() - clipRect.y() - clipRect.height(), 
-                             clipRect.width(), 
-                             clipRect.height());
+    if( clipRect.isNull() )
+    {
+        _clipRect = CGRectNull;
+    }
+    else
+    {
+        _clipRect = CGRectMake( clipRect.x(), 
+                                _size.height() - clipRect.y() - clipRect.height(), 
+                                clipRect.width(), 
+                                clipRect.height() );
+    }
+}
 
+
+void PixmapSurfaceImpl::beginClip()
+{
     //CGContextResetClip(_context);
-    //CGContextBeginPath(_context);
-    //CGContextAddRect(_context, rect);
-    //CGContextClip(_context);
 
-    //CGContextClipToRect(_context, rect);
+    CGContextSaveGState(_context);
+
+    if( ! CGRectIsNull(_clipRect) )
+    {
+        CGContextClipToRect(_context, _clipRect);
+
+        //CGContextBeginPath(_context);
+        //CGContextAddRect(_context, _clipRect);
+        //CGContextClip(_context);
+    }
 
     //CGRect boundingRect = CGContextGetClipBoundingBox(_context);
 
     //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
     //CGContextFillRect (_context, rect);
+}
+
+
+void PixmapSurfaceImpl::endClip()
+{
+    CGContextRestoreGState(_context);
 }
 
 
@@ -305,8 +329,11 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     //CGContextSetTextMatrix(_context, CGAffineTransformMakeScale(1.0, -1.0));
     
     CGContextSetTextPosition(_context, to.x(), _size.height() - to.y());
+
+    beginClip();
     CTLineDraw(line, _context);
-    
+    endClip();
+
     CFRelease(line);
     CFRelease(attributedString);
     CFRelease(string);
@@ -337,7 +364,10 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
 
     CGContextMoveToPoint(_context, from.x(), from.y());
     CGContextAddLineToPoint(_context, to.x(), to.y());
+
+    beginClip();
     CGContextStrokePath(_context);
+    endClip();
 }
 
 
@@ -348,7 +378,9 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
                                rect.width(), 
                                rect.height());
     
+    beginClip();
     CGContextStrokeRect(_context, cgRect);
+    endclip();
 }
 
 
@@ -359,7 +391,9 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
                                rect.width(), 
                                rect.height());
 
+    beginClip();
     CGContextFillRect(_context, cgRect);
+    endclip();
 
     //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
     //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
@@ -426,7 +460,9 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* p, size_t pointCount)
     for( size_t i = 1; i < pointCount; ++i)
         CGContextAddLineToPoint(_context, points[i].x(), points[i].y());
     
+    beginClip();
     CGContextStrokePath(_context);
+    endClip();
 }
 
 
@@ -442,7 +478,9 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* p, size_t pointCount)
     for( size_t i = 1; i < pointCount; ++i)
         CGContextAddLineToPoint(_context, points[i].x(), points[i].y());
     
+    beginClip();
     CGContextFillPath(_context);
+    endClip();
 }
 
 
@@ -461,7 +499,10 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& 
     //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
     //CGContextFillRect(_context, rect);
     //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
+
+    beginClip();
     CGContextDrawImage(_context, rect, image);
+    endClip();
 
     CGImageRelease(image);
 }
@@ -485,7 +526,10 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
                              pmRect.size().width(), 
                              pmRect.size().height());
     
+    beginClip();
     CGContextDrawImage(_context, rect, subImage);
+    endClip();
+
     CGImageRelease(image);
 }
 
@@ -534,8 +578,10 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image
                                      image.width(), 
                                      image.height() );
     
+    beginClip();
     CGContextDrawImage(_context, contextRect, imageRef);
-
+    endClip();
+    
     CFRelease(imageRef);
     CFRelease(colorSpace);
     CFRelease(provider);

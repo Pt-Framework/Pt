@@ -84,7 +84,7 @@ class PainterImpl
 
         CTFontRef ctFont() const
         {
-          return _font;
+            return _font;
         }
         
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 

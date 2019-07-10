@@ -142,11 +142,16 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         void create();
     
         void destroy();
+
+        void beginClip();
+
+        void endClip();
     
     private:
         Pt::Gfx::SizeF _size;
         Painter*       _painter;
         CGContextRef   _context;
+        CGRect         _clipRect;
 };
 
 } // namespace
