@@ -26,19 +26,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301  USA
  */
+
 #include <Pt/IOError.h>
 #include <string>
 
 namespace Pt {
 
 IOError::IOError(const std::string& msg)
+#if __cplusplus >= 201103L || _MSC_VER >= 1900
+: std::ios::failure( msg, std::make_error_code(std::errc::io_error) )
+#else
 : std::ios::failure(msg)
+#endif
 {
 }
 
 
 IOError::IOError(const char* msg)
+#if __cplusplus >= 201103L || _MSC_VER >= 1900
+: std::ios::failure( msg, std::make_error_code(std::errc::io_error) )
+#else
 : std::ios::failure(msg)
+#endif
 {
 }
 
