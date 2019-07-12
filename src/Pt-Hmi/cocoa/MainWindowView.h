@@ -82,4 +82,6 @@
 
 - (BOOL) windowShouldClose: (id) sender;
 
+- (void) windowDidChangeBackingProperties: (NSNotification*) notification;
+
 @end

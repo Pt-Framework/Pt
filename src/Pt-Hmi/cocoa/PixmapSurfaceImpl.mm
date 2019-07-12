@@ -243,6 +243,7 @@ void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
     }
 }
 
+
 void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 {
     switch( brush.fillStyle() )

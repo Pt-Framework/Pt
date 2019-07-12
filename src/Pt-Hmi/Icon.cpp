@@ -34,173 +34,227 @@ namespace Pt {
 
 namespace Hmi {
 
+/////////////////////////////////////////////////////////////////////////////
+// IconImpl
+/////////////////////////////////////////////////////////////////////////////
+
 class IconImpl
 {
     public:
-        IconImpl();
-
         struct Entry
         {
-            Entry(Gfx::Image i)
-                : image(i)
-            {
-            }
+            Entry()
+            { }
+
+            Entry(const Gfx::Image& i)
+            : image(i)
+            { }
 
             Entry(const System::Path& p)
-                :path(p)
-            {
-            }
-
-            Entry()
-            {
-            }
+            : path(p)
+            { }
 
             Gfx::Image   image;
             System::Path path;
         };
 
+    public:
+        IconImpl()
+        : refCount(1)
+        { }
+
+        bool empty() const
+        {
+          return images.empty();
+        }
+
+        const Entry& front() const
+        {
+            return images.begin()->second;
+        }
+
+        const Entry& back() const
+        { 
+            return images.rbegin()->second;
+        }
+
+        void clear()
+        {
+            images.clear();
+        }
+
+        void insert(const Gfx::SizeF& size, const Gfx::Image& image)
+        {
+            images[size] = IconImpl::Entry(image);
+        }
+
+        void insert(const Gfx::SizeF& size, const System::Path& path)
+        {
+            images[size] = IconImpl::Entry(path);
+        }
+
+        Entry* findBest(const Gfx::SizeF& sizeF)
+        {
+            const Gfx::Size size = round(sizeF);
+
+            std::map<Gfx::SizeF, IconImpl::Entry>::iterator match;
+            match = images.begin();
+
+            std::map<Gfx::SizeF, IconImpl::Entry>::iterator it;
+            for(it = images.begin(); it != images.end(); ++it)
+            {
+                const Gfx::SizeF& imageSize = it->first;
+                double imageArea = imageSize.width() * imageSize.height();
+
+                const Gfx::SizeF& matchSize = match->first;
+                double matchArea = matchSize.width() * matchSize.height();
+                
+                if( imageSize.width() <= size.width() &&
+                    imageSize.height() <= size.height() && 
+                    imageArea > matchArea)
+                {
+                    match = it;
+                }
+            }
+
+            return match == images.end() ? 0 : &(match->second);
+        }
+
+        Gfx::SizeF minimumSize() const
+        {
+            return empty() ? Gfx::SizeF() : images.begin()->first;
+        }
+
+
+        Gfx::SizeF maximumSize() const
+        {
+            return empty() ? Gfx::SizeF() : images.rbegin()->first;
+        }
+
+    public:
+        size_t refs() const
+        {
+            return refCount;
+        }
+
+        void ref()
+        {
+            refCount++;
+        }
+
+        size_t unref()
+        {
+            return --refCount;
+        }
+
+    private:
         std::map<Gfx::SizeF, Entry> images;
         size_t refCount;
 };
 
-
-IconImpl::IconImpl()
-: refCount(1)
-{
-
-}
+/////////////////////////////////////////////////////////////////////////////
+// Icon
+/////////////////////////////////////////////////////////////////////////////
 
 Icon::Icon()
-: _data(new IconImpl())
+: _impl(0)
 {
+    _impl = new IconImpl();
 }
 
 
 Icon::~Icon()
 {
-    _data->refCount--;
-
-    if (_data->refCount == 0)
-        delete _data;
+  if ( ! _impl->unref() )
+      delete _impl;
 }
 
 
 Icon::Icon(const Icon& icon)
-: _data(icon._data)
+: _impl(0)
 {
-    _data->refCount++;
+    _impl = icon._impl;
+    _impl->ref();
 }
 
 
-Icon& Icon::operator=(const Icon& icon)
+Icon& Icon::operator=(const Icon& other)
 {
-    if (icon._data == this->_data)
+    if(other._impl == this->_impl)
         return *this;
 
-    _data->refCount--;
+    other._impl->ref();
 
-    if (_data->refCount == 0)
-        delete _data;
+    if( ! _impl->unref() )
+        delete _impl;
 
-    _data = icon._data;
-    _data->refCount++;
+    _impl = other._impl;
     return *this;
+}
+
+
+void Icon::detach()
+{
+    if( _impl->refs() == 1 )
+        return;
+
+    IconImpl* other = _impl;
+    _impl = new IconImpl(*other);
+
+    if( ! other->unref() )
+        delete other;
 }
 
 
 bool Icon::empty() const
 { 
-    return _data->images.empty();
+    return _impl->empty();
 }
 
 
 void Icon::clear()
 {
-    if (_data->refCount > 1)
-    {
-        _data->refCount--;
-        _data = new IconImpl();
-    }
+    detach();
+    _impl->clear();
 }
 
 
 void Icon::addImage(const Gfx::SizeF& size, const Gfx::Image& image)
 {
-    if (_data->refCount > 1)
-    {
-        _data->refCount--;
-        _data =  new IconImpl(*_data);
-    }
-
-    _data->images[size] = IconImpl::Entry(image);
+    detach();
+    _impl->insert(size, image);
 }
+
 
 void Icon::addImage(const Gfx::SizeF& size, const System::Path& path)
 {
-    if (_data->refCount > 1)
-    {
-        _data->refCount--;
-        _data = new IconImpl(*_data);
-    }
-
-    _data->images[size] = IconImpl::Entry(path);
+    detach();
+    _impl->insert(size, path);
 }
 
 
 const Gfx::Image& Icon::getImage(const Gfx::SizeF& sizeF) const
 {
-    const Gfx::Size size = round(sizeF);
+    IconImpl::Entry* match = _impl->findBest(sizeF);
+    if( ! match )
+        throw std::logic_error("invalid icon");
 
-    std::map<Gfx::SizeF, IconImpl::Entry>::iterator match = _data->images.end();
+    if( match->image.empty() )
+        Application::instance().loadImage(match->path, match->image);
 
-    std::map<Gfx::SizeF, IconImpl::Entry>::iterator it;
-
-    for(it = _data->images.begin(); it != _data->images.end(); ++it)
-    {
-        const Gfx::SizeF& imageSize = it->first;
-
-        if( imageSize.width() <= size.width() &&
-            imageSize.height() <= size.height() )
-        {
-            if( match == _data->images.end() )
-            {
-                match = it;
-            }
-            else
-            {
-                const Gfx::SizeF& matchSize = match->first;
-                double m = matchSize.width() * matchSize.height();
-                double n = imageSize.width() * imageSize.height();
-                if (n > m)
-                    match = it;
-            }
-        }
-    }
-
-    if( match == _data->images.end() )
-    {
-        if( empty() )
-            throw std::logic_error("invalid icon");
-
-        match = _data->images.begin();
-    }
-
-    if (match->second.image.empty())
-        Application::instance().loadImage(match->second.path, match->second.image);
-
-    return match->second.image;
+    return match->image;
 }
 
 
 Gfx::SizeF Icon::minimumSize() const
 {
-    return empty() ? Gfx::SizeF() : _data->images.begin()->first;
+    return _impl->minimumSize();
 }
 
 
 Gfx::SizeF Icon::maximumSize() const
 {
-    return empty() ? Gfx::SizeF() : _data->images.rbegin()->first;
+    return _impl->maximumSize();
 }
 
 } // namespace

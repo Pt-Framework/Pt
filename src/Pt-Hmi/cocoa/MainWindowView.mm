@@ -253,4 +253,11 @@
     return FALSE;
 }
 
+
+- (void) windowDidChangeBackingProperties: (NSNotification*) notification
+{
+    CGFloat scale = [ _windowImpl->window() backingScaleFactor ];
+    std::clog << "BACKING SCALE FACTOR: " << scale << std::endl;
+}
+
 @end

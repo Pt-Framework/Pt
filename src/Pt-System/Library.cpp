@@ -66,6 +66,7 @@ Library::Library(const Path& path)
 
 
 Library::Library(const Library& other)
+: _impl(0)
 {
     _path = other._path;
     _impl = other._impl;

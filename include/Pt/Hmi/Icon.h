@@ -42,8 +42,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class IconImpl;
-
 class PT_HMI_API Icon
 {
     public:
@@ -69,8 +67,11 @@ class PT_HMI_API Icon
 
         Gfx::SizeF maximumSize() const;
 
+    protected:
+        void detach();
+
     private:
-        mutable IconImpl* _data;
+        mutable class IconImpl* _impl;
 };
 
 } // namespace
