@@ -270,8 +270,10 @@ Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+
+    Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
     double itemsHeight = std::max<double>(fm.height(), pictureHeight);
 
@@ -340,9 +342,12 @@ void ListBoxItem::onPaintContent(Painter& painter)
     double textY = 0;
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+
+    Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
+    double itemsHeight = fm.height() + spacing + pictureHeight;
 
     pictureX = padding().left();
     pictureY = (size().height() - pictureHeight) / 2;
@@ -357,8 +362,12 @@ void ListBoxItem::onPaintContent(Painter& painter)
     if( ! _picture.empty() )
     {
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
+        
+        double pictureXOff = (pictureWidth - pictureSize.width()) / 2;
+        double pictureYOff = (pictureHeight - pictureSize.height()) / 2;
 
-        Gfx::PointF picturePos(pictureX, pictureY);
+        Gfx::PointF picturePos(pictureX + pictureXOff, 
+                               pictureY + pictureYOff);
         painter.drawPicture(picturePos, _picture);
         
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);

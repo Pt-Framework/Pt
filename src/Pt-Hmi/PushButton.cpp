@@ -328,8 +328,10 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
     double textHeight = fm.height() + fm.descent(); // use descent as additional spacing
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+
+    Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = 0;
     double itemsHeight = 0;
 
@@ -365,8 +367,8 @@ void PushButton::layoutContent()
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
+    
     Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
-
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;

@@ -226,8 +226,10 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 
     if(_hasImage)
     {
-        w = static_cast<double>( _picture.width() );
-        h = static_cast<double>( _picture.height() );
+        Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+
+        w = static_cast<double>( pictureSize.width() );
+        h = static_cast<double>( pictureSize.height() );
     }
     else
     {
@@ -300,6 +302,8 @@ void Label::layoutText()
 
 void Label::layoutImage()
 {
+    Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+
     switch( _alignment )
     {
         default:
@@ -311,7 +315,7 @@ void Label::layoutImage()
         case Alignment::Top:
         {
             double width = size().width() - padding().leftRight();
-            double x = (width - _picture.width()) / 2;
+            double x = (width - pictureSize.width()) / 2;
 
             _imagePos.set( padding().left() + x, padding().top() );
             break;
@@ -319,7 +323,7 @@ void Label::layoutImage()
         case Alignment::TopRight:
         {
             double width = size().width() - padding().leftRight();
-            double x = width - _picture.width();
+            double x = width - pictureSize.width();
 
             _imagePos.set( padding().left() + x, padding().top() );
             break;
@@ -327,7 +331,7 @@ void Label::layoutImage()
         case Alignment::Left:
         {
             double height = size().height() - padding().topBottom();
-            double y = (height - _picture.height()) / 2;
+            double y = (height - pictureSize.height()) / 2;
 
             _imagePos.set( padding().left(), padding().top() + y);
             break;
@@ -335,10 +339,10 @@ void Label::layoutImage()
         case Alignment::Center:
         {
             double width = size().width() - padding().leftRight();
-            double x = (width - _picture.width()) / 2;
+            double x = (width - pictureSize.width()) / 2;
             
             double height = size().height() - padding().topBottom();
-            double y = (height - _picture.height()) / 2;
+            double y = (height - pictureSize.height()) / 2;
 
             _imagePos.set( padding().left() + x, padding().top() + y);
             break;
@@ -346,10 +350,10 @@ void Label::layoutImage()
         case Alignment::Right:
         {
             double width = size().width() - padding().leftRight();
-            double x = width - _picture.width();
+            double x = width - pictureSize.width();
 
             double height = size().height() - padding().topBottom();
-            double y = (height - _picture.height()) / 2;
+            double y = (height - pictureSize.height()) / 2;
 
             _imagePos.set( padding().left() + x, padding().top() + y);
             break;
@@ -357,7 +361,7 @@ void Label::layoutImage()
         case Alignment::BottomLeft:
         {
             double height = size().height() - padding().topBottom();
-            double y = height - _picture.height();
+            double y = height - pictureSize.height();
 
             _imagePos.set(padding().left(), padding().top() + y);
             break;
@@ -365,10 +369,10 @@ void Label::layoutImage()
         case Alignment::Bottom:
         {
             double width = size().width() - padding().leftRight();
-            double x = (width - _picture.width()) / 2;
+            double x = (width - pictureSize.width()) / 2;
 
             double height = size().height() - padding().topBottom();
-            double y = height - _picture.height();
+            double y = height - pictureSize.height();
 
             _imagePos.set( padding().left() + x, padding().top() + y);
             break;
@@ -376,10 +380,10 @@ void Label::layoutImage()
         case Alignment::BottomRight:
         {
             double width = size().width() - padding().leftRight();
-            double x = width - _picture.width();
+            double x = width - pictureSize.width();
 
             double height = size().height() - padding().topBottom();
-            double y = height - _picture.height();
+            double y = height - pictureSize.height();
 
             _imagePos.set( padding().left() + x, padding().top() + y);
             break;
