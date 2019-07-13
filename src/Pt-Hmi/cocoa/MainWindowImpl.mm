@@ -291,13 +291,13 @@ void MainWindowImpl::setState(Window::State s)
                 [_window deminiaturize: nil];
             
             if( [_window isZoomed] )
-                [nswindow zoom: nil];
+                [_window zoom: nil];
             
             break;
 
         case Window::Maximized:
             if( ! [_window isZoomed] )
-                [nswindow zoom: nil];
+                [_window zoom: nil];
             break;
 
         case Window::Minimized:

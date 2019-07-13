@@ -144,6 +144,7 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 
 void PixmapSurfaceImpl::beginClip()
 {
+    //return;
     //CGContextResetClip(_context);
 
     CGContextSaveGState(_context);
@@ -166,6 +167,7 @@ void PixmapSurfaceImpl::beginClip()
 
 void PixmapSurfaceImpl::endClip()
 {
+    //return;
     CGContextRestoreGState(_context);
 }
 
@@ -363,10 +365,9 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
     //std::clog << "drawLine: " << from.x() << ", " << from.y()
     //          << " -> " << to.x() << ", " << to.y() << std::endl;
 
+    beginClip();
     CGContextMoveToPoint(_context, from.x(), from.y());
     CGContextAddLineToPoint(_context, to.x(), to.y());
-
-    beginClip();
     CGContextStrokePath(_context);
     endClip();
 }
@@ -381,7 +382,7 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
     
     beginClip();
     CGContextStrokeRect(_context, cgRect);
-    endclip();
+    endClip();
 }
 
 
@@ -394,7 +395,7 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 
     beginClip();
     CGContextFillRect(_context, cgRect);
-    endclip();
+    endClip();
 
     //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
     //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
@@ -456,12 +457,12 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* p, size_t pointCount)
     for( size_t i = 0; i < pointCount; ++i)
         points[i] = transform(p[i]);
     
+    beginClip();
     CGContextMoveToPoint(_context, points[0].x(), points[0].y());
     
     for( size_t i = 1; i < pointCount; ++i)
         CGContextAddLineToPoint(_context, points[i].x(), points[i].y());
     
-    beginClip();
     CGContextStrokePath(_context);
     endClip();
 }
@@ -474,12 +475,12 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* p, size_t pointCount)
     for( size_t i = 0; i < pointCount; ++i)
         points[i] = transform(p[i]);
     
+    beginClip();
     CGContextMoveToPoint(_context, points[0].x(), points[0].y());
     
     for( size_t i = 1; i < pointCount; ++i)
         CGContextAddLineToPoint(_context, points[i].x(), points[i].y());
     
-    beginClip();
     CGContextFillPath(_context);
     endClip();
 }
