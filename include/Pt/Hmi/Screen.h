@@ -142,8 +142,9 @@ class PT_HMI_API Screen : public WindowBase
         double alignContour(size_t n) const
         {
           double p = toPhysical(n);
-          size_t m = static_cast<size_t>(p);
-          return toLogical(m);
+          // TODO: should painter deal with sizes below 1.0?
+          size_t s = p >= 1.0 ? static_cast<size_t>(p) : lround(p);
+          return toLogical(s);
         }
 
         Gfx::PointF align(const Gfx::PointF& p) const
