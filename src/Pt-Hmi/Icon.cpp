@@ -219,6 +219,13 @@ void Icon::clear()
 }
 
 
+void Icon::addImage(const Gfx::Image& image)
+{
+    Gfx::SizeF size(image.width(), image.height());
+    addImage(size, image);
+}
+
+
 void Icon::addImage(const Gfx::SizeF& size, const Gfx::Image& image)
 {
     detach();
@@ -230,6 +237,13 @@ void Icon::addImage(const Gfx::SizeF& size, const System::Path& path)
 {
     detach();
     _impl->insert(size, path);
+}
+
+
+void Icon::addImage(double width, double height, const System::Path& path)
+{
+    Gfx::SizeF size(width, height);
+    addImage(size, path);
 }
 
 

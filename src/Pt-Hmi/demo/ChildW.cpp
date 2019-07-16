@@ -3,6 +3,8 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Algorithm.h>
 
+#include <filesystem>
+
 namespace Pt {
 
 namespace Hmi {
@@ -77,11 +79,11 @@ ChildW::ChildW(const std::string& title)
     appdir = appdir.dirName();
 
     Icon icon;
-    icon.addImage(Gfx::SizeF(16, 16), appdir / System::Path("test-16x16.png"));
-    icon.addImage(Gfx::SizeF(24, 24), appdir / System::Path("test-24x24.png"));
-    icon.addImage(Gfx::SizeF(32, 32), appdir / System::Path("test-32x32.png"));
-    icon.addImage(Gfx::SizeF(48, 48), appdir / System::Path("test-48x48.png"));
-    icon.addImage(Gfx::SizeF(64, 64), appdir / System::Path("test-64x64.png"));
+    icon.addImage(16, 16, appdir / "test-16x16.png");
+    icon.addImage(24, 24, appdir / "test-24x24.png");
+    icon.addImage(32, 32, appdir / "test-32x32.png");
+    icon.addImage(48, 48, appdir / "test-48x48.png");
+    icon.addImage(64, 64, appdir / "test-64x64.png");
 
     _iconLabel.setIcon(icon, icon.minimumSize());
     _iconLabel.setAlignment(Alignment::Bottom);

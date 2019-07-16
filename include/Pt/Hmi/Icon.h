@@ -57,9 +57,13 @@ class PT_HMI_API Icon
 
         void clear();
 
+        void addImage(const Gfx::Image& image);
+
         void addImage(const Gfx::SizeF& size, const Gfx::Image& image);
 
         void addImage(const Gfx::SizeF& size, const System::Path& path);
+
+        void addImage(double width, double height, const System::Path& path);
 
         const Gfx::Image& getImage(const Gfx::SizeF& area) const;
 
