@@ -179,7 +179,7 @@ void PlatinumButtonRenderer::onPrepare(const PushButton& button,
                                        Gfx::Font& font,
                                        Gfx::Pen& textPen) const 
 {
-    contour.setJoinStyle(Gfx::Pen::JoinStyle::BevelJoin);
+    contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
     if( button.isEnabled() )
     {
@@ -305,7 +305,7 @@ void PlatinumCheckBoxRenderer::onPrepare(const CheckBox& cb,
                                          Gfx::Pen& textPen,
                                          Gfx::SizeF& boxSize) const 
 {
-    contour.setJoinStyle(Gfx::Pen::JoinStyle::BevelJoin);
+    contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
     boxSize.set( font.size() * 1.2, font.size() * 1.2 );
 }
@@ -443,7 +443,7 @@ void PlatinumLabelRenderer::onPrepare(const Label& l,
                                       Gfx::Pen& contour,
                                       Gfx::Pen& textPen) const 
 {
-    contour.setJoinStyle(Gfx::Pen::JoinStyle::BevelJoin);
+    contour.setJoinStyle(Gfx::Pen::BevelJoin);
 }
 
 
@@ -1198,7 +1198,7 @@ void PlatinumSpinBoxRenderer::onPrepare(const SpinBox& sb,
                                         Gfx::Font& font,
                                         Gfx::Pen& textPen) const
 {
-    contour.setJoinStyle(Gfx::Pen::JoinStyle::BevelJoin);
+    contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
     if( sb.isEnabled() )
     {

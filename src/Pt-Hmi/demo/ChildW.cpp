@@ -3,8 +3,6 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Algorithm.h>
 
-#include <filesystem>
-
 namespace Pt {
 
 namespace Hmi {
