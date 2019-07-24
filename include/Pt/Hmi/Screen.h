@@ -141,9 +141,12 @@ class PT_HMI_API Screen : public WindowBase
 
         double alignContour(size_t n) const
         {
+          // keep contour size when downscaling
+          if( _scaling < 1.0 )
+              return toLogical(n);
+
           double p = toPhysical(n);
-          // TODO: should painter deal with sizes below 1.0?
-          size_t s = p >= 1.0 ? static_cast<size_t>(p) : lround(p);
+          size_t s = static_cast<size_t>(p);
           return toLogical(s);
         }
 

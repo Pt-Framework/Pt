@@ -125,10 +125,13 @@ void Painter::setClip(const Gfx::RectF& clip)
 
 void Painter::setPen(const Gfx::Pen& pen)
 {
-    // TODO: should paint implementationdeal with sizes below 1.0?
-    double scaledSize = Application::instance().screen().scaleFactor() * pen.size();
-    size_t penSize = scaledSize >= 1.0 ? static_cast<size_t>(scaledSize) 
-                                       : lround(scaledSize);
+    double scaleFactor = Application::instance().screen().scaleFactor();
+
+    // keep pen size when downscaling
+    double scaledSize = scaleFactor < 1.0 ? pen.size() 
+                                          : scaleFactor * pen.size();
+
+    size_t penSize = static_cast<size_t>(scaledSize);
 
     Gfx::Pen scaledPen = pen;
     scaledPen.setSize(penSize);
