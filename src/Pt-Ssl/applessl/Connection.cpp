@@ -514,28 +514,35 @@ OSStatus Connection::sslRead(void* data, std::size_t* n)
         return errSSLWouldBlock;
     }       
 
-    std::streamsize gsize = std::min( _maxImport, static_cast<std::streamsize>(*n) );
-    std::streamsize r = sb->sgetn(reinterpret_cast<char*>(data), gsize);
-    PT_LOG_DEBUG("read " << r << " bytes from input");
+    sb->sgetc();
+    std::streamsize avail = sb->in_avail();
 
-    _maxImport -= r;
+    std::streamsize refill = static_cast<std::streamsize>(*n);
+    refill = std::min(refill, _maxImport);
+    refill = std::min(refill, avail);
+
+    std::streamsize gcount = sb->sgetn(reinterpret_cast<char*>(data), gsize);
+    PT_LOG_DEBUG("read " << gcount << " bytes from input");
+
+    if(gcount > 0)
+        _maxImport -= gcount;
 
     OSStatus ret = noErr;
     
-    if( static_cast<std::size_t>(r) < (*n) )
+    if( static_cast<std::size_t>(gcount) < (*n) )
     {
         _wantRead = true;
         ret = errSSLWouldBlock;
     }
 
-    if(r <= 0)
+    if(gcount <= 0)
     {
         ret = errSSLClosedNoNotify;
     }
     
     PT_LOG_DEBUG("sslRead: " << ret);
     
-    *n = static_cast<std::size_t>(r);
+    *n = static_cast<std::size_t>(gcount);
     return ret;
 }
 

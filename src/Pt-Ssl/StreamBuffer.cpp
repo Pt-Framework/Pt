@@ -285,21 +285,6 @@ StreamBuffer::int_type StreamBuffer::underflow()
     std::streamsize max = std::numeric_limits<std::streamsize>::max();
     this->import(max);
 
-    //if( 0 == this->do_underflow(_ibufferSize) )
-    //{
-    //    if( isShutdown() ) 
-    //    {
-    //        PT_LOG_DEBUG("Received shutdown notification");
-    //        return traits_type::eof();
-    //    }
-
-    //    if( traits_type::eof() == _ios->sgetc() )
-    //    {
-    //        PT_LOG_DEBUG("underlying streambuf is EOF");
-    //        return traits_type::eof();
-    //    }
-    //}
-
     return this->gptr() < this->egptr() ? traits_type::to_int_type( *gptr() )
                                         : traits_type::eof();
 }

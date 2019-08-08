@@ -340,7 +340,7 @@ void Connection::receiveReply(Reply& reply)
     _httpbuf.beginBody( reply.header() );
     PT_LOG_DEBUG("reply size: " << reply.header().contentLength() << ", chunked: " << reply.header().isChunked());
 
-    // stuff whole body into MessageBuffer...
+    // read whole body into MessageBuffer...
     reply.body() << &_httpbuf;
     PT_LOG_DEBUG("reply body finished");
 
