@@ -384,15 +384,13 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
 
     while(true) 
     {
-        // even if we could not refill the BIO, we might still get data from the SSL
+        // decode data from BIO buffer
         const int readSize = SSL_read(_ssl, buf, n);
         PT_LOG_DEBUG("Read " << readSize << " bytes from _ssl");
         PT_LOG_DEBUG("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
 
         if(readSize > 0)
-        {           
             return readSize;
-        }
 
         long sslerr = SSL_get_error(_ssl, readSize);
 
@@ -417,21 +415,26 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
         if(maxImport == 0)
             return 0;
 
-        // Refill the BIO with encoded bytes for decoding
+        // refill the BIO with encoded bytes for decoding
         BUF_MEM* bm = 0;
         BIO_get_mem_ptr(_in, &bm);
 
         if(bm->max == bm->length)
             continue;
 
-        const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), maxImport);
+        sb->sgetc();
+        std::streamsize avail = sb->in_avail();
+
+        std::streamsize refill = static_cast<std::streamsize>(bm->max - bm->length);
+        refill = std::min(refill, maxImport);
+        refill = std::min(refill, avail);
         PT_LOG_DEBUG("get " << refill << " bytes from _ios");
-        
+
         std::streamsize gcount = sb->sgetn(bm->data + bm->length, refill);
         if(gcount <= 0)
             return 0;
 
-        bm->length += static_cast<int>( gcount );
+        bm->length += static_cast<int>(gcount);
         PT_LOG_DEBUG("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
 
         maxImport -= gcount;
