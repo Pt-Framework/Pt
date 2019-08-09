@@ -413,7 +413,7 @@ void FreeType::draw(Image& image, const Color& color,
             incX = glyphBitmap->xadvance << 16;
             incY = glyphBitmap->yadvance << 16;
 
-            if( FT_HAS_KERNING(face) && previousIndex )
+            if( FT_HAS_KERNING(face) && previousIndex && face->size )
             {
                 FT_Vector delta;
                 FT_Get_Kerning(face, previousIndex, glyphIndex, FT_KERNING_DEFAULT, &delta);
