@@ -195,15 +195,17 @@ FTC_FaceID FreeType::findFaceId(const Font& font)
         return _defaultFace;
     }
 
-    Fonts::iterator it = _fonts.find(font);
-    if( it == _fonts.end() )
+    Fonts::iterator it = _fonts.begin();
+    for (; it != _fonts.end(); ++it)
     {
-        return DefaultFaceId;
+        if (it->first.name() == font.name() && it->first.style() == font.style())
+        {
+            System::Path* path = &it->second;
+            return reinterpret_cast<FTC_FaceID>(path);
+        }
     }
 
-    System::Path* path = &it->second;
-    return reinterpret_cast<FTC_FaceID>(path);
-
+    return DefaultFaceId;
     // UNLOCK
 }
 
