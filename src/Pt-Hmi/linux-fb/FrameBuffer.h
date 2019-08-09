@@ -105,6 +105,11 @@ class FrameBuffer
           return &_rotationBuffer[(_fixedInfo.line_length * h) + _pixelSize * w ];
       }
 
+      inline char* pixelFB(size_t w, size_t h)
+      {
+          return &_buffer[(_fixedInfo.line_length * h) + _pixelSize * w];
+      }
+
       inline const Pt::uint8_t* pixelFrame(const Pt::uint8_t* frame, size_t w, size_t h)
       {
           return &frame [_lineSize * h + w * _pixelSize];

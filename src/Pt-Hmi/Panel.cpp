@@ -227,7 +227,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
 void Panel::onPaintContent(Painter& painter)
 {
-    if( ! _picture.empty() )
+    if(  _picture.empty() )
         return;
 
     Gfx::PointF imagePosition;

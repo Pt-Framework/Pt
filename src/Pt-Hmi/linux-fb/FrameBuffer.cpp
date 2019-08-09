@@ -223,8 +223,20 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
     switch( _rotation)
     {
       case Rotate0:
-          memcpy( _buffer, frame, _bufferSize );
-          break;
+      {
+        const Gfx::Rect clipArea = areaIn.intersect(Gfx::Rect(Gfx::Point(0, 0), size()));
+        const int clipRight  = clipArea.x() + clipArea.width();
+        const int clipBottom = clipArea.y() + clipArea.height();
+        const int widthInByte = clipArea.width()*_pixelSize;
+
+        for (Pt::ssize_t h = clipArea.y(); h < clipBottom; ++h)
+        {
+            Pt::uint32_t* dest = (Pt::uint32_t*)pixelFB(clipArea.x(), h);
+            const  Pt::uint32_t* src = (Pt::uint32_t*)pixelFrame(frame, clipArea.x(), h);
+            memcpy(dest, src, widthInByte);
+        }
+      }
+      break;
 
       case Rotate90:
       {
