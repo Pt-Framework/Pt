@@ -5,13 +5,28 @@ rule ConfigureVisualC
         VISUALC_CONFIGURED = 1 ;
     
         VISUALC ?= $(VISUALC:J=" ") ;
-
+                
+        
         if ! $(VISUALC) 
         {
             VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\VisualStudio\\SxS\\VS7\\" : "15.0"  ] ;
             VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\15.0\\Setup\\VC\\" : "ProductDir" ] ;
 
-            VISUALC = $(VISUALC)\\VC\\\Tools\\\MSVC\\\14.13.26128\\ ;
+            MSVC_VERSION = "" ;
+            
+            VISUALC = $(VISUALC)\\VC\\\Tools\\\MSVC\\ ;
+            
+            msvc = [ GLOB [ FDirName $(VISUALC) ] : *.*.* ] ;
+            
+            for local kit in $(msvc:BS)
+            {
+                if $(kit) > $(WINKIT)
+                {
+                    MSVC_VERSION = $(kit:BS) ;
+                } 
+            }
+            
+            VISUALC = $(VISUALC)\\$(MSVC_VERSION)\\ ;
         }
         
         if ! $(VISUALC)
@@ -19,8 +34,8 @@ rule ConfigureVisualC
             Exit "VISUALC not found" ;
         }
 
-		CCFLAGS  += /FS ;
-		C++FLAGS += /FS ;
+        CCFLAGS  += /FS ;
+        C++FLAGS += /FS ;
     
         VISUALC_PATH = $(VISUALC) ;		
         Echo "Checking for Visual Studio..." $(VISUALC) ;
@@ -65,13 +80,13 @@ rule ConfigurePlatformSDK
 
         STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\um\"" ;
         STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\ucrt\"" ;
-		STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\shared\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\shared\"" ;
         STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\winrt\"" ;
         CCFLAGS  += /DWIN32 ;
         C++FLAGS += /DWIN32 ;
    
         C++FLAGS += /AI \""$(PLATFORMSDK)UnionMetadata\"" ;
-		C++FLAGS += /AI \""$(VISUALC)\\VC\\VCPackages\"" ;
+        C++FLAGS += /AI \""$(VISUALC)\\VC\\VCPackages\"" ;
 
         if $(TARGET_OSPLAT:L) = "x86_64"
         {
@@ -166,17 +181,17 @@ rule CheckCc
 
         if $(TARGET_OSPLAT:L) = "x86_64"
         {
-			AS   = $(VISUALC)\\bin\\Hostx64\\x64\\ml64 ;
-			AR   = $(VISUALC)\\bin\\Hostx64\\x64\\lib ;
-			CC   = $(VISUALC)\\bin\\Hostx64\\x64\\cl /nologo ;
-			LINK = $(VISUALC)\\bin\\Hostx64\\x64\\link /nologo ;
+            AS   = $(VISUALC)\\bin\\Hostx64\\x64\\ml64 ;
+            AR   = $(VISUALC)\\bin\\Hostx64\\x64\\lib ;
+            CC   = $(VISUALC)\\bin\\Hostx64\\x64\\cl /nologo ;
+            LINK = $(VISUALC)\\bin\\Hostx64\\x64\\link /nologo ;
         }
         else if $(TARGET_OSPLAT:L) = "x86"
         {         
-			AS   = $(VISUALC)\\bin\\Hostx86\\x86\\ml64 ;
-			AR   = $(VISUALC)\\bin\\Hostx86\\x86\\lib ;
-			CC   = $(VISUALC)\\bin\\Hostx86\\x86\\cl /nologo ;
-			LINK = $(VISUALC)\\bin\\Hostx86\\x86\\link /nologo ;			
+            AS   = $(VISUALC)\\bin\\Hostx86\\x86\\ml64 ;
+            AR   = $(VISUALC)\\bin\\Hostx86\\x86\\lib ;
+            CC   = $(VISUALC)\\bin\\Hostx86\\x86\\cl /nologo ;
+            LINK = $(VISUALC)\\bin\\Hostx86\\x86\\link /nologo ;			
         }
     }
     else if $(TARGET_OS:L) = "wince"
@@ -225,13 +240,13 @@ rule CheckCc
             LINKFLAGS += /LIBPATH:\""$(VISUALC)\\VC\\ce\\lib\\armv4\"" ;
         }
     }
-	
-	if $(TARGET_OS:L) = "winrt"
-	{
-		LINKFLAGS += "/WINMD" "/APPCONTAINER:NO" ;
-		WINMDFILE = "/WINMDFILE:" ;
-		Configure WINMDFILE ;
-	}
+    
+    if $(TARGET_OS:L) = "winrt"
+    {
+        LINKFLAGS += "/WINMD" "/APPCONTAINER:NO" ;
+        WINMDFILE = "/WINMDFILE:" ;
+        Configure WINMDFILE ;
+    }
 
     Configure STDHDRS ;
     Configure LINKFLAGS ;
@@ -283,10 +298,10 @@ rule CheckC++
     LINK++ = $(LINK) ;
     Configure LINK++ ;
 
-	if $(TARGET_OS:L) = "winrt"
-	{
-		C++FLAGS += "/ZW" ;
-	}
+    if $(TARGET_OS:L) = "winrt"
+    {
+        C++FLAGS += "/ZW" ;
+    }
 
     C++FLAGS += /EHsc /fp:precise /GR /TP /FD ;
 
@@ -453,7 +468,7 @@ rule SharedLibrary-Build
     Clean clean : $(_target:S=.pdb) ;
     Clean clean : $(_target:S=.ilk) ;
     Clean clean : $(_target:S=.idb) ;
-	Clean clean : $(_target:S=.winmd) ;
+    Clean clean : $(_target:S=.winmd) ;
     Clean clean : $(_target).manifest ;
     
     INSTALL_LIB on $(<) += $(_target:S=.lib) $(_target:S=.pdb) ;
