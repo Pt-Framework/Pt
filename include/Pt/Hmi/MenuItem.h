@@ -119,7 +119,7 @@ class PT_HMI_API MenuItem : public Control
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
 
-        virtual void onTouchEvent(const TouchEvent& ev);
+        virtual bool onTouchEvent(const TouchEvent& ev);
 
         virtual void onEnterEvent( const EnterEvent& ev);
 

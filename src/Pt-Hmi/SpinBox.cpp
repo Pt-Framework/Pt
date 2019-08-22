@@ -758,12 +758,12 @@ bool SpinBox::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void SpinBox::onTouchEvent(const TouchEvent& ev)
+bool SpinBox::onTouchEvent(const TouchEvent& ev)
 {
     Base::onTouchEvent(ev);
 
     if( ! ev.isPress() || ! _textBox.contains( ev.position() ) )
-        return;  
+        return true;  
 
     if(_isEditable)
     {
@@ -773,6 +773,8 @@ void SpinBox::onTouchEvent(const TouchEvent& ev)
 
         Application::instance().inputMethod().begin(*this);
     }
+
+    return true;
 }
 
 

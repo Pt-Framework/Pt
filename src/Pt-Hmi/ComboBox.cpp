@@ -530,12 +530,12 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void ComboBox::onTouchEvent(const TouchEvent& ev)
+bool ComboBox::onTouchEvent(const TouchEvent& ev)
 {    
     Base::onTouchEvent(ev);
 
     if( ! ev.isPress() )
-        return;
+        return true;
 
     double buttonX = size().width() - _buttonSize.width();
 
@@ -551,6 +551,8 @@ void ComboBox::onTouchEvent(const TouchEvent& ev)
 
         Application::instance().inputMethod().begin(*this);
     }
+
+    return true;
 }
 
 

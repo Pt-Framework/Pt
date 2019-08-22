@@ -282,7 +282,7 @@ bool Slider::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void Slider::onTouchEvent(const TouchEvent& ev)
+bool Slider::onTouchEvent(const TouchEvent& ev)
 {
     Base::onTouchEvent(ev);
 
@@ -300,6 +300,8 @@ void Slider::onTouchEvent(const TouchEvent& ev)
         double offset = x * (_max - _min) / width;
         setPosition(_min + offset);
     }
+
+    return true;
 }
 
 } // namespace

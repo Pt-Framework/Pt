@@ -143,6 +143,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setFontDir(const Pt::System::Path& dir);
 
+        void setDefaultFont(const std::string& fontName);
+
         void loadImage(const System::Path& path, Gfx::Image& image);
 
     protected:

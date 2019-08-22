@@ -67,7 +67,11 @@ class ApplicationImpl : public Pt::System::MainLoop
         {
         }
 
-        Pt::Timespan inactivityTime() co;
+        void setDefaultFont(const std::string& fontName)
+        {
+        }
+
+        Pt::Timespan inactivityTime() const;
 
         void grabPointer(Window& grabber);
 

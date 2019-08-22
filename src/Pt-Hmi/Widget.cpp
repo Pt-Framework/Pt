@@ -64,7 +64,7 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onResizeEvent );
     _eventReady += Pt::slot(*this, &Widget::onPaintEvent );
     _eventReady += Pt::slot(*this, &Widget::mouseEvent);
-    _eventReady += Pt::slot(*this, &Widget::onTouchEvent);
+    _eventReady += Pt::slot(*this, &Widget::touchEvent);
     _eventReady += Pt::slot(*this, &Widget::onEnterEvent);
     _eventReady += Pt::slot(*this, &Widget::onLeaveEvent);
     _eventReady += Pt::slot(*this, &Widget::onEnableEvent);
@@ -1127,6 +1127,23 @@ void Widget::mouseEvent(const MouseEvent& ev)
   }
 }
 
+void Widget::touchEvent(const TouchEvent& ev)
+{
+    bool consumed = onTouchEvent(ev);
+
+    if (consumed)
+        return;
+
+    Widget* w = this->parent();
+
+    if (w)
+    {
+        TouchEvent ev2(ev);
+        ev2.setId(w->vid());
+        Application::instance().loop().commitEvent(ev2);
+    }
+}
+
 
 bool Widget::onMouseEvent(const MouseEvent& ev)
 {
@@ -1139,12 +1156,14 @@ bool Widget::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void Widget::onTouchEvent(const TouchEvent& ev)
+bool Widget::onTouchEvent(const TouchEvent& ev)
 {
     if( ev.isPress() )
     {
         focus();
     }
+
+    return false;
 }
 
 

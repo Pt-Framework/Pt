@@ -409,7 +409,7 @@ bool MenuItem::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void MenuItem::onTouchEvent(const TouchEvent& ev)
+bool MenuItem::onTouchEvent(const TouchEvent& ev)
 {    
     Base::onTouchEvent(ev);
 
@@ -419,6 +419,8 @@ void MenuItem::onTouchEvent(const TouchEvent& ev)
     {
         onTriggered();
     }
+
+    return true;
 }
 
 

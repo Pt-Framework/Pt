@@ -310,7 +310,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
             if( ! onSpace )
                 continue;
                 
-            word.first = n;     
+            word.first = n;
             onSpace = false;
         }
     }

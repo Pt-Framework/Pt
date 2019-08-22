@@ -57,6 +57,8 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         void setFontDir(const Pt::System::Path& dir);
 
+        void setDefaultFont(const std::string& fontName);
+
         const Cursor& cursor()
         { return _cursor; }
 

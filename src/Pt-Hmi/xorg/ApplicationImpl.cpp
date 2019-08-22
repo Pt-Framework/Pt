@@ -112,7 +112,12 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
 void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 {
-   PainterImpl::setFontDir(dir);	
+    PainterImpl::setFontDir(dir);
+}
+
+void ApplicationImpl::setDefaultFont(const std::string& fname)
+{
+    PainterImpl::setDefaultFont(fname);
 }
 
 

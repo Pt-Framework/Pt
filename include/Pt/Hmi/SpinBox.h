@@ -203,7 +203,7 @@ class PT_HMI_API SpinBox : public Control
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 
-        virtual void onTouchEvent(const TouchEvent& ev);
+        virtual bool onTouchEvent(const TouchEvent& ev);
 
         virtual void onFocusEvent(const FocusEvent& ev);
 

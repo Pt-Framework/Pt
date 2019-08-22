@@ -254,7 +254,7 @@ bool ScrollBar::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void ScrollBar::onTouchEvent(const TouchEvent& tev)
+bool ScrollBar::onTouchEvent(const TouchEvent& tev)
 {
     Control::onTouchEvent(tev);
 
@@ -285,6 +285,8 @@ void ScrollBar::onTouchEvent(const TouchEvent& tev)
         if( pos >= _minPos && pos <= _maxPos)
           scroll(pos);
     }
+
+    return true;
 }
 
 

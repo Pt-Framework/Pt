@@ -114,10 +114,11 @@ class FreeType : public Pt::Singleton<FreeType>
         FTC_CMapCache  _charMapCache;
         FTC_SBitCache  _bitmapCache;
         System::Path   _fontDir;
-        Font           _defaultFont;
+        std::string    _defaultFont;
         FTC_FaceID     _defaultFace;
         Fonts          _fonts;
         Files          _files;
+
 };
 
 static FreeType::Init initFreeType;

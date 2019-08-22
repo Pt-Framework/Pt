@@ -160,6 +160,11 @@ void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
     PainterImpl::setFontDir(dir);
 }
 
+void ApplicationImpl::setDefaultFont(const std::string& fontName)
+{
+    PainterImpl::setDefaultFont(fontName);
+}
+
 
 void ApplicationImpl::grabPointer(Window& grabber)
 {

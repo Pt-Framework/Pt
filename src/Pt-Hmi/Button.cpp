@@ -178,8 +178,8 @@ bool Button::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void Button::onTouchEvent(const TouchEvent& ev)
-{    
+bool Button::onTouchEvent(const TouchEvent& ev)
+{
     Base::onTouchEvent(ev);
 
     if( ev.isPress() )
@@ -211,7 +211,8 @@ void Button::onTouchEvent(const TouchEvent& ev)
         {
             onCanceled();
         }
-    }   
+    }
+    return true;
 }
 
 

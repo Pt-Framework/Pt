@@ -1,4 +1,5 @@
 /* Copyright (C) 2015 Marc Boris Duerner
+   Copyright (C) 2019 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -89,7 +90,7 @@ const std::string& FreeType::defaultFont() const
 {
     // LOCK
 
-    return _defaultFont.name();
+    return _defaultFont;
 
     // UNLOCK
 }
@@ -109,8 +110,8 @@ void FreeType::setDefaultFont(const std::string& font)
 {
     // LOCK
 
-    _defaultFont = Font(font, DefaultFontSize);
-    _defaultFace = findFaceId(_defaultFont);
+    _defaultFont = font;
+    _defaultFace = findFaceId(Font(_defaultFont, DefaultFontSize));
 
     // UNLOCK
 }
@@ -189,16 +190,13 @@ void FreeType::setFontDir(const System::Path& path)
 FTC_FaceID FreeType::findFaceId(const Font& font)
 {
     // LOCK
-
-    if( font.name().empty() )
-    {
-        return _defaultFace;
-    }
+    const std::string fontName = font.name().empty() ? _defaultFont : font.name();
 
     Fonts::iterator it = _fonts.begin();
+
     for (; it != _fonts.end(); ++it)
     {
-        if (it->first.name() == font.name() && it->first.style() == font.style())
+        if (it->first.name() == fontName && it->first.style() == font.style())
         {
             System::Path* path = &it->second;
             return reinterpret_cast<FTC_FaceID>(path);

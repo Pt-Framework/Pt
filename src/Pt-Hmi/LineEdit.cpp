@@ -481,15 +481,15 @@ bool LineEdit::onMouseEvent(const MouseEvent& mev)
 }
 
 
-void LineEdit::onTouchEvent(const TouchEvent& tev)
+bool LineEdit::onTouchEvent(const TouchEvent& tev)
 {
     Base::onTouchEvent(tev);
 
     if(_echoMode == Hidden)
-        return;
+        return true;
 
     if( ! tev.isPress() )
-        return;
+        return true;
 
     if(_isEditable)
     {
@@ -499,6 +499,7 @@ void LineEdit::onTouchEvent(const TouchEvent& tev)
 
         Application::instance().inputMethod().begin(*this);
     }
+    return true;
 }
 
 

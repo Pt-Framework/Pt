@@ -79,7 +79,7 @@ class PT_HMI_API ScrollLayout : public Layout
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
         
-        virtual void onTouchEvent(const TouchEvent& ev);
+        virtual bool onTouchEvent(const TouchEvent& ev);
 
         virtual bool onScrollEvent(const ScrollEvent& ev);
        

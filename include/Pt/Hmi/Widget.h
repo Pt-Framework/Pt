@@ -319,7 +319,9 @@ class PT_HMI_API Widget : public Visual
 
         void mouseEvent(const MouseEvent& ev);
 
-        virtual void onTouchEvent(const TouchEvent& ev);
+        void touchEvent(const TouchEvent& ev);
+
+        virtual bool onTouchEvent(const TouchEvent& ev);
 
         void scrollEvent( const ScrollEvent& ev );
 

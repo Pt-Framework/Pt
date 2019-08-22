@@ -227,12 +227,12 @@ bool TabBar::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void TabBar::onTouchEvent(const TouchEvent& ev)
+bool TabBar::onTouchEvent(const TouchEvent& ev)
 {
     Base::onTouchEvent(ev);
 
     if( ! ev.isPress() )
-        return;
+        return true;
 
     std::vector<TabItem>::iterator it;
     for(std::size_t n = 0; n != _tabs.size(); ++n)
@@ -257,6 +257,8 @@ void TabBar::onTouchEvent(const TouchEvent& ev)
             break;
         }
     }
+
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////

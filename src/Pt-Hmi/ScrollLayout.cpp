@@ -229,9 +229,9 @@ bool ScrollLayout::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void ScrollLayout::onTouchEvent(const TouchEvent& ev)
+bool ScrollLayout::onTouchEvent(const TouchEvent& ev)
 {    
-    Base::onTouchEvent(ev);
+    return Base::onTouchEvent(ev);
 }
 
 

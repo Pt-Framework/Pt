@@ -606,6 +606,11 @@ void Application::setFontDir(const Pt::System::Path& dir)
 }
 
 
+void Application::setDefaultFont(const std::string& fontName)
+{
+    _impl->setDefaultFont(fontName);
+}
+
 void Application::loadImage(const System::Path& path, Gfx::Image& image)
 {
     std::ifstream fs(path.toLocal().c_str(), std::ios::binary);
