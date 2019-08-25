@@ -67,9 +67,7 @@ class ApplicationImpl : public Pt::System::MainLoop
         {
         }
 
-        void setDefaultFont(const std::string& fontName)
-        {
-        }
+        void setDefaultFont(const std::string& fontName);
 
         Pt::Timespan inactivityTime() const;
 

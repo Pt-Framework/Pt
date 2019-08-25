@@ -81,10 +81,8 @@ class ApplicationImpl : public Pt::System::EventLoop
         {
         }
 
-        void setDefaultFont(const std::string& fontName)
-        {
-        
-        }
+        void setDefaultFont(const std::string& fontName);
+
         Pt::Timespan inactivityTime() const;
 
         void grabPointer(Window& grabber);

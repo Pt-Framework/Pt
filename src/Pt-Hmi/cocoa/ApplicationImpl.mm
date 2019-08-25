@@ -28,6 +28,7 @@
 */
 
 #import "ApplicationImpl.h"
+#import <PainterImpl.h>
 
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
@@ -144,6 +145,11 @@ ApplicationImpl::~ApplicationImpl()
     [NSApp release];
 }
 
+
+void ApplicationImpl::setDefaultFont(const std::string& fontName)
+{
+    PainterImpl::setDefaultFont(fontName);
+}
 
 void ApplicationImpl::nextEvent()
 {

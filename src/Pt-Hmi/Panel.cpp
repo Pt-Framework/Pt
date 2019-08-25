@@ -57,7 +57,21 @@ void Panel::setImage(const Gfx::Image& image, Alignment align)
     _imageAlignment = align;
     
     update();
-}   
+}
+
+
+void Panel::setIcon(const Icon& icon, const Gfx::SizeF& iconSize, Alignment align)
+{
+    if (icon.empty())
+        return;
+
+    Application& app = Application::instance();
+
+    const Gfx::SizeF scaledSize = app.screen().toPhysical(iconSize);
+    const Gfx::Image& image = icon.getImage(scaledSize);
+
+    setImage(image, align);
+}
 
 
 Widget* Panel::content() const
@@ -66,14 +80,15 @@ Widget* Panel::content() const
 }
 
 
-void Panel::setContent(Widget& widget)
+void Panel::setContent(Widget* widget)
 {
     if(_content)
         remove(*_content);
 
-    _content = &widget;
-    
-    add(widget); 
+    _content = widget;
+
+    if (widget)
+        add(*widget);
 }
 
 

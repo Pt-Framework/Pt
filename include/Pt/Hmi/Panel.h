@@ -53,9 +53,11 @@ class PT_HMI_API Panel : public Control
         void setImage(const Gfx::Image& image, 
                       Alignment align = Alignment::Center); 
 
+        void setIcon(const Icon& icon, const Gfx::SizeF& iconSize, Alignment align = Alignment::Center);
+
         Widget* content() const;
 
-        void setContent(Widget& widget);
+        void setContent(Widget* widget);
 
     public:
         const Gfx::Brush* background() const;

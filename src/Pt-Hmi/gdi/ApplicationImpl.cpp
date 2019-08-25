@@ -32,6 +32,7 @@
 #include "PaintSurfaceImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
+#include "PainterImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/ResizeEvent.h>
@@ -203,6 +204,12 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
     DeleteObject( andMask );
     DeleteObject( xorMask );
+}
+
+
+void ApplicationImpl::setDefaultFont(const std::string& fontName)
+{
+    PainterImpl::setDefaultFont(fontName);
 }
 
 

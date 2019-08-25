@@ -42,7 +42,6 @@ ScrollLayout::ScrollLayout()
 , _maxY(0)
 {
     setAcceptInput(true);
-    setFocusPolicy(Widget::NormalFocus);
 }
 
 

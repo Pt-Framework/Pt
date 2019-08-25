@@ -128,8 +128,7 @@ class ApplicationImpl : public Pt::System::EventLoop,
         void setFontDir(const Pt::System::Path& dir)
         {}
 
-        void setDefaultFont(const std::string& fontName)
-        {}
+        void setDefaultFont(const std::string& fontName);
 
     protected:
         virtual void onAttachSelectable(System::Selectable&);
