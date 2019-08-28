@@ -36,6 +36,7 @@ namespace Hmi {
 FlowLayout::FlowLayout(Direction d)
 : _direction(d)
 , _center(false)
+, _reverse(false)
 {
 }
 
@@ -68,6 +69,11 @@ void FlowLayout::setDirection(Direction d)
 void FlowLayout::setCenter(bool b)
 {
     _center = b;
+}
+
+void FlowLayout::setReverse(bool b)
+{
+    _reverse = b;
 }
 
 
@@ -180,31 +186,63 @@ void FlowLayout::onLayoutLeft(const Gfx::RectF& rect, bool center)
         posX = (rect.width() - itemsWidth) / 2;
     }
 
-    std::vector<Widget*>::const_iterator it = widgets().begin();
-    std::vector<Widget*>::const_iterator end = widgets().end();
-
-    for( ; it != end; ++it)
+    if (!_reverse)
     {
-        Widget* item = *it;
-        
-        if( ! item->isVisible() )
-            continue;  
+        std::vector<Widget*>::const_iterator it = widgets().begin();
+        std::vector<Widget*>::const_iterator end = widgets().end();
 
-        double x = posX + item->margin().left();
-        double y = padding().top() + item->margin().top(); 
-                 
-        posX += item->preferredSize().width() + 
+        for (; it != end; ++it)
+        {
+            Widget* item = *it;
+
+            if (!item->isVisible())
+                continue;
+
+            double x = posX + item->margin().left();
+            double y = padding().top() + item->margin().top();
+
+            posX += item->preferredSize().width() +
                 item->margin().leftRight();
 
-        Gfx::SizeF itemSize( item->preferredSize().width(), 
-                             rect.size().height() - 
-                             padding().top() - 
-                             padding().bottom() -
-                             item->margin().top() - 
-                             item->margin().bottom() );
+            Gfx::SizeF itemSize(item->preferredSize().width(),
+                rect.size().height() -
+                padding().top() -
+                padding().bottom() -
+                item->margin().top() -
+                item->margin().bottom());
 
-        Gfx::PointF pos(x, y);
-        item->layout( pos, itemSize );
+            Gfx::PointF pos(x, y);
+            item->layout(pos, itemSize);
+        }
+    }
+    else
+    {
+        std::vector<Widget*>::const_reverse_iterator it = widgets().rbegin();
+        std::vector<Widget*>::const_reverse_iterator end = widgets().rend();
+
+        for (; it != end; ++it)
+        {
+            Widget* item = *it;
+
+            if (!item->isVisible())
+                continue;
+
+            double x = posX + item->margin().left();
+            double y = padding().top() + item->margin().top();
+
+            posX += item->preferredSize().width() +
+                item->margin().leftRight();
+
+            Gfx::SizeF itemSize(item->preferredSize().width(),
+                rect.size().height() -
+                padding().top() -
+                padding().bottom() -
+                item->margin().top() -
+                item->margin().bottom());
+
+            Gfx::PointF pos(x, y);
+            item->layout(pos, itemSize);
+        }
     }
 }
 
@@ -228,33 +266,67 @@ void FlowLayout::onLayoutRight(const Gfx::RectF& rect, bool center)
         posRight -= (rect.width() - itemsWidth) / 2;
     }
 
-    std::vector<Widget*>::const_iterator it = widgets().begin();
-    std::vector<Widget*>::const_iterator end = widgets().end();
-
-    for( ; it != end; ++it)
+    if (!_reverse)
     {
-        Widget* item = *it; 
+        std::vector<Widget*>::const_iterator it = widgets().begin();
+        std::vector<Widget*>::const_iterator end = widgets().end();
 
-        if( ! item->isVisible() )
-            continue; 
+        for (; it != end; ++it)
+        {
+            Widget* item = *it;
 
-        posRight -= item->preferredSize().width();
-        posRight -= item->margin().right();
-                
-        double x = posRight;              
-        double y = padding().top() + item->margin().top(); 
-                
-        posRight -= item->margin().left();
-                   
-        Gfx::SizeF itemSize( item->preferredSize().width(), 
-                             rect.size().height() - 
-                             padding().top() - 
-                             padding().bottom() -
-                             item->margin().top() - 
-                             item->margin().bottom() );
+            if (!item->isVisible())
+                continue;
 
-        Gfx::PointF pos(x, y);                   
-        item->layout( pos, itemSize );
+            posRight -= item->preferredSize().width();
+            posRight -= item->margin().right();
+
+            double x = posRight;
+            double y = padding().top() + item->margin().top();
+
+            posRight -= item->margin().left();
+
+            Gfx::SizeF itemSize(item->preferredSize().width(),
+                rect.size().height() -
+                padding().top() -
+                padding().bottom() -
+                item->margin().top() -
+                item->margin().bottom());
+
+            Gfx::PointF pos(x, y);
+            item->layout(pos, itemSize);
+        }
+    }
+    else
+    {
+        std::vector<Widget*>::const_reverse_iterator it = widgets().rbegin();
+        std::vector<Widget*>::const_reverse_iterator end = widgets().rend();
+
+        for (; it != end; ++it)
+        {
+            Widget* item = *it;
+
+            if (!item->isVisible())
+                continue;
+
+            posRight -= item->preferredSize().width();
+            posRight -= item->margin().right();
+
+            double x = posRight;
+            double y = padding().top() + item->margin().top();
+
+            posRight -= item->margin().left();
+
+            Gfx::SizeF itemSize(item->preferredSize().width(),
+                rect.size().height() -
+                padding().top() -
+                padding().bottom() -
+                item->margin().top() -
+                item->margin().bottom());
+
+            Gfx::PointF pos(x, y);
+            item->layout(pos, itemSize);
+        }
     }
 }
 
@@ -317,31 +389,63 @@ void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)
         posTop = (rect.height() - itemsHeight) / 2;
     }
 
-    std::vector<Widget*>::const_iterator it = widgets().begin();
-    std::vector<Widget*>::const_iterator end = widgets().end();
-
-    for( ; it != end; ++it)
+    if (!_reverse)
     {
-        Widget* item = *it; 
+        std::vector<Widget*>::const_iterator it = widgets().begin();
+        std::vector<Widget*>::const_iterator end = widgets().end();
 
-        if( ! item->isVisible() )
-            continue; 
+        for (; it != end; ++it)
+        {
+            Widget* item = *it;
 
-        double x = padding().left() + item->margin().left();
-        double y = posTop + item->margin().top();
-                
-        posTop += item->preferredSize().height() + 
-                  item->margin().topBottom();
+            if (!item->isVisible())
+                continue;
 
-        Gfx::SizeF itemSize( rect.size().width() - 
-                             padding().left() -
-                             padding().right() -
-                             item->margin().left() - 
-                             item->margin().right(), 
-                             item->preferredSize().height());
+            double x = padding().left() + item->margin().left();
+            double y = posTop + item->margin().top();
 
-        Gfx::PointF pos(x, y);                   
-        item->layout( pos, itemSize );
+            posTop += item->preferredSize().height() +
+                item->margin().topBottom();
+
+            Gfx::SizeF itemSize(rect.size().width() -
+                padding().left() -
+                padding().right() -
+                item->margin().left() -
+                item->margin().right(),
+                item->preferredSize().height());
+
+            Gfx::PointF pos(x, y);
+            item->layout(pos, itemSize);
+        }
+    }
+    else
+    {
+        std::vector<Widget*>::const_reverse_iterator it = widgets().rbegin();
+        std::vector<Widget*>::const_reverse_iterator end = widgets().rend();
+
+        for (; it != end; ++it)
+        {
+            Widget* item = *it;
+
+            if (!item->isVisible())
+                continue;
+
+            double x = padding().left() + item->margin().left();
+            double y = posTop + item->margin().top();
+
+            posTop += item->preferredSize().height() +
+                item->margin().topBottom();
+
+            Gfx::SizeF itemSize(rect.size().width() -
+                padding().left() -
+                padding().right() -
+                item->margin().left() -
+                item->margin().right(),
+                item->preferredSize().height());
+
+            Gfx::PointF pos(x, y);
+            item->layout(pos, itemSize);
+        }
     }
 }
 
@@ -365,33 +469,67 @@ void FlowLayout::onLayoutBottom(const Gfx::RectF& rect, bool center)
         posBottom -= (rect.height() - itemsHeight) / 2;
     }
 
-    std::vector<Widget*>::const_iterator it = widgets().begin();
-    std::vector<Widget*>::const_iterator end = widgets().end();
-
-    for( ; it != end; ++it)
+    if (!_reverse)
     {
-        Widget* item = *it; 
+        std::vector<Widget*>::const_iterator it = widgets().begin();
+        std::vector<Widget*>::const_iterator end = widgets().end();
 
-        if( ! item->isVisible() )
-            continue; 
-        
-        posBottom -= item->preferredSize().height();
-        posBottom -= item->margin().bottom();
-                
-        double x = padding().left() + item->margin().left();
-        double y = posBottom;
-                
-        posBottom -= item->margin().top();
-                       
-        Gfx::SizeF itemSize( rect.size().width() - 
-                             padding().left() -
-                             padding().right() -
-                             item->margin().left() - 
-                             item->margin().right(), 
-                             item->preferredSize().height());
-                                         
-        Gfx::PointF pos(x, y);                   
-        item->layout( pos, itemSize );
+        for (; it != end; ++it)
+        {
+            Widget* item = *it;
+
+            if (!item->isVisible())
+                continue;
+
+            posBottom -= item->preferredSize().height();
+            posBottom -= item->margin().bottom();
+
+            double x = padding().left() + item->margin().left();
+            double y = posBottom;
+
+            posBottom -= item->margin().top();
+
+            Gfx::SizeF itemSize(rect.size().width() -
+                padding().left() -
+                padding().right() -
+                item->margin().left() -
+                item->margin().right(),
+                item->preferredSize().height());
+
+            Gfx::PointF pos(x, y);
+            item->layout(pos, itemSize);
+        }
+    }
+    else
+    {
+        std::vector<Widget*>::const_reverse_iterator it = widgets().rbegin();
+        std::vector<Widget*>::const_reverse_iterator end = widgets().rend();
+
+        for (; it != end; ++it)
+        {
+            Widget* item = *it;
+
+            if (!item->isVisible())
+                continue;
+
+            posBottom -= item->preferredSize().height();
+            posBottom -= item->margin().bottom();
+
+            double x = padding().left() + item->margin().left();
+            double y = posBottom;
+
+            posBottom -= item->margin().top();
+
+            Gfx::SizeF itemSize(rect.size().width() -
+                padding().left() -
+                padding().right() -
+                item->margin().left() -
+                item->margin().right(),
+                item->preferredSize().height());
+
+            Gfx::PointF pos(x, y);
+            item->layout(pos, itemSize);
+        }
     }
 }
 

@@ -64,6 +64,8 @@ class PT_HMI_API FlowLayout : public Layout
 
         void setCenter(bool b);
 
+        void setReverse(bool b);
+
         void addItem(Widget& w);
 
         void removeItem(Widget& w);
@@ -89,6 +91,7 @@ class PT_HMI_API FlowLayout : public Layout
     private:
         Direction _direction;
         bool      _center;
+        bool      _reverse;
 };
 
 } // namespace

@@ -1134,9 +1134,10 @@ void Rasterizer2::fillRoundedRect(const RectF& rect, float radius)
 
 void Rasterizer2::fillEllipse(const PointF& topLeft, const SizeF& size)
 {
-    const Point tl(round(topLeft));
-    
-    const Size  sz(round(size));
+    const Point tl(Pt::lround(topLeft.x() - 0.5),
+        Pt::lround(topLeft.y() - 0.5));
+
+    const Size sz(lround(size.width() - 0.5), lround(size.height() - 0.5));
 
     fillEllipse(tl, sz);
 }
