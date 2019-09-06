@@ -69,6 +69,8 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         virtual void setClip( const Gfx::RectF& clip);
 
+        virtual void resetClip();
+
         virtual void setPen(const Gfx::Pen& pen);
 
         virtual void setBrush(const Gfx::Brush& brush);

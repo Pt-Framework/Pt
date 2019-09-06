@@ -144,12 +144,6 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& rectF)
 {
     Gfx::Rect rect = round(rectF);
 
-    if( rect.isNull() )
-    {
-        XftDrawSetClipRectangles(_xftDraw, 0, 0, 0, 0);
-        return;
-    }
-
     XRectangle xrect;
     xrect.x      = rect.x();
     xrect.y      = rect.y();
@@ -159,6 +153,14 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& rectF)
     XftDrawSetClipRectangles(_xftDraw, 0, 0, &xrect, 1);
 
     _painter->impl()->setClip(rectF);
+}
+
+
+void PixmapSurfaceImpl::resetClip()
+{
+    XftDrawSetClipRectangles(_xftDraw, 0, 0, 0, 0);
+
+    _painter->impl()->resetClip();
 }
 
 

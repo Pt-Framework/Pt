@@ -81,6 +81,12 @@ void PaintRegion::setClip(const Gfx::RectF& clip)
 }
 
 
+void PaintRegion::resetClip()
+{
+    _surface->resetClip();
+}
+
+
 void PaintRegion::setCompositionMode(const Gfx::CompositionMode& mode)
 {
     _surface->setCompositionMode(mode);

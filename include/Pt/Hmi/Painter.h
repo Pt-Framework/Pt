@@ -61,6 +61,8 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual void setClip(const Gfx::RectF& clip);
 
+        virtual void resetClip();
+
         virtual void setPen(const Gfx::Pen& pen);
 
         virtual const Gfx::Pen& pen() const;

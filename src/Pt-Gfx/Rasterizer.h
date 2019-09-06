@@ -74,11 +74,12 @@ class Rasterizer
 
     void setClip( const Rect& clip );
 
+    void resetClip();
+
     const Rect& clip() const
     {
       return _clip;
     }
-
 
     void setFont( const Font& font );
 

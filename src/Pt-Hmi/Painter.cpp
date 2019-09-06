@@ -68,7 +68,13 @@ void Painter::begin(PaintSurface& surface)
     _surface->setPen(_pen);
     _surface->setBrush(_brush);
     _surface->setFont(_font);
-    _surface->setClip(_clip);
+    
+    // TODO: RECT-NULL
+    if( _clip.isNull() )
+      _surface->resetClip();
+    else
+      _surface->setClip(_clip);
+
     _surface->setCompositionMode(_compositionMode); 
 }
 
@@ -114,12 +120,28 @@ const Gfx::CompositionMode& Painter::compositionMode() const
 
 void Painter::setClip(const Gfx::RectF& clip)
 {
-    _clip = clip;
+    // TODO: RECT-NULL empty rect should clip everything
+    if( clip.isNull() )
+        _clip = Gfx::RectF( Gfx::PointF(0, 0), Gfx::SizeF(1, 1) );
+    else
+        _clip = clip;
 
     // NOTE: cannot cache clip in _impl, because of surface transformation
 
     if(_surface)
         _surface->setClip(_clip);
+}
+
+
+void Painter::resetClip()
+{
+    // TODO: RECT-NULL
+    _clip = Gfx::RectF();
+
+    // NOTE: cannot cache clip in _impl, because of surface transformation
+
+    if(_surface)
+        _surface->resetClip();
 }
 
 

@@ -90,6 +90,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void setClip(const Gfx::RectF& clip);
 
+        void resetClip();
+
         void setCompositionMode(const Gfx::CompositionMode& mode);
 
         void setPen(const Gfx::Pen& pen);

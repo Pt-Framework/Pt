@@ -87,6 +87,13 @@ void ImagePainter::setClip( const RectF& clipIn )
 }
 
 
+void ImagePainter::resetClip()
+{
+  _rasterizer->resetClip();
+  _clip = RectF();
+}
+
+
 void ImagePainter::setPen( const Pen& pen )
 {
   _rasterizer->setPen( pen ) ;

@@ -56,6 +56,8 @@ class PainterImpl
 
         void setClip(const Gfx::RectF& rectF);
 
+        void resetClip();
+
         void setCompositionMode(const Gfx::CompositionMode& mode)
         {
         }

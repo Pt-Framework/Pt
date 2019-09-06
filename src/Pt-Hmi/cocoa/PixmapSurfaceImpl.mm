@@ -128,17 +128,16 @@ void PixmapSurfaceImpl::finish()
 
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
-    if( clipRect.isNull() )
-    {
-        _clipRect = CGRectNull;
-    }
-    else
-    {
-        _clipRect = CGRectMake( clipRect.x(), 
-                                _size.height() - clipRect.y() - clipRect.height(), 
-                                clipRect.width(), 
-                                clipRect.height() );
-    }
+    _clipRect = CGRectMake( clipRect.x(), 
+                            _size.height() - clipRect.y() - clipRect.height(), 
+                            clipRect.width(), 
+                            clipRect.height() );
+}
+
+
+void PixmapSurfaceImpl::resetClip()
+{
+    _clipRect = CGRectNull;
 }
 
 

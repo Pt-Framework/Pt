@@ -63,6 +63,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         const Gfx::ImageFormat& format() const;
 
         void setClip( const Gfx::RectF& clip);
+
+        void resetClip();
          
         void setCompositionMode(const Gfx::CompositionMode& mode);
 

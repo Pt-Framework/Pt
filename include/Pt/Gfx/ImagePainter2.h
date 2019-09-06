@@ -63,6 +63,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void setClip(const RectF& clip);
 
+        virtual void resetClip();
+
         virtual const Pen& pen() const;
         
         virtual void setPen(const Pen& pen);

@@ -94,6 +94,12 @@ void ImagePainter2::setClip(const RectF& clip)
 }
 
 
+void ImagePainter2::resetClip()
+{
+    _rasterizer->resetClip();
+}
+
+
 const Pen& ImagePainter2::pen() const
 {
   return _rasterizer->pen();

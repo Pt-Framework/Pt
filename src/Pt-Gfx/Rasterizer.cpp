@@ -3284,10 +3284,12 @@ void Rasterizer::fillRect(const Rect& rectIn)
 void Rasterizer::updateClip()
 {
   Rect imageRect(Point(0,0) , _image->size());
-  _currentClip =  _clip.isNull() ? imageRect : _clip.intersect( imageRect);
+  
+  _currentClip =  _clip.isNull() ? imageRect 
+                                 : _clip.intersect( imageRect);
+  
   _clipRight = _currentClip.x() + _currentClip.width();
   _clipBottom = _currentClip.y() + _currentClip.height();
-
 }
 
 
@@ -3645,7 +3647,21 @@ FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
 
 void Rasterizer::setClip( const Rect& clip )
 {
-  _clip = clip;
+  // TODO: RECT-NULL empty rect should clip everything
+  if( clip.isNull() )
+      _clip = Rect( Point(0, 0), Size(1, 1) );
+  else
+      _clip = clip;
+
+  updateClip();
+}
+
+
+void Rasterizer::resetClip()
+{
+  // TODO: RECT-NULL
+  _clip = Rect();
+  
   updateClip();
 }
 

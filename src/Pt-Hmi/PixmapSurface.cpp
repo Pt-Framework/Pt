@@ -111,6 +111,12 @@ void PixmapSurface::setClip( const Gfx::RectF& clip)
 }
 
 
+void PixmapSurface::resetClip()
+{
+    _impl->resetClip();
+}
+
+
 void PixmapSurface::setCompositionMode(const Gfx::CompositionMode& mode)
 {
     _impl->setCompositionMode(mode);

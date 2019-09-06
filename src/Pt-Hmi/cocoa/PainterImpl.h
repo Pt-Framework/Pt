@@ -68,6 +68,10 @@ class PainterImpl
         {
         }
 
+        void resetClip()
+        {
+        }
+
         void setCompositionMode(const Gfx::CompositionMode& mode)
         {
         }

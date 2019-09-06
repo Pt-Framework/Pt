@@ -274,13 +274,6 @@ void PainterImpl::setClip(const Gfx::RectF& rectF)
     Display* display = Application::instance().impl()->display();
     Gfx::Rect rect = round(rectF);
 
-    if( rect.isNull() )
-    {
-        XSetClipRectangles(display, _penGc, 0, 0, 0, 0, Unsorted);
-        XSetClipRectangles(display, _brushGc, 0, 0, 0, 0, Unsorted);
-        return;
-    }
-
     XRectangle xrect;
     xrect.x      = rect.x();
     xrect.y      = rect.y();
@@ -289,6 +282,14 @@ void PainterImpl::setClip(const Gfx::RectF& rectF)
 
     XSetClipRectangles(display, _penGc, 0, 0, &xrect, 1, Unsorted);
     XSetClipRectangles(display, _brushGc, 0, 0, &xrect, 1, Unsorted);
+}
+
+
+void PainterImpl::resetClip()
+{
+    Display* display = Application::instance().impl()->display();
+    XSetClipRectangles(display, _penGc, 0, 0, 0, 0, Unsorted);
+    XSetClipRectangles(display, _brushGc, 0, 0, 0, 0, Unsorted);
 }
 
 

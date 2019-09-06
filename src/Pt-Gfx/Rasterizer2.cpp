@@ -594,9 +594,26 @@ void Rasterizer2::setFont(const Font& font)
 }
 
 
-void Rasterizer2::setClip( const Rect& clip )
+void Rasterizer2::setClip(const Rect& clip)
 {
-    _clip = clip;
+    // TODO: RECT-NULL empty rect should clip everything
+    if( clip.isNull() )
+        _clip = Rect( Point(0, 0), Size(1, 1) );
+    else
+        _clip = clip;
+    
+    updateClip();
+
+    //TODO: clipping routines still assume offset by one
+    _currentClip = Rect(_currentClip.topLeft(), Size(_currentClip.width() - 1, _currentClip.height() - 1));
+}
+
+
+void Rasterizer2::resetClip()
+{
+    // TODO: RECT-NULL
+    _clip = Rect();
+
     updateClip();
 
     //TODO: clipping routines still assume offset by one

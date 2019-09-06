@@ -203,11 +203,17 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
     _painter->impl()->setClip(clipRect);
     
     HRGN hrgn = _painter->impl()->clipRect();
-
     if(hrgn)
         SelectClipRgn(_dc, hrgn);
     else
         SelectClipRgn(_dc, NULL);
+}
+
+
+void PixmapSurfaceImpl::resetClip()
+{
+    _painter->impl()->resetClip();
+    SelectClipRgn(_dc, NULL);
 }
 
 

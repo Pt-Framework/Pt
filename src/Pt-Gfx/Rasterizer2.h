@@ -114,6 +114,8 @@ class Rasterizer2
 
         void setClip(const Rect& clip);
 
+        void resetClip();
+
         const Rect& clip() const
         { return _clip; }
 

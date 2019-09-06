@@ -198,17 +198,23 @@ class PainterImpl
             if(_clipRect)
             {
                 DeleteObject(_clipRect);
-                _clipRect = 0;
+                _clipRect = NULL;
             }
-
-            if( rect.isNull() )
-                return;
             
             // CreateRectRgn only includes the interior of the rect
             _clipRect = CreateRectRgn( rect.x(), 
                                        rect.y(), 
                                        rect.bottomRight().x(), 
                                        rect.bottomRight().y() );
+        }
+
+        void resetClip()
+        {
+            if(_clipRect)
+            {
+                DeleteObject(_clipRect);
+                _clipRect = NULL;
+            }
         }
 
         HRGN clipRect() const

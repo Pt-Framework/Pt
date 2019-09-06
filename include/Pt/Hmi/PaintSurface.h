@@ -108,6 +108,8 @@ class PT_HMI_API PaintSurface
 
         virtual void setClip(const Gfx::RectF& clip) = 0;
 
+        virtual void resetClip() = 0;
+
         virtual void setCompositionMode(const Gfx::CompositionMode& mode) = 0;
 
         virtual void setPen(const Gfx::Pen& pen) = 0;
