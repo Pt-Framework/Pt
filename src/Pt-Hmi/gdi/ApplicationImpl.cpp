@@ -95,9 +95,11 @@ Selector::~Selector()
 {
 }
 
-DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
+DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, 
+                        DWORD msecs, bool& isTimeout)
 {    
-    DWORD result = MsgWaitForMultipleObjects(numHandles, (HANDLE *)handles, false, msecs, QS_ALLEVENTS);
+    DWORD result = MsgWaitForMultipleObjects(numHandles, (HANDLE*)handles, 
+                                             FALSE, msecs, QS_ALLINPUT);
 
     if(result == WAIT_FAILED)
         throw Pt::System::IOError("WaitForMultipleObjects");
@@ -113,11 +115,10 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
     if(offset == numHandles)
     {
         MSG msg;
-
         while( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE) )
         {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
         }    
     }
 
