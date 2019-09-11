@@ -100,11 +100,6 @@ class FrameBuffer
         void output( const Pt::uint8_t* frame, const Gfx::Rect& area );
 
     private:
-      inline char* pixelBuffer(size_t w, size_t h)
-      {
-          return &_rotationBuffer[(_fixedInfo.line_length * h) + _pixelSize * w ];
-      }
-
       inline char* pixelFB(size_t w, size_t h)
       {
           return &_buffer[(_fixedInfo.line_length * h) + _pixelSize * w];
@@ -121,7 +116,6 @@ class FrameBuffer
         fb_fix_screeninfo _fixedInfo;
 
         Rotation          _rotation;
-        std::vector<char> _rotationBuffer;
 
         size_t            _bufferSize;
         char*             _buffer;

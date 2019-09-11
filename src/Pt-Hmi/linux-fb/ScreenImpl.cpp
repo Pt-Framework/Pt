@@ -137,7 +137,8 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
     //
     // update the screen including the cursor
     //
-    updateScreen( Gfx::round(updateRect) );
+    Pt::Gfx::RectF urect  = Pt::Hmi::Application::instance().screen().toPhysical(updateRect);
+    updateScreen( Gfx::round(urect) );
 }
 
 

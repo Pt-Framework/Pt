@@ -154,12 +154,10 @@ void FrameBuffer::setRotation(Rotation r)
     default:
     case Rotate0:
         _lineSize = _fixedInfo.line_length;
-        _rotationBuffer = std::vector<char>();
         break;
 
     case  Rotate90:
         _lineSize =  _screenInfo.yres * _pixelSize;
-        _rotationBuffer.resize(_bufferSize);
         break;
   }
 
@@ -248,14 +246,12 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
         {
            for(  Pt::ssize_t h = clipArea.y(); h < clipBottom; ++h)
            {
-              Pt::uint32_t* dest = ( Pt::uint32_t*)pixelBuffer( h, _screenInfo.yres - w -1);
+              Pt::uint32_t* dest = ( Pt::uint32_t*)pixelFB( h, _screenInfo.yres - w -1);
 
               const  Pt::uint32_t* src = ( Pt::uint32_t*)pixelFrame(frame, w, h);
               *dest =  *src;
             }
         }
-
-        memcpy( _buffer, &_rotationBuffer[0], _rotationBuffer.size());
         break;
       }
     }
