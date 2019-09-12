@@ -241,12 +241,15 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
         const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));
         const int clipRight = clipArea.x() + clipArea.width();
         const int clipBottom = clipArea.y() + clipArea.height();
+        const Pt::ssize_t height = _screenInfo.yres - 1; 
 
         for( Pt::ssize_t w = clipArea.x(); w < clipRight; ++w)
         {
+           const Pt::ssize_t yPos =  height - w;
+
            for(  Pt::ssize_t h = clipArea.y(); h < clipBottom; ++h)
            {
-              Pt::uint32_t* dest = ( Pt::uint32_t*)pixelFB( h, _screenInfo.yres - w -1);
+              Pt::uint32_t* dest = ( Pt::uint32_t*)pixelFB( h, yPos);
 
               const  Pt::uint32_t* src = ( Pt::uint32_t*)pixelFrame(frame, w, h);
               *dest =  *src;

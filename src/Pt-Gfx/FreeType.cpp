@@ -444,7 +444,7 @@ void FreeType::draw(Image& image, const Color& color,
             incX = glyphCopy->advance.x;
             incY = glyphCopy->advance.y;
 
-            if(FT_HAS_KERNING(face) && previousIndex)
+            if(FT_HAS_KERNING(face) && previousIndex && face->size)
             {
                 FT_Vector delta;
                 FT_Get_Kerning(face, previousIndex, glyphIndex, FT_KERNING_DEFAULT, &delta);
