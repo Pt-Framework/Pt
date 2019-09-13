@@ -380,6 +380,7 @@ void ApplicationImpl::onWake()
 void ApplicationImpl::onProcessEvents()
 {
     _eventQueue.processEvents( this->eventReceived() );
+    //_selector.waitForWake(0);
 }
 
 
@@ -430,10 +431,13 @@ long CALLBACK ApplicationImpl::wndProc(HWND hwnd, UINT msg,
     Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
     bool handled = app.impl()->processMessage(hwnd, msg, wparam, lparam);
-    if(! handled )
+    if( ! handled )
         return DefWindowProc(hwnd, msg, wparam, lparam);
 
-    return ! handled;
+    if(msg == WM_ERASEBKGND)
+        return TRUE;
+
+    return handled ? 0 : 1;
 }
 
 
