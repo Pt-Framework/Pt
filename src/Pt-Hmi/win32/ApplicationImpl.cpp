@@ -437,7 +437,7 @@ long CALLBACK ApplicationImpl::wndProc(HWND hwnd, UINT msg,
     if(! handled )
         return DefWindowProc(hwnd, msg, wparam, lparam);
 
-    return !handled;
+    return ! handled;
 }
 
 
@@ -529,6 +529,12 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
             break;
         }
         
+        case WM_ERASEBKGND:
+        {
+            handled = true;
+            break;
+        }
+
         case WM_PAINT:
         {
             onPaint(*w, hwnd);

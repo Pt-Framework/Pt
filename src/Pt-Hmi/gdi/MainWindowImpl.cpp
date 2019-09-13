@@ -113,8 +113,8 @@ void MainWindowImpl::show( bool v)
 {
     if( v )
     {
-      setTopMost(_isTopMost);
-      ShowWindow(_hwnd, SW_SHOW);
+        setTopMost(_isTopMost);
+        ShowWindow(_hwnd, SW_SHOW);
     }
     else
     {
