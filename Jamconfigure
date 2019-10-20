@@ -296,7 +296,7 @@ if ! $(WITH_SELECTOR)
 
 if $(PT_SYSTEM) = win32
 {
-    WSA_LINKLIBS ?= wsock32.lib ws2_32.lib Iphlpapi.lib ;
+    WSA_LINKLIBS ?= ws2_32.lib Iphlpapi.lib ;
 
     WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
                                "#include <windows.h>"
@@ -308,7 +308,7 @@ if $(PT_SYSTEM) = win32
 
     if ! $(WITH_WSA)
     {
-        WSA_LINKLIBS = winsock.lib Ws2.lib Iphlpapi.lib ;
+        WSA_LINKLIBS = Ws2.lib Iphlpapi.lib ;
 
         WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
                                    "#include <windows.h>"
@@ -321,7 +321,7 @@ if $(PT_SYSTEM) = win32
 
     if ! $(WITH_WSA)
     {
-        WSA_LINKLIBS = -lwsock32 -lws2_32 -lIphlpapi ;
+        WSA_LINKLIBS =  -lws2_32 -lIphlpapi ;
 
         WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
                                    "#include <windows.h>"

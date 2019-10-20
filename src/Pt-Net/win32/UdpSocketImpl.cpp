@@ -510,6 +510,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 
         if(it->ai_family == AF_INET)
         {
+            unsigned joined = 0;
             ip_mreq req;
 
             sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
@@ -517,20 +518,23 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 
             for(IP_ADAPTER_ADDRESSES* adapter = adapters; adapter != 0; adapter = adapter->Next)
             {
-                // req.imr_interface.s_addr = htonl(INADDR_ANY);
+                 //req.imr_interface.s_addr = htonl(INADDR_ANY);
                 req.imr_interface.s_addr = htonl(adapter->IfIndex);
 
-                if (::setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) != 0)
-                {
-                    throw System::IOError("setsockopt failed");
-                }
+                int ret = ::setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq));
+                if ( ret == 0)
+                    joined++;
             }
+
+            if (joined == 0)
+                throw System::IOError("setsockopt failed");
 
             PT_LOG_DEBUG( "joined IP4 multicast group: " << ipaddr );
             return;
         }
         else if(it->ai_family == AF_INET6)
         {
+            unsigned joined = 0;
             ipv6_mreq req;
             
             sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
@@ -541,11 +545,14 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
                 // req.ipv6mr_interface = 0;
                 req.ipv6mr_interface = adapter->Ipv6IfIndex;
                 
-                if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char*)&req, sizeof(ipv6_mreq)) == 0)
-                {
-                    throw System::IOError("setsockopt failed");
-                }
+                int ret = ::setsockopt(_fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char*)&req, sizeof(ipv6_mreq));
+
+                if (ret == 0)
+                    joined++;
             }
+
+            if (joined == 0)
+                throw System::IOError("setsockopt failed");
 
             PT_LOG_DEBUG( "joined IP6 multicast group: " << ipaddr );
             return;

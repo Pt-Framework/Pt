@@ -39,9 +39,10 @@
 #include "Pt/Net/Endpoint.h"
 #include "Pt/Net/UdpSocket.h"
 #include <string>
-#include <windows.h>
+//#include <windows.h>
 #include <winsock2.h>
 #include <Ws2tcpip.h>
+
 
 namespace Pt {
 

@@ -1,0 +1,552 @@
+Load vswhere.jam ;
+
+rule ConfigureVisualC
+{
+    if ! $(VISUALC_CONFIGURED) 
+	{
+        VISUALC_CONFIGURED = 1 ;
+    
+        VISUALC ?= $(VISUALC:J=" ") ;
+                
+        if ! $(VISUALC) 
+        {
+			local result = [ EXEC $(VSWHERE)" -nologo -property installationPath -version $(VS_VERSION)" ] ;						
+			VISUALC = $(result[2])"\\VC\\Tools\\MSVC\\" ;
+			
+            if ! $(MSVC_VERSION) 
+			{
+				local versions = [ GLOB [ FDirName $(VISUALC) ] : *.*.* ] ;
+				for local v in $(versions:BS)
+				{
+					if $(v) > $(MSVC_VERSION)
+					{
+						MSVC_VERSION = $(v:BS) ;
+					} 
+				}
+			}
+			Echo "Using MSVC..." $(MSVC_VERSION) ;
+            
+            VISUALC = $(VISUALC)\\$(MSVC_VERSION)\\ ;
+        }
+        
+        if ! $(VISUALC)
+        {
+            Exit "VISUALC not found" ;
+        }
+
+        CCFLAGS  += /FS ;
+        C++FLAGS += /FS ;
+    
+        VISUALC_PATH = $(VISUALC) ;		
+        Echo "Checking for Visual Studio..." $(VISUALC) ;
+        Configure VISUALC_PATH ;
+    }
+}
+
+
+rule ConfigurePlatformSDK
+{
+    if ! $(PLATFORMSDK_CONFIGURED)
+    {
+        PLATFORMSDK_CONFIGURED = 1 ;
+
+        PLATFORMSDK ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots\\" : "KitsRoot10" ] ;
+    
+        if ! $(PLATFORMSDK)
+        {
+            Exit "PLATFORMSDK not found" ;
+        }
+    
+        Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
+
+        if ! $(WINKIT)
+        {
+            local winkits = [ GLOB [ FDirName $(PLATFORMSDK) include ] : *.*.*.* ] ;
+            for local kit in $(winkits:BS)
+            {
+                if $(kit) > $(WINKIT)
+                {
+                    WINKIT = $(kit:BS) ;
+                } 
+            }
+        }
+
+        if ! $(WINKIT)
+        {
+            Exit "WINKIT not found" ;
+        }
+
+        Echo "Checking for Windows Kit..." $(WINKIT) ;
+
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\um\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\ucrt\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\shared\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\winrt\"" ;
+        CCFLAGS  += /DWIN32 ;
+        C++FLAGS += /DWIN32 ;
+   
+        C++FLAGS += /AI \""$(PLATFORMSDK)UnionMetadata\"" ;
+        C++FLAGS += /AI \""$(VISUALC)\\VC\\VCPackages\"" ;
+
+        if $(TARGET_OSPLAT:L) = "x86_64"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\um\\x64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\ucrt\\x64\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "x86"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\um\\x86\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\ucrt\\x86\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "arm"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\um\\arm\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\ucrt\\arm\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "arm64"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\um\\arm64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\ucrt\\arm64\"" ;
+        }
+
+        Configure STDHDRS ;
+        Configure CCFLAGS ;
+        Configure C++FLAGS ;
+        Configure LINKFLAGS ;
+    }
+}
+
+##########################################################################
+# Configuration rules
+##########################################################################
+
+rule TryBuild
+{
+    local _cc = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(1)\"" ;
+    local _link = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(LINK)\"" ;
+    local _src = $(2) ;
+    local _cflags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+    local _obj = $(_src:S=$(SUFOBJ))  ;
+    local _out = $(_src:S=$(SUFDLL))  ;
+
+    local _cmd = $(_cc) /MDd $(_cflags) /c /Fo$(_obj) /I$(STDHDRS) /Tp $(_src) ;
+    local _r = [ TryCommand $(_cmd) ] ;
+
+    if $(_r) && $(4)
+    {
+        _cmd = $(_link) /dll $(LINKFLAGS) /out:$(_out) $(_obj) /LIBPATH:$(5) $(LINKLIBS) $(4) ;
+        _r = [ TryCommand $(_cmd) ] ;
+        TryCommand $(RM) $(_out) ;
+        TryCommand $(RM) $(_out).manifest ;
+    }
+
+    TryCommand $(RM) $(_obj) ;
+    TryCommand $(RM) $(_obj:S=.ilk) ;
+    TryCommand $(RM) $(_obj:S=.pdb) ;
+    
+    return $(_r) ;
+}
+
+
+rule TryBuildCc
+{
+    local _cflags = $(CCFLAGS) $(2) ;
+    return [ TryBuild $(CC) : $(1) : $(_cflags) : $(3) : $(4) ] ;
+}
+
+
+rule TryBuildC++
+{
+    local _cflags = $(C++FLAGS) $(2) ;
+    return [ TryBuild $(C++) : $(1) : $(_cflags) : $(3) : $(4) ] ;
+}
+
+
+rule CheckCc
+{
+    ConfigureVisualC ;
+
+    if $(TARGET_OS:L) = "nt" || $(TARGET_OS:L) = "winrt"
+    {
+        LINKFLAGS += /MANIFEST ;
+
+        if $(TARGET_OSPLAT:L) = "x86_64"
+        {
+            AS   = $(VISUALC)\\bin\\Hostx64\\x64\\ml64 ;
+            AR   = $(VISUALC)\\bin\\Hostx64\\x64\\lib ;
+            CC   = $(VISUALC)\\bin\\Hostx64\\x64\\cl /nologo ;
+            LINK = $(VISUALC)\\bin\\Hostx64\\x64\\link /nologo ;
+        }
+        else if $(TARGET_OSPLAT:L) = "x86"
+        {         
+            AS   = $(VISUALC)\\bin\\Hostx86\\x86\\ml64 ;
+            AR   = $(VISUALC)\\bin\\Hostx86\\x86\\lib ;
+            CC   = $(VISUALC)\\bin\\Hostx86\\x86\\cl /nologo ;
+            LINK = $(VISUALC)\\bin\\Hostx86\\x86\\link /nologo ;			
+        }
+    }
+
+    Configure AS : $(AS) ;  
+    Configure AR : $(AR) ;
+    Configure CC : $(CC) ;
+    Configure LINK : $(LINK) ;
+
+    Configure MAIN_LINKFLAGS ;
+    Configure LINKFLAGS ;
+    Configure LINKLIBS ;
+        
+    if $(TARGET_OS:L) = "nt" || $(TARGET_OS:L) = "winrt"
+    {
+        STDHDRS += \""$(VISUALC)\\include\"" ;
+
+        if $(TARGET_OSPLAT:L) = "x86_64"
+        {   
+            LINKFLAGS += /LIBPATH:\""$(VISUALC)\\lib\\x64\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "x86"
+        {
+            LINKFLAGS += /LIBPATH:\""$(VISUALC)\\lib\\x86\"" ;
+        }
+    }
+    
+    if $(TARGET_OS:L) = "winrt"
+    {
+        LINKFLAGS += "/WINMD" "/APPCONTAINER:NO" ;
+        WINMDFILE = "/WINMDFILE:" ;
+        Configure WINMDFILE ;
+    }
+
+    Configure STDHDRS ;
+    Configure LINKFLAGS ;
+
+    if $(WITH_DEBUG) && $(WITH_OPTIM)
+    {
+        CCFLAGS += /MD /D "NDEBUG" /Zi ;
+        LINKFLAGS += /DEBUG ;
+    }
+    else if $(WITH_DEBUG)
+    {
+        CCFLAGS += /MDd /D "DEBUG" /D "_DEBUG" /Zi ;
+        LINKFLAGS += /DEBUG ;
+    }
+    else 
+    {
+        CCFLAGS += /MD /D "NDEBUG" ;
+    }
+
+    if $(WITH_OPTIM)
+    {
+        OPTIM ?= /Ox /Ot /Oy ;
+    }
+    else 
+    {
+        OPTIM ?= /Od ;
+    }
+
+    WARN      ?= /W3 ;
+    UNDEFFLAG  = "/u _" ;
+
+    Configure CCFLAGS ;
+    Configure LINKFLAGS ;
+    Configure OPTIM ;
+    Configure WARN ;
+    Configure UNDEFFLAG ;
+
+    ConfigurePlatformSDK ;
+}
+
+
+rule CheckC++
+{
+    ConfigureCc ;
+
+    C++ = $(CC) ;
+    Configure C++ ;
+
+    LINK++ = $(LINK) ;
+    Configure LINK++ ;
+
+    if $(TARGET_OS:L) = "winrt"
+    {
+        C++FLAGS += "/ZW" ;
+    }
+
+    C++FLAGS += /EHsc /fp:precise /GR /TP /FD ;
+
+    if $(WITH_DEBUG) && $(WITH_OPTIM)
+    {
+        C++FLAGS += /MD /D "NDEBUG" /Zi ;
+    }
+    else if $(WITH_DEBUG)
+    {
+        C++FLAGS += /MDd /D "DEBUG" /D "_DEBUG" /Zi ;
+    }
+    else
+    {
+        C++FLAGS += /MD /D "NDEBUG" ;
+    }
+
+    Configure C++FLAGS ;
+}
+
+
+##########################################################################
+# Build Rules
+##########################################################################
+
+if $(MT)
+{
+    rule EmbedManifest
+    {
+      MFTYPE on $(<) = 1 ;
+      
+      if $(<:S) = $(SUFDLL:S)
+      {
+        MFTYPE on $(<) = 2 ;
+      }
+    
+      Mt $(<) : $(>) ;
+    }
+
+    actions Mt
+    {
+      "$(MT)" -manifest $(>) -b$(3) -outputresource:$(<);$(MFTYPE)
+    }
+}
+
+rule FDefines 
+{ 
+  return /D$(<) ; 
+}
+
+
+rule FIncludes 
+{ 
+  return /I$(<) ; 
+}
+
+
+rule Library-Build
+{
+    Objects $(>) ;
+    LibraryFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+
+    local _target = $(PRELIB)$(<)$(SUFLIB) ;
+    
+    Clean clean : $(_target:S=.pdb) ;
+    Clean clean : $(_target:S=.idb) ;
+    
+    local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+    PDB on $(_objects:GBS) = $(_target:S=.pdb) ;
+
+    Depends $(_objects) : first ;
+}
+
+
+rule Library-MakeLocate
+{
+    local _l = $(PRELIB)$(<:S=$(SUFLIB)) ;
+    _MakeLocate $(_l) : $(>) ;
+    MakeLocate $(_l:S=.pdb) : $(>) ;
+    MakeLocate $(_l:S=.idb) : $(>) ;
+    
+    # create dir before C++ rule creates .pdb files
+    Depends first : $(>) ;
+}
+
+
+rule Main-Build
+{
+    MainFromObjects $(<) : $(>) ;
+
+    local _target = $(<:S=$(SUFEXE)) ;
+    
+    Clean clean : $(_target) ;
+    Clean clean : $(_target:S=.lib) ;
+    Clean clean : $(_target:S=.exp) ; 
+    Clean clean : $(_target:S=.pdb) ;
+    Clean clean : $(_target:S=.ilk) ;
+    Clean clean : $(_target:S=.idb) ;
+    Clean clean : $(_target:S=.winmd) ;
+    Clean clean : $(_target:S=.exe.manifest) ;
+    
+    local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+    PDB on $(_objects:GBS) = $(_target:S=.pdb) ;
+    
+    # embed manifest into exe
+    if $(MT)
+    {
+        EmbedManifest $(_target) : $(_target:S=.exe.manifest) ;
+    }
+    
+    Depends $(_objects) : first ;
+}
+
+
+rule Main-LinkSharedLibraries
+{
+    local _target = $(<:S=$(SUFEXE)) ;
+    
+    if $(3) 
+    {
+        LINKLIBS on $(_target) += $(2).lib ;
+        LINKLIBS on $(_target) += /LIBPATH:$(3) ;
+    }
+    else
+    {
+        Main-LinkLibraries $(<) : $(>) ;
+        Depends $(_target) : $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+rule Main-MakeLocate
+{
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    _MakeLocate $(_target) : $(>) ;
+    MakeLocate $(_target:S=.lib) : $(>) ;
+    MakeLocate $(_target:S=.exp) : $(>) ;
+    MakeLocate $(_target:S=.pdb) : $(>) ;
+    MakeLocate $(_target:S=.idb) : $(>) ;
+    MakeLocate $(_target:S=.ilk) : $(>) ;
+    MakeLocate $(_target:S=.winmd) : $(>) ;
+    MakeLocate $(_target:S=.exe.manifest) : $(>) ;
+    
+    # create dir before C++ rule creates .pdb files
+    Depends first : $(>) ;
+}
+
+
+rule SharedLibrary-Build
+{
+    SharedLibraryFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
+
+    # Add grist to file names
+    local _sources = [ FGristFiles $(>) ] ;
+    local _objects = $(_sources:S=$(SUFOBJ)) ;
+    
+    # Add library name decorations <name><.dll/.so>
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    
+    Clean clean : $(_target) ;
+    Clean clean : $(_target:S=.lib) ;
+    Clean clean : $(_target:S=.exp) ; 
+    Clean clean : $(_target:S=.pdb) ;
+    Clean clean : $(_target:S=.ilk) ;
+    Clean clean : $(_target:S=.idb) ;
+    Clean clean : $(_target:S=.winmd) ;
+    Clean clean : $(_target).manifest ;
+    
+    INSTALL_LIB on $(<) += $(_target:S=.lib) $(_target:S=.pdb) ;
+    
+    PDB on $(_objects:GBS) = $(_target:S=.pdb) ;
+    
+    Depends $(_sources) : first ;
+    Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
+    
+    # embed manifest into dll
+    if $(MT)
+    {
+        EmbedManifest $(_target) : $(_target).manifest ;
+    }
+
+    # The *.lib is created before its *.dll and therefore has an older timestamp.
+    # However, the lib depends on the dll and will be recreated everytime a 
+    # target is called using this dll because it seems to be 'old'.
+    # NOUPDATE will ignore the lib's timestamp once it has been created.
+    NOUPDATE $(PRELIB)$(<:S=$(SUFLIB)) ;
+    
+    LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
+}
+
+
+rule SharedLibrary-LinkSharedLibraries
+{
+  # Add library name decorations <name><.dll/.so>
+  local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+  if $(3) 
+  {
+    LINKLIBS on $(_target) += $(>).lib ;
+    LINKLIBS on $(_target) += /LIBPATH:$(3) ;
+  }
+  else
+  {
+    SharedLibrary-LinkLibraries $(<) : $(>) ;
+    Depends $(_target) : $(>:S=$(SUFDLL)) ;
+  }
+}
+
+
+rule SharedLibrary-MakeLocate
+{
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    MakeLocate $(_target) : $(>) ;
+
+    MakeLocate $(_target:S=.lib) : $(>) ;
+    MakeLocate $(_target:S=.exp) : $(>) ;
+    MakeLocate $(_target:S=.pdb) : $(>) ;   
+    MakeLocate $(_target:S=.ilk) : $(>) ;
+    MakeLocate $(_target:S=.idb) : $(>) ;
+    MakeLocate $(_target:S=.winmd) : $(>) ;
+    MakeLocate $(_target:S=.dll.manifest) : $(>) ;
+    
+    # create dir before C++ rule creates .pdb files
+    Depends first : $(>) ;
+}
+
+##########################################################################
+# Build Actions
+##########################################################################
+
+actions As
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(AS)" /Ml /p /v /w2 $(>) $(<) ,nul,nul;
+}
+
+
+actions Cc bind PDB
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(CC)" /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
+}
+
+
+actions C++ bind PDB
+{ 
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(C++)" /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+}
+
+
+actions updated together piecemeal Archive
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+
+  set _inputfile_=archive.cmd
+  echo "$(>)" > %_inputfile_%
+
+  if exist $(<) set _$(<:B)_=$(<)
+
+  "$(AR)" /NOLOGO /out:$(<) %_$(<:B)_% @%_inputfile_%
+
+  del %_inputfile_%
+}
+# set PATH=$(VISUALC)\Common7/IDE;%PATH%
+# if exist $(<) set _$(<:B)_=$(<)
+# "$(AR)" /out:$(<) %_$(<:B)_% $(>)
+
+
+#WINMDFILE = /WINMDFILE: ;
+
+actions together Link bind NEEDLIBS
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) $(WINMDFILE)$(<:S=.winmd) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+}
+
