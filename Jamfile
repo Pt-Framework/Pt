@@ -160,7 +160,7 @@ if $(WITH_BUILTIN_LIBJPEG)
 
 if $(WITH_BUILTIN_FREETYPE)
 {
-    SubInclude PT_TOP src freetype2 src ;
+    SubInclude PT_TOP src freetype src ;
 }
 
 if $(WITH_MBEDTLS)

@@ -205,14 +205,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
-    Window::onPaintBackground(rect);
-    return;
+    Window::onPaintBackground(rect);    
 
     Painter painter( surface() );
     painter.setClip(rect);
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
     Gfx::ImagePainter2 imagePainter(image);
+    Gfx::ImagePainter2::setFontDir(Pt::System::Path("/home/sca/Pt/build/debug/"));
     imagePainter.setAntiAliasing(true);
     //imagePainter.setAntiAliasing(false);
 
@@ -377,8 +377,12 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.fillPath(path);
     imagePainter.drawPath(path);
 
-    imagePainter.setFont( Pt::Gfx::Font("", 24) );
-    imagePainter.drawText(Pt::Gfx::PointF(20, 260), "Hello World!", trans);
+    
+    imagePainter.setFont( Pt::Gfx::Font("Noto Sans CJK HK", 24) );
+   Pt::String str = "Hallo ";
+        str += 0x2EC4;
+
+    imagePainter.drawText(Pt::Gfx::PointF(20, 260), str, trans);
 
     Pt::Gfx::PointF triangle[4];
     triangle[0] = Pt::Gfx::PointF(500, 500);

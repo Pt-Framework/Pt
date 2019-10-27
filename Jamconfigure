@@ -784,7 +784,7 @@ if ! $(WITH_FREETYPE) || $(WITH_BUILTIN_FREETYPE)
 {
     WITH_BUILTIN_FREETYPE = yes ;
     WITH_FREETYPE = yes ;
-    FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src freetype2 include ] ;
+    FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src freetype include ] ;
     FREETYPE_LINKLIBS = "" ;
 }
 

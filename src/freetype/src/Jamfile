@@ -1,10 +1,10 @@
-SubDir PT_TOP src freetype2 src ;
+SubDir PT_TOP src freetype src ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(FREETYPE_INCLUDES) ;
 SubDirCcFlags [ FDefines FT2_BUILD_LIBRARY ] ;
 SubDirCcFlags [ FDefines FT_CONFIG_OPTION_SYSTEM_ZLIB ] ;
 SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
-SubDirObjects $(PT_OUTPUT_OBJECT) freetype2 ;
+SubDirObjects $(PT_OUTPUT_OBJECT) freetype ;
 
 if $(ZLIB_INCLUDES)
 {
