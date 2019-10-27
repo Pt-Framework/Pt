@@ -643,7 +643,8 @@ void Rasterizer2::drawImage(const Point& to, const Image& from, const Rect& from
     const Point d       = _currentClip.topLeft() - to;
     const Point fromPos = fromRect.topLeft() + d;
 
-    Rect fromClip(fromPos, _currentClip.size());
+    Rect fromClip(fromPos, Gfx::Size(_currentClip.size().width() + 1, _currentClip.height() + 1));
+
     fromClip = fromRect.intersect(fromClip);
 
     if( fromClip.isNull() )
