@@ -1,0 +1,56 @@
+SubDir PT_TOP src freetype2 src ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(FREETYPE_INCLUDES) ;
+SubDirCcFlags [ FDefines FT2_BUILD_LIBRARY ] ;
+SubDirCcFlags [ FDefines FT_CONFIG_OPTION_SYSTEM_ZLIB ] ;
+SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) freetype2 ;
+
+if $(ZLIB_INCLUDES)
+{
+    SubDirHdrs $(ZLIB_INCLUDES) ;
+}
+
+Library freetype :
+    [ FDirName autofit autofit.c ]
+    [ FDirName base ftbase.c ]
+    [ FDirName base ftbbox.c ]
+    [ FDirName base ftbdf.c ]
+    [ FDirName base ftbitmap.c ]
+    [ FDirName base ftcid.c ]
+    [ FDirName base ftdebug.c ]
+    [ FDirName base ftfstype.c ]
+    [ FDirName base ftgasp.c ]
+    [ FDirName base ftglyph.c ]
+    [ FDirName base ftgxval.c ]
+    [ FDirName base ftinit.c ]
+    [ FDirName base ftmm.c ]
+    [ FDirName base ftotval.c ]
+    [ FDirName base ftpatent.c ]
+    [ FDirName base ftpfr.c ]
+    [ FDirName base ftstroke.c ]
+    [ FDirName base ftsynth.c ]
+    [ FDirName base ftsystem.c ]
+    [ FDirName bdf bdf.c ]
+    [ FDirName cache ftcache.c ]
+    [ FDirName cff cff.c ]
+    [ FDirName cid type1cid.c ]
+    [ FDirName gxvalid gxvalid.c ]
+    [ FDirName gzip ftgzip.c ]
+    [ FDirName lzw ftlzw.c ]
+    [ FDirName otvalid otvalid.c ]
+    [ FDirName pcf pcf.c ]
+    [ FDirName pfr pfr.c ]
+    [ FDirName psaux psaux.c ]
+    [ FDirName pshinter pshinter.c ]
+    [ FDirName psnames psnames.c ]
+    [ FDirName raster raster.c ]
+    [ FDirName sfnt sfnt.c ]
+    [ FDirName smooth smooth.c ]
+    [ FDirName truetype truetype.c ]
+    [ FDirName type1 type1.c ]
+    [ FDirName type42 type42.c ]
+    [ FDirName winfonts winfnt.c ]
+    ;
+
+MakeLocate freetype : $(PT_OUTPUT_TARGET) ;
