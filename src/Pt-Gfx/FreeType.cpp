@@ -287,8 +287,17 @@ FontMetrics FreeType::fontMetrics(const String& text,
     {
         FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId,
                                                    charMapIndex, it->value());
+
         if( ! glyph_index )
+            glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId,
+                                              charMapIndex, 63);
+        
+        if( ! glyph_index )
+        {
+            tbbox.xMin = std::min( FT_Pos(0), tbbox.xMin );
+            tbbox.xMax = std::max( FT_Pos(0), tbbox.xMax );
             continue;
+        }
 
         FTC_Node node;
         if( FTC_ImageCache_Lookup(_imageCache, &imageType, glyph_index, &glyph, &node) )
@@ -386,6 +395,11 @@ void FreeType::draw(Image& image, const Color& color,
     {
         FT_UInt glyphIndex = FTC_CMapCache_Lookup(_charMapCache, faceId,
                                                    charMapIndex, it->value());
+        
+        if( ! glyphIndex )
+            glyphIndex = FTC_CMapCache_Lookup(_charMapCache, faceId,
+                                              charMapIndex, 63);
+
         if( ! glyphIndex )
             continue;
 
