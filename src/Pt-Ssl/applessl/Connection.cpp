@@ -521,7 +521,7 @@ OSStatus Connection::sslRead(void* data, std::size_t* n)
     refill = std::min(refill, _maxImport);
     refill = std::min(refill, avail);
 
-    std::streamsize gcount = sb->sgetn(reinterpret_cast<char*>(data), gsize);
+    std::streamsize gcount = sb->sgetn(reinterpret_cast<char*>(data), refill);
     PT_LOG_DEBUG("read " << gcount << " bytes from input");
 
     if(gcount > 0)
