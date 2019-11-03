@@ -53,6 +53,12 @@ void ScreenImpl::init(WindowBase& w)
 }
 
 
+double ScreenImpl::scaleFactor(Window& w)
+{
+    return w.impl()->scaleFactor();
+}
+
+
 void ScreenImpl::registerWindow(Window& w)
 {
 }

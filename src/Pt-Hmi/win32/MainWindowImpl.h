@@ -84,6 +84,8 @@ class MainWindowImpl
 
         void grabPointer();
 
+        double scaleFactor() const;
+
         HWND hwnd()
         {
             return _hwnd;

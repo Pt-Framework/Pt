@@ -72,6 +72,19 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
+double MainWindowImpl::scaleFactor() const
+{
+    HDC screen = GetDC(_hwnd);
+
+    int dpix = GetDeviceCaps(screen, LOGPIXELSX);
+
+    //std::clog << "SCALING DPI: " << dpix << std::endl;
+    //std::clog << "SCALING: " << dpix / 96.0 << std::endl;
+
+    return dpix / 96.0;
+}
+
+
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 {
     POINT p = { lround(windowPos.x()), 

@@ -55,6 +55,8 @@ class ScreenImpl
 
         void init(WindowBase& w);
 
+        double scaleFactor(Window& w);
+
         Gfx::SizeF size() const;
 
         void registerWindow(Window& w);

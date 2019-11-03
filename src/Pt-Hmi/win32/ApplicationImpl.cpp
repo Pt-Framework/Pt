@@ -143,6 +143,8 @@ ApplicationImpl::ApplicationImpl()
     FreeConsole();
 #endif
 
+    SetProcessDPIAware();
+
     _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
 
     WNDCLASS winClass;
