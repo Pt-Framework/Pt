@@ -328,6 +328,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
     std::size_t prevWordEnd = 0;
     Pt::String segment;
     Gfx::FontMetrics lineMetrics;
+    Screen& screen = Application::instance().screen();
 
     Words::iterator it;
     for(it = words.begin(); it != words.end(); ++it)
@@ -339,7 +340,9 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
         segment.append(&text[prevWordEnd], wordEnd - prevWordEnd);
         
         Gfx::FontMetrics fm = Painter::fontMetrics(font, segment);
-        if(fm.width() <= _maxWidth || lineLength == 0)
+        double segmentWidth = screen.align( fm.width() );
+        
+        if(segmentWidth <= _maxWidth || lineLength == 0)
         {
             lineLength = segment.size();
             lineMetrics = fm;
