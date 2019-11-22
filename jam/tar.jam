@@ -70,7 +70,7 @@ actions TarFile bind ARCHIVE_NAME
     mkdir "%FILE_DIR%"
   )
 
-  copy $(2) "%FILE_DIR%" > NUL
+  copy "$(2)" "%FILE_DIR%" > NUL
   
   set CURRENT_DIR=%cd%
   
