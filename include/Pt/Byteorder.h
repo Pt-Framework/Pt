@@ -63,7 +63,7 @@
       defined (_M_AMD64) || defined (__amd64) || \
       defined(MIPSEL) || defined(_MIPSEL) || \
       defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT) || \
-      defined (vax) || defined (__alpha) || defined(__THW_INTEL)
+      defined (vax) || defined (__alpha) || defined(__THW_INTEL) || defined(__aarch64__)
     #define PT_LE
 #elif defined(__BIG_ENDIAN__) || \
       defined(__hppa__) || defined(__hppa) || defined(__hp9000) || \
