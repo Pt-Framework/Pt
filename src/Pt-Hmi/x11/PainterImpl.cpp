@@ -190,11 +190,17 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
             lineStyle = LineSolid;
             break;
 
-        case Gfx::Pen::Dash:
+        case Gfx::Pen::Dot:
+            char dashList[] = { pen.size(), pen.size() };
+            XSetDashes(display, _penGc, 0, dashList, 2);
             lineStyle = LineOnOffDash;
             break;
-
+        
+        case Gfx::Pen::Dash:
         case Gfx::Pen::DoubleDash:
+            char dashList[] = { pen.size() * 3, pen.size() };
+            XSetDashes(display, _penGc, 0, dashList, 2);
+            lineStyle = LineOnOffDash;
             break;
     }
 
@@ -207,6 +213,10 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
 
         case Gfx::Pen::BevelJoin:
             joinStyle = JoinBevel;
+            break;
+
+        case Gfx::Pen::MiterJoin:
+            joinStyle = JoinMiter;
             break;
     }
 
@@ -221,10 +231,9 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
             capStyle = CapRound;
             break;
 
-        case Gfx::Pen::TriangularCap:
-            break;
-
         case Gfx::Pen::ProjectingCap:
+        case Gfx::Pen::SquareCap:
+            capStyle = CapProjecting;
             break;
     }
 
