@@ -298,7 +298,8 @@ void Rasterizer::strokeEllipse( const Point& topLeft, const Size& size )
 }
 
 
-void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt )
+void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
+                                       int dashOn, int dashOff )
 {
     int	      x1, y1, x2, y2;
     int	      dashNum;					// Absolute number of dash, starts with 0
@@ -316,8 +317,8 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt )
 
     //Define the dash patter.
      int dashes[2];
-    dashes[0] = _pen.size() * 2; // Length of `on' dashes.
-    dashes[1] = _pen.size() * 2;	// Length of `off' dashes.
+    dashes[0] = dashOn; // Length of `on' dashes.
+    dashes[1] = dashOff;	// Length of `off' dashes.
 
     // Ensure we have >=1 points
     if( npt <= 0 )
@@ -1187,7 +1188,8 @@ void Rasterizer::drawWideSolidPolyline( const  Point* pPts, int npt )
 }
 
 
-void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, const  int* pDash, int numInDashList, int *pDashOffset )
+void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, 
+                           const int* pDash, int numInDashList, int *pDashOffset )
 {
     int	dashNum, dashIndex, dashOffset;
     int totallen;
@@ -1239,30 +1241,38 @@ void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, const  int*
 }
 
 
-void Rasterizer::stroke(const Point* points,  size_t pointCount)
+void Rasterizer::stroke(const Point* points,  size_t n)
 {
 
   switch( _pen.style() )
   {
     case Pen::Solid:
       if( _pen.size() == 1 )
-        drawThinSolidPolyline( points, pointCount );
+        drawThinSolidPolyline(points, n);
       else
-        drawWideSolidPolyline( points, pointCount );
-    break;
+        drawWideSolidPolyline(points, n);
+       break;
+
+    case Pen::Dot:
+      if( _pen.size() == 1 )
+        drawThinDashPolyline(points, n, _pen.size(), _pen.size() );
+      else
+        drawWideDashPolyline(points, n, _pen.size(), _pen.size() );
+      break;
 
     case Pen::Dash:
     case Pen::DoubleDash:
       if( _pen.size() == 1 )
-        drawThinDashPolyline(points, pointCount );
+        drawThinDashPolyline( points, n, _pen.size() * 3, _pen.size() );
       else
-        drawWideDashPolyline( points, pointCount );
-    break;
+        drawWideDashPolyline (points, n, _pen.size() * 3, _pen.size() );
+      break;
   }
 }
 
 
-void Rasterizer::drawThinDashPolyline( const Point* points,  int pointCount )
+void Rasterizer::drawThinDashPolyline(const Point* points,  int pointCount,
+                                      int dashOn, int dashOff)
 {
     const Point* ppt = points;
     int xstart, ystart;
@@ -1273,9 +1283,9 @@ void Rasterizer::drawThinDashPolyline( const Point* points,  int pointCount )
     int  dashOffset = 0;
     bool isDoubleDash = (_pen.style() == Pen::DoubleDash);
 
-    std::vector< int> dashes(2);
-    dashes[0] = _pen.size() * 3; // Length of `on' dashes.
-    dashes[1] = _pen.size();		// Length of `off' dashes.
+    std::vector<int> dashes(2);
+    dashes[0] = dashOn; // Length of `on' dashes.
+    dashes[1] = dashOff; // Length of `off' dashes.
 
     stepDash( 0, &dashNum, &dashIndex, &dashes[0], dashes.size(), &dashOffset);
 

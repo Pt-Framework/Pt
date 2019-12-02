@@ -144,7 +144,8 @@ class Rasterizer
   protected:
     enum { xAxis, yAxis };
     void drawThinSolidPolyline( const Point* points, int pointCount );
-    void drawThinDashPolyline( const Point* points, int pointCount);
+    void drawThinDashPolyline( const Point* points, int pointCount,
+                               int dashOn, int dashOff);
     void stepDash( int dist, int* pDashNum, int* pDashIndex, const int* pDash, int numInDashList, int *pDashOffset );
     void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len);
     void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len );
@@ -174,7 +175,8 @@ class Rasterizer
   protected:
     enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
 
-    void drawWideDashPolyline( const Point* points, int pointCount );
+    void drawWideDashPolyline( const Point* points, int pointCount,
+                               int dashOn, int dashOff );
 
     void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash );
 
