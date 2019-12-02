@@ -184,7 +184,7 @@ void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
                                pen.color().blue() / 65535.0,
                                pen.color().alpha() / 65535.0);
     
-    CGContextSetLineWidth(_context, pen.size());
+    CGContextSetLineWidth( _context, pen.size() );
     
     switch( pen.capStyle() )
     {
@@ -207,22 +207,21 @@ void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
         default:
         case Pt::Gfx::Pen::Solid:
         {
-            double dash[1] = {1.0};
-            CGContextSetLineDash(_context,0, dash, 0);
+            CGContextSetLineDash(_context, 0, NULL, 0);
             break;
         }
             
         case Pt::Gfx::Pen::Dash:
         {
-            double dash[2] = {3.0, 2.0};
-            CGContextSetLineDash(_context,0, dash, 2);
+            double dash[2] = { 3.0* pen.size(), 1.0 * pen.size() };
+            CGContextSetLineDash(_context, 0, dash, 2);
             break;
         }
  
         case Pt::Gfx::Pen::DoubleDash:
         {
-            double dash[3]  = {3.0, 2.0, 2.0};
-            CGContextSetLineDash(_context,0, dash, 3);
+            double dash[3]  = {1.0 * pen.size(), 1.0 * pen.size()};
+            CGContextSetLineDash(_context, 0, dash, 2);
             break;
         }
     }

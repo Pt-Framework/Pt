@@ -309,10 +309,19 @@ class PainterImpl
             {
                 case Gfx::Pen::Solid:
                     penStyle |= PS_SOLID;
-                break;
+                    break;
+                
                 case Gfx::Pen::Dash:
                     penStyle |= PS_DASH;
-                break;
+                    break;
+
+                case Gfx::Pen::Dot:
+#ifdef _WIN32_WCE
+                    penStyle |= PS_DASH;
+#else
+                    penStyle |= PS_DOT;
+#endif
+                    break;
             }
 
 #ifndef _WIN32_WCE
@@ -320,20 +329,22 @@ class PainterImpl
             {
                 case Gfx::Pen::RoundCap:
                     penStyle |= PS_ENDCAP_ROUND;
-                break;
+                    break;
+                
                 case Gfx::Pen::FlatCap:
                     penStyle |= PS_ENDCAP_FLAT;
-                break;
+                    break;
             }
 
             switch( pen.joinStyle() )
             {
                 case Gfx::Pen::RoundJoin:
                      penStyle |= PS_JOIN_ROUND;
-                break;
+                    break;
+                
                 case Gfx::Pen::BevelJoin:
                      penStyle |= PS_JOIN_BEVEL;
-                break;
+                     break;
             }
 #endif
 
