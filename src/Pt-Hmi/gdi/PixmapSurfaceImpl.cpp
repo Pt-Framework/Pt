@@ -286,20 +286,6 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 }
 
 
-void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
-{
-    POINT points[2];
-    
-    points[0].x = lround( from.x() - 0.4999 );
-    points[0].y = lround( from.y() - 0.4999 );
-    
-    points[1].x = lround( to.x() - 0.4999 );
-    points[1].y = lround( to.y() - 0.4999 );
-
-    Polyline(_dc, points, 2);
-}
-
-
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
     RECT rectangle;
@@ -314,6 +300,20 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     
     int rezt = DrawTextW(_dc, _text.c_str(), -1, 
                          &rectangle, DT_NOCLIP| DT_NOPREFIX );    
+}
+
+
+void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+{
+    POINT points[2];
+    
+    points[0].x = lround( from.x() - 0.4999 );
+    points[0].y = lround( from.y() - 0.4999 );
+    
+    points[1].x = lround( to.x() - 0.4999 );
+    points[1].y = lround( to.y() - 0.4999 );
+
+    Polyline(_dc, points, 2);
 }
 
 
