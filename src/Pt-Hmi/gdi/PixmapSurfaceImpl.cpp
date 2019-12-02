@@ -134,6 +134,9 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
     
     SelectObject(_dc, _bitmap);
     SetBkMode(_dc, TRANSPARENT);
+
+    // TODO: GM_ADVANCED
+    //SetGraphicsMode(_dc, GM_ADVANCED);
 }
 
 
@@ -326,6 +329,12 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
                    lround(rect.top()    - 0.4999), 
                    lround(rect.right()  - 0.4999) + 1, 
                    lround(rect.bottom() - 0.4999) + 1);
+
+    // TODO: GM_ADVANCED
+    //Rectangle(_dc, lround(rect.left()   - 0.4999), 
+    //               lround(rect.top()    - 0.4999), 
+    //               lround(rect.right()  - 0.4999), 
+    //               lround(rect.bottom() - 0.4999));
 
     SelectObject(_dc, originalBrush);
 }

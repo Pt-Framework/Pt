@@ -47,14 +47,13 @@ namespace Hmi {
 
 namespace Demo {
 
-
 MainWindow::MainWindow()
 : _child1("Child 1")
 , _scrollContainer(Hmi::FlowLayout::Top)
 , _scrollContainer2(Hmi::FlowLayout::Top)
 {
     setTitle("Main 1");
-    move( Gfx::PointF(10, 10) );
+    move( Gfx::PointF(100, 10) );
     resize( Gfx::SizeF(500, 700) );
 
     //_child2.setTopMost(true);
