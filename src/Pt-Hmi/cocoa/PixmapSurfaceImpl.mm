@@ -212,13 +212,14 @@ void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
         }
             
         case Pt::Gfx::Pen::Dash:
+        case Pt::Gfx::Pen::DoubleDash:
         {
             double dash[2] = { 3.0* pen.size(), 1.0 * pen.size() };
             CGContextSetLineDash(_context, 0, dash, 2);
             break;
         }
  
-        case Pt::Gfx::Pen::DoubleDash:
+        case Pt::Gfx::Pen::Dot:
         {
             double dash[3]  = {1.0 * pen.size(), 1.0 * pen.size()};
             CGContextSetLineDash(_context, 0, dash, 2);
