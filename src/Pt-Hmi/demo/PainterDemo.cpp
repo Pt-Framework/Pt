@@ -64,40 +64,40 @@ class LineStylesWidget : public Pt::Hmi::Control
             painter.drawLine( PointF(10, 70),
                               PointF(180, 70) );
 
-            Pen pen1Dash(red, 1, Pen::Dash);
-            Pen pen2Dash(red, 4, Pen::Dash);
-            Pen pen3Dash(red, 9, Pen::Dash);
-
-            painter.setPen(pen1Dash);
-            painter.drawLine( PointF(10, 100),
-                              PointF(180, 100) );
-
-            painter.setPen(pen2Dash);
-            painter.drawLine( PointF(10, 115),
-                              PointF(180, 115) );
-
-            painter.setPen(pen3Dash);
-            painter.drawLine( PointF(10, 130),
-                              PointF(180, 130) );
-
             Pen pen1Dot(red, 1, Pen::Dot);
             Pen pen2Dot(red, 4, Pen::Dot);
             Pen pen3Dot(red, 9, Pen::Dot);
 
             painter.setPen(pen1Dot);
+            painter.drawLine( PointF(10, 100),
+                              PointF(180, 100) );
+
+            painter.setPen(pen2Dot);
+            painter.drawLine( PointF(10, 115),
+                              PointF(180, 115) );
+
+            painter.setPen(pen3Dot);
+            painter.drawLine( PointF(10, 130),
+                              PointF(180, 130) );
+
+            Pen pen1Dash(red, 1, Pen::Dash);
+            Pen pen2Dash(red, 4, Pen::Dash);
+            Pen pen3Dash(red, 9, Pen::Dash);
+
+            painter.setPen(pen1Dash);
             painter.drawLine( PointF(10, 160),
                               PointF(180, 160) );
 
-            painter.setPen(pen2Dot);
+            painter.setPen(pen2Dash);
             painter.drawLine( PointF(10, 175),
                               PointF(180, 175) );
 
-            painter.setPen(pen3Dot);
+            painter.setPen(pen3Dash);
             painter.drawLine( PointF(10, 190),
                               PointF(180, 190) );
 
             ///////////////////////////////////////////////////
-            
+
             Pen pen1DoubleDot(red, 1, Pen::DoubleDot);
             Pen pen2DoubleDot(red, 4, Pen::DoubleDot);
             Pen pen3DoubleDot(red, 9, Pen::DoubleDot);
