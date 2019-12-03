@@ -34,6 +34,16 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Path.h> // Polygon
 
+
+// Scaling factor and starting value for the pattern buffer
+#define PATTERN_BUFFER_NUM_OF_CELLS  64
+#define PATTERN_BUFFER_SCALE_FACTOR  4
+#define PATTERN_BUFFER_COUNTER_START FIXED_POINT_FROM_INT(3)
+
+#define PATTERN_BUFFER_COUNTER_MAX1P FIXED_POINT_FROM_INT(PATTERN_BUFFER_NUM_OF_CELLS * PATTERN_BUFFER_SCALE_FACTOR)
+#define PATTERN_BUFFER_COUNTER_MAXMP PATTERN_BUFFER_NUM_OF_CELLS
+
+
 namespace Pt {
 
 namespace Gfx {
@@ -204,8 +214,7 @@ class Polygonizer
         static const double VecResScaleUp;
         static const double VecResScaleDn;
 
-        enum { PatternCells = 64 };
-        Pt::uint8_t _patternBufferMP[PatternCells];
+        Pt::uint8_t _patternBufferMP[PATTERN_BUFFER_NUM_OF_CELLS];
 };
 
 } //namespace

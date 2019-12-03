@@ -98,6 +98,7 @@ void Polygonizer::setPattern(const Pen::Style& style)
     static const Pt::uint64_t patternDotDash    = 0x800FF000800FF000; // 1000000000001111111100000000000010000000000011111111000000000000
 #else
     // New --- WHY IT IS DIFFERENT WITH Rasterizer2::updatePenPattern() ???
+    /*
     static const Pt::uint64_t patternDot        = 0x8888888888888888;// 1000100010001000100010001000100010001000100010001000100010001000
     static const Pt::uint64_t patternDoubleDot  = 0x8800880088008800;// 1000100000000000100010000000000010001000000000001000100000000000
     //static const Pt::uint64_t patternDash       = 0xE0E0E0E0E0E0E0E0;// 1110000011100000111000001110000011100000111000001110000011100000
@@ -105,6 +106,12 @@ void Polygonizer::setPattern(const Pen::Style& style)
     static const Pt::uint64_t patternDash       = 0xF8F8F8F8F8F8F8F8;  // 1111100011111000111110001111100011111000111110001111100011111000
     static const Pt::uint64_t patternDoubleDash = 0xE0E00000E0E00000;// 1110000011100000000000000000000011100000111000000000000000000000
     static const Pt::uint64_t patternDotDash    = 0x8E008E008E008E00;// 1000111000000000100011100000000010001110000000001000111000000000
+    */
+
+    static const Pt::uint64_t patternDot        = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000
+  //static const Pt::uint64_t patternDash       = 0xE0E0E0E0E0E0E0E0; // 1110000011100000111000001110000011100000111000001110000011100000
+    static const Pt::uint64_t patternDash       = 0xF8F8F8F8F8F8F8F8; // 1111100011111000111110001111100011111000111110001111100011111000
+
 #endif
 
     // Select the pattern
@@ -127,7 +134,7 @@ void Polygonizer::setPattern(const Pen::Style& style)
 
     // Generate the pattern
     //bool previous = 0;
-    for(Pt::int8_t p = 0; p < PatternCells; ++p)
+    for(Pt::int8_t p = 0; p < PATTERN_BUFFER_NUM_OF_CELLS; ++p)
     {
         // Reverse expand the pattern cell value
         // The pattern has 64 points
@@ -873,8 +880,8 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
             // Get and compare the pattern bit
             const Pt::uint8_t curPat = pBuff[piCtrInOut++];
 
-            if(piCtrInOut >= PatternCells)
-                piCtrInOut -= PatternCells;
+            if(piCtrInOut >= PATTERN_BUFFER_NUM_OF_CELLS)
+                piCtrInOut -= PATTERN_BUFFER_NUM_OF_CELLS;
 
             if(curPat == refPat)
             {
@@ -885,7 +892,7 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
             // We have got a different pattern bit, exit to process the "pattern" segment
             --piCtrInOut;
             if(piCtrInOut < 0)
-                piCtrInOut += PatternCells;
+                piCtrInOut += PATTERN_BUFFER_NUM_OF_CELLS;
 
             break;
         }

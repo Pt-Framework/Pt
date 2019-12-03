@@ -172,8 +172,8 @@ void Rasterizer2::updatePenPattern()
     static const Pt::uint64_t patternDoubleDash = 0x0077007700770077;// 0000000001110111000000000111011100000000011101110000000001110111
     static const Pt::uint64_t patternDotDash    = 0x3939393939393939;// 0011100100111001001110010011100100111001001110010011100100111001
     */
-    static const Pt::uint64_t patternDot        = 0x5555555555555555;// 1010101010101010101010101010101010101010101010101010101010101010
-    static const Pt::uint64_t patternDash       = 0x7777777777777777;// 0111011101110111011101110111011101110111011101110111011101110111
+    static const Pt::uint64_t patternDot        = 0xAAAAAAAAAAAAAAAA;// 1010101010101010101010101010101010101010101010101010101010101010
+    static const Pt::uint64_t patternDash       = 0xEEEEEEEEEEEEEEEE;// 1110111011101110111011101110111011101110111011101110111011101110
 #endif
 
     // Select the pattern
@@ -195,10 +195,10 @@ void Rasterizer2::updatePenPattern()
 
     // Generate the pattern
     bool previous = 0;
-    for(Pt::int8_t p = 0; p < 64; ++p)
+    for(Pt::int8_t p = 0; p < PATTERN_BUFFER_NUM_OF_CELLS; ++p)
     { // The pattern has 64 points
         // Get the pattern cell value
-        const bool current = patternSel & ((Pt::uint64_t) 1 << p);
+        const bool current = patternSel & ( (Pt::uint64_t) 1 << ( PATTERN_BUFFER_NUM_OF_CELLS - p - 1 ) );
 
         // --- One-pixel pattern ---
         // Pattern cell change from 0 to 0
