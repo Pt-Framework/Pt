@@ -91,11 +91,13 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
 
     if(ip2) ip2->setAntiAliasing(true);
 
+    /*
     painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::DotDash ) );
     painter.drawLine( PointF(  5,   5), PointF(994,   5) );
     painter.drawLine( PointF(  5, 594), PointF(994, 594) );
     painter.drawLine( PointF(  5,   5), PointF(  5, 594) );
     painter.drawLine( PointF(994,   5), PointF(994, 594) );
+    */
 
     painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash ) );
     painter.drawLine( PointF( 10, 110), PointF(100, 150) );
@@ -105,9 +107,11 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawLine( PointF(500, 500), PointF(200, 200) );
     painter.drawLine( PointF(300, 150), PointF(700,  50) );
 
+    /*
     painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash ) );
     painter.drawLine( PointF(550, 500), PointF(250, 200) );
     painter.drawLine( PointF(300, 200), PointF(700, 100) );
+    */
 
     painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dot ) );
     //painter.drawLine( PointF(870,  11), PointF(870, 500) );
@@ -115,11 +119,13 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF(781, 552), PointF( 10, 550) );
 
+    /*
     painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDot ) );
     painter.drawLine( PointF(970,  11), PointF(970, 500) );
     painter.drawLine( PointF(980,  11), PointF(982, 500) );
     painter.drawLine( PointF( 10, 440), PointF(781, 440) );
     painter.drawLine( PointF(781, 452), PointF( 10, 450) );
+    */
 
     if(ip2) ip2->setAntiAliasing(true);
     painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::Dash ) );
@@ -366,14 +372,14 @@ static void testDrawRoundRect(const char* title, Image& image, Painter& painter)
     ip2->drawRoundedRect( RectF(PointF(480, 290), SizeF(200, 100)), 25 );
 
     // Outline - thin - patterned
-    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::DotDash, Pen::RoundCap, Pen::MiterJoin ) );
+    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dash, Pen::RoundCap, Pen::MiterJoin ) );
     ip2->drawRoundedRect( RectF(PointF(712,  20), SizeF(200, 100)), 10 );
 
     // Outline - thick - patterned
-    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::DotDash, Pen::RoundCap, Pen::MiterJoin ));
+    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap, Pen::MiterJoin ));
     ip2->drawRoundedRect( RectF(PointF(712, 160), SizeF(200, 100)), 10 );
 
-    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::DotDash, Pen::RoundCap, Pen::MiterJoin ));
+    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap, Pen::MiterJoin ));
     ip2->drawRoundedRect( RectF(PointF(712, 290), SizeF(200, 100)), 25 );
 
     ip2->setPen( Color::fromRgb8(255, 127, 127, 127) );

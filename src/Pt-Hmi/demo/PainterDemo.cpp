@@ -96,6 +96,7 @@ class LineStylesWidget : public Pt::Hmi::Control
             painter.drawLine( PointF(10, 190),
                               PointF(180, 190) );
 
+#if 0
             ///////////////////////////////////////////////////
 
             Pen pen1DoubleDot(red, 1, Pen::DoubleDot);
@@ -136,6 +137,7 @@ class LineStylesWidget : public Pt::Hmi::Control
             painter.setPen(pen3DotDash);
             painter.drawLine( PointF(10, 370+20),
                               PointF(180, 370+20) );
+#endif
         }
 
 };

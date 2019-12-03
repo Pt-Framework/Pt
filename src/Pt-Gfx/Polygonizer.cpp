@@ -114,11 +114,11 @@ void Polygonizer::setPattern(const Pen::Style& style)
     {
         default:
         case Pen::Dot         : patternSel = patternDot;              break;
-        case Pen::DoubleDot   : patternSel = patternDoubleDot;        break;
+      //case Pen::DoubleDot   : patternSel = patternDoubleDot;        break;
         case Pen::Dash        : patternSel = patternDash;             break;
-        case Pen::DoubleDash  : patternSel = patternDoubleDash;       break;
-        case Pen::DotDash     : patternSel = patternDotDash;          break;
-        //case Pen::UserDefined : patternSel = _pen.styleUserPattern(); break;
+      //case Pen::DoubleDash  : patternSel = patternDoubleDash;       break;
+      //case Pen::DotDash     : patternSel = patternDotDash;          break;
+      //case Pen::UserDefined : patternSel = _pen.styleUserPattern(); break;
     }
 
     // Counter for generating the patterns

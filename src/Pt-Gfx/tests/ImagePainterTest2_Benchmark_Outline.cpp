@@ -99,8 +99,8 @@ static Pt::int64_t benchDrawPatternedLine(int loopCount, CompositionMode cm, boo
         painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
         painter.drawLine( PointF( 10,  10), PointF(789, 110) );
 
-        painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash )  );
-        painter.drawLine( PointF(789, 489), PointF( 10, 589) );
+        //painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash )  );
+        //painter.drawLine( PointF(789, 489), PointF( 10, 589) );
 
         sum += clock.stop().toUSecs();
 

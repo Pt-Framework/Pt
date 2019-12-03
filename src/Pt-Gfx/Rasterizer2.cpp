@@ -165,12 +165,15 @@ void Rasterizer2::updatePenPattern()
     static const Pt::uint64_t patternDash       = 0xEEEEEEEEEEEEEEEE;// 1110111011101110111011101110111011101110111011101110111011101110
     static const Pt::uint64_t patternDoubleDash = 0xEE00EE00EE00EE00;// 1110111000000000111011100000000011101110000000001110111000000000
     static const Pt::uint64_t patternDotDash    = 0x9C9C9C9C9C9C9C9C;// 1001110010011100100111001001110010011100100111001001110010011100
-    */
+
     static const Pt::uint64_t patternDot        = 0x5555555555555555;// 1010101010101010101010101010101010101010101010101010101010101010
     static const Pt::uint64_t patternDoubleDot  = 0x0505050505050505;// 1010000010100000101000001010000010100000101000001010000010100000
     static const Pt::uint64_t patternDash       = 0x7777777777777777;// 0111011101110111011101110111011101110111011101110111011101110111
     static const Pt::uint64_t patternDoubleDash = 0x0077007700770077;// 0000000001110111000000000111011100000000011101110000000001110111
     static const Pt::uint64_t patternDotDash    = 0x3939393939393939;// 0011100100111001001110010011100100111001001110010011100100111001
+    */
+    static const Pt::uint64_t patternDot        = 0x5555555555555555;// 1010101010101010101010101010101010101010101010101010101010101010
+    static const Pt::uint64_t patternDash       = 0x7777777777777777;// 0111011101110111011101110111011101110111011101110111011101110111
 #endif
 
     // Select the pattern
@@ -180,11 +183,11 @@ void Rasterizer2::updatePenPattern()
     {
         default:
         case Pen::Dot         : patternSel = patternDot;              break;
-        case Pen::DoubleDot   : patternSel = patternDoubleDot;        break;
+      //case Pen::DoubleDot   : patternSel = patternDoubleDot;        break;
         case Pen::Dash        : patternSel = patternDash;             break;
-        case Pen::DoubleDash  : patternSel = patternDoubleDash;       break;
-        case Pen::DotDash     : patternSel = patternDotDash;          break;
-        case Pen::UserDefined : patternSel = _pen.styleUserPattern(); break;
+      //case Pen::DoubleDash  : patternSel = patternDoubleDash;       break;
+      //case Pen::DotDash     : patternSel = patternDotDash;          break;
+      //case Pen::UserDefined : patternSel = _pen.styleUserPattern(); break;
     }
 
     // Counter for generating the patterns
