@@ -70,7 +70,8 @@ struct PatternState
     //, dstPCount(0)
     //, dstPCount0(0)
     , srcPoints(src)
-    , srcCount(pointCount), cellSize(penSize * 0.25f)
+    //, srcCount(pointCount), cellSize(penSize * 0.25f)
+    , srcCount(pointCount), cellSize(penSize * 0.5f)
     , idx1(0)
     , remLen(-1.0f)
     , gatherLen(0.0f)
@@ -88,11 +89,21 @@ Polygonizer::Polygonizer()
 void Polygonizer::setPattern(const Pen::Style& style)
 {
     // Predefined patterns
+#if 0
+    // Original
     static const Pt::uint64_t patternDot        = 0x8080808080808080; // 1000000010000000100000001000000010000000100000001000000010000000
     static const Pt::uint64_t patternDoubleDot  = 0x8400840084008400; // 1000010000000000100001000000000010000100000000001000010000000000
     static const Pt::uint64_t patternDash       = 0xFF00FF00FF00FF00; // 1111111100000000111111110000000011111111000000001111111100000000
     static const Pt::uint64_t patternDoubleDash = 0xFF07F800FF07F800; // 1111111100000111111110000000000011111111000001111111100000000000
     static const Pt::uint64_t patternDotDash    = 0x800FF000800FF000; // 1000000000001111111100000000000010000000000011111111000000000000
+#else
+    // New --- WHY IT IS DIFFERENT WITH Rasterizer2::updatePenPattern() ???
+    static const Pt::uint64_t patternDot        = 0x8888888888888888;// 1000100010001000100010001000100010001000100010001000100010001000
+    static const Pt::uint64_t patternDoubleDot  = 0x8800880088008800;// 1000100000000000100010000000000010001000000000001000100000000000
+    static const Pt::uint64_t patternDash       = 0xE0E0E0E0E0E0E0E0;// 1110000011100000111000001110000011100000111000001110000011100000
+    static const Pt::uint64_t patternDoubleDash = 0xE0E00000E0E00000;// 1110000011100000000000000000000011100000111000000000000000000000
+    static const Pt::uint64_t patternDotDash    = 0x8E008E008E008E00;// 1000111000000000100011100000000010001110000000001000111000000000
+#endif
 
     // Select the pattern
     Pt::uint64_t patternSel;
@@ -116,11 +127,11 @@ void Polygonizer::setPattern(const Pen::Style& style)
     //bool previous = 0;
     for(Pt::int8_t p = 0; p < PatternCells; ++p)
     {
+        // Reverse expand the pattern cell value
         // The pattern has 64 points
-        // Get the pattern cell value
+
         const bool current = patternSel & ((Pt::uint64_t) 1 << p);
 
-        // It is a simple expanded copy of the pattern above
         _patternBufferMP[PATTERN_BUFFER_NUM_OF_CELLS - gctrMP - 1] = current ? 1 : 0;
         ++gctrMP;
     }
