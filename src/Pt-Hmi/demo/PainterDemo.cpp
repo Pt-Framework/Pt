@@ -16,7 +16,7 @@ class LineStylesWidget : public Pt::Hmi::Control
         {}
 
     protected:
-        virtual void onPaint(Pt::Hmi::PaintSurface& surface, 
+        virtual void onPaint(Pt::Hmi::PaintSurface& surface,
                              const Pt::Gfx::RectF& rect)
         {
             Pt::Hmi::Painter painter(surface);
@@ -57,45 +57,87 @@ class LineStylesWidget : public Pt::Hmi::Control
                               PointF(180, 40) );
 
             painter.setPen(pen2Solid);
-            painter.drawLine( PointF(10, 60),
-                              PointF(180, 60) );
+            painter.drawLine( PointF(10, 55),
+                              PointF(180, 55) );
 
             painter.setPen(pen3Solid);
-            painter.drawLine( PointF(10, 80),
-                              PointF(180, 80) );
+            painter.drawLine( PointF(10, 70),
+                              PointF(180, 70) );
 
             Pen pen1Dash(red, 1, Pen::Dash);
             Pen pen2Dash(red, 4, Pen::Dash);
             Pen pen3Dash(red, 9, Pen::Dash);
 
             painter.setPen(pen1Dash);
-            painter.drawLine( PointF(10, 140),
-                              PointF(180, 140) );
+            painter.drawLine( PointF(10, 100),
+                              PointF(180, 100) );
 
             painter.setPen(pen2Dash);
-            painter.drawLine( PointF(10, 160),
-                              PointF(180, 160) );
+            painter.drawLine( PointF(10, 115),
+                              PointF(180, 115) );
 
             painter.setPen(pen3Dash);
-            painter.drawLine( PointF(10, 180),
-                              PointF(180, 180) );
+            painter.drawLine( PointF(10, 130),
+                              PointF(180, 130) );
 
             Pen pen1Dot(red, 1, Pen::Dot);
             Pen pen2Dot(red, 4, Pen::Dot);
             Pen pen3Dot(red, 9, Pen::Dot);
 
             painter.setPen(pen1Dot);
-            painter.drawLine( PointF(10, 240),
-                              PointF(180, 240) );
+            painter.drawLine( PointF(10, 160),
+                              PointF(180, 160) );
 
             painter.setPen(pen2Dot);
-            painter.drawLine( PointF(10, 260),
-                              PointF(180, 260) );
+            painter.drawLine( PointF(10, 175),
+                              PointF(180, 175) );
 
             painter.setPen(pen3Dot);
-            painter.drawLine( PointF(10, 280),
-                              PointF(180, 280) );
+            painter.drawLine( PointF(10, 190),
+                              PointF(180, 190) );
+
+            ///////////////////////////////////////////////////
+            
+            Pen pen1DoubleDot(red, 1, Pen::DoubleDot);
+            Pen pen2DoubleDot(red, 4, Pen::DoubleDot);
+            Pen pen3DoubleDot(red, 9, Pen::DoubleDot);
+            painter.setPen(pen1DoubleDot);
+            painter.drawLine( PointF(10, 220+20),
+                              PointF(180, 220+20) );
+            painter.setPen(pen2DoubleDot);
+            painter.drawLine( PointF(10, 235+20),
+                              PointF(180, 235+20) );
+            painter.setPen(pen3DoubleDot);
+            painter.drawLine( PointF(10, 250+20),
+                              PointF(180, 250+20) );
+
+            Pen pen1DoubleDash(red, 1, Pen::DoubleDash);
+            Pen pen2DoubleDash(red, 4, Pen::DoubleDash);
+            Pen pen3DoubleDash(red, 9, Pen::DoubleDash);
+            painter.setPen(pen1DoubleDash);
+            painter.drawLine( PointF(10, 280+20),
+                              PointF(180, 280+20) );
+            painter.setPen(pen2DoubleDash);
+            painter.drawLine( PointF(10, 295+20),
+                              PointF(180, 295+20) );
+            painter.setPen(pen3DoubleDash);
+            painter.drawLine( PointF(10, 310+20),
+                              PointF(180, 310+20) );
+
+            Pen pen1DotDash(red, 1, Pen::DotDash);
+            Pen pen2DotDash(red, 4, Pen::DotDash);
+            Pen pen3DotDash(red, 9, Pen::DotDash);
+            painter.setPen(pen1DotDash);
+            painter.drawLine( PointF(10, 340+20),
+                              PointF(180, 340+20) );
+            painter.setPen(pen2DotDash);
+            painter.drawLine( PointF(10, 355+20),
+                              PointF(180, 355+20) );
+            painter.setPen(pen3DotDash);
+            painter.drawLine( PointF(10, 370+20),
+                              PointF(180, 370+20) );
         }
+
 };
 
 class PainterDemoWindow : public Pt::Hmi::Window

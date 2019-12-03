@@ -150,11 +150,17 @@ void Rasterizer2::setPen( const Pen& pen )
 void Rasterizer2::updatePenPattern()
 {
     // Predefined patterns
-    static const Pt::uint64_t patternDot        = 0x8080808080808080;// 1000000010000000100000001000000010000000100000001000000010000000
-    static const Pt::uint64_t patternDoubleDot  = 0x8400840084008400;// 1000010000000000100001000000000010000100000000001000010000000000
-    static const Pt::uint64_t patternDash       = 0xFF00FF00FF00FF00;// 1111111100000000111111110000000011111111000000001111111100000000
-    static const Pt::uint64_t patternDoubleDash = 0xFF07F800FF07F800;// 1111111100000111111110000000000011111111000001111111100000000000
-    static const Pt::uint64_t patternDotDash    = 0x800FF000800FF000;// 1000000000001111111100000000000010000000000011111111000000000000
+    //static const Pt::uint64_t patternDot        = 0x8080808080808080;// 1000000010000000100000001000000010000000100000001000000010000000
+    //static const Pt::uint64_t patternDoubleDot  = 0x8400840084008400;// 1000010000000000100001000000000010000100000000001000010000000000
+    //static const Pt::uint64_t patternDash       = 0xFF00FF00FF00FF00;// 1111111100000000111111110000000011111111000000001111111100000000
+    //static const Pt::uint64_t patternDoubleDash = 0xFF07F800FF07F800;// 1111111100000111111110000000000011111111000001111111100000000000
+    //static const Pt::uint64_t patternDotDash    = 0x800FF000800FF000;// 1000000000001111111100000000000010000000000011111111000000000000
+
+    static const Pt::uint64_t patternDot        = 0xAAAAAAAAAAAAAAAA;// 1010101010101010101010101010101010101010101010101010101010101010
+    static const Pt::uint64_t patternDoubleDot  = 0xA0A0A0A0A0A0A0A0;// 1010000010100000101000001010000010100000101000001010000010100000
+    static const Pt::uint64_t patternDash       = 0xEEEEEEEEEEEEEEEE;// 1110111011101110111011101110111011101110111011101110111011101110
+    static const Pt::uint64_t patternDoubleDash = 0xEE00EE00EE00EE00;// 1110111000000000111011100000000011101110000000001110111000000000
+    static const Pt::uint64_t patternDotDash    = 0x9C9C9C9C9C9C9C9C;// 1001110010011100100111001001110010011100100111001001110010011100
 
     // Select the pattern
     Pt::uint64_t patternSel;
@@ -601,7 +607,7 @@ void Rasterizer2::setClip(const Rect& clip)
         _clip = Rect( Point(0, 0), Size(1, 1) );
     else
         _clip = clip;
-    
+
     updateClip();
 
     //TODO: clipping routines still assume offset by one
@@ -697,7 +703,7 @@ void Rasterizer2::drawLine(const PointF& from, const PointF& to)
         drawNarrowLine(a, b, 0);
         return;
     }
-    
+
     std::vector<Polygon> polygons;
     _polygonizer.renderWidePolyline(polygons, points, 2, _pen, true);
 
@@ -786,7 +792,7 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 
 
 void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
-{    
+{
     //BasicClipShape<double>::(clipped, _currentClip);
     //if(clipped.empty()) return;
 
@@ -801,7 +807,7 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
 
     // From point N to point (N + 1), successively
     std::size_t pc1 = pointCount - 1;
-    
+
     for(std::size_t i = 0; i < pc1; ++i)
     {
         int x1 = points[i].x();
