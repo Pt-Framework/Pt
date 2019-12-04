@@ -186,23 +186,48 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
     int lineStyle = LineSolid;
     switch( pen.style() )
     {
+        default:
         case Gfx::Pen::Solid:
             lineStyle = LineSolid;
             break;
 
         case Gfx::Pen::Dot:
         {
-            char dashList[] = { pen.size(), pen.size() };
-            XSetDashes(display, _penGc, 0, dashList, 2);
+            if(pen.capStyle() == Gfx::Pen::RoundCap ||
+               pen.capStyle() == Gfx::Pen::SquareCap)
+            {
+                char spacing = static_cast<char>( 2 * pen.size() );
+                char dashList[] = { 1, spacing };
+                XSetDashes(display, _penGc, 0, dashList, 2);
+            }
+            else
+            {
+                char size = static_cast<char>( pen.size() );
+                char dashList[] = { size, size };
+                XSetDashes(display, _penGc, 0, dashList, 2);
+            }
+
             lineStyle = LineOnOffDash;
             break;
         }
         
         case Gfx::Pen::Dash:
-        case Gfx::Pen::DoubleDash:
         {
-            char dashList[] = { pen.size() * 3, pen.size() };
-            XSetDashes(display, _penGc, 0, dashList, 2);
+            if(pen.capStyle() == Gfx::Pen::RoundCap ||
+               pen.capStyle() == Gfx::Pen::SquareCap)
+            {
+                char size = static_cast<char>( 2 * pen.size() );
+                char dashList[] = { size, size };
+                XSetDashes(display, _penGc, 0, dashList, 2);
+            }
+            else
+            {
+                char size = static_cast<char>( 3 * pen.size() );
+                char spacing = static_cast<char>( pen.size() );
+                char dashList[] = { size, spacing };
+                XSetDashes(display, _penGc, 0, dashList, 2);
+            }
+
             lineStyle = LineOnOffDash;
             break;
         }
@@ -211,12 +236,13 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
     int joinStyle = JoinBevel;
     switch( pen.joinStyle() )
     {
-        case Gfx::Pen::RoundJoin:
-            joinStyle = JoinRound;
-            break;
-
+        default:
         case Gfx::Pen::BevelJoin:
             joinStyle = JoinBevel;
+            break;
+
+        case Gfx::Pen::RoundJoin:
+            joinStyle = JoinRound;
             break;
 
         case Gfx::Pen::MiterJoin:
@@ -227,6 +253,7 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
     int capStyle  = CapButt;
     switch( pen.capStyle() )
     {
+        default:
         case Gfx::Pen::FlatCap:
             capStyle = CapButt;
             break;
