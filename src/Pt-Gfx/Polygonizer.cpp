@@ -962,8 +962,16 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
 
         // (Re-)initialize some part of the operational state as needed
         if(state.remLen <= 0.0f) {
+            //std::cerr << "A\n";
             // Check if all polygon's points have been processed
             if(state.idx1 + 1 >= state.srcCount) {
+                //if(state.remLen > 0.0f) std::cerr << "### state.remLen = " << state.remLen << std::endl;
+                //if(state.gatherLen > 0.0f) std::cerr << "### state.gatherLen = " << state.gatherLen << std::endl;
+                // Process left-over partial segment (if any)
+                if(state.gatherLen && draw) {
+                    sagGeneratePolyLineSegment(state, pen, collisionDetection);
+                }
+                // All done
                 state.gather.clear();
                 state.gatherLen = 0.0f;
                 return true;
@@ -975,7 +983,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             const float y2 = state.srcPoints[state.idx1 + 1].y();
             const float vx = x2 - x1;
             const float vy = y2 - y1;
-            const float vz = sqrt(vx * vx + vy * vy) + 2.0f;
+            const float vz = sqrt(vx * vx + vy * vy);// + 2.0f;
             // Initialize some part of the operational state
             state.px     = x1;
             state.py     = y1;
@@ -992,6 +1000,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         if(state.gatherLen >= state.patSegLen) {
             // Generate one solid polygon segment as needed
             if(draw) {
+                //std::cerr << "B\n";
                 if(pen.capStyle() == Pen::ButtCap) {
                     state.gather.back().set(
                         state.gather.back().x() + state.cvx,
@@ -1015,6 +1024,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         if(state.gather.empty() && state.remLen >= state.patSegLen) {
             // Generate a simple line segment as needed
             if(draw) {
+                //std::cerr << "C\n";
                 if(pen.capStyle() == Pen::ButtCap) {
                     sagGenerateSimpleLineSegment(
                         state,
@@ -1075,6 +1085,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         }
         // If the combined length is less than or equal to the "pattern" segment length, simply store the end coordinate
         if(state.gatherLen + state.remLen <= state.patSegLen) {
+            //std::cerr << "#@# 111\n";
             // Store the end coordinate
             state.gather.push_back(PointF(state.ex, state.ey));
             state.gatherLen += state.remLen;
@@ -1085,6 +1096,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         }
         // Otherwise, store the in-between coordinate
         else {
+            //std::cerr << "#@# 222\n";
             // Calculate the needed length
             const float nl = state.patSegLen - state.gatherLen;
             // Update the interpolation coordinate
