@@ -73,15 +73,15 @@ using namespace Pt::Gfx;
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
-#define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           1 // (including bezier)
+#define TEST_DRAW_PATTERNED_LINE                1 // (including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
 #define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
 
-#define TEST_DRAW_ELLIPSES_ARCS                 1
+#define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
 #define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
 
@@ -98,7 +98,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATH                          0 // (including thick and filled and rectangle clipping area)
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 
-#define TEST_IMAGE_OPERATION                    1
+#define TEST_IMAGE_OPERATION                    0
 
 // Detailed-test benchmark settings for Pt-Gfx
 #define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing)
@@ -112,14 +112,14 @@ using namespace Pt::Gfx;
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0 // XXX
 
-#define BENCHMARK_SOLID_LINE                0
-#define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_SOLID_THICK_LINE          0
-#define BENCHMARK_PATTERNED_THICK_LINE      0
+#define BENCHMARK_SOLID_LINE                1
+#define BENCHMARK_PATTERNED_LINE            1
+#define BENCHMARK_SOLID_THICK_LINE          1
+#define BENCHMARK_PATTERNED_THICK_LINE      1
 
 #define BENCHMARK_RECTANGLE                 0
-#define BENCHMARK_ELLIPSE                   1
-#define BENCHMARK_ARC                       1
+#define BENCHMARK_ELLIPSE                   0
+#define BENCHMARK_ARC                       0
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0

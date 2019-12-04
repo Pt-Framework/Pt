@@ -41,16 +41,17 @@ class LineStylesWidget : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
-            Color red        = Color::fromRgb8(255,   0,   0);
-            Color lightGreen = Color::fromRgb8(100, 255, 100);
-            Color lightBlue  = Color::fromRgb8(100, 100, 255);
+            Color red         = Color::fromRgb8(255,   0,   0);
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue   = Color::fromRgb8(100, 100, 255);
 
-            painter.setPen( lightGreen );
+            painter.setPen( lightPurple );
             painter.setFont( Font("", 12) );
             painter.drawText( PointF(20, 22), text);
+
             painter.setFont( Font("", 10) );
 
-            int y = 40;
+            int y = 45;
 
             if(1) {
                 Pen pen1Solid(red, 1, Pen::Solid, Pen::ButtCap);

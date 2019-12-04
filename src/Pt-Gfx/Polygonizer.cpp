@@ -998,7 +998,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             const float y2 = state.srcPoints[state.idx1 + 1].y();
             const float vx = x2 - x1;
             const float vy = y2 - y1;
-            const float vz = sqrt(vx * vx + vy * vy);
+            const float vz = sqrt(vx * vx + vy * vy) + 2.0f;
             // Initialize some part of the operational state
             state.px     = x1;
             state.py     = y1;
@@ -1008,7 +1008,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             state.uvy    = vy / vz;
             state.cvx    = state.uvx * state.cellSize;
             state.cvy    = state.uvy * state.cellSize;
-            state.remLen = vz + 1.0f;
+            state.remLen = vz;
         }
 
         // If we have the complete length from the gathered points, process them into a thick polygon
