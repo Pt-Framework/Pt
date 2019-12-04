@@ -141,7 +141,7 @@ void Rasterizer2::setPen( const Pen& pen )
     _penPixel.reset(_penBuffer.view(), 0, 0);
 
     if( pen.style() != Pen::Solid )
-        _polygonizer.setPattern( pen.style() );
+        _polygonizer.setPattern( pen.style(), pen.styleUserPattern() );
 
     updatePenPattern();
 }
@@ -149,45 +149,15 @@ void Rasterizer2::setPen( const Pen& pen )
 
 void Rasterizer2::updatePenPattern()
 {
-    // Predefined patterns
-#if 0
-    // Original
-    static const Pt::uint64_t patternDot        = 0x8080808080808080;// 1000000010000000100000001000000010000000100000001000000010000000
-    static const Pt::uint64_t patternDoubleDot  = 0x8400840084008400;// 1000010000000000100001000000000010000100000000001000010000000000
-    static const Pt::uint64_t patternDash       = 0xFF00FF00FF00FF00;// 1111111100000000111111110000000011111111000000001111111100000000
-    static const Pt::uint64_t patternDoubleDash = 0xFF07F800FF07F800;// 1111111100000111111110000000000011111111000001111111100000000000
-    static const Pt::uint64_t patternDotDash    = 0x800FF000800FF000;// 1000000000001111111100000000000010000000000011111111000000000000
-#else
-    // New --- WHY IT IS DIFFERENT WITH Polygonizer::setPattern(const Pen::Style& style) ???
-    /*
-    static const Pt::uint64_t patternDot        = 0xAAAAAAAAAAAAAAAA;// 1010101010101010101010101010101010101010101010101010101010101010
-    static const Pt::uint64_t patternDoubleDot  = 0xA0A0A0A0A0A0A0A0;// 1010000010100000101000001010000010100000101000001010000010100000
-    static const Pt::uint64_t patternDash       = 0xEEEEEEEEEEEEEEEE;// 1110111011101110111011101110111011101110111011101110111011101110
-    static const Pt::uint64_t patternDoubleDash = 0xEE00EE00EE00EE00;// 1110111000000000111011100000000011101110000000001110111000000000
-    static const Pt::uint64_t patternDotDash    = 0x9C9C9C9C9C9C9C9C;// 1001110010011100100111001001110010011100100111001001110010011100
-
-    static const Pt::uint64_t patternDot        = 0x5555555555555555;// 1010101010101010101010101010101010101010101010101010101010101010
-    static const Pt::uint64_t patternDoubleDot  = 0x0505050505050505;// 1010000010100000101000001010000010100000101000001010000010100000
-    static const Pt::uint64_t patternDash       = 0x7777777777777777;// 0111011101110111011101110111011101110111011101110111011101110111
-    static const Pt::uint64_t patternDoubleDash = 0x0077007700770077;// 0000000001110111000000000111011100000000011101110000000001110111
-    static const Pt::uint64_t patternDotDash    = 0x3939393939393939;// 0011100100111001001110010011100100111001001110010011100100111001
-    */
-    static const Pt::uint64_t patternDot        = 0xAAAAAAAAAAAAAAAA;// 1010101010101010101010101010101010101010101010101010101010101010
-    static const Pt::uint64_t patternDash       = 0xEEEEEEEEEEEEEEEE;// 1110111011101110111011101110111011101110111011101110111011101110
-#endif
-
     // Select the pattern
     Pt::uint64_t patternSel;
 
     switch( _pen.style() )
     {
         default:
-        case Pen::Dot         : patternSel = patternDot;              break;
-      //case Pen::DoubleDot   : patternSel = patternDoubleDot;        break;
-        case Pen::Dash        : patternSel = patternDash;             break;
-      //case Pen::DoubleDash  : patternSel = patternDoubleDash;       break;
-      //case Pen::DotDash     : patternSel = patternDotDash;          break;
-      //case Pen::UserDefined : patternSel = _pen.styleUserPattern(); break;
+        case Pen::Dot         : patternSel = Polygonizer::patternDot;  break;
+        case Pen::Dash        : patternSel = Polygonizer::patternDash; break;
+        case Pen::UserDefined : patternSel = _pen.styleUserPattern();  break;
     }
 
     // Counter for generating the patterns
@@ -196,7 +166,7 @@ void Rasterizer2::updatePenPattern()
     // Generate the pattern
     bool previous = 0;
     for(Pt::int8_t p = 0; p < PATTERN_BUFFER_NUM_OF_CELLS; ++p)
-    { // The pattern has 64 points
+    {
         // Get the pattern cell value
         const bool current = patternSel & ( (Pt::uint64_t) 1 << ( PATTERN_BUFFER_NUM_OF_CELLS - p - 1 ) );
 

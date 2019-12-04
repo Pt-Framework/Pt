@@ -83,59 +83,36 @@ struct PatternState
 const double Polygonizer::VecResScaleUp = 64.0;
 const double Polygonizer::VecResScaleDn = 1.0 / 64.0;
 
+// Predefined patterns
+const Pt::uint64_t Polygonizer::patternDot  = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010;
+const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110;
+
+//static const Pt::uint64_t patternDoubleDot  = 0xA0A0A0A0A0A0A0A0;// 1010000010100000101000001010000010100000101000001010000010100000
+//static const Pt::uint64_t patternDoubleDash = 0xEE00EE00EE00EE00;// 1110111000000000111011100000000011101110000000001110111000000000
+//static const Pt::uint64_t patternDotDash    = 0x9C9C9C9C9C9C9C9C;// 1001110010011100100111001001110010011100100111001001110010011100
+
+
 Polygonizer::Polygonizer()
 {
 }
 
-void Polygonizer::setPattern(const Pen::Style& style)
+void Polygonizer::setPattern(const Pen::Style& style, Pt::uint64_t userPattern)
 {
-    // Predefined patterns
-#if 0
-    // Original
-    static const Pt::uint64_t patternDot        = 0x8080808080808080; // 1000000010000000100000001000000010000000100000001000000010000000
-    static const Pt::uint64_t patternDoubleDot  = 0x8400840084008400; // 1000010000000000100001000000000010000100000000001000010000000000
-    static const Pt::uint64_t patternDash       = 0xFF00FF00FF00FF00; // 1111111100000000111111110000000011111111000000001111111100000000
-    static const Pt::uint64_t patternDoubleDash = 0xFF07F800FF07F800; // 1111111100000111111110000000000011111111000001111111100000000000
-    static const Pt::uint64_t patternDotDash    = 0x800FF000800FF000; // 1000000000001111111100000000000010000000000011111111000000000000
-#else
-    // New --- WHY IT IS DIFFERENT WITH Rasterizer2::updatePenPattern() ???
-    /*
-    static const Pt::uint64_t patternDot        = 0x8888888888888888;// 1000100010001000100010001000100010001000100010001000100010001000
-    static const Pt::uint64_t patternDoubleDot  = 0x8800880088008800;// 1000100000000000100010000000000010001000000000001000100000000000
-    //static const Pt::uint64_t patternDash       = 0xE0E0E0E0E0E0E0E0;// 1110000011100000111000001110000011100000111000001110000011100000
-    //static const Pt::uint64_t patternDash       = 0xF0F0F0F0F0F0F0F0;  // 1111000011110000111100001111000011110000111100001111000011110000
-    static const Pt::uint64_t patternDash       = 0xF8F8F8F8F8F8F8F8;  // 1111100011111000111110001111100011111000111110001111100011111000
-    static const Pt::uint64_t patternDoubleDash = 0xE0E00000E0E00000;// 1110000011100000000000000000000011100000111000000000000000000000
-    static const Pt::uint64_t patternDotDash    = 0x8E008E008E008E00;// 1000111000000000100011100000000010001110000000001000111000000000
-    */
-
-  //static const Pt::uint64_t patternDot        = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000
-  //static const Pt::uint64_t patternDash       = 0xF8F8F8F8F8F8F8F8; // 1111100011111000111110001111100011111000111110001111100011111000
-
-    static const Pt::uint64_t patternDot        = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010
-    static const Pt::uint64_t patternDash       = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110
-#endif
-
     // Select the pattern
     Pt::uint64_t patternSel;
 
     switch(style)
     {
         default:
-        case Pen::Dot         : patternSel = patternDot;              break;
-      //case Pen::DoubleDot   : patternSel = patternDoubleDot;        break;
-        case Pen::Dash        : patternSel = patternDash;             break;
-      //case Pen::DoubleDash  : patternSel = patternDoubleDash;       break;
-      //case Pen::DotDash     : patternSel = patternDotDash;          break;
-      //case Pen::UserDefined : patternSel = _pen.styleUserPattern(); break;
+        case Pen::Dot         : patternSel = patternDot;  break;
+        case Pen::Dash        : patternSel = patternDash; break;
+        case Pen::UserDefined : patternSel = userPattern; break;
     }
 
     // Counter for generating the patterns
-    //size_t gctr1P = 0;
     size_t gctrMP = 0;
 
     // Generate the pattern
-    //bool previous = 0;
     for(Pt::int8_t p = 0; p < PATTERN_BUFFER_NUM_OF_CELLS; ++p)
     {
         // Explode the pattern cell value from integer to array

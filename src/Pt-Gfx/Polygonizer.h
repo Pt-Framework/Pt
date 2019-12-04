@@ -54,9 +54,13 @@ class PatternState;
 class Polygonizer
 {
     public:
+        static const Pt::uint64_t patternDot;
+        static const Pt::uint64_t patternDash;
+
+    public:
         Polygonizer();
 
-        void setPattern(const Pen::Style& style);
+        void setPattern(const Pen::Style& style, Pt::uint64_t userPattern);
 
 
         void renderRoundedRect(std::vector<Polygon>& polygons,

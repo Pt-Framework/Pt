@@ -53,10 +53,18 @@ class LineStylesWidget : public Pt::Hmi::Control
 
             int y = 45;
 
+//#define USER_STYLE 0xB8B8B8B8B8B8B8B8
+
             if(1) {
+#ifdef USER_STYLE
+                Pen pen1Solid(red, 1, USER_STYLE, Pen::ButtCap);
+                Pen pen2Solid(red, 4, USER_STYLE, Pen::ButtCap);
+                Pen pen3Solid(red, 9, USER_STYLE, Pen::ButtCap);
+#else
                 Pen pen1Solid(red, 1, Pen::Solid, Pen::ButtCap);
                 Pen pen2Solid(red, 4, Pen::Solid, Pen::ButtCap);
                 Pen pen3Solid(red, 9, Pen::Solid, Pen::ButtCap);
+#endif
                 painter.setPen(pen1Solid);
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
@@ -99,8 +107,13 @@ class LineStylesWidget : public Pt::Hmi::Control
             }
 
             if(1) {
+#ifdef USER_STYLE
+                Pen pen2Solid(red, 4, USER_STYLE, Pen::SquareCap);
+                Pen pen3Solid(red, 9, USER_STYLE, Pen::SquareCap);
+#else
                 Pen pen2Solid(red, 4, Pen::Solid, Pen::SquareCap);
                 Pen pen3Solid(red, 9, Pen::Solid, Pen::SquareCap);
+#endif
                 painter.setPen(pen2Solid);
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
@@ -132,8 +145,13 @@ class LineStylesWidget : public Pt::Hmi::Control
             }
 
             if(1) {
+#ifdef USER_STYLE
+                Pen pen2Solid(red, 4, USER_STYLE, Pen::RoundCap);
+                Pen pen3Solid(red, 9, USER_STYLE, Pen::RoundCap);
+#else
                 Pen pen2Solid(red, 4, Pen::Solid, Pen::RoundCap);
                 Pen pen3Solid(red, 9, Pen::Solid, Pen::RoundCap);
+#endif
                 painter.setPen(pen2Solid);
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
