@@ -41,61 +41,127 @@ class LineStylesWidget : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
-            Color red = Color::fromRgb8(255, 0, 0);
-            Color lightBlue = Color::fromRgb8(100, 100, 255);
+            Color red        = Color::fromRgb8(255,   0,   0);
+            Color lightGreen = Color::fromRgb8(100, 255, 100);
+            Color lightBlue  = Color::fromRgb8(100, 100, 255);
 
-            painter.setPen(lightBlue);
+            painter.setPen( lightGreen );
             painter.setFont( Font("", 12) );
             painter.drawText( PointF(20, 22), text);
+            painter.setFont( Font("", 10) );
 
-            Pen pen1Solid(red, 1);
-            Pen pen2Solid(red, 4);
-            Pen pen3Solid(red, 9);
+            int y = 40;
 
-            painter.setPen(pen1Solid);
-            painter.drawLine( PointF(10, 40),
-                              PointF(180, 40) );
+            if(1) {
+                Pen pen1Solid(red, 1, Pen::Solid, Pen::ButtCap);
+                Pen pen2Solid(red, 4, Pen::Solid, Pen::ButtCap);
+                Pen pen3Solid(red, 9, Pen::Solid, Pen::ButtCap);
+                painter.setPen(pen1Solid);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen2Solid);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen3Solid);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
 
-            painter.setPen(pen2Solid);
-            painter.drawLine( PointF(10, 55),
-                              PointF(180, 55) );
+                Pen pen1Dot(red, 1, Pen::Dot, Pen::ButtCap);
+                Pen pen2Dot(red, 4, Pen::Dot, Pen::ButtCap);
+                Pen pen3Dot(red, 9, Pen::Dot, Pen::ButtCap);
+                painter.setPen(pen1Dot);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen2Dot);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen3Dot);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
 
-            painter.setPen(pen3Solid);
-            painter.drawLine( PointF(10, 70),
-                              PointF(180, 70) );
+                Pen pen1Dash(red, 1, Pen::Dash, Pen::ButtCap);
+                Pen pen2Dash(red, 4, Pen::Dash, Pen::ButtCap);
+                Pen pen3Dash(red, 9, Pen::Dash, Pen::ButtCap);
+                painter.setPen(pen1Dash);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen2Dash);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen3Dash);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
 
-            Pen pen1Dot(red, 1, Pen::Dot);
-            Pen pen2Dot(red, 4, Pen::Dot);
-            Pen pen3Dot(red, 9, Pen::Dot);
+                painter.setPen( lightBlue );
+                painter.drawText( PointF(20, y - 15 * 9), "ButtCap");
+                y += 15;
+            }
 
-            painter.setPen(pen1Dot);
-            painter.drawLine( PointF(10, 100),
-                              PointF(180, 100) );
+            if(1) {
+                Pen pen2Solid(red, 4, Pen::Solid, Pen::SquareCap);
+                Pen pen3Solid(red, 9, Pen::Solid, Pen::SquareCap);
+                painter.setPen(pen2Solid);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen3Solid);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
 
-            painter.setPen(pen2Dot);
-            painter.drawLine( PointF(10, 115),
-                              PointF(180, 115) );
+                Pen pen2Dot(red, 4, Pen::Dot, Pen::SquareCap);
+                Pen pen3Dot(red, 9, Pen::Dot, Pen::SquareCap);
+                painter.setPen(pen2Dot);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen3Dot);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
 
-            painter.setPen(pen3Dot);
-            painter.drawLine( PointF(10, 130),
-                              PointF(180, 130) );
+                Pen pen2Dash(red, 4, Pen::Dash, Pen::SquareCap);
+                Pen pen3Dash(red, 9, Pen::Dash, Pen::SquareCap);
+                painter.setPen(pen2Dash);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen3Dash);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
 
-            Pen pen1Dash(red, 1, Pen::Dash);
-            Pen pen2Dash(red, 4, Pen::Dash);
-            Pen pen3Dash(red, 9, Pen::Dash);
+                painter.setPen( lightBlue );
+                painter.drawText( PointF(20, y - 15 * 6), "SquareCap");
+                y += 15;
+            }
 
-            painter.setPen(pen1Dash);
-            painter.drawLine( PointF(10, 160),
-                              PointF(180, 160) );
+            if(1) {
+                Pen pen2Solid(red, 4, Pen::Solid, Pen::RoundCap);
+                Pen pen3Solid(red, 9, Pen::Solid, Pen::RoundCap);
+                painter.setPen(pen2Solid);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen3Solid);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
 
-            painter.setPen(pen2Dash);
-            painter.drawLine( PointF(10, 175),
-                              PointF(180, 175) );
+                Pen pen2Dot(red, 4, Pen::Dot, Pen::RoundCap);
+                Pen pen3Dot(red, 9, Pen::Dot, Pen::RoundCap);
+                painter.setPen(pen2Dot);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen3Dot);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
 
-            painter.setPen(pen3Dash);
-            painter.drawLine( PointF(10, 190),
-                              PointF(180, 190) );
+                Pen pen2Dash(red, 4, Pen::Dash, Pen::RoundCap);
+                Pen pen3Dash(red, 9, Pen::Dash, Pen::RoundCap);
+                painter.setPen(pen2Dash);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
+                painter.setPen(pen3Dash);
+                painter.drawLine( PointF(10, y),
+                                  PointF(180, y) ); y += 15;
 
+                painter.setPen( lightBlue );
+                painter.drawText( PointF(20, y - 15 * 6), "RoundCap");
+                y += 15;
+            }
 #if 0
             ///////////////////////////////////////////////////
 

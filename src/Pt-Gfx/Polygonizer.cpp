@@ -71,7 +71,8 @@ struct PatternState
     //, dstPCount0(0)
     , srcPoints(src)
     //, srcCount(pointCount), cellSize(penSize * 0.25f)
-    , srcCount(pointCount), cellSize(penSize * 0.5f)
+    //, srcCount(pointCount), cellSize(penSize * 0.5f)
+    , srcCount(pointCount), cellSize(penSize)
     , idx1(0)
     , remLen(-1.0f)
     , gatherLen(0.0f)
@@ -108,13 +109,11 @@ void Polygonizer::setPattern(const Pen::Style& style)
     static const Pt::uint64_t patternDotDash    = 0x8E008E008E008E00;// 1000111000000000100011100000000010001110000000001000111000000000
     */
 
+  //static const Pt::uint64_t patternDot        = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000
+  //static const Pt::uint64_t patternDash       = 0xF8F8F8F8F8F8F8F8; // 1111100011111000111110001111100011111000111110001111100011111000
 
-//  static const Pt::uint64_t patternDot        = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010
-    static const Pt::uint64_t patternDot        = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000
-
-  //static const Pt::uint64_t patternDash       = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110
-    static const Pt::uint64_t patternDash       = 0xF8F8F8F8F8F8F8F8; // 1111100011111000111110001111100011111000111110001111100011111000
-
+    static const Pt::uint64_t patternDot        = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010
+    static const Pt::uint64_t patternDash       = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110
 #endif
 
     // Select the pattern
@@ -1025,7 +1024,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
                 sagGeneratePolyLineSegment(state, pen, collisionDetection);
             }
             else {
-                std::cerr << "#1\n";
+                //std::cerr << "#1\n";
             }
             // Reset the "pattern" segment length
             state.patSegLen = 0.0f;
@@ -1044,24 +1043,28 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
                         state,
                         state.px,
                         state.py,
-                        state.px + state.cvx + state.uvx * state.patSegLen,
-                        state.py + state.cvy + state.uvy * state.patSegLen,
-                        pen,
-                        collisionDetection
-                    );
-                }
-                else {
-                    std::cerr << "#2\n";
-                    sagGenerateSimpleLineSegment(
-                        state,
-                        state.px,
-                        state.py,
+                        //state.px + state.cvx + state.uvx * state.patSegLen,
+                        //state.py + state.cvy + state.uvy * state.patSegLen,
                         state.px + state.uvx * state.patSegLen,
                         state.py + state.uvy * state.patSegLen,
                         pen,
                         collisionDetection
                     );
                 }
+                else {
+                    sagGenerateSimpleLineSegment(
+                        state,
+                        state.px,
+                        state.py,
+                        state.px + state.uvx * state.patSegLen - state.uvx,
+                        state.py + state.uvy * state.patSegLen - state.uvy,
+                        pen,
+                        collisionDetection
+                    );
+                }
+            }
+            else {
+                //std::cerr << "#2\n";
             }
             // Substract the remainder length
             state.remLen -= state.patSegLen;
