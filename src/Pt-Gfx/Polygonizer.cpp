@@ -1008,7 +1008,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             state.uvy    = vy / vz;
             state.cvx    = state.uvx * state.cellSize;
             state.cvy    = state.uvy * state.cellSize;
-            state.remLen = vz;
+            state.remLen = vz + 1.0f;
         }
 
         // If we have the complete length from the gathered points, process them into a thick polygon
