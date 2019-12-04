@@ -327,12 +327,16 @@ class PainterImpl
 #ifndef _WIN32_WCE
             switch( pen.capStyle() )
             {
+                case Gfx::Pen::FlatCap:
+                    penStyle |= PS_ENDCAP_FLAT;
+                    break;
+
                 case Gfx::Pen::RoundCap:
                     penStyle |= PS_ENDCAP_ROUND;
                     break;
-                
-                case Gfx::Pen::FlatCap:
-                    penStyle |= PS_ENDCAP_FLAT;
+
+                case Gfx::Pen::SquareCap:
+                    penStyle |= PS_ENDCAP_SQUARE;
                     break;
             }
 
@@ -344,6 +348,10 @@ class PainterImpl
                 
                 case Gfx::Pen::BevelJoin:
                      penStyle |= PS_JOIN_BEVEL;
+                     break;
+
+                case Gfx::Pen::MiterJoin:
+                     penStyle |= PS_JOIN_MITER;
                      break;
             }
 #endif
