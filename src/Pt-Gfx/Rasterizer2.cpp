@@ -165,34 +165,35 @@ void Rasterizer2::updatePenPattern()
 
     // Generate the pattern
     bool previous = 0;
-    for(Pt::int8_t p = 0; p < PATTERN_BUFFER_NUM_OF_CELLS; ++p)
+    for(Pt::int8_t p = 0; p < (PATTERN_BUFFER_NUM_OF_CELLS + 1); ++p)
     {
         // Get the pattern cell value
-        const bool current = patternSel & ( (Pt::uint64_t) 1 << ( PATTERN_BUFFER_NUM_OF_CELLS - p - 1 ) );
+        const Pt::int8_t idx     = (p == PATTERN_BUFFER_NUM_OF_CELLS) ? 0 : p;
+        const bool       current = patternSel & ( (Pt::uint64_t) 1 << ( PATTERN_BUFFER_NUM_OF_CELLS - idx - 1 ) );
 
         // --- One-pixel pattern ---
         // Pattern cell change from 0 to 0
         if(!previous && !current) {
-            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
+            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
                 _patternBuffer1P[gctr1P++] = 0;
             }
         }
         // Pattern cell change from 1 to 1
         else if(previous && current) {
-            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
+            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
                 _patternBuffer1P[gctr1P++] = 255;
             }
         }
         // Pattern cell change from 0 to 1
         else if(!previous && current) {
-            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
-                _patternBuffer1P[gctr1P++] = i * 255 / PATTERN_BUFFER_SCALE_FACTOR;
+            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
+                _patternBuffer1P[gctr1P++] = i * 255 / PATTERN_BUFFER_1P_SCALE_FACTOR;
             }
         }
         // Pattern cell change from 1 to 0
         else if(previous && !current) {
-            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
-                _patternBuffer1P[gctr1P++] = 255 - i * 255 / PATTERN_BUFFER_SCALE_FACTOR;
+            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
+                _patternBuffer1P[gctr1P++] = 255 - i * 255 / PATTERN_BUFFER_1P_SCALE_FACTOR;
             }
         }
         // Copy the pattern cell value
@@ -219,7 +220,7 @@ void Rasterizer2::updatePenPattern()
 
 Pt::uint8_t Rasterizer2::patternBuffer1PAlpha(Pt::int32_t idx) const
 {
-    return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ];
+    return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ];
 }
 
 
@@ -242,8 +243,8 @@ Pt::uint8_t Rasterizer2::patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y,
 
 void Rasterizer2::patternBuffer1PAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const
 {
-    a0 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ] * alpha0 / 255;
-    a1 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ] * alpha1 / 255;
+    a0 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha0 / 255;
+    a1 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha1 / 255;
 }
 
 
@@ -748,7 +749,7 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
     }
     else
     {
-        Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+        Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_1P_COUNTER_START;
         rasterNarrowPatternedLine(x1, y1, x2, y2, _pen.color(), fpiCtrInOut, maskInOut);
     }
 }
@@ -787,7 +788,7 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
     memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 
     bool solid = _pen.style() == Pen::Solid;
-    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_1P_COUNTER_START;
 
     // From point N to point (N + 1), successively
     std::size_t pc1 = pointCount - 1;
@@ -1010,7 +1011,7 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
     memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 
     bool solid = _pen.style() == Pen::Solid;
-    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_1P_COUNTER_START;
 
     // From point N to point (N + 1), successively
     std::size_t pc1 = pointCount - 1;

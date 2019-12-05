@@ -47,7 +47,7 @@ namespace Gfx {
 //    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 //
 //    // Counter for pattern buffer
-//    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+//    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_1P_COUNTER_START;
 //
 //    // Draw the curves
 //    for(size_t i = 0; i < (pointCount - 1); i += 2) {
@@ -205,7 +205,7 @@ void Rasterizer2::rasterNarrowQuadraticBezier(Pt::int32_t x1, Pt::int32_t y1,
         const Pt::int32_t l21  = sqrtf(dx21 * dx21 + dy21 * dy21);
         const Pt::int32_t s321 = s32 + s21;
         const Pt::int32_t l321 = l32 + l21;
-        fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_SCALE_FACTOR * s321) / l321;
+        fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_1P_SCALE_FACTOR * s321) / l321;
     }
 
     // Approximated error distance
@@ -222,7 +222,7 @@ void Rasterizer2::rasterNarrowQuadraticBezier(Pt::int32_t x1, Pt::int32_t y1,
             if(fpiCtrInOut) {
                 patAlpha = _patternBuffer1P[FIXED_POINT_TO_INT(*fpiCtrInOut)];
                 *fpiCtrInOut += fpiCtrInc;
-                if(*fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) *fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+                if(*fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) *fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             // Approximate the error distance
             cur = std::min(dx + xy, -xy - dy);
@@ -306,7 +306,7 @@ void Rasterizer2::rasterNarrowQuadraticBezier(Pt::int32_t x1, Pt::int32_t y1,
             if(fpiCtrInOut) {
                 patAlpha = _patternBuffer1P[FIXED_POINT_TO_INT(*fpiCtrInOut)];
                 *fpiCtrInOut += fpiCtrInc;
-                if(*fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) *fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+                if(*fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) *fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             // Plot curve
             XW_SET_PIXEL(x1, y1, 0, patAlpha);

@@ -593,8 +593,7 @@ class Rasterizer2
         ConstPixel       _penPixel;
 
         // Pattern buffer for one-pixel line
-        Pt::uint8_t      _patternBuffer1P[PATTERN_BUFFER_NUM_OF_CELLS *
-                                          PATTERN_BUFFER_SCALE_FACTOR];
+        Pt::uint8_t      _patternBuffer1P[ ( PATTERN_BUFFER_NUM_OF_CELLS + 1 )* PATTERN_BUFFER_1P_SCALE_FACTOR ];
         Font             _font;
         FTC_FaceID       _faceId;
         std::size_t      _fontSize;

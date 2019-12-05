@@ -1374,7 +1374,7 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
     {
         // Get the pattern
         const Pt::uint8_t curPat = pBuff[piCtrInOut++];
-        if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
+        if(piCtrInOut >= PATTERN_BUFFER_MP_COUNTER_MAX) piCtrInOut -= PATTERN_BUFFER_MP_COUNTER_MAX;
         // Determine whether we should draw this segment as well as its coordinate
         const bool draw = (!curPat && prvPat);
         if(curPat && !prvPat) {

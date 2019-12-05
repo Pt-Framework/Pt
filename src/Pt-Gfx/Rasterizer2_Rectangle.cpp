@@ -61,7 +61,7 @@ void Rasterizer2::rasterNarrowRect(const Point& tl, const Point& br)
     }
     else // Patterned line
     {
-        Pt::int32_t  fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+        Pt::int32_t  fpiCtrInOut = PATTERN_BUFFER_1P_COUNTER_START;
         DrawLineMask mask;
         memcpy(mask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
         rasterNarrowPatternedLine(minX, minY, maxX, minY, _pen.color(), fpiCtrInOut, &mask);
@@ -87,7 +87,7 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
     memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 
     // pattern state
-    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_1P_COUNTER_START;
 
     // bottom left corner
     rasterNarrowQuadraticBezier(
@@ -179,7 +179,7 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     Rect rect(tl, br);
 
     Rect clipRect(_currentClip.topLeft(), Size(_currentClip.width() + 1, _currentClip.height() + 1));
-   
+
     rect = rect.intersect(clipRect);
 
     if (rect.isNull())

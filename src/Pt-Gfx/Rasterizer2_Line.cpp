@@ -204,7 +204,7 @@ void Rasterizer2::rasterNarrowPatternedLine(Pt::int32_t x1, Pt::int32_t y1,
     const Pt::int32_t sizeL = sqrtf(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_SCALE_FACTOR * sizeS / sizeL;
+    const Pt::int32_t fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_1P_SCALE_FACTOR * sizeS / sizeL;
 
     // Check for 45-degree line
     if(abs(x2 - x1) == abs(y2 - y1)) {
@@ -238,9 +238,7 @@ void Rasterizer2::rasterNarrowPatternedLine_F(float x1, float y1,
     const float sizeL = sqrt(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = lround(FIXED_POINT_CONSTANT_ISQRT2 *
-                                         PATTERN_BUFFER_SCALE_FACTOR *
-                                         sizeS / sizeL);
+    const Pt::int32_t fpiCtrInc = lround( FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_1P_SCALE_FACTOR * sizeS / sizeL );
 
     // Rasterize line
     rasterNarrowPatternedGLineSegmentXWAA_F(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
@@ -785,7 +783,7 @@ void Rasterizer2::rasterNarrowPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t 
         // Get alpha from the pattern
         Pt::uint8_t patAlpha = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
         fpiCtrInOut += fpiCtrInc;
-        if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+        if(fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
         // Check if we should skip drawing the pixel
         bool skipDrawing = !patAlpha;
         for(Pt::int32_t i = 0; !skipDrawing && i < 4; ++i) {
@@ -862,7 +860,7 @@ void Rasterizer2::rasterNarrowPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int3
         // Get alpha from the pattern
         Pt::uint8_t patAlpha = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
         fpiCtrInOut += fpiCtrInc;
-        if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+        if(fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
         // Check if we should skip drawing the pixel
         bool skipDrawing = !patAlpha;
         for(Pt::int32_t i = 0; !skipDrawing && i < 4; ++i) {
@@ -981,9 +979,9 @@ void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int3
     Pt::int32_t fpiCtrNextOut = 0;
     if(swapDir) {
         const Pt::int32_t lineLen = to - from + 1;
-        fpiCtrNextOut = (fpiCtrInOut + fpiCtrInc * lineLen) % PATTERN_BUFFER_COUNTER_MAX1P;
+        fpiCtrNextOut = (fpiCtrInOut + fpiCtrInc * lineLen) % PATTERN_BUFFER_1P_COUNTER_MAX;
         fpiCtrInOut   = fpiCtrNextOut - fpiCtrInc;
-        if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_COUNTER_MAX1P;
+        if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_1P_COUNTER_MAX;
     }
 
     // Draw the pixels
@@ -994,11 +992,11 @@ void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int3
             Pt::uint8_t pa = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
             if(swapDir) {
                 fpiCtrInOut -= fpiCtrInc;
-                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_COUNTER_MAX1P;
+                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             else {
                 fpiCtrInOut += fpiCtrInc;
-                if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+                if(fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             // Draw the pixels
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
@@ -1022,11 +1020,11 @@ void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int3
             Pt::uint8_t pa = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
             if(swapDir) {
                 fpiCtrInOut -= fpiCtrInc;
-                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_COUNTER_MAX1P;
+                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             else {
                 fpiCtrInOut += fpiCtrInc;
-                if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+                if(fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             // Draw the pixels
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
@@ -1134,9 +1132,9 @@ void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA_F(float x1, float y1,
     Pt::int32_t fpiCtrNextOut = 0;
     if(swapDir) {
         const Pt::int32_t lineLen = to - from + 1;
-        fpiCtrNextOut = (fpiCtrInOut + fpiCtrInc * lineLen) % PATTERN_BUFFER_COUNTER_MAX1P;
+        fpiCtrNextOut = (fpiCtrInOut + fpiCtrInc * lineLen) % PATTERN_BUFFER_1P_COUNTER_MAX;
         fpiCtrInOut   = fpiCtrNextOut - fpiCtrInc;
-        if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_COUNTER_MAX1P;
+        if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_1P_COUNTER_MAX;
     }
 
     // Draw the pixels
@@ -1147,11 +1145,11 @@ void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA_F(float x1, float y1,
             Pt::uint8_t pa = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
             if(swapDir) {
                 fpiCtrInOut -= fpiCtrInc;
-                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_COUNTER_MAX1P;
+                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             else {
                 fpiCtrInOut += fpiCtrInc;
-                if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+                if(fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             // Draw the pixels
             const Pt::int32_t fypxli = Pt::lround(floor(ypxli));
@@ -1178,11 +1176,11 @@ void Rasterizer2::rasterNarrowPatternedGLineSegmentXWAA_F(float x1, float y1,
             Pt::uint8_t pa = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
             if(swapDir) {
                 fpiCtrInOut -= fpiCtrInc;
-                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_COUNTER_MAX1P;
+                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             else {
                 fpiCtrInOut += fpiCtrInc;
-                if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+                if(fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
             }
             // Draw the pixels
             const Pt::int32_t fypxli = Pt::lround(floor(ypxli));

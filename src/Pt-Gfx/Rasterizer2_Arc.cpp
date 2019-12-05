@@ -248,7 +248,7 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     const bool solid = (pen().style() == Pen::Solid);
 
     // Calculate the scaling factor for retrieving alphas from the pattern buffer
-    const float pbScale = solid ? 1.0f : std::max(radX, radY) / (float) (64 / PATTERN_BUFFER_SCALE_FACTOR);
+    const float pbScale = solid ? 1.0f : std::max(radX, radY) / (float) (64 / PATTERN_BUFFER_1P_SCALE_FACTOR);
 
     // Determine we need to scale the indexes to the pattern buffer
     const bool scaleWP = (radX != radY);
