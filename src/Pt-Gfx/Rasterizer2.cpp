@@ -141,7 +141,8 @@ void Rasterizer2::setPen( const Pen& pen )
     _penPixel.reset(_penBuffer.view(), 0, 0);
 
     if( pen.style() != Pen::Solid )
-        _polygonizer.setPattern( pen.style(), pen.styleUserPattern() );
+        _polygonizer.setPattern( pen.style(), pen.capStyle(), 
+                                 pen.styleUserPattern() );
 
     updatePenPattern();
 }

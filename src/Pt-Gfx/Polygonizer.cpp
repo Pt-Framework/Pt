@@ -86,6 +86,10 @@ const double Polygonizer::VecResScaleDn = 1.0 / 64.0;
 // Predefined patterns
 const Pt::uint64_t Polygonizer::patternDot  = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010;
 const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110;
+const Pt::uint64_t patternDotCapped         = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000;
+
+// what could we do here ????
+const Pt::uint64_t patternDashCapped        = 0xCCCCCCCCCCCCCCCC; // 1100110011001100110011001100110011001100110011001100110011001100;
 
 //static const Pt::uint64_t patternDoubleDot  = 0xA0A0A0A0A0A0A0A0;// 1010000010100000101000001010000010100000101000001010000010100000
 //static const Pt::uint64_t patternDoubleDash = 0xEE00EE00EE00EE00;// 1110111000000000111011100000000011101110000000001110111000000000
@@ -96,7 +100,8 @@ Polygonizer::Polygonizer()
 {
 }
 
-void Polygonizer::setPattern(const Pen::Style& style, Pt::uint64_t userPattern)
+void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap, 
+                             Pt::uint64_t userPattern)
 {
     // Select the pattern
     Pt::uint64_t patternSel;
@@ -104,9 +109,29 @@ void Polygonizer::setPattern(const Pen::Style& style, Pt::uint64_t userPattern)
     switch(style)
     {
         default:
-        case Pen::Dot         : patternSel = patternDot;  break;
-        case Pen::Dash        : patternSel = patternDash; break;
-        case Pen::UserDefined : patternSel = userPattern; break;
+        case Pen::Dot:
+        {
+            if(cap == Pen::SquareCap || cap == Pen::RoundCap)
+                patternSel = patternDotCapped; // what could we do here ????
+            else
+              patternSel = patternDot;  
+            
+            break;
+        }
+
+        case Pen::Dash:
+        {
+            if(cap == Pen::SquareCap || cap == Pen::RoundCap)
+                patternSel = patternDashCapped;
+            else
+                patternSel = patternDash; 
+         
+          break;
+        }
+        
+        case Pen::UserDefined: 
+            patternSel = userPattern; 
+            break;
     }
 
     // Counter for generating the patterns
@@ -880,6 +905,32 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
         done = sagPolygonPoints(state, !!refPat, pen, collisionDetection);
     }
 }
+
+
+//void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
+//                                            const PointF* src, size_t pointCount,
+//                                            const Pen& pen, bool collisionDetection)
+//{
+//    // instead of _patternBufferMP: draw 6 pixels, then 12 pixels space, then repeat
+//    float linePattern[] = { 6.0, 12.0 };
+//    unsigned linePatternSize = 2;
+//
+//    PatternState state(polygons, src, pointCount, 1);
+//
+//    bool done = false;
+//    bool draw = true;
+//    unsigned n = 0;
+//    while( ! done )
+//    {
+//      state.patSegLen = linePattern[n];
+//
+//      done = sagPolygonPoints(state, draw, pen, collisionDetection);
+//      draw = ! draw;
+//
+//      if(++n >= linePatternSize)
+//       n = 0;
+//    }
+//}
 
 
 //

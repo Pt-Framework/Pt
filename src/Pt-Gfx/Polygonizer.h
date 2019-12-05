@@ -61,7 +61,8 @@ class Polygonizer
     public:
         Polygonizer();
 
-        void setPattern(const Pen::Style& style, Pt::uint64_t userPattern);
+        void setPattern(const Pen::Style& style, const Pen::CapStyle& cap, 
+                        Pt::uint64_t userPattern);
 
 
         void renderRoundedRect(std::vector<Polygon>& polygons,
