@@ -61,7 +61,7 @@ class Polygonizer
     public:
         Polygonizer();
 
-        void setPattern(const Pen::Style& style, const Pen::CapStyle& cap, 
+        void setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
                         Pt::uint64_t userPattern);
 
 
@@ -85,9 +85,12 @@ class Polygonizer
                                 const PointF* points, const std::size_t n,
                                 const Pen& pen, bool useNonZeroFillingRule);
 
+        /*
+         // NOT USED ANYMORE !!!
         void renderWideLine(std::vector<Polygon>& polygons,
                             const PointF& from, const PointF& to,
                             const Pen& pen);
+        */
 
     private:
         void renderRoundedRectPoints(std::vector<PointF>& dst,
@@ -140,11 +143,14 @@ class Polygonizer
                                     float x1, float y1, float x2, float y2,
                                     const Pen& pen, bool openingCap, bool closingCap);
 
+        /*
+         // NOT USED ANYMORE !!!
         void renderPatternedSingleLineSegment(std::vector<Polygon>& polygons,
                                               float x1, float y1,
                                               float x2, float y2,
                                               Pt::int32_t& piCtrInOut,
                                               const Pen& pen);
+        */
 
         bool joinClosedWidePolyline(std::vector<PointF>& outer,
                                     std::vector<PointF>& inner,

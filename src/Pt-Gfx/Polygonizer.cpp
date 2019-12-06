@@ -691,6 +691,8 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
 }
 
 
+/*
+// NOT USED ANYMORE !!!
 // Just as fast as calling renderWidePolyline with just two points...
 void Polygonizer::renderWideLine(std::vector<Polygon>& polygons,
                                   const PointF& from, const PointF& to,
@@ -714,6 +716,7 @@ void Polygonizer::renderWideLine(std::vector<Polygon>& polygons,
                                          to.x(), to.y(), piCtrInOut, pen);
     }
 }
+*/
 
 
 void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
@@ -1425,6 +1428,8 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
 }
 
 
+/*
+// NOT USED ANYMORE !!!
 void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygons,
                                                    float x1, float y1,
                                                    float x2, float y2,
@@ -1507,6 +1512,7 @@ void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygon
         }
     }
 }
+*/
 
 
 bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
