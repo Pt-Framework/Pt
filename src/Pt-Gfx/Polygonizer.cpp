@@ -86,11 +86,11 @@ const double Polygonizer::VecResScaleDn = 1.0 / 64.0;
 // Predefined patterns
 const Pt::uint64_t Polygonizer::patternDot  = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010;
 const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110;
-const Pt::uint64_t patternDotCapped         = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000;
 
-// what could we do here ????
-const Pt::uint64_t patternDashCapped        = 0xCCCCCCCCCCCCCCCC; // 1100110011001100110011001100110011001100110011001100110011001100;
+//const Pt::uint64_t patternDotCapped         = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000;
+//const Pt::uint64_t patternDashCapped        = 0xCCCCCCCCCCCCCCCC; // 1100110011001100110011001100110011001100110011001100110011001100;
 
+// !!! UNUSED NOW !!!
 //static const Pt::uint64_t patternDoubleDot  = 0xA0A0A0A0A0A0A0A0;// 1010000010100000101000001010000010100000101000001010000010100000
 //static const Pt::uint64_t patternDoubleDash = 0xEE00EE00EE00EE00;// 1110111000000000111011100000000011101110000000001110111000000000
 //static const Pt::uint64_t patternDotDash    = 0x9C9C9C9C9C9C9C9C;// 1001110010011100100111001001110010011100100111001001110010011100
@@ -111,22 +111,26 @@ void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
         default:
         case Pen::Dot:
         {
+            /*
             if(cap == Pen::SquareCap || cap == Pen::RoundCap)
-                patternSel = patternDotCapped; // what could we do here ????
+                patternSel = patternDotCapped;
             else
-              patternSel = patternDot;
-
+                patternSel = patternDot;
+            */
+            patternSel = patternDot;
             break;
         }
 
         case Pen::Dash:
         {
+            /*
             if(cap == Pen::SquareCap || cap == Pen::RoundCap)
                 patternSel = patternDashCapped;
             else
                 patternSel = patternDash;
-
-          break;
+            */
+            patternSel = patternDash;
+            break;
         }
 
         case Pen::UserDefined:
@@ -1244,6 +1248,15 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
+    // #@#
+    // Adjust the coordinates (thus the line's length) based on the line and cap styles
+    if(pen.style() != Pen::Solid && pen.capStyle() != Pen::ButtCap) {
+        x1 += (dx * 0.75f);
+        y1 += (dy * 0.75f);
+        x2 -= (dx * 0.75f);
+        y2 -= (dy * 0.75f);
+    }
+
     // Generate points (CCW)
     // --- Begin point ---
     switch(pen.capStyle()) {
@@ -1359,7 +1372,16 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size()/*, pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::RoundHoleCap*/);
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
+
+    // #@#
+    // Adjust the coordinates (thus the line's length) based on the line and cap styles
+    if(pen.style() != Pen::Solid && pen.capStyle() != Pen::ButtCap) {
+        x1 += (dx * 0.75f);
+        y1 += (dy * 0.75f);
+        x2 -= (dx * 0.75f);
+        y2 -= (dy * 0.75f);
+    }
 
     // Generate points (CCW)
 

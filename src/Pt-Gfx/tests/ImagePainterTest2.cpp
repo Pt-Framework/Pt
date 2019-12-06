@@ -82,7 +82,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
 
 #define TEST_DRAW_ELLIPSES_ARCS                 1
-#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
+#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     1
 #define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
