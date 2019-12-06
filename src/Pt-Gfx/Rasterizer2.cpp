@@ -141,12 +141,108 @@ void Rasterizer2::setPen( const Pen& pen )
     _penPixel.reset(_penBuffer.view(), 0, 0);
 
     if( pen.style() != Pen::Solid )
-        _polygonizer.setPattern( pen.style(), pen.capStyle(), 
+        _polygonizer.setPattern( pen.style(), pen.capStyle(),
                                  pen.styleUserPattern() );
 
     updatePenPattern();
 }
 
+#ifdef DYNAMIC_PPB_1P
+
+void Rasterizer2::updatePenPattern()
+{
+
+    // Test pattern
+    const Pt::uint8_t selPattern[] = { 3, 5, 6, 2 };
+    const Pt::uint8_t selPatCount  = sizeof(selPattern) / sizeof(selPattern[0]);
+
+    // Calculate the expanded size of the pattern
+    Pt::int32_t expPatCount = 0;
+
+    for(Pt::uint8_t i = 0; i < selPatCount; ++i) {
+        expPatCount += selPattern[i];
+    }
+
+    // Expand the pattern
+    std::vector<bool> expPattern;
+    expPattern.resize(expPatCount);
+
+    bool        draw = true;
+    Pt::int32_t k    = 0;
+    for(Pt::uint8_t i = 0; i < selPatCount; ++i) {
+        for(Pt::uint8_t j = 0; j < selPattern[i]; ++j) {
+            expPattern[k++] = draw;
+        }
+        draw = !draw;
+    }
+
+    // Resize the pattern buffer
+    const Pt::int32_t patternBuffer1PDynSize = (expPatCount + 1) * PATTERN_BUFFER_1P_SCALE_FACTOR;
+
+    _patternBuffer1PDyn.clear();
+    _patternBuffer1PDynCntMax = 0;
+
+    _patternBuffer1PDyn.resize(patternBuffer1PDynSize);
+    _patternBuffer1PDynCntMax = FIXED_POINT_FROM_INT(patternBuffer1PDynSize);
+
+    // Counter for generating the patterns
+    size_t gctr1P = 0;
+
+    // Generate the pattern
+    bool previous = false;
+    for(Pt::int32_t p = 0; p <= expPatCount; ++p)
+    {
+        // Get the pattern cell value
+        const Pt::int8_t idx     = (p == expPatCount) ? 0 : p;
+        const bool       current = expPattern[idx];
+
+        // --- One-pixel pattern ---
+        // Pattern cell change from 0 to 0
+        if(!previous && !current) {
+            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
+                _patternBuffer1PDyn[gctr1P++] = 0;
+            }
+        }
+        // Pattern cell change from 1 to 1
+        else if(previous && current) {
+            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
+                _patternBuffer1PDyn[gctr1P++] = 255;
+            }
+        }
+        // Pattern cell change from 0 to 1
+        else if(!previous && current) {
+            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
+                _patternBuffer1PDyn[gctr1P++] = i * 255 / PATTERN_BUFFER_1P_SCALE_FACTOR;
+            }
+        }
+        // Pattern cell change from 1 to 0
+        else if(previous && !current) {
+            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
+                _patternBuffer1PDyn[gctr1P++] = 255 - i * 255 / PATTERN_BUFFER_1P_SCALE_FACTOR;
+            }
+        }
+        // Copy the pattern cell value
+        previous = current;
+    }
+
+    // Transfom the pattern - without anti-aliasing
+    if( ! _aaMode )
+    {
+        for(size_t i = 0; i < gctr1P; ++i) {
+            if(_patternBuffer1PDyn[i] > 127) _patternBuffer1PDyn[i] = 255;
+            else                             _patternBuffer1PDyn[i] = 0;
+        }
+    }
+    // Transfom the pattern - with anti-aliasing
+    else
+    {
+        for(size_t i = 0; i < gctr1P; ++i) {
+            _patternBuffer1PDyn[i] = XWAA_WFILTER[ 255 - _patternBuffer1PDyn[i] ];
+        }
+    }
+}
+
+#else
 
 void Rasterizer2::updatePenPattern()
 {
@@ -165,7 +261,7 @@ void Rasterizer2::updatePenPattern()
     size_t gctr1P = 0;
 
     // Generate the pattern
-    bool previous = 0;
+    bool previous = false;
     for(Pt::int8_t p = 0; p < (PATTERN_BUFFER_NUM_OF_CELLS + 1); ++p)
     {
         // Get the pattern cell value
@@ -218,10 +314,16 @@ void Rasterizer2::updatePenPattern()
     }
 }
 
+#endif
+
 
 Pt::uint8_t Rasterizer2::patternBuffer1PAlpha(Pt::int32_t idx) const
 {
+#ifdef DYNAMIC_PPB_1P
+    return _patternBuffer1PDyn[ idx % FIXED_POINT_TO_INT(_patternBuffer1PDynCntMax) ];
+#else
     return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ];
+#endif
 }
 
 
@@ -244,8 +346,13 @@ Pt::uint8_t Rasterizer2::patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y,
 
 void Rasterizer2::patternBuffer1PAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const
 {
+#ifdef DYNAMIC_PPB_1P
+    a0 = (Pt::uint32_t) _patternBuffer1PDyn[ idx % FIXED_POINT_TO_INT(_patternBuffer1PDynCntMax) ] * alpha0 / 255;
+    a1 = (Pt::uint32_t) _patternBuffer1PDyn[ idx % FIXED_POINT_TO_INT(_patternBuffer1PDynCntMax) ] * alpha1 / 255;
+#else
     a0 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha0 / 255;
     a1 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha1 / 255;
+#endif
 }
 
 
