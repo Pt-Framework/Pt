@@ -861,7 +861,8 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
     polygons.resize( polygons.size() + 1 );
     Polygon& polygon = polygons.back();
 
-    polygon.assign( &pointsFPolygon[0], pointsFPolygon.size() );
+    polygon.assign( pointsFPolygon.empty() ? 0 : &pointsFPolygon[0], 
+                    pointsFPolygon.size() );
 }
 
 
