@@ -798,7 +798,7 @@ void Rasterizer2::drawLine(const PointF& from, const PointF& to)
     }
 
     std::vector<Polygon> polygons;
-    _polygonizer.renderWidePolyline(polygons, points, 2, _pen, true);
+    _polygonizer.renderWidePolyline(polygons, points, 2, _pen, true, false);
 
     // no performance benefit to use renderWideLine
     //_polygonizer.renderWideLine( polygons, from, to, _rasterizer->pen() );
@@ -922,7 +922,7 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
 void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount)
 {
     std::vector<Polygon> polygons;
-    _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen, true);
+    _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen, true, false);
 
     const bool isSolid = _pen.style() == Pen::Solid;
     //const bool isClosed = points[0] == points[pointCount - 1];

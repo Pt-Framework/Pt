@@ -373,14 +373,14 @@ static void testDrawRoundRect(const char* title, Image& image, Painter& painter)
     ip2->drawRoundedRect( RectF(PointF(480, 290), SizeF(200, 100)), 25 );
 
     // Outline - thin - patterned
-    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dash, Pen::RoundCap, Pen::MiterJoin ) );
+    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dash, Pen::RoundCap, Pen::BevelJoin ) );
     ip2->drawRoundedRect( RectF(PointF(712,  20), SizeF(200, 100)), 10 );
 
     // Outline - thick - patterned
-    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap, Pen::MiterJoin ));
+    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap, Pen::BevelJoin ));
     ip2->drawRoundedRect( RectF(PointF(712, 160), SizeF(200, 100)), 10 );
 
-    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap, Pen::MiterJoin ));
+    ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap, Pen::BevelJoin ));
     ip2->drawRoundedRect( RectF(PointF(712, 290), SizeF(200, 100)), 25 );
 
     ip2->setPen( Color::fromRgb8(255, 127, 127, 127) );
