@@ -128,8 +128,12 @@ static const std::string formatCaption(const Painter& painter, CompositionMode c
 
 static void sdlPreviewRGB888Buffer(const std::string& title, const Pt::uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsPNG)
 {
-    // !!! DISABLE PNG GENERATION !!!
+    // Enable/disable PNG generation
+#if defined(WITH_EXPERIMENTAL_GFX)
     saveImageAsPNG = true;
+#else
+    saveImageAsPNG = false;
+#endif
 
     // Save the image as a PNG file
     if(saveImageAsPNG) {
