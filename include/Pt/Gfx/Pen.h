@@ -68,11 +68,11 @@ class PT_GFX_API Pen
         enum CapStyle { ButtCap          = 0,
                         SquareCap        = 1,
                         RoundCap         = 2,
-                        TriangularOutCap = 3,
-                        TriangularInCap  = 4,
-                        RoundHoleCap     = 5,
-                        Arrow1Cap        = 6,
-                        Arrow2Cap        = 7,
+                        //TriangularOutCap = 3,
+                        //TriangularInCap  = 4,
+                        //RoundHoleCap     = 5,
+                        //Arrow1Cap        = 6,
+                        //Arrow2Cap        = 7,
                         FlatCap          = 0, // FlatCap       and ButtCap          are the same
                         ProjectingCap    = 1, // ProjectingCap and SquareCap        are the same
                         TriangularCap    = 3, // TriangularCap and TriangularOutCap are the same

@@ -129,7 +129,7 @@ static const std::string formatCaption(const Painter& painter, CompositionMode c
 static void sdlPreviewRGB888Buffer(const std::string& title, const Pt::uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsPNG)
 {
     // !!! DISABLE PNG GENERATION !!!
-    saveImageAsPNG = false;
+    saveImageAsPNG = true;
 
     // Save the image as a PNG file
     if(saveImageAsPNG) {

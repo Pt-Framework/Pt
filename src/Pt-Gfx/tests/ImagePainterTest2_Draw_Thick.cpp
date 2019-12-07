@@ -2,12 +2,12 @@ static void testDrawThickLine_impl(
     const char* title, Image& image, Painter& painter,
     const Pen& penBCapBJoin,
     const Pen& penSCapBJoin,
-    const Pen& penRCapBJoin,
-    const Pen& penICapBJoin,
-    const Pen& penOCapNJoin,
-    const Pen& penOCapBJoin,
-    const Pen& penOCapMJoin,
-    const Pen& penOCapRJoin
+    const Pen& penRCapBJoin
+    //const Pen& penICapBJoin,
+    //const Pen& penOCapNJoin,
+    //const Pen& penOCapBJoin,
+    //const Pen& penOCapMJoin,
+    //const Pen& penOCapRJoin
 )
 {
     resetImage(image);
@@ -148,6 +148,7 @@ static void testDrawThickLine_impl(
     }
     painter.setPen(penText); painter.drawText( PointF(220, 370 - 30), "Round" );
 
+    /*
     painter.setPen(penOCapBJoin);
     painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
     painter.drawLine( PointF(320, 430 - 30), PointF(400, 380 - 30) );
@@ -296,9 +297,11 @@ static void testDrawThickLine_impl(
 
         ip2->setPen(penText); painter.drawText( PointF(650 - 600 - 20, 100 + 400), "None" );
     }
+    */
 
     // Test bezier
     if(ip2) {
+        /*
         // Test caps
         const PointF bezier1a[] = { // CCW
             PointF(150 + 310, 150 + 330),
@@ -306,7 +309,7 @@ static void testDrawThickLine_impl(
             PointF(100 + 310, 100 + 330)
         };
         ip2->setPen(penSCapBJoin);
-        //ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
+        ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
         if(true) {
             ip2->setPen(penRef);
             //ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
@@ -323,7 +326,9 @@ static void testDrawThickLine_impl(
             ip2->setPen(penRef);
             //ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
         }
+        */
 
+        /*
         const PointF bezier1c[] = { // CCW
             PointF(150 + 310, 150 + 420),
             PointF(150 + 310, 100 + 420),
@@ -400,6 +405,7 @@ static void testDrawThickLine_impl(
             ip2->setPen(penRef);
             //ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
         }
+        */
     }
 
 #endif
@@ -415,23 +421,23 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap,          Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::SquareCap,        Pen::BevelJoin);
     Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::RoundCap,         Pen::BevelJoin);
-    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularInCap,  Pen::BevelJoin);
 
-    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::NoJoin   );
-    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::BevelJoin);
-    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::MiterJoin);
-    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::RoundJoin);
+  //Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularInCap,  Pen::BevelJoin);
+  //Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::NoJoin   );
+  //Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::BevelJoin);
+  //Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::MiterJoin);
+  //Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::RoundJoin);
 
     testDrawThickLine_impl(
         title, image, painter,
         penBCapBJoin,
         penSCapBJoin,
-        penRCapBJoin,
-        penICapBJoin,
-        penOCapNJoin,
-        penOCapBJoin,
-        penOCapMJoin,
-        penOCapRJoin
+        penRCapBJoin
+      //penICapBJoin,
+      //penOCapNJoin,
+      //penOCapBJoin,
+      //penOCapMJoin,
+      //penOCapRJoin
     );
 }
 
@@ -440,33 +446,34 @@ static void testDrawPatternedThickLine(const char* title, Image& image, Painter&
     Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::ButtCap,          Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::SquareCap,        Pen::BevelJoin);
     Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::RoundCap,         Pen::BevelJoin);
-    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularInCap,  Pen::BevelJoin);
 
-    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::NoJoin   );
-    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::BevelJoin);
-    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::MiterJoin);
-    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::RoundJoin);
+  //Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularInCap,  Pen::BevelJoin);
+  //Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::NoJoin   );
+  //Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::BevelJoin);
+  //Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::MiterJoin);
+  //Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::RoundJoin);
 
     testDrawThickLine_impl(
         title, image, painter,
         penBCapBJoin,
         penSCapBJoin,
-        penRCapBJoin,
-        penICapBJoin,
-        penOCapNJoin,
-        penOCapBJoin,
-        penOCapMJoin,
-        penOCapRJoin
+        penRCapBJoin
+      //penICapBJoin,
+      //penOCapNJoin,
+      //penOCapBJoin,
+      //penOCapMJoin,
+      //penOCapRJoin
     );
 }
 
+// ###
 static void testDrawThickEllipseArc_impl(
     const char* title, Image& image, Painter& painter,
     const Pen& drawB,
     const Pen& drawS,
-    const Pen& drawR,
-    const Pen& drawO,
-    const Pen& drawI
+    const Pen& drawR
+  //const Pen& drawO,
+  //const Pen& drawI
 )
 {
     resetImage(image);
@@ -535,6 +542,7 @@ static void testDrawThickEllipseArc_impl(
         painter.setCompositionMode(cm);
     }
 
+    /*
     // Second row
     if(ip2) ip2->setAntiAliasing(false);
     painter.setPen(drawO); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
@@ -610,6 +618,7 @@ static void testDrawThickEllipseArc_impl(
         painter.setPen(vref ); ip2->drawPie( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135 );
         painter.setCompositionMode(cm);
     }
+    */
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
@@ -619,16 +628,16 @@ static void testDrawSolidThickEllipseArc(const char* title, Image& image, Painte
     Pen drawB( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap         ) );
     Pen drawS( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::SquareCap       ) );
     Pen drawR( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::RoundCap        ) );
-    Pen drawO( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::TriangularOutCap) );
-    Pen drawI( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::TriangularInCap ) );
+  //Pen drawO( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::TriangularOutCap) );
+  //Pen drawI( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::TriangularInCap ) );
 
     testDrawThickEllipseArc_impl(
         title, image, painter,
         drawB,
         drawS,
-        drawR,
-        drawO,
-        drawI
+        drawR
+      //drawO,
+      //drawI
     );
 }
 
@@ -637,16 +646,16 @@ static void testDrawPatternedThickEllipseArc(const char* title, Image& image, Pa
     Pen drawB( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::ButtCap         ) );
     Pen drawS( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::SquareCap       ) );
     Pen drawR( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::RoundCap        ) );
-    Pen drawO( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::TriangularOutCap) );
-    Pen drawI( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::TriangularInCap ) );
+  //Pen drawO( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::TriangularOutCap) );
+  //Pen drawI( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::TriangularInCap ) );
 
     testDrawThickEllipseArc_impl(
         title, image, painter,
         drawB,
         drawS,
-        drawR,
-        drawO,
-        drawI
+        drawR
+      //drawO,
+      //drawI
     );
 }
 

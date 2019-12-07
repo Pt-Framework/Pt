@@ -326,6 +326,7 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 
+// ###
 static void testDrawRoundRect(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);

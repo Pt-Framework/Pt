@@ -74,16 +74,16 @@ using namespace Pt::Gfx;
 #define TEST_SOURCEOVER                         0
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
-#define TEST_DRAW_PATTERNED_LINE                1 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
+#define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
-#define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled)
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
@@ -93,7 +93,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_EXTRA                         0
+//#define TEST_DRAW_EXTRA                         0
 
 #define TEST_DRAW_PATH                          0 // (including thick and filled and rectangle clipping area)
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
@@ -546,6 +546,7 @@ int main(int argc, char* args[])
     //    testDrawPathClipping("Path Clipping - ImagePainter2 [SourceOver]", image, *painter2, brushGradient1, brushGradient2);
     //}
 
+    /*
     // Extra features
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_EXTRA) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
@@ -556,6 +557,7 @@ int main(int argc, char* args[])
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawExtra("Extra Features - ImagePainter2 [SourceOver]", image, *painter2);
     }
+    */
 
     // Image operations
     //if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_IMAGE_OPERATION) {

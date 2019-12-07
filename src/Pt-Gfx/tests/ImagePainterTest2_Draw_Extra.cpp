@@ -1,3 +1,4 @@
+/*
 static void testDrawExtra(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);
@@ -112,3 +113,4 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
+*/
