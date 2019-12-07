@@ -212,17 +212,34 @@ void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
         }
             
         case Pt::Gfx::Pen::Dash:
-        case Pt::Gfx::Pen::DoubleDash:
         {
-            double dash[2] = { 3.0* pen.size(), 1.0 * pen.size() };
-            CGContextSetLineDash(_context, 0, dash, 2);
+            if(pen.capStyle() == Gfx::Pen::RoundCap ||
+               pen.capStyle() == Gfx::Pen::SquareCap)
+            {
+                double dashes[] = { 2.0 * pen.size(), 2.0 * pen.size() };
+                CGContextSetLineDash(_context, 0, dashes, 2);
+            }
+            else
+            {
+                double dashes[] = { 3.0 * pen.size(), 1.0 * pen.size() };
+                CGContextSetLineDash(_context, 0, dashes, 2);
+            }
             break;
         }
  
         case Pt::Gfx::Pen::Dot:
         {
-            double dash[3]  = {1.0 * pen.size(), 1.0 * pen.size()};
-            CGContextSetLineDash(_context, 0, dash, 2);
+            if(pen.capStyle() == Gfx::Pen::RoundCap ||
+               pen.capStyle() == Gfx::Pen::SquareCap)
+            {
+                double dashes[]  = {1.0, 2.0 * pen.size()};
+                CGContextSetLineDash(_context, 0, dashes, 2);
+            }
+            else
+            {
+                double dashes[]  = {1.0 * pen.size(), 1.0 * pen.size()};
+                CGContextSetLineDash(_context, 0, dashes, 2);
+            }
             break;
         }
     }

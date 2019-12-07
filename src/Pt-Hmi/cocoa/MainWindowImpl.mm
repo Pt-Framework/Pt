@@ -168,7 +168,7 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
 
 void MainWindowImpl::show(bool visible)
 {
-    std::clog << "SHOW: " << visible << std::endl;
+    //std::clog << "SHOW: " << visible << std::endl;
 
     if(visible)
     {
@@ -189,7 +189,7 @@ void MainWindowImpl::show(bool visible)
 
 void MainWindowImpl::close()
 {
-    [_window perFormClose:nil];
+    [_window performClose:nil];
 }
 
 
@@ -384,7 +384,7 @@ void MainWindowImpl::onMove()
 
     double x = origin.x;
     double y = screenHeight - origin.y - windowHeight;
-    std::clog << "MOVE: " << x << "," << y << std::endl;
+    //std::clog << "MOVE: " << x << "," << y << std::endl;
 
     Pt::Gfx::PointF pos(x, y);
     pos = Application::instance().screen().toLogical(pos);
@@ -396,8 +396,8 @@ void MainWindowImpl::onMove()
 
 void MainWindowImpl::onResize(const NSSize& viewSize)
 {   
-    std::clog << "RESIZE: " << viewSize.width << "x" 
-                            << viewSize.height << std::endl;
+    //std::clog << "RESIZE: " << viewSize.width << "x" 
+    //                        << viewSize.height << std::endl;
 
     Window* window = findWindow(_window);
     if( ! window )
@@ -454,7 +454,7 @@ void MainWindowImpl::onClosing()
 
 void MainWindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
 {
-    std::clog << "KEY DOWN: " << vkey << std::endl;
+    //std::clog << "KEY DOWN: " << vkey << std::endl;
 
     Window* window = findWindow(_window);
     if( ! window )
@@ -481,7 +481,7 @@ void MainWindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
 
 void MainWindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
 {
-    std::clog << "KEY UP: " << vkey << std::endl;
+    //std::clog << "KEY UP: " << vkey << std::endl;
 
     Window* window = findWindow(_window);
     if( ! window )
@@ -508,7 +508,7 @@ void MainWindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
 
 void MainWindowImpl::onKeyModifier(unsigned int mask)
 {
-    std::clog << "KEY MODIFIER: " << mask << std::endl;
+    //std::clog << "KEY MODIFIER: " << mask << std::endl;
 
     bool wasShift = (_keyFlags & NSEventModifierFlagShift) == NSEventModifierFlagShift;
     bool wasControl = (_keyFlags & NSEventModifierFlagControl) == NSEventModifierFlagControl;
@@ -573,7 +573,7 @@ void MainWindowImpl::onKeyModifier(unsigned int mask)
 
 void MainWindowImpl::onLMouseDown(double x, double y)
 {
-    std::clog << "MOUSE PRESS: " << x << ", " << y << std::endl;
+    //std::clog << "MOUSE PRESS: " << x << ", " << y << std::endl;
 
     Window* window = findWindow(_window);
     if( ! window )
@@ -599,7 +599,7 @@ void MainWindowImpl::onLMouseDown(double x, double y)
 
 void MainWindowImpl::onLMouseUp(double x, double y)
 {
-    std::clog << "MOUSE RELEASE: " << x << ", " << y << std::endl;
+    //std::clog << "MOUSE RELEASE: " << x << ", " << y << std::endl;
 
     Window* window = findWindow(_window);
     if( ! window )
@@ -625,7 +625,7 @@ void MainWindowImpl::onLMouseUp(double x, double y)
 
 void MainWindowImpl::onMouseMove(double x, double y)
 {
-    std::clog << "MOUSE MOVE: " << x << ", " << y << std::endl;
+    //std::clog << "MOUSE MOVE: " << x << ", " << y << std::endl;
 
     Window* window = findWindow(_window);
     if( ! window )

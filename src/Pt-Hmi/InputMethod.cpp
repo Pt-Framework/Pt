@@ -136,7 +136,7 @@ DefaultInputMethod::~DefaultInputMethod()
 
 void DefaultInputMethod::onKeyPress()
 {
-    std::clog << "KEY PRESS" << std::endl;
+    //std::clog << "KEY PRESS" << std::endl;
     KeyEvent kev(0);
     kev.setPress(Key(Key::A), 'a');
 
@@ -157,13 +157,13 @@ void DefaultInputMethod::onBegin()
     //
     //_window->show(true);
 
-    std::clog << "INPUTMETHOD BEGIN" << std::endl;
+    //std::clog << "INPUTMETHOD BEGIN" << std::endl;
 }
 
 void DefaultInputMethod::onFinish()
 {
     //_window->show(false);
-    std::clog << "INPUTMETHOD FINISH" << std::endl;
+    //std::clog << "INPUTMETHOD FINISH" << std::endl;
 }
 
 

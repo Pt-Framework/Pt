@@ -138,8 +138,8 @@
 
 - (void)setFrameOrigin: (NSPoint) origin
 {
-    std::clog << "FRAME ORIGIN: " << origin.x << "," 
-                                  << origin.y << std::endl;
+    //std::clog << "FRAME ORIGIN: " << origin.x << "," 
+    //                              << origin.y << std::endl;
 
     [super setFrameOrigin:origin];
     //_windowImpl->onMove(origin);
@@ -159,7 +159,7 @@
 
 - (void) mouseDown: (NSEvent*) ev
 {
-    std::clog << "MOUSE DOWN" << std::endl;
+    //std::clog << "MOUSE DOWN" << std::endl;
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onLMouseDown(mp.x,mp.y);
 }
@@ -167,7 +167,7 @@
 
 - (void) mouseUp: (NSEvent*) ev
 {
-    std::clog << "MOUSE UP" << std::endl;
+    //std::clog << "MOUSE UP" << std::endl;
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onLMouseUp(mp.x,mp.y);
 }
@@ -175,7 +175,7 @@
 
 - (void) mouseDragged: (NSEvent*) ev
 {
-    std::clog << "MOUSE DRAGGED" << std::endl;
+    //std::clog << "MOUSE DRAGGED" << std::endl;
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onMouseMove(mp.x,mp.y);
 }
@@ -191,14 +191,14 @@
 
 - (void) viewDidUnhide;
 {
-    std::clog << "VIEW UNHIDE" << std::endl;
+    //std::clog << "VIEW UNHIDE" << std::endl;
     _windowImpl->onShow(true);
 }
 
 
 - (void) viewDidHide;
 {
-    std::clog << "VIEW HIDE" << std::endl;
+    //std::clog << "VIEW HIDE" << std::endl;
     _windowImpl->onShow(false);
 }
 
@@ -237,13 +237,13 @@
 
 - (void) windowDidBecomeKey:(NSNotification*) notification
 {
-    std::clog << "WINDOW BECAME KEY" << std::endl;
+    //std::clog << "WINDOW BECAME KEY" << std::endl;
 }
 
 
 - (void) windowDidResignKey:(NSNotification*) notification
 {
-    std::clog << "WINDOW RESIGNED KEY" << std::endl;
+    //std::clog << "WINDOW RESIGNED KEY" << std::endl;
 }
 
 
