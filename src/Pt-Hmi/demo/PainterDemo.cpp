@@ -19,22 +19,34 @@ class LineStylesWidget : public Pt::Hmi::Control
         virtual void onPaint(Pt::Hmi::PaintSurface& surface,
                              const Pt::Gfx::RectF& rect)
         {
+            using namespace Pt::Gfx;
+
+            int imageWidth = 200, imageHeight = 440;
+            RectF imageRect = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
+            Color background = Color::fromRgb8(0, 0, 0);
+
             Pt::Hmi::Painter painter(surface);
             painter.setClip(rect);
+            painter.setBrush(background);
+            painter.fillRect(imageRect);
 
-            Pt::Gfx::Image image1( painter.format(), Pt::Gfx::Size(200, 400) );
-            Pt::Gfx::ImagePainter imagePainter(image1);
+            Image image1( painter.format(), Size(imageWidth, imageHeight) );
+            ImagePainter imagePainter(image1);
+            imagePainter.setBrush(background);
+            imagePainter.fillRect(imageRect);
 
-            Pt::Gfx::Image image2( painter.format(), Pt::Gfx::Size(200, 400) );
-            Pt::Gfx::ImagePainter2 imagePainter2(image2);
+            Image image2( painter.format(), Size(imageWidth, imageHeight) );
+            ImagePainter2 imagePainter2(image2);
             imagePainter2.setAntiAliasing(true);
+            imagePainter2.setBrush(background);
+            imagePainter2.fillRect(imageRect);
 
             drawLinesLines(painter, "Native Painter");
             drawLinesLines(imagePainter, "ImagePainter");
             drawLinesLines(imagePainter2, "ImagePainter2");
 
-            painter.drawImage(Pt::Gfx::PointF(210, 0), image1);
-            painter.drawImage(Pt::Gfx::PointF(420, 0), image2);
+            painter.drawImage(PointF(210, 0), image1);
+            painter.drawImage(PointF(420, 0), image2);
         }
 
         void drawLinesLines(Pt::Gfx::Painter& painter, const Pt::String& text)
@@ -51,11 +63,15 @@ class LineStylesWidget : public Pt::Hmi::Control
 
             painter.setFont( Font("", 10) );
 
-            int y = 45;
+            int y = 40;
 
 //#define USER_STYLE 0xB8B8B8B8B8B8B8B8
 
             if(1) {
+                painter.setPen( lightBlue );
+                painter.drawText( PointF(20, y + 10), "ButtCap");
+                y += 20;
+
 #ifdef USER_STYLE
                 Pen pen1Solid(red, 1, USER_STYLE, Pen::ButtCap);
                 Pen pen2Solid(red, 4, USER_STYLE, Pen::ButtCap);
@@ -101,12 +117,14 @@ class LineStylesWidget : public Pt::Hmi::Control
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
 
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y - 15 * 9), "ButtCap");
-                y += 15;
+                y += 5;
             }
 
             if(1) {
+                painter.setPen( lightBlue );
+                painter.drawText( PointF(20, y +10), "SquareCap");
+                y += 20;
+
 #ifdef USER_STYLE
                 Pen pen2Solid(red, 4, USER_STYLE, Pen::SquareCap);
                 Pen pen3Solid(red, 9, USER_STYLE, Pen::SquareCap);
@@ -139,12 +157,14 @@ class LineStylesWidget : public Pt::Hmi::Control
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
 
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y - 15 * 6), "SquareCap");
-                y += 15;
+                y += 5;
             }
 
             if(1) {
+                painter.setPen( lightBlue );
+                painter.drawText( PointF(20, y +10), "RoundCap");
+                y += 20;
+
 #ifdef USER_STYLE
                 Pen pen2Solid(red, 4, USER_STYLE, Pen::RoundCap);
                 Pen pen3Solid(red, 9, USER_STYLE, Pen::RoundCap);
@@ -177,9 +197,7 @@ class LineStylesWidget : public Pt::Hmi::Control
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
 
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y - 15 * 6), "RoundCap");
-                y += 15;
+                y += 5;
             }
 #if 0
             ///////////////////////////////////////////////////

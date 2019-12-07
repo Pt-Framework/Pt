@@ -554,37 +554,15 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
-    //const Pt::uint8_t* data = image.data();
-    //std::size_t dataSize = image.format().imageSize( image.size(), image.padding() );
-
-    std::vector<Pt::uint8_t> imageData;
-    imageData.reserve( image.width() * image.height() * 4 );
-
-    for( std::size_t y = 0; y < image.height(); ++y )
-    {
-        for( std::size_t x = 0; x < image.width(); ++x )
-        {
-            Gfx::ConstPixel pixel(image.view(), x, y);
-            Gfx::Color color = image.format().getColor(pixel);
-            
-            const Pt::uint8_t r = color.red() / 257;
-            const Pt::uint8_t g = color.green() / 257;
-            const Pt::uint8_t b = color.blue() / 257;
-            const Pt::uint8_t a = color.alpha() / 257;
-
-            imageData.push_back( (Pt::uint8_t) (a * b/255) );
-            imageData.push_back( (Pt::uint8_t) (a * g/255) );
-            imageData.push_back( (Pt::uint8_t) (a * r/255) );
-            imageData.push_back( (Pt::uint8_t) (a) );
-        }
-    }
+    const Pt::uint8_t* data = image.data();
+    std::size_t dataSize = image.format().imageSize( image.size(), image.padding() );
 
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, 
-                                                              &imageData[0], 
-                                                              imageData.size(), 
+                                                              data, 
+                                                              dataSize, 
                                                               NULL);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault|kCGImageAlphaPremultipliedLast;
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Little|kCGImageAlphaFirst;
     
     CGImageRef imageRef = CGImageCreate(image.width(), image.height(), 
                                         8, 32, 4 * image.width(), 
@@ -595,7 +573,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image
                                      _size.height() - to.y() - image.height(), 
                                      image.width(), 
                                      image.height() );
-    
+
     beginClip();
     CGContextDrawImage(_context, contextRect, imageRef);
     endClip();
