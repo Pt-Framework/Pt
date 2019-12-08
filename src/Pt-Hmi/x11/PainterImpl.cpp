@@ -188,26 +188,8 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
     {
         default:
         case Gfx::Pen::Solid:
-            lineStyle = LineSolid;
-            break;
-
-        case Gfx::Pen::Dot:
         {
-            if(pen.capStyle() == Gfx::Pen::RoundCap ||
-               pen.capStyle() == Gfx::Pen::SquareCap)
-            {
-                char spacing = static_cast<char>( 2 * pen.size() );
-                char dashList[] = { 1, spacing };
-                XSetDashes(display, _penGc, 0, dashList, 2);
-            }
-            else
-            {
-                char size = static_cast<char>( pen.size() );
-                char dashList[] = { size, size };
-                XSetDashes(display, _penGc, 0, dashList, 2);
-            }
-
-            lineStyle = LineOnOffDash;
+            lineStyle = LineSolid;
             break;
         }
         
@@ -225,6 +207,26 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
                 char size = static_cast<char>( 3 * pen.size() );
                 char spacing = static_cast<char>( pen.size() );
                 char dashList[] = { size, spacing };
+                XSetDashes(display, _penGc, 0, dashList, 2);
+            }
+
+            lineStyle = LineOnOffDash;
+            break;
+        }
+
+        case Gfx::Pen::Dot:
+        {
+            if(pen.capStyle() == Gfx::Pen::RoundCap ||
+               pen.capStyle() == Gfx::Pen::SquareCap)
+            {
+                char spacing = static_cast<char>( 2 * pen.size() );
+                char dashList[] = { 1, spacing };
+                XSetDashes(display, _penGc, 0, dashList, 2);
+            }
+            else
+            {
+                char size = static_cast<char>( pen.size() );
+                char dashList[] = { size, size };
                 XSetDashes(display, _penGc, 0, dashList, 2);
             }
 
