@@ -174,9 +174,10 @@ void Rasterizer2::updatePenPattern()
         expPatCount += selPattern[i];
     }
 
-    // Determinethe repeate count
-    Pt::uint8_t repeatCount = 1;
-    if(expPatCount < 64) repeatCount = 64 / expPatCount;
+    // Determine the repeat count
+    // Repeat how many is the best? 1, 64, 128, or ???
+    Pt::uint8_t repeatCount = 128 / expPatCount;
+    if(repeatCount < 1) repeatCount = 1;
 
     // Expand the pattern
     std::vector<bool> expPattern;
@@ -195,7 +196,7 @@ void Rasterizer2::updatePenPattern()
     }
 
     // Resize the pattern buffer
-    const Pt::int32_t patternBuffer1PDynSize = ( expPattern.size() + 1 ) * PATTERN_BUFFER_1P_SCALE_FACTOR;
+    const Pt::int32_t patternBuffer1PDynSize = expPattern.size() * PATTERN_BUFFER_1P_SCALE_FACTOR;
 
     _patternBuffer1PDyn.clear();
     _patternBuffer1PDynCntMax = 0;
@@ -207,11 +208,10 @@ void Rasterizer2::updatePenPattern()
 
     // Generate the pattern
     bool previous = false;
-    for(unsigned p = 0; p < ( expPattern.size() + 1 ); ++p)
+    for(unsigned p = 0; p < expPattern.size(); ++p)
     {
         // Get the pattern cell value
-        const Pt::int8_t idx     = ( p == expPattern.size() ) ? 0 : p;
-        const bool       current = expPattern[idx];
+        const bool current = expPattern[p];
 
         // --- One-pixel pattern ---
         // Pattern cell change from 0 to 0
@@ -257,6 +257,19 @@ void Rasterizer2::updatePenPattern()
             _patternBuffer1PDyn[i] = XWAA_WFILTER[ 255 - _patternBuffer1PDyn[i] ];
         }
     }
+
+    /*
+    if(_pen.style() == Pen::Dot) {
+        std::cerr << "### " << (int) expPattern.size() << " -> " << (int) gctr1P << std::endl;
+        for(size_t i = 0; i < gctr1P; ++i) {
+            std::cerr << (int) _patternBuffer1PDyn[i] << " ";
+        }
+        std::cerr << std::endl;
+    }
+    //*/
+
+
+//105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255
 }
 
 #else
