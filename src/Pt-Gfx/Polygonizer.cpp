@@ -80,14 +80,20 @@ struct PatternState
 };
 
 
+// Rounding factors used for cleaning-up polygons
 const double Polygonizer::VecResScaleUp = 64.0;
 const double Polygonizer::VecResScaleDn = 1.0 / 64.0;
 
 // Predefined patterns
+static const Pt::uint8_t dashPatternDot_ [] = { 1, 1 };
+static const Pt::uint8_t dashPatternDash_[] = { 3, 1 };
+
+std::vector<Pt::uint8_t> Polygonizer::dashPatternDot  = std::vector<Pt::uint8_t>( dashPatternDot_,  dashPatternDot_  + sizeof(dashPatternDot_ ) );
+std::vector<Pt::uint8_t> Polygonizer::dashPatternDash = std::vector<Pt::uint8_t>( dashPatternDash_, dashPatternDash_ + sizeof(dashPatternDash_) );
 
 // !!! UNUSED NOW !!!
-const Pt::uint64_t Polygonizer::patternDot  = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010;
-const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110;
+//const Pt::uint64_t Polygonizer::patternDot  = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010;
+//const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110;
 
 // !!! UNUSED NOW !!!
 //const Pt::uint64_t patternDotCapped         = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000;
@@ -98,13 +104,11 @@ const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 11101110111
 //static const Pt::uint64_t patternDoubleDash = 0xEE00EE00EE00EE00;// 1110111000000000111011100000000011101110000000001110111000000000
 //static const Pt::uint64_t patternDotDash    = 0x9C9C9C9C9C9C9C9C;// 1001110010011100100111001001110010011100100111001001110010011100
 
-std::vector<Pt::uint8_t> Polygonizer::dashPatternDot;  // Will be initialized later
-std::vector<Pt::uint8_t> Polygonizer::dashPatternDash; // Will be initialized later
-
 
 Polygonizer::Polygonizer()
 {
-    /// Initialize the dash pattern once and once only
+    /*
+    // Initialize the dash pattern once and once only
     static bool dashPatternInitialized = false;
     if(!dashPatternInitialized) {
         dashPatternDot.resize(2);
@@ -117,8 +121,10 @@ Polygonizer::Polygonizer()
 
         dashPatternInitialized = true;
     }
+    */
 }
 
+/*
 void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
                              Pt::uint64_t userPattern)
 {
@@ -130,24 +136,20 @@ void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
         default:
         case Pen::Dot:
         {
-            /*
-            if(cap == Pen::SquareCap || cap == Pen::RoundCap)
-                patternSel = patternDotCapped;
-            else
-                patternSel = patternDot;
-            */
+            //if(cap == Pen::SquareCap || cap == Pen::RoundCap)
+            //    patternSel = patternDotCapped;
+            //else
+            //    patternSel = patternDot;
             patternSel = patternDot;
             break;
         }
 
         case Pen::Dash:
         {
-            /*
-            if(cap == Pen::SquareCap || cap == Pen::RoundCap)
-                patternSel = patternDashCapped;
-            else
-                patternSel = patternDash;
-            */
+            //if(cap == Pen::SquareCap || cap == Pen::RoundCap)
+            //    patternSel = patternDashCapped;
+            //else
+            //    patternSel = patternDash;
             patternSel = patternDash;
             break;
         }
@@ -169,7 +171,7 @@ void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
         ++gctrMP;
     }
 }
-
+*/
 
 void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
                              const std::vector<Pt::uint8_t>& userDashPattern, std::size_t penSize)

@@ -60,16 +60,13 @@ Pen::Pen(const Color& color, std::size_t size, const std::vector<Pt::uint8_t>& u
 
 
 Pen::Pen(const Color& color, std::size_t size, const Pt::uint8_t* userDashPattern, Pt::uint8_t userDashPatternCount, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, cap, join))
-{
-    std::vector<Pt::uint8_t> userDashPattern_;
-    userDashPattern_.resize(userDashPatternCount);
+: _penData(new PenData(color, size, UserDefined, userDashPattern, userDashPattern + userDashPatternCount, cap, join))
+{}
 
-    for(Pt::uint8_t i = 0; i < userDashPatternCount; ++i)
-        userDashPattern_[i] = userDashPattern[i];
 
-    _penData->setStyle(UserDefined, userDashPattern_);
-}
+Pen::Pen(const Color& color, std::size_t size, const Pt::uint8_t* userDashPatternBeg, const Pt::uint8_t* userDashPatternEnd, CapStyle cap, JoinStyle join)
+: _penData(new PenData(color, size, UserDefined, userDashPatternBeg, userDashPatternEnd, cap, join))
+{}
 
 
 void Pen::setColor(const Color& color)

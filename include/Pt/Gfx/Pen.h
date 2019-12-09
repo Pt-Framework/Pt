@@ -110,24 +110,30 @@ class PT_GFX_API Pen
 
         /** @brief Constructs a Pen with the specified size, color and styles.
         */
-        Pen(const Color& color, std::size_t width, Style style = Solid, 
+        Pen(const Color& color, std::size_t width, Style style = Solid,
             CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Constructs a Pen with the specified size, color and custom styles.
         */
-        Pen(const Color& color, std::size_t width, Pt::uint64_t stylePattern, 
-            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
-
-        /** @brief Constructs a Pen with the specified size, color and custom styles.
-        */
-        Pen(const Color& color, std::size_t width,
-            const std::vector<Pt::uint8_t>& userDashPattern, 
+        Pen(const Color& color, std::size_t width, Pt::uint64_t stylePattern,
             CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Constructs a Pen with the specified size, color and custom styles.
         */
         Pen(const Color& color, std::size_t width,
-            const Pt::uint8_t* dashPattern, Pt::uint8_t dashPatternSize, 
+            const std::vector<Pt::uint8_t>& userDashPattern,
+            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
+
+        /** @brief Constructs a Pen with the specified size, color and custom styles.
+        */
+        Pen(const Color& color, std::size_t width,
+            const Pt::uint8_t* dashPattern, Pt::uint8_t dashPatternSize,
+            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
+
+        /** @brief Constructs a Pen with the specified size, color and custom styles.
+        */
+        Pen(const Color& color, std::size_t width,
+            const Pt::uint8_t* userDashPatternBeg, const Pt::uint8_t* userDashPatternEnd,
             CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Sets the size of the pen.
@@ -208,19 +214,24 @@ class PT_GFX_API PenData
       , _joinStyle(join)
       {}
 
-      PenData(const Color& color, std::size_t size, Pen::CapStyle cap, Pen::JoinStyle join)
-      : _color(color)
-      , _size(size)
-      , _capStyle(cap)
-      , _joinStyle(join)
-      {}
-
       PenData(const Color& color, std::size_t size,
               Pen::Style style, const std::vector<Pt::uint8_t>& userDashPattern, Pen::CapStyle cap, Pen::JoinStyle join)
       : _color(color)
       , _size(size)
       , _style(style)
+      , _userPattern(0)
       , _userDashPattern(userDashPattern)
+      , _capStyle(cap)
+      , _joinStyle(join)
+      {}
+
+      PenData(const Color& color, std::size_t size,
+              Pen::Style style, const Pt::uint8_t* userDashPatternBeg, const Pt::uint8_t* userDashPatternEnd, Pen::CapStyle cap, Pen::JoinStyle join)
+      : _color(color)
+      , _size(size)
+      , _style(style)
+      , _userPattern(0)
+      , _userDashPattern(userDashPatternBeg, userDashPatternEnd)
       , _capStyle(cap)
       , _joinStyle(join)
       {}

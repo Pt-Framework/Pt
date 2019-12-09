@@ -68,12 +68,9 @@ class LineStylesWidget : public Pt::Hmi::Control
 //#define USER_STYLE
 
 #ifdef USER_STYLE
-            std::vector<Pt::uint8_t> userStyle;
-            userStyle.resize(4);
-            userStyle[0] = 1;
-            userStyle[1] = 1;
-            userStyle[2] = 3;
-            userStyle[3] = 1;
+            const Pt::uint8_t  userStyle[]  = { 1, 1, 3, 3 };
+            const Pt::uint8_t* userStyleBeg = userStyle;
+            const Pt::uint8_t* userStyleEnd = userStyle + sizeof(userStyle);
 #endif
 
             if(1) {
@@ -82,10 +79,9 @@ class LineStylesWidget : public Pt::Hmi::Control
                 y += 20;
 
 #ifdef USER_STYLE
-
-                Pen pen1Solid(red, 1, userStyle, Pen::ButtCap);
-                Pen pen2Solid(red, 4, userStyle, Pen::ButtCap);
-                Pen pen3Solid(red, 9, userStyle, Pen::ButtCap);
+                Pen pen1Solid(red, 1, userStyleBeg, userStyleEnd, Pen::ButtCap);
+                Pen pen2Solid(red, 4, userStyleBeg, userStyleEnd, Pen::ButtCap);
+                Pen pen3Solid(red, 9, userStyleBeg, userStyleEnd, Pen::ButtCap);
 #else
                 Pen pen1Solid(red, 1, Pen::Solid, Pen::ButtCap);
                 Pen pen2Solid(red, 4, Pen::Solid, Pen::ButtCap);
@@ -136,8 +132,8 @@ class LineStylesWidget : public Pt::Hmi::Control
                 y += 20;
 
 #ifdef USER_STYLE
-                Pen pen2Solid(red, 4, userStyle, Pen::SquareCap);
-                Pen pen3Solid(red, 9, userStyle, Pen::SquareCap);
+                Pen pen2Solid(red, 4, userStyleBeg, userStyleEnd, Pen::SquareCap);
+                Pen pen3Solid(red, 9, userStyleBeg, userStyleEnd, Pen::SquareCap);
 #else
                 Pen pen2Solid(red, 4, Pen::Solid, Pen::SquareCap);
                 Pen pen3Solid(red, 9, Pen::Solid, Pen::SquareCap);
@@ -176,8 +172,8 @@ class LineStylesWidget : public Pt::Hmi::Control
                 y += 20;
 
 #ifdef USER_STYLE
-                Pen pen2Solid(red, 4, userStyle, Pen::RoundCap);
-                Pen pen3Solid(red, 9, userStyle, Pen::RoundCap);
+                Pen pen2Solid(red, 4, userStyleBeg, userStyleEnd, Pen::RoundCap);
+                Pen pen3Solid(red, 9, userStyleBeg, userStyleEnd, Pen::RoundCap);
 #else
                 Pen pen2Solid(red, 4, Pen::Solid, Pen::RoundCap);
                 Pen pen3Solid(red, 9, Pen::Solid, Pen::RoundCap);

@@ -55,18 +55,18 @@ class PatternState;
 class Polygonizer
 {
     public:
-        static const Pt::uint64_t patternDot;
-        static const Pt::uint64_t patternDash;
-
         static std::vector<Pt::uint8_t> dashPatternDot;
         static std::vector<Pt::uint8_t> dashPatternDash;
 
+        // DEPRECATED:
+        //static const Pt::uint64_t patternDot;
+        //static const Pt::uint64_t patternDash;
 
     public:
         Polygonizer();
 
-        void setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
-                        Pt::uint64_t userPattern);
+        //void setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
+        //                Pt::uint64_t userPattern);
 
         void setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
                         const std::vector<Pt::uint8_t>& userDashPattern, std::size_t penSize);
