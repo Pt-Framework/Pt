@@ -174,21 +174,28 @@ void Rasterizer2::updatePenPattern()
         expPatCount += selPattern[i];
     }
 
+    // Determinethe repeate count
+    Pt::uint8_t repeatCount = 1;
+    if(expPatCount < 64) repeatCount = 64 / expPatCount;
+
     // Expand the pattern
     std::vector<bool> expPattern;
-    expPattern.resize(expPatCount);
+    expPattern.resize(expPatCount * repeatCount);
 
     bool        draw = true;
     Pt::int32_t k    = 0;
-    for(Pt::uint8_t i = 0; i < selPatCount; ++i) {
-        for(Pt::uint8_t j = 0; j < selPattern[i]; ++j) {
-            expPattern[k++] = draw;
+
+    for(Pt::uint8_t r = 0; r < repeatCount; ++r) {
+        for(Pt::uint8_t i = 0; i < selPatCount; ++i) {
+            for(Pt::uint8_t j = 0; j < selPattern[i]; ++j) {
+                expPattern[k++] = draw;
+            }
+            draw = !draw;
         }
-        draw = !draw;
     }
 
     // Resize the pattern buffer
-    const Pt::int32_t patternBuffer1PDynSize = (expPatCount + 1) * PATTERN_BUFFER_1P_SCALE_FACTOR;
+    const Pt::int32_t patternBuffer1PDynSize = ( expPattern.size() + 1 ) * PATTERN_BUFFER_1P_SCALE_FACTOR;
 
     _patternBuffer1PDyn.clear();
     _patternBuffer1PDynCntMax = 0;
@@ -196,15 +203,14 @@ void Rasterizer2::updatePenPattern()
     _patternBuffer1PDyn.resize(patternBuffer1PDynSize);
     _patternBuffer1PDynCntMax = FIXED_POINT_FROM_INT(patternBuffer1PDynSize);
 
-    // Counter for generating the patterns
     size_t gctr1P = 0;
 
     // Generate the pattern
     bool previous = false;
-    for(Pt::int32_t p = 0; p <= expPatCount; ++p)
+    for(unsigned p = 0; p < ( expPattern.size() + 1 ); ++p)
     {
         // Get the pattern cell value
-        const Pt::int8_t idx     = (p == expPatCount) ? 0 : p;
+        const Pt::int8_t idx     = ( p == expPattern.size() ) ? 0 : p;
         const bool       current = expPattern[idx];
 
         // --- One-pixel pattern ---

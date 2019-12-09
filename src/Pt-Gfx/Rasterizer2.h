@@ -592,7 +592,7 @@ class Rasterizer2
         Image            _penBuffer;
         ConstPixel       _penPixel;
 
-//#define DYNAMIC_PPB_1P
+#define DYNAMIC_PPB_1P
 
         // Pattern buffer for one-pixel line
 #ifdef DYNAMIC_PPB_1P
