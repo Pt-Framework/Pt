@@ -58,12 +58,18 @@ class Polygonizer
         static const Pt::uint64_t patternDot;
         static const Pt::uint64_t patternDash;
 
+        static std::vector<Pt::uint8_t> dashPatternDot;
+        static std::vector<Pt::uint8_t> dashPatternDash;
+
+
     public:
         Polygonizer();
 
         void setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
                         Pt::uint64_t userPattern);
 
+        void setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
+                        const std::vector<Pt::uint8_t>& userDashPattern, std::size_t penSize);
 
         void renderRoundedRect(std::vector<Polygon>& polygons,
                                const RectF& rect, float radius,
@@ -227,6 +233,9 @@ class Polygonizer
         static const double VecResScaleDn;
 
         Pt::uint8_t _patternBufferMP[PATTERN_BUFFER_NUM_OF_CELLS];
+
+        std::vector<float> dashPatternBuffer;
+
 };
 
 } //namespace

@@ -113,6 +113,18 @@ class PT_GFX_API Pen
             Pt::uint64_t stylePattern, CapStyle cap = FlatCap,
             JoinStyle join = BevelJoin);
 
+        /** @brief Constructs a Pen with the specified size, color and custom styles.
+        */
+        Pen(const Color& color, std::size_t width,
+            const std::vector<Pt::uint8_t>& userDashPattern, CapStyle cap = FlatCap,
+            JoinStyle join = BevelJoin);
+
+        /** @brief Constructs a Pen with the specified size, color and custom styles.
+        */
+        Pen(const Color& color, std::size_t width,
+            const Pt::uint8_t* userDashPattern, Pt::uint8_t userDashPatternCount, CapStyle cap = FlatCap,
+            JoinStyle join = BevelJoin);
+
         /** @brief Sets the size of the pen.
         */
         void setSize(std::size_t size);
@@ -137,6 +149,10 @@ class PT_GFX_API Pen
         */
         void setStyle(Pt::uint64_t stylePattern);
 
+        /** @brief Sets the pen style.
+        */
+        void setStyle(const std::vector<Pt::uint8_t>& userDashPattern);
+
         /** @brief Returns the pen style.
         */
         Style style() const;
@@ -144,6 +160,10 @@ class PT_GFX_API Pen
         /** @brief Returns the pen style user pattern.
         */
         Pt::uint64_t styleUserPattern() const;
+
+        /** @brief Returns the pen style user pattern.
+        */
+        const std::vector<Pt::uint8_t>& styleUserDashPattern() const;
 
         /** @brief Sets the cap style.
         */
@@ -177,8 +197,25 @@ class PT_GFX_API PenData
               Pen::Style style, Pt::uint64_t userPattern, Pen::CapStyle cap, Pen::JoinStyle join)
       : _color(color)
       , _size(size)
-      , _style(style )
+      , _style(style)
       , _userPattern(userPattern)
+      , _capStyle(cap)
+      , _joinStyle(join)
+      {}
+
+      PenData(const Color& color, std::size_t size, Pen::CapStyle cap, Pen::JoinStyle join)
+      : _color(color)
+      , _size(size)
+      , _capStyle(cap)
+      , _joinStyle(join)
+      {}
+
+      PenData(const Color& color, std::size_t size,
+              Pen::Style style, const std::vector<Pt::uint8_t>& userDashPattern, Pen::CapStyle cap, Pen::JoinStyle join)
+      : _color(color)
+      , _size(size)
+      , _style(style)
+      , _userDashPattern(userDashPattern)
       , _capStyle(cap)
       , _joinStyle(join)
       {}
@@ -201,11 +238,20 @@ class PT_GFX_API PenData
           _userPattern = userPattern;
       }
 
+      void setStyle(Pen::Style style, const std::vector<Pt::uint8_t>& userDashPattern)
+      {
+          _style           = style;
+          _userDashPattern = userDashPattern;
+      }
+
       Pen::Style style() const
       { return _style; }
 
       Pt::uint64_t styleUserPattern() const
       { return _userPattern; }
+
+      const std::vector<Pt::uint8_t>& styleUserDashPattern() const
+      { return _userDashPattern; }
 
       void setCapStyle(Pen::CapStyle cap)
       { _capStyle = cap;}
@@ -220,12 +266,13 @@ class PT_GFX_API PenData
       { return _joinStyle; }
 
   private:
-      Color          _color;
-      std::size_t    _size;
-      Pen::Style     _style;
-      Pt::uint64_t   _userPattern;
-      Pen::CapStyle  _capStyle;
-      Pen::JoinStyle _joinStyle;
+      Color                    _color;
+      std::size_t              _size;
+      Pen::Style               _style;
+      Pt::uint64_t             _userPattern;
+      std::vector<Pt::uint8_t> _userDashPattern;
+      Pen::CapStyle            _capStyle;
+      Pen::JoinStyle           _joinStyle;
 };
 
 } // namespace

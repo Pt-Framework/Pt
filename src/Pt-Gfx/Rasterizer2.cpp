@@ -140,9 +140,11 @@ void Rasterizer2::setPen( const Pen& pen )
 
     _penPixel.reset(_penBuffer.view(), 0, 0);
 
+    //if( pen.style() != Pen::Solid )
+    //    _polygonizer.setPattern( pen.style(), pen.capStyle(), pen.styleUserPattern() );
+
     if( pen.style() != Pen::Solid )
-        _polygonizer.setPattern( pen.style(), pen.capStyle(),
-                                 pen.styleUserPattern() );
+        _polygonizer.setPattern( pen.style(), pen.capStyle(), pen.styleUserDashPattern(), pen.size() );
 
     updatePenPattern();
 }
@@ -151,10 +153,19 @@ void Rasterizer2::setPen( const Pen& pen )
 
 void Rasterizer2::updatePenPattern()
 {
+    // Select the pattern
+    const std::vector<Pt::uint8_t>* selDashPattern;
 
-    // Test pattern
-    const Pt::uint8_t selPattern[] = { 3, 5, 6, 2 };
-    const Pt::uint8_t selPatCount  = sizeof(selPattern) / sizeof(selPattern[0]);
+    switch(_pen.style())
+    {
+        default:
+        case Pen::Dot         : selDashPattern = &Polygonizer::dashPatternDot;  break;
+        case Pen::Dash        : selDashPattern = &Polygonizer::dashPatternDash; break;
+        case Pen::UserDefined : selDashPattern = &_pen.styleUserDashPattern();  break;
+    }
+
+    const std::vector<Pt::uint8_t>& selPattern  = *selDashPattern;
+    const Pt::uint8_t               selPatCount = selPattern.size();
 
     // Calculate the expanded size of the pattern
     Pt::int32_t expPatCount = 0;

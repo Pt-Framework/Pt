@@ -54,6 +54,24 @@ Pen::Pen(const Color& color, std::size_t size, Pt::uint64_t stylePattern, CapSty
 {}
 
 
+Pen::Pen(const Color& color, std::size_t size, const std::vector<Pt::uint8_t>& userDashPattern, CapStyle cap, JoinStyle join)
+: _penData(new PenData(color, size, UserDefined, userDashPattern, cap, join))
+{}
+
+
+Pen::Pen(const Color& color, std::size_t size, const Pt::uint8_t* userDashPattern, Pt::uint8_t userDashPatternCount, CapStyle cap, JoinStyle join)
+: _penData(new PenData(color, size, cap, join))
+{
+    std::vector<Pt::uint8_t> userDashPattern_;
+    userDashPattern_.resize(userDashPatternCount);
+
+    for(Pt::uint8_t i = 0; i < userDashPatternCount; ++i)
+        userDashPattern_[i] = userDashPattern[i];
+
+    _penData->setStyle(UserDefined, userDashPattern_);
+}
+
+
 void Pen::setColor(const Color& color)
 {
     // COW
@@ -67,8 +85,8 @@ void Pen::setColor(const Color& color)
 
 
 const Color& Pen::color() const
-{ 
-    return _penData->color(); 
+{
+    return _penData->color();
 }
 
 
@@ -85,8 +103,8 @@ void Pen::setSize(std::size_t size)
 
 
 std::size_t Pen::size() const
-{ 
-    return _penData->size(); 
+{
+    return _penData->size();
 }
 
 
@@ -114,15 +132,33 @@ void Pen::setStyle(Pt::uint64_t stylePattern)
 }
 
 
+void Pen::setStyle(const std::vector<Pt::uint8_t>& userDashPattern)
+{
+    // COW
+    if(_penData.refs() > 1) {
+        SmartPtr<PenData> penData( new PenData(*_penData) );
+        _penData = penData;
+    }
+
+    _penData->setStyle(UserDefined, userDashPattern);
+}
+
+
 Pen::Style Pen::style() const
-{ 
-    return _penData->style(); 
+{
+    return _penData->style();
 }
 
 
 Pt::uint64_t Pen::styleUserPattern() const
-{ 
-    return _penData->styleUserPattern(); 
+{
+    return _penData->styleUserPattern();
+}
+
+
+const std::vector<Pt::uint8_t>& Pen::styleUserDashPattern() const
+{
+    return _penData->styleUserDashPattern();
 }
 
 
@@ -157,14 +193,14 @@ void Pen::setJoinStyle(JoinStyle join)
 
 
 Pen::JoinStyle Pen::joinStyle() const
-{ 
-    return _penData->joinStyle(); 
+{
+    return _penData->joinStyle();
 }
 
 
 bool Pen::isNull() const
-{ 
-    return size() == 0; 
+{
+    return size() == 0;
 }
 
 } // namespace

@@ -96,8 +96,25 @@ const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 11101110111
 //static const Pt::uint64_t patternDotDash    = 0x9C9C9C9C9C9C9C9C;// 1001110010011100100111001001110010011100100111001001110010011100
 
 
+std::vector<Pt::uint8_t> Polygonizer::dashPatternDot;
+std::vector<Pt::uint8_t> Polygonizer::dashPatternDash;
+
+
 Polygonizer::Polygonizer()
 {
+    /// Initialize the dash pattern once and once only
+    static bool dashPatternInitialized = false;
+    if(!dashPatternInitialized) {
+        dashPatternDot.resize(2);
+        dashPatternDot[0] = 1;
+        dashPatternDot[1] = 1;
+
+        dashPatternDash.resize(2);
+        dashPatternDash[0] = 3;
+        dashPatternDash[1] = 1;
+
+        dashPatternInitialized = true;
+    }
 }
 
 void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
@@ -149,6 +166,29 @@ void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
         _patternBufferMP[gctrMP] = current ? 1 : 0;
         ++gctrMP;
     }
+}
+
+
+void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
+                             const std::vector<Pt::uint8_t>& userDashPattern, std::size_t penSize)
+{
+    // Select the pattern
+    const std::vector<Pt::uint8_t>* selDashPattern;
+
+    switch(style)
+    {
+        default:
+        case Pen::Dot         : selDashPattern = &dashPatternDot;  break;
+        case Pen::Dash        : selDashPattern = &dashPatternDash; break;
+        case Pen::UserDefined : selDashPattern = &userDashPattern; break;
+    }
+
+    // Generate the pattern
+    dashPatternBuffer.clear();
+    dashPatternBuffer.resize(selDashPattern->size());
+
+    for(unsigned i = 0; i < selDashPattern->size(); ++i)
+        dashPatternBuffer[i] = selDashPattern->operator[](i) * penSize;
 }
 
 
@@ -875,7 +915,7 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
 
 
 // #@#
-#if 1
+#if 0
 
 void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
                                             const PointF* src, size_t pointCount,
@@ -931,26 +971,22 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
                                            const PointF* src, size_t pointCount,
                                            const Pen& pen, bool collisionDetection, bool forSmoothCurve)
 {
-   // instead of _patternBufferMP: draw 6 pixels, then 12 pixels space, then repeat
-   //float linePattern[] = { 6.0, 12.0 };
-   float linePattern[] = { pen.size() * 1.5f, pen.size() * 2.5f, pen.size() * 3.0f, pen.size() };
-   unsigned linePatternSize = sizeof(linePattern) / sizeof(linePattern[0]);
+    // Initialize the operational state
+    PatternState state(polygons, src, pointCount, 1);
 
-   PatternState state(polygons, src, pointCount, 1);
+    // Loop until all the polygon's points are processed
+    bool     done = false;
+    bool     draw = true;
+    unsigned n    = 0;
+    while( ! done )
+    {
+        state.patSegLen = dashPatternBuffer[n];
 
-   bool done = false;
-   bool draw = true;
-   unsigned n = 0;
-   while( ! done )
-   {
-     state.patSegLen = linePattern[n];
+        done = sagPolygonPoints(state, draw, pen, collisionDetection, forSmoothCurve);
+        draw = ! draw;
 
-     done = sagPolygonPoints(state, draw, pen, collisionDetection, forSmoothCurve);
-     draw = ! draw;
-
-     if(++n >= linePatternSize)
-      n = 0;
-   }
+        if(++n >= dashPatternBuffer.size()) n = 0;
+    }
 }
 
 #endif
