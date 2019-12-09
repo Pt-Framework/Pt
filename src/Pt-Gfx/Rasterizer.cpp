@@ -1347,9 +1347,9 @@ void Rasterizer::drawThinDashPolyline(const Point* points,  int pointCount,
     }
 
     // paint the last point if the end style isn't CapNotLast.
-    // (Assume that a projecting, butt, or round cap that is one
-    // pixel wide is the same as the single pixel of the endpoint.) */
-    if (_pen.capStyle() != Pen::NotLastCap && (xstart != x2 || ystart != y2 || ppt == points + 1))
+    // Assume that a projecting, butt, or round cap that is one
+    // pixel wide is the same as the single pixel of the endpoint
+    if( /*_pen.capStyle() != Pen::NotLastCap && */ (xstart != x2 || ystart != y2 || ppt == points + 1))
     {
         if (dashNum & 1)
         {// Background dash. paint, in paint type #0

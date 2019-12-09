@@ -56,8 +56,10 @@ class PT_GFX_API Pen
         */
         enum Style { Solid       = 0,
                      Dot         = 1,
-                     DoubleDot   = 2,
-                     Dash        = 3,
+                     Dash        = 2,
+
+                     // DEPRECATED:
+                     DoubleDot   = 3,
                      DoubleDash  = 4,
                      DotDash     = 5,
                      UserDefined = 6
@@ -65,18 +67,21 @@ class PT_GFX_API Pen
 
         /** @brief Pen cap style.
         */
-        enum CapStyle { ButtCap          = 0,
+        enum CapStyle { FlatCap          = 0,
                         SquareCap        = 1,
                         RoundCap         = 2,
-                        //TriangularOutCap = 3,
-                        //TriangularInCap  = 4,
-                        //RoundHoleCap     = 5,
-                        //Arrow1Cap        = 6,
-                        //Arrow2Cap        = 7,
-                        FlatCap          = 0, // FlatCap       and ButtCap          are the same
-                        ProjectingCap    = 1, // ProjectingCap and SquareCap        are the same
-                        TriangularCap    = 3, // TriangularCap and TriangularOutCap are the same
-                        NotLastCap       = 9  // What is this ???
+
+                        // DEPRECATED:
+                        ButtCap          = FlatCap,
+                        ProjectingCap    = SquareCap,
+                        TriangularCap    = 3
+
+                        //NotLastCap       = 4
+                        //TriangularOutCap = TriangularCap,
+                        //TriangularInCap  = 5,
+                        //RoundHoleCap     = 6,
+                        //Arrow1Cap        = 7,
+                        //Arrow2Cap        = 8,
                       };
 
         /** @brief Pen join style.
@@ -85,6 +90,8 @@ class PT_GFX_API Pen
                          BevelJoin      = 1,
                          MiterJoin      = 2,
                          RoundJoin      = 3,
+
+                         // DEPRECATED:
                          TriangularJoin = 9  // What is this ???
                        };
 
@@ -103,27 +110,25 @@ class PT_GFX_API Pen
 
         /** @brief Constructs a Pen with the specified size, color and styles.
         */
-        Pen(const Color& color, std::size_t width,
-            Style style = Solid, CapStyle cap = FlatCap,
-            JoinStyle join = BevelJoin);
+        Pen(const Color& color, std::size_t width, Style style = Solid, 
+            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
+
+        /** @brief Constructs a Pen with the specified size, color and custom styles.
+        */
+        Pen(const Color& color, std::size_t width, Pt::uint64_t stylePattern, 
+            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Constructs a Pen with the specified size, color and custom styles.
         */
         Pen(const Color& color, std::size_t width,
-            Pt::uint64_t stylePattern, CapStyle cap = FlatCap,
-            JoinStyle join = BevelJoin);
+            const std::vector<Pt::uint8_t>& userDashPattern, 
+            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Constructs a Pen with the specified size, color and custom styles.
         */
         Pen(const Color& color, std::size_t width,
-            const std::vector<Pt::uint8_t>& userDashPattern, CapStyle cap = FlatCap,
-            JoinStyle join = BevelJoin);
-
-        /** @brief Constructs a Pen with the specified size, color and custom styles.
-        */
-        Pen(const Color& color, std::size_t width,
-            const Pt::uint8_t* userDashPattern, Pt::uint8_t userDashPatternCount, CapStyle cap = FlatCap,
-            JoinStyle join = BevelJoin);
+            const Pt::uint8_t* dashPattern, Pt::uint8_t dashPatternSize, 
+            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Sets the size of the pen.
         */
