@@ -156,7 +156,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
 
 
     Pt::uint8_t pa[] = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 15 };
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, pa, sizeof(pa) ) ); // 1011001110001111000011111000001111110000001111111000000000000000
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, pa, sizeof(pa) / sizeof(pa[0]) ) ); // 1011001110001111000011111000001111110000001111111000000000000000
     //painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, 0xB38F0F83F03F8000 ) ); // 1011001110001111000011111000001111110000001111111000000000000000
 
     painter.drawRect( RectF(PointF(260, 20), SizeF(180, 80)) );

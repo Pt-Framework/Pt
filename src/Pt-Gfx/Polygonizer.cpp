@@ -84,9 +84,12 @@ const double Polygonizer::VecResScaleUp = 64.0;
 const double Polygonizer::VecResScaleDn = 1.0 / 64.0;
 
 // Predefined patterns
+
+// !!! UNUSED NOW !!!
 const Pt::uint64_t Polygonizer::patternDot  = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010;
 const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110;
 
+// !!! UNUSED NOW !!!
 //const Pt::uint64_t patternDotCapped         = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000;
 //const Pt::uint64_t patternDashCapped        = 0xCCCCCCCCCCCCCCCC; // 1100110011001100110011001100110011001100110011001100110011001100;
 
@@ -95,9 +98,8 @@ const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 11101110111
 //static const Pt::uint64_t patternDoubleDash = 0xEE00EE00EE00EE00;// 1110111000000000111011100000000011101110000000001110111000000000
 //static const Pt::uint64_t patternDotDash    = 0x9C9C9C9C9C9C9C9C;// 1001110010011100100111001001110010011100100111001001110010011100
 
-
-std::vector<Pt::uint8_t> Polygonizer::dashPatternDot;
-std::vector<Pt::uint8_t> Polygonizer::dashPatternDash;
+std::vector<Pt::uint8_t> Polygonizer::dashPatternDot;  // Will be initialized later
+std::vector<Pt::uint8_t> Polygonizer::dashPatternDash; // Will be initialized later
 
 
 Polygonizer::Polygonizer()
