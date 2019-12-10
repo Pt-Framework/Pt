@@ -46,7 +46,7 @@ inline std::string toString(Pt::System::LogLevel level)
         case Pt::System::None:  return "None";
         case Pt::System::Fatal: return "Fatal";
         case Pt::System::Error: return "Error";
-        case Pt::System::Warn:  return "Warning";
+        case Pt::System::Warn:  return "Warn";
         case Pt::System::Info:  return "Info";
         case Pt::System::Debug: return "Debug";
         case Pt::System::Trace: return "Trace";
