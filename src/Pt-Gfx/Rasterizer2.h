@@ -592,15 +592,11 @@ class Rasterizer2
         Image            _penBuffer;
         ConstPixel       _penPixel;
 
-#define DYNAMIC_PPB_1P
 
         // Pattern buffer for one-pixel line
-#ifdef DYNAMIC_PPB_1P
         std::vector<Pt::uint8_t> _patternBuffer1PDyn;
         Pt::int32_t              _patternBuffer1PDynCntMax;
-#else
-        Pt::uint8_t      _patternBuffer1P[ ( PATTERN_BUFFER_NUM_OF_CELLS + 1 )* PATTERN_BUFFER_1P_SCALE_FACTOR ];
-#endif
+      //Pt::uint8_t              _patternBuffer1P[ ( PATTERN_BUFFER_NUM_OF_CELLS + 1 )* PATTERN_BUFFER_1P_SCALE_FACTOR ];
 
         // Font & text related
         Font             _font;

@@ -149,19 +149,22 @@ void Rasterizer2::setPen( const Pen& pen )
     updatePenPattern();
 }
 
-#ifdef DYNAMIC_PPB_1P
 
 void Rasterizer2::updatePenPattern()
 {
     // Select the pattern
     const std::vector<Pt::uint8_t>* selDashPattern;
 
-    switch(_pen.style())
-    {
-        default:
-        case Pen::Dot         : selDashPattern = &Polygonizer::dashPatternDot;  break;
-        case Pen::Dash        : selDashPattern = &Polygonizer::dashPatternDash; break;
-        case Pen::UserDefined : selDashPattern = &_pen.styleUserDashPattern();  break;
+    if(!_pen.styleUserDashPattern().empty()) {
+        selDashPattern = &_pen.styleUserDashPattern();
+    }
+    else {
+        switch(_pen.style())
+        {
+            default        :
+            case Pen::Dot  : selDashPattern = &Polygonizer::dashPatternDot;  break;
+            case Pen::Dash : selDashPattern = &Polygonizer::dashPatternDash; break;
+        }
     }
 
     const std::vector<Pt::uint8_t>& selPattern  = *selDashPattern;
@@ -268,12 +271,10 @@ void Rasterizer2::updatePenPattern()
     }
     //*/
 
-
-//105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255 236 186 106 0 105 185 236 255
 }
 
-#else
 
+/*
 void Rasterizer2::updatePenPattern()
 {
     // Select the pattern
@@ -343,17 +344,13 @@ void Rasterizer2::updatePenPattern()
         }
     }
 }
-
-#endif
+*/
 
 
 Pt::uint8_t Rasterizer2::patternBuffer1PAlpha(Pt::int32_t idx) const
 {
-#ifdef DYNAMIC_PPB_1P
     return _patternBuffer1PDyn[ idx % FIXED_POINT_TO_INT(_patternBuffer1PDynCntMax) ];
-#else
-    return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ];
-#endif
+  //return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ];
 }
 
 
@@ -376,13 +373,10 @@ Pt::uint8_t Rasterizer2::patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y,
 
 void Rasterizer2::patternBuffer1PAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const
 {
-#ifdef DYNAMIC_PPB_1P
     a0 = (Pt::uint32_t) _patternBuffer1PDyn[ idx % FIXED_POINT_TO_INT(_patternBuffer1PDynCntMax) ] * alpha0 / 255;
     a1 = (Pt::uint32_t) _patternBuffer1PDyn[ idx % FIXED_POINT_TO_INT(_patternBuffer1PDynCntMax) ] * alpha1 / 255;
-#else
-    a0 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha0 / 255;
-    a1 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha1 / 255;
-#endif
+  //a0 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha0 / 255;
+  //a1 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha1 / 255;
 }
 
 

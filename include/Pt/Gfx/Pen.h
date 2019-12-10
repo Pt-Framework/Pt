@@ -57,12 +57,12 @@ class PT_GFX_API Pen
         enum Style { Solid       = 0,
                      Dot         = 1,
                      Dash        = 2,
+                     UserDefined = 3, // Need to use this for easier if-else branches
 
-                     // DEPRECATED:
-                     DoubleDot   = 3,
-                     DoubleDash  = 4,
-                     DotDash     = 5,
-                     UserDefined = 6
+                   // DEPRECATED:
+                   //DoubleDot   = 4,
+                     DoubleDash  = 5, // The original Rasterizer class seems to still use this?
+                   //DotDash     = 6
                    };
 
         /** @brief Pen cap style.
@@ -113,10 +113,10 @@ class PT_GFX_API Pen
         Pen(const Color& color, std::size_t width, Style style = Solid,
             CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
-        /** @brief Constructs a Pen with the specified size, color and custom styles.
-        */
-        Pen(const Color& color, std::size_t width, Pt::uint64_t stylePattern,
-            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
+        ///** @brief Constructs a Pen with the specified size, color and custom styles.
+        //*/
+        //Pen(const Color& color, std::size_t width, Pt::uint64_t stylePattern,
+        //    CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Constructs a Pen with the specified size, color and custom styles.
         */
@@ -156,9 +156,9 @@ class PT_GFX_API Pen
         */
         void setStyle(Style style = Solid);
 
-        /** @brief Sets the pen style.
-        */
-        void setStyle(Pt::uint64_t stylePattern);
+        ///** @brief Sets the pen style.
+        //*/
+        //void setStyle(Pt::uint64_t stylePattern);
 
         /** @brief Sets the pen style.
         */
@@ -168,9 +168,9 @@ class PT_GFX_API Pen
         */
         Style style() const;
 
-        /** @brief Returns the pen style user pattern.
-        */
-        Pt::uint64_t styleUserPattern() const;
+        ///** @brief Returns the pen style user pattern.
+        //*/
+        //Pt::uint64_t styleUserPattern() const;
 
         /** @brief Returns the pen style user pattern.
         */
@@ -205,11 +205,11 @@ class PT_GFX_API PenData
 {
   public:
       PenData(const Color& color, std::size_t size,
-              Pen::Style style, Pt::uint64_t userPattern, Pen::CapStyle cap, Pen::JoinStyle join)
+              Pen::Style style, /*Pt::uint64_t userPattern,*/ Pen::CapStyle cap, Pen::JoinStyle join)
       : _color(color)
       , _size(size)
       , _style(style)
-      , _userPattern(userPattern)
+    //, _userPattern(userPattern)
       , _capStyle(cap)
       , _joinStyle(join)
       {}
@@ -219,7 +219,7 @@ class PT_GFX_API PenData
       : _color(color)
       , _size(size)
       , _style(style)
-      , _userPattern(0)
+    //, _userPattern(0)
       , _userDashPattern(userDashPattern)
       , _capStyle(cap)
       , _joinStyle(join)
@@ -230,7 +230,7 @@ class PT_GFX_API PenData
       : _color(color)
       , _size(size)
       , _style(style)
-      , _userPattern(0)
+    //, _userPattern(0)
       , _userDashPattern(userDashPatternBeg, userDashPatternEnd)
       , _capStyle(cap)
       , _joinStyle(join)
@@ -248,23 +248,33 @@ class PT_GFX_API PenData
       std::size_t size() const
       { return _size; }
 
+      /*
       void setStyle(Pen::Style style, Pt::uint64_t userPattern)
       {
           _style       = style;
           _userPattern = userPattern;
       }
+      */
 
-      void setStyle(Pen::Style style, const std::vector<Pt::uint8_t>& userDashPattern)
+      void setStyle(Pen::Style style)
       {
-          _style           = style;
+          _style = style;
+          _userDashPattern.clear();
+      }
+
+      void setStyle(const std::vector<Pt::uint8_t>& userDashPattern)
+      {
+          _style           = Pen::Solid;
           _userDashPattern = userDashPattern;
       }
 
       Pen::Style style() const
       { return _style; }
 
+      /*
       Pt::uint64_t styleUserPattern() const
       { return _userPattern; }
+      */
 
       const std::vector<Pt::uint8_t>& styleUserDashPattern() const
       { return _userDashPattern; }
@@ -285,7 +295,7 @@ class PT_GFX_API PenData
       Color                    _color;
       std::size_t              _size;
       Pen::Style               _style;
-      Pt::uint64_t             _userPattern;
+    //Pt::uint64_t             _userPattern;
       std::vector<Pt::uint8_t> _userDashPattern;
       Pen::CapStyle            _capStyle;
       Pen::JoinStyle           _joinStyle;

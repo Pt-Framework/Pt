@@ -35,23 +35,23 @@ namespace Pt {
 namespace Gfx {
 
 Pen::Pen()
-: _penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin))
+: _penData(new PenData(Color(0, 0, 0), 0, Solid, /*0,*/ RoundCap, RoundJoin))
 {}
 
 
 Pen::Pen(const Color& color)
-: _penData(new PenData(color, 1, Solid, 0, RoundCap, RoundJoin))
+: _penData(new PenData(color, 1, Solid, /*0,*/ RoundCap, RoundJoin))
 {}
 
 
 Pen::Pen(const Color& color, std::size_t size, Style style, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, (style != UserDefined) ? style : Solid, 0, cap, join))
+: _penData(new PenData(color, size, (style != UserDefined) ? style : Solid, /*0,*/ cap, join))
 {}
 
 
-Pen::Pen(const Color& color, std::size_t size, Pt::uint64_t stylePattern, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, UserDefined, stylePattern, cap, join))
-{}
+//Pen::Pen(const Color& color, std::size_t size, Pt::uint64_t stylePattern, CapStyle cap, JoinStyle join)
+//: _penData(new PenData(color, size, UserDefined, stylePattern, cap, join))
+//{}
 
 
 Pen::Pen(const Color& color, std::size_t size, const std::vector<Pt::uint8_t>& userDashPattern, CapStyle cap, JoinStyle join)
@@ -113,10 +113,11 @@ void Pen::setStyle(Style style)
         _penData = penData;
     }
 
-    _penData->setStyle( (style != UserDefined) ? style : Solid, 0 );
+    _penData->setStyle(style);
 }
 
 
+/*
 void Pen::setStyle(Pt::uint64_t stylePattern)
 {
     // COW
@@ -127,6 +128,7 @@ void Pen::setStyle(Pt::uint64_t stylePattern)
 
     _penData->setStyle(UserDefined, stylePattern);
 }
+*/
 
 
 void Pen::setStyle(const std::vector<Pt::uint8_t>& userDashPattern)
@@ -137,7 +139,7 @@ void Pen::setStyle(const std::vector<Pt::uint8_t>& userDashPattern)
         _penData = penData;
     }
 
-    _penData->setStyle(UserDefined, userDashPattern);
+    _penData->setStyle(userDashPattern);
 }
 
 
@@ -147,10 +149,12 @@ Pen::Style Pen::style() const
 }
 
 
+/*
 Pt::uint64_t Pen::styleUserPattern() const
 {
     return _penData->styleUserPattern();
 }
+*/
 
 
 const std::vector<Pt::uint8_t>& Pen::styleUserDashPattern() const

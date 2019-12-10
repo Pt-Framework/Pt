@@ -218,21 +218,20 @@ void Rasterizer2::rasterNarrowQuadraticBezier(Pt::int32_t x1, Pt::int32_t y1,
         bool        firstPixel1 = true;
         do {
             // Get alpha from the pattern as needed
-#ifdef DYNAMIC_PPB_1P
             Pt::uint8_t patAlpha = 255;
             if(fpiCtrInOut) {
                 patAlpha = _patternBuffer1PDyn[FIXED_POINT_TO_INT(*fpiCtrInOut)];
                 *fpiCtrInOut += fpiCtrInc;
                 if(*fpiCtrInOut >= _patternBuffer1PDynCntMax) *fpiCtrInOut -= _patternBuffer1PDynCntMax;
             }
-#else
+            /*
             Pt::uint8_t patAlpha = 255;
             if(fpiCtrInOut) {
                 patAlpha = _patternBuffer1P[FIXED_POINT_TO_INT(*fpiCtrInOut)];
                 *fpiCtrInOut += fpiCtrInc;
                 if(*fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) *fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
             }
-#endif
+            */
             // Approximate the error distance
             cur = std::min(dx + xy, -xy - dy);
             ed  = std::max(dx + xy, -xy - dy);
@@ -311,21 +310,20 @@ void Rasterizer2::rasterNarrowQuadraticBezier(Pt::int32_t x1, Pt::int32_t y1,
         // Draw the pixels
         do {
             // Get alpha from the pattern
-#ifdef DYNAMIC_PPB_1P
             Pt::uint8_t patAlpha = 255;
             if(fpiCtrInOut) {
                 patAlpha = _patternBuffer1PDyn[FIXED_POINT_TO_INT(*fpiCtrInOut)];
                 *fpiCtrInOut += fpiCtrInc;
                 if(*fpiCtrInOut >= _patternBuffer1PDynCntMax) *fpiCtrInOut -= _patternBuffer1PDynCntMax;
             }
-#else
+            /*
             Pt::uint8_t patAlpha = 255;
             if(fpiCtrInOut) {
                 patAlpha = _patternBuffer1P[FIXED_POINT_TO_INT(*fpiCtrInOut)];
                 *fpiCtrInOut += fpiCtrInc;
                 if(*fpiCtrInOut >= PATTERN_BUFFER_1P_COUNTER_MAX) *fpiCtrInOut -= PATTERN_BUFFER_1P_COUNTER_MAX;
             }
-#endif
+            */
             // Plot curve
             XW_SET_PIXEL(x1, y1, 0, patAlpha);
             // Check if we have just drawn the last pixel

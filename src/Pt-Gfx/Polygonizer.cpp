@@ -179,12 +179,16 @@ void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
     // Select the pattern
     const std::vector<Pt::uint8_t>* selDashPattern;
 
-    switch(style)
-    {
-        default:
-        case Pen::Dot         : selDashPattern = &dashPatternDot;  break;
-        case Pen::Dash        : selDashPattern = &dashPatternDash; break;
-        case Pen::UserDefined : selDashPattern = &userDashPattern; break;
+    if(!userDashPattern.empty()) {
+        selDashPattern = &userDashPattern;
+    }
+    else {
+        switch(style)
+        {
+            default        :
+            case Pen::Dot  : selDashPattern = &dashPatternDot;  break;
+            case Pen::Dash : selDashPattern = &dashPatternDash; break;
+        }
     }
 
     // Generate the pattern
