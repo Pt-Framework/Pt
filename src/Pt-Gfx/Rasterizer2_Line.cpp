@@ -204,7 +204,11 @@ void Rasterizer2::rasterNarrowPatternedLine(Pt::int32_t x1, Pt::int32_t y1,
     const Pt::int32_t sizeL = sqrtf(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_1P_SCALE_FACTOR * sizeS / sizeL;
+    Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_1P_SCALE_FACTOR);
+
+    if( ! ( (y1 == y2) || (x1 == x2) || (abs(x2 - x1) == abs(y2 - y1)) ) ) { // Check generic line (non horizontal, vertical, or for 45-degree line)
+        fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_1P_SCALE_FACTOR * sizeS / sizeL;
+    }
 
     // Check for 45-degree line
     if(abs(x2 - x1) == abs(y2 - y1)) {
@@ -213,7 +217,6 @@ void Rasterizer2::rasterNarrowPatternedLine(Pt::int32_t x1, Pt::int32_t y1,
 
     // Generic line
     else {
-
         // Without anti-aliasing
         if( ! _aaMode)
             rasterNarrowPatternedGLineSegmentNoAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
@@ -239,7 +242,11 @@ void Rasterizer2::rasterNarrowPatternedLine_F(float x1, float y1,
     const float sizeL = sqrt(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = lround( FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_1P_SCALE_FACTOR * sizeS / sizeL );
+    Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_1P_SCALE_FACTOR);
+
+    if( ! ( (y1 == y2) || (x1 == x2) || (abs(x2 - x1) == abs(y2 - y1)) ) ) { // Check generic line (non horizontal, vertical, or for 45-degree line)
+        fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_1P_SCALE_FACTOR * sizeS / sizeL;
+    }
 
     // Rasterize line
     rasterNarrowPatternedGLineSegmentXWAA_F(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);

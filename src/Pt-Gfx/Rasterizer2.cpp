@@ -178,9 +178,10 @@ void Rasterizer2::updatePenPattern()
     }
 
     // Determine the repeat count
-    // Repeat how many is the best? 1, 64, 128, or ???
-    Pt::uint8_t repeatCount = 128 / expPatCount;
-    if(repeatCount < 1) repeatCount = 1;
+    //Pt::uint8_t repeatCount = 128 / expPatCount;
+    //if(repeatCount < 1) repeatCount = 1;
+
+    const Pt::uint8_t repeatCount = 1;
 
     // Expand the pattern
     std::vector<bool> expPattern;

@@ -36,13 +36,16 @@
 
 
 // Scaling factor and starting value for the pattern buffer
-#define PATTERN_BUFFER_NUM_OF_CELLS     64
+//#define PATTERN_BUFFER_NUM_OF_CELLS     64
 
-#define PATTERN_BUFFER_MP_COUNTER_MAX   PATTERN_BUFFER_NUM_OF_CELLS
+//#define PATTERN_BUFFER_1P_SCALE_FACTOR  4
+//#define PATTERN_BUFFER_1P_COUNTER_START FIXED_POINT_FROM_INT( (PATTERN_BUFFER_1P_SCALE_FACTOR) - 1 )
+//#define PATTERN_BUFFER_1P_COUNTER_MAX   FIXED_POINT_FROM_INT( ( PATTERN_BUFFER_NUM_OF_CELLS + 1 ) * PATTERN_BUFFER_1P_SCALE_FACTOR )
+
+//#define PATTERN_BUFFER_MP_COUNTER_MAX   PATTERN_BUFFER_NUM_OF_CELLS
 
 #define PATTERN_BUFFER_1P_SCALE_FACTOR  4
 #define PATTERN_BUFFER_1P_COUNTER_START FIXED_POINT_FROM_INT( (PATTERN_BUFFER_1P_SCALE_FACTOR) - 1 )
-#define PATTERN_BUFFER_1P_COUNTER_MAX   FIXED_POINT_FROM_INT( ( PATTERN_BUFFER_NUM_OF_CELLS + 1 ) * PATTERN_BUFFER_1P_SCALE_FACTOR )
 
 
 namespace Pt {
@@ -232,7 +235,7 @@ class Polygonizer
         static const double VecResScaleUp;
         static const double VecResScaleDn;
 
-        Pt::uint8_t _patternBufferMP[PATTERN_BUFFER_NUM_OF_CELLS];
+        //Pt::uint8_t _patternBufferMP[PATTERN_BUFFER_NUM_OF_CELLS];
 
         std::vector<float> dashPatternBuffer;
 
