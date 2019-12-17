@@ -59,8 +59,12 @@ class BasicStylesWidget : public Pt::Hmi::Control
 
 class LineStylesWidget : public BasicStylesWidget
 {
+    private:
+        bool _userStyle;
+
     public:
-        LineStylesWidget()
+        LineStylesWidget(bool userStyle)
+        : _userStyle(userStyle)
         {}
 
         virtual ~LineStylesWidget()
@@ -83,28 +87,27 @@ class LineStylesWidget : public BasicStylesWidget
 
             int y = 40;
 
-//#define USER_STYLE
-
-#ifdef USER_STYLE
+            // User-defined style
             const Pt::uint8_t  userStyle[]  = { 1, 1, 3, 3 };
             const Pt::uint8_t* userStyleBeg = userStyle;
             const Pt::uint8_t* userStyleEnd = userStyle + sizeof(userStyle);
-#endif
+
 
             if(1) {
                 painter.setPen( lightBlue );
                 painter.drawText( PointF(20, y + 10), "ButtCap");
                 y += 20;
 
-#ifdef USER_STYLE
-                Pen pen1Solid(red, 1, userStyleBeg, userStyleEnd, Pen::ButtCap);
-                Pen pen2Solid(red, 4, userStyleBeg, userStyleEnd, Pen::ButtCap);
-                Pen pen3Solid(red, 9, userStyleBeg, userStyleEnd, Pen::ButtCap);
-#else
                 Pen pen1Solid(red, 1, Pen::Solid, Pen::ButtCap);
                 Pen pen2Solid(red, 4, Pen::Solid, Pen::ButtCap);
                 Pen pen3Solid(red, 9, Pen::Solid, Pen::ButtCap);
-#endif
+
+                if(_userStyle) {
+                    pen1Solid = Pen(red, 1, userStyleBeg, userStyleEnd, Pen::ButtCap);
+                    pen2Solid = Pen(red, 4, userStyleBeg, userStyleEnd, Pen::ButtCap);
+                    pen3Solid = Pen(red, 9, userStyleBeg, userStyleEnd, Pen::ButtCap);
+                }
+
                 painter.setPen(pen1Solid);
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
@@ -149,13 +152,14 @@ class LineStylesWidget : public BasicStylesWidget
                 painter.drawText( PointF(20, y + 10), "SquareCap");
                 y += 20;
 
-#ifdef USER_STYLE
-                Pen pen2Solid(red, 4, userStyleBeg, userStyleEnd, Pen::SquareCap);
-                Pen pen3Solid(red, 9, userStyleBeg, userStyleEnd, Pen::SquareCap);
-#else
                 Pen pen2Solid(red, 4, Pen::Solid, Pen::SquareCap);
                 Pen pen3Solid(red, 9, Pen::Solid, Pen::SquareCap);
-#endif
+
+                if(_userStyle) {
+                    pen2Solid = Pen(red, 4, userStyleBeg, userStyleEnd, Pen::SquareCap);
+                    pen3Solid = Pen(red, 9, userStyleBeg, userStyleEnd, Pen::SquareCap);
+                }
+
                 painter.setPen(pen2Solid);
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
@@ -189,13 +193,14 @@ class LineStylesWidget : public BasicStylesWidget
                 painter.drawText( PointF(20, y + 10), "RoundCap");
                 y += 20;
 
-#ifdef USER_STYLE
-                Pen pen2Solid(red, 4, userStyleBeg, userStyleEnd, Pen::RoundCap);
-                Pen pen3Solid(red, 9, userStyleBeg, userStyleEnd, Pen::RoundCap);
-#else
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::RoundCap);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::RoundCap);
-#endif
+                Pen pen2Solid(red, 4, Pen::Solid, Pen::SquareCap);
+                Pen pen3Solid(red, 9, Pen::Solid, Pen::SquareCap);
+
+                if(_userStyle) {
+                    pen2Solid = Pen(red, 4, userStyleBeg, userStyleEnd, Pen::SquareCap);
+                    pen3Solid = Pen(red, 9, userStyleBeg, userStyleEnd, Pen::SquareCap);
+                }
+
                 painter.setPen(pen2Solid);
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
@@ -607,15 +612,19 @@ class PainterDemoWindow : public Pt::Hmi::Window
 {
     public:
         PainterDemoWindow()
+        : _tabLineStyles1(false), _tabLineStyles2(true)
         {
-            _tabLineStyles.setMargin(2);
-            _tabCapStyles.setMargin(2);
-            _tabView.setMargin(2);
+            _tabLineStyles1.setMargin(2);
+            _tabLineStyles2.setMargin(2);
+            _tabCapStyles  .setMargin(2);
+            _tabJoinStyles .setMargin(2);
 
-            _tabView.addTab(_tabLineStyles, "Line Styles");
-            _tabView.addTab(_tabCapStyles,  "Cap Styles" );
-            _tabView.addTab(_tabJoinStyles, "Join Styles");
-            _tabView.setCurrent(2);
+            _tabView.addTab(_tabLineStyles1, "Line Styles 1");
+            _tabView.addTab(_tabLineStyles2, "Line Styles 2");
+            _tabView.addTab(_tabCapStyles,   "Cap Styles"   );
+            _tabView.addTab(_tabJoinStyles,  "Join Styles"  );
+            _tabView.setPadding(8);
+            _tabView.setCurrent(3);
 
             this->setContent(&_tabView);
         }
@@ -629,7 +638,8 @@ class PainterDemoWindow : public Pt::Hmi::Window
 
     private:
         Pt::Hmi::TabView _tabView;
-        LineStylesWidget _tabLineStyles;
+        LineStylesWidget _tabLineStyles1;
+        LineStylesWidget _tabLineStyles2;
         CapStylesWidget  _tabCapStyles;
         JoinStylesWidget _tabJoinStyles;
 };
