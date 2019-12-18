@@ -204,7 +204,7 @@ void Polygonizer::renderRoundedRect(std::vector<Polygon>& polygons,
                                      const RectF& rect, float radius, const Pen& pen)
 {
     std::vector<PointF> pointsF;
-    renderRoundedRectPoints(pointsF, rect, radius, pen.size() );
+    renderRoundedRectPoints(pointsF, rect, radius, pen.size(), pen.style() );
 
     if( ! pointsF.empty() )
         pointsF.push_back( pointsF.front() );
@@ -216,7 +216,7 @@ void Polygonizer::renderRoundedRect(std::vector<Polygon>& polygons,
 void Polygonizer::fillRoundedRect(std::vector<PointF>& pointsF,
                                    const RectF& rect, float radius)
 {
-    renderRoundedRectPoints(pointsF, rect, radius, 10);
+    renderRoundedRectPoints( pointsF, rect, radius, 10, Pen::Solid );
 
     if( ! pointsF.empty() )
         pointsF.push_back( pointsF.front() );
@@ -225,7 +225,7 @@ void Polygonizer::fillRoundedRect(std::vector<PointF>& pointsF,
 
 void Polygonizer::renderRoundedRectPoints(std::vector<PointF>& dst,
                                            const RectF& rect, float radius,
-                                           std::size_t penSize)
+                                           std::size_t penSize, Pen::Style penStyle)
 {
     // TODO: penSize is actually a smoothness value
 
@@ -235,6 +235,7 @@ void Polygonizer::renderRoundedRectPoints(std::vector<PointF>& dst,
     const float y2 = rect.bottomRight().y();
 
     Pt::int32_t nSegs = Pt::lround( ceil(penSize * 0.5f) );
+    if(penStyle != Pen::Solid) nSegs = -nSegs;
 
     // CCW
 
@@ -724,9 +725,9 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
     const bool isSolid  = pen.style() == Pen::Solid;
     const bool isClosed = points[0] == points[n - 1];
 
-    const bool isSelfIn = selfIntersecting(points, n);
+    const bool isSelfIn = ( (useNonZeroFillingRule && forSmoothCurve) || selfIntersecting(points, n) );
 
-    if(isSolid) // solid line
+    if(isSolid) // Solid line
     {
         if(isClosed)
         {
@@ -737,7 +738,7 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
             renderSolidOpenWidePolyline(polygons, points, n, pen, false, false);
         }
     }
-    else // dashed line
+    else // Dashed line
     {
         renderDashedWidePolyLine(polygons, points, n, pen, !isSelfIn, forSmoothCurve);
     }
@@ -2187,8 +2188,13 @@ void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,
     }
 
     // Ensure that the number of segments are not too few
-    if(nSegs < 4)
-        nSegs = 4;
+    if(nSegs < 0) {
+        nSegs = -nSegs;
+        if(nSegs < 2) nSegs = 2;
+    }
+    else {
+        if(nSegs < 4) nSegs = 4;
+    }
 
     // Calculate the inverse multiplication factor
     const float nSegs1i = 1.0f / (nSegs - 1);

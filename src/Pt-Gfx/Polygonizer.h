@@ -104,7 +104,7 @@ class Polygonizer
     private:
         void renderRoundedRectPoints(std::vector<PointF>& dst,
                                      const RectF& rect, float radius,
-                                     std::size_t penSize);
+                                     std::size_t penSize, Pen::Style penStyle);
 
         void renderEllipsePoints(std::vector<PointF>& dst,
                                  Pt::int32_t radiusX, Pt::int32_t radiusY,
