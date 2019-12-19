@@ -111,7 +111,7 @@ class PT_GFX_API Pen
         /** @brief Constructs a Pen with the specified size, color and custom styles.
         */
         Pen(const Color& color, std::size_t width,
-            const std::vector<Pt::uint8_t>& userDashPattern,
+            const std::vector<Pt::uint8_t>& dashPattern,
             CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Constructs a Pen with the specified size, color and custom styles.
@@ -123,7 +123,7 @@ class PT_GFX_API Pen
         /** @brief Constructs a Pen with the specified size, color and custom styles.
         */
         Pen(const Color& color, std::size_t width,
-            const Pt::uint8_t* userDashPatternBeg, const Pt::uint8_t* userDashPatternEnd,
+            const Pt::uint8_t* dashPatternBeg, const Pt::uint8_t* dashPatternEnd,
             CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Sets the size of the pen.
@@ -146,25 +146,18 @@ class PT_GFX_API Pen
         */
         void setStyle(Style style = Solid);
 
-        ///** @brief Sets the pen style.
-        //*/
-        //void setStyle(Pt::uint64_t stylePattern);
-
-        /** @brief Sets the pen style.
-        */
-        void setStyle(const std::vector<Pt::uint8_t>& userDashPattern);
 
         /** @brief Returns the pen style.
         */
         Style style() const;
 
-        ///** @brief Returns the pen style user pattern.
-        //*/
-        //Pt::uint64_t styleUserPattern() const;
-
-        /** @brief Returns the pen style user pattern.
+        /** @brief Sets the pen user dash pattern.
         */
-        const std::vector<Pt::uint8_t>& styleUserDashPattern() const;
+        void setDashPattern(const std::vector<Pt::uint8_t>& dashPattern);
+
+        /** @brief Returns the pen user dash pattern.
+        */
+        const std::vector<Pt::uint8_t>& dashPattern() const;
 
         /** @brief Sets the cap style.
         */
@@ -189,7 +182,7 @@ class PT_GFX_API Pen
         /** @brief Returns true if the pen is solid.
         */
         inline bool isSolid() const
-        { return (style() == Solid) && styleUserDashPattern().empty(); }
+        { return (style() == Solid) && dashPattern().empty(); }
 
     private:
       SmartPtr<PenData> _penData;
@@ -200,33 +193,30 @@ class PT_GFX_API PenData
 {
   public:
       PenData(const Color& color, std::size_t size,
-              Pen::Style style, /*Pt::uint64_t userPattern,*/ Pen::CapStyle cap, Pen::JoinStyle join)
+              Pen::Style style, Pen::CapStyle cap, Pen::JoinStyle join)
       : _color(color)
       , _size(size)
       , _style(style)
-    //, _userPattern(userPattern)
       , _capStyle(cap)
       , _joinStyle(join)
       {}
 
       PenData(const Color& color, std::size_t size,
-              Pen::Style style, const std::vector<Pt::uint8_t>& userDashPattern, Pen::CapStyle cap, Pen::JoinStyle join)
+              Pen::Style style, const std::vector<Pt::uint8_t>& dashPattern, Pen::CapStyle cap, Pen::JoinStyle join)
       : _color(color)
       , _size(size)
       , _style(style)
-    //, _userPattern(0)
-      , _userDashPattern(userDashPattern)
+      , _dashPattern(dashPattern)
       , _capStyle(cap)
       , _joinStyle(join)
       {}
 
       PenData(const Color& color, std::size_t size,
-              Pen::Style style, const Pt::uint8_t* userDashPatternBeg, const Pt::uint8_t* userDashPatternEnd, Pen::CapStyle cap, Pen::JoinStyle join)
+              Pen::Style style, const Pt::uint8_t* dashPatternBeg, const Pt::uint8_t* dashPatternEnd, Pen::CapStyle cap, Pen::JoinStyle join)
       : _color(color)
       , _size(size)
       , _style(style)
-    //, _userPattern(0)
-      , _userDashPattern(userDashPatternBeg, userDashPatternEnd)
+      , _dashPattern(dashPatternBeg, dashPatternEnd)
       , _capStyle(cap)
       , _joinStyle(join)
       {}
@@ -243,36 +233,23 @@ class PT_GFX_API PenData
       std::size_t size() const
       { return _size; }
 
-      /*
-      void setStyle(Pen::Style style, Pt::uint64_t userPattern)
-      {
-          _style       = style;
-          _userPattern = userPattern;
-      }
-      */
-
       void setStyle(Pen::Style style)
       {
           _style = style;
-          _userDashPattern.clear();
-      }
-
-      void setStyle(const std::vector<Pt::uint8_t>& userDashPattern)
-      {
-          _style           = Pen::Solid;
-          _userDashPattern = userDashPattern;
+          _dashPattern.clear();
       }
 
       Pen::Style style() const
       { return _style; }
 
-      /*
-      Pt::uint64_t styleUserPattern() const
-      { return _userPattern; }
-      */
+      void setDashPattern(const std::vector<Pt::uint8_t>& dashPattern)
+      {
+          _style       = Pen::Solid;
+          _dashPattern = dashPattern;
+      }
 
-      const std::vector<Pt::uint8_t>& styleUserDashPattern() const
-      { return _userDashPattern; }
+      const std::vector<Pt::uint8_t>& dashPattern() const
+      { return _dashPattern; }
 
       void setCapStyle(Pen::CapStyle cap)
       { _capStyle = cap;}
@@ -290,8 +267,7 @@ class PT_GFX_API PenData
       Color                    _color;
       std::size_t              _size;
       Pen::Style               _style;
-    //Pt::uint64_t             _userPattern;
-      std::vector<Pt::uint8_t> _userDashPattern;
+      std::vector<Pt::uint8_t> _dashPattern;
       Pen::CapStyle            _capStyle;
       Pen::JoinStyle           _joinStyle;
 };

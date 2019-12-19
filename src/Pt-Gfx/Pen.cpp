@@ -113,8 +113,13 @@ void Pen::setStyle(Style style)
 }
 
 
+Pen::Style Pen::style() const
+{
+    return _penData->style();
+}
 
-void Pen::setStyle(const std::vector<Pt::uint8_t>& userDashPattern)
+
+void Pen::setDashPattern(const std::vector<Pt::uint8_t>& dashPattern)
 {
     // COW
     if(_penData.refs() > 1) {
@@ -122,20 +127,13 @@ void Pen::setStyle(const std::vector<Pt::uint8_t>& userDashPattern)
         _penData = penData;
     }
 
-    _penData->setStyle(userDashPattern);
+    _penData->setDashPattern(dashPattern);
 }
 
 
-Pen::Style Pen::style() const
+const std::vector<Pt::uint8_t>& Pen::dashPattern() const
 {
-    return _penData->style();
-}
-
-
-
-const std::vector<Pt::uint8_t>& Pen::styleUserDashPattern() const
-{
-    return _penData->styleUserDashPattern();
+    return _penData->dashPattern();
 }
 
 

@@ -142,7 +142,7 @@ void Rasterizer2::setPen( const Pen& pen )
     _penPixel.reset(_penBuffer.view(), 0, 0);
 
     if( !pen.isSolid() )
-        _polygonizer.setPattern( pen.style(), pen.capStyle(), pen.styleUserDashPattern(), pen.size() );
+        _polygonizer.setPattern( pen.style(), pen.capStyle(), pen.dashPattern(), pen.size() );
 
     updatePenPattern();
 }
@@ -153,8 +153,8 @@ void Rasterizer2::updatePenPattern()
     // Select the pattern
     const std::vector<Pt::uint8_t>* selDashPattern;
 
-    if(!_pen.styleUserDashPattern().empty()) {
-        selDashPattern = &_pen.styleUserDashPattern();
+    if(!_pen.dashPattern().empty()) {
+        selDashPattern = &_pen.dashPattern();
     }
     else {
         switch(_pen.style())
