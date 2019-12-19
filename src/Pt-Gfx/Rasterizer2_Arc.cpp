@@ -245,7 +245,7 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
     //fprintf(stderr, "PAR (%6.2f, %6.2f) (%6.2f, %6.2f)\n\n", ctrX, ctrY, radX, radY);
 
     // Draw using solid pen?
-    const bool solid = (pen().style() == Pen::Solid);
+    const bool solid = pen().isSolid();
 
     // Calculate the scaling factor for retrieving alphas from the pattern buffer
     const float pbScale = solid ? 1.0f : std::max(radX, radY) / (float) (64 / PATTERN_BUFFER_1P_SCALE_FACTOR);

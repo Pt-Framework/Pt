@@ -79,17 +79,17 @@ class Polygonizer
     private:
         void renderRoundedRectPoints(std::vector<PointF>& dst,
                                      const RectF& rect, float radius,
-                                     std::size_t penSize, Pen::Style penStyle);
+                                     const Pen& pen);
 
         void renderEllipsePoints(std::vector<PointF>& dst,
                                  Pt::int32_t radiusX, Pt::int32_t radiusY,
                                  Pt::int32_t centerX, Pt::int32_t centerY,
-                                 size_t penSize, Pen::Style penStyle);
+                                 const Pen& pen);
 
         void renderArcPoints(std::vector<PointF>& dst,
                              Pt::int32_t radiusX, Pt::int32_t radiusY,
                              Pt::int32_t centerX, Pt::int32_t centerY,
-                             float degBegin, float degEnd, size_t penSize, Pen::Style penStyle);
+                             float degBegin, float degEnd, const Pen& pen);
 
         void renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
                                            const PointF* basePtr, size_t curPCnt,

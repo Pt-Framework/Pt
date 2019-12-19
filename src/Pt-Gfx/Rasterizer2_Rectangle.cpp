@@ -49,7 +49,7 @@ void Rasterizer2::rasterNarrowRect(const Point& tl, const Point& br)
     if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
     if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
 
-    if(_pen.style() == Pen::Solid)
+    if(_pen.isSolid())
     {
         // Draw the rectangle's horizontal lines
         rasterNarrowSolidHLineSegment(minX, maxX, minY, _pen.color(), 0);
@@ -95,7 +95,7 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
         x1         , y2,
         x1         , y2 - radius,
         _pen.color(),
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        _pen.isSolid() ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -105,7 +105,7 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
         x1, y1 + rect.height() / 2,
         x1, y1 + radius,
         _pen.color(),
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        _pen.isSolid() ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -115,7 +115,7 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
         x1        , y1,
         x1 + radius, y1,
         _pen.color(),
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        _pen.isSolid() ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -125,7 +125,7 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
         x1 + rect.width() / 2, y1,
         x2 - radius          , y1,
         _pen.color(),
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        _pen.isSolid() ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -135,7 +135,7 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
         x2         , y1,
         x2         , y1 + radius,
         _pen.color(),
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        _pen.isSolid() ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -145,7 +145,7 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
         x2, y1 + rect.height() / 2,
         x2, y2 - radius,
         _pen.color(),
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        _pen.isSolid() ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -155,7 +155,7 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
         x2         , y2,
         x2 - radius, y2,
         _pen.color(),
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        _pen.isSolid() ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -165,7 +165,7 @@ void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
         x1 + rect.width() / 2, y2,
         x1 + radius          , y2,
         _pen.color(),
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        _pen.isSolid() ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 }

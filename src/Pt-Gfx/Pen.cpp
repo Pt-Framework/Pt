@@ -34,38 +34,34 @@ namespace Pt {
 
 namespace Gfx {
 
+
 Pen::Pen()
-: _penData(new PenData(Color(0, 0, 0), 0, Solid, /*0,*/ RoundCap, RoundJoin))
+: _penData(new PenData(Color(0, 0, 0), 0, Solid, RoundCap, RoundJoin))
 {}
 
 
 Pen::Pen(const Color& color)
-: _penData(new PenData(color, 1, Solid, /*0,*/ RoundCap, RoundJoin))
+: _penData(new PenData(color, 1, Solid, RoundCap, RoundJoin))
 {}
 
 
 Pen::Pen(const Color& color, std::size_t size, Style style, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, (style != UserDefined) ? style : Solid, /*0,*/ cap, join))
+: _penData(new PenData(color, size, style, cap, join))
 {}
 
 
-//Pen::Pen(const Color& color, std::size_t size, Pt::uint64_t stylePattern, CapStyle cap, JoinStyle join)
-//: _penData(new PenData(color, size, UserDefined, stylePattern, cap, join))
-//{}
-
-
 Pen::Pen(const Color& color, std::size_t size, const std::vector<Pt::uint8_t>& userDashPattern, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, UserDefined, userDashPattern, cap, join))
+: _penData(new PenData(color, size, Solid, userDashPattern, cap, join))
 {}
 
 
 Pen::Pen(const Color& color, std::size_t size, const Pt::uint8_t* userDashPattern, Pt::uint8_t userDashPatternCount, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, UserDefined, userDashPattern, userDashPattern + userDashPatternCount, cap, join))
+: _penData(new PenData(color, size, Solid, userDashPattern, userDashPattern + userDashPatternCount, cap, join))
 {}
 
 
 Pen::Pen(const Color& color, std::size_t size, const Pt::uint8_t* userDashPatternBeg, const Pt::uint8_t* userDashPatternEnd, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, UserDefined, userDashPatternBeg, userDashPatternEnd, cap, join))
+: _penData(new PenData(color, size, Solid, userDashPatternBeg, userDashPatternEnd, cap, join))
 {}
 
 
@@ -117,19 +113,6 @@ void Pen::setStyle(Style style)
 }
 
 
-/*
-void Pen::setStyle(Pt::uint64_t stylePattern)
-{
-    // COW
-    if(_penData.refs() > 1) {
-        SmartPtr<PenData> penData( new PenData(*_penData) );
-        _penData = penData;
-    }
-
-    _penData->setStyle(UserDefined, stylePattern);
-}
-*/
-
 
 void Pen::setStyle(const std::vector<Pt::uint8_t>& userDashPattern)
 {
@@ -148,13 +131,6 @@ Pen::Style Pen::style() const
     return _penData->style();
 }
 
-
-/*
-Pt::uint64_t Pen::styleUserPattern() const
-{
-    return _penData->styleUserPattern();
-}
-*/
 
 
 const std::vector<Pt::uint8_t>& Pen::styleUserDashPattern() const
@@ -203,6 +179,7 @@ bool Pen::isNull() const
 {
     return size() == 0;
 }
+
 
 } // namespace
 

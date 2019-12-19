@@ -121,19 +121,21 @@ void Polygonizer::renderRoundedRect(std::vector<Polygon>& polygons,
                                      const RectF& rect, float radius, const Pen& pen)
 {
     std::vector<PointF> pointsF;
-    renderRoundedRectPoints(pointsF, rect, radius, pen.size(), pen.style() );
+    renderRoundedRectPoints(pointsF, rect, radius, pen );
 
     if( ! pointsF.empty() )
         pointsF.push_back( pointsF.front() );
 
-    renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, pen.style() != Pen::Solid, true );
+    renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, !pen.isSolid(), true );
 }
 
 
 void Polygonizer::fillRoundedRect(std::vector<PointF>& pointsF,
                                    const RectF& rect, float radius)
 {
-    renderRoundedRectPoints( pointsF, rect, radius, 10, Pen::Solid );
+    static const Pen defaultPen( Color(), 10, Pen::Solid, Pen::FlatCap, Pen::BevelJoin);
+
+    renderRoundedRectPoints( pointsF, rect, radius, defaultPen );
 
     if( ! pointsF.empty() )
         pointsF.push_back( pointsF.front() );
@@ -141,8 +143,8 @@ void Polygonizer::fillRoundedRect(std::vector<PointF>& pointsF,
 
 
 void Polygonizer::renderRoundedRectPoints(std::vector<PointF>& dst,
-                                           const RectF& rect, float radius,
-                                           std::size_t penSize, Pen::Style penStyle)
+                                          const RectF& rect, float radius,
+                                          const Pen& pen)
 {
     // TODO: penSize is actually a smoothness value
 
@@ -151,8 +153,8 @@ void Polygonizer::renderRoundedRectPoints(std::vector<PointF>& dst,
     const float x2 = rect.bottomRight().x();
     const float y2 = rect.bottomRight().y();
 
-    Pt::int32_t nSegs = Pt::lround( ceil(penSize * 0.5f) );
-    if(penStyle != Pen::Solid) nSegs = -nSegs;
+    Pt::int32_t nSegs = Pt::lround( ceil(pen.size() * 0.5f) );
+    if(!pen.isSolid()) nSegs = -nSegs;
 
     // CCW
 
@@ -216,8 +218,12 @@ void Polygonizer::renderEllipse(std::vector<Polygon>& polygons,
     const Pt::int32_t centerX  = topLeft.x() + radiusX;
     const Pt::int32_t centerY  = topLeft.y() + radiusY;
 
-    if(pen.style() == Pen::Solid)
+    if(pen.isSolid())
     {
+        // Copy the pen
+        Pen cpen = pen;
+        cpen.setSize(0);
+
         // Calculate the additional ellipse's parameters
         const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
@@ -229,17 +235,17 @@ void Polygonizer::renderEllipse(std::vector<Polygon>& polygons,
         // Generate a polygon that approximates the ellipse
         polygons.resize(polygons.size() + 1);
         std::vector<PointF>& pointsOuter = polygons.back().points();
-        renderEllipsePoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, 0, pen.style());
+        renderEllipsePoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, cpen);
 
         polygons.resize(polygons.size() + 1);
         std::vector<PointF>& pointsInner = polygons.back().points();
-        renderEllipsePoints(pointsInner, radiusXi, radiusYi, centerX, centerY, 0, pen.style());
+        renderEllipsePoints(pointsInner, radiusXi, radiusYi, centerX, centerY, cpen);
     }
     else // Patterned
     {
         // Generate a polygon that approximates the ellipse
         std::vector<PointF> pointsF;
-        renderEllipsePoints(pointsF, radiusX, radiusY, centerX, centerY, pen.size(), pen.style());
+        renderEllipsePoints(pointsF, radiusX, radiusY, centerX, centerY, pen);
 
         renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true, true );
     }
@@ -247,15 +253,15 @@ void Polygonizer::renderEllipse(std::vector<Polygon>& polygons,
 
 
 void Polygonizer::renderEllipsePoints(std::vector<PointF>& dst,
-                                       Pt::int32_t radiusX, Pt::int32_t radiusY,
-                                       Pt::int32_t centerX, Pt::int32_t centerY,
-                                       size_t penSize, Pen::Style penStyle)
+                                      Pt::int32_t radiusX, Pt::int32_t radiusY,
+                                      Pt::int32_t centerX, Pt::int32_t centerY,
+                                      const Pen& pen)
 {
     // Calculate the ellipse's parameters
     Pt::int32_t circFac = Pt::lround( sqrt(0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
-                                      ( (penSize > 4) ? (penSize * 0.25f) : 1.0f ) );
-
-    const Pt::int32_t segMult = (penStyle != Pen::Solid) ? 10 : 20;
+                                      ( (pen.size() > 4) ? (pen.size() * 0.25f) : 1.0f )
+                                    );
+    const Pt::int32_t segMult = !pen.isSolid() ? 10 : 20;
     const Pt::int32_t circSeg = (circFac / 16) * segMult + 1;
     const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
     const float       nSegs1i = 1.0f / (nSegs - 1);
@@ -315,8 +321,12 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
     const Pt::int32_t centerX = topLeft.x() + radiusX;
     const Pt::int32_t centerY = topLeft.y() + radiusY;
 
-    if(pen.style() == Pen::Solid)
+    if(pen.isSolid())
     {
+        // Copy the pen
+        Pen cpen = pen;
+        cpen.setSize(0);
+
         // Calculate the additional arc's parameters
         const Pt::int32_t radiusXo   = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
@@ -333,14 +343,14 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
             polygons.resize(polygons.size() + 1);
             std::vector<PointF>& pointsOuter = polygons.back().points();
 
-            renderArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0, pen.style());
+            renderArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, cpen);
             pointsOuter.push_back( pointsOuter.front() );
 
             // The arc's "inside" lines
             polygons.resize(polygons.size() + 1);
             std::vector<PointF>& pointsInner = polygons.back().points();
 
-            renderArcPoints(pointsInner, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0, pen.style());
+            renderArcPoints(pointsInner, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, cpen);
             pointsInner.push_back( pointsInner.front() );
         }
         else if(arcMode == ArcMode::Pie)
@@ -355,7 +365,7 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
             polygons.resize(polygons.size() + 1);
             std::vector<PointF>& pointsOuter = polygons.back().points();
 
-            renderArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0, pen.style());
+            renderArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, cpen);
             pointsOuter.push_back(PointF(centerXsub, centerYsub));
             pointsOuter.push_back( pointsOuter.front() );
 
@@ -363,7 +373,7 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
             polygons.resize(polygons.size() + 1);
             std::vector<PointF>& pointsInner = polygons.back().points();
 
-            renderArcPoints(pointsInner, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, 0, pen.style());
+            renderArcPoints(pointsInner, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, cpen);
             pointsInner.push_back(PointF(centerXadd, centerYadd));
             pointsInner.push_back( pointsInner.front() );
         }
@@ -371,8 +381,8 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
         {
             // The arc's "inside" and "outside" lines
             std::vector<PointF> inner, outer;
-            renderArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd, 0, pen.style());
-            renderArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0, pen.style());
+            renderArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd, cpen);
+            renderArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, cpen);
 
             // Combine the arc's lines and add caps
             polygons.resize(polygons.size() + 1);
@@ -388,19 +398,19 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
 
         if(arcMode == ArcMode::Chord)
         {
-            renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, pen.size(), pen.style());
+            renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, pen);
             pointsF.push_back( pointsF[0] );
         }
         else if(arcMode == ArcMode::Pie)
         {
             pointsF.push_back( PointF(centerX, centerY) );
-            renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, pen.size(), pen.style());
+            renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, pen);
             pointsF.push_back( PointF(centerX, centerY) );
         }
         else // ArcMode::Open
         {
             renderArcPoints(pointsF, radiusX, radiusY, centerX, centerY,
-                            degBegin, degEnd, pen.size(), pen.style());
+                            degBegin, degEnd, pen);
         }
 
         renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true, true );
@@ -411,7 +421,7 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
 void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
                                    Pt::int32_t radiusX, Pt::int32_t radiusY,
                                    Pt::int32_t centerX, Pt::int32_t centerY,
-                                   float degBegin, float degEnd, size_t penSize, Pen::Style penStyle)
+                                   float degBegin, float degEnd, const Pen& pen)
 {
     // Calculate the arc's parameters
     const float       degDlt  = degEnd - degBegin;
@@ -419,10 +429,10 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
     const Pt::int32_t circFac = Pt::lround(
                                     degFac *
                                     sqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
-                                    ( (penSize > 4) ? (penSize * 0.25f) : 1.0f )
+                                    ( (pen.size() > 4) ? (pen.size() * 0.25f) : 1.0f )
                                 );
 
-    const Pt::int32_t segMult = (penStyle != Pen::Solid) ? 10 : 20;
+    const Pt::int32_t segMult = !pen.isSolid() ? 10 : 20;
     const Pt::int32_t circSeg = (circFac / 16) * segMult + 1;
     const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
     const float       nSegs1i = 1.0f / (nSegs - 1);
@@ -607,7 +617,7 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
     if( n < 2 )
         return;
 
-    const bool isSolid  = pen.style() == Pen::Solid;
+    const bool isSolid  = pen.isSolid();
     const bool isClosed = points[0] == points[n - 1];
     const bool isSelfIn = selfIntersecting(points, n);
 
@@ -1112,7 +1122,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 
     // #@#
     // Adjust the coordinates (thus the line's length) based on the line and cap styles
-    if(pen.style() != Pen::Solid && pen.capStyle() != Pen::ButtCap) {
+    if( !pen.isSolid() && pen.capStyle() != Pen::ButtCap ) {
         x1 += (dx * 0.75f);
         y1 += (dy * 0.75f);
         x2 -= (dx * 0.75f);
@@ -1228,7 +1238,7 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
 
     // #@#
     // Adjust the coordinates (thus the line's length) based on the line and cap styles
-    if(!forSmoothCurve && pen.style() != Pen::Solid && pen.capStyle() != Pen::ButtCap) {
+    if( !forSmoothCurve && !pen.isSolid() && pen.capStyle() != Pen::ButtCap ) {
         x1 += (dx * 0.75f);
         y1 += (dy * 0.75f);
         x2 -= (dx * 0.75f);

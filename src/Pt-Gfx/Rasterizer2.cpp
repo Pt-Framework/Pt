@@ -141,7 +141,7 @@ void Rasterizer2::setPen( const Pen& pen )
 
     _penPixel.reset(_penBuffer.view(), 0, 0);
 
-    if( pen.style() != Pen::Solid )
+    if( !pen.isSolid() )
         _polygonizer.setPattern( pen.style(), pen.capStyle(), pen.styleUserDashPattern(), pen.size() );
 
     updatePenPattern();
@@ -787,7 +787,7 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
         return;
 
     // Draw the line
-    if(_pen.style() == Pen::Solid)
+    if(_pen.isSolid())
     {
         rasterNarrowSolidLine(x1, y1, x2, y2, _pen.color(), maskInOut);
     }
@@ -828,7 +828,8 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
     DrawLineMask mask_nnp1;
     memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 
-    bool solid = _pen.style() == Pen::Solid;
+    const bool solid = _pen.isSolid();
+
     Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_1P_COUNTER_START;
 
     // From point N to point (N + 1), successively
@@ -857,8 +858,8 @@ void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount
     std::vector<Polygon> polygons;
     _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen, true, false);
 
-    const bool isSolid = _pen.style() == Pen::Solid;
-    //const bool isClosed = points[0] == points[pointCount - 1];
+    const bool isSolid  = _pen.isSolid();
+  //const bool isClosed = points[0] == points[pointCount - 1];
 
     if( isSolid /*&& isClosed*/ )
     {
@@ -962,9 +963,7 @@ void Rasterizer2::drawEllipse(const PointF& topLeft, const SizeF& size)
     std::vector<Polygon> polygons;
     _polygonizer.renderEllipse(polygons, topLeft, size, newPen);
 
-    bool isSolid = _pen.style() == Pen::Solid;
-
-    if( isSolid )
+    if( _pen.isSolid() )
     {
         rasterWidePolyline(polygons);
     }
@@ -1001,10 +1000,9 @@ void Rasterizer2::drawArc(const PointF& topLeft, const SizeF& size,
     std::vector<Polygon> polygons;
     _polygonizer.renderArc(polygons, arcMode, topLeft, size, degBegin, degEnd, newPen);
 
-    bool isSolid = _pen.style() == Pen::Solid;
-    bool isClosed = arcMode != ArcMode::Open;
+    const bool isClosed = arcMode != ArcMode::Open;
 
-    if( isSolid && isClosed )
+    if( _pen.isSolid() && isClosed )
     {
         rasterWidePolyline(polygons);
     }
@@ -1048,7 +1046,8 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
     DrawLineMask mask_nnp1;
     memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 
-    bool solid = _pen.style() == Pen::Solid;
+    const bool solid = _pen.isSolid();
+
     Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_1P_COUNTER_START;
 
     // From point N to point (N + 1), successively

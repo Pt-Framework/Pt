@@ -57,10 +57,9 @@ class PT_GFX_API Pen
         enum Style { Solid       = 0,
                      Dot         = 1,
                      Dash        = 2,
-                     UserDefined = 3, // Need to use this for easier if-else branches
 
                      // DEPRECATED:
-                     DoubleDash  = 4  // The original Rasterizer class seems to still use this?
+                     DoubleDash  = 3  // The original Rasterizer class seems to still use this?
                    };
 
         /** @brief Pen cap style.
@@ -186,6 +185,11 @@ class PT_GFX_API Pen
         /** @brief Returns true if the pen is null.
         */
         bool isNull() const;
+
+        /** @brief Returns true if the pen is solid.
+        */
+        inline bool isSolid() const
+        { return (style() == Solid) && styleUserDashPattern().empty(); }
 
     private:
       SmartPtr<PenData> _penData;
