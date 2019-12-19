@@ -35,25 +35,14 @@
 #include <Pt/Gfx/Path.h> // Polygon
 
 
-// Scaling factor and starting value for the pattern buffer
-//#define PATTERN_BUFFER_NUM_OF_CELLS     64
-
-//#define PATTERN_BUFFER_1P_SCALE_FACTOR  4
-//#define PATTERN_BUFFER_1P_COUNTER_START FIXED_POINT_FROM_INT( (PATTERN_BUFFER_1P_SCALE_FACTOR) - 1 )
-//#define PATTERN_BUFFER_1P_COUNTER_MAX   FIXED_POINT_FROM_INT( ( PATTERN_BUFFER_NUM_OF_CELLS + 1 ) * PATTERN_BUFFER_1P_SCALE_FACTOR )
-
-//#define PATTERN_BUFFER_MP_COUNTER_MAX   PATTERN_BUFFER_NUM_OF_CELLS
-
-#define PATTERN_BUFFER_1P_SCALE_FACTOR  4
-#define PATTERN_BUFFER_1P_COUNTER_START FIXED_POINT_FROM_INT( (PATTERN_BUFFER_1P_SCALE_FACTOR) - 1 )
-
-
 namespace Pt {
 
 namespace Gfx {
 
+
 class ArcMode;
 class PatternState;
+
 
 class Polygonizer
 {
@@ -61,15 +50,8 @@ class Polygonizer
         static std::vector<Pt::uint8_t> dashPatternDot;
         static std::vector<Pt::uint8_t> dashPatternDash;
 
-        // DEPRECATED:
-        //static const Pt::uint64_t patternDot;
-        //static const Pt::uint64_t patternDash;
-
     public:
         Polygonizer();
-
-        //void setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
-        //                Pt::uint64_t userPattern);
 
         void setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
                         const std::vector<Pt::uint8_t>& userDashPattern, std::size_t penSize);
@@ -93,13 +75,6 @@ class Polygonizer
         void renderWidePolyline(std::vector<Polygon>& polygons,
                                 const PointF* points, const std::size_t n,
                                 const Pen& pen, bool useNonZeroFillingRule, bool forSmoothCurve);
-
-        /*
-         // NOT USED ANYMORE !!!
-        void renderWideLine(std::vector<Polygon>& polygons,
-                            const PointF& from, const PointF& to,
-                            const Pen& pen);
-        */
 
     private:
         void renderRoundedRectPoints(std::vector<PointF>& dst,
@@ -151,15 +126,6 @@ class Polygonizer
         void renderSolidLineSegment(std::vector<PointF>& dst,
                                     float x1, float y1, float x2, float y2,
                                     const Pen& pen, bool openingCap, bool closingCap, bool forSmoothCurve);
-
-        /*
-         // NOT USED ANYMORE !!!
-        void renderPatternedSingleLineSegment(std::vector<Polygon>& polygons,
-                                              float x1, float y1,
-                                              float x2, float y2,
-                                              Pt::int32_t& piCtrInOut,
-                                              const Pen& pen);
-        */
 
         bool joinClosedWidePolyline(std::vector<PointF>& outer,
                                     std::vector<PointF>& inner,
@@ -235,11 +201,9 @@ class Polygonizer
         static const double VecResScaleUp;
         static const double VecResScaleDn;
 
-        //Pt::uint8_t _patternBufferMP[PATTERN_BUFFER_NUM_OF_CELLS];
-
         std::vector<float> dashPatternBuffer;
-
 };
+
 
 } //namespace
 

@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
 
+
 namespace Pt {
 
 namespace Gfx {
@@ -140,9 +141,6 @@ void Rasterizer2::setPen( const Pen& pen )
 
     _penPixel.reset(_penBuffer.view(), 0, 0);
 
-    //if( pen.style() != Pen::Solid )
-    //    _polygonizer.setPattern( pen.style(), pen.capStyle(), pen.styleUserPattern() );
-
     if( pen.style() != Pen::Solid )
         _polygonizer.setPattern( pen.style(), pen.capStyle(), pen.styleUserDashPattern(), pen.size() );
 
@@ -177,26 +175,18 @@ void Rasterizer2::updatePenPattern()
         expPatCount += selPattern[i];
     }
 
-    // Determine the repeat count
-    //Pt::uint8_t repeatCount = 128 / expPatCount;
-    //if(repeatCount < 1) repeatCount = 1;
-
-    const Pt::uint8_t repeatCount = 1;
-
     // Expand the pattern
     std::vector<bool> expPattern;
-    expPattern.resize(expPatCount * repeatCount);
+    expPattern.resize(expPatCount);
 
     bool        draw = true;
     Pt::int32_t k    = 0;
 
-    for(Pt::uint8_t r = 0; r < repeatCount; ++r) {
-        for(Pt::uint8_t i = 0; i < selPatCount; ++i) {
-            for(Pt::uint8_t j = 0; j < selPattern[i]; ++j) {
-                expPattern[k++] = draw;
-            }
-            draw = !draw;
+    for(Pt::uint8_t i = 0; i < selPatCount; ++i) {
+        for(Pt::uint8_t j = 0; j < selPattern[i]; ++j) {
+            expPattern[k++] = draw;
         }
+        draw = !draw;
     }
 
     // Resize the pattern buffer
@@ -275,83 +265,9 @@ void Rasterizer2::updatePenPattern()
 }
 
 
-/*
-void Rasterizer2::updatePenPattern()
-{
-    // Select the pattern
-    Pt::uint64_t patternSel;
-
-    switch( _pen.style() )
-    {
-        default:
-        case Pen::Dot         : patternSel = Polygonizer::patternDot;  break;
-        case Pen::Dash        : patternSel = Polygonizer::patternDash; break;
-        case Pen::UserDefined : patternSel = _pen.styleUserPattern();  break;
-    }
-
-    // Counter for generating the patterns
-    size_t gctr1P = 0;
-
-    // Generate the pattern
-    bool previous = false;
-    for(Pt::int8_t p = 0; p < (PATTERN_BUFFER_NUM_OF_CELLS + 1); ++p)
-    {
-        // Get the pattern cell value
-        const Pt::int8_t idx     = (p == PATTERN_BUFFER_NUM_OF_CELLS) ? 0 : p;
-        const bool       current = patternSel & ( (Pt::uint64_t) 1 << ( PATTERN_BUFFER_NUM_OF_CELLS - idx - 1 ) );
-
-        // --- One-pixel pattern ---
-        // Pattern cell change from 0 to 0
-        if(!previous && !current) {
-            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
-                _patternBuffer1P[gctr1P++] = 0;
-            }
-        }
-        // Pattern cell change from 1 to 1
-        else if(previous && current) {
-            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
-                _patternBuffer1P[gctr1P++] = 255;
-            }
-        }
-        // Pattern cell change from 0 to 1
-        else if(!previous && current) {
-            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
-                _patternBuffer1P[gctr1P++] = i * 255 / PATTERN_BUFFER_1P_SCALE_FACTOR;
-            }
-        }
-        // Pattern cell change from 1 to 0
-        else if(previous && !current) {
-            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_1P_SCALE_FACTOR; ++i) {
-                _patternBuffer1P[gctr1P++] = 255 - i * 255 / PATTERN_BUFFER_1P_SCALE_FACTOR;
-            }
-        }
-        // Copy the pattern cell value
-        previous = current;
-    }
-
-    // Transfom the pattern - without anti-aliasing
-    if( ! _aaMode )
-    {
-        for(size_t i = 0; i < gctr1P; ++i) {
-            if(_patternBuffer1P[i] > 127) _patternBuffer1P[i] = 255;
-            else                          _patternBuffer1P[i] = 0;
-        }
-    }
-    // Transfom the pattern - with anti-aliasing
-    else
-    {
-        for(size_t i = 0; i < gctr1P; ++i) {
-            _patternBuffer1P[i] = XWAA_WFILTER[ 255 - _patternBuffer1P[i] ];
-        }
-    }
-}
-*/
-
-
 Pt::uint8_t Rasterizer2::patternBuffer1PAlpha(Pt::int32_t idx) const
 {
     return _patternBuffer1PDyn[ idx % FIXED_POINT_TO_INT(_patternBuffer1PDynCntMax) ];
-  //return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ];
 }
 
 
@@ -376,8 +292,6 @@ void Rasterizer2::patternBuffer1PAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int
 {
     a0 = (Pt::uint32_t) _patternBuffer1PDyn[ idx % FIXED_POINT_TO_INT(_patternBuffer1PDynCntMax) ] * alpha0 / 255;
     a1 = (Pt::uint32_t) _patternBuffer1PDyn[ idx % FIXED_POINT_TO_INT(_patternBuffer1PDynCntMax) ] * alpha1 / 255;
-  //a0 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha0 / 255;
-  //a1 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_1P_COUNTER_MAX) ] * alpha1 / 255;
 }
 
 
@@ -506,7 +420,6 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 
 void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt::int32_t height)
 {
-#if 1
     // Get and check the color stops
     // TODO: Shall we implicitly clear the image if there is no color stop?
     const ColorStops& colStops = _brush.gradientStops();
@@ -531,8 +444,7 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
         pit->assign(colRes, CompositionMode::SourceCopy);
     }
 
-#else
-
+    /*
     // Get and check the color stops
     // TODO: Shall we implicitly clear the image if there is no color stop?
     const ColorStops& colStops = _brush.gradientStops();
@@ -566,8 +478,7 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
         // Put the pixel
         pit->assign(colRes, CompositionMode::SourceCopy);
     }
-
-#endif
+    */
 }
 
 
@@ -911,9 +822,6 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 
 void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
 {
-    //BasicClipShape<double>::(clipped, _currentClip);
-    //if(clipped.empty()) return;
-
     if(pointCount < 2)
         return;
 
@@ -1134,9 +1042,6 @@ void Rasterizer2::drawPath(const Path& path, float smoothness)
 
 void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
 {
-    //BasicClipShape<double>::clipPolyline(clipped, _currentClip);
-    //if(clipped.empty()) return;
-
     if(pointCount < 2)
         return;
 
@@ -1345,7 +1250,6 @@ void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y,
 }
 
 
-
 void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
 {
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
@@ -1374,6 +1278,7 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
     }
 }
 
+
 void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const bool mask[4])
 {
     const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
@@ -1401,6 +1306,7 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
         _image->format().setPixel(pixel, _pen.color(), _compositionMode);
     }
 }
+
 
 void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
                                 Pt::int32_t x2, Pt::int32_t y2,
@@ -1432,6 +1338,7 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
+
 void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
                                 Pt::int32_t x2, Pt::int32_t y2,
                                 Pt::uint8_t alpha, const bool mask[4])
@@ -1461,6 +1368,7 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1,
         _image->format().setPixel(pixel, _pen.color(), _compositionMode, alpha);
     }
 }
+
 
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
                               Pt::int32_t x2, Pt::int32_t y2,
@@ -1518,6 +1426,7 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
         }
     }
 }
+
 
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
                               Pt::int32_t x2, Pt::int32_t y2,
@@ -1577,6 +1486,7 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
+
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
                               Pt::int32_t x2, Pt::int32_t y2,
                               Pt::int32_t minX, Pt::int32_t minY,
@@ -1634,6 +1544,7 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
         }
     }
 }
+
 
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
                               Pt::int32_t x2, Pt::int32_t y2,
@@ -1693,6 +1604,7 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
+
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
                              Pt::int32_t x2, Pt::int32_t y2,
                              Pt::int32_t minX, Pt::int32_t minY,
@@ -1750,6 +1662,7 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1,
         }
     }
 }
+
 
 void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
                                  Pt::int32_t pixelY,
@@ -1815,19 +1728,8 @@ void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
     // Draw the span using solid color
     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
     _image->format().setPixels(pixel, color, iterR - iterL + 1, _compositionMode);
-
-    //Pt::int32_t iterX     = iterL;
-    //Pt::int32_t spanWidth = iterR - iterL + 1;
-    //while(spanWidth > 0) {
-    //    const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-    //    if(n) {
-    //        Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
-    //        _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-    //    }
-    //    spanWidth -= n;
-    //    iterX     += n;
-    //}
 }
+
 
 void Rasterizer2::rasterScanlineClipped(Pt::int32_t from, Pt::int32_t to,
                                         Pt::int32_t pixelY,
@@ -1846,6 +1748,7 @@ void Rasterizer2::rasterScanlineClipped(Pt::int32_t from, Pt::int32_t to,
     // Draw the scanline
     rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, _brush.color());
 }
+
 
 } // namespace
 

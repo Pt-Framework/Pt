@@ -59,40 +59,31 @@ class PT_GFX_API Pen
                      Dash        = 2,
                      UserDefined = 3, // Need to use this for easier if-else branches
 
-                   // DEPRECATED:
-                   //DoubleDot   = 4,
-                     DoubleDash  = 5, // The original Rasterizer class seems to still use this?
-                   //DotDash     = 6
+                     // DEPRECATED:
+                     DoubleDash  = 4  // The original Rasterizer class seems to still use this?
                    };
 
         /** @brief Pen cap style.
         */
-        enum CapStyle { FlatCap          = 0,
+        enum CapStyle { FlatCap          = 0, // Do we use FlatCap or ButtCap?
                         SquareCap        = 1,
                         RoundCap         = 2,
 
                         // DEPRECATED:
                         ButtCap          = FlatCap,
-                        ProjectingCap    = SquareCap,
-                        TriangularCap    = 3
-
-                        //NotLastCap       = 4
-                        //TriangularOutCap = TriangularCap,
-                        //TriangularInCap  = 5,
-                        //RoundHoleCap     = 6,
-                        //Arrow1Cap        = 7,
-                        //Arrow2Cap        = 8,
+                        ProjectingCap    = SquareCap, // The original Rasterizer class seems to still use this?
+                        TriangularCap    = 3          // The original Rasterizer class seems to still use this?
                       };
 
         /** @brief Pen join style.
         */
-        enum JoinStyle { NoJoin         = 0,
+        enum JoinStyle { NoJoin         = 0, // What is this actually?
                          BevelJoin      = 1,
                          MiterJoin      = 2,
                          RoundJoin      = 3,
 
                          // DEPRECATED:
-                         TriangularJoin = 9  // What is this ???
+                         TriangularJoin = 4  // The original Rasterizer class seems to still use this?
                        };
 
         /** @brief Constructs a null pen.

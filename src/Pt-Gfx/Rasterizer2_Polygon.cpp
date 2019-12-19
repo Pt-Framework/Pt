@@ -614,7 +614,9 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     }
 
     // Raster the anti-aliased outline
-#ifdef USE_OLD_POLYGON_XWAA
+
+    /*
+    // OLD POLYGON XWAA
     // Mask
     DrawLineMask mask_zero;
     DrawLineMask mask_nnp1;
@@ -645,7 +647,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
           points[pc1].x(), points[pc1].y(),
           points[0].x(),   points[0].y(),
           color, minX, minY_ - 1, scanlines, mask_zero );
-#else
+    */
+
     // Mask
     DrawLineMask xwaaMask;
     memcpy(xwaaMask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
@@ -665,7 +668,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
           points[pc1].x(), points[pc1].y(),
           points[0].x(),   points[0].y(),
           color, minX, minY_ - 1, scanlines, xwaaMask );
-#endif
 }
 
 
@@ -801,7 +803,8 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
         if( polygon->size() < 2 )
             continue;
 
-#ifdef USE_OLD_POLYGON_XWAA
+        /*
+        // OLD POLYGON XWAA
         // Mask
         DrawLineMask mask_zero;
         DrawLineMask mask_nnp1;
@@ -832,7 +835,8 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
              polygon->at(pc1).x(), polygon->at(pc1).y(),
              polygon->at(0).x(), polygon->at(0).y(),
              color, minX, minY_ - 1, scanlines, mask_zero );
-#else
+        */
+
         // Mask
         DrawLineMask xwaaMask;
         memcpy(xwaaMask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
@@ -852,13 +856,12 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
              polygon->at(pc1).x(), polygon->at(pc1).y(),
              polygon->at(0).x(), polygon->at(0).y(),
              color, minX, minY_ - 1, scanlines, xwaaMask );
-#endif
     }
 }
 
 
-#ifdef USE_OLD_POLYGON_XWAA
-
+#if 0
+// OLD POLYGON XWAA
 // REVIEW: Seems nothing actually uses this function anymore?
 
 // Using algorithm from: Xiaolin Wu's Line Algorithm
@@ -1052,7 +1055,6 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
     // Undefine the helper macro
     #undef XW_FILL_PIXEL
 }
-
 #endif
 
 
@@ -1351,7 +1353,6 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     // Undefine the helper macro
     #undef XW_FILL_PIXEL
 }
-
 
 
 } // namespace

@@ -38,12 +38,10 @@ namespace Pt {
 
 namespace Gfx {
 
+
 struct PatternState
 {
     std::vector<Polygon>& dstPolygons;  // Destination vector
-    //size_t                dstPStart;  // Start index of the previous polygon in the above vector
-    //size_t                dstPCount;  // The number of points of the previous polygon in the above vector
-    //size_t                dstPCount0; // The number of points of the first polygon in the above vector
 
     const PointF*         srcPoints;  // Source points
     size_t                srcCount;   // The number of source points
@@ -66,12 +64,7 @@ struct PatternState
     PatternState(std::vector<Polygon>& polygons,
                  const PointF* src, size_t pointCount, size_t penSize)
     : dstPolygons(polygons)
-    //, dstPStart(0)
-    //, dstPCount(0)
-    //, dstPCount0(0)
     , srcPoints(src)
-    //, srcCount(pointCount), cellSize(penSize * 0.25f)
-    //, srcCount(pointCount), cellSize(penSize * 0.5f)
     , srcCount(pointCount), cellSize(penSize)
     , idx1(0)
     , remLen(-1.0f)
@@ -91,87 +84,11 @@ static const Pt::uint8_t dashPatternDash_[] = { 3, 1 };
 std::vector<Pt::uint8_t> Polygonizer::dashPatternDot  = std::vector<Pt::uint8_t>( dashPatternDot_,  dashPatternDot_  + sizeof(dashPatternDot_ ) );
 std::vector<Pt::uint8_t> Polygonizer::dashPatternDash = std::vector<Pt::uint8_t>( dashPatternDash_, dashPatternDash_ + sizeof(dashPatternDash_) );
 
-// !!! UNUSED NOW !!!
-//const Pt::uint64_t Polygonizer::patternDot  = 0xAAAAAAAAAAAAAAAA; // 1010101010101010101010101010101010101010101010101010101010101010;
-//const Pt::uint64_t Polygonizer::patternDash = 0xEEEEEEEEEEEEEEEE; // 1110111011101110111011101110111011101110111011101110111011101110;
-
-// !!! UNUSED NOW !!!
-//const Pt::uint64_t patternDotCapped         = 0x8888888888888888; // 1000100010001000100010001000100010001000100010001000100010001000;
-//const Pt::uint64_t patternDashCapped        = 0xCCCCCCCCCCCCCCCC; // 1100110011001100110011001100110011001100110011001100110011001100;
-
-// !!! UNUSED NOW !!!
-//static const Pt::uint64_t patternDoubleDot  = 0xA0A0A0A0A0A0A0A0;// 1010000010100000101000001010000010100000101000001010000010100000
-//static const Pt::uint64_t patternDoubleDash = 0xEE00EE00EE00EE00;// 1110111000000000111011100000000011101110000000001110111000000000
-//static const Pt::uint64_t patternDotDash    = 0x9C9C9C9C9C9C9C9C;// 1001110010011100100111001001110010011100100111001001110010011100
-
 
 Polygonizer::Polygonizer()
 {
-    /*
-    // Initialize the dash pattern once and once only
-    static bool dashPatternInitialized = false;
-    if(!dashPatternInitialized) {
-        dashPatternDot.resize(2);
-        dashPatternDot[0] = 1;
-        dashPatternDot[1] = 1;
-
-        dashPatternDash.resize(2);
-        dashPatternDash[0] = 3;
-        dashPatternDash[1] = 1;
-
-        dashPatternInitialized = true;
-    }
-    */
 }
 
-/*
-void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
-                             Pt::uint64_t userPattern)
-{
-    // Select the pattern
-    Pt::uint64_t patternSel;
-
-    switch(style)
-    {
-        default:
-        case Pen::Dot:
-        {
-            //if(cap == Pen::SquareCap || cap == Pen::RoundCap)
-            //    patternSel = patternDotCapped;
-            //else
-            //    patternSel = patternDot;
-            patternSel = patternDot;
-            break;
-        }
-
-        case Pen::Dash:
-        {
-            //if(cap == Pen::SquareCap || cap == Pen::RoundCap)
-            //    patternSel = patternDashCapped;
-            //else
-            //    patternSel = patternDash;
-            patternSel = patternDash;
-            break;
-        }
-
-        case Pen::UserDefined:
-            patternSel = userPattern;
-            break;
-    }
-
-    // Counter for generating the patterns
-    size_t gctrMP = 0;
-
-    // Generate the pattern
-    for(Pt::int8_t p = 0; p < PATTERN_BUFFER_NUM_OF_CELLS; ++p)
-    {
-        // Explode the pattern cell value from integer to array
-        const bool current = patternSel & ( (Pt::uint64_t) 1 << ( PATTERN_BUFFER_NUM_OF_CELLS - p - 1 ) );
-        _patternBufferMP[gctrMP] = current ? 1 : 0;
-        ++gctrMP;
-    }
-}
-*/
 
 void Polygonizer::setPattern(const Pen::Style& style, const Pen::CapStyle& cap,
                              const std::vector<Pt::uint8_t>& userDashPattern, std::size_t penSize)
@@ -717,34 +634,6 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
 }
 
 
-/*
-// NOT USED ANYMORE !!!
-// Just as fast as calling renderWidePolyline with just two points...
-void Polygonizer::renderWideLine(std::vector<Polygon>& polygons,
-                                  const PointF& from, const PointF& to,
-                                  const Pen& pen)
-{
-    const bool isSolid = pen.style() == Pen::Solid;
-
-    if(isSolid)
-    {
-        polygons.resize( polygons.size() + 1 );
-        std::vector<PointF>& pointsF = polygons.back().points();
-
-        renderSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(),
-                               pen, true, true, false);
-    }
-    else
-    {
-        Pt::int32_t piCtrInOut = 0;
-        renderPatternedSingleLineSegment(polygons,
-                                         from.x(), from.y(),
-                                         to.x(), to.y(), piCtrInOut, pen);
-    }
-}
-*/
-
-
 void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
                                                  const PointF* basePtr, size_t curPCnt,
                                                  const Pen& pen)
@@ -892,59 +781,6 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
 }
 
 
-// #@#
-#if 0
-
-void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
-                                            const PointF* src, size_t pointCount,
-                                            const Pen& pen, bool collisionDetection, bool forSmoothCurve)
-{
-    // Initialize the operational state
-    PatternState state(polygons, src, pointCount, pen.size());
-
-    // The pattern buffer and its counter
-    const Pt::uint8_t* pBuff      = _patternBufferMP;
-          Pt::int32_t  piCtrInOut = 0;
-
-    // Loop until all the polygon's points are processed
-    bool done = false;
-    while( ! done )
-    {
-        // Calculate the "pattern" segment length
-        const Pt::uint8_t refPat = pBuff[piCtrInOut];
-        state.patSegLen = 0.0f;
-        for(;;)
-        {
-            // Get and compare the pattern bit
-            const Pt::uint8_t curPat = pBuff[piCtrInOut++];
-
-            if(piCtrInOut >= PATTERN_BUFFER_NUM_OF_CELLS) piCtrInOut = 0; //piCtrInOut -= PATTERN_BUFFER_NUM_OF_CELLS;
-
-            if(curPat == refPat)
-            {
-                state.patSegLen += state.cellSize;
-                continue;
-            }
-
-            // We have got a different pattern bit, reverse back to the previous pattern bit
-            // and exit to process the "pattern" segment
-            --piCtrInOut;
-            if(piCtrInOut < 0) piCtrInOut = PATTERN_BUFFER_NUM_OF_CELLS - 1; //piCtrInOut += PATTERN_BUFFER_NUM_OF_CELLS;
-
-            break;
-        }
-
-        // Bail out if the "pattern" segment is shorter than the cell size
-        if(state.patSegLen < state.cellSize)
-            return;
-
-        // Process the "pattern" segment
-        done = sagPolygonPoints(state, !!refPat, pen, collisionDetection, forSmoothCurve);
-    }
-}
-
-#else
-
 void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
                                            const PointF* src, size_t pointCount,
                                            const Pen& pen, bool collisionDetection, bool forSmoothCurve)
@@ -966,8 +802,6 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
         if(++n >= dashPatternBuffer.size()) n = 0;
     }
 }
-
-#endif
 
 
 //
@@ -1288,25 +1122,15 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
     // Generate points (CCW)
     // --- Begin point ---
     switch(pen.capStyle()) {
-        case Pen::SquareCap        : renderLineSquareCap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
-        case Pen::RoundCap         : renderLineRoundCap        (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
-      //case Pen::TriangularOutCap : renderLineTriangularOutCap(pointsF, x1, y1,     dx, dy, nx, ny); break;
-      //case Pen::TriangularInCap  : renderLineTriangularInCap (pointsF, x1, y1,     dx, dy, nx, ny); break;
-      //case Pen::RoundHoleCap     : renderLineRoundHoleCap    (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
-      //case Pen::Arrow1Cap        : renderLineArrow1Cap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
-      //case Pen::Arrow2Cap        : renderLineArrow2Cap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
-        default                    : renderLineButtCap         (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
+        case Pen::SquareCap : renderLineSquareCap(pointsF, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::RoundCap  : renderLineRoundCap (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
+        default             : renderLineButtCap  (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
     }
     // --- End point ---
     switch(pen.capStyle()) {
-        case Pen::SquareCap        : renderLineSquareCap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
-        case Pen::RoundCap         : renderLineRoundCap        (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-      //case Pen::TriangularOutCap : renderLineTriangularOutCap(pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
-      //case Pen::TriangularInCap  : renderLineTriangularInCap (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
-      //case Pen::RoundHoleCap     : renderLineRoundHoleCap    (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-      //case Pen::Arrow1Cap        : renderLineArrow1Cap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
-      //case Pen::Arrow2Cap        : renderLineArrow2Cap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
-        default                    : renderLineButtCap         (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+        case Pen::SquareCap : renderLineSquareCap(pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::RoundCap  : renderLineRoundCap (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+        default             : renderLineButtCap  (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
     }
 
     // Perform collision detection and polygon-segment combining as needed
@@ -1418,14 +1242,9 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     {
         switch( pen.capStyle() )
         {
-            case Pen::SquareCap        : renderLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::RoundCap         : renderLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
-          //case Pen::TriangularOutCap : renderLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
-          //case Pen::TriangularInCap  : renderLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
-          //case Pen::RoundHoleCap     : renderLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
-          //case Pen::Arrow1Cap        : renderLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
-          //case Pen::Arrow2Cap        : renderLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            default                    : openingCap = false;
+            case Pen::SquareCap : renderLineSquareCap(dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundCap  : renderLineRoundCap (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            default             : openingCap = false;
         }
     }
 
@@ -1437,107 +1256,15 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     {
         switch( pen.capStyle() )
         {
-            case Pen::SquareCap        : renderLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::RoundCap         : renderLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-          //case Pen::TriangularOutCap : renderLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-          //case Pen::TriangularInCap  : renderLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-          //case Pen::RoundHoleCap     : renderLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-          //case Pen::Arrow1Cap        : renderLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-          //case Pen::Arrow2Cap        : renderLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            default                    : closingCap = false;
+            case Pen::SquareCap : renderLineSquareCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundCap  : renderLineRoundCap (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            default             : closingCap = false;
         }
     }
 
     if( ! closingCap )
         renderLineButtCap(dst, x2, y2, wh, -dx, -dy, -nx, -ny);
 }
-
-
-/*
-// NOT USED ANYMORE !!!
-void Polygonizer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygons,
-                                                   float x1, float y1,
-                                                   float x2, float y2,
-                                                   Pt::int32_t& piCtrInOut,
-                                                   const Pen& pen)
-{
-    // Calculate the line's parameters
-    float wh, dx, dy, nx, ny;
-
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
-
-    // Get the pattern buffer and calculate the number of "pattern" segments
-    const Pt::uint8_t* pBuff = _patternBufferMP;
-    const float        xLen  = (x2 > x1) ? (x2 - x1) : (x1 - x2);
-    const float        yLen  = (y2 > y1) ? (y2 - y1) : (y1 - y2);
-    const float        lLen  = sqrt(xLen * xLen + yLen * yLen);
-    const size_t       nSegs = (size_t) lround(lLen / wh) * 2;
-    const float        xInc  = (x2 - x1) / nSegs;
-    const float        yInc  = (y2 - y1) / nSegs;
-
-    // Generate the segments
-    Pt::uint8_t prvPat = 0;
-    float       xs     = x1;
-    float       ys     = y1;
-    for(size_t i = 0; i <= nSegs; ++i)
-    {
-        // Get the pattern
-        const Pt::uint8_t curPat = pBuff[piCtrInOut++];
-        if(piCtrInOut >= PATTERN_BUFFER_MP_COUNTER_MAX) piCtrInOut -= PATTERN_BUFFER_MP_COUNTER_MAX;
-        // Determine whether we should draw this segment as well as its coordinate
-        const bool draw = (!curPat && prvPat);
-        if(curPat && !prvPat) {
-            x1 = xs;
-            y1 = ys;
-        }
-        else if(draw) {
-            x2 = xs;
-            y2 = ys;
-            if(pen.capStyle() == Pen::ButtCap) {
-                x2 += xInc;
-                y2 += yInc;
-            }
-        }
-        prvPat = curPat;
-        // Update the coordinates
-        xs += xInc;
-        ys += yInc;
-
-        // Skip if we are not going to draw this segment
-        if( ! draw)
-            continue;
-
-        polygons.resize( polygons.size() + 1 );
-        std::vector<PointF>& dst = polygons.back().points();
-
-        // Generate points (CCW)
-
-        // --- Begin point ---
-        switch(pen.capStyle()) {
-            case Pen::SquareCap        : renderLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::RoundCap         : renderLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::TriangularOutCap : renderLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::TriangularInCap  : renderLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::RoundHoleCap     : renderLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::Arrow1Cap        : renderLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::Arrow2Cap        : renderLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            default                    : renderLineButtCap         (dst, x1, y1, wh, dx, dy, nx, ny); break;
-        }
-
-        // --- End point ---
-        switch(pen.capStyle()) {
-            case Pen::SquareCap        : renderLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::RoundCap         : renderLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularOutCap : renderLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularInCap  : renderLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::RoundHoleCap     : renderLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::Arrow1Cap        : renderLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::Arrow2Cap        : renderLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            default                    : renderLineButtCap         (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-        }
-    }
-}
-*/
 
 
 bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
@@ -1853,47 +1580,6 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
             }
             break;
         }
-
-        /*
-        case Pen::TriangularOutCap:
-            dst.push_back( PointF( x2a - dx2, y2a - dy2 ) );
-            break;
-
-        case Pen::TriangularInCap:
-            dst.push_back( PointF( x2a + dx2, y2a + dy2 ) );
-            break;
-
-        case Pen::RoundHoleCap: {
-            // Calculate additional line parameters
-            float wh2i, dx2i, dy2i, nx2i, ny2i;
-            float wh2o, dx2o, dy2o, nx2o, ny2o;
-            calculateLineParams(wh2i, dx2i, dy2i, nx2i, ny2i, ix2a, iy2a, ix2b, iy2b, penSize);
-            calculateLineParams(wh2o, dx2o, dy2o, nx2o, ny2o, ox2a, oy2a, ox2b, oy2b, penSize);
-            // Generate the points
-            std::vector<PointF> tmp;
-            renderQuadraticBezierPoints(tmp, ix2a - dx2i, iy2a - dy2i, x2a + dx2, y2a + dy2, ox2a - dx2o, oy2a - dy2o, penSize);
-            if(tmp.size() <= 2) break;
-            for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
-            }
-            break;
-        }
-
-        case Pen::Arrow1Cap:
-            dst.push_back( PointF( x2a - nx2 * 2.0f, y2a - ny2 * 2.0f ) );
-            dst.push_back( PointF( x2a - dx2       , y2a - dy2        ) );
-            dst.push_back( PointF( x2a + nx2 * 2.0f, y2a + ny2 * 2.0f ) );
-            break;
-
-        case Pen::Arrow2Cap:
-            dst.push_back( PointF( x2a - dx2 * 0.5f - nx2       , y2a - dy2 * 0.5f - ny2        ) );
-            dst.push_back( PointF( x2a              - nx2 * 2.0f, y2a              - ny2 * 2.0f ) );
-            dst.push_back( PointF( x2a - dx2 * 2.0f             , y2a - dy2 * 2.0f              ) );
-            dst.push_back( PointF( x2a              + nx2 * 2.0f, y2a              + ny2 * 2.0f ) );
-            dst.push_back( PointF( x2a - dx2 * 0.5f + nx2       , y2a - dy2 * 0.5f + ny2        ) );
-            break;
-        */
-
         default:
             break;
     }
@@ -1935,49 +1621,6 @@ void Polygonizer::combineLinePointsAndAddCaps(std::vector<PointF>& dst,
             }
             break;
         }
-
-        /*
-        case Pen::TriangularOutCap:
-            dst.push_back( PointF( x1a + dx1, y1a + dy1 ) );
-            break;
-
-        case Pen::TriangularInCap:
-            dst.push_back( PointF( x1a - dx1, y1a - dy1 ) );
-            break;
-
-        case Pen::RoundHoleCap: {
-            // *
-            // Calculate additional line parameters
-            float wh1i, dx1i, dy1i, nx1i, ny1i;
-            float wh1o, dx1o, dy1o, nx1o, ny1o;
-            calculateLineParams(wh1i, dx1i, dy1i, nx1i, ny1i, ix1a, iy1a, ix1b, iy1b, penSize);
-            calculateLineParams(wh1o, dx1o, dy1o, nx1o, ny1o, ox1a, oy1a, ox1b, oy1b, penSize);
-            // Generate the points
-            // * /
-            std::vector<PointF> tmp;
-            renderQuadraticBezierPoints(tmp, ox1a + dx1, oy1a + dy1, x1a - dx1, y1a - dy1, ix1a + dx1, iy1a + dy1, penSize);
-            if(tmp.size() <= 2) break;
-            for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
-            }
-            break;
-        }
-
-        case Pen::Arrow1Cap:
-            dst.push_back( PointF( x1a + nx1 * 2.0f, y1a + ny1 * 2.0f ) );
-            dst.push_back( PointF( x1a + dx1       , y1a + dy1        ) );
-            dst.push_back( PointF( x1a - nx1 * 2.0f, y1a - ny1 * 2.0f ) );
-            break;
-
-        case Pen::Arrow2Cap:
-            dst.push_back( PointF( x1a + dx1 * 0.5f + nx1       , y1a + dy1 * 0.5f + ny1        ) );
-            dst.push_back( PointF( x1a              + nx1 * 2.0f, y1a              + ny1 * 2.0f ) );
-            dst.push_back( PointF( x1a + dx1 * 2.0f             , y1a + dy1 * 2.0f              ) );
-            dst.push_back( PointF( x1a              - nx1 * 2.0f, y1a              - ny1 * 2.0f ) );
-            dst.push_back( PointF( x1a + dx1 * 0.5f - nx1       , y1a + dy1 * 0.5f - ny1        ) );
-            break;
-        */
-
         default:
             break;
     }
@@ -2048,85 +1691,6 @@ void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y,
     );
 #endif
 }
-
-
-/*
-void Polygonizer::renderLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x - dx, y - dy) );
-    dst.push_back( PointF(x - nx, y - ny) );
-}
-
-
-void Polygonizer::renderLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx - dx, y + ny - dy) );
-    dst.push_back( PointF(x,           y          ) );
-    dst.push_back( PointF(x - nx - dx, y - ny - dy) );
-}
-
-
-void Polygonizer::renderLineRoundHoleCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
-{
-#if 1
-    // Hack for small-width lines?
-    if(wh <= 1.5f) {
-        dst.push_back( PointF(x + nx - dx * 1.5f, y + ny - dy * 1.5f) );
-        dst.push_back( PointF(x,           y          ) );
-        dst.push_back( PointF(x - nx - dx * 1.5f, y - ny - dy * 1.5f) );
-        return;
-    }
-#endif
-
-#if 0
-    // This one seems produce worse result
-    renderQuadraticBezierPoints(
-        dst,
-        roundf((x + nx - dx) * 10.0f) * 0.1f, roundf((y + ny - dy) * 10.0f) * 0.1f,
-        roundf((x      + dx) * 10.0f) * 0.1f, roundf((y      + dy) * 10.0f) * 0.1f,
-        roundf((x - nx - dx) * 10.0f) * 0.1f, roundf((y - ny - dy) * 10.0f) * 0.1f,
-        (Pt::int32_t) ceil(wh) - 1
-    );
-#else
-    // This one seems produce better result
-    renderQuadraticBezierPoints(
-        dst,
-        roundf((x + nx - dx) * 10.0f) * 0.1f, roundf((y + ny - dy) * 10.0f) * 0.1f,
-        roundf((x + nx     ) * 10.0f) * 0.1f, roundf((y + ny     ) * 10.0f) * 0.1f,
-        roundf((x          ) * 10.0f) * 0.1f, roundf((y          ) * 10.0f) * 0.1f,
-        (Pt::int32_t) ceil(wh) - 1
-    );
-    renderQuadraticBezierPoints(
-        dst,
-        roundf((x          ) * 10.0f) * 0.1f, roundf((y          ) * 10.0f) * 0.1f,
-        roundf((x - nx     ) * 10.0f) * 0.1f, roundf((y - ny     ) * 10.0f) * 0.1f,
-        roundf((x - nx - dx) * 10.0f) * 0.1f, roundf((y - ny - dy) * 10.0f) * 0.1f,
-        (Pt::int32_t) ceil(wh) - 1
-    );
-#endif
-}
-
-
-void Polygonizer::renderLineArrow1Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx,        y + ny       ) );
-    dst.push_back( PointF(x + nx * 2.0f, y + ny * 2.0f) );
-    dst.push_back( PointF(x - dx,        y - dy       ) );
-    dst.push_back( PointF(x - nx * 2.0f, y - ny * 2.0f) );
-    dst.push_back( PointF(x - nx,        y - ny       ) );
-}
-
-
-void Polygonizer::renderLineArrow2Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + dx * 0.5f + nx,        y + dy * 0.5f + ny       ) );
-    dst.push_back( PointF(x + dx        + nx * 2.0f, y + dy        + ny * 2.0f) );
-    dst.push_back( PointF(x - dx,                    y - dy                   ) );
-    dst.push_back( PointF(x + dx        - nx * 2.0f, y + dy        - ny * 2.0f) );
-    dst.push_back( PointF(x + dx * 0.5f - nx,        y + dy * 0.5f - ny       ) );
-}
-*/
 
 
 // Based on: Bitmap/Bézier curves/Quadratic
@@ -2300,6 +1864,7 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
     //lprintf("\n");
     return true;
 }
+
 
 } // namespace
 

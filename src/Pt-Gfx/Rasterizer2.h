@@ -46,6 +46,10 @@
 #define MAXIMUM_COORD   32767
 #define MAXIMUM_COORD_F 32767.0f
 
+// Scaling factor and starting value for the pattern buffer of narrow lines
+#define PATTERN_BUFFER_1P_SCALE_FACTOR  4
+#define PATTERN_BUFFER_1P_COUNTER_START FIXED_POINT_FROM_INT( (PATTERN_BUFFER_1P_SCALE_FACTOR) - 1 )
+
 
 namespace Pt {
 
@@ -364,18 +368,17 @@ class Rasterizer2
         //     * The vector element specify a set of "from" and "to" X coordinates
         typedef std::vector< std::vector<ScanlineElement16> > PolygonScanlines;
 
-//#define USE_OLD_POLYGON_XWAA
 
-#ifdef USE_OLD_POLYGON_XWAA
+        /*
+        // OLD POLYGON XWAA
         // REVIEW: Seems nothing actually uses this function anymore?
-
         void rasterPolygonBorderXWAA_F(float x1, float y1,
                                        float x2, float y2,
                                        const Color& color,
                                        Pt::int32_t minX, Pt::int32_t minY,
                                        const PolygonScanlines& exclusionZone,
                                        DrawLineMask& maskInOut);
-#endif
+        */
 
         void rasterPolygonBorderXWAA_F2(float x1, float y1,
                                        float x2, float y2,
@@ -593,10 +596,9 @@ class Rasterizer2
         ConstPixel       _penPixel;
 
 
-        // Pattern buffer for one-pixel line
+        // Pattern buffer for narrow lines
         std::vector<Pt::uint8_t> _patternBuffer1PDyn;
         Pt::int32_t              _patternBuffer1PDynCntMax;
-      //Pt::uint8_t              _patternBuffer1P[ ( PATTERN_BUFFER_NUM_OF_CELLS + 1 )* PATTERN_BUFFER_1P_SCALE_FACTOR ];
 
         // Font & text related
         Font             _font;
@@ -609,6 +611,7 @@ class Rasterizer2
         Rect             _clip;
         Rect             _currentClip;
 };
+
 
 } // namespace
 
