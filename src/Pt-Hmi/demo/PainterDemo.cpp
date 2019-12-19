@@ -624,7 +624,7 @@ class PainterDemoWindow : public Pt::Hmi::Window
             _tabView.addTab(_tabCapStyles,   "Cap Styles"   );
             _tabView.addTab(_tabJoinStyles,  "Join Styles"  );
             _tabView.setPadding(8);
-            _tabView.setCurrent(0);
+            _tabView.setCurrent(3);
 
             this->setContent(&_tabView);
         }

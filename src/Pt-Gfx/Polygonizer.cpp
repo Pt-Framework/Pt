@@ -258,9 +258,13 @@ void Polygonizer::renderEllipsePoints(std::vector<PointF>& dst,
                                       const Pen& pen)
 {
     // Calculate the ellipse's parameters
+    /*
     Pt::int32_t circFac = Pt::lround( sqrt(0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
                                       ( (pen.size() > 4) ? (pen.size() * 0.25f) : 1.0f )
                                     );
+    */
+    Pt::int32_t circFac = Pt::lround( sqrt(0.5f * (radiusX * radiusX + radiusY * radiusY) ) );
+
     const Pt::int32_t segMult = !pen.isSolid() ? 10 : 20;
     const Pt::int32_t circSeg = (circFac / 16) * segMult + 1;
     const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
@@ -426,10 +430,16 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
     // Calculate the arc's parameters
     const float       degDlt  = degEnd - degBegin;
     const float       degFac  = degDlt / 360.0f;
+    /*
     const Pt::int32_t circFac = Pt::lround(
                                     degFac *
                                     sqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
                                     ( (pen.size() > 4) ? (pen.size() * 0.25f) : 1.0f )
+                                );
+    */
+    const Pt::int32_t circFac = Pt::lround(
+                                    degFac *
+                                    sqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) )
                                 );
 
     const Pt::int32_t segMult = !pen.isSolid() ? 10 : 20;
