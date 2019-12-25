@@ -88,7 +88,7 @@ MainWindow::MainWindow()
         _btns2[n].setMargin(5);
 
         std::stringstream ss;
-        ss<<"Scroll2 "<< (n+1);
+        ss << "Scroll2 "<< (n+1);
 
         _btns2[n].setText(ss.str().c_str());
 

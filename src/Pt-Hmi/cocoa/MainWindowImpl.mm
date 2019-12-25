@@ -152,17 +152,39 @@ void MainWindowImpl::setType(Window::Type type)
 
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
 {
-    NSPoint p = NSMakePoint(pos.x(), pos.y());
+    //std::clog << "TO SCREEN POS: " << pos.y() << std::endl;
+
+    CGFloat viewHeight = [_view frame].size.height;
+    double y = viewHeight - pos.y();
+    //std::clog << "TO SCREEN VH: " << viewHeight << " -> " << y << std::endl;
+
+    NSPoint p = NSMakePoint(pos.x(), y);
     p = [ _window convertPointToScreen: p ];
-    return Gfx::PointF(p.x, p.y);
+
+    CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
+    y = screenHeight - p.y;
+    //std::clog << "TO SCREEN SH: " << screenHeight << " -> " << y << std::endl;
+
+    return Gfx::PointF(p.x, y);
 }
 
 
 Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
-{
-    NSPoint p = NSMakePoint(pos.x(), pos.y());
+{   
+    //std::clog << "FROM SCREEN POS: " << pos.y() << std::endl;
+    
+    CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
+    double y = screenHeight - pos.y();
+    //std::clog << "FROM SCREEN SH: " << screenHeight << " -> " << y << std::endl;
+
+    NSPoint p = NSMakePoint(pos.x(), y);
     p = [ _window convertPointFromScreen: p ];
-    return Gfx::PointF(p.x, p.y);
+
+    CGFloat viewHeight = [_view frame].size.height;
+    y = viewHeight - p.y;
+    //std::clog << "FROM SCREEN VH: " << viewHeight << " -> " << y << std::endl;
+    
+    return Gfx::PointF(p.x, y);
 }
 
 
@@ -228,6 +250,9 @@ void MainWindowImpl::setTopMost(bool onTop)
 
 void MainWindowImpl::move(const Gfx::PointF& p)
 {
+    //std::clog << "MOVE: " << p.x() << "," 
+    //                      << p.y() << std::endl;
+
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
 
