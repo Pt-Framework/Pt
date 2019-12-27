@@ -2963,5 +2963,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Icon.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\demo\PainterDemo.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

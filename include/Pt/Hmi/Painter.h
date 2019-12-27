@@ -74,10 +74,10 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual void setFont(const Gfx::Font& font);
 
-        virtual const Gfx::Font& font() const;  
+        virtual const Gfx::Font& font() const;
 
         virtual Gfx::FontMetrics fontMetrics(const Pt::String& Text) const; 
-        
+
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);   
 
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);

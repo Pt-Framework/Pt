@@ -373,8 +373,8 @@ void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF
 
     Ellipse( _dc, lround( topLeft.x()),  
                   lround( topLeft.y()), 
-                  lround( topLeft.x() + size.width() ), 
-                  lround( topLeft.y() + size.height() ) );
+                  lround( topLeft.x() + size.width() -1), 
+                  lround( topLeft.y() + size.height() -1 ));
 
     SelectObject(_dc, originalBrush);
 }

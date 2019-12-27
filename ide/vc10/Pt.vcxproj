@@ -596,6 +596,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog2.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Main.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\MainWindow.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\demo\PainterDemo.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\DockingLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\Display.cpp" />

@@ -232,6 +232,48 @@ class LineStylesWidget : public BasicStylesWidget
 };
 
 
+
+class EllipseWidget : public BasicStylesWidget
+{
+public:
+    EllipseWidget()
+    {}
+
+    virtual ~EllipseWidget()
+    {}
+
+protected:
+    virtual void drawShapes(Pt::Gfx::Painter& painter, const Pt::String& text)
+    {
+        using namespace Pt::Gfx;
+
+        Color red = Color::fromRgb8(255, 0, 0);
+        Color lightPurple = Color::fromRgb8(164, 100, 255);
+        Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+        painter.setPen(Pen(lightPurple,1));
+
+        painter.setBrush(lightBlue);
+        painter.setFont(Font("", 12));
+        painter.drawText(PointF(20, 22), text);
+
+        painter.setFont(Font("", 10));
+
+        painter.drawEllipse(PointF(20, 50), SizeF(100, 50));
+        painter.fillEllipse(PointF(30, 60), SizeF(80, 30));
+        painter.drawCircle(PointF(120, 50), 10);
+        painter.fillCircle(PointF(122, 52), 5);
+
+        painter.drawEllipse(PointF(20, 120), SizeF(50, 100));
+        painter.fillEllipse(PointF(30, 130), SizeF(30, 80));
+
+        painter.drawRect(RectF(PointF(20, 240), SizeF(50, 100)));
+        painter.fillRect(RectF(PointF(30, 250), SizeF(30, 80)));
+    }
+};
+
+
+
 class CapStylesWidget : public BasicStylesWidget
 {
     public:
@@ -618,11 +660,13 @@ class PainterDemoWindow : public Pt::Hmi::Window
             _tabLineStyles2.setMargin(2);
             _tabCapStyles  .setMargin(2);
             _tabJoinStyles .setMargin(2);
+            _tabEllipseStyles.setMargin(2);
 
             _tabView.addTab(_tabLineStyles1, "Line Styles 1");
             _tabView.addTab(_tabLineStyles2, "Line Styles 2");
             _tabView.addTab(_tabCapStyles,   "Cap Styles"   );
             _tabView.addTab(_tabJoinStyles,  "Join Styles"  );
+            _tabView.addTab(_tabEllipseStyles, "Ellipse");
             _tabView.setPadding(8);
             _tabView.setCurrent(3);
 
@@ -642,6 +686,7 @@ class PainterDemoWindow : public Pt::Hmi::Window
         LineStylesWidget _tabLineStyles2;
         CapStylesWidget  _tabCapStyles;
         JoinStylesWidget _tabJoinStyles;
+        EllipseWidget    _tabEllipseStyles;
 };
 
 
