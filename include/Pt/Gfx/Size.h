@@ -174,28 +174,28 @@ class BasicSize {
         BasicSize& operator*=(T v)
         {
             _w *= v;
-            _h *= v:
+            _h *= v;
             return *this;
         }
 
         BasicSize& operator/=(T v)
         {
             _w /= v;
-            _h /= v:
+            _h /= v;
             return *this;
         }
 
         BasicSize& operator+=(T v)
         {
             _w += v;
-            _h += v:
+            _h += v;
             return *this;
         }
 
         BasicSize& operator-=(T v)
         {
             _w -= v;
-            _h -= v:
+            _h -= v;
             return *this;
         }
 
