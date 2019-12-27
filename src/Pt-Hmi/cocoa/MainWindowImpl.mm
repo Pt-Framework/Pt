@@ -412,10 +412,10 @@ void MainWindowImpl::onMove()
     //std::clog << "MOVE: " << x << "," << y << std::endl;
 
     Pt::Gfx::PointF pos(x, y);
-    pos = Application::instance().screen().toLogical(pos);
+    pos = window->toLogical(pos);
 
     MoveEvent ev(vid, pos);
-    Application::instance().impl()->commitEvent( ev );     
+    Application::instance().impl()->commitEvent( ev );
 }
 
 
