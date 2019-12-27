@@ -341,7 +341,7 @@ void MainWindowImpl::grabPointer()
 
 Window* MainWindowImpl::findWindow(NSWindow* wnd)
 {
-    const std::vector<Window*>& windows = Application::instance().windows();
+    const std::vector<Window*>& windows = Application::instance().screen().windows();
 
     std::vector<Window*>::const_iterator it;
     for(it = windows.begin(); it != windows.end(); ++it)
