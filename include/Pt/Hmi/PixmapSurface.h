@@ -56,11 +56,16 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         virtual ~PixmapSurface();
 
-        void resize(const Gfx::SizeF& size);        
+        void resize(const Gfx::SizeF& size);
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
         PixmapSurfaceImpl* pixmapImpl() const;
+
+        void setScaleFactor(double v)
+        {
+            _scaleFactor = v;
+        }
 
     protected:
         virtual const Gfx::ImageFormat& format() const;
@@ -110,30 +115,19 @@ class PT_HMI_API PixmapSurface : public PaintSurface
     protected:
         virtual const Gfx::SizeF& onSize() const;
 
+        virtual double onScaleFactor() const
+        {
+            return _scaleFactor;
+        }
+
         virtual void onBegin(Painter& painter);
 
         virtual void onFinish();
 
     private:
-        Gfx::PointF toPhysical(const Gfx::PointF& p)
-        {
-            return Application::instance().screen().toPhysical(p);
-        }
-
-        Gfx::SizeF toPhysical(const Gfx::SizeF& s)
-        {
-            return Application::instance().screen().toPhysical(s);
-        }
-
-        Gfx::RectF toPhysical(const Gfx::RectF& r)
-        {
-            return Application::instance().screen().toPhysical(r);
-        }
-
-
-    private:
         PixmapSurfaceImpl* _impl;
         Gfx::SizeF _logicSize;
+        double _scaleFactor;
 };
 
 } // namespace

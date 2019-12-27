@@ -84,6 +84,8 @@ class MainWindowImpl
 
         void grabPointer();
 
+        double scaleFactor() const;
+
         HWND hwnd()
         {
             return _hwnd;
@@ -93,6 +95,7 @@ class MainWindowImpl
         HWND    _hwnd;
         Screen& _screen;
         bool    _isTopMost;
+        double  _scalingFactor;
 };
 
 } // namespace

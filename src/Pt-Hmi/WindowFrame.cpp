@@ -491,8 +491,8 @@ const Gfx::RectF& WindowFrame::frameRect() const
 
 void WindowFrame::setFrame(double bw, double th)
 {
-    _borderWidth = Application::instance().screen().align(bw);
-    _titleHeight = Application::instance().screen().align(th);
+    _borderWidth = _window->align(bw);
+    _titleHeight = _window->align(th);
 }
 
 

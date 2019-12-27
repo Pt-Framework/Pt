@@ -61,8 +61,6 @@ class PT_HMI_API Label : public Control
 
         void setText(const Pt::String& text);
 
-        void setImage(const Gfx::Image& image); 
-        
         void setIcon(const Icon& icon, const Gfx::SizeF& iconSize);
 
     public:
@@ -110,14 +108,15 @@ class PT_HMI_API Label : public Control
 
     private:
         Alignment   _alignment;
-        bool        _hasImage;
 
         Pt::String  _text;
         Adjustment  _adjustment;
         TextBlock   _textBlock;
 
-        Gfx::PointF _imagePos;
-        
+        Icon        _icon;
+        Gfx::PointF _iconPos;
+        Gfx::SizeF  _iconSize;
+
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;

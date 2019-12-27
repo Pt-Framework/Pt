@@ -35,6 +35,9 @@
 #include <Pt/Event.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Hmi/Spacing.h>
 #include <string>
 
 namespace Pt {
@@ -63,9 +66,134 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return _name;
         }
 
-        virtual Gfx::PointF toScreen(const Gfx::PointF& l) const = 0;
+        Gfx::PointF toScreen(const Gfx::PointF& l) const
+        {
+            return onToScreen(l);
+        }
 
-        virtual Gfx::PointF fromScreen(const Gfx::PointF& g) const = 0;
+        Gfx::PointF fromScreen(const Gfx::PointF& g) const
+        {
+            return onFromScreen(g);
+        }
+
+        double scaleFactor() const
+        {
+            return onScaleFactor();
+        }
+
+        Gfx::PointF toPhysical(const Gfx::PointF& p) const
+        {
+            return p * scaleFactor();
+        }
+
+        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const
+        {
+            return s * scaleFactor();
+        }
+
+        Gfx::RectF toPhysical(const Gfx::RectF& r) const
+        {
+            return Gfx::RectF(toPhysical(r.topLeft()), toPhysical(r.size()));
+        }
+
+        Gfx::PointF toLogical(const Gfx::PointF& p) const
+        {
+            return p / scaleFactor();
+        }
+
+        Gfx::SizeF toLogical(const Gfx::SizeF& s) const
+        {
+            return s / scaleFactor();
+        }
+
+        Gfx::RectF toLogical(const Gfx::RectF& r) const
+        {
+            return Gfx::RectF(toLogical(r.topLeft()), toLogical(r.size()));
+        }
+
+        double toLogical(double n) const
+        {
+            return n / scaleFactor();
+        }
+
+        double toPhysical(double n) const
+        {
+            return n * scaleFactor();
+        }
+
+        double align(double n) const
+        {
+            // better name: alignGrid()
+
+            double p = toPhysical(n);
+            p = lround(p);
+            return toLogical(p);
+        }
+
+        double alignPixel(double n) const
+        {
+            double p = toPhysical(n);
+            p = lround(p + 0.5) - 0.5;
+            return toLogical(p);
+        }
+
+        double alignContour(size_t n) const
+        {
+            const double scaling = scaleFactor();
+            // keep contour size when downscaling
+            if (scaling < 1.0)
+                return toLogical(n);
+
+            double p = toPhysical(n);
+            size_t s = static_cast<size_t>(p);
+            return toLogical(s);
+        }
+
+        Gfx::PointF align(const Gfx::PointF& p) const
+        {
+            Gfx::PointF pos = toPhysical(p);
+            pos.setX(lround(pos.x()));
+            pos.setY(lround(pos.y()));
+            return toLogical(pos);
+        }
+
+        Gfx::SizeF align(const Gfx::SizeF& s) const
+        {
+            Gfx::SizeF size = toPhysical(s);
+            size.setWidth(lround(size.width()));
+            size.setHeight(lround(size.height()));
+            return toLogical(size);
+        }
+
+        Gfx::RectF align(const Gfx::RectF& rect) const
+        {
+            Gfx::PointF pos = toPhysical(rect.topLeft());
+            pos.setX(lround(pos.x()));
+            pos.setY(lround(pos.y()));
+
+            Gfx::SizeF size = toPhysical(rect.size());
+            size.setWidth(lround(size.width()));
+            size.setHeight(lround(size.height()));
+
+            return toLogical(Gfx::RectF(pos, size));
+        }
+
+        Spacing align(const Spacing& spacing) const
+        {
+            Spacing alignedSpacing(align(spacing.left()),
+                align(spacing.top()),
+                align(spacing.right()),
+                align(spacing.bottom()));
+
+            return alignedSpacing;
+        }
+
+    protected:
+        virtual Gfx::PointF onToScreen(const Gfx::PointF& l) const = 0;
+
+        virtual Gfx::PointF onFromScreen(const Gfx::PointF& g) const = 0;
+
+        virtual double onScaleFactor() const = 0;
 
     protected:
         Visual();
@@ -74,7 +202,7 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
 
     private:
         Pt::uint64_t _vid;
-        std::string  _name;        
+        std::string  _name;
 };
 
 } // namespace

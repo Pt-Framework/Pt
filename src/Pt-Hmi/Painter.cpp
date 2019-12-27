@@ -147,7 +147,7 @@ void Painter::resetClip()
 
 void Painter::setPen(const Gfx::Pen& pen)
 {
-    double scaleFactor = Application::instance().screen().scaleFactor();
+    const double scaleFactor = Application::instance().scaleFactor();
 
     // keep pen size when downscaling
     double scaledSize = scaleFactor < 1.0 ? pen.size() 
@@ -323,77 +323,82 @@ void Painter::setDefaultFont(std::string f)
     PaintSurface::setDefaultFont(f);
 }
 
-
 double Painter::toPhysical(double n) const
 {
-    return _surface ? _surface->toPhysical(n) : n;
+    return _surface->toPhysical(n);
 }
-
 
 Gfx::PointF Painter::toPhysical(const Gfx::PointF& p) const
 {
-    return _surface ?_surface->toPhysical(p) : p;
+    return _surface->toPhysical(p);
 }
-
 
 Gfx::SizeF Painter::toPhysical(const Gfx::SizeF& s) const
 {
-    return _surface ? _surface->toPhysical(s) : s;
+    return _surface->toPhysical(s);
 }
-
 
 Gfx::RectF Painter::toPhysical(const Gfx::RectF& r) const
 {
-    return _surface ? _surface->toPhysical(r) : r;
+    return _surface->toPhysical(r);
 }
-
 
 double Painter::toLogical(double n) const
 {
-    return _surface ? _surface->toLogical(n) : n;
+    return _surface->toLogical(n);
 }
-
 
 Gfx::PointF Painter::toLogical(const Gfx::PointF& p) const
 {
-    return _surface ? _surface->toLogical(p) : p;
+    return _surface->toLogical(p);
 }
-
 
 Gfx::SizeF Painter::toLogical(const Gfx::SizeF& s) const
 {
-    return _surface ? _surface->toLogical(s) : s;
+    return _surface->toLogical(s);
 }
-
 
 Gfx::RectF Painter::toLogical(const Gfx::RectF& r) const
 {
-    return _surface ? _surface->toLogical(r) : r;
+    return _surface->toLogical(r);
 }
-
-
-double Painter::alignContour(size_t n) const
-{
-    return _surface ? _surface->alignContour(n) : n;
-}
-
 
 double Painter::align(double n) const
 {
-    return _surface ? _surface->align(n) : n;
+    return _surface->align(n);
 }
 
+double Painter::alignPixel(double n) const
+{
+    return _surface->alignPixel(n);
+}
+
+double Painter::alignContour(size_t n) const
+{
+    return _surface->alignContour(n);
+}
 
 Gfx::PointF Painter::align(const Gfx::PointF& p) const
 {
-    return _surface ? _surface->align(p) : p;
+    return _surface->align(p);
 }
 
+Gfx::SizeF Painter::align(const Gfx::SizeF& s) const
+{
+    return _surface->align(s);
+}
 
 Gfx::RectF Painter::align(const Gfx::RectF& rect) const
 {
-    return _surface ? _surface->align(rect) : rect;
+    return _surface->align(rect);
 }
+
+Spacing Painter::align(const Spacing& spacing) const
+{
+    return _surface->align(spacing);
+}
+
+
 
 } // namespace
 

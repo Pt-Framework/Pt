@@ -168,7 +168,6 @@ class BasicRect
             return _p.y() + _s.height();
         }
 
-       
         const BasicPoint<T>& topLeft() const
         { 
             return _p;

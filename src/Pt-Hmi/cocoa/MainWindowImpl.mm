@@ -341,7 +341,7 @@ void MainWindowImpl::grabPointer()
 
 Window* MainWindowImpl::findWindow(NSWindow* wnd)
 {
-    const std::vector<Window*>& windows = Application::instance().screen().windows();
+    const std::vector<Window*>& windows = Application::instance().windows();
 
     std::vector<Window*>::const_iterator it;
     for(it = windows.begin(); it != windows.end(); ++it)
@@ -609,7 +609,7 @@ void MainWindowImpl::onLMouseDown(double x, double y)
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
     y = height - y;
 
-    double scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().scaleFactor();
 
     Pt::Gfx::PointF pos(x / scaling, 
                         y / scaling);
@@ -635,7 +635,7 @@ void MainWindowImpl::onLMouseUp(double x, double y)
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
     y = height - y;
 
-    double scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().scaleFactor();
 
     Pt::Gfx::PointF pos(x / scaling, 
                         y / scaling);
@@ -661,7 +661,7 @@ void MainWindowImpl::onMouseMove(double x, double y)
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
     y = height - y;
 
-    double scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().scaleFactor();
 
     Pt::Gfx::PointF pos(x / scaling, 
                         y / scaling);

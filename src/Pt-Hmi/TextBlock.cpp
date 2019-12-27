@@ -191,6 +191,7 @@ TextBlock::TextBlock()
 , _size()
 , _maxWidth(10000)
 , _adjustment(Adjustment::Center)
+, _lineSpacing(0)
 {
 }
 
@@ -328,7 +329,6 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
     std::size_t prevWordEnd = 0;
     Pt::String segment;
     Gfx::FontMetrics lineMetrics;
-    Screen& screen = Application::instance().screen();
 
     Words::iterator it;
     for(it = words.begin(); it != words.end(); ++it)
@@ -340,7 +340,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
         segment.append(&text[prevWordEnd], wordEnd - prevWordEnd);
         
         Gfx::FontMetrics fm = Painter::fontMetrics(font, segment);
-        double segmentWidth = screen.align( fm.width() );
+        double segmentWidth = fm.width();
         
         if(segmentWidth <= _maxWidth || lineLength == 0)
         {
@@ -377,11 +377,8 @@ void TextBlock::addLine(const Pt::String& line,
                         const Gfx::Font& font, 
                         const Gfx::FontMetrics& tm)
 {
-    Screen& screen = Application::instance().screen();
-
-    double lineWidth = screen.align( tm.width() );
-    double lineHeight = screen.align( tm.height() );
-    double lineSpacing = screen.align( font.size() / 3 );
+    double lineWidth = tm.width();
+    double lineHeight = tm.height();
 
     double lineX = 0;
     double lineY = _size.height();
@@ -389,7 +386,7 @@ void TextBlock::addLine(const Pt::String& line,
     bool firstLine = _lines.empty();
 
     if( ! firstLine )
-        lineY += lineSpacing;
+        lineY += _lineSpacing;
 
     _lines.resize(_lines.size() + 1);
     TextLine& textLine = _lines.back();
@@ -418,7 +415,7 @@ void TextBlock::addLine(const Pt::String& line,
     _size.addHeight(lineHeight);
 
     if( ! firstLine )
-        _size.addHeight(lineSpacing);
+        _size.addHeight(_lineSpacing);
 }
 
 } // namespace

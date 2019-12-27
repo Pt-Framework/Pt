@@ -63,12 +63,28 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     _hwnd = CreateWindowEx(exStyle, "Pt-Hmi", "", style,
                            0, 0, 10, 10, GetDesktopWindow(), 
                            NULL, hInstance, NULL);
+
+    HDC screen = GetDC(_hwnd);
+
+    int dpix = GetDeviceCaps(screen, LOGPIXELSX);
+
+    //std::clog << "SCALING DPI: " << dpix << std::endl;
+    //std::clog << "SCALING: " << dpix / 96.0 << std::endl;
+
+    _scalingFactor = dpix / 96.0;
+    ReleaseDC(_hwnd, screen);
 }
 
 
 MainWindowImpl::~MainWindowImpl()
 {
     DestroyWindow( _hwnd);
+}
+
+
+double MainWindowImpl::scaleFactor() const
+{
+    return _scalingFactor;
 }
 
 

@@ -41,6 +41,13 @@ Transform::Transform()
 }
 
 
+Transform::Transform(double m11, double m12,
+                     double m21, double m22,
+                     double dx,  double dy)
+{
+    set(m11, m12, m21, m22, dx, dy);
+}
+
 Transform::~Transform()
 {
 }
@@ -157,8 +164,12 @@ void Transform::rotateRad(double r)
     const double s = ::sin(r);
     const double c = ::cos(r);
 
-    n[0][0] = c; n[0][1] = -s; n[0][2] = 0;
-    n[1][0] = s; n[1][1] = c;  n[1][2] = 0;
+    n[0][0] = c;  //m11
+    n[0][1] = -s; //m12
+    n[0][2] = 0;  //
+    n[1][0] = s;  //m21
+    n[1][1] = c;  //m22
+    n[1][2] = 0;
 
     updateMatrix(n);
     _isIdentity = false;
@@ -276,6 +287,30 @@ void Transform::updateMatrix(const MatrixData& m)
     result[1][2] = m[1][0] * _mdata[0][2] + m[1][1] * _mdata[1][2] + m[1][2] * 1;
 
     memcpy(_mdata, result, sizeof(MatrixData));
+}
+
+double Transform::determinant() const
+{
+    return m11() * m22() - m12() * m21();
+}
+
+
+Transform Transform::inverted() const
+{
+    const double det = determinant();
+
+    if (det == 0.0)
+        return Transform();
+
+    const double invDet = 1.0 / det;
+
+    return Transform(m22() * invDet,
+        -m12() * invDet,
+        -m21() * invDet,
+        m11() * invDet,
+        (m21() * dy() - m22() * dx()) * invDet,
+        (m12() * dx() - m11() * dy()) * invDet);
+
 }
 
 } // namespace

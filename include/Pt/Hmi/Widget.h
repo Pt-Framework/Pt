@@ -67,7 +67,7 @@ class PT_HMI_API Widget : public Visual
 
     public:
         Widget();
-        
+
         virtual ~Widget();
 
         //
@@ -82,7 +82,6 @@ class PT_HMI_API Widget : public Visual
 
         const Widget* parent() const;
 
-       
         const std::vector<Widget*>& widgets() const;
 
         Widget* findWidget(const Gfx::PointF& pos);
@@ -261,16 +260,17 @@ class PT_HMI_API Widget : public Visual
 
         Pt::Signal<const Pt::Event&>& eventReady();
 
-    public:
-        virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
-
-
     protected:
         void add(Widget& w);
 
         void remove(Widget& w);
+
+    protected:
+        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
+
+        virtual double onScaleFactor() const;
 
     protected:
         virtual void onAddWidget(Widget& w);

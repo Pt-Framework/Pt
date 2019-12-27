@@ -160,7 +160,7 @@ class PT_HMI_API Window : public WindowBase
 
     bool isClosed() const;
 
-    void close();    
+    void close();
 
     Type type() const;
 
@@ -216,11 +216,13 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onLayout(const Gfx::RectF& rect);
 
-  public:
-    virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+  protected:
+    virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
     
-    virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const; 
-   
+    virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const; 
+
+    virtual double onScaleFactor() const;
+
   protected:
     virtual Gfx::SizeF onSize() const;
 

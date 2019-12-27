@@ -114,8 +114,8 @@ class BasicPoint
         const BasicPoint& move(T dx, T dy)
         {
             _x += dx; 
-						_y += dy; 
-						return *this;
+                        _y += dy; 
+                        return *this;
         }
 
         //! @brief Calculate distance between this BasicPoint and the given BasicPoint
@@ -177,14 +177,58 @@ class BasicPoint
             return *this;
         }
 
-        inline BasicPoint operator-(const BasicPoint<T>& pt) const
+        BasicPoint operator-(const BasicPoint<T>& pt) const
         {
             return BasicPoint( (_x-pt.x()), (_y-pt.y()) );
         }
 
-        inline BasicPoint operator*(const double factor) const
+
+        BasicPoint operator*(T factor) const
         {
-            return BasicPoint( (T)(_x * factor), (T)(_y * factor) );
+            return BasicPoint(_x * factor, _y * factor);
+        }
+
+        BasicPoint operator/(T factor) const
+        {
+            return BasicPoint(_x / factor, _y / factor);
+        }
+
+        BasicPoint operator+(T factor) const
+        {
+            return BasicPoint(_x + factor, _y + factor);
+        }
+
+        BasicPoint operator-(T factor) const
+        {
+            return BasicPoint(_x - factor, _y - factor);
+        }
+
+        BasicPoint& operator*=(T factor)
+        {
+            _x *= factor;
+            _y *= factor;
+            return *this;
+        }
+
+        BasicPoint& operator/=(T factor)
+        {
+            _x /= factor;
+            _y /= factor;
+            return *this;
+        }
+
+        BasicPoint& operator+(T factor)
+        {
+            _x += factor;
+            _y += factor;
+            return *this;
+        }
+
+        BasicPoint& operator-(T factor)
+        {
+            _x -= factor;
+            _y -= factor;
+            return *this;
         }
 
     protected:

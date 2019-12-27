@@ -582,7 +582,7 @@ Gfx::PointF Window::onFromParent(const Window& w, const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
+Gfx::PointF Window::onToScreen(const Gfx::PointF& pos) const
 {
     if( ! _init )
         return Gfx::PointF(0, 0);
@@ -596,7 +596,7 @@ Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
+Gfx::PointF Window::onFromScreen(const Gfx::PointF& pos) const
 {
     if( ! _init )
         return Gfx::PointF(0, 0);
@@ -607,6 +607,22 @@ Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
         return _parentWindow->fromScreen(p);
 
     return p;
+}
+
+
+double Window::onScaleFactor() const
+{
+    const Window* topWindow = this;
+
+    while (topWindow)
+    {
+        if (topWindow->_parentWindow == 0)
+            break;
+
+        topWindow = topWindow->_parentWindow;
+    }
+
+    return Application::instance().screen().onScaleFactor(*topWindow);
 }
 
 
@@ -1015,6 +1031,8 @@ void Window::onResize(Window& w, const Gfx::SizeF& to)
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
     _size = ev.size();
+
+    _surface.setScaleFactor( scaleFactor());
     _surface.resize( ev.size() );
 
     //if(_mainWidget)

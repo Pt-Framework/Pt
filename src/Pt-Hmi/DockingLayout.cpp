@@ -277,7 +277,7 @@ void DockingLayout::onLayout(const Gfx::RectF& rect)
                 posRight -= (*it)->preferredSize().width()  + (*it)->margin().right();  
                      
                 double x = posRight;
-                double y = posTop + (*it)->margin().top();                             
+                double y = posTop + (*it)->margin().top();
                     
                 posRight -=  (*it)->margin().left();
 
@@ -295,8 +295,7 @@ void DockingLayout::onLayout(const Gfx::RectF& rect)
                 //
                 // TODO: align preferred size also in all other cases
                 //
-                double preferredHeight = 
-                    Application::instance().screen().align( (*it)->preferredSize().height() );
+                double preferredHeight = (*it)->align( (*it)->preferredSize().height() );
 
                 posBottom -= preferredHeight + (*it)->margin().bottom(); 
 

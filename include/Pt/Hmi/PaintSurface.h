@@ -62,32 +62,118 @@ class PT_HMI_API PaintSurface
         const Gfx::SizeF& size() const;
 
         static void setDefaultFont(const std::string& f);
-    
-        virtual double toPhysical(double n) const;
 
-        Gfx::PointF toPhysical(const Gfx::PointF& p) const;
+        double scaleFactor() const
+        {
+            return onScaleFactor();
+        }
 
-        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const;
+        Gfx::PointF toPhysical(const Gfx::PointF& p) const
+        {
+            return p * scaleFactor();
+        }
 
-        Gfx::RectF toPhysical(const Gfx::RectF& r) const;
+        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const
+        {
+            return s * scaleFactor();
+        }
 
-        double toLogical(double n) const;
+        Gfx::RectF toPhysical(const Gfx::RectF& r) const
+        {
+            return Gfx::RectF(toPhysical(r.topLeft()), toPhysical(r.size()));
+        }
 
-        Gfx::PointF toLogical(const Gfx::PointF& p) const;
+        Gfx::PointF toLogical(const Gfx::PointF& p) const
+        {
+            return p / scaleFactor();
+        }
 
-        Gfx::SizeF toLogical(const Gfx::SizeF& s) const;
+        Gfx::SizeF toLogical(const Gfx::SizeF& s) const
+        {
+            return s / scaleFactor();
+        }
 
-        Gfx::RectF toLogical(const Gfx::RectF& s) const;
+        Gfx::RectF toLogical(const Gfx::RectF& r) const
+        {
+            return Gfx::RectF(toLogical(r.topLeft()), toLogical(r.size()));
+        }
 
-        double alignContour(size_t n) const;
+        double toLogical(double n) const
+        {
+            return n / scaleFactor();
+        }
 
-        double align(double n) const;
+        double toPhysical(double n) const
+        {
+            return n * scaleFactor();
+        }
 
-        Gfx::PointF align(const Gfx::PointF& p) const;
+        double align(double n) const
+        {
+            // better name: alignGrid()
 
-        Gfx::SizeF align(const Gfx::SizeF& s) const;
+            double p = toPhysical(n);
+            p = lround(p);
+            return toLogical(p);
+        }
 
-        Gfx::RectF align(const Gfx::RectF& rect) const;
+        double alignPixel(double n) const
+        {
+            double p = toPhysical(n);
+            p = lround(p + 0.5) - 0.5;
+            return toLogical(p);
+        }
+
+        double alignContour(size_t n) const
+        {
+            const double scaling = scaleFactor();
+            // keep contour size when downscaling
+            if (scaling < 1.0)
+                return toLogical(n);
+
+            double p = toPhysical(n);
+            size_t s = static_cast<size_t>(p);
+            return toLogical(s);
+        }
+
+        Gfx::PointF align(const Gfx::PointF& p) const
+        {
+            Gfx::PointF pos = toPhysical(p);
+            pos.setX(lround(pos.x()));
+            pos.setY(lround(pos.y()));
+            return toLogical(pos);
+        }
+
+        Gfx::SizeF align(const Gfx::SizeF& s) const
+        {
+            Gfx::SizeF size = toPhysical(s);
+            size.setWidth(lround(size.width()));
+            size.setHeight(lround(size.height()));
+            return toLogical(size);
+        }
+
+        Gfx::RectF align(const Gfx::RectF& rect) const
+        {
+            Gfx::PointF pos = toPhysical(rect.topLeft());
+            pos.setX(lround(pos.x()));
+            pos.setY(lround(pos.y()));
+
+            Gfx::SizeF size = toPhysical(rect.size());
+            size.setWidth(lround(size.width()));
+            size.setHeight(lround(size.height()));
+
+            return toLogical(Gfx::RectF(pos, size));
+        }
+
+        Spacing align(const Spacing& spacing) const
+        {
+            Spacing alignedSpacing(align(spacing.left()),
+                align(spacing.top()),
+                align(spacing.right()),
+                align(spacing.bottom()));
+
+            return alignedSpacing;
+        }
 
     protected:
         PaintSurface();
@@ -97,6 +183,8 @@ class PT_HMI_API PaintSurface
         void finish(Painter& painter);
 
     protected:
+        virtual double onScaleFactor() const = 0;
+
         virtual const Gfx::SizeF& onSize() const = 0;
 
         virtual void onBegin(Painter& painter) = 0;

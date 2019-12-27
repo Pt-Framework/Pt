@@ -143,6 +143,8 @@ ApplicationImpl::ApplicationImpl()
     FreeConsole();
 #endif
 
+    SetProcessDPIAware();
+
     _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
 
     WNDCLASS winClass;
@@ -743,12 +745,12 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
             _mouseEvent.setMove();
         break;
     }
-  
-    double scaling = Application::instance().screen().scaleFactor();
+    
+    const double scaling = w.scaleFactor();
 
     Gfx::PointF pos(Gfx::PointF(xPos / scaling, 
                                 yPos / scaling));
-
+    
     _mouseEvent.setPosition(pos);
     _mouseEvent.setId( w.vid() );
     
@@ -775,10 +777,10 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
     int y = info.top;
 
     Gfx::PointF pos(x, y);
-    pos = Application::instance().screen().toLogical(pos);
+    pos = w.toLogical(pos);
 
     MoveEvent ev(w.vid(), pos);
-    commitEvent( ev );          
+    commitEvent( ev );
 }
 
 
@@ -818,12 +820,12 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     int height = HIWORD(lParam);
 
     Gfx::SizeF to(width, height);
-    to = Application::instance().screen().toLogical(to);
+    to = w.toLogical(to);
     
     ResizeEvent rev(w.vid(), to);
     commitEvent(rev);
            
-    Gfx::RectF updateRect(Gfx::PointF(0,0), to);
+    Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
     w.update(updateRect);
             
     // windows starts a nested message loop during resizing, so the events

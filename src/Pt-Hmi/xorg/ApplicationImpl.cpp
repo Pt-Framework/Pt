@@ -369,7 +369,7 @@ void ApplicationImpl::onMotionNotify(Window& window, XEvent& xev)
     std::size_t x = xev.xmotion.x;
     std::size_t y = xev.xmotion.y;
 
-    double scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().scaleFactor();
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition(pos);
@@ -408,7 +408,7 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
         default:
             return;
     }
-    double scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().scaleFactor();
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition(pos);
@@ -466,7 +466,7 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
             return;
     }
 
-    double scaling = Application::instance().screen().scaleFactor();
+    double scaling = Application::instance().scaleFactor();
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition(pos);

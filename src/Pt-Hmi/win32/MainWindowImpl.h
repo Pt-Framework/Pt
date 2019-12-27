@@ -95,6 +95,7 @@ class MainWindowImpl
         HWND    _hwnd;
         Screen& _screen;
         bool    _isTopMost;
+        double  _scalingFactor;
 };
 
 } // namespace

@@ -652,7 +652,7 @@ int main(int argc, char* args[])
         Pt::System::Logger::setLogLevel( "Pt.Hmi", Pt::System::Info );
 
         Pt::Hmi::Application app(argc, args);
-        app.screen().setScaleFactor(1.0);
+        app.setScaleFactor(1.0);
 
         PainterDemoWindow window;
         window.setTitle("Painter Demo");

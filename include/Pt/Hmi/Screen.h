@@ -51,7 +51,7 @@ class ScreenImpl;
 class ApplicationImpl;
 class Widget;
 
-class PT_HMI_API Screen : public WindowBase
+class PT_HMI_API Screen : protected WindowBase
 {
     friend class Window;
 
@@ -68,131 +68,15 @@ class PT_HMI_API Screen : public WindowBase
   
         ScreenImpl* impl();
 
-        void setScaleFactor(double scale);
-
-        double scaleFactor() const
-        {
-            return _scaling;
-        }
-
-        Gfx::PointF toPhysical(const Gfx::PointF& p) const
-        {
-            Gfx::PointF point;
-            point.set(p.x() * _scaling, p.y()  * _scaling);
-            return point;
-        }
-
-        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const
-        {
-            Gfx::SizeF size(s.width()* _scaling, s.height() * _scaling);
-            return size;
-        }
-
-        Gfx::RectF toPhysical(const Gfx::RectF& r) const
-        {
-            Gfx::RectF rect(toPhysical(r.topLeft()), toPhysical(r.size()));
-            return rect;
-        }
-
-        Gfx::PointF toLogical(const Gfx::PointF& p) const
-        {
-            Gfx::PointF point;
-            point.set(p.x() / _scaling, p.y() / _scaling);
-            return point;
-        }
-
-        Gfx::SizeF toLogical(const Gfx::SizeF& s) const
-        {
-            Gfx::SizeF size(s.width()/ _scaling, s.height() / _scaling);
-            return size;
-        }
-
-        Gfx::RectF toLogical(const Gfx::RectF& s) const
-        {
-            Gfx::RectF rect(toLogical(s.topLeft()), toLogical(s.size()));
-            return rect;
-        }
-
-        virtual double toLogical(double n) const
-        {
-            return n / _scaling;
-        }
-
-        virtual double toPhysical(double n) const
-        {
-            return n * _scaling;
-        }
-
-        double align(double n) const
-        {
-            // better name: alignGrid()
-
-            double p = toPhysical(n);
-            p = lround(p);
-            return toLogical(p);
-        }
-
-        double alignPixel(double n) const
-        {
-            double p = toPhysical(n);
-            p = lround(p + 0.5) - 0.5;
-            return toLogical(p);
-        }
-
-        double alignContour(size_t n) const
-        {
-          // keep contour size when downscaling
-          if( _scaling < 1.0 )
-              return toLogical(n);
-
-          double p = toPhysical(n);
-          size_t s = static_cast<size_t>(p);
-          return toLogical(s);
-        }
-
-        Gfx::PointF align(const Gfx::PointF& p) const
-        {
-            Gfx::PointF pos = toPhysical(p);
-            pos.setX(lround(pos.x()));
-            pos.setY(lround(pos.y()));
-            return toLogical(pos);
-        }
-
-        Gfx::SizeF align(const Gfx::SizeF& s) const
-        {
-            Gfx::SizeF size = toPhysical(s);
-            size.setWidth(lround(size.width()));
-            size.setHeight(lround(size.height()));
-            return toLogical(size);
-        }
-
-        Gfx::RectF align(const Gfx::RectF& rect) const
-        {
-            Gfx::PointF pos = toPhysical(rect.topLeft());
-            pos.setX(lround(pos.x()));
-            pos.setY(lround(pos.y()));
-
-            Gfx::SizeF size = toPhysical(rect.size());
-            size.setWidth(lround(size.width()));
-            size.setHeight(lround(size.height()));
-
-            return toLogical(Gfx::RectF(pos, size));
-        }
-
-        Spacing align(const Spacing& spacing) const
-        {
-            Spacing alignedSpacing( align(spacing.left()),
-                                    align(spacing.top()),
-                                    align(spacing.right()),
-                                    align(spacing.bottom()));
-            return alignedSpacing;
-        }
-       
-
     public:
-        virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const;
+        virtual Pt::Gfx::PointF onToScreen(const Pt::Gfx::PointF& p) const;
 
-        virtual Pt::Gfx::PointF fromScreen(const Pt::Gfx::PointF& p) const;
+        virtual Pt::Gfx::PointF onFromScreen(const Pt::Gfx::PointF& p) const;
+
+    protected:
+        double onScaleFactor(const Window& w) const;
+
+        virtual double onScaleFactor() const;
 
     protected:
         virtual Gfx::SizeF onSize() const;
@@ -241,7 +125,6 @@ class PT_HMI_API Screen : public WindowBase
         int                  _updates;
         std::vector<Window*> _windows;
         Pt::System::Clock    _clock;
-        double             _scaling;
 };
 
 } // namespace

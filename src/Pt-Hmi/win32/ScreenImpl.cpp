@@ -30,9 +30,9 @@
 #include "ScreenImpl.h"
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
-
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
+#include <Windows.h>
 
 namespace Pt {
 
@@ -40,6 +40,16 @@ namespace Hmi {
 
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 {
+    HDC screen = GetDC(GetDesktopWindow());
+
+    int dpix = GetDeviceCaps(screen, LOGPIXELSX);
+
+    //std::clog << "SCALING DPI: " << dpix << std::endl;
+    //std::clog << "SCALING: " << dpix / 96.0 << std::endl;
+
+    _scalingFactor = dpix / 96.0;
+
+    ReleaseDC(GetDesktopWindow(), screen);
 }
 
 
@@ -53,9 +63,18 @@ void ScreenImpl::init(WindowBase& w)
 }
 
 
-double ScreenImpl::scaleFactor(Window& w)
+double ScreenImpl::scaleFactor(const Window& w) const
 {
+    if (!w.impl())
+        return 1.0;
+
     return w.impl()->scaleFactor();
+}
+
+
+double ScreenImpl::scaleFactor() const
+{
+    return _scalingFactor;
 }
 
 
@@ -71,18 +90,18 @@ void ScreenImpl::unregisterWindow(Window& w)
         
 Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
 {
-    Gfx::PointF physicalPos = Application::instance().screen().toPhysical(pos);
+    Gfx::PointF physicalPos = w.toPhysical(pos);
     Gfx::PointF parentPos = w.impl()->toScreen(physicalPos);
-    Gfx::PointF logicalPos = Application::instance().screen().toLogical(parentPos);
+    Gfx::PointF logicalPos = w.toLogical(parentPos);
     return logicalPos;
 }
 
 
 Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
 {
-    Gfx::PointF physicalPos = Application::instance().screen().toPhysical(pos);
+    Gfx::PointF physicalPos = w.toPhysical(pos);
     Gfx::PointF windowPos = w.impl()->fromScreen(physicalPos);
-    Gfx::PointF logicalPos = Application::instance().screen().toLogical(windowPos);
+    Gfx::PointF logicalPos = w.toLogical(windowPos);
     return logicalPos;
 }
 

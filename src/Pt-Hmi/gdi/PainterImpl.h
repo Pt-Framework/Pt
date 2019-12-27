@@ -234,12 +234,7 @@ class PainterImpl
                 _font = 0;
             }
 
-            Screen& screen = Application::instance().screen();
-            std::size_t scaledSize = screen.scaleFactor() * font.size();
-            Gfx::Font f = Gfx::Font(font.name(), scaledSize, 
-                                    font.style(), font.angle());
-
-            _font = getFont(f);
+            _font = getFont(font);
         }
         
         HFONT font() const
@@ -250,13 +245,8 @@ class PainterImpl
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
                                             const Pt::String& text)
         {   
-            Screen& screen = Application::instance().screen();
-            std::size_t scaledSize = screen.scaleFactor() * font.size();
-            Gfx::Font f = Gfx::Font(font.name(), scaledSize, 
-                                    font.style(), font.angle());
-
             HDC dc = GetDC(NULL);
-            HFONT newFont = getFont(f);
+            HFONT newFont = getFont(font);
             HGDIOBJ oldFont = SelectObject(dc, newFont);
 
             TEXTMETRIC tm;
@@ -272,10 +262,10 @@ class PainterImpl
             DeleteObject(newFont);
             ReleaseDC(NULL, dc);
 
-            return Gfx::FontMetrics( lround(tm.tmAscent / screen.scaleFactor()), 
-                                     lround(tm.tmDescent / screen.scaleFactor()), 
-                                     lround(textSize.cx / screen.scaleFactor()), 
-                                     lround(tm.tmHeight / screen.scaleFactor()) );
+            return Gfx::FontMetrics( tm.tmAscent, 
+                                     tm.tmDescent, 
+                                     textSize.cx, 
+                                     tm.tmHeight );
         }
         
         static std::string defaultFont()

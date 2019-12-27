@@ -28,6 +28,7 @@
 #define PT_HMI_PAINTER_H
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Spacing.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -85,7 +86,7 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
 
-        virtual void drawRect(const Gfx::RectF& rectangle);        
+        virtual void drawRect(const Gfx::RectF& rectangle);
 
         virtual void fillRect(const Gfx::RectF& rectangle);
 
@@ -117,15 +118,21 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         Gfx::SizeF toLogical(const Gfx::SizeF& s) const;
 
-        Gfx::RectF toLogical(const Gfx::RectF& s) const;
-
-        double alignContour(size_t n) const;
+        Gfx::RectF toLogical(const Gfx::RectF& r) const;
 
         double align(double n) const;
 
-        Gfx::PointF align(const Gfx::PointF& rect) const;
+        double alignPixel(double n) const;
+
+        double alignContour(size_t n) const;
+
+        Gfx::PointF align(const Gfx::PointF& p) const;
+
+        Gfx::SizeF align(const Gfx::SizeF& s) const;
 
         Gfx::RectF align(const Gfx::RectF& rect) const;
+
+        Spacing align(const Spacing& spacing) const;
 
     public:
         void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);

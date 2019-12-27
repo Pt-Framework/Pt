@@ -70,10 +70,6 @@ class PT_HMI_API PushButton : public Button
 
         void setToggle(bool toggle);
 
-        void setIcon(const Gfx::Image& image);
-
-        void setIconSize(const Gfx::SizeF& size);
-
         void setIcon(const Icon& icon, const Gfx::SizeF& iconSize);
 
         bool isFlat() const;
@@ -135,9 +131,6 @@ class PT_HMI_API PushButton : public Button
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-    protected:
-        virtual void onEnableEvent(const EnableEvent& ev);
-
     private:
         void layoutContent();
 
@@ -147,7 +140,7 @@ class PT_HMI_API PushButton : public Button
         bool                      _isBeingToggled;
         bool                      _isFlat;
         Direction                 _direction;
-        Gfx::Image                _icon;
+        Icon                      _icon;
         Gfx::SizeF                _iconSize;
         Gfx::PointF               _iconPos;
         Gfx::PointF               _textPos;

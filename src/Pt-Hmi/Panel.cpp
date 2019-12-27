@@ -50,27 +50,13 @@ Panel::~Panel()
 {
 }
 
-
-void Panel::setImage(const Gfx::Image& image, Alignment align)
-{
-    _picture.set(image);
-    _imageAlignment = align;
-    
-    update();
-}
-
-
 void Panel::setIcon(const Icon& icon, const Gfx::SizeF& iconSize, Alignment align)
 {
-    if (icon.empty())
-        return;
+    _icon = icon;
+    _iconSize = iconSize;
+    _imageAlignment = align;
 
-    Application& app = Application::instance();
-
-    const Gfx::SizeF scaledSize = app.screen().toPhysical(iconSize);
-    const Gfx::Image& image = icon.getImage(scaledSize);
-
-    setImage(image, align);
+    invalidate();
 }
 
 
@@ -171,6 +157,17 @@ void Panel::onInvalidate()
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<PanelRenderer>() );
+
+    if (!_icon.empty())
+    {
+        const Gfx::SizeF scaledSize = toPhysical(_iconSize);
+        const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
+        _picture.set(iconImage);
+    }
+    else
+    {
+        _picture.set(Pt::Gfx::Image());
+    }
 }
 
 

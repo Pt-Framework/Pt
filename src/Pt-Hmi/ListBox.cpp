@@ -108,42 +108,14 @@ void ListBoxItem::setText(const Pt::String& text)
 }
 
 
-void ListBoxItem::setIcon(const Gfx::Image& image)
-{
-    _image = image;
-    _picture.set(image);
-
-    invalidate();
-}
 
 
 void ListBoxItem::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
 {
-    if (icon.empty())
-        return;
-
-    Application& app = Application::instance();
-
-    const Gfx::SizeF scaledSize = app.screen().toPhysical(iconSize);
-    const Gfx::Image& image =  icon.getImage(scaledSize);
-
-    setIconSize(iconSize);
-    setIcon(image);
+    _icon = icon;
+    _iconSize = iconSize;
+    invalidate();
 }
-
-
-void ListBoxItem::setIconSize(const Gfx::SizeF& size)
-{
-    _iconSize = size;
-    update();
-}
-
-
-void ListBoxItem::setIconSize(double width, double height)
-{
-    setIconSize( Gfx::SizeF(width, height) );
-}
-
 
 Pt::Signal<ListBoxItem&>& ListBoxItem::selected()
 {
@@ -271,7 +243,7 @@ Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
-    Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
@@ -301,6 +273,17 @@ void ListBoxItem::onInvalidate()
         return;
 
     _renderer->prepareItem(*this, options, _brush, _pen, _font, _textPen);
+
+    if (_icon.empty())
+    {
+        _picture.set(Gfx::Image());
+    }
+    else
+    {
+        const Gfx::SizeF scaledSize = toPhysical(_iconSize);
+        const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
+        _picture.set(iconImage);
+    }
 
     Base::onInvalidate();
 }
@@ -343,7 +326,7 @@ void ListBoxItem::onPaintContent(Painter& painter)
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
-    Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;

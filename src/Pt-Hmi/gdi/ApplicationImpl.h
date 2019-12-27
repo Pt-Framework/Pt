@@ -155,7 +155,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         System::Mutex                    _mutex;
         System::TimerQueue               _timerQueue;
         System::EventQueue               _eventQueue;
-        Pt::Hmi::Selector                _selector;        
+        Pt::Hmi::Selector                _selector;
         std::vector<System::Selectable*> _avail;
         HINSTANCE                        _instanceHandle;
         MouseEvent                       _mouseEvent;

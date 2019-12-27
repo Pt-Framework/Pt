@@ -145,6 +145,12 @@ class PT_GFX_API Image
             return _view.empty();
         }
 
+        void clear()
+        {
+            _buffer.clear();
+            _view.clear();
+        }
+
     private:
         std::vector<Pt::uint8_t> _buffer;
         ImageView                _view;

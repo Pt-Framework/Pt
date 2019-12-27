@@ -194,7 +194,7 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
     if( cursor == 0 )
         return;
 
-   if( _cursorHandle != 0 )            
+   if( _cursorHandle != 0 )
        DestroyCursor( _cursorHandle );
 
     if( cursor->empty() )
@@ -216,7 +216,7 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
     _cursorHandle = CreateIconIndirect(&iconInfo);
 
     if( _cursorHandle != 0 )
-      SetCursor( _cursorHandle );    
+      SetCursor( _cursorHandle );
 
     DeleteObject( andMask );
     DeleteObject( xorMask );
@@ -225,9 +225,9 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
 Pt::Timespan ApplicationImpl::inactivityTime() const
 {
-	LASTINPUTINFO info = { 0 };
-	info.cbSize = sizeof(info);
-	GetLastInputInfo(&info);
+    LASTINPUTINFO info = { 0 };
+    info.cbSize = sizeof(info);
+    GetLastInputInfo(&info);
 
   Pt::uint64_t msecs = info.dwTime;
   return Pt::Timespan(msecs * 1000);
@@ -750,7 +750,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
         break;
     }
     
-    double scaling = Application::instance().screen().scaleFactor();
+    const double scaling = w.scaleFactor();
 
     Gfx::PointF pos(Gfx::PointF(xPos / scaling, 
                                 yPos / scaling));
@@ -781,10 +781,10 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
     int y = info.top;
 
     Gfx::PointF pos(x, y);
-    pos = Application::instance().screen().toLogical(pos);
+    pos = w.toLogical(pos);
 
     MoveEvent ev(w.vid(), pos);
-    commitEvent( ev );          
+    commitEvent( ev );
 }
 
 
@@ -824,7 +824,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     int height = HIWORD(lParam);
 
     Gfx::SizeF to(width, height);
-    to = Application::instance().screen().toLogical(to);
+    to = w.toLogical(to);
     
     ResizeEvent rev(w.vid(), to);
     commitEvent(rev);

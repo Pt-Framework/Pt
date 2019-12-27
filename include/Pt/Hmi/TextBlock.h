@@ -111,6 +111,16 @@ class PT_HMI_API TextBlock
 
         Adjustment adjustment() const;
 
+        void setLineSpacing(double v)
+        {
+            _lineSpacing = v;
+        }
+
+        double lineSpacing() const
+        {
+            return _lineSpacing;
+        }
+
         Iterator begin();
 
         Iterator end();
@@ -126,12 +136,18 @@ class PT_HMI_API TextBlock
                      const Gfx::Font& font, 
                      const Gfx::FontMetrics& tm);
 
+        double align(double v) const
+        {
+            return v;
+        }
+
     private:
         Gfx::PointF           _position;
         Gfx::SizeF            _size;
         double                _maxWidth;
         Adjustment            _adjustment;
         std::vector<TextLine> _lines;
+        double                _lineSpacing;
 };
 
 } // namespace

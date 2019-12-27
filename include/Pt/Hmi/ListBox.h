@@ -63,17 +63,11 @@ class PT_HMI_API ListBoxItem : public Button
         void setText(const Pt::String& t);
 
         const Pt::String& text() const;
-        
-        void setIcon(const Gfx::Image& image);
 
         void setIcon(const Icon& icon, const Gfx::SizeF& size);
 
         const Gfx::SizeF& iconSize() const
         { return _iconSize; }
-
-        void setIconSize(const Gfx::SizeF& size);
-
-        void setIconSize(double width, double height);
 
         Pt::Signal<ListBoxItem&>& selected();
 
@@ -132,7 +126,8 @@ class PT_HMI_API ListBoxItem : public Button
         bool                     _isSelectable;
         bool                     _isSelected;
         String                   _text;
-        Gfx::Image               _image;
+        
+        Icon                     _icon;
         Gfx::SizeF               _iconSize;
 
         FacetPtr<ListBoxRenderer> _renderer;

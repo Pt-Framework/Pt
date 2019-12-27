@@ -151,11 +151,60 @@ class BasicSize {
             return _h < other._h || (_h == other._h && _w < other._w);
         }
 
+        BasicSize operator*(T v) const
+        {
+            return BasicSize(_w *v, _h * v);
+        }
+
+        BasicSize operator/(T v) const
+        {
+            return BasicSize(_w/v, _h/v);
+        }
+
+        BasicSize operator+(T v) const
+        {
+            return BasicSize(_w +v, _h+v);
+        }
+
+        BasicSize operator-(T v) const
+        {
+            return BasicSize(_w - v, _h - v);
+        }
+
+        BasicSize& operator*=(T v)
+        {
+            _w *= v;
+            _h *= v:
+            return *this;
+        }
+
+        BasicSize& operator/=(T v)
+        {
+            _w /= v;
+            _h /= v:
+            return *this;
+        }
+
+        BasicSize& operator+=(T v)
+        {
+            _w += v;
+            _h += v:
+            return *this;
+        }
+
+        BasicSize& operator-=(T v)
+        {
+            _w -= v;
+            _h -= v:
+            return *this;
+        }
+
     protected:
         T _w;
         T _h;
 };
 
+ 
 typedef BasicSize<Pt::ssize_t> Size;
 typedef BasicSize<double> SizeF;
 

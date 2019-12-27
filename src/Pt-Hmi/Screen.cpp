@@ -41,7 +41,6 @@ namespace Hmi {
 Screen::Screen(ApplicationImpl& app)
 : _impl( new ScreenImpl(app) )
 , _updates(0)
-, _scaling(1)
 {
     _impl->init(*this);
 }
@@ -104,10 +103,19 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
-void Screen::setScaleFactor(double scale)
+double Screen::onScaleFactor(const Window& w) const
 {
-    _scaling = scale;
+    const double scaling = Application::instance().scaleFactor();
+
+    return _impl->scaleFactor(w) * scaling;
 }
+
+
+double Screen::onScaleFactor() const
+{
+    return _impl->scaleFactor();
+}
+
 
 Gfx::SizeF Screen::onSize() const
 {
@@ -115,13 +123,13 @@ Gfx::SizeF Screen::onSize() const
 }
 
 
-Pt::Gfx::PointF Screen::toScreen(const Pt::Gfx::PointF& p) const
+Pt::Gfx::PointF Screen::onToScreen(const Pt::Gfx::PointF& p) const
 {
     return p;
 }
 
 
-Pt::Gfx::PointF Screen::fromScreen(const Pt::Gfx::PointF& p) const
+Pt::Gfx::PointF Screen::onFromScreen(const Pt::Gfx::PointF& p) const
 {
     return p;
 }
@@ -147,14 +155,19 @@ Gfx::PointF Screen::onFromParent(const Window& w, const Gfx::PointF& pos) const
 
 void Screen::onResize(Window& w, const Gfx::SizeF& s)
 {
-    w.impl()->resize(toPhysical(s));
+    const Gfx::SizeF size = w.toPhysical(s);
+
+    w.impl()->resize(size);
+
     _impl->onResize(w, s);
 }
 
 
 void Screen::onMove(Window& w, const Gfx::PointF& p)
 {   
-    w.impl()->move(toPhysical(p));
+    const Gfx::PointF point = w.toPhysical(p);
+
+    w.impl()->move(point);
     _impl->onMove(w, p);
 }
 
@@ -200,7 +213,7 @@ void Screen::onActivate(Window& w)
 void Screen::onEnable(Window& w, bool enable)
 {
     w.impl()->enable(enable);
-    _impl->onEnable(w, enable);      
+    _impl->onEnable(w, enable);
 }
 
 
@@ -215,7 +228,7 @@ void Screen::onUpdate(const Gfx::RectF& updateRect)
 
 
 void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
-{	
+{
     Gfx::PointF pos = w.toScreen( updateRect.topLeft() );
     Gfx::RectF rect( pos, updateRect.size() );
     update(rect);
@@ -257,7 +270,7 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         (*it)->repaint();
-    }    
+    }
 
    _updateRect.clear();
 

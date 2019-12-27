@@ -379,6 +379,14 @@ class ImageView
         Pt::ssize_t padding() const
         { return _padding; }
 
+        void clear()
+        {
+            _data = 0;
+            _size.set(0, 0);
+            _padding = 0;
+            _stride = 0;
+        }
+
     private:
         const ImageFormat* _format;
 

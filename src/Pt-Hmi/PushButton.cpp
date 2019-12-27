@@ -66,41 +66,11 @@ void PushButton::setToggle(bool toggle)
 }
 
 
-void PushButton::setIcon(const Gfx::Image& image)
-{
-    _icon = image;
-    _picture.set(image);
-
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    if( ! _renderer )
-        return;
-
-    _renderer->prepareIcon(*this, options, image, _picture);
-    
-    invalidate();
-}
-
-
 void PushButton::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
 {
-    if( icon.empty() )
-        return;
-
-    Application& app = Application::instance();
-
-    const Gfx::SizeF scaledSize = app.screen().toPhysical(iconSize);
-    const Gfx::Image& image = icon.getImage(scaledSize);
-
-    setIconSize(iconSize);
-    setIcon(image);
-}
-
-
-void PushButton::setIconSize(const Gfx::SizeF& size)
-{
-    _iconSize = size;
-    update();
+    _icon = icon;
+    _iconSize = iconSize;
+    invalidate();
 }
 
 
@@ -256,11 +226,6 @@ void PushButton::setPressed(bool pressed)
 {
     _isPressed = pressed;
 
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    if(_renderer)
-        _renderer->prepareIcon(*this, options, _icon, _picture);
-
     invalidate();
 }
 
@@ -324,12 +289,12 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 
 Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
+    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text());
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
     double textHeight = fm.height() + fm.descent(); // use descent as additional spacing
 
-    Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = 0;
@@ -368,7 +333,7 @@ void PushButton::layoutContent()
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
     
-    Gfx::SizeF pictureSize = Application::instance().screen().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
@@ -378,8 +343,6 @@ void PushButton::layoutContent()
     double pictureY = 0;
     double textX = 0;
     double textY = 0;
-
-    Screen& screen = Application::instance().screen();
 
     switch(_direction)
     {
@@ -425,18 +388,19 @@ void PushButton::layoutContent()
         _iconPos.set(pictureX + pictureXOff, 
                      pictureY + pictureYOff);
 
-        _iconPos = screen.align(_iconPos);
+        _iconPos = align(_iconPos);
     }
 
     _textPos.set(textX, textY);
-    _textPos = screen.align(_textPos);
+    _textPos = align(_textPos);
 }
 
 
 void PushButton::onInvalidate()
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
+    Application& app = Application::instance();
+    const StyleOptions& options = app.styleOptions();
+    const Style& style = app.style();
 
     _brush = foreground();
     _pen = contour();
@@ -445,9 +409,20 @@ void PushButton::onInvalidate()
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<ButtonRenderer>() );
-    
+
     if( ! _renderer )
         return;
+
+    if( !_icon.empty() )
+    {
+        const Gfx::SizeF scaledSize = toPhysical(_iconSize);
+        const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
+        _renderer->prepareIcon(*this, options, iconImage, _picture);
+    }
+    else
+    {
+        _picture.set(Pt::Gfx::Image());
+    }
 
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 
@@ -520,16 +495,6 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                           mnemonicRect);
 }
 
-
-void PushButton::onEnableEvent(const EnableEvent& ev)
-{
-    Base::onEnableEvent(ev);
-
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    if(_renderer)
-        _renderer->prepareIcon(*this, options, _icon, _picture);
-}
 
 } // namespace
 

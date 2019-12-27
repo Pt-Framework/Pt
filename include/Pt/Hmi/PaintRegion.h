@@ -106,6 +106,11 @@ class PT_HMI_API PaintRegion : public PaintSurface
     protected:
         virtual const Gfx::SizeF& onSize() const;
 
+        virtual double onScaleFactor() const
+        {
+            return _surface->onScaleFactor();
+        }
+
         virtual void onBegin(Painter& painter);
 
         virtual void onFinish();

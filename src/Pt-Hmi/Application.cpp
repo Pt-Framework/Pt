@@ -52,6 +52,7 @@ Application::Application(int argc, char** argv)
 , _pointerGrabber(0)
 , _inputMethod(0)
 , _onScroll(false)
+, _scaling(1)
 {
     this->init(*_impl);
 
@@ -832,6 +833,7 @@ void Application::onLayoutEvent(const LayoutEvent& ev)
 
     it->second->processEvent(ev);
 }
+
 
 } // namespace
 

@@ -30,7 +30,6 @@
 #include <Pt/Hmi/PixmapSurface.h>
 #include "PixmapSurfaceImpl.h"
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Widget.h>
 
 namespace Pt {
@@ -39,6 +38,7 @@ namespace Hmi {
 
 PixmapSurface::PixmapSurface()
 : _impl( new PixmapSurfaceImpl )
+, _scaleFactor(1)
 {
 }
 
@@ -139,19 +139,18 @@ void PixmapSurface::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
     Gfx::Transform trans;
-    double scaling = Application::instance().screen().scaleFactor();
-    trans.scale(scaling, scaling);
+    trans.scale(_scaleFactor, _scaleFactor);
 
     _impl->drawText(toPhysical(to), text, trans);
 }
 
 
-void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& t)
+void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text, 
+                             const Gfx::Transform& t)
 {
-    double scaling = Application::instance().screen().scaleFactor();
     Gfx::Transform trans = t;
 
-    trans.scale(trans.m11() * scaling, trans.m22() * scaling);
+    trans.scale(_scaleFactor, _scaleFactor);
 
     _impl->drawText(toPhysical(to), text, trans);
 }

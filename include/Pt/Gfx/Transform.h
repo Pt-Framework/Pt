@@ -44,6 +44,10 @@ class PT_GFX_API Transform
     public:
         Transform();
 
+        Transform(double m11, double m12,
+                  double m21, double m22,
+                  double dx,  double dy);
+
         ~Transform();
 
         bool isIdentity() const;
@@ -91,6 +95,10 @@ class PT_GFX_API Transform
         PointF operator*(const PointF& p) const;
 
         SizeF operator*(const SizeF& p) const;
+
+        double determinant() const;
+
+        Transform inverted() const;
 
     private:
       typedef double MatrixData[2][3];

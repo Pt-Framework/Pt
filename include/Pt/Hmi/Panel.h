@@ -49,9 +49,6 @@ class PT_HMI_API Panel : public Control
         Panel();
 
         virtual ~Panel();
-   
-        void setImage(const Gfx::Image& image, 
-                      Alignment align = Alignment::Center); 
 
         void setIcon(const Icon& icon, const Gfx::SizeF& iconSize, Alignment align = Alignment::Center);
 
@@ -99,6 +96,8 @@ class PT_HMI_API Panel : public Control
         AutoPtr<Gfx::Pen>       _contour;
         bool                    _hasFrame;
 
+        Icon                    _icon;
+        Gfx::SizeF              _iconSize;
         Picture                 _picture;
         Alignment               _imageAlignment;
 };

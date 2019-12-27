@@ -96,7 +96,7 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
         
         pixel[0] = (b1 + b2) / 257;
         pixel[1] = (g1 + g2) / 257;
-        pixel[2] = (r1 + r2) / 257;                
+        pixel[2] = (r1 + r2) / 257;
         pixel[3] = 0;
 
         pixel += 4;
@@ -135,8 +135,7 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
     SelectObject(_dc, _bitmap);
     SetBkMode(_dc, TRANSPARENT);
 
-    // TODO: GM_ADVANCED
-    //SetGraphicsMode(_dc, GM_ADVANCED);
+    SetGraphicsMode(_dc, GM_ADVANCED);
 }
 
 
@@ -280,29 +279,36 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     SIZE textSize;
     GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
     
-    Screen& screen = Application::instance().screen();
-
-    return Gfx::FontMetrics( lround(tm.tmAscent / screen.scaleFactor()), 
-                             lround(tm.tmDescent / screen.scaleFactor()), 
-                             lround(textSize.cx / screen.scaleFactor()), 
-                             lround(tm.tmHeight / screen.scaleFactor()) );
+    return Gfx::FontMetrics(tm.tmAscent, 
+                            tm.tmDescent, 
+                            textSize.cx, 
+                            tm.tmHeight);
 }
 
 
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
+void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, 
+                                 const Pt::String& text, 
+                                 const Gfx::Transform& trans)
 {
-    RECT rectangle;
-
-    SetRect( &rectangle, lround(to.x() + 0.001), 
-                         lround(to.y() + 0.001), 
-                         lround(to.x() + 0.001), 
-                         lround(to.y() + 0.001) );
-
     _text.clear();
-    text.toUtf16( std::back_inserter(_text) );    
-    
-    int rezt = DrawTextW(_dc, _text.c_str(), -1, 
-                         &rectangle, DT_NOCLIP| DT_NOPREFIX );    
+    text.toUtf16(std::back_inserter(_text));
+
+    XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
+
+    GetWorldTransform(_dc, &oldTrans);
+
+    Gfx::Transform tt = trans;
+    tt.translate(to.x(), to.y());
+
+    XFORM newTrans = { tt.m11(), tt.m12(),
+                       tt.m21(), tt.m22(),
+                       tt.dx(), tt.dy()};
+
+    SetWorldTransform(_dc, &newTrans);
+
+    TextOutW(_dc, 0, 0, _text.c_str(), _text.size());
+
+    SetWorldTransform(_dc, &oldTrans);
 }
 
 
@@ -323,18 +329,11 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 {
     HBRUSH originalBrush = (HBRUSH) SelectObject(_dc, GetStockObject(NULL_BRUSH));
-    
-    // the rectangle that is drawn excludes the bottom and right edges
+
     Rectangle(_dc, lround(rect.left()   - 0.4999), 
                    lround(rect.top()    - 0.4999), 
-                   lround(rect.right()  - 0.4999) + 1, 
-                   lround(rect.bottom() - 0.4999) + 1);
-
-    // TODO: GM_ADVANCED
-    //Rectangle(_dc, lround(rect.left()   - 0.4999), 
-    //               lround(rect.top()    - 0.4999), 
-    //               lround(rect.right()  - 0.4999), 
-    //               lround(rect.bottom() - 0.4999));
+                   lround(rect.right()  - 0.4999), 
+                   lround(rect.bottom() - 0.4999));
 
     SelectObject(_dc, originalBrush);
 }
@@ -404,8 +403,8 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF
 
     Ellipse( _dc, lround( topLeft.x() ),
                   lround( topLeft.y() ),
-                  lround( topLeft.x() + size.width() ) + 1,
-                  lround( topLeft.y() + size.height() ) + 1 );
+                  lround( topLeft.x() + size.width() - 1),
+                  lround( topLeft.y() + size.height() - 1) );
 
     SelectObject(_dc, originalPen);
 

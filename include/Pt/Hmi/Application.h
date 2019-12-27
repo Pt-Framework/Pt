@@ -147,6 +147,16 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void loadImage(const System::Path& path, Gfx::Image& image);
 
+        void setScaleFactor(double scale)
+        {
+            _scaling = scale;
+        }
+
+        double scaleFactor() const
+        {
+            return _scaling;
+        }
+
     protected:
         void onResizeEvent(const ResizeEvent& ev);
 
@@ -218,6 +228,7 @@ class PT_HMI_API Application : public Pt::System::Application
         Gfx::PointF        _scrollFrom;
         bool               _onScroll;
         Gfx::PngReader     _iconReader;
+        double             _scaling;
 };
 
 } // namespace

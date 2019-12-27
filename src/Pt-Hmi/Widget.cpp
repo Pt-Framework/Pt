@@ -329,7 +329,7 @@ Gfx::PointF Widget::toWindow(const Gfx::PointF& p) const
 }
 
 
-Gfx::PointF Widget::toScreen(const Gfx::PointF& pos) const
+Gfx::PointF Widget::onToScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF screenPos = toWindow(pos);
 
@@ -340,7 +340,7 @@ Gfx::PointF Widget::toScreen(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
+Gfx::PointF Widget::onFromScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF widgetPos;
 
@@ -348,6 +348,15 @@ Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
         widgetPos = window()->fromScreen(pos);
 
     return fromWindow( widgetPos );
+}
+
+
+double Widget::onScaleFactor() const
+{
+    if (window())
+        return window()->scaleFactor();
+
+    return 1.0;
 }
 
 
@@ -579,7 +588,7 @@ const SizePolicy& Widget::sizePolicy() const
 void Widget::setSizePolicy(const SizePolicy& policy)
 {
     _sizePolicy = policy;
-    _sizePolicy.setSize( Application::instance().screen().align(policy.size()) );
+    _sizePolicy.setSize( align(policy.size()) );
 
     if( parent() )
         parent()->relayout();
@@ -693,7 +702,7 @@ void Widget::layout(const Gfx::RectF& r)
     //
     // align to physical pixel grid
     //
-    Gfx::RectF rect = Application::instance().screen().align(r);
+    Gfx::RectF rect = align(r);
 
     //
     // layout this widget and its contents
@@ -941,7 +950,7 @@ void Widget::move(const Gfx::PointF& pos)
     if(pos == _position)
         return;
 
-    _position = Application::instance().screen().align(pos);
+    _position = align(pos);
 
     // relayout will not send a move event
     MoveEvent mev(vid(), _position);
@@ -1004,8 +1013,7 @@ const Spacing& Widget::margin() const
 
 void Widget::setMargin(const Spacing& s)
 {
-
-    _margin = Application::instance().screen().align(s);
+    _margin = align(s);
 
     if( parent() )
        parent()->relayout();
@@ -1032,7 +1040,7 @@ const Spacing& Widget::padding() const
 
 void Widget::setPadding( const Spacing& p )
 {
-    _padding = Application::instance().screen().align(p);
+    _padding = align(p);
     relayout();
 }
 
