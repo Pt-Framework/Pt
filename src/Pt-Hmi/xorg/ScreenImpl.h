@@ -89,6 +89,11 @@ class ScreenImpl
 
         void onEnable(Window& w, bool enable);
 
+        double scaleFactor() const
+        {
+            return 1;
+        }
+
     private:
         ApplicationImpl& _app;
 };

@@ -89,6 +89,8 @@ class ScreenImpl
         void onActivate(Window& w);
 
         void onEnable(Window& w, bool enable);
+
+        double scaleFactor() const;
 };
 
 } // namespace

@@ -149,6 +149,11 @@ Gfx::SizeF ScreenImpl::size() const
     return Gfx::SizeF(620, 480);
 }
 
+double ScreenImpl::scaleFactor() const
+{
+    return 1;
+}
+
 } // namespace
 
 } // namespace
