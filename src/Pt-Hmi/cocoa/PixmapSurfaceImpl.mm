@@ -298,7 +298,9 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 }
 
 
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
+void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, 
+                                const Pt::String& text,
+                                const Gfx::Transform& trans)
 {
     if( ! _painter )
         return;
@@ -347,6 +349,16 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     // flip the text coordinate system for iOS
     //CGContextSetTextMatrix(_context, CGAffineTransformMakeScale(1.0, -1.0));
     
+    CGAffineTransform tf;
+    tf.a = trans.m11();
+    tf.b = trans.m12();
+    tf.c = trans.m21();
+    tf.d = trans.m22();
+    tf.tx = trans.dx();
+    tf.ty = trans.dy();
+    //CGContextConcatCTM(_context, tf);
+    //CGContextSetTextMatrix(_context, tf);
+
     CGContextSetTextPosition(_context, to.x(), _size.height() - to.y());
 
     beginClip();
@@ -363,13 +375,6 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     //CGContextRestoreGState(_context);
 
     // ALTERNATIVE: CTRunDraw
-}
-
-
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text, 
-                                 const Gfx::Transform& trans)
-{
-    drawText(to, text);
 }
 
 

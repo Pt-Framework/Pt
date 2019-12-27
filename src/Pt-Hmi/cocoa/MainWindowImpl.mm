@@ -113,6 +113,12 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
+double MainWindowImpl::scaleFactor() const
+{
+    return [_window backingScaleFactor];
+}
+
+
 void MainWindowImpl::setType(Window::Type type)
 {
     // TODO: NSWindowStyleMaskBorderless for Popups

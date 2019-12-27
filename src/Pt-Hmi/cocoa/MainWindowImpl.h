@@ -68,6 +68,8 @@ class MainWindowImpl : public Pt::Connectable
 
         virtual ~MainWindowImpl();
 
+        double scaleFactor() const;
+
         void setType(Window::Type type);
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;

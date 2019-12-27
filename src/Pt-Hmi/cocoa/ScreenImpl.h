@@ -54,6 +54,10 @@ class ScreenImpl
 
         void init(WindowBase& w);
 
+        double scaleFactor(const Window& w) const;
+
+        double scaleFactor() const;
+
         Gfx::SizeF size() const;
 
         void registerWindow(Window& w);
@@ -89,16 +93,6 @@ class ScreenImpl
         void onActivate(Window& w);
 
         void onEnable(Window& w, bool enable);
-
-        double scaleFactor(const Window&) const
-        {
-            return 1.0;
-        }
-
-        double scaleFactor() const
-        {
-            return 1.0;
-        }
 };
 
 } // namespace

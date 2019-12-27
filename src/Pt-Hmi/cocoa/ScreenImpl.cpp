@@ -53,6 +53,21 @@ void ScreenImpl::init(WindowBase& w)
 }
 
 
+double ScreenImpl::scaleFactor(const Window& w) const
+{
+    if( ! w.impl() )
+        return 1.0;
+
+    return w.impl()->scaleFactor();
+}
+
+
+double ScreenImpl::scaleFactor() const
+{
+    return 1.0;
+}
+
+
 void ScreenImpl::registerWindow(Window& w)
 {
 }
