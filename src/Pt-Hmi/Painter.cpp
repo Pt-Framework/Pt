@@ -242,10 +242,12 @@ void Painter::drawText(const Gfx::PointF& to, const Pt::String& text)
     _surface->drawText(to, text);
 }
 
+
 void Painter::drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans)
 {
     _surface->drawText(to, text, trans);
 }
+
 
 void Painter::drawRect(const Gfx::RectF& rect)
 {

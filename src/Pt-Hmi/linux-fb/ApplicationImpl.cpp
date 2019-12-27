@@ -33,6 +33,7 @@
 
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Screen.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/FileInfo.h>

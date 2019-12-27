@@ -105,7 +105,6 @@ Gfx::Image& ScreenImpl::image()
     return _surface.pixmapImpl()->image();
 }
 
-
 void ScreenImpl::paint(const Gfx::RectF& updateRect)
 {
     //

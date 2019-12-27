@@ -51,7 +51,7 @@ class ScreenImpl;
 class ApplicationImpl;
 class Widget;
 
-class PT_HMI_API Screen : protected WindowBase
+class PT_HMI_API Screen : public WindowBase
 {
     friend class Window;
 

@@ -84,6 +84,16 @@ class ScreenImpl : public Pt::Connectable
             return _windowManager;
         }
 
+        double scaleFactor(const Window&) const
+        {
+            return 1.0;
+        }
+
+        double scaleFactor() const
+        {
+            return 1.0;
+        }
+
     public:
         void dispatchMouseEvent(const MouseEvent& ev);
 
