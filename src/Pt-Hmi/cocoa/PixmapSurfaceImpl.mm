@@ -338,8 +338,6 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 
     CTLineRef line = CTLineCreateWithAttributedString(attributedString);
 
-    //CGContextSetTextDrawingMode(_context, kCGTextFill);
-
     // either flip the coordinate system for iOS, or...
     //CGContextTranslateCTM(_context, 0, _size.height());
     //CGContextScaleCTM(_context, 1.0, -1.0);
@@ -349,21 +347,19 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     
     beginClip();
 
+    Gfx::Transform tt = trans;    
+    tt.translate(to.x(), _size.height() - to.y());   
+
     CGAffineTransform tf;
-    tf.a = trans.m11();
-    tf.b = trans.m12();
-    tf.c = trans.m21();
-    tf.d = trans.m22();
-    tf.tx = trans.dx();
-    tf.ty = trans.dy();
-    
+    tf.a = tt.m11();
+    tf.b = tt.m21();
+    tf.c = tt.m12();
+    tf.d = tt.m22();
+    tf.tx = tt.dx();
+    tf.ty = tt.dy();
+
     CGContextConcatCTM(_context, tf);
-
-    Gfx::PointF textPos = _painter->toLogical(Gfx::PointF(to.x(), 
-                                                          _size.height() - to.y()) );
-
-    CGContextSetTextPosition(_context, textPos.x(), textPos.y());
-
+    CGContextSetTextPosition(_context, 0, 0);
     CTLineDraw(line, _context);
     
     endClip();
