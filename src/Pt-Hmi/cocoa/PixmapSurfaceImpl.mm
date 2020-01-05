@@ -299,8 +299,8 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 
 
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, 
-                                const Pt::String& text,
-                                const Gfx::Transform& trans)
+                                 const Pt::String& text,
+                                 const Gfx::Transform& trans)
 {
     if( ! _painter )
         return;
@@ -338,8 +338,6 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 
     CTLineRef line = CTLineCreateWithAttributedString(attributedString);
 
-    //CGPoint textPosition = CGContextGetTextPosition(_context);
-    
     //CGContextSetTextDrawingMode(_context, kCGTextFill);
 
     // either flip the coordinate system for iOS, or...
@@ -349,6 +347,8 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     // flip the text coordinate system for iOS
     //CGContextSetTextMatrix(_context, CGAffineTransformMakeScale(1.0, -1.0));
     
+    beginClip();
+
     CGAffineTransform tf;
     tf.a = trans.m11();
     tf.b = trans.m12();
@@ -356,13 +356,16 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     tf.d = trans.m22();
     tf.tx = trans.dx();
     tf.ty = trans.dy();
-    //CGContextConcatCTM(_context, tf);
-    //CGContextSetTextMatrix(_context, tf);
+    
+    CGContextConcatCTM(_context, tf);
 
-    CGContextSetTextPosition(_context, to.x(), _size.height() - to.y());
+    Gfx::PointF textPos = _painter->toLogical(Gfx::PointF(to.x(), 
+                                                          _size.height() - to.y()) );
 
-    beginClip();
+    CGContextSetTextPosition(_context, textPos.x(), textPos.y());
+
     CTLineDraw(line, _context);
+    
     endClip();
 
     CFRelease(line);
@@ -370,9 +373,6 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     CFRelease(string);
     CFRelease(attributes);
     CFRelease(textColor);
-
-    //CGContextSetTextPosition(_context, textPosition.x, textPosition.y);
-    //CGContextRestoreGState(_context);
 
     // ALTERNATIVE: CTRunDraw
 }

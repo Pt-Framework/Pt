@@ -262,9 +262,9 @@ void MainWindowImpl::move(const Gfx::PointF& p)
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
 
-    CGFloat y = screenHeight - p.y() - windowHeight;
-    NSPoint origin = NSMakePoint(p.x(), y);
-    
+    CGFloat y = screenHeight - p.y() / scaleFactor() - windowHeight;
+    NSPoint origin = NSMakePoint(p.x() / scaleFactor(), y);
+
     [_window setFrameOrigin:origin];
 }
 
@@ -274,10 +274,10 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
     NSRect frameRect = [_window frame];
     NSRect contentRect = [_window contentRectForFrameRect:frameRect];
 
-    contentRect.origin.y += contentRect.size.height - size.height();
+    contentRect.origin.y += contentRect.size.height - size.height() / scaleFactor();
     
-    contentRect.size.width = size.width();
-    contentRect.size.height = size.height();
+    contentRect.size.width = size.width() / scaleFactor();
+    contentRect.size.height = size.height() / scaleFactor();
 
     frameRect = [_window frameRectForContentRect:contentRect];
     [_window setFrame:frameRect display:NO animate:NO];
@@ -415,7 +415,7 @@ void MainWindowImpl::onMove()
 
     double x = origin.x;
     double y = screenHeight - origin.y - windowHeight;
-    //std::clog << "MOVE: " << x << "," << y << std::endl;
+    //std::clog << "ON MOVE: " << x << "," << origin.y << std::endl;
 
     Pt::Gfx::PointF pos(x, y);
     pos = window->toLogical(pos);
