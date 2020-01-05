@@ -223,8 +223,20 @@ void MainWindowImpl::close()
 
 void MainWindowImpl::paint(const Gfx::RectF& rect)
 {
-    //std::clog << "PAINT" << std::endl;
-    [_view setNeedsDisplay:YES];
+    NSRect frameRect = [_window frame];
+    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
+    CGFloat contentHeight = contentRect.size.height;
+
+    CGFloat x = rect.x();
+    CGFloat y = contentHeight - (rect.y() + rect.height());
+    CGFloat w = rect.width();
+    CGFloat h = rect.height();
+    
+    //std::clog << "PAINT: " << x << "," << y <<
+    //                   " " << w << "x" << h << std::endl;
+
+    NSRect invalidRect = NSMakeRect(x, y, w, h);
+    [_view setNeedsDisplayInRect:invalidRect ];
 }
 
 
@@ -370,18 +382,29 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 
     //std::clog << "ON PAINT: " << rect.size.width << "x" 
     //                          << rect.size.height << std::endl;
-    
-    //CGFloat bsf = [_window backingScaleFactor];
-    //std::clog << "backingScaleFactor: " << bsf << std::endl;
 
     Pt::Hmi::PixmapSurfaceImpl* pixmap = window->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
+    
     CGImageRef image = CGBitmapContextCreateImage(pixmapContext);
+    CGFloat imageHeight = CGImageGetHeight(image);
+
+    CGFloat subImageX = rect.origin.x * scaleFactor();
+    CGFloat subImageY = rect.origin.y * scaleFactor();
+    CGFloat subImageWidth = rect.size.width * scaleFactor();
+    CGFloat subImageHeight = rect.size.height * scaleFactor();
+    
+    CGRect subRect = CGRectMake(subImageX,
+                                imageHeight - subImageY - subImageHeight,
+                                subImageWidth, 
+                                subImageHeight);
+    
+    CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
-    CGContextRef currentContext = [graphicsContext CGContext];
+    CGContextRef windowContext = [graphicsContext CGContext];
 
-    CGContextDrawImage(currentContext, rect, image);
+    CGContextDrawImage(windowContext, rect, subImage);
     CGImageRelease(image);
 }
 
