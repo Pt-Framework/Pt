@@ -144,9 +144,9 @@ Rasterizer::Rasterizer(Image& image)
 : _image(&image)
 , _text( new DrawText() )
 , _font()
-, _compositionMode(CompositionMode::SourceCopy)
-, _penPixel(_image->view(), 0, 0)
 , _brushPixel(_image->view(), 0, 0)
+, _penPixel(_image->view(), 0, 0)
+, _compositionMode(CompositionMode::SourceCopy)
 {
     _text->setFont(_font);
 
@@ -383,7 +383,7 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
 
             // Add round cap or line join at left end of just-drawn segment;
             // if DashStyle, do so only if segment began with an `on' dash
-            if( _pen.style() == Pen::DoubleDash || (startPaintType != 0))
+            if( /*_pen.style() == Pen::DoubleDash || */ (startPaintType != 0) )
             {
                 // Draw cap at left end, unless this is first segment of a closed polyline
                 if( first || (_pen.style() == Pen::Dash && prevEndPaintType == 0 ) )
@@ -417,10 +417,10 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
         // `on' dash, or if we're doing DoubleDash
         if( npt == 1 && somethingDrawn )
         {
-            if( _pen.style() == Pen::DoubleDash || (endPaintType != 0) )
+            if( /*_pen.style() == Pen::DoubleDash ||*/ (endPaintType != 0) )
             {
                 // closed, so draw a join
-                if (selfJoin && (_pen.style() == Pen::DoubleDash  || (firstPaintType != 0)))
+                if (selfJoin && (/*_pen.style() == Pen::DoubleDash ||*/ (firstPaintType != 0)) )
                 {
                     lineJoin( &firstFace, &rightFace );
                 }
@@ -444,7 +444,7 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
     }
 
     // Handle `all points coincident' crock, nothing yet drawn
-    if( !somethingDrawn && (_pen.style() == Pen::DoubleDash || !(dashNum & 1)) )
+    if( ! somethingDrawn && (/*_pen.style() == Pen::DoubleDash ||*/ !(dashNum & 1)) )
     {
          int w1;
 
@@ -627,7 +627,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
         slopes[V_RIGHT].setK( vertices[V_RIGHT].x() * dx + vertices[V_RIGHT].y() * dy );
 
         // Draw dash (if OnOffDash, don't draw `off' dashes)
-        if( _pen.style() == Pen::DoubleDash  || !(paintType == 0))
+        if( /*_pen.style() == Pen::DoubleDash ||*/ ! (paintType == 0) )
         {
             if( _pen.style() == Pen::Dash && _pen.capStyle() == Pen::ProjectingCap )
             {
@@ -751,7 +751,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
     }
 
     // Final portion of segment is dashed specially, with an incomplete dash
-    if( _pen.style() == Pen::DoubleDash || !(paintType == 0))
+    if( /*_pen.style() == Pen::DoubleDash ||*/ ! (paintType == 0) )
     {
         vertices[V_TOP].setX( vertices[V_TOP].x() - dx );
         vertices[V_TOP].setY( vertices[V_TOP].y() - dy );
@@ -1261,7 +1261,7 @@ void Rasterizer::stroke(const Point* points,  size_t n)
       break;
 
     case Pen::Dash:
-    case Pen::DoubleDash:
+    //case Pen::DoubleDash:
       if( _pen.size() == 1 )
         drawThinDashPolyline( points, n, _pen.size() * 3, _pen.size() );
       else
@@ -1281,7 +1281,7 @@ void Rasterizer::drawThinDashPolyline(const Point* points,  int pointCount,
     int  dashNum    = 0;
     int  dashIndex  = 0;
     int  dashOffset = 0;
-    bool isDoubleDash = (_pen.style() == Pen::DoubleDash);
+    bool isDoubleDash = false; //(_pen.style() == Pen::DoubleDash);
 
     std::vector<int> dashes(2);
     dashes[0] = dashOn; // Length of `on' dashes.

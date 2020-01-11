@@ -34,10 +34,89 @@
 
 #include "clipper_aj/clipper.hpp"
 
+//
+// TODO: move this to Point class
+//
+
+namespace {
+
+//
+// Based on: Geometric Primitives
+//           http://algs4.cs.princeton.edu/91primitives
+//           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
+double ccw3(const Pt::Gfx::PointF& a, 
+            const Pt::Gfx::PointF& b, 
+            const Pt::Gfx::PointF& c)
+{
+   return (b.x() - a.x()) * (c.y() - a.y()) - (c.x() - a.x()) * (b.y() - a.y());
+}
+
+//
+// Based on: Geometric Primitives
+//           http://algs4.cs.princeton.edu/91primitives
+//           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
+bool lineIntersecting(const Pt::Gfx::PointF& ap, const Pt::Gfx::PointF& aq, 
+                      const Pt::Gfx::PointF& bp, const Pt::Gfx::PointF& bq)
+{
+   if( ccw3(ap, aq, bp) * ccw3(ap, aq, bq) >= 0.0 ) return false;
+   if( ccw3(bp, bq, ap) * ccw3(bp, bq, aq) >= 0.0 ) return false;
+
+   return true;
+}
+
+
+bool selfIntersecting(const Pt::Gfx::PointF* points, const size_t n)
+{
+    if(n <= 2) return false;
+
+    const size_t size1 = n - 1;
+    const size_t size2 = n - 2;
+
+    // Check the edges
+    for(size_t i = 0; i < size2; ++i) {
+        const Pt::Gfx::PointF& ap = points[i    ];
+        const Pt::Gfx::PointF& aq = points[i + 1];
+        for(size_t j = i + 1; j < size1; ++j) {
+            const Pt::Gfx::PointF& bp = points[j    ];
+            const Pt::Gfx::PointF& bq = points[j + 1];
+            if( lineIntersecting(ap, aq, bp, bq) ) return true;
+        }
+    }
+
+#if 0
+    // Check the last edge against the first edge
+    const Pt::Gfx::PointF& ap = points[size2];
+    const Pt::Gfx::PointF& aq = points[size1];
+    const Pt::Gfx::PointF& bp = points[size1];
+    const Pt::Gfx::PointF& bq = points[0    ];
+    if( lineIntersecting(ap, aq, bp, bq) ) return true;
+#endif
+
+    // No intersection
+    return false;
+}
+
+
+bool selfIntersecting(const std::vector<Pt::Gfx::PointF>& points)
+{
+    return selfIntersecting(&points[0], points.size());
+}
+
+
+// bool selfIntersecting(const std::vector<Pt::Gfx::Polygon>& polygons)
+// {
+//     for(size_t i = 0; i < polygons.size(); ++i) {
+//         if( selfIntersecting(polygons[i].points()) ) return true;
+//     }
+
+//     return false;
+// }
+
+} // namespace
+
 namespace Pt {
 
 namespace Gfx {
-
 
 struct PatternState
 {
@@ -545,77 +624,6 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNon
             polygons[i].points()[j].setY( cpaths[i][j].Y * Polygonizer::VecResScaleDn );
         }
     }
-}
-
-
-//
-// Based on: Geometric Primitives
-//           http://algs4.cs.princeton.edu/91primitives
-//           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
-static inline double ccw3(const PointF& a, const PointF& b, const PointF& c)
-{
-   return (b.x() - a.x()) * (c.y() - a.y()) - (c.x() - a.x()) * (b.y() - a.y());
-}
-
-
-//
-// Based on: Geometric Primitives
-//           http://algs4.cs.princeton.edu/91primitives
-//           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
-static inline bool lineIntersecting(const PointF& ap, const PointF& aq, const PointF& bp, const PointF& bq)
-{
-   if( ccw3(ap, aq, bp) * ccw3(ap, aq, bq) >= 0.0 ) return false;
-   if( ccw3(bp, bq, ap) * ccw3(bp, bq, aq) >= 0.0 ) return false;
-
-   return true;
-}
-
-
-static inline bool selfIntersecting(const PointF* points, const size_t n)
-{
-    if(n <= 2) return false;
-
-    const size_t size1 = n - 1;
-    const size_t size2 = n - 2;
-
-    // Check the edges
-    for(size_t i = 0; i < size2; ++i) {
-        const PointF& ap = points[i    ];
-        const PointF& aq = points[i + 1];
-        for(size_t j = i + 1; j < size1; ++j) {
-            const PointF& bp = points[j    ];
-            const PointF& bq = points[j + 1];
-            if( lineIntersecting(ap, aq, bp, bq) ) return true;
-        }
-    }
-
-#if 0
-    // Check the last edge against the first edge
-    const PointF& ap = points[size2];
-    const PointF& aq = points[size1];
-    const PointF& bp = points[size1];
-    const PointF& bq = points[0    ];
-    if( lineIntersecting(ap, aq, bp, bq) ) return true;
-#endif
-
-    // No intersection
-    return false;
-}
-
-
-static inline bool selfIntersecting(const std::vector<PointF>& points)
-{
-    return selfIntersecting(&points[0], points.size());
-}
-
-
-static inline bool selfIntersecting(const std::vector<Polygon>& polygons)
-{
-    for(size_t i = 0; i < polygons.size(); ++i) {
-        if( selfIntersecting(polygons[i].points()) ) return true;
-    }
-
-    return false;
 }
 
 
@@ -1713,7 +1721,7 @@ void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y,
 }
 
 
-// Based on: Bitmap/Bézier curves/Quadratic
+// Based on: Bitmap/Bï¿½zier curves/Quadratic
 //           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
 //           Last modified on February 17, 2017
 void Polygonizer::renderQuadraticBezierPoints(std::vector<PointF>& dst,

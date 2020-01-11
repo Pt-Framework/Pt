@@ -54,13 +54,12 @@ class PT_GFX_API Pen
     public:
         /** @brief Pen line style.
         */
-        enum Style { Solid       = 0,
-                     Dot         = 1,
-                     Dash        = 2,
-
-                     // DEPRECATED:
-                     DoubleDash  = 3  // The original Rasterizer class seems to still use this?
-                   };
+        enum Style 
+        { 
+            Solid       = 0,
+            Dot         = 1,
+            Dash        = 2
+        };
 
         /** @brief Pen cap style.
         */

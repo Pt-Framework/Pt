@@ -39,10 +39,8 @@ namespace Pt {
 
 namespace Gfx {
 
-
 class ArcMode;
-class PatternState;
-
+struct PatternState;
 
 class Polygonizer
 {
