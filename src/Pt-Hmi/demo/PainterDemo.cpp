@@ -98,14 +98,14 @@ class LineStylesWidget : public BasicStylesWidget
                 painter.drawText( PointF(20, y + 10), "ButtCap");
                 y += 20;
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::ButtCap);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::ButtCap);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::ButtCap);
+                Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap);
+                Pen pen2Solid(red, 4, Pen::Solid, Pen::FlatCap);
+                Pen pen3Solid(red, 9, Pen::Solid, Pen::FlatCap);
 
                 if(_userStyle) {
-                    pen1Solid = Pen(red, 1, userStyleBeg, userStyleEnd, Pen::ButtCap);
-                    pen2Solid = Pen(red, 4, userStyleBeg, userStyleEnd, Pen::ButtCap);
-                    pen3Solid = Pen(red, 9, userStyleBeg, userStyleEnd, Pen::ButtCap);
+                    pen1Solid = Pen(red, 1, userStyleBeg, userStyleEnd, Pen::FlatCap);
+                    pen2Solid = Pen(red, 4, userStyleBeg, userStyleEnd, Pen::FlatCap);
+                    pen3Solid = Pen(red, 9, userStyleBeg, userStyleEnd, Pen::FlatCap);
                 }
 
                 painter.setPen(pen1Solid);
@@ -118,9 +118,9 @@ class LineStylesWidget : public BasicStylesWidget
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
 
-                Pen pen1Dot(red, 1, Pen::Dot, Pen::ButtCap);
-                Pen pen2Dot(red, 4, Pen::Dot, Pen::ButtCap);
-                Pen pen3Dot(red, 9, Pen::Dot, Pen::ButtCap);
+                Pen pen1Dot(red, 1, Pen::Dot, Pen::FlatCap);
+                Pen pen2Dot(red, 4, Pen::Dot, Pen::FlatCap);
+                Pen pen3Dot(red, 9, Pen::Dot, Pen::FlatCap);
                 painter.setPen(pen1Dot);
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
@@ -131,9 +131,9 @@ class LineStylesWidget : public BasicStylesWidget
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
 
-                Pen pen1Dash(red, 1, Pen::Dash, Pen::ButtCap);
-                Pen pen2Dash(red, 4, Pen::Dash, Pen::ButtCap);
-                Pen pen3Dash(red, 9, Pen::Dash, Pen::ButtCap);
+                Pen pen1Dash(red, 1, Pen::Dash, Pen::FlatCap);
+                Pen pen2Dash(red, 4, Pen::Dash, Pen::FlatCap);
+                Pen pen3Dash(red, 9, Pen::Dash, Pen::FlatCap);
                 painter.setPen(pen1Dash);
                 painter.drawLine( PointF(10, y),
                                   PointF(180, y) ); y += 15;
@@ -306,10 +306,10 @@ class CapStylesWidget : public BasicStylesWidget
                 painter.drawText( PointF(20, y + 10), "ButtCap");
                 y += 20;
 
-                Pen pen1Solid(red,  1, Pen::Solid, Pen::ButtCap);
-                Pen pen2Solid(red,  4, Pen::Solid, Pen::ButtCap);
-                Pen pen3Solid(red,  9, Pen::Solid, Pen::ButtCap);
-                Pen pen4Solid(red, 14, Pen::Solid, Pen::ButtCap);
+                Pen pen1Solid(red,  1, Pen::Solid, Pen::FlatCap);
+                Pen pen2Solid(red,  4, Pen::Solid, Pen::FlatCap);
+                Pen pen3Solid(red,  9, Pen::Solid, Pen::FlatCap);
+                Pen pen4Solid(red, 14, Pen::Solid, Pen::FlatCap);
 
                 painter.setPen(pen1Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
                 painter.setPen(pen2Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
@@ -390,9 +390,9 @@ class JoinStylesWidget : public BasicStylesWidget
                 painter.drawText( PointF(20, y + 10), "ButtCap - BevelJoin");
                 y += 20;
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::ButtCap, Pen::BevelJoin);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::ButtCap, Pen::BevelJoin);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::ButtCap, Pen::BevelJoin);
+                Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap, Pen::BevelJoin);
+                Pen pen2Solid(red, 4, Pen::Solid, Pen::FlatCap, Pen::BevelJoin);
+                Pen pen3Solid(red, 9, Pen::Solid, Pen::FlatCap, Pen::BevelJoin);
 
                 int x = 0;
                 if(1) {
@@ -433,9 +433,9 @@ class JoinStylesWidget : public BasicStylesWidget
                 painter.drawText( PointF(20, y + 10), "ButtCap - MiterJoin");
                 y += 20;
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::ButtCap, Pen::MiterJoin);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::ButtCap, Pen::MiterJoin);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::ButtCap, Pen::MiterJoin);
+                Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap, Pen::MiterJoin);
+                Pen pen2Solid(red, 4, Pen::Solid, Pen::FlatCap, Pen::MiterJoin);
+                Pen pen3Solid(red, 9, Pen::Solid, Pen::FlatCap, Pen::MiterJoin);
 
                 int x = 0;
                 if(1) {
@@ -476,9 +476,9 @@ class JoinStylesWidget : public BasicStylesWidget
                 painter.drawText( PointF(20, y + 10), "ButtCap - RoundJoin");
                 y += 20;
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::ButtCap, Pen::RoundJoin);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::ButtCap, Pen::RoundJoin);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::ButtCap, Pen::RoundJoin);
+                Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap, Pen::RoundJoin);
+                Pen pen2Solid(red, 4, Pen::Solid, Pen::FlatCap, Pen::RoundJoin);
+                Pen pen3Solid(red, 9, Pen::Solid, Pen::FlatCap, Pen::RoundJoin);
 
                 int x = 0;
                 if(1) {

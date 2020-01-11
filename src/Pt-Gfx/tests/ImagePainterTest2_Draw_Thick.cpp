@@ -50,7 +50,7 @@ static void testDrawThickLine_impl(
 
     transform.translate(-530, -50);
     path.transform(transform);
-    ip2->setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap) );
+    ip2->setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::FlatCap) );
     ip2->drawPath(path);
 #endif
 
@@ -418,7 +418,7 @@ static void testDrawThickLine_impl(
 
 static void testDrawSolidThickLine(const char* title, Image& image, Painter& painter)
 {
-    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap,          Pen::BevelJoin);
+    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::FlatCap,          Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::SquareCap,        Pen::BevelJoin);
     Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::RoundCap,         Pen::BevelJoin);
 
@@ -443,7 +443,7 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
 static void testDrawPatternedThickLine(const char* title, Image& image, Painter& painter)
 {
-    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::ButtCap,          Pen::BevelJoin);
+    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::FlatCap,          Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::SquareCap,        Pen::BevelJoin);
     Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::RoundCap,         Pen::BevelJoin);
 
@@ -625,7 +625,7 @@ static void testDrawThickEllipseArc_impl(
 
 static void testDrawSolidThickEllipseArc(const char* title, Image& image, Painter& painter)
 {
-    Pen drawB( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap         ) );
+    Pen drawB( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::FlatCap         ) );
     Pen drawS( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::SquareCap       ) );
     Pen drawR( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::RoundCap        ) );
   //Pen drawO( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::TriangularOutCap) );
@@ -643,7 +643,7 @@ static void testDrawSolidThickEllipseArc(const char* title, Image& image, Painte
 
 static void testDrawPatternedThickEllipseArc(const char* title, Image& image, Painter& painter)
 {
-    Pen drawB( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::ButtCap         ) );
+    Pen drawB( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::FlatCap         ) );
     Pen drawS( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::SquareCap       ) );
     Pen drawR( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::RoundCap        ) );
   //Pen drawO( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::TriangularOutCap) );

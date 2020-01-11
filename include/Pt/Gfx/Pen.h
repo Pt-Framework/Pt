@@ -63,15 +63,12 @@ class PT_GFX_API Pen
 
         /** @brief Pen cap style.
         */
-        enum CapStyle { FlatCap          = 0, // Do we use FlatCap or ButtCap?
-                        SquareCap        = 1,
-                        RoundCap         = 2,
-
-                        // DEPRECATED:
-                        ButtCap          = FlatCap,
-                        ProjectingCap    = SquareCap, // The original Rasterizer class seems to still use this?
-                        TriangularCap    = 3          // The original Rasterizer class seems to still use this?
-                      };
+        enum CapStyle 
+        { 
+            FlatCap          = 0,
+            SquareCap        = 1,
+            RoundCap         = 2
+        };
 
         /** @brief Pen join style.
         */

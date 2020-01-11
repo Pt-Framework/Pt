@@ -336,7 +336,7 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
 
     // Dash segments (except for the last) will not project right; and
     // (except for the first) will not project left
-    projectLeft  = (_pen.capStyle() == Pen::ProjectingCap) && !selfJoin;
+    projectLeft  = (_pen.capStyle() == Pen::SquareCap) && ! selfJoin;
     projectRight = false;
 
     // perform initial offsetting into the dash sequence
@@ -368,7 +368,7 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
             int lastPaintedDashNum;
 
             // Final point; and need a projecting cap here.
-            if( npt == 1 && _pen.capStyle() ==Pen::ProjectingCap  && (!selfJoin || (firstPaintType == 0)))
+            if( npt == 1 && _pen.capStyle() == Pen::SquareCap  && ( ! selfJoin || (firstPaintType == 0) ))
                 projectRight = true;
 
             // Draw dashed segment, updating dashNum, dashIndex and dashOffset, returning faces
@@ -393,7 +393,7 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
                         firstFace = leftFace;
                         firstPaintType = startPaintType;
                     }
-                    else if( _pen.capStyle() == Pen::RoundCap || _pen.capStyle() == Pen::TriangularCap )
+                    else if( _pen.capStyle() == Pen::RoundCap /* || _pen.capStyle() == Pen::TriangularCap */ )
                     {
                         lineArc( &leftFace, (LineFace *)NULL, (double)0.0, (double)0.0, true);
                     }
@@ -426,7 +426,7 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
                 }
                 else
                 {
-                    if( _pen.capStyle() == Pen::RoundCap || _pen.capStyle() == Pen::TriangularCap )
+                    if( _pen.capStyle() == Pen::RoundCap /*|| _pen.capStyle() == Pen::TriangularCap*/ )
                         lineArc( (LineFace *)NULL, &rightFace, (double)0.0, (double)0.0, true );
                 }
             }
@@ -434,9 +434,9 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
             {
                 if( selfJoin && (firstPaintType != 0 ) )  // closed; if projecting or round caps are being used, draw one on the first face
                 {
-                    if( _pen.capStyle() == Pen::ProjectingCap)
+                    if( _pen.capStyle() == Pen::SquareCap)
                         lineProjectingCap( &firstFace, true, true);
-                    else if (_pen.capStyle() == Pen::RoundCap || _pen.capStyle() == Pen::TriangularCap )
+                    else if (_pen.capStyle() == Pen::RoundCap /*|| _pen.capStyle() == Pen::TriangularCap*/ )
                         lineArc( &firstFace, (LineFace *)NULL, (double)0.0, (double)0.0, true);
                 }
             }
@@ -450,20 +450,19 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
 
         switch( _pen.capStyle() )
         {
+            //case Pen::TriangularCap:
             case Pen::RoundCap:
-            case Pen::TriangularCap:
                 lineArc( (LineFace *)NULL, (LineFace *)NULL, (double)x2, (double)y2, false );
-            break;
+                break;
 
-            case Pen::ProjectingCap: // Draw a square box with edge size equal to line width
+            case Pen::SquareCap: // Draw a square box with edge size equal to line width
                 w1 = _pen.size();
                 fillSpans( (int)(x2 - (w1 >> 1)), (int)(y2 - (w1 >> 1)), w1, w1);
-            break;
+                break;
 
-            case Pen::ButtCap:
+            case Pen::FlatCap:
             default:
-
-            break;
+                break;
         }
     }
 }
@@ -592,7 +591,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
     lcentery = y1;
 
     // Keep track of starting face (need only in OnOff case)
-    if( _pen.capStyle() == Pen::RoundCap  || _pen.capStyle() == Pen::TriangularCap )
+    if( _pen.capStyle() == Pen::RoundCap /*|| _pen.capStyle() == Pen::TriangularCap*/ )
     {
         lcapFace.setDX( dx );
         lcapFace.setDY( dy );
@@ -629,7 +628,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
         // Draw dash (if OnOffDash, don't draw `off' dashes)
         if( /*_pen.style() == Pen::DoubleDash ||*/ ! (paintType == 0) )
         {
-            if( _pen.style() == Pen::Dash && _pen.capStyle() == Pen::ProjectingCap )
+            if( _pen.style() == Pen::Dash && _pen.capStyle() == Pen::SquareCap )
             {
                 saveRight = vertices[V_RIGHT];
                 saveBottom = vertices[V_BOTTOM];
@@ -667,18 +666,18 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
             {
                 switch( _pen.capStyle() )
                 {
-                    case Pen::ButtCap:
+                    case Pen::FlatCap:
                     default:
                     break;
                     // Use saved vertices
-                    case Pen::ProjectingCap:
+                    case Pen::SquareCap:
                         vertices[V_BOTTOM] = saveBottom;
                         vertices[V_RIGHT]  = saveRight;
                         slopes[V_RIGHT].setK( saveK );
                     break;
 
+                    //case Pen::TriangularCap:
                     case Pen::RoundCap:
-                    case Pen::TriangularCap:
                         if( !first )
                         {
                             if( dx < 0 )
@@ -782,7 +781,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
 
         // If DashStyle line style and cap mode is projecting, offset the
         // face, so as to draw a projecting cap
-        if( !first && ( _pen.style() == Pen::Dash)  && (_pen.capStyle() == Pen::ProjectingCap ) )
+        if( !first && ( _pen.style() == Pen::Dash)  && (_pen.capStyle() == Pen::SquareCap ) )
         {
             vertices[V_TOP].setX( vertices[V_TOP].x() - rdx );
             vertices[V_TOP].setY( vertices[V_TOP].y() - rdy );
@@ -806,7 +805,8 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
         fillLine( y, h, left, right, nleft, nright);
 
         // If DashStyle line style and cap mode is round, draw a round cap
-        if( ( !first && ( _pen.style() == Pen::Dash) && ( _pen.capStyle() == Pen::RoundCap) ) || ( _pen.capStyle() == Pen::TriangularCap) )
+        if( ( ! first && (_pen.style() == Pen::Dash) && (_pen.capStyle() == Pen::RoundCap) ) 
+            /*|| (_pen.capStyle() == Pen::TriangularCap)*/ )
         {
             lcapFace.setX( x2 );
             lcapFace.setY( y2 );
@@ -1109,7 +1109,7 @@ void Rasterizer::drawWideSolidPolyline( const  Point* pPts, int npt )
 
     // Line segments (except for the last) will not project right; they'll
     // project left if the cap mode is "projecting".
-    projectLeft = (_pen.capStyle() == Pen::ProjectingCap && !selfJoin);
+    projectLeft = (_pen.capStyle() == Pen::SquareCap && ! selfJoin);
     projectRight = false;
 
     // Iterate through points, drawing all line segments of nonzero length.
@@ -1127,7 +1127,7 @@ void Rasterizer::drawWideSolidPolyline( const  Point* pPts, int npt )
         {
             somethingDrawn = true;
 
-            if (npt == 1 && _pen.capStyle() == Pen::ProjectingCap && !selfJoin) // last point; and need a projecting cap here
+            if (npt == 1 && _pen.capStyle() == Pen::SquareCap && ! selfJoin) // last point; and need a projecting cap here
                 projectRight = true;
 
             // Draw segment (pixel=1), returning faces.
@@ -1139,7 +1139,7 @@ void Rasterizer::drawWideSolidPolyline( const  Point* pPts, int npt )
                 {
                     firstFace = leftFace;
                 }
-                else if (_pen.capStyle() == Pen::RoundCap || _pen.capStyle() == Pen::TriangularCap )
+                else if (_pen.capStyle() == Pen::RoundCap /*|| _pen.capStyle() == Pen::TriangularCap*/ )
                 {
                     // Invoke miLineArc, isInt = true, to draw a round cap on left face in paint type #1.
                     lineArc(  &leftFace, 0,(double)0.0, (double)0.0, true );
@@ -1162,7 +1162,7 @@ void Rasterizer::drawWideSolidPolyline( const  Point* pPts, int npt )
             if (selfJoin) // Add line join to close the polyline, pixel=1.
                 lineJoin(  &firstFace, &rightFace);
 
-            else if (_pen.capStyle() == Pen::RoundCap || _pen.capStyle() == Pen::TriangularCap )
+            else if ( _pen.capStyle() == Pen::RoundCap /*|| _pen.capStyle() == Pen::TriangularCap*/ )
                 // Invoke miLineArc, isInt = true, to draw round cap on right face, pixel=1.
                 lineArc( 0, &rightFace, (double)0.0, (double)0.0, true );
         }
@@ -1171,11 +1171,11 @@ void Rasterizer::drawWideSolidPolyline( const  Point* pPts, int npt )
     // handle crock where all points are coincident
     if( !somethingDrawn )
     {
-        projectLeft = (_pen.capStyle() == Pen::ProjectingCap );
+        projectLeft = (_pen.capStyle() == Pen::SquareCap );
 
         drawSegment(  Point(x2, y2), Point(x2, y2), projectLeft, projectRight, &leftFace, &rightFace );
 
-        if( _pen.capStyle() == Pen::RoundCap ||_pen.capStyle() == Pen::TriangularCap)
+        if( _pen.capStyle() == Pen::RoundCap /*|| _pen.capStyle() == Pen::TriangularCap*/ )
         {
             // invoke miLineArc, isInt = true, to draw round cap in paint type #1
             lineArc( &leftFace, (LineFace *)NULL, (double)0.0, (double)0.0, true );
@@ -2421,7 +2421,7 @@ void Rasterizer::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, 
     edgeleft2 = false;
 
     if( (_pen.style() != Pen::Solid || _pen.size() > 2) && ((_pen.capStyle() == Pen::RoundCap && _pen.joinStyle() != Pen::RoundJoin)  ||
-        ( _pen.joinStyle() == Pen::RoundJoin && _pen.capStyle() == Pen::ButtCap)))
+        ( _pen.joinStyle() == Pen::RoundJoin && _pen.capStyle() == Pen::FlatCap)))
     { // Construct clipping edges from the passed line faces (otherwise,
       // ignore them; will just draw a disk).
 

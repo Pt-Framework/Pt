@@ -269,16 +269,16 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     painter.fillRect( RectF(PointF(450, 440), SizeF(200, 100)) );
 
     // Thick
-    painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap, Pen::BevelJoin) );
+    painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::FlatCap, Pen::BevelJoin) );
     painter.drawRect( RectF(PointF(700,  50), SizeF(200, 100)) );
 
-    painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
+    painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::FlatCap, Pen::MiterJoin) );
     painter.drawRect( RectF(PointF(700, 220), SizeF(200, 100)) );
 
-    painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap, Pen::RoundJoin) );
+    painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::FlatCap, Pen::RoundJoin) );
     painter.drawRect( RectF(PointF(700, 390), SizeF(200, 100)) );
 
-    painter.setPen  ( Pen(Color::fromRgb8(255, 0, 0, 175), 6, Pen::Solid, Pen::ButtCap, Pen::NoJoin) );
+    painter.setPen  ( Pen(Color::fromRgb8(255, 0, 0, 175), 6, Pen::Solid, Pen::FlatCap, Pen::NoJoin) );
     painter.drawRect( RectF(PointF(750, 100), SizeF(200, 100)) );
     painter.drawRect( RectF(PointF(750, 270), SizeF(200, 100)) );
     painter.drawRect( RectF(PointF(750, 440), SizeF(200, 100)) );

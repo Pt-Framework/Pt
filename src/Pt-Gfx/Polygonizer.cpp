@@ -952,7 +952,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             // Generate one solid polygon segment as needed
             if(draw) {
                 //std::cerr << "B\n";
-                if(pen.capStyle() == Pen::ButtCap) {
+                if(pen.capStyle() == Pen::FlatCap) {
                     state.gather.back().set(
                         state.gather.back().x() + state.cvx,
                         state.gather.back().y() + state.cvy
@@ -976,7 +976,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             // Generate a simple line segment as needed
             if(draw) {
                 //std::cerr << "C\n";
-                if(pen.capStyle() == Pen::ButtCap) {
+                if(pen.capStyle() == Pen::FlatCap) {
                     sagGenerateSimpleLineSegment(
                         state,
                         state.px,
@@ -1140,7 +1140,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 
     // #@#
     // Adjust the coordinates (thus the line's length) based on the line and cap styles
-    if( !pen.isSolid() && pen.capStyle() != Pen::ButtCap ) {
+    if( !pen.isSolid() && pen.capStyle() != Pen::FlatCap ) {
         x1 += (dx * 0.75f);
         y1 += (dy * 0.75f);
         x2 -= (dx * 0.75f);
@@ -1256,7 +1256,7 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
 
     // #@#
     // Adjust the coordinates (thus the line's length) based on the line and cap styles
-    if( !forSmoothCurve && !pen.isSolid() && pen.capStyle() != Pen::ButtCap ) {
+    if( !forSmoothCurve && !pen.isSolid() && pen.capStyle() != Pen::FlatCap ) {
         x1 += (dx * 0.75f);
         y1 += (dy * 0.75f);
         x2 -= (dx * 0.75f);

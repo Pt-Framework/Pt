@@ -1,7 +1,7 @@
 template <typename PainterT>
 static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
-    Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::ButtCap,   Pen::BevelJoin);
+    Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::FlatCap,   Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::SquareCap, Pen::BevelJoin);
     Pen penRCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::RoundCap,  Pen::BevelJoin);
     Pen penRCapMJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::RoundCap,  Pen::MiterJoin);
@@ -175,9 +175,9 @@ static size_t benchDrawSolidThickLine(int loopCount, CompositionMode cm, bool an
 {
     Pen penRCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::RoundCap,  Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::SquareCap, Pen::BevelJoin);
-    Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::ButtCap,   Pen::BevelJoin);
-    Pen penBCapMJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::ButtCap,   Pen::MiterJoin);
-    Pen penBCapRJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::ButtCap,   Pen::RoundJoin);
+    Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::FlatCap,   Pen::BevelJoin);
+    Pen penBCapMJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::FlatCap,   Pen::MiterJoin);
+    Pen penBCapRJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::FlatCap,   Pen::RoundJoin);
 
     return benchDrawThickLine_impl<PainterT>(
         loopCount, cm, antiAliasingMode,
@@ -194,9 +194,9 @@ static size_t benchDrawPatternedThickLine(int loopCount, CompositionMode cm, boo
 {
     Pen penRCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::RoundCap,  Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::SquareCap, Pen::BevelJoin);
-    Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::ButtCap,   Pen::BevelJoin);
-    Pen penBCapMJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::ButtCap,   Pen::MiterJoin);
-    Pen penBCapRJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::ButtCap,   Pen::RoundJoin);
+    Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::FlatCap,   Pen::BevelJoin);
+    Pen penBCapMJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::FlatCap,   Pen::MiterJoin);
+    Pen penBCapRJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::FlatCap,   Pen::RoundJoin);
 
     return benchDrawThickLine_impl<PainterT>(
         loopCount, cm, antiAliasingMode,

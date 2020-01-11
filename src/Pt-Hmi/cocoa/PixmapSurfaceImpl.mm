@@ -189,7 +189,7 @@ void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
     switch( pen.capStyle() )
     {
         default:
-        case Pt::Gfx::Pen::ButtCap:
+        case Pt::Gfx::Pen::FlatCap:
             CGContextSetLineCap(_context, kCGLineCapButt);
             break;
         
