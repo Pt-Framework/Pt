@@ -427,30 +427,35 @@ Pt::Gfx::PointF PixmapSurfaceImpl::transform(const Pt::Gfx::PointF& p)
 
 void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    // double scaleX = size.width() / size.height();
-    // double centerX = (topLeft.x() + size.width() / 2.0) / scaleX;
-    // double centerY = topLeft.y() + size.height() / 2;
-    // double radius = size.height() / 2.0;
-
-    // CGMutablePathRef path = CGPathCreateMutable();
-    // CGAffineTransform transform = CGAffineTransformMakeScale(scaleX, 1);
+    CGRect rect = CGRectMake(topLeft.x(), 
+                             _size.height() - topLeft.y() - size.height(), 
+                             size.width(), 
+                             size.height());
     
-    // CGPathAddArc(path, &transform,
-    //              centerX, centerY, radius, 
-    //              0, 2 * 3.1415927, false);
-   
-    // CGContextBeginPath(_context);
-    // CGContextAddPath(_context, path);
-    // CGContextStrokePath(_context);
-    // CGPathRelease(path);
+    beginClip();
+    CGContextAddEllipseInRect(_context, rect);
+    CGContextStrokePath(_context);
+    endClip();
 }
 
 
 void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
+    CGRect rect = CGRectMake(topLeft.x(), 
+                             _size.height() - topLeft.y() - size.height(), 
+                             size.width(), 
+                             size.height());
+    
+    beginClip();
+    CGContextAddEllipseInRect(_context, rect);
+    CGContextFillPath(_context);
+    endClip();
+
+    // double y = _size.height() - topLeft.y() - size.height();
+
     // double scaleX = size.width() / size.height();
     // double centerX = (topLeft.x() + size.width() / 2.0) / scaleX;
-    // double centerY = topLeft.y() + size.height() / 2;
+    // double centerY = y + size.height() / 2;
     // double radius = size.height() / 2.0;
 
     // CGMutablePathRef path = CGPathCreateMutable();
