@@ -95,7 +95,7 @@ class LineStylesWidget : public BasicStylesWidget
 
             if(1) {
                 painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "ButtCap");
+                painter.drawText( PointF(20, y + 10), "FlatCap");
                 y += 20;
 
                 Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap);
@@ -303,7 +303,7 @@ class CapStylesWidget : public BasicStylesWidget
 
             if(1) {
                 painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "ButtCap");
+                painter.drawText( PointF(20, y + 10), "FlatCap");
                 y += 20;
 
                 Pen pen1Solid(red,  1, Pen::Solid, Pen::FlatCap);
@@ -387,7 +387,7 @@ class JoinStylesWidget : public BasicStylesWidget
 
             if(1) {
                 painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "ButtCap - BevelJoin");
+                painter.drawText( PointF(20, y + 10), "FlatCap - BevelJoin");
                 y += 20;
 
                 Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap, Pen::BevelJoin);
@@ -430,7 +430,7 @@ class JoinStylesWidget : public BasicStylesWidget
 
             if(1) {
                 painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "ButtCap - MiterJoin");
+                painter.drawText( PointF(20, y + 10), "FlatCap - MiterJoin");
                 y += 20;
 
                 Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap, Pen::MiterJoin);
@@ -473,7 +473,7 @@ class JoinStylesWidget : public BasicStylesWidget
 
             if(1) {
                 painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "ButtCap - RoundJoin");
+                painter.drawText( PointF(20, y + 10), "FlatCap - RoundJoin");
                 y += 20;
 
                 Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap, Pen::RoundJoin);

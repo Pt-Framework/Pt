@@ -56,30 +56,29 @@ class PT_GFX_API Pen
         */
         enum Style 
         { 
-            Solid       = 0,
-            Dot         = 1,
-            Dash        = 2
+            Solid = 0,
+            Dot   = 1,
+            Dash  = 2
         };
 
         /** @brief Pen cap style.
         */
         enum CapStyle 
         { 
-            FlatCap          = 0,
-            SquareCap        = 1,
-            RoundCap         = 2
+            FlatCap   = 0,
+            SquareCap = 1,
+            RoundCap  = 2
         };
 
         /** @brief Pen join style.
         */
-        enum JoinStyle { NoJoin         = 0, // What is this actually?
-                         BevelJoin      = 1,
-                         MiterJoin      = 2,
-                         RoundJoin      = 3,
-
-                         // DEPRECATED:
-                         TriangularJoin = 4  // The original Rasterizer class seems to still use this?
-                       };
+        enum JoinStyle 
+        { 
+            NoJoin    = 0,
+            BevelJoin = 1,
+            MiterJoin = 2,
+            RoundJoin = 3
+        };
 
         /** @brief Constructs a null pen.
 
@@ -98,11 +97,6 @@ class PT_GFX_API Pen
         */
         Pen(const Color& color, std::size_t width, Style style = Solid,
             CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
-
-        ///** @brief Constructs a Pen with the specified size, color and custom styles.
-        //*/
-        //Pen(const Color& color, std::size_t width, Pt::uint64_t stylePattern,
-        //    CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
         /** @brief Constructs a Pen with the specified size, color and custom styles.
         */
@@ -141,7 +135,6 @@ class PT_GFX_API Pen
         /** @brief Sets the pen style.
         */
         void setStyle(Style style = Solid);
-
 
         /** @brief Returns the pen style.
         */

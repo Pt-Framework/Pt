@@ -2915,9 +2915,9 @@ void Rasterizer::lineJoin(  LineFace *pLeft, LineFace *pRight )
 
     switch( joinStyle )
     {
-        case Pen::MiterJoin :
-        default: // join by adding a quadrilateral
+        default: 
 
+        case Pen::MiterJoin: // join by adding a quadrilateral
             edgecount = 4;
             slopes[2].setDX( pLeft->dx() );
             slopes[2].setDY( pLeft->dy() );
@@ -2943,7 +2943,7 @@ void Rasterizer::lineJoin(  LineFace *pLeft, LineFace *pRight )
                 slopes[3].setDY( -slopes[3].dy() );
                 slopes[3].setK( -slopes[3].k() );
             }
-        break;
+            break;
 
         case Pen::BevelJoin: //join by adding a triangle
         {
@@ -2977,9 +2977,10 @@ void Rasterizer::lineJoin(  LineFace *pLeft, LineFace *pRight )
             slopes[2].setDX(  (int)((dx * 65536) / scale) );
             slopes[2].setDY( (int)((dy * 65536) / scale) );
             slopes[2].setK( midpoint.x() * slopes[2].dy() - midpoint.y() * slopes[2].dx() );
+            break;
         }
-        break;
 
+        /*
         case Pen::TriangularJoin: // join by adding a stubby quadrilateral
         {
             Point midpoint, newpoint;
@@ -3031,8 +3032,9 @@ void Rasterizer::lineJoin(  LineFace *pLeft, LineFace *pRight )
             slopes[3].setDX( (int)((dx3 * 65536) / scale) );
             slopes[3].setDY( (int)((dy3 * 65536) / scale) );
             slopes[3].setK(  newpoint.x() * slopes[3].dy() - newpoint.y() * slopes[3].dx() );
+            break;
         }
-        break;
+        */
     }
 
     // Compute lists of left and right edges for the small polygon, using the
