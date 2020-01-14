@@ -382,7 +382,7 @@ void Label::layoutImage()
 
 void Label::onLayout(const Gfx::RectF& rect)
 {
-    if(_icon.empty())
+    if( _icon.empty() )
         layoutText();
     else
         layoutImage();
@@ -413,9 +413,9 @@ void Label::onInvalidate()
 
     _renderer->prepare(*this, options, _font, _pen, _textPen);
 
-    if (_icon.empty())
+    if( _icon.empty() )
     {
-        _picture.set(Pt::Gfx::Image());
+        _picture.set( Pt::Gfx::Image() );
         layoutText();
     }
     else
@@ -474,7 +474,6 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         painter.drawPicture(_iconPos, _picture);
         painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     }
-
 }
 
 } // namespace
