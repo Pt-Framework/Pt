@@ -54,6 +54,7 @@ Window::Window(Window* parent, Window::Type type)
 , _layouts(0)
 , _parent(0)
 , _parentWindow(0)
+, _screen(0)
 , _mainWidget(0)
 , _focusWidget(0)
 , _init(false)
@@ -111,23 +112,59 @@ PixmapSurface& Window::surface()
 }
 
 
+void Window::onSetScreen(Screen* screen)
+{
+    if(screen == _screen)
+        return;
+
+    _screen = screen;
+
+    _surface.setScaleFactor( scaleFactor() );
+
+    _position = _surface.align(_position);
+    _size =_surface.align(_size);
+
+    //std::vector<Window*>::iterator w;
+    //for(w = _windows.begin(); w != _windows.end(); ++w)
+    //{
+    //    (*w)->onSetScreen(screen);
+    //}
+}
+
+
 void Window::init(Window* parent)
 {
     if(_init)
         deinit();
 
-    _parent = parent;
-
-    if( ! _parent )
+    if( ! parent )
     {
         _impl = new MainWindowImpl(_type);
-        _parent = &Application::instance().screen();
+
+        Screen& screen = Application::instance().screen();
+        _parent = &screen;
+    }
+    else
+    {
+        Screen* screen = parent->_screen;
+        _parent = parent;
     }
 
     _parent->onInit(*this);
     
     _init = true;
     _isClosed = false;
+
+    if(parent)
+    {
+        Screen* screen = parent->_screen;
+        onSetScreen(screen);
+    }
+    else
+    {
+        Screen& screen = Application::instance().screen();        
+        onSetScreen(&screen);
+    }
 
     setParent(parent);
     
@@ -176,6 +213,8 @@ void Window::deinit()
     releasePointer();
 
     _parent->onDeinit(*this);
+
+    onSetScreen(0);
 
     if(_impl)
     {

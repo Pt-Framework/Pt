@@ -57,6 +57,7 @@ namespace Pt {
 
 namespace Hmi {
 
+class Screen;
 class Widget;
 class MainWindowImpl;
 class WindowStateEvent;
@@ -202,6 +203,8 @@ class PT_HMI_API Window : public WindowBase
     void setBackground(const Gfx::Brush& b);
 
   protected:
+    virtual void onSetScreen(Screen* screen);
+
     virtual void onAddWindow(Window& w);
 
     virtual void onRemoveWindow(Window& w);
@@ -341,6 +344,7 @@ class PT_HMI_API Window : public WindowBase
     std::vector<Window*>         _windows;
     WindowBase*                  _parent;
     Window*                      _parentWindow;
+    Screen*                      _screen; 
     Widget*                      _mainWidget;
     Widget*                      _focusWidget;
     std::vector<Widget*>         _focusList;
