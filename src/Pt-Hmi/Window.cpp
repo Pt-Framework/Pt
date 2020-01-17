@@ -612,17 +612,31 @@ Gfx::PointF Window::onFromScreen(const Gfx::PointF& pos) const
 
 double Window::onScaleFactor() const
 {
-    const Window* topWindow = this;
+    //const Window* topWindow = this;
 
-    while (topWindow)
-    {
-        if (topWindow->_parentWindow == 0)
-            break;
+    //while(topWindow)
+    //{
+    //    if(topWindow->_parentWindow == 0)
+    //        break;
 
-        topWindow = topWindow->_parentWindow;
-    }
+    //    topWindow = topWindow->_parentWindow;
+    //}
 
-    return Application::instance().screen().onScaleFactor(*topWindow);
+    //return Application::instance().screen().onScaleFactor(*topWindow);
+
+    if( ! _init )
+        return 1.0;
+
+    return _parent->onScaleFactor(*this);
+}
+
+
+double Window::onScaleFactor(const Window& w) const
+{
+    if( ! _init )
+        return 1.0;
+
+    return _parent->scaleFactor();
 }
 
 
@@ -752,7 +766,7 @@ void Window::repaint()
         return;
 
     if( ! this->isVisible() )
-        return;  
+        return;
 
     onPaintBackground(_damageRect);
 
@@ -1032,7 +1046,7 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 {
     _size = ev.size();
 
-    _surface.setScaleFactor( scaleFactor());
+    _surface.setScaleFactor( scaleFactor() );
     _surface.resize( ev.size() );
 
     //if(_mainWidget)

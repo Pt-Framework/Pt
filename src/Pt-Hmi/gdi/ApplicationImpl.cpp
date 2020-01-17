@@ -33,6 +33,7 @@
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
 #include "PainterImpl.h"
+
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/ResizeEvent.h>
@@ -44,7 +45,14 @@
 #include <Pt/System/IOError.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
+
+
+using std::max;
+using std::min;
 #include <WindowsX.h>
+#include <Gdiplus.h>
+
+#pragma comment (lib, "gdiplus.lib")
 
 namespace {
 
@@ -132,6 +140,7 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles,
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
 , _instanceHandle(NULL)
+, _gdiplusToken(0)
 , _mouseEvent(0)
 , _keyEvent(0)
 , _pointerInWindow(false)
@@ -145,7 +154,10 @@ ApplicationImpl::ApplicationImpl()
 
     SetProcessDPIAware();
 
-    _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
+    _instanceHandle = (HINSTANCE) GetModuleHandle(NULL);
+
+    Gdiplus::GdiplusStartupInput startupInput;
+    Gdiplus::GdiplusStartup(&_gdiplusToken, &startupInput, NULL);
 
     WNDCLASS winClass;
     winClass.style         = CS_HREDRAW | CS_VREDRAW;
@@ -164,8 +176,10 @@ ApplicationImpl::ApplicationImpl()
 
 ApplicationImpl::~ApplicationImpl()
 {
-   if( _cursorHandle != 0 )
+    if( _cursorHandle != 0 )
        DestroyCursor( _cursorHandle );
+
+    Gdiplus::GdiplusShutdown(_gdiplusToken);
 
     UnregisterClass("Pt-Hmi", _instanceHandle);
 }
@@ -276,8 +290,8 @@ void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
 
 void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 {
-    POINT p = { ev.position().x(), 
-                ev.position().y() };
+    POINT p = { Pt::lround( ev.position().x() ), 
+                Pt::lround( ev.position().y() ) };
 
     HWND h = WindowFromPoint(p);
 

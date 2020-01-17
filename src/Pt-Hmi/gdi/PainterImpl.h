@@ -145,15 +145,17 @@ class PainterImpl
                     BITMAPINFO bi;
                     ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
 
+                    std::size_t depth = texture.view().pixelStride() * 8;
+
                     bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);    
-                    bi.bmiHeader.biWidth        = texture.width();                // width
-                    bi.bmiHeader.biHeight       = -(ssize_t)texture.height();     // top-down image
-                    bi.bmiHeader.biPlanes       = 1;                              // always 1
-                    bi.bmiHeader.biBitCount     = texture.view().pixelStride()*8; // 32-bit
-                    bi.bmiHeader.biCompression  = BI_RGB;                         // uncompressed RGB
-                    bi.bmiHeader.biSizeImage    = 0;                              // automatic
-                    bi.bmiHeader.biClrUsed      = 0;                              // no color table
-                    bi.bmiHeader.biClrImportant = 0;                              // no color table
+                    bi.bmiHeader.biWidth        = texture.width();
+                    bi.bmiHeader.biHeight       = -(ssize_t)texture.height(); // top-down image
+                    bi.bmiHeader.biPlanes       = 1;                          // always 1
+                    bi.bmiHeader.biBitCount     = static_cast<WORD>(depth);   // bits per pixel
+                    bi.bmiHeader.biCompression  = BI_RGB;                     // uncompressed RGB
+                    bi.bmiHeader.biSizeImage    = 0;                          // automatic
+                    bi.bmiHeader.biClrUsed      = 0;                          // no color table
+                    bi.bmiHeader.biClrImportant = 0;                          // no color table
 
                     HDC dc = GetDC(NULL);
 

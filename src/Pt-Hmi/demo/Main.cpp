@@ -28,4 +28,3 @@ int main(int argc, char* args[])
         std::clog << "ERROR: " << ex.what() << std::endl;
     }
 }
-

@@ -243,6 +243,8 @@ class PT_HMI_API Window : public WindowBase
 
     virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
 
+    virtual double onScaleFactor(const Window& w) const;
+
     virtual void onUpdate(Window& w, const Gfx::RectF& rect);
 
     virtual void onShow(Window& w, bool visible);

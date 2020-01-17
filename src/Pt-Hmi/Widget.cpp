@@ -353,7 +353,7 @@ Gfx::PointF Widget::onFromScreen(const Gfx::PointF& pos) const
 
 double Widget::onScaleFactor() const
 {
-    if (window())
+    if( window() )
         return window()->scaleFactor();
 
     return 1.0;

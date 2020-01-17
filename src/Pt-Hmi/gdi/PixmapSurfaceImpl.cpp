@@ -38,7 +38,9 @@
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Argb32Format.h>
 
-#include <tchar.h>
+using std::max;
+using std::min;
+#include <Gdiplus.h>
 
 namespace {
 
@@ -93,10 +95,9 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
         float b1 = gradientStart.blue() * f1;
         float b2 = gradientStop.blue() * f2;
                 
-        
-        pixel[0] = (b1 + b2) / 257;
-        pixel[1] = (g1 + g2) / 257;
-        pixel[2] = (r1 + r2) / 257;
+        pixel[0] = static_cast<Pt::uint8_t>( (b1 + b2) / 257 );
+        pixel[1] = static_cast<Pt::uint8_t>( (g1 + g2) / 257 );
+        pixel[2] = static_cast<Pt::uint8_t>( (r1 + r2) / 257 );
         pixel[3] = 0;
 
         pixel += 4;
@@ -290,25 +291,87 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
                                  const Pt::String& text, 
                                  const Gfx::Transform& trans)
 {
+    //drawLine(to, Gfx::PointF(to.x() + 50, to.y()));
+
     _text.clear();
     text.toUtf16(std::back_inserter(_text));
 
-    XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
-
-    GetWorldTransform(_dc, &oldTrans);
-
     Gfx::Transform tt = trans;
-    tt.translate(to.x(), to.y());
+    tt.translate( to.x(), to.y() );
 
-    XFORM newTrans = { tt.m11(), tt.m12(),
-                       tt.m21(), tt.m22(),
-                       tt.dx(), tt.dy()};
+    ////XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
+    ////GetWorldTransform(_dc, &oldTrans);
 
-    SetWorldTransform(_dc, &newTrans);
+    ////XFORM newTrans = { static_cast<FLOAT>( tt.m11() ), 
+    ////                   static_cast<FLOAT>( tt.m12() ),
+    ////                   static_cast<FLOAT>( tt.m21() ), 
+    ////                   static_cast<FLOAT>( tt.m22() ),
+    ////                   static_cast<FLOAT>( tt.dx() ),  
+    ////                   static_cast<FLOAT>( tt.dy() ) };
 
-    TextOutW(_dc, 0, 0, _text.c_str(), _text.size());
+    ////SetWorldTransform(_dc, &newTrans);
 
-    SetWorldTransform(_dc, &oldTrans);
+    ////TextOutW(_dc, 0, 0, _text.c_str(), _text.size());
+
+    ////SetWorldTransform(_dc, &oldTrans);
+    ////return;
+   
+    Gdiplus::Graphics graphics(_dc);
+    
+    Gdiplus::Font font(_dc);
+
+    Gdiplus::FontFamily family;
+    font.GetFamily(&family);
+
+    Gdiplus::REAL height = font.GetHeight( graphics.GetDpiY() );
+
+    UINT16 ascentUnits = family.GetCellAscent( font.GetStyle() );
+    UINT16 descentUnits = family.GetCellDescent( font.GetStyle() );
+    UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
+    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
+
+    Gdiplus::REAL ascent = ascentUnits * pixelsPerUnit;
+    Gdiplus::REAL descent = descentUnits * pixelsPerUnit;
+    Gdiplus::REAL spacing = height - ascent - descent;
+    Gdiplus::REAL offsetY = ascent + 1;
+    
+    Gdiplus::REAL toX = static_cast<Gdiplus::REAL>( to.x() );
+    Gdiplus::REAL toY = static_cast<Gdiplus::REAL>( to.y() );
+    Gdiplus::PointF origin( 0, -offsetY );
+    
+    const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
+
+    Gdiplus::Matrix oldMatrix;
+    graphics.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix matrix( static_cast<Gdiplus::REAL>( tt.m11() ), 
+                            static_cast<Gdiplus::REAL>( tt.m12() ),
+                            static_cast<Gdiplus::REAL>( tt.m21() ), 
+                            static_cast<Gdiplus::REAL>( tt.m22() ),
+                            static_cast<Gdiplus::REAL>( tt.dx() ), 
+                            static_cast<Gdiplus::REAL>( tt.dy() ) );
+
+    graphics.SetTransform(&matrix);
+
+    //Gdiplus::RectF textRect;
+    //graphics.MeasureString(_text.c_str(), _text.size(), &font, 
+    //                       Gdiplus::PointF(to.x(), to.y()), format, &textRect);
+
+    //Gdiplus::Pen blackPen( Gdiplus::Color(255, 0, 0, 0), 1 );
+    //graphics.DrawRectangle(&blackPen, textRect);
+
+    const Gfx::Color& color = _painter->pen().color();
+    BYTE alpha = color.alpha() / 257;
+    BYTE red   = color.red()   / 257;
+    BYTE green = color.green() / 257; 
+    BYTE blue  = color.blue()  / 257;
+
+    Gdiplus::SolidBrush blackBrush( Gdiplus::Color(alpha, red, green, blue) );
+
+    graphics.DrawString( _text.c_str(), _text.size(), &font, 
+                         origin, format, &blackBrush);
+
+    graphics.SetTransform(&oldMatrix);
 }
 
 
@@ -577,7 +640,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
 {
     Gfx::Point to = Gfx::round(toF);
 
-    const size_t depth = image.view().pixelStride() * 8; 
+    size_t depth = image.view().pixelStride() * 8; 
     const Pt::uint8_t* data = image.data();
 
     HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
@@ -588,13 +651,13 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
 
         bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); 
         bitmapInfo.bmiHeader.biWidth       = image.width();   
-        bitmapInfo.bmiHeader.biHeight      = -(ssize_t)image.height();  // top-down image
-        bitmapInfo.bmiHeader.biPlanes      = 1;                         // always 1            
-        bitmapInfo.bmiHeader.biBitCount    = depth;                     // 32-bit 
-        bitmapInfo.bmiHeader.biCompression = BI_RGB;                    // uncompressed RGB
-        bitmapInfo.bmiHeader.biSizeImage   = 0;                         // automatic
-        bitmapInfo.bmiHeader.biClrUsed     = 0;                         // no color table
-        bitmapInfo.bmiHeader.biClrImportant= 0;                         // no color table
+        bitmapInfo.bmiHeader.biHeight      = -(ssize_t)image.height(); // top-down image
+        bitmapInfo.bmiHeader.biPlanes      = 1;                        // always 1            
+        bitmapInfo.bmiHeader.biBitCount    = static_cast<WORD>(depth); // bits per pixel
+        bitmapInfo.bmiHeader.biCompression = BI_RGB;                   // uncompressed RGB
+        bitmapInfo.bmiHeader.biSizeImage   = 0;                        // automatic
+        bitmapInfo.bmiHeader.biClrUsed     = 0;                        // no color table
+        bitmapInfo.bmiHeader.biClrImportant= 0;                        // no color table
 
         VOID* imageBits = 0;
         bitmap = CreateDIBSection(_dc, &bitmapInfo, 
