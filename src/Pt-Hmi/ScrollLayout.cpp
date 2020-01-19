@@ -217,7 +217,7 @@ void ScrollLayout::onLayout(const Gfx::RectF& rect)
     for(it = widgets().begin() ; it != widgets().end(); ++it)
     {        
         Widget* w = *it;
-        w->layout( w->position(), w->preferredSize() );            
+        w->layout( w->position(), w->preferredSize() );
     }
 }
 

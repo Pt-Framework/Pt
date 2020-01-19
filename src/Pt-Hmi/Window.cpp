@@ -133,6 +133,9 @@ void Window::setScreen(Screen* screen)
         (*w)->setScreen(_screen);
     }
 
+    if (_mainWidget)
+        _mainWidget->setScreen(screen);
+
     onSetScreen(screen);
 }
 
@@ -166,11 +169,11 @@ void Window::init(Window* parent)
     if( ! parent )
     {
         Screen& screen = Application::instance().screen();
-        onSetScreen(&screen);
+        setScreen(&screen);
     }
     else
     {
-        onSetScreen(parent->_screen);
+        setScreen(parent->_screen);
     }
 
     if( ! _enabled )
@@ -216,7 +219,7 @@ void Window::deinit()
 
     _parent->onDeinit(*this);
 
-    onSetScreen(0);
+    setScreen(0);
 
     if(_impl)
     {

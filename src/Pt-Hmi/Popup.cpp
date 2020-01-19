@@ -37,7 +37,7 @@ Popup::Popup()
 {
 }
 
-		
+
 Popup::~Popup()
 {
 }
@@ -85,7 +85,7 @@ void Popup::onTouchEvent(const TouchEvent& ev)
 
     if( ev.isPress() )
     {
-        show(false);          
+        show(false);
     }
 }
 

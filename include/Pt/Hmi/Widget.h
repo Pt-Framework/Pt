@@ -60,6 +60,7 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
+class Screen;
 
 class PT_HMI_API Widget : public Visual
 {
@@ -273,6 +274,11 @@ class PT_HMI_API Widget : public Visual
         virtual double onScaleFactor() const;
 
     protected:
+        virtual void onSetWindow(Window* w);
+
+        virtual void onSetScreen(Screen* s);
+
+
         virtual void onAddWidget(Widget& w);
 
         virtual void onRemoveWidget(Widget& w);
@@ -281,7 +287,7 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onRaise(Widget& w);
 
-        
+
         virtual void onInvalidate();
 
 
@@ -336,6 +342,9 @@ class PT_HMI_API Widget : public Visual
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
     private:
+        
+        void setScreen(Screen* screen);
+
         void setParent(Widget* parent);
 
         void setWindow(Window* window);

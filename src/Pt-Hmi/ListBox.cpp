@@ -452,7 +452,7 @@ void ListBox::setScrollBars(bool hasScrollBars)
 
 
 void ListBox::addItem(ListBoxItem& item)
-{   
+{
     _layout.addItem(item);
     item.selected() += Pt::slot(_layout, &ListBoxLayout::onItemSelected);
 }

@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Layout.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Screen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/String.h>
 
@@ -163,6 +164,16 @@ void Widget::remove(Widget& widget)
 }
 
 
+void Widget::onSetWindow(Window* w)
+{
+}
+
+
+void Widget::onSetScreen(Screen* s)
+{
+}
+
+
 void Widget::onAddWidget(Widget& w)
 {
 }
@@ -175,6 +186,17 @@ void Widget::onRemoveWidget(Widget& w)
 
 void Widget::onParentChanged(Widget* w)
 {
+}
+
+
+void Widget::setScreen(Screen* screen)
+{
+    invalidate();
+
+    for (size_t i = 0; i < _children.size(); ++i)
+        _children[i]->setScreen(screen);
+
+    onSetScreen(screen);
 }
 
 
@@ -204,6 +226,8 @@ void Widget::setWindow(Window* window)
 
     // previous relayouts did not work without parent window
     relayout();
+
+    onSetWindow(window);
 }
 
 
