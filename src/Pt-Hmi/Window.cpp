@@ -167,6 +167,13 @@ void Window::init(Window* parent)
     }
 
     setParent(parent);
+
+    // TODO: delay initialisation until attached to screen 
+    //if( ! _screen )
+    //{
+    //    _init = false;
+    //    return;
+    //}
     
     move(_position);
     resize(_size);
