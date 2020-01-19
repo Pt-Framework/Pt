@@ -333,6 +333,8 @@ class PT_HMI_API Window : public WindowBase
 
     Widget* findWidget(const Gfx::PointF& pos, bool input);
 
+    void setScreen(Screen* screen);
+
   private:
     MainWindowImpl*              _impl;
     WindowManager                _windowManager;

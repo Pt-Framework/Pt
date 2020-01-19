@@ -112,97 +112,92 @@ PixmapSurface& Window::surface()
 }
 
 
-void Window::onSetScreen(Screen* screen)
+void Window::setScreen(Screen* screen)
 {
-    if(screen == _screen)
+    if (_screen == screen)
         return;
 
     _screen = screen;
 
-    _surface.setScaleFactor( scaleFactor() );
+    if (screen)
+    {
+        _surface.setScaleFactor(scaleFactor());
 
-    _position = _surface.align(_position);
-    _size =_surface.align(_size);
+        move(_position);
+        resize(_size);
+    }
+    
+    std::vector<Window*>::iterator w;
+    for(w = _windows.begin(); w != _windows.end(); ++w)
+    {
+        (*w)->setScreen(_screen);
+    }
 
-    //std::vector<Window*>::iterator w;
-    //for(w = _windows.begin(); w != _windows.end(); ++w)
-    //{
-    //    (*w)->onSetScreen(screen);
-    //}
+    onSetScreen(screen);
+}
+
+
+void Window::onSetScreen(Screen* screen)
+{
 }
 
 
 void Window::init(Window* parent)
 {
-    if(_init)
+    if (_init)
         deinit();
 
-    if( ! parent )
+    _parent = parent;
+
+    if( ! _parent )
     {
         _impl = new MainWindowImpl(_type);
-
         Screen& screen = Application::instance().screen();
         _parent = &screen;
     }
-    else
-    {
-        Screen* screen = parent->_screen;
-        _parent = parent;
-    }
 
     _parent->onInit(*this);
-    
+
     _init = true;
     _isClosed = false;
 
-    if(parent)
+    setParent(parent);
+
+    if( ! parent )
     {
-        Screen* screen = parent->_screen;
-        onSetScreen(screen);
+        Screen& screen = Application::instance().screen();
+        onSetScreen(&screen);
     }
     else
     {
-        Screen& screen = Application::instance().screen();        
-        onSetScreen(&screen);
+        onSetScreen(parent->_screen);
     }
-
-    setParent(parent);
-
-    // TODO: delay initialisation until attached to screen 
-    //if( ! _screen )
-    //{
-    //    _init = false;
-    //    return;
-    //}
-    
-    move(_position);
-    resize(_size);
 
     if( ! _enabled )
     {
         // defered initialization
         enable(_enabled);
     }
-    else if( parent && ! parent->isEnabled() && isEnabled() )
+    else if (parent && !parent->isEnabled() && isEnabled())
     {
         // disable indirectly, when parent is disabled
-        EnableEvent eev( vid(), false);
+        EnableEvent eev(vid(), false);
         Application::instance().loop().commitEvent(eev);
     }
-    else if( ! _enabledState && _enabled)
+    else if (!_enabledState && _enabled)
     {
         // enable when indirectly disabled, but parent is enabled
         enable(true);
     }
 
-    if( _isActive )
+    if (_isActive)
         activate();
 
-    if( _impl)
+    if (_impl)
     {
         _impl->setTitle(_title);
         _impl->setMinimumSize(_minimumSize);
-        _impl->setMaximumSize(_maximumSize );
+        _impl->setMaximumSize(_maximumSize);
         _impl->setIcon(_icon);
         _impl->setState(_state);
     }
@@ -638,7 +633,7 @@ Gfx::PointF Window::onToScreen(const Gfx::PointF& pos) const
     if(_parentWindow)
         return _parentWindow->toScreen(p);
 
-    return p;    
+    return p;
 }
 
 
@@ -658,18 +653,6 @@ Gfx::PointF Window::onFromScreen(const Gfx::PointF& pos) const
 
 double Window::onScaleFactor() const
 {
-    //const Window* topWindow = this;
-
-    //while(topWindow)
-    //{
-    //    if(topWindow->_parentWindow == 0)
-    //        break;
-
-    //    topWindow = topWindow->_parentWindow;
-    //}
-
-    //return Application::instance().screen().onScaleFactor(*topWindow);
-
     if( ! _init )
         return 1.0;
 
@@ -1047,10 +1030,15 @@ void Window::move(const Gfx::PointF& p)
     //
     // align to physical pixel grid
     //
-    _position = _surface.align(p);
+    
 
-    if( ! _init )
+    if (!_screen)
+    {
+        _position = p;
         return;
+    }
+
+    _position = _surface.align(p);
 
     _parent->onMove(*this, _position);
 }
@@ -1073,10 +1061,13 @@ void Window::resize(const Gfx::SizeF& s)
     //
     // align to physical pixel grid
     //
-    _size =_surface.align(s);
-
-    if( ! _init )
+    if (!_screen)
+    {
+        _size = s;
         return;
+    }
+
+    _size = _surface.align(s);
 
     _parent->onResize(*this, _size);
 }
@@ -1092,7 +1083,6 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 {
     _size = ev.size();
 
-    _surface.setScaleFactor( scaleFactor() );
     _surface.resize( ev.size() );
 
     //if(_mainWidget)
