@@ -37,7 +37,10 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
 
+using std::max;
+using std::min;
 #include <Windows.h>
+#include <Gdiplus.h>
 
 namespace Pt {
 

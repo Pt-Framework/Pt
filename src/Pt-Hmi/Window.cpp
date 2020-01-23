@@ -126,6 +126,8 @@ void Window::setScreen(Screen* screen)
         move(_position);
         resize(_size);
     }
+
+    _windowManager.setScreen(screen);
     
     std::vector<Window*>::iterator w;
     for(w = _windows.begin(); w != _windows.end(); ++w)
@@ -374,7 +376,10 @@ const Widget* Window::content()  const
 void Window::setContent(Widget* widget)
 {
     if(_mainWidget)
+    {
+        _mainWidget->setScreen(0);
         _mainWidget->setWindow(0);
+    }
 
     _mainWidget = widget;
 
@@ -385,6 +390,7 @@ void Window::setContent(Widget* widget)
         _mainWidget->parent()->remove(*_mainWidget);
 
     _mainWidget->setWindow(this);
+    _mainWidget->setScreen(_screen);
 }
 
 
@@ -1030,17 +1036,15 @@ const Gfx::PointF& Window::position() const
 
 void Window::move(const Gfx::PointF& p)
 {
-    //
-    // align to physical pixel grid
-    //
-    
-
     if (!_screen)
     {
         _position = p;
         return;
     }
 
+    //
+    // align to physical pixel grid
+    //
     _position = _surface.align(p);
 
     _parent->onMove(*this, _position);
@@ -1061,15 +1065,15 @@ void Window::onMoveEvent(const MoveEvent& ev)
 
 void Window::resize(const Gfx::SizeF& s)
 {
-    //
-    // align to physical pixel grid
-    //
     if (!_screen)
     {
         _size = s;
         return;
     }
 
+    //
+    // align to physical pixel grid
+    //
     _size = _surface.align(s);
 
     _parent->onResize(*this, _size);

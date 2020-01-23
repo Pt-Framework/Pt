@@ -122,6 +122,17 @@ void WindowManager::remove(Window& w)
 }
 
 
+void WindowManager::setScreen(Screen* screen)
+{
+    std::vector<WindowFrame*>::iterator wit;
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    {
+        WindowFrame* frame = *wit;
+        frame->setFrame(_borderWidth, _titleHeight);
+    }
+}
+
+
 WindowFrame* WindowManager::findWindow(const Gfx::PointF& p)
 {
     std::vector<WindowFrame*>::reverse_iterator rit;

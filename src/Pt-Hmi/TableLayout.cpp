@@ -248,9 +248,8 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
                 if( ! item )
                     continue;
 
-                double width = item->preferredSize().width() + 
-                                item->margin().leftRight();
-                
+                double preferredWidth = item->align( item->preferredSize().width() );
+                double width = preferredWidth + item->margin().leftRight();
                 width = std::max(columnPolicy.size(), width);
                 
                 columnPolicy.setSize(width);

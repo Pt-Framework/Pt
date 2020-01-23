@@ -356,8 +356,10 @@ class PT_HMI_API Widget : public Visual
         Pt::Signal<>                 _layoutChanged;
 
         std::vector<Widget*>         _children;
-        Widget*                      _parent; 
+        
+        Screen*                      _screen; 
         Window*                      _window; 
+        Widget*                      _parent; 
 
         int                          _invalidates;
         bool                         _isLayouting;

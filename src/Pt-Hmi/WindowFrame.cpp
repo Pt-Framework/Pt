@@ -522,6 +522,7 @@ Gfx::SizeF WindowFrame::fromFrame(const Gfx::SizeF& size) const
     return Gfx::SizeF(size.width() - offX, size.height() - offY);
 }
 
+
 void WindowFrame::onMenu()
 {
 }

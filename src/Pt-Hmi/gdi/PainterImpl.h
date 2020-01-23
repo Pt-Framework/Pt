@@ -29,8 +29,9 @@
 #ifndef Pt_Hmi_PainterImpl_h
 #define Pt_Hmi_PainterImpl_h
 
-#include <Pt/Hmi/Api.h>
 #include "win32.h"
+
+#include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -40,7 +41,11 @@
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
+
+using std::max;
+using std::min;
 #include <Windows.h>
+#include <Gdiplus.h>
 
 namespace Pt {
 
@@ -247,27 +252,64 @@ class PainterImpl
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
                                             const Pt::String& text)
         {   
+            std::wstring wtext;
+            text.toUtf16( std::back_inserter(wtext) );
+
             HDC dc = GetDC(NULL);
             HFONT newFont = getFont(font);
             HGDIOBJ oldFont = SelectObject(dc, newFont);
 
-            TEXTMETRIC tm;
-            GetTextMetrics(dc, &tm);
+            
+            
+            //TEXTMETRIC tm;
+            //GetTextMetrics(dc, &tm);
+    
+            //SIZE textSize;
+            //GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
+    
+            //SelectObject(dc, oldFont);
+            //DeleteObject(newFont);
+            //ReleaseDC(NULL, dc);
 
-            std::wstring wtext;
-            text.toUtf16( std::back_inserter(wtext) );
-    
-            SIZE textSize;
-            GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
-    
+            //return Gfx::FontMetrics( tm.tmAscent, 
+            //                         tm.tmDescent, 
+            //                         textSize.cx, 
+            //                         tm.tmHeight );
+
+            
+            
+            Gdiplus::Graphics graphics(dc);
+
+            const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
+            Gdiplus::Font gdiFont(dc);
+
+            Gdiplus::FontFamily family;
+            gdiFont.GetFamily(&family);
+
+            Gdiplus::REAL height = gdiFont.GetHeight( graphics.GetDpiY() );
+
+            UINT16 ascentUnits = family.GetCellAscent( gdiFont.GetStyle() );
+            UINT16 descentUnits = family.GetCellDescent( gdiFont.GetStyle() );
+            UINT16 heightUnits = family.GetLineSpacing( gdiFont.GetStyle() );
+            Gdiplus::REAL pixelsPerUnit = height / heightUnits;
+
+            Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
+            Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+
+            Gdiplus::RectF textRect;
+            graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
+                                   Gdiplus::PointF(0, 0), format, &textRect);
+
             SelectObject(dc, oldFont);
             DeleteObject(newFont);
             ReleaseDC(NULL, dc);
 
-            return Gfx::FontMetrics( tm.tmAscent, 
-                                     tm.tmDescent, 
-                                     textSize.cx, 
-                                     tm.tmHeight );
+            std::size_t ascent  = static_cast<std::size_t>( std::ceil(ascentF) );
+            std::size_t descent = static_cast<std::size_t>( std::ceil(descentF) );
+            std::size_t twidth   = static_cast<std::size_t>( std::lround(textRect.Width) );
+            std::size_t theight   = static_cast<std::size_t>( std::lround(textRect.Height) );
+            
+            return Gfx::FontMetrics(ascent, descent, twidth, theight);
         }
         
         static std::string defaultFont()
@@ -410,12 +452,12 @@ class PainterImpl
         }
 
     private:
-        HPEN   _pen;
-        DWORD  _penColor;
-        HBRUSH _brush;
-        bool   _gradientBrush;
-        HRGN   _clipRect;
-        HFONT  _font;
+        HPEN           _pen;
+        DWORD          _penColor;
+        HBRUSH         _brush;
+        bool           _gradientBrush;
+        HRGN           _clipRect;
+        HFONT          _font;
 };
 
 } // namespace

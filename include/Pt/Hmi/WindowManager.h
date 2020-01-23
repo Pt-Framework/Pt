@@ -43,6 +43,7 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
+class Screen;
 class WindowFrame;
 class MouseEvent;
 class TouchEvent;
@@ -63,6 +64,8 @@ class WindowManager : public Pt::Connectable
         void add(Window& w);
 
         void remove(Window& window);
+
+        void setScreen(Screen* screen);
 
         double borderWidth() const
         {

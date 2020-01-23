@@ -43,8 +43,9 @@ namespace Pt {
 namespace Hmi {
 
 Widget::Widget()
-: _parent(0)
+: _screen(0)
 , _window(0)
+, _parent(0)
 , _invalidates(0)
 , _isLayouting(true)
 , _visible(true)
@@ -133,6 +134,7 @@ void Widget::add(Widget& widget)
 
     widget.setParent(this);
     widget.setWindow(_window);
+    widget.setScreen(_screen);
 
     relayout();
     widget.update();
@@ -154,6 +156,7 @@ void Widget::remove(Widget& widget)
     if( ! widget._enabledState && widget._enabled)
         widget.enable(true);
 
+    widget.setScreen(0);
     widget.setParent(0);
     widget.setWindow(0);
 
@@ -191,7 +194,17 @@ void Widget::onParentChanged(Widget* w)
 
 void Widget::setScreen(Screen* screen)
 {
+    if(_screen == screen)
+        return;
+
+    _screen = screen;
+
     invalidate();
+
+    _margin = align(_margin);
+    _padding = align(_padding);
+
+    _sizePolicy.setSize( align( _sizePolicy.size() ) );
 
     for (size_t i = 0; i < _children.size(); ++i)
         _children[i]->setScreen(screen);

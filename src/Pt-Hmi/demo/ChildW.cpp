@@ -34,7 +34,7 @@ void ChildW::checkSpinBox(int value)
 ChildW::ChildW(const std::string& title)
 {
     _fileMenu.setName("FileMenu");
-    
+
     _item1.setText("New");
     Key f3(Key::F3); 
     _item1.setShortcut(&f3);

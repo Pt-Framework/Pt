@@ -38,10 +38,6 @@
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Argb32Format.h>
 
-using std::max;
-using std::min;
-#include <Gdiplus.h>
-
 namespace {
 
 HBRUSH gradientBrush(HDC dc, int width, int height,
@@ -271,19 +267,48 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 {
-    TEXTMETRIC tm;
-    GetTextMetrics(_dc, &tm);
-
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
+
+    Gdiplus::Graphics graphics(_dc);
+
+    const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
+    Gdiplus::Font font(_dc);
+
+    Gdiplus::FontFamily family;
+    font.GetFamily(&family);
+
+    Gdiplus::REAL height = font.GetHeight( graphics.GetDpiY() );
+
+    UINT16 ascentUnits = family.GetCellAscent( font.GetStyle() );
+    UINT16 descentUnits = family.GetCellDescent( font.GetStyle() );
+    UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
+    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
+
+    Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
+    Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+
+    Gdiplus::RectF textRect;
+    graphics.MeasureString(wtext.c_str(), wtext.size(), &font, 
+                           Gdiplus::PointF(0, 0), format, &textRect);
     
-    SIZE textSize;
-    GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
-    
-    return Gfx::FontMetrics(tm.tmAscent, 
-                            tm.tmDescent, 
-                            textSize.cx, 
-                            tm.tmHeight);
+    std::size_t ascent  = static_cast<std::size_t>( std::ceil(ascentF) );
+    std::size_t descent = static_cast<std::size_t>( std::ceil(descentF) );
+    std::size_t twidth   = static_cast<std::size_t>( std::lround(textRect.Width) );
+    std::size_t theight   = static_cast<std::size_t>( std::lround(textRect.Height) );
+
+    return Gfx::FontMetrics(ascent, descent, twidth, theight);
+
+    //TEXTMETRIC tm;
+    //GetTextMetrics(_dc, &tm);
+
+    //SIZE textSize;
+    //GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
+    //
+    //return Gfx::FontMetrics(tm.tmAscent, 
+    //                        tm.tmDescent, 
+    //                        textSize.cx, 
+    //                        tm.tmHeight);
 }
 
 
@@ -299,22 +324,22 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     Gfx::Transform tt = trans;
     tt.translate( to.x(), to.y() );
 
-    ////XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
-    ////GetWorldTransform(_dc, &oldTrans);
+    //XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
+    //GetWorldTransform(_dc, &oldTrans);
 
-    ////XFORM newTrans = { static_cast<FLOAT>( tt.m11() ), 
-    ////                   static_cast<FLOAT>( tt.m12() ),
-    ////                   static_cast<FLOAT>( tt.m21() ), 
-    ////                   static_cast<FLOAT>( tt.m22() ),
-    ////                   static_cast<FLOAT>( tt.dx() ),  
-    ////                   static_cast<FLOAT>( tt.dy() ) };
+    //XFORM newTrans = { static_cast<FLOAT>( tt.m11() ), 
+    //                   static_cast<FLOAT>( tt.m12() ),
+    //                   static_cast<FLOAT>( tt.m21() ), 
+    //                   static_cast<FLOAT>( tt.m22() ),
+    //                   static_cast<FLOAT>( tt.dx() ),  
+    //                   static_cast<FLOAT>( tt.dy() ) };
 
-    ////SetWorldTransform(_dc, &newTrans);
+    //SetWorldTransform(_dc, &newTrans);
 
-    ////TextOutW(_dc, 0, 0, _text.c_str(), _text.size());
+    //TextOutW(_dc, 0, 0, _text.c_str(), _text.size());
 
-    ////SetWorldTransform(_dc, &oldTrans);
-    ////return;
+    //SetWorldTransform(_dc, &oldTrans);
+    //return;
    
     Gdiplus::Graphics graphics(_dc);
     
@@ -333,7 +358,7 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     Gdiplus::REAL ascent = ascentUnits * pixelsPerUnit;
     Gdiplus::REAL descent = descentUnits * pixelsPerUnit;
     Gdiplus::REAL spacing = height - ascent - descent;
-    Gdiplus::REAL offsetY = ascent + 1;
+    Gdiplus::REAL offsetY = ascent + 0.5;
     
     Gdiplus::REAL toX = static_cast<Gdiplus::REAL>( to.x() );
     Gdiplus::REAL toY = static_cast<Gdiplus::REAL>( to.y() );
@@ -352,13 +377,6 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
                             static_cast<Gdiplus::REAL>( tt.dy() ) );
 
     graphics.SetTransform(&matrix);
-
-    //Gdiplus::RectF textRect;
-    //graphics.MeasureString(_text.c_str(), _text.size(), &font, 
-    //                       Gdiplus::PointF(to.x(), to.y()), format, &textRect);
-
-    //Gdiplus::Pen blackPen( Gdiplus::Color(255, 0, 0, 0), 1 );
-    //graphics.DrawRectangle(&blackPen, textRect);
 
     const Gfx::Color& color = _painter->pen().color();
     BYTE alpha = color.alpha() / 257;
