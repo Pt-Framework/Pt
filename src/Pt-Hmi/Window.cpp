@@ -114,28 +114,29 @@ PixmapSurface& Window::surface()
 
 void Window::setScreen(Screen* screen)
 {
-    if (_screen == screen)
+    if(_screen == screen)
         return;
 
     _screen = screen;
 
-    if (screen)
-    {
-        _surface.setScaleFactor(scaleFactor());
+    double scaling = scaleFactor();
+    _surface.setScaleFactor(scaling);
 
+    if(screen)
+    {
         move(_position);
         resize(_size);
     }
 
     _windowManager.setScreen(screen);
-    
+
     std::vector<Window*>::iterator w;
     for(w = _windows.begin(); w != _windows.end(); ++w)
     {
         (*w)->setScreen(_screen);
     }
 
-    if (_mainWidget)
+    if(_mainWidget)
         _mainWidget->setScreen(screen);
 
     onSetScreen(screen);
@@ -662,6 +663,22 @@ Gfx::PointF Window::onFromScreen(const Gfx::PointF& pos) const
 
 double Window::onScaleFactor() const
 {
+    //double parentScaling = 1.0;
+    //double scaling = 1.0;
+
+    //if( _init )
+    //    parentScaling = _parent->onScaleFactor(*this);
+
+    //if(_screen )
+    //  scaling = _screen->onScaleFactor(*this);
+
+    //double diff = parentScaling - scaling;
+
+    //if( std::abs(diff) > 0.01 )
+    //  diff = diff;
+
+    //return scaling;
+
     if( ! _init )
         return 1.0;
 
@@ -1036,7 +1053,7 @@ const Gfx::PointF& Window::position() const
 
 void Window::move(const Gfx::PointF& p)
 {
-    if (!_screen)
+    if( ! _screen )
     {
         _position = p;
         return;
@@ -1045,7 +1062,7 @@ void Window::move(const Gfx::PointF& p)
     //
     // align to physical pixel grid
     //
-    _position = _surface.align(p);
+    _position = align(p);
 
     _parent->onMove(*this, _position);
 }
@@ -1065,7 +1082,7 @@ void Window::onMoveEvent(const MoveEvent& ev)
 
 void Window::resize(const Gfx::SizeF& s)
 {
-    if (!_screen)
+    if( ! _screen )
     {
         _size = s;
         return;
@@ -1074,7 +1091,7 @@ void Window::resize(const Gfx::SizeF& s)
     //
     // align to physical pixel grid
     //
-    _size = _surface.align(s);
+    _size = align(s);
 
     _parent->onResize(*this, _size);
 }

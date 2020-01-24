@@ -65,7 +65,7 @@ class WindowStateEvent;
 class PT_HMI_API Window : public WindowBase
 {
   friend class Widget; 
-
+ 
   public:
     enum Type
     {
