@@ -40,6 +40,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Transform.h>
+#include <Pt/Gfx/Path.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
 #include <cstddef>
@@ -160,6 +161,48 @@ class PT_GFX_API Painter
         /** @brief Draws a part of an image.
         */
         virtual void drawImage(const PointF& to, const Image& im, const RectF& rect) = 0;
+
+
+
+        virtual void drawArc(const PointF& topLeft, const SizeF& size,
+                             float degBegin, float degEnd)
+        {
+        }
+
+        virtual void drawChord(const PointF& topLeft, const SizeF& size,
+            float degBegin, float degEnd)
+        {
+
+        }
+
+        virtual void drawPie(const PointF& topLeft, const SizeF& size,
+            float degBegin, float degEnd)
+        {
+
+        }
+
+        virtual void drawPath(const Path& path, float smoothness = 1.0f)
+        {
+
+        }
+
+
+        virtual void fillPie(const PointF& topLeft, const SizeF& size,
+            float degBegin, float degEnd)
+        {
+
+        }
+
+        virtual void fillChord(const PointF& topLeft, const SizeF& size,
+            float degBegin, float degEnd)
+        {
+
+        }
+
+        virtual void fillPath(const Path& path, float smoothness = 1.0f)
+        {
+
+        }
 };
 
 } // namespace

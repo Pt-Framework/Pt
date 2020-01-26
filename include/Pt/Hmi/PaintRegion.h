@@ -103,6 +103,8 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
+        virtual void drawPath(const Gfx::Path& path, float smoothness);
+
     protected:
         virtual const Gfx::SizeF& onSize() const;
 

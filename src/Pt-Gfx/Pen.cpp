@@ -51,17 +51,17 @@ Pen::Pen(const Color& color, std::size_t size, Style style, CapStyle cap, JoinSt
 
 
 Pen::Pen(const Color& color, std::size_t size, const std::vector<Pt::uint8_t>& userDashPattern, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, Solid, userDashPattern, cap, join))
+: _penData(new PenData(color, size, DashPattern, userDashPattern, cap, join))
 {}
 
 
 Pen::Pen(const Color& color, std::size_t size, const Pt::uint8_t* userDashPattern, Pt::uint8_t userDashPatternCount, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, Solid, userDashPattern, userDashPattern + userDashPatternCount, cap, join))
+: _penData(new PenData(color, size, DashPattern, userDashPattern, userDashPattern + userDashPatternCount, cap, join))
 {}
 
 
 Pen::Pen(const Color& color, std::size_t size, const Pt::uint8_t* userDashPatternBeg, const Pt::uint8_t* userDashPatternEnd, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, Solid, userDashPatternBeg, userDashPatternEnd, cap, join))
+: _penData(new PenData(color, size, DashPattern, userDashPatternBeg, userDashPatternEnd, cap, join))
 {}
 
 

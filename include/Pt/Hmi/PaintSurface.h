@@ -236,6 +236,8 @@ class PT_HMI_API PaintSurface
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic) = 0;
 
+        virtual void drawPath(const Gfx::Path& path, float smoothness) = 0;
+
     private:
         Painter* _painter;
 };

@@ -444,6 +444,18 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
 }
 
 
+void PixmapSurfaceImpl::drawPath(const Gfx::Path& path, float smoothness)
+{
+    Gdiplus::GraphicsPath gdiPath;
+    
+    //Todo::
+
+    /*
+    const Gdiplus::Pen& pen = _painter->impl()->pen();
+    _graphics->DrawPath(&pen, &gdiPath);
+    */
+}
+
 HDC PixmapSurfaceImpl::deviceContext() const
 {
     return _dc;

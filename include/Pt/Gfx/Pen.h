@@ -58,7 +58,8 @@ class PT_GFX_API Pen
         { 
             Solid = 0,
             Dot   = 1,
-            Dash  = 2
+            Dash  = 2,
+            DashPattern = 3
         };
 
         /** @brief Pen cap style.

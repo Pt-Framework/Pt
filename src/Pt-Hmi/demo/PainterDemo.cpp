@@ -654,7 +654,8 @@ class PainterDemoWindow : public Pt::Hmi::Window
 {
     public:
         PainterDemoWindow()
-        : _tabLineStyles1(false), _tabLineStyles2(true)
+        : _tabLineStyles1(false)
+        , _tabLineStyles2(true)
         {
             _tabLineStyles1.setMargin(2);
             _tabLineStyles2.setMargin(2);
@@ -663,7 +664,7 @@ class PainterDemoWindow : public Pt::Hmi::Window
             _tabEllipseStyles.setMargin(2);
 
             _tabView.addTab(_tabLineStyles1, "Line Styles 1");
-            _tabView.addTab(_tabLineStyles2, "Line Styles 2");
+            _tabView.addTab(_tabLineStyles2, "Dashes");
             _tabView.addTab(_tabCapStyles,   "Cap Styles"   );
             _tabView.addTab(_tabJoinStyles,  "Join Styles"  );
             _tabView.addTab(_tabEllipseStyles, "Ellipse");

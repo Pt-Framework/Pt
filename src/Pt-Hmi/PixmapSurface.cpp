@@ -233,6 +233,11 @@ void PixmapSurface::drawPicture(const Gfx::PointF& to, const Picture& pic)
     _impl->drawPicture(toPhysical(to) , pic);
 }
 
+void PixmapSurface::drawPath(const Gfx::Path& path, float smoothness)
+{
+    _impl->drawPath(path, smoothness);
+}
+
 
 PixmapSurfaceImpl* PixmapSurface::pixmapImpl() const
 { 

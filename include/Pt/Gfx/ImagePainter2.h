@@ -53,50 +53,60 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual const ImageFormat& format() const;
 
-        virtual bool isAntiAliasing() const;
-
-        virtual void setAntiAliasing(bool on);
+        virtual void setCompositionMode(const CompositionMode& mode);
 
         virtual const CompositionMode& compositionMode() const;
-
-        virtual void setCompositionMode(const CompositionMode& mode);
 
         virtual void setClip(const RectF& clip);
 
         virtual void resetClip();
 
-        virtual const Pen& pen() const;
-        
         virtual void setPen(const Pen& pen);
-        
-        virtual const Brush& brush() const;
-        
+
+        virtual const Pen& pen() const;
+
         virtual void setBrush(const Brush& brush);
 
-        virtual const Font& font() const;
-        
+        virtual const Brush& brush() const;
+
         virtual void setFont(const Font& font);
 
-        virtual void drawImage(const PointF& to, const Image& image);
+        virtual const Font& font() const;
 
-        virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
-        
+        virtual FontMetrics fontMetrics(const Pt::String& text) const;
+
+        virtual void drawLine(const PointF& from, const PointF& to);
+
+        // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong may be drawn!
+        virtual void drawPolyline(const PointF* points, const size_t pointCount);
+
+        virtual void fillPolygon(const PointF* points, const size_t pointCount);
+
         virtual void drawText(const PointF& to, const Pt::String& text);
 
         virtual void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
-        virtual FontMetrics fontMetrics(const Pt::String& text) const;
-
-        static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
-
-        virtual void drawLine(const PointF& from, const PointF& to);
-
         virtual void drawRect(const RectF& rect);
+
+        virtual void fillRect(const RectF& rect);
+
+        virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
+
+        virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
+
+        virtual void drawImage(const PointF& to, const Image& image);
+
+        virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
+
+
+
+        virtual bool isAntiAliasing() const;
+
+        virtual void setAntiAliasing(bool on);
+
 
         virtual void drawRoundedRect(const RectF& rect, float radius);
 
-        // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong may be drawn!
-        virtual void drawPolyline(const PointF* points, const size_t pointCount);
 
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong may be drawn!
         virtual void drawArc(const PointF& topLeft, const SizeF& size, 
@@ -110,18 +120,12 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void drawPie(const PointF& topLeft, const SizeF& size, 
                              float degBegin, float degEnd);
 
-        virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
-
         // maybe better have ImagePainter::setSmoothness
         virtual void drawPath(const Path& path, float smoothness = 1.0f);
 
-        virtual void fillRect(const RectF& rect);
 
         virtual void fillRoundedRect(const RectF& rect, float radius);
 
-        virtual void fillPolygon(const PointF* points, const size_t pointCount);
-
-        virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
         virtual void fillPie(const PointF& topLeft, const SizeF& size, 
                              float degBegin, float degEnd);
@@ -133,6 +137,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void fillPath(const Path& path, float smoothness = 1.0f);
 
     public:
+        static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
+
         static void setFontDir(const System::Path& path);
         
         static void setDefaultFont(const std::string& name);

@@ -218,6 +218,18 @@ void PaintRegion::drawPicture(const Gfx::PointF& to, const Picture& pic)
     _surface->drawPicture(to + _area.topLeft(), pic);
 }
 
+void PaintRegion::drawPath(const Gfx::Path& path, float smoothness)
+{
+    Gfx::Path tpath = path;
+
+    Gfx::Transform trans;
+    trans.translate(_area.topLeft().x(), _area.topLeft().y());
+
+    tpath.transform(trans);
+
+    _surface->drawPath(tpath, smoothness);
+}
+
 } // namespace
 
 } // namespace

@@ -320,6 +320,11 @@ void Painter::drawImage(const Gfx::PointF& to,
 }
 
 
+void Painter::drawPath(const Gfx::Path& path, float smoothness)
+{
+    _surface->drawPath(path, smoothness);
+}
+
 void Painter::setDefaultFont(std::string f)
 {
     PaintSurface::setDefaultFont(f);

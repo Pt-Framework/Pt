@@ -92,6 +92,15 @@ class PainterImpl
                 case Gfx::Pen::Dot:
                     _pen->SetDashStyle(Gdiplus::DashStyleDot);
                 break;
+
+                case Gfx::Pen::DashPattern:
+                {
+                    const std::vector<Pt::uint8_t>& dashPattern = pen.dashPattern();
+                    const std::vector<Gdiplus::REAL> gdiPattern(dashPattern.begin(), dashPattern.end());
+
+                    _pen->SetDashPattern(&gdiPattern[0], gdiPattern.size());
+                }
+                break;
             }
 
             switch (pen.capStyle())
@@ -381,6 +390,7 @@ class PainterImpl
 
             return f;
         }
+
 
     private:
         Gdiplus::Pen* _pen;
