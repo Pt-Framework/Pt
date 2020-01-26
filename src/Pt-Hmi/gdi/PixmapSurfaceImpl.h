@@ -120,16 +120,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         Painter*       _painter;
         HDC            _dc;
         HBITMAP        _bitmap;
-        HPEN           _oldPen;
-        HBRUSH         _oldBrush;
-        HFONT          _oldFont;
-        HBITMAP        _oldBitmap;
         std::wstring   _text;
-
-        bool                      _gradientBrush;
-        Gfx::Brush::GradientStyle _gradient;
-        Gfx::Color                _gradientStart;
-        Gfx::Color                _gradientStop;
+        Gdiplus::Graphics*   _graphics;
 };
 
 } // namespace

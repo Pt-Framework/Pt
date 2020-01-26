@@ -127,7 +127,7 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles,
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        }    
+        }
     }
 
     return offset;

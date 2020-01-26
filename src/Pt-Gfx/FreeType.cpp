@@ -331,10 +331,10 @@ FontMetrics FreeType::fontMetrics(const String& text,
     if( ! text.empty() )
       tbbox.xMin = 0;
 
-    return FontMetrics( size->metrics.ascender >> 6,
-                       (-size->metrics.descender) >> 6,
+    return FontMetrics( size->metrics.ascender/64,
+                       (-size->metrics.descender)/64,
                        tbbox.xMax - tbbox.xMin,
-                       size->metrics.height >> 6 );
+                       size->metrics.height/64 );
 
     // UNLOCK
 }

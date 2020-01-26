@@ -42,8 +42,8 @@ FontMetrics::FontMetrics()
 { }
 
 
-FontMetrics::FontMetrics(std::size_t ascent, std::size_t descent, 
-                         std::size_t width, std::size_t height)
+FontMetrics::FontMetrics(ValueType ascent, ValueType descent,
+    ValueType width, ValueType height)
 : _ascent(ascent)
 , _descent(descent)
 , _width(width)
@@ -51,29 +51,6 @@ FontMetrics::FontMetrics(std::size_t ascent, std::size_t descent,
 {
 }
 
-
-std::size_t FontMetrics::ascent() const
-{
-    return _ascent;
-}
-
-
-std::size_t FontMetrics::descent() const
-{
-    return _descent;
-}
-
-
-std::size_t FontMetrics::width() const
-{
-    return _width;
-}
-
-
-std::size_t FontMetrics::height() const
-{
-    return _height;
-}
 
 } // namespace
 

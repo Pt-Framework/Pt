@@ -41,25 +41,44 @@ namespace Gfx {
 
 class PT_GFX_API FontMetrics
 {
+    public:
+        typedef double ValueType;
+
   public:
       FontMetrics();
 
-      FontMetrics(std::size_t ascent, std::size_t descent,
-                  std::size_t width, std::size_t height);
+      FontMetrics(ValueType ascent, ValueType descent,
+                  ValueType width, ValueType height);
 
-      std::size_t ascent() const;
 
-      std::size_t descent() const;
+      ValueType ascent() const
+      {
+          return _ascent;
+      }
 
-      std::size_t width() const;
 
-      std::size_t height() const;
+      ValueType descent() const
+      {
+          return _descent;
+      }
+
+
+      ValueType width() const
+      {
+          return _width;
+      }
+
+
+      ValueType height() const
+      {
+          return _height;
+      }
 
   private:
-      std::size_t _ascent;
-      std::size_t _descent;
-      std::size_t _width;
-      std::size_t _height;
+      ValueType _ascent;
+      ValueType _descent;
+      ValueType _width;
+      ValueType _height;
 };
 
 } // namespace

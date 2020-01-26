@@ -55,24 +55,19 @@ class PainterImpl
 {
     public:
         PainterImpl()
-        : _pen(0)
-        , _penColor(0)
-        , _brush(0)
-        , _gradientBrush(false)
+        : _pen( new Gdiplus::Pen(Gdiplus::Color(0, 0, 0), 1))
+        , _brush( new Gdiplus::SolidBrush(Gdiplus::Color(0, 0, 0)))
         , _clipRect(0)
-        , _font(0)
+        , _font(new Gdiplus::Font(L"", 1))
         { }
 
         ~PainterImpl()
         {
-            if(_pen)
-                DeleteObject(_pen);
+            delete _pen;
 
-            if(_brush)
-                DeleteObject(_brush);
+            delete _brush;
 
-            if(_font)
-                DeleteObject(_font);
+            delete _font;
 
             if(_clipRect)
                 DeleteObject(_clipRect);
@@ -80,64 +75,76 @@ class PainterImpl
 
         void setPen(const Gfx::Pen& pen)
         {
-            if(_pen)
+            delete _pen;
+
+            _pen = new Gdiplus::Pen(toGdi(pen.color()), static_cast<Gdiplus::REAL>(pen.size()));
+
+            switch (pen.style())
             {
-                DeleteObject(_pen);
-                _pen = 0;
+                case Gfx::Pen::Solid:
+                    _pen->SetDashStyle(Gdiplus::DashStyleSolid);
+                break;
+
+                case Gfx::Pen::Dash:
+                    _pen->SetDashStyle(Gdiplus::DashStyleDash);
+                break;
+
+                case Gfx::Pen::Dot:
+                    _pen->SetDashStyle(Gdiplus::DashStyleDot);
+                break;
             }
 
-            DWORD penStyle = getPenStyle(pen);
+            switch (pen.capStyle())
+            {
+                case Gfx::Pen::FlatCap:
+                    _pen->SetLineCap(Gdiplus::LineCapFlat, Gdiplus::LineCapFlat, Gdiplus::DashCapFlat);
+                break;
 
-            _penColor = RGB( pen.color().red()  / 257, 
-                             pen.color().green() / 257, 
-                             pen.color().blue()  / 257 );
+                case Gfx::Pen::RoundCap:
+                    _pen->SetLineCap(Gdiplus::LineCapRound, Gdiplus::LineCapRound, Gdiplus::DashCapRound);
+                break;
 
-#ifdef _WIN32_WCE
-            _pen = CreatePen(penStyle, pen.size(), _penColor);
-#else
-            LOGBRUSH brush;
-            brush.lbStyle = BS_SOLID;
-            brush.lbColor = _penColor;
+                case Gfx::Pen::SquareCap:
+                    _pen->SetLineCap(Gdiplus::LineCapSquare, Gdiplus::LineCapSquare, Gdiplus::DashCapFlat);
+                break;
+            }
 
-            _pen = ExtCreatePen(penStyle, pen.size(), &brush, 0, NULL);
-#endif
+            switch (pen.joinStyle())
+            {
+                case Gfx::Pen::RoundJoin:
+                    _pen->SetLineJoin(Gdiplus::LineJoinRound);
+                break;
+
+                case Gfx::Pen::BevelJoin:
+                    _pen->SetLineJoin(Gdiplus::LineJoinBevel);
+                break;
+
+                case Gfx::Pen::MiterJoin:
+                    _pen->SetLineJoin(Gdiplus::LineJoinMiter);
+                break;
+            }
         }
 
-        HPEN pen() const
+        const Gdiplus::Pen& pen() const
         {
-            return _pen;
-        }
-
-        DWORD penColor() const
-        {
-            return _penColor;
+            return *_pen;
         }
 
         void setBrush(const Gfx::Brush& brush)
         {
-            if(_brush)
-            {
-                DeleteObject(_brush);
-                _brush = 0;
-            }
-           
-
-            _gradientBrush = false;
-
-            DWORD brushColor = RGB(brush.color().red() / 257, 
-                                   brush.color().green() / 257, 
-                                   brush.color().blue() / 257);
+            delete _brush;
 
             switch( brush.fillStyle() ) 
             {
                 case Gfx::Brush::Solid: 
                 {
-                    _brush = CreateSolidBrush(brushColor);
-                    break;
+                    _brush = new Gdiplus::SolidBrush(toGdi(brush.color()));
                 }
+                break;
 
                 case Gfx::Brush::Texture: 
                 {
+                    /*
                     const Gfx::Image& texture = brush.texture();
 
                     // use an empty brush for empty textures
@@ -174,29 +181,40 @@ class PainterImpl
                     _brush = CreatePatternBrush(bitmap);
                     DeleteObject(bitmap);
                     ReleaseDC(NULL, dc);
-                    break;     
+                    */
                 }
-                
+                break;
+
                 case Gfx::Brush::Gradient:
                 {
-                    _gradientBrush = true;
-                    break;
+                    switch (brush.gradient())
+                    {
+                        case Gfx::Brush::Linear:
+                        case Gfx::Brush::Horizontal:
+                        case Gfx::Brush::Vertical:
+                            _brush = new Gdiplus::LinearGradientBrush(toGdi(brush.gradientBegin()),
+                                                                      toGdi(brush.gradientEnd()),
+                                                                      toGdi(brush.color()), 
+                                                                      toGdi(brush.gradientColor()));
+                        break;
+
+                        case Gfx::Brush::Radial:
+
+                        break;
+                    }
                 }
-                
+                break;
+
                 default:
-                    break;
+                break;
             }
         }
 
-        HBRUSH brush() const
+        const Gdiplus::Brush& brush() const
         {
-            return _brush;
+            return *_brush;
         }
 
-        bool gradientBrush() const
-        {
-            return _gradientBrush;
-        }
 
         void setClip(const Gfx::RectF& rectF)
         {
@@ -235,20 +253,23 @@ class PainterImpl
 
         void setFont(const Gfx::Font& font)
         {
-            if(_font)
-            {
-                DeleteObject(_font);
-                _font = 0;
-            }
+            delete _font;
+            _font = toGdi(font);
 
-            _font = getFont(font);
+
+            _font->GetFamily(&_fontFamily);
         }
         
-        HFONT font() const
+        const Gdiplus::Font& font() const
         {
-            return _font;
+           return *_font;
         }
-        
+
+        const Gdiplus::FontFamily& fontFamily() const
+        {
+            return _fontFamily;
+        }
+
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
                                             const Pt::String& text)
         {   
@@ -256,60 +277,33 @@ class PainterImpl
             text.toUtf16( std::back_inserter(wtext) );
 
             HDC dc = GetDC(NULL);
-            HFONT newFont = getFont(font);
-            HGDIOBJ oldFont = SelectObject(dc, newFont);
-
-            
-            
-            //TEXTMETRIC tm;
-            //GetTextMetrics(dc, &tm);
-    
-            //SIZE textSize;
-            //GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
-    
-            //SelectObject(dc, oldFont);
-            //DeleteObject(newFont);
-            //ReleaseDC(NULL, dc);
-
-            //return Gfx::FontMetrics( tm.tmAscent, 
-            //                         tm.tmDescent, 
-            //                         textSize.cx, 
-            //                         tm.tmHeight );
-
-            
+            Gdiplus::Font* gdiFont = toGdi(font);
             
             Gdiplus::Graphics graphics(dc);
 
             const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
-            Gdiplus::Font gdiFont(dc);
 
             Gdiplus::FontFamily family;
-            gdiFont.GetFamily(&family);
+            gdiFont->GetFamily(&family);
 
-            Gdiplus::REAL height = gdiFont.GetHeight( graphics.GetDpiY() );
+            Gdiplus::REAL height = gdiFont->GetHeight( graphics.GetDpiY() );
 
-            UINT16 ascentUnits = family.GetCellAscent( gdiFont.GetStyle() );
-            UINT16 descentUnits = family.GetCellDescent( gdiFont.GetStyle() );
-            UINT16 heightUnits = family.GetLineSpacing( gdiFont.GetStyle() );
+            UINT16 ascentUnits = family.GetCellAscent( gdiFont->GetStyle() );
+            UINT16 descentUnits = family.GetCellDescent( gdiFont->GetStyle() );
+            UINT16 heightUnits = family.GetLineSpacing( gdiFont->GetStyle() );
             Gdiplus::REAL pixelsPerUnit = height / heightUnits;
 
             Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
             Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
 
             Gdiplus::RectF textRect;
-            graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
+            graphics.MeasureString(wtext.c_str(), wtext.size(), gdiFont, 
                                    Gdiplus::PointF(0, 0), format, &textRect);
 
-            SelectObject(dc, oldFont);
-            DeleteObject(newFont);
             ReleaseDC(NULL, dc);
+            delete gdiFont;
 
-            std::size_t ascent  = static_cast<std::size_t>( std::ceil(ascentF) );
-            std::size_t descent = static_cast<std::size_t>( std::ceil(descentF) );
-            std::size_t twidth   = static_cast<std::size_t>( std::lround(textRect.Width) );
-            std::size_t theight   = static_cast<std::size_t>( std::lround(textRect.Height) );
-            
-            return Gfx::FontMetrics(ascent, descent, twidth, theight);
+            return Gfx::FontMetrics(ascentF, descentF, textRect.Width, textRect.Height);
         }
         
         static std::string defaultFont()
@@ -328,136 +322,72 @@ class PainterImpl
             return _defaultFont; 
         }
     
-    private:
-        DWORD getPenStyle(const Pt::Gfx::Pen& pen)
+        static Gdiplus::Color toGdi(const Gfx::Color& c)
         {
-          using namespace Pt;
-
-#ifdef _WIN32_WCE
-            DWORD penStyle = 0;
-#else
-            DWORD penStyle = PS_GEOMETRIC;
-#endif
-
-            switch( pen.style() )
-            {
-                case Gfx::Pen::Solid:
-                    penStyle |= PS_SOLID;
-                    break;
-                
-                case Gfx::Pen::Dash:
-                    penStyle |= PS_DASH;
-                    break;
-
-                case Gfx::Pen::Dot:
-#ifdef _WIN32_WCE
-                    penStyle |= PS_DASH;
-#else
-                    penStyle |= PS_DOT;
-#endif
-                    break;
-            }
-
-#ifndef _WIN32_WCE
-            switch( pen.capStyle() )
-            {
-                case Gfx::Pen::FlatCap:
-                    penStyle |= PS_ENDCAP_FLAT;
-                    break;
-
-                case Gfx::Pen::RoundCap:
-                    penStyle |= PS_ENDCAP_ROUND;
-                    break;
-
-                case Gfx::Pen::SquareCap:
-                    penStyle |= PS_ENDCAP_SQUARE;
-                    break;
-            }
-
-            switch( pen.joinStyle() )
-            {
-                case Gfx::Pen::RoundJoin:
-                     penStyle |= PS_JOIN_ROUND;
-                    break;
-                
-                case Gfx::Pen::BevelJoin:
-                     penStyle |= PS_JOIN_BEVEL;
-                     break;
-
-                case Gfx::Pen::MiterJoin:
-                     penStyle |= PS_JOIN_MITER;
-                     break;
-            }
-#endif
-
-            return penStyle;
+            return Gdiplus::Color(c.alpha() / 257, c.red() / 257, c.green() / 257, c.blue() / 257);
         }
 
-        static HFONT getFont(const Pt::Gfx::Font& font)
+        static Gdiplus::PointF toGdi(const Gfx::PointF& p)
         {
-            int fontWeight;
-    
-            switch( font.style() ) 
+            return Gdiplus::PointF(static_cast<Gdiplus::REAL>(p.x()),
+                                   static_cast<Gdiplus::REAL>(p.y()));
+        }
+
+        static Gdiplus::SizeF toGdi(const Gfx::SizeF& s)
+        {
+            return Gdiplus::SizeF(static_cast<Gdiplus::REAL>(s.width()),
+                                  static_cast<Gdiplus::REAL>(s.height()));
+        }
+
+        static Gdiplus::RectF toGdi(const Gfx::RectF& r)
+        {
+            return Gdiplus::RectF(toGdi(r.topLeft()), toGdi(r.size()));
+        }
+
+        static Gdiplus::RectF toGdi(const Gfx::PointF& p, const Gfx::SizeF& s)
+        {
+            return Gdiplus::RectF(toGdi(p), toGdi(s));
+        }
+
+        static Gdiplus::Font* toGdi(const Pt::Gfx::Font& font)
+        {
+            Gdiplus::Font* f = 0;
+
+            const std::wstring fname(font.name().begin(), font.name().end());
+
+            switch (font.style())
             {
                 default:
                 case Pt::Gfx::Font::Normal:
+                    f = new Gdiplus::Font(fname.c_str(), static_cast<Gdiplus::REAL>(font.size()),
+                                          Gdiplus::FontStyleRegular);
+                break;
+
                 case Pt::Gfx::Font::Italic:
-                    fontWeight = FW_NORMAL;
-                    break;
+                    f = new Gdiplus::Font(fname.c_str(), static_cast<Gdiplus::REAL>(font.size()),
+                                          Gdiplus::FontStyleItalic);
+                break;
 
                 case Pt::Gfx::Font::Bold:
+                    f = new Gdiplus::Font(fname.c_str(), static_cast<Gdiplus::REAL>(font.size()),
+                                          Gdiplus::FontStyleBold);
+                break;
+
                 case Pt::Gfx::Font::BoldItalic:
-                    fontWeight = FW_BOLD;
-                    break;
+                    f = new Gdiplus::Font(fname.c_str(), static_cast<Gdiplus::REAL>(font.size()), 
+                                          Gdiplus::FontStyleBoldItalic);
+                break;
             }
 
-            BYTE italic = font.style() == Pt::Gfx::Font::Italic || 
-                          font.style() == Pt::Gfx::Font::BoldItalic;
-
-            HDC dc = GetDC(NULL);
-            int logicalPPI = GetDeviceCaps(dc, LOGPIXELSY);
-            int height = MulDiv(font.size(), logicalPPI, 72);
-            ReleaseDC(NULL, dc);
-            
-            // If a negative value is used for lfHeight, the font is
-            // looked up by character size, which is only the ascent.
-            // Looking up fonts by ascent seems to be more portable.
-
-            LOGFONT lf;
-            lf.lfHeight         = -height;                     // will be converted to device units    
-            lf.lfWidth          = 0;                           // default width of the font
-            lf.lfEscapement     = font.angle();                // escapement angle
-            lf.lfOrientation    = 0;                           // orientation
-            lf.lfWeight         = fontWeight;                  // font weight
-            lf.lfItalic         = italic;                      // italic
-            lf.lfUnderline      = FALSE;                       // underline
-            lf.lfStrikeOut      = FALSE;                       // strikeout
-            lf.lfCharSet        = DEFAULT_CHARSET;             // use the default charset
-            lf.lfOutPrecision   = OUT_DEFAULT_PRECIS;          // default output precision
-            lf.lfClipPrecision  = CLIP_DEFAULT_PRECIS;         // default clipping behaviour
-            lf.lfQuality        = DEFAULT_QUALITY;             // default quality
-            lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // default pitch and family
-
-            if( font.name().empty() )
-            {
-                memcpy(lf.lfFaceName, defaultFont().c_str(), std::min<size_t>( LF_FACESIZE, defaultFont().size() + 1) );
-            }
-            else
-            {
-                memcpy(lf.lfFaceName, font.name().c_str(), std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
-            }
-
-            HFONT hf = CreateFontIndirect(&lf);
-            return hf;
+            return f;
         }
 
     private:
-        HPEN           _pen;
-        DWORD          _penColor;
-        HBRUSH         _brush;
-        bool           _gradientBrush;
+        Gdiplus::Pen* _pen;
+        Gdiplus::Brush* _brush;
+        Gdiplus::Font* _font;
+        Gdiplus::FontFamily _fontFamily;
         HRGN           _clipRect;
-        HFONT          _font;
 };
 
 } // namespace
