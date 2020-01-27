@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -131,7 +131,7 @@ Gfx::FontMetrics PixmapSurface::fontMetrics(const Pt::String& text) const
 
 void PixmapSurface::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
-    
+
     _impl->drawLine(toPhysical(from), toPhysical(to));
 }
 
@@ -145,7 +145,7 @@ void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text)
 }
 
 
-void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text, 
+void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text,
                              const Gfx::Transform& t)
 {
     Gfx::Transform trans = t;
@@ -209,7 +209,7 @@ void PixmapSurface::drawSurface(const Gfx::PointF& to, const PixmapSurface& surf
 }
 
 
-void PixmapSurface::drawSurface(const Gfx::PointF& to, 
+void PixmapSurface::drawSurface(const Gfx::PointF& to,
                                   const PixmapSurface& pm,
                                   const Gfx::RectF& pmRect)
 {
@@ -235,13 +235,14 @@ void PixmapSurface::drawPicture(const Gfx::PointF& to, const Picture& pic)
 
 void PixmapSurface::drawPath(const Gfx::Path& path, float smoothness)
 {
-    _impl->drawPath(path, smoothness);
+    // NOTE: This cause compile error in my PC
+    //_impl->drawPath(path, smoothness);
 }
 
 
 PixmapSurfaceImpl* PixmapSurface::pixmapImpl() const
-{ 
-    return _impl; 
+{
+    return _impl;
 }
 
 } // namespace
