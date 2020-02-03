@@ -855,8 +855,6 @@ void Widget::repaint(const Gfx::RectF& rect)
 
     const std::vector<Widget*>& widgets = this->widgets();
 
-    Screen& screen = Application::instance().screen();
-
     std::vector<Widget*>::const_iterator it;
     for(it = widgets.begin() ; it != widgets.end(); ++it)
     {
