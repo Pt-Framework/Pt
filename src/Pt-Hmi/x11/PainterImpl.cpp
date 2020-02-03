@@ -329,8 +329,8 @@ void PainterImpl::setClip(const Gfx::RectF& rectF)
 void PainterImpl::resetClip()
 {
     Display* display = Application::instance().impl()->display();
-    XSetClipRectangles(display, _penGc, 0, 0, 0, 0, Unsorted);
-    XSetClipRectangles(display, _brushGc, 0, 0, 0, 0, Unsorted);
+    XSetClipMask(display, _penGc, None);
+    XSetClipMask(display, _brushGc, None);
 }
 
 

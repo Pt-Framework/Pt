@@ -158,9 +158,9 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& rectF)
 
 void PixmapSurfaceImpl::resetClip()
 {
-    XftDrawSetClipRectangles(_xftDraw, 0, 0, 0, 0);
+    XftDrawSetClip(_xftDraw, 0);
 
-    _painter->impl()->resetClip();
+    //_painter->impl()->resetClip();
 }
 
 
@@ -212,23 +212,6 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 }
 
 
-void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
-{
-    if( ! _painter ) 
-        return;   
-
-    int fromX = lround(from.x());
-    int fromY = lround(from.y());
-    int toX   = lround(to.x());
-    int toY   = lround(to.y());
-
-    GC& penGc = _painter->impl()->pen();
-
-    Display* display = Application::instance().impl()->display();
-    XDrawLine(display, _drawable, penGc, fromX, fromY, toX, toY); 
-}
-
-
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
     if( ! _painter ) 
@@ -256,12 +239,32 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 }
 
 
+void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+{
+    if( ! _painter ) 
+        return;   
+
+    int fromX = lround( from.x() - 0.4999 );
+    int fromY = lround( from.y() - 0.4999 );
+    int toX   = lround( to.x() - 0.4999 );
+    int toY   = lround( to.y() - 0.4999 );
+
+    GC& penGc = _painter->impl()->pen();
+
+    Display* display = Application::instance().impl()->display();
+    XDrawLine(display, _drawable, penGc, fromX, fromY, toX, toY); 
+}
+
+
 void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rectF)
 {
     if( ! _painter ) 
         return; 
 
-    Pt::Gfx::Rect rect = Gfx::round(rectF);
+    Pt::Gfx::Rect rect( Gfx::Point( lround(rectF.x() - 0.4999),
+                                    lround(rectF.y() - 0.4999) ),
+                        Gfx::Size( lround(rectF.width() - 0.4999),
+                                   lround(rectF.height() - 0.4999) ) );
 
     if( rect.width() == 0 || rect.height() == 0 ) 
         return;
@@ -269,8 +272,8 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rectF)
     Display* display = Application::instance().impl()->display();
     GC& penGc = _painter->impl()->pen();
 
-    XDrawRectangle(display, _drawable, penGc, 
-                   rect.x(), rect.y(), rect.width() - 1, rect.height() - 1);    
+    XDrawRectangle( display, _drawable, penGc, 
+                    rect.x(), rect.y(), rect.width(), rect.height() );
 }
 
 
@@ -279,7 +282,10 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rectF)
     if( ! _painter ) 
         return; 
 
-    Pt::Gfx::Rect rect = Gfx::round(rectF);
+    Pt::Gfx::Rect rect(Gfx::Point( lround(rectF.x() ),
+                                   lround(rectF.y() ) ),
+                       Gfx::Size( lround(rectF.width() + 0.001 ),
+                                  lround(rectF.height() + 0.001 ) ) );
 
     if( rect.width() == 0 || rect.height() == 0 ) 
         return;
@@ -349,10 +355,8 @@ void PixmapSurfaceImpl::drawPolyline(const Pt::Gfx::PointF* points, size_t point
     
     for(size_t n = 0; n < pointCount; ++n)
     {
-        Pt::Gfx::Point point = Gfx::round( points[n] );
-
-        xpoints[n].x = point.x();
-        xpoints[n].y = point.y();
+        xpoints[n].x = Pt::lround( points[n].x() - 0.4999 );
+        xpoints[n].y = Pt::lround( points[n].y() - 0.4999 );
     }
 
     XDrawLines(display, _drawable, penGc, 
@@ -372,10 +376,8 @@ void PixmapSurfaceImpl::fillPolygon(const Pt::Gfx::PointF* points, size_t pointC
 
     for(size_t n = 0; n < pointCount; ++n) 
     {
-        Pt::Gfx::Point point = Gfx::round( points[n] );
-        
-        xpoints[n].x = point.x();
-        xpoints[n].y = point.y();
+        xpoints[n].x = Pt::lround( points[n].x() - 0.4999 );
+        xpoints[n].y = Pt::lround( points[n].y() - 0.4999 );
     }
 
     XFillPolygon(display, _drawable, brushGc, 
@@ -393,8 +395,8 @@ void PixmapSurfaceImpl::drawSurface(const Pt::Gfx::PointF& toF,
     GC& brushGc = _painter->impl()->brush();
     ::Drawable from = pm.pixmapImpl()->drawable();
 
-    Pt::Gfx::Size size = Gfx::round(pm.size());
-    Pt::Gfx::Point to =  Gfx::round(toF);
+    Pt::Gfx::Size size = Gfx::round( pm.size() );
+    Pt::Gfx::Point to =  Gfx::round( toF );
 
     XCopyArea(display, from, _drawable, brushGc, 
             0, 0, size.width(), size.height(), to.x(), to.y() );
@@ -412,17 +414,17 @@ void PixmapSurfaceImpl::drawSurface(const Pt::Gfx::PointF& toF,
 
     Display* display = Application::instance().impl()->display();
     GC& brushGc = _painter->impl()->brush();
-	::Drawable source = pm.pixmapImpl()->drawable();
+    ::Drawable source = pm.pixmapImpl()->drawable();
 
-	Pt::Gfx::Size size =  Gfx::round(pm.size());
-	Pt::Gfx::Point to =  Gfx::round(toF);
+    Pt::Gfx::Size size =  Gfx::round( pm.size() );
+    Pt::Gfx::Point to =  Gfx::round( toF );
     const Gfx::Point from = Gfx::round( pmRect.topLeft() );
 
-	XCopyArea(display, source, _drawable, brushGc, 
+    XCopyArea(display, source, _drawable, brushGc, 
               from.x(), from.y(), 
               size.width(), size.height(), 
               to.x(), to.y() );
-	
+
     //XSync(display, false);        
 }
 
@@ -470,6 +472,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF,
     //std::clog << "XDestroyImage" << std::endl;
     XDestroyImage(ximage); 
 }
+
 
 void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& toF, const Picture& pic)
 {
