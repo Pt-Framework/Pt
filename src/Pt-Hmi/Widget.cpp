@@ -201,6 +201,8 @@ void Widget::setScreen(Screen* screen)
 
     invalidate();
 
+    relayout();
+
     _margin = align(_margin);
     _padding = align(_padding);
 
