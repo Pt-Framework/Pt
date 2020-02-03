@@ -180,7 +180,6 @@ void PushButton::setFont(const std::string& fontName)
 
 std::size_t PushButton::fontSize() const
 {
-
     return _fontSize ? *_fontSize
                      : Application::instance().styleOptions().font().size();
 }
@@ -289,7 +288,7 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 
 Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text());
+    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
     double textHeight = fm.height() + fm.descent(); // use descent as additional spacing
@@ -453,7 +452,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     }
 
     painter.setFont(_font);
-    Gfx::FontMetrics fm = painter.fontMetrics( text() );
+    //Gfx::FontMetrics fm = painter.fontMetrics( text() );
 
     //
     // button icon

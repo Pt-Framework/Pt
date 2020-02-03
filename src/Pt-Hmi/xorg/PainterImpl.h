@@ -37,6 +37,7 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
 
@@ -81,24 +82,23 @@ class PainterImpl
         
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text)
         {   
-            return Gfx::ImagePainter::fontMetrics(font, text); 
+            return Gfx::ImagePainter2::fontMetrics(font, text); 
         }
         
         static std::string defaultFont()
         {
-            return Gfx::ImagePainter::defaultFont();
+            return Gfx::ImagePainter2::defaultFont();
         }
 
         static void setDefaultFont(const std::string& f)
         {
-            Gfx::ImagePainter::setDefaultFont(f);
+            Gfx::ImagePainter2::setDefaultFont(f);
         }
 
         static void setFontDir(const Pt::System::Path& dir)
         {
-            Gfx::ImagePainter::setFontDir(dir);
+            Gfx::ImagePainter2::setFontDir(dir);
         }
-
 };
 
 }  // namespace
