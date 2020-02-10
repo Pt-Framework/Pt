@@ -10,18 +10,13 @@
 #include <Pt/System/Logger.h>
 
 
-class BasicStylesWidget : public Pt::Hmi::Control
+class PaintView : public Pt::Hmi::Control
 {
     public:
-        BasicStylesWidget()
-        {}
-
-        virtual ~BasicStylesWidget()
+        PaintView()
         {}
 
     protected:
-        virtual void drawShapes(Pt::Gfx::Painter& painter, const Pt::String& text) = 0;
-
         virtual void onPaint(Pt::Hmi::PaintSurface& surface,
                              const Pt::Gfx::RectF& rect)
         {
@@ -47,329 +42,113 @@ class BasicStylesWidget : public Pt::Hmi::Control
             imagePainter2.setBrush(background);
             imagePainter2.fillRect(imageRect);
 
-            drawShapes(painter,       "Native Painter");
-            drawShapes(imagePainter,  "ImagePainter"  );
-            drawShapes(imagePainter2, "ImagePainter2" );
+            onPaintContent(painter,       "Native Painter");
+            onPaintContent(imagePainter,  "ImagePainter"  );
+            onPaintContent(imagePainter2, "ImagePainter2" );
 
             painter.drawImage(PointF(210, 0), image1);
             painter.drawImage(PointF(420, 0), image2);
         }
+
+        virtual void onPaintContent(Pt::Gfx::Painter& painter, 
+                                    const Pt::String& text) = 0;
 };
 
 
-class LineStylesWidget : public BasicStylesWidget
+class LinesView : public PaintView
 {
-    private:
-        bool _userStyle;
-
     public:
-        LineStylesWidget(bool userStyle)
-        : _userStyle(userStyle)
-        {}
-
-        virtual ~LineStylesWidget()
+        LinesView()
         {}
 
     protected:
-        virtual void drawShapes(Pt::Gfx::Painter& painter, const Pt::String& text)
+        virtual void onPaintContent(Pt::Gfx::Painter& painter, 
+                                const Pt::String& text)
         {
             using namespace Pt::Gfx;
 
-            Color red         = Color::fromRgb8(255,   0,   0);
             Color lightPurple = Color::fromRgb8(164, 100, 255);
             Color lightBlue   = Color::fromRgb8(100, 100, 255);
 
             painter.setPen( lightPurple );
             painter.setFont( Font("", 12) );
-            painter.drawText( PointF(20, 22), text);
+            painter.drawText( PointF(10, 20), text );
+
+            int y = 30;
 
             painter.setFont( Font("", 10) );
+            painter.setPen(lightBlue);
+            painter.drawText( PointF(20, y + 12), "FlatCap");
+            y += 18;
 
-            int y = 40;
+            y = drawLines(y, painter, Pen::Solid, Pen::FlatCap);
+            y = drawLines(y, painter, Pen::Dash, Pen::FlatCap);
+            y = drawLines(y, painter, Pen::Dot, Pen::FlatCap);
+            y = drawLines(y, painter, Pen::DashPattern, Pen::FlatCap);
 
-            // User-defined style
-            const Pt::uint8_t  userStyle[]  = { 1, 1, 3, 3 };
-            const Pt::uint8_t* userStyleBeg = userStyle;
-            const Pt::uint8_t* userStyleEnd = userStyle + sizeof(userStyle);
+            painter.setPen(lightBlue);
+            painter.drawText( PointF(20, y + 12), "SquareCap");
+            y += 18;
 
+            y = drawLines(y, painter, Pen::Solid, Pen::SquareCap);
+            y = drawLines(y, painter, Pen::Dash, Pen::SquareCap);
+            y = drawLines(y, painter, Pen::Dot, Pen::SquareCap);
+            y = drawLines(y, painter, Pen::DashPattern, Pen::SquareCap);
 
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "FlatCap");
-                y += 20;
+            painter.setPen(lightBlue);
+            painter.drawText( PointF(20, y + 12), "RoundCap");
+            y += 18;
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::FlatCap);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::FlatCap);
-
-                if(_userStyle) {
-                    pen1Solid = Pen(red, 1, userStyleBeg, userStyleEnd, Pen::FlatCap);
-                    pen2Solid = Pen(red, 4, userStyleBeg, userStyleEnd, Pen::FlatCap);
-                    pen3Solid = Pen(red, 9, userStyleBeg, userStyleEnd, Pen::FlatCap);
-                }
-
-                painter.setPen(pen1Solid);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen2Solid);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen3Solid);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-
-                Pen pen1Dot(red, 1, Pen::Dot, Pen::FlatCap);
-                Pen pen2Dot(red, 4, Pen::Dot, Pen::FlatCap);
-                Pen pen3Dot(red, 9, Pen::Dot, Pen::FlatCap);
-                painter.setPen(pen1Dot);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen2Dot);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen3Dot);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-
-                Pen pen1Dash(red, 1, Pen::Dash, Pen::FlatCap);
-                Pen pen2Dash(red, 4, Pen::Dash, Pen::FlatCap);
-                Pen pen3Dash(red, 9, Pen::Dash, Pen::FlatCap);
-                painter.setPen(pen1Dash);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen2Dash);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen3Dash);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-
-                y += 5;
-            }
-
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "SquareCap");
-                y += 20;
-
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::SquareCap);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::SquareCap);
-
-                if(_userStyle) {
-                    pen2Solid = Pen(red, 4, userStyleBeg, userStyleEnd, Pen::SquareCap);
-                    pen3Solid = Pen(red, 9, userStyleBeg, userStyleEnd, Pen::SquareCap);
-                }
-
-                painter.setPen(pen2Solid);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen3Solid);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-
-                Pen pen2Dot(red, 4, Pen::Dot, Pen::SquareCap);
-                Pen pen3Dot(red, 9, Pen::Dot, Pen::SquareCap);
-                painter.setPen(pen2Dot);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen3Dot);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-
-                Pen pen2Dash(red, 4, Pen::Dash, Pen::SquareCap);
-                Pen pen3Dash(red, 9, Pen::Dash, Pen::SquareCap);
-                painter.setPen(pen2Dash);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen3Dash);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-
-                y += 5;
-            }
-
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "RoundCap");
-                y += 20;
-
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::SquareCap);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::SquareCap);
-
-                if(_userStyle) {
-                    pen2Solid = Pen(red, 4, userStyleBeg, userStyleEnd, Pen::SquareCap);
-                    pen3Solid = Pen(red, 9, userStyleBeg, userStyleEnd, Pen::SquareCap);
-                }
-
-                painter.setPen(pen2Solid);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen3Solid);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-
-                Pen pen2Dot(red, 4, Pen::Dot, Pen::RoundCap);
-                Pen pen3Dot(red, 9, Pen::Dot, Pen::RoundCap);
-                painter.setPen(pen2Dot);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen3Dot);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-
-                Pen pen2Dash(red, 4, Pen::Dash, Pen::RoundCap);
-                Pen pen3Dash(red, 9, Pen::Dash, Pen::RoundCap);
-                painter.setPen(pen2Dash);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-                painter.setPen(pen3Dash);
-                painter.drawLine( PointF(10, y),
-                                  PointF(180, y) ); y += 15;
-
-                y += 5;
-            }
+            y = drawLines(y, painter, Pen::Solid, Pen::RoundCap);
+            y = drawLines(y, painter, Pen::Dash, Pen::RoundCap);
+            y = drawLines(y, painter, Pen::Dot, Pen::RoundCap);
+            y = drawLines(y, painter, Pen::DashPattern, Pen::RoundCap);
         }
-};
 
-
-
-class EllipseWidget : public BasicStylesWidget
-{
-public:
-    EllipseWidget()
-    {}
-
-    virtual ~EllipseWidget()
-    {}
-
-protected:
-    virtual void drawShapes(Pt::Gfx::Painter& painter, const Pt::String& text)
-    {
-        using namespace Pt::Gfx;
-
-        Color red = Color::fromRgb8(255, 0, 0);
-        Color lightPurple = Color::fromRgb8(164, 100, 255);
-        Color lightBlue = Color::fromRgb8(100, 100, 255);
-
-        painter.setPen(Pen(lightPurple,1));
-
-        painter.setBrush(lightBlue);
-        painter.setFont(Font("", 12));
-        painter.drawText(PointF(20, 22), text);
-
-        painter.setFont(Font("", 10));
-
-        painter.drawEllipse(PointF(20, 50), SizeF(100, 50));
-        painter.fillEllipse(PointF(30, 60), SizeF(80, 30));
-        painter.drawCircle(PointF(120, 50), 10);
-        painter.fillCircle(PointF(122, 52), 5);
-
-        painter.drawEllipse(PointF(20, 120), SizeF(50, 100));
-        painter.fillEllipse(PointF(30, 130), SizeF(30, 80));
-
-        painter.drawRect(RectF(PointF(20, 240), SizeF(50, 100)));
-        painter.fillRect(RectF(PointF(30, 250), SizeF(30, 80)));
-    }
-};
-
-
-
-class CapStylesWidget : public BasicStylesWidget
-{
-    public:
-        CapStylesWidget()
-        {}
-
-        virtual ~CapStylesWidget()
-        {}
-
-    protected:
-
-        virtual void drawShapes(Pt::Gfx::Painter& painter, const Pt::String& text)
+        int drawLines(int y, Pt::Gfx::Painter& painter,
+                      Pt::Gfx::Pen::Style style,
+                      Pt::Gfx::Pen::CapStyle cap)
         {
             using namespace Pt::Gfx;
+            
+            Pt::uint8_t dashes[] = { 1, 1, 3, 1 };
+            std::vector<Pt::uint8_t> dashPattern( dashes, dashes + sizeof(dashes) );
 
-            Color red         = Color::fromRgb8(255,   0,   0);
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue   = Color::fromRgb8(100, 100, 255);
+            Color red = Color::fromRgb8(255, 0, 0);
 
-            painter.setPen( lightPurple );
-            painter.setFont( Font("", 12) );
-            painter.drawText( PointF(20, 22), text);
+            Pen pen(red, 1, style, cap);
+            
+            if(style == Pen::DashPattern)
+                pen.setDashPattern(dashPattern);
 
-            painter.setFont( Font("", 10) );
+            painter.setPen(pen);
+            painter.drawLine( PointF(10, y), PointF(190, y) ); 
+            y += 6;
 
-            int y = 40;
+            pen.setSize(4);
+            painter.setPen(pen);
+            painter.drawLine( PointF(10, y), PointF(190, y) ); 
+            y += 10;
 
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "FlatCap");
-                y += 20;
+            pen.setSize(10);
+            painter.setPen(pen);
+            painter.drawLine( PointF(10, y), PointF(190, y) ); 
+            y += 12;
 
-                Pen pen1Solid(red,  1, Pen::Solid, Pen::FlatCap);
-                Pen pen2Solid(red,  4, Pen::Solid, Pen::FlatCap);
-                Pen pen3Solid(red,  9, Pen::Solid, Pen::FlatCap);
-                Pen pen4Solid(red, 14, Pen::Solid, Pen::FlatCap);
-
-                painter.setPen(pen1Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-                painter.setPen(pen2Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-                painter.setPen(pen3Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-                painter.setPen(pen4Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-
-                y += 5;
-            }
-
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "SquareCap");
-                y += 20;
-
-                Pen pen1Solid(red,  1, Pen::Solid, Pen::SquareCap);
-                Pen pen2Solid(red,  4, Pen::Solid, Pen::SquareCap);
-                Pen pen3Solid(red,  9, Pen::Solid, Pen::SquareCap);
-                Pen pen4Solid(red, 14, Pen::Solid, Pen::SquareCap);
-
-                painter.setPen(pen1Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-                painter.setPen(pen2Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-                painter.setPen(pen3Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-                painter.setPen(pen4Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-
-                y += 5;
-            }
-
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "RoundCap");
-                y += 20;
-
-                Pen pen1Solid(red,  1, Pen::Solid, Pen::RoundCap);
-                Pen pen2Solid(red,  4, Pen::Solid, Pen::RoundCap);
-                Pen pen3Solid(red,  9, Pen::Solid, Pen::RoundCap);
-                Pen pen4Solid(red, 14, Pen::Solid, Pen::RoundCap);
-
-                painter.setPen(pen1Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-                painter.setPen(pen2Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-                painter.setPen(pen3Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-                painter.setPen(pen4Solid); painter.drawLine( PointF(10, y), PointF(180, y) ); y += 15;
-
-                y += 5;
-            }
+            return y;
         }
 };
 
 
-class JoinStylesWidget : public BasicStylesWidget
+class PolylinesView : public PaintView
 {
     public:
-        JoinStylesWidget()
-        {}
-
-        virtual ~JoinStylesWidget()
+        PolylinesView()
         {}
 
     protected:
 
-        virtual void drawShapes(Pt::Gfx::Painter& painter, const Pt::String& text)
+        virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text)
         {
             using namespace Pt::Gfx;
 
@@ -650,26 +429,57 @@ class JoinStylesWidget : public BasicStylesWidget
 };
 
 
+class ShapesView : public PaintView
+{
+    public:
+        ShapesView()
+        {}
+
+    protected:
+        virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text)
+        {
+            using namespace Pt::Gfx;
+
+            Color red = Color::fromRgb8(255, 0, 0);
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+            painter.setPen(Pen(lightPurple,1));
+
+            painter.setBrush(lightBlue);
+            painter.setFont(Font("", 12));
+            painter.drawText(PointF(20, 22), text);
+
+            painter.setFont(Font("", 10));
+
+            painter.drawEllipse(PointF(20, 50), SizeF(100, 50));
+            painter.fillEllipse(PointF(30, 60), SizeF(80, 30));
+            painter.drawCircle(PointF(120, 50), 10);
+            painter.fillCircle(PointF(122, 52), 5);
+
+            painter.drawEllipse(PointF(20, 120), SizeF(50, 100));
+            painter.fillEllipse(PointF(30, 130), SizeF(30, 80));
+
+            painter.drawRect(RectF(PointF(20, 240), SizeF(50, 100)));
+            painter.fillRect(RectF(PointF(30, 250), SizeF(30, 80)));
+        }
+};
+
+
 class PainterDemoWindow : public Pt::Hmi::Window
 {
     public:
         PainterDemoWindow()
-        : _tabLineStyles1(false)
-        , _tabLineStyles2(true)
         {
-            _tabLineStyles1.setMargin(2);
-            _tabLineStyles2.setMargin(2);
-            _tabCapStyles  .setMargin(2);
-            _tabJoinStyles .setMargin(2);
-            _tabEllipseStyles.setMargin(2);
+            _linesView.setMargin(2);
+            _polylinesView.setMargin(2);
+            _shapesView.setMargin(2);
 
-            _tabView.addTab(_tabLineStyles1, "Line Styles 1");
-            _tabView.addTab(_tabLineStyles2, "Dashes");
-            _tabView.addTab(_tabCapStyles,   "Cap Styles"   );
-            _tabView.addTab(_tabJoinStyles,  "Join Styles"  );
-            _tabView.addTab(_tabEllipseStyles, "Ellipse");
+            _tabView.addTab(_linesView, "Lines");
+            _tabView.addTab(_polylinesView, "Polylines"  );
+            _tabView.addTab(_shapesView, "Shapes");
             _tabView.setPadding(8);
-            _tabView.setCurrent(3);
+            _tabView.setCurrent(0);
 
             this->setContent(&_tabView);
         }
@@ -683,11 +493,9 @@ class PainterDemoWindow : public Pt::Hmi::Window
 
     private:
         Pt::Hmi::TabView _tabView;
-        LineStylesWidget _tabLineStyles1;
-        LineStylesWidget _tabLineStyles2;
-        CapStylesWidget  _tabCapStyles;
-        JoinStylesWidget _tabJoinStyles;
-        EllipseWidget    _tabEllipseStyles;
+        LinesView        _linesView;
+        PolylinesView    _polylinesView;
+        ShapesView       _shapesView;
 };
 
 
@@ -696,6 +504,7 @@ int main(int argc, char* args[])
     try
     {
         Pt::System::Logger::setLogLevel( "Pt.Hmi", Pt::System::Info );
+        Pt::System::Logger::setLogLevel( "Pt.Gfx", Pt::System::Info );
 
         Pt::Hmi::Application app(argc, args);
         app.setScaleFactor(1.0);

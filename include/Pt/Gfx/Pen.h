@@ -42,7 +42,7 @@ namespace Gfx {
 
 class PenData;
 
-/** @brief Attributs for the drawing of outlines.
+/** @brief Attributes for the drawing of outlines.
 
     Pen objects are used as container of drawing attributes for Painter
     objects. A size and a color can be specified per pen. The size and
@@ -105,17 +105,9 @@ class PT_GFX_API Pen
             const std::vector<Pt::uint8_t>& dashPattern,
             CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
-        /** @brief Constructs a Pen with the specified size, color and custom styles.
+        /** @brief Returns true if the pen is null.
         */
-        Pen(const Color& color, std::size_t width,
-            const Pt::uint8_t* dashPattern, Pt::uint8_t dashPatternSize,
-            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
-
-        /** @brief Constructs a Pen with the specified size, color and custom styles.
-        */
-        Pen(const Color& color, std::size_t width,
-            const Pt::uint8_t* dashPatternBeg, const Pt::uint8_t* dashPatternEnd,
-            CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
+        bool isNull() const;
 
         /** @brief Sets the size of the pen.
         */
@@ -141,6 +133,11 @@ class PT_GFX_API Pen
         */
         Style style() const;
 
+        /** @brief Returns true if the pen is solid.
+        */
+        bool isSolid() const
+        { return style() == Solid; }
+
         /** @brief Sets the pen user dash pattern.
         */
         void setDashPattern(const std::vector<Pt::uint8_t>& dashPattern);
@@ -164,15 +161,6 @@ class PT_GFX_API Pen
         /** @brief Returns the join style.
         */
         JoinStyle joinStyle() const;
-
-        /** @brief Returns true if the pen is null.
-        */
-        bool isNull() const;
-
-        /** @brief Returns true if the pen is solid.
-        */
-        inline bool isSolid() const
-        { return (style() == Solid) && dashPattern().empty(); }
 
     private:
       SmartPtr<PenData> _penData;
@@ -234,7 +222,7 @@ class PT_GFX_API PenData
 
       void setDashPattern(const std::vector<Pt::uint8_t>& dashPattern)
       {
-          _style       = Pen::Solid;
+          _style       = Pen::DashPattern;
           _dashPattern = dashPattern;
       }
 

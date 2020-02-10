@@ -34,7 +34,6 @@ namespace Pt {
 
 namespace Gfx {
 
-
 Pen::Pen()
 : _penData(new PenData(Color(0, 0, 0), 0, Solid, RoundCap, RoundJoin))
 {}
@@ -45,30 +44,30 @@ Pen::Pen(const Color& color)
 {}
 
 
-Pen::Pen(const Color& color, std::size_t size, Style style, CapStyle cap, JoinStyle join)
+Pen::Pen(const Color& color, std::size_t size, 
+         Style style, CapStyle cap, JoinStyle join)
 : _penData(new PenData(color, size, style, cap, join))
 {}
 
 
-Pen::Pen(const Color& color, std::size_t size, const std::vector<Pt::uint8_t>& userDashPattern, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, DashPattern, userDashPattern, cap, join))
+Pen::Pen(const Color& color, std::size_t size, 
+         const std::vector<Pt::uint8_t>& dashPattern, 
+         CapStyle cap, JoinStyle join)
+: _penData(new PenData(color, size, DashPattern, dashPattern, cap, join))
 {}
 
 
-Pen::Pen(const Color& color, std::size_t size, const Pt::uint8_t* userDashPattern, Pt::uint8_t userDashPatternCount, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, DashPattern, userDashPattern, userDashPattern + userDashPatternCount, cap, join))
-{}
-
-
-Pen::Pen(const Color& color, std::size_t size, const Pt::uint8_t* userDashPatternBeg, const Pt::uint8_t* userDashPatternEnd, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, DashPattern, userDashPatternBeg, userDashPatternEnd, cap, join))
-{}
+bool Pen::isNull() const
+{
+    return size() == 0;
+}
 
 
 void Pen::setColor(const Color& color)
 {
     // COW
-    if(_penData.refs() > 1) {
+    if(_penData.refs() > 1) 
+    {
         SmartPtr<PenData> penData( new PenData(*_penData) );
         _penData = penData;
     }
@@ -86,7 +85,8 @@ const Color& Pen::color() const
 void Pen::setSize(std::size_t size)
 {
     // COW
-    if(_penData.refs() > 1) {
+    if(_penData.refs() > 1) 
+    {
         SmartPtr<PenData> penData( new PenData(*_penData) );
         _penData = penData;
     }
@@ -122,7 +122,8 @@ Pen::Style Pen::style() const
 void Pen::setDashPattern(const std::vector<Pt::uint8_t>& dashPattern)
 {
     // COW
-    if(_penData.refs() > 1) {
+    if(_penData.refs() > 1) 
+    {
         SmartPtr<PenData> penData( new PenData(*_penData) );
         _penData = penData;
     }
@@ -140,7 +141,8 @@ const std::vector<Pt::uint8_t>& Pen::dashPattern() const
 void Pen::setCapStyle(CapStyle cap)
 {
     // COW
-    if(_penData.refs() > 1) {
+    if(_penData.refs() > 1) 
+    {
         SmartPtr<PenData> penData( new PenData(*_penData) );
         _penData = penData;
     }
@@ -158,7 +160,8 @@ Pen::CapStyle Pen::capStyle() const
 void Pen::setJoinStyle(JoinStyle join)
 {
     // COW
-    if(_penData.refs() > 1) {
+    if(_penData.refs() > 1) 
+    {
         SmartPtr<PenData> penData( new PenData( *_penData) );
         _penData = penData;
     }
@@ -171,13 +174,6 @@ Pen::JoinStyle Pen::joinStyle() const
 {
     return _penData->joinStyle();
 }
-
-
-bool Pen::isNull() const
-{
-    return size() == 0;
-}
-
 
 } // namespace
 
