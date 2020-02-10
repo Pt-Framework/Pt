@@ -160,7 +160,7 @@ void PixmapSurfaceImpl::resetClip()
 {
     XftDrawSetClip(_xftDraw, 0);
 
-    //_painter->impl()->resetClip();
+    _painter->impl()->resetClip();
 }
 
 
