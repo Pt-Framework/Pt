@@ -321,12 +321,16 @@ struct char_traits<Pt::Char>
 
     inline static char_type* move(char_type* s1, const char_type* s2, std::size_t n)
     {
-        return (Pt::Char*) std::memmove(s1, s2, n * sizeof(Pt::Char));
+        return (Pt::Char*) std::memmove( static_cast<void*>(s1),
+                                         static_cast<const void*>(s2),
+                                         n * sizeof(Pt::Char) );
     }
 
     inline static char_type* copy(char_type* s1, const char_type* s2, std::size_t n)
     {
-        return (Pt::Char*) std::memcpy(s1, s2, n * sizeof(Pt::Char));
+        return (Pt::Char*) std::memcpy( static_cast<void*>(s1),
+                                        static_cast<const void*>(s2),
+                                        n * sizeof(Pt::Char) );
     }
 
     inline static char_type* assign(char_type* s, std::size_t n, char_type a)
