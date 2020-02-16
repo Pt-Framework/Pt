@@ -317,7 +317,7 @@ void PixmapSurfaceImpl::drawEllipse(const Pt::Gfx::PointF& topLeftF,
 
     XDrawArc(display, _drawable, penGc, 
              topLeft.x(), topLeft.y(), 
-             size.width() - 1, size.height() - 1, 
+             size.width(), size.height(), 
              0, 360*64);    
 }
 

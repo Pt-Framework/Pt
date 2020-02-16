@@ -168,17 +168,25 @@ protected:
 
         painter.setBrush(lightPurple);
 
-        painter.drawCircle(PointF(4.5, y - 0.5), 20);
-        painter.fillCircle(PointF(25.5, y - 0.5), 20);
+        painter.fillCircle(PointF(5, y), 20);
+        painter.drawCircle(PointF(35, y), 20);
 
-        painter.fillEllipse(PointF(69.5, y-0.5), SizeF(60, 20));
-        painter.drawEllipse(PointF(69.5, y-0.5), SizeF(60, 20));
+        y += 25;
+
+        painter.fillCircle(PointF(5, y), 20);
+        painter.drawCircle(PointF(5, y), 20);
+
+
+        painter.fillEllipse(PointF(70, y), SizeF(60, 20));
+        painter.drawEllipse(PointF(70, y), SizeF(60, 20));
 
         //painter.drawEllipse(PointF(20, 120), SizeF(50, 100));
         //painter.fillEllipse(PointF(30, 130), SizeF(30, 80));
 
-        //painter.drawRect(RectF(PointF(20, 240), SizeF(50, 100)));
-        //painter.fillRect(RectF(PointF(30, 250), SizeF(30, 80)));
+        y += 30;
+
+        painter.fillRect(RectF(PointF(20, y), SizeF(20, 30)));
+        painter.drawRect(RectF(PointF(20.5, y + 0.5), SizeF(19, 29)));
     }
 };
 
