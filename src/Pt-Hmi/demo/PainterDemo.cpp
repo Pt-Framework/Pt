@@ -140,6 +140,49 @@ class LinesView : public PaintView
 };
 
 
+
+class ShapesView : public PaintView
+{
+public:
+    ShapesView()
+    {}
+
+protected:
+    virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text)
+    {
+        using namespace Pt::Gfx;
+
+        Color lightPurple = Color::fromRgb8(164, 100, 255);
+        Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+        painter.setPen(lightPurple);
+        painter.setFont(Font("", 12));
+        painter.drawText(PointF(10, 20), text);
+
+        int y = 30;
+
+        painter.setFont(Font("", 10));
+        painter.setPen(lightBlue);
+        painter.drawText(PointF(20, y + 12), "Ellipse and Circle");
+        y += 18;
+
+        painter.setBrush(lightPurple);
+
+        painter.drawCircle(PointF(4.5, y - 0.5), 20);
+        painter.fillCircle(PointF(25.5, y - 0.5), 20);
+
+        painter.fillEllipse(PointF(69.5, y-0.5), SizeF(60, 20));
+        painter.drawEllipse(PointF(69.5, y-0.5), SizeF(60, 20));
+
+        //painter.drawEllipse(PointF(20, 120), SizeF(50, 100));
+        //painter.fillEllipse(PointF(30, 130), SizeF(30, 80));
+
+        //painter.drawRect(RectF(PointF(20, 240), SizeF(50, 100)));
+        //painter.fillRect(RectF(PointF(30, 250), SizeF(30, 80)));
+    }
+};
+
+
 class PolylinesView : public PaintView
 {
     public:
@@ -429,43 +472,6 @@ class PolylinesView : public PaintView
 };
 
 
-class ShapesView : public PaintView
-{
-    public:
-        ShapesView()
-        {}
-
-    protected:
-        virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text)
-        {
-            using namespace Pt::Gfx;
-
-            Color red = Color::fromRgb8(255, 0, 0);
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue = Color::fromRgb8(100, 100, 255);
-
-            painter.setPen(Pen(lightPurple,1));
-
-            painter.setBrush(lightBlue);
-            painter.setFont(Font("", 12));
-            painter.drawText(PointF(20, 22), text);
-
-            painter.setFont(Font("", 10));
-
-            painter.drawEllipse(PointF(20, 50), SizeF(100, 50));
-            painter.fillEllipse(PointF(30, 60), SizeF(80, 30));
-            painter.drawCircle(PointF(120, 50), 10);
-            painter.fillCircle(PointF(122, 52), 5);
-
-            painter.drawEllipse(PointF(20, 120), SizeF(50, 100));
-            painter.fillEllipse(PointF(30, 130), SizeF(30, 80));
-
-            painter.drawRect(RectF(PointF(20, 240), SizeF(50, 100)));
-            painter.fillRect(RectF(PointF(30, 250), SizeF(30, 80)));
-        }
-};
-
-
 class PainterDemoWindow : public Pt::Hmi::Window
 {
     public:
@@ -479,7 +485,7 @@ class PainterDemoWindow : public Pt::Hmi::Window
             _tabView.addTab(_polylinesView, "Polylines"  );
             _tabView.addTab(_shapesView, "Shapes");
             _tabView.setPadding(8);
-            _tabView.setCurrent(0);
+            _tabView.setCurrent(2);
 
             this->setContent(&_tabView);
         }

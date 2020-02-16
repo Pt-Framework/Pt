@@ -58,7 +58,7 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
     SelectObject(_dc, _bitmap);
     SetBkMode(_dc, TRANSPARENT);
 
-    SetGraphicsMode(_dc, GM_ADVANCED);
+//    SetGraphicsMode(_dc, GM_ADVANCED);
 
     _graphics = new Gdiplus::Graphics(_dc);
 }
@@ -92,15 +92,12 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
                                                       lround( _size.height() ) );
 
     _dc = CreateCompatibleDC(screenDC);
-
     ReleaseDC(NULL, screenDC);
 
     SelectObject(_dc, bitmap);
-
     _bitmap = bitmap;
 
     delete _graphics;
-
     _graphics = new Gdiplus::Graphics(_dc);
 }
 
@@ -131,22 +128,15 @@ const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
-    _painter->impl()->setClip(clipRect);
-    
-
-    HRGN hrgn = _painter->impl()->clipRect();
-
-    
-    if (hrgn)
-        _graphics->SetClip(hrgn);
-    else
+    if (clipRect.isNull())
         _graphics->ResetClip();
+    else
+        _graphics->SetClip(PainterImpl::toGdi(clipRect));
 }
 
 
 void PixmapSurfaceImpl::resetClip()
 {
-    _painter->impl()->resetClip();
     _graphics->ResetClip();
 }
 
@@ -158,19 +148,16 @@ void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
 
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 {
-    
 }
 
 
 void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 {
-
 }
 
 
 void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 {
-
 }
 
 
@@ -251,10 +238,10 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     BYTE green = color.green() / 257; 
     BYTE blue  = color.blue()  / 257;
 
-    Gdiplus::SolidBrush blackBrush( Gdiplus::Color(alpha, red, green, blue) );
+    Gdiplus::SolidBrush brush( Gdiplus::Color(alpha, red, green, blue) );
 
     _graphics->DrawString( _text.c_str(), _text.size(), &font,
-                         origin, format, &blackBrush);
+                         origin, format, &brush);
 
     _graphics->SetTransform(&oldMatrix);
 }
@@ -284,14 +271,16 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     const Gdiplus::Pen& pen = _painter->impl()->pen();
-    _graphics->DrawEllipse(&pen, PainterImpl::toGdi(topLeft, size));
+    _graphics->DrawEllipse(&pen, PainterImpl::toGdi(Gfx::PointF(topLeft.x(), topLeft.y()), 
+                                                    Gfx::SizeF(size.width(), size.height())));
 }
 
 
 void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     const Gdiplus::Brush& brush = _painter->impl()->brush();
-    _graphics->FillEllipse(&brush, PainterImpl::toGdi(topLeft, size));
+    _graphics->FillEllipse(&brush, PainterImpl::toGdi(Gfx::PointF(topLeft.x(), topLeft.y()), 
+                                                      Gfx::SizeF(size.width(), size.height())));
 }
 
 

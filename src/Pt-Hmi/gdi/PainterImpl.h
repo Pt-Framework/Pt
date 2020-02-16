@@ -55,22 +55,16 @@ class PainterImpl
 {
     public:
         PainterImpl()
-        : _pen( new Gdiplus::Pen(Gdiplus::Color(0, 0, 0), 1))
-        , _brush( new Gdiplus::SolidBrush(Gdiplus::Color(0, 0, 0)))
-        , _clipRect(0)
-        , _font(new Gdiplus::Font(L"", 1))
+        : _pen( new Gdiplus::Pen(Gdiplus::Color(0, 0, 0), 1) )
+        , _brush( new Gdiplus::SolidBrush(Gdiplus::Color(0, 0, 0)) )
+        , _font( new Gdiplus::Font(L"", 1) )
         { }
 
         ~PainterImpl()
         {
             delete _pen;
-
             delete _brush;
-
             delete _font;
-
-            if(_clipRect)
-                DeleteObject(_clipRect);
         }
 
         void setPen(const Gfx::Pen& pen)
@@ -79,7 +73,7 @@ class PainterImpl
 
             _pen = new Gdiplus::Pen(toGdi(pen.color()), static_cast<Gdiplus::REAL>(pen.size()));
 
-            switch (pen.style())
+            switch( pen.style() )
             {
                 case Gfx::Pen::Solid:
                     _pen->SetDashStyle(Gdiplus::DashStyleSolid);
@@ -103,7 +97,7 @@ class PainterImpl
                 break;
             }
 
-            switch (pen.capStyle())
+            switch( pen.capStyle() )
             {
                 case Gfx::Pen::FlatCap:
                     _pen->SetLineCap(Gdiplus::LineCapFlat, Gdiplus::LineCapFlat, Gdiplus::DashCapFlat);
@@ -118,7 +112,7 @@ class PainterImpl
                 break;
             }
 
-            switch (pen.joinStyle())
+            switch( pen.joinStyle() )
             {
                 case Gfx::Pen::RoundJoin:
                     _pen->SetLineJoin(Gdiplus::LineJoinRound);
@@ -224,38 +218,6 @@ class PainterImpl
             return *_brush;
         }
 
-
-        void setClip(const Gfx::RectF& rectF)
-        {
-            Gfx::Rect rect = round(rectF);
-
-            if(_clipRect)
-            {
-                DeleteObject(_clipRect);
-                _clipRect = NULL;
-            }
-            
-            // CreateRectRgn only includes the interior of the rect
-            _clipRect = CreateRectRgn( rect.x(), 
-                                       rect.y(), 
-                                       rect.bottomRight().x(), 
-                                       rect.bottomRight().y() );
-        }
-
-        void resetClip()
-        {
-            if(_clipRect)
-            {
-                DeleteObject(_clipRect);
-                _clipRect = NULL;
-            }
-        }
-
-        HRGN clipRect() const
-        {
-            return _clipRect;
-        }
-
         void setCompositionMode(const Gfx::CompositionMode& mode)
         {
         }
@@ -264,7 +226,6 @@ class PainterImpl
         {
             delete _font;
             _font = toGdi(font);
-
 
             _font->GetFamily(&_fontFamily);
         }
@@ -314,7 +275,7 @@ class PainterImpl
 
             return Gfx::FontMetrics(ascentF, descentF, textRect.Width, textRect.Height);
         }
-        
+
         static std::string defaultFont()
         {
             return getDefaultFont();
@@ -391,13 +352,11 @@ class PainterImpl
             return f;
         }
 
-
     private:
-        Gdiplus::Pen* _pen;
-        Gdiplus::Brush* _brush;
-        Gdiplus::Font* _font;
+        Gdiplus::Pen*       _pen;
+        Gdiplus::Brush*     _brush;
+        Gdiplus::Font*      _font;
         Gdiplus::FontFamily _fontFamily;
-        HRGN           _clipRect;
 };
 
 } // namespace

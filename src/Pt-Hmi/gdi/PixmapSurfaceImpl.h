@@ -118,12 +118,13 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         void bitBlit( const Gfx::Point& pos, size_t width, size_t height, HBITMAP bitmap, DWORD op );
 
     private:
-        Gfx::SizeF     _size;
-        Painter*       _painter;
-        HDC            _dc;
-        HBITMAP        _bitmap;
-        std::wstring   _text;
-        Gdiplus::Graphics*   _graphics;
+        Gfx::SizeF          _size;
+        Painter*            _painter;
+        HDC                 _dc;
+        HBITMAP             _bitmap;
+        Gdiplus::Graphics*  _graphics;
+        HRGN                _clipRect;
+        std::wstring        _text;
 };
 
 } // namespace
