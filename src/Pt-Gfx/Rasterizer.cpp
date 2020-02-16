@@ -3313,7 +3313,7 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
     std::vector<Point> points( pts, pts + pointCount );
 
     ClipPolygon clipper;
-    Rect clipRect(_currentClip.left(), _currentClip.right() - -1, _currentClip.top(), _currentClip.bottom() - 1);
+    Rect clipRect(_currentClip.left(), _currentClip.right() -1, _currentClip.top(), _currentClip.bottom() - 1);
 
     clipper( points, clipRect);
 

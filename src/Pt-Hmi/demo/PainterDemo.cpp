@@ -191,13 +191,12 @@ protected:
 
         double x = 40;
         double width = 5;
-
+        
         points[0].set(x, y);
         points[1].set(x + width, y);
         points[2].set(x + width, y + width);
         points[3].set(x, y + width);
         points[4] = points[0];
-
         painter.fillPolygon(points, 4);
         
         y += 6;

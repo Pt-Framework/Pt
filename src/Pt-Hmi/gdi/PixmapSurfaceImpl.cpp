@@ -58,9 +58,12 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
     SelectObject(_dc, _bitmap);
     SetBkMode(_dc, TRANSPARENT);
 
-//    SetGraphicsMode(_dc, GM_ADVANCED);
+    SetGraphicsMode(_dc, GM_ADVANCED);
 
     _graphics = new Gdiplus::Graphics(_dc);
+
+    _graphics->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
+    _graphics->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
 }
 
 
@@ -99,6 +102,8 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 
     delete _graphics;
     _graphics = new Gdiplus::Graphics(_dc);
+    _graphics->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
+    _graphics->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
 }
 
 
