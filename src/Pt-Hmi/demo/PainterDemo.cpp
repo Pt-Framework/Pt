@@ -180,13 +180,37 @@ protected:
         painter.fillEllipse(PointF(70, y), SizeF(60, 20));
         painter.drawEllipse(PointF(70, y), SizeF(60, 20));
 
-        //painter.drawEllipse(PointF(20, 120), SizeF(50, 100));
-        //painter.fillEllipse(PointF(30, 130), SizeF(30, 80));
-
         y += 30;
 
         painter.fillRect(RectF(PointF(20, y), SizeF(20, 30)));
-        painter.drawRect(RectF(PointF(20.5, y + 0.5), SizeF(19, 29)));
+        painter.drawRect(RectF(PointF(41.5, y+0.5), SizeF(19, 29)));
+
+        y += 40;
+
+        Pt::Gfx::PointF points[5];
+
+        double x = 40;
+        double width = 5;
+
+        points[0].set(x, y);
+        points[1].set(x + width, y);
+        points[2].set(x + width, y + width);
+        points[3].set(x, y + width);
+        points[4] = points[0];
+
+        painter.fillPolygon(points, 4);
+        
+        y += 6;
+        
+
+        points[0].set(x+0.5, y + 0.5);
+        points[1].set(x + width - 0.5, y + 0.5);
+        points[2].set(x + width -0.5, y + width - 0.5);
+        points[3].set(x + 0.5, y + width - 0.5);
+        points[4] = points[0];
+
+        painter.drawPolyline(points, 5);
+
     }
 };
 
@@ -537,4 +561,5 @@ int main(int argc, char* args[])
         std::clog << "ERROR: " << ex.what() << std::endl;
     }
 }
+
 
