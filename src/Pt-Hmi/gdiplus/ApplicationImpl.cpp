@@ -46,6 +46,13 @@
 #include <Pt/String.h>
 #include <Pt/Types.h>
 
+using std::max;
+using std::min;
+#include <WindowsX.h>
+#include <Gdiplus.h>
+
+#pragma comment (lib, "gdiplus.lib")
+
 namespace {
 
 HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height)
@@ -119,7 +126,7 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles,
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        }    
+        }
     }
 
     return offset;
@@ -132,6 +139,7 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles,
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
 , _instanceHandle(NULL)
+, _gdiplusToken(0)
 , _mouseEvent(0)
 , _keyEvent(0)
 , _pointerInWindow(false)
@@ -146,6 +154,9 @@ ApplicationImpl::ApplicationImpl()
     SetProcessDPIAware();
 
     _instanceHandle = (HINSTANCE) GetModuleHandle(NULL);
+
+    Gdiplus::GdiplusStartupInput startupInput;
+    Gdiplus::GdiplusStartup(&_gdiplusToken, &startupInput, NULL);
 
     WNDCLASS winClass;
     winClass.style         = CS_HREDRAW | CS_VREDRAW;
@@ -166,6 +177,8 @@ ApplicationImpl::~ApplicationImpl()
 {
     if( _cursorHandle != 0 )
        DestroyCursor( _cursorHandle );
+
+    Gdiplus::GdiplusShutdown(_gdiplusToken);
 
     UnregisterClass("Pt-Hmi", _instanceHandle);
 }
