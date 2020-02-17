@@ -140,80 +140,6 @@ class LinesView : public PaintView
 };
 
 
-
-class ShapesView : public PaintView
-{
-public:
-    ShapesView()
-    {}
-
-protected:
-    virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text)
-    {
-        using namespace Pt::Gfx;
-
-        Color lightPurple = Color::fromRgb8(164, 100, 255);
-        Color lightBlue = Color::fromRgb8(100, 100, 255);
-
-        painter.setPen(lightPurple);
-        painter.setFont(Font("", 12));
-        painter.drawText(PointF(10, 20), text);
-
-        int y = 30;
-
-        painter.setFont(Font("", 10));
-        painter.setPen(lightBlue);
-        painter.drawText(PointF(20, y + 12), "Ellipse and Circle");
-        y += 18;
-
-        painter.setBrush(lightPurple);
-
-        painter.fillCircle(PointF(5, y), 20);
-        painter.drawCircle(PointF(35, y), 20);
-
-        y += 25;
-
-        painter.fillCircle(PointF(5, y), 20);
-        painter.drawCircle(PointF(5, y), 20);
-
-
-        painter.fillEllipse(PointF(70, y), SizeF(60, 20));
-        painter.drawEllipse(PointF(70, y), SizeF(60, 20));
-
-        y += 30;
-
-        painter.fillRect(RectF(PointF(20, y), SizeF(20, 30)));
-        painter.drawRect(RectF(PointF(41.5, y+0.5), SizeF(19, 29)));
-
-        y += 40;
-
-        Pt::Gfx::PointF points[5];
-
-        double x = 40;
-        double width = 5;
-        
-        points[0].set(x, y);
-        points[1].set(x + width, y);
-        points[2].set(x + width, y + width);
-        points[3].set(x, y + width);
-        points[4] = points[0];
-        painter.fillPolygon(points, 4);
-        
-        y += 6;
-        
-
-        points[0].set(x+0.5, y + 0.5);
-        points[1].set(x + width - 0.5, y + 0.5);
-        points[2].set(x + width -0.5, y + width - 0.5);
-        points[3].set(x + 0.5, y + width - 0.5);
-        points[4] = points[0];
-
-        painter.drawPolyline(points, 5);
-
-    }
-};
-
-
 class PolylinesView : public PaintView
 {
     public:
@@ -221,284 +147,272 @@ class PolylinesView : public PaintView
         {}
 
     protected:
-
-        virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text)
+        virtual void onPaintContent(Pt::Gfx::Painter& painter, 
+                                const Pt::String& text)
         {
             using namespace Pt::Gfx;
 
-            Color red         = Color::fromRgb8(255,   0,   0);
             Color lightPurple = Color::fromRgb8(164, 100, 255);
             Color lightBlue   = Color::fromRgb8(100, 100, 255);
 
             painter.setPen( lightPurple );
             painter.setFont( Font("", 12) );
-            painter.drawText( PointF(20, 22), text);
+            painter.drawText( PointF(10, 20), text );
+
+            int y = 30;
 
             painter.setFont( Font("", 10) );
+            painter.setPen(lightBlue);
+            painter.drawText( PointF(20, y + 14), "BevelJoin");
+            y += 20;
 
-            int y = 40;
+            y = drawLines(y, painter, Pen::BevelJoin);
 
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "FlatCap - BevelJoin");
-                y += 20;
+            painter.setPen(lightBlue);
+            painter.drawText( PointF(20, y + 14), "MiterJoin");
+            y += 20;
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap, Pen::BevelJoin);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::FlatCap, Pen::BevelJoin);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::FlatCap, Pen::BevelJoin);
+            y = drawLines(y, painter, Pen::MiterJoin);
 
-                int x = 0;
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen1Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen2Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen3Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                y += 45;
-            }
+            painter.setPen(lightBlue);
+            painter.drawText( PointF(20, y + 14), "RoundJoin");
+            y += 20;
 
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "FlatCap - MiterJoin");
-                y += 20;
+            y = drawLines(y, painter, Pen::RoundJoin);
+        }
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap, Pen::MiterJoin);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::FlatCap, Pen::MiterJoin);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::FlatCap, Pen::MiterJoin);
+        int drawLines(int y, Pt::Gfx::Painter& painter,
+                      Pt::Gfx::Pen::JoinStyle join)
+        {
+            using namespace Pt::Gfx;
 
-                int x = 0;
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen1Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen2Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen3Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                y += 45;
-            }
+            Color red = Color::fromRgb8(255,   0,   0);
 
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "FlatCap - RoundJoin");
-                y += 20;
+            Pen pen(red, 1, Pen::Solid, Pen::FlatCap, join);
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::FlatCap, Pen::RoundJoin);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::FlatCap, Pen::RoundJoin);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::FlatCap, Pen::RoundJoin);
+            PointF polygon[] = { // CCW
+                PointF(20, y),
+                PointF(90, y + 30),
+                PointF(180, y),
+                PointF(190, y + 30)
+            };
 
-                int x = 0;
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen1Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen2Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen3Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                y += 45;
-            }
+            pen.setSize(1);
+            painter.setPen(pen);
+            painter.drawPolyline(polygon, 4);
 
-            y += 10;
+            y += 20;
 
-            /////
+            PointF polygon2[] = { // CCW
+                PointF(15, y),
+                PointF(85, y + 30),
+                PointF(175, y),
+                PointF(185, y + 30)
+            };
+            
+            pen.setSize(4);
+            painter.setPen(pen);
+            painter.drawPolyline(polygon2, 4);
+            
+            y += 30;
 
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "RoundCap - BevelJoin");
-                y += 20;
+            PointF polygon3[] = { // CCW
+                PointF(10, y),
+                PointF(80, y + 30),
+                PointF(170, y),
+                PointF(180, y + 30)
+            };
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::RoundCap, Pen::BevelJoin);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::RoundCap, Pen::BevelJoin);
+            pen.setSize(11);
+            painter.setPen(pen);
+            painter.drawPolyline(polygon3, 4);
 
-                int x = 0;
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen1Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen2Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen3Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                y += 45;
-            }
+            y += 50;
 
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "RoundCap - MiterJoin");
-                y += 20;
+            return y;
+        }
+};
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::RoundCap, Pen::MiterJoin);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::RoundCap, Pen::MiterJoin);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::RoundCap, Pen::MiterJoin);
 
-                int x = 0;
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen1Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen2Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen3Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                y += 45;
-            }
+class ShapesView : public PaintView
+{
+    public:
+        ShapesView()
+        {}
 
-            if(1) {
-                painter.setPen( lightBlue );
-                painter.drawText( PointF(20, y + 10), "RoundCap - RoundJoin");
-                y += 20;
+    protected:
+        virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text)
+        {
+            using namespace Pt::Gfx;
 
-                Pen pen1Solid(red, 1, Pen::Solid, Pen::RoundCap, Pen::RoundJoin);
-                Pen pen2Solid(red, 4, Pen::Solid, Pen::RoundCap, Pen::RoundJoin);
-                Pen pen3Solid(red, 9, Pen::Solid, Pen::RoundCap, Pen::RoundJoin);
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue = Color::fromRgb8(100, 100, 255);
 
-                int x = 0;
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen1Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen2Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                if(1) {
-                    const PointF poly[] = { // CCW
-                        PointF(x + 10, y),
-                        PointF(x + 30, y + 30),
-                        PointF(x + 50, y + 10)
-                    };
-                    painter.setPen(pen3Solid);
-                    painter.drawPolyline(poly, sizeof(poly) / sizeof(poly[0]) );
-                    x += 65;
-                }
-                y += 45;
-            }
+            painter.setPen(lightPurple);
+            painter.setFont(Font("", 12));
+            painter.drawText(PointF(10, 20), text);
+
+            int y = 30;
+
+            painter.setFont(Font("", 10));
+            painter.setPen(lightBlue);
+            painter.drawText(PointF(20, y + 12), "Circles");
+            y += 20;
+
+            y = drawCircles(y, painter);
+
+            painter.setFont(Font("", 10));
+            painter.setPen(lightBlue);
+            painter.drawText(PointF(20, y + 12), "Ellipses");
+            y += 20;
+
+            y = drawEllipses(y, painter);
+
+            painter.setPen(lightBlue);
+            painter.drawText( PointF(20, y + 12), "Rectangles");
+            y += 20;
+
+            y = drawRects(y, painter);
+
+            painter.setPen(lightBlue);
+            painter.drawText( PointF(20, y + 12), "Polygons");
+            y += 20;
+
+            y += drawPolygons(y, painter);
+        }
+
+        int drawCircles(int y, Pt::Gfx::Painter& painter)
+        {
+            using namespace Pt::Gfx;
+
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+            painter.setPen(lightBlue);
+            painter.setBrush(lightPurple);
+
+            double x = 5;
+            double size = 20;
+            
+            painter.fillCircle(PointF(x, y), size);
+
+            x += size + 1;
+
+            painter.drawCircle(PointF(x, y), size);
+
+            x += size + 1;
+            
+            painter.fillCircle(PointF(x, y), size);
+            painter.drawCircle(PointF(x, y), size);
+
+            y += size + 20;
+
+            return y;
+        }
+
+        int drawEllipses(int y, Pt::Gfx::Painter& painter)
+        {
+            using namespace Pt::Gfx;
+
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+            painter.setPen(lightBlue);
+            painter.setBrush(lightPurple);
+
+            double x = 5;
+            double width = 50;
+            double height = 20;
+
+            painter.fillEllipse(PointF(x, y), SizeF(width, height));
+
+            x += width + 1;
+
+            painter.drawEllipse(PointF(x, y), SizeF(width, height));
+
+            x += width + 1;
+            painter.fillEllipse(PointF(x, y), SizeF(width, height));
+            painter.drawEllipse(PointF(x, y), SizeF(width, height));
+
+            y += height + 20;
+
+            return y;
+        }
+
+        int drawRects(int y, Pt::Gfx::Painter& painter)
+        {
+            using namespace Pt::Gfx;
+
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+            painter.setPen(lightBlue);
+            painter.setBrush(lightPurple);
+
+            double x = 5;
+            double width = 5;
+            double height = 5;
+            double inset = 0;
+            
+            painter.fillRect(RectF(PointF(x + inset, y + inset), 
+                                   SizeF(width - 2*inset, height- 2*inset)));
+            
+            inset = 0.5;
+            x += width + 1;
+            painter.drawRect(RectF(PointF(x + inset, y + inset), 
+                                   SizeF(width - 2*inset, height - 2*inset)));
+
+            x += 60;
+
+            painter.fillRect(RectF(PointF(x + inset, y + inset), 
+                                   SizeF(width - 2*inset, height - 2*inset)));
+            painter.drawRect(RectF(PointF(x + inset, y + inset), 
+                                   SizeF(width - 2*inset, height - 2*inset)));
+
+            y += height + 20;
+
+            return y;
+        }
+
+        int drawPolygons(int y, Pt::Gfx::Painter& painter)
+        {
+            using namespace Pt::Gfx;
+
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+            painter.setPen(lightBlue);
+            painter.setBrush(lightPurple);
+
+            double x = 5;
+            double width = 5;
+            double height = 5;
+            double inset = 0.5;
+       
+            Pt::Gfx::PointF polyine[5];
+            polyine[0].set(x + inset, y + inset);
+            polyine[1].set(x + width - inset, y + inset);
+            polyine[2].set(x + width - inset, y + height - inset);
+            polyine[3].set(x + inset, y + height - inset);
+            polyine[4] = polyine[0];
+
+            painter.drawPolyline(polyine, 5);
+
+            x += width + 1;
+            inset = 0;
+
+            Pt::Gfx::PointF polygon[5];
+            polygon[0].set(x + inset, y + inset);
+            polygon[1].set(x + width - inset, y + inset);
+            polygon[2].set(x + width - inset, y + height - inset);
+            polygon[3].set(x + inset, y + height - inset);
+            polygon[4] = polygon[0];
+
+            painter.fillPolygon(polygon, 5);
+
+            y += height + 20;
+
+            return y;
         }
 };
 
