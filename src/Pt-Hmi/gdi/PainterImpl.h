@@ -40,7 +40,13 @@
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
+
+using std::max;
+using std::min;
 #include <Windows.h>
+#include <Gdiplus.h>
+
+#define PT_HMI_GDIPLUS 1
 
 namespace Pt {
 
@@ -244,6 +250,7 @@ class PainterImpl
             return _font;
         }
         
+#ifndef PT_HMI_GDIPLUS
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
                                             const Pt::String& text)
         {   
@@ -269,7 +276,47 @@ class PainterImpl
                                      textSize.cx, 
                                      tm.tmHeight );
         }
-        
+
+#else
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
+                                            const Pt::String& text)
+        {   
+            std::wstring wtext;
+            text.toUtf16( std::back_inserter(wtext) );
+
+            HDC dc = GetDC(NULL);
+            HFONT newFont = getFont(font);
+            HGDIOBJ oldFont = SelectObject(dc, newFont);
+
+            Gdiplus::Font gdiFont(dc);
+            Gdiplus::Graphics graphics(dc);
+
+            const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
+
+            Gdiplus::FontFamily family;
+            gdiFont.GetFamily(&family);
+
+            Gdiplus::REAL height = gdiFont.GetHeight( graphics.GetDpiY() );
+
+            UINT16 ascentUnits = family.GetCellAscent( gdiFont.GetStyle() );
+            UINT16 descentUnits = family.GetCellDescent( gdiFont.GetStyle() );
+            UINT16 heightUnits = family.GetLineSpacing( gdiFont.GetStyle() );
+            Gdiplus::REAL pixelsPerUnit = height / heightUnits;
+
+            Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
+            Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+
+            Gdiplus::RectF textRect;
+            graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
+                                   Gdiplus::PointF(0, 0), format, &textRect);
+
+            SelectObject(dc, oldFont);
+            DeleteObject(newFont);
+            ReleaseDC(NULL, dc);
+
+            return Gfx::FontMetrics(ascentF, descentF, textRect.Width, textRect.Height);
+        }
+#endif
         static std::string defaultFont()
         {
             return getDefaultFont();

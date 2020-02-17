@@ -40,8 +40,7 @@
 
 #include <vector>
 
-#include <Windows.h>
-#include <WindowsX.h>
+#include <windows.h>
 
 namespace Pt {
 
@@ -159,6 +158,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         Pt::Hmi::Selector                _selector;
         std::vector<System::Selectable*> _avail;
         HINSTANCE                        _instanceHandle;
+        ULONG_PTR                        _gdiplusToken;
         MouseEvent                       _mouseEvent;
         KeyEvent                         _keyEvent;
         bool                             _pointerInWindow;

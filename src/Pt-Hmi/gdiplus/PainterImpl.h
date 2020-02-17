@@ -250,6 +250,8 @@ class PainterImpl
             Gdiplus::Font* gdiFont = toGdi(font);
             
             Gdiplus::Graphics graphics(dc);
+            graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
+            graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
 
             const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
 

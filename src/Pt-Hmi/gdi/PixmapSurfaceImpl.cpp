@@ -38,6 +38,10 @@
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Argb32Format.h>
 
+using std::max;
+using std::min;
+#include <Gdiplus.h>
+
 namespace {
 
 HBRUSH gradientBrush(HDC dc, int width, int height,
@@ -264,7 +268,7 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
     SetTextAlign(_dc, TA_BASELINE | TA_LEFT | TA_NOUPDATECP);
 }
 
-
+#ifndef PT_HMI_GDIPLUS
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 {
     TEXTMETRIC tm;
@@ -282,6 +286,37 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
                             tm.tmHeight);
 }
 
+#else
+Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
+{
+    std::wstring wtext;
+    text.toUtf16( std::back_inserter(wtext) );
+
+    Gdiplus::Font gdiFont(_dc);
+    Gdiplus::Graphics graphics(_dc);
+
+    const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
+
+    Gdiplus::FontFamily family;
+    gdiFont.GetFamily(&family);
+
+    Gdiplus::REAL height = gdiFont.GetHeight( graphics.GetDpiY() );
+
+    UINT16 ascentUnits = family.GetCellAscent( gdiFont.GetStyle() );
+    UINT16 descentUnits = family.GetCellDescent( gdiFont.GetStyle() );
+    UINT16 heightUnits = family.GetLineSpacing( gdiFont.GetStyle() );
+    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
+
+    Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
+    Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+
+    Gdiplus::RectF textRect;
+    graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
+                            Gdiplus::PointF(0, 0), format, &textRect);
+
+    return Gfx::FontMetrics(ascentF, descentF, textRect.Width, textRect.Height);
+}
+#endif
 
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, 
                                  const Pt::String& text, 
@@ -293,6 +328,7 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     Gfx::Transform tt = trans;
     tt.translate( to.x(), to.y() );
 
+#ifndef PT_HMI_GDIPLUS
     XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
     GetWorldTransform(_dc, &oldTrans);
 
@@ -308,6 +344,65 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     TextOutW(_dc, 0, 0, _text.c_str(), _text.size());
 
     SetWorldTransform(_dc, &oldTrans);
+#else
+   
+    Gdiplus::Graphics graphics(_dc);
+    
+    Gdiplus::Font font(_dc);
+
+    Gdiplus::FontFamily family;
+    font.GetFamily(&family);
+
+    Gdiplus::REAL height = font.GetHeight( graphics.GetDpiY() );
+
+    UINT16 ascentUnits = family.GetCellAscent( font.GetStyle() );
+    UINT16 descentUnits = family.GetCellDescent( font.GetStyle() );
+    UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
+    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
+
+    Gdiplus::REAL ascent = ascentUnits * pixelsPerUnit;
+    Gdiplus::REAL descent = descentUnits * pixelsPerUnit;
+    Gdiplus::REAL spacing = height - ascent - descent;
+    Gdiplus::REAL offsetY = ascent + 1;
+    
+    Gdiplus::REAL toX = static_cast<Gdiplus::REAL>( to.x() );
+    Gdiplus::REAL toY = static_cast<Gdiplus::REAL>( to.y() );
+    Gdiplus::PointF origin( 0, -offsetY );
+    
+    const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
+
+    Gdiplus::Matrix oldMatrix;
+    graphics.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix matrix( static_cast<Gdiplus::REAL>( tt.m11() ), 
+                            static_cast<Gdiplus::REAL>( tt.m12() ),
+                            static_cast<Gdiplus::REAL>( tt.m21() ), 
+                            static_cast<Gdiplus::REAL>( tt.m22() ),
+                            static_cast<Gdiplus::REAL>( tt.dx() ), 
+                            static_cast<Gdiplus::REAL>( tt.dy() ) );
+
+    graphics.SetTransform(&matrix);
+
+    //Gdiplus::RectF textRect;
+    //graphics.MeasureString(_text.c_str(), _text.size(), &font, 
+    //                       Gdiplus::PointF(to.x(), to.y()), format, &textRect);
+
+    //Gdiplus::Pen blackPen( Gdiplus::Color(255, 0, 0, 0), 1 );
+    //graphics.DrawRectangle(&blackPen, textRect);
+
+    const Gfx::Color& color = _painter->pen().color();
+    BYTE alpha = color.alpha() / 257;
+    BYTE red   = color.red()   / 257;
+    BYTE green = color.green() / 257; 
+    BYTE blue  = color.blue()  / 257;
+
+    Gdiplus::SolidBrush blackBrush( Gdiplus::Color(alpha, red, green, blue) );
+
+    graphics.DrawString( _text.c_str(), _text.size(), &font, 
+                         origin, format, &blackBrush);
+
+    graphics.SetTransform(&oldMatrix);
+#endif
 }
 
 
