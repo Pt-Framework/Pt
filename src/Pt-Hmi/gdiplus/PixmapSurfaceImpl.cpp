@@ -133,7 +133,7 @@ const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
-    if (clipRect.isNull())
+    if( clipRect.isNull() )
         _graphics->ResetClip();
     else
         _graphics->SetClip(PainterImpl::toGdi(clipRect));

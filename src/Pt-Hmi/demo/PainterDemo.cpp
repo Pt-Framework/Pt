@@ -389,14 +389,14 @@ class ShapesView : public PaintView
             double height = 5;
             double inset = 0.5;
        
-            Pt::Gfx::PointF polyine[5];
-            polyine[0].set(x + inset, y + inset);
-            polyine[1].set(x + width - inset, y + inset);
-            polyine[2].set(x + width - inset, y + height - inset);
-            polyine[3].set(x + inset, y + height - inset);
-            polyine[4] = polyine[0];
+            Pt::Gfx::PointF polyline[5];
+            polyline[0].set(x + inset, y + inset);
+            polyline[1].set(x + width - inset, y + inset);
+            polyline[2].set(x + width - inset, y + height - inset);
+            polyline[3].set(x + inset, y + height - inset);
+            polyline[4] = polyline[0];
 
-            painter.drawPolyline(polyine, 5);
+            painter.drawPolyline(polyline, 5);
 
             x += width + 1;
             inset = 0;
