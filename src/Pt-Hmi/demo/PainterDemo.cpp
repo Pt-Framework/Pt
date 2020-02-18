@@ -427,27 +427,27 @@ class ShapesView : public PaintView
             painter.setBrush(lightPurple);
 
             double x = 5;
-            double width = 6;
-            double height = 6;
-            double inset = 0.5;
+            double width = 12;
+            double height = 12;
+            double inset = 0;
        
             Pt::Gfx::PointF polyline[5];
-            polyline[0].set(x + width,             y + inset);
-            polyline[1].set(x + 2 * width - inset, y + height);
-            polyline[2].set(x + width,             y + 2 * height - inset);
-            polyline[3].set(x + inset,             y + height);
+            polyline[0].set(x + width/2.0,     y + inset);
+            polyline[1].set(x + width - inset, y + height/2.0);
+            polyline[2].set(x + width/2.0,     y + height - inset);
+            polyline[3].set(x + inset,         y + height/2.0);
             polyline[4] = polyline[0];
 
             painter.drawPolyline(polyline, 5);
 
             x += 2 * width + 1;
-            inset = 0.5;
+            inset = 0;
 
             Pt::Gfx::PointF polygon[5];
-            polygon[0].set(x + width,             y + inset);
-            polygon[1].set(x + 2 * width - inset, y + height);
-            polygon[2].set(x + width,             y + 2 * height - inset);
-            polygon[3].set(x + inset,             y + height);
+            polygon[0].set(x + width/2.0,     y + inset);
+            polygon[1].set(x + width - inset, y + height/2.0);
+            polygon[2].set(x + width/2.0,     y + height - inset);
+            polygon[3].set(x + inset,         y + height/2.0);
             polygon[4] = polygon[0];
 
             painter.fillPolygon(polygon, 5);
