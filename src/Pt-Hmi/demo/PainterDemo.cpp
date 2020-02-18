@@ -278,7 +278,8 @@ class ShapesView : public PaintView
             painter.drawText( PointF(20, y + 12), "Polygons");
             y += 20;
 
-            y += drawPolygons(y, painter);
+            y = drawPolygons(y, painter);
+            y = drawDiamonds(y, painter);
         }
 
         int drawCircles(int y, Pt::Gfx::Painter& painter)
@@ -406,6 +407,47 @@ class ShapesView : public PaintView
             polygon[1].set(x + width - inset, y + inset);
             polygon[2].set(x + width - inset, y + height - inset);
             polygon[3].set(x + inset, y + height - inset);
+            polygon[4] = polygon[0];
+
+            painter.fillPolygon(polygon, 5);
+
+            y += height + 20;
+
+            return y;
+        }
+
+        int drawDiamonds(int y, Pt::Gfx::Painter& painter)
+        {
+            using namespace Pt::Gfx;
+
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+            painter.setPen(lightBlue);
+            painter.setBrush(lightPurple);
+
+            double x = 5;
+            double width = 6;
+            double height = 6;
+            double inset = 0.5;
+       
+            Pt::Gfx::PointF polyline[5];
+            polyline[0].set(x + width,             y + inset);
+            polyline[1].set(x + 2 * width - inset, y + height);
+            polyline[2].set(x + width,             y + 2 * height - inset);
+            polyline[3].set(x + inset,             y + height);
+            polyline[4] = polyline[0];
+
+            painter.drawPolyline(polyline, 5);
+
+            x += 2 * width + 1;
+            inset = 0.5;
+
+            Pt::Gfx::PointF polygon[5];
+            polygon[0].set(x + width,             y + inset);
+            polygon[1].set(x + 2 * width - inset, y + height);
+            polygon[2].set(x + width,             y + 2 * height - inset);
+            polygon[3].set(x + inset,             y + height);
             polygon[4] = polygon[0];
 
             painter.fillPolygon(polygon, 5);
