@@ -440,7 +440,7 @@ class ShapesView : public PaintView
 
             painter.drawPolyline(polyline, 5);
 
-            x += 2 * width + 1;
+            x += width + 1;
             inset = 0;
 
             Pt::Gfx::PointF polygon[5];
