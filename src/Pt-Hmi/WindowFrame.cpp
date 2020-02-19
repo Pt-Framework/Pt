@@ -1086,8 +1086,10 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     painter.setFont(font);
     Gfx::FontMetrics fm = painter.fontMetrics(title);
 
+    double textOffset = (_borderWidth + _titleHeight - fm.height()) / 2.0;
+
     Gfx::PointF textPos(pos.x() + _borderWidth + _titleHeight,
-                        pos.y() + _titleHeight - _borderWidth);
+                        pos.y() + textOffset + fm.ascent() );
 
     Gfx::Color textColor = _window->isActive() ? _wm->textColor()
                                                : _wm->inactiveTextColor();

@@ -180,14 +180,14 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     UINT16 ascentUnits = family.GetCellAscent( font.GetStyle() );
     UINT16 descentUnits = family.GetCellDescent( font.GetStyle() );
     UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
-    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
 
+    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
     Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
     Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
 
     Gdiplus::RectF textRect;
     _graphics->MeasureString(wtext.c_str(), wtext.size(), &font,
-                           Gdiplus::PointF(0, 0), format, &textRect);
+                             Gdiplus::PointF(0, 0), format, &textRect);
 
     return Gfx::FontMetrics(ascentF, descentF, textRect.Width, textRect.Height);
 }

@@ -294,6 +294,8 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 
     Gdiplus::Font gdiFont(_dc);
     Gdiplus::Graphics graphics(_dc);
+    graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
+    graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
 
     const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
 
@@ -305,8 +307,8 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     UINT16 ascentUnits = family.GetCellAscent( gdiFont.GetStyle() );
     UINT16 descentUnits = family.GetCellDescent( gdiFont.GetStyle() );
     UINT16 heightUnits = family.GetLineSpacing( gdiFont.GetStyle() );
-    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
 
+    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
     Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
     Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
 
@@ -347,7 +349,9 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 #else
    
     Gdiplus::Graphics graphics(_dc);
-    
+    graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
+    graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
+
     Gdiplus::Font font(_dc);
 
     Gdiplus::FontFamily family;
