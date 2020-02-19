@@ -437,31 +437,69 @@ class ShapesView : public PaintView
             double width = 12;
             double height = 12;
             double inset = 0;
+            std::vector<Pt::Gfx::PointF> shape;
 
-            Pt::Gfx::PointF polyline[5];
-            polyline[0].set(x + width/2.0,     y + inset);
-            polyline[1].set(x + width - inset, y + height/2.0);
-            polyline[2].set(x + width/2.0,     y + height - inset);
-            polyline[3].set(x + inset,         y + height/2.0);
-            polyline[4] = polyline[0];
+            shape = makeDiamond(x, y, width, height, inset);
+            painter.drawPolyline(&shape[0], shape.size());
 
-            painter.drawPolyline(polyline, 5);
+            x += width + 2;
 
-            x += width + 1;
-            inset = 0;
+            shape = makeDiamond(x, y, width, height, inset);
+            painter.fillPolygon(&shape[0], shape.size());
 
-            Pt::Gfx::PointF polygon[5];
+            x += width + 2;
+
+            shape = makeDiamond(x, y, width, height, inset);
+            painter.fillPolygon(&shape[0], shape.size());
+            painter.drawPolyline(&shape[0], shape.size());
+
+            x += width + 2;
+
+            shape = makeFlag(x, y, width, height, inset);
+            painter.drawPolyline(&shape[0], shape.size());
+
+            x += width + 2;
+
+            shape = makeFlag(x, y, width, height, inset);
+            painter.fillPolygon(&shape[0], shape.size());
+
+            x += width + 2;
+
+            shape = makeFlag(x, y, width, height, inset);
+            painter.fillPolygon(&shape[0], shape.size());
+            painter.drawPolyline(&shape[0], shape.size());
+
+            y += height + 20;
+
+            return y;
+        }
+
+        std::vector<Pt::Gfx::PointF> makeDiamond(double x, double y, 
+                                                 double width, double height, 
+                                                 double inset)
+        {
+            std::vector<Pt::Gfx::PointF> polygon(5);
             polygon[0].set(x + width/2.0,     y + inset);
             polygon[1].set(x + width - inset, y + height/2.0);
             polygon[2].set(x + width/2.0,     y + height - inset);
             polygon[3].set(x + inset,         y + height/2.0);
             polygon[4] = polygon[0];
+            return polygon;
+        }
 
-            painter.fillPolygon(polygon, 5);
 
-            y += height + 20;
-
-            return y;
+        std::vector<Pt::Gfx::PointF> makeFlag(double x, double y, 
+                                              double width, double height, 
+                                              double inset)
+        {
+            std::vector<Pt::Gfx::PointF> polygon(6);
+            polygon[0].set(x + inset,     y + inset);
+            polygon[1].set(x + width - inset,  y + inset);
+            polygon[2].set(x + width/2.0 - inset, y + height/2.0);
+            polygon[3].set(x + width - inset, y + height - inset);
+            polygon[4].set(x + inset, y + height - inset);
+            polygon[5] = polygon[0];
+            return polygon;
         }
 };
 
