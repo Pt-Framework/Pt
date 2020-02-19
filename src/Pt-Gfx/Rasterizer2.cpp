@@ -1097,7 +1097,8 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
      */
     const size_t sz = polygon.size();
 
-    std::vector<bool> adjX(sz, false), adjY(sz, false);
+    std::vector<bool> adjX(sz, false);
+    std::vector<bool> adjY(sz, false);
 
     for(size_t i = 0; i < sz; ++i)
     {
@@ -1127,6 +1128,9 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         if(adjX[i]) polygon[i].setX(polygon[i].x() - 1.0f);
         if(adjY[i]) polygon[i].setY(polygon[i].y() - 1.0f);
     }
+
+    adjX.clear();
+    adjY.clear();
 #endif
 
     // Find the minimum and maximum coordinates
