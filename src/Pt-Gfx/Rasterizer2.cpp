@@ -1069,6 +1069,7 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 {
+    // Clip the polygon
     std::vector<PointF> polygon(n);
 
     for (size_t i = 0; i < polygon.size(); ++i)
@@ -1084,6 +1085,51 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 
     BasicClipShape<double>::clipPolygon(polygon, _currentClip);
 
+#if 1
+    // #@#
+    // Perform coordinate adjustments
+    /*
+     *
+     * 0   1x
+     *
+     * 3y  2xy
+     *
+     */
+    const size_t sz = polygon.size();
+
+    std::vector<bool> adjX(sz, false), adjY(sz, false);
+
+    for(size_t i = 0; i < sz; ++i)
+    {
+        size_t j = i + 1;
+        if(j >= sz) j = 0;
+
+        const double x0 = polygon[i].x();
+        const double y0 = polygon[i].y();
+        const double x1 = polygon[j].x();
+        const double y1 = polygon[j].y();
+
+        if(y0 == y1) {
+            if(x1 > x0) adjX[j] = true;
+            if(i > 0) {
+                if(adjY[i]) adjY[j] = true;
+            }
+        }
+        if(x0 == x1) {
+            if(y1 > y0) adjY[j] = true;
+            if(i > 0) {
+                if(adjX[i]) adjX[j] = true;
+            }
+        }
+    }
+
+    for(size_t i = 0; i < sz; ++i) {
+        if(adjX[i]) polygon[i].setX(polygon[i].x() - 1.0f);
+        if(adjY[i]) polygon[i].setY(polygon[i].y() - 1.0f);
+    }
+#endif
+
+    // Find the minimum and maximum coordinates
     for(size_t j = 0; j < polygon.size(); ++j)
     {
         const double x = polygon[j].x();

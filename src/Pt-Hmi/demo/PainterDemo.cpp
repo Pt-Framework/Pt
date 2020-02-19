@@ -403,19 +403,19 @@ class ShapesView : public PaintView
             inset = 0;
 
             Pt::Gfx::PointF polygon[5];
-            /*
+#if 1
             polygon[0].set(x + inset, y + inset);
             polygon[1].set(x + width - inset, y + inset);
             polygon[2].set(x + width - inset, y + height - inset);
             polygon[3].set(x + inset, y + height - inset);
             polygon[4] = polygon[0];
-            */
+#else
             polygon[0].set(x + inset, y + inset);
             polygon[1].set(x + width - 1.0f - inset, y + inset);
             polygon[2].set(x + width - 1.0f - inset, y + height - 1.0f - inset);
             polygon[3].set(x + inset, y + height - 1.0f - inset);
             polygon[4] = polygon[0];
-
+#endif
             painter.fillPolygon(polygon, 5);
 
             y += height + 20;
