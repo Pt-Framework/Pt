@@ -846,9 +846,9 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
             continue;
 
         if(solid)
-            rasterNarrowSolidLine(x1, y1,x2, y2, _pen.color(), &mask_nnp1);
+            rasterNarrowSolidLine(x1, y1, x2, y2, _pen.color(), &mask_nnp1);
         else
-            rasterNarrowPatternedLine(x1,y1,x2, y2,_pen.color(), fpiCtrInOut, &mask_nnp1);
+            rasterNarrowPatternedLine(x1, y1, x2, y2,_pen.color(), fpiCtrInOut, &mask_nnp1);
     }
 }
 
@@ -1098,15 +1098,16 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     if(_isGradient)
         updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
+    // #@#
     if( this->isAntiAliasing() )
     {
         rasterPolygonXWAA(&polygon[0], polygon.size(),
-                           _brush.color(), minX, minY, maxX, maxY);
+                          _brush.color(), minX, minY, maxX, maxY);
     }
     else
     {
         rasterPolygonNoAA(&polygon[0], polygon.size(),
-                           _brush.color(), minX, minY, maxX, maxY);
+                          _brush.color(), minX, minY, maxX, maxY);
     }
 }
 

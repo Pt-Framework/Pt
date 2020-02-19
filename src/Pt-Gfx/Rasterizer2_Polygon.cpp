@@ -591,9 +591,11 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         // Fill the pixels between the node pairs
         for(std::size_t i = 0; i < nodes; i += 2)
         {
+            // #@#
             // Calculate the coordinate
             Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
+          //Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
@@ -615,7 +617,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
     // Raster the anti-aliased outline
 
-    /*
+#if 0
     // OLD POLYGON XWAA
     // Mask
     DrawLineMask mask_zero;
@@ -647,7 +649,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
           points[pc1].x(), points[pc1].y(),
           points[0].x(),   points[0].y(),
           color, minX, minY_ - 1, scanlines, mask_zero );
-    */
+#endif
 
     // Mask
     DrawLineMask xwaaMask;
@@ -1134,6 +1136,13 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     float fx1 = x2;
     float fy1 = y2;
 
+    /*
+         if(fx1 >= fx0) { fx0 += 0.5f; fx1 -= 0.5f; }
+    else                { fx1 += 0.5f; fx0 -= 0.5f; }
+         if(fy1 >= fy0) { fy0 += 0.5f; fy1 -= 0.5f; }
+    else                { fy1 += 0.5f; fy0 -= 0.5f; }
+    */
+
     // Swap the coordinates as needed
     const bool steep = ( fabs(fy1 - fy0) > fabs(fx1 - fx0) );
 
@@ -1162,6 +1171,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     const Pt::int32_t xpxl1 = xend; // This will be used in the main loop
     const Pt::int32_t ypxl1 = floor(yend);
 
+#if 1
     if(steep) {
         // Calculate the alphas and coordinates
         const float  fpart = yend - floor(yend);
@@ -1215,6 +1225,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         lx[0] = ix; ly[0] = iy0;
         lx[1] = ix; ly[1] = iy1;
     }
+#endif
 
     // Calculate the first y-intersection for the main loop
     float intery = yend + gradient;
@@ -1227,6 +1238,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     const Pt::int32_t xpxl2 = xend; // This will be used in the main loop
     const Pt::int32_t ypxl2 = floor(yend);
 
+#if 1
     if(steep) {
         // Calculate the alphas and coordinates
         const float  fpart = yend - floor(yend);
@@ -1280,6 +1292,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         lx[2] = ix; ly[2] = iy0;
         lx[3] = ix; ly[3] = iy1;
     }
+#endif
 
     // Main loop
     if(steep) {

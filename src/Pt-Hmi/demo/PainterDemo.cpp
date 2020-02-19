@@ -50,7 +50,7 @@ class PaintView : public Pt::Hmi::Control
             painter.drawImage(PointF(420, 0), image2);
         }
 
-        virtual void onPaintContent(Pt::Gfx::Painter& painter, 
+        virtual void onPaintContent(Pt::Gfx::Painter& painter,
                                     const Pt::String& text) = 0;
 };
 
@@ -62,7 +62,7 @@ class LinesView : public PaintView
         {}
 
     protected:
-        virtual void onPaintContent(Pt::Gfx::Painter& painter, 
+        virtual void onPaintContent(Pt::Gfx::Painter& painter,
                                 const Pt::String& text)
         {
             using namespace Pt::Gfx;
@@ -110,29 +110,29 @@ class LinesView : public PaintView
                       Pt::Gfx::Pen::CapStyle cap)
         {
             using namespace Pt::Gfx;
-            
+
             Pt::uint8_t dashes[] = { 1, 1, 3, 1 };
             std::vector<Pt::uint8_t> dashPattern( dashes, dashes + sizeof(dashes) );
 
             Color red = Color::fromRgb8(255, 0, 0);
 
             Pen pen(red, 1, style, cap);
-            
+
             if(style == Pen::DashPattern)
                 pen.setDashPattern(dashPattern);
 
             painter.setPen(pen);
-            painter.drawLine( PointF(10, y), PointF(190, y) ); 
+            painter.drawLine( PointF(10, y), PointF(190, y) );
             y += 6;
 
             pen.setSize(4);
             painter.setPen(pen);
-            painter.drawLine( PointF(10, y), PointF(190, y) ); 
+            painter.drawLine( PointF(10, y), PointF(190, y) );
             y += 10;
 
             pen.setSize(10);
             painter.setPen(pen);
-            painter.drawLine( PointF(10, y), PointF(190, y) ); 
+            painter.drawLine( PointF(10, y), PointF(190, y) );
             y += 12;
 
             return y;
@@ -147,7 +147,7 @@ class PolylinesView : public PaintView
         {}
 
     protected:
-        virtual void onPaintContent(Pt::Gfx::Painter& painter, 
+        virtual void onPaintContent(Pt::Gfx::Painter& painter,
                                 const Pt::String& text)
         {
             using namespace Pt::Gfx;
@@ -209,11 +209,11 @@ class PolylinesView : public PaintView
                 PointF(175, y),
                 PointF(185, y + 30)
             };
-            
+
             pen.setSize(4);
             painter.setPen(pen);
             painter.drawPolyline(polygon2, 4);
-            
+
             y += 30;
 
             PointF polygon3[] = { // CCW
@@ -294,7 +294,7 @@ class ShapesView : public PaintView
 
             double x = 5;
             double size = 20;
-            
+
             painter.fillCircle(PointF(x, y), size);
 
             x += size + 1;
@@ -302,7 +302,7 @@ class ShapesView : public PaintView
             painter.drawCircle(PointF(x, y), size);
 
             x += size + 1;
-            
+
             painter.fillCircle(PointF(x, y), size);
             painter.drawCircle(PointF(x, y), size);
 
@@ -354,20 +354,20 @@ class ShapesView : public PaintView
             double width = 5;
             double height = 5;
             double inset = 0;
-            
-            painter.fillRect(RectF(PointF(x + inset, y + inset), 
+
+            painter.fillRect(RectF(PointF(x + inset, y + inset),
                                    SizeF(width - 2*inset, height- 2*inset)));
-            
+
             inset = 0.5;
             x += width + 1;
-            painter.drawRect(RectF(PointF(x + inset, y + inset), 
+            painter.drawRect(RectF(PointF(x + inset, y + inset),
                                    SizeF(width - 2*inset, height - 2*inset)));
 
             x += 60;
 
-            painter.fillRect(RectF(PointF(x + inset, y + inset), 
+            painter.fillRect(RectF(PointF(x + inset, y + inset),
                                    SizeF(width - 2*inset, height - 2*inset)));
-            painter.drawRect(RectF(PointF(x + inset, y + inset), 
+            painter.drawRect(RectF(PointF(x + inset, y + inset),
                                    SizeF(width - 2*inset, height - 2*inset)));
 
             y += height + 20;
@@ -389,7 +389,7 @@ class ShapesView : public PaintView
             double width = 5;
             double height = 5;
             double inset = 0.5;
-       
+
             Pt::Gfx::PointF polyline[5];
             polyline[0].set(x + inset, y + inset);
             polyline[1].set(x + width - inset, y + inset);
@@ -403,10 +403,17 @@ class ShapesView : public PaintView
             inset = 0;
 
             Pt::Gfx::PointF polygon[5];
+            /*
             polygon[0].set(x + inset, y + inset);
             polygon[1].set(x + width - inset, y + inset);
             polygon[2].set(x + width - inset, y + height - inset);
             polygon[3].set(x + inset, y + height - inset);
+            polygon[4] = polygon[0];
+            */
+            polygon[0].set(x + inset, y + inset);
+            polygon[1].set(x + width - 1.0f - inset, y + inset);
+            polygon[2].set(x + width - 1.0f - inset, y + height - 1.0f - inset);
+            polygon[3].set(x + inset, y + height - 1.0f - inset);
             polygon[4] = polygon[0];
 
             painter.fillPolygon(polygon, 5);
@@ -430,7 +437,7 @@ class ShapesView : public PaintView
             double width = 12;
             double height = 12;
             double inset = 0;
-       
+
             Pt::Gfx::PointF polyline[5];
             polyline[0].set(x + width/2.0,     y + inset);
             polyline[1].set(x + width - inset, y + height/2.0);
