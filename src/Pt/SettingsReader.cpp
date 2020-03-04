@@ -181,12 +181,12 @@ void SettingsReader::pushValue()
     {
         unsigned dot = 0;
         unsigned digits = 0;
-        Pt::String::const_iterator it;
-        for( it = _token.begin(); it != _token.end(); ++it )
+        Pt::String::const_iterator cit;
+        for( cit = _token.begin(); cit != _token.end(); ++cit )
         {
-            if(*it == '.')
+            if(*cit == '.')
                 dot++;
-            else if(Pt::isdigit(*it))
+            else if(Pt::isdigit(*cit))
                 digits++;
         }
 
@@ -199,7 +199,40 @@ void SettingsReader::pushValue()
         else if(digits >= 1)
         {
             Pt::int64_t i = 0;
-            Pt::parseInt(_token.begin(), _token.end(), i);
+
+            int base = 10;
+            String::iterator it = _token.begin();
+
+            if(it != _token.end() && *it == '0')
+            {
+                ++it;
+                
+                if( it == _token.end() ) // single digit zero
+                {
+                    it = _token.begin();
+                    base = 10;
+                }
+                else if(*it == 'x' || *it == 'X')
+                {
+                    ++it;
+                    base = 16;
+                }
+                else
+                    base = 8;
+            }
+
+            String::iterator r = _token.end();
+
+            if(base == 8)
+                r = Pt::parseInt(it, _token.end(), i, OctalFormat<Pt::Char>());
+            else if(base == 16)
+                r = Pt::parseInt(it, _token.end(), i, HexFormat<Pt::Char>());
+            else
+                r = Pt::parseInt(it, _token.end(), i);
+
+            if( r != _token.end() )
+                throw SettingsError("invalid entry value", line());
+
             _current->setInt64(i);
         }
         else

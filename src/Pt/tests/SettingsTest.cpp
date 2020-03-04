@@ -322,6 +322,9 @@ void SettingsTest::SimpleValue()
     std::stringstream ss;
     ss << "a = 5\n";
     ss << "b=6\n";
+    ss << "c =0x2a\n";
+    ss << "d= 053\n";
+    ss << "e= 0\n";
     Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
@@ -329,11 +332,23 @@ void SettingsTest::SimpleValue()
     
     int a = 0;
     settings.entry("a").get(a);
-    PT_UNIT_ASSERT(5 == a );
+    PT_UNIT_ASSERT(5 == a);
     
     int b = 0;
     settings.entry("b").get(b);
-    PT_UNIT_ASSERT(6 == b );
+    PT_UNIT_ASSERT(6 == b);
+
+    int c = 0;
+    settings.entry("c").get(c);
+    PT_UNIT_ASSERT(0x2a == c);
+
+    int d = 0;
+    settings.entry("d").get(d);
+    PT_UNIT_ASSERT(053 == d);
+
+    int e = 0;
+    settings.entry("e").get(e);
+    PT_UNIT_ASSERT(0 == e);
 }
 
 void SettingsTest::SimpleTypedValue()
