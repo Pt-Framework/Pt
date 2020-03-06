@@ -31,6 +31,7 @@
 #include <Pt/Xml/XmlResolver.h>
 #include <Pt/Utf16Codec.h>
 #include <Pt/Utf32Codec.h>
+#include <Pt/Latin1Codec.h>
 #include <cctype>
 #include <cassert>
 
@@ -1415,9 +1416,15 @@ void BinaryInputSource::onDeclaration()
 {
     if(_bom.width() == 1)
     {
-        if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
+        if(_xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
         {
             // keep using utf-8 codec
+            return;
+        }
+
+        if (_xmlDecl.encoding() == "ISO-8859-1")
+        {
+            _tbuf.setCodec(new Latin1Codec);
             return;
         }
     }

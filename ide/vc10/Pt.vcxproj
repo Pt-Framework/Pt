@@ -147,6 +147,7 @@
     <ClInclude Include="..\..\include\Pt\Invokable.h" />
     <ClInclude Include="..\..\include\Pt\IOError.h" />
     <ClInclude Include="..\..\include\Pt\IOStream.h" />
+    <ClInclude Include="..\..\include\Pt\Latin1Codec.h" />
     <ClInclude Include="..\..\include\Pt\LiteralPtr.h" />
     <ClInclude Include="..\..\include\Pt\Locale.h" />
     <ClInclude Include="..\..\include\Pt\Main.h" />
@@ -906,6 +907,7 @@
     <ClCompile Include="..\..\src\Pt\Deserializer.cpp" />
     <ClCompile Include="..\..\src\Pt\Facets.cpp" />
     <ClCompile Include="..\..\src\Pt\IOError.cpp" />
+    <ClCompile Include="..\..\src\Pt\Latin1Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\PageAllocator.cpp" />
     <ClCompile Include="..\..\src\Pt\PoolAllocator.cpp" />
     <ClCompile Include="..\..\src\Pt\Regex.cpp" />

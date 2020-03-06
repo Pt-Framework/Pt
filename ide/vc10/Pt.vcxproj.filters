@@ -1593,6 +1593,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\KeyMap.h">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Latin1Codec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2965,6 +2968,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\demo\PainterDemo.cpp">
       <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Latin1Codec.cpp">
+      <Filter>Pt</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
