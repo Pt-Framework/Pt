@@ -328,7 +328,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
 
     // Loop through the rows of the image
-    for(Pt::int32_t y = minY; y <= maxY; ++y)
+    for(Pt::int32_t y = minY; y <= maxY/* - 1*/; ++y)
     {
         // Pixel-by-pixel clipping
         if(y < _currentClip.top   ()) continue;
@@ -382,7 +382,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         {
             // Get the coordinate
             Pt::int32_t from = nodeX[i    ];
-            Pt::int32_t to   = nodeX[i + 1];
+            Pt::int32_t to   = nodeX[i + 1]/* - 1*/;
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
@@ -541,7 +541,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         scanlines.resize( (maxY - minY) + 1 + 4 );
 
     // Loop through the rows of the image
-    for(Pt::int32_t y = minY; y <= maxY; ++y)
+    for(Pt::int32_t y = minY; y <= maxY/* - 1*/; ++y)
     {
         // Pixel-by-pixel clipping
         if(y < _currentClip.top   ()) continue;
@@ -594,7 +594,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // #@#
             // Calculate the coordinate
             Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) )/* - 1*/;
           //Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
 
             // Pixel-by-pixel clipping
@@ -862,6 +862,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
 }
 
 
+
 #if 0
 // OLD POLYGON XWAA
 // REVIEW: Seems nothing actually uses this function anymore?
@@ -1070,6 +1071,13 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                                             const PolygonScanlines& exclusionZone,
                                             DrawLineMask& maskInOut)
 {
+
+#if 0
+    rasterNarrowSolidLine(x1, y1, x2, y2, color, &maskInOut);
+    return;
+#endif
+
+
     // NOTE: This implementation does not need to use the Rasterizer2::XWAA_WFILTER[]
 
     // TODO: Does the other XWAA implementation will benefit from this more conservative apparoach?

@@ -1085,7 +1085,7 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 
     BasicClipShape<double>::clipPolygon(polygon, _currentClip);
 
-#if 1
+#if 0
     // #@#
     // Perform coordinate adjustments
     /*
