@@ -805,10 +805,10 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 
     for (size_t i = 0; i < polygon.size(); ++i)
     {
-        polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
-                       Pt::lround(ps[i].y() - 0.4999));
+        //polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
+        //               Pt::lround(ps[i].y() - 0.4999));
 
-        //polygon[i].set( Pt::lround(ps[i].x()), Pt::lround(ps[i].y()) );
+        polygon[i].set(ps[i].x(), ps[i].y());
     }
 
     if(_pen.size() == 1)
@@ -1077,8 +1077,10 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 #if 0
     for (size_t i = 0; i < polygon.size(); ++i)
     {
-        polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
-                       Pt::lround(ps[i].y() - 0.4999));
+        //polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
+        //               Pt::lround(ps[i].y() - 0.4999));
+
+        polygon[i].set(ps[i].x(), ps[i].y());
     }
 #else
     /*
@@ -1139,7 +1141,10 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
              if(yi < yc) yi += 0.5f;
         else if(yi > yc) yi -= 0.5f;
 
-        polygon[i].set( Pt::lround(xi - 0.4999), Pt::lround(yi - 0.4999) );
+        //polygon[i].set( Pt::lround(xi - 0.4999), Pt::lround(yi - 0.4999) );
+        //polygon[i].set( Pt::lround(xi) - 0.5, Pt::lround(yi) - 0.5 );
+        polygon[i].set( xi - 0.45, yi - 0.45 );
+
         //polygon[i].set( floor(xi + 0.4999999), floor(yi + 0.4999999) );
     }
 #endif
