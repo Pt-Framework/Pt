@@ -807,6 +807,8 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
     {
         polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
                        Pt::lround(ps[i].y() - 0.4999));
+
+        //polygon[i].set( Pt::lround(ps[i].x()), Pt::lround(ps[i].y()) );
     }
 
     if(_pen.size() == 1)
@@ -1072,11 +1074,75 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     // Clip the polygon
     std::vector<PointF> polygon(n);
 
+#if 0
     for (size_t i = 0; i < polygon.size(); ++i)
     {
         polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
                        Pt::lround(ps[i].y() - 0.4999));
     }
+#else
+    /*
+    double xmin =  MAXIMUM_COORD;
+    double ymin =  MAXIMUM_COORD;
+    double xmax = -MAXIMUM_COORD;
+    double ymax = -MAXIMUM_COORD;
+    for(size_t i = 0; i < n; ++i)
+    {
+        const double x = ps[i].x();
+        const double y = ps[i].y();
+
+        if(x < xmin) xmin = x;
+        if(y < ymin) ymin = y;
+        if(x > xmax) xmax = x;
+        if(y > ymax) ymax = y;
+    }
+
+    const double xcenter = (xmax - xmin) / (double) n;
+    const double ycenter = (ymax - ymin) / (double) n;
+    for(size_t i = 0; i < n; ++i)
+    {
+        double x = ps[i].x() - xmin;
+             if(x < xcenter) x += 0.5f;
+        else if(x > xcenter) x -= 0.5f;
+
+        double y = ps[i].y() - ymin;
+             if(y < ycenter) y += 0.5f;
+        else if(y > ycenter) y -= 0.5f;
+
+        polygon[i].set(x + xmin, y + ymin);
+    }
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        polygon[i].set(Pt::lround(polygon[i].x() - 0.4999),
+                       Pt::lround(polygon[i].y() - 0.4999));
+    }
+    */
+
+    double xc = 0.0f;
+    double yc = 0.0f;
+    for (size_t i = 0; i < n; ++i)
+    {
+        xc += ps[i].x();
+        yc += ps[i].y();
+    }
+    xc = xc / (double) n;
+    yc = yc / (double) n;
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        double xi = ps[i].x();
+             if(xi < xc) xi += 0.5f;
+        else if(xi > xc) xi -= 0.5f;
+
+        double yi = ps[i].y();
+             if(yi < yc) yi += 0.5f;
+        else if(yi > yc) yi -= 0.5f;
+
+        polygon[i].set( Pt::lround(xi - 0.4999), Pt::lround(yi - 0.4999) );
+        //polygon[i].set( floor(xi + 0.4999999), floor(yi + 0.4999999) );
+    }
+#endif
 
     Pt::int32_t minX =  MAXIMUM_COORD;
     Pt::int32_t minY =  MAXIMUM_COORD;
