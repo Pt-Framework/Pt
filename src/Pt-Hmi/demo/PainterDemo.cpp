@@ -404,7 +404,7 @@ class ShapesView : public PaintView
 
             x += 60;
 
-            Pt::Gfx::DEBUG_DUMP = true;
+            //Pt::Gfx::DEBUG_DUMP = true;
             shape = makeRectangle(x, y, width, height, insetF);
             painter.fillPolygon(&shape[0], shape.size());
             shape = makeRectangle(x, y, width, height, insetD);
@@ -430,7 +430,7 @@ class ShapesView : public PaintView
             double width = 12;
             double height = 12;
             double insetD = 0.5; // polyline
-            double insetF = 0.0; // filled polygon
+            double insetF = 0.5; // filled polygon
             std::vector<Pt::Gfx::PointF> shape;
 
             shape = makeDiamond(x, y, width, height, insetD);
@@ -484,6 +484,20 @@ class ShapesView : public PaintView
 
         std::vector<Pt::Gfx::PointF> makeDiamond(double x, double y,
                                                  double width, double height,
+                                                 double offset)
+        {
+            std::vector<Pt::Gfx::PointF> polygon(5);
+            polygon[0].set(x + width/2.0 + offset,     y + offset);
+            polygon[1].set(x + width + offset,         y + height/2.0 + offset);
+            polygon[2].set(x + width/2.0 + offset,     y + height + offset);
+            polygon[3].set(x + offset,                 y + height/2.0 + offset);
+            polygon[4] = polygon[0];
+            return polygon;
+        }
+
+
+        std::vector<Pt::Gfx::PointF> makeDiamondOld(double x, double y,
+                                                 double width, double height,
                                                  double inset)
         {
             std::vector<Pt::Gfx::PointF> polygon(5);
@@ -497,6 +511,20 @@ class ShapesView : public PaintView
 
 
         std::vector<Pt::Gfx::PointF> makeFlag(double x, double y,
+                                              double width, double height,
+                                              double offset)
+        {
+            std::vector<Pt::Gfx::PointF> polygon(6);
+            polygon[0].set(x + offset,             y + offset);
+            polygon[1].set(x + width + offset,     y + offset);
+            polygon[2].set(x + width/2.0 + offset, y + height/2.0 + offset);
+            polygon[3].set(x + width + offset,     y + height + offset);
+            polygon[4].set(x + offset,             y + height + offset);
+            polygon[5] = polygon[0];
+            return polygon;
+        }
+
+        std::vector<Pt::Gfx::PointF> makeFlagOld(double x, double y,
                                               double width, double height,
                                               double inset)
         {
