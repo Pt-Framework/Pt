@@ -541,7 +541,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         scanlines.resize( (maxY - minY) + 1 + 4 );
 
     // Loop through the rows of the image
-    for(Pt::int32_t y = minY; y <= maxY/* - 1*/; ++y)
+    for(Pt::int32_t y = minY; y <= maxY; ++y)
     {
         // Pixel-by-pixel clipping
         if(y < _currentClip.top   ()) continue;

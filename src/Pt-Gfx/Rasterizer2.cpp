@@ -28,6 +28,8 @@
   02110-1301 USA
 */
 
+#include <iomanip>
+
 #include "Rasterizer2.h"
 #include "ClipShape.h"
 #include <Pt/Gfx/Transform.h>
@@ -798,27 +800,38 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
     }
 }
 
+bool DEBUG_DUMP = false;
 
 void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 {
+    if(DEBUG_DUMP) {
+        const std::ios_base::fmtflags f(std::cerr.flags());
+        std::cerr << "Rasterizer2::drawPolyline ### ENTRY POINT ###" << std::endl;
+        for (size_t i = 0; i < n; ++i) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << ps[i].x() << ", " << ps[i].y() << std::endl;
+        }
+        std::cerr << std::endl;
+        std::cerr.flags(f);
+    }
+
+#if 0
+
     std::vector<PointF> polygon(n);
-
-    for (size_t i = 0; i < polygon.size(); ++i)
-    {
-        //polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
-        //               Pt::lround(ps[i].y() - 0.4999));
-
-        polygon[i].set(ps[i].x(), ps[i].y());
+    for (size_t i = 0; i < polygon.size(); ++i) {
+        polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
+                       Pt::lround(ps[i].y() - 0.4999));
     }
 
-    if(_pen.size() == 1)
-    {
-        drawNarrowPolyline(&polygon[0], polygon.size());
-    }
-    else
-    {
-        drawWidePolyline(&polygon[0], polygon.size());
-    }
+    if(_pen.size() == 1) drawNarrowPolyline(&polygon[0], polygon.size());
+    else                 drawWidePolyline(&polygon[0], polygon.size());
+
+#else
+
+    if(_pen.size() == 1) drawNarrowPolyline(ps, n);
+    else                 drawWidePolyline(ps, n);
+
+#endif
 }
 
 
@@ -1071,68 +1084,38 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 {
-    // Clip the polygon
+    if(DEBUG_DUMP) {
+        const std::ios_base::fmtflags f(std::cerr.flags());
+        std::cerr << "Rasterizer2::fillPolygon ### ENTRY POINT ###" << std::endl;
+        for (size_t i = 0; i < n; ++i) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << ps[i].x() << ", " << ps[i].y() << std::endl;
+        }
+        std::cerr << std::endl;
+        std::cerr.flags(f);
+    }
+
+    // Perform coordinate adjustments
     std::vector<PointF> polygon(n);
 
 #if 0
     for (size_t i = 0; i < polygon.size(); ++i)
     {
-        //polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
-        //               Pt::lround(ps[i].y() - 0.4999));
-
-        polygon[i].set(ps[i].x(), ps[i].y());
+        polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
+                       Pt::lround(ps[i].y() - 0.4999));
+        //polygon[i].set(ps[i].x(), ps[i].y());
     }
 #else
-    /*
-    double xmin =  MAXIMUM_COORD;
-    double ymin =  MAXIMUM_COORD;
-    double xmax = -MAXIMUM_COORD;
-    double ymax = -MAXIMUM_COORD;
-    for(size_t i = 0; i < n; ++i)
-    {
-        const double x = ps[i].x();
-        const double y = ps[i].y();
-
-        if(x < xmin) xmin = x;
-        if(y < ymin) ymin = y;
-        if(x > xmax) xmax = x;
-        if(y > ymax) ymax = y;
-    }
-
-    const double xcenter = (xmax - xmin) / (double) n;
-    const double ycenter = (ymax - ymin) / (double) n;
-    for(size_t i = 0; i < n; ++i)
-    {
-        double x = ps[i].x() - xmin;
-             if(x < xcenter) x += 0.5f;
-        else if(x > xcenter) x -= 0.5f;
-
-        double y = ps[i].y() - ymin;
-             if(y < ycenter) y += 0.5f;
-        else if(y > ycenter) y -= 0.5f;
-
-        polygon[i].set(x + xmin, y + ymin);
-    }
-
-    for (size_t i = 0; i < n; ++i)
-    {
-        polygon[i].set(Pt::lround(polygon[i].x() - 0.4999),
-                       Pt::lround(polygon[i].y() - 0.4999));
-    }
-    */
-
     double xc = 0.0f;
     double yc = 0.0f;
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         xc += ps[i].x();
         yc += ps[i].y();
     }
     xc = xc / (double) n;
     yc = yc / (double) n;
 
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         double xi = ps[i].x();
              if(xi < xc) xi += 0.5f;
         else if(xi > xc) xi -= 0.5f;
@@ -1141,19 +1124,25 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
              if(yi < yc) yi += 0.5f;
         else if(yi > yc) yi -= 0.5f;
 
-        //polygon[i].set( Pt::lround(xi - 0.4999), Pt::lround(yi - 0.4999) );
-        //polygon[i].set( Pt::lround(xi) - 0.5, Pt::lround(yi) - 0.5 );
-        polygon[i].set( xi - 0.45, yi - 0.45 );
-
-        //polygon[i].set( floor(xi + 0.4999999), floor(yi + 0.4999999) );
+        //polygon[i].set(xi - 0.5, yi - 0.5);
+        polygon[i].set(xi, yi);
     }
 #endif
 
-    Pt::int32_t minX =  MAXIMUM_COORD;
-    Pt::int32_t minY =  MAXIMUM_COORD;
-    Pt::int32_t maxX = -MAXIMUM_COORD;
-    Pt::int32_t maxY = -MAXIMUM_COORD;
+    if(DEBUG_DUMP) {
+        const std::ios_base::fmtflags f(std::cerr.flags());
+        std::cerr << "Rasterizer2::fillPolygon ### AFTER ADJUST ### CENTER = " ;
+        std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                  << xc << ", " << yc << std::endl;
+        for (size_t i = 0; i < n; ++i) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << polygon[i].x() << ", " << polygon[i].y() << std::endl;
+        }
+        std::cerr << std::endl;
+        std::cerr.flags(f);
+    }
 
+    // Clip the polygon
     BasicClipShape<double>::clipPolygon(polygon, _currentClip);
 
 #if 0
@@ -1205,8 +1194,13 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 #endif
 
     // Find the minimum and maximum coordinates
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
     for(size_t j = 0; j < polygon.size(); ++j)
     {
+#if 0
         const double x = polygon[j].x();
         const double y = polygon[j].y();
 
@@ -1214,6 +1208,21 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         if(y < minY) minY = y;
         if(x > maxX) maxX = x;
         if(y > maxY) maxY = y;
+#else
+        const double x1 = floor( polygon[j].x() );
+        const double x2 = ceil ( polygon[j].x() );
+        if(x1 < minX) minX = x1;
+        if(x2 < minX) minX = x2;
+        if(x1 > maxX) maxX = x1;
+        if(x2 > maxX) maxX = x2;
+
+        const double y1 = floor( polygon[j].y() );
+        const double y2 = ceil ( polygon[j].y() );
+        if(y1 < minY) minY = y1;
+        if(y2 < minY) minY = y2;
+        if(y1 > maxY) maxY = y1;
+        if(y2 > maxY) maxY = y2;
+#endif
     }
 
     if(_isGradient)
