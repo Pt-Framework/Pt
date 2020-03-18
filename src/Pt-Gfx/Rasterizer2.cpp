@@ -804,18 +804,7 @@ bool DEBUG_DUMP = false;
 
 void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 {
-    if(DEBUG_DUMP) {
-        const std::ios_base::fmtflags f(std::cerr.flags());
-        std::cerr << "Rasterizer2::drawPolyline ### ENTRY POINT ###" << std::endl;
-        for (size_t i = 0; i < n; ++i) {
-            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                      << ps[i].x() << ", " << ps[i].y() << std::endl;
-        }
-        std::cerr << std::endl;
-        std::cerr.flags(f);
-    }
-
-#if 0
+#if 1
 
     std::vector<PointF> polygon(n);
     for (size_t i = 0; i < polygon.size(); ++i) {
@@ -823,10 +812,32 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
                        Pt::lround(ps[i].y() - 0.4999));
     }
 
+    if(DEBUG_DUMP) {
+        const std::ios_base::fmtflags f(std::cerr.flags());
+        std::cerr << "Rasterizer2::drawPolyline ### AFTER FIXED ADJUST ###" << std::endl;
+        for (size_t i = 0; i < n; ++i) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << polygon[i].x() << ", " << polygon[i].y() << std::endl;
+        }
+        std::cerr << std::endl;
+        std::cerr.flags(f);
+    }
+
     if(_pen.size() == 1) drawNarrowPolyline(&polygon[0], polygon.size());
     else                 drawWidePolyline(&polygon[0], polygon.size());
 
 #else
+
+    if(DEBUG_DUMP) {
+        const std::ios_base::fmtflags f(std::cerr.flags());
+        std::cerr << "Rasterizer2::drawPolyline ### ENTRY POINT - NO ADJUST ###" << std::endl;
+        for (size_t i = 0; i < n; ++i) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << ps[i].x() << ", " << ps[i].y() << std::endl;
+        }
+        std::cerr << std::endl;
+        std::cerr.flags(f);
+    }
 
     if(_pen.size() == 1) drawNarrowPolyline(ps, n);
     else                 drawWidePolyline(ps, n);
@@ -1099,7 +1110,7 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     std::vector<PointF> polygon(n);
 
 #if 0
-    for (size_t i = 0; i < polygon.size(); ++i)
+    for (size_t i = 0; i < n; ++i)
     {
         polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
                        Pt::lround(ps[i].y() - 0.4999));
@@ -1108,12 +1119,14 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 #else
     double xc = 0.0f;
     double yc = 0.0f;
-    for (size_t i = 0; i < n; ++i) {
+    size_t cn = n;
+    if(ps[n - 1] == ps[0]) --cn;
+    for (size_t i = 0; i < cn; ++i) {
         xc += ps[i].x();
         yc += ps[i].y();
     }
-    xc = xc / (double) n;
-    yc = yc / (double) n;
+    xc = xc / (double) cn;
+    yc = yc / (double) cn;
 
     for (size_t i = 0; i < n; ++i) {
         double xi = ps[i].x();
@@ -1124,16 +1137,21 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
              if(yi < yc) yi += 0.5f;
         else if(yi > yc) yi -= 0.5f;
 
-        //polygon[i].set(xi - 0.5, yi - 0.5);
-        polygon[i].set(xi, yi);
+        polygon[i].set(Pt::lround(xi - 0.4999),
+                       Pt::lround(yi - 0.4999));
+        //polygon[i].set(xi, yi);
     }
 #endif
 
     if(DEBUG_DUMP) {
         const std::ios_base::fmtflags f(std::cerr.flags());
-        std::cerr << "Rasterizer2::fillPolygon ### AFTER ADJUST ### CENTER = " ;
+#if 0
+        std::cerr << "Rasterizer2::fillPolygon ### AFTER FIXED ADJUST ###" << std::endl;
+#else
+        std::cerr << "Rasterizer2::fillPolygon ### AFTER DYNAMIC ADJUST ### CENTER = " ;
         std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                   << xc << ", " << yc << std::endl;
+#endif
         for (size_t i = 0; i < n; ++i) {
             std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                       << polygon[i].x() << ", " << polygon[i].y() << std::endl;

@@ -392,7 +392,7 @@ class ShapesView : public PaintView
             double width = 5;
             double height = 5;
             double insetD = 0.5; // polyline
-            double insetF = 0;   // filled polygon
+            double insetF = 0.0; // filled polygon
             std::vector<Pt::Gfx::PointF> shape;
 
             shape = makeRectangle(x, y, width, height, insetD);
@@ -404,10 +404,12 @@ class ShapesView : public PaintView
 
             x += 60;
 
+            Pt::Gfx::DEBUG_DUMP = true;
             shape = makeRectangle(x, y, width, height, insetF);
             painter.fillPolygon(&shape[0], shape.size());
             shape = makeRectangle(x, y, width, height, insetD);
             painter.drawPolyline(&shape[0], shape.size());
+            Pt::Gfx::DEBUG_DUMP = false;
 
             y += height + 20;
 
@@ -428,7 +430,7 @@ class ShapesView : public PaintView
             double width = 12;
             double height = 12;
             double insetD = 0.5; // polyline
-            double insetF = 0;   // filled polygon
+            double insetF = 0.0; // filled polygon
             std::vector<Pt::Gfx::PointF> shape;
 
             shape = makeDiamond(x, y, width, height, insetD);
@@ -439,7 +441,7 @@ class ShapesView : public PaintView
             painter.fillPolygon(&shape[0], shape.size());
             x += width + 2;
 
-            Pt::Gfx::DEBUG_DUMP = true;
+            //Pt::Gfx::DEBUG_DUMP = true;
             shape = makeDiamond(x, y, width, height, insetF);
             painter.fillPolygon(&shape[0], shape.size());
             shape = makeDiamond(x, y, width, height, insetD);
