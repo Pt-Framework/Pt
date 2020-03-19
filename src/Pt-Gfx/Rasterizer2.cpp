@@ -804,7 +804,7 @@ bool DEBUG_DUMP = false;
 
 void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 {
-#if 1
+#if 0
 
     std::vector<PointF> polygon(n);
     for (size_t i = 0; i < polygon.size(); ++i) {
