@@ -570,9 +570,9 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
                 // Calculate the node's coordinate
                 const float deltaYp = y - curYi;
-                const float deltaYj = curYj  - curYi;
-                const float deltaXj = curXj  - curXi;
-                const float interXf = curXi  + (deltaYp) / deltaYj * deltaXj;
+                const float deltaYj = curYj - curYi;
+                const float deltaXj = curXj - curXi;
+                const float interXf = curXi + (deltaYp) / deltaYj * deltaXj;
 
                 nodeX[nodes++] = interXf;
             }
@@ -752,10 +752,10 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
                         return;
 
                     // Calculate the node's coordinate
-                    const float deltaYp = y - curYi;
-                    const float deltaYj = curYj  - curYi;
-                    const float deltaXj = curXj  - curXi;
-                    const float interXf = curXi  + (deltaYp) / deltaYj * deltaXj;
+                    const float deltaYp = y     - curYi;
+                    const float deltaYj = curYj - curYi;
+                    const float deltaXj = curXj - curXi;
+                    const float interXf = curXi + (deltaYp) / deltaYj * deltaXj;
 
                     nodeX[nodes++] = interXf;
                 }
