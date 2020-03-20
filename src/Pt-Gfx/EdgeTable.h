@@ -71,7 +71,7 @@ class ActiveEdgeTable : public std::vector<Edge>
             {
                Edge& edge = (*this)[i];
 
-                if(edge.ymax < scanLine )
+                if(edge.ymax <= scanLine )
                 {
                     erase(begin() + i);
                     --i;

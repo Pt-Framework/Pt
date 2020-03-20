@@ -3313,7 +3313,7 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
     std::vector<Point> points( pts, pts + pointCount );
 
     ClipPolygon clipper;
-    Rect clipRect(_currentClip.left(), _currentClip.right() -1, _currentClip.top(), _currentClip.bottom() - 1);
+    Rect clipRect(_currentClip.left(), _currentClip.right(), _currentClip.top(), _currentClip.bottom());
 
     clipper( points, clipRect);
 
@@ -3467,7 +3467,7 @@ void Rasterizer::outputEdges(const ActiveEdgeTable& edges, const Point&  origin,
     {
         const int xend    = std::max(edges[i].x, edges[i-1].x);
         const int xbegin  = std::min(edges[i].x, edges[i-1].x);
-        const int length  = xend - xbegin + 1;
+        const int length  = xend - xbegin;
 
         fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
     }

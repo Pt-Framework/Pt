@@ -130,6 +130,9 @@
     <Filter Include="Pt-Hmi\xorg">
       <UniqueIdentifier>{a778bad0-210f-4746-a155-f513e6568c2a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\gdiplus">
+      <UniqueIdentifier>{0214d853-7964-4279-a744-a21c00166642}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1596,6 +1599,33 @@
     <ClInclude Include="..\..\include\Pt\Latin1Codec.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\ApplicationImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\KeyMap.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\MainWindowImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PainterImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PaintSurfaceImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PictureImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PixmapSurfaceImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\ScreenImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\win32.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2971,6 +3001,24 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\Latin1Codec.cpp">
       <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\MainWindowImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\PaintSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\PictureImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\PixmapSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
