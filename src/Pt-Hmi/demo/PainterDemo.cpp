@@ -434,9 +434,11 @@ class ShapesView : public PaintView
             double offset = 0.5; // pen size / 2
             std::vector<Pt::Gfx::PointF> shape;
 
+            Pt::Gfx::DEBUG_DUMP = true;
             shape = makeDiamond(x, y, width, height, insetD, offset);
             painter.drawPolyline(&shape[0], shape.size());
             x += width + 2;
+            Pt::Gfx::DEBUG_DUMP = false;
 
             shape = makeDiamond(x, y, width, height, insetF, offset);
             painter.fillPolygon(&shape[0], shape.size());
@@ -488,11 +490,20 @@ class ShapesView : public PaintView
                                                  double inset, double offset)
         {
             std::vector<Pt::Gfx::PointF> polygon(5);
-            polygon[0].set(x + width/2.0 + offset,       y + inset + offset);
-            polygon[1].set(x + width - inset + offset*0, y + height/2.0 + offset);
-            polygon[2].set(x + width/2.0 + offset,       y + height - inset + offset*0);
-            polygon[3].set(x + inset + offset,           y + height/2.0 + offset);
+
+#if 1
+            polygon[0].set(x + width/2.0     + offset,   y + inset          + offset  );
+            polygon[1].set(x + width - inset + offset*0, y + height/2.0     + offset  );
+            polygon[2].set(x + width/2.0     + offset,   y + height - inset + offset*0);
+            polygon[3].set(x + inset         + offset,   y + height/2.0     + offset  );
             polygon[4] = polygon[0];
+#else
+            polygon[0].set(x + width/2.0,                y + inset                    );
+            polygon[1].set(x + width - inset,            y + height/2.0               );
+            polygon[2].set(x + width/2.0,                y + height - inset           );
+            polygon[3].set(x + inset,                    y + height/2.0               );
+            polygon[4] = polygon[0];
+#endif
             return polygon;
         }
 

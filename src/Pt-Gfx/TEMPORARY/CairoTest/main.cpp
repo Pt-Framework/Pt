@@ -10,8 +10,8 @@
 
 int main ()
 {
-    int SIZEX = 80;
-    int SIZEY = 80;
+    int SIZEX = 400;
+    int SIZEY = 400;
 
     cairo_surface_t* cs;
     cairo_t*         c;
@@ -22,6 +22,39 @@ int main ()
     cairo_set_operator  (c, CAIRO_OPERATOR_SOURCE);
     cairo_set_antialias (c, CAIRO_ANTIALIAS_DEFAULT);
     cairo_set_line_width(c, 1.0);
+
+#if 1
+
+    /* Draw something and write to PNG */
+    cairo_set_source_rgba(c, 0.0, 0.0, 0.0, 1.0);
+    cairo_paint          (c);
+
+    cairo_set_source_rgba(c, 1.0, 1.0, 1.0, 1.0);
+
+    cairo_move_to(c, 11.0, 240.5);
+    cairo_line_to(c, 16.5, 246.0);
+    cairo_line_to(c, 11.0, 251.5);
+    cairo_line_to(c,  5.5, 246.0);
+    cairo_line_to(c, 11.0, 240.5);
+    cairo_stroke (c);
+    cairo_surface_write_to_png (cs, "CairoTest1.png");
+
+    /* Draw something and write to PNG */
+    cairo_set_source_rgba(c, 0.0, 0.0, 0.0, 1.0);
+    cairo_paint          (c);
+
+    cairo_set_source_rgba(c, 1.0, 1.0, 1.0, 1.0);
+
+    cairo_move_to(c, 11.0, 240.0);
+    cairo_line_to(c, 16.0, 246.0);
+    cairo_line_to(c, 11.0, 251.0);
+    cairo_line_to(c,  5.0, 246.0);
+    cairo_line_to(c, 11.0, 240.0);
+    cairo_stroke (c);
+
+    cairo_surface_write_to_png (cs, "CairoTest2.png");
+
+#else
 
     /* Draw something and write to PNG */
     cairo_set_source_rgba(c, 0.0, 0.0, 0.0, 1.0);
@@ -86,6 +119,8 @@ int main ()
     cairo_stroke (c);
 
     cairo_surface_write_to_png (cs, "CairoTest2.png");
+
+#endif
 
     /* Done */
     cairo_destroy        (c);
