@@ -434,7 +434,7 @@ class ShapesView : public PaintView
             double offset = 0.5; // pen size / 2
             std::vector<Pt::Gfx::PointF> shape;
 
-            Pt::Gfx::DEBUG_DUMP = true;
+            //Pt::Gfx::DEBUG_DUMP = true;
             shape = makeDiamond(x, y, width, height, insetD, offset);
             painter.drawPolyline(&shape[0], shape.size());
             x += width + 2;
