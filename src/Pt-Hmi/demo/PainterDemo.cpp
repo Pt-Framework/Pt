@@ -513,7 +513,7 @@ class ShapesView : public PaintView
             width  = 12;
             height = 12;
             auto makeSimpleDiamond = [](double x, double y, double width, double height) {
-            std::vector<Pt::Gfx::PointF> p(5);
+                std::vector<Pt::Gfx::PointF> p(5);
                 p[0].set(x + width/2.0, y             );
                 p[1].set(x + width,     y + height/2.0);
                 p[2].set(x + width/2.0, y + height    );
