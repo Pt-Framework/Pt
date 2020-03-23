@@ -5,7 +5,7 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi-Demo ;
 HMI_DEMO_SOURCES = Main.cpp
 				   MainWindow.cpp
 				   Dialog1.cpp
-				   Dialog2.cpp 
+				   Dialog2.cpp
 				   ChildW.cpp
 				   ;
 
@@ -14,6 +14,10 @@ LinkSharedLibraries Pt-Hmi-Demo : Pt Pt-System Pt-Gfx Pt-Net Pt-Hmi  ;
 MakeLocate Pt-Hmi-Demo : $(PT_OUTPUT_TARGET) ;
 
 HMI_PAINTER_DEMO_SOURCES = PainterDemo.cpp ;
+
+#rule FGeneric
+#{ return $(<) ; }
+#SubDirC++Flags [ FGeneric -std=c++11  ] ;
 
 Main Pt-Hmi-PainterDemo : $(HMI_PAINTER_DEMO_SOURCES) ;
 LinkSharedLibraries Pt-Hmi-PainterDemo : Pt Pt-System Pt-Gfx Pt-Hmi ;

@@ -284,6 +284,9 @@ class ShapesView : public PaintView
 
             y = drawPolygons(y, painter);
             y = drawDiamonds(y, painter);
+            y += 20;
+
+            //y = drawSPECIALTEST(y, painter);
         }
 
         int drawCircles(int y, Pt::Gfx::Painter& painter)
@@ -470,6 +473,92 @@ class ShapesView : public PaintView
             return y;
         }
 
+#if 0
+        int drawSPECIALTEST(int y, Pt::Gfx::Painter& painter)
+        {
+            using namespace Pt::Gfx;
+
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+            painter.setPen(lightBlue);
+            painter.setBrush(lightPurple);
+
+            double x      = 5;
+            double width  = 5;
+            double height = 5;
+            std::vector<Pt::Gfx::PointF> polygon;
+
+            auto makeSimpleRectangle = [](double x, double y, double width, double height) {
+                std::vector<Pt::Gfx::PointF> p(5);
+                p[0].set(x,         y         );
+                p[1].set(x + width, y         );
+                p[2].set(x + width, y + height);
+                p[3].set(x,         y + height);
+                p[4] = p[0];
+                return p;
+            };
+            polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
+            painter.drawPolyline(&polygon[0], polygon.size());
+            polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            //Pt::Gfx::DEBUG_DUMP = true;
+            polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            painter.drawPolyline(&polygon[0], polygon.size());
+            Pt::Gfx::DEBUG_DUMP = false;
+            y += 20;
+
+            x      = 5;
+            width  = 12;
+            height = 12;
+            auto makeSimpleDiamond = [](double x, double y, double width, double height) {
+            std::vector<Pt::Gfx::PointF> p(5);
+                p[0].set(x + width/2.0, y             );
+                p[1].set(x + width,     y + height/2.0);
+                p[2].set(x + width/2.0, y + height    );
+                p[3].set(x,             y + height/2.0);
+                p[4] = p[0];
+                return p;
+            };
+            polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
+            painter.drawPolyline(&polygon[0], polygon.size());
+            polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            //Pt::Gfx::DEBUG_DUMP = true;
+            polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            painter.drawPolyline(&polygon[0], polygon.size());
+            Pt::Gfx::DEBUG_DUMP = false;
+            y += 20;
+
+            x      = 5;
+            width  = 12;
+            height = 12;
+            auto makeSimpleFlag = [](double x, double y, double width, double height) {
+                std::vector<Pt::Gfx::PointF> p(6);
+                p[0].set(x,             y             );
+                p[1].set(x + width,     y             );
+                p[2].set(x + width/2.0, y + height/2.0);
+                p[3].set(x + width,     y + height    );
+                p[4].set(x,             y + height    );
+                p[5] = p[0];
+                return p;
+            };
+            polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
+            painter.drawPolyline(&polygon[0], polygon.size());
+            polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            //Pt::Gfx::DEBUG_DUMP = true;
+            polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            painter.drawPolyline(&polygon[0], polygon.size());
+            Pt::Gfx::DEBUG_DUMP = false;
+            y += 20;
+
+            return y;
+        }
+#endif
 
         std::vector<Pt::Gfx::PointF> makeRectangle(double x, double y,
                                                  double width, double height,
