@@ -38,7 +38,7 @@ class PaintView : public Pt::Hmi::Control
 
             Image image2( painter.format(), Size(imageWidth, imageHeight) );
             ImagePainter2 imagePainter2(image2);
-            imagePainter2.setAntiAliasing(true);
+            imagePainter2.setAntiAliasing(false);
             imagePainter2.setBrush(background);
             imagePainter2.fillRect(imageRect);
 
@@ -438,8 +438,8 @@ class ShapesView : public PaintView
             double x = 5;
             double width = 12;
             double height = 12;
-            double offsetDraw = 0.5; // pen size / 2
-            double offsetFill = 0.5; // pen size / 2
+            double offsetDraw = 0.0; // pen size / 2
+            double offsetFill = 0.0; // pen size / 2
             std::vector<Pt::Gfx::PointF> shape;
 
             // convex diamond shape
