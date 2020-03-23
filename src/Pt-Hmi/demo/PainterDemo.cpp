@@ -233,9 +233,10 @@ class PolylinesView : public PaintView
         }
 };
 
+// this does not work on all toolsets
 namespace Pt {
 namespace Gfx {
-    extern bool DEBUG_DUMP;
+    static bool DEBUG_DUMP;
 }}
 
 class ShapesView : public PaintView
@@ -283,7 +284,6 @@ class ShapesView : public PaintView
             y += 20;
 
             y = drawPolygons(y, painter);
-            y = drawDiamonds(y, painter);
             y += 20;
 
             //y = drawSPECIALTEST(y, painter);
@@ -360,25 +360,69 @@ class ShapesView : public PaintView
             double x = 5;
             double width = 5;
             double height = 5;
-            double inset = 0;
+            double insetDraw = 0.0;
+            double insetFill = 0.0;
+            double offsetDraw = 0.0;
+            double offsetFill = 0.0;
 
-            painter.fillRect(RectF(PointF(x + inset, y + inset),
-                                   SizeF(width - 2*inset, height- 2*inset)));
-            inset = 0.5;
-            x += width + 1;
-            painter.drawRect(RectF(PointF(x + inset, y + inset),
-                                   SizeF(width - 2*inset, height - 2*inset)));
+            painter.drawRect( makeRect(x, y, width, height, insetDraw, offsetDraw) );
 
-            x += 60;
+            x += width + 2;
+            
+            painter.fillRect( makeRect(x, y, width, height, insetFill, offsetFill) );
 
-            painter.fillRect(RectF(PointF(x + inset, y + inset),
-                                   SizeF(width - 2*inset, height - 2*inset)));
-            painter.drawRect(RectF(PointF(x + inset, y + inset),
-                                   SizeF(width - 2*inset, height - 2*inset)));
+            x += width + 2;
+
+            painter.fillRect( makeRect(x, y, width, height, insetFill, offsetFill) );
+            painter.drawRect( makeRect(x, y, width, height, insetDraw, offsetDraw) );
+
+            x += width + 20;
+
+            std::vector<Pt::Gfx::PointF> shape;
+
+            shape = makeRectangle(x, y, width, height, insetDraw, offsetDraw);
+            painter.drawPolyline(&shape[0], shape.size());
+            
+            x += width + 2;
+
+            shape = makeRectangle(x, y, width, height, insetFill, offsetFill);
+            painter.fillPolygon(&shape[0], shape.size());
+            
+            x += width + 2;
+           
+            shape = makeRectangle(x, y, width, height, insetFill, offsetFill);
+            painter.fillPolygon(&shape[0], shape.size());
+            
+            shape = makeRectangle(x, y, width, height, insetDraw, offsetDraw);
+            painter.drawPolyline(&shape[0], shape.size());
 
             y += height + 20;
 
             return y;
+        }
+
+        Pt::Gfx::RectF makeRect(double x, double y, double width, double height,
+                                double inset = 0.0, double offset = 0.0)
+        {
+          using namespace Pt::Gfx;
+
+          return RectF( PointF(x + offset + inset, 
+                               y + offset + inset),
+                        SizeF(width - 2 * inset, 
+                              height - 2 * inset) );
+        }
+
+        std::vector<Pt::Gfx::PointF> makeRectangle(double x, double y,
+                                                   double width, double height,
+                                                   double inset = 0.0, double offset = 0.0)
+        {
+            std::vector<Pt::Gfx::PointF> polygon(5);
+            polygon[0].set(x + inset + offset,         y + inset + offset);
+            polygon[1].set(x + width - inset + offset, y + inset + offset);
+            polygon[2].set(x + width - inset + offset, y + height - inset + offset);
+            polygon[3].set(x + inset + offset,         y + height - inset + offset);
+            polygon[4] = polygon[0];
+            return polygon;
         }
 
         int drawPolygons(int y, Pt::Gfx::Painter& painter)
@@ -392,85 +436,80 @@ class ShapesView : public PaintView
             painter.setBrush(lightPurple);
 
             double x = 5;
-            double width = 5;
-            double height = 5;
-            double insetD = 0.5; // polyline
-            double insetF = 0.0; // filled polygon
+            double width = 12;
+            double height = 12;
+            double offsetDraw = 0.5; // pen size / 2
+            double offsetFill = 0.5; // pen size / 2
             std::vector<Pt::Gfx::PointF> shape;
 
-            shape = makeRectangle(x, y, width, height, insetD);
+            // convex diamond shape
+
+            shape = makeDiamond(x, y, width, height, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
-            x += width + 1;
+            
+            x += width + 2;
 
-            shape = makeRectangle(x, y, width, height, insetF);
+            shape = makeDiamond(x, y, width, height, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
+            
+            x += width + 2;
 
-            x += 60;
-
-            //Pt::Gfx::DEBUG_DUMP = true;
-            shape = makeRectangle(x, y, width, height, insetF);
+            shape = makeDiamond(x, y, width, height, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
-            shape = makeRectangle(x, y, width, height, insetD);
+            
+            shape = makeDiamond(x, y, width, height, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
-            Pt::Gfx::DEBUG_DUMP = false;
+            
+            x += width + 20;
+            
+            // concave diamond shape
+
+            shape = makeFlag(x, y, width, height, offsetDraw);
+            painter.drawPolyline(&shape[0], shape.size());
+            
+            x += width + 2;
+
+            shape = makeFlag(x, y, width, height, offsetFill);
+            painter.fillPolygon(&shape[0], shape.size());
+            
+            x += width + 2;
+
+            shape = makeFlag(x, y, width, height, offsetFill);
+            painter.fillPolygon(&shape[0], shape.size());
+            
+            shape = makeFlag(x, y, width, height, offsetDraw);
+            painter.drawPolyline(&shape[0], shape.size());
 
             y += height + 20;
 
             return y;
         }
 
-        int drawDiamonds(int y, Pt::Gfx::Painter& painter)
+        std::vector<Pt::Gfx::PointF> makeDiamond(double x, double y,
+                                                 double width, double height,
+                                                 double offset = 0.0)
         {
-            using namespace Pt::Gfx;
+            std::vector<Pt::Gfx::PointF> polygon(5);
+            polygon[0].set(x + width/2.0 + offset,     y + offset);
+            polygon[1].set(x + width + offset,         y + height/2.0 + offset);
+            polygon[2].set(x + width/2.0 + offset,     y + height + offset);
+            polygon[3].set(x + offset,                 y + height/2.0 + offset);
+            polygon[4] = polygon[0];
+            return polygon;
+        }
 
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue = Color::fromRgb8(100, 100, 255);
-
-            painter.setPen(lightBlue);
-            painter.setBrush(lightPurple);
-
-            double x = 5;
-            double width = 12;
-            double height = 12;
-            double insetD = 0.5; // polyline
-            double insetF = 0.0; // filled polygon
-            double offset = 0.5; // pen size / 2
-            std::vector<Pt::Gfx::PointF> shape;
-
-            //Pt::Gfx::DEBUG_DUMP = true;
-            shape = makeDiamond(x, y, width, height, insetD, offset);
-            painter.drawPolyline(&shape[0], shape.size());
-            x += width + 2;
-            Pt::Gfx::DEBUG_DUMP = false;
-
-            shape = makeDiamond(x, y, width, height, insetF, offset);
-            painter.fillPolygon(&shape[0], shape.size());
-            x += width + 2;
-
-            //Pt::Gfx::DEBUG_DUMP = true;
-            shape = makeDiamond(x, y, width, height, insetF, offset);
-            painter.fillPolygon(&shape[0], shape.size());
-            shape = makeDiamond(x, y, width, height, insetD, offset);
-            painter.drawPolyline(&shape[0], shape.size());
-            x += width + 2;
-            Pt::Gfx::DEBUG_DUMP = false;
-
-            shape = makeFlag(x, y, width, height, insetD, offset);
-            painter.drawPolyline(&shape[0], shape.size());
-            x += width + 2;
-
-            shape = makeFlag(x, y, width, height, insetF, offset);
-            painter.fillPolygon(&shape[0], shape.size());
-            x += width + 2;
-
-            shape = makeFlag(x, y, width, height, insetF, offset);
-            painter.fillPolygon(&shape[0], shape.size());
-            shape = makeFlag(x, y, width, height, insetD, offset);
-            painter.drawPolyline(&shape[0], shape.size());
-
-            y += height + 20;
-
-            return y;
+        std::vector<Pt::Gfx::PointF> makeFlag(double x, double y,
+                                              double width, double height,
+                                              double offset = 0.0)
+        {
+            std::vector<Pt::Gfx::PointF> polygon(6);
+            polygon[0].set(x + offset,             y + offset);
+            polygon[1].set(x + width + offset,     y + offset);
+            polygon[2].set(x + width/2.0 + offset, y + height/2.0 + offset);
+            polygon[3].set(x + width + offset,     y + height + offset);
+            polygon[4].set(x + offset,             y + height + offset);
+            polygon[5] = polygon[0];
+            return polygon;
         }
 
 #if 0
@@ -559,115 +598,6 @@ class ShapesView : public PaintView
             return y;
         }
 #endif
-
-        std::vector<Pt::Gfx::PointF> makeRectangle(double x, double y,
-                                                 double width, double height,
-                                                 double inset)
-        {
-            std::vector<Pt::Gfx::PointF> polygon(5);
-            polygon[0].set(x + inset,         y + inset);
-            polygon[1].set(x + width - inset, y + inset);
-            polygon[2].set(x + width - inset, y + height - inset);
-            polygon[3].set(x + inset,         y + height - inset);
-            polygon[4] = polygon[0];
-            return polygon;
-        }
-
-
-        std::vector<Pt::Gfx::PointF> makeDiamond(double x, double y,
-                                                 double width, double height,
-                                                 double inset, double offset)
-        {
-            std::vector<Pt::Gfx::PointF> polygon(5);
-
-#if 1
-            polygon[0].set(x + width/2.0     + offset,   y + inset          + offset  );
-            polygon[1].set(x + width - inset + offset*0, y + height/2.0     + offset  );
-            polygon[2].set(x + width/2.0     + offset,   y + height - inset + offset*0);
-            polygon[3].set(x + inset         + offset,   y + height/2.0     + offset  );
-            polygon[4] = polygon[0];
-#else
-            polygon[0].set(x + width/2.0,                y + inset                    );
-            polygon[1].set(x + width - inset,            y + height/2.0               );
-            polygon[2].set(x + width/2.0,                y + height - inset           );
-            polygon[3].set(x + inset,                    y + height/2.0               );
-            polygon[4] = polygon[0];
-#endif
-            return polygon;
-        }
-
-
-        std::vector<Pt::Gfx::PointF> makeFlag(double x, double y,
-                                              double width, double height,
-                                              double inset, double offset)
-        {
-            std::vector<Pt::Gfx::PointF> polygon(6);
-            polygon[0].set(x + inset + offset,               y + inset + offset);
-            polygon[1].set(x + width - inset + offset*0,     y + inset + offset);
-            polygon[2].set(x + width/2.0 - inset + offset*0, y + height/2.0 + offset);
-            polygon[3].set(x + width - inset + offset*0,     y + height - inset + offset*0);
-            polygon[4].set(x + inset + offset,               y + height - inset + offset*0);
-            polygon[5] = polygon[0];
-            return polygon;
-        }
-
-
-        /*
-        std::vector<Pt::Gfx::PointF> makeDiamond(double x, double y,
-                                                 double width, double height,
-                                                 double offset)
-        {
-            std::vector<Pt::Gfx::PointF> polygon(5);
-            polygon[0].set(x + width/2.0 + offset,     y + offset);
-            polygon[1].set(x + width + offset,         y + height/2.0 + offset);
-            polygon[2].set(x + width/2.0 + offset,     y + height + offset);
-            polygon[3].set(x + offset,                 y + height/2.0 + offset);
-            polygon[4] = polygon[0];
-            return polygon;
-        }
-
-
-        std::vector<Pt::Gfx::PointF> makeDiamondOld(double x, double y,
-                                                 double width, double height,
-                                                 double inset)
-        {
-            std::vector<Pt::Gfx::PointF> polygon(5);
-            polygon[0].set(x + width/2.0,     y + inset);
-            polygon[1].set(x + width - inset, y + height/2.0);
-            polygon[2].set(x + width/2.0,     y + height - inset);
-            polygon[3].set(x + inset,         y + height/2.0);
-            polygon[4] = polygon[0];
-            return polygon;
-        }
-
-        std::vector<Pt::Gfx::PointF> makeFlag(double x, double y,
-                                              double width, double height,
-                                              double offset)
-        {
-            std::vector<Pt::Gfx::PointF> polygon(6);
-            polygon[0].set(x + offset,             y + offset);
-            polygon[1].set(x + width + offset,     y + offset);
-            polygon[2].set(x + width/2.0 + offset, y + height/2.0 + offset);
-            polygon[3].set(x + width + offset,     y + height + offset);
-            polygon[4].set(x + offset,             y + height + offset);
-            polygon[5] = polygon[0];
-            return polygon;
-        }
-
-        std::vector<Pt::Gfx::PointF> makeFlagOld(double x, double y,
-                                              double width, double height,
-                                              double inset)
-        {
-            std::vector<Pt::Gfx::PointF> polygon(6);
-            polygon[0].set(x + inset,             y + inset);
-            polygon[1].set(x + width - inset,     y + inset);
-            polygon[2].set(x + width/2.0 - inset, y + height/2.0);
-            polygon[3].set(x + width - inset,     y + height - inset);
-            polygon[4].set(x + inset,             y + height - inset);
-            polygon[5] = polygon[0];
-            return polygon;
-        }
-        */
 };
 
 

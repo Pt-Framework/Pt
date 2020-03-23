@@ -805,9 +805,10 @@ bool DEBUG_DUMP = false;
 void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 {
     std::vector<PointF> polygon(n);
-    for (size_t i = 0; i < polygon.size(); ++i) {
-        polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
-                       Pt::lround(ps[i].y() - 0.4999));
+    for (size_t i = 0; i < polygon.size(); ++i) 
+    {
+        polygon[i].set( Pt::lround(ps[i].x() - 0.4999),
+                        Pt::lround(ps[i].y() - 0.4999) );
         //polygon[i].set(ps[i].x(), ps[i].y());
     }
 
@@ -1097,11 +1098,12 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     // Perform coordinate adjustments
     std::vector<PointF> polygon(n);
 
-#if 0
+#if 1
     for (size_t i = 0; i < n; ++i)
     {
-        polygon[i].set(Pt::lround(ps[i].x() - 0.4999),
-                       Pt::lround(ps[i].y() - 0.4999));
+        polygon[i].set( Pt::lround( ps[i].x() - 0.4999 ),
+                        Pt::lround( ps[i].y() - 0.4999 ) );
+        
         //polygon[i].set(ps[i].x(), ps[i].y());
     }
 #else
@@ -1133,7 +1135,7 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 
     if(DEBUG_DUMP) {
         const std::ios_base::fmtflags f(std::cerr.flags());
-#if 0
+#if 1
         std::cerr << "Rasterizer2::fillPolygon ### AFTER FIXED ADJUST ###" << std::endl;
 #else
         std::cerr << "Rasterizer2::fillPolygon ### AFTER DYNAMIC ADJUST ### CENTER = " ;
@@ -1206,7 +1208,7 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     Pt::int32_t maxY = -MAXIMUM_COORD;
     for(size_t j = 0; j < polygon.size(); ++j)
     {
-#if 0
+#if 1
         const double x = polygon[j].x();
         const double y = polygon[j].y();
 
