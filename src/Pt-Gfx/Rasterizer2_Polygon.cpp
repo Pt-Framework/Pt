@@ -706,15 +706,14 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // #@#
             // Calculate the coordinate
             Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
-          //Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) )/* - 1*/;
+            //Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
             if(to   > _currentClip.right()) to   = _currentClip.right();
 
             if(to < from) continue;
-            //if( (to - from) < 1 ) continue;
 
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy)
