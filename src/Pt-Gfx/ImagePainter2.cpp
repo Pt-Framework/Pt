@@ -38,6 +38,12 @@ namespace Pt {
 
 namespace Gfx {
 
+
+// ### TEMPORARY ###
+bool IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+// ### TEMPORARY ###
+
+
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image) )
 {

@@ -800,19 +800,18 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
     }
 }
 
-bool DEBUG_DUMP = false;
 
 void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 {
     std::vector<PointF> polygon(n);
-    for (size_t i = 0; i < polygon.size(); ++i) 
+    for (size_t i = 0; i < polygon.size(); ++i)
     {
+        // Foor the coordinates while avoiding rounding errors
         polygon[i].set( Pt::lround(ps[i].x() - 0.4999),
                         Pt::lround(ps[i].y() - 0.4999) );
-        //polygon[i].set(ps[i].x(), ps[i].y());
     }
 
-    if(DEBUG_DUMP) {
+    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
         const std::ios_base::fmtflags f(std::cerr.flags());
 
         std::cerr << "Rasterizer2::drawPolyline ### AT ENTRY POINT ###" << std::endl;
@@ -1085,7 +1084,7 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 {
-    if(DEBUG_DUMP) {
+    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
         const std::ios_base::fmtflags f(std::cerr.flags());
         std::cerr << "Rasterizer2::fillPolygon ### AT ENTRY POINT ###" << std::endl;
         for (size_t i = 0; i < n; ++i) {
@@ -1098,13 +1097,14 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     // Perform coordinate adjustments
     std::vector<PointF> polygon(n);
 
-#if 1
+#define FIXED_ADJUST
+
+#ifdef FIXED_ADJUST
     for (size_t i = 0; i < n; ++i)
     {
+        // Foor the coordinates while avoiding rounding errors
         polygon[i].set( Pt::lround( ps[i].x() - 0.4999 ),
                         Pt::lround( ps[i].y() - 0.4999 ) );
-        
-        //polygon[i].set(ps[i].x(), ps[i].y());
     }
 #else
     double xc = 0.0f;
@@ -1127,15 +1127,15 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
              if(yi < yc) yi += 0.5f;
         else if(yi > yc) yi -= 0.5f;
 
+        // Foor the coordinates while avoiding rounding errors
         polygon[i].set(Pt::lround(xi - 0.4999),
                        Pt::lround(yi - 0.4999));
-        //polygon[i].set(xi, yi);
     }
 #endif
 
-    if(DEBUG_DUMP) {
+    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
         const std::ios_base::fmtflags f(std::cerr.flags());
-#if 1
+#ifdef FIXED_ADJUST
         std::cerr << "Rasterizer2::fillPolygon ### AFTER FIXED ADJUST ###" << std::endl;
 #else
         std::cerr << "Rasterizer2::fillPolygon ### AFTER DYNAMIC ADJUST ### CENTER = " ;

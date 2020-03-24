@@ -42,6 +42,16 @@ namespace Pt {
 
 namespace Gfx {
 
+
+// ### TEMPORARY ###
+class PT_GFX_API IP2_DEBUG
+{
+    public:
+        static bool DUMP_POLYGON_COORDINATES;
+};
+// ### TEMPORARY ###
+
+
 class Polygon
 {
     public:
@@ -89,7 +99,7 @@ class Polygon
         {
             return _points.empty();
         }
-        
+
         std::size_t size() const
         {
             return _points.size();
@@ -130,13 +140,13 @@ class Polygon
             const double h2 = (ymax - ymin) / 2;
             const double transx = xmin + w2;
             const double transy = ymin + h2;
-            
+
             Polygon polygon;
 
             for (size_t i = 0; i < _points.size(); ++i)
             {
                 PointF point = _points[i];
-            
+
                 point.addX(-transx);
                 point.addY(-transy);
 
@@ -162,7 +172,7 @@ class Polygon
 
                 polygon.push_back(point);
             }
-            
+
             return polygon;
         }*/
     private:
@@ -171,13 +181,13 @@ class Polygon
 
 struct Element
 {
-    enum ElementType 
+    enum ElementType
     {
         IT_Close,
-        IT_MoveTo, 
-        IT_LineTo, 
-        IT_QuadBezierTo, 
-        IT_CubicBezierTo, 
+        IT_MoveTo,
+        IT_LineTo,
+        IT_QuadBezierTo,
+        IT_CubicBezierTo,
         IT_GenNBezierTo
     };
 
@@ -209,7 +219,7 @@ struct Element
 };
 
 
-class PT_GFX_API Path 
+class PT_GFX_API Path
 {
     public:
         Path();
@@ -263,8 +273,8 @@ class PT_GFX_API Path
         void addChord(const SizeF& size,  float degBegin, float degEnd);
 
         void transform(const Transform& transform);
-        
-        void toPolygons(std::vector<Polygon>& polygons, float smoothness = 1) const; 
+
+        void toPolygons(std::vector<Polygon>& polygons, float smoothness = 1) const;
 
     private:
         typedef std::vector<Element> ElementVector;

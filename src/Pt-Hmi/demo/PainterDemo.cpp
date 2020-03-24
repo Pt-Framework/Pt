@@ -38,7 +38,7 @@ class PaintView : public Pt::Hmi::Control
 
             Image image2( painter.format(), Size(imageWidth, imageHeight) );
             ImagePainter2 imagePainter2(image2);
-            imagePainter2.setAntiAliasing(false);
+            imagePainter2.setAntiAliasing(true);
             imagePainter2.setBrush(background);
             imagePainter2.fillRect(imageRect);
 
@@ -233,11 +233,6 @@ class PolylinesView : public PaintView
         }
 };
 
-// this does not work on all toolsets
-namespace Pt {
-namespace Gfx {
-    static bool DEBUG_DUMP;
-}}
 
 class ShapesView : public PaintView
 {
@@ -246,7 +241,7 @@ class ShapesView : public PaintView
         {}
 
     protected:
-        virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text)
+        int doPaint(int y, Pt::Gfx::Painter& painter, const Pt::String& text)
         {
             using namespace Pt::Gfx;
 
@@ -256,8 +251,6 @@ class ShapesView : public PaintView
             painter.setPen(lightPurple);
             painter.setFont(Font("", 12));
             painter.drawText(PointF(10, 20), text);
-
-            int y = 30;
 
             painter.setFont(Font("", 10));
             painter.setPen(lightBlue);
@@ -286,6 +279,21 @@ class ShapesView : public PaintView
             y = drawPolygons(y, painter);
             y += 20;
 
+            return y;
+        }
+
+        virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text)
+        {
+            int y = 30;
+            y = doPaint(y, painter, text);
+
+            Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
+            if(ip2) {
+                ip2->setAntiAliasing(false);
+                y = doPaint(y + 20, painter, text);
+                ip2->setAntiAliasing(true);
+            };
+
             //y = drawSPECIALTEST(y, painter);
         }
 
@@ -313,7 +321,7 @@ class ShapesView : public PaintView
             painter.fillCircle(PointF(x, y), size);
             painter.drawCircle(PointF(x, y), size);
 
-            y += size + 20;
+            y += size + 10;
 
             return y;
         }
@@ -342,7 +350,7 @@ class ShapesView : public PaintView
             painter.fillEllipse(PointF(x, y), SizeF(width, height));
             painter.drawEllipse(PointF(x, y), SizeF(width, height));
 
-            y += height + 20;
+            y += height + 10;
 
             return y;
         }
@@ -368,7 +376,7 @@ class ShapesView : public PaintView
             painter.drawRect( makeRect(x, y, width, height, insetDraw, offsetDraw) );
 
             x += width + 2;
-            
+
             painter.fillRect( makeRect(x, y, width, height, insetFill, offsetFill) );
 
             x += width + 2;
@@ -382,21 +390,21 @@ class ShapesView : public PaintView
 
             shape = makeRectangle(x, y, width, height, insetDraw, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
-            
+
             x += width + 2;
 
             shape = makeRectangle(x, y, width, height, insetFill, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
-            
+
             x += width + 2;
-           
+
             shape = makeRectangle(x, y, width, height, insetFill, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
-            
+
             shape = makeRectangle(x, y, width, height, insetDraw, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
 
-            y += height + 20;
+            y += height + 10;
 
             return y;
         }
@@ -406,9 +414,9 @@ class ShapesView : public PaintView
         {
           using namespace Pt::Gfx;
 
-          return RectF( PointF(x + offset + inset, 
+          return RectF( PointF(x + offset + inset,
                                y + offset + inset),
-                        SizeF(width - 2 * inset, 
+                        SizeF(width - 2 * inset,
                               height - 2 * inset) );
         }
 
@@ -446,41 +454,45 @@ class ShapesView : public PaintView
 
             shape = makeDiamond(x, y, width, height, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
-            
+
             x += width + 2;
 
             shape = makeDiamond(x, y, width, height, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
-            
+
             x += width + 2;
+
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
 
             shape = makeDiamond(x, y, width, height, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
-            
+
             shape = makeDiamond(x, y, width, height, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
-            
+
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+
             x += width + 20;
-            
+
             // concave diamond shape
 
             shape = makeFlag(x, y, width, height, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
-            
+
             x += width + 2;
 
             shape = makeFlag(x, y, width, height, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
-            
+
             x += width + 2;
 
             shape = makeFlag(x, y, width, height, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
-            
+
             shape = makeFlag(x, y, width, height, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
 
-            y += height + 20;
+            y += height + 10;
 
             return y;
         }
@@ -541,11 +553,11 @@ class ShapesView : public PaintView
             painter.drawPolyline(&polygon[0], polygon.size());
             polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
             painter.fillPolygon (&polygon[0], polygon.size());
-            //Pt::Gfx::DEBUG_DUMP = true;
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
             polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
             painter.fillPolygon (&polygon[0], polygon.size());
             painter.drawPolyline(&polygon[0], polygon.size());
-            Pt::Gfx::DEBUG_DUMP = false;
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
             y += 20;
 
             x      = 5;
@@ -564,11 +576,11 @@ class ShapesView : public PaintView
             painter.drawPolyline(&polygon[0], polygon.size());
             polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
             painter.fillPolygon (&polygon[0], polygon.size());
-            //Pt::Gfx::DEBUG_DUMP = true;
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
             polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
             painter.fillPolygon (&polygon[0], polygon.size());
             painter.drawPolyline(&polygon[0], polygon.size());
-            Pt::Gfx::DEBUG_DUMP = false;
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
             y += 20;
 
             x      = 5;
@@ -588,11 +600,11 @@ class ShapesView : public PaintView
             painter.drawPolyline(&polygon[0], polygon.size());
             polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
             painter.fillPolygon (&polygon[0], polygon.size());
-            //Pt::Gfx::DEBUG_DUMP = true;
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
             polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
             painter.fillPolygon (&polygon[0], polygon.size());
             painter.drawPolyline(&polygon[0], polygon.size());
-            Pt::Gfx::DEBUG_DUMP = false;
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
             y += 20;
 
             return y;

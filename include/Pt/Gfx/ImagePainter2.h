@@ -109,15 +109,15 @@ class PT_GFX_API ImagePainter2 : public Painter
 
 
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong may be drawn!
-        virtual void drawArc(const PointF& topLeft, const SizeF& size, 
+        virtual void drawArc(const PointF& topLeft, const SizeF& size,
                              float degBegin, float degEnd);
 
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong may be drawn!
-        virtual void drawChord(const PointF& topLeft, const SizeF& size, 
+        virtual void drawChord(const PointF& topLeft, const SizeF& size,
                                float degBegin, float degEnd);
 
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong may be drawn!
-        virtual void drawPie(const PointF& topLeft, const SizeF& size, 
+        virtual void drawPie(const PointF& topLeft, const SizeF& size,
                              float degBegin, float degEnd);
 
         // maybe better have ImagePainter::setSmoothness
@@ -127,10 +127,10 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void fillRoundedRect(const RectF& rect, float radius);
 
 
-        virtual void fillPie(const PointF& topLeft, const SizeF& size, 
+        virtual void fillPie(const PointF& topLeft, const SizeF& size,
                              float degBegin, float degEnd);
 
-        virtual void fillChord(const PointF& topLeft, const SizeF& size, 
+        virtual void fillChord(const PointF& topLeft, const SizeF& size,
                               float degBegin, float degEnd);
 
         // maybe better have a separate ImagePainter::setSmoothness
@@ -140,17 +140,17 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
         static void setFontDir(const System::Path& path);
-        
+
         static void setDefaultFont(const std::string& name);
-        
+
         static std::string defaultFont();
-        
+
         static std::vector<std::string> fontNames();
 
     private:
         // USUSED
-        //void clipPolygonXXX(std::vector<PointF>& result, 
-        //                    const std::vector<PointF>& subject, 
+        //void clipPolygonXXX(std::vector<PointF>& result,
+        //                    const std::vector<PointF>& subject,
         //                    const std::vector<PointF>& clipRegion);
 
     private:
