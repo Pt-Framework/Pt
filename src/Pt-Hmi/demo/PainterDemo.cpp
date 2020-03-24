@@ -1,3 +1,4 @@
+#include <iomanip>
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
@@ -457,12 +458,38 @@ class ShapesView : public PaintView
             // convex diamond shape
 
             shape = makeDiamond(x, y, width, height, offsetDraw);
+#if 0
+            Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
+            if(ip2 && !ip2->isAntiAliasing()) {
+                IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
+                std::cerr << "### 1 ###" << std::endl;
+                for (size_t i = 0; i < shape.size(); ++i) {
+                    std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                              << shape[i].x() << ", " << shape[i].y() << std::endl;
+                }
+                std::cerr << std::endl;
+            }
+#endif
             painter.drawPolyline(&shape[0], shape.size());
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
 
             x += width + 2;
 
             shape = makeDiamond(x, y, width, height, offsetFill);
+#if 0
+            Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
+            if(ip2 && !ip2->isAntiAliasing()) {
+                IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
+                std::cerr << "### 1 ###" << std::endl;
+                for (size_t i = 0; i < shape.size(); ++i) {
+                    std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                              << shape[i].x() << ", " << shape[i].y() << std::endl;
+                }
+                std::cerr << std::endl;
+            }
+#endif
             painter.fillPolygon(&shape[0], shape.size());
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
 
             x += width + 2;
 

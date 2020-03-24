@@ -28,6 +28,8 @@
   02110-1301 USA
 */
 
+#include <iomanip>
+
 #include "Rasterizer2.h"
 #include "ClipShape.h"
 
@@ -312,6 +314,14 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
     if( pointCount < 3 )
         return;
 
+    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES && !this->isAntiAliasing()) {
+        std::cerr << "### 2 ###\n";
+        for (size_t i = 0; i < pointCount; ++i) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << points[i].x() << ", " << points[i].y() << std::endl;
+        }
+    }
+
     std::vector<Point> polygon;
     polygon.reserve( pointCount );
 
@@ -322,13 +332,15 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         const Pt::int32_t y = Pt::lround( pf.y() );
 
         polygon.push_back( Point(x, y) );
+        //polygon.push_back( Point(pf.x(), pf.y()) );
     }
 
     // List of nodes that define the horizontal spans
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
 
     // Loop through the rows of the image
-    for(Pt::int32_t y = minY; y <= maxY; ++y)
+    //for(Pt::int32_t y = minY; y <= maxY; ++y)
+    for(Pt::int32_t y = minY; y < maxY; ++y)
     {
         // Pixel-by-pixel clipping
         if(y < _currentClip.top   ()) continue;

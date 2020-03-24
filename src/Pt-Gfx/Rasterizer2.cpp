@@ -850,6 +850,14 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
     // From point N to point (N + 1), successively
     std::size_t pc1 = pointCount - 1;
 
+    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES && !this->isAntiAliasing()) {
+        std::cerr << "### 3 ###\n";
+        for (size_t i = 0; i < pointCount; ++i) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << points[i].x() << ", " << points[i].y() << std::endl;
+        }
+    }
+
     for(std::size_t i = 0; i < pc1; ++i)
     {
         Pt::int32_t x1 = points[i].x();
@@ -1105,6 +1113,8 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         // Foor the coordinates while avoiding rounding errors
         polygon[i].set( Pt::lround( ps[i].x() - 0.4999 ),
                         Pt::lround( ps[i].y() - 0.4999 ) );
+
+        // polygon[i].set( ps[i].x(), ps[i].y() );
     }
 #else
     double xc = 0.0f;
