@@ -814,13 +814,13 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
         const std::ios_base::fmtflags f(std::cerr.flags());
 
-        std::cerr << "Rasterizer2::drawPolyline ### AT ENTRY POINT ###" << std::endl;
+        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::drawPolyline ### AT ENTRY POINT ###" << std::endl;
         for (size_t i = 0; i < n; ++i) {
             std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                       << ps[i].x() << ", " << ps[i].y() << std::endl;
         }
 
-        std::cerr << "Rasterizer2::drawPolyline ### AFTER FIXED ADJUST ###" << std::endl;
+        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::drawPolyline ### AFTER FIXED ADJUST ###" << std::endl;
         for (size_t i = 0; i < n; ++i) {
             std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                       << polygon[i].x() << ", " << polygon[i].y() << std::endl;
@@ -1086,7 +1086,7 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 {
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
         const std::ios_base::fmtflags f(std::cerr.flags());
-        std::cerr << "Rasterizer2::fillPolygon ### AT ENTRY POINT ###" << std::endl;
+        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AT ENTRY POINT ###" << std::endl;
         for (size_t i = 0; i < n; ++i) {
             std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                       << ps[i].x() << ", " << ps[i].y() << std::endl;
@@ -1136,9 +1136,9 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
         const std::ios_base::fmtflags f(std::cerr.flags());
 #ifdef FIXED_ADJUST
-        std::cerr << "Rasterizer2::fillPolygon ### AFTER FIXED ADJUST ###" << std::endl;
+        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AFTER FIXED ADJUST ###" << std::endl;
 #else
-        std::cerr << "Rasterizer2::fillPolygon ### AFTER DYNAMIC ADJUST ### CENTER = " ;
+        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AFTER DYNAMIC ADJUST ### CENTER = " ;
         std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                   << xc << ", " << yc << std::endl;
 #endif

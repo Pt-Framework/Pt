@@ -398,11 +398,15 @@ class ShapesView : public PaintView
 
             x += width + 2;
 
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
+
             shape = makeRectangle(x, y, width, height, insetFill, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
 
             shape = makeRectangle(x, y, width, height, insetDraw, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
+
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
 
             y += height + 10;
 

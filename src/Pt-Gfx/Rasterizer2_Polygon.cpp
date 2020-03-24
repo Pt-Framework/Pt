@@ -328,7 +328,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
 
     // Loop through the rows of the image
-    for(Pt::int32_t y = minY; y <= maxY/* - 1*/; ++y)
+    for(Pt::int32_t y = minY; y <= maxY; ++y)
     {
         // Pixel-by-pixel clipping
         if(y < _currentClip.top   ()) continue;
@@ -360,11 +360,11 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
                 const Pt::int32_t deltaYj = curYj  - curYi;
                 const Pt::int32_t deltaXj = curXj  - curXi;
                 const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi) +
-                                            ( (FIXED_POINT_FROM_INT(deltaYp) +
-                                                FIXED_POINT_CONSTANT_HALF) /
+                                            ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF ) /
                                               deltaYj * deltaXj );
                 nodeX[nodes++] = FIXED_POINT_TO_INT(interXf);
             }
+
 
             j = i;
         }
@@ -382,7 +382,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         {
             // Get the coordinate
             Pt::int32_t from = nodeX[i    ];
-            Pt::int32_t to   = nodeX[i + 1]/* - 1*/;
+            Pt::int32_t to   = nodeX[i + 1];
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
@@ -471,9 +471,8 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
                     const Pt::int32_t deltaYj = curYj  - curYi;
                     const Pt::int32_t deltaXj = curXj  - curXi;
                     const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi) +
-                                                ( (FIXED_POINT_FROM_INT(deltaYp) +
-                                                   FIXED_POINT_CONSTANT_HALF) /
-                                                 deltaYj * deltaXj );
+                                                ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF ) /
+                                                  deltaYj * deltaXj );
                     nodeX[nodes++] = FIXED_POINT_TO_INT(interXf);
                 }
 
@@ -572,7 +571,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 const float deltaYp = y - curYi;
                 const float deltaYj = curYj - curYi;
                 const float deltaXj = curXj - curXi;
-                const float interXf = curXi + (deltaYp) / deltaYj * deltaXj;
+                const float interXf = curXi + deltaYp / deltaYj * deltaXj;
 
                 nodeX[nodes++] = interXf;
             }
@@ -594,8 +593,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // #@#
             // Calculate the coordinate
             Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) )/* - 1*/;
-          //Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+          //Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) )/* - 1*/;
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
@@ -755,7 +754,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
                     const float deltaYp = y     - curYi;
                     const float deltaYj = curYj - curYi;
                     const float deltaXj = curXj - curXi;
-                    const float interXf = curXi + (deltaYp) / deltaYj * deltaXj;
+                    const float interXf = curXi + deltaYp / deltaYj * deltaXj;
 
                     nodeX[nodes++] = interXf;
                 }
