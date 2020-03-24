@@ -850,6 +850,7 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
     // From point N to point (N + 1), successively
     std::size_t pc1 = pointCount - 1;
 
+#if 0
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES && !this->isAntiAliasing()) {
         std::cerr << "### 3 ###\n";
         for (size_t i = 0; i < pointCount; ++i) {
@@ -857,6 +858,7 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
                       << points[i].x() << ", " << points[i].y() << std::endl;
         }
     }
+#endif
 
     for(std::size_t i = 0; i < pc1; ++i)
     {
@@ -1874,6 +1876,13 @@ void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
     }
 
     // Draw the span using solid color
+#if 0
+    if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
+        std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+              << "SCNLINE " << (minX + iterL) << ", " << (minY + pixelY) << " LEN " << (iterR - iterL + 1) << std::endl;
+    }
+#endif
+
     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
     _image->format().setPixels(pixel, color, iterR - iterL + 1, _compositionMode);
 }

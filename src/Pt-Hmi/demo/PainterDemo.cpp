@@ -488,8 +488,18 @@ class ShapesView : public PaintView
                 std::cerr << std::endl;
             }
 #endif
+#if 1
+            Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
+            if(ip2) {
+                if(ip2->isAntiAliasing()) std::cerr << "WITH AA" << std::endl;
+                else                      std::cerr << "NO AA" << std::endl;
+                IP2_DEBUG::DUMP_SCANLINE_COORDINATES = true;
+            }
+#endif
             painter.fillPolygon(&shape[0], shape.size());
-            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+
+            IP2_DEBUG::DUMP_SCANLINE_COORDINATES = false;
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES  = false;
 
             x += width + 2;
 

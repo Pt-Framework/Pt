@@ -314,6 +314,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
     if( pointCount < 3 )
         return;
 
+#if 0
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES && !this->isAntiAliasing()) {
         std::cerr << "### 2 ###\n";
         for (size_t i = 0; i < pointCount; ++i) {
@@ -321,6 +322,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
                       << points[i].x() << ", " << points[i].y() << std::endl;
         }
     }
+#endif
 
     std::vector<Point> polygon;
     polygon.reserve( pointCount );
@@ -403,6 +405,12 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
             if(to < from) continue;
 
             // Draw the scanline
+#if 1
+        if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                  << "RP NOAA " << (minX + (from - minX)) << ", " << (minY + y - minY) << " LEN " << ((to - minX) - (from - minX) + 1) << std::endl;
+        }
+#endif
             rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
         }
     }
@@ -622,6 +630,13 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             }
 
             // Draw the scanline
+#if 1
+        if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                  << "RP XWAA " << (minX + (from - minX)) << ", " << (minY + y - minY) << " LEN " << ((to - minX) - (from - minX) + 1) << std::endl;
+        }
+#endif
+
             rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
         }
     }

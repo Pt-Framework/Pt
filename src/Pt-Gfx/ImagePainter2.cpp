@@ -40,7 +40,8 @@ namespace Gfx {
 
 
 // ### TEMPORARY ###
-bool IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+bool IP2_DEBUG::DUMP_POLYGON_COORDINATES  = false;
+bool IP2_DEBUG::DUMP_SCANLINE_COORDINATES = false;
 // ### TEMPORARY ###
 
 

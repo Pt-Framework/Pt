@@ -48,6 +48,7 @@ class PT_GFX_API IP2_DEBUG
 {
     public:
         static bool DUMP_POLYGON_COORDINATES;
+        static bool DUMP_SCANLINE_COORDINATES;
 };
 // ### TEMPORARY ###
 
