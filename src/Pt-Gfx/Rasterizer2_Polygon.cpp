@@ -311,10 +311,8 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
                                      Pt::int32_t minX, Pt::int32_t minY,
                                      Pt::int32_t maxX, Pt::int32_t maxY)
 {
-    std::size_t totalPointCount = pointCount;
-
     // List of nodes that define the horizontal spans
-    std::vector<float> nodeX(totalPointCount * 2, 0);
+    std::vector<float> nodeX(pointCount * 2, 0);
 
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
@@ -367,7 +365,6 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         // Fill the pixels between the node pairs
         for(std::size_t i = 0; i < nodes; i += 2)
         {
-            // #@#
             // Calculate the coordinate
             Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
             Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
@@ -378,15 +375,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
 
             if(to < from) continue;
 
-
             // Draw the scanline
-#if 1
-        if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
-            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                  << "RP NOAA " << (minX + (from - minX)) << ", " << (minY + y - minY) << " LEN " << ((to - minX) - (from - minX) + 1) << std::endl;
-        }
-#endif
-
             rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
         }
     }
@@ -498,10 +487,10 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
 
             // Draw the scanline
 #if 1
-        if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
-            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                  << "RP NOAA " << (minX + (from - minX)) << ", " << (minY + y - minY) << " LEN " << ((to - minX) - (from - minX) + 1) << std::endl;
-        }
+            if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
+                std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << "RP NOAA " << (minX + (from - minX)) << ", " << (minY + y - minY) << " LEN " << ((to - minX) - (from - minX) + 1) << std::endl;
+            }
 #endif
             rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
         }
