@@ -311,6 +311,95 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
                                      Pt::int32_t minX, Pt::int32_t minY,
                                      Pt::int32_t maxX, Pt::int32_t maxY)
 {
+    std::size_t totalPointCount = pointCount;
+
+    // List of nodes that define the horizontal spans
+    std::vector<float> nodeX(totalPointCount * 2, 0);
+
+    // Loop through the rows of the image
+    for(Pt::int32_t y = minY; y <= maxY; ++y)
+    {
+        // Pixel-by-pixel clipping
+        if(y < _currentClip.top   ()) continue;
+        if(y > _currentClip.bottom()) continue;
+
+        // Build a list of nodes using all the polygons
+        std::size_t nodes = 0;
+
+        // Loop through the points
+        Pt::int32_t j = pointCount - 1;
+
+        for(size_t i = 0; i < pointCount; ++i)
+        {
+            // Get the coordinates
+            const float curXi = points[i].x();
+            const float curYi = points[i].y();
+            const float curXj = points[j].x();
+            const float curYj = points[j].y();
+
+            // Calculate the node's coordinate
+            if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
+            {
+                // Bail out if we have produced too many nodes
+                if( nodes >= nodeX.size() )
+                    return;
+
+                // Calculate the node's coordinate
+                const float deltaYp = y - curYi;
+                const float deltaYj = curYj - curYi;
+                const float deltaXj = curXj - curXi;
+                const float interXf = curXi + deltaYp / deltaYj * deltaXj;
+
+                nodeX[nodes++] = interXf;
+            }
+
+            // Update the searching index
+            j = i;
+        }
+
+        // Skip if there is no node
+        if( ! nodes )
+            continue;
+
+        // Sort the nodes
+        bubbleSortAscending(nodeX, nodes);
+
+        // Fill the pixels between the node pairs
+        for(std::size_t i = 0; i < nodes; i += 2)
+        {
+            // #@#
+            // Calculate the coordinate
+            Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
+
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
+            if(to < from) continue;
+
+
+            // Draw the scanline
+#if 1
+        if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                  << "RP NOAA " << (minX + (from - minX)) << ", " << (minY + y - minY) << " LEN " << ((to - minX) - (from - minX) + 1) << std::endl;
+        }
+#endif
+
+            rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+        }
+    }
+}
+
+
+/*
+// THE ORIGINAL ONE USING FIXED POINTS
+void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount,
+                                     const Color& color,
+                                     Pt::int32_t minX, Pt::int32_t minY,
+                                     Pt::int32_t maxX, Pt::int32_t maxY)
+{
     if( pointCount < 3 )
         return;
 
@@ -373,9 +462,12 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
                 const Pt::int32_t deltaYp = y - curYi;
                 const Pt::int32_t deltaYj = curYj  - curYi;
                 const Pt::int32_t deltaXj = curXj  - curXi;
+                //const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi) +
+                //                            ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF ) /
+                //                              deltaYj * deltaXj );
                 const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi) +
-                                            ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF ) /
-                                              deltaYj * deltaXj );
+                                            ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF ) *
+                                              deltaXj / deltaYj );
                 nodeX[nodes++] = FIXED_POINT_TO_INT(interXf);
             }
 
@@ -415,6 +507,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         }
     }
 }
+*/
 
 
 //
