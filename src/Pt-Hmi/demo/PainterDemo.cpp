@@ -488,7 +488,7 @@ class ShapesView : public PaintView
                 std::cerr << std::endl;
             }
 #endif
-#if 1
+#if 0
             Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
             if(ip2) {
                 if(ip2->isAntiAliasing()) std::cerr << "WITH AA" << std::endl;
