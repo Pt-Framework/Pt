@@ -666,7 +666,7 @@ class TestView : public Pt::Hmi::Control
         {
           using namespace Pt::Gfx;
 
-            int imageWidth = 620, imageHeight = 480;
+            int imageWidth = 620, imageHeight = 680;
             RectF imageRect = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
             Color background = Color::fromRgb8(0, 0, 0);
 
@@ -729,19 +729,6 @@ class TestView : public Pt::Hmi::Control
         std::vector<Pt::Gfx::PointF> makeTestShape2(double xOfs, double yOfs)
         {
             std::vector<Pt::Gfx::PointF> points;
-            points.push_back(Pt::Gfx::PointF(51.000000000000000, -195.00000000000000) );
-            points.push_back(Pt::Gfx::PointF(57.000000000000000, -18.000000000000000) );
-            points.push_back(Pt::Gfx::PointF(64.000000000000000, 155.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(70.000000000000000, 282.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(77.000000000000000, 361.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(83.000000000000000, 426.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(90.000000000000000, 482.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(96.000000000000000, 517.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(103.00000000000000, 552.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(109.00000000000000, 575.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(116.00000000000000, 591.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(122.00000000000000, 606.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(129.00000000000000, 606.00000000000000 ) );
             points.push_back(Pt::Gfx::PointF(135.00000000000000, 613.00000000000000 ) );
             points.push_back(Pt::Gfx::PointF(142.00000000000000, 624.00000000000000 ) );
             points.push_back(Pt::Gfx::PointF(148.00000000000000, 630.00000000000000 ) );
@@ -806,7 +793,7 @@ int main(int argc, char* args[])
         PainterDemoWindow window;
         window.setTitle("Painter Demo");
         window.move( Pt::Gfx::PointF(100, 50) );
-        window.resize( Pt::Gfx::SizeF(640, 500) );
+        window.resize( Pt::Gfx::SizeF(640, 700) );
         window.show();
         window.activate();
 
