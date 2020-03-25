@@ -1864,7 +1864,7 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
             intersect.set(x12, y11);
             inLine = true;
 #ifdef DEBUG_INTERSECT_LINE
-                fprintf(stderr, "Intersect #Y : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
+            fprintf(stderr, "Intersect #Y : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
 #endif
             return true;
         }
@@ -1874,7 +1874,7 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
             return true;
         }
 #ifdef DEBUG_INTERSECT_LINE
-                fprintf(stderr, "Intersect #X : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
+            fprintf(stderr, "Intersect #X : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
 #endif
         // No intersection
         return false;
@@ -1888,9 +1888,9 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
     // Check and fix the coordinate of the intersection point
     // (for very steep lines, the coordinate of the intersection point can be incorrectly calculated)
     const size_t pzf = FIXED_POINT_TO_INT(penSize * FIXED_POINT_CONSTANT_SQRT2);
-          if(ipX < minX1 - pzf && ipX < minX2 - pzf) ipX = (minX1 + minX2) * 0.5f;
+         if(ipX < minX1 - pzf && ipX < minX2 - pzf) ipX = (minX1 + minX2) * 0.5f;
     else if(ipX > maxX1 + pzf && ipX > maxX2 + pzf) ipX = (maxX1 + maxX2) * 0.5f;
-          if(ipY < minY1 - pzf && ipY < minY2 - pzf) ipY = (minY1 + minY2) * 0.5f;
+         if(ipY < minY1 - pzf && ipY < minY2 - pzf) ipY = (minY1 + minY2) * 0.5f;
     else if(ipY > maxY1 + pzf && ipY > maxY2 + pzf) ipY = (maxY1 + maxY2) * 0.5f;
 
     // Store the intersection point
@@ -1898,7 +1898,7 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
 
     // Determine if the intersection point is inside the line
     inLine = (ipX >= minX1 && ipX <= maxX1 && ipY >= minY1 && ipY <= maxY1)
-            | (ipX >= minX2 && ipX <= maxX2 && ipY >= minY2 && ipY <= maxY2);
+           | (ipX >= minX2 && ipX <= maxX2 && ipY >= minY2 && ipY <= maxY2);
 
 #ifdef DEBUG_INTERSECT_LINE
     fprintf(stderr, "Intersect #G : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
