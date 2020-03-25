@@ -676,7 +676,7 @@ class TestView : public Pt::Hmi::Control
 
             Image image2( painter.format(), Size(imageWidth, imageHeight) );
             ImagePainter2 imagePainter2(image2);
-            imagePainter2.setAntiAliasing(true);
+            imagePainter2.setAntiAliasing(false);
             imagePainter2.setBrush(background);
             imagePainter2.fillRect(imageRect);
 
@@ -691,75 +691,29 @@ class TestView : public Pt::Hmi::Control
 
             Pt::Gfx::Pen red1( Pt::Gfx::Color::fromRgb8(255, 0, 0), 1 );
             
-            Pt::Gfx::Pen red2( Pt::Gfx::Color::fromRgb8(255, 0, 0) );
-            red2.setSize(2);
+            // shapes will only be drawn with a penSize of 1
+            unsigned penSize = 2;
+
+            // RoundCap, RoundJoin
+            Pt::Gfx::Pen red2a( Color::fromRgb8(255, 0, 0), penSize, 
+                                Pen::Solid,  Pen::RoundCap, Pen::RoundJoin );
             
-            Pt::Gfx::Pen red3( Pt::Gfx::Color::fromRgb8(255, 0, 0), 3 );
+            // FlatCap, BevelJoin
+            Pt::Gfx::Pen red2b( Pt::Gfx::Color::fromRgb8(255, 0, 0), penSize, 
+                                Pen::Solid,  Pen::FlatCap, Pen::BevelJoin );
+            
             std::vector<Pt::Gfx::PointF> shape;
 
             int x = -400;
             int y = -380;
 
             shape = makeTestShape1(0, 0);
-            painter.setPen(red2);
+            painter.setPen(red2a); // RoundCap, RoundJoin
             painter.drawPolyline( &shape[0], shape.size() );
-#if 0
-            painter.setAntiAliasing(false);
 
-            shape = makeTestShape1(x, y);
-            painter.setPen(red1);
+            shape = makeTestShape2(0, 0);
+            painter.setPen(red2b); // FlatCap, BevelJoin
             painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape1(x, y);
-            painter.setPen(red2);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape1(x, y);
-            painter.setPen(red3);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape2(x, y);
-            painter.setPen(red1);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape2(x, y);
-            painter.setPen(red2);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape2(x, y);
-            painter.setPen(red3);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y -= 30 * 5;
-            x += 30;
-
-            painter.setAntiAliasing(true);
-
-            shape = makeTestShape1(x, y);
-            painter.setPen(red1);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape1(x, y);
-            painter.setPen(red2);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape1(x, y);
-            painter.setPen(red3);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape2(x, y);
-            painter.setPen(red1);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape2(x, y);
-            painter.setPen(red2);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y += 30;
-            shape = makeTestShape2(x, y);
-            painter.setPen(red3);
-            painter.drawPolyline( &shape[0], shape.size() );
-            y -= 30 * 5;
-            x += 30;
-#endif
         }
 
         std::vector<Pt::Gfx::PointF> makeTestShape1(double xOfs, double yOfs)
@@ -775,14 +729,27 @@ class TestView : public Pt::Hmi::Control
         std::vector<Pt::Gfx::PointF> makeTestShape2(double xOfs, double yOfs)
         {
             std::vector<Pt::Gfx::PointF> points;
-            points.push_back(Pt::Gfx::PointF(xOfs + 431.0, yOfs + 409.0) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 433.0, yOfs + 408.0) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 435.0, yOfs + 406.0) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 437.0, yOfs + 408.0) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 438.0, yOfs + 408.0) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 440.0, yOfs + 407.0) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 442.0, yOfs + 408.0) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 444.0, yOfs + 412.0) );
+            points.push_back(Pt::Gfx::PointF(51.000000000000000, -195.00000000000000) );
+            points.push_back(Pt::Gfx::PointF(57.000000000000000, -18.000000000000000) );
+            points.push_back(Pt::Gfx::PointF(64.000000000000000, 155.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(70.000000000000000, 282.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(77.000000000000000, 361.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(83.000000000000000, 426.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(90.000000000000000, 482.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(96.000000000000000, 517.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(103.00000000000000, 552.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(109.00000000000000, 575.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(116.00000000000000, 591.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(122.00000000000000, 606.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(129.00000000000000, 606.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(135.00000000000000, 613.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(142.00000000000000, 624.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(148.00000000000000, 630.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(155.00000000000000, 637.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(161.00000000000000, 641.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(168.00000000000000, 641.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(174.00000000000000, 638.00000000000000 ) );
+            points.push_back(Pt::Gfx::PointF(181.00000000000000, 643.00000000000000 ) );
             return points;
         }
 };
