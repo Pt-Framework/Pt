@@ -689,14 +689,76 @@ class TestView : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
+            Pt::Gfx::Pen red1( Pt::Gfx::Color::fromRgb8(255, 0, 0), 1 );
+            Pt::Gfx::Pen red2( Pt::Gfx::Color::fromRgb8(255, 0, 0), 2 );
+            Pt::Gfx::Pen red3( Pt::Gfx::Color::fromRgb8(255, 0, 0), 3 );
             std::vector<Pt::Gfx::PointF> shape;
 
-            shape = makeTestShape(0, 0);
-            painter.setPen( Pt::Gfx::Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 2) );
+            int x = -400;
+            int y = -380;
+
+            shape = makeTestShape1(0, 0);
+            painter.setPen(red2);
             painter.drawPolyline( &shape[0], shape.size() );
+
+            painter.setAntiAliasing(false);
+
+            shape = makeTestShape1(x, y);
+            painter.setPen(red1);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape1(x, y);
+            painter.setPen(red2);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape1(x, y);
+            painter.setPen(red3);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape2(x, y);
+            painter.setPen(red1);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape2(x, y);
+            painter.setPen(red2);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape2(x, y);
+            painter.setPen(red3);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y -= 30 * 5;
+            x += 30;
+
+            painter.setAntiAliasing(true);
+
+            shape = makeTestShape1(x, y);
+            painter.setPen(red1);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape1(x, y);
+            painter.setPen(red2);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape1(x, y);
+            painter.setPen(red3);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape2(x, y);
+            painter.setPen(red1);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape2(x, y);
+            painter.setPen(red2);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y += 30;
+            shape = makeTestShape2(x, y);
+            painter.setPen(red3);
+            painter.drawPolyline( &shape[0], shape.size() );
+            y -= 30 * 5;
+            x += 30;
         }
 
-        std::vector<Pt::Gfx::PointF> makeTestShape(double xOfs, double yOfs)
+        std::vector<Pt::Gfx::PointF> makeTestShape1(double xOfs, double yOfs)
         {
             std::vector<Pt::Gfx::PointF> points;
           //points.push_back(Pt::Gfx::PointF(xOfs + 431.0, yOfs + 409.0) );
@@ -707,6 +769,20 @@ class TestView : public Pt::Hmi::Control
             points.push_back(Pt::Gfx::PointF(xOfs + 440.0, yOfs + 407.0) );
           //points.push_back(Pt::Gfx::PointF(xOfs + 442.0, yOfs + 408.0) );
           //points.push_back(Pt::Gfx::PointF(xOfs + 444.0, yOfs + 412.0) );
+            return points;
+        }
+
+        std::vector<Pt::Gfx::PointF> makeTestShape2(double xOfs, double yOfs)
+        {
+            std::vector<Pt::Gfx::PointF> points;
+            points.push_back(Pt::Gfx::PointF(xOfs + 431.0, yOfs + 409.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 433.0, yOfs + 408.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 435.0, yOfs + 406.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 437.0, yOfs + 408.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 438.0, yOfs + 408.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 440.0, yOfs + 407.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 442.0, yOfs + 408.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 444.0, yOfs + 412.0) );
             return points;
         }
 };
