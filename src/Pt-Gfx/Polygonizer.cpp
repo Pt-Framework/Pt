@@ -44,8 +44,8 @@ namespace {
 // Based on: Geometric Primitives
 //           http://algs4.cs.princeton.edu/91primitives
 //           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
-double ccw3(const Pt::Gfx::PointF& a, 
-            const Pt::Gfx::PointF& b, 
+double ccw3(const Pt::Gfx::PointF& a,
+            const Pt::Gfx::PointF& b,
             const Pt::Gfx::PointF& c)
 {
    return (b.x() - a.x()) * (c.y() - a.y()) - (c.x() - a.x()) * (b.y() - a.y());
@@ -55,7 +55,7 @@ double ccw3(const Pt::Gfx::PointF& a,
 // Based on: Geometric Primitives
 //           http://algs4.cs.princeton.edu/91primitives
 //           Article and original code by Robert Sedgewick and Kevin Wayne, 2016
-bool lineIntersecting(const Pt::Gfx::PointF& ap, const Pt::Gfx::PointF& aq, 
+bool lineIntersecting(const Pt::Gfx::PointF& ap, const Pt::Gfx::PointF& aq,
                       const Pt::Gfx::PointF& bp, const Pt::Gfx::PointF& bq)
 {
    if( ccw3(ap, aq, bp) * ccw3(ap, aq, bq) >= 0.0 ) return false;
@@ -1847,6 +1847,13 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
     const float b2    = x21 - x22;
     const float c2    = -(x21 * y22 - x22 * y21);
 
+#define DEBUG_INTERSECT_LINE
+
+#ifdef DEBUG_INTERSECT_LINE
+    fprintf(stderr, "Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
+    fprintf(stderr, "Line 2       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x21, y21, x22, y22);
+#endif
+
     // Check if the line is parallel
     const float denom = a1 * b2 - a2 * b1;
     if(denom == 0.0f) {
@@ -1854,6 +1861,9 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
         if(y11 == y12 && y11 == y21 && y11 == y22 && x12 == x21) {
             intersect.set(x12, y11);
             inLine = true;
+#ifdef DEBUG_INTERSECT_LINE
+                fprintf(stderr, "Intersect #Y : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
+#endif
             return true;
         }
         if(x11 == x12 && x11 == x21 && x11 == x22 && y12 == y21) {
@@ -1861,6 +1871,9 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
             inLine = true;
             return true;
         }
+#ifdef DEBUG_INTERSECT_LINE
+                fprintf(stderr, "Intersect #X : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
+#endif
         // No intersection
         return false;
     }
@@ -1885,11 +1898,11 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
     inLine = (ipX >= minX1 && ipX <= maxX1 && ipY >= minY1 && ipY <= maxY1)
             | (ipX >= minX2 && ipX <= maxX2 && ipY >= minY2 && ipY <= maxY2);
 
+#ifdef DEBUG_INTERSECT_LINE
+    fprintf(stderr, "Intersect #G : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
+#endif
+
     // Done
-    //lprintf("Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
-    //lprintf("Line 2       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x21, y21, x22, y22);
-    //lprintf("Intersection : (%7.3f, %7.3f) - %s \n", ipX, ipY, inLine ? "inline" : "outline");
-    //lprintf("\n");
     return true;
 }
 

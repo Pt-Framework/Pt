@@ -700,7 +700,7 @@ class TestView : public Pt::Hmi::Control
             shape = makeTestShape1(0, 0);
             painter.setPen(red2);
             painter.drawPolyline( &shape[0], shape.size() );
-
+#if 0
             painter.setAntiAliasing(false);
 
             shape = makeTestShape1(x, y);
@@ -756,6 +756,7 @@ class TestView : public Pt::Hmi::Control
             painter.drawPolyline( &shape[0], shape.size() );
             y -= 30 * 5;
             x += 30;
+#endif
         }
 
         std::vector<Pt::Gfx::PointF> makeTestShape1(double xOfs, double yOfs)
