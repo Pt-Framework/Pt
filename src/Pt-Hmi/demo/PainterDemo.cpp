@@ -654,6 +654,64 @@ class ShapesView : public PaintView
 };
 
 
+class TestView : public Pt::Hmi::Control
+{
+    public:
+        TestView()
+        {}
+
+    protected:
+        virtual void onPaint(Pt::Hmi::PaintSurface& surface,
+                             const Pt::Gfx::RectF& rect)
+        {
+          using namespace Pt::Gfx;
+
+            int imageWidth = 620, imageHeight = 440;
+            RectF imageRect = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
+            Color background = Color::fromRgb8(0, 0, 0);
+
+            Pt::Hmi::Painter painter(surface);
+            painter.setClip(rect);
+            painter.setBrush(background);
+
+            Image image2( painter.format(), Size(imageWidth, imageHeight) );
+            ImagePainter2 imagePainter2(image2);
+            imagePainter2.setAntiAliasing(true);
+            imagePainter2.setBrush(background);
+            imagePainter2.fillRect(imageRect);
+
+            onPaintContent(imagePainter2);
+
+            painter.drawImage(PointF(2, 2), image2);
+        }
+
+        virtual void onPaintContent(Pt::Gfx::ImagePainter2& painter)
+        {
+            using namespace Pt::Gfx;
+
+            std::vector<Pt::Gfx::PointF> shape;
+
+            shape = makeTestShape(0, 0);
+            painter.setPen( Pt::Gfx::Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 2) );
+            painter.drawPolyline( &shape[0], shape.size() );
+        }
+
+        std::vector<Pt::Gfx::PointF> makeTestShape(double xOfs, double yOfs)
+        {
+            std::vector<Pt::Gfx::PointF> points;
+          //points.push_back(Pt::Gfx::PointF(xOfs + 431.0, yOfs + 409.0) );
+          //points.push_back(Pt::Gfx::PointF(xOfs + 433.0, yOfs + 408.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 435.0, yOfs + 406.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 437.0, yOfs + 408.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 438.0, yOfs + 408.0) );
+            points.push_back(Pt::Gfx::PointF(xOfs + 440.0, yOfs + 407.0) );
+          //points.push_back(Pt::Gfx::PointF(xOfs + 442.0, yOfs + 408.0) );
+          //points.push_back(Pt::Gfx::PointF(xOfs + 444.0, yOfs + 412.0) );
+            return points;
+        }
+};
+
+
 class PainterDemoWindow : public Pt::Hmi::Window
 {
     public:
@@ -668,6 +726,9 @@ class PainterDemoWindow : public Pt::Hmi::Window
             _tabView.addTab(_shapesView, "Shapes");
             _tabView.setPadding(8);
             _tabView.setCurrent(2);
+
+            _tabView.addTab(_testView, "Test");
+            _tabView.setCurrent(3);
 
             this->setContent(&_tabView);
         }
@@ -684,6 +745,8 @@ class PainterDemoWindow : public Pt::Hmi::Window
         LinesView        _linesView;
         PolylinesView    _polylinesView;
         ShapesView       _shapesView;
+
+        TestView         _testView;
 };
 
 
