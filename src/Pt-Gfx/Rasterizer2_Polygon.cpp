@@ -381,7 +381,6 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
     }
 }
 
-
 /*
 // THE ORIGINAL ONE USING FIXED POINTS
 void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount,
@@ -510,6 +509,99 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
                                      Pt::int32_t maxX, Pt::int32_t maxY)
 {
     std::size_t totalPointCount = 0;
+
+    for(std::vector<Polygon>::const_iterator it = polygons.begin();
+        it != polygons.end(); ++it)
+    {
+        totalPointCount += it->size();
+    }
+
+    // List of nodes that define the horizontal spans
+    std::vector<float> nodeX(totalPointCount * 2, 0);
+
+    // Loop through the rows of the image
+    for(Pt::int32_t y = minY; y <= maxY; ++y)
+    {
+        // Pixel-by-pixel clipping
+        if(y < _currentClip.top   ()) continue;
+        if(y > _currentClip.bottom()) continue;
+
+        // Build a list of nodes using all the polygons
+        std::size_t nodes = 0;
+
+        for(size_t p = 0; p < polygons.size(); ++p)
+        {
+            const Polygon* polygon = &polygons[p];
+
+            if( polygon->size() < 2 )
+                continue;
+
+            // Loop through the points
+            Pt::int32_t j = polygon->size() - 1;
+
+            for(size_t i = 0; i < polygon->size(); ++i)
+            {
+                // Get the coordinates
+                const float curXi = polygon->at(i).x();
+                const float curYi = polygon->at(i).y();
+                const float curXj = polygon->at(j).x();
+                const float curYj = polygon->at(j).y();
+
+                // Calculate the node's coordinate
+                if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
+                {
+                    // Bail out if we have produced too many nodes
+                    if((size_t) nodes >= nodeX.size())
+                        return;
+
+                    // Calculate the node's coordinate
+                    const float deltaYp = y     - curYi;
+                    const float deltaYj = curYj - curYi;
+                    const float deltaXj = curXj - curXi;
+                    const float interXf = curXi + deltaYp / deltaYj * deltaXj;
+
+                    nodeX[nodes++] = interXf;
+                }
+
+                // Update the searching index
+                j = i;
+            }
+        }
+
+        // Skip if there is no node
+        if( ! nodes)
+            continue;
+
+        // Sort the nodes
+        bubbleSortAscending(nodeX, nodes);
+
+        // Fill the pixels between the node pairs
+        for(std::size_t i = 0; i < nodes; i += 2)
+        {
+            // Calculate the coordinate
+            Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
+
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
+            if(to < from) continue;
+
+            // Draw the scanline
+            rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+        }
+    }
+}
+
+/*
+// THE ORIGINAL ONE USING FIXED POINTS
+void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
+                                     const Color& color,
+                                     Pt::int32_t minX, Pt::int32_t minY,
+                                     Pt::int32_t maxX, Pt::int32_t maxY)
+{
+    std::size_t totalPointCount = 0;
     std::vector< std::vector<Point> > polygonPoints;
     polygonPoints.reserve( polygons.size() );
 
@@ -607,7 +699,7 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
         }
     }
 }
-
+*/
 
 
 // Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
@@ -629,14 +721,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
     // List of polygon scanlines
     PolygonScanlines scanlines;
-
-    // REVIEW +2 or +4?
-    // INFO: * When using AA, more scanlines can be produced.
-    //       * In theory, +2 is enough, but when I worked on this code, sometimes more than +2 scanlines are produced
-    //         (which of course will lead to seg fault).
-    //       * It seems that there won't be more than +4 scanlines will be produced. So, I think +4 is safer here.
-    //if(_compositionMode != CompositionMode::SourceCopy)
-    //    scanlines.resize( (maxY - minY) + 1 + 2 );
 
     if(_compositionMode != CompositionMode::SourceCopy)
         scanlines.resize( (maxY - minY) + 1 + 4 );
@@ -695,8 +779,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // #@#
             // Calculate the coordinate
             Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            //Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
             Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
+          //Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
@@ -812,14 +896,6 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
     // List of polygon scanlines
     PolygonScanlines scanlines;
 
-    // REVIEW +2 or +4?
-    // INFO: * When using AA, more scanlines can be produced.
-    //       * In theory, +2 is enough, but when I worked on this code, sometimes more than +2 scanlines are produced
-    //         (which of course will lead to seg fault).
-    //       * It seems that there won't be more than +4 scanlines will be produced. So, I think +4 is safer here.
-    //if(_compositionMode != CompositionMode::SourceCopy)
-    //    scanlines.resize( (maxY - minY) + 1 + 2 );
-
     if(_compositionMode != CompositionMode::SourceCopy)
         scanlines.resize( (maxY - minY) + 1 + 4 );
 
@@ -884,14 +960,13 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
         {
             // Calculate the coordinate
             Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]/* - 0.5f*/) );
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
             if(to   > _currentClip.right()) to   = _currentClip.right();
 
             if(to < from) continue;
-            //if( (to - from) < 1 ) continue;
 
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy)
@@ -967,7 +1042,6 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
              color, minX, minY_ - 1, scanlines, xwaaMask );
     }
 }
-
 
 
 #if 0
@@ -1178,13 +1252,6 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                                             const PolygonScanlines& exclusionZone,
                                             DrawLineMask& maskInOut)
 {
-
-#if 0
-    rasterNarrowSolidLine(x1, y1, x2, y2, color, &maskInOut);
-    return;
-#endif
-
-
     // NOTE: This implementation does not need to use the Rasterizer2::XWAA_WFILTER[]
 
     // TODO: Does the other XWAA implementation will benefit from this more conservative apparoach?
