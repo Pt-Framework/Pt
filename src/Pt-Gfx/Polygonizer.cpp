@@ -1847,7 +1847,7 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
     const float b2    = x21 - x22;
     const float c2    = -(x21 * y22 - x22 * y21);
 
-#define DEBUG_INTERSECT_LINE
+//#define DEBUG_INTERSECT_LINE
 
 #ifdef DEBUG_INTERSECT_LINE
     fprintf(stderr, "Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
