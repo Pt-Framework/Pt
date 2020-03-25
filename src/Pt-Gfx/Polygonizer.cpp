@@ -1849,13 +1849,15 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
 
 //#define DEBUG_INTERSECT_LINE
 
+    // Check if the line is parallel
+    const float denom = a1 * b2 - a2 * b1;
+
 #ifdef DEBUG_INTERSECT_LINE
     fprintf(stderr, "Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
     fprintf(stderr, "Line 2       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x21, y21, x22, y22);
+    fprintf(stderr, "a1b1 a2b2 dn : (%7.3f, %7.3f) - (%7.3f, %7.3f) : %7.3f\n", a1, b1, a2, b2, denom);
 #endif
 
-    // Check if the line is parallel
-    const float denom = a1 * b2 - a2 * b1;
     if(denom == 0.0f) {
         // Check for special cases
         if(y11 == y12 && y11 == y21 && y11 == y22 && x12 == x21) {
