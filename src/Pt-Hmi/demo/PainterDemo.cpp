@@ -676,7 +676,7 @@ class TestView : public Pt::Hmi::Control
 
             Image image2( painter.format(), Size(imageWidth, imageHeight) );
             ImagePainter2 imagePainter2(image2);
-            imagePainter2.setAntiAliasing(false);
+            imagePainter2.setAntiAliasing(true);
             imagePainter2.setBrush(background);
             imagePainter2.fillRect(imageRect);
 
@@ -690,14 +690,14 @@ class TestView : public Pt::Hmi::Control
             using namespace Pt::Gfx;
 
             // RoundCap, RoundJoin
-            Pt::Gfx::Pen rcrj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
-            Pt::Gfx::Pen rcrj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
-            Pt::Gfx::Pen rcrj3( Color::fromRgb8(0,   255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
+            Pt::Gfx::Pen rcrj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
+            Pt::Gfx::Pen rcrj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
+            Pt::Gfx::Pen rcrj3( Color::fromRgb8(0,   255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
 
-            // RoundCap, BevelJoin
-            Pt::Gfx::Pen fcbj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
-            Pt::Gfx::Pen fcbj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
-            Pt::Gfx::Pen fcbj3( Color::fromRgb8(0,   255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
+            // FlatCap, BevelJoin
+            Pt::Gfx::Pen fcbj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::FlatCap, Pen::BevelJoin );
+            Pt::Gfx::Pen fcbj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::FlatCap, Pen::BevelJoin );
+            Pt::Gfx::Pen fcbj3( Color::fromRgb8(0,   255,   0), 3, Pen::Solid, Pen::FlatCap, Pen::BevelJoin );
 
             std::vector<Pt::Gfx::PointF> shape;
 
