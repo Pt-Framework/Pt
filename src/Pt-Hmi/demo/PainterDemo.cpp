@@ -689,6 +689,7 @@ class TestView : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
+#if 0
             // RoundCap, RoundJoin
             Pt::Gfx::Pen rcrj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
             Pt::Gfx::Pen rcrj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
@@ -698,6 +699,15 @@ class TestView : public Pt::Hmi::Control
             Pt::Gfx::Pen fcbj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::FlatCap, Pen::BevelJoin );
             Pt::Gfx::Pen fcbj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::FlatCap, Pen::BevelJoin );
             Pt::Gfx::Pen fcbj3( Color::fromRgb8(0,   255,   0), 3, Pen::Solid, Pen::FlatCap, Pen::BevelJoin );
+#else
+            Pt::Gfx::Pen rcrj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen rcrj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen rcrj3( Color::fromRgb8(0,   255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+
+            Pt::Gfx::Pen fcbj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen fcbj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen fcbj3( Color::fromRgb8(0,   255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+#endif
 
             std::vector<Pt::Gfx::PointF> shape;
 
