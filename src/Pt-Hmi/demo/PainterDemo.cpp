@@ -690,24 +690,36 @@ class TestView : public Pt::Hmi::Control
             using namespace Pt::Gfx;
 
             // RoundCap, RoundJoin
-            Pt::Gfx::Pen rcrj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
-            Pt::Gfx::Pen rcrj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
+            Pt::Gfx::Pen rcrj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
+            Pt::Gfx::Pen rcrj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
+            Pt::Gfx::Pen rcrj3( Color::fromRgb8(0,   255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
 
-            // FlatCap, BevelJoin
-            Pt::Gfx::Pen fcbj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::FlatCap, Pen::BevelJoin );
-            Pt::Gfx::Pen fcbj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::FlatCap, Pen::BevelJoin );
+            // RoundCap, BevelJoin
+            Pt::Gfx::Pen fcbj1( Color::fromRgb8(255, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
+            Pt::Gfx::Pen fcbj2( Color::fromRgb8(0,   255,   0), 2, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
+            Pt::Gfx::Pen fcbj3( Color::fromRgb8(0,   255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::BevelJoin );
 
             std::vector<Pt::Gfx::PointF> shape;
 
             shape = makeTestShape1(-300, -380);
-            painter.setPen(rcrj1); painter.drawPolyline( &shape[0], shape.size() );
-            painter.setPen(rcrj2); painter.drawPolyline( &shape[0], shape.size() );
-
-            return;
+            painter.setPen(rcrj1);
+            painter.drawPolyline( &shape[0], shape.size() );
+            shape = makeTestShape1(-300, -300);
+            painter.setPen(rcrj2);
+            painter.drawPolyline( &shape[0], shape.size() );
+            shape = makeTestShape1(-300, -220);
+            painter.setPen(rcrj3);
+            painter.drawPolyline( &shape[0], shape.size() );
 
             shape = makeTestShape2(0, -580);
-            painter.setPen(fcbj1); painter.drawPolyline( &shape[0], shape.size() );
-            painter.setPen(fcbj2); painter.drawPolyline( &shape[0], shape.size() );
+            painter.setPen(fcbj1);
+            painter.drawPolyline( &shape[0], shape.size() );
+            shape = makeTestShape2(0, -500);
+            painter.setPen(fcbj2);
+            painter.drawPolyline( &shape[0], shape.size() );
+            shape = makeTestShape2(0, -420);
+            painter.setPen(fcbj3);
+            painter.drawPolyline( &shape[0], shape.size() );
         }
 
         std::vector<Pt::Gfx::PointF> makeTestShape1(double xOfs, double yOfs)
