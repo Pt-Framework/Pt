@@ -1343,7 +1343,11 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
     */
 
     // Store the "outside" line's points
-    const Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
+    //Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
+
+    Pen::JoinStyle js1 = pen.joinStyle();
+         if(!in1                   ) js1 = Pen::NoJoin;
+    else if(inSameSegment || inLine) js1 = Pen::MiterJoin;
 
     outer.pop_back();
     if(isFirst) outer.pop_back();
@@ -1362,12 +1366,12 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
             break;
         // Miter join
         case Pen::MiterJoin:
-            if(!in1) return false;
+            //if(!in1) return false;
             outer.push_back(intersect);
             break;
         // Round join
         case Pen::RoundJoin:
-            if(!in1) return false;
+            //if(!in1) return false;
             renderQuadraticBezierPoints(
                 outer,
                 lround(oline1b  .x()), lround(oline1b  .y()),
@@ -1400,7 +1404,11 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
     */
 
     // Store the "inside" line's points
-    const Pen::JoinStyle js2 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
+    //const Pen::JoinStyle js2 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
+
+    Pen::JoinStyle js2 = pen.joinStyle();
+         if(!in2                   ) js2 = Pen::NoJoin;
+    else if(inSameSegment || inLine) js2 = Pen::MiterJoin;
 
     inner.pop_back();
     if(isFirst) inner.pop_back();
@@ -1491,7 +1499,11 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
     //*/
 
     // Store the "outside" line's points to the main polygon buffer
-    const Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
+    //const Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
+
+    Pen::JoinStyle js1 = pen.joinStyle();
+         if(!in1                   ) js1 = Pen::NoJoin;
+    else if(inSameSegment || inLine) js1 = Pen::MiterJoin;
 
     switch(js1) {
         // No join
@@ -1548,7 +1560,11 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
     //*/
 
     // Store the "inside" line's points to the auxiliary polygon buffer
-    const Pen::JoinStyle js2 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
+    //const Pen::JoinStyle js2 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
+
+    Pen::JoinStyle js2 = pen.joinStyle();
+         if(!in2                   ) js2 = Pen::NoJoin;
+    else if(inSameSegment || inLine) js2 = Pen::MiterJoin;
 
     switch(js2) {
         // No join
