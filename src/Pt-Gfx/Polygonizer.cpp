@@ -1427,12 +1427,12 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
             break;
         // Miter join
         case Pen::MiterJoin:
-            if(!in2) return false;
+            //if(!in2) return false;
             inner.push_back(intersect);
             break;
         // Round join
         case Pen::RoundJoin:
-            if(!in2) return false;
+            //if(!in2) return false;
             renderQuadraticBezierPoints(
                 inner,
                 lround(iline1b  .x()), lround(iline1b  .y()),
@@ -1519,12 +1519,12 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
             break;
         // Miter join
         case Pen::MiterJoin:
-            if(!in1) return false;
+            //if(!in1) return false;
             polygon.push_back(intersect);
             break;
         // Round join
         case Pen::RoundJoin:
-            if(!in1) return false;
+            //if(!in1) return false;
             renderQuadraticBezierPoints(
                 polygon,
                 lround(oline1b  .x()), lround(oline1b  .y()),
@@ -1580,12 +1580,12 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
             break;
         // Miter join
         case Pen::MiterJoin:
-            if(!in2) return false;
+            //if(!in2) return false;
             inner.push_back(intersect);
             break;
         // Round join
         case Pen::RoundJoin:
-            if(!in2) return false;
+            //if(!in2) return false;
             renderQuadraticBezierPoints(
                 inner,
                 lround(iline1b  .x()), lround(iline1b  .y()),
