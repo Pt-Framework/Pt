@@ -1839,8 +1839,8 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy,
 
 
 bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
-                                 const PointF& line1a, const PointF& line1b,
-                                 const PointF& line2a, const PointF& line2b, size_t penSize)
+                                const PointF& line1a, const PointF& line1b,
+                                const PointF& line2a, const PointF& line2b, size_t penSize)
 {
     // The first line
     const float x11   = line1a.x();
