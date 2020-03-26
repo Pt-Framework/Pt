@@ -164,6 +164,9 @@ std::vector<Pt::uint8_t> Polygonizer::dashPatternDot  = std::vector<Pt::uint8_t>
 std::vector<Pt::uint8_t> Polygonizer::dashPatternDash = std::vector<Pt::uint8_t>( dashPatternDash_, dashPatternDash_ + sizeof(dashPatternDash_) );
 
 
+#define DEBUG_INTERSECT_LINE
+
+
 Polygonizer::Polygonizer()
 {
 }
@@ -639,7 +642,6 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
     const bool isClosed = points[0] == points[n - 1];
     const bool isSelfIn = selfIntersecting(points, n);
 
-
     if(isSolid) // Solid line
     {
         if(isClosed)
@@ -747,6 +749,13 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                               const PointF* basePtr, size_t curPCnt,
                                               const Pen& pen, bool cleanUpSelfIntersection, bool forSmoothCurve)
 {
+#ifdef DEBUG_INTERSECT_LINE
+    fprintf(stderr, "### CALLING renderSolidOpenWidePolyline() ###\n");
+    for (size_t i = 0; i < curPCnt; ++i) {
+        fprintf(stderr, "%7.3f, %7.3f\n", (basePtr + i)->x(), (basePtr + i)->y());
+    }
+#endif
+
     //Pt::int32_t* segmentIndexMarker = 0;
 
     // Prepare the buffers
@@ -1847,15 +1856,13 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
     const float b2    = x21 - x22;
     const float c2    = -(x21 * y22 - x22 * y21);
 
-//#define DEBUG_INTERSECT_LINE
-
     // Check if the line is parallel
     const float denom = a1 * b2 - a2 * b1;
 
 #ifdef DEBUG_INTERSECT_LINE
     fprintf(stderr, "Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
     fprintf(stderr, "Line 2       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x21, y21, x22, y22);
-    fprintf(stderr, "a1b1 a2b2 dn : (%7.3f, %7.3f) - (%7.3f, %7.3f) : %7.3f\n", a1, b1, a2, b2, denom);
+    fprintf(stderr, "a1b2 a2b1 dn : (%7.3f, %7.3f) - (%7.3f, %7.3f) : %7.3f\n", a1, b2, a2, b1, denom);
 #endif
 
     if(denom == 0.0f) {
@@ -1864,19 +1871,22 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
             intersect.set(x12, y11);
             inLine = true;
 #ifdef DEBUG_INTERSECT_LINE
-            fprintf(stderr, "Intersect #Y : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
+            fprintf(stderr, "Intersect #Y : (%7.3f, %7.3f) - %s\n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
 #endif
             return true;
         }
         if(x11 == x12 && x11 == x21 && x11 == x22 && y12 == y21) {
             intersect.set(x11, y12);
             inLine = true;
+#ifdef DEBUG_INTERSECT_LINE
+            fprintf(stderr, "Intersect #X : (%7.3f, %7.3f) - %s\n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
+#endif
             return true;
         }
-#ifdef DEBUG_INTERSECT_LINE
-            fprintf(stderr, "Intersect #X : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
-#endif
         // No intersection
+#ifdef DEBUG_INTERSECT_LINE
+        fprintf(stderr, "Intersect NONE \n");
+#endif
         return false;
     }
 
@@ -1901,7 +1911,7 @@ bool Polygonizer::intersectLine(bool& inLine, PointF& intersect,
            | (ipX >= minX2 && ipX <= maxX2 && ipY >= minY2 && ipY <= maxY2);
 
 #ifdef DEBUG_INTERSECT_LINE
-    fprintf(stderr, "Intersect #G : (%7.3f, %7.3f) - %s \n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
+    fprintf(stderr, "Intersect #G : (%7.3f, %7.3f) - %s\n", intersect.x(), intersect.y(), inLine ? "inline" : "outline");
 #endif
 
     // Done

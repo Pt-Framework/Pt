@@ -809,6 +809,8 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
         // Foor the coordinates while avoiding rounding errors
         polygon[i].set( Pt::lround(ps[i].x() - 0.4999),
                         Pt::lround(ps[i].y() - 0.4999) );
+
+        //polygon[i].set( ps[i].x(), ps[i].y() );
     }
 
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
