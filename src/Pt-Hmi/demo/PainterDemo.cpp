@@ -729,6 +729,22 @@ class TestView : public Pt::Hmi::Control
             shape = makeTestShape3(50, -370);
             painter.setPen(green3);
             painter.drawPolyline( &shape[0], shape.size() );
+            shape = makeTestShape3(50, -290);
+            painter.setBrush(Color::fromRgb8(0, 255, 0));
+            painter.fillPolygon( &shape[0], shape.size() );
+
+            shape = makeTestShape3(150, -530); scaleShape(shape, 5);
+            painter.setPen(green1);
+            painter.drawPolyline( &shape[0], shape.size() );
+            shape = makeTestShape3(150, -450); scaleShape(shape, 5);
+            painter.setPen(green2);
+            painter.drawPolyline( &shape[0], shape.size() );
+            shape = makeTestShape3(150, -370); scaleShape(shape, 5);
+            painter.setPen(green3);
+            painter.drawPolyline( &shape[0], shape.size() );
+            shape = makeTestShape3(150, -290); scaleShape(shape, 5);
+            painter.setBrush(Color::fromRgb8(0, 255, 0));
+            painter.fillPolygon( &shape[0], shape.size() );
 #endif
         }
 
@@ -786,6 +802,26 @@ class TestView : public Pt::Hmi::Control
             points.push_back(Pt::Gfx::PointF( xOfs + 210.99301288397146, yOfs + 586.96522243684171 ) );
             points.push_back(Pt::Gfx::PointF( xOfs + 211.44926877995317, yOfs + 587.33749410772862 ) );
             return points;
+        }
+
+        void scaleShape(std::vector<Pt::Gfx::PointF>& points, double scale)
+        {
+            double minX = 99999;
+            double minY = 99999;
+            for(size_t i = 0; i < points.size(); ++i)
+            {
+                const double x = points[i].x();
+                const double y = points[i].y();
+                if(x < minX) minX = x;
+                if(y < minY) minY = y;
+            }
+
+            for(size_t i = 0; i < points.size(); ++i)
+            {
+                const double x = (points[i].x() - minX) * scale;
+                const double y = (points[i].y() - minY) * scale;
+                points[i].set( x + minX, y + minY );
+            }
         }
 };
 

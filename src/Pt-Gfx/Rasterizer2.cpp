@@ -814,9 +814,9 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
         //const double x = ps[i].x();
         //const double y = ps[i].y();
         if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
-        polygon[pointCount].set(x, y);
-        ++pointCount;
+        polygon[pointCount++].set(x, y);
     }
+    polygon.resize(pointCount);
 
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
         const std::ios_base::fmtflags f(std::cerr.flags());
@@ -828,7 +828,7 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
         }
 
         std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::drawPolyline ### AFTER FIXED ADJUST ###" << std::endl;
-        for (size_t i = 0; i < pointCount; ++i) {
+        for (size_t i = 0; i < polygon.size(); ++i) {
             std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                       << polygon[i].x() << ", " << polygon[i].y() << std::endl;
         }
@@ -837,8 +837,8 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
         std::cerr.flags(f);
     }
 
-    if(_pen.size() == 1) drawNarrowPolyline(&polygon[0], pointCount);
-    else                 drawWidePolyline(&polygon[0], pointCount);
+    if(_pen.size() == 1) drawNarrowPolyline(&polygon[0], polygon.size());
+    else                 drawWidePolyline  (&polygon[0], polygon.size());
 }
 
 
@@ -1113,6 +1113,7 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 
     // Perform coordinate adjustments
     std::vector<PointF> polygon(n);
+    size_t              pointCount = 0;
 
 #define FIXED_ADJUST
 
@@ -1120,11 +1121,14 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     for (size_t i = 0; i < n; ++i)
     {
         // Foor the coordinates while avoiding rounding errors
-        polygon[i].set( Pt::lround( ps[i].x() - 0.4999 ),
-                        Pt::lround( ps[i].y() - 0.4999 ) );
-
-        // polygon[i].set( ps[i].x(), ps[i].y() );
+        const double x = Pt::lround(ps[i].x() - 0.4999);
+        const double y = Pt::lround(ps[i].y() - 0.4999);
+        //const double x = ps[i].x();
+        //const double y = ps[i].y();
+        if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
+        polygon[pointCount++].set(x, y);
     }
+    polygon.resize(pointCount);
 #else
     double xc = 0.0f;
     double yc = 0.0f;
@@ -1147,9 +1151,14 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         else if(yi > yc) yi -= 0.5f;
 
         // Foor the coordinates while avoiding rounding errors
-        polygon[i].set(Pt::lround(xi - 0.4999),
-                       Pt::lround(yi - 0.4999));
+        const double x = Pt::lround(xi - 0.4999);
+        const double y = Pt::lround(yi - 0.4999);
+        //const double x = ps[i].x();
+        //const double y = ps[i].y();
+        if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
+        polygon[pointCount++].set(x, y);
     }
+    polygon.resize(pointCount);
 #endif
 
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
@@ -1161,7 +1170,7 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                   << xc << ", " << yc << std::endl;
 #endif
-        for (size_t i = 0; i < n; ++i) {
+        for (size_t i = 0; i < polygon.size(); ++i) {
             std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                       << polygon[i].x() << ", " << polygon[i].y() << std::endl;
         }
