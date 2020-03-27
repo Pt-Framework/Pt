@@ -349,7 +349,7 @@ void Polygonizer::renderEllipsePoints(std::vector<PointF>& dst,
 
     const Pt::int32_t segMult = !pen.isSolid() ? 10 : 20;
     const Pt::int32_t circSeg = (circFac / 16) * segMult + 1;
-    const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
+    const Pt::int32_t nSegs   = (circSeg <  9) ? 9 : circSeg;
     const float       nSegs1i = 1.0f / (nSegs - 1);
 
     // Generate a polygon that approximates the ellipse
@@ -526,7 +526,7 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
 
     const Pt::int32_t segMult = !pen.isSolid() ? 10 : 20;
     const Pt::int32_t circSeg = (circFac / 16) * segMult + 1;
-    const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
+    const Pt::int32_t nSegs   = (circSeg <  9) ? 9 : circSeg;
     const float       nSegs1i = 1.0f / (nSegs - 1);
 
     // Generate a polygon that approximates the arc
@@ -1147,6 +1147,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
+#if 1
     // #@#
     // Adjust the coordinates (thus the line's length) based on the line and cap styles
     if( !pen.isSolid() && pen.capStyle() != Pen::FlatCap ) {
@@ -1155,6 +1156,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
         x2 -= (dx * 0.75f);
         y2 -= (dy * 0.75f);
     }
+#endif
 
     // Generate points (CCW)
     // --- Begin point ---
@@ -1263,7 +1265,9 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
 
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
+#if 1
     // #@#
+    // #@# TEMPORARY HACK FOR SMOOTH CURVEs #@#
     // Adjust the coordinates (thus the line's length) based on the line and cap styles
     if( !forSmoothCurve && !pen.isSolid() && pen.capStyle() != Pen::FlatCap ) {
         x1 += (dx * 0.75f);
@@ -1271,6 +1275,7 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
         x2 -= (dx * 0.75f);
         y2 -= (dy * 0.75f);
     }
+#endif
 
     // Generate points (CCW)
 

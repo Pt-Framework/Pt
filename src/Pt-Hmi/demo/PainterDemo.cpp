@@ -689,9 +689,11 @@ class TestView : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
-            Pt::Gfx::Pen green1( Color::fromRgb8(0, 255, 0), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
-            Pt::Gfx::Pen green2( Color::fromRgb8(0, 255, 0), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
-            Pt::Gfx::Pen green3( Color::fromRgb8(0, 255, 0), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen   green1( Color::fromRgb8(0, 255, 0), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen   green2( Color::fromRgb8(0, 255, 0), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen   green3( Color::fromRgb8(0, 255, 0), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+
+            Pt::Gfx::Brush greenb( Color::fromRgb8(0, 255, 0) );
 
             std::vector<Pt::Gfx::PointF> shape;
 
@@ -730,7 +732,7 @@ class TestView : public Pt::Hmi::Control
             painter.setPen(green3);
             painter.drawPolyline( &shape[0], shape.size() );
             shape = makeTestShape3(50, -290);
-            painter.setBrush(Color::fromRgb8(0, 255, 0));
+            painter.setBrush(greenb);
             painter.fillPolygon( &shape[0], shape.size() );
 
             shape = makeTestShape3(150, -530); scaleShape(shape, 5);
@@ -743,7 +745,7 @@ class TestView : public Pt::Hmi::Control
             painter.setPen(green3);
             painter.drawPolyline( &shape[0], shape.size() );
             shape = makeTestShape3(150, -290); scaleShape(shape, 5);
-            painter.setBrush(Color::fromRgb8(0, 255, 0));
+            painter.setBrush(greenb);
             painter.fillPolygon( &shape[0], shape.size() );
 #endif
         }
@@ -804,7 +806,7 @@ class TestView : public Pt::Hmi::Control
             return points;
         }
 
-        void scaleShape(std::vector<Pt::Gfx::PointF>& points, double scale)
+        void scaleShape(std::vector<Pt::Gfx::PointF>& points, double scale, double xOfs = 0.0, double yOfs = 0.0)
         {
             double minX = 99999;
             double minY = 99999;
@@ -820,7 +822,7 @@ class TestView : public Pt::Hmi::Control
             {
                 const double x = (points[i].x() - minX) * scale;
                 const double y = (points[i].y() - minY) * scale;
-                points[i].set( x + minX, y + minY );
+                points[i].set( x + minX + xOfs, y + minY + yOfs );
             }
         }
 };

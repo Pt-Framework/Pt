@@ -707,17 +707,13 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
 //              Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount,
                                     const Color& color,
-                                    Pt::int32_t minX_, Pt::int32_t minY_,
-                                    Pt::int32_t maxX_, Pt::int32_t maxY_)
+                                    Pt::int32_t minX, Pt::int32_t minY,
+                                    Pt::int32_t maxX, Pt::int32_t maxY)
 {
     std::size_t totalPointCount = pointCount;
 
     // List of nodes that define the horizontal spans
     std::vector<float> nodeX(totalPointCount * 2, 0);
-
-    const Pt::int32_t minX = minX_;
-    const Pt::int32_t minY = minY_;
-    const Pt::int32_t maxY = maxY_;
 
     // List of polygon scanlines
     PolygonScanlines scanlines;
@@ -779,8 +775,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // #@#
             // Calculate the coordinate
             Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
-          //Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]/* - 0.5f*/) );
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
@@ -854,13 +849,13 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         rasterPolygonBorderXWAA_F2(
             points[i].x(),     points[i].y(),
             points[i + 1].x(), points[i + 1].y(),
-            color, minX, minY_ - 1, scanlines, xwaaMask );
+            color, minX, minY - 1, scanlines, xwaaMask );
     }
 
     rasterPolygonBorderXWAA_F2(
           points[pc1].x(), points[pc1].y(),
           points[0].x(),   points[0].y(),
-          color, minX, minY_ - 1, scanlines, xwaaMask );
+          color, minX, minY - 1, scanlines, xwaaMask );
 }
 
 
@@ -869,8 +864,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 //              Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
                                      const Color& color,
-                                     Pt::int32_t minX_, Pt::int32_t minY_,
-                                     Pt::int32_t maxX_, Pt::int32_t maxY_)
+                                     Pt::int32_t minX, Pt::int32_t minY,
+                                     Pt::int32_t maxX, Pt::int32_t maxY)
 {
     std::size_t totalPointCount = 0;
 
@@ -888,10 +883,6 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
     // // unused: const Pt::int32_t maxX = Pt::lround(floor(maxX_));
     //const Pt::int32_t minY = Pt::lround(floor(minY_));
     //const Pt::int32_t maxY = Pt::lround(floor(maxY_));
-
-    const Pt::int32_t minX = minX_;
-    const Pt::int32_t minY = minY_;
-    const Pt::int32_t maxY = maxY_;
 
     // List of polygon scanlines
     PolygonScanlines scanlines;
@@ -1033,13 +1024,13 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
             rasterPolygonBorderXWAA_F2(
                 polygon->at(i).x(), polygon->at(i).y(),
                 polygon->at(i + 1).x(), polygon->at(i + 1).y(),
-                color, minX, minY_ - 1, scanlines, xwaaMask );
+                color, minX, minY - 1, scanlines, xwaaMask );
         }
 
         rasterPolygonBorderXWAA_F2(
              polygon->at(pc1).x(), polygon->at(pc1).y(),
              polygon->at(0).x(), polygon->at(0).y(),
-             color, minX, minY_ - 1, scanlines, xwaaMask );
+             color, minX, minY - 1, scanlines, xwaaMask );
     }
 }
 
