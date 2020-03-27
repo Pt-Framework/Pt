@@ -801,24 +801,25 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
 }
 
 
-void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
+void Rasterizer2::drawPolyline(const PointF* ps, size_t n)
 {
-    std::vector<PointF> polygon(n);
-    size_t              pointCount = 0;
+    std::vector<PointF> polygon;
+    polygon.reserve(n);
 
     for (size_t i = 0; i < n; ++i)
     {
-        // Foor the coordinates while avoiding rounding errors
-        const double x = Pt::lround(ps[i].x() - 0.4999);
-        const double y = Pt::lround(ps[i].y() - 0.4999);
-        //const double x = ps[i].x();
-        //const double y = ps[i].y();
-        if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
-        polygon[pointCount++].set(x, y);
-    }
-    polygon.resize(pointCount);
+        // Floor the coordinates with an epsilon of 0.001
+        PointF p( Pt::lround(ps[i].x() - 0.4999), 
+                  Pt::lround(ps[i].y() - 0.4999) );
 
-    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
+        if( ! polygon.empty() && polygon.back() == p )
+          continue;
+        
+        polygon.push_back(p);
+    }
+   
+    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) 
+    {
         const std::ios_base::fmtflags f(std::cerr.flags());
 
         std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::drawPolyline ### AT ENTRY POINT ###" << std::endl;
@@ -837,8 +838,10 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
         std::cerr.flags(f);
     }
 
-    if(_pen.size() == 1) drawNarrowPolyline(&polygon[0], polygon.size());
-    else                 drawWidePolyline  (&polygon[0], polygon.size());
+    if(_pen.size() == 1) 
+      drawNarrowPolyline( &polygon[0], polygon.size() );
+    else                 
+      drawWidePolyline( &polygon[0], polygon.size() );
 }
 
 

@@ -134,7 +134,7 @@ class Rasterizer2
 
         void drawLine(const PointF& from, const PointF& to);
 
-        void drawPolyline(const PointF* ps, const size_t pointCount);
+        void drawPolyline(const PointF* ps, size_t n);
 
         void drawRect(const RectF& rect);
 
