@@ -804,13 +804,18 @@ void Rasterizer2::drawNarrowLine(const Point& a, const Point& b, DrawLineMask* m
 void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
 {
     std::vector<PointF> polygon(n);
-    for (size_t i = 0; i < polygon.size(); ++i)
+    size_t              pointCount = 0;
+
+    for (size_t i = 0; i < n; ++i)
     {
         // Foor the coordinates while avoiding rounding errors
-        polygon[i].set( Pt::lround(ps[i].x() - 0.4999),
-                        Pt::lround(ps[i].y() - 0.4999) );
-
-        //polygon[i].set( ps[i].x(), ps[i].y() );
+        const double x = Pt::lround(ps[i].x() - 0.4999);
+        const double y = Pt::lround(ps[i].y() - 0.4999);
+        //const double x = ps[i].x();
+        //const double y = ps[i].y();
+        if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
+        polygon[pointCount].set(x, y);
+        ++pointCount;
     }
 
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
@@ -823,7 +828,7 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
         }
 
         std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::drawPolyline ### AFTER FIXED ADJUST ###" << std::endl;
-        for (size_t i = 0; i < n; ++i) {
+        for (size_t i = 0; i < pointCount; ++i) {
             std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                       << polygon[i].x() << ", " << polygon[i].y() << std::endl;
         }
@@ -832,8 +837,8 @@ void Rasterizer2::drawPolyline(const PointF* ps, const size_t n)
         std::cerr.flags(f);
     }
 
-    if(_pen.size() == 1) drawNarrowPolyline(&polygon[0], polygon.size());
-    else                 drawWidePolyline(&polygon[0], polygon.size());
+    if(_pen.size() == 1) drawNarrowPolyline(&polygon[0], pointCount);
+    else                 drawWidePolyline(&polygon[0], pointCount);
 }
 
 
