@@ -28,7 +28,9 @@ class BenchmarkView : public Pt::Hmi::Control
             if(doBenchmark) {
                 doBenchmark = false;
                 onPaintContent(ip1, "IP1", true);
+                fprintf(stderr, "\n");
                 onPaintContent(ip2, "IP2", true);
+                fprintf(stderr, "\n");
             }
 
             ip1.setBrush(background);
@@ -44,14 +46,13 @@ class BenchmarkView : public Pt::Hmi::Control
             painter.drawImage(PointF(317, 2), image2);
         }
 
-        virtual void onPaintContent(Pt::Gfx::Painter& painter, const Pt::String& text, bool benchmark)
+        virtual void onPaintContent(Pt::Gfx::Painter& painter, const char* text, bool benchmark)
         {
-
             using namespace Pt::Gfx;
 
             painter.setPen  ( Color::fromRgb8(164, 100, 255)  );
             painter.setFont ( Font("", 12) );
-            painter.drawText( PointF(10, 20), text );
+            painter.drawText( PointF(10, 20), Pt::String(text) );
 
             Pt::Gfx::Pen   green1( Color::fromRgb8(  0, 255,   0), 1, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
             Pt::Gfx::Pen   green2( Color::fromRgb8(  0, 255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
@@ -67,9 +68,40 @@ class BenchmarkView : public Pt::Hmi::Control
             double scale = 1.0;
             std::vector<Pt::Gfx::PointF> shape;
 
+            // ImagePainter2
+            ImagePainter2* ip2 = 0;
+
+            // Benchmark loop count
+            const int loopCount = 100;
+
+#define BENCHMARK_CODE(DESC, SIZE, SCALE)                                    \
+                do {                                                         \
+                    Pt::int64_t sum = 0;                                     \
+                    for(int i = 0; i < loopCount; ++i) {                     \
+                        Pt::System::Clock clock;                             \
+                        if(ip2) {                                            \
+                            clock.start();                                   \
+                            ip2->fillPolygon_NR( &shape[0], shape.size() );  \
+                            sum += clock.stop().toUSecs();                   \
+                        }                                                    \
+                        else {                                               \
+                            clock.start();                                   \
+                            painter.drawPolyline( &shape[0], shape.size() ); \
+                            sum += clock.stop().toUSecs();                   \
+                        }                                                    \
+                    }                                                        \
+                    sum /= loopCount;                                        \
+                    fprintf(stderr, "%s [%s] [SCALE %4.1f SIZE %d] %3zd\n",  \
+                                    text, DESC, SCALE, SIZE, sum);           \
+                } while(false)
+
             // Polyline simple - scale 10x
             scale = 10.0;
             if(benchmark) {
+                shape = makeLineSimple(0, 0, scale);
+                painter.setPen(green1); BENCHMARK_CODE("Polyline Simple ", 1, scale);
+                painter.setPen(green2); BENCHMARK_CODE("Polyline Simple ", 2, scale);
+                painter.setPen(green9); BENCHMARK_CODE("Polyline Simple ", 9, scale);
             }
             else {
                 shape = makeLineSimple(x, y, scale);
@@ -90,6 +122,9 @@ class BenchmarkView : public Pt::Hmi::Control
             // Polyline complex - scale 1x
             scale = 1.0;
             if(benchmark) {
+                shape = makeLineComplex(0, 0, scale);
+                painter.setPen(cyan1); BENCHMARK_CODE("Polyline Complex", 1, scale);
+                painter.setPen(cyan2); BENCHMARK_CODE("Polyline Complex", 2, scale);
             }
             else {
                 shape = makeLineComplex(x, y, scale);
@@ -107,6 +142,9 @@ class BenchmarkView : public Pt::Hmi::Control
             // Polyline complex - scale 5x
             scale = 5.0;
             if(benchmark) {
+                shape = makeLineComplex(0, 0, scale);
+                painter.setPen(cyan1); BENCHMARK_CODE("Polyline Complex", 1, scale);
+                painter.setPen(cyan2); BENCHMARK_CODE("Polyline Complex", 2, scale);
             }
             else {
                 shape = makeLineComplex(x, y, scale);
@@ -122,11 +160,14 @@ class BenchmarkView : public Pt::Hmi::Control
             x -= 50;
 
             // Get ImagePainter2
-            ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
+            ip2 = dynamic_cast<ImagePainter2*>(&painter);
             if(!ip2) return;
 
             // Polygon - simple
             if(benchmark) {
+                ip2->setBrush(redb);
+                shape = makePolygonSimple_S10_P2_RC_RJ(0, 0); BENCHMARK_CODE("Polygon  Simple ", 2, 10.0);
+                shape = makePolygonSimple_S10_P9_RC_RJ(0, 0); BENCHMARK_CODE("Polygon  Simple ", 9, 10.0);
             }
             else {
                 shape = makePolygonSimple_S10_P2_RC_RJ(x, y);
@@ -142,6 +183,9 @@ class BenchmarkView : public Pt::Hmi::Control
 
             // Polygon - complex
             if(benchmark) {
+                ip2->setBrush(redb);
+                shape = makePolygonComplex_S1_P2_RC_NJ(0, 0); BENCHMARK_CODE("Polygon  Complex", 2, 1.0);
+                shape = makePolygonComplex_S5_P2_RC_NJ(0, 0); BENCHMARK_CODE("Polygon  Complex", 2, 5.0);
             }
             else {
                 shape = makePolygonComplex_S1_P2_RC_NJ(x, y);

@@ -1,5 +1,5 @@
 //#include <iomanip>
-//#include <stdio.h>
+#include <stdio.h>
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
