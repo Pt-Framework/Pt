@@ -29,25 +29,32 @@ class BenchmarkView : public Pt::Hmi::Control
                 doBenchmark = false;
 
                 std::vector<std::string> result1, result2;
-
                 onPaintContent(ip1, "IP1", &result1);
                 onPaintContent(ip2, "IP2", &result2);
 
+                if(ip2.isAntiAliasing()) fprintf(stderr, "IP2 WITH AA\n\n");
+                else                     fprintf(stderr, "IP2 WITHOUT AA\n\n");
+
                 for(size_t i = 0; i < result1.size(); ++i) {
-                    const std::string& s1 = result1[i];
-                    const std::string& s2 = result2[i];
-
-                    fprintf(stderr, "%s\n", s1.c_str());
-                    fprintf(stderr, "%s\n", s2.c_str());
-
+                    std::string s1 = result1[i];
+                    std::string s2 = result2[i];
                     if(s1[s1.length() - 1] == 'A') {
                         const char idx = s1[s1.length() - 2];
                         for(size_t j = 0; j < result2.size(); ++j) {
-                            const std::string& s3 = result2[j];
+                            std::string s3 = result2[j];
                             if(s3[s3.length() - 1] == 'B' && s3[s3.length() - 2] == idx) {
+                                s1[s1.length() - 3] = 0;
+                                s2[s2.length() - 3] = 0;
+                                s3[s3.length() - 3] = 0;
+                                fprintf(stderr, "%s\n", s1.c_str());
+                                fprintf(stderr, "%s\n", s2.c_str());
                                 fprintf(stderr, "%s\n", s3.c_str());
                             }
                         }
+                    }
+                    else {
+                        fprintf(stderr, "%s\n", s1.c_str());
+                        fprintf(stderr, "%s\n", s2.c_str());
                     }
                     fprintf(stderr, "\n");
                 }
@@ -92,7 +99,7 @@ class BenchmarkView : public Pt::Hmi::Control
             ImagePainter2* ip2 = 0;
 
             // Benchmark loop count
-            const int loopCount = 100;
+            const int loopCount = 250;
 
 #define BENCHMARK_CODE(DESC, INFO, SIZE, SCALE)                              \
                 do {                                                         \
@@ -123,7 +130,7 @@ class BenchmarkView : public Pt::Hmi::Control
                 shape = makeLineSimple(0, 0, scale);
                 painter.setPen(green1); BENCHMARK_CODE("Polyline Simple ", "",   1, scale);
                 painter.setPen(green2); BENCHMARK_CODE("Polyline Simple ", "2A", 2, scale);
-                painter.setPen(green9); BENCHMARK_CODE("Polyline Simple ", "9B", 9, scale);
+                painter.setPen(green9); BENCHMARK_CODE("Polyline Simple ", "9A", 9, scale);
             }
             else {
                 shape = makeLineSimple(x, y, scale);
