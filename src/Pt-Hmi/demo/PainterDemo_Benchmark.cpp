@@ -114,11 +114,11 @@ class BenchmarkView : public Pt::Hmi::Control
             double scale = 1.0;
             std::vector<Pt::Gfx::PointF> shape;
 
-            // Get ImagePainter2
-            ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
+            // Set ImagePainter2 to null
+            ImagePainter2* ip2 = 0;
 
             // Benchmark loop count
-            const int loopCount = 250;
+            const int loopCount = 1;
 
 #define BENCHMARK_CODE(DESC, INFO, SIZE, SCALE)                                 \
                 do {                                                            \
@@ -127,7 +127,7 @@ class BenchmarkView : public Pt::Hmi::Control
                     for(int i = 0; i < loopCount; ++i) {                        \
                         Pt::System::Clock clock;                                \
                         if(ip2) {                                               \
-                            clock.start();                                      \
+                            std::cerr<<"F\n";clock.start();                     \
                             if(ip2)                                             \
                                 ip2->fillPolygon_NR( &shape[0], shape.size() ); \
                             else                                                \
@@ -135,7 +135,7 @@ class BenchmarkView : public Pt::Hmi::Control
                             sum += clock.stop().toUSecs();                      \
                         }                                                       \
                         else {                                                  \
-                            clock.start();                                      \
+                            std::cerr<<"D\n";clock.start();                     \
                             painter.drawPolyline( &shape[0], shape.size() );    \
                             sum += clock.stop().toUSecs();                      \
                         }                                                       \
@@ -209,6 +209,9 @@ class BenchmarkView : public Pt::Hmi::Control
             }
             y += 15;
             x -= 50;
+
+            // Get ImagePainter2
+            ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
             // Polygon - simple
             if(brBuff) {
