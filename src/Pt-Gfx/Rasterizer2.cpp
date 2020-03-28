@@ -809,16 +809,16 @@ void Rasterizer2::drawPolyline(const PointF* ps, size_t n)
     for (size_t i = 0; i < n; ++i)
     {
         // Floor the coordinates with an epsilon of 0.001
-        PointF p( Pt::lround(ps[i].x() - 0.4999), 
+        PointF p( Pt::lround(ps[i].x() - 0.4999),
                   Pt::lround(ps[i].y() - 0.4999) );
 
         if( ! polygon.empty() && polygon.back() == p )
           continue;
-        
+
         polygon.push_back(p);
     }
-   
-    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) 
+
+    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES)
     {
         const std::ios_base::fmtflags f(std::cerr.flags());
 
@@ -838,9 +838,9 @@ void Rasterizer2::drawPolyline(const PointF* ps, size_t n)
         std::cerr.flags(f);
     }
 
-    if(_pen.size() == 1) 
+    if(_pen.size() == 1)
       drawNarrowPolyline( &polygon[0], polygon.size() );
-    else                 
+    else
       drawWidePolyline( &polygon[0], polygon.size() );
 }
 
@@ -893,6 +893,7 @@ void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount
     std::vector<Polygon> polygons;
     _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen, true, false);
 
+    
     const bool isSolid  = _pen.isSolid();
   //const bool isClosed = points[0] == points[pointCount - 1];
 

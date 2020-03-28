@@ -1,4 +1,5 @@
-#include <iomanip>
+//#include <iomanip>
+//#include <stdio.h>
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
@@ -9,7 +10,6 @@
 #include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/System/Logger.h>
-
 
 class PaintView : public Pt::Hmi::Control
 {
@@ -753,56 +753,56 @@ class TestView : public Pt::Hmi::Control
         std::vector<Pt::Gfx::PointF> makeTestShape1(double xOfs, double yOfs)
         {
             std::vector<Pt::Gfx::PointF> points;
-            points.push_back(Pt::Gfx::PointF(xOfs + 364.25000000000000, yOfs + 444.50000000000000) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 365.75000000000000, yOfs + 446.00000000000000) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 366.50000000000000, yOfs + 446.00000000000000) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 368.00000000000000, yOfs + 445.25000000000000) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 364.25000000000000, yOfs + 444.50000000000000) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 365.75000000000000, yOfs + 446.00000000000000) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 366.50000000000000, yOfs + 446.00000000000000) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 368.00000000000000, yOfs + 445.25000000000000) );
             return points;
         }
 
         std::vector<Pt::Gfx::PointF> makeTestShape2(double xOfs, double yOfs)
         {
             std::vector<Pt::Gfx::PointF> points;
-            points.push_back(Pt::Gfx::PointF(xOfs + 135.00000000000000, yOfs + 613.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 142.00000000000000, yOfs + 624.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 148.00000000000000, yOfs + 630.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 155.00000000000000, yOfs + 637.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 161.00000000000000, yOfs + 641.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 168.00000000000000, yOfs + 641.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 174.00000000000000, yOfs + 638.00000000000000 ) );
-            points.push_back(Pt::Gfx::PointF(xOfs + 181.00000000000000, yOfs + 643.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 135.00000000000000, yOfs + 613.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 142.00000000000000, yOfs + 624.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 148.00000000000000, yOfs + 630.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 155.00000000000000, yOfs + 637.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 161.00000000000000, yOfs + 641.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 168.00000000000000, yOfs + 641.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 174.00000000000000, yOfs + 638.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF(xOfs + 181.00000000000000, yOfs + 643.00000000000000 ) );
             return points;
         }
 
         std::vector<Pt::Gfx::PointF> makeTestShape3(double xOfs, double yOfs)
         {
             std::vector<Pt::Gfx::PointF> points;
-            points.push_back(Pt::Gfx::PointF( xOfs + 200.04287138041008, yOfs + 586.71004820396047 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 200.49912727639179, yOfs + 587.09713039419933 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 200.95538317237353, yOfs + 587.14491976184195 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 201.41163906835527, yOfs + 587.06236973221769 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 201.86789496433698, yOfs + 587.14328427272108 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 202.32415086031870, yOfs + 587.35944317395581 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 202.78040675630041, yOfs + 587.33688018323755 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 203.23666265228215, yOfs + 587.06855211079812 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 203.69291854826389, yOfs + 586.81770235767578 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 204.14917444424560, yOfs + 586.34153385773061 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 204.60543034022731, yOfs + 585.38229968091991 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 205.06168623620903, yOfs + 584.32761411477202 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 205.51794213219077, yOfs + 583.34996804920286 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 205.97419802817251, yOfs + 581.81590048140788 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 206.43045392415422, yOfs + 581.22712949756612 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 206.88670982013593, yOfs + 581.10834525424411 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 207.34296571611765, yOfs + 580.50872918254674 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 207.79922161209939, yOfs + 580.19319242330948 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 208.25547750808113, yOfs + 580.18038204659888 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 208.71173340406284, yOfs + 581.20957233906279 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 209.16798930004455, yOfs + 583.21187839564334 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 209.62424519602627, yOfs + 584.87984718126211 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 210.08050109200801, yOfs + 586.03687522046437 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 210.53675698798975, yOfs + 586.63168745407006 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 210.99301288397146, yOfs + 586.96522243684171 ) );
-            points.push_back(Pt::Gfx::PointF( xOfs + 211.44926877995317, yOfs + 587.33749410772862 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 200.04287138041008, yOfs + 586.71004820396047 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 200.49912727639179, yOfs + 587.09713039419933 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 200.95538317237353, yOfs + 587.14491976184195 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 201.41163906835527, yOfs + 587.06236973221769 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 201.86789496433698, yOfs + 587.14328427272108 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 202.32415086031870, yOfs + 587.35944317395581 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 202.78040675630041, yOfs + 587.33688018323755 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 203.23666265228215, yOfs + 587.06855211079812 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 203.69291854826389, yOfs + 586.81770235767578 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 204.14917444424560, yOfs + 586.34153385773061 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 204.60543034022731, yOfs + 585.38229968091991 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 205.06168623620903, yOfs + 584.32761411477202 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 205.51794213219077, yOfs + 583.34996804920286 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 205.97419802817251, yOfs + 581.81590048140788 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 206.43045392415422, yOfs + 581.22712949756612 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 206.88670982013593, yOfs + 581.10834525424411 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 207.34296571611765, yOfs + 580.50872918254674 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 207.79922161209939, yOfs + 580.19319242330948 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 208.25547750808113, yOfs + 580.18038204659888 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 208.71173340406284, yOfs + 581.20957233906279 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 209.16798930004455, yOfs + 583.21187839564334 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 209.62424519602627, yOfs + 584.87984718126211 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 210.08050109200801, yOfs + 586.03687522046437 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 210.53675698798975, yOfs + 586.63168745407006 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 210.99301288397146, yOfs + 586.96522243684171 ) );
+            points.push_back( Pt::Gfx::PointF( xOfs + 211.44926877995317, yOfs + 587.33749410772862 ) );
             return points;
         }
 
@@ -818,14 +818,19 @@ class TestView : public Pt::Hmi::Control
                 if(y < minY) minY = y;
             }
 
+            //fprintf(stderr, "###\n");
             for(size_t i = 0; i < points.size(); ++i)
             {
+                //fprintf(stderr, "            points.push_back( Pt::Gfx::PointF( x + %17.14f * scale, y + %16.14f * scale ) );\n", points[i].x() - minX, points[i].y() - minY);
                 const double x = (points[i].x() - minX) * scale;
                 const double y = (points[i].y() - minY) * scale;
                 points[i].set( x + minX + xOfs, y + minY + yOfs );
             }
         }
 };
+
+
+#include "PainterDemo_Benchmark.cpp"
 
 
 class PainterDemoWindow : public Pt::Hmi::Window
@@ -844,7 +849,8 @@ class PainterDemoWindow : public Pt::Hmi::Window
             _tabView.setCurrent(2);
 
             _tabView.addTab(_testView, "Test");
-            _tabView.setCurrent(3);
+            _tabView.addTab(_benchmarkView, "Benchmark");
+            _tabView.setCurrent(4);
 
             this->setContent(&_tabView);
         }
@@ -863,6 +869,7 @@ class PainterDemoWindow : public Pt::Hmi::Window
         ShapesView       _shapesView;
 
         TestView         _testView;
+        BenchmarkView    _benchmarkView;
 };
 
 
