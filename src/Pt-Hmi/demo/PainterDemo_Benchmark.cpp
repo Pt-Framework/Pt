@@ -35,6 +35,15 @@ class BenchmarkView : public Pt::Hmi::Control
                 if(ip2.isAntiAliasing()) fprintf(stderr, "IP2 WITH AA\n\n");
                 else                     fprintf(stderr, "IP2 WITHOUT AA\n\n");
 
+#if 0
+                for(size_t i = 0; i < result1.size(); ++i) {
+                    fprintf(stderr, "%s\n", result1[i].c_str());
+                }
+                for(size_t i = 0; i < result2.size(); ++i) {
+                    fprintf(stderr, "%s\n", result2[i].c_str());
+                }
+                fprintf(stderr, "\n");
+#else
                 for(size_t i = 0; i < result1.size(); ++i) {
                     std::string r1 = result1[i];
                     std::string r2 = result2[i];
@@ -67,6 +76,7 @@ class BenchmarkView : public Pt::Hmi::Control
                     if(!r4.empty()) fprintf(stderr, "%s\n", r4.c_str());
                                     fprintf(stderr, "\n");
                 }
+#endif
             }
 
             ip1.setBrush(background);
