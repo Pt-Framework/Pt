@@ -41,24 +41,21 @@ class BenchmarkView : public Pt::Hmi::Control
                     std::string r3;
                     std::string r4;
                     if(r1[0] == 0 || r2[0] == 0) continue;
-                    if(r1[r1.length() - 1] == 'A') {
+                    if(r1[r1.length() - 1] == 'A' && r2[r2.length() - 1] == 'A') {
                         const char idx = r1[r1.length() - 2];
                         for(size_t j = 0; j < result1.size(); ++j) {
                             r3 = result1[j];
-                            if(r3[r3.length() - 1] == 'B' && r3[r3.length() - 2] == idx) {
+                            r4 = result2[j];
+                            if(r3[r3.length() - 1] == 'B' && r3[r3.length() - 2] == idx &&
+                               r4[r4.length() - 1] == 'B' && r4[r4.length() - 2] == idx
+                            ) {
                                 result1[i][0] = 0;
                                 result1[j][0] = 0;
-                                r1[r1.length() - 3] = 0;
-                                r3[r3.length() - 3] = 0;
-                                break;
-                            }
-                        }
-                        for(size_t j = 0; j < result2.size(); ++j) {
-                            r4 = result2[j];
-                            if(r4[r4.length() - 1] == 'B' && r4[r4.length() - 2] == idx) {
                                 result2[i][0] = 0;
                                 result2[j][0] = 0;
+                                r1[r1.length() - 3] = 0;
                                 r2[r2.length() - 3] = 0;
+                                r3[r3.length() - 3] = 0;
                                 r4[r4.length() - 3] = 0;
                                 break;
                             }
