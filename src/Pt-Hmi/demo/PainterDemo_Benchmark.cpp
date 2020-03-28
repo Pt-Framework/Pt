@@ -36,27 +36,39 @@ class BenchmarkView : public Pt::Hmi::Control
                 else                     fprintf(stderr, "IP2 WITHOUT AA\n\n");
 
                 for(size_t i = 0; i < result1.size(); ++i) {
-                    std::string s1 = result1[i];
-                    std::string s2 = result2[i];
-                    if(s1[s1.length() - 1] == 'A') {
-                        const char idx = s1[s1.length() - 2];
+                    std::string r1 = result1[i];
+                    std::string r2 = result2[i];
+                    std::string r3;
+                    std::string r4;
+                    if(r1[0] == 0 || r2[0] == 0) continue;
+                    if(r1[r1.length() - 1] == 'A') {
+                        const char idx = r1[r1.length() - 2];
+                        for(size_t j = 0; j < result1.size(); ++j) {
+                            r3 = result1[j];
+                            if(r3[r3.length() - 1] == 'B' && r3[r3.length() - 2] == idx) {
+                                result1[i][0] = 0;
+                                result1[j][0] = 0;
+                                r1[r1.length() - 3] = 0;
+                                r3[r3.length() - 3] = 0;
+                                break;
+                            }
+                        }
                         for(size_t j = 0; j < result2.size(); ++j) {
-                            std::string s3 = result2[j];
-                            if(s3[s3.length() - 1] == 'B' && s3[s3.length() - 2] == idx) {
-                                s1[s1.length() - 3] = 0;
-                                s2[s2.length() - 3] = 0;
-                                s3[s3.length() - 3] = 0;
-                                fprintf(stderr, "%s\n", s1.c_str());
-                                fprintf(stderr, "%s\n", s2.c_str());
-                                fprintf(stderr, "%s\n", s3.c_str());
+                            r4 = result2[j];
+                            if(r4[r4.length() - 1] == 'B' && r4[r4.length() - 2] == idx) {
+                                result2[i][0] = 0;
+                                result2[j][0] = 0;
+                                r2[r2.length() - 3] = 0;
+                                r4[r4.length() - 3] = 0;
+                                break;
                             }
                         }
                     }
-                    else {
-                        fprintf(stderr, "%s\n", s1.c_str());
-                        fprintf(stderr, "%s\n", s2.c_str());
-                    }
-                    fprintf(stderr, "\n");
+                                    fprintf(stderr, "%s\n", r1.c_str());
+                    if(!r3.empty()) fprintf(stderr, "%s\n", r3.c_str());
+                                    fprintf(stderr, "%s\n", r2.c_str());
+                    if(!r4.empty()) fprintf(stderr, "%s\n", r4.c_str());
+                                    fprintf(stderr, "\n");
                 }
             }
 
@@ -95,33 +107,36 @@ class BenchmarkView : public Pt::Hmi::Control
             double scale = 1.0;
             std::vector<Pt::Gfx::PointF> shape;
 
-            // ImagePainter2
-            ImagePainter2* ip2 = 0;
+            // Get ImagePainter2
+            ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
             // Benchmark loop count
             const int loopCount = 250;
 
-#define BENCHMARK_CODE(DESC, INFO, SIZE, SCALE)                              \
-                do {                                                         \
-                    char buff[128];                                          \
-                    Pt::int64_t sum = 0;                                     \
-                    for(int i = 0; i < loopCount; ++i) {                     \
-                        Pt::System::Clock clock;                             \
-                        if(ip2) {                                            \
-                            clock.start();                                   \
-                            ip2->fillPolygon_NR( &shape[0], shape.size() );  \
-                            sum += clock.stop().toUSecs();                   \
-                        }                                                    \
-                        else {                                               \
-                            clock.start();                                   \
-                            painter.drawPolyline( &shape[0], shape.size() ); \
-                            sum += clock.stop().toUSecs();                   \
-                        }                                                    \
-                    }                                                        \
-                    sum /= loopCount;                                        \
-                    sprintf(buff, "%s [%s] [SCALE %4.1f SIZE %d] %3zd %s",   \
-                                   text, DESC, SCALE, SIZE, sum, INFO);      \
-                    brBuff->push_back(buff);                                 \
+#define BENCHMARK_CODE(DESC, INFO, SIZE, SCALE)                                 \
+                do {                                                            \
+                    char buff[128];                                             \
+                    Pt::int64_t sum = 0;                                        \
+                    for(int i = 0; i < loopCount; ++i) {                        \
+                        Pt::System::Clock clock;                                \
+                        if(ip2) {                                               \
+                            clock.start();                                      \
+                            if(ip2)                                             \
+                                ip2->fillPolygon_NR( &shape[0], shape.size() ); \
+                            else                                                \
+                                painter.fillPolygon( &shape[0], shape.size() ); \
+                            sum += clock.stop().toUSecs();                      \
+                        }                                                       \
+                        else {                                                  \
+                            clock.start();                                      \
+                            painter.drawPolyline( &shape[0], shape.size() );    \
+                            sum += clock.stop().toUSecs();                      \
+                        }                                                       \
+                    }                                                           \
+                    sum /= loopCount;                                           \
+                    sprintf(buff, "%s [%s] [SCALE %4.1f SIZE %d] %3zd %s",      \
+                                   text, DESC, SCALE, SIZE, sum, INFO);         \
+                    brBuff->push_back(buff);                                    \
                 } while(false)
 
             // Polyline simple - scale 10x
@@ -188,42 +203,42 @@ class BenchmarkView : public Pt::Hmi::Control
             y += 15;
             x -= 50;
 
-            // Get ImagePainter2
-            ip2 = dynamic_cast<ImagePainter2*>(&painter);
-            if(!ip2) return;
-
             // Polygon - simple
             if(brBuff) {
-                ip2->setBrush(redb);
+                painter.setBrush(redb);
                 shape = makePolygonSimple_S10_P2_RC_RJ(0, 0); BENCHMARK_CODE("Polygon  Simple ", "2B", 2, 10.0);
                 shape = makePolygonSimple_S10_P9_RC_RJ(0, 0); BENCHMARK_CODE("Polygon  Simple ", "9B", 9, 10.0);
             }
             else {
                 shape = makePolygonSimple_S10_P2_RC_RJ(x, y);
-                ip2->setBrush(redb);
-                ip2->fillPolygon_NR( &shape[0], shape.size() );
+                painter.setBrush(redb);
+                if(ip2) ip2->fillPolygon_NR( &shape[0], shape.size() );
+                else    painter.fillPolygon( &shape[0], shape.size() );
                 y += 35;
                 shape = makePolygonSimple_S10_P9_RC_RJ(x, y);
-                ip2->setBrush(redb);
-                ip2->fillPolygon_NR( &shape[0], shape.size() );
+                painter.setBrush(redb);
+                if(ip2) ip2->fillPolygon_NR( &shape[0], shape.size() );
+                else    painter.fillPolygon( &shape[0], shape.size() );
                 y += 35;
             }
             y += 15;
 
             // Polygon - complex
             if(brBuff) {
-                ip2->setBrush(redb);
+                painter.setBrush(redb);
                 shape = makePolygonComplex_S1_P2_RC_NJ(0, 0); BENCHMARK_CODE("Polygon  Complex", "1B", 2, 1.0);
                 shape = makePolygonComplex_S5_P2_RC_NJ(0, 0); BENCHMARK_CODE("Polygon  Complex", "5B", 2, 5.0);
             }
             else {
                 shape = makePolygonComplex_S1_P2_RC_NJ(x, y);
-                ip2->setBrush(redb);
-                ip2->fillPolygon_NR( &shape[0], shape.size() );
+                painter.setBrush(redb);
+                if(ip2) ip2->fillPolygon_NR( &shape[0], shape.size() );
+                else    painter.fillPolygon( &shape[0], shape.size() );
                 x += 50;
                 shape = makePolygonComplex_S5_P2_RC_NJ(x, y);
-                ip2->setBrush(redb);
-                ip2->fillPolygon_NR( &shape[0], shape.size() );
+                painter.setBrush(redb);
+                if(ip2) ip2->fillPolygon_NR( &shape[0], shape.size() );
+                else    painter.fillPolygon( &shape[0], shape.size() );
             }
             x -= 50;
         }
