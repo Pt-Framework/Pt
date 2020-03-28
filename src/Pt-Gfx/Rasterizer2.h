@@ -149,6 +149,8 @@ class Rasterizer2
 
         void fillPolygon(const PointF* ps, const size_t pointCount);
 
+        void fillPolygon_NR(const PointF* ps, const size_t pointCount);
+
         void fillPolygons(const std::vector<Polygon>& polygons);
 
         void fillRect(const RectF& rect);

@@ -82,6 +82,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void fillPolygon(const PointF* points, const size_t pointCount);
 
+        virtual void fillPolygon_NR(const PointF* points, const size_t pointCount);
+
         virtual void drawText(const PointF& to, const Pt::String& text);
 
         virtual void drawText(const PointF& to, const Pt::String& text, const Transform& t);

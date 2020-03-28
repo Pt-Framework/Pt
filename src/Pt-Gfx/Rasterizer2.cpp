@@ -893,7 +893,6 @@ void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount
     std::vector<Polygon> polygons;
     _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen, true, false);
 
-    
     const bool isSolid  = _pen.isSolid();
   //const bool isClosed = points[0] == points[pointCount - 1];
 
@@ -1269,6 +1268,58 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
     // #@#
+    if( this->isAntiAliasing() )
+    {
+        rasterPolygonXWAA(&polygon[0], polygon.size(),
+                          _brush.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonNoAA(&polygon[0], polygon.size(),
+                          _brush.color(), minX, minY, maxX, maxY);
+    }
+}
+
+
+void Rasterizer2::fillPolygon_NR(const PointF* ps, std::size_t n)
+{
+    // Clip the polygon
+    std::vector<PointF> polygon(n);
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        const double x = ps[i].x();
+        const double y = ps[i].y();
+        polygon[i].set(x, y);
+    }
+
+    BasicClipShape<double>::clipPolygon(polygon, _currentClip);
+
+    // Find the minimum and maximum coordinates
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+    for(size_t j = 0; j < polygon.size(); ++j)
+    {
+        const double x1 = floor( polygon[j].x() );
+        const double x2 = ceil ( polygon[j].x() );
+        if(x1 < minX) minX = x1;
+        if(x2 < minX) minX = x2;
+        if(x1 > maxX) maxX = x1;
+        if(x2 > maxX) maxX = x2;
+
+        const double y1 = floor( polygon[j].y() );
+        const double y2 = ceil ( polygon[j].y() );
+        if(y1 < minY) minY = y1;
+        if(y2 < minY) minY = y2;
+        if(y1 > maxY) maxY = y1;
+        if(y2 > maxY) maxY = y2;
+    }
+
+    if(_isGradient)
+        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+
     if( this->isAntiAliasing() )
     {
         rasterPolygonXWAA(&polygon[0], polygon.size(),

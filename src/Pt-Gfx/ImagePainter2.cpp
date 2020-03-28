@@ -257,6 +257,12 @@ void ImagePainter2::fillPolygon(const PointF* points, const size_t pointCount)
 }
 
 
+void ImagePainter2::fillPolygon_NR(const PointF* points, const size_t pointCount)
+{
+    _rasterizer->fillPolygon_NR(points, pointCount);
+}
+
+
 void ImagePainter2::fillRect( const RectF& rect )
 {
     _rasterizer->fillRect(rect);

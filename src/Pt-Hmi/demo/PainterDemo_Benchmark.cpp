@@ -53,11 +53,14 @@ class BenchmarkView : public Pt::Hmi::Control
             painter.setFont ( Font("", 12) );
             painter.drawText( PointF(10, 20), text );
 
-            Pt::Gfx::Pen   green1( Color::fromRgb8(0, 255, 0), 1, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
-            Pt::Gfx::Pen   green2( Color::fromRgb8(0, 255, 0), 3, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
-            Pt::Gfx::Pen   green9( Color::fromRgb8(0, 255, 0), 9, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
+            Pt::Gfx::Pen   green1( Color::fromRgb8(  0, 255,   0), 1, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
+            Pt::Gfx::Pen   green2( Color::fromRgb8(  0, 255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
+            Pt::Gfx::Pen   green9( Color::fromRgb8(  0, 255,   0), 9, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
 
-            Pt::Gfx::Brush redb  ( Color::fromRgb8(255, 0, 0) );
+            Pt::Gfx::Pen   cyan1 ( Color::fromRgb8(  0, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen   cyan2 ( Color::fromRgb8(  0, 255, 255), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+
+            Pt::Gfx::Brush redb  ( Color::fromRgb8(255,   0,   0) );
 
             int    x     = 10;
             int    y     = 30;
@@ -90,11 +93,11 @@ class BenchmarkView : public Pt::Hmi::Control
             }
             else {
                 shape = makeLineComplex(x, y, scale);
-                painter.setPen(green1);
+                painter.setPen(cyan1);
                 painter.drawPolyline( &shape[0], shape.size() );
                 y += 35;
                 shape = makeLineComplex(x, y, scale);
-                painter.setPen(green2);
+                painter.setPen(cyan2);
                 painter.drawPolyline( &shape[0], shape.size() );
                 y += 35;
             }
@@ -107,16 +110,49 @@ class BenchmarkView : public Pt::Hmi::Control
             }
             else {
                 shape = makeLineComplex(x, y, scale);
-                painter.setPen(green1);
+                painter.setPen(cyan1);
                 painter.drawPolyline( &shape[0], shape.size() );
                 y += 35;
                 shape = makeLineComplex(x, y, scale);
-                painter.setPen(green2);
+                painter.setPen(cyan2);
                 painter.drawPolyline( &shape[0], shape.size() );
                 y += 35;
             }
+            y += 15;
             x -= 50;
 
+            // Get ImagePainter2
+            ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
+            if(!ip2) return;
+
+            // Polygon - simple
+            if(benchmark) {
+            }
+            else {
+                shape = makePolygonSimple_S10_P2_RC_RJ(x, y);
+                ip2->setBrush(redb);
+                ip2->fillPolygon_NR( &shape[0], shape.size() );
+                y += 35;
+                shape = makePolygonSimple_S10_P9_RC_RJ(x, y);
+                ip2->setBrush(redb);
+                ip2->fillPolygon_NR( &shape[0], shape.size() );
+                y += 35;
+            }
+            y += 15;
+
+            // Polygon - complex
+            if(benchmark) {
+            }
+            else {
+                shape = makePolygonComplex_S1_P2_RC_NJ(x, y);
+                ip2->setBrush(redb);
+                ip2->fillPolygon_NR( &shape[0], shape.size() );
+                x += 50;
+                shape = makePolygonComplex_S5_P2_RC_NJ(x, y);
+                ip2->setBrush(redb);
+                ip2->fillPolygon_NR( &shape[0], shape.size() );
+            }
+            x -= 50;
         }
 
         std::vector<Pt::Gfx::PointF> makeLineSimple(double x, double y, double scale)
@@ -158,6 +194,229 @@ class BenchmarkView : public Pt::Hmi::Control
             points.push_back( Pt::Gfx::PointF( x + 10.49388560757967 * scale, y + 6.45130540747118 * scale ) );
             points.push_back( Pt::Gfx::PointF( x + 10.95014150356138 * scale, y + 6.78484039024283 * scale ) );
             points.push_back( Pt::Gfx::PointF( x + 11.40639739954310 * scale, y + 7.15711206112974 * scale ) );
+            return points;
+        }
+
+        std::vector<Pt::Gfx::PointF> makePolygonSimple_S10_P2_RC_RJ(double x, double y)
+        {
+            std::vector<Pt::Gfx::PointF> points;
+            points.push_back( Pt::Gfx::PointF( x +   1.77263683080673, y +  0.08085495233536 ) );
+            points.push_back( Pt::Gfx::PointF( x +   0.00000000000000, y +  0.40912103652954 ) );
+            points.push_back( Pt::Gfx::PointF( x +   0.98479825258255, y +  1.91914504766464 ) );
+            points.push_back( Pt::Gfx::PointF( x +  71.37871754169464, y + 32.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x + 160.74607288837433, y +  2.26439464092255 ) );
+            points.push_back( Pt::Gfx::PointF( x + 170.43003284931183, y + 31.31622695922852 ) );
+            points.push_back( Pt::Gfx::PointF( x + 171.85305225849152, y + 32.42302513122559 ) );
+            points.push_back( Pt::Gfx::PointF( x + 172.32740223407745, y + 30.68377304077148 ) );
+            points.push_back( Pt::Gfx::PointF( x + 162.37871754169464, y +  1.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x + 162.26760303974152, y +  0.44444447755814 ) );
+            points.push_back( Pt::Gfx::PointF( x + 161.93425953388214, y +  0.11111116409302 ) );
+            points.push_back( Pt::Gfx::PointF( x + 161.37871754169464, y +  0.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  71.42318165302277, y + 29.93108749389648 ) );
+            return points;
+        }
+
+        std::vector<Pt::Gfx::PointF> makePolygonSimple_S10_P9_RC_RJ(double x, double y)
+        {
+            std::vector<Pt::Gfx::PointF> points;
+            points.push_back( Pt::Gfx::PointF( x +   5.42222225666046, y +  0.50000023841858 ) );
+            points.push_back( Pt::Gfx::PointF( x +   1.06666684150696, y +  1.54444503784180 ) );
+            points.push_back( Pt::Gfx::PointF( x +   0.00000000000000, y +  4.01111161708832 ) );
+            points.push_back( Pt::Gfx::PointF( x +   2.22222220897675, y +  7.90000033378601 ) );
+            points.push_back( Pt::Gfx::PointF( x +  71.82222223281860, y + 38.20000028610229 ) );
+            points.push_back( Pt::Gfx::PointF( x +  74.82222223281860, y + 38.20000028610229 ) );
+            points.push_back( Pt::Gfx::PointF( x + 161.29196405410767, y +  9.26470613479614 ) );
+            points.push_back( Pt::Gfx::PointF( x + 170.02221918106079, y + 35.50000143051147 ) );
+            points.push_back( Pt::Gfx::PointF( x + 173.66665887832642, y + 38.01111173629761 ) );
+            points.push_back( Pt::Gfx::PointF( x + 176.19999933242798, y + 37.14444684982300 ) );
+            points.push_back( Pt::Gfx::PointF( x + 177.62222528457642, y + 32.90000104904175 ) );
+            points.push_back( Pt::Gfx::PointF( x + 167.82222223281860, y +  3.20000028610229 ) );
+            points.push_back( Pt::Gfx::PointF( x + 167.30223321914673, y +  1.80000042915344 ) );
+            points.push_back( Pt::Gfx::PointF( x + 166.54222345352173, y +  0.80000066757202 ) );
+            points.push_back( Pt::Gfx::PointF( x + 165.54223871231079, y +  0.20000028610229 ) );
+            points.push_back( Pt::Gfx::PointF( x + 164.30223321914673, y +  0.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x + 162.82222223281860, y +  0.20000028610229 ) );
+            points.push_back( Pt::Gfx::PointF( x +  74.00096368789673, y + 29.92405462265015 ) );
+            return points;
+        }
+
+        std::vector<Pt::Gfx::PointF> makePolygonComplex_S1_P2_RC_NJ(double x, double y)
+        {
+            std::vector<Pt::Gfx::PointF> points;
+            points.push_back( Pt::Gfx::PointF( x +   1.50000000000000, y +  6.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   0.00000000000000, y +  7.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   1.50000000000000, y +  8.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   2.08578634262085, y +  8.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   2.79289317131042, y +  8.70710659027100 ) );
+            points.push_back( Pt::Gfx::PointF( x +   3.50000000000000, y +  8.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   4.20710682868958, y +  8.70710659027100 ) );
+            points.push_back( Pt::Gfx::PointF( x +   4.91421318054199, y +  8.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   5.50000000000000, y +  8.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   5.50000000000000, y +  7.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   6.50000000000000, y +  7.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   6.50000000000000, y +  6.41421127319336 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.20710659027100, y +  5.70710659027100 ) );
+            points.push_back( Pt::Gfx::PointF( x +   6.50000000000000, y +  5.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.50000000000000, y +  5.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.50000000000000, y +  4.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.50000000000000, y +  3.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.50000000000000, y +  3.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.50000000000000, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   8.50000000000000, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   8.50000000000000, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   8.50000000000000, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   8.50000000000000, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   8.50000000000000, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   9.50000000000000, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   8.60557270050049, y +  2.44721364974976 ) );
+            points.push_back( Pt::Gfx::PointF( x +   9.50000000000000, y +  4.23606872558594 ) );
+            points.push_back( Pt::Gfx::PointF( x +   9.50000000000000, y +  5.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.50000000000000, y +  5.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   9.79289340972900, y +  5.70710659027100 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.50000000000000, y +  6.41421508789062 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.50000000000000, y +  7.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  11.50000000000000, y +  7.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.79289340972900, y +  7.70710659027100 ) );
+            points.push_back( Pt::Gfx::PointF( x +  11.79289340972900, y +  8.70710659027100 ) );
+            points.push_back( Pt::Gfx::PointF( x +  13.56066036224365, y +  9.06066036224365 ) );
+            points.push_back( Pt::Gfx::PointF( x +  13.20710659027100, y +  7.29289340972900 ) );
+            points.push_back( Pt::Gfx::PointF( x +  12.50000000000000, y +  6.58578872680664 ) );
+            points.push_back( Pt::Gfx::PointF( x +  12.50000000000000, y +  6.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  11.50000000000000, y +  6.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  12.20710659027100, y +  5.29289340972900 ) );
+            points.push_back( Pt::Gfx::PointF( x +  11.50000000000000, y +  4.58578681945801 ) );
+            points.push_back( Pt::Gfx::PointF( x +  11.50000000000000, y +  4.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.50000000000000, y +  4.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  11.39442729949951, y +  3.55278635025024 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.50000000000000, y +  1.76393318176270 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.50000000000000, y +  1.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   9.50000000000000, y +  1.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   9.50000000000000, y +  0.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   8.50000000000000, y +  0.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.50000000000000, y +  0.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.50000000000000, y +  1.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   6.50000000000000, y +  1.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   6.50000000000000, y +  1.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   6.50000000000000, y +  1.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   6.50000000000000, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   5.50000000000000, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   5.50000000000000, y +  4.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   5.50000000000000, y +  4.58578681945801 ) );
+            points.push_back( Pt::Gfx::PointF( x +   4.79289317131042, y +  5.29289340972900 ) );
+            points.push_back( Pt::Gfx::PointF( x +   5.50000000000000, y +  6.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   4.50000000000000, y +  6.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   4.50000000000000, y +  6.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   4.50000000000000, y +  6.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   4.50000000000000, y +  7.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   3.79289317131042, y +  6.29289340972900 ) );
+            points.push_back( Pt::Gfx::PointF( x +   3.49999976158142, y +  6.58578681945801 ) );
+            points.push_back( Pt::Gfx::PointF( x +   3.20710682868958, y +  6.29289340972900 ) );
+            points.push_back( Pt::Gfx::PointF( x +   2.50000000000000, y +  7.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   2.50000000000000, y +  6.00000000000000 ) );
+            return points;
+        }
+
+        std::vector<Pt::Gfx::PointF> makePolygonComplex_S5_P2_RC_NJ(double x, double y)
+        {
+            std::vector<Pt::Gfx::PointF> points;
+            points.push_back( Pt::Gfx::PointF( x +   1.76776689291000, y + 32.29289245605469 ) );
+            points.push_back( Pt::Gfx::PointF( x +   0.00000000000000, y + 31.93934059143066 ) );
+            points.push_back( Pt::Gfx::PointF( x +   0.35355335474014, y + 33.70710754394531 ) );
+            points.push_back( Pt::Gfx::PointF( x +   2.35355329513550, y + 35.70710754394531 ) );
+            points.push_back( Pt::Gfx::PointF( x +   3.06066012382507, y + 35.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   3.06066012382507, y + 36.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   5.06066012382507, y + 36.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.06066012382507, y + 36.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   9.82460665702820, y + 36.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  11.61344695091248, y + 36.89442825317383 ) );
+            points.push_back( Pt::Gfx::PointF( x +  12.06066012382507, y + 36.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  12.06066012382507, y + 37.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  14.06066012382507, y + 37.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  14.06066012382507, y + 36.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  14.50787329673767, y + 36.89442825317383 ) );
+            points.push_back( Pt::Gfx::PointF( x +  16.44429564476013, y + 35.92621231079102 ) );
+            points.push_back( Pt::Gfx::PointF( x +  19.37688708305359, y + 34.94868469238281 ) );
+            points.push_back( Pt::Gfx::PointF( x +  19.06066012382507, y + 34.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  19.89271044731140, y + 34.55469894409180 ) );
+            points.push_back( Pt::Gfx::PointF( x +  21.89271044731140, y + 31.55470085144043 ) );
+            points.push_back( Pt::Gfx::PointF( x +  21.06066012382507, y + 31.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  21.95508646965027, y + 31.44721412658691 ) );
+            points.push_back( Pt::Gfx::PointF( x +  23.95508646965027, y + 27.44721412658691 ) );
+            points.push_back( Pt::Gfx::PointF( x +  23.06066012382507, y + 27.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  23.95508646965027, y + 27.44721412658691 ) );
+            points.push_back( Pt::Gfx::PointF( x +  26.95508646965027, y + 21.44721412658691 ) );
+            points.push_back( Pt::Gfx::PointF( x +  26.06066012382507, y + 21.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  26.98913645744324, y + 21.37139129638672 ) );
+            points.push_back( Pt::Gfx::PointF( x +  28.98913645744324, y + 16.37139034271240 ) );
+            points.push_back( Pt::Gfx::PointF( x +  28.06066012382507, y + 16.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  29.02218317985535, y + 16.27472114562988 ) );
+            points.push_back( Pt::Gfx::PointF( x +  30.97929644584656, y +  9.42481899261475 ) );
+            points.push_back( Pt::Gfx::PointF( x +  32.70239329338074, y +  6.84018230438232 ) );
+            points.push_back( Pt::Gfx::PointF( x +  35.37688708305359, y +  5.94868326187134 ) );
+            points.push_back( Pt::Gfx::PointF( x +  35.06066012382507, y +  5.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  35.89271044731140, y +  5.55470037460327 ) );
+            points.push_back( Pt::Gfx::PointF( x +  37.74540209770203, y +  2.77566123008728 ) );
+            points.push_back( Pt::Gfx::PointF( x +  39.29673266410828, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  41.38362765312195, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  43.09808611869812, y +  6.28613948822021 ) );
+            points.push_back( Pt::Gfx::PointF( x +  45.08008074760437, y + 16.19611644744873 ) );
+            points.push_back( Pt::Gfx::PointF( x +  46.06066012382507, y + 16.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  45.09051775932312, y + 16.24253559112549 ) );
+            points.push_back( Pt::Gfx::PointF( x +  47.09051775932312, y + 24.24253654479980 ) );
+            points.push_back( Pt::Gfx::PointF( x +  48.06066012382507, y + 24.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  47.16623187065125, y + 24.44721412658691 ) );
+            points.push_back( Pt::Gfx::PointF( x +  50.16623187065125, y + 30.44721412658691 ) );
+            points.push_back( Pt::Gfx::PointF( x +  51.06066012382507, y + 30.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  50.22860980033875, y + 30.55470085144043 ) );
+            points.push_back( Pt::Gfx::PointF( x +  52.22860980033875, y + 33.55469894409180 ) );
+            points.push_back( Pt::Gfx::PointF( x +  53.06066012382507, y + 33.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  52.61344790458679, y + 33.89442825317383 ) );
+            points.push_back( Pt::Gfx::PointF( x +  54.55773043632507, y + 34.86657714843750 ) );
+            points.push_back( Pt::Gfx::PointF( x +  57.50596117973328, y + 36.83205032348633 ) );
+            points.push_back( Pt::Gfx::PointF( x +  59.30873751640320, y + 36.83205032348633 ) );
+            points.push_back( Pt::Gfx::PointF( x +  58.61535906791687, y + 35.16794967651367 ) );
+            points.push_back( Pt::Gfx::PointF( x +  55.61535906791687, y + 33.16794967651367 ) );
+            points.push_back( Pt::Gfx::PointF( x +  55.06066012382507, y + 34.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  55.50787234306335, y + 33.10557174682617 ) );
+            points.push_back( Pt::Gfx::PointF( x +  53.74540591239929, y + 32.22434425354004 ) );
+            points.push_back( Pt::Gfx::PointF( x +  51.92726397514343, y + 29.49711227416992 ) );
+            points.push_back( Pt::Gfx::PointF( x +  49.00416064262390, y + 23.65092658996582 ) );
+            points.push_back( Pt::Gfx::PointF( x +  47.03655886650085, y + 15.78051090240479 ) );
+            points.push_back( Pt::Gfx::PointF( x +  45.04123950004578, y +  5.80388402938843 ) );
+            points.push_back( Pt::Gfx::PointF( x +  44.06066012382507, y +  6.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  44.98913836479187, y +  5.62860918045044 ) );
+            points.push_back( Pt::Gfx::PointF( x +  42.98913836479187, y +  0.62860932946205 ) );
+            points.push_back( Pt::Gfx::PointF( x +  42.06066012382507, y +  1.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  42.06066012382507, y +  0.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  39.06066012382507, y +  0.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  39.06066012382507, y +  1.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  38.61344790458679, y +  0.10557281970978 ) );
+            points.push_back( Pt::Gfx::PointF( x +  36.61344790458679, y +  1.10557281970978 ) );
+            points.push_back( Pt::Gfx::PointF( x +  37.06066012382507, y +  2.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  36.22860980033875, y +  1.44529980421066 ) );
+            points.push_back( Pt::Gfx::PointF( x +  34.41893267631531, y +  4.15981960296631 ) );
+            points.push_back( Pt::Gfx::PointF( x +  31.74443316459656, y +  5.05131673812866 ) );
+            points.push_back( Pt::Gfx::PointF( x +  32.06066012382507, y +  6.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  31.22860980033875, y +  5.44529962539673 ) );
+            points.push_back( Pt::Gfx::PointF( x +  29.22860980033875, y +  8.44529962539673 ) );
+            points.push_back( Pt::Gfx::PointF( x +  30.06066012382507, y +  9.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  29.09913706779480, y +  8.72527885437012 ) );
+            points.push_back( Pt::Gfx::PointF( x +  27.11319041252136, y + 15.67609786987305 ) );
+            points.push_back( Pt::Gfx::PointF( x +  25.15500903129578, y + 20.57154655456543 ) );
+            points.push_back( Pt::Gfx::PointF( x +  23.46066164970398, y + 23.40000152587891 ) );
+            points.push_back( Pt::Gfx::PointF( x +  20.19411540031433, y + 30.49704170227051 ) );
+            points.push_back( Pt::Gfx::PointF( x +  18.41893649101257, y + 33.15982055664062 ) );
+            points.push_back( Pt::Gfx::PointF( x +  15.74443221092224, y + 34.05131530761719 ) );
+            points.push_back( Pt::Gfx::PointF( x +  16.06066012382507, y + 35.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  15.61344695091248, y + 34.10557174682617 ) );
+            points.push_back( Pt::Gfx::PointF( x +  13.82457804679871, y + 35.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  12.29674410820007, y + 35.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.50787329673767, y + 34.10557174682617 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.06066012382507, y + 35.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +  10.06066012382507, y + 34.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   7.06066012382507, y + 34.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   5.06066012382507, y + 34.00000000000000 ) );
+            points.push_back( Pt::Gfx::PointF( x +   3.47487330436707, y + 34.00000000000000 ) );
             return points;
         }
 };
