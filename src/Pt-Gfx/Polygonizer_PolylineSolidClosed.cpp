@@ -146,17 +146,15 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
 
     const bool in1 = intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b, penSize);
 
-    /*
+#if 1
     const PointF& ochk1 = oline1b - intersect;
     const PointF& ochk2 = oline2a - intersect;
 
     inLine |= ( fabs(ochk1.x()) <= 0.8f && fabs(ochk1.y()) <= 0.8f ) || // For preventing artifacts
               ( fabs(ochk2.x()) <= 0.8f && fabs(ochk2.y()) <= 0.8f );
-    */
+#endif
 
     // Store the "outside" line's points
-    //Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
-
     Pen::JoinStyle js1 = pen.joinStyle();
          if(!in1                   ) js1 = Pen::NoJoin;
     else if(inSameSegment || inLine) js1 = Pen::MiterJoin;
@@ -178,18 +176,16 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
             break;
         // Miter join
         case Pen::MiterJoin:
-            //if(!in1) return false;
             outer.push_back(intersect);
             break;
         // Round join
         case Pen::RoundJoin:
-            //if(!in1) return false;
             renderQuadraticBezierPoints(
                 outer,
                 lround(oline1b  .x()), lround(oline1b  .y()),
                 lround(intersect.x()), lround(intersect.y()),
                 lround(oline2a  .x()), lround(oline2a  .y()),
-                penSize / 2 + 2
+                penSize / 2/* + 2*/
             );
             break;
         // Invalid join type
@@ -207,17 +203,15 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
     // Intersect the "inside" lines
     const bool in2 = intersectLine(inLine, intersect, iline1a, iline1b, iline2a, iline2b, penSize);
 
-    /*
+#if 1
     const PointF& ichk1 = iline1b - intersect;
     const PointF& ichk2 = iline2a - intersect;
 
     inLine |= ( fabs(ichk1.x()) <= 0.8f && fabs(ichk1.y()) <= 0.8f ) || // For preventing artifacts
               ( fabs(ichk2.x()) <= 0.8f && fabs(ichk2.y()) <= 0.8f );
-    */
+#endif
 
     // Store the "inside" line's points
-    //const Pen::JoinStyle js2 = (inSameSegment || inLine) ? Pen::MiterJoin : pen.joinStyle();
-
     Pen::JoinStyle js2 = pen.joinStyle();
          if(!in2                   ) js2 = Pen::NoJoin;
     else if(inSameSegment || inLine) js2 = Pen::MiterJoin;
@@ -239,18 +233,16 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
             break;
         // Miter join
         case Pen::MiterJoin:
-            //if(!in2) return false;
             inner.push_back(intersect);
             break;
         // Round join
         case Pen::RoundJoin:
-            //if(!in2) return false;
             renderQuadraticBezierPoints(
                 inner,
                 lround(iline1b  .x()), lround(iline1b  .y()),
                 lround(intersect.x()), lround(intersect.y()),
                 lround(iline2a  .x()), lround(iline2a  .y()),
-                penSize / 2 + 2
+                penSize / 2/* + 2*/
             );
             break;
         // Invalid join type

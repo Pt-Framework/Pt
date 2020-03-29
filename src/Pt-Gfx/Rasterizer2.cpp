@@ -839,9 +839,9 @@ void Rasterizer2::drawPolyline(const PointF* ps, size_t n)
     }
 
     if(_pen.size() == 1)
-      drawNarrowPolyline( &polygon[0], polygon.size() );
+       drawNarrowPolyline( &polygon[0], polygon.size() );
     else
-      drawWidePolyline( &polygon[0], polygon.size() );
+       drawWidePolyline( &polygon[0], polygon.size() );
 }
 
 

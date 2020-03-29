@@ -1248,6 +1248,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     // TODO: Does the other XWAA implementation will benefit from this more conservative apparoach?
     //       (shall they be converted too?). IMHO: they seems to work fine, so nope ;-)
 
+    // TODO: Visual (brightness) artifact in SourceOver mode!
+
     // Get the input mask's coordinate
     float mx[4];
     float my[4];

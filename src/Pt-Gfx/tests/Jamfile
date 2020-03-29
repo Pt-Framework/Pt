@@ -20,7 +20,7 @@ Main ImagePainterTest : ImagePainterTest.cpp ;
 LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-System ;
 MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
-# Aloy's personal tester flag
+# Aloysius' personal tester flag
 #WITH_EXPERIMENTAL_GFX = yes ;
 
 if $(WITH_EXPERIMENTAL_GFX)
