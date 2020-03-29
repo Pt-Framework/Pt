@@ -32,6 +32,9 @@
 #include "Polygonizer.h"
 
 
+//#define DEBUG_INTERSECT_LINE
+
+
 namespace Pt {
 
 namespace Gfx {

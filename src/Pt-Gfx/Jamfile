@@ -52,6 +52,17 @@ PT_GFX_NEW_RASTERIZER_FILES = ImageOperation2_Scale32Bpp.cpp
                               Rasterizer2_Bezier.cpp
                               Rasterizer2_Arc.cpp
                               Rasterizer2_Ellipse.cpp
+                              Path.cpp
+                              Polygonizer.cpp
+                              Polygonizer_Rect.cpp
+                              Polygonizer_Ellipse.cpp
+                              Polygonizer_Arc.cpp
+                              Polygonizer_Polyline.cpp
+                              Polygonizer_PolylineSolidOpen.cpp
+                              Polygonizer_PolylineSolidClosed.cpp
+                              Polygonizer_PolylineDashed.cpp
+                              Polygonizer_Collision.cpp
+                              Polygonizer_Cleanup.cpp
                               clipper_aj$(SLASH)clipper.cpp
                               ;
 
@@ -69,20 +80,9 @@ SharedLibrary Pt-Gfx : Argb32Format.cpp
                        ImagePainter.cpp
                        JpegReader.cpp
                        Painter.cpp
-                       Path.cpp
                        Pen.cpp
                        PngReader.cpp
                        PngWriter.cpp
-                       Polygonizer.cpp
-                       Polygonizer_Rect.cpp
-                       Polygonizer_Ellipse.cpp
-                       Polygonizer_Arc.cpp
-                       Polygonizer_Polyline.cpp
-                       Polygonizer_PolylineSolidOpen.cpp
-                       Polygonizer_PolylineSolidClosed.cpp
-                       Polygonizer_PolylineDashed.cpp
-                       Polygonizer_Collision.cpp
-                       Polygonizer_Cleanup.cpp
                        Rasterizer.cpp
                        Rgb32Format.cpp
                        Rgb16Format.cpp

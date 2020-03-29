@@ -27,53 +27,13 @@
   02110-1301 USA
 */
 
-
 #ifndef PT_GFX_POLYGONIZER_INLINE_H
 #define PT_GFX_POLYGONIZER_INLINE_H
-
-
-//#define DEBUG_INTERSECT_LINE
 
 
 namespace Pt {
 
 namespace Gfx {
-
-
-//
-// Pattern state information structure
-//
-struct PatternState
-{
-    std::vector<Polygon>& dstPolygons;  // Destination vector
-
-    const PointF*         srcPoints;   // Source points
-    size_t                srcCount;    // The number of source points
-
-    float                 cellSize;    // Cell size
-    float                 patSegLen;   // Length of the currently processed "pattern" segment
-
-    size_t                idx1;        // Index to the first point which is currently being processed;
-                                       // the index to the second point is always (idx1 + 1)
-
-    float                 px, py;      // Current interpolation coordinate (in-between the two points)
-    float                 ex, ey;      // Current end coordinate (coordinate of the the second point)
-    float                 uvx, uvy;    // Unit vector from the first point to the second point
-    float                 cvx, cvy;    // Cell vector from the first point to the second point
-    float                 remLen;      // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
-
-    std::vector<PointF>   gather;      // Gathered polygon points
-    float                 gatherLen;   // Length of the gathered points
-
-    PatternState(std::vector<Polygon>& polygons, const PointF* src, size_t pointCount, size_t penSize)
-    : dstPolygons(polygons)
-    , srcPoints(src)
-    , srcCount(pointCount), cellSize(penSize)
-    , idx1(0)
-    , remLen(-1.0f)
-    , gatherLen(0.0f)
-    {}
-};
 
 
 //

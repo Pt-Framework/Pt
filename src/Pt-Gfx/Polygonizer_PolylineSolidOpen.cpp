@@ -40,7 +40,7 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                               const PointF* basePtr, size_t curPCnt,
                                               const Pen& pen, bool cleanUpSelfIntersection, bool forSmoothCurve)
 {
-#ifdef DEBUG_INTERSECT_LINE
+#if 0
     fprintf(stderr, "### CALLING renderSolidOpenWidePolyline() ###\n");
     for (size_t i = 0; i < curPCnt; ++i) {
         fprintf(stderr, "%7.3f, %7.3f\n", (basePtr + i)->x(), (basePtr + i)->y());
