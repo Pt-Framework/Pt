@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2017 Aloysius Indrayanto
+/* Copyright (C) 2017-2020 Aloysius Indrayanto
    Copyright (C) 2017-2017 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
@@ -39,8 +39,10 @@ namespace Pt {
 
 namespace Gfx {
 
+
 class ArcMode;
 struct PatternState;
+
 
 class Polygonizer
 {

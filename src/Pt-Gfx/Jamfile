@@ -74,6 +74,15 @@ SharedLibrary Pt-Gfx : Argb32Format.cpp
                        PngReader.cpp
                        PngWriter.cpp
                        Polygonizer.cpp
+                       Polygonizer_Rect.cpp
+                       Polygonizer_Ellipse.cpp
+                       Polygonizer_Arc.cpp
+                       Polygonizer_Polyline.cpp
+                       Polygonizer_PolylineSolidOpen.cpp
+                       Polygonizer_PolylineSolidClosed.cpp
+                       Polygonizer_PolylineDashed.cpp
+                       Polygonizer_Collision.cpp
+                       Polygonizer_Cleanup.cpp
                        Rasterizer.cpp
                        Rgb32Format.cpp
                        Rgb16Format.cpp
