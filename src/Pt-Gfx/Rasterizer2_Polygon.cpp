@@ -790,14 +790,13 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             }
 
             // Draw the scanline
-#if 1
+            rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+#if 0
         if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
             std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                   << "RP XWAA " << (minX + (from - minX)) << ", " << (minY + y - minY) << " LEN " << ((to - minX) - (from - minX) + 1) << std::endl;
         }
 #endif
-
-            rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
         }
     }
 
@@ -1263,6 +1262,16 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     float lx[4];
     float ly[4];
 
+            /* Update the output mask's coordinates * /                                \
+            if(swapDir) {                                                              \
+                lx[0] = lx[1]; lx[1] = X;                                              \
+                ly[0] = ly[1]; ly[1] = Y;                                              \
+            }                                                                          \
+            else {                                                                     \
+                lx[2] = lx[3]; lx[3] = X;                                              \
+                ly[2] = ly[3]; ly[3] = Y;                                              \
+            }*/                                                                        \
+
     // A helper macro to fill pixel
     #define  XW_FILL_PIXEL(X, Y, A)                                                    \
         do {                                                                           \
@@ -1278,15 +1287,6 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                 }                                                                      \
             }                                                                          \
             if(skipDrawing || !(A)) break;                                             \
-            /* Update the output mask's coordinates * /                                \
-            if(swapDir) {                                                              \
-                lx[0] = lx[1]; lx[1] = X;                                              \
-                ly[0] = ly[1]; ly[1] = Y;                                              \
-            }                                                                          \
-            else {                                                                     \
-                lx[2] = lx[3]; lx[3] = X;                                              \
-                ly[2] = ly[3]; ly[3] = Y;                                              \
-            }*/                                                                        \
             /* Fill the pixel */                                                       \
             if(_isTexture || _isGradient) {                                            \
                 const Pt::int32_t bw = _brushImage->width();                           \
@@ -1310,13 +1310,6 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     float fy0 = y1;
     float fx1 = x2;
     float fy1 = y2;
-
-    /*
-         if(fx1 >= fx0) { fx0 += 0.5f; fx1 -= 0.5f; }
-    else                { fx1 += 0.5f; fx0 -= 0.5f; }
-         if(fy1 >= fy0) { fy0 += 0.5f; fy1 -= 0.5f; }
-    else                { fy1 += 0.5f; fy0 -= 0.5f; }
-    */
 
     // Swap the coordinates as needed
     const bool steep = ( fabs(fy1 - fy0) > fabs(fx1 - fx0) );
