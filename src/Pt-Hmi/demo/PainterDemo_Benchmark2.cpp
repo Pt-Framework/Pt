@@ -58,12 +58,15 @@ class Benchmark2View : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
+            ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
+            const char*    aai = (ip2 && ip2->isAntiAliasing()) ? "WITH AA" : "WITHOUT AA";
+
             char buff[128];
-            sprintf(buff, "%s - %zd mS", text, benchmarkResult);
+            sprintf(buff, "%s [%s] - %zd mS", text, aai, benchmarkResult);
 
             painter.setPen  ( Color::fromRgb8(164, 100, 255)  );
             painter.setFont ( Font("", 12) );
-            painter.drawText( PointF(10, 20), Pt::String(buff));
+            painter.drawText( PointF(250, 50), Pt::String(buff));
 
 #ifdef SOURCE_OVER
             const Pt::uint8_t alpha = 175;
@@ -71,7 +74,7 @@ class Benchmark2View : public Pt::Hmi::Control
             const Pt::uint8_t alpha = 255;
 #endif
 
-            Pt::Gfx::Pen green2( Color::fromRgb8(0, 255, 0, alpha), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen green2( Color::fromRgb8(0, 255, 0, alpha), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
 
             std::vector<Pt::Gfx::PointF> shape = makeLineComplex(5, 2);
 

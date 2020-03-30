@@ -396,7 +396,6 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
 
             // Loop through the points
             Pt::int32_t j = polygon->size() - 1;
-
             for(size_t i = 0; i < polygon->size(); ++i)
             {
                 // Get the coordinates
