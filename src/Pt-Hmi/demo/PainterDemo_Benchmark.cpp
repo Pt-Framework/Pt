@@ -24,6 +24,13 @@ class BenchmarkView : public Pt::Hmi::Control
             ImagePainter2 ip2(image2);
             ip2.setAntiAliasing(true);
 
+//#define SOURCE_OVER
+
+#ifdef SOURCE_OVER
+            ip1.setCompositionMode(CompositionMode::SourceOver);
+            ip2.setCompositionMode(CompositionMode::SourceOver);
+#endif
+
             static bool doBenchmark = true;
             if(doBenchmark) {
                 doBenchmark = false;
@@ -84,13 +91,6 @@ class BenchmarkView : public Pt::Hmi::Control
 
             ip2.setBrush(background);
             ip2.fillRect(imageRect);
-
-//#define SOURCE_OVER
-
-#ifdef SOURCE_OVER
-            ip1.setCompositionMode(CompositionMode::SourceOver);
-            ip2.setCompositionMode(CompositionMode::SourceOver);
-#endif
 
             onPaintContent(ip1, "IP1", 0);
             onPaintContent(ip2, "IP2", 0);
