@@ -1,7 +1,7 @@
-class BenchmarkView : public Pt::Hmi::Control
+class Benchmark1View : public Pt::Hmi::Control
 {
     public:
-        BenchmarkView()
+        Benchmark1View()
         {}
 
     protected:
