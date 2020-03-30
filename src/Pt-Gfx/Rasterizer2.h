@@ -380,13 +380,19 @@ class Rasterizer2
 
         static inline S16V::const_iterator S16V_begin(const PolygonScanlines& ps, const Pt::int32_t i)
         {
-            if(i < 0 || i >= (Pt::int32_t) ps.size()) return ps.back().end();
+            if(i < 0 || i >= (Pt::int32_t) ps.size()) {
+                // Safe because this function will never be called with an empty 'ps'
+                return ps.back().end();
+            }
             return ps[i].begin();
         }
 
         static inline S16V::const_iterator S16V_end(const PolygonScanlines& ps, const Pt::int32_t i)
         {
-            if(i < 0 || i >= (Pt::int32_t) ps.size()) return ps.back().end();
+            if(i < 0 || i >= (Pt::int32_t) ps.size()) {
+                // Safe because this function will never be called with an empty 'ps'
+                return ps.back().end();
+            }
             return ps[i].end();
         }
 
