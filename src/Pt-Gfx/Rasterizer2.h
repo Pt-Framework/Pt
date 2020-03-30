@@ -390,17 +390,6 @@ class Rasterizer2
             return ps[i].end();
         }
 
-        /*
-        // OLD POLYGON XWAA
-        // REVIEW: Seems nothing actually uses this function anymore?
-        void rasterPolygonBorderXWAA_F(float x1, float y1,
-                                       float x2, float y2,
-                                       const Color& color,
-                                       Pt::int32_t minX, Pt::int32_t minY,
-                                       const PolygonScanlines& exclusionZone,
-                                       DrawLineMask& maskInOut);
-        */
-
         void rasterPolygonBorderXWAA_F2(float x1, float y1,
                                        float x2, float y2,
                                        const Color& color,
@@ -505,7 +494,7 @@ class Rasterizer2
         //    * The vector index specify the Y coordinate of the scanline
         //    * The vector element specify the "from" and "to" X coordinates
         typedef std::vector<ScanlineElement32> EAScanlines;
-        
+
         void rasterNarrowArc(const Point& topLeft, const Size& size,
                              float degBegin, float degEnd, const ArcMode& arcMode);
 
