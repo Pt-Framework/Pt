@@ -131,7 +131,7 @@ class BenchmarkView : public Pt::Hmi::Control
             ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
             // Benchmark loop count and flag
-            const int  loopCount = 100;
+            const int  loopCount = 250;
                   bool fill      = false;
 
 #define BENCHMARK_CODE(DESC, INFO, SIZE, SCALE)                                 \
