@@ -369,11 +369,26 @@ class Rasterizer2
 
         typedef std::vector<ScanlineElement32> S32V;
 
+        typedef std::vector<ScanlineElement16>::const_iterator S16V_CI;
+
+        typedef std::vector<ScanlineElement32>::const_iterator S32V_CI;
+
         // Polygon scanlines (used for drawing filled polygons with XWAA)
         //     * The vector index specify the Y coordinate of the scanline
         //     * The vector element specify a set of "from" and "to" X coordinates
         typedef std::vector< std::vector<ScanlineElement16> > PolygonScanlines;
 
+        static inline S16V::const_iterator S16V_begin(const PolygonScanlines& ps, const Pt::int32_t i)
+        {
+            if(i < 0 || i >= (Pt::int32_t) ps.size()) return ps.back().end();
+            return ps[i].begin();
+        }
+
+        static inline S16V::const_iterator S16V_end(const PolygonScanlines& ps, const Pt::int32_t i)
+        {
+            if(i < 0 || i >= (Pt::int32_t) ps.size()) return ps.back().end();
+            return ps[i].end();
+        }
 
         /*
         // OLD POLYGON XWAA
@@ -490,7 +505,7 @@ class Rasterizer2
         //    * The vector index specify the Y coordinate of the scanline
         //    * The vector element specify the "from" and "to" X coordinates
         typedef std::vector<ScanlineElement32> EAScanlines;
-
+        
         void rasterNarrowArc(const Point& topLeft, const Size& size,
                              float degBegin, float degEnd, const ArcMode& arcMode);
 

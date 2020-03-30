@@ -1352,7 +1352,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         bool skipPixel0 = false;
         bool skipPixel1 = false;
         if(!exclusionZone.empty()) {
-            for(S16V::const_iterator it = exclusionZone[iy - minY/* + 1*/].begin(); it != exclusionZone[iy - minY/* + 1*/].end(); ++it) {
+            for(S16V_CI it = S16V_begin(exclusionZone, iy - minY/* + 1*/); it != S16V_end(exclusionZone, iy - minY/* + 1*/); ++it) {
                 if(ix0 >= it->from && ix0 <= it->to) skipPixel0 = true;
                 if(ix1 >= it->from && ix1 <= it->to) skipPixel1 = true;
                 if(skipPixel0 && skipPixel1) break;
@@ -1374,8 +1374,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         // Draw the pixels as needed
         bool skipPixel = false;
         if(!exclusionZone.empty()) {
-            for(S16V::const_iterator it = exclusionZone[iy0 - minY/* + 1*/].begin(); it != exclusionZone[iy0 - minY/* + 1*/].end(); ++it) {
-                if(ix <= it->from || ix >= it->to) continue;
+            for(S16V_CI it = S16V_begin(exclusionZone, iy0 - minY/* + 1*/); it != S16V_end(exclusionZone, iy0 - minY/* + 1*/); ++it) {
+                if(ix < it->from || ix > it->to) continue;
                 skipPixel = true;
                 break;
             }
@@ -1383,8 +1383,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap * 255.0f) );
         skipPixel = false;
         if(!exclusionZone.empty()) {
-            for(S16V::const_iterator it = exclusionZone[iy1 - minY/* + 1*/].begin(); it != exclusionZone[iy1 - minY/* + 1*/].end(); ++it) {
-                if (ix <= it->from || ix >= it->to) continue;
+            for(S16V_CI it = S16V_begin(exclusionZone, iy1 - minY/* + 1*/); it != S16V_end(exclusionZone, iy1 - minY/* + 1*/); ++it) {
+                if (ix < it->from || ix > it->to) continue;
                 skipPixel = true;
                 break;
             }
@@ -1419,7 +1419,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         bool skipPixel0 = false;
         bool skipPixel1 = false;
         if(!exclusionZone.empty()) {
-            for(S16V::const_iterator it = exclusionZone[iy - minY/* + 1*/].begin(); it != exclusionZone[iy - minY/* + 1*/].end(); ++it) {
+            for(S16V_CI it = S16V_begin(exclusionZone, iy - minY/* + 1*/); it != S16V_end(exclusionZone, iy - minY/* + 1*/); ++it) {
                 if(ix0 >= it->from && ix0 <= it->to) skipPixel0 = true;
                 if(ix1 >= it->from && ix1 <= it->to) skipPixel1 = true;
                 if(skipPixel0 && skipPixel1) break;
@@ -1441,8 +1441,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         // Draw the pixels as needed
         bool skipPixel = false;
         if(!exclusionZone.empty()) {
-            for(S16V::const_iterator it = exclusionZone[iy0 - minY/* + 1*/].begin(); it != exclusionZone[iy0 - minY/* + 1*/].end(); ++it) {
-                if(ix <= it->from || ix >= it->to) continue;
+            for(S16V_CI it = S16V_begin(exclusionZone, iy0 - minY/* + 1*/); it != S16V_end(exclusionZone, iy0 - minY/* + 1*/); ++it) {
+                if(ix < it->from || ix > it->to) continue;
                 skipPixel = true;
                 break;
             }
@@ -1450,8 +1450,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap * 255.0f) );
         skipPixel = false;
         if(!exclusionZone.empty()) {
-            for(S16V::const_iterator it = exclusionZone[iy1 - minY/* + 1*/].begin(); it != exclusionZone[iy1 - minY/* + 1*/].end(); ++it) {
-                if (ix <= it->from || ix >= it->to) continue;
+            for(S16V_CI it = S16V_begin(exclusionZone, iy1 - minY/* + 1*/); it != S16V_end(exclusionZone, iy1 - minY/* + 1*/); ++it) {
+                if (ix < it->from || ix > it->to) continue;
                 skipPixel = true;
                 break;
             }
@@ -1477,7 +1477,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             bool skipPixel0 = false;
             bool skipPixel1 = false;
             if(!exclusionZone.empty()) {
-                for(S16V::const_iterator it = exclusionZone[iy - minY/* + 1*/].begin(); it != exclusionZone[iy - minY/* + 1*/].end(); ++it) {
+                for(S16V_CI it = S16V_begin(exclusionZone, iy - minY/* + 1*/); it != S16V_end(exclusionZone, iy - minY/* + 1*/); ++it) {
                     //if(iy >= 32 && iy <= 35) fprintf(stderr, "CH [%3d:%3d] = %3d - %3d\n", iy - minY, iy, it->from, it->to);
                     if(ix0 >= it->from && ix0 <= it->to) skipPixel0 = true;
                     if(ix1 >= it->from && ix1 <= it->to) skipPixel1 = true;
@@ -1500,21 +1500,19 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             // Draw the pixels as needed
             bool skipPixel = false;
             if(!exclusionZone.empty()) {
-                for(S16V::const_iterator it = exclusionZone[iy0 - minY/* + 1*/].begin(); it != exclusionZone[iy0 - minY/* + 1*/].end(); ++it) {
-                    if(ix >= it->from && ix <= it->to) {
-                        skipPixel = true;
-                        break;
-                    }
+                for(S16V_CI it = S16V_begin(exclusionZone, iy0 - minY/* + 1*/); it != S16V_end(exclusionZone, iy0 - minY/* + 1*/); ++it) {
+                    if(ix < it->from || ix > it->to) continue;
+                    skipPixel = true;
+                    break;
                 }
             }
             if(!skipPixel) XW_FILL_PIXEL(ix, iy0, rfpart);
             skipPixel = false;
             if(!exclusionZone.empty()) {
-                for(S16V::const_iterator it = exclusionZone[iy1 - minY/* + 1*/].begin(); it != exclusionZone[iy1 - minY/* + 1*/].end(); ++it) {
-                    if(ix >= it->from && ix <= it->to) {
-                        skipPixel = true;
-                        break;
-                    }
+                for(S16V_CI it = S16V_begin(exclusionZone, iy1 - minY/* + 1*/); it != S16V_end(exclusionZone, iy1 - minY/* + 1*/); ++it) {
+                    if(ix < it->from || ix > it->to) continue;
+                    skipPixel = true;
+                    break;
                 }
             }
             if(!skipPixel) XW_FILL_PIXEL(ix, iy1, fpart);
