@@ -1956,6 +1956,8 @@ void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
 
     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
     _image->format().setPixels(pixel, color, iterR - iterL + 1, _compositionMode);
+
+    //fprintf(stderr, "RS [%3d] = %3d - %3d\n", minY + pixelY, (minX + iterL), (minX + iterL) + (iterR - iterL + 1) - 1);
 }
 
 

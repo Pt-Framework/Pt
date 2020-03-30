@@ -24,7 +24,7 @@ class BenchmarkView : public Pt::Hmi::Control
             ImagePainter2 ip2(image2);
             ip2.setAntiAliasing(true);
 
-            static bool doBenchmark = true;
+            static bool doBenchmark = false;
             if(doBenchmark) {
                 doBenchmark = false;
 
@@ -85,6 +85,13 @@ class BenchmarkView : public Pt::Hmi::Control
             ip2.setBrush(background);
             ip2.fillRect(imageRect);
 
+#define SOURCE_OVER
+
+#ifdef SOURCE_OVER
+            ip1.setCompositionMode(CompositionMode::SourceOver);
+            ip2.setCompositionMode(CompositionMode::SourceOver);
+#endif
+
             onPaintContent(ip1, "IP1", 0);
             onPaintContent(ip2, "IP2", 0);
 
@@ -100,14 +107,20 @@ class BenchmarkView : public Pt::Hmi::Control
             painter.setFont ( Font("", 12) );
             painter.drawText( PointF(10, 20), Pt::String(text) );
 
-            Pt::Gfx::Pen   green1( Color::fromRgb8(  0, 255,   0), 1, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
-            Pt::Gfx::Pen   green2( Color::fromRgb8(  0, 255,   0), 3, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
-            Pt::Gfx::Pen   green9( Color::fromRgb8(  0, 255,   0), 9, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
+#ifdef SOURCE_OVER
+            const Pt::uint8_t alpha = 175;
+#else
+            const Pt::uint8_t alpha = 255;
+#endif
 
-            Pt::Gfx::Pen   cyan1 ( Color::fromRgb8(  0, 255, 255), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
-            Pt::Gfx::Pen   cyan2 ( Color::fromRgb8(  0, 255, 255), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen   green1( Color::fromRgb8(  0, 255,   0, alpha), 1, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
+            Pt::Gfx::Pen   green2( Color::fromRgb8(  0, 255,   0, alpha), 3, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
+            Pt::Gfx::Pen   green9( Color::fromRgb8(  0, 255,   0, alpha), 9, Pen::Solid, Pen::RoundCap, Pen::RoundJoin );
 
-            Pt::Gfx::Brush redb  ( Color::fromRgb8(255,   0,   0) );
+            Pt::Gfx::Pen   cyan1 ( Color::fromRgb8(  0, 255, 255, alpha), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen   cyan2 ( Color::fromRgb8(  0, 255, 255, alpha), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+
+            Pt::Gfx::Brush redb  ( Color::fromRgb8(255,   0,   0, alpha) );
 
             int    x     = 10;
             int    y     = 30;
@@ -117,8 +130,18 @@ class BenchmarkView : public Pt::Hmi::Control
             // Get ImagePainter2
             ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
+//shape = makeLineSimple(x, y, 10.0);
+//painter.setPen(green9);
+//painter.drawPolyline( &shape[0], shape.size() );
+
+shape = makePolygonSimple_S10_P9_RC_RJ(x, y);
+painter.setBrush(redb);
+if(ip2) ip2->fillPolygon_NR( &shape[0], shape.size() );
+else    painter.fillPolygon( &shape[0], shape.size() );
+return;
+
             // Benchmark loop count and flag
-            const int  loopCount = 250;
+            const int  loopCount = 100;
                   bool fill      = false;
 
 #define BENCHMARK_CODE(DESC, INFO, SIZE, SCALE)                                 \

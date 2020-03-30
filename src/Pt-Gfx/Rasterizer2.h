@@ -365,6 +365,10 @@ class Rasterizer2
 
         typedef ScanlineElement<Pt::int32_t> ScanlineElement32;
 
+        typedef std::vector<ScanlineElement16> S16V;
+
+        typedef std::vector<ScanlineElement32> S32V;
+
         // Polygon scanlines (used for drawing filled polygons with XWAA)
         //     * The vector index specify the Y coordinate of the scanline
         //     * The vector element specify a set of "from" and "to" X coordinates

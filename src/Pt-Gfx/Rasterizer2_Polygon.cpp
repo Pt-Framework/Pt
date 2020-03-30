@@ -787,15 +787,16 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             if(_compositionMode != CompositionMode::SourceCopy)
             {
                 scanlines[y - minY + 1].push_back(ScanlineElement16(from, to));
+                //fprintf(stderr, "SL [%3d] = %3d - %3d\n", y, from, to);
+                //if(y >= 32 && y <= 35) fprintf(stderr, "SL [%3d:%3d] = %3d - %3d\n", y - minY + 1, y, from, to);
             }
 
             // Draw the scanline
             rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
 #if 0
-        if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
-            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                  << "RP XWAA " << (minX + (from - minX)) << ", " << (minY + y - minY) << " LEN " << ((to - minX) - (from - minX) + 1) << std::endl;
-        }
+            if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
+                fprintf(stderr, "SL [%3d] = %3d - %3d\n", (minY + y - minY), (minX + (from - minX)), (minX + (from - minX)) + ((to - minX) - (from - minX) + 1) - 1 );
+            }
 #endif
         }
     }
@@ -1167,7 +1168,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
             bool skipPixel1 = false;
             bool skipPixel2 = false;
             if(!exclusionZone.empty()) {
-                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[y - minY].begin(); it != exclusionZone[y - minY].end(); ++it) {
+                for(S16V::const_iterator it = exclusionZone[y - minY].begin(); it != exclusionZone[y - minY].end(); ++it) {
                     if(x1 >= it->from && x1 <= it->to) skipPixel1 = true;
                     if(x2 >= it->from && x2 <= it->to) skipPixel2 = true;
                     if(skipPixel1 && skipPixel2) break;
@@ -1193,7 +1194,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
             // Draw the pixels as needed
             bool skipPixel = false;
             if(!exclusionZone.empty()) {
-                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[y1 - minY].begin(); it != exclusionZone[y1 - minY].end(); ++it) {
+                for(S16V::const_iterator it = exclusionZone[y1 - minY].begin(); it != exclusionZone[y1 - minY].end(); ++it) {
                     if (x <= it->from || x >= it->to) continue;
                     skipPixel = true;
                     break;
@@ -1202,7 +1203,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
             if(!skipPixel) XW_FILL_PIXEL(x, y1, a1);
             skipPixel = false;
             if(!exclusionZone.empty()) {
-                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[y2 - minY].begin(); it != exclusionZone[y2 - minY].end(); ++it) {
+                for(S16V::const_iterator it = exclusionZone[y2 - minY].begin(); it != exclusionZone[y2 - minY].end(); ++it) {
                     if (x <= it->from || x >= it->to) continue;
                     skipPixel = true;
                     break;
@@ -1351,7 +1352,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         bool skipPixel0 = false;
         bool skipPixel1 = false;
         if(!exclusionZone.empty()) {
-            for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy - minY + 1].begin(); it != exclusionZone[iy - minY + 1].end(); ++it) {
+            for(S16V::const_iterator it = exclusionZone[iy - minY/* + 1*/].begin(); it != exclusionZone[iy - minY/* + 1*/].end(); ++it) {
                 if(ix0 >= it->from && ix0 <= it->to) skipPixel0 = true;
                 if(ix1 >= it->from && ix1 <= it->to) skipPixel1 = true;
                 if(skipPixel0 && skipPixel1) break;
@@ -1373,7 +1374,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         // Draw the pixels as needed
         bool skipPixel = false;
         if(!exclusionZone.empty()) {
-            for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy0 - minY + 1].begin(); it != exclusionZone[iy0 - minY + 1].end(); ++it) {
+            for(S16V::const_iterator it = exclusionZone[iy0 - minY/* + 1*/].begin(); it != exclusionZone[iy0 - minY/* + 1*/].end(); ++it) {
                 if(ix <= it->from || ix >= it->to) continue;
                 skipPixel = true;
                 break;
@@ -1382,7 +1383,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap * 255.0f) );
         skipPixel = false;
         if(!exclusionZone.empty()) {
-            for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy1 - minY + 1].begin(); it != exclusionZone[iy1 - minY + 1].end(); ++it) {
+            for(S16V::const_iterator it = exclusionZone[iy1 - minY/* + 1*/].begin(); it != exclusionZone[iy1 - minY/* + 1*/].end(); ++it) {
                 if (ix <= it->from || ix >= it->to) continue;
                 skipPixel = true;
                 break;
@@ -1418,7 +1419,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         bool skipPixel0 = false;
         bool skipPixel1 = false;
         if(!exclusionZone.empty()) {
-            for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy - minY + 1].begin(); it != exclusionZone[iy - minY + 1].end(); ++it) {
+            for(S16V::const_iterator it = exclusionZone[iy - minY/* + 1*/].begin(); it != exclusionZone[iy - minY/* + 1*/].end(); ++it) {
                 if(ix0 >= it->from && ix0 <= it->to) skipPixel0 = true;
                 if(ix1 >= it->from && ix1 <= it->to) skipPixel1 = true;
                 if(skipPixel0 && skipPixel1) break;
@@ -1440,7 +1441,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         // Draw the pixels as needed
         bool skipPixel = false;
         if(!exclusionZone.empty()) {
-            for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy0 - minY + 1].begin(); it != exclusionZone[iy0 - minY + 1].end(); ++it) {
+            for(S16V::const_iterator it = exclusionZone[iy0 - minY/* + 1*/].begin(); it != exclusionZone[iy0 - minY/* + 1*/].end(); ++it) {
                 if(ix <= it->from || ix >= it->to) continue;
                 skipPixel = true;
                 break;
@@ -1449,7 +1450,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
         if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap * 255.0f) );
         skipPixel = false;
         if(!exclusionZone.empty()) {
-            for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy1 - minY + 1].begin(); it != exclusionZone[iy1 - minY + 1].end(); ++it) {
+            for(S16V::const_iterator it = exclusionZone[iy1 - minY/* + 1*/].begin(); it != exclusionZone[iy1 - minY/* + 1*/].end(); ++it) {
                 if (ix <= it->from || ix >= it->to) continue;
                 skipPixel = true;
                 break;
@@ -1476,7 +1477,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             bool skipPixel0 = false;
             bool skipPixel1 = false;
             if(!exclusionZone.empty()) {
-                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy - minY + 1].begin(); it != exclusionZone[iy - minY + 1].end(); ++it) {
+                for(S16V::const_iterator it = exclusionZone[iy - minY/* + 1*/].begin(); it != exclusionZone[iy - minY/* + 1*/].end(); ++it) {
+                    //if(iy >= 32 && iy <= 35) fprintf(stderr, "CH [%3d:%3d] = %3d - %3d\n", iy - minY, iy, it->from, it->to);
                     if(ix0 >= it->from && ix0 <= it->to) skipPixel0 = true;
                     if(ix1 >= it->from && ix1 <= it->to) skipPixel1 = true;
                     if(skipPixel0 && skipPixel1) break;
@@ -1498,19 +1500,21 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             // Draw the pixels as needed
             bool skipPixel = false;
             if(!exclusionZone.empty()) {
-                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy0 - minY + 1].begin(); it != exclusionZone[iy0 - minY + 1].end(); ++it) {
-                    if(ix <= it->from || ix >= it->to) continue;
-                    skipPixel = true;
-                    break;
+                for(S16V::const_iterator it = exclusionZone[iy0 - minY/* + 1*/].begin(); it != exclusionZone[iy0 - minY/* + 1*/].end(); ++it) {
+                    if(ix >= it->from && ix <= it->to) {
+                        skipPixel = true;
+                        break;
+                    }
                 }
             }
             if(!skipPixel) XW_FILL_PIXEL(ix, iy0, rfpart);
             skipPixel = false;
             if(!exclusionZone.empty()) {
-                for(std::vector<ScanlineElement16>::const_iterator it = exclusionZone[iy1 - minY + 1].begin(); it != exclusionZone[iy1 - minY + 1].end(); ++it) {
-                    if (ix <= it->from || ix >= it->to) continue;
-                    skipPixel = true;
-                    break;
+                for(S16V::const_iterator it = exclusionZone[iy1 - minY/* + 1*/].begin(); it != exclusionZone[iy1 - minY/* + 1*/].end(); ++it) {
+                    if(ix >= it->from && ix <= it->to) {
+                        skipPixel = true;
+                        break;
+                    }
                 }
             }
             if(!skipPixel) XW_FILL_PIXEL(ix, iy1, fpart);
