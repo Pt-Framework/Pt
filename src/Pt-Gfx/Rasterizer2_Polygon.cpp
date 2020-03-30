@@ -1248,8 +1248,6 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     // TODO: Does the other XWAA implementation will benefit from this more conservative apparoach?
     //       (shall they be converted too?). IMHO: they seems to work fine, so nope ;-)
 
-    // TODO: Visual (brightness) artifact in SourceOver mode!
-
     // Get the input mask's coordinate
     float mx[4];
     float my[4];
@@ -1262,16 +1260,6 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     // For storing the output mask's coordinate
     float lx[4];
     float ly[4];
-
-            /* Update the output mask's coordinates * /                                \
-            if(swapDir) {                                                              \
-                lx[0] = lx[1]; lx[1] = X;                                              \
-                ly[0] = ly[1]; ly[1] = Y;                                              \
-            }                                                                          \
-            else {                                                                     \
-                lx[2] = lx[3]; lx[3] = X;                                              \
-                ly[2] = ly[3]; ly[3] = Y;                                              \
-            }*/                                                                        \
 
     // A helper macro to fill pixel
     #define  XW_FILL_PIXEL(X, Y, A)                                                    \

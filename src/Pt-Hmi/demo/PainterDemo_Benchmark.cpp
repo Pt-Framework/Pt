@@ -24,7 +24,7 @@ class BenchmarkView : public Pt::Hmi::Control
             ImagePainter2 ip2(image2);
             ip2.setAntiAliasing(true);
 
-            static bool doBenchmark = false;
+            static bool doBenchmark = true;
             if(doBenchmark) {
                 doBenchmark = false;
 
@@ -85,7 +85,7 @@ class BenchmarkView : public Pt::Hmi::Control
             ip2.setBrush(background);
             ip2.fillRect(imageRect);
 
-#define SOURCE_OVER
+//#define SOURCE_OVER
 
 #ifdef SOURCE_OVER
             ip1.setCompositionMode(CompositionMode::SourceOver);
@@ -129,16 +129,6 @@ class BenchmarkView : public Pt::Hmi::Control
 
             // Get ImagePainter2
             ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
-
-//shape = makeLineSimple(x, y, 10.0);
-//painter.setPen(green9);
-//painter.drawPolyline( &shape[0], shape.size() );
-
-shape = makePolygonSimple_S10_P9_RC_RJ(x, y);
-painter.setBrush(redb);
-if(ip2) ip2->fillPolygon_NR( &shape[0], shape.size() );
-else    painter.fillPolygon( &shape[0], shape.size() );
-return;
 
             // Benchmark loop count and flag
             const int  loopCount = 100;
