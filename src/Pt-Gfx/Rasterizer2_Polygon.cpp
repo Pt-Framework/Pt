@@ -670,11 +670,11 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
 #if 1
     if(steep) {
         // Calculate the alphas and coordinates
-        const float  fpart = yend - floor(yend);
-        const float rfpart = 1.0f - fpart;
-        const Pt::int32_t ix0 = ypxl1;
-        const Pt::int32_t ix1 = ix0 + 1;
-        const Pt::int32_t iy  = xpxl1;
+        const float       fpart  = yend - floor(yend);
+        const float       rfpart = 1.0f - fpart;
+        const Pt::int32_t ix0    = ypxl1;
+        const Pt::int32_t ix1    = ix0 + 1;
+        const Pt::int32_t iy     = xpxl1;
         // Draw the pixels as needed
         bool skipPixel0 = false;
         bool skipPixel1 = false;
@@ -685,19 +685,19 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
                 if(skipPixel0 && skipPixel1) break;
             }
         }
-        if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap * 255.0f));
-        if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap * 255.0f));
+        if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap * 255.0f) );
+        if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap * 255.0f) );
         // Store the first endpoint coordinates as the output mask
         lx[0] = ix0; ly[0] = iy;
         lx[1] = ix1; ly[1] = iy;
     }
     else {
         // Calculate the alphas and coordinates
-        const float  fpart = yend - floor(yend);
-        const float rfpart = 1.0f - fpart;
-        const Pt::int32_t ix  = xpxl1;
-        const Pt::int32_t iy0 = ypxl1;
-        const Pt::int32_t iy1 = iy0 + 1;
+        const float       fpart  = yend - floor(yend);
+        const float       rfpart = 1.0f - fpart;
+        const Pt::int32_t ix     = xpxl1;
+        const Pt::int32_t iy0    = ypxl1;
+        const Pt::int32_t iy1    = iy0 + 1;
         // Draw the pixels as needed
         bool skipPixel = false;
         if(!exclusionZone.empty()) {
@@ -737,11 +737,11 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
 #if 1
     if(steep) {
         // Calculate the alphas and coordinates
-        const float  fpart = yend - floor(yend);
-        const float rfpart = 1.0f - fpart;
-        const Pt::int32_t ix0 = ypxl2;
-        const Pt::int32_t ix1 = ix0 + 1;
-        const Pt::int32_t iy  = xpxl2;
+        const float       fpart  = yend - floor(yend);
+        const float       rfpart = 1.0f - fpart;
+        const Pt::int32_t ix0    = ypxl2;
+        const Pt::int32_t ix1    = ix0 + 1;
+        const Pt::int32_t iy     = xpxl2;
         // Draw the pixels as needed
         bool skipPixel0 = false;
         bool skipPixel1 = false;
@@ -760,11 +760,11 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
     }
     else {
         // Calculate the alphas and coordinates
-        const float  fpart = yend - floor(yend);
-        const float rfpart = 1.0f - fpart;
-        const Pt::int32_t ix  = xpxl2;
-        const Pt::int32_t iy0 = ypxl2;
-        const Pt::int32_t iy1 = iy0 + 1;
+        const float       fpart  = yend - floor(yend);
+        const float       rfpart = 1.0f - fpart;
+        const Pt::int32_t ix     = xpxl2;
+        const Pt::int32_t iy0    = ypxl2;
+        const Pt::int32_t iy1    = iy0 + 1;
         // Draw the pixels as needed
         bool skipPixel = false;
         if(!exclusionZone.empty()) {
@@ -796,9 +796,9 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             // Calculate the alphas and coordinates
             const Pt::int32_t fpart  = (intery - floor(intery)) * 255.0f;
             const Pt::int32_t rfpart = 255 - fpart;
-            const Pt::int32_t ix0 = floor(intery);
-            const Pt::int32_t ix1 = ix0 + 1;
-            const Pt::int32_t iy  = x;
+            const Pt::int32_t ix0    = floor(intery);
+            const Pt::int32_t ix1    = ix0 + 1;
+            const Pt::int32_t iy     = x;
             intery = intery + gradient;
             // Draw the pixels as needed
             bool skipPixel0 = false;
@@ -820,9 +820,9 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             // Calculate the alphas and coordinates
             const Pt::int32_t fpart  = (intery - floor(intery)) * 255.0f;
             const Pt::int32_t rfpart = 255 - fpart;
-            const Pt::int32_t ix  = x;
-            const Pt::int32_t iy0 = floor(intery);
-            const Pt::int32_t iy1 = iy0 + 1;
+            const Pt::int32_t ix     = x;
+            const Pt::int32_t iy0    = floor(intery);
+            const Pt::int32_t iy1    = iy0 + 1;
             intery = intery + gradient;
             // Draw the pixels as needed
             bool skipPixel = false;
@@ -848,16 +848,16 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
 
     // Output the new mask
     if(swapDir) {
-        if(maskInOut[0].x() == MAXIMUM_COORD_F || maskInOut[0].y() == MAXIMUM_COORD_F) maskInOut[0].set(lx[2], ly[2]);
-        if(maskInOut[1].x() == MAXIMUM_COORD_F || maskInOut[1].y() == MAXIMUM_COORD_F) maskInOut[1].set(lx[3], ly[3]);
-                                                                                       maskInOut[2].set(lx[0], ly[0]);
-                                                                                       maskInOut[3].set(lx[1], ly[1]);
-    }
-    else {
         if(maskInOut[0].x() == MAXIMUM_COORD_F || maskInOut[0].y() == MAXIMUM_COORD_F) maskInOut[0].set(lx[0], ly[0]);
         if(maskInOut[1].x() == MAXIMUM_COORD_F || maskInOut[1].y() == MAXIMUM_COORD_F) maskInOut[1].set(lx[1], ly[1]);
                                                                                        maskInOut[2].set(lx[2], ly[2]);
                                                                                        maskInOut[3].set(lx[3], ly[3]);
+    }
+    else {
+        if(maskInOut[0].x() == MAXIMUM_COORD_F || maskInOut[0].y() == MAXIMUM_COORD_F) maskInOut[0].set(lx[2], ly[2]);
+        if(maskInOut[1].x() == MAXIMUM_COORD_F || maskInOut[1].y() == MAXIMUM_COORD_F) maskInOut[1].set(lx[3], ly[3]);
+                                                                                       maskInOut[2].set(lx[0], ly[0]);
+                                                                                       maskInOut[3].set(lx[1], ly[1]);
     }
 
     // Undefine the helper macro
