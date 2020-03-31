@@ -33,10 +33,12 @@
 #include "Rasterizer2.h"
 #include "ClipShape.h"
 
+
 namespace {
 
+
 template<typename T>
-void bubbleSortAscending(T& basket, Pt::int32_t size)
+static inline void bubbleSortAscending(T& basket, Pt::int32_t size)
 {
     for(Pt::int32_t i = 0; i < size - 1;) {
         if(basket[i] > basket[i + 1]) {
@@ -49,7 +51,83 @@ void bubbleSortAscending(T& basket, Pt::int32_t size)
     }
 }
 
+
+template<typename T>
+static inline void insertionsortAscending(T& basket, Pt::int32_t size)
+{
+    if(size <= 1) return;
+
+    for(Pt::int32_t i = 1; i < size; ++i)
+    {
+        const typename T::value_type key = basket[i];
+        Pt::int32_t                  j   = i - 1;
+
+        while(j >= 0 && basket[j] > key)
+        {
+            basket[j + 1] = basket[j];
+            --j;
+        }
+        basket[j + 1] = key;
+
+    }
+}
+
+
+template<typename T>
+static inline void selectionsortAscending(T& basket, Pt::int32_t size)
+{
+    for(Pt::int32_t i = 0; i < size - 1; ++i)
+    {
+        Pt::int32_t min = i;
+        for(Pt::int32_t j = i+1; j < size; ++j)
+        {
+            if(basket[j] < basket[min]) min = j;
+        }
+        std::swap(basket[min], basket[i]);
+    }
+}
+
+
+template<typename T>
+static inline Pt::int32_t quicksortAscending_partition(T& basket, Pt::int32_t start, Pt::int32_t end)
+{
+    const typename T::value_type pivot = basket[end];
+    Pt::int32_t                  pidx  = start;
+
+    for(Pt::int32_t i = start; i < end; ++i)
+    {
+        if(basket[i] <= pivot)
+        {
+            std::swap(basket[i], basket[pidx]);
+            ++pidx;
+        }
+    }
+
+    std::swap(basket[pidx], basket[end]);
+
+    return pidx;
+}
+
+template<typename T>
+static inline void quicksortAscending(T& basket, Pt::int32_t start, Pt::int32_t end)
+{
+    if(start >= end) return;
+
+    const Pt::int32_t pidx = quicksortAscending_partition(basket, start, end);
+
+    quicksortAscending(basket, start,    pidx - 1);
+    quicksortAscending(basket, pidx + 1, end     );
+}
+
+template<typename T>
+static inline void quicksortAscending(T& basket, Pt::int32_t size)
+{
+    quicksortAscending(basket, 0, size - 1);
+}
+
+
 } // namespace
+
 
 namespace Pt {
 
@@ -249,10 +327,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                                     Pt::int32_t minX, Pt::int32_t minY,
                                     Pt::int32_t maxX, Pt::int32_t maxY)
 {
-    std::size_t totalPointCount = pointCount;
-
     // List of nodes that define the horizontal spans
-    std::vector<float> nodeX(totalPointCount * 2, 0);
+    std::vector<float> nodeX(pointCount * 2, 0);
 
     // List of polygon scanlines
     PolygonScanlines scanlines;
@@ -308,7 +384,10 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             continue;
 
         // Sort the nodes
+        //selectionsortAscending(nodeX, nodes);
+        //insertionsortAscending(nodeX, nodes);
         bubbleSortAscending(nodeX, nodes);
+        //quicksortAscending(nodeX, nodes);
 
         // Fill the pixels between the node pairs
         for(std::size_t i = 0; i < nodes; i += 2)
