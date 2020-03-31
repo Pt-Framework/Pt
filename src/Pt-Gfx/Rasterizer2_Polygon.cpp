@@ -88,9 +88,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         for(size_t i = 0; i < pointCount; ++i)
         {
             // Get the coordinates
-            const float curXi = points[i].x();
             const float curYi = points[i].y();
-            const float curXj = points[j].x();
             const float curYj = points[j].y();
 
             // Calculate the node's coordinate
@@ -99,6 +97,10 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
                 // Bail out if we have produced too many nodes
                 if( nodes >= nodeX.size() )
                     return;
+
+                // Get the X coordinates
+                const float curXi = points[i].x();
+                const float curXj = points[j].x();
 
                 // Calculate the node's coordinate
                 const float deltaYp = y - curYi;
@@ -184,9 +186,7 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
             for(size_t i = 0; i < polygon.size(); ++i)
             {
                 // Get the coordinates
-                const float curXi = polygon[i].x();
                 const float curYi = polygon[i].y();
-                const float curXj = polygon[j].x();
                 const float curYj = polygon[j].y();
 
                 // Calculate the node's coordinate
@@ -195,6 +195,10 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes >= nodeX.size())
                         return;
+
+                    // Get the X coordinates
+                    const float curXi = polygon[i].x();
+                    const float curXj = polygon[j].x();
 
                     // Calculate the node's coordinate
                     const float deltaYp = y     - curYi;
@@ -271,10 +275,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
         for(size_t i = 0; i < pointCount; ++i)
         {
-            // Get the coordinates
-            const float curXi = points[i].x();
+            // Get the Y coordinates
             const float curYi = points[i].y();
-            const float curXj = points[j].x();
             const float curYj = points[j].y();
 
             // Calculate the node's coordinate
@@ -283,6 +285,10 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 // Bail out if we have produced too many nodes
                 if( nodes >= nodeX.size() )
                     return;
+
+                // Get the X coordinates
+                const float curXi = points[i].x();
+                const float curXj = points[j].x();
 
                 // Calculate the node's coordinate
                 const float deltaYp = y - curYi;
@@ -399,10 +405,8 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
             Pt::int32_t j = polygon.size() - 1;
             for(size_t i = 0; i < polygon.size(); ++i)
             {
-                // Get the coordinates
-                const float curXi = polygon[i].x();
+                // Get the Y coordinates
                 const float curYi = polygon[i].y();
-                const float curXj = polygon[j].x();
                 const float curYj = polygon[j].y();
 
                 // Calculate the node's coordinate
@@ -411,6 +415,10 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes >= nodeX.size())
                         return;
+
+                    // Get the X coordinates
+                    const float curXi = polygon[i].x();
+                    const float curXj = polygon[j].x();
 
                     // Calculate the node's coordinate
                     const float deltaYp = y     - curYi;
