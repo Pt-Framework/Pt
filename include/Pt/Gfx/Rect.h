@@ -24,7 +24,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301 USA
  */
 
@@ -39,11 +39,15 @@ namespace Pt {
 
 namespace Gfx {
 
+
 template<typename T>
-class BasicRect 
+class BasicRect
 {
     public:
-        explicit BasicRect( const BasicPoint<T>& p = BasicPoint<T>(0, 0), 
+        typedef T ValueT;
+
+    public:
+        explicit BasicRect( const BasicPoint<T>& p = BasicPoint<T>(0, 0),
                             const BasicSize<T>& s = BasicSize<T>(0, 0) )
         : _p(p)
         , _s(s)
@@ -59,9 +63,9 @@ class BasicRect
         BasicRect(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
         : _p(p1)
         , _s( p2.x() - p1.x(), p2.y() - p1.y())
-        {                
+        {
         }
-        
+
         BasicRect(const T left, const T right, const T top, const T bottom)
         {
             set( left, right, top, bottom );
@@ -84,7 +88,7 @@ class BasicRect
             _s.set(0, 0);
         }
 
-        void set(const BasicPoint<T>& p, const BasicSize<T>& s) 
+        void set(const BasicPoint<T>& p, const BasicSize<T>& s)
         {
             _p = p;
             _s = s;
@@ -169,24 +173,24 @@ class BasicRect
         }
 
         const BasicPoint<T>& topLeft() const
-        { 
+        {
             return _p;
         }
 
         const BasicPoint<T> topRight() const
-        { 
-            return BasicPoint<T>(this->x() + this->width(), this->y()); 
+        {
+            return BasicPoint<T>(this->x() + this->width(), this->y());
         }
 
         const BasicPoint<T> bottomLeft() const
-        { 
-            return BasicPoint<T>(this->x(), this->y() + this->height()); 
+        {
+            return BasicPoint<T>(this->x(), this->y() + this->height());
         }
 
         const BasicPoint<T> bottomRight() const
-        { 
-            return BasicPoint<T>(this->x() + this->width(), 
-                                 this->y() + this->height() ); 
+        {
+            return BasicPoint<T>(this->x() + this->width(),
+                                 this->y() + this->height() );
         }
 
         bool operator==(const BasicRect& other) const
@@ -232,27 +236,27 @@ class BasicRect
             const T l     = std::min( this->left(), rect.left() );
             const T t     = std::min( this->top(), rect.top() );
             const T r     = std::max( this->right(), rect.right() );
-            const T b  = std::max( this->bottom(), rect.bottom() ); 
-        
+            const T b  = std::max( this->bottom(), rect.bottom() );
+
             set(l, r, t, b);
         }
 
-        BasicRect<T> intersect(const BasicRect<T>& rect) const 
+        BasicRect<T> intersect(const BasicRect<T>& rect) const
         {
             const T l     = std::max( this->left(), rect.left() );
             const T t     = std::max( this->top(), rect.top() );
             const T r     = std::min( this->right(), rect.right() );
             const T b  = std::min( this->bottom(), rect.bottom() );
 
-            return r >= l && b >= t ? BasicRect<T>(l, r, t, b) 
+            return r >= l && b >= t ? BasicRect<T>(l, r, t, b)
                           : BasicRect<T>();
         }
 
-        bool contains(const BasicPoint<T>& p) const 
+        bool contains(const BasicPoint<T>& p) const
         {
-            return p.x() >= _p.x() &&  
-                    p.x() < _p.x() + _s.width() && 
-                    p.y() >= _p.y() &&  
+            return p.x() >= _p.x() &&
+                    p.x() < _p.x() + _s.width() &&
+                    p.y() >= _p.y() &&
                     p.y() <  _p.y() + _s.height();
         }
 
@@ -261,14 +265,18 @@ class BasicRect
         BasicSize<T>  _s;
 };
 
+
 typedef BasicRect<Pt::ssize_t> Rect;
 typedef BasicRect<double> RectF;
+//typedef BasicRect<float> RectF;
+
 
 inline Rect round(const RectF& r)
 {
-  return Rect( round(r.topLeft()),  
+  return Rect( round(r.topLeft()),
                round(r.size()) );
 }
+
 
 }  // namespace
 

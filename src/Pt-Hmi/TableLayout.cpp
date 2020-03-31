@@ -1,10 +1,10 @@
-/* Copyright (C) 2017 Marc Boris Duerner 
-  
+/* Copyright (C) 2017 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -57,9 +57,9 @@ void TableLayout::addItem(Widget& w, std::size_t row, std::size_t col)
 
     if( cols > _columnSizes.size() )
         _columnSizes.resize(cols);
-    
+
     std::size_t currentCols = _rows.empty() ? 0 : _rows.back().size();
-    
+
     if(cols < currentCols)
         cols = currentCols;
 
@@ -109,7 +109,7 @@ void TableLayout::setColumn(std::size_t col, SizeMode mode, double size)
     std::size_t cols = col + 1;
     if( cols > _columnSizes.size() )
         _columnSizes.resize(cols);
-    
+
     _columnSizes.at(col) = SizeInfo(mode, size);
 }
 
@@ -119,14 +119,14 @@ void TableLayout::setRow(std::size_t row, SizeMode mode, double size)
     std::size_t rows = row + 1;
     if( rows > _rowSizes.size() )
         _rowSizes.resize(rows);
-    
+
     _rowSizes.at(row) = SizeInfo(mode, size);
 }
 
 
 Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
 {
-    double itemsWidth = policy.width() - padding().leftRight(); 
+    double itemsWidth = policy.width() - padding().leftRight();
     double itemsHeight = policy.height() - padding().topBottom();
 
     Gfx::SizeF contentSize;
@@ -138,7 +138,7 @@ Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
 
         double rowWidth = 0;
         double rowHeight = 0;
-        
+
         for(std::size_t col = 0; col != columns; ++col)
         {
             SizeInfo& columnPolicy = _columnSizes.at(col);
@@ -149,11 +149,11 @@ Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
 
             if( ! item->isVisible() )
                 continue;
-            
+
             SizePolicy itemPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
             itemPolicy.setWidth( itemsWidth - item->margin().leftRight() );
             itemPolicy.setHeight( itemsHeight - item->margin().topBottom() );
-            
+
             if(columnPolicy.mode() == TableLayout::Fixed)
             {
                 itemPolicy.setHorizontal(SizePolicy::Fixed);
@@ -171,12 +171,12 @@ Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
 
             double itemWidth = prefSize.width() + item->margin().leftRight();
             double itemHeight = prefSize.height() + item->margin().topBottom();
-        
+
             rowWidth += itemWidth;
-            rowHeight = std::max(rowHeight, itemHeight);
+            rowHeight = std::max<double>(rowHeight, itemHeight);
         }
 
-        contentSize.addWidth( std::max(contentSize.width(), rowWidth) );
+        contentSize.addWidth( std::max<double>(contentSize.width(), rowWidth) );
         contentSize.addHeight(rowHeight);
     }
 
@@ -199,7 +199,7 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
     {
         SizeInfo& rowPolicy = _rowSizes.at(row);
         std::size_t columns = _rows.at(row).size();
-        
+
         if(rowPolicy.mode() == TableLayout::Preferred)
         {
             rowPolicy.setSize(0);
@@ -209,11 +209,11 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
                 Widget* item = _rows.at(row).at(col);
                 if( ! item )
                     continue;
-            
+
                 double height = item->preferredSize().height() +
                                 item->margin().topBottom();
 
-                height = std::max(rowPolicy.size(), height);
+                height = std::max<double>(rowPolicy.size(), height);
 
                 rowPolicy.setSize( std::floor(height + 0.5) );
             }
@@ -237,7 +237,7 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
     for(std::size_t col = 0; col != columns; ++col)
     {
         SizeInfo& columnPolicy = _columnSizes.at(col);
-        
+
         if(columnPolicy.mode() == TableLayout::Preferred)
         {
             columnPolicy.setSize(0);
@@ -250,8 +250,8 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
 
                 double preferredWidth = item->align( item->preferredSize().width() );
                 double width = preferredWidth + item->margin().leftRight();
-                width = std::max(columnPolicy.size(), width);
-                
+                width = std::max<double>(columnPolicy.size(), width);
+
                 columnPolicy.setSize(width);
             }
         }
@@ -262,7 +262,7 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
         columnAvail -= columnPolicy.size();
         columnAvail = columnAvail;
     }
-    
+
     //
     // cell layouting
     //
@@ -279,7 +279,7 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
 
         double x = padding().left();
         std::size_t columns = _rows.at(row).size();
-        
+
         for(std::size_t col = 0; col < columns; ++col)
         {
             SizeInfo& columnPolicy = _columnSizes.at(col);
@@ -290,15 +290,15 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
 
             if( item && item->isVisible() )
             {
-                Gfx::PointF pos( x + item->margin().left(), 
+                Gfx::PointF pos( x + item->margin().left(),
                                  y + item->margin().top() );
 
-                Gfx::SizeF size( columnSize - item->margin().leftRight(), 
+                Gfx::SizeF size( columnSize - item->margin().leftRight(),
                                  rowSize - item->margin().topBottom() );
 
                 item->layout(pos, size);
             }
-            
+
             x += columnSize;
         }
 

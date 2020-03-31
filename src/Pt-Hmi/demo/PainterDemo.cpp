@@ -11,6 +11,7 @@
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/System/Logger.h>
 
+
 class PaintView : public Pt::Hmi::Control
 {
     public:
@@ -294,8 +295,6 @@ class ShapesView : public PaintView
                 y = doPaint(y + 20, painter, text);
                 ip2->setAntiAliasing(true);
             };
-
-            //y = drawSPECIALTEST(y, painter);
         }
 
         int drawCircles(int y, Pt::Gfx::Painter& painter)
@@ -407,7 +406,7 @@ class ShapesView : public PaintView
             shape = makeRectangle(x, y, width, height, insetDraw, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
 
-            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
 
             y += height + 10;
 
@@ -458,48 +457,18 @@ class ShapesView : public PaintView
             // convex diamond shape
 
             shape = makeDiamond(x, y, width, height, offsetDraw);
-#if 0
-            Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
-            if(ip2 && !ip2->isAntiAliasing()) {
-                IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
-                std::cerr << "### 1 ###" << std::endl;
-                for (size_t i = 0; i < shape.size(); ++i) {
-                    std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                              << shape[i].x() << ", " << shape[i].y() << std::endl;
-                }
-                std::cerr << std::endl;
-            }
-#endif
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
             painter.drawPolyline(&shape[0], shape.size());
-            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
 
             x += width + 2;
 
             shape = makeDiamond(x, y, width, height, offsetFill);
-#if 0
-            Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
-            if(ip2 && !ip2->isAntiAliasing()) {
-                IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
-                std::cerr << "### 1 ###" << std::endl;
-                for (size_t i = 0; i < shape.size(); ++i) {
-                    std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                              << shape[i].x() << ", " << shape[i].y() << std::endl;
-                }
-                std::cerr << std::endl;
-            }
-#endif
-#if 0
-            Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
-            if(ip2) {
-                if(ip2->isAntiAliasing()) std::cerr << "WITH AA" << std::endl;
-                else                      std::cerr << "NO AA" << std::endl;
-                IP2_DEBUG::DUMP_SCANLINE_COORDINATES = true;
-            }
-#endif
+            //IP2_DEBUG::DUMP_SCANLINE_COORDINATES = true;
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
             painter.fillPolygon(&shape[0], shape.size());
-
-            IP2_DEBUG::DUMP_SCANLINE_COORDINATES = false;
-            IP2_DEBUG::DUMP_POLYGON_COORDINATES  = false;
+            //IP2_DEBUG::DUMP_SCANLINE_COORDINATES = false;
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES  = false;
 
             x += width + 2;
 
@@ -511,7 +480,7 @@ class ShapesView : public PaintView
             shape = makeDiamond(x, y, width, height, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
 
-            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
 
             x += width + 20;
 
@@ -564,93 +533,6 @@ class ShapesView : public PaintView
             polygon[5] = polygon[0];
             return polygon;
         }
-
-#if 0
-        int drawSPECIALTEST(int y, Pt::Gfx::Painter& painter)
-        {
-            using namespace Pt::Gfx;
-
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue = Color::fromRgb8(100, 100, 255);
-
-            painter.setPen(lightBlue);
-            painter.setBrush(lightPurple);
-
-            double x      = 5;
-            double width  = 5;
-            double height = 5;
-            std::vector<Pt::Gfx::PointF> polygon;
-
-            auto makeSimpleRectangle = [](double x, double y, double width, double height) {
-                std::vector<Pt::Gfx::PointF> p(5);
-                p[0].set(x,         y         );
-                p[1].set(x + width, y         );
-                p[2].set(x + width, y + height);
-                p[3].set(x,         y + height);
-                p[4] = p[0];
-                return p;
-            };
-            polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
-            painter.drawPolyline(&polygon[0], polygon.size());
-            polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
-            painter.fillPolygon (&polygon[0], polygon.size());
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
-            polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
-            painter.fillPolygon (&polygon[0], polygon.size());
-            painter.drawPolyline(&polygon[0], polygon.size());
-            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
-            y += 20;
-
-            x      = 5;
-            width  = 12;
-            height = 12;
-            auto makeSimpleDiamond = [](double x, double y, double width, double height) {
-                std::vector<Pt::Gfx::PointF> p(5);
-                p[0].set(x + width/2.0, y             );
-                p[1].set(x + width,     y + height/2.0);
-                p[2].set(x + width/2.0, y + height    );
-                p[3].set(x,             y + height/2.0);
-                p[4] = p[0];
-                return p;
-            };
-            polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
-            painter.drawPolyline(&polygon[0], polygon.size());
-            polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
-            painter.fillPolygon (&polygon[0], polygon.size());
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
-            polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
-            painter.fillPolygon (&polygon[0], polygon.size());
-            painter.drawPolyline(&polygon[0], polygon.size());
-            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
-            y += 20;
-
-            x      = 5;
-            width  = 12;
-            height = 12;
-            auto makeSimpleFlag = [](double x, double y, double width, double height) {
-                std::vector<Pt::Gfx::PointF> p(6);
-                p[0].set(x,             y             );
-                p[1].set(x + width,     y             );
-                p[2].set(x + width/2.0, y + height/2.0);
-                p[3].set(x + width,     y + height    );
-                p[4].set(x,             y + height    );
-                p[5] = p[0];
-                return p;
-            };
-            polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
-            painter.drawPolyline(&polygon[0], polygon.size());
-            polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
-            painter.fillPolygon (&polygon[0], polygon.size());
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
-            polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
-            painter.fillPolygon (&polygon[0], polygon.size());
-            painter.drawPolyline(&polygon[0], polygon.size());
-            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
-            y += 20;
-
-            return y;
-        }
-#endif
 };
 
 

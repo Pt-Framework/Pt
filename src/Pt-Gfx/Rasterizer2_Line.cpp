@@ -48,13 +48,13 @@ void Rasterizer2::rasterWideLine(const PointF* ps, std::size_t n)
 
     std::vector<PointF> clippedPolygon(ps, ps + n);
 
-    BasicClipShape<double>::clipPolygon(clippedPolygon, _currentClip);
+    BasicClipShape<PointF::ValueT>::clipPolygon(clippedPolygon, _currentClip);
     if(clippedPolygon.empty()) return;
 
     for(size_t j = 0; j < clippedPolygon.size(); ++j)
     {
-        const double x = clippedPolygon[j].x();
-        const double y = clippedPolygon[j].y();
+        const PointF::ValueT x = clippedPolygon[j].x();
+        const PointF::ValueT y = clippedPolygon[j].y();
 
         if(x < minX) minX = x;
         if(y < minY) minY = y;
@@ -104,13 +104,13 @@ void Rasterizer2::rasterWidePolyline(const std::vector<Polygon>& polygons)
     {
         Polygon& polygon = clippedPolygons[i];
 
-        BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
+        BasicClipShape<PointF::ValueT>::clipPolygon(polygon.points(), _currentClip);
         if(polygon.empty()) continue;
 
         for(size_t j = 0; j < polygon.size(); ++j)
         {
-            const double x = polygon.at(j).x();
-            const double y = polygon.at(j).y();
+            const PointF::ValueT x = polygon.at(j).x();
+            const PointF::ValueT y = polygon.at(j).y();
 
             if(x < minX) minX = x;
             if(y < minY) minY = y;

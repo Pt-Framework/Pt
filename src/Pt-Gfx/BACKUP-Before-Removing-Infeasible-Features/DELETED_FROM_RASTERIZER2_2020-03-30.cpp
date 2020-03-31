@@ -995,3 +995,277 @@ void Rasterizer2::rasterPolygonBorderXWAA_F(float x1, float y1,
 #endif
 
 
+
+
+
+void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
+{
+#if 0
+    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
+        const std::ios_base::fmtflags f(std::cerr.flags());
+        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AT ENTRY POINT ###" << std::endl;
+        for (size_t i = 0; i < n; ++i) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << ps[i].x() << ", " << ps[i].y() << std::endl;
+        }
+        std::cerr.flags(f);
+    }
+#endif
+
+    // Perform coordinate adjustments
+    std::vector<PointF> polygon(n);
+    size_t              pointCount = 0;
+
+#define FIXED_ADJUST
+
+#ifdef FIXED_ADJUST
+    for (size_t i = 0; i < n; ++i)
+    {
+        // Foor the coordinates while avoiding rounding errors
+        const double x = Pt::lround(ps[i].x() - 0.4999);
+        const double y = Pt::lround(ps[i].y() - 0.4999);
+        //const double x = ps[i].x();
+        //const double y = ps[i].y();
+        if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
+        polygon[pointCount++].set(x, y);
+    }
+    polygon.resize(pointCount);
+#else
+    double xc = 0.0f;
+    double yc = 0.0f;
+    size_t cn = n;
+    if(ps[n - 1] == ps[0]) --cn;
+    for (size_t i = 0; i < cn; ++i) {
+        xc += ps[i].x();
+        yc += ps[i].y();
+    }
+    xc = xc / (double) cn;
+    yc = yc / (double) cn;
+
+    for (size_t i = 0; i < n; ++i) {
+        double xi = ps[i].x();
+             if(xi < xc) xi += 0.5f;
+        else if(xi > xc) xi -= 0.5f;
+
+        double yi = ps[i].y();
+             if(yi < yc) yi += 0.5f;
+        else if(yi > yc) yi -= 0.5f;
+
+        // Foor the coordinates while avoiding rounding errors
+        const double x = Pt::lround(xi - 0.4999);
+        const double y = Pt::lround(yi - 0.4999);
+        //const double x = ps[i].x();
+        //const double y = ps[i].y();
+        if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
+        polygon[pointCount++].set(x, y);
+    }
+    polygon.resize(pointCount);
+#endif
+
+#if 0
+    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
+        const std::ios_base::fmtflags f(std::cerr.flags());
+#ifdef FIXED_ADJUST
+        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AFTER FIXED ADJUST ###" << std::endl;
+#else
+        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AFTER DYNAMIC ADJUST ### CENTER = " ;
+        std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                  << xc << ", " << yc << std::endl;
+#endif
+        for (size_t i = 0; i < polygon.size(); ++i) {
+            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
+                      << polygon[i].x() << ", " << polygon[i].y() << std::endl;
+        }
+        std::cerr << std::endl;
+        std::cerr.flags(f);
+    }
+#endif
+
+    // Clip the polygon
+    BasicClipShape<PointF::ValueT>::clipPolygon(polygon, _currentClip);
+
+#if 0
+    // #@#
+    // Perform coordinate adjustments
+    /*
+     *
+     * 0   1x
+     *
+     * 3y  2xy
+     *
+     */
+    const size_t sz = polygon.size();
+
+    std::vector<bool> adjX(sz, false);
+    std::vector<bool> adjY(sz, false);
+
+    for(size_t i = 0; i < sz; ++i)
+    {
+        size_t j = i + 1;
+        if(j >= sz) j = 0;
+
+        const double x0 = polygon[i].x();
+        const double y0 = polygon[i].y();
+        const double x1 = polygon[j].x();
+        const double y1 = polygon[j].y();
+
+        if(y0 == y1) {
+            if(x1 > x0) adjX[j] = true;
+            if(i > 0) {
+                if(adjY[i]) adjY[j] = true;
+            }
+        }
+        if(x0 == x1) {
+            if(y1 > y0) adjY[j] = true;
+            if(i > 0) {
+                if(adjX[i]) adjX[j] = true;
+            }
+        }
+    }
+
+    for(size_t i = 0; i < sz; ++i) {
+        if(adjX[i]) polygon[i].setX(polygon[i].x() - 1.0f);
+        if(adjY[i]) polygon[i].setY(polygon[i].y() - 1.0f);
+    }
+
+    adjX.clear();
+    adjY.clear();
+#endif
+
+    // Find the minimum and maximum coordinates
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+    for(size_t j = 0; j < polygon.size(); ++j)
+    {
+#if 1
+        const PointF::ValueT x = polygon[j].x();
+        const PointF::ValueT y = polygon[j].y();
+
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
+#else
+        const PointF::ValueT x1 = floor( polygon[j].x() );
+        const PointF::ValueT x2 = ceil ( polygon[j].x() );
+        if(x1 < minX) minX = x1;
+        if(x2 < minX) minX = x2;
+        if(x1 > maxX) maxX = x1;
+        if(x2 > maxX) maxX = x2;
+
+        const PointF::ValueT y1 = floor( polygon[j].y() );
+        const PointF::ValueT y2 = ceil ( polygon[j].y() );
+        if(y1 < minY) minY = y1;
+        if(y2 < minY) minY = y2;
+        if(y1 > maxY) maxY = y1;
+        if(y2 > maxY) maxY = y2;
+#endif
+    }
+
+    if(_isGradient)
+        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+
+    // #@#
+    if( this->isAntiAliasing() )
+    {
+        rasterPolygonXWAA(&polygon[0], polygon.size(),
+                          _brush.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonNoAA(&polygon[0], polygon.size(),
+                          _brush.color(), minX, minY, maxX, maxY);
+    }
+}
+
+
+
+
+#if 0
+        int drawSPECIALTEST(int y, Pt::Gfx::Painter& painter)
+        {
+            using namespace Pt::Gfx;
+
+            Color lightPurple = Color::fromRgb8(164, 100, 255);
+            Color lightBlue = Color::fromRgb8(100, 100, 255);
+
+            painter.setPen(lightBlue);
+            painter.setBrush(lightPurple);
+
+            double x      = 5;
+            double width  = 5;
+            double height = 5;
+            std::vector<Pt::Gfx::PointF> polygon;
+
+            auto makeSimpleRectangle = [](double x, double y, double width, double height) {
+                std::vector<Pt::Gfx::PointF> p(5);
+                p[0].set(x,         y         );
+                p[1].set(x + width, y         );
+                p[2].set(x + width, y + height);
+                p[3].set(x,         y + height);
+                p[4] = p[0];
+                return p;
+            };
+            polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
+            painter.drawPolyline(&polygon[0], polygon.size());
+            polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
+            polygon = makeSimpleRectangle(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            painter.drawPolyline(&polygon[0], polygon.size());
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+            y += 20;
+
+            x      = 5;
+            width  = 12;
+            height = 12;
+            auto makeSimpleDiamond = [](double x, double y, double width, double height) {
+                std::vector<Pt::Gfx::PointF> p(5);
+                p[0].set(x + width/2.0, y             );
+                p[1].set(x + width,     y + height/2.0);
+                p[2].set(x + width/2.0, y + height    );
+                p[3].set(x,             y + height/2.0);
+                p[4] = p[0];
+                return p;
+            };
+            polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
+            painter.drawPolyline(&polygon[0], polygon.size());
+            polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
+            polygon = makeSimpleDiamond(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            painter.drawPolyline(&polygon[0], polygon.size());
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+            y += 20;
+
+            x      = 5;
+            width  = 12;
+            height = 12;
+            auto makeSimpleFlag = [](double x, double y, double width, double height) {
+                std::vector<Pt::Gfx::PointF> p(6);
+                p[0].set(x,             y             );
+                p[1].set(x + width,     y             );
+                p[2].set(x + width/2.0, y + height/2.0);
+                p[3].set(x + width,     y + height    );
+                p[4].set(x,             y + height    );
+                p[5] = p[0];
+                return p;
+            };
+            polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
+            painter.drawPolyline(&polygon[0], polygon.size());
+            polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
+            polygon = makeSimpleFlag(x, y, width, height); x += width + 2;
+            painter.fillPolygon (&polygon[0], polygon.size());
+            painter.drawPolyline(&polygon[0], polygon.size());
+            IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
+            y += 20;
+
+            return y;
+        }
+#endif

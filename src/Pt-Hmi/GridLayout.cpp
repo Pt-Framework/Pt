@@ -1,10 +1,10 @@
-/* Copyright (C) 2017 Marc Boris Duerner 
-  
+/* Copyright (C) 2017 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -87,8 +87,8 @@ Gfx::SizeF GridLayout::onMeasure(const SizePolicy& policy)
 
 Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
 {
-    double itemsWidth = policy.size().width() - padding().leftRight(); 
-    double itemsHeight = policy.size().height() - padding().topBottom(); 
+    double itemsWidth = policy.size().width() - padding().leftRight();
+    double itemsHeight = policy.size().height() - padding().topBottom();
 
     Gfx::SizeF itemSize;
 
@@ -111,9 +111,9 @@ Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
 
         double itemWidth = prefSize.width() + item->margin().leftRight();
         double itemHeight = prefSize.height() + item->margin().topBottom();
-        
-        double width = std::max( itemWidth, itemSize.width() );
-        double height = std::max( itemHeight, itemSize.height() );
+
+        double width = std::max<double>( itemWidth, itemSize.width() );
+        double height = std::max<double>( itemHeight, itemSize.height() );
         itemSize.set(width, height);
     }
 
@@ -133,7 +133,7 @@ Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
         }
         else
         {
-            cols = static_cast<std::size_t>( 
+            cols = static_cast<std::size_t>(
                       std::sqrt( static_cast<double>(widgets().size()) ) + 0.5 );
         }
     }
@@ -160,15 +160,15 @@ Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
         }
     }
 
-    return Gfx::SizeF(cols * itemSize.width(), 
+    return Gfx::SizeF(cols * itemSize.width(),
                       rows * itemSize.height());
 }
 
 
 Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
 {
-    double itemsWidth = policy.size().width() - padding().leftRight(); 
-    double itemsHeight = policy.size().height() - padding().topBottom(); 
+    double itemsWidth = policy.size().width() - padding().leftRight();
+    double itemsHeight = policy.size().height() - padding().topBottom();
 
     Gfx::SizeF itemSize;
 
@@ -191,9 +191,9 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
 
         double itemWidth = prefSize.width() + item->margin().leftRight();
         double itemHeight = prefSize.height() + item->margin().topBottom();
-        
-        double width = std::max( itemWidth, itemSize.width() );
-        double height = std::max( itemHeight, itemSize.height() );
+
+        double width = std::max<double>( itemWidth, itemSize.width() );
+        double height = std::max<double>( itemHeight, itemSize.height() );
         itemSize.set(width, height);
     }
 
@@ -202,7 +202,7 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
     if(_span == 0 && itemSize.height() > 0)
     {
         std::size_t maxRows = static_cast<std::size_t>( itemsHeight / itemSize.height() );
-        
+
         if(policy.vertical() == SizePolicy::Fixed)
         {
             rows = maxRows;
@@ -213,7 +213,7 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
         }
         else
         {
-            rows = static_cast<std::size_t>( 
+            rows = static_cast<std::size_t>(
                       std::sqrt( static_cast<double>(widgets().size()) ) + 0.5 );
         }
     }
@@ -240,7 +240,7 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
         }
     }
 
-    return Gfx::SizeF(cols * itemSize.width(), 
+    return Gfx::SizeF(cols * itemSize.width(),
                       rows * itemSize.height());
 }
 
@@ -265,9 +265,9 @@ void GridLayout::onLayout(const Gfx::RectF& rect)
 
         double itemWidth = item->preferredSize().width() + item->margin().leftRight();
         double itemHeight = item->preferredSize().height() + item->margin().topBottom();
-        
-        double width = std::max( itemWidth, itemSize.width() );
-        double height = std::max( itemHeight, itemSize.height() );
+
+        double width = std::max<double>( itemWidth, itemSize.width() );
+        double height = std::max<double>( itemHeight, itemSize.height() );
         itemSize.set(width, height);
     }
 
@@ -318,7 +318,7 @@ void GridLayout::onLayoutVertical(const Gfx::SizeF& itemSize, const Gfx::RectF& 
     for(it = widgets().begin(); it != end; ++it)
     {
         Widget* widget = *it;
-        
+
         if( ! widget->isVisible() )
             continue;
 
@@ -330,7 +330,7 @@ void GridLayout::onLayoutVertical(const Gfx::SizeF& itemSize, const Gfx::RectF& 
         widget->layout(pos, widget->preferredSize());
 
         itemX += itemSize.width();
-        
+
         if(++col == cols)
         {
             col = 0;
@@ -366,11 +366,11 @@ void GridLayout::onLayoutHorizontal(const Gfx::SizeF& itemSize, const Gfx::RectF
     double itemX = padding().left();
     double itemY = startY;
     unsigned row = 0;
-    
+
     for(it = widgets().begin(); it != end; ++it)
     {
         Widget* widget = *it;
-        
+
         if( ! widget->isVisible() )
             continue;
 
@@ -382,7 +382,7 @@ void GridLayout::onLayoutHorizontal(const Gfx::SizeF& itemSize, const Gfx::RectF
         widget->layout(pos, widget->preferredSize());
 
         itemY += itemSize.height();
-        
+
         if(++row == rows)
         {
             row = 0;

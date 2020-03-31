@@ -1,12 +1,12 @@
 /* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
    Copyright (C) 2006-2015 Marc Boris Duerner
    Copyright (C) 2010 Aloysius Indrayanto
- 
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -16,15 +16,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -39,11 +39,15 @@ namespace Pt {
 
 namespace Gfx {
 
+
 /** @brief %Point with X ynd X coordinates.
 */
 template<typename T>
-class BasicPoint 
+class BasicPoint
 {
+    public:
+        typedef T ValueT;
+
     public:
         //! @brief Construct a BasicPoint of (0,0)
         BasicPoint()
@@ -113,9 +117,9 @@ class BasicPoint
         //! @brief Move the BasicPoint as far as th given the X and Y distances
         const BasicPoint& move(T dx, T dy)
         {
-            _x += dx; 
-                        _y += dy; 
-                        return *this;
+            _x += dx;
+            _y += dy;
+            return *this;
         }
 
         //! @brief Calculate distance between this BasicPoint and the given BasicPoint
@@ -236,14 +240,18 @@ class BasicPoint
         T _y;
 };
 
+
 typedef BasicPoint<Pt::ssize_t> Point;
 typedef BasicPoint<double> PointF;
+//typedef BasicPoint<float> PointF;
+
 
 inline Point round(const PointF& r)
 {
-  return Point( lround(r.x()), 
+  return Point( lround(r.x()),
                 lround(r.y()) );
 }
+
 
 } // namespace
 

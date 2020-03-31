@@ -39,10 +39,14 @@ namespace Pt {
 
 namespace Gfx {
 
+
 /** @brief %Size with width and height.
 */
 template<typename T>
 class BasicSize {
+    public:
+        typedef T ValueT;
+
     public:
         /** @brief Construct with width and height.
         */
@@ -132,13 +136,13 @@ class BasicSize {
         }
 
         bool operator==(const BasicSize& other) const
-        { 
-            return (_w == other._w && _h == other._h); 
+        {
+            return (_w == other._w && _h == other._h);
         }
 
         bool operator!=(const BasicSize& other) const
-        { 
-            return (_w != other._w || _h != other._h); 
+        {
+            return (_w != other._w || _h != other._h);
         }
 
         bool operator>(const BasicSize& other) const
@@ -204,15 +208,18 @@ class BasicSize {
         T _h;
 };
 
- 
+
 typedef BasicSize<Pt::ssize_t> Size;
 typedef BasicSize<double> SizeF;
+//typedef BasicSize<float> SizeF;
+
 
 inline Size round(const SizeF& r)
 {
   return Size( lround(r.width()),
                lround(r.height()) );
 }
+
 
 } //namespace
 

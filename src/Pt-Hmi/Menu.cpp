@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -45,7 +45,7 @@ Menu::Menu()
 , _iconWidth(0)
 , _hasRenderer(false)
 {
-    setContent(&_layout);    
+    setContent(&_layout);
 }
 
 
@@ -67,13 +67,13 @@ Menu::~Menu()
 
 
 MenuShell* Menu::parentShell()
-{ 
-    return _parentShell; 
+{
+    return _parentShell;
 }
 
 
 MenuShell& Menu::rootShell()
-{    
+{
     if( _parentMenu )
         return _parentMenu->rootShell();
 
@@ -97,10 +97,10 @@ void Menu::addItem(MenuItem& item)
         return;
 
    _layout.addItem(item);
-    
+
     item._menu = this;
     item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
-    
+
     invalidate();
 }
 
@@ -121,13 +121,13 @@ void Menu::removeItem(MenuItem& item)
 
 void Menu::onItemTriggered(MenuItem&)
 {
-    rootShell().cancel();    
+    rootShell().cancel();
 }
 
 
 void Menu::onAddMenu(Menu& menu, const Pt::String& text)
 {
-    MenuItem* item = new MenuItem(); 
+    MenuItem* item = new MenuItem();
     item->setText(text);
     item->setSubMenu(menu);
 
@@ -135,10 +135,10 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
 
     item->_menu = this;
     item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
-    
+
     _subMenus.push_back(item);
     menu._parentMenu = this;
-    
+
     invalidate();
 }
 
@@ -151,13 +151,13 @@ void Menu::onRemoveMenu(Menu& menu)
         if( (*it)->subMenu() == &menu )
         {
             delete *it;
-            
+
             _subMenus.erase(it);
             menu._parentMenu = 0;
 
             if(_currentMenu == &menu)
                 _currentMenu = 0;
-            
+
             break;
         }
     }
@@ -171,7 +171,7 @@ void Menu::onMenuTriggered(MenuItem& item)
 
     // TODO: open menu on mouse enter and close menu on mouse leave
     //       possibly delayed by a 500ms timer
-    
+
     if( ! menu->isVisible() )
     {
         Gfx::PointF topRight(item.size().width(), 0);
@@ -187,7 +187,7 @@ void Menu::onMenuTriggered(MenuItem& item)
 
 
 MenuShell* Menu::onFindMenu(const Gfx::PointF& screenPos)
-{ 
+{
     if( ! isVisible() )
         return 0;
 
@@ -271,7 +271,7 @@ void Menu::setRenderer(MenuRenderer* renderer)
 }
 
 
-/* TODO: 
+/* TODO:
 this happens when item->resize() is called in onInvalidate
 One soluton is to assign the _size member in Window::resize immediately
 and not only when the ResizeEvent is received
@@ -306,17 +306,17 @@ void Menu::onInvalidate()
         itemSize.addHeight( item->margin().topBottom() );
 
         // the width of the menu is the width of the widest item
-        menuWidth = std::max( menuWidth, itemSize.width() );
+        menuWidth = std::max<double>( menuWidth, itemSize.width() );
 
         // the height of the menu is the sum of the item heights
         menuHeight += itemSize.height();
 
-        _iconWidth = std::max(item->icon().width(), _iconWidth);
+        _iconWidth = std::max<double>(item->icon().width(), _iconWidth);
     }
-    
+
     int iconPadding = 4;
     int menuPadding = 4;
-   
+
     if(_iconWidth > 0)
     {
         _iconWidth += 2 * iconPadding;
@@ -324,7 +324,7 @@ void Menu::onInvalidate()
     }
 
     _layout.setPadding(menuPadding);
-    
+
     Gfx::SizeF size(menuWidth, menuHeight);
     size.addWidth( _layout.padding().leftRight() );
     size.addHeight( _layout.padding().topBottom() );
@@ -339,7 +339,7 @@ void Menu::onInvalidate()
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<MenuRenderer>() );
-    
+
     if( ! _renderer )
         return;
 
@@ -359,7 +359,7 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
     Painter painter( surface() );
     painter.setClip(rect);
 
-    _renderer->renderBackground(*this, options, painter, rect, 
+    _renderer->renderBackground(*this, options, painter, rect,
                                 _brush, _pen);
 }
 
@@ -410,8 +410,8 @@ void Menu::onCloseEvent(const CloseEvent& ev)
 
     if( parentShell() )
         parentShell()->onCloseMenu(*this);
-    
-    Base::onCloseEvent(ev);    
+
+    Base::onCloseEvent(ev);
 }
 
 
@@ -458,7 +458,7 @@ void Menu::onShowEvent(const ShowEvent& ev)
 void Menu::onEnterEvent( const EnterEvent& ev )
 {
     Base::onEnterEvent(ev);
-    
+
     onEnter();
 }
 

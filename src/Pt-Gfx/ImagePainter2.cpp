@@ -39,10 +39,12 @@ namespace Pt {
 namespace Gfx {
 
 
+#if 0
 // ### TEMPORARY ###
 bool IP2_DEBUG::DUMP_POLYGON_COORDINATES  = false;
 bool IP2_DEBUG::DUMP_SCANLINE_COORDINATES = false;
 // ### TEMPORARY ###
+#endif
 
 
 ImagePainter2::ImagePainter2(Image& image)

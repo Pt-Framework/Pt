@@ -658,7 +658,7 @@ void Widget::measure(const SizePolicy& policy)
 {
     SizePolicy contentPolicy = _sizePolicy;
 
-    // use stricter size mode of parent and, if parent is fixed, 
+    // use stricter size mode of parent and, if parent is fixed,
     // we also use the parents fixed width
     if( policy.horizontal() > _sizePolicy.horizontal() ||
         policy.horizontal() == SizePolicy::Fixed )
@@ -667,7 +667,7 @@ void Widget::measure(const SizePolicy& policy)
         contentPolicy.setWidth( policy.width() );
     }
 
-    // use stricter size mode of parent and, if parent is fixed, 
+    // use stricter size mode of parent and, if parent is fixed,
     // we also use the parents fixed height
     if( policy.vertical() > _sizePolicy.vertical() ||
         policy.vertical() == SizePolicy::Fixed )
@@ -714,7 +714,7 @@ void Widget::measure(const SizePolicy& policy)
 
 
         if(contentPolicy.vertical() == SizePolicy::Maximum)
-            _preferredSize.setHeight( std::min( _preferredSize.height(),
+            _preferredSize.setHeight( std::min<double>( _preferredSize.height(),
                                                 contentPolicy.height() ) );
 
         // use fixed width, if size mode is fixed
@@ -724,7 +724,7 @@ void Widget::measure(const SizePolicy& policy)
             _preferredSize.setWidth( _minimumSize.width() );
 
         if(contentPolicy.horizontal() == SizePolicy::Maximum)
-            _preferredSize.setWidth( std::min( _preferredSize.width(),
+            _preferredSize.setWidth( std::min<double>( _preferredSize.width(),
                                                 contentPolicy.width() ) );
     }
 }

@@ -1,10 +1,10 @@
 /* Copyright (C) 2017 Marc Boris Duerner
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  As a special exception, you may use this file as part of a free
  software library without restriction. Specifically, if other files
  instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
  License. This exception does not however invalidate any other
  reasons why the executable file might be covered by the GNU Library
  General Public License.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  MA 02110-1301 USA
 */
 
@@ -55,7 +55,7 @@ const Gfx::PointF& TextLine::position() const
     return _position;
 }
 
-        
+
 void TextLine::setPosition(const Gfx::PointF& p)
 {
     _position = p;
@@ -66,7 +66,7 @@ void TextLine::setPosition(double x, double y)
 {
     _position.set(x, y);
 }
-   
+
 
 double TextLine::width() const
 {
@@ -125,7 +125,7 @@ void TextLine::setText(const Pt::String& text, const Gfx::Font& font,
 double TextLine::cursorToX(std::size_t cursorPosition) const
 {
     Pt::String left;
-    if( cursorPosition <= _text.size() && ! _text.empty() ) 
+    if( cursorPosition <= _text.size() && ! _text.empty() )
         left = _text.substr(0, cursorPosition);
 
     Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics(_font, left);
@@ -161,19 +161,19 @@ std::size_t TextLine::xToCursor(double x) const
         {
             left = str.substr(0, pos);
             fm = Hmi::Painter::fontMetrics( _font, left );
-      
+
             if( textX >= fm.width() )
                 break;
         }
     }
-    else 
+    else
     {
         // cursor position was under estimated, so search right
         for(++pos ; pos < str.size(); ++pos)
         {
             left = str.substr(0, pos + 1);
             fm = Hmi::Painter::fontMetrics( _font, left );
-      
+
             if( textX < fm.width() )
                 break;
         }
@@ -206,7 +206,7 @@ const Gfx::PointF& TextBlock::position() const
     return _position;
 }
 
-      
+
 void TextBlock::setPosition(const Gfx::PointF& p)
 {
     _position = p;
@@ -263,9 +263,9 @@ TextBlock::Iterator TextBlock::begin()
 
 TextBlock::Iterator TextBlock::end()
 {
-    TextLine* line = _lines.empty() ? 0 
+    TextLine* line = _lines.empty() ? 0
                                     : &_lines[0] + _lines.size();
-    return line; 
+    return line;
 }
 
 
@@ -277,9 +277,9 @@ TextBlock::ConstIterator TextBlock::begin() const
 
 TextBlock::ConstIterator TextBlock::end() const
 {
-    const TextLine* line = _lines.empty() ? 0 
+    const TextLine* line = _lines.empty() ? 0
                                           : &_lines[0] + _lines.size();
-    return line; 
+    return line;
 }
 
 
@@ -301,7 +301,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
         {
             if(onSpace)
                 continue;
-          
+
             word.second = n;
             words.push_back(word);
             onSpace = true;
@@ -310,7 +310,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
         {
             if( ! onSpace )
                 continue;
-                
+
             word.first = n;
             onSpace = false;
         }
@@ -338,10 +338,10 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
         wordEnd = it->second;
 
         segment.append(&text[prevWordEnd], wordEnd - prevWordEnd);
-        
+
         Gfx::FontMetrics fm = Painter::fontMetrics(font, segment);
         double segmentWidth = fm.width();
-        
+
         if(segmentWidth <= _maxWidth || lineLength == 0)
         {
             lineLength = segment.size();
@@ -352,7 +352,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
         // remove the line from the segment
         segment.assign(&text[wordBegin], wordEnd - wordBegin );
 
-        // add the whitespace after the last word of the line 
+        // add the whitespace after the last word of the line
         lineLength += wordBegin - prevWordEnd;
 
         Pt::String line(&text[lineBegin], lineLength);
@@ -366,15 +366,15 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
 
     // add the whitespace after the last word
     lineLength += text.size() - wordEnd;
-    
+
     Pt::String line(&text[lineBegin], lineLength);
     //line += ';';
     addLine(line, font, lineMetrics);
 }
 
 
-void TextBlock::addLine(const Pt::String& line, 
-                        const Gfx::Font& font, 
+void TextBlock::addLine(const Pt::String& line,
+                        const Gfx::Font& font,
                         const Gfx::FontMetrics& tm)
 {
     double lineWidth = tm.width();
@@ -390,7 +390,7 @@ void TextBlock::addLine(const Pt::String& line,
 
     _lines.resize(_lines.size() + 1);
     TextLine& textLine = _lines.back();
-    
+
     textLine.setText(line, font, tm);
 
     switch(_adjustment)
@@ -407,11 +407,11 @@ void TextBlock::addLine(const Pt::String& line,
         case Adjustment::Center:
             lineX = (_maxWidth - tm.width()) / 2;
             break;
-    } 
-        
+    }
+
     textLine.setPosition(lineX, lineY);
 
-    _size.setWidth( std::max(_size.width(), lineWidth) );
+    _size.setWidth( std::max<double>(_size.width(), lineWidth) );
     _size.addHeight(lineHeight);
 
     if( ! firstLine )

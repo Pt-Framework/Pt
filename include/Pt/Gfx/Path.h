@@ -43,6 +43,7 @@ namespace Pt {
 namespace Gfx {
 
 
+#if 0
 // ### TEMPORARY ###
 class PT_GFX_API IP2_DEBUG
 {
@@ -51,13 +52,14 @@ class PT_GFX_API IP2_DEBUG
         static bool DUMP_SCANLINE_COORDINATES;
 };
 // ### TEMPORARY ###
+#endif
 
 
 class Polygon
 {
     public:
         Polygon(const PointF* ps, std::size_t n)
-        : _points(ps, ps+n)
+        : _points(ps, ps + n)
         {
         }
 
@@ -121,7 +123,8 @@ class Polygon
             return _points;
         }
 
-       /* Polygon toPixel() const
+#if 0
+        Polygon toPixel() const
         {
 
             double xmin = std::numeric_limits<double>::max();
@@ -175,10 +178,13 @@ class Polygon
             }
 
             return polygon;
-        }*/
+        }
+#endif
+
     private:
         std::vector<PointF> _points;
 };
+
 
 struct Element
 {
@@ -211,8 +217,6 @@ struct Element
     Element(ElementType type_, const std::vector<double>& pxy_)
     : type(type_), pxy(pxy_)
     {}
-
-
 
 
     ElementType         type;
@@ -284,6 +288,7 @@ class PT_GFX_API Path
         ElementVector _elements;
         PointF        _position;
 };
+
 
 } // namespace
 

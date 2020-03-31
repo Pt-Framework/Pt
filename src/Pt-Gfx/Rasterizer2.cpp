@@ -818,6 +818,7 @@ void Rasterizer2::drawPolyline(const PointF* ps, size_t n)
         polygon.push_back(p);
     }
 
+#if 0
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES)
     {
         const std::ios_base::fmtflags f(std::cerr.flags());
@@ -837,6 +838,7 @@ void Rasterizer2::drawPolyline(const PointF* ps, size_t n)
         std::cerr << std::endl;
         std::cerr.flags(f);
     }
+#endif
 
     if(_pen.size() == 1)
        drawNarrowPolyline( &polygon[0], polygon.size() );
@@ -1104,6 +1106,7 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 {
+#if 0
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
         const std::ios_base::fmtflags f(std::cerr.flags());
         std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AT ENTRY POINT ###" << std::endl;
@@ -1113,14 +1116,13 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         }
         std::cerr.flags(f);
     }
+#endif
 
     // Perform coordinate adjustments
     std::vector<PointF> polygon(n);
     size_t              pointCount = 0;
 
-#define FIXED_ADJUST
 
-#ifdef FIXED_ADJUST
     for (size_t i = 0; i < n; ++i)
     {
         // Foor the coordinates while avoiding rounding errors
@@ -1132,47 +1134,11 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         polygon[pointCount++].set(x, y);
     }
     polygon.resize(pointCount);
-#else
-    double xc = 0.0f;
-    double yc = 0.0f;
-    size_t cn = n;
-    if(ps[n - 1] == ps[0]) --cn;
-    for (size_t i = 0; i < cn; ++i) {
-        xc += ps[i].x();
-        yc += ps[i].y();
-    }
-    xc = xc / (double) cn;
-    yc = yc / (double) cn;
 
-    for (size_t i = 0; i < n; ++i) {
-        double xi = ps[i].x();
-             if(xi < xc) xi += 0.5f;
-        else if(xi > xc) xi -= 0.5f;
-
-        double yi = ps[i].y();
-             if(yi < yc) yi += 0.5f;
-        else if(yi > yc) yi -= 0.5f;
-
-        // Foor the coordinates while avoiding rounding errors
-        const double x = Pt::lround(xi - 0.4999);
-        const double y = Pt::lround(yi - 0.4999);
-        //const double x = ps[i].x();
-        //const double y = ps[i].y();
-        if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
-        polygon[pointCount++].set(x, y);
-    }
-    polygon.resize(pointCount);
-#endif
-
+#if 0
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
         const std::ios_base::fmtflags f(std::cerr.flags());
-#ifdef FIXED_ADJUST
         std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AFTER FIXED ADJUST ###" << std::endl;
-#else
-        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AFTER DYNAMIC ADJUST ### CENTER = " ;
-        std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                  << xc << ", " << yc << std::endl;
-#endif
         for (size_t i = 0; i < polygon.size(); ++i) {
             std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
                       << polygon[i].x() << ", " << polygon[i].y() << std::endl;
@@ -1180,57 +1146,10 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         std::cerr << std::endl;
         std::cerr.flags(f);
     }
+#endif
 
     // Clip the polygon
-    BasicClipShape<double>::clipPolygon(polygon, _currentClip);
-
-#if 0
-    // #@#
-    // Perform coordinate adjustments
-    /*
-     *
-     * 0   1x
-     *
-     * 3y  2xy
-     *
-     */
-    const size_t sz = polygon.size();
-
-    std::vector<bool> adjX(sz, false);
-    std::vector<bool> adjY(sz, false);
-
-    for(size_t i = 0; i < sz; ++i)
-    {
-        size_t j = i + 1;
-        if(j >= sz) j = 0;
-
-        const double x0 = polygon[i].x();
-        const double y0 = polygon[i].y();
-        const double x1 = polygon[j].x();
-        const double y1 = polygon[j].y();
-
-        if(y0 == y1) {
-            if(x1 > x0) adjX[j] = true;
-            if(i > 0) {
-                if(adjY[i]) adjY[j] = true;
-            }
-        }
-        if(x0 == x1) {
-            if(y1 > y0) adjY[j] = true;
-            if(i > 0) {
-                if(adjX[i]) adjX[j] = true;
-            }
-        }
-    }
-
-    for(size_t i = 0; i < sz; ++i) {
-        if(adjX[i]) polygon[i].setX(polygon[i].x() - 1.0f);
-        if(adjY[i]) polygon[i].setY(polygon[i].y() - 1.0f);
-    }
-
-    adjX.clear();
-    adjY.clear();
-#endif
+    BasicClipShape<PointF::ValueT>::clipPolygon(polygon, _currentClip);
 
     // Find the minimum and maximum coordinates
     Pt::int32_t minX =  MAXIMUM_COORD;
@@ -1239,29 +1158,12 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     Pt::int32_t maxY = -MAXIMUM_COORD;
     for(size_t j = 0; j < polygon.size(); ++j)
     {
-#if 1
-        const double x = polygon[j].x();
-        const double y = polygon[j].y();
-
+        const PointF::ValueT x = polygon[j].x();
+        const PointF::ValueT y = polygon[j].y();
         if(x < minX) minX = x;
         if(y < minY) minY = y;
         if(x > maxX) maxX = x;
         if(y > maxY) maxY = y;
-#else
-        const double x1 = floor( polygon[j].x() );
-        const double x2 = ceil ( polygon[j].x() );
-        if(x1 < minX) minX = x1;
-        if(x2 < minX) minX = x2;
-        if(x1 > maxX) maxX = x1;
-        if(x2 > maxX) maxX = x2;
-
-        const double y1 = floor( polygon[j].y() );
-        const double y2 = ceil ( polygon[j].y() );
-        if(y1 < minY) minY = y1;
-        if(y2 < minY) minY = y2;
-        if(y1 > maxY) maxY = y1;
-        if(y2 > maxY) maxY = y2;
-#endif
     }
 
     if(_isGradient)
@@ -1288,12 +1190,12 @@ void Rasterizer2::fillPolygon_NR(const PointF* ps, std::size_t n)
 
     for (size_t i = 0; i < n; ++i)
     {
-        const double x = ps[i].x();
-        const double y = ps[i].y();
+        const PointF::ValueT x = ps[i].x();
+        const PointF::ValueT y = ps[i].y();
         polygon[i].set(x, y);
     }
 
-    BasicClipShape<double>::clipPolygon(polygon, _currentClip);
+    BasicClipShape<PointF::ValueT>::clipPolygon(polygon, _currentClip);
 
     // Find the minimum and maximum coordinates
     Pt::int32_t minX =  MAXIMUM_COORD;
@@ -1302,15 +1204,15 @@ void Rasterizer2::fillPolygon_NR(const PointF* ps, std::size_t n)
     Pt::int32_t maxY = -MAXIMUM_COORD;
     for(size_t j = 0; j < polygon.size(); ++j)
     {
-        const double x1 = floor( polygon[j].x() );
-        const double x2 = ceil ( polygon[j].x() );
+        const PointF::ValueT x1 = floor( polygon[j].x() );
+        const PointF::ValueT x2 = ceil ( polygon[j].x() );
         if(x1 < minX) minX = x1;
         if(x2 < minX) minX = x2;
         if(x1 > maxX) maxX = x1;
         if(x2 > maxX) maxX = x2;
 
-        const double y1 = floor( polygon[j].y() );
-        const double y2 = ceil ( polygon[j].y() );
+        const PointF::ValueT y1 = floor( polygon[j].y() );
+        const PointF::ValueT y2 = ceil ( polygon[j].y() );
         if(y1 < minY) minY = y1;
         if(y2 < minY) minY = y2;
         if(y1 > maxY) maxY = y1;
@@ -1346,12 +1248,12 @@ void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
     {
         Polygon& polygon = clippedPolygons[i];
 
-        BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
+        BasicClipShape<PointF::ValueT>::clipPolygon(polygon.points(), _currentClip);
 
         for(size_t j = 0; j < polygon.size(); ++j)
         {
-            const double x = polygon.at(j).x();
-            const double y = polygon.at(j).y();
+            const PointF::ValueT x = polygon.at(j).x();
+            const PointF::ValueT y = polygon.at(j).y();
 
             if(x < minX) minX = x;
             if(y < minY) minY = y;
