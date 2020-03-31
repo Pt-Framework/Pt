@@ -1265,13 +1265,20 @@ void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
     if(_isGradient)
         updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
+
     if( this->isAntiAliasing() )
     {
-        rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
+        if(clippedPolygons.size() == 1)
+            rasterPolygonXWAA(&clippedPolygons[0][0], clippedPolygons[0].size(), _brush.color(), minX, minY, maxX, maxY);
+        else
+            rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
     }
     else
     {
-        rasterPolygonsNoAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
+        if(clippedPolygons.size() == 1)
+            rasterPolygonNoAA(&clippedPolygons[0][0], clippedPolygons[0].size(), _brush.color(), minX, minY, maxX, maxY);
+        else
+            rasterPolygonsNoAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
     }
 }
 
@@ -1320,7 +1327,7 @@ void Rasterizer2::fillPie(const PointF& topLeft, const SizeF& size,
 
     Size  sz(round(size));
 
-     rasterArcArea(tl, sz, degBegin, degEnd, ArcMode::Pie);
+    rasterArcArea(tl, sz, degBegin, degEnd, ArcMode::Pie);
 }
 
 
@@ -1331,7 +1338,7 @@ void Rasterizer2::fillChord( const PointF& topLeft, const SizeF& size,
 
     const Size  sz(round(size));
 
-     rasterArcArea(tl, sz, degBegin, degEnd, ArcMode::Chord);
+    rasterArcArea(tl, sz, degBegin, degEnd, ArcMode::Chord);
 }
 
 

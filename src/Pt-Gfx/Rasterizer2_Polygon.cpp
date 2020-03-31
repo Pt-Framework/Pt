@@ -173,21 +173,21 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
 
         for(size_t p = 0; p < polygons.size(); ++p)
         {
-            const Polygon* polygon = &polygons[p];
+            const Polygon& polygon = polygons[p];
 
-            if( polygon->size() < 2 )
+            if( polygon.size() < 2 )
                 continue;
 
             // Loop through the points
-            Pt::int32_t j = polygon->size() - 1;
+            Pt::int32_t j = polygon.size() - 1;
 
-            for(size_t i = 0; i < polygon->size(); ++i)
+            for(size_t i = 0; i < polygon.size(); ++i)
             {
                 // Get the coordinates
-                const float curXi = polygon->at(i).x();
-                const float curYi = polygon->at(i).y();
-                const float curXj = polygon->at(j).x();
-                const float curYj = polygon->at(j).y();
+                const float curXi = polygon[i].x();
+                const float curYi = polygon[i].y();
+                const float curXj = polygon[j].x();
+                const float curYj = polygon[j].y();
 
                 // Calculate the node's coordinate
                 if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
@@ -360,6 +360,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
                                      Pt::int32_t minX, Pt::int32_t minY,
                                      Pt::int32_t maxX, Pt::int32_t maxY)
 {
+
     std::size_t totalPointCount = 0;
 
     for(std::vector<Polygon>::const_iterator it = polygons.begin();
@@ -389,20 +390,20 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
 
         for(size_t p = 0; p < polygons.size(); ++p)
         {
-            const Polygon* polygon = &polygons[p];
+            const Polygon& polygon = polygons[p];
 
-            if( polygon->size() < 2 )
+            if( polygon.size() < 2 )
                 continue;
 
             // Loop through the points
-            Pt::int32_t j = polygon->size() - 1;
-            for(size_t i = 0; i < polygon->size(); ++i)
+            Pt::int32_t j = polygon.size() - 1;
+            for(size_t i = 0; i < polygon.size(); ++i)
             {
                 // Get the coordinates
-                const float curXi = polygon->at(i).x();
-                const float curYi = polygon->at(i).y();
-                const float curXj = polygon->at(j).x();
-                const float curYj = polygon->at(j).y();
+                const float curXi = polygon[i].x();
+                const float curYi = polygon[i].y();
+                const float curXj = polygon[j].x();
+                const float curYj = polygon[j].y();
 
                 // Calculate the node's coordinate
                 if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
@@ -459,9 +460,9 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
     // Raster the anti-aliased outline
     for(size_t p = 0; p < polygons.size(); ++p)
     {
-        const Polygon* polygon = &polygons[p];
+        const Polygon& polygon = polygons[p];
 
-        if( polygon->size() < 2 )
+        if( polygon.size() < 2 )
             continue;
 
         // Mask
@@ -469,19 +470,19 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
         memcpy(xwaaMask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 
         // From point N to point (N + 1), successively
-        const size_t pc1 = polygon->size() - 1;
+        const size_t pc1 = polygon.size() - 1;
 
         for(size_t i = 0; i < pc1; ++i)
         {
             rasterPolygonBorderXWAA_F2(
-                polygon->at(i).x(), polygon->at(i).y(),
-                polygon->at(i + 1).x(), polygon->at(i + 1).y(),
+                polygon[i].x(), polygon[i].y(),
+                polygon[i + 1].x(), polygon[i + 1].y(),
                 color, minX, minY - 1, scanlines, xwaaMask );
         }
 
         rasterPolygonBorderXWAA_F2(
-             polygon->at(pc1).x(), polygon->at(pc1).y(),
-             polygon->at(0).x(), polygon->at(0).y(),
+             polygon[pc1].x(), polygon[pc1].y(),
+             polygon[0].x(), polygon[0].y(),
              color, minX, minY - 1, scanlines, xwaaMask );
     }
 }

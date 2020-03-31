@@ -119,26 +119,6 @@ void Rasterizer2::rasterWidePolyline(const std::vector<Polygon>& polygons)
         }
     }
 
-#if 0
-    const std::vector<PointF>& p = polygons[0].points();
-    double mX = 99999;
-    double mY = 99999;
-    for(size_t i = 0; i < p.size(); ++i)
-    {
-        const double x = p[i].x();
-        const double y = p[i].y();
-        if(x < mX) mX = x;
-        if(y < mY) mY = y;
-    }
-    fprintf(stderr, "###\n");
-    for(size_t i = 0; i < p.size(); ++i)
-    {
-        const double x = p[i].x() - mX;
-        const double y = p[i].y() - mY;
-        fprintf(stderr, "            points.push_back( Pt::Gfx::PointF( x + %18.14f, y + %17.14f ) );\n", x, y);
-    }
-#endif
-
     // Disable texture and gradient
     const bool isTexture  = _isTexture;
     const bool isGradient = _isGradient;
@@ -148,11 +128,17 @@ void Rasterizer2::rasterWidePolyline(const std::vector<Polygon>& polygons)
 
     if( this->isAntiAliasing() )
     {
-        rasterPolygonsXWAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+        if(clippedPolygons.size() == 1)
+            rasterPolygonXWAA(&clippedPolygons[0][0], clippedPolygons[0].size(), _pen.color(), minX, minY, maxX, maxY);
+        else
+            rasterPolygonsXWAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
     }
     else
     {
-        rasterPolygonsNoAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+        if(clippedPolygons.size() == 1)
+            rasterPolygonNoAA(&clippedPolygons[0][0], clippedPolygons[0].size(), _pen.color(), minX, minY, maxX, maxY);
+        else
+            rasterPolygonsNoAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
     }
 
     // Restore texture and gradient
