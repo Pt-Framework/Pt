@@ -27,12 +27,11 @@
   02110-1301 USA
 */
 
+//#define DEBUG_SAG
+
+#ifdef DEBUG_SAG
 #include <stdio.h>
-
 #define LPF(FMT, ...) fprintf(stderr, FMT, __VA_ARGS__)
-
-#ifndef LPF
-#define LPF(FMT, ...) do { } while(false)
 #endif
 
 
@@ -66,7 +65,6 @@ struct PatternState
     float                 px, py;      // Current interpolation coordinate (in-between the two points)
     float                 ex, ey;      // Current end coordinate (coordinate of the the second point)
     float                 uvx, uvy;    // Unit vector from the first point to the second point
-    float                 cvx, cvy;    // Cell vector from the first point to the second point
     float                 remLen;      // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
 
     std::vector<PointF>   gather;      // Gathered polygon points
@@ -77,7 +75,6 @@ struct PatternState
     , srcPoints(src)
     , srcCount(pointCount)
     , hpSize((float) penSize * 0.5f)
-    , cellSize(1)
     , idx1(0)
     , remLen(-1.0f)
     , gatherLen(0.0f)
@@ -149,8 +146,6 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             state.ey     = y2;
             state.uvx    = vx / vz;
             state.uvy    = vy / vz;
-            state.cvx    = state.uvx * state.cellSize;
-            state.cvy    = state.uvy * state.cellSize;
             state.remLen = vz;// + sqrtf(2.0);
         }
 
@@ -158,42 +153,33 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         if(state.gather.empty() && state.remLen >= state.patSegLen) {
             // Generate a simple line segment as needed
             if(draw) {
+#ifdef DEBUG_SAG
                 LPF(
                     "LINE DRAW remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) to (%5.1f , %5.1f)\n",
                     state.remLen, state.patSegLen,
                     state.px, state.py,
                     state.px + state.uvx * state.patSegLen, state.py + state.uvy * state.patSegLen
                 );
-                if(pen.capStyle() == Pen::FlatCap) {
-                    sagGenerateSimpleLineSegment(
-                        state,
-                        state.px,
-                        state.py,
-                        state.px + state.uvx * state.patSegLen,
-                        state.py + state.uvy * state.patSegLen,
-                        pen,
-                        collisionDetection
-                    );
-                }
-                else {
-                    sagGenerateSimpleLineSegment(
-                        state,
-                        state.px,
-                        state.py,
-                        state.px + state.uvx * (state.patSegLen - state.hpSize),
-                        state.py + state.uvy * (state.patSegLen - state.hpSize),
-                        pen,
-                        collisionDetection
-                    );
-                }
+#endif
+                sagGenerateSimpleLineSegment(
+                    state,
+                    state.px,
+                    state.py,
+                    state.px + state.uvx * state.patSegLen,
+                    state.py + state.uvy * state.patSegLen,
+                    pen,
+                    collisionDetection
+                );
             }
             else {
+#ifdef DEBUG_SAG
                 LPF(
                     "LINE SKIP remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) to (%5.1f , %5.1f)\n",
                     state.remLen, state.patSegLen,
                     state.px, state.py,
                     state.px + state.uvx * state.patSegLen, state.py + state.uvy * state.patSegLen
                 );
+#endif
             }
             // Substract the remainder length
             state.remLen -= state.patSegLen;
@@ -202,12 +188,14 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             // Process excess length (if any)
             if(state.remLen > 0.0f) {
                 // Update the interpolation coordinate
+#ifdef DEBUG_SAG
                 LPF(
                     "LINE NEXT remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) => (%5.1f , %5.1f)\n",
                     state.remLen, state.patSegLen,
                     state.px, state.py,
                     state.ex - state.uvx * state.remLen, state.ey - state.uvy * state.remLen
                 );
+#endif
                 state.px = state.ex - state.uvx * state.remLen;
                 state.py = state.ey - state.uvy * state.remLen;
             }
@@ -221,24 +209,29 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         }
 
         // If we have the complete length from the gathered points, process them into a thick polygon
+        // (consume all the gathered points)
         if(state.gatherLen >= state.patSegLen) {
             // Generate one solid polygon segment as needed
             if(draw) {
+#ifdef DEBUG_SAG
                 LPF(
                     "POLY DRAW remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) to (%5.1f , %5.1f)\n",
                     state.remLen, state.patSegLen,
                     state.gather.front().x(), state.gather.front().y(),
                     state.gather.back().x(), state.gather.back().y()
                 );
+#endif
                 sagGeneratePolyLineSegment(state, pen, collisionDetection, forSmoothCurve);
             }
             else {
+#ifdef DEBUG_SAG
                 LPF(
                     "POLY SKIP remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) to (%5.1f , %5.1f)\n",
                     state.remLen, state.patSegLen,
                     state.gather.front().x(), state.gather.front().y(),
                     state.gather.back().x(), state.gather.back().y()
                 );
+#endif
             }
             // Reset the "pattern" segment length
             state.patSegLen = 0.0f;
@@ -254,15 +247,14 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         //     2. The "gathered" length is not enough
         // ------------------------------------------
 
-        // Store the current interpolation coordinate to the "gather" buffer as needed
-        if(state.gather.empty() || state.gather.back().x() != state.px || state.gather.back().y() != state.py) {
+        // Store the current interpolation coordinate to the "gather" buffer as the first gathered point
+        if(state.gather.empty()) {// || state.gather.back().x() != state.px || state.gather.back().y() != state.py) {
             state.gather.push_back(PointF(state.px, state.py));
             continue;
         }
 
         // If the combined length is less than or equal to the "pattern" segment length, simply store the end coordinate
         if(state.gatherLen + state.remLen <= state.patSegLen) {
-            //std::cerr << "#@# 111\n";
             // Store the end coordinate
             state.gather.push_back(PointF(state.ex, state.ey));
             state.gatherLen += state.remLen;
@@ -273,7 +265,6 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         }
         // Otherwise, store the in-between coordinate
         else {
-            //std::cerr << "#@# 222\n";
             // Calculate the needed length
             const float nl = state.patSegLen - state.gatherLen;
             // Update the interpolation coordinate
@@ -314,16 +305,13 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
-#if 0
-    // #@#
-    // Adjust the coordinates (thus the line's length) based on the line and cap styles
-    if( !pen.isSolid() && pen.capStyle() != Pen::FlatCap ) {
+    // Adjust the coordinates (thus the line's length) as needed
+    if( pen.capStyle() != Pen::FlatCap ) {
         x1 += (dx * 0.75f);
         y1 += (dy * 0.75f);
         x2 -= (dx * 0.75f);
         y2 -= (dy * 0.75f);
     }
-#endif
 
     // Generate points (CCW)
     // --- Begin point ---
@@ -377,6 +365,32 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 
 void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen, bool collisionDetection, bool forSmoothCurve)
 {
+    // Adjust the coordinates (thus the line's length) as needed
+    if( pen.capStyle() != Pen::FlatCap ) {
+        // Get the sizes
+        const size_t cn = state.gather.size() - 1;
+        const size_t pz = pen.size();
+        // Calculate the line's parameters for the first segment
+        const float fx1 = state.gather[0].x();
+        const float fy1 = state.gather[0].y();
+        const float fx2 = state.gather[1].x();
+        const float fy2 = state.gather[1].y();
+              float fdx;
+              float fdy;
+        calculateLineParams(fdx, fdy, fx1, fy1, fx2, fy2, pz);
+        // Calculate the line's parameters for the last segment
+        const float lx1 = state.gather[cn - 1].x();
+        const float ly1 = state.gather[cn - 1].y();
+        const float lx2 = state.gather[cn    ].x();
+        const float ly2 = state.gather[cn    ].y();
+              float ldx;
+              float ldy;
+        calculateLineParams(ldx, ldy, lx1, ly1, lx2, ly2, pz);
+        // Perform coordinate adjustments
+        state.gather[ 0].set( fx1 + fdx * 0.75f, fy1 + fdy * 0.75f );
+        state.gather[cn].set( lx2 - ldx * 0.75f, ly2 - ldy * 0.75f );
+    }
+
     // Generate a new thick polygon
     std::vector<Polygon> polygons;
     renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen, true, forSmoothCurve);

@@ -185,9 +185,11 @@ class Polygonizer
                                          float x3, float y3,
                                          Pt::int32_t nSegs);
 
-        void calculateLineParams(float& wh, float& dx, float& dy,
-                                 float& nx, float& ny, float x1, float y1,
-                                 float x2, float y2, size_t w);
+        void calculateLineParams(float& dx, float& dy,
+                                 float x1, float y1, float x2, float y2, size_t w);
+
+        void calculateLineParams(float& wh, float& dx, float& dy, float& nx, float& ny,
+                                 float x1, float y1, float x2, float y2, size_t w);
 
         bool intersectLine(bool& inLine, PointF& intersect,
                            const PointF& line1a, const PointF& line1b,
