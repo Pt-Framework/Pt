@@ -553,17 +553,18 @@ class PainterDemoWindow : public Pt::Hmi::Window
             _polylinesView.setMargin(2);
             _shapesView.setMargin(2);
 
-            _tabView.addTab(_linesView, "Lines");
-            _tabView.addTab(_polylinesView, "Polylines"  );
-            _tabView.addTab(_shapesView, "Shapes");
             _tabView.setPadding(8);
+
+            _tabView.addTab(_linesView,     "Lines"       ); // 0
+            _tabView.addTab(_polylinesView, "Polylines"   ); // 1
+            _tabView.addTab(_shapesView,    "Shapes"      ); // 2
             _tabView.setCurrent(2);
 
-            _tabView.addTab(_test1View, "Test 1");
-            _tabView.addTab(_test2View, "Test 2");
-            _tabView.addTab(_benchmark1View, "Benchmark 1");
-            _tabView.addTab(_benchmark2View, "Benchmark 2");
-            _tabView.setCurrent(6);
+            _tabView.addTab(_test1View,      "Test 1"     ); // 3
+            _tabView.addTab(_test2View,      "Test 2"     ); // 4
+            _tabView.addTab(_benchmark1View, "Benchmark 1"); // 5
+            _tabView.addTab(_benchmark2View, "Benchmark 2"); // 6
+            _tabView.setCurrent(4);
 
             this->setContent(&_tabView);
         }

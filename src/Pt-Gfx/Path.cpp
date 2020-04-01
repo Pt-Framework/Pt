@@ -31,7 +31,7 @@
 #include <Pt/Gfx/Painter.h>
 
 
-#if 1
+#if 0
 // ### TEMPORARY ###
 namespace Pt { namespace Gfx {
 bool IP2_DEBUG::DUMP_POLYGON_COORDINATES  = false;

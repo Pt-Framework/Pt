@@ -37,6 +37,7 @@ class Test2View : public Pt::Hmi::Control
             painter.setFont ( Font("", 16) );
             painter.drawText( PointF(200, 50), Pt::String("--- NOT WORKING PROPERLY ---") );
 
+            Pt::Gfx::Pen blue1sf ( Color::fromRgb8(0, 0, 255), 1, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );
             Pt::Gfx::Pen green1sf( Color::fromRgb8(0, 255, 0), 1, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );
 
             Pt::Gfx::Pen green7sf( Color::fromRgb8(0, 255, 0), 7, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );
@@ -51,12 +52,33 @@ class Test2View : public Pt::Hmi::Control
             Pt::Gfx::Pen green7hs( Color::fromRgb8(0, 255, 0), 7, Pen::Dash,  Pen::SquareCap, Pen::NoJoin );
             Pt::Gfx::Pen green7hr( Color::fromRgb8(0, 255, 0), 7, Pen::Dash,  Pen::RoundCap,  Pen::NoJoin );
 
+            int x = 400;
+            int y = 100;
+
+#if 1
+            painter.setPen(blue1sf);
+            painter.drawLine( PointF(x,       y - 20), PointF(x,       y + 20 * 12) );
+            painter.drawLine( PointF(x + 150, y - 20), PointF(x + 150, y + 20 * 12) );
+
+            painter.setPen(green7sf); painter.drawLine( PointF(x, y), PointF(x + 150, y) ); y += 20;
+            painter.setPen(green7df); painter.drawLine( PointF(x, y), PointF(x + 150, y) ); y += 20;
+            painter.setPen(green7hf); painter.drawLine( PointF(x, y), PointF(x + 150, y) ); y += 20;
+                                                                                            y += 20;
+            painter.setPen(green7ss); painter.drawLine( PointF(x, y), PointF(x + 150, y) ); y += 20;
+            painter.setPen(green7ds); painter.drawLine( PointF(x, y), PointF(x + 150, y) ); y += 20;
+            painter.setPen(green7hs); painter.drawLine( PointF(x, y), PointF(x + 150, y) ); y += 20;
+                                                                                            y += 20;
+            painter.setPen(green7sr); painter.drawLine( PointF(x, y), PointF(x + 150, y) ); y += 20;
+            painter.setPen(green7dr); painter.drawLine( PointF(x, y), PointF(x + 150, y) ); y += 20;
+            painter.setPen(green7hr); painter.drawLine( PointF(x, y), PointF(x + 150, y) ); y += 20;
+#endif
+
             std::vector<Pt::Gfx::PointF> shape;
 
-            int x = 30;
-            int y = 30;
+            x = 30;
+            y = 30;
 
-            IP2_DEBUG::TEST_SMOOTH_CURVE_HACK = true;
+            //IP2_DEBUG::TEST_SMOOTH_CURVE_HACK = true;
 
 #if 1
             shape = makeTestShape1(x, y, 1.0);
@@ -113,7 +135,7 @@ class Test2View : public Pt::Hmi::Control
             y += 100;
 #endif
 
-            IP2_DEBUG::TEST_SMOOTH_CURVE_HACK = false;
+            //IP2_DEBUG::TEST_SMOOTH_CURVE_HACK = false;
         }
 
         std::vector<Pt::Gfx::PointF> makeTestShape1(double x, double y, double scale)

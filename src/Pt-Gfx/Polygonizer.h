@@ -43,6 +43,7 @@ namespace Gfx {
 class ArcMode;
 struct PatternState;
 
+// TODO: Remove "bool forSmoothCurve" !!!
 
 class Polygonizer
 {
