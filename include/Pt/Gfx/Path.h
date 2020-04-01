@@ -43,13 +43,15 @@ namespace Pt {
 namespace Gfx {
 
 
-#if 0
+#if 1
 // ### TEMPORARY ###
 class PT_GFX_API IP2_DEBUG
 {
     public:
         static bool DUMP_POLYGON_COORDINATES;
         static bool DUMP_SCANLINE_COORDINATES;
+        
+        static bool TEST_SMOOTH_CURVE_HACK;
 };
 // ### TEMPORARY ###
 #endif

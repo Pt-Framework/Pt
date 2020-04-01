@@ -49,8 +49,10 @@ class Test2View : public Pt::Hmi::Control
 
             std::vector<Pt::Gfx::PointF> shape;
 
-            int x = 20;
-            int y = 20;
+            int x = 30;
+            int y = 30;
+
+            IP2_DEBUG::TEST_SMOOTH_CURVE_HACK = true;
 
 #if 1
             shape = makeTestShape1(x, y, 1.0);
@@ -106,10 +108,13 @@ class Test2View : public Pt::Hmi::Control
             x -= 100 * 2;
             y += 100;
 #endif
+
+            IP2_DEBUG::TEST_SMOOTH_CURVE_HACK = false;
         }
 
         std::vector<Pt::Gfx::PointF> makeTestShape1(double x, double y, double scale)
-        {            std::vector<Pt::Gfx::PointF> points;
+        {
+            std::vector<Pt::Gfx::PointF> points;
             points.push_back( Pt::Gfx::PointF( x + 75.36458587646484 * scale, y + 33.35655212402344 * scale ) );
             points.push_back( Pt::Gfx::PointF( x + 69.13257598876953 * scale, y + 24.35220336914062 * scale ) );
             points.push_back( Pt::Gfx::PointF( x + 61.51705169677734 * scale, y + 16.48329162597656 * scale ) );

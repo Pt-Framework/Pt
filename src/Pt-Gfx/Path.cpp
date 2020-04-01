@@ -30,12 +30,25 @@
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Painter.h>
 
+
+#if 1
+// ### TEMPORARY ###
+namespace Pt { namespace Gfx {
+bool IP2_DEBUG::DUMP_POLYGON_COORDINATES  = false;
+bool IP2_DEBUG::DUMP_SCANLINE_COORDINATES = false;
+bool IP2_DEBUG::TEST_SMOOTH_CURVE_HACK    = false;
+} }
+// ### TEMPORARY ###
+#endif
+
+
 namespace {
 
-void quadraticBezierToPoints(std::vector<Pt::Gfx::PointF>& dst, 
-                             double x1, double y1, 
-                             double x2, double y2, 
-                             double x3, double y3, 
+
+void quadraticBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
+                             double x1, double y1,
+                             double x2, double y2,
+                             double x3, double y3,
                              double smoothness)
 {
     // checkfor a straight line
@@ -44,12 +57,12 @@ void quadraticBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
     const double dx12 = x1 - x2;
     const double dy12 = y1 - y2;
 
-    if( ! (dx12 * dy32 - dy12 * dx32) ) 
-    { 
+    if( ! (dx12 * dy32 - dy12 * dx32) )
+    {
         // curvature
-        if( dst.empty() ) 
+        if( dst.empty() )
             dst.push_back( Pt::Gfx::PointF(x1, y1) );
-                
+
         dst.push_back( Pt::Gfx::PointF(x3, y3) );
         return;
     }
@@ -69,7 +82,7 @@ void quadraticBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
     // PB = (1 - t) * (1 - t) * P1 + 2 * t * (1 - t) * P2 + t * t * P3
     //      -----------------        ---------------        -----
     //      a                        b                      c
-    for(Pt::int32_t i = 0; i < nSegs; ++i) 
+    for(Pt::int32_t i = 0; i < nSegs; ++i)
     {
         const double t  = i * nSegs1i;
         const double it = 1.0 - t;
@@ -78,18 +91,18 @@ void quadraticBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
         const double c  = t * t;
         const double x  = a * x1 + b * x2 + c * x3;
         const double y  = a * y1 + b * y2 + c * y3;
-                
-        if( i || dst.empty() ) 
+
+        if( i || dst.empty() )
             dst.push_back( Pt::Gfx::PointF(x, y) );
     }
 }
 
 
-void cubicBezierToPoints(std::vector<Pt::Gfx::PointF>& dst, 
-                         double x1, double y1, 
-                         double x2, double y2, 
-                         double x3, double y3, 
-                         double x4, double y4, 
+void cubicBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
+                         double x1, double y1,
+                         double x2, double y2,
+                         double x3, double y3,
+                         double x4, double y4,
                          double smoothness)
 {
     // Calculate the approximate length of the curve
@@ -114,7 +127,7 @@ void cubicBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
     // PB = (1 - t) * (1 - t) * (1 - t) * P1 + 3 * t * (1 - t) * (1 - t) * P2 + 3 * t * t * (1 - t) * P3 + t * t * t * P4
     //      ---------------------------        -------------------------        -------------------        ---------
     //      a                                  b                                c                          d
-    for(Pt::int32_t i = 0; i < nSegs; ++i) 
+    for(Pt::int32_t i = 0; i < nSegs; ++i)
     {
         // Calculate the coordinates
         const double t  = i * nSegs1i;
@@ -125,15 +138,15 @@ void cubicBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
         const double d  = t * t * t;
         const double x  = a * x1 + b * x2 + c * x3 + d * x4;
         const double y  = a * y1 + b * y2 + c * y3 + d * y4;
-        
+
         // Store the coordinate as needed
-        if( i || dst.empty() ) 
+        if( i || dst.empty() )
             dst.push_back( Pt::Gfx::PointF(x, y) );
     }
 }
 
 
-void getBezierPoint(double& x, double& y, 
+void getBezierPoint(double& x, double& y,
                             const std::vector<double>& points, double t)
 {
     // Based on: How do I implement a Bezier curve in C++?
@@ -144,16 +157,16 @@ void getBezierPoint(double& x, double& y,
 
     size_t i = points.size() / 2 - 1;
 
-    while(i > 0) 
+    while(i > 0)
     {
-        for(size_t k = 0; k < i; ++k) 
+        for(size_t k = 0; k < i; ++k)
         {
             const size_t cidx =  k      * 2;
             const size_t nidx = (k + 1) * 2;
             tmp[cidx + 0] = tmp[cidx + 0] + t * ( tmp[nidx + 0] - tmp[cidx + 0] ); // X
             tmp[cidx + 1] = tmp[cidx + 1] + t * ( tmp[nidx + 1] - tmp[cidx + 1] ); // Y
         }
-                
+
         --i;
     }
 
@@ -162,9 +175,9 @@ void getBezierPoint(double& x, double& y,
 }
 
 
-void bezierToPoints(std::vector<Pt::Gfx::PointF>& dst, 
-                    double x1, double y1, 
-                    const std::vector<double>& points, 
+void bezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
+                    double x1, double y1,
+                    const std::vector<double>& points,
                     double smoothness)
 {
     // Add the start coordinate to the point
@@ -178,7 +191,7 @@ void bezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
 
     // Calculate the approximate length of the curve
     double clen = 0.0;
-    for(size_t i = 0; i < (points.size() / 2 - 1); ++i) 
+    for(size_t i = 0; i < (points.size() / 2 - 1); ++i)
     {
         const size_t cidx =  i      * 2;
         const size_t nidx = (i + 1) * 2;
@@ -198,17 +211,17 @@ void bezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
     const double nSegs1i = 1.0 / (nSegs - 1);
 
     // Generate the points
-    for(Pt::int32_t i = 0; i < nSegs; ++i) 
+    for(Pt::int32_t i = 0; i < nSegs; ++i)
     {
         // Calculate the coordinates
         const double t  = i * nSegs1i;
-                
+
         double x;
         double y;
         getBezierPoint(x, y, pts, t);
-                
+
         // Store the coordinate as needed
-        if( i || dst.empty() ) 
+        if( i || dst.empty() )
             dst.push_back( Pt::Gfx::PointF(x, y) );
     }
 }
@@ -249,7 +262,7 @@ const Element& Path::at(std::size_t n) const
 
 void Path::clear()
 {
-    return _elements.clear();    
+    return _elements.clear();
 }
 
 
@@ -339,7 +352,7 @@ void Path::arcTo(const PointF& p, double r)
     const double c1y2 = c1y1 + nyry * od;
     const double c1x3 = c1x4 - nyrx * od;
     const double c1y3 = c1y4 - nxry * od;
-    
+
     Element elem1(Element::IT_CubicBezierTo, c1x2, c1y2, c1x3, c1y3, c1x4, c1y4);
     _elements.push_back(elem1);
 
@@ -371,10 +384,10 @@ void Path::quadraticBezierTo(const PointF &c, const PointF& to)
 
 
 void Path::cubicBezierTo(const PointF &c1, const PointF &c2, const PointF& to)
-{   
-    Element elem(Element::IT_CubicBezierTo, 
-                 c1.x() , c1.y(), 
-                 c2.x(), c2.y(), 
+{
+    Element elem(Element::IT_CubicBezierTo,
+                 c1.x() , c1.y(),
+                 c2.x(), c2.y(),
                  to.x(), to.y());
     _elements.push_back(elem);
 
@@ -383,7 +396,7 @@ void Path::cubicBezierTo(const PointF &c1, const PointF &c2, const PointF& to)
 
 
 void Path::bezierTo(const PointF* cxy, size_t controlPointCount, const PointF& to)
-{    
+{
     std::vector<double> points;
 
     for(size_t i = 0; i < controlPointCount; ++i)
@@ -391,7 +404,7 @@ void Path::bezierTo(const PointF* cxy, size_t controlPointCount, const PointF& t
         points.push_back(cxy[i].x());
         points.push_back(cxy[i].y());
     }
-        
+
     points.push_back(to.x());
     points.push_back(to.y());
 
@@ -426,7 +439,7 @@ void Path::insertPath(const Path& p)
 
 
 void Path::addRect(const SizeF& size)
-{    
+{
     const double x = _position.x();
     const double y = _position.y();
 
@@ -434,7 +447,7 @@ void Path::addRect(const SizeF& size)
     lineTo(Pt::Gfx::PointF(x + size.width(), y+ size.height()));
     lineTo(Pt::Gfx::PointF(x + size.width(), y));
     lineTo(Pt::Gfx::PointF(x, y));
-    close();  
+    close();
 }
 
 
@@ -444,25 +457,25 @@ void Path::addRoundedRect(const SizeF& size, float radius)
     const double y = _position.y();
 
     moveTo(Pt::Gfx::PointF(x, y +  radius));
-    quadraticBezierTo(Pt::Gfx::PointF(x, y), Pt::Gfx::PointF(x + radius, y));     
+    quadraticBezierTo(Pt::Gfx::PointF(x, y), Pt::Gfx::PointF(x + radius, y));
 
     lineTo(Pt::Gfx::PointF(x +  size.width() - radius, y));
-    quadraticBezierTo(Pt::Gfx::PointF(x + size.width(), y), 
+    quadraticBezierTo(Pt::Gfx::PointF(x + size.width(), y),
                       Pt::Gfx::PointF(x + size.width(), y + radius));
 
     lineTo(Pt::Gfx::PointF(x +  size.width(), y + size.height() - radius));
-    quadraticBezierTo(Pt::Gfx::PointF(x + size.width(), y+ size.height() ), 
+    quadraticBezierTo(Pt::Gfx::PointF(x + size.width(), y+ size.height() ),
                       Pt::Gfx::PointF(x + size.width() - radius, y + size.height()));
 
     lineTo(Pt::Gfx::PointF(x +  radius, y + size.height()));
-    quadraticBezierTo(Pt::Gfx::PointF(x, y + size.height()), 
+    quadraticBezierTo(Pt::Gfx::PointF(x, y + size.height()),
                       Pt::Gfx::PointF(x, y + size.height() - radius));
 
     lineTo(Pt::Gfx::PointF(x, y + radius));
 
     close();
 }
- 
+
 
 void Path::addEllipse(const SizeF& size)
 {
@@ -470,7 +483,7 @@ void Path::addEllipse(const SizeF& size)
   const Pt::Gfx::PointF p2(_position.x() + size.width(), _position.y() + size.height() / 2);
 
   moveTo(p1);
-  arcTo( p2, size.height()/2 );   
+  arcTo( p2, size.height()/2 );
 
   moveTo(p2);
   arcTo( p1, size.height()/2 );
@@ -478,7 +491,7 @@ void Path::addEllipse(const SizeF& size)
   close();
 }
 
-               
+
 void Path::addPie(const SizeF& size, float degBegin, float degEnd)
 {
     // TODO: decompose into 4 quadrants and use Trigonometry sin/cos to calculate the point coordinates
@@ -497,19 +510,19 @@ void Path::transform(const Transform& transform)
     typedef ElementVector::iterator PDIIterator;
 
     // Walk through the instructions
-    for(PDIIterator it = _elements.begin(); it != _elements.end(); ++it) 
+    for(PDIIterator it = _elements.begin(); it != _elements.end(); ++it)
     {
         // Get the instruction
         Element& elem = *it;
 
         // Act based on the type of the instruction
-        switch(elem.type) 
+        switch(elem.type)
         {
             case Element::IT_Close:
                 break;
 
             case Element::IT_MoveTo:
-            case Element::IT_LineTo:            
+            case Element::IT_LineTo:
             {
                 Pt::Gfx::PointF p( elem.pxy[0], elem.pxy[1] );
                 p = transform * p;
@@ -576,13 +589,13 @@ void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
     Polygon polygon;
 
     ElementVector::const_iterator it;
-    for(it = _elements.begin(); it != _elements.end(); ++it) 
+    for(it = _elements.begin(); it != _elements.end(); ++it)
     {
         // Get the instruction
         const Element& ins = *it;
 
         // Act based on the type of the instruction
-        switch(ins.type) 
+        switch(ins.type)
         {
             case Element::IT_Close:
                 polygons.push_back(polygon);
@@ -595,9 +608,9 @@ void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
                 break;
 
             case Element::IT_LineTo:
-                if( polygon.empty() ) 
+                if( polygon.empty() )
                     polygon.push_back( PointF(curX, curY) );
-                
+
                 curX = ins.pxy[0];
                 curY = ins.pxy[1];
                 polygon.push_back( PointF(curX, curY) );
