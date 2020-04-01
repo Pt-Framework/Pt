@@ -115,7 +115,7 @@ void Polygonizer::renderEllipse(std::vector<Polygon>& polygons,
         std::vector<PointF> pointsF;
         renderEllipsePoints(pointsF, radiusX, radiusY, centerX, centerY, pen);
 
-        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true );
+        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true/*, true */);
     }
 }
 

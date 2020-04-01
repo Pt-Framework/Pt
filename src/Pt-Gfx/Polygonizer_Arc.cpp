@@ -230,7 +230,7 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
                             degBegin, degEnd, pen);
         }
 
-        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true );
+        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true/*, true */);
     }
 }
 

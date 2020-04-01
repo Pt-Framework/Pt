@@ -74,7 +74,7 @@ class Polygonizer
 
         void renderWidePolyline(std::vector<Polygon>& polygons,
                                 const PointF* points, const std::size_t n,
-                                const Pen& pen, bool useNonZeroFillingRule);
+                                const Pen& pen, bool useNonZeroFillingRule/*, bool forSmoothCurve*/);
 
     private:
         void renderRoundedRectPoints(std::vector<PointF>& dst,
@@ -97,12 +97,12 @@ class Polygonizer
 
         void renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                          const PointF* basePtr, size_t curPCnt,
-                                         const Pen& pen, bool cleanUpSelfIntersection);
+                                         const Pen& pen, bool cleanUpSelfIntersection/*, bool forSmoothCurve*/);
 
         void renderDashedWidePolyLine(std::vector<Polygon>& polygons,
                                       const PointF* src, size_t pointCount,
                                       const Pen& pen,
-                                      bool collisionDetection);
+                                      bool collisionDetection/*, bool forSmoothCurve*/);
 
         void renderDashedWidePolyLine();
 
@@ -113,7 +113,7 @@ class Polygonizer
         bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Count,
                                        const PointF* poly2, size_t poly2Count);
 
-        bool sagPolygonPoints(PatternState& state, bool draw, const Pen& pen, bool collisionDetection);
+        bool sagPolygonPoints(PatternState& state, bool draw, const Pen& pen, bool collisionDetection/*, bool forSmoothCurve*/);
 
         void sagGenerateSimpleLineSegment(PatternState& state,
                                           float x1, float y1,
@@ -121,11 +121,11 @@ class Polygonizer
                                           const Pen& pen,
                                           bool collisionDetection);
 
-        void sagGeneratePolyLineSegment(PatternState& state, const Pen& pen, bool collisionDetection);
+        void sagGeneratePolyLineSegment(PatternState& state, const Pen& pen, bool collisionDetection/*, bool forSmoothCurve*/);
 
         void renderSolidLineSegment(std::vector<PointF>& dst,
                                     float x1, float y1, float x2, float y2,
-                                    const Pen& pen, bool openingCap, bool closingCap);
+                                    const Pen& pen, bool openingCap, bool closingCap/*, bool forSmoothCurve*/);
 
         bool joinClosedWidePolyline(std::vector<PointF>& outer,
                                     std::vector<PointF>& inner,

@@ -172,7 +172,7 @@ class Rasterizer2
 
         void drawNarrowPolyline(const PointF* points, size_t pointCount);
 
-        void drawWidePolyline(const PointF* points, const size_t pointCount);
+        void drawWidePolyline(const PointF* points, const size_t pointCount, bool useNonZeroFillingRule = true);
 
         void drawNarrowPath(const PointF* pointsF, size_t pointCount);
 

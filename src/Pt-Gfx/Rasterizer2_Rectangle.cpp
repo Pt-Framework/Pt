@@ -75,6 +75,36 @@ void Rasterizer2::rasterNarrowRect(const Point& tl, const Point& br)
 */
 
 
+void Rasterizer2::drawRect(const RectF& rect)
+{
+    std::vector<PointF> ps;
+    ps.reserve(5);
+
+    ps.push_back(rect.bottomLeft ());
+    ps.push_back(rect.bottomRight());
+    ps.push_back(rect.topRight   ());
+    ps.push_back(rect.topLeft    ());
+    ps.push_back(rect.bottomLeft ());
+
+    /*
+    for (size_t i = 0; i < n; ++i)
+    {
+        // Floor the coordinates with an epsilon of 0.001
+        PointF p( Pt::lround(ps[i].x() - 0.4999),
+                  Pt::lround(ps[i].y() - 0.4999) );
+        // Only store non-duplicated coordinates
+        if( ! polygon.empty() && polygon.back() == p )
+          continue;
+    }
+    */
+
+    if(_pen.size() == 1)
+       drawNarrowPolyline( &ps[0], ps.size() );
+    else
+       drawWidePolyline( &ps[0], ps.size(), false );
+}
+
+
 void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
 {
     const float x1 = rect.topLeft().x();

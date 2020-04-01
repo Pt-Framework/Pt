@@ -39,7 +39,7 @@ namespace Gfx {
 void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
                                       const PointF* points, const std::size_t n,
                                       const Pen& pen,
-                                      bool useNonZeroFillingRule)
+                                      bool useNonZeroFillingRule/*, bool forSmoothCurve*/)
 {
     if( n < 2 )
         return;
@@ -57,16 +57,17 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
         }
         else
         {
-            renderSolidOpenWidePolyline(polygons, points, n, pen, false);
+            renderSolidOpenWidePolyline(polygons, points, n, pen, false/*, false*/);
         }
     }
     // Dashed line
     else
     {
-        renderDashedWidePolyLine(polygons, points, n, pen, !isSelfIn);
+        renderDashedWidePolyLine(polygons, points, n, pen, !isSelfIn/*, forSmoothCurve*/);
     }
 
     // Ensure that all self-intersecting polygons are cleaned-up
+    //if ( isSelfIn || (useNonZeroFillingRule && forSmoothCurve) )
     if ( isSelfIn || useNonZeroFillingRule )
         cleanupAllPolygons(polygons, useNonZeroFillingRule);
 }
@@ -74,7 +75,7 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
 
 void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
                                          float x1, float y1, float x2, float y2,
-                                         const Pen& pen, bool openingCap, bool closingCap)
+                                         const Pen& pen, bool openingCap, bool closingCap/*, bool forSmoothCurve*/)
 {
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
@@ -82,7 +83,13 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
 #if 0
-    if( !forSmoothCurve && pen.capStyle() != Pen::FlatCap ) {
+    // #@#
+    // #@# TEMPORARY HACK FOR SMOOTH CURVEs #@#
+    // Adjust the coordinates (thus the line's length) based on the line and cap styles
+
+    //if(IP2_DEBUG::TEST_SMOOTH_CURVE_HACK) forSmoothCurve = true;
+
+    if( !forSmoothCurve && !pen.isSolid() && pen.capStyle() != Pen::FlatCap ) {
         x1 += (dx * 0.75f);
         y1 += (dy * 0.75f);
         x2 -= (dx * 0.75f);
