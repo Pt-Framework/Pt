@@ -35,7 +35,7 @@ class Test2View : public Pt::Hmi::Control
 
             painter.setPen  ( Color::fromRgb8(255, 0, 0)  );
             painter.setFont ( Font("", 16) );
-            painter.drawText( PointF(200, 50), Pt::String("--- NOT WORKING PROPERLY ---") );
+            painter.drawText( PointF(200, 50), Pt::String("--- DOES NOT WORK PROPERLY ---") );
 
             Pt::Gfx::Pen blue1sf ( Color::fromRgb8(0, 0, 255), 1, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );
             Pt::Gfx::Pen green1sf( Color::fromRgb8(0, 255, 0), 1, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );

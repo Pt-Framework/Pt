@@ -83,7 +83,7 @@ using namespace Pt::Gfx;
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
@@ -95,7 +95,7 @@ using namespace Pt::Gfx;
 
 //#define TEST_DRAW_EXTRA                       0
 
-#define TEST_DRAW_PATH                          0 // (including thick and filled and rectangle clipping area)
+#define TEST_DRAW_PATH                          1 // (including thick and filled and rectangle clipping area)
 //#define TEST_DRAW_PATH_CLIPPING               0 // (including path-based text)
 
 //#define TEST_IMAGE_OPERATION                  0

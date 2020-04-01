@@ -21,7 +21,7 @@ LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-System ;
 MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
 # Aloysius' personal tester flag
-WITH_EXPERIMENTAL_GFX = yes ;
+#WITH_EXPERIMENTAL_GFX = yes ;
 
 if $(WITH_EXPERIMENTAL_GFX)
 {

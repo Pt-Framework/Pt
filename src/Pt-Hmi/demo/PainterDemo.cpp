@@ -564,7 +564,7 @@ class PainterDemoWindow : public Pt::Hmi::Window
             _tabView.addTab(_test2View,      "Test 2"     ); // 4
             _tabView.addTab(_benchmark1View, "Benchmark 1"); // 5
             _tabView.addTab(_benchmark2View, "Benchmark 2"); // 6
-            _tabView.setCurrent(4);
+            _tabView.setCurrent(6);
 
             this->setContent(&_tabView);
         }

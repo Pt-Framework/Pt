@@ -86,17 +86,11 @@ void Rasterizer2::drawRect(const RectF& rect)
     ps.push_back(rect.topLeft    ());
     ps.push_back(rect.bottomLeft ());
 
-    /*
-    for (size_t i = 0; i < n; ++i)
+    for (size_t i = 0; i < ps.size(); ++i)
     {
         // Floor the coordinates with an epsilon of 0.001
-        PointF p( Pt::lround(ps[i].x() - 0.4999),
-                  Pt::lround(ps[i].y() - 0.4999) );
-        // Only store non-duplicated coordinates
-        if( ! polygon.empty() && polygon.back() == p )
-          continue;
+        ps[i].set( Pt::lround(ps[i].x() - 0.4999), Pt::lround(ps[i].y() - 0.4999) );
     }
-    */
 
     if(_pen.size() == 1)
        drawNarrowPolyline( &ps[0], ps.size() );
