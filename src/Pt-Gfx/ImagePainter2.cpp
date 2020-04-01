@@ -239,9 +239,9 @@ void ImagePainter2::drawPie(const PointF& topLeft, const SizeF& size,
 }
 
 
-void ImagePainter2::drawPath(const Path& path, float smoothness)
+void ImagePainter2::drawPath(const Path& path, float smoothness, bool useNonZeroFillingRule)
 {
-    _rasterizer->drawPath(path, smoothness);
+    _rasterizer->drawPath(path, smoothness, useNonZeroFillingRule);
 }
 
 

@@ -851,7 +851,7 @@ void Rasterizer2::drawPolyline(const PointF* ps, size_t n)
     if(_pen.size() == 1)
        drawNarrowPolyline( &polygon[0], polygon.size() );
     else
-       drawWidePolyline( &polygon[0], polygon.size() );
+       drawWidePolyline( &polygon[0], polygon.size(), false );
 }
 
 
@@ -1016,7 +1016,7 @@ void Rasterizer2::drawArc(const PointF& topLeft, const SizeF& size,
 }
 
 
-void Rasterizer2::drawPath(const Path& path, float smoothness)
+void Rasterizer2::drawPath(const Path& path, float smoothness, bool useNonZeroFillingRule)
 {
     std::vector<Polygon> polygons;
     path.toPolygons(polygons, smoothness);
@@ -1031,7 +1031,7 @@ void Rasterizer2::drawPath(const Path& path, float smoothness)
         }
         else
         {
-            drawWidePolyline( &pointsF[0], pointsF.size() );
+            drawWidePolyline( &pointsF[0], pointsF.size(), useNonZeroFillingRule );
         }
     }
 }

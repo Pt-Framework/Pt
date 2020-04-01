@@ -46,12 +46,12 @@ static void testDrawThickLine_impl(
 
     transform.translate(530, 200);
     path.transform(transform);
-    ip2->drawPath(path);
+    ip2->drawPath(path, 1.0, true); // Set 'useNonZeroFillingRule' to 'true'
 
     transform.translate(-530, -50);
     path.transform(transform);
     ip2->setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::FlatCap) );
-    ip2->drawPath(path);
+    ip2->drawPath(path, 1.0, true); // Set 'useNonZeroFillingRule' to 'true'
 #endif
 
 #if 1

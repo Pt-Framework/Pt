@@ -83,13 +83,8 @@ void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
 #if 0
-    // #@#
-    // #@# TEMPORARY HACK FOR SMOOTH CURVEs #@#
-    // Adjust the coordinates (thus the line's length) based on the line and cap styles
-
-    //if(IP2_DEBUG::TEST_SMOOTH_CURVE_HACK) forSmoothCurve = true;
-
-    if( !forSmoothCurve && !pen.isSolid() && pen.capStyle() != Pen::FlatCap ) {
+    // Adjust the coordinates (thus the line's length) as needed
+    if( pen.capStyle() != Pen::FlatCap ) {
         x1 += (dx * 0.75f);
         y1 += (dy * 0.75f);
         x2 -= (dx * 0.75f);

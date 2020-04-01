@@ -122,7 +122,7 @@ class PT_GFX_API ImagePainter2 : public Painter
                              float degBegin, float degEnd);
 
         // maybe better have ImagePainter::setSmoothness
-        virtual void drawPath(const Path& path, float smoothness = 1.0f);
+        virtual void drawPath(const Path& path, float smoothness = 1.0f, bool useNonZeroFillingRule = false);
 
 
         virtual void fillRoundedRect(const RectF& rect, float radius);
