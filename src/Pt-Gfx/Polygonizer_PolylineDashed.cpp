@@ -372,6 +372,8 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen, bool collisionDetection/*, bool forSmoothCurve*/)
 {
 #if 1
+    // ### TODO: FIND A METHOD TO WORKAROUND SHORT SEGMENTS AT THE START & END !!! ###
+
     // Adjust the coordinates (thus the line's length) as needed
     if( pen.capStyle() != Pen::FlatCap ) {
         // Get the sizes
