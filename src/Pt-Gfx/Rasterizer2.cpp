@@ -811,12 +811,20 @@ void Rasterizer2::drawPolyline(const PointF* ps, size_t n)
         // Floor the coordinates with an epsilon of 0.001
         PointF p( Pt::lround(ps[i].x() - 0.4999),
                   Pt::lround(ps[i].y() - 0.4999) );
-
+        // Only store non-duplicated coordinates
+#if 0
+        if( ! polygon.empty() ) {
+            const PointF& delta = polygon.back() - p;
+            if( fabs( delta.x() ) < 0.5 && fabs( delta.y() ) < 0.5 )
+              continue;
+        }
+#else
         if( ! polygon.empty() && polygon.back() == p )
           continue;
-
+#endif
         polygon.push_back(p);
     }
+    //std::cerr << "### " << polygon.size() << std::endl;
 
 #if 0
     if(IP2_DEBUG::DUMP_POLYGON_COORDINATES)
@@ -1092,7 +1100,6 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
     std::vector<PointF> polygon(n);
     size_t              pointCount = 0;
 
-
     for (size_t i = 0; i < n; ++i)
     {
         // Foor the coordinates while avoiding rounding errors
@@ -1100,6 +1107,7 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         const double y = Pt::lround(ps[i].y() - 0.4999);
         //const double x = ps[i].x();
         //const double y = ps[i].y();
+        // Only store non-duplicated coordinates
         if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
         polygon[pointCount++].set(x, y);
     }
@@ -1155,16 +1163,21 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 
 void Rasterizer2::fillPolygon_NR(const PointF* ps, std::size_t n)
 {
-    // Clip the polygon
+    // Perform coordinate adjustments
     std::vector<PointF> polygon(n);
+    size_t              pointCount = 0;
 
     for (size_t i = 0; i < n; ++i)
     {
         const PointF::ValueT x = ps[i].x();
         const PointF::ValueT y = ps[i].y();
-        polygon[i].set(x, y);
+        // Only store non-duplicated coordinates
+        if(pointCount && polygon[pointCount - 1].x() == x && polygon[pointCount - 1].y() == y) continue;
+        polygon[pointCount++].set(x, y);
     }
+    polygon.resize(pointCount);
 
+    // Clip the polygon
     BasicClipShape<PointF::ValueT>::clipPolygon(polygon, _currentClip);
 
     // Find the minimum and maximum coordinates

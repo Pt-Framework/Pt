@@ -33,6 +33,10 @@ class Test2View : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
+            painter.setPen  ( Color::fromRgb8(255, 0, 0)  );
+            painter.setFont ( Font("", 16) );
+            painter.drawText( PointF(200, 50), Pt::String("--- NOT WORKING PROPERLY ---") );
+
             Pt::Gfx::Pen green1sf( Color::fromRgb8(0, 255, 0), 1, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );
 
             Pt::Gfx::Pen green7sf( Color::fromRgb8(0, 255, 0), 7, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );
