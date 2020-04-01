@@ -37,8 +37,8 @@ class Benchmark2View : public Pt::Hmi::Control
             static bool doBenchmark = true;
             if(doBenchmark) {
                 doBenchmark = false;
-                resIP1 = onPaintContent(ip1, "IP1", 0);
-                resIP2 = onPaintContent(ip2, "IP1", 0);
+                resIP1 = onPaintContent(ip1, "IP1", 0, 0.0f);
+                resIP2 = onPaintContent(ip2, "IP1", 0, 0.0f);
             }
 
             ip1.setBrush(background);
@@ -47,14 +47,14 @@ class Benchmark2View : public Pt::Hmi::Control
             ip2.setBrush(background);
             ip2.fillRect(imageRect);
 
-            onPaintContent(ip1, "IP1", resIP1);
-            onPaintContent(ip2, "IP2", resIP2);
+            onPaintContent(ip1, "IP1", resIP1, 1.0f);
+            onPaintContent(ip2, "IP2", resIP2, (float) resIP2 / (float) resIP1);
 
             painter.drawImage(PointF(2, 2), image1);
             painter.drawImage(PointF(2, 339), image2);
         }
 
-        virtual Pt::uint64_t onPaintContent(Pt::Gfx::Painter& painter, const char* text, Pt::uint64_t benchmarkResult)
+        virtual Pt::uint64_t onPaintContent(Pt::Gfx::Painter& painter, const char* text, Pt::uint64_t benchmarkResult, float benchmarkRatio)
         {
             using namespace Pt::Gfx;
 
@@ -62,7 +62,7 @@ class Benchmark2View : public Pt::Hmi::Control
             const char*    aai = (ip2 && ip2->isAntiAliasing()) ? "WITH AA" : "WITHOUT AA";
 
             char buff[128];
-            sprintf(buff, "%s [%s] - %zd mS", text, aai, benchmarkResult);
+            sprintf(buff, "%s [%s] - %zd mS (%.1f x)", text, aai, benchmarkResult, benchmarkRatio);
 
             painter.setPen  ( Color::fromRgb8(164, 100, 255)  );
             painter.setFont ( Font("", 12) );
@@ -82,13 +82,15 @@ class Benchmark2View : public Pt::Hmi::Control
                 painter.setPen(green2);
 
                 Pt::System::Clock clock;
-                clock.start();
+                const int         loopCount = 250;
 
-                for(int i = 0; i < 100; ++i) {
+                for(int i = 0; i < loopCount; ++i) {
+                    clock.start();
                     painter.drawPolyline( &shape[0], shape.size() );
+                    benchmarkResult += clock.stop().toUSecs();
                 }
 
-                benchmarkResult = clock.stop().toMSecs();
+                benchmarkResult /= 1000;
             }
             else {
                 painter.setPen(green2);

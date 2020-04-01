@@ -1093,13 +1093,15 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
     for(std::size_t i = 0; i < pc1; ++i)
     {
         if(solid)
-            rasterNarrowSolidLine_F(pointsF[i].x(), pointsF[i].y(),
-                                    pointsF[i + 1].x(), pointsF[i + 1].y(),
-                                    _pen.color(), &mask_nnp1);
+            rasterNarrowSolidLine_F( pointsF[i].x(), pointsF[i].y(),
+                                     pointsF[i + 1].x(), pointsF[i + 1].y(),
+                                     _pen.color(), &mask_nnp1
+                                   );
         else
-            rasterNarrowPatternedLine_F(pointsF[i].x(), pointsF[i].y(),
-                                        pointsF[i + 1].x(), pointsF[i + 1].y(),
-                                        _pen.color(), fpiCtrInOut, &mask_nnp1);
+            rasterNarrowPatternedLine_F( pointsF[i].x(), pointsF[i].y(),
+                                         pointsF[i + 1].x(), pointsF[i + 1].y(),
+                                         _pen.color(), fpiCtrInOut, &mask_nnp1
+                                       );
     }
 }
 
@@ -1268,17 +1270,11 @@ void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
 
     if( this->isAntiAliasing() )
     {
-        if(clippedPolygons.size() == 1)
-            rasterPolygonXWAA(&clippedPolygons[0][0], clippedPolygons[0].size(), _brush.color(), minX, minY, maxX, maxY);
-        else
-            rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
     }
     else
     {
-        if(clippedPolygons.size() == 1)
-            rasterPolygonNoAA(&clippedPolygons[0][0], clippedPolygons[0].size(), _brush.color(), minX, minY, maxX, maxY);
-        else
-            rasterPolygonsNoAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonsNoAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
     }
 }
 

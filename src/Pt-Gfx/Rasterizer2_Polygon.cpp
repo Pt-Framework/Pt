@@ -230,6 +230,13 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
                                      Pt::int32_t minX, Pt::int32_t minY,
                                      Pt::int32_t maxX, Pt::int32_t maxY)
 {
+    // Check if there is only one polygon
+    if(polygons.size() == 1) {
+        rasterPolygonNoAA(&polygons[0][0], polygons[0].size(), color, minX, minY, maxX, maxY);
+        return;
+    }
+
+    // Calculate the total number of points
     std::size_t totalPointCount = 0;
 
     for(std::vector<Polygon>::const_iterator it = polygons.begin();
@@ -445,7 +452,13 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
                                      Pt::int32_t minX, Pt::int32_t minY,
                                      Pt::int32_t maxX, Pt::int32_t maxY)
 {
+    // Check if there is only one polygon
+    if(polygons.size() == 1) {
+        rasterPolygonXWAA(&polygons[0][0], polygons[0].size(), color, minX, minY, maxX, maxY);
+        return;
+    }
 
+    // Calculate the total number of points
     std::size_t totalPointCount = 0;
 
     for(std::vector<Polygon>::const_iterator it = polygons.begin();

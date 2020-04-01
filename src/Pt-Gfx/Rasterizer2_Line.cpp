@@ -128,17 +128,11 @@ void Rasterizer2::rasterWidePolyline(const std::vector<Polygon>& polygons)
 
     if( this->isAntiAliasing() )
     {
-        if(clippedPolygons.size() == 1)
-            rasterPolygonXWAA(&clippedPolygons[0][0], clippedPolygons[0].size(), _pen.color(), minX, minY, maxX, maxY);
-        else
-            rasterPolygonsXWAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+        rasterPolygonsXWAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
     }
     else
     {
-        if(clippedPolygons.size() == 1)
-            rasterPolygonNoAA(&clippedPolygons[0][0], clippedPolygons[0].size(), _pen.color(), minX, minY, maxX, maxY);
-        else
-            rasterPolygonsNoAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+        rasterPolygonsNoAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
     }
 
     // Restore texture and gradient
