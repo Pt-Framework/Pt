@@ -1,3 +1,5 @@
+// ./jam.sh configure --release --optimize --with-hmi -sGUI=xorg
+
 //#include <iomanip>
 #include <stdio.h>
 
