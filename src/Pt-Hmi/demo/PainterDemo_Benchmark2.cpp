@@ -76,7 +76,7 @@ class Benchmark2View : public Pt::Hmi::Control
 
             Pt::Gfx::Pen green2( Color::fromRgb8(0, 255, 0, alpha), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
 
-            std::vector<Pt::Gfx::PointF> shape = makeLineComplex(5, 2);
+            std::vector<Pt::Gfx::PointF> shape = makeLineComplex(6, 1);
 
             if(!benchmarkResult) {
                 painter.setPen(green2);
