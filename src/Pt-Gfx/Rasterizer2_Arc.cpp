@@ -57,49 +57,6 @@ struct XY {
 
 typedef std::map<XY, Pt::int32_t> XYAlphaMap;
 
-/*
-ORIGINAL ALGORITHM BENCHMARK
-
-Pt::Gfx - CompositionMode::SourceCopy
-                                                       (Time) (Factor)
-                                                       ------ --------
-    Ellipse NOAA                     @ ImagePainter2 =      6
-    Ellipse XWAA                     @ ImagePainter2 =     15 ( 2.500)
-
-    Arc     NOAA                     @ ImagePainter2 =     11
-    Arc     XWAA                     @ ImagePainter2 =     23 ( 2.091)
-
-Pt::Gfx - CompositionMode::SourceOver
-                                                       (Time) (Factor)
-                                                       ------ --------
-    Ellipse NOAA                     @ ImagePainter2 =      9
-    Ellipse XWAA                     @ ImagePainter2 =     13 ( 1.444)
-
-    Arc     NOAA                     @ ImagePainter2 =     13
-    Arc     XWAA                     @ ImagePainter2 =     22 ( 1.692)
-
-
-ALTERNATIVE ALGORITHM BENCHMARK
-
-Pt::Gfx - CompositionMode::SourceCopy
-                                                       (Time) (Factor)
-                                                       ------ --------
-    Ellipse NOAA                     @ ImagePainter2 =    250
-    Ellipse XWAA                     @ ImagePainter2 =    245 ( 0.980)
-
-    Arc     NOAA                     @ ImagePainter2 =    196
-    Arc     XWAA                     @ ImagePainter2 =    197 ( 1.005)
-
-Pt::Gfx - CompositionMode::SourceOver
-                                                       (Time) (Factor)
-                                                       ------ --------
-    Ellipse NOAA                     @ ImagePainter2 =    241
-    Ellipse XWAA                     @ ImagePainter2 =    239 ( 0.992)
-
-    Arc     NOAA                     @ ImagePainter2 =    196
-    Arc     XWAA                     @ ImagePainter2 =    196 ( 1.000)
-
-*/
 
 // Inspired by: Drawing Antialiased Circles and Ellipses
 //              http://create.stephan-brumme.com/antialiased-circle

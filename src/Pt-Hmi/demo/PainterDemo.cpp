@@ -539,6 +539,7 @@ class ShapesView : public PaintView
 
 
 #include "PainterDemo_Test1.cpp"
+#include "PainterDemo_Test2.cpp"
 #include "PainterDemo_Benchmark1.cpp"
 #include "PainterDemo_Benchmark2.cpp"
 
@@ -559,9 +560,10 @@ class PainterDemoWindow : public Pt::Hmi::Window
             _tabView.setCurrent(2);
 
             _tabView.addTab(_test1View, "Test 1");
+            _tabView.addTab(_test2View, "Test 2");
             _tabView.addTab(_benchmark1View, "Benchmark 1");
             _tabView.addTab(_benchmark2View, "Benchmark 2");
-            _tabView.setCurrent(5);
+            _tabView.setCurrent(4);
 
             this->setContent(&_tabView);
         }
@@ -580,6 +582,7 @@ class PainterDemoWindow : public Pt::Hmi::Window
         ShapesView       _shapesView;
 
         Test1View         _test1View;
+        Test2View         _test2View;
         Benchmark1View    _benchmark1View;
         Benchmark2View    _benchmark2View;
 };

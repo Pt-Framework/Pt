@@ -27,6 +27,8 @@
   02110-1301 USA
 */
 
+//#include <stdio.h>
+
 #include "ArcMode.h"
 
 #include "Polygonizer.h"
@@ -37,9 +39,9 @@ namespace Pt {
 namespace Gfx {
 
 void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
-                                   Pt::int32_t radiusX, Pt::int32_t radiusY,
-                                   Pt::int32_t centerX, Pt::int32_t centerY,
-                                   float degBegin, float degEnd, const Pen& pen)
+                                  Pt::int32_t radiusX, Pt::int32_t radiusY,
+                                  Pt::int32_t centerX, Pt::int32_t centerY,
+                                  float degBegin, float degEnd, const Pen& pen)
 {
     // Calculate the arc's parameters
     const float       degDlt  = degEnd - degBegin;
@@ -81,6 +83,22 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
         dst.push_back( PointF(x, y) );
     }
 
+#if 0
+    double minX = 99999;
+    double minY = 99999;
+    for(size_t i = 0; i < dst.size(); ++i)
+    {
+        const double x = dst[i].x();
+        const double y = dst[i].y();
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+    }
+    for(size_t i = 0; i < dst.size(); ++i)
+    {
+        fprintf(stderr, "            points.push_back( Pt::Gfx::PointF( x + %17.14f * scale, y + %17.14f * scale ) );\n", dst[i].x() - minX, dst[i].y() - minY );
+    }
+#endif
+
     // Discard the last point if it has the same coordinate with the first one
     if(dst.back() == dst[0])
         dst.pop_back();
@@ -88,8 +106,8 @@ void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
 
 
 void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMode,
-                             const PointF& topLeft, const SizeF& size,
-                             float degBegin, float degEnd, const Pen& pen)
+                            const PointF& topLeft, const SizeF& size,
+                            float degBegin, float degEnd, const Pen& pen)
 {
     // Ensure that the begin angle is within the acceptable range
     while(degBegin < -360.0f) degBegin += 360.0f;

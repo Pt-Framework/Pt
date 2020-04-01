@@ -28,7 +28,7 @@
   02110-1301 USA
 */
 
-#include <iomanip>
+//#include <iomanip>
 
 #include "Rasterizer2.h"
 #include "ClipShape.h"
