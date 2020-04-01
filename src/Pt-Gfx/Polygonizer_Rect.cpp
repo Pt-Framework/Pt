@@ -109,7 +109,7 @@ void Polygonizer::renderRoundedRect(std::vector<Polygon>& polygons,
     if( ! pointsF.empty() )
         pointsF.push_back( pointsF.front() );
 
-    renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, !pen.isSolid(), true );
+    renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, !pen.isSolid() );
 }
 
 

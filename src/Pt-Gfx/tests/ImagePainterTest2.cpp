@@ -76,7 +76,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
 #define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
 #define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled)
@@ -95,7 +95,7 @@ using namespace Pt::Gfx;
 
 //#define TEST_DRAW_EXTRA                       0
 
-#define TEST_DRAW_PATH                          0 // (including thick and filled and rectangle clipping area)
+#define TEST_DRAW_PATH                          1 // (including thick and filled and rectangle clipping area)
 //#define TEST_DRAW_PATH_CLIPPING               0 // (including path-based text)
 
 //#define TEST_IMAGE_OPERATION                  0

@@ -38,7 +38,7 @@ namespace Gfx {
 
 void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                               const PointF* basePtr, size_t curPCnt,
-                                              const Pen& pen, bool cleanUpSelfIntersection, bool forSmoothCurve)
+                                              const Pen& pen, bool cleanUpSelfIntersection)
 {
 #if 0
     fprintf(stderr, "### CALLING renderSolidOpenWidePolyline() ###\n");
@@ -84,7 +84,7 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
         pointsFSegment.clear();
 
         renderSolidLineSegment(pointsFSegment, from.x(), from.y(),
-                               to.x(), to.y(), pen, i == 0, i == curPC2, forSmoothCurve);
+                               to.x(), to.y(), pen, i == 0, i == curPC2);
 
         if( ! joinOpenWidePolyline( pointsFPolygon, pointsFInner,
                                     pointsFSegment, from, pen, false /*inSameSegment*/ ) )
