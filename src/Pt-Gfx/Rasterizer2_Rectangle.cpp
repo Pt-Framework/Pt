@@ -35,6 +35,8 @@ namespace Pt {
 
 namespace Gfx {
 
+/*
+// REVIEW: Seems nothing actually uses these functions anymore?
 void Rasterizer2::rasterNarrowRect(const Point& tl, const Point& br)
 {
     // Get the minimum and maximum coordinates
@@ -70,6 +72,7 @@ void Rasterizer2::rasterNarrowRect(const Point& tl, const Point& br)
         rasterNarrowPatternedLine(minX, maxY, minX, minY, _pen.color(), fpiCtrInOut, &mask);
     }
 }
+*/
 
 
 void Rasterizer2::rasterNarrowRoundedRect(const RectF& rect, float radius)
@@ -267,6 +270,7 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
                                    sizeX, _compositionMode);
     }
 }
+
 
 } // namespace
 

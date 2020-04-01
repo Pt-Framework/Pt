@@ -407,7 +407,7 @@ class Rasterizer2
         // rects
         //
 
-        void rasterNarrowRect(const Point& tl, const Point& br);
+        //void rasterNarrowRect(const Point& tl, const Point& br);
 
         void rasterNarrowRoundedRect(const RectF& rect, float radius);
 
