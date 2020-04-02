@@ -164,8 +164,6 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
                     collisionDetection
                 );
             }
-            else {
-            }
             // Substract the remainder length
             state.remLen -= state.patSegLen;
             // Reset the "pattern" segment length
@@ -191,8 +189,6 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             // Generate one solid polygon segment as needed
             if(draw) {
                 sagGeneratePolyLineSegment(state, pen, collisionDetection);
-            }
-            else {
             }
             // Reset the "pattern" segment length
             state.patSegLen = 0.0f;
@@ -271,12 +267,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
         // Check if the line is too short for adjustment
         if(ll) return;
         // Line has enough length
-#if 1
-        x1 += (dx * NON_FLAT_CAP_REDUCTION_FACTOR);
-        y1 += (dy * NON_FLAT_CAP_REDUCTION_FACTOR);
-        x2 -= (dx * NON_FLAT_CAP_REDUCTION_FACTOR);
-        y2 -= (dy * NON_FLAT_CAP_REDUCTION_FACTOR);
-#else
+#if 0
         if(!state.dstPolygons.empty()) { // Exclude the first segment
             x1 += (dx * NON_FLAT_CAP_REDUCTION_FACTOR);
             y1 += (dy * NON_FLAT_CAP_REDUCTION_FACTOR);
@@ -285,6 +276,11 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
             x2 -= (dx * NON_FLAT_CAP_REDUCTION_FACTOR);
             y2 -= (dy * NON_FLAT_CAP_REDUCTION_FACTOR);
         }
+#else
+        x1 += (dx * NON_FLAT_CAP_REDUCTION_FACTOR);
+        y1 += (dy * NON_FLAT_CAP_REDUCTION_FACTOR);
+        x2 -= (dx * NON_FLAT_CAP_REDUCTION_FACTOR);
+        y2 -= (dy * NON_FLAT_CAP_REDUCTION_FACTOR);
 #endif
     }
 
@@ -355,12 +351,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         const float  fy1 = state.gather[0].y();
         const float  fx2 = state.gather[1].x();
         const float  fy2 = state.gather[1].y();
-#if 1
-        const float  fll = calculateLineParams(fdx, fdy, fx1, fy1, fx2, fy2, pnz);
-        if(!fll) {
-            state.gather[0].set(fx1 + fdx * NON_FLAT_CAP_REDUCTION_FACTOR, fy1 + fdy * NON_FLAT_CAP_REDUCTION_FACTOR );
-        }
-#else
+#if 0
               float  fll = calculateLineParams(fdx, fdy, fx1, fy1, fx2, fy2, pnz);
         if(!state.dstPolygons.empty()) { // Exclude the first segment
             if(!fll) {
@@ -369,6 +360,11 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         }
         else {
             fll = 0.0f;
+        }
+#else
+        const float  fll = calculateLineParams(fdx, fdy, fx1, fy1, fx2, fy2, pnz);
+        if(!fll) {
+            state.gather[0].set(fx1 + fdx * NON_FLAT_CAP_REDUCTION_FACTOR, fy1 + fdy * NON_FLAT_CAP_REDUCTION_FACTOR );
         }
 #endif
         // Line has enough length
@@ -379,12 +375,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         const float  ly1 = state.gather[eix - 1].y();
         const float  lx2 = state.gather[eix    ].x();
         const float  ly2 = state.gather[eix    ].y();
-#if 1
-        const float  lll = calculateLineParams(ldx, ldy, lx1, ly1, lx2, ly2, pnz);
-        if(!lll) {
-            state.gather[eix].set(lx2 - ldx * NON_FLAT_CAP_REDUCTION_FACTOR, ly2 - ldy * NON_FLAT_CAP_REDUCTION_FACTOR );
-        }
-#else
+#if 0
               float  lll = calculateLineParams(ldx, ldy, lx1, ly1, lx2, ly2, pnz);
         if(state.idx1 < state.srcCount) { // Exclude the last segment
             if(!lll) {
@@ -393,6 +384,11 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         }
         else {
             lll = 0.0f;
+        }
+#else
+        const float  lll = calculateLineParams(ldx, ldy, lx1, ly1, lx2, ly2, pnz);
+        if(!lll) {
+            state.gather[eix].set(lx2 - ldx * NON_FLAT_CAP_REDUCTION_FACTOR, ly2 - ldy * NON_FLAT_CAP_REDUCTION_FACTOR );
         }
 #endif
         // If the segments are too small, remove them (instead of adjusting the coordinates)
