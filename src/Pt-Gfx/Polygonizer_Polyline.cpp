@@ -39,7 +39,7 @@ namespace Gfx {
 void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
                                       const PointF* points, const std::size_t n,
                                       const Pen& pen,
-                                      bool useNonZeroFillingRule/*, bool forSmoothCurve*/)
+                                      bool nonZeroFillingRule)
 {
     if( n < 2 )
         return;
@@ -57,40 +57,29 @@ void Polygonizer::renderWidePolyline(std::vector<Polygon>& polygons,
         }
         else
         {
-            renderSolidOpenWidePolyline(polygons, points, n, pen, false/*, false*/);
+            renderSolidOpenWidePolyline(polygons, points, n, pen, false);
         }
     }
     // Dashed line
     else
     {
-        renderDashedWidePolyLine(polygons, points, n, pen, !isSelfIn/*, forSmoothCurve*/);
+        renderDashedWidePolyLine(polygons, points, n, pen, !isSelfIn);
     }
 
     // Ensure that all self-intersecting polygons are cleaned-up
-    //if ( isSelfIn || (useNonZeroFillingRule && forSmoothCurve) )
-    if ( isSelfIn || useNonZeroFillingRule )
-        cleanupAllPolygons(polygons, useNonZeroFillingRule);
+    if ( isSelfIn || nonZeroFillingRule )
+        cleanupAllPolygons(polygons, nonZeroFillingRule);
 }
 
 
 void Polygonizer::renderSolidLineSegment(std::vector<PointF>& dst,
                                          float x1, float y1, float x2, float y2,
-                                         const Pen& pen, bool openingCap, bool closingCap/*, bool forSmoothCurve*/)
+                                         const Pen& pen, bool openingCap, bool closingCap)
 {
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
-
-#if 0
-    // Adjust the coordinates (thus the line's length) as needed
-    if( pen.capStyle() != Pen::FlatCap ) {
-        x1 += (dx * 0.75f);
-        y1 += (dy * 0.75f);
-        x2 -= (dx * 0.75f);
-        y2 -= (dy * 0.75f);
-    }
-#endif
 
     // Generate points (CCW)
 

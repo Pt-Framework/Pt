@@ -35,44 +35,6 @@ namespace Pt {
 
 namespace Gfx {
 
-/*
-// REVIEW: Seems nothing actually uses these functions anymore?
-void Rasterizer2::rasterNarrowRect(const Point& tl, const Point& br)
-{
-    // Get the minimum and maximum coordinates
-    Pt::int32_t minX = tl.x();
-    Pt::int32_t minY = tl.y();
-    Pt::int32_t maxX = br.x();
-    Pt::int32_t maxY = br.y();
-
-    // Clip the coordinates
-    if(minX < _currentClip.left  ()) minX = _currentClip.left  ();
-    if(minY < _currentClip.top   ()) minY = _currentClip.top   ();
-    if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
-    if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
-
-    if(_pen.isSolid())
-    {
-        // Draw the rectangle's horizontal lines
-        rasterNarrowSolidHLineSegment(minX, maxX, minY, _pen.color(), 0);
-        rasterNarrowSolidHLineSegment(minX, maxX, maxY, _pen.color(), 0);
-
-        // Draw the rectangle's vertical lines
-        rasterNarrowSolidVLineSegment(minX, minY + 1, maxY - 1, _pen.color(), 0);
-        rasterNarrowSolidVLineSegment(maxX, minY + 1, maxY - 1, _pen.color(), 0);
-    }
-    else // Patterned line
-    {
-        Pt::int32_t  fpiCtrInOut = PATTERN_BUFFER_1P_COUNTER_START;
-        DrawLineMask mask;
-        memcpy(mask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
-        rasterNarrowPatternedLine(minX, minY, maxX, minY, _pen.color(), fpiCtrInOut, &mask);
-        rasterNarrowPatternedLine(maxX, minY, maxX, maxY, _pen.color(), fpiCtrInOut, &mask);
-        rasterNarrowPatternedLine(maxX, maxY, minX, maxY, _pen.color(), fpiCtrInOut, &mask);
-        rasterNarrowPatternedLine(minX, maxY, minX, minY, _pen.color(), fpiCtrInOut, &mask);
-    }
-}
-*/
 
 
 void Rasterizer2::drawRect(const RectF& rect)
@@ -86,9 +48,9 @@ void Rasterizer2::drawRect(const RectF& rect)
     ps.push_back(rect.topLeft    ());
     ps.push_back(rect.bottomLeft ());
 
+    // Floor the coordinates with an epsilon of 0.001
     for (size_t i = 0; i < ps.size(); ++i)
     {
-        // Floor the coordinates with an epsilon of 0.001
         ps[i].set( Pt::lround(ps[i].x() - 0.4999), Pt::lround(ps[i].y() - 0.4999) );
     }
 

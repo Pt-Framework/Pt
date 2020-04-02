@@ -145,7 +145,7 @@ class Rasterizer2
         void drawArc(const PointF& topLeft, const SizeF& size,
                      float degBegin, float degEnd, const ArcMode& arcMode);
 
-        void drawPath(const Path& path, float smoothness, bool useNonZeroFillingRule);
+        void drawPath(const Path& path, float smoothness, bool nonZeroFillingRule);
 
         void fillPolygon(const PointF* ps, const size_t pointCount);
 
@@ -172,7 +172,7 @@ class Rasterizer2
 
         void drawNarrowPolyline(const PointF* points, size_t pointCount);
 
-        void drawWidePolyline(const PointF* points, const size_t pointCount, bool useNonZeroFillingRule);
+        void drawWidePolyline(const PointF* points, const size_t pointCount, bool nonZeroFillingRule);
 
         void drawNarrowPath(const PointF* pointsF, size_t pointCount);
 
@@ -406,8 +406,6 @@ class Rasterizer2
         //
         // rects
         //
-
-        //void rasterNarrowRect(const Point& tl, const Point& br);
 
         void rasterNarrowRoundedRect(const RectF& rect, float radius);
 

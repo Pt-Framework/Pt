@@ -122,7 +122,7 @@ class PT_GFX_API ImagePainter2 : public Painter
                              float degBegin, float degEnd);
 
         // maybe better have ImagePainter::setSmoothness
-        virtual void drawPath(const Path& path, float smoothness = 1.0f, bool useNonZeroFillingRule = false);
+        virtual void drawPath(const Path& path, float smoothness = 1.0f, bool nonZeroFillingRule = false);
 
 
         virtual void fillRoundedRect(const RectF& rect, float radius);
@@ -147,12 +147,6 @@ class PT_GFX_API ImagePainter2 : public Painter
         static std::string defaultFont();
 
         static std::vector<std::string> fontNames();
-
-    private:
-        // USUSED
-        //void clipPolygonXXX(std::vector<PointF>& result,
-        //                    const std::vector<PointF>& subject,
-        //                    const std::vector<PointF>& clipRegion);
 
     private:
       Rasterizer2* _rasterizer;

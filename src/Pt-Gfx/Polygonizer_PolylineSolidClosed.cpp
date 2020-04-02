@@ -79,7 +79,7 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
         renderSolidLineSegment(pointsFSegment,
                                from.x(), from.y(),
                                to.x(), to.y(),
-                               pen, false, false/*, false*/);
+                               pen, false, false);
 
         if( ! joinClosedWidePolyline(pointsFOuter, pointsFInner,
                                      pointsFSegment, from, pen,
@@ -97,7 +97,7 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
     renderSolidLineSegment(pointsFSegment,
                            from.x(), from.y(),
                            to.x(), to.y(),
-                           pen, false, false/*, false*/);
+                           pen, false, false);
 
     if( ! joinClosedWidePolyline(pointsFOuter, pointsFInner,
                                  pointsFSegment, from, pen,

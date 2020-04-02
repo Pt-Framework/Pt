@@ -35,6 +35,7 @@
 #include "ClipShape.h"
 #include "Rasterizer2.h"
 
+
 namespace Pt {
 
 namespace Gfx {
@@ -64,107 +65,6 @@ typedef std::map<XY, Pt::int32_t> XYAlphaMap;
 void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
                                   float degBegin, float degEnd, const ArcMode& arcMode)
 {
-/*
-    // Shall we draw an ellipse or arc?
-    const bool drawArc = (degBegin != 0) || (degEnd != 0);
-
-    if(drawArc) {
-        // Ensure that the begin angle is within the acceptable range
-        while(degBegin < -360) degBegin += 360;
-        while(degBegin >  360) degBegin -= 360;
-        // Ensure that the end angle is within the acceptable range
-        while(degEnd < -360) degEnd += 360;
-        while(degEnd >  360) degEnd -= 360;
-    }
-    else {
-        degBegin =   0.0f;
-        degEnd   = 360.0f;
-    }
-
-    // Calculate the ellipse's parameters
-    const float minX = topLeft.x();
-    const float minY = topLeft.y();
-    const float radX = (size.width () - 1) * 0.5f;
-    const float radY = (size.height() - 1) * 0.5f;
-    const float ctrX = minX + radX;
-    const float ctrY = minY + radY;
-
-    const float       dTot = fabs(degEnd - degBegin);
-    const float       cCir = 2.0f * Pt::pi<float>() * sqrtf( (radX * radX + radY * radY) * 0.5f );
-    const Pt::int32_t cRes = ceil( cCir * dTot / 360.0f );
-
-    const float dInc = degToRad(degEnd - degBegin) / float(cRes);
-          float dItr = degToRad(degBegin);
-
-    //fprintf(stderr, "BOX (%6.2f, %6.2f) (%6.2f, %6.2f)\n", (float) topLeft.x(), (float) topLeft.y(), (float) topLeft.x() + size.width() - 1, (float) topLeft.y() + size.height() - 1);
-    //fprintf(stderr, "PAR (%6.2f, %6.2f) (%6.2f, %6.2f)\n\n", ctrX, ctrY, radX, radY);
-
-    //
-    XYAlphaMap xyam;
-
-    for(Pt::int32_t i = 0; i < cRes; ++i) {
-        //
-        //  std::cerr << dItr << std::endl;
-        const float xc = ctrX + radX * cos(dItr);
-        const float yc = ctrY - radY * sin(dItr);
-        dItr += dInc;
-        //
-        const Pt::int32_t xl = floor(xc);
-        const Pt::int32_t yt = floor(yc);
-        const Pt::int32_t xr = ceil (xc);
-        const Pt::int32_t yb = ceil (yc);
-        //
-        const float       alphaXr = xc - xl;
-        const float       alphaXl = 1.0f - alphaXr;
-        const float       alphaYb = yc - yt;
-        const float       alphaYt = 1.0f - alphaYb;
-        const Pt::int32_t alphaLT = XWAA_WFILTER[ 255 - lround( alphaXl * alphaYt * 255.0f ) ];
-        const Pt::int32_t alphaLB = XWAA_WFILTER[ 255 - lround( alphaXl * alphaYb * 255.0f ) ];
-        const Pt::int32_t alphaRT = XWAA_WFILTER[ 255 - lround( alphaXr * alphaYt * 255.0f ) ];
-        const Pt::int32_t alphaRB = XWAA_WFILTER[ 255 - lround( alphaXr * alphaYb * 255.0f ) ];
-
-        //
-        const bool xlValid = ClipShapeI::insideXRange(xl, _currentClip);
-        const bool ytValid = ClipShapeI::insideYRange(yt, _currentClip);
-        const bool xrValid = ClipShapeI::insideXRange(xr, _currentClip) && (xr != xl);
-        const bool ybValid = ClipShapeI::insideYRange(yb, _currentClip) && (yb != yt);
-
-        //
-        Pt::int32_t& alt = xyam[XY(xl, yt)];
-        Pt::int32_t& alb = xyam[XY(xl, yb)];
-        Pt::int32_t& art = xyam[XY(xr, yt)];
-        Pt::int32_t& arb = xyam[XY(xr, yb)];
-
-        if(ytValid) {
-            if(xlValid) {
-                alt += alphaLT;
-                if(alt > 255) alt = 255;
-            }
-            if(xrValid) {
-                art += alphaRT;
-                if(art > 255) art = 255;
-            }
-        }
-
-        if(ybValid) {
-            if(xlValid) {
-                alb += alphaLB;
-                if(alb > 255) alb = 255;
-            }
-            if(xrValid) {
-                arb += alphaRB;
-                if(arb > 255) arb = 255;
-            }
-        }
-    }
-
-    //
-    for(XYAlphaMap::const_iterator it = xyam.begin(); it != xyam.end(); ++it) {
-        Pixel pixel(_image->view(), it->first.x, it->first.y);
-        _image->format().setPixel(pixel, _pen.color(), _compositionMode, it->second);
-    }
-*/
-
     // IMPORTANT NOTES:
     //     * The Y coordinate goes from low to high according to the coordinate system being used:
     //           - cartesian coordinate system: from the horizontal axis (the X axis) to the top;
@@ -197,9 +97,6 @@ void Rasterizer2::rasterNarrowArc(const Point& topLeft, const Size& size,
 
     const Pt::int32_t sfX   = wEven ? 1 : 0;
     const Pt::int32_t sfY   = hEven ? 1 : 0;
-
-    //fprintf(stderr, "BOX (%6.2f, %6.2f) (%6.2f, %6.2f)\n", (float) topLeft.x(), (float) topLeft.y(), (float) topLeft.x() + size.width() - 1, (float) topLeft.y() + size.height() - 1);
-    //fprintf(stderr, "PAR (%6.2f, %6.2f) (%6.2f, %6.2f)\n\n", ctrX, ctrY, radX, radY);
 
     // Draw using solid pen?
     const bool solid = pen().isSolid();

@@ -27,8 +27,6 @@
   02110-1301 USA
 */
 
-//#include <stdio.h>
-
 #include "ArcMode.h"
 
 #include "Polygonizer.h"
@@ -37,6 +35,7 @@
 namespace Pt {
 
 namespace Gfx {
+
 
 void Polygonizer::renderArcPoints(std::vector<PointF>& dst,
                                   Pt::int32_t radiusX, Pt::int32_t radiusY,
@@ -230,7 +229,7 @@ void Polygonizer::renderArc(std::vector<Polygon>& polygons, const ArcMode& arcMo
                             degBegin, degEnd, pen);
         }
 
-        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true/*, true */);
+        renderWidePolyline( polygons, &pointsF[0], pointsF.size(), pen, true);
     }
 }
 

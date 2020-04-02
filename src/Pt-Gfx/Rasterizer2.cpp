@@ -28,8 +28,6 @@
   02110-1301 USA
 */
 
-//#include <iomanip>
-
 #include "Rasterizer2.h"
 #include "ClipShape.h"
 #include <Pt/Gfx/Transform.h>
@@ -736,7 +734,7 @@ void Rasterizer2::drawLine(const PointF& from, const PointF& to)
     }
 
     std::vector<Polygon> polygons;
-    _polygonizer.renderWidePolyline(polygons, points, 2, _pen, true/*, false*/);
+    _polygonizer.renderWidePolyline(polygons, points, 2, _pen, true);
 
     // no performance benefit to use renderWideLine
     //_polygonizer.renderWideLine( polygons, from, to, _rasterizer->pen() );
@@ -812,41 +810,10 @@ void Rasterizer2::drawPolyline(const PointF* ps, size_t n)
         PointF p( Pt::lround(ps[i].x() - 0.4999),
                   Pt::lround(ps[i].y() - 0.4999) );
         // Only store non-duplicated coordinates
-#if 0
-        if( ! polygon.empty() ) {
-            const PointF& delta = polygon.back() - p;
-            if( fabs( delta.x() ) < 0.5 && fabs( delta.y() ) < 0.5 )
-              continue;
-        }
-#else
         if( ! polygon.empty() && polygon.back() == p )
           continue;
-#endif
         polygon.push_back(p);
     }
-    //std::cerr << "### " << polygon.size() << std::endl;
-
-#if 0
-    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES)
-    {
-        const std::ios_base::fmtflags f(std::cerr.flags());
-
-        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::drawPolyline ### AT ENTRY POINT ###" << std::endl;
-        for (size_t i = 0; i < n; ++i) {
-            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                      << ps[i].x() << ", " << ps[i].y() << std::endl;
-        }
-
-        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::drawPolyline ### AFTER FIXED ADJUST ###" << std::endl;
-        for (size_t i = 0; i < polygon.size(); ++i) {
-            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                      << polygon[i].x() << ", " << polygon[i].y() << std::endl;
-        }
-
-        std::cerr << std::endl;
-        std::cerr.flags(f);
-    }
-#endif
 
     if(_pen.size() == 1)
        drawNarrowPolyline( &polygon[0], polygon.size() );
@@ -870,16 +837,6 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
     // From point N to point (N + 1), successively
     std::size_t pc1 = pointCount - 1;
 
-#if 0
-    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES && !this->isAntiAliasing()) {
-        std::cerr << "### 3 ###\n";
-        for (size_t i = 0; i < pointCount; ++i) {
-            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                      << points[i].x() << ", " << points[i].y() << std::endl;
-        }
-    }
-#endif
-
     for(std::size_t i = 0; i < pc1; ++i)
     {
         Pt::int32_t x1 = points[i].x();
@@ -898,14 +855,16 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
 }
 
 
-void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount, bool useNonZeroFillingRule)
+void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount, bool nonZeroFillingRule)
 {
     std::vector<Polygon> polygons;
-    _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen, useNonZeroFillingRule/*, false*/);
+    _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen, nonZeroFillingRule);
 
     const bool isSolid  = _pen.isSolid();
   //const bool isClosed = points[0] == points[pointCount - 1];
 
+    // ### TODO: WHY USE BOTH rasterWidePolyline() and rasterWideLine() ??? ###
+    
     if( isSolid /*&& isClosed*/ )
     {
         rasterWidePolyline(polygons);
@@ -1016,7 +975,7 @@ void Rasterizer2::drawArc(const PointF& topLeft, const SizeF& size,
 }
 
 
-void Rasterizer2::drawPath(const Path& path, float smoothness, bool useNonZeroFillingRule)
+void Rasterizer2::drawPath(const Path& path, float smoothness, bool nonZeroFillingRule)
 {
     std::vector<Polygon> polygons;
     path.toPolygons(polygons, smoothness);
@@ -1031,7 +990,7 @@ void Rasterizer2::drawPath(const Path& path, float smoothness, bool useNonZeroFi
         }
         else
         {
-            drawWidePolyline( &pointsF[0], pointsF.size(), useNonZeroFillingRule );
+            drawWidePolyline( &pointsF[0], pointsF.size(), nonZeroFillingRule );
         }
     }
 }
@@ -1070,18 +1029,6 @@ void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
 {
-#if 0
-    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
-        const std::ios_base::fmtflags f(std::cerr.flags());
-        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AT ENTRY POINT ###" << std::endl;
-        for (size_t i = 0; i < n; ++i) {
-            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                      << ps[i].x() << ", " << ps[i].y() << std::endl;
-        }
-        std::cerr.flags(f);
-    }
-#endif
-
     // Perform coordinate adjustments
     std::vector<PointF> polygon(n);
     size_t              pointCount = 0;
@@ -1098,19 +1045,6 @@ void Rasterizer2::fillPolygon(const PointF* ps, std::size_t n)
         polygon[pointCount++].set(x, y);
     }
     polygon.resize(pointCount);
-
-#if 0
-    if(IP2_DEBUG::DUMP_POLYGON_COORDINATES) {
-        const std::ios_base::fmtflags f(std::cerr.flags());
-        std::cerr << (this->isAntiAliasing() ? "WAA: " : "NAA: ") << "Rasterizer2::fillPolygon ### AFTER FIXED ADJUST ###" << std::endl;
-        for (size_t i = 0; i < polygon.size(); ++i) {
-            std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-                      << polygon[i].x() << ", " << polygon[i].y() << std::endl;
-        }
-        std::cerr << std::endl;
-        std::cerr.flags(f);
-    }
-#endif
 
     // Clip the polygon
     BasicClipShape<PointF::ValueT>::clipPolygon(polygon, _currentClip);
@@ -1819,17 +1753,8 @@ void Rasterizer2::rasterScanline(Pt::int32_t iterL, Pt::int32_t iterR,
     }
 
     // Draw the span using solid color
-#if 0
-    if(IP2_DEBUG::DUMP_SCANLINE_COORDINATES) {
-        std::cerr << std::fixed << std::setw(5) << std::setprecision(1)
-              << "SCNLINE " << (minX + iterL) << ", " << (minY + pixelY) << " LEN " << (iterR - iterL + 1) << std::endl;
-    }
-#endif
-
     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
     _image->format().setPixels(pixel, color, iterR - iterL + 1, _compositionMode);
-
-    //fprintf(stderr, "RS [%3d] = %3d - %3d\n", minY + pixelY, (minX + iterL), (minX + iterL) + (iterR - iterL + 1) - 1);
 }
 
 

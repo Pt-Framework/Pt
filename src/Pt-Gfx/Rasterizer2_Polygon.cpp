@@ -818,7 +818,6 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1,
             bool skipPixel1 = false;
             if(!exclusionZone.empty()) {
                 for(S16V_CI it = S16V_begin(exclusionZone, iy - minY/* + 1*/); it != S16V_end(exclusionZone, iy - minY/* + 1*/); ++it) {
-                    //if(iy >= 32 && iy <= 35) fprintf(stderr, "CH [%3d:%3d] = %3d - %3d\n", iy - minY, iy, it->from, it->to);
                     if(ix0 >= it->from && ix0 <= it->to) skipPixel0 = true;
                     if(ix1 >= it->from && ix1 <= it->to) skipPixel1 = true;
                     if(skipPixel0 && skipPixel1) break;

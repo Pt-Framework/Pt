@@ -78,8 +78,6 @@ class Test2View : public Pt::Hmi::Control
             x = 30;
             y = 30;
 
-            //IP2_DEBUG::TEST_SMOOTH_CURVE_HACK = true;
-
 #if 1
             shape = makeTestShape1(x, y, 1.0);
             painter.setPen(green1sf);

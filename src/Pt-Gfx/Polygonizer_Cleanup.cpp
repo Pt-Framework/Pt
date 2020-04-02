@@ -37,7 +37,7 @@ namespace Pt {
 namespace Gfx {
 
 
-void Polygonizer::cleanupOnePolygon(std::vector<PointF>& polygon, bool useNonZeroFillingRule)
+void Polygonizer::cleanupOnePolygon(std::vector<PointF>& polygon, bool nonZeroFillingRule)
 {
     // Working variables
     ClipperLib::Path  cpath;
@@ -52,7 +52,7 @@ void Polygonizer::cleanupOnePolygon(std::vector<PointF>& polygon, bool useNonZer
     }
 
     // Simplify the polygon
-    if(useNonZeroFillingRule)
+    if(nonZeroFillingRule)
         ClipperLib::SimplifyPolygon(cpath, cpaths, ClipperLib::pftNonZero);
     else
         ClipperLib::SimplifyPolygon(cpath, cpaths, ClipperLib::pftEvenOdd);
@@ -73,7 +73,7 @@ void Polygonizer::cleanupOnePolygon(std::vector<PointF>& polygon, bool useNonZer
 }
 
 
-void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNonZeroFillingRule)
+void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool nonZeroFillingRule)
 {
     // Working variables
     ClipperLib::Paths cpaths;
@@ -92,7 +92,7 @@ void Polygonizer::cleanupAllPolygons(std::vector<Polygon>& polygons, bool useNon
     }
 
     // Simplify the polygons
-    if(useNonZeroFillingRule)
+    if(nonZeroFillingRule)
         ClipperLib::SimplifyPolygons(cpaths, ClipperLib::pftNonZero);
     else
         ClipperLib::SimplifyPolygons(cpaths, ClipperLib::pftEvenOdd);

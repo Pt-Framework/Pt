@@ -27,14 +27,6 @@
   02110-1301 USA
 */
 
-//#define DEBUG_SAG
-
-#ifdef DEBUG_SAG
-#include <stdio.h>
-#define LPF(FMT, ...) fprintf(stderr, FMT, __VA_ARGS__)
-#endif
-
-
 #include "Polygonizer.h"
 
 #include "clipper_aj/clipper.hpp"
@@ -82,7 +74,7 @@ struct PatternState
 
 void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
                                            const PointF* src, size_t pointCount,
-                                           const Pen& pen, bool collisionDetection/*, bool forSmoothCurve*/)
+                                           const Pen& pen, bool collisionDetection)
 {
     // Initialize the operational state
     PatternState state(polygons, src, pointCount, pen.size());
@@ -95,7 +87,7 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
     {
         state.patSegLen = dashPatternBuffer[n];
 
-        done = sagPolygonPoints(state, draw, pen, collisionDetection/*, forSmoothCurve*/);
+        done = sagPolygonPoints(state, draw, pen, collisionDetection);
         draw = ! draw;
 
         if(++n >= dashPatternBuffer.size()) n = 0;
@@ -103,7 +95,7 @@ void Polygonizer::renderDashedWidePolyLine(std::vector<Polygon>& polygons,
 }
 
 
-bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen, bool collisionDetection/*, bool forSmoothCurve*/)
+bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen, bool collisionDetection)
 {
     // Temporary buffer for the generated points
     std::vector<PointF> pointsF;
@@ -118,7 +110,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
                 // Process left-over partial segment (if any)
                 if(state.gatherLen && draw) {
                     if(state.gather.size() > 2) {
-                        sagGeneratePolyLineSegment(state, pen, collisionDetection/*, forSmoothCurve*/);
+                        sagGeneratePolyLineSegment(state, pen, collisionDetection);
                     }
                     else {
                         sagGenerateSimpleLineSegment(
@@ -159,14 +151,6 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         if(state.gather.empty() && state.remLen >= state.patSegLen) {
             // Generate a simple line segment as needed
             if(draw) {
-#ifdef DEBUG_SAG
-                LPF(
-                    "LINE DRAW remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) to (%5.1f , %5.1f)\n",
-                    state.remLen, state.patSegLen,
-                    state.px, state.py,
-                    state.px + state.uvx * state.patSegLen, state.py + state.uvy * state.patSegLen
-                );
-#endif
                 sagGenerateSimpleLineSegment(
                     state,
                     state.px,
@@ -178,14 +162,6 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
                 );
             }
             else {
-#ifdef DEBUG_SAG
-                LPF(
-                    "LINE SKIP remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) to (%5.1f , %5.1f)\n",
-                    state.remLen, state.patSegLen,
-                    state.px, state.py,
-                    state.px + state.uvx * state.patSegLen, state.py + state.uvy * state.patSegLen
-                );
-#endif
             }
             // Substract the remainder length
             state.remLen -= state.patSegLen;
@@ -194,14 +170,6 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             // Process excess length (if any)
             if(state.remLen > 0.0f) {
                 // Update the interpolation coordinate
-#ifdef DEBUG_SAG
-                LPF(
-                    "LINE NEXT remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) => (%5.1f , %5.1f)\n",
-                    state.remLen, state.patSegLen,
-                    state.px, state.py,
-                    state.ex - state.uvx * state.remLen, state.ey - state.uvy * state.remLen
-                );
-#endif
                 state.px = state.ex - state.uvx * state.remLen;
                 state.py = state.ey - state.uvy * state.remLen;
             }
@@ -219,25 +187,9 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
         if(state.gatherLen >= state.patSegLen) {
             // Generate one solid polygon segment as needed
             if(draw) {
-#ifdef DEBUG_SAG
-                LPF(
-                    "POLY DRAW remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) to (%5.1f , %5.1f)\n",
-                    state.remLen, state.patSegLen,
-                    state.gather.front().x(), state.gather.front().y(),
-                    state.gather.back().x(), state.gather.back().y()
-                );
-#endif
-                sagGeneratePolyLineSegment(state, pen, collisionDetection/*, forSmoothCurve*/);
+                sagGeneratePolyLineSegment(state, pen, collisionDetection);
             }
             else {
-#ifdef DEBUG_SAG
-                LPF(
-                    "POLY SKIP remLen=%5.1f   patSegLen=%5.1f   (%5.1f , %5.1f) to (%5.1f , %5.1f)\n",
-                    state.remLen, state.patSegLen,
-                    state.gather.front().x(), state.gather.front().y(),
-                    state.gather.back().x(), state.gather.back().y()
-                );
-#endif
             }
             // Reset the "pattern" segment length
             state.patSegLen = 0.0f;
@@ -369,7 +321,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 }
 
 
-void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen, bool collisionDetection/*, bool forSmoothCurve*/)
+void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen, bool collisionDetection)
 {
 #if 1
     // ### TODO: FIND A METHOD TO WORKAROUND SHORT SEGMENTS AT THE START & END !!! ###
@@ -404,7 +356,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
 
     // Generate a new thick polygon
     std::vector<Polygon> polygons;
-    renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen, true/*, forSmoothCurve*/);
+    renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen, true);
 
     // Exit here if the generated polygon does not actually have a meaningful number of points
     if(polygons.empty() || polygons[0].size() < 3)

@@ -31,17 +31,6 @@
 #include <Pt/Gfx/Painter.h>
 
 
-#if 0
-// ### TEMPORARY ###
-namespace Pt { namespace Gfx {
-bool IP2_DEBUG::DUMP_POLYGON_COORDINATES  = false;
-bool IP2_DEBUG::DUMP_SCANLINE_COORDINATES = false;
-bool IP2_DEBUG::TEST_SMOOTH_CURVE_HACK    = false;
-} }
-// ### TEMPORARY ###
-#endif
-
-
 namespace {
 
 
