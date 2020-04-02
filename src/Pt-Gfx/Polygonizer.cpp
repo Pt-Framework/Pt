@@ -204,20 +204,14 @@ void Polygonizer::renderLineRoundCap(std::vector<PointF>& dst, float x, float y,
 }
 
 
-void Polygonizer::calculateLineParams(float& dx, float& dy,
-                                      float x1, float y1, float x2, float y2, size_t w)
+float Polygonizer::calculateLineParams(float& dx, float& dy,
+                                           float x1, float y1, float x2, float y2, size_t w)
 {
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
     const float a = y2 - y1;
     const float b = x1 - x2;
   //const float c = -(x1 * y2 - x2 * y1);
-
-    // Line length
-    const float ll = ::sqrtf(a * a + b * b);
-
-    // Inverse line length
-    const float il = 1.0f / ll;
 
     // Half-line width
     float wh = (float) w * 0.5f;
@@ -228,9 +222,21 @@ void Polygonizer::calculateLineParams(float& dx, float& dy,
         wh -= 0.5f;
     }
 
+    // Line length
+    const float ll = ::sqrtf(a * a + b * b);
+
+    // Check if the line length is smaller than the halp-line width
+    if(ll <= wh) return ll;
+
+    // Inverse line length
+    const float il = 1.0f / ll;
+
     // Calculate the Direction vector
     dx = -b * il * wh;
     dy =  a * il * wh;
+
+    // Done
+    return 0.0f;
 }
 
 

@@ -323,40 +323,59 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
 
 void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen, bool collisionDetection)
 {
-#if 1
-    // ### TODO: FIND A METHOD TO WORKAROUND SHORT SEGMENTS AT THE START & END !!! ###
+    const PointF* gatherData = state.gather.data();
+          size_t  gatherSize = state.gather.size();
 
     // Adjust the coordinates (thus the line's length) as needed
     if( pen.capStyle() != Pen::FlatCap ) {
-        // Get the sizes
-        const size_t cn = state.gather.size() - 1;
-        const size_t pz = pen.size();
-        // Calculate the line's parameters for the first segment
-        const float fx1 = state.gather[0].x();
-        const float fy1 = state.gather[0].y();
-        const float fx2 = state.gather[1].x();
-        const float fy2 = state.gather[1].y();
-              float fdx;
-              float fdy;
-        calculateLineParams(fdx, fdy, fx1, fy1, fx2, fy2, pz);
-
-        // Calculate the line's parameters for the last segment
-        const float lx1 = state.gather[cn - 1].x();
-        const float ly1 = state.gather[cn - 1].y();
-        const float lx2 = state.gather[cn    ].x();
-        const float ly2 = state.gather[cn    ].y();
-              float ldx;
-              float ldy;
-        calculateLineParams(ldx, ldy, lx1, ly1, lx2, ly2, pz);
-
-        state.gather[ 0].set( fx1 + fdx * 0.5f, fy1 + fdy * 0.5f );
-        state.gather[cn].set( lx2 - ldx * 0.5f, ly2 - ldy * 0.5f );
+        // Process the first segment
+        const size_t pnz = pen.size();
+              float  fdx;
+              float  fdy;
+        const float  fx1 = state.gather[0].x();
+        const float  fy1 = state.gather[0].y();
+        const float  fx2 = state.gather[1].x();
+        const float  fy2 = state.gather[1].y();
+        const float  fll = calculateLineParams(fdx, fdy, fx1, fy1, fx2, fy2, pnz);
+        if(!fll) {
+            state.gather[0].set(fx1 + fdx * 0.75f, fy1 + fdy * 0.75f );
+        }
+        // Process the last segment
+        const size_t eix = gatherSize - 1;
+              float  ldx;
+              float  ldy;
+        const float  lx1 = state.gather[eix - 1].x();
+        const float  ly1 = state.gather[eix - 1].y();
+        const float  lx2 = state.gather[eix    ].x();
+        const float  ly2 = state.gather[eix    ].y();
+        const float  lll = calculateLineParams(ldx, ldy, lx1, ly1, lx2, ly2, pnz);
+        if(!lll) {
+            state.gather[eix].set(lx2 - ldx * 0.75f, ly2 - ldy * 0.75f );
+        }
+        // If the segments are too small, remove them (instead of adjusting the coordinates)
+        if(fll && lll) {
+            if(fll <= lll) {
+                ++gatherData;
+                --gatherSize;
+            }
+            else {
+                --gatherSize;
+            }
+        }
+        else {
+            if(fll) {
+                ++gatherData;
+                --gatherSize;
+            }
+            if(lll) {
+                --gatherSize;
+            }
+        }
     }
-#endif
 
     // Generate a new thick polygon
     std::vector<Polygon> polygons;
-    renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen, true);
+    renderSolidOpenWidePolyline(polygons, gatherData, gatherSize, pen, true);
 
     // Exit here if the generated polygon does not actually have a meaningful number of points
     if(polygons.empty() || polygons[0].size() < 3)
