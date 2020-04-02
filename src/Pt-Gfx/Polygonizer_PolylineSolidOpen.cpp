@@ -40,7 +40,9 @@ void Polygonizer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
                                               const PointF* basePtr, size_t curPCnt,
                                               const Pen& pen, bool cleanUpSelfIntersection)
 {
+#if 0
     Pt::int32_t* segmentIndexMarker = 0;
+#endif
 
     // Prepare the buffers
     std::vector<PointF> pointsFPolygon;
@@ -152,7 +154,7 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
     // Store the "outside" line's points to the main polygon buffer
     Pen::JoinStyle js1 = pen.joinStyle();
          if(!in1                   ) js1 = Pen::NoJoin;
-    else if(inSameSegment || inLine) js1 = Pen::MiterJoin;
+    else if(inLine || inSameSegment) js1 = Pen::MiterJoin;
 
     switch(js1) {
         // No join
@@ -210,7 +212,7 @@ bool Polygonizer::joinOpenWidePolyline(std::vector<PointF>& polygon,
 
     Pen::JoinStyle js2 = pen.joinStyle();
          if(!in2                   ) js2 = Pen::NoJoin;
-    else if(inSameSegment || inLine) js2 = Pen::MiterJoin;
+    else if(inLine || inSameSegment) js2 = Pen::MiterJoin;
 
     switch(js2) {
         // No join

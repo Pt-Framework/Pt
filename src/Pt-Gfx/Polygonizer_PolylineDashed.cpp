@@ -32,6 +32,9 @@
 #include "clipper_aj/clipper.hpp"
 
 
+#define NON_FLAT_CAP_REDUCTION_FACTOR 0.75f
+
+
 namespace Pt {
 
 namespace Gfx {
@@ -144,7 +147,7 @@ bool Polygonizer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pe
             state.ey     = y2;
             state.uvx    = vx / vz;
             state.uvy    = vy / vz;
-            state.remLen = vz;// + sqrtf(2.0);
+            state.remLen = vz + sqrtf(2.0); // Adjustment factor because both 'vx' and 'vy' are each 1 pixel less than the real length
         }
 
         // If we have enough remainder length, process the polygon's edge as a simple line segment
@@ -269,10 +272,10 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
         // Check if the line is too short for adjustment
         if(ll) return;
         // Line has enough length
-        x1 += (dx * 0.75f);
-        y1 += (dy * 0.75f);
-        x2 -= (dx * 0.75f);
-        y2 -= (dy * 0.75f);
+        x1 += (dx * NON_FLAT_CAP_REDUCTION_FACTOR);
+        y1 += (dy * NON_FLAT_CAP_REDUCTION_FACTOR);
+        x2 -= (dx * NON_FLAT_CAP_REDUCTION_FACTOR);
+        y2 -= (dy * NON_FLAT_CAP_REDUCTION_FACTOR);
     }
 
     // Generate points (CCW)
@@ -345,7 +348,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         const float  fy2 = state.gather[1].y();
         const float  fll = calculateLineParams(fdx, fdy, fx1, fy1, fx2, fy2, pnz);
         if(!fll) {
-            state.gather[0].set(fx1 + fdx * 0.75f, fy1 + fdy * 0.75f );
+            state.gather[0].set(fx1 + fdx * NON_FLAT_CAP_REDUCTION_FACTOR, fy1 + fdy * NON_FLAT_CAP_REDUCTION_FACTOR );
         }
         // Process the last segment
               float  ldx;
@@ -356,7 +359,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
         const float  ly2 = state.gather[eix    ].y();
         const float  lll = calculateLineParams(ldx, ldy, lx1, ly1, lx2, ly2, pnz);
         if(!lll) {
-            state.gather[eix].set(lx2 - ldx * 0.75f, ly2 - ldy * 0.75f );
+            state.gather[eix].set(lx2 - ldx * NON_FLAT_CAP_REDUCTION_FACTOR, ly2 - ldy * NON_FLAT_CAP_REDUCTION_FACTOR );
         }
         // If the segments are too small, remove them (instead of adjusting the coordinates)
         if(fll && lll) {

@@ -39,7 +39,9 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
                                                 const PointF* basePtr, size_t curPCnt,
                                                 const Pen& pen)
 {
+#if 0
     Pt::int32_t* segmentIndexMarker = 0;
+#endif
 
     // Prepare the buffers
     std::vector<PointF> pointsFOuter;
@@ -161,7 +163,7 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
     // Store the "outside" line's points
     Pen::JoinStyle js1 = pen.joinStyle();
          if(!in1                   ) js1 = Pen::NoJoin;
-    else if(inSameSegment || inLine) js1 = Pen::MiterJoin;
+    else if(inLine || inSameSegment) js1 = Pen::MiterJoin;
 
     outer.pop_back();
     if(isFirst) outer.pop_back();
@@ -218,7 +220,7 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
     // Store the "inside" line's points
     Pen::JoinStyle js2 = pen.joinStyle();
          if(!in2                   ) js2 = Pen::NoJoin;
-    else if(inSameSegment || inLine) js2 = Pen::MiterJoin;
+    else if(inLine || inSameSegment) js2 = Pen::MiterJoin;
 
     inner.pop_back();
     if(isFirst) inner.pop_back();

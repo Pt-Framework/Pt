@@ -48,7 +48,7 @@ void Polygonizer::renderEllipsePoints(std::vector<PointF>& dst,
     */
     Pt::int32_t circFac = Pt::lround( sqrt(0.5f * (radiusX * radiusX + radiusY * radiusY) ) );
 
-    const Pt::int32_t segMult = !pen.isSolid() ? 10 : 20;
+    const Pt::int32_t segMult = (!pen.isSolid()) ? 10 : 20;
     const Pt::int32_t circSeg = (circFac / 16) * segMult + 1;
     const Pt::int32_t nSegs   = (circSeg <  9) ? 9 : circSeg;
     const float       nSegs1i = 1.0f / (nSegs - 1);
