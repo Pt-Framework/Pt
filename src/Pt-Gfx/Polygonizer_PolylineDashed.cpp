@@ -264,6 +264,7 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
     const float ll = calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
     // Adjust the coordinates (thus the line's length) as needed
+    // ### TODO: Exclude the first and last segment of dashed line ??? ###
     if( pen.capStyle() != Pen::FlatCap ) {
         // Check if the line is too short for adjustment
         if(ll) return;
@@ -330,6 +331,7 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
           size_t  gatherSize = state.gather.size();
 
     // Adjust the coordinates (thus the line's length) as needed
+    // ### TODO: Exclude the first and last segment of dashed line ??? ###
     if( pen.capStyle() != Pen::FlatCap ) {
         // Get the sizes
         const size_t pnz = pen.size();
