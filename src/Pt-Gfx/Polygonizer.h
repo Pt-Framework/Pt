@@ -127,8 +127,6 @@ class Polygonizer
                                     float x1, float y1, float x2, float y2,
                                     const Pen& pen, bool openingCap, bool closingCap);
 
-        // TODO: REMOVE "inSameSegment" ???
-
         bool joinClosedWidePolyline(std::vector<PointF>& outer,
                                     std::vector<PointF>& inner,
                                     const std::vector<PointF>& segment,

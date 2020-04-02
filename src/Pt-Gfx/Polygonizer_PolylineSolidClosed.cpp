@@ -39,7 +39,7 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
                                                 const PointF* basePtr, size_t curPCnt,
                                                 const Pen& pen)
 {
-    //Pt::int32_t* segmentIndexMarker = 0;
+    Pt::int32_t* segmentIndexMarker = 0;
 
     // Prepare the buffers
     std::vector<PointF> pointsFOuter;
@@ -65,13 +65,17 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
         const PointF& from = *basePtr++;
         const PointF& to   = (i == curPC1) ? *ptrZero : *basePtr;
 
+#if 0
         // Check if the "to" point belongs to the same segment
-        //bool inSameSegment = segmentIndexMarker && (i != curPC1);
+        bool inSameSegment = segmentIndexMarker && (i != curPC1);
 
-        //if(inSameSegment && *segmentIndexMarker < (Pt::int32_t) (i + 1)) {
-        //    inSameSegment = false;
-        //    ++segmentIndexMarker;
-        //}
+        if(inSameSegment && *segmentIndexMarker < (Pt::int32_t) (i + 1)) {
+            inSameSegment = false;
+            ++segmentIndexMarker;
+        }
+#else
+        const bool inSameSegment = false;
+#endif
 
         // Generate and combine line segments
         pointsFSegment.clear();
@@ -83,7 +87,7 @@ void Polygonizer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons,
 
         if( ! joinClosedWidePolyline(pointsFOuter, pointsFInner,
                                      pointsFSegment, from, pen,
-                                     i == 1, false, false /*inSameSegment*/) )
+                                     i == 1, false, inSameSegment) )
             return;
     }
 
