@@ -225,7 +225,7 @@ float Polygonizer::calculateLineParams(float& dx, float& dy,
     // Line length
     const float ll = ::sqrtf(a * a + b * b);
 
-    // Check if the line length is smaller than the halp-line width
+    // Check if the line length is smaller than the half-line width
     if(ll <= wh) return ll;
 
     // Inverse line length
@@ -240,8 +240,8 @@ float Polygonizer::calculateLineParams(float& dx, float& dy,
 }
 
 
-void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy, float& nx, float& ny,
-                                      float x1, float y1, float x2, float y2, size_t w)
+float Polygonizer::calculateLineParams(float& wh, float& dx, float& dy, float& nx, float& ny,
+                                       float x1, float y1, float x2, float y2, size_t w)
 {
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
@@ -271,6 +271,10 @@ void Polygonizer::calculateLineParams(float& wh, float& dx, float& dy, float& nx
     // Calculate the normal vector
     nx =  a * il * wh;
     ny =  b * il * wh;
+
+    // Check if the line length is smaller than the half-line width
+    if(ll <= wh) return ll;
+    return 0;
 }
 
 

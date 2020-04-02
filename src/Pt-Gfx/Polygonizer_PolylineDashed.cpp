@@ -261,10 +261,13 @@ void Polygonizer::sagGenerateSimpleLineSegment(PatternState& state,
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
+    const float ll = calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
 
     // Adjust the coordinates (thus the line's length) as needed
     if( pen.capStyle() != Pen::FlatCap ) {
+        // Check if the line is too short for adjustment
+        if(ll) return;
+        // Line has enough length
         x1 += (dx * 0.75f);
         y1 += (dy * 0.75f);
         x2 -= (dx * 0.75f);
@@ -328,8 +331,10 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
 
     // Adjust the coordinates (thus the line's length) as needed
     if( pen.capStyle() != Pen::FlatCap ) {
-        // Process the first segment
+        // Get the sizes
         const size_t pnz = pen.size();
+        const size_t eix = gatherSize - 1;
+        // Process the first segment
               float  fdx;
               float  fdy;
         const float  fx1 = state.gather[0].x();
@@ -341,7 +346,6 @@ void Polygonizer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen
             state.gather[0].set(fx1 + fdx * 0.75f, fy1 + fdy * 0.75f );
         }
         // Process the last segment
-        const size_t eix = gatherSize - 1;
               float  ldx;
               float  ldy;
         const float  lx1 = state.gather[eix - 1].x();

@@ -33,9 +33,9 @@ class Test2View : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
-            painter.setPen  ( Color::fromRgb8(255, 0, 0)  );
-            painter.setFont ( Font("", 16) );
-            painter.drawText( PointF(200, 50), Pt::String("--- DOES NOT WORK PROPERLY ---") );
+            //painter.setPen  ( Color::fromRgb8(255, 0, 0)  );
+            //painter.setFont ( Font("", 16) );
+            //painter.drawText( PointF(200, 50), Pt::String("--- DOES NOT WORK PROPERLY ---") );
 
             Pt::Gfx::Pen blue1sf ( Color::fromRgb8(0, 0, 255), 1, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );
             Pt::Gfx::Pen green1sf( Color::fromRgb8(0, 255, 0), 1, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );
@@ -222,6 +222,13 @@ class Test2View : public Pt::Hmi::Control
             ip2->setCompositionMode(CompositionMode::SourceOver);
             ip2->drawPath(path, 1.0, true);
             ip2->setCompositionMode(CompositionMode::SourceCopy);
+#endif
+
+#if 1
+            x = 230;
+            y =  70;
+            painter.setPen( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Dot, Pen::RoundCap) );
+            ip2->drawArc( PointF (x, y), SizeF(135, 135), -135, 135 );
 #endif
         }
 
