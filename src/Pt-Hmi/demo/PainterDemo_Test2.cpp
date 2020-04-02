@@ -135,7 +135,96 @@ class Test2View : public Pt::Hmi::Control
             y += 100;
 #endif
 
-            //IP2_DEBUG::TEST_SMOOTH_CURVE_HACK = false;
+            // Get ImagePainter2
+            ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
+            if(!ip2) return;
+
+            Pt::Gfx::Pen cyan7sr( Color::fromRgb8(0, 255, 255, 175), 7, Pen::Solid, Pen::RoundCap, Pen::RoundJoin);
+            Pt::Gfx::Pen cyan7hr( Color::fromRgb8(0, 255, 255, 175), 7, Pen::Dash,  Pen::RoundCap, Pen::RoundJoin);
+
+            Path         path;
+            Transform    transform;
+
+            ip2->setPen(cyan7sr);
+
+#if 1
+            path.moveTo( PointF( 0,  0) );
+            path.lineTo( PointF(20, 50) );
+            path.lineTo( PointF(60, 69) );
+            path.lineTo( PointF(79, 10) );
+            path.lineTo( PointF( 0,  0) );
+            path.close ();
+
+            transform.translate(x, y);
+            path.transform(transform);
+            ip2->drawPath(path);
+
+            transform.reset();
+            transform.translate(120, 0);
+            path.transform(transform);
+            ip2->setCompositionMode(CompositionMode::SourceOver);
+            ip2->drawPath(path);
+            ip2->setCompositionMode(CompositionMode::SourceCopy);
+
+            path.transform(transform);
+            ip2->drawPath(path, 1.0, true);
+
+            path.transform(transform);
+            ip2->setCompositionMode(CompositionMode::SourceOver);
+            ip2->drawPath(path, 1.0, true);
+            ip2->setCompositionMode(CompositionMode::SourceCopy);
+
+            y += 100;
+#endif
+
+#if 1
+            path.clear();
+            path.moveTo( PointF(  0,   0) );
+            path.lineTo( PointF( 55,  55) );
+            path.lineTo( PointF(  0,  55) );
+            path.lineTo( PointF( 55,   0) );
+            path.close ();
+
+            ip2->setPen(cyan7sr);
+
+            transform.reset();
+            transform.translate(x, y);
+            path.transform(transform);
+            ip2->drawPath(path);
+
+            transform.reset();
+            transform.translate(120, 0);
+            path.transform(transform);
+            ip2->setCompositionMode(CompositionMode::SourceOver);
+            ip2->drawPath(path);
+            ip2->setCompositionMode(CompositionMode::SourceCopy);
+
+            path.transform(transform);
+            ip2->drawPath(path, 1.0, true);
+
+            transform.reset();
+            transform.translate(120, 0);
+            path.transform(transform);
+            ip2->setCompositionMode(CompositionMode::SourceOver);
+            ip2->drawPath(path, 1.0, true);
+            ip2->setCompositionMode(CompositionMode::SourceCopy);
+
+            ip2->setPen(cyan7hr);
+
+            transform.reset();
+            transform.translate(120, -100);
+            path.transform(transform);
+            ip2->setCompositionMode(CompositionMode::SourceOver);
+            ip2->drawPath(path, 1.0);
+            ip2->setCompositionMode(CompositionMode::SourceCopy);
+
+            transform.reset();
+            transform.translate(0, 100);
+            path.transform(transform);
+            ip2->setCompositionMode(CompositionMode::SourceOver);
+            ip2->drawPath(path, 1.0, true);
+            ip2->setCompositionMode(CompositionMode::SourceCopy);
+#endif
         }
 
         std::vector<Pt::Gfx::PointF> makeTestShape1(double x, double y, double scale)
