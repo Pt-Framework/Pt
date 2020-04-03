@@ -11,11 +11,13 @@ class Benchmark1View : public Pt::Hmi::Control
             using namespace Pt::Gfx;
 
 
-            int imageWidth = 305, imageHeight = 440;
-            RectF imageRect = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
-            Color background = Color::fromRgb8(0, 0, 0);
+            const int   imageWidth  = 305;
+            const int   imageHeight = 440;
+            const RectF imageRect   = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
+            const Color background  = Color::fromRgb8(0, 0, 0);
 
             Pt::Hmi::Painter painter(surface);
+            painter.setClip(rect);
 
             Image image1( painter.format(), Size(imageWidth, imageHeight) );
             ImagePainter ip1(image1);
@@ -103,8 +105,8 @@ class Benchmark1View : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
-            painter.setPen  ( Color::fromRgb8(164, 100, 255)  );
             painter.setFont ( Font("", 12) );
+            painter.setPen  ( Color::fromRgb8(164, 100, 255)  );
             painter.drawText( PointF(10, 20), Pt::String(text) );
 
 #ifdef SOURCE_OVER
@@ -134,30 +136,30 @@ class Benchmark1View : public Pt::Hmi::Control
             const int  loopCount = 250;
                   bool fill      = false;
 
-#define BENCHMARK_CODE(DESC, INFO, SIZE, SCALE)                                 \
-                do {                                                            \
-                    char buff[128];                                             \
-                    Pt::int64_t sum = 0;                                        \
-                    for(int i = 0; i < loopCount; ++i) {                        \
-                        Pt::System::Clock clock;                                \
-                        if(fill) {                                              \
-                            clock.start();                                      \
-                            if(ip2)                                             \
-                                ip2->fillPolygon_NR( &shape[0], shape.size() ); \
-                            else                                                \
-                                painter.fillPolygon( &shape[0], shape.size() ); \
-                            sum += clock.stop().toUSecs();                      \
-                        }                                                       \
-                        else {                                                  \
-                            clock.start();                                      \
-                            painter.drawPolyline( &shape[0], shape.size() );    \
-                            sum += clock.stop().toUSecs();                      \
-                        }                                                       \
-                    }                                                           \
-                    sum /= loopCount;                                           \
-                    sprintf(buff, "%s [%s] [SCALE %4.1f SIZE %d] %3zd %s",      \
-                                   text, DESC, SCALE, SIZE, sum, INFO);         \
-                    brBuff->push_back(buff);                                    \
+#define BENCHMARK_CODE(DESC, INFO, SIZE, SCALE)                                  \
+                do {                                                             \
+                    char buff[128];                                              \
+                    Pt::int64_t sum = 0;                                         \
+                    for(int i = 0; i < loopCount; ++i) {                         \
+                        Pt::System::Clock clock;                                 \
+                        if(fill) {                                               \
+                            clock.start();                                       \
+                            if(ip2)                                              \
+                                ip2->fillPolygon_NR( &shape[0], shape.size() );  \
+                            else                                                 \
+                                painter.fillPolygon( &shape[0], shape.size() );  \
+                            sum += clock.stop().toUSecs();                       \
+                        }                                                        \
+                        else {                                                   \
+                            clock.start();                                       \
+                            painter.drawPolyline( &shape[0], shape.size() );     \
+                            sum += clock.stop().toUSecs();                       \
+                        }                                                        \
+                    }                                                            \
+                    sum /= loopCount;                                            \
+                    sprintf(buff, "%s [%s] [SCALE %4.1f SIZE %d] %3zd %s",       \
+                                   text, DESC, SCALE, SIZE, (size_t) sum, INFO); \
+                    brBuff->push_back(buff);                                     \
                 } while(false)
 
             // Polyline simple - scale 10x

@@ -10,13 +10,13 @@ class Test1View : public Pt::Hmi::Control
         {
           using namespace Pt::Gfx;
 
-            int imageWidth = 620, imageHeight = 680;
-            RectF imageRect = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
-            Color background = Color::fromRgb8(0, 0, 0);
+            const int   imageWidth  = 620;
+            const int   imageHeight = 680;
+            const RectF imageRect   = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
+            const Color background  = Color::fromRgb8(0, 0, 0);
 
             Pt::Hmi::Painter painter(surface);
             painter.setClip(rect);
-            painter.setBrush(background);
 
             Image image2( painter.format(), Size(imageWidth, imageHeight) );
             ImagePainter2 imagePainter2(image2);
@@ -165,10 +165,10 @@ class Test1View : public Pt::Hmi::Control
             //fprintf(stderr, "###\n");
             for(size_t i = 0; i < points.size(); ++i)
             {
-                //fprintf(stderr, "            points.push_back( Pt::Gfx::PointF( x + %17.14f * scale, y + %16.14f * scale ) );\n", points[i].x() - minX, points[i].y() - minY);
                 const double x = (points[i].x() - minX) * scale;
                 const double y = (points[i].y() - minY) * scale;
                 points[i].set( x + minX + xOfs, y + minY + yOfs );
+                //fprintf(stderr, "            points.push_back( Pt::Gfx::PointF( x + %17.14f * scale, y + %16.14f * scale ) );\n", points[i].x() - minX, points[i].y() - minY);
             }
         }
 };

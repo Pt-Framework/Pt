@@ -10,13 +10,13 @@ class Test2View : public Pt::Hmi::Control
         {
           using namespace Pt::Gfx;
 
-            int imageWidth = 620, imageHeight = 680;
-            RectF imageRect = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
-            Color background = Color::fromRgb8(0, 0, 0);
+            const int   imageWidth  = 620;
+            const int   imageHeight = 680;
+            const RectF imageRect   = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
+            const Color background  = Color::fromRgb8(0, 0, 0);
 
             Pt::Hmi::Painter painter(surface);
             painter.setClip(rect);
-            painter.setBrush(background);
 
             Image image2( painter.format(), Size(imageWidth, imageHeight) );
             ImagePainter2 imagePainter2(image2);
@@ -33,8 +33,8 @@ class Test2View : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
-            //painter.setPen  ( Color::fromRgb8(255, 0, 0)  );
             //painter.setFont ( Font("", 16) );
+            //painter.setPen  ( Color::fromRgb8(255, 0, 0)  );
             //painter.drawText( PointF(200, 50), Pt::String("--- DOES NOT WORK PROPERLY ---") );
 
             Pt::Gfx::Pen blue1sf ( Color::fromRgb8(0, 0, 255), 1, Pen::Solid, Pen::FlatCap,   Pen::NoJoin );

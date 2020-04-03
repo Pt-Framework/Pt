@@ -1,7 +1,12 @@
-// ./jam.sh configure --release --optimize --with-hmi -sGUI=xorg
+//
+// X11       : ./jam.sh configure --debug --optimize --with-hmi -sGUI=x11
+// XPutImage : ./jam.sh configure --debug --optimize --with-hmi -sGUI=xorg
+//
 
-//#include <iomanip>
 #include <stdio.h>
+
+#include <sstream>
+#include <iomanip>
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
@@ -26,9 +31,10 @@ class PaintView : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
-            int imageWidth = 200, imageHeight = 440;
-            RectF imageRect = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
-            Color background = Color::fromRgb8(0, 0, 0);
+            const int   imageWidth  = 200;
+            const int   imageHeight = 440;
+            const RectF imageRect   = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
+            const Color background  = Color::fromRgb8(0, 0, 0);
 
             Pt::Hmi::Painter painter(surface);
             painter.setClip(rect);
@@ -74,8 +80,8 @@ class LinesView : public PaintView
             Color lightPurple = Color::fromRgb8(164, 100, 255);
             Color lightBlue   = Color::fromRgb8(100, 100, 255);
 
-            painter.setPen( lightPurple );
             painter.setFont( Font("", 12) );
+            painter.setPen( lightPurple );
             painter.drawText( PointF(10, 20), text );
 
             int y = 30;
@@ -159,8 +165,8 @@ class PolylinesView : public PaintView
             Color lightPurple = Color::fromRgb8(164, 100, 255);
             Color lightBlue   = Color::fromRgb8(100, 100, 255);
 
-            painter.setPen( lightPurple );
             painter.setFont( Font("", 12) );
+            painter.setPen( lightPurple );
             painter.drawText( PointF(10, 20), text );
 
             int y = 30;
@@ -252,8 +258,8 @@ class ShapesView : public PaintView
             Color lightPurple = Color::fromRgb8(164, 100, 255);
             Color lightBlue = Color::fromRgb8(100, 100, 255);
 
-            painter.setPen(lightPurple);
             painter.setFont(Font("", 12));
+            painter.setPen(lightPurple);
             painter.drawText(PointF(10, 20), text);
 
             painter.setFont(Font("", 10));
@@ -263,7 +269,6 @@ class ShapesView : public PaintView
 
             y = drawCircles(y, painter);
 
-            painter.setFont(Font("", 10));
             painter.setPen(lightBlue);
             painter.drawText(PointF(20, y + 12), "Ellipses");
             y += 20;
@@ -400,15 +405,11 @@ class ShapesView : public PaintView
 
             x += width + 2;
 
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
-
             shape = makeRectangle(x, y, width, height, insetFill, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
 
             shape = makeRectangle(x, y, width, height, insetDraw, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
-
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
 
             y += height + 10;
 
@@ -459,30 +460,20 @@ class ShapesView : public PaintView
             // convex diamond shape
 
             shape = makeDiamond(x, y, width, height, offsetDraw);
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
             painter.drawPolyline(&shape[0], shape.size());
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
 
             x += width + 2;
 
             shape = makeDiamond(x, y, width, height, offsetFill);
-            //IP2_DEBUG::DUMP_SCANLINE_COORDINATES = true;
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
             painter.fillPolygon(&shape[0], shape.size());
-            //IP2_DEBUG::DUMP_SCANLINE_COORDINATES = false;
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES  = false;
 
             x += width + 2;
-
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = true;
 
             shape = makeDiamond(x, y, width, height, offsetFill);
             painter.fillPolygon(&shape[0], shape.size());
 
             shape = makeDiamond(x, y, width, height, offsetDraw);
             painter.drawPolyline(&shape[0], shape.size());
-
-            //IP2_DEBUG::DUMP_POLYGON_COORDINATES = false;
 
             x += width + 20;
 
@@ -601,9 +592,9 @@ int main(int argc, char* args[])
 
         PainterDemoWindow window;
         window.setTitle("Painter Demo");
-        window.move( Pt::Gfx::PointF(50, 50) );
-        window.resize( Pt::Gfx::SizeF(690, 700) );
+        window.resize( Pt::Gfx::SizeF(690, 705) );
         window.show();
+        window.move( Pt::Gfx::PointF(50, 0) );
         window.activate();
 
         app.run();

@@ -11,11 +11,13 @@ class Benchmark2View : public Pt::Hmi::Control
             using namespace Pt::Gfx;
 
 
-            int imageWidth = 672, imageHeight = 327;
-            RectF imageRect = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
-            Color background = Color::fromRgb8(0, 0, 0);
+            const int   imageWidth  = 672;
+            const int   imageHeight = 327;
+            const RectF imageRect   = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
+            const Color background  = Color::fromRgb8(0, 0, 0);
 
             Pt::Hmi::Painter painter(surface);
+            painter.setClip(rect);
 
             Image image1( painter.format(), Size(imageWidth, imageHeight) );
             ImagePainter ip1(image1);
@@ -51,7 +53,7 @@ class Benchmark2View : public Pt::Hmi::Control
             onPaintContent(ip2, "IP2", resIP2, (float) resIP2 / (float) resIP1);
 
             painter.drawImage(PointF(2, 2), image1);
-            painter.drawImage(PointF(2, 339), image2);
+            painter.drawImage(PointF(2, 338), image2);
         }
 
         virtual Pt::uint64_t onPaintContent(Pt::Gfx::Painter& painter, const char* text, Pt::uint64_t benchmarkResult, float benchmarkRatio)
@@ -61,12 +63,16 @@ class Benchmark2View : public Pt::Hmi::Control
             ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
             const char*    aai = (ip2 && ip2->isAntiAliasing()) ? "WITH AA" : "WITHOUT AA";
 
-            char buff[128];
-            sprintf(buff, "%s [%s] - %zd mS (%.1f x)", text, aai, benchmarkResult, benchmarkRatio);
+            //char buff[128];
+            //sprintf(buff, "%s [%s] - %zd mS (%.1f x)", text, aai, (size_t) benchmarkResult, benchmarkRatio);
 
-            painter.setPen  ( Color::fromRgb8(164, 100, 255)  );
+            std::ostringstream oss;
+            oss << text << " [" << aai << "] - " << benchmarkResult << " mS ("
+                << std::fixed << std::setprecision(1) << benchmarkRatio << " x)";
+
             painter.setFont ( Font("", 12) );
-            painter.drawText( PointF(250, 50), Pt::String(buff));
+            painter.setPen  ( Color::fromRgb8(164, 100, 255)  );
+            painter.drawText( PointF(250, 50), Pt::String(oss.str().c_str()));
 
 #ifdef SOURCE_OVER
             const Pt::uint8_t alpha = 175;
