@@ -157,7 +157,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         if(y < _currentClip.top   ()) continue;
         if(y > _currentClip.bottom()) continue;
 
-        // Build a list of nodes using all the polygons
+        // Build a list of nodes using the coordinates from the polygon
         std::size_t nodes = 0;
 
         // Loop through the points
@@ -169,7 +169,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
             const float curYi = points[i].y();
             const float curYj = points[j].y();
 
-            // Calculate the node's coordinate
+            // Check againts the Y coordinates
             if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
             {
                 // Bail out if we have produced too many nodes
@@ -181,7 +181,7 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
                 const float curXj = points[j].x();
 
                 // Calculate the node's coordinate
-                const float deltaYp = y - curYi;
+                const float deltaYp = y     - curYi;
                 const float deltaYj = curYj - curYi;
                 const float deltaXj = curXj - curXi;
                 const float interXf = curXi + deltaYp / deltaYj * deltaXj;
@@ -193,9 +193,8 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
             j = i;
         }
 
-        // Skip if there is no node
-        if( ! nodes )
-            continue;
+        // Skip if there is no node generated
+        if( !nodes ) continue;
 
         // Sort the nodes
         bubbleSortAscending(nodeX, nodes);
@@ -204,8 +203,10 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         for(std::size_t i = 0; i < nodes; i += 2)
         {
             // Calculate the coordinate
-            Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
+            //Pt::int32_t from = Pt::lround( ceil ( nodeX[i] ) );
+            //Pt::int32_t to   = Pt::lround( floor( nodeX[i + 1] - 0.5f ) );
+            Pt::int32_t from = ceil ( nodeX[i] );
+            Pt::int32_t to   = floor( nodeX[i + 1] - 0.5f );
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
@@ -255,7 +256,7 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
         if(y < _currentClip.top   ()) continue;
         if(y > _currentClip.bottom()) continue;
 
-        // Build a list of nodes using all the polygons
+        // Build a list of nodes using the coordinates from all the polygons
         std::size_t nodes = 0;
 
         for(size_t p = 0; p < polygons.size(); ++p)
@@ -274,7 +275,7 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
                 const float curYi = polygon[i].y();
                 const float curYj = polygon[j].y();
 
-                // Calculate the node's coordinate
+                // Check againts the Y coordinates
                 if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
                 {
                     // Bail out if we have produced too many nodes
@@ -299,9 +300,8 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
             }
         }
 
-        // Skip if there is no node
-        if( ! nodes)
-            continue;
+        // Skip if there is no node generated
+        if( !nodes ) continue;
 
         // Sort the nodes
         bubbleSortAscending(nodeX, nodes);
@@ -310,8 +310,10 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
         for(std::size_t i = 0; i < nodes; i += 2)
         {
             // Calculate the coordinate
-            Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1] - 0.5f) );
+            //Pt::int32_t from = Pt::lround( ceil ( nodeX[i] ) );
+            //Pt::int32_t to   = Pt::lround( floor( nodeX[i + 1] - 0.5f ) );
+            Pt::int32_t from = ceil ( nodeX[i] );
+            Pt::int32_t to   = floor( nodeX[i + 1] - 0.5f );
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
@@ -350,7 +352,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         if(y < _currentClip.top   ()) continue;
         if(y > _currentClip.bottom()) continue;
 
-        // Build a list of nodes using all the polygons
+#if 1
+        // Build a list of nodes using the coordinates from the polygon
         std::size_t nodes = 0;
 
         // Loop through the points
@@ -362,7 +365,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             const float curYi = points[i].y();
             const float curYj = points[j].y();
 
-            // Calculate the node's coordinate
+            // Check againts the Y coordinates
             if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
             {
                 // Bail out if we have produced too many nodes
@@ -374,7 +377,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 const float curXj = points[j].x();
 
                 // Calculate the node's coordinate
-                const float deltaYp = y - curYi;
+                const float deltaYp = y     - curYi;
                 const float deltaYj = curYj - curYi;
                 const float deltaXj = curXj - curXi;
                 const float interXf = curXi + deltaYp / deltaYj * deltaXj;
@@ -385,10 +388,52 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // Update the searching index
             j = i;
         }
+#else
+        // Loop through the points to build a list of nodes using the coordinates from the polygon
+        const PointF* pIterI    = &points[0];
+        const PointF* pIterIEnd = pIterI + pointCount;
+        const PointF* pIterJ    = pIterIEnd - 1;
 
-        // Skip if there is no node
-        if( ! nodes )
-            continue;
+        float* nodeXIterBeg = &nodeX[0];
+        float* nodeXIterEnd = nodeXIterBeg + nodeX.size();
+        float* nodeXIter    = nodeXIterBeg;
+
+        while(pIterI < pIterIEnd)
+        {
+            // Get the Y coordinates
+            const float curYi = pIterI->y();
+            const float curYj = pIterJ->y();
+
+            // Check againts the Y coordinates
+            if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
+            {
+                // Bail out if we have produced too many nodes
+                if( nodeXIter >= nodeXIterEnd )
+                    return;
+
+                // Get the X coordinates
+                const float curXi = pIterI->x();
+                const float curXj = pIterJ->x();
+
+                // Calculate the node's coordinate
+                const float deltaYp = y     - curYi;
+                const float deltaYj = curYj - curYi;
+                const float deltaXj = curXj - curXi;
+                const float interXf = curXi + deltaYp / deltaYj * deltaXj;
+
+                *nodeXIter++ = interXf;
+            }
+
+            // Update the searching index
+            pIterJ = pIterI++;
+        }
+
+        // Claculate the number of generated nodes
+        const std::size_t nodes = (size_t) (nodeXIter - nodeXIterBeg);
+#endif
+
+        // Skip if there is no node generated
+        if( !nodes ) continue;
 
         // Sort the nodes
         //selectionsortAscending(nodeX, nodes);
@@ -400,8 +445,10 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         for(std::size_t i = 0; i < nodes; i += 2)
         {
             // Calculate the coordinate
-            Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]/* - 0.5f*/) );
+            //Pt::int32_t from = Pt::lround( ceil ( nodeX[i] ) );
+            //Pt::int32_t to   = Pt::lround( floor( nodeX[i + 1]/* - 0.5f*/ ) );
+            Pt::int32_t from = ceil ( nodeX[i] );
+            Pt::int32_t to   = floor( nodeX[i + 1] );
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
@@ -483,7 +530,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
         if(y < _currentClip.top   ()) continue;
         if(y > _currentClip.bottom()) continue;
 
-        // Build a list of nodes using all the polygons
+        // Build a list of nodes using the coordinates from all the polygons
         std::size_t nodes = 0;
 
         for(size_t p = 0; p < polygons.size(); ++p)
@@ -501,7 +548,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
                 const float curYi = polygon[i].y();
                 const float curYj = polygon[j].y();
 
-                // Calculate the node's coordinate
+                // Check againts the Y coordinates
                 if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
                 {
                     // Bail out if we have produced too many nodes
@@ -526,9 +573,8 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
             }
         }
 
-        // Skip if there is no node
-        if( ! nodes)
-            continue;
+        // Skip if there is no node generated
+        if( !nodes ) continue;
 
         // Sort the nodes
         bubbleSortAscending(nodeX, nodes);
@@ -537,8 +583,10 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
         for(std::size_t i = 0; i < nodes; i += 2)
         {
             // Calculate the coordinate
-            Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
-            Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]/* - 0.5f*/) );
+            //Pt::int32_t from = Pt::lround( ceil ( nodeX[i] ) );
+            //Pt::int32_t to   = Pt::lround( floor( nodeX[i + 1]/* - 0.5f*/ ) );
+            Pt::int32_t from = ceil ( nodeX[i] );
+            Pt::int32_t to   = floor( nodeX[i + 1] );
 
             // Pixel-by-pixel clipping
             if(from < _currentClip.left ()) from = _currentClip.left ();
