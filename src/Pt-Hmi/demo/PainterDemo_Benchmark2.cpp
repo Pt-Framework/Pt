@@ -40,7 +40,7 @@ class Benchmark2View : public Pt::Hmi::Control
             if(doBenchmark) {
                 doBenchmark = false;
                 resIP1 = onPaintContent(ip1, "IP1", 0, 0.0f);
-                resIP2 = onPaintContent(ip2, "IP1", 0, 0.0f);
+                resIP2 = onPaintContent(ip2, "IP2", 0, 0.0f);
             }
 
             ip1.setBrush(background);
