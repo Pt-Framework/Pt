@@ -1311,3 +1311,4 @@ void Rasterizer2::rasterNarrowRect(const Point& tl, const Point& br)
     }
 }
 */
+

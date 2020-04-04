@@ -36,7 +36,6 @@
 
 namespace {
 
-
 template<typename T>
 static inline void bubbleSortAscending(T& basket, Pt::int32_t size)
 {
@@ -49,80 +48,6 @@ static inline void bubbleSortAscending(T& basket, Pt::int32_t size)
             ++i;
         }
     }
-}
-
-
-template<typename T>
-static inline void insertionsortAscending(T& basket, Pt::int32_t size)
-{
-    if(size <= 1) return;
-
-    for(Pt::int32_t i = 1; i < size; ++i)
-    {
-        const typename T::value_type key = basket[i];
-        Pt::int32_t                  j   = i - 1;
-
-        while(j >= 0 && basket[j] > key)
-        {
-            basket[j + 1] = basket[j];
-            --j;
-        }
-        basket[j + 1] = key;
-
-    }
-}
-
-
-template<typename T>
-static inline void selectionsortAscending(T& basket, Pt::int32_t size)
-{
-    for(Pt::int32_t i = 0; i < size - 1; ++i)
-    {
-        Pt::int32_t min = i;
-        for(Pt::int32_t j = i+1; j < size; ++j)
-        {
-            if(basket[j] < basket[min]) min = j;
-        }
-        std::swap(basket[min], basket[i]);
-    }
-}
-
-
-template<typename T>
-static inline Pt::int32_t quicksortAscending_partition(T& basket, Pt::int32_t start, Pt::int32_t end)
-{
-    const typename T::value_type pivot = basket[end];
-    Pt::int32_t                  pidx  = start;
-
-    for(Pt::int32_t i = start; i < end; ++i)
-    {
-        if(basket[i] <= pivot)
-        {
-            std::swap(basket[i], basket[pidx]);
-            ++pidx;
-        }
-    }
-
-    std::swap(basket[pidx], basket[end]);
-
-    return pidx;
-}
-
-template<typename T>
-static inline void quicksortAscending(T& basket, Pt::int32_t start, Pt::int32_t end)
-{
-    if(start >= end) return;
-
-    const Pt::int32_t pidx = quicksortAscending_partition(basket, start, end);
-
-    quicksortAscending(basket, start,    pidx - 1);
-    quicksortAscending(basket, pidx + 1, end     );
-}
-
-template<typename T>
-static inline void quicksortAscending(T& basket, Pt::int32_t size)
-{
-    quicksortAscending(basket, 0, size - 1);
 }
 
 
@@ -352,7 +277,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         if(y < _currentClip.top   ()) continue;
         if(y > _currentClip.bottom()) continue;
 
-#if 1
         // Build a list of nodes using the coordinates from the polygon
         std::size_t nodes = 0;
 
@@ -388,58 +312,12 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // Update the searching index
             j = i;
         }
-#else
-        // Loop through the points to build a list of nodes using the coordinates from the polygon
-        const PointF* pIterI    = &points[0];
-        const PointF* pIterIEnd = pIterI + pointCount;
-        const PointF* pIterJ    = pIterIEnd - 1;
-
-        float* nodeXIterBeg = &nodeX[0];
-        float* nodeXIterEnd = nodeXIterBeg + nodeX.size();
-        float* nodeXIter    = nodeXIterBeg;
-
-        while(pIterI < pIterIEnd)
-        {
-            // Get the Y coordinates
-            const float curYi = pIterI->y();
-            const float curYj = pIterJ->y();
-
-            // Check againts the Y coordinates
-            if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
-            {
-                // Bail out if we have produced too many nodes
-                if( nodeXIter >= nodeXIterEnd )
-                    return;
-
-                // Get the X coordinates
-                const float curXi = pIterI->x();
-                const float curXj = pIterJ->x();
-
-                // Calculate the node's coordinate
-                const float deltaYp = y     - curYi;
-                const float deltaYj = curYj - curYi;
-                const float deltaXj = curXj - curXi;
-                const float interXf = curXi + deltaYp / deltaYj * deltaXj;
-
-                *nodeXIter++ = interXf;
-            }
-
-            // Update the searching index
-            pIterJ = pIterI++;
-        }
-
-        // Claculate the number of generated nodes
-        const std::size_t nodes = (size_t) (nodeXIter - nodeXIterBeg);
-#endif
 
         // Skip if there is no node generated
         if( !nodes ) continue;
 
         // Sort the nodes
-        //selectionsortAscending(nodeX, nodes);
-        //insertionsortAscending(nodeX, nodes);
         bubbleSortAscending(nodeX, nodes);
-        //quicksortAscending(nodeX, nodes);
 
         // Fill the pixels between the node pairs
         for(std::size_t i = 0; i < nodes; i += 2)
