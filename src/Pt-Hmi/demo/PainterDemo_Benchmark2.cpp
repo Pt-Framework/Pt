@@ -63,12 +63,15 @@ class Benchmark2View : public Pt::Hmi::Control
             ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
             const char*    aai = (ip2 && ip2->isAntiAliasing()) ? "WITH AA" : "WITHOUT AA";
 
+            const int loopCount = 250;
+
             //char buff[128];
             //sprintf(buff, "%s [%s] - %zd mS (%.1f x)", text, aai, (size_t) benchmarkResult, benchmarkRatio);
 
             std::ostringstream oss;
             oss << text << " [" << aai << "] - " << benchmarkResult << " mS ("
-                << std::fixed << std::setprecision(1) << benchmarkRatio << " x)";
+                << std::fixed << std::setprecision(1) << benchmarkRatio << " x)"
+                << " [" << loopCount << " polylines]";
 
             painter.setFont ( Font("", 12) );
             painter.setPen  ( Color::fromRgb8(164, 100, 255)  );
@@ -88,7 +91,6 @@ class Benchmark2View : public Pt::Hmi::Control
                 painter.setPen(green2);
 
                 Pt::System::Clock clock;
-                const int         loopCount = 250;
 
                 for(int i = 0; i < loopCount; ++i) {
                     clock.start();
