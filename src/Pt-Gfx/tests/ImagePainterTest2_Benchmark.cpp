@@ -149,6 +149,7 @@ static void doBenchmark(CompositionMode cm)
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
+    
     // Filled rectangles
     if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_FILLED_RECTANGLE) {
         time1 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm);

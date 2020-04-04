@@ -73,10 +73,10 @@ using namespace Pt::Gfx;
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         1
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
-#define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (no longer including bezier)
+#define TEST_DRAW_PATTERNED_LINE                0 // (no longer including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              0 // (no longer including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (no longer including bezier)
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
 #define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
@@ -112,19 +112,19 @@ using namespace Pt::Gfx;
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0 // XXX
 
-#define BENCHMARK_SOLID_LINE                0
+#define BENCHMARK_SOLID_LINE                1
 #define BENCHMARK_PATTERNED_LINE            1
-#define BENCHMARK_SOLID_THICK_LINE          0
-#define BENCHMARK_PATTERNED_THICK_LINE      0
+#define BENCHMARK_SOLID_THICK_LINE          1
+#define BENCHMARK_PATTERNED_THICK_LINE      1
 
 #define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
 
-#define BENCHMARK_SOLID_BEZIER              0
-#define BENCHMARK_PATTERNED_BEZIER          0
-#define BENCHMARK_SOLID_THICK_BEZIER        0
-#define BENCHMARK_PATTERNED_THICK_BEZIER    0
+#define BENCHMARK_SOLID_BEZIER              0 // No longer available
+#define BENCHMARK_PATTERNED_BEZIER          0 // No longer available
+#define BENCHMARK_SOLID_THICK_BEZIER        0 // No longer available
+#define BENCHMARK_PATTERNED_THICK_BEZIER    0 // No longer available
 
 #define BENCHMARK_SOLID_FILLED_RECTANGLE    0
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0

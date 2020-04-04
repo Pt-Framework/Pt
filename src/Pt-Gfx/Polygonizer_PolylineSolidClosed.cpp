@@ -153,11 +153,13 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
     const bool in1 = intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b, penSize);
 
 #if 1
+    const float ilFactor = 0.8f;
+
     const PointF& ochk1 = oline1b - intersect;
     const PointF& ochk2 = oline2a - intersect;
 
-    inLine |= ( fabs(ochk1.x()) <= 0.8f && fabs(ochk1.y()) <= 0.8f ) || // For preventing artifacts
-              ( fabs(ochk2.x()) <= 0.8f && fabs(ochk2.y()) <= 0.8f );
+    inLine |= ( fabs(ochk1.x()) <= ilFactor && fabs(ochk1.y()) <= ilFactor ) || // For preventing artifacts
+              ( fabs(ochk2.x()) <= ilFactor && fabs(ochk2.y()) <= ilFactor );
 #endif
 
     // Store the "outside" line's points
@@ -213,8 +215,8 @@ bool Polygonizer::joinClosedWidePolyline(std::vector<PointF>& outer,
     const PointF& ichk1 = iline1b - intersect;
     const PointF& ichk2 = iline2a - intersect;
 
-    inLine |= ( fabs(ichk1.x()) <= 0.8f && fabs(ichk1.y()) <= 0.8f ) || // For preventing artifacts
-              ( fabs(ichk2.x()) <= 0.8f && fabs(ichk2.y()) <= 0.8f );
+    inLine |= ( fabs(ichk1.x()) <= ilFactor && fabs(ichk1.y()) <= ilFactor ) || // For preventing artifacts
+              ( fabs(ichk2.x()) <= ilFactor && fabs(ichk2.y()) <= ilFactor );
 #endif
 
     // Store the "inside" line's points

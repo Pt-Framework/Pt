@@ -598,6 +598,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1, float x2, float
     const Pt::int32_t xpxl1 = xend; // This will be used in the main loop
     const Pt::int32_t ypxl1 = floor(yend);
 
+    float xgap255 = xgap * 255.0f;
+
     if(steep) {
         // Calculate the alphas and coordinates
         const float       fpart  = yend - floor(yend);
@@ -615,8 +617,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1, float x2, float
                 if(skipPixel0 && skipPixel1) break;
             }
         }
-        if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap * 255.0f) );
-        if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap * 255.0f) );
+        if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap255) );
+        if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap255) );
         // Store the first endpoint coordinates as the output mask
         lx[0] = ix0; ly[0] = iy;
         lx[1] = ix1; ly[1] = iy;
@@ -637,7 +639,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1, float x2, float
                 break;
             }
         }
-        if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap * 255.0f) );
+        if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap255) );
         skipPixel = false;
         if(!exclusionZone.empty()) {
             for(S16V_CI it = S16V_begin(exclusionZone, iy1 - minY/* + 1*/); it != S16V_end(exclusionZone, iy1 - minY/* + 1*/); ++it) {
@@ -646,7 +648,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1, float x2, float
                 break;
             }
         }
-        if(!skipPixel) XW_FILL_PIXEL( ix, iy1, (Pt::int32_t) (fpart * xgap * 255.0f) );
+        if(!skipPixel) XW_FILL_PIXEL( ix, iy1, (Pt::int32_t) (fpart * xgap255) );
         // Store the first endpoint coordinates as the output mask
         lx[0] = ix; ly[0] = iy0;
         lx[1] = ix; ly[1] = iy1;
@@ -662,6 +664,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1, float x2, float
 
     const Pt::int32_t xpxl2 = xend; // This will be used in the main loop
     const Pt::int32_t ypxl2 = floor(yend);
+
+    xgap255 = xgap * 255.0f;
 
     if(steep) {
         // Calculate the alphas and coordinates
@@ -680,8 +684,8 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1, float x2, float
                 if(skipPixel0 && skipPixel1) break;
             }
         }
-        if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap * 255.0f) );
-        if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap * 255.0f) );
+        if(!skipPixel0) XW_FILL_PIXEL( ix0, iy, (Pt::int32_t) (rfpart * xgap255) );
+        if(!skipPixel1) XW_FILL_PIXEL( ix1, iy, (Pt::int32_t) ( fpart * xgap255) );
         // Store the second endpoint coordinates as the output mask
         lx[2] = ix0; ly[2] = iy;
         lx[3] = ix1; ly[3] = iy;
@@ -702,7 +706,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1, float x2, float
                 break;
             }
         }
-        if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap * 255.0f) );
+        if(!skipPixel) XW_FILL_PIXEL( ix, iy0, (Pt::int32_t) (rfpart * xgap255) );
         skipPixel = false;
         if(!exclusionZone.empty()) {
             for(S16V_CI it = S16V_begin(exclusionZone, iy1 - minY/* + 1*/); it != S16V_end(exclusionZone, iy1 - minY/* + 1*/); ++it) {
@@ -711,7 +715,7 @@ void Rasterizer2::rasterPolygonBorderXWAA_F2(float x1, float y1, float x2, float
                 break;
             }
         }
-        if(!skipPixel) XW_FILL_PIXEL( ix, iy1, (Pt::int32_t) (fpart * xgap * 255.0f) );
+        if(!skipPixel) XW_FILL_PIXEL( ix, iy1, (Pt::int32_t) (fpart * xgap255) );
         // Store the second endpoint coordinates as the output mask
         lx[2] = ix; ly[2] = iy0;
         lx[3] = ix; ly[3] = iy1;
