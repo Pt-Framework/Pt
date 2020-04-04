@@ -74,6 +74,91 @@ static inline void quicksortAscending(T& basket, Pt::int32_t size)
 
 
 
+//
+// Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
+//              http://alienryderflex.com/polygon_fill
+//              Public-domain code by Darel Rex Finley, 2007
+//
+void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount,
+                                     const Color& color,
+                                     Pt::int32_t minX, Pt::int32_t minY,
+                                     Pt::int32_t maxX, Pt::int32_t maxY)
+{
+    // List of nodes that define the horizontal spans
+    std::vector<float> nodeX(pointCount * 2, 0);
+
+    // Loop through the rows of the image
+    for(Pt::int32_t y = minY; y <= maxY; ++y)
+    {
+        // Pixel-by-pixel clipping
+        if(y < _currentClip.top   ()) continue;
+        if(y > _currentClip.bottom()) continue;
+
+        // Build a list of nodes using the coordinates from the polygon
+        std::size_t nodes = 0;
+
+        // Loop through the points
+        Pt::int32_t j = pointCount - 1;
+
+        for(size_t i = 0; i < pointCount; ++i)
+        {
+            // Get the coordinates
+            const float curYi = points[i].y();
+            const float curYj = points[j].y();
+
+            // Check againts the Y coordinates
+            if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
+            {
+                // Bail out if we have produced too many nodes
+                if( nodes >= nodeX.size() )
+                    return;
+
+                // Get the X coordinates
+                const float curXi = points[i].x();
+                const float curXj = points[j].x();
+
+                // Calculate the node's coordinate
+                const float deltaYp = y     - curYi;
+                const float deltaYj = curYj - curYi;
+                const float deltaXj = curXj - curXi;
+                const float interXf = curXi + deltaYp / deltaYj * deltaXj;
+
+                nodeX[nodes++] = interXf;
+            }
+
+            // Update the searching index
+            j = i;
+        }
+
+        // Skip if there is no node generated
+        if( !nodes ) continue;
+
+        // Sort the nodes
+        bubbleSortAscending(nodeX, nodes);
+
+        // Fill the pixels between the node pairs
+        for(std::size_t i = 0; i < nodes; i += 2)
+        {
+            // Calculate the coordinate
+            //Pt::int32_t from = Pt::lround( ceil ( nodeX[i] ) );
+            //Pt::int32_t to   = Pt::lround( floor( nodeX[i + 1] - 0.5f ) );
+            Pt::int32_t from = ceil ( nodeX[i] );
+            Pt::int32_t to   = floor( nodeX[i + 1] - 0.5f );
+
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
+            if(to < from) continue;
+
+            // Draw the scanline
+            rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+        }
+    }
+}
+
+
+
 // Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
 //              http://alienryderflex.com/polygon_fill
 //              Public-domain code by Darel Rex Finley, 2007
@@ -236,3 +321,72 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
           color, minX, minY - 1, scanlines, xwaaMask );
 }
 
+
+
+
+
+
+
+
+void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt::int32_t height)
+{
+    // Get and check the color stops
+    // TODO: Shall we implicitly clear the image if there is no color stop?
+    const ColorStops& colStops = _brush.gradientStops();
+    if( colStops.empty() )
+        return;
+
+
+    // Prepare the interpolation buffer
+    Color colRes;
+
+    // Walk through the pixels and generate the gradient
+    const float       length = width + height - 1 - 1;
+          Pt::int32_t pixelPos = 0;
+
+    for(Image::PixelIterator pit = _brushBuffer.begin(); pit != _brushBuffer.end(); ++pit) {
+        // Calculate the interpolation factor
+        const float ratio = (float) pixelPos / length;
+        ++pixelPos;
+        // Interpolate the color
+        colStops.calculateInterpolatedColor(colRes, ratio);
+        // Put the pixel
+        pit->assign(colRes, CompositionMode::SourceCopy);
+    }
+
+    /*
+    // Get and check the color stops
+    // TODO: Shall we implicitly clear the image if there is no color stop?
+    const ColorStops& colStops = _brush.gradientStops();
+    if( colStops.size() < 2 )
+        return;
+
+    // Get the first and second colors
+    const Color& color1 = colStops[0].color();
+    const Color& color2 = colStops[1].color();
+
+    const Pt::int32_t rs = color1.red  ();
+    const Pt::int32_t gs = color1.green();
+    const Pt::int32_t bs = color1.blue ();
+    const Pt::int32_t as = color1.alpha();
+
+    const Pt::int32_t rd = color2.red  () - rs;
+    const Pt::int32_t gd = color2.green() - gs;
+    const Pt::int32_t bd = color2.blue () - bs;
+    const Pt::int32_t ad = color2.alpha() - as;
+
+    // Walk through the pixels and generate the gradient
+    const float       length = width + height - 1 - 1;
+          Pt::int32_t pixelPos = 0;
+
+    for(Image::PixelIterator pit = _brushBuffer.begin(); pit != _brushBuffer.end(); ++pit) {
+        // Calculate the interpolation factor
+        const float fb = (float) pixelPos / length;
+        ++pixelPos;
+        // Interpolate the color
+        const Color colRes(as + ad * fb, rs + rd * fb, gs + gd * fb, bs + bd * fb);
+        // Put the pixel
+        pit->assign(colRes, CompositionMode::SourceCopy);
+    }
+    */
+}

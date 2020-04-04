@@ -24,6 +24,8 @@ class Test1View : public Pt::Hmi::Control
             imagePainter2.setBrush(background);
             imagePainter2.fillRect(imageRect);
 
+            //imagePainter2.setCompositionMode(CompositionMode::SourceOver);
+
             onPaintContent(imagePainter2);
 
             painter.drawImage(PointF(2, 2), image2);
@@ -33,11 +35,11 @@ class Test1View : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
-            Pt::Gfx::Pen   green1( Color::fromRgb8(0, 255, 0), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
-            Pt::Gfx::Pen   green2( Color::fromRgb8(0, 255, 0), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
-            Pt::Gfx::Pen   green3( Color::fromRgb8(0, 255, 0), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen   green1( Color::fromRgb8(0, 255, 0, 175), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen   green2( Color::fromRgb8(0, 255, 0, 175), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+            Pt::Gfx::Pen   green3( Color::fromRgb8(0, 255, 0, 175), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
 
-            Pt::Gfx::Brush greenb( Color::fromRgb8(0, 255, 0) );
+            Pt::Gfx::Brush greenb( Color::fromRgb8(0, 255, 0, 175) );
 
             std::vector<Pt::Gfx::PointF> shape;
 

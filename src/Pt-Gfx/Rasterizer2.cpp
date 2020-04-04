@@ -443,42 +443,6 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
         // Put the pixel
         pit->assign(colRes, CompositionMode::SourceCopy);
     }
-
-    /*
-    // Get and check the color stops
-    // TODO: Shall we implicitly clear the image if there is no color stop?
-    const ColorStops& colStops = _brush.gradientStops();
-    if( colStops.size() < 2 )
-        return;
-
-    // Get the first and second colors
-    const Color& color1 = colStops[0].color();
-    const Color& color2 = colStops[1].color();
-
-    const Pt::int32_t rs = color1.red  ();
-    const Pt::int32_t gs = color1.green();
-    const Pt::int32_t bs = color1.blue ();
-    const Pt::int32_t as = color1.alpha();
-
-    const Pt::int32_t rd = color2.red  () - rs;
-    const Pt::int32_t gd = color2.green() - gs;
-    const Pt::int32_t bd = color2.blue () - bs;
-    const Pt::int32_t ad = color2.alpha() - as;
-
-    // Walk through the pixels and generate the gradient
-    const float       length = width + height - 1 - 1;
-          Pt::int32_t pixelPos = 0;
-
-    for(Image::PixelIterator pit = _brushBuffer.begin(); pit != _brushBuffer.end(); ++pit) {
-        // Calculate the interpolation factor
-        const float fb = (float) pixelPos / length;
-        ++pixelPos;
-        // Interpolate the color
-        const Color colRes(as + ad * fb, rs + rd * fb, gs + gd * fb, bs + bd * fb);
-        // Put the pixel
-        pit->assign(colRes, CompositionMode::SourceCopy);
-    }
-    */
 }
 
 
@@ -721,13 +685,14 @@ void Rasterizer2::drawLine(const PointF& from, const PointF& to)
 {
     PointF points[2];
 
-    points[0].set(from.x() - 0.5, from.y() - 0.5);
-    points[1].set(to.x() - 0.5, to.y() - 0.5);
+    // Floor the coordinates with an epsilon of 0.001
+    points[0].set(from.x() - 0.4999, from.y() - 0.4999);
+    points[1].set(to  .x() - 0.4999, to  .y() - 0.4999);
 
     if(_pen.size() == 1)
     {
-        Point a( lround(points[0].x() ), lround(points[0].y() ) );
-        Point b( lround(points[1].x()), lround(points[1].y()) );
+        const Point a( lround( points[0].x() ), lround(points[0].y() ) );
+        const Point b( lround( points[1].x() ), lround(points[1].y() ) );
 
         drawNarrowLine(a, b, 0);
         return;
@@ -735,9 +700,6 @@ void Rasterizer2::drawLine(const PointF& from, const PointF& to)
 
     std::vector<Polygon> polygons;
     _polygonizer.renderWidePolyline(polygons, points, 2, _pen, true);
-
-    // no performance benefit to use renderWideLine
-    //_polygonizer.renderWideLine( polygons, from, to, _rasterizer->pen() );
 
     for(std::size_t n = 0; n < polygons.size(); ++n)
     {
@@ -857,15 +819,19 @@ void Rasterizer2::drawNarrowPolyline(const PointF* points, size_t pointCount)
 
 void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount, bool nonZeroFillingRule)
 {
+
     std::vector<Polygon> polygons;
     _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen, nonZeroFillingRule);
 
+    rasterWidePolyline(polygons);
+
+#if 0
     const bool isSolid  = _pen.isSolid();
   //const bool isClosed = points[0] == points[pointCount - 1];
 
     // ### TODO: WHY USE BOTH rasterWidePolyline() and rasterWideLine() ??? ###
-    
-    if( isSolid /*&& isClosed*/ )
+
+    if( isSolid )
     {
         rasterWidePolyline(polygons);
     }
@@ -877,6 +843,7 @@ void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount
             rasterWideLine( &polygon[0], polygon.size() );
         }
     }
+#endif
 }
 
 
@@ -950,14 +917,18 @@ void Rasterizer2::drawArc(const PointF& topLeft, const SizeF& size,
         return;
     }
 
-    // use a new pen with bevel join
+    // Use a new pen with bevel join
     const Pen orgPen = _pen;
+
     Pen newPen = orgPen;
     newPen.setJoinStyle(Pen::BevelJoin);
 
     std::vector<Polygon> polygons;
     _polygonizer.renderArc(polygons, arcMode, topLeft, size, degBegin, degEnd, newPen);
 
+    rasterWidePolyline(polygons);
+
+#if 0
     const bool isClosed = arcMode != ArcMode::Open;
 
     if( _pen.isSolid() && isClosed )
@@ -972,6 +943,7 @@ void Rasterizer2::drawArc(const PointF& topLeft, const SizeF& size,
             rasterWideLine( &polygon[0], polygon.size() );
         }
     }
+#endif
 }
 
 
