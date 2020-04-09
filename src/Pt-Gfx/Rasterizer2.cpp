@@ -98,6 +98,9 @@ Rasterizer2::Rasterizer2(Image& image)
     _imageType.width   = 12;
     _imageType.height  = 12;
     _imageType.flags   =  FT_LOAD_DEFAULT;
+
+    // Initial size of nodeX used within the polygon rasterizers
+    _polygonNodeX.resize(500);
 }
 
 

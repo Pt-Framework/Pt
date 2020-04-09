@@ -593,7 +593,6 @@ class Rasterizer2
 
     private:
         Image*           _image;
-        Polygonizer      _polygonizer;
 
         CompositionMode  _compositionMode;
         bool             _aaMode;
@@ -609,10 +608,14 @@ class Rasterizer2
         Image            _penBuffer;
         ConstPixel       _penPixel;
 
-
         // Pattern buffer for narrow lines
         std::vector<Pt::uint8_t> _patternBuffer1PDyn;
         Pt::int32_t              _patternBuffer1PDynCntMax;
+
+        // Polygon related
+        Polygonizer        _polygonizer;
+        std::vector<float> _polygonNodeX;
+        PolygonScanlines   _polygonScanlines;
 
         // Font & text related
         Font             _font;

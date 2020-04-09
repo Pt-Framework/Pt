@@ -73,7 +73,8 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
                                      Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // List of nodes that define the horizontal spans
-    std::vector<float> nodeX(pointCount * 2, 0);
+    std::vector<float>& nodeX = _polygonNodeX;
+    nodeX.resize(pointCount * 2);
 
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
@@ -170,7 +171,8 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
     }
 
     // List of nodes that define the horizontal spans
-    std::vector<float> nodeX(totalPointCount * 2, 0);
+    std::vector<float>& nodeX = _polygonNodeX;
+    nodeX.resize(totalPointCount * 2);
 
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
@@ -258,10 +260,11 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                                     Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // List of nodes that define the horizontal spans
-    std::vector<float> nodeX(pointCount * 2, 0);
+    std::vector<float>& nodeX = _polygonNodeX;
+    nodeX.resize(pointCount * 2);
 
     // List of polygon scanlines
-    PolygonScanlines scanlines;
+    PolygonScanlines& scanlines = _polygonScanlines;
 
     if(_compositionMode != CompositionMode::SourceCopy)
         scanlines.resize( (maxY - minY) + 1 + 4 );
@@ -387,10 +390,11 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
     }
 
     // List of nodes that define the horizontal spans
-    std::vector<float> nodeX(totalPointCount * 2, 0);
+    std::vector<float>& nodeX = _polygonNodeX;
+    nodeX.resize(totalPointCount * 2);
 
     // List of polygon scanlines
-    PolygonScanlines scanlines;
+    PolygonScanlines& scanlines = _polygonScanlines;
 
     if(_compositionMode != CompositionMode::SourceCopy)
         scanlines.resize( (maxY - minY) + 1 + 4 );
