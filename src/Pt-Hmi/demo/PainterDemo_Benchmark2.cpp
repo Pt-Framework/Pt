@@ -68,14 +68,22 @@ class Benchmark2View : public Pt::Hmi::Control
             //char buff[128];
             //sprintf(buff, "%s [%s] - %zd mS (%.1f x) [%zd loops]", text, aai, (size_t) benchmarkResult, benchmarkRatio, (size_t) loopCount);
 
+#if 0
             std::ostringstream oss;
             oss << text << " [" << aai << "] - " << benchmarkResult << " mS ("
                 << std::fixed << std::setprecision(1) << benchmarkRatio << " x)"
                 << " [" << loopCount << " loops]";
+            const std::string& msg = oss.str();
+#else
+            const std::string& msg = Pt::format(
+                                         "{} [{}] - {:d} mS ({:.1f} x) [{:d} loops]",
+                                         text, aai, benchmarkResult, benchmarkRatio, loopCount
+                                     );
+#endif
 
             painter.setFont ( Font("", 12) );
             painter.setPen  ( Color::fromRgb8(164, 100, 255)  );
-            painter.drawText( PointF(250, 50), Pt::String( oss.str().c_str() ) );
+            painter.drawText( PointF(250, 50), Pt::String( msg.c_str() ) );
 
 #ifdef SOURCE_OVER
             const Pt::uint8_t alpha = 175;
