@@ -34,18 +34,16 @@ namespace Pt {
 
 
 //
-// Format error exception
+// Format string error
 //
-FormatError::FormatError(const std::string& msg)
+FormatStringError::FormatStringError(const std::string& msg)
 : std::runtime_error(msg)
-{
-}
+{}
 
 
-FormatError::FormatError(const char* msg)
+FormatStringError::FormatStringError(const char* msg)
 : std::runtime_error(msg)
-{
-}
+{}
 
 
 // https://en.cppreference.com/w/cpp/utility/format/format
@@ -59,11 +57,72 @@ FormatError::FormatError(const char* msg)
 
 
 //
-// Argument wrapper & formatter
+// Format string argument and it's formatter
 //
-
-const Pt::String FormatArg::operator()(const FormatSpec& fs) const
+const Pt::String FormatStringArg::operator()(const FormatStringSpec& fs, const std::numpunct<Pt::Char>& numpunct) const
 {
+    switch(_type) {
+        // 8 bits signed integer
+        case AT_I8:
+            break;
+
+        // 8 bits unsigned integer
+        case AT_U8:
+            break;
+
+        // 16 bits signed integer
+        case AT_I16:
+            break;
+
+        // 16 bits unsigned integer
+        case AT_U16:
+            break;
+
+        // 32 bits signed integer
+        case AT_I32:
+            break;
+
+        // 32 bits unsigned integer
+        case AT_U32:
+            break;
+
+        // 64 bits signed integer
+        case AT_I64:
+            break;
+
+        // 64 bits unsigned integer
+        case AT_U64:
+            break;
+
+        // Float
+        case AT_F:
+            break;
+
+        // Double
+        case AT_D:
+            break;
+
+        // Long double
+        case AT_LD:
+            break;
+
+        // Boolean
+        case AT_B:
+            break;
+
+        // Pointer
+        case AT_P:
+            break;
+
+        // String
+        case AT_S:
+            break;
+
+        // Invalid type
+        default:
+            throw FormatStringError("Invalid ArgType");
+    }
+
     return "";
 }
 

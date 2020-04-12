@@ -38,72 +38,84 @@ namespace Pt {
 
 
 //
-// Format-error exception
+// Format string error
 //
-class PT_API FormatError : public std::runtime_error
+class PT_API FormatStringError : public std::runtime_error
 {
     public:
-        explicit FormatError(const std::string& msg);
+        explicit FormatStringError(const std::string& msg);
 
-        explicit FormatError(const char* msg);
+        explicit FormatStringError(const char* msg);
 
-        inline ~FormatError() throw()
+        virtual ~FormatStringError() throw()
         {}
 };
 
 
 //
-// Format specifier
+// Format string specifier
 //
-struct FormatSpec {
+struct FormatStringSpec {
     // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
-    char fill;       // fill
-    char align;      // align
+    char fill;       // fill character
+    char align;      // < > ^
     char sign;       // + - [space]
     bool altForm;    // #
     bool zeroPad;    // 0
-    int  width;      // width
-    int  precision;  // precision (default 6)
-    bool locale;     // locale-specific formatting
+    int  width;      // minimum field width
+    int  precision;  // floating-point precision (default 6)
+    bool locale;     // use locale-specific formatting
     char type;       // none/s b B c d o x X a A e E f/F g G p
+
+    inline FormatStringSpec()
+    : fill     (0    ) // default none
+    , align    (0    ) // default '<' for non number and '>' for number
+    , sign     ('-'  )
+    , altForm  (false)
+    , zeroPad  (false)
+    , width    (0    )
+    , precision(6    )
+    , locale   (false)
+    , type     (0    ) // default copy as string
+    {}
 };
 
 
 //
-// Format argument
+// Format string argument and it's formatter
 //
-class PT_API FormatArg {
+class PT_API FormatStringArg {
 
     public:
-        inline FormatArg(Pt::int8_t         p) :_type(AT_I8 ) { _valuePOD.i8  = p;             }
-        inline FormatArg(Pt::uint8_t        p) :_type(AT_U8 ) { _valuePOD.u8  = p;             }
-        inline FormatArg(Pt::int16_t        p) :_type(AT_I16) { _valuePOD.i16 = p;             }
-        inline FormatArg(Pt::uint16_t       p) :_type(AT_U16) { _valuePOD.u16 = p;             }
-        inline FormatArg(Pt::int32_t        p) :_type(AT_I32) { _valuePOD.i32 = p;             }
-        inline FormatArg(Pt::uint32_t       p) :_type(AT_U32) { _valuePOD.u32 = p;             }
-        inline FormatArg(Pt::int64_t        p) :_type(AT_I64) { _valuePOD.i64 = p;             }
-        inline FormatArg(Pt::uint64_t       p) :_type(AT_U64) { _valuePOD.u64 = p;             }
-        inline FormatArg(float              p) :_type(AT_F  ) { _valuePOD.f   = p;             }
-        inline FormatArg(double             p) :_type(AT_D  ) { _valuePOD.d   = p;             }
-        inline FormatArg(long double        p) :_type(AT_LD ) { _valuePOD.ld  = p;             }
-        inline FormatArg(bool               p) :_type(AT_B  ) { _valuePOD.b   = p;             }
-        inline FormatArg(const void*        p) :_type(AT_P  ) { _valuePOD.p   = p;             }
-        inline FormatArg(const char*        p) :_type(AT_S  ) { _valueString  = Pt::String(p); }
-        inline FormatArg(const std::string& p) :_type(AT_S  ) { _valueString  = p.c_str();     }
-        inline FormatArg(const Pt::String&  p) :_type(AT_S  ) { _valueString  = p;             }
+        inline FormatStringArg(Pt::int8_t         p) :_type(AT_I8 ) { _valuePOD.i8  = p;             }
+        inline FormatStringArg(Pt::uint8_t        p) :_type(AT_U8 ) { _valuePOD.u8  = p;             }
+        inline FormatStringArg(Pt::int16_t        p) :_type(AT_I16) { _valuePOD.i16 = p;             }
+        inline FormatStringArg(Pt::uint16_t       p) :_type(AT_U16) { _valuePOD.u16 = p;             }
+        inline FormatStringArg(Pt::int32_t        p) :_type(AT_I32) { _valuePOD.i32 = p;             }
+        inline FormatStringArg(Pt::uint32_t       p) :_type(AT_U32) { _valuePOD.u32 = p;             }
+        inline FormatStringArg(Pt::int64_t        p) :_type(AT_I64) { _valuePOD.i64 = p;             }
+        inline FormatStringArg(Pt::uint64_t       p) :_type(AT_U64) { _valuePOD.u64 = p;             }
+        inline FormatStringArg(float              p) :_type(AT_F  ) { _valuePOD.f   = p;             }
+        inline FormatStringArg(double             p) :_type(AT_D  ) { _valuePOD.d   = p;             }
+        inline FormatStringArg(long double        p) :_type(AT_LD ) { _valuePOD.ld  = p;             }
+        inline FormatStringArg(bool               p) :_type(AT_B  ) { _valuePOD.b   = p;             }
+        inline FormatStringArg(const void*        p) :_type(AT_P  ) { _valuePOD.p   = p;             }
+        inline FormatStringArg(const char*        p) :_type(AT_S  ) { _valueString  = Pt::String(p); }
+        inline FormatStringArg(const std::string& p) :_type(AT_S  ) { _valueString  = p.c_str();     }
+        inline FormatStringArg(const Pt::String&  p) :_type(AT_S  ) { _valueString  = p;             }
 
-        const Pt::String operator()(const FormatSpec& fs) const;
+        const Pt::String operator()(const FormatStringSpec& fs, const std::numpunct<Pt::Char>& numpunct) const;
 
     private:
         enum ArgType {
-            AT_I8,  AT_U8,  // 8  bits integer
-            AT_I16, AT_U16, // 16 bits integer
-            AT_I32, AT_U32, // 32 bits integer
-            AT_I64, AT_U64, // 64 bits integer
+            AT_I8,  AT_U8,  // 8  bits integers
+            AT_I16, AT_U16, // 16 bits integers
+            AT_I32, AT_U32, // 32 bits integers
+            AT_I64, AT_U64, // 64 bits integers
             AT_F,           // float
             AT_D,           // double
             AT_LD,          // long double
-            AT_B,           // bool
+            AT_B,           // boolean
             AT_P,           // pointer
             AT_S            // string
         };
@@ -135,35 +147,35 @@ class PT_API FormatArg {
 //
 class PT_API FormatString {
     public:
-        inline FormatString(const char* format, const std::vector<const FormatArg*>& args)
+        inline FormatString(const char* format, const std::vector<const FormatStringArg*>& args)
         : _format(format), _args(args)
         {}
 
-        inline FormatString(const std::string& format, const std::vector<const FormatArg*>& args)
+        inline FormatString(const std::string& format, const std::vector<const FormatStringArg*>& args)
         : _format(format.c_str()), _args(args)
         {}
 
-        inline FormatString(const Pt::Char* format, const std::vector<const FormatArg*>& args)
+        inline FormatString(const Pt::Char* format, const std::vector<const FormatStringArg*>& args)
         : _format(format), _args(args)
         {}
 
-        inline FormatString(const Pt::String& format, const std::vector<const FormatArg*>& args)
+        inline FormatString(const Pt::String& format, const std::vector<const FormatStringArg*>& args)
         : _format(format), _args(args)
         {}
 
         const Pt::String operator()() const;
 
     private:
-        const Pt::String&                    _format;
-        const std::vector<const FormatArg*>& _args;
+        const Pt::String&                          _format;
+        const std::vector<const FormatStringArg*>& _args;
 };
 
 
 
 //
-// Front-ends
+// Front-ends functions
 //
-#define FS_ARG_NAME_N(I) const FormatArg& a##I
+#define FS_ARG_NAME_N(I) const FormatStringArg& a##I
 #define FS_ARG_NAME_X(X) FS_ARG_NAME_##X
 
 #define FS_ARG_NAME_1  FS_ARG_NAME_N(1)
@@ -192,40 +204,40 @@ class PT_API FormatString {
 #define FS_ARG_NAME_24 FS_ARG_NAME_23, FS_ARG_NAME_N(24)
 #define FS_ARG_NAME_25 FS_ARG_NAME_24, FS_ARG_NAME_N(25)
 
-#define FS_ARG_PUSH_N(I) args[I - 1] = &a##I
-#define FS_ARG_PUSH_X(X) FS_ARG_PUSH_##X
+#define FS_ARG_STOR_N(I) args[I - 1] = &a##I
+#define FS_ARG_STOR_X(X) FS_ARG_STOR_##X
 
-#define FS_ARG_PUSH_1  FS_ARG_PUSH_N(1)
-#define FS_ARG_PUSH_2  FS_ARG_PUSH_1  ; FS_ARG_PUSH_N(2)
-#define FS_ARG_PUSH_3  FS_ARG_PUSH_2  ; FS_ARG_PUSH_N(3)
-#define FS_ARG_PUSH_4  FS_ARG_PUSH_3  ; FS_ARG_PUSH_N(4)
-#define FS_ARG_PUSH_5  FS_ARG_PUSH_4  ; FS_ARG_PUSH_N(5)
-#define FS_ARG_PUSH_6  FS_ARG_PUSH_5  ; FS_ARG_PUSH_N(6)
-#define FS_ARG_PUSH_7  FS_ARG_PUSH_6  ; FS_ARG_PUSH_N(7)
-#define FS_ARG_PUSH_8  FS_ARG_PUSH_7  ; FS_ARG_PUSH_N(8)
-#define FS_ARG_PUSH_9  FS_ARG_PUSH_8  ; FS_ARG_PUSH_N(9)
-#define FS_ARG_PUSH_10 FS_ARG_PUSH_9  ; FS_ARG_PUSH_N(10)
-#define FS_ARG_PUSH_11 FS_ARG_PUSH_10 ; FS_ARG_PUSH_N(11)
-#define FS_ARG_PUSH_12 FS_ARG_PUSH_11 ; FS_ARG_PUSH_N(12)
-#define FS_ARG_PUSH_13 FS_ARG_PUSH_12 ; FS_ARG_PUSH_N(13)
-#define FS_ARG_PUSH_14 FS_ARG_PUSH_13 ; FS_ARG_PUSH_N(14)
-#define FS_ARG_PUSH_15 FS_ARG_PUSH_14 ; FS_ARG_PUSH_N(15)
-#define FS_ARG_PUSH_16 FS_ARG_PUSH_15 ; FS_ARG_PUSH_N(16)
-#define FS_ARG_PUSH_17 FS_ARG_PUSH_16 ; FS_ARG_PUSH_N(17)
-#define FS_ARG_PUSH_18 FS_ARG_PUSH_17 ; FS_ARG_PUSH_N(18)
-#define FS_ARG_PUSH_19 FS_ARG_PUSH_18 ; FS_ARG_PUSH_N(19)
-#define FS_ARG_PUSH_20 FS_ARG_PUSH_19 ; FS_ARG_PUSH_N(20)
-#define FS_ARG_PUSH_21 FS_ARG_PUSH_20 ; FS_ARG_PUSH_N(21)
-#define FS_ARG_PUSH_22 FS_ARG_PUSH_21 ; FS_ARG_PUSH_N(22)
-#define FS_ARG_PUSH_23 FS_ARG_PUSH_22 ; FS_ARG_PUSH_N(23)
-#define FS_ARG_PUSH_24 FS_ARG_PUSH_23 ; FS_ARG_PUSH_N(24)
-#define FS_ARG_PUSH_25 FS_ARG_PUSH_24 ; FS_ARG_PUSH_N(25)
+#define FS_ARG_STOR_1  FS_ARG_STOR_N(1)
+#define FS_ARG_STOR_2  FS_ARG_STOR_1  ; FS_ARG_STOR_N(2)
+#define FS_ARG_STOR_3  FS_ARG_STOR_2  ; FS_ARG_STOR_N(3)
+#define FS_ARG_STOR_4  FS_ARG_STOR_3  ; FS_ARG_STOR_N(4)
+#define FS_ARG_STOR_5  FS_ARG_STOR_4  ; FS_ARG_STOR_N(5)
+#define FS_ARG_STOR_6  FS_ARG_STOR_5  ; FS_ARG_STOR_N(6)
+#define FS_ARG_STOR_7  FS_ARG_STOR_6  ; FS_ARG_STOR_N(7)
+#define FS_ARG_STOR_8  FS_ARG_STOR_7  ; FS_ARG_STOR_N(8)
+#define FS_ARG_STOR_9  FS_ARG_STOR_8  ; FS_ARG_STOR_N(9)
+#define FS_ARG_STOR_10 FS_ARG_STOR_9  ; FS_ARG_STOR_N(10)
+#define FS_ARG_STOR_11 FS_ARG_STOR_10 ; FS_ARG_STOR_N(11)
+#define FS_ARG_STOR_12 FS_ARG_STOR_11 ; FS_ARG_STOR_N(12)
+#define FS_ARG_STOR_13 FS_ARG_STOR_12 ; FS_ARG_STOR_N(13)
+#define FS_ARG_STOR_14 FS_ARG_STOR_13 ; FS_ARG_STOR_N(14)
+#define FS_ARG_STOR_15 FS_ARG_STOR_14 ; FS_ARG_STOR_N(15)
+#define FS_ARG_STOR_16 FS_ARG_STOR_15 ; FS_ARG_STOR_N(16)
+#define FS_ARG_STOR_17 FS_ARG_STOR_16 ; FS_ARG_STOR_N(17)
+#define FS_ARG_STOR_18 FS_ARG_STOR_17 ; FS_ARG_STOR_N(18)
+#define FS_ARG_STOR_19 FS_ARG_STOR_18 ; FS_ARG_STOR_N(19)
+#define FS_ARG_STOR_20 FS_ARG_STOR_19 ; FS_ARG_STOR_N(20)
+#define FS_ARG_STOR_21 FS_ARG_STOR_20 ; FS_ARG_STOR_N(21)
+#define FS_ARG_STOR_22 FS_ARG_STOR_21 ; FS_ARG_STOR_N(22)
+#define FS_ARG_STOR_23 FS_ARG_STOR_22 ; FS_ARG_STOR_N(23)
+#define FS_ARG_STOR_24 FS_ARG_STOR_23 ; FS_ARG_STOR_N(24)
+#define FS_ARG_STOR_25 FS_ARG_STOR_24 ; FS_ARG_STOR_N(25)
 
 #define FS_GENERATE_FORMAT_FUNCTION(X)                                          \
     inline Pt::String format_string(const Pt::String& format, FS_ARG_NAME_X(X)) \
     {                                                                           \
-        std::vector<const FormatArg*> args(X);                                  \
-        FS_ARG_PUSH_X(X);                                                       \
+        std::vector<const FormatStringArg*> args(X);                            \
+        FS_ARG_STOR_X(X);                                                       \
         FormatString fstr(format, args);                                        \
         return fstr();                                                          \
     }
