@@ -124,7 +124,7 @@ class PT_API FormatString_Arg {
 
 
 //
-// Main string formatter
+// The main string formatter
 //
 class PT_API FormatString {
     public:
@@ -135,8 +135,8 @@ class PT_API FormatString {
         const Pt::String operator()() const;
 
     private:
-        const Pt::String                    _format;
-        const std::vector<FormatString_Arg> _args;
+        const Pt::String&                    _format;
+        const std::vector<FormatString_Arg>& _args;
 };
 
 

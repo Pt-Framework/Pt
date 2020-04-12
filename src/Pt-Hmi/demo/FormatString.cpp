@@ -25,6 +25,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Pt/StringStream.h>
+
 #include "FormatString.h"
 
 
@@ -46,21 +48,37 @@ FormatError::FormatError(const char* msg)
 }
 
 
+// https://en.cppreference.com/w/cpp/utility/format/format
+// https://en.cppreference.com/w/cpp/utility/format/formatter#Standard_format_specification
+// https://en.cppreference.com/w/cpp/chrono/system_clock/formatter#Format_specification
+// https://en.cppreference.com/w/cpp/locale/locale
+// https://en.cppreference.com/w/cpp/locale/num_put
+// https://en.cppreference.com/w/cpp/locale/numpunct
+
+
 //
 // Argument wrapper & formatter
 //
 const Pt::String FormatString_Arg::operator()(const FormatSpec& fs) const
 {
+    //const std::num_put<Pt::Char>& facet = std::use_facet< std::num_put<Pt::Char> >( std::locale() );
+
     return "";
 }
 
 
 //
-// Main string formatter
+// The main string formatter
 //
 const Pt::String FormatString::operator()() const
 {
-    return "";
+    const std::num_put<Pt::Char>& facet = std::use_facet< std::num_put<Pt::Char> >( std::locale() );
+
+    Pt::OStringStream oss;
+    facet.put(oss, oss, '0', 2.71);
+    oss << "\n";
+
+    return oss.str();
 }
 
 

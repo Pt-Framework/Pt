@@ -12,11 +12,11 @@ int main(int argc, char* args[])
                      "{} {:d} {:.1f}\n",
                      "Test", 123, 456.789
                  );
-    
+
     std::cerr << Pt::format_string(
                      "{} {:d} {:.1f}\n",
                      "Test", 123, 456.789
-                 );
+                 ).narrow();
 
     return 0;
 }
