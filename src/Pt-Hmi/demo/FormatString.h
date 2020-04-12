@@ -38,7 +38,7 @@ namespace Pt {
 
 
 //
-// Format string error
+// Format-string error
 //
 class PT_API FormatStringError : public std::runtime_error
 {
@@ -53,7 +53,7 @@ class PT_API FormatStringError : public std::runtime_error
 
 
 //
-// Format string specifier
+// Format-string specifier
 //
 struct FormatStringSpec {
     // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
@@ -82,7 +82,7 @@ struct FormatStringSpec {
 
 
 //
-// Format string argument and formatter
+// Format-string argument and its corresponding formatter
 //
 class PT_API FormatStringArg {
     public:
@@ -148,7 +148,7 @@ class PT_API FormatStringArg {
 
 
 //
-// The main string formatter
+// The main string-formatter class
 //
 class PT_API FormatString {
     public:
@@ -243,7 +243,7 @@ class PT_API FormatString {
     {                                                                           \
         std::vector<const FormatStringArg*> args(X);                            \
         FS_ARG_STOR_X(X);                                                       \
-        FormatString fstr(format, args);                                        \
+        const FormatString fstr(format, args);                                  \
         return fstr();                                                          \
     }
 
