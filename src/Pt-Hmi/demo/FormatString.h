@@ -38,7 +38,7 @@ namespace Pt {
 
 
 //
-// Format error exception
+// Format-error exception
 //
 class PT_API FormatError : public std::runtime_error
 {
@@ -53,39 +53,44 @@ class PT_API FormatError : public std::runtime_error
 
 
 //
-// Argument wrapper & formatter
+// Format specifier
 //
-class PT_API FormatString_Arg {
-    public:
-        struct FormatSpec {
-            // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
-            char fill;       // fill
-            char align;      // align
-            char sign;       // + - [space]
-            bool altForm;    // #
-            bool zeroPad;    // 0
-            int  width;      // width
-            int  precision;  // precision (default 6)
-            bool locale;     // locale-specific formatting
-            char type;       // none/s b B c d o x X a A e E f/F g G p
-        };
+struct FormatSpec {
+    // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
+    char fill;       // fill
+    char align;      // align
+    char sign;       // + - [space]
+    bool altForm;    // #
+    bool zeroPad;    // 0
+    int  width;      // width
+    int  precision;  // precision (default 6)
+    bool locale;     // locale-specific formatting
+    char type;       // none/s b B c d o x X a A e E f/F g G p
+};
+
+
+//
+// Format argument
+//
+class PT_API FormatArg {
 
     public:
-        inline FormatString_Arg(Pt::int8_t         p) :_type(AT_I8 ) { _valuePOD.i8  = p;             }
-        inline FormatString_Arg(Pt::uint8_t        p) :_type(AT_U8 ) { _valuePOD.u8  = p;             }
-        inline FormatString_Arg(Pt::int16_t        p) :_type(AT_I16) { _valuePOD.i16 = p;             }
-        inline FormatString_Arg(Pt::uint16_t       p) :_type(AT_U16) { _valuePOD.u16 = p;             }
-        inline FormatString_Arg(Pt::int32_t        p) :_type(AT_I32) { _valuePOD.i32 = p;             }
-        inline FormatString_Arg(Pt::uint32_t       p) :_type(AT_U32) { _valuePOD.u32 = p;             }
-        inline FormatString_Arg(Pt::int64_t        p) :_type(AT_I64) { _valuePOD.i64 = p;             }
-        inline FormatString_Arg(Pt::uint64_t       p) :_type(AT_U64) { _valuePOD.u64 = p;             }
-        inline FormatString_Arg(float              p) :_type(AT_F  ) { _valuePOD.f   = p;             }
-        inline FormatString_Arg(double             p) :_type(AT_D  ) { _valuePOD.d   = p;             }
-        inline FormatString_Arg(long double        p) :_type(AT_LD ) { _valuePOD.ld  = p;             }
-        inline FormatString_Arg(bool               p) :_type(AT_B  ) { _valuePOD.b   = p;             }
-        inline FormatString_Arg(const char*        p) :_type(AT_S  ) { _valueString  = Pt::String(p); }
-        inline FormatString_Arg(const std::string& p) :_type(AT_S  ) { _valueString  = p.c_str();     }
-        inline FormatString_Arg(const Pt::String&  p) :_type(AT_S  ) { _valueString  = p;             }
+        inline FormatArg(Pt::int8_t         p) :_type(AT_I8 ) { _valuePOD.i8  = p;             }
+        inline FormatArg(Pt::uint8_t        p) :_type(AT_U8 ) { _valuePOD.u8  = p;             }
+        inline FormatArg(Pt::int16_t        p) :_type(AT_I16) { _valuePOD.i16 = p;             }
+        inline FormatArg(Pt::uint16_t       p) :_type(AT_U16) { _valuePOD.u16 = p;             }
+        inline FormatArg(Pt::int32_t        p) :_type(AT_I32) { _valuePOD.i32 = p;             }
+        inline FormatArg(Pt::uint32_t       p) :_type(AT_U32) { _valuePOD.u32 = p;             }
+        inline FormatArg(Pt::int64_t        p) :_type(AT_I64) { _valuePOD.i64 = p;             }
+        inline FormatArg(Pt::uint64_t       p) :_type(AT_U64) { _valuePOD.u64 = p;             }
+        inline FormatArg(float              p) :_type(AT_F  ) { _valuePOD.f   = p;             }
+        inline FormatArg(double             p) :_type(AT_D  ) { _valuePOD.d   = p;             }
+        inline FormatArg(long double        p) :_type(AT_LD ) { _valuePOD.ld  = p;             }
+        inline FormatArg(bool               p) :_type(AT_B  ) { _valuePOD.b   = p;             }
+        inline FormatArg(const void*        p) :_type(AT_P  ) { _valuePOD.p   = p;             }
+        inline FormatArg(const char*        p) :_type(AT_S  ) { _valueString  = Pt::String(p); }
+        inline FormatArg(const std::string& p) :_type(AT_S  ) { _valueString  = p.c_str();     }
+        inline FormatArg(const Pt::String&  p) :_type(AT_S  ) { _valueString  = p;             }
 
         const Pt::String operator()(const FormatSpec& fs) const;
 
@@ -99,6 +104,7 @@ class PT_API FormatString_Arg {
             AT_D,           // double
             AT_LD,          // long double
             AT_B,           // bool
+            AT_P,           // pointer
             AT_S            // string
         };
 
@@ -115,6 +121,7 @@ class PT_API FormatString_Arg {
             double       d;
             long double  ld;
             bool         b;
+            const void*  p;
         };
 
         ArgType    _type;
@@ -128,7 +135,19 @@ class PT_API FormatString_Arg {
 //
 class PT_API FormatString {
     public:
-        inline FormatString(const Pt::String& format, const std::vector<FormatString_Arg>& args)
+        inline FormatString(const char* format, const std::vector<const FormatArg*>& args)
+        : _format(format), _args(args)
+        {}
+
+        inline FormatString(const std::string& format, const std::vector<const FormatArg*>& args)
+        : _format(format.c_str()), _args(args)
+        {}
+
+        inline FormatString(const Pt::Char* format, const std::vector<const FormatArg*>& args)
+        : _format(format), _args(args)
+        {}
+
+        inline FormatString(const Pt::String& format, const std::vector<const FormatArg*>& args)
         : _format(format), _args(args)
         {}
 
@@ -136,7 +155,7 @@ class PT_API FormatString {
 
     private:
         const Pt::String&                    _format;
-        const std::vector<FormatString_Arg>& _args;
+        const std::vector<const FormatArg*>& _args;
 };
 
 
@@ -144,7 +163,7 @@ class PT_API FormatString {
 //
 // Front-ends
 //
-#define FS_ARG_NAME_N(I) const FormatString_Arg& a##I
+#define FS_ARG_NAME_N(I) const FormatArg& a##I
 #define FS_ARG_NAME_X(X) FS_ARG_NAME_##X
 
 #define FS_ARG_NAME_1  FS_ARG_NAME_N(1)
@@ -173,7 +192,7 @@ class PT_API FormatString {
 #define FS_ARG_NAME_24 FS_ARG_NAME_23, FS_ARG_NAME_N(24)
 #define FS_ARG_NAME_25 FS_ARG_NAME_24, FS_ARG_NAME_N(25)
 
-#define FS_ARG_PUSH_N(I) args.push_back(a##I)
+#define FS_ARG_PUSH_N(I) args[I - 1] = &a##I
 #define FS_ARG_PUSH_X(X) FS_ARG_PUSH_##X
 
 #define FS_ARG_PUSH_1  FS_ARG_PUSH_N(1)
@@ -205,8 +224,7 @@ class PT_API FormatString {
 #define FS_GENERATE_FORMAT_FUNCTION(X)                                          \
     inline Pt::String format_string(const Pt::String& format, FS_ARG_NAME_X(X)) \
     {                                                                           \
-        std::vector<FormatString_Arg> args;                                     \
-        args.reserve(X);                                                        \
+        std::vector<const FormatArg*> args(X);                                  \
         FS_ARG_PUSH_X(X);                                                       \
         FormatString fstr(format, args);                                        \
         return fstr();                                                          \
@@ -240,9 +258,6 @@ FS_GENERATE_FORMAT_FUNCTION(25)
 
 
 }
-
-
-#include "FormatString.tpp"
 
 
 #endif

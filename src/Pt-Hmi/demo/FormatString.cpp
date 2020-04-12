@@ -55,14 +55,15 @@ FormatError::FormatError(const char* msg)
 // https://en.cppreference.com/w/cpp/locale/num_put
 // https://en.cppreference.com/w/cpp/locale/numpunct
 
+// svn commit -m 'Trying to implement a simple string formatter ala std::format that uses Pt::String'
+
 
 //
 // Argument wrapper & formatter
 //
-const Pt::String FormatString_Arg::operator()(const FormatSpec& fs) const
-{
-    //const std::num_put<Pt::Char>& facet = std::use_facet< std::num_put<Pt::Char> >( std::locale() );
 
+const Pt::String FormatArg::operator()(const FormatSpec& fs) const
+{
     return "";
 }
 
@@ -72,10 +73,13 @@ const Pt::String FormatString_Arg::operator()(const FormatSpec& fs) const
 //
 const Pt::String FormatString::operator()() const
 {
-    const std::num_put<Pt::Char>& facet = std::use_facet< std::num_put<Pt::Char> >( std::locale() );
+    const std::num_put <Pt::Char>& numput   = std::use_facet< std::num_put <Pt::Char> >( std::locale() );
+    const std::numpunct<Pt::Char>& numpunct = std::use_facet< std::numpunct<Pt::Char> >( std::locale() );
 
     Pt::OStringStream oss;
-    facet.put(oss, oss, '0', 2.71);
+
+    numput.put(oss, oss, '0', 2.71);
+    oss << " " << numpunct.truename();
     oss << "\n";
 
     return oss.str();
