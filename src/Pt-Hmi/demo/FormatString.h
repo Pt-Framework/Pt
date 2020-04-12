@@ -31,7 +31,7 @@
 
 #include <vector>
 
-#include <Pt/String.h>
+#include <Pt/StringStream.h>
 
 
 namespace Pt {
@@ -82,44 +82,47 @@ struct FormatStringSpec {
 
 
 //
-// Format string argument and it's formatter
+// Format string argument and formatter
 //
 class PT_API FormatStringArg {
-
     public:
-        inline FormatStringArg(Pt::int8_t         p) :_type(AT_I8 ) { _valuePOD.i8  = p;             }
-        inline FormatStringArg(Pt::uint8_t        p) :_type(AT_U8 ) { _valuePOD.u8  = p;             }
-        inline FormatStringArg(Pt::int16_t        p) :_type(AT_I16) { _valuePOD.i16 = p;             }
-        inline FormatStringArg(Pt::uint16_t       p) :_type(AT_U16) { _valuePOD.u16 = p;             }
-        inline FormatStringArg(Pt::int32_t        p) :_type(AT_I32) { _valuePOD.i32 = p;             }
-        inline FormatStringArg(Pt::uint32_t       p) :_type(AT_U32) { _valuePOD.u32 = p;             }
-        inline FormatStringArg(Pt::int64_t        p) :_type(AT_I64) { _valuePOD.i64 = p;             }
-        inline FormatStringArg(Pt::uint64_t       p) :_type(AT_U64) { _valuePOD.u64 = p;             }
-        inline FormatStringArg(float              p) :_type(AT_F  ) { _valuePOD.f   = p;             }
-        inline FormatStringArg(double             p) :_type(AT_D  ) { _valuePOD.d   = p;             }
-        inline FormatStringArg(long double        p) :_type(AT_LD ) { _valuePOD.ld  = p;             }
-        inline FormatStringArg(bool               p) :_type(AT_B  ) { _valuePOD.b   = p;             }
-        inline FormatStringArg(const void*        p) :_type(AT_P  ) { _valuePOD.p   = p;             }
-        inline FormatStringArg(const char*        p) :_type(AT_S  ) { _valueString  = Pt::String(p); }
-        inline FormatStringArg(const std::string& p) :_type(AT_S  ) { _valueString  = p.c_str();     }
-        inline FormatStringArg(const Pt::String&  p) :_type(AT_S  ) { _valueString  = p;             }
+        inline FormatStringArg(Pt::int8_t         p) :_formatFunc(&FormatStringArg::ff_I8 ) { _valuePOD.i8  = p;             }
+        inline FormatStringArg(Pt::uint8_t        p) :_formatFunc(&FormatStringArg::ff_U8 ) { _valuePOD.u8  = p;             }
+        inline FormatStringArg(Pt::int16_t        p) :_formatFunc(&FormatStringArg::ff_I16) { _valuePOD.i16 = p;             }
+        inline FormatStringArg(Pt::uint16_t       p) :_formatFunc(&FormatStringArg::ff_U16) { _valuePOD.u16 = p;             }
+        inline FormatStringArg(Pt::int32_t        p) :_formatFunc(&FormatStringArg::ff_I32) { _valuePOD.i32 = p;             }
+        inline FormatStringArg(Pt::uint32_t       p) :_formatFunc(&FormatStringArg::ff_U32) { _valuePOD.u32 = p;             }
+        inline FormatStringArg(Pt::int64_t        p) :_formatFunc(&FormatStringArg::ff_I64) { _valuePOD.i64 = p;             }
+        inline FormatStringArg(Pt::uint64_t       p) :_formatFunc(&FormatStringArg::ff_U64) { _valuePOD.u64 = p;             }
+        inline FormatStringArg(float              p) :_formatFunc(&FormatStringArg::ff_F  ) { _valuePOD.f   = p;             }
+        inline FormatStringArg(double             p) :_formatFunc(&FormatStringArg::ff_D  ) { _valuePOD.d   = p;             }
+        inline FormatStringArg(long double        p) :_formatFunc(&FormatStringArg::ff_LD ) { _valuePOD.ld  = p;             }
+        inline FormatStringArg(bool               p) :_formatFunc(&FormatStringArg::ff_B  ) { _valuePOD.b   = p;             }
+        inline FormatStringArg(const void*        p) :_formatFunc(&FormatStringArg::ff_P  ) { _valuePOD.p   = p;             }
+        inline FormatStringArg(const char*        p) :_formatFunc(&FormatStringArg::ff_S  ) { _valueString  = Pt::String(p); }
+        inline FormatStringArg(const std::string& p) :_formatFunc(&FormatStringArg::ff_S  ) { _valueString  = p.c_str();     }
+        inline FormatStringArg(const Pt::String&  p) :_formatFunc(&FormatStringArg::ff_S  ) { _valueString  = p;             }
 
-        const Pt::String operator()(const FormatStringSpec& fs, const std::numpunct<Pt::Char>& numpunct) const;
+        inline void operator()(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+        { (this->*_formatFunc)(oss, fss, numpunct); }
 
     private:
-        enum ArgType {
-            AT_I8,  AT_U8,  // 8  bits integers
-            AT_I16, AT_U16, // 16 bits integers
-            AT_I32, AT_U32, // 32 bits integers
-            AT_I64, AT_U64, // 64 bits integers
-            AT_F,           // float
-            AT_D,           // double
-            AT_LD,          // long double
-            AT_B,           // boolean
-            AT_P,           // pointer
-            AT_S            // string
-        };
+        void ff_I8 (Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_U8 (Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_I16(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_U16(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_I32(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_U32(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_I64(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_U64(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_F  (Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_D  (Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_LD (Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_B  (Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_P  (Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_S  (Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
 
+    private:
         union ArgValue {
             Pt::int8_t   i8;
             Pt::uint8_t  u8;
@@ -136,9 +139,11 @@ class PT_API FormatStringArg {
             const void*  p;
         };
 
-        ArgType    _type;
+        typedef void (FormatStringArg::*FormatFunc)(Pt::OStringStream&, const FormatStringSpec&, const std::numpunct<Pt::Char>&) const;
+
         ArgValue   _valuePOD;
         Pt::String _valueString;
+        FormatFunc _formatFunc;
 };
 
 

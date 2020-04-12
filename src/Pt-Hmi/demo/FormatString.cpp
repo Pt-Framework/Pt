@@ -25,8 +25,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/StringStream.h>
-
 #include "FormatString.h"
 
 
@@ -39,7 +37,6 @@ namespace Pt {
 FormatStringError::FormatStringError(const std::string& msg)
 : std::runtime_error(msg)
 {}
-
 
 FormatStringError::FormatStringError(const char* msg)
 : std::runtime_error(msg)
@@ -57,73 +54,62 @@ FormatStringError::FormatStringError(const char* msg)
 
 
 //
-// Format string argument and it's formatter
+// Format string argument and formatter
 //
-const Pt::String FormatStringArg::operator()(const FormatStringSpec& fs, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_I8(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
-    switch(_type) {
-        // 8 bits signed integer
-        case AT_I8:
-            break;
+}
 
-        // 8 bits unsigned integer
-        case AT_U8:
-            break;
+void FormatStringArg::ff_U8(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // 16 bits signed integer
-        case AT_I16:
-            break;
+void FormatStringArg::ff_I16(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // 16 bits unsigned integer
-        case AT_U16:
-            break;
+void FormatStringArg::ff_U16(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // 32 bits signed integer
-        case AT_I32:
-            break;
+void FormatStringArg::ff_I32(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // 32 bits unsigned integer
-        case AT_U32:
-            break;
+void FormatStringArg::ff_U32(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // 64 bits signed integer
-        case AT_I64:
-            break;
+void FormatStringArg::ff_I64(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // 64 bits unsigned integer
-        case AT_U64:
-            break;
+void FormatStringArg::ff_U64(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // Float
-        case AT_F:
-            break;
+void FormatStringArg::ff_F(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // Double
-        case AT_D:
-            break;
+void FormatStringArg::ff_D(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // Long double
-        case AT_LD:
-            break;
+void FormatStringArg::ff_LD(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // Boolean
-        case AT_B:
-            break;
+void FormatStringArg::ff_B(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // Pointer
-        case AT_P:
-            break;
+void FormatStringArg::ff_P(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+}
 
-        // String
-        case AT_S:
-            break;
-
-        // Invalid type
-        default:
-            throw FormatStringError("Invalid ArgType");
-    }
-
-    return "";
+void FormatStringArg::ff_S(Pt::OStringStream& oss, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
 }
 
 
