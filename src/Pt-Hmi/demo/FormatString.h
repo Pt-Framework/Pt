@@ -62,7 +62,7 @@ struct FormatStringSpec {
     char sign;       // + - [space]
     bool altForm;    // #
     bool zeroPad;    // 0
-    int  width;      // minimum field width
+    int  width;      // minimum field width (default 0)
     int  precision;  // floating-point precision (default 6)
     bool locale;     // use locale-specific formatting
     char type;       // none/s b B c d o x X a A e E f/F g G p
@@ -269,7 +269,7 @@ FS_GENERATE_FORMAT_FUNCTION(24)
 FS_GENERATE_FORMAT_FUNCTION(25)
 
 
-}
+} // namespace
 
 
 #endif

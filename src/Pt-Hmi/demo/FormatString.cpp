@@ -145,4 +145,4 @@ const Pt::String FormatString::operator()() const
 }
 
 
-}
+} // namespace
