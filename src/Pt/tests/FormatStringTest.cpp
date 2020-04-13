@@ -3,7 +3,9 @@
 
 #include <Pt/System/Clock.h>
 
+#define FMT_HEADER_ONLY
 #include "fmt/format.h"
+//#include "fmtc11/fmt/format.h"
 
 #include "FormatString.h"
 
@@ -17,6 +19,29 @@
 #endif
 
 
+#ifdef __unix__
+#define BLACK   "\u001b[30m"
+#define RED     "\u001b[31m"
+#define GREEN   "\u001b[32m"
+#define YELLOW  "\u001b[33m"
+#define BLUE    "\u001b[34m"
+#define MAGENTA "\u001b[35m"
+#define CYAN    "\u001b[36m"
+#define WHITE   "\u001b[37m"
+#define RESET   "\u001b[0m"
+#else
+#define BLACK
+#define RED
+#define GREEN
+#define YELLOW
+#define BLUE
+#define MAGENTA
+#define CYAN
+#define WHITE
+#define RESET
+#endif
+
+
 #define LOOP_COUNT 15000
 
 #define TEST_AND_BENCHMARK(FORMAT, ...)                                          \
@@ -27,15 +52,14 @@
         const std::string& c = Pt::format_string(FORMAT, __VA_ARGS__).narrow();  \
         std::cerr << c << std::endl;                                             \
         /* Compare */                                                            \
-        std::cerr << std::endl;                                                  \
         if(COMPARE_WITH_FMT) {                                                   \
             if(r == c)                                                           \
-                std::cerr << ">>> [MATCH] ";                                     \
+                std::cerr << GREEN << "[MATCH]" << RESET;                        \
             else                                                                 \
-                std::cerr << "[!!! NOT MATCH !!!] " << std::endl << std::endl;   \
+                std::cerr << RED << "[NOT MATCH]" << RESET;                      \
         }                                                                        \
         else {                                                                   \
-            std::cerr << ">>> [NO COMPARE] ";                                    \
+            std::cerr << CYAN << "[NO COMPARE]" << RESET;                        \
         }                                                                        \
         /* Benchmark the reference fmt 4.1.0 library */                          \
         Pt::System::Clock clock;                                                 \
@@ -64,33 +88,35 @@
 
 int main(int argc, char* args[])
 {
-    // String
-    TEST_AND_BENCHMARK("{{ }}", 0);
-
+    // Strings
+    TEST_AND_BENCHMARK("{{}}", 0);
     TEST_AND_BENCHMARK("{}", "aBc");
-
     TEST_AND_BENCHMARK("{0} {0}", "aBc");
 
     TEST_AND_BENCHMARK("|{}| |{:s}|", "aBc", "dEf");
-
     TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
 
-    // Character
+    // Characters
+    TEST_AND_BENCHMARK("|{}| |{}| |{}|", 'A', 'b', 'c');
+    TEST_AND_BENCHMARK("|{:*<8}| |{:*>8}| |{:*^8}|", 'A', 'b', 'c');
 
-    // Pointer
+    //TEST_AND_BENCHMARK("|{:d}| |{:d}| |{:d}|", 'A', 'b', 'c');
+    //TEST_AND_BENCHMARK("|{:*<8d}| |{:*>8d}| |{:*^8d}|", 'A', 'b', 'c');
 
-    // Boolean
+    // Pointers
+
+    // Booleans
     TEST_AND_BENCHMARK("|{0:*<8}| |{0:*>8}| |{0:*^8}| |{1:*<8}| |{1:*>8}| |{1:*^8}|", true, false);
-
     TEST_AND_BENCHMARK("|{0:*<08}| |{0:*>08}| |{0:*^08}| |{1:*<08}| |{1:*>08}| |{1:*^08}|", true, false);
 
-
-    // Integers
+    //TEST_AND_BENCHMARK("|{0:*<8d}| |{0:*>8d}| |{0:*^8d}| |{1:*<8d}| |{1:*>8d}| |{1:*^8d}|", true, false);
+    //TEST_AND_BENCHMARK("|{0:*<08d}| |{0:*>08d}| |{0:*^08d}| |{1:*<08d}| |{1:*>08d}| |{1:*^08d}|", true, false);
 
     // Floating-points
 
-    return 0;
+    // Integers
 
+    // Mixeds
     /*
     std::cerr << fmt::format(
                      "{} {:d} {:.1f} {:p} {}\n",
@@ -102,4 +128,7 @@ int main(int argc, char* args[])
                      "Test", 123, 456.789, (void*) 1234567890, true
                  ).narrow();
     */
+
+    // Done
+    return 0;
 }

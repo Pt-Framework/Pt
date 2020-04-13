@@ -107,6 +107,8 @@ class PT_API FormatStringArg {
         inline FormatStringArg(long double        p) : _fmtFun(&FormatStringArg::ff_LD ) { _valPOD.ld  = p;             }
         inline FormatStringArg(bool               p) : _fmtFun(&FormatStringArg::ff_B  ) { _valPOD.b   = p;             }
         inline FormatStringArg(const void*        p) : _fmtFun(&FormatStringArg::ff_P  ) { _valPOD.p   = p;             }
+        inline FormatStringArg(char               p) : _fmtFun(&FormatStringArg::ff_C  ) { _valChr     = p;             }
+        inline FormatStringArg(Pt::Char           p) : _fmtFun(&FormatStringArg::ff_C  ) { _valChr     = p;             }
         inline FormatStringArg(const char*        p) : _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = Pt::String(p); }
         inline FormatStringArg(const std::string& p) : _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = p.c_str();     }
         inline FormatStringArg(const Pt::String&  p) : _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = p;             }
@@ -130,6 +132,7 @@ class PT_API FormatStringArg {
         void ff_LD (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
         void ff_B  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
         void ff_P  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_C  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
         void ff_S  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
 
     private:
@@ -155,6 +158,7 @@ class PT_API FormatStringArg {
 
         // Argument data
         mutable ArgValue   _valPOD;
+        mutable Pt::Char   _valChr;
         mutable Pt::String _valStr;
 
         // Selected formatter function specific to the argument's data type

@@ -105,27 +105,30 @@ FormatStringError::FormatStringError(const char* msg)
 //
 // Results verified using:
 //     https://fmt.dev/latest/index.html
-//     https://github.com/fmtlib/fmt/releases/tag/4.1.0
+//     https://github.com/fmtlib/fmt/releases/tag/6.2.0
 //
 void FormatStringArg::ff_I8(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
+    if( !TYPE_IS_BDOX(fss.type) )
+        throw FormatStringError("invalid 'type' in format string");
+
     throw FormatStringError("ff_I8 Not implemented yet!");
 }
 
 
-    /*
-        fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
+/*
+    fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
 
-        Pt::Char fill;       // fill character
-        char     align;      // < > ^
-        char     sign;       // + - [space]
-        bool     altForm;    // #
-        bool     zeroPad;    // 0
-        size_t   width;      // minimum field width (default 0)
-        size_t   precision;  // floating-point precision (default 6)
-        bool     locale;     // use locale-specific formatting
-        char     type;       // none/s b B c d o x X a A e E f/F g G p
-    */
+    Pt::Char fill;       // fill character
+    char     align;      // < > ^
+    char     sign;       // + - [space]
+    bool     altForm;    // #
+    bool     zeroPad;    // 0
+    size_t   width;      // minimum field width (default 0)
+    size_t   precision;  // floating-point precision (default 6)
+    bool     locale;     // use locale-specific formatting
+    char     type;       // none/s b B c d o x X a A e E f/F g G p
+*/
 void FormatStringArg::ff_U8(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
 /*
@@ -138,9 +141,10 @@ void FormatStringArg::ff_U8(Pt::String &rbf, FormatStringSpec& fss, const std::n
 #define TYPE_IS_BDOX(T)  ( T && ( (T == 'b') || (T == 'B') || (T == 'd') || (T == 'o') || (T == 'x') || (T == 'X') ) )
 #define TYPE_IS_BCDOX(T) ( T && ( (T == 'b') || (T == 'B') || (T == 'c') || (T == 'd') || (T == 'o') ||  (T == 'x') || (T == 'X') ) )
 #define TYPE_IS_AEFG(T)  ( T && ( (T == 'a') || (T == 'A') || (T == 'e') || (T == 'E') || (T == 'f') ||  (T == 'F') || (T == 'g') || (T == 'G') ) )
+*/
 
- * */
-
+    if( !TYPE_IS_BDOX(fss.type) )
+        throw FormatStringError("invalid 'type' in format string");
 
     throw FormatStringError("ff_U8 Not implemented yet!");
 }
@@ -234,6 +238,36 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const std::nu
 void FormatStringArg::ff_P(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
     throw FormatStringError("ff_P Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_C(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    // Check the specifiers
+    if(fss.sign)
+        throw FormatStringError("format specifier 'sign' requires numeric argument");
+
+    if(fss.altForm)
+        throw FormatStringError("format specifier '#' requires numeric argument");
+
+    if(fss.zeroPad)
+        throw FormatStringError("format specifier '0' requires numeric argument");
+
+    if(fss.locale)
+        throw FormatStringError("format specifier 'L' is not supported yet");
+
+    // Process according the required type
+    if( TYPE_IS_C(fss.type) ) {
+        _valStr = _valChr;
+        ff_S(rbf, fss, numpunct);
+    }
+    else if( TYPE_IS_BCDOX(fss.type) ) {
+        _valPOD.u8 = _valPOD.b ? 1 : 0;
+        ff_U8(rbf, fss, numpunct);
+    }
+    else {
+        throw FormatStringError("invalid 'type' in format string");
+    }
 }
 
 
