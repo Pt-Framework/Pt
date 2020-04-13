@@ -39,5 +39,5 @@ FORMAT_STRING_SOURCES = FormatString.cpp
                         ;
 
 Main FormatStringTest : $(FORMAT_STRING_SOURCES) ;
-LinkSharedLibraries FormatStringTest : Pt ;
+LinkSharedLibraries FormatStringTest : Pt Pt-System ;
 MakeLocate FormatStringTest : $(PT_OUTPUT_TARGET) ;
