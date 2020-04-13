@@ -55,8 +55,9 @@ class PT_API FormatStringError : public std::runtime_error
 //
 // Format-string specifier
 //
-struct FormatStringSpec {
+struct PT_API FormatStringSpec {
     // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
+
     char fill;       // fill character
     char align;      // < > ^
     char sign;       // + - [space]
@@ -90,27 +91,30 @@ struct FormatStringSpec {
 //
 class PT_API FormatStringArg {
     public:
-        inline FormatStringArg(Pt::int8_t         p) :_formatFunc(&FormatStringArg::ff_I8 ) { _valuePOD.i8  = p;             }
-        inline FormatStringArg(Pt::uint8_t        p) :_formatFunc(&FormatStringArg::ff_U8 ) { _valuePOD.u8  = p;             }
-        inline FormatStringArg(Pt::int16_t        p) :_formatFunc(&FormatStringArg::ff_I16) { _valuePOD.i16 = p;             }
-        inline FormatStringArg(Pt::uint16_t       p) :_formatFunc(&FormatStringArg::ff_U16) { _valuePOD.u16 = p;             }
-        inline FormatStringArg(Pt::int32_t        p) :_formatFunc(&FormatStringArg::ff_I32) { _valuePOD.i32 = p;             }
-        inline FormatStringArg(Pt::uint32_t       p) :_formatFunc(&FormatStringArg::ff_U32) { _valuePOD.u32 = p;             }
-        inline FormatStringArg(Pt::int64_t        p) :_formatFunc(&FormatStringArg::ff_I64) { _valuePOD.i64 = p;             }
-        inline FormatStringArg(Pt::uint64_t       p) :_formatFunc(&FormatStringArg::ff_U64) { _valuePOD.u64 = p;             }
-        inline FormatStringArg(float              p) :_formatFunc(&FormatStringArg::ff_F  ) { _valuePOD.f   = p;             }
-        inline FormatStringArg(double             p) :_formatFunc(&FormatStringArg::ff_D  ) { _valuePOD.d   = p;             }
-        inline FormatStringArg(long double        p) :_formatFunc(&FormatStringArg::ff_LD ) { _valuePOD.ld  = p;             }
-        inline FormatStringArg(bool               p) :_formatFunc(&FormatStringArg::ff_B  ) { _valuePOD.b   = p;             }
-        inline FormatStringArg(const void*        p) :_formatFunc(&FormatStringArg::ff_P  ) { _valuePOD.p   = p;             }
-        inline FormatStringArg(const char*        p) :_formatFunc(&FormatStringArg::ff_S  ) { _valueString  = Pt::String(p); }
-        inline FormatStringArg(const std::string& p) :_formatFunc(&FormatStringArg::ff_S  ) { _valueString  = p.c_str();     }
-        inline FormatStringArg(const Pt::String&  p) :_formatFunc(&FormatStringArg::ff_S  ) { _valueString  = p;             }
+        // Constructors (one for each data type)
+        inline FormatStringArg(Pt::int8_t         p) : _fmtFun(&FormatStringArg::ff_I8 ) { _valPOD.i8  = p;             }
+        inline FormatStringArg(Pt::uint8_t        p) : _fmtFun(&FormatStringArg::ff_U8 ) { _valPOD.u8  = p;             }
+        inline FormatStringArg(Pt::int16_t        p) : _fmtFun(&FormatStringArg::ff_I16) { _valPOD.i16 = p;             }
+        inline FormatStringArg(Pt::uint16_t       p) : _fmtFun(&FormatStringArg::ff_U16) { _valPOD.u16 = p;             }
+        inline FormatStringArg(Pt::int32_t        p) : _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
+        inline FormatStringArg(Pt::uint32_t       p) : _fmtFun(&FormatStringArg::ff_U32) { _valPOD.u32 = p;             }
+        inline FormatStringArg(Pt::int64_t        p) : _fmtFun(&FormatStringArg::ff_I64) { _valPOD.i64 = p;             }
+        inline FormatStringArg(Pt::uint64_t       p) : _fmtFun(&FormatStringArg::ff_U64) { _valPOD.u64 = p;             }
+        inline FormatStringArg(float              p) : _fmtFun(&FormatStringArg::ff_F  ) { _valPOD.f   = p;             }
+        inline FormatStringArg(double             p) : _fmtFun(&FormatStringArg::ff_D  ) { _valPOD.d   = p;             }
+        inline FormatStringArg(long double        p) : _fmtFun(&FormatStringArg::ff_LD ) { _valPOD.ld  = p;             }
+        inline FormatStringArg(bool               p) : _fmtFun(&FormatStringArg::ff_B  ) { _valPOD.b   = p;             }
+        inline FormatStringArg(const void*        p) : _fmtFun(&FormatStringArg::ff_P  ) { _valPOD.p   = p;             }
+        inline FormatStringArg(const char*        p) : _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = Pt::String(p); }
+        inline FormatStringArg(const std::string& p) : _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = p.c_str();     }
+        inline FormatStringArg(const Pt::String&  p) : _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = p;             }
 
+        // Formatter function entry point
         inline void operator()(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-        { (this->*_formatFunc)(rbf, fss, numpunct); }
+        { (this->*_fmtFun)(rbf, fss, numpunct); }
 
     private:
+        // Formatter functions (one for each data type)
         void ff_I8 (Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
         void ff_U8 (Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
         void ff_I16(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
@@ -127,6 +131,10 @@ class PT_API FormatStringArg {
         void ff_S  (Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
 
     private:
+        // Formatter function typedef
+        typedef void (FormatStringArg::*FormatFunc)(Pt::String&, const FormatStringSpec&, const std::numpunct<Pt::Char>&) const;
+
+        // Union for POD argument value
         union ArgValue {
             Pt::int8_t   i8;
             Pt::uint8_t  u8;
@@ -143,11 +151,12 @@ class PT_API FormatStringArg {
             const void*  p;
         };
 
-        typedef void (FormatStringArg::*FormatFunc)(Pt::String&, const FormatStringSpec&, const std::numpunct<Pt::Char>&) const;
+        // Argument data
+        ArgValue   _valPOD;
+        Pt::String _valStr;
 
-        ArgValue   _valuePOD;
-        Pt::String _valueString;
-        FormatFunc _formatFunc;
+        // Selected formatter function specific to the argument's data type
+        FormatFunc _fmtFun;
 };
 
 
@@ -212,6 +221,13 @@ class PT_API FormatString {
 #define FS_ARG_NAME_23 FS_ARG_NAME_22, FS_ARG_NAME_N(23)
 #define FS_ARG_NAME_24 FS_ARG_NAME_23, FS_ARG_NAME_N(24)
 #define FS_ARG_NAME_25 FS_ARG_NAME_24, FS_ARG_NAME_N(25)
+#define FS_ARG_NAME_26 FS_ARG_NAME_25, FS_ARG_NAME_N(26)
+#define FS_ARG_NAME_27 FS_ARG_NAME_26, FS_ARG_NAME_N(27)
+#define FS_ARG_NAME_28 FS_ARG_NAME_27, FS_ARG_NAME_N(28)
+#define FS_ARG_NAME_29 FS_ARG_NAME_28, FS_ARG_NAME_N(29)
+#define FS_ARG_NAME_30 FS_ARG_NAME_29, FS_ARG_NAME_N(30)
+#define FS_ARG_NAME_31 FS_ARG_NAME_30, FS_ARG_NAME_N(31)
+#define FS_ARG_NAME_32 FS_ARG_NAME_31, FS_ARG_NAME_N(32)
 
 #define FS_ARG_STOR_N(I) args[I - 1] = &a##I
 #define FS_ARG_STOR_X(X) FS_ARG_STOR_##X
@@ -241,6 +257,13 @@ class PT_API FormatString {
 #define FS_ARG_STOR_23 FS_ARG_STOR_22 ; FS_ARG_STOR_N(23)
 #define FS_ARG_STOR_24 FS_ARG_STOR_23 ; FS_ARG_STOR_N(24)
 #define FS_ARG_STOR_25 FS_ARG_STOR_24 ; FS_ARG_STOR_N(25)
+#define FS_ARG_STOR_26 FS_ARG_STOR_25 ; FS_ARG_STOR_N(26)
+#define FS_ARG_STOR_27 FS_ARG_STOR_26 ; FS_ARG_STOR_N(27)
+#define FS_ARG_STOR_28 FS_ARG_STOR_27 ; FS_ARG_STOR_N(28)
+#define FS_ARG_STOR_29 FS_ARG_STOR_28 ; FS_ARG_STOR_N(29)
+#define FS_ARG_STOR_30 FS_ARG_STOR_29 ; FS_ARG_STOR_N(30)
+#define FS_ARG_STOR_31 FS_ARG_STOR_30 ; FS_ARG_STOR_N(31)
+#define FS_ARG_STOR_32 FS_ARG_STOR_31 ; FS_ARG_STOR_N(32)
 
 #define FS_GENERATE_FORMAT_FUNCTION(X)                                          \
     inline Pt::String format_string(const Pt::String& format, FS_ARG_NAME_X(X)) \
@@ -276,6 +299,13 @@ FS_GENERATE_FORMAT_FUNCTION(22)
 FS_GENERATE_FORMAT_FUNCTION(23)
 FS_GENERATE_FORMAT_FUNCTION(24)
 FS_GENERATE_FORMAT_FUNCTION(25)
+FS_GENERATE_FORMAT_FUNCTION(26)
+FS_GENERATE_FORMAT_FUNCTION(27)
+FS_GENERATE_FORMAT_FUNCTION(28)
+FS_GENERATE_FORMAT_FUNCTION(29)
+FS_GENERATE_FORMAT_FUNCTION(30)
+FS_GENERATE_FORMAT_FUNCTION(31)
+FS_GENERATE_FORMAT_FUNCTION(32)
 
 
 } // namespace
