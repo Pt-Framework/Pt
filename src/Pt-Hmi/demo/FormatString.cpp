@@ -213,23 +213,32 @@ void FormatStringArg::ff_S(Pt::String &rbf, const FormatStringSpec& fss, const s
 //
 const void FormatString::operator()(Pt::String& resultBuffer) const
 {
+#define CHECK_FOR_CLOSING_BRACKET() \
+    if(*it == '}') {                \
+        ++it;                       \
+        gotArgFld = true;           \
+        continue;                   \
+    }                               \
+    do {} while(false)              \
+
     // Format-string specifier
     FormatStringSpec fsSpec;
 
     // Get the "numpunct" instance
     const std::numpunct<Pt::Char>& numpunct = std::use_facet< std::numpunct<Pt::Char> >( std::locale() );
 
-    // Variable for processing argument(s)
+    // Variables for processing argument(s)
+    bool         gotArgFld = false;
+
     std::string  argIdxStr;
     unsigned int argIdxMan = 0;
     unsigned int argIdxCnt = 0;
     unsigned int argIdxEff;
 
-    bool         gotArgFld = false;
+    bool         gotColon  = false;
+    std::string  numberStr;
 
-    // Walk through the characters of the format string
-    //Pt::String::const_iterator it    = _format.begin();
-    //Pt::String::const_iterator itEnd = _format.end();
+    // Walk through the format characters
     const Pt::Char* it    =      _format.data();
     const Pt::Char* itEnd = it + _format.length();
 
@@ -251,7 +260,7 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
                 argIdxMan = argIdxEff + 1;
             }
             if(!_args || argIdxEff >= _args->size()) {
-                throw FormatStringError("argument index out of range");
+                throw FormatStringError("'argument index' out of range in format string");
             }
             // Process (format) the argument
             const FormatStringArg& arg = *( (*_args)[argIdxEff] );
@@ -259,10 +268,9 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
             // Clear the flags
             gotArgFld = false;
             fsSpec.reset();
-            // Break loop if all the format characters have been processed
+            // Break the loop if all the format characters have been processed
             if(it == itEnd) break;
         }
-
         // Check for '{'
         if(*it == '{') {
             // Check if the next character is also '{'
@@ -271,32 +279,78 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
                 resultBuffer += *it++;
                 continue;
             }
-            // Read the argument index
+            // Read the 'argument index'
+            CHECK_FOR_CLOSING_BRACKET();
             argIdxStr.clear();
             while( isdigit(*it) ) argIdxStr += *it++;
-            // Check if the next character is '}'
-            if(*it == '}') {
+            // Check if the next character is ':'
+            CHECK_FOR_CLOSING_BRACKET();
+            gotColon = false;
+            if(*it == ':') {
                 ++it;
-                gotArgFld = true;
-                continue;
+                gotColon = true;
             }
-            // {0:*<-#08.6Ls}
-            //   *
-
-/*
-    // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
-    char fill;       // fill character
-    char align;      // < > ^
-    char sign;       // + - [space]
-    bool altForm;    // #
-    bool zeroPad;    // 0
-    int  width;      // minimum field width (default 0)
-    int  precision;  // floating-point precision (default 6)
-    bool locale;     // use locale-specific formatting
-    char type;       // none/s b B c d o x X a A e E f/F g G p
-*/
+            // Read the 'fill' and 'align'
+            CHECK_FOR_CLOSING_BRACKET();
+            if(*it == '<' || *it == '>' || *it == '^') {
+                fsSpec.align = *it++;
+            }
+            else if(*(it + 1) == '<' || *(it + 1) == '>' || *(it + 1) == '^') {
+                fsSpec.fill = *it++;
+                fsSpec.align = *it++;
+            }
+            // Read the 'sign'
+            CHECK_FOR_CLOSING_BRACKET();
+            if(*it == '+' || *it == '-' || *it == ' ') {
+                fsSpec.align = *it++;
+            }
+            // Read the '#'
+            CHECK_FOR_CLOSING_BRACKET();
+            if(*it == '#') {
+                fsSpec.altForm = true;
+            }
+            // Read the '0'
+            CHECK_FOR_CLOSING_BRACKET();
+            if(*it == '0') {
+                fsSpec.zeroPad = true;
+            }
+            // Read the 'width'
+            CHECK_FOR_CLOSING_BRACKET();
+            numberStr.clear();
+            while( isdigit(*it) ) numberStr += *it++;
+            if(!numberStr.empty()) {
+                fsSpec.width = parseUInt(numberStr.c_str());
+            }
+            // Check if the next character is '.'
+            CHECK_FOR_CLOSING_BRACKET();
+            if(*it == '.') {
+                // Read the 'precision'
+                ++it;
+                numberStr.clear();
+                while( isdigit(*it) ) numberStr += *it++;
+                if(!numberStr.empty()) {
+                    fsSpec.precision = parseUInt(numberStr.c_str());
+                }
+                else {
+                    throw FormatStringError("missing 'precision specifier' in format string");
+                }
+            }
+            // Read the 'locale'
+            CHECK_FOR_CLOSING_BRACKET();
+            if(*it == 'L') {
+                ++it;
+                fsSpec.locale = true;
+            }
+            // Read the 'type'
+            CHECK_FOR_CLOSING_BRACKET();
+            fsSpec.type = *it++;
+            // All should be done here
+            CHECK_FOR_CLOSING_BRACKET();
             // Error
-            throw FormatStringError("missing '}' in format string");
+            if(gotColon)
+                throw FormatStringError("invalid character in format string");
+            else
+                throw FormatStringError("missing '}' in format string");
         }
         // Check for '}'
         else if(*it == '}') {
