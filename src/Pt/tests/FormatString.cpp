@@ -46,6 +46,23 @@ static inline unsigned int parseUInt(const char *p)
     return v;
 }
 
+static inline Pt::Char* fill(Pt::Char* dst, Pt::Char chr, size_t len)
+{
+    Pt::Char* end = dst + len;
+
+    while(dst != end) *dst++ = chr;
+
+    return dst;
+}
+
+static inline Pt::Char* copy(Pt::Char* dst, const Pt::Char* src, size_t len)
+{
+    const Pt::Char* end = src + len;
+
+    while(src != end) *dst++ = *src++;
+
+    return dst;
+}
 
 
 //
@@ -151,6 +168,8 @@ void FormatStringArg::ff_B(Pt::String &rbf, const FormatStringSpec& fss, const s
 void FormatStringArg::ff_P(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
     /*
+        fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
+
         Pt::Char fill;       // fill character
         char     align;      // < > ^
         char     sign;       // + - [space]
@@ -167,12 +186,7 @@ void FormatStringArg::ff_P(Pt::String &rbf, const FormatStringSpec& fss, const s
 
 void FormatStringArg::ff_S(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
-    // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
-
-    //    char     sign;       // + - [space]
-  //      bool     altForm;    // #
-//        bool     zeroPad;    // 0
-
+    // Check the specifiers
     if(fss.sign)
         throw FormatStringError("format specifier 'sign' requires numeric argument");
 
@@ -182,6 +196,9 @@ void FormatStringArg::ff_S(Pt::String &rbf, const FormatStringSpec& fss, const s
     if(fss.zeroPad)
         throw FormatStringError("format specifier '0' requires numeric argument");
 
+    if(fss.locale)
+        throw FormatStringError("format specifier 'L' is not supported yet");
+
     // Check the type
     if(fss.type && fss.type != 's')
         throw FormatStringError("invalid 'type' in format string");
@@ -189,39 +206,49 @@ void FormatStringArg::ff_S(Pt::String &rbf, const FormatStringSpec& fss, const s
     // Get the alignment
     const char align = fss.align ? fss.align : '<'; // The default alignment for string is left
 
-    // Get the length of the string
+    // Calculate string the length
     const size_t strLen = _valStr.length();
+    const size_t padLen = fss.width - strLen;
+
+    // Calculate the write pointer and resize the destination buffer
+    const size_t    rbfOrgLen = rbf.length();
+    const size_t    rbfNewLen = rbfOrgLen + std::max( strLen, fss.width );
+          Pt::Char* rbfPtr    = &rbf[0] + rbfOrgLen;
+
+    rbf.resize(rbfNewLen);
 
     // Center
     if(align == '^') {
-        // Calculate the padding
-        const size_t dlen = fss.width - strLen;
-        const size_t lpad = dlen / 2;
-        const size_t rpad = (lpad * 2 == dlen) ? lpad : (lpad + 1);
-        // Left pad the string as needed
-        for(size_t i = 0; i < lpad; ++i) rbf += fss.fill;
-        // Put the string
-        rbf += _valStr;
-        // Right pad the string as needed
-        for(size_t i = 0; i < rpad; ++i) rbf += fss.fill;
+        // Pad the string as needed
+        if(strLen < fss.width) {
+            // Calculate the padding sizes
+            const size_t lPadLen = padLen / 2;
+            const size_t rPadLen = (lPadLen * 2 == padLen) ? lPadLen : (lPadLen + 1);
+            // Left pad the string
+            rbfPtr = fill(rbfPtr, fss.fill, lPadLen);
+            // Copy the string
+            rbfPtr = copy(rbfPtr, _valStr.data(), strLen);
+            // Right pad the string
+            rbfPtr = fill(rbfPtr, fss.fill, rPadLen);
+        }
+        // Do not pad the string
+        else {
+            copy(rbfPtr, _valStr.data(), strLen);
+        }
     }
     // Right
     else if(align == '>') {
         // Left pad the string as needed
-        if(strLen < fss.width) {
-            for(size_t i = 0; i < (fss.width - strLen); ++i) rbf += fss.fill;
-        }
-        // Put the string
-        rbf += _valStr;
+        if(strLen < fss.width) rbfPtr = fill(rbfPtr, fss.fill, padLen);
+        // Copy the string
+        copy(rbfPtr, _valStr.data(), strLen);
     }
     // Left
     else if(align == '<') {
-        // Put the string
-        rbf += _valStr;
+        // Copy the string
+        rbfPtr = copy(rbfPtr, _valStr.data(), strLen);
         // Right pad the string as needed
-        if(strLen < fss.width) {
-            for(size_t i = 0; i < (fss.width - strLen); ++i) rbf += fss.fill;
-        }
+        if(strLen < fss.width) fill(rbfPtr, fss.fill, padLen);
     }
     // Invalid
     else {

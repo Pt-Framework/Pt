@@ -78,6 +78,16 @@ int main(int argc, char* args[])
 
     TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
 
+    // Character
+
+    // Pointer
+
+    // Boolean
+
+    // Integers
+
+    // Floating-points
+
     return 0;
 
     /*
