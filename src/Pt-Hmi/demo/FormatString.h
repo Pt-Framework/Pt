@@ -75,7 +75,7 @@ struct PT_API FormatStringSpec {
     {
         fill      = ' ';   // default space
         align     = 0;     // default '<' for non number and '>' for number
-        sign      = '-';
+        sign      = 0;     // default '-' for number
         altForm   = false;
         zeroPad   = false;
         width     = 0;

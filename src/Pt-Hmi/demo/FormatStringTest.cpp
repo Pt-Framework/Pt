@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 
 #include <Pt/System/Clock.h>
@@ -6,22 +7,37 @@
 #include "FormatString.h"
 
 
-#define LOOP_COUNT 1000
+#define COMPARE_WITH_FMT 1
+
+#if !!COMPARE_WITH_FMT
+#define FMT_FORMAT(...) fmt::format(__VA_ARGS__)
+#else
+#define FMT_FORMAT(...) ""
+#endif
+
+
+#define LOOP_COUNT 15000
 
 #define TEST_AND_BENCHMARK(FORMAT, ...)                                          \
     do {                                                                         \
         /* Test and print */                                                     \
-        const std::string& r = fmt::format       (FORMAT, __VA_ARGS__);          \
-        std::cerr << r << std::endl;                                             \
-        const std::string& c =  Pt::format_string(FORMAT, __VA_ARGS__).narrow(); \
+        const std::string& r = FMT_FORMAT(FORMAT, __VA_ARGS__);                  \
+        if(COMPARE_WITH_FMT) std::cerr << r << std::endl;                        \
+        const std::string& c = Pt::format_string(FORMAT, __VA_ARGS__).narrow();  \
         std::cerr << c << std::endl;                                             \
         /* Compare */                                                            \
-        if(r == c) {                                                             \
-            std::cerr << "MATCH : ";                                             \
+        std::cerr << std::endl;                                                  \
+        if(COMPARE_WITH_FMT) {                                                   \
+            if(r == c) {                                                         \
+                std::cerr << ">>> [MATCH] ";                                     \
+            }                                                                    \
+            else {                                                               \
+                std::cerr << "[!!! NOT MATCH !!!] " << std::endl << std::endl;   \
+                return -1;                                                       \
+            }                                                                    \
         }                                                                        \
         else {                                                                   \
-            std::cerr << "!!! NOT MATCH !!!" << std::endl << std::endl;          \
-            return -1;                                                           \
+            std::cerr << ">>> [NO COMPARE] ";                                    \
         }                                                                        \
         /* Benchmark the reference fmt 4.1.0 library */                          \
         Pt::System::Clock clock;                                                 \
@@ -29,17 +45,20 @@
         for(int i = 0; i < LOOP_COUNT; ++i) {                                    \
             fmt::format(FORMAT, __VA_ARGS__);                                    \
         }                                                                        \
-        const size_t br = clock.stop().toUSecs();                                \
+        const double br = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;          \
         /* Benchmark our implementation */                                       \
         clock.start();                                                           \
         for(int i = 0; i < LOOP_COUNT; ++i) {                                    \
             Pt::format_string(FORMAT, __VA_ARGS__);                              \
         }                                                                        \
-        const size_t bc = clock.stop().toUSecs();                                \
+        const double bc = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;          \
         /* Print the benchmark result */                                         \
-        std::cerr << br << " uS - " << bc << " uS (";                            \
-        std::cerr << ((float) bc / (float) br) << ")" << std::endl << std::endl; \
-    } while(false)
+        std::cerr << std::fixed << std::setprecision(1);                         \
+        std::cerr << std::setw(6) << br << " nS/call - ";                        \
+        std::cerr << std::setw(6) << bc << " nS/call (";                         \
+        std::cerr << std::setw(3) << (bc / br) << "x slower)";                   \
+        std::cerr << std::endl << std::endl << std::endl;                        \
+   } while(false)
 
 
 // svn commit -m 'Implementing a simple string formatter ala std::format that uses Pt::String'

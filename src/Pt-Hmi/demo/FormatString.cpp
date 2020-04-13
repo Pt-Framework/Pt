@@ -64,12 +64,17 @@ FormatStringError::FormatStringError(const char* msg)
 //
 // Format-string argument and its corresponding formatter
 //
-// https://en.cppreference.com/w/cpp/utility/format/format
-// https://en.cppreference.com/w/cpp/utility/format/formatter#Standard_format_specification
-// https://en.cppreference.com/w/cpp/chrono/system_clock/formatter#Format_specification
-// https://en.cppreference.com/w/cpp/locale/locale
-// https://en.cppreference.com/w/cpp/locale/num_put
-// https://en.cppreference.com/w/cpp/locale/numpunct
+// References:
+//     https://en.cppreference.com/w/cpp/utility/format/format
+//     https://en.cppreference.com/w/cpp/utility/format/formatter#Standard_format_specification
+//     https://en.cppreference.com/w/cpp/chrono/system_clock/formatter#Format_specification
+//     https://en.cppreference.com/w/cpp/locale/locale
+//     https://en.cppreference.com/w/cpp/locale/num_put
+//     https://en.cppreference.com/w/cpp/locale/numpunct
+//
+// Results verified using:
+//     https://fmt.dev/latest/index.html
+//     https://github.com/fmtlib/fmt/releases/tag/4.1.0
 //
 void FormatStringArg::ff_I8(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
@@ -145,12 +150,38 @@ void FormatStringArg::ff_B(Pt::String &rbf, const FormatStringSpec& fss, const s
 
 void FormatStringArg::ff_P(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
+    /*
+        Pt::Char fill;       // fill character
+        char     align;      // < > ^
+        char     sign;       // + - [space]
+        bool     altForm;    // #
+        bool     zeroPad;    // 0
+        size_t   width;      // minimum field width (default 0)
+        size_t   precision;  // floating-point precision (default 6)
+        bool     locale;     // use locale-specific formatting
+        char     type;       // none/s b B c d o x X a A e E f/F g G p
+    */
     throw FormatStringError("ff_P Not implemented yet!");
 }
 
 
 void FormatStringArg::ff_S(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
+    // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
+
+    //    char     sign;       // + - [space]
+  //      bool     altForm;    // #
+//        bool     zeroPad;    // 0
+
+    if(fss.sign)
+        throw FormatStringError("format specifier 'sign' requires numeric argument");
+
+    if(fss.altForm)
+        throw FormatStringError("format specifier '#' requires numeric argument");
+
+    if(fss.zeroPad)
+        throw FormatStringError("format specifier '0' requires numeric argument");
+
     // Check the type
     if(fss.type && fss.type != 's')
         throw FormatStringError("invalid 'type' in format string");
@@ -290,22 +321,24 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
                 fsSpec.align = *it++;
             }
             else if(*(it + 1) == '<' || *(it + 1) == '>' || *(it + 1) == '^') {
-                fsSpec.fill = *it++;
+                fsSpec.fill  = *it++;
                 fsSpec.align = *it++;
             }
             // Read the 'sign'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '+' || *it == '-' || *it == ' ') {
-                fsSpec.align = *it++;
+                fsSpec.sign = *it++;
             }
             // Read the '#'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '#') {
+                ++it;
                 fsSpec.altForm = true;
             }
             // Read the '0'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '0') {
+                ++it;
                 fsSpec.zeroPad = true;
             }
             // Read the 'width'
