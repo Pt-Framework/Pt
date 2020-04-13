@@ -58,22 +58,22 @@ class PT_API FormatStringError : public std::runtime_error
 struct PT_API FormatStringSpec {
     // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
 
-    char fill;       // fill character
-    char align;      // < > ^
-    char sign;       // + - [space]
-    bool altForm;    // #
-    bool zeroPad;    // 0
-    int  width;      // minimum field width (default 0)
-    int  precision;  // floating-point precision (default 6)
-    bool locale;     // use locale-specific formatting
-    char type;       // none/s b B c d o x X a A e E f/F g G p
+    Pt::Char fill;       // fill character
+    char     align;      // < > ^
+    char     sign;       // + - [space]
+    bool     altForm;    // #
+    bool     zeroPad;    // 0
+    size_t   width;      // minimum field width (default 0)
+    size_t   precision;  // floating-point precision (default 6)
+    bool     locale;     // use locale-specific formatting
+    char     type;       // none/s b B c d o x X a A e E f/F g G p
 
     inline FormatStringSpec()
     { reset(); }
 
     inline void reset()
     {
-        fill      = 0;     // default none
+        fill      = ' ';   // default space
         align     = 0;     // default '<' for non number and '>' for number
         sign      = '-';
         altForm   = false;
@@ -181,7 +181,7 @@ class PT_API FormatString {
         : _format(format), _args(args)
         {}
 
-        const Pt::String operator()() const;
+        const void operator()(Pt::String& resultBuffer) const;
 
     private:
         const Pt::String&                          _format;
@@ -268,13 +268,24 @@ class PT_API FormatString {
 #define FS_GENERATE_FORMAT_FUNCTION(X)                                          \
     inline Pt::String format_string(const Pt::String& format, FS_ARG_NAME_X(X)) \
     {                                                                           \
+        if(format.empty()) return "";                                           \
+                                                                                \
         std::vector<const FormatStringArg*> args(X);                            \
         FS_ARG_STOR_X(X);                                                       \
-        return FormatString(format, &args)();                                   \
+                                                                                \
+        Pt::String resultBuffer;                                                \
+        FormatString(format, &args)(resultBuffer);                              \
+        return resultBuffer;                                                    \
     }
 
 inline Pt::String format_string(const Pt::String& format)
-{ return FormatString(format, 0)(); }
+{
+    if(format.empty()) return "";
+
+    Pt::String resultBuffer;
+    FormatString(format, 0)(resultBuffer);
+    return resultBuffer;
+}
 
 FS_GENERATE_FORMAT_FUNCTION(1)
 FS_GENERATE_FORMAT_FUNCTION(2)

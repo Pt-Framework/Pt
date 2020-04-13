@@ -37,7 +37,8 @@
         }                                                                        \
         const size_t bc = clock.stop().toUSecs();                                \
         /* Print the benchmark result */                                         \
-        std::cerr << br << " uS - " << bc << " uS" << std::endl << std::endl;    \
+        std::cerr << br << " uS - " << bc << " uS (";                            \
+        std::cerr << ((float) bc / (float) br) << ")" << std::endl << std::endl; \
     } while(false)
 
 
@@ -48,6 +49,10 @@ int main(int argc, char* args[])
 {
     // String
     TEST_AND_BENCHMARK("{{ }}", 0);
+
+    TEST_AND_BENCHMARK("{}", "aBc");
+
+    TEST_AND_BENCHMARK("{0} {0}", "aBc");
 
     TEST_AND_BENCHMARK("|{}| |{:s}|", "aBc", "aBc");
 
