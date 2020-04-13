@@ -31,13 +31,3 @@ for local f in $(PT_DEMO_ICONS)
     File $(f:BS) : $(f) ;
     MakeLocate $(f:BS)  : [ FDirName $(PT_OUTPUT_TARGET) ] ;
 }
-
-
-
-FORMAT_STRING_SOURCES = FormatString.cpp
-                        FormatStringTest.cpp
-                        ;
-
-Main FormatStringTest : $(FORMAT_STRING_SOURCES) ;
-LinkSharedLibraries FormatStringTest : Pt Pt-System ;
-MakeLocate FormatStringTest : $(PT_OUTPUT_TARGET) ;

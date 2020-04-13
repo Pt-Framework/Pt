@@ -68,7 +68,7 @@ class Benchmark2View : public Pt::Hmi::Control
             //char buff[128];
             //sprintf(buff, "%s [%s] - %zd mS (%.1f x) [%zd loops]", text, aai, (size_t) benchmarkResult, benchmarkRatio, (size_t) loopCount);
 
-#if 0
+#if 1
             std::ostringstream oss;
             oss << text << " [" << aai << "] - " << benchmarkResult << " mS ("
                 << std::fixed << std::setprecision(1) << benchmarkRatio << " x)"

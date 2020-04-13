@@ -7,8 +7,8 @@
  For the license information refer to format.h.
  */
 
-#include <Pt/fmt/format.h>
-#include <Pt/fmt/printf.h>
+#include "format.h"
+#include "printf.h"
 
 namespace fmt {
 

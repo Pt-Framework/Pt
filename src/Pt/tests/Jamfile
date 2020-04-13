@@ -34,3 +34,16 @@ Main Pt-test : Pt-test.cpp
 LinkSharedLibraries Pt-test : Pt-System Pt-Unit Pt ;
 MakeLocate Pt-test : $(PT_OUTPUT_TARGET) ;
 RunUnitTest Pt-test : $(PT_OUTPUT_TEST) ;
+
+
+
+
+
+FORMAT_STRING_SOURCES = fmt/format.cc
+                        FormatString.cpp
+                        FormatStringTest.cpp
+                        ;
+
+Main FormatStringTest : $(FORMAT_STRING_SOURCES) ;
+LinkSharedLibraries FormatStringTest : Pt Pt-System ;
+MakeLocate FormatStringTest : $(PT_OUTPUT_TARGET) ;

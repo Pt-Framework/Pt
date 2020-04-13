@@ -5,10 +5,10 @@
 
 #include <stdio.h>
 
-//#include <sstream>
-//#include <iomanip>
+#include <sstream>
+#include <iomanip>
 
-#include <Pt/Format.h>
+//#include <Pt/Format.h>
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>

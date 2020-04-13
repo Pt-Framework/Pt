@@ -39,10 +39,10 @@ SharedLibrary Pt : Atomicity.cpp
                    Utf32Codec.cpp
                    Latin1Codec.cpp
                    ZBuffer.cpp
-                   fmt/format.cc    ### EXPERIMENT ###
-                   fmt/ostream.cc   ### EXPERIMENT ###
-                   fmt/posix.cc     ### EXPERIMENT ###
-                   fmt/printf.cc    ### EXPERIMENT ###
+                   #fmt/format.cc    ### EXPERIMENT ###
+                   #fmt/ostream.cc   ### EXPERIMENT ###
+                   #fmt/posix.cc     ### EXPERIMENT ###
+                   #fmt/printf.cc    ### EXPERIMENT ###
                    ;
 
 MakeLocate Pt : $(PT_OUTPUT_TARGET) ;
