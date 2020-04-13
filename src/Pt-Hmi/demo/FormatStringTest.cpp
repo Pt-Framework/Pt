@@ -10,11 +10,12 @@
 
 #define TEST_AND_BENCHMARK(FORMAT, ...)                                          \
     do {                                                                         \
-        /* Test and compare */                                                   \
+        /* Test and print */                                                     \
         const std::string& r = fmt::format       (FORMAT, __VA_ARGS__);          \
-        const std::string& c =  Pt::format_string(FORMAT, __VA_ARGS__).narrow(); \
         std::cerr << r << std::endl;                                             \
+        const std::string& c =  Pt::format_string(FORMAT, __VA_ARGS__).narrow(); \
         std::cerr << c << std::endl;                                             \
+        /* Compare */                                                            \
         if(r == c) {                                                             \
             std::cerr << "MATCH : ";                                             \
         }                                                                        \
@@ -46,10 +47,11 @@
 int main(int argc, char* args[])
 {
     // String
+    TEST_AND_BENCHMARK("{{ }}", 0);
 
-    TEST_AND_BENCHMARK("{{ }} |{}| |{:s}|", "aBc", "aBc");
+    TEST_AND_BENCHMARK("|{}| |{:s}|", "aBc", "aBc");
 
-    TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
+    //TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
 
     return 0;
 

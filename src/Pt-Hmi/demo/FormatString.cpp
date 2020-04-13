@@ -156,8 +156,36 @@ const Pt::String FormatString::operator()() const
 
 //    TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
 
-    //while(it != itEnd) {
-    //}
+    while(it != itEnd) {
+        // Check for '{'
+        if(*it == '{') {
+            // Check if the next character is also '{'
+            ++it;
+            if(*it == '{') {
+                resBuff += *it++;
+                continue;
+            }
+            // Read the argument index
+            std::string argIdx;
+            while( isdigit(*it) ) argIdx += *it++;
+//0s
+        }
+        // Check for '}'
+        else if(*it == '}') {
+            // Check if the next character is also '}'
+            ++it;
+            if(*it == '}') {
+                resBuff += *it++;
+                continue;
+            }
+            // Error
+            throw FormatStringError("unmatched '}' in format string");
+        }
+        // Non formatting characters
+        else {
+            resBuff += *it++;
+        }
+    }
 /*
     // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
     char fill;       // fill character
@@ -177,7 +205,6 @@ const Pt::String FormatString::operator()() const
 }
 /*
   what():  missing '}' in format string
-  what():  unmatched '}' in format string
   what():  cannot switch from automatic to manual argument indexing
   what():  cannot switch from manual to automatic argument indexing
   what():  argument index out of range

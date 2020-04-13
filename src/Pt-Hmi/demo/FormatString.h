@@ -165,19 +165,19 @@ class PT_API FormatStringArg {
 //
 class PT_API FormatString {
     public:
-        inline FormatString(const char* format, const std::vector<const FormatStringArg*>& args)
+        inline FormatString(const char* format, const std::vector<const FormatStringArg*>* args)
         : _format(format), _args(args)
         {}
 
-        inline FormatString(const std::string& format, const std::vector<const FormatStringArg*>& args)
+        inline FormatString(const std::string& format, const std::vector<const FormatStringArg*>* args)
         : _format(format.c_str()), _args(args)
         {}
 
-        inline FormatString(const Pt::Char* format, const std::vector<const FormatStringArg*>& args)
+        inline FormatString(const Pt::Char* format, const std::vector<const FormatStringArg*>* args)
         : _format(format), _args(args)
         {}
 
-        inline FormatString(const Pt::String& format, const std::vector<const FormatStringArg*>& args)
+        inline FormatString(const Pt::String& format, const std::vector<const FormatStringArg*>* args)
         : _format(format), _args(args)
         {}
 
@@ -185,7 +185,7 @@ class PT_API FormatString {
 
     private:
         const Pt::String&                          _format;
-        const std::vector<const FormatStringArg*>& _args;
+        const std::vector<const FormatStringArg*>* _args;
 };
 
 
@@ -270,9 +270,11 @@ class PT_API FormatString {
     {                                                                           \
         std::vector<const FormatStringArg*> args(X);                            \
         FS_ARG_STOR_X(X);                                                       \
-        const FormatString fstr(format, args);                                  \
-        return fstr();                                                          \
+        return FormatString(format, &args)();                                   \
     }
+
+inline Pt::String format_string(const Pt::String& format)
+{ return FormatString(format, 0)(); }
 
 FS_GENERATE_FORMAT_FUNCTION(1)
 FS_GENERATE_FORMAT_FUNCTION(2)
