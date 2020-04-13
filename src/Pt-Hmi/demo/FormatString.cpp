@@ -196,15 +196,6 @@ void FormatStringArg::ff_S(Pt::String &rbf, const FormatStringSpec& fss, const s
     else {
         throw FormatStringError("invalid 'align' in format string");
     }
-
-/*
-    // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
-    char sign;       // + - [space]
-    bool altForm;    // #
-    bool zeroPad;    // 0
-    int  precision;  // floating-point precision (default 6)
-    bool locale;     // use locale-specific formatting
-*/
 }
 
 
@@ -226,6 +217,9 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
 
     // Get the "numpunct" instance
     const std::numpunct<Pt::Char>& numpunct = std::use_facet< std::numpunct<Pt::Char> >( std::locale() );
+
+    // Reserve some bytes within the result buffer
+    resultBuffer.reserve(512);
 
     // Variables for processing argument(s)
     bool         gotArgFld = false;

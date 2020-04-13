@@ -54,7 +54,7 @@ int main(int argc, char* args[])
 
     TEST_AND_BENCHMARK("{0} {0}", "aBc");
 
-//    TEST_AND_BENCHMARK("|{}| |{:s}|", "aBc", "aBc");
+    TEST_AND_BENCHMARK("|{}| |{:s}|", "aBc", "dEf");
 
     TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
 
