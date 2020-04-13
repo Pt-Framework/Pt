@@ -32,6 +32,20 @@ namespace Pt {
 
 
 //
+// Utility macros
+//
+#define TYPE_IS_N(T)     ( !T )
+
+#define TYPE_IS_P(T)     ( !T || (T && T == 'p') )
+#define TYPE_IS_C(T)     ( !T || (T && T == 'c') )
+#define TYPE_IS_S(T)     ( !T || (T && T == 's') )
+
+#define TYPE_IS_BDOX(T)  ( T && ( (T == 'b') || (T == 'B') || (T == 'd') || (T == 'o') || (T == 'x') || (T == 'X') ) )
+#define TYPE_IS_BCDOX(T) ( T && ( (T == 'b') || (T == 'B') || (T == 'c') || (T == 'd') || (T == 'o') ||  (T == 'x') || (T == 'X') ) )
+#define TYPE_IS_AEFG(T)  ( T && ( (T == 'a') || (T == 'A') || (T == 'e') || (T == 'E') || (T == 'f') ||  (T == 'F') || (T == 'g') || (T == 'G') ) )
+
+
+//
 // Inline utility functions
 //
 static inline unsigned int parseUInt(const char *p)
@@ -93,80 +107,12 @@ FormatStringError::FormatStringError(const char* msg)
 //     https://fmt.dev/latest/index.html
 //     https://github.com/fmtlib/fmt/releases/tag/4.1.0
 //
-void FormatStringArg::ff_I8(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_I8(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
     throw FormatStringError("ff_I8 Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_U8(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_U8 Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_I16(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_I16 Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_U16(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_U16 Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_I32(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_I32 Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_U32(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_U32 Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_I64(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_I64 Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_U64(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_U64 Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_F(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_F Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_D(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_D Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_LD(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_LD Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_B(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
-    throw FormatStringError("ff_B Not implemented yet!");
-}
-
-
-void FormatStringArg::ff_P(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
-{
     /*
         fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
 
@@ -180,11 +126,118 @@ void FormatStringArg::ff_P(Pt::String &rbf, const FormatStringSpec& fss, const s
         bool     locale;     // use locale-specific formatting
         char     type;       // none/s b B c d o x X a A e E f/F g G p
     */
+void FormatStringArg::ff_U8(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+/*
+#define TYPE_IS_N(T)     ( !T )
+
+#define TYPE_IS_P(T)     ( !T || (T && T == 'p') )
+#define TYPE_IS_C(T)     ( !T || (T && T == 'c') )
+#define TYPE_IS_S(T)     ( !T || (T && T == 's') )
+
+#define TYPE_IS_BDOX(T)  ( T && ( (T == 'b') || (T == 'B') || (T == 'd') || (T == 'o') || (T == 'x') || (T == 'X') ) )
+#define TYPE_IS_BCDOX(T) ( T && ( (T == 'b') || (T == 'B') || (T == 'c') || (T == 'd') || (T == 'o') ||  (T == 'x') || (T == 'X') ) )
+#define TYPE_IS_AEFG(T)  ( T && ( (T == 'a') || (T == 'A') || (T == 'e') || (T == 'E') || (T == 'f') ||  (T == 'F') || (T == 'g') || (T == 'G') ) )
+
+ * */
+
+
+    throw FormatStringError("ff_U8 Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_I16(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    throw FormatStringError("ff_I16 Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_U16(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    throw FormatStringError("ff_U16 Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    throw FormatStringError("ff_I32 Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_U32(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    throw FormatStringError("ff_U32 Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    throw FormatStringError("ff_I64 Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_U64(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    throw FormatStringError("ff_U64 Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    throw FormatStringError("ff_F Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_D(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    throw FormatStringError("ff_D Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_LD(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    throw FormatStringError("ff_LD Not implemented yet!");
+}
+
+
+void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
+    // Check the specifiers
+    if(fss.sign)
+        throw FormatStringError("format specifier 'sign' requires numeric argument");
+
+    if(fss.altForm)
+        throw FormatStringError("format specifier '#' requires numeric argument");
+
+    if(fss.locale)
+        throw FormatStringError("format specifier 'L' is not supported yet");
+
+    // Process according the required type
+    if( TYPE_IS_S(fss.type) ) {
+        if(fss.zeroPad) {
+            fss.zeroPad = 0;
+            if(!fss.align) fss.fill = '0';
+        }
+        _valStr = _valPOD.b ? numpunct.truename() : numpunct.falsename();
+        ff_S(rbf, fss, numpunct);
+    }
+    else if( TYPE_IS_BCDOX(fss.type) ) {
+        _valPOD.u8 = _valPOD.b ? 1 : 0;
+        ff_U8(rbf, fss, numpunct);
+    }
+    else {
+        throw FormatStringError("invalid 'type' in format string");
+    }
+}
+
+
+void FormatStringArg::ff_P(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+{
     throw FormatStringError("ff_P Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_S(Pt::String &rbf, const FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_S(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
 {
     // Check the specifiers
     if(fss.sign)
@@ -199,8 +252,7 @@ void FormatStringArg::ff_S(Pt::String &rbf, const FormatStringSpec& fss, const s
     if(fss.locale)
         throw FormatStringError("format specifier 'L' is not supported yet");
 
-    // Check the type
-    if(fss.type && fss.type != 's')
+    if( !TYPE_IS_S(fss.type) )
         throw FormatStringError("invalid 'type' in format string");
 
     // Get the alignment

@@ -29,13 +29,10 @@
         /* Compare */                                                            \
         std::cerr << std::endl;                                                  \
         if(COMPARE_WITH_FMT) {                                                   \
-            if(r == c) {                                                         \
+            if(r == c)                                                           \
                 std::cerr << ">>> [MATCH] ";                                     \
-            }                                                                    \
-            else {                                                               \
+            else                                                                 \
                 std::cerr << "[!!! NOT MATCH !!!] " << std::endl << std::endl;   \
-                return -1;                                                       \
-            }                                                                    \
         }                                                                        \
         else {                                                                   \
             std::cerr << ">>> [NO COMPARE] ";                                    \
@@ -83,6 +80,10 @@ int main(int argc, char* args[])
     // Pointer
 
     // Boolean
+    TEST_AND_BENCHMARK("|{0:*<8}| |{0:*>8}| |{0:*^8}| |{1:*<8}| |{1:*>8}| |{1:*^8}|", true, false);
+
+    TEST_AND_BENCHMARK("|{0:*<08}| |{0:*>08}| |{0:*^08}| |{1:*<08}| |{1:*>08}| |{1:*^08}|", true, false);
+
 
     // Integers
 
