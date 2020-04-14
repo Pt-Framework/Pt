@@ -89,7 +89,7 @@ struct PT_API FormatStringSpec {
         altForm   = false;
         zeroPad   = false;
         width     = 0;
-        precision = 6;
+        precision = (size_t) -1;
         locale    = false;
         type      = 0;     // default copy as string
     }

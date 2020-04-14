@@ -52,6 +52,18 @@ namespace Pt {
 
 
 //
+// Default values
+//
+#define DEFAULT_TRUE_NAME           "true"
+#define DEFAULT_FALSE_NAME          "false"
+
+#define DEFAULT_DECIMAL_POINT       '.'
+#define DEFAULT_THOUSANDS_SEPARATOR ','
+
+#define DEFAULT_PRECISION           6
+
+
+//
 // Utility macros
 //
 #define TYPE_IS_N(T)    ( !T                                          )
@@ -229,7 +241,7 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
         numVal = negNum ? -sigVal : sigVal;
     }
 
-    // Handle 'sign' as prefix character
+    // Handle 'sign' as a prefix character
     Pt::String prefixStr;
 
     if(!fss.sign || fss.sign == '-') {
@@ -297,12 +309,12 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
         // Determine the thousands separator
         Pt::Char thousandsSep = 0;
         if(fss.locale) {
-            // Get the locale-specific separator if possible
+            // Get the locale-specific thousands separator if possible
 #ifdef PT_WITH_STD_LOCALE
             if(numpunct) thousandsSep = numpunct->thousands_sep();
 #endif
-            // Otherwise, use the default separator
-            if(!thousandsSep) thousandsSep = '.';
+            // Otherwise, use the default thousands separator
+            if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
         }
         // Reverse the string and add thousands separator as needed
         revUnsignedString(_valStr, strVal, thousandsSep);
@@ -315,8 +327,13 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     // Put the prefix characters
     if(fss.zeroPad) {
         if(!prefixStr.empty()) {
-            rbf += prefixStr;
-            fss.width = ( fss.width > prefixStr.length() ) ? ( fss.width - prefixStr.length() ) : 0;
+            if(!fss.align) {
+                rbf += prefixStr;
+                fss.width = ( fss.width > prefixStr.length() ) ? ( fss.width - prefixStr.length() ) : 0;
+            }
+            else {
+                _valStr = prefixStr + _valStr;
+            }
         }
     }
     else if(!prefixStr.empty()) {
@@ -326,7 +343,7 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     // Handle '0'
     if(fss.zeroPad) {
         // Handle '0'
-        fss.zeroPad = 0;
+        fss.zeroPad = false;
         if(!fss.align) fss.fill = '0';
     }
 
@@ -365,42 +382,118 @@ void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpu
 void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // TODO: Optimize!
-    // TODO: Do not us snprintf?
+    // TODO: Do not use snprintf()?
+
+    // Determine the decimal point
+    Pt::Char decimalPoint = 0;
+    if(fss.locale) {
+        // Get the locale-specific decimal point if possible
+#ifdef PT_WITH_STD_LOCALE
+        if(numpunct) decimalPoint = numpunct->decimal_point();
+#endif
+        // Otherwise, use the default decimal point
+        if(!decimalPoint) decimalPoint = DEFAULT_DECIMAL_POINT;
+    }
+
+    // Determine the thousands separator
+    Pt::Char thousandsSep = 0;
+    if(fss.locale) {
+        // Get the locale-specific thousands separator if possible
+#ifdef PT_WITH_STD_LOCALE
+        if(numpunct) thousandsSep = numpunct->thousands_sep();
+#endif
+        // Otherwise, use the default thousands separator
+        if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
+    }
+
+    // Preparation
+    const bool  negNum = (_valPOD.f < 0.0f);
+    const float numVal = negNum ? -_valPOD.f : _valPOD.f;
+
+    // TODO: NaN -INF +INF
+
+    // For now, simply use snprintf()
+    char fmt[128];
+
+    if( fss.precision == (size_t) -1 ) fss.precision = DEFAULT_PRECISION;
+    if(!fss.type                     ) fss.type      = 'g';
+
+    const size_t flen = snprintf(fmt, sizeof(fmt), "%%%zd.%zd%c", fss.width, fss.precision, (char) fss.type);
+    fmt[flen] = 0;
+
+    char buf[128];
+    const size_t blen = snprintf(buf, sizeof(buf), fmt, numVal);
+    buf[blen] = 0;
+
+    _valStr.clear();
+    for(size_t i = 0; i < sizeof(buf); ++i) {
+        if(buf[i] == ' ') continue;
+        _valStr = buf + i;
+        break;
+    }
+
+    // Handle decimal point thousands separator
+    // TODO
+
+    // Handle 'sign' as prefix character
+    Pt::Char prefixChr = 0;
+
+    if(!fss.sign || fss.sign == '-') {
+        if(negNum) {
+            prefixChr = '-';
+        }
+    }
+    else if(fss.sign == '+') {
+        if(negNum) prefixChr = '-';
+        else       prefixChr = '+';
+    }
+    else if(fss.sign == ' ') {
+        if(negNum) prefixChr = '-';
+        else       prefixChr = ' ';
+    }
+    else {
+        throw FormatStringError("invalid 'sign specifier' in format string");
+    }
+
+    /*
+        For floating-point types, the alternate form causes the result of the conversion of finite
+        values to always contain a decimal-point character, even if no digits follow it. Normally,
+        a decimal-point character appears in the result of these conversions only if a digit follows it.
+        In addition, for g and G conversions, trailing zeros are not removed from the result.
+     */
+    if(fss.altForm) {
+    }
+
+    // Put the prefix character
+    if(fss.zeroPad) {
+        if(prefixChr) {
+            if(!fss.align) {
+                rbf += prefixChr;
+                if(fss.width) --fss.width;
+            }
+            else {
+                _valStr = prefixChr + _valStr;
+            }
+        }
+    }
+    else if(prefixChr) {
+        _valStr = prefixChr + _valStr;
+    }
 
     // Handle '0'
     if(fss.zeroPad) {
-        fss.zeroPad = 0;
+        fss.zeroPad = false;
         if(!fss.align) fss.fill = '0';
     }
 
+    // The default alignment for numeric argument is right
+    if(!fss.align) fss.align = '>';
+
     // Process as string type
-
-    char fmt[128];
-    snprintf(fmt, sizeof(fmt), "%%%zd.%zdf", fss.width, fss.precision);
-
-    char buf[128];
-    snprintf(buf, sizeof(buf), fmt, _valPOD.f);
-
-    _valStr = buf;
-
-    /*
-    *Pt::Char fill;       // fill character
-    *char     align;      // < > ^
-    char     sign;       // + - [space]
-    bool     altForm;    // #
-    *bool     zeroPad;    // 0
-    *size_t   width;      // minimum field width (default 0)
-    *size_t   precision;  // floating-point precision (default 6)
-    bool     locale;     // use locale-specific formatting
-    *char     type;       // none/s b B c d o x X a A e E f/F g G p
-    */
-
-    // Process the generated string
+    fss.sign   = 0;
     fss.locale = false;
     fss.type   = 's';
     ff_S(rbf, fss, numpunct);
-
-    throw FormatStringError("ff_F is not implemented yet!");
 }
 
 
@@ -429,7 +522,7 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     if( TYPE_IS_S(fss.type) ) {
         // Handle '0'
         if(fss.zeroPad) {
-            fss.zeroPad = 0;
+            fss.zeroPad = false;
             if(!fss.align) fss.fill = '0';
         }
         // Get the locale-specific string if possible
@@ -441,7 +534,7 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunc
 #endif
         // Otherwise, use the default string
         if(_valStr.empty()) {
-            _valStr = _valPOD.b ? "true": "false";
+            _valStr = _valPOD.b ? DEFAULT_TRUE_NAME : DEFAULT_FALSE_NAME;
         }
         // Process the generated string
         fss.locale = false;
