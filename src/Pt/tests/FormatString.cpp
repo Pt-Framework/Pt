@@ -67,6 +67,7 @@ static inline Pt::Char* fill(Pt::Char* dst, Pt::Char chr, size_t len)
     return dst;
 }
 
+
 static inline Pt::Char* copy(Pt::Char* dst, const Pt::Char* src, size_t len)
 {
     const Pt::Char* end = src + len;
@@ -75,6 +76,7 @@ static inline Pt::Char* copy(Pt::Char* dst, const Pt::Char* src, size_t len)
 
     return dst;
 }
+
 
 static inline unsigned int parseUInt(const char *p)
 {
@@ -89,83 +91,51 @@ static inline unsigned int parseUInt(const char *p)
 }
 
 
-/*
-// A functor that doesn't add a thousands separator.
-struct NoThousandsSep {
-  template <typename Char>
-  void operator()(Char *) {}
-};
-
-
-// A functor that adds a thousands separator.
-class ThousandsSep {
- private:
-  fmt::StringRef sep_;
-
-  // Index of a decimal digit with the least significant digit having index 0.
-  unsigned digit_index_;
-
- public:
-  explicit ThousandsSep(fmt::StringRef sep) : sep_(sep), digit_index_(0) {}
-
-  template <typename Char>
-  void operator()(Char *&buffer) {
-    if (++digit_index_ % 3 != 0)
-      return;
-    buffer -= sep_.size();
-    std::uninitialized_copy(sep_.data(), sep_.data() + sep_.size(),
-                            internal::make_ptr(buffer, sep_.size()));
-  }
-};
-*/
-/*
-// {fmt} - Victor Zverovich (vitaut) and Jonathan Müller - MIT license
-// https://github.com/fmtlib/fmt/releases/tag/4.1.0
-static const char DIGITS[] =
-    "0001020304050607080910111213141516171819"
-    "2021222324252627282930313233343536373839"
-    "4041424344454647484950515253545556575859"
-    "6061626364656667686970717273747576777879"
-    "8081828384858687888990919293949596979899";
-
-template <typename ValueT, typename ThousandsSep>
-inline void uintToString(Pt::String& dst, ValueT val
-
-template <typename UInt, typename Char, typename ThousandsSep>
-inline void format_decimal(Char *buffer, UInt value, unsigned num_digits,
-                           ThousandsSep thousands_sep) {
-  buffer += num_digits;
-  while (value >= 100) {
-    // Integer division is slow so do it for a group of two digits instead
-    // of for every digit. The idea comes from the talk by Alexandrescu
-    // "Three Optimization Tips for C++". See speed-test for a comparison.
-    unsigned index = static_cast<unsigned>((value % 100) * 2);
-    value /= 100;
-    *--buffer = Data::DIGITS[index + 1];
-    thousands_sep(buffer);
-    *--buffer = Data::DIGITS[index];
-    thousands_sep(buffer);
-  }
-  if (value < 10) {
-    *--buffer = static_cast<char>('0' + value);
-    return;
-  }
-  unsigned index = static_cast<unsigned>(value * 2);
-  *--buffer = Data::DIGITS[index + 1];
-  thousands_sep(buffer);
-  *--buffer = Data::DIGITS[index];
-}
-*/
-
 template <typename T>
-static inline void printUIntRev(Pt::String& dst, T val, T base)
+static inline void printUIntRev(Pt::String& dst, T val, Pt::uint8_t base, bool uppercase)
 {
-    static const char* DIGITS = "0123456789abcdef";
+    static const char* L_DIGITS = "0123456789abcdef";
+    static const char* U_DIGITS = "0123456789ABCDEF";
+           const char* S_DIGITS = uppercase ? U_DIGITS : L_DIGITS;
 
     do {
-        dst += DIGITS[val % base];
+        dst += S_DIGITS[val % base];
         val /= base;
     } while(val != 0);
+}
+
+
+static inline void revUIntString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep)
+{
+    // Get the source length
+    const size_t srcLen = src.length();
+
+    // Get the source pointers
+    const Pt::Char* srcIt    = &src[srcLen - 1];
+    const Pt::Char* srcItEnd = srcIt - srcLen;
+
+    // Process without using thousands separator
+    if(!thousandsSep || srcLen <= 3) {
+        // Resize the destination buffer
+        dst.reserve(srcLen);
+        // Reserve the characters
+        while(srcIt != srcItEnd) dst += *srcIt--;
+    }
+    // Process using thousands separator(s)
+    else {
+        // Calculate the number of thousands separator(s)
+        const size_t sepCnt = (srcLen + 2) / 3 - 1;
+        const size_t dstLen = src.length() + sepCnt;
+        // Resize the destination buffer
+        dst.reserve(dstLen);
+        // Reserve the characters while adding thousands separator(s)
+        unsigned int digitIndex = 0;
+        for(;;) {
+            dst += *srcIt--;
+            if(srcIt == srcItEnd) break;
+            if(++digitIndex % 3 == 1) dst += thousandsSep;
+        }
+    }
 }
 
 
@@ -237,6 +207,12 @@ void FormatStringArg::ff_U16(Pt::String &rbf, FormatStringSpec& fss, const numpu
 */
 void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
+    // Preparation
+    const bool         negNum = (_valPOD.i32 < 0);
+    const Pt::uint32_t numVal = negNum ? (-_valPOD.i32) : _valPOD.i32;
+    Pt::String         strVal;
+    Pt::Char           chrSgn = 0;
+
     // Process as base 2 type
     if( TYPE_IS_B(fss.type) ) {
         throw FormatStringError("ff_I32 'b' is not implemented yet!");
@@ -253,13 +229,19 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
            inserts the prefix (0b, 0, or 0x) into the output value after the sign character (possibly space) if
            there is one, or add it before the output value otherwise.
      */
+        //
+        if(fss.altForm) {
+            fss.altForm = false;
+            // Reduce width
+        }
     }
     // Process as base 10 type
     else if( TYPE_IS_D(fss.type) ) {
-        // Convert to string (in reserved direction)
-        Pt::String str;
-        printUIntRev(str, _valPOD.i32, 10);
-        _valStr = str;
+        // Alternate form cannot be used with base 10 type
+        if(fss.altForm)
+            throw FormatStringError("format specifier '#' requires 'b/B/o/x/X' numeric argument");
+        // Convert to string (in reversed direction)
+        printUIntRev(strVal, numVal, 10, false);
         // Determine the thousands separator
         Pt::Char thousandsSep = 0;
         if(fss.locale) {
@@ -270,24 +252,50 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
             // Otherwise, use the default separator
             if(!thousandsSep) thousandsSep = '.';
         }
+        // Add the 'sign' as needed
+        if(!fss.sign || fss.sign == '-') {
+            if(negNum) {
+                chrSgn = '-';
+            }
+        }
+        else if(!fss.sign == '+') {
+            if(negNum) chrSgn = '-';
+            else       chrSgn = '+';
+        }
+        else if(!fss.sign == ' ') {
+            if(negNum) chrSgn = '-';
+            else       chrSgn = ' ';
+        }
+        else {
+            throw FormatStringError("invalid 'sign specifier' in format string");
+        }
 
-        //
-        if(fss.sign) {
-            fss.sign = 0;
-        }
-        //
-        if(fss.altForm) {
-            fss.altForm = false;
-        }
-        //
+        // Handle 'sign' and '0'
+        _valStr.clear();
         if(fss.zeroPad) {
-            fss.zeroPad = false;
+            fss.zeroPad = 0;
+            if(!fss.align) fss.fill = '0';
+
+            if(chrSgn) {
+                rbf += chrSgn;
+                if(fss.width) --fss.width;
+            }
         }
+        else {
+            if(chrSgn) _valStr += chrSgn;
+        }
+
+        // Reverse and add thousands separator as needed
+        revUIntString(_valStr, strVal, thousandsSep);
     }
     // Invalid type
     else {
         throw FormatStringError("invalid 'type specifier' in format string");
     }
+
+
+    // The default alignment for numeric argument is right
+    if(!fss.align) fss.align = '>';
 
     // Process the generated string
     fss.type   = 's';
@@ -341,12 +349,9 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     if(fss.altForm)
         throw FormatStringError("format specifier '#' requires numeric argument");
 
-    //if(fss.zeroPad)
-    //    throw FormatStringError("format specifier '0' requires numeric argument");
-
     // Process as string type
     if( TYPE_IS_S(fss.type) ) {
-        //
+        // Handle zero padding
         if(fss.zeroPad) {
             fss.zeroPad = 0;
             if(!fss.align) fss.fill = '0';
@@ -439,8 +444,8 @@ void FormatStringArg::ff_S(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     if( !TYPE_IS_S(fss.type) )
         throw FormatStringError("invalid 'type specifier' in format string");
 
-    // Get the alignment
-    const char align = fss.align ? fss.align : '<'; // The default alignment for string is left
+    // The default alignment for non numeric argument is left
+    const char align = fss.align ? fss.align : '<';
 
     // Calculate string the length
     const size_t strLen = _valStr.length();
