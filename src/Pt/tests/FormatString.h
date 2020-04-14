@@ -195,7 +195,7 @@ class PT_API FormatString {
         const void operator()(Pt::String& resultBuffer) const;
 
     private:
-        const Pt::String&                          _format;
+        const Pt::String                           _format;
         const std::vector<const FormatStringArg*>* _args;
 };
 

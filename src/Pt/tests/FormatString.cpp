@@ -294,7 +294,7 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
             prefixStr += fss.type;
         }
         // Convert to string (in reversed direction)
-        printUnsignedRev(strVal, numVal, 2, (fss.type == 'X'));
+        printUnsignedRev(strVal, numVal, 2, (fss.type == 'B'));
         // Reverse the string
         revUnsignedString(_valStr, strVal, 0);
     }
@@ -306,7 +306,7 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
             prefixStr += '0';
         }
         // Convert to string (in reversed direction)
-        printUnsignedRev(strVal, numVal, 8, (fss.type == 'X'));
+        printUnsignedRev(strVal, numVal, 8, false);
         // Reverse the string
         revUnsignedString(_valStr, strVal, 0);
     }
