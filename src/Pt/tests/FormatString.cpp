@@ -43,6 +43,7 @@
 //     It should still be faster than sprintf() and std::ostringstream
 //
 
+#include <math.h>
 #include <stdio.h>
 
 #include "FormatString.h"
@@ -54,6 +55,11 @@ namespace Pt {
 //
 // Default values
 //
+#define FLOAT_LOWER_INF             "inf"
+#define FLOAT_UPPER_INF             "INF"
+#define FLOAT_LOWER_NAN             "nan"
+#define FLOAT_UPPER_NAN             "NAN"
+
 #define DEFAULT_TRUE_NAME           "true"
 #define DEFAULT_FALSE_NAME          "false"
 
@@ -382,7 +388,56 @@ void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpu
 void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // TODO: Optimize!
-    // TODO: Do not use snprintf()?
+
+    // Preparation
+    const bool  negNum = (_valPOD.f < 0.0f);
+    const float numVal = negNum ? -_valPOD.f : _valPOD.f;
+
+    // Handle 'sign' as prefix character
+    Pt::Char prefixChr = 0;
+
+    if(!fss.sign || fss.sign == '-') {
+        if(negNum) {
+            prefixChr = '-';
+        }
+    }
+    else if(fss.sign == '+') {
+        if(negNum) prefixChr = '-';
+        else       prefixChr = '+';
+    }
+    else if(fss.sign == ' ') {
+        if(negNum) prefixChr = '-';
+        else       prefixChr = ' ';
+    }
+    else {
+        throw FormatStringError("invalid 'sign specifier' in format string");
+    }
+
+    // Process Inf and NaN
+    _valStr.clear();
+
+    if(isinf(numVal)) {
+        if(Pt::isupper(fss.type)) _valStr = FLOAT_UPPER_INF;
+        else                      _valStr = FLOAT_LOWER_INF;
+    }
+    else if(isnan(numVal)) {
+        if(Pt::isupper(fss.type)) _valStr = FLOAT_UPPER_NAN;
+        else                      _valStr = FLOAT_LOWER_NAN;
+    }
+
+    if(!_valStr.empty()) {
+        // The default alignment for numeric argument is right
+        if(!fss.align) fss.align = '>';
+        // Process as string type
+        fss.sign    = 0;
+        fss.altForm = false;
+        fss.zeroPad = false;
+        fss.locale  = false;
+        fss.type    = 's';
+        ff_S(rbf, fss, numpunct);
+        // We are done here
+        return;
+    }
 
     // Determine the decimal point
     Pt::Char decimalPoint = 0;
@@ -406,63 +461,31 @@ void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunc
         if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
     }
 
-    // Preparation
-    const bool  negNum = (_valPOD.f < 0.0f);
-    const float numVal = negNum ? -_valPOD.f : _valPOD.f;
-
-    // TODO: NaN -INF +INF
-
     // For now, simply use snprintf()
-    char fmt[128];
-
+    // TODO: Do not use snprintf()?
     if( fss.precision == (size_t) -1 ) fss.precision = DEFAULT_PRECISION;
     if(!fss.type                     ) fss.type      = 'g';
 
-    const size_t flen = snprintf(fmt, sizeof(fmt), "%%%zd.%zd%c", fss.width, fss.precision, (char) fss.type);
-    fmt[flen] = 0;
+    char fmt[16];
+    snprintf(fmt, sizeof(fmt), "%%%zd.%zd%c", fss.width, fss.precision, (char) fss.type);
 
-    char buf[128];
-    const size_t blen = snprintf(buf, sizeof(buf), fmt, numVal);
-    buf[blen] = 0;
+    char buf[64]; // 48 should be enough
+    snprintf(buf, sizeof(buf), fmt, numVal);
 
-    _valStr.clear();
     for(size_t i = 0; i < sizeof(buf); ++i) {
         if(buf[i] == ' ') continue;
         _valStr = buf + i;
         break;
     }
 
-    // Handle decimal point thousands separator
-    // TODO
-
-    // Handle 'sign' as prefix character
-    Pt::Char prefixChr = 0;
-
-    if(!fss.sign || fss.sign == '-') {
-        if(negNum) {
-            prefixChr = '-';
-        }
-    }
-    else if(fss.sign == '+') {
-        if(negNum) prefixChr = '-';
-        else       prefixChr = '+';
-    }
-    else if(fss.sign == ' ') {
-        if(negNum) prefixChr = '-';
-        else       prefixChr = ' ';
-    }
-    else {
-        throw FormatStringError("invalid 'sign specifier' in format string");
-    }
-
-    /*
-        For floating-point types, the alternate form causes the result of the conversion of finite
-        values to always contain a decimal-point character, even if no digits follow it. Normally,
-        a decimal-point character appears in the result of these conversions only if a digit follows it.
-        In addition, for g and G conversions, trailing zeros are not removed from the result.
-     */
+    // Handle '#'
     if(fss.altForm) {
+        fss.altForm = false;
+        if(_valStr.find('.') == Pt::String::npos) _valStr += '.';
     }
+
+    // Handle the decimal point and thousands separator
+    // TODO
 
     // Put the prefix character
     if(fss.zeroPad) {

@@ -49,12 +49,12 @@ static bool COMPARE_WITH_FMT = true;
         /* Compare */                                                            \
         if(COMPARE_WITH_FMT) {                                                   \
             if(r == c)                                                           \
-                std::cerr << GREEN << "[MATCH]" << RESET;                        \
+                std::cerr << GREEN << "[MATCH] " << RESET;                       \
             else                                                                 \
-                std::cerr << RED << "[NOT MATCH]" << RESET;                      \
+                std::cerr << RED << "[NOT MATCH] " << RESET;                     \
         }                                                                        \
         else {                                                                   \
-            std::cerr << CYAN << "[NO COMPARE]" << RESET;                        \
+            std::cerr << CYAN << "[NO COMPARE] " << RESET;                       \
         }                                                                        \
         /* Benchmark the reference fmt 4.1.0 library */                          \
         Pt::System::Clock clock;                                                 \
