@@ -58,24 +58,27 @@ static bool COMPARE_WITH_FMT = true;
         }                                                                        \
         /* Benchmark the reference fmt 4.1.0 library */                          \
         Pt::System::Clock clock;                                                 \
-        clock.start();                                                           \
+        double            br = 0.0;                                              \
         if(COMPARE_WITH_FMT) {                                                   \
+            clock.start();                                                       \
             for(int i = 0; i < LOOP_COUNT; ++i) {                                \
                 fmt::format(FORMAT, __VA_ARGS__);                                \
             }                                                                    \
+            br = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;                   \
         }                                                                        \
-        const double br = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;          \
         /* Benchmark our implementation */                                       \
+        double bc = 0.0;                                                         \
         clock.start();                                                           \
         for(int i = 0; i < LOOP_COUNT; ++i) {                                    \
             Pt::format_string(FORMAT, __VA_ARGS__);                              \
         }                                                                        \
-        const double bc = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;          \
+        bc = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;                       \
         /* Print the benchmark result */                                         \
+        double bx = COMPARE_WITH_FMT ? (bc / br) : 0.0;                          \
         std::cerr << std::fixed << std::setprecision(1);                         \
         std::cerr << std::setw(6) << br << " nS/call - ";                        \
         std::cerr << std::setw(6) << bc << " nS/call (";                         \
-        std::cerr << std::setw(3) << (bc / br) << "x slower)";                   \
+        std::cerr << std::setw(3) << bx << "x slower)";                          \
         std::cerr << std::endl << std::endl << std::endl;                        \
    } while(false)
 
@@ -106,7 +109,11 @@ int main(int argc, char* args[])
     COMPARE_WITH_FMT = false;
     TEST_AND_BENCHMARK("|{:08}||{:08}|", true, false);
     //TEST_AND_BENCHMARK("|{:08d}||{:08d}|", true, false);
+
+    TEST_AND_BENCHMARK("|{:<8L}| |{:>8L}|", true, false);
+
     COMPARE_WITH_FMT = true;
+
 
     TEST_AND_BENCHMARK("|{0:*<8}| |{0:*>8}| |{0:*^8}| |{1:*<8}| |{1:*>8}| |{1:*^8}|", true, false);
     TEST_AND_BENCHMARK("|{0:*<08}| |{0:*>08}| |{0:*^08}| |{1:*<08}| |{1:*>08}| |{1:*^08}|", true, false);

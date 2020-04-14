@@ -218,18 +218,29 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     //if(fss.zeroPad)
     //    throw FormatStringError("format specifier '0' requires numeric argument");
 
-    // Process to string type
+    // Process as string type
     if( TYPE_IS_S(fss.type) ) {
+        //
         if(fss.zeroPad) {
             fss.zeroPad = 0;
             if(!fss.align) fss.fill = '0';
         }
-        if(fss.locale && numpunct) _valStr = _valPOD.b ? numpunct->truename() : numpunct->falsename();
-        else                       _valStr = _valPOD.b ? "true"               : "false";
+        // Get the locale-specific string if possible
+        _valStr.clear();
+#ifdef PT_WITH_STD_LOCALE
+        if(fss.locale && numpunct) {
+            _valStr = _valPOD.b ? numpunct->truename() : numpunct->falsename();
+        }
+#endif
+        // Otherwise, use the default string
+        if(_valStr.empty()) {
+            _valStr = _valPOD.b ? "true": "false";
+        }
+        // Process the string
+        fss.locale = false;
         ff_S(rbf, fss, numpunct);
-
     }
-    // Process to numeric type
+    // Process as numeric type
     else if( TYPE_IS_BCDOX(fss.type) ) {
         _valPOD.u8 = _valPOD.b ? 1 : 0;
         ff_U8(rbf, fss, numpunct);
@@ -262,12 +273,12 @@ void FormatStringArg::ff_C(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     if(fss.locale)
         throw FormatStringError("format specifier 'L' requires numeric/boolean argument");
 
-    // Process to character type
+    // Process as character type
     if( TYPE_IS_C(fss.type) ) {
         _valStr = _valChr;
         ff_S(rbf, fss, numpunct);
     }
-    // Process to numeric type
+    // Process as numeric type
     else if( TYPE_IS_BCDOX(fss.type) ) {
         _valPOD.u8 = _valPOD.b ? 1 : 0;
         ff_U8(rbf, fss, numpunct);
