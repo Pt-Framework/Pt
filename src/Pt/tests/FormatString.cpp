@@ -151,6 +151,8 @@ static inline void printUnsignedRev(Pt::String& dst, T val, Pt::uint8_t base, bo
 
 static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep)
 {
+    // TODO: Optimize!
+
     // Get the source length
     const size_t srcLen = src.length();
 
@@ -179,7 +181,7 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
         for(;;) {
             dst += *srcIt--;
             if(srcIt == srcItEnd) break;
-            if( !(++digitIndex % 3) ) dst += thousandsSep;
+            if( ++digitIndex % 3 == 0) dst += thousandsSep;
         }
     }
 }
@@ -204,6 +206,8 @@ FormatStringError::FormatStringError(const char* msg)
 template <typename ValueT> inline
 void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
+    // TODO: Optimize!
+
     // Preparation
     typedef typename SelectValue<ValueT>::SignedT   SignedT;
     typedef typename SelectValue<ValueT>::UnsignedT UnsignedT;
@@ -408,7 +412,7 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     // Process as numeric type
     else if( TYPE_IS_C(fss.type) ) {
         _valPOD.u32 = _valPOD.b ? 1 : 0;
-        fss.type    = 'd'; // For boolean type 'c' is assumed as type 'd'
+        fss.type    = 'd'; // For boolean, type 'c' is considered the same as type 'd'
         ff_I32(rbf, fss, numpunct);
     }
     else if( TYPE_IS_BDOX(fss.type) ) {
@@ -537,6 +541,8 @@ void FormatStringArg::ff_S(Pt::String &rbf, FormatStringSpec& fss, const numpunc
 //
 const void FormatString::operator()(Pt::String& resultBuffer) const
 {
+    // TODO: Optimize!
+
 #define CHECK_FOR_CLOSING_BRACKET() \
     if(*it == '}') {                \
         ++it;                       \

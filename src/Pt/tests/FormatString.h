@@ -129,12 +129,13 @@ class PT_API FormatStringArg {
         // Formatter functions (one for each data type)
         template <typename ValueT> inline
         void ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
-
         void ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+
         void ff_F  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_D  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_LD (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+
         void ff_B  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_P  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_C  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
