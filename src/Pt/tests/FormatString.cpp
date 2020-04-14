@@ -211,7 +211,26 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
     const bool         negNum = (_valPOD.i32 < 0);
     const Pt::uint32_t numVal = negNum ? (-_valPOD.i32) : _valPOD.i32;
     Pt::String         strVal;
-    Pt::Char           chrSgn = 0;
+
+    // Process the 'sign' character as prefix characters
+    Pt::String prefixStr;
+
+    if(!fss.sign || fss.sign == '-') {
+        if(negNum) {
+            prefixStr = '-';
+        }
+    }
+    else if(!fss.sign == '+') {
+        if(negNum) prefixStr = '-';
+        else       prefixStr = '+';
+    }
+    else if(!fss.sign == ' ') {
+        if(negNum) prefixStr = '-';
+        else       prefixStr = ' ';
+    }
+    else {
+        throw FormatStringError("invalid 'sign specifier' in format string");
+    }
 
     // Process as base 2 type
     if( TYPE_IS_B(fss.type) ) {
@@ -223,17 +242,25 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
     }
     // Process as base 16 type
     else if( TYPE_IS_X(fss.type) ) {
-        throw FormatStringError("ff_I32 'x' is not implemented yet!");
+        //throw FormatStringError("ff_I32 'x' is not implemented yet!");
     /*
          # For integral types, when binary, octal, or hexadecimal presentation type is used, the alternate form
            inserts the prefix (0b, 0, or 0x) into the output value after the sign character (possibly space) if
            there is one, or add it before the output value otherwise.
      */
-        //
+        // Handle '#'
         if(fss.altForm) {
             fss.altForm = false;
-            // Reduce width
+            prefixStr += '0';
+            prefixStr += fss.type;
         }
+
+        // Convert to string (in reversed direction)
+        printUIntRev(strVal, numVal, 16, (fss.type == 'X'));
+
+        // Reverse the string
+        _valStr.clear();
+        revUIntString(_valStr, strVal, 0);
     }
     // Process as base 10 type
     else if( TYPE_IS_D(fss.type) ) {
@@ -252,40 +279,8 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
             // Otherwise, use the default separator
             if(!thousandsSep) thousandsSep = '.';
         }
-        // Add the 'sign' as needed
-        if(!fss.sign || fss.sign == '-') {
-            if(negNum) {
-                chrSgn = '-';
-            }
-        }
-        else if(!fss.sign == '+') {
-            if(negNum) chrSgn = '-';
-            else       chrSgn = '+';
-        }
-        else if(!fss.sign == ' ') {
-            if(negNum) chrSgn = '-';
-            else       chrSgn = ' ';
-        }
-        else {
-            throw FormatStringError("invalid 'sign specifier' in format string");
-        }
-
-        // Handle 'sign' and '0'
+        // Reverse the string and add thousands separator as needed
         _valStr.clear();
-        if(fss.zeroPad) {
-            fss.zeroPad = 0;
-            if(!fss.align) fss.fill = '0';
-
-            if(chrSgn) {
-                rbf += chrSgn;
-                if(fss.width) --fss.width;
-            }
-        }
-        else {
-            if(chrSgn) _valStr += chrSgn;
-        }
-
-        // Reverse and add thousands separator as needed
         revUIntString(_valStr, strVal, thousandsSep);
     }
     // Invalid type
@@ -293,6 +288,23 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
         throw FormatStringError("invalid 'type specifier' in format string");
     }
 
+    // Put the prefix characters
+    if(fss.zeroPad) {
+        if(!prefixStr.empty()) {
+            rbf += prefixStr;
+            fss.width = ( fss.width > prefixStr.length() ) ? ( fss.width - prefixStr.length() ) : 0;
+        }
+    }
+    else if(!prefixStr.empty()) {
+        _valStr = prefixStr + _valStr;
+    }
+
+    // Handle '0'
+    if(fss.zeroPad) {
+        // Handle '0'
+        fss.zeroPad = 0;
+        if(!fss.align) fss.fill = '0';
+    }
 
     // The default alignment for numeric argument is right
     if(!fss.align) fss.align = '>';
@@ -351,7 +363,7 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunc
 
     // Process as string type
     if( TYPE_IS_S(fss.type) ) {
-        // Handle zero padding
+        // Handle '0'
         if(fss.zeroPad) {
             fss.zeroPad = 0;
             if(!fss.align) fss.fill = '0';
