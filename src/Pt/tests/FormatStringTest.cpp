@@ -109,11 +109,8 @@ int main(int argc, char* args[])
     COMPARE_WITH_FMT = false;
     TEST_AND_BENCHMARK("|{:08}||{:08}|", true, false);
     //TEST_AND_BENCHMARK("|{:08d}||{:08d}|", true, false);
-
     TEST_AND_BENCHMARK("|{:<8L}| |{:>8L}|", true, false);
-
     COMPARE_WITH_FMT = true;
-
 
     TEST_AND_BENCHMARK("|{0:*<8}| |{0:*>8}| |{0:*^8}| |{1:*<8}| |{1:*>8}| |{1:*^8}|", true, false);
     TEST_AND_BENCHMARK("|{0:*<08}| |{0:*>08}| |{0:*^08}| |{1:*<08}| |{1:*>08}| |{1:*^08}|", true, false);
@@ -124,6 +121,7 @@ int main(int argc, char* args[])
     // Floating-points
 
     // Integers
+    TEST_AND_BENCHMARK("|{0:8n}| |{1:8n}| |{0:08n}| |{1:08n}| |{2:8n}| |{3:8n}| |{2:08n}| |{3:08n}|", 123, 1234, -567, -5678);
 
     // Mixeds
     /*
