@@ -486,8 +486,8 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
 
     // For now, simply use snprintf()
     // TODO: Do not use snprintf()?
-    if( fss.precision == (size_t) -1 ) fss.precision = DEFAULT_PRECISION;
-    if(!fss.type                     ) fss.type      = 'g';
+    if(  fss.precision == (size_t) -1 ) fss.precision = DEFAULT_PRECISION;
+    if( !fss.type                     ) fss.type      = 'g';
 
     char fmt[16];
     snprintf(fmt, sizeof(fmt), "%%%zd.%zd%c", fss.width, fss.precision, (char) fss.type);

@@ -35,7 +35,7 @@
 
 static bool COMPARE_WITH_FMT = true;
 
-#define LOOP_COUNT 15000
+#define LOOP_COUNT 5000
 
 #define TEST_AND_BENCHMARK(FORMAT, ...)                                          \
     do {                                                                         \
@@ -138,18 +138,7 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:+n}| |{:+n}| |{:n}|", (Pt::int64_t) 9223372036854775807LL, (Pt::int64_t) -9223372036854775807LL - 1, (Pt::uint64_t) 18446744073709551615ULL);
 
     // Mixeds
-    // TODO
-    /*
-    std::cerr << fmt::format(
-                     "{} {:d} {:.1f} {:p} {}\n",
-                     "Test", 123, 456.789, (void*) 1234567890, true
-                 );
-
-    std::cerr << Pt::format_string(
-                     "{} {:d} {:.1f} {:p} {}\n",
-                     "Test", 123, 456.789, (void*) 1234567890, true
-                 ).narrow();
-    */
+    TEST_AND_BENCHMARK("{} [{}] - {:d} mS ({:.1f}x) [{:d} loops]", "TEST", "FLAG", 1000, 3.5f, 250);
 
     // Done
     return 0;
