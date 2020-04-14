@@ -78,9 +78,9 @@ static inline Pt::Char* copy(Pt::Char* dst, const Pt::Char* src, size_t len)
 }
 
 
-static inline unsigned int parseUInt(const char *p)
+static inline size_t parseSizeT(const char *p)
 {
-    unsigned int v = 0;
+    size_t v = 0;
 
     while(*p != '\0') {
         v = (v * 10) + (*p - '0');
@@ -92,7 +92,7 @@ static inline unsigned int parseUInt(const char *p)
 
 
 template <typename T>
-static inline void printUIntRev(Pt::String& dst, T val, Pt::uint8_t base, bool uppercase)
+static inline void printUnsignedRev(Pt::String& dst, T val, Pt::uint8_t base, bool uppercase)
 {
     dst.clear();
 
@@ -107,7 +107,7 @@ static inline void printUIntRev(Pt::String& dst, T val, Pt::uint8_t base, bool u
 }
 
 
-static inline void revUIntString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep)
+static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep)
 {
     // Get the source length
     const size_t srcLen = src.length();
@@ -172,12 +172,25 @@ FormatStringError::FormatStringError(const char* msg)
 //     https://github.com/fmtlib/fmt/releases/tag/6.2.0
 //     https://github.com/fmtlib/fmt/releases/tag/4.1.0
 //
+// Performance:
+//     About 3x - 5x slower than {fmt} 4.1.0
+//     Should still be much faster than sprintf() and std::ostringstream
+//
 void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // Preparation
-    const bool         negNum = (_valPOD.i32 < 0);
-    const Pt::uint32_t numVal = negNum ? (-_valPOD.i32) : _valPOD.i32;
-    Pt::String         strVal;
+    bool         negNum;
+    Pt::uint32_t numVal;
+    Pt::String   strVal;
+
+    if(_isUInt) {
+        negNum = false;
+        numVal = _valPOD.u32;
+    }
+    else {
+        negNum = (_valPOD.i32 < 0);
+        numVal = negNum ? (-_valPOD.i32) : _valPOD.i32;
+    }
 
     // Handle 'sign' as prefix character
     Pt::String prefixStr;
@@ -208,9 +221,9 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
             prefixStr += fss.type;
         }
         // Convert to string (in reversed direction)
-        printUIntRev(strVal, numVal, 2, (fss.type == 'X'));
+        printUnsignedRev(strVal, numVal, 2, (fss.type == 'X'));
         // Reverse the string
-        revUIntString(_valStr, strVal, 0);
+        revUnsignedString(_valStr, strVal, 0);
     }
     // Process as base 8 type
     else if( TYPE_IS_O(fss.type) ) {
@@ -220,9 +233,9 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
             prefixStr += '0';
         }
         // Convert to string (in reversed direction)
-        printUIntRev(strVal, numVal, 8, (fss.type == 'X'));
+        printUnsignedRev(strVal, numVal, 8, (fss.type == 'X'));
         // Reverse the string
-        revUIntString(_valStr, strVal, 0);
+        revUnsignedString(_valStr, strVal, 0);
     }
     // Process as base 16 type
     else if( TYPE_IS_X(fss.type) ) {
@@ -233,9 +246,9 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
             prefixStr += fss.type;
         }
         // Convert to string (in reversed direction)
-        printUIntRev(strVal, numVal, 16, (fss.type == 'X'));
+        printUnsignedRev(strVal, numVal, 16, (fss.type == 'X'));
         // Reverse the string
-        revUIntString(_valStr, strVal, 0);
+        revUnsignedString(_valStr, strVal, 0);
     }
     // Process as base 10 type
     else if( TYPE_IS_D(fss.type) ) {
@@ -243,7 +256,7 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
         if(fss.altForm)
             throw FormatStringError("format specifier '#' requires 'b/B/o/x/X' numeric argument");
         // Convert to string (in reversed direction)
-        printUIntRev(strVal, numVal, 10, false);
+        printUnsignedRev(strVal, numVal, 10, false);
         // Determine the thousands separator
         Pt::Char thousandsSep = 0;
         if(fss.locale) {
@@ -255,7 +268,7 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
             if(!thousandsSep) thousandsSep = '.';
         }
         // Reverse the string and add thousands separator as needed
-        revUIntString(_valStr, strVal, thousandsSep);
+        revUnsignedString(_valStr, strVal, thousandsSep);
     }
     // Invalid type
     else {
@@ -291,116 +304,7 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
 
 
 void FormatStringArg::ff_U32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{
-    // Preparation
-    const Pt::uint32_t numVal = _valPOD.u32;
-    Pt::String         strVal;
-
-    // Handle 'sign' as prefix character
-    Pt::String prefixStr;
-
-    if(!fss.sign || fss.sign == '-') {
-        // Not used
-    }
-    else if(!fss.sign == '+') {
-        prefixStr = '+';
-    }
-    else if(!fss.sign == ' ') {
-        prefixStr = ' ';
-    }
-    else {
-        throw FormatStringError("invalid 'sign specifier' in format string");
-    }
-
-    // Process as base 2 type
-    if( TYPE_IS_B(fss.type) ) {
-        // Handle '#' as prefix characters
-        if(fss.altForm) {
-            fss.altForm = false;
-            prefixStr += '0';
-            prefixStr += fss.type;
-        }
-        // Convert to string (in reversed direction)
-        printUIntRev(strVal, numVal, 2, (fss.type == 'X'));
-        // Reverse the string
-        revUIntString(_valStr, strVal, 0);
-    }
-    // Process as base 8 type
-    else if( TYPE_IS_O(fss.type) ) {
-        // Handle '#' as prefix characters
-        if(fss.altForm) {
-            fss.altForm = false;
-            prefixStr += '0';
-        }
-        // Convert to string (in reversed direction)
-        printUIntRev(strVal, numVal, 8, (fss.type == 'X'));
-        // Reverse the string
-        revUIntString(_valStr, strVal, 0);
-    }
-    // Process as base 16 type
-    else if( TYPE_IS_X(fss.type) ) {
-        // Handle '#' as prefix characters
-        if(fss.altForm) {
-            fss.altForm = false;
-            prefixStr += '0';
-            prefixStr += fss.type;
-        }
-        // Convert to string (in reversed direction)
-        printUIntRev(strVal, numVal, 16, (fss.type == 'X'));
-        // Reverse the string
-        revUIntString(_valStr, strVal, 0);
-    }
-    // Process as base 10 type
-    else if( TYPE_IS_D(fss.type) ) {
-        // Alternate form cannot be used with base 10 type
-        if(fss.altForm)
-            throw FormatStringError("format specifier '#' requires 'b/B/o/x/X' numeric argument");
-        // Convert to string (in reversed direction)
-        printUIntRev(strVal, numVal, 10, false);
-        // Determine the thousands separator
-        Pt::Char thousandsSep = 0;
-        if(fss.locale) {
-            // Get the locale-specific separator if possible
-#ifdef PT_WITH_STD_LOCALE
-            if(numpunct) thousandsSep = numpunct->thousands_sep();
-#endif
-            // Otherwise, use the default separator
-            if(!thousandsSep) thousandsSep = '.';
-        }
-        // Reverse the string and add thousands separator as needed
-        revUIntString(_valStr, strVal, thousandsSep);
-    }
-    // Invalid type
-    else {
-        throw FormatStringError("invalid 'type specifier' in format string");
-    }
-
-    // Put the prefix characters
-    if(fss.zeroPad) {
-        if(!prefixStr.empty()) {
-            rbf += prefixStr;
-            fss.width = ( fss.width > prefixStr.length() ) ? ( fss.width - prefixStr.length() ) : 0;
-        }
-    }
-    else if(!prefixStr.empty()) {
-        _valStr = prefixStr + _valStr;
-    }
-
-    // Handle '0'
-    if(fss.zeroPad) {
-        // Handle '0'
-        fss.zeroPad = 0;
-        if(!fss.align) fss.fill = '0';
-    }
-
-    // The default alignment for numeric argument is right
-    if(!fss.align) fss.align = '>';
-
-    // Process the generated string
-    fss.type   = 's';
-    fss.locale = false;
-    ff_S(rbf, fss, numpunct);
-}
+{ ff_I32(rbf, fss, numpunct); }
 
 
 void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
@@ -410,9 +314,7 @@ void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpu
 
 
 void FormatStringArg::ff_U64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{
-    throw FormatStringError("ff_U64 is not implemented yet!");
-}
+{ ff_I64(rbf, fss, numpunct); }
 
 
 /*
@@ -522,7 +424,7 @@ void FormatStringArg::ff_C(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     }
     // Process as numeric type
     else if( TYPE_IS_BDOX(fss.type) ) {
-        _valPOD.u32 = _valPOD.b ? 1 : 0;
+        _valPOD.u32 = _valChr;
         ff_U32(rbf, fss, numpunct);
     }
     // Invalid type
@@ -631,15 +533,15 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
     resultBuffer.reserve(512);
 
     // Variables for processing argument(s)
-    bool         gotArgFld = false;
+    bool        gotArgFld = false;
 
-    std::string  argIdxStr;
-    unsigned int argIdxMan = 0;
-    unsigned int argIdxCnt = 0;
-    unsigned int argIdxEff;
+    std::string argIdxStr;
+    size_t      argIdxMan = 0;
+    size_t      argIdxCnt = 0;
+    size_t      argIdxEff;
 
-    bool         gotColon  = false;
-    std::string  numberStr;
+    bool        gotColon  = false;
+    std::string numberStr;
 
     // Walk through the format characters
     const Pt::Char* it    =      _format.data();
@@ -659,7 +561,7 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
                 if(argIdxCnt) {
                     throw FormatStringError("cannot switch from automatic to manual argument indexing");
                 }
-                argIdxEff = parseUInt(argIdxStr.c_str());
+                argIdxEff = parseSizeT(argIdxStr.c_str());
                 argIdxMan = argIdxEff + 1;
             }
             if(!_args || argIdxEff >= _args->size()) {
@@ -724,7 +626,7 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
             numberStr.clear();
             while( isdigit(*it) ) numberStr += *it++;
             if(!numberStr.empty()) {
-                fsSpec.width = parseUInt(numberStr.c_str());
+                fsSpec.width = parseSizeT(numberStr.c_str());
             }
             // Check if the next character is '.'
             CHECK_FOR_CLOSING_BRACKET();
@@ -734,7 +636,7 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
                 numberStr.clear();
                 while( isdigit(*it) ) numberStr += *it++;
                 if(!numberStr.empty()) {
-                    fsSpec.precision = parseUInt(numberStr.c_str());
+                    fsSpec.precision = parseSizeT(numberStr.c_str());
                 }
                 else {
                     throw FormatStringError("missing 'precision specifier' in format string");

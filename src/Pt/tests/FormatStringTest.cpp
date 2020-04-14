@@ -96,12 +96,12 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{}| |{:s}|", "aBc", "dEf");
     TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
 
-    // Characters
-    TEST_AND_BENCHMARK("|{}| |{}| |{}|", 'A', 'b', 'c');
-    TEST_AND_BENCHMARK("|{:*<8}| |{:*>8}| |{:*^8}|", 'A', 'b', 'c');
+    // Characters (xA9 == 169 == ©)
+    TEST_AND_BENCHMARK("|{}| |{}| |{}|", 'A', 'b', '\xA9');
+    TEST_AND_BENCHMARK("|{:*<8}| |{:*>8}| |{:*^8}|", 'A', 'b', '\xA9');
 
-    TEST_AND_BENCHMARK("|{:d}| |{:d}| |{:d}|", 'A', 'b', 'c');
-    TEST_AND_BENCHMARK("|{:*<8d}| |{:*>8d}| |{:*^8d}|", 'A', 'b', 'c');
+    TEST_AND_BENCHMARK("|{:d}| |{:d}| |{:d}|", 'A', 'b', '\xA9');
+    TEST_AND_BENCHMARK("|{:*<8d}| |{:*>8d}| |{:*^8d}|", 'A', 'b', '\xA9');
 
     // Pointers
     // TODO
