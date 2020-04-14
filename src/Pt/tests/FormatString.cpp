@@ -25,6 +25,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+// References:
+//     https://en.cppreference.com/w/cpp/utility/format/format
+//     https://en.cppreference.com/w/cpp/utility/format/formatter#Standard_format_specification
+//     https://en.cppreference.com/w/cpp/chrono/system_clock/formatter#Format_specification
+//     https://en.cppreference.com/w/cpp/locale/locale
+//     https://en.cppreference.com/w/cpp/locale/num_put
+//     https://en.cppreference.com/w/cpp/locale/numpunct
+//
+// Results verified using:
+//     https://fmt.dev/latest/index.html
+//     https://github.com/fmtlib/fmt/releases/tag/6.2.0
+//     https://github.com/fmtlib/fmt/releases/tag/4.1.0
+//
+// Performance:
+//     About 3x - 5x slower than {fmt} 4.1.0
+//     Should still be much faster than sprintf() and std::ostringstream
+//
+
 #include "FormatString.h"
 
 
@@ -56,8 +74,30 @@ namespace Pt {
 
 
 //
-// Inline utility functions
+// Utilities
 //
+template <typename ValueT>
+struct SelectValue;
+
+template<>
+struct SelectValue<Pt::int32_t> {
+    typedef Pt::int32_t  SignedT;
+    typedef Pt::uint32_t UnsignedT;
+
+    static inline Pt::int32_t  selectSigned  (Pt::int32_t  i32, Pt::int64_t ) { return i32; }
+    static inline Pt::uint32_t selectUnsigned(Pt::uint32_t u32, Pt::uint64_t) { return u32; }
+};
+
+template<>
+struct SelectValue<Pt::int64_t> {
+    typedef Pt::int64_t  SignedT;
+    typedef Pt::uint64_t UnsignedT;
+
+    static inline Pt::int64_t  selectSigned (Pt::int32_t,  Pt::int64_t  i64) { return i64; }
+    static inline Pt::uint64_t selectUnsigned(Pt::uint32_t, Pt::uint64_t u64) { return u64; }
+};
+
+
 static inline Pt::Char* fill(Pt::Char* dst, Pt::Char chr, size_t len)
 {
     Pt::Char* end = dst + len;
@@ -159,37 +199,26 @@ FormatStringError::FormatStringError(const char* msg)
 //
 // Format-string argument and its corresponding formatter
 //
-// References:
-//     https://en.cppreference.com/w/cpp/utility/format/format
-//     https://en.cppreference.com/w/cpp/utility/format/formatter#Standard_format_specification
-//     https://en.cppreference.com/w/cpp/chrono/system_clock/formatter#Format_specification
-//     https://en.cppreference.com/w/cpp/locale/locale
-//     https://en.cppreference.com/w/cpp/locale/num_put
-//     https://en.cppreference.com/w/cpp/locale/numpunct
-//
-// Results verified using:
-//     https://fmt.dev/latest/index.html
-//     https://github.com/fmtlib/fmt/releases/tag/6.2.0
-//     https://github.com/fmtlib/fmt/releases/tag/4.1.0
-//
-// Performance:
-//     About 3x - 5x slower than {fmt} 4.1.0
-//     Should still be much faster than sprintf() and std::ostringstream
-//
-void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
+template <typename ValueT> inline
+void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // Preparation
-    bool         negNum;
-    Pt::uint32_t numVal;
-    Pt::String   strVal;
+    typedef typename SelectValue<ValueT>::SignedT   SignedT;
+    typedef typename SelectValue<ValueT>::UnsignedT UnsignedT;
 
-    if(_isUInt) {
+    bool       negNum;
+    UnsignedT  numVal;
+    Pt::String strVal;
+
+    if(_isUnsigned) {
         negNum = false;
-        numVal = _valPOD.u32;
+        numVal = SelectValue<ValueT>::selectUnsigned(_valPOD.u32, _valPOD.u64);
     }
     else {
-        negNum = (_valPOD.i32 < 0);
-        numVal = negNum ? (-_valPOD.i32) : _valPOD.i32;
+        const SignedT sigVal = SelectValue<ValueT>::selectSigned(_valPOD.i32, _valPOD.i64);
+
+        negNum = (sigVal < 0);
+        numVal = negNum ? -sigVal : sigVal;
     }
 
     // Handle 'sign' as prefix character
@@ -303,18 +332,12 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
 }
 
 
-void FormatStringArg::ff_U32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{ ff_I32(rbf, fss, numpunct); }
+void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
+{ ff_IXX<Pt::int32_t>(rbf, fss, numpunct); }
 
 
 void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{
-    throw FormatStringError("ff_I64 is not implemented yet!");
-}
-
-
-void FormatStringArg::ff_U64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{ ff_I64(rbf, fss, numpunct); }
+{ ff_IXX<Pt::int64_t>(rbf, fss, numpunct); }
 
 
 /*
@@ -382,12 +405,12 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     // Process as numeric type
     else if( TYPE_IS_C(fss.type) ) {
         _valPOD.u32 = _valPOD.b ? 1 : 0;
-        fss.type    = 'd'; // For boolean type 'c' is assumed as 'd'
-        ff_U32(rbf, fss, numpunct);
+        fss.type    = 'd'; // For boolean type 'c' is assumed as type 'd'
+        ff_I32(rbf, fss, numpunct);
     }
     else if( TYPE_IS_BDOX(fss.type) ) {
         _valPOD.u32 = _valPOD.b ? 1 : 0;
-        ff_U32(rbf, fss, numpunct);
+        ff_I32(rbf, fss, numpunct);
     }
     // Invalid type
     else {
@@ -425,7 +448,7 @@ void FormatStringArg::ff_C(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     // Process as numeric type
     else if( TYPE_IS_BDOX(fss.type) ) {
         _valPOD.u32 = _valChr;
-        ff_U32(rbf, fss, numpunct);
+        ff_I32(rbf, fss, numpunct);
     }
     // Invalid type
     else {

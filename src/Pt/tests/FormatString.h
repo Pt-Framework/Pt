@@ -28,7 +28,6 @@
 #ifndef PT_FORMAT_STRING_H
 #define PT_FORMAT_STRING_H
 
-
 #include <vector>
 
 #include <Pt/String.h>
@@ -103,24 +102,24 @@ struct PT_API FormatStringSpec {
 class PT_API FormatStringArg {
     public:
         // Constructors (one for each data type)
-        inline FormatStringArg(Pt::int8_t         p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
-        inline FormatStringArg(Pt::uint8_t        p) : _isUInt(true ), _fmtFun(&FormatStringArg::ff_U32) { _valPOD.u32 = p;             }
-        inline FormatStringArg(Pt::int16_t        p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
-        inline FormatStringArg(Pt::uint16_t       p) : _isUInt(true ), _fmtFun(&FormatStringArg::ff_U32) { _valPOD.u32 = p;             }
-        inline FormatStringArg(Pt::int32_t        p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
-        inline FormatStringArg(Pt::uint32_t       p) : _isUInt(true ), _fmtFun(&FormatStringArg::ff_U32) { _valPOD.u32 = p;             }
-        inline FormatStringArg(Pt::int64_t        p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_I64) { _valPOD.i64 = p;             }
-        inline FormatStringArg(Pt::uint64_t       p) : _isUInt(true ), _fmtFun(&FormatStringArg::ff_U64) { _valPOD.u64 = p;             }
-        inline FormatStringArg(float              p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_F  ) { _valPOD.f   = p;             }
-        inline FormatStringArg(double             p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_D  ) { _valPOD.d   = p;             }
-        inline FormatStringArg(long double        p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_LD ) { _valPOD.ld  = p;             }
-        inline FormatStringArg(bool               p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_B  ) { _valPOD.b   = p;             }
-        inline FormatStringArg(const void*        p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_P  ) { _valPOD.p   = p;             }
-        inline FormatStringArg(char               p) : _isUInt(true ), _fmtFun(&FormatStringArg::ff_C  ) { _valChr     = p;             }
-        inline FormatStringArg(Pt::Char           p) : _isUInt(true ), _fmtFun(&FormatStringArg::ff_C  ) { _valChr     = p;             }
-        inline FormatStringArg(const char*        p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = Pt::String(p); }
-        inline FormatStringArg(const std::string& p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = p.c_str();     }
-        inline FormatStringArg(const Pt::String&  p) : _isUInt(false), _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = p;             }
+        inline FormatStringArg(Pt::int8_t         p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
+        inline FormatStringArg(Pt::uint8_t        p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.u32 = p;             }
+        inline FormatStringArg(Pt::int16_t        p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
+        inline FormatStringArg(Pt::uint16_t       p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.u32 = p;             }
+        inline FormatStringArg(Pt::int32_t        p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
+        inline FormatStringArg(Pt::uint32_t       p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.u32 = p;             }
+        inline FormatStringArg(Pt::int64_t        p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_I64) { _valPOD.i64 = p;             }
+        inline FormatStringArg(Pt::uint64_t       p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_I64) { _valPOD.u64 = p;             }
+        inline FormatStringArg(float              p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_F  ) { _valPOD.f   = p;             }
+        inline FormatStringArg(double             p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_D  ) { _valPOD.d   = p;             }
+        inline FormatStringArg(long double        p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_LD ) { _valPOD.ld  = p;             }
+        inline FormatStringArg(bool               p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_B  ) { _valPOD.b   = p;             }
+        inline FormatStringArg(const void*        p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_P  ) { _valPOD.p   = p;             }
+        inline FormatStringArg(char               p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_C  ) { _valChr     = p;             }
+        inline FormatStringArg(Pt::Char           p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_C  ) { _valChr     = p;             }
+        inline FormatStringArg(const char*        p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = Pt::String(p); }
+        inline FormatStringArg(const std::string& p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = p.c_str();     }
+        inline FormatStringArg(const Pt::String&  p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = p;             }
 
         // Formatter function entry point
         inline void operator()(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
@@ -128,10 +127,11 @@ class PT_API FormatStringArg {
 
     private:
         // Formatter functions (one for each data type)
+        template <typename ValueT> inline
+        void ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+
         void ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
-        void ff_U32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
-        void ff_U64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_F  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_D  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_LD (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
@@ -158,7 +158,7 @@ class PT_API FormatStringArg {
         };
 
         // Argument data
-                bool       _isUInt;
+                bool       _isUnsigned;
         mutable ArgValue   _valPOD;
         mutable Pt::Char   _valChr;
         mutable Pt::String _valStr;
