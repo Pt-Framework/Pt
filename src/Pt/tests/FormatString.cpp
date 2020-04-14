@@ -39,8 +39,8 @@
 //     https://github.com/fmtlib/fmt/releases/tag/4.1.0
 //
 // Performance:
-//     About 3x - 5x slower than {fmt} 4.1.0
-//     Should still be much faster than sprintf() and std::ostringstream
+//     It is about 3x - 8x slower than {fmt} 4.1.0
+//     It should still be faster than sprintf() and std::ostringstream
 //
 
 #include "FormatString.h"
@@ -134,6 +134,8 @@ static inline size_t parseSizeT(const char *p)
 template <typename T>
 static inline void printUnsignedRev(Pt::String& dst, T val, Pt::uint8_t base, bool uppercase)
 {
+    // TODO: Optimize!
+
     dst.clear();
 
     static const char* L_DIGITS = "0123456789abcdef";
@@ -173,11 +175,11 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
         dst.clear();
         dst.reserve(dstLen);
         // Reserve the characters while adding thousands separator(s)
-        unsigned int digitIndex = 0;
+        Pt::uint32_t digitIndex = 3 - (srcLen % 3);
         for(;;) {
             dst += *srcIt--;
             if(srcIt == srcItEnd) break;
-            if(++digitIndex % 3 == 1) dst += thousandsSep;
+            if( !(++digitIndex % 3) ) dst += thousandsSep;
         }
     }
 }
@@ -229,11 +231,11 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
             prefixStr = '-';
         }
     }
-    else if(!fss.sign == '+') {
+    else if(fss.sign == '+') {
         if(negNum) prefixStr = '-';
         else       prefixStr = '+';
     }
-    else if(!fss.sign == ' ') {
+    else if(fss.sign == ' ') {
         if(negNum) prefixStr = '-';
         else       prefixStr = ' ';
     }
@@ -326,8 +328,9 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     if(!fss.align) fss.align = '>';
 
     // Process the generated string
-    fss.type   = 's';
+    fss.sign   = 0;
     fss.locale = false;
+    fss.type   = 's';
     ff_S(rbf, fss, numpunct);
 }
 
