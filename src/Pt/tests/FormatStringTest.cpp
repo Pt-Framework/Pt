@@ -104,7 +104,8 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:*<8d}| |{:*>8d}| |{:*^8d}|", 'A', 'b', '\xA9');
 
     // Pointers
-    // TODO
+    int dummy = 0;
+    TEST_AND_BENCHMARK("|{0:p}| |{0:24p}| |{0:*^24p}|", (void*) &dummy);
 
     // Booleans
     TEST_AND_BENCHMARK("|{:08}| |{:08}|", true, false);

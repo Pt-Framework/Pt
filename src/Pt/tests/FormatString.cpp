@@ -428,7 +428,33 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunc
 
 void FormatStringArg::ff_P(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
-    throw FormatStringError("ff_P is not implemented yet!");
+    // Check the specifiers
+    if(fss.sign)
+        throw FormatStringError("format specifier 'sign' requires numeric argument");
+
+    if(fss.altForm)
+        throw FormatStringError("format specifier '#' requires numeric argument");
+
+    if(fss.zeroPad)
+        throw FormatStringError("format specifier '0' requires numeric argument");
+
+    if(fss.locale)
+        throw FormatStringError("format specifier 'L' requires numeric/boolean argument");
+
+    if( !TYPE_IS_P(fss.type) )
+        throw FormatStringError("invalid 'type specifier' in format string");
+
+    // Process as numeric type
+    fss.altForm = true;
+    fss.width   = std::max( fss.width, sizeof(void*) );
+    fss.type    = 'x';
+#if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__)
+    _valPOD.u64 = (Pt::uint64_t) _valPOD.p;
+    ff_I64(rbf, fss, numpunct);
+#else
+    _valPOD.u32 = (Pt::uint32_t) _valPOD.p;
+    ff_I32(rbf, fss, numpunct);
+#endif
 }
 
 
