@@ -107,10 +107,11 @@ FormatStringError::FormatStringError(const char* msg)
 //     https://fmt.dev/latest/index.html
 //     https://github.com/fmtlib/fmt/releases/tag/6.2.0
 //
-void FormatStringArg::ff_I8(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_I8(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
+    // Check the specifiers
     if( !TYPE_IS_BDOX(fss.type) )
-        throw FormatStringError("invalid 'type' in format string");
+        throw FormatStringError("invalid 'type specifier' in format string");
 
     throw FormatStringError("ff_I8 Not implemented yet!");
 }
@@ -129,7 +130,7 @@ void FormatStringArg::ff_I8(Pt::String &rbf, FormatStringSpec& fss, const std::n
     bool     locale;     // use locale-specific formatting
     char     type;       // none/s b B c d o x X a A e E f/F g G p
 */
-void FormatStringArg::ff_U8(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_U8(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
 /*
 #define TYPE_IS_N(T)     ( !T )
@@ -143,68 +144,69 @@ void FormatStringArg::ff_U8(Pt::String &rbf, FormatStringSpec& fss, const std::n
 #define TYPE_IS_AEFG(T)  ( T && ( (T == 'a') || (T == 'A') || (T == 'e') || (T == 'E') || (T == 'f') ||  (T == 'F') || (T == 'g') || (T == 'G') ) )
 */
 
+    // Check the specifiers
     if( !TYPE_IS_BDOX(fss.type) )
-        throw FormatStringError("invalid 'type' in format string");
+        throw FormatStringError("invalid 'type specifier' in format string");
 
     throw FormatStringError("ff_U8 Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_I16(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_I16(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_I16 Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_U16(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_U16(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_U16 Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_I32 Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_U32(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_U32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_U32 Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_I64 Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_U64(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_U64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_U64 Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_F Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_D(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_D(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_D Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_LD(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_LD(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_LD Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // Check the specifiers
     if(fss.sign)
@@ -213,35 +215,39 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const std::nu
     if(fss.altForm)
         throw FormatStringError("format specifier '#' requires numeric argument");
 
-    if(fss.locale)
-        throw FormatStringError("format specifier 'L' is not supported yet");
+    //if(fss.zeroPad)
+    //    throw FormatStringError("format specifier '0' requires numeric argument");
 
-    // Process according the required type
+    // Process to string type
     if( TYPE_IS_S(fss.type) ) {
         if(fss.zeroPad) {
             fss.zeroPad = 0;
             if(!fss.align) fss.fill = '0';
         }
-        _valStr = _valPOD.b ? numpunct.truename() : numpunct.falsename();
+        if(fss.locale && numpunct) _valStr = _valPOD.b ? numpunct->truename() : numpunct->falsename();
+        else                       _valStr = _valPOD.b ? "true"               : "false";
         ff_S(rbf, fss, numpunct);
+
     }
+    // Process to numeric type
     else if( TYPE_IS_BCDOX(fss.type) ) {
         _valPOD.u8 = _valPOD.b ? 1 : 0;
         ff_U8(rbf, fss, numpunct);
     }
+    // Invalid type
     else {
-        throw FormatStringError("invalid 'type' in format string");
+        throw FormatStringError("invalid 'type specifier' in format string");
     }
 }
 
 
-void FormatStringArg::ff_P(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_P(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_P Not implemented yet!");
 }
 
 
-void FormatStringArg::ff_C(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_C(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // Check the specifiers
     if(fss.sign)
@@ -254,24 +260,26 @@ void FormatStringArg::ff_C(Pt::String &rbf, FormatStringSpec& fss, const std::nu
         throw FormatStringError("format specifier '0' requires numeric argument");
 
     if(fss.locale)
-        throw FormatStringError("format specifier 'L' is not supported yet");
+        throw FormatStringError("format specifier 'L' requires numeric/boolean argument");
 
-    // Process according the required type
+    // Process to character type
     if( TYPE_IS_C(fss.type) ) {
         _valStr = _valChr;
         ff_S(rbf, fss, numpunct);
     }
+    // Process to numeric type
     else if( TYPE_IS_BCDOX(fss.type) ) {
         _valPOD.u8 = _valPOD.b ? 1 : 0;
         ff_U8(rbf, fss, numpunct);
     }
+    // Invalid type
     else {
-        throw FormatStringError("invalid 'type' in format string");
+        throw FormatStringError("invalid 'type specifier' in format string");
     }
 }
 
 
-void FormatStringArg::ff_S(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+void FormatStringArg::ff_S(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // Check the specifiers
     if(fss.sign)
@@ -284,10 +292,10 @@ void FormatStringArg::ff_S(Pt::String &rbf, FormatStringSpec& fss, const std::nu
         throw FormatStringError("format specifier '0' requires numeric argument");
 
     if(fss.locale)
-        throw FormatStringError("format specifier 'L' is not supported yet");
+        throw FormatStringError("format specifier 'L' requires numeric/boolean argument");
 
     if( !TYPE_IS_S(fss.type) )
-        throw FormatStringError("invalid 'type' in format string");
+        throw FormatStringError("invalid 'type specifier' in format string");
 
     // Get the alignment
     const char align = fss.align ? fss.align : '<'; // The default alignment for string is left
@@ -338,7 +346,7 @@ void FormatStringArg::ff_S(Pt::String &rbf, FormatStringSpec& fss, const std::nu
     }
     // Invalid
     else {
-        throw FormatStringError("invalid 'align' in format string");
+        throw FormatStringError("invalid 'align specifier' in format string");
     }
 }
 
@@ -359,8 +367,12 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
     // Format-string specifier
     FormatStringSpec fsSpec;
 
-    // Get the "numpunct" instance
-    const std::numpunct<Pt::Char>& numpunct = std::use_facet< std::numpunct<Pt::Char> >( std::locale() );
+    // Get the "numpunct" instance (if supported)
+#ifdef PT_WITH_STD_LOCALE
+    const numpunct_t* numpunct = &std::use_facet< std::numpunct<Pt::Char> >( std::locale() );
+#else
+    const numpunct_t* numpunct = 0;
+#endif
 
     // Reserve some bytes within the result buffer
     resultBuffer.reserve(512);

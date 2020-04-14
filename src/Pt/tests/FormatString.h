@@ -36,6 +36,15 @@
 
 namespace Pt {
 
+//
+// Not all systems provide locale-classes
+//
+#ifdef PT_WITH_STD_LOCALE
+typedef std::numpunct<Pt::Char> numpunct_t;
+#else
+typedef void* numpunct_t;
+#endif
+
 
 //
 // Format-string error
@@ -114,30 +123,30 @@ class PT_API FormatStringArg {
         inline FormatStringArg(const Pt::String&  p) : _fmtFun(&FormatStringArg::ff_S  ) { _valStr     = p;             }
 
         // Formatter function entry point
-        inline void operator()(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const
+        inline void operator()(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
         { (this->*_fmtFun)(rbf, fss, numpunct); }
 
     private:
         // Formatter functions (one for each data type)
-        void ff_I8 (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_U8 (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_I16(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_U16(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_I32(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_U32(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_I64(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_U64(Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_F  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_D  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_LD (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_B  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_P  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_C  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
-        void ff_S  (Pt::String &rbf, FormatStringSpec& fss, const std::numpunct<Pt::Char>& numpunct) const;
+        void ff_I8 (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_U8 (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_I16(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_U16(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_U32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_U64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_F  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_D  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_LD (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_B  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_P  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_C  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
+        void ff_S  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
 
     private:
         // Formatter function typedef
-        typedef void (FormatStringArg::*FormatFunc)(Pt::String&, FormatStringSpec&, const std::numpunct<Pt::Char>&) const;
+        typedef void (FormatStringArg::*FormatFunc)(Pt::String&, FormatStringSpec&, const numpunct_t*) const;
 
         // Union for POD argument value
         union ArgValue {

@@ -10,15 +10,6 @@
 #include "FormatString.h"
 
 
-#define COMPARE_WITH_FMT 1
-
-#if !!COMPARE_WITH_FMT
-#define FMT_FORMAT(...) fmt::format(__VA_ARGS__)
-#else
-#define FMT_FORMAT(...) ""
-#endif
-
-
 #ifdef __unix__
 #define BLACK   "\u001b[30m"
 #define RED     "\u001b[31m"
@@ -42,12 +33,16 @@
 #endif
 
 
+static bool COMPARE_WITH_FMT = true;
+
 #define LOOP_COUNT 15000
 
 #define TEST_AND_BENCHMARK(FORMAT, ...)                                          \
     do {                                                                         \
         /* Test and print */                                                     \
-        const std::string& r = FMT_FORMAT(FORMAT, __VA_ARGS__);                  \
+        const std::string& r = COMPARE_WITH_FMT                                  \
+                               ? fmt::format(FORMAT, __VA_ARGS__)                \
+                               : "";                                             \
         if(COMPARE_WITH_FMT) std::cerr << r << std::endl;                        \
         const std::string& c = Pt::format_string(FORMAT, __VA_ARGS__).narrow();  \
         std::cerr << c << std::endl;                                             \
@@ -64,8 +59,10 @@
         /* Benchmark the reference fmt 4.1.0 library */                          \
         Pt::System::Clock clock;                                                 \
         clock.start();                                                           \
-        for(int i = 0; i < LOOP_COUNT; ++i) {                                    \
-            fmt::format(FORMAT, __VA_ARGS__);                                    \
+        if(COMPARE_WITH_FMT) {                                                   \
+            for(int i = 0; i < LOOP_COUNT; ++i) {                                \
+                fmt::format(FORMAT, __VA_ARGS__);                                \
+            }                                                                    \
         }                                                                        \
         const double br = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;          \
         /* Benchmark our implementation */                                       \
@@ -106,6 +103,11 @@ int main(int argc, char* args[])
     // Pointers
 
     // Booleans
+    COMPARE_WITH_FMT = false;
+    TEST_AND_BENCHMARK("|{:08}||{:08}|", true, false);
+    //TEST_AND_BENCHMARK("|{:08d}||{:08d}|", true, false);
+    COMPARE_WITH_FMT = true;
+
     TEST_AND_BENCHMARK("|{0:*<8}| |{0:*>8}| |{0:*^8}| |{1:*<8}| |{1:*>8}| |{1:*^8}|", true, false);
     TEST_AND_BENCHMARK("|{0:*<08}| |{0:*>08}| |{0:*^08}| |{1:*<08}| |{1:*>08}| |{1:*^08}|", true, false);
 

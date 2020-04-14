@@ -44,14 +44,6 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-### EXPERIMENT ###
-#SubDir PT_TOP include Pt fmt ;
-#PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt fmt ] ;
-#PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
-#PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
-#InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt fmt ] : $(PT_INSTALL_INCLUDES:BS) ;
-### EXPERIMENT ###
-
 SubDir PT_TOP include Pt System ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt System ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
