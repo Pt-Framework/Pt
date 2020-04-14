@@ -122,7 +122,8 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{0:*<08d}| |{0:*>08d}| |{0:*^08d}| |{1:*<08d}| |{1:*>08d}| |{1:*^08d}|", true, false);
 
     // Floating-points
-    // TODO
+    TEST_AND_BENCHMARK("|{0}| |{0:.1f}| |{0:8.1f}| |{0:08.1f}| |{0:*^8.1f}| |{0:*^08.1f}|", 123.456f);
+    return 0;
 
     // Integers
     TEST_AND_BENCHMARK("|{0:8n}| |{1:8n}| |{0:08n}| |{1:08n}| |{2:8n}| |{3:8n}| |{2:08n}| |{3:08n}|", 123, 1234, -567, -5678);

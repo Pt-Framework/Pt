@@ -43,6 +43,8 @@
 //     It should still be faster than sprintf() and std::ostringstream
 //
 
+#include <stdio.h>
+
 #include "FormatString.h"
 
 
@@ -362,6 +364,42 @@ void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpu
 */
 void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
+    // TODO: Optimize!
+    // TODO: Do not us snprintf?
+
+    // Handle '0'
+    if(fss.zeroPad) {
+        fss.zeroPad = 0;
+        if(!fss.align) fss.fill = '0';
+    }
+
+    // Process as string type
+
+    char fmt[128];
+    snprintf(fmt, sizeof(fmt), "%%%zd.%zdf", fss.width, fss.precision);
+
+    char buf[128];
+    snprintf(buf, sizeof(buf), fmt, _valPOD.f);
+
+    _valStr = buf;
+
+    /*
+    *Pt::Char fill;       // fill character
+    *char     align;      // < > ^
+    char     sign;       // + - [space]
+    bool     altForm;    // #
+    *bool     zeroPad;    // 0
+    *size_t   width;      // minimum field width (default 0)
+    *size_t   precision;  // floating-point precision (default 6)
+    bool     locale;     // use locale-specific formatting
+    *char     type;       // none/s b B c d o x X a A e E f/F g G p
+    */
+
+    // Process the generated string
+    fss.locale = false;
+    fss.type   = 's';
+    ff_S(rbf, fss, numpunct);
+
     throw FormatStringError("ff_F is not implemented yet!");
 }
 
