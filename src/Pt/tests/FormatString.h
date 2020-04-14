@@ -132,6 +132,8 @@ class PT_API FormatStringArg {
         void ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
 
+        template <typename ValueT> inline
+        void ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_F  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_D  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_LD (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;

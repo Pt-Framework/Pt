@@ -97,10 +97,10 @@ namespace Pt {
 // Utilities
 //
 template <typename ValueT>
-struct SelectValue;
+struct SelectInteger;
 
 template<>
-struct SelectValue<Pt::int32_t> {
+struct SelectInteger<Pt::int32_t> {
     typedef Pt::int32_t  SignedT;
     typedef Pt::uint32_t UnsignedT;
 
@@ -109,12 +109,30 @@ struct SelectValue<Pt::int32_t> {
 };
 
 template<>
-struct SelectValue<Pt::int64_t> {
+struct SelectInteger<Pt::int64_t> {
     typedef Pt::int64_t  SignedT;
     typedef Pt::uint64_t UnsignedT;
 
-    static inline Pt::int64_t  selectSigned (Pt::int32_t,  Pt::int64_t  i64) { return i64; }
+    static inline Pt::int64_t  selectSigned  (Pt::int32_t,  Pt::int64_t  i64) { return i64; }
     static inline Pt::uint64_t selectUnsigned(Pt::uint32_t, Pt::uint64_t u64) { return u64; }
+};
+
+
+template <typename ValueT>
+struct SelectReal;
+
+template<>
+struct SelectReal<float> {
+    typedef float ValueT;
+
+    static inline float selectValue(float f, double) { return f; }
+};
+
+template<>
+struct SelectReal<double> {
+    typedef double ValueT;
+
+    static inline double selectValue(float, double d) { return d; }
 };
 
 
@@ -229,8 +247,8 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     // TODO: Optimize!
 
     // Preparation
-    typedef typename SelectValue<ValueT>::SignedT   SignedT;
-    typedef typename SelectValue<ValueT>::UnsignedT UnsignedT;
+    typedef typename SelectInteger<ValueT>::SignedT   SignedT;
+    typedef typename SelectInteger<ValueT>::UnsignedT UnsignedT;
 
     bool       negNum;
     UnsignedT  numVal;
@@ -238,10 +256,10 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
 
     if(_isUnsigned) {
         negNum = false;
-        numVal = SelectValue<ValueT>::selectUnsigned(_valPOD.u32, _valPOD.u64);
+        numVal = SelectInteger<ValueT>::selectUnsigned(_valPOD.u32, _valPOD.u64);
     }
     else {
-        const SignedT sigVal = SelectValue<ValueT>::selectSigned(_valPOD.i32, _valPOD.i64);
+        const SignedT sigVal = SelectInteger<ValueT>::selectSigned(_valPOD.i32, _valPOD.i64);
 
         negNum = (sigVal < 0);
         numVal = negNum ? -sigVal : sigVal;
@@ -385,13 +403,18 @@ void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpu
     bool     locale;     // use locale-specific formatting
     char     type;       // none/s b B c d o x X a A e E f/F g G p
 */
-void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
+template <typename _ValueT> inline
+void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // TODO: Optimize!
 
     // Preparation
-    const bool  negNum = (_valPOD.f < 0.0f);
-    const float numVal = negNum ? -_valPOD.f : _valPOD.f;
+    typedef typename SelectReal<_ValueT>::ValueT ValueT;
+
+    const ValueT sigVal = SelectReal<_ValueT>::selectValue(_valPOD.f, _valPOD.d);
+
+    const bool   negNum = (sigVal < SelectReal<_ValueT>::selectValue(0.0f, 0.0));
+    const ValueT numVal = negNum ? -sigVal : sigVal;
 
     // Handle 'sign' as prefix character
     Pt::Char prefixChr = 0;
@@ -485,7 +508,7 @@ void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     }
 
     // Handle the decimal point and thousands separator
-    // TODO
+    // ### !!! TODO !!! ###
 
     // Put the prefix character
     if(fss.zeroPad) {
@@ -520,16 +543,16 @@ void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunc
 }
 
 
+void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
+{ ff_RXX<float>(rbf, fss, numpunct); }
+
+
 void FormatStringArg::ff_D(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{
-    throw FormatStringError("ff_D is not implemented yet!");
-}
+{ ff_RXX<double>(rbf, fss, numpunct); }
 
 
 void FormatStringArg::ff_LD(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{
-    throw FormatStringError("ff_LD is not implemented yet!");
-}
+{ throw FormatStringError("ff_LD is not implemented yet!"); }
 
 
 void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
