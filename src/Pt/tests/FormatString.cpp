@@ -285,6 +285,12 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
         throw FormatStringError("invalid 'sign specifier' in format string");
     }
 
+    // For backward compatibility with older (draft) C++20 standard
+    if(fss.type == 'n') {
+        fss.locale = true;
+        fss.type   = 'd';
+    }
+
     // Process as base 2 type
     if( TYPE_IS_B(fss.type) ) {
         // Handle '#' as prefix characters
@@ -888,10 +894,6 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
             // Read the 'type'
             CHECK_FOR_CLOSING_BRACKET();
             fsSpec.type = *it++;
-            if(fsSpec.type == 'n') { // For backward compatibility with older (draft) C++20 standard
-                fsSpec.locale = true;
-                fsSpec.type   = 'd';
-            }
             // All should be done here
             CHECK_FOR_CLOSING_BRACKET();
             // Error

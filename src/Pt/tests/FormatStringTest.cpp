@@ -36,7 +36,7 @@
 
 static bool COMPARE_WITH_FMT = true;
 
-#define LOOP_COUNT 5000
+#define LOOP_COUNT 8000
 
 #define TEST_AND_BENCHMARK(FORMAT, ...)                                          \
     do {                                                                         \
