@@ -203,7 +203,7 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
         // Resize the destination buffer
         dst.clear();
         dst.reserve(srcLen);
-        // Reserve the characters
+        // Reverse the characters
         while(srcIt != srcItEnd) dst += *srcIt--;
     }
     // Process using thousands separator(s)
@@ -214,7 +214,7 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
         // Resize the destination buffer
         dst.clear();
         dst.reserve(dstLen);
-        // Reserve the characters while adding thousands separator(s)
+        // Reverse the characters while adding thousands separator(s)
         Pt::uint32_t digitIndex = 3 - (srcLen % 3);
         for(;;) {
             dst += *srcIt--;
@@ -692,12 +692,14 @@ void FormatStringArg::ff_S(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     const size_t strLen = _valStr.length();
     const size_t padLen = fss.width - strLen;
 
-    // Calculate the write pointer and resize the destination buffer
-    const size_t    rbfOrgLen = rbf.length();
-    const size_t    rbfNewLen = rbfOrgLen + std::max( strLen, fss.width );
-          Pt::Char* rbfPtr    = &rbf[0] + rbfOrgLen;
+    // Resize the destination buffer
+    const size_t rbfOrgLen = rbf.length();
+    const size_t rbfNewLen = rbfOrgLen + std::max( strLen, fss.width );
 
     rbf.resize(rbfNewLen);
+
+    // Get the write pointer
+    Pt::Char* rbfPtr = &rbf[0] + rbfOrgLen;
 
     // Center
     if(align == '^') {
@@ -765,7 +767,7 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
 #endif
 
     // Reserve some bytes within the result buffer
-    resultBuffer.reserve(512);
+    resultBuffer.reserve(256);
 
     // Variables for processing argument(s)
     bool        gotArgFld = false;
