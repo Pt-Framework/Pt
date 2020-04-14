@@ -94,6 +94,8 @@ static inline unsigned int parseUInt(const char *p)
 template <typename T>
 static inline void printUIntRev(Pt::String& dst, T val, Pt::uint8_t base, bool uppercase)
 {
+    dst.clear();
+
     static const char* L_DIGITS = "0123456789abcdef";
     static const char* U_DIGITS = "0123456789ABCDEF";
            const char* S_DIGITS = uppercase ? U_DIGITS : L_DIGITS;
@@ -117,6 +119,7 @@ static inline void revUIntString(Pt::String& dst, const Pt::String& src, Pt::Cha
     // Process without using thousands separator
     if(!thousandsSep || srcLen <= 3) {
         // Resize the destination buffer
+        dst.clear();
         dst.reserve(srcLen);
         // Reserve the characters
         while(srcIt != srcItEnd) dst += *srcIt--;
@@ -127,6 +130,7 @@ static inline void revUIntString(Pt::String& dst, const Pt::String& src, Pt::Cha
         const size_t sepCnt = (srcLen + 2) / 3 - 1;
         const size_t dstLen = src.length() + sepCnt;
         // Resize the destination buffer
+        dst.clear();
         dst.reserve(dstLen);
         // Reserve the characters while adding thousands separator(s)
         unsigned int digitIndex = 0;
@@ -212,7 +216,7 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
     const Pt::uint32_t numVal = negNum ? (-_valPOD.i32) : _valPOD.i32;
     Pt::String         strVal;
 
-    // Process the 'sign' character as prefix characters
+    // Handle 'sign' as prefix character
     Pt::String prefixStr;
 
     if(!fss.sign || fss.sign == '-') {
@@ -234,32 +238,40 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
 
     // Process as base 2 type
     if( TYPE_IS_B(fss.type) ) {
-        throw FormatStringError("ff_I32 'b' is not implemented yet!");
-    }
-    // Process as base 8 type
-    else if( TYPE_IS_O(fss.type) ) {
-        throw FormatStringError("ff_I32 'o' is not implemented yet!");
-    }
-    // Process as base 16 type
-    else if( TYPE_IS_X(fss.type) ) {
-        //throw FormatStringError("ff_I32 'x' is not implemented yet!");
-    /*
-         # For integral types, when binary, octal, or hexadecimal presentation type is used, the alternate form
-           inserts the prefix (0b, 0, or 0x) into the output value after the sign character (possibly space) if
-           there is one, or add it before the output value otherwise.
-     */
-        // Handle '#'
+        // Handle '#' as prefix characters
         if(fss.altForm) {
             fss.altForm = false;
             prefixStr += '0';
             prefixStr += fss.type;
         }
-
+        // Convert to string (in reversed direction)
+        printUIntRev(strVal, numVal, 2, (fss.type == 'X'));
+        // Reverse the string
+        revUIntString(_valStr, strVal, 0);
+    }
+    // Process as base 8 type
+    else if( TYPE_IS_O(fss.type) ) {
+        // Handle '#' as prefix characters
+        if(fss.altForm) {
+            fss.altForm = false;
+            prefixStr += '0';
+        }
+        // Convert to string (in reversed direction)
+        printUIntRev(strVal, numVal, 8, (fss.type == 'X'));
+        // Reverse the string
+        revUIntString(_valStr, strVal, 0);
+    }
+    // Process as base 16 type
+    else if( TYPE_IS_X(fss.type) ) {
+        // Handle '#' as prefix characters
+        if(fss.altForm) {
+            fss.altForm = false;
+            prefixStr += '0';
+            prefixStr += fss.type;
+        }
         // Convert to string (in reversed direction)
         printUIntRev(strVal, numVal, 16, (fss.type == 'X'));
-
         // Reverse the string
-        _valStr.clear();
         revUIntString(_valStr, strVal, 0);
     }
     // Process as base 10 type
@@ -280,7 +292,6 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
             if(!thousandsSep) thousandsSep = '.';
         }
         // Reverse the string and add thousands separator as needed
-        _valStr.clear();
         revUIntString(_valStr, strVal, thousandsSep);
     }
     // Invalid type
