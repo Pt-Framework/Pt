@@ -172,43 +172,6 @@ FormatStringError::FormatStringError(const char* msg)
 //     https://github.com/fmtlib/fmt/releases/tag/6.2.0
 //     https://github.com/fmtlib/fmt/releases/tag/4.1.0
 //
-void FormatStringArg::ff_I8(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{
-    throw FormatStringError("ff_I8 is not implemented yet!");
-}
-
-
-void FormatStringArg::ff_U8(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{
-    throw FormatStringError("ff_U8 is not implemented yet!");
-}
-
-
-void FormatStringArg::ff_I16(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{
-    throw FormatStringError("ff_I16 is not implemented yet!");
-}
-
-
-void FormatStringArg::ff_U16(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{
-    throw FormatStringError("ff_U16 is not implemented yet!");
-}
-
-
-/*
-    fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
-
-    Pt::Char fill;       // fill character
-    char     align;      // < > ^
-    char     sign;       // + - [space]
-    bool     altForm;    // #
-    bool     zeroPad;    // 0
-    size_t   width;      // minimum field width (default 0)
-    size_t   precision;  // floating-point precision (default 6)
-    bool     locale;     // use locale-specific formatting
-    char     type;       // none/s b B c d o x X a A e E f/F g G p
-*/
 void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // Preparation
@@ -329,7 +292,114 @@ void FormatStringArg::ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpu
 
 void FormatStringArg::ff_U32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
-    throw FormatStringError("ff_U32 is not implemented yet!");
+    // Preparation
+    const Pt::uint32_t numVal = _valPOD.u32;
+    Pt::String         strVal;
+
+    // Handle 'sign' as prefix character
+    Pt::String prefixStr;
+
+    if(!fss.sign || fss.sign == '-') {
+        // Not used
+    }
+    else if(!fss.sign == '+') {
+        prefixStr = '+';
+    }
+    else if(!fss.sign == ' ') {
+        prefixStr = ' ';
+    }
+    else {
+        throw FormatStringError("invalid 'sign specifier' in format string");
+    }
+
+    // Process as base 2 type
+    if( TYPE_IS_B(fss.type) ) {
+        // Handle '#' as prefix characters
+        if(fss.altForm) {
+            fss.altForm = false;
+            prefixStr += '0';
+            prefixStr += fss.type;
+        }
+        // Convert to string (in reversed direction)
+        printUIntRev(strVal, numVal, 2, (fss.type == 'X'));
+        // Reverse the string
+        revUIntString(_valStr, strVal, 0);
+    }
+    // Process as base 8 type
+    else if( TYPE_IS_O(fss.type) ) {
+        // Handle '#' as prefix characters
+        if(fss.altForm) {
+            fss.altForm = false;
+            prefixStr += '0';
+        }
+        // Convert to string (in reversed direction)
+        printUIntRev(strVal, numVal, 8, (fss.type == 'X'));
+        // Reverse the string
+        revUIntString(_valStr, strVal, 0);
+    }
+    // Process as base 16 type
+    else if( TYPE_IS_X(fss.type) ) {
+        // Handle '#' as prefix characters
+        if(fss.altForm) {
+            fss.altForm = false;
+            prefixStr += '0';
+            prefixStr += fss.type;
+        }
+        // Convert to string (in reversed direction)
+        printUIntRev(strVal, numVal, 16, (fss.type == 'X'));
+        // Reverse the string
+        revUIntString(_valStr, strVal, 0);
+    }
+    // Process as base 10 type
+    else if( TYPE_IS_D(fss.type) ) {
+        // Alternate form cannot be used with base 10 type
+        if(fss.altForm)
+            throw FormatStringError("format specifier '#' requires 'b/B/o/x/X' numeric argument");
+        // Convert to string (in reversed direction)
+        printUIntRev(strVal, numVal, 10, false);
+        // Determine the thousands separator
+        Pt::Char thousandsSep = 0;
+        if(fss.locale) {
+            // Get the locale-specific separator if possible
+#ifdef PT_WITH_STD_LOCALE
+            if(numpunct) thousandsSep = numpunct->thousands_sep();
+#endif
+            // Otherwise, use the default separator
+            if(!thousandsSep) thousandsSep = '.';
+        }
+        // Reverse the string and add thousands separator as needed
+        revUIntString(_valStr, strVal, thousandsSep);
+    }
+    // Invalid type
+    else {
+        throw FormatStringError("invalid 'type specifier' in format string");
+    }
+
+    // Put the prefix characters
+    if(fss.zeroPad) {
+        if(!prefixStr.empty()) {
+            rbf += prefixStr;
+            fss.width = ( fss.width > prefixStr.length() ) ? ( fss.width - prefixStr.length() ) : 0;
+        }
+    }
+    else if(!prefixStr.empty()) {
+        _valStr = prefixStr + _valStr;
+    }
+
+    // Handle '0'
+    if(fss.zeroPad) {
+        // Handle '0'
+        fss.zeroPad = 0;
+        if(!fss.align) fss.fill = '0';
+    }
+
+    // The default alignment for numeric argument is right
+    if(!fss.align) fss.align = '>';
+
+    // Process the generated string
+    fss.type   = 's';
+    fss.locale = false;
+    ff_S(rbf, fss, numpunct);
 }
 
 
@@ -345,6 +415,19 @@ void FormatStringArg::ff_U64(Pt::String &rbf, FormatStringSpec& fss, const numpu
 }
 
 
+/*
+    fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
+
+    Pt::Char fill;       // fill character
+    char     align;      // < > ^
+    char     sign;       // + - [space]
+    bool     altForm;    // #
+    bool     zeroPad;    // 0
+    size_t   width;      // minimum field width (default 0)
+    size_t   precision;  // floating-point precision (default 6)
+    bool     locale;     // use locale-specific formatting
+    char     type;       // none/s b B c d o x X a A e E f/F g G p
+*/
 void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     throw FormatStringError("ff_F is not implemented yet!");
@@ -396,13 +479,13 @@ void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     }
     // Process as numeric type
     else if( TYPE_IS_C(fss.type) ) {
-        _valPOD.u8 = _valPOD.b ? 1 : 0;
-        fss.type   = 'd'; // For boolean type 'c' is assumed as 'd'
-        ff_U8(rbf, fss, numpunct);
+        _valPOD.u32 = _valPOD.b ? 1 : 0;
+        fss.type    = 'd'; // For boolean type 'c' is assumed as 'd'
+        ff_U32(rbf, fss, numpunct);
     }
     else if( TYPE_IS_BDOX(fss.type) ) {
-        _valPOD.u8 = _valPOD.b ? 1 : 0;
-        ff_U8(rbf, fss, numpunct);
+        _valPOD.u32 = _valPOD.b ? 1 : 0;
+        ff_U32(rbf, fss, numpunct);
     }
     // Invalid type
     else {
@@ -439,8 +522,8 @@ void FormatStringArg::ff_C(Pt::String &rbf, FormatStringSpec& fss, const numpunc
     }
     // Process as numeric type
     else if( TYPE_IS_BDOX(fss.type) ) {
-        _valPOD.u8 = _valPOD.b ? 1 : 0;
-        ff_U8(rbf, fss, numpunct);
+        _valPOD.u32 = _valPOD.b ? 1 : 0;
+        ff_U32(rbf, fss, numpunct);
     }
     // Invalid type
     else {

@@ -100,25 +100,28 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{}| |{}| |{}|", 'A', 'b', 'c');
     TEST_AND_BENCHMARK("|{:*<8}| |{:*>8}| |{:*^8}|", 'A', 'b', 'c');
 
-    //TEST_AND_BENCHMARK("|{:d}| |{:d}| |{:d}|", 'A', 'b', 'c');
-    //TEST_AND_BENCHMARK("|{:*<8d}| |{:*>8d}| |{:*^8d}|", 'A', 'b', 'c');
+    TEST_AND_BENCHMARK("|{:d}| |{:d}| |{:d}|", 'A', 'b', 'c');
+    TEST_AND_BENCHMARK("|{:*<8d}| |{:*>8d}| |{:*^8d}|", 'A', 'b', 'c');
 
     // Pointers
+    // TODO
 
     // Booleans
+    TEST_AND_BENCHMARK("|{:08}| |{:08}|", true, false);
+    TEST_AND_BENCHMARK("|{:08d}| |{:08d}|", true, false);
+
     COMPARE_WITH_FMT = false;
-    TEST_AND_BENCHMARK("|{:08}||{:08}|", true, false);
-    //TEST_AND_BENCHMARK("|{:08d}||{:08d}|", true, false);
     TEST_AND_BENCHMARK("|{:<8L}| |{:>8L}|", true, false);
     COMPARE_WITH_FMT = true;
 
     TEST_AND_BENCHMARK("|{0:*<8}| |{0:*>8}| |{0:*^8}| |{1:*<8}| |{1:*>8}| |{1:*^8}|", true, false);
     TEST_AND_BENCHMARK("|{0:*<08}| |{0:*>08}| |{0:*^08}| |{1:*<08}| |{1:*>08}| |{1:*^08}|", true, false);
 
-    //TEST_AND_BENCHMARK("|{0:*<8d}| |{0:*>8d}| |{0:*^8d}| |{1:*<8d}| |{1:*>8d}| |{1:*^8d}|", true, false);
-    //TEST_AND_BENCHMARK("|{0:*<08d}| |{0:*>08d}| |{0:*^08d}| |{1:*<08d}| |{1:*>08d}| |{1:*^08d}|", true, false);
+    TEST_AND_BENCHMARK("|{0:*<8d}| |{0:*>8d}| |{0:*^8d}| |{1:*<8d}| |{1:*>8d}| |{1:*^8d}|", true, false);
+    TEST_AND_BENCHMARK("|{0:*<08d}| |{0:*>08d}| |{0:*^08d}| |{1:*<08d}| |{1:*>08d}| |{1:*^08d}|", true, false);
 
     // Floating-points
+    // TODO
 
     // Integers
     TEST_AND_BENCHMARK("|{0:8n}| |{1:8n}| |{0:08n}| |{1:08n}| |{2:8n}| |{3:8n}| |{2:08n}| |{3:08n}|", 123, 1234, -567, -5678);
@@ -131,6 +134,7 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{0:*<#8x}| |{1:*<#8x}| |{0:*^#8x}| |{1:*^#8x}| |{2:*<#8x}| |{3:*<#8x}| |{2:*^#8x}| |{3:*^#8x}|", 123, 1234, -567, -5678);
 
     // Mixeds
+    // TODO
     /*
     std::cerr << fmt::format(
                      "{} {:d} {:.1f} {:p} {}\n",

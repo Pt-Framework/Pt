@@ -103,10 +103,10 @@ struct PT_API FormatStringSpec {
 class PT_API FormatStringArg {
     public:
         // Constructors (one for each data type)
-        inline FormatStringArg(Pt::int8_t         p) : _fmtFun(&FormatStringArg::ff_I8 ) { _valPOD.i8  = p;             }
-        inline FormatStringArg(Pt::uint8_t        p) : _fmtFun(&FormatStringArg::ff_U8 ) { _valPOD.u8  = p;             }
-        inline FormatStringArg(Pt::int16_t        p) : _fmtFun(&FormatStringArg::ff_I16) { _valPOD.i16 = p;             }
-        inline FormatStringArg(Pt::uint16_t       p) : _fmtFun(&FormatStringArg::ff_U16) { _valPOD.u16 = p;             }
+        inline FormatStringArg(Pt::int8_t         p) : _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
+        inline FormatStringArg(Pt::uint8_t        p) : _fmtFun(&FormatStringArg::ff_U32) { _valPOD.u32 = p;             }
+        inline FormatStringArg(Pt::int16_t        p) : _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
+        inline FormatStringArg(Pt::uint16_t       p) : _fmtFun(&FormatStringArg::ff_U32) { _valPOD.u32 = p;             }
         inline FormatStringArg(Pt::int32_t        p) : _fmtFun(&FormatStringArg::ff_I32) { _valPOD.i32 = p;             }
         inline FormatStringArg(Pt::uint32_t       p) : _fmtFun(&FormatStringArg::ff_U32) { _valPOD.u32 = p;             }
         inline FormatStringArg(Pt::int64_t        p) : _fmtFun(&FormatStringArg::ff_I64) { _valPOD.i64 = p;             }
@@ -128,10 +128,6 @@ class PT_API FormatStringArg {
 
     private:
         // Formatter functions (one for each data type)
-        void ff_I8 (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
-        void ff_U8 (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
-        void ff_I16(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
-        void ff_U16(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_U32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
@@ -150,10 +146,6 @@ class PT_API FormatStringArg {
 
         // Union for POD argument value
         union ArgValue {
-            Pt::int8_t   i8;
-            Pt::uint8_t  u8;
-            Pt::int16_t  i16;
-            Pt::uint16_t u16;
             Pt::int32_t  i32;
             Pt::uint32_t u32;
             Pt::int64_t  i64;
