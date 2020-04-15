@@ -177,7 +177,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         if(precision < 0 || precision >= LDBL_MANT_DIG / 4 - 1) re = 0;
         else                                                    re = LDBL_MANT_DIG / 4 - 1 -precision;
         if(re) {
-            round *= 1 << (LDBL_MANT_DIG % 4);
+            round *= ( 1 << (LDBL_MANT_DIG % 4) );
             while(re--) round *= 16;
             val += round;
             val -= round;
@@ -188,15 +188,21 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         *--estr = (e2<0 ? '-' : '+');
         *--estr = uppercase ? 'P' : 'p';
         // Process the mantissa
-        // TODO: ERROR : Wanted : f.fffffffffffffff
-        //               Got    : 1.fffffffffffffffe
-        //printf("### %.20La\n", val);
+        /* ### NOTE ###
+         *
+         * for number 1.18973149535723176502E+4932
+         *
+         *     sprintf() produces F.FFFFFFFFFFFFFFF00000P+16380L
+         *     this code produces 1.FFFFFFFFFFFFFFFE0000P+16383L
+         *
+         * Both are acctually correct and really represent the same number.
+         */
         s = buf;
         do {
             const Pt::int32_t x = val;
             *s++ = X_DIGITS[x];
             val = 16 * (val - x);
-            if( s - buf == 1 && ( val || precision > 0 || altForm ) ) *s++='.';
+            if( s - buf == 1 && ( val || precision > 0 || altForm ) ) *s++ = '.';
         } while(val);
         *s = 0;
         //printf("### %s\n", buf);
@@ -268,13 +274,13 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         e = 0;
     }
 
-    // Perform rounding - j is precision after the radix (possibly negative)
+    // Perform rounding: j is precision after the radix (possibly negative)
     Pt::int32_t j = precision - (type != 'f') * e - (type == 'g' && precision);
 
     if( j < 9 * (z - r - 1) ) {
         // Avoid C's broken division of negative numbers
         d = r + 1 + ( ( j + 9 * LDBL_MAX_EXP ) / 9 - LDBL_MAX_EXP );
-        j += 9 * LDBL_MAX_EXP;
+        j += (9 * LDBL_MAX_EXP);
         j %= 9;
         Pt::uint32_t mf = 10;
         ++j;
@@ -311,7 +317,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         if((ssize_t) precision > e && e >= -4) {
             // Select 'f'
             type--;
-            precision -= e + 1;
+            precision -= (e + 1);
         }
         else {
             // Select 'e'
@@ -333,49 +339,59 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         }
     }
 
-    if (precision > INT_MAX-1-(precision || altForm ))
-        return false;
+    if( (ssize_t) precision > INT_MAX - 1 - (precision || altForm ) ) return false;
+
     l = 1 + precision + (precision || altForm );
-    if (type == 'f') {
-        if (e > INT_MAX-l) return false;
-        if (e>0) l+=e;
-    } else {
-        estr=formatUnsigned( ebuf, (e < 0) ? -e : e );
-        while(ebuf-estr<2) *--estr='0';
-        *--estr = (e<0 ? '-' : '+');
-        *--estr = type;
-        if (ebuf-estr > INT_MAX-l) return false;
-        l += ebuf-estr;
+
+    if(type == 'f') {
+        if(e > INT_MAX - l) return false;
+        if(e > 0) l += e;
+    }
+    else {
+        estr = formatUnsigned( ebuf, (e < 0) ? -e : e );
+        while(ebuf - estr < 2) *--estr = '0';
+        *--estr = ( (e < 0) ? '-' : '+' );
+        *--estr = uppercase ? 'E' : 'e';
+        if(ebuf - estr > INT_MAX - l) return false;
+        l += (ebuf - estr);
     }
 
-    if (l > INT_MAX-pl) return false;
+    if(l > INT_MAX - pl) return false;
 
-    if (type == 'f') {
-        if (a>r) a=r;
-        for (d=a; d<=r; d++) {
-            char *s = formatUnsigned( buf + 9, *d );
-            if (d!=a) while (s>buf) *--s='0';
-            else if (s==buf+9) *--s='0';
-            puts(dst, s, buf+9-s);
+    if(type == 'f') {
+        if(a > r) a = r;
+        for(d = a; d <= r; ++d) {
+            char *s = formatUnsigned(buf + 9, *d);
+            if(d != a) {
+                while(s > buf) *--s = '0';
+            }
+            else if(s == buf + 9) {
+                *--s = '0';
+            }
+            puts(dst, s, buf + 9 - s);
         }
-        if (precision || altForm ) puts(dst, ".", 1);
-        for (; d<z && precision>0; d++, precision-=9) {
-            char *s = formatUnsigned( buf + 9, *d );
-            while (s>buf) *--s='0';
-            puts(dst, s, MIN(9,precision));
+        if(precision || altForm ) puts(dst, ".", 1);
+        for(; d < z && precision > 0; ++d, precision -= 9) {
+            char *s = formatUnsigned(buf + 9, *d);
+            while(s > buf) *--s = '0';
+            puts(dst, s, MIN(9, precision));
         }
-    } else {
-        if (z<=a) z=a+1;
-        for (d=a; d<z && precision>=0; d++) {
-            char *s = formatUnsigned( buf + 9, *d );
-            if (s==buf+9) *--s='0';
-            if (d!=a) while (s>buf) *--s='0';
+    }
+    else {
+        if(z <= a) z = a + 1;
+
+        for(d = a; d < z && precision >= 0; ++d) {
+            char *s = formatUnsigned(buf + 9, *d);
+            if(s == buf+9) *--s = '0';
+            if(d != a) {
+                while(s > buf) *--s = '0';
+            }
             else {
                 puts(dst, s++, 1);
-                if ( precision > 0|| altForm ) puts(dst, ".", 1);
+                if(precision > 0 || altForm) puts(dst, ".", 1);
             }
-            puts(dst, s, MIN(buf+9-s, precision));
-            precision -= buf+9-s;
+            puts(dst, s, MIN(buf + 9 - s, (ssize_t) precision));
+            precision -= (buf + 9 - s);
         }
         puts(dst, estr, ebuf-estr);
     }
