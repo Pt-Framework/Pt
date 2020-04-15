@@ -144,6 +144,90 @@ namespace Pt {
 
 int main(int argc, char* args[])
 {
+    /*
+        REFERENCE
+
+        1.81C9P+13
+        1.2345E+04
+        12345.1235
+        1.235E+04
+
+        1.FFFFFE00000000000000P+127
+        3.40282346638528859812E+38
+        3.4028234663852885981E+38
+
+        1.FFFFFFFFFFFFF0000000P+1023
+        1.79769313486231570815E+308
+        1.7976931348623157081E+308
+
+        F.FFFFFFFFFFFFFFF00000P+16380
+        1.18973149535723176502E+4932
+        1.189731495357231765E+4932
+
+        1.000099999999999989
+
+        -------------------------
+
+        1.81C9P+13
+        1.2345e+04
+        12345.1235
+        1.235e+04
+
+        1.FFFFFE00000000000000P+127
+        3.40282346638528859812e+38
+        3.4028234663852885981e+38
+
+        1.FFFFFFFFFFFFF0000000P+1023
+        1.79769313486231570815e+308
+        1.7976931348623157081e+308
+
+        1.FFFFFFFFFFFFFFFE0000P+16383
+        1.18973149535723176502e+4932
+        1.189731495357231765e+4932
+    */
+#if 1
+    bool       altFrm = false;
+    Pt::String s;
+    formatPositiveFP(s, 12345.123456789, 4, altFrm, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, altFrm, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, altFrm, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, altFrm, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    std::cerr << std::endl;
+    formatPositiveFP(s, 3.40282347e+38f, 20, altFrm, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 3.40282347e+38f, 20, altFrm, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 3.40282347e+38f, 20, altFrm, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    std::cerr << std::endl;
+    formatPositiveFP(s, 1.7976931348623157e308, 20, altFrm, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.7976931348623157e308, 20, altFrm, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.7976931348623157e308, 20, altFrm, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    std::cerr << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, altFrm, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, altFrm, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, altFrm, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    std::cerr << std::endl;
+    formatPositiveFP(s, 1.00010000, 20, false, 'G'); std::cerr << s.narrow() << std::endl;
+#else
+    printf("%.4lA\n", 12345.123456789);
+    printf("%.4lE\n", 12345.123456789);
+    printf("%.4lF\n", 12345.123456789);
+    printf("%.4lG\n", 12345.123456789);
+    printf("\n");
+    printf("%.20A\n", 3.40282347e+38f);
+    printf("%.20E\n", 3.40282347e+38f);
+    printf("%.20G\n", 3.40282347e+38f);
+    printf("\n");
+    printf("%.20lA\n", 1.7976931348623157e308);
+    printf("%.20lE\n", 1.7976931348623157e308);
+    printf("%.20lG\n", 1.7976931348623157e308);
+    printf("\n");
+    printf("%.20LA\n", 1.18973149535723176502e+4932L);
+    printf("%.20LE\n", 1.18973149535723176502e+4932L);
+    printf("%.20LG\n", 1.18973149535723176502e+4932L);
+    printf("\n");
+    printf("%.20G\n", 1.00010000);
+#endif
+    return 0;
+
     // Strings
     TEST_AND_BENCHMARK("{{}}", 0);
     TEST_AND_BENCHMARK("{}", "aBc");
@@ -216,83 +300,6 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
 
     COMPARE_WITH_FMT = true;
-#endif
-
-    /*
-        REFERENCE
-
-        1.81C9P+13
-        1.2345E+04
-        12345.1235
-        1.235E+04
-
-        1.FFFFFE00000000000000P+127
-        3.40282346638528859812E+38
-        3.4028234663852885981E+38
-
-        1.FFFFFFFFFFFFF0000000P+1023
-        1.79769313486231570815E+308
-        1.7976931348623157081E+308
-
-        F.FFFFFFFFFFFFFFF00000P+16380
-        1.18973149535723176502E+4932
-        1.189731495357231765E+4932
-
-        -------------------------
-
-        1.81C9P+13
-        1.2345e+04
-        12345.1235
-        1.235e+04
-
-        1.FFFFFE00000000000000P+127
-        3.40282346638528859812e+38
-        3.4028234663852885981e+38
-
-        1.FFFFFFFFFFFFF0000000P+1023
-        1.79769313486231570815e+308
-        1.7976931348623157081e+308
-
-        1.FFFFFFFFFFFFFFFE0000P+16383
-        1.18973149535723176502e+4932
-        1.189731495357231765e+4932
-    */
-    
-#if 1
-    Pt::String s;
-    formatPositiveFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 12345.123456789, 4, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 12345.123456789, 4, false, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 12345.123456789, 4, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
-    std::cerr << std::endl;
-    formatPositiveFP(s, 3.40282347e+38f, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 3.40282347e+38f, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 3.40282347e+38f, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
-    std::cerr << std::endl;
-    formatPositiveFP(s, 1.7976931348623157e308, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 1.7976931348623157e308, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 1.7976931348623157e308, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
-    std::cerr << std::endl;
-    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
-#else
-    printf("%.4lA\n", 12345.123456789);
-    printf("%.4lE\n", 12345.123456789);
-    printf("%.4lF\n", 12345.123456789);
-    printf("%.4lG\n", 12345.123456789);
-    printf("\n");
-    printf("%.20A\n", 3.40282347e+38f);
-    printf("%.20E\n", 3.40282347e+38f);
-    printf("%.20G\n", 3.40282347e+38f);
-    printf("\n");
-    printf("%.20lA\n", 1.7976931348623157e308);
-    printf("%.20lE\n", 1.7976931348623157e308);
-    printf("%.20lG\n", 1.7976931348623157e308);
-    printf("\n");
-    printf("%.20LA\n", 1.18973149535723176502e+4932L);
-    printf("%.20LE\n", 1.18973149535723176502e+4932L);
-    printf("%.20LG\n", 1.18973149535723176502e+4932L);
 #endif
 
     // Done

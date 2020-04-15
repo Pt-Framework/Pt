@@ -161,8 +161,6 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
     Pt::int32_t e2 = 0;
     Pt::int32_t e;
 
-    Pt::int32_t i;
-    Pt::int32_t j;
     Pt::int32_t l;
 
     Pt::int32_t pl = 0;
@@ -204,9 +202,9 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         //printf("### %s\n", buf);
         // Store the result
         pl += 2;
-        if(precision > INT_MAX - 2 - (ebuf - estr) - pl) return false;
-        if(precision && s - buf - 2 < precision) l = (precision + 2) + (ebuf - estr);
-        else                                     l = (s - buf) + (ebuf - estr);
+        if( (ssize_t) precision > (INT_MAX - 2 - (ebuf - estr) - pl) ) return false;
+        if( precision && (s - buf - 2 < (ssize_t) precision) ) l = (precision + 2) + (ebuf - estr);
+        else                                                   l = (s - buf) + (ebuf - estr);
         puts(dst, buf, s - buf);
         put0(dst, l - (ebuf - estr) - (s - buf));
         puts(dst, estr, ebuf - estr);
@@ -231,101 +229,110 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         val = 1000000000 * (val - *z++);
     } while(val);
 
-
-
-
-    while (e2>0) {
-        uint32_t carry=0;
-        int sh=MIN(29,e2);
-        for (d=z-1; d>=a; d--) {
-            uint64_t x = ((uint64_t)*d<<sh)+carry;
-            *d = x % 1000000000;
+    while(e2 > 0) {
+              Pt::uint32_t carry = 0;
+        const Pt::int32_t  sh    = MIN(29, e2);
+        for(d = z - 1; d >= a; --d) {
+            const Pt::uint64_t x = ( (Pt::uint64_t) *d << sh ) + carry;
+            *d    = x % 1000000000;
             carry = x / 1000000000;
         }
-        if (carry) *--a = carry;
-        while (z>a && !z[-1]) z--;
-        e2-=sh;
+        if(carry) *--a = carry;
+        while(z > a && !z[-1]) --z;
+        e2 -= sh;
     }
-    while (e2<0) {
-        uint32_t carry=0, *b;
-        int sh=MIN(9,-e2), need=1+(precision+LDBL_MANT_DIG/3U+8)/9;
-        for (d=a; d<z; d++) {
-            uint32_t rm = *d & (1<<sh)-1;
-            *d = (*d>>sh) + carry;
-            carry = (1000000000>>sh) * rm;
+
+    while(e2 < 0) {
+              Pt::uint32_t* b;
+              Pt::uint32_t  carry = 0;
+        const Pt::int32_t   sh    = MIN(9, -e2);
+        const Pt::int32_t   need  = 1 + ( precision + LDBL_MANT_DIG / 3U + 8 ) / 9;
+        for(d = a; d < z; ++d) {
+            const Pt::uint32_t rm = *d & ( (1 << sh) - 1 );
+            *d = (*d >> sh) + carry;
+            carry = (1000000000 >> sh) * rm;
         }
-        if (!*a) a++;
-        if (carry) *z++ = carry;
-        /* Avoid (slow!) computation past requested precision */
-        b = type == 'f' ? r : a;
-        if (z-b > need) z = b+need;
-        e2+=sh;
+        if(!*a) ++a;
+        if(carry) *z++ = carry;
+        // Avoid slow computation past requested precision
+        b = (type == 'f') ? r : a;
+        if(z - b > need) z = b + need;
+        e2 += sh;
     }
 
-    if (a<z) for (i=10, e=9*(r-a); *a>=i; i*=10, e++);
-    else e=0;
+    if(a < z) {
+        e = 9 * (r - a);
+        for(Pt::uint32_t i = 10; *a >= i; i *= 10) ++e;
+    }
+    else {
+        e = 0;
+    }
 
+    // Perform rounding - j is precision after the radix (possibly negative)
+    Pt::int32_t j = precision - (type != 'f') * e - (type == 'g' && precision);
 
-
-    // e   Decimal floating point
-    // f   Scientific notation (mantissa/exponent)
-    // g   Use the shortest representation: %e or %f
-
-
-    /* Perform rounding: j is precision after the radix (possibly neg) */
-    j = precision - (type != 'f')*e - (type == 'g' && precision);
-    if (j < 9*(z-r-1)) {
-        uint32_t x;
-        /* We avoid C's broken division of negative numbers */
-        d = r + 1 + ((j+9*LDBL_MAX_EXP)/9 - LDBL_MAX_EXP);
-        j += 9*LDBL_MAX_EXP;
+    if( j < 9 * (z - r - 1) ) {
+        // Avoid C's broken division of negative numbers
+        d = r + 1 + ( ( j + 9 * LDBL_MAX_EXP ) / 9 - LDBL_MAX_EXP );
+        j += 9 * LDBL_MAX_EXP;
         j %= 9;
-        for (i=10, j++; j<9; i*=10, j++);
-        x = *d % i;
-        /* Are there any significant digits past j? */
-        if (x || d+1!=z) {
-            long double round = 2/LDBL_EPSILON;
+        Pt::uint32_t mf = 10;
+        ++j;
+        for(; j < 9; ++j) mf *=10;
+        Pt::uint32_t x = *d % mf;
+        // Are there any significant digits past j?
+        if( x || d + 1 != z ) {
+            long double round = 2 / LDBL_EPSILON;
+            if( ( *d / mf & 1 ) || ( mf == 1000000000 && d > a && ( d[-1] & 1 ) ) ) round += 2;
             long double small;
-            if ((*d/i & 1) || (i==1000000000 && d>a && (d[-1]&1)))
-                round += 2;
-            if (x<i/2) small=0x0.8p0;
-            else if (x==i/2 && d+1==z) small=0x1.0p0;
-            else small=0x1.8p0;
+                 if( x < mf / 2               ) small = 0x0.8p0;
+            else if( x == mf / 2 && d + 1 == z) small = 0x1.0p0;
+            else                                small = 0x1.8p0;
             *d -= x;
-            /* Decide whether to round by probing round+small */
-            if (round+small != round) {
-                *d = *d + i;
-                while (*d > 999999999) {
-                    *d--=0;
-                    if (d<a) *--a=0;
-                    (*d)++;
+            // Decide whether to round by probing (round + small)
+            if( round + small != round ) {
+                *d = *d + mf;
+                while(*d > 999999999) {
+                    *d-- = 0;
+                    if(d < a) *--a = 0;
+                    ++(*d);
                 }
-                for (i=10, e=9*(r-a); *a>=i; i*=10, e++);
+                e = 9 * (r - a);
+                for(Pt::uint32_t i = 10; *a >= i; i *= 10) ++e;
             }
         }
-        if (z>d+1) z=d+1;
+        if(z > d + 1) z = d + 1;
     }
-    for (; z>a && !z[-1]; z--);
+    for(; z > a && !z[-1]; --z);
 
-    if (type == 'g') {
-        if (!precision) precision++;
-        if (precision>e && e>=-4) {
+    // Choose the shortest one between 'f' and 'e'
+    if(type == 'g') {
+        if(!precision) ++precision;
+        if((ssize_t) precision > e && e >= -4) {
+            // Select 'f'
             type--;
-            precision-=e+1;
-        } else {
-            type-=2;
+            precision -= e + 1;
+        }
+        else {
+            // Select 'e'
+            type -= 2;
             precision--;
         }
-        if ( !altForm ) {
-            /* Count trailing zeros in last place */
-            if (z>a && z[-1]) for (i=10, j=0; z[-1]%i==0; i*=10, j++);
-            else j=9;
-            if (type == 'f')
-                precision = MIN(precision,MAX(0,9*(z-r-1)-j));
-            else
-                precision = MIN(precision,MAX(0,9*(z-r-1)+e-j));
+        // Handle non alternate form
+        if( !altForm ) {
+            // Count trailing zeros in last place
+            if(z > a && z[-1]) {
+                j = 0;
+                for(Pt::uint32_t i = 10; z[-1] %i == 0; i *= 10) ++j;
+            }
+            else {
+                j = 9;
+            }
+            if (type == 'f') precision = MIN( precision, MAX( 0, 9 * (z - r - 1)     - j ) );
+            else             precision = MIN( precision, MAX( 0, 9 * (z - r - 1) + e - j ) );
         }
     }
+
     if (precision > INT_MAX-1-(precision || altForm ))
         return false;
     l = 1 + precision + (precision || altForm );
