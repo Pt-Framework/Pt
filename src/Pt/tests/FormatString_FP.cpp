@@ -107,8 +107,8 @@ static inline void out(Pt::String& dst, const char* s, size_t l)
 #define ALT_FORM   (1U<<('#'-' '))
 
 
-
-static inline char *fmt_u(uintmax_t x, char *s)
+template <typename T>
+static inline char *fmt_u(T x, char *s)
 {
     unsigned long y;
     for (   ; x>ULONG_MAX; x/=10) *--s = '0' + x%10;
@@ -116,17 +116,7 @@ static inline char *fmt_u(uintmax_t x, char *s)
     return s;
 }
 
-/* Do not override this check. The floating point printing code below
- * depends on the float.h constants being right. If they are wrong, it
- * may overflow the stack. */
-
-/*
- * w = string width, p = precision, fl = flags, t = type
- *
- * default formatting : w =  0, p = -1
- * "%20.5g            : w = 20, p =  5, fl = 0, t = 'g'
- */
-bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
+bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type)
 {
     // Clear the destination buffer
     dst.clear();
@@ -136,10 +126,10 @@ bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
 
     // Check for uppercase mode
     bool uppercase = false;
-         if(t == 'A') { t = 'a'; uppercase = true; }
-    else if(t == 'E') { t = 'e'; uppercase = true; }
-    else if(t == 'F') { t = 'f'; uppercase = true; }
-    else if(t == 'G') { t = 'g'; uppercase = true; }
+         if(type == 'A') { type = 'a'; uppercase = true; }
+    else if(type == 'E') { type = 'e'; uppercase = true; }
+    else if(type == 'F') { type = 'f'; uppercase = true; }
+    else if(type == 'G') { type = 'g'; uppercase = true; }
 
     // Select the digits
     static const char* L_DIGITS = "0123456789abcdef";
@@ -175,14 +165,14 @@ bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
     val = frexpl(val, &e2) * 2;
     if (val) e2--;
 
-    if ((t|32)=='a') {
+    if (type == 'a') {
         long double round = 8.0;
         int re;
 
         pl += 2;
 
-        if (p<0 || p>=LDBL_MANT_DIG/4-1) re=0;
-        else re=LDBL_MANT_DIG/4-1-p;
+        if (precision<0 || precision>=LDBL_MANT_DIG/4-1) re=0;
+        else re=LDBL_MANT_DIG/4-1-precision;
 
         if (re) {
             round *= 1<<(LDBL_MANT_DIG%4);
@@ -194,20 +184,20 @@ bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
         estr=fmt_u(e2<0 ? -e2 : e2, ebuf);
         if (estr==ebuf) *--estr='0';
         *--estr = (e2<0 ? '-' : '+');
-        *--estr = t+('p'-'a');
+        *--estr = type+('p'-'a');
 
         s=buf;
         do {
             int x=val;
-            *s++=X_DIGITS[x]|(t&32);
+            *s++=X_DIGITS[x]|(type&32);
             val=16*(val-x);
-            if (s-buf==1 && (val||p>0||(fl&ALT_FORM))) *s++='.';
+            if (s-buf==1 && (val||precision>0|| altForm )) *s++='.';
         } while (val);
 
-        if (p > INT_MAX-2-(ebuf-estr)-pl)
+        if (precision > INT_MAX-2-(ebuf-estr)-pl)
             return false;
-        if (p && s-buf-2 < p)
-            l = (p+2) + (ebuf-estr);
+        if (precision && s-buf-2 < precision)
+            l = (precision+2) + (ebuf-estr);
         else
             l = (s-buf) + (ebuf-estr);
 
@@ -215,7 +205,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
         out(dst, estr, ebuf-estr);
         return true;
     }
-    if (p<0) p=6;
+    if (precision<0) precision=6;
 
     if (val) val *= 0x1p28, e2-=28;
 
@@ -241,7 +231,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
     }
     while (e2<0) {
         uint32_t carry=0, *b;
-        int sh=MIN(9,-e2), need=1+(p+LDBL_MANT_DIG/3U+8)/9;
+        int sh=MIN(9,-e2), need=1+(precision+LDBL_MANT_DIG/3U+8)/9;
         for (d=a; d<z; d++) {
             uint32_t rm = *d & (1<<sh)-1;
             *d = (*d>>sh) + carry;
@@ -250,7 +240,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
         if (!*a) a++;
         if (carry) *z++ = carry;
         /* Avoid (slow!) computation past requested precision */
-        b = (t|32)=='f' ? r : a;
+        b = type == 'f' ? r : a;
         if (z-b > need) z = b+need;
         e2+=sh;
     }
@@ -259,7 +249,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
     else e=0;
 
     /* Perform rounding: j is precision after the radix (possibly neg) */
-    j = p - ((t|32)!='f')*e - ((t|32)=='g' && p);
+    j = precision - (type != 'f')*e - (type == 'g' && precision);
     if (j < 9*(z-r-1)) {
         uint32_t x;
         /* We avoid C's broken division of negative numbers */
@@ -293,43 +283,43 @@ bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
     }
     for (; z>a && !z[-1]; z--);
 
-    if ((t|32)=='g') {
-        if (!p) p++;
-        if (p>e && e>=-4) {
-            t--;
-            p-=e+1;
+    if (type == 'g') {
+        if (!precision) precision++;
+        if (precision>e && e>=-4) {
+            type--;
+            precision-=e+1;
         } else {
-            t-=2;
-            p--;
+            type-=2;
+            precision--;
         }
-        if (!(fl&ALT_FORM)) {
+        if ( !altForm ) {
             /* Count trailing zeros in last place */
             if (z>a && z[-1]) for (i=10, j=0; z[-1]%i==0; i*=10, j++);
             else j=9;
-            if ((t|32)=='f')
-                p = MIN(p,MAX(0,9*(z-r-1)-j));
+            if (type == 'f')
+                precision = MIN(precision,MAX(0,9*(z-r-1)-j));
             else
-                p = MIN(p,MAX(0,9*(z-r-1)+e-j));
+                precision = MIN(precision,MAX(0,9*(z-r-1)+e-j));
         }
     }
-    if (p > INT_MAX-1-(p || (fl&ALT_FORM)))
+    if (precision > INT_MAX-1-(precision || altForm ))
         return false;
-    l = 1 + p + (p || (fl&ALT_FORM));
-    if ((t|32)=='f') {
+    l = 1 + precision + (precision || altForm );
+    if (type == 'f') {
         if (e > INT_MAX-l) return false;
         if (e>0) l+=e;
     } else {
         estr=fmt_u(e<0 ? -e : e, ebuf);
         while(ebuf-estr<2) *--estr='0';
         *--estr = (e<0 ? '-' : '+');
-        *--estr = t;
+        *--estr = type;
         if (ebuf-estr > INT_MAX-l) return false;
         l += ebuf-estr;
     }
 
     if (l > INT_MAX-pl) return false;
 
-    if ((t|32)=='f') {
+    if (type == 'f') {
         if (a>r) a=r;
         for (d=a; d<=r; d++) {
             char *s = fmt_u(*d, buf+9);
@@ -337,24 +327,24 @@ bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
             else if (s==buf+9) *--s='0';
             out(dst, s, buf+9-s);
         }
-        if (p || (fl&ALT_FORM)) out(dst, ".", 1);
-        for (; d<z && p>0; d++, p-=9) {
+        if (precision || altForm ) out(dst, ".", 1);
+        for (; d<z && precision>0; d++, precision-=9) {
             char *s = fmt_u(*d, buf+9);
             while (s>buf) *--s='0';
-            out(dst, s, MIN(9,p));
+            out(dst, s, MIN(9,precision));
         }
     } else {
         if (z<=a) z=a+1;
-        for (d=a; d<z && p>=0; d++) {
+        for (d=a; d<z && precision>=0; d++) {
             char *s = fmt_u(*d, buf+9);
             if (s==buf+9) *--s='0';
             if (d!=a) while (s>buf) *--s='0';
             else {
                 out(dst, s++, 1);
-                if (p>0||(fl&ALT_FORM)) out(dst, ".", 1);
+                if ( precision > 0|| altForm ) out(dst, ".", 1);
             }
-            out(dst, s, MIN(buf+9-s, p));
-            p -= buf+9-s;
+            out(dst, s, MIN(buf+9-s, precision));
+            precision -= buf+9-s;
         }
         out(dst, estr, ebuf-estr);
     }

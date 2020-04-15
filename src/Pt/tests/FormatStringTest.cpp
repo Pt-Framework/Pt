@@ -91,16 +91,32 @@ static bool COMPARE_WITH_FMT = true;
 // svn commit -m 'Implementing a simple string formatter ala std::format that uses Pt::String'
 
 namespace Pt {
-    bool formatPositiveFP(Pt::String& f, long double y, int p, int fl, int t);
+    bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
 }
 
 int main(int argc, char* args[])
 {
+    /*
+        1.81c9p+13
+        1.2345e+04
+        12345.1235
+        1.235e+04
+
+        1.fffffffffffffffep+16383
+        1.18973149535723176502e+4932
+        1.189731495357231765e+4932
+     */
     Pt::String s;
-    formatPositiveFP(s, 12345.123456789, 4, 0, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 12345.123456789, 4, 0, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 12345.123456789, 4, 0, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 12345.123456789, 4, 0, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    std::cerr << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    //std::cerr << std::endl;
+    //printf("%.4f\n", 0x1.81c9p+13);
     return 0;
 
     // Strings

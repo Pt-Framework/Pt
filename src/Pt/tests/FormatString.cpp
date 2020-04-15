@@ -419,26 +419,6 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     const bool   negNum = (sigVal < SelectFP<_ValueT>::selectValue(0.0f, 0.0));
     const ValueT numVal = negNum ? -sigVal : sigVal;
 
-    // Handle 'sign' as prefix character
-    Pt::Char prefixChr = 0;
-
-    if(!fss.sign || fss.sign == '-') {
-        if(negNum) {
-            prefixChr = '-';
-        }
-    }
-    else if(fss.sign == '+') {
-        if(negNum) prefixChr = '-';
-        else       prefixChr = '+';
-    }
-    else if(fss.sign == ' ') {
-        if(negNum) prefixChr = '-';
-        else       prefixChr = ' ';
-    }
-    else {
-        throw FormatStringError("invalid 'sign specifier' in format string");
-    }
-
     // Process Inf and NaN
     _valStr.clear();
 
@@ -449,6 +429,27 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     else if(isnan(numVal)) {
         if(Pt::isupper(fss.type)) _valStr = FLOAT_UPPER_NAN;
         else                      _valStr = FLOAT_LOWER_NAN;
+    }
+
+    // Handle 'sign' as a prefix character
+    // TODO: 'a' and 'A' -> add '0x' and '0X'
+    Pt::String prefixStr;
+
+    if(!fss.sign || fss.sign == '-') {
+        if(negNum) {
+            prefixStr = '-';
+        }
+    }
+    else if(fss.sign == '+') {
+        if(negNum) prefixStr = '-';
+        else       prefixStr = '+';
+    }
+    else if(fss.sign == ' ') {
+        if(negNum) prefixStr = '-';
+        else       prefixStr = ' ';
+    }
+    else {
+        throw FormatStringError("invalid 'sign specifier' in format string");
     }
 
     if(!_valStr.empty()) {
@@ -513,20 +514,20 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     // Handle the decimal point and thousands separator
     // ### !!! TODO !!! ###
 
-    // Put the prefix character
+    // Put the prefix characters
     if(fss.zeroPad) {
-        if(prefixChr) {
+        if(!prefixStr.empty()) {
             if(!fss.align) {
-                rbf += prefixChr;
-                if(fss.width) --fss.width;
+                rbf += prefixStr;
+                fss.width = ( fss.width > prefixStr.length() ) ? ( fss.width - prefixStr.length() ) : 0;
             }
             else {
-                _valStr = prefixChr + _valStr;
+                _valStr = prefixStr + _valStr;
             }
         }
     }
-    else if(prefixChr) {
-        _valStr = prefixChr + _valStr;
+    else if(!prefixStr.empty()) {
+        _valStr = prefixStr + _valStr;
     }
 
     // Handle '0'
