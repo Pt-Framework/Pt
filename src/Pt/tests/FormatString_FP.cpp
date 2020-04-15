@@ -54,8 +54,6 @@
  *     ----------------------------------------------------------------------
  */
 
-#include <stdio.h> // TODO: Remove !
-
 #include <float.h>
 #include <math.h>
 
@@ -125,6 +123,8 @@ extern bool PT_API formatPositiveFP(Pt::String& dst, long double val, size_t pre
 
 bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type)
 {
+    // TODO: Optimize!
+
     // Clear the destination buffer
     dst.clear();
 
@@ -379,7 +379,6 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
     }
     else {
         if(z <= a) z = a + 1;
-
         for(d = a; d < z && precision >= 0; ++d) {
             char *s = formatUnsigned(buf + 9, *d);
             if(s == buf+9) *--s = '0';
@@ -396,6 +395,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         puts(dst, estr, ebuf-estr);
     }
 
+    // Done
     return true;
 }
 

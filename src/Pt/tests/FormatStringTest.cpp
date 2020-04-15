@@ -200,6 +200,7 @@ int main(int argc, char* args[])
         1.E+06
     */
 #if 1
+    // Test the in-house positive floating-point formatter
     Pt::String s;
     formatPositiveFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
     formatPositiveFP(s, 12345.123456789, 4, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
@@ -227,6 +228,7 @@ int main(int argc, char* args[])
     formatPositiveFP(s, 1.00010000 * 1000000, 0, true, 'G'); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl << std::endl;
 #else
+    // Generate reference results
     printf("%.4lA\n", 12345.123456789);
     printf("%.4lE\n", 12345.123456789);
     printf("%.4lF\n", 12345.123456789);

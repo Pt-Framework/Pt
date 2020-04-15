@@ -44,7 +44,6 @@
 //
 
 #include <math.h>
-//#include <stdio.h>
 
 #include "FormatString.h"
 
@@ -112,24 +111,6 @@ struct SelectInt<Pt::int64_t> {
 
     static inline Pt::int64_t  selectSigned  (Pt::int32_t,  Pt::int64_t  i64) { return i64; }
     static inline Pt::uint64_t selectUnsigned(Pt::uint32_t, Pt::uint64_t u64) { return u64; }
-};
-
-
-template <typename ValueT>
-struct SelectFP;
-
-template<>
-struct SelectFP<float> {
-    typedef float ValueT;
-
-    static inline float selectValue(float f, double) { return f; }
-};
-
-template<>
-struct SelectFP<double> {
-    typedef double ValueT;
-
-    static inline double selectValue(float, double d) { return d; }
 };
 
 
@@ -453,31 +434,13 @@ void FormatStringArg::ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpu
 { ff_IXX<Pt::int64_t>(rbf, fss, numpunct); }
 
 
-/*
-    fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
-
-    Pt::Char fill;       // fill character
-    char     align;      // < > ^
-    char     sign;       // + - [space]
-    bool     altForm;    // #
-    bool     zeroPad;    // 0
-    size_t   width;      // minimum field width (default 0)
-    size_t   precision;  // floating-point precision (default 6)
-    bool     locale;     // use locale-specific formatting
-    char     type;       // none/s b B c d o x X a A e E f/F g G p
-*/
-template <typename _ValueT> inline
-void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
+void FormatStringArg::ff_LD(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
 {
     // TODO: Optimize!
 
     // Preparation
-    typedef typename SelectFP<_ValueT>::ValueT ValueT;
-
-    const ValueT sigVal = SelectFP<_ValueT>::selectValue(_valPOD.f, _valPOD.d);
-
-    const bool   negNum = (sigVal < SelectFP<_ValueT>::selectValue(0.0f, 0.0));
-    const ValueT numVal = negNum ? -sigVal : sigVal;
+    const bool        negNum = (_valPOD.ld < 0.0L);
+    const long double numVal = negNum ? -_valPOD.ld : _valPOD.ld;
 
     // Process Inf and NaN
     _valStr.clear();
@@ -560,26 +523,6 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     Pt::String strFP;
     formatPositiveFP(strFP, numVal, fss.precision, fss.altForm, fss.type);
 
-    /*
-    char fmt[16];
-    snprintf(fmt, sizeof(fmt), "%%%zd.%zd%c", fss.width, fss.precision, (char) fss.type);
-
-    char buf[64]; // 48 should be enough
-    snprintf(buf, sizeof(buf), fmt, numVal);
-
-    for(size_t i = 0; i < sizeof(buf); ++i) {
-        if(buf[i] == ' ') continue;
-        strFP = buf + i;
-        break;
-    }
-
-    // Handle '#'
-    if(fss.altForm) {
-        fss.altForm = false;
-        if(strFP.find('.') == Pt::String::npos) strFP += '.';
-    }
-    */
-
     // Handle the decimal point and thousands separator
     formatFPString(_valStr, strFP, decimalPoint, thousandsSep);
 
@@ -615,18 +558,6 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     fss.type    = 's';
     ff_S(rbf, fss, numpunct);
 }
-
-
-void FormatStringArg::ff_F(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{ ff_RXX<float>(rbf, fss, numpunct); }
-
-
-void FormatStringArg::ff_D(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{ ff_RXX<double>(rbf, fss, numpunct); }
-
-
-void FormatStringArg::ff_LD(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const
-{ throw FormatStringError("ff_LD is not implemented yet!"); }
 
 
 void FormatStringArg::ff_B(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const

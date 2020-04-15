@@ -110,8 +110,8 @@ class PT_API FormatStringArg {
         inline FormatStringArg(Pt::uint32_t       p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_I32) { _valPOD.u32 = p;             }
         inline FormatStringArg(Pt::int64_t        p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_I64) { _valPOD.i64 = p;             }
         inline FormatStringArg(Pt::uint64_t       p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_I64) { _valPOD.u64 = p;             }
-        inline FormatStringArg(float              p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_F  ) { _valPOD.f   = p;             }
-        inline FormatStringArg(double             p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_D  ) { _valPOD.d   = p;             }
+        inline FormatStringArg(float              p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_LD ) { _valPOD.ld  = p;             }
+        inline FormatStringArg(double             p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_LD ) { _valPOD.ld  = p;             }
         inline FormatStringArg(long double        p) : _isUnsigned(false), _fmtFun(&FormatStringArg::ff_LD ) { _valPOD.ld  = p;             }
         inline FormatStringArg(bool               p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_B  ) { _valPOD.b   = p;             }
         inline FormatStringArg(const void*        p) : _isUnsigned(true ), _fmtFun(&FormatStringArg::ff_P  ) { _valPOD.p   = p;             }
@@ -132,10 +132,6 @@ class PT_API FormatStringArg {
         void ff_I32(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_I64(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
 
-        template <typename ValueT> inline
-        void ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
-        void ff_F  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
-        void ff_D  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
         void ff_LD (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
 
         void ff_B  (Pt::String &rbf, FormatStringSpec& fss, const numpunct_t* numpunct) const;
