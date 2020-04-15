@@ -145,6 +145,14 @@ int main(int argc, char* args[])
     // Floating-points
     TEST_AND_BENCHMARK("|{0}| |{0:18f}| |{0:.4f}| |{0:18.4f}| |{0:018.4f}| |{0:*^18.4f}| |{0:*^018.4f}|", 12345.123456789f);
     TEST_AND_BENCHMARK("|{0}| |{0:18f}| |{0:.4f}| |{0:18.4f}| |{0:018.4f}| |{0:*^18.4f}| |{0:*^018.4f}|", -12345.123456789f);
+    TEST_AND_BENCHMARK("|{0:.4a}| |{0:.4e}| |{0:.4g}|", 12345.123456789f);
+    TEST_AND_BENCHMARK("|{0:.4A}| |{0:.4E}| |{0:.4G}|", 12345.123456789f);
+
+    COMPARE_WITH_FMT = false;
+    TEST_AND_BENCHMARK("|{0:+Lf}| |{0:+18Lf}| |{0:+.4Lf}| |{0:+18.4Lf}| |{0:+018.4Lf}| |{0:*^+18.4Lf}| |{0:*^+018.4Lf}|", 12345.123456789f);
+    TEST_AND_BENCHMARK("|{0:+Lf}| |{0:+18Lf}| |{0:+.4Lf}| |{0:+18.4Lf}| |{0:+018.4Lf}| |{0:*^+18.4Lf}| |{0:*^+018.4Lf}|", -12345.123456789f);
+    COMPARE_WITH_FMT = true;
+
     return 0;
 
     // Integers

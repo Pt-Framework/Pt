@@ -225,6 +225,17 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
 }
 
 
+static inline void formatFPString(Pt::String& dst, const Pt::String& src, Pt::Char decimalPoint, Pt::Char thousandsSep)
+{
+    if(!decimalPoint && !thousandsSep) {
+        dst = src;
+        return;
+    }
+
+    dst = src;
+}
+
+
 //
 // Format-string error
 //
@@ -435,7 +446,6 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     }
 
     // Handle 'sign' as a prefix character
-    // TODO: 'a' and 'A' -> add '0x' and '0X'
     Pt::String prefixStr;
 
     if(!fss.sign || fss.sign == '-') {
@@ -469,6 +479,12 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
         return;
     }
 
+    // Handle 'a' and 'A'
+    if( TYPE_IS_A(fss.type) ) {
+        prefixStr += '0';
+        prefixStr += (fss.type == 'A') ? 'X' : 'x';
+    }
+
     // Determine the decimal point
     Pt::Char decimalPoint = 0;
     if(fss.locale) {
@@ -495,7 +511,8 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     if(  fss.precision == (size_t) -1 ) fss.precision = DEFAULT_PRECISION;
     if( !fss.type                     ) fss.type      = 'g';
 
-    formatPositiveFP(_valStr, numVal, fss.precision, fss.altForm, fss.type);
+    Pt::String strFP;
+    formatPositiveFP(strFP, numVal, fss.precision, fss.altForm, fss.type);
 
     /*
     char fmt[16];
@@ -506,19 +523,19 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
 
     for(size_t i = 0; i < sizeof(buf); ++i) {
         if(buf[i] == ' ') continue;
-        _valStr = buf + i;
+        strFP = buf + i;
         break;
     }
 
     // Handle '#'
     if(fss.altForm) {
         fss.altForm = false;
-        if(_valStr.find('.') == Pt::String::npos) _valStr += '.';
+        if(strFP.find('.') == Pt::String::npos) strFP += '.';
     }
     */
 
     // Handle the decimal point and thousands separator
-    // ### !!! TODO !!! ###
+    formatFPString(_valStr, strFP, decimalPoint, thousandsSep);
 
     // Put the prefix characters
     if(fss.zeroPad) {
