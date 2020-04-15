@@ -53,19 +53,12 @@
  * ----------------------------------------------------------------------
  */
 
-#include <Pt/String.h>
+#include <stdio.h> // TODO
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <string.h>
-#include <limits.h>
 #include <float.h>
 #include <math.h>
-#include <errno.h>
+
+#include <Pt/String.h>
 
 
 namespace Pt {
@@ -82,40 +75,51 @@ typedef char check_if_the_compiler_defines_long_double_incorrectly[ 9 - sizeof(l
 //
 // Utilities
 //
-#define MAX(a,b) ((a)>(b) ? (a) : (b))
-#define MIN(a,b) ((a)<(b) ? (a) : (b))
+#define MAX(A, B) ( (A) > (B) ? (A) : (B) )
+#define MIN(A, B) ( (A) < (B) ? (A) : (B) )
 
 
-static inline void out(Pt::String& dst, const char* s, size_t l)
+static inline void puts(Pt::String& dst, const char* src, size_t len)
 {
     const size_t olen = dst.length();
 
-    dst.resize(olen + l);
+    dst.resize(olen + len);
 
           Pt::Char* it    = &dst[olen];
-    const Pt::Char* itEnd = it + l;
+    const Pt::Char* itEnd = it + len;
 
-    while(it != itEnd) *it++ = *s++;
+    while(it != itEnd) *it++ = *src++;
 }
 
 
-
-
-/* Convenient bit representation for modifier flags, which all fall
- * within 31 codepoints of the space character. */
-
-#define ALT_FORM   (1U<<('#'-' '))
-
-
-template <typename T>
-static inline char *fmt_u(T x, char *s)
+static inline void put0(Pt::String& dst, size_t len)
 {
-    unsigned long y;
-    for (   ; x>ULONG_MAX; x/=10) *--s = '0' + x%10;
-    for (y=x;           y; y/=10) *--s = '0' + y%10;
-    return s;
+    static const char zeroes[] = { '0', '0', '0', '0', '0', '0', '0', '0',
+                                   '0', '0', '0', '0', '0', '0', '0', '0'
+                                 } ;
+
+    for(; len >= sizeof(zeroes); len -= sizeof(zeroes))
+        puts(dst, zeroes, sizeof(zeroes));
+
+    puts(dst, zeroes, len);
 }
 
+
+static inline char* formatUnsigned(char* dst, Pt::uint32_t val)
+{
+    for(; val > ULLONG_MAX; val /= 10)
+        *--dst = '0' + (val % 10);
+
+    for(Pt::uint32_t rem = val; rem; rem /= 10)
+        *--dst = '0' + (rem % 10);
+
+    return dst;
+}
+
+
+//
+// The main formatter function
+//
 bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type)
 {
     // Clear the destination buffer
@@ -160,51 +164,58 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
 
     Pt::int32_t pl = 0;
 
-    //
-
+    // Decompose into a normalized fraction and an integral power of two
     val = frexpl(val, &e2) * 2;
-    if (val) e2--;
+    if(val) e2--;
 
-    if (type == 'a') {
+    // Hexadecimal floating-point
+    if(type == 'a') {
+        // Perform rounding as needed
         long double round = 8.0;
-        int re;
-
-        pl += 2;
-
-        if (precision<0 || precision>=LDBL_MANT_DIG/4-1) re=0;
-        else re=LDBL_MANT_DIG/4-1-precision;
-
-        if (re) {
-            round *= 1<<(LDBL_MANT_DIG%4);
-            while (re--) round*=16;
-            val+=round;
-            val-=round;
+        int         re;
+        if(precision < 0 || precision >= LDBL_MANT_DIG / 4 - 1) re = 0;
+        else                                                    re = LDBL_MANT_DIG / 4 - 1 -precision;
+        if(re) {
+            round *= 1 << (LDBL_MANT_DIG % 4);
+            while(re--) round *= 16;
+            val += round;
+            val -= round;
         }
-
-        estr=fmt_u(e2<0 ? -e2 : e2, ebuf);
-        if (estr==ebuf) *--estr='0';
+        // Process the exponent
+        estr = formatUnsigned( ebuf, (e2 < 0) ? -e2 : e2 );
+        if(estr == ebuf) *--estr = '0';
         *--estr = (e2<0 ? '-' : '+');
-        *--estr = type+('p'-'a');
-
-        s=buf;
+        *--estr = uppercase ? 'P' : 'p';
+        // Process the mantissa
+        // TODO: ERROR : Wanted : f.fffffffffffffff
+        //               Got    : 1.fffffffffffffffe
+        //printf("### %.20La\n", val);
+        s = buf;
         do {
-            int x=val;
-            *s++=X_DIGITS[x]|(type&32);
-            val=16*(val-x);
-            if (s-buf==1 && (val||precision>0|| altForm )) *s++='.';
-        } while (val);
-
-        if (precision > INT_MAX-2-(ebuf-estr)-pl)
-            return false;
-        if (precision && s-buf-2 < precision)
-            l = (precision+2) + (ebuf-estr);
-        else
-            l = (s-buf) + (ebuf-estr);
-
-        out(dst, buf, s-buf);
-        out(dst, estr, ebuf-estr);
+            const Pt::int64_t x = val;
+            *s++ = X_DIGITS[x];
+            val = 16 * (val - x);
+            if( s - buf == 1 && ( val || precision > 0 || altForm ) ) *s++='.';
+        } while(val);
+        *s = 0;
+        //printf("### %s\n", buf);
+        // Store the result
+        pl += 2;
+        if(precision > INT_MAX - 2 - (ebuf - estr) - pl) return false;
+        if(precision && s - buf - 2 < precision) l = (precision + 2) + (ebuf - estr);
+        else                                     l = (s - buf) + (ebuf - estr);
+        puts(dst, buf, s - buf);
+        put0(dst, l - (ebuf - estr) - (s - buf));
+        puts(dst, estr, ebuf - estr);
+        // Done
         return true;
     }
+
+    // e   Decimal floating point
+    // f   Scientific notation (mantissa/exponent)
+    // g   Use the shortest representation: %e or %f
+
+
     if (precision<0) precision=6;
 
     if (val) val *= 0x1p28, e2-=28;
@@ -309,7 +320,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         if (e > INT_MAX-l) return false;
         if (e>0) l+=e;
     } else {
-        estr=fmt_u(e<0 ? -e : e, ebuf);
+        estr=formatUnsigned( ebuf, (e < 0) ? -e : e );
         while(ebuf-estr<2) *--estr='0';
         *--estr = (e<0 ? '-' : '+');
         *--estr = type;
@@ -322,31 +333,31 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
     if (type == 'f') {
         if (a>r) a=r;
         for (d=a; d<=r; d++) {
-            char *s = fmt_u(*d, buf+9);
+            char *s = formatUnsigned( buf + 9, *d );
             if (d!=a) while (s>buf) *--s='0';
             else if (s==buf+9) *--s='0';
-            out(dst, s, buf+9-s);
+            puts(dst, s, buf+9-s);
         }
-        if (precision || altForm ) out(dst, ".", 1);
+        if (precision || altForm ) puts(dst, ".", 1);
         for (; d<z && precision>0; d++, precision-=9) {
-            char *s = fmt_u(*d, buf+9);
+            char *s = formatUnsigned( buf + 9, *d );
             while (s>buf) *--s='0';
-            out(dst, s, MIN(9,precision));
+            puts(dst, s, MIN(9,precision));
         }
     } else {
         if (z<=a) z=a+1;
         for (d=a; d<z && precision>=0; d++) {
-            char *s = fmt_u(*d, buf+9);
+            char *s = formatUnsigned( buf + 9, *d );
             if (s==buf+9) *--s='0';
             if (d!=a) while (s>buf) *--s='0';
             else {
-                out(dst, s++, 1);
-                if ( precision > 0|| altForm ) out(dst, ".", 1);
+                puts(dst, s++, 1);
+                if ( precision > 0|| altForm ) puts(dst, ".", 1);
             }
-            out(dst, s, MIN(buf+9-s, precision));
+            puts(dst, s, MIN(buf+9-s, precision));
             precision -= buf+9-s;
         }
-        out(dst, estr, ebuf-estr);
+        puts(dst, estr, ebuf-estr);
     }
 
     return true;

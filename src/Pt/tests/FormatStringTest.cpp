@@ -97,26 +97,80 @@ namespace Pt {
 int main(int argc, char* args[])
 {
     /*
+        REFERENCE
+
         1.81c9p+13
         1.2345e+04
         12345.1235
         1.235e+04
 
-        1.fffffffffffffffep+16383
+        1.fffffe00000000000000p+127
+        3.40282346638528859812e+38
+        3.4028234663852885981e+38
+
+        1.fffffffffffff0000000p+1023
+        1.79769313486231570815e+308
+        1.7976931348623157081e+308
+
+        f.fffffffffffffff00000p+16380
+        1.18973149535723176502e+4932
+        1.189731495357231765e+4932
+
+        -------------------------
+
+        1.81c9p+13
+        1.2345e+04
+        12345.1235
+        1.235e+04
+
+        1.fffffe00000000000000p+127
+        3.40282346638528859812e+38
+        3.4028234663852885981e+38
+
+        1.fffffffffffff0000000p+1023
+        1.79769313486231570815e+308
+        1.7976931348623157081e+308
+
+        1.fffffffffffffffe0000p+16383
         1.18973149535723176502e+4932
         1.189731495357231765e+4932
      */
+#if 1
     Pt::String s;
-    formatPositiveFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 12345.123456789, 4, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 12345.123456789, 4, false, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 12345.123456789, 4, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'a'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'e'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'f'/* %0.4f */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'g'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
-    //std::cerr << std::endl;
-    //printf("%.4f\n", 0x1.81c9p+13);
+    formatPositiveFP(s, 3.40282347e+38f, 20, false, 'a'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 3.40282347e+38f, 20, false, 'e'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 3.40282347e+38f, 20, false, 'g'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    std::cerr << std::endl;
+    formatPositiveFP(s, 1.7976931348623157e308, 20, false, 'a'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.7976931348623157e308, 20, false, 'e'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.7976931348623157e308, 20, false, 'g'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    std::cerr << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'a'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'e'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'g'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+#else
+    printf("%.4la\n", 12345.123456789);
+    printf("%.4le\n", 12345.123456789);
+    printf("%.4lf\n", 12345.123456789);
+    printf("%.4lg\n", 12345.123456789);
+    printf("\n");
+    printf("%.20a\n", 3.40282347e+38f);
+    printf("%.20e\n", 3.40282347e+38f);
+    printf("%.20g\n", 3.40282347e+38f);
+    printf("\n");
+    printf("%.20la\n", 1.7976931348623157e308);
+    printf("%.20le\n", 1.7976931348623157e308);
+    printf("%.20lg\n", 1.7976931348623157e308);
+    printf("\n");
+    printf("%.20La\n", 1.18973149535723176502e+4932L);
+    printf("%.20Le\n", 1.18973149535723176502e+4932L);
+    printf("%.20Lg\n", 1.18973149535723176502e+4932L);
+#endif
     return 0;
 
     // Strings
