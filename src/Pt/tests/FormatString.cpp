@@ -178,10 +178,10 @@ static inline void printUnsignedRev(Pt::String& dst, T val, Pt::uint8_t base, bo
 
     static const char* L_DIGITS = "0123456789abcdef";
     static const char* U_DIGITS = "0123456789ABCDEF";
-           const char* S_DIGITS = uppercase ? U_DIGITS : L_DIGITS;
+           const char* X_DIGITS = uppercase ? U_DIGITS : L_DIGITS;
 
     do {
-        dst += S_DIGITS[val % base];
+        dst += X_DIGITS[val % base];
         val /= base;
     } while(val != 0);
 }
