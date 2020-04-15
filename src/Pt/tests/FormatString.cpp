@@ -227,12 +227,58 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
 
 static inline void formatFPString(Pt::String& dst, const Pt::String& src, Pt::Char decimalPoint, Pt::Char thousandsSep)
 {
+    // TODO: Optimize!
+
+    // Simply copy the string if there is no specified decimal point and thousands separator
     if(!decimalPoint && !thousandsSep) {
         dst = src;
         return;
     }
 
-    dst = src;
+    // Get the source pointers
+    const Pt::Char* itSrcBeg = &src[0];
+    const Pt::Char* itSrcEnd = itSrcBeg + src.length();
+    const Pt::Char* itSrc    = itSrcBeg;
+
+    // Find the decimal point
+    const Pt::Char* itSrcDec = 0;
+    while(itSrc != itSrcEnd) {
+        if( *itSrc == '.' ) {
+            itSrcDec = itSrc;
+            break;
+        }
+        if( !isdigit(*itSrc) ) break;
+        ++itSrc;
+    }
+
+    // Calculate the number of digits before the decimal point
+    const size_t numDigitBeforeDec = itSrcDec ? (itSrcDec - itSrcBeg) : (itSrc - itSrcBeg);
+
+    // Check if there is no need to add any thousands separator
+    if(!thousandsSep || numDigitBeforeDec <= 3) {
+        dst = src;
+        if(decimalPoint && numDigitBeforeDec < dst.length()) dst[numDigitBeforeDec] = decimalPoint;
+        return;
+    }
+
+    // Copy the characters while adding thousands separator(s)
+    Pt::uint32_t digitIndex = 3 - (numDigitBeforeDec % 3);
+
+    itSrc = itSrcBeg;
+    for(;;) {
+        dst += *itSrc++;
+        if(itSrc == itSrcDec || itSrc == itSrcEnd) break;
+        if( ++digitIndex % 3 == 0) dst += thousandsSep;
+    }
+
+    // Add the decimal point
+    if(itSrcDec) {
+        dst += ( decimalPoint ? decimalPoint : src[numDigitBeforeDec] );
+    }
+
+    // Copy the remainder of the characters
+    itSrc = itSrcBeg + numDigitBeforeDec + 1;
+    while(itSrc != itSrcEnd) dst += *itSrc++;
 }
 
 
@@ -789,9 +835,15 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
 
     // Get the "numpunct" instance (if supported)
 #ifdef PT_WITH_STD_LOCALE
-    const numpunct_t* numpunct = &std::use_facet< std::numpunct<Pt::Char> >( std::locale() );
+
+    const numpunct_t* numpunct = &std::use_facet<numpunct_t>( std::locale() );
+
+    if( numpunct && !numpunct->grouping().empty() && numpunct->grouping() != "\3" )
+        throw FormatStringError("using locale with non default grouping is not supported");
 #else
+
     const numpunct_t* numpunct = 0;
+
 #endif
 
     // Reserve some bytes within the result buffer

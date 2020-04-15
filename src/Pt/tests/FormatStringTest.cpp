@@ -103,9 +103,44 @@ static bool COMPARE_WITH_FMT = true;
 // svn commit -m 'Implementing a simple string formatter ala std::format that uses Pt::String'
 
 
+#ifdef PT_WITH_STD_LOCALE
+
+class TestNumpunct : public std::numpunct<Pt::Char>  {
+    public:
+        typedef Pt::Char                    char_type;
+        typedef std::basic_string<Pt::Char> string_type;
+
+    public:
+        TestNumpunct()
+        {}
+
+        virtual ~TestNumpunct()
+        {}
+
+    protected:
+        virtual char_type do_decimal_point() const
+        { return ','; }
+
+        virtual char_type do_thousands_sep() const
+        { return '.'; }
+
+        virtual std::string do_grouping() const
+        { return "\3"; }
+
+        virtual string_type do_truename() const
+        { return "benar"; }
+
+        virtual string_type do_falsename() const
+        { return "salah"; }
+};
+
+#endif
+
+
 namespace Pt {
     bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
 }
+
 
 int main(int argc, char* args[])
 {
@@ -153,7 +188,7 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{0:+Lf}| |{0:+18Lf}| |{0:+.4Lf}| |{0:+18.4Lf}| |{0:+018.4Lf}| |{0:*^+18.4Lf}| |{0:*^+018.4Lf}|", -12345.123456789f);
     COMPARE_WITH_FMT = true;
 
-    return 0;
+    //return 0;
 
     // Integers
     TEST_AND_BENCHMARK("|{0:8n}| |{1:8n}| |{0:08n}| |{1:08n}| |{2:8n}| |{3:8n}| |{2:08n}| |{3:08n}|", 123, 1234, -567, -5678);
@@ -169,6 +204,19 @@ int main(int argc, char* args[])
 
     // Mixeds
     TEST_AND_BENCHMARK("{} [{}] - {:d} mS ({:.1f}x) [{:d} loops]", "TEST", "FLAG", 1000, 3.5f, 250);
+
+    // Custom numpunct
+#ifdef PT_WITH_STD_LOCALE
+    COMPARE_WITH_FMT = false;
+
+    std::locale oldLocale = std::locale::global( std::locale( std::locale(), new TestNumpunct() ) );
+    TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
+
+    std::locale::global( oldLocale );
+    TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
+
+    COMPARE_WITH_FMT = true;
+#endif
 
     /*
         REFERENCE
@@ -208,7 +256,8 @@ int main(int argc, char* args[])
         1.FFFFFFFFFFFFFFFE0000P+16383
         1.18973149535723176502e+4932
         1.189731495357231765e+4932
-     */
+    */
+    
 #if 1
     Pt::String s;
     formatPositiveFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
