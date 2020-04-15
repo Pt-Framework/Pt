@@ -25,11 +25,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * This code is based on the fmt_fp() function from musl libc:
- *     http://git.musl-libc.org/cgit/musl/plain/src/stdio/vfprintf.c
  *
  *     ----------------------------------------------------------------------
- *     musl as a whole is licensed under the following standard MIT license:
+ *     http://git.musl-libc.org/cgit/musl/plain/src/stdio/vfprintf.c
  *     ----------------------------------------------------------------------
+ *     musl as a whole is licensed under the following standard MIT license:
+ *
  *     Copyright © 2005-2020 Rich Felker, et al.
  *
  *     Permission is hereby granted, free of charge, to any person obtaining
@@ -50,10 +51,10 @@
  *     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  *     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  *     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * ----------------------------------------------------------------------
+ *     ----------------------------------------------------------------------
  */
 
-#include <stdio.h> // TODO
+#include <stdio.h> // TODO: Remove !
 
 #include <float.h>
 #include <math.h>
@@ -126,7 +127,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
     dst.clear();
 
     // Check if it is a negative number, Inf, or NaN
-    if(val < 0.0 || isinf(val) || isnan(val)) return false;
+    if( val < 0.0 || isinf(val) || isnan(val) ) return false;
 
     // Check for uppercase mode
     bool uppercase = false;
@@ -141,8 +142,8 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
            const char* X_DIGITS = uppercase ? U_DIGITS : L_DIGITS;
 
     // Preparation
-    Pt::uint32_t  big[   ( (LDBL_MANT_DIG + 28                   ) / 29 + 1 ) // Mantissa expansion
-                       + ( (LDBL_MAX_EXP + LDBL_MANT_DIG + 28 + 8) / 9      ) // Exponent expansion
+    Pt::uint32_t  big[   ( ( LDBL_MANT_DIG + 28                    ) / 29 + 1 ) // Mantissa expansion
+                       + ( ( LDBL_MAX_EXP + LDBL_MANT_DIG + 28 + 8 ) / 9      ) // Exponent expansion
                      ];
     Pt::uint32_t* a;
     Pt::uint32_t* d;
@@ -192,7 +193,7 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         //printf("### %.20La\n", val);
         s = buf;
         do {
-            const Pt::int64_t x = val;
+            const Pt::int32_t x = val;
             *s++ = X_DIGITS[x];
             val = 16 * (val - x);
             if( s - buf == 1 && ( val || precision > 0 || altForm ) ) *s++='.';
@@ -211,22 +212,25 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
         return true;
     }
 
-    // e   Decimal floating point
-    // f   Scientific notation (mantissa/exponent)
-    // g   Use the shortest representation: %e or %f
+    // The default precision is 6
+    if(precision < 0) precision = 6;
 
+    // Perform some adjustment
+    if(val) {
+        val *= 0x1p28;
+        e2  -= 28;
+    }
 
-    if (precision<0) precision=6;
-
-    if (val) val *= 0x1p28, e2-=28;
-
-    if (e2<0) a=r=z=big;
-    else a=r=z=big+sizeof(big)/sizeof(*big) - LDBL_MANT_DIG - 1;
+    if(e2 < 0)  a = r = z = big;
+    else        a = r = z = big + sizeof(big) / sizeof(*big) - LDBL_MANT_DIG - 1;
 
     do {
-        *z = val;
-        val = 1000000000*(val-*z++);
-    } while (val);
+        *z  = val;
+        val = 1000000000 * (val - *z++);
+    } while(val);
+
+
+
 
     while (e2>0) {
         uint32_t carry=0;
@@ -258,6 +262,13 @@ bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool a
 
     if (a<z) for (i=10, e=9*(r-a); *a>=i; i*=10, e++);
     else e=0;
+
+
+
+    // e   Decimal floating point
+    // f   Scientific notation (mantissa/exponent)
+    // g   Use the shortest representation: %e or %f
+
 
     /* Perform rounding: j is precision after the radix (possibly neg) */
     j = precision - (type != 'f')*e - (type == 'g' && precision);
