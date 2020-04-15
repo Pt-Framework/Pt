@@ -121,6 +121,8 @@ static inline char* formatUnsigned(char* dst, Pt::uint32_t val)
 //
 // The main formatter function
 //
+extern bool PT_API formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
+
 bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type)
 {
     // Clear the destination buffer

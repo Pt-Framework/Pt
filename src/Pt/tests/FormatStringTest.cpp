@@ -12,17 +12,17 @@
 
 
 #ifdef __unix__
-#define BLACK   "\u001b[30m"
-#define RED     "\u001b[31m"
-#define GREEN   "\u001b[32m"
-#define YELLOW  "\u001b[33m"
-#define BLUE    "\u001b[34m"
-#define MAGENTA "\u001b[35m"
-#define CYAN    "\u001b[36m"
-#define WHITE   "\u001b[37m"
+#define GRAY    "\u001b[90m"
+#define RED     "\u001b[91m"
+#define GREEN   "\u001b[92m"
+#define YELLOW  "\u001b[93m"
+#define BLUE    "\u001b[94m"
+#define MAGENTA "\u001b[95m"
+#define CYAN    "\u001b[96m"
+#define WHITE   "\u001b[97m"
 #define RESET   "\u001b[0m"
 #else
-#define BLACK   ""
+#define GRAY    ""
 #define RED     ""
 #define GREEN   ""
 #define YELLOW  ""
@@ -79,16 +79,29 @@ static bool COMPARE_WITH_FMT = true;
         }                                                                        \
         bptf = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;                     \
         /* Print the benchmark result */                                         \
-        const double brat = COMPARE_WITH_FMT ? (bptf / bfmt) : 0.0;              \
+        double brat = COMPARE_WITH_FMT ? (bptf / bfmt) : 0.0;                    \
         std::cerr << std::fixed << std::setprecision(1);                         \
         std::cerr << std::setw(6) << bfmt << " nS/call - ";                      \
-        std::cerr << std::setw(6) << bptf << " nS/call (";                       \
-        std::cerr << std::setw(3) << brat << "x slower)";                        \
+        std::cerr << std::setw(6) << bptf << " nS/call ";                        \
+        if(!COMPARE_WITH_FMT) {                                                  \
+            std::cerr << std::endl << std::endl << std::endl;                    \
+            break;                                                               \
+        }                                                                        \
+        if(brat < 1.0) {                                                         \
+            brat = 1.0 / brat;                                                   \
+            std::cerr << BLUE;                                                   \
+            std::cerr << "(" << std::setw(3) << brat << "x faster)" << RESET;    \
+        }                                                                        \
+        else {                                                                   \
+            std::cerr << MAGENTA;                                                \
+            std::cerr << "(" << std::setw(3) << brat << "x slower)" << RESET;    \
+        }                                                                        \
         std::cerr << std::endl << std::endl << std::endl;                        \
    } while(false)
 
 
 // svn commit -m 'Implementing a simple string formatter ala std::format that uses Pt::String'
+
 
 namespace Pt {
     bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
@@ -96,6 +109,59 @@ namespace Pt {
 
 int main(int argc, char* args[])
 {
+    // Strings
+    TEST_AND_BENCHMARK("{{}}", 0);
+    TEST_AND_BENCHMARK("{}", "aBc");
+    TEST_AND_BENCHMARK("{0} {0}", "aBc");
+
+    TEST_AND_BENCHMARK("|{}| |{:s}|", "aBc", "dEf");
+    TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
+
+    // Characters (xA9 == 169 == ©)
+    TEST_AND_BENCHMARK("|{}| |{}| |{}|", 'A', 'b', '\xA9');
+    TEST_AND_BENCHMARK("|{:*<8}| |{:*>8}| |{:*^8}|", 'A', 'b', '\xA9');
+
+    TEST_AND_BENCHMARK("|{:d}| |{:d}| |{:d}|", 'A', 'b', '\xA9');
+    TEST_AND_BENCHMARK("|{:*<8d}| |{:*>8d}| |{:*^8d}|", 'A', 'b', '\xA9');
+
+    // Pointers
+    int dummy = 0;
+    TEST_AND_BENCHMARK("|{0:p}| |{0:24p}| |{0:*^24p}|", (void*) &dummy);
+
+    // Booleans
+    TEST_AND_BENCHMARK("|{:08}| |{:08}|", true, false);
+    TEST_AND_BENCHMARK("|{:08d}| |{:08d}|", true, false);
+
+    COMPARE_WITH_FMT = false;
+    TEST_AND_BENCHMARK("|{:<8L}| |{:>8L}|", true, false);
+    COMPARE_WITH_FMT = true;
+
+    TEST_AND_BENCHMARK("|{0:*<8}| |{0:*>8}| |{0:*^8}| |{1:*<8}| |{1:*>8}| |{1:*^8}|", true, false);
+    TEST_AND_BENCHMARK("|{0:*<08}| |{0:*>08}| |{0:*^08}| |{1:*<08}| |{1:*>08}| |{1:*^08}|", true, false);
+
+    TEST_AND_BENCHMARK("|{0:*<8d}| |{0:*>8d}| |{0:*^8d}| |{1:*<8d}| |{1:*>8d}| |{1:*^8d}|", true, false);
+    TEST_AND_BENCHMARK("|{0:*<08d}| |{0:*>08d}| |{0:*^08d}| |{1:*<08d}| |{1:*>08d}| |{1:*^08d}|", true, false);
+
+    // Floating-points
+    TEST_AND_BENCHMARK("|{0}| |{0:18f}| |{0:.4f}| |{0:18.4f}| |{0:018.4f}| |{0:*^18.4f}| |{0:*^018.4f}|", 12345.123456789f);
+    TEST_AND_BENCHMARK("|{0}| |{0:18f}| |{0:.4f}| |{0:18.4f}| |{0:018.4f}| |{0:*^18.4f}| |{0:*^018.4f}|", -12345.123456789f);
+    return 0;
+
+    // Integers
+    TEST_AND_BENCHMARK("|{0:8n}| |{1:8n}| |{0:08n}| |{1:08n}| |{2:8n}| |{3:8n}| |{2:08n}| |{3:08n}|", 123, 1234, -567, -5678);
+    TEST_AND_BENCHMARK("|{0:*<8n}| |{1:*<8n}| |{0:*^8n}| |{1:*^8n}| |{2:*<8n}| |{3:*<8n}| |{2:*^8n}| |{3:*^8n}|", 123, 1234, -567, -5678);
+
+    TEST_AND_BENCHMARK("|{0:8x}| |{1:8x}| |{0:08x}| |{1:08x}| |{2:8x}| |{3:8x}| |{2:08x}| |{3:08x}|", 123, 1234, -567, -5678);
+    TEST_AND_BENCHMARK("|{0:*<8x}| |{1:*<8x}| |{0:*^8x}| |{1:*^8x}| |{2:*<8x}| |{3:*<8x}| |{2:*^8x}| |{3:*^8x}|", 123, 1234, -567, -5678);
+
+    TEST_AND_BENCHMARK("|{0:#8x}| |{1:#8x}| |{0:#08x}| |{1:#08x}| |{2:#8x}| |{3:#8x}| |{2:#08x}| |{3:#08x}|", 123, 1234, -567, -5678);
+    TEST_AND_BENCHMARK("|{0:*<#8x}| |{1:*<#8x}| |{0:*^#8x}| |{1:*^#8x}| |{2:*<#8x}| |{3:*<#8x}| |{2:*^#8x}| |{3:*^#8x}|", 123, 1234, -567, -5678);
+
+    TEST_AND_BENCHMARK("|{:+n}| |{:+n}| |{:n}|", (Pt::int64_t) 9223372036854775807LL, (Pt::int64_t) -9223372036854775807LL - 1, (Pt::uint64_t) 18446744073709551615ULL);
+
+    // Mixeds
+    TEST_AND_BENCHMARK("{} [{}] - {:d} mS ({:.1f}x) [{:d} loops]", "TEST", "FLAG", 1000, 3.5f, 250);
+
     /*
         REFERENCE
 
@@ -171,59 +237,6 @@ int main(int argc, char* args[])
     printf("%.20LE\n", 1.18973149535723176502e+4932L);
     printf("%.20LG\n", 1.18973149535723176502e+4932L);
 #endif
-    return 0;
-
-    // Strings
-    TEST_AND_BENCHMARK("{{}}", 0);
-    TEST_AND_BENCHMARK("{}", "aBc");
-    TEST_AND_BENCHMARK("{0} {0}", "aBc");
-
-    TEST_AND_BENCHMARK("|{}| |{:s}|", "aBc", "dEf");
-    TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
-
-    // Characters (xA9 == 169 == ©)
-    TEST_AND_BENCHMARK("|{}| |{}| |{}|", 'A', 'b', '\xA9');
-    TEST_AND_BENCHMARK("|{:*<8}| |{:*>8}| |{:*^8}|", 'A', 'b', '\xA9');
-
-    TEST_AND_BENCHMARK("|{:d}| |{:d}| |{:d}|", 'A', 'b', '\xA9');
-    TEST_AND_BENCHMARK("|{:*<8d}| |{:*>8d}| |{:*^8d}|", 'A', 'b', '\xA9');
-
-    // Pointers
-    int dummy = 0;
-    TEST_AND_BENCHMARK("|{0:p}| |{0:24p}| |{0:*^24p}|", (void*) &dummy);
-
-    // Booleans
-    TEST_AND_BENCHMARK("|{:08}| |{:08}|", true, false);
-    TEST_AND_BENCHMARK("|{:08d}| |{:08d}|", true, false);
-
-    COMPARE_WITH_FMT = false;
-    TEST_AND_BENCHMARK("|{:<8L}| |{:>8L}|", true, false);
-    COMPARE_WITH_FMT = true;
-
-    TEST_AND_BENCHMARK("|{0:*<8}| |{0:*>8}| |{0:*^8}| |{1:*<8}| |{1:*>8}| |{1:*^8}|", true, false);
-    TEST_AND_BENCHMARK("|{0:*<08}| |{0:*>08}| |{0:*^08}| |{1:*<08}| |{1:*>08}| |{1:*^08}|", true, false);
-
-    TEST_AND_BENCHMARK("|{0:*<8d}| |{0:*>8d}| |{0:*^8d}| |{1:*<8d}| |{1:*>8d}| |{1:*^8d}|", true, false);
-    TEST_AND_BENCHMARK("|{0:*<08d}| |{0:*>08d}| |{0:*^08d}| |{1:*<08d}| |{1:*>08d}| |{1:*^08d}|", true, false);
-
-    // Floating-points
-    TEST_AND_BENCHMARK("|{0}| |{0:18f}| |{0:.4f}| |{0:18.4f}| |{0:018.4f}| |{0:*^18.4f}| |{0:*^018.4f}|", 12345.123456789f);
-    TEST_AND_BENCHMARK("|{0}| |{0:18f}| |{0:.4f}| |{0:18.4f}| |{0:018.4f}| |{0:*^18.4f}| |{0:*^018.4f}|", -12345.123456789f);
-
-    // Integers
-    TEST_AND_BENCHMARK("|{0:8n}| |{1:8n}| |{0:08n}| |{1:08n}| |{2:8n}| |{3:8n}| |{2:08n}| |{3:08n}|", 123, 1234, -567, -5678);
-    TEST_AND_BENCHMARK("|{0:*<8n}| |{1:*<8n}| |{0:*^8n}| |{1:*^8n}| |{2:*<8n}| |{3:*<8n}| |{2:*^8n}| |{3:*^8n}|", 123, 1234, -567, -5678);
-
-    TEST_AND_BENCHMARK("|{0:8x}| |{1:8x}| |{0:08x}| |{1:08x}| |{2:8x}| |{3:8x}| |{2:08x}| |{3:08x}|", 123, 1234, -567, -5678);
-    TEST_AND_BENCHMARK("|{0:*<8x}| |{1:*<8x}| |{0:*^8x}| |{1:*^8x}| |{2:*<8x}| |{3:*<8x}| |{2:*^8x}| |{3:*^8x}|", 123, 1234, -567, -5678);
-
-    TEST_AND_BENCHMARK("|{0:#8x}| |{1:#8x}| |{0:#08x}| |{1:#08x}| |{2:#8x}| |{3:#8x}| |{2:#08x}| |{3:#08x}|", 123, 1234, -567, -5678);
-    TEST_AND_BENCHMARK("|{0:*<#8x}| |{1:*<#8x}| |{0:*^#8x}| |{1:*^#8x}| |{2:*<#8x}| |{3:*<#8x}| |{2:*^#8x}| |{3:*^#8x}|", 123, 1234, -567, -5678);
-
-    TEST_AND_BENCHMARK("|{:+n}| |{:+n}| |{:n}|", (Pt::int64_t) 9223372036854775807LL, (Pt::int64_t) -9223372036854775807LL - 1, (Pt::uint64_t) 18446744073709551615ULL);
-
-    // Mixeds
-    TEST_AND_BENCHMARK("{} [{}] - {:d} mS ({:.1f}x) [{:d} loops]", "TEST", "FLAG", 1000, 3.5f, 250);
 
     // Done
     return 0;

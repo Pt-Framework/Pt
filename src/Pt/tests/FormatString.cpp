@@ -39,12 +39,12 @@
 //     https://github.com/fmtlib/fmt/releases/tag/4.1.0
 //
 // Performance:
-//     It is about 3x - 8x slower than {fmt} 4.1.0
+//     It is generally about 3x - 8x slower than {fmt} 4.1.0
 //     It should still be faster than sprintf() and std::ostringstream
 //
 
 #include <math.h>
-#include <stdio.h>
+//#include <stdio.h>
 
 #include "FormatString.h"
 
@@ -131,6 +131,9 @@ struct SelectFP<double> {
 
     static inline double selectValue(float, double d) { return d; }
 };
+
+
+extern bool PT_API formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
 
 
 static inline Pt::Char* fill(Pt::Char* dst, Pt::Char chr, size_t len)
@@ -488,11 +491,13 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
         if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
     }
 
-    // For now, simply use snprintf()
-    // TODO: Do not use snprintf()?
+    // Format the number
     if(  fss.precision == (size_t) -1 ) fss.precision = DEFAULT_PRECISION;
     if( !fss.type                     ) fss.type      = 'g';
 
+    formatPositiveFP(_valStr, numVal, fss.precision, fss.altForm, fss.type);
+
+    /*
     char fmt[16];
     snprintf(fmt, sizeof(fmt), "%%%zd.%zd%c", fss.width, fss.precision, (char) fss.type);
 
@@ -510,6 +515,7 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
         fss.altForm = false;
         if(_valStr.find('.') == Pt::String::npos) _valStr += '.';
     }
+    */
 
     // Handle the decimal point and thousands separator
     // ### !!! TODO !!! ###
@@ -540,9 +546,10 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     if(!fss.align) fss.align = '>';
 
     // Process as string type
-    fss.sign   = 0;
-    fss.locale = false;
-    fss.type   = 's';
+    fss.sign    = 0;
+    fss.altForm = false;
+    fss.locale  = false;
+    fss.type    = 's';
     ff_S(rbf, fss, numpunct);
 }
 
