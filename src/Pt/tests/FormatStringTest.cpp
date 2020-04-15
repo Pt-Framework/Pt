@@ -90,9 +90,19 @@ static bool COMPARE_WITH_FMT = true;
 
 // svn commit -m 'Implementing a simple string formatter ala std::format that uses Pt::String'
 
+namespace Pt {
+    bool formatPositiveFP(Pt::String& f, long double y, int p, int fl, int t);
+}
 
 int main(int argc, char* args[])
 {
+    Pt::String s;
+    formatPositiveFP(s, 12345.123456789, 4, 0, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, 0, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, 0, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, 0, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    return 0;
+
     // Strings
     TEST_AND_BENCHMARK("{{}}", 0);
     TEST_AND_BENCHMARK("{}", "aBc");

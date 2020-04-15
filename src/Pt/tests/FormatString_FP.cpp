@@ -51,7 +51,6 @@
  *     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  *     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * ----------------------------------------------------------------------
- *
  */
 
 #include <Pt/String.h>
@@ -72,14 +71,33 @@
 namespace Pt {
 
 
+//
 // Check if the compiler defines the size of "long double" correctly
+//
 #if LDBL_MANT_DIG == 53
 typedef char check_if_the_compiler_defines_long_double_incorrectly[ 9 - sizeof(long double) ];
 #endif
 
-// Utility macros
+
+//
+// Utilities
+//
 #define MAX(a,b) ((a)>(b) ? (a) : (b))
 #define MIN(a,b) ((a)<(b) ? (a) : (b))
+
+
+static inline void out(Pt::String& dst, const char* s, size_t l)
+{
+    const size_t olen = dst.length();
+
+    dst.resize(olen + l);
+
+          Pt::Char* it    = &dst[olen];
+    const Pt::Char* itEnd = it + l;
+
+    while(it != itEnd) *it++ = *s++;
+}
+
 
 
 
@@ -87,34 +105,10 @@ typedef char check_if_the_compiler_defines_long_double_incorrectly[ 9 - sizeof(l
  * within 31 codepoints of the space character. */
 
 #define ALT_FORM   (1U<<('#'-' '))
-#define ZERO_PAD   (1U<<('0'-' '))
-#define LEFT_ADJ   (1U<<('-'-' '))
-#define PAD_POS    (1U<<(' '-' '))
-#define MARK_POS   (1U<<('+'-' '))
-#define GROUPED    (1U<<('\''-' '))
 
 
 
-
-static void out(FILE *f, const char *s, size_t l)
-{
-    //if (!(f->flags & F_ERR)) __fwritex((void *)s, l, f);
-}
-
-static void pad(FILE *f, char c, int w, int l, int fl)
-{
-    /*
-    char pad[256];
-    if (fl & (LEFT_ADJ | ZERO_PAD) || l >= w) return;
-    l = w - l;
-    memset(pad, c, l>sizeof pad ? sizeof pad : l);
-    for (; l >= sizeof pad; l -= sizeof pad)
-        out(f, pad, sizeof pad);
-    out(f, pad, l);
-    */
-}
-
-static char *fmt_u(uintmax_t x, char *s)
+static inline char *fmt_u(uintmax_t x, char *s)
 {
     unsigned long y;
     for (   ; x>ULONG_MAX; x/=10) *--s = '0' + x%10;
@@ -132,8 +126,14 @@ static char *fmt_u(uintmax_t x, char *s)
  * default formatting : w =  0, p = -1
  * "%20.5g            : w = 20, p =  5, fl = 0, t = 'g'
  */
-static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
+bool formatPositiveFP(Pt::String& dst, long double val, int p, int fl, int t)
 {
+    // Clear the destination buffer
+    dst.clear();
+
+    // Check if it is a negative number, Inf, or NaN
+    if(val < 0.0 || isinf(val) || isnan(val)) return false;
+
     // Check for uppercase mode
     bool uppercase = false;
          if(t == 'A') { t = 'a'; uppercase = true; }
@@ -146,46 +146,39 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
     static const char* U_DIGITS = "0123456789ABCDEF";
            const char* X_DIGITS = uppercase ? U_DIGITS : L_DIGITS;
 
+    // Preparation
+    Pt::uint32_t  big[   ( (LDBL_MANT_DIG + 28                   ) / 29 + 1 ) // Mantissa expansion
+                       + ( (LDBL_MAX_EXP + LDBL_MANT_DIG + 28 + 8) / 9      ) // Exponent expansion
+                     ];
+    Pt::uint32_t* a;
+    Pt::uint32_t* d;
+    Pt::uint32_t* r;
+    Pt::uint32_t* z;
 
+    char        buf[9 + LDBL_MANT_DIG / 4];
+    char*       s;
 
-    uint32_t big[(LDBL_MANT_DIG+28)/29 + 1          // mantissa expansion
-        + (LDBL_MAX_EXP+LDBL_MANT_DIG+28+8)/9]; // exponent expansion
-    uint32_t *a, *d, *r, *z;
-    int e2=0, e, i, j, l;
-    char buf[9+LDBL_MANT_DIG/4], *s;
-    const char *prefix="-0X+0X 0X-0x+0x 0x";
-    int pl;
-    char ebuf0[3*sizeof(int)], *ebuf=&ebuf0[3*sizeof(int)], *estr;
+    char        ebuf0[ 3 * sizeof(Pt::int32_t) ];
+    char*       ebuf = &ebuf0[ 3 * sizeof(Pt::int32_t) ];
+    char*       estr;
+    Pt::int32_t e2 = 0;
+    Pt::int32_t e;
 
-    pl=1;
-    if (signbit(y)) {
-        y=-y;
-    } else if (fl & MARK_POS) {
-        prefix+=3;
-    } else if (fl & PAD_POS) {
-        prefix+=6;
-    } else prefix++, pl=0;
+    Pt::int32_t i;
+    Pt::int32_t j;
+    Pt::int32_t l;
 
-    /*
-    if (!isfinite(y)) {
-        char *s = (t&32)?"inf":"INF";
-        if (y!=y) s=(t&32)?"nan":"NAN";
-        pad(f, ' ', w, 3+pl, fl&~ZERO_PAD);
-        out(f, prefix, pl);
-        out(f, s, 3);
-        pad(f, ' ', w, 3+pl, fl^LEFT_ADJ);
-        return MAX(w, 3+pl);
-    }
-    */
+    Pt::int32_t pl = 0;
 
-    y = frexpl(y, &e2) * 2;
-    if (y) e2--;
+    //
+
+    val = frexpl(val, &e2) * 2;
+    if (val) e2--;
 
     if ((t|32)=='a') {
         long double round = 8.0;
         int re;
 
-        if (t&32) prefix += 9;
         pl += 2;
 
         if (p<0 || p>=LDBL_MANT_DIG/4-1) re=0;
@@ -194,15 +187,8 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
         if (re) {
             round *= 1<<(LDBL_MANT_DIG%4);
             while (re--) round*=16;
-            if (*prefix=='-') {
-                y=-y;
-                y-=round;
-                y+=round;
-                y=-y;
-            } else {
-                y+=round;
-                y-=round;
-            }
+            val+=round;
+            val-=round;
         }
 
         estr=fmt_u(e2<0 ? -e2 : e2, ebuf);
@@ -212,39 +198,34 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
 
         s=buf;
         do {
-            int x=y;
+            int x=val;
             *s++=X_DIGITS[x]|(t&32);
-            y=16*(y-x);
-            if (s-buf==1 && (y||p>0||(fl&ALT_FORM))) *s++='.';
-        } while (y);
+            val=16*(val-x);
+            if (s-buf==1 && (val||p>0||(fl&ALT_FORM))) *s++='.';
+        } while (val);
 
         if (p > INT_MAX-2-(ebuf-estr)-pl)
-            return -1;
+            return false;
         if (p && s-buf-2 < p)
             l = (p+2) + (ebuf-estr);
         else
             l = (s-buf) + (ebuf-estr);
 
-        pad(f, ' ', w, pl+l, fl);
-        out(f, prefix, pl);
-        pad(f, '0', w, pl+l, fl^ZERO_PAD);
-        out(f, buf, s-buf);
-        pad(f, '0', l-(ebuf-estr)-(s-buf), 0, 0);
-        out(f, estr, ebuf-estr);
-        pad(f, ' ', w, pl+l, fl^LEFT_ADJ);
-        return MAX(w, pl+l);
+        out(dst, buf, s-buf);
+        out(dst, estr, ebuf-estr);
+        return true;
     }
     if (p<0) p=6;
 
-    if (y) y *= 0x1p28, e2-=28;
+    if (val) val *= 0x1p28, e2-=28;
 
     if (e2<0) a=r=z=big;
     else a=r=z=big+sizeof(big)/sizeof(*big) - LDBL_MANT_DIG - 1;
 
     do {
-        *z = y;
-        y = 1000000000*(y-*z++);
-    } while (y);
+        *z = val;
+        val = 1000000000*(val-*z++);
+    } while (val);
 
     while (e2>0) {
         uint32_t carry=0;
@@ -296,7 +277,6 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
             if (x<i/2) small=0x0.8p0;
             else if (x==i/2 && d+1==z) small=0x1.0p0;
             else small=0x1.8p0;
-            if (pl && *prefix=='-') round*=-1, small*=-1;
             *d -= x;
             /* Decide whether to round by probing round+small */
             if (round+small != round) {
@@ -333,24 +313,21 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
         }
     }
     if (p > INT_MAX-1-(p || (fl&ALT_FORM)))
-        return -1;
+        return false;
     l = 1 + p + (p || (fl&ALT_FORM));
     if ((t|32)=='f') {
-        if (e > INT_MAX-l) return -1;
+        if (e > INT_MAX-l) return false;
         if (e>0) l+=e;
     } else {
         estr=fmt_u(e<0 ? -e : e, ebuf);
         while(ebuf-estr<2) *--estr='0';
         *--estr = (e<0 ? '-' : '+');
         *--estr = t;
-        if (ebuf-estr > INT_MAX-l) return -1;
+        if (ebuf-estr > INT_MAX-l) return false;
         l += ebuf-estr;
     }
 
-    if (l > INT_MAX-pl) return -1;
-    pad(f, ' ', w, pl+l, fl);
-    out(f, prefix, pl);
-    pad(f, '0', w, pl+l, fl^ZERO_PAD);
+    if (l > INT_MAX-pl) return false;
 
     if ((t|32)=='f') {
         if (a>r) a=r;
@@ -358,15 +335,14 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
             char *s = fmt_u(*d, buf+9);
             if (d!=a) while (s>buf) *--s='0';
             else if (s==buf+9) *--s='0';
-            out(f, s, buf+9-s);
+            out(dst, s, buf+9-s);
         }
-        if (p || (fl&ALT_FORM)) out(f, ".", 1);
+        if (p || (fl&ALT_FORM)) out(dst, ".", 1);
         for (; d<z && p>0; d++, p-=9) {
             char *s = fmt_u(*d, buf+9);
             while (s>buf) *--s='0';
-            out(f, s, MIN(9,p));
+            out(dst, s, MIN(9,p));
         }
-        pad(f, '0', p+9, 9, 0);
     } else {
         if (z<=a) z=a+1;
         for (d=a; d<z && p>=0; d++) {
@@ -374,19 +350,16 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
             if (s==buf+9) *--s='0';
             if (d!=a) while (s>buf) *--s='0';
             else {
-                out(f, s++, 1);
-                if (p>0||(fl&ALT_FORM)) out(f, ".", 1);
+                out(dst, s++, 1);
+                if (p>0||(fl&ALT_FORM)) out(dst, ".", 1);
             }
-            out(f, s, MIN(buf+9-s, p));
+            out(dst, s, MIN(buf+9-s, p));
             p -= buf+9-s;
         }
-        pad(f, '0', p+18, 18, 0);
-        out(f, estr, ebuf-estr);
+        out(dst, estr, ebuf-estr);
     }
 
-    pad(f, ' ', w, pl+l, fl^LEFT_ADJ);
-
-    return MAX(w, pl+l);
+    return true;
 }
 
 

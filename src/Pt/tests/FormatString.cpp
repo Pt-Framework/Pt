@@ -70,7 +70,7 @@ namespace Pt {
 
 
 //
-// Utility macros
+// Utilities
 //
 #define TYPE_IS_N(T)    ( !T                                          )
 
@@ -93,14 +93,11 @@ namespace Pt {
 #define TYPE_IS_AEFG(T) ( T && ( (T == 'a') || (T == 'A') || (T == 'e') || (T == 'E') || (T == 'f') || (T == 'F') || (T == 'g') || (T == 'G') ) )
 
 
-//
-// Utilities
-//
 template <typename ValueT>
-struct SelectInteger;
+struct SelectInt;
 
 template<>
-struct SelectInteger<Pt::int32_t> {
+struct SelectInt<Pt::int32_t> {
     typedef Pt::int32_t  SignedT;
     typedef Pt::uint32_t UnsignedT;
 
@@ -109,7 +106,7 @@ struct SelectInteger<Pt::int32_t> {
 };
 
 template<>
-struct SelectInteger<Pt::int64_t> {
+struct SelectInt<Pt::int64_t> {
     typedef Pt::int64_t  SignedT;
     typedef Pt::uint64_t UnsignedT;
 
@@ -119,17 +116,17 @@ struct SelectInteger<Pt::int64_t> {
 
 
 template <typename ValueT>
-struct SelectReal;
+struct SelectFP;
 
 template<>
-struct SelectReal<float> {
+struct SelectFP<float> {
     typedef float ValueT;
 
     static inline float selectValue(float f, double) { return f; }
 };
 
 template<>
-struct SelectReal<double> {
+struct SelectFP<double> {
     typedef double ValueT;
 
     static inline double selectValue(float, double d) { return d; }
@@ -247,8 +244,8 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     // TODO: Optimize!
 
     // Preparation
-    typedef typename SelectInteger<ValueT>::SignedT   SignedT;
-    typedef typename SelectInteger<ValueT>::UnsignedT UnsignedT;
+    typedef typename SelectInt<ValueT>::SignedT   SignedT;
+    typedef typename SelectInt<ValueT>::UnsignedT UnsignedT;
 
     bool       negNum;
     UnsignedT  numVal;
@@ -256,10 +253,10 @@ void FormatStringArg::ff_IXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
 
     if(_isUnsigned) {
         negNum = false;
-        numVal = SelectInteger<ValueT>::selectUnsigned(_valPOD.u32, _valPOD.u64);
+        numVal = SelectInt<ValueT>::selectUnsigned(_valPOD.u32, _valPOD.u64);
     }
     else {
-        const SignedT sigVal = SelectInteger<ValueT>::selectSigned(_valPOD.i32, _valPOD.i64);
+        const SignedT sigVal = SelectInt<ValueT>::selectSigned(_valPOD.i32, _valPOD.i64);
 
         negNum = (sigVal < 0);
         numVal = negNum ? -sigVal : sigVal;
@@ -415,11 +412,11 @@ void FormatStringArg::ff_RXX(Pt::String &rbf, FormatStringSpec& fss, const numpu
     // TODO: Optimize!
 
     // Preparation
-    typedef typename SelectReal<_ValueT>::ValueT ValueT;
+    typedef typename SelectFP<_ValueT>::ValueT ValueT;
 
-    const ValueT sigVal = SelectReal<_ValueT>::selectValue(_valPOD.f, _valPOD.d);
+    const ValueT sigVal = SelectFP<_ValueT>::selectValue(_valPOD.f, _valPOD.d);
 
-    const bool   negNum = (sigVal < SelectReal<_ValueT>::selectValue(0.0f, 0.0));
+    const bool   negNum = (sigVal < SelectFP<_ValueT>::selectValue(0.0f, 0.0));
     const ValueT numVal = negNum ? -sigVal : sigVal;
 
     // Handle 'sign' as prefix character
