@@ -85,7 +85,7 @@ namespace Pt {
 
 
 //
-// Utility templates
+// Utility template structs
 //
 template <typename ValueT>
 struct SelectInt;
@@ -109,7 +109,7 @@ struct SelectInt<Pt::int64_t> {
 };
 
 
-template <typename T, int base>
+template <typename T, int BASE>
 struct PrintUnsigned {
     static inline void Reversed(Pt::String& dst, T val, bool uppercase)
     {
@@ -118,8 +118,8 @@ struct PrintUnsigned {
         dst.clear();
 
         do {
-            dst += XDIGITS[val % base];
-            val /= base;
+            dst += XDIGITS[val % BASE];
+            val /= BASE;
         } while(val != 0);
     }
 };
@@ -264,6 +264,7 @@ static inline Pt::Char* copy(Pt::Char* dst, const Pt::Char* src, size_t len)
 }
 
 
+template <int GROUP_SIZE>
 static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep)
 {
     // TODO: Optimize!
@@ -276,7 +277,7 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
     const Pt::Char* srcItEnd = srcIt - srcLen;
 
     // Process without using thousands separator
-    if(!thousandsSep || srcLen <= 3) {
+    if(!thousandsSep || srcLen <= GROUP_SIZE) {
         // Resize the destination buffer
         dst.clear();
         dst.reserve(srcLen);
@@ -286,17 +287,17 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
     // Process using thousands separator(s)
     else {
         // Calculate the number of thousands separator(s)
-        const size_t sepCnt = (srcLen + 2) / 3 - 1;
+        const size_t sepCnt = (srcLen + GROUP_SIZE - 1) / GROUP_SIZE - 1;
         const size_t dstLen = src.length() + sepCnt;
         // Resize the destination buffer
         dst.clear();
         dst.reserve(dstLen);
         // Reverse the characters while adding thousands separator(s)
-        Pt::uint32_t digitIndex = 3 - (srcLen % 3);
+        Pt::uint32_t digitIndex = GROUP_SIZE - (srcLen % GROUP_SIZE);
         for(;;) {
             dst += *srcIt--;
             if(srcIt == srcItEnd) break;
-            if( ++digitIndex % 3 == 0) dst += thousandsSep;
+            if( ++digitIndex % GROUP_SIZE == 0) dst += thousandsSep;
         }
     }
 }
@@ -435,7 +436,8 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         // Convert to string (in reversed direction)
         PrintUnsigned<UnsignedT, 2>::Reversed(strVal, numVal, false);
         // Reverse the string
-        revUnsignedString(tmpResBuff, strVal, 0);
+        // TODO: Grouping ???
+        revUnsignedString<0>(tmpResBuff, strVal, 0);
     }
     // Process as base 8 type
     else if( TYPE_IS_O(rule.type) ) {
@@ -447,7 +449,8 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         // Convert to string (in reversed direction)
         PrintUnsigned<UnsignedT, 8>::Reversed(strVal, numVal, false);
         // Reverse the string
-        revUnsignedString(tmpResBuff, strVal, 0);
+        // TODO: Grouping ???
+        revUnsignedString<0>(tmpResBuff, strVal, 0);
     }
     // Process as base 16 type
     else if( TYPE_IS_X(rule.type) ) {
@@ -460,7 +463,8 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         // Convert to string (in reversed direction)
         PrintUnsigned<UnsignedT, 16>::Reversed(strVal, numVal, rule.type == 'X');
         // Reverse the string
-        revUnsignedString(tmpResBuff, strVal, 0);
+        // TODO: Grouping ???
+        revUnsignedString<0>(tmpResBuff, strVal, 0);
     }
     // Process as base 10 type
     else if( TYPE_IS_D(rule.type) ) {
@@ -480,7 +484,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
             if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
         }
         // Reverse the string and add thousands separator as needed
-        revUnsignedString(tmpResBuff, strVal, thousandsSep);
+        revUnsignedString<3>(tmpResBuff, strVal, thousandsSep);
     }
     // Invalid type
     else {

@@ -40,33 +40,60 @@
 
 
 #ifdef PT_WITH_STD_LOCALE
-class TestNumpunct : public std::numpunct<Pt::Char>  {
+class CustomNumpunct : public std::numpunct<Pt::Char>  {
     public:
         typedef Pt::Char                    char_type;
         typedef std::basic_string<Pt::Char> string_type;
 
     public:
-        TestNumpunct()
+        CustomNumpunct()
+        : _decimal_point(',')
+        , _thousands_sep('.')
+        , _grouping     ("\3")
+        , _truename     ("benar")
+        , _falsename    ("salah")
         {}
 
-        virtual ~TestNumpunct()
+        virtual ~CustomNumpunct()
         {}
+
+        inline void setDecimalPoint(char_type v)
+        { _decimal_point = v; }
+
+        inline void setThousandsSeparator(char_type v)
+        { _thousands_sep = v; }
+
+        inline void setGrouping(const std::string& v)
+        { _grouping = v; }
+
+        inline void setTruename(const string_type& v)
+        { _truename = v; }
+
+        inline void setFalsename(const string_type& v)
+        { _falsename = v; }
 
     protected:
         virtual char_type do_decimal_point() const
-        { return ','; }
+        { return _decimal_point; }
 
         virtual char_type do_thousands_sep() const
-        { return '.'; }
+        { return _decimal_point; }
 
         virtual std::string do_grouping() const
-        { return "\3"; }
+        { return _grouping; }
 
         virtual string_type do_truename() const
-        { return "benar"; }
+        { return _truename; }
 
         virtual string_type do_falsename() const
-        { return "salah"; }
+        { return _falsename; }
+
+    private:
+        char_type   _decimal_point;
+        char_type   _thousands_sep;
+        std::string _grouping;
+        string_type _truename;
+        string_type _falsename;
 };
 #endif
 
@@ -171,8 +198,6 @@ static Pt::FormatStringValue::locale_t* customLocale     = 0;
         }                                                                     \
         std::cerr << std::endl << std::endl << std::endl;                     \
    } while(false)
-
-
 
 
 int main(int argc, char* args[])
@@ -337,6 +362,12 @@ int main(int argc, char* args[])
 #endif
     //return 0;
 
+#ifdef PT_WITH_STD_LOCALE
+    // Create a customized locale
+    CustomNumpunct* customNumPunct = new CustomNumpunct();
+    std::locale clNumpunct = std::locale( std::locale(), customNumPunct );
+#endif
+
     // Strings
     TEST_AND_BENCHMARK("{{}}", 0);
     TEST_AND_BENCHMARK("{}", "aBc");
@@ -419,8 +450,6 @@ int main(int argc, char* args[])
 #ifdef PT_WITH_STD_LOCALE
     COMPARE_WITH_FMT = false;
 
-    std::locale clNumpunct = std::locale( std::locale(), new TestNumpunct() );
-
     std::locale oldLocale = std::locale::global(clNumpunct);
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
 
@@ -428,12 +457,33 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
 
     customLocale = &clNumpunct;
+
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
+
+    customNumPunct->setTruename ( Pt::Utf8Codec::decode( std::string("真") ) );
+    customNumPunct->setFalsename( Pt::Utf8Codec::decode( std::string("偽") ) );
+    TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
+
     customLocale = 0;
 
     COMPARE_WITH_FMT = true;
 
     //return 0;
+#endif
+
+    // Test special grouping
+#ifdef PT_WITH_STD_LOCALE
+    COMPARE_WITH_FMT = false;
+
+    customLocale = &clNumpunct;
+
+    customNumPunct->setThousandsSeparator(':');
+    customNumPunct->setGrouping("\4");
+    //TEST_AND_BENCHMARK("|{0:b}| |{0:Lb}|", 0b10101010);
+
+    customLocale = 0;
+
+    COMPARE_WITH_FMT = true;
 #endif
 
     // Output stream
