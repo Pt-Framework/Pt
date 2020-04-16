@@ -127,7 +127,7 @@ namespace Pt {
         return resultBuffer;                                                                                  \
     }                                                                                                         \
                                                                                                               \
-    inline Pt::String format(const Pt::String& fmt, const FormatStringValue::locale_t& loc, FS_ARG_NAME_X(X)) \
+    inline Pt::String format(const FormatStringValue::locale_t& loc, const Pt::String& fmt, FS_ARG_NAME_X(X)) \
     {                                                                                                         \
         if(fmt.empty()) return "";                                                                            \
                                                                                                               \
@@ -152,7 +152,7 @@ inline Pt::String format(const Pt::String& fmt)
 }
 
 
-inline Pt::String format(const Pt::String& fmt, const FormatStringValue::locale_t& loc)
+inline Pt::String format(const FormatStringValue::locale_t& loc, const Pt::String& fmt)
 {
     if(fmt.empty()) return "";
 
@@ -160,7 +160,29 @@ inline Pt::String format(const Pt::String& fmt, const FormatStringValue::locale_
     FormatString(fmt, 0)(resultBuffer, &loc);
     return resultBuffer;
 }
+/*
+template <typename OutputIt>
+inline Pt::String format_to(OutputIt out, const Pt::String& fmt)
+{
+    if(fmt.empty()) return "";
 
+    Pt::String resultBuffer;
+    FormatString(fmt, 0)(resultBuffer);
+    return resultBuffer;
+}
+
+template<class OutputIt, class... Args>
+OutputIt format_to(OutputIt out, std::string_view fmt, const Args&... args);
+    (1)     (since C++20)
+template<class OutputIt, class... Args>
+OutputIt format_to(OutputIt out, std::wstring_view fmt, const Args&... args);
+    (2)     (since C++20)
+template<class OutputIt, class... Args>
+
+OutputIt format_to(OutputIt out, const std::locale& loc,
+                   std::string_view fmt, const Args&... args);
+    (3)     (since C++20)
+*/
 
 //
 // Generate front-end functions that accept the format string and some arguments

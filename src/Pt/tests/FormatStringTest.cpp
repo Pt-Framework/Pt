@@ -79,7 +79,7 @@ static Pt::FormatStringValue::locale_t* customLocale     = 0;
             ? fmt::format(FMT, __VA_ARGS__)                                   \
             : "";                                                             \
         const Pt::String& ptf =                                               \
-            customLocale ? Pt::format(FMT, *customLocale, __VA_ARGS__)        \
+            customLocale ? Pt::format(*customLocale, FMT, __VA_ARGS__)        \
                          : Pt::format(FMT, __VA_ARGS__);                      \
         /* Print */                                                           \
         if(COMPARE_WITH_FMT) {                                                \
@@ -112,7 +112,7 @@ static Pt::FormatStringValue::locale_t* customLocale     = 0;
         if(customLocale) {                                                    \
             clock.start();                                                    \
             for(size_t i = 0; i < LOOP_COUNT; ++i) {                          \
-                Pt::format(FMT, *customLocale, __VA_ARGS__);                  \
+                Pt::format(*customLocale, FMT, __VA_ARGS__);                  \
             }                                                                 \
             bptf = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;              \
         }                                                                     \
