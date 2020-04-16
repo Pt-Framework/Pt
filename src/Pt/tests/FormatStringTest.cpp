@@ -1,6 +1,7 @@
 #include <iomanip>
 #include <iostream>
 
+#include <Pt/StringStream.h>
 #include <Pt/Utf8Codec.h>
 #include <Pt/System/Clock.h>
 
@@ -343,9 +344,16 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
     customLocale = 0;
 
-
     COMPARE_WITH_FMT = true;
 #endif
+
+    // Output stream
+    Pt::OStringStream oss;
+
+    format_to(oss, "Test Pt::OStringStream\n"); std::cerr << Pt::Utf8Codec::encode(oss.str());
+    format_to(oss, "Test Pt::OStringStream : {} {}\n", "aBc", 123.123); std::cerr << Pt::Utf8Codec::encode(oss.str());
+
+    std::cerr << std::endl;
 #endif
 
     // Done
