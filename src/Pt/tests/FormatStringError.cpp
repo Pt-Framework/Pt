@@ -25,56 +25,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_FORMAT_STRING_H
-#define PT_FORMAT_STRING_H
-
-#include <vector>
-
-#include "FormatStringValue.h"
+#include "FormatStringError.h"
 
 
 namespace Pt {
 
 
 //
-// The string-formatter class
+// Format-string error
 //
-class PT_API FormatString {
-    public:
-        // Constructors
-        inline FormatString(const char* format, const std::vector<const FormatStringValue*>* args)
-        : _format(format), _args(args)
-        {}
+FormatStringError::FormatStringError(const std::string& msg)
+: std::runtime_error(msg)
+{}
 
-        inline FormatString(const std::string& format, const std::vector<const FormatStringValue*>* args)
-        : _format(format.c_str()), _args(args)
-        {}
 
-        inline FormatString(const Pt::Char* format, const std::vector<const FormatStringValue*>* args)
-        : _format(format), _args(args)
-        {}
-
-        inline FormatString(const Pt::String& format, const std::vector<const FormatStringValue*>* args)
-        : _format(format), _args(args)
-        {}
-
-        // Format the value(s) using the specified rule
-        const void operator()(Pt::String& resultBuffer) const;
-
-    private:
-        const Pt::String                             _format;
-        const std::vector<const FormatStringValue*>* _args;
-};
+FormatStringError::FormatStringError(const char* msg)
+: std::runtime_error(msg)
+{}
 
 
 } // namespace
-
-
-//
-// Include the front-ends functions
-//
-#include "FormatString_FS.h"
-
-
-#endif
-

@@ -38,66 +38,69 @@ static bool COMPARE_WITH_FMT = true;
 
 #define LOOP_COUNT 8000
 
-#define TEST_AND_BENCHMARK(FORMAT, ...)                                       \
-    do {                                                                      \
-        /* Test */                                                            \
-        const std::string& fmt = COMPARE_WITH_FMT                             \
-                                 ? fmt::format(FORMAT, __VA_ARGS__)           \
-                                 : "";                                        \
-        const  Pt::String& ptf = Pt::format(FORMAT, __VA_ARGS__);             \
-        /* Print */                                                           \
-        if(COMPARE_WITH_FMT) {                                                \
-            const Pt::String& tmp = Pt::String(fmt.c_str());                  \
-            std::cerr << Pt::Utf8Codec::encode(tmp) << std::endl;             \
-        }                                                                     \
-        std::cerr << Pt::Utf8Codec::encode(ptf) << std::endl;                 \
-        /* Compare */                                                         \
-        if(COMPARE_WITH_FMT) {                                                \
-            if(fmt == ptf.narrow())                                           \
-                std::cerr << GREEN << "[MATCH] " << RESET;                    \
-            else                                                              \
-                std::cerr << RED << "[NOT MATCH] " << RESET;                  \
-        }                                                                     \
-        else {                                                                \
-            std::cerr << CYAN << "[NO COMPARE] " << RESET;                    \
-        }                                                                     \
-        /* Benchmark the reference fmt 4.1.0 library */                       \
-        Pt::System::Clock clock;                                              \
-        double            bfmt = 0.0;                                         \
-        if(COMPARE_WITH_FMT) {                                                \
-            clock.start();                                                    \
-            for(size_t i = 0; i < LOOP_COUNT; ++i) {                          \
-                fmt::format(FORMAT, __VA_ARGS__);                             \
-            }                                                                 \
-            bfmt = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;              \
-        }                                                                     \
-        /* Benchmark our implementation */                                    \
-        double bptf = 0.0;                                                    \
-        clock.start();                                                        \
-        for(size_t i = 0; i < LOOP_COUNT; ++i) {                              \
-            Pt::format(FORMAT, __VA_ARGS__);                                  \
-        }                                                                     \
-        bptf = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;                  \
-        /* Print the benchmark result */                                      \
-        double brat = COMPARE_WITH_FMT ? (bptf / bfmt) : 0.0;                 \
-        std::cerr << std::fixed << std::setprecision(1);                      \
-        std::cerr << std::setw(6) << bfmt << " nS/call - ";                   \
-        std::cerr << std::setw(6) << bptf << " nS/call ";                     \
-        if(!COMPARE_WITH_FMT) {                                               \
-            std::cerr << std::endl << std::endl << std::endl;                 \
-            break;                                                            \
-        }                                                                     \
-        if(brat < 1.0) {                                                      \
-            brat = 1.0 / brat;                                                \
-            std::cerr << BLUE;                                                \
-            std::cerr << "(" << std::setw(3) << brat << "x faster)" << RESET; \
-        }                                                                     \
-        else {                                                                \
-            std::cerr << MAGENTA;                                             \
-            std::cerr << "(" << std::setw(3) << brat << "x slower)" << RESET; \
-        }                                                                     \
-        std::cerr << std::endl << std::endl << std::endl;                     \
+#define TEST_AND_BENCHMARK(FORMAT, ...)                                          \
+    do {                                                                         \
+        /* Test */                                                               \
+        const std::string& fmt = COMPARE_WITH_FMT                                \
+                                 ? fmt::format(FORMAT, __VA_ARGS__)              \
+                                 : "";                                           \
+        const  Pt::String& ptf = Pt::format_string(FORMAT, __VA_ARGS__);         \
+        /* Print */                                                              \
+        if(COMPARE_WITH_FMT) {                                                   \
+            const Pt::String& tmp = Pt::String(fmt.c_str());                     \
+            std::cerr << Pt::Utf8Codec::encode(tmp) << std::endl;                \
+        }                                                                        \
+        std::cerr << Pt::Utf8Codec::encode(ptf) << std::endl;                    \
+        /* Compare */                                                            \
+        if(COMPARE_WITH_FMT) {                                                   \
+            if(fmt == ptf.narrow())                                              \
+                std::cerr << GREEN << "[MATCH] " << RESET;                       \
+            else                                                                 \
+                std::cerr << RED << "[NOT MATCH] " << RESET;                     \
+        }                                                                        \
+        else {                                                                   \
+            std::cerr << CYAN << "[NO COMPARE] " << RESET;                       \
+        }                                                                        \
+        /* Benchmark the reference fmt 4.1.0 library */                          \
+        Pt::System::Clock clock;                                                 \
+        double            bfmt = 0.0;                                            \
+        if(COMPARE_WITH_FMT) {                                                   \
+            clock.start();                                                       \
+            for(size_t i = 0; i < LOOP_COUNT; ++i) {                             \
+                fmt::format(FORMAT, __VA_ARGS__);                                \
+            }                                                                    \
+            bfmt = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;                 \
+        }                                                                        \
+        /* Benchmark our implementation */                                       \
+        double bptf = 0.0;                                                       \
+        clock.start();                                                           \
+        for(size_t i = 0; i < LOOP_COUNT; ++i) {                                 \
+            Pt::format_string(FORMAT, __VA_ARGS__);                              \
+        }                                                                        \
+        bptf = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;                     \
+        /* Print the benchmark result */                                         \
+        double brat = COMPARE_WITH_FMT ? (bptf / bfmt) : 0.0;                    \
+        std::cerr << std::fixed << std::setprecision(1);                         \
+        std::cerr << std::setw(6) << bfmt << " nS/call - ";                      \
+        std::cerr << std::setw(6) << bptf << " nS/call ";                        \
+        if(!COMPARE_WITH_FMT) {                                                  \
+            std::cerr << std::endl << std::endl << std::endl;                    \
+            break;                                                               \
+        }                                                                        \
+        if(brat < 1.0) {                                                         \
+            brat = 1.0 / brat;                                                   \
+            std::cerr << BLUE;                                                   \
+            std::cerr << "(" << std::setw(3) << brat << "x faster)" << RESET;    \
+        }                                                                        \
+        else {                                                                   \
+            std::cerr << MAGENTA;                                                \
+            std::cerr << "(" << std::setw(3) << brat << "x slower)" << RESET;    \
+        }                                                                        \
+        std::cerr << std::endl << std::endl << std::endl;                        \
    } while(false)
+
+
+// svn commit -m 'Implementing a simple string formatter ala std::format that uses Pt::String'
 
 
 #ifdef PT_WITH_STD_LOCALE
@@ -132,6 +135,11 @@ class TestNumpunct : public std::numpunct<Pt::Char>  {
 };
 
 #endif
+
+
+namespace Pt {
+    bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
+}
 
 
 int main(int argc, char* args[])
@@ -192,33 +200,32 @@ int main(int argc, char* args[])
         1.E+06
     */
 #if 1
-#define FPFP(F, ...) Pt::FormatStringValue::formatPositiveFP(F, __VA_ARGS__)
     // Test the in-house positive floating-point formatter
     Pt::String s;
-    FPFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 12345.123456789, 4, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 12345.123456789, 4, false, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 12345.123456789, 4, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 12345.123456789, 4, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, 3.40282347e+38f, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 3.40282347e+38f, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 3.40282347e+38f, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 3.40282347e+38f, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 3.40282347e+38f, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 3.40282347e+38f, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, 1.7976931348623157e308, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.7976931348623157e308, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.7976931348623157e308, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.7976931348623157e308, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.7976931348623157e308, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.7976931348623157e308, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, 1.18973149535723176502e+4932L, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.18973149535723176502e+4932L, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.18973149535723176502e+4932L, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.18973149535723176502e+4932L, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, 1.00010000, 20, false, 'G'); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.00010000 * 1000000, 20, false, 'G'); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.00010000 * 1000000, 0, false, 'G'); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.00010000, 20, false, 'G'); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.00010000 * 1000000, 20, false, 'G'); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.00010000 * 1000000, 0, false, 'G'); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, 1.00010000, 20, true, 'G'); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.00010000, 0, true, 'G'); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.00010000 * 1000000, 0, true, 'G'); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.00010000, 20, true, 'G'); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.00010000, 0, true, 'G'); std::cerr << s.narrow() << std::endl;
+    formatPositiveFP(s, 1.00010000 * 1000000, 0, true, 'G'); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl << std::endl;
 #else
     // Generate reference results

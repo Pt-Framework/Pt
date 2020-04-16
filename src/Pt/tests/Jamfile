@@ -41,8 +41,10 @@ RunUnitTest Pt-test : $(PT_OUTPUT_TEST) ;
 #{ return $(<) ; }
 #SubDirC++Flags [ FGeneric -std=c++11  ] ;
 
-FORMAT_STRING_SOURCES = FormatString.cpp
-                        FormatString_FP.cpp
+FORMAT_STRING_SOURCES = FormatStringError.cpp
+                        FormatStringValue.cpp
+                        FormatStringValue_FP.cpp
+                        FormatString.cpp
                         FormatStringTest.cpp
                         ;
 
