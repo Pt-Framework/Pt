@@ -439,7 +439,7 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:d}|", (Pt::uint64_t) 18406740073009501610ULL);
     TEST_AND_BENCHMARK("|{:x}|", (Pt::uint64_t) 18406740073009501610ULL);
 
-    //return 0;
+    return 0;
 
     // Mixeds
     TEST_AND_BENCHMARK("{} [{}] - {:d} mS ({:.1f}x) [{:d} loops]", "TEST", "FLAG", 1000, 3.5f, 250);

@@ -478,7 +478,11 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         if(rule.locale) {
             // Get the locale-specific thousands separator if possible
 #ifdef PT_WITH_STD_LOCALE
-            if(numpunct) thousandsSep = numpunct->thousands_sep();
+            if(numpunct) {
+                if(!numpunct->grouping().empty() && numpunct->grouping() != "\3")
+                    throw FormatStringError("only the default grouping ('\\3') is supported for decimal");
+                thousandsSep = numpunct->thousands_sep();
+            }
 #endif
             // Otherwise, use the default thousands separator
             if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
