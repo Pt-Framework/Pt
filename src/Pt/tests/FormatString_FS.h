@@ -171,7 +171,7 @@ namespace Pt {
         return out;                                                                    \
     }
 
-    
+
 //
 // Front-end functions that accept only the format string
 //
@@ -262,5 +262,3 @@ FS_GENERATE_FORMAT_FUNCTION(32)
 
 
 #endif
-
-
