@@ -109,6 +109,138 @@ struct SelectInt<Pt::int64_t> {
 };
 
 
+template <typename T, int base>
+struct PrintUnsigned {
+    static inline void Reversed(Pt::String& dst, T val, bool uppercase)
+    {
+        const char* XDIGITS = FormatStringValue::selectXDigits(uppercase);
+
+        dst.clear();
+
+        do {
+            dst += XDIGITS[val % base];
+            val /= base;
+        } while(val != 0);
+    }
+};
+
+template <typename T>
+struct PrintUnsigned<T, 2> {
+    static inline void Reversed(Pt::String& dst, T val, bool)
+    {
+        static const char* BIN_DIGITS_R4 =
+            "00001000010011000010101001101110"
+            "00011001010111010011101101111111";
+
+        dst.clear();
+
+        while(val >= 16) {
+            Pt::uint32_t idx = (val % 16) * 4;
+            val /= 16;
+            dst += BIN_DIGITS_R4[idx++];
+            dst += BIN_DIGITS_R4[idx++];
+            dst += BIN_DIGITS_R4[idx++];
+            dst += BIN_DIGITS_R4[idx  ];
+        }
+
+        Pt::uint32_t idx = val * 4;
+                     dst += BIN_DIGITS_R4[idx++];
+        if(val >= 2) dst += BIN_DIGITS_R4[idx++];
+        if(val >= 4) dst += BIN_DIGITS_R4[idx++];
+        if(val >= 8) dst += BIN_DIGITS_R4[idx  ];
+    }
+};
+
+template <typename T>
+struct PrintUnsigned<T, 8> {
+    static inline void Reversed(Pt::String& dst, T val, bool)
+    {
+        static const char* OCT_DIGITS_R2 =
+            "00102030405060700111213141516171"
+            "02122232425262720313233343536373"
+            "04142434445464740515253545556575"
+            "06162636465666760717273747576777";
+
+        dst.clear();
+
+        while(val >= 64) {
+            Pt::uint32_t idx = (val % 64) * 2;
+            val /= 64;
+            dst += OCT_DIGITS_R2[idx++];
+            dst += OCT_DIGITS_R2[idx  ];
+        }
+
+        Pt::uint32_t idx = val * 2;
+                     dst += OCT_DIGITS_R2[idx++];
+        if(val >= 8) dst += OCT_DIGITS_R2[idx  ];
+    }
+};
+
+template <typename T>
+struct PrintUnsigned<T, 10> {
+    static inline void Reversed(Pt::String& dst, T val, bool)
+    {
+        static const char* DEC_DIGITS_R2 =
+            "00102030405060708090011121314151617181910212223242"
+            "52627282920313233343536373839304142434445464748494"
+            "05152535455565758595061626364656667686960717273747"
+            "57677787970818283848586878889809192939495969798999";
+
+        dst.clear();
+
+        while(val >= 100) {
+            Pt::uint32_t idx = (val % 100) * 2;
+            val /= 100;
+            dst += DEC_DIGITS_R2[idx++];
+            dst += DEC_DIGITS_R2[idx  ];
+        }
+
+        Pt::uint32_t idx = val * 2;
+                      dst += DEC_DIGITS_R2[idx++];
+        if(val >= 10) dst += DEC_DIGITS_R2[idx  ];
+    }
+};
+
+template <typename T>
+struct PrintUnsigned<T, 16> {
+    static inline void Reversed(Pt::String& dst, T val, bool uppercase)
+    {
+        static const char* HEX_DIGITS_R2_L =
+            "00102030405060708090a0b0c0d0e0f001112131415161718191a1b1c1d1e1f1"
+            "02122232425262728292a2b2c2d2e2f203132333435363738393a3b3c3d3e3f3"
+            "04142434445464748494a4b4c4d4e4f405152535455565758595a5b5c5d5e5f5"
+            "06162636465666768696a6b6c6d6e6f607172737475767778797a7b7c7d7e7f7"
+            "08182838485868788898a8b8c8d8e8f809192939495969798999a9b9c9d9e9f9"
+            "0a1a2a3a4a5a6a7a8a9aaabacadaeafa0b1b2b3b4b5b6b7b8b9babbbcbdbebfb"
+            "0c1c2c3c4c5c6c7c8c9cacbcccdcecfc0d1d2d3d4d5d6d7d8d9dadbdcdddedfd"
+            "0e1e2e3e4e5e6e7e8e9eaebecedeeefe0f1f2f3f4f5f6f7f8f9fafbfcfdfefff";
+        static const char* HEX_DIGITS_R2_U =
+            "00102030405060708090A0B0C0D0E0F001112131415161718191A1B1C1D1E1F1"
+            "02122232425262728292A2B2C2D2E2F203132333435363738393A3B3C3D3E3F3"
+            "04142434445464748494A4B4C4D4E4F405152535455565758595A5B5C5D5E5F5"
+            "06162636465666768696A6B6C6D6E6F607172737475767778797A7B7C7D7E7F7"
+            "08182838485868788898A8B8C8D8E8F809192939495969798999A9B9C9D9E9F9"
+            "0A1A2A3A4A5A6A7A8A9AAABACADAEAFA0B1B2B3B4B5B6B7B8B9BABBBCBDBEBFB"
+            "0C1C2C3C4C5C6C7C8C9CACBCCCDCECFC0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFD"
+            "0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFE0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFFF";
+        const char* HEX_DIGITS_R2 = uppercase ? HEX_DIGITS_R2_U : HEX_DIGITS_R2_L;
+
+        dst.clear();
+
+        while(val >= 256) {
+            Pt::uint32_t idx = (val % 256) * 2;
+            val /= 256;
+            dst += HEX_DIGITS_R2[idx++];
+            dst += HEX_DIGITS_R2[idx  ];
+        }
+
+        Pt::uint32_t idx = val * 2;
+                      dst += HEX_DIGITS_R2[idx++];
+        if(val >= 16) dst += HEX_DIGITS_R2[idx  ];
+    }
+};
+
+
 //
 // Utility functions
 //
@@ -129,20 +261,6 @@ static inline Pt::Char* copy(Pt::Char* dst, const Pt::Char* src, size_t len)
     while(src != end) *dst++ = *src++;
 
     return dst;
-}
-
-
-template <typename T>
-static inline void printUnsignedRev(Pt::String& dst, T val, Pt::uint8_t base, const char* xdigits)
-{
-    // TODO: Optimize!
-
-    dst.clear();
-
-    do {
-        dst += xdigits[val % base];
-        val /= base;
-    } while(val != 0);
 }
 
 
@@ -315,7 +433,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
             prefixStr += rule.type;
         }
         // Convert to string (in reversed direction)
-        printUnsignedRev(strVal, numVal, 2, selectXDigits(false));
+        PrintUnsigned<UnsignedT, 2>::Reversed(strVal, numVal, false);
         // Reverse the string
         revUnsignedString(tmpResBuff, strVal, 0);
     }
@@ -327,7 +445,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
             prefixStr += '0';
         }
         // Convert to string (in reversed direction)
-        printUnsignedRev(strVal, numVal, 8, selectXDigits(false));
+        PrintUnsigned<UnsignedT, 8>::Reversed(strVal, numVal, false);
         // Reverse the string
         revUnsignedString(tmpResBuff, strVal, 0);
     }
@@ -340,7 +458,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
             prefixStr += rule.type;
         }
         // Convert to string (in reversed direction)
-        printUnsignedRev(strVal, numVal, 16, selectXDigits(rule.type == 'X'));
+        PrintUnsigned<UnsignedT, 16>::Reversed(strVal, numVal, rule.type == 'X');
         // Reverse the string
         revUnsignedString(tmpResBuff, strVal, 0);
     }
@@ -350,7 +468,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         if(rule.altForm)
             throw FormatStringError("format specifier '#' requires 'b/B/o/x/X' numeric argument");
         // Convert to string (in reversed direction)
-        printUnsignedRev(strVal, numVal, 10, selectXDigits(false));
+        PrintUnsigned<UnsignedT, 10>::Reversed(strVal, numVal, false);
         // Determine the thousands separator
         Pt::Char thousandsSep = 0;
         if(rule.locale) {

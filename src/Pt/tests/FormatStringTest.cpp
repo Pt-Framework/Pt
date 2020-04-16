@@ -289,9 +289,54 @@ int main(int argc, char* args[])
     printf("N\\A\n");
     printf("\n\n");
 #endif
+#if 0
+    // Base 2 - group every 4 digits
+    std::cerr << std::endl;
+    for(int i = 0; i < 16; ++i) {
+        const Pt::String& s = Pt::format("{:04b}", i);
+        for(int j = 0; j < 4; ++j) std::cerr << (char) s[3 - j];
+        if( !((i + 1) % 8) ) std::cerr << std::endl;
+    }
+    std::cerr << std::endl;
+#endif
+#if 0
+    // Base 8 - group every 2 digits
+    std::cerr << std::endl;
+    for(int i = 0; i < 64; ++i) {
+        const Pt::String& s = Pt::format("{:02o}", i);
+        for(int j = 0; j < 2; ++j) std::cerr << (char) s[1 - j];
+        if( !((i + 1) % 16) ) std::cerr << std::endl;
+    }
+    std::cerr << std::endl;
+#endif
+#if 0
+    // Base 10 - group every 2 digits
+    std::cerr << std::endl;
+    for(int i = 0; i < 100; ++i) {
+        const Pt::String& s = Pt::format("{:02d}", i);
+        for(int j = 0; j < 2; ++j) std::cerr << (char) s[1 - j];
+        if( !((i + 1) % 25) ) std::cerr << std::endl;
+    }
+    std::cerr << std::endl;
+#endif
+#if 0
+    // Base 16 - group every 2 digits
+    std::cerr << std::endl;
+    for(int i = 0; i < 256; ++i) {
+        const Pt::String& s = Pt::format("{:02x}", i);
+        for(int j = 0; j < 2; ++j) std::cerr << (char) s[1 - j];
+        if( !((i + 1) % 32) ) std::cerr << std::endl;
+    }
+    std::cerr << std::endl;
+    for(int i = 0; i < 256; ++i) {
+        const Pt::String& s = Pt::format("{:02X}", i);
+        for(int j = 0; j < 2; ++j) std::cerr << (char) s[1 - j];
+        if( !((i + 1) % 32) ) std::cerr << std::endl;
+    }
+    std::cerr << std::endl;
+#endif
     //return 0;
 
-#if 1
     // Strings
     TEST_AND_BENCHMARK("{{}}", 0);
     TEST_AND_BENCHMARK("{}", "aBc");
@@ -300,6 +345,8 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{}| |{:s}|", "aBc", "dEf");
     TEST_AND_BENCHMARK("|{0:8}| |{0:*<8}| |{0:*>8}| |{0:*^8}| |{0:^8}|", "aBc");
 
+    //return 0;
+
     // Characters (xA9 == 169 == ©)
     TEST_AND_BENCHMARK("|{}| |{}| |{}|", 'A', 'b', '\xA9');
     TEST_AND_BENCHMARK("|{:*<8}| |{:*>8}| |{:*^8}|", 'A', 'b', '\xA9');
@@ -307,9 +354,13 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:d}| |{:d}| |{:d}|", 'A', 'b', '\xA9');
     TEST_AND_BENCHMARK("|{:*<8d}| |{:*>8d}| |{:*^8d}|", 'A', 'b', '\xA9');
 
+    //return 0;
+
     // Pointers
     int dummy = 0;
     TEST_AND_BENCHMARK("|{0:p}| |{0:24p}| |{0:*^24p}|", (void*) &dummy);
+
+    //return 0;
 
     // Booleans
     TEST_AND_BENCHMARK("|{:08}| |{:08}|", true, false);
@@ -352,8 +403,17 @@ int main(int argc, char* args[])
 
     TEST_AND_BENCHMARK("|{:+n}| |{:+n}| |{:n}|", (Pt::int64_t) 9223372036854775807LL, (Pt::int64_t) -9223372036854775807LL - 1, (Pt::uint64_t) 18446744073709551615ULL);
 
+    TEST_AND_BENCHMARK("|{:b}|", (Pt::uint64_t) 18406740073009501610ULL);
+    TEST_AND_BENCHMARK("|{:o}|", (Pt::uint64_t) 18406740073009501610ULL);
+    TEST_AND_BENCHMARK("|{:d}|", (Pt::uint64_t) 18406740073009501610ULL);
+    TEST_AND_BENCHMARK("|{:x}|", (Pt::uint64_t) 18406740073009501610ULL);
+
+    //return 0;
+
     // Mixeds
     TEST_AND_BENCHMARK("{} [{}] - {:d} mS ({:.1f}x) [{:d} loops]", "TEST", "FLAG", 1000, 3.5f, 250);
+
+    //return 0;
 
     // Custom numpunct
 #ifdef PT_WITH_STD_LOCALE
@@ -372,6 +432,8 @@ int main(int argc, char* args[])
     customLocale = 0;
 
     COMPARE_WITH_FMT = true;
+
+    //return 0;
 #endif
 
     // Output stream
@@ -381,7 +443,6 @@ int main(int argc, char* args[])
     format_to(oss, "Test Pt::OStringStream : {} {}\n", "aBc", 123.123); std::cerr << Pt::Utf8Codec::encode(oss.str());
 
     std::cerr << std::endl;
-#endif
 
     // Done
     return 0;
