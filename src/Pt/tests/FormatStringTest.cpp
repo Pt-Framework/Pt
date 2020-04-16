@@ -11,97 +11,7 @@
 #include "FormatString.h"
 
 
-#ifdef __unix__
-#define GRAY    "\u001b[90m"
-#define RED     "\u001b[91m"
-#define GREEN   "\u001b[92m"
-#define YELLOW  "\u001b[93m"
-#define BLUE    "\u001b[94m"
-#define MAGENTA "\u001b[95m"
-#define CYAN    "\u001b[96m"
-#define WHITE   "\u001b[97m"
-#define RESET   "\u001b[0m"
-#else
-#define GRAY    ""
-#define RED     ""
-#define GREEN   ""
-#define YELLOW  ""
-#define BLUE    ""
-#define MAGENTA ""
-#define CYAN    ""
-#define WHITE   ""
-#define RESET   ""
-#endif
-
-
-static bool COMPARE_WITH_FMT = true;
-
-#define LOOP_COUNT 8000
-
-#define TEST_AND_BENCHMARK(FORMAT, ...)                                       \
-    do {                                                                      \
-        /* Test */                                                            \
-        const std::string& fmt = COMPARE_WITH_FMT                             \
-                                 ? fmt::format(FORMAT, __VA_ARGS__)           \
-                                 : "";                                        \
-        const  Pt::String& ptf = Pt::format(FORMAT, __VA_ARGS__);             \
-        /* Print */                                                           \
-        if(COMPARE_WITH_FMT) {                                                \
-            const Pt::String& tmp = Pt::String(fmt.c_str());                  \
-            std::cerr << Pt::Utf8Codec::encode(tmp) << std::endl;             \
-        }                                                                     \
-        std::cerr << Pt::Utf8Codec::encode(ptf) << std::endl;                 \
-        /* Compare */                                                         \
-        if(COMPARE_WITH_FMT) {                                                \
-            if(fmt == ptf.narrow())                                           \
-                std::cerr << GREEN << "[MATCH] " << RESET;                    \
-            else                                                              \
-                std::cerr << RED << "[NOT MATCH] " << RESET;                  \
-        }                                                                     \
-        else {                                                                \
-            std::cerr << CYAN << "[NO COMPARE] " << RESET;                    \
-        }                                                                     \
-        /* Benchmark the reference fmt 4.1.0 library */                       \
-        Pt::System::Clock clock;                                              \
-        double            bfmt = 0.0;                                         \
-        if(COMPARE_WITH_FMT) {                                                \
-            clock.start();                                                    \
-            for(size_t i = 0; i < LOOP_COUNT; ++i) {                          \
-                fmt::format(FORMAT, __VA_ARGS__);                             \
-            }                                                                 \
-            bfmt = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;              \
-        }                                                                     \
-        /* Benchmark our implementation */                                    \
-        double bptf = 0.0;                                                    \
-        clock.start();                                                        \
-        for(size_t i = 0; i < LOOP_COUNT; ++i) {                              \
-            Pt::format(FORMAT, __VA_ARGS__);                                  \
-        }                                                                     \
-        bptf = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;                  \
-        /* Print the benchmark result */                                      \
-        double brat = COMPARE_WITH_FMT ? (bptf / bfmt) : 0.0;                 \
-        std::cerr << std::fixed << std::setprecision(1);                      \
-        std::cerr << std::setw(6) << bfmt << " nS/call - ";                   \
-        std::cerr << std::setw(6) << bptf << " nS/call ";                     \
-        if(!COMPARE_WITH_FMT) {                                               \
-            std::cerr << std::endl << std::endl << std::endl;                 \
-            break;                                                            \
-        }                                                                     \
-        if(brat < 1.0) {                                                      \
-            brat = 1.0 / brat;                                                \
-            std::cerr << BLUE;                                                \
-            std::cerr << "(" << std::setw(3) << brat << "x faster)" << RESET; \
-        }                                                                     \
-        else {                                                                \
-            std::cerr << MAGENTA;                                             \
-            std::cerr << "(" << std::setw(3) << brat << "x slower)" << RESET; \
-        }                                                                     \
-        std::cerr << std::endl << std::endl << std::endl;                     \
-   } while(false)
-
-
 #ifdef PT_WITH_STD_LOCALE
-
 class TestNumpunct : public std::numpunct<Pt::Char>  {
     public:
         typedef Pt::Char                    char_type;
@@ -130,8 +40,111 @@ class TestNumpunct : public std::numpunct<Pt::Char>  {
         virtual string_type do_falsename() const
         { return "salah"; }
 };
-
 #endif
+
+
+#ifdef __unix__
+#define GRAY    "\u001b[90m"
+#define RED     "\u001b[91m"
+#define GREEN   "\u001b[92m"
+#define YELLOW  "\u001b[93m"
+#define BLUE    "\u001b[94m"
+#define MAGENTA "\u001b[95m"
+#define CYAN    "\u001b[96m"
+#define WHITE   "\u001b[97m"
+#define RESET   "\u001b[0m"
+#else
+#define GRAY    ""
+#define RED     ""
+#define GREEN   ""
+#define YELLOW  ""
+#define BLUE    ""
+#define MAGENTA ""
+#define CYAN    ""
+#define WHITE   ""
+#define RESET   ""
+#endif
+
+
+static bool                             COMPARE_WITH_FMT = true;
+static Pt::FormatStringValue::locale_t* customLocale     = 0;
+
+#define LOOP_COUNT 8000
+
+#define TEST_AND_BENCHMARK(FMT, ...)                                          \
+    do {                                                                      \
+        /* Test */                                                            \
+        const std::string& fmt =                                              \
+            COMPARE_WITH_FMT                                                  \
+            ? fmt::format(FMT, __VA_ARGS__)                                   \
+            : "";                                                             \
+        const Pt::String& ptf =                                               \
+            customLocale ? Pt::format(FMT, *customLocale, __VA_ARGS__)        \
+                         : Pt::format(FMT, __VA_ARGS__);                      \
+        /* Print */                                                           \
+        if(COMPARE_WITH_FMT) {                                                \
+            const Pt::String& tmp = Pt::String(fmt.c_str());                  \
+            std::cerr << Pt::Utf8Codec::encode(tmp) << std::endl;             \
+        }                                                                     \
+        std::cerr << Pt::Utf8Codec::encode(ptf) << std::endl;                 \
+        /* Compare */                                                         \
+        if(COMPARE_WITH_FMT) {                                                \
+            if(fmt == ptf.narrow())                                           \
+                std::cerr << GREEN << "[MATCH] " << RESET;                    \
+            else                                                              \
+                std::cerr << RED << "[NOT MATCH] " << RESET;                  \
+        }                                                                     \
+        else {                                                                \
+            std::cerr << CYAN << "[NO COMPARE] " << RESET;                    \
+        }                                                                     \
+        /* Benchmark the reference fmt 4.1.0 library */                       \
+        Pt::System::Clock clock;                                              \
+        double            bfmt = 0.0;                                         \
+        if(COMPARE_WITH_FMT) {                                                \
+            clock.start();                                                    \
+            for(size_t i = 0; i < LOOP_COUNT; ++i) {                          \
+                fmt::format(FMT, __VA_ARGS__);                                \
+            }                                                                 \
+            bfmt = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;              \
+        }                                                                     \
+        /* Benchmark our implementation */                                    \
+        double bptf = 0.0;                                                    \
+        if(customLocale) {                                                    \
+            clock.start();                                                    \
+            for(size_t i = 0; i < LOOP_COUNT; ++i) {                          \
+                Pt::format(FMT, *customLocale, __VA_ARGS__);                  \
+            }                                                                 \
+            bptf = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;              \
+        }                                                                     \
+        else {                                                                \
+            clock.start();                                                    \
+            for(size_t i = 0; i < LOOP_COUNT; ++i) {                          \
+                Pt::format(FMT, __VA_ARGS__);                                 \
+            }                                                                 \
+            bptf = clock.stop().toUSecs() * 1000.0 / LOOP_COUNT;              \
+        }                                                                     \
+        /* Print the benchmark result */                                      \
+        double brat = COMPARE_WITH_FMT ? (bptf / bfmt) : 0.0;                 \
+        std::cerr << std::fixed << std::setprecision(1);                      \
+        std::cerr << std::setw(6) << bfmt << " nS/call - ";                   \
+        std::cerr << std::setw(6) << bptf << " nS/call ";                     \
+        if(!COMPARE_WITH_FMT) {                                               \
+            std::cerr << std::endl << std::endl << std::endl;                 \
+            break;                                                            \
+        }                                                                     \
+        if(brat < 1.0) {                                                      \
+            brat = 1.0 / brat;                                                \
+            std::cerr << BLUE;                                                \
+            std::cerr << "(" << std::setw(3) << brat << "x faster)" << RESET; \
+        }                                                                     \
+        else {                                                                \
+            std::cerr << MAGENTA;                                             \
+            std::cerr << "(" << std::setw(3) << brat << "x slower)" << RESET; \
+        }                                                                     \
+        std::cerr << std::endl << std::endl << std::endl;                     \
+   } while(false)
+
+
 
 
 int main(int argc, char* args[])
@@ -250,6 +263,7 @@ int main(int argc, char* args[])
 #endif
     //return 0;
 
+#if 1
     // Strings
     TEST_AND_BENCHMARK("{{}}", 0);
     TEST_AND_BENCHMARK("{}", "aBc");
@@ -317,13 +331,21 @@ int main(int argc, char* args[])
 #ifdef PT_WITH_STD_LOCALE
     COMPARE_WITH_FMT = false;
 
-    std::locale oldLocale = std::locale::global( std::locale( std::locale(), new TestNumpunct() ) );
+    std::locale clNumpunct = std::locale( std::locale(), new TestNumpunct() );
+
+    std::locale oldLocale = std::locale::global(clNumpunct);
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
 
-    std::locale::global( oldLocale );
+    std::locale::global(oldLocale);
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
+
+    customLocale = &clNumpunct;
+    TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
+    customLocale = 0;
+
 
     COMPARE_WITH_FMT = true;
+#endif
 #endif
 
     // Done

@@ -46,8 +46,8 @@ class PT_API FormatStringValue {
         typedef std::locale             locale_t;
         typedef std::numpunct<Pt::Char> numpunct_t;
 #else
-        typedef void* locale_t;
-        typedef void* numpunct_t;
+        struct locale_t {};
+        struct numpunct_t {};
 #endif
 
     public:

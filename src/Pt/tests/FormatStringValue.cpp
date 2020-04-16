@@ -554,7 +554,7 @@ void FormatStringValue::ff_B(Pt::String& resBuff, Rule& rule, const numpunct_t* 
         }
 #endif
         // Otherwise, use the default string
-        if(_valStr.empty()) {
+        if(boolName.empty()) {
             boolName = _valPOD.b ? DEFAULT_TRUE_NAME : DEFAULT_FALSE_NAME;
         }
         // Process the generated string

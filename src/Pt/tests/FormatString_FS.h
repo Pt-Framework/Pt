@@ -112,24 +112,35 @@ namespace Pt {
 
 
 //
-// Macros for generating front end functions
+// Macros for generating front-end functions
 //
-#define FS_GENERATE_FORMAT_FUNCTION(X)                                \
-    inline Pt::String format(const Pt::String& fmt, FS_ARG_NAME_X(X)) \
-    {                                                                 \
-        if(fmt.empty()) return "";                                    \
-                                                                      \
-        std::vector<const FormatStringValue*> args(X);                \
-        FS_ARG_STOR_X(X);                                             \
-                                                                      \
-        Pt::String resultBuffer;                                      \
-        FormatString(fmt, &args)(resultBuffer);                       \
-        return resultBuffer;                                          \
+#define FS_GENERATE_FORMAT_FUNCTION(X)                                                                        \
+    inline Pt::String format(const Pt::String& fmt, FS_ARG_NAME_X(X))                                         \
+    {                                                                                                         \
+        if(fmt.empty()) return "";                                                                            \
+                                                                                                              \
+        std::vector<const FormatStringValue*> args(X);                                                        \
+        FS_ARG_STOR_X(X);                                                                                     \
+                                                                                                              \
+        Pt::String resultBuffer;                                                                              \
+        FormatString(fmt, &args)(resultBuffer);                                                               \
+        return resultBuffer;                                                                                  \
+    }                                                                                                         \
+                                                                                                              \
+    inline Pt::String format(const Pt::String& fmt, const FormatStringValue::locale_t& loc, FS_ARG_NAME_X(X)) \
+    {                                                                                                         \
+        if(fmt.empty()) return "";                                                                            \
+                                                                                                              \
+        std::vector<const FormatStringValue*> args(X);                                                        \
+        FS_ARG_STOR_X(X);                                                                                     \
+                                                                                                              \
+        Pt::String resultBuffer;                                                                              \
+        FormatString(fmt, &args)(resultBuffer, &loc);                                                         \
+        return resultBuffer;                                                                                  \
     }
 
-
 //
-// Front end functions that accept only the format string
+// Front-end functions that accept only the format string
 //
 inline Pt::String format(const Pt::String& fmt)
 {
@@ -141,8 +152,18 @@ inline Pt::String format(const Pt::String& fmt)
 }
 
 
+inline Pt::String format(const Pt::String& fmt, const FormatStringValue::locale_t& loc)
+{
+    if(fmt.empty()) return "";
+
+    Pt::String resultBuffer;
+    FormatString(fmt, 0)(resultBuffer, &loc);
+    return resultBuffer;
+}
+
+
 //
-// Front end functions that accept the format string and some arguments
+// Generate front-end functions that accept the format string and some arguments
 //
 FS_GENERATE_FORMAT_FUNCTION(1)
 FS_GENERATE_FORMAT_FUNCTION(2)

@@ -60,7 +60,7 @@ static inline size_t parseSizeT(const char *p)
 //
 // The string-formatter class
 //
-const void FormatString::operator()(Pt::String& resultBuffer) const
+const void FormatString::operator()(Pt::String& resultBuffer, const FormatStringValue::locale_t* customLocale) const
 {
     // TODO: Optimize!
 
@@ -78,7 +78,9 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
     // Get the "numpunct" instance (if supported)
 #ifdef PT_WITH_STD_LOCALE
 
-    const FormatStringValue::numpunct_t* numpunct = &std::use_facet<FormatStringValue::numpunct_t>( std::locale() );
+    const FormatStringValue::numpunct_t* numpunct =
+        customLocale ? &std::use_facet<FormatStringValue::numpunct_t>( *customLocale )
+                     : &std::use_facet<FormatStringValue::numpunct_t>( std::locale() );
 
     if( numpunct && !numpunct->grouping().empty() && numpunct->grouping() != "\3" )
         throw FormatStringError("using locale with non default grouping is not supported");
