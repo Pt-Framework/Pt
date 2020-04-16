@@ -77,7 +77,7 @@ class CustomNumpunct : public std::numpunct<Pt::Char>  {
         { return _decimal_point; }
 
         virtual char_type do_thousands_sep() const
-        { return _decimal_point; }
+        { return _thousands_sep; }
 
         virtual std::string do_grouping() const
         { return _grouping; }
@@ -439,7 +439,7 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:d}|", (Pt::uint64_t) 18406740073009501610ULL);
     TEST_AND_BENCHMARK("|{:x}|", (Pt::uint64_t) 18406740073009501610ULL);
 
-    return 0;
+    //return 0;
 
     // Mixeds
     TEST_AND_BENCHMARK("{} [{}] - {:d} mS ({:.1f}x) [{:d} loops]", "TEST", "FLAG", 1000, 3.5f, 250);
@@ -478,8 +478,9 @@ int main(int argc, char* args[])
     customLocale = &clNumpunct;
 
     customNumPunct->setThousandsSeparator(':');
+
     customNumPunct->setGrouping("\4");
-    //TEST_AND_BENCHMARK("|{0:b}| |{0:Lb}|", 0b10101010);
+    TEST_AND_BENCHMARK("|{0:b}| |{0:Lb}|", 0b10101010101010101010101010101010);
 
     customLocale = 0;
 

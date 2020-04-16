@@ -58,6 +58,7 @@ namespace Pt {
 #define DEFAULT_THOUSANDS_SEPARATOR ','
 
 #define DEFAULT_PRECISION           6
+#define DEFAULT_GROUPING_SIZE       3
 
 
 //
@@ -264,8 +265,7 @@ static inline Pt::Char* copy(Pt::Char* dst, const Pt::Char* src, size_t len)
 }
 
 
-template <int GROUP_SIZE>
-static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep)
+static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize = DEFAULT_GROUPING_SIZE)
 {
     // TODO: Optimize!
 
@@ -277,7 +277,7 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
     const Pt::Char* srcItEnd = srcIt - srcLen;
 
     // Process without using thousands separator
-    if(!thousandsSep || srcLen <= GROUP_SIZE) {
+    if(!thousandsSep || srcLen <= groupingSize) {
         // Resize the destination buffer
         dst.clear();
         dst.reserve(srcLen);
@@ -287,17 +287,17 @@ static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt:
     // Process using thousands separator(s)
     else {
         // Calculate the number of thousands separator(s)
-        const size_t sepCnt = (srcLen + GROUP_SIZE - 1) / GROUP_SIZE - 1;
+        const size_t sepCnt = (srcLen + groupingSize - 1) / groupingSize - 1;
         const size_t dstLen = src.length() + sepCnt;
         // Resize the destination buffer
         dst.clear();
         dst.reserve(dstLen);
         // Reverse the characters while adding thousands separator(s)
-        Pt::uint32_t digitIndex = GROUP_SIZE - (srcLen % GROUP_SIZE);
+        Pt::uint32_t digitIndex = groupingSize - (srcLen % groupingSize);
         for(;;) {
             dst += *srcIt--;
             if(srcIt == srcItEnd) break;
-            if( ++digitIndex % GROUP_SIZE == 0) dst += thousandsSep;
+            if( ++digitIndex % groupingSize == 0) dst += thousandsSep;
         }
     }
 }
@@ -395,6 +395,12 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         numVal = negNum ? -sigVal : sigVal;
     }
 
+    // For backward compatibility with older (draft) C++20 standard
+    if(rule.type == 'n') {
+        rule.locale = true;
+        rule.type   = 'd';
+    }
+
     // Handle 'sign' as a prefix character
     Pt::String prefixStr;
 
@@ -415,10 +421,20 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         throw FormatStringError("invalid 'sign specifier' in format string");
     }
 
-    // For backward compatibility with older (draft) C++20 standard
-    if(rule.type == 'n') {
-        rule.locale = true;
-        rule.type   = 'd';
+    // Determine the thousands separator
+    Pt::Char thousandsSep = 0;
+    size_t   groupingSize = 0;
+    if(rule.locale) {
+    // Get the locale-specific thousands separator and grouping size if possible
+#ifdef PT_WITH_STD_LOCALE
+        if(numpunct) {
+            groupingSize = numpunct->grouping()[0];
+            thousandsSep = numpunct->thousands_sep();
+        }
+#endif
+        // Otherwise, use the default thousands separator and grouping size
+        if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
+        if(!groupingSize) groupingSize = DEFAULT_GROUPING_SIZE;
     }
 
     // Temporary result buffers
@@ -436,8 +452,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         // Convert to string (in reversed direction)
         PrintUnsigned<UnsignedT, 2>::Reversed(strVal, numVal, false);
         // Reverse the string
-        // TODO: Grouping ???
-        revUnsignedString<0>(tmpResBuff, strVal, 0);
+        revUnsignedString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Process as base 8 type
     else if( TYPE_IS_O(rule.type) ) {
@@ -449,8 +464,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         // Convert to string (in reversed direction)
         PrintUnsigned<UnsignedT, 8>::Reversed(strVal, numVal, false);
         // Reverse the string
-        // TODO: Grouping ???
-        revUnsignedString<0>(tmpResBuff, strVal, 0);
+        revUnsignedString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Process as base 16 type
     else if( TYPE_IS_X(rule.type) ) {
@@ -463,8 +477,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         // Convert to string (in reversed direction)
         PrintUnsigned<UnsignedT, 16>::Reversed(strVal, numVal, rule.type == 'X');
         // Reverse the string
-        // TODO: Grouping ???
-        revUnsignedString<0>(tmpResBuff, strVal, 0);
+        revUnsignedString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Process as base 10 type
     else if( TYPE_IS_D(rule.type) ) {
@@ -473,22 +486,10 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
             throw FormatStringError("format specifier '#' requires 'b/B/o/x/X' numeric argument");
         // Convert to string (in reversed direction)
         PrintUnsigned<UnsignedT, 10>::Reversed(strVal, numVal, false);
-        // Determine the thousands separator
-        Pt::Char thousandsSep = 0;
-        if(rule.locale) {
-            // Get the locale-specific thousands separator if possible
-#ifdef PT_WITH_STD_LOCALE
-            if(numpunct) {
-                if(!numpunct->grouping().empty() && numpunct->grouping() != "\3")
-                    throw FormatStringError("only the default grouping ('\\3') is supported for decimal");
-                thousandsSep = numpunct->thousands_sep();
-            }
-#endif
-            // Otherwise, use the default thousands separator
-            if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
-        }
         // Reverse the string and add thousands separator as needed
-        revUnsignedString<3>(tmpResBuff, strVal, thousandsSep);
+        if(rule.locale && groupingSize != 3)
+            throw FormatStringError("only locale with default grouping ('\\3') is supported for decimal");
+        revUnsignedString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Invalid type
     else {
