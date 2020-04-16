@@ -457,34 +457,29 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
 
     customLocale = &clNumpunct;
-
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
 
     customNumPunct->setTruename ( Pt::Utf8Codec::decode( std::string("真") ) );
     customNumPunct->setFalsename( Pt::Utf8Codec::decode( std::string("偽") ) );
     TEST_AND_BENCHMARK("|{:*^8L}| |{:*^8L}| |{:*^20.5Lf}|", true, false, 123456789.123456789);
 
+    //return 0;
+
+    customNumPunct->setThousandsSeparator(':');
+    customNumPunct->setGrouping("\x08");
+    TEST_AND_BENCHMARK("|{0:b}| |{0:Lb}|", 0b10101010101010101010101010101010);
+
+    customNumPunct->setGrouping("\3");
+    TEST_AND_BENCHMARK("|{0:o}| |{0:Lo}|", 0b10101010101010101010101010101010);
+
+    customNumPunct->setGrouping("\2");
+    TEST_AND_BENCHMARK("|{0:x}| |{0:Lx}|", 0b10101010101010101010101010101010);
+
     customLocale = 0;
 
     COMPARE_WITH_FMT = true;
 
     //return 0;
-#endif
-
-    // Test special grouping
-#ifdef PT_WITH_STD_LOCALE
-    COMPARE_WITH_FMT = false;
-
-    customLocale = &clNumpunct;
-
-    customNumPunct->setThousandsSeparator(':');
-
-    customNumPunct->setGrouping("\4");
-    TEST_AND_BENCHMARK("|{0:b}| |{0:Lb}|", 0b10101010101010101010101010101010);
-
-    customLocale = 0;
-
-    COMPARE_WITH_FMT = true;
 #endif
 
     // Output stream
