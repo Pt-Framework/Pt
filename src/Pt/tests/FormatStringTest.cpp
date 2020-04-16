@@ -283,6 +283,8 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{0:*<8d}| |{0:*>8d}| |{0:*^8d}| |{1:*<8d}| |{1:*>8d}| |{1:*^8d}|", true, false);
     TEST_AND_BENCHMARK("|{0:*<08d}| |{0:*>08d}| |{0:*^08d}| |{1:*<08d}| |{1:*>08d}| |{1:*^08d}|", true, false);
 
+    //return 0;
+
     // Floating-points
     TEST_AND_BENCHMARK("|{0}| |{0:18f}| |{0:.4f}| |{0:18.4f}| |{0:018.4f}| |{0:*^18.4f}| |{0:*^018.4f}|", 12345.123456789f);
     TEST_AND_BENCHMARK("|{0}| |{0:18f}| |{0:.4f}| |{0:18.4f}| |{0:018.4f}| |{0:*^18.4f}| |{0:*^018.4f}|", -12345.123456789f);

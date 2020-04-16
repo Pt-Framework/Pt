@@ -254,7 +254,7 @@ const char FormatStringValue::XDIGITS_UPPER[16] = {
 
 
 template <typename ValueT> inline
-void FormatStringValue::ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const
+void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
 {
     // TODO: Optimize!
 
@@ -262,9 +262,8 @@ void FormatStringValue::ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t
     typedef typename SelectInt<ValueT>::SignedT   SignedT;
     typedef typename SelectInt<ValueT>::UnsignedT UnsignedT;
 
-    bool       negNum;
-    UnsignedT  numVal;
-    Pt::String strVal;
+    bool      negNum;
+    UnsignedT numVal;
 
     if(_isUnsigned) {
         negNum = false;
@@ -303,6 +302,10 @@ void FormatStringValue::ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t
         rule.type   = 'd';
     }
 
+    // Temporary result buffers
+    Pt::String strVal;
+    Pt::String tmpResBuff;
+
     // Process as base 2 type
     if( TYPE_IS_B(rule.type) ) {
         // Handle '#' as prefix characters
@@ -314,7 +317,7 @@ void FormatStringValue::ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t
         // Convert to string (in reversed direction)
         printUnsignedRev(strVal, numVal, 2, selectXDigits(false));
         // Reverse the string
-        revUnsignedString(_valStr, strVal, 0);
+        revUnsignedString(tmpResBuff, strVal, 0);
     }
     // Process as base 8 type
     else if( TYPE_IS_O(rule.type) ) {
@@ -326,7 +329,7 @@ void FormatStringValue::ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t
         // Convert to string (in reversed direction)
         printUnsignedRev(strVal, numVal, 8, selectXDigits(false));
         // Reverse the string
-        revUnsignedString(_valStr, strVal, 0);
+        revUnsignedString(tmpResBuff, strVal, 0);
     }
     // Process as base 16 type
     else if( TYPE_IS_X(rule.type) ) {
@@ -339,7 +342,7 @@ void FormatStringValue::ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t
         // Convert to string (in reversed direction)
         printUnsignedRev(strVal, numVal, 16, selectXDigits(rule.type == 'X'));
         // Reverse the string
-        revUnsignedString(_valStr, strVal, 0);
+        revUnsignedString(tmpResBuff, strVal, 0);
     }
     // Process as base 10 type
     else if( TYPE_IS_D(rule.type) ) {
@@ -359,7 +362,7 @@ void FormatStringValue::ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t
             if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
         }
         // Reverse the string and add thousands separator as needed
-        revUnsignedString(_valStr, strVal, thousandsSep);
+        revUnsignedString(tmpResBuff, strVal, thousandsSep);
     }
     // Invalid type
     else {
@@ -374,12 +377,12 @@ void FormatStringValue::ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t
                 rule.width = ( rule.width > prefixStr.length() ) ? ( rule.width - prefixStr.length() ) : 0;
             }
             else {
-                _valStr = prefixStr + _valStr;
+                tmpResBuff = prefixStr + tmpResBuff;
             }
         }
     }
     else if(!prefixStr.empty()) {
-        _valStr = prefixStr + _valStr;
+        tmpResBuff = prefixStr + tmpResBuff;
     }
 
     // Handle '0'
@@ -393,22 +396,20 @@ void FormatStringValue::ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t
     if(!rule.align) rule.align = '>';
 
     // Process the generated string
-    rule.sign   = 0;
-    rule.locale = false;
-    rule.type   = 's';
-    ff_S(resBuff, rule, numpunct);
+    Rule r(rule.fill, rule.align, rule.width, 's');
+    FormatStringValue(tmpResBuff).ff_S(resBuff, r, numpunct);
 }
 
 
-void FormatStringValue::ff_I32(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const
+void FormatStringValue::ff_I32(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
 { ff_IXX<Pt::int32_t>(resBuff, rule, numpunct); }
 
 
-void FormatStringValue::ff_I64(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const
+void FormatStringValue::ff_I64(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
 { ff_IXX<Pt::int64_t>(resBuff, rule, numpunct); }
 
 
-void FormatStringValue::ff_LD(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const
+void FormatStringValue::ff_LD(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
 {
     // TODO: Optimize!
 
@@ -416,16 +417,17 @@ void FormatStringValue::ff_LD(Pt::String &resBuff, Rule& rule, const numpunct_t*
     const bool        negNum = (_valPOD.ld < 0.0L);
     const long double numVal = negNum ? -_valPOD.ld : _valPOD.ld;
 
-    // Process Inf and NaN
-    _valStr.clear();
+    // Temporary result buffer
+    Pt::String tmpResBuff;
 
+    // Process Inf and NaN
     if(isinf(numVal)) {
-        if(Pt::isupper(rule.type)) _valStr = FLOAT_UPPER_INF;
-        else                       _valStr = FLOAT_LOWER_INF;
+        if(Pt::isupper(rule.type)) tmpResBuff = FLOAT_UPPER_INF;
+        else                       tmpResBuff = FLOAT_LOWER_INF;
     }
     else if(isnan(numVal)) {
-        if(Pt::isupper(rule.type)) _valStr = FLOAT_UPPER_NAN;
-        else                       _valStr = FLOAT_LOWER_NAN;
+        if(Pt::isupper(rule.type)) tmpResBuff = FLOAT_UPPER_NAN;
+        else                       tmpResBuff = FLOAT_LOWER_NAN;
     }
 
     // Handle 'sign' as a prefix character
@@ -448,16 +450,13 @@ void FormatStringValue::ff_LD(Pt::String &resBuff, Rule& rule, const numpunct_t*
         throw FormatStringError("invalid 'sign specifier' in format string");
     }
 
-    if(!_valStr.empty()) {
+    // Check if we have Inf or NaN
+    if(!tmpResBuff.empty()) {
         // The default alignment for numeric argument is right
         if(!rule.align) rule.align = '>';
         // Process as string type
-        rule.sign    = 0;
-        rule.altForm = false;
-        rule.zeroPad = false;
-        rule.locale  = false;
-        rule.type    = 's';
-        ff_S(resBuff, rule, numpunct);
+        Rule r(rule.fill, rule.align, rule.width, 's');
+        FormatStringValue(prefixStr + tmpResBuff).ff_S(resBuff, r, numpunct);
         // We are done here
         return;
     }
@@ -498,7 +497,7 @@ void FormatStringValue::ff_LD(Pt::String &resBuff, Rule& rule, const numpunct_t*
     formatPositiveFP(strFP, numVal, rule.precision, rule.altForm, rule.type);
 
     // Handle the decimal point and thousands separator
-    formatFPString(_valStr, strFP, decimalPoint, thousandsSep);
+    formatFPString(tmpResBuff, strFP, decimalPoint, thousandsSep);
 
     // Put the prefix characters
     if(rule.zeroPad) {
@@ -508,12 +507,12 @@ void FormatStringValue::ff_LD(Pt::String &resBuff, Rule& rule, const numpunct_t*
                 rule.width = ( rule.width > prefixStr.length() ) ? ( rule.width - prefixStr.length() ) : 0;
             }
             else {
-                _valStr = prefixStr + _valStr;
+                tmpResBuff = prefixStr + tmpResBuff;
             }
         }
     }
     else if(!prefixStr.empty()) {
-        _valStr = prefixStr + _valStr;
+        tmpResBuff = prefixStr + tmpResBuff;
     }
 
     // Handle '0'
@@ -526,15 +525,12 @@ void FormatStringValue::ff_LD(Pt::String &resBuff, Rule& rule, const numpunct_t*
     if(!rule.align) rule.align = '>';
 
     // Process as string type
-    rule.sign    = 0;
-    rule.altForm = false;
-    rule.locale  = false;
-    rule.type    = 's';
-    ff_S(resBuff, rule, numpunct);
+    Rule r(rule.fill, rule.align, rule.width, 's');
+    FormatStringValue(tmpResBuff).ff_S(resBuff, r, numpunct);
 }
 
 
-void FormatStringValue::ff_B(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const
+void FormatStringValue::ff_B(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
 {
     // Check the specifiers
     if(rule.sign)
@@ -551,29 +547,28 @@ void FormatStringValue::ff_B(Pt::String &resBuff, Rule& rule, const numpunct_t* 
             if(!rule.align) rule.fill = '0';
         }
         // Get the locale-specific string if possible
-        _valStr.clear();
+        Pt::String boolName;
 #ifdef PT_WITH_STD_LOCALE
         if(rule.locale && numpunct) {
-            _valStr = _valPOD.b ? numpunct->truename() : numpunct->falsename();
+            boolName = _valPOD.b ? numpunct->truename() : numpunct->falsename();
         }
 #endif
         // Otherwise, use the default string
         if(_valStr.empty()) {
-            _valStr = _valPOD.b ? DEFAULT_TRUE_NAME : DEFAULT_FALSE_NAME;
+            boolName = _valPOD.b ? DEFAULT_TRUE_NAME : DEFAULT_FALSE_NAME;
         }
         // Process the generated string
-        rule.locale = false;
-        ff_S(resBuff, rule, numpunct);
+        Rule r(rule.fill, rule.align, rule.width, rule.type);
+        FormatStringValue(boolName).ff_S(resBuff, r, numpunct);
     }
     // Process as numeric type
     else if( TYPE_IS_C(rule.type) ) {
-        _valPOD.u32 = _valPOD.b ? 1 : 0;
-        rule.type    = 'd'; // For boolean, type 'c' is considered the same as type 'd'
-        ff_I32(resBuff, rule, numpunct);
+        Rule r(rule.fill, rule.align, rule.width, 'd', rule.zeroPad); // For boolean, type 'c' is considered the same as type 'd'
+        FormatStringValue((Pt::uint32_t) _valPOD.b ? 1 : 0).ff_I32(resBuff, r, numpunct);
     }
     else if( TYPE_IS_BDOX(rule.type) ) {
-        _valPOD.u32 = _valPOD.b ? 1 : 0;
-        ff_I32(resBuff, rule, numpunct);
+        Rule r(rule.fill, rule.align, rule.width, rule.type, rule.zeroPad);
+        FormatStringValue((Pt::uint32_t) _valPOD.b ? 1 : 0).ff_I32(resBuff, r, numpunct);
     }
     // Invalid type
     else {
@@ -582,7 +577,7 @@ void FormatStringValue::ff_B(Pt::String &resBuff, Rule& rule, const numpunct_t* 
 }
 
 
-void FormatStringValue::ff_P(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const
+void FormatStringValue::ff_P(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
 {
     // Check the specifiers
     if(rule.sign)
@@ -601,20 +596,16 @@ void FormatStringValue::ff_P(Pt::String &resBuff, Rule& rule, const numpunct_t* 
         throw FormatStringError("invalid 'type specifier' in format string");
 
     // Process as numeric type
-    rule.altForm = true;
-    rule.width   = std::max( rule.width, sizeof(void*) );
-    rule.type    = 'x';
+    Rule r(rule.fill, rule.align, std::max(rule.width, sizeof(void*)), 'x', false, true);
 #if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__)
-    _valPOD.u64 = (Pt::uint64_t) _valPOD.p;
-    ff_I64(resBuff, rule, numpunct);
+    FormatStringValue((Pt::uint64_t) _valPOD.p).ff_I64(resBuff, r, numpunct);
 #else
-    _valPOD.u32 = (Pt::uint32_t) _valPOD.p;
-    ff_I32(resBuff, rule, numpunct);
+    FormatStringValue((Pt::uint32_t) _valPOD.p).ff_I32(resBuff, r, numpunct);
 #endif
 }
 
 
-void FormatStringValue::ff_C(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const
+void FormatStringValue::ff_C(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
 {
     // Check the specifiers
     if(rule.sign)
@@ -631,13 +622,13 @@ void FormatStringValue::ff_C(Pt::String &resBuff, Rule& rule, const numpunct_t* 
 
     // Process as character type
     if( TYPE_IS_C(rule.type) ) {
-        _valStr = _valChr;
-        ff_S(resBuff, rule, numpunct);
+        Rule r(rule.fill, rule.align, rule.width, rule.type);
+        FormatStringValue(Pt::String(1, _valChr)).ff_S(resBuff, r, numpunct);
     }
     // Process as numeric type
     else if( TYPE_IS_BDOX(rule.type) ) {
-        _valPOD.u32 = _valChr;
-        ff_I32(resBuff, rule, numpunct);
+        Rule r(rule.fill, rule.align, rule.width, rule.type);
+        FormatStringValue((Pt::uint32_t) _valChr).ff_I32(resBuff, r, numpunct);
     }
     // Invalid type
     else {
@@ -646,7 +637,7 @@ void FormatStringValue::ff_C(Pt::String &resBuff, Rule& rule, const numpunct_t* 
 }
 
 
-void FormatStringValue::ff_S(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const
+void FormatStringValue::ff_S(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
 {
     // Check the specifiers
     if(rule.sign)

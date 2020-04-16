@@ -73,18 +73,18 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
     do {} while(false)              \
 
     // Formatting rule
-    FormatStringValue::Rule fsSpec;
+    FormatStringValue::Rule rule;
 
     // Get the "numpunct" instance (if supported)
 #ifdef PT_WITH_STD_LOCALE
 
-    const numpunct_t* numpunct = &std::use_facet<numpunct_t>( std::locale() );
+    const FormatStringValue::numpunct_t* numpunct = &std::use_facet<FormatStringValue::numpunct_t>( std::locale() );
 
     if( numpunct && !numpunct->grouping().empty() && numpunct->grouping() != "\3" )
         throw FormatStringError("using locale with non default grouping is not supported");
 #else
 
-    const numpunct_t* numpunct = 0;
+    const FormatStringValue::numpunct_t* numpunct = 0;
 
 #endif
 
@@ -131,10 +131,10 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
             }
             // Process (format) the argument
             const FormatStringValue& arg = *( (*_args)[argIdxEff] );
-            arg(resultBuffer, fsSpec, numpunct);
+            arg(resultBuffer, rule, numpunct);
             // Clear the flags
             gotArgFld = false;
-            fsSpec.reset();
+            rule.reset();
             // Break the loop if all the format characters have been processed
             if(it == itEnd) break;
         }
@@ -160,35 +160,35 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
             // Read the 'fill' and 'align'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '<' || *it == '>' || *it == '^') {
-                fsSpec.align = *it++;
+                rule.align = *it++;
             }
             else if(*(it + 1) == '<' || *(it + 1) == '>' || *(it + 1) == '^') {
-                fsSpec.fill  = *it++;
-                fsSpec.align = *it++;
+                rule.fill  = *it++;
+                rule.align = *it++;
             }
             // Read the 'sign'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '+' || *it == '-' || *it == ' ') {
-                fsSpec.sign = *it++;
+                rule.sign = *it++;
             }
             // Read the '#'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '#') {
                 ++it;
-                fsSpec.altForm = true;
+                rule.altForm = true;
             }
             // Read the '0'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '0') {
                 ++it;
-                fsSpec.zeroPad = true;
+                rule.zeroPad = true;
             }
             // Read the 'width'
             CHECK_FOR_CLOSING_BRACKET();
             numberStr.clear();
             while( isdigit(*it) ) numberStr += *it++;
             if(!numberStr.empty()) {
-                fsSpec.width = parseSizeT(numberStr.c_str());
+                rule.width = parseSizeT(numberStr.c_str());
             }
             // Check if the next character is '.'
             CHECK_FOR_CLOSING_BRACKET();
@@ -198,7 +198,7 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
                 numberStr.clear();
                 while( isdigit(*it) ) numberStr += *it++;
                 if(!numberStr.empty()) {
-                    fsSpec.precision = parseSizeT(numberStr.c_str());
+                    rule.precision = parseSizeT(numberStr.c_str());
                 }
                 else {
                     throw FormatStringError("missing 'precision specifier' in format string");
@@ -208,11 +208,11 @@ const void FormatString::operator()(Pt::String& resultBuffer) const
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == 'L') {
                 ++it;
-                fsSpec.locale = true;
+                rule.locale = true;
             }
             // Read the 'type'
             CHECK_FOR_CLOSING_BRACKET();
-            fsSpec.type = *it++;
+            rule.type = *it++;
             // All should be done here
             CHECK_FOR_CLOSING_BRACKET();
             // Error

@@ -37,25 +37,19 @@ namespace Pt {
 
 
 //
-// Not all systems provide locale-classes
-//
-#ifdef PT_WITH_STD_LOCALE
-
-typedef std::locale             locale_t;
-typedef std::numpunct<Pt::Char> numpunct_t;
-
-#else
-
-typedef void* locale_t;
-typedef void* numpunct_t;
-
-#endif
-
-
-//
 // Format-string value and its corresponding formatter
 //
 class PT_API FormatStringValue {
+    public:
+        // Not all systems provide locale-classes
+#ifdef PT_WITH_STD_LOCALE
+        typedef std::locale             locale_t;
+        typedef std::numpunct<Pt::Char> numpunct_t;
+#else
+        typedef void* locale_t;
+        typedef void* numpunct_t;
+#endif
+
     public:
         // Formatting rule
         struct Rule {
@@ -72,6 +66,18 @@ class PT_API FormatStringValue {
 
             inline Rule()
             { reset(); }
+
+            inline Rule(Pt::Char fill_, char align_, size_t width_ = 0, char type_ = 0, bool zeroPad_ = false, bool altForm_ = false)
+            {
+                reset();
+
+                fill    = fill_;
+                align   = align_;
+                altForm = altForm_;
+                zeroPad = zeroPad_;
+                width   = width_;
+                type    = type_;
+            }
 
             inline void reset()
             {
@@ -180,7 +186,7 @@ class PT_API FormatStringValue {
         { _valStr = p; }
 
         // Format value using the given rule
-        inline void operator()(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const
+        inline void operator()(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
         { (this->*_fmtFun)(resBuff, rule, numpunct); }
 
         // Format positive floating-point number
@@ -189,14 +195,14 @@ class PT_API FormatStringValue {
     private:
         // Formatter functions (one for each data type)
         template <typename ValueT> inline
-        void ff_IXX(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_I32(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_I64(Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_LD (Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_B  (Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_P  (Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_C  (Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_S  (Pt::String &resBuff, Rule& rule, const numpunct_t* numpunct) const;
+        void ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
+        void ff_I32(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
+        void ff_I64(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
+        void ff_LD (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
+        void ff_B  (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
+        void ff_P  (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
+        void ff_C  (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
+        void ff_S  (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
 
     private:
         // Formatter function typedef
@@ -216,10 +222,11 @@ class PT_API FormatStringValue {
         };
 
         // Argument data
-                bool       _isUnsigned;
-        mutable ArgValue   _valPOD;
-        mutable Pt::Char   _valChr;
-        mutable Pt::String _valStr;
+        bool       _isUnsigned;
+
+        ArgValue   _valPOD;
+        Pt::Char   _valChr;
+        Pt::String _valStr;
 
         // Selected formatter function specific to the argument's data type
         FormatFunc _fmtFun;
