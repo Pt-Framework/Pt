@@ -58,7 +58,7 @@ class PT_API FormatString {
         : _format(format), _args(args)
         {}
 
-        // Format the value(s) using the specified rule and optional locale
+        // Format the value(s) using the already specified format and optional locale
         const void operator()(Pt::String& resultBuffer, const FormatStringValue::locale_t* customLocale = 0) const;
 
     private:
@@ -73,7 +73,7 @@ class PT_API FormatString {
 //
 // Include the front-ends functions
 //
-#include "FormatString_FS.h"
+#include "FormatString_FrontEnd.h"
 
 
 #endif

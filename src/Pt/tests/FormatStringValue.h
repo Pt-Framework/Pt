@@ -53,17 +53,21 @@ class PT_API FormatStringValue {
     public:
         // Formatting rule
         struct Rule {
-            // If the 0 character and an align option both appear, the 0 character is ignored.
+            // Member flags
             Pt::Char fill;       // fill character
             char     align;      // < > ^
             char     sign;       // + - [space]
             bool     altForm;    // #
-            bool     zeroPad;    // 0
+            bool     zeroPad;    // 0 (if the 0 character and an align option both appear, the 0 character is ignored)
             size_t   width;      // minimum field width (default 0)
             size_t   precision;  // floating-point precision (default 6)
             bool     locale;     // use locale-specific formatting
             char     type;       // none/s b B c d o x X a A e E f/F g G p
 
+            // Constant to indicate that no precision is specified
+            static const size_t NoPrecisionSpecified = (size_t) - 1;
+
+            // Constructor
             inline Rule()
             { reset(); }
 
@@ -79,17 +83,31 @@ class PT_API FormatStringValue {
                 type    = type_;
             }
 
+            inline Rule(Pt::Char fill_, char align_, size_t width_ = 0, size_t precision_ = NoPrecisionSpecified, char type_ = 0, bool zeroPad_ = false, bool altForm_ = false)
+            {
+                reset();
+
+                fill      = fill_;
+                align     = align_;
+                altForm   = altForm_;
+                zeroPad   = zeroPad_;
+                width     = width_;
+                precision = precision_;
+                type      = type_;
+            }
+
+            // Reset all the flags
             inline void reset()
             {
-                fill      = ' ';         // default: space
-                align     = 0;           // default: '<' for non number and '>' for number
-                sign      = 0;           // default: '-' for number
-                altForm   = false;       // default: no alternate form
-                zeroPad   = false;       // default: no zero pad
-                width     = 0;           // default: no minimum width
-                precision = (size_t) -1; // default: no precision specified
-                locale    = false;       // default: do not use locale-specific formatting
-                type      = 0;           // default: none
+                fill      = ' ';                  // default: space
+                align     = 0;                    // default: '<' for non number and '>' for number
+                sign      = 0;                    // default: '-' for number
+                altForm   = false;                // default: no alternate form
+                zeroPad   = false;                // default: no zero pad
+                width     = 0;                    // default: no minimum width
+                precision = NoPrecisionSpecified; // default: no precision specified
+                locale    = false;                // default: do not use locale-specific formatting
+                type      = 0;                    // default: none
             }
         };
 
@@ -186,7 +204,7 @@ class PT_API FormatStringValue {
         { _valStr = p; }
 
         // Format value using the given rule
-        inline void operator()(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const
+        inline void operator()(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const
         { (this->*_fmtFun)(resBuff, rule, numpunct); }
 
         // Format positive floating-point number
@@ -195,18 +213,18 @@ class PT_API FormatStringValue {
     private:
         // Formatter functions (one for each data type)
         template <typename ValueT> inline
-        void ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_I32(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_I64(Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_LD (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_B  (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_P  (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_C  (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
-        void ff_S  (Pt::String& resBuff, Rule& rule, const numpunct_t* numpunct) const;
+        void ff_IXX(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
+        void ff_I32(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
+        void ff_I64(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
+        void ff_LD (Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
+        void ff_B  (Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
+        void ff_P  (Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
+        void ff_C  (Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
+        void ff_S  (Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
 
     private:
         // Formatter function typedef
-        typedef void (FormatStringValue::*FormatFunc)(Pt::String&, Rule&, const numpunct_t*) const;
+        typedef void (FormatStringValue::*FormatFunc)(Pt::String&, const Rule&, const numpunct_t*) const;
 
         // Union for POD argument value
         union ArgValue {
