@@ -37,6 +37,24 @@ namespace Pt {
 
 
 //
+// Default values
+//
+#define FLOAT_LOWER_INF             "inf"
+#define FLOAT_UPPER_INF             "INF"
+#define FLOAT_LOWER_NAN             "nan"
+#define FLOAT_UPPER_NAN             "NAN"
+
+#define DEFAULT_TRUE_NAME           "true"
+#define DEFAULT_FALSE_NAME          "false"
+
+#define DEFAULT_DECIMAL_POINT       '.'
+#define DEFAULT_THOUSANDS_SEPARATOR ','
+
+#define DEFAULT_PRECISION           6
+#define DEFAULT_GROUPING_SIZE       3
+
+
+//
 // Format-string value and its corresponding formatter
 //
 class PT_API FormatStringValue {
@@ -207,8 +225,9 @@ class PT_API FormatStringValue {
         inline void operator()(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const
         { (this->*_fmtFun)(resBuff, rule, numpunct); }
 
-        // Format positive floating-point number
-        static bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
+        // Print positive floating-point number into string
+        // (never calls it with a negative number, Inf, or NaN)
+        static bool printPositiveFloatingPoint(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
 
     private:
         // Formatter functions (one for each data type)

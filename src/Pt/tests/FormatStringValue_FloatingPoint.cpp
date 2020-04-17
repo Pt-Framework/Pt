@@ -117,17 +117,14 @@ static inline char* formatUnsigned(char* dst, Pt::uint32_t val)
 
 
 //
-// Format positive floating-point number
+// Print positive floating-point number into string
 //
-bool FormatStringValue::formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type)
+bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double val, size_t precision, bool altForm, char type)
 {
     // TODO: Optimize!
 
     // Clear the destination buffer
     dst.clear();
-
-    // Check if it is a negative number, Inf, or NaN
-    if( val < 0.0 || isinf(val) || isnan(val) ) return false;
 
     // Check for uppercase mode
     bool uppercase = false;
@@ -214,8 +211,8 @@ bool FormatStringValue::formatPositiveFP(Pt::String& dst, long double val, size_
         return true;
     }
 
-    // The default precision is 6
-    if(precision < 0) precision = 6;
+    // Use the default precision as needed
+    if(precision < 0) precision = DEFAULT_PRECISION;
 
     // Perform some adjustment
     if(val) {

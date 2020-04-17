@@ -258,7 +258,7 @@ int main(int argc, char* args[])
         1.E+06
     */
 #if 1
-#define FPFP(F, ...) Pt::FormatStringValue::formatPositiveFP(F, __VA_ARGS__)
+#define FPFP(F, ...) Pt::FormatStringValue::printPositiveFloatingPoint(F, __VA_ARGS__)
     // Test the in-house positive floating-point formatter
     Pt::String s;
     FPFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;

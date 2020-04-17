@@ -33,24 +33,6 @@ namespace Pt {
 
 
 //
-// Default values
-//
-#define FLOAT_LOWER_INF             "inf"
-#define FLOAT_UPPER_INF             "INF"
-#define FLOAT_LOWER_NAN             "nan"
-#define FLOAT_UPPER_NAN             "NAN"
-
-#define DEFAULT_TRUE_NAME           "true"
-#define DEFAULT_FALSE_NAME          "false"
-
-#define DEFAULT_DECIMAL_POINT       '.'
-#define DEFAULT_THOUSANDS_SEPARATOR ','
-
-#define DEFAULT_PRECISION           6
-#define DEFAULT_GROUPING_SIZE       3
-
-
-//
 // Utility macros
 //
 #define TYPE_IS_N(T)    ( !T                                          )
@@ -132,6 +114,8 @@ inline void FormatStringValue::FormatUnsigned<ValueT, BASE>::reverseAndGroupStri
 {
     // TODO: Optimize!
 
+    // TODO: Implement complex digit grouping (example: \1\2\3 => 18,446,744,073,709,551,61,5)
+
     // Get the source length
     const size_t srcLen = src.length();
 
@@ -212,7 +196,7 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 2>::printReversed(Pt::Stri
 
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 2>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
-{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); }
+{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); } // Call the generic version
 
 
 // Specialization for base 8
@@ -258,7 +242,7 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 8>::printReversed(Pt::Stri
 
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 8>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
-{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); }
+{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); } // Call the generic version
 
 
 // Specialization for base 10
@@ -304,7 +288,7 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 10>::printReversed(Pt::Str
 
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 10>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
-{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); }
+{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); } // Call the generic version
 
 
 // Specialization for base 16
@@ -370,7 +354,7 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 16>::printReversed(Pt::Str
 
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 16>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
-{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); }
+{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); } // Call the generic version
 
 
 //

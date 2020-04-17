@@ -303,7 +303,7 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
     const char   ruleType      = rule.type ? rule.type : 'g';
 
     Pt::String strFP;
-    formatPositiveFP(strFP, numVal, rulePrecision, rule.altForm, ruleType);
+    printPositiveFloatingPoint(strFP, numVal, rulePrecision, rule.altForm, ruleType);
 
     // Format/add the decimal point and thousands separator(s) as needed
     finalizeFPStringFormat(tmpResBuff, strFP, decimalPoint, thousandsSep);
