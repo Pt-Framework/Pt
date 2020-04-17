@@ -235,7 +235,9 @@ class PT_API FormatStringValue {
         void ff_IXX(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
         void ff_I32(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
         void ff_I64(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
+
         void ff_LD (Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
+
         void ff_B  (Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
         void ff_P  (Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;
         void ff_C  (Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const;

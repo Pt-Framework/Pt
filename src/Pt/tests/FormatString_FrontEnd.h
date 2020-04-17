@@ -28,6 +28,7 @@
 #ifndef PT_FORMAT_STRING_FRONT_END_H
 #define PT_FORMAT_STRING_FRONT_END_H
 
+
 namespace Pt {
 
 

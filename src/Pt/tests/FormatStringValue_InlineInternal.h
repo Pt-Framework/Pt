@@ -57,7 +57,7 @@ namespace Pt {
 
 
 //
-// Utilities for selecting integer
+// Utilities for selecting integer from FormatStringValue::_valPOD
 //
 template <typename ValueT>
 struct FormatStringValue::SelectInt {};
@@ -207,6 +207,8 @@ struct FormatStringValue::FormatUnsigned<ValueT, 2> {
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 2>::printReversed(Pt::String& dst, ValueT val, bool uppercase)
 {
+    // TODO: Optimize!
+
 #if 0
     // Generate the magic string for base 2 - group every 4 digits
     std::cerr << std::endl;
@@ -263,6 +265,8 @@ struct FormatStringValue::FormatUnsigned<ValueT, 8> {
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 8>::printReversed(Pt::String& dst, ValueT val, bool uppercase)
 {
+    // TODO: Optimize!
+
 #if 0
     // Generate the magic string for base 8 - group every 2 digits
     std::cerr << std::endl;
@@ -317,6 +321,8 @@ struct FormatStringValue::FormatUnsigned<ValueT, 10> {
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 10>::printReversed(Pt::String& dst, ValueT val, bool uppercase)
 {
+    // TODO: Optimize!
+
 #if 0
     // Generate the magic string for base 10 - group every 2 digits
     std::cerr << std::endl;
@@ -371,6 +377,8 @@ struct FormatStringValue::FormatUnsigned<ValueT, 16> {
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 16>::printReversed(Pt::String& dst, ValueT val, bool uppercase)
 {
+    // TODO: Optimize!
+
 #if 0
     // Generate the magic string for base 16 - group every 2 digits
     std::cerr << std::endl;
@@ -436,7 +444,9 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 16>::reverseAndGroupString
 //
 // Utilities for formatting (printing) floating-point value
 //
-static inline void finalizeFPStringFormat(Pt::String& dst, const Pt::String& src, Pt::Char decimalPoint, Pt::Char thousandsSep)
+
+// Format/add the decimal point and thousands separator(s) as needed
+static inline void finalizePositiveFloatingPointStringFormat(Pt::String& dst, const Pt::String& src, Pt::Char decimalPoint, Pt::Char thousandsSep)
 {
     // TODO: Optimize!
 

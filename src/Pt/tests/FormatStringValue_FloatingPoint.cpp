@@ -248,7 +248,7 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
         const Pt::int32_t   need  = 1 + ( precision + LDBL_MANT_DIG / 3U + 8 ) / 9;
         for(d = a; d < z; ++d) {
             const Pt::uint32_t rm = *d & ( (1 << sh) - 1 );
-            *d = (*d >> sh) + carry;
+            *d    = (*d >> sh) + carry;
             carry = (1000000000 >> sh) * rm;
         }
         if(!*a) ++a;
@@ -327,8 +327,8 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
             else {
                 j = 9;
             }
-            if (type == 'f') precision = MIN( precision, MAX( 0, 9 * (z - r - 1)     - j ) );
-            else             precision = MIN( precision, MAX( 0, 9 * (z - r - 1) + e - j ) );
+            if(type == 'f') precision = MIN( precision, MAX( 0, 9 * (z - r - 1)     - j ) );
+            else            precision = MIN( precision, MAX( 0, 9 * (z - r - 1) + e - j ) );
         }
     }
 
@@ -354,7 +354,7 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
     if(type == 'f') {
         if(a > r) a = r;
         for(d = a; d <= r; ++d) {
-            char *s = formatUnsigned(buf + 9, *d);
+            char* s = formatUnsigned(buf + 9, *d);
             if(d != a) {
                 while(s > buf) *--s = '0';
             }
@@ -365,7 +365,7 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
         }
         if(precision || altForm ) puts(dst, ".", 1);
         for(; d < z && precision > 0; ++d, precision -= 9) {
-            char *s = formatUnsigned(buf + 9, *d);
+            char* s = formatUnsigned(buf + 9, *d);
             while(s > buf) *--s = '0';
             puts(dst, s, MIN(9, precision));
         }
@@ -373,7 +373,7 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
     else {
         if(z <= a) z = a + 1;
         for(d = a; d < z && precision >= 0; ++d) {
-            char *s = formatUnsigned(buf + 9, *d);
+            char* s = formatUnsigned(buf + 9, *d);
             if(s == buf+9) *--s = '0';
             if(d != a) {
                 while(s > buf) *--s = '0';

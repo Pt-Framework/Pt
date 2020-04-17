@@ -194,7 +194,6 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
         //if(ruleLocale && (groupingSize != 3 || groupingSizeCnt))
         //    throw FormatStringError("only locale with default grouping ('\\3') is supported for decimal");
 #endif
-        //FormatUnsigned<UnsignedT, 10>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
         if(groupingSizePtr)
             FormatUnsigned<UnsignedT, 10>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSizePtr, groupingSizeCnt);
         else
@@ -337,7 +336,7 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
     printPositiveFloatingPoint(strFP, numVal, rulePrecision, rule.altForm, ruleType);
 
     // Format/add the decimal point and thousands separator(s) as needed
-    finalizeFPStringFormat(tmpResBuff, strFP, decimalPoint, thousandsSep);
+    finalizePositiveFloatingPointStringFormat(tmpResBuff, strFP, decimalPoint, thousandsSep);
 
     // Put the prefix characters
     size_t ruleWidth = rule.width;

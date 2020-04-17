@@ -77,7 +77,6 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
 
     // Get the "numpunct" instance (if supported)
 #ifdef PT_WITH_STD_LOCALE
-    // TODO: Implement complex digit grouping (example: \1\2\3 => 18,446,744,073,709,551,61,5)
     const FormatStringValue::numpunct_t* numpunct =
         customLocale ? &std::use_facet<FormatStringValue::numpunct_t>( *customLocale )
                      : &std::use_facet<FormatStringValue::numpunct_t>( std::locale() );
