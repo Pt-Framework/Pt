@@ -439,8 +439,11 @@ int main(int argc, char* args[])
     // Output stream
     Pt::OStringStream oss;
 
-    format_to(oss, "Test Pt::OStringStream\n"); std::cerr << Pt::Utf8Codec::encode(oss.str());
-    format_to(oss, "Test Pt::OStringStream : {} {}\n", "aBc", 123.123); std::cerr << Pt::Utf8Codec::encode(oss.str());
+    format_to(oss, "Test Pt::OStringStream\n");
+    std::cerr << Pt::Utf8Codec::encode(oss.str());
+
+    format_to(oss, "Test Pt::OStringStream : {} {}\n", "aBc", 123.123);
+    std::cerr << Pt::Utf8Codec::encode(oss.str());
 
     std::cerr << std::endl;
 
