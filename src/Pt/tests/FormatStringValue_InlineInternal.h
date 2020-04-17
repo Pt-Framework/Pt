@@ -94,8 +94,9 @@ template <typename ValueT, int BASE>
 struct FormatStringValue::FormatUnsigned {
     static inline void printReversed(Pt::String& dst, ValueT val, bool uppercase = false);
     static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize);
-    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount);
+    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount);
 };
+
 
 template <typename ValueT, int BASE>
 inline void FormatStringValue::FormatUnsigned<ValueT, BASE>::printReversed(Pt::String& dst, ValueT val, bool uppercase)
@@ -109,6 +110,7 @@ inline void FormatStringValue::FormatUnsigned<ValueT, BASE>::printReversed(Pt::S
         val /= BASE;
     } while(val != 0);
 }
+
 
 template <typename ValueT, int BASE>
 inline void FormatStringValue::FormatUnsigned<ValueT, BASE>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
@@ -149,47 +151,47 @@ inline void FormatStringValue::FormatUnsigned<ValueT, BASE>::reverseAndGroupStri
     }
 }
 
+
 template <typename ValueT, int BASE>
-inline void FormatStringValue::FormatUnsigned<ValueT, BASE>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount)
+inline void FormatStringValue::FormatUnsigned<ValueT, BASE>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount)
 {
     // TODO: Optimize!
 
-    // TODO: Implement complex digit grouping (example: \1\2\3 => 18,446,744,073,709,551,61,5)
-
-    /*
-    // Get the source length
-    const size_t srcLen = src.length();
-
     // Get the source pointers
-    const Pt::Char* srcIt    = &src[srcLen - 1];
-    const Pt::Char* srcItEnd = srcIt - srcLen;
+    const Pt::Char* srcIt    = &src[0];
+    const Pt::Char* srcItEnd = srcIt + src.length();
 
-    // Process without using thousands separator
-    if(!thousandsSep || srcLen <= groupingSize) {
-        // Resize the destination buffer
-        dst.clear();
-        dst.reserve(srcLen);
-        // Reverse the characters
-        while(srcIt != srcItEnd) dst += *srcIt--;
-    }
+    // Clear the destination buffer
+    dst.clear();
 
-    // Process using thousands separator(s)
-    else {
-        // Calculate the number of thousands separator(s)
-        const size_t sepCnt = (srcLen + groupingSize - 1) / groupingSize - 1;
-        const size_t dstLen = src.length() + sepCnt;
-        // Resize the destination buffer
-        dst.clear();
-        dst.reserve(dstLen);
-        // Reverse the characters while adding thousands separator(s)
-        Pt::uint32_t digitIndex = groupingSize - (srcLen % groupingSize);
+    // Walk through the grouping sizes and implement complex digit grouping (add thousands separator(s) as needed)
+    // Example: \1\2\3 => 18,446,744,073,709,551,61,5
+
+    size_t idxGroupingSize = 0;
+    --groupingSizeCount;
+
+    while(srcIt != srcItEnd) {
+        // Get the current grouping size
+        Pt::uint8_t groupingSize = groupingSizePtr[idxGroupingSize];
+        if(idxGroupingSize < groupingSizeCount) ++idxGroupingSize;
+        // Process the characters
         for(;;) {
-            dst += *srcIt--;
+            dst += *srcIt++;
             if(srcIt == srcItEnd) break;
-            if( ++digitIndex % groupingSize == 0) dst += thousandsSep;
+            if(--groupingSize) continue;
+            dst += thousandsSep;
+            break;
         }
     }
-    */
+
+    // Reverse the characters
+    const size_t dstLen = dst.length();
+
+    for(size_t i = 0; i < (dstLen / 2); ++i) {
+        const Pt::Char t = dst[i];
+        dst[         i    ] = dst[dstLen - i - 1];
+        dst[dstLen - i - 1] = t;
+    }
 }
 
 
@@ -198,8 +200,9 @@ template <typename ValueT>
 struct FormatStringValue::FormatUnsigned<ValueT, 2> {
     static inline void printReversed(Pt::String& dst, ValueT val, bool uppercase = false);
     static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize);
-    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount);
+    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount);
 };
+
 
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 2>::printReversed(Pt::String& dst, ValueT val, bool uppercase)
@@ -237,13 +240,15 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 2>::printReversed(Pt::Stri
     if(val >= 8) dst += BIN_DIGITS_R4[idx  ];
 }
 
+
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 2>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
 { FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); } // Call the generic version
 
+
 template <typename ValueT>
-inline void FormatStringValue::FormatUnsigned<ValueT, 2>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount)
-{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize, groupingSizeCount); } // Call the generic version
+inline void FormatStringValue::FormatUnsigned<ValueT, 2>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount)
+{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSizePtr, groupingSizeCount); } // Call the generic version
 
 
 // Specialization for base 8
@@ -251,8 +256,9 @@ template <typename ValueT>
 struct FormatStringValue::FormatUnsigned<ValueT, 8> {
     static inline void printReversed(Pt::String& dst, ValueT val, bool uppercase = false);
     static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize);
-    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount);
+    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount);
 };
+
 
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 8>::printReversed(Pt::String& dst, ValueT val, bool uppercase)
@@ -288,13 +294,15 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 8>::printReversed(Pt::Stri
     if(val >= 8) dst += OCT_DIGITS_R2[idx  ];
 }
 
+
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 8>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
 { FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); } // Call the generic version
 
+
 template <typename ValueT>
-inline void FormatStringValue::FormatUnsigned<ValueT, 8>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount)
-{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize, groupingSizeCount); } // Call the generic version
+inline void FormatStringValue::FormatUnsigned<ValueT, 8>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount)
+{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSizePtr, groupingSizeCount); } // Call the generic version
 
 
 // Specialization for base 10
@@ -302,8 +310,9 @@ template <typename ValueT>
 struct FormatStringValue::FormatUnsigned<ValueT, 10> {
     static inline void printReversed(Pt::String& dst, ValueT val, bool uppercase = false);
     static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize);
-    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount);
+    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount);
 };
+
 
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 10>::printReversed(Pt::String& dst, ValueT val, bool uppercase)
@@ -339,13 +348,15 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 10>::printReversed(Pt::Str
     if(val >= 10) dst += DEC_DIGITS_R2[idx  ];
 }
 
+
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 10>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
 { FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); } // Call the generic version
 
+
 template <typename ValueT>
-inline void FormatStringValue::FormatUnsigned<ValueT, 10>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount)
-{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize, groupingSizeCount); } // Call the generic version
+inline void FormatStringValue::FormatUnsigned<ValueT, 10>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount)
+{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSizePtr, groupingSizeCount); } // Call the generic version
 
 
 // Specialization for base 16
@@ -353,8 +364,9 @@ template <typename ValueT>
 struct FormatStringValue::FormatUnsigned<ValueT, 16> {
     static inline void printReversed(Pt::String& dst, ValueT val, bool uppercase);
     static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize);
-    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount);
+    static inline void reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount);
 };
+
 
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 16>::printReversed(Pt::String& dst, ValueT val, bool uppercase)
@@ -410,13 +422,15 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 16>::printReversed(Pt::Str
     if(val >= 16) dst += HEX_DIGITS_R2[idx  ];
 }
 
+
 template <typename ValueT>
 inline void FormatStringValue::FormatUnsigned<ValueT, 16>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
 { FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize); } // Call the generic version
 
+
 template <typename ValueT>
-inline void FormatStringValue::FormatUnsigned<ValueT, 16>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSize, size_t groupingSizeCount)
-{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSize, groupingSizeCount); } // Call the generic version
+inline void FormatStringValue::FormatUnsigned<ValueT, 16>::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount)
+{ FormatUnsigned<ValueT, 0>::reverseAndGroupString(dst, src, thousandsSep, groupingSizePtr, groupingSizeCount); } // Call the generic version
 
 
 //

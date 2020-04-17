@@ -124,7 +124,7 @@ class CustomNumpunct : public std::numpunct<Pt::Char>  {
 static bool                             COMPARE_WITH_FMT = true;
 static Pt::FormatStringValue::locale_t* customLocale     = 0;
 
-#define LOOP_COUNT 8000
+#define LOOP_COUNT (1 * 8000)
 
 #define TEST_AND_BENCHMARK(FMT, ...)                                          \
     do {                                                                      \
