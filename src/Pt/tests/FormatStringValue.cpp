@@ -39,326 +39,10 @@
 
 #include "FormatStringValue.h"
 
+#include "FormatStringValue_InlineInternal.h"
+
 
 namespace Pt {
-
-
-//
-// Default values
-//
-#define FLOAT_LOWER_INF             "inf"
-#define FLOAT_UPPER_INF             "INF"
-#define FLOAT_LOWER_NAN             "nan"
-#define FLOAT_UPPER_NAN             "NAN"
-
-#define DEFAULT_TRUE_NAME           "true"
-#define DEFAULT_FALSE_NAME          "false"
-
-#define DEFAULT_DECIMAL_POINT       '.'
-#define DEFAULT_THOUSANDS_SEPARATOR ','
-
-#define DEFAULT_PRECISION           6
-#define DEFAULT_GROUPING_SIZE       3
-
-
-//
-// Utility macros
-//
-#define TYPE_IS_N(T)    ( !T                                          )
-
-#define TYPE_IS_S(T)    ( !T || ( T &&   (T == 's')                 ) )
-#define TYPE_IS_C(T)    ( !T || ( T &&   (T == 'c')                 ) )
-
-#define TYPE_IS_B(T)    (       ( T && ( (T == 'b') || (T == 'B') ) ) )
-#define TYPE_IS_D(T)    ( !T || ( T &&   (T == 'd')                 ) )
-#define TYPE_IS_O(T)    (       ( T &&   (T == 'o')                 ) )
-#define TYPE_IS_X(T)    (       ( T && ( (T == 'x') || (T == 'X') ) ) )
-
-#define TYPE_IS_A(T)    (       ( T && ( (T == 'a') || (T == 'A') ) ) )
-#define TYPE_IS_E(T)    (       ( T && ( (T == 'e') || (T == 'E') ) ) )
-#define TYPE_IS_F(T)    (       ( T && ( (T == 'f') || (T == 'F') ) ) )
-#define TYPE_IS_G(T)    (       ( T && ( (T == 'g') || (T == 'G') ) ) )
-
-#define TYPE_IS_P(T)    ( !T || ( T &&   (T == 'p')                 ) )
-
-#define TYPE_IS_BDOX(T) ( T && ( (T == 'b') || (T == 'B') || (T == 'd') || (T == 'o') || (T == 'x') || (T == 'X') ) )
-#define TYPE_IS_AEFG(T) ( T && ( (T == 'a') || (T == 'A') || (T == 'e') || (T == 'E') || (T == 'f') || (T == 'F') || (T == 'g') || (T == 'G') ) )
-
-
-//
-// Utility template structs
-//
-template <typename ValueT>
-struct SelectInt;
-
-template<>
-struct SelectInt<Pt::int32_t> {
-    typedef Pt::int32_t  SignedT;
-    typedef Pt::uint32_t UnsignedT;
-
-    static inline Pt::int32_t  selectSigned  (Pt::int32_t  i32, Pt::int64_t ) { return i32; }
-    static inline Pt::uint32_t selectUnsigned(Pt::uint32_t u32, Pt::uint64_t) { return u32; }
-};
-
-template<>
-struct SelectInt<Pt::int64_t> {
-    typedef Pt::int64_t  SignedT;
-    typedef Pt::uint64_t UnsignedT;
-
-    static inline Pt::int64_t  selectSigned  (Pt::int32_t,  Pt::int64_t  i64) { return i64; }
-    static inline Pt::uint64_t selectUnsigned(Pt::uint32_t, Pt::uint64_t u64) { return u64; }
-};
-
-
-template <typename T, int BASE>
-struct PrintUnsigned {
-    static inline void Reversed(Pt::String& dst, T val, bool uppercase)
-    {
-        const char* XDIGITS = FormatStringValue::selectXDigits(uppercase);
-
-        dst.clear();
-
-        do {
-            dst += XDIGITS[val % BASE];
-            val /= BASE;
-        } while(val != 0);
-    }
-};
-
-template <typename T>
-struct PrintUnsigned<T, 2> {
-    static inline void Reversed(Pt::String& dst, T val, bool)
-    {
-        static const char* BIN_DIGITS_R4 =
-            "00001000010011000010101001101110"
-            "00011001010111010011101101111111";
-
-        dst.clear();
-
-        while(val >= 16) {
-            Pt::uint32_t idx = (val % 16) * 4;
-            val /= 16;
-            dst += BIN_DIGITS_R4[idx++];
-            dst += BIN_DIGITS_R4[idx++];
-            dst += BIN_DIGITS_R4[idx++];
-            dst += BIN_DIGITS_R4[idx  ];
-        }
-
-        Pt::uint32_t idx = val * 4;
-                     dst += BIN_DIGITS_R4[idx++];
-        if(val >= 2) dst += BIN_DIGITS_R4[idx++];
-        if(val >= 4) dst += BIN_DIGITS_R4[idx++];
-        if(val >= 8) dst += BIN_DIGITS_R4[idx  ];
-    }
-};
-
-template <typename T>
-struct PrintUnsigned<T, 8> {
-    static inline void Reversed(Pt::String& dst, T val, bool)
-    {
-        static const char* OCT_DIGITS_R2 =
-            "00102030405060700111213141516171"
-            "02122232425262720313233343536373"
-            "04142434445464740515253545556575"
-            "06162636465666760717273747576777";
-
-        dst.clear();
-
-        while(val >= 64) {
-            Pt::uint32_t idx = (val % 64) * 2;
-            val /= 64;
-            dst += OCT_DIGITS_R2[idx++];
-            dst += OCT_DIGITS_R2[idx  ];
-        }
-
-        Pt::uint32_t idx = val * 2;
-                     dst += OCT_DIGITS_R2[idx++];
-        if(val >= 8) dst += OCT_DIGITS_R2[idx  ];
-    }
-};
-
-template <typename T>
-struct PrintUnsigned<T, 10> {
-    static inline void Reversed(Pt::String& dst, T val, bool)
-    {
-        static const char* DEC_DIGITS_R2 =
-            "00102030405060708090011121314151617181910212223242"
-            "52627282920313233343536373839304142434445464748494"
-            "05152535455565758595061626364656667686960717273747"
-            "57677787970818283848586878889809192939495969798999";
-
-        dst.clear();
-
-        while(val >= 100) {
-            Pt::uint32_t idx = (val % 100) * 2;
-            val /= 100;
-            dst += DEC_DIGITS_R2[idx++];
-            dst += DEC_DIGITS_R2[idx  ];
-        }
-
-        Pt::uint32_t idx = val * 2;
-                      dst += DEC_DIGITS_R2[idx++];
-        if(val >= 10) dst += DEC_DIGITS_R2[idx  ];
-    }
-};
-
-template <typename T>
-struct PrintUnsigned<T, 16> {
-    static inline void Reversed(Pt::String& dst, T val, bool uppercase)
-    {
-        static const char* HEX_DIGITS_R2_L =
-            "00102030405060708090a0b0c0d0e0f001112131415161718191a1b1c1d1e1f1"
-            "02122232425262728292a2b2c2d2e2f203132333435363738393a3b3c3d3e3f3"
-            "04142434445464748494a4b4c4d4e4f405152535455565758595a5b5c5d5e5f5"
-            "06162636465666768696a6b6c6d6e6f607172737475767778797a7b7c7d7e7f7"
-            "08182838485868788898a8b8c8d8e8f809192939495969798999a9b9c9d9e9f9"
-            "0a1a2a3a4a5a6a7a8a9aaabacadaeafa0b1b2b3b4b5b6b7b8b9babbbcbdbebfb"
-            "0c1c2c3c4c5c6c7c8c9cacbcccdcecfc0d1d2d3d4d5d6d7d8d9dadbdcdddedfd"
-            "0e1e2e3e4e5e6e7e8e9eaebecedeeefe0f1f2f3f4f5f6f7f8f9fafbfcfdfefff";
-        static const char* HEX_DIGITS_R2_U =
-            "00102030405060708090A0B0C0D0E0F001112131415161718191A1B1C1D1E1F1"
-            "02122232425262728292A2B2C2D2E2F203132333435363738393A3B3C3D3E3F3"
-            "04142434445464748494A4B4C4D4E4F405152535455565758595A5B5C5D5E5F5"
-            "06162636465666768696A6B6C6D6E6F607172737475767778797A7B7C7D7E7F7"
-            "08182838485868788898A8B8C8D8E8F809192939495969798999A9B9C9D9E9F9"
-            "0A1A2A3A4A5A6A7A8A9AAABACADAEAFA0B1B2B3B4B5B6B7B8B9BABBBCBDBEBFB"
-            "0C1C2C3C4C5C6C7C8C9CACBCCCDCECFC0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFD"
-            "0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFE0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFFF";
-        const char* HEX_DIGITS_R2 = uppercase ? HEX_DIGITS_R2_U : HEX_DIGITS_R2_L;
-
-        dst.clear();
-
-        while(val >= 256) {
-            Pt::uint32_t idx = (val % 256) * 2;
-            val /= 256;
-            dst += HEX_DIGITS_R2[idx++];
-            dst += HEX_DIGITS_R2[idx  ];
-        }
-
-        Pt::uint32_t idx = val * 2;
-                      dst += HEX_DIGITS_R2[idx++];
-        if(val >= 16) dst += HEX_DIGITS_R2[idx  ];
-    }
-};
-
-
-//
-// Utility functions
-//
-static inline Pt::Char* fill(Pt::Char* dst, Pt::Char chr, size_t len)
-{
-    Pt::Char* end = dst + len;
-
-    while(dst != end) *dst++ = chr;
-
-    return dst;
-}
-
-
-static inline Pt::Char* copy(Pt::Char* dst, const Pt::Char* src, size_t len)
-{
-    const Pt::Char* end = src + len;
-
-    while(src != end) *dst++ = *src++;
-
-    return dst;
-}
-
-
-static inline void revUnsignedString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize = DEFAULT_GROUPING_SIZE)
-{
-    // TODO: Optimize!
-
-    // Get the source length
-    const size_t srcLen = src.length();
-
-    // Get the source pointers
-    const Pt::Char* srcIt    = &src[srcLen - 1];
-    const Pt::Char* srcItEnd = srcIt - srcLen;
-
-    // Process without using thousands separator
-    if(!thousandsSep || srcLen <= groupingSize) {
-        // Resize the destination buffer
-        dst.clear();
-        dst.reserve(srcLen);
-        // Reverse the characters
-        while(srcIt != srcItEnd) dst += *srcIt--;
-    }
-    // Process using thousands separator(s)
-    else {
-        // Calculate the number of thousands separator(s)
-        const size_t sepCnt = (srcLen + groupingSize - 1) / groupingSize - 1;
-        const size_t dstLen = src.length() + sepCnt;
-        // Resize the destination buffer
-        dst.clear();
-        dst.reserve(dstLen);
-        // Reverse the characters while adding thousands separator(s)
-        Pt::uint32_t digitIndex = groupingSize - (srcLen % groupingSize);
-        for(;;) {
-            dst += *srcIt--;
-            if(srcIt == srcItEnd) break;
-            if( ++digitIndex % groupingSize == 0) dst += thousandsSep;
-        }
-    }
-}
-
-
-static inline void formatFPString(Pt::String& dst, const Pt::String& src, Pt::Char decimalPoint, Pt::Char thousandsSep)
-{
-    // TODO: Optimize!
-
-    // Simply copy the string if there is no specified decimal point and thousands separator
-    if(!decimalPoint && !thousandsSep) {
-        dst = src;
-        return;
-    }
-
-    // Get the source pointers
-    const Pt::Char* itSrcBeg = &src[0];
-    const Pt::Char* itSrcEnd = itSrcBeg + src.length();
-    const Pt::Char* itSrc    = itSrcBeg;
-
-    // Find the decimal point
-    const Pt::Char* itSrcDec = 0;
-    while(itSrc != itSrcEnd) {
-        if( *itSrc == '.' ) {
-            itSrcDec = itSrc;
-            break;
-        }
-        if( !isdigit(*itSrc) ) break;
-        ++itSrc;
-    }
-
-    // Calculate the number of digits before the decimal point
-    const size_t numDigitBeforeDec = itSrcDec ? (itSrcDec - itSrcBeg) : (itSrc - itSrcBeg);
-
-    // Check if there is no need to add any thousands separator
-    if(!thousandsSep || numDigitBeforeDec <= 3) {
-        dst = src;
-        if(decimalPoint && numDigitBeforeDec < dst.length()) dst[numDigitBeforeDec] = decimalPoint;
-        return;
-    }
-
-    // Copy the characters while adding thousands separator(s)
-    Pt::uint32_t digitIndex = 3 - (numDigitBeforeDec % 3);
-
-    itSrc = itSrcBeg;
-    for(;;) {
-        dst += *itSrc++;
-        if(itSrc == itSrcDec || itSrc == itSrcEnd) break;
-        if( ++digitIndex % 3 == 0) dst += thousandsSep;
-    }
-
-    // Add the decimal point
-    if(itSrcDec) {
-        dst += ( decimalPoint ? decimalPoint : src[numDigitBeforeDec] );
-    }
-
-    // Copy the remainder of the characters
-    itSrc = itSrcBeg + numDigitBeforeDec + 1;
-    while(itSrc != itSrcEnd) dst += *itSrc++;
-}
-
 
 //
 // Format-string value and its corresponding formatter
@@ -386,10 +70,10 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
 
     if(_isUnsigned) {
         negNum = false;
-        numVal = SelectInt<ValueT>::selectUnsigned(_valPOD.u32, _valPOD.u64);
+        numVal = SelectInt<ValueT>::selectUnsigned(this);
     }
     else {
-        const SignedT sigVal = SelectInt<ValueT>::selectSigned(_valPOD.i32, _valPOD.i64);
+        const SignedT sigVal = SelectInt<ValueT>::selectSigned(this);
 
         negNum = (sigVal < 0);
         numVal = negNum ? -sigVal : sigVal;
@@ -450,9 +134,9 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
             prefixStr += rule.type;
         }
         // Convert to string (in reversed direction)
-        PrintUnsigned<UnsignedT, 2>::Reversed(strVal, numVal, false);
-        // Reverse the string
-        revUnsignedString(tmpResBuff, strVal, thousandsSep, groupingSize);
+        FormatUnsigned<UnsignedT, 2>::printReversed(strVal, numVal);
+        // Reverse the string and add thousands separator as needed
+        FormatUnsigned<UnsignedT, 2>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Process as base 8 type
     else if( TYPE_IS_O(rule.type) ) {
@@ -462,9 +146,9 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
             prefixStr += '0';
         }
         // Convert to string (in reversed direction)
-        PrintUnsigned<UnsignedT, 8>::Reversed(strVal, numVal, false);
-        // Reverse the string
-        revUnsignedString(tmpResBuff, strVal, thousandsSep, groupingSize);
+        FormatUnsigned<UnsignedT, 8>::printReversed(strVal, numVal);
+        // Reverse the string and add thousands separator as needed
+        FormatUnsigned<UnsignedT, 8>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Process as base 16 type
     else if( TYPE_IS_X(rule.type) ) {
@@ -475,9 +159,9 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
             prefixStr += rule.type;
         }
         // Convert to string (in reversed direction)
-        PrintUnsigned<UnsignedT, 16>::Reversed(strVal, numVal, rule.type == 'X');
-        // Reverse the string
-        revUnsignedString(tmpResBuff, strVal, thousandsSep, groupingSize);
+        FormatUnsigned<UnsignedT, 16>::printReversed(strVal, numVal, rule.type == 'X');
+        // Reverse the string and add thousands separator as needed
+        FormatUnsigned<UnsignedT, 16>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Process as base 10 type
     else if( TYPE_IS_D(rule.type) ) {
@@ -485,11 +169,11 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, Rule& rule, const numpunct_t
         if(rule.altForm)
             throw FormatStringError("format specifier '#' requires 'b/B/o/x/X' numeric argument");
         // Convert to string (in reversed direction)
-        PrintUnsigned<UnsignedT, 10>::Reversed(strVal, numVal, false);
+        FormatUnsigned<UnsignedT, 10>::printReversed(strVal, numVal);
         // Reverse the string and add thousands separator as needed
         if(rule.locale && groupingSize != 3)
             throw FormatStringError("only locale with default grouping ('\\3') is supported for decimal");
-        revUnsignedString(tmpResBuff, strVal, thousandsSep, groupingSize);
+        FormatUnsigned<UnsignedT, 10>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Invalid type
     else {
@@ -623,8 +307,8 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, Rule& rule, const numpunct_t*
     Pt::String strFP;
     formatPositiveFP(strFP, numVal, rule.precision, rule.altForm, rule.type);
 
-    // Handle the decimal point and thousands separator
-    formatFPString(tmpResBuff, strFP, decimalPoint, thousandsSep);
+    // Format/add the decimal point and thousands separator(s) as needed
+    finalizeFPStringFormat(tmpResBuff, strFP, decimalPoint, thousandsSep);
 
     // Put the prefix characters
     if(rule.zeroPad) {

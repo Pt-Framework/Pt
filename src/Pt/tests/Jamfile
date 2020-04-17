@@ -43,7 +43,7 @@ RunUnitTest Pt-test : $(PT_OUTPUT_TEST) ;
 
 FORMAT_STRING_SOURCES = FormatStringError.cpp
                         FormatStringValue.cpp
-                        FormatStringValue_FP.cpp
+                        FormatStringValue_FloatingPoint.cpp
                         FormatString.cpp
                         FormatStringTest.cpp
                         ;

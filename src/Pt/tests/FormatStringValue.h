@@ -192,10 +192,6 @@ class PT_API FormatStringValue {
         // Format positive floating-point number
         static bool formatPositiveFP(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
 
-        // Returns a full set of hexadecimal digits
-        static inline const char* selectXDigits(bool uppercase)
-        { return uppercase ? XDIGITS_UPPER : XDIGITS_LOWER; }
-
     private:
         // Formatter functions (one for each data type)
         template <typename ValueT> inline
@@ -236,9 +232,19 @@ class PT_API FormatStringValue {
         FormatFunc _fmtFun;
 
     private:
-        // Digits
+        // X-Digits
         static const char XDIGITS_LOWER[16];
         static const char XDIGITS_UPPER[16];
+
+        static inline const char* selectXDigits(bool uppercase)
+        { return uppercase ? XDIGITS_UPPER : XDIGITS_LOWER; }
+
+        // Utilities
+        template <typename ValueT>
+        struct SelectInt;
+
+        template <typename ValueT, int BASE>
+        struct FormatUnsigned;
 };
 
 

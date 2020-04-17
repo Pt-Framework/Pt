@@ -314,52 +314,6 @@ int main(int argc, char* args[])
     printf("N\\A\n");
     printf("\n\n");
 #endif
-#if 0
-    // Base 2 - group every 4 digits
-    std::cerr << std::endl;
-    for(int i = 0; i < 16; ++i) {
-        const Pt::String& s = Pt::format("{:04b}", i);
-        for(int j = 0; j < 4; ++j) std::cerr << (char) s[3 - j];
-        if( !((i + 1) % 8) ) std::cerr << std::endl;
-    }
-    std::cerr << std::endl;
-#endif
-#if 0
-    // Base 8 - group every 2 digits
-    std::cerr << std::endl;
-    for(int i = 0; i < 64; ++i) {
-        const Pt::String& s = Pt::format("{:02o}", i);
-        for(int j = 0; j < 2; ++j) std::cerr << (char) s[1 - j];
-        if( !((i + 1) % 16) ) std::cerr << std::endl;
-    }
-    std::cerr << std::endl;
-#endif
-#if 0
-    // Base 10 - group every 2 digits
-    std::cerr << std::endl;
-    for(int i = 0; i < 100; ++i) {
-        const Pt::String& s = Pt::format("{:02d}", i);
-        for(int j = 0; j < 2; ++j) std::cerr << (char) s[1 - j];
-        if( !((i + 1) % 25) ) std::cerr << std::endl;
-    }
-    std::cerr << std::endl;
-#endif
-#if 0
-    // Base 16 - group every 2 digits
-    std::cerr << std::endl;
-    for(int i = 0; i < 256; ++i) {
-        const Pt::String& s = Pt::format("{:02x}", i);
-        for(int j = 0; j < 2; ++j) std::cerr << (char) s[1 - j];
-        if( !((i + 1) % 32) ) std::cerr << std::endl;
-    }
-    std::cerr << std::endl;
-    for(int i = 0; i < 256; ++i) {
-        const Pt::String& s = Pt::format("{:02X}", i);
-        for(int j = 0; j < 2; ++j) std::cerr << (char) s[1 - j];
-        if( !((i + 1) % 32) ) std::cerr << std::endl;
-    }
-    std::cerr << std::endl;
-#endif
     //return 0;
 
 #ifdef PT_WITH_STD_LOCALE
