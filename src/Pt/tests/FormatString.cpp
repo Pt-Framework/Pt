@@ -81,8 +81,8 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
     const FormatStringValue::numpunct_t* numpunct =
         customLocale ? &std::use_facet<FormatStringValue::numpunct_t>( *customLocale )
                      : &std::use_facet<FormatStringValue::numpunct_t>( std::locale() );
-    if(numpunct && numpunct->grouping().length() > 1)
-        throw FormatStringError("locale with complex digit grouping is not supported");
+    //if(numpunct && numpunct->grouping().length() > 1)
+    //    throw FormatStringError("locale with complex digit grouping is not supported");
 #else
     const FormatStringValue::numpunct_t* numpunct = 0;
 #endif

@@ -108,15 +108,25 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
         throw FormatStringError("invalid 'sign specifier' in format string");
     }
 
-    // Determine the thousands separator
-    Pt::Char thousandsSep = 0;
-    size_t   groupingSize = 0;
+    // Determine the thousands separator and grouping size
+    Pt::Char           thousandsSep    = 0;
+    size_t             groupingSize    = 0;
+    const Pt::uint8_t* groupingSizePtr = 0;
+    size_t             groupingSizeCnt = 0;
+
     if(ruleLocale) {
-    // Get the locale-specific thousands separator and grouping size if possible
+
 #ifdef PT_WITH_STD_LOCALE
+        // Get the locale-specific thousands separator and grouping size if possible
         if(numpunct) {
-            groupingSize = numpunct->grouping()[0];
             thousandsSep = numpunct->thousands_sep();
+            if(numpunct->grouping().length() > 1) {
+                groupingSizePtr = (const Pt::uint8_t*) &numpunct->grouping()[0];
+                groupingSizeCnt =                       numpunct->grouping().length();
+            }
+            else {
+                groupingSize = numpunct->grouping()[0];
+            }
         }
 #endif
         // Otherwise, use the default thousands separator and grouping size
@@ -138,7 +148,10 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
         // Convert to string (in reversed direction)
         FormatUnsigned<UnsignedT, 2>::printReversed(strVal, numVal);
         // Reverse the string and add thousands separator as needed
-        FormatUnsigned<UnsignedT, 2>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
+        if(groupingSizePtr)
+            FormatUnsigned<UnsignedT, 2>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSizePtr, groupingSizeCnt);
+        else
+            FormatUnsigned<UnsignedT, 2>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Process as base 8 type
     else if( TYPE_IS_O(ruleType) ) {
@@ -149,7 +162,10 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
         // Convert to string (in reversed direction)
         FormatUnsigned<UnsignedT, 8>::printReversed(strVal, numVal);
         // Reverse the string and add thousands separator as needed
-        FormatUnsigned<UnsignedT, 8>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
+        if(groupingSizePtr)
+            FormatUnsigned<UnsignedT, 8>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSizePtr, groupingSizeCnt);
+        else
+            FormatUnsigned<UnsignedT, 8>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Process as base 16 type
     else if( TYPE_IS_X(ruleType) ) {
@@ -161,7 +177,10 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
         // Convert to string (in reversed direction)
         FormatUnsigned<UnsignedT, 16>::printReversed(strVal, numVal, ruleType == 'X');
         // Reverse the string and add thousands separator as needed
-        FormatUnsigned<UnsignedT, 16>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
+        if(groupingSizePtr)
+            FormatUnsigned<UnsignedT, 16>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSizePtr, groupingSizeCnt);
+        else
+            FormatUnsigned<UnsignedT, 16>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Process as base 10 type
     else if( TYPE_IS_D(ruleType) ) {
@@ -171,9 +190,15 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
         // Convert to string (in reversed direction)
         FormatUnsigned<UnsignedT, 10>::printReversed(strVal, numVal);
         // Reverse the string and add thousands separator as needed
-        if(ruleLocale && groupingSize != 3)
-            throw FormatStringError("only locale with default grouping ('\\3') is supported for decimal");
-        FormatUnsigned<UnsignedT, 10>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
+#ifdef PT_WITH_STD_LOCALE
+        //if(ruleLocale && (groupingSize != 3 || groupingSizeCnt))
+        //    throw FormatStringError("only locale with default grouping ('\\3') is supported for decimal");
+#endif
+        //FormatUnsigned<UnsignedT, 10>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
+        if(groupingSizePtr)
+            FormatUnsigned<UnsignedT, 10>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSizePtr, groupingSizeCnt);
+        else
+            FormatUnsigned<UnsignedT, 10>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSize);
     }
     // Invalid type
     else {
@@ -297,6 +322,12 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
         // Otherwise, use the default thousands separator
         if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
     }
+
+    // Check the grouping size
+#ifdef PT_WITH_STD_LOCALE
+    if(numpunct && !numpunct->grouping().empty() && numpunct->grouping() != "\3")
+        throw FormatStringError("only locale with default grouping ('\\3') is supported for floating-point");
+#endif
 
     // Format the number
     const size_t rulePrecision = (rule.precision == Rule::NoPrecisionSpecified) ? DEFAULT_PRECISION : rule.precision;

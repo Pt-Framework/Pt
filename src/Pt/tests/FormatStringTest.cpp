@@ -429,6 +429,12 @@ int main(int argc, char* args[])
     customNumPunct->setGrouping("\2");
     TEST_AND_BENCHMARK("|{0:x}| |{0:Lx}|", 0b10101010101010101010101010101010);
 
+    customNumPunct->setGrouping("\1\2\3");
+    TEST_AND_BENCHMARK("|{0:b}| |{0:Lb}|", 0b10101010101010101010101010101010);
+    TEST_AND_BENCHMARK("|{0:o}| |{0:Lo}|", 0b10101010101010101010101010101010);
+    TEST_AND_BENCHMARK("|{0:d}| |{0:Ld}|", 0b10101010101010101010101010101010);
+    TEST_AND_BENCHMARK("|{0:x}| |{0:Lx}|", 0b10101010101010101010101010101010);
+
     customLocale = 0;
 
     COMPARE_WITH_FMT = true;
