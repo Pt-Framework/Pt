@@ -113,13 +113,13 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
             // Get and check the argument index
             if(argIdxStr.empty()) {
                 if(argIdxMan) {
-                    throw FormatStringError("cannot switch from manual to automatic argument indexing");
+                    throw FormatStringError("cannot switch from manual to automatic argument indexing in format string");
                 }
                 argIdxEff = argIdxCnt++;
             }
             else {
                 if(argIdxCnt) {
-                    throw FormatStringError("cannot switch from automatic to manual argument indexing");
+                    throw FormatStringError("cannot switch from automatic to manual argument indexing in format string");
                 }
                 argIdxEff = parseSizeT(argIdxStr.c_str());
                 argIdxMan = argIdxEff + 1;

@@ -105,7 +105,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
         else       prefixStr = ' ';
     }
     else {
-        throw FormatStringError("invalid 'sign specifier' in format string");
+        throw FormatStringError("invalid 'sign specifier' in format string for integer");
     }
 
     // Determine the thousands separator and grouping size
@@ -186,13 +186,13 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     else if( TYPE_IS_D(ruleType) ) {
         // Alternate form cannot be used with base 10 type
         if( rule.altForm() )
-            throw FormatStringError("format specifier '#' requires 'b/B/o/x/X' numeric argument");
+            throw FormatStringError("alternate-form specifier '#' requires 'b/B/o/x/X' numeric argument for integer");
         // Convert to string (in reversed direction)
         FormatUnsigned<UnsignedT, 10>::printReversed(strVal, numVal);
         // Reverse the string and add thousands separator as needed
 #ifdef PT_WITH_STD_LOCALE
         //if(ruleLocale && (groupingSize != 3 || groupingSizeCnt))
-        //    throw FormatStringError("only locale with default grouping ('\\3') is supported for decimal");
+        //    throw FormatStringError("only locale with default grouping ('\\3') is supported for decimal integer");
 #endif
         if(groupingSizePtr)
             FormatUnsigned<UnsignedT, 10>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSizePtr, groupingSizeCnt);
@@ -201,7 +201,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     }
     // Invalid type
     else {
-        throw FormatStringError("invalid 'type specifier' in format string");
+        throw FormatStringError("invalid 'type specifier' in format string for integer");
     }
 
     // Put the prefix characters
@@ -246,6 +246,10 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
 {
     // TODO: Optimize!
 
+    // Check the type
+    if( !TYPE_IS_AEFG( rule.type() ) )
+        throw FormatStringError("invalid 'type specifier' in format string for floating-point");
+
     // Preparation
     const bool        negNum = (_valPOD.ld < 0.0L);
     const long double numVal = negNum ? -_valPOD.ld : _valPOD.ld;
@@ -289,7 +293,7 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
         else       prefixStr = ' ';
     }
     else {
-        throw FormatStringError("invalid 'sign specifier' in format string");
+        throw FormatStringError("invalid 'sign specifier' in format string for floating-point");
     }
 
     // Check if we have Inf or NaN
@@ -417,7 +421,7 @@ void FormatStringValue::ff_B(Pt::String& resBuff, const Rule& rule, const numpun
     }
     // Invalid type
     else {
-        throw FormatStringError("invalid 'type specifier' in format string");
+        throw FormatStringError("invalid 'type specifier' in format string for boolean");
     }
 }
 
@@ -477,7 +481,7 @@ void FormatStringValue::ff_C(Pt::String& resBuff, const Rule& rule, const numpun
     }
     // Invalid type
     else {
-        throw FormatStringError("invalid 'type specifier' in format string");
+        throw FormatStringError("invalid 'type specifier' in format string for character");
     }
 }
 
@@ -498,7 +502,7 @@ void FormatStringValue::ff_S(Pt::String& resBuff, const Rule& rule, const numpun
         throw FormatStringError("format specifier 'L' requires numeric/boolean argument");
 
     if( !TYPE_IS_S( rule.type() ) )
-        throw FormatStringError("invalid 'type specifier' in format string");
+        throw FormatStringError("invalid 'type specifier' in format string for string");
 
     // The default alignment for non numeric argument is left
     const Rule::Align align = rule.align() ? rule.align() : Rule::LEFT;
@@ -551,7 +555,7 @@ void FormatStringValue::ff_S(Pt::String& resBuff, const Rule& rule, const numpun
     }
     // Invalid
     else {
-        throw FormatStringError("invalid 'align specifier' in format string");
+        throw FormatStringError("invalid 'align specifier' in format string for string");
     }
 }
 
