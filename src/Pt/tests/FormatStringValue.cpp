@@ -247,7 +247,7 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
     // TODO: Optimize!
 
     // Check the type
-    if( !TYPE_IS_AEFG( rule.type() ) )
+    if( !TYPE_IS_N( rule.type() ) && !TYPE_IS_AEFG( rule.type() ) )
         throw FormatStringError("invalid 'type specifier' in format string for floating-point");
 
     // Preparation

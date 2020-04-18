@@ -35,25 +35,35 @@ namespace Pt {
 //
 // Utility macros
 //
-#define TYPE_IS_N(T)    ( !T                                          )
+#define TYPE_IS_N(T)    ( !T                                                                                        )
 
-#define TYPE_IS_S(T)    ( !T || ( T &&   (T == 's')                 ) )
-#define TYPE_IS_C(T)    ( !T || ( T &&   (T == 'c')                 ) )
+#define TYPE_IS_S(T)    ( !T || ( T &&   (T == Rule::STRING              )                                        ) )
+#define TYPE_IS_C(T)    ( !T || ( T &&   (T == Rule::CHARACTER           )                                        ) )
 
-#define TYPE_IS_B(T)    (       ( T && ( (T == 'b') || (T == 'B') ) ) )
-#define TYPE_IS_D(T)    ( !T || ( T &&   (T == 'd')                 ) )
-#define TYPE_IS_O(T)    (       ( T &&   (T == 'o')                 ) )
-#define TYPE_IS_X(T)    (       ( T && ( (T == 'x') || (T == 'X') ) ) )
+#define TYPE_IS_B(T)    (       ( T && ( (T == Rule::BINARY_LOWER        ) || (T == Rule::BINARY_UPPER        ) ) ) )
+#define TYPE_IS_D(T)    ( !T || ( T &&   (T == Rule::DECIMAL             )                                        ) )
+#define TYPE_IS_O(T)    (       ( T &&   (T == Rule::OCTAL               )                                        ) )
+#define TYPE_IS_X(T)    (       ( T && ( (T == Rule::HEXADECIMAL_LOWER   ) || (T == Rule::HEXADECIMAL_UPPER   ) ) ) )
 
-#define TYPE_IS_A(T)    (       ( T && ( (T == 'a') || (T == 'A') ) ) )
-#define TYPE_IS_E(T)    (       ( T && ( (T == 'e') || (T == 'E') ) ) )
-#define TYPE_IS_F(T)    (       ( T && ( (T == 'f') || (T == 'F') ) ) )
-#define TYPE_IS_G(T)    (       ( T && ( (T == 'g') || (T == 'G') ) ) )
+#define TYPE_IS_A(T)    (       ( T && ( (T == Rule::HEXADECIMAL_FP_LOWER) || (T == Rule::HEXADECIMAL_FP_UPPER) ) ) )
+#define TYPE_IS_E(T)    (       ( T && ( (T == Rule::SCIENTIFIC_FP_LOWER ) || (T == Rule::SCIENTIFIC_FP_UPPER ) ) ) )
+#define TYPE_IS_F(T)    (       ( T && ( (T == Rule::DECIMAL_FP_LOWER    ) || (T == Rule::DECIMAL_FP_UPPER    ) ) ) )
+#define TYPE_IS_G(T)    (       ( T && ( (T == Rule::SHORTEST_FP_LOWER   ) || (T == Rule::SHORTEST_FP_UPPER   ) ) ) )
 
-#define TYPE_IS_P(T)    ( !T || ( T &&   (T == 'p')                 ) )
+#define TYPE_IS_P(T)    ( !T || ( T &&   (T == Rule::POINTER             )                                        ) )
 
-#define TYPE_IS_BDOX(T) ( T && ( (T == 'b') || (T == 'B') || (T == 'd') || (T == 'o') || (T == 'x') || (T == 'X') ) )
-#define TYPE_IS_AEFG(T) ( T && ( (T == 'a') || (T == 'A') || (T == 'e') || (T == 'E') || (T == 'f') || (T == 'F') || (T == 'g') || (T == 'G') ) )
+#define TYPE_IS_BDOX(T) ( T && ( (T == Rule::BINARY_LOWER     ) || (T == Rule::BINARY_UPPER     ) || \
+                                 (T == Rule::DECIMAL          ) || (T == Rule::OCTAL            ) || \
+                                 (T == Rule::HEXADECIMAL_LOWER) || (T == Rule::HEXADECIMAL_UPPER)    \
+                               )                                                                     \
+                        )
+
+#define TYPE_IS_AEFG(T) ( T && ( (T == Rule::HEXADECIMAL_FP_LOWER) || (T == Rule::HEXADECIMAL_FP_UPPER) || \
+                                 (T == Rule::SCIENTIFIC_FP_LOWER ) || (T == Rule::SCIENTIFIC_FP_UPPER ) || \
+                                 (T == Rule::DECIMAL_FP_LOWER    ) || (T == Rule::DECIMAL_FP_UPPER    ) || \
+                                 (T == Rule::SHORTEST_FP_LOWER   ) || (T == Rule::SHORTEST_FP_UPPER   )    \
+                               )                                                                           \
+                        )
 
 
 //

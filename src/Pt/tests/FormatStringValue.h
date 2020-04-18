@@ -266,7 +266,9 @@ class FormatStringValue::Rule {
             OCTAL                = 'o',
             HEXADECIMAL_LOWER    = 'x',
             HEXADECIMAL_UPPER    = 'X',
-            DECIMAL_FP           = 'f',
+            DECIMAL_FP_LOWER     = 'f',
+            DECIMAL_FP_UPPER     = 'F',
+            DECIMAL_FP           = DECIMAL_FP_LOWER,
             HEXADECIMAL_FP_LOWER = 'a',
             HEXADECIMAL_FP_UPPER = 'A',
             SCIENTIFIC_FP_LOWER  = 'e',
@@ -274,7 +276,7 @@ class FormatStringValue::Rule {
             SHORTEST_FP_LOWER    = 'g',
             SHORTEST_FP_UPPER    = 'G',
             POINTER              = 'p',
-            // Below are shortcuts for the above types
+            // More are aliases/shortcuts for the above types
             CHR        = CHARACTER,
             CHAR       = CHARACTER,
             STR        = STRING,
