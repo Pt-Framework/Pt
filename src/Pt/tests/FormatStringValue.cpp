@@ -80,8 +80,8 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     }
 
     // For backward compatibility with older (draft) C++20 standard
-    char ruleType   = rule.type;
-    bool ruleLocale = rule.locale;
+    char ruleType   = rule.type  ();
+    bool ruleLocale = rule.locale();
 
     if(ruleType == 'n') {
         ruleLocale = true;
@@ -91,16 +91,16 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     // Handle 'sign' as a prefix character
     Pt::String prefixStr;
 
-    if(!rule.sign || rule.sign == '-') {
+    if( !rule.sign() || rule.sign() == '-' ) {
         if(negNum) {
             prefixStr = '-';
         }
     }
-    else if(rule.sign == '+') {
+    else if( rule.sign() == '+' ) {
         if(negNum) prefixStr = '-';
         else       prefixStr = '+';
     }
-    else if(rule.sign == ' ') {
+    else if( rule.sign() == ' ' ) {
         if(negNum) prefixStr = '-';
         else       prefixStr = ' ';
     }
@@ -141,7 +141,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     // Process as base 2 type
     if( TYPE_IS_B(ruleType) ) {
         // Handle '#' as prefix characters
-        if(rule.altForm) {
+        if( rule.altForm() ) {
             prefixStr += '0';
             prefixStr += ruleType;
         }
@@ -156,7 +156,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     // Process as base 8 type
     else if( TYPE_IS_O(ruleType) ) {
         // Handle '#' as prefix characters
-        if(rule.altForm) {
+        if( rule.altForm() ) {
             prefixStr += '0';
         }
         // Convert to string (in reversed direction)
@@ -170,7 +170,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     // Process as base 16 type
     else if( TYPE_IS_X(ruleType) ) {
         // Handle '#' as prefix characters
-        if(rule.altForm) {
+        if( rule.altForm() ) {
             prefixStr += '0';
             prefixStr += ruleType;
         }
@@ -185,7 +185,7 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     // Process as base 10 type
     else if( TYPE_IS_D(ruleType) ) {
         // Alternate form cannot be used with base 10 type
-        if(rule.altForm)
+        if( rule.altForm() )
             throw FormatStringError("format specifier '#' requires 'b/B/o/x/X' numeric argument");
         // Convert to string (in reversed direction)
         FormatUnsigned<UnsignedT, 10>::printReversed(strVal, numVal);
@@ -205,11 +205,11 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     }
 
     // Put the prefix characters
-    size_t ruleWidth = rule.width;
+    size_t ruleWidth = rule.width();
 
-    if(rule.zeroPad) {
-        if(!prefixStr.empty()) {
-            if(!rule.align) {
+    if( rule.zeroPad() ) {
+        if( !prefixStr.empty() ) {
+            if( !rule.align() ) {
                 resBuff += prefixStr;
                 ruleWidth = ( ruleWidth > prefixStr.length() ) ? ( ruleWidth - prefixStr.length() ) : 0;
             }
@@ -223,13 +223,13 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     }
 
     // Handle '0'
-    const Pt::Char& ruleFill = (rule.zeroPad && !rule.align) ? Pt::Char('0') : rule.fill;
+    const Pt::Char& ruleFill = (rule.zeroPad() && !rule.align()) ? Pt::Char('0') : rule.fill();
 
     // The default alignment for numeric argument is right
-    const char ruleAlign = rule.align ? rule.align : '>';
+    const FormatStringValue::Rule::Align ruleAlign = rule.align() ? rule.align() : FormatStringValue::Rule::RIGHT;
 
     // Process the generated string
-    Rule r(ruleFill, ruleAlign, ruleWidth, 's');
+    Rule r( ruleFill, ruleAlign, ruleWidth, 's' );
     FormatStringValue(tmpResBuff).ff_S(resBuff, r, numpunct);
 }
 
@@ -255,27 +255,27 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
 
     // Process Inf and NaN
     if(isinf(numVal)) {
-        if(Pt::isupper(rule.type)) tmpResBuff = FLOAT_UPPER_INF;
-        else                       tmpResBuff = FLOAT_LOWER_INF;
+        if( Pt::isupper( rule.type() ) ) tmpResBuff = FLOAT_UPPER_INF;
+        else                             tmpResBuff = FLOAT_LOWER_INF;
     }
     else if(isnan(numVal)) {
-        if(Pt::isupper(rule.type)) tmpResBuff = FLOAT_UPPER_NAN;
-        else                       tmpResBuff = FLOAT_LOWER_NAN;
+        if( Pt::isupper( rule.type() ) ) tmpResBuff = FLOAT_UPPER_NAN;
+        else                             tmpResBuff = FLOAT_LOWER_NAN;
     }
 
     // Handle 'sign' as a prefix character
     Pt::String prefixStr;
 
-    if(!rule.sign || rule.sign == '-') {
+    if( !rule.sign() || rule.sign() == '-' ) {
         if(negNum) {
             prefixStr = '-';
         }
     }
-    else if(rule.sign == '+') {
+    else if( rule.sign() == '+' ) {
         if(negNum) prefixStr = '-';
         else       prefixStr = '+';
     }
-    else if(rule.sign == ' ') {
+    else if( rule.sign() == ' ' ) {
         if(negNum) prefixStr = '-';
         else       prefixStr = ' ';
     }
@@ -286,23 +286,23 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
     // Check if we have Inf or NaN
     if(!tmpResBuff.empty()) {
         // The default alignment for numeric argument is right
-        const char ruleAlign = rule.align ? rule.align : '>';
+        const FormatStringValue::Rule::Align ruleAlign = rule.align() ? rule.align() : FormatStringValue::Rule::RIGHT;
         // Process as string type
-        Rule r(rule.fill, ruleAlign, rule.width, 's');
+        Rule r( rule.fill(), ruleAlign, rule.width(), 's' );
         FormatStringValue(prefixStr + tmpResBuff).ff_S(resBuff, r, numpunct);
         // We are done here
         return;
     }
 
     // Handle 'a' and 'A'
-    if( TYPE_IS_A(rule.type) ) {
+    if( TYPE_IS_A( rule.type() ) ) {
         prefixStr += '0';
-        prefixStr += (rule.type == 'A') ? 'X' : 'x';
+        prefixStr += (rule.type() == 'A') ? 'X' : 'x';
     }
 
     // Determine the decimal point
     Pt::Char decimalPoint = 0;
-    if(rule.locale) {
+    if( rule.locale() ) {
         // Get the locale-specific decimal point if possible
 #ifdef PT_WITH_STD_LOCALE
         if(numpunct) decimalPoint = numpunct->decimal_point();
@@ -313,7 +313,7 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
 
     // Determine the thousands separator
     Pt::Char thousandsSep = 0;
-    if(rule.locale) {
+    if( rule.locale() ) {
         // Get the locale-specific thousands separator if possible
 #ifdef PT_WITH_STD_LOCALE
         if(numpunct) thousandsSep = numpunct->thousands_sep();
@@ -329,21 +329,21 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
 #endif
 
     // Format the number
-    const size_t rulePrecision = (rule.precision == Rule::NoPrecisionSpecified) ? DEFAULT_PRECISION : rule.precision;
-    const char   ruleType      = rule.type ? rule.type : 'g';
+    const size_t rulePrecision = (rule.precision() == Rule::NoPrecisionSpecified) ? DEFAULT_PRECISION : rule.precision();
+    const char   ruleType      = rule.type() ? rule.type() : 'g';
 
     Pt::String strFP;
-    printPositiveFloatingPoint(strFP, numVal, rulePrecision, rule.altForm, ruleType);
+    printPositiveFloatingPoint(strFP, numVal, rulePrecision, rule.altForm(), ruleType);
 
     // Format/add the decimal point and thousands separator(s) as needed
     finalizePositiveFloatingPointStringFormat(tmpResBuff, strFP, decimalPoint, thousandsSep);
 
     // Put the prefix characters
-    size_t ruleWidth = rule.width;
+    size_t ruleWidth = rule.width();
 
-    if(rule.zeroPad) {
-        if(!prefixStr.empty()) {
-            if(!rule.align) {
+    if( rule.zeroPad() ) {
+        if( !prefixStr.empty() ) {
+            if( !rule.align() ) {
                 resBuff += prefixStr;
                 ruleWidth = ( ruleWidth > prefixStr.length() ) ? ( ruleWidth - prefixStr.length() ) : 0;
             }
@@ -357,13 +357,13 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
     }
 
     // Handle '0'
-    const Pt::Char& ruleFill = (rule.zeroPad && !rule.align) ? Pt::Char('0') : rule.fill;
+    const Pt::Char& ruleFill = (rule.zeroPad() && !rule.align()) ? Pt::Char('0') : rule.fill();
 
     // The default alignment for numeric argument is right
-    const char ruleAlign = rule.align ? rule.align : '>';
+    const FormatStringValue::Rule::Align ruleAlign = rule.align() ? rule.align (): FormatStringValue::Rule::RIGHT;
 
     // Process as string type
-    Rule r(ruleFill, ruleAlign, ruleWidth, 's');
+    Rule r( ruleFill, ruleAlign, ruleWidth, 's' );
     FormatStringValue(tmpResBuff).ff_S(resBuff, r, numpunct);
 }
 
@@ -371,39 +371,40 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
 void FormatStringValue::ff_B(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const
 {
     // Check the specifiers
-    if(rule.sign)
+    if( rule.sign() )
         throw FormatStringError("format specifier 'sign' requires numeric argument");
 
-    if(rule.altForm)
+    if( rule.altForm() )
         throw FormatStringError("format specifier '#' requires numeric argument");
 
     // Process as string type
-    if( TYPE_IS_S(rule.type) ) {
+    if( TYPE_IS_S( rule.type() ) ) {
         // Handle '0'
-        const Pt::Char& ruleFill = (rule.zeroPad && !rule.align) ? Pt::Char('0') : rule.fill;
+        const Pt::Char& ruleFill = (rule.zeroPad() && !rule.align()) ? Pt::Char('0') : rule.fill();
         // Get the locale-specific string if possible
         Pt::String boolName;
 #ifdef PT_WITH_STD_LOCALE
-        if(rule.locale && numpunct) {
+        if( rule.locale() && numpunct ) {
             boolName = _valPOD.b ? numpunct->truename() : numpunct->falsename();
         }
 #endif
         // Otherwise, use the default string
-        if(boolName.empty()) {
+        if( boolName.empty() ) {
             boolName = _valPOD.b ? DEFAULT_TRUE_NAME : DEFAULT_FALSE_NAME;
         }
         // Process the generated string
-        Rule r(ruleFill, rule.align, rule.width, rule.type);
+        Rule r( ruleFill, rule.align(), rule.width(), rule.type() );
         FormatStringValue(boolName).ff_S(resBuff, r, numpunct);
     }
     // Process as numeric type
-    else if( TYPE_IS_C(rule.type) ) {
-        Rule r(rule.fill, rule.align, rule.width, 'd', rule.zeroPad); // For boolean, type 'c' is considered the same as type 'd'
-        FormatStringValue((Pt::uint32_t) _valPOD.b ? 1 : 0).ff_I32(resBuff, r, numpunct);
+    else if( TYPE_IS_C( rule.type() ) ) {
+        // For boolean, type 'c' is considered the same as type 'd'
+        Rule r( rule.fill(), rule.align(), rule.width(), 'd', rule.zeroPad() );
+        FormatStringValue( (Pt::uint32_t) _valPOD.b ? 1 : 0 ).ff_I32(resBuff, r, numpunct);
     }
-    else if( TYPE_IS_BDOX(rule.type) ) {
-        Rule r(rule.fill, rule.align, rule.width, rule.type, rule.zeroPad);
-        FormatStringValue((Pt::uint32_t) _valPOD.b ? 1 : 0).ff_I32(resBuff, r, numpunct);
+    else if( TYPE_IS_BDOX( rule.type() ) ) {
+        Rule r( rule.fill(), rule.align(), rule.width(), rule.type(), rule.zeroPad() );
+        FormatStringValue( (Pt::uint32_t) _valPOD.b ? 1 : 0 ).ff_I32(resBuff, r, numpunct);
     }
     // Invalid type
     else {
@@ -415,27 +416,27 @@ void FormatStringValue::ff_B(Pt::String& resBuff, const Rule& rule, const numpun
 void FormatStringValue::ff_P(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const
 {
     // Check the specifiers
-    if(rule.sign)
+    if( rule.sign() )
         throw FormatStringError("format specifier 'sign' requires numeric argument");
 
-    if(rule.altForm)
+    if( rule.altForm() )
         throw FormatStringError("format specifier '#' requires numeric argument");
 
-    if(rule.zeroPad)
+    if( rule.zeroPad() )
         throw FormatStringError("format specifier '0' requires numeric argument");
 
-    if(rule.locale)
+    if( rule.locale() )
         throw FormatStringError("format specifier 'L' requires numeric/boolean argument");
 
-    if( !TYPE_IS_P(rule.type) )
+    if( !TYPE_IS_P( rule.type() ) )
         throw FormatStringError("invalid 'type specifier' in format string");
 
     // Process as numeric type
-    Rule r(rule.fill, rule.align, std::max(rule.width, sizeof(void*)), 'x', false, true);
+    Rule r( rule.fill(), rule.align(), std::max( rule.width(), sizeof(void*) ), 'x', false, true );
 #if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__)
-    FormatStringValue((Pt::uint64_t) _valPOD.p).ff_I64(resBuff, r, numpunct);
+    FormatStringValue( (Pt::uint64_t) _valPOD.p ).ff_I64(resBuff, r, numpunct);
 #else
-    FormatStringValue((Pt::uint32_t) _valPOD.p).ff_I32(resBuff, r, numpunct);
+    FormatStringValue(( Pt::uint32_t) _valPOD.p ).ff_I32(resBuff, r, numpunct);
 #endif
 }
 
@@ -443,27 +444,27 @@ void FormatStringValue::ff_P(Pt::String& resBuff, const Rule& rule, const numpun
 void FormatStringValue::ff_C(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const
 {
     // Check the specifiers
-    if(rule.sign)
+    if( rule.sign() )
         throw FormatStringError("format specifier 'sign' requires numeric argument");
 
-    if(rule.altForm)
+    if( rule.altForm() )
         throw FormatStringError("format specifier '#' requires numeric argument");
 
-    if(rule.zeroPad)
+    if( rule.zeroPad() )
         throw FormatStringError("format specifier '0' requires numeric argument");
 
-    if(rule.locale)
+    if( rule.locale() )
         throw FormatStringError("format specifier 'L' requires numeric/boolean argument");
 
     // Process as character type
-    if( TYPE_IS_C(rule.type) ) {
-        Rule r(rule.fill, rule.align, rule.width, rule.type);
-        FormatStringValue(Pt::String(1, _valChr)).ff_S(resBuff, r, numpunct);
+    if( TYPE_IS_C( rule.type() ) ) {
+        Rule r( rule.fill(), rule.align(), rule.width(), rule.type() );
+        FormatStringValue( Pt::String(1, _valChr) ).ff_S(resBuff, r, numpunct);
     }
     // Process as numeric type
-    else if( TYPE_IS_BDOX(rule.type) ) {
-        Rule r(rule.fill, rule.align, rule.width, rule.type);
-        FormatStringValue((Pt::uint32_t) _valChr).ff_I32(resBuff, r, numpunct);
+    else if( TYPE_IS_BDOX( rule.type() ) ) {
+        Rule r( rule.fill(), rule.align(), rule.width(), rule.type() );
+        FormatStringValue( (Pt::uint32_t) _valChr ).ff_I32(resBuff, r, numpunct);
     }
     // Invalid type
     else {
@@ -475,31 +476,31 @@ void FormatStringValue::ff_C(Pt::String& resBuff, const Rule& rule, const numpun
 void FormatStringValue::ff_S(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const
 {
     // Check the specifiers
-    if(rule.sign)
+    if( rule.sign() )
         throw FormatStringError("format specifier 'sign' requires numeric argument");
 
-    if(rule.altForm)
+    if( rule.altForm() )
         throw FormatStringError("format specifier '#' requires numeric argument");
 
-    if(rule.zeroPad)
+    if( rule.zeroPad() )
         throw FormatStringError("format specifier '0' requires numeric argument");
 
-    if(rule.locale)
+    if( rule.locale() )
         throw FormatStringError("format specifier 'L' requires numeric/boolean argument");
 
-    if( !TYPE_IS_S(rule.type) )
+    if( !TYPE_IS_S( rule.type() ) )
         throw FormatStringError("invalid 'type specifier' in format string");
 
     // The default alignment for non numeric argument is left
-    const char align = rule.align ? rule.align : '<';
+    const FormatStringValue::Rule::Align align = rule.align() ? rule.align() : FormatStringValue::Rule::LEFT;
 
     // Calculate string the length
     const size_t strLen = _valStr.length();
-    const size_t padLen = rule.width - strLen;
+    const size_t padLen = rule.width() - strLen;
 
     // Resize the destination buffer
     const size_t resBuffOrgLen = resBuff.length();
-    const size_t resBuffNewLen = resBuffOrgLen + std::max( strLen, rule.width );
+    const size_t resBuffNewLen = resBuffOrgLen + std::max( strLen, rule.width() );
 
     resBuff.resize(resBuffNewLen);
 
@@ -507,18 +508,18 @@ void FormatStringValue::ff_S(Pt::String& resBuff, const Rule& rule, const numpun
     Pt::Char* resBuffPtr = &resBuff[0] + resBuffOrgLen;
 
     // Center
-    if(align == '^') {
+    if(align == FormatStringValue::Rule::CENTER) {
         // Pad the string as needed
-        if(strLen < rule.width) {
+        if( strLen < rule.width() ) {
             // Calculate the padding sizes
             const size_t lPadLen = padLen / 2;
             const size_t rPadLen = (lPadLen * 2 == padLen) ? lPadLen : (lPadLen + 1);
             // Left pad the string
-            resBuffPtr = fill(resBuffPtr, rule.fill, lPadLen);
+            resBuffPtr = fill(resBuffPtr, rule.fill(), lPadLen);
             // Copy the string
             resBuffPtr = copy(resBuffPtr, _valStr.data(), strLen);
             // Right pad the string
-            resBuffPtr = fill(resBuffPtr, rule.fill, rPadLen);
+            resBuffPtr = fill(resBuffPtr, rule.fill(), rPadLen);
         }
         // Do not pad the string
         else {
@@ -526,18 +527,18 @@ void FormatStringValue::ff_S(Pt::String& resBuff, const Rule& rule, const numpun
         }
     }
     // Right
-    else if(align == '>') {
+    else if(align == FormatStringValue::Rule::RIGHT) {
         // Left pad the string as needed
-        if(strLen < rule.width) resBuffPtr = fill(resBuffPtr, rule.fill, padLen);
+        if( strLen < rule.width() ) resBuffPtr = fill(resBuffPtr, rule.fill(), padLen);
         // Copy the string
         copy(resBuffPtr, _valStr.data(), strLen);
     }
     // Left
-    else if(align == '<') {
+    else if(align == FormatStringValue::Rule::LEFT) {
         // Copy the string
         resBuffPtr = copy(resBuffPtr, _valStr.data(), strLen);
         // Right pad the string as needed
-        if(strLen < rule.width) fill(resBuffPtr, rule.fill, padLen);
+        if( strLen < rule.width() ) fill(resBuffPtr, rule.fill(), padLen);
     }
     // Invalid
     else {

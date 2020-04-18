@@ -68,66 +68,8 @@ class PT_API FormatStringValue {
         struct numpunct_t {};
 #endif
 
-    public:
         // Formatting rule
-        struct Rule {
-            // Member flags
-            Pt::Char fill;       // fill character
-            char     align;      // < > ^
-            char     sign;       // + - [space]
-            bool     altForm;    // #
-            bool     zeroPad;    // 0 (if the 0 character and an align option both appear, the 0 character is ignored)
-            size_t   width;      // minimum field width (default 0)
-            size_t   precision;  // floating-point precision (default 6)
-            bool     locale;     // use locale-specific formatting
-            char     type;       // none/s b B c d o x X a A e E f/F g G p
-
-            // Constant to indicate that no precision is specified
-            static const size_t NoPrecisionSpecified = (size_t) - 1;
-
-            // Constructor
-            inline Rule()
-            { reset(); }
-
-            inline Rule(Pt::Char fill_, char align_, size_t width_ = 0, char type_ = 0, bool zeroPad_ = false, bool altForm_ = false)
-            {
-                reset();
-
-                fill    = fill_;
-                align   = align_;
-                altForm = altForm_;
-                zeroPad = zeroPad_;
-                width   = width_;
-                type    = type_;
-            }
-
-            inline Rule(Pt::Char fill_, char align_, size_t width_ = 0, size_t precision_ = NoPrecisionSpecified, char type_ = 0, bool zeroPad_ = false, bool altForm_ = false)
-            {
-                reset();
-
-                fill      = fill_;
-                align     = align_;
-                altForm   = altForm_;
-                zeroPad   = zeroPad_;
-                width     = width_;
-                precision = precision_;
-                type      = type_;
-            }
-
-            // Reset all the flags
-            inline void reset()
-            {
-                fill      = ' ';                  // default: space
-                align     = 0;                    // default: '<' for non number and '>' for number
-                sign      = 0;                    // default: '-' for number
-                altForm   = false;                // default: no alternate form
-                zeroPad   = false;                // default: no zero pad
-                width     = 0;                    // default: no minimum width
-                precision = NoPrecisionSpecified; // default: no precision specified
-                locale    = false;                // default: do not use locale-specific formatting
-                type      = 0;                    // default: none
-            }
-        };
+        class Rule;
 
     public:
         // Constructors (one for each data type)
@@ -285,6 +227,182 @@ class PT_API FormatStringValue {
         template <typename ValueT, int BASE>
         struct FormatUnsigned;
 };
+
+
+//
+// Formatting rule
+//
+class FormatStringValue::Rule {
+    public:
+        // A constant to indicate that no precision is specified
+        static const size_t NoPrecisionSpecified = (size_t) - 1;
+
+        // Align enum
+        enum Align {
+            DEFAULT_ALIGN = 0,
+            LEFT    = '<',
+            RIGHT   = '>',
+            CENTER  = '^'
+        };
+
+        // Sign enum
+        enum Sign {
+            DEFAULT_SIGN      = 0,
+            POSITIVE_NEGATIVE = '+',
+            NEGATIVE_ONLY     = '-',
+            POSITIVE_SPACE    = ' '
+        };
+
+        // Type enum
+        enum Type {
+            DEFAULT_TYPE         = 0,
+            CHARACTER            = 'c',
+            STRING               = 's',
+            DECIMAL              = 'd',
+            BINARY_LOWER         = 'b',
+            BINARY_UPPER         = 'B',
+            OCTAL                = 'o',
+            HEXADECIMAL_LOWER    = 'x',
+            HEXADECIMAL_UPPER    = 'X',
+            DECIMAL_FP           = 'f',
+            HEXADECIMAL_FP_LOWER = 'a',
+            HEXADECIMAL_FP_UPPER = 'A',
+            SCIENTIFIC_FP_LOWER  = 'e',
+            SCIENTIFIC_FP_UPPER  = 'E',
+            SHORTEST_FP_LOWER    = 'g',
+            SHORTEST_FP_UPPER    = 'G',
+            POINTER              = 'p',
+            // Below are shortcuts for the above types
+            CHR        = CHARACTER,
+            CHAR       = CHARACTER,
+            STR        = STRING,
+            DEC        = DECIMAL,
+            BIN        = BINARY_LOWER,
+            OCT        = OCTAL,
+            HEX        = HEXADECIMAL_LOWER,
+            FLT        = DECIMAL_FP,
+            FLOAT      = DECIMAL_FP,
+            SCIENTIFIC = SCIENTIFIC_FP_LOWER,
+            PTR        = POINTER
+        };
+
+    public:
+        // Constructors
+        inline Rule()
+        : _fill     (' '                 ) //                             default: space
+        , _align    (DEFAULT_ALIGN       ) //                             default: '<' for non number and '>' for number
+        , _sign     (0                   ) //                number only; default: '-'
+        , _altForm  (false               ) //                number only; default: do not use the alternate form
+        , _zeroPad  (false               ) //                number only; default: no use zero pad
+        , _width    (0                   ) //                             default: no minimum width
+        , _precision(NoPrecisionSpecified) // floating-point number only; default: not specified
+        , _locale   (false               ) //                             default: no
+        , _type     (0                   ) //                             default: not specified
+        {}
+
+        inline Rule(Pt::Char fill, Align align, size_t width = 0, char type = 0, bool zeroPad = false, bool altForm = false)
+        : _fill     (fill                )
+        , _align    (align               )
+        , _sign     (0                   )
+        , _altForm  (altForm             )
+        , _zeroPad  (zeroPad             )
+        , _width    (width               )
+        , _precision(NoPrecisionSpecified)
+        , _locale   (false               )
+        , _type     (type                )
+        {}
+
+        inline Rule(Pt::Char fill, Align align, size_t width = 0, size_t precision = NoPrecisionSpecified, char type = 0, bool zeroPad = false, bool altForm = false)
+        : _fill     (fill     )
+        , _align    (align    )
+        , _sign     (0        )
+        , _altForm  (altForm  )
+        , _zeroPad  (zeroPad  )
+        , _width    (width    )
+        , _precision(precision)
+        , _locale   (false    )
+        , _type     (type     )
+        {}
+
+        // Reset all the flags
+        inline void reset()
+        { *this = Rule(); }
+
+        // Fill character (default: space)
+        inline void setFill(Pt::Char fill = ' ')
+        { _fill = fill; }
+
+        inline Pt::Char fill() const
+        { return _fill; }
+
+        // Alignment (default: '<' for non number and '>' for number)
+        inline void setAlign(Align align = DEFAULT_ALIGN)
+        { _align = align; }
+
+        inline Align align() const
+        { return _align; }
+
+        // Sign character (number only; default: '-')
+        inline void setSign(char sign = 0)
+        { _sign = sign; }
+
+        inline char sign() const
+        { return _sign; }
+
+        // Alternate form (number only; default: do not use the alternate form)
+        inline void setAltForm(bool altForm = false)
+        { _altForm = altForm; }
+
+        inline bool altForm() const
+        { return _altForm; }
+
+        // Zero pad (number only; default: no use zero pad)
+        inline void setZeroPad(bool zeroPad = false)
+        { _zeroPad = zeroPad; }
+
+        inline bool zeroPad() const
+        { return _zeroPad; }
+
+        // Minimum field width (default: no minimum width)
+        inline void setWidth(size_t width = 0)
+        { _width = width; }
+
+        inline size_t width() const
+        { return _width; }
+
+        // Minimum field precision (floating-point number only; default: not specified)
+        inline void setPrecision(size_t precision = NoPrecisionSpecified)
+        { _precision = precision; }
+
+        inline size_t precision() const
+        { return _precision; }
+
+        // Use locale-specific formatting (default: no)
+        inline void setLocale(bool locale = false)
+        { _locale = locale; }
+
+        inline bool locale() const
+        { return _locale; }
+
+        // Type (default: not specified)
+        inline void setType(char type = 0)
+        { _type = type; }
+
+        inline char type() const
+        { return _type; }
+
+    private:
+        Pt::Char _fill;       // fill character
+        Align    _align;      // < > ^
+        char     _sign;       // + - [space]
+        bool     _altForm;    // #
+        bool     _zeroPad;    // 0 (if the 0 character and an align option both appear, the 0 character is ignored)
+        size_t   _width;      // minimum field width
+        size_t   _precision;  // floating-point precision
+        bool     _locale;     // use locale-specific formatting
+        char     _type;       // none/s b B c d o x X a A e E f/F g G p
+};
+
 
 
 } // namespace

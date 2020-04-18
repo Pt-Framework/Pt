@@ -158,35 +158,37 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
             // Read the 'fill' and 'align'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '<' || *it == '>' || *it == '^') {
-                rule.align = *it++;
+                rule.setAlign( (FormatStringValue::Rule::Align) it->value() );
+                ++it;
             }
             else if(*(it + 1) == '<' || *(it + 1) == '>' || *(it + 1) == '^') {
-                rule.fill  = *it++;
-                rule.align = *it++;
+                rule.setFill (*it++);
+                rule.setAlign( (FormatStringValue::Rule::Align) it->value() );
+                ++it;
             }
             // Read the 'sign'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '+' || *it == '-' || *it == ' ') {
-                rule.sign = *it++;
+                rule.setSign(*it++);
             }
             // Read the '#'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '#') {
                 ++it;
-                rule.altForm = true;
+                rule.setAltForm(true);
             }
             // Read the '0'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '0') {
                 ++it;
-                rule.zeroPad = true;
+                rule.setZeroPad(true);
             }
             // Read the 'width'
             CHECK_FOR_CLOSING_BRACKET();
             numberStr.clear();
             while( isdigit(*it) ) numberStr += *it++;
             if(!numberStr.empty()) {
-                rule.width = parseSizeT(numberStr.c_str());
+                rule.setWidth( parseSizeT(numberStr.c_str()) );
             }
             // Check if the next character is '.'
             CHECK_FOR_CLOSING_BRACKET();
@@ -196,7 +198,7 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
                 numberStr.clear();
                 while( isdigit(*it) ) numberStr += *it++;
                 if(!numberStr.empty()) {
-                    rule.precision = parseSizeT(numberStr.c_str());
+                    rule.setPrecision( parseSizeT(numberStr.c_str()) );
                 }
                 else {
                     throw FormatStringError("missing 'precision specifier' in format string");
@@ -206,11 +208,11 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == 'L') {
                 ++it;
-                rule.locale = true;
+                rule.setLocale(true);
             }
             // Read the 'type'
             CHECK_FOR_CLOSING_BRACKET();
-            rule.type = *it++;
+            rule.setType(*it++);
             // All should be done here
             CHECK_FOR_CLOSING_BRACKET();
             // Error
