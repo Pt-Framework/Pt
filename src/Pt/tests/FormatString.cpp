@@ -169,7 +169,8 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
             // Read the 'sign'
             CHECK_FOR_CLOSING_BRACKET();
             if(*it == '+' || *it == '-' || *it == ' ') {
-                rule.setSign(*it++);
+                rule.setSign( (FormatStringValue::Rule::Sign) it->value() );
+                ++it;
             }
             // Read the '#'
             CHECK_FOR_CLOSING_BRACKET();

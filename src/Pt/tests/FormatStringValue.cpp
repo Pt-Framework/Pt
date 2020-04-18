@@ -91,16 +91,16 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     // Handle 'sign' as a prefix character
     Pt::String prefixStr;
 
-    if( !rule.sign() || rule.sign() == '-' ) {
+    if( !rule.sign() || rule.sign() == FormatStringValue::Rule::NEGATIVE_ONLY ) {
         if(negNum) {
             prefixStr = '-';
         }
     }
-    else if( rule.sign() == '+' ) {
+    else if( rule.sign() == FormatStringValue::Rule::POSITIVE_NEGATIVE ) {
         if(negNum) prefixStr = '-';
         else       prefixStr = '+';
     }
-    else if( rule.sign() == ' ' ) {
+    else if( rule.sign() == FormatStringValue::Rule::POSITIVE_SPACE ) {
         if(negNum) prefixStr = '-';
         else       prefixStr = ' ';
     }
@@ -266,16 +266,16 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
     // Handle 'sign' as a prefix character
     Pt::String prefixStr;
 
-    if( !rule.sign() || rule.sign() == '-' ) {
+    if( !rule.sign() || rule.sign() == FormatStringValue::Rule::NEGATIVE_ONLY ) {
         if(negNum) {
             prefixStr = '-';
         }
     }
-    else if( rule.sign() == '+' ) {
+    else if( rule.sign() == FormatStringValue::Rule::POSITIVE_NEGATIVE ) {
         if(negNum) prefixStr = '-';
         else       prefixStr = '+';
     }
-    else if( rule.sign() == ' ' ) {
+    else if( rule.sign() == FormatStringValue::Rule::POSITIVE_SPACE ) {
         if(negNum) prefixStr = '-';
         else       prefixStr = ' ';
     }

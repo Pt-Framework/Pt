@@ -248,8 +248,8 @@ class FormatStringValue::Rule {
         // Sign enum
         enum Sign {
             DEFAULT_SIGN      = 0,
-            POSITIVE_NEGATIVE = '+',
             NEGATIVE_ONLY     = '-',
+            POSITIVE_NEGATIVE = '+',
             POSITIVE_SPACE    = ' '
         };
 
@@ -291,7 +291,7 @@ class FormatStringValue::Rule {
         inline Rule()
         : _fill     (' '                 ) //                             default: space
         , _align    (DEFAULT_ALIGN       ) //                             default: '<' for non number and '>' for number
-        , _sign     (0                   ) //                number only; default: '-'
+        , _sign     (DEFAULT_SIGN        ) //                number only; default: '-'
         , _altForm  (false               ) //                number only; default: do not use the alternate form
         , _zeroPad  (false               ) //                number only; default: no use zero pad
         , _width    (0                   ) //                             default: no minimum width
@@ -303,7 +303,7 @@ class FormatStringValue::Rule {
         inline Rule(Pt::Char fill, Align align, size_t width = 0, char type = 0, bool zeroPad = false, bool altForm = false)
         : _fill     (fill                )
         , _align    (align               )
-        , _sign     (0                   )
+        , _sign     (DEFAULT_SIGN        )
         , _altForm  (altForm             )
         , _zeroPad  (zeroPad             )
         , _width    (width               )
@@ -313,15 +313,15 @@ class FormatStringValue::Rule {
         {}
 
         inline Rule(Pt::Char fill, Align align, size_t width = 0, size_t precision = NoPrecisionSpecified, char type = 0, bool zeroPad = false, bool altForm = false)
-        : _fill     (fill     )
-        , _align    (align    )
-        , _sign     (0        )
-        , _altForm  (altForm  )
-        , _zeroPad  (zeroPad  )
-        , _width    (width    )
-        , _precision(precision)
-        , _locale   (false    )
-        , _type     (type     )
+        : _fill     (fill        )
+        , _align    (align       )
+        , _sign     (DEFAULT_SIGN)
+        , _altForm  (altForm     )
+        , _zeroPad  (zeroPad     )
+        , _width    (width       )
+        , _precision(precision   )
+        , _locale   (false       )
+        , _type     (type        )
         {}
 
         // Reset all the flags
@@ -343,10 +343,10 @@ class FormatStringValue::Rule {
         { return _align; }
 
         // Sign character (number only; default: '-')
-        inline void setSign(char sign = 0)
+        inline void setSign(Sign sign = DEFAULT_SIGN)
         { _sign = sign; }
 
-        inline char sign() const
+        inline Sign sign() const
         { return _sign; }
 
         // Alternate form (number only; default: do not use the alternate form)
@@ -394,7 +394,7 @@ class FormatStringValue::Rule {
     private:
         Pt::Char _fill;       // fill character
         Align    _align;      // < > ^
-        char     _sign;       // + - [space]
+        Sign     _sign;       // + - [space]
         bool     _altForm;    // #
         bool     _zeroPad;    // 0 (if the 0 character and an align option both appear, the 0 character is ignored)
         size_t   _width;      // minimum field width
