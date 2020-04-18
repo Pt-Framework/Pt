@@ -211,9 +211,16 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
                 ++it;
                 rule.setLocale(true);
             }
+            else if(*it == 'n') { // For backward compatibility with older (draft) C++20 standard
+                if( *(it + 1) != '}' ) {
+                    ++it;
+                    rule.setLocale(true);
+                }
+            }
             // Read the 'type'
             CHECK_FOR_CLOSING_BRACKET();
-            rule.setType(*it++);
+            rule.setType( (FormatStringValue::Rule::Type) it->value() );
+            ++it;
             // All should be done here
             CHECK_FOR_CLOSING_BRACKET();
             // Error

@@ -258,7 +258,9 @@ class FormatStringValue::Rule {
             DEFAULT_TYPE         = 0,
             CHARACTER            = 'c',
             STRING               = 's',
+            NUMBER               = 'n', // For backward compatibility with older (draft) C++20 standard
             DECIMAL              = 'd',
+            INTEGER              = DECIMAL,
             BINARY_LOWER         = 'b',
             BINARY_UPPER         = 'B',
             OCTAL                = 'o',
@@ -277,6 +279,7 @@ class FormatStringValue::Rule {
             CHAR       = CHARACTER,
             STR        = STRING,
             DEC        = DECIMAL,
+            INT        = DECIMAL,
             BIN        = BINARY_LOWER,
             OCT        = OCTAL,
             HEX        = HEXADECIMAL_LOWER,
@@ -297,10 +300,10 @@ class FormatStringValue::Rule {
         , _width    (0                   ) //                             default: no minimum width
         , _precision(NoPrecisionSpecified) // floating-point number only; default: not specified
         , _locale   (false               ) //                             default: no
-        , _type     (0                   ) //                             default: not specified
+        , _type     (DEFAULT_TYPE        ) //                             default: not specified
         {}
 
-        inline Rule(Pt::Char fill, Align align, size_t width = 0, char type = 0, bool zeroPad = false, bool altForm = false)
+        inline Rule(Pt::Char fill, Align align, size_t width = 0, Type type = DEFAULT_TYPE, bool zeroPad = false, bool altForm = false)
         : _fill     (fill                )
         , _align    (align               )
         , _sign     (DEFAULT_SIGN        )
@@ -312,7 +315,7 @@ class FormatStringValue::Rule {
         , _type     (type                )
         {}
 
-        inline Rule(Pt::Char fill, Align align, size_t width = 0, size_t precision = NoPrecisionSpecified, char type = 0, bool zeroPad = false, bool altForm = false)
+        inline Rule(Pt::Char fill, Align align, size_t width = 0, size_t precision = NoPrecisionSpecified, Type type = DEFAULT_TYPE, bool zeroPad = false, bool altForm = false)
         : _fill     (fill        )
         , _align    (align       )
         , _sign     (DEFAULT_SIGN)
@@ -385,10 +388,10 @@ class FormatStringValue::Rule {
         { return _locale; }
 
         // Type (default: not specified)
-        inline void setType(char type = 0)
+        inline void setType(Type type = DEFAULT_TYPE)
         { _type = type; }
 
-        inline char type() const
+        inline Type type() const
         { return _type; }
 
     private:
@@ -400,7 +403,7 @@ class FormatStringValue::Rule {
         size_t   _width;      // minimum field width
         size_t   _precision;  // floating-point precision
         bool     _locale;     // use locale-specific formatting
-        char     _type;       // none/s b B c d o x X a A e E f/F g G p
+        Type     _type;       // none/s b B c d o x X a A e E f/F g G p
 };
 
 

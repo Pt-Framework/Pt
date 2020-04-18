@@ -322,8 +322,10 @@ int main(int argc, char* args[])
     std::locale clNumpunct = std::locale( std::locale(), customNumPunct );
 #endif
 
-    // Strings
+    // Format-string only
     TEST_AND_BENCHMARK("{{}}", 0);
+
+    // Strings
     TEST_AND_BENCHMARK("{}", "aBc");
     TEST_AND_BENCHMARK("{0} {0}", "aBc");
 
