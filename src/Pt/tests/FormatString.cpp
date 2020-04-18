@@ -60,6 +60,13 @@ static inline size_t parseSizeT(const char *p)
 //
 // The string-formatter class
 //
+//
+// Using Pt::String as the output buffer seems to be much faster than using Pt::OStringStream et. al.
+//
+// This is consistent with:
+//     Q: https://stackoverflow.com/q/30254175
+//     A: https://stackoverflow.com/a/30255493
+//
 const void FormatString::operator()(Pt::String& resultBuffer, const FormatStringValue::locale_t* customLocale) const
 {
     // TODO: Optimize!
@@ -70,12 +77,13 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
         gotArgFld = true;           \
         continue;                   \
     }                               \
-    do {} while(false)              \
+    do {} while(false)
 
     // Formatting rule
     FormatStringValue::Rule rule;
 
     // Get the "numpunct" instance (if supported)
+    // (for totally empty string, obtaining this object adds around 100% overhead)
 #ifdef PT_WITH_STD_LOCALE
     const FormatStringValue::numpunct_t* numpunct =
         customLocale ? &std::use_facet<FormatStringValue::numpunct_t>( *customLocale )
@@ -87,6 +95,7 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
 #endif
 
     // Reserve some bytes within the result buffer
+    // (for totally empty string, reserving memory object adds around 75% overhead)
     resultBuffer.reserve(256);
 
     // Variables for processing argument(s)

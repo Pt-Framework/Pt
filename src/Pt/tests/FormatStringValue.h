@@ -354,14 +354,15 @@ class FormatStringValue::Rule {
         inline Sign sign() const
         { return _sign; }
 
-        // Alternate form (number only; default: do not use the alternate form)
+        // Alternate form '#' (number only; default: do not use the alternate form)
         inline void setAltForm(bool altForm = false)
         { _altForm = altForm; }
 
         inline bool altForm() const
         { return _altForm; }
 
-        // Zero pad (number only; default: no use zero pad)
+        // Zero pad '0' (number only; default: no use zero pad)
+        // If 'align specifier' is not DEFAULT_ALIGN, then 'zero pad' is ignored
         inline void setZeroPad(bool zeroPad = false)
         { _zeroPad = zeroPad; }
 
