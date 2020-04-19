@@ -69,33 +69,30 @@ static inline size_t parseSizeT(const char *p)
 //
 const void FormatString::operator()(Pt::String& resultBuffer, const FormatStringValue::locale_t* customLocale) const
 {
-    // TODO: Optimize!
-
-#define CHECK_FOR_CLOSING_BRACKET() \
-    if(*it == '}') {                \
-        ++it;                       \
-        gotArgFld = true;           \
-        continue;                   \
-    }                               \
+    // A macro to check if the character is '}' and set the 'got argument field' flag
+#define CHECK_FOR_COMPLETE_ARGUMENT_FIELD() \
+    if(*it == '}') {                        \
+        ++it;                               \
+        gotArgFld = true;                   \
+        continue;                           \
+    }                                       \
     do {} while(false)
 
     // Formatting rule
     FormatStringValue::Rule rule;
 
     // Get the "numpunct" instance (if supported)
-    // (for totally empty string, obtaining this object adds around 100% overhead)
+    // (for a totally empty format string, obtaining this object adds around 100% overhead)
 #ifdef PT_WITH_STD_LOCALE
     const FormatStringValue::numpunct_t* numpunct =
         customLocale ? &std::use_facet<FormatStringValue::numpunct_t>( *customLocale )
                      : &std::use_facet<FormatStringValue::numpunct_t>( std::locale() );
-    //if(numpunct && numpunct->grouping().length() > 1)
-    //    throw FormatStringError("locale with complex digit grouping is not supported");
 #else
     const FormatStringValue::numpunct_t* numpunct = 0;
 #endif
 
     // Reserve some bytes within the result buffer
-    // (for totally empty string, reserving memory object adds around 75% overhead)
+    // (for a totally empty format string, reserving memory object adds around 75% overhead)
     resultBuffer.reserve(256);
 
     // Variables for processing argument(s)
@@ -107,13 +104,14 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
     size_t      argIdxEff;
 
     bool        gotColon  = false;
+
     std::string numberStr;
 
     // Walk through the format characters
     //
     // fill-and-align(optional) sign(optional) #(optional) 0(optional) width(optional) precision(optional) L(optional) type(optional)
     //
-    const Pt::Char* it    =      _format.data();
+    const Pt::Char* it    =      &_format[0];
     const Pt::Char* itEnd = it + _format.length();
 
     while(gotArgFld || it != itEnd) {
@@ -133,13 +131,13 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
                 argIdxEff = parseSizeT(argIdxStr.c_str());
                 argIdxMan = argIdxEff + 1;
             }
-            if(!_args || argIdxEff >= _args->size()) {
+            if( !_args || argIdxEff >= _args->size() ) {
                 throw FormatStringError("'argument index' out of range in format string");
             }
             // Process (format) the argument
             const FormatStringValue& arg = *( (*_args)[argIdxEff] );
             arg(resultBuffer, rule, numpunct);
-            // Clear the flags
+            // Clear the flag and reset the rule
             gotArgFld = false;
             rule.reset();
             // Break the loop if all the format characters have been processed
@@ -153,57 +151,57 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
                 resultBuffer += *it++;
                 continue;
             }
-            // Read the 'argument index'
-            CHECK_FOR_CLOSING_BRACKET();
+            // Read the 'argument index' specifier
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             argIdxStr.clear();
             while( isdigit(*it) ) argIdxStr += *it++;
             // Check if the next character is ':'
-            CHECK_FOR_CLOSING_BRACKET();
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             gotColon = false;
             if(*it == ':') {
                 ++it;
                 gotColon = true;
             }
-            // Read the 'fill' and 'align'
-            CHECK_FOR_CLOSING_BRACKET();
+            // Read the 'fill' and 'align' specifier(s)
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             if(*it == '<' || *it == '>' || *it == '^') {
                 rule.setAlign( (FormatStringValue::Rule::Align) it->value() );
                 ++it;
             }
             else if(*(it + 1) == '<' || *(it + 1) == '>' || *(it + 1) == '^') {
-                rule.setFill (*it++);
+                rule.setFill ( *it++) ;
                 rule.setAlign( (FormatStringValue::Rule::Align) it->value() );
                 ++it;
             }
-            // Read the 'sign'
-            CHECK_FOR_CLOSING_BRACKET();
+            // Read the 'sign' specifier
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             if(*it == '+' || *it == '-' || *it == ' ') {
                 rule.setSign( (FormatStringValue::Rule::Sign) it->value() );
                 ++it;
             }
-            // Read the '#'
-            CHECK_FOR_CLOSING_BRACKET();
+            // Read the '#' specifier
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             if(*it == '#') {
                 ++it;
                 rule.setAltForm(true);
             }
-            // Read the '0'
-            CHECK_FOR_CLOSING_BRACKET();
+            // Read the '0' specifier
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             if(*it == '0') {
                 ++it;
                 rule.setZeroPad(true);
             }
-            // Read the 'width'
-            CHECK_FOR_CLOSING_BRACKET();
+            // Read the 'width' specifier
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             numberStr.clear();
             while( isdigit(*it) ) numberStr += *it++;
             if(!numberStr.empty()) {
                 rule.setWidth( parseSizeT(numberStr.c_str()) );
             }
             // Check if the next character is '.'
-            CHECK_FOR_CLOSING_BRACKET();
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             if(*it == '.') {
-                // Read the 'precision'
+                // Read the 'precision' specifier
                 ++it;
                 numberStr.clear();
                 while( isdigit(*it) ) numberStr += *it++;
@@ -214,8 +212,8 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
                     throw FormatStringError("missing 'precision specifier' in format string");
                 }
             }
-            // Read the 'locale'
-            CHECK_FOR_CLOSING_BRACKET();
+            // Read the 'locale' specifier
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             if(*it == 'L') {
                 ++it;
                 rule.setLocale(true);
@@ -226,12 +224,12 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
                     rule.setLocale(true);
                 }
             }
-            // Read the 'type'
-            CHECK_FOR_CLOSING_BRACKET();
+            // Read the 'type' specifier
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             rule.setType( (FormatStringValue::Rule::Type) it->value() );
             ++it;
             // All should be done here
-            CHECK_FOR_CLOSING_BRACKET();
+            CHECK_FOR_COMPLETE_ARGUMENT_FIELD();
             // Error
             if(gotColon)
                 throw FormatStringError("invalid character in format string");
@@ -249,7 +247,7 @@ const void FormatString::operator()(Pt::String& resultBuffer, const FormatString
             // Error
             throw FormatStringError("unmatched '}' in format string");
         }
-        // Other characters
+        // Simply put other characters directly into the result buffer
         else {
             resultBuffer += *it++;
         }
