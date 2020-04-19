@@ -224,6 +224,8 @@ class PT_API FormatStringValue {
         template <typename ValueT>
         struct SelectInt;
 
+        struct FormatUnsigned_Common;
+
         template <typename ValueT, int BASE>
         struct FormatUnsigned;
 };

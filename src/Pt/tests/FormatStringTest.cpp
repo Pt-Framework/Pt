@@ -202,6 +202,38 @@ static Pt::FormatStringValue::locale_t* customLocale     = 0;
 
 int main(int argc, char* args[])
 {
+#if 0
+    Pt::System::Clock clock;
+    const size_t      loopCount = 1000000;
+    const bool        uppercase = false;
+
+    Pt::uint64_t testValue = 18406740073009501610ULL;
+    Pt::String   strValue;
+
+    Pt::size_t res2  = 0;
+    Pt::size_t res8  = 0;
+    Pt::size_t res10 = 0;
+    Pt::size_t res16 = 0;
+
+    for(size_t i = 0; i < 10; ++i) {
+        clock.start();
+        for(size_t j = 0; j < loopCount; ++j) {
+        }
+        res2 += clock.stop().toUSecs();
+        std::cerr << strValue.narrow() << std::endl;
+    }
+    std::cerr << std::endl;
+
+    std::cerr << "Base 2  = " << res2  << std::endl;
+    std::cerr << "Base 8  = " << res8  << std::endl;
+    std::cerr << "Base 10 = " << res10 << std::endl;
+    std::cerr << "Base 16 = " << res16 << std::endl;
+    std::cerr << std::endl;
+
+    return 0;
+#endif
+
+
     /*
         REFERENCE
 
@@ -401,7 +433,7 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{:d}|", (Pt::uint64_t) 18406740073009501610ULL);
     TEST_AND_BENCHMARK("|{:x}|", (Pt::uint64_t) 18406740073009501610ULL);
 
-    //return 0;
+    return 0;
 
     // Mixeds
     TEST_AND_BENCHMARK("{} [{}] - {:d} mS ({:.1f}x) [{:d} loops]", "TEST", "FLAG", 1000, 3.5f, 250);
