@@ -236,8 +236,6 @@ int main(int argc, char* args[])
     return 0;
 #endif
 
-
-
     /*
         REFERENCE
 
@@ -297,6 +295,7 @@ int main(int argc, char* args[])
 #define FPFP(F, ...) Pt::FormatStringValue::printPositiveFloatingPoint(F, __VA_ARGS__)
     // Test the in-house positive floating-point formatter
     Pt::String s;
+    std::cerr << std::endl;
     FPFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
     FPFP(s, 12345.123456789, 4, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
     FPFP(s, 12345.123456789, 4, false, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
@@ -324,6 +323,7 @@ int main(int argc, char* args[])
     std::cerr << std::endl << std::endl;
 #else
     // Generate reference results
+    printf("\n");
     printf("%.4lA\n", 12345.123456789);
     printf("%.4lE\n", 12345.123456789);
     printf("%.4lF\n", 12345.123456789);
@@ -473,8 +473,9 @@ int main(int argc, char* args[])
     customNumPunct->setGrouping("\2");
     TEST_AND_BENCHMARK("|{0:x}| |{0:Lx}|", 0b10101010101010101010101010101010);
 
-    customNumPunct->setGrouping("\1\2\3");
+    customNumPunct->setGrouping("\1\2\3\4\5");
     TEST_AND_BENCHMARK("|{0:b}| |{0:Lb}|", 0b10101010101010101010101010101010);
+    customNumPunct->setGrouping("\1\2\3");
     TEST_AND_BENCHMARK("|{0:o}| |{0:Lo}|", 0b10101010101010101010101010101010);
     TEST_AND_BENCHMARK("|{0:d}| |{0:Ld}|", 0b10101010101010101010101010101010);
     TEST_AND_BENCHMARK("|{0:x}| |{0:Lx}|", 0b10101010101010101010101010101010);

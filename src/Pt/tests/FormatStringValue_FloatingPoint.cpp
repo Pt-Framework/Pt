@@ -121,8 +121,6 @@ static inline char* formatUnsigned(char* dst, Pt::uint32_t val)
 //
 bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double val, size_t precision, bool altForm, char type)
 {
-    // TODO: Optimize!
-
     // Clear the destination buffer
     dst.clear();
 
@@ -166,7 +164,7 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
     if(type == 'a') {
         // Perform rounding as needed
         long double round = 8.0;
-        int         re;
+        Pt::int32_t re;
         if(precision < 0 || precision >= LDBL_MANT_DIG / 4 - 1) re = 0;
         else                                                    re = LDBL_MANT_DIG / 4 - 1 -precision;
         if(re) {
@@ -178,17 +176,17 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
         // Process the exponent
         estr = formatUnsigned( ebuf, (e2 < 0) ? -e2 : e2 );
         if(estr == ebuf) *--estr = '0';
-        *--estr = (e2<0 ? '-' : '+');
+        *--estr = ( (e2 < 0) ? '-' : '+' );
         *--estr = uppercase ? 'P' : 'p';
         // Process the mantissa
         /* ### NOTE ###
          *
-         * for number 1.18973149535723176502E+4932
+         * For number 1.18973149535723176502E+4932 :
          *
          *     sprintf() produces F.FFFFFFFFFFFFFFF00000P+16380L
          *     this code produces 1.FFFFFFFFFFFFFFFE0000P+16383L
          *
-         * Both are acctually correct and really represent the same number.
+         * Both are correct and really represent the same number.
          */
         s = buf;
         do {
@@ -198,7 +196,6 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
             if( s - buf == 1 && ( val || precision > 0 || altForm ) ) *s++ = '.';
         } while(val);
         *s = 0;
-        //printf("### %s\n", buf);
         // Store the result
         pl += 2;
         if( (ssize_t) precision > (INT_MAX - 2 - (ebuf - estr) - pl) ) return false;
@@ -221,7 +218,7 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
     }
 
     if(e2 < 0)  a = r = z = big;
-    else        a = r = z = big + sizeof(big) / sizeof(*big) - LDBL_MANT_DIG - 1;
+    else        a = r = z = big + ( sizeof(big) / sizeof(*big) ) - LDBL_MANT_DIG - 1;
 
     do {
         *z  = val;
@@ -306,8 +303,8 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
 
     // Choose the shortest one between 'f' and 'e'
     if(type == 'g') {
-        if(!precision) ++precision;
-        if((ssize_t) precision > e && e >= -4) {
+        if( !precision ) ++precision;
+        if( (ssize_t) precision > e && e >= -4 ) {
             // Select 'f'
             type--;
             precision -= (e + 1);
@@ -317,7 +314,7 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
             type -= 2;
             precision--;
         }
-        // Handle non alternate form
+        // Handle normal (non alternate) form
         if( !altForm ) {
             // Count trailing zeros in last place
             if(z > a && z[-1]) {
@@ -332,9 +329,9 @@ bool FormatStringValue::printPositiveFloatingPoint(Pt::String& dst, long double 
         }
     }
 
-    if( (ssize_t) precision > INT_MAX - 1 - (precision || altForm ) ) return false;
+    if( (ssize_t) precision > INT_MAX - 1 - (precision || altForm) ) return false;
 
-    l = 1 + precision + (precision || altForm );
+    l = 1 + precision + (precision || altForm);
 
     if(type == 'f') {
         if(e > INT_MAX - l) return false;

@@ -112,6 +112,8 @@ struct FormatStringValue::FormatUnsigned_Common {
 template <typename ValueT, unsigned int BASE>
 inline Pt::uint32_t FormatStringValue::FormatUnsigned_Common::countNumberOfUnsignedDigits(ValueT val)
 {
+    if(!val) return 1;
+
 #if 0
     Pt::uint32_t cntDigit = 0;
 
@@ -511,9 +513,6 @@ static inline void finalizePositiveFloatingPointStringFormat(Pt::String& dst, co
         if(decimalPoint && numDigitBeforeDec < srcLen) dst[numDigitBeforeDec] = decimalPoint;
         return;
     }
-
-    // Clear the destination buffer
-    dst.clear();
 
     // Calculate the number of thousands separator(s)
     size_t digitIndex = 3 - (numDigitBeforeDec % 3);
