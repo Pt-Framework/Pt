@@ -135,10 +135,10 @@ class PainterImpl
             CFRelease(string);
             CFRelease(attributes);
 
-            return Gfx::FontMetrics( static_cast<unsigned>(ascent), 
-                                     static_cast<unsigned>(descent), 
-                                     static_cast<unsigned>(width), 
-                                     static_cast<unsigned>(ascent + descent) );
+            return Gfx::FontMetrics( ascent, 
+                                     descent, 
+                                     width, 
+                                     ascent + descent );
         }
 
         static CTFontRef createCTFont(const Gfx::Font& font)
