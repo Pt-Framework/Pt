@@ -202,6 +202,42 @@ static Pt::FormatStringValue::locale_t* customLocale     = 0;
 
 int main(int argc, char* args[])
 {
+#if 0
+    Pt::System::Clock clock;
+    const size_t      loopCount = 3 * 1000000;
+
+    Pt::String srcStr = "12345.123047";
+    Pt::String dstStr;
+
+    Pt::size_t resN = 0;
+    Pt::size_t resO = 0;
+
+    for(size_t i = 0; i < 10; ++i) {
+        clock.start();
+        for(size_t j = 0; j < loopCount; ++j) {
+            finalizePositiveFloatingPointStringFormatN(dstStr, srcStr, ',', '.');
+        }
+        resN += clock.stop().toUSecs();
+        std::cerr << dstStr.narrow() << std::endl;
+
+        clock.start();
+        for(size_t j = 0; j < loopCount; ++j) {
+            finalizePositiveFloatingPointStringFormatO(dstStr, srcStr, ',', '.');
+        }
+        resO += clock.stop().toUSecs();
+        std::cerr << dstStr.narrow() << std::endl;
+    }
+    std::cerr << std::endl;
+
+    std::cerr << "N = " << resN << std::endl;
+    std::cerr << "O = " << resO << std::endl;
+    std::cerr << std::endl;
+
+    return 0;
+#endif
+
+
+
     /*
         REFERENCE
 

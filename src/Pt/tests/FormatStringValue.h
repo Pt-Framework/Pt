@@ -140,35 +140,39 @@ class PT_API FormatStringValue {
 
         inline FormatStringValue(char p)
         : _isUnsigned(true)
+        , _valChr    (p)
         , _fmtFun    (&FormatStringValue::ff_C)
-        { _valChr = p; }
+        {}
 
         inline FormatStringValue(Pt::Char p)
         : _isUnsigned(true)
+        , _valChr    (p)
         , _fmtFun    (&FormatStringValue::ff_C)
-        { _valChr = p; }
+        {}
 
         inline FormatStringValue(const char* p)
         : _isUnsigned(false)
+        , _valStr    (p)
         , _fmtFun    (&FormatStringValue::ff_S)
-        { _valStr = Pt::String(p); }
+        {}
 
         inline FormatStringValue(const std::string& p)
         : _isUnsigned(false)
+        , _valStr    (p.c_str())
         , _fmtFun    (&FormatStringValue::ff_S)
-        { _valStr = p.c_str(); }
+        {}
 
         inline FormatStringValue(const Pt::String& p)
         : _isUnsigned(false)
+        , _valStr    (p)
         , _fmtFun    (&FormatStringValue::ff_S)
-        { _valStr = p; }
+        {}
 
         // Format value using the given rule
         inline void operator()(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const
         { (this->*_fmtFun)(resBuff, rule, numpunct); }
 
-        // Print positive floating-point number into string
-        // (never calls it with a negative number, Inf, or NaN)
+        // Print positive floating-point number into string (never calls it with a negative number, Inf, or NaN)
         static bool printPositiveFloatingPoint(Pt::String& dst, long double val, size_t precision, bool altForm, char type);
 
     private:
@@ -195,8 +199,6 @@ class PT_API FormatStringValue {
             Pt::uint32_t u32;
             Pt::int64_t  i64;
             Pt::uint64_t u64;
-            float        f;
-            double       d;
             long double  ld;
             bool         b;
             const void*  p;
@@ -287,8 +289,8 @@ class FormatStringValue::Rule {
             BIN        = BINARY_LOWER,
             OCT        = OCTAL,
             HEX        = HEXADECIMAL_LOWER,
-            FLT        = DECIMAL_FP,
-            FLOAT      = DECIMAL_FP,
+            FLT        = DECIMAL_FP_LOWER,
+            FLOAT      = DECIMAL_FP_LOWER,
             SCIENTIFIC = SCIENTIFIC_FP_LOWER,
             PTR        = POINTER
         };
@@ -410,7 +412,6 @@ class FormatStringValue::Rule {
         bool     _locale;     // use locale-specific formatting
         Type     _type;       // none/s b B c d o x X a A e E f/F g G p
 };
-
 
 
 } // namespace

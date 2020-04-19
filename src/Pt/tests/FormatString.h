@@ -41,19 +41,7 @@ namespace Pt {
 //
 class PT_API FormatString {
     public:
-        // Constructors
-        inline FormatString(const char* format, const std::vector<const FormatStringValue*>* args)
-        : _format(format), _args(args)
-        {}
-
-        inline FormatString(const std::string& format, const std::vector<const FormatStringValue*>* args)
-        : _format(format.c_str()), _args(args)
-        {}
-
-        inline FormatString(const Pt::Char* format, const std::vector<const FormatStringValue*>* args)
-        : _format(format), _args(args)
-        {}
-
+        // Constructor
         inline FormatString(const Pt::String& format, const std::vector<const FormatStringValue*>* args)
         : _format(format), _args(args)
         {}

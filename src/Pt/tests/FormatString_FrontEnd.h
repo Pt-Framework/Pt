@@ -116,7 +116,7 @@ namespace Pt {
 // Macros for generating front-end functions
 //
 #define FS_GENERATE_FORMAT_FUNCTION(X)                                                 \
-    inline Pt::String format(const Pt::String& fmt, FS_ARG_NAME_X(X))                  \
+    inline const Pt::String format(const Pt::String& fmt, FS_ARG_NAME_X(X))            \
     {                                                                                  \
         if(fmt.empty()) return "";                                                     \
                                                                                        \
@@ -128,7 +128,7 @@ namespace Pt {
         return resultBuffer;                                                           \
     }                                                                                  \
                                                                                        \
-    inline Pt::String format(const FormatStringValue::locale_t& loc,                   \
+    inline const Pt::String format(const FormatStringValue::locale_t& loc,             \
                              const Pt::String& fmt, FS_ARG_NAME_X(X))                  \
     {                                                                                  \
         if(fmt.empty()) return "";                                                     \
@@ -176,7 +176,7 @@ namespace Pt {
 //
 // Front-end functions that accept only the format string
 //
-inline Pt::String format(const Pt::String& fmt)
+inline const Pt::String format(const Pt::String& fmt)
 {
     if(fmt.empty()) return "";
 
@@ -186,7 +186,7 @@ inline Pt::String format(const Pt::String& fmt)
 }
 
 
-inline Pt::String format(const FormatStringValue::locale_t& loc, const Pt::String& fmt)
+inline const Pt::String format(const FormatStringValue::locale_t& loc, const Pt::String& fmt)
 {
     if(fmt.empty()) return "";
 

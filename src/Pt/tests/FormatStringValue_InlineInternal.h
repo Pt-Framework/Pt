@@ -477,17 +477,18 @@ inline void FormatStringValue::FormatUnsigned<ValueT, 16>::printReversed(Pt::Str
 // Format/add the decimal point and thousands separator(s) as needed
 static inline void finalizePositiveFloatingPointStringFormat(Pt::String& dst, const Pt::String& src, Pt::Char decimalPoint, Pt::Char thousandsSep)
 {
-    // TODO: Optimize!
-
     // Simply copy the string if there is no specified decimal point and thousands separator
-    if(!decimalPoint && !thousandsSep) {
+    if( !decimalPoint && !thousandsSep ) {
         dst = src;
         return;
     }
 
+    // Get the source length
+    const size_t srcLen = src.length();
+
     // Get the source pointers
     const Pt::Char* itSrcBeg = &src[0];
-    const Pt::Char* itSrcEnd = itSrcBeg + src.length();
+    const Pt::Char* itSrcEnd = itSrcBeg + srcLen;
     const Pt::Char* itSrc    = itSrcBeg;
 
     // Find the decimal point
@@ -505,30 +506,52 @@ static inline void finalizePositiveFloatingPointStringFormat(Pt::String& dst, co
     const size_t numDigitBeforeDec = itSrcDec ? (itSrcDec - itSrcBeg) : (itSrc - itSrcBeg);
 
     // Check if there is no need to add any thousands separator
-    if(!thousandsSep || numDigitBeforeDec <= 3) {
+    if( !thousandsSep || numDigitBeforeDec <= 3 ) {
         dst = src;
-        if(decimalPoint && numDigitBeforeDec < dst.length()) dst[numDigitBeforeDec] = decimalPoint;
+        if(decimalPoint && numDigitBeforeDec < srcLen) dst[numDigitBeforeDec] = decimalPoint;
         return;
     }
 
-    // Copy the characters while adding thousands separator(s)
-    Pt::uint32_t digitIndex = 3 - (numDigitBeforeDec % 3);
+    // Clear the destination buffer
+    dst.clear();
+
+    // Calculate the number of thousands separator(s)
+    size_t digitIndex = 3 - (numDigitBeforeDec % 3);
+    size_t sepCnt     = 0;
 
     itSrc = itSrcBeg;
     for(;;) {
-        dst += *itSrc++;
+        ++itSrc;
         if(itSrc == itSrcDec || itSrc == itSrcEnd) break;
-        if( ++digitIndex % 3 == 0) dst += thousandsSep;
+        if(++digitIndex % 3 == 0) ++sepCnt;
+    }
+
+    // Resize the destination buffer
+    const size_t dstLen = srcLen + sepCnt;
+
+    dst.clear();
+    dst.resize(dstLen);
+
+    // Copy the characters while adding thousands separator(s)
+    Pt::Char* itDst = &dst[0];
+              itSrc = itSrcBeg;
+
+    digitIndex = 3 - (numDigitBeforeDec % 3);
+
+    for(;;) {
+        *itDst++ = *itSrc++;
+        if(itSrc == itSrcDec || itSrc == itSrcEnd) break;
+        if(++digitIndex % 3 == 0) *itDst++ = thousandsSep;
     }
 
     // Add the decimal point
     if(itSrcDec) {
-        dst += ( decimalPoint ? decimalPoint : src[numDigitBeforeDec] );
+        *itDst++ = ( decimalPoint ? decimalPoint : Pt::Char(DEFAULT_DECIMAL_POINT) );
     }
 
     // Copy the remainder of the characters
-    itSrc = itSrcBeg + numDigitBeforeDec + 1;
-    while(itSrc != itSrcEnd) dst += *itSrc++;
+    if(itSrcDec) ++itSrc;
+    while(itSrc != itSrcEnd) *itDst++ = *itSrc++;
 }
 
 

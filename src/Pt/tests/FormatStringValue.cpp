@@ -59,8 +59,6 @@ const char FormatStringValue::XDIGITS_UPPER[16] = {
 template <typename ValueT> inline
 void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const
 {
-    // TODO: Optimize!
-
     // Preparation
     typedef typename SelectInt<ValueT>::SignedT   SignedT;
     typedef typename SelectInt<ValueT>::UnsignedT UnsignedT;
@@ -115,7 +113,6 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
     size_t             groupingSizeCnt = 0;
 
     if(ruleLocale) {
-
 #ifdef PT_WITH_STD_LOCALE
         // Get the locale-specific thousands separator and grouping size if possible
         if(numpunct) {
@@ -190,10 +187,6 @@ void FormatStringValue::ff_IXX(Pt::String& resBuff, const Rule& rule, const nump
         // Convert to string (in reversed direction)
         FormatUnsigned<UnsignedT, 10>::printReversed(strVal, numVal);
         // Reverse the string and add thousands separator as needed
-#ifdef PT_WITH_STD_LOCALE
-        //if(ruleLocale && (groupingSize != 3 || groupingSizeCnt))
-        //    throw FormatStringError("only locale with default grouping ('\\3') is supported for decimal integer");
-#endif
         if(groupingSizePtr)
             FormatUnsigned<UnsignedT, 10>::reverseAndGroupString(tmpResBuff, strVal, thousandsSep, groupingSizePtr, groupingSizeCnt);
         else
@@ -244,8 +237,6 @@ void FormatStringValue::ff_I64(Pt::String& resBuff, const Rule& rule, const nump
 
 void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpunct_t* numpunct) const
 {
-    // TODO: Optimize!
-
     // Check the type
     if( !TYPE_IS_N( rule.type() ) && !TYPE_IS_AEFG( rule.type() ) )
         throw FormatStringError("invalid 'type specifier' in format string for floating-point");
@@ -297,7 +288,7 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
     }
 
     // Check if we have Inf or NaN
-    if(!tmpResBuff.empty()) {
+    if( !tmpResBuff.empty() ) {
         // The default alignment for numeric argument is right
         const Rule::Align ruleAlign = rule.align() ? rule.align() : Rule::RIGHT;
         // Process as string type
@@ -312,6 +303,12 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
         prefixStr += '0';
         prefixStr += (ruleType == Rule::HEXADECIMAL_FP_UPPER) ? 'X' : 'x';
     }
+
+    // Check the grouping size
+#ifdef PT_WITH_STD_LOCALE
+    if(ruleLocale && numpunct && !numpunct->grouping().empty() && numpunct->grouping() != "\3")
+        throw FormatStringError("only locale with default grouping ('\\3') is supported for floating-point");
+#endif
 
     // Determine the decimal point
     Pt::Char decimalPoint = 0;
@@ -334,12 +331,6 @@ void FormatStringValue::ff_LD(Pt::String& resBuff, const Rule& rule, const numpu
         // Otherwise, use the default thousands separator
         if(!thousandsSep) thousandsSep = DEFAULT_THOUSANDS_SEPARATOR;
     }
-
-    // Check the grouping size
-#ifdef PT_WITH_STD_LOCALE
-    if(numpunct && !numpunct->grouping().empty() && numpunct->grouping() != "\3")
-        throw FormatStringError("only locale with default grouping ('\\3') is supported for floating-point");
-#endif
 
     // Format the number
     const size_t rulePrecision = (rule.precision() == Rule::NoPrecisionSpecified) ? DEFAULT_PRECISION : rule.precision();
@@ -449,7 +440,7 @@ void FormatStringValue::ff_P(Pt::String& resBuff, const Rule& rule, const numpun
 #if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__)
     FormatStringValue( (Pt::uint64_t) _valPOD.p ).ff_I64(resBuff, r, numpunct);
 #else
-    FormatStringValue(( Pt::uint32_t) _valPOD.p ).ff_I32(resBuff, r, numpunct);
+    FormatStringValue( (Pt::uint32_t) _valPOD.p ).ff_I32(resBuff, r, numpunct);
 #endif
 }
 
