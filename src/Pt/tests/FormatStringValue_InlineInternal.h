@@ -130,8 +130,6 @@ inline Pt::uint32_t FormatStringValue::FormatUnsigned_Common::countNumberOfUnsig
 
 inline void FormatStringValue::FormatUnsigned_Common::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, Pt::uint8_t groupingSize)
 {
-    // TODO: Optimize!
-
     // Get the source length
     const size_t srcLen = src.length();
 
@@ -143,64 +141,89 @@ inline void FormatStringValue::FormatUnsigned_Common::reverseAndGroupString(Pt::
     if(!thousandsSep || srcLen <= groupingSize) {
         // Resize the destination buffer
         dst.clear();
-        dst.reserve(srcLen);
+        dst.resize(srcLen);
         // Reverse the characters
-        while(srcIt != srcItEnd) dst += *srcIt--;
+        Pt::Char* dstIt = &dst[0];
+        while(srcIt != srcItEnd) *dstIt++ = *srcIt--;
+        // Done
+        return;
     }
 
-    // Process using thousands separator(s)
-    else {
-        // Calculate the number of thousands separator(s)
-        const size_t sepCnt = (srcLen + groupingSize - 1) / groupingSize - 1;
-        const size_t dstLen = src.length() + sepCnt;
-        // Resize the destination buffer
-        dst.clear();
-        dst.reserve(dstLen);
-        // Reverse the characters while adding thousands separator(s)
-        Pt::uint32_t digitIndex = groupingSize - (srcLen % groupingSize);
-        for(;;) {
-            dst += *srcIt--;
-            if(srcIt == srcItEnd) break;
-            if( ++digitIndex % groupingSize == 0) dst += thousandsSep;
-        }
+    // Calculate the number of thousands separator(s)
+    const size_t sepCnt = (srcLen + groupingSize - 1) / groupingSize - 1;
+    const size_t dstLen = src.length() + sepCnt;
+
+    // Resize the destination buffer
+    dst.clear();
+    dst.resize(dstLen);
+
+    // Reverse the characters while adding thousands separator(s)
+    Pt::Char*    dstIt      = &dst[0];
+    Pt::uint32_t digitIndex = groupingSize - (srcLen % groupingSize);
+    for(;;) {
+        *dstIt++ = *srcIt--;
+        if(srcIt == srcItEnd) break;
+        if(++digitIndex % groupingSize == 0) *dstIt++ = thousandsSep;
     }
 }
 
 
 inline void FormatStringValue::FormatUnsigned_Common::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount)
 {
-    // TODO: Optimize!
+    // Get the source length
+    const size_t srcLen = src.length();
 
     // Get the source pointers
     const Pt::Char* srcIt    = &src[0];
-    const Pt::Char* srcItEnd = srcIt + src.length();
+    const Pt::Char* srcItEnd = srcIt + srcLen;
 
-    // Clear the destination buffer
-    dst.clear();
+    // Implement complex digit grouping (example: \1\2\3 => 18,446,744,073,709,551,61,5)
 
-    // Walk through the grouping sizes and implement complex digit grouping (add thousands separator(s) as needed)
-    // Example: \1\2\3 => 18,446,744,073,709,551,61,5
+    // Calculate the number of thousands separator(s)
+    size_t idxGz  = 0;
+    size_t sepCnt = 0;
 
-    size_t idxGroupingSize = 0;
     --groupingSizeCount;
 
     while(srcIt != srcItEnd) {
         // Get the current grouping size
-        Pt::uint8_t groupingSize = groupingSizePtr[idxGroupingSize];
-        if(idxGroupingSize < groupingSizeCount) ++idxGroupingSize;
+        Pt::uint8_t groupingSize = groupingSizePtr[idxGz];
+        if(idxGz < groupingSizeCount) ++idxGz;
         // Process the characters
         for(;;) {
-            dst += *srcIt++;
+            if(++srcIt == srcItEnd) break;
+            if(--groupingSize) continue;
+            ++sepCnt;
+            break;
+        }
+    }
+
+    // Resize the destination buffer
+    const size_t dstLen = srcLen + sepCnt;
+
+    dst.clear();
+    dst.resize(dstLen);
+
+    // Add thousands separator(s)
+    Pt::Char* dstIt = &dst[0];
+              srcIt = &src[0];
+              idxGz = 0;
+
+    while(srcIt != srcItEnd) {
+        // Get the current grouping size
+        Pt::uint8_t groupingSize = groupingSizePtr[idxGz];
+        if(idxGz < groupingSizeCount) ++idxGz;
+        // Process the characters
+        for(;;) {
+            *dstIt++ = *srcIt++;
             if(srcIt == srcItEnd) break;
             if(--groupingSize) continue;
-            dst += thousandsSep;
+            *dstIt++ = thousandsSep;
             break;
         }
     }
 
     // Reverse the characters
-    const size_t dstLen = dst.length();
-
     for(size_t i = 0; i < (dstLen / 2); ++i) {
         const Pt::Char t = dst[i];
         dst[         i    ] = dst[dstLen - i - 1];
