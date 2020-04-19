@@ -61,7 +61,7 @@ static inline size_t parseSizeT(const char *p)
 // The string-formatter class
 //
 //
-// Using Pt::String as the output buffer seems to be much faster than using Pt::OStringStream et. al.
+// Using Pt::String as the output buffer seems to be much faster than using Pt::OStringStream et al.
 //
 // This is consistent with:
 //     Q: https://stackoverflow.com/q/30254175

@@ -25,6 +25,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <cfloat>
+
 #include <iomanip>
 #include <iostream>
 
@@ -301,17 +303,17 @@ int main(int argc, char* args[])
     FPFP(s, 12345.123456789, 4, false, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
     FPFP(s, 12345.123456789, 4, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, 3.40282347e+38f, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 3.40282347e+38f, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 3.40282347e+38f, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, FLT_MAX /*3.40282347e+38f*/, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, FLT_MAX /*3.40282347e+38f*/, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, FLT_MAX /*3.40282347e+38f*/, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, 1.7976931348623157e308, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.7976931348623157e308, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.7976931348623157e308, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, DBL_MAX /*1.7976931348623157e308*/, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, DBL_MAX /*1.7976931348623157e308*/, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, DBL_MAX /*1.7976931348623157e308*/, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, 1.18973149535723176502e+4932L, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.18973149535723176502e+4932L, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, 1.18973149535723176502e+4932L, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, LDBL_MAX /*1.18973149535723176502e+4932L*/, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, LDBL_MAX /*1.18973149535723176502e+4932L*/, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, LDBL_MAX /*1.18973149535723176502e+4932L*/, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
     FPFP(s, 1.00010000, 20, false, 'G'); std::cerr << s.narrow() << std::endl;
     FPFP(s, 1.00010000 * 1000000, 20, false, 'G'); std::cerr << s.narrow() << std::endl;
@@ -329,17 +331,17 @@ int main(int argc, char* args[])
     printf("%.4lF\n", 12345.123456789);
     printf("%.4lG\n", 12345.123456789);
     printf("\n");
-    printf("%.20A\n", 3.40282347e+38f);
-    printf("%.20E\n", 3.40282347e+38f);
-    printf("%.20G\n", 3.40282347e+38f);
+    printf("%.20A\n", FLT_MAX /*3.40282347e+38f*/);
+    printf("%.20E\n", FLT_MAX /*3.40282347e+38f*/);
+    printf("%.20G\n", FLT_MAX /*3.40282347e+38f*/);
     printf("\n");
-    printf("%.20lA\n", 1.7976931348623157e308);
-    printf("%.20lE\n", 1.7976931348623157e308);
-    printf("%.20lG\n", 1.7976931348623157e308);
+    printf("%.20lA\n", DBL_MAX /*1.7976931348623157e308*/);
+    printf("%.20lE\n", DBL_MAX /*1.7976931348623157e308*/);
+    printf("%.20lG\n", DBL_MAX /*1.7976931348623157e308*/);
     printf("\n");
-    printf("%.20LA\n", 1.18973149535723176502e+4932L);
-    printf("%.20LE\n", 1.18973149535723176502e+4932L);
-    printf("%.20LG\n", 1.18973149535723176502e+4932L);
+    printf("%.20LA\n", LDBL_MAX /*1.18973149535723176502e+4932L*/);
+    printf("%.20LE\n", LDBL_MAX /*1.18973149535723176502e+4932L*/);
+    printf("%.20LG\n", LDBL_MAX /*1.18973149535723176502e+4932L*/);
     printf("\n");
     printf("%.20G\n", 1.00010000);
     printf("%.20G\n", 1.00010000 * 1000000);
@@ -430,7 +432,7 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{0:#8x}| |{1:#8x}| |{0:#08x}| |{1:#08x}| |{2:#8x}| |{3:#8x}| |{2:#08x}| |{3:#08x}|", 123, 1234, -567, -5678);
     TEST_AND_BENCHMARK("|{0:*<#8x}| |{1:*<#8x}| |{0:*^#8x}| |{1:*^#8x}| |{2:*<#8x}| |{3:*<#8x}| |{2:*^#8x}| |{3:*^#8x}|", 123, 1234, -567, -5678);
 
-    TEST_AND_BENCHMARK("|{:+n}| |{:+n}| |{:n}|", (Pt::int64_t) 9223372036854775807LL, (Pt::int64_t) -9223372036854775807LL - 1, (Pt::uint64_t) 18446744073709551615ULL);
+    TEST_AND_BENCHMARK("|{:+n}| |{:+n}| |{:n}|", (Pt::int64_t) LLONG_MAX /*9223372036854775807LL*/, (Pt::int64_t) LLONG_MIN /*-9223372036854775807LL - 1*/, (Pt::uint64_t) ULLONG_MAX /*18406740073009501615ULL*/);
 
     TEST_AND_BENCHMARK("|{:b}|", (Pt::uint64_t) 18406740073009501610ULL);
     TEST_AND_BENCHMARK("|{:o}|", (Pt::uint64_t) 18406740073009501610ULL);
