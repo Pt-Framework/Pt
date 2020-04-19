@@ -170,6 +170,10 @@ inline void FormatStringValue::FormatUnsigned_Common::reverseAndGroupString(Pt::
 
 inline void FormatStringValue::FormatUnsigned_Common::reverseAndGroupString(Pt::String& dst, const Pt::String& src, Pt::Char thousandsSep, const Pt::uint8_t* groupingSizePtr, size_t groupingSizeCount)
 {
+    // Check if there is no thousands separator specified or there is only one grouping-size defined
+    if(!thousandsSep || groupingSizeCount <= 1)
+        reverseAndGroupString(dst, src, thousandsSep, *groupingSizePtr);
+
     // Get the source length
     const size_t srcLen = src.length();
 
