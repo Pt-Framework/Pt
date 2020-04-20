@@ -37,17 +37,20 @@ RunUnitTest Pt-test : $(PT_OUTPUT_TEST) ;
 
 
 
-#rule FGeneric
-#{ return $(<) ; }
-#SubDirC++Flags [ FGeneric -std=c++11  ] ;
+if $(WITH_EXPERIMENTAL_FORMAT)
+{
+    #rule FGeneric
+    #{ return $(<) ; }
+    #SubDirC++Flags [ FGeneric -std=c++11  ] ;
 
-FORMAT_STRING_SOURCES = FormatStringError.cpp
-                        FormatStringValue.cpp
-                        FormatStringValue_FloatingPoint.cpp
-                        FormatString.cpp
-                        FormatStringTest.cpp
-                        ;
+    FORMAT_STRING_SOURCES = FormatStringError.cpp
+                            FormatStringValue.cpp
+                            FormatStringValue_FloatingPoint.cpp
+                            FormatString.cpp
+                            FormatStringTest.cpp
+                            ;
 
-Main FormatStringTest : $(FORMAT_STRING_SOURCES) ;
-LinkSharedLibraries FormatStringTest : Pt Pt-System ;
-MakeLocate FormatStringTest : $(PT_OUTPUT_TARGET) ;
+    Main FormatStringTest : $(FORMAT_STRING_SOURCES) ;
+    LinkSharedLibraries FormatStringTest : Pt Pt-System ;
+    MakeLocate FormatStringTest : $(PT_OUTPUT_TARGET) ;
+}

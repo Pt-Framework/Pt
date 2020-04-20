@@ -25,6 +25,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+// ./jam.sh configure --optimize --with-hmi -sGUI=xorg --with-experimental-format
+
 #include <cfloat>
 
 #include <iomanip>
@@ -238,8 +240,46 @@ int main(int argc, char* args[])
     return 0;
 #endif
 
+    // Test the in-house positive floating-point formatter
+#if 1
+    // Constants
+    const float       maxFlt  = FLT_MAX;  // 3.40282347e+38f
+    const double      maxDbl  = DBL_MAX;  // 1.7976931348623157e308
+    const long double maxLDbl = LDBL_MAX; // 1.18973149535723176502e+4932L
+    // Generate reference results
+    printf("\n");
+    printf("-------------------------------\n");
+    printf("Reference Result from sprintf()\n");
+    printf("-------------------------------\n");
+    printf("\n");
+    printf("%.4lA\n", 12345.123456789);
+    printf("%.4lE\n", 12345.123456789);
+    printf("%.4lF\n", 12345.123456789);
+    printf("%.4lG\n", 12345.123456789);
+    printf("\n");
+    printf("%.20A\n", maxFlt);
+    printf("%.20E\n", maxFlt);
+    printf("%.20G\n", maxFlt);
+    printf("\n");
+    printf("%.20lA\n", maxDbl);
+    printf("%.20lE\n", maxDbl);
+    printf("%.20lG\n", maxDbl);
+    printf("\n");
+    printf("%.20LA\n", maxLDbl);
+    printf("%.20LE\n", maxLDbl);
+    printf("%.20LG\n", maxLDbl);
+    printf("\n");
+    printf("%.20G\n", 1.00010000);
+    printf("%.20G\n", 1.00010000 * 1000000);
+    printf("%.0G\n", 1.00010000 * 1000000);
+    printf("\n");
+    printf("N\\A\n");
+    printf("N\\A\n");
+    printf("N\\A\n");
     /*
-        REFERENCE
+        -------------------------------
+        Reference Result from sprintf()
+        -------------------------------
 
         1.81C9P+13
         1.2345E+04
@@ -266,7 +306,9 @@ int main(int argc, char* args[])
         N\A
         N\A
 
-        -------------------------
+        ---------------------------------------------------------------
+        Result from Pt::FormatStringValue::printPositiveFloatingPoint()
+        ---------------------------------------------------------------
 
         1.81C9P+13
         1.2345E+04
@@ -293,27 +335,30 @@ int main(int argc, char* args[])
         1.
         1.E+06
     */
-#if 1
+    // Perform test (by design it does not print the prefix '0x' for hexadecimal floating-point numbers)
 #define FPFP(F, ...) Pt::FormatStringValue::printPositiveFloatingPoint(F, __VA_ARGS__)
-    // Test the in-house positive floating-point formatter
-    Pt::String s;
     std::cerr << std::endl;
+    std::cerr << "---------------------------------------------------------------" << std::endl;
+    std::cerr << "Result from Pt::FormatStringValue::printPositiveFloatingPoint()" << std::endl;
+    std::cerr << "---------------------------------------------------------------" << std::endl;
+    std::cerr << std::endl;
+    Pt::String s;
     FPFP(s, 12345.123456789, 4, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
     FPFP(s, 12345.123456789, 4, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
     FPFP(s, 12345.123456789, 4, false, 'F'/* %0.4f */); std::cerr << s.narrow() << std::endl;
     FPFP(s, 12345.123456789, 4, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, FLT_MAX /*3.40282347e+38f*/, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, FLT_MAX /*3.40282347e+38f*/, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, FLT_MAX /*3.40282347e+38f*/, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, maxFlt, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, maxFlt, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, maxFlt, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, DBL_MAX /*1.7976931348623157e308*/, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, DBL_MAX /*1.7976931348623157e308*/, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, DBL_MAX /*1.7976931348623157e308*/, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, maxDbl, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, maxDbl, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, maxDbl, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
-    FPFP(s, LDBL_MAX /*1.18973149535723176502e+4932L*/, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, LDBL_MAX /*1.18973149535723176502e+4932L*/, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
-    FPFP(s, LDBL_MAX /*1.18973149535723176502e+4932L*/, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, maxLDbl, 20, false, 'A'/* %0.4a */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, maxLDbl, 20, false, 'E'/* %0.4e */); std::cerr << s.narrow() << std::endl;
+    FPFP(s, maxLDbl, 20, false, 'G'/* %0.4g */); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
     FPFP(s, 1.00010000, 20, false, 'G'); std::cerr << s.narrow() << std::endl;
     FPFP(s, 1.00010000 * 1000000, 20, false, 'G'); std::cerr << s.narrow() << std::endl;
@@ -322,42 +367,10 @@ int main(int argc, char* args[])
     FPFP(s, 1.00010000, 20, true, 'G'); std::cerr << s.narrow() << std::endl;
     FPFP(s, 1.00010000, 0, true, 'G'); std::cerr << s.narrow() << std::endl;
     FPFP(s, 1.00010000 * 1000000, 0, true, 'G'); std::cerr << s.narrow() << std::endl;
-    std::cerr << std::endl << std::endl;
-#else
-    // Generate reference results
-    printf("\n");
-    printf("%.4lA\n", 12345.123456789);
-    printf("%.4lE\n", 12345.123456789);
-    printf("%.4lF\n", 12345.123456789);
-    printf("%.4lG\n", 12345.123456789);
-    printf("\n");
-    printf("%.20A\n", FLT_MAX /*3.40282347e+38f*/);
-    printf("%.20E\n", FLT_MAX /*3.40282347e+38f*/);
-    printf("%.20G\n", FLT_MAX /*3.40282347e+38f*/);
-    printf("\n");
-    printf("%.20lA\n", DBL_MAX /*1.7976931348623157e308*/);
-    printf("%.20lE\n", DBL_MAX /*1.7976931348623157e308*/);
-    printf("%.20lG\n", DBL_MAX /*1.7976931348623157e308*/);
-    printf("\n");
-    printf("%.20LA\n", LDBL_MAX /*1.18973149535723176502e+4932L*/);
-    printf("%.20LE\n", LDBL_MAX /*1.18973149535723176502e+4932L*/);
-    printf("%.20LG\n", LDBL_MAX /*1.18973149535723176502e+4932L*/);
-    printf("\n");
-    printf("%.20G\n", 1.00010000);
-    printf("%.20G\n", 1.00010000 * 1000000);
-    printf("%.0G\n", 1.00010000 * 1000000);
-    printf("\n");
-    printf("N\\A\n");
-    printf("N\\A\n");
-    printf("N\\A\n");
-    printf("\n\n");
-#endif
+    std::cerr << std::endl;
+    std::cerr << "---------------------------------------------------------------" << std::endl;
+    std::cerr << std::endl;
     //return 0;
-
-#ifdef PT_WITH_STD_LOCALE
-    // Create a customized locale
-    CustomNumpunct* customNumPunct = new CustomNumpunct();
-    std::locale clNumpunct = std::locale( std::locale(), customNumPunct );
 #endif
 
     // Format-string only
@@ -388,7 +401,8 @@ int main(int argc, char* args[])
     //return 0;
 
     // Pointers
-    int dummy = 0;
+    Pt::uint32_t dummy = 0;
+
     TEST_AND_BENCHMARK("|{0:p}| |{0:24p}| |{0:*^24p}|", (void*) &dummy);
 
     //return 0;
@@ -423,6 +437,12 @@ int main(int argc, char* args[])
     //return 0;
 
     // Integers
+    const Pt::int64_t  minInt64  = LLONG_MIN;  // -9223372036854775807LL - 1
+    const Pt::int64_t  maxInt64  = LLONG_MAX;  //  9223372036854775807LL
+    const Pt::uint64_t maxUInt64 = ULLONG_MAX; // 18406740073009501615ULL
+
+    const Pt::uint64_t bigUInt64 = 18406740073009ULL * 1000000ULL + 501610ULL;
+
     TEST_AND_BENCHMARK("|{0:8n}| |{1:8n}| |{0:08n}| |{1:08n}| |{2:8n}| |{3:8n}| |{2:08n}| |{3:08n}|", 123, 1234, -567, -5678);
     TEST_AND_BENCHMARK("|{0:*<8n}| |{1:*<8n}| |{0:*^8n}| |{1:*^8n}| |{2:*<8n}| |{3:*<8n}| |{2:*^8n}| |{3:*^8n}|", 123, 1234, -567, -5678);
 
@@ -432,12 +452,12 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("|{0:#8x}| |{1:#8x}| |{0:#08x}| |{1:#08x}| |{2:#8x}| |{3:#8x}| |{2:#08x}| |{3:#08x}|", 123, 1234, -567, -5678);
     TEST_AND_BENCHMARK("|{0:*<#8x}| |{1:*<#8x}| |{0:*^#8x}| |{1:*^#8x}| |{2:*<#8x}| |{3:*<#8x}| |{2:*^#8x}| |{3:*^#8x}|", 123, 1234, -567, -5678);
 
-    TEST_AND_BENCHMARK("|{:+n}| |{:+n}| |{:n}|", (Pt::int64_t) LLONG_MAX /*9223372036854775807LL*/, (Pt::int64_t) LLONG_MIN /*-9223372036854775807LL - 1*/, (Pt::uint64_t) ULLONG_MAX /*18406740073009501615ULL*/);
+    TEST_AND_BENCHMARK("|{:+n}| |{:+n}| |{:n}|", minInt64, maxInt64, maxUInt64);
 
-    TEST_AND_BENCHMARK("|{:b}|", (Pt::uint64_t) 18406740073009501610ULL);
-    TEST_AND_BENCHMARK("|{:o}|", (Pt::uint64_t) 18406740073009501610ULL);
-    TEST_AND_BENCHMARK("|{:d}|", (Pt::uint64_t) 18406740073009501610ULL);
-    TEST_AND_BENCHMARK("|{:x}|", (Pt::uint64_t) 18406740073009501610ULL);
+    TEST_AND_BENCHMARK("|{:b}|", bigUInt64);
+    TEST_AND_BENCHMARK("|{:o}|", bigUInt64);
+    TEST_AND_BENCHMARK("|{:d}|", bigUInt64);
+    TEST_AND_BENCHMARK("|{:x}|", bigUInt64);
 
     //return 0;
 
@@ -445,6 +465,12 @@ int main(int argc, char* args[])
     TEST_AND_BENCHMARK("{} [{}] - {:d} mS ({:.1f}x) [{:d} loops]", "TEST", "FLAG", 1000, 3.5f, 250);
 
     //return 0;
+
+    // Create a customized locale
+#ifdef PT_WITH_STD_LOCALE
+    CustomNumpunct* customNumPunct = new CustomNumpunct();
+    std::locale clNumpunct = std::locale( std::locale(), customNumPunct );
+#endif
 
     // Custom numpunct
 #ifdef PT_WITH_STD_LOCALE
