@@ -369,7 +369,6 @@ int main(int argc, char* args[])
     FPFP(s, 1.00010000 * 1000000, 0, true, 'G'); std::cerr << s.narrow() << std::endl;
     std::cerr << std::endl;
     std::cerr << "---------------------------------------------------------------" << std::endl;
-    std::cerr << std::endl;
     //return 0;
 #endif
 
