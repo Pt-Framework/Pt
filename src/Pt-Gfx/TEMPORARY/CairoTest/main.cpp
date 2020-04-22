@@ -139,7 +139,6 @@ int main ()
     struct timeval _startTime;
     struct timeval _stopTime;
 
-
     const int          loopCount       = 250;
     unsigned long long benchmarkResult = 0;
 
@@ -270,8 +269,8 @@ int main ()
         cairo_stroke (c);
 
         gettimeofday(&_stopTime, 0);
-        time_t      secs  = _stopTime.tv_sec - _startTime.tv_sec;
-        suseconds_t usecs = _stopTime.tv_usec - _startTime.tv_usec;
+        const time_t      secs  = _stopTime.tv_sec - _startTime.tv_sec;
+        const suseconds_t usecs = _stopTime.tv_usec - _startTime.tv_usec;
 
         benchmarkResult += ( secs * 1000000 + usecs );
 
@@ -279,10 +278,7 @@ int main ()
     }
 
     benchmarkResult /= 1000;
-
     printf("%zd\n", (size_t) benchmarkResult);
-
-
 #endif
 
     /* Done */
