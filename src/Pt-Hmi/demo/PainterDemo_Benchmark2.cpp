@@ -10,7 +10,6 @@ class Benchmark2View : public Pt::Hmi::Control
         {
             using namespace Pt::Gfx;
 
-
             const int   imageWidth  = 672;
             const int   imageHeight = 327;
             const RectF imageRect   = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
@@ -42,17 +41,21 @@ class Benchmark2View : public Pt::Hmi::Control
                 resIP1 = onPaintContent(ip1, "IP1", 0, 0.0f);
                 resIP2 = onPaintContent(ip2, "IP2", 0, 0.0f);
             }
+            
+            // use this to compare against native painter
+            //painter.setBrush(background);
+            //painter.fillRect(imageRect);
+            //onPaintContent(painter, "Native", resIP1, 1.0f);
 
+            // use this to compare against IP1
             ip1.setBrush(background);
             ip1.fillRect(imageRect);
+            onPaintContent(ip1, "IP1", resIP1, 1.0f);
+            painter.drawImage(PointF(2, 2), image1);    
 
             ip2.setBrush(background);
             ip2.fillRect(imageRect);
-
-            onPaintContent(ip1, "IP1", resIP1, 1.0f);
             onPaintContent(ip2, "IP2", resIP2, (float) resIP2 / (float) resIP1);
-
-            painter.drawImage(PointF(2, 2), image1);
             painter.drawImage(PointF(2, 338), image2);
         }
 
