@@ -43,9 +43,9 @@ class Benchmark2View : public Pt::Hmi::Control
             }
             
             // use this to compare against native painter
-            //painter.setBrush(background);
-            //painter.fillRect(imageRect);
-            //onPaintContent(painter, "Native", resIP1, 1.0f);
+            // painter.setBrush(background);
+            // painter.fillRect(imageRect);
+            // onPaintContent(painter, "Native", resIP1, 1.0f);
 
             // use this to compare against IP1
             ip1.setBrush(background);
@@ -66,7 +66,7 @@ class Benchmark2View : public Pt::Hmi::Control
             ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
             const char*    aai = (ip2 && ip2->isAntiAliasing()) ? "WITH AA" : "WITHOUT AA";
 
-            const int loopCount = 250;
+            const int loopCount = 500;
 
             //char buff[128];
             //sprintf(buff, "%s [%s] - %zd mS (%.1fx) [%zd loops]", text, aai, (size_t) benchmarkResult, benchmarkRatio, (size_t) loopCount);
