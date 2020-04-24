@@ -663,22 +663,6 @@ Gfx::PointF Window::onFromScreen(const Gfx::PointF& pos) const
 
 double Window::onScaleFactor() const
 {
-    //double parentScaling = 1.0;
-    //double scaling = 1.0;
-
-    //if( _init )
-    //    parentScaling = _parent->onScaleFactor(*this);
-
-    //if(_screen )
-    //  scaling = _screen->onScaleFactor(*this);
-
-    //double diff = parentScaling - scaling;
-
-    //if( std::abs(diff) > 0.01 )
-    //  diff = diff;
-
-    //return scaling;
-
     if( ! _init )
         return 1.0;
 
@@ -691,7 +675,7 @@ double Window::onScaleFactor(const Window& w) const
     if( ! _init )
         return 1.0;
 
-    return _parent->scaleFactor();
+    return _parent->onScaleFactor(*this);
 }
 
 

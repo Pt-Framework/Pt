@@ -111,7 +111,9 @@ double Screen::onScaleFactor(const Window& w) const
 
 
 double Screen::onScaleFactor() const
-{
+{   
+    // TODO: support multiple screens
+
     double scaling = Application::instance().scaleFactor();
     return _impl->scaleFactor() * scaling;
 }

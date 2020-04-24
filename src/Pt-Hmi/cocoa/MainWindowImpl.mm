@@ -271,11 +271,13 @@ void MainWindowImpl::move(const Gfx::PointF& p)
     //std::clog << "MOVE: " << p.x() << "," 
     //                      << p.y() << std::endl;
 
+    double scaling = scaleFactor();
+
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
 
-    CGFloat y = screenHeight - p.y() / scaleFactor() - windowHeight;
-    NSPoint origin = NSMakePoint(p.x() / scaleFactor(), y);
+    CGFloat y = screenHeight - p.y() / scaling - windowHeight;
+    NSPoint origin = NSMakePoint(p.x() / scaling, y);
 
     [_window setFrameOrigin:origin];
 }
@@ -283,13 +285,18 @@ void MainWindowImpl::move(const Gfx::PointF& p)
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
+    //std::clog << "RESIZE: " << size.width() << "," 
+    //                        << size.height() << std::endl;
+
+    double scaling = scaleFactor();
+
     NSRect frameRect = [_window frame];
     NSRect contentRect = [_window contentRectForFrameRect:frameRect];
 
-    contentRect.origin.y += contentRect.size.height - size.height() / scaleFactor();
+    contentRect.origin.y += contentRect.size.height - size.height() / scaling;
     
-    contentRect.size.width = size.width() / scaleFactor();
-    contentRect.size.height = size.height() / scaleFactor();
+    contentRect.size.width = size.width() / scaling;
+    contentRect.size.height = size.height() / scaling;
 
     frameRect = [_window frameRectForContentRect:contentRect];
     [_window setFrame:frameRect display:NO animate:NO];

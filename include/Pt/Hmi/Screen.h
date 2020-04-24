@@ -68,7 +68,7 @@ class PT_HMI_API Screen : public WindowBase
   
         ScreenImpl* impl();
 
-    public:
+    protected:
         virtual Pt::Gfx::PointF onToScreen(const Pt::Gfx::PointF& p) const;
 
         virtual Pt::Gfx::PointF onFromScreen(const Pt::Gfx::PointF& p) const;
