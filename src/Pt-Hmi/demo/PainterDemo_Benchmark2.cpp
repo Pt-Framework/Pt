@@ -66,7 +66,7 @@ class Benchmark2View : public Pt::Hmi::Control
             ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
             const char*    aai = (ip2 && ip2->isAntiAliasing()) ? "WITH AA" : "WITHOUT AA";
 
-            const int loopCount = 500;
+            const int loopCount = 250;
 
             //char buff[128];
             //sprintf(buff, "%s [%s] - %zd mS (%.1fx) [%zd loops]", text, aai, (size_t) benchmarkResult, benchmarkRatio, (size_t) loopCount);
