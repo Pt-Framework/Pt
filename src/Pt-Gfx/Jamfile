@@ -19,7 +19,7 @@ if $(FREETYPE_INCLUDES)
 }
 
 # Aloysius' personal tester flag
-WITH_EXPERIMENTAL_GFX = yes ;
+#WITH_EXPERIMENTAL_GFX = yes ;
 
 if $(WITH_EXPERIMENTAL_GFX)
 {
