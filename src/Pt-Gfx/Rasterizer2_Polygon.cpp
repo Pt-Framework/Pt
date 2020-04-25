@@ -350,23 +350,15 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         }
     };
 
-    auto worker1 = std::async(lambdaWorker, minY            , maxY * 1 / 8);
-    auto worker2 = std::async(lambdaWorker, maxY * 1 / 8 + 1, maxY * 2 / 8);
-    auto worker3 = std::async(lambdaWorker, maxY * 2 / 8 + 1, maxY * 3 / 8);
-    auto worker4 = std::async(lambdaWorker, maxY * 3 / 8 + 1, maxY * 4 / 8);
-    auto worker5 = std::async(lambdaWorker, maxY * 4 / 8    , maxY * 5 / 8);
-    auto worker6 = std::async(lambdaWorker, maxY * 5 / 8 + 1, maxY * 6 / 8);
-    auto worker7 = std::async(lambdaWorker, maxY * 6 / 8 + 1, maxY * 7 / 8);
-    auto worker8 = std::async(lambdaWorker, maxY * 7 / 8 + 1, maxY        );
+    auto worker1 = std::async(lambdaWorker, minY            , maxY * 1 / 4);
+    auto worker2 = std::async(lambdaWorker, maxY * 1 / 4 + 1, maxY * 2 / 4);
+    auto worker3 = std::async(lambdaWorker, maxY * 2 / 4 + 1, maxY * 3 / 4);
+    auto worker4 = std::async(lambdaWorker, maxY * 3 / 4 + 1, maxY        );
 
     worker1.wait();
     worker2.wait();
     worker3.wait();
     worker4.wait();
-    worker5.wait();
-    worker6.wait();
-    worker7.wait();
-    worker8.wait();
 
 #else
 
