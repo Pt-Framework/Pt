@@ -275,6 +275,92 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
 #ifdef WITH_EXPERIMENTAL_GFX
 
+    // Loop through the rows of the image
+    for(Pt::int32_t y = minY; y <= maxY; ++y)
+    {
+        // Pixel-by-pixel clipping
+        if(y < _currentClip.top   ()) continue;
+        if(y > _currentClip.bottom()) continue;
+
+        // Build a list of nodes using the coordinates from the polygon
+        std::size_t nodes = 0;
+
+        // Loop through the points
+        auto lambdaWorker = [&](Pt::int32_t start, size_t pc) {
+            Pt::int32_t j = pc - 1;
+
+            for(size_t i = start; i < pc; ++i)
+            {
+                // Get the Y coordinates
+                const float curYi = points[i].y();
+                const float curYj = points[j].y();
+
+                // Check againts the Y coordinates
+                if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
+                {
+                    // Bail out if we have produced too many nodes
+                    if( nodes >= nodeX.size() )
+                        return;
+
+                    // Get the X coordinates
+                    const float curXi = points[i].x();
+                    const float curXj = points[j].x();
+
+                    // Calculate the node's coordinate
+                    const float deltaYp = y     - curYi;
+                    const float deltaYj = curYj - curYi;
+                    const float deltaXj = curXj - curXi;
+                    const float interXf = curXi + deltaYp / deltaYj * deltaXj;
+
+                    nodeX[nodes++] = interXf;
+                }
+
+                // Update the searching index
+                j = i;
+            }
+        };
+
+        auto worker1 = std::async(lambdaWorker, 0,                      pointCount     / 4);
+        auto worker2 = std::async(lambdaWorker, pointCount     / 4 + 1, pointCount     / 2);
+        auto worker3 = std::async(lambdaWorker, pointCount     / 2 + 1, pointCount * 3 / 4);
+        auto worker4 = std::async(lambdaWorker, pointCount * 3 / 4 + 1, pointCount        );
+
+        worker1.wait();
+        worker2.wait();
+        worker3.wait();
+        worker4.wait();
+
+        // Skip if there is no node generated
+        if( !nodes ) continue;
+
+        // Sort the nodes
+        bubbleSortAscending(nodeX, nodes);
+
+        // Fill the pixels between the node pairs
+        for(std::size_t i = 0; i < nodes; i += 2)
+        {
+            // Calculate the coordinate
+            Pt::int32_t from = ceil ( nodeX[i] );
+            Pt::int32_t to   = floor( nodeX[i + 1] );
+
+            // Pixel-by-pixel clipping
+            if(from < _currentClip.left ()) from = _currentClip.left ();
+            if(to   > _currentClip.right()) to   = _currentClip.right();
+
+            if(to < from) continue;
+
+            // Store the scanline coordinate as needed
+            if(_compositionMode != CompositionMode::SourceCopy)
+            {
+                scanlines[y - minY + 1].push_back(ScanlineElement16(from, to));
+            }
+
+            // Draw the scanline
+            rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+        }
+    }
+
+    /*
     auto lambdaWorker = [&](Pt::int32_t y1, Pt::int32_t y2) {
         // Loop through the rows of the image
         for(Pt::int32_t y = y1; y <= y2; ++y)
@@ -359,6 +445,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     worker2.wait();
     worker3.wait();
     worker4.wait();
+    */
 
 #else
 
