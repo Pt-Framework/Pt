@@ -46,6 +46,11 @@ if $(WITH_EXPERIMENTAL_GFX)
     SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
 }
 
+#rule FGeneric
+#{ return $(<) ; }
+#SubDirCcFlags  [ FGeneric -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ] ;
+#SubDirC++Flags [ FGeneric -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ] ;
+
 PT_GFX_NEW_RASTERIZER_FILES = ImageOperation2_Scale32Bpp.cpp
                               ImageOperation2_Rotate32Bpp.cpp
                               ImagePainter2.cpp
