@@ -326,48 +326,48 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             bubbleSortAscending(nodeX, nodes);
 
             // Fill the pixels between the node pairs
-            auto lambdaWorkerInternal = [&](std::size_t start, size_t count) {
+            for(std::size_t i = 0; i < nodes; i += 2)
+            {
+                // Calculate the coordinate
+                Pt::int32_t from = ceil ( nodeX[i] );
+                Pt::int32_t to   = floor( nodeX[i + 1] );
 
-                for(std::size_t i = start; i < count; i += 2)
+                // Pixel-by-pixel clipping
+                if(from < _currentClip.left ()) from = _currentClip.left ();
+                if(to   > _currentClip.right()) to   = _currentClip.right();
+
+                if(to < from) continue;
+
+                // Store the scanline coordinate as needed
+                if(_compositionMode != CompositionMode::SourceCopy)
                 {
-                    // Calculate the coordinate
-                    Pt::int32_t from = ceil ( nodeX[i] );
-                    Pt::int32_t to   = floor( nodeX[i + 1] );
-
-                    // Pixel-by-pixel clipping
-                    if(from < _currentClip.left ()) from = _currentClip.left ();
-                    if(to   > _currentClip.right()) to   = _currentClip.right();
-
-                    if(to < from) continue;
-
-                    // Store the scanline coordinate as needed
-                    if(_compositionMode != CompositionMode::SourceCopy)
-                    {
-                        scanlines[y - minY + 1].push_back(ScanlineElement16(from, to));
-                    }
-
-                    // Draw the scanline
-                    rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+                    scanlines[y - minY + 1].push_back(ScanlineElement16(from, to));
                 }
-            };
-            auto workerInternal1 = std::async(lambdaWorkerInternal, 0,             nodes / 2);
-            workerInternal1.wait();
 
-            auto workerInternal2 = std::async(lambdaWorkerInternal, nodes / 2 + 1, nodes    );
-            workerInternal2.wait();
+                // Draw the scanline
+                rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+            }
         }
     };
 
-    auto worker1 = std::async(lambdaWorker, minY,             maxY     / 1);
- //   auto worker2 = std::async(lambdaWorker, maxY     / 4 + 1, maxY     / 2);
-    auto worker3 = std::async(lambdaWorker, maxY     / 2 + 1, maxY * 3 / 4);
-    auto worker4 = std::async(lambdaWorker, maxY * 3 / 4 + 1, maxY        );
+    auto worker1 = std::async(lambdaWorker, minY            , maxY * 1 / 8);
+    auto worker2 = std::async(lambdaWorker, maxY * 1 / 8 + 1, maxY * 2 / 8);
+    auto worker3 = std::async(lambdaWorker, maxY * 2 / 8 + 1, maxY * 3 / 8);
+    auto worker4 = std::async(lambdaWorker, maxY * 3 / 8 + 1, maxY * 4 / 8);
+    auto worker5 = std::async(lambdaWorker, maxY * 4 / 8    , maxY * 5 / 8);
+    auto worker6 = std::async(lambdaWorker, maxY * 5 / 8 + 1, maxY * 6 / 8);
+    auto worker7 = std::async(lambdaWorker, maxY * 6 / 8 + 1, maxY * 7 / 8);
+    auto worker8 = std::async(lambdaWorker, maxY * 7 / 8 + 1, maxY        );
 
     worker1.wait();
-  //  worker2.wait();
-   // worker3.wait();
-   // worker4.wait();
-return;
+    worker2.wait();
+    worker3.wait();
+    worker4.wait();
+    worker5.wait();
+    worker6.wait();
+    worker7.wait();
+    worker8.wait();
+
 #else
 
     // Loop through the rows of the image
