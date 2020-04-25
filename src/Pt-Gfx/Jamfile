@@ -18,6 +18,9 @@ if $(FREETYPE_INCLUDES)
     SubDirHdrs $(FREETYPE_INCLUDES) ;
 }
 
+# Aloysius' personal tester flag
+WITH_EXPERIMENTAL_GFX = yes ;
+
 if $(WITH_EXPERIMENTAL_GFX)
 {
     rule FGeneric
@@ -31,7 +34,8 @@ if $(WITH_EXPERIMENTAL_GFX)
 
     if $(TARGET_OSPLAT:L) = x86_64
     {
-        CPU_FLAGS = -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ;
+        CPU_FLAGS = -std=c++11 ;
+       #CPU_FLAGS = -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ;
        #CPU_FLAGS = -msse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-fma ;
     }
 
