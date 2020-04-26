@@ -53,7 +53,7 @@ MainWindow::MainWindow()
 , _scrollContainer2(Hmi::FlowLayout::Top)
 {
     setTitle("Main 1");
-    move( Gfx::PointF(100, 10) );
+    move( Gfx::PointF(100, 30) );
     resize( Gfx::SizeF(500, 700) );
 
     //_child2.setTopMost(true);

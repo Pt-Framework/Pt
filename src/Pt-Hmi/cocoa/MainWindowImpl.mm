@@ -223,14 +223,17 @@ void MainWindowImpl::close()
 
 void MainWindowImpl::paint(const Gfx::RectF& rect)
 {
+    double scaling = Application::instance().scaleFactor();
+    Gfx::RectF r(rect.topLeft() * scaling, rect.size() * scaling);
+
     NSRect frameRect = [_window frame];
     NSRect contentRect = [_window contentRectForFrameRect:frameRect];
     CGFloat contentHeight = contentRect.size.height;
 
-    CGFloat x = rect.x();
-    CGFloat y = contentHeight - (rect.y() + rect.height());
-    CGFloat w = rect.width();
-    CGFloat h = rect.height();
+    CGFloat x = r.x();
+    CGFloat y = contentHeight - (r.y() + r.height());
+    CGFloat w = r.width();
+    CGFloat h = r.height();
     
     //std::clog << "PAINT: " << x << "," << y <<
     //                   " " << w << "x" << h << std::endl;
@@ -390,16 +393,21 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     //std::clog << "ON PAINT: " << rect.size.width << "x" 
     //                          << rect.size.height << std::endl;
 
+    NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
+    CGContextRef windowContext = [graphicsContext CGContext];
+
     Pt::Hmi::PixmapSurfaceImpl* pixmap = window->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
     
     CGImageRef image = CGBitmapContextCreateImage(pixmapContext);
+    
     CGFloat imageHeight = CGImageGetHeight(image);
+    double scaling = scaleFactor();
 
-    CGFloat subImageX = rect.origin.x * scaleFactor();
-    CGFloat subImageY = rect.origin.y * scaleFactor();
-    CGFloat subImageWidth = rect.size.width * scaleFactor();
-    CGFloat subImageHeight = rect.size.height * scaleFactor();
+    CGFloat subImageX = rect.origin.x * scaling;
+    CGFloat subImageY = rect.origin.y * scaling;
+    CGFloat subImageWidth = rect.size.width * scaling;
+    CGFloat subImageHeight = rect.size.height * scaling;
     
     CGRect subRect = CGRectMake(subImageX,
                                 imageHeight - subImageY - subImageHeight,
@@ -408,10 +416,8 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     
     CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
 
-    NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
-    CGContextRef windowContext = [graphicsContext CGContext];
-
     CGContextDrawImage(windowContext, rect, subImage);
+
     CGImageRelease(image);
 }
 
@@ -485,6 +491,9 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 
     Gfx::SizeF to(viewSize.width, 
                   viewSize.height);
+
+    double scaling = Application::instance().scaleFactor();
+    to = to / scaling;
 
     ResizeEvent rev(vid, to);
     Application::instance().impl()->commitEvent(rev);

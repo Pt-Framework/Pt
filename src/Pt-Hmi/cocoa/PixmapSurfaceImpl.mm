@@ -68,7 +68,7 @@ void PixmapSurfaceImpl::create()
 
     CGColorSpaceRelease(colorSpace);
 
-    //std::clog << "pixmap: " << _context << " " << _size.width() << "x" 
+    //std::clog << "PIXMAP: " << _context << " " << _size.width() << "x" 
     //                        << _size.height() << std::endl;
 }
 
@@ -510,8 +510,8 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* p, size_t pointCount)
 
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& pm)
 {
-    std::clog << "drawSurface: " <<  pm.pixmapImpl()->context()
-              << " to: " << _context << std::endl;
+    //std::clog << "drawSurface: " <<  pm.pixmapImpl()->context()
+    //          << " to: " << _context << std::endl;
     
     CGImageRef image =  CGBitmapContextCreateImage( pm.pixmapImpl()->context() );
     

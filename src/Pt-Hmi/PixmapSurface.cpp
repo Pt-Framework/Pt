@@ -53,7 +53,7 @@ PixmapSurface::~PixmapSurface()
 void PixmapSurface::resize(const Gfx::SizeF& size)
 {
     _logicSize = size;
-    _impl->resize(toPhysical(size));
+    _impl->resize( toPhysical(size) );
 }
 
 
