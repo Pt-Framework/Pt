@@ -271,8 +271,8 @@ void MainWindowImpl::setTopMost(bool onTop)
 
 void MainWindowImpl::move(const Gfx::PointF& p)
 {
-    //std::clog << "MOVE: " << p.x() << "," 
-    //                      << p.y() << std::endl;
+    std::clog << "MOVE: " << p.x() << "," 
+                          << p.y() << std::endl;
 
     double scaling = scaleFactor();
 
@@ -451,10 +451,12 @@ void MainWindowImpl::onMove()
 
     double x = origin.x;
     double y = screenHeight - origin.y - windowHeight;
-    //std::clog << "ON MOVE: " << x << "," << origin.y << std::endl;
+    std::clog << "ON MOVE: " << x << "," << origin.y << std::endl;
 
     Pt::Gfx::PointF pos(x, y);
-    pos = window->toLogical(pos);
+
+    double scaling = Application::instance().scaleFactor();
+    pos = pos / scaling;
 
     MoveEvent ev(vid, pos);
     Application::instance().impl()->commitEvent( ev );
