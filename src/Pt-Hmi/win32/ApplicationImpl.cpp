@@ -840,15 +840,13 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
 void ApplicationImpl::onPaint(Window& w, HWND hwnd)
 {
-    RECT info;
-    GetClientRect(hwnd, &info);
+    RECT updateRect;
+    GetUpdateRect(hwnd, &updateRect, FALSE);
       
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);
 
     Pt::Gfx::Image& image = w.surface().pixmapImpl()->image();
-
-    Gfx::Point to(0, 0);
 
     const size_t depth = image.view().pixelStride() * 8;
     const Pt::uint8_t* data = image.data();
@@ -880,8 +878,9 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     HDC bitmapDC = CreateCompatibleDC(NULL);
     SelectObject(bitmapDC, bitmap);
 
-    BitBlt(windowContext,to.x(), to.y(), image.width(), image.height(),
-           bitmapDC, 0, 0, SRCCOPY);
+    BitBlt(windowContext, updateRect.left, updateRect.top, 
+           updateRect.right - updateRect.left, updateRect.bottom - updateRect.top,
+           bitmapDC, updateRect.left, updateRect.top, SRCCOPY);
 
     DeleteDC(bitmapDC);
     DeleteObject(bitmap);

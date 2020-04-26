@@ -312,11 +312,15 @@ class PainterImpl
             graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
                                    Gdiplus::PointF(0, 0), format, &textRect);
 
+            const int dpix = GetDeviceCaps(dc, LOGPIXELSX);
+            const double scaling = 96.0 / dpix;
+
             SelectObject(dc, oldFont);
             DeleteObject(newFont);
             ReleaseDC(NULL, dc);
 
-            return Gfx::FontMetrics(ascentF, descentF, textRect.Width, textRect.Height);
+            return Gfx::FontMetrics(ascentF*scaling, descentF*scaling, 
+                                    textRect.Width*scaling, textRect.Height*scaling);
         }
 #endif
         static std::string defaultFont()

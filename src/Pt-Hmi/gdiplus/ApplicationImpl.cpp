@@ -849,18 +849,17 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
 void ApplicationImpl::onPaint(Window& w, HWND hwnd)
 {
-    RECT info;
-    GetClientRect(hwnd, &info);
-      
+    RECT updateRect;
+    GetUpdateRect(hwnd, &updateRect, FALSE);
+
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);
 
-    // TODO: rect optimization
-    //Gfx::Rect updateRect(Gfx::Point(0,0), w.size());
-
     HDC bitmapContext = w.surface().pixmapImpl()->deviceContext();
-    BitBlt(windowContext, 0, 0, info.right, info.bottom, bitmapContext, 0, 0, SRCCOPY);    
-    
+    BitBlt(windowContext, updateRect.left, updateRect.top, 
+           updateRect.right - updateRect.left, updateRect.bottom - updateRect.top,
+           bitmapContext, updateRect.left, updateRect.top, SRCCOPY);
+
     EndPaint(hwnd, &ps);
 }
 

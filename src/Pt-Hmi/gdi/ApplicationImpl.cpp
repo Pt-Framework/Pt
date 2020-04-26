@@ -857,7 +857,8 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     HDC windowContext = BeginPaint(hwnd, &ps);
 
     HDC bitmapContext = w.surface().pixmapImpl()->deviceContext();
-    BitBlt(windowContext, updateRect.left, updateRect.top, updateRect.right, updateRect.bottom, 
+    BitBlt(windowContext, updateRect.left, updateRect.top, 
+           updateRect.right - updateRect.left, updateRect.bottom - updateRect.top, 
            bitmapContext, updateRect.left,  updateRect.top, SRCCOPY);
     
     EndPaint(hwnd, &ps);

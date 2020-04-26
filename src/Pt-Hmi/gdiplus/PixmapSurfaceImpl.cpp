@@ -189,7 +189,11 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     _graphics->MeasureString(wtext.c_str(), wtext.size(), &font,
                              Gdiplus::PointF(0, 0), format, &textRect);
 
-    return Gfx::FontMetrics(ascentF, descentF, textRect.Width, textRect.Height);
+    const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
+    const double scaling = 96.0 / dpix;
+
+    return Gfx::FontMetrics(ascentF*scaling, descentF* scaling, 
+                            textRect.Width* scaling, textRect.Height* scaling);
 }
 
 
@@ -200,11 +204,15 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     _text.clear();
     text.toUtf16(std::back_inserter(_text));
 
-    Gfx::Transform tt = trans;
-    tt.translate( to.x(), to.y() );
+    Gfx::Transform tt = trans;    
+
+    const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
+    const double scaling = 96.0 / dpix;
+
+    tt.scale(scaling, scaling);
+    tt.translate( to.x(), to.y());
 
     const Gdiplus::Font& font = _painter->impl()->font();
-
     const Gdiplus::FontFamily& family = _painter->impl()->fontFamily();
     
     Gdiplus::REAL height = font.GetHeight(_graphics->GetDpiY() );
@@ -219,10 +227,8 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     Gdiplus::REAL spacing = height - ascent - descent;
     Gdiplus::REAL offsetY = ascent + 1;
     
-    Gdiplus::REAL toX = static_cast<Gdiplus::REAL>( to.x() );
-    Gdiplus::REAL toY = static_cast<Gdiplus::REAL>( to.y() );
     Gdiplus::PointF origin( 0, -offsetY );
-    
+
     const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
 
     Gdiplus::Matrix oldMatrix;

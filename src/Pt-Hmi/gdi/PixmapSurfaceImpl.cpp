@@ -316,7 +316,11 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
                             Gdiplus::PointF(0, 0), format, &textRect);
 
-    return Gfx::FontMetrics(ascentF, descentF, textRect.Width, textRect.Height);
+    const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
+    const double scaling = 96.0 / dpix;
+
+    return Gfx::FontMetrics(ascentF* scaling, descentF* scaling, 
+                            textRect.Width* scaling, textRect.Height* scaling);
 }
 #endif
 
@@ -327,10 +331,14 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     _text.clear();
     text.toUtf16(std::back_inserter(_text));
 
+    const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
+    const double scaling = 96.0 / dpix;
+
     Gfx::Transform tt = trans;
-    tt.translate( to.x(), to.y() );
 
 #ifndef PT_HMI_GDIPLUS
+    tt.translate(to.x(), to.y());
+
     XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
     GetWorldTransform(_dc, &oldTrans);
 
@@ -347,7 +355,9 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 
     SetWorldTransform(_dc, &oldTrans);
 #else
-   
+    tt.scale(scaling, scaling);
+    tt.translate(to.x(), to.y());
+
     Gdiplus::Graphics graphics(_dc);
     graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
     graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
