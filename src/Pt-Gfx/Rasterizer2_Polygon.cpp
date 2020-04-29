@@ -31,8 +31,16 @@
 //#include <iomanip>
 
 #ifdef WITH_EXPERIMENTAL_GFX
+
 #include <future>
+
+//#define MIPP_NO_INTRINSICS
+#include "simd/mipp/mipp.h"
+
+//#include "simd/xsimd/xsimd.hpp"
+
 #endif
+
 
 #include "Rasterizer2.h"
 #include "ClipShape.h"
@@ -307,12 +315,21 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     const float curXj = points[j].x();
 
                     // Calculate the node's coordinate
+#if 1
                     const float deltaYp = y     - curYi;
                     const float deltaYj = curYj - curYi;
                     const float deltaXj = curXj - curXi;
                     const float interXf = curXi + deltaYp / deltaYj * deltaXj;
 
                     nodeX[nodes++] = interXf;
+#else
+                    mipp::Reg<double> rlhs{ (double) y, curYj, curXj, 0.0f };
+                    mipp::Reg<double> rrhs{ curYi,      curYi, curXi, 0.0f };
+                    mipp::Reg<double> rres = rlhs - rrhs;
+
+                    nodeX[nodes++] = rrhs[2] + rres[0] / rres[1] * rres[2];
+#endif
+
                 }
 
                 // Update the searching index
