@@ -295,7 +295,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             std::size_t nodes = 0;
 
             // Loop through the points
-#if 0 
+#if 0
      #if 1
             Pt::int32_t j = pointCount - 1;
 
@@ -539,7 +539,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     //worker3.wait();
     //worker4.wait();
 
-#else
+#else // WITH_EXPERIMENTAL_GFX
 
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
@@ -614,7 +614,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         }
     }
 
-#endif
+#endif // WITH_EXPERIMENTAL_GFX
 
     // Raster the anti-aliased outline
 
