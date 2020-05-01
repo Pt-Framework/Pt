@@ -295,6 +295,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             std::size_t nodes = 0;
 
             // Loop through the points
+#if 0 
+     #if 1
             Pt::int32_t j = pointCount - 1;
 
             for(size_t i = 0; i < pointCount; ++i)
@@ -315,26 +317,184 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     const float curXj = points[j].x();
 
                     // Calculate the node's coordinate
-#if 1
                     const float deltaYp = y     - curYi;
                     const float deltaYj = curYj - curYi;
                     const float deltaXj = curXj - curXi;
                     const float interXf = curXi + deltaYp / deltaYj * deltaXj;
 
                     nodeX[nodes++] = interXf;
-#else
-                    mipp::Reg<double> rlhs{ (double) y, curYj, curXj, 0.0f };
-                    mipp::Reg<double> rrhs{ curYi,      curYi, curXi, 0.0f };
-                    mipp::Reg<double> rres = rlhs - rrhs;
-
-                    nodeX[nodes++] = rrhs[2] + rres[0] / rres[1] * rres[2];
-#endif
-
                 }
 
                 // Update the searching index
                 j = i;
             }
+    #else
+            for(size_t j = 0; j < pointCount; ++j)
+            {
+                // Calculate the i
+                const size_t i = ( j >= (pointCount - 1) ) ? 0 : (j + 1);
+
+                // Get the Y coordinates
+                const float curYi = points[i].y();
+                const float curYj = points[j].y();
+
+                // Check againts the Y coordinates
+                if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
+                {
+                    // Bail out if we have produced too many nodes
+                    if( nodes >= nodeX.size() )
+                        return;
+
+                    // Get the X coordinates
+                    const float curXi = points[i].x();
+                    const float curXj = points[j].x();
+
+                    // Calculate the node's coordinate
+                    const float deltaYp = y     - curYi;
+                    const float deltaYj = curYj - curYi;
+                    const float deltaXj = curXj - curXi;
+                    const float interXf = curXi + deltaYp / deltaYj * deltaXj;
+
+                    nodeX[nodes++] = interXf;
+                }
+            }
+    #endif
+
+#else
+            // 11221122*  Scalar
+            // 012345678  N = 9
+            // i       j
+            // ji
+            //  ji
+            //   ji
+            //    ji
+            //     ji
+            //      ji
+            //       ji
+            //        ji
+            //
+            // 11221122*  VecSize = 2
+            // 012345678  N = 9         Loop = N / VecSize / 2 = 2   RemStart = Loop * VecSize * 2 - Loop
+            // jiji
+            //  jiji
+            //      jiji
+            //       jiji
+            //     jiji
+
+            //       ji
+            //        ji
+            // i       j
+            //
+            // 11221122*  VecSize = 4
+            // 012345678  N = 9         Loop = N / VecSize / 2 = 1   RemStart = Loop * VecSize * 2 - Loop
+            // jijijiji*
+            //        ji
+            // i       j
+
+            // 0123456789ABCDE
+            // jiji             0 -> j = 0
+            //    jiji          1 -> j = 3
+            //       jiji       2 -> j = 6
+            //          jiji    3 -> j = 9
+            //
+            // 000000000011111111112222222222
+            // 012345678901234567890123456789
+            // 0 2 4 6
+            //        7 9 1113
+            // jijijiji                        0 -> j =  0
+            //        jijijiji                 1 -> j =  7
+            //               jijijiji          2 -> j = 14
+            //                      jijijiji   3 -> j = 21
+
+            const size_t vecSize  = mipp::N<float>();
+            const size_t loop     = pointCount / vecSize / 2;
+            const size_t remStart = loop * vecSize * 2 - loop;
+
+            const mipp::Reg<float> curY = { y, y, y, y };
+
+            for(size_t j = 0; j < loop; ++j) {
+                // Get the X and Y coordinates
+                const size_t pj = j * vecSize * 2 - j;
+                const size_t pi = pj + 1;
+
+                const mipp::Reg<float> curXj = { points[pj + 2 * 0].x(),
+                                                 points[pj + 2 * 1].x(),
+                                                 points[pj + 2 * 2].x(),
+                                                 points[pj + 2 * 3].x() };
+
+                const mipp::Reg<float> curXi = { points[pi + 2 * 0].x(),
+                                                 points[pi + 2 * 1].x(),
+                                                 points[pi + 2 * 2].x(),
+                                                 points[pi + 2 * 3].x() };
+
+                const mipp::Reg<float> curYj = { points[pj + 2 * 0].y(),
+                                                 points[pj + 2 * 1].y(),
+                                                 points[pj + 2 * 2].y(),
+                                                 points[pj + 2 * 3].y() };
+
+                const mipp::Reg<float> curYi = { points[pi + 2 * 0].y(),
+                                                 points[pi + 2 * 1].y(),
+                                                 points[pi + 2 * 2].y(),
+                                                 points[pi + 2 * 3].y() };
+
+                // Compare againts the Y coordinates
+                const mipp::Msk<mipp::N<float>()> cmp = (
+                    ( ( mipp::cmpgt(curY, curYi) | mipp::cmpeq(curY, curYi) ) // ( y >= curYi && y < curYj )
+                      &
+                      ( mipp::cmplt(curY, curYj)                            )
+                    )
+                    |
+                    ( ( mipp::cmpgt(curY, curYj) | mipp::cmpeq(curY, curYj) ) // ( y >= curYj && y < curYi )
+                      &
+                      ( mipp::cmplt(curY, curYi)                            )
+                    )
+                );
+
+                // Calculate the node's coordinate
+                const mipp::Reg<float> deltaYp = curY  - curYi;
+                const mipp::Reg<float> deltaYj = curYj - curYi;
+                const mipp::Reg<float> deltaXj = curXj - curXi;
+                const mipp::Reg<float> interXf = curXi + deltaYp / deltaYj * deltaXj;
+
+
+                if(cmp[0]) nodeX[nodes++] = interXf[0];
+                if(cmp[1]) nodeX[nodes++] = interXf[1];
+                if(cmp[2]) nodeX[nodes++] = interXf[2];
+                if(cmp[3]) nodeX[nodes++] = interXf[3];
+            }
+            /*
+            for(size_t j = remStart; j < pointCount; ++j)
+            {
+                // Calculate the i
+                size_t i = j + 1;
+                if(i >= pointCount) i = 0;
+
+                // Get the Y coordinates
+                const float curYi = points[i].y();
+                const float curYj = points[j].y();
+
+                // Check againts the Y coordinates
+                if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
+                {
+                    // Bail out if we have produced too many nodes
+                    if( nodes >= nodeX.size() )
+                        return;
+
+                    // Get the X coordinates
+                    const float curXi = points[i].x();
+                    const float curXj = points[j].x();
+
+                    // Calculate the node's coordinate
+                    const float deltaYp = y     - curYi;
+                    const float deltaYj = curYj - curYi;
+                    const float deltaXj = curXj - curXi;
+                    const float interXf = curXi + deltaYp / deltaYj * deltaXj;
+
+                    nodeX[nodes++] = interXf;
+                }
+            }
+            */
+#endif
 
             // Skip if there is no node generated
             if( !nodes ) continue;
@@ -367,15 +527,17 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         }
     };
 
-    auto worker1 = std::async(lambdaWorker, minY            , maxY * 1 / 4);
-    auto worker2 = std::async(lambdaWorker, maxY * 1 / 4 + 1, maxY * 2 / 4);
-    auto worker3 = std::async(lambdaWorker, maxY * 2 / 4 + 1, maxY * 3 / 4);
-    auto worker4 = std::async(lambdaWorker, maxY * 3 / 4 + 1, maxY        );
+    std::async(lambdaWorker, minY, maxY).wait();
 
-    worker1.wait();
-    worker2.wait();
-    worker3.wait();
-    worker4.wait();
+    //auto worker1 = std::async(lambdaWorker, minY            , maxY * 1 / 4);
+    //auto worker2 = std::async(lambdaWorker, maxY * 1 / 4 + 1, maxY * 2 / 4);
+    //auto worker3 = std::async(lambdaWorker, maxY * 2 / 4 + 1, maxY * 3 / 4);
+    //auto worker4 = std::async(lambdaWorker, maxY * 3 / 4 + 1, maxY        );
+
+    //worker1.wait();
+    //worker2.wait();
+    //worker3.wait();
+    //worker4.wait();
 
 #else
 
@@ -530,6 +692,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
 
             // Loop through the points
             Pt::int32_t j = polygon.size() - 1;
+
             for(size_t i = 0; i < polygon.size(); ++i)
             {
                 // Get the Y coordinates
