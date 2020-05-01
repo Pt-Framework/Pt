@@ -29,6 +29,7 @@ if $(WITH_EXPERIMENTAL_GFX)
     if $(TARGET_OSPLAT:L) = arm
     {
         CPU_FLAGS = -mfpu=neon ;
+        #-O3 -mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard
     }
 
     if $(TARGET_OSPLAT:L) = x86_64

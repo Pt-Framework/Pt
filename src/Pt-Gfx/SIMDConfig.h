@@ -20,7 +20,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
- 
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -35,8 +35,10 @@
 // SIMD headers and macros
 //
 
+// Disable this for now due to SIMD experiment with polygon/vector calculation in Rasterizer2
+#undef WITH_EXPERIMENTAL_GFX
+
 // For now only enable SIMD when working with experimental Gfx
-// ### TODO: Autodetect the SIMD support! ###
 #ifdef WITH_EXPERIMENTAL_GFX
 
 // GNU-style compiler
