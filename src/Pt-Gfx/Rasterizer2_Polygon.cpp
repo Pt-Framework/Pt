@@ -361,50 +361,127 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     #endif
 
 #else
-            // 11221122*  Scalar
-            // 012345678  N = 9
-            // i       j
-            // ji
-            //  ji
-            //   ji
-            //    ji
-            //     ji
-            //      ji
-            //       ji
-            //        ji
             //
-            // 11221122*  VecSize = 2
-            // 012345678  N = 9         Loop = N / VecSize / 2 = 2   RemStart = Loop * VecSize * 2 - Loop
-            // jiji
-            //  jiji
-            //      jiji
-            //       jiji
-            //     jiji
-
-            //       ji
-            //        ji
-            // i       j
+            // Scalar
+            //    000000000011111111112222222222333 PointCount = 33
+            //    012345678901234567890123456789012
+            //  0 ji
+            //  1  ji
+            //  2   ji
+            //  3    ji
+            //  4     ji
+            //  5      ji
+            //  6       ji
+            //  7        ji
+            //  8         ji
+            // 10          ji
+            // 11           ji
+            // 12            ji
+            // 13             ji
+            // 14              ji
+            // 15               ji
+            // 16                ji
+            // 17                 ji
+            // 18                  ji
+            // 19                   ji
+            // 20                    ji
+            // 21                     ji
+            // 22                      ji
+            // 23                       ji
+            // 24                        ji
+            // 25                         ji
+            // 26                          ji
+            // 27                           ji
+            // 28                            ji
+            // 29                             ji
+            // 30                              ji
+            // 31                               ji
+            // 32                                ji
+            // 33 i                               j
+            //    000000000011111111112222222222333
+            //    012345678901234567890123456789012
             //
-            // 11221122*  VecSize = 4
-            // 012345678  N = 9         Loop = N / VecSize / 2 = 1   RemStart = Loop * VecSize * 2 - Loop
-            // jijijiji*
-            //        ji
-            // i       j
-
-            // 0123456789ABCDE
-            // jiji             0 -> j = 0
-            //    jiji          1 -> j = 3
-            //       jiji       2 -> j = 6
-            //          jiji    3 -> j = 9
             //
-            // 000000000011111111112222222222
-            // 012345678901234567890123456789
-            // 0 2 4 6
-            //        7 9 1113
-            // jijijiji                        0 -> j =  0
-            //        jijijiji                 1 -> j =  7
-            //               jijijiji          2 -> j = 14
-            //                      jijijiji   3 -> j = 21
+            // VectorSize = 4
+            //    000000000011111111112222222222333 PointCount = 33
+            //    012345678901234567890123456789012
+            // 0a jijijiji
+            // 0b  jijijiji
+            // 1a         jijijiji
+            // 1b          jijijiji
+            // 2a                 jijijiji
+            // 2b                  jijijiji
+            // 3a                         jijijiji
+            // 3b                          jijijiji
+            // R0 i                               j
+            //    000000000011111111112222222222333
+            //    012345678901234567890123456789012
+            //
+            // VectorSize = 4
+            //    00000000001111111111222222222233  PointCount = 32
+            //    01234567890123456789012345678901
+            // 0a jijijiji
+            // 0b  jijijiji
+            // 1a         jijijiji
+            // 1b          jijijiji
+            // 2a                 jijijiji
+            // 2b                  jijijiji
+            // 3a                         jijijiji
+            // R0                                ji
+            // R1 i                               j
+            //    000000000011111111112222222222333
+            //    012345678901234567890123456789012
+            //
+            // VectorSize = 4
+            //    000000000011111111112             PointCount = 21
+            //    012345678901234567890
+            // 0a jijijiji
+            // 0b  jijijiji
+            // 0a         jijijiji
+            // 0b          jijijiji
+            // R0                 ji
+            // R1                  ji
+            // R2                   ji
+            // R3                    ji
+            // R4 i                   j
+            //    000000000011111111112
+            //    012345678901234567890
+            //
+            //
+            // VectorSize = 8
+            //    000000000011111111112222222222333 PointCount = 33
+            //    012345678901234567890123456789012
+            // 0a jijijijijijijiji
+            // 0b  jijijijijijijiji
+            // 1a                 jijijijijijijiji
+            // 1b                  jijijijijijijiji
+            // R0 i                               j
+            //    000000000011111111112222222222333
+            //    012345678901234567890123456789012
+            //
+            // VectorSize = 8
+            //    00000000001111111111222222222233  PointCount = 32
+            //    01234567890123456789012345678901
+            // 0a jijijijijijijiji
+            // 0b  jijijijijijijiji
+            // 1a                 jijijijijijijiji
+            // R0 i                              j
+            //    00000000001111111111222222222233
+            //    01234567890123456789012345678901
+            //
+            // VectorSize = 8
+            //    000000000011111111112             PointCount = 21
+            //    012345678901234567890
+            // 0a jijijijijijijiji
+            // 0b  jijijijijijijiji
+            // R0                 ji
+            // R1                  ji
+            // R2                   ji
+            // R3                    ji
+            // R4 i                   j
+            //    000000000011111111112
+            //    012345678901234567890
+            //
 
             const size_t vecSize  = mipp::N<float>();
             const size_t loop     = pointCount / vecSize / 2;
