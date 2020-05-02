@@ -294,41 +294,15 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // Build a list of nodes using the coordinates from the polygon
             std::size_t nodes = 0;
 
-            // Loop through the points
 #if 0
-     #if 1
-            Pt::int32_t j = pointCount - 1;
 
-            for(size_t i = 0; i < pointCount; ++i)
-            {
-                // Get the Y coordinates
-                const float curYi = points[i].y();
-                const float curYj = points[j].y();
-
-                // Check againts the Y coordinates
-                if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
-                {
-                    // Bail out if we have produced too many nodes
-                    if( nodes >= nodeX.size() )
-                        return;
-
-                    // Get the X coordinates
-                    const float curXi = points[i].x();
-                    const float curXj = points[j].x();
-
-                    // Calculate the node's coordinate
-                    const float deltaYp = y     - curYi;
-                    const float deltaYj = curYj - curYi;
-                    const float deltaXj = curXj - curXi;
-                    const float interXf = curXi + deltaYp / deltaYj * deltaXj;
-
-                    nodeX[nodes++] = interXf;
-                }
-
-                // Update the searching index
-                j = i;
-            }
-    #else
+            /*
+            const size_t vecSize  = mipp::N<float>();
+            const size_t loop     = pointCount / vecSize / 2;
+            const size_t loopEnd  = loop * vecSize * 2;
+            const size_t remStart = (loopEnd < pointCount) ? loopEnd : (loopEnd - 1);
+            */
+            // Loop through the points
             for(size_t j = 0; j < pointCount; ++j)
             {
                 // Calculate the i
@@ -358,10 +332,11 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     nodeX[nodes++] = interXf;
                 }
             }
-    #endif
 
 #else
-            //
+
+            // Loop through the points
+            /*
             // Scalar
             //    000000000011111111112222222222333 PointCount = 33
             //    012345678901234567890123456789012
@@ -403,11 +378,11 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             //
             //
             // VectorSize = 4
-            //    000000000011111111112222222222333 PointCount = 33
-            //    012345678901234567890123456789012
-            // 0a jijijiji
-            // 0b  jijijiji
-            // 1a         jijijiji
+            //    000000000011111111112222222222333 PointCount = 33   Loop     = PointCount / VecSize / 2 = 4
+            //    012345678901234567890123456789012                   LoopEnd  = Loop * VecSize * 2       = 32
+            // 0a jijijiji                                            LastB    = (LoopEnd < PointCount)   = true
+            // 0b  jijijiji                                           RemStart = Loop * VecSize * 2       = 32
+            // 1a         jijijiji                                    RemEnd   = PointCount - 1           = 32
             // 1b          jijijiji
             // 2a                 jijijiji
             // 2b                  jijijiji
@@ -418,26 +393,25 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             //    012345678901234567890123456789012
             //
             // VectorSize = 4
-            //    00000000001111111111222222222233  PointCount = 32
-            //    01234567890123456789012345678901
-            // 0a jijijiji
-            // 0b  jijijiji
-            // 1a         jijijiji
+            //    00000000001111111111222222222233  PointCount = 32   Loop     = PointCount / VecSize / 2 = 4
+            //    01234567890123456789012345678901                    LoopEnd  = Loop * VecSize * 2       = 32
+            // 0a jijijiji                                            LastB    = (LoopEnd < PointCount)   = false
+            // 0b  jijijiji                                           RemStart = Loop * VecSize * 2 - 1   = 31
+            // 1a         jijijiji                                    RemEnd   = PointCount - 1           = 31
             // 1b          jijijiji
             // 2a                 jijijiji
             // 2b                  jijijiji
             // 3a                         jijijiji
-            // R0                                ji
-            // R1 i                               j
-            //    000000000011111111112222222222333
-            //    012345678901234567890123456789012
+            // R0 i                              j
+            //    00000000001111111111222222222233
+            //    01234567890123456789012345678901
             //
             // VectorSize = 4
-            //    000000000011111111112             PointCount = 21
-            //    012345678901234567890
-            // 0a jijijiji
-            // 0b  jijijiji
-            // 0a         jijijiji
+            //    000000000011111111112             PointCount = 21   Loop     = PointCount / VecSize / 2 = 2
+            //    012345678901234567890                               LoopEnd  = Loop * VecSize * 2       = 16
+            // 0a jijijiji                                            LastB    = (LoopEnd < PointCount)   = true
+            // 0b  jijijiji                                           RemStart = Loop * VecSize * 2       = 16
+            // 0a         jijijiji                                    RemEnd   = PointCount - 1           = 20
             // 0b          jijijiji
             // R0                 ji
             // R1                  ji
@@ -449,102 +423,123 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             //
             //
             // VectorSize = 8
-            //    000000000011111111112222222222333 PointCount = 33
-            //    012345678901234567890123456789012
-            // 0a jijijijijijijiji
-            // 0b  jijijijijijijiji
-            // 1a                 jijijijijijijiji
+            //    000000000011111111112222222222333 PointCount = 33   Loop     = PointCount / VecSize / 2 =  2
+            //    012345678901234567890123456789012                   LoopEnd  = Loop * VecSize * 2       = 32
+            // 0a jijijijijijijiji                                    LastB    = (LoopEnd < PointCount)   = true
+            // 0b  jijijijijijijiji                                   RemStart = Loop * VecSize * 2       = 32
+            // 1a                 jijijijijijijiji                    RemEnd   = PointCount - 1           = 32
             // 1b                  jijijijijijijiji
             // R0 i                               j
             //    000000000011111111112222222222333
             //    012345678901234567890123456789012
             //
             // VectorSize = 8
-            //    00000000001111111111222222222233  PointCount = 32
-            //    01234567890123456789012345678901
-            // 0a jijijijijijijiji
-            // 0b  jijijijijijijiji
-            // 1a                 jijijijijijijiji
+            //    00000000001111111111222222222233  PointCount = 32   Loop     = PointCount / VecSize / 2 =  2
+            //    01234567890123456789012345678901                    LoopEnd  = Loop * VecSize * 2       = 32
+            // 0a jijijijijijijiji                                    LastB    = (LoopEnd < PointCount)   = false
+            // 0b  jijijijijijijiji                                   RemStart = Loop * VecSize * 2 - 1   = 31
+            // 1a                 jijijijijijijiji                    RemEnd   = PointCount - 1           = 31
             // R0 i                              j
             //    00000000001111111111222222222233
             //    01234567890123456789012345678901
             //
             // VectorSize = 8
-            //    000000000011111111112             PointCount = 21
-            //    012345678901234567890
-            // 0a jijijijijijijiji
-            // 0b  jijijijijijijiji
-            // R0                 ji
+            //    000000000011111111112             PointCount = 21   Loop     = PointCount / VecSize / 2 =  1
+            //    012345678901234567890                               LoopEnd  = Loop * VecSize * 2       = 16
+            // 0a jijijijijijijiji                                    LastB    = (LoopEnd < PointCount)   = true
+            // 0b  jijijijijijijiji                                   RemStart = Loop * VecSize * 2       = 16
+            // R0                 ji                                  RemEnd   = PointCount - 1           = 20
             // R1                  ji
             // R2                   ji
             // R3                    ji
             // R4 i                   j
             //    000000000011111111112
             //    012345678901234567890
-            //
+            */
 
+            // Calculate the number of loop that can be calculated using SIMD and the number of remaining loop
             const size_t vecSize  = mipp::N<float>();
-            const size_t loop     = pointCount / vecSize / 2;
-            const size_t remStart = loop * vecSize * 2 - loop;
 
+            const size_t loop     = pointCount / vecSize / 2;
+            const size_t loopEnd  = loop * vecSize * 2;
+            const bool   lastB    = (loopEnd < pointCount);
+
+            const size_t remStart = lastB ? loopEnd : (loopEnd - 1);
+            const size_t remEnd   = pointCount - 1;
+
+            // Make a vector Y for the current scanline
             const mipp::Reg<float> curY = { y, y, y, y };
 
+            // Loop as many as the number of loop that can be calculated using SIMD operations
             for(size_t j = 0; j < loop; ++j) {
-                // Get the X and Y coordinates
-                const size_t pj = j * vecSize * 2 - j;
-                const size_t pi = pj + 1;
 
-                const mipp::Reg<float> curXj = { points[pj + 2 * 0].x(),
-                                                 points[pj + 2 * 1].x(),
-                                                 points[pj + 2 * 2].x(),
-                                                 points[pj + 2 * 3].x() };
+                // Determine if the second SIMD part needs to be executed
+                const size_t bOne = ( lastB || ( j < (loop - 1) ) ) ? 1 : 0;
 
-                const mipp::Reg<float> curXi = { points[pi + 2 * 0].x(),
-                                                 points[pi + 2 * 1].x(),
-                                                 points[pi + 2 * 2].x(),
-                                                 points[pi + 2 * 3].x() };
+                for(size_t b = 0; b < bOne; ++b) {
+                    // Calculate the real position within the array of points
+                    const size_t pj = j * vecSize * 2 - j;
+                    const size_t pi = pj + 1;
 
-                const mipp::Reg<float> curYj = { points[pj + 2 * 0].y(),
-                                                 points[pj + 2 * 1].y(),
-                                                 points[pj + 2 * 2].y(),
-                                                 points[pj + 2 * 3].y() };
+                    // Get the Y coordinates
+                    const mipp::Reg<float> curYi = { points[pi + 2 * 0].y(),
+                                                     points[pi + 2 * 1].y(),
+                                                     points[pi + 2 * 2].y(),
+                                                     points[pi + 2 * 3].y() };
 
-                const mipp::Reg<float> curYi = { points[pi + 2 * 0].y(),
-                                                 points[pi + 2 * 1].y(),
-                                                 points[pi + 2 * 2].y(),
-                                                 points[pi + 2 * 3].y() };
+                    const mipp::Reg<float> curYj = { points[pj + 2 * 0].y(),
+                                                     points[pj + 2 * 1].y(),
+                                                     points[pj + 2 * 2].y(),
+                                                     points[pj + 2 * 3].y() };
 
-                // Compare againts the Y coordinates
-                const mipp::Msk<mipp::N<float>()> cmp = (
-                    ( ( mipp::cmpgt(curY, curYi) | mipp::cmpeq(curY, curYi) ) // ( y >= curYi && y < curYj )
-                      &
-                      ( mipp::cmplt(curY, curYj)                            )
-                    )
-                    |
-                    ( ( mipp::cmpgt(curY, curYj) | mipp::cmpeq(curY, curYj) ) // ( y >= curYj && y < curYi )
-                      &
-                      ( mipp::cmplt(curY, curYi)                            )
-                    )
-                );
+                    // Get the X coordinates
+                    const mipp::Reg<float> curXi = { points[pi + 2 * 0].x(),
+                                                     points[pi + 2 * 1].x(),
+                                                     points[pi + 2 * 2].x(),
+                                                     points[pi + 2 * 3].x() };
 
-                // Calculate the node's coordinate
-                const mipp::Reg<float> deltaYp = curY  - curYi;
-                const mipp::Reg<float> deltaYj = curYj - curYi;
-                const mipp::Reg<float> deltaXj = curXj - curXi;
-                const mipp::Reg<float> interXf = curXi + deltaYp / deltaYj * deltaXj;
+                    const mipp::Reg<float> curXj = { points[pj + 2 * 0].x(),
+                                                     points[pj + 2 * 1].x(),
+                                                     points[pj + 2 * 2].x(),
+                                                     points[pj + 2 * 3].x() };
 
+                    // Compare againts the Y coordinates
+                    const mipp::Msk<mipp::N<float>()> cmpYs = (
+                        ( ( mipp::cmpgt(curY, curYi) | mipp::cmpeq(curY, curYi) ) // ( y >= curYi && y < curYj )
+                          &
+                          ( mipp::cmplt(curY, curYj)                            )
+                        )
+                        |
+                        ( ( mipp::cmpgt(curY, curYj) | mipp::cmpeq(curY, curYj) ) // ( y >= curYj && y < curYi )
+                          &
+                          ( mipp::cmplt(curY, curYi)                            )
+                        )
+                    );
 
-                if(cmp[0]) nodeX[nodes++] = interXf[0];
-                if(cmp[1]) nodeX[nodes++] = interXf[1];
-                if(cmp[2]) nodeX[nodes++] = interXf[2];
-                if(cmp[3]) nodeX[nodes++] = interXf[3];
+                    // Calculate the interpolated X coordinates
+                    const mipp::Reg<float> deltaYp = curY  - curYi;
+                    const mipp::Reg<float> deltaYj = curYj - curYi;
+                    const mipp::Reg<float> deltaXj = curXj - curXi;
+                    const mipp::Reg<float> interXf = curXi + deltaYp / deltaYj * deltaXj;
+
+                    // Bail out if we have produced too many nodes
+                    if( (nodes + vecSize) >= nodeX.size() )
+                        return;
+
+                    // Store the coordinates as needed
+                    if(cmpYs[0]) nodeX[nodes++] = interXf[0];
+                    if(cmpYs[1]) nodeX[nodes++] = interXf[1];
+                    if(cmpYs[2]) nodeX[nodes++] = interXf[2];
+                    if(cmpYs[3]) nodeX[nodes++] = interXf[3];
+                }
             }
+
             /*
-            for(size_t j = remStart; j < pointCount; ++j)
+            // Process the remaining loop using scalar operations
+            for(size_t j = remStart; j <= remEnd; ++j)
             {
                 // Calculate the i
-                size_t i = j + 1;
-                if(i >= pointCount) i = 0;
+                const size_t i = ( j >= (pointCount - 1) ) ? 0 : (j + 1);
 
                 // Get the Y coordinates
                 const float curYi = points[i].y();
@@ -571,6 +566,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 }
             }
             */
+
 #endif
 
             // Skip if there is no node generated
@@ -694,6 +690,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 #endif // WITH_EXPERIMENTAL_GFX
 
     // Raster the anti-aliased outline
+    return;
 
     // Mask
     DrawLineMask xwaaMask;
