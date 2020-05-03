@@ -34,12 +34,7 @@
 
 #include <future>
 
-//#define MIPP_NO_INTRINSICS
-//#include "simd/mipp/mipp.h"
-
-#ifndef MIPP
 #include "simd/xsimd/xsimd.hpp"
-#endif
 
 #endif
 
@@ -297,16 +292,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             std::size_t nodes = 0;
 
 #if 0
-            //*
-        #ifdef MIPP
-            const size_t vecSize  = mipp::N<float>();
-        #else
-            const size_t vecSize  = 4;
-        #endif
-            const size_t loop     = pointCount / vecSize / 2;
-            const size_t loopEnd  = loop * vecSize * 2;
-            const size_t remStart = (loopEnd < pointCount) ? loopEnd : (loopEnd - 1);
-            //*/
+
             // Loop through the points
             for(size_t j = 0; j < pointCount; ++j)
             {
@@ -337,7 +323,9 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     nodeX[nodes++] = interXf;
                 }
             }
+
 #else
+
             // Loop through the points
             /*
             // Scalar
@@ -461,11 +449,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             */
 
             // Calculate the number of loop that can be calculated using SIMD and the number of remaining loop
-        #ifdef MIPP
-            const size_t vecSize  = mipp::N<float>();
-        #else
             const size_t vecSize  = 4;
-        #endif
 
             const size_t loop     = pointCount / vecSize / 2;
             const size_t loopEnd  = loop * vecSize * 2;
@@ -475,11 +459,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             const size_t remEnd   = pointCount - 1;
 
             // Make a vector Y for the current scanline
-        #ifdef MIPP
-            const mipp::Reg<float> curY = y;
-        #else
-            const xsimd::batch<float, 4> curY( y, y, y, y );
-        #endif
+            const xsimd::batch<float, 4> curY( y );
 
         #if 1
             // Loop as many as the number of loop that can be calculated using SIMD operations
@@ -490,86 +470,41 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
                 for(size_t b = 0; b <= bOne; ++b) {
                     // Calculate the real position within the array of points
-                    const size_t pj = b + j * vecSize * 2;
-                    const size_t pi = b + pj + 1;
+                    const size_t pj = j * vecSize * 2 + b;
+                    const size_t pi = pj + 1;
 
                     // Get the Y coordinates
-                #ifdef MIPP
-                    const mipp::Reg<float> curYi = { points[pi + 2 * 0].y(),
-                                                     points[pi + 2 * 1].y(),
-                                                     points[pi + 2 * 2].y(),
-                                                     points[pi + 2 * 3].y() };
+                    const xsimd::batch<float, 4> curYi( points[pi + 0].y(),
+                                                        points[pi + 2].y(),
+                                                        points[pi + 4].y(),
+                                                        points[pi + 6].y() );
 
-                    const mipp::Reg<float> curYj = { points[pj + 2 * 0].y(),
-                                                     points[pj + 2 * 1].y(),
-                                                     points[pj + 2 * 2].y(),
-                                                     points[pj + 2 * 3].y() };
-                #else
-                    const xsimd::batch<float, 4> curYi( points[pi + 2 * 0].y(),
-                                                        points[pi + 2 * 1].y(),
-                                                        points[pi + 2 * 2].y(),
-                                                        points[pi + 2 * 3].y() );
-
-                    const xsimd::batch<float, 4> curYj( points[pj + 2 * 0].y(),
-                                                        points[pj + 2 * 1].y(),
-                                                        points[pj + 2 * 2].y(),
-                                                        points[pj + 2 * 3].y() );
-                #endif
+                    const xsimd::batch<float, 4> curYj( points[pj + 0].y(),
+                                                        points[pj + 2].y(),
+                                                        points[pj + 4].y(),
+                                                        points[pj + 6].y() );
 
                     // Get the X coordinates
-                #ifdef MIPP
-                    const mipp::Reg<float> curXi = { points[pi + 2 * 0].x(),
-                                                     points[pi + 2 * 1].x(),
-                                                     points[pi + 2 * 2].x(),
-                                                     points[pi + 2 * 3].x() };
+                    const xsimd::batch<float, 4> curXi( points[pi + 0].x(),
+                                                        points[pi + 2].x(),
+                                                        points[pi + 4].x(),
+                                                        points[pi + 6].x() );
 
-                    const mipp::Reg<float> curXj = { points[pj + 2 * 0].x(),
-                                                     points[pj + 2 * 1].x(),
-                                                     points[pj + 2 * 2].x(),
-                                                     points[pj + 2 * 3].x() };
-                #else
-                    const xsimd::batch<float, 4> curXi( points[pi + 2 * 0].x(),
-                                                        points[pi + 2 * 1].x(),
-                                                        points[pi + 2 * 2].x(),
-                                                        points[pi + 2 * 3].x() );
-
-                    const xsimd::batch<float, 4> curXj( points[pj + 2 * 0].x(),
-                                                        points[pj + 2 * 1].x(),
-                                                        points[pj + 2 * 2].x(),
-                                                        points[pj + 2 * 3].x() );
-                #endif
+                    const xsimd::batch<float, 4> curXj( points[pj + 0].x(),
+                                                        points[pj + 2].x(),
+                                                        points[pj + 4].x(),
+                                                        points[pj + 6].x() );
 
                     // Compare againts the Y coordinates
-                #ifdef MIPP
-                    const mipp::Msk<mipp::N<float>()> cmpYs = (
-                        ( ( mipp::cmpgt(curY, curYi) | mipp::cmpeq(curY, curYi) ) // ( y >= curYi && y < curYj )
-                          &
-                          ( mipp::cmplt(curY, curYj)                            )
-                        )
-                        |
-                        ( ( mipp::cmpgt(curY, curYj) | mipp::cmpeq(curY, curYj) ) // ( y >= curYj && y < curYi )
-                          &
-                          ( mipp::cmplt(curY, curYi)                            )
-                        )
-                    );
-                #else
                     const xsimd::batch_bool<float, 4>& cmpYs = (
                         ( curY >= curYi && curY < curYj ) || ( curY >= curYj && curY < curYi )
                     );
-                #endif
 
                     // Calculate the interpolated X coordinates
-                #ifdef MIPP
-                    const mipp::Reg<float> deltaYp = curY  - curYi;
-                    const mipp::Reg<float> deltaYj = curYj - curYi;
-                    const mipp::Reg<float> deltaXj = curXj - curXi;
-                    const mipp::Reg<float> interXf = curXi + deltaYp / deltaYj * deltaXj;
-                #else
                     const xsimd::batch<float, 4> deltaYp = curY  - curYi;
                     const xsimd::batch<float, 4> deltaYj = curYj - curYi;
                     const xsimd::batch<float, 4> deltaXj = curXj - curXi;
                     const xsimd::batch<float, 4> interXf = curXi + deltaYp / deltaYj * deltaXj;
-                #endif
 
                     // Bail out if we have produced too many nodes
                     if( (nodes + vecSize) >= nodeX.size() )
@@ -616,6 +551,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 }
             }
         #endif
+
 #endif
 
             // Skip if there is no node generated

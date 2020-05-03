@@ -34,7 +34,7 @@ if $(WITH_EXPERIMENTAL_GFX)
 
     if $(TARGET_OSPLAT:L) = x86_64
     {
-        CPU_FLAGS = -std=c++11 -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mno-avx -mno-avx2 -mno-fma -Wno-narrowing ;
+        CPU_FLAGS = -std=c++11 -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mfma -mno-avx -mno-avx2 ;
     }
 
     SubDirCcFlags  [ FGeneric $(CPU_FLAGS) ] ;
