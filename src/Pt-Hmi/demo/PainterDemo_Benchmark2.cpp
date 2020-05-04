@@ -41,7 +41,7 @@ class Benchmark2View : public Pt::Hmi::Control
                 resIP1 = onPaintContent(ip1, "IP1", 0, 0.0f);
                 resIP2 = onPaintContent(ip2, "IP2", 0, 0.0f);
             }
-            
+
             // use this to compare against native painter
             // painter.setBrush(background);
             // painter.fillRect(imageRect);
@@ -51,7 +51,7 @@ class Benchmark2View : public Pt::Hmi::Control
             ip1.setBrush(background);
             ip1.fillRect(imageRect);
             onPaintContent(ip1, "IP1", resIP1, 1.0f);
-            painter.drawImage(PointF(2, 2), image1);    
+            painter.drawImage(PointF(2, 2), image1);
 
             ip2.setBrush(background);
             ip2.fillRect(imageRect);
