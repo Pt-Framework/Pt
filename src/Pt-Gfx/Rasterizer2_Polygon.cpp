@@ -282,6 +282,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 #ifdef WITH_EXPERIMENTAL_GFX
 
     auto lambdaWorker = [&](Pt::int32_t y1, Pt::int32_t y2) {
+        size_t tot = 0;
+
         // Loop through the rows of the image
         for(Pt::int32_t y = y1; y <= y2; ++y)
         {
@@ -297,8 +299,19 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // Loop through the points
             for(size_t j = 0; j < pointCount; ++j)
             {
+                //++tot;
                 // Calculate the i
                 const size_t i = ( j >= (pointCount - 1) ) ? 0 : (j + 1);
+
+                #if 0
+                if(y == y2 - 10) {
+                    printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
+                        j, i,
+                        points[j].x(), points[j].y(),
+                        points[i].x(), points[i].y()
+                    );
+                }
+                #endif
 
                 // Get the Y coordinates
                 const float curYi = points[i].y();
@@ -310,6 +323,16 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     // Bail out if we have produced too many nodes
                     if( nodes >= nodeX.size() )
                         return;
+
+                    #if 0
+                    if(y == y2 - 10) {
+                        printf("IN_Y   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
+                            j, i,
+                            points[j].x(), points[j].y(),
+                            points[i].x(), points[i].y()
+                        );
+                    }
+                    #endif
 
                     // Get the X coordinates
                     const float curXi = points[i].x();
@@ -323,9 +346,16 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
                     nodeX[nodes++] = interXf;
 
-                    //if(y == y2 - 10) {
-                    //    printf("%03d %03d -> %03d\n", (int) j, (int) i, (int) interXf);
-                    //}
+                    #if 0
+                    if(y == y2 - 10) {
+                        printf("IN_X   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ->   %05.1f   [%03zd]\n",
+                            j, i,
+                            points[j].x(), points[j].y(),
+                            points[i].x(), points[i].y(),
+                            interXf, nodes
+                        );
+                    }
+                    #endif
                 }
             }
 
@@ -345,30 +375,30 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             //  6       ji
             //  7        ji
             //  8         ji
-            // 10          ji
-            // 11           ji
-            // 12            ji
-            // 13             ji
-            // 14              ji
-            // 15               ji
-            // 16                ji
-            // 17                 ji
-            // 18                  ji
-            // 19                   ji
-            // 20                    ji
-            // 21                     ji
-            // 22                      ji
-            // 23                       ji
-            // 24                        ji
-            // 25                         ji
-            // 26                          ji
-            // 27                           ji
-            // 28                            ji
-            // 29                             ji
-            // 30                              ji
-            // 31                               ji
-            // 32                                ji
-            // 33 i                               j
+            //  9          ji
+            // 10           ji
+            // 11            ji
+            // 12             ji
+            // 13              ji
+            // 14               ji
+            // 15                ji
+            // 16                 ji
+            // 17                  ji
+            // 18                   ji
+            // 19                    ji
+            // 20                     ji
+            // 21                      ji
+            // 22                       ji
+            // 23                        ji
+            // 24                         ji
+            // 25                          ji
+            // 26                           ji
+            // 27                            ji
+            // 28                             ji
+            // 29                              ji
+            // 30                               ji
+            // 31                                ji
+            // 32 i                               j
             //    000000000011111111112222222222333
             //    012345678901234567890123456789012
             //
@@ -389,16 +419,22 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             //    012345678901234567890123456789012
             //
             // VectorSize = 4
-            //    00000000001111111111222222222233  PointCount = 32   Loop     = PointCount / VecSize / 2 = 4
-            //    01234567890123456789012345678901                    LoopEnd  = Loop * VecSize * 2       = 32
-            // 0a jijijiji                                            LastB    = (LoopEnd < PointCount)   = false
-            // 0b  jijijiji                                           RemStart = Loop * VecSize * 2 - 1   = 31
-            // 1a         jijijiji                                    RemEnd   = PointCount - 1           = 31
+            //    00000000001111111111222222222233  PointCount = 32   Loop     = PointCount / VecSize / 2  = 4
+            //    01234567890123456789012345678901                    LoopEnd  = Loop * VecSize * 2        = 32
+            // 0a jijijiji                                            LastB    = (LoopEnd < PointCount)    = false
+            // 0b  jijijiji                                           RemStart = LoopEnd - VecSize * 2 + 1 = 25
+            // 1a         jijijiji                                    RemEnd   = PointCount - 1            = 31
             // 1b          jijijiji
             // 2a                 jijijiji
             // 2b                  jijijiji
             // 3a                         jijijiji
-            // R0 i                              j
+            // R0                          ji
+            // R1                           ji
+            // R2                            ji
+            // R3                             ji
+            // R4                              ji
+            // R5                               ji
+            // R6 i                              j
             //    00000000001111111111222222222233
             //    01234567890123456789012345678901
             //
@@ -430,12 +466,26 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             //    012345678901234567890123456789012
             //
             // VectorSize = 8
-            //    00000000001111111111222222222233  PointCount = 32   Loop     = PointCount / VecSize / 2 =  2
-            //    01234567890123456789012345678901                    LoopEnd  = Loop * VecSize * 2       = 32
-            // 0a jijijijijijijiji                                    LastB    = (LoopEnd < PointCount)   = false
-            // 0b  jijijijijijijiji                                   RemStart = Loop * VecSize * 2 - 1   = 31
-            // 1a                 jijijijijijijiji                    RemEnd   = PointCount - 1           = 31
-            // R0 i                              j
+            //    00000000001111111111222222222233  PointCount = 32   Loop     = PointCount / VecSize / 2  =  2
+            //    01234567890123456789012345678901                    LoopEnd  = Loop * VecSize * 2        = 32
+            // 0a jijijijijijijiji                                    LastB    = (LoopEnd < PointCount)    = false
+            // 0b  jijijijijijijiji                                   RemStart = LoopEnd - VecSize * 2 + 1 = 17
+            // 1a                 jijijijijijijiji                    RemEnd   = PointCount - 1            = 31
+            // R0                  ji
+            // R1                   ji
+            // R2                    ji
+            // R3                     ji
+            // R4                      ji
+            // R5                       ji
+            // R6                        ji
+            // R7                         ji
+            // R8                          ji
+            // R9                           ji
+            // RA                            ji
+            // RB                             ji
+            // RC                              ji
+            // RD                               ji
+            // RE i                              j
             //    00000000001111111111222222222233
             //    01234567890123456789012345678901
             //
@@ -467,7 +517,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             const size_t loopEnd  = loop * vecSize * 2;
             const bool   lastB    = (loopEnd < pointCount);
 
-            const size_t remStart = lastB ? loopEnd : (loopEnd - 1);
+            const size_t remStart = lastB ? loopEnd : (loopEnd - vecSize * 2 + 1);
             const size_t remEnd   = pointCount - 1;
 
             // Make a vector Y for the current scanline
@@ -481,12 +531,37 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 const size_t bOne = ( lastB || ( j < (loop - 1) ) ) ? 1 : 0;
 
                 for(size_t b = 0; b <= bOne; ++b) {
+                    tot += vecSize;
+
                     // Calculate the real position within the array of points
                     const size_t pj = j * vecSize * 2 + b;
-                          size_t pi = pj + 1;
+                    const size_t pi = pj + 1;
+                  //if(pi >= (pointCount - 1)) pi = 0;
 
-                          if(pi >= (pointCount - 1)) pi = 0;
-
+                    #if 0
+                    if(y == y2 - 10) {
+                        printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
+                            pj + 0, pi + 0,
+                            points[pj + 0].x(), points[pj + 0].y(),
+                            points[pi + 0].x(), points[pi + 0].y()
+                        );
+                        printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
+                            pj + 2, pi + 2,
+                            points[pj + 2].x(), points[pj + 2].y(),
+                            points[pi + 2].x(), points[pi + 2].y()
+                        );
+                        printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
+                            pj + 4, pi + 4,
+                            points[pj + 4].x(), points[pj + 4].y(),
+                            points[pi + 4].x(), points[pi + 4].y()
+                        );
+                        printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
+                            pj + 6, pi + 6,
+                            points[pj + 6].x(), points[pj + 6].y(),
+                            points[pi + 6].x(), points[pi + 6].y()
+                        );
+                    }
+                    #endif
 
                     // Get the Y coordinates
                     /*
@@ -568,13 +643,28 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     for(int k = 0; k < vecSize; ++k) {
                         if( ( y >= scurYi[k] && y < scurYj[k] ) || ( y >= scurYj[k] && y < scurYi[k] ) ) {
                             if( nodes >= nodeX.size() ) return;
-
                             nodeX[nodes++] = sinterXf[k];
 
+                            #if 0
                             if(y == y2 - 10) {
-                                printf("%03d %03d -> %03d\n", (int) pj + k * 2, (int) pi + k * 2, sinterXf[k]);
+                                printf("IN_Y   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
+                                    pj + k * 2, pi + k * 2,
+                                    points[pj + k * 2].x(), points[pj + k * 2].y(),
+                                    points[pi + k * 2].x(), points[pi + k * 2].y()
+                                );
                             }
+                            #endif
 
+                            #if 0
+                            if(y == y2 - 10) {
+                                printf("IN_X   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ->   %05.1f   [%03zd]\n",
+                                    pj + k * 2, pi + k * 2,
+                                    points[pj + k * 2].x(), points[pj + k * 2].y(),
+                                    points[pi + k * 2].x(), points[pi + k * 2].y(),
+                                    sinterXf[k], nodes
+                                );
+                            }
+                            #endif
                         }
                     }
                 }
@@ -585,8 +675,19 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // Process the remaining loop using scalar operations
             for(size_t j = remStart; j <= remEnd; ++j)
             {
+                ++tot;
                 // Calculate the i
                 const size_t i = ( j >= (pointCount - 1) ) ? 0 : (j + 1);
+
+                #if 0
+                if(y == y2 - 10) {
+                    printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ###\n",
+                        j, i,
+                        points[j].x(), points[j].y(),
+                        points[i].x(), points[i].y()
+                    );
+                }
+                #endif
 
                 // Get the Y coordinates
                 const float curYi = points[i].y();
@@ -599,6 +700,16 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     if( nodes >= nodeX.size() )
                         return;
 
+                    #if 0
+                    if(y == y2 - 10) {
+                        printf("IN_Y   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ###\n",
+                            j, i,
+                            points[j].x(), points[j].y(),
+                            points[i].x(), points[i].y()
+                        );
+                    }
+                    #endif
+
                     // Get the X coordinates
                     const float curXi = points[i].x();
                     const float curXj = points[j].x();
@@ -610,10 +721,16 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     const float interXf = curXi + deltaYp / deltaYj * deltaXj;
 
                     nodeX[nodes++] = interXf;
-
+                    #if 0
                     if(y == y2 - 10) {
-                        printf("%03d %03d -> %03d\n", (int) j, (int) i, (int) interXf);
+                        printf("IN_X   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ->   %05.1f   [%03zd]   ###\n",
+                            j, i,
+                            points[j].x(), points[j].y(),
+                            points[i].x(), points[i].y(),
+                            interXf, nodes
+                        );
                     }
+                    #endif
                 }
             }
         #endif
@@ -649,6 +766,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
             }
         }
+
+        printf("$$$$$ %zd\n", tot);
     };
 
     lambdaWorker(minY, maxY);
