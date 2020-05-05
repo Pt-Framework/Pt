@@ -35,7 +35,7 @@ class Benchmark2View : public Pt::Hmi::Control
             static Pt::uint64_t resIP1 = 0;
             static Pt::uint64_t resIP2 = 0;
 
-            static bool doBenchmark = true;
+            static bool doBenchmark = false;
             if(doBenchmark) {
                 doBenchmark = false;
                 resIP1 = onPaintContent(ip1, "IP1", 0, 0.0f);

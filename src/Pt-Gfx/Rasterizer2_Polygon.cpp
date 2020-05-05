@@ -282,7 +282,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 #ifdef WITH_EXPERIMENTAL_GFX
 
     auto lambdaWorker = [&](Pt::int32_t y1, Pt::int32_t y2) {
-        size_t tot = 0;
+        size_t __TOT__ = 0;
 
         // Loop through the rows of the image
         for(Pt::int32_t y = y1; y <= y2; ++y)
@@ -299,19 +299,10 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // Loop through the points
             for(size_t j = 0; j < pointCount; ++j)
             {
-                //++tot;
+                ++__TOT__;
+
                 // Calculate the i
                 const size_t i = ( j >= (pointCount - 1) ) ? 0 : (j + 1);
-
-                #if 0
-                if(y == y2 - 10) {
-                    printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
-                        j, i,
-                        points[j].x(), points[j].y(),
-                        points[i].x(), points[i].y()
-                    );
-                }
-                #endif
 
                 // Get the Y coordinates
                 const float curYi = points[i].y();
@@ -324,16 +315,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     if( nodes >= nodeX.size() )
                         return;
 
-                    #if 0
-                    if(y == y2 - 10) {
-                        printf("IN_Y   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
-                            j, i,
-                            points[j].x(), points[j].y(),
-                            points[i].x(), points[i].y()
-                        );
-                    }
-                    #endif
-
                     // Get the X coordinates
                     const float curXi = points[i].x();
                     const float curXj = points[j].x();
@@ -345,17 +326,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     const float interXf = curXi + deltaYp / deltaYj * deltaXj;
 
                     nodeX[nodes++] = interXf;
-
-                    #if 0
-                    if(y == y2 - 10) {
-                        printf("IN_X   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ->   %05.1f   [%03zd]\n",
-                            j, i,
-                            points[j].x(), points[j].y(),
-                            points[i].x(), points[i].y(),
-                            interXf, nodes
-                        );
-                    }
-                    #endif
                 }
             }
 
@@ -503,13 +473,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             //    012345678901234567890
             */
 
-            // PointCount = 248
-            // Loop       =  31
-            // LoopEnd    = 248
-            // LastB      = false
-            // RemStart   = 247
-            // RemEnd     = 247
-
             // Calculate the number of loop that can be calculated using SIMD and the number of remaining loop
             const size_t vecSize  = 4;
 
@@ -521,9 +484,9 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             const size_t remEnd   = pointCount - 1;
 
             // Make a vector Y for the current scanline
-            //const xsimd::batch<float, 4> curY( y );
+            const xsimd::batch<float, 4> curY( y );
 
-        #if 1
+            #if 1
             // Loop as many as the number of loop that can be calculated using SIMD operations
             for(size_t j = 0; j < loop; ++j) {
 
@@ -531,40 +494,13 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 const size_t bOne = ( lastB || ( j < (loop - 1) ) ) ? 1 : 0;
 
                 for(size_t b = 0; b <= bOne; ++b) {
-                    tot += vecSize;
+                    __TOT__ += vecSize;
 
                     // Calculate the real position within the array of points
                     const size_t pj = j * vecSize * 2 + b;
                     const size_t pi = pj + 1;
-                  //if(pi >= (pointCount - 1)) pi = 0;
-
-                    #if 0
-                    if(y == y2 - 10) {
-                        printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
-                            pj + 0, pi + 0,
-                            points[pj + 0].x(), points[pj + 0].y(),
-                            points[pi + 0].x(), points[pi + 0].y()
-                        );
-                        printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
-                            pj + 2, pi + 2,
-                            points[pj + 2].x(), points[pj + 2].y(),
-                            points[pi + 2].x(), points[pi + 2].y()
-                        );
-                        printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
-                            pj + 4, pi + 4,
-                            points[pj + 4].x(), points[pj + 4].y(),
-                            points[pi + 4].x(), points[pi + 4].y()
-                        );
-                        printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
-                            pj + 6, pi + 6,
-                            points[pj + 6].x(), points[pj + 6].y(),
-                            points[pi + 6].x(), points[pi + 6].y()
-                        );
-                    }
-                    #endif
 
                     // Get the Y coordinates
-                    /*
                     const xsimd::batch<float, 4> curYi( points[pi + 0].y(),
                                                         points[pi + 2].y(),
                                                         points[pi + 4].y(),
@@ -585,109 +521,39 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                                                         points[pj + 2].x(),
                                                         points[pj + 4].x(),
                                                         points[pj + 6].x() );
-                    */
-
-                    // ### Check with scalar ###
-                    const float scurYi[4] = { points[pi + 0].y(),
-                                              points[pi + 2].y(),
-                                              points[pi + 4].y(),
-                                              points[pi + 6].y() };
-
-                    const float scurYj[4] = { points[pj + 0].y(),
-                                              points[pj + 2].y(),
-                                              points[pj + 4].y(),
-                                              points[pj + 6].y() };
-
-                    const float scurXi[4] = { points[pi + 0].x(),
-                                              points[pi + 2].x(),
-                                              points[pi + 4].x(),
-                                              points[pi + 6].x() };
-
-                    const float scurXj[4] = { points[pj + 0].x(),
-                                              points[pj + 2].x(),
-                                              points[pj + 4].x(),
-                                              points[pj + 6].x() };
 
                     // Compare againts the Y coordinates
-                    //const xsimd::batch_bool<float, 4>& cmpYs = (
-                    //    ( curY >= curYi && curY < curYj ) || ( curY >= curYj && curY < curYi )
-                    //);
+                    const xsimd::batch_bool<float, 4>& cmpYs = (
+                        ( curY >= curYi && curY < curYj ) || ( curY >= curYj && curY < curYi )
+                    );
 
                     // Calculate the interpolated X coordinates
-                    //const xsimd::batch<float, 4> deltaYp = curY  - curYi;
-                    //const xsimd::batch<float, 4> deltaYj = curYj - curYi;
-                    //const xsimd::batch<float, 4> deltaXj = curXj - curXi;
-                    //const xsimd::batch<float, 4> interXf = curXi + deltaYp / deltaYj * deltaXj;
-
-                    // ### Check with scalar ###
-                    float sdeltaYp[4], sdeltaYj[4], sdeltaXj[4], sinterXf[4];
-
-                    for(int k = 0; k < vecSize; ++k) {
-                        sdeltaYp[k] = y         - scurYi[k];
-                        sdeltaYj[k] = scurYj[k] - scurYi[k];
-                        sdeltaXj[k] = scurXj[k] - scurXi[k];
-                        sinterXf[k] = scurXi[k] + sdeltaYp[k] / sdeltaYj[k] * sdeltaXj[k];
-                    }
+                    const xsimd::batch<float, 4> deltaYp = curY  - curYi;
+                    const xsimd::batch<float, 4> deltaYj = curYj - curYi;
+                    const xsimd::batch<float, 4> deltaXj = curXj - curXi;
+                    const xsimd::batch<float, 4> interXf = curXi + deltaYp / deltaYj * deltaXj;
 
                     // Bail out if we have produced too many nodes
-                    //if( (nodes + vecSize) >= nodeX.size() )
-                    //    return;
+                    if( (nodes + vecSize) >= nodeX.size() )
+                        return;
 
                     // Store the coordinates as needed
-                    //if(cmpYs[0]) nodeX[nodes++] = interXf[0];
-                    //if(cmpYs[1]) nodeX[nodes++] = interXf[1];
-                    //if(cmpYs[2]) nodeX[nodes++] = interXf[2];
-                    //if(cmpYs[3]) nodeX[nodes++] = interXf[3];
-
-                    // ### Check with scalar ###
-                    for(int k = 0; k < vecSize; ++k) {
-                        if( ( y >= scurYi[k] && y < scurYj[k] ) || ( y >= scurYj[k] && y < scurYi[k] ) ) {
-                            if( nodes >= nodeX.size() ) return;
-                            nodeX[nodes++] = sinterXf[k];
-
-                            #if 0
-                            if(y == y2 - 10) {
-                                printf("IN_Y   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)\n",
-                                    pj + k * 2, pi + k * 2,
-                                    points[pj + k * 2].x(), points[pj + k * 2].y(),
-                                    points[pi + k * 2].x(), points[pi + k * 2].y()
-                                );
-                            }
-                            #endif
-
-                            #if 0
-                            if(y == y2 - 10) {
-                                printf("IN_X   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ->   %05.1f   [%03zd]\n",
-                                    pj + k * 2, pi + k * 2,
-                                    points[pj + k * 2].x(), points[pj + k * 2].y(),
-                                    points[pi + k * 2].x(), points[pi + k * 2].y(),
-                                    sinterXf[k], nodes
-                                );
-                            }
-                            #endif
-                        }
-                    }
+                    if(cmpYs[0]) nodeX[nodes++] = interXf[0];
+                    if(cmpYs[1]) nodeX[nodes++] = interXf[1];
+                    if(cmpYs[2]) nodeX[nodes++] = interXf[2];
+                    if(cmpYs[3]) nodeX[nodes++] = interXf[3];
                 }
             }
-        #endif
+            #endif
 
-        #if 1
+            #if 1
             // Process the remaining loop using scalar operations
             for(size_t j = remStart; j <= remEnd; ++j)
             {
-                ++tot;
+                ++__TOT__;
+
                 // Calculate the i
                 const size_t i = ( j >= (pointCount - 1) ) ? 0 : (j + 1);
-
-                #if 0
-                if(y == y2 - 10) {
-                    printf("j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ###\n",
-                        j, i,
-                        points[j].x(), points[j].y(),
-                        points[i].x(), points[i].y()
-                    );
-                }
-                #endif
 
                 // Get the Y coordinates
                 const float curYi = points[i].y();
@@ -700,16 +566,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     if( nodes >= nodeX.size() )
                         return;
 
-                    #if 0
-                    if(y == y2 - 10) {
-                        printf("IN_Y   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ###\n",
-                            j, i,
-                            points[j].x(), points[j].y(),
-                            points[i].x(), points[i].y()
-                        );
-                    }
-                    #endif
-
                     // Get the X coordinates
                     const float curXi = points[i].x();
                     const float curXj = points[j].x();
@@ -721,19 +577,9 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     const float interXf = curXi + deltaYp / deltaYj * deltaXj;
 
                     nodeX[nodes++] = interXf;
-                    #if 0
-                    if(y == y2 - 10) {
-                        printf("IN_X   j = %03zd   i = %03zd   ->   (%05.1f, %05.1f)   (%05.1f, %05.1f)   ->   %05.1f   [%03zd]   ###\n",
-                            j, i,
-                            points[j].x(), points[j].y(),
-                            points[i].x(), points[i].y(),
-                            interXf, nodes
-                        );
-                    }
-                    #endif
                 }
             }
-        #endif
+            #endif
 
 #endif
 
@@ -767,7 +613,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             }
         }
 
-        printf("$$$$$ %zd\n", tot);
+        printf("$$$$$ %zd\n", __TOT__);
     };
 
     lambdaWorker(minY, maxY);
