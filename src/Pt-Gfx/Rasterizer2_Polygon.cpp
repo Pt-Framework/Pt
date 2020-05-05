@@ -282,7 +282,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 #ifdef WITH_EXPERIMENTAL_GFX
 
     auto lambdaWorker = [&](Pt::int32_t y1, Pt::int32_t y2) {
-        //size_t __TOT__ = 0;
 
         // Loop through the rows of the image
         for(Pt::int32_t y = y1; y <= y2; ++y)
@@ -293,43 +292,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
             // Build a list of nodes using the coordinates from the polygon
             std::size_t nodes = 0;
-
-#if 0
-
-            // Loop through the points
-            for(size_t j = 0; j < pointCount; ++j)
-            {
-                //++__TOT__;
-
-                // Calculate the i
-                const size_t i = ( j >= (pointCount - 1) ) ? 0 : (j + 1);
-
-                // Get the Y coordinates
-                const float curYi = points[i].y();
-                const float curYj = points[j].y();
-
-                // Check againts the Y coordinates
-                if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
-                {
-                    // Bail out if we have produced too many nodes
-                    if( nodes >= nodeX.size() )
-                        return;
-
-                    // Get the X coordinates
-                    const float curXi = points[i].x();
-                    const float curXj = points[j].x();
-
-                    // Calculate the node's coordinate
-                    const float deltaYp = y     - curYi;
-                    const float deltaYj = curYj - curYi;
-                    const float deltaXj = curXj - curXi;
-                    const float interXf = curXi + deltaYp / deltaYj * deltaXj;
-
-                    nodeX[nodes++] = interXf;
-                }
-            }
-
-#else
 
             /*
             // Scalar
@@ -486,7 +448,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
             // Make a vector Y for the current scanline
             const xsimd::batch<float, 4> curY( y );
 
-            #if 1
             // Loop as many as the number of loop that can be calculated using SIMD operations
             for(size_t j = 0; j < loop; ++j) {
 
@@ -494,12 +455,65 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 const size_t bOne = ( lastB || ( j < (loop - 1) ) ) ? 1 : 0;
 
                 for(size_t b = 0; b <= bOne; ++b) {
-                    //__TOT__ += vecSize;
-
                     // Calculate the real position within the array of points
                     const size_t pj = j * vecSize * 2 + b;
                     const size_t pi = pj + 1;
 
+                    /*
+                    //
+                    // j = 0
+                    //
+                    // i = 1
+                    //
+                    //       0         1         2         3         4         5         6         7
+                    // MEM   px0  py0  px1  py1  px2  py2  px3  py3  px4  py4  px5  py5  px6  py6  px7  py7
+                    // Yi                   Yi0                 Yi1                 Yi2                 Yi3
+                    // Yj         Yj0                 Yj1                Yj2                  Yj3
+                    // Xi              Xi0                 Xi1                 Xi2                 Xi3
+                    // Xj    Xj0                 Xj1                 Xj2                 Xj3
+                    //
+                    // GET2  0         1         2         3         4         5         6         7
+                    //       Xj0  Yj0  Xi0  Yi0  Xj1  Yj1  Xi1  Yi1  Xj2  Yj2  Xi2  Yi2  Xj3  Yj3  Xi3  Yi3
+                    //
+                    // GET4  0                   1                   2                   3
+                    //       Xj0  Yj0  Xi0  Yi0  Xj1  Yj1  Xi1  Yi1  Xj2  Yj2  Xi2  Yi2  Xj3  Yj3  Xi3  Yi3
+                    */
+
+                    double* getPtr = (double*) &points[pj];
+
+                    #if 1
+
+                    const xsimd::batch<double, 4> get0(getPtr     );
+                    const xsimd::batch<double, 4> get1(getPtr +  4);
+                    const xsimd::batch<double, 4> get2(getPtr +  8);
+                    const xsimd::batch<double, 4> get3(getPtr + 12);
+
+                    const xsimd::batch<float, 4> curYi( get0[3], get1[3], get2[3], get3[3] );
+                    const xsimd::batch<float, 4> curYj( get0[1], get1[1], get2[1], get3[1] );
+
+                    const xsimd::batch<float, 4> curXi( get0[2], get1[2], get2[2], get3[2] );
+                    const xsimd::batch<float, 4> curXj( get0[0], get1[0], get2[0], get3[0] );
+
+                    #else
+
+                    const xsimd::batch<double, 2> get0(getPtr     );
+                    const xsimd::batch<double, 2> get1(getPtr +  2);
+                    const xsimd::batch<double, 2> get2(getPtr +  4);
+                    const xsimd::batch<double, 2> get3(getPtr +  6);
+                    const xsimd::batch<double, 2> get4(getPtr +  8);
+                    const xsimd::batch<double, 2> get5(getPtr + 10);
+                    const xsimd::batch<double, 2> get6(getPtr + 12);
+                    const xsimd::batch<double, 2> get7(getPtr + 14);
+
+                    const xsimd::batch<float, 4> curYi( get1[1], get3[1], get5[1], get7[1] );
+                    const xsimd::batch<float, 4> curYj( get0[1], get2[1], get4[1], get6[1] );
+
+                    const xsimd::batch<float, 4> curXi( get1[0], get3[0], get5[0], get7[0] );
+                    const xsimd::batch<float, 4> curXj( get0[0], get2[0], get4[0], get6[0] );
+
+                    #endif
+
+                    #if 0
                     // Get the Y coordinates
                     const xsimd::batch<float, 4> curYi( points[pi + 0].y(),
                                                         points[pi + 2].y(),
@@ -521,6 +535,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                                                         points[pj + 2].x(),
                                                         points[pj + 4].x(),
                                                         points[pj + 6].x() );
+                    #endif
 
                     // Compare againts the Y coordinates
                     const xsimd::batch_bool<float, 4>& cmpYs = (
@@ -544,14 +559,10 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     if(cmpYs[3]) nodeX[nodes++] = interXf[3];
                 }
             }
-            #endif
 
-            #if 1
             // Process the remaining loop using scalar operations
             for(size_t j = remStart; j <= remEnd; j += remInc)
             {
-                //++__TOT__;
-
                 // Calculate the i
                 const size_t i = ( j >= (pointCount - 1) ) ? 0 : (j + 1);
 
@@ -579,9 +590,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     nodeX[nodes++] = interXf;
                 }
             }
-            #endif
-
-#endif
 
             // Skip if there is no node generated
             if( !nodes ) continue;
@@ -612,21 +620,19 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
             }
         }
-
-        //printf("$$$$$ %zd\n", __TOT__);
     };
 
-    lambdaWorker(minY, maxY);
+    //lambdaWorker(minY, maxY);
 
-    //auto worker1 = std::async(lambdaWorker, minY            , maxY * 1 / 4);
-    //auto worker2 = std::async(lambdaWorker, maxY * 1 / 4 + 1, maxY * 2 / 4);
-    //auto worker3 = std::async(lambdaWorker, maxY * 2 / 4 + 1, maxY * 3 / 4);
-    //auto worker4 = std::async(lambdaWorker, maxY * 3 / 4 + 1, maxY        );
+    auto worker1 = std::async(lambdaWorker, minY            , maxY * 1 / 4);
+    auto worker2 = std::async(lambdaWorker, maxY * 1 / 4 + 1, maxY * 2 / 4);
+    auto worker3 = std::async(lambdaWorker, maxY * 2 / 4 + 1, maxY * 3 / 4);
+    auto worker4 = std::async(lambdaWorker, maxY * 3 / 4 + 1, maxY        );
 
-    //worker1.wait();
-    //worker2.wait();
-    //worker3.wait();
-    //worker4.wait();
+    worker1.wait();
+    worker2.wait();
+    worker3.wait();
+    worker4.wait();
 
 #else // WITH_EXPERIMENTAL_GFX
 
