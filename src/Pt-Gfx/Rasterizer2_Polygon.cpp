@@ -86,6 +86,15 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
     std::vector<float>& nodeX = _polygonNodeX;
     nodeX.resize(pointCount * 2);
 
+    // Convert from PointF* to simple floats
+    _polygonVecX.resize(pointCount);
+    _polygonVecY.resize(pointCount);
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        _polygonVecX[i] = points[i].x();
+        _polygonVecY[i] = points[i].y();
+    }
+
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
     {
@@ -102,8 +111,8 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
         for(size_t i = 0; i < pointCount; ++i)
         {
             // Get the coordinates
-            const float curYi = points[i].y();
-            const float curYj = points[j].y();
+            const float curYi = _polygonVecY[i];
+            const float curYj = _polygonVecY[j];
 
             // Check againts the Y coordinates
             if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
@@ -113,8 +122,8 @@ void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount
                     return;
 
                 // Get the X coordinates
-                const float curXi = points[i].x();
-                const float curXj = points[j].x();
+                const float curXi = _polygonVecX[i];
+                const float curXj = _polygonVecX[j];
 
                 // Calculate the node's coordinate
                 const float deltaYp = y     - curYi;
