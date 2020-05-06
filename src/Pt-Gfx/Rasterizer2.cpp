@@ -99,7 +99,9 @@ Rasterizer2::Rasterizer2(Image& image)
     _imageType.height  = 12;
     _imageType.flags   =  FT_LOAD_DEFAULT;
 
-    // Initial size of nodeX used within the polygon rasterizers
+    // Initial size of the buffers used by the polygon rasterizers
+    _polygonVecX .resize(100);
+    _polygonVecY .resize(100);
     _polygonNodeX.resize(500);
 }
 

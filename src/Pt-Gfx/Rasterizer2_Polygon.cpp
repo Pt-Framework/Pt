@@ -273,6 +273,15 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     std::vector<float>& nodeX = _polygonNodeX;
     nodeX.resize(pointCount * 2);
 
+    // Convert from PointF* to simple floats
+    _polygonVecX.resize(pointCount);
+    _polygonVecY.resize(pointCount);
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        _polygonVecX[i] = points[i].x();
+        _polygonVecY[i] = points[i].y();
+    }
+
     // List of polygon scanlines
     PolygonScanlines& scanlines = _polygonScanlines;
 
@@ -280,15 +289,6 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         scanlines.resize( (maxY - minY) + 1 + 4 );
 
 #ifdef WITH_EXPERIMENTAL_GFX
-
-    // Convert from PointF* to simple floats
-    std::vector<float> vecX(pointCount);
-    std::vector<float> vecY(pointCount);
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        vecX[i] = points[i].x();
-        vecY[i] = points[i].y();
-    }
 
     auto lambdaWorker = [&](Pt::int32_t y1, Pt::int32_t y2) {
 
@@ -485,10 +485,10 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     // GET  Y0                  Y1
                     //      0    1    2    3    0    1    2    3
                     */
-                    const xsimd::batch<float, 4> getX0(&vecX[pj    ]);
-                    const xsimd::batch<float, 4> getX1(&vecX[pj + 4]);
-                    const xsimd::batch<float, 4> getY0(&vecY[pj    ]);
-                    const xsimd::batch<float, 4> getY1(&vecY[pj + 4]);
+                    const xsimd::batch<float, 4> getX0(&_polygonVecX[pj    ]);
+                    const xsimd::batch<float, 4> getX1(&_polygonVecX[pj + 4]);
+                    const xsimd::batch<float, 4> getY0(&_polygonVecY[pj    ]);
+                    const xsimd::batch<float, 4> getY1(&_polygonVecY[pj + 4]);
 
                     const xsimd::batch<float, 4> curYi( getY0[1], getY0[3], getY1[1], getY1[3] );
                     const xsimd::batch<float, 4> curYj( getY0[0], getY0[2], getY1[0], getY1[2] );
@@ -611,8 +611,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
         for(size_t i = 0; i < pointCount; ++i)
         {
             // Get the Y coordinates
-            const float curYi = points[i].y();
-            const float curYj = points[j].y();
+            const float curYi = _polygonVecY[i];
+            const float curYj = _polygonVecY[j];
 
             // Check againts the Y coordinates
             if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
@@ -622,8 +622,8 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     return;
 
                 // Get the X coordinates
-                const float curXi = points[i].x();
-                const float curXj = points[j].x();
+                const float curXi = _polygonVecX[i];
+                const float curXj = _polygonVecX[j];
 
                 // Calculate the node's coordinate
                 const float deltaYp = y     - curYi;
@@ -682,15 +682,17 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     for(size_t i = 0; i < pc1; ++i)
     {
         rasterPolygonBorderXWAA_F2(
-            points[i].x(),     points[i].y(),
-            points[i + 1].x(), points[i + 1].y(),
-            color, minX, minY - 1, scanlines, xwaaMask );
+            _polygonVecX[i    ], _polygonVecY[i    ],
+            _polygonVecX[i + 1], _polygonVecY[i + 1],
+            color, minX, minY - 1, scanlines, xwaaMask
+        );
     }
 
     rasterPolygonBorderXWAA_F2(
-          points[pc1].x(), points[pc1].y(),
-          points[0].x(),   points[0].y(),
-          color, minX, minY - 1, scanlines, xwaaMask );
+          _polygonVecX[pc1], _polygonVecY[pc1],
+          _polygonVecX[0  ], _polygonVecY[0  ],
+          color, minX, minY - 1, scanlines, xwaaMask
+    );
 }
 
 

@@ -614,6 +614,8 @@ class Rasterizer2
 
         // Polygon related
         Polygonizer        _polygonizer;
+        std::vector<float> _polygonVecX;
+        std::vector<float> _polygonVecY;
         std::vector<float> _polygonNodeX;
         PolygonScanlines   _polygonScanlines;
 
