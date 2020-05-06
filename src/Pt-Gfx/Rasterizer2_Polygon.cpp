@@ -281,6 +281,15 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
 
 #ifdef WITH_EXPERIMENTAL_GFX
 
+    // Convert from PointF* to simple floats
+    std::vector<float> vecX(pointCount);
+    std::vector<float> vecY(pointCount);
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        vecX[i] = points[i].x();
+        vecY[i] = points[i].y();
+    }
+
     auto lambdaWorker = [&](Pt::int32_t y1, Pt::int32_t y2) {
 
         // Loop through the rows of the image
@@ -457,7 +466,7 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                 for(size_t b = 0; b <= bOne; ++b) {
                     // Calculate the real position within the array of points
                     const size_t pj = j * vecSize * 2 + b;
-                    const size_t pi = pj + 1;
+                  //const size_t pi = pj + 1;
 
                     /*
                     //
@@ -465,77 +474,27 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
                     //
                     // i = 1
                     //
-                    //       0         1         2         3         4         5         6         7
-                    // MEM   px0  py0  px1  py1  px2  py2  px3  py3  px4  py4  px5  py5  px6  py6  px7  py7
-                    // Yi                   Yi0                 Yi1                 Yi2                 Yi3
-                    // Yj         Yj0                 Yj1                Yj2                  Yj3
-                    // Xi              Xi0                 Xi1                 Xi2                 Xi3
-                    // Xj    Xj0                 Xj1                 Xj2                 Xj3
                     //
-                    // GET2  0         1         2         3         4         5         6         7
-                    //       Xj0  Yj0  Xi0  Yi0  Xj1  Yj1  Xi1  Yi1  Xj2  Yj2  Xi2  Yi2  Xj3  Yj3  Xi3  Yi3
+                    // MEM  px0  px1  px2  px3  px4  px5  px6  px7
+                    //      Xj0  Xi0  Xj1  Xi1  Xj2  Xi2  Xj3  Xi3
+                    // GET  X0                  Y1
+                    //      0    1    2    3    0    1    2    3
                     //
-                    // GET4  0                   1                   2                   3
-                    //       Xj0  Yj0  Xi0  Yi0  Xj1  Yj1  Xi1  Yi1  Xj2  Yj2  Xi2  Yi2  Xj3  Yj3  Xi3  Yi3
+                    // MEM  py0  py1  py2  py3  py4  py5  py6  py7
+                    //      Yj0  Yi0  Yj1  Yi1  Yj2  Yi2  Yj3  Yi3
+                    // GET  Y0                  Y1
+                    //      0    1    2    3    0    1    2    3
                     */
+                    const xsimd::batch<float, 4> getX0(&vecX[pj    ]);
+                    const xsimd::batch<float, 4> getX1(&vecX[pj + 4]);
+                    const xsimd::batch<float, 4> getY0(&vecY[pj    ]);
+                    const xsimd::batch<float, 4> getY1(&vecY[pj + 4]);
 
-                    double* getPtr = (double*) &points[pj];
+                    const xsimd::batch<float, 4> curYi( getY0[1], getY0[3], getY1[1], getY1[3] );
+                    const xsimd::batch<float, 4> curYj( getY0[0], getY0[2], getY1[0], getY1[2] );
 
-                    #if 1
-
-                    const xsimd::batch<double, 4> get0(getPtr     );
-                    const xsimd::batch<double, 4> get1(getPtr +  4);
-                    const xsimd::batch<double, 4> get2(getPtr +  8);
-                    const xsimd::batch<double, 4> get3(getPtr + 12);
-
-                    const xsimd::batch<float, 4> curYi( get0[3], get1[3], get2[3], get3[3] );
-                    const xsimd::batch<float, 4> curYj( get0[1], get1[1], get2[1], get3[1] );
-
-                    const xsimd::batch<float, 4> curXi( get0[2], get1[2], get2[2], get3[2] );
-                    const xsimd::batch<float, 4> curXj( get0[0], get1[0], get2[0], get3[0] );
-
-                    #else
-
-                    const xsimd::batch<double, 2> get0(getPtr     );
-                    const xsimd::batch<double, 2> get1(getPtr +  2);
-                    const xsimd::batch<double, 2> get2(getPtr +  4);
-                    const xsimd::batch<double, 2> get3(getPtr +  6);
-                    const xsimd::batch<double, 2> get4(getPtr +  8);
-                    const xsimd::batch<double, 2> get5(getPtr + 10);
-                    const xsimd::batch<double, 2> get6(getPtr + 12);
-                    const xsimd::batch<double, 2> get7(getPtr + 14);
-
-                    const xsimd::batch<float, 4> curYi( get1[1], get3[1], get5[1], get7[1] );
-                    const xsimd::batch<float, 4> curYj( get0[1], get2[1], get4[1], get6[1] );
-
-                    const xsimd::batch<float, 4> curXi( get1[0], get3[0], get5[0], get7[0] );
-                    const xsimd::batch<float, 4> curXj( get0[0], get2[0], get4[0], get6[0] );
-
-                    #endif
-
-                    #if 0
-                    // Get the Y coordinates
-                    const xsimd::batch<float, 4> curYi( points[pi + 0].y(),
-                                                        points[pi + 2].y(),
-                                                        points[pi + 4].y(),
-                                                        points[pi + 6].y() );
-
-                    const xsimd::batch<float, 4> curYj( points[pj + 0].y(),
-                                                        points[pj + 2].y(),
-                                                        points[pj + 4].y(),
-                                                        points[pj + 6].y() );
-
-                    // Get the X coordinates
-                    const xsimd::batch<float, 4> curXi( points[pi + 0].x(),
-                                                        points[pi + 2].x(),
-                                                        points[pi + 4].x(),
-                                                        points[pi + 6].x() );
-
-                    const xsimd::batch<float, 4> curXj( points[pj + 0].x(),
-                                                        points[pj + 2].x(),
-                                                        points[pj + 4].x(),
-                                                        points[pj + 6].x() );
-                    #endif
+                    const xsimd::batch<float, 4> curXi( getX0[1], getX0[3], getX1[1], getX1[3] );
+                    const xsimd::batch<float, 4> curXj( getX0[0], getX0[2], getX1[0], getX1[2] );
 
                     // Compare againts the Y coordinates
                     const xsimd::batch_bool<float, 4>& cmpYs = (
