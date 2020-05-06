@@ -207,11 +207,9 @@ std::size_t IODeviceImpl::read( char* buffer, std::size_t count, bool& eof )
         fd_set rfds;
         FD_ZERO(&rfds);
         FD_SET(this->fd(), &rfds);
-        bool ret = this->wait(_timeout, &rfds, 0, 0);
-        if(false == ret)
-        {
+        bool avail = this->wait(_timeout, &rfds, 0, 0);
+        if( ! avail )
             throw System::IOError("read");
-        }
     }
 
     PT_LOG_DEBUG("read: " << ret << " bytes");
@@ -285,11 +283,9 @@ std::size_t IODeviceImpl::write( const char* buffer, std::size_t count )
         fd_set wfds;
         FD_ZERO(&wfds);
         FD_SET(this->fd(), &wfds);
-        bool ret = this->wait(_timeout, 0, &wfds, 0);
-        if(false == ret)
-        {
+        bool avail = this->wait(_timeout, 0, &wfds, 0);
+        if( ! avail )
             throw System::IOError("write");
-        }
     }
 
     PT_LOG_DEBUG("wrote: " << ret << " bytes");
@@ -312,7 +308,8 @@ bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* e
     do
     {
         ret = ::select(FD_SETSIZE, rfds, wfds, efds, timeout);
-    } while (ret == -1 && errno == EINTR);
+    } 
+    while (ret == -1 && errno == EINTR);
 
     if (ret == -1)
         throw IOError( PT_ERROR_MSG("select failed") );
