@@ -143,6 +143,11 @@ SubInclude PT_TOP src Pt-Reflex ;
 SubInclude PT_TOP src Pt-Unit ;
 SubInclude PT_TOP src Pt-Xml ;
 
+if $(WITH_BUILTIN_SKIA)
+{
+	SubInclude PT_TOP src skia src ;
+}
+
 if $(WITH_BUILTIN_ZLIB)
 {
     SubInclude PT_TOP src zlib ;

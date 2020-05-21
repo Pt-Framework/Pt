@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "Pt/SmartPtr.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestMain.h"
@@ -206,7 +207,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void setUp()
         {
             _loop = new Pt::System::MainLoop();
-            std::auto_ptr<Pt::System::MainLoop> loopPtr(_loop);
+            Pt::AutoPtr<Pt::System::MainLoop> loopPtr(_loop);
 
             _exitTimer.setActive(*_loop);
             _exitTimer.start(20000);

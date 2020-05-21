@@ -27,6 +27,7 @@
  */
 
 #include "ServerImpl.h"
+#include <Pt/SmartPtr.h>
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Servlet.h>
 #include <Pt/Net/Endpoint.h>
@@ -47,7 +48,7 @@ Server::Server(System::EventLoop& loop)
 : _impl(0)
 {
     _impl = new ServerImpl();
-    std::auto_ptr<ServerImpl> impl(_impl);
+    Pt::AutoPtr<ServerImpl> impl(_impl);
 
     setActive(loop);
     impl.release();
@@ -58,7 +59,7 @@ Server::Server(System::EventLoop& loop, const Pt::Net::Endpoint& ep)
 : _impl(0)
 {
     _impl = new ServerImpl();
-    std::auto_ptr<ServerImpl> impl(_impl);
+    Pt::AutoPtr<ServerImpl> impl(_impl);
     
     setActive(loop);
     listen(ep);

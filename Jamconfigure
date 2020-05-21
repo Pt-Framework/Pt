@@ -765,6 +765,18 @@ Configure JPEG_LINKLIBS ;
 EchoOption JPEG_LINKLIBS : "JPEG libs" ;
 
 #############################################################################
+# Skia support
+#############################################################################
+
+if --with-skia in $(ARGV)
+{
+    WITH_BUILTIN_SKIA = yes ;
+}
+
+Configure WITH_BUILTIN_SKIA ;
+EchoOption --with-skia : "Builtin skia library" : $(WITH_BUILTIN_SKIA:E="no") ;
+
+#############################################################################
 # Freetype support
 #############################################################################
 

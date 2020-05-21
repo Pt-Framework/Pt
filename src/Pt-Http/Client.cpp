@@ -30,6 +30,7 @@
 #include <Pt/Http/Client.h>
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/Logger.h>
+#include <Pt/SmartPtr.h>
 #include <memory>
 
 PT_LOG_DEFINE("Pt.Http.Client")
@@ -41,7 +42,7 @@ namespace Http {
 Client::Client()
 : _impl( new ClientImpl() )
 {
-    std::auto_ptr<ClientImpl> impl(_impl);
+    Pt::AutoPtr<ClientImpl> impl(_impl);
     
     init();
     
@@ -52,7 +53,7 @@ Client::Client()
 Client::Client(const Net::Endpoint& ep)
 : _impl( new ClientImpl() )
 {
-    std::auto_ptr<ClientImpl> impl(_impl);
+    Pt::AutoPtr<ClientImpl> impl(_impl);
 
     init();
     _impl->setHost(ep);
@@ -64,7 +65,7 @@ Client::Client(const Net::Endpoint& ep)
 Client::Client(System::EventLoop& loop)
 : _impl( new ClientImpl() )
 {
-    std::auto_ptr<ClientImpl> impl(_impl);
+    Pt::AutoPtr<ClientImpl> impl(_impl);
 
     init();
     _impl->setActive(loop);
@@ -76,7 +77,7 @@ Client::Client(System::EventLoop& loop)
 Client::Client(System::EventLoop& loop, const Net::Endpoint& ep)
 : _impl( new ClientImpl() )
 {
-    std::auto_ptr<ClientImpl> impl(_impl);
+    Pt::AutoPtr<ClientImpl> impl(_impl);
 
     init();
     _impl->setActive(loop);

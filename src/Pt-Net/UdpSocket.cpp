@@ -31,6 +31,7 @@
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/IOError.h>
 #include <Pt/SourceInfo.h>
+#include <Pt/SmartPtr.h>
 #include <stdexcept>
 #include <memory>
 
@@ -82,7 +83,7 @@ UdpSocket::UdpSocket(System::EventLoop& loop)
 , _binding(false)
 {
     _impl = new UdpSocketImpl(*this);
-    std::auto_ptr<UdpSocketImpl> impl(_impl);
+    Pt::AutoPtr<UdpSocketImpl> impl(_impl);
 
     setActive(loop);
     impl.release();
