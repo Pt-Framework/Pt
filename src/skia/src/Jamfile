@@ -318,9 +318,24 @@ SKIA_PORTS_SOURCES  =  SkMemory_malloc.cpp
 					   SkImageGenerator_none.cpp
 					   SkGlobalInitialization_default.cpp
 					   SkFontMgr_empty_factory.cpp
+					   ;
 
-					   SkOSFile_win.cpp
-						;
+
+if $(PT_SYSTEM) = posix
+{
+	SKIA_PORTS_SOURCES += SkOSFile_posix.cpp ;
+}
+
+if $(PT_SYSTEM) = win32
+{
+	SKIA_PORTS_SOURCES += SkOSFile_win.cpp ;
+}
+
+if $(PT_SYSTEM) = winrt
+{
+	SKIA_PORTS_SOURCES += SkOSFile_win.cpp ;
+}
+
 
 SKIA_SOURCES += $(SKIA_PORTS_SOURCES:D=ports) ;
 
