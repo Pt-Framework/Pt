@@ -51,7 +51,7 @@ void atomicSet(volatile atomic_t& val, int n)
 
 int atomicIncrement(volatile atomic_t& val)
 {
-    volatile register int64_t tmp;
+    volatile  int64_t tmp;
 
     asm volatile ( "lock; xaddq %0, %1"
                    : "=r"(tmp), "=m"(val.i64)
@@ -61,7 +61,7 @@ int atomicIncrement(volatile atomic_t& val)
 
 int atomicDecrement(volatile atomic_t& val)
 {
-    volatile register int64_t tmp;
+    volatile  int64_t tmp;
 
     asm volatile ( "lock; xaddq %0, %1"
                    : "=r"(tmp), "=m"(val.i64)
@@ -71,7 +71,7 @@ int atomicDecrement(volatile atomic_t& val)
 
 int atomicExchange(volatile atomic_t& val, int exch)
 {
-    volatile register int64_t ret;
+    volatile  int64_t ret;
 
     // Using cmpxchg and a loop here on purpose
     asm volatile ( "1:; lock; cmpxchgq %2, %0; jne 1b"
@@ -83,7 +83,7 @@ int atomicExchange(volatile atomic_t& val, int exch)
 
 int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
-    volatile register int64_t old;
+    volatile  int64_t old;
 
     asm volatile ( "lock; cmpxchgq %2, %0"
                    : "=m"(val.i64),    "=a"(old)
@@ -93,7 +93,7 @@ int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 
 int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
-    volatile register int64_t ret;
+    volatile  int64_t ret;
 
     asm volatile ( "lock; xaddq %0, %1"
                    : "=r"(ret),       "=m"(val.i64)

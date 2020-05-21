@@ -51,9 +51,9 @@ void atomicSet(volatile atomic_t& val, int n)
 
 int atomicIncrement(volatile atomic_t& val)
 {
-    register volatile int* dest asm("g1") = &val.i32;
-    register int tmp asm("o4");
-    register int ret asm("o5");
+     volatile int* dest asm("g1") = &val.i32;
+     int tmp asm("o4");
+     int ret asm("o5");
 
     asm volatile (
             "1:     ld    [%%g1], %%o4\n\t"
@@ -72,9 +72,9 @@ int atomicIncrement(volatile atomic_t& val)
 
 int atomicDecrement(volatile atomic_t& val)
 {
-    register volatile int* dest asm("g1") = &val.i32;
-    register int tmp asm("o4");
-    register int ret asm("o5");
+     volatile int* dest asm("g1") = &val.i32;
+     int tmp asm("o4");
+     int ret asm("o5");
 
     asm volatile (
             "1:     ld    [%%g1], %%o4\n\t"
@@ -93,9 +93,9 @@ int atomicDecrement(volatile atomic_t& val)
 
 int atomicExchange(volatile atomic_t& val, int exch)
 {
-    register volatile int* dest asm("g1") = &val.i32;
-    register int tmp asm("o4");
-    register int ret asm("o5");
+     volatile int* dest asm("g1") = &val.i32;
+     int tmp asm("o4");
+     int ret asm("o5");
 
     asm volatile (
             "1:     ld    [%%g1], %%o4\n\t"
@@ -114,9 +114,9 @@ int atomicExchange(volatile atomic_t& val, int exch)
 
 int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
-    register volatile int* dest asm("g1") = &val.i32;
-    register int _comp asm("o4") = comp;
-    register int _exch asm("o5") = exch;
+     volatile int* dest asm("g1") = &val.i32;
+     int _comp asm("o4") = comp;
+     int _exch asm("o5") = exch;
 
     asm volatile (
           /* cas    [%%g1], %%o4, %%o5 */
@@ -130,9 +130,9 @@ int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 
 int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
-    register volatile int* dest asm("g1") = &val.i32;
-    register int tmp asm("o4");
-    register int ret asm("o5");
+     volatile int* dest asm("g1") = &val.i32;
+     int tmp asm("o4");
+     int ret asm("o5");
 
     asm volatile (
             "1:     ld    [%%g1], %%o4\n\t"
@@ -151,9 +151,9 @@ int atomicExchangeAdd(volatile atomic_t& val, int add)
 
 void* atomicExchange(void* volatile& val, void* exch)
 {
-       register void* volatile* dest asm("g1") = &val;
-       register void* tmp asm("o4");
-       register void* ret asm("o5");
+        void* volatile* dest asm("g1") = &val;
+        void* tmp asm("o4");
+        void* ret asm("o5");
 
        asm volatile (
 #if defined(__sparcv9)
@@ -181,9 +181,9 @@ void* atomicExchange(void* volatile& val, void* exch)
 
 void* atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
-    register void* volatile* dest asm("g1") = &val;
-    register void* _comp asm("o4") = comp;
-    register void* _exch asm("o5") = exch;
+     void* volatile* dest asm("g1") = &val;
+     void* _comp asm("o4") = comp;
+     void* _exch asm("o5") = exch;
 
     asm volatile (
 #if defined(__sparcv9)

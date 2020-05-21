@@ -193,7 +193,7 @@ STATIC CHARTYPE *regbranch( parse_state* state, int *flagp );
 STATIC CHARTYPE *regpiece( parse_state* state, int *flagp );
 STATIC CHARTYPE *regatom( parse_state* state, int *flagp );
 STATIC CHARTYPE *regnode( parse_state* state,int op );
-STATIC CHARTYPE *regnext( register CHARTYPE *p );
+STATIC CHARTYPE *regnext(  CHARTYPE *p );
 STATIC void regc( parse_state* state, INTTYPE b );
 STATIC void reginsert( parse_state* state, CHARTYPE op, CHARTYPE *opnd );
 STATIC void regtail( CHARTYPE *p, CHARTYPE *val );
@@ -305,10 +305,10 @@ struct regexp_ptr
  */
 pt_regexp* regcomp( const CHARTYPE *exp )
 {
-    register regexp_ptr rx;
-    register CHARTYPE *scan;
-    register CHARTYPE *longest;
-    register size_t len;
+     regexp_ptr rx;
+     CHARTYPE *scan;
+     CHARTYPE *longest;
+     size_t len;
     ///CHARTYPE *regparse;
     parse_state state;
     int flags;
@@ -411,10 +411,10 @@ reg(
     int paren,            /* Parenthesized? */
     int *flagp )
 {
-    register CHARTYPE *ret;
-    register CHARTYPE *br;
-    register CHARTYPE *ender;
-    register int parno = 0;
+     CHARTYPE *ret;
+     CHARTYPE *br;
+     CHARTYPE *ender;
+     int parno = 0;
     int flags;
 
     *flagp = HASWIDTH;    /* Tentatively. */
@@ -481,9 +481,9 @@ reg(
 static CHARTYPE *
 regbranch( parse_state* state, int *flagp )
 {
-    register CHARTYPE *ret;
-    register CHARTYPE *chain;
-    register CHARTYPE *latest;
+     CHARTYPE *ret;
+     CHARTYPE *chain;
+     CHARTYPE *latest;
     int flags;
 
     *flagp = WORST;        /* Tentatively. */
@@ -520,9 +520,9 @@ regbranch( parse_state* state, int *flagp )
 static CHARTYPE *
 regpiece( parse_state* state, int *flagp )
 {
-    register CHARTYPE *ret;
-    register CHARTYPE op;
-    register CHARTYPE *next;
+     CHARTYPE *ret;
+     CHARTYPE op;
+     CHARTYPE *next;
     int flags;
 
     ret = regatom(state, &flags);
@@ -583,7 +583,7 @@ regpiece( parse_state* state, int *flagp )
 static CHARTYPE *
 regatom( parse_state* state, int *flagp )
 {
-    register CHARTYPE *ret;
+     CHARTYPE *ret;
     int flags;
 
     *flagp = WORST;        /* Tentatively. */
@@ -603,8 +603,8 @@ regatom( parse_state* state, int *flagp )
         *flagp |= HASWIDTH|SIMPLE;
         break;
     case '[': {
-            //register int classr;
-            //register int classend;
+            // int classr;
+            // int classend;
 
             if (*state->regparse == '^') {    /* Complement of range. */
                 ret = regnode(state, ANYBUT);
@@ -702,7 +702,7 @@ regatom( parse_state* state, int *flagp )
          */
         {
             const CHARTYPE *regprev;
-            register CHARTYPE ch;
+             CHARTYPE ch;
 
             state->regparse--;            /* Look at cur char */
             ret = regnode(state, EXACTLY);
@@ -765,8 +765,8 @@ regatom( parse_state* state, int *flagp )
 static CHARTYPE *            /* Location. */
 regnode( parse_state* state, int op )
 {
-    register CHARTYPE *ret;
-    register CHARTYPE *ptr;
+     CHARTYPE *ret;
+     CHARTYPE *ptr;
 
     ret = state->regcode;
     if (ret == &regdummy) {
@@ -806,9 +806,9 @@ reginsert(
     CHARTYPE op,
     CHARTYPE *opnd )
 {
-    register CHARTYPE *src;
-    register CHARTYPE *dst;
-    register CHARTYPE *place;
+     CHARTYPE *src;
+     CHARTYPE *dst;
+     CHARTYPE *place;
 
     if (state->regcode == &regdummy) {
         state->regsize += 3;
@@ -835,9 +835,9 @@ regtail(
     CHARTYPE *p,
     CHARTYPE *val )
 {
-    register CHARTYPE *scan;
-    register CHARTYPE *temp;
-    register int offset;
+     CHARTYPE *scan;
+     CHARTYPE *temp;
+     int offset;
 
     if (p == &regdummy)
         return;
@@ -911,11 +911,11 @@ STATIC char *regprop(CHARTYPE*);
 /*
  - regexec - match a regexp against a string
  */
-int regexec(register pt_regexp *prog,
+int regexec( pt_regexp *prog,
             pt_regmatch_t *match,
-            register const CHARTYPE *string )
+             const CHARTYPE *string )
 {
-    register const CHARTYPE *s;
+     const CHARTYPE *s;
 
     /* Be paranoid... */
     if (prog == NULL || string == NULL) {
@@ -981,9 +981,9 @@ regtry( match_state* state,
         pt_regmatch_t* match,
         const CHARTYPE *string )
 {
-    register int i;
-    register const CHARTYPE **sp;
-    register const CHARTYPE **ep;
+     int i;
+     const CHARTYPE **sp;
+     const CHARTYPE **ep;
 
     state->reginput = string;
     state->regstartp = match->startp;
@@ -1016,7 +1016,7 @@ regtry( match_state* state,
 static int            /* 0 failure, 1 success */
 regmatch( match_state* state, CHARTYPE *prog )
 {
-    register CHARTYPE *scan;    /* Current node. */
+     CHARTYPE *scan;    /* Current node. */
     CHARTYPE *next;        /* Next node. */
 
     scan = prog;
@@ -1061,8 +1061,8 @@ regmatch( match_state* state, CHARTYPE *prog )
             state->reginput++;
             break;
         case EXACTLY: {
-                register int len;
-                register CHARTYPE *opnd;
+                 int len;
+                 CHARTYPE *opnd;
 
                 opnd = OPERAND(scan);
                 /* Inline the first character, for speed. */
@@ -1097,8 +1097,8 @@ regmatch( match_state* state, CHARTYPE *prog )
         case OPEN+7:
         case OPEN+8:
         case OPEN+9: {
-                register int no;
-                register const CHARTYPE *save;
+                 int no;
+                 const CHARTYPE *save;
 
                 no = OP(scan) - OPEN;
                 save = state->reginput;
@@ -1125,8 +1125,8 @@ regmatch( match_state* state, CHARTYPE *prog )
         case CLOSE+7:
         case CLOSE+8:
         case CLOSE+9: {
-                register int no;
-                register const CHARTYPE *save;
+                 int no;
+                 const CHARTYPE *save;
 
                 no = OP(scan) - CLOSE;
                 save = state->reginput;
@@ -1145,7 +1145,7 @@ regmatch( match_state* state, CHARTYPE *prog )
             }
             break;
         case BRANCH: {
-                register const CHARTYPE *save;
+                 const CHARTYPE *save;
 
                 if (OP(next) != BRANCH)        /* No choice. */
                     next = OPERAND(scan);    /* Avoid recursion. */
@@ -1164,10 +1164,10 @@ regmatch( match_state* state, CHARTYPE *prog )
             break;
         case STAR:
         case PLUS: {
-                register CHARTYPE nextch;
-                register int no;
-                register const CHARTYPE *save;
-                register int min;
+                 CHARTYPE nextch;
+                 int no;
+                 const CHARTYPE *save;
+                 int min;
 
                 /*
                  * Lookahead to avoid useless match attempts
@@ -1217,9 +1217,9 @@ regmatch( match_state* state, CHARTYPE *prog )
 static int
 regrepeat( match_state* state, CHARTYPE *p )
 {
-    register int count = 0;
-    register const CHARTYPE *scan;
-    register CHARTYPE *opnd;
+     int count = 0;
+     const CHARTYPE *scan;
+     CHARTYPE *opnd;
 
     scan = state->reginput;
     opnd = OPERAND(p);
@@ -1260,9 +1260,9 @@ regrepeat( match_state* state, CHARTYPE *p )
  - regnext - dig the "next" pointer out of a node
  */
 static CHARTYPE *
-regnext( register CHARTYPE *p )
+regnext(  CHARTYPE *p )
 {
-    register int offset;
+     int offset;
 
     if (p == &regdummy)
         return(NULL);
@@ -1285,9 +1285,9 @@ regnext( register CHARTYPE *p )
 void
 regdump( pt_regexp *r )
 {
-    register CHARTYPE *s;
-    register CHARTYPE op = EXACTLY;    /* Arbitrary non-END op. */
-    register CHARTYPE *next;
+     CHARTYPE *s;
+     CHARTYPE op = EXACTLY;    /* Arbitrary non-END op. */
+     CHARTYPE *next;
 
 
     s = r->program + 1;
@@ -1327,7 +1327,7 @@ regdump( pt_regexp *r )
 static char *
 regprop( CHARTYPE *op )
 {
-    register const char *p = "";
+     const char *p = "";
     static char buf[50];
 
     (void) strcpy(buf, ":");
