@@ -40,9 +40,10 @@
 #include <Pt/Gfx/Algorithm.h>
 #include <sstream>
 #include <fstream>
-#include <include/core/SkSurface.h>
-#include <include/core/SkImage.h>
-#include <include/core/SkCanvas.h>
+
+//#include <include/core/SkSurface.h>
+//#include <include/core/SkImage.h>
+//#include <include/core/SkCanvas.h>
 
 namespace Pt {
 
@@ -208,21 +209,20 @@ MainWindow::~MainWindow()
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);    
-    
+    return;
 
     Painter painter( surface() );
     painter.setClip(rect);
 
-    Gfx::Image img(Gfx::ImageFormat::argb32(), Gfx::Size(300, 200));
+    /*Gfx::Image img(Gfx::ImageFormat::argb32(), Gfx::Size(300, 200));
 
     SkImageInfo info = SkImageInfo::MakeN32Premul(img.width(), img.height());
     size_t rowBytes = info.minRowBytes();
 
-
     sk_sp<SkSurface> surface = SkSurface::MakeRasterDirect( info, img.data(), rowBytes);
     SkCanvas* canvas = surface->getCanvas();
     
-    canvas->clear(SK_ColorBLACK);
+    canvas->clear(SK_ColorWHITE);
 
     SkPaint paint;
     paint.setColor(SK_ColorRED);
@@ -237,8 +237,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     p2.fY = 200;
     canvas->drawLine(p1, p2, paint);
 
-    
     painter.drawImage(Gfx::PointF(0, 0), img);
+    */
+
     return;
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
