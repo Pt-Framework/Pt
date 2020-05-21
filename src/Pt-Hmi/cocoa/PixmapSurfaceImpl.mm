@@ -568,7 +568,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image
                                                               dataSize, 
                                                               NULL);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Little|kCGImageAlphaFirst;
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Big|kCGImageAlphaLast;
     
     CGImageRef imageRef = CGImageCreate(image.width(), image.height(), 
                                         8, 32, 4 * image.width(), 
