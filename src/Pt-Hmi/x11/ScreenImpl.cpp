@@ -64,13 +64,19 @@ void ScreenImpl::unregisterWindow(Window& w)
 
 Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
 {
-    return w.impl()->toScreen(pos);
+    Gfx::PointF physicalPos = w.toPhysical(pos);
+    Gfx::PointF parentPos = w.impl()->toScreen(physicalPos);
+    Gfx::PointF logicalPos = w.toLogical(parentPos);
+    return logicalPos;
 }
 
 
 Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
 {
-    return w.impl()->fromScreen(pos);
+    Gfx::PointF physicalPos = w.toPhysical(pos);
+    Gfx::PointF windowPos = w.impl()->fromScreen(physicalPos);
+    Gfx::PointF logicalPos = w.toLogical(windowPos);
+    return logicalPos;
 }
 
 
