@@ -158,7 +158,7 @@ const Gfx::Pen& SkiaPainter::pen() const
 void SkiaPainter::setBrush(const Gfx::Brush& brush)
 {
     _skiaBrush = SkPaint();
-    _skiaBrush.setAntiAlias(false);
+    _skiaBrush.setAntiAlias(true);
     _skiaBrush.setStyle(SkPaint::kFill_Style);
     _skiaBrush.setColor(toSkia(brush.color()));
     _brush = brush;
