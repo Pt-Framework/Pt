@@ -41,9 +41,13 @@
 #include <sstream>
 #include <fstream>
 
-//#include <include/core/SkSurface.h>
-//#include <include/core/SkImage.h>
-//#include <include/core/SkCanvas.h>
+//#define DEMO_WITH_SKIA 1
+
+#ifdef DEMO_WITH_SKIA
+#include <include/core/SkSurface.h>
+#include <include/core/SkImage.h>
+#include <include/core/SkCanvas.h>
+#endif
 
 namespace Pt {
 
@@ -208,15 +212,19 @@ MainWindow::~MainWindow()
 
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
-    Window::onPaintBackground(rect);    
-    return;
-
+    Window::onPaintBackground(rect);
+    return;   
+    
     Painter painter( surface() );
     painter.setClip(rect);
 
-    /*Gfx::Image img(Gfx::ImageFormat::argb32(), Gfx::Size(300, 200));
+#ifdef DEMO_WITH_SKIA
+    Gfx::Image img(Gfx::ImageFormat::argb32(), Gfx::Size(800, 400));
 
-    SkImageInfo info = SkImageInfo::MakeN32Premul(img.width(), img.height());
+    SkISize skSize;
+    skSize.fWidth = img.width();
+    skSize.fHeight = img.height();
+    SkImageInfo info = SkImageInfo::Make(skSize, kBGRA_8888_SkColorType, kPremul_SkAlphaType, 0);
     size_t rowBytes = info.minRowBytes();
 
     sk_sp<SkSurface> surface = SkSurface::MakeRasterDirect( info, img.data(), rowBytes);
@@ -229,18 +237,61 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     paint.setAntiAlias(true);
     paint.setStrokeWidth(10);
     SkPoint p1;
-    p1.fX = 0;
-    p1.fY = 0;
+    p1.fX = 20;
+    p1.fY = 20;
 
     SkPoint p2;
-    p2.fX = 50;
-    p2.fY = 200;
-    canvas->drawLine(p1, p2, paint);
+    p2.fX = 170;
+    p2.fY = 320;
+
+    Pt::System::Clock clock;
+
+    // Skia
+    clock.start();
+
+    size_t count = 10000;
+
+    for(size_t i = 0; i < count; ++i)
+        canvas->drawLine(p1, p2, paint);
+
+    Pt::Timespan span= clock.stop();
+    std::cout << "Skia: " << span.toUSecs() / 1000.0 << " ms" << std::endl;
+
+    // Image painter 2
+    Pt::Gfx::ImagePainter2  painter2(img);
+
+    painter2.setPen(Gfx::Pen(Gfx::Color::fromRgb8(0, 255, 00), 10));
+
+    Gfx::PointF p3(40, 20);
+    Gfx::PointF p4(190, 320);
+
+    clock.start();
+
+    for (size_t i = 0; i < count; ++i)
+        painter2.drawLine(p3, p4);
+
+    span = clock.stop();
+    std::cout << "IpP: " << span.toUSecs() / 1000.0 << " ms" << std::endl;
 
     painter.drawImage(Gfx::PointF(0, 0), img);
-    */
+
+    // Native
+    Gfx::PointF p5(60, 20);
+    Gfx::PointF p6(210, 320);
+
+    painter.setPen(Gfx::Pen(Gfx::Color::fromRgb8(0, 0, 255), 10));
+
+    clock.start();
+
+    for (size_t i = 0; i < count; ++i)
+        painter.drawLine(p5, p6);
+
+    span = clock.stop();
+    std::cout << "Native: " << span.toUSecs() / 1000.0 << " ms" << std::endl;
+    std::cout << "----------------------------" << std::endl;
 
     return;
+#endif
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
     Gfx::ImagePainter2 imagePainter(image);
@@ -248,8 +299,6 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.setAntiAliasing(true);
     //imagePainter.setAntiAliasing(false);
 
-
-    
 //#define TEST_POLYGON_RASTERIZER
 
 #ifdef TEST_POLYGON_RASTERIZER
@@ -295,8 +344,6 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 //*/
 
 #else
-
-
     //Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
 
     //
