@@ -122,12 +122,12 @@ void SkiaPainter::setPen(const Gfx::Pen& pen)
         {
             if (_pen.capStyle() == Gfx::Pen::RoundCap || _pen.capStyle() == Gfx::Pen::SquareCap)
             {
-                SkScalar dashes[] = { 2 * pen.size(), 2 * pen.size() };
+                SkScalar dashes[] = { 2.0f * pen.size(), 2.0f * pen.size() };
                 _skiaPen.setPathEffect(SkDashPathEffect::Make(dashes, 2, 0));
             }
             else
             {
-                SkScalar dashes[] = { 3 * pen.size(), 1 * pen.size() };
+                SkScalar dashes[] = { 3.0f * pen.size(), 1.0f * pen.size() };
                 _skiaPen.setPathEffect(SkDashPathEffect::Make(dashes, 2, 0));
             }
         }
@@ -138,12 +138,12 @@ void SkiaPainter::setPen(const Gfx::Pen& pen)
             if (_pen.capStyle() == Gfx::Pen::RoundCap ||
                 _pen.capStyle() == Gfx::Pen::SquareCap)
             {
-                SkScalar dashes[] = { 1.0, 2.0 * pen.size() };
+                SkScalar dashes[] = { 1.0f, 2.0f * pen.size() };
                 _skiaPen.setPathEffect(SkDashPathEffect::Make(dashes, 2, 0));
             }
             else
             {
-                SkScalar dashes[] = { 1.0 * pen.size(), 1.0 * pen.size() };
+                SkScalar dashes[] = { 1.0f * pen.size(), 1.0f * pen.size() };
 
                 _skiaPen.setPathEffect(SkDashPathEffect::Make(dashes, 2, 0));
             }            
