@@ -53,8 +53,13 @@ void SkiaPainter::setImage(Gfx::Image& image)
 {
     _image = &image;
     _imgPainter.setImage(image);
-    
-    SkImageInfo info = SkImageInfo::MakeN32Premul(image.width(), image.height());
+
+    SkISize imgSize;
+    imgSize.fWidth= image.width();
+    imgSize.fHeight = image.height();
+
+    SkImageInfo info = SkImageInfo::Make(imgSize, kBGRA_8888_SkColorType, kPremul_SkAlphaType, 0);
+
     size_t rowBytes = info.minRowBytes();
 
     _surface = SkSurface::MakeRasterDirect(info, image.data(), rowBytes);
