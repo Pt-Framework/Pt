@@ -30,6 +30,8 @@
 #ifndef Pt_Hmi_win32_PixmapSurfaceImpl_h
 #define Pt_Hmi_win32_PixmapSurfaceImpl_h
 
+#include "../SkiaPainter.h"
+
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Gfx/ImagePainter2.h>
@@ -118,7 +120,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
     private:
         Gfx::SizeF            _size;
         Gfx::Image            _image;
-        Gfx::ImagePainter    _painter;
+        SkiaPainter    _painter;
 };
 
 } // namespace

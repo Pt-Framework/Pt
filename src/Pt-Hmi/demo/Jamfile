@@ -1,6 +1,5 @@
 SubDir PT_TOP src Pt-Hmi demo  ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirHdrs $(PT_TOP)/src/skia/ ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi-Demo ;
 
 HMI_DEMO_SOURCES = Main.cpp
@@ -12,11 +11,6 @@ HMI_DEMO_SOURCES = Main.cpp
 
 Main Pt-Hmi-Demo : $(HMI_DEMO_SOURCES) ;
 LinkSharedLibraries Pt-Hmi-Demo : Pt Pt-System Pt-Gfx Pt-Net Pt-Hmi ;
-
-if $(WITH_BUILTIN_SKIA)
-{
-	LinkLibraries Pt-Hmi-Demo : skia ;
-}
 
 MakeLocate Pt-Hmi-Demo : $(PT_OUTPUT_TARGET) ;
 

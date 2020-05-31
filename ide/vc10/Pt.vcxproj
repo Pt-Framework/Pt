@@ -406,6 +406,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\SkiaPainter.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\KeyMap.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\MainWindowImpl.h" />
@@ -677,6 +678,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\SkiaPainter.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Slider.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\SpinBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\StackLayout.cpp" />

@@ -428,8 +428,20 @@ SKIA_SKSL_IR_SOURCES = SkSLSetting.cpp
 					   SkSLType.cpp
 					   SkSLVariableReference.cpp
 					   ;
+					   
+SKIA_SOURCES += $(SKIA_SKSL_IR_SOURCES:D=$(SKIA_SKSL_IR_DIR)) ;					   
 
-SKIA_SOURCES += $(SKIA_SKSL_IR_SOURCES:D=$(SKIA_SKSL_IR_DIR)) ;
+# SKIA EFFECTS
+#-----------------------------------------------
+
+SKIA_EFFECTS_DIR = [ FDirName effects ] ;
+			
+
+SKIA_EFFECTS_SOURCES = SkDashPathEffect.cpp
+					   SkTrimPathEffect.cpp
+					   ;					   
+	
+SKIA_SOURCES += $(SKIA_EFFECTS_SOURCES:D=$(SKIA_EFFECTS_DIR)) ;
 
 Library skia : $(SKIA_SOURCES) ;
 
