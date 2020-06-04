@@ -50,7 +50,7 @@ InputDevice::InputDevice(const char* deviceName)
 , _meta(false)
 , _keyEvent(0)
 , _mouseEvent(0)
-, _touchMove(0)
+, _touchCount(0)
 , _touchEvent(0)
 {
     _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);
@@ -69,7 +69,7 @@ InputDevice::InputDevice()
 , _meta(false)
 , _keyEvent(0)
 , _mouseEvent(0)
-, _touchMove(0)
+, _touchCount(0)
 , _touchEvent(0)
 {
     _ioh.fd = -1;
@@ -172,6 +172,23 @@ bool InputDevice::onRun()
               onAbsolute(ev);
               break;
           }
+
+          case EV_SYN:
+          {
+              if(_touchCount > 0)
+              {
+                  //std::clog << "EV_SYN " << ev.code << " " << ev.value << std::endl;
+
+                  _eventReady.send(_touchEvent);
+
+                  if( _touchEvent.isRelease() )
+                      _touchCount = 0;
+                  else
+                      _touchEvent.setMove();
+              }
+
+              break;
+          }
       }
     }
     
@@ -212,9 +229,16 @@ void InputDevice::onAbsolute(const input_event& ev)
     //EV_KEY 330 1
     //EV_ABS_X
     //EV_ABS_Y
+    //EV_SYN
+    //
     //EV_ABS_X
+    //EV_SYN
+    //
     //EV_ABS_X
+    //EV_SYN
+    //
     //EV_KEY 330 0
+    //EV_SYN
 
     switch(ev.code)
     {
@@ -237,14 +261,14 @@ void InputDevice::onAbsolute(const input_event& ev)
             //std::clog << "ABS_X " << ev.value << std::endl;
             
             _touchEvent.setX( static_cast<double>(ev.value) );
-            _touchMove++;
+            _touchCount++;
             break;
 
         case ABS_Y:
             //std::clog << "ABS_Y " << ev.value << std::endl;
            
             _touchEvent.setY( static_cast<double>(ev.value) );
-            _touchMove++;
+            _touchCount++;
             break;
 
         case ABS_PRESSURE:
@@ -253,16 +277,6 @@ void InputDevice::onAbsolute(const input_event& ev)
 
         default:
             return;
-    }
-
-    if(_touchMove >= 2)
-    {
-        if(_touchMove == 2)
-            _touchEvent.setPress();
-        else
-            _touchEvent.setMove();
-
-        _eventReady.send(_touchEvent);
     }
 }
 
@@ -296,17 +310,15 @@ void InputDevice::onKey(const input_event& ev)
 
     if(ev.code == 330) // BTN_TOUCH
     {
-        if( ev.value == 0  )
+        if(ev.value == 0)
         {
-            if(_touchMove == 0)
-            {
-                std::clog << "WARNING: touch without position" << std::endl;
-                return;
-            }
-
-            _touchMove = 0;
-            _touchEvent.setRelease();
-            _eventReady.send(_touchEvent);
+            _touchCount++;
+            _touchEvent.setRelease();  
+        }
+        else
+        {
+            _touchCount++;
+            _touchEvent.setPress();
         }
 
         return;
