@@ -31,8 +31,8 @@
 #include <Pt/Api.h>
 
 #define PT_SOAP_VERSION_MAJOR 1
-#define PT_SOAP_VERSION_MINOR 2
-#define PT_SOAP_VERSION_REVISION 1
+#define PT_SOAP_VERSION_MINOR 3
+#define PT_SOAP_VERSION_REVISION 0
 
 #if defined(PT_SOAP_API_EXPORT)
 #    define PT_SOAP_API PT_EXPORT
