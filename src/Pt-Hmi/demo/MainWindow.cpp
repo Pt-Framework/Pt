@@ -44,9 +44,9 @@
 //#define DEMO_WITH_SKIA 1
 
 #ifdef DEMO_WITH_SKIA
-#include <include/core/SkSurface.h>
-#include <include/core/SkImage.h>
-#include <include/core/SkCanvas.h>
+#include <SkSurface.h>
+#include <SkImage.h>
+#include <SkCanvas.h>
 #endif
 
 namespace Pt {
@@ -213,7 +213,7 @@ MainWindow::~MainWindow()
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
-    return;   
+    //return;   
     
     Painter painter( surface() );
     painter.setClip(rect);
@@ -221,10 +221,8 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 #ifdef DEMO_WITH_SKIA
     Gfx::Image img(Gfx::ImageFormat::argb32(), Gfx::Size(800, 400));
 
-    SkISize skSize;
-    skSize.fWidth = img.width();
-    skSize.fHeight = img.height();
-    SkImageInfo info = SkImageInfo::Make(skSize, kBGRA_8888_SkColorType, kPremul_SkAlphaType, 0);
+    SkImageInfo info = SkImageInfo::Make(img.width(), img.height(),
+                                         kBGRA_8888_SkColorType, kPremul_SkAlphaType, 0);
     size_t rowBytes = info.minRowBytes();
 
     sk_sp<SkSurface> surface = SkSurface::MakeRasterDirect( info, img.data(), rowBytes);
@@ -259,7 +257,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     // Image painter 2
     Pt::Gfx::ImagePainter2  painter2(img);
-
+    
     painter2.setPen(Gfx::Pen(Gfx::Color::fromRgb8(0, 255, 00), 10));
 
     Gfx::PointF p3(40, 20);
@@ -271,9 +269,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
         painter2.drawLine(p3, p4);
 
     span = clock.stop();
-    std::cout << "IpP: " << span.toUSecs() / 1000.0 << " ms" << std::endl;
+    std::cout << "IP2: " << span.toUSecs() / 1000.0 << " ms" << std::endl;
 
-    painter.drawImage(Gfx::PointF(0, 0), img);
+        painter.drawImage(Gfx::PointF(0, 0), img);
 
     // Native
     Gfx::PointF p5(60, 20);

@@ -998,9 +998,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Configured|Win32'">
-    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j8 -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j8 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
+    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions); PT_QT_API_EXPORT;PT_HMI_API_EXPORT</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(SolutionDir)..\..\include;$(SolutionDir)..\..\src\Pt-System\win32\;$(SolutionDir)..\..\src\Pt-Qt\win32\;$(QTDIR)\include;.\src\gdi;$(SolutionDir)\..\..\src\skia\</NMakeIncludeSearchPath>
   </PropertyGroup>
