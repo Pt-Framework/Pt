@@ -1,0 +1,600 @@
+SubDir PT_TOP src skia src ;
+
+SubDirHdrs $(PT_TOP)/src/skia ;
+SubDirHdrs $(PT_TOP)/src/skia/include/c ;
+SubDirHdrs $(PT_TOP)/src/skia/include/codec ;
+SubDirHdrs $(PT_TOP)/src/skia/include/config ;
+SubDirHdrs $(PT_TOP)/src/skia/include/core ;
+SubDirHdrs $(PT_TOP)/src/skia/include/effects ;
+SubDirHdrs $(PT_TOP)/src/skia/include/encode ;
+SubDirHdrs $(PT_TOP)/src/skia/include/gpu ;
+SubDirHdrs $(PT_TOP)/src/skia/include/pathops ;
+SubDirHdrs $(PT_TOP)/src/skia/include/ports ;
+SubDirHdrs $(PT_TOP)/src/skia/include/private ;
+SubDirHdrs $(PT_TOP)/src/skia/include/utils ;
+
+SubDirHdrs $(PT_TOP)/src/skia/src/c ;
+SubDirHdrs $(PT_TOP)/src/skia/src/codec 
+SubDirHdrs $(PT_TOP)/src/skia/src/core ;
+SubDirHdrs $(PT_TOP)/src/skia/src/core ;
+SubDirHdrs $(PT_TOP)/src/skia/src/effects ;
+SubDirHdrs $(PT_TOP)/src/skia/src/gpu ;
+SubDirHdrs $(PT_TOP)/src/skia/src/image ;
+SubDirHdrs $(PT_TOP)/src/skia/src/images ;
+SubDirHdrs $(PT_TOP)/src/skia/src/jumper ;
+SubDirHdrs $(PT_TOP)/src/skia/src/lazy ;
+SubDirHdrs $(PT_TOP)/src/skia/src/opts ;
+SubDirHdrs $(PT_TOP)/src/skia/src/pathops ;
+SubDirHdrs $(PT_TOP)/src/skia/src/ports ;
+SubDirHdrs $(PT_TOP)/src/skia/src/sfnt ;
+SubDirHdrs $(PT_TOP)/src/skia/src/shaders ;
+SubDirHdrs $(PT_TOP)/src/skia/src/sksl ;
+SubDirHdrs $(PT_TOP)/src/skia/src/utils ;
+
+SubDirHdrs $(PT_TOP)/src/skia/include/third_party/skcms ;
+
+SubDirObjects $(PT_OUTPUT_OBJECT) skia ;
+
+SubDirC++Flags [ FDefines SK_SUPPORT_GPU=0 ] ;
+SubDirC++Flags [ FDefines SKSL_STANDALONE  ] ;
+SubDirC++Flags [ FDefines SK_BUILD_NO_OPTS ] ;
+SubDirC++Flags [ FDefines SK_DISABLE_EFFECT_DESERIALIZATION ] ;
+
+#######################################################################
+# c
+#######################################################################
+
+SKIA_C_SOURCES = sk_paint.cpp 
+				         sk_surface.cpp 
+                 sk_effects.cpp
+				         ;
+
+SKIA_SOURCES += $(SKIA_C_SOURCES:D=c) ;
+
+#######################################################################
+# core
+#######################################################################
+
+SKIA_CORE_SOURCES = SkAAClip.cpp
+                    SkAnnotation.cpp
+                    SkAlphaRuns.cpp
+                    SkATrace.cpp
+                    SkAutoPixmapStorage.cpp
+                    SkBBHFactory.cpp
+                    SkBigPicture.cpp
+                    SkBitmap.cpp
+                    SkBitmapCache.cpp
+                    SkBitmapController.cpp
+                    SkBitmapDevice.cpp
+                    SkBitmapProcState.cpp
+                    SkBitmapProcState_matrixProcs.cpp
+                    SkBitmapProvider.cpp
+                    SkBlendMode.cpp
+                    SkBlitMask_D32.cpp
+                    SkBlitRow_D32.cpp
+                    SkBlitter.cpp
+                    SkBlitter_A8.cpp
+                    SkBlitter_ARGB32.cpp
+                    SkBlitter_RGB565.cpp
+                    SkBlitter_Sprite.cpp
+                    SkBlurImageFilter.cpp
+                    SkBlurMask.cpp
+                    SkBlurMF.cpp
+                    SkBuffer.cpp
+                    SkCachedData.cpp
+                    SkCanvas.cpp
+                    SkCanvasPriv.cpp
+                    SkCoverageDelta.cpp
+                    SkClipStack.cpp
+                    SkClipStackDevice.cpp
+                    SkColor.cpp
+                    SkColorFilter.cpp
+                    SkColorLookUpTable.cpp
+                    SkColorMatrixFilterRowMajor255.cpp
+                    SkColorSpace.cpp
+                    SkColorSpace_A2B.cpp
+                    SkColorSpace_XYZ.cpp
+                    SkColorSpace_ICC.cpp
+                    SkColorSpaceXform.cpp
+                    SkColorSpaceXformCanvas.cpp
+                    SkColorSpaceXformSteps.cpp
+                    SkColorSpaceXformer.cpp
+                    SkConvertPixels.cpp
+                    SkCpu.cpp
+                    SkCubicClipper.cpp
+                    SkCubicMap.cpp
+                    SkData.cpp
+                    SkDataTable.cpp
+                    SkDebug.cpp
+                    SkDeferredDisplayList.cpp
+                    SkDeferredDisplayListRecorder.cpp
+                    SkDeque.cpp
+                    SkDevice.cpp
+                    SkDeviceProfile.cpp
+                    SkDistanceFieldGen.cpp
+                    SkDither.cpp
+                    SkDocument.cpp
+                    SkDraw.cpp
+                    SkDraw_vertices.cpp
+                    SkDrawable.cpp
+                    SkDrawLooper.cpp
+                    SkDrawShadowInfo.cpp
+                    SkEdgeBuilder.cpp
+                    SkEdgeClipper.cpp
+                    SkExecutor.cpp
+                    SkAnalyticEdge.cpp
+                    SkFDot6Constants.cpp
+                    SkEdge.cpp
+                    SkArenaAlloc.cpp
+                    SkGaussFilter.cpp
+                    SkFlattenable.cpp
+                    SkFont.cpp
+                    SkFontLCDConfig.cpp
+                    SkFontMgr.cpp
+                    SkFontDescriptor.cpp
+                    SkFontStream.cpp
+                    SkGeometry.cpp
+                    SkGlobalInitialization_core.cpp
+                    SkGlyph.cpp
+                    SkGlyphCache.cpp
+                    SkGpuBlurUtils.cpp
+                    SkGraphics.cpp
+                    SkHalf.cpp
+                    SkICC.cpp
+                    SkImageFilter.cpp
+                    SkImageFilterCache.cpp
+                    SkImageInfo.cpp
+                    SkImageGenerator.cpp
+                    SkLineClipper.cpp
+                    SkLiteDL.cpp
+                    SkLiteRecorder.cpp
+                    SkLocalMatrixImageFilter.cpp
+                    SkMD5.cpp
+                    SkMallocPixelRef.cpp
+                    SkMask.cpp
+                    SkMaskBlurFilter.cpp
+                    SkMaskCache.cpp
+                    SkMaskFilter.cpp
+                    SkMaskGamma.cpp
+                    SkMath.cpp
+                    SkMatrix.cpp
+                    SkMatrix44.cpp
+                    SkMatrixImageFilter.cpp
+                    SkMetaData.cpp
+                    SkMipMap.cpp
+                    SkMiniRecorder.cpp
+                    SkModeColorFilter.cpp
+                    SkMultiPictureDraw.cpp
+                    SkLatticeIter.cpp
+                    SkOpts.cpp
+                    SkOverdrawCanvas.cpp
+                    SkPaint.cpp
+                    SkPaintPriv.cpp
+                    SkPath.cpp
+                    SkPath_serial.cpp
+                    SkPathEffect.cpp
+                    SkPathMeasure.cpp
+                    SkPathRef.cpp
+                    SkPicture.cpp
+                    SkPictureData.cpp
+                    SkPictureFlat.cpp
+                    SkPictureImageGenerator.cpp
+                    SkPicturePlayback.cpp
+                    SkPictureRecord.cpp
+                    SkPictureRecorder.cpp
+                    SkPixelRef.cpp
+                    SkPixmap.cpp
+                    SkPoint.cpp
+                    SkPoint3.cpp
+                    SkPtrRecorder.cpp
+                    SkQuadClipper.cpp
+                    SkRasterClip.cpp
+                    SkRasterPipeline.cpp
+                    SkRasterPipelineBlitter.cpp
+                    SkReadBuffer.cpp
+                    SkRecord.cpp
+                    SkRecords.cpp
+                    SkRecordDraw.cpp
+                    SkRecordOpts.cpp
+                    SkRecordedDrawable.cpp
+                    SkRecorder.cpp
+                    SkRect.cpp
+                    SkRefDict.cpp
+                    SkRegion.cpp
+                    SkRegion_path.cpp
+                    SkRemoteGlyphCache.cpp
+                    SkResourceCache.cpp
+                    SkRRect.cpp
+                    SkRTree.cpp
+                    SkRWBuffer.cpp
+                    SkScalar.cpp
+                    SkScalerContext.cpp
+                    SkScan.cpp
+                    SkScan_AAAPath.cpp
+                    SkScan_DAAPath.cpp
+                    SkScan_AntiPath.cpp
+                    SkScan_Antihair.cpp
+                    SkScan_Hairline.cpp
+                    SkScan_Path.cpp
+                    SkSemaphore.cpp
+                    SkSharedMutex.cpp
+                    SkSpecialImage.cpp
+                    SkSpecialSurface.cpp
+                    SkSpinlock.cpp
+                    SkSpriteBlitter_ARGB32.cpp
+                    SkSpriteBlitter_RGB565.cpp
+                    SkStream.cpp
+                    SkStrikeCache.cpp
+                    SkString.cpp
+                    SkStringUtils.cpp
+                    SkStroke.cpp
+                    SkStrokeRec.cpp
+                    SkStrokerPriv.cpp
+                    SkSurfaceCharacterization.cpp
+                    SkSwizzle.cpp
+                    SkSRGB.cpp
+                    SkTaskGroup.cpp
+                    SkTaskGroup2D.cpp
+                    SkTextBlob.cpp
+                    SkTime.cpp
+                    SkThreadedBMPDevice.cpp
+                    SkThreadID.cpp
+                    SkTLS.cpp
+                    SkTSearch.cpp
+                    SkTypeface.cpp
+                    SkTypeface_remote.cpp
+                    SkTypefaceCache.cpp
+                    SkUnPreMultiply.cpp
+                    SkUtils.cpp
+                    SkVertices.cpp
+                    SkVertState.cpp
+                    SkWriteBuffer.cpp
+                    SkWriter32.cpp
+                    SkXfermode.cpp
+                    SkXfermodeInterpretation.cpp
+                    SkYUVPlanesCache.cpp
+					          ;
+
+SKIA_SOURCES += $(SKIA_CORE_SOURCES:D=core) ;
+
+#######################################################################
+# lazy
+#######################################################################
+
+SKIA_LAZY_SOURCES = SkDiscardableMemoryPool.cpp ;
+SKIA_SOURCES += $(SKIA_LAZY_SOURCES:D=lazy) ;
+
+#######################################################################
+# image
+#######################################################################
+
+SKIA_IMAGE_SOURCES = SkImage.cpp
+					           SkImage_Lazy.cpp
+					           SkImage_Raster.cpp
+					           SkSurface.cpp
+					           SkSurface_Raster.cpp
+  					         ;
+
+SKIA_SOURCES += $(SKIA_IMAGE_SOURCES:D=image) ;
+
+#######################################################################
+# pipe
+#######################################################################
+
+SKIA_PIPE_SOURCES = SkPipeCanvas.cpp
+                    SkPipeReader.cpp
+  					        ;
+
+SKIA_SOURCES += $(SKIA_PIPE_SOURCES:D=pipe) ;
+
+#######################################################################
+# jumper
+#######################################################################
+
+SKIA_JUMPER_SOURCES = SkJumper.cpp ;
+SKIA_SOURCES += $(SKIA_JUMPER_SOURCES:D=jumper) ;
+
+#######################################################################
+# shaders
+#######################################################################
+
+SKIA_SHADERS_SOURCES = SkBitmapProcShader.cpp						 
+						           SkColorFilterShader.cpp						 
+						           SkColorShader.cpp						 
+						           SkComposeShader.cpp						 
+						           SkImageShader.cpp						 
+						           SkLocalMatrixShader.cpp						 
+                       SkPictureShader.cpp
+						           SkShader.cpp				                         
+					             ;
+
+SKIA_SHADERS_SOURCES += SkPerlinNoiseShader.cpp				                         
+					              ;
+
+SKIA_SOURCES += $(SKIA_SHADERS_SOURCES:D=shaders) ;
+
+#######################################################################
+# gradient shaders
+#######################################################################
+
+SKIA_SHADERS_GRADIENTS_SOURCES = Sk4fGradientBase.cpp
+                                 Sk4fLinearGradient.cpp
+                                 SkGradientBitmapCache.cpp
+                                 SkGradientShader.cpp
+                                 SkLinearGradient.cpp
+                                 SkRadialGradient.cpp
+                                 SkTwoPointConicalGradient.cpp
+                                 SkTwoPointConicalGradient_gpu.cpp
+                                 SkSweepGradient.cpp
+                                 ;
+
+SKIA_SHADERS_GRADIENTS_DIR = [ FDirName shaders gradients ] ;
+SKIA_SOURCES += $(SKIA_SHADERS_GRADIENTS_SOURCES:D=$(SKIA_SHADERS_GRADIENTS_DIR)) ;
+
+#######################################################################
+# pathops
+#######################################################################
+
+SKIA_PATHOPS_SOURCES = SkAddIntersections.cpp
+						           SkDConicLineIntersection.cpp
+						           SkDCubicLineIntersection.cpp
+						           SkDCubicToQuads.cpp
+						           SkDLineIntersection.cpp
+						           SkDQuadLineIntersection.cpp
+						           SkIntersections.cpp
+						           SkOpAngle.cpp
+						           SkOpBuilder.cpp
+						           SkOpCoincidence.cpp
+						           SkOpContour.cpp
+						           SkOpCubicHull.cpp
+						           SkOpEdgeBuilder.cpp
+						           SkOpSegment.cpp
+						           SkOpSpan.cpp
+						           SkPathOpsCommon.cpp
+						           SkPathOpsConic.cpp
+						           SkPathOpsCubic.cpp
+						           SkPathOpsCurve.cpp
+						           SkPathOpsDebug.cpp
+						           SkPathOpsLine.cpp
+						           SkPathOpsOp.cpp
+                       SkPathOpsPoint.cpp
+						           SkPathOpsQuad.cpp
+						           SkPathOpsRect.cpp
+						           SkPathOpsSimplify.cpp
+						           SkPathOpsTSect.cpp
+						           SkPathOpsTightBounds.cpp
+						           SkPathOpsTypes.cpp
+						           SkPathOpsWinding.cpp
+						           SkPathWriter.cpp
+						           SkReduceOrder.cpp
+					             ;
+
+SKIA_SOURCES += $(SKIA_PATHOPS_SOURCES:D=pathops) ;
+
+#######################################################################
+# SKIA PORTS
+#######################################################################
+
+SKIA_PORTS_SOURCES = SkMemory_malloc.cpp
+					           SkDebug_stdio.cpp	
+					           SkOSFile_stdio.cpp
+					           SkImageGenerator_none.cpp
+					           SkGlobalInitialization_default.cpp
+					           SkFontMgr_empty_factory.cpp
+					           ;
+
+if $(PT_SYSTEM) = posix
+{
+	SKIA_PORTS_SOURCES += SkOSFile_posix.cpp ;
+}
+
+if $(PT_SYSTEM) = win32
+{
+	SKIA_PORTS_SOURCES += SkDebug_win.cpp 
+                        SkOSFile_win.cpp ;
+}
+
+if $(PT_SYSTEM) = winrt
+{
+	SKIA_PORTS_SOURCES += SkDebug_win.cpp 
+                        SkOSFile_win.cpp ;
+}
+
+SKIA_SOURCES += $(SKIA_PORTS_SOURCES:D=ports) ;
+
+#######################################################################
+# opts
+#######################################################################
+
+SKIA_OPTS_SOURCES = SkBitmapProcState_opts_none.cpp
+                    SkBlitMask_opts_none.cpp
+                    SkBlitRow_opts_none.cpp
+
+                    # armv7
+                    #SkBitmapProcState_opts_none.cpp
+                    #SkBlitMask_opts_arm.cpp
+                    #SkBlitRow_opts_arm.cpp
+                   
+                    # neon
+                    #SkBitmapProcState_arm_neon.cpp
+                    #SkBitmapProcState_matrixProcs_neon.cpp
+                    #SkBlitMask_opts_arm_neon.cpp
+                    #SkBlitRow_opts_arm_neon.cpp
+                   
+                    # arm64
+                    #SkBitmapProcState_arm_neon.cpp
+                    #SkBitmapProcState_matrixProcs_neon.cpp
+                    #SkBitmapProcState_opts_none.cpp
+                    #SkBlitMask_opts_arm.cpp
+                    #SkBlitMask_opts_arm_neon.cpp
+                    #SkBlitRow_opts_arm.cpp
+                    #SkBlitRow_opts_arm_neon.cpp
+                   
+                    # crc32
+                    #SkOpts_crc32.cpp
+                   
+                    # sse2
+                    #SkBitmapProcState_opts_SSE2.cpp
+                    #SkBlitRow_opts_SSE2.cpp
+                    #opts_check_x86.cpp
+                   
+                    # ssse3
+                    #SkBitmapProcState_opts_SSSE3.cpp
+                    #SkOpts_ssse3.cpp
+                   
+                    # sse41
+                    #SkOpts_sse41.cpp
+                   
+                    # sse42
+                    #SkOpts_sse42.cpp
+                   
+                    # avx
+                    #SkOpts_avx.cpp
+                   
+                    # hsw
+                    #SkOpts_hsw.cpp
+                    ;
+
+SKIA_SOURCES += $(SKIA_OPTS_SOURCES:D=opts) ;
+
+#######################################################################
+# utils
+#######################################################################
+
+SKIA_UTILS_SOURCES = Sk3D.cpp
+                     SkBase64.cpp
+                     SkFrontBufferedStream.cpp
+                     SkCamera.cpp
+                     SkCanvasStack.cpp
+                     SkCanvasStateUtils.cpp
+                     SkDashPath.cpp
+                     SkEventTracer.cpp
+                     SkFloatToDecimal.cpp
+                     SkInterpolator.cpp
+                     SkJSONWriter.cpp
+                     SkMatrix22.cpp
+                     SkMultiPictureDocument.cpp
+                     SkNWayCanvas.cpp
+                     SkNullCanvas.cpp
+                     SkOffsetPolygon.cpp
+                     SkOSPath.cpp
+                     SkPaintFilterCanvas.cpp
+                     SkParse.cpp
+                     SkParseColor.cpp
+                     SkParsePath.cpp
+                     SkPatchUtils.cpp
+                     SkShadowTessellator.cpp
+                     SkShadowUtils.cpp
+                     SkThreadUtils_pthread.cpp
+                     SkThreadUtils_win.cpp
+                     SkWhitelistTypefaces.cpp		
+                     
+                     # mac
+                     #/mac/SkCreateCGImageRef.cpp
+
+                     # windows
+                     #/win/SkAutoCoInitialize.cpp
+                     #/win/SkDWrite.cpp
+                     #/win/SkDWriteFontFileStream.cpp
+                     #/win/SkDWriteGeometrySink.cpp
+                     #/win/SkHRESULT.cpp
+                     #/win/SkIStream.cpp
+                     #/win/SkWGL_win.cpp
+                     ;
+
+SKIA_SOURCES += $(SKIA_UTILS_SOURCES:D=utils) ;
+
+#######################################################################
+# skcms
+#######################################################################
+
+SKIA_THIRD_PARTY_SKCMS_SOURCES = skcms.c ;
+SKIA_SKCMS_DIR = [ FDirName .. third_party skcms ] ;
+SKIA_SOURCES += $(SKIA_THIRD_PARTY_SKCMS_SOURCES:D=$(SKIA_SKCMS_DIR)) ;
+
+#######################################################################
+# images
+#######################################################################
+
+SKIA_IMAGES_SOURCES = SkImageEncoder.cpp ;
+SKIA_SOURCES += $(SKIA_IMAGES_SOURCES:D=images) ;
+
+#######################################################################
+# sksl
+#######################################################################
+
+SKIA_SKSL_SOURCES = SkSLCFGGenerator.cpp
+					          SkSLCompiler.cpp
+					          SkSLIRGenerator.cpp
+					          SkSLLexer.cpp
+					          SkSLParser.cpp
+					          SkSLString.cpp
+					          SkSLUtil.cpp
+					          ;
+
+SKIA_SOURCES += $(SKIA_SKSL_SOURCES:D=sksl) ;
+
+#######################################################################
+# sksl ir
+#######################################################################
+
+SKIA_SKSL_IR_SOURCES = SkSLSetting.cpp
+					             SkSLSymbolTable.cpp
+					             SkSLType.cpp
+					             SkSLVariableReference.cpp
+					             ;
+					 
+SKIA_SKSL_IR_DIR = [ FDirName sksl ir ] ;
+SKIA_SOURCES += $(SKIA_SKSL_IR_SOURCES:D=$(SKIA_SKSL_IR_DIR)) ;					   
+
+#######################################################################
+# effects
+#######################################################################
+
+SKIA_EFFECTS_SOURCES = Sk1DPathEffect.cpp
+                       Sk2DPathEffect.cpp
+                       SkAlphaThresholdFilter.cpp
+                       SkArithmeticImageFilter.cpp
+                       SkColorFilterImageFilter.cpp
+                       SkColorMatrix.cpp
+                       SkColorMatrixFilter.cpp
+                       SkComposeImageFilter.cpp
+                       SkCornerPathEffect.cpp
+                       SkDashPathEffect.cpp
+                       SkDiscretePathEffect.cpp
+                       SkDisplacementMapEffect.cpp
+                       SkDropShadowImageFilter.cpp
+                       SkEmbossMask.cpp
+                       SkEmbossMaskFilter.cpp
+                       SkImageSource.cpp
+                       SkHighContrastFilter.cpp
+                       SkLayerDrawLooper.cpp
+                       SkLightingImageFilter.cpp
+                       SkLumaColorFilter.cpp
+                       SkMagnifierImageFilter.cpp
+                       SkMatrixConvolutionImageFilter.cpp
+                       SkMergeImageFilter.cpp
+                       SkMorphologyImageFilter.cpp
+                       SkOffsetImageFilter.cpp
+                       SkOverdrawColorFilter.cpp
+                       SkPackBits.cpp
+                       SkPaintFlagsDrawFilter.cpp
+                       SkPaintImageFilter.cpp
+                       SkPictureImageFilter.cpp
+                       SkShaderMaskFilter.cpp
+                       SkTableColorFilter.cpp
+                       SkTableMaskFilter.cpp
+                       SkTileImageFilter.cpp
+                       SkToSRGBColorFilter.cpp
+                       SkTrimPathEffect.cpp
+                       SkXfermodeImageFilter.cpp
+					             ;					  
+
+SKIA_SOURCES += $(SKIA_EFFECTS_SOURCES:D=effects) ;
+
+#######################################################################
+# skia library
+#######################################################################
+
+Library skia : $(SKIA_SOURCES) ;
+MakeLocate skia : $(PT_OUTPUT_TARGET) ;

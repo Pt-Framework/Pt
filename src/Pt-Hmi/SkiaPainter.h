@@ -30,10 +30,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #ifndef PT_HMI_SKIAPAINTER_H
 #define PT_HMI_SKIAPAINTER_H
 
-#include <include/core/SkSurface.h>
-#include <include/core/SkImage.h>
-#include <include/core/SkCanvas.h>
-#include <include/core/SkFont.h>
+#include <SkSurface.h>
+#include <SkImage.h>
+#include <SkCanvas.h>
+#include <SkFont.h>
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/ImagePainter.h>
@@ -218,7 +218,6 @@ namespace Hmi {
 
         SkPaint _skiaPen;
         SkPaint _skiaBrush;
-        SkFont  _skiaFont;
         sk_sp<SkSurface> _surface;
         SkCanvas* _canvas;
         Gfx::ImagePainter _imgPainter;

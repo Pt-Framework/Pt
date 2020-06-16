@@ -29,8 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
 #include "SkiaPainter.h"
 #include <Pt/Gfx/ImagePainter.h>
-#include <include/core/SkPath.h>
-#include <include/effects/SkDashPathEffect.h>
+#include <SkPath.h>
+#include <SkDashPathEffect.h>
 
 namespace Pt {
 namespace Hmi {
@@ -54,11 +54,8 @@ void SkiaPainter::setImage(Gfx::Image& image)
     _image = &image;
     _imgPainter.setImage(image);
 
-    SkISize imgSize;
-    imgSize.fWidth= image.width();
-    imgSize.fHeight = image.height();
 
-    SkImageInfo info = SkImageInfo::Make(imgSize, kBGRA_8888_SkColorType, kPremul_SkAlphaType, 0);
+    SkImageInfo info = SkImageInfo::Make(image.width(), image.height(), kBGRA_8888_SkColorType, kPremul_SkAlphaType, 0);
 
     size_t rowBytes = info.minRowBytes();
 
@@ -215,7 +212,6 @@ void SkiaPainter::setFont(const Gfx::Font& font)
     _font = font;
 
     _imgPainter.setFont(_font);
-    _skiaFont = SkFont(nullptr, 64.0f, 1.0f, 0.0f);
 }
 
 const Gfx::Font& SkiaPainter::font() const
