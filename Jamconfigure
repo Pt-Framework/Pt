@@ -771,6 +771,11 @@ EchoOption JPEG_LINKLIBS : "JPEG libs" ;
 if --with-skia in $(ARGV)
 {
     WITH_BUILTIN_SKIA = yes ;
+
+    if $(TOOLSET) = gcc
+    {
+      C++FLAGS += -std=c++11 ;
+    }
 }
 
 Configure WITH_BUILTIN_SKIA ;
