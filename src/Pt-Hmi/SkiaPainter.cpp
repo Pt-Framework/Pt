@@ -55,11 +55,18 @@ void SkiaPainter::setImage(Gfx::Image& image)
     _imgPainter.setImage(image);
 
 
-    SkImageInfo info = SkImageInfo::Make(image.width(), image.height(), kBGRA_8888_SkColorType, kPremul_SkAlphaType, 0);
-
+#if 1
+    SkImageInfo info = SkImageInfo::Make(image.width(), image.height(), kPt_SkColorType, kPremul_SkAlphaType, 0);    
+    
     size_t rowBytes = info.minRowBytes();
-
-    _surface = SkSurface::MakeRasterDirect(info, image.data(), rowBytes);
+    _surface = SkSurface::MakeRasterDirect(info, (void*)&image, rowBytes);
+#else
+    
+    SkImageInfo info = SkImageInfo::Make(image.width(), image.height(), kBGRA_8888_SkColorType, kOpaque_SkAlphaType, 0);
+    size_t rowBytes = info.minRowBytes();
+    _surface = SkSurface::MakeRasterDirect(info, (void*)image.data(), rowBytes);
+#endif
+    
     _canvas = _surface->getCanvas();
 
     resetClip();

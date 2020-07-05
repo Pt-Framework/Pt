@@ -23,6 +23,11 @@ PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.mm  ] ;
 
 if $(WITH_BUILTIN_SKIA)
 {
+    SubDirC++Flags [ FDefines SK_SUPPORT_GPU=0 ] ;
+    SubDirC++Flags [ FDefines SKSL_STANDALONE  ] ;
+    SubDirC++Flags [ FDefines SK_BUILD_NO_OPTS ] ;
+    SubDirC++Flags [ FDefines SK_DISABLE_EFFECT_DESERIALIZATION ] ;
+
     SubDirHdrs $(PT_TOP)/src/skia/include/c ;
     SubDirHdrs $(PT_TOP)/src/skia/include/codec ;
     SubDirHdrs $(PT_TOP)/src/skia/include/config ;
@@ -34,8 +39,10 @@ if $(WITH_BUILTIN_SKIA)
     SubDirHdrs $(PT_TOP)/src/skia/include/ports ;
     SubDirHdrs $(PT_TOP)/src/skia/include/private ;
     SubDirHdrs $(PT_TOP)/src/skia/include/utils ;
+    SubDirHdrs $(PT_TOP)/src/skia/src/core ;
+    SubDirHdrs $(PT_TOP)/src/skia/src/shaders ;
 
-    PT_HMI_IMPL += SkiaPainter.cpp ;
+    PT_HMI_IMPL += SkiaPainter.cpp SkiaBlitter.cpp ;
 }
 
 SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)

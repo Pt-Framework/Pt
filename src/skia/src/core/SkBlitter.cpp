@@ -981,6 +981,12 @@ bool SkBlitter::UseRasterPipelineBlitter(const SkPixmap& device, const SkPaint& 
         return false;
     }
 
+
+    if (device.colorType() == kPt_SkColorType) {
+        return false;
+    }
+
+
     return device.colorType() != kN32_SkColorType;
 #endif
 }
@@ -1111,6 +1117,7 @@ SkBlitter* SkBlitter::Choose(const SkPixmap& device,
 
     SkBlitter*  blitter = nullptr;
     switch (device.colorType()) {
+
         case kN32_SkColorType:
             // sRGB and general color spaces are handled via raster pipeline.
             SkASSERT(!device.colorSpace());
@@ -1131,6 +1138,10 @@ SkBlitter* SkBlitter::Choose(const SkPixmap& device,
             } else {
                 blitter = SkCreateRasterPipelineBlitter(device, *commonPaint, matrix, alloc);
             }
+            break;
+
+        case kPt_SkColorType:
+            blitter = SkCreateBlitter(device, *legacyPaint, alloc);
             break;
 
         default:

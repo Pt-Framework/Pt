@@ -28,6 +28,12 @@ struct SkMask;
     for the destination and how src/generated pixels map to the destination.
     The coordinates passed to the blitX calls are in destination pixel space.
 */
+
+class SkBlitter;
+
+SkBlitter* SkCreateBlitter(const SkPixmap& device, const SkPaint& paint, SkArenaAlloc* alloc);
+
+
 class SkBlitter {
 public:
     virtual ~SkBlitter();
