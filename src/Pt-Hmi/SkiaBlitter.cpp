@@ -32,12 +32,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 namespace Pt {
 namespace Hmi {
 
-SkiaBlitter::SkiaBlitter(const SkPixmap& device, const SkPaint& paint)
+SkiaBlitter::SkiaBlitter(const SkPixmap& device, const SkPaint& paint, Gfx::Image& image)
 : _device(device)
+, _image(image)
 {
     SkColor color = paint.getColor();
-
-    _image = (Pt::Gfx::Image*)( device.addr());
 
     unsigned fSrcA = SkColorGetA(color);
 
@@ -55,7 +54,7 @@ SkiaBlitter::SkiaBlitter(const SkPixmap& device, const SkPaint& paint)
 
 void SkiaBlitter::blitH(int x, int y, int width)
 {
-    _image->format().setPixels(*_image->pixel(x, y), _color, width, Pt::Gfx::CompositionMode::Mode::SourceCopy);
+    _image.format().setPixels(*_image.pixel(x, y), _color, width, Pt::Gfx::CompositionMode::Mode::SourceCopy);
 }
 
 void SkiaBlitter::blitAntiH(int x, int y, const SkAlpha antialias[], const int16_t runs[])
@@ -65,7 +64,7 @@ void SkiaBlitter::blitAntiH(int x, int y, const SkAlpha antialias[], const int16
     }
 
     uint32_t    color = _pmColor;
-    Pt::Gfx::Image::PixelIterator device = _image->pixel(x, y);
+    Pt::Gfx::Image::PixelIterator device = _image.pixel(x, y);
     unsigned    opaqueMask = _color.alpha() / 256;
    
     size_t pos = 0;
@@ -81,9 +80,9 @@ void SkiaBlitter::blitAntiH(int x, int y, const SkAlpha antialias[], const int16
             for (size_t i = 0; i < count; ++i)
             {
                 if ((opaqueMask & aa) == 255)
-                    _image->format().setPixel(*device, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, aa);
+                    _image.format().setPixel(*device, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, aa);
                 else
-                    _image->format().setPixel(*device, _color, Pt::Gfx::CompositionMode::Mode::SourceOver, aa);
+                    _image.format().setPixel(*device, _color, Pt::Gfx::CompositionMode::Mode::SourceOver, aa);
 
 
                 ++device;
@@ -101,17 +100,17 @@ void SkiaBlitter::blitV(int x, int y, int height, SkAlpha alpha)
         return;
     
 
-    Pt::Gfx::Image::PixelIterator device = _image->pixel(x, y);
+    Pt::Gfx::Image::PixelIterator device = _image.pixel(x, y);
 
     Pt::Gfx::Color color = _color;
 
     color.setAlpha(alpha* 256);
     
-    size_t width = _image->width();
+    size_t width = _image.width();
 
     while (--height >= 0) 
     {
-        _image->format().setPixel(*device, color, Pt::Gfx::CompositionMode::Mode::SourceOver);
+        _image.format().setPixel(*device, color, Pt::Gfx::CompositionMode::Mode::SourceOver);
 
          device  +=  width;
     }
@@ -123,13 +122,13 @@ void SkiaBlitter::blitRect(int x, int y, int width, int height)
     if (_color.alpha() == 0)
         return;
 
-    Pt::Gfx::Image::PixelIterator device = _image->pixel(x, y);
+    Pt::Gfx::Image::PixelIterator device = _image.pixel(x, y);
 
-    size_t  row= _image->width();
+    size_t  row= _image.width();
 
     while (--height >= 0) 
     {
-        _image->format().setPixels(*device, _color, width, Pt::Gfx::CompositionMode::Mode::SourceOver);
+        _image.format().setPixels(*device, _color, width, Pt::Gfx::CompositionMode::Mode::SourceOver);
         device += row;
     }
 }
@@ -144,7 +143,7 @@ void SkiaBlitter::blitMask(const SkMask& mask, const SkIRect& clip)
     int width = clip.width();
     int height = clip.height();
 
-    Pt::Gfx::Image::PixelIterator dstRow = _image->pixel(x, y);
+    Pt::Gfx::Image::PixelIterator dstRow = _image.pixel(x, y);
 
     switch (mask.fFormat)
     {
@@ -159,12 +158,12 @@ void SkiaBlitter::blitMask(const SkMask& mask, const SkIRect& clip)
 
                 for (size_t i = 0; i < mask.fRowBytes; ++i)
                 {
-                    _image->format().setPixel(*p2, _color, Pt::Gfx::CompositionMode::Mode::SourceOver, srcRow[i]);
+                    _image.format().setPixel(*p2, _color, Pt::Gfx::CompositionMode::Mode::SourceOver, srcRow[i]);
                     ++p2;
                 }
 
 
-                dstRow += _image->width();
+                dstRow += _image.width();
                 srcRow += mask.fRowBytes;
 
             } while (--height != 0);
@@ -185,26 +184,28 @@ const SkPixmap* SkiaBlitter::justAnOpaqueColor(uint32_t* value)
 
 void SkiaBlitter::blitAntiH2(int x, int y, U8CPU a0, U8CPU a1)
 {
-    Pt::Gfx::Image::PixelIterator p = _image->pixel(x, y);
+    Pt::Gfx::Image::PixelIterator p = _image.pixel(x, y);
 
-    _image->format().setPixel(*p, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, a0);
+    _image.format().setPixel(*p, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, a0);
     ++p;
-    _image->format().setPixel(*p, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, a1);
+    _image.format().setPixel(*p, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, a1);
 }
 
 void SkiaBlitter::blitAntiV2(int x, int y, U8CPU a0, U8CPU a1)
 {
-    Pt::Gfx::Image::PixelIterator p = _image->pixel(x, y);
+    Pt::Gfx::Image::PixelIterator p = _image.pixel(x, y);
 
-    _image->format().setPixel(*p, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, a0);
-     p += _image->width();
-    _image->format().setPixel(*p, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, a1);
+    _image.format().setPixel(*p, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, a0);
+     p += _image.width();
+    _image.format().setPixel(*p, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, a1);
 }
+
+
+SkBlitter* SkCreateBlitter(const SkPixmap& device, const SkPaint& paint, SkArenaAlloc* alloc, void* context)
+{
+    Pt::Gfx::Image* image = (Pt::Gfx::Image*) context;
+    return  alloc->make<Pt::Hmi::SkiaBlitter>(device, paint, *image);
+}
+
 
 }}
-
-
-SkBlitter* SkCreateBlitter(const SkPixmap& device, const SkPaint& paint, SkArenaAlloc* alloc)
-{
-    return  alloc->make<Pt::Hmi::SkiaBlitter>(device, paint);
-}

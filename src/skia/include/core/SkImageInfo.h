@@ -16,6 +16,10 @@
 
 class SkReadBuffer;
 class SkWriteBuffer;
+class SkBlitter;
+class SkArenaAlloc;
+class SkPixmap;
+class SkPaint;
 
 /** \enum SkImageInfo::SkAlphaType
     Describes how to interpret the alpha component of a pixel. A pixel may
@@ -92,7 +96,7 @@ enum SkColorType {
 #else
 #error "SK_*32_SHIFT values must correspond to BGRA or RGBA byte order"
 #endif
-    kPt_SkColorType
+    kCustom_SkColorType
 };
 
 /** Returns the number of bytes required to store a pixel, including unused padding.
@@ -167,6 +171,9 @@ enum SkYUVColorSpace {
     kLastEnum_SkYUVColorSpace = kRec709_SkYUVColorSpace, //!< last valid value
 };
 
+
+typedef SkBlitter* (*SkCreateBlitterProc)(const SkPixmap& device, const SkPaint& paint, SkArenaAlloc* alloc, void* context);
+
 /** \struct SkImageInfo
     Describes pixel dimensions and encoding. SkBitmap, SkImage, PixMap, and SkSurface
     can be created from SkImageInfo. SkImageInfo can be retrieved from SkBitmap and
@@ -215,9 +222,16 @@ public:
         @param cs      range of colors; may be nullptr
         @return        created SkImageInfo
     */
+
     static SkImageInfo Make(int width, int height, SkColorType ct, SkAlphaType at,
-                            sk_sp<SkColorSpace> cs = nullptr) {
-        return SkImageInfo(width, height, ct, at, std::move(cs));
+                            sk_sp<SkColorSpace> cs = nullptr, SkCreateBlitterProc proc = 0, void* blitterContext = 0)
+    {
+        return SkImageInfo(width, height, ct, at, std::move(cs), proc, blitterContext);
+    }
+
+    static SkImageInfo MakeCustom(int width, int height, SkAlphaType at, SkCreateBlitterProc proc, void* blitterContext)
+    {
+        return SkImageInfo(width, height, kCustom_SkColorType, at, nullptr, proc, blitterContext);
     }
 
     /** Creates SkImageInfo from integral dimensions width and height, kN32_SkColorType,
@@ -426,7 +440,7 @@ public:
         @return           created SkImageInfo
     */
     SkImageInfo makeWH(int newWidth, int newHeight) const {
-        return Make(newWidth, newHeight, fColorType, fAlphaType, fColorSpace);
+        return Make(newWidth, newHeight, fColorType, fAlphaType, fColorSpace, fCreateBlitter, fBlitterContext);
     }
 
     /** Creates SkImageInfo with same SkColorType, SkColorSpace, width, and height,
@@ -441,7 +455,7 @@ public:
         @return              created SkImageInfo
     */
     SkImageInfo makeAlphaType(SkAlphaType newAlphaType) const {
-        return Make(fWidth, fHeight, fColorType, newAlphaType, fColorSpace);
+        return Make(fWidth, fHeight, fColorType, newAlphaType, fColorSpace, fCreateBlitter, fBlitterContext);
     }
 
     /** Creates SkImageInfo with same SkAlphaType, SkColorSpace, width, and height,
@@ -455,7 +469,7 @@ public:
         @return              created SkImageInfo
     */
     SkImageInfo makeColorType(SkColorType newColorType) const {
-        return Make(fWidth, fHeight, newColorType, fAlphaType, fColorSpace);
+        return Make(fWidth, fHeight, newColorType, fAlphaType, fColorSpace, fCreateBlitter, fBlitterContext);
     }
 
     /** Creates SkImageInfo with same SkAlphaType, SkColorType, width, and height,
@@ -465,7 +479,7 @@ public:
         @return    created SkImageInfo
     */
     SkImageInfo makeColorSpace(sk_sp<SkColorSpace> cs) const {
-        return Make(fWidth, fHeight, fColorType, fAlphaType, std::move(cs));
+        return Make(fWidth, fHeight, fColorType, fAlphaType, std::move(cs), fCreateBlitter, fBlitterContext);
     }
 
     /** Returns number of bytes per pixel required by SkColorType.
@@ -599,6 +613,16 @@ public:
     */
     SkDEBUGCODE(void validate() const;)
 
+    SkCreateBlitterProc createBlitter() const
+    {
+        return fCreateBlitter;
+    }
+
+    void* blitterContext() const
+    {
+        return fBlitterContext;
+    }
+
 private:
     sk_sp<SkColorSpace> fColorSpace;
     int                 fWidth;
@@ -606,13 +630,21 @@ private:
     SkColorType         fColorType;
     SkAlphaType         fAlphaType;
 
-    SkImageInfo(int width, int height, SkColorType ct, SkAlphaType at, sk_sp<SkColorSpace> cs)
+    SkImageInfo(int width, int height, SkColorType ct, SkAlphaType at, sk_sp<SkColorSpace> cs, 
+                SkCreateBlitterProc fCreateBlitter = 0, void* fBlitterContext = 0)
         : fColorSpace(std::move(cs))
         , fWidth(width)
         , fHeight(height)
         , fColorType(ct)
         , fAlphaType(at)
+        , fCreateBlitter(fCreateBlitter)
+        , fBlitterContext(fBlitterContext)
     {}
+
+
+private:
+    SkCreateBlitterProc fCreateBlitter;
+    void* fBlitterContext;
 };
 
 #endif

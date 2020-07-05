@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 */
 
 #include "SkiaPainter.h"
+#include "SkiaBlitter.h"
 #include <Pt/Gfx/ImagePainter.h>
 #include <SkPath.h>
 #include <SkDashPathEffect.h>
@@ -56,10 +57,9 @@ void SkiaPainter::setImage(Gfx::Image& image)
 
 
 #if 1
-    SkImageInfo info = SkImageInfo::Make(image.width(), image.height(), kPt_SkColorType, kPremul_SkAlphaType, 0);    
+    SkImageInfo info = SkImageInfo::MakeCustom(image.width(), image.height(), kPremul_SkAlphaType, SkCreateBlitter, (void*)&image);
     
-    size_t rowBytes = info.minRowBytes();
-    _surface = SkSurface::MakeRasterDirect(info, (void*)&image, rowBytes);
+    _surface = SkSurface::MakeRaster(info);
 #else
     
     SkImageInfo info = SkImageInfo::Make(image.width(), image.height(), kBGRA_8888_SkColorType, kOpaque_SkAlphaType, 0);

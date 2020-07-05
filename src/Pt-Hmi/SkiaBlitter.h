@@ -48,7 +48,7 @@ namespace Hmi {
 
 class SkiaBlitter : public SkBlitter {
 public:
-    SkiaBlitter(const SkPixmap& device, const SkPaint& paint);
+    SkiaBlitter(const SkPixmap& device, const SkPaint& paint, Gfx::Image& image);
 
 
     void blitH(int x, int y, int width) override;
@@ -63,10 +63,12 @@ public:
 protected:
     const SkPixmap& _device;
 
-    Pt::Gfx::Image* _image;
+    Pt::Gfx::Image& _image;
     Pt::Gfx::Color _color;
     uint32_t _pmColor;
 };
+
+SkBlitter* SkCreateBlitter(const SkPixmap& device, const SkPaint& paint, SkArenaAlloc* alloc, void* context);
 
 }
 }

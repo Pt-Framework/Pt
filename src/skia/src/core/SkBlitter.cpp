@@ -949,6 +949,11 @@ bool gSkForceRasterPipelineBlitter;
 
 bool SkBlitter::UseRasterPipelineBlitter(const SkPixmap& device, const SkPaint& paint,
                                          const SkMatrix& matrix) {
+
+    if (device.info().createBlitter() != nullptr) {
+        return false;
+    }
+
     if (gSkForceRasterPipelineBlitter) {
         return true;
     }
@@ -981,12 +986,6 @@ bool SkBlitter::UseRasterPipelineBlitter(const SkPixmap& device, const SkPaint& 
         return false;
     }
 
-
-    if (device.colorType() == kPt_SkColorType) {
-        return false;
-    }
-
-
     return device.colorType() != kN32_SkColorType;
 #endif
 }
@@ -997,6 +996,11 @@ SkBlitter* SkBlitter::Choose(const SkPixmap& device,
                              SkArenaAlloc* alloc,
                              bool drawCoverage) {
     SkASSERT(alloc != nullptr);
+
+    if (device.info().createBlitter() != nullptr)
+    {
+        return device.info().createBlitter()(device, origPaint, alloc, device.info().blitterContext());
+    }
 
     // which check, in case we're being called by a client with a dummy device
     // (e.g. they have a bounder that always aborts the draw)
@@ -1140,9 +1144,6 @@ SkBlitter* SkBlitter::Choose(const SkPixmap& device,
             }
             break;
 
-        case kPt_SkColorType:
-            blitter = SkCreateBlitter(device, *legacyPaint, alloc);
-            break;
 
         default:
             // should have been handled via raster pipeline.
