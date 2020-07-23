@@ -47,6 +47,11 @@ class IONotifierImpl
 
         void setFd(int fd);
 
+        void setHandle(void* h)
+        {
+
+        }
+
         void cancel(EventLoop& loop);
 
         void beginWait(EventLoop& loop, int flags);

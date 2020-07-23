@@ -52,11 +52,15 @@ class PT_SYSTEM_API IONotifier : public Selectable
     public:
         IONotifier();
 
+        explicit IONotifier(void* handle);
+
         explicit IONotifier(int fd);
 
         ~IONotifier();
 
         void setFd(int fd);
+
+        void setHandle(void* handle);
 
         void beginWait(int flags);
 

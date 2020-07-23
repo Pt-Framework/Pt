@@ -30,6 +30,7 @@
 #define PT_SYSTEM_IONOTIFIERIMPL_H
 
 #include "Pt/System/IONotifier.h"
+#include "Selector.h"
 
 namespace Pt {
 
@@ -44,6 +45,8 @@ class IONotifierImpl
 
         void setFd(int fd);
 
+        void setHandle(void* h);
+
         void cancel(EventLoop& loop);
 
         void beginWait(EventLoop& loop, int flags);
@@ -51,6 +54,10 @@ class IONotifierImpl
         int endWait(EventLoop& loop);
         
         bool runWait(EventLoop& loop);
+
+    private:
+        IOHandle _handle;
+        int _flags;
 };
 
 } // namespace

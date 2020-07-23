@@ -29,13 +29,15 @@
 #include "IONotifierImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/EventLoop.h"
+#include "Selector.h"
 
 namespace Pt {
 
 namespace System {
 
-IONotifierImpl::IONotifierImpl(IONotifier&)
+IONotifierImpl::IONotifierImpl(IONotifier& ioNotifier)
 {
+    _handle.init(ioNotifier);
 }
 
 
@@ -48,26 +50,34 @@ void IONotifierImpl::setFd(int fd)
 {
 }
 
+void IONotifierImpl::setHandle(void* h)
+{
+    _handle.setHandle(h);
+}
+
 
 void IONotifierImpl::cancel(EventLoop& loop)
 {
+    loop.selector().disable(_handle);
 }
 
 
 void IONotifierImpl::beginWait(EventLoop& loop, int flags)
 {
+    loop.selector().enable(_handle);
 }
 
 
 int IONotifierImpl::endWait(EventLoop& loop)
 {
+    loop.selector().disable(_handle);
     return 0;
 }
 
 
 bool IONotifierImpl::runWait(EventLoop& loop)
 {
-    return false;
+    return true;
 }
 
 } // namespace
