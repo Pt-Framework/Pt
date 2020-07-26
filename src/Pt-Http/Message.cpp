@@ -212,10 +212,27 @@ bool MessageHeader::isKeepAlive() const
         return compareIgnoreCase(ch, "keep-alive") == 0;
 }
 
-
 void MessageHeader::setKeepAlive()
 {
     set("Connection", "keep-alive");
+}
+
+
+bool MessageHeader::isUpgrade() const
+{
+    const char* ch = get("Connection");
+
+    if (ch == 0)
+        return versionMajor() == 1
+        && versionMinor() >= 1;
+    else
+        return compareIgnoreCase(ch, "upgrade") == 0;
+}
+
+
+void MessageHeader::setUpgrade()
+{
+    set("Connection", "upgrade");
 }
 
 

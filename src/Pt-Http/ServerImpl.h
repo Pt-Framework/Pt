@@ -35,6 +35,7 @@
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Server.h>
+#include <Pt/Http/IOStream.h>
 #include <Pt/Ssl/Context.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/MainLoop.h>
@@ -67,24 +68,32 @@ class Acceptor : public Pt::Connectable
         ~Acceptor();
 
         void setSecure(Ssl::Context& ctx)
-        { _conn.setSecure(ctx); }
+        { _conn->setSecure(ctx); }
 
         void setTimeout(std::size_t timeout)
-        { _conn.setTimeout(timeout); }
+        { _conn->setTimeout(timeout); }
 
         void setKeepAliveTimeout(std::size_t timeout)
-        { _conn.setKeepAliveTimeout(timeout); }
+        { _conn->setKeepAliveTimeout(timeout); }
 
         void setMaxReadSize(std::size_t maxSize)
-        { _conn.setMaxReadSize(maxSize); }
+        { _conn->setMaxReadSize(maxSize); }
 
         void beginServe(System::EventLoop& loop);
 
         Signal<Acceptor&>& finished()
         { return _finished; }
 
+
         Servlet* servlet()
         { return _servlet; }
+
+        Connection* release()
+        {
+            Connection* conn = _conn;
+            _conn = 0;
+            return conn;
+        }
 
     protected:
         void releaseResponder();
@@ -104,7 +113,7 @@ class Acceptor : public Pt::Connectable
         Authorization* _auth;
         Servlet* _servlet;
         Responder* _responder;
-        Connection _conn;
+        Connection* _conn;
         Request _request;
         Reply _reply;
         MessageProgress _requestProgress;
@@ -198,6 +207,22 @@ class ServerThread : public Connectable
 class ServerImpl : public Connectable
                  , private NonCopyable
 {
+    class UpgradeEvent : public Pt::BasicEvent<UpgradeEvent>
+    {
+        public:
+            UpgradeEvent(IOStream* iostream)
+                : _iostream(iostream)
+            { }
+
+            IOStream* iostream() const
+            {
+                return _iostream;
+            }
+
+        private:
+            IOStream* _iostream;
+    };
+
     public:
         ServerImpl();
 
@@ -207,7 +232,14 @@ class ServerImpl : public Connectable
         { return _serverSocket.loop(); }
 
         void setActive(System::EventLoop& eventLoop)
-        { _serverSocket.setActive(eventLoop); }
+        { 
+            System::EventLoop* loop = _serverSocket.loop();
+            if (loop)
+                loop->eventReceived() -= Pt::slot(*this, &ServerImpl::onUpgrade);
+            
+            _serverSocket.setActive(eventLoop); 
+            eventLoop.eventReceived() += Pt::slot(*this, &ServerImpl::onUpgrade);
+        }
 
         std::size_t timeout() const
         { return _timeout; }
@@ -250,10 +282,22 @@ class ServerImpl : public Connectable
 
         Servlet* getServlet(const Request& request);
 
+        void upgrade(Connection* conn);
+
+        Signal<IOStream*>& upgradeRequested()
+        {
+            return _upgradeRequested;
+        }
+
     private:
         void onAccept(Net::TcpServer& server);
 
         void onHandlerFinished(Acceptor& conn);
+
+        void onUpgrade(const UpgradeEvent& ev)
+        {
+            _upgradeRequested.send( ev.iostream() );
+        }
 
     private:
         struct ServletListEntry
@@ -288,6 +332,7 @@ class ServerImpl : public Connectable
         System::ReadWriteMutex _serviceMutex;
         typedef std::vector<ServletListEntry> ServletList;
         ServletList _servlets;
+        Signal<IOStream*> _upgradeRequested;
 };
 
 } // namespace Http

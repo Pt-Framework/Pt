@@ -254,6 +254,10 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         /** @brief Sets the HTTP keep-alive header.
         */
         void setKeepAlive();
+        
+        bool isUpgrade() const;
+
+        void setUpgrade();
 
         // Returns a properly formatted current time-string, as needed in http.
         // The buffer must have at least 30 bytes.

@@ -675,9 +675,11 @@ MessageProgress Connection::endSendReply()
         return progress;
     }
 
+    bool isUpgrade = _reply->header().isUpgrade();
+
     _reply = 0;
 
-    if( ! _keepAlive)
+    if( ! _keepAlive && ! isUpgrade )
     {
         PT_LOG_DEBUG("no keep alive, closing connection");
         cancel();

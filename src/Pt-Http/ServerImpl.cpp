@@ -51,11 +51,11 @@ Acceptor::Acceptor(ServerImpl& server, Net::TcpServer& tcpServer)
 , _auth(0)
 , _servlet(0)
 , _responder(0)
-, _conn()
-, _request(_conn)
-, _reply(_conn)
+, _conn(new Connection())
+, _request(*_conn)
+, _reply(*_conn)
 {
-    _conn.accept(tcpServer);
+    _conn->accept(tcpServer);
     _request.inputReceived() += Pt::slot(*this, &Acceptor::onRequestReceived);
     _reply.outputSent() += Pt::slot(*this, &Acceptor::onReplySent);
 }
@@ -71,6 +71,9 @@ Acceptor::~Acceptor()
         assert(_servlet->authorizer());
         _servlet->authorizer()->cancelAuthorization(_auth);
     }
+
+    if (_conn)
+        delete _conn;
 }
 
 
@@ -91,7 +94,7 @@ void Acceptor::beginServe(System::EventLoop& loop)
 {  
     PT_LOG_TRACE("Acceptor::beginServe");
 
-    _conn.setActive(loop);
+    _conn->setActive(loop);
 
     _reply.clear();
     _request.clear();
@@ -220,7 +223,7 @@ void Acceptor::onRequest(MessageProgress progress)
             _responder = _servlet->service()->getResponder( _request );
             
             assert(_responder);
-            _responder->beginRequest( _request, _reply, *_conn.loop() );
+            _responder->beginRequest( _request, _reply, *_conn->loop() );
 
             if( _reply.isSending() )
             {
@@ -234,7 +237,7 @@ void Acceptor::onRequest(MessageProgress progress)
             if( _responder)
             {
                 PT_LOG_DEBUG("received request body");
-                _responder->readRequest(_request, _reply, *_conn.loop());
+                _responder->readRequest(_request, _reply, *_conn->loop());
 
                 if( _reply.isSending() )
                 {
@@ -252,7 +255,7 @@ void Acceptor::onRequest(MessageProgress progress)
 
         if( progress.finished() )
         {
-            if( ! _conn.isConnected() )
+            if( ! _conn->isConnected() )
             {
                 PT_LOG_DEBUG("not connected anymore");
                 _finished.send(*this);
@@ -262,7 +265,7 @@ void Acceptor::onRequest(MessageProgress progress)
             if(_responder)
             {
                 PT_LOG_DEBUG("request body finished, begin reply");
-                _responder->beginReply(_request, _reply, *_conn.loop());
+                _responder->beginReply(_request, _reply, *_conn->loop());
                 return;
             }
 
@@ -302,11 +305,20 @@ void Acceptor::onReplySent(Reply& r)
         {
             PT_LOG_DEBUG("response finished");
 
+            if (r.statusCode() == 101)
+            {
+                PT_LOG_DEBUG("upgrade");
+
+                Connection* conn = this->release();
+                _server.upgrade(conn);
+            }
+
             releaseResponder();
+
             _reply.clear();
             _request.clear();
 
-            if( ! _conn.isConnected() )
+            if (_conn == 0 || !_conn->isConnected())
             {
                 PT_LOG_DEBUG("not connected anymore");
                 _finished.send(*this);
@@ -329,7 +341,7 @@ void Acceptor::onReplySent(Reply& r)
         _reply.discard();
         assert(_responder);
 
-        _responder->writeReply(_request, _reply, *_conn.loop());
+        _responder->writeReply(_request, _reply, *_conn->loop());        
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
@@ -500,8 +512,6 @@ void ServerThread::onHandlerFinished(Acceptor& handler)
         }
     }
 }
-
-
 
 
 ServerImpl::ServerImpl()
@@ -689,6 +699,13 @@ Servlet* ServerImpl::getServlet(const Request& request)
 
     PT_LOG_WARN("not found: " << request.url());
     return 0;
+}
+
+
+void ServerImpl::upgrade(Connection* conn)
+{
+    UpgradeEvent ev(new IOStream(conn));
+    loop()->commitEvent(ev);
 }
 
 

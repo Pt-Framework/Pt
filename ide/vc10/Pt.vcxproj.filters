@@ -1632,6 +1632,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\SkiaBlitter.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\IOStream.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -3031,6 +3034,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\SkiaBlitter.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\IOStream.cpp">
+      <Filter>Pt-Http</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

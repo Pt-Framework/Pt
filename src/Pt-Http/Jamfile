@@ -19,6 +19,7 @@ SharedLibrary Pt-Http : Authorizer.cpp
                         ServerImpl.cpp
                         Service.cpp
                         Servlet.cpp
+                        IOStream.cpp
                         ;
 
 LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net Pt-Ssl ;

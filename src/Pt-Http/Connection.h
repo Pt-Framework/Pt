@@ -235,7 +235,67 @@ class Connection : public Connectable
         std::streambuf& buffer()
         { return _httpbuf; }
 
+        std::streambuf* releaseBuffer()
+        {
+            _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
+            _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
+
+            return _os.rdbuf();
+        }
+
+        Pt::Signal<Pt::System::IOBuffer&>& inputReady()
+        {
+            return _sockbuf.inputReady();
+        }
+
+        Pt::Signal<Pt::System::IOBuffer&>& outputReady()
+        {
+            return _sockbuf.outputReady();
+        }
+
+        void beginInput()
+        {
+            if (_ssl)
+                _sslbuf.import();
+
+            _sockbuf.beginRead();
+        }
+
+        size_t endInput()
+        {
+            std::size_t readSize = _sockbuf.endRead();
+
+            if (_ssl)
+            {
+                _sslbuf.import();
+                return _sslbuf.in_avail();
+            }
+
+            return readSize;
+        }
+
+        void beginOutput()
+        {
+            if (_ssl)
+                _sslbuf.pubsync();
+
+            _sockbuf.beginWrite();
+        }
+
+        size_t endOutput()
+        {
+             return _sockbuf.endWrite();
+        }
+
     protected:
+        void beginRead();
+
+        void endRead();
+
+        void beginWrite();
+
+        void endWrite();
+
         void onConnect(Net::TcpSocket& socket);
 
         void onOutput();
@@ -247,14 +307,6 @@ class Connection : public Connectable
         void onHttpInput(System::IOBuffer& sb);
 
         void onHttpOutput(System::IOBuffer& sb);
-
-        void beginRead();
-
-        void endRead();
-
-        void beginWrite();
-
-        void endWrite();
 
         bool inputAvailable();
 

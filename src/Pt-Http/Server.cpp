@@ -189,6 +189,11 @@ Servlet* Server::getServlet(const Request& request)
     return _impl->getServlet(request);
 }
 
+Signal<IOStream*>& Server::upgradeRequested()
+{
+    return _impl->upgradeRequested();
+}
+
 } // namespace Http
 
 } // namespace Pt

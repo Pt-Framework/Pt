@@ -30,6 +30,7 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Http/IOStream.h>
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
 #include <cstddef>
@@ -147,6 +148,8 @@ class PT_HTTP_API Server : public Connectable
 
         //! @internal
         Servlet* getServlet(const Request& request);
+
+        Signal<IOStream*>& upgradeRequested();
 
     private:
         class ServerImpl* _impl;
