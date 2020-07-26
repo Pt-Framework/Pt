@@ -36,6 +36,7 @@ namespace Pt {
 namespace System {
 
 IONotifierImpl::IONotifierImpl(IONotifier& ioNotifier)
+: _flags(0)
 {
     _handle.init(ioNotifier);
 }
@@ -58,12 +59,14 @@ void IONotifierImpl::setHandle(void* h)
 
 void IONotifierImpl::cancel(EventLoop& loop)
 {
+    _flags = 0;
     loop.selector().disable(_handle);
 }
 
 
 void IONotifierImpl::beginWait(EventLoop& loop, int flags)
 {
+    _flags = flags;
     loop.selector().enable(_handle);
 }
 
@@ -71,7 +74,9 @@ void IONotifierImpl::beginWait(EventLoop& loop, int flags)
 int IONotifierImpl::endWait(EventLoop& loop)
 {
     loop.selector().disable(_handle);
-    return 0;
+    int flags = _flags;
+    _flags = 0;
+    return flags;
 }
 
 
