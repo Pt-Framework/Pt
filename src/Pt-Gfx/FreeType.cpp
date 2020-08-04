@@ -272,69 +272,46 @@ FontMetrics FreeType::fontMetrics(const String& text,
     FT_Size size;
     FTC_Manager_LookupSize(_manager, &scaler, &size);
 
-    int pen_x = 0;
-    int pen_y = 0;
     FT_UInt   previous = 0;
     FT_Vector delta;
     FT_Glyph  glyph;
-    FT_BBox   gbbox = { 0 , 0, 0, 0 };
-    FT_BBox   tbbox = { std::numeric_limits<FT_Pos>::max(),
-                        std::numeric_limits<FT_Pos>::max(),
-                        std::numeric_limits<FT_Pos>::min(),
-                        std::numeric_limits<FT_Pos>::min() };
+
+    int width = 0;
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
-        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId,
-                                                   charMapIndex, it->value());
+        FT_UInt glyph_index = FTC_CMapCache_Lookup( _charMapCache, faceId,
+                                                    charMapIndex, it->value() );
 
         if( ! glyph_index )
             glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId,
-                                              charMapIndex, 63);
-        
+                                               charMapIndex, 63);
+
         if( ! glyph_index )
-        {
-            tbbox.xMin = std::min( FT_Pos(0), tbbox.xMin );
-            tbbox.xMax = std::max( FT_Pos(0), tbbox.xMax );
             continue;
-        }
 
         FTC_Node node;
         if( FTC_ImageCache_Lookup(_imageCache, &imageType, glyph_index, &glyph, &node) )
             continue;
 
+        // width is the sum of the advance of each character
+        width += glyph->advance.x >> 16;
+
+        // add kerning between previous and this character
         if( FT_HAS_KERNING(face) && previous )
         {
-            FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
-            if(delta.x < glyph->advance.x && delta.y < glyph->advance.y)
-            {
-              pen_x += delta.x;
-              pen_y -= delta.y;
-            }
+            FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
+
+            width += delta.x >> 16;
         }
-
-        FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_PIXELS, &gbbox);
-
-        gbbox.xMin += ( pen_x >> 16 );
-        gbbox.xMax += ( pen_x >> 16 );
-
-        tbbox.xMin = std::min( gbbox.xMin, tbbox.xMin );
-        tbbox.xMax = std::max( gbbox.xMax, tbbox.xMax );
-
-        pen_x += glyph->advance.x;
-        pen_y -= glyph->advance.y;
 
         previous = glyph_index;
     }
 
-    // text width with left bearing
-    if( ! text.empty() )
-      tbbox.xMin = 0;
-
-    return FontMetrics( size->metrics.ascender/64,
-                       (-size->metrics.descender)/64,
-                       tbbox.xMax - tbbox.xMin,
-                       size->metrics.height/64 );
+    return FontMetrics( size->metrics.ascender >> 6,
+                        (-size->metrics.descender) >> 6,
+                        width,
+                        size->metrics.height >> 6 );
 
     // UNLOCK
 }
