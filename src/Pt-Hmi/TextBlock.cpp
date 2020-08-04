@@ -146,6 +146,10 @@ std::size_t TextLine::xToCursor(double x) const
     // estimate cursor position
     Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, str );
     std::size_t widthPerChar = fm.width() / str.size();
+
+    if(widthPerChar == 0)
+      return 0;
+
     std::size_t pos = textX / widthPerChar;
 
     if( pos >= str.size() )
