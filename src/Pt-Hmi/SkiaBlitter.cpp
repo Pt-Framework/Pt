@@ -59,9 +59,8 @@ void SkiaBlitter::blitH(int x, int y, int width)
 
 void SkiaBlitter::blitAntiH(int x, int y, const SkAlpha antialias[], const int16_t runs[])
 {
-    if (_color.alpha() == 0) {
+    if (_color.alpha() == 0) 
         return;
-    }
 
     uint32_t    color = _pmColor;
     Pt::Gfx::Image::PixelIterator device = _image.pixel(x, y);
@@ -69,25 +68,27 @@ void SkiaBlitter::blitAntiH(int x, int y, const SkAlpha antialias[], const int16
    
     size_t pos = 0;
 
-    while (runs[pos] > 0)
+    while(runs[pos] > 0)
     {
-        unsigned aa = antialias[pos];
+        const unsigned aa = antialias[pos];
         int count = runs[pos];
        
         if (aa)
         {
-
             for (size_t i = 0; i < count; ++i)
             {
                 if ((opaqueMask & aa) == 255)
-                    _image.format().setPixel(*device, _color, Pt::Gfx::CompositionMode::Mode::SourceCopy, aa);
+                    _image.format().setPixel(*device, _color,Pt::Gfx::CompositionMode::Mode::SourceCopy, aa);
                 else
                     _image.format().setPixel(*device, _color, Pt::Gfx::CompositionMode::Mode::SourceOver, aa);
 
-
                 ++device;
             }
-        }        
+        }
+        else
+        {
+            device += count;
+        }
 
         pos += count;
     }

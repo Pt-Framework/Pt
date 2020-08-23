@@ -36,7 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 namespace Pt {
 namespace Hmi {
 
-
 SkiaPainter::SkiaPainter(Gfx::Image& image)
 : _image(0)
 , _canvas(0)
@@ -45,10 +44,12 @@ SkiaPainter::SkiaPainter(Gfx::Image& image)
     setImage(image);
 }
 
+
 SkiaPainter::~SkiaPainter()
 {
 
 }
+
 
 void SkiaPainter::setImage(Gfx::Image& image)
 {
@@ -72,10 +73,12 @@ void SkiaPainter::setImage(Gfx::Image& image)
     resetClip();
 }
 
+
 const Gfx::ImageFormat& SkiaPainter::format() const
 {
     return _image->format();
 }
+
 
 void SkiaPainter::setCompositionMode(const Gfx::CompositionMode& mode)
 {
@@ -83,10 +86,12 @@ void SkiaPainter::setCompositionMode(const Gfx::CompositionMode& mode)
     _imgPainter.setCompositionMode(mode);
 }
 
+
 const Gfx::CompositionMode& SkiaPainter::compositionMode() const
 {
     return _imgPainter.compositionMode();
 }
+
 
 void SkiaPainter::setClip(const Gfx::RectF& clip)
 {
@@ -94,10 +99,12 @@ void SkiaPainter::setClip(const Gfx::RectF& clip)
     _canvas->clipRect(toSkia(clip), SkClipOp::kMax_EnumValue);
 }
 
+
 void SkiaPainter::resetClip()
 {
     setClip(Gfx::RectF(Gfx::PointF(0, 0), Gfx::SizeF(_image->width(), _image->height())));
 }
+
 
 void SkiaPainter::setPen(const Gfx::Pen& pen)
 {
@@ -164,6 +171,7 @@ const Gfx::Pen& SkiaPainter::pen() const
     return _pen;
 }
 
+
 void SkiaPainter::setBrush(const Gfx::Brush& brush)
 {
     _skiaBrush = SkPaint();
@@ -209,10 +217,12 @@ void SkiaPainter::setBrush(const Gfx::Brush& brush)
     }
 }
 
+
 const Gfx::Brush& SkiaPainter::brush() const
 {
     return _brush;
 }
+
 
 void SkiaPainter::setFont(const Gfx::Font& font)
 {
@@ -221,20 +231,24 @@ void SkiaPainter::setFont(const Gfx::Font& font)
     _imgPainter.setFont(_font);
 }
 
+
 const Gfx::Font& SkiaPainter::font() const
 {
     return _font;
 }
+
 
 Gfx::FontMetrics SkiaPainter::fontMetrics(const Pt::String& text) const
 {
     return _imgPainter.fontMetrics(text);
 }
 
+
 void SkiaPainter::drawLine(const Gfx::PointF& from, const  Gfx::PointF& to)
 {
     _canvas->drawLine(toSkia(from), toSkia(to), _skiaPen);
 }
+
 
 void SkiaPainter::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
@@ -242,15 +256,18 @@ void SkiaPainter::drawText(const Gfx::PointF& to, const Pt::String& text)
     _imgPainter.drawText(to, text);
 }
 
+
 void SkiaPainter::drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans)
 {
     _imgPainter.drawText(to, text, trans);
 }
 
+
 void SkiaPainter::drawRect(const Gfx::RectF& rect)
 {
     _canvas->drawRect(toSkia(rect), _skiaPen);
 }
+
 
 void SkiaPainter::fillRect(const Gfx::RectF& rect)
 {
@@ -269,6 +286,7 @@ void SkiaPainter::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size
     _canvas->drawOval(toRect(topLeft, size), _skiaBrush);
 }
 
+
 void SkiaPainter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
     SkPath path;
@@ -284,6 +302,7 @@ void SkiaPainter::drawPolyline(const Gfx::PointF* points, const size_t pointCoun
     _canvas->drawPath(path, _skiaPen);
 }
 
+
 void SkiaPainter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
     SkPath path;
@@ -297,6 +316,7 @@ void SkiaPainter::fillPolygon(const Gfx::PointF* points, const size_t pointCount
 
     _canvas->drawPath(path, _skiaBrush);
 }
+
 
 void SkiaPainter::drawImage(const  Gfx::PointF& to, const Gfx::Image& image)
 {
@@ -320,10 +340,12 @@ std::string SkiaPainter::defaultFont()
     return Gfx::ImagePainter::defaultFont();
 }
 
+
 void SkiaPainter::setDefaultFont(const std::string& name)
 {
     Gfx::ImagePainter::setDefaultFont(name);
 }
+
 
 std::vector<std::string> SkiaPainter::fontNames()
 {
@@ -336,7 +358,4 @@ Gfx::FontMetrics SkiaPainter::fontMetrics(const Gfx::Font& font, const Pt::Strin
     return Gfx::ImagePainter::fontMetrics(font, text);
 }
 
-
 }}
-
-

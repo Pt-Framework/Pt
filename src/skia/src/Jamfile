@@ -45,9 +45,9 @@ SubDirC++Flags [ FDefines SK_DISABLE_EFFECT_DESERIALIZATION ] ;
 #######################################################################
 
 SKIA_C_SOURCES = sk_paint.cpp 
-				         sk_surface.cpp 
+                         sk_surface.cpp 
                  sk_effects.cpp
-				         ;
+                         ;
 
 SKIA_SOURCES += $(SKIA_C_SOURCES:D=c) ;
 
@@ -253,7 +253,7 @@ SKIA_CORE_SOURCES = SkAAClip.cpp
                     SkXfermode.cpp
                     SkXfermodeInterpretation.cpp
                     SkYUVPlanesCache.cpp
-					          ;
+                              ;
 
 SKIA_SOURCES += $(SKIA_CORE_SOURCES:D=core) ;
 
@@ -269,11 +269,11 @@ SKIA_SOURCES += $(SKIA_LAZY_SOURCES:D=lazy) ;
 #######################################################################
 
 SKIA_IMAGE_SOURCES = SkImage.cpp
-					           SkImage_Lazy.cpp
-					           SkImage_Raster.cpp
-					           SkSurface.cpp
-					           SkSurface_Raster.cpp
-  					         ;
+                               SkImage_Lazy.cpp
+                               SkImage_Raster.cpp
+                               SkSurface.cpp
+                               SkSurface_Raster.cpp
+                             ;
 
 SKIA_SOURCES += $(SKIA_IMAGE_SOURCES:D=image) ;
 
@@ -283,7 +283,7 @@ SKIA_SOURCES += $(SKIA_IMAGE_SOURCES:D=image) ;
 
 SKIA_PIPE_SOURCES = SkPipeCanvas.cpp
                     SkPipeReader.cpp
-  					        ;
+                            ;
 
 SKIA_SOURCES += $(SKIA_PIPE_SOURCES:D=pipe) ;
 
@@ -298,18 +298,18 @@ SKIA_SOURCES += $(SKIA_JUMPER_SOURCES:D=jumper) ;
 # shaders
 #######################################################################
 
-SKIA_SHADERS_SOURCES = SkBitmapProcShader.cpp						 
-						           SkColorFilterShader.cpp						 
-						           SkColorShader.cpp						 
-						           SkComposeShader.cpp						 
-						           SkImageShader.cpp						 
-						           SkLocalMatrixShader.cpp						 
-                       SkPictureShader.cpp
-						           SkShader.cpp				                         
-					             ;
+SKIA_SHADERS_SOURCES = SkBitmapProcShader.cpp
+                                   SkColorFilterShader.cpp
+                                   SkColorShader.cpp
+                                   SkComposeShader.cpp
+                                   SkImageShader.cpp
+                                   SkLocalMatrixShader.cpp
+                                   SkPictureShader.cpp
+                                   SkShader.cpp
+                                 ;
 
-SKIA_SHADERS_SOURCES += SkPerlinNoiseShader.cpp				                         
-					              ;
+SKIA_SHADERS_SOURCES += SkPerlinNoiseShader.cpp
+                                  ;
 
 SKIA_SOURCES += $(SKIA_SHADERS_SOURCES:D=shaders) ;
 
@@ -336,38 +336,38 @@ SKIA_SOURCES += $(SKIA_SHADERS_GRADIENTS_SOURCES:D=$(SKIA_SHADERS_GRADIENTS_DIR)
 #######################################################################
 
 SKIA_PATHOPS_SOURCES = SkAddIntersections.cpp
-						           SkDConicLineIntersection.cpp
-						           SkDCubicLineIntersection.cpp
-						           SkDCubicToQuads.cpp
-						           SkDLineIntersection.cpp
-						           SkDQuadLineIntersection.cpp
-						           SkIntersections.cpp
-						           SkOpAngle.cpp
-						           SkOpBuilder.cpp
-						           SkOpCoincidence.cpp
-						           SkOpContour.cpp
-						           SkOpCubicHull.cpp
-						           SkOpEdgeBuilder.cpp
-						           SkOpSegment.cpp
-						           SkOpSpan.cpp
-						           SkPathOpsCommon.cpp
-						           SkPathOpsConic.cpp
-						           SkPathOpsCubic.cpp
-						           SkPathOpsCurve.cpp
-						           SkPathOpsDebug.cpp
-						           SkPathOpsLine.cpp
-						           SkPathOpsOp.cpp
-                       SkPathOpsPoint.cpp
-						           SkPathOpsQuad.cpp
-						           SkPathOpsRect.cpp
-						           SkPathOpsSimplify.cpp
-						           SkPathOpsTSect.cpp
-						           SkPathOpsTightBounds.cpp
-						           SkPathOpsTypes.cpp
-						           SkPathOpsWinding.cpp
-						           SkPathWriter.cpp
-						           SkReduceOrder.cpp
-					             ;
+                                   SkDConicLineIntersection.cpp
+                                   SkDCubicLineIntersection.cpp
+                                   SkDCubicToQuads.cpp
+                                   SkDLineIntersection.cpp
+                                   SkDQuadLineIntersection.cpp
+                                   SkIntersections.cpp
+                                   SkOpAngle.cpp
+                                   SkOpBuilder.cpp
+                                   SkOpCoincidence.cpp
+                                   SkOpContour.cpp
+                                   SkOpCubicHull.cpp
+                                   SkOpEdgeBuilder.cpp
+                                   SkOpSegment.cpp
+                                   SkOpSpan.cpp
+                                   SkPathOpsCommon.cpp
+                                   SkPathOpsConic.cpp
+                                   SkPathOpsCubic.cpp
+                                   SkPathOpsCurve.cpp
+                                   SkPathOpsDebug.cpp
+                                   SkPathOpsLine.cpp
+                                   SkPathOpsOp.cpp
+                                   SkPathOpsPoint.cpp
+                                   SkPathOpsQuad.cpp
+                                   SkPathOpsRect.cpp
+                                   SkPathOpsSimplify.cpp
+                                   SkPathOpsTSect.cpp
+                                   SkPathOpsTightBounds.cpp
+                                   SkPathOpsTypes.cpp
+                                   SkPathOpsWinding.cpp
+                                   SkPathWriter.cpp
+                                   SkReduceOrder.cpp
+                                 ;
 
 SKIA_SOURCES += $(SKIA_PATHOPS_SOURCES:D=pathops) ;
 
@@ -376,27 +376,27 @@ SKIA_SOURCES += $(SKIA_PATHOPS_SOURCES:D=pathops) ;
 #######################################################################
 
 SKIA_PORTS_SOURCES = SkMemory_malloc.cpp
-					           SkDebug_stdio.cpp	
-					           SkOSFile_stdio.cpp
-					           SkImageGenerator_none.cpp
-					           SkGlobalInitialization_default.cpp
-					           SkFontMgr_empty_factory.cpp
-					           ;
+                               SkDebug_stdio.cpp	
+                               SkOSFile_stdio.cpp
+                               SkImageGenerator_none.cpp
+                               SkGlobalInitialization_default.cpp
+                               SkFontMgr_empty_factory.cpp
+                               ;
 
 if $(PT_SYSTEM) = posix
 {
-	SKIA_PORTS_SOURCES += SkOSFile_posix.cpp ;
+    SKIA_PORTS_SOURCES += SkOSFile_posix.cpp ;
 }
 
 if $(PT_SYSTEM) = win32
 {
-	SKIA_PORTS_SOURCES += SkDebug_win.cpp 
+    SKIA_PORTS_SOURCES += SkDebug_win.cpp 
                         SkOSFile_win.cpp ;
 }
 
 if $(PT_SYSTEM) = winrt
 {
-	SKIA_PORTS_SOURCES += SkDebug_win.cpp 
+    SKIA_PORTS_SOURCES += SkDebug_win.cpp 
                         SkOSFile_win.cpp ;
 }
 
@@ -487,8 +487,8 @@ SKIA_UTILS_SOURCES = Sk3D.cpp
                      SkShadowUtils.cpp
                      SkThreadUtils_pthread.cpp
                      SkThreadUtils_win.cpp
-                     SkWhitelistTypefaces.cpp		
-                     
+                     SkWhitelistTypefaces.cpp
+
                      # mac
                      #/mac/SkCreateCGImageRef.cpp
 
@@ -524,13 +524,13 @@ SKIA_SOURCES += $(SKIA_IMAGES_SOURCES:D=images) ;
 #######################################################################
 
 SKIA_SKSL_SOURCES = SkSLCFGGenerator.cpp
-					          SkSLCompiler.cpp
-					          SkSLIRGenerator.cpp
-					          SkSLLexer.cpp
-					          SkSLParser.cpp
-					          SkSLString.cpp
-					          SkSLUtil.cpp
-					          ;
+                              SkSLCompiler.cpp
+                              SkSLIRGenerator.cpp
+                              SkSLLexer.cpp
+                              SkSLParser.cpp
+                              SkSLString.cpp
+                              SkSLUtil.cpp
+                              ;
 
 SKIA_SOURCES += $(SKIA_SKSL_SOURCES:D=sksl) ;
 
@@ -539,13 +539,13 @@ SKIA_SOURCES += $(SKIA_SKSL_SOURCES:D=sksl) ;
 #######################################################################
 
 SKIA_SKSL_IR_SOURCES = SkSLSetting.cpp
-					             SkSLSymbolTable.cpp
-					             SkSLType.cpp
-					             SkSLVariableReference.cpp
-					             ;
-					 
+                                 SkSLSymbolTable.cpp
+                                 SkSLType.cpp
+                                 SkSLVariableReference.cpp
+                                 ;
+                     
 SKIA_SKSL_IR_DIR = [ FDirName sksl ir ] ;
-SKIA_SOURCES += $(SKIA_SKSL_IR_SOURCES:D=$(SKIA_SKSL_IR_DIR)) ;					   
+SKIA_SOURCES += $(SKIA_SKSL_IR_SOURCES:D=$(SKIA_SKSL_IR_DIR)) ;
 
 #######################################################################
 # effects
@@ -588,7 +588,7 @@ SKIA_EFFECTS_SOURCES = Sk1DPathEffect.cpp
                        SkToSRGBColorFilter.cpp
                        SkTrimPathEffect.cpp
                        SkXfermodeImageFilter.cpp
-					             ;					  
+                                 ;
 
 SKIA_SOURCES += $(SKIA_EFFECTS_SOURCES:D=effects) ;
 

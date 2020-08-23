@@ -120,7 +120,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
     private:
         Gfx::SizeF            _size;
         Gfx::Image            _image;
-        SkiaPainter    _painter;
+        SkiaPainter           _painter;
 };
 
 } // namespace
