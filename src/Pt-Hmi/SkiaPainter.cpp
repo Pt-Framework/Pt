@@ -29,8 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
 #include "SkiaPainter.h"
 #include "SkiaBlitter.h"
+
 #include <Pt/Gfx/ImagePainter.h>
-#include <SkPath.h>
+
 #include <SkDashPathEffect.h>
 
 namespace Pt {
@@ -315,6 +316,76 @@ void SkiaPainter::fillPolygon(const Gfx::PointF* points, const size_t pointCount
     path.close();
 
     _canvas->drawPath(path, _skiaBrush);
+}
+
+
+SkPath SkiaPainter::toSkia(const Gfx::Path& p)
+{
+    SkPath skp;
+
+    std:size_t s = p.size();
+
+    for(std::size_t n = 0; n < s; n++)
+    {
+        const Gfx::Element& e = p.at(n);
+
+        switch(e.type)
+        {
+            case Gfx::Element::IT_Close:
+                skp.close();
+                break;
+
+            case Gfx::Element::IT_MoveTo:
+            {
+                double x = e.pxy.at(0);
+                double y = e.pxy.at(1);
+                skp.moveTo(x, y);
+                break;
+            }
+
+            case Gfx::Element::IT_LineTo:
+            {
+                double x = e.pxy.at(0);
+                double y = e.pxy.at(1);
+                skp.lineTo(x, y);
+                break;
+            }
+
+            case Gfx::Element::IT_QuadBezierTo:
+            {
+                double x1 = e.pxy.at(0);
+                double y1 = e.pxy.at(1);
+                double x2 = e.pxy.at(2);
+                double y2 = e.pxy.at(3);
+                skp.quadTo(x1, y1, x2, y2);
+                break;
+            }
+
+            case Gfx::Element::IT_CubicBezierTo:
+            {
+                double x1 = e.pxy.at(0);
+                double y1 = e.pxy.at(1);
+                double x2 = e.pxy.at(2);
+                double y2 = e.pxy.at(3);
+                double x3 = e.pxy.at(4);
+                double y3 = e.pxy.at(5);
+                skp.cubicTo(x1, y1, x2, y2, x3, y3);
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+    return skp;
+}
+
+
+void SkiaPainter::drawPath(const Gfx::Path& path, float smoothness)
+{
+    SkPath skPath = toSkia(path);
+    _canvas->drawPath(skPath, _skiaPen);
 }
 
 

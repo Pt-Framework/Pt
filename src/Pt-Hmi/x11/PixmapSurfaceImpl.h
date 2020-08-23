@@ -89,12 +89,15 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void drawText(const Gfx::PointF& to, const Pt::String& text);
 
-	void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans)
-	{
-	    drawText(to, text);
-	}
+        void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans)
+        {
+            drawText(to, text);
+        }
 
         void drawRect(const Gfx::RectF& rectangle);
+
+        void drawPath(const Gfx::Path& path, float smoothness)
+        {}
 
         void fillRect(const Gfx::RectF& rectangle);
 
@@ -105,6 +108,9 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         void drawPolyline(const Gfx::PointF* points, size_t pointCount);
 
         void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        void drawPath(const Gfx::Path& path, float smoothness)
+        {}
 
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 

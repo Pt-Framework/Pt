@@ -119,6 +119,9 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void fillPolygon(const Gfx::PointF* points, size_t pointCount);
 
+        void drawPath(const Gfx::Path& path, float smoothness)
+        {}
+
         void drawSurface(const Gfx::PointF& to, const PixmapSurface& surface);
 
         void drawSurface(const Gfx::PointF& to, 

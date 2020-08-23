@@ -203,6 +203,12 @@ void PixmapSurface::fillPolygon(const Gfx::PointF* points, size_t pointCount)
 }
 
 
+void PixmapSurface::drawPath(const Gfx::Path& path, float smoothness)
+{
+    _impl->drawPath(path, smoothness);
+}
+
+
 void PixmapSurface::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
 {
     _impl->drawSurface(toPhysical(to), surface);
@@ -231,12 +237,6 @@ void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image, co
 void PixmapSurface::drawPicture(const Gfx::PointF& to, const Picture& pic)
 {
     _impl->drawPicture(toPhysical(to) , pic);
-}
-
-void PixmapSurface::drawPath(const Gfx::Path& path, float smoothness)
-{
-    // NOTE: This cause compile error in my PC
-    //_impl->drawPath(path, smoothness);
 }
 
 

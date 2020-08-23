@@ -102,6 +102,8 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
 
+        virtual void drawPath(const Gfx::Path& path, float smoothness);
+
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
@@ -111,8 +113,6 @@ class PT_HMI_API PixmapSurface : public PaintSurface
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
-        virtual void drawPath(const Gfx::Path& path, float smoothness);
 
     protected:
         virtual const Gfx::SizeF& onSize() const;

@@ -34,6 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <SkImage.h>
 #include <SkCanvas.h>
 #include <SkFont.h>
+#include <SkPath.h>
+
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/ImagePainter.h>
@@ -43,7 +45,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 namespace Pt {
 
 namespace Hmi {
-
 
     class SkiaPainter : public Gfx::Painter
     {
@@ -96,6 +97,8 @@ namespace Hmi {
 
         virtual void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
 
+        virtual void drawPath(const Gfx::Path& path, float smoothness);
+
         virtual void drawImage(const  Gfx::PointF& to, const Gfx::Image& image);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imageRect);
@@ -140,7 +143,6 @@ namespace Hmi {
 
             return sr;
         }
-
 
         static SkPaint::Join toSkia(Gfx::Pen::JoinStyle s)
         {
@@ -189,6 +191,7 @@ namespace Hmi {
             return sr;
         }
 
+        static SkPath toSkia(const Gfx::Path& p);
 
         static bool equals(const Gfx::PointF& p1, const Gfx::PointF& p2)
         {
