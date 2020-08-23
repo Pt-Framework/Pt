@@ -195,7 +195,12 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
 void PixmapSurfaceImpl::drawPath(const Gfx::Path& path, float smoothness)
 {
     _painter.drawPath(path, smoothness);
+}
 
+
+void PixmapSurfaceImpl::fillPath(const Gfx::Path& path, float smoothness)
+{
+    _painter.fillPath(path, smoothness);
 }
 
 

@@ -181,19 +181,15 @@ void SkiaPainter::setBrush(const Gfx::Brush& brush)
     _skiaBrush.setColor(toSkia(brush.color()));
     _brush = brush;
 
-
     switch (brush.fillStyle())
     {
         case Gfx::Brush::Solid:
         {
-     
         }
         break;
 
         case Gfx::Brush::Texture:
         {
-       
-        
         }
         break;
 
@@ -386,6 +382,13 @@ void SkiaPainter::drawPath(const Gfx::Path& path, float smoothness)
 {
     SkPath skPath = toSkia(path);
     _canvas->drawPath(skPath, _skiaPen);
+}
+
+
+void SkiaPainter::fillPath(const Gfx::Path& path, float smoothness)
+{
+    SkPath skPath = toSkia(path);
+    _canvas->drawPath(skPath, _skiaBrush);
 }
 
 

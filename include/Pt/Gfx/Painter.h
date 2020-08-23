@@ -154,6 +154,14 @@ class PT_GFX_API Painter
         */
         virtual void fillEllipse(const PointF& topLeft, const SizeF& size) = 0;
 
+        virtual void drawPath(const Path& path, float smoothness = 1.0f)
+        {
+        }
+
+        virtual void fillPath(const Path& path, float smoothness = 1.0f)
+        {
+        }
+
         /** @brief Draws an image.
         */
         virtual void drawImage(const PointF& to, const Image& im) = 0;
@@ -161,8 +169,6 @@ class PT_GFX_API Painter
         /** @brief Draws a part of an image.
         */
         virtual void drawImage(const PointF& to, const Image& im, const RectF& rect) = 0;
-
-
 
         virtual void drawArc(const PointF& topLeft, const SizeF& size,
                              float degBegin, float degEnd)
@@ -172,36 +178,21 @@ class PT_GFX_API Painter
         virtual void drawChord(const PointF& topLeft, const SizeF& size,
             float degBegin, float degEnd)
         {
-
         }
 
         virtual void drawPie(const PointF& topLeft, const SizeF& size,
             float degBegin, float degEnd)
         {
-
         }
-
-        virtual void drawPath(const Path& path, float smoothness = 1.0f)
-        {
-
-        }
-
 
         virtual void fillPie(const PointF& topLeft, const SizeF& size,
             float degBegin, float degEnd)
         {
-
         }
 
         virtual void fillChord(const PointF& topLeft, const SizeF& size,
             float degBegin, float degEnd)
         {
-
-        }
-
-        virtual void fillPath(const Path& path, float smoothness = 1.0f)
-        {
-
         }
 };
 

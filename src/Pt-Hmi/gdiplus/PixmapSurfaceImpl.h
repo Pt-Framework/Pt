@@ -99,6 +99,9 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         void drawPath(const Gfx::Path& path, float smoothness)
         {}
 
+        void fillPath(const Gfx::Path& path, float smoothness)
+        {}
+
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
         void drawSurface(const Gfx::PointF& toF, 

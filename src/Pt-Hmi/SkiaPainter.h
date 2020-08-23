@@ -99,6 +99,8 @@ namespace Hmi {
 
         virtual void drawPath(const Gfx::Path& path, float smoothness);
 
+        virtual void fillPath(const Gfx::Path& path, float smoothness);
+
         virtual void drawImage(const  Gfx::PointF& to, const Gfx::Image& image);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imageRect);
