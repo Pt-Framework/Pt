@@ -71,10 +71,10 @@ class PT_API Utf8Codec : public TextCodec<Char, char>
         virtual int do_max_length() const throw();
 
         // inheritdoc
-        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const;
+        virtual result do_unshift(Pt::MBState&, char*, char*, char*&) const;
 
         // inheritdoc
-        int do_encoding() const throw();
+        virtual int do_encoding() const throw();
 
         //! @brief Decode to a unicode string.
         static String decode(const char* data, std::size_t size);
