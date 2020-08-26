@@ -29,7 +29,7 @@ namespace Pt {
 
     @code
     Pt::Utf8Codec codec(1);
-    Pt::TextOStream tos(codec);
+    Pt::TextOStream tos(&codec);
     @endcode
 
     @ingroup Unicode
