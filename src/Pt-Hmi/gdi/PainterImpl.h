@@ -46,7 +46,7 @@ using std::min;
 #include <Windows.h>
 #include <Gdiplus.h>
 
-//#define PT_HMI_GDIPLUS 1
+#define PT_HMI_GDIPLUS 1
 
 namespace Pt {
 
