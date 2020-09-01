@@ -1118,7 +1118,7 @@ if ! $(GUI) || $(GUI:L) = "gdi" || $(GUI:L) = "gdiplus" || $(GUI:L) = "win32"
 
     if $(WITH_GDI) && $(WITH_WINUI)
     {
-        GUI ?= gdiplus ;
+        GUI ?= gdi ;
         GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
     }
 }

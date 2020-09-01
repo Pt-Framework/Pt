@@ -319,7 +319,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
     const double scaling = 96.0 / dpix;
 
-    return Gfx::FontMetrics(ascentF* scaling, descentF* scaling, 
+    return Gfx::FontMetrics(ascentF * scaling, descentF * scaling, 
                             textRect.Width* scaling, textRect.Height* scaling);
 }
 #endif
@@ -331,10 +331,10 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     _text.clear();
     text.toUtf16(std::back_inserter(_text));
 
+    Gfx::Transform tt = trans;
+
     const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
     const double scaling = 96.0 / dpix;
-
-    Gfx::Transform tt = trans;
 
 #ifndef PT_HMI_GDIPLUS
     tt.translate(to.x(), to.y());
@@ -379,8 +379,6 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     Gdiplus::REAL spacing = height - ascent - descent;
     Gdiplus::REAL offsetY = ascent + 1;
     
-    Gdiplus::REAL toX = static_cast<Gdiplus::REAL>( to.x() );
-    Gdiplus::REAL toY = static_cast<Gdiplus::REAL>( to.y() );
     Gdiplus::PointF origin( 0, -offsetY );
     
     const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
@@ -397,23 +395,16 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 
     graphics.SetTransform(&matrix);
 
-    //Gdiplus::RectF textRect;
-    //graphics.MeasureString(_text.c_str(), _text.size(), &font, 
-    //                       Gdiplus::PointF(to.x(), to.y()), format, &textRect);
-
-    //Gdiplus::Pen blackPen( Gdiplus::Color(255, 0, 0, 0), 1 );
-    //graphics.DrawRectangle(&blackPen, textRect);
-
     const Gfx::Color& color = _painter->pen().color();
     BYTE alpha = color.alpha() / 257;
     BYTE red   = color.red()   / 257;
     BYTE green = color.green() / 257; 
     BYTE blue  = color.blue()  / 257;
 
-    Gdiplus::SolidBrush blackBrush( Gdiplus::Color(alpha, red, green, blue) );
+    Gdiplus::SolidBrush brush( Gdiplus::Color(alpha, red, green, blue) );
 
     graphics.DrawString( _text.c_str(), _text.size(), &font, 
-                         origin, format, &blackBrush);
+                         origin, format, &brush);
 
     graphics.SetTransform(&oldMatrix);
 #endif

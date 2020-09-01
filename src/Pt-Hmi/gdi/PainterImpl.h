@@ -46,7 +46,7 @@ using std::min;
 #include <Windows.h>
 #include <Gdiplus.h>
 
-#define PT_HMI_GDIPLUS 1
+//#define PT_HMI_GDIPLUS 1
 
 namespace Pt {
 
@@ -303,8 +303,8 @@ class PainterImpl
             UINT16 ascentUnits = family.GetCellAscent( gdiFont.GetStyle() );
             UINT16 descentUnits = family.GetCellDescent( gdiFont.GetStyle() );
             UINT16 heightUnits = family.GetLineSpacing( gdiFont.GetStyle() );
-            Gdiplus::REAL pixelsPerUnit = height / heightUnits;
 
+            Gdiplus::REAL pixelsPerUnit = height / heightUnits;
             Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
             Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
 
@@ -319,8 +319,8 @@ class PainterImpl
             DeleteObject(newFont);
             ReleaseDC(NULL, dc);
 
-            return Gfx::FontMetrics(ascentF*scaling, descentF*scaling, 
-                                    textRect.Width*scaling, textRect.Height*scaling);
+            return Gfx::FontMetrics(ascentF * scaling, descentF * scaling, 
+                                    textRect.Width * scaling, textRect.Height * scaling);
         }
 #endif
         static std::string defaultFont()

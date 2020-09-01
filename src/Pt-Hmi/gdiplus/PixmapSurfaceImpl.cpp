@@ -192,7 +192,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
     const double scaling = 96.0 / dpix;
 
-    return Gfx::FontMetrics(ascentF*scaling, descentF* scaling, 
+    return Gfx::FontMetrics(ascentF * scaling, descentF * scaling, 
                             textRect.Width* scaling, textRect.Height* scaling);
 }
 
@@ -312,7 +312,7 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* ps, const size_t n)
 
 void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* ps, const size_t n)
 {
-    if (!n)
+    if(n == 0)
         return;
 
     std::vector<Gdiplus::PointF> points(n);
@@ -320,8 +320,22 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* ps, const size_t n)
     for (unsigned i = 0; i < n; i++)
         points[i] = PainterImpl::toGdi(ps[i]);
 
-     const Gdiplus::Brush& brush = _painter->impl()->brush();
+    const Gdiplus::Brush& brush = _painter->impl()->brush();
     _graphics->FillPolygon(&brush, &points[0], n);
+}
+
+
+
+void PixmapSurfaceImpl::drawPath(const Gfx::Path& path, float smoothness)
+{
+    Gdiplus::GraphicsPath gdiPath;
+    
+    //Todo::
+
+    /*
+    const Gdiplus::Pen& pen = _painter->impl()->pen();
+    _graphics->DrawPath(&pen, &gdiPath);
+    */
 }
 
 
@@ -383,17 +397,6 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& toF, const Picture& pic)
 }
 
 
-void PixmapSurfaceImpl::bitBlit( const Gfx::Point& to, size_t width, size_t height, HBITMAP bitmap, DWORD op )
-{
-    HDC bitmapDC = CreateCompatibleDC(NULL);
-    SelectObject(bitmapDC, bitmap);
-
-    BitBlt(_dc,  to.x(), to.y(), width, height, bitmapDC, 0, 0, op);
-
-    DeleteDC(bitmapDC);
-}
-
-
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, 
                                   const Gfx::Image& image, 
                                   const Gfx::RectF& imgRect)
@@ -444,21 +447,20 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
 }
 
 
-void PixmapSurfaceImpl::drawPath(const Gfx::Path& path, float smoothness)
-{
-    Gdiplus::GraphicsPath gdiPath;
-    
-    //Todo::
-
-    /*
-    const Gdiplus::Pen& pen = _painter->impl()->pen();
-    _graphics->DrawPath(&pen, &gdiPath);
-    */
-}
-
 HDC PixmapSurfaceImpl::deviceContext() const
 {
     return _dc;
+}
+
+
+void PixmapSurfaceImpl::bitBlit( const Gfx::Point& to, size_t width, size_t height, HBITMAP bitmap, DWORD op )
+{
+    HDC bitmapDC = CreateCompatibleDC(NULL);
+    SelectObject(bitmapDC, bitmap);
+
+    BitBlt(_dc,  to.x(), to.y(), width, height, bitmapDC, 0, 0, op);
+
+    DeleteDC(bitmapDC);
 }
 
 } // namespace

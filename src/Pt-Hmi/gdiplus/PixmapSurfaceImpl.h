@@ -96,8 +96,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void fillPolygon(const Gfx::PointF* points, size_t pointCount);
 
-        void drawPath(const Gfx::Path& path, float smoothness)
-        {}
+        void drawPath(const Gfx::Path& path, float smoothness);
 
         void fillPath(const Gfx::Path& path, float smoothness)
         {}
@@ -115,8 +114,6 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
                        const Gfx::RectF& imgRect);
 
         void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
-        void drawPath(const Gfx::Path& path, float smoothness);
 
         HDC deviceContext() const;
 
