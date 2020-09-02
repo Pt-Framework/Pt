@@ -263,10 +263,11 @@ class PainterImpl
             UINT16 ascentUnits = family.GetCellAscent( gdiFont->GetStyle() );
             UINT16 descentUnits = family.GetCellDescent( gdiFont->GetStyle() );
             UINT16 heightUnits = family.GetLineSpacing( gdiFont->GetStyle() );
+            
             Gdiplus::REAL pixelsPerUnit = height / heightUnits;
-
             Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
             Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+            Gdiplus::REAL heightF = ascentF + descentF;
 
             Gdiplus::RectF textRect;
             graphics.MeasureString(wtext.c_str(), wtext.size(), gdiFont, 
@@ -279,7 +280,7 @@ class PainterImpl
             delete gdiFont;
 
             return Gfx::FontMetrics(ascentF* scaling, descentF* scaling, 
-                                    textRect.Width* scaling, textRect.Height* scaling);
+                                    textRect.Width * scaling, heightF * scaling);
         }
 
         static std::string defaultFont()

@@ -184,6 +184,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     Gdiplus::REAL pixelsPerUnit = height / heightUnits;
     Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
     Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+    Gdiplus::REAL heightF = ascentF + descentF;
 
     Gdiplus::RectF textRect;
     _graphics->MeasureString(wtext.c_str(), wtext.size(), &font,
@@ -193,7 +194,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     const double scaling = 96.0 / dpix;
 
     return Gfx::FontMetrics(ascentF * scaling, descentF * scaling, 
-                            textRect.Width* scaling, textRect.Height* scaling);
+                            textRect.Width * scaling, heightF * scaling);
 }
 
 

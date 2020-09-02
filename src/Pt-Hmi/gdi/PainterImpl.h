@@ -307,20 +307,21 @@ class PainterImpl
             Gdiplus::REAL pixelsPerUnit = height / heightUnits;
             Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
             Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+            Gdiplus::REAL heightF = ascentF + descentF;
 
             Gdiplus::RectF textRect;
             graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
                                    Gdiplus::PointF(0, 0), format, &textRect);
 
-            const int dpix = GetDeviceCaps(dc, LOGPIXELSX);
-            const double scaling = 96.0 / dpix;
+            int dpix = GetDeviceCaps(dc, LOGPIXELSX);
+            double scaling = 96.0 / dpix;
 
             SelectObject(dc, oldFont);
             DeleteObject(newFont);
             ReleaseDC(NULL, dc);
 
             return Gfx::FontMetrics(ascentF * scaling, descentF * scaling, 
-                                    textRect.Width * scaling, textRect.Height * scaling);
+                                    textRect.Width * scaling, heightF * scaling);
         }
 #endif
         static std::string defaultFont()
