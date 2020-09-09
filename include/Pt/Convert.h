@@ -588,10 +588,10 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt
 
     do
     {
-        UnsignedInt lsd = u % base;
+        unsigned char lsd = static_cast<unsigned char>(u % base);
         u /= base;
         --cur;
-        *cur = fmt.toChar( unsigned(lsd) );
+        *cur = fmt.toChar(lsd);
     } 
     while(u != 0 && cur != buf);
     
@@ -618,7 +618,8 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat<
     do
     {
         --cur;
-        *cur = fmt.toChar( unsigned(i & mask));
+        unsigned char d = static_cast<unsigned char>(i & mask);
+        *cur = fmt.toChar(d);
         i = i >> 1;
     } 
     while(i != 0 && cur != buf);
@@ -705,7 +706,7 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
         if( trailZero )
             continue;
 
-        CharT c = fmt.toChar(digit);
+        CharT c = fmt.toChar( static_cast<unsigned char>(digit) );
         assert(d < fractSize);
         fraction[d] = c;
 
@@ -912,10 +913,10 @@ InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt, bool& ok)
 
         u *= base;
 
-        if(static_cast<unsigned char>(d) > max - u)
+        if(static_cast<UnsignedInt>(d) > max - u)
             return it;
 
-        u += d;
+        u += static_cast<UnsignedInt>(d);
         ++it;
     }
 
