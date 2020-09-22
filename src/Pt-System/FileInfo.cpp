@@ -141,19 +141,22 @@ void FileInfo::removeAll(const Pt::System::Path& path)
             continue;
 
         Pt::System::Path subPath = path / it->path();
-
         Pt::System::FileInfo::Type fileType = FileInfo::type(subPath);
 
-        if(fileType == Pt::System::FileInfo::Directory)
-        {
-            FileInfo::removeAll(subPath);
-            continue;
-        }
-      
-        if( fileType == Pt::System::FileInfo::File)
+        if(fileType == Pt::System::FileInfo::Link)
         {
             Pt::System::FileInfo::remove(subPath);
-            PT_LOG_DEBUG("removed: " << subPath.toLocal());
+            PT_LOG_DEBUG( "removed link: " << subPath.toLocal() );
+        }
+        else if(fileType == Pt::System::FileInfo::Directory)
+        {
+            FileInfo::removeAll(subPath);
+            PT_LOG_DEBUG( "removing dir: " << subPath.toLocal() );
+        }
+        else // Pt::System::FileInfo::File
+        {
+            Pt::System::FileInfo::remove(subPath);
+            PT_LOG_DEBUG( "removed: " << subPath.toLocal() );
         }
     }
 
