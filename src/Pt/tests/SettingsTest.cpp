@@ -101,7 +101,7 @@ Pt::Unit::RegisterTest<SettingsTest> register_SettingsTest;
 
 void SettingsTest::EscapeString()
 {
-    Pt::String str = "h\"\\h";
+    Pt::String str = "#h\"\\h";
     Pt::Settings settings;
     settings.root().addEntry("str").set(str);
 
