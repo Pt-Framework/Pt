@@ -65,6 +65,9 @@ class PT_HTTP_API IOStream : public Pt::BasicIOStream<char>,
             return _outputReady;
         }
 
+
+        void cancel();
+
     private:
         void onInput(Pt::System::IOBuffer& b)
         {
