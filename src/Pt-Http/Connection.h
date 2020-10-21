@@ -287,6 +287,8 @@ class Connection : public Connectable
              return _sockbuf.endWrite();
         }
 
+        void reset();
+
     protected:
         void beginRead();
 

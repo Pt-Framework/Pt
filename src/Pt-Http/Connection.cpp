@@ -214,6 +214,27 @@ void Connection::onCancel()
     _os.clear();
 }
 
+void Connection::reset()
+{
+    PT_LOG_DEBUG("reset connection");
+    _readSize = 0;
+    _readBytes = 0;
+    _socket.cancel();
+    _sockbuf.discard();
+    _sockios.clear();
+    _reply = 0;
+    _request = 0;
+    _outputPipelined = false;
+    _inputPipelined = false;
+    _chunked = false;
+    _onTimeout = false;
+    _isFailed = false;
+    _parser.reset(false);
+    _replyParser.reset(true);
+    _httpbuf.reset();
+    _os.clear();
+}
+
 
 void Connection::sendRequest(Request& request)
 {

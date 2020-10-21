@@ -75,7 +75,7 @@ size_t IOStream::endOutput()
 
 void IOStream::cancel()
 {
-    _conn->cancel();
+    _conn->reset();
 }
 
 }
