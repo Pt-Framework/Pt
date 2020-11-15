@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
  * MA 02110-1301 USA
  */
-
+ /*
 #ifndef Pt_Hmi_PaintSurfaceImpl_h
 #define Pt_Hmi_PaintSurfaceImpl_h
 
@@ -56,3 +56,4 @@ class PaintSurfaceImpl
 } // namespace
 
 #endif
+*/

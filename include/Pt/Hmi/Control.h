@@ -30,20 +30,20 @@
 #define Pt_Hmi_Control_H
 
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/Application.h>
-    
+#include <Pt/Gfx/PaintSurface.h>
+
 namespace Pt {
 
 namespace Hmi {
 
 class PT_HMI_API Control : public Widget
 {
-	  public:
+     public:
         Control();
-		
-        virtual ~Control();	
+
+        virtual ~Control();
 
         // TODO: find better name
         bool isHighlighted() const;
@@ -55,7 +55,7 @@ class PT_HMI_API Control : public Widget
         
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);

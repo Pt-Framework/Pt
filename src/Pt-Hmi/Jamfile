@@ -21,30 +21,6 @@ PT_HMI_SUBDIR = [ FDirName $(PT_TOP) src Pt-Hmi $(GUI:L) ] ;
 PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.cpp  ] ;
 PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.mm  ] ;
 
-if $(WITH_BUILTIN_SKIA)
-{
-    SubDirC++Flags [ FDefines SK_SUPPORT_GPU=0 ] ;
-    SubDirC++Flags [ FDefines SKSL_STANDALONE  ] ;
-    SubDirC++Flags [ FDefines SK_BUILD_NO_OPTS ] ;
-    SubDirC++Flags [ FDefines SK_DISABLE_EFFECT_DESERIALIZATION ] ;
-
-    SubDirHdrs $(PT_TOP)/src/skia/include/c ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/codec ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/config ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/core ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/effects ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/encode ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/gpu ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/pathops ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/ports ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/private ;
-    SubDirHdrs $(PT_TOP)/src/skia/include/utils ;
-    SubDirHdrs $(PT_TOP)/src/skia/src/core ;
-    SubDirHdrs $(PT_TOP)/src/skia/src/shaders ;
-
-    PT_HMI_IMPL += SkiaPainter.cpp SkiaBlitter.cpp ;
-}
-
 SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
                        Application.cpp
                        Button.cpp
@@ -65,12 +41,8 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
                        Menu.cpp
                        MenuBar.cpp
                        MenuItem.cpp
-                       MenuShell.cpp 
-                       PaintSurface.cpp
-                       PaintRegion.cpp
-                       Painter.cpp
+                       MenuShell.cpp
                        Panel.cpp
-                       Picture.cpp
                        PixmapSurface.cpp
                        PlatinumStyle.cpp
                        Popup.cpp
@@ -95,11 +67,6 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
                        WindowFrame.cpp
                        WindowManager.cpp
                        ;
-
-if $(WITH_BUILTIN_SKIA)
-{
-	LinkLibraries Pt-Hmi : skia ;
-}
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;
 LinkLibs Pt-Hmi : $(GUILIBS) ;

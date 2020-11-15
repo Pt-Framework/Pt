@@ -27,15 +27,12 @@
   MA 02110-1301 USA
 */
 
-#include "PaintSurfaceImpl.h"
-#include "PainterImpl.h"
-
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
-namespace Hmi {
+namespace Gfx {
 
 PaintSurface::PaintSurface()
 : _painter(0)
@@ -46,7 +43,7 @@ PaintSurface::PaintSurface()
 PaintSurface::~PaintSurface()
 {
     if(_painter)
-        _painter->onDetach();
+        _painter->finish();
 }
 
 
@@ -58,26 +55,15 @@ const Gfx::SizeF& PaintSurface::size() const
 
 void PaintSurface::begin(Painter& painter)
 {
-    if(_painter)
-        _painter->finish();
-
-    _painter = 0;
-
     onBegin(painter);
     _painter = &painter;
 }
 
 
-void PaintSurface::finish(Painter& painter)
+void PaintSurface::finish()
 {
     onFinish();
     _painter = 0;
-}
-
-
-void PaintSurface::setDefaultFont(const std::string& f)
-{
-    PainterImpl::setDefaultFont(f);
 }
 
 

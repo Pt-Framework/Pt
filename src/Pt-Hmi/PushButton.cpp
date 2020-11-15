@@ -30,7 +30,7 @@
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt {
@@ -288,7 +288,7 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 
 Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, text() );
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
     double textHeight = fm.height() + fm.descent(); // use descent as additional spacing
@@ -328,7 +328,7 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 
 void PushButton::layoutContent()
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, text() );
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
     
@@ -420,7 +420,7 @@ void PushButton::onInvalidate()
     }
     else
     {
-        _picture.set(Pt::Gfx::Image());
+        _picture.clear();
     }
 
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
@@ -431,14 +431,14 @@ void PushButton::onInvalidate()
 }
 
 
-void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void PushButton::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     //
@@ -461,7 +461,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _picture.empty() )
     {
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-        painter.drawPicture(_iconPos, _picture);
+        painter.drawSurface(_iconPos, _picture);
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
     }
 

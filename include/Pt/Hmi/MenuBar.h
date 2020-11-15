@@ -98,7 +98,7 @@ class MenuBarItem : public Control
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
@@ -172,7 +172,7 @@ class PT_HMI_API MenuBar : public MenuShell
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);

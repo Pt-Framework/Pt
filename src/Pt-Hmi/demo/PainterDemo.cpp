@@ -15,9 +15,9 @@
 #include <Pt/Hmi/TabView.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Label.h>
-#include <Pt/Hmi/Painter.h>
-#include <Pt/Gfx/ImagePainter2.h>
-#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/Painter.h>
+//#include <Pt/Gfx/ImagePainter2.h>
+#include <Pt/Gfx/ImageSurface.h>
 #include <Pt/System/Logger.h>
 
 
@@ -38,28 +38,29 @@ class PaintView : public Pt::Hmi::Control
             const RectF imageRect   = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
             const Color background  = Color::fromRgb8(0, 0, 0);
 
-            Pt::Hmi::Painter painter(surface);
+            Painter painter(surface);
             painter.setClip(rect);
             painter.setBrush(background);
             painter.fillRect(imageRect);
 
             Image image1( painter.format(), Size(imageWidth, imageHeight) );
-            ImagePainter imagePainter(image1);
+            ImageSurface imageSurface(image1);
+            Painter imagePainter(imageSurface);
             imagePainter.setBrush(background);
             imagePainter.fillRect(imageRect);
 
-            Image image2( painter.format(), Size(imageWidth, imageHeight) );
-            ImagePainter2 imagePainter2(image2);
-            imagePainter2.setAntiAliasing(true);
-            imagePainter2.setBrush(background);
-            imagePainter2.fillRect(imageRect);
+            //Image image2( painter.format(), Size(imageWidth, imageHeight) );
+            //ImagePainter2 imagePainter2(image2);
+            //imagePainter2.setAntiAliasing(true);
+            //imagePainter2.setBrush(background);
+            //imagePainter2.fillRect(imageRect);
 
             onPaintContent(painter,       "Native Painter");
             onPaintContent(imagePainter,  "ImagePainter"  );
-            onPaintContent(imagePainter2, "ImagePainter2" );
+            //onPaintContent(imagePainter2, "ImagePainter2" );
 
             painter.drawImage(PointF(210, 0), image1);
-            painter.drawImage(PointF(420, 0), image2);
+            //painter.drawImage(PointF(420, 0), image2);
         }
 
         virtual void onPaintContent(Pt::Gfx::Painter& painter,
@@ -298,12 +299,12 @@ class ShapesView : public PaintView
             int y = 30;
             y = doPaint(y, painter, text);
 
-            Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
-            if(ip2) {
-                ip2->setAntiAliasing(false);
-                y = doPaint(y + 20, painter, text);
-                ip2->setAntiAliasing(true);
-            };
+            //Pt::Gfx::ImagePainter2* ip2 = dynamic_cast<Pt::Gfx::ImagePainter2*>(&painter);
+            //if(ip2) {
+            //    ip2->setAntiAliasing(false);
+            //    y = doPaint(y + 20, painter, text);
+            //    ip2->setAntiAliasing(true);
+            //};
         }
 
         int drawCircles(int y, Pt::Gfx::Painter& painter)

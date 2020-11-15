@@ -34,7 +34,7 @@
 #include <Pt/Hmi/Alignment.h>
 #include <Pt/Hmi/Adjustment.h>
 #include <Pt/Hmi/TextBlock.h>
-#include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/Icon.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
@@ -97,7 +97,7 @@ class PT_HMI_API Label : public Control
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
         
     private:
         Adjustment adjustment() const;
@@ -130,7 +130,7 @@ class PT_HMI_API Label : public Control
         Gfx::Pen  _textPen;
         Gfx::Pen  _pen;
         Gfx::Font _font;
-        Picture   _picture;
+        PixmapSurface   _picture;
 };
 
 } // namespace

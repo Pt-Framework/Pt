@@ -31,34 +31,35 @@
 #define Pt_Hmi_PixmalSurfaceImpl_h
 
 #include "PaintSurfaceImpl.h"
+#include "PaintData.h"
 
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Picture.h>
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
-
+#include <vector>
 #include <Windows.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PixmapSurfaceImpl : public PaintSurfaceImpl
+class PixmapSurfaceImpl
 {
-    public:        
+    public:
         PixmapSurfaceImpl();
+
+        virtual ~PixmapSurfaceImpl();
         
-        virtual ~PixmapSurfaceImpl();  
-        
-        void clear(const Gfx::Color& c);  
-    
+        void clear(const Gfx::Color& c);
+
         void resize(const Gfx::SizeF& size);
-        
+
         const Gfx::SizeF& size() const;
 
-        void begin(Painter& painter);  
+        void begin(Gfx::Painter& painter);
         
-        void finish();           
+        void finish();
         
         const Gfx::ImageFormat& format() const;
 
@@ -101,9 +102,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
-        void drawSurface(const Gfx::PointF& toF, 
-                         const PixmapSurface& pm,
-                         const Gfx::RectF& pmRect);
+        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
+
 
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
@@ -111,16 +111,33 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
                        const Gfx::Image& image, 
                        const Gfx::RectF& imgRect);
 
-        void drawPicture(const Gfx::PointF& to, const Picture& pic);
+        Gfx::Image toImage(const Gfx::ImageFormat& format) const;
+
+        void set(const Gfx::Image& image);
+
+        static std::string defaultFont();
+
+        static void setDefaultFont(const std::string& name);
+
+        static std::vector<std::string> fontNames();
+
+        static std::string& getDefaultFont();
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+
+        static void setFontDir(const System::Path& path);
 
         HDC deviceContext() const;
 
     private: 
         void bitBlit( const Gfx::Point& pos, size_t width, size_t height, HBITMAP bitmap, DWORD op );
 
+        static void toPreMulAlpha(const Pt::Gfx::Image& image, std::vector<Pt::uint8_t>& preMul);
+
     private:
         Gfx::SizeF     _size;
-        Painter*       _painter;
+        PaintData*      _paintData;
+        Gfx::Painter* _painter;
         HDC            _dc;
         HBITMAP        _bitmap;
         HPEN           _oldPen;
@@ -133,6 +150,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         Gfx::Brush::GradientStyle _gradient;
         Gfx::Color                _gradientStart;
         Gfx::Color                _gradientStop;
+        Gfx::CompositionMode      _compositionMode;
 };
 
 } // namespace

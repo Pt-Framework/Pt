@@ -30,7 +30,7 @@
 #ifndef Pt_Hmi_WindowFrame_h
 #define Pt_Hmi_WindowFrame_h
 
-#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/Point.h>
@@ -95,7 +95,7 @@ class WindowButton
 
         virtual void touchEvent(const TouchEvent& tev);
 
-        virtual void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     private:
         Signal<>       _clicked;
@@ -112,7 +112,7 @@ class MinimizeButton : public WindowButton
 
         ~MinimizeButton();
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -123,7 +123,7 @@ class MaximizeButton : public WindowButton
 
         ~MaximizeButton();
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -134,7 +134,7 @@ class CloseButton : public WindowButton
 
         ~CloseButton();
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -145,7 +145,7 @@ class MenuButton : public WindowButton
 
         ~MenuButton();
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -200,7 +200,7 @@ class WindowFrame : public Pt::Connectable
         //! @brief Returns true if window was grabbed for moving or resizing.
         bool touchEvent(const TouchEvent& tev);
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
         bool onMouseEvent(const MouseEvent& mev);

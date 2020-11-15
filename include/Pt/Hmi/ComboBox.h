@@ -126,8 +126,8 @@ class PT_HMI_API ComboBox : public Control
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onInvalidate();
-	
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);

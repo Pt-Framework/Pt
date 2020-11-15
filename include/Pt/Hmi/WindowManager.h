@@ -30,11 +30,11 @@
 #ifndef Pt_Hmi_WindowManager_h
 #define Pt_Hmi_WindowManager_h
 
-#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/WindowBase.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Connectable.h>
 #include <vector>
 
@@ -110,7 +110,7 @@ class WindowManager : public Pt::Connectable
 
         bool scrollEvent(const ScrollEvent& ev);
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     public:
         void onUpdate(Window& child, const Gfx::RectF& rect);

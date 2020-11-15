@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/Menu.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/Application.h>
 #include <cassert>
 
@@ -356,7 +356,7 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
-    Painter painter( surface() );
+    Gfx::Painter painter( surface() );
     painter.setClip(rect);
 
     _renderer->renderBackground(*this, options, painter, rect,

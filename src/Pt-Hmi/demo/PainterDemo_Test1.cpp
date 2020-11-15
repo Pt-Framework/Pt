@@ -15,86 +15,86 @@ class Test1View : public Pt::Hmi::Control
             const RectF imageRect   = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
             const Color background  = Color::fromRgb8(0, 0, 0);
 
-            Pt::Hmi::Painter painter(surface);
-            painter.setClip(rect);
+            //Pt::Hmi::Painter painter(surface);
+            //painter.setClip(rect);
 
-            Image image2( painter.format(), Size(imageWidth, imageHeight) );
-            ImagePainter2 imagePainter2(image2);
-            imagePainter2.setAntiAliasing(true);
-            imagePainter2.setBrush(background);
-            imagePainter2.fillRect(imageRect);
+            //Image image2( painter.format(), Size(imageWidth, imageHeight) );
+            //ImagePainter2 imagePainter2(image2);
+            //imagePainter2.setAntiAliasing(true);
+            //imagePainter2.setBrush(background);
+            //imagePainter2.fillRect(imageRect);
 
-            //imagePainter2.setCompositionMode(CompositionMode::SourceOver);
+            ////imagePainter2.setCompositionMode(CompositionMode::SourceOver);
 
-            onPaintContent(imagePainter2);
+            ////onPaintContent(imagePainter2);
 
-            painter.drawImage(PointF(2, 2), image2);
+            //painter.drawImage(PointF(2, 2), image2);
         }
 
-        virtual void onPaintContent(Pt::Gfx::ImagePainter2& painter)
-        {
-            using namespace Pt::Gfx;
-
-            Pt::Gfx::Pen   green1( Color::fromRgb8(0, 255, 0, 175), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
-            Pt::Gfx::Pen   green2( Color::fromRgb8(0, 255, 0, 175), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
-            Pt::Gfx::Pen   green3( Color::fromRgb8(0, 255, 0, 175), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
-
-            Pt::Gfx::Brush greenb( Color::fromRgb8(0, 255, 0, 175) );
-
-            std::vector<Pt::Gfx::PointF> shape;
-
-#if 1
-            shape = makeTestShape1(-300, -380);
-            painter.setPen(green1);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape1(-300, -300);
-            painter.setPen(green2);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape1(-300, -220);
-            painter.setPen(green3);
-            painter.drawPolyline( &shape[0], shape.size() );
-#endif
-
-#if 1
-            shape = makeTestShape2(0, -580);
-            painter.setPen(green1);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape2(0, -500);
-            painter.setPen(green2);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape2(0, -420);
-            painter.setPen(green3);
-            painter.drawPolyline( &shape[0], shape.size() );
-#endif
-
-#if 1
-            shape = makeTestShape3(50, -530);
-            painter.setPen(green1);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape3(50, -450);
-            painter.setPen(green2);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape3(50, -370);
-            painter.setPen(green3);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape3(50, -290);
-            painter.setBrush(greenb);
-            painter.fillPolygon( &shape[0], shape.size() );
-
-            shape = makeTestShape3(150, -530); scaleShape(shape, 5);
-            painter.setPen(green1);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape3(150, -450); scaleShape(shape, 5);
-            painter.setPen(green2);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape3(150, -370); scaleShape(shape, 5);
-            painter.setPen(green3);
-            painter.drawPolyline( &shape[0], shape.size() );
-            shape = makeTestShape3(150, -290); scaleShape(shape, 5);
-            painter.setBrush(greenb);
-            painter.fillPolygon( &shape[0], shape.size() );
-#endif
-        }
+//        virtual void onPaintContent(Pt::Gfx::ImagePainter2& painter)
+//        {
+//            using namespace Pt::Gfx;
+//
+//            Pt::Gfx::Pen   green1( Color::fromRgb8(0, 255, 0, 175), 1, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+//            Pt::Gfx::Pen   green2( Color::fromRgb8(0, 255, 0, 175), 2, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+//            Pt::Gfx::Pen   green3( Color::fromRgb8(0, 255, 0, 175), 3, Pen::Solid, Pen::RoundCap, Pen::NoJoin );
+//
+//            Pt::Gfx::Brush greenb( Color::fromRgb8(0, 255, 0, 175) );
+//
+//            std::vector<Pt::Gfx::PointF> shape;
+//
+//#if 1
+//            shape = makeTestShape1(-300, -380);
+//            painter.setPen(green1);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape1(-300, -300);
+//            painter.setPen(green2);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape1(-300, -220);
+//            painter.setPen(green3);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//#endif
+//
+//#if 1
+//            shape = makeTestShape2(0, -580);
+//            painter.setPen(green1);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape2(0, -500);
+//            painter.setPen(green2);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape2(0, -420);
+//            painter.setPen(green3);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//#endif
+//
+//#if 1
+//            shape = makeTestShape3(50, -530);
+//            painter.setPen(green1);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape3(50, -450);
+//            painter.setPen(green2);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape3(50, -370);
+//            painter.setPen(green3);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape3(50, -290);
+//            painter.setBrush(greenb);
+//            painter.fillPolygon( &shape[0], shape.size() );
+//
+//            shape = makeTestShape3(150, -530); scaleShape(shape, 5);
+//            painter.setPen(green1);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape3(150, -450); scaleShape(shape, 5);
+//            painter.setPen(green2);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape3(150, -370); scaleShape(shape, 5);
+//            painter.setPen(green3);
+//            painter.drawPolyline( &shape[0], shape.size() );
+//            shape = makeTestShape3(150, -290); scaleShape(shape, 5);
+//            painter.setBrush(greenb);
+//            painter.fillPolygon( &shape[0], shape.size() );
+//#endif
+//        }
 
         std::vector<Pt::Gfx::PointF> makeTestShape1(double xOfs, double yOfs)
         {

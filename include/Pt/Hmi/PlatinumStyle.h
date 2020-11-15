@@ -39,6 +39,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Path.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/String.h>
 
 #include <cstddef>
@@ -47,8 +48,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class Painter;
-
 class PlatinumRendererBase
 {
     public:
@@ -56,12 +55,12 @@ class PlatinumRendererBase
 
         virtual ~PlatinumRendererBase();
 
-        void renderFrame(Painter& painter, 
+        void renderFrame(Gfx::Painter& painter, 
                          const Gfx::RectF& rect,
                          const Gfx::Pen& pen,
                          double corner) const;
 
-        void renderPlane(Painter& painter,
+        void renderPlane(Gfx::Painter& painter,
                          const Gfx::RectF& rect,
                          const Gfx::Brush& brush,
                          double corner) const;
@@ -89,18 +88,18 @@ class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
         virtual void onPrepareIcon(const PushButton& button,
                                    const StyleOptions& options,
                                    const Gfx::Image& icon,
-                                   Picture& picture) const;
+                                   PixmapSurface& picture) const;
 
         virtual void onRenderBackground(const PushButton& button,
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter,
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush,
                                         const Gfx::Pen& color) const;
 
         virtual void onRenderText(const PushButton& button,
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter,
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -131,7 +130,7 @@ class PT_HMI_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
 
         virtual void onRenderBox(const CheckBox& cb,
                                  const StyleOptions& options,
-                                 Painter& painter, 
+                                 Gfx::Painter& painter,
                                  const Gfx::RectF& rect,
                                  const Gfx::RectF& boxRect,
                                  const Gfx::Brush& brush,
@@ -139,7 +138,7 @@ class PT_HMI_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
 
         virtual void onRenderText(const CheckBox& cb,
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter,
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -162,13 +161,13 @@ class PT_HMI_API PlatinumPanelRenderer : public PanelRenderer
     protected:
         virtual void onRenderBackground(const Panel& p,
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush) const;
 
         virtual void onRenderFrame(const Panel& p,
                                    const StyleOptions& options,
-                                   Painter& painter, 
+                                   Gfx::Painter& painter, 
                                    const Gfx::RectF& rect, 
                                    const Gfx::Pen& pen) const;
     
@@ -193,19 +192,19 @@ class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
 
         virtual void onRenderBackground(const Label& l,
                                         const StyleOptions& options,
-                                        Painter& p, 
+                                        Gfx::Painter& p, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush) const;
 
         virtual void onRenderFrame(const Label& l,
                                    const StyleOptions& options,
-                                   Painter& p, 
+                                   Gfx::Painter& p, 
                                    const Gfx::RectF& rect, 
                                    const Gfx::Pen& contour) const;
 
         virtual void onRenderText(const Label& l,
                                   const StyleOptions& options,
-                                  Painter& p, 
+                                  Gfx::Painter& p, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -234,14 +233,14 @@ class PT_HMI_API PlatinumLineEditRenderer : public LineEditRenderer
 
         virtual void onRenderBackground(const LineEdit& le, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const;
 
         virtual void onRenderText(const LineEdit& le, 
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -250,7 +249,7 @@ class PT_HMI_API PlatinumLineEditRenderer : public LineEditRenderer
 
         virtual void onRenderCursor(const LineEdit& le, 
                                     const StyleOptions& options,
-                                    Painter& painter, 
+                                    Gfx::Painter& painter, 
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& cursorRect ) const;
 
@@ -274,7 +273,7 @@ class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
         
         virtual void onRenderBackground(const Menu& m, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush,
                                         const Gfx::Pen& contour) const;
@@ -282,7 +281,7 @@ class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
         virtual void onPrepareItem(const MenuItem& m, 
                                    const StyleOptions& options,
                                    const Gfx::Image& icon,
-                                   Picture& picture,
+                                   PixmapSurface& picture,
                                    Gfx::Brush& brush,
                                    Gfx::Pen& contour,
                                    Gfx::Font& font,
@@ -292,14 +291,14 @@ class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
 
         virtual void onRenderItem(const MenuItem& m, 
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   Gfx::Brush& brush,
                                   Gfx::Pen& contour) const;
 
         virtual void onRenderIndicator(const MenuItem& m, 
                                        const StyleOptions& options,
-                                       Painter& painter, 
+                                       Gfx::Painter& painter, 
                                        const Gfx::RectF& rect) const;
 
     private:
@@ -322,7 +321,7 @@ class PT_HMI_API PlatinumMenuBarRenderer : public MenuBarRenderer
 
         virtual void onRenderBackground(const MenuBar& m, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush,
                                         const Gfx::Pen& contour) const;
@@ -336,14 +335,14 @@ class PT_HMI_API PlatinumMenuBarRenderer : public MenuBarRenderer
 
         virtual void onRenderItem(const MenuBarItem& m, 
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const Gfx::Brush& brush,
                                   const Gfx::Pen& contour) const;
 
         virtual void onRenderItemText(const MenuBarItem& m,
                                       const StyleOptions& options,
-                                      Painter& painter, 
+                                      Gfx::Painter& painter, 
                                       const Gfx::RectF& rect,
                                       const String& text,
                                       const Gfx::PointF& textPos,
@@ -371,7 +370,7 @@ class PT_HMI_API PlatinumScrollBarRenderer : public ScrollBarRenderer
         
         virtual void onRender(const ScrollBar& s,
                               const StyleOptions& options,
-                              Painter& painter,
+                              Gfx::Painter& painter,
                               const Gfx::RectF& rect,
                               const Gfx::RectF& handleRect,
                               const Gfx::Brush& background,
@@ -402,7 +401,7 @@ class PT_HMI_API PlatinumProgressBarRenderer : public ProgressBarRenderer
 
         virtual void onRender( const ProgressBar& p,
                                const StyleOptions& options,
-                              Painter& painter,
+                              Gfx::Painter& painter,
                               const Gfx::RectF& rect,
                               const Gfx::Brush& background,
                               const Gfx::Brush& foreground,
@@ -432,7 +431,7 @@ class PT_HMI_API PlatinumSliderRenderer : public SliderRenderer
 
         virtual void onRender( const Slider&        s,
                                const StyleOptions&  options,
-                               Painter&              painter,
+                               Gfx::Painter&              painter,
                                const Gfx::RectF&    rect,
                                const Gfx::Brush&    background,
                                const Gfx::Brush&    foreground,
@@ -455,13 +454,13 @@ class PT_HMI_API PlatinumListBoxRenderer : public ListBoxRenderer
 
         virtual void onRenderBackground(const ListBox& p,
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush) const;
 
         virtual void onRenderFrame(const ListBox& p,
                                    const StyleOptions& options,
-                                   Painter& painter, 
+                                   Gfx::Painter& painter, 
                                    const Gfx::RectF& rect, 
                                    const Gfx::Pen& pen) const;
         
@@ -474,7 +473,7 @@ class PT_HMI_API PlatinumListBoxRenderer : public ListBoxRenderer
 
         virtual void onRenderItem(const ListBoxItem& item, 
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   Gfx::Brush& brush,
                                   Gfx::Pen& contour) const;
@@ -504,21 +503,21 @@ class PT_HMI_API PlatinumComboBoxRenderer : public ComboBoxRenderer
         
         virtual void onRenderBackground(const ComboBox& cb, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const;
 
         virtual void onRenderButton(const ComboBox& cb, 
                                     const StyleOptions& options,
-                                    Painter& painter, 
+                                    Gfx::Painter& painter, 
                                     const Gfx::RectF& rect,
                                     const Gfx::Pen& contour,
                                     const Gfx::Brush& foreground) const;
 
         virtual void onRenderText(const ComboBox& cb,
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -558,21 +557,21 @@ class PT_HMI_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
         
         virtual void onRenderBackground(const SpinBox& cb, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const;
 
         virtual void onRenderButton(const SpinBoxButton& sb, 
                                     const StyleOptions& options,
-                                    Painter& painter, 
+                                    Gfx::Painter& painter, 
                                     const Gfx::RectF& rect,
                                     const Gfx::Brush& foreground,
                                     const Gfx::Pen& contour) const;
 
         virtual void onRenderText(const SpinBox& cb,
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -598,7 +597,7 @@ class PT_HMI_API PlatinumTabViewRenderer : public TabViewRenderer
 
         virtual void onRender(const TabView& tv,
                               const StyleOptions& options,
-                              Painter& painter,
+                              Gfx::Painter& painter,
                               const Gfx::RectF& rect,
                               const Gfx::Brush& background,
                               const Gfx::Brush& foreground,
@@ -621,7 +620,7 @@ class PT_HMI_API PlatinumTabViewRenderer : public TabViewRenderer
 
         virtual void onRenderTabs(const std::vector<TabItem>& tabs,
                                   const StyleOptions& options,
-                                  Painter& painter,
+                                  Gfx::Painter& painter,
                                   const Gfx::RectF& rect,
                                   const Gfx::Brush& background,
                                   const Gfx::Brush& foreground,

@@ -38,7 +38,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
 

@@ -34,12 +34,11 @@
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
 
 #include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/ImagePainter.h>
 
 namespace {
 
@@ -144,9 +143,9 @@ void WindowButton::touchEvent(const TouchEvent& tev)
 }
 
 
-void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void WindowButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     Gfx::Color light = brighten(color(), 1.25f);
@@ -226,11 +225,11 @@ MinimizeButton::~MinimizeButton()
 }
 
 
-void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void MinimizeButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     WindowButton::paint(surface, rect);
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     double inset = painter.align(3.0);
@@ -260,11 +259,11 @@ MaximizeButton::~MaximizeButton()
 }
 
 
-void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void MaximizeButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     WindowButton::paint(surface, rect);
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     double inset = painter.align(3.0) + painter.toLogical(0.5);
@@ -300,11 +299,11 @@ CloseButton::~CloseButton()
 }
 
 
-void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void CloseButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     WindowButton::paint(surface, rect);
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     double margin = painter.align(3.0);
@@ -356,9 +355,9 @@ MenuButton::~MenuButton()
 }
 
 
-void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     double pixelWidth = painter.toLogical(1.0);
@@ -958,12 +957,12 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 }
 
 
-void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void WindowFrame::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     if( _borderWidth < 0.1 && _titleHeight < 0.1  )
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     Gfx::Color color = _window->isActive() ? _wm->activeColor()

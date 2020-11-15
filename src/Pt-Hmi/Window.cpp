@@ -30,7 +30,7 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 
@@ -846,14 +846,14 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
 void Window::onPaintBackground(const Gfx::RectF& rect)
 {
-    Painter painter(_surface);
+    Gfx::Painter painter(_surface);
     painter.setBrush(_backgroundBrush);
     painter.fillRect(rect);
 }
 
 
 void Window::onPaintContent(const Gfx::RectF& rect)
-{   
+{
     _windowManager.paint(_surface, rect);
 }
 

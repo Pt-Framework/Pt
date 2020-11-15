@@ -97,7 +97,7 @@ class PT_HMI_API ScrollBar : public Control
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
 

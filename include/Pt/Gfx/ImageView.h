@@ -48,7 +48,16 @@ class ImageView;
 class Pixel
 {
     public:
+        Pixel()
+        : _view(0)
+        , _base(0)
+        , _x(0)
+        , _y(0)
+        {  
+        }
+
         Pixel(ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
+
 
         Pixel(const Pixel& p)
         : _view(p._view)
@@ -135,6 +144,14 @@ class Pixel
 class ConstPixel
 {
     public:
+        ConstPixel()
+        : _view(0)
+        , _base(0)
+        , _x(0)
+        , _y(0)
+        {
+        }
+
         ConstPixel(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
 
         ConstPixel(const ConstPixel& p)

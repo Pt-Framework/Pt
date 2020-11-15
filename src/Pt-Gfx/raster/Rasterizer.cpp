@@ -36,7 +36,6 @@
 #include "DrawText.h"
 
 #include "Rasterizer.h"
-#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Math.h>
@@ -143,9 +142,6 @@ inline int stepAround( int v, int incr, int max )
 Rasterizer::Rasterizer(Image& image)
 : _image(&image)
 , _text( new DrawText() )
-, _font()
-, _brushPixel(_image->view(), 0, 0)
-, _penPixel(_image->view(), 0, 0)
 , _compositionMode(CompositionMode::SourceCopy)
 {
     _text->setFont(_font);
@@ -163,7 +159,9 @@ Rasterizer::~Rasterizer()
 void Rasterizer::setImage( Image& image )
 {
     _image = &image;
+
     _brushBuffer.reset(_image->format(), _brushBuffer.size());
+
     updateClip();
 }
 
@@ -221,6 +219,211 @@ void Rasterizer::setBrush( const Brush& brush )
     _brushPixel.reset(_brushImage->view(), 0, 0);
 }
 
+
+void Rasterizer::drawLine(const PointF& from, const  PointF& to)
+{
+    Point points[2];
+
+    points[0].set(Pt::lround(from.x() - 0.5),
+        Pt::lround(from.y() - 0.5));
+
+    points[1].set(Pt::lround(to.x() - 0.5),
+        Pt::lround(to.y() - 0.5));
+
+    stroke(points, 2);
+}
+
+
+void Rasterizer::drawText(const PointF& toF, const String& text)
+{
+    Point to(round(toF));
+
+    strokeText(to, text);
+}
+
+
+void Rasterizer::drawText(const PointF& toF, const Pt::String& text,
+    const Transform& trans)
+{
+    Point to(round(toF));
+
+    strokeText(to, text, trans);
+}
+
+
+void Rasterizer::drawRect(const RectF& r)
+{
+    RectF rect(r.left() - 0.5,
+        r.right() - 0.5,
+        r.top() - 0.5,
+        r.bottom() - 0.5);
+
+    Point points[5] = { round(rect.topLeft()),
+                        round(rect.topRight()),
+                        round(rect.bottomRight()),
+                        round(rect.bottomLeft()),
+                        round(rect.topLeft()),
+    };
+
+    stroke(points, 5);
+}
+
+
+void Rasterizer::fillRect(const RectF& r)
+{
+    Rect rect(Pt::lround(r.left()),
+        Pt::lround(r.right()),
+        Pt::lround(r.top()),
+        Pt::lround(r.bottom()));
+
+    fillRect(rect);
+}
+
+
+void Rasterizer::drawEllipse(const PointF& topLeftF, const SizeF& sizeF)
+{
+    Point topLeft(Pt::lround(topLeftF.x() - 0.5),
+        Pt::lround(topLeftF.y() - 0.5));
+
+    Size size(lround(sizeF.width() - 0.5),
+        lround(sizeF.height() - 0.5));
+
+    strokeEllipse(topLeft, size);
+}
+
+
+void Rasterizer::fillEllipse(const PointF& topLeftF, const SizeF& sizeF)
+{
+    Point topLeft = round(topLeftF);
+    Size size = round(sizeF);
+
+    fillEllipse(topLeft, size);
+}
+
+
+void Rasterizer::drawPolyline(const PointF* ps, const size_t n)
+{
+    std::vector<Point> points(n);
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        Point p(Pt::lround(ps[i].x() - 0.4999),
+            Pt::lround(ps[i].y() - 0.4999));
+
+        points[i] = p;
+    }
+
+    stroke(&points[0], points.size());
+}
+
+
+void Rasterizer::fillPolygon(const PointF* ps, const size_t n)
+{
+    std::vector<Point> points(n);
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        Point p(Pt::lround(ps[i].x() - 0.4999),
+            Pt::lround(ps[i].y() - 0.4999));
+
+        points[i] = p;
+    }
+
+    fill(&points[0], points.size());
+}
+
+
+void Rasterizer::drawImage(const PointF& to, const Image& img)
+{
+    image(round(to), img);
+}
+
+
+void Rasterizer::drawImage(const PointF& to, const Image& img, const RectF& imageRect)
+{
+    image(round(to), img, round(imageRect));
+}
+
+
+void Rasterizer::drawPath(const Gfx::Path& path, float smoothness)
+{
+}
+
+
+void Rasterizer::fillPath(const Path& path, float smoothness)
+{
+}
+
+
+void Rasterizer::drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+}
+
+
+void Rasterizer::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+}
+
+
+void Rasterizer::drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+}
+
+
+void Rasterizer::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+}
+
+
+void Rasterizer::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+}
+
+Image Rasterizer::toImage(const Gfx::ImageFormat& format) const
+{
+    if( ! _image )
+        return Image(format, Size(0, 0));
+    
+    if(_image->format() == format)
+        return *_image;
+
+    Image image (_image->format(), _image->size() );
+    Gfx::copy( _image->begin(), _image->end(), image.begin() );
+    return image;
+}
+
+
+FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
+{
+  DrawText textRender;
+  textRender.setFont(font);
+
+  return textRender.fontMetrics(text);
+}
+
+
+void Rasterizer::setFontDir(const Pt::System::Path& path)
+{
+    FreeType::instance().setFontDir(path);
+}
+
+
+std::string Rasterizer::defaultFont()
+{
+    return  FreeType::instance().defaultFont();
+}
+
+
+void Rasterizer::setDefaultFont(const std::string& f)
+{
+    FreeType::instance().setDefaultFont(f);
+}
+
+
+std::vector<std::string> Rasterizer::fontNames()
+{
+    return FreeType::instance().fontNames();
+}
 
 void Rasterizer::strokeEllipse( const Point& topLeft, const Size& size )
 {
@@ -3297,8 +3500,7 @@ void Rasterizer::updateClip()
 {
   Rect imageRect(Point(0,0) , _image->size());
   
-  _currentClip =  _clip.isNull() ? imageRect 
-                                 : _clip.intersect( imageRect);
+  _currentClip = _clip.intersect( imageRect);
   
   _clipRight = _currentClip.x() + _currentClip.width();
   _clipBottom = _currentClip.y() + _currentClip.height();
@@ -3648,31 +3850,20 @@ FontMetrics Rasterizer::fontMetrics( const String& text ) const
 }
 
 
-FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
+void Rasterizer::setClip( const RectF& clip )
 {
-  DrawText textRender;
-  textRender.setFont(font);
+    if( clip.isNull() ) // crashes otherwise
+        _clip = Rect( Point(0, 0), Size(1, 1) );
+    else
+        _clip = round(clip);
 
-  return textRender.fontMetrics(text);
-}
-
-
-void Rasterizer::setClip( const Rect& clip )
-{
-  // TODO: RECT-NULL empty rect should clip everything
-  if( clip.isNull() )
-      _clip = Rect( Point(0, 0), Size(1, 1) );
-  else
-      _clip = clip;
-
-  updateClip();
+    updateClip();
 }
 
 
 void Rasterizer::resetClip()
 {
-  // TODO: RECT-NULL
-  _clip = Rect();
+  _clip = Rect( Gfx::Point(0,0), _image->size() );
   
   updateClip();
 }

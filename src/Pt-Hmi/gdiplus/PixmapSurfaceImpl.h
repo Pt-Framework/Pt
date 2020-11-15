@@ -51,7 +51,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
     public:        
         PixmapSurfaceImpl();
         
-        virtual ~PixmapSurfaceImpl();  
+        virtual ~PixmapSurfaceImpl();
         
         void clear(const Gfx::Color& c);  
     

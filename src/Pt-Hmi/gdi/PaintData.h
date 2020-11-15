@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_PainterImpl_h
-#define Pt_Hmi_PainterImpl_h
+#ifndef Pt_Hmi_PaintData_h
+#define Pt_Hmi_PaintData_h
 
 #include <Pt/Hmi/Api.h>
 #include "win32.h"
@@ -52,10 +52,10 @@ namespace Pt {
 
 namespace Hmi {
 
-class PainterImpl
+class PaintData : public Gfx::PaintData
 {
     public:
-        PainterImpl()
+        PaintData()
         : _pen(0)
         , _penColor(0)
         , _brush(0)
@@ -64,7 +64,7 @@ class PainterImpl
         , _font(0)
         { }
 
-        ~PainterImpl()
+        ~PaintData()
         {
             if(_pen)
                 DeleteObject(_pen);

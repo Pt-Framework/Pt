@@ -26,10 +26,10 @@
  MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_PaintRegion_h
-#define Pt_Hmi_PaintRegion_h
+#ifndef Pt_Gfx_PaintRegion_h
+#define Pt_Gfx_PaintRegion_h
 
-#include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Pen.h>
@@ -38,23 +38,21 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Gfx/PaintSurface.h>
 
 namespace Pt {
-
-namespace Hmi {
-
-class PixmapSurface;
-class Picture;
+namespace Gfx {
 
 /** @brief Drawing region on another surface.
 */
-class PT_HMI_API PaintRegion : public PaintSurface
+class PT_GFX_API PaintRegion : public virtual PaintSurface
 {
     public:
         PaintRegion(PaintSurface& surface, const Gfx::RectF& rect);
 
         virtual ~PaintRegion();
+
+        virtual Image toImage(const Gfx::ImageFormat& format) const;
 
     protected:
         virtual const Gfx::ImageFormat& format() const;
@@ -91,19 +89,27 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
         virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
 
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& toF, 
-                                 const PixmapSurface& pm,
-                                 const Gfx::RectF& pmRect);
-
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
 
-        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
         virtual void drawPath(const Gfx::Path& path, float smoothness);
+
+        virtual void fillPath(const Path& path, float smoothness);
+
+        virtual void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+        virtual void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+        virtual void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+        virtual void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& surface);
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect);
 
     protected:
         virtual const Gfx::SizeF& onSize() const;
@@ -116,6 +122,12 @@ class PT_HMI_API PaintRegion : public PaintSurface
         virtual void onBegin(Painter& painter);
 
         virtual void onFinish();
+
+    public:
+        const Gfx::RectF& area() const
+        {
+            return _area;
+        }
 
     private:
         PaintSurface* _surface;

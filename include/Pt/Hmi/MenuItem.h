@@ -31,7 +31,7 @@
 #define Pt_Hmi_MenuItem_H
 
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/SmartPtr.h>
@@ -114,7 +114,7 @@ class PT_HMI_API MenuItem : public Control
     protected:
         virtual void onInvalidate();
         
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
   
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
@@ -145,7 +145,7 @@ class PT_HMI_API MenuItem : public Control
         AutoPtr<std::size_t>      _fontSize;
         AutoPtr<Gfx::Font::Style> _fontStyle;
 
-        Picture           _picture;
+        PixmapSurface     _picture;
         Gfx::Brush        _brush;
         Gfx::Pen          _pen;
         Gfx::Pen          _textPen;

@@ -30,7 +30,7 @@
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace {
 
@@ -283,7 +283,7 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 
 Gfx::SizeF MenuItem::onAutoSize(const SizePolicy& policy) const
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics(_font, _text);
 
     double contentHeight = std::max<Pt::ssize_t>( fm.height(), _icon.height() );
     double contentWidth = fm.width() + _picture.width();
@@ -293,7 +293,7 @@ Gfx::SizeF MenuItem::onAutoSize(const SizePolicy& policy) const
     {
         Pt::String text = shortcutText(*sk);
         contentWidth += fm.height() * 2.5; // spacing towards shortcut text
-        contentWidth += Painter::fontMetrics(_font, text).width();
+        contentWidth += PixmapSurface::fontMetrics(_font, text).width();
     }
 
     if(_subMenu)
@@ -329,14 +329,14 @@ void MenuItem::onInvalidate()
 }
 
 
-void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void MenuItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
     
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
     
     //
@@ -352,7 +352,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     Gfx::PointF iconPos(iconX, iconY);
     painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-    painter.drawPicture(iconPos, _picture);
+    painter.drawSurface(iconPos, _picture);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     //
@@ -361,7 +361,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     painter.setFont(_font);
     painter.setPen(_textPen);
 
-    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics(_font, _text);
     double textX = padding().left() + _iconWidth;
     double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
@@ -376,7 +376,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if(sk)
     {
         Pt::String skText = shortcutText(*sk);
-        Gfx::FontMetrics skm = Painter::fontMetrics(_font, skText);
+        Gfx::FontMetrics skm = PixmapSurface::fontMetrics(_font, skText);
 
         double skX = size().width() - skm.width() - padding().right();
         double skY = (size().height() - skm.height()) / 2;

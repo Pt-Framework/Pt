@@ -27,7 +27,7 @@
 */
 
 #include <Pt/Hmi/TabView.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -176,14 +176,14 @@ void TabBar::onLayout(const Gfx::RectF& rect)
 }
 
 
-void TabBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void TabBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->renderTabs(_tabs, options, painter, rect,
@@ -387,14 +387,14 @@ void TabView::onLayout(const Gfx::RectF& rect)
 }
 
 
-void TabView::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void TabView::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->render(*this, options, painter, rect,

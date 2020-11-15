@@ -29,12 +29,12 @@
 #include "MainWindow.h"
 #include "AtesionIcon.h"
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/JpegReader.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImagePainter.h>
-#include <Pt/Gfx/ImagePainter2.h>
+#include <Pt/Gfx/ImageSurface.h>
+//#include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Algorithm.h>
@@ -213,9 +213,9 @@ MainWindow::~MainWindow()
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
-    //return;   
+    return;   
     
-    Painter painter( surface() );
+    Gfx::Painter painter( surface() );
     painter.setClip(rect);
 
 #ifdef DEMO_WITH_SKIA
@@ -292,9 +292,10 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 #endif
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
-    Gfx::ImagePainter2 imagePainter(image);
-    
-    imagePainter.setAntiAliasing(true);
+    Gfx::ImageSurface imageSurface(image);
+    Gfx::Painter imagePainter(imageSurface);
+    //
+    //imagePainter.setAntiAliasing(true);
     //imagePainter.setAntiAliasing(false);
 
 //#define TEST_POLYGON_RASTERIZER

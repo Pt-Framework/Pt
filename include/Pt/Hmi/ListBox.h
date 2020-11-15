@@ -33,8 +33,8 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/FlowLayout.h>
-#include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/Icon.h>
+#include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/SmartPtr.h>
@@ -99,7 +99,7 @@ class PT_HMI_API ListBoxItem : public Button
         void setRenderer(ListBoxRenderer* renderer);
 
     protected:
-        const Picture& picture() const
+        const PixmapSurface& picture() const
         { return _picture; }
 
         const Gfx::Font& currentFont() const
@@ -117,9 +117,9 @@ class PT_HMI_API ListBoxItem : public Button
 
         virtual void onInvalidate();
     
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual void onPaintContent(Painter& painter);
+        virtual void onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter);
 
     private:
         Pt::Signal<ListBoxItem&> _selected;
@@ -144,7 +144,7 @@ class PT_HMI_API ListBoxItem : public Button
         Gfx::Font  _font;
         Gfx::Brush _brush;
         Gfx::Pen   _pen;
-        Picture    _picture;
+        PixmapSurface    _picture;
 };
 
 
@@ -218,7 +218,7 @@ class PT_HMI_API ListBox : public Control
     protected:
         virtual void onInvalidate();
     
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 

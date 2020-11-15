@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/ProgressBar.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -258,14 +258,14 @@ void ProgressBar::onInvalidate()
 }
 
 
-void ProgressBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ProgressBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->render(*this, options, painter, rect, 

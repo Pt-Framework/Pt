@@ -22,11 +22,11 @@ if $(WITH_BUILTIN_SKIA)
 
 MakeLocate Pt-Hmi-Demo : $(PT_OUTPUT_TARGET) ;
 
-HMI_PAINTER_DEMO_SOURCES = PainterDemo.cpp ;
+#HMI_PAINTER_DEMO_SOURCES = PainterDemo.cpp ;
 
-Main Pt-Hmi-PainterDemo : $(HMI_PAINTER_DEMO_SOURCES) ;
-LinkSharedLibraries Pt-Hmi-PainterDemo : Pt Pt-System Pt-Gfx Pt-Hmi ;
-MakeLocate Pt-Hmi-PainterDemo : $(PT_OUTPUT_TARGET) ;
+#Main Pt-Hmi-PainterDemo : $(HMI_PAINTER_DEMO_SOURCES) ;
+#LinkSharedLibraries Pt-Hmi-PainterDemo : Pt Pt-System Pt-Gfx Pt-Hmi ;
+#MakeLocate Pt-Hmi-PainterDemo : $(PT_OUTPUT_TARGET) ;
 
 PT_DEMO_ICONS_DIR = [ FDirName etc icons ] ;
 PT_DEMO_ICONS = [ GLOB $(PT_DEMO_ICONS_DIR) : *.png  ] ;

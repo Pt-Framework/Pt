@@ -30,9 +30,8 @@
 
 #include <Pt/Hmi/PlatinumStyle.h>
 #include <Pt/Hmi/StyleOptions.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/Picture.h>
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/LineEdit.h>
@@ -86,7 +85,7 @@ PlatinumRendererBase::~PlatinumRendererBase()
 }
 
 
-void PlatinumRendererBase::renderFrame(Painter& painter,
+void PlatinumRendererBase::renderFrame(Gfx::Painter& painter,
                                        const Gfx::RectF& rect,
                                        const Gfx::Pen& pen,
                                        double corner) const
@@ -100,7 +99,7 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
 }
 
 
-void PlatinumRendererBase::renderPlane(Painter& painter,
+void PlatinumRendererBase::renderPlane(Gfx::Painter& painter,
                                        const Gfx::RectF& rect,
                                        const Gfx::Brush& brush,
                                        double corner) const
@@ -202,8 +201,9 @@ void PlatinumButtonRenderer::onPrepare(const PushButton& button,
 void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
                                            const StyleOptions& options,
                                            const Gfx::Image& icon,
-                                           Picture& picture) const
+                                           PixmapSurface& picture) const
 {
+
     if( button.isPressed() && button.isFlat() )
     {
         Gfx::Color hightlightColor = button.accentColor();
@@ -232,7 +232,7 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
 
 void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
                                                 const StyleOptions& options,
-                                                Painter& painter, 
+                                                Gfx::Painter& painter, 
                                                 const Gfx::RectF& rect,
                                                 const Gfx::Brush& brush,
                                                 const Gfx::Pen& pen) const 
@@ -262,7 +262,7 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
 
 void PlatinumButtonRenderer::onRenderText(const PushButton& button,
                                           const StyleOptions& options,
-                                          Painter& painter, 
+                                          Gfx::Painter& painter, 
                                           const Gfx::RectF& rect,
                                           const String& text,
                                           const Gfx::PointF& textPos,
@@ -313,7 +313,7 @@ void PlatinumCheckBoxRenderer::onPrepare(const CheckBox& cb,
 
 void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
                                            const StyleOptions& options,
-                                           Painter& painter, 
+                                           Gfx::Painter& painter, 
                                            const Gfx::RectF& rect,
                                            const Gfx::RectF& box,
                                            const Gfx::Brush& brush,
@@ -349,7 +349,7 @@ void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
 
 void PlatinumCheckBoxRenderer::onRenderText(const CheckBox& cb,
                                             const StyleOptions& options,
-                                            Painter& painter, 
+                                            Gfx::Painter& painter, 
                                             const Gfx::RectF& rect,
                                             const String& text,
                                             const Gfx::PointF& textPos,
@@ -399,7 +399,7 @@ PlatinumPanelRenderer::~PlatinumPanelRenderer()
 
 void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
                                                const StyleOptions& options,
-                                               Painter& painter, 
+                                               Gfx::Painter& painter, 
                                                const Gfx::RectF& rect,
                                                const Gfx::Brush& brush) const 
 {
@@ -412,7 +412,7 @@ void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
 
 void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
                                           const StyleOptions& options,
-                                          Painter& painter, 
+                                          Gfx::Painter& painter, 
                                           const Gfx::RectF& rect,
                                           const Gfx::Pen& pen) const 
 {
@@ -449,7 +449,7 @@ void PlatinumLabelRenderer::onPrepare(const Label& l,
 
 void PlatinumLabelRenderer::onRenderBackground(const Label& label,
                                                const StyleOptions& options,
-                                               Painter& painter, 
+                                               Gfx::Painter& painter, 
                                                const Gfx::RectF& rect,
                                                const Gfx::Brush& brush) const 
 {
@@ -462,7 +462,7 @@ void PlatinumLabelRenderer::onRenderBackground(const Label& label,
 
 void PlatinumLabelRenderer::onRenderFrame(const Label& label,
                                           const StyleOptions& options,
-                                          Painter& painter, 
+                                          Gfx::Painter& painter, 
                                           const Gfx::RectF& rect,
                                           const Gfx::Pen& contour) const 
 {
@@ -475,7 +475,7 @@ void PlatinumLabelRenderer::onRenderFrame(const Label& label,
 
 void PlatinumLabelRenderer::onRenderText(const Label& l,
                                          const StyleOptions& options,
-                                         Painter& painter, 
+                                         Gfx::Painter& painter, 
                                          const Gfx::RectF& rect,
                                          const String& text,
                                          const Gfx::PointF& textPos,
@@ -529,7 +529,7 @@ void PlatinumLineEditRenderer::onPrepare(const LineEdit& le,
 
 void PlatinumLineEditRenderer::onRenderBackground(const LineEdit& le, 
                                                   const StyleOptions& options,
-                                                  Painter& painter, 
+                                                  Gfx::Painter& painter, 
                                                   const Gfx::RectF& rect,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& brush) const
@@ -550,7 +550,7 @@ void PlatinumLineEditRenderer::onRenderBackground(const LineEdit& le,
 
 void PlatinumLineEditRenderer::onRenderText(const LineEdit& le, 
                                             const StyleOptions& options,
-                                            Painter& painter, 
+                                            Gfx::Painter& painter, 
                                             const Gfx::RectF& rect,
                                             const String& text,
                                             const Gfx::PointF& textPos,
@@ -565,7 +565,7 @@ void PlatinumLineEditRenderer::onRenderText(const LineEdit& le,
 
 void PlatinumLineEditRenderer::onRenderCursor(const LineEdit& le, 
                                               const StyleOptions& options,
-                                              Painter& painter, 
+                                              Gfx::Painter& painter, 
                                               const Gfx::RectF& rect,
                                               const Gfx::RectF& cursorRect ) const
 {
@@ -600,7 +600,7 @@ void PlatinumMenuRenderer::onPrepare(const Menu& m,
 
 void PlatinumMenuRenderer::onRenderBackground(const Menu& m, 
                                               const StyleOptions& options,
-                                              Painter& painter, 
+                                              Gfx::Painter& painter, 
                                               const Gfx::RectF& rect,
                                               const Gfx::Brush& brush,
                                               const Gfx::Pen& contour) const
@@ -640,7 +640,7 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
 void PlatinumMenuRenderer::onPrepareItem(const MenuItem& m, 
                                          const StyleOptions& options,
                                          const Gfx::Image& icon,
-                                         Picture& picture,
+                                         PixmapSurface& picture,
                                          Gfx::Brush& brush,
                                          Gfx::Pen& contour,
                                          Gfx::Font& font,
@@ -655,7 +655,7 @@ void PlatinumMenuRenderer::onPrepareItem(const MenuItem& m,
 
 void PlatinumMenuRenderer::onRenderItem(const MenuItem& m, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         Gfx::Brush& brush,
                                         Gfx::Pen& contour) const
@@ -671,7 +671,7 @@ void PlatinumMenuRenderer::onRenderItem(const MenuItem& m,
 
 void PlatinumMenuRenderer::onRenderIndicator(const MenuItem& m, 
                                              const StyleOptions& options,
-                                             Painter& painter, 
+                                             Gfx::Painter& painter, 
                                              const Gfx::RectF& rect) const
 {
     static const double indicatorWidth = 5.0;
@@ -713,7 +713,7 @@ void PlatinumMenuBarRenderer::onPrepare(const MenuBar& m,
 
 void PlatinumMenuBarRenderer::onRenderBackground(const MenuBar& m, 
                                                  const StyleOptions& options,
-                                                 Painter& painter, 
+                                                 Gfx::Painter& painter, 
                                                  const Gfx::RectF& rect,
                                                  const Gfx::Brush& brush,
                                                  const Gfx::Pen& contour) const
@@ -737,7 +737,7 @@ void PlatinumMenuBarRenderer::onPrepareItem(const MenuBarItem& m,
 
 void PlatinumMenuBarRenderer::onRenderItem(const MenuBarItem& m, 
                                            const StyleOptions& options,
-                                           Painter& painter, 
+                                           Gfx::Painter& painter, 
                                            const Gfx::RectF& rect,
                                            const Gfx::Brush& brush,
                                            const Gfx::Pen& contour) const
@@ -752,7 +752,7 @@ void PlatinumMenuBarRenderer::onRenderItem(const MenuBarItem& m,
 
 void PlatinumMenuBarRenderer::onRenderItemText(const MenuBarItem& m,
                                                const StyleOptions& options,
-                                               Painter& painter, 
+                                               Gfx::Painter& painter, 
                                                const Gfx::RectF& rect,
                                                const String& text,
                                                const Gfx::PointF& textPos,
@@ -798,7 +798,7 @@ void PlatinumScrollBarRenderer::onPrepare(const ScrollBar& s,
 
 void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
                                          const StyleOptions& options,
-                                         Painter& painter,
+                                         Gfx::Painter& painter,
                                          const Gfx::RectF& rect,
                                          const Gfx::RectF& handleRect,
                                          const Gfx::Brush& background,
@@ -856,7 +856,7 @@ void PlatinumProgressBarRenderer::onPrepare(const ProgressBar&    p,
 
 void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
                                             const StyleOptions& options,
-                                            Painter& painter,
+                                            Gfx::Painter& painter,
                                             const Gfx::RectF& rect,
                                             const Gfx::Brush& background,
                                             const Gfx::Brush& foreground,
@@ -922,7 +922,7 @@ void PlatinumSliderRenderer::onPrepare( const Slider& s,
 
 void PlatinumSliderRenderer::onRender( const Slider& s,
                                        const StyleOptions& options,
-                                       Painter& painter,
+                                       Gfx::Painter& painter,
                                        const Gfx::RectF& rect,
                                        const Gfx::Brush& background,
                                        const Gfx::Brush& foreground,
@@ -981,7 +981,7 @@ void PlatinumListBoxRenderer::onPrepareLayout(Spacing& frameSize)
 
 void PlatinumListBoxRenderer::onRenderBackground(const ListBox& lb,
                                                  const StyleOptions& options,
-                                                 Painter& painter, 
+                                                 Gfx::Painter& painter, 
                                                  const Gfx::RectF& rect,
                                                  const Gfx::Brush& brush) const 
 {   
@@ -992,7 +992,7 @@ void PlatinumListBoxRenderer::onRenderBackground(const ListBox& lb,
 
 void PlatinumListBoxRenderer::onRenderFrame(const ListBox& lb,
                                             const StyleOptions& options,
-                                            Painter& painter, 
+                                            Gfx::Painter& painter, 
                                             const Gfx::RectF& rect,
                                             const Gfx::Pen& pen) const 
 {
@@ -1024,7 +1024,7 @@ void PlatinumListBoxRenderer::onPrepareItem(const ListBoxItem& item,
 
 void PlatinumListBoxRenderer::onRenderItem(const ListBoxItem& item, 
                                            const StyleOptions& options,
-                                           Painter& painter, 
+                                           Gfx::Painter& painter, 
                                            const Gfx::RectF& rect,
                                            Gfx::Brush& brush,
                                            Gfx::Pen& contour) const
@@ -1075,7 +1075,7 @@ void PlatinumComboBoxRenderer::onPrepare(const ComboBox& cb,
 
 void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb, 
                                                   const StyleOptions& options,
-                                                  Painter& painter, 
+                                                  Gfx::Painter& painter, 
                                                   const Gfx::RectF& rect,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& background) const
@@ -1105,7 +1105,7 @@ void PlatinumComboBoxRenderer::onPrepareLayout(const ComboBox& cb,
 
 void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb, 
                                               const StyleOptions& options,
-                                              Painter& painter, 
+                                              Gfx::Painter& painter, 
                                               const Gfx::RectF& rect,
                                               const Gfx::Pen& contour,
                                               const Gfx::Brush& foreground) const
@@ -1151,7 +1151,7 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
 
 void PlatinumComboBoxRenderer::onRenderText(const ComboBox& cb,
                                             const StyleOptions& options,
-                                            Painter& painter, 
+                                            Gfx::Painter& painter, 
                                             const Gfx::RectF& rect,
                                             const String& text,
                                             const Gfx::PointF& textPos,
@@ -1254,7 +1254,7 @@ void PlatinumSpinBoxRenderer::onLayout(const SpinBox& sb,
 
 void PlatinumSpinBoxRenderer::onRenderBackground(const SpinBox& sb, 
                                                  const StyleOptions& options,
-                                                 Painter& painter, 
+                                                 Gfx::Painter& painter, 
                                                  const Gfx::RectF& rect,
                                                  const Gfx::Pen& contour,
                                                  const Gfx::Brush& background) const
@@ -1280,7 +1280,7 @@ void PlatinumSpinBoxRenderer::onRenderBackground(const SpinBox& sb,
 
 void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb, 
                                              const StyleOptions& options,
-                                             Painter& painter, 
+                                             Gfx::Painter& painter, 
                                              const Gfx::RectF& rect,
                                              const Gfx::Brush& foreground,
                                              const Gfx::Pen& contour) const
@@ -1333,7 +1333,7 @@ void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb,
 
 void PlatinumSpinBoxRenderer::onRenderText(const SpinBox& sb,
                                            const StyleOptions& options,
-                                           Painter& painter, 
+                                           Gfx::Painter& painter, 
                                            const Gfx::RectF& rect,
                                            const String& text,
                                            const Gfx::PointF& textPos,
@@ -1384,7 +1384,7 @@ void PlatinumTabViewRenderer::onPrepare(const TabView& tv,
 
 void PlatinumTabViewRenderer::onRender(const TabView& tv,
                                        const StyleOptions& options,
-                                       Painter& painter,
+                                       Gfx::Painter& painter,
                                        const Gfx::RectF& rect,
                                        const Gfx::Brush& background,
                                        const Gfx::Brush& foreground,
@@ -1404,7 +1404,7 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(const std::vector<TabItem>& ta
     std::vector<TabItem>::const_iterator it;
     for(it = tabs.begin(); it != tabs.end(); ++it)
     {
-        Gfx::FontMetrics fm = Painter::fontMetrics( font, it->text() );
+        Gfx::FontMetrics fm = PixmapSurface::fontMetrics( font, it->text() );
         s.addWidth( fm.width() + spacing.leftRight() );
     }
 
@@ -1423,7 +1423,7 @@ void PlatinumTabViewRenderer::onLayoutTabs(std::vector<TabItem>& tabs,
     std::vector<TabItem>::iterator it;
     for(it = tabs.begin(); it != tabs.end(); ++it)
     {
-        Gfx::FontMetrics fm = Painter::fontMetrics( font, it->text() );
+        Gfx::FontMetrics fm = PixmapSurface::fontMetrics( font, it->text() );
 
         double tabWidth = fm.width() + spacing.leftRight();
         
@@ -1452,7 +1452,7 @@ void PlatinumTabViewRenderer::onPrepareTabs(const TabBar& tabs,
 
 void PlatinumTabViewRenderer::onRenderTabs(const std::vector<TabItem>& tabs,
                                            const StyleOptions& options,
-                                           Painter& painter,
+                                           Gfx::Painter& painter,
                                            const Gfx::RectF& rect,
                                            const Gfx::Brush& background,
                                            const Gfx::Brush& foreground,
@@ -1472,7 +1472,7 @@ void PlatinumTabViewRenderer::onRenderTabs(const std::vector<TabItem>& tabs,
 
         painter.setFont(font);
 
-        Gfx::FontMetrics fm = Painter::fontMetrics( font, it->text() );
+        Gfx::FontMetrics fm = PixmapSurface::fontMetrics( font, it->text() );
         
         double textX = it->geometry().left() + spacing.left();
         double textY = it->geometry().height() / 2 + fm.ascent() / 2;

@@ -38,7 +38,8 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/System/Path.h>
 
 namespace Pt {
 
@@ -49,7 +50,7 @@ class PixmapSurfaceImpl;
 
 /** @brief A back buffer drawing surface.
 */
-class PT_HMI_API PixmapSurface : public PaintSurface
+class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 {
     public:
         PixmapSurface();
@@ -67,14 +68,51 @@ class PT_HMI_API PixmapSurface : public PaintSurface
             _scaleFactor = v;
         }
 
+        void set(const Gfx::Image& image);
+
+
+        bool empty() const;
+
+        double width() const;
+
+        double height() const;
+
+        PixmapSurfaceImpl* impl()
+        {
+            return _impl;
+        }
+
+        const PixmapSurfaceImpl* impl() const
+        {
+            return _impl;
+        }
+
+    public:
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+
+    protected:
+        virtual double onScaleFactor() const
+        {
+            return _scaleFactor;
+        }
+
+        virtual const Gfx::SizeF& onSize() const
+        {
+            return _logicSize;
+        }
+
+        virtual void onBegin(Gfx::Painter& painter);
+
+        virtual void onFinish();
+
     protected:
         virtual const Gfx::ImageFormat& format() const;
 
-        virtual void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        virtual void setClip( const Gfx::RectF& clip);
+        virtual void setClip(const Gfx::RectF& clip);
 
         virtual void resetClip();
+
+        virtual void setCompositionMode(const Gfx::CompositionMode& mode);
 
         virtual void setPen(const Gfx::Pen& pen);
 
@@ -102,29 +140,40 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
 
-        virtual void drawPath(const Gfx::Path& path, float smoothness);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
-
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
 
-        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
+        virtual void drawPath(const Gfx::Path& path, float smoothness);
+
+        virtual void fillPath(const Gfx::Path& path, float smoothness);
+
+        virtual void drawChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
+
+        virtual void fillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
+
+        virtual void drawPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
+
+        virtual void fillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
+
+        virtual void drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
 
     protected:
-        virtual const Gfx::SizeF& onSize() const;
+        virtual void drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& surface);
 
-        virtual double onScaleFactor() const
-        {
-            return _scaleFactor;
-        }
+        virtual void drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
 
-        virtual void onBegin(Painter& painter);
+        virtual Gfx::Image toImage(const Gfx::ImageFormat& format) const;
 
-        virtual void onFinish();
+  public:
+      static void setFontDir(const System::Path& path);
+
+      static std::string defaultFont();
+
+      static void setDefaultFont(const std::string& name);
+
+      static std::vector<std::string> fontNames();
+
 
     private:
         PixmapSurfaceImpl* _impl;

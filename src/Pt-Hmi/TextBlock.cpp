@@ -27,7 +27,8 @@
 */
 
 #include <Pt/Hmi/TextBlock.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Screen.h>
 #include <cassert>
@@ -109,7 +110,7 @@ void TextLine::setText(const Pt::String& text, const Gfx::Font& font)
     _text = text;
     _font = font;
 
-    _textMetrics = Hmi::Painter::fontMetrics(_font, _text);
+    _textMetrics = PixmapSurface::fontMetrics(_font, _text);
 }
 
 
@@ -128,7 +129,7 @@ double TextLine::cursorToX(std::size_t cursorPosition) const
     if( cursorPosition <= _text.size() && ! _text.empty() )
         left = _text.substr(0, cursorPosition);
 
-    Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics(_font, left);
+    Gfx::FontMetrics fmLeft = PixmapSurface::fontMetrics(_font, left);
 
     return fmLeft.width();
 }
@@ -144,7 +145,7 @@ std::size_t TextLine::xToCursor(double x) const
     std::size_t textX = x - _position.x();
 
     // estimate cursor position
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, str );
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, str );
     std::size_t widthPerChar = fm.width() / str.size();
 
     if(widthPerChar == 0)
@@ -156,7 +157,7 @@ std::size_t TextLine::xToCursor(double x) const
         pos = str.size() - 1;
 
     Pt::String left = str.substr(0, pos + 1);
-    fm = Hmi::Painter::fontMetrics( _font, left );
+    fm = PixmapSurface::fontMetrics( _font, left );
 
     if( textX < fm.width() )
     {
@@ -164,7 +165,7 @@ std::size_t TextLine::xToCursor(double x) const
         for( ; pos > 0; --pos)
         {
             left = str.substr(0, pos);
-            fm = Hmi::Painter::fontMetrics( _font, left );
+            fm = PixmapSurface::fontMetrics( _font, left );
 
             if( textX >= fm.width() )
                 break;
@@ -176,7 +177,7 @@ std::size_t TextLine::xToCursor(double x) const
         for(++pos ; pos < str.size(); ++pos)
         {
             left = str.substr(0, pos + 1);
-            fm = Hmi::Painter::fontMetrics( _font, left );
+            fm = PixmapSurface::fontMetrics( _font, left );
 
             if( textX < fm.width() )
                 break;
@@ -343,7 +344,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
 
         segment.append(&text[prevWordEnd], wordEnd - prevWordEnd);
 
-        Gfx::FontMetrics fm = Painter::fontMetrics(font, segment);
+        Gfx::FontMetrics fm = PixmapSurface::fontMetrics(font, segment);
         double segmentWidth = fm.width();
 
         if(segmentWidth <= _maxWidth || lineLength == 0)
@@ -365,7 +366,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
 
         lineBegin = wordBegin;
         lineLength = wordEnd - wordBegin;
-        lineMetrics = Painter::fontMetrics(font, Pt::String(segment.c_str()));
+        lineMetrics = PixmapSurface::fontMetrics(font, Pt::String(segment.c_str()));
     }
 
     // add the whitespace after the last word

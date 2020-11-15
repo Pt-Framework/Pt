@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/BlockScale.h>
@@ -209,14 +209,14 @@ void Panel::onLayout(const Gfx::RectF& rect)
 }
 
 
-void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void Panel::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();
@@ -226,7 +226,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                                     painter, rect, *brush);
     }
 
-    onPaintContent(painter);
+    onPaintContent(surface, painter);
 
     const Gfx::Pen* pen = contour();
     if(pen)
@@ -237,7 +237,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void Panel::onPaintContent(Painter& painter)
+void Panel::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter)
 {
     if(  _picture.empty() )
         return;
@@ -291,7 +291,7 @@ void Panel::onPaintContent(Painter& painter)
     }
 
     painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-    painter.drawPicture(imagePosition, _picture);
+    painter.drawSurface(imagePosition, _picture);
     painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
 }
 

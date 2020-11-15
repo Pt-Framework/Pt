@@ -27,11 +27,10 @@
  MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_PaintSurface_h
-#define Pt_Hmi_PaintSurface_h
+#ifndef Pt_Gfx_PaintSurface_h
+#define Pt_Gfx_PaintSurface_h
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Application.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Pen.h>
@@ -40,18 +39,17 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Transform.h>
+#include <Pt/Gfx/Path.h>
 
 namespace Pt {
 
-namespace Hmi {
+namespace Gfx {
 
 class Painter;
-class PixmapSurface;
-class Picture;
 
 /** @brief Paint target for painters.
 */
-class PT_HMI_API PaintSurface
+class PT_GFX_API PaintSurface
 {
     friend class Painter;
     friend class PaintRegion;
@@ -60,8 +58,6 @@ class PT_HMI_API PaintSurface
         virtual ~PaintSurface();
         
         const Gfx::SizeF& size() const;
-
-        static void setDefaultFont(const std::string& f);
 
         double scaleFactor() const
         {
@@ -165,22 +161,14 @@ class PT_HMI_API PaintSurface
             return toLogical(Gfx::RectF(pos, size));
         }
 
-        Spacing align(const Spacing& spacing) const
-        {
-            Spacing alignedSpacing(align(spacing.left()),
-                align(spacing.top()),
-                align(spacing.right()),
-                align(spacing.bottom()));
-
-            return alignedSpacing;
-        }
-
-    protected:
+    public:
         PaintSurface();
+
+        virtual Image toImage(const Gfx::ImageFormat& format) const = 0;
 
         void begin(Painter& painter);
 
-        void finish(Painter& painter);
+        void finish();
 
     protected:
         virtual double onScaleFactor() const = 0;
@@ -200,6 +188,7 @@ class PT_HMI_API PaintSurface
 
         virtual void setCompositionMode(const Gfx::CompositionMode& mode) = 0;
 
+    protected:
         virtual void setPen(const Gfx::Pen& pen) = 0;
 
         virtual void setBrush(const Gfx::Brush& brush) = 0;
@@ -226,17 +215,27 @@ class PT_HMI_API PaintSurface
 
         virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount) = 0;
 
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface) = 0;
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect) = 0;
-
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect) = 0;
 
-        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic) = 0;
-
         virtual void drawPath(const Gfx::Path& path, float smoothness) = 0;
+
+        virtual void fillPath(const Path& path, float smoothness) = 0;
+
+        virtual void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& surface) = 0;
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect) = 0;
 
     private:
         Painter* _painter;

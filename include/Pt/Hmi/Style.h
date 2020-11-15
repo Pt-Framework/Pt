@@ -33,6 +33,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Spacing.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Pen.h>
@@ -49,8 +50,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class Painter;
-class Picture;
+class PixmapSurface;
 class StyleOptions;
 class Panel;
 class Label;
@@ -238,18 +238,18 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
         void prepareIcon(const PushButton& button,
                          const StyleOptions& options,
                          const Gfx::Image& icon,
-                         Picture& picture) const;
+                         PixmapSurface& picture) const;
 
         void renderBackground(const PushButton& button,
                               const StyleOptions& options,
-                              Painter& painter, 
+                              Gfx::Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Brush& brush,
                               const Gfx::Pen& pen) const;
         
         void renderText(const PushButton& button,
                         const StyleOptions& options,
-                        Painter& painter, 
+                        Gfx::Painter& painter, 
                         const Gfx::RectF& rect,
                         const String& text,
                         const Gfx::PointF& textPos,
@@ -268,18 +268,18 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
         virtual void onPrepareIcon(const PushButton& button,
                                    const StyleOptions& options,
                                    const Gfx::Image& icon,
-                                   Picture& picture) const = 0;
+                                   PixmapSurface& picture) const = 0;
 
         virtual void onRenderBackground(const PushButton& button,
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush,
                                         const Gfx::Pen& pen) const = 0;
 
         virtual void onRenderText(const PushButton& button,
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -306,7 +306,7 @@ class PT_HMI_API CheckBoxRenderer : public Style::Facet
 
         void renderBox(const CheckBox& cb,
                        const StyleOptions& options,
-                       Painter& painter, 
+                       Gfx::Painter& painter, 
                        const Gfx::RectF& rect,
                        const Gfx::RectF& boxRect,
                        const Gfx::Brush& brush,
@@ -314,7 +314,7 @@ class PT_HMI_API CheckBoxRenderer : public Style::Facet
 
         void renderText(const CheckBox& cb,
                         const StyleOptions& options,
-                        Painter& painter, 
+                        Gfx::Painter& painter, 
                         const Gfx::RectF& rect,
                         const String& text,
                         const Gfx::PointF& textPos,
@@ -334,7 +334,7 @@ class PT_HMI_API CheckBoxRenderer : public Style::Facet
 
         virtual void onRenderBox(const CheckBox& cb,
                                  const StyleOptions& options,
-                                 Painter& painter, 
+                                 Gfx::Painter& painter, 
                                  const Gfx::RectF& rect,
                                  const Gfx::RectF& boxRect,
                                  const Gfx::Brush& brush,
@@ -342,7 +342,7 @@ class PT_HMI_API CheckBoxRenderer : public Style::Facet
 
         virtual void onRenderText(const CheckBox& cb,
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -362,26 +362,26 @@ class PT_HMI_API PanelRenderer : public Style::Facet
 
         void renderBackground(const Panel& p,
                               const StyleOptions& options,
-                              Painter& painter, 
+                              Gfx::Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Brush& brush) const;
 
         void renderFrame(const Panel& p,
                          const StyleOptions& options,
-                         Painter& painter, 
+                         Gfx::Painter& painter, 
                          const Gfx::RectF& rect, 
                          const Gfx::Pen& pen) const;
 
     protected:
         virtual void onRenderBackground(const Panel& p,
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush) const = 0;
 
         virtual void onRenderFrame(const Panel& p,
                                    const StyleOptions& options,
-                                   Painter& painter, 
+                                   Gfx::Painter& painter, 
                                    const Gfx::RectF& rect, 
                                    const Gfx::Pen& pen) const = 0;
 };
@@ -402,19 +402,19 @@ class PT_HMI_API LabelRenderer : public Style::Facet
         
         void renderBackground(const Label& l,
                               const StyleOptions& options,
-                              Painter& p, 
+                              Gfx::Painter& p, 
                               const Gfx::RectF& rect,
                               const Gfx::Brush& brush) const;
 
         void renderFrame(const Label& l,
                          const StyleOptions& options,
-                         Painter& p, 
+                         Gfx::Painter& p, 
                          const Gfx::RectF& rect, 
                          const Gfx::Pen& contour) const;
 
         void renderText(const Label& l,
                         const StyleOptions& options,
-                        Painter& p, 
+                        Gfx::Painter& p, 
                         const Gfx::RectF& rect,
                         const String& text,
                         const Gfx::PointF& textPos,
@@ -430,19 +430,19 @@ class PT_HMI_API LabelRenderer : public Style::Facet
 
         virtual void onRenderBackground(const Label& l,
                                         const StyleOptions& options,
-                                        Painter& p, 
+                                        Gfx::Painter& p, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush) const = 0;
 
         virtual void onRenderFrame(const Label& l,
                                    const StyleOptions& options,
-                                   Painter& p, 
+                                   Gfx::Painter& p, 
                                    const Gfx::RectF& rect, 
                                    const Gfx::Pen& contour) const = 0;
 
         virtual void onRenderText(const Label& l,
                                   const StyleOptions& options,
-                                  Painter& p, 
+                                  Gfx::Painter& p, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -466,14 +466,14 @@ class PT_HMI_API LineEditRenderer : public Style::Facet
         
         void renderBackground(const LineEdit& le, 
                               const StyleOptions& options,
-                              Painter& painter, 
+                              Gfx::Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Pen& contour,
                               const Gfx::Brush& brush) const;
 
         void renderText(const LineEdit& le, 
                         const StyleOptions& options,
-                        Painter& painter, 
+                        Gfx::Painter& painter, 
                         const Gfx::RectF& rect,
                         const String& text,
                         const Gfx::PointF& textPos,
@@ -482,7 +482,7 @@ class PT_HMI_API LineEditRenderer : public Style::Facet
 
         void renderCursor(const LineEdit& le, 
                           const StyleOptions& options,
-                          Painter& painter, 
+                          Gfx::Painter& painter, 
                           const Gfx::RectF& rect,
                           const Gfx::RectF& cursorRect ) const;
     
@@ -496,14 +496,14 @@ class PT_HMI_API LineEditRenderer : public Style::Facet
 
         virtual void onRenderBackground(const LineEdit& le, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const = 0;
 
         virtual void onRenderText(const LineEdit& le, 
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -512,7 +512,7 @@ class PT_HMI_API LineEditRenderer : public Style::Facet
 
         virtual void onRenderCursor(const LineEdit& le, 
                                     const StyleOptions& options,
-                                    Painter& painter, 
+                                    Gfx::Painter& painter, 
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& cursorRect ) const = 0;
 };
@@ -532,7 +532,7 @@ class PT_HMI_API MenuRenderer : public Style::Facet
         void prepareItem(const MenuItem& m, 
                          const StyleOptions& options,
                          const Gfx::Image& icon,
-                         Picture& picture,
+                         PixmapSurface& picture,
                          Gfx::Brush& brush,
                          Gfx::Pen& contour,
                          Gfx::Font& font,
@@ -540,21 +540,21 @@ class PT_HMI_API MenuRenderer : public Style::Facet
 
         void renderBackground(const Menu& m, 
                               const StyleOptions& options,
-                              Painter& painter, 
+                              Gfx::Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Brush& brush,
                               const Gfx::Pen& contour) const;
 
         void renderItem(const MenuItem& m, 
                         const StyleOptions& options,
-                        Painter& painter, 
+                        Gfx::Painter& painter, 
                         const Gfx::RectF& rect,
                         Gfx::Brush& brush,
                         Gfx::Pen& contour) const;
         
         void renderIndicator(const MenuItem& m, 
                              const StyleOptions& options,
-                             Painter& painter, 
+                             Gfx::Painter& painter, 
                              const Gfx::RectF& rect) const;
     
     protected:
@@ -566,7 +566,7 @@ class PT_HMI_API MenuRenderer : public Style::Facet
         virtual void onPrepareItem(const MenuItem& m, 
                                    const StyleOptions& options,
                                    const Gfx::Image& icon,
-                                   Picture& picture,
+                                   PixmapSurface& picture,
                                    Gfx::Brush& brush,
                                    Gfx::Pen& contour,
                                    Gfx::Font& font,
@@ -574,21 +574,21 @@ class PT_HMI_API MenuRenderer : public Style::Facet
 
         virtual void onRenderBackground(const Menu& m, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush,
                                         const Gfx::Pen& contour) const = 0;
 
         virtual void onRenderItem(const MenuItem& m, 
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   Gfx::Brush& brush,
                                   Gfx::Pen& contour) const = 0;
         
         virtual void onRenderIndicator(const MenuItem& m, 
                                        const StyleOptions& options,
-                                       Painter& painter, 
+                                       Gfx::Painter& painter, 
                                        const Gfx::RectF& rect) const = 0;
 };
 
@@ -606,7 +606,7 @@ class PT_HMI_API MenuBarRenderer : public Style::Facet
 
         void renderBackground(const MenuBar& m, 
                               const StyleOptions& options,
-                              Painter& painter, 
+                              Gfx::Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Brush& brush,
                               const Gfx::Pen& contour) const;
@@ -620,14 +620,14 @@ class PT_HMI_API MenuBarRenderer : public Style::Facet
 
         void renderItem(const MenuBarItem& m, 
                         const StyleOptions& options,
-                        Painter& painter, 
+                        Gfx::Painter& painter, 
                         const Gfx::RectF& rect,
                         const Gfx::Brush& brush,
                         const Gfx::Pen& contour) const;
 
         void renderItemText(const MenuBarItem& m,
                             const StyleOptions& options,
-                            Painter& painter, 
+                            Gfx::Painter& painter, 
                             const Gfx::RectF& rect,
                             const String& text,
                             const Gfx::PointF& textPos,
@@ -643,7 +643,7 @@ class PT_HMI_API MenuBarRenderer : public Style::Facet
 
         virtual void onRenderBackground(const MenuBar& m, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush,
                                         const Gfx::Pen& contour) const = 0;
@@ -657,14 +657,14 @@ class PT_HMI_API MenuBarRenderer : public Style::Facet
 
         virtual void onRenderItem(const MenuBarItem& m, 
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const Gfx::Brush& brush,
                                   const Gfx::Pen& contour) const = 0;
 
         virtual void onRenderItemText(const MenuBarItem& m,
                                       const StyleOptions& options,
-                                      Painter& painter, 
+                                      Gfx::Painter& painter, 
                                       const Gfx::RectF& rect,
                                       const String& text,
                                       const Gfx::PointF& textPos,
@@ -689,7 +689,7 @@ class PT_HMI_API ScrollBarRenderer : public Style::Facet
         
         void render(const ScrollBar& s,
                     const StyleOptions& options,
-                    Painter& painter,
+                    Gfx::Painter& painter,
                     const Gfx::RectF& rect,
                     const Gfx::RectF& handleRect,
                     const Gfx::Brush& background,
@@ -705,7 +705,7 @@ class PT_HMI_API ScrollBarRenderer : public Style::Facet
         
         virtual void onRender(const ScrollBar& s,
                               const StyleOptions& options,
-                              Painter& painter,
+                              Gfx::Painter& painter,
                               const Gfx::RectF& rect,
                               const Gfx::RectF& handleRect,
                               const Gfx::Brush& background,
@@ -732,7 +732,7 @@ class PT_HMI_API ProgressBarRenderer : public Style::Facet
 
        void render( const ProgressBar& p,
                                const StyleOptions& options,
-                              Painter& painter,
+                              Gfx::Painter& painter,
                               const Gfx::RectF& rect,
                               const Gfx::Brush& background,
                               const Gfx::Brush& foreground,
@@ -753,7 +753,7 @@ class PT_HMI_API ProgressBarRenderer : public Style::Facet
 
         virtual void onRender( const ProgressBar& p,
                                const StyleOptions& options,
-                              Painter& painter,
+                              Gfx::Painter& painter,
                               const Gfx::RectF& rect,
                               const Gfx::Brush& background,
                               const Gfx::Brush& foreground,
@@ -782,7 +782,7 @@ class PT_HMI_API SliderRenderer : public Style::Facet
 
        void render( const Slider&        s,
                     const StyleOptions& options,
-                    Painter&            painter,
+                    Gfx::Painter&            painter,
                     const Gfx::RectF&    rect,
                     const Gfx::Brush&    background,
                     const Gfx::Brush&    foreground,
@@ -803,7 +803,7 @@ class PT_HMI_API SliderRenderer : public Style::Facet
 
         virtual void onRender( const Slider&         s,
                                const StyleOptions&   options,
-                               Painter&               painter,
+                               Gfx::Painter&               painter,
                                const Gfx::RectF&     rect,
                                const Gfx::Brush&     background,
                                const Gfx::Brush&     foreground,
@@ -825,13 +825,13 @@ class PT_HMI_API ListBoxRenderer : public Style::Facet
 
         void renderBackground(const ListBox& lb,
                               const StyleOptions& options,
-                              Painter& painter, 
+                              Gfx::Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Brush& brush) const;
 
         void renderFrame(const ListBox& lb,
                          const StyleOptions& options,
-                         Painter& painter, 
+                         Gfx::Painter& painter, 
                          const Gfx::RectF& rect, 
                          const Gfx::Pen& pen) const;
 
@@ -844,7 +844,7 @@ class PT_HMI_API ListBoxRenderer : public Style::Facet
 
         void renderItem(const ListBoxItem& item, 
                         const StyleOptions& options,
-                        Painter& painter, 
+                        Gfx::Painter& painter, 
                         const Gfx::RectF& rect,
                         Gfx::Brush& brush,
                         Gfx::Pen& contour) const;
@@ -854,13 +854,13 @@ class PT_HMI_API ListBoxRenderer : public Style::Facet
 
         virtual void onRenderBackground(const ListBox& lb,
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush) const = 0;
 
         virtual void onRenderFrame(const ListBox& lb,
                                    const StyleOptions& options,
-                                   Painter& painter, 
+                                   Gfx::Painter& painter, 
                                    const Gfx::RectF& rect, 
                                    const Gfx::Pen& pen) const = 0;
 
@@ -873,7 +873,7 @@ class PT_HMI_API ListBoxRenderer : public Style::Facet
 
         virtual void onRenderItem(const ListBoxItem& item, 
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   Gfx::Brush& brush,
                                   Gfx::Pen& contour) const = 0;
@@ -900,21 +900,21 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
         
         void renderBackground(const ComboBox& cb, 
                               const StyleOptions& options,
-                              Painter& painter, 
+                              Gfx::Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Pen& contour,
                               const Gfx::Brush& brush) const;
 
         void renderButton(const ComboBox& cb, 
                           const StyleOptions& options,
-                          Painter& painter, 
+                          Gfx::Painter& painter, 
                           const Gfx::RectF& rect,
                           const Gfx::Pen& contour,
                           const Gfx::Brush& foreground) const;
 
         void renderText(const ComboBox& cb,
                         const StyleOptions& options,
-                        Painter& painter, 
+                        Gfx::Painter& painter, 
                         const Gfx::RectF& rect,
                         const String& text,
                         const Gfx::PointF& textPos,
@@ -936,21 +936,21 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
 
         virtual void onRenderBackground(const ComboBox& cb, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const = 0;
 
         virtual void onRenderButton(const ComboBox& cb, 
                                     const StyleOptions& options,
-                                    Painter& painter, 
+                                    Gfx::Painter& painter, 
                                     const Gfx::RectF& rect,
                                     const Gfx::Pen& contour,
                                     const Gfx::Brush& foreground) const = 0;
 
         virtual void onRenderText(const ComboBox& cb,
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -986,21 +986,21 @@ class PT_HMI_API SpinBoxRenderer : public Style::Facet
         
         void renderBackground(const SpinBox& sb, 
                               const StyleOptions& options,
-                              Painter& painter, 
+                              Gfx::Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Pen& contour,
                               const Gfx::Brush& brush) const;
 
         void renderButton(const SpinBoxButton& sb, 
                           const StyleOptions& options,
-                          Painter& painter, 
+                          Gfx::Painter& painter, 
                           const Gfx::RectF& rect,
                           const Gfx::Brush& foreground,
                           const Gfx::Pen& contour) const;
 
         void renderText(const SpinBox& sb,
                         const StyleOptions& options,
-                        Painter& painter, 
+                        Gfx::Painter& painter, 
                         const Gfx::RectF& rect,
                         const String& text,
                         const Gfx::PointF& textPos,
@@ -1028,21 +1028,21 @@ class PT_HMI_API SpinBoxRenderer : public Style::Facet
 
         virtual void onRenderBackground(const SpinBox& sb, 
                                         const StyleOptions& options,
-                                        Painter& painter, 
+                                        Gfx::Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const = 0;
 
         virtual void onRenderButton(const SpinBoxButton& sb, 
                                     const StyleOptions& options,
-                                    Painter& painter, 
+                                    Gfx::Painter& painter, 
                                     const Gfx::RectF& rect,
                                     const Gfx::Brush& foreground,
                                     const Gfx::Pen& contour) const = 0;
 
         virtual void onRenderText(const SpinBox& sb,
                                   const StyleOptions& options,
-                                  Painter& painter, 
+                                  Gfx::Painter& painter, 
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
@@ -1067,7 +1067,7 @@ class PT_HMI_API TabViewRenderer : public Style::Facet
 
         void render(const TabView& tv,
                     const StyleOptions& options,
-                    Painter& painter,
+                    Gfx::Painter& painter,
                     const Gfx::RectF& rect,
                     const Gfx::Brush& background,
                     const Gfx::Brush& foreground,
@@ -1090,7 +1090,7 @@ class PT_HMI_API TabViewRenderer : public Style::Facet
 
         void renderTabs(const std::vector<TabItem>& tabs,
                         const StyleOptions& options,
-                        Painter& painter,
+                        Gfx::Painter& painter,
                         const Gfx::RectF& rect,
                         const Gfx::Brush& background,
                         const Gfx::Brush& foreground,
@@ -1107,7 +1107,7 @@ class PT_HMI_API TabViewRenderer : public Style::Facet
 
         virtual void onRender(const TabView& tv,
                               const StyleOptions& options,
-                              Painter& painter,
+                              Gfx::Painter& painter,
                               const Gfx::RectF& rect,
                               const Gfx::Brush& background,
                               const Gfx::Brush& foreground,
@@ -1130,7 +1130,7 @@ class PT_HMI_API TabViewRenderer : public Style::Facet
 
         virtual void onRenderTabs(const std::vector<TabItem>& tabs,
                                   const StyleOptions& options,
-                                  Painter& painter,
+                                  Gfx::Painter& painter,
                                   const Gfx::RectF& rect,
                                   const Gfx::Brush& background,
                                   const Gfx::Brush& foreground,

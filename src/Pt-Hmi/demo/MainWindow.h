@@ -32,7 +32,6 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/MenuItem.h>
-#include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/TabView.h>
 #include "ChildW.h"

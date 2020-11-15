@@ -30,7 +30,8 @@
 #include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/PixmapSurface.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -187,7 +188,7 @@ void CheckBox::onCanceled()
 
 Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, text() );
 
     double space = std::min<double>(_boxSize.width() / 2, _font.size() / 2);
     double boxWidth = _boxSize.width();
@@ -223,14 +224,14 @@ void CheckBox::onInvalidate()
 }
 
 
-void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void CheckBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     double space = std::min<double>(_boxSize.width() / 2, _font.size() / 1.5);

@@ -30,101 +30,45 @@
 #ifndef Pt_Hmi_win32_PixmapSurfaceImpl_h
 #define Pt_Hmi_win32_PixmapSurfaceImpl_h
 
-#include "../SkiaPainter.h"
-
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Gfx/ImagePainter2.h>
-#include <Pt/Gfx/ImagePainter.h>
-#include "PaintSurfaceImpl.h"
+#include <Pt/Gfx/ImageSurface.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PixmapSurfaceImpl : public PaintSurfaceImpl
+class PixmapSurface;
+
+class PixmapSurfaceImpl : public  Gfx::ImageSurface
 {
-    public:        
-        PixmapSurfaceImpl();
-        
-        virtual ~PixmapSurfaceImpl();  
-
-        void clear(const Gfx::Color& c);
-
-        const Gfx::Image& image() const
+    public:
+        PixmapSurfaceImpl()
+        : ImageSurface(_image)
         {
-            return _image;
+            //resize( Gfx::SizeF(0,100) );
         }
 
-        Gfx::Image& image()
+        void clear(const Gfx::Color& c)
         {
-            return _image;
         }
-    
-        const Gfx::ImageFormat& format() const;
 
-        void begin(Painter& painter);  
-        
-        void finish();    
+        void resize(const Gfx::SizeF& size)
+        {
+            _image.reset(_image.format(), round(size));
+            setImage(_image);
+        }
 
-        //void resize(const Gfx::Size& size, size_t stride);
-
-        void resize(const Gfx::SizeF& size);    
-
-        const Gfx::SizeF& size() const;
-
-        void setClip( const Gfx::RectF& clip);
-
-        void resetClip();
-
-        void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        void setPen(const Gfx::Pen& pen);
-
-        void setBrush(const Gfx::Brush& brush);
-
-        void setFont(const Gfx::Font& font);
-
-        Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        void drawText(const Gfx::PointF& to, const Pt::String& Text);
-
-        void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
-
-        void drawRect(const Gfx::RectF& rectangle);
-
-        void fillRect(const Gfx::RectF& rectangle);
-
-        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        void drawPolyline(const Gfx::PointF* points, size_t pointCount);
-
-        void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        void drawPath(const Gfx::Path& path, float smoothness);
-
-        void fillPath(const Gfx::Path& path, float smoothness);
+        void set(const Gfx::Image& s)
+        {
+            _image = s;
+        }
 
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
-        void drawSurface(const Gfx::PointF& toF, 
-                         const PixmapSurface& pm,
-                         const Gfx::RectF& pmRect);
+        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
 
-        void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r);
-
-        void drawPicture(const Gfx::PointF& to, const Picture& pic);
-        
     private:
-        Gfx::SizeF            _size;
-        Gfx::Image            _image;
-        SkiaPainter           _painter;
+        Gfx::Image _image;
+
 };
 
 } // namespace

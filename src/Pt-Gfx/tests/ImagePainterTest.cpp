@@ -1,6 +1,7 @@
 
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/BlockScale.h>
@@ -17,11 +18,12 @@ void Paint()
         {
 
             Image image( ImageFormat::argb32(), Size(1280, 800) );
+            ImageSurface surface(image);
 
             Pt::System::Clock clock;
             clock.start();
 
-            ImagePainter painter(image);
+            Painter painter(surface);
             painter.setCompositionMode(CompositionMode::SourceOver);
 
             Brush brush( Color(1, 1, 1) );

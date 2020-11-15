@@ -28,8 +28,7 @@
 */
 
 #include "PaintSurfaceImpl.h"
-#include <Pt/Gfx/ImagePainter.h>
-
+/*
 namespace Pt {
 
 namespace Hmi {
@@ -54,3 +53,5 @@ std::vector<std::string> PaintSurfaceImpl::fontNames()
 } // namespace
 
 } // namespace
+
+*/

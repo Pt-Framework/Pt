@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/ScrollBar.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Brush.h>
 
@@ -206,14 +206,14 @@ void ScrollBar::onInvalidate()
 }
 
 
-void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ScrollBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->render(*this, options, painter, rect, _handleRect,

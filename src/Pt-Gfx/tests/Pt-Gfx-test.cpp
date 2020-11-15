@@ -31,8 +31,8 @@
 #include "Pt/Unit/RegisterTest.h"
 
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImagePainter.h>
-#include <Pt/Gfx/ImagePainter2.h>
+#include <Pt/Gfx/Painter.h>
+//#include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/PngWriter.h>
 
@@ -44,32 +44,32 @@ class PtGfxTest : public Pt::Unit::TestSuite
         PtGfxTest()
         : Pt::Unit::TestSuite("Pt-Gfx-test")
         {
-            using namespace Pt;
+            //using namespace Pt;
 
-            Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
+            //Gfx::ImagePainter2::setDefaultFont("DejaVu Sans");
         
-            Gfx::Image image( Gfx::ImageFormat::argb32(), Gfx::Size(600, 600) );
-            Gfx::ImagePainter2 imagePainter(image);
+            //Gfx::Image image( Gfx::ImageFormat::argb32(), Gfx::Size(600, 600) );
+            //Gfx::ImagePainter2 imagePainter(image);
 
-            Pt::Gfx::Transform trans;    
-            trans.rotateDeg(90);
+            //Pt::Gfx::Transform trans;    
+            //trans.rotateDeg(90);
 
-            imagePainter.setFont( Pt::Gfx::Font("", 32) );
-            
-            imagePainter.setPen( Gfx::Color::fromRgb8(255, 0, 0) );
-            imagePainter.drawText(Pt::Gfx::PointF(200, 200), "rotated", trans);
+            //imagePainter.setFont( Pt::Gfx::Font("", 32) );
+            //
+            //imagePainter.setPen( Gfx::Color::fromRgb8(255, 0, 0) );
+            //imagePainter.drawText(Pt::Gfx::PointF(200, 200), "rotated", trans);
 
-            imagePainter.setPen( Gfx::Color::fromRgb8(0, 255, 0) );
-            imagePainter.drawText(Pt::Gfx::PointF(200, 50), "not rotated");
+            //imagePainter.setPen( Gfx::Color::fromRgb8(0, 255, 0) );
+            //imagePainter.drawText(Pt::Gfx::PointF(200, 50), "not rotated");
 
-            imagePainter.setPen( Gfx::Color::fromRgb8(255, 255, 0) );
-            imagePainter.drawLine( Gfx::PointF(0,0), Gfx::PointF(200, 200) );
+            //imagePainter.setPen( Gfx::Color::fromRgb8(255, 255, 0) );
+            //imagePainter.drawLine( Gfx::PointF(0,0), Gfx::PointF(200, 200) );
 
-            std::clog << "PtGfxTest: writing gfx-test-image.png" << std::endl;
-            std::ofstream ofs("gfx-test-image.png", std::ios::out|std::ios::trunc);
-            Gfx::PngWriter pngWriter(ofs);
-            pngWriter.write(image);
-            ofs.close();
+            //std::clog << "PtGfxTest: writing gfx-test-image.png" << std::endl;
+            //std::ofstream ofs("gfx-test-image.png", std::ios::out|std::ios::trunc);
+            //Gfx::PngWriter pngWriter(ofs);
+            //pngWriter.write(image);
+            //ofs.close();
         }
 };
 

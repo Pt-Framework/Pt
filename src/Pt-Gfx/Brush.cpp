@@ -28,7 +28,8 @@
 */
 
 #include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Painter.h>
 #include <stdexcept>
 
 namespace Pt {
@@ -465,7 +466,8 @@ void BrushData::setTexture(const Image& texture,
 
         // Prepare the image painter
         // ### TODO: Use the new painter later! ###
-        ImagePainter painter(_texture);
+         ImageSurface surface(_texture);
+        Painter painter(surface);
         painter.setCompositionMode(CompositionMode::SourceCopy);
 
         // Calculate the source and destination coordinate

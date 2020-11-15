@@ -73,6 +73,58 @@ class EchoQueryResponder : public Pt::Http::Responder
 
 typedef Pt::Http::BasicService<EchoQueryResponder> EchoQueryService;
 
+/*
+class WebSocketResponder : public Pt::Http::Responder
+{
+    public:
+        WebSocketResponder(WebSocketService& s)
+            : Pt::Http::Responder(s)
+        {}
+
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {
+        }
+
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {
+        }
+
+        virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {
+            onWriteReply(request, reply, loop);
+        }
+
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {
+            reply.setStatus(101, "Switching Protocols");
+            reply.header().setUpgrade();
+            reply.header().set("Upgrade", "websocket");
+            reply.header().set("Connection", "Upgrade");
+            reply.header().set("Sec-WebSocket-Accept", "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=");
+            reply.beginSend(true);
+        }
+
+        virtual void onUpgrade(const Pt::Http::Request& request, Pt::Http::IOStream* stream)
+        {
+            //TODO send event to WebSocketService
+            // return true to destroy responder
+        }
+};
+
+class WebSocketService : public  Pt::Http::BasicService<WebSocketService>
+{
+    public:
+        WebSocketService()
+        {}
+
+        void onUpgrade(Pt::Http::IOStream* stream)
+        {
+            auto s = new WebSocket(stream);
+
+            _signal.send(s);
+        }
+};
+*/
 
 class HelloResponder : public Pt::Http::Responder
 {
@@ -144,7 +196,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::System::Logger::setLogLevel("Pt", Pt::System::Error);
 
             _authent.setUser( Pt::Http::Credential("testo", "testpwd") );
-
+/*
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL
             this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
@@ -156,6 +208,8 @@ class ServerTest : public Pt::Unit::TestSuite
             this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
             this->registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
             this->registerMethod( "QueryString", *this, &ServerTest::QueryString);
+            */
+            this->registerMethod("Upgrate", *this, &ServerTest::Upgrade);
         }
 
         void setUp()
@@ -172,7 +226,7 @@ class ServerTest : public Pt::Unit::TestSuite
             _loop = new Pt::System::MainLoop();
 
             _exitTimer.setActive(*_loop);
-            _exitTimer.start(10000);
+//            _exitTimer.start(10000);
             _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::EventLoop::exit);
         }
 
@@ -543,6 +597,45 @@ class ServerTest : public Pt::Unit::TestSuite
             _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "a=4&b=Hello");
+        }
+
+
+
+        void Upgrade()
+        {
+            /*
+            Pt::Net::Endpoint ep("127.0.0.1", 80);
+
+            WebSocketService service;
+
+            Pt::Http::Server server(*_loop, ep);
+
+            Pt::Http::MapUrl mapurl("/WebSocket", service);
+            server.addServlet(mapurl);
+
+            server.upgradeRequested() += Pt::slot(*this, &ServerTest::onUpgrade);
+
+            _loop->run();
+            */
+        }
+
+
+        Pt::Http::IOStream* _ioStream;
+
+
+        void onUpgradeInput()
+        {
+            size_t s = _ioStream->endInput();
+            char buffer[1024];
+            _ioStream->read(buffer, s);
+
+        }
+        void onUpgrade(Pt::Http::IOStream* stream)
+        {
+            _ioStream = stream;
+            _ioStream->inputReady() += Pt::slot(*this, &ServerTest::onUpgradeInput);
+            _ioStream->beginInput();
+            
         }
 
         void onQueryStringReceived(Pt::Http::Client& client)

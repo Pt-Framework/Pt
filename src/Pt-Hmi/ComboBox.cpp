@@ -27,7 +27,7 @@
 */
 
 #include <Pt/Hmi/ComboBox.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -360,14 +360,14 @@ void ComboBox::onInvalidate()
 }
 
 
-void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ComboBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     //

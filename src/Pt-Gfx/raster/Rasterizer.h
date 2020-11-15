@@ -56,47 +56,93 @@ class Rasterizer
 
     void setImage(Image& image);
 
+    Image& image()
+    {
+        return *_image;
+    }
+
+    const Image& image() const
+    {
+        return *_image;
+    }
+
+    void begin(Gfx::Painter& painter)
+    {}
+
+    void finish()
+    {}
+
+
     const ImageFormat& format() const;
 
-    void setPen( const Pen& pen );
-
-    const Pen& pen() const
-    {
-      return _pen;
-    }
-
-    void setBrush( const Brush& brush );
-
-    const Brush& brush() const
-    {
-      return _brush;
-    }
-
-    void setClip( const Rect& clip );
+    void setClip(const RectF& clip);
 
     void resetClip();
 
-    const Rect& clip() const
-    {
-      return _clip;
-    }
-
-    void setFont( const Font& font );
-
-    const Font& font() const
-    {
-      return _font;
-    }
-
     void setCompositionMode(const CompositionMode& mode)
     {
-      _compositionMode = mode;
+        _compositionMode = mode;
     }
 
-    const CompositionMode& compositionMode() const
-    {
-      return _compositionMode;
-    }
+    void setPen( const Pen& pen );
+
+    void setBrush( const Brush& brush );
+
+    void setFont(const Font& font);
+
+    FontMetrics fontMetrics(const String& text) const;
+
+    void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+
+    void drawText(const Gfx::PointF& to, const Pt::String& Text);
+
+    void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
+
+    void drawRect(const Gfx::RectF& rectangle);
+
+    void fillRect(const Gfx::RectF& rectangle);
+
+    void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+    void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+    void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+
+    void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+    void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+    void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
+
+    void drawPath(const Gfx::Path& path, float smoothness);
+
+    void fillPath(const Path& path, float smoothness);
+
+    void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+    void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+    void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+    void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+    void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+
+    Image toImage(const Gfx::ImageFormat& format) const;
+
+
+  public:
+      static void setFontDir(const System::Path& path);
+
+      static std::string defaultFont();
+
+      static void setDefaultFont(const std::string& name);
+
+      static std::vector<std::string> fontNames();
+
+      static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
+
+private:
 
     void image( const Point& to, const Image& image);
 
@@ -120,9 +166,6 @@ class Rasterizer
 
     void fillEllipse( const Point& topLeft, const Size& size );
 
-    FontMetrics fontMetrics( const String& text ) const;
-
-    static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
   //Output algo.
   protected:
@@ -206,7 +249,6 @@ class Rasterizer
     CompositionMode _compositionMode;
     int             _clipRight;
     int             _clipBottom;
-
 };
 
 } //namespace

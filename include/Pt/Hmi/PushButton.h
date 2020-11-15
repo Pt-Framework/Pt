@@ -31,8 +31,8 @@
 #define Pt_Hmi_PushButton_H
 
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/Icon.h>
+#include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Pen.h>
@@ -129,7 +129,7 @@ class PT_HMI_API PushButton : public Button
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
         void layoutContent();
@@ -161,7 +161,7 @@ class PT_HMI_API PushButton : public Button
         Gfx::Pen   _pen;
         Gfx::Pen   _textPen;
         Gfx::Font  _font;
-        Picture    _picture;
+        PixmapSurface    _picture;
 };
 
 } // namespace

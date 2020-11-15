@@ -27,7 +27,7 @@
 */
 
 #include <Pt/Hmi/SpinBox.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Convert.h>
 
 namespace Pt {
@@ -133,14 +133,14 @@ void SpinBoxButton::onInvalidate()
 }
 
 
-void SpinBoxButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void SpinBoxButton::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->renderButton(*this, options, painter, rect, _brush, _pen);
@@ -592,14 +592,14 @@ void SpinBox::onInvalidate()
 }
 
 
-void SpinBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void SpinBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     //

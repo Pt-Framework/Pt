@@ -27,15 +27,11 @@
   MA 02110-1301 USA
 */
 
-#include "PaintSurfaceImpl.h"
-
-#include <Pt/Hmi/PaintRegion.h>
-#include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/PaintRegion.h>
 
 namespace Pt {
 
-namespace Hmi {
+namespace Gfx {
 
 PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
 : _surface(0)
@@ -187,20 +183,6 @@ void PaintRegion::fillPolygon(const Gfx::PointF* points, size_t pointCount)
 }
 
 
-void PaintRegion::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
-{
-    _surface->drawSurface(toF + _area.topLeft(), surface);
-}
-
-
-void PaintRegion::drawSurface(const Gfx::PointF& toF, 
-                                  const PixmapSurface& pm,
-                                  const Gfx::RectF& pmRect)
-{
-    _surface->drawSurface(toF + _area.topLeft(), pm, pmRect);
-}
-
-
 void PaintRegion::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
     _surface->drawImage(toF + _area.topLeft(), image);
@@ -213,11 +195,6 @@ void PaintRegion::drawImage(const Gfx::PointF& to, const Gfx::Image& image, cons
 }
 
 
-void PaintRegion::drawPicture(const Gfx::PointF& to, const Picture& pic)
-{
-    _surface->drawPicture(to + _area.topLeft(), pic);
-}
-
 void PaintRegion::drawPath(const Gfx::Path& path, float smoothness)
 {
     Gfx::Path tpath = path;
@@ -229,6 +206,61 @@ void PaintRegion::drawPath(const Gfx::Path& path, float smoothness)
 
     _surface->drawPath(tpath, smoothness);
 }
+
+
+void PaintRegion::fillPath(const Path& path, float smoothness)
+{
+    Gfx::Path tpath = path;
+
+    Gfx::Transform trans;
+    trans.translate(_area.topLeft().x(), _area.topLeft().y());
+
+    tpath.transform(trans);
+
+    _surface->fillPath(tpath, smoothness);
+}
+
+void PaintRegion::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
+{
+    _surface->drawSurface(_area.topLeft() + toF, surface);
+}
+
+void PaintRegion::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface, const Gfx::RectF& pmRect)
+{
+    _surface->drawSurface(_area.topLeft() + toF, surface, pmRect);;
+}
+
+
+Image PaintRegion::toImage(const Gfx::ImageFormat& format) const
+{
+    return _surface->toImage(format);
+}
+
+void PaintRegion::drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+
+}
+
+void PaintRegion::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+
+}
+
+void PaintRegion::drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+
+}
+
+void PaintRegion::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+
+}
+
+void PaintRegion::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+
+}
+
 
 } // namespace
 

@@ -29,7 +29,7 @@
 
 #include <Pt/Hmi/MenuBar.h>
 #include <Pt/Hmi/Menu.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/StyleOptions.h>
@@ -108,7 +108,7 @@ void MenuBarItem::close()
 
 Gfx::SizeF MenuBarItem::onAutoSize(const SizePolicy& policy) const
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics(_font, _text);
 
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
@@ -281,14 +281,14 @@ void MenuBarItem::onInvalidate()
 }
 
 
-void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void MenuBarItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
     
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     //
@@ -529,14 +529,14 @@ void MenuBar::onInvalidate()
 }
 
 
-void MenuBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void MenuBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->renderBackground(*this, options, painter, rect, 

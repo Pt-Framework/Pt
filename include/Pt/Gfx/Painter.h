@@ -49,88 +49,120 @@ namespace Pt {
 
 namespace Gfx {
 
+class PaintSurface;
+
+
+class PaintData
+{
+    public:
+        virtual ~PaintData()
+        {
+
+        }
+
+    protected:
+        PaintData()
+        {
+        }
+};
+
+
 /** @brief 2D painter interface.
   */
 class PT_GFX_API Painter
 {
     public:
+        Painter();
+
+        Painter(PaintSurface& surface);
+
         //! @brief Destructor.
-        virtual ~Painter()
-        {}
+        virtual ~Painter();
+
+        void begin(PaintSurface& surface);
+
+        void finish();
 
         /** @brief Returns the painters native image format.
         */
-        virtual const ImageFormat& format() const  = 0;
+        const ImageFormat& format() const;
 
         /** @brief Sets the composition mode.
         */
-        virtual void setCompositionMode(const CompositionMode& mode) = 0;
+        void setCompositionMode(const CompositionMode& mode);
 
         /** @brief Returns the current composition mode.
         */
-        virtual const CompositionMode& compositionMode() const = 0;
+        const CompositionMode& compositionMode() const;
+
+        /** @brief Returns the clipping rect.
+        */
+        const RectF& clip() const
+        {
+            return _clip;
+        }
 
         /** @brief Sets the clipping rect.
         */
-        virtual void setClip(const RectF& clip) = 0;
+        void setClip(const RectF& clip);
 
         /** @brief Resets the clipping rect.
         */
-        virtual void resetClip() = 0;
+        void resetClip();
 
         /** @brief Sets the pen used to stroke lines.
         */
-        virtual void setPen(const Pen& pen) = 0;
+        void setPen(const Pen& pen);
 
         /** @brief Returns the current pen.
         */
-        virtual const Pen& pen() const = 0;
+        const Pen& pen() const;
 
         /** @brief Sets the brush used to fill areas.
         */
-        virtual void setBrush(const Brush& brush) = 0;
+        void setBrush(const Brush& brush);
 
         /** @brief Returns the current brush.
         */
-        virtual const Brush& brush() const = 0;
+        const Brush& brush() const;
 
         /** @brief Sets the font used to draw text.
         */
-        virtual void setFont(const Font& font) = 0;
+        void setFont(const Font& font);
 
         /** @brief Returns the current font.
         */
-        virtual const Font& font() const = 0;
+        const Font& font() const;
 
         /** @brief Measures the metrics of a text block.
         */
-        virtual FontMetrics fontMetrics(const Pt::String& text) const = 0;
+        FontMetrics fontMetrics(const Pt::String& text) const;
 
         /** @brief Draws a line between two points.
         */
-        virtual void drawLine(const PointF& from, const PointF& to) = 0;
+        void drawLine(const PointF& from, const PointF& to);
 
         /** @brief Draws a polyline.
         */
-        virtual void drawPolyline(const PointF* points, const size_t pointCount) = 0;
+        void drawPolyline(const PointF* points, const size_t pointCount);
 
         /** @brief Fills a polygon.
         */
-        virtual void fillPolygon(const PointF* points, const size_t pointCount) = 0;
+        void fillPolygon(const PointF* points, const size_t pointCount);
 
         /** @brief Draws a text block.
         */
-        virtual void drawText(const PointF& to, const Pt::String& text) = 0;
+        void drawText(const PointF& to, const Pt::String& text);
 
-        virtual void drawText(const PointF& to, const Pt::String& text, const Transform& t) = 0;
+        void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
         /** @brief Draws the outline of a rectangle.
         */
-        virtual void drawRect(const RectF& rect) = 0;
+        void drawRect(const RectF& rect);
 
         /** @brief Fills a rectangular area.
         */
-        virtual void fillRect(const RectF& rect) = 0;
+        void fillRect(const RectF& rect);
 
         /** @brief Draws the outline of a circle.
           */
@@ -148,52 +180,95 @@ class PT_GFX_API Painter
 
         /** @brief Draws the outline of an ellipse.
         */
-        virtual void drawEllipse(const PointF& topLeft, const SizeF& size) = 0;
+        void drawEllipse(const PointF& topLeft, const SizeF& size);
 
         /** @brief Fills an elliptical area.
         */
-        virtual void fillEllipse(const PointF& topLeft, const SizeF& size) = 0;
+        void fillEllipse(const PointF& topLeft, const SizeF& size);
 
-        virtual void drawPath(const Path& path, float smoothness = 1.0f)
-        {
-        }
-
-        virtual void fillPath(const Path& path, float smoothness = 1.0f)
-        {
-        }
-
+        void drawPath(const Path& path, float smoothness = 1.0f);
+        
+        void fillPath(const Path& path, float smoothness = 1.0f);
         /** @brief Draws an image.
         */
-        virtual void drawImage(const PointF& to, const Image& im) = 0;
+        void drawImage(const PointF& to, const Image& im);
 
         /** @brief Draws a part of an image.
         */
-        virtual void drawImage(const PointF& to, const Image& im, const RectF& rect) = 0;
+        void drawImage(const PointF& to, const Image& im, const RectF& rect);
 
-        virtual void drawArc(const PointF& topLeft, const SizeF& size,
-                             float degBegin, float degEnd)
+        void drawArc(const PointF& topLeft, const SizeF& size,
+                     float degBegin, float degEnd);
+
+        void drawChord(const PointF& topLeft, const SizeF& size,
+                       float degBegin, float degEnd);
+
+        void drawPie(const PointF& topLeft, const SizeF& size,
+                     float degBegin, float degEnd);
+
+        void fillPie(const PointF& topLeft, const SizeF& size,
+                     float degBegin, float degEnd);
+
+        void fillChord(const PointF& topLeft, const SizeF& size,
+                       float degBegin, float degEnd);
+
+        void drawSurface(const Gfx::PointF& toF, const PaintSurface& surface);
+
+        void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect);
+
+        Image toImage(const Gfx::ImageFormat& format) const;
+
+    public:
+        double scaleFactor() const;
+
+        double toPhysical(double n) const;
+
+        Gfx::PointF toPhysical(const Gfx::PointF& p) const;
+
+        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const;
+
+        Gfx::RectF toPhysical(const Gfx::RectF& r) const;
+
+        double toLogical(double n) const;
+
+        Gfx::PointF toLogical(const Gfx::PointF& p) const;
+
+        Gfx::SizeF toLogical(const Gfx::SizeF& s) const;
+
+        Gfx::RectF toLogical(const Gfx::RectF& r) const;
+
+        double align(double n) const;
+
+        double alignPixel(double n) const;
+
+        double alignContour(size_t n) const;
+
+        Gfx::PointF align(const Gfx::PointF& p) const;
+
+        Gfx::SizeF align(const Gfx::SizeF& s) const;
+
+        Gfx::RectF align(const Gfx::RectF& rect) const;
+
+        PaintData* paintData()
         {
+            return _paintData;
         }
 
-        virtual void drawChord(const PointF& topLeft, const SizeF& size,
-            float degBegin, float degEnd)
+        void setPaintData(PaintData* pd)
         {
+            _paintData = pd;
         }
 
-        virtual void drawPie(const PointF& topLeft, const SizeF& size,
-            float degBegin, float degEnd)
-        {
-        }
+    private:
+        PaintSurface*        _surface;
+        Gfx::Pen             _pen;
+        Gfx::Brush           _brush;
+        Gfx::Font            _font;
+        Gfx::CompositionMode _compositionMode;
+        Gfx::RectF           _clip;
 
-        virtual void fillPie(const PointF& topLeft, const SizeF& size,
-            float degBegin, float degEnd)
-        {
-        }
+        PaintData*           _paintData;
 
-        virtual void fillChord(const PointF& topLeft, const SizeF& size,
-            float degBegin, float degEnd)
-        {
-        }
 };
 
 } // namespace

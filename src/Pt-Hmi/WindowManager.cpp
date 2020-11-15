@@ -28,8 +28,8 @@
 */
 
 #include <Pt/Hmi/WindowManager.h>
-#include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
@@ -348,7 +348,7 @@ bool WindowManager::scrollEvent(const ScrollEvent& sev)
 }
 
 
-void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void WindowManager::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     std::vector<WindowFrame*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it )
@@ -373,10 +373,10 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
         frame->paint(surface, frameRect);
 
         // paint client rect
-        Painter painter(surface);
-
         Gfx::PointF surfacePos = w->fromParent( updateRect.topLeft() );
         Gfx::RectF surfaceRect( surfacePos, updateRect.size() );
+
+        Pt::Gfx::Painter painter(surface);
         painter.drawSurface(updateRect.topLeft(), w->surface(), surfaceRect);
     }
 }

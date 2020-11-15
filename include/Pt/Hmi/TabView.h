@@ -114,7 +114,7 @@ class PT_HMI_API TabBar : public Control
 
         virtual void onLayout(const Gfx::RectF& rect);
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
@@ -172,7 +172,7 @@ class PT_HMI_API TabView : public Control
 
         virtual void onLayout(const Gfx::RectF& rect);
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
         DockingLayout             _layout;

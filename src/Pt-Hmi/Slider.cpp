@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/Slider.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -244,14 +244,14 @@ void Slider::onInvalidate()
 }
 
 
-void Slider::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void Slider::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->render(*this, options, painter, rect, 

@@ -29,11 +29,11 @@
 
 #include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/PaintRegion.h>
-#include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
+#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PaintRegion.h>
 
 namespace Pt {
 
@@ -83,10 +83,10 @@ void Control::onPaintEvent(const PaintEvent& ev)
         return;
 
     Gfx::PointF winpos = toWindow( Gfx::PointF(0,0) );
-    PaintSurface& windowSurface = w->surface();
+    Gfx::PaintSurface& windowSurface = w->surface();
 
     Gfx::RectF paintRect(winpos, size());
-    PaintRegion region(windowSurface, paintRect);
+    Gfx::PaintRegion region(windowSurface, paintRect);
     
     onPaint(region, ev.rect());
 }

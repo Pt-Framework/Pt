@@ -1,5 +1,35 @@
 SubDir PT_TOP src Pt-Gfx ;
+
+if $(WITH_BUILTIN_SKIA)
+{
+    SubDirC++Flags [ FDefines SK_SUPPORT_GPU=0 ] ;
+    SubDirC++Flags [ FDefines SKSL_STANDALONE  ] ;
+    SubDirC++Flags [ FDefines SK_BUILD_NO_OPTS ] ;
+    SubDirC++Flags [ FDefines SK_DISABLE_EFFECT_DESERIALIZATION ] ;
+
+    SubDirHdrs $(PT_TOP)/src/skia/include/c ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/codec ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/config ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/core ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/effects ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/encode ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/gpu ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/pathops ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/ports ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/private ;
+    SubDirHdrs $(PT_TOP)/src/skia/include/utils ;
+    SubDirHdrs $(PT_TOP)/src/skia/src/core ;
+    SubDirHdrs $(PT_TOP)/src/skia/src/shaders ;
+
+    PT_GFX_IMPL = skia ;
+}
+else
+{
+    PT_GFX_IMPL = raster ;
+}
+
 SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-Gfx/$(PT_GFX_IMPL:L) ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
@@ -55,7 +85,6 @@ PT_GFX_NEW_RASTERIZER_FILES = ImageOperation2_Scale32Bpp.cpp
                               Rasterizer2_Bezier.cpp
                               Rasterizer2_Arc.cpp
                               Rasterizer2_Ellipse.cpp
-                              Path.cpp
                               Polygonizer.cpp
                               Polygonizer_Rect.cpp
                               Polygonizer_Ellipse.cpp
@@ -69,34 +98,41 @@ PT_GFX_NEW_RASTERIZER_FILES = ImageOperation2_Scale32Bpp.cpp
                               clipper_aj$(SLASH)clipper.cpp
                               ;
 
-SharedLibrary Pt-Gfx : Argb32Format.cpp
+PT_GFX_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Gfx $(PT_GFX_IMPL:L) ] ;
+PT_GFX_IMPL_SOURCES += [ GLOB $(PT_GFX_IMPL_SUBDIR) : *.cpp  ] ;
+
+SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
+                       Argb32Format.cpp
                        Argb32Image.cpp
                        Brush.cpp
-                       ClipPolygon.cpp
                        Color.cpp
-                       DrawText.cpp
                        Font.cpp
                        FontMetrics.cpp
-                       FreeType.cpp
                        Image.cpp
                        ImageFormat.cpp
-                       ImagePainter.cpp
+                       ImageSurface.cpp
                        JpegReader.cpp
                        Painter.cpp
+                       PaintSurface.cpp
+                       PaintRegion.cpp
+                       Path.cpp
                        Pen.cpp
                        PngReader.cpp
                        PngWriter.cpp
-                       Rasterizer.cpp
                        Rgb32Format.cpp
                        Rgb16Format.cpp
                        Transform.cpp
                        Yuv12Format.cpp
-                       $(PT_GFX_NEW_RASTERIZER_FILES)
                        ;
 
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;
 MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Gfx : $(PT_INSTALL_LIBDIR) ;
+
+if $(WITH_BUILTIN_SKIA)
+{
+    LinkLibraries Pt-Gfx : skia ;
+}
 
 if $(WITH_BUILTIN_LIBPNG)
 {
@@ -138,4 +174,4 @@ else
     LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
 }
 
-SubInclude PT_TOP src Pt-Gfx tests ;
+#SubInclude PT_TOP src Pt-Gfx tests ;

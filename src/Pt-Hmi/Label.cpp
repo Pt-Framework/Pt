@@ -29,7 +29,7 @@
 
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/LineEditor.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/FontMetrics.h>
 
 namespace Pt {
@@ -429,14 +429,14 @@ void Label::onInvalidate()
 }
 
 
-void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void Label::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();
@@ -471,7 +471,7 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     else
     {
         painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        painter.drawPicture(_iconPos, _picture);
+        painter.drawSurface(_iconPos, _picture);
         painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     }
 }

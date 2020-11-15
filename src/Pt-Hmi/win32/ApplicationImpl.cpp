@@ -160,7 +160,7 @@ ApplicationImpl::ApplicationImpl()
     winClass.lpszClassName = "Pt-Hmi";
     RegisterClass(&winClass);
 
-    PainterImpl::setFontDir(Pt::System::Path("C:\\Windows\\Fonts\\"));
+    PixmapSurface::setFontDir(Pt::System::Path("C:\\Windows\\Fonts\\"));
 }
 
 
@@ -175,13 +175,13 @@ ApplicationImpl::~ApplicationImpl()
 
 void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 {
-    PainterImpl::setFontDir(dir);
+    PixmapSurface::setFontDir(dir);
 }
 
 
 void ApplicationImpl::setDefaultFont(const std::string& fontName)
 {
-    PainterImpl::setDefaultFont(fontName);
+    PixmapSurface::setDefaultFont(fontName);
 }
 
 void ApplicationImpl::setCursor(const Cursor* cursor)

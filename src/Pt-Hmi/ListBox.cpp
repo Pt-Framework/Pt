@@ -27,7 +27,7 @@
 */
 
 #include <Pt/Hmi/ListBox.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -239,7 +239,7 @@ void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 
 Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, _text );
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
@@ -289,14 +289,14 @@ void ListBoxItem::onInvalidate()
 }
 
 
-void ListBoxItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ListBoxItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     //
@@ -304,11 +304,11 @@ void ListBoxItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     _renderer->renderItem(*this, options, painter, rect, _brush, _pen);
 
-    onPaintContent(painter);
+    onPaintContent(surface, painter);
 }
 
 
-void ListBoxItem::onPaintContent(Painter& painter)
+void ListBoxItem::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter)
 {   
     painter.setFont(_font);
     painter.setPen(_textPen);
@@ -351,7 +351,7 @@ void ListBoxItem::onPaintContent(Painter& painter)
 
         Gfx::PointF picturePos(pictureX + pictureXOff, 
                                pictureY + pictureYOff);
-        painter.drawPicture(picturePos, _picture);
+        painter.drawSurface(picturePos, _picture);
         
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
     }
@@ -619,14 +619,14 @@ void ListBox::onInvalidate()
 }
 
 
-void ListBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ListBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     if(_hasBackground)

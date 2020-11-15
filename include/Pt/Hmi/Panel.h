@@ -31,8 +31,8 @@
 #define Pt_Hmi_Panel_H
 
 #include <Pt/Hmi/Control.h>
-#include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/Alignment.h>
+#include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/SmartPtr.h>
@@ -80,9 +80,9 @@ class PT_HMI_API Panel : public Control
 
         virtual void onLayout(const Gfx::RectF& rect);
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual void onPaintContent(Painter& painter);
+        virtual void onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter);
 
     private:
         Widget*                  _content;
@@ -98,7 +98,7 @@ class PT_HMI_API Panel : public Control
 
         Icon                    _icon;
         Gfx::SizeF              _iconSize;
-        Picture                 _picture;
+        PixmapSurface           _picture;
         Alignment               _imageAlignment;
 };
 
