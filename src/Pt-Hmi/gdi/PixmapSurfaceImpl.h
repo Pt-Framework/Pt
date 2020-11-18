@@ -118,25 +118,27 @@ class PixmapSurfaceImpl
 
         static void setDefaultFont(const std::string& name);
 
-        static std::vector<std::string> fontNames();
-
         static std::string& getDefaultFont();
 
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+        static std::vector<std::string> fontNames();
 
         static void setFontDir(const System::Path& path);
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
         HDC deviceContext() const;
 
     private: 
-        void bitBlit( const Gfx::Point& pos, size_t width, size_t height, HBITMAP bitmap, DWORD op );
+        void bitBlit(const Gfx::Point& pos, size_t width, size_t height, 
+                     HBITMAP bitmap, DWORD op);
 
-        static void toPreMulAlpha(const Pt::Gfx::Image& image, std::vector<Pt::uint8_t>& preMul);
+        static void toPreMulAlpha(const Pt::Gfx::Image& image, 
+                                  std::vector<Pt::uint8_t>& preMul);
 
     private:
         Gfx::SizeF     _size;
-        PaintData*      _paintData;
-        Gfx::Painter* _painter;
+        PaintData*     _paintData;
+        Gfx::Painter*  _painter;
         HDC            _dc;
         HBITMAP        _bitmap;
         HPEN           _oldPen;

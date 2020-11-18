@@ -29,10 +29,8 @@
 
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
-#include "PaintSurfaceImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
-#include "PainterImpl.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Widget.h>
@@ -225,7 +223,7 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
 void ApplicationImpl::setDefaultFont(const std::string& fontName)
 {
-    PainterImpl::setDefaultFont(fontName);
+    PixmapSurfaceImpl::setDefaultFont(fontName);
 }
 
 

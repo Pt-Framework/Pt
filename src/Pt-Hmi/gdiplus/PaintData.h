@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_PainterImpl_h
-#define Pt_Hmi_PainterImpl_h
+#ifndef Pt_Hmi_PaintData_h
+#define Pt_Hmi_PaintData_h
 
 #include "win32.h"
 
@@ -51,16 +51,16 @@ namespace Pt {
 
 namespace Hmi {
 
-class PainterImpl
+class PaintData : public Gfx::PaintData
 {
     public:
-        PainterImpl()
+        PaintData()
         : _pen( new Gdiplus::Pen(Gdiplus::Color(0, 0, 0), 1) )
         , _brush( new Gdiplus::SolidBrush(Gdiplus::Color(0, 0, 0)) )
         , _font( new Gdiplus::Font(L"", 1) )
         { }
 
-        ~PainterImpl()
+        ~PaintData()
         {
             delete _pen;
             delete _brush;
@@ -281,22 +281,6 @@ class PainterImpl
 
             return Gfx::FontMetrics(ascentF* scaling, descentF* scaling, 
                                     textRect.Width * scaling, heightF * scaling);
-        }
-
-        static std::string defaultFont()
-        {
-            return getDefaultFont();
-        }
-
-        static void setDefaultFont(const std::string& f)
-        {
-            getDefaultFont() = f;
-        }
-
-        static std::string& getDefaultFont()
-        { 
-            static std::string _defaultFont;
-            return _defaultFont; 
         }
     
         static Gdiplus::Color toGdi(const Gfx::Color& c)

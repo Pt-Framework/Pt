@@ -51,13 +51,13 @@ namespace Gfx {
 
 class PaintSurface;
 
-
+/** @brief Paint attributes.
+*/
 class PaintData
 {
     public:
         virtual ~PaintData()
         {
-
         }
 
     protected:
@@ -66,9 +66,8 @@ class PaintData
         }
 };
 
-
 /** @brief 2D painter interface.
-  */
+*/
 class PT_GFX_API Painter
 {
     public:
@@ -82,6 +81,16 @@ class PT_GFX_API Painter
         void begin(PaintSurface& surface);
 
         void finish();
+
+        PaintData* paintData()
+        {
+            return _paintData;
+        }
+
+        void setPaintData(PaintData* data)
+        {
+            _paintData = data;
+        }
 
         /** @brief Returns the painters native image format.
         */
@@ -249,26 +258,14 @@ class PT_GFX_API Painter
 
         Gfx::RectF align(const Gfx::RectF& rect) const;
 
-        PaintData* paintData()
-        {
-            return _paintData;
-        }
-
-        void setPaintData(PaintData* pd)
-        {
-            _paintData = pd;
-        }
-
     private:
         PaintSurface*        _surface;
+        PaintData*           _paintData;
         Gfx::Pen             _pen;
         Gfx::Brush           _brush;
         Gfx::Font            _font;
         Gfx::CompositionMode _compositionMode;
         Gfx::RectF           _clip;
-
-        PaintData*           _paintData;
-
 };
 
 } // namespace

@@ -30,10 +30,10 @@
 #ifndef Pt_Hmi_PixmalSurfaceImpl_h
 #define Pt_Hmi_PixmalSurfaceImpl_h
 
-#include "PaintSurfaceImpl.h"
+#include "PaintData.h"
 
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Picture.h>
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
 
@@ -46,7 +46,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class PixmapSurfaceImpl : public PaintSurfaceImpl
+class PixmapSurfaceImpl
 {
     public:        
         PixmapSurfaceImpl();
@@ -59,7 +59,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         const Gfx::SizeF& size() const;
 
-        void begin(Painter& painter);  
+        void begin(Gfx::Painter& painter);  
         
         void finish();           
         
@@ -113,21 +113,40 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
                        const Gfx::Image& image, 
                        const Gfx::RectF& imgRect);
 
-        void drawPicture(const Gfx::PointF& to, const Picture& pic);
+        Gfx::Image toImage(const Gfx::ImageFormat& format) const;
+
+        void set(const Gfx::Image& image);
+
+        static std::string defaultFont();
+
+        static void setDefaultFont(const std::string& name);
+
+        static std::string& getDefaultFont();
+
+        static std::vector<std::string> fontNames();
+
+        static void setFontDir(const System::Path& path);
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
         HDC deviceContext() const;
 
     private: 
-        void bitBlit( const Gfx::Point& pos, size_t width, size_t height, HBITMAP bitmap, DWORD op );
+        void bitBlit(const Gfx::Point& pos, size_t width, size_t height, 
+                     HBITMAP bitmap, DWORD op);
+
+        static void toPreMulAlpha(const Pt::Gfx::Image& image, 
+                                  std::vector<Pt::uint8_t>& preMul);
 
     private:
-        Gfx::SizeF          _size;
-        Painter*            _painter;
-        HDC                 _dc;
-        HBITMAP             _bitmap;
-        Gdiplus::Graphics*  _graphics;
-        HRGN                _clipRect;
-        std::wstring        _text;
+        Gfx::SizeF            _size;
+        PaintData*            _paintData;
+        Gfx::Painter*         _painter;
+        HDC                   _dc;
+        HBITMAP               _bitmap;
+        Gdiplus::Graphics*    _graphics;
+        Gfx::CompositionMode  _compositionMode;
+        std::wstring          _text;
 };
 
 } // namespace

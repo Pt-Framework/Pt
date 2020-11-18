@@ -1542,15 +1542,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\MainWindowImpl.h">
       <Filter>Pt-Hmi\gdiplus</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PainterImpl.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PictureImpl.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PixmapSurfaceImpl.h">
       <Filter>Pt-Hmi\gdiplus</Filter>
     </ClInclude>
@@ -1628,6 +1619,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\skia\SkiaBlitter.h">
       <Filter>Pt-Gfx\skia</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PaintData.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2964,12 +2958,6 @@
       <Filter>Pt-Hmi\gdiplus</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\gdiplus</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\gdiplus</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\PictureImpl.cpp">
       <Filter>Pt-Hmi\gdiplus</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\PixmapSurfaceImpl.cpp">

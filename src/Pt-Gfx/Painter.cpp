@@ -70,7 +70,7 @@ void Painter::begin(PaintSurface& surface)
     _surface->setFont(_font);
 
     // TODO: RECT-NULL
-    if (_clip.isNull())
+    if( _clip.isNull() )
         _surface->resetClip();
     else
         _surface->setClip(_clip);
@@ -81,7 +81,7 @@ void Painter::begin(PaintSurface& surface)
 
 void Painter::finish()
 {
-    if (!_surface)
+    if( ! _surface )
         return;
 
     PaintSurface* s = _surface;

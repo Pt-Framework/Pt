@@ -29,8 +29,9 @@
 #ifndef Pt_Hmi_PaintData_h
 #define Pt_Hmi_PaintData_h
 
-#include <Pt/Hmi/Api.h>
 #include "win32.h"
+
+#include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>

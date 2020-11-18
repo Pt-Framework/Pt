@@ -389,9 +389,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\KeyMap.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\MainWindowImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PainterImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PictureImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PaintData.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\win32.h" />
@@ -638,8 +636,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\FlowLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\MainWindowImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
