@@ -909,9 +909,6 @@
     <ClInclude Include="..\..\src\Pt-Ssl\nossl\ContextImpl.h">
       <Filter>Pt-Ssl\nossl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
@@ -1024,9 +1021,6 @@
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h">
@@ -1275,12 +1269,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBase.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PictureImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStateEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
@@ -1346,9 +1334,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h">
       <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\InvalidateEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
@@ -1468,15 +1453,6 @@
       <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\win32\MainWindowImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PainterImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PictureImpl.h">
       <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.h">
@@ -2480,9 +2456,6 @@
     <ClCompile Include="..\..\src\Pt-Ssl\nossl\ContextImpl.cpp">
       <Filter>Pt-Ssl\nossl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Qt\Application.cpp">
       <Filter>Pt-Qt</Filter>
     </ClCompile>
@@ -2566,9 +2539,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
@@ -2753,12 +2723,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\WindowBase.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PictureImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
@@ -2937,12 +2901,6 @@
       <Filter>Pt-Hmi\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\win32\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\PictureImpl.cpp">
       <Filter>Pt-Hmi\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.cpp">

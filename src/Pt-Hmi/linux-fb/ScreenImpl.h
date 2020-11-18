@@ -35,7 +35,6 @@
 
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
 

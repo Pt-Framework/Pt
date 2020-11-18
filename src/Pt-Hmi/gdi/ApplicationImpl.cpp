@@ -29,7 +29,6 @@
 
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
-#include "PaintSurfaceImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
 #include "PaintData.h"

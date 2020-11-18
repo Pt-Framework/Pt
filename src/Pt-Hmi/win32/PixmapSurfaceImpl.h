@@ -38,7 +38,7 @@ namespace Hmi {
 
 class PixmapSurface;
 
-class PixmapSurfaceImpl : public  Gfx::ImageSurface
+class PixmapSurfaceImpl : public Gfx::ImageSurface
 {
     public:
         PixmapSurfaceImpl()
@@ -68,11 +68,10 @@ class PixmapSurfaceImpl : public  Gfx::ImageSurface
 
     private:
         Gfx::Image _image;
-
 };
 
 } // namespace
 
-}  // namespace
+} // namespace
 
 #endif // include guard

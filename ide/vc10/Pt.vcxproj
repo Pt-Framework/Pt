@@ -399,8 +399,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\KeyMap.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintData.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h" />
@@ -408,17 +406,11 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\KeyMap.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\MainWindowImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PainterImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\win32.h" />
@@ -652,8 +644,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdiplus\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\GridLayout.cpp" />
@@ -668,8 +658,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ListBox.cpp" />
@@ -699,8 +687,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\MainWindowImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />

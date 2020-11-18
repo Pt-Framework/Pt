@@ -29,7 +29,6 @@
 
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
-#include "PaintSurfaceImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
 #include <Pt/Hmi/Application.h>
@@ -44,7 +43,6 @@
 #include <Pt/String.h>
 #include <Pt/Types.h>
 #include <WindowsX.h>
-#include "PainterImpl.h"
 
 namespace {
 

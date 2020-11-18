@@ -30,7 +30,6 @@
 #ifndef Pt_Hmi_PixmalSurfaceImpl_h
 #define Pt_Hmi_PixmalSurfaceImpl_h
 
-#include "PaintSurfaceImpl.h"
 #include "PaintData.h"
 
 #include <Pt/Gfx/PaintSurface.h>

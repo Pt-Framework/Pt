@@ -28,9 +28,7 @@
 */
 
 #include "win32.h"
-#include "PaintSurfaceImpl.h"
 #include "PixmapSurfaceImpl.h"
-#include "PictureImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Argb32Format.h>

@@ -29,12 +29,11 @@
 
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
-#include "PainterImpl.h"
 
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Screen.h>
-#include <Pt/Gfx/Transform.h>
+#include <Pt/Gfx/ImageSurface.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/Clock.h>
@@ -158,12 +157,13 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
 void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 {
-    PainterImpl::setFontDir(dir);
+    Gfx::ImageSurface::setFontDir(dir);
 }
+
 
 void ApplicationImpl::setDefaultFont(const std::string& fontName)
 {
-    PainterImpl::setDefaultFont(fontName);
+    Gfx::ImageSurface::setDefaultFont(fontName);
 }
 
 

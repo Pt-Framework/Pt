@@ -37,6 +37,7 @@
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/System/MainLoop.h>
+#include <Pt/DateTime.h>
 #include <Pt/Timespan.h>
 
 namespace Pt {

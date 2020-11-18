@@ -32,19 +32,18 @@
 #include "FrameBuffer.h"
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
-#include "PaintSurfaceImpl.h"
 #include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
-#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/System/Clock.h>
 #include <Pt/System/Logger.h>
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 
 PT_LOG_DEFINE("Pt.Hmi.Screen")
 
@@ -58,10 +57,12 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _dpi(96.0)
 , _drawCursor(false)
 {
-    _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideSize() );
+    _surface.pixmapImpl()->resize( _frameBuffer.size(), 
+                                   _frameBuffer.strideSize() );
 
     Gfx::Image& background = _surface.pixmapImpl()->image();
-    Gfx::ImagePainter painter(background);
+    Gfx::ImageSurface backgroundSurface(background);
+    Gfx::Painter painter(backgroundSurface);
 
     Gfx::RectF rect( Gfx::PointF(0, 0), _surface.size() );
     painter.setBrush( Gfx::Color(0, 0, 0) );
@@ -105,6 +106,7 @@ Gfx::Image& ScreenImpl::image()
     return _surface.pixmapImpl()->image();
 }
 
+
 void ScreenImpl::paint(const Gfx::RectF& updateRect)
 {
     //
@@ -122,7 +124,7 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
     //
     // repaint the update area
     //
-    Painter painter(_surface);
+    Gfx::Painter painter(_surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     painter.setBrush( Pt::Gfx::Color(0, 0, 0) );
     painter.fillRect(updateRect);
@@ -332,7 +334,7 @@ void ScreenImpl::grabImage(const Pt::uint8_t* buffer,
                             pos.x() * pixelSizeInByte;
 
         Pt::uint8_t* pdata = image.data() + (y - pos.y()) * image.view().stride();
-        memcpy( pdata, &buffer[lineOffset], widthInByte );
+        std::memcpy( pdata, &buffer[lineOffset], widthInByte );
     }
 }
 
