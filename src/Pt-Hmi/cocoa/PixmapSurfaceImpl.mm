@@ -28,11 +28,7 @@
 */
 
 #include "PixmapSurfaceImpl.h"
-#include "PainterImpl.h"
-#include "PictureImpl.h"
 
-#include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Utf8Codec.h>
@@ -108,21 +104,33 @@ void PixmapSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
 }
 
 
-const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
-{
-    return Gfx::ImageFormat::argb32();
-}
-
-
-void PixmapSurfaceImpl::begin(Painter& painter)
+void PixmapSurfaceImpl::begin(Gfx::Painter& painter)
 {
     _painter = &painter;
+
+    Gfx::PaintData* pd = painter.paintData();
+    _paintData = dynamic_cast<PaintData*>(pd);
+
+    if (_paintData == 0)
+    {
+        delete pd;
+
+        _paintData = new PaintData();
+        painter.setPaintData(_paintData);
+    }
 }
 
 
 void PixmapSurfaceImpl::finish()
 {
+    _paintData = 0;
     _painter = 0;
+}
+
+
+const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+{
+    return Gfx::ImageFormat::argb32();
 }
 
 
@@ -284,17 +292,17 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 
 void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 {
-    
+    _paintData->setFont(font);
 }
 
 
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 {
-    if( ! _painter )
+    if( ! _paintData )
         return Gfx::FontMetrics();
 
-    CTFontRef font = _painter->impl()->ctFont();
-    return PainterImpl::fontMetrics(font, text);
+    CTFontRef font = _paintData->ctFont();
+    return PaintData::fontMetrics(font, text);
 }
 
 
@@ -302,10 +310,10 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
                                  const Pt::String& text,
                                  const Gfx::Transform& trans)
 {
-    if( ! _painter )
+    if( ! _paintData || ! _painter )
         return;
 
-    CTFontRef font = _painter->impl()->ctFont();
+    CTFontRef font = _paintData->ctFont();
     const Gfx::Pen& pen = _painter->pen();
 
     CGColorRef textColor = CGColorCreateGenericRGB(pen.color().red() / 65535.0,
@@ -598,15 +606,81 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to,
 }
 
 
-void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
+Gfx::Image PixmapSurfaceImpl::toImage(const Gfx::ImageFormat& iformat) const
 {
-    const PictureImpl* picImpl = pic.impl();
-    const Gfx::Image& image = picImpl->image();
+  return Gfx::Image();
+}
 
-    if( picImpl->empty() )
-        return;
 
-    drawImage(to, image);
+void PixmapSurfaceImpl::set(const Gfx::Image& image)
+{
+    resize( Gfx::SizeF( image.size().width(), 
+                        image.size().height() ) );
+
+    Gfx::PointF origin(0, 0);
+
+    drawImage(origin, image);
+}
+
+
+std::string PixmapSurfaceImpl::defaultFont()
+{
+    return getDefaultFont();
+}
+
+
+void PixmapSurfaceImpl::setDefaultFont(const std::string& f)
+{
+    getDefaultFont() = f;
+}
+
+
+std::string& PixmapSurfaceImpl::getDefaultFont()
+{ 
+    #if PT_IOS
+        //"Helvetica"
+        //"Times New Roman"
+        //"Courier New"
+        static std::string _defaultFont = "Helvetica";
+    #else
+        //"Lucida Grande"
+        //"Times New Roman"
+        //"Monaco"
+        static std::string _defaultFont = "Helvetica";
+    #endif
+            
+    return _defaultFont; 
+}
+
+
+std::vector<std::string> PixmapSurfaceImpl::fontNames()
+{
+    std::vector<std::string> fonts;
+
+#if PT_IOS
+    NSArray* fonts = [UIFont familyNames];
+#else
+    NSArray* families = [[NSFontManager sharedFontManager] availableFontFamilies];
+#endif
+
+    for (unsigned int i = 0; i < [families count]; ++i)
+    {
+        NSString* font = (NSString*)[families objectAtIndex: i];
+        fonts.push_back( [font UTF8String] );
+    }
+    
+    return fonts;
+}
+
+
+void PixmapSurfaceImpl::setFontDir(const System::Path& path)
+{
+}
+
+
+Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
+{
+    return PaintData::fontMetrics(font, text);
 }
 
 } // namespace

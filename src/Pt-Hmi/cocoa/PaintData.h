@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_cocoa_PainterImpl_h
-#define Pt_Hmi_cocoa_PainterImpl_h
+#ifndef Pt_Hmi_PaintData_h
+#define Pt_Hmi_PaintData_h
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Pen.h>
@@ -36,6 +36,7 @@
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/String.h>
 #include <Pt/Utf8Codec.h>
 
@@ -45,12 +46,15 @@ namespace Pt {
 
 namespace Hmi {
 
-class PainterImpl
+class PaintData : public Gfx::PaintData
 {
     public:
-        PainterImpl();
+        PaintData()
+        : _font(nil)
+        { 
+        }
 
-        ~PainterImpl()
+        ~PaintData()
         {
           if(_font)
             CFRelease(_font);
@@ -178,33 +182,6 @@ class PainterImpl
             // TODO: use CTFontCreateCopyWithSymbolicTraits for bold and italic
             
             return f;
-        }
-
-        static std::string defaultFont()
-        {
-            return getDefaultFont();
-        }
-
-        static void setDefaultFont(const std::string& f)
-        {
-            getDefaultFont() = f;
-        }
-
-        static std::string& getDefaultFont()
-        { 
-            #if PT_IOS
-                //"Helvetica"
-                //"Times New Roman"
-                //"Courier New"
-                static std::string _defaultFont = "Helvetica";
-            #else
-                //"Lucida Grande"
-                //"Times New Roman"
-                //"Monaco"
-                static std::string _defaultFont = "Helvetica";
-            #endif
-            
-            return _defaultFont; 
         }
 
     private:

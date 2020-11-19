@@ -30,7 +30,7 @@
 #ifndef Pt_Hmi_cocoa_PixmapSurfaceImpl_h
 #define Pt_Hmi_cocoa_PixmapSurfaceImpl_h
 
-#include "PaintSurfaceImpl.h"
+#include "PaintData.h"
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Size.h>
@@ -65,11 +65,9 @@ namespace Pt {
 
 namespace Hmi {
 
-class Painter;
-class Picture;
 class PixmapSurface;
 
-class PixmapSurfaceImpl : public PaintSurfaceImpl
+class PixmapSurfaceImpl
 {
     public:
         PixmapSurfaceImpl();            
@@ -82,11 +80,11 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void resize(const Pt::Gfx::SizeF& size);
 
-        const Gfx::ImageFormat& format() const;
-
-        void begin(Painter& painter);  
+        void begin(Gfx::Painter& painter);  
         
         void finish();
+
+        const Gfx::ImageFormat& format() const;
 
         void setClip(const Gfx::RectF& clip);
 
@@ -137,9 +135,23 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
                        const Gfx::Image& image, 
                        const Gfx::RectF& imgRect);
 
-        void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
         Pt::Gfx::PointF transform(const Pt::Gfx::PointF& p);
+
+        Gfx::Image toImage(const Gfx::ImageFormat& format) const;
+
+        void set(const Gfx::Image& image);
+
+        static std::string defaultFont();
+
+        static void setDefaultFont(const std::string& name);
+
+        static std::string& getDefaultFont();
+
+        static std::vector<std::string> fontNames();
+
+        static void setFontDir(const System::Path& path);
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
         CGContextRef context() const
         { return _context; }
@@ -155,6 +167,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
     
     private:
         Pt::Gfx::SizeF _size;
+        PaintData*     _paintData;
         Painter*       _painter;
         CGContextRef   _context;
         CGRect         _clipRect;

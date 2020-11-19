@@ -909,9 +909,6 @@
     <ClInclude Include="..\..\src\Pt-Ssl\nossl\ContextImpl.h">
       <Filter>Pt-Ssl\nossl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Qt\Api.h">
       <Filter>Pt-Qt</Filter>
     </ClInclude>
@@ -1497,12 +1494,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PictureImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
@@ -1614,6 +1605,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdiplus\PaintData.h">
       <Filter>Pt-Hmi\gdiplus</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintData.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1706,9 +1700,6 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </None>
     <None Include="..\..\src\Pt-Qt\Jamfile">
       <Filter>Pt-Qt</Filter>
     </None>
@@ -1750,9 +1741,6 @@
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
   </ItemGroup>
@@ -2923,9 +2911,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\win32\IONotifierImpl.cpp">
       <Filter>Pt-System\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\PictureImpl.cpp">
-      <Filter>Pt-Hmi\cocoa</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.cpp">
       <Filter>Pt-Hmi\cocoa</Filter>

@@ -351,9 +351,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\KeyMap.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PictureImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintData.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\AtesionIcon.h" />
@@ -519,8 +517,6 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.mm" />
-    <None Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.mm" />
-    <None Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\demo\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\Jamfile" />
@@ -597,7 +593,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\CheckBox.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ComboBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Control.cpp" />

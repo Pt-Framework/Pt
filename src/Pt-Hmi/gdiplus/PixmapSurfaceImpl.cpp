@@ -636,7 +636,6 @@ Gfx::Image PixmapSurfaceImpl::toImage(const Gfx::ImageFormat& iformat) const
 
     int ret =  GetDIBits(_dc, _bitmap, 0, _size.height(), srcBuffer, &bitmapInfo, DIB_RGB_COLORS);
 
-
     Pt::Gfx::Image source(format(), srcBuffer, round(_size));
 
     Pt::Gfx::copy(source.begin(), source.end(), dest.begin());
