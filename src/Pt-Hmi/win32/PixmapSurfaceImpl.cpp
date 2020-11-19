@@ -39,6 +39,7 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface&
     Gfx::ImageSurface::drawSurface(toF, *surface.impl());
 }
 
+
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface, const Gfx::RectF& pmRect)
 {
     Gfx::ImageSurface::drawSurface(toF, *surface.impl(), pmRect);

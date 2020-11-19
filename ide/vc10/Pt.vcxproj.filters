@@ -1476,15 +1476,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\xorg\MainWindowImpl.h">
       <Filter>Pt-Hmi\xorg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\PainterImpl.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\PictureImpl.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\xorg\PixmapSurfaceImpl.h">
       <Filter>Pt-Hmi\xorg</Filter>
     </ClInclude>
@@ -2913,12 +2904,6 @@
       <Filter>Pt-Hmi\xorg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\xorg\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\xorg\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\xorg\PictureImpl.cpp">
       <Filter>Pt-Hmi\xorg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\xorg\PixmapSurfaceImpl.cpp">

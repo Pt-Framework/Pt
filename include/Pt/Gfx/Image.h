@@ -51,6 +51,8 @@ class PT_GFX_API Image
     public:
         Image();
 
+        explicit Image(const ImageFormat& format);
+
         Image(const ImageFormat& format, const Size& size,
               size_t padding = 0);
 

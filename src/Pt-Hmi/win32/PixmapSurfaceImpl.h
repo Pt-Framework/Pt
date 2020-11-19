@@ -30,6 +30,7 @@
 #ifndef Pt_Hmi_win32_PixmapSurfaceImpl_h
 #define Pt_Hmi_win32_PixmapSurfaceImpl_h
 
+#include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/ImageSurface.h>
 
 namespace Pt {

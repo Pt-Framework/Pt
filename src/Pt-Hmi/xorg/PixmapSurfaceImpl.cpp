@@ -28,12 +28,10 @@
 */
 
 #include "PixmapSurfaceImpl.h"
-#include "ScreenImpl.h"
 #include "ApplicationImpl.h"
+
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include "PictureImpl.h"
 
 namespace Pt {
 
@@ -45,13 +43,12 @@ const Gfx::ImageFormat& getScreenFormat()
 
     switch(depth)
     {
-       case 16:
-	    return Gfx::ImageFormat::rgb16();
+        case 16:
+            return Gfx::ImageFormat::rgb16();
 
-
-       case 24:
-       case 32:
-	    return Gfx::ImageFormat::argb32();
+        case 24:
+        case 32:
+            return Gfx::ImageFormat::argb32();
     }
 
     return Gfx::ImageFormat::argb32();
@@ -59,10 +56,8 @@ const Gfx::ImageFormat& getScreenFormat()
 
 
 PixmapSurfaceImpl::PixmapSurfaceImpl()
-: _size(10,10)
-, _image( getScreenFormat(),
-          Gfx::Size(_size.width(), _size.height()) )
-, _painter(_image)
+: ImageSurface(_image)
+, _image( getScreenFormat() )
 {
 }
 
@@ -72,182 +67,15 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 }
 
 
-void PixmapSurfaceImpl::clear(const Gfx::Color& c)
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
 {
+    Gfx::ImageSurface::drawSurface(toF, *surface.impl());
 }
 
 
-const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface, const Gfx::RectF& pmRect)
 {
-    return _painter.format();
-}
-
-
-void PixmapSurfaceImpl::begin(Painter& painter)
-{
-}
-
-
-void PixmapSurfaceImpl::finish()
-{
-}
-
-
-void PixmapSurfaceImpl::resize(const Gfx::Size& size, size_t padding)
-{
-    _size.set(size.width(), size.height());
-    _image.reset(_image.format(), size, padding);
-    _painter.setImage(_image);
-}
-
-
-void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
-{
-    _size = size;
-    _image.reset(_image.format(), round(size));
-    _painter.setImage(_image);
-}
-
-
-const Gfx::SizeF& PixmapSurfaceImpl::size() const
-{
-    return _size;
-}
-
-
-void PixmapSurfaceImpl::setClip(const Gfx::RectF& clip)
-{
-    _painter.setClip(clip);
-}
-
-
-void PixmapSurfaceImpl::resetClip()
-{
-    _painter.resetClip();
-}
-
-
-void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _painter.setCompositionMode(mode);
-}
-
-
-void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
-{
-    _painter.setPen(pen);
-}
-
-
-void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
-{
-    _painter.setBrush(brush);
-}
-
-
-void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
-{
-    _painter.setFont(font); 
-}
-
-
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
-{
-    return _painter.fontMetrics(text);
-}
-
-
-void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
-{    
-    _painter.drawLine(from, to);
-}
-
-
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
-{
-    _painter.drawText(to, text);
-}
-
-
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans)
-{
-    _painter.drawText(to, text, trans);
-}
-
-
-void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
-{  
-    _painter.drawRect(rect); 
-}
-
-
-void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
-{
-    _painter.fillRect(rect);
-}
-
-
-void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
-{
-    _painter.drawEllipse(topLeft, size);
-}
-
-
-void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
-{
-    _painter.fillEllipse(topLeft, size);
-}
-
-
-void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
-{
-    _painter.drawPolyline(points, pointCount);
-}
-
-
-void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
-{
-    _painter.fillPolygon(points, pointCount);
-}
-
-
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
-{
-    const Gfx::Image& image = surface.pixmapImpl()->image();
-    _painter.drawImage(to, image);
-}
-
-
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
-                                  const PixmapSurface& pm,
-                                  const Gfx::RectF& pmRect)
-{
-    const Gfx::Image& image = pm.pixmapImpl()->image();
-    _painter.drawImage(to, image, pmRect);
-}
-
-
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
-{
-    _painter.drawImage(to, image);
-}
-
-
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r)
-{
-    _painter.drawImage( to, image, r);
-}
-
-
-void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
-{
-    const PictureImpl* picImpl = pic.impl();
-    const Gfx::Image& image = picImpl->image();
-
-    if( picImpl->empty() )
-        return;
-
-    _painter.drawImage(to, image);
+    Gfx::ImageSurface::drawSurface(toF, *surface.impl(), pmRect);
 }
 
 } // namespace

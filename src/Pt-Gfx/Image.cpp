@@ -38,6 +38,12 @@ Image::Image()
 }
 
 
+Image::Image(const ImageFormat& format)
+: _view(format)
+{
+}
+
+
 Image::Image(const ImageFormat& format, const Size& size, size_t padding)
 : _buffer( format.imageSize(size, padding) )
 {
@@ -49,6 +55,7 @@ Image::Image(const ImageFormat& format, const Size& size, size_t padding)
 
 Image::Image(const ImageFormat& format, Pt::uint8_t* buffer,
              const Gfx::Size& size, size_t padding)
+: _view(format, buffer, size, padding)
 {
 }
 
