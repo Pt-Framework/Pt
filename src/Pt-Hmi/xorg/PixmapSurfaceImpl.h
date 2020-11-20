@@ -37,6 +37,8 @@ namespace Pt {
 
 namespace Hmi {
 
+class PixmapSurface;
+
 class PixmapSurfaceImpl : public Gfx::ImageSurface
 {
     public:        

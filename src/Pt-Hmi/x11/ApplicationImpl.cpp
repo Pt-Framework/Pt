@@ -30,7 +30,6 @@
 #include "MainWindowImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyHandler.h"
-#include "PainterImpl.h"
 
 #ifndef _AIX
 #include <X11/Xft/Xft.h>
@@ -113,7 +112,7 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
 void ApplicationImpl::setDefaultFont(const std::string& fontName)
 {
-    PainterImpl::setDefaultFont(fontName);
+    PixmapSurfaceImpl::setDefaultFont(fontName);
 }
 
 

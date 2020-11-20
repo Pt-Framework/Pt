@@ -31,6 +31,7 @@
 #define PT_HMI_X11_PAINTDATA_H
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
@@ -48,7 +49,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class PaintData
+class PaintData : public Gfx::PaintData
 {
     public:
         PaintData();

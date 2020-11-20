@@ -29,10 +29,10 @@
 
 #include "PaintData.h"
 #include "ApplicationImpl.h"
+#include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PixmapSurface.h>
-#include <Pt/Gfx/Painter.h>
 
 #include <cmath>
 
@@ -90,7 +90,7 @@ _XftFont* openFont(const Pt::Gfx::Font& font)
     mx.yy = cosa;
 
     const char* fontName = font.name().empty() ? 
-          Pt::Hmi::PainterImpl::defaultFont().c_str()
+          Pt::Hmi::PixmapSurface::defaultFont().c_str()
         : font.name().c_str();
 
     XftFont* xftFont = XftFontOpen(display, screen,

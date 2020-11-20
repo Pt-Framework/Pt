@@ -46,7 +46,6 @@
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt {

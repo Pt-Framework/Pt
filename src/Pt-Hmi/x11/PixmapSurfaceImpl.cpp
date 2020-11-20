@@ -505,7 +505,7 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
 }
 
 
-const PixmapSurfaceImpl::std::string& defaultFont()
+std::string PixmapSurfaceImpl::defaultFont()
 {
     return getDefaultFont();
 }

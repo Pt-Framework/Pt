@@ -30,7 +30,10 @@
 #ifndef Pt_Hmi_X11_PixmapSurfaceImpl_h
 #define Pt_Hmi_X11_PixmapSurfaceImpl_h
 
+#include "PaintData.h"
+
 #include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
@@ -38,6 +41,7 @@
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/System/Path.h>
 #include <Pt/String.h>
 
 #include <X11/X.h>
@@ -48,6 +52,8 @@ struct _XftDraw;
 namespace Pt {
 
 namespace Hmi {
+
+class PixmapSurface;
 
 class PixmapSurfaceImpl
 {
@@ -93,9 +99,6 @@ class PixmapSurfaceImpl
         }
 
         void drawRect(const Gfx::RectF& rectangle);
-
-        void drawPath(const Gfx::Path& path, float smoothness)
-        {}
 
         void fillRect(const Gfx::RectF& rectangle);
 
