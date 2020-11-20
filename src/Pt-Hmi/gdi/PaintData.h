@@ -32,7 +32,6 @@
 #include "win32.h"
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>

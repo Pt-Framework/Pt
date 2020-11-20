@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015 Marc Boris Duerner 
  * Copyright (C) 2014 Laurentiu-Gheorghe Crisan
  *
  * This library is free software; you can redistribute it and/or
@@ -32,10 +33,11 @@
 
 #include "PaintData.h"
 
-#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/System/Path.h>
 
 using std::max;
 using std::min;
@@ -45,6 +47,8 @@ using std::min;
 namespace Pt {
 
 namespace Hmi {
+
+class PixmapSurface;
 
 class PixmapSurfaceImpl
 {
@@ -61,7 +65,8 @@ class PixmapSurfaceImpl
 
         void begin(Gfx::Painter& painter);  
         
-        void finish();           
+        void finish();         
+          
         
         const Gfx::ImageFormat& format() const;
 

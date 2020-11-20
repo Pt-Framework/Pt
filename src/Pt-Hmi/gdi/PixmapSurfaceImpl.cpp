@@ -901,38 +901,40 @@ Gfx::Image PixmapSurfaceImpl::toImage(const Gfx::ImageFormat& iformat) const
 
 void PixmapSurfaceImpl::set(const Gfx::Image& image)
 {
-    resize(Gfx::SizeF(image.size().width(), image.size().height()));
+    resize( Gfx::SizeF(image.size().width(), 
+                       image.size().height() ) );
 
     size_t _width = image.width();
     size_t _height = image.height();
 
     std::vector<Pt::uint8_t> bitmapData;
-
     toPreMulAlpha(image, bitmapData);
 
     const Pt::uint8_t* data = bitmapData.empty() ? 0 : &bitmapData[0];
 
     const size_t depth = 32;
 
-    HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
+    HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 
+                                  1, depth, (VOID*)data);
 
     if (bitmap == NULL)
     {
         BITMAPINFO bitmapInfo;
         ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-        bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        bitmapInfo.bmiHeader.biWidth = image.width();
-        bitmapInfo.bmiHeader.biHeight = -(ssize_t)image.height(); // top-down image
-        bitmapInfo.bmiHeader.biPlanes = 1;                        // always 1            
-        bitmapInfo.bmiHeader.biBitCount = static_cast<WORD>(depth); // bits per pixel
-        bitmapInfo.bmiHeader.biCompression = BI_RGB;                   // uncompressed RGB
-        bitmapInfo.bmiHeader.biSizeImage = 0;                        // automatic
-        bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
+        bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
+        bitmapInfo.bmiHeader.biWidth        = image.width();
+        bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
+        bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
+        bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
+        bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
+        bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
+        bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
         bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
 
         VOID* imageBits = 0;
-        bitmap = CreateDIBSection(_dc, &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
+        bitmap = CreateDIBSection(_dc, &bitmapInfo, DIB_RGB_COLORS, 
+                                  &imageBits, NULL, 0);
         memcpy(imageBits, data, image.width() * image.height() * 4);
     }
 

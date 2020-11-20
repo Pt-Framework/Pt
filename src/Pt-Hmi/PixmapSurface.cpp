@@ -59,7 +59,8 @@ void PixmapSurface::resize(const Gfx::SizeF& size)
 
 void PixmapSurface::set(const Gfx::Image& image)
 {
-    _logicSize = toLogical(Gfx::SizeF(image.size().width(), image.size().height()));
+    _logicSize = toLogical( Gfx::SizeF( image.size().width(), 
+                                        image.size().height() ) );
     _impl->set(image);
 }
 

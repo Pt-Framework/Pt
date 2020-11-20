@@ -1011,12 +1011,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\PainterImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
@@ -1434,9 +1428,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.h">
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\PictureImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.h">
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
@@ -1607,6 +1598,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintData.h">
       <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintData.h">
+      <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2507,12 +2501,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\PainterImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
@@ -2861,9 +2849,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\PictureImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
@@ -2974,6 +2959,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\skia\SkiaBlitter.cpp">
       <Filter>Pt-Gfx\skia</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintData.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

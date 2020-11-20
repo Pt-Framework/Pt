@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Marc Boris Duerner
+ * Copyright (C) 2015 Marc Boris Duerner 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,16 +23,16 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA 02110-1301 USA
  */
 
-#include "PainterImpl.h"
+#include "PaintData.h"
 #include "ApplicationImpl.h"
-#include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PixmapSurface.h>
+#include <Pt/Gfx/Painter.h>
 
 #include <cmath>
 
@@ -113,7 +113,7 @@ namespace Pt {
 
 namespace Hmi {
 
-PainterImpl::PainterImpl()
+PaintData::PaintData()
 : _penGc(0)
 , _brushGc(0)
 , _xftFont(0)
@@ -122,13 +122,13 @@ PainterImpl::PainterImpl()
 }
 
 
-PainterImpl::~PainterImpl()
+PaintData::~PaintData()
 {
     destroy();
 }
 
 
-void PainterImpl::create()
+void PaintData::create()
 {
     Display* display = Application::instance().impl()->display();
     ::Window root = XDefaultRootWindow(display);
@@ -138,7 +138,7 @@ void PainterImpl::create()
 }
 
 
-void PainterImpl::destroy()
+void PaintData::destroy()
 {
     Display* display = Application::instance().impl()->display();
 
@@ -158,7 +158,7 @@ void PainterImpl::destroy()
 }
 
 
-long PainterImpl::toXColor(const Gfx::Color& color)
+long PaintData::toXColor(const Gfx::Color& color)
 {
     Display* display = Application::instance().impl()->display();
     unsigned int screen = DefaultScreen(display);
@@ -176,7 +176,7 @@ long PainterImpl::toXColor(const Gfx::Color& color)
 }
 
 
-void PainterImpl::setPen(const Gfx::Pen& pen)
+void PaintData::setPen(const Gfx::Pen& pen)
 {
     Display* display = Application::instance().impl()->display();
 
@@ -273,13 +273,13 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
 }
 
 
-GC& PainterImpl::pen()
+GC& PaintData::pen()
 {
     return _penGc;
 }
 
 
-void PainterImpl::setBrush(const Gfx::Brush& brush)
+void PaintData::setBrush(const Gfx::Brush& brush)
 {
     Display* display = Application::instance().impl()->display();
 
@@ -295,7 +295,7 @@ void PainterImpl::setBrush(const Gfx::Brush& brush)
         tile.resize( Pt::Gfx::SizeF(brush.texture().width(), 
                                     brush.texture().height()) );
         
-        Painter painter(tile);
+        Gfx::Painter painter(tile);
         painter.drawImage( Gfx::PointF(0, 0), brush.texture() );
         
         XSetFillStyle(display, _brushGc, FillTiled);
@@ -304,13 +304,13 @@ void PainterImpl::setBrush(const Gfx::Brush& brush)
 }
 
 
-GC& PainterImpl::brush()
+GC& PaintData::brush()
 {
     return _brushGc;
 }
 
 
-void PainterImpl::setClip(const Gfx::RectF& rectF)
+void PaintData::setClip(const Gfx::RectF& rectF)
 {
     Display* display = Application::instance().impl()->display();
     Gfx::Rect rect = round(rectF);
@@ -326,7 +326,7 @@ void PainterImpl::setClip(const Gfx::RectF& rectF)
 }
 
 
-void PainterImpl::resetClip()
+void PaintData::resetClip()
 {
     Display* display = Application::instance().impl()->display();
     XSetClipMask(display, _penGc, None);
@@ -334,7 +334,7 @@ void PainterImpl::resetClip()
 }
 
 
-void PainterImpl::setFont(const Gfx::Font& font)
+void PaintData::setFont(const Gfx::Font& font)
 {
     Display* display = Application::instance().impl()->display();
 
@@ -350,13 +350,13 @@ void PainterImpl::setFont(const Gfx::Font& font)
 }
 
 
-_XftFont* PainterImpl::font()
+_XftFont* PaintData::font()
 {
     return _xftFont;
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics(const Gfx::Font& font, 
+Gfx::FontMetrics PaintData::fontMetrics(const Gfx::Font& font, 
                                           const Pt::String& text)
 {
 #ifndef _AIX

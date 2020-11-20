@@ -618,7 +618,6 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
                         image.size().height() ) );
 
     Gfx::PointF origin(0, 0);
-
     drawImage(origin, image);
 }
 

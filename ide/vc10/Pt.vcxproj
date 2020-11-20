@@ -418,9 +418,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\KeyHandler.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\PainterImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\PictureImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintData.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h" />
@@ -688,9 +686,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\x11\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\KeyHandler.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\PainterImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\PictureImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintData.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd.cpp" />

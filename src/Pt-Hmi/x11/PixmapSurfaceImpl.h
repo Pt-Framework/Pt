@@ -30,10 +30,7 @@
 #ifndef Pt_Hmi_X11_PixmapSurfaceImpl_h
 #define Pt_Hmi_X11_PixmapSurfaceImpl_h
 
-#include "PaintSurfaceImpl.h"
-
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
@@ -52,7 +49,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class PixmapSurfaceImpl : public PaintSurfaceImpl
+class PixmapSurfaceImpl
 {
     public:
         PixmapSurfaceImpl();
@@ -65,9 +62,10 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         const Pt::Gfx::SizeF& size() const;
 
-        void begin(Painter& painter);  
+        void begin(Gfx::Painter& painter);  
         
         void finish();
+
 
         void setClip( const Gfx::RectF& clip);
 
@@ -125,7 +123,21 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
 
-        void drawPicture(const Gfx::PointF& to, const Picture& pic);
+        Gfx::Image toImage(const Gfx::ImageFormat& format) const;
+
+        void set(const Gfx::Image& image);
+
+        static std::string defaultFont();
+
+        static void setDefaultFont(const std::string& name);
+
+        static std::string& getDefaultFont();
+
+        static std::vector<std::string> fontNames();
+
+        static void setFontDir(const System::Path& path);
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
         ::Drawable drawable()
         {
@@ -138,10 +150,11 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         void destroy();
 
     private:
-        Gfx::SizeF _size;
-        Painter*   _painter;
-        ::Drawable _drawable;
-        _XftDraw*  _xftDraw;
+        Gfx::SizeF     _size;
+        PaintData*     _paintData;
+        Gfx::Painter*  _painter;
+        ::Drawable     _drawable;
+        _XftDraw*      _xftDraw;
 };
 
 } // namespace

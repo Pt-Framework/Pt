@@ -36,12 +36,17 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/System/Path.h>
+
 #include <vector>
+
 #include <Windows.h>
 
 namespace Pt {
 
 namespace Hmi {
+
+class PixmapSurface;
 
 class PixmapSurfaceImpl
 {

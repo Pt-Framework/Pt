@@ -70,7 +70,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         void set(const Gfx::Image& image);
 
-
         bool empty() const;
 
         double width() const;
@@ -165,15 +164,14 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         virtual Gfx::Image toImage(const Gfx::ImageFormat& format) const;
 
-  public:
-      static void setFontDir(const System::Path& path);
+    public:
+        static void setFontDir(const System::Path& path);
 
-      static std::string defaultFont();
+        static std::string defaultFont();
 
-      static void setDefaultFont(const std::string& name);
+        static void setDefaultFont(const std::string& name);
 
-      static std::vector<std::string> fontNames();
-
+        static std::vector<std::string> fontNames();
 
     private:
         PixmapSurfaceImpl* _impl;
