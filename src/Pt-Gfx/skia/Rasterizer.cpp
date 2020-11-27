@@ -403,7 +403,7 @@ SkPath Rasterizer::toSkia(const Gfx::Path& p)
 {
     SkPath skp;
 
-    std:size_t s = p.size();
+    std::size_t s = p.size();
 
     for (std::size_t n = 0; n < s; n++)
     {
