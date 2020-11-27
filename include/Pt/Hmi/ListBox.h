@@ -119,6 +119,7 @@ class PT_HMI_API ListBoxItem : public Button
     
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
+        // TODO: why pass PaintSurface?
         virtual void onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter);
 
     private:
