@@ -108,14 +108,13 @@ void ListBoxItem::setText(const Pt::String& text)
 }
 
 
-
-
 void ListBoxItem::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
 {
     _icon = icon;
     _iconSize = iconSize;
     invalidate();
 }
+
 
 Pt::Signal<ListBoxItem&>& ListBoxItem::selected()
 {
@@ -421,7 +420,6 @@ void ListBoxLayout::onItemSelected(ListBoxItem& item)
     _selected.send(item);
 }
 
-
 /////////////////////////////////////////////////////////////////////////////
 // ListBox
 /////////////////////////////////////////////////////////////////////////////
@@ -645,5 +643,3 @@ void ListBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 } // namespace
 
 } // namespace
-
-
