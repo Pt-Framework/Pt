@@ -58,7 +58,6 @@ class Pixel
 
         Pixel(ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
 
-
         Pixel(const Pixel& p)
         : _view(p._view)
         , _base(p._base)

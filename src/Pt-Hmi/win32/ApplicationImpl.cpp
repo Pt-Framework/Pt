@@ -182,6 +182,7 @@ void ApplicationImpl::setDefaultFont(const std::string& fontName)
     PixmapSurface::setDefaultFont(fontName);
 }
 
+
 void ApplicationImpl::setCursor(const Cursor* cursor)
 {      
     if( _currentCursor == cursor )
@@ -844,7 +845,7 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);
 
-    Pt::Gfx::Image& image = w.surface().pixmapImpl()->image();
+    const Pt::Gfx::Image& image = w.surface().pixmapImpl()->image();
 
     const size_t depth = image.view().pixelStride() * 8;
     const Pt::uint8_t* data = image.data();

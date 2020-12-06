@@ -61,7 +61,7 @@ Rasterizer::~Rasterizer()
 }
 
 
-void Rasterizer::setImage( Image& image )
+void Rasterizer::setImage(Image& image)
 {
     _image = &image;
 
@@ -130,19 +130,21 @@ void Rasterizer::setBrush( const Brush& brush )
 }
 
 
+void Rasterizer::updateClip() const
+{
+    RectF imageRect( SizeF(_image->width(), 
+                           _image->height()) );
+
+    RectF currentClip = _clip.intersect(imageRect);
+    _paintData->setClip(currentClip);
+
+    _canvas->clipRect(toSkia(currentClip), SkClipOp::kMax_EnumValue);
+}
+
+
 void Rasterizer::setClip(const RectF& clip)
 {
-    RectF imageRect(PointF(0, 0), SizeF(_image->size().width(), _image->height()));
-
-    RectF currentClip = clip.intersect(imageRect);
-
-    if(_paintData)
-        _paintData->setClip(currentClip);
-
-    if(!_canvas)
-        return;
-
-   _canvas->clipRect(toSkia(currentClip), SkClipOp::kMax_EnumValue);
+    _clip = clip;
 }
 
 
@@ -164,13 +166,20 @@ void Rasterizer::drawLine(const PointF& from, const  PointF& to)
     if (!_canvas)
         return;
 
+    updateClip();
     _canvas->drawLine(toSkia(from), toSkia(to), _paintData->pen());
 }
 
 
 void Rasterizer::drawText(const PointF& toF, const String& text)
 {
+    if (!_canvas)
+        return;
+
     Point to = round(toF);
+
+    updateClip();
+
     Rect currentClip = round(_paintData->clipRect() );
 
     if (currentClip.isNull())
@@ -183,7 +192,11 @@ void Rasterizer::drawText(const PointF& toF, const String& text)
 
 void Rasterizer::drawText(const PointF& toF, const Pt::String& text, const Transform& trans)
 {
+    if (!_canvas)
+        return;
+
     Point to = round(toF);
+    updateClip();
     Rect currentClip = round( _paintData->clipRect() );
 
     if(currentClip.isNull())
@@ -214,6 +227,8 @@ void Rasterizer::drawRect(const RectF& r)
     if (!_canvas)
         return;
 
+    updateClip();
+
     _canvas->drawRect( toSkia(r), _paintData->pen() );
 }
 
@@ -222,6 +237,8 @@ void Rasterizer::fillRect(const RectF& r)
 {
     if (!_canvas)
         return;
+
+    updateClip();
 
     _canvas->drawRect( toSkia(r), _paintData->brush() );
 }
@@ -232,6 +249,8 @@ void Rasterizer::drawEllipse(const PointF& topLeft, const SizeF& size)
     if (!_canvas)
         return;
 
+    updateClip();
+
     _canvas->drawOval( toSkia(topLeft, size), _paintData->pen() );
 }
 
@@ -241,6 +260,7 @@ void Rasterizer::fillEllipse(const PointF& topLeft, const SizeF& size)
     if (!_canvas)
         return;
 
+    updateClip();
 
     _canvas->drawOval( toSkia(topLeft, size), _paintData->brush() );
 }
@@ -250,6 +270,8 @@ void Rasterizer::drawPolyline(const PointF* points, const size_t n)
 {
     if (!_canvas)
         return;
+
+    updateClip();
 
     SkPath path;
 
@@ -269,6 +291,8 @@ void Rasterizer::fillPolygon(const PointF* points, const size_t n)
 {
     if (!_canvas)
         return;
+
+    updateClip();
 
     SkPath path;
 
@@ -292,9 +316,11 @@ void Rasterizer::drawImage(const PointF& to, const Image& img)
 
 void Rasterizer::drawImage(const PointF& toF, const Image& from, const RectF& fromRectF)
 {
+    updateClip();
+
     Rect fromRect = round(fromRectF);
     Point to = round(toF);
-    Rect currentClip = round(_paintData->clipRect());
+    Rect currentClip = round( _paintData->clipRect() );
 
     if(currentClip.isNull())
         currentClip = Gfx::Rect(Gfx::Point(0,0),_image->size());
@@ -321,6 +347,8 @@ void Rasterizer::drawPath(const Gfx::Path& path, float smoothness)
     if (!_canvas)
         return;
 
+    updateClip();
+
     SkPath skPath = toSkia(path);
     _canvas->drawPath( skPath, _paintData->pen() );
 }
@@ -331,6 +359,7 @@ void Rasterizer::fillPath(const Path& path, float smoothness)
     if (!_canvas)
         return;
 
+    updateClip();
     SkPath skPath = toSkia(path);
     _canvas->drawPath( skPath, _paintData->brush() );
 }
@@ -338,26 +367,31 @@ void Rasterizer::fillPath(const Path& path, float smoothness)
 
 void Rasterizer::drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
+    updateClip();
 }
 
 
 void Rasterizer::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
+    updateClip();
 }
 
 
 void Rasterizer::drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
+    updateClip();
 }
 
 
 void Rasterizer::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
+    updateClip();
 }
 
 
 void Rasterizer::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
+    updateClip();
 }
 
 

@@ -464,9 +464,7 @@ void BrushData::setTexture(const Image& texture,
         // Prepare the destination texture
         _texture.reset(texture.format(), texture.size());
 
-        // Prepare the image painter
-        // ### TODO: Use the new painter later! ###
-         ImageSurface surface(_texture);
+        ImageSurface surface(_texture);
         Painter painter(surface);
         painter.setCompositionMode(CompositionMode::SourceCopy);
 

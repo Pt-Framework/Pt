@@ -56,6 +56,12 @@ ImageSurface::~ImageSurface()
 }
 
 
+const Gfx::Image& ImageSurface::image() const
+{
+    return _rasterizer->image();
+}
+
+
 void ImageSurface::setImage(Image& image)
 {
     _rasterizer->setImage(image);
@@ -300,17 +306,6 @@ Image ImageSurface::toImage(const Gfx::ImageFormat& format) const
 {
     return _rasterizer->toImage(format);
 }
-
-const Gfx::Image& ImageSurface::image() const
-{
-        return _rasterizer->image();
-}
-
-Gfx::Image& ImageSurface::image()
-{
-    return _rasterizer->image();
-}
-
 
 } // namespace
 

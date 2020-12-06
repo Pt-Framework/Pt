@@ -53,8 +53,6 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     const Gfx::Image& image() const;
 
-    Gfx::Image& image();
-
 protected:
     virtual double onScaleFactor() const;
 

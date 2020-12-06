@@ -48,23 +48,53 @@ class ActiveEdgeTable;
 
 class Rasterizer
 {
+  protected:
+    class ClipRect : public Rect
+    {
+      public:
+        ClipRect( const Rect& r = Rect() )
+        : Rect(r)
+        , _bottom(0)
+        , _right(0)
+        {
+            _right = x() + width();
+            _bottom = y() + height();
+        }
+
+        ClipRect& operator=(const ClipRect& r)
+        {
+            Rect::operator=(r);
+            _right = x() + width();
+            _bottom = y() + height();
+            return *this;
+        }
+        
+        int bottom() const
+        {
+            return _bottom;
+        }
+
+        int right() const
+        {
+            return _right;
+        }
+
+      private:
+        int _bottom;
+        int _right;
+    };
+
   public:
     Rasterizer( Image& image );
 
     ~Rasterizer();
 
-
-    void setImage(Image& image);
-
-    Image& image()
-    {
-        return *_image;
-    }
-
     const Image& image() const
     {
         return *_image;
     }
+
+    void setImage(Image& image);
 
     void begin(Gfx::Painter& painter)
     {}
@@ -150,22 +180,21 @@ private:
                const Image& image,
                const Rect& imageRect);
 
-    void fillRect(const Rect& r);
+    void fillRect(const Rect& r, const ClipRect& currentClip);
 
-    void stroke( const Point* points, size_t pointCount );
+    void stroke( const Point* points, size_t pointCount, const ClipRect& currentClip);
 
-    void stroke( const Point& pixel);
+    void stroke( const Point& pixel, const ClipRect& currentClip);
 
-    void fill( const Point* points, size_t pointCount );
+    void fill( const Point* points, size_t pointCount, const ClipRect& currentClip);
 
-    void strokeText( const Point& to, const Pt::String& text );
+    void strokeText( const Point& to, const Pt::String& text, const ClipRect& currentClip);
 
-    void strokeText(const Point& to, const Pt::String& text, const Transform& trans);
+    void strokeText(const Point& to, const Pt::String& text, const Transform& trans, const ClipRect& currentClip);
 
-    void strokeEllipse( const Point& topLeft, const Size& size );
+    void strokeEllipse( const Point& topLeft, const Size& size, const ClipRect& currentClip);
 
-    void fillEllipse( const Point& topLeft, const Size& size );
-
+    void fillEllipse( const Point& topLeft, const Size& size, const ClipRect& currentClip);
 
   //Output algo.
   protected:
@@ -179,61 +208,75 @@ private:
     //                           Pt::Gfx::Color gradientStart,
     //                           Pt::Gfx::Color gradientStop, 
     //                           Pt::Gfx::Brush::GradientDirection style);
-    void clipSpan( int& x, int& y, int& length );
-    void updateClip();
+    void clipSpan( int& x, int& y, int& length, const ClipRect& currentClip);
+
+    ClipRect updateClip() const
+    {
+        const Rect imageRect( _image->size() );
+        return _clip.intersect(imageRect);
+    }
+    
     void outputEdges(const ActiveEdgeTable& edges, const Point&  origin, int scalLine);
 
   //Thin polyline algo.
   protected:
     enum { xAxis, yAxis };
-    void drawThinSolidPolyline( const Point* points, int pointCount );
+    void drawThinSolidPolyline( const Point* points, int pointCount, const ClipRect& currentClip);
     void drawThinDashPolyline( const Point* points, int pointCount,
-                               int dashOn, int dashOff);
+                               int dashOn, int dashOff, const ClipRect& currentClip);
     void stepDash( int dist, int* pDashNum, int* pDashIndex, const int* pDash, int numInDashList, int *pDashOffset );
-    void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len);
-    void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len );
+
+    void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, 
+                                   bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, 
+                                   int e, int e1, int e2, int len, const ClipRect& currentClip);
+
+    void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, 
+                                int e, int e1, int e2, int len, const ClipRect& currentClip);
 
   //Wide polyline base algo.
   protected:
     int polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );
     int buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
-    void fillSpans(int x, int y,  int w,  int h );
-    void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count );
-    void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt );
+    void fillSpans(int x, int y,  int w,  int h, const ClipRect& currentClip);
+    void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const ClipRect& currentClip);
+    void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const ClipRect& currentClip);
     void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );
     int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );
     int lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths);
     int lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
     int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );
-    void lineJoin(LineFace *pLeft, LineFace *pRight );
-    void lineProjectingCap(const LineFace *face, bool isLeft, bool isInt );
+    void lineJoin(LineFace *pLeft, LineFace *pRight, const ClipRect& currentClip);
+    void lineProjectingCap(const LineFace *face, bool isLeft, bool isInt, const ClipRect& currentClip);
     void clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft );
 
   //Wide solid polyline algo.
   protected:
-    void drawWideSolidPolyline( const Point* points, int pointCount );
-    void drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace );
+    void drawWideSolidPolyline( const Point* points, int pointCount, const ClipRect& currentClip);
+    void drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const ClipRect& currentClip);
 
   //Wide dashed polyline algo.
   protected:
     enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
 
     void drawWideDashPolyline( const Point* points, int pointCount,
-                               int dashOn, int dashOff );
+                               int dashOn, int dashOff, const ClipRect& currentClip );
 
-    void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash );
+    void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
+                      bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const ClipRect& currentClip);
 
   private:
-    void stroke(int x, int y);
+    void stroke(int x, int y, const ClipRect& currentClip);
 
-    void stroke(int xpos, int ypos, int length);
+    void stroke(int xpos, int ypos, int length, const ClipRect& currentClip);
+
     void updateGradientBrush(int width, int height);
+
+
 
   private:
     Image*          _image;
     DrawText*       _text;
     Rect            _clip;
-    Rect            _currentClip;
     Font            _font;
 
     Brush           _brush;
@@ -247,8 +290,6 @@ private:
     ConstPixel      _penPixel;
 
     CompositionMode _compositionMode;
-    int             _clipRight;
-    int             _clipBottom;
 };
 
 } //namespace

@@ -65,24 +65,16 @@ class Rasterizer
 
     ~Rasterizer();
 
-
-    void setImage(Image& image);
-
-    Image& image()
-    {
-        return *_image;
-    }
-
     const Image& image() const
     {
         return *_image;
     }
 
+    void setImage(Image& image);
 
     void begin(Painter& painter);
 
     void finish();
-
 
     const ImageFormat& format() const;
 
@@ -201,6 +193,8 @@ class Rasterizer
 
             return true;
         }
+  private:
+      void updateClip() const;
 
   private:
     Image*           _image;
@@ -210,6 +204,7 @@ class Rasterizer
     CompositionMode  _compositionMode;
     SkiaPaintData*   _paintData;
     Painter*         _painter;
+    RectF            _clip;
 };
 
 } //namespace
