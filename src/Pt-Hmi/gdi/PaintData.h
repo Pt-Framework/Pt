@@ -46,7 +46,7 @@ using std::min;
 #include <Windows.h>
 #include <Gdiplus.h>
 
-#define PT_HMI_GDIPLUS 1
+//#define PT_HMI_GDIPLUS 1
 
 namespace Pt {
 
@@ -270,6 +270,13 @@ class PaintData : public Gfx::PaintData
             SelectObject(dc, oldFont);
             DeleteObject(newFont);
             ReleaseDC(NULL, dc);
+
+            long asc = tm.tmAscent;
+            long des = tm.tmDescent;
+            long inl = tm.tmInternalLeading;
+            long cap = tm.tmAscent - tm.tmInternalLeading;
+            long exl = tm.tmExternalLeading;
+            long lh = asc + des + exl;
 
             return Gfx::FontMetrics( tm.tmAscent, 
                                      tm.tmDescent, 

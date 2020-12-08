@@ -369,6 +369,8 @@ Gfx::FontMetrics PaintData::fontMetrics(const Gfx::Font& font,
     XGlyphInfo info;
     XftTextExtents32(display, xftFont, (XftChar32*)text.c_str(), text.size(), &info);
     
+    // TODO: use XftLockFace() to get FT_face instead
+
     XftFontClose(display, xftFont);
 
     return Gfx::FontMetrics(xftFont->ascent, xftFont->descent, info.width, xftFont->height);

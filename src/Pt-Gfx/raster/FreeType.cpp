@@ -73,7 +73,11 @@ FreeType::FreeType()
     if( FTC_SBitCache_New( _manager, &_bitmapCache ) )
         throw std::runtime_error( "FTC_SBitCache_New" );
 
-    System::Path  path = System::Path( System::Path::curdir()) / "fonts";
+    //System::Path  path = System::Path( System::Path::curdir()) / "fonts";
+    //std::string lp = path.toLocal();
+    //setFontDir(path);
+
+    System::Path  path = System::Path("C:\\Windows\\Fonts");
     std::string lp = path.toLocal();
     setFontDir(path);
 }
@@ -160,6 +164,8 @@ void FreeType::setFontDir(const System::Path& path)
         FT_Error err = FT_New_Face(_ft, fp.toLocal().c_str(), 0, &face);
         if(err != 0)
             continue;
+
+        std::clog << face->family_name << " " << face->style_name << std::endl;
 
         Font::Style style = Font::Normal;
 
@@ -308,10 +314,17 @@ FontMetrics FreeType::fontMetrics(const String& text,
         previous = glyph_index;
     }
 
-    return FontMetrics( size->metrics.ascender >> 6,
-                        (-size->metrics.descender) >> 6,
-                        width,
-                        size->metrics.height >> 6 );
+    double scaleY = size->metrics.y_scale / 65536.0;
+    double ascender = (face->ascender * scaleY) / 64.0;
+    double descender = (-face->descender * scaleY) / 64.0;
+    double emh = (face->units_per_EM * scaleY) / 64.0;
+    double lih = (face->height * scaleY) / 64.0;
+    double cap = emh - descender;
+    double inl = ascender - cap;
+    double exl = lih - (ascender + descender);
+
+    return FontMetrics( ascender, descender,
+                        width, ascender + descender );
 
     // UNLOCK
 }

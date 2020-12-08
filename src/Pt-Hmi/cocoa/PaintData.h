@@ -130,19 +130,24 @@ class PaintData : public Gfx::PaintData
 
             CTLineRef line = CTLineCreateWithAttributedString(attributedString);
             
-            CGFloat ascent = 0.0;
-            CGFloat descent = 0.0;
-            double width = CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
+            CGFloat lineAscent = 0.0;
+            CGFloat lineDescent = 0.0;
+            double width = CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, NULL);
             
+            //CGFloat ascent = CTFontGetAscent(font);
+            //CGFloat descent = CTFontGetDescent(font);
+            //CGFloat leading = CTFontGetLeading(font);
+            //CGFloat capHeight = CTFontGetCapHeight(font);
+
             CFRelease(line);
             CFRelease(attributedString);
             CFRelease(string);
             CFRelease(attributes);
 
-            return Gfx::FontMetrics( ascent, 
-                                     descent, 
+            return Gfx::FontMetrics( lineAscent, 
+                                     lineDescent, 
                                      width, 
-                                     ascent + descent );
+                                     lineAscent + lineDescent );
         }
 
         static CTFontRef createCTFont(const Gfx::Font& font)
