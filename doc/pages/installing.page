@@ -191,14 +191,15 @@ Installation of the built artifacts is performed by the means of a
 pseudo-target 'install'. With default settings, no real installation will
 be performed, but the relevant files will only copied to a directory named
 'deploy'. If you dare to copy files to your system directories you can set
-the INSTALL_DIR (root directory of the installation), INSTALL_BINDIR (directory
-to install programs), INSTALL_INCLUDEDIR (directory to install header files
-and INSTALL_LIBDIR (directroy to install libraries). You can set these
-at configuration time or just before installation. The following command
-will install the files in the '/opt' directory:
+the PT_INSTALL_DIR (root directory of the installation), PT_INSTALL_BINDIR 
+(directory to install programs), PT_INSTALL_INCLUDEDIR (directory to install
+header files) and PT_INSTALL_LIBDIR (directroy to install libraries) at 
+configuration time. The following commands will install the files in the 
+'/opt/Pt' directory:
 
 @code
-jam.sh -sPT_INSTALL_DIR=/opt/Pt
+jam.sh configure -sPT_INSTALL_DIR=/opt/Pt <other options>
+jam.sh install
 @endcode
 
 This means that a directory named Pt will be created with three subdirectories
