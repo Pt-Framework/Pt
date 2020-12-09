@@ -73,13 +73,13 @@ FreeType::FreeType()
     if( FTC_SBitCache_New( _manager, &_bitmapCache ) )
         throw std::runtime_error( "FTC_SBitCache_New" );
 
-    //System::Path  path = System::Path( System::Path::curdir()) / "fonts";
-    //std::string lp = path.toLocal();
-    //setFontDir(path);
-
-    System::Path  path = System::Path("C:\\Windows\\Fonts");
+    System::Path  path = System::Path( System::Path::curdir()) / "fonts";
     std::string lp = path.toLocal();
     setFontDir(path);
+
+    //System::Path  path = System::Path("C:\\Windows\\Fonts");
+    //std::string lp = path.toLocal();
+    //setFontDir(path);
 }
 
 
@@ -165,7 +165,7 @@ void FreeType::setFontDir(const System::Path& path)
         if(err != 0)
             continue;
 
-        std::clog << face->family_name << " " << face->style_name << std::endl;
+        //std::clog << face->family_name << " " << face->style_name << std::endl;
 
         Font::Style style = Font::Normal;
 
