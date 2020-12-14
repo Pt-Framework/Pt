@@ -517,7 +517,13 @@ class PT_API Settings : private SerializationInfo
         */
         Settings();
 
+        /** @brief Clears the settings.
+        */
         void clear();
+
+        /** @brief Returns true if settings are empty.
+        */
+        bool isEmpty() const;
 
         /** @brief Begin of entries.
         */

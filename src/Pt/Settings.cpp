@@ -44,7 +44,13 @@ Settings::Settings()
 
 void Settings::clear()
 {
-  SerializationInfo::clear();
+    SerializationInfo::clear();
+}
+
+
+bool Settings::isEmpty() const
+{
+    return SerializationInfo::isVoid();
 }
 
 
