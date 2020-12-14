@@ -121,6 +121,14 @@ class PT_SYSTEM_API Timer
         */
         void start(std::size_t interval);
 
+        /** @brief Starts the timer.
+
+            Start a timer from the moment this method is called. The
+            %Timer needs to be registered with an event loop,
+            otherwise the timeout signal will not be sent.
+        */
+        void start(const Pt::Timespan& interval);
+
         /** @brief Stops the timer.
 
             If the %Timer is registered with an event loop,

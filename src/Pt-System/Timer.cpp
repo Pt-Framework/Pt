@@ -145,6 +145,14 @@ void Timer::start(std::size_t interval)
 }
 
 
+void Timer::start(const Pt::Timespan& interval)
+{
+    // TODO: keep interval as Timespan in Timer
+
+    start( interval.toMSecs() );
+}
+
+
 void Timer::stop()
 {
     Pt::int64_t maxTime = std::numeric_limits<Pt::int64_t>::max();

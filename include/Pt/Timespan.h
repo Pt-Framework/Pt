@@ -144,13 +144,19 @@ class Timespan
         int seconds() const;
 
         //! @brief Returns the total number of seconds.
-        int toSeconds() const;
+        Pt::int64_t toSeconds() const;
+
+        //! @brief Contructa %Timespan from seconds.
+        inline static Timespan fromSecs(Pt::int64_t s);
 
         //! @brief Returns the number of milliseconds (0 to 999).
         int msecs() const;
 
         //! @brief Returns the total number of milliseconds.
         Pt::int64_t toMSecs() const;
+
+        //! @brief Contructa %Timespan from milli seconds.
+        inline static Timespan fromMSecs(Pt::int64_t ms);
 
         //! @brief Returns the fractions of a millisecond in microseconds (0 to 999).
         int usecs() const
@@ -159,6 +165,10 @@ class Timespan
         //! @brief Returns the total number of microseconds.
         inline Pt::int64_t toUSecs() const
         { return _span; }
+
+        //! @brief Contructa %Timespan from micro seconds.
+        static Timespan fromUSecs(Pt::int64_t us)
+        { return Timespan(us); }
 
         // @internal
         inline static Pt::int64_t maxMSecs()
@@ -276,9 +286,15 @@ inline int Timespan::seconds() const
 }
 
 
-inline int Timespan::toSeconds() const
+inline Pt::int64_t Timespan::toSeconds() const
 {
-    return int(_span/Seconds);
+    return _span/Seconds;
+}
+
+
+Timespan Timespan::fromSecs(Pt::int64_t s)
+{
+    return Timespan(s * Seconds);  
 }
 
 
@@ -291,6 +307,12 @@ inline int Timespan::msecs() const
 inline Pt::int64_t Timespan::toMSecs() const
 {
     return _span/Milliseconds;
+}
+
+
+inline Timespan Timespan::fromMSecs(Pt::int64_t ms)
+{ 
+    return Timespan(ms * Milliseconds); 
 }
 
 
