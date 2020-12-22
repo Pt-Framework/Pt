@@ -72,6 +72,8 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX* logFont, NEWTEXTMETRICEX* p
 {
     char* faceName = logFont->elfLogFont.lfFaceName;
 
+    //std::clog << faceName << " - " << (const char*)(logFont->elfStyle) << std::endl;
+
     // Ignore fonts with @ as first character.
     if (faceName[0] != '@')
     {
@@ -99,7 +101,9 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 {
     Gfx::SizeF size = Gfx::SizeF(10, 10);
-
+    
+    //fontNames();
+   
     HDC screenDC = GetDC(NULL);
     _dc = CreateCompatibleDC(screenDC);
     _bitmap = CreateCompatibleBitmap(screenDC, lround(size.width()), 
@@ -249,8 +253,8 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
 
     Gdiplus::REAL pixelsPerUnit = height / heightUnits;
-    Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
-    Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+    Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit + 0.5;
+    Gdiplus::REAL descentF = descentUnits * pixelsPerUnit - 0.5;
     Gdiplus::REAL heightF = ascentF + descentF;
 
     Gdiplus::RectF textRect;
@@ -290,10 +294,10 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
     Gdiplus::REAL pixelsPerUnit = height / heightUnits;
 
-    Gdiplus::REAL ascent = ascentUnits * pixelsPerUnit;
-    Gdiplus::REAL descent = descentUnits * pixelsPerUnit;
+    Gdiplus::REAL ascent = ascentUnits * pixelsPerUnit + 0.5;
+    Gdiplus::REAL descent = descentUnits * pixelsPerUnit - 0.5;
     Gdiplus::REAL spacing = height - ascent - descent;
-    Gdiplus::REAL offsetY = ascent + 1;
+    Gdiplus::REAL offsetY = ascent;
     
     Gdiplus::PointF origin( 0, -offsetY );
 

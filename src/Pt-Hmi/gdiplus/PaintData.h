@@ -266,8 +266,8 @@ class PaintData : public Gfx::PaintData
             UINT16 emHeightUnits = family.GetEmHeight( gdiFont->GetStyle() );
             
             Gdiplus::REAL pixelsPerUnit = lineSpacingF / lineSpacingUnits;
-            Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
-            Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+            Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit + 0.5;
+            Gdiplus::REAL descentF = descentUnits * pixelsPerUnit - 0.5;
             Gdiplus::REAL heightF = ascentF + descentF;
             Gdiplus::REAL emHeightF = emHeightUnits * pixelsPerUnit;
 

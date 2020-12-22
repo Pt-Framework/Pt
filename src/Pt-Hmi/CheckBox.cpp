@@ -247,8 +247,11 @@ void CheckBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::FontMetrics tm = painter.fontMetrics( text() );
 
     double textX = space + _boxSize.width() + space;
-    double textY = size().height() / 2.0 + tm.ascent() / 2.0;
+    double textY = size().height() / 2.0 - tm.height()/ 2.0 + tm.ascent();
     
+    //double textYTop = size().height() / 2.0 - tm.height()/2.0;
+    //double textYBottom = size().height() / 2.0 + tm.height()/2.0;
+
     Gfx::PointF textPos(textX, textY);
     textPos = painter.align(textPos);
 
@@ -276,6 +279,11 @@ void CheckBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     _renderer->renderText(*this, options, painter, rect,
                           text(), textPos, tm, _font, _textPen,
                           mnemonicRect);
+
+    //painter.setPen(Gfx::Color::fromRgb8(255,0,0));
+    //painter.drawLine(textPos, Gfx::PointF(textPos.x() +100, textPos.y()));
+    //painter.drawLine(Gfx::PointF(textPos.x(), textYTop), Gfx::PointF(textPos.x() + 100, textYTop));
+    //painter.drawLine(Gfx::PointF(textPos.x(), textYBottom), Gfx::PointF(textPos.x() + 100, textYBottom));
 }
 
 } // namespace
