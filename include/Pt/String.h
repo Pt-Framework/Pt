@@ -63,13 +63,11 @@ namespace Pt {
 
     @ingroup Unicode
  */
-class Char
+struct Char
 {
     public:
         //! @brief Default Constructor.
-        Char()
-        : _value(0)
-        {}
+        Char() = default;
 
         //! @brief Construct from char.
         Char(char ch)
@@ -95,11 +93,11 @@ class Char
         { return _value; }
 
         //! @brief Assignment operator.
-        Char& operator=(const Char& ch)
+        /*Char& operator=(const Char& ch)
         { 
             _value = ch._value; 
             return *this; 
-        }
+        }*/
 
         /** @brief Narrows the character to 8-bit.
          
@@ -112,7 +110,7 @@ class Char
         }
 
     private:
-        Pt::uint32_t _value;
+        Pt::uint32_t _value ;
 };
 
 //! @internal @brief Returns the ctype mask for the \a ch.
@@ -248,14 +246,19 @@ struct MBState
 
 namespace std {
 
-#if _LIBCPP_VERSION >= 5000
+//#if _LIBCPP_VERSION >= 5000
 
 template <>
 struct is_pod<Pt::Char> {
     static const bool value = true;
 };
 
-#endif
+template <>
+struct is_trivial<Pt::Char> {
+    static const bool value = true;
+};
+
+//#endif
 
 template<>
 struct char_traits<Pt::Char>
