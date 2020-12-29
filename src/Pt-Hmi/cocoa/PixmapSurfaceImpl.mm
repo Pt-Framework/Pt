@@ -28,6 +28,7 @@
 */
 
 #include "PixmapSurfaceImpl.h"
+#include "PaintData.h"
 
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Argb32Format.h>

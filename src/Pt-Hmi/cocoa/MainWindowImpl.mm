@@ -34,7 +34,6 @@
 #include "KeyMap.h"
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 

@@ -30,8 +30,6 @@
 #ifndef Pt_Hmi_cocoa_PixmapSurfaceImpl_h
 #define Pt_Hmi_cocoa_PixmapSurfaceImpl_h
 
-#include "PaintData.h"
-
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -39,8 +37,11 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Path.h>
+#include <Pt/System/Path.h>
 
 #include <CoreGraphics/CGBitmapContext.h>
 
@@ -49,15 +50,10 @@
     #import <AppKit/NSGraphicsContext.h>
     #import <AppKit/NSBezierPath.h>
     #import <AppKit/NSImage.h>
+    #import <AppKit/NSColor.h>
+    #import <AppKit/NSFontManager.h>
 #else
     struct NSBezierPath;
-    struct NSImage;
-#endif
-
-#ifdef __OBJC__
-    #import <AppKit/NSImage.h>
-    #import <AppKit/NSColor.h>
-#else
     struct NSImage;
 #endif
 
@@ -65,6 +61,7 @@ namespace Pt {
 
 namespace Hmi {
 
+class PaintData;
 class PixmapSurface;
 
 class PixmapSurfaceImpl
@@ -166,9 +163,9 @@ class PixmapSurfaceImpl
         void endClip();
     
     private:
-        Pt::Gfx::SizeF _size;
+        Gfx::SizeF     _size;
         PaintData*     _paintData;
-        Painter*       _painter;
+        Gfx::Painter*  _painter;
         CGContextRef   _context;
         CGRect         _clipRect;
 };

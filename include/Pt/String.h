@@ -66,9 +66,15 @@ namespace Pt {
 struct Char
 {
     public:
+#if __cplusplus >= 201103L
         //! @brief Default Constructor.
         Char() = default;
-
+#else
+        //! @brief Default Constructor.
+        Char()
+        : _value()
+        {}
+#endif
         //! @brief Construct from char.
         Char(char ch)
         : _value( (unsigned char)ch )
@@ -112,6 +118,22 @@ struct Char
     private:
         Pt::uint32_t _value ;
 };
+
+} // namespace Pt
+
+//#if _LIBCPP_VERSION >= 5000
+namespace std {
+
+// workaround for partial c++11 implementations like macOS
+template <>
+struct is_trivial<Pt::Char> {
+    static const bool value = true;
+};
+
+} // namespace
+//#endif
+
+namespace Pt {
 
 //! @internal @brief Returns the ctype mask for the \a ch.
 PT_API std::ctype_base::mask ctypeMask(const Char& ch);
@@ -245,20 +267,6 @@ struct MBState
 } // namespace Pt
 
 namespace std {
-
-//#if _LIBCPP_VERSION >= 5000
-
-template <>
-struct is_pod<Pt::Char> {
-    static const bool value = true;
-};
-
-template <>
-struct is_trivial<Pt::Char> {
-    static const bool value = true;
-};
-
-//#endif
 
 template<>
 struct char_traits<Pt::Char>

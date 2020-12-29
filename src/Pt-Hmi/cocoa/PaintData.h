@@ -30,6 +30,8 @@
 #ifndef Pt_Hmi_PaintData_h
 #define Pt_Hmi_PaintData_h
 
+#include "PixmapSurfaceImpl.h"
+
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -160,8 +162,9 @@ class PaintData : public Gfx::PaintData
             
             if( font.name().empty() )
             {
-                stringData = reinterpret_cast<const UInt8*>( getDefaultFont().c_str() );
-                stringSize = getDefaultFont().size();
+                const std::string& defaultFont = PixmapSurfaceImpl::getDefaultFont();
+                stringData = reinterpret_cast<const UInt8*>( defaultFont.c_str() );
+                stringSize = defaultFont.size();
             }
             else
             {
