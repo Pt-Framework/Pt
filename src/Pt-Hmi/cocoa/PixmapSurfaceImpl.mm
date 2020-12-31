@@ -569,6 +569,9 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
+    if( image.empty() )
+        return;
+
     const Pt::uint8_t* data = image.data();
     std::size_t dataSize = image.format().imageSize( image.size(), image.padding() );
 
