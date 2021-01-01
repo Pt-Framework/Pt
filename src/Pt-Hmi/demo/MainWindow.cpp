@@ -218,6 +218,16 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     Gfx::Painter painter( surface() );
     painter.setClip(rect);
 
+    Pt::String text = "MgWjOy";
+
+    painter.setFont( Pt::Gfx::Font("", 10) );
+    painter.fontMetrics(text);
+    painter.drawText( Pt::Gfx::PointF(10, 15), text);
+
+    painter.setPen( Gfx::Color::fromRgb8(255, 0, 0, 150) );
+    painter.drawLine(Pt::Gfx::PointF(10, 15), Pt::Gfx::PointF(50, 15));
+    return;
+
 #ifdef DEMO_WITH_SKIA
     Gfx::Image img(Gfx::ImageFormat::argb32(), Gfx::Size(800, 400));
 

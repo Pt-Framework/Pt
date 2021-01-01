@@ -141,6 +141,10 @@ class PaintData : public Gfx::PaintData
             //CGFloat leading = CTFontGetLeading(font);
             //CGFloat capHeight = CTFontGetCapHeight(font);
 
+            //std::clog << text.narrow() << " " << lineAscent << " " << lineDescent 
+            //                           << " " << ascent << " " << descent 
+            //                           << " " << capHeight << " " << leading << std::endl;
+            
             CFRelease(line);
             CFRelease(attributedString);
             CFRelease(string);
@@ -187,6 +191,9 @@ class PaintData : public Gfx::PaintData
             CTFontRef f = CTFontCreateWithName(fontName, fontSize, &matrix);
             CFRelease(fontName);
 
+            //CFStringRef fn = CTFontCopyPostScriptName(f);
+            //printf("%s\n", CFStringGetCStringPtr(fn, kCFStringEncodingUTF8));
+            
             // TODO: use CTFontCreateCopyWithSymbolicTraits for bold and italic
             
             return f;
