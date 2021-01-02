@@ -50,39 +50,46 @@ class PT_GFX_API FontMetrics
       FontMetrics(ValueType ascent, ValueType descent,
                   ValueType width, ValueType height);
 
-
       ValueType ascent() const
       {
           return _ascent;
       }
-
 
       ValueType descent() const
       {
           return _descent;
       }
 
-
-      ValueType width() const
+      ValueType capHeight() const
       {
-          return _width;
+          return _capHeight;
       }
 
+      void setCapHeight(ValueType n)
+      {
+          _capHeight = n;
+      }
 
       ValueType height() const
       {
           return _height;
       }
 
+      ValueType width() const
+      {
+          return _width;
+      }
+
   private:
       ValueType _ascent;
       ValueType _descent;
-      ValueType _width;
+      ValueType _capHeight;
       ValueType _height;
+      ValueType _width;
 };
 
 } // namespace
 
 } // namespace
 
-#endif
+#endif // include guard

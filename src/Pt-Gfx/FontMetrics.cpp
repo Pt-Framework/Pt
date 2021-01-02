@@ -37,20 +37,21 @@ namespace Gfx {
 FontMetrics::FontMetrics()
 : _ascent( 0)
 , _descent(0)
-, _width(0)
+, _capHeight(0)
 , _height(0)
+, _width(0)
 { }
 
 
 FontMetrics::FontMetrics(ValueType ascent, ValueType descent,
-    ValueType width, ValueType height)
+                         ValueType width, ValueType height)
 : _ascent(ascent)
 , _descent(descent)
-, _width(width)
+, _capHeight(ascent)
 , _height(height)
+, _width(width)
 {
 }
-
 
 } // namespace
 

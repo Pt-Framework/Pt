@@ -139,7 +139,7 @@ class PaintData : public Gfx::PaintData
             //CGFloat ascent = CTFontGetAscent(font);
             //CGFloat descent = CTFontGetDescent(font);
             //CGFloat leading = CTFontGetLeading(font);
-            //CGFloat capHeight = CTFontGetCapHeight(font);
+            CGFloat capHeight = CTFontGetCapHeight(font);
 
             //std::clog << text.narrow() << " " << lineAscent << " " << lineDescent 
             //                           << " " << ascent << " " << descent 
@@ -150,10 +150,14 @@ class PaintData : public Gfx::PaintData
             CFRelease(string);
             CFRelease(attributes);
 
-            return Gfx::FontMetrics( lineAscent, 
-                                     lineDescent, 
-                                     width, 
-                                     lineAscent + lineDescent );
+            Gfx::FontMetrics fm(lineAscent, 
+                                lineDescent, 
+                                width, 
+                                lineAscent + lineDescent );
+
+            fm.setCapHeight(capHeight);
+
+            return fm;
         }
 
         static CTFontRef createCTFont(const Gfx::Font& font)
