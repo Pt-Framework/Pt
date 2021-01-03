@@ -38,7 +38,7 @@ FontMetrics::FontMetrics()
 : _ascent( 0)
 , _descent(0)
 , _capHeight(0)
-, _height(0)
+, _leading(0)
 , _width(0)
 { }
 
@@ -48,7 +48,7 @@ FontMetrics::FontMetrics(ValueType ascent, ValueType descent,
 : _ascent(ascent)
 , _descent(descent)
 , _capHeight(ascent)
-, _height(height)
+, _leading(0)
 , _width(width)
 {
 }

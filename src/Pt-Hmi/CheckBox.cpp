@@ -195,7 +195,7 @@ Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
     double boxHeight = _boxSize.height();
 
     double itemsWidth = space + boxWidth + space + fm.width();
-    double itemsHeight = std::max<double>(fm.height(), boxHeight);
+    double itemsHeight = std::max<double>(fm.lineHeight(), boxHeight);
 
     return Gfx::SizeF( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );

@@ -44,48 +44,78 @@ class PT_GFX_API FontMetrics
     public:
         typedef double ValueType;
 
-  public:
-      FontMetrics();
+    public:
+        FontMetrics();
 
-      FontMetrics(ValueType ascent, ValueType descent,
-                  ValueType width, ValueType height);
+        FontMetrics(ValueType ascent, ValueType descent,
+                    ValueType width, ValueType height);
 
-      ValueType ascent() const
-      {
-          return _ascent;
-      }
+        ValueType ascent() const
+        {
+            return _ascent;
+        }
 
-      ValueType descent() const
-      {
-          return _descent;
-      }
+        void setAscent(ValueType n)
+        {
+            _ascent = n;
+        }
 
-      ValueType capHeight() const
-      {
-          return _capHeight;
-      }
+        ValueType descent() const
+        {
+            return _descent;
+        }
 
-      void setCapHeight(ValueType n)
-      {
-          _capHeight = n;
-      }
+        void setDescent(ValueType n)
+        {
+            _descent = n;
+        }
 
-      ValueType height() const
-      {
-          return _height;
-      }
+        ValueType capHeight() const
+        {
+            return _capHeight;
+        }
 
-      ValueType width() const
-      {
-          return _width;
-      }
+        void setCapHeight(ValueType n)
+        {
+            _capHeight = n;
+        }
 
-  private:
-      ValueType _ascent;
-      ValueType _descent;
-      ValueType _capHeight;
-      ValueType _height;
-      ValueType _width;
+        ValueType leading() const
+        {
+            return _leading;
+        }
+
+        void setLeading(ValueType n)
+        {
+            _leading = n;
+        }
+
+        ValueType height() const
+        {
+            return _ascent + _descent;
+        }
+
+        ValueType lineHeight() const
+        {
+            return _ascent + _descent + _leading;
+        }
+
+        ValueType width() const
+        {
+            return _width;
+        }
+
+        void setWidth(ValueType n)
+        {
+            _width = n;
+        }
+
+    private:
+        ValueType _ascent;
+        ValueType _descent;
+        ValueType _capHeight;
+        ValueType _leading;
+        ValueType _width;
 };
 
 } // namespace

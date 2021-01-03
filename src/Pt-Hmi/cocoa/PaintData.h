@@ -132,31 +132,28 @@ class PaintData : public Gfx::PaintData
 
             CTLineRef line = CTLineCreateWithAttributedString(attributedString);
             
-            CGFloat lineAscent = 0.0;
-            CGFloat lineDescent = 0.0;
-            double width = CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, NULL);
+            double width = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
             
-            //CGFloat ascent = CTFontGetAscent(font);
-            //CGFloat descent = CTFontGetDescent(font);
-            //CGFloat leading = CTFontGetLeading(font);
+            CGFloat ascent = CTFontGetAscent(font);
+            CGFloat descent = CTFontGetDescent(font);
+            CGFloat leading = CTFontGetLeading(font);
             CGFloat capHeight = CTFontGetCapHeight(font);
 
-            //std::clog << text.narrow() << " " << lineAscent << " " << lineDescent 
-            //                           << " " << ascent << " " << descent 
-            //                           << " " << capHeight << " " << leading << std::endl;
+            //std::clog << text.narrow() << " " << ascent << " " << descent 
+            //                           << " " << capHeight << " " << leading 
+            //                           << " " << width << std::endl;
             
             CFRelease(line);
             CFRelease(attributedString);
             CFRelease(string);
             CFRelease(attributes);
 
-            Gfx::FontMetrics fm(lineAscent, 
-                                lineDescent, 
-                                width, 
-                                lineAscent + lineDescent );
-
+            Gfx::FontMetrics fm;
+            fm.setAscent(ascent);
+            fm.setDescent(descent);
             fm.setCapHeight(capHeight);
-
+            fm.setLeading(leading);
+            fm.setWidth(width);
             return fm;
         }
 

@@ -109,13 +109,13 @@ void PixmapSurfaceImpl::begin(Gfx::Painter& painter)
 {
     _painter = &painter;
 
-    Gfx::PaintData* pd = painter.paintData();
-    _paintData = dynamic_cast<PaintData*>(pd);
-
-    if (_paintData == 0)
+    Gfx::PaintData* paintData = painter.paintData();
+    
+    _paintData = dynamic_cast<PaintData*>(paintData);
+    if ( ! _paintData )
     {
-        delete pd;
-
+        delete paintData;
+        
         _paintData = new PaintData();
         painter.setPaintData(_paintData);
     }
@@ -303,7 +303,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
         return Gfx::FontMetrics();
 
     CTFontRef font = _paintData->ctFont();
-    return PaintData::fontMetrics(font, text);
+    return _paintData->fontMetrics(font, text);
 }
 
 
