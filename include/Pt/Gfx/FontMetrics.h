@@ -47,9 +47,6 @@ class PT_GFX_API FontMetrics
     public:
         FontMetrics();
 
-        FontMetrics(ValueType ascent, ValueType descent,
-                    ValueType width, ValueType height);
-
         ValueType ascent() const
         {
             return _ascent;

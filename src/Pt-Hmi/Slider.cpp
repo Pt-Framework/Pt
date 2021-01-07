@@ -185,16 +185,16 @@ void Slider::setFontSize(const std::size_t s)
 }
 
 
-Gfx::Font::Style Slider::fontStyle() const
+const std::string& Slider::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void Slider::setFontStyle(Gfx::Font::Style style)
+void Slider::setFontStyle(const std::string& style)
 {
-    _fontStyle.reset( new Gfx::Font::Style(style) );
+    _fontStyle.reset( new std::string(style) );
     invalidate();
 }
 

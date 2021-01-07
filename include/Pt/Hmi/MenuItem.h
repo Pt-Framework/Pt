@@ -95,9 +95,9 @@ class PT_HMI_API MenuItem : public Control
 
         void setFontSize(const std::size_t n);
 
-        Gfx::Font::Style fontStyle() const;
+        const std::string& fontStyle() const;
 
-        void setFontStyle(Gfx::Font::Style style);
+        void setFontStyle(const std::string& style);
 
         void setRenderer(MenuRenderer* renderer);
 
@@ -143,7 +143,7 @@ class PT_HMI_API MenuItem : public Control
         AutoPtr<Gfx::Color>       _textColor;
         AutoPtr<std::string>      _fontName;
         AutoPtr<std::size_t>      _fontSize;
-        AutoPtr<Gfx::Font::Style> _fontStyle;
+        AutoPtr<std::string> _fontStyle;
 
         PixmapSurface     _picture;
         Gfx::Brush        _brush;

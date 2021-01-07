@@ -106,7 +106,16 @@ class FreeType : public Pt::Singleton<FreeType>
 
     private:
         typedef std::set<System::Path*> Files;
-        typedef std::map<Font, System::Path> Fonts;
+
+        struct CompareFont
+        {
+            inline bool operator()(const Font& a, const Font& b) const
+            {
+                return a.name() < b.name() && a.style() < b.style();
+            }
+        };
+
+        typedef std::map<Font, System::Path, CompareFont> Fonts;
 
         FT_Library     _ft;
         FTC_Manager    _manager;
@@ -118,7 +127,6 @@ class FreeType : public Pt::Singleton<FreeType>
         FTC_FaceID     _defaultFace;
         Fonts          _fonts;
         Files          _files;
-
 };
 
 static FreeType::Init initFreeType;

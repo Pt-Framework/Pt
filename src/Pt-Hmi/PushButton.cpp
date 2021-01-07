@@ -192,16 +192,16 @@ void PushButton::setFontSize(const std::size_t s)
 }
 
 
-Gfx::Font::Style PushButton::fontStyle() const
+const std::string& PushButton::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void PushButton::setFontStyle(Gfx::Font::Style style)
+void PushButton::setFontStyle(const std::string& style)
 {
-    _fontStyle.reset( new Gfx::Font::Style(style) );
+    _fontStyle.reset( new std::string(style) );
     invalidate();
 }
 
@@ -282,7 +282,7 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
     _highlightColor.reset( new Gfx::Color( o.highlightColor() ) );
     _fontName.reset( new std::string( o.font().name() ) );
     _fontSize.reset( new std::size_t( o.font().size() ) );
-    _fontStyle.reset( new Gfx::Font::Style( o.font().style() ) );
+    _fontStyle.reset( new std::string( o.font().style() ) );
 }
 
 

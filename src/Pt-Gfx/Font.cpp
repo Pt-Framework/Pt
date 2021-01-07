@@ -37,17 +37,14 @@ namespace Gfx {
 Font::Font()
 : _name()
 , _size(0)
-, _style(Normal)
-, _angle(0)
 {
 }
 
 
-Font::Font(const std::string& name, std::size_t size, Style style, Pt::ssize_t angle)
+Font::Font(const std::string& name, std::size_t size, const std::string& style)
 : _name(name)
 ,  _size(size)
 ,  _style(style)
-,  _angle(angle)
 {
 }
 
@@ -56,37 +53,7 @@ Font::Font( const std::string& name, const Font& font)
 : _name(name)
 , _size(font._size)
 , _style(font._style)
-, _angle(font._angle)
 {
-}
-
-const std::string& Font::name() const
-{
-    return _name;
-}
-
-
-size_t Font::size() const
-{
-    return _size;
-}
-
-
-Font::Style Font::style() const
-{
-    return _style;
-}
-
-
-ssize_t Font::angle() const
-{
-    return _angle;
-}
-
-
-bool Font::isNull() const
-{
-    return size() == 0;
 }
 
 } // namespace

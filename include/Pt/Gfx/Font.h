@@ -35,94 +35,65 @@
 #include <Pt/Types.h>
 #include <Pt/String.h>
 
-
 namespace Pt {
-namespace Gfx {
 
+namespace Gfx {
 
 class PT_GFX_API Font
 {
     public:
-        enum Style
-        {
-            Normal = 0,
-            Bold,
-            Italic,
-            BoldItalic
-        };
-
-    public:
         Font();
 
         //! @brief Construct a font.
-        explicit Font( const std::string& name,
-                       size_t             size,
-                       Style              style = Normal,
-                       ssize_t            angle = 0);
+        Font( const std::string& name,
+              std::size_t size,
+              const std::string& style = std::string() );
 
         //! @brief Construct a font.
         Font(const std::string& name, const Font& font);
 
         //! @brief Returns the name of the font
-        const std::string& name() const;
+        const std::string& name() const
+        {
+            return _name;
+        }
 
         //! @brief Returns the size of the font
-        size_t size() const;
+        size_t size() const
+        {
+            return _size;
+        }
 
         //! @brief Returns the style of the font
-        Style style() const;
-
-        //! @brief Returns the angle of the font
-        ssize_t angle() const;
-
-        bool isNull() const;
-
-        friend bool operator==(const Font& a, const Font& b);
-
-        friend bool operator!=(const Font& a, const Font& b);
-
-        // ### TODO: Remove it later! ###
-        friend bool operator<(const Font& a, const Font& b);
+        const std::string& style() const
+        {
+            return _style;
+        }
 
     private:
         std::string _name;
         size_t      _size;
-        Style       _style;
-        ssize_t     _angle;
+        std::string _style;
 };
 
 
 inline bool operator==(const Font& a, const Font& b)
 {
-    return a._name  == b._name  &&
-           a._style == b._style &&
-           a._size  == b._size  &&
-           a._angle == b._angle;
+    return a.name()  == b.name()  &&
+           a.style() == b.style() &&
+           a.size()  == b.size();
 }
 
 
 inline bool operator!=(const Font& a, const Font& b)
 {
-    return a._name  != b._name  ||
-           a._style != b._style ||
-           a._size  != b._size  ||
-           a._angle != b._angle;
+    return a.name()  != b.name()  ||
+           a.style() != b.style() ||
+           a.size()  != b.size();
 }
-
-// ### TODO: Remove it later! ###
-inline bool operator<(const Font& a, const Font& b)
-{
-    if(a._name < b._name)
-        return true;
-
-    if(a._name > b._name)
-        return false;
-
-    return a._style < b._style;
-}
-
 
 } //namespace
+
 } //namespace
 
 #endif

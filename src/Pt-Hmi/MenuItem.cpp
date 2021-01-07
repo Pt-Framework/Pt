@@ -237,16 +237,16 @@ void MenuItem::setFontSize(const std::size_t s)
 }
 
 
-Gfx::Font::Style MenuItem::fontStyle() const
+const std::string& MenuItem::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void MenuItem::setFontStyle(Gfx::Font::Style style)
+void MenuItem::setFontStyle(const std::string& style)
 {
-    _fontStyle.reset( new Gfx::Font::Style(style) );
+    _fontStyle.reset( new std::string(style) );
     invalidate();
 }
 

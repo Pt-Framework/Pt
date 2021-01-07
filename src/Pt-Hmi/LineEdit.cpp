@@ -258,16 +258,16 @@ void LineEdit::setFontSize(const std::size_t s)
 }
 
 
-Gfx::Font::Style LineEdit::fontStyle() const
+const std::string& LineEdit::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void LineEdit::setFontStyle(Gfx::Font::Style style)
+void LineEdit::setFontStyle(const std::string& style)
 {
-    _fontStyle.reset( new Gfx::Font::Style(style) );
+    _fontStyle.reset( new std::string(style) );
     invalidate();
 }
 

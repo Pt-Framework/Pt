@@ -326,35 +326,27 @@ class PaintData : public Gfx::PaintData
 
         static Gdiplus::Font* toGdi(const Pt::Gfx::Font& font)
         {
-            Gdiplus::Font* f = 0;
+            const std::wstring fontName(font.name().begin(), font.name().end());
+            Gdiplus::FontStyle fontStyle = Gdiplus::FontStyleRegular;
+            Gdiplus::REAL fontSize = static_cast<Gdiplus::REAL>(font.size());
 
-            const std::wstring fname(font.name().begin(), font.name().end());
+            std::string styleName = font.style();
+            std::transform(styleName.begin(), styleName.end(), styleName.begin(), ::tolower);
 
-            switch (font.style())
+            if(styleName == "italic")
             {
-                default:
-                case Pt::Gfx::Font::Normal:
-                    f = new Gdiplus::Font(fname.c_str(), static_cast<Gdiplus::REAL>(font.size()),
-                                          Gdiplus::FontStyleRegular);
-                break;
-
-                case Pt::Gfx::Font::Italic:
-                    f = new Gdiplus::Font(fname.c_str(), static_cast<Gdiplus::REAL>(font.size()),
-                                          Gdiplus::FontStyleItalic);
-                break;
-
-                case Pt::Gfx::Font::Bold:
-                    f = new Gdiplus::Font(fname.c_str(), static_cast<Gdiplus::REAL>(font.size()),
-                                          Gdiplus::FontStyleBold);
-                break;
-
-                case Pt::Gfx::Font::BoldItalic:
-                    f = new Gdiplus::Font(fname.c_str(), static_cast<Gdiplus::REAL>(font.size()), 
-                                          Gdiplus::FontStyleBoldItalic);
-                break;
+                fontStyle = Gdiplus::FontStyleItalic;
+            }
+            else if (styleName == "bold")
+            {
+                fontStyle = Gdiplus::FontStyleBold;
+            }
+            else if (styleName == "bold italic" || styleName == "bolditalic")
+            { 
+                fontStyle = Gdiplus::FontStyleBoldItalic;
             }
 
-            return f;
+            return new Gdiplus::Font(fontName.c_str(), fontSize, fontStyle);
         }
 
     private:

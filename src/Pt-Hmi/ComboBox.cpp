@@ -288,16 +288,16 @@ void ComboBox::setFontSize(const std::size_t s)
 }
 
 
-Gfx::Font::Style ComboBox::fontStyle() const
+const std::string& ComboBox::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void ComboBox::setFontStyle(Gfx::Font::Style style)
+void ComboBox::setFontStyle(const std::string& style)
 {
-    _fontStyle.reset( new Gfx::Font::Style(style) );
+    _fontStyle.reset( new std::string(style) );
     invalidate();
 }
 

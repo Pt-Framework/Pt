@@ -213,16 +213,16 @@ void ListBoxItem::setFontSize(const std::size_t s)
 }
 
 
-Gfx::Font::Style ListBoxItem::fontStyle() const
+const std::string& ListBoxItem::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void ListBoxItem::setFontStyle(Gfx::Font::Style style)
+void ListBoxItem::setFontStyle(const std::string& style)
 {
-    _fontStyle.reset( new Gfx::Font::Style(style) );
+    _fontStyle.reset( new std::string(style) );
     invalidate();
 }
 

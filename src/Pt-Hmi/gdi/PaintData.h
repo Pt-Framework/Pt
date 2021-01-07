@@ -40,6 +40,8 @@
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
+#include <algorithm>
+#include <cctype>
 
 using std::max;
 using std::min;
@@ -432,24 +434,15 @@ class PaintData : public Gfx::PaintData
 
         static HFONT getFont(const Pt::Gfx::Font& font)
         {
-            int fontWeight;
+            int fontWeight = FW_NORMAL;
     
-            switch( font.style() ) 
-            {
-                default:
-                case Pt::Gfx::Font::Normal:
-                case Pt::Gfx::Font::Italic:
-                    fontWeight = FW_NORMAL;
-                    break;
+            std::string style = font.style();
+            std::transform(style.begin(), style.end(),  style.begin(), ::tolower);
 
-                case Pt::Gfx::Font::Bold:
-                case Pt::Gfx::Font::BoldItalic:
-                    fontWeight = FW_BOLD;
-                    break;
-            }
+            if(style == "bold" || style == "bold italic" || style == "bolditalic")
+                fontWeight = FW_BOLD;
 
-            BYTE italic = font.style() == Pt::Gfx::Font::Italic || 
-                          font.style() == Pt::Gfx::Font::BoldItalic;
+            BYTE italic = (style == "italic" || style == "bold italic" || style == "bolditalic");
 
             HDC dc = GetDC(NULL);
             int logicalPPI = GetDeviceCaps(dc, LOGPIXELSY);
@@ -463,7 +456,7 @@ class PaintData : public Gfx::PaintData
             LOGFONT lf;
             lf.lfHeight         = -height;                     // will be converted to device units    
             lf.lfWidth          = 0;                           // default width of the font
-            lf.lfEscapement     = font.angle();                // escapement angle
+            lf.lfEscapement     = 0;                           // escapement angle
             lf.lfOrientation    = 0;                           // orientation
             lf.lfWeight         = fontWeight;                  // font weight
             lf.lfItalic         = italic;                      // italic

@@ -65,21 +65,7 @@ void DrawText::setFont(const Font& font)
     _imageType.height  = font.size();
     _imageType.flags   = FT_LOAD_DEFAULT;
 
-    // normalize the rotation angle
-    Pt::ssize_t fontAngle = font.angle() % 3600;
-    if( fontAngle < 0 )
-        fontAngle += 3600;
-
-    // setup the rotation matrix
-    const double angle = fontAngle / 10.0;
-    if(angle > 0.01)
-    {
-        _transform.rotateDeg(angle);
-    }
-    else
-    {
-        _transform.reset();
-    }
+    _transform.reset();
 }
  
 

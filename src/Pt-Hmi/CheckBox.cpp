@@ -139,16 +139,16 @@ void CheckBox::setFontSize(const std::size_t s)
 }
 
 
-Gfx::Font::Style CheckBox::fontStyle() const
+const std::string& CheckBox::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void CheckBox::setFontStyle(Gfx::Font::Style style)
+void CheckBox::setFontStyle(const std::string& style)
 {
-    _fontStyle.reset( new Gfx::Font::Style(style) );
+    _fontStyle.reset( new std::string(style) );
     invalidate();
 }
 

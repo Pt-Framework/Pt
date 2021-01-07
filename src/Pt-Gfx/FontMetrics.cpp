@@ -42,17 +42,6 @@ FontMetrics::FontMetrics()
 , _width(0)
 { }
 
-
-FontMetrics::FontMetrics(ValueType ascent, ValueType descent,
-                         ValueType width, ValueType height)
-: _ascent(ascent)
-, _descent(descent)
-, _capHeight(ascent)
-, _leading(0)
-, _width(width)
-{
-}
-
 } // namespace
 
 } // namespace

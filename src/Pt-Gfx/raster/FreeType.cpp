@@ -76,10 +76,6 @@ FreeType::FreeType()
     System::Path  path = System::Path( System::Path::curdir()) / "fonts";
     std::string lp = path.toLocal();
     setFontDir(path);
-
-    //System::Path  path = System::Path("C:\\Windows\\Fonts");
-    //std::string lp = path.toLocal();
-    //setFontDir(path);
 }
 
 
@@ -158,31 +154,20 @@ void FreeType::setFontDir(const System::Path& path)
 
     for( ; it != end; ++it)
     {
-        System::Path fp = _fontDir / it->path();
+        System::Path fontFile = _fontDir / it->path();
 
         FT_Face face;
-        FT_Error err = FT_New_Face(_ft, fp.toLocal().c_str(), 0, &face);
+        FT_Error err = FT_New_Face(_ft, fontFile.toLocal().c_str(), 0, &face);
         if(err != 0)
             continue;
 
-        //std::clog << face->family_name << " " << face->style_name << std::endl;
+        if ((face->face_flags & FT_FACE_FLAG_SCALABLE) == 0)
+            continue;
 
-        Font::Style style = Font::Normal;
-
-        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD )
-            style = Font::Bold;
-
-        if( (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
-            style = Font::Italic;
-
-        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD &&
-            (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
-            style = Font::BoldItalic;
-
-        Font font(face->family_name, DefaultFontSize, style);
+        Font font(face->family_name, DefaultFontSize, face->style_name);
 
         System::Path& fontPath = _fonts[font];
-        fontPath = fp;
+        fontPath = fontFile;
 
         _files.insert(&fontPath);
 

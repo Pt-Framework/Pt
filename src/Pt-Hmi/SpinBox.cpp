@@ -500,16 +500,16 @@ void SpinBox::setFontSize(const std::size_t s)
 }
 
 
-Gfx::Font::Style SpinBox::fontStyle() const
+const std::string& SpinBox::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void SpinBox::setFontStyle(Gfx::Font::Style style)
+void SpinBox::setFontStyle(const std::string& style)
 {
-    _fontStyle.reset( new Gfx::Font::Style(style) );
+    _fontStyle.reset( new std::string(style) );
     invalidate();
 }
 

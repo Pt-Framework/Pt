@@ -153,16 +153,16 @@ void Label::setFontSize(const std::size_t s)
 }
 
 
-Gfx::Font::Style Label::fontStyle() const
+const std::string& Label::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void Label::setFontStyle(Gfx::Font::Style style)
+void Label::setFontStyle(const std::string& style)
 {
-    _fontStyle.reset( new Gfx::Font::Style(style) );
+    _fontStyle.reset( new std::string(style) );
     invalidate();
 }
 
