@@ -266,8 +266,8 @@ class PaintData : public Gfx::PaintData
             UINT16 emHeightUnits = family.GetEmHeight( gdiFont->GetStyle() );
             
             Gdiplus::REAL pixelsPerUnit = lineSpacingF / lineSpacingUnits;
-            Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit + 0.5;
-            Gdiplus::REAL descentF = descentUnits * pixelsPerUnit - 0.5;
+            Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
+            Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
             Gdiplus::REAL heightF = ascentF + descentF;
             Gdiplus::REAL emHeightF = emHeightUnits * pixelsPerUnit;
 
@@ -288,8 +288,13 @@ class PaintData : public Gfx::PaintData
             ReleaseDC(NULL, dc);
             delete gdiFont;
 
-            return Gfx::FontMetrics(ascentF* scaling, descentF* scaling, 
-                                    textRect.Width * scaling, heightF * scaling);
+            Gfx::FontMetrics fm;
+            fm.setAscent(asc * scaling);
+            fm.setDescent(des * scaling);
+            fm.setCapHeight(cap * scaling);
+            fm.setLeading(exl * scaling);
+            fm.setWidth(textRect.Width * scaling);
+            return fm;
         }
     
         static Gdiplus::Color toGdi(const Gfx::Color& c)

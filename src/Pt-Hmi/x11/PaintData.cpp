@@ -373,9 +373,15 @@ Gfx::FontMetrics PaintData::fontMetrics(const Gfx::Font& font,
 
     XftFontClose(display, xftFont);
 
-    return Gfx::FontMetrics(xftFont->ascent, xftFont->descent, info.width, xftFont->height);
+    Gfx::FontMetrics fm;
+    fm.setAscent(xftFont->ascent);
+    fm.setDescent(xftFont->descent);
+    fm.setCapHeight(xftFont->ascent - xftFont->descent / 2.0);
+    fm.setLeading(xftFont->descent / 2.0);
+    fm.setWidth(info.width);
+    return fm;
 #else
-    return Gfx::FontMetrics(0, 0, 0, 0);
+    return Gfx::FontMetrics();
 #endif     
 }
 

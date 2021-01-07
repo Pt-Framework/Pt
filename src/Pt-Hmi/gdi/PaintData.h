@@ -278,10 +278,13 @@ class PaintData : public Gfx::PaintData
             long exl = tm.tmExternalLeading;
             long lh = asc + des + exl;
 
-            return Gfx::FontMetrics( tm.tmAscent, 
-                                     tm.tmDescent, 
-                                     textSize.cx, 
-                                     tm.tmHeight );
+            Gfx::FontMetrics fm;
+            fm.setAscent(asc);
+            fm.setDescent(des);
+            fm.setCapHeight(cap);
+            fm.setLeading(exl);
+            fm.setWidth(textSize.cx);
+            return fm;
         }
 
 #else
@@ -305,16 +308,26 @@ class PaintData : public Gfx::PaintData
             Gdiplus::FontFamily family;
             gdiFont.GetFamily(&family);
 
-            Gdiplus::REAL height = gdiFont.GetHeight( graphics.GetDpiY() );
+            Gdiplus::REAL lineSpacingF = gdiFont.GetHeight(graphics.GetDpiY());
+            Gdiplus::REAL sizeUnits = gdiFont.GetSize();
 
-            UINT16 ascentUnits = family.GetCellAscent( gdiFont.GetStyle() );
-            UINT16 descentUnits = family.GetCellDescent( gdiFont.GetStyle() );
-            UINT16 heightUnits = family.GetLineSpacing( gdiFont.GetStyle() );
+            UINT16 ascentUnits = family.GetCellAscent(gdiFont.GetStyle());
+            UINT16 descentUnits = family.GetCellDescent(gdiFont.GetStyle());
+            UINT16 lineSpacingUnits = family.GetLineSpacing(gdiFont.GetStyle());
+            UINT16 emHeightUnits = family.GetEmHeight(gdiFont.GetStyle());
 
-            Gdiplus::REAL pixelsPerUnit = height / heightUnits;
+            Gdiplus::REAL pixelsPerUnit = lineSpacingF / lineSpacingUnits;
             Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
             Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
             Gdiplus::REAL heightF = ascentF + descentF;
+            Gdiplus::REAL emHeightF = emHeightUnits * pixelsPerUnit;
+
+            Gdiplus::REAL asc = ascentF;
+            Gdiplus::REAL des = descentF;
+            Gdiplus::REAL cap = emHeightF - descentF;
+            Gdiplus::REAL inl = ascentF - cap;
+            Gdiplus::REAL exl = lineSpacingF - heightF;
+            Gdiplus::REAL lh = asc + des + exl;
 
             Gdiplus::RectF textRect;
             graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
@@ -327,8 +340,13 @@ class PaintData : public Gfx::PaintData
             DeleteObject(newFont);
             ReleaseDC(NULL, dc);
 
-            return Gfx::FontMetrics(ascentF * scaling, descentF * scaling, 
-                                    textRect.Width * scaling, heightF * scaling);
+            Gfx::FontMetrics fm;
+            fm.setAscent(asc * scaling);
+            fm.setDescent(des * scaling);
+            fm.setCapHeight(cap * scaling);
+            fm.setLeading(exl* scaling);
+            fm.setWidth(textRect.Width * scaling);
+            return fm;
         }
 #endif
         static std::string defaultFont()

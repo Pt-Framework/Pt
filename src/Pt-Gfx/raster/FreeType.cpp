@@ -248,7 +248,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
     FT_Face face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
     if(ferr)
-        return FontMetrics(0, 0, 0, 0);
+        return FontMetrics();
 
     // calculate total font height
     double fontHeight = (face->height / double(face->ascender)) * fontSize;
@@ -315,16 +315,20 @@ FontMetrics FreeType::fontMetrics(const String& text,
     }
 
     double scaleY = size->metrics.y_scale / 65536.0;
-    double ascender = (face->ascender * scaleY) / 64.0;
-    double descender = (-face->descender * scaleY) / 64.0;
+    double asc = (face->ascender * scaleY) / 64.0;
+    double des = (-face->descender * scaleY) / 64.0;
     double emh = (face->units_per_EM * scaleY) / 64.0;
     double lih = (face->height * scaleY) / 64.0;
-    double cap = emh - descender;
-    double inl = ascender - cap;
-    double exl = lih - (ascender + descender);
+    double cap = emh - des;
+    double exl = lih - (asc + des);
 
-    return FontMetrics( ascender, descender,
-                        width, ascender + descender );
+    Gfx::FontMetrics fm;
+    fm.setAscent(asc);
+    fm.setDescent(des);
+    fm.setCapHeight(cap);
+    fm.setLeading(exl);
+    fm.setWidth(width);
+    return fm;
 
     // UNLOCK
 }

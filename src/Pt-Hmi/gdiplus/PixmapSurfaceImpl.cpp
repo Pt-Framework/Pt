@@ -243,29 +243,44 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     text.toUtf16( std::back_inserter(wtext) );
 
     const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
-    const Gdiplus::Font& font = _paintData->font();
+    const Gdiplus::Font& gdiFont = _paintData->font();
     const Gdiplus::FontFamily& family = _paintData->fontFamily();
 
-    Gdiplus::REAL height = font.GetHeight( _graphics->GetDpiY() );
+    Gdiplus::REAL lineSpacingF = gdiFont.GetHeight(_graphics->GetDpiY());
+    Gdiplus::REAL sizeUnits = gdiFont.GetSize();
 
-    UINT16 ascentUnits = family.GetCellAscent( font.GetStyle() );
-    UINT16 descentUnits = family.GetCellDescent( font.GetStyle() );
-    UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
+    UINT16 ascentUnits = family.GetCellAscent(gdiFont.GetStyle());
+    UINT16 descentUnits = family.GetCellDescent(gdiFont.GetStyle());
+    UINT16 lineSpacingUnits = family.GetLineSpacing(gdiFont.GetStyle());
+    UINT16 emHeightUnits = family.GetEmHeight(gdiFont.GetStyle());
 
-    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
-    Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit + 0.5;
-    Gdiplus::REAL descentF = descentUnits * pixelsPerUnit - 0.5;
+    Gdiplus::REAL pixelsPerUnit = lineSpacingF / lineSpacingUnits;
+    Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
+    Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
     Gdiplus::REAL heightF = ascentF + descentF;
+    Gdiplus::REAL emHeightF = emHeightUnits * pixelsPerUnit;
+
+    Gdiplus::REAL asc = ascentF;
+    Gdiplus::REAL des = descentF;
+    Gdiplus::REAL cap = emHeightF - descentF;
+    Gdiplus::REAL inl = ascentF - cap;
+    Gdiplus::REAL exl = lineSpacingF - heightF;
+    Gdiplus::REAL lh = asc + des + exl;
 
     Gdiplus::RectF textRect;
-    _graphics->MeasureString(wtext.c_str(), wtext.size(), &font,
+    _graphics->MeasureString(wtext.c_str(), wtext.size(), &gdiFont,
                              Gdiplus::PointF(0, 0), format, &textRect);
 
     const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
     const double scaling = 96.0 / dpix;
 
-    return Gfx::FontMetrics(ascentF * scaling, descentF * scaling, 
-                            textRect.Width * scaling, heightF * scaling);
+    Gfx::FontMetrics fm;
+    fm.setAscent(asc * scaling);
+    fm.setDescent(des * scaling);
+    fm.setCapHeight(cap * scaling);
+    fm.setLeading(exl * scaling);
+    fm.setWidth(textRect.Width * scaling);
+    return fm;
 }
 
 
@@ -294,12 +309,12 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
     Gdiplus::REAL pixelsPerUnit = height / heightUnits;
 
-    Gdiplus::REAL ascent = ascentUnits * pixelsPerUnit + 0.5;
-    Gdiplus::REAL descent = descentUnits * pixelsPerUnit - 0.5;
+    Gdiplus::REAL ascent = ascentUnits * pixelsPerUnit;
+    Gdiplus::REAL descent = descentUnits * pixelsPerUnit;
     Gdiplus::REAL spacing = height - ascent - descent;
     Gdiplus::REAL offsetY = ascent;
     
-    Gdiplus::PointF origin( 0, -offsetY );
+    Gdiplus::PointF origin( 0, -offsetY);
 
     const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
 
