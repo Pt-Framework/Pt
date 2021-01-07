@@ -162,42 +162,66 @@ class PaintData : public Gfx::PaintData
             //std::clog << "font: " << font.name() 
             //          << "size: " << font.size() << std::endl;
 
-            const UInt8* stringData = 0;
-            std::size_t stringSize = 0;
-            
-            if( font.name().empty() )
-            {
-                const std::string& defaultFont = PixmapSurfaceImpl::getDefaultFont();
-                stringData = reinterpret_cast<const UInt8*>( defaultFont.c_str() );
-                stringSize = defaultFont.size();
-            }
-            else
-            {
-              stringData = reinterpret_cast<const UInt8*>( font.name().c_str() );
-              stringSize = font.name().size();
-            }
+            const char* fontName = font.name().empty() ? PixmapSurfaceImpl::getDefaultFont().c_str()
+                                                       : font.name().c_str();
 
-            CFStringRef fontName = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
-                                                                 stringData, 
-                                                                 stringSize, 
-                                                                 kCFStringEncodingUTF8, 
-                                                                 false, 
-                                                                 kCFAllocatorNull);
+            const char* fontStyle = font.style().c_str();
 
             // CoreText uses 96 points per inch, but the typographic convention
             // is 72 dots per inch, so scale by 96.0 / 72.0
             CGFloat fontSize = static_cast<int>( font.size() * (96.0 / 72.0) );
         
-            CGAffineTransform matrix = CGAffineTransformIdentity;
-            CTFontRef f = CTFontCreateWithName(fontName, fontSize, &matrix);
-            CFRelease(fontName);
+            NSDictionary* fontAttributes = 
+            @{
+                (NSString *)kCTFontFamilyNameAttribute : [NSString stringWithUTF8String:fontName],
+                (NSString *)kCTFontStyleNameAttribute : [NSString stringWithUTF8String:fontStyle],
+                (NSString *)kCTFontSizeAttribute : [NSNumber numberWithFloat:fontSize]
+            };
 
-            //CFStringRef fn = CTFontCopyPostScriptName(f);
-            //printf("%s\n", CFStringGetCStringPtr(fn, kCFStringEncodingUTF8));
+            CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontAttributes);
+
+            CGAffineTransform matrix = CGAffineTransformIdentity;
+            CTFontRef f = CTFontCreateWithFontDescriptor(descriptor, 0, &matrix);
+            CFRelease(descriptor);
+
+            return f;
+
+            // const UInt8* stringData = 0;
+            // std::size_t stringSize = 0;
+
+            // if( font.name().empty() )
+            // {
+            //     const std::string& defaultFont = PixmapSurfaceImpl::getDefaultFont();
+            //     stringData = reinterpret_cast<const UInt8*>( defaultFont.c_str() );
+            //     stringSize = defaultFont.size();
+            // }
+            // else
+            // {
+            //   stringData = reinterpret_cast<const UInt8*>( font.name().c_str() );
+            //   stringSize = font.name().size();
+            // }
+
+            // // CoreText uses 96 points per inch, but the typographic convention
+            // // is 72 dots per inch, so scale by 96.0 / 72.0
+            // CGFloat fontSize = static_cast<int>( font.size() * (96.0 / 72.0) );
+
+            // CFStringRef fontName = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
+            //                                                      stringData, 
+            //                                                      stringSize, 
+            //                                                      kCFStringEncodingUTF8, 
+            //                                                      false, 
+            //                                                      kCFAllocatorNull);
+
+            // CGAffineTransform matrix = CGAffineTransformIdentity;
+            // CTFontRef f = CTFontCreateWithName(fontName, fontSize, &matrix);
+            // CFRelease(fontName);
+
+            // CFStringRef fn = CTFontCopyPostScriptName(f);
+            // printf("%s\n", CFStringGetCStringPtr(fn, kCFStringEncodingUTF8));
             
             // TODO: use CTFontCreateCopyWithSymbolicTraits for bold and italic
             
-            return f;
+            //return f;
         }
 
     private:
