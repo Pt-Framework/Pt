@@ -234,8 +234,6 @@ void PixmapSurfaceImpl::begin(Gfx::Painter& painter)
 
     if (_paintData == 0)
     {
-        delete pd;
-
         _paintData = new PaintData();
         painter.setPaintData(_paintData);
     }

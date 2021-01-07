@@ -113,9 +113,7 @@ void PixmapSurfaceImpl::begin(Gfx::Painter& painter)
     
     _paintData = dynamic_cast<PaintData*>(paintData);
     if ( ! _paintData )
-    {
-        delete paintData;
-        
+    {     
         _paintData = new PaintData();
         painter.setPaintData(_paintData);
     }

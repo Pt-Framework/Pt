@@ -89,6 +89,12 @@ class PT_GFX_API Painter
 
         void setPaintData(PaintData* data)
         {
+            if(_paintData)
+            {
+                delete _paintData;
+                _paintData = 0;
+            }
+            
             _paintData = data;
         }
 
