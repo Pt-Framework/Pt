@@ -306,7 +306,7 @@ void DockingLayout::onLayout(const Gfx::RectF& rect)
 
                 Gfx::SizeF itemSize( (posRight - posLeft) - (*it)->margin().leftRight(),
                                      preferredHeight );
-
+                
                 Gfx::PointF pos(x, y);
                 (*it)->layout( pos, itemSize );
                 break;

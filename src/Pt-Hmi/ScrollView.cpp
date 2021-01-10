@@ -179,6 +179,8 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
 
 void ScrollView::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+
     _scrollLayout.layout( Gfx::PointF(0, 0), rect.size() );
 
     double width = rect.size().width();

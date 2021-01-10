@@ -81,14 +81,12 @@ void Painter::begin(PaintSurface& surface)
 
 void Painter::finish()
 {
-    if( ! _surface )
-        return;
-
-    PaintSurface* s = _surface;
-    _surface = 0;
-    s->finish();
+    if( _surface )
+    {
+        _surface->finish();
+        _surface = 0;
+    }
 }
-
 
 
 const Gfx::ImageFormat& Painter::format() const
@@ -249,11 +247,11 @@ void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
     _surface->drawPolyline(points, pointCount);
 }
 
+
 void Painter::fillPath(const Path& path, float smoothness)
 {
     _surface->fillPath(path, smoothness);
 }
-
 
 
 void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
@@ -268,7 +266,6 @@ void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 }
 
 
-
 void Painter::drawImage(const Gfx::PointF& to,
     const Gfx::Image& image, const Gfx::RectF& imageRect)
 {
@@ -281,45 +278,54 @@ void Painter::drawPath(const Gfx::Path& path, float smoothness)
     _surface->drawPath(path, smoothness);
 }
 
+
 void Painter::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
     _surface->drawArc(topLeft, size, degBegin, degEnd);
 }
+
 
 void Painter::drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
     _surface->drawChord(topLeft, size, degBegin, degEnd);
 }
 
+
 void Painter::drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
     _surface->drawPie(topLeft, size, degBegin, degEnd);
 }
+
 
 void Painter::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
     _surface->fillPie(topLeft, size, degBegin, degEnd);
 }
 
+
 void Painter::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
     _surface->fillChord(topLeft, size, degBegin, degEnd);
 }
+
 
 void Painter::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
 {
     _surface->drawSurface(toF, surface);
 }
 
+
 void Painter::drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect)
 {
     _surface->drawSurface(toF, pm, pmRect);
 }
 
+
 Image Painter::toImage(const Gfx::ImageFormat& format) const
 {
     return _surface->toImage(format);
 }
+
 
 double Painter::scaleFactor() const
 {
@@ -332,65 +338,78 @@ double Painter::toPhysical(double n) const
     return _surface->toPhysical(n);
 }
 
+
 Gfx::PointF Painter::toPhysical(const Gfx::PointF& p) const
 {
     return _surface->toPhysical(p);
 }
+
 
 Gfx::SizeF Painter::toPhysical(const Gfx::SizeF& s) const
 {
     return _surface->toPhysical(s);
 }
 
+
 Gfx::RectF Painter::toPhysical(const Gfx::RectF& r) const
 {
     return _surface->toPhysical(r);
 }
+
 
 double Painter::toLogical(double n) const
 {
     return _surface->toLogical(n);
 }
 
+
 Gfx::PointF Painter::toLogical(const Gfx::PointF& p) const
 {
     return _surface->toLogical(p);
 }
+
 
 Gfx::SizeF Painter::toLogical(const Gfx::SizeF& s) const
 {
     return _surface->toLogical(s);
 }
 
+
 Gfx::RectF Painter::toLogical(const Gfx::RectF& r) const
 {
     return _surface->toLogical(r);
 }
+
 
 double Painter::align(double n) const
 {
     return _surface->align(n);
 }
 
+
 double Painter::alignPixel(double n) const
 {
     return _surface->alignPixel(n);
 }
+
 
 double Painter::alignContour(size_t n) const
 {
     return _surface->alignContour(n);
 }
 
+
 Gfx::PointF Painter::align(const Gfx::PointF& p) const
 {
     return _surface->align(p);
 }
 
+
 Gfx::SizeF Painter::align(const Gfx::SizeF& s) const
 {
     return _surface->align(s);
 }
+
 
 Gfx::RectF Painter::align(const Gfx::RectF& rect) const
 {

@@ -43,7 +43,7 @@ PaintSurface::PaintSurface()
 PaintSurface::~PaintSurface()
 {
     if(_painter)
-        _painter->finish();
+        _painter->_surface = 0;
 }
 
 
@@ -66,6 +66,11 @@ void PaintSurface::finish()
     _painter = 0;
 }
 
+
+Painter* PaintSurface::painter()
+{
+    return _painter;
+}
 
 } // namespace
 

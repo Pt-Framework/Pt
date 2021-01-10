@@ -577,6 +577,8 @@ Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
 
 void ListBox::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+    
     Gfx::PointF pos(padding().left() + _scrollView.margin().left(), 
                     padding().top()  + _scrollView.margin().top());
         

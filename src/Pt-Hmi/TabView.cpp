@@ -169,6 +169,8 @@ Gfx::SizeF TabBar::onMeasure(const SizePolicy& policy)
 
 void TabBar::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+
     if( ! _renderer)
         return;
 

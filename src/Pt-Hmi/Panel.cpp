@@ -192,6 +192,8 @@ Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
 
 void Panel::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+    
     if(_content)
     {
         Gfx::PointF pos(padding().left() + _content->margin().left(), 

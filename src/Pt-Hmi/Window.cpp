@@ -793,9 +793,7 @@ Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
 void Window::onLayout(const Gfx::RectF& rect)
 {
     if( _mainWidget )
-    {
         _mainWidget->layout(rect);
-    }
 }
 
 

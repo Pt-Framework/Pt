@@ -543,6 +543,8 @@ Gfx::SizeF SpinBox::onMeasure(const SizePolicy& policy)
 
 void SpinBox::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+
     if( ! _renderer )
     {
         const Style& style = Application::instance().style();

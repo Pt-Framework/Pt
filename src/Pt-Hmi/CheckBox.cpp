@@ -188,7 +188,11 @@ void CheckBox::onCanceled()
 
 Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
 {
-    Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, text() );
+    //Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, text() );
+
+    Gfx::Painter painter( surface() );
+    painter.setFont(_font);
+    Gfx::FontMetrics fm = painter.fontMetrics( text() );
 
     double space = std::min<double>(_boxSize.width() / 2, _font.size() / 2);
     double boxWidth = _boxSize.width();

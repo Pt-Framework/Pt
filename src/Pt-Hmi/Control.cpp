@@ -50,20 +50,43 @@ Control::~Control()
 }
 
 
-void Control::setStyleOptions(const StyleOptions& o)
+Gfx::PaintSurface& Control::surface()
 {
-    onSetStyleOptions(o);
-    invalidate();
-}
-
-void Control::onSetStyleOptions(const StyleOptions& o)
-{
+    return _surface;
 }
 
 
 bool Control::isHighlighted() const
 {
     return _isHighlighted;
+}
+
+
+void Control::setStyleOptions(const StyleOptions& o)
+{
+    onSetStyleOptions(o);
+    invalidate();
+}
+
+
+void Control::onSetStyleOptions(const StyleOptions& o)
+{
+}
+
+
+void Control::onSetWindow(Window* w)
+{
+    if( ! w )
+    {   
+        _surface.detach();
+        return;
+    }
+    
+    Gfx::PointF winpos = toWindow( Gfx::PointF(0, 0) );
+    Gfx::PaintSurface& windowSurface = w->surface();
+
+    Gfx::RectF paintRect( winpos, size() );
+    _surface.attach(windowSurface, paintRect);
 }
 
 
@@ -74,21 +97,27 @@ void Control::onInvalidate()
 }
 
 
+void Control::onLayout(const Gfx::RectF& rect)
+{
+    Widget::onLayout(rect);
+}
+
+
 void Control::onPaintEvent(const PaintEvent& ev)
 {
     Widget::onPaintEvent(ev);
 
-    Window* w = this->window();
-    if( ! w )
+    Window* window = this->window();
+    if( ! window )
         return;
+ 
+    Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
+    Gfx::PaintSurface& surface = window->surface();
 
-    Gfx::PointF winpos = toWindow( Gfx::PointF(0,0) );
-    Gfx::PaintSurface& windowSurface = w->surface();
+    Gfx::RectF surfaceRect( pos, size() );
+    _surface.attach(surface, surfaceRect);
 
-    Gfx::RectF paintRect(winpos, size());
-    Gfx::PaintRegion region(windowSurface, paintRect);
-    
-    onPaint(region, ev.rect());
+    onPaint( _surface, ev.rect() );
 }
 
 

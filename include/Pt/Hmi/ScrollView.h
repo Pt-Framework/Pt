@@ -41,6 +41,8 @@ namespace Hmi {
 
 class PT_HMI_API ScrollView : public Widget
 {
+    typedef Widget Base;
+
     public:
         ScrollView();
 

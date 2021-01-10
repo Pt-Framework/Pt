@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/PaintRegion.h>
 
 namespace Pt {
 
@@ -45,6 +46,8 @@ class PT_HMI_API Control : public Widget
 
         virtual ~Control();
 
+        Gfx::PaintSurface& surface();
+
         // TODO: find better name
         bool isHighlighted() const;
 
@@ -53,7 +56,12 @@ class PT_HMI_API Control : public Widget
     protected:
         virtual void onSetStyleOptions(const StyleOptions& o);
         
+    protected:
+        virtual void onSetWindow(Window* w);
+
         virtual void onInvalidate();
+
+        virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
 
@@ -67,7 +75,8 @@ class PT_HMI_API Control : public Widget
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
     private:
-        bool          _isHighlighted;
+        Gfx::PaintRegion  _surface;
+        bool              _isHighlighted;
 }; 
 
 } // namespace

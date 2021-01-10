@@ -342,7 +342,6 @@ class PT_HMI_API Widget : public Visual
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
     private:
-        
         void setScreen(Screen* screen);
 
         void setParent(Widget* parent);
@@ -353,7 +352,6 @@ class PT_HMI_API Widget : public Visual
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
-        Pt::Signal<>                 _layoutChanged;
 
         std::vector<Widget*>         _children;
         

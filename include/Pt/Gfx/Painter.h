@@ -70,6 +70,8 @@ class PaintData
 */
 class PT_GFX_API Painter
 {
+    friend class PaintSurface;
+
     public:
         Painter();
 

@@ -48,9 +48,15 @@ namespace Gfx {
 class PT_GFX_API PaintRegion : public virtual PaintSurface
 {
     public:
+        PaintRegion();
+
         PaintRegion(PaintSurface& surface, const Gfx::RectF& rect);
 
         virtual ~PaintRegion();
+
+        void attach(PaintSurface& surface, const Gfx::RectF& rect);
+
+        void detach();
 
         virtual Image toImage(const Gfx::ImageFormat& format) const;
 

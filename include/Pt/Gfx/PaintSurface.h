@@ -166,9 +166,12 @@ class PT_GFX_API PaintSurface
 
         virtual Image toImage(const Gfx::ImageFormat& format) const = 0;
 
+    protected:
         void begin(Painter& painter);
 
         void finish();
+
+        Painter* painter();
 
     protected:
         virtual double onScaleFactor() const = 0;

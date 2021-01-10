@@ -787,11 +787,19 @@ void Widget::layout(const Gfx::RectF& r)
         update(updateRect);
     }
 
+    //onPreLayout();
+
+    // or onUpdate() when window position changes
+
     if(isChanged)
     {
         //static int nnn = 0;
         //std::clog << "LAYOUT: " << typeid(*this).name() << " " << ++nnn << std::endl;
         onLayout(rect);
+    }
+    else
+    {
+        // for each child onPreLayout();
     }
 }
 
@@ -846,9 +854,6 @@ void Widget::repaint(const Gfx::RectF& rect)
 
     Gfx::RectF widgetRect = rect.intersect( Gfx::RectF(Gfx::PointF(0,0),
                                                        this->size() ) );
-
-    // TODO: remove this hack when Size is integer based
-    //widgetRect.setHeight( std::floor(widgetRect.height() + 0.5) );
 
     PaintEvent pev( vid(), widgetRect);
     Application::instance().loop().commitEvent(pev);
@@ -995,6 +1000,21 @@ void Widget::move(const Gfx::PointF& pos)
 
     if( parent() )
         parent()->relayout();
+
+    // Gfx::PointF p = align(pos);
+
+    // Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
+
+    // Gfx::PointF to = p - _position;
+    // updateRect.unify( Gfx::RectF(to, _size) );
+
+    // MoveEvent mev(vid(), p);
+    // Application::instance().loop().commitEvent(mev);
+
+    // // update needs to refer to previous position
+    // update(updateRect);
+
+    // _position = p;
 }
 
 
