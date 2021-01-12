@@ -97,16 +97,8 @@ void Control::onInvalidate()
 }
 
 
-void Control::onLayout(const Gfx::RectF& rect)
+void Control::onLayoutChanged(const Gfx::RectF& rect)
 {
-    Widget::onLayout(rect);
-}
-
-
-void Control::onPaintEvent(const PaintEvent& ev)
-{
-    Widget::onPaintEvent(ev);
-
     Window* window = this->window();
     if( ! window )
         return;
@@ -116,6 +108,20 @@ void Control::onPaintEvent(const PaintEvent& ev)
 
     Gfx::RectF surfaceRect( pos, size() );
     _surface.attach(surface, surfaceRect);
+
+    Widget::onLayoutChanged(rect);
+}
+
+
+void Control::onLayout(const Gfx::RectF& rect)
+{
+    Widget::onLayout(rect);
+}
+
+
+void Control::onPaintEvent(const PaintEvent& ev)
+{
+    Widget::onPaintEvent(ev);
 
     onPaint( _surface, ev.rect() );
 }

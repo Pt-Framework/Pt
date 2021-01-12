@@ -293,6 +293,8 @@ class PT_HMI_API Widget : public Visual
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        virtual void onLayoutChanged(const Gfx::RectF& rect);
+
         virtual void onLayout(const Gfx::RectF& rect);
 
 

@@ -654,6 +654,12 @@ void Widget::relayout()
 }
 
 
+bool Widget::isLayouting() const
+{
+    return _isLayouting;
+}
+
+
 void Widget::measure(const SizePolicy& policy)
 {
     SizePolicy contentPolicy = _sizePolicy;
@@ -736,6 +742,18 @@ Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
 }
 
 
+void Widget::layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s)
+{
+    layout( Gfx::RectF(p, s) );
+}
+
+
+void Widget::layout(double x, double y, double width, double height)
+{
+    layout( Gfx::PointF(x, y), Pt::Gfx::SizeF(width,height) );
+}
+
+
 void Widget::layout(const Gfx::RectF& r)
 {
     //
@@ -744,7 +762,7 @@ void Widget::layout(const Gfx::RectF& r)
     Gfx::RectF rect = align(r);
 
     //
-    // layout this widget and its contents
+    // update position and size
     //
     bool moved = rect.topLeft() != _position;
     bool resized = rect.size() != _size;
@@ -754,7 +772,7 @@ void Widget::layout(const Gfx::RectF& r)
 
     if(moved)
     {
-        Gfx::PointF p = rect.topLeft();
+        const Gfx::PointF& p = rect.topLeft();
 
         Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
 
@@ -764,7 +782,6 @@ void Widget::layout(const Gfx::RectF& r)
         MoveEvent mev(vid(), p);
         Application::instance().loop().commitEvent(mev);
 
-        // update needs to refer to previous position
         update(updateRect);
 
         _position = p;
@@ -779,46 +796,39 @@ void Widget::layout(const Gfx::RectF& r)
 
         Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
 
-        _size = s;
-
         ResizeEvent rev(vid(), s);
         Application::instance().loop().commitEvent(rev);
 
         update(updateRect);
+
+        _size = s;
     }
 
-    //onPreLayout();
+    //
+    // layout this widget and its contents
+    //
 
-    // or onUpdate() when window position changes
+    // TODO: possibly only if position in window has changed
+    onLayoutChanged(rect); // rename: onLayout(rect);
 
     if(isChanged)
-    {
-        //static int nnn = 0;
-        //std::clog << "LAYOUT: " << typeid(*this).name() << " " << ++nnn << std::endl;
-        onLayout(rect);
+    {       
+        onLayout(rect); // rename: onLayoutContent(rect);
     }
     else
     {
-        // for each child onPreLayout();
+        std::vector<Widget*>::iterator it;
+        for(it = _children.begin(); it != _children.end(); ++it)
+        {
+            Widget* widget = *it;
+            widget->layout( widget->geometry() );
+        }
     }
 }
 
 
-void Widget::layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s)
+void Widget::onLayoutChanged(const Gfx::RectF& rect)
 {
-    layout( Gfx::RectF(p, s) );
-}
-
-
-void Widget::layout(double x, double y, double width, double height)
-{
-    layout( Gfx::PointF(x, y), Pt::Gfx::SizeF(width,height) );
-}
-
-
-bool Widget::isLayouting() const
-{
-    return _isLayouting;
 }
 
 

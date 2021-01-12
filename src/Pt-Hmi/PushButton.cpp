@@ -323,7 +323,7 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 void PushButton::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
-    
+
     layoutContent();
 }
 

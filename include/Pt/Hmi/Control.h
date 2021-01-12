@@ -61,6 +61,8 @@ class PT_HMI_API Control : public Widget
 
         virtual void onInvalidate();
 
+        virtual void onLayoutChanged(const Gfx::RectF& rect);
+
         virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
