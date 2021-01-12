@@ -92,7 +92,6 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setText("Platinum C++     Framework");
     _textLabel.setAlignment(Alignment::Bottom);
     _textLabel.setPadding(10);
-    _textLabel.move( Gfx::PointF(60,60) );
     _textLabel.setBackground( Gfx::Color::fromRgb8(240, 220, 70) );
     _textLabel.setMnemonicWidget(&_toggleButton);
     _textLabel.setCursor( Hmi::Cursor::waitCursor() ); 
@@ -107,7 +106,6 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.setText("&Toggle Me [CTRL+I]" );
     _toggleButton.setToggle(true);  
     _toggleButton.setShortcut( &key );
-    _toggleButton.move( Gfx::PointF(20,30) );
     _toggleButton.setMargin(5);
     _toggleButton.setPadding(5);
     _toggleButton.setIcon(icon, icon.minimumSize());
@@ -118,7 +116,6 @@ ChildW::ChildW(const std::string& title)
     _dialogButton.setName("DialogButton");  
     _dialogButton.setText("&&Dia&log [CTRL+D]&");
     _dialogButton.setShortcut( &dKey );
-    _dialogButton.move( Gfx::PointF(20,100));
     _dialogButton.setMargin(5);
     _dialogButton.setPadding(5);
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
@@ -134,7 +131,6 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setName("CloseButton"); 
     _closeButton.setText("Close App [CTRL+X]");
     _closeButton.setShortcut(&xKey);
-    _closeButton.move( Gfx::PointF(20,200) );
     _closeButton.setMargin(5);
     _closeButton.setPadding(5);
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
@@ -142,7 +138,6 @@ ChildW::ChildW(const std::string& title)
     _checkBox.setState(CheckBox::Unspecified);
     _checkBox.setName("CheckBox"); 
     _checkBox.setText("Ch&eck Me");
-    _checkBox.move( Gfx::PointF(0, 0) );
 
     _checkBox.setMargin(5);
     _checkBox.setPadding(5);
@@ -177,13 +172,11 @@ ChildW::ChildW(const std::string& title)
     }
 
     _progressBar.setName("ProgressBar"); 
-    _progressBar.move( Gfx::PointF(0, 0) );
     _progressBar.setRange(0, 100);
     _progressBar.setMargin(5);
     _progressBar.setPadding(5);
 
     _slider.setName("Slider"); 
-    _slider.move( Gfx::PointF(0, 0) );
     _slider.setMargin(5);
     _slider.setPadding(5);
     _slider.setRange(0, 100);
@@ -191,7 +184,6 @@ ChildW::ChildW(const std::string& title)
     _slider.positionChanged() += Pt::slot(_progressBar, &ProgressBar::setValue);
 
     _spinBox.setName("SpinBox"); 
-    _spinBox.move( Gfx::PointF(0, 0) );
     _spinBox.setMargin(5);
     _spinBox.valueEdited() += Pt::slot(*this, &ChildW::checkSpinBox);
 
@@ -207,7 +199,6 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.addItem(_slider, DockingLayout::Bottom);
     _buttonBar.addItem(_spinBox, DockingLayout::Bottom);
  
-    _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");
     _childView.setPadding(20); 
     _childView.addItem(_textLabel, DockingLayout::Fill);
