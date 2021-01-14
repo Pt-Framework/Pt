@@ -79,6 +79,8 @@ void FlowLayout::setReverse(bool b)
 
 Gfx::SizeF FlowLayout::onMeasure(const SizePolicy& policy)
 {
+    Base::onMeasure(policy);
+
     switch(_direction)
     {
         default:
@@ -105,6 +107,8 @@ Gfx::SizeF FlowLayout::onMeasure(const SizePolicy& policy)
 
 void FlowLayout::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+
     switch(_direction)
     {
         default:

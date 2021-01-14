@@ -247,6 +247,8 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
 
 void GridLayout::onLayout(const Gfx::RectF& rect)
 {
+    Layout::onLayout(rect);
+
     //
     // determine the cell size from maximum item width and height
     //

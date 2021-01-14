@@ -47,7 +47,7 @@ Widget::Widget()
 , _window(0)
 , _parent(0)
 , _invalidates(0)
-, _isLayouting(true)
+, _isLayoutInvalid(true)
 , _visible(true)
 , _enabled(true)
 , _enabledState(true)
@@ -644,19 +644,13 @@ void Widget::relayout()
 {
   if( window() )
   {
-      _isLayouting = true;
+      _isLayoutInvalid = true;
 
       if( parent() )
           parent()->relayout();
       else
           window()->relayout();
   }
-}
-
-
-bool Widget::isLayouting() const
-{
-    return _isLayouting;
 }
 
 
@@ -696,7 +690,7 @@ void Widget::measure(const SizePolicy& policy)
         contentPolicy.setWidth( _minimumSize.width() );
     }
 
-    bool doMeasure = contentPolicy != _lastPolicy || _isLayouting;
+    bool doMeasure = contentPolicy != _lastPolicy || _isLayoutInvalid;
 
     if(doMeasure)
     {
@@ -761,15 +755,25 @@ void Widget::layout(const Gfx::RectF& r)
     //
     Gfx::RectF rect = align(r);
 
+    //bool moved = rect.topLeft() != _position;
+    //bool resized = rect.size() != _size;
+    //bool isChanged = moved || resized || _isLayoutInvalid;
+
     //
-    // update position and size
+    // layout content
+    //
+    onLayout(rect);
+    
+    _isLayoutInvalid = false;
+}
+
+
+void Widget::onLayout(const Gfx::RectF& rect)
+{
+    //
+    // update widget position
     //
     bool moved = rect.topLeft() != _position;
-    bool resized = rect.size() != _size;
-    bool isChanged = moved || resized || _isLayouting;
-
-    _isLayouting = false;
-
     if(moved)
     {
         const Gfx::PointF& p = rect.topLeft();
@@ -787,6 +791,10 @@ void Widget::layout(const Gfx::RectF& r)
         _position = p;
     }
 
+    //
+    // update widget size
+    //
+    bool resized = rect.size() != _size;
     if(resized)
     {
         const Gfx::SizeF& s = rect.size();
@@ -803,37 +811,6 @@ void Widget::layout(const Gfx::RectF& r)
 
         _size = s;
     }
-
-    //
-    // layout this widget and its contents
-    //
-
-    // TODO: possibly only if position in window has changed
-    onLayoutChanged(rect); // rename: onLayout(rect);
-
-    if(isChanged)
-    {       
-        onLayout(rect); // rename: onLayoutContent(rect);
-    }
-    else
-    {
-        std::vector<Widget*>::iterator it;
-        for(it = _children.begin(); it != _children.end(); ++it)
-        {
-            Widget* widget = *it;
-            widget->layout( widget->geometry() );
-        }
-    }
-}
-
-
-void Widget::onLayoutChanged(const Gfx::RectF& rect)
-{
-}
-
-
-void Widget::onLayout(const Gfx::RectF& rect)
-{
 }
 
 

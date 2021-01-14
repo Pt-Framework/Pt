@@ -214,8 +214,6 @@ class PT_HMI_API Widget : public Visual
 
         void layout(double x, double y, double width, double height);
 
-        bool isLayouting() const;
-
 
         // outer spacing
         const Spacing& margin() const;
@@ -293,8 +291,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayoutChanged(const Gfx::RectF& rect);
-
         virtual void onLayout(const Gfx::RectF& rect);
 
 
@@ -362,7 +358,7 @@ class PT_HMI_API Widget : public Visual
         Widget*                      _parent; 
 
         int                          _invalidates;
-        bool                         _isLayouting;
+        bool                         _isLayoutInvalid;
 
         bool                         _visible;
         bool                         _enabled;

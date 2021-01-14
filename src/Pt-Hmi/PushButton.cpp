@@ -322,7 +322,16 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 
 void PushButton::onLayout(const Gfx::RectF& rect)
 {
+    bool resized = rect.size() != size();
+
     Base::onLayout(rect);
+
+    if( ! resized )
+    {
+      //static int nn = 0;
+      //std::clog << ++nn << " SKIP LAYOUT: " << typeid(*this).name() << std::endl;
+      return;
+    }
 
     layoutContent();
 }
@@ -427,7 +436,7 @@ void PushButton::onInvalidate()
 
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 
-    layoutContent();
+    //layoutContent();
 
     Base::onInvalidate();
 }

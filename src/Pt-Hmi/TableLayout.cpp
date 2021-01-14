@@ -188,6 +188,8 @@ Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
 
 void TableLayout::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+
     //
     // calculate row sizes
     //

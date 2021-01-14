@@ -368,6 +368,8 @@ void TabView::onInvalidate()
 
 Gfx::SizeF TabView::onMeasure(const SizePolicy& policy)
 {
+    Base::onMeasure(policy);
+
     _layout.measure(policy);
     return _layout.preferredSize();
 }
@@ -375,6 +377,8 @@ Gfx::SizeF TabView::onMeasure(const SizePolicy& policy)
 
 void TabView::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+
     Gfx::PointF pos(padding().left() + _layout.margin().left(), 
                     padding().top()  + _layout.margin().top());
         
@@ -391,6 +395,8 @@ void TabView::onLayout(const Gfx::RectF& rect)
 
 void TabView::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
+    //Base::onPaint(surface, rect);
+
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)

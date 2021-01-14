@@ -97,8 +97,10 @@ void Control::onInvalidate()
 }
 
 
-void Control::onLayoutChanged(const Gfx::RectF& rect)
+void Control::onLayout(const Gfx::RectF& rect)
 {
+    Widget::onLayout(rect);
+
     Window* window = this->window();
     if( ! window )
         return;
@@ -108,14 +110,6 @@ void Control::onLayoutChanged(const Gfx::RectF& rect)
 
     Gfx::RectF surfaceRect( pos, size() );
     _surface.attach(surface, surfaceRect);
-
-    Widget::onLayoutChanged(rect);
-}
-
-
-void Control::onLayout(const Gfx::RectF& rect)
-{
-    Widget::onLayout(rect);
 }
 
 

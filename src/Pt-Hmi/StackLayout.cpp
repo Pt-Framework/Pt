@@ -132,6 +132,8 @@ void StackLayout::setCurrent(std::size_t n)
 
 Gfx::SizeF StackLayout::onMeasure(const SizePolicy& policy)
 {
+    Base::onMeasure(policy);
+
     Gfx::SizeF s;
 
     std::vector<Widget*>::iterator it;
@@ -153,6 +155,8 @@ Gfx::SizeF StackLayout::onMeasure(const SizePolicy& policy)
 
 void StackLayout::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+
     Widget* widget = widgetAt(_current);
 
     if(widget)

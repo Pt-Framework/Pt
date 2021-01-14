@@ -418,7 +418,7 @@ void Label::onInvalidate()
     if( _icon.empty() )
     {
         _picture.set( Pt::Gfx::Image() );
-        layoutText();
+        //layoutText();
     }
     else
     {
@@ -426,7 +426,7 @@ void Label::onInvalidate()
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _picture.set(iconImage);
 
-        layoutImage();
+        //layoutImage();
     }
 }
 
