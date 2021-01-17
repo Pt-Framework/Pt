@@ -101,21 +101,31 @@ void Control::onLayout(const Gfx::RectF& rect)
 {
     Widget::onLayout(rect);
 
-    Window* window = this->window();
-    if( ! window )
-        return;
+    // Window* window = this->window();
+    // if( ! window )
+    //     return;
  
-    Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
-    Gfx::PaintSurface& surface = window->surface();
+    // Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
+    // Gfx::PaintSurface& surface = window->surface();
 
-    Gfx::RectF surfaceRect( pos, size() );
-    _surface.attach(surface, surfaceRect);
+    // Gfx::RectF surfaceRect( pos, size() );
+    // _surface.attach(surface, surfaceRect);
 }
 
 
 void Control::onPaintEvent(const PaintEvent& ev)
 {
     Widget::onPaintEvent(ev);
+
+    Window* window = this->window();
+    if( ! window )
+        return;
+
+    Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
+    Gfx::PaintSurface& surface = window->surface();
+
+    Gfx::RectF surfaceRect( pos, size() );
+    _surface.attach(surface, surfaceRect);
 
     onPaint( _surface, ev.rect() );
 }

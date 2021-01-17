@@ -206,6 +206,8 @@ class PT_HMI_API Widget : public Visual
 
         Gfx::SizeF preferredSize() const;
 
+        bool isLayoutInvalid() const;
+
         void measure(const SizePolicy& policy);
 
         void layout(const Gfx::RectF& rect);

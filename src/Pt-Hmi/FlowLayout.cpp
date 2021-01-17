@@ -131,7 +131,6 @@ void FlowLayout::onLayout(const Gfx::RectF& rect)
 }
 
 
-
 Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
 {
     std::vector<Widget*>::const_iterator it = widgets().begin();
