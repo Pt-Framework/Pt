@@ -70,6 +70,12 @@ void PaintRegion::attach(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
+void PaintRegion::reset(const Gfx::RectF& rect)
+{
+    _area = rect;
+}
+
+
 void PaintRegion::detach()
 {
     if(_surface)

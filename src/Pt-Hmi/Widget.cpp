@@ -662,6 +662,9 @@ bool Widget::isLayoutInvalid() const
 
 void Widget::measure(const SizePolicy& policy)
 {
+    //static int nn = 0;
+    //std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nn << std::endl;
+
     SizePolicy contentPolicy = _sizePolicy;
 
     // use stricter size mode of parent and, if parent is fixed,
@@ -700,9 +703,6 @@ void Widget::measure(const SizePolicy& policy)
 
     if(doMeasure)
     {
-        //static int nnn = 0;
-        //std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nnn << std::endl;
-
         _lastPolicy = contentPolicy;
 
         if( contentPolicy.vertical() != SizePolicy::Fixed ||
@@ -718,9 +718,8 @@ void Widget::measure(const SizePolicy& policy)
         else if( _preferredSize.height() < _minimumSize.height() )
             _preferredSize.setHeight( _minimumSize.height() );
 
-
         if(contentPolicy.vertical() == SizePolicy::Maximum)
-            _preferredSize.setHeight( std::min<double>( _preferredSize.height(),
+            _preferredSize.setHeight( std::min( _preferredSize.height(),
                                                 contentPolicy.height() ) );
 
         // use fixed width, if size mode is fixed
@@ -730,8 +729,8 @@ void Widget::measure(const SizePolicy& policy)
             _preferredSize.setWidth( _minimumSize.width() );
 
         if(contentPolicy.horizontal() == SizePolicy::Maximum)
-            _preferredSize.setWidth( std::min<double>( _preferredSize.width(),
-                                                contentPolicy.width() ) );
+            _preferredSize.setWidth( std::min( _preferredSize.width(),
+                                               contentPolicy.width() ) );
     }
 }
 
@@ -756,8 +755,8 @@ void Widget::layout(double x, double y, double width, double height)
 
 void Widget::layout(const Gfx::RectF& r)
 {
-    //static int nnn = 0;
-    //std::clog << "LAYOUT: " << typeid(*this).name() << " " << ++nnn << std::endl;
+    //static int nn = 0;
+    //std::clog << "LAYOUT: " << typeid(*this).name() << " " << ++nn << std::endl;
 
     //
     // align to physical pixel grid
@@ -789,7 +788,6 @@ void Widget::layout(const Gfx::RectF& r)
     //
     // update widget size
     //
-
     bool resized = rect.size() != _size;
     
     if(resized)

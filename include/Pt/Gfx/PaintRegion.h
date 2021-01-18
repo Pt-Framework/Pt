@@ -58,6 +58,8 @@ class PT_GFX_API PaintRegion : public virtual PaintSurface
 
         void detach();
 
+        void reset(const Gfx::RectF& rect);
+
         virtual Image toImage(const Gfx::ImageFormat& format) const;
 
     protected:

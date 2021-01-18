@@ -107,15 +107,9 @@ void Control::onPaintEvent(const PaintEvent& ev)
 {
     Widget::onPaintEvent(ev);
 
-    Window* window = this->window();
-    if( ! window )
-        return;
-
     Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
-    Gfx::PaintSurface& surface = window->surface();
-
     Gfx::RectF surfaceRect( pos, size() );
-    _surface.attach(surface, surfaceRect);
+    _surface.reset(surfaceRect);
 
     onPaint( _surface, ev.rect() );
 }
