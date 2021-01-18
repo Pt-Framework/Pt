@@ -144,6 +144,7 @@ class PT_HMI_API PushButton : public Button
         Gfx::SizeF                _iconSize;
         Gfx::PointF               _iconPos;
         Gfx::PointF               _textPos;
+        Gfx::FontMetrics          _textMetrics;
                                   
         FacetPtr<ButtonRenderer>  _renderer;
         bool                      _hasRenderer;

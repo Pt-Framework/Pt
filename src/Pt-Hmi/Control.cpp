@@ -99,17 +99,7 @@ void Control::onInvalidate()
 
 void Control::onLayout(const Gfx::RectF& rect)
 {
-    Widget::onLayout(rect);
-
-    // Window* window = this->window();
-    // if( ! window )
-    //     return;
- 
-    // Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
-    // Gfx::PaintSurface& surface = window->surface();
-
-    // Gfx::RectF surfaceRect( pos, size() );
-    // _surface.attach(surface, surfaceRect);
+     Widget::onLayout(rect);
 }
 
 
@@ -128,6 +118,16 @@ void Control::onPaintEvent(const PaintEvent& ev)
     _surface.attach(surface, surfaceRect);
 
     onPaint( _surface, ev.rect() );
+}
+
+
+void Control::onMoveEvent(const MoveEvent& ev)
+{
+}
+
+
+void Control::onResizeEvent(const ResizeEvent& ev)
+{
 }
 
 

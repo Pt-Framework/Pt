@@ -756,19 +756,19 @@ void Widget::layout(double x, double y, double width, double height)
 
 void Widget::layout(const Gfx::RectF& r)
 {
+    //static int nnn = 0;
+    //std::clog << "LAYOUT: " << typeid(*this).name() << " " << ++nnn << std::endl;
+
     //
     // align to physical pixel grid
     //
     Gfx::RectF rect = align(r);
 
-    bool moved = rect.topLeft() != _position;
-    bool resized = rect.size() != _size;
-    if(resized /*|| moved*/)
-        _isLayoutInvalid = true;
-
     //
     // update widget position
     //
+    bool moved = rect.topLeft() != _position;
+
     if(moved)
     {
         const Gfx::PointF& p = rect.topLeft();
@@ -789,6 +789,9 @@ void Widget::layout(const Gfx::RectF& r)
     //
     // update widget size
     //
+
+    bool resized = rect.size() != _size;
+    
     if(resized)
     {
         const Gfx::SizeF& s = rect.size();
@@ -809,6 +812,9 @@ void Widget::layout(const Gfx::RectF& r)
     //
     // layout content
     //
+    if(resized /*|| moved*/)
+        _isLayoutInvalid = true;
+
     if(_isLayoutInvalid)
         onLayout(rect);
     
@@ -818,47 +824,6 @@ void Widget::layout(const Gfx::RectF& r)
 
 void Widget::onLayout(const Gfx::RectF& rect)
 {
-    // //
-    // // update widget position
-    // //
-    // bool moved = rect.topLeft() != _position;
-    // if(moved)
-    // {
-    //     const Gfx::PointF& p = rect.topLeft();
-
-    //     Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
-
-    //     Gfx::PointF to = p - _position;
-    //     updateRect.unify( Gfx::RectF(to, _size) );
-
-    //     MoveEvent mev(vid(), p);
-    //     Application::instance().loop().commitEvent(mev);
-
-    //     update(updateRect);
-
-    //     _position = p;
-    // }
-
-    // //
-    // // update widget size
-    // //
-    // bool resized = rect.size() != _size;
-    // if(resized)
-    // {
-    //     const Gfx::SizeF& s = rect.size();
-
-    //     Gfx::SizeF updateSize( std::max( _size.width(), s.width()),
-    //                            std::max( _size.height(), s.height()) );
-
-    //     Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
-
-    //     ResizeEvent rev(vid(), s);
-    //     Application::instance().loop().commitEvent(rev);
-
-    //     update(updateRect);
-
-    //     _size = s;
-    // }
 }
 
 

@@ -288,10 +288,15 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 
 Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
-    Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, text() );
+    Gfx::Painter _painter( surface() );
+    _painter.setFont(_font);
 
-    double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
-    double textHeight = fm.height() + fm.descent(); // use descent as additional spacing
+    _textMetrics = _painter.fontMetrics( text() );
+
+    double spacing = _picture.empty() || text().empty() ? 0 : _textMetrics.height() * 0.5;
+
+    // use descent as additional spacing
+    double textHeight = _textMetrics.height() + _textMetrics.descent(); 
 
     Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
@@ -304,13 +309,13 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
         default:
         case Left:
         case Right:
-            itemsWidth = fm.width() + spacing + pictureWidth;
+            itemsWidth = _textMetrics.width() + spacing + pictureWidth;
             itemsHeight = std::max<double>(textHeight, pictureHeight);
             break;
 
         case Top:
         case Bottom:
-            itemsWidth = std::max<double>(fm.width(), pictureWidth);
+            itemsWidth = std::max<double>(_textMetrics.width(), pictureWidth);
             itemsHeight = textHeight + spacing + pictureHeight;
             break;  
     }
@@ -339,15 +344,13 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 
 void PushButton::layoutContent()
 {
-    Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, text() );
-
-    double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
+    double spacing = _picture.empty() || text().empty() ? 0 : _textMetrics.height() * 0.5;
     
     Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
-    double itemsWidth = fm.width() + spacing + pictureWidth;
-    double itemsHeight = fm.height() + spacing + pictureHeight;
+    double itemsWidth = _textMetrics.width() + spacing + pictureWidth;
+    double itemsHeight = _textMetrics.height() + spacing + pictureHeight;
 
     double pictureX = 0;
     double pictureY = 0;
@@ -362,14 +365,14 @@ void PushButton::layoutContent()
             pictureY = (size().height() - pictureHeight) / 2;
     
             textX = pictureX + pictureWidth + spacing;
-            textY = ((size().height() - fm.height()) / 2) + fm.ascent();
+            textY = ((size().height() - _textMetrics.height()) / 2) + _textMetrics.ascent();
             break;
 
         case Right:
             textX = (size().width() - itemsWidth) / 2;
-            textY = ((size().height() - fm.height()) / 2) + fm.ascent();
+            textY = ((size().height() - _textMetrics.height()) / 2) + _textMetrics.ascent();
             
-            pictureX = textX + fm.width() + spacing;
+            pictureX = textX + _textMetrics.width() + spacing;
             pictureY = (size().height() - pictureHeight) / 2;
             break;
 
@@ -377,16 +380,16 @@ void PushButton::layoutContent()
             pictureX = (size().width() - pictureWidth) / 2;
             pictureY = (size().height() - itemsHeight) / 2;
     
-            textX = (size().width() - fm.width()) / 2;
-            textY = pictureY + pictureHeight + spacing + fm.ascent();
+            textX = (size().width() - _textMetrics.width()) / 2;
+            textY = pictureY + pictureHeight + spacing + _textMetrics.ascent();
             break;  
 
         case Bottom:
-            textX = (size().width() - fm.width()) / 2;
-            textY = ((size().height() - itemsHeight) / 2) + fm.ascent();
+            textX = (size().width() - _textMetrics.width()) / 2;
+            textY = ((size().height() - itemsHeight) / 2) + _textMetrics.ascent();
 
             pictureX = (size().width() - pictureWidth) / 2;
-            pictureY = textY + fm.descent() + spacing;
+            pictureY = textY + _textMetrics.descent() + spacing;
             break;  
     }
 
