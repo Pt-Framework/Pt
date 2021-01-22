@@ -109,7 +109,7 @@ class PT_HMI_API Screen : public WindowBase
 
         virtual void onEnable(Window& w, bool enable);
 
-        virtual void onUpdate(Window& w, const Gfx::RectF& rect);
+        //virtual void onUpdate(Window& w, const Gfx::RectF& rect);
 
     protected:
         virtual void onEvent( const Event& ev );

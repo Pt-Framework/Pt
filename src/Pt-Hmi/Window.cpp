@@ -705,6 +705,12 @@ Gfx::SizeF Window::onSize() const
 }
 
 
+//void Window::onUpdate(Window& child, const Gfx::RectF& rect)
+//{
+//     _windowManager.onUpdate(child, rect);
+//}
+
+
 void Window::onUpdate(const Gfx::RectF& rect)
 {
     if( ! _init )
@@ -712,13 +718,34 @@ void Window::onUpdate(const Gfx::RectF& rect)
 
     _damageRect.unify(rect);
 
-    _parent->onUpdate(*this, rect);
+    //_parent->onUpdate(*this, rect);
+
+    Gfx::PointF updatePos = toParent( rect.topLeft() );
+    Gfx::RectF updateRect( updatePos, rect.size() );
+
+    _parent->update(updateRect);
 }
 
 
-void Window::onUpdate(Window& child, const Gfx::RectF& rect)
+void Window::invalidate()
 {
-     _windowManager.onUpdate(child, rect);
+    //++_invalidates;
+
+    InvalidateEvent ev(vid());
+    Application::instance().loop().commitEvent(ev);
+}
+
+
+void Window::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    //--_invalidates;
+
+    //if(_invalidates > 0)
+    //  return;
+
+    onInvalidate();
+
+    //relayout();
 }
 
 
@@ -727,12 +754,6 @@ void Window::onInvalidate()
     _backgroundBrush = background();
 
     update();
-}
-
-
-void Window::onInvalidateEvent(const InvalidateEvent& ev)
-{
-    onInvalidate();
 }
 
 
@@ -755,26 +776,18 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     if(_layouts > 0)
         return;
 
-    //std::clog << "--- LAYOUT ---" << std::endl;
-
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize(_size);
-    onMeasure(policy);
+    measure(policy);
 
     Gfx::RectF layoutRect(_size);
-    onLayout(layoutRect);
+    layout(layoutRect);
 }
 
 
 Gfx::SizeF Window::measure(const SizePolicy& policy)
 {
     return onMeasure(policy);
-}
-
-
-void Window::layout(const Gfx::RectF& rect)
-{
-    onLayout(rect);
 }
 
 
@@ -790,6 +803,12 @@ Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
 }
 
 
+void Window::layout(const Gfx::RectF& rect)
+{
+    onLayout(rect);
+}
+
+
 void Window::onLayout(const Gfx::RectF& rect)
 {
     if( _mainWidget )
@@ -797,33 +816,41 @@ void Window::onLayout(const Gfx::RectF& rect)
 }
 
 
-void Window::repaint()
+void Window::paint(const Gfx::RectF& rect)
 {
-    if( _damageRect.isNull() )
+    if( rect.isNull() )
         return;
 
     if( ! this->isVisible() )
         return;
 
-    onPaintBackground(_damageRect);
+    _damageRect = _damageRect.intersect( Gfx::RectF(_size) );
+
+    onPaintBackground(rect);
 
     if( mainWidget() )
     {
         // TODO: possibly use device units, because intersect() can not
         //       consider logic sub-pixels
-        Gfx::RectF updateRect = mainWidget()->geometry().intersect(_damageRect);
+        Gfx::RectF updateRect = mainWidget()->geometry().intersect(rect);
 
         if( ! updateRect.isNull() )
-            mainWidget()->repaint(_damageRect);
+            mainWidget()->paint(rect);
     }
 
     std::vector<Window*>::iterator child;
     for(child = _windows.begin(); child != _windows.end(); ++child)
     {
-        (*child)->repaint();
+        Gfx::PointF winPos = (*child)->fromParent( rect.topLeft() );
+        Gfx::RectF winRect( winPos, rect.size() );
+
+        Gfx::RectF clipRectChild( (*child)->size() );
+        winRect = winRect.intersect( Gfx::RectF( (*child)->size() ) );
+
+        (*child)->paint(winRect);
     }
 
-    PaintEvent pev(vid(), _damageRect);
+    PaintEvent pev(vid(), rect);
     Application::instance().loop().commitEvent(pev);
 
     _damageRect.clear();

@@ -53,8 +53,6 @@ class PT_HMI_API WindowBase : public Visual
 
         Gfx::SizeF size() const;
 
-        void invalidate();
-
         void update();
 
         void update(const Gfx::RectF& rect);
@@ -67,6 +65,8 @@ class PT_HMI_API WindowBase : public Visual
         
         virtual void onUpdate(const Gfx::RectF& rect) = 0;
 
+        //virtual void onUpdate(Window& child, const Gfx::RectF& rect) = 0;
+
     protected:
         virtual void onInit(Window& w) = 0;
 
@@ -77,8 +77,6 @@ class PT_HMI_API WindowBase : public Visual
         virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const = 0;
 
         virtual double onScaleFactor(const Window& w) const = 0;
-
-        virtual void onUpdate(Window& child, const Gfx::RectF& rect) = 0;
 
         virtual void onShow(Window& w, bool visible) = 0; 
     

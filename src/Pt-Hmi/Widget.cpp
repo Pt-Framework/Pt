@@ -608,8 +608,7 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 
     onInvalidate();
 
-    if( parent() )
-        parent()->relayout();
+    relayout();
 }
 
 
@@ -629,8 +628,7 @@ void Widget::setSizePolicy(const SizePolicy& policy)
     _sizePolicy = policy;
     _sizePolicy.setSize( align(policy.size()) );
 
-    if( parent() )
-        parent()->relayout();
+    relayout();
 }
 
 
@@ -642,15 +640,19 @@ Gfx::SizeF Widget::preferredSize() const
 
 void Widget::relayout()
 {
-  if( window() )
-  {
-      _isLayoutInvalid = true;
+    _isLayoutInvalid = true;
 
-      if( parent() )
-          parent()->relayout();
-      else
-          window()->relayout();
-  }
+    Window* parentWindow = window();
+    Widget* parentWidget = parent();
+    
+    if(parentWidget)
+    {
+        parentWidget->relayout();
+    }
+    else if(parentWindow)
+    {
+        parentWindow->relayout();
+    }
 }
 
 
@@ -767,44 +769,18 @@ void Widget::layout(const Gfx::RectF& r)
     // update widget position
     //
     bool moved = rect.topLeft() != _position;
-
     if(moved)
     {
-        const Gfx::PointF& p = rect.topLeft();
-
-        Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
-
-        Gfx::PointF to = p - _position;
-        updateRect.unify( Gfx::RectF(to, _size) );
-
-        MoveEvent mev(vid(), p);
-        Application::instance().loop().commitEvent(mev);
-
-        update(updateRect);
-
-        _position = p;
+        move( rect.topLeft() );
     }
 
     //
     // update widget size
     //
     bool resized = rect.size() != _size;
-    
     if(resized)
     {
-        const Gfx::SizeF& s = rect.size();
-
-        Gfx::SizeF updateSize( std::max( _size.width(), s.width()),
-                               std::max( _size.height(), s.height()) );
-
-        Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
-
-        ResizeEvent rev(vid(), s);
-        Application::instance().loop().commitEvent(rev);
-
-        update(updateRect);
-
-        _size = s;
+        resize( rect.size() );
     }
 
     //
@@ -834,18 +810,42 @@ void Widget::update()
 
 void Widget::update(const Gfx::RectF& rect)
 {
-    Window* w = window();
-    if( ! w )
-        return;
-
-    Gfx::PointF updatePos = toWindow( rect.topLeft() );
-    Gfx::RectF updateRect( updatePos, rect.size() );
-
-    w->update(updateRect);
+    onUpdate(rect);
 }
 
 
-void Widget::repaint(const Gfx::RectF& rect)
+void Widget::onUpdate(const Gfx::RectF& rect)
+{
+    Window* parentWindow = window();
+    Widget* parentWidget = parent();
+
+    if(parentWidget)
+    {
+        Gfx::PointF updatePos = toParent( rect.topLeft() );
+        Gfx::RectF updateRect( updatePos, rect.size() );
+
+        parentWidget->update(updateRect);
+    }
+    else if(parentWindow)
+    {
+        Gfx::PointF updatePos = toWindow( rect.topLeft() );
+        Gfx::RectF updateRect( updatePos, rect.size() );
+
+        parentWindow->update(updateRect);
+    }
+
+    //Window* w = window();
+    //if( ! w )
+    //    return;
+
+    //Gfx::PointF updatePos = toWindow( rect.topLeft() );
+    //Gfx::RectF updateRect( updatePos, rect.size() );
+
+    //w->update(updateRect);
+}
+
+
+void Widget::paint(const Gfx::RectF& rect)
 {
     if( ! isVisible() )
         return;
@@ -872,7 +872,7 @@ void Widget::repaint(const Gfx::RectF& rect)
         // paint widget rect
         Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );
         updateRect.setOrigin(updatePos);
-        w->repaint(updateRect);
+        w->paint(updateRect);
     }
 }
 
@@ -985,40 +985,26 @@ const Gfx::PointF& Widget::position() const
 }
 
 
-void Widget::move(const Gfx::PointF& pos)
-{
-    if(pos == _position)
-        return;
-
-    _position = align(pos);
-
-    // relayout will not send a move event
-    MoveEvent mev(vid(), _position);
-    Application::instance().loop().commitEvent(mev);
-
-    if( parent() )
-        parent()->relayout();
-
-    // Gfx::PointF p = align(pos);
-
-    // Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
-
-    // Gfx::PointF to = p - _position;
-    // updateRect.unify( Gfx::RectF(to, _size) );
-
-    // MoveEvent mev(vid(), p);
-    // Application::instance().loop().commitEvent(mev);
-
-    // // update needs to refer to previous position
-    // update(updateRect);
-
-    // _position = p;
-}
-
-
 void Widget::move(double x, double y)
 {
     move( Gfx::PointF(x, y) );
+}
+
+
+void Widget::move(const Gfx::PointF& pos)
+{
+    Gfx::PointF p = align(pos);
+    Gfx::PointF to = p - _position;
+
+    Gfx::RectF updateRect(_size);
+    updateRect.unify( Gfx::RectF(to, _size) );
+
+    MoveEvent mev(vid(), p);
+    Application::instance().loop().commitEvent(mev);
+
+    update(updateRect);
+    
+    _position = p;
 }
 
 
@@ -1032,6 +1018,29 @@ const Gfx::SizeF& Widget::size() const
     return _size;
 }
 
+
+void Widget::resize(double width, double height)
+{
+    resize( Gfx::SizeF(width, height) );
+}
+
+
+void Widget::resize(const Gfx::SizeF& size)
+{
+    const Gfx::SizeF& s = align(size);
+
+    Gfx::SizeF updateSize( std::max( _size.width(), s.width()),
+                           std::max( _size.height(), s.height()) );
+
+    Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
+
+    ResizeEvent rev(vid(), s);
+    Application::instance().loop().commitEvent(rev);
+
+    update(updateRect);
+
+    _size = s;
+}
 
 
 void Widget::onResizeEvent(const ResizeEvent& ev)

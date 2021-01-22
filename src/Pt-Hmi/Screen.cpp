@@ -219,24 +219,6 @@ void Screen::onEnable(Window& w, bool enable)
 }
 
 
-void Screen::onUpdate(const Gfx::RectF& updateRect)
-{
-    _updateRect.unify(updateRect);
-    ++_updates;
-
-    UpdateEvent uev(vid(), _updateRect);
-    Application::instance().loop().commitEvent(uev);
-}
-
-
-void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
-{
-    Gfx::PointF pos = w.toScreen( updateRect.topLeft() );
-    Gfx::RectF rect( pos, updateRect.size() );
-    update(rect);
-}
-
-
 void Screen::onEvent(const Event& ev)
 {
     if(ev.typeInfo() == typeid(UpdateEvent) )
@@ -253,6 +235,24 @@ void Screen::onEvent(const Event& ev)
 }
 
 
+//void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
+//{
+//    Gfx::PointF pos = w.toScreen( updateRect.topLeft() );
+//    Gfx::RectF rect( pos, updateRect.size() );
+//    update(rect);
+//}
+
+
+void Screen::onUpdate(const Gfx::RectF& updateRect)
+{
+    _updateRect.unify(updateRect);
+    ++_updates;
+
+    UpdateEvent uev(vid(), _updateRect);
+    Application::instance().loop().commitEvent(uev);
+}
+
+
 void Screen::onUpdateEvent(const UpdateEvent& ev)
 {
     --_updates;
@@ -264,14 +264,19 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     //std::clog << std::endl;
     //_clock.start();
 
-    //std::clog << "Screen::onUpdateEvent" << std::endl;
+    //std::clog << "Screen::onUpdateEvent " << std::endl;
 
     const Gfx::RectF& screenRect = ev.rect();
 
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
-        (*it)->repaint();
+        Gfx::PointF winPos = (*it)->fromParent( screenRect.topLeft() );
+        Gfx::RectF winRect( winPos, screenRect.size() );
+
+        winRect = winRect.intersect( Gfx::RectF( (*it)->size() ) );
+
+        (*it)->paint(winRect);
     }
 
    _updateRect.clear();

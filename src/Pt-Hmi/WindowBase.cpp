@@ -51,19 +51,10 @@ Gfx::SizeF WindowBase::size() const
 }
 
 
-void WindowBase::invalidate()
-{
-    InvalidateEvent ev(vid());
-    Application::instance().loop().commitEvent(ev);
-}
-
-
 void WindowBase::update()
 {
-    Gfx::RectF updateRect( Gfx::PointF(0,0),
-                           size() );
-
-    onUpdate(updateRect);
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    onUpdate(rect);
 }
 
 

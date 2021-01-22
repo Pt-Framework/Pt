@@ -129,11 +129,13 @@ class PT_HMI_API Window : public WindowBase
 
     void relayout();
 
+    void invalidate();
+
     Gfx::SizeF measure(const SizePolicy& policy);
 
     void layout(const Gfx::RectF& rect);
 
-    void repaint();
+    void paint(const Gfx::RectF& rect);
 
     bool isActive() const;
 
@@ -248,7 +250,7 @@ class PT_HMI_API Window : public WindowBase
 
     virtual double onScaleFactor(const Window& w) const;
 
-    virtual void onUpdate(Window& w, const Gfx::RectF& rect);
+    //virtual void onUpdate(Window& w, const Gfx::RectF& rect);
 
     virtual void onShow(Window& w, bool visible);
 

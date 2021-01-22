@@ -166,7 +166,7 @@ class PT_HMI_API Widget : public Visual
 
         void update(const Gfx::RectF& rect);
 
-        void repaint(const Gfx::RectF& updateRect);
+        void paint(const Gfx::RectF& updateRect);
 
         bool isVisible() const;
 
@@ -182,13 +182,20 @@ class PT_HMI_API Widget : public Visual
 
         void releasePointer();
 
-        const Gfx::PointF& position() const;
 
-        void move(const Gfx::PointF& p);
+        const Gfx::PointF& position() const;
 
         void move(double x, double y);
 
+        void move(const Gfx::PointF& p);
+
+
         const Gfx::SizeF& size() const;
+
+        void resize(double width, double height);
+
+        void resize(const Gfx::SizeF& size);
+
 
         const Gfx::RectF geometry() const;
 
@@ -287,13 +294,15 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onRaise(Widget& w);
 
-
         virtual void onInvalidate();
 
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
+
+
+        virtual void onUpdate(const Gfx::RectF& rect);
 
 
         virtual void onSetActionKey(const Key& ak);
