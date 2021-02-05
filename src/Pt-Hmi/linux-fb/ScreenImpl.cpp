@@ -264,9 +264,9 @@ void ScreenImpl::onShow(Window& w, bool visible)
 }
 
 
-void ScreenImpl::onActivate(Window& w)
+void ScreenImpl::onActivate(Window& w, bool active)
 {
-    _windowManager.onActivate(&w);
+    _windowManager.onActivate(&w, active);
 }
 
 

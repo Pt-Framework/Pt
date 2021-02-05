@@ -105,7 +105,7 @@ class PT_HMI_API Screen : public WindowBase
 
         virtual void onShow(Window& w, bool visible);
 
-        virtual void onActivate(Window& w);
+        virtual void onActivate(Window& w, bool active);
 
         virtual void onEnable(Window& w, bool enable);
 

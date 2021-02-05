@@ -90,7 +90,7 @@ class ScreenImpl
 
         void onShow(Window& w, bool visible);
 
-        void onActivate(Window& w);
+        void onActivate(Window& w, bool active);
 
         void onEnable(Window& w, bool enable);
 };

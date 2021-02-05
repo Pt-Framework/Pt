@@ -139,7 +139,7 @@ class PT_HMI_API Window : public WindowBase
 
     bool isActive() const;
 
-    void activate();
+    void activate(bool active = true);
 
     bool isVisible() const;
 
@@ -254,7 +254,7 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onShow(Window& w, bool visible);
 
-    virtual void onActivate(Window& w);
+    virtual void onActivate(Window& w, bool active);
 
     virtual void onEnable(Window& w, bool enable);
 

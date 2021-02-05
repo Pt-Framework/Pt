@@ -1010,6 +1010,7 @@ void Widget::move(const Gfx::PointF& pos)
 
 void Widget::onMoveEvent(const MoveEvent& ev)
 {
+    _position = ev.position();
 }
 
 
@@ -1045,6 +1046,7 @@ void Widget::resize(const Gfx::SizeF& size)
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {
+    _size = ev.size();
 }
 
 

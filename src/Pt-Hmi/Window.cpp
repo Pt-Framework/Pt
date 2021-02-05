@@ -889,29 +889,32 @@ bool Window::isActive() const
 }
 
 
-void Window::activate()
+void Window::activate(bool active)
 {
-    _isActive = true;
+    _isActive = active;
 
     if( ! _init )
         return;
 
-    if(_parentWindow)
-        _parentWindow->activate();
+    _parent->onActivate(*this, active);
 
-    _parent->onActivate(*this);
+    ActivateEvent aev(vid(), active);
+    Application::instance().loop().commitEvent(aev);
 }
 
 
-void Window::onActivate(Window& w)
+void Window::onActivate(Window& w, bool active)
 {
-    _windowManager.onActivate(&w);
+    if(active)
+        activate();
+
+    _windowManager.onActivate(&w, active);
 }
 
 
 void Window::onActivateEvent(const ActivateEvent& ev)
 { 
-    _isActive = ev.isActive();
+    //_isActive = ev.isActive();
 }
 
 
@@ -1073,6 +1076,15 @@ void Window::move(const Gfx::PointF& p)
     //
     _position = align(p);
 
+    //
+    // send move event
+    //
+    MoveEvent mev( vid(), _position );
+    Application::instance().loop().commitEvent(mev);
+
+    //
+    // notify parent
+    //
     _parent->onMove(*this, _position);
 }
 
@@ -1085,7 +1097,7 @@ void Window::onMove(Window& w, const Gfx::PointF& to)
 
 void Window::onMoveEvent(const MoveEvent& ev)
 {    
-    _position = ev.position();
+    //_position = ev.position();
 }
 
 
@@ -1102,6 +1114,30 @@ void Window::resize(const Gfx::SizeF& s)
     //
     _size = align(s);
 
+    //
+    // maximum width and height
+    //
+    if( _size.width() > maximumSize().width() )
+        _size.setWidth( maximumSize().width() );
+
+    if( _size.height() > maximumSize().height() )
+        _size.setHeight( maximumSize().height() );
+
+    if( _size.width() < minimumSize().width() )
+        _size.setWidth( minimumSize().width() );
+
+    if( _size.height() < minimumSize().height() )
+        _size.setHeight( minimumSize().height() );
+
+    //
+    // send resize event
+    //
+    ResizeEvent rev( vid(), _size );
+    Application::instance().loop().commitEvent(rev);
+
+    //
+    // notify parent
+    //
     _parent->onResize(*this, _size);
 }
 
@@ -1114,7 +1150,7 @@ void Window::onResize(Window& w, const Gfx::SizeF& to)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
-    _size = ev.size();
+    //_size = ev.size();
 
     _surface.resize( ev.size() );
 

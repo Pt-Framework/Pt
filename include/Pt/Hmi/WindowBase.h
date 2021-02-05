@@ -80,7 +80,7 @@ class PT_HMI_API WindowBase : public Visual
 
         virtual void onShow(Window& w, bool visible) = 0; 
     
-        virtual void onActivate(Window& w) = 0; 
+        virtual void onActivate(Window& w, bool active) = 0; 
 
         virtual void onEnable(Window& w, bool enable) = 0;
 

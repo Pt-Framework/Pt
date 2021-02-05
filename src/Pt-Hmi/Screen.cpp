@@ -205,10 +205,10 @@ void Screen::onShow(Window& w, bool visible)
 }
 
 
-void Screen::onActivate(Window& w)
+void Screen::onActivate(Window& w, bool active)
 {
     w.impl()->activate();
-    _impl->onActivate(w);
+    _impl->onActivate(w, active);
 }
 
 

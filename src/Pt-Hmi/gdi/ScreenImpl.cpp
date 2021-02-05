@@ -165,26 +165,8 @@ void ScreenImpl::onShow(Window& w, bool visible)
 }
 
 
-void ScreenImpl::onActivate(Window& w)
+void ScreenImpl::onActivate(Window& w, bool active)
 {
-    //const std::vector<Window*>& windows = w.windows();
-    //
-    //std::vector<Window*>::const_iterator it;
-    //for(it = windows.begin(); it != windows.end(); ++it)
-    //{
-    //    if((*it)->isActive() && *it != &w)
-    //    {
-    //        ActivateEvent aev( (*it)->vid(), false );
-    //    }
-    //}
-
-    //Window* parent = w.parent();
-
-    //if(parent)
-    //    onActivate(*parent);
-
-    //ActivateEvent aev( w.vid(), true );
-    //Application::instance().loop().commitEvent(aev);
 }
 
 

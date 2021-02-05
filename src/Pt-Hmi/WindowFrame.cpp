@@ -566,11 +566,11 @@ void WindowFrame::update(const Gfx::RectF& rect)
 }
 
 
-void WindowFrame::moveEvent(const MoveEvent& mev)
+void WindowFrame::moveEvent(const Gfx::PointF& pos)
 {
-    _frameRect.setOrigin( mev.position() );
+    _frameRect.setOrigin( pos );
 
-    Gfx::PointF clientPos = mev.position();
+    Gfx::PointF clientPos = pos;
     clientPos.addX(_borderWidth);
     clientPos.addY(_borderWidth + _titleHeight);
     _clientRect.setOrigin(clientPos);
@@ -579,11 +579,11 @@ void WindowFrame::moveEvent(const MoveEvent& mev)
 }
 
 
-void WindowFrame::resizeEvent(const ResizeEvent& rev)
+void WindowFrame::resizeEvent(const Gfx::SizeF& size)
 {
-    _clientRect.setSize( rev.size() );
+    _clientRect.setSize(size);
 
-    Gfx::SizeF frameSize = rev.size();
+    Gfx::SizeF frameSize = size;
     frameSize.addWidth(2 * _borderWidth);
     frameSize.addHeight(2 * _borderWidth);
     frameSize.addHeight(_titleHeight);

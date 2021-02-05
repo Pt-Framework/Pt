@@ -122,6 +122,15 @@ void WindowManager::remove(Window& w)
 }
 
 
+Window* WindowManager::activeWindow()
+{
+    if(_activeWindow)
+        return _activeWindow->window();
+
+    return 0;
+}
+
+
 void WindowManager::setScreen(Screen* screen)
 {
     std::vector<WindowFrame*>::iterator wit;
@@ -223,7 +232,7 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
     {
         if( ! windowFrame && _activeWindow )
         {
-            onActivate(0);
+            _activeWindow->window()->activate(false);
         }
         
         if( windowFrame && ! windowFrame->window()->isActive())
@@ -285,7 +294,7 @@ bool WindowManager::touchEvent( const TouchEvent& tev )
     {
         if( ! windowFrame && _activeWindow )
         {
-            onActivate(0);
+            windowFrame->window()->activate(false);
         }
         
         if( windowFrame && ! windowFrame->window()->isActive())
@@ -401,30 +410,30 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& sz)
 {   
     Gfx::SizeF to = sz;
 
-    if( to.width() > w.maximumSize().width() )
-        to.setWidth( w.maximumSize().width() );
+    //if( to.width() > w.maximumSize().width() )
+    //    to.setWidth( w.maximumSize().width() );
 
-    if( to.height() > w.maximumSize().height() )
-        to.setHeight( w.maximumSize().height() );
+    //if( to.height() > w.maximumSize().height() )
+    //    to.setHeight( w.maximumSize().height() );
 
-    if( to.width() < w.minimumSize().width() )
-        to.setWidth( w.minimumSize().width() );
+    //if( to.width() < w.minimumSize().width() )
+    //    to.setWidth( w.minimumSize().width() );
 
-    if( to.height() < w.minimumSize().height() )
-        to.setHeight( w.minimumSize().height() );
+    //if( to.height() < w.minimumSize().height() )
+    //    to.setHeight( w.minimumSize().height() );
 
     WindowFrame* frame = findWindow(w);
     if( ! frame )
         return;
 
-    ResizeEvent rev(w.vid(), to);
-    Application::instance().loop().commitEvent(rev);
+    //ResizeEvent rev(w.vid(), to);
+    //Application::instance().loop().commitEvent(rev);
     
     // TODO: move updating to frame
 
     Gfx::RectF updateRect = frame->frameRect();
     
-    frame->resizeEvent(rev);
+    frame->resizeEvent(to);
     
     updateRect.unify( frame->frameRect() );
 
@@ -444,14 +453,14 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
     if( ! frame )
         return;
 
-    MoveEvent mev(w.vid(), to);
-    Application::instance().loop().commitEvent(mev);
+    //MoveEvent mev(w.vid(), to);
+    //Application::instance().loop().commitEvent(mev);
     
     // TODO: move updating to frame
 
     Gfx::RectF updateRect = frame->frameRect();
 
-    frame->moveEvent(mev);
+    frame->moveEvent(to);
 
     updateRect.unify( frame->frameRect() );
 
@@ -488,16 +497,8 @@ void WindowManager::onShow(Window& w, bool visible)
 }
 
 
-void WindowManager::onActivate(Window* w)
+void WindowManager::onActivate(Window* w, bool active)
 {
-    if(_activeWindow && _activeWindow->window() != w)
-    {
-        ActivateEvent aev(_activeWindow->window()->vid(), false);
-        Application::instance().loop().commitEvent(aev);
-        _activeWindow->update();
-        _activeWindow = 0;
-    }
-
     if( ! w )
         return;
 
@@ -505,26 +506,40 @@ void WindowManager::onActivate(Window* w)
     if( ! frame )
         return;
 
-    // raise active frame
-    std::vector<WindowFrame*>::iterator it =
-        std::find(_windows.begin(), _windows.end(), frame);
-
-    _windows.erase(it);
-
-    if(_topMostWindow && frame != _topMostWindow)
+    if(active)
     {
-        _windows.insert(--_windows.end(), frame);
+        //
+        // deactivate other active window
+        //
+        if(_activeWindow && _activeWindow == frame)
+            _activeWindow->window()->activate(false);
+
+        //
+        // raise to top of window stack
+        //
+        std::vector<WindowFrame*>::iterator it =
+            std::find(_windows.begin(), _windows.end(), frame);
+
+        _windows.erase(it);
+
+        if(_topMostWindow && frame != _topMostWindow)
+        {
+            _windows.insert(--_windows.end(), frame);
+        }
+        else
+        {
+            _windows.push_back(frame);
+        }
+
+        _activeWindow = frame;
     }
     else
     {
-        _windows.push_back(frame);
+        if(frame == _activeWindow)
+            _activeWindow = 0;
     }
-    
-    ActivateEvent aev(w->vid(), true);
-    Application::instance().loop().commitEvent(aev);
 
-    _activeWindow = frame;
-    _activeWindow->update();
+    frame->update();
 }
 
 

@@ -139,7 +139,7 @@ void ScreenImpl::onShow(Window& w, bool visible)
 }
 
 
-void ScreenImpl::onActivate(Window& w)
+void ScreenImpl::onActivate(Window& w, bool active)
 {
 }
 
