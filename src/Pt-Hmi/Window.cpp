@@ -251,16 +251,16 @@ void Window::onDeinit(Window& w)
 }
 
 
-WindowBase* Window::parent()
-{
-   return _parent;
-}
+// WindowBase* Window::parent()
+// {
+//    return _parent;
+// }
 
 
-const WindowBase* Window::parent() const
-{
-    return _parent;
-}
+// const WindowBase* Window::parent() const
+// {
+//     return _parent;
+// }
 
 
 Window& Window::mainWindow()
@@ -305,7 +305,7 @@ const std::vector<Window*>& Window::windows() const
 
 void Window::add(Window& child)
 {
-    if( child.parent() == this )
+    if( child.parentWindow() == this )
         return;
 
     child.init(this);
@@ -317,7 +317,7 @@ void Window::add(Window& child)
 
 void Window::remove(Window& child)
 {
-    if( child.parent() != this )
+    if( child.parentWindow() != this )
         return;
 
     child.init(0);

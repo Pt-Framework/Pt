@@ -893,7 +893,6 @@ void Widget::show(bool s)
     if( parent() )
         parent()->relayout();
 
-
     ShowEvent ev(vid(), s);
     Application::instance().loop().commitEvent(ev);
 

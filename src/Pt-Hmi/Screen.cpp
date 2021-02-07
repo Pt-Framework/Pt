@@ -103,19 +103,18 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
-double Screen::onScaleFactor(const Window& w) const
-{
-    double scaling = Application::instance().scaleFactor();
-    return _impl->scaleFactor(w) * scaling;
-}
-
-
 double Screen::onScaleFactor() const
 {   
     // TODO: support multiple screens
 
     double scaling = Application::instance().scaleFactor();
     return _impl->scaleFactor() * scaling;
+}
+
+
+double Screen::onScaleFactor(const Window& w) const
+{
+    return onScaleFactor();
 }
 
 

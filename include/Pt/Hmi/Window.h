@@ -87,9 +87,9 @@ class PT_HMI_API Window : public WindowBase
 
     PixmapSurface& surface();
 
-    WindowBase* parent();
+    //WindowBase* parent();
 
-    const WindowBase* parent() const;
+    //const WindowBase* parent() const;
 
     Window& mainWindow();
 
