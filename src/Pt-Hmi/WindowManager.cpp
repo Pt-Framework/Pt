@@ -511,7 +511,7 @@ void WindowManager::onActivate(Window* w, bool active)
         //
         // deactivate other active window
         //
-        if(_activeWindow && _activeWindow == frame)
+        if(_activeWindow && _activeWindow != frame)
             _activeWindow->window()->activate(false);
 
         //
