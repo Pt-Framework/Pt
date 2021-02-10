@@ -43,6 +43,8 @@ Screen::Screen(ApplicationImpl& app)
 , _updates(0)
 {
     _impl->init(*this);
+
+    _size = toLogical( _impl->size() );
 }
 
 
@@ -119,8 +121,9 @@ double Screen::onScaleFactor(const Window& w) const
 
 
 Gfx::SizeF Screen::onSize() const
-{
-    return toLogical(_impl->size());
+{   
+    // TODO: return _size;
+    return toLogical( _impl->size() );
 }
 
 

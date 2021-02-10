@@ -158,6 +158,8 @@ class PT_HMI_API Widget : public Visual
         // widget operations
         //
 
+        void invalidate(bool content, bool relayout, const Gfx::RectF* rect = 0);
+
         void invalidate();
 
         void relayout();

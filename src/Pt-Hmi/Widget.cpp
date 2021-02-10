@@ -590,6 +590,56 @@ void Widget::onMnemonic()
 }
 
 
+void Widget::invalidate(bool content, bool relayout, const Gfx::RectF* rect)
+{
+  if(content)
+  {
+    ++_invalidates;
+
+    InvalidateEvent ev( vid() );
+    Application::instance().loop().commitEvent(ev);
+  }
+
+  if(relayout)
+  {
+    _isLayoutInvalid = true;
+
+    Window* parentWindow = window();
+    Widget* parentWidget = parent();
+    
+    if(parentWidget)
+    {
+        parentWidget->relayout();
+    }
+    else if(parentWindow)
+    {
+        parentWindow->relayout();
+    }
+  }
+
+  if(rect)
+  {
+    Window* parentWindow = window();
+    Widget* parentWidget = parent();
+
+    if(parentWidget)
+    {
+        Gfx::PointF updatePos = toParent( rect->topLeft() );
+        Gfx::RectF updateRect( updatePos, rect->size() );
+
+        parentWidget->update(updateRect);
+    }
+    else if(parentWindow)
+    {
+        Gfx::PointF updatePos = toWindow( rect->topLeft() );
+        Gfx::RectF updateRect( updatePos, rect->size() );
+
+        parentWindow->update(updateRect);
+    }
+  }
+}
+
+
 void Widget::invalidate()
 {
     ++_invalidates;
@@ -803,7 +853,7 @@ void Widget::onLayout(const Gfx::RectF& rect)
 
 void Widget::update()
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
     update(rect);
 }
 

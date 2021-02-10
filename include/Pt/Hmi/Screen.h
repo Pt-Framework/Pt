@@ -120,6 +120,7 @@ class PT_HMI_API Screen : public WindowBase
     
     private:
         ScreenImpl*          _impl;
+        Gfx::SizeF           _size;
         Gfx::RectF           _updateRect;
         int                  _updates;
         std::vector<Window*> _windows;
