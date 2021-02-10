@@ -593,7 +593,7 @@ void Window::removeFocusWidget(Widget& w)
     if( it != _focusList.end() )
         _focusList.erase(it);
 
-    // TODO: should w loose focus?
+    // TODO: should we loose focus?
 }
 
 
