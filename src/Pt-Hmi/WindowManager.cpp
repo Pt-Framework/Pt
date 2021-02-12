@@ -131,6 +131,16 @@ Window* WindowManager::activeWindow()
 }
 
 
+Gfx::RectF WindowManager::frameRect(Window& w) const
+{
+    WindowFrame* frame = findWindow(w);
+    if( ! frame )
+        return Gfx::RectF();
+
+    return frame->frameRect();
+}
+
+
 void WindowManager::setScreen(Screen* screen)
 {
     std::vector<WindowFrame*>::iterator wit;
@@ -391,19 +401,19 @@ void WindowManager::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void WindowManager::onUpdate(Window& w, const Gfx::RectF& rect)
-{
-    Gfx::PointF updatePos = toParent( w, rect.topLeft() );
-
-    Gfx::RectF updateRect(updatePos, rect.size());
-
-    if( ! _parent )
-        throw std::logic_error("WindowManager not initialized");
-           
-    updateRect = updateRect.intersect( Gfx::RectF(Gfx::PointF(0,0), _parent->size()));
-
-    _parent->update(updateRect);
-}
+//void WindowManager::onUpdate(Window& w, const Gfx::RectF& rect)
+//{
+//    Gfx::PointF updatePos = toParent( w, rect.topLeft() );
+//
+//    Gfx::RectF updateRect(updatePos, rect.size());
+//
+//    if( ! _parent )
+//        throw std::logic_error("WindowManager not initialized");
+//           
+//    updateRect = updateRect.intersect( Gfx::RectF(Gfx::PointF(0,0), _parent->size()));
+//
+//    _parent->update(updateRect);
+//}
 
 
 void WindowManager::onResize(Window& w, const Gfx::SizeF& sz)
@@ -453,23 +463,7 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
     if( ! frame )
         return;
 
-    //MoveEvent mev(w.vid(), to);
-    //Application::instance().loop().commitEvent(mev);
-    
-    // TODO: move updating to frame
-
-    Gfx::RectF updateRect = frame->frameRect();
-
     frame->moveEvent(to);
-
-    updateRect.unify( frame->frameRect() );
-
-    if( ! _parent )
-        throw std::logic_error("WindowManager not initialized");
-
-    updateRect = updateRect.intersect( Gfx::RectF(Gfx::PointF(0,0), _parent->size()));
-
-    _parent->update(updateRect);
 }
 
 

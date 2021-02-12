@@ -69,6 +69,8 @@ class WindowManager : public Pt::Connectable
 
         void setScreen(Screen* screen);
 
+        Gfx::RectF frameRect(Window& w) const;
+
         double borderWidth() const
         {
             return _borderWidth;
@@ -115,8 +117,6 @@ class WindowManager : public Pt::Connectable
         void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     public:
-        void onUpdate(Window& child, const Gfx::RectF& rect);
-
         void onResize(Window& w, const Gfx::SizeF& to);
 
         void onMove(Window& w, const Gfx::PointF& to);

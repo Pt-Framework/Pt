@@ -127,6 +127,10 @@ class PT_HMI_API Window : public WindowBase
 
     Gfx::PointF fromParent(const Gfx::PointF& pos) const;
 
+    Gfx::PointF fromWindow(const Window& w, const Gfx::PointF& pos) const;
+
+    Gfx::PointF toWindow(const Window& w, const Gfx::PointF& pos) const;
+
     void relayout();
 
     void invalidate();
@@ -248,7 +252,7 @@ class PT_HMI_API Window : public WindowBase
 
     virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
 
-    virtual double onScaleFactor(const Window& w) const;
+    //virtual double onScaleFactor(const Window& w) const;
 
     //virtual void onUpdate(Window& w, const Gfx::RectF& rect);
 
@@ -344,6 +348,7 @@ class PT_HMI_API Window : public WindowBase
     Gfx::RectF                   _damageRect;
     Pt::Signal<const Pt::Event&> _eventReady;
     int                          _layouts;
+    int                          _invalidates;
 
     std::vector<Window*>         _windows;
     WindowBase*                  _parent;

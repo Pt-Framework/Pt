@@ -52,6 +52,7 @@ namespace Hmi {
 Window::Window(Window* parent, Window::Type type)
 : _impl(0)
 , _layouts(0)
+, _invalidates(0)
 , _parent(0)
 , _parentWindow(0)
 , _screen(0)
@@ -605,10 +606,31 @@ void Window::setFocusIndex(Widget& , size_t)
 
 Gfx::PointF Window::toParent(const Gfx::PointF& pos) const
 {
-    if( ! _init )
-        return Gfx::PointF(0, 0);
+    //if( ! _init )
+    //    return Gfx::PointF(0, 0);
 
-    return _parent->onToParent(*this, pos);
+    //return _parent->onToParent(*this, pos);
+
+    Gfx::PointF parentPos(0, 0);
+
+    if(_parentWindow)
+        return _parentWindow->fromWindow(*this, pos);
+    else if(_screen)
+        return _screen->fromWindow(*this, pos);
+
+    return Gfx::PointF(0, 0);
+}
+
+
+Gfx::PointF Window::fromWindow(const Window& w, const Gfx::PointF& pos) const
+{
+    return _windowManager.toParent(w, pos);
+}
+
+
+Gfx::PointF Window::toWindow(const Window& w, const Gfx::PointF& pos) const
+{
+    return _windowManager.fromParent(w, pos);
 }
 
 
@@ -666,17 +688,17 @@ double Window::onScaleFactor() const
     if( ! _init )
         return 1.0;
 
-    return _parent->onScaleFactor(*this);
+    return _parent->scaleFactor();
 }
 
 
-double Window::onScaleFactor(const Window& w) const
-{
-    if( ! _init )
-        return 1.0;
-
-    return _parent->onScaleFactor(*this);
-}
+//double Window::onScaleFactor(const Window& w) const
+//{
+//    if( ! _init )
+//        return 1.0;
+//
+//    return _parent->onScaleFactor(*this);
+//}
 
 
 const Gfx::Brush& Window::background() const
@@ -702,6 +724,36 @@ Pt::Signal<const Pt::Event&>& Window::eventReady()
 Gfx::SizeF Window::onSize() const
 {
     return _size;
+}
+
+
+void Window::invalidate()
+{
+    ++_invalidates;
+
+    InvalidateEvent ev(vid());
+    Application::instance().loop().commitEvent(ev);
+}
+
+
+void Window::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    --_invalidates;
+
+    if(_invalidates > 0)
+      return;
+
+    onInvalidate();
+
+    //relayout();
+}
+
+
+void Window::onInvalidate()
+{
+    _backgroundBrush = background();
+
+    update();
 }
 
 
@@ -737,36 +789,6 @@ void Window::onUpdate(const Gfx::RectF& rect)
     Gfx::RectF updateRect( updatePos, rect.size() );
 
     _parent->update(updateRect);
-}
-
-
-void Window::invalidate()
-{
-    //++_invalidates;
-
-    InvalidateEvent ev(vid());
-    Application::instance().loop().commitEvent(ev);
-}
-
-
-void Window::onInvalidateEvent(const InvalidateEvent& ev)
-{
-    //--_invalidates;
-
-    //if(_invalidates > 0)
-    //  return;
-
-    onInvalidate();
-
-    //relayout();
-}
-
-
-void Window::onInvalidate()
-{
-    _backgroundBrush = background();
-
-    update();
 }
 
 
@@ -1087,30 +1109,39 @@ void Window::move(const Gfx::PointF& p)
     //
     // align to physical pixel grid
     //
-    _position = align(p);
+    Gfx::PointF aligedPos = align(p);
+    
+    _position = aligedPos;
 
     //
     // send move event
     //
-    MoveEvent mev( vid(), _position );
+    MoveEvent mev( vid(), aligedPos );
     Application::instance().loop().commitEvent(mev);
 
     //
     // notify parent
     //
-    _parent->onMove(*this, _position);
+    _parent->onMove(*this, aligedPos);
 }
 
 
 void Window::onMove(Window& w, const Gfx::PointF& to)
 {   
+    Gfx::RectF updateRect = _windowManager.frameRect(w);
+
     _windowManager.onMove(w, to);
+
+    Gfx::RectF movedRect = _windowManager.frameRect(w);
+    updateRect.unify(movedRect);
+
+    update(updateRect);
 }
 
 
 void Window::onMoveEvent(const MoveEvent& ev)
 {    
-    //_position = ev.position();
+    _position = ev.position();
 }
 
 
@@ -1125,33 +1156,35 @@ void Window::resize(const Gfx::SizeF& s)
     //
     // align to physical pixel grid
     //
-    _size = align(s);
+    Gfx::SizeF alignedSize = align(s);
+
+    _size = alignedSize;
 
     //
     // maximum width and height
     //
-    if( _size.width() > maximumSize().width() )
-        _size.setWidth( maximumSize().width() );
+    if( alignedSize.width() > maximumSize().width() )
+        alignedSize.setWidth( maximumSize().width() );
 
-    if( _size.height() > maximumSize().height() )
-        _size.setHeight( maximumSize().height() );
+    if( alignedSize.height() > maximumSize().height() )
+        alignedSize.setHeight( maximumSize().height() );
 
-    if( _size.width() < minimumSize().width() )
-        _size.setWidth( minimumSize().width() );
+    if( alignedSize.width() < minimumSize().width() )
+        alignedSize.setWidth( minimumSize().width() );
 
-    if( _size.height() < minimumSize().height() )
-        _size.setHeight( minimumSize().height() );
+    if( alignedSize.height() < minimumSize().height() )
+        alignedSize.setHeight( minimumSize().height() );
 
     //
     // send resize event
     //
-    ResizeEvent rev( vid(), _size );
+    ResizeEvent rev( vid(), alignedSize );
     Application::instance().loop().commitEvent(rev);
 
     //
     // notify parent
     //
-    _parent->onResize(*this, _size);
+    _parent->onResize(*this, alignedSize);
 }
 
 
@@ -1163,7 +1196,7 @@ void Window::onResize(Window& w, const Gfx::SizeF& to)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
-    //_size = ev.size();
+    _size = ev.size();
 
     _surface.resize( ev.size() );
 

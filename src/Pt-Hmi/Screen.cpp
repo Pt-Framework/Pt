@@ -114,12 +114,6 @@ double Screen::onScaleFactor() const
 }
 
 
-double Screen::onScaleFactor(const Window& w) const
-{
-    return onScaleFactor();
-}
-
-
 Gfx::SizeF Screen::onSize() const
 {   
     // TODO: return _size;
@@ -142,6 +136,18 @@ Pt::Gfx::PointF Screen::onFromScreen(const Pt::Gfx::PointF& p) const
 ScreenImpl* Screen::impl()
 {
     return _impl;
+}
+
+
+Gfx::PointF Screen::fromWindow(const Window& w, const Gfx::PointF& pos) const
+{
+    return _impl->toParent(w, pos);
+}
+
+
+Gfx::PointF Screen::toWindow(const Window& w, const Gfx::PointF& pos) const
+{
+    return _impl->fromParent(w, pos);
 }
 
 
@@ -237,14 +243,6 @@ void Screen::onEvent(const Event& ev)
 }
 
 
-//void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
-//{
-//    Gfx::PointF pos = w.toScreen( updateRect.topLeft() );
-//    Gfx::RectF rect( pos, updateRect.size() );
-//    update(rect);
-//}
-
-
 void Screen::onUpdate(const Gfx::RectF& updateRect)
 {
     _updateRect.unify(updateRect);
@@ -261,7 +259,7 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
 
     // skip all updates except the last one
     if(_updates > 0)
-      return ;
+      return;
     
     //std::clog << std::endl;
     //_clock.start();
@@ -273,12 +271,14 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
-        Gfx::PointF winPos = (*it)->fromParent( screenRect.topLeft() );
+        Window* window = *it;
+
+        Gfx::PointF winPos = window->fromParent( screenRect.topLeft() );
         Gfx::RectF winRect( winPos, screenRect.size() );
 
-        winRect = winRect.intersect( Gfx::RectF( (*it)->size() ) );
+        winRect = winRect.intersect( Gfx::RectF( window->size() ) );
 
-        (*it)->paint(winRect);
+        window->paint(winRect);
     }
 
    _updateRect.clear();

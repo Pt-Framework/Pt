@@ -590,53 +590,18 @@ void Widget::onMnemonic()
 }
 
 
-void Widget::invalidate(bool content, bool relayout, const Gfx::RectF* rect)
+const SizePolicy& Widget::sizePolicy() const
 {
-  if(content)
-  {
-    ++_invalidates;
+    return _sizePolicy;
+}
 
-    InvalidateEvent ev( vid() );
-    Application::instance().loop().commitEvent(ev);
-  }
 
-  if(relayout)
-  {
-    _isLayoutInvalid = true;
+void Widget::setSizePolicy(const SizePolicy& policy)
+{
+    _sizePolicy = policy;
+    _sizePolicy.setSize( align(policy.size()) );
 
-    Window* parentWindow = window();
-    Widget* parentWidget = parent();
-    
-    if(parentWidget)
-    {
-        parentWidget->relayout();
-    }
-    else if(parentWindow)
-    {
-        parentWindow->relayout();
-    }
-  }
-
-  if(rect)
-  {
-    Window* parentWindow = window();
-    Widget* parentWidget = parent();
-
-    if(parentWidget)
-    {
-        Gfx::PointF updatePos = toParent( rect->topLeft() );
-        Gfx::RectF updateRect( updatePos, rect->size() );
-
-        parentWidget->update(updateRect);
-    }
-    else if(parentWindow)
-    {
-        Gfx::PointF updatePos = toWindow( rect->topLeft() );
-        Gfx::RectF updateRect( updatePos, rect->size() );
-
-        parentWindow->update(updateRect);
-    }
-  }
+    relayout();
 }
 
 
@@ -667,27 +632,37 @@ void Widget::onInvalidate()
 }
 
 
-const SizePolicy& Widget::sizePolicy() const
+void Widget::update()
 {
-    return _sizePolicy;
+    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+    update(rect);
 }
 
 
-void Widget::setSizePolicy(const SizePolicy& policy)
+// invalidateArea() invalidateRect()
+void Widget::update(const Gfx::RectF& rect)
 {
-    _sizePolicy = policy;
-    _sizePolicy.setSize( align(policy.size()) );
+    Window* parentWindow = window();
+    Widget* parentWidget = parent();
 
-    relayout();
+    if(parentWidget)
+    {
+        Gfx::PointF updatePos = toParent( rect.topLeft() );
+        Gfx::RectF updateRect( updatePos, rect.size() );
+
+        parentWidget->update(updateRect);
+    }
+    else if(parentWindow)
+    {
+        Gfx::PointF updatePos = toWindow( rect.topLeft() );
+        Gfx::RectF updateRect( updatePos, rect.size() );
+
+        parentWindow->update(updateRect);
+    }
 }
 
 
-Gfx::SizeF Widget::preferredSize() const
-{
-    return _preferredSize;
-}
-
-
+// invalidateLayout()
 void Widget::relayout()
 {
     _isLayoutInvalid = true;
@@ -706,9 +681,9 @@ void Widget::relayout()
 }
 
 
-bool Widget::isLayoutInvalid() const
+Gfx::SizeF Widget::preferredSize() const
 {
-    return _isLayoutInvalid;
+    return _preferredSize;
 }
 
 
@@ -848,50 +823,6 @@ void Widget::layout(const Gfx::RectF& r)
 
 void Widget::onLayout(const Gfx::RectF& rect)
 {
-}
-
-
-void Widget::update()
-{
-    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-    update(rect);
-}
-
-
-void Widget::update(const Gfx::RectF& rect)
-{
-    onUpdate(rect);
-}
-
-
-void Widget::onUpdate(const Gfx::RectF& rect)
-{
-    Window* parentWindow = window();
-    Widget* parentWidget = parent();
-
-    if(parentWidget)
-    {
-        Gfx::PointF updatePos = toParent( rect.topLeft() );
-        Gfx::RectF updateRect( updatePos, rect.size() );
-
-        parentWidget->update(updateRect);
-    }
-    else if(parentWindow)
-    {
-        Gfx::PointF updatePos = toWindow( rect.topLeft() );
-        Gfx::RectF updateRect( updatePos, rect.size() );
-
-        parentWindow->update(updateRect);
-    }
-
-    //Window* w = window();
-    //if( ! w )
-    //    return;
-
-    //Gfx::PointF updatePos = toWindow( rect.topLeft() );
-    //Gfx::RectF updateRect( updatePos, rect.size() );
-
-    //w->update(updateRect);
 }
 
 

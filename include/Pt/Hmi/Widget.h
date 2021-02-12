@@ -158,18 +158,19 @@ class PT_HMI_API Widget : public Visual
         // widget operations
         //
 
-        void invalidate(bool content, bool relayout, const Gfx::RectF* rect = 0);
-
         void invalidate();
 
+        // invalidateLayout()
         void relayout();
 
+        // invalidatePaint() invalidateArea() invalidateDraw()
         void update();
 
         void update(const Gfx::RectF& rect);
 
         void paint(const Gfx::RectF& updateRect);
 
+      public:
         bool isVisible() const;
 
         void show( bool b = true );
@@ -214,8 +215,6 @@ class PT_HMI_API Widget : public Visual
         void setSizePolicy(const SizePolicy& policy);
 
         Gfx::SizeF preferredSize() const;
-
-        bool isLayoutInvalid() const;
 
         void measure(const SizePolicy& policy);
 
@@ -296,15 +295,13 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onRaise(Widget& w);
 
+
         virtual void onInvalidate();
 
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
-
-
-        virtual void onUpdate(const Gfx::RectF& rect);
 
 
         virtual void onSetActionKey(const Key& ak);

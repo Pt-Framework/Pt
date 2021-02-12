@@ -53,6 +53,7 @@ namespace Hmi {
 
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _frameBuffer( app.frameBuffer() )
+, _screen(0)
 , _cursorPos(0, 0)
 , _dpi(96.0)
 , _drawCursor(false)
@@ -77,9 +78,10 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::init(WindowBase& w)
+void ScreenImpl::init(Screen& screen)
 {
-    _windowManager.init(w);
+    _screen = &screen;
+    _windowManager.init(screen);
 }
 
 
@@ -228,9 +230,17 @@ void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 }
 
 
-void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
+void ScreenImpl::onMove(Window& w, const Gfx::PointF& to)
 {
-    _windowManager.onMove(w, pos);
+    Gfx::RectF updateRect = _windowManager.frameRect(w);
+
+    _windowManager.onMove(w, to);
+
+    Gfx::RectF movedRect = _windowManager.frameRect(w);
+    updateRect.unify(movedRect);
+
+    if(_screen)
+      _screen->update(updateRect);
 }
 
 

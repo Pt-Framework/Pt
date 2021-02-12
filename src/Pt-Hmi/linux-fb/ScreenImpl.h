@@ -53,7 +53,7 @@ class ScreenImpl : public Pt::Connectable
 
         virtual ~ScreenImpl();
 
-        void init(WindowBase& w);
+        void init(Screen& screen);
 
         void registerWindow(Window& w);
 
@@ -144,6 +144,7 @@ class ScreenImpl : public Pt::Connectable
 
     private:
         FrameBuffer&  _frameBuffer;
+        Screen*       _screen;
         Gfx::Image    _cursorBackground;
         Gfx::Point    _cursorPos;
         double        _dpi;

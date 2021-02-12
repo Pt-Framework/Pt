@@ -53,8 +53,6 @@ class Widget;
 
 class PT_HMI_API Screen : public WindowBase
 {
-    friend class Window;
-
     public:
         Screen(ApplicationImpl& app);
 
@@ -66,6 +64,10 @@ class PT_HMI_API Screen : public WindowBase
 
         const std::vector<Window*>& windows() const;
   
+        Gfx::PointF fromWindow(const Window& w, const Gfx::PointF& pos) const;
+
+        Gfx::PointF toWindow(const Window& w, const Gfx::PointF& pos) const;
+
         ScreenImpl* impl();
 
     protected:
@@ -88,8 +90,6 @@ class PT_HMI_API Screen : public WindowBase
         virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
-
-        virtual double onScaleFactor(const Window& w) const;
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
 
