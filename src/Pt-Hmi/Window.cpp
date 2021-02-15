@@ -79,6 +79,7 @@ Window::Window(Window* parent, Window::Type type)
     _eventReady += Pt::slot(*this, &Window::onTouchEvent);
     _eventReady += Pt::slot(*this, &Window::onScrollEvent);
     _eventReady += Pt::slot(*this, &Window::onPaintEvent);
+    _eventReady += Pt::slot(*this, &Window::onUpdateEvent);
     _eventReady += Pt::slot(*this, &Window::onActivateEvent);
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
     _eventReady += Pt::slot(*this, &Window::onEnterEvent);
@@ -310,7 +311,7 @@ void Window::add(Window& child)
         return;
 
     child.init(this);
-    update();
+    repaint();
     
     onAddWindow(child);
 }
@@ -322,7 +323,7 @@ void Window::remove(Window& child)
         return;
 
     child.init(0);
-    update();
+    repaint();
     
     onRemoveWindow(child);
 }
@@ -692,15 +693,6 @@ double Window::onScaleFactor() const
 }
 
 
-//double Window::onScaleFactor(const Window& w) const
-//{
-//    if( ! _init )
-//        return 1.0;
-//
-//    return _parent->onScaleFactor(*this);
-//}
-
-
 const Gfx::Brush& Window::background() const
 {
     return _background ? *_background
@@ -721,7 +713,7 @@ Pt::Signal<const Pt::Event&>& Window::eventReady()
 }
 
 
-Gfx::SizeF Window::onSize() const
+const Gfx::SizeF& Window::onSize() const
 {
     return _size;
 }
@@ -753,42 +745,7 @@ void Window::onInvalidate()
 {
     _backgroundBrush = background();
 
-    update();
-}
-
-
-//void Window::onUpdate(Window& child, const Gfx::RectF& rect)
-//{
-//     _windowManager.onUpdate(child, rect);
-//}
-
-
-//void Window::update()
-//{
-//    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-//    update(rect);
-//}
-
-
-//void Window::update(const Gfx::RectF& rect)
-//{
-//    onUpdate(rect);
-//}
-
-
-void Window::onUpdate(const Gfx::RectF& rect)
-{
-    if( ! _init )
-        return;
-
-    _damageRect.unify(rect);
-
-    //_parent->onUpdate(*this, rect);
-
-    Gfx::PointF updatePos = toParent( rect.topLeft() );
-    Gfx::RectF updateRect( updatePos, rect.size() );
-
-    _parent->update(updateRect);
+    repaint();
 }
 
 
@@ -851,6 +808,27 @@ void Window::onLayout(const Gfx::RectF& rect)
 }
 
 
+void Window::repaint()
+{
+    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+    repaint(rect);
+}
+
+
+void Window::repaint(const Gfx::RectF& rect)
+{
+    _damageRect.unify(rect);
+
+    Gfx::PointF updatePos = toParent( rect.topLeft() );
+    Gfx::RectF updateRect( updatePos, rect.size() );
+
+    if(_parentWindow)
+        _parentWindow->repaint(updateRect);
+    else if(_screen)
+        _screen->repaint(updateRect);
+}
+
+
 void Window::paint(const Gfx::RectF& rect)
 {
     if( rect.isNull() )
@@ -861,7 +839,8 @@ void Window::paint(const Gfx::RectF& rect)
 
     _damageRect = _damageRect.intersect( Gfx::RectF(_size) );
 
-    onPaintBackground(rect);
+    PaintEvent pev(vid(), rect);
+    Application::instance().loop().commitEvent(pev);
 
     if( mainWidget() )
     {
@@ -885,8 +864,8 @@ void Window::paint(const Gfx::RectF& rect)
         (*child)->paint(winRect);
     }
 
-    PaintEvent pev(vid(), rect);
-    Application::instance().loop().commitEvent(pev);
+    UpdateEvent uev(vid(), rect);
+    Application::instance().loop().commitEvent(uev);
 
     _damageRect.clear();
 }
@@ -896,6 +875,15 @@ void Window::onPaintEvent(const PaintEvent& ev)
 {
     if( ! this->isVisible() )
         return; 
+
+    onPaintBackground( ev.rect() );
+}
+
+
+void Window::onUpdateEvent(const UpdateEvent& ev)
+{
+    if( ! this->isVisible() )
+        return;
 
     onPaintContent( ev.rect() );
 
@@ -966,6 +954,8 @@ void Window::show(bool b)
         init(_parentWindow);
     }
     
+    invalidate();
+
     _parent->onShow(*this, b);
 }
 
@@ -1135,7 +1125,7 @@ void Window::onMove(Window& w, const Gfx::PointF& to)
     Gfx::RectF movedRect = _windowManager.frameRect(w);
     updateRect.unify(movedRect);
 
-    update(updateRect);
+    repaint(updateRect);
 }
 
 
@@ -1235,8 +1225,12 @@ void Window::onClosing(Window& w)
  
 void Window::onClose(Window& w)
 {     
+    Gfx::RectF updateRect = _windowManager.frameRect(w);
+
     // the window has been closed, clean up
     _windowManager.onClose(w);
+
+    repaint(updateRect);
 }
 
 
@@ -1307,7 +1301,14 @@ void Window::setTitle(const std::string& t)
 
 void Window::onFrameChanged(Window& w)
 {
+    Gfx::RectF updateRect = _windowManager.frameRect(w);
+    
     _windowManager.onFrameChanged(w);
+
+    Gfx::RectF changedRect = _windowManager.frameRect(w);
+    updateRect.unify(changedRect);
+
+    repaint(updateRect);
 }
 
 
@@ -1555,7 +1556,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
             if(_focusWidget)
             {
-                _focusWidget->update();
+                _focusWidget->repaint();
 
                 if( ! _focusWidget->isTextInput() )
                     Application::instance().inputMethod().finish();

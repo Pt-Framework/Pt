@@ -114,10 +114,11 @@ double Screen::onScaleFactor() const
 }
 
 
-Gfx::SizeF Screen::onSize() const
+const Gfx::SizeF& Screen::onSize() const
 {   
-    // TODO: return _size;
-    return toLogical( _impl->size() );
+    return _size;
+
+    //return toLogical( _impl->size() );
 }
 
 
@@ -130,6 +131,23 @@ Pt::Gfx::PointF Screen::onToScreen(const Pt::Gfx::PointF& p) const
 Pt::Gfx::PointF Screen::onFromScreen(const Pt::Gfx::PointF& p) const
 {
     return p;
+}
+
+
+void Screen::repaint()
+{
+    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+    repaint(rect);
+}
+
+
+void Screen::repaint(const Gfx::RectF& updateRect)
+{
+    _updateRect.unify(updateRect);
+    ++_updates;
+
+    PaintEvent uev(vid(), _updateRect);
+    Application::instance().loop().commitEvent(uev);
 }
 
 
@@ -243,17 +261,17 @@ void Screen::onEvent(const Event& ev)
 }
 
 
-void Screen::onUpdate(const Gfx::RectF& updateRect)
-{
-    _updateRect.unify(updateRect);
-    ++_updates;
+//void Screen::onUpdate(const Gfx::RectF& updateRect)
+//{
+//    _updateRect.unify(updateRect);
+//    ++_updates;
+//
+//    PaintEvent uev(vid(), _updateRect);
+//    Application::instance().loop().commitEvent(uev);
+//}
 
-    UpdateEvent uev(vid(), _updateRect);
-    Application::instance().loop().commitEvent(uev);
-}
 
-
-void Screen::onUpdateEvent(const UpdateEvent& ev)
+void Screen::onPaintEvent(const PaintEvent& ev)
 {
     --_updates;
 
@@ -283,12 +301,12 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
 
    _updateRect.clear();
 
-    PaintEvent pev( this->vid(), screenRect);
-    Application::instance().loop().commitEvent(pev);
+    UpdateEvent uev( this->vid(), screenRect);
+    Application::instance().loop().commitEvent(uev);
 }
 
 
-void Screen::onPaintEvent(const PaintEvent& ev)
+void Screen::onUpdateEvent(const UpdateEvent& ev)
 {
     //std::clog << "Screen::onPaintEvent" << std::endl;
     

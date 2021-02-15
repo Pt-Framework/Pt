@@ -51,16 +51,10 @@ class PT_HMI_API WindowBase : public Visual
 
         virtual ~WindowBase();
 
-        Gfx::SizeF size() const;
-
-        void update();
-
-        void update(const Gfx::RectF& rect);
+        const Gfx::SizeF& size() const;
 
     protected:
-        virtual Gfx::SizeF onSize() const = 0;
-        
-        virtual void onUpdate(const Gfx::RectF& rect) = 0;
+        virtual const Gfx::SizeF& onSize() const = 0;
 
     protected:
         virtual void onInit(Window& w) = 0;

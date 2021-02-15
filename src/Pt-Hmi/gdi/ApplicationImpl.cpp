@@ -635,7 +635,7 @@ void ApplicationImpl::onShow(Window& w,  bool v)
     ShowEvent sev(w.vid(), v);
     commitEvent( sev );
 
-    w.invalidate();
+    // w.invalidate();
 }
 
 

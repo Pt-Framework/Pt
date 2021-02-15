@@ -64,7 +64,6 @@ class PT_HMI_API DockingLayout : public Layout
 
         void setDockingStyle(Widget& w, DockMode ds);
 
-
     protected:
         virtual void onAddWidget(Widget& w);
 

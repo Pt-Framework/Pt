@@ -426,7 +426,7 @@ void PushButton::onInvalidate()
     if( ! _renderer )
         return;
 
-    if( !_icon.empty() )
+    if( ! _icon.empty() )
     {
         const Gfx::SizeF scaledSize = toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);

@@ -68,6 +68,10 @@ class PT_HMI_API Screen : public WindowBase
 
         Gfx::PointF toWindow(const Window& w, const Gfx::PointF& pos) const;
 
+        void repaint();
+
+        void repaint(const Gfx::RectF& rect);
+
         ScreenImpl* impl();
 
     protected:
@@ -78,9 +82,9 @@ class PT_HMI_API Screen : public WindowBase
         virtual double onScaleFactor() const;
 
     protected:
-        virtual Gfx::SizeF onSize() const;
+        virtual const Gfx::SizeF& onSize() const;
         
-        virtual void onUpdate(const Gfx::RectF& updateRect);
+        //virtual void onUpdate(const Gfx::RectF& updateRect);
 
     protected:
         virtual void onInit(Window& w);
@@ -109,14 +113,12 @@ class PT_HMI_API Screen : public WindowBase
 
         virtual void onEnable(Window& w, bool enable);
 
-        //virtual void onUpdate(Window& w, const Gfx::RectF& rect);
-
     protected:
         virtual void onEvent( const Event& ev );
         
-        virtual void onUpdateEvent(const UpdateEvent& ev);
-
         virtual void onPaintEvent(const PaintEvent& ev);
+
+        virtual void onUpdateEvent(const UpdateEvent& ev);
     
     private:
         ScreenImpl*          _impl;

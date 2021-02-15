@@ -45,22 +45,9 @@ WindowBase::~WindowBase()
 }
 
 
-Gfx::SizeF WindowBase::size() const
+const Gfx::SizeF& WindowBase::size() const
 {
     return onSize();
-}
-
-
-void WindowBase::update()
-{
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    onUpdate(rect);
-}
-
-
-void WindowBase::update(const Gfx::RectF& rect)
-{
-    onUpdate(rect);
 }
 
 } // namespace

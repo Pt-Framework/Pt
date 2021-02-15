@@ -59,12 +59,14 @@ namespace Pt {
 
 namespace Hmi {
 
+class Widget;
 class Window;
 class Screen;
 
 class PT_HMI_API Widget : public Visual
 {
     friend class Window;
+    friend class WidgetLayouter;
 
     public:
         Widget();
@@ -158,17 +160,22 @@ class PT_HMI_API Widget : public Visual
         // widget operations
         //
 
+        // deprecated
+        void update()
+        { repaint(); }
+
+        // deprecated
+        void update(const Gfx::RectF& rect)
+        { repaint(rect); }
+
+
         void invalidate();
 
-        // invalidateLayout()
         void relayout();
 
-        // invalidatePaint() invalidateArea() invalidateDraw()
-        void update();
+        void repaint();
 
-        void update(const Gfx::RectF& rect);
-
-        void paint(const Gfx::RectF& updateRect);
+        void repaint(const Gfx::RectF& rect);
 
       public:
         bool isVisible() const;
@@ -205,6 +212,12 @@ class PT_HMI_API Widget : public Visual
         const Cursor& cursor() const;
 
         void setCursor(const Cursor& c);
+
+        //
+        // painting
+        //
+
+        void paint(const Gfx::RectF& updateRect);
 
         //
         // layouting

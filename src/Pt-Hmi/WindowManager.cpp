@@ -486,7 +486,7 @@ void WindowManager::onShow(Window& w, bool visible)
     Gfx::PointF updatePos = fromParent( w, updateRect.topLeft() );
     updateRect.setOrigin(updatePos);
 
-    w.invalidate();
+    // w.invalidate();
     w.update(updateRect);
 }
 
@@ -579,16 +579,14 @@ void WindowManager::onFrameChanged(Window& w)
             break;
     }
 
-    // TODO: move updating to frame
+    //Gfx::RectF updateRect = frame->frameRect();
 
-    Gfx::RectF updateRect = frame->frameRect();
+    //if( ! _parent )
+    //    throw std::logic_error("WindowManager not initialized");
 
-    if( ! _parent )
-        throw std::logic_error("WindowManager not initialized");
+    //updateRect = updateRect.intersect( Gfx::RectF(Gfx::PointF(0,0), _parent->size()));
 
-    updateRect = updateRect.intersect( Gfx::RectF(Gfx::PointF(0,0), _parent->size()));
-
-    _parent->update(updateRect);
+    //_parent->update(updateRect);
 }
 
 
@@ -676,18 +674,16 @@ void WindowManager::onClose(Window& w)
     if( ! frame )
         return;
 
-    Gfx::RectF updateRect = frame->frameRect();
+    //Gfx::RectF updateRect = frame->frameRect();
 
     remove(w);
 
-    // TODO: move updating to frame
-
-    if( ! _parent )
-        throw std::logic_error("WindowManager not initialized");
+    //if( ! _parent )
+    //    throw std::logic_error("WindowManager not initialized");
    
-    updateRect = updateRect.intersect( Gfx::RectF(Gfx::PointF(0,0), _parent->size()));
+    //updateRect = updateRect.intersect( Gfx::RectF(Gfx::PointF(0,0), _parent->size()));
 
-   _parent->update(updateRect);
+   //_parent->update(updateRect);
 }
 
 

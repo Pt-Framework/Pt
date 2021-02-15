@@ -131,9 +131,23 @@ class PT_HMI_API Window : public WindowBase
 
     Gfx::PointF toWindow(const Window& w, const Gfx::PointF& pos) const;
 
-    void relayout();
+    // deprecated
+    void update()
+    { repaint(); }
+
+    // deprecated
+    void update(const Gfx::RectF& rect)
+    { repaint(rect); }
+
 
     void invalidate();
+
+    void repaint();
+
+    void repaint(const Gfx::RectF& rect);
+
+    void relayout();
+
 
     Gfx::SizeF measure(const SizePolicy& policy);
 
@@ -233,9 +247,7 @@ class PT_HMI_API Window : public WindowBase
     virtual double onScaleFactor() const;
 
   protected:
-    virtual Gfx::SizeF onSize() const;
-
-    virtual void onUpdate(const Gfx::RectF& rect);
+    virtual const Gfx::SizeF& onSize() const;
 
     virtual void onInvalidate();
 
@@ -251,10 +263,6 @@ class PT_HMI_API Window : public WindowBase
     virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
 
     virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
-
-    //virtual double onScaleFactor(const Window& w) const;
-
-    //virtual void onUpdate(Window& w, const Gfx::RectF& rect);
 
     virtual void onShow(Window& w, bool visible);
 
@@ -278,6 +286,8 @@ class PT_HMI_API Window : public WindowBase
     virtual void onEvent(const Pt::Event& ev);
 
     virtual void onPaintEvent(const PaintEvent& ev);
+
+    void onUpdateEvent(const UpdateEvent& ev);
 
     virtual bool onMouseEvent( const MouseEvent& ev );
 

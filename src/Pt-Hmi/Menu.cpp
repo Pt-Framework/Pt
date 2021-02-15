@@ -101,7 +101,7 @@ void Menu::addItem(MenuItem& item)
     item._menu = this;
     item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
 
-    invalidate();
+    //invalidate();
 }
 
 
@@ -139,7 +139,7 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
     _subMenus.push_back(item);
     menu._parentMenu = this;
 
-    invalidate();
+    //invalidate();
 }
 
 

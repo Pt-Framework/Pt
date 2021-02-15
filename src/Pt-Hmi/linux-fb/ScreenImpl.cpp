@@ -246,7 +246,15 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& to)
 
 void ScreenImpl::onFrameChanged(Window& w)
 {
+    Gfx::RectF updateRect = _windowManager.frameRect(w);
+    
     _windowManager.onFrameChanged(w);
+
+    Gfx::RectF changedRect = _windowManager.frameRect(w);
+    updateRect.unify(changedRect);
+
+    if(_screen)
+      _screen->update(updateRect);
 }
 
 
@@ -264,7 +272,13 @@ void ScreenImpl::onClosing(Window& w)
 
 void ScreenImpl::onClose(Window& w)
 {
+    Gfx::RectF updateRect = _windowManager.frameRect(w);
+
+    // the window has been closed, clean up
     _windowManager.onClose(w);
+
+    if(_screen)
+      _screen->update(updateRect);
 }
 
 
