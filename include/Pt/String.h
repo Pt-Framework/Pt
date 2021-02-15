@@ -121,17 +121,19 @@ struct Char
 
 } // namespace Pt
 
-//#if _LIBCPP_VERSION >= 5000
+// workaround for partial c++11 implementations like macOS
+#if _LIBCPP_VERSION >= 5000
+
 namespace std {
 
-// workaround for partial c++11 implementations like macOS
 template <>
 struct is_trivial<Pt::Char> {
     static const bool value = true;
 };
 
 } // namespace
-//#endif
+
+#endif
 
 namespace Pt {
 
