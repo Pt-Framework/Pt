@@ -896,7 +896,7 @@ void Widget::onMoveEvent(const MoveEvent& ev)
 }
 
 
-const Gfx::SizeF& Widget::size() const
+const Gfx::SizeF& Widget::onSize() const
 {
     return _size;
 }

@@ -200,8 +200,6 @@ class PT_HMI_API Widget : public Visual
         void move(const Gfx::PointF& p);
 
 
-        const Gfx::SizeF& size() const;
-
         void resize(double width, double height);
 
         void resize(const Gfx::SizeF& size);
@@ -288,6 +286,8 @@ class PT_HMI_API Widget : public Visual
         void remove(Widget& w);
 
     protected:
+        virtual const Gfx::SizeF& onSize() const;
+
         virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;

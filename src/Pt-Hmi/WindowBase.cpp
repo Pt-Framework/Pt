@@ -44,12 +44,6 @@ WindowBase::~WindowBase()
 { 
 }
 
-
-const Gfx::SizeF& WindowBase::size() const
-{
-    return onSize();
-}
-
 } // namespace
 
 } // namespace
