@@ -64,7 +64,6 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::scrollEvent );
     _eventReady += Pt::slot(*this, &Widget::onMoveEvent );
     _eventReady += Pt::slot(*this, &Widget::onResizeEvent );
-    _eventReady += Pt::slot(*this, &Widget::onPaintEvent );
     _eventReady += Pt::slot(*this, &Widget::mouseEvent);
     _eventReady += Pt::slot(*this, &Widget::touchEvent);
     _eventReady += Pt::slot(*this, &Widget::onEnterEvent);
@@ -690,11 +689,6 @@ void Widget::paint(const Gfx::RectF& rect)
         updateRect.setOrigin(updatePos);
         w->paint(updateRect);
     }
-}
-
-
-void Widget::onPaintEvent(const PaintEvent& ev)
-{
 }
 
 

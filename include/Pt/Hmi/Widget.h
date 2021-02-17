@@ -336,8 +336,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onShowEvent(const ShowEvent& ev );
 
-        virtual void onPaintEvent( const PaintEvent& ev );
-
         virtual void onMoveEvent(const MoveEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);

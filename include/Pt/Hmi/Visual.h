@@ -196,11 +196,11 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
     protected:
         virtual const Gfx::SizeF& onSize() const = 0;
 
+        virtual double onScaleFactor() const = 0;
+
         virtual Gfx::PointF onToScreen(const Gfx::PointF& l) const = 0;
 
         virtual Gfx::PointF onFromScreen(const Gfx::PointF& g) const = 0;
-
-        virtual double onScaleFactor() const = 0;
 
     protected:
         Visual();

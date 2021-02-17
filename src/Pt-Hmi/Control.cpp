@@ -41,7 +41,8 @@ namespace Hmi {
 
 Control::Control()
 : _isHighlighted(false)
-{    
+{
+    eventReady() += Pt::slot(*this, &Control::paintEvent );
 }
 
 
@@ -103,15 +104,21 @@ void Control::onLayout(const Gfx::RectF& rect)
 }
 
 
-void Control::onPaintEvent(const PaintEvent& ev)
+void Control::paintEvent(const PaintEvent& ev)
 {
-    Widget::onPaintEvent(ev);
+    //Widget::onPaintEvent(ev);
 
     Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
     Gfx::RectF surfaceRect( pos, size() );
     _surface.reset(surfaceRect);
 
-    onPaint( _surface, ev.rect() );
+    onPaintEvent(ev);
+}
+
+
+void Control::onPaintEvent(const PaintEvent& ev)
+{
+    onPaint(_surface, ev.rect() );
 }
 
 
