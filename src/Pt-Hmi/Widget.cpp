@@ -961,9 +961,8 @@ void Widget::show(bool s)
 }
 
 
-void Widget::onShowEvent(const ShowEvent& ev )
+void Widget::onShowEvent(const ShowEvent& ev)
 {
-
 }
 
 
