@@ -117,11 +117,13 @@ void Control::onPaintEvent(const PaintEvent& ev)
 
 void Control::onMoveEvent(const MoveEvent& ev)
 {
+    Widget::onMoveEvent(ev);
 }
 
 
 void Control::onResizeEvent(const ResizeEvent& ev)
 {
+    Widget::onResizeEvent(ev);
 }
 
 
