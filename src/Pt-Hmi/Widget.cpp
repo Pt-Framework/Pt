@@ -713,6 +713,10 @@ void Widget::relayout()
     {
         parentWindow->relayout();
     }
+
+    // TODO: easier layout cycle
+    //Gfx::RectF rect(_position, _size);
+    //onLayout(rect);
 }
 
 
@@ -929,6 +933,10 @@ void Widget::resize(const Gfx::SizeF& size)
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {
     _size = ev.size();
+
+    // TODO: easier layout cycle
+    //Gfx::RectF rect(_position, _size);
+    //onLayout(rect);
 }
 
 
