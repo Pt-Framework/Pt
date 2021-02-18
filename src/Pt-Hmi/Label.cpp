@@ -431,16 +431,15 @@ void Label::onInvalidate()
 }
 
 
-void Label::onPaintEvent(const PaintEvent& ev)
+void Label::onPaint(Gfx::PaintSurface& surface, 
+                    const Gfx::RectF& rect)
 {
-    const Gfx::RectF& rect = ev.rect();
-
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter( surface() );
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();

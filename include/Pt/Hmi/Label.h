@@ -98,7 +98,8 @@ class PT_HMI_API Label : public Control
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaintEvent(const PaintEvent& ev);
+        virtual void onPaint(Gfx::PaintSurface& surface, 
+                             const Gfx::RectF& rect);
         
     private:
         Adjustment adjustment() const;
