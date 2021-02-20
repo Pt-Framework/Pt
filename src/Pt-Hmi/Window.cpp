@@ -1090,43 +1090,57 @@ const Gfx::PointF& Window::position() const
 }
 
 
-void Window::move(const Gfx::PointF& p)
+void Window::move(const Gfx::PointF& pos)
 {
+    //
+    // if not attached store position until later
+    //
     if( ! _screen )
     {
-        _position = p;
+        _position = pos;
         return;
     }
 
     //
     // align to physical pixel grid
     //
-    Gfx::PointF aligedPos = align(p);
-    
-    _position = aligedPos;
+    //Gfx::PointF aligedPos = align(pos);
+
+    //_position = aligedPos;
 
     //
-    // send move event
+    // request window move
     //
-    MoveEvent mev( vid(), aligedPos );
-    Application::instance().loop().commitEvent(mev);
-
-    //
-    // notify parent
-    //
-    _parent->onMove(*this, aligedPos);
+    _parent->moveWindow(*this, pos);
 }
 
 
-void Window::onMove(Window& w, const Gfx::PointF& to)
+void Window::onMove(Window& w, const Gfx::PointF& pos)
 {   
+    //
+    // align to physical pixel grid
+    //
+    Gfx::PointF aligedPos = align(pos);
+
+    //
+    // update window manager
+    //
     Gfx::RectF updateRect = _windowManager.frameRect(w);
 
-    _windowManager.onMove(w, to);
+    _windowManager.onMove(w, aligedPos);
 
     Gfx::RectF movedRect = _windowManager.frameRect(w);
     updateRect.unify(movedRect);
 
+    //
+    // send move event
+    //
+    MoveEvent mev( w.vid(), aligedPos );
+    Application::instance().loop().commitEvent(mev);
+
+    //
+    // request repaint
+    //
     repaint(updateRect);
 }
 
@@ -1148,41 +1162,49 @@ void Window::resize(const Gfx::SizeF& s)
     //
     // align to physical pixel grid
     //
+    //Gfx::SizeF alignedSize = align(s);
+
+    //_size = alignedSize;
+
+    //
+    // request window resize
+    //
+    _parent->resizeWindow(*this, s);
+}
+
+
+void Window::onResize(Window& w, const Gfx::SizeF& s)
+{   
+    //
+    // align to physical pixel grid
+    //
     Gfx::SizeF alignedSize = align(s);
 
     //
     // maximum width and height
     //
-    if( alignedSize.width() > maximumSize().width() )
-        alignedSize.setWidth( maximumSize().width() );
+    if( alignedSize.width() > w.maximumSize().width() )
+        alignedSize.setWidth( w.maximumSize().width() );
 
-    if( alignedSize.height() > maximumSize().height() )
-        alignedSize.setHeight( maximumSize().height() );
+    if( alignedSize.height() > w.maximumSize().height() )
+        alignedSize.setHeight( w.maximumSize().height() );
 
-    if( alignedSize.width() < minimumSize().width() )
-        alignedSize.setWidth( minimumSize().width() );
+    if( alignedSize.width() < w.minimumSize().width() )
+        alignedSize.setWidth( w.minimumSize().width() );
 
-    if( alignedSize.height() < minimumSize().height() )
-        alignedSize.setHeight( minimumSize().height() );
-
-    _size = alignedSize;
+    if( alignedSize.height() < w.minimumSize().height() )
+        alignedSize.setHeight( w.minimumSize().height() );
 
     //
     // send resize event
     //
-    ResizeEvent rev( vid(), alignedSize );
+    ResizeEvent rev( w.vid(), alignedSize );
     Application::instance().loop().commitEvent(rev);
 
     //
-    // notify parent
+    // update window manager
     //
-    _parent->onResize(*this, alignedSize);
-}
-
-
-void Window::onResize(Window& w, const Gfx::SizeF& to)
-{   
-    _windowManager.onResize(w, to);
+    _windowManager.onResize(w, alignedSize);
 }
 
 
@@ -1191,12 +1213,6 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _size = ev.size();
 
     _surface.resize( ev.size() );
-
-    //if(_mainWidget)
-    //    _mainWidget->resize( ev.size() );
-
-    //if(_mainWidget)
-    //    _mainWidget->relayout();
 
     relayout();
 }

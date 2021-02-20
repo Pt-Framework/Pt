@@ -51,6 +51,16 @@ class PT_HMI_API WindowBase : public Visual
 
         virtual ~WindowBase();
 
+        void moveWindow(Window& w, const Gfx::PointF& p)
+        {
+            return onMove(w, p);
+        }
+
+        void resizeWindow(Window& w, const Gfx::SizeF& s)
+        {
+            return onResize(w, s);
+        }
+
     protected:
         virtual void onInit(Window& w) = 0;
 
