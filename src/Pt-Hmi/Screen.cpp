@@ -186,7 +186,6 @@ void Screen::onResize(Window& w, const Gfx::SizeF& s)
     const Gfx::SizeF size = w.toPhysical(s);
 
     w.impl()->resize(size);
-
     _impl->onResize(w, s);
 }
 

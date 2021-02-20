@@ -689,7 +689,9 @@ double Window::onScaleFactor() const
     if( ! _init )
         return 1.0;
 
-    return _parent->scaleFactor();
+    double scaling = _impl ? _impl->scaleFactor() : 1.0;
+
+    return _parent->scaleFactor() * scaling;
 }
 
 
@@ -1148,8 +1150,6 @@ void Window::resize(const Gfx::SizeF& s)
     //
     Gfx::SizeF alignedSize = align(s);
 
-    _size = alignedSize;
-
     //
     // maximum width and height
     //
@@ -1164,6 +1164,8 @@ void Window::resize(const Gfx::SizeF& s)
 
     if( alignedSize.height() < minimumSize().height() )
         alignedSize.setHeight( minimumSize().height() );
+
+    _size = alignedSize;
 
     //
     // send resize event
