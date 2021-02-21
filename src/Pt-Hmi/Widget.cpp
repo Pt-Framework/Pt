@@ -707,10 +707,6 @@ void Widget::relayout()
     {
         parentWindow->relayout();
     }
-
-    // TODO: easier layout cycle
-    //Gfx::RectF rect(_position, _size);
-    //onLayout(rect);
 }
 
 
