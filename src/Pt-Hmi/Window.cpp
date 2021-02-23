@@ -763,6 +763,10 @@ void Window::relayout()
 }
 
 
+//void Window::setSizePolicy()
+//{
+//}
+
 void Window::onLayoutEvent(const LayoutEvent& ev)
 {
     --_layouts;
@@ -770,10 +774,12 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     if(_layouts > 0)
         return;
 
+    // 1. Pass
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize(_size);
     measure(policy);
 
+    // 2. Pass
     Gfx::RectF layoutRect(_size);
     layout(layoutRect);
 }

@@ -62,6 +62,7 @@ Widget::Widget()
 {
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent );
     _eventReady += Pt::slot(*this, &Widget::scrollEvent );
+    _eventReady += Pt::slot(*this, &Widget::onLayoutEvent );
     _eventReady += Pt::slot(*this, &Widget::onMoveEvent );
     _eventReady += Pt::slot(*this, &Widget::onResizeEvent );
     _eventReady += Pt::slot(*this, &Widget::mouseEvent);
@@ -845,8 +846,21 @@ void Widget::layout(const Gfx::RectF& r)
 
     if(_isLayoutInvalid)
         onLayout(rect);
-   
+
+    //if(_isLayoutInvalid)
+    //{
+    //    LayoutEvent lev(vid());
+    //    Application::instance().loop().commitEvent(lev);
+    //}
+
     _isLayoutInvalid = false;
+}
+
+
+void Widget::onLayoutEvent(const LayoutEvent& ev)
+{
+    Gfx::RectF rect(_position, _size);
+    onLayout(rect);
 }
 
 
@@ -914,6 +928,8 @@ void Widget::resize(const Gfx::SizeF& size)
     ResizeEvent rev(vid(), s);
     Application::instance().loop().commitEvent(rev);
 
+    //onResizeEvent(rev);
+
     repaint(updateRect);
 
     _size = s;
@@ -923,6 +939,9 @@ void Widget::resize(const Gfx::SizeF& size)
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {
     _size = ev.size();
+
+    //LayoutEvent lev( vid() );
+    //Application::instance().loop().commitEvent(lev);
 
     // TODO: easier layout cycle
     //Gfx::RectF rect(_position, _size);

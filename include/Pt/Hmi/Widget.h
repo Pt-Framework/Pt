@@ -221,12 +221,6 @@ class PT_HMI_API Widget : public Visual
         // layouting
         //
 
-        const SizePolicy& sizePolicy() const;
-
-        void setSizePolicy(const SizePolicy& policy);
-
-        Gfx::SizeF preferredSize() const;
-
         void measure(const SizePolicy& policy);
 
         void layout(const Gfx::RectF& rect);
@@ -234,6 +228,14 @@ class PT_HMI_API Widget : public Visual
         void layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s);
 
         void layout(double x, double y, double width, double height);
+
+
+        const SizePolicy& sizePolicy() const;
+
+        void setSizePolicy(const SizePolicy& policy);
+
+
+        Gfx::SizeF preferredSize() const;
 
 
         // outer spacing
@@ -328,13 +330,15 @@ class PT_HMI_API Widget : public Visual
         virtual void onMnemonic();
 
     protected:
-        virtual void onEvent( const Event& ev );
+        virtual void onEvent(const Event& ev);
 
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
 
         virtual void onEnableEvent(const EnableEvent& ev);
 
-        virtual void onShowEvent(const ShowEvent& ev );
+        virtual void onShowEvent(const ShowEvent& ev);
+
+        virtual void onLayoutEvent(const LayoutEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);
 
