@@ -48,9 +48,12 @@ rule ConfigurePlatformSDK
         if ! $(WINKIT)
         {
             local winkits = [ GLOB [ FDirName $(PLATFORMSDK) include ] : *.*.*.* ] ;
+
             for local kit in $(winkits:BS)
             {
-                if $(kit) > $(WINKIT)
+				local ucrt = [ GLOB [ FDirName $(PLATFORMSDK) include $(kit) ] : ucrt ] ;
+
+				if $(ucrt) && $(kit) > $(WINKIT)
                 {
                     WINKIT = $(kit:BS) ;
                 } 
