@@ -10,21 +10,21 @@ rule ConfigureVisualC
                 
         if ! $(VISUALC) 
         {
-			local result = [ EXEC $(VSWHERE)" -nologo -property installationPath -version $(VS_VERSION)" ] ;						
-			VISUALC = $(result[2])"\\VC\\Tools\\MSVC\\" ;
-			
+            local result = [ EXEC $(VSWHERE)" -nologo -property installationPath -version $(VS_VERSION)" ] ;						
+            VISUALC = $(result[2])"\\VC\\Tools\\MSVC\\" ;
+
             if ! $(MSVC_VERSION) 
-			{
-				local versions = [ GLOB [ FDirName $(VISUALC) ] : *.*.* ] ;
-				for local v in $(versions:BS)
-				{
-					if $(v) > $(MSVC_VERSION)
-					{
-						MSVC_VERSION = $(v:BS) ;
-					} 
-				}
-			}
-			Echo "Using MSVC..." $(MSVC_VERSION) ;
+            {
+                local versions = [ GLOB [ FDirName $(VISUALC) ] : *.*.* ] ;
+                for local v in $(versions:BS)
+                {
+                    if $(v) > $(MSVC_VERSION)
+                    {
+                        MSVC_VERSION = $(v:BS) ;
+                    } 
+                }
+            }
+            Echo "Using MSVC..." $(MSVC_VERSION) ;
             
             VISUALC = $(VISUALC)\\$(MSVC_VERSION)\\ ;
         }
@@ -65,12 +65,12 @@ rule ConfigurePlatformSDK
 
             for local kit in $(winkits:BS)
             {
-				local ucrt = [ GLOB [ FDirName $(PLATFORMSDK) include $(kit) ] : ucrt ] ;
+                local ucrt = [ GLOB [ FDirName $(PLATFORMSDK) include $(kit) ] : ucrt ] ;
 
                 if $(ucrt) && $(kit) > $(WINKIT)
                 {
                     WINKIT = $(kit:BS) ;
-                } 
+                }
             }
         }
 

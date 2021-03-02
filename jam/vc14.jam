@@ -20,8 +20,8 @@ rule ConfigureVisualC
             Exit "VISUALC not found" ;
         }
 
-		CCFLAGS  += /FS ;
-		C++FLAGS += /FS ;
+        CCFLAGS  += /FS ;
+        C++FLAGS += /FS ;
     
         VISUALC_PATH = $(VISUALC)\\Common7\\IDE ;
         Echo "Checking for Visual Studio..." $(VISUALC) ;
@@ -51,9 +51,9 @@ rule ConfigurePlatformSDK
 
             for local kit in $(winkits:BS)
             {
-				local ucrt = [ GLOB [ FDirName $(PLATFORMSDK) include $(kit) ] : ucrt ] ;
+                local ucrt = [ GLOB [ FDirName $(PLATFORMSDK) include $(kit) ] : ucrt ] ;
 
-				if $(ucrt) && $(kit) > $(WINKIT)
+                if $(ucrt) && $(kit) > $(WINKIT)
                 {
                     WINKIT = $(kit:BS) ;
                 } 
@@ -69,13 +69,13 @@ rule ConfigurePlatformSDK
 
         STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\um\"" ;
         STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\ucrt\"" ;
-		STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\shared\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\shared\"" ;
         STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\winrt\"" ;
         CCFLAGS  += /DWIN32 ;
         C++FLAGS += /DWIN32 ;
    
         C++FLAGS += /AI \""$(PLATFORMSDK)UnionMetadata\"" ;
-		C++FLAGS += /AI \""$(VISUALC)\\VC\\VCPackages\"" ;
+        C++FLAGS += /AI \""$(VISUALC)\\VC\\VCPackages\"" ;
 
         if $(TARGET_OSPLAT:L) = "x86_64"
         {
