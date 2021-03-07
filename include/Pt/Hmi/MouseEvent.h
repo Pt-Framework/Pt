@@ -39,6 +39,69 @@ namespace Pt {
 
 namespace Hmi {
 
+class MouseButton
+{
+    public:
+        enum Type
+        {
+            Left = 0,
+            Right = 1,
+            Middle = 2,
+        };
+
+        MouseButton(Type type = Left)
+        : _type(type)
+        { }
+
+        operator Pt::uint32_t() const
+        { 
+            return _type; 
+        }
+
+    private:
+        Pt::uint32_t _type;
+};
+
+
+class MouseState
+{
+    public:
+        MouseState()
+        : _buttonState(0)
+        { }
+
+        /** @brief Returns true if the button is in pressed state.
+        */
+        bool isPressed(MouseButton button) const
+        {
+             Pt::uint32_t mask = 0x1 << button;
+             return (_buttonState & mask) == mask;
+        }
+
+        void setPressed(MouseButton button)
+        {
+            Pt::uint32_t mask = 0x1 << button;
+            _buttonState |= mask;
+        }
+
+        /** @brief Returns true if the button is in released state.
+        */
+        bool isReleased(MouseButton button) const
+        {
+             Pt::uint32_t mask = 0x1 << button;
+             return (_buttonState & mask) != mask;
+        }
+
+        void setReleased(MouseButton button)
+        {
+            Pt::uint32_t mask = 0x1 << button;
+            _buttonState &= (~mask);
+        }
+    private:
+        Pt::uint32_t _buttonState;
+};
+
+
 class MouseEvent : public Pt::BasicEvent<MouseEvent>
 {
     public:    

@@ -792,6 +792,34 @@ void Widget::measure(const SizePolicy& policy)
 }
 
 
+void Widget::onMeasureEvent(const MeasureEvent& ev)
+{
+    const SizePolicy& contentPolicy = ev.sizePolicy();
+    
+    _preferredSize = onMeasure( ev.sizePolicy() );
+
+    // use fixed height, if size mode is fixed
+    if(contentPolicy.vertical() == SizePolicy::Fixed)
+        _preferredSize.setHeight( contentPolicy.height() );
+    else if( _preferredSize.height() < _minimumSize.height() )
+        _preferredSize.setHeight( _minimumSize.height() );
+
+    if(contentPolicy.vertical() == SizePolicy::Maximum)
+        _preferredSize.setHeight( std::min( _preferredSize.height(),
+                                            contentPolicy.height() ) );
+
+    // use fixed width, if size mode is fixed
+    if(contentPolicy.horizontal() == SizePolicy::Fixed)
+        _preferredSize.setWidth( contentPolicy.width() );
+    else if( _preferredSize.width() < _minimumSize.width() )
+        _preferredSize.setWidth( _minimumSize.width() );
+
+    if(contentPolicy.horizontal() == SizePolicy::Maximum)
+        _preferredSize.setWidth( std::min( _preferredSize.width(),
+                                            contentPolicy.width() ) );
+}
+
+
 Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
 {
    return Gfx::SizeF(0, 0);
@@ -801,12 +829,6 @@ Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
 void Widget::layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s)
 {
     layout( Gfx::RectF(p, s) );
-}
-
-
-void Widget::layout(double x, double y, double width, double height)
-{
-    layout( Gfx::PointF(x, y), Pt::Gfx::SizeF(width,height) );
 }
 
 
@@ -1009,8 +1031,8 @@ void Widget::onEnableEvent(const EnableEvent& ev)
     {
         Widget* w = _children[i];
 
-        // skip directly disabled children, because they are either already
-        // disabled or they should not be enabled
+        // skip directly disabled children, because they are 
+        // either already disabled or they should not be enabled
         if( ! w->_enabled )
             continue;
 

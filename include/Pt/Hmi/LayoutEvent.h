@@ -29,13 +29,46 @@
 #ifndef Pt_Hmi_LayoutEvent_h
 #define Pt_Hmi_LayoutEvent_h
 
-#include <Pt/Types.h>
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/SizePolicy.h>
+#include <Pt/Types.h>
 #include <Pt/Event.h>
 
 namespace Pt {
 
 namespace Hmi {
+
+class PT_HMI_API MeasureEvent : public Pt::BasicEvent<MeasureEvent>
+{
+  public:
+    MeasureEvent(Pt::uint64_t vid)
+    : _vid(vid)
+    {
+    }
+
+    virtual ~MeasureEvent()
+    {
+    }
+
+    Pt::uint64_t vid() const
+    {
+        return _vid;
+    }
+
+    const SizePolicy& sizePolicy() const
+    {
+        return _sizePolicy;
+    }
+
+    void setSizePolicy(const SizePolicy& policy)
+    {
+        _sizePolicy = policy;
+    }
+
+    private:
+        Pt::uint64_t _vid;
+        SizePolicy   _sizePolicy;
+};
 
 class PT_HMI_API LayoutEvent : public Pt::BasicEvent<LayoutEvent>
 {

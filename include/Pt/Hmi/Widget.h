@@ -215,7 +215,7 @@ class PT_HMI_API Widget : public Visual
         // painting
         //
 
-        void paint(const Gfx::RectF& updateRect);
+        void paint(const Gfx::RectF& rect);
 
         //
         // layouting
@@ -226,8 +226,6 @@ class PT_HMI_API Widget : public Visual
         void layout(const Gfx::RectF& rect);
 
         void layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s);
-
-        void layout(double x, double y, double width, double height);
 
 
         const SizePolicy& sizePolicy() const;
@@ -338,6 +336,10 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onShowEvent(const ShowEvent& ev);
 
+        virtual void onFocusEvent(const FocusEvent& ev);
+
+        virtual void onMeasureEvent(const MeasureEvent& ev);
+
         virtual void onLayoutEvent(const LayoutEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);
@@ -352,17 +354,15 @@ class PT_HMI_API Widget : public Visual
 
         virtual bool onTouchEvent(const TouchEvent& ev);
 
-        void scrollEvent( const ScrollEvent& ev );
+        void scrollEvent( const ScrollEvent& ev);
 
-        virtual bool onScrollEvent( const ScrollEvent& ev );
+        virtual bool onScrollEvent( const ScrollEvent& ev);
 
         virtual void onKeyEvent(const KeyEvent& ev);
 
-        virtual void onEnterEvent( const EnterEvent& ev );
+        virtual void onEnterEvent( const EnterEvent& ev);
 
-        virtual void onFocusEvent(const FocusEvent& ev);
-
-        virtual void onLeaveEvent(const LeaveEvent& ev );
+        virtual void onLeaveEvent(const LeaveEvent& ev);
 
     private:
         void setScreen(Screen* screen);
