@@ -41,6 +41,8 @@ namespace Hmi {
 
 class PT_HMI_API ScrollView : public Widget
 {
+    typedef Widget Base;
+
     public:
         ScrollView();
 
@@ -53,22 +55,22 @@ class PT_HMI_API ScrollView : public Widget
         void setContentMode(SizePolicy::Mode horizontal, 
                             SizePolicy::Mode vertical);
 
-        void scrollX(int xpos);
+        void scrollX(double xpos);
 
-        void scrollY(int ypos);
+        void scrollY(double ypos);
 
-        int maximumX() const;
+        double maximumX() const;
 
-        int maximumY() const;
+        double maximumY() const;
         
     protected:
-        void onScrollBarX(int pos);
+        void onScrollBarX(double pos);
         
-        void onScrollBarY(int pos);
+        void onScrollBarY(double pos);
 
-        void onScrolledX(int n);
+        void onScrolledX(double n);
         
-        void onScrolledY(int n);
+        void onScrolledY(double n);
 
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);

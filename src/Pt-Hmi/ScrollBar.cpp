@@ -59,7 +59,7 @@ ScrollBar::~ScrollBar()
 }
 
 
-void ScrollBar::setRange(int minpos, int maxpos)
+void ScrollBar::setRange(double minpos, double maxpos)
 {
     _minPos = minpos;
     _maxPos = maxpos;
@@ -74,32 +74,32 @@ void ScrollBar::setRange(int minpos, int maxpos)
 }
 
 
-void ScrollBar::setStepping(int scroll, int page)
+void ScrollBar::setStepping(double scroll, double page)
 {
     _scrollStep = scroll;
     _pageStep = page;
 }
 
 
-int ScrollBar::minimumPosition() const
+double ScrollBar::minimumPosition() const
 {
     return _minPos;
 }
 
 
-int ScrollBar::maximumPosition() const
+double ScrollBar::maximumPosition() const
 {
     return _maxPos;
 }
 
 
-int ScrollBar::position() const
+double ScrollBar::position() const
 {
     return _position;
 }
 
 
-void ScrollBar::setPosition(int pos)
+void ScrollBar::setPosition(double pos)
 {
     if(_position == pos)
         return;
@@ -126,7 +126,7 @@ void ScrollBar::setPosition(int pos)
 }
 
 
-void ScrollBar::scroll(int pos)
+void ScrollBar::scroll(double pos)
 {
     setPosition(pos);
 
@@ -244,7 +244,7 @@ bool ScrollBar::onMouseEvent(const MouseEvent& ev)
     {
         double pixPos = _orientation == Vertical ? ev.position().y() 
                                                  : ev.position().x();
-        int pos = pixelToPosition(pixPos);
+        double pos = pixelToPosition(pixPos);
 
         if( pos >= _minPos && pos <= _maxPos)
           scroll(pos);
@@ -280,7 +280,7 @@ bool ScrollBar::onTouchEvent(const TouchEvent& tev)
     {
         double pixPos = _orientation == Vertical ? tev.position().y() 
                                                  : tev.position().x();
-        int pos = pixelToPosition(pixPos);
+        double pos = pixelToPosition(pixPos);
 
         if( pos >= _minPos && pos <= _maxPos)
           scroll(pos);
@@ -298,14 +298,13 @@ void ScrollBar::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-int ScrollBar::pixelToPosition(double pix)
+double ScrollBar::pixelToPosition(double pix)
 {
-    double pos = pix * _factorPosition + _offsetPosition;
-    return static_cast<int>(pos);
+    return pix * _factorPosition + _offsetPosition;
 }
 
 
-double ScrollBar::positionToPixel(int pos)
+double ScrollBar::positionToPixel(double pos)
 {
     return pos * _factorPixel + _offsetPixel;
 }
@@ -331,11 +330,11 @@ void ScrollBar::updateScroll()
     const double pixMin = buttonLength;
     const double pixMax = length - buttonLength * 2;
 
-    _factorPixel = (pixMax  - pixMin) / (_maxPos -_minPos );
-    _offsetPixel = (pixMin * _maxPos - pixMax *_minPos) / (_maxPos - _minPos );
+    _factorPixel = (pixMax  - pixMin) / (_maxPos -_minPos);
+    _offsetPixel = (pixMin * _maxPos - pixMax *_minPos) / (_maxPos - _minPos);
        
-    _factorPosition = (_maxPos -_minPos) / (pixMax - pixMin );
-    _offsetPosition = (_minPos * pixMax - _maxPos *pixMin) / (pixMax - pixMin );  
+    _factorPosition = (_maxPos -_minPos) / (pixMax - pixMin);
+    _offsetPosition = (_minPos * pixMax - _maxPos *pixMin) / (pixMax - pixMin);  
 
     double pixpos = positionToPixel(_position);
 

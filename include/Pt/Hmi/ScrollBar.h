@@ -58,25 +58,25 @@ class PT_HMI_API ScrollBar : public Control
           return _handleRect;
         }
 
-        void setRange(int minpos, int maxpos);
+        void setRange(double minpos, double maxpos);
         
-        void setStepping(int scroll, int page);
+        void setStepping(double scroll, double page);
 
-        int minimumPosition() const;
+        double minimumPosition() const;
 
-        int maximumPosition() const;
+        double maximumPosition() const;
 
-        int position() const;
+        double position() const;
 
         /** @brief Updates the position without scrolling.
         */
-        void setPosition(int pos);
+        void setPosition(double pos);
 
         /** @brief Scrolls to an absolute position.
         */
-        void scroll(int pos);
+        void scroll(double pos);
 
-        Signal<int>& changed()
+        Signal<double>& changed()
         { return _changed; }
         
     public:
@@ -110,26 +110,26 @@ class PT_HMI_API ScrollBar : public Control
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
-        int pixelToPosition(double pix);
+        double pixelToPosition(double pix);
         
-        double positionToPixel(int pos);
+        double positionToPixel(double pos);
 
         void updateScroll();
 
     private:
-        Orientation _orientation;
-        int         _minPos;
-        int         _maxPos;
-        int         _pageStep;
-        int         _scrollStep;
-        int         _position;
-        bool        _dragging;
-        double      _factorPixel;
-        double      _offsetPixel;
-        double      _factorPosition;
-        double      _offsetPosition;
-        Gfx::RectF  _handleRect;
-        Signal<int> _changed;
+        Orientation    _orientation;
+        double         _minPos;
+        double         _maxPos;
+        double         _pageStep;
+        double         _scrollStep;
+        double         _position;
+        bool           _dragging;
+        double         _factorPixel;
+        double         _offsetPixel;
+        double         _factorPosition;
+        double         _offsetPosition;
+        Gfx::RectF     _handleRect;
+        Signal<double> _changed;
 
         FacetPtr<ScrollBarRenderer>  _renderer;
         bool                         _hasRenderer;

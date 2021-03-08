@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/ScrollLayout.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -69,20 +70,22 @@ void ScrollLayout::enableScrolling(bool scrollX, bool scrollY)
 }
 
 
-int ScrollLayout::maximumX() const
+double ScrollLayout::maximumX() const
 {
     return _maxX;
 }
 
 
-int ScrollLayout::maximumY() const
+double ScrollLayout::maximumY() const
 {
     return _maxY;
 }
 
 
-void ScrollLayout::scrollX(int xpos)
+void ScrollLayout::scrollX(double posX)
 {
+    double xpos = Application::instance().screen().align(posX);
+
     double maxPosX = _maxX - size().width();
     
     if( xpos > maxPosX  )
@@ -109,8 +112,10 @@ void ScrollLayout::scrollX(int xpos)
 }
 
 
-void ScrollLayout::scrollY(int ypos)
-{    
+void ScrollLayout::scrollY(double posY)
+{
+    double ypos = Application::instance().screen().align(posY);
+
     double maxPosY = _maxY - size().height();
     
     if( ypos > maxPosY  )
@@ -137,25 +142,25 @@ void ScrollLayout::scrollY(int ypos)
 }
 
 
-int ScrollLayout::scrollPosX() const
+double ScrollLayout::scrollPosX() const
 {
     return _scrollPos.x();
 }
 
 
-int ScrollLayout::scrollPosY() const
+double ScrollLayout::scrollPosY() const
 {
     return _scrollPos.y();
 }
 
 
-Pt::Signal<int>& ScrollLayout::scrolledX() 
+Pt::Signal<double>& ScrollLayout::scrolledX()
 {
     return _scrolledX;
 }
 
 
-Pt::Signal<int>& ScrollLayout::scrolledY()
+Pt::Signal<double>& ScrollLayout::scrolledY()
 {
     return _scrolledY;
 }
@@ -186,7 +191,7 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
     double maxWidth = 0;
     double maxHeight = 0;
     
-    for(std::size_t i = 0; i < widgets().size(); ++i)
+    for(size_t i = 0; i < widgets().size(); ++i)
     {
         Widget* w = widgets().at(i);
 
@@ -202,8 +207,8 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
                                          _scrollPos.y() );
     }
 
-    _maxX = static_cast<int>(maxWidth);
-    _maxY = static_cast<int>(maxHeight);
+    _maxX = maxWidth;
+    _maxY = maxHeight;
 
     return policy.size();
 }
@@ -229,7 +234,7 @@ bool ScrollLayout::onMouseEvent(const MouseEvent& ev)
 
 
 bool ScrollLayout::onTouchEvent(const TouchEvent& ev)
-{    
+{
     return Base::onTouchEvent(ev);
 }
 

@@ -90,49 +90,49 @@ void ScrollView::setContentMode(SizePolicy::Mode horizontal,
 }
 
 
-void ScrollView::scrollX(int xpos)
+void ScrollView::scrollX(double xpos)
 {
     _scrollLayout.scrollX(xpos);
 }
 
 
-void ScrollView::scrollY(int ypos)
+void ScrollView::scrollY(double ypos)
 {
     _scrollLayout.scrollY(ypos);
 }
 
 
-int ScrollView::maximumX() const
+double ScrollView::maximumX() const
 {
     return _scrollLayout.maximumX();
 }
 
 
-int ScrollView::maximumY() const
+double ScrollView::maximumY() const
 {
     return _scrollLayout.maximumY();
 }
 
 
-void ScrollView::onScrollBarX(int pos)
+void ScrollView::onScrollBarX(double pos)
 {
     _scrollLayout.scrollX(pos);
 }
 
 
-void ScrollView::onScrollBarY(int pos)
+void ScrollView::onScrollBarY(double pos)
 {
     _scrollLayout.scrollY(pos);
 }
 
 
-void ScrollView::onScrolledX(int n)
+void ScrollView::onScrolledX(double n)
 {
     _scrollBarX.setPosition(n);
 }
 
 
-void ScrollView::onScrolledY(int n)
+void ScrollView::onScrolledY(double n)
 {
     _scrollBarY.setPosition(n);
 }
@@ -179,6 +179,8 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
 
 void ScrollView::onLayout(const Gfx::RectF& rect)
 {
+    Base::onLayout(rect);
+
     _scrollLayout.layout( Gfx::PointF(0, 0), rect.size() );
 
     double width = rect.size().width();
@@ -225,21 +227,20 @@ void ScrollView::onLayout(const Gfx::RectF& rect)
 }
 
 
-
 void ScrollView::updateScrollBar(ScrollBar& sb, double maxRange)
 {
-    int oldPos = sb.position();
-    int oldMax = sb.maximumPosition();
+    double oldPos = sb.position();
+    double oldMax = sb.maximumPosition();
 
     // TODO: setRange might cause a scroll !!!
-    sb.setRange( 0, static_cast<int>(maxRange) ); 
+    sb.setRange(0, maxRange); 
     
     if(sb.maximumPosition() > 0)
     {      
-        double relPos = double(oldPos) / oldMax;
+        double relPos = oldPos / oldMax;
         double newPos = maxRange * relPos + 0.5;
 
-        sb.setPosition( static_cast<int>(newPos) );
+        sb.setPosition(newPos);
     }
 }
 
