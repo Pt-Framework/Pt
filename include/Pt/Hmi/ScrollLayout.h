@@ -49,21 +49,21 @@ class PT_HMI_API ScrollLayout : public Layout
 
         void enableScrolling(bool scrollX, bool scrollY);
 
-        int maximumX() const;
+        double maximumX() const;
 
-        int maximumY() const;
+        double maximumY() const;
 
-        void scrollX(int xpos);
+        void scrollX(double xpos);
 
-        void scrollY(int ypos);
+        void scrollY(double ypos);
 
-        int scrollPosX() const;
+        double scrollPosX() const;
 
-        int scrollPosY() const;
+        double scrollPosY() const;
 
-        Pt::Signal<int>& scrolledX();
+        Pt::Signal<double>& scrolledX();
 
-        Pt::Signal<int>& scrolledY();
+        Pt::Signal<double>& scrolledY();
 
         void addItem(Widget& w);
 
@@ -84,16 +84,16 @@ class PT_HMI_API ScrollLayout : public Layout
         virtual bool onScrollEvent(const ScrollEvent& ev);
        
     private:
-        Pt::Signal<int> _scrolledX;
-        Pt::Signal<int> _scrolledY;
+        Pt::Signal<double> _scrolledX;
+        Pt::Signal<double> _scrolledY;
         SizePolicy::Mode _hmode;
         SizePolicy::Mode _vmode;
         Gfx::PointF _scrollPos;
         Gfx::PointF _lastPos;
         bool _enableX;
         bool _enableY;
-        int _maxX;
-        int _maxY;
+        double _maxX;
+        double _maxY;
 };
 
 } // namespace
