@@ -36,6 +36,7 @@ namespace Hmi {
 ScrollLayout::ScrollLayout()
 : _hmode(SizePolicy::Any)
 , _vmode(SizePolicy::Any)
+, _scrollByY(0)
 , _enableX(true)
 , _enableY(true)
 , _maxX(0)
@@ -105,8 +106,8 @@ void ScrollLayout::scrollX(double posX)
     }
 
     _scrollPos.setX(xpos);
-
     _scrolledX.send(xpos);
+    
     update();
 }
 
@@ -114,7 +115,7 @@ void ScrollLayout::scrollX(double posX)
 void ScrollLayout::scrollY(double posY)
 {
     double ypos = align(posY);
-  
+
     double maxPosY = _maxY - size().height();
 
     if( ypos > maxPosY  )
@@ -125,19 +126,22 @@ void ScrollLayout::scrollY(double posY)
 
     double delta = ypos - _scrollPos.y();
 
-    for( size_t i = 0; i < widgets().size();  ++ i)
-    {
-        Widget* w =  widgets().at(i);
+    _scrollByY += delta;
 
-        Gfx::PointF pos = w->position();
-        pos.subY(delta);
-        w->move(pos);
-    }
+    //for( size_t i = 0; i < widgets().size();  ++ i)
+    //{
+    //    Widget* w =  widgets().at(i);
+
+    //    Gfx::PointF pos = w->position();
+    //    pos.subY(delta);
+    //    w->move(pos);
+    //}
 
     _scrollPos.setY(ypos);
-
     _scrolledY.send(ypos);
-    update();
+    
+    relayout();
+    //update();
 }
 
 
@@ -203,7 +207,7 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 
         maxHeight = std::max( maxHeight, wpos.y() +
                                          wsize.height() +
-                                         _scrollPos.y() );
+                                         _scrollPos.y() - _scrollByY);
     }
 
     _maxX = maxWidth;
@@ -221,8 +225,14 @@ void ScrollLayout::onLayout(const Gfx::RectF& rect)
     for(it = widgets().begin() ; it != widgets().end(); ++it)
     {
         Widget* w = *it;
-        w->layout( w->position(), w->preferredSize() );
+        
+        Gfx::PointF pos = w->position();
+        pos.subY(_scrollByY);
+        
+        w->layout( pos, w->preferredSize() );
     }
+
+    _scrollByY = 0;
 }
 
 
