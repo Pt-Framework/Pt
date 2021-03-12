@@ -95,6 +95,8 @@ class PT_HMI_API Label : public Control
 
         virtual void onLayout(const Gfx::RectF& rect);
 
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
     protected:
         virtual void onInvalidate();
 

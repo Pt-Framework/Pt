@@ -207,6 +207,8 @@ Adjustment Label::adjustment() const
 
 Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 {
+    //std::clog << _text.narrow() << " measure " << this << std::endl;
+
     double w = 0;
     double h = 0;
 
@@ -382,12 +384,21 @@ void Label::layoutImage()
 
 void Label::onLayout(const Gfx::RectF& rect)
 {
+    //std::clog << _text.narrow() << " layout " << this << std::endl;
+
     Base::onLayout(rect);
     
     if( _icon.empty() )
         layoutText();
     else
         layoutImage();
+}
+
+
+void Label::onResizeEvent(const ResizeEvent& ev)
+{
+    //std::clog << _text.narrow() << " resize " << this << std::endl;
+    Base::onResizeEvent(ev);
 }
 
 
@@ -434,6 +445,8 @@ void Label::onInvalidate()
 void Label::onPaint(Gfx::PaintSurface& surface, 
                     const Gfx::RectF& rect)
 {
+    //std::clog << _text.narrow() << " paint " << this << std::endl;
+
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
