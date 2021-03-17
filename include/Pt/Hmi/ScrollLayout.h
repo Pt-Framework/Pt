@@ -89,6 +89,7 @@ class PT_HMI_API ScrollLayout : public Layout
         SizePolicy::Mode _hmode;
         SizePolicy::Mode _vmode;
         Gfx::PointF _scrollPos;
+        double _scrollByX;
         double _scrollByY;
         bool _enableX;
         bool _enableY;

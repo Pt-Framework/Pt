@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/ScrollView.h>
 #include <algorithm>
+#include <cmath>
 
 namespace Pt {
 
@@ -238,7 +239,7 @@ void ScrollView::updateScrollBar(ScrollBar& sb, double maxRange)
     if(sb.maximumPosition() > 0)
     {      
         double relPos = oldPos / oldMax;
-        double newPos = maxRange * relPos + 0.5;
+        double newPos = maxRange * relPos;
 
         sb.setPosition(newPos);
     }

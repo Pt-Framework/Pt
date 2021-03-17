@@ -29,6 +29,8 @@
 
 #include <Pt/Hmi/ScrollLayout.h>
 
+//#define PT_SCROLL_LAYOUT_OLD 1
+
 namespace Pt {
 
 namespace Hmi {
@@ -36,6 +38,7 @@ namespace Hmi {
 ScrollLayout::ScrollLayout()
 : _hmode(SizePolicy::Any)
 , _vmode(SizePolicy::Any)
+, _scrollByX(0)
 , _scrollByY(0)
 , _enableX(true)
 , _enableY(true)
@@ -96,6 +99,7 @@ void ScrollLayout::scrollX(double posX)
 
     double delta = xpos - _scrollPos.x();
 
+#ifdef PT_SCROLL_LAYOUT_OLD
     for( size_t i = 0; i < widgets().size();  ++i)
     {
         Widget* w =  widgets().at(i);
@@ -109,6 +113,14 @@ void ScrollLayout::scrollX(double posX)
     _scrolledX.send(xpos);
     
     update();
+#else
+    _scrollByX += delta;
+
+    _scrollPos.setX(xpos);
+    _scrolledX.send(xpos);
+
+    relayout();
+#endif
 }
 
 
@@ -126,22 +138,28 @@ void ScrollLayout::scrollY(double posY)
 
     double delta = ypos - _scrollPos.y();
 
-    _scrollByY += delta;
+#ifdef PT_SCROLL_LAYOUT_OLD
+    for( size_t i = 0; i < widgets().size();  ++ i)
+    {
+        Widget* w =  widgets().at(i);
 
-    //for( size_t i = 0; i < widgets().size();  ++ i)
-    //{
-    //    Widget* w =  widgets().at(i);
-
-    //    Gfx::PointF pos = w->position();
-    //    pos.subY(delta);
-    //    w->move(pos);
-    //}
+        Gfx::PointF pos = w->position();
+        pos.subY(delta);
+        w->move(pos);
+    }
 
     _scrollPos.setY(ypos);
     _scrolledY.send(ypos);
-    
+
+    update();
+#else    
+    _scrollByY += delta;
+
+    _scrollPos.setY(ypos);
+    _scrolledY.send(ypos);
+
     relayout();
-    //update();
+#endif
 }
 
 
@@ -203,7 +221,7 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 
         maxWidth = std::max( maxWidth, wpos.x() +
                                        wsize.width() +
-                                       _scrollPos.x() );
+                                       _scrollPos.x() - _scrollByX);
 
         maxHeight = std::max( maxHeight, wpos.y() +
                                          wsize.height() +
@@ -221,18 +239,30 @@ void ScrollLayout::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
+#ifdef PT_SCROLL_LAYOUT_OLD
     std::vector<Widget*>::const_iterator it;
     for(it = widgets().begin() ; it != widgets().end(); ++it)
     {
         Widget* w = *it;
-        
+        w->layout( w->position(), w->preferredSize() );
+    }
+#else
+    std::vector<Widget*>::const_iterator it;
+    for(it = widgets().begin() ; it != widgets().end(); ++it)
+    {
+        Widget* w = *it;
+
+
         Gfx::PointF pos = w->position();
+        pos.subY(_scrollByX);
         pos.subY(_scrollByY);
         
         w->layout( pos, w->preferredSize() );
     }
 
+    _scrollByX = 0;
     _scrollByY = 0;
+#endif
 }
 
 
