@@ -51,7 +51,7 @@ EventLoop::~EventLoop()
 void EventLoop::run()
 {
     this->onRun();
-    exited();
+    exited().send();
 }
 
 
