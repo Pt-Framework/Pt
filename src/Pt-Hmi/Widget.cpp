@@ -1207,13 +1207,15 @@ void Widget::mouseEvent(const MouseEvent& ev)
   if( consumed )
      return;
 
-  Widget* w = this->parent();
+  Widget* parentWidget = this->parent();
 
-  if(w)
+  if(parentWidget)
   {
       MouseEvent ev2(ev);
-      ev2.setId (w->vid() );
+      ev2.setId (parentWidget->vid() );
       Application::instance().loop().commitEvent(ev2);
+
+      //parentWidget->mouseEvent(ev);
   }
 }
 

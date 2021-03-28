@@ -310,6 +310,7 @@ void Window::add(Window& child)
     if( child.parentWindow() == this )
         return;
 
+    // TODO: pass WindowBase (WindowManager interface)
     child.init(this);
     repaint();
     
@@ -611,8 +612,6 @@ Gfx::PointF Window::toParent(const Gfx::PointF& pos) const
     //    return Gfx::PointF(0, 0);
 
     //return _parent->onToParent(*this, pos);
-
-    Gfx::PointF parentPos(0, 0);
 
     if(_parentWindow)
         return _parentWindow->fromWindow(*this, pos);
