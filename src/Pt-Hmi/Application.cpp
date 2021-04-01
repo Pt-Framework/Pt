@@ -834,7 +834,6 @@ void Application::onLayoutEvent(const LayoutEvent& ev)
     it->second->processEvent(ev);
 }
 
-
 } // namespace
 
 } // namespace

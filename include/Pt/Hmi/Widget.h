@@ -193,20 +193,6 @@ class PT_HMI_API Widget : public Visual
         void releasePointer();
 
 
-        const Gfx::PointF& position() const;
-
-        void move(double x, double y);
-
-        void move(const Gfx::PointF& p);
-
-
-        void resize(double width, double height);
-
-        void resize(const Gfx::SizeF& size);
-
-
-        const Gfx::RectF geometry() const;
-
         const Cursor& cursor() const;
 
         void setCursor(const Cursor& c);
@@ -221,11 +207,9 @@ class PT_HMI_API Widget : public Visual
         // layouting
         //
 
-        void measure(const SizePolicy& policy);
+        const Gfx::PointF& position() const;
 
-        void layout(const Gfx::RectF& rect);
-
-        void layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s);
+        const Gfx::RectF geometry() const;
 
 
         const SizePolicy& sizePolicy() const;
@@ -234,6 +218,12 @@ class PT_HMI_API Widget : public Visual
 
 
         Gfx::SizeF preferredSize() const;
+
+        void measure(const SizePolicy& policy);
+
+        void layout(const Gfx::RectF& rect);
+
+        void layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s);
 
 
         // outer spacing
@@ -311,7 +301,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onInvalidate();
 
-
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
@@ -338,7 +327,11 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onFocusEvent(const FocusEvent& ev);
 
-        virtual void onMeasureEvent(const MeasureEvent& ev);
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+        void measureEvent(const MeasureEvent& ev);
+
+        virtual Gfx::SizeF onMeasureEvent(const MeasureEvent& ev);
 
         virtual void onLayoutEvent(const LayoutEvent& ev);
 

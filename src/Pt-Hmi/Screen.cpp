@@ -300,8 +300,20 @@ void Screen::onPaintEvent(const PaintEvent& ev)
 
    _updateRect.clear();
 
-    UpdateEvent uev( this->vid(), screenRect);
-    Application::instance().loop().commitEvent(uev);
+    //UpdateEvent uev( this->vid(), screenRect);
+    //onUpdateEvent(uev);
+    //Application::instance().loop().commitEvent(uev);
+
+    //std::clog << "Screen::onPaintEvent" << std::endl;
+    
+    _impl->paint(screenRect);
+
+    static int nnn = 0;
+    //std::clog << "screen update: " 
+    //          << _clock.stop().toUSecs() << " usecs. " 
+    //          << ++nnn << std::endl;
+    //std::clog << "    " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
+    //          << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
 }
 
 
@@ -311,9 +323,11 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     
     _impl->paint( ev.rect() );
 
-    //static int nnn = 0;
-    //std::clog << "screen update: " << _clock.stop().toUSecs() << " usecs. " << ++nnn << std::endl;
-    //std::clog << "               " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
+    static int nnn = 0;
+    //std::clog << "screen update: " 
+    //          << _clock.stop().toUSecs() << " usecs. " 
+    //          << ++nnn << std::endl;
+    //std::clog << "    " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
     //          << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
 }
 

@@ -72,6 +72,7 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onEnableEvent);
     _eventReady += Pt::slot(*this, &Widget::onFocusEvent);
     _eventReady += Pt::slot(*this, &Widget::onShowEvent);
+    _eventReady += Pt::slot(*this, &Widget::onPaintEvent );
     _eventReady += Pt::slot(*this, &Widget::onInvalidateEvent);
 }
 
@@ -663,14 +664,16 @@ void Widget::repaint(const Gfx::RectF& rect)
 
 void Widget::paint(const Gfx::RectF& rect)
 {
+    if( rect.isNull() )
+        return;
+
     if( ! isVisible() )
         return;
 
-    Gfx::RectF widgetRect = rect.intersect( Gfx::RectF(Gfx::PointF(0,0),
-                                                       this->size() ) );
+    Gfx::RectF updateRect = rect.intersect( Gfx::RectF(_size ) );
 
-    PaintEvent pev( vid(), widgetRect);
-    Application::instance().loop().commitEvent(pev);
+    PaintEvent pev( vid(), updateRect );
+    onPaintEvent(pev);
 
     const std::vector<Widget*>& widgets = this->widgets();
 
@@ -681,7 +684,6 @@ void Widget::paint(const Gfx::RectF& rect)
 
         // clip widget update rect
         Gfx::RectF updateRect = w->geometry().intersect(rect);
-
         if( updateRect.isNull() )
             continue;
 
@@ -690,6 +692,11 @@ void Widget::paint(const Gfx::RectF& rect)
         updateRect.setOrigin(updatePos);
         w->paint(updateRect);
     }
+}
+
+
+void Widget::onPaintEvent(const PaintEvent& ev)
+{
 }
 
 
@@ -714,6 +721,24 @@ void Widget::relayout()
 Gfx::SizeF Widget::preferredSize() const
 {
     return _preferredSize;
+}
+
+
+const Gfx::PointF& Widget::position() const
+{
+    return _position;
+}
+
+
+const Gfx::SizeF& Widget::onSize() const
+{
+    return _size;
+}
+
+
+const Gfx::RectF Widget::geometry() const
+{
+    return Gfx::RectF( position(), size() );
 }
 
 
@@ -792,31 +817,16 @@ void Widget::measure(const SizePolicy& policy)
 }
 
 
-void Widget::onMeasureEvent(const MeasureEvent& ev)
+void Widget::measureEvent(const MeasureEvent& ev)
+{
+    _preferredSize = onMeasureEvent(ev);
+}
+
+
+Gfx::SizeF Widget::onMeasureEvent(const MeasureEvent& ev)
 {
     const SizePolicy& contentPolicy = ev.sizePolicy();
-    
-    _preferredSize = onMeasure( ev.sizePolicy() );
-
-    // use fixed height, if size mode is fixed
-    if(contentPolicy.vertical() == SizePolicy::Fixed)
-        _preferredSize.setHeight( contentPolicy.height() );
-    else if( _preferredSize.height() < _minimumSize.height() )
-        _preferredSize.setHeight( _minimumSize.height() );
-
-    if(contentPolicy.vertical() == SizePolicy::Maximum)
-        _preferredSize.setHeight( std::min( _preferredSize.height(),
-                                            contentPolicy.height() ) );
-
-    // use fixed width, if size mode is fixed
-    if(contentPolicy.horizontal() == SizePolicy::Fixed)
-        _preferredSize.setWidth( contentPolicy.width() );
-    else if( _preferredSize.width() < _minimumSize.width() )
-        _preferredSize.setWidth( _minimumSize.width() );
-
-    if(contentPolicy.horizontal() == SizePolicy::Maximum)
-        _preferredSize.setWidth( std::min( _preferredSize.width(),
-                                            contentPolicy.width() ) );
+    return onMeasure(contentPolicy);
 }
 
 
@@ -848,7 +858,20 @@ void Widget::layout(const Gfx::RectF& r)
     bool moved = rect.topLeft() != _position;
     if(moved)
     {
-        move( rect.topLeft() );
+        //move( rect.topLeft() );
+
+        Gfx::PointF p = align( rect.topLeft() );
+        Gfx::PointF to = p - _position;
+
+        Gfx::RectF updateRect(_size);
+        updateRect.unify( Gfx::RectF(to, _size) );
+
+        MoveEvent mev(vid(), p);
+        onMoveEvent(mev);
+
+        repaint(updateRect);
+    
+        _position = p;
     }
 
     //
@@ -857,7 +880,21 @@ void Widget::layout(const Gfx::RectF& r)
     bool resized = rect.size() != _size;
     if(resized)
     {
-        resize( rect.size() );
+        //resize( rect.size() );
+
+        const Gfx::SizeF& s = align( rect.size() );
+
+        Gfx::SizeF updateSize( std::max( _size.width(), s.width()),
+                               std::max( _size.height(), s.height()) );
+
+        Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
+
+        ResizeEvent rev(vid(), s);
+        onResizeEvent(rev);
+
+        repaint(updateRect);
+
+        _size = s;
     }
 
     //
@@ -867,13 +904,12 @@ void Widget::layout(const Gfx::RectF& r)
         _isLayoutInvalid = true;
 
     if(_isLayoutInvalid)
-        onLayout(rect);
+    {
+        //LayoutEvent lev( vid() );
+        //onLayoutEvent(lev);
 
-    //if(_isLayoutInvalid)
-    //{
-    //    LayoutEvent lev(vid());
-    //    Application::instance().loop().commitEvent(lev);
-    //}
+        onLayout(rect);
+    }
 
     _isLayoutInvalid = false;
 }
@@ -891,89 +927,15 @@ void Widget::onLayout(const Gfx::RectF& rect)
 }
 
 
-const Gfx::PointF& Widget::position() const
-{
-    return _position;
-}
-
-
-void Widget::move(double x, double y)
-{
-    move( Gfx::PointF(x, y) );
-}
-
-
-void Widget::move(const Gfx::PointF& pos)
-{
-    Gfx::PointF p = align(pos);
-    Gfx::PointF to = p - _position;
-
-    Gfx::RectF updateRect(_size);
-    updateRect.unify( Gfx::RectF(to, _size) );
-
-    MoveEvent mev(vid(), p);
-    Application::instance().loop().commitEvent(mev);
-
-    repaint(updateRect);
-    
-    _position = p;
-}
-
-
 void Widget::onMoveEvent(const MoveEvent& ev)
 {
     _position = ev.position();
 }
 
 
-const Gfx::SizeF& Widget::onSize() const
-{
-    return _size;
-}
-
-
-void Widget::resize(double width, double height)
-{
-    resize( Gfx::SizeF(width, height) );
-}
-
-
-void Widget::resize(const Gfx::SizeF& size)
-{
-    const Gfx::SizeF& s = align(size);
-
-    Gfx::SizeF updateSize( std::max( _size.width(), s.width()),
-                           std::max( _size.height(), s.height()) );
-
-    Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
-
-    ResizeEvent rev(vid(), s);
-    Application::instance().loop().commitEvent(rev);
-
-    //onResizeEvent(rev);
-
-    repaint(updateRect);
-
-    _size = s;
-}
-
-
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {
     _size = ev.size();
-
-    //LayoutEvent lev( vid() );
-    //Application::instance().loop().commitEvent(lev);
-
-    // TODO: easier layout cycle
-    //Gfx::RectF rect(_position, _size);
-    //onLayout(rect);
-}
-
-
-const Gfx::RectF Widget::geometry() const
-{
-    return Gfx::RectF( position(), size() );
 }
 
 

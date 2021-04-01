@@ -340,7 +340,7 @@ MenuBar::MenuBar()
     //this->setBorderColor( Gfx::Color(32767, 32767, 32767)  );
     //this->setBorderStyle(Panel::NoBorder);
 
-    _layout.move( Gfx::PointF(0,0) );
+    //_layout.move( Gfx::PointF(0,0) );
     _layout.setPadding(1);
 
     add(_layout);

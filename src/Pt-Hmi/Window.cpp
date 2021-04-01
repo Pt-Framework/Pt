@@ -86,7 +86,7 @@ Window::Window(Window* parent, Window::Type type)
     _eventReady += Pt::slot(*this, &Window::onLeaveEvent);
     _eventReady += Pt::slot(*this, &Window::onMoveEvent);
     _eventReady += Pt::slot(*this, &Window::onResizeEvent);
-    _eventReady += Pt::slot(*this, &Window::onLayoutEvent);
+    _eventReady += Pt::slot(*this, &Window::layoutEvent);
     _eventReady += Pt::slot(*this, &Window::onShowEvent);
     _eventReady += Pt::slot(*this, &Window::onEnableEvent);
     _eventReady += Pt::slot(*this, &Window::onWindowStateEvent);
@@ -766,7 +766,8 @@ void Window::relayout()
 //{
 //}
 
-void Window::onLayoutEvent(const LayoutEvent& ev)
+
+void Window::layoutEvent(const LayoutEvent& ev)
 {
     --_layouts;
 
@@ -776,11 +777,16 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     // 1. Pass
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize(_size);
-    measure(policy);
+    onMeasure(policy);
 
     // 2. Pass
-    Gfx::RectF layoutRect(_size);
-    layout(layoutRect);
+    onLayoutEvent(ev);
+}
+
+
+void Window::onLayoutEvent(const LayoutEvent& ev)
+{
+    onLayout(_size);
 }
 
 
@@ -802,14 +808,10 @@ Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
 }
 
 
-void Window::layout(const Gfx::RectF& rect)
+void Window::onLayout(const Gfx::SizeF& s)
 {
-    onLayout(rect);
-}
+    Gfx::RectF rect(s);
 
-
-void Window::onLayout(const Gfx::RectF& rect)
-{
     if( _mainWidget )
         _mainWidget->layout(rect);
 }
@@ -846,15 +848,15 @@ void Window::paint(const Gfx::RectF& rect)
 
     _damageRect = _damageRect.intersect( Gfx::RectF(_size) );
 
-    PaintEvent pev(vid(), rect);
-    Application::instance().loop().commitEvent(pev);
+    PaintEvent pev( vid(), rect );
+    onPaintEvent(pev);
 
     if( mainWidget() )
     {
-        // TODO: possibly use device units, because intersect() can not
-        //       consider logic sub-pixels
+        // clip widget update rect
         Gfx::RectF updateRect = mainWidget()->geometry().intersect(rect);
 
+        // paint main widget rect
         if( ! updateRect.isNull() )
             mainWidget()->paint(rect);
     }
@@ -872,7 +874,7 @@ void Window::paint(const Gfx::RectF& rect)
     }
 
     UpdateEvent uev(vid(), rect);
-    Application::instance().loop().commitEvent(uev);
+    onUpdateEvent(uev);
 
     _damageRect.clear();
 }
@@ -884,18 +886,8 @@ void Window::onPaintEvent(const PaintEvent& ev)
         return; 
 
     onPaintBackground( ev.rect() );
-}
-
-
-void Window::onUpdateEvent(const UpdateEvent& ev)
-{
-    if( ! this->isVisible() )
-        return;
 
     onPaintContent( ev.rect() );
-
-    if(_impl)
-        _impl->paint( ev.rect() );
 }
 
 
@@ -909,7 +901,18 @@ void Window::onPaintBackground(const Gfx::RectF& rect)
 
 void Window::onPaintContent(const Gfx::RectF& rect)
 {
-    _windowManager.paint(_surface, rect);
+}
+
+
+void Window::onUpdateEvent(const UpdateEvent& ev)
+{
+    if( ! this->isVisible() )
+        return;
+
+    _windowManager.paint( _surface, ev.rect() );
+
+    if(_impl)
+        _impl->paint( ev.rect() );
 }
 
 

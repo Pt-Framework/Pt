@@ -384,7 +384,7 @@ void Label::layoutImage()
 
 void Label::onLayout(const Gfx::RectF& rect)
 {
-    //std::clog << _text.narrow() << " layout " << this << std::endl;
+    //std::clog  << " layout " << _text.narrow()<< this << std::endl;
 
     Base::onLayout(rect);
     
@@ -397,7 +397,7 @@ void Label::onLayout(const Gfx::RectF& rect)
 
 void Label::onResizeEvent(const ResizeEvent& ev)
 {
-    //std::clog << _text.narrow() << " resize " << this << std::endl;
+    //std::clog << " resize " << _text.narrow() << this << std::endl;
     Base::onResizeEvent(ev);
 }
 
@@ -445,7 +445,7 @@ void Label::onInvalidate()
 void Label::onPaint(Gfx::PaintSurface& surface, 
                     const Gfx::RectF& rect)
 {
-    //std::clog << _text.narrow() << " paint " << this << std::endl;
+    //std::clog << " paint " << _text.narrow() << this << std::endl;
 
     const StyleOptions& options = Application::instance().styleOptions();
 

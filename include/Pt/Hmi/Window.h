@@ -146,12 +146,11 @@ class PT_HMI_API Window : public WindowBase
 
     void repaint(const Gfx::RectF& rect);
 
+    
     void relayout();
-
 
     Gfx::SizeF measure(const SizePolicy& policy);
 
-    void layout(const Gfx::RectF& rect);
 
     void paint(const Gfx::RectF& rect);
 
@@ -237,7 +236,7 @@ class PT_HMI_API Window : public WindowBase
 
     virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-    virtual void onLayout(const Gfx::RectF& rect);
+    virtual void onLayout(const Gfx::SizeF& rect);
 
   protected:
     virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
@@ -289,9 +288,11 @@ class PT_HMI_API Window : public WindowBase
 
     void onUpdateEvent(const UpdateEvent& ev);
 
+    void mouseEvent( const MouseEvent& ev );
+
     virtual bool onMouseEvent( const MouseEvent& ev );
 
-    void mouseEvent( const MouseEvent& ev );
+    void layoutEvent(const LayoutEvent& ev);
 
     virtual void onLayoutEvent(const LayoutEvent& ev);
 
