@@ -1182,9 +1182,8 @@ void Widget::mouseEvent(const MouseEvent& ev)
   {
       MouseEvent ev2(ev);
       ev2.setId (parentWidget->vid() );
-      Application::instance().loop().commitEvent(ev2);
-
-      //parentWidget->mouseEvent(ev);
+      //Application::instance().loop().commitEvent(ev2);
+      parentWidget->mouseEvent(ev);
   }
 }
 

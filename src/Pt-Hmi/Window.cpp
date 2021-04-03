@@ -1478,7 +1478,8 @@ bool Window::onMouseEvent(const MouseEvent& ev)
         MouseEvent clientEv(ev);
         clientEv.setId( widget->vid() );
         clientEv.setPosition( widget->fromWindow(ev.position()) );
-        Application::instance().loop().commitEvent(clientEv); 
+        //Application::instance().loop().commitEvent(clientEv);
+        widget->mouseEvent(ev);
     }
 
     return true;
