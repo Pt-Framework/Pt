@@ -817,6 +817,13 @@ void Widget::measure(const SizePolicy& policy)
 }
 
 
+Gfx::SizeF Widget::measure(Widget& w, const SizePolicy& policy)
+{
+    w.measure(policy);
+    return w.preferredSize();
+}
+
+
 void Widget::measureEvent(const MeasureEvent& ev)
 {
     _preferredSize = onMeasureEvent(ev);

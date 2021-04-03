@@ -118,12 +118,20 @@ void Control::onPaintEvent(const PaintEvent& ev)
 void Control::onMoveEvent(const MoveEvent& ev)
 {
     Widget::onMoveEvent(ev);
+
+    // Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
+    // Gfx::RectF surfaceRect( pos, size() );
+    // _surface.reset(surfaceRect);
 }
 
 
 void Control::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
+
+    // Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
+    // Gfx::RectF surfaceRect( pos, size() );
+    // _surface.reset(surfaceRect);
 }
 
 

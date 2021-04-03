@@ -152,8 +152,10 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
         itemPolicy.setWidth( fillSize.width() - fillWidget->margin().leftRight() );
         itemPolicy.setHeight( fillSize.height() - fillWidget->margin().topBottom() );
 
-        fillWidget->measure(itemPolicy);
-        Gfx::SizeF itemSize = fillWidget->preferredSize();
+        //fillWidget->measure(itemPolicy);
+        //Gfx::SizeF itemSize = fillWidget->preferredSize();
+
+        Gfx::SizeF itemSize = measure(*fillWidget, itemPolicy);
 
         double itemWidth = itemSize.width() + fillWidget->margin().leftRight();
         double itemHeight = itemSize.height() + fillWidget->margin().topBottom();

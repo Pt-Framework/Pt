@@ -219,8 +219,13 @@ class PT_HMI_API Widget : public Visual
 
         Gfx::SizeF preferredSize() const;
 
+    public:
         void measure(const SizePolicy& policy);
 
+    protected:
+        Gfx::SizeF measure(Widget& w, const SizePolicy& policy);
+
+    public:
         void layout(const Gfx::RectF& rect);
 
         void layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s);
