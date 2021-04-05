@@ -106,9 +106,8 @@ Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
         itemPolicy.setWidth( itemsWidth - item->margin().leftRight() );
         itemPolicy.setHeight( itemsHeight - item->margin().topBottom() );
 
-        item->measure(itemPolicy);
-        Gfx::SizeF prefSize = item->preferredSize();
-
+        Gfx::SizeF prefSize = onMeasureChild(*item, itemPolicy);
+        
         double itemWidth = prefSize.width() + item->margin().leftRight();
         double itemHeight = prefSize.height() + item->margin().topBottom();
 
@@ -186,8 +185,7 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
         itemPolicy.setWidth( itemsWidth - item->margin().leftRight() );
         itemPolicy.setHeight( itemsHeight - item->margin().topBottom() );
 
-        item->measure(itemPolicy);
-        Gfx::SizeF prefSize = item->preferredSize();
+        Gfx::SizeF prefSize = onMeasureChild(*item, itemPolicy);
 
         double itemWidth = prefSize.width() + item->margin().leftRight();
         double itemHeight = prefSize.height() + item->margin().topBottom();
@@ -329,7 +327,7 @@ void GridLayout::onLayoutVertical(const Gfx::SizeF& itemSize, const Gfx::RectF& 
         double y = ( itemSize.height() - widget->preferredSize().height() ) / 2;
 
         Gfx::PointF pos(itemX + x, itemY + y);
-        widget->layout(pos, widget->preferredSize());
+        layoutContent( *widget, pos, widget->preferredSize() );
 
         itemX += itemSize.width();
 
@@ -381,7 +379,7 @@ void GridLayout::onLayoutHorizontal(const Gfx::SizeF& itemSize, const Gfx::RectF
         double y = ( itemSize.height() - widget->preferredSize().height() ) / 2;
 
         Gfx::PointF pos(itemX + x, itemY + y);
-        widget->layout(pos, widget->preferredSize());
+        layoutContent( *widget, pos, widget->preferredSize() );
 
         itemY += itemSize.height();
 

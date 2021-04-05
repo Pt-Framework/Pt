@@ -166,7 +166,7 @@ Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
                 itemPolicy.setHeight( rowPolicy.size() );
             }
 
-            item->measure(itemPolicy);
+            onMeasureChild(*item, itemPolicy);
             Gfx::SizeF prefSize = item->preferredSize();
 
             double itemWidth = prefSize.width() + item->margin().leftRight();
@@ -298,7 +298,7 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
                 Gfx::SizeF size( columnSize - item->margin().leftRight(),
                                  rowSize - item->margin().topBottom() );
 
-                item->layout(pos, size);
+                layoutContent(*item, pos, size);
             }
 
             x += columnSize;

@@ -212,11 +212,13 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::onPaintBackground(const Gfx::RectF& rect)
+void MainWindow::onPaintEvent(const PaintEvent& ev)
 {
-    Window::onPaintBackground(rect);
+    Window::onPaintEvent(ev);
     return;   
     
+    const Gfx::RectF& rect = ev.rect();
+ 
     Gfx::Painter painter( surface() );
     painter.setClip(rect);
 

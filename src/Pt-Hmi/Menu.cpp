@@ -349,7 +349,7 @@ void Menu::onInvalidate()
 
 void Menu::onPaintBackground(const Gfx::RectF& rect)
 {
-    Base::onPaintBackground(rect);
+    //Base::onPaintBackground(rect);
 
     const StyleOptions& options = Application::instance().styleOptions();
 

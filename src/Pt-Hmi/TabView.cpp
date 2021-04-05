@@ -370,8 +370,7 @@ Gfx::SizeF TabView::onMeasure(const SizePolicy& policy)
 {
     Base::onMeasure(policy);
 
-    _layout.measure(policy);
-    return _layout.preferredSize();
+    return onMeasureChild(_layout, policy);
 }
 
 
@@ -389,7 +388,7 @@ void TabView::onLayout(const Gfx::RectF& rect)
     size.setWidth( rect.width() - hspace );
     size.setHeight( rect.height() - vspace );
 
-    _layout.layout( pos, size );
+    layoutContent(_layout, pos, size);
 }
 
 

@@ -206,7 +206,8 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 
         SizePolicy itemPolicy(_hmode, _vmode);
         itemPolicy.setSize( policy.size() );
-        item->measure(itemPolicy);
+
+        onMeasureChild(*item, itemPolicy);
    }
 
     double maxWidth = 0;
@@ -257,7 +258,7 @@ void ScrollLayout::onLayout(const Gfx::RectF& rect)
         pos.subY(_scrollByX);
         pos.subY(_scrollByY);
         
-        w->layout( pos, w->preferredSize() );
+        layoutContent( *w, pos, w->preferredSize() );
     }
 
     _scrollByX = 0;

@@ -134,23 +134,6 @@ Pt::Gfx::PointF Screen::onFromScreen(const Pt::Gfx::PointF& p) const
 }
 
 
-void Screen::repaint()
-{
-    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-    repaint(rect);
-}
-
-
-void Screen::repaint(const Gfx::RectF& updateRect)
-{
-    _updateRect.unify(updateRect);
-    ++_updates;
-
-    PaintEvent uev(vid(), _updateRect);
-    Application::instance().loop().commitEvent(uev);
-}
-
-
 ScreenImpl* Screen::impl()
 {
     return _impl;
@@ -246,12 +229,6 @@ void Screen::onEnable(Window& w, bool enable)
 
 void Screen::onEvent(const Event& ev)
 {
-    if(ev.typeInfo() == typeid(UpdateEvent) )
-    {
-        const UpdateEvent& uev = static_cast<const UpdateEvent&>(ev);
-        onUpdateEvent(uev);
-    }
-
     if(ev.typeInfo() == typeid(PaintEvent) )
     {
         const PaintEvent& pev = static_cast<const PaintEvent&>(ev);
@@ -260,14 +237,21 @@ void Screen::onEvent(const Event& ev)
 }
 
 
-//void Screen::onUpdate(const Gfx::RectF& updateRect)
-//{
-//    _updateRect.unify(updateRect);
-//    ++_updates;
-//
-//    PaintEvent uev(vid(), _updateRect);
-//    Application::instance().loop().commitEvent(uev);
-//}
+void Screen::repaint()
+{
+    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+    repaint(rect);
+}
+
+
+void Screen::repaint(const Gfx::RectF& updateRect)
+{
+    _updateRect.unify(updateRect);
+    ++_updates;
+
+    PaintEvent uev(vid(), _updateRect);
+    Application::instance().loop().commitEvent(uev);
+}
 
 
 void Screen::onPaintEvent(const PaintEvent& ev)
@@ -278,12 +262,17 @@ void Screen::onPaintEvent(const PaintEvent& ev)
     if(_updates > 0)
       return;
     
+    const Gfx::RectF& screenRect = ev.rect();
+    onPaintContent(screenRect);
+}
+
+
+void Screen::onPaintContent(const Gfx::RectF& screenRect)
+{
     //std::clog << std::endl;
     //_clock.start();
 
     //std::clog << "Screen::onPaintEvent " << std::endl;
-
-    const Gfx::RectF& screenRect = ev.rect();
 
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
@@ -295,7 +284,7 @@ void Screen::onPaintEvent(const PaintEvent& ev)
 
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );
 
-        window->paint(winRect);
+        paintContent(*window, winRect);
     }
 
    _updateRect.clear();
@@ -307,21 +296,6 @@ void Screen::onPaintEvent(const PaintEvent& ev)
     //std::clog << "Screen::onPaintEvent" << std::endl;
     
     _impl->paint(screenRect);
-
-    //static int nnn = 0;
-    //std::clog << "screen update: " 
-    //          << _clock.stop().toUSecs() << " usecs. " 
-    //          << ++nnn << std::endl;
-    //std::clog << "    " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
-    //          << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
-}
-
-
-void Screen::onUpdateEvent(const UpdateEvent& ev)
-{
-    //std::clog << "Screen::onPaintEvent" << std::endl;
-    
-    _impl->paint( ev.rect() );
 
     //static int nnn = 0;
     //std::clog << "screen update: " 

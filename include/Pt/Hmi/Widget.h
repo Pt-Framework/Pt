@@ -66,7 +66,6 @@ class Screen;
 class PT_HMI_API Widget : public Visual
 {
     friend class Window;
-    friend class WidgetLayouter;
 
     public:
         Widget();
@@ -197,40 +196,44 @@ class PT_HMI_API Widget : public Visual
 
         void setCursor(const Cursor& c);
 
-        //
-        // painting
-        //
-
-        void paint(const Gfx::RectF& rect);
-
-        //
-        // layouting
-        //
-
+    //
+    // layouting
+    //
+    public:
         const Gfx::PointF& position() const;
 
         const Gfx::RectF geometry() const;
-
 
         const SizePolicy& sizePolicy() const;
 
         void setSizePolicy(const SizePolicy& policy);
 
-
         Gfx::SizeF preferredSize() const;
 
-    public:
-        void measure(const SizePolicy& policy);
-
     protected:
-        Gfx::SizeF measure(Widget& w, const SizePolicy& policy);
+        // onMeasure
+        virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy);
+
+        // onMeasureContent (widget specific)
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        // onLayout
+        virtual void onLayoutContent(const Gfx::RectF& rect);
+
+        // onLayoutContent (widget specific)
+        virtual void onLayout(const Gfx::RectF& rect);
+
+    //
+    // painting
+    //
+    protected:
+        // onPaint
+        virtual void onPaintContent(const Gfx::RectF& r);
+
+        // onPaintContent (widget specific)
+        virtual void onPaintEvent(const PaintEvent& ev);
 
     public:
-        void layout(const Gfx::RectF& rect);
-
-        void layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s);
-
-
         // outer spacing
         const Spacing& margin() const;
 
@@ -306,10 +309,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onInvalidate();
 
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-        virtual void onLayout(const Gfx::RectF& rect);
-
 
         virtual void onSetActionKey(const Key& ak);
 
@@ -331,14 +330,6 @@ class PT_HMI_API Widget : public Visual
         virtual void onShowEvent(const ShowEvent& ev);
 
         virtual void onFocusEvent(const FocusEvent& ev);
-
-        virtual void onPaintEvent(const PaintEvent& ev);
-
-        void measureEvent(const MeasureEvent& ev);
-
-        virtual Gfx::SizeF onMeasureEvent(const MeasureEvent& ev);
-
-        virtual void onLayoutEvent(const LayoutEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);
 

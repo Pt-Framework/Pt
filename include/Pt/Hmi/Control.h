@@ -67,6 +67,8 @@ class PT_HMI_API Control : public Widget
                              const Gfx::RectF& updateRect) = 0;
 
     protected:
+        //void onPaintContent(const Gfx::RectF& r);
+
         virtual void onPaintEvent(const PaintEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);

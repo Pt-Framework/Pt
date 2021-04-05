@@ -79,7 +79,6 @@ Window::Window(Window* parent, Window::Type type)
     _eventReady += Pt::slot(*this, &Window::onTouchEvent);
     _eventReady += Pt::slot(*this, &Window::onScrollEvent);
     _eventReady += Pt::slot(*this, &Window::onPaintEvent);
-    _eventReady += Pt::slot(*this, &Window::onUpdateEvent);
     _eventReady += Pt::slot(*this, &Window::onActivateEvent);
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
     _eventReady += Pt::slot(*this, &Window::onEnterEvent);
@@ -762,7 +761,7 @@ void Window::relayout()
 }
 
 
-//void Window::setSizePolicy()
+//void Window::setSizePolicy(const SizePolicy& policy)
 //{
 //}
 
@@ -777,43 +776,34 @@ void Window::layoutEvent(const LayoutEvent& ev)
     // 1. Pass
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize(_size);
-    onMeasure(policy);
+    onMeasureContent(policy);
 
     // 2. Pass
-    onLayoutEvent(ev);
+    Gfx::RectF rect(_position, _size);
+    onLayoutContent(rect);
 }
 
-
-void Window::onLayoutEvent(const LayoutEvent& ev)
-{
-    onLayout(_size);
-}
-
-
-Gfx::SizeF Window::measure(const SizePolicy& policy)
-{
-    return onMeasure(policy);
-}
-
-
-Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
-{
+// onMeasure
+Gfx::SizeF Window::onMeasureContent(const SizePolicy& policy)
+{ 
     if( _mainWidget )
-    {
-        _mainWidget->measure(policy);
-        return _mainWidget->preferredSize();
-    }
+        return onMeasureChild(*_mainWidget, policy);
 
     return policy.size();
 }
 
-
-void Window::onLayout(const Gfx::SizeF& s)
+// onLayout
+void Window::onLayoutContent(const Gfx::RectF& rect)
 {
-    Gfx::RectF rect(s);
+    // TODO: consider moving and resizing the window according to the layout
+    //       rect. In resize() and move() only record the new size and 
+    //       position, then call relayout() to perform the move or resize.
 
     if( _mainWidget )
-        _mainWidget->layout(rect);
+    {
+        Gfx::RectF widgetRect( rect.size() );
+        layoutContent(*_mainWidget, widgetRect);
+    }
 }
 
 
@@ -837,8 +827,8 @@ void Window::repaint(const Gfx::RectF& rect)
         _screen->repaint(updateRect);
 }
 
-
-void Window::paint(const Gfx::RectF& rect)
+// onPaint
+void Window::onPaintContent(const Gfx::RectF& rect)
 {
     if( rect.isNull() )
         return;
@@ -848,17 +838,21 @@ void Window::paint(const Gfx::RectF& rect)
 
     _damageRect = _damageRect.intersect( Gfx::RectF(_size) );
 
+    if( _damageRect.isNull() )
+        return;
+
     PaintEvent pev( vid(), rect );
     onPaintEvent(pev);
 
-    if( mainWidget() )
+    Widget* widget = mainWidget();
+    if(widget)
     {
         // clip widget update rect
         Gfx::RectF updateRect = mainWidget()->geometry().intersect(rect);
 
         // paint main widget rect
         if( ! updateRect.isNull() )
-            mainWidget()->paint(rect);
+            paintContent(*widget, updateRect);
     }
 
     std::vector<Window*>::iterator child;
@@ -870,49 +864,23 @@ void Window::paint(const Gfx::RectF& rect)
         Gfx::RectF clipRectChild( (*child)->size() );
         winRect = winRect.intersect( Gfx::RectF( (*child)->size() ) );
 
-        (*child)->paint(winRect);
+        paintContent(**child, winRect);
     }
 
-    UpdateEvent uev(vid(), rect);
-    onUpdateEvent(uev);
+    _windowManager.paint(_surface, rect);
+
+    if(_impl)
+        _impl->paint(rect);
 
     _damageRect.clear();
 }
 
-
+// onPaintContent
 void Window::onPaintEvent(const PaintEvent& ev)
-{
-    if( ! this->isVisible() )
-        return; 
-
-    onPaintBackground( ev.rect() );
-
-    onPaintContent( ev.rect() );
-}
-
-
-void Window::onPaintBackground(const Gfx::RectF& rect)
 {
     Gfx::Painter painter(_surface);
     painter.setBrush(_backgroundBrush);
-    painter.fillRect(rect);
-}
-
-
-void Window::onPaintContent(const Gfx::RectF& rect)
-{
-}
-
-
-void Window::onUpdateEvent(const UpdateEvent& ev)
-{
-    if( ! this->isVisible() )
-        return;
-
-    _windowManager.paint( _surface, ev.rect() );
-
-    if(_impl)
-        _impl->paint( ev.rect() );
+    painter.fillRect( ev.rect() );
 }
 
 

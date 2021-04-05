@@ -182,7 +182,7 @@ Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
         contentPolicy.setWidth( policy.size().width() - hspace );
         contentPolicy.setHeight( policy.size().height() - vspace );
         
-        _content->measure(contentPolicy);
+        onMeasureChild(*_content, contentPolicy);
         return _content->preferredSize();
     }
 
@@ -206,7 +206,7 @@ void Panel::onLayout(const Gfx::RectF& rect)
         size.setWidth( rect.width() - hspace );
         size.setHeight( rect.height() - vspace );
 
-        _content->layout( pos, size );
+        layoutContent( *_content, pos, size );
     }
 }
 

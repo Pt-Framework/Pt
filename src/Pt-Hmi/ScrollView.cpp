@@ -147,7 +147,7 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
     SizePolicy contentPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
     contentPolicy.setSize(width, height);
 
-    _scrollLayout.measure(contentPolicy);
+    onMeasureChild(_scrollLayout, contentPolicy);
 
     // TODO: extend the scroll range for the width/height of the visible
     //       scrollbars instead of shrinking the scroll layout
@@ -163,7 +163,7 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
         SizePolicy barPolicy(SizePolicy::Fixed, SizePolicy::Preferred);
         barPolicy.setSize(width, height);
 
-        _scrollBarX.measure(barPolicy);
+        onMeasureChild(_scrollBarX, barPolicy);
     }
 
     if( _scrollBarY.isVisible() )
@@ -171,7 +171,7 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
         SizePolicy barPolicy(SizePolicy::Preferred, SizePolicy::Fixed);
         barPolicy.setSize(width, height);
 
-        _scrollBarY.measure(barPolicy);
+        onMeasureChild(_scrollBarY, barPolicy);
     }
 
     return policy.size();
@@ -182,7 +182,7 @@ void ScrollView::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    _scrollLayout.layout( Gfx::PointF(0, 0), rect.size() );
+    layoutContent( _scrollLayout, Gfx::PointF(0, 0), rect.size() );
 
     double width = rect.size().width();
     double height = rect.size().height();
@@ -208,14 +208,14 @@ void ScrollView::onLayout(const Gfx::RectF& rect)
 
     if( _scrollBarX.isVisible() )
     {
-        _scrollBarX.layout( Gfx::PointF(0, height),
-                            Gfx::SizeF(width, _scrollBarX.preferredSize().height()) );
+        layoutContent( _scrollBarX, Gfx::PointF(0, height),
+                       Gfx::SizeF(width, _scrollBarX.preferredSize().height()) );
     }
 
     if( _scrollBarY.isVisible() )
     {
-        _scrollBarY.layout( Gfx::PointF(width, 0),
-                            Gfx::SizeF(_scrollBarY.preferredSize().width(), height) );
+        layoutContent( _scrollBarY, Gfx::PointF(width, 0),
+                       Gfx::SizeF(_scrollBarY.preferredSize().width(), height) );
     }
 
     double hrange = _scrollLayout.maximumX() - _scrollLayout.size().width();

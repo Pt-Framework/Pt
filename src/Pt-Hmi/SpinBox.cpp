@@ -533,8 +533,8 @@ Gfx::SizeF SpinBox::onMeasure(const SizePolicy& policy)
     double itemsWidth = policy.width();
     double itemsHeight = _font.size() * 2.5;
 
-    _downButton.measure(policy);
-    _upButton.measure(policy);
+    onMeasureChild(_downButton, policy);
+    onMeasureChild(_upButton, policy);
 
     return Gfx::SizeF( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );
@@ -559,8 +559,8 @@ void SpinBox::onLayout(const Gfx::RectF& rect)
     
     _renderer->layout(*this, downRect, upRect, _textBox);
 
-    _downButton.layout(downRect);
-    _upButton.layout(upRect);
+    layoutContent(_downButton, downRect);
+    layoutContent(_upButton, upRect);
 
     Gfx::SizeF editSize = _textBox.size();
     editSize.subWidth(5);  // TODO: cursor

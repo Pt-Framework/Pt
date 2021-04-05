@@ -103,6 +103,16 @@ void Control::onLayout(const Gfx::RectF& rect)
 }
 
 
+// void Control::onPaintContent(const Gfx::RectF& r)
+// {
+//     Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
+//     Gfx::RectF surfaceRect( pos, size() );
+//     _surface.reset(surfaceRect);
+
+//     Widget::onPaintContent(r);
+// }
+
+
 void Control::onPaintEvent(const PaintEvent& ev)
 {
     Widget::onPaintEvent(ev);

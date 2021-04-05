@@ -140,7 +140,7 @@ Gfx::SizeF StackLayout::onMeasure(const SizePolicy& policy)
     for(it = _widgets.begin(); it != _widgets.end(); ++it)
     {
         Widget* item = *it;
-        item->measure(policy);
+        onMeasureChild(*item, policy);
         Gfx::SizeF preferredSize = item->preferredSize();
 
         double width = std::max( preferredSize.width(), s.width() );
@@ -171,7 +171,7 @@ void StackLayout::onLayout(const Gfx::RectF& rect)
         size.setWidth( rect.width() - hspace );
         size.setHeight( rect.height() - vspace );
 
-        widget->layout( pos, size );
+        layoutContent( *widget, pos, size );
     }
 }
 

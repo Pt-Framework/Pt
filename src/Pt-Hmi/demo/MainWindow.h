@@ -50,7 +50,7 @@ class MainWindow : public Pt::Hmi::Window
         virtual ~MainWindow();
 
     protected:
-        virtual void onPaintBackground(const Gfx::RectF& rect);
+        virtual void onPaintEvent(const PaintEvent& ev);
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 

@@ -569,7 +569,7 @@ Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
     contentPolicy.setWidth( policy.size().width() - hspace );
     contentPolicy.setHeight( policy.size().height() - vspace );
 
-    _scrollView.measure(contentPolicy);
+    onMeasureChild(_scrollView, contentPolicy);
     
     return policy.size();
 }
@@ -589,7 +589,7 @@ void ListBox::onLayout(const Gfx::RectF& rect)
     size.setWidth( rect.width() - hspace );
     size.setHeight( rect.height() - vspace );
 
-    _scrollView.layout( pos, size );
+    layoutContent( _scrollView, pos, size );
 }
 
 

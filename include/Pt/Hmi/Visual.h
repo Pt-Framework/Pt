@@ -38,6 +38,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/Spacing.h>
+#include <Pt/Hmi/SizePolicy.h>
 #include <string>
 
 namespace Pt {
@@ -191,6 +192,42 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
                 align(spacing.bottom()));
 
             return alignedSpacing;
+        }
+
+    protected:
+        // onMeasure
+        virtual Gfx::SizeF onMeasureContent(const SizePolicy&) = 0;
+
+        // measure
+        Gfx::SizeF onMeasureChild(Visual& v, const SizePolicy& policy)
+        {
+            return v.onMeasureContent(policy);
+        }
+
+        // onLayout
+        virtual void onLayoutContent(const Gfx::RectF&) = 0;
+
+        // layout
+        void layoutContent(Visual& v, const Gfx::PointF& p, const Gfx::SizeF& s)
+        {
+            Gfx::RectF r(p, s);
+            v.onLayoutContent(r);
+        }
+
+        // layout
+        void layoutContent(Visual& v, const Gfx::RectF& r)
+        {
+            v.onLayoutContent(r);
+        }
+
+    protected:
+        // onPaint
+        virtual void onPaintContent(const Gfx::RectF& r) = 0;
+
+        // paint
+        void paintContent(Visual& v, const Gfx::RectF& r)
+        {
+            return v.onPaintContent(r);
         }
 
     protected:

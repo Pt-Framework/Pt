@@ -153,7 +153,7 @@ Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
         SizePolicy itemPolicy(SizePolicy::Preferred, policy.vertical());
         itemPolicy.setSize(itemSize);
 
-        item->measure(itemPolicy);
+        onMeasureChild(*item, itemPolicy);
 
         Gfx::SizeF prefSize = item->preferredSize();
         prefSize.addWidth( item->margin().leftRight() );
@@ -215,7 +215,7 @@ void FlowLayout::onLayoutLeft(const Gfx::RectF& rect, bool center)
                 item->margin().bottom());
 
             Gfx::PointF pos(x, y);
-            item->layout(pos, itemSize);
+            layoutContent(*item, pos, itemSize);
         }
     }
     else
@@ -244,7 +244,7 @@ void FlowLayout::onLayoutLeft(const Gfx::RectF& rect, bool center)
                 item->margin().bottom());
 
             Gfx::PointF pos(x, y);
-            item->layout(pos, itemSize);
+            layoutContent(*item, pos, itemSize);
         }
     }
 }
@@ -297,7 +297,7 @@ void FlowLayout::onLayoutRight(const Gfx::RectF& rect, bool center)
                 item->margin().bottom());
 
             Gfx::PointF pos(x, y);
-            item->layout(pos, itemSize);
+            layoutContent(*item, pos, itemSize);
         }
     }
     else
@@ -328,7 +328,7 @@ void FlowLayout::onLayoutRight(const Gfx::RectF& rect, bool center)
                 item->margin().bottom());
 
             Gfx::PointF pos(x, y);
-            item->layout(pos, itemSize);
+            layoutContent(*item, pos, itemSize);
         }
     }
 }
@@ -356,7 +356,7 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
         SizePolicy itemPolicy(policy.horizontal(), SizePolicy::Preferred);
         itemPolicy.setSize(itemSize);                  
         
-        item->measure(itemPolicy);
+        onMeasureChild(*item, itemPolicy);
         
         Gfx::SizeF prefSize = item->preferredSize();
         prefSize.addWidth( padding().leftRight() + item->margin().leftRight() );
@@ -418,7 +418,7 @@ void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)
                 item->preferredSize().height());
 
             Gfx::PointF pos(x, y);
-            item->layout(pos, itemSize);
+            layoutContent(*item, pos, itemSize);
         }
     }
     else
@@ -447,7 +447,7 @@ void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)
                 item->preferredSize().height());
 
             Gfx::PointF pos(x, y);
-            item->layout(pos, itemSize);
+            layoutContent(*item, pos, itemSize);
         }
     }
 }
@@ -500,7 +500,7 @@ void FlowLayout::onLayoutBottom(const Gfx::RectF& rect, bool center)
                 item->preferredSize().height());
 
             Gfx::PointF pos(x, y);
-            item->layout(pos, itemSize);
+            layoutContent(*item, pos, itemSize);
         }
     }
     else
@@ -531,7 +531,7 @@ void FlowLayout::onLayoutBottom(const Gfx::RectF& rect, bool center)
                 item->preferredSize().height());
 
             Gfx::PointF pos(x, y);
-            item->layout(pos, itemSize);
+            layoutContent(*item, pos, itemSize);
         }
     }
 }

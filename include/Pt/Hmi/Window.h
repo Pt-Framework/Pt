@@ -149,10 +149,6 @@ class PT_HMI_API Window : public WindowBase
     
     void relayout();
 
-    Gfx::SizeF measure(const SizePolicy& policy);
-
-
-    void paint(const Gfx::RectF& rect);
 
     bool isActive() const;
 
@@ -233,10 +229,26 @@ class PT_HMI_API Window : public WindowBase
     virtual void onAddWidget(Widget& w);
 
     virtual void onRemoveWidget(Widget& w);
+  
+  //
+  // layouting
+  //
+  protected:
+    // onMeasure
+    virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy);
 
-    virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+    // onLayout
+    virtual void onLayoutContent(const Gfx::RectF& rect);
 
-    virtual void onLayout(const Gfx::SizeF& rect);
+  //
+  // painting
+  //
+  protected:
+    // onPaint
+    virtual void onPaintContent(const Gfx::RectF& r);
+
+    // onPaintContent (window specific)
+    virtual void onPaintEvent(const PaintEvent& ev);
 
   protected:
     virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
@@ -249,10 +261,6 @@ class PT_HMI_API Window : public WindowBase
     virtual const Gfx::SizeF& onSize() const;
 
     virtual void onInvalidate();
-
-    virtual void onPaintBackground(const Gfx::RectF& rect);
-
-    virtual void onPaintContent(const Gfx::RectF& rect);
 
   protected:
     virtual void onInit(Window& w);
@@ -284,17 +292,11 @@ class PT_HMI_API Window : public WindowBase
   protected:
     virtual void onEvent(const Pt::Event& ev);
 
-    virtual void onPaintEvent(const PaintEvent& ev);
-
-    void onUpdateEvent(const UpdateEvent& ev);
-
     void mouseEvent( const MouseEvent& ev );
 
     virtual bool onMouseEvent( const MouseEvent& ev );
 
     void layoutEvent(const LayoutEvent& ev);
-
-    virtual void onLayoutEvent(const LayoutEvent& ev);
 
     virtual void onTouchEvent( const TouchEvent& ev );
 
