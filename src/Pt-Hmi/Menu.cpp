@@ -364,12 +364,6 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
 }
 
 
-void Menu::onPaintEvent(const PaintEvent& ev)
-{
-    Base::onPaintEvent(ev);
-}
-
-
 bool Menu::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);

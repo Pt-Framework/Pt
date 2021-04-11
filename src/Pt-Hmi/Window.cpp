@@ -78,7 +78,7 @@ Window::Window(Window* parent, Window::Type type)
     _eventReady += Pt::slot(*this, &Window::mouseEvent);
     _eventReady += Pt::slot(*this, &Window::onTouchEvent);
     _eventReady += Pt::slot(*this, &Window::onScrollEvent);
-    _eventReady += Pt::slot(*this, &Window::onPaintEvent);
+    _eventReady += Pt::slot(*this, &Window::paintEvent);
     _eventReady += Pt::slot(*this, &Window::onActivateEvent);
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
     _eventReady += Pt::slot(*this, &Window::onEnterEvent);
@@ -827,9 +827,11 @@ void Window::repaint(const Gfx::RectF& rect)
         _screen->repaint(updateRect);
 }
 
-// onPaint
-void Window::onPaintContent(const Gfx::RectF& rect)
+
+void Window::paintEvent(const PaintEvent& ev)
 {
+    const Gfx::RectF& rect = _damageRect;
+
     if( rect.isNull() )
         return;
 
@@ -841,9 +843,29 @@ void Window::onPaintContent(const Gfx::RectF& rect)
     if( _damageRect.isNull() )
         return;
 
-    PaintEvent pev( vid(), rect );
-    onPaintEvent(pev);
+    onPaintContent(rect);
 
+    _damageRect.clear();
+}
+
+// onPaint
+void Window::onPaintContent(const Gfx::RectF& rect)
+{
+    if( rect.isNull() )
+        return;
+
+    if( ! this->isVisible() )
+        return;
+
+    //
+    // paint window content
+    //
+    PaintEvent pev(vid(), rect);
+    onPaintContent(pev);
+
+    //
+    // paint main child widget
+    //
     Widget* widget = mainWidget();
     if(widget)
     {
@@ -855,32 +877,33 @@ void Window::onPaintContent(const Gfx::RectF& rect)
             paintContent(*widget, updateRect);
     }
 
+    //
+    // paint child windows
+    //
     std::vector<Window*>::iterator child;
     for(child = _windows.begin(); child != _windows.end(); ++child)
     {
         Gfx::PointF winPos = (*child)->fromParent( rect.topLeft() );
         Gfx::RectF winRect( winPos, rect.size() );
 
-        Gfx::RectF clipRectChild( (*child)->size() );
         winRect = winRect.intersect( Gfx::RectF( (*child)->size() ) );
 
         paintContent(**child, winRect);
+
+        // _windowManager.paintWindow(**child, _surface, rect);
     }
 
     _windowManager.paint(_surface, rect);
-
-    if(_impl)
-        _impl->paint(rect);
-
-    _damageRect.clear();
 }
 
-// onPaintContent
-void Window::onPaintEvent(const PaintEvent& ev)
+// onPaintContent (window specific)
+void Window::onPaintContent(const PaintEvent& ev)
 {
+    const Gfx::RectF& rect = ev.rect();
+
     Gfx::Painter painter(_surface);
     painter.setBrush(_backgroundBrush);
-    painter.fillRect( ev.rect() );
+    painter.fillRect(rect);
 }
 
 

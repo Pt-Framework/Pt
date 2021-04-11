@@ -240,6 +240,8 @@ class PT_HMI_API Window : public WindowBase
     // onLayout
     virtual void onLayoutContent(const Gfx::RectF& rect);
 
+    void layoutEvent(const LayoutEvent& ev);
+
   //
   // painting
   //
@@ -248,7 +250,9 @@ class PT_HMI_API Window : public WindowBase
     virtual void onPaintContent(const Gfx::RectF& r);
 
     // onPaintContent (window specific)
-    virtual void onPaintEvent(const PaintEvent& ev);
+    virtual void onPaintContent(const PaintEvent& ev);
+
+    void paintEvent(const PaintEvent& ev);
 
   protected:
     virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
@@ -295,8 +299,6 @@ class PT_HMI_API Window : public WindowBase
     void mouseEvent( const MouseEvent& ev );
 
     virtual bool onMouseEvent( const MouseEvent& ev );
-
-    void layoutEvent(const LayoutEvent& ev);
 
     virtual void onTouchEvent( const TouchEvent& ev );
 

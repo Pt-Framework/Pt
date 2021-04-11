@@ -212,9 +212,9 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::onPaintEvent(const PaintEvent& ev)
+void MainWindow::onPaintContent(const PaintEvent& ev)
 {
-    Window::onPaintEvent(ev);
+    Window::onPaintContent(ev);
     return;   
     
     const Gfx::RectF& rect = ev.rect();

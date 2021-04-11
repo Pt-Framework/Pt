@@ -690,7 +690,7 @@ void Widget::onPaintContent(const Gfx::RectF& r)
     }
 }
 
-// onPaintContent
+// onPaintContent (widget specific)
 void Widget::onPaintEvent(const PaintEvent& ev)
 {
 }

@@ -262,17 +262,20 @@ void Screen::onPaintEvent(const PaintEvent& ev)
     if(_updates > 0)
       return;
     
+    _updateRect.clear();
+
     const Gfx::RectF& screenRect = ev.rect();
     onPaintContent(screenRect);
 }
 
-
+// onPaint
 void Screen::onPaintContent(const Gfx::RectF& screenRect)
 {
     //std::clog << std::endl;
     //_clock.start();
+    //std::clog << "Screen::onPaintContent " << std::endl;
 
-    //std::clog << "Screen::onPaintEvent " << std::endl;
+    onPaintScreen(screenRect);
 
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
@@ -284,17 +287,12 @@ void Screen::onPaintContent(const Gfx::RectF& screenRect)
 
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );
 
-        paintContent(*window, winRect);
+        //paintContent(*window, winRect);
+
+        window->impl()->paint(winRect);
+        //_impl->paint(*window, winRect);
     }
 
-   _updateRect.clear();
-
-    //UpdateEvent uev( this->vid(), screenRect);
-    //onUpdateEvent(uev);
-    //Application::instance().loop().commitEvent(uev);
-
-    //std::clog << "Screen::onPaintEvent" << std::endl;
-    
     _impl->paint(screenRect);
 
     //static int nnn = 0;
@@ -303,6 +301,12 @@ void Screen::onPaintContent(const Gfx::RectF& screenRect)
     //          << ++nnn << std::endl;
     //std::clog << "    " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
     //          << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
+}
+
+// onPaintContent (window specific)
+void Screen::onPaintScreen(const Gfx::RectF& rect)
+{
+    // _impl->paintContent(rect);
 }
 
 } // namespace

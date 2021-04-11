@@ -96,8 +96,6 @@ class PT_HMI_API Menu : public MenuShell
         virtual void onPaintBackground(const Gfx::RectF& rect);
 
     protected:
-        virtual void onPaintEvent(const PaintEvent& ev);
-
         virtual void onCloseEvent(const CloseEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);

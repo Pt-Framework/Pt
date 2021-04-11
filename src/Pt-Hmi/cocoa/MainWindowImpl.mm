@@ -392,6 +392,26 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     //std::clog << "ON PAINT: " << rect.size.width << "x" 
     //                          << rect.size.height << std::endl;
 
+    Pt::uint64_t vid =  window->vid();
+
+    CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
+    CGFloat windowHeight = [_window frame].size.height;
+    NSPoint origin = [_window frame].origin;
+
+    double x = origin.x;
+    double y = screenHeight - origin.y - windowHeight;
+    Pt::Gfx::PointF pos(x, y);
+
+    Gfx::SizeF size(rect.size.width, rect.size.height);
+
+    double scaling = scaleFactor();
+    pos = pos / scaling;
+    size = size / scaling;
+
+    PaintEvent pev(vid, Gfx::RectF(pos, size));
+    window->processEvent(pev);
+    //Application::instance().impl()->commitEvent(pev);
+
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
 
@@ -399,9 +419,7 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     CGContextRef pixmapContext = pixmap->context();
     
     CGImageRef image = CGBitmapContextCreateImage(pixmapContext);
-    
     CGFloat imageHeight = CGImageGetHeight(image);
-    double scaling = scaleFactor();
 
     CGFloat subImageX = rect.origin.x * scaling;
     CGFloat subImageY = rect.origin.y * scaling;
