@@ -67,6 +67,16 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
 
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
 
+        void begin(Gfx::Painter& painter)
+        {
+            Gfx::PaintSurface::begin(painter);
+        }
+
+        void finish()
+        {
+            Gfx::PaintSurface::finish();
+        }
+
     private:
         Gfx::Image _image;
 };

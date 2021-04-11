@@ -832,16 +832,12 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
     Gfx::SizeF to(width, height);
     to = w.toLogical(to);
-    
+
     ResizeEvent rev(w.vid(), to);
-    commitEvent(rev);
-           
+    w.processEvent(rev);
+
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
-    w.update(updateRect);
-            
-    // windows starts a nested message loop during resizing, so the events
-    // required for painting need to be processed manually
-    processEvents();
+    w.repaint(updateRect);
 }
 
 
@@ -849,6 +845,11 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
 {
     RECT updateRect;
     GetUpdateRect(hwnd, &updateRect, FALSE);
+
+    const Gfx::RectF r(updateRect.left, updateRect.right, updateRect.top, updateRect.bottom);
+
+    PaintEvent ev(w.vid(), r);
+    w.processEvent(ev);
 
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);

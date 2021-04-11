@@ -451,7 +451,7 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& sz)
         return;
 
     Gfx::PointF updatePos = fromParent( w, updateRect.topLeft() );
-    updateRect.setOrigin(updatePos);       
+    updateRect.setOrigin(updatePos);
 
     w.update(updateRect);
 }

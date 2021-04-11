@@ -1214,7 +1214,6 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _surface.resize( ev.size() );
 
     relayout();
-    repaint();
 }
 
 
