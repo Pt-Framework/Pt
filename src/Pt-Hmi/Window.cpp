@@ -830,17 +830,12 @@ void Window::repaint(const Gfx::RectF& rect)
 
 void Window::paintEvent(const PaintEvent& ev)
 {
-    const Gfx::RectF& rect = _damageRect;
+    const Gfx::RectF& rect = ev.rect();
 
     if( rect.isNull() )
         return;
 
     if( ! this->isVisible() )
-        return;
-
-    _damageRect = _damageRect.intersect( Gfx::RectF(_size) );
-
-    if( _damageRect.isNull() )
         return;
 
     onPaintContent(rect);

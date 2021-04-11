@@ -392,25 +392,26 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     //std::clog << "ON PAINT: " << rect.size.width << "x" 
     //                          << rect.size.height << std::endl;
 
-    Pt::uint64_t vid =  window->vid();
+    NSRect frameRect = [_window frame];
+    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
+    CGFloat contentHeight = contentRect.size.height;
 
-    CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
-    CGFloat windowHeight = [_window frame].size.height;
-    NSPoint origin = [_window frame].origin;
-
-    double x = origin.x;
-    double y = screenHeight - origin.y - windowHeight;
+    double x = contentHeight - (rect.origin.x + rect.size.height);
+    double y = rect.origin.y;
     Pt::Gfx::PointF pos(x, y);
 
-    Gfx::SizeF size(rect.size.width, rect.size.height);
+    double width = rect.size.width;
+    double height = rect.size.height;
+    Gfx::SizeF size(width, height);
 
     double scaling = scaleFactor();
     pos = pos / scaling;
     size = size / scaling;
 
-    PaintEvent pev(vid, Gfx::RectF(pos, size));
+    Gfx::RectF paintRect(pos, size);
+
+    PaintEvent pev(window->vid(), paintRect);
     window->processEvent(pev);
-    //Application::instance().impl()->commitEvent(pev);
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
@@ -515,16 +516,16 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     to = to / scaling;
 
     ResizeEvent rev(vid, to);
-    Application::instance().impl()->commitEvent(rev);
-           
-    Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
-    window->update(updateRect);
+    window->processEvent(rev);
+
+    //Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
+    //window->repaint(updateRect);
 
     // cocoa performs a paint/display right after a window resize, so we
     // need to process the window update now to avoid flicker
     // 
     // OR: override NSWwindow::setFrame to not perform a paint/display
-    Application::instance().impl()->processEvents();
+    //Application::instance().impl()->processEvents();
 }
 
 

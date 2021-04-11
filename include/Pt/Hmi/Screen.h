@@ -97,7 +97,7 @@ class PT_HMI_API Screen : public WindowBase
         // onPaint
         void onPaintContent(const Gfx::RectF& r);
 
-        // onPaintContent (window specific)
+        // onPaintContent (screen specific)
         void onPaintScreen(const Gfx::RectF& rect);
 
     protected:

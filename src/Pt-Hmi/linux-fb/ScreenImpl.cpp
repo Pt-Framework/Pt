@@ -226,6 +226,9 @@ Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) cons
 
 void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
+    ResizeEvent rev( w.vid(), s );
+    Application::instance().loop().commitEvent(rev);
+
     _windowManager.onResize(w, s);
 }
 
@@ -238,6 +241,9 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& to)
 
     Gfx::RectF movedRect = _windowManager.frameRect(w);
     updateRect.unify(movedRect);
+
+    MoveEvent mev( w.vid(), to );
+    Application::instance().loop().commitEvent(mev);
 
     if(_screen)
       _screen->update(updateRect);

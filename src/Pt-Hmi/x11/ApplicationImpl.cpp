@@ -309,6 +309,12 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 
     //std::clog << "   ### Expose: " << width << "x" << height << std::endl;
 
+    Gfx::PointF pos(x, y);
+    Gfx::SizeF size(width, height);
+
+    PaintEvent pev(window.vid(), Gfx::Rectf(pos, size) );
+    window->processEvent(pev);
+
     ::Drawable from = window.surface().pixmapImpl()->drawable();
     ::Window to = window.impl()->window();
 
@@ -534,10 +540,10 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         Gfx::SizeF to(width, height);
 
         ResizeEvent rev( window.vid(), to );
-        commitEvent(rev);
+        window.processEvent(rev);
 
         Gfx::RectF updateRect(Gfx::PointF(0,0), to);
-        window.update(updateRect);
+        window.repaint(updateRect);
     }
 
     if( window.position().x() != x || window.position().y() != y)

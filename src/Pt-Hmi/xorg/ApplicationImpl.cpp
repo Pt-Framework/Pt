@@ -307,14 +307,22 @@ void ApplicationImpl::onLeaveNotify(Window& window, XEvent& xev)
 
 void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 {
-   const Gfx::Image& image = window.surface().pixmapImpl()->image();
+    const Gfx::Image& image = window.surface().pixmapImpl()->image();
 
     const size_t width = xev.xexpose.width;
     const size_t height = xev.xexpose.height;
     const size_t x = xev.xexpose.x;
     const size_t y = xev.xexpose.y;
 
-    
+    Gfx::PointF pos(x, y);
+    pos = Application::instance().screen().toLogical(pos);
+
+    Gfx::SizeF size(width, height);
+    size = Application::instance().screen().toLogical(size);
+
+    PaintEvent pev(window.vid(), Gfx::Rectf(pos, size) );
+    window->processEvent(pev);
+
     Display* display = Application::instance().impl()->display();
     ::Visual* visual = Application::instance().impl()->visual();
     int depth = Application::instance().impl()->depth();
@@ -556,11 +564,12 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         //std::clog << "   ### resize event: " << width << "x" << height << std::endl;
         Gfx::SizeF to(width, height);
         to = Application::instance().screen().toLogical(to);
+    
         ResizeEvent rev( window.vid(), to );
-        commitEvent(rev);
+        window.processEvent(rev);
 
         Gfx::RectF updateRect(Gfx::PointF(0,0), to);
-        window.update(updateRect);
+        window.repaint(updateRect);
     }
 
     if( window.position().x() != x || window.position().y() != y)
@@ -568,6 +577,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         //std::clog << "   ### move event: " << x << "x" << y << std::endl;
         Gfx::PointF to(x, y);
         to = Application::instance().screen().toLogical(to);
+
         MoveEvent ev(window.vid(), to);
         commitEvent( ev );
     }

@@ -246,6 +246,7 @@ void Screen::repaint()
 
 void Screen::repaint(const Gfx::RectF& updateRect)
 {
+    // TODO: record damaged area per window
     _updateRect.unify(updateRect);
     ++_updates;
 
@@ -277,6 +278,8 @@ void Screen::onPaintContent(const Gfx::RectF& screenRect)
 
     onPaintScreen(screenRect);
 
+    // TODO: paint only windows with damaged area as indicated by repaint()
+
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
@@ -303,7 +306,7 @@ void Screen::onPaintContent(const Gfx::RectF& screenRect)
     //          << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
 }
 
-// onPaintContent (window specific)
+// onPaintContent (screen specific)
 void Screen::onPaintScreen(const Gfx::RectF& rect)
 {
     // _impl->paintContent(rect);
