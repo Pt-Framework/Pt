@@ -208,21 +208,28 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 {
     if( ! _paintData )
-        return Gfx::FontMetrics(0, 0, 0, 0);
+        return Gfx::FontMetrics();
 
 #ifndef _AIX
     _XftFont* font = _paintData->font();
     if( ! font )
-        return Gfx::FontMetrics(0, 0, 0, 0);
+        return Gfx::FontMetrics();
     
     Display* display = Application::instance().impl()->display();
     
     XGlyphInfo info;
     XftTextExtents32(display, font, (XftChar32*)text.c_str(), text.size(), &info);
 
-    return Gfx::FontMetrics(font->ascent, font->descent, info.width, font->height);
+    Gfx::FontMetrics fm;
+
+    fm.setAscent(font->ascent);
+    fm.setDescent(font->descent);
+    fm.setWidth(info.width);
+    fm.setCapHeight(2);
+
+    return fm; //Gfx::FontMetrics(font->ascent, font->descent, info.width, font->height);
 #else
-    return Gfx::FontMetrics(0, 0, 0, 0);
+    return Gfx::FontMetrics();
 #endif     
 }
 

@@ -50,26 +50,22 @@ _XftFont* openFont(const Pt::Gfx::Font& font)
     int slant = XFT_SLANT_ROMAN;
     int weight = XFT_WEIGHT_MEDIUM;
 
-    switch( font.style() )
+    if(font.style() == "Italic")
+        slant = XFT_SLANT_ITALIC;
+            
+
+    if (font.style() == "Bold")
+        weight = XFT_WEIGHT_BOLD;
+
+    if (font.style()  == "BoldItalic")
     {
-        case Pt::Gfx::Font::Italic:
-            slant = XFT_SLANT_ITALIC;
-            break;
-
-        case Pt::Gfx::Font::Bold:
-            weight = XFT_WEIGHT_BOLD;
-            break;
-
-        case Pt::Gfx::Font::BoldItalic:
-            slant = XFT_SLANT_ITALIC;
-            weight = XFT_WEIGHT_BOLD;
-            break;
-
-        default:
-            break;
+        slant = XFT_SLANT_ITALIC;
+        weight = XFT_WEIGHT_BOLD;
     }
 
+
     double sina = 0.0, cosa = 0.0;
+    /*
     switch( font.angle() ) 
     {
         case    0: sina =  0; cosa =  1; break;
@@ -82,6 +78,9 @@ _XftFont* openFont(const Pt::Gfx::Font& font)
             cosa = cos(a);
             break;
     }
+    */
+    sina = 0; cosa = 1;
+
 
     XftMatrix mx;
     mx.xx = cosa;
@@ -362,7 +361,7 @@ Gfx::FontMetrics PaintData::fontMetrics(const Gfx::Font& font,
 #ifndef _AIX
     _XftFont* xftFont = openFont(font);
     if( ! xftFont )
-        return Gfx::FontMetrics(0, 0, 0, 0);
+        return Gfx::FontMetrics();
 
     Display* display = Application::instance().impl()->display();
     

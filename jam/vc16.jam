@@ -2,6 +2,5 @@ Load vcbase.jam ;
 
 VS_VERSION = "[16.0,17.0)" ;
 
-# CCFLAGS  += /std:c++17 ;
 C++FLAGS += /std:c++17 /Zc:__cplusplus ;
 		
