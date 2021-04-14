@@ -87,6 +87,8 @@ class PT_HMI_API WindowBase : public Visual
 
         virtual void onDeinit(Window& w) = 0;
 
+        //virtual void onRepaint(Window& w, Gfx::RectF& r) = 0;
+
         //virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
 
         //virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const = 0;

@@ -364,12 +364,33 @@ Gfx::PointF Widget::toWindow(const Gfx::PointF& pos) const
 
 Gfx::PointF Widget::onToScreen(const Gfx::PointF& pos) const
 {
-    Gfx::PointF screenPos = toWindow(pos);
+    // const Visual* pr = parent();
+    // if( ! pr )
+    //     pr = window();
 
-    if( window() )
-        return window()->toScreen(screenPos);
+    // if( ! pr )
+    //     return pos;
 
-    return screenPos;
+    // pr->toParent(pos);
+
+
+    Gfx::PointF p = toParent(pos);
+
+    if(_parent)
+        return _parent->toScreen(p);
+    
+    if(_window)
+        return _window->toScreen(p);
+
+    return p;
+
+
+    // Gfx::PointF winPos = toWindow(pos);
+
+    // if( window() )
+    //     return window()->toScreen(winPos);
+
+    // return winPos;
 }
 
 
@@ -635,23 +656,34 @@ void Widget::repaint()
 
 void Widget::repaint(const Gfx::RectF& rect)
 {
-    Window* parentWindow = window();
-    Widget* parentWidget = parent();
+    // Window* parentWindow = window();
+    // Widget* parentWidget = parent();
 
-    if(parentWidget)
-    {
-        Gfx::PointF updatePos = toParent( rect.topLeft() );
-        Gfx::RectF updateRect( updatePos, rect.size() );
+    // if(parentWidget)
+    // {
+    //     Gfx::PointF updatePos = toParent( rect.topLeft() );
+    //     Gfx::RectF updateRect( updatePos, rect.size() );
 
-        parentWidget->repaint(updateRect);
-    }
-    else if(parentWindow)
-    {
-        Gfx::PointF updatePos = toWindow( rect.topLeft() );
-        Gfx::RectF updateRect( updatePos, rect.size() );
+    //     parentWidget->repaint(updateRect);
+    // }
+    // else if(parentWindow)
+    // {
+    //     Gfx::PointF updatePos = toParent( rect.topLeft() );
+    //     Gfx::RectF updateRect( updatePos, rect.size() );
 
-        parentWindow->repaint(updateRect);
-    }
+    //     parentWindow->repaint(updateRect);
+    // }
+
+    Visual* pr = parent();
+    if( ! pr )
+        pr = window();
+
+    if( ! pr )
+        return;
+
+    Gfx::PointF updatePos = toParent( rect.topLeft() );
+    Gfx::RectF updateRect( updatePos, rect.size() );
+    pr->repaint(updateRect);
 }
 
 // onPaint

@@ -83,6 +83,10 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return onScaleFactor();
         }
 
+        // virtual Gfx::PointF toParent(const Gfx::PointF& pos) const = 0;
+
+        // virtual Gfx::PointF fromParent(const Gfx::PointF& pos) const = 0;
+
         Gfx::PointF toScreen(const Gfx::PointF& pos) const
         {
             return onToScreen(pos);
@@ -92,6 +96,9 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         {
             return onFromScreen(pos);
         }
+
+    public:
+        virtual void repaint(const Gfx::RectF& r) = 0;
 
     protected:
         virtual const Gfx::SizeF& onSize() const = 0;
