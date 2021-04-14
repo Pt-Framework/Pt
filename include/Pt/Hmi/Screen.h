@@ -63,10 +63,6 @@ class PT_HMI_API Screen : public WindowBase
         Widget* findWidget(const std::string& name);
 
         const std::vector<Window*>& windows() const;
-  
-        Gfx::PointF fromWindow(const Window& w, const Gfx::PointF& pos) const;
-
-        Gfx::PointF toWindow(const Window& w, const Gfx::PointF& pos) const;
 
         void repaint();
 

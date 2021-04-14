@@ -50,8 +50,6 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
     public:
         virtual ~Visual();
 
-        void processEvent(const Pt::Event& ev);
-
         Pt::uint64_t vid() const
         {
             return _vid;
@@ -67,19 +65,17 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return _name;
         }
 
+        void processEvent(const Pt::Event& ev);
+
+    protected:
+        Visual();
+        
+        virtual void onEvent(const Pt::Event& ev) = 0;
+
+    public:
         const Gfx::SizeF& size() const
         {
             return onSize();
-        }
-
-        Gfx::PointF toScreen(const Gfx::PointF& l) const
-        {
-            return onToScreen(l);
-        }
-
-        Gfx::PointF fromScreen(const Gfx::PointF& g) const
-        {
-            return onFromScreen(g);
         }
 
         double scaleFactor() const
@@ -87,6 +83,26 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return onScaleFactor();
         }
 
+        Gfx::PointF toScreen(const Gfx::PointF& pos) const
+        {
+            return onToScreen(pos);
+        }
+
+        Gfx::PointF fromScreen(const Gfx::PointF& pos) const
+        {
+            return onFromScreen(pos);
+        }
+
+    protected:
+        virtual const Gfx::SizeF& onSize() const = 0;
+
+        virtual double onScaleFactor() const = 0;
+
+        virtual Gfx::PointF onToScreen(const Gfx::PointF& l) const = 0;
+
+        virtual Gfx::PointF onFromScreen(const Gfx::PointF& g) const = 0;
+
+    public:
         Gfx::PointF toPhysical(const Gfx::PointF& p) const
         {
             return p * scaleFactor();
@@ -99,7 +115,8 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
 
         Gfx::RectF toPhysical(const Gfx::RectF& r) const
         {
-            return Gfx::RectF(toPhysical(r.topLeft()), toPhysical(r.size()));
+            return Gfx::RectF( toPhysical( r.topLeft() ), 
+                               toPhysical( r.size() ) );
         }
 
         Gfx::PointF toLogical(const Gfx::PointF& p) const
@@ -229,20 +246,6 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         {
             return v.onPaintContent(r);
         }
-
-    protected:
-        virtual const Gfx::SizeF& onSize() const = 0;
-
-        virtual double onScaleFactor() const = 0;
-
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& l) const = 0;
-
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& g) const = 0;
-
-    protected:
-        Visual();
-        
-        virtual void onEvent(const Pt::Event& ev) = 0;
 
     private:
         Pt::uint64_t _vid;

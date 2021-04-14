@@ -42,6 +42,7 @@ namespace Hmi {
 
 class Window;
 
+// WindowHost
 class PT_HMI_API WindowBase : public Visual
 {
     friend class Window;
@@ -51,20 +52,44 @@ class PT_HMI_API WindowBase : public Visual
 
         virtual ~WindowBase();
 
-        void moveWindow(Window& w, const Gfx::PointF& p)
+        void moveWindow(Window& w, const Gfx::PointF& to)
         {
-            return onMove(w, p);
+            return onMove(w, to);
         }
 
-        void resizeWindow(Window& w, const Gfx::SizeF& s)
+        void resizeWindow(Window& w, const Gfx::SizeF& to)
         {
-            return onResize(w, s);
+            return onResize(w, to);
         }
+
+        Gfx::PointF toClient(const Window& to, const Gfx::PointF& pos) const
+        {
+            return onFromParent(to, pos);
+        }
+
+        Gfx::PointF fromClient(const Window& from, const Gfx::PointF& pos) const
+        {
+            return onToParent(from, pos);
+        }
+
+        //Gfx::PointF toParent(const Gfx::PointF& pos) const
+        //{
+        //    return onToParent(pos);
+        //}
+
+        //Gfx::PointF fromParent(const Gfx::PointF& pos) const
+        //{
+        //    return onFromParent(pos);
+        //}
 
     protected:
         virtual void onInit(Window& w) = 0;
 
         virtual void onDeinit(Window& w) = 0;
+
+        //virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
+
+        //virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const = 0;
 
         virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const = 0;
 

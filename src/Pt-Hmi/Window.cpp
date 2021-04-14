@@ -605,31 +605,52 @@ void Window::setFocusIndex(Widget& , size_t)
 }
 
 
+double Window::onScaleFactor() const
+{
+    if( ! _init )
+        return 1.0;
+
+    double scaling = _impl ? _impl->scaleFactor() : 1.0;
+
+    return _parent->scaleFactor() * scaling;
+}
+
+
+Gfx::PointF Window::onToScreen(const Gfx::PointF& pos) const
+{
+    if( ! _parent || ! _init )
+        return pos;
+
+    Gfx::PointF p = _parent->fromClient(*this, pos);
+    return _parent->toScreen(p);
+}
+
+
+Gfx::PointF Window::onFromScreen(const Gfx::PointF& pos) const
+{
+    if( ! _parent || ! _init )
+        return pos;
+
+    Gfx::PointF p = _parent->fromScreen(pos);
+    return _parent->toClient(*this, p);
+}
+
+
 Gfx::PointF Window::toParent(const Gfx::PointF& pos) const
 {
-    //if( ! _init )
-    //    return Gfx::PointF(0, 0);
+    if( ! _parent || ! _init )
+        return pos;
 
-    //return _parent->onToParent(*this, pos);
-
-    if(_parentWindow)
-        return _parentWindow->fromWindow(*this, pos);
-    else if(_screen)
-        return _screen->fromWindow(*this, pos);
-
-    return Gfx::PointF(0, 0);
+    return _parent->onToParent(*this, pos);
 }
 
 
-Gfx::PointF Window::fromWindow(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Window::fromParent(const Gfx::PointF& pos) const
 {
-    return _windowManager.toParent(w, pos);
-}
+    if( ! _parent || ! _init )
+        return pos;
 
-
-Gfx::PointF Window::toWindow(const Window& w, const Gfx::PointF& pos) const
-{
-    return _windowManager.fromParent(w, pos);
+    return _parent->onFromParent(*this, pos);
 }
 
 
@@ -639,57 +660,9 @@ Gfx::PointF Window::onToParent(const Window& w, const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF Window::fromParent(const Gfx::PointF& pos) const
-{
-    if( ! _init )
-        return Gfx::PointF(0, 0);
-
-    return _parent->onFromParent(*this, pos);
-}
-
-
 Gfx::PointF Window::onFromParent(const Window& w, const Gfx::PointF& pos) const
 {
     return _windowManager.fromParent(w, pos);
-}
-
-
-Gfx::PointF Window::onToScreen(const Gfx::PointF& pos) const
-{
-    if( ! _init )
-        return Gfx::PointF(0, 0);
-
-    Gfx::PointF p = toParent(pos);
-
-    if(_parentWindow)
-        return _parentWindow->toScreen(p);
-
-    return p;
-}
-
-
-Gfx::PointF Window::onFromScreen(const Gfx::PointF& pos) const
-{
-    if( ! _init )
-        return Gfx::PointF(0, 0);
-
-    Gfx::PointF p = fromParent(pos);
-    
-    if(_parentWindow)
-        return _parentWindow->fromScreen(p);
-
-    return p;
-}
-
-
-double Window::onScaleFactor() const
-{
-    if( ! _init )
-        return 1.0;
-
-    double scaling = _impl ? _impl->scaleFactor() : 1.0;
-
-    return _parent->scaleFactor() * scaling;
 }
 
 
@@ -1464,7 +1437,7 @@ bool Window::onMouseEvent(const MouseEvent& ev)
         clientEv.setId( widget->vid() );
         clientEv.setPosition( widget->fromWindow(ev.position()) );
         //Application::instance().loop().commitEvent(clientEv);
-        widget->mouseEvent(ev);
+        widget->mouseEvent(clientEv);
     }
 
     return true;

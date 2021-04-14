@@ -352,18 +352,13 @@ Gfx::PointF Widget::fromWindow(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF Widget::toWindow(const Gfx::PointF& p) const
+Gfx::PointF Widget::toWindow(const Gfx::PointF& pos) const
 {
-    Gfx::PointF pos = p + this->position();
+    if( ! _parent )
+        return pos;
 
-    const Widget* w = this;
-
-    for(w = w->parent(); w != 0; w = w->parent())
-    {
-        pos += w->position();
-    }
-
-    return pos;
+    Gfx::PointF p = pos + _position;
+    return _parent->toWindow(p);
 }
 
 
