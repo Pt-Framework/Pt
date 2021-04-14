@@ -112,6 +112,11 @@ void MainWindowImpl::setTopMost(bool m)
 {
 }
 
+double MainWindowImpl::scaleFactor() const
+{
+    return 1.0;
+}
+
 } // namespace
 
 } // namespace

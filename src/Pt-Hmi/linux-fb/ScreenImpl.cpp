@@ -246,7 +246,7 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& to)
     Application::instance().loop().commitEvent(mev);
 
     if(_screen)
-      _screen->update(updateRect);
+      _screen->repaint(updateRect);
 }
 
 
@@ -260,7 +260,7 @@ void ScreenImpl::onFrameChanged(Window& w)
     updateRect.unify(changedRect);
 
     if(_screen)
-      _screen->update(updateRect);
+      _screen->repaint(updateRect);
 }
 
 
@@ -284,7 +284,7 @@ void ScreenImpl::onClose(Window& w)
     _windowManager.onClose(w);
 
     if(_screen)
-      _screen->update(updateRect);
+      _screen->repaint(updateRect);
 }
 
 
