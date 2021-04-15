@@ -222,7 +222,7 @@ void Window::deinit()
     releasePointer();
 
     _parent->onDeinit(*this);
-
+    
     setScreen(0);
 
     if(_impl)
@@ -231,6 +231,7 @@ void Window::deinit()
         _impl = 0;
     }
 
+    _parent = 0;
     _init = false;
 }
 
@@ -616,51 +617,37 @@ double Window::onScaleFactor() const
 }
 
 
-Gfx::PointF Window::onToScreen(const Gfx::PointF& pos) const
+Visual* Window::onParent() const
 {
-    if( ! _parent || ! _init )
-        return pos;
-
-    Gfx::PointF p = _parent->fromClient(*this, pos);
-    return _parent->toScreen(p);
+    return _parent;
 }
 
 
-Gfx::PointF Window::onFromScreen(const Gfx::PointF& pos) const
+Gfx::PointF Window::onToParent(const Gfx::PointF& pos) const
 {
-    if( ! _parent || ! _init )
+    if( ! _parent )
         return pos;
 
-    Gfx::PointF p = _parent->fromScreen(pos);
-    return _parent->toClient(*this, p);
+    return _parent->toHost(*this, pos);
 }
 
 
-Gfx::PointF Window::toParent(const Gfx::PointF& pos) const
+Gfx::PointF Window::onFromParent(const Gfx::PointF& pos) const
 {
-    if( ! _parent || ! _init )
+    if( ! _parent )
         return pos;
 
-    return _parent->onToParent(*this, pos);
+    return _parent->fromHost(*this, pos);
 }
 
 
-Gfx::PointF Window::fromParent(const Gfx::PointF& pos) const
-{
-    if( ! _parent || ! _init )
-        return pos;
-
-    return _parent->onFromParent(*this, pos);
-}
-
-
-Gfx::PointF Window::onToParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Window::onToHost(const Window& w, const Gfx::PointF& pos) const
 {
     return _windowManager.toParent(w, pos);
 }
 
 
-Gfx::PointF Window::onFromParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Window::onFromHost(const Window& w, const Gfx::PointF& pos) const
 {
     return _windowManager.fromParent(w, pos);
 }

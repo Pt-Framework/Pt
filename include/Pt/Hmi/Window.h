@@ -123,10 +123,6 @@ class PT_HMI_API Window : public WindowBase
 
     void focusPrev();
 
-    Gfx::PointF toParent(const Gfx::PointF& pos) const;
-
-    Gfx::PointF fromParent(const Gfx::PointF& pos) const;
-
     // deprecated
     void update()
     { repaint(); }
@@ -251,15 +247,17 @@ class PT_HMI_API Window : public WindowBase
     void paintEvent(const PaintEvent& ev);
 
   protected:
-    virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
-    
-    virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const; 
+    virtual Visual* onParent() const;
+
+    Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+    Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+    virtual const Gfx::SizeF& onSize() const;
 
     virtual double onScaleFactor() const;
 
   protected:
-    virtual const Gfx::SizeF& onSize() const;
-
     virtual void onInvalidate();
 
   protected:
@@ -267,9 +265,9 @@ class PT_HMI_API Window : public WindowBase
     
     virtual void onDeinit(Window& w);
 
-    virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
+    virtual Gfx::PointF onToHost(const Window& w, const Gfx::PointF& pos) const;
 
-    virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
+    virtual Gfx::PointF onFromHost(const Window& w, const Gfx::PointF& pos) const;
 
     virtual void onShow(Window& w, bool visible);
 

@@ -62,40 +62,24 @@ class PT_HMI_API WindowBase : public Visual
             return onResize(w, to);
         }
 
-        Gfx::PointF toClient(const Window& to, const Gfx::PointF& pos) const
+        Gfx::PointF toHost(const Window& w, const Gfx::PointF& pos)
         {
-            return onFromParent(to, pos);
+            return onToHost(w, pos);
         }
 
-        Gfx::PointF fromClient(const Window& from, const Gfx::PointF& pos) const
+        Gfx::PointF fromHost(const Window& w, const Gfx::PointF& pos) const
         {
-            return onToParent(from, pos);
+            return onFromHost(w, pos);
         }
-
-        //Gfx::PointF toParent(const Gfx::PointF& pos) const
-        //{
-        //    return onToParent(pos);
-        //}
-
-        //Gfx::PointF fromParent(const Gfx::PointF& pos) const
-        //{
-        //    return onFromParent(pos);
-        //}
 
     protected:
         virtual void onInit(Window& w) = 0;
 
         virtual void onDeinit(Window& w) = 0;
 
-        //virtual void onRepaint(Window& w, Gfx::RectF& r) = 0;
+        virtual Gfx::PointF onToHost(const Window& w, const Gfx::PointF& pos) const = 0;
 
-        //virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
-
-        //virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const = 0;
+        virtual Gfx::PointF onFromHost(const Window& w, const Gfx::PointF& pos) const = 0;
 
         virtual void onShow(Window& w, bool visible) = 0; 
 

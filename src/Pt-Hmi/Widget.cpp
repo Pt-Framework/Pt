@@ -330,18 +330,6 @@ Widget* Widget::findWidget(const std::string& name)
 }
 
 
-Gfx::PointF Widget::toParent(const Gfx::PointF& pos) const
-{
-    return  pos + _position;
-}
-
-
-Gfx::PointF Widget::fromParent(const Gfx::PointF& pos) const
-{
-    return pos - _position;
-}
-
-
 Gfx::PointF Widget::fromWindow(const Gfx::PointF& pos) const
 {
     if( ! _parent )
@@ -362,46 +350,24 @@ Gfx::PointF Widget::toWindow(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF Widget::onToScreen(const Gfx::PointF& pos) const
+Visual* Widget::onParent() const
 {
-    // const Visual* pr = parent();
-    // if( ! pr )
-    //     pr = window();
-
-    // if( ! pr )
-    //     return pos;
-
-    // pr->toParent(pos);
-
-
-    Gfx::PointF p = toParent(pos);
-
     if(_parent)
-        return _parent->toScreen(p);
-    
-    if(_window)
-        return _window->toScreen(p);
+        return _parent;
 
-    return p;
-
-
-    // Gfx::PointF winPos = toWindow(pos);
-
-    // if( window() )
-    //     return window()->toScreen(winPos);
-
-    // return winPos;
+    return _window;
 }
 
 
-Gfx::PointF Widget::onFromScreen(const Gfx::PointF& pos) const
+Gfx::PointF Widget::onToParent(const Gfx::PointF& pos) const
 {
-    Gfx::PointF widgetPos;
+    return  pos + _position;
+}
 
-    if( window() )
-        widgetPos = window()->fromScreen(pos);
 
-    return fromWindow( widgetPos );
+Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
+{
+    return pos - _position;
 }
 
 

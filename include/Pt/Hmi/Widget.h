@@ -103,11 +103,6 @@ class PT_HMI_API Widget : public Visual
         //
         // coordinate transformations
         //
-
-        Gfx::PointF toParent(const Gfx::PointF& pos) const;
-
-        Gfx::PointF fromParent(const Gfx::PointF& pos) const;
-
         Gfx::PointF toWindow(const Gfx::PointF& p) const;
 
         Gfx::PointF fromWindow(const Gfx::PointF& pos) const;
@@ -284,11 +279,13 @@ class PT_HMI_API Widget : public Visual
         void remove(Widget& w);
 
     protected:
+        virtual Visual* onParent() const;
+
+        Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
         virtual const Gfx::SizeF& onSize() const;
-
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
 
         virtual double onScaleFactor() const;
 

@@ -105,12 +105,20 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
-double Screen::onScaleFactor() const
-{   
-    // TODO: support multiple screens
+Visual* Screen::onParent() const
+{
+    return 0;
+}
 
-    double scaling = Application::instance().scaleFactor();
-    return _impl->scaleFactor() * scaling;
+
+Gfx::PointF Screen::onToParent(const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+Gfx::PointF Screen::onFromParent(const Gfx::PointF& pos) const
+{
+    return pos;
 }
 
 
@@ -122,15 +130,12 @@ const Gfx::SizeF& Screen::onSize() const
 }
 
 
-Pt::Gfx::PointF Screen::onToScreen(const Pt::Gfx::PointF& p) const
-{
-    return p;
-}
+double Screen::onScaleFactor() const
+{   
+    // TODO: support multiple screens
 
-
-Pt::Gfx::PointF Screen::onFromScreen(const Pt::Gfx::PointF& p) const
-{
-    return p;
+    double scaling = Application::instance().scaleFactor();
+    return _impl->scaleFactor() * scaling;
 }
 
 
@@ -140,13 +145,13 @@ ScreenImpl* Screen::impl()
 }
 
 
-Gfx::PointF Screen::onToParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Screen::onToHost(const Window& w, const Gfx::PointF& pos) const
 {
     return _impl->toParent(w, pos);
 }
 
 
-Gfx::PointF Screen::onFromParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Screen::onFromHost(const Window& w, const Gfx::PointF& pos) const
 {
     return _impl->fromParent(w, pos);
 }

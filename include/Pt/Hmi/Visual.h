@@ -73,6 +73,16 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         virtual void onEvent(const Pt::Event& ev) = 0;
 
     public:
+        const Visual* parent() const
+        {
+          return onParent();
+        }
+
+        Visual* parent()
+        {
+          return onParent();
+        }
+
         const Gfx::SizeF& size() const
         {
             return onSize();
@@ -83,31 +93,49 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return onScaleFactor();
         }
 
-        // virtual Gfx::PointF toParent(const Gfx::PointF& pos) const = 0;
+        Gfx::PointF toParent(const Gfx::PointF& pos) const
+        {
+            return onToParent(pos);
+        }
 
-        // virtual Gfx::PointF fromParent(const Gfx::PointF& pos) const = 0;
+        Gfx::PointF fromParent(const Gfx::PointF& pos) const
+        {
+            return onFromParent(pos);
+        }
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const
         {
-            return onToScreen(pos);
+            const Visual* _parent = parent();
+            if( ! _parent )
+                return pos;
+
+            Gfx::PointF p = toParent(pos);
+            return _parent->toScreen(p);
         }
 
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const
         {
-            return onFromScreen(pos);
+            const Visual* _parent = parent();
+            if( ! _parent )
+                return pos;
+
+            Gfx::PointF parentPos = _parent->fromScreen(pos);
+            return fromParent(parentPos);
         }
 
     public:
         virtual void repaint(const Gfx::RectF& r) = 0;
 
     protected:
+        virtual Visual* onParent() const = 0;
+
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const = 0;
+
         virtual const Gfx::SizeF& onSize() const = 0;
 
         virtual double onScaleFactor() const = 0;
-
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& l) const = 0;
-
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& g) const = 0;
 
     public:
         Gfx::PointF toPhysical(const Gfx::PointF& p) const

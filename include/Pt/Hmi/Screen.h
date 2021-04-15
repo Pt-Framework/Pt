@@ -71,14 +71,15 @@ class PT_HMI_API Screen : public WindowBase
         ScreenImpl* impl();
 
     protected:
-        virtual Pt::Gfx::PointF onToScreen(const Pt::Gfx::PointF& p) const;
+        virtual Visual* onParent() const;
 
-        virtual Pt::Gfx::PointF onFromScreen(const Pt::Gfx::PointF& p) const;
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+        virtual const Gfx::SizeF& onSize() const;
 
         virtual double onScaleFactor() const;
-
-    protected:
-        virtual const Gfx::SizeF& onSize() const;
 
     protected:
         virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy)
@@ -101,9 +102,9 @@ class PT_HMI_API Screen : public WindowBase
     
         virtual void onDeinit(Window& w);
 
-        virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onToHost(const Window& w, const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onFromHost(const Window& w, const Gfx::PointF& pos) const;
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
 
