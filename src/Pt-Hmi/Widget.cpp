@@ -613,44 +613,56 @@ void Widget::onInvalidate()
 }
 
 
-void Widget::repaint()
+void Widget::onRepaint(const Gfx::RectF& rect)
 {
-    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-    repaint(rect);
+    Visual* p = Visual::parent();
+    if(p)
+    {
+        Gfx::PointF parentPos = toParent( rect.topLeft() );
+        Gfx::RectF parentRect( parentPos, rect.size() );
+        p->repaint(parentRect);
+    }
 }
 
 
-void Widget::repaint(const Gfx::RectF& rect)
-{
-    // Window* parentWindow = window();
-    // Widget* parentWidget = parent();
-
-    // if(parentWidget)
-    // {
-    //     Gfx::PointF updatePos = toParent( rect.topLeft() );
-    //     Gfx::RectF updateRect( updatePos, rect.size() );
-
-    //     parentWidget->repaint(updateRect);
-    // }
-    // else if(parentWindow)
-    // {
-    //     Gfx::PointF updatePos = toParent( rect.topLeft() );
-    //     Gfx::RectF updateRect( updatePos, rect.size() );
-
-    //     parentWindow->repaint(updateRect);
-    // }
-
-    Visual* pr = parent();
-    if( ! pr )
-        pr = window();
-
-    if( ! pr )
-        return;
-
-    Gfx::PointF updatePos = toParent( rect.topLeft() );
-    Gfx::RectF updateRect( updatePos, rect.size() );
-    pr->repaint(updateRect);
-}
+//void Widget::repaint()
+//{
+//    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+//    repaint(rect);
+//}
+//
+//
+//void Widget::repaint(const Gfx::RectF& rect)
+//{
+//    // Window* parentWindow = window();
+//    // Widget* parentWidget = parent();
+//
+//    // if(parentWidget)
+//    // {
+//    //     Gfx::PointF updatePos = toParent( rect.topLeft() );
+//    //     Gfx::RectF updateRect( updatePos, rect.size() );
+//
+//    //     parentWidget->repaint(updateRect);
+//    // }
+//    // else if(parentWindow)
+//    // {
+//    //     Gfx::PointF updatePos = toParent( rect.topLeft() );
+//    //     Gfx::RectF updateRect( updatePos, rect.size() );
+//
+//    //     parentWindow->repaint(updateRect);
+//    // }
+//
+//    Visual* pr = parent();
+//    if( ! pr )
+//        pr = window();
+//
+//    if( ! pr )
+//        return;
+//
+//    Gfx::PointF updatePos = toParent( rect.topLeft() );
+//    Gfx::RectF updateRect( updatePos, rect.size() );
+//    pr->repaint(updateRect);
+//}
 
 // onPaint
 void Widget::onPaintContent(const Gfx::RectF& r)

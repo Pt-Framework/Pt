@@ -134,9 +134,9 @@ class PT_HMI_API Window : public WindowBase
 
     void invalidate();
 
-    void repaint();
+    //void repaint();
 
-    void repaint(const Gfx::RectF& rect);
+    //void repaint(const Gfx::RectF& rect);
 
     
     void relayout();
@@ -256,6 +256,8 @@ class PT_HMI_API Window : public WindowBase
     virtual const Gfx::SizeF& onSize() const;
 
     virtual double onScaleFactor() const;
+
+    virtual void onRepaint(const Gfx::RectF& rect);
 
   protected:
     virtual void onInvalidate();

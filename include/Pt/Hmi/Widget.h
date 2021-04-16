@@ -167,9 +167,9 @@ class PT_HMI_API Widget : public Visual
 
         void relayout();
 
-        void repaint();
+        //void repaint();
 
-        void repaint(const Gfx::RectF& rect);
+        //void repaint(const Gfx::RectF& rect);
 
       public:
         bool isVisible() const;
@@ -288,6 +288,8 @@ class PT_HMI_API Widget : public Visual
         virtual const Gfx::SizeF& onSize() const;
 
         virtual double onScaleFactor() const;
+
+        virtual void onRepaint(const Gfx::RectF& rect);
 
     protected:
         virtual void onSetWindow(Window* w);

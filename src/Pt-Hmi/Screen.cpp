@@ -230,22 +230,31 @@ void Screen::onEvent(const Event& ev)
 }
 
 
-void Screen::repaint()
+void Screen::onRepaint(const Gfx::RectF& rect)
 {
-    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-    repaint(rect);
-}
-
-
-void Screen::repaint(const Gfx::RectF& updateRect)
-{
-    // TODO: record damaged area per window
-    _updateRect.unify(updateRect);
+    _updateRect.unify(rect);
     ++_updates;
 
     PaintEvent uev(vid(), _updateRect);
     Application::instance().loop().commitEvent(uev);
 }
+
+//
+//void Screen::repaint()
+//{
+//    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+//    repaint(rect);
+//}
+//
+//
+//void Screen::repaint(const Gfx::RectF& updateRect)
+//{
+//    _updateRect.unify(updateRect);
+//    ++_updates;
+//
+//    PaintEvent uev(vid(), _updateRect);
+//    Application::instance().loop().commitEvent(uev);
+//}
 
 
 void Screen::onPaintEvent(const PaintEvent& ev)
@@ -270,8 +279,6 @@ void Screen::onPaintContent(const Gfx::RectF& screenRect)
     //std::clog << "Screen::onPaintContent " << std::endl;
 
     onPaintScreen(screenRect);
-
-    // TODO: paint only windows with damaged area as indicated by repaint()
 
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)

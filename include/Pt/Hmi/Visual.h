@@ -92,17 +92,23 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         {
             return onScaleFactor();
         }
-
+        
+        /** @brief Converts local to parent coordinate.
+        */
         Gfx::PointF toParent(const Gfx::PointF& pos) const
         {
             return onToParent(pos);
         }
-
+        
+        /** @brief Converts parent to local coordinate.
+        */
         Gfx::PointF fromParent(const Gfx::PointF& pos) const
         {
             return onFromParent(pos);
         }
 
+        /** @brief Converts global to local coordinate.
+        */
         Gfx::PointF toScreen(const Gfx::PointF& pos) const
         {
             const Visual* _parent = parent();
@@ -113,6 +119,8 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return _parent->toScreen(p);
         }
 
+        /** @brief Converts local to global coordinate.
+        */
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const
         {
             const Visual* _parent = parent();
@@ -122,9 +130,6 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             Gfx::PointF parentPos = _parent->fromScreen(pos);
             return fromParent(parentPos);
         }
-
-    public:
-        virtual void repaint(const Gfx::RectF& r) = 0;
 
     protected:
         virtual Visual* onParent() const = 0;
@@ -136,6 +141,47 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         virtual const Gfx::SizeF& onSize() const = 0;
 
         virtual double onScaleFactor() const = 0;
+
+    public:
+        void repaint()
+        {
+            Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+            onRepaint(rect);
+        }
+
+        void repaint(const Gfx::RectF& rect)
+        {
+            onRepaint(rect);
+        }
+
+    protected:
+        virtual void onRepaint(const Gfx::RectF& rect) = 0;
+
+    protected:
+        // onMeasure
+        virtual Gfx::SizeF onMeasureContent(const SizePolicy&) = 0;
+
+        // measure
+        Gfx::SizeF onMeasureChild(Visual& v, const SizePolicy& policy)
+        {
+            return v.onMeasureContent(policy);
+        }
+
+        // onLayout
+        virtual void onLayoutContent(const Gfx::RectF&) = 0;
+
+        // layout
+        void layoutContent(Visual& v, const Gfx::PointF& p, const Gfx::SizeF& s)
+        {
+            Gfx::RectF r(p, s);
+            v.onLayoutContent(r);
+        }
+
+        // layout
+        void layoutContent(Visual& v, const Gfx::RectF& r)
+        {
+            v.onLayoutContent(r);
+        }
 
     public:
         Gfx::PointF toPhysical(const Gfx::PointF& p) const
@@ -244,32 +290,6 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
                 align(spacing.bottom()));
 
             return alignedSpacing;
-        }
-
-    protected:
-        // onMeasure
-        virtual Gfx::SizeF onMeasureContent(const SizePolicy&) = 0;
-
-        // measure
-        Gfx::SizeF onMeasureChild(Visual& v, const SizePolicy& policy)
-        {
-            return v.onMeasureContent(policy);
-        }
-
-        // onLayout
-        virtual void onLayoutContent(const Gfx::RectF&) = 0;
-
-        // layout
-        void layoutContent(Visual& v, const Gfx::PointF& p, const Gfx::SizeF& s)
-        {
-            Gfx::RectF r(p, s);
-            v.onLayoutContent(r);
-        }
-
-        // layout
-        void layoutContent(Visual& v, const Gfx::RectF& r)
-        {
-            v.onLayoutContent(r);
         }
 
     protected:

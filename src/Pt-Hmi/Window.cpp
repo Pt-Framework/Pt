@@ -767,25 +767,41 @@ void Window::onLayoutContent(const Gfx::RectF& rect)
 }
 
 
-void Window::repaint()
+void Window::onRepaint(const Gfx::RectF& rect)
 {
-    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-    repaint(rect);
-}
+    //std::clog << "REPAINT: " << title() << std::endl;
 
-
-void Window::repaint(const Gfx::RectF& rect)
-{
     _damageRect.unify(rect);
 
-    Gfx::PointF updatePos = toParent( rect.topLeft() );
-    Gfx::RectF updateRect( updatePos, rect.size() );
-
-    if(_parentWindow)
-        _parentWindow->repaint(updateRect);
-    else if(_screen)
-        _screen->repaint(updateRect);
+    Visual* p = Visual::parent();
+    if(p)
+    {
+        Gfx::PointF parentPos = toParent( rect.topLeft() );
+        Gfx::RectF parentRect( parentPos, rect.size() );
+        p->repaint(parentRect);
+    }
 }
+
+
+//void Window::repaint()
+//{
+//    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+//    repaint(rect);
+//}
+//
+//
+//void Window::repaint(const Gfx::RectF& rect)
+//{
+//    _damageRect.unify(rect);
+//
+//    Gfx::PointF updatePos = toParent( rect.topLeft() );
+//    Gfx::RectF updateRect( updatePos, rect.size() );
+//
+//    if(_parentWindow)
+//        _parentWindow->repaint(updateRect);
+//    else if(_screen)
+//        _screen->repaint(updateRect);
+//}
 
 
 void Window::paintEvent(const PaintEvent& ev)
@@ -798,7 +814,8 @@ void Window::paintEvent(const PaintEvent& ev)
     if( ! this->isVisible() )
         return;
 
-    onPaintContent(rect);
+    if( ! _damageRect.isNull() )
+        onPaintContent(_damageRect);
 
     _damageRect.clear();
 }
@@ -812,6 +829,9 @@ void Window::onPaintContent(const Gfx::RectF& rect)
     if( ! this->isVisible() )
         return;
 
+    //std::clog << "  PAINT: " << title() << rect.width() << "x" 
+    //                                    << rect.height() << std::endl;
+    
     //
     // paint window content
     //
