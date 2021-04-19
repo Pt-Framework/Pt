@@ -83,6 +83,9 @@ class PT_HMI_API Screen : public WindowBase
 
         virtual void onRepaint(const Gfx::RectF& r);
 
+        virtual void onRelayout()
+        {}
+
     protected:
         virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy)
         { 
@@ -129,7 +132,7 @@ class PT_HMI_API Screen : public WindowBase
     protected:
         virtual void onEvent( const Event& ev );
         
-        virtual void onPaintEvent(const PaintEvent& ev);
+        virtual void paintEvent(const PaintEvent& ev);
     
     private:
         ScreenImpl*          _impl;

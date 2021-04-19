@@ -613,18 +613,6 @@ void Widget::onInvalidate()
 }
 
 
-void Widget::onRepaint(const Gfx::RectF& rect)
-{
-    Visual* p = Visual::parent();
-    if(p)
-    {
-        Gfx::PointF parentPos = toParent( rect.topLeft() );
-        Gfx::RectF parentRect( parentPos, rect.size() );
-        p->repaint(parentRect);
-    }
-}
-
-
 //void Widget::repaint()
 //{
 //    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
@@ -664,6 +652,18 @@ void Widget::onRepaint(const Gfx::RectF& rect)
 //    pr->repaint(updateRect);
 //}
 
+
+void Widget::onRepaint(const Gfx::RectF& rect)
+{
+    Visual* p = Visual::parent();
+    if(p)
+    {
+        Gfx::PointF parentPos = toParent( rect.topLeft() );
+        Gfx::RectF parentRect( parentPos, rect.size() );
+        p->repaint(parentRect);
+    }
+}
+
 // onPaint
 void Widget::onPaintContent(const Gfx::RectF& r)
 {
@@ -675,6 +675,7 @@ void Widget::onPaintContent(const Gfx::RectF& r)
 
     Gfx::RectF rect = r.intersect( Gfx::RectF(_size) );
 
+    // onPaintContent (widget specific)
     PaintEvent pev( vid(), rect );
     onPaintEvent(pev);
 

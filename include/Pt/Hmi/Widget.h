@@ -63,7 +63,7 @@ class Widget;
 class Window;
 class Screen;
 
-class PT_HMI_API Widget : public Visual
+class PT_HMI_API Widget : public Element
 {
     friend class Window;
 

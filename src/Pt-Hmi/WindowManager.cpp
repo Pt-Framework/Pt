@@ -608,7 +608,6 @@ void WindowManager::onStateChanged(Window& w)
 
         if(state == Window::Maximized)
         {
-        
             Gfx::SizeF maxSize = _parent->size();
             maxSize = frame->fromFrame(maxSize);
 

@@ -280,7 +280,7 @@ void Application::grabLast()
         }
         else
         {
-            Widget* widget = static_cast<Widget*>(visual);
+            Widget* widget = dynamic_cast<Widget*>(visual);
             if(widget)
                 grabPointer(*widget);
         }

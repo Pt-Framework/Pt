@@ -225,19 +225,10 @@ void Screen::onEvent(const Event& ev)
     if(ev.typeInfo() == typeid(PaintEvent) )
     {
         const PaintEvent& pev = static_cast<const PaintEvent&>(ev);
-        onPaintEvent(pev);
+        paintEvent(pev);
     }
 }
 
-
-void Screen::onRepaint(const Gfx::RectF& rect)
-{
-    _updateRect.unify(rect);
-    ++_updates;
-
-    PaintEvent uev(vid(), _updateRect);
-    Application::instance().loop().commitEvent(uev);
-}
 
 //
 //void Screen::repaint()
@@ -257,7 +248,17 @@ void Screen::onRepaint(const Gfx::RectF& rect)
 //}
 
 
-void Screen::onPaintEvent(const PaintEvent& ev)
+void Screen::onRepaint(const Gfx::RectF& rect)
+{
+    _updateRect.unify(rect);
+    ++_updates;
+
+    PaintEvent uev(vid(), _updateRect);
+    Application::instance().loop().commitEvent(uev);
+}
+
+
+void Screen::paintEvent(const PaintEvent& ev)
 {
     --_updates;
 
@@ -268,17 +269,10 @@ void Screen::onPaintEvent(const PaintEvent& ev)
     _updateRect.clear();
 
     const Gfx::RectF& screenRect = ev.rect();
+    //onPaintContent(screenRect);
+
+    // onPaint
     onPaintContent(screenRect);
-}
-
-// onPaint
-void Screen::onPaintContent(const Gfx::RectF& screenRect)
-{
-    //std::clog << std::endl;
-    //_clock.start();
-    //std::clog << "Screen::onPaintContent " << std::endl;
-
-    onPaintScreen(screenRect);
 
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
@@ -292,11 +286,23 @@ void Screen::onPaintContent(const Gfx::RectF& screenRect)
 
         //paintContent(*window, winRect);
 
+        // send paint event to window
         window->impl()->paint(winRect);
         //_impl->paint(*window, winRect);
     }
 
     _impl->paint(screenRect);
+}
+
+// onPaint
+void Screen::onPaintContent(const Gfx::RectF& screenRect)
+{
+    // onPaintContent (screen specific)
+    onPaintScreen(screenRect);
+
+    //std::clog << std::endl;
+    //_clock.start();
+    //std::clog << "Screen::onPaintContent " << std::endl;
 
     //static int nnn = 0;
     //std::clog << "screen update: " 

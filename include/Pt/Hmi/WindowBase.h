@@ -43,7 +43,7 @@ namespace Hmi {
 class Window;
 
 // WindowHost
-class PT_HMI_API WindowBase : public Visual
+class PT_HMI_API WindowBase : public virtual Visual
 {
     friend class Window;
 

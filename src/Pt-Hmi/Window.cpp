@@ -806,6 +806,7 @@ void Window::onRepaint(const Gfx::RectF& rect)
 
 void Window::paintEvent(const PaintEvent& ev)
 {
+    //const Gfx::RectF& rect = _damageRect;
     const Gfx::RectF& rect = ev.rect();
 
     if( rect.isNull() )
@@ -814,8 +815,33 @@ void Window::paintEvent(const PaintEvent& ev)
     if( ! this->isVisible() )
         return;
 
-    if( ! _damageRect.isNull() )
-        onPaintContent(_damageRect);
+    //if( _damageRect.isNull() )
+    //    return;
+
+    //onPaintContent(_damageRect);
+    
+    // onPaint
+    onPaintContent(rect);
+
+    //
+    // paint child windows
+    //
+    std::vector<Window*>::iterator child;
+    for(child = _windows.begin(); child != _windows.end(); ++child)
+    {
+        Gfx::PointF winPos = (*child)->fromParent( rect.topLeft() );
+        Gfx::RectF winRect( winPos, rect.size() );
+
+        winRect = winRect.intersect( Gfx::RectF( (*child)->size() ) );
+
+        //paintContent(**child, winRect);
+        PaintEvent pev((*child)->vid(), winRect);
+        (*child)->processEvent(pev);
+
+        // _windowManager.paintWindow(**child, _surface, rect);
+    }
+
+    _windowManager.paint(_surface, rect);
 
     _damageRect.clear();
 }
@@ -851,24 +877,6 @@ void Window::onPaintContent(const Gfx::RectF& rect)
         if( ! updateRect.isNull() )
             paintContent(*widget, updateRect);
     }
-
-    //
-    // paint child windows
-    //
-    std::vector<Window*>::iterator child;
-    for(child = _windows.begin(); child != _windows.end(); ++child)
-    {
-        Gfx::PointF winPos = (*child)->fromParent( rect.topLeft() );
-        Gfx::RectF winRect( winPos, rect.size() );
-
-        winRect = winRect.intersect( Gfx::RectF( (*child)->size() ) );
-
-        paintContent(**child, winRect);
-
-        // _windowManager.paintWindow(**child, _surface, rect);
-    }
-
-    _windowManager.paint(_surface, rect);
 }
 
 // onPaintContent (window specific)

@@ -157,31 +157,49 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
     protected:
         virtual void onRepaint(const Gfx::RectF& rect) = 0;
 
-    protected:
-        // onMeasure
-        virtual Gfx::SizeF onMeasureContent(const SizePolicy&) = 0;
+        // onPaint
+        virtual void onPaintContent(const Gfx::RectF& r) = 0;
 
-        // measure
-        Gfx::SizeF onMeasureChild(Visual& v, const SizePolicy& policy)
+        // paint
+        void paintContent(Visual& v, const Gfx::RectF& r)
         {
-            return v.onMeasureContent(policy);
+            return v.onPaintContent(r);
         }
 
-        // onLayout
-        virtual void onLayoutContent(const Gfx::RectF&) = 0;
+    // public:
+    //     // void relayout()
+    //     // {
+    //     //     onReLayout();
+    //     // }
 
-        // layout
-        void layoutContent(Visual& v, const Gfx::PointF& p, const Gfx::SizeF& s)
-        {
-            Gfx::RectF r(p, s);
-            v.onLayoutContent(r);
-        }
+    // protected:
+    //     //virtual void onReLayout() = 0;
 
-        // layout
-        void layoutContent(Visual& v, const Gfx::RectF& r)
-        {
-            v.onLayoutContent(r);
-        }
+    // protected:
+    //     // onMeasure
+    //     virtual Gfx::SizeF onMeasureContent(const SizePolicy&) = 0;
+
+    //     // measure
+    //     Gfx::SizeF onMeasureChild(Visual& v, const SizePolicy& policy)
+    //     {
+    //         return v.onMeasureContent(policy);
+    //     }
+
+    //     // onLayout
+    //     virtual void onLayoutContent(const Gfx::RectF&) = 0;
+
+    //     // layout
+    //     void layoutContent(Visual& v, const Gfx::PointF& p, const Gfx::SizeF& s)
+    //     {
+    //         Gfx::RectF r(p, s);
+    //         v.onLayoutContent(r);
+    //     }
+
+    //     // layout
+    //     void layoutContent(Visual& v, const Gfx::RectF& r)
+    //     {
+    //         v.onLayoutContent(r);
+    //     }
 
     public:
         Gfx::PointF toPhysical(const Gfx::PointF& p) const
@@ -292,19 +310,55 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return alignedSpacing;
         }
 
-    protected:
-        // onPaint
-        virtual void onPaintContent(const Gfx::RectF& r) = 0;
-
-        // paint
-        void paintContent(Visual& v, const Gfx::RectF& r)
-        {
-            return v.onPaintContent(r);
-        }
-
     private:
         Pt::uint64_t _vid;
         std::string  _name;
+};
+
+
+class PT_HMI_API Element : public virtual Visual
+{
+    public:
+        virtual ~Element()
+        {}
+
+        Element()
+        {}
+
+    public:
+        // void relayout()
+        // {
+        //     onReLayout();
+        // }
+
+    protected:
+        //virtual void onReLayout() = 0;
+
+    protected:
+        // onMeasure
+        virtual Gfx::SizeF onMeasureContent(const SizePolicy&) = 0;
+
+        // measure
+        Gfx::SizeF onMeasureChild(Element& v, const SizePolicy& policy)
+        {
+            return v.onMeasureContent(policy);
+        }
+
+        // onLayout
+        virtual void onLayoutContent(const Gfx::RectF&) = 0;
+
+        // layout
+        void layoutContent(Element& v, const Gfx::PointF& p, const Gfx::SizeF& s)
+        {
+            Gfx::RectF r(p, s);
+            v.onLayoutContent(r);
+        }
+
+        // layout
+        void layoutContent(Element& v, const Gfx::RectF& r)
+        {
+            v.onLayoutContent(r);
+        }
 };
 
 } // namespace
