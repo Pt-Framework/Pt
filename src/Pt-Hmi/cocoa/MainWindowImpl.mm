@@ -518,8 +518,8 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     ResizeEvent rev(vid, to);
     window->processEvent(rev);
 
-    //Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
-    //window->repaint(updateRect);
+    Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
+    window->repaint(updateRect);
 
     // cocoa performs a paint/display right after a window resize, so we
     // need to process the window update now to avoid flicker
