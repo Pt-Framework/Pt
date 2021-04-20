@@ -855,8 +855,8 @@ void Window::onPaintContent(const Gfx::RectF& rect)
     if( ! this->isVisible() )
         return;
 
-    std::clog << "  PAINT(" << title() << "): " 
-              << rect.width() << "x" << rect.height() << std::endl;
+    //std::clog << "  PAINT(" << title() << "): " 
+    //          << rect.width() << "x" << rect.height() << std::endl;
     
     //
     // paint window content
@@ -1192,8 +1192,8 @@ void Window::onResize(Window& w, const Gfx::SizeF& s)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
-    std::clog << "RESIZE EVENT: " 
-              << ev.size().width() << "x" << ev.size().height() << std::endl;
+    //std::clog << "RESIZE EVENT: " 
+    //          << ev.size().width() << "x" << ev.size().height() << std::endl;
 
     _size = ev.size();
 
