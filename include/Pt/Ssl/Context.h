@@ -59,9 +59,11 @@ enum OpenMode
 enum Protocol 
 {
     SSLv2,    //!< SSL version 2
-    SSLv3or2, //!< SSL version 2 or 3
+    SSLv3or2, //!< highest possible protocol version
     SSLv3,    //!< SSL version 3
-    TLSv1     //!< TLS version 1
+    TLSv1,    //!< TLS version 1.0
+    TLSv1_1,  //!< TLS version 1.1
+    TLSv1_2,  //!< TLS version 1.2
 };
 
 //! @brief Verification mode.
