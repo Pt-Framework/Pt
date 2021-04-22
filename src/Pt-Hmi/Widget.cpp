@@ -702,21 +702,25 @@ void Widget::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Widget::relayout()
+void Widget::onRelayout()
 {
     _isLayoutInvalid = true;
 
-    Window* parentWindow = window();
-    Widget* parentWidget = parent();
+    Visual* parentVisual = onParent();
+    if(parentVisual)
+        parentVisual->relayout();
+
+    //Window* parentWindow = window();
+    //Widget* parentWidget = parent();
     
-    if(parentWidget)
-    {
-        parentWidget->relayout();
-    }
-    else if(parentWindow)
-    {
-        parentWindow->relayout();
-    }
+    //if(parentWidget)
+    //{
+    //    parentWidget->relayout();
+    //}
+    //else if(parentWindow)
+    //{
+    //    parentWindow->relayout();
+    //}
 }
 
 
@@ -793,6 +797,9 @@ Gfx::SizeF Widget::onMeasureContent(const SizePolicy& policy)
             contentPolicy.horizontal() != SizePolicy::Fixed ||
             ! widgets().empty() )
         {
+            Layouter layouter;
+            Gfx::SizeF prefSize = onMeasure2(layouter, contentPolicy);
+
             _preferredSize = onMeasure(contentPolicy);
         }
 
@@ -820,7 +827,15 @@ Gfx::SizeF Widget::onMeasureContent(const SizePolicy& policy)
     return _preferredSize;
 }
 
-// onMeasureContent
+
+// onMeasureContent (widget specific)
+Gfx::SizeF Widget::onMeasure2(Layouter& layouter, const SizePolicy& policy)
+{
+   return Gfx::SizeF(0, 0);
+}
+
+
+// onMeasureContent (widget specific)
 Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
 {
    return Gfx::SizeF(0, 0);
@@ -1164,7 +1179,8 @@ void Widget::touchEvent(const TouchEvent& ev)
     {
         TouchEvent ev2(ev);
         ev2.setId(w->vid());
-        Application::instance().loop().commitEvent(ev2);
+        //Application::instance().loop().commitEvent(ev2);
+        w->touchEvent(ev);
     }
 }
 
@@ -1202,7 +1218,8 @@ void Widget::scrollEvent(const ScrollEvent& ev)
     {
         ScrollEvent ev2(ev);
         ev2.setId (w->vid() );
-        Application::instance().loop().commitEvent(ev2);
+        //Application::instance().loop().commitEvent(ev2);
+        w->scrollEvent(ev);
     }
 }
 

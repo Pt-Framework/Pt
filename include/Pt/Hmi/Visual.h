@@ -143,6 +143,15 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         virtual double onScaleFactor() const = 0;
 
     public:
+        void relayout()
+        {
+            onRelayout();
+        }
+
+    protected:
+        virtual void onRelayout() = 0;
+
+    public:
         void repaint()
         {
             Gfx::RectF rect( Gfx::PointF(0, 0), size() );
@@ -165,15 +174,6 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         {
             return v.onPaintContent(r);
         }
-
-    // public:
-    //     // void relayout()
-    //     // {
-    //     //     onReLayout();
-    //     // }
-
-    // protected:
-    //     //virtual void onReLayout() = 0;
 
     // protected:
     //     // onMeasure
@@ -318,23 +318,16 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
 
 class PT_HMI_API Element : public virtual Visual
 {
+    friend class Layouter;
+
     public:
         virtual ~Element()
         {}
 
+    protected:
         Element()
         {}
 
-    public:
-        // void relayout()
-        // {
-        //     onReLayout();
-        // }
-
-    protected:
-        //virtual void onReLayout() = 0;
-
-    protected:
         // onMeasure
         virtual Gfx::SizeF onMeasureContent(const SizePolicy&) = 0;
 

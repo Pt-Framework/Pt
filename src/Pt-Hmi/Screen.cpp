@@ -248,6 +248,11 @@ void Screen::onEvent(const Event& ev)
 //}
 
 
+void Screen::onRelayout()
+{
+}
+
+
 void Screen::onRepaint(const Gfx::RectF& rect)
 {
     _updateRect.unify(rect);

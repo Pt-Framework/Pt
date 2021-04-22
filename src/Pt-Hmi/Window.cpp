@@ -709,7 +709,7 @@ void Window::onInvalidate()
 }
 
 
-void Window::relayout()
+void Window::onRelayout()
 {   
     _layouts++;
 
@@ -747,7 +747,11 @@ void Window::layoutEvent(const LayoutEvent& ev)
 Gfx::SizeF Window::onMeasureContent(const SizePolicy& policy)
 { 
     if( _mainWidget )
-        return onMeasureChild(*_mainWidget, policy);
+    {
+        return _mainWidget->onMeasureContent(policy);
+
+        //return onMeasureChild(*_mainWidget, policy);
+    }
 
     return policy.size();
 }

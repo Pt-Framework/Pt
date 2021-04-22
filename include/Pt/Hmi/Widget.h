@@ -66,6 +66,7 @@ class Screen;
 class PT_HMI_API Widget : public Element
 {
     friend class Window;
+    friend class Layouter;
 
     public:
         Widget();
@@ -165,7 +166,7 @@ class PT_HMI_API Widget : public Element
 
         void invalidate();
 
-        void relayout();
+        //void relayout();
 
         //void repaint();
 
@@ -209,6 +210,10 @@ class PT_HMI_API Widget : public Element
         // onMeasure
         virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy);
 
+        // onMeasureContent (widget specific)
+        virtual Gfx::SizeF onMeasure2(Layouter& layouter, const SizePolicy& policy);
+
+    protected:
         // onMeasureContent (widget specific)
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
@@ -288,6 +293,8 @@ class PT_HMI_API Widget : public Element
         virtual const Gfx::SizeF& onSize() const;
 
         virtual double onScaleFactor() const;
+
+        virtual void onRelayout();
 
         virtual void onRepaint(const Gfx::RectF& rect);
 
@@ -398,6 +405,30 @@ class PT_HMI_API Widget : public Element
         
         Spacing                      _padding;
         Spacing                      _margin;
+};
+
+
+class Layouter
+{
+    friend class Widget;
+
+    protected:
+        Layouter()
+        {}
+
+    public:
+        virtual ~Layouter()
+        {}
+
+        Gfx::SizeF measure(Widget& w, const SizePolicy& policy)
+        {
+            return w.onMeasureContent(policy);
+        }
+
+        void layout(Widget& w, const Gfx::RectF& r)
+        {
+            w.onLayoutContent(r);
+        }
 };
 
 } // namespace

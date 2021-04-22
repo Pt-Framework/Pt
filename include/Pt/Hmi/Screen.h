@@ -81,10 +81,9 @@ class PT_HMI_API Screen : public WindowBase
 
         virtual double onScaleFactor() const;
 
-        virtual void onRepaint(const Gfx::RectF& r);
+        virtual void onRelayout();
 
-        virtual void onRelayout()
-        {}
+        virtual void onRepaint(const Gfx::RectF& r);
 
     protected:
         virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy)
