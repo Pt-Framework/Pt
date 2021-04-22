@@ -187,16 +187,20 @@ ContextImpl::ContextImpl(Protocol protocol)
     // Create the context for the given protocol
     switch(_protocol) 
     {
+        default:
+        case SSLv3or2: 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+            _ctx = SSL_CTX_new( SSLv23_method() ); 
+#else
+            _ctx = ::SSL_CTX_new( ::TLS_method() );
+#endif
+            break;
+
         case SSLv2: 
             // SSLv2_method is not available everywhere (check OPENSSL_NO_SSL2)
             _ctx = SSL_CTX_new( SSLv23_method() ); 
             break;
         
-        case SSLv3or2: 
-            _ctx = SSL_CTX_new( SSLv23_method() ); 
-            break;
-
-        default:
         case SSLv3: 
             // SSLv3_method is not available everywhere (check OPENSSL_NO_SSL3)
             _ctx = SSL_CTX_new( SSLv23_method() ); 
@@ -209,6 +213,26 @@ ContextImpl::ContextImpl(Protocol protocol)
             _ctx = ::SSL_CTX_new(::TLS_method());
             SSL_CTX_set_min_proto_version(_ctx, TLS1_VERSION);
             SSL_CTX_set_max_proto_version(_ctx, TLS1_VERSION);
+#endif
+            break;
+
+        case TLSv1_1:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+            _ctx = SSL_CTX_new( TLSv1_1_method () ); 
+#else
+            _ctx = ::SSL_CTX_new(::TLS_method());
+            SSL_CTX_set_min_proto_version(_ctx, TLS1_1_VERSION);
+            SSL_CTX_set_max_proto_version(_ctx, TLS1_1_VERSION);
+#endif
+            break;
+
+        case TLSv1_2:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+            _ctx = SSL_CTX_new( TLSv1_2_method () ); 
+#else
+            _ctx = ::SSL_CTX_new(::TLS_method());
+            SSL_CTX_set_min_proto_version(_ctx, TLS1_2_VERSION);
+            SSL_CTX_set_max_proto_version(_ctx, TLS1_2_VERSION);
 #endif
             break;
     }
@@ -256,19 +280,23 @@ void ContextImpl::setProtocol(Protocol protocol)
 
     switch(protocol) 
     {
+        default:
+        case SSLv3or2: 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+            SSL_CTX_set_ssl_version( _ctx, SSLv23_method() );  
+#else
+            SSL_CTX_set_ssl_version( _ctx, ::TLS_method() ); 
+#endif
+            break;
+
         case SSLv2: 
             // SSLv2_method is not available everywhere (check OPENSSL_NO_SSL2)
             SSL_CTX_set_ssl_version(_ctx, SSLv23_method() );
             v2 = true;
             break;
-        
-        case SSLv3or2: 
-            SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); 
-            v2 = true;
-            break;
 
-        default:
-        case SSLv3: 
+        case SSLv3:
+            // SSLv3_method is not available everywhere (check OPENSSL_NO_SSL3) 
             SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); 
             break;
 
@@ -279,6 +307,26 @@ void ContextImpl::setProtocol(Protocol protocol)
             SSL_CTX_set_ssl_version( _ctx, TLS_method());
             SSL_CTX_set_min_proto_version(_ctx, TLS1_VERSION);
             SSL_CTX_set_max_proto_version(_ctx, TLS1_VERSION);
+#endif
+            break;
+
+        case TLSv1_1: 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+            SSL_CTX_set_ssl_version( _ctx, TLSv1_1_method() ); 
+#else
+            SSL_CTX_set_ssl_version( _ctx, TLS_method());
+            SSL_CTX_set_min_proto_version(_ctx, TLS1_1_VERSION);
+            SSL_CTX_set_max_proto_version(_ctx, TLS1_1_VERSION);
+#endif
+            break;
+
+        case TLSv1_2: 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+            SSL_CTX_set_ssl_version( _ctx, TLSv1_2_method() ); 
+#else
+            SSL_CTX_set_ssl_version( _ctx, TLS_method());
+            SSL_CTX_set_min_proto_version(_ctx, TLS1_2_VERSION);
+            SSL_CTX_set_max_proto_version(_ctx, TLS1_2_VERSION);
 #endif
             break;
     }

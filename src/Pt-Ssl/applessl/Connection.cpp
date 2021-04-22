@@ -77,20 +77,20 @@ Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
     
     switch( _ctx->protocol() ) 
     {
+        default:
+        case SSLv3or2:
+            //SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
+            //SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
+            protocolMin = kSSLProtocol2;
+            protocolMax = kTLSProtocolMaxSupported;
+            break;
+
         case SSLv2:
             protocolMin = kSSLProtocol2;
             protocolMax = kSSLProtocol2;
             //SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
             break;
 
-        case SSLv3or2:
-            //SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
-            //SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
-            protocolMin = kSSLProtocol2;
-            protocolMax = kSSLProtocol3;
-            break;
-
-        default:
         case SSLv3:
             //SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
             protocolMin = kSSLProtocol3;
@@ -99,8 +99,20 @@ Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
       
         case TLSv1:
             //SSLSetProtocolVersionEnabled(_context, kTLSProtocol1, true);
+            protocolMin = kTLSProtocol1;
+            protocolMax = kTLSProtocol1;
+            break;
+
+        case TLSv1_1:
+            //SSLSetProtocolVersionEnabled(_context, kTLSProtocol1, true);
             protocolMin = kTLSProtocol11;
             protocolMax = kTLSProtocol11;
+            break;
+
+        case TLSv1_2:
+            //SSLSetProtocolVersionEnabled(_context, kTLSProtocol1, true);
+            protocolMin = kTLSProtocol12;
+            protocolMax = kTLSProtocol12;
             break;
     }
 
