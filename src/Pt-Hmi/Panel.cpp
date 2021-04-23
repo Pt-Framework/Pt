@@ -171,7 +171,7 @@ void Panel::onInvalidate()
 }
 
 
-Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Panel::onMeasure(Layouter& layouter, const SizePolicy& policy)
 {
     if(_content)
     { 
@@ -182,7 +182,7 @@ Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
         contentPolicy.setWidth( policy.size().width() - hspace );
         contentPolicy.setHeight( policy.size().height() - vspace );
         
-        onMeasureChild(*_content, contentPolicy);
+        layouter.measure(*_content, contentPolicy);
         return _content->preferredSize();
     }
 
@@ -190,9 +190,9 @@ Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
 }
 
 
-void Panel::onLayout(const Gfx::RectF& rect)
+void Panel::onLayout(Layouter& layouter, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(layouter, rect);
     
     if(_content)
     {
@@ -206,7 +206,7 @@ void Panel::onLayout(const Gfx::RectF& rect)
         size.setWidth( rect.width() - hspace );
         size.setHeight( rect.height() - vspace );
 
-        layoutContent( *_content, pos, size );
+        layouter.layout( *_content, pos, size );
     }
 }
 

@@ -205,7 +205,7 @@ Adjustment Label::adjustment() const
 }
 
 
-Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Label::onMeasure(Layouter& layouter, const SizePolicy& policy)
 {
     //std::clog << _text.narrow() << " measure " << this << std::endl;
 
@@ -382,11 +382,11 @@ void Label::layoutImage()
 }
 
 
-void Label::onLayout(const Gfx::RectF& rect)
+void Label::onLayout(Layouter& layouter, const Gfx::RectF& rect)
 {
     //std::clog  << " layout " << _text.narrow()<< this << std::endl;
 
-    Base::onLayout(rect);
+    Base::onLayout(layouter, rect);
     
     if( _icon.empty() )
         layoutText();

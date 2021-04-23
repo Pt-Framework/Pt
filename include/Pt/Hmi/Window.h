@@ -63,7 +63,6 @@ class MainWindowImpl;
 class WindowStateEvent;
 
 class PT_HMI_API Window : public WindowBase
-                        , public Element
 {
   friend class Widget; 
  
@@ -226,12 +225,15 @@ class PT_HMI_API Window : public WindowBase
   //
   // layouting
   //
-  protected:
-    // onMeasure
-    virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy);
+  public:
+    //Gfx::SizeF setSizePolicy(const SizePolicy& policy);
 
+    // onMeasure
+    virtual Gfx::SizeF measure(const SizePolicy& policy);
+
+  protected:
     // onLayout
-    virtual void onLayoutContent(const Gfx::RectF& rect);
+    virtual void layout(const Gfx::RectF& rect);
 
     void layoutEvent(const LayoutEvent& ev);
 

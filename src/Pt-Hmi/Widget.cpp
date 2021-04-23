@@ -45,7 +45,7 @@ namespace Hmi {
 Widget::Widget()
 : _screen(0)
 , _window(0)
-, _parent(0)
+, _parentWidget(0)
 , _invalidates(0)
 , _isLayoutInvalid(true)
 , _visible(true)
@@ -82,8 +82,8 @@ Widget::~Widget()
     while( ! _children.empty() )
         remove( *_children.back() );
 
-    if(_parent)
-        _parent->remove(*this);
+    if(_parentWidget)
+        _parentWidget->remove(*this);
 
     if(_window)
         _window->removeWidget(*this);
@@ -102,25 +102,25 @@ const Window* Widget::window() const
 }
 
 
-Widget* Widget::parent()
+Widget* Widget::parentWidget()
 {
-    return _parent;
+    return _parentWidget;
 }
 
 
-const Widget* Widget::parent() const
+const Widget* Widget::parentWidget() const
 {
-    return _parent;
+    return _parentWidget;
 }
 
 
 void Widget::add(Widget& widget)
 {
-    if(widget.parent() == this)
+    if(widget.parentWidget() == this)
         return;
 
-    if( widget.parent() )
-        widget.parent()->remove(widget);
+    if( widget.parentWidget() )
+        widget.parentWidget()->remove(widget);
 
     _children.push_back(&widget);
 
@@ -216,7 +216,7 @@ void Widget::setScreen(Screen* screen)
 
 void Widget::setParent(Widget* parent)
 {
-    _parent = parent;
+    _parentWidget = parent;
     onParentChanged(parent);
 }
 
@@ -332,28 +332,28 @@ Widget* Widget::findWidget(const std::string& name)
 
 Gfx::PointF Widget::fromWindow(const Gfx::PointF& pos) const
 {
-    if( ! _parent )
+    if( ! _parentWidget )
         return pos;
 
-    Gfx::PointF p = _parent->fromWindow(pos);
+    Gfx::PointF p = _parentWidget->fromWindow(pos);
     return p - _position;
 }
 
 
 Gfx::PointF Widget::toWindow(const Gfx::PointF& pos) const
 {
-    if( ! _parent )
+    if( ! _parentWidget )
         return pos;
 
     Gfx::PointF p = pos + _position;
-    return _parent->toWindow(p);
+    return _parentWidget->toWindow(p);
 }
 
 
 Visual* Widget::onParent() const
 {
-    if(_parent)
-        return _parent;
+    if(_parentWidget)
+        return _parentWidget;
 
     return _window;
 }
@@ -655,12 +655,12 @@ void Widget::onInvalidate()
 
 void Widget::onRepaint(const Gfx::RectF& rect)
 {
-    Visual* p = Visual::parent();
-    if(p)
+    Visual* parentVisual = parent();
+    if(parentVisual)
     {
         Gfx::PointF parentPos = toParent( rect.topLeft() );
         Gfx::RectF parentRect( parentPos, rect.size() );
-        p->repaint(parentRect);
+        parentVisual->repaint(parentRect);
     }
 }
 
@@ -692,7 +692,9 @@ void Widget::onPaintContent(const Gfx::RectF& r)
         // paint widget rect
         Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );
         updateRect.setOrigin(updatePos);
-        paintContent(*w, updateRect);
+        
+        //paintContent(*w, updateRect);
+        w->onPaintContent(updateRect);
     }
 }
 
@@ -706,7 +708,7 @@ void Widget::onRelayout()
 {
     _isLayoutInvalid = true;
 
-    Visual* parentVisual = onParent();
+    Visual* parentVisual = parent();
     if(parentVisual)
         parentVisual->relayout();
 
@@ -748,7 +750,7 @@ const Gfx::RectF Widget::geometry() const
 }
 
 // onMeasure
-Gfx::SizeF Widget::onMeasureContent(const SizePolicy& policy)
+Gfx::SizeF Widget::measure(const SizePolicy& policy)
 {
     //static int nn = 0;
     //std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nn << std::endl;
@@ -798,9 +800,7 @@ Gfx::SizeF Widget::onMeasureContent(const SizePolicy& policy)
             ! widgets().empty() )
         {
             Layouter layouter;
-            Gfx::SizeF prefSize = onMeasure2(layouter, contentPolicy);
-
-            _preferredSize = onMeasure(contentPolicy);
+            _preferredSize = onMeasure(layouter, contentPolicy);
         }
 
         // use fixed height, if size mode is fixed
@@ -827,22 +827,14 @@ Gfx::SizeF Widget::onMeasureContent(const SizePolicy& policy)
     return _preferredSize;
 }
 
-
 // onMeasureContent (widget specific)
-Gfx::SizeF Widget::onMeasure2(Layouter& layouter, const SizePolicy& policy)
-{
-   return Gfx::SizeF(0, 0);
-}
-
-
-// onMeasureContent (widget specific)
-Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Widget::onMeasure(Layouter& layouter, const SizePolicy& policy)
 {
    return Gfx::SizeF(0, 0);
 }
 
 // onLayout
-void Widget::onLayoutContent(const Gfx::RectF& r)
+void Widget::layout(const Gfx::RectF& r)
 {
     //static int nn = 0;
     //std::clog << "LAYOUT: " << typeid(*this).name() << " " << ++nn << std::endl;
@@ -901,14 +893,15 @@ void Widget::onLayoutContent(const Gfx::RectF& r)
 
     if(_isLayoutInvalid)
     {
-        onLayout(rect);
+        Layouter layouter;
+        onLayout(layouter, rect);
     }
 
     _isLayoutInvalid = false;
 }
 
 // onLayoutContent
-void Widget::onLayout(const Gfx::RectF& rect)
+void Widget::onLayout(Layouter& layouter, const Gfx::RectF& rect)
 {
 }
 
@@ -992,10 +985,10 @@ void Widget::onEnableEvent(const EnableEvent& ev)
 
 void Widget::raise()
 {
-    if( ! _parent )
+    if( ! _parentWidget )
         return;
 
-    _parent->onRaise(*this);
+    _parentWidget->onRaise(*this);
 }
 
 
@@ -1155,8 +1148,7 @@ void Widget::mouseEvent(const MouseEvent& ev)
   if( consumed )
      return;
 
-  Widget* parentWidget = this->parent();
-
+  Widget* parentWidget = this->parentWidget();
   if(parentWidget)
   {
       MouseEvent ev2(ev);
@@ -1173,14 +1165,14 @@ void Widget::touchEvent(const TouchEvent& ev)
     if (consumed)
         return;
 
-    Widget* w = this->parent();
-
-    if (w)
+    Widget* parentWidget = this->parentWidget();
+    if(parentWidget)
     {
         TouchEvent ev2(ev);
-        ev2.setId(w->vid());
+        ev2.setId( parentWidget->vid() );
+        
         //Application::instance().loop().commitEvent(ev2);
-        w->touchEvent(ev);
+        parentWidget->touchEvent(ev);
     }
 }
 
@@ -1213,13 +1205,14 @@ void Widget::scrollEvent(const ScrollEvent& ev)
     if(consumed)
         return;
 
-    Widget* w = this->parent();
-    if(w)
+    Widget* parentWidget = this->parentWidget();
+    if(parentWidget)
     {
         ScrollEvent ev2(ev);
-        ev2.setId (w->vid() );
+        ev2.setId( parentWidget->vid() );
+        
         //Application::instance().loop().commitEvent(ev2);
-        w->scrollEvent(ev);
+        parentWidget->scrollEvent(ev);
     }
 }
 

@@ -90,7 +90,7 @@ class PT_HMI_API CheckBox : public Button
         void setRenderer(CheckBoxRenderer* renderer);
     
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& policy);
 
         virtual void onInvalidate();
 

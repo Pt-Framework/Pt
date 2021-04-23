@@ -70,6 +70,10 @@ void PushButton::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
 {
     _icon = icon;
     _iconSize = iconSize;
+    
+    //onIconChanged();
+    //relayout();
+
     invalidate();
 }
 
@@ -286,7 +290,7 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 }
 
 
-Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
+Gfx::SizeF PushButton::onMeasure(Layouter& layouter, const SizePolicy& policy)
 {
     Gfx::Painter _painter( surface() );
     _painter.setFont(_font);
@@ -325,9 +329,9 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 }
 
 
-void PushButton::onLayout(const Gfx::RectF& rect)
+void PushButton::onLayout(Layouter& layouter, const Gfx::RectF& rect)
 {    
-    Base::onLayout(rect);
+    Base::onLayout(layouter, rect);
 
     // bool isInvalid = isLayoutInvalid();
 
@@ -338,12 +342,6 @@ void PushButton::onLayout(const Gfx::RectF& rect)
     //   return;
     // }
 
-    layoutContent();
-}
-
-
-void PushButton::layoutContent()
-{
     double spacing = _picture.empty() || text().empty() ? 0 : _textMetrics.height() * 0.5;
     
     Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
@@ -409,16 +407,11 @@ void PushButton::layoutContent()
 }
 
 
-void PushButton::onInvalidate()
+void PushButton::onIconChanged()
 {
     Application& app = Application::instance();
     const StyleOptions& options = app.styleOptions();
     const Style& style = app.style();
-
-    _brush = foreground();
-    _pen = contour();
-    _textPen = textColor();
-    _font = Gfx::Font(font(), fontSize(), fontStyle());
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<ButtonRenderer>() );
@@ -436,10 +429,40 @@ void PushButton::onInvalidate()
     {
         _picture.clear();
     }
+}
+
+
+void PushButton::onInvalidate()
+{
+    Application& app = Application::instance();
+    const StyleOptions& options = app.styleOptions();
+    const Style& style = app.style();
+
+    _brush = foreground();
+    _pen = contour();
+    _textPen = textColor();
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<ButtonRenderer>() );
+
+    if( ! _renderer )
+        return;
+
+    //// onIconChanged()
+    if( ! _icon.empty() )
+    {
+        const Gfx::SizeF scaledSize = toPhysical(_iconSize);
+        const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
+        _renderer->prepareIcon(*this, options, iconImage, _picture);
+    }
+    else
+    {
+        _picture.clear();
+    }
+    //// onIconChanged()
 
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
-
-    //layoutContent();
 
     Base::onInvalidate();
 }

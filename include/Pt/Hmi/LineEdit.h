@@ -123,7 +123,7 @@ class PT_HMI_API LineEdit : public Control
         void setRenderer(LineEditRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& policy);
 
         virtual void onInvalidate();
 

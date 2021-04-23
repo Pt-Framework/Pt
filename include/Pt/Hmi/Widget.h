@@ -63,7 +63,7 @@ class Widget;
 class Window;
 class Screen;
 
-class PT_HMI_API Widget : public Element
+class PT_HMI_API Widget : public Visual
 {
     friend class Window;
     friend class Layouter;
@@ -81,9 +81,9 @@ class PT_HMI_API Widget : public Element
 
         const Window* window() const;
 
-        Widget* parent();
+        Widget* parentWidget();
 
-        const Widget* parent() const;
+        const Widget* parentWidget() const;
 
         const std::vector<Widget*>& widgets() const;
 
@@ -208,20 +208,16 @@ class PT_HMI_API Widget : public Element
 
     protected:
         // onMeasure
-        virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy);
+        virtual Gfx::SizeF measure(const SizePolicy& policy);
 
         // onMeasureContent (widget specific)
-        virtual Gfx::SizeF onMeasure2(Layouter& layouter, const SizePolicy& policy);
-
-    protected:
-        // onMeasureContent (widget specific)
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& policy);
 
         // onLayout
-        virtual void onLayoutContent(const Gfx::RectF& rect);
+        virtual void layout(const Gfx::RectF& rect);
 
         // onLayoutContent (widget specific)
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onLayout(Layouter& layouter, const Gfx::RectF& rect);
 
     //
     // painting
@@ -375,7 +371,7 @@ class PT_HMI_API Widget : public Element
         
         Screen*                      _screen; 
         Window*                      _window; 
-        Widget*                      _parent; 
+        Widget*                      _parentWidget;
 
         int                          _invalidates;
         bool                         _isLayoutInvalid;
@@ -422,12 +418,17 @@ class Layouter
 
         Gfx::SizeF measure(Widget& w, const SizePolicy& policy)
         {
-            return w.onMeasureContent(policy);
+            return w.measure(policy);
         }
 
         void layout(Widget& w, const Gfx::RectF& r)
         {
-            w.onLayoutContent(r);
+            w.layout(r);
+        }
+
+        void layout(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s)
+        {
+            w.layout( Gfx::RectF(p, s) );
         }
 };
 

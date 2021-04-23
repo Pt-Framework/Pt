@@ -76,9 +76,9 @@ class PT_HMI_API Panel : public Control
 
         virtual void onInvalidate();
 
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onLayout(Layouter& layouter, const Gfx::RectF& rect);
 
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 

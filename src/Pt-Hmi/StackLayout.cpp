@@ -130,9 +130,9 @@ void StackLayout::setCurrent(std::size_t n)
 }
 
 
-Gfx::SizeF StackLayout::onMeasure(const SizePolicy& policy)
+Gfx::SizeF StackLayout::onMeasure(Layouter& layouter, const SizePolicy& policy)
 {
-    Base::onMeasure(policy);
+    Base::onMeasure(layouter, policy);
 
     Gfx::SizeF s;
 
@@ -140,7 +140,7 @@ Gfx::SizeF StackLayout::onMeasure(const SizePolicy& policy)
     for(it = _widgets.begin(); it != _widgets.end(); ++it)
     {
         Widget* item = *it;
-        onMeasureChild(*item, policy);
+        layouter.measure(*item, policy);
         Gfx::SizeF preferredSize = item->preferredSize();
 
         double width = std::max( preferredSize.width(), s.width() );
@@ -153,9 +153,9 @@ Gfx::SizeF StackLayout::onMeasure(const SizePolicy& policy)
 }
 
 
-void StackLayout::onLayout(const Gfx::RectF& rect)
+void StackLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(layouter, rect);
 
     Widget* widget = widgetAt(_current);
 
@@ -171,7 +171,7 @@ void StackLayout::onLayout(const Gfx::RectF& rect)
         size.setWidth( rect.width() - hspace );
         size.setHeight( rect.height() - vspace );
 
-        layoutContent( *widget, pos, size );
+        layouter.layout( *widget, pos, size );
     }
 }
 

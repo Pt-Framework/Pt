@@ -101,7 +101,7 @@ class PT_HMI_API ScrollBar : public Control
 
     protected:
 
-        Gfx::SizeF onMeasure(const SizePolicy& s);;
+        Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& s);;
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 

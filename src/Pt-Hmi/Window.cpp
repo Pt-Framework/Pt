@@ -390,8 +390,8 @@ void Window::setContent(Widget* widget)
     if( ! _mainWidget )
         return;
     
-    if( _mainWidget->parent() )
-        _mainWidget->parent()->remove(*_mainWidget);
+    if( _mainWidget->parentWidget() )
+        _mainWidget->parentWidget()->remove(*_mainWidget);
 
     _mainWidget->setWindow(this);
     _mainWidget->setScreen(_screen);
@@ -721,11 +721,6 @@ void Window::onRelayout()
 }
 
 
-//void Window::setSizePolicy(const SizePolicy& policy)
-//{
-//}
-
-
 void Window::layoutEvent(const LayoutEvent& ev)
 {
     --_layouts;
@@ -736,28 +731,36 @@ void Window::layoutEvent(const LayoutEvent& ev)
     // 1. Pass
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize(_size);
-    onMeasureContent(policy);
+    measure(policy);
 
     // 2. Pass
     Gfx::RectF rect(_position, _size);
-    onLayoutContent(rect);
+    layout(rect);
 }
 
+
+//Gfx::SizeF Window::setSizePolicy(const SizePolicy& policy)
+//{
+//    if(_mainWidget)
+//        return _mainWidget->measure(policy);
+//
+//    return policy.size();
+//}
+
+
 // onMeasure
-Gfx::SizeF Window::onMeasureContent(const SizePolicy& policy)
+Gfx::SizeF Window::measure(const SizePolicy& policy)
 { 
     if( _mainWidget )
     {
-        return _mainWidget->onMeasureContent(policy);
-
-        //return onMeasureChild(*_mainWidget, policy);
+        return _mainWidget->measure(policy);
     }
 
     return policy.size();
 }
 
 // onLayout
-void Window::onLayoutContent(const Gfx::RectF& rect)
+void Window::layout(const Gfx::RectF& rect)
 {
     // TODO: consider moving and resizing the window according to the layout
     //       rect. In resize() and move() only record the new size and 
@@ -766,7 +769,7 @@ void Window::onLayoutContent(const Gfx::RectF& rect)
     if( _mainWidget )
     {
         Gfx::RectF widgetRect( rect.size() );
-        layoutContent(*_mainWidget, widgetRect);
+        _mainWidget->layout(widgetRect);
     }
 }
 
@@ -879,7 +882,10 @@ void Window::onPaintContent(const Gfx::RectF& rect)
 
         // paint main widget rect
         if( ! updateRect.isNull() )
-            paintContent(*widget, updateRect);
+        {
+            //paintContent(*widget, updateRect);
+            widget->onPaintContent(updateRect);
+        }
     }
 }
 

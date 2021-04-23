@@ -97,9 +97,9 @@ void Control::onInvalidate()
 }
 
 
-void Control::onLayout(const Gfx::RectF& rect)
+void Control::onLayout(Layouter& layouter, const Gfx::RectF& rect)
 {
-     Widget::onLayout(rect);
+     Widget::onLayout(layouter, rect);
 }
 
 

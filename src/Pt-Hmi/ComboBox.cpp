@@ -149,9 +149,9 @@ void ComboBox::showPopup()
 {
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
     policy.setWidth( size().width() );
-    policy.setHeight( _maxHeight );
+    policy.setHeight(_maxHeight);
 
-    Gfx::SizeF popupSize = onMeasureChild(_popup, policy);
+    Gfx::SizeF popupSize = _popup.measure(policy);
 
     int maxY = _items.maximumY();
     popupSize.setHeight( std::min<double>(maxY, _maxHeight) );
@@ -322,7 +322,7 @@ void ComboBox::onItemSelected(ListBoxItem& item)
 }
 
 
-Gfx::SizeF ComboBox::onMeasure(const SizePolicy& policy)
+Gfx::SizeF ComboBox::onMeasure(Layouter& layouter, const SizePolicy& policy)
 {
     // TODO: width of widest item?
     double itemsWidth = policy.width();
