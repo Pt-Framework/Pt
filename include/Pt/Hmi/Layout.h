@@ -42,8 +42,17 @@ namespace Hmi {
 
 class PT_HMI_API Layout : public Widget
 {
-  public:
-    Layout();
+    public:
+        Layout();
+
+    protected:
+        Layouter& layouter()
+        {
+            return _layouter;
+        }
+
+    private:
+        Layouter _layouter;
 };
 
 } // namespace

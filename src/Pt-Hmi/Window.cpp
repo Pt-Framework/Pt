@@ -393,7 +393,7 @@ void Window::setContent(Widget* widget)
     if( _mainWidget->parentWidget() )
         _mainWidget->parentWidget()->remove(*_mainWidget);
 
-    _mainWidget->setWindow(this);
+    _mainWidget->setParent(this);
     _mainWidget->setScreen(_screen);
 }
 

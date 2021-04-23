@@ -46,6 +46,7 @@ Widget::Widget()
 : _screen(0)
 , _window(0)
 , _parentWidget(0)
+, _parent(0)
 , _invalidates(0)
 , _isLayoutInvalid(true)
 , _visible(true)
@@ -156,7 +157,7 @@ void Widget::remove(Widget& widget)
         widget.enable(true);
 
     widget.setScreen(0);
-    widget.setParent(0);
+    widget.setParent((Widget*)0);
     widget.setWindow(0);
 
     relayout();
@@ -218,6 +219,19 @@ void Widget::setParent(Widget* parent)
 {
     _parentWidget = parent;
     onParentChanged(parent);
+    
+    _parent = parent;
+}
+
+
+void Widget::setParent(Window* parent)
+{
+    Widget* widget = 0;
+    setParent(widget);
+
+    setWindow(parent);
+
+    _parent = parent;
 }
 
 
@@ -352,10 +366,12 @@ Gfx::PointF Widget::toWindow(const Gfx::PointF& pos) const
 
 Visual* Widget::onParent() const
 {
-    if(_parentWidget)
-        return _parentWidget;
+    //if(_parentWidget)
+    //    return _parentWidget;
 
-    return _window;
+    //return _window;
+
+    return _parent;
 }
 
 

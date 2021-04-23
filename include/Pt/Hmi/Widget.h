@@ -360,6 +360,8 @@ class PT_HMI_API Widget : public Visual
 
         void setParent(Widget* parent);
 
+        void setParent(Window* parent);
+
         void setWindow(Window* window);
 
         Widget* findWidget( const Gfx::PointF& pos, bool input );
@@ -372,6 +374,7 @@ class PT_HMI_API Widget : public Visual
         Screen*                      _screen; 
         Window*                      _window; 
         Widget*                      _parentWidget;
+        Visual*                      _parent;
 
         int                          _invalidates;
         bool                         _isLayoutInvalid;
@@ -407,14 +410,36 @@ class PT_HMI_API Widget : public Visual
 class Layouter
 {
     friend class Widget;
+    friend class Layout;
 
     protected:
         Layouter()
+        : _widget(0)
         {}
+
+        void set(Widget* w)
+        { _widget = w; }
 
     public:
         virtual ~Layouter()
         {}
+
+        Gfx::SizeF measure(const SizePolicy& policy)
+        {
+            return _widget->measure(policy);
+        }
+
+        void layout(const Gfx::RectF& r)
+        {
+            _widget->layout(r);
+        }
+
+
+
+        void layout(const Gfx::PointF& p, const Gfx::SizeF& s)
+        {
+            _widget->layout( Gfx::RectF(p, s) );
+        }
 
         Gfx::SizeF measure(Widget& w, const SizePolicy& policy)
         {
@@ -430,6 +455,9 @@ class Layouter
         {
             w.layout( Gfx::RectF(p, s) );
         }
+
+    private:
+        Widget* _widget;
 };
 
 } // namespace

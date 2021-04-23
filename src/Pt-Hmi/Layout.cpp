@@ -35,6 +35,8 @@ namespace Hmi {
 
 Layout::Layout()
 {
+    _layouter.set(this);
+    
     setAcceptInput(false);
 }
 
