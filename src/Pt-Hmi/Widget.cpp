@@ -46,7 +46,9 @@ Widget::Widget()
 : _screen(0)
 , _window(0)
 , _parentWidget(0)
+, _parentWindow(0)
 , _parent(0)
+, _layouter(0)
 , _invalidates(0)
 , _isLayoutInvalid(true)
 , _visible(true)
@@ -103,6 +105,18 @@ const Window* Widget::window() const
 }
 
 
+Screen* Widget::screen()
+{
+    return _screen;
+}
+
+
+const Screen* Widget::screen() const
+{
+    return _screen;
+}
+
+
 Widget* Widget::parentWidget()
 {
     return _parentWidget;
@@ -117,63 +131,153 @@ const Widget* Widget::parentWidget() const
 
 void Widget::add(Widget& widget)
 {
+    widget.setParent(*this);
+}
+
+
+void Widget::remove(Widget& widget)
+{
     if(widget.parentWidget() == this)
-        return;
+        widget.detach();
+}
 
-    if( widget.parentWidget() )
-        widget.parentWidget()->remove(widget);
 
+void Widget::setParent(Widget& parent)
+{
+    detach();
+    
+    _parentWidget = &parent;
+    _parentWindow = 0;
+    _parent = &parent;
+    _layouter = &parent;
+
+    parent.onAttach(*this);
+
+    setWindow( parent.window() );
+    setScreen( parent.screen() );
+
+    onParentChanged(&parent);
+}
+
+
+void Widget::setParent(Window& parent)
+{
+    detach();
+
+    _parentWidget = 0;
+    _parentWindow = &parent;
+    _parent = &parent;
+    _layouter = &parent;
+
+    parent.onAttach(*this);
+
+    setWindow( &parent );
+    setScreen( parent.screen() );
+
+    onParentChanged(0);
+}
+
+
+void Widget::detach()
+{
+    if(_parentWidget)
+        _parentWidget->onDetach(*this);
+    
+    if(_parentWindow)
+        _parentWindow->onDetach(*this);
+
+    setWindow(0);
+    setScreen(0);
+
+    _parentWidget = 0;
+    _parentWindow = 0;
+    _parent = 0;
+    _layouter = 0;
+
+    onParentChanged(0);
+}
+
+
+void Widget::onAttach(Widget& widget)
+{
     _children.push_back(&widget);
 
-    // disable indirectly, when parent is disabled
+    // disable child if this widget is disabled
     if( ! isEnabled() && widget.isEnabled() )
     {
         EnableEvent eev( widget.vid(), false);
         Application::instance().loop().commitEvent(eev);
     }
 
-    widget.setParent(this);
-    widget.setWindow(_window);
-    widget.setScreen(_screen);
-
     relayout();
-    widget.update();
 
     onAddWidget(widget);
 }
 
 
-void Widget::remove(Widget& widget)
+void Widget::onDetach(Widget& widget)
 {
     std::vector<Widget*>::iterator it;
     it = std::find(_children.begin(), _children.end(), &widget);
-    if( it == _children.end() )
-        return;
-
-    _children.erase(it);
+    if( it != _children.end() )
+        _children.erase(it);
 
     // enable when indirectly disabled
     if( ! widget._enabledState && widget._enabled)
         widget.enable(true);
 
-    widget.setScreen(0);
-    widget.setParent((Widget*)0);
-    widget.setWindow(0);
-
     relayout();
-    update();
 
     onRemoveWidget(widget);
 }
 
 
-void Widget::onSetWindow(Window* w)
+void Widget::setWindow(Window* window)
 {
+    if(_window == window)
+        return;
+
+    if(_window)
+        _window->removeWidget(*this);
+
+    _window = window;
+
+    if( _window )
+        _window->addWidget(*this);
+
+    // this serves as the initial invalidate
+    invalidate();
+
+    // previous relayouts did not work without parent window
+    relayout();
+
+    std::vector<Widget*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+        (*it)->setWindow(window);
+
+    onSetWindow(window);
 }
 
 
-void Widget::onSetScreen(Screen* s)
+void Widget::setScreen(Screen* screen)
 {
+    if(_screen == screen)
+        return;
+
+    _screen = screen;
+
+    invalidate();
+    relayout();
+
+    _margin = align(_margin);
+    _padding = align(_padding);
+
+    _sizePolicy.setSize( align( _sizePolicy.size() ) );
+
+    for (size_t i = 0; i < _children.size(); ++i)
+        _children[i]->setScreen(screen);
+
+    onSetScreen(screen);
 }
 
 
@@ -192,70 +296,13 @@ void Widget::onParentChanged(Widget* w)
 }
 
 
-void Widget::setScreen(Screen* screen)
+void Widget::onSetWindow(Window* w)
 {
-    if(_screen == screen)
-        return;
-
-    _screen = screen;
-
-    invalidate();
-
-    relayout();
-
-    _margin = align(_margin);
-    _padding = align(_padding);
-
-    _sizePolicy.setSize( align( _sizePolicy.size() ) );
-
-    for (size_t i = 0; i < _children.size(); ++i)
-        _children[i]->setScreen(screen);
-
-    onSetScreen(screen);
 }
 
 
-void Widget::setParent(Widget* parent)
+void Widget::onSetScreen(Screen* s)
 {
-    _parentWidget = parent;
-    onParentChanged(parent);
-    
-    _parent = parent;
-}
-
-
-void Widget::setParent(Window* parent)
-{
-    Widget* widget = 0;
-    setParent(widget);
-
-    setWindow(parent);
-
-    _parent = parent;
-}
-
-
-void Widget::setWindow(Window* window)
-{
-    if(_window)
-        _window->removeWidget(*this);
-
-    _window = window;
-
-    std::vector<Widget*>::iterator it;
-    for(it = _children.begin(); it != _children.end(); ++it)
-        (*it)->setWindow(window);
-
-    if( _window )
-        _window->addWidget(*this);
-
-    // this serves as the initial invalidate
-    invalidate();
-
-    // previous relayouts did not work without parent window
-    relayout();
-
-    onSetWindow(window);
 }
 
 
@@ -724,9 +771,12 @@ void Widget::onRelayout()
 {
     _isLayoutInvalid = true;
 
-    Visual* parentVisual = parent();
-    if(parentVisual)
-        parentVisual->relayout();
+    // Visual* parentVisual = parent();
+    // if(parentVisual)
+    //     parentVisual->relayout();
+
+    if(_layouter)
+        _layouter->relayout();
 
     //Window* parentWindow = window();
     //Widget* parentWidget = parent();
@@ -947,8 +997,11 @@ void Widget::show(bool s)
 
     _visible = s;
 
-    if( parent() )
-        parent()->relayout();
+    // if( parent() )
+    //     parent()->relayout();
+
+    if( _layouter )
+        _layouter->relayout();
 
     ShowEvent ev(vid(), s);
     Application::instance().loop().commitEvent(ev);
@@ -1059,8 +1112,11 @@ void Widget::setMargin(const Spacing& s)
 {
     _margin = align(s);
 
-    if( parent() )
-       parent()->relayout();
+    //if( parent() )
+    //   parent()->relayout();
+
+    if( _layouter )
+        _layouter->relayout();
 }
 
 

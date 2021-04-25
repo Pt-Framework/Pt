@@ -65,6 +65,7 @@ class Screen;
 class Layouter;
 
 class PT_HMI_API Widget : public Visual
+                        , public LayoutManager
 {
     friend class Window;
     friend class Layouter;
@@ -81,6 +82,10 @@ class PT_HMI_API Widget : public Visual
         Window* window();
 
         const Window* window() const;
+
+        Screen* screen();
+
+        const Screen* screen() const;
 
         Widget* parentWidget();
 
@@ -357,13 +362,19 @@ class PT_HMI_API Widget : public Visual
         virtual void onLeaveEvent(const LeaveEvent& ev);
 
     private:
-        void setScreen(Screen* screen);
+        void setParent(Widget& parent);
 
-        void setParent(Widget* parent);
+        void setParent(Window& parent);
 
-        void setParent(Window* parent);
+        void detach();
+
+        void onAttach(Widget& widget);
+
+        void onDetach(Widget& widget);
 
         void setWindow(Window* window);
+
+        void setScreen(Screen* screen);
 
         Widget* findWidget( const Gfx::PointF& pos, bool input );
 
@@ -375,7 +386,9 @@ class PT_HMI_API Widget : public Visual
         Screen*                      _screen; 
         Window*                      _window; 
         Widget*                      _parentWidget;
+        Window*                      _parentWindow;
         Visual*                      _parent;
+        LayoutManager*               _layouter;
 
         int                          _invalidates;
         bool                         _isLayoutInvalid;
@@ -415,32 +428,11 @@ class Layouter
 
     protected:
         Layouter()
-        : _widget(0)
         {}
-
-        void set(Widget* w)
-        { _widget = w; }
 
     public:
         virtual ~Layouter()
         {}
-
-        Gfx::SizeF measure(const SizePolicy& policy)
-        {
-            return _widget->measure(policy);
-        }
-
-        void layout(const Gfx::RectF& r)
-        {
-            _widget->layout(r);
-        }
-
-
-
-        void layout(const Gfx::PointF& p, const Gfx::SizeF& s)
-        {
-            _widget->layout( Gfx::RectF(p, s) );
-        }
 
         Gfx::SizeF measure(Widget& w, const SizePolicy& policy)
         {
@@ -456,9 +448,6 @@ class Layouter
         {
             w.layout( Gfx::RectF(p, s) );
         }
-
-    private:
-        Widget* _widget;
 };
 
 } // namespace

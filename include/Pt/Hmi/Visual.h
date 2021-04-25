@@ -143,15 +143,6 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         virtual double onScaleFactor() const = 0;
 
     public:
-        void relayout()
-        {
-            onRelayout();
-        }
-
-    protected:
-        virtual void onRelayout() = 0;
-
-    public:
         void repaint()
         {
             Gfx::RectF rect( Gfx::PointF(0, 0), size() );
@@ -278,6 +269,28 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
     private:
         Pt::uint64_t _vid;
         std::string  _name;
+};
+
+class LayoutManager
+{
+    friend class Widget;
+    friend class Layout;
+
+    protected:
+        LayoutManager()
+        {}
+
+    public:
+        virtual ~LayoutManager()
+        {}
+
+        void relayout()
+        {
+            onRelayout();
+        }
+
+    protected:
+        virtual void onRelayout() = 0;
 };
 
 } // namespace

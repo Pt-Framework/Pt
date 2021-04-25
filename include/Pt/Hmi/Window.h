@@ -63,6 +63,7 @@ class MainWindowImpl;
 class WindowStateEvent;
 
 class PT_HMI_API Window : public WindowBase
+                        , public LayoutManager
 {
   friend class Widget; 
  
@@ -90,6 +91,10 @@ class PT_HMI_API Window : public WindowBase
     //WindowBase* parent();
 
     //const WindowBase* parent() const;
+
+    Screen* screen();
+
+    const Screen* screen() const;
 
     Window& mainWindow();
 
@@ -333,6 +338,10 @@ class PT_HMI_API Window : public WindowBase
     void deinit();
 
     void setParent(Window* parent);
+
+    void onAttach(Widget& widget);
+
+    void onDetach(Widget& widget);
 
     void addWidget(Widget& w);
 

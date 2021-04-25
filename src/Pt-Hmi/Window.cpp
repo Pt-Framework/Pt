@@ -265,6 +265,18 @@ void Window::onDeinit(Window& w)
 // }
 
 
+Screen* Window::screen()
+{
+    return _screen;
+}
+
+
+const Screen* Window::screen() const
+{
+    return _screen;
+}
+
+
 Window& Window::mainWindow()
 {
     Window* mainWindow = this;
@@ -380,21 +392,55 @@ const Widget* Window::content()  const
 void Window::setContent(Widget* widget)
 {
     if(_mainWidget)
-    {
-        _mainWidget->setScreen(0);
-        _mainWidget->setWindow(0);
-    }
+        _mainWidget->detach();
 
-    _mainWidget = widget;
+    if(widget)
+        widget->setParent(*this);
+}
 
-    if( ! _mainWidget )
-        return;
-    
-    if( _mainWidget->parentWidget() )
-        _mainWidget->parentWidget()->remove(*_mainWidget);
 
-    _mainWidget->setParent(this);
-    _mainWidget->setScreen(_screen);
+void Window::onAttach(Widget& widget)
+{
+    _mainWidget = &widget;
+}
+
+
+void Window::onDetach(Widget& widget)
+{
+    if(_mainWidget == & widget)
+        _mainWidget = 0;
+}
+
+
+void Window::addWidget(Widget& w)
+{
+    addFocusWidget(w);
+
+    setShortcut( w, w.shortcut() );
+    setMnemonic( w, w.mnemonic() );
+
+    onAddWidget(w);
+}
+
+
+void Window::removeWidget(Widget& w)
+{
+    // TODO: do this in Widget's destructor
+    if( Application::instance().pointerWidget() == &w )
+        Application::instance().setPointerWidget(0);
+
+    if(_mainWidget == &w)
+        _mainWidget = 0;
+
+    if( _focusWidget == &w )
+        setFocusWidget(0);
+
+    removeFocusWidget(w);
+
+    setShortcut(w, 0);
+    setMnemonic(w, 0);
+
+    onRemoveWidget(w);
 }
 
 
@@ -451,38 +497,6 @@ Widget* Window::findWidget(Pt::uint64_t vid)
         return _mainWidget;
 
     return _mainWidget->findWidget(vid);
-}
-
-
-void Window::addWidget(Widget& w)
-{
-    addFocusWidget(w);
-
-    setShortcut( w, w.shortcut() );
-    setMnemonic( w, w.mnemonic() );
-
-    onAddWidget(w);
-}
-
-
-void Window::removeWidget(Widget& w)
-{
-    // TODO: do this in Widget's destructor
-    if( Application::instance().pointerWidget() == &w )
-        Application::instance().setPointerWidget(0);
-
-    if(_mainWidget == &w)
-        _mainWidget = 0;
-
-    if( _focusWidget == &w )
-        setFocusWidget(0);
-
-    removeFocusWidget(w);
-
-    setShortcut(w, 0);
-    setMnemonic(w, 0);
-
-    onRemoveWidget(w);
 }
 
 
