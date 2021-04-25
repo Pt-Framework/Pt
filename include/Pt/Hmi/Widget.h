@@ -62,6 +62,7 @@ namespace Hmi {
 class Widget;
 class Window;
 class Screen;
+class Layouter;
 
 class PT_HMI_API Widget : public Visual
 {
