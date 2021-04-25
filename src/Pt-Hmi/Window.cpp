@@ -395,7 +395,10 @@ void Window::setContent(Widget* widget)
         _mainWidget->detach();
 
     if(widget)
+    {
         widget->setParent(*this);
+        onAttach(*widget);
+    }
 }
 
 
@@ -791,13 +794,21 @@ void Window::onRepaint(const Gfx::RectF& rect)
 
     _damageRect.unify(rect);
 
-    Visual* p = Visual::parent();
-    if(p)
-    {
-        Gfx::PointF parentPos = toParent( rect.topLeft() );
-        Gfx::RectF parentRect( parentPos, rect.size() );
-        p->repaint(parentRect);
-    }
+    // Visual* p = Visual::parent();
+    // if(p)
+    // {
+    //     Gfx::PointF parentPos = toParent( rect.topLeft() );
+    //     Gfx::RectF parentRect( parentPos, rect.size() );
+    //     p->repaint(parentRect);
+    // }
+
+     Gfx::PointF parentPos = toParent( rect.topLeft() );
+     Gfx::RectF parentRect( parentPos, rect.size() );
+
+    if(_parentWindow)
+       _parentWindow->repaint(parentRect);
+    else if(_screen)
+       _screen->repaint(parentRect);
 }
 
 

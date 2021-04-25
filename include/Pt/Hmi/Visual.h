@@ -142,20 +142,20 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
 
         virtual double onScaleFactor() const = 0;
 
-    public:
-        void repaint()
-        {
-            Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-            onRepaint(rect);
-        }
+    // public:
+    //     void repaint()
+    //     {
+    //         Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+    //         onRepaint(rect);
+    //     }
 
-        void repaint(const Gfx::RectF& rect)
-        {
-            onRepaint(rect);
-        }
+    //     void repaint(const Gfx::RectF& rect)
+    //     {
+    //         onRepaint(rect);
+    //     }
 
-    protected:
-        virtual void onRepaint(const Gfx::RectF& rect) = 0;
+    //protected:
+    //    virtual void onRepaint(const Gfx::RectF& rect) = 0;
 
     public:
         Gfx::PointF toPhysical(const Gfx::PointF& p) const
@@ -271,6 +271,8 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         std::string  _name;
 };
 
+class Widget;
+
 class LayoutManager
 {
     friend class Widget;
@@ -280,17 +282,26 @@ class LayoutManager
         LayoutManager()
         {}
 
+        // void add(Widget& widget);
+
+        // void remove(Widget& widget);
+
     public:
         virtual ~LayoutManager()
         {}
 
-        void relayout()
-        {
-            onRelayout();
-        }
+        // virtual void onAttach(Widget& widget) = 0;
 
-    protected:
-        virtual void onRelayout() = 0;
+        // virtual void onDetach(Widget& widget) = 0;
+
+
+        // void relayout()
+        // {
+        //     onRelayout();
+        // }
+
+    //protected:
+    //    virtual void onRelayout() = 0;
 };
 
 } // namespace

@@ -139,12 +139,23 @@ class PT_HMI_API Window : public WindowBase
 
     void invalidate();
 
-    //void repaint();
 
-    //void repaint(const Gfx::RectF& rect);
+    void relayout()
+    {
+        onRelayout();
+    }
 
-    
-    //void relayout();
+
+    void repaint()
+    {
+        Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+        onRepaint(rect);
+    }
+
+    void repaint(const Gfx::RectF& rect)
+    {
+        onRepaint(rect);
+    }
 
 
     bool isActive() const;

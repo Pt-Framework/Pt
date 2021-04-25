@@ -69,6 +69,7 @@ class PT_HMI_API Widget : public Visual
 {
     friend class Window;
     friend class Layouter;
+    friend class LayoutManager;
 
     public:
         Widget();
@@ -172,11 +173,21 @@ class PT_HMI_API Widget : public Visual
 
         void invalidate();
 
-        //void relayout();
+        void relayout()
+        {
+            onRelayout();
+        }
 
-        //void repaint();
+        void repaint()
+        {
+            Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+            onRepaint(rect);
+        }
 
-        //void repaint(const Gfx::RectF& rect);
+        void repaint(const Gfx::RectF& rect)
+        {
+            onRepaint(rect);
+        }
 
       public:
         bool isVisible() const;
@@ -365,6 +376,8 @@ class PT_HMI_API Widget : public Visual
         void setParent(Widget& parent);
 
         void setParent(Window& parent);
+
+        void setParent2(LayoutManager& parent);
 
         void detach();
 

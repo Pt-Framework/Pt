@@ -127,6 +127,7 @@ const Widget* Widget::parentWidget() const
 
 void Widget::add(Widget& widget)
 {
+    onAttach(widget);
     widget.setParent(*this);
 }
 
@@ -138,6 +139,37 @@ void Widget::remove(Widget& widget)
 }
 
 
+// void LayoutManager::add(Widget& widget)
+// {
+//     widget.setParent2(*this);
+
+//     onAttach(widget);
+// }
+
+
+// void LayoutManager::remove(Widget& widget)
+// {
+//     if(widget.parentWidget() == this)
+//         widget.detach();
+// }
+
+
+// void Widget::setParent2(LayoutManager& parent)
+// {
+//     detach();
+    
+//     //_parentWidget = &parent;
+//     //_parentWindow = 0;
+//     //_parent = &parent;
+//     _layouter = &parent;
+
+//     //setWindow( parent.window() );
+//     //setScreen( parent.screen() );
+
+//     onParentChanged(&parent);
+// }
+
+
 void Widget::setParent(Widget& parent)
 {
     detach();
@@ -147,7 +179,7 @@ void Widget::setParent(Widget& parent)
     _parent = &parent;
     _layouter = &parent;
 
-    parent.onAttach(*this);
+    //parent.onAttach(*this);
 
     setWindow( parent.window() );
     setScreen( parent.screen() );
@@ -165,7 +197,7 @@ void Widget::setParent(Window& parent)
     _parent = &parent;
     _layouter = &parent;
 
-    parent.onAttach(*this);
+    //parent.onAttach(*this);
 
     setWindow( &parent );
     setScreen( parent.screen() );
@@ -714,13 +746,22 @@ void Widget::onInvalidate()
 
 void Widget::onRepaint(const Gfx::RectF& rect)
 {
-    Visual* parentVisual = parent();
-    if(parentVisual)
-    {
-        Gfx::PointF parentPos = toParent( rect.topLeft() );
-        Gfx::RectF parentRect( parentPos, rect.size() );
-        parentVisual->repaint(parentRect);
-    }
+    // Visual* parentVisual = parent();
+    // if(parentVisual)
+    // {
+    //     Gfx::PointF parentPos = toParent( rect.topLeft() );
+    //     Gfx::RectF parentRect( parentPos, rect.size() );
+    //     parentVisual->repaint(parentRect);
+    // }
+
+    Gfx::PointF parentPos = toParent( rect.topLeft() );
+    Gfx::RectF parentRect( parentPos, rect.size() );
+
+    if(_parentWidget)
+       _parentWidget->repaint(parentRect);
+    
+    if(_parentWindow)
+       _parentWindow->repaint(parentRect);
 }
 
 // onPaint
@@ -771,20 +812,17 @@ void Widget::onRelayout()
     // if(parentVisual)
     //     parentVisual->relayout();
 
-    if(_layouter)
-        _layouter->relayout();
+    //if(_layouter)
+    //    _layouter->relayout();
 
     //Window* parentWindow = window();
     //Widget* parentWidget = parent();
     
-    //if(parentWidget)
-    //{
-    //    parentWidget->relayout();
-    //}
-    //else if(parentWindow)
-    //{
-    //    parentWindow->relayout();
-    //}
+    if(_parentWidget)
+       _parentWidget->relayout();
+    
+    if(_parentWindow)
+       _parentWindow->relayout();
 }
 
 
@@ -993,11 +1031,10 @@ void Widget::show(bool s)
 
     _visible = s;
 
-    // if( parent() )
-    //     parent()->relayout();
+    relayout();
 
-    if( _layouter )
-        _layouter->relayout();
+    //if( _layouter )
+    //    _layouter->relayout();
 
     ShowEvent ev(vid(), s);
     Application::instance().loop().commitEvent(ev);
@@ -1108,11 +1145,10 @@ void Widget::setMargin(const Spacing& s)
 {
     _margin = align(s);
 
-    //if( parent() )
-    //   parent()->relayout();
+    relayout();
 
-    if( _layouter )
-        _layouter->relayout();
+    //if( _layouter )
+    //    _layouter->relayout();
 }
 
 
