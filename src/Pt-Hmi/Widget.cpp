@@ -85,11 +85,7 @@ Widget::~Widget()
     while( ! _children.empty() )
         remove( *_children.back() );
 
-    if(_parentWidget)
-        _parentWidget->remove(*this);
-
-    if(_window)
-        _window->removeWidget(*this);
+    detach();
 }
 
 

@@ -429,9 +429,6 @@ void Window::removeWidget(Widget& w)
     if( Application::instance().pointerWidget() == &w )
         Application::instance().setPointerWidget(0);
 
-    if(_mainWidget == &w)
-        _mainWidget = 0;
-
     if( _focusWidget == &w )
         setFocusWidget(0);
 
