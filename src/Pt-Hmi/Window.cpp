@@ -98,7 +98,8 @@ Window::Window(Window* parent, Window::Type type)
 
 Window::~Window()
 {
-    setContent(0);
+    if(_mainWidget)
+        LayoutManager::remove(*_mainWidget);
 
     while( ! _windows.empty() )
        remove( *_windows.back() );
@@ -392,19 +393,29 @@ const Widget* Window::content()  const
 void Window::setContent(Widget* widget)
 {
     if(_mainWidget)
-        _mainWidget->detach();
+        LayoutManager::remove(*_mainWidget);
 
     if(widget)
-    {
-        widget->setParent(*this);
-        onAttach(*widget);
-    }
+        LayoutManager::add(*widget);
+}
+
+
+Window* Window::onGetWindow()
+{
+    return this;
+}
+
+
+Screen* Window::onGetScreen()
+{
+    return _screen;
 }
 
 
 void Window::onAttach(Widget& widget)
 {
     _mainWidget = &widget;
+    relayout();
 }
 
 
@@ -412,6 +423,8 @@ void Window::onDetach(Widget& widget)
 {
     if(_mainWidget == & widget)
         _mainWidget = 0;
+
+    relayout();
 }
 
 

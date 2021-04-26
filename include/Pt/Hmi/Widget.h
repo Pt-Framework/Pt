@@ -173,10 +173,6 @@ class PT_HMI_API Widget : public Visual
 
         void invalidate();
 
-        void relayout()
-        {
-            onRelayout();
-        }
 
         void repaint()
         {
@@ -292,9 +288,9 @@ class PT_HMI_API Widget : public Visual
         Pt::Signal<const Pt::Event&>& eventReady();
 
     protected:
-        void add(Widget& w);
+        //void add(Widget& w);
 
-        void remove(Widget& w);
+        //void remove(Widget& w);
 
     protected:
         virtual Visual* onParent() const;
@@ -373,17 +369,16 @@ class PT_HMI_API Widget : public Visual
         virtual void onLeaveEvent(const LeaveEvent& ev);
 
     private:
-        void setParent(Widget& parent);
+        Window* onGetWindow();
 
-        void setParent(Window& parent);
-
-        void setParent2(LayoutManager& parent);
-
-        void detach();
+        Screen* onGetScreen();
 
         void onAttach(Widget& widget);
 
         void onDetach(Widget& widget);
+
+    private:
+        void setParent(LayoutManager* parent);
 
         void setWindow(Window* window);
 

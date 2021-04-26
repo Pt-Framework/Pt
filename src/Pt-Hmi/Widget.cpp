@@ -85,7 +85,8 @@ Widget::~Widget()
     while( ! _children.empty() )
         remove( *_children.back() );
 
-    detach();
+    if(_layouter)
+        _layouter->remove(*this);
 }
 
 
@@ -125,104 +126,15 @@ const Widget* Widget::parentWidget() const
 }
 
 
-void Widget::add(Widget& widget)
+Window* Widget::onGetWindow()
 {
-    onAttach(widget);
-    widget.setParent(*this);
+    return _window;
 }
 
 
-void Widget::remove(Widget& widget)
+Screen* Widget::onGetScreen()
 {
-    if(widget.parentWidget() == this)
-        widget.detach();
-}
-
-
-// void LayoutManager::add(Widget& widget)
-// {
-//     widget.setParent2(*this);
-
-//     onAttach(widget);
-// }
-
-
-// void LayoutManager::remove(Widget& widget)
-// {
-//     if(widget.parentWidget() == this)
-//         widget.detach();
-// }
-
-
-// void Widget::setParent2(LayoutManager& parent)
-// {
-//     detach();
-    
-//     //_parentWidget = &parent;
-//     //_parentWindow = 0;
-//     //_parent = &parent;
-//     _layouter = &parent;
-
-//     //setWindow( parent.window() );
-//     //setScreen( parent.screen() );
-
-//     onParentChanged(&parent);
-// }
-
-
-void Widget::setParent(Widget& parent)
-{
-    detach();
-    
-    _parentWidget = &parent;
-    _parentWindow = 0;
-    _parent = &parent;
-    _layouter = &parent;
-
-    //parent.onAttach(*this);
-
-    setWindow( parent.window() );
-    setScreen( parent.screen() );
-
-    onParentChanged(&parent);
-}
-
-
-void Widget::setParent(Window& parent)
-{
-    detach();
-
-    _parentWidget = 0;
-    _parentWindow = &parent;
-    _parent = &parent;
-    _layouter = &parent;
-
-    //parent.onAttach(*this);
-
-    setWindow( &parent );
-    setScreen( parent.screen() );
-
-    onParentChanged(0);
-}
-
-
-void Widget::detach()
-{
-    if(_parentWidget)
-        _parentWidget->onDetach(*this);
-    
-    if(_parentWindow)
-        _parentWindow->onDetach(*this);
-
-    setWindow(0);
-    setScreen(0);
-
-    _parentWidget = 0;
-    _parentWindow = 0;
-    _parent = 0;
-    _layouter = 0;
-
-    onParentChanged(0);
+    return _screen;
 }
 
 
@@ -257,6 +169,38 @@ void Widget::onDetach(Widget& widget)
     relayout();
 
     onRemoveWidget(widget);
+}
+
+
+void Widget::setParent(LayoutManager* parent)
+{
+    setWindow(0);
+    setScreen(0);
+
+    _parentWidget = 0;
+    _parentWindow = 0;
+    _parent = 0;
+    _layouter = 0;
+
+    onParentChanged(0);
+
+    if( ! parent )
+        return;
+    
+    _parentWidget = dynamic_cast<Widget*>(parent);
+    if(_parentWidget)
+        _parent = _parentWidget;
+
+    _parentWindow = dynamic_cast<Window*>(parent);
+    if(_parentWindow)
+        _parent = _parentWindow;
+    
+    _layouter = parent;
+
+    setWindow( parent->window() );
+    setScreen( parent->screen() );
+
+    onParentChanged(_parentWidget);
 }
 
 
@@ -746,22 +690,22 @@ void Widget::onInvalidate()
 
 void Widget::onRepaint(const Gfx::RectF& rect)
 {
-    // Visual* parentVisual = parent();
-    // if(parentVisual)
-    // {
-    //     Gfx::PointF parentPos = toParent( rect.topLeft() );
-    //     Gfx::RectF parentRect( parentPos, rect.size() );
-    //     parentVisual->repaint(parentRect);
-    // }
+     Visual* parentVisual = parent();
+     if(parentVisual)
+     {
+         Gfx::PointF parentPos = toParent( rect.topLeft() );
+         Gfx::RectF parentRect( parentPos, rect.size() );
+         parentVisual->repaint(parentRect);
+     }
 
-    Gfx::PointF parentPos = toParent( rect.topLeft() );
-    Gfx::RectF parentRect( parentPos, rect.size() );
+    //Gfx::PointF parentPos = toParent( rect.topLeft() );
+    //Gfx::RectF parentRect( parentPos, rect.size() );
 
-    if(_parentWidget)
-       _parentWidget->repaint(parentRect);
-    
-    if(_parentWindow)
-       _parentWindow->repaint(parentRect);
+    //if(_parentWidget)
+    //   _parentWidget->repaint(parentRect);
+    //
+    //if(_parentWindow)
+    //   _parentWindow->repaint(parentRect);
 }
 
 // onPaint
@@ -812,17 +756,16 @@ void Widget::onRelayout()
     // if(parentVisual)
     //     parentVisual->relayout();
 
-    //if(_layouter)
-    //    _layouter->relayout();
 
-    //Window* parentWindow = window();
-    //Widget* parentWidget = parent();
-    
-    if(_parentWidget)
-       _parentWidget->relayout();
-    
-    if(_parentWindow)
-       _parentWindow->relayout();
+    if(_layouter)
+        _layouter->relayout();
+
+
+    //if(_parentWidget)
+    //   _parentWidget->relayout();
+    //
+    //if(_parentWindow)
+    //   _parentWindow->relayout();
 }
 
 

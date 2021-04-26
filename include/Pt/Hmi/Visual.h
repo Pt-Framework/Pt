@@ -142,20 +142,20 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
 
         virtual double onScaleFactor() const = 0;
 
-    // public:
-    //     void repaint()
-    //     {
-    //         Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-    //         onRepaint(rect);
-    //     }
+     public:
+         void repaint()
+         {
+             Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+             onRepaint(rect);
+         }
 
-    //     void repaint(const Gfx::RectF& rect)
-    //     {
-    //         onRepaint(rect);
-    //     }
+         void repaint(const Gfx::RectF& rect)
+         {
+             onRepaint(rect);
+         }
 
-    //protected:
-    //    virtual void onRepaint(const Gfx::RectF& rect) = 0;
+    protected:
+        virtual void onRepaint(const Gfx::RectF& rect) = 0;
 
     public:
         Gfx::PointF toPhysical(const Gfx::PointF& p) const
@@ -272,36 +272,42 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
 };
 
 class Widget;
+class Window;
+class Screen;
 
 class LayoutManager
 {
     friend class Widget;
-    friend class Layout;
 
     protected:
         LayoutManager()
         {}
 
-        // void add(Widget& widget);
-
-        // void remove(Widget& widget);
-
     public:
         virtual ~LayoutManager()
         {}
 
-        // virtual void onAttach(Widget& widget) = 0;
+        Window* window();
 
-        // virtual void onDetach(Widget& widget) = 0;
+        Screen* screen();
 
+        void relayout();
 
-        // void relayout()
-        // {
-        //     onRelayout();
-        // }
+    protected:
+        void add(Widget& widget);
 
-    //protected:
-    //    virtual void onRelayout() = 0;
+        void remove(Widget& widget);
+
+    private:
+        virtual Window* onGetWindow() = 0;
+
+        virtual Screen* onGetScreen() = 0;
+
+        virtual void onAttach(Widget& widget) = 0;
+
+        virtual void onDetach(Widget& widget) = 0;
+
+        virtual void onRelayout() = 0;
 };
 
 } // namespace

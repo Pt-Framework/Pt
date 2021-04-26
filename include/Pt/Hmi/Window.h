@@ -140,12 +140,6 @@ class PT_HMI_API Window : public WindowBase
     void invalidate();
 
 
-    void relayout()
-    {
-        onRelayout();
-    }
-
-
     void repaint()
     {
         Gfx::RectF rect( Gfx::PointF(0, 0), size() );
@@ -349,6 +343,10 @@ class PT_HMI_API Window : public WindowBase
     void deinit();
 
     void setParent(Window* parent);
+
+    Window* onGetWindow();
+
+    Screen* onGetScreen();
 
     void onAttach(Widget& widget);
 

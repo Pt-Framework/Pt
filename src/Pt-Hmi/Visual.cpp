@@ -28,11 +28,16 @@
 */
 
 #include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
 namespace Hmi {
+
+///////////////////////////////////////////////////////////////////////
+// Visual
+///////////////////////////////////////////////////////////////////////
 
 Visual::Visual()
 : _vid( Application::instance().makeId()  )
@@ -50,6 +55,46 @@ Visual::~Visual()
 void Visual::processEvent(const Pt::Event& ev)
 {
     this->onEvent(ev); 
+}
+
+///////////////////////////////////////////////////////////////////////
+// LayoutManager
+///////////////////////////////////////////////////////////////////////
+
+Window* LayoutManager::window()
+{
+    return onGetWindow(); 
+}
+
+Screen* LayoutManager::screen()
+{
+    return onGetScreen(); 
+}
+
+
+void LayoutManager::add(Widget& widget)
+{
+    if(widget._layouter)
+        widget._layouter->remove(widget);
+
+    onAttach(widget);
+    widget.setParent(this);
+}
+
+
+void LayoutManager::remove(Widget& widget)
+{
+    if(widget._layouter != this)
+        return;
+
+    onDetach(widget);
+    widget.setParent(0);
+}
+
+
+void LayoutManager::relayout()
+{
+    onRelayout();
 }
 
 } // namespace
