@@ -75,7 +75,7 @@ Window::Window(Window* parent, Window::Type type)
     _windowManager.init(*this);
 
     _eventReady += Pt::slot(*this, &Window::onKeyEvent);
-    _eventReady += Pt::slot(*this, &Window::mouseEvent);
+    _eventReady += Pt::slot(*this, &Window::processMouseEvent);
     _eventReady += Pt::slot(*this, &Window::onTouchEvent);
     _eventReady += Pt::slot(*this, &Window::onScrollEvent);
     _eventReady += Pt::slot(*this, &Window::paintEvent);
@@ -400,6 +400,12 @@ void Window::setContent(Widget* widget)
 }
 
 
+Visual* Window::onGetVisual()
+{
+    return this;
+}
+
+
 Window* Window::onGetWindow()
 {
     return this;
@@ -425,6 +431,17 @@ void Window::onDetach(Widget& widget)
         _mainWidget = 0;
 
     relayout();
+}
+
+
+void Window::onRaise(Widget& widget)
+{
+}
+
+
+Gfx::PointF Window::onToWindow(const Widget& child, const Gfx::PointF& pos) const
+{
+    return child.position() + pos;
 }
 
 
@@ -1466,9 +1483,16 @@ void Window::onEvent(const Pt::Event& ev)
 }
 
 
-void Window::mouseEvent( const MouseEvent& ev )
+void Window::mouseEvent(const MouseEvent& ev)
 {
-    bool consumend = onMouseEvent(ev);
+}
+
+
+void Window::processMouseEvent( const MouseEvent& ev )
+{
+    bool consumed = onMouseEvent(ev);
+    if(consumed)
+        return;
 }
 
 

@@ -307,7 +307,7 @@ class PT_HMI_API Window : public WindowBase
   protected:
     virtual void onEvent(const Pt::Event& ev);
 
-    void mouseEvent( const MouseEvent& ev );
+    void processMouseEvent( const MouseEvent& ev );
 
     virtual bool onMouseEvent( const MouseEvent& ev );
 
@@ -344,14 +344,25 @@ class PT_HMI_API Window : public WindowBase
 
     void setParent(Window* parent);
 
-    Window* onGetWindow();
+  private:
+    virtual Visual* onGetVisual();
 
-    Screen* onGetScreen();
+    virtual Window* onGetWindow();
 
-    void onAttach(Widget& widget);
+    virtual Screen* onGetScreen();
 
-    void onDetach(Widget& widget);
+    virtual void onAttach(Widget& widget);
 
+    virtual void onDetach(Widget& widget);
+
+    virtual void onRaise(Widget& widget);
+
+    virtual Gfx::PointF onToWindow(const Widget& child, 
+                                   const Gfx::PointF& pos) const;
+
+    virtual void mouseEvent( const MouseEvent& ev );
+
+  private:
     void addWidget(Widget& w);
 
     void removeWidget(Widget& w);

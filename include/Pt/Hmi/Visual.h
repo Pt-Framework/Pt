@@ -39,6 +39,7 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/Spacing.h>
 #include <Pt/Hmi/SizePolicy.h>
+#include <Pt/Hmi/MouseEvent.h>
 #include <string>
 
 namespace Pt {
@@ -130,6 +131,9 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             Gfx::PointF parentPos = _parent->fromScreen(pos);
             return fromParent(parentPos);
         }
+
+        virtual void mouseEvent(const MouseEvent& ev)
+        {}
 
     protected:
         virtual Visual* onParent() const = 0;
@@ -287,6 +291,8 @@ class LayoutManager
         virtual ~LayoutManager()
         {}
 
+        Visual* visual();
+
         Window* window();
 
         Screen* screen();
@@ -299,6 +305,8 @@ class LayoutManager
         void remove(Widget& widget);
 
     private:
+        virtual Visual* onGetVisual() = 0;
+
         virtual Window* onGetWindow() = 0;
 
         virtual Screen* onGetScreen() = 0;
@@ -308,6 +316,10 @@ class LayoutManager
         virtual void onDetach(Widget& widget) = 0;
 
         virtual void onRelayout() = 0;
+
+        virtual Gfx::PointF onToWindow(const Widget& w, const Gfx::PointF& pos) const = 0;
+
+        virtual void onRaise(Widget& widget) = 0;
 };
 
 } // namespace

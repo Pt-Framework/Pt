@@ -61,6 +61,12 @@ void Visual::processEvent(const Pt::Event& ev)
 // LayoutManager
 ///////////////////////////////////////////////////////////////////////
 
+Visual* LayoutManager::visual()
+{
+    return onGetVisual(); 
+}
+
+
 Window* LayoutManager::window()
 {
     return onGetWindow(); 

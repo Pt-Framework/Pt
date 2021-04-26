@@ -369,13 +369,18 @@ class PT_HMI_API Widget : public Visual
         virtual void onLeaveEvent(const LeaveEvent& ev);
 
     private:
-        Window* onGetWindow();
+        virtual Visual* onGetVisual();
 
-        Screen* onGetScreen();
+        virtual Window* onGetWindow();
 
-        void onAttach(Widget& widget);
+        virtual Screen* onGetScreen();
 
-        void onDetach(Widget& widget);
+        virtual void onAttach(Widget& widget);
+
+        virtual void onDetach(Widget& widget);
+
+        virtual Gfx::PointF onToWindow(const Widget& child, 
+                                       const Gfx::PointF& pos) const;
 
     private:
         void setParent(LayoutManager* parent);

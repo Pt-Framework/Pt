@@ -126,6 +126,12 @@ const Widget* Widget::parentWidget() const
 }
 
 
+Visual* Widget::onGetVisual()
+{
+    return this;
+}
+
+
 Window* Widget::onGetWindow()
 {
     return _window;
@@ -375,11 +381,27 @@ Gfx::PointF Widget::fromWindow(const Gfx::PointF& pos) const
 
 Gfx::PointF Widget::toWindow(const Gfx::PointF& pos) const
 {
-    if( ! _parentWidget )
-        return pos;
+    //if( ! _parentWidget )
+    //    return pos;
 
-    Gfx::PointF p = pos + _position;
-    return _parentWidget->toWindow(p);
+    //Gfx::PointF p = pos + _position;
+    //return _parentWidget->toWindow(p);
+
+    if(_layouter)
+        return _layouter->onToWindow(*this, pos);
+
+    return pos;
+}
+
+
+Gfx::PointF Widget::onToWindow(const Widget& child, const Gfx::PointF& pos) const
+{
+   Gfx::PointF p = child.position() + pos;
+
+   if(_layouter)
+      return _layouter->onToWindow(*this, p);
+
+   return p;
 }
 
 
@@ -1030,10 +1052,10 @@ void Widget::onEnableEvent(const EnableEvent& ev)
 
 void Widget::raise()
 {
-    if( ! _parentWidget )
+    if( ! _layouter )
         return;
 
-    _parentWidget->onRaise(*this);
+    _layouter->onRaise(*this);
 }
 
 
@@ -1191,19 +1213,40 @@ void Widget::onEvent(const Pt::Event& ev)
 void Widget::mouseEvent(const MouseEvent& ev)
 {
   bool consumed = onMouseEvent(ev);
-
   if( consumed )
      return;
 
-  Widget* parentWidget = this->parentWidget();
-  if(parentWidget)
+  if(_layouter)
   {
-      MouseEvent ev2(ev);
-      ev2.setId (parentWidget->vid() );
-      //Application::instance().loop().commitEvent(ev2);
-      parentWidget->mouseEvent(ev);
+      Visual* parent = _layouter->visual();
+
+      Gfx::PointF p = toParent( ev.position() );
+
+      MouseEvent ev2(0);
+      ev2.setPosition(p);
+
+      parent->mouseEvent(ev2);
   }
 }
+
+
+//void Widget::mouseEvent(const MouseEvent& ev)
+//{
+//  bool consumed = onMouseEvent(ev);
+//
+//  if( consumed )
+//     return;
+//
+//  Widget* parentWidget = this->parentWidget();
+//  if(parentWidget)
+//  {
+//      MouseEvent ev2(ev);
+//      ev2.setId (parentWidget->vid() );
+//      
+//      //Application::instance().loop().commitEvent(ev2);
+//      parentWidget->mouseEvent(ev);
+//  }
+//}
 
 void Widget::touchEvent(const TouchEvent& ev)
 {
