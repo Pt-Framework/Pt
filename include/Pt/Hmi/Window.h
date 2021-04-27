@@ -361,6 +361,10 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onRaise(Widget& widget);
 
+    virtual void onEnable(Widget& widget, bool isEnable);
+
+    virtual void onShow(Widget& widget, bool isShown);
+
   protected:
     virtual void mouseEvent(const MouseEvent& ev);
 

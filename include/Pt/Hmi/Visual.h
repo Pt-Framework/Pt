@@ -328,6 +328,7 @@ class Widget;
 class Window;
 class Screen;
 
+// View
 class LayoutManager
 {
     friend class Widget;
@@ -368,6 +369,10 @@ class LayoutManager
         virtual void onDetach(Widget& widget) = 0;
 
         virtual void onRaise(Widget& widget) = 0;
+
+        virtual void onEnable(Widget& widget, bool isEnable) = 0;
+
+        virtual void onShow(Widget& widget, bool isShown) = 0;
 };
 
 } // namespace

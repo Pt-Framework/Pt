@@ -336,9 +336,9 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
 
-        virtual void onEnableEvent(const EnableEvent& ev);
+        virtual void onEnable(bool isEnable);
 
-        virtual void onShowEvent(const ShowEvent& ev);
+        virtual void onShow(bool isShown);
 
         virtual void onFocusEvent(const FocusEvent& ev);
 
@@ -376,6 +376,10 @@ class PT_HMI_API Widget : public Visual
         virtual void onAttach(Widget& widget);
 
         virtual void onDetach(Widget& widget);
+
+        virtual void onEnable(Widget& widget, bool isEnable);
+
+        virtual void onShow(Widget& widget, bool isShown);
 
     private:
         void setParent(LayoutManager* parent);

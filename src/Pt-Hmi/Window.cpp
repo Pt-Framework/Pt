@@ -439,6 +439,16 @@ void Window::onRaise(Widget& widget)
 }
 
 
+void Window::onEnable(Widget& widget, bool isEnable)
+{
+}
+
+
+void Window::onShow(Widget& widget, bool isShown)
+{
+}
+
+
 void Window::addWidget(Widget& w)
 {
     addFocusWidget(w);

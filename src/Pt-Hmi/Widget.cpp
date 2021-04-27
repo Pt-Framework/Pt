@@ -69,9 +69,9 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::touchEvent);
     _eventReady += Pt::slot(*this, &Widget::onEnterEvent);
     _eventReady += Pt::slot(*this, &Widget::onLeaveEvent);
-    _eventReady += Pt::slot(*this, &Widget::onEnableEvent);
+    //_eventReady += Pt::slot(*this, &Widget::onEnableEvent);
     _eventReady += Pt::slot(*this, &Widget::onFocusEvent);
-    _eventReady += Pt::slot(*this, &Widget::onShowEvent);
+    //_eventReady += Pt::slot(*this, &Widget::onShowEvent);
     _eventReady += Pt::slot(*this, &Widget::onInvalidateEvent);
 }
 
@@ -137,8 +137,10 @@ void Widget::onAttach(Widget& widget)
     // disable child if this widget is disabled
     if( ! isEnabled() && widget.isEnabled() )
     {
-        EnableEvent eev( widget.vid(), false);
-        Application::instance().loop().commitEvent(eev);
+        //EnableEvent eev( widget.vid(), false);
+        //Application::instance().loop().commitEvent(eev);
+
+        widget.onEnable(false);
     }
 
     relayout();
@@ -877,21 +879,34 @@ bool Widget::isVisible() const
 
 void Widget::show(bool s)
 {
-    if(_visible == s)
-        return;
+    //if(_visible == s)
+    //    return;
 
-    _visible = s;
+    //_visible = s;
+
+    //ShowEvent ev(vid(), s);
+    //Application::instance().loop().commitEvent(ev);
+
+    //relayout();
+    //repaint();
+    
+    onShow(s);
+
+    if(_layouter)
+      _layouter->onShow(*this, s);  
+}
+
+
+void Widget::onShow(bool isShown)
+{
+    _visible = isShown;
 
     relayout();
-
-    ShowEvent ev(vid(), s);
-    Application::instance().loop().commitEvent(ev);
-
     repaint();
 }
 
 
-void Widget::onShowEvent(const ShowEvent& ev)
+void Widget::onShow(Widget& widget, bool isShown)
 {
 }
 
@@ -907,16 +922,16 @@ void Widget::enable(bool e)
     _enabled = e;
     _enabledState = e;
 
-    EnableEvent eev( vid(), e);
-    Application::instance().loop().commitEvent(eev);
+    //EnableEvent eev( vid(), e);
+    //Application::instance().loop().commitEvent(eev);
 
-    invalidate();
+    onEnable(e);
 }
 
 
-void Widget::onEnableEvent(const EnableEvent& ev)
+void Widget::onEnable(bool e)
 {
-    _enabledState = ev.enabled();
+    _enabledState = e;
 
     for( size_t i = 0; i < _children.size(); ++i)
     {
@@ -927,25 +942,34 @@ void Widget::onEnableEvent(const EnableEvent& ev)
         if( ! w->_enabled )
             continue;
 
-        EnableEvent eev( w->vid(), ev.enabled());
-        Application::instance().loop().commitEvent(eev);
+        //EnableEvent eev( w->vid(), ev.enabled());
+        //Application::instance().loop().commitEvent(eev);
+        w->onEnable(e);
     }
+
+    if( _layouter )
+        _layouter->onEnable(*this, e);
+
+    invalidate();
+}
+
+
+void Widget::onEnable(Widget& widget, bool isEnable)
+{
 }
 
 
 void Widget::raise()
 {
-    if( ! _layouter )
-        return;
-
-    _layouter->onRaise(*this);
+    if( _layouter )
+        _layouter->onRaise(*this);
 }
 
 
 void Widget::onRaise(Widget& w)
 {
-    std::vector<Widget*>::iterator it = std::find(_children.begin(), _children.end(), &w);
-
+    std::vector<Widget*>::iterator it = std::find(_children.begin(), 
+                                                  _children.end(), &w);
     if( it == _children.end() )
         return;
 
