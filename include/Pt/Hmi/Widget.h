@@ -346,15 +346,17 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
-        virtual bool onMouseEvent(const MouseEvent& ev);
-
+    public:
         void mouseEvent(const MouseEvent& ev);
 
         void touchEvent(const TouchEvent& ev);
 
-        virtual bool onTouchEvent(const TouchEvent& ev);
-
         void scrollEvent( const ScrollEvent& ev);
+
+    protected:
+        virtual bool onMouseEvent(const MouseEvent& ev);
+
+        virtual bool onTouchEvent(const TouchEvent& ev);
 
         virtual bool onScrollEvent( const ScrollEvent& ev);
 

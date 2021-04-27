@@ -1572,7 +1572,8 @@ void Window::onTouchEvent(const TouchEvent& tev)
         TouchEvent ev(tev);
         ev.setId( widget->vid() );
         ev.setPosition( widget->fromWindow(tev.position()) );
-        Application::instance().loop().commitEvent(ev); 
+        //Application::instance().loop().commitEvent(ev); 
+        widget->touchEvent(ev);
     }
 }
 
@@ -1607,7 +1608,8 @@ void Window::onScrollEvent(const ScrollEvent& sev)
     {
         ScrollEvent ev(sev);
         ev.setId( widget->vid() );
-        Application::instance().loop().commitEvent(ev); 
+        //Application::instance().loop().commitEvent(ev);
+        widget->scrollEvent(ev); 
     }
 }
 
