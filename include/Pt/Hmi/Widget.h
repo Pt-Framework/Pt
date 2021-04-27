@@ -88,10 +88,6 @@ class PT_HMI_API Widget : public Visual
 
         const Screen* screen() const;
 
-        Widget* parentWidget();
-
-        const Widget* parentWidget() const;
-
         const std::vector<Widget*>& widgets() const;
 
         Widget* findWidget(const Gfx::PointF& pos);
@@ -379,9 +375,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onDetach(Widget& widget);
 
-        virtual Gfx::PointF onToWindow(const Widget& child, 
-                                       const Gfx::PointF& pos) const;
-
     private:
         void setParent(LayoutManager* parent);
 
@@ -398,8 +391,6 @@ class PT_HMI_API Widget : public Visual
         
         Screen*                      _screen; 
         Window*                      _window; 
-        Widget*                      _parentWidget;
-        Window*                      _parentWindow;
         Visual*                      _parent;
         LayoutManager*               _layouter;
 

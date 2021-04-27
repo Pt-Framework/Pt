@@ -40,13 +40,35 @@
 #include <Pt/Hmi/Spacing.h>
 #include <Pt/Hmi/SizePolicy.h>
 #include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
+#include <Pt/Hmi/ScrollEvent.h>
 #include <string>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Visual : public virtual Pt::Connectable
+class PT_HMI_API Responder
+{
+    public:
+        virtual ~Responder();
+
+        virtual void mouseEvent(const MouseEvent& ev)
+        {}
+
+        virtual void touchEvent(const TouchEvent& ev)
+        {}
+
+        virtual void scrollEvent(const ScrollEvent& ev)
+        {}
+
+    protected:
+        Responder();
+};
+
+
+class PT_HMI_API Visual : public Responder
+                        , public Pt::Connectable
 {
     public:
         virtual ~Visual();
@@ -100,12 +122,42 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         {
             return onToParent(pos);
         }
+
+        /** @brief Converts local to parent coordinate.
+        */
+        Gfx::PointF toParent(const Visual* v, const Gfx::PointF& pos) const
+        {
+            const Visual* _parent = parent();
+            if( ! _parent )
+                return pos;
+
+            if(this == v)
+                return pos;
+            
+            Gfx::PointF p = toParent(pos);
+            return _parent->toParent(v, p);
+        }
         
         /** @brief Converts parent to local coordinate.
         */
         Gfx::PointF fromParent(const Gfx::PointF& pos) const
         {
             return onFromParent(pos);
+        }
+
+        /** @brief Converts parent to local coordinate.
+        */
+        Gfx::PointF fromParent(const Visual* v, const Gfx::PointF& pos) const
+        {
+            const Visual* _parent = parent();
+            if( ! _parent )
+                return pos;
+
+            if(this == v)
+                return pos;
+
+            Gfx::PointF p = _parent->fromParent(v, pos);
+            return fromParent(p);
         }
 
         /** @brief Converts global to local coordinate.
@@ -131,9 +183,6 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             Gfx::PointF parentPos = _parent->fromScreen(pos);
             return fromParent(parentPos);
         }
-
-        virtual void mouseEvent(const MouseEvent& ev)
-        {}
 
     protected:
         virtual Visual* onParent() const = 0;
@@ -311,13 +360,12 @@ class LayoutManager
 
         virtual Screen* onGetScreen() = 0;
 
+        virtual void onRelayout() = 0;
+
+    private:
         virtual void onAttach(Widget& widget) = 0;
 
         virtual void onDetach(Widget& widget) = 0;
-
-        virtual void onRelayout() = 0;
-
-        virtual Gfx::PointF onToWindow(const Widget& w, const Gfx::PointF& pos) const = 0;
 
         virtual void onRaise(Widget& widget) = 0;
 };

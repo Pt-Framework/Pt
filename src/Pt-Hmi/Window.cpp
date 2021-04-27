@@ -76,8 +76,8 @@ Window::Window(Window* parent, Window::Type type)
 
     _eventReady += Pt::slot(*this, &Window::onKeyEvent);
     _eventReady += Pt::slot(*this, &Window::processMouseEvent);
-    _eventReady += Pt::slot(*this, &Window::onTouchEvent);
-    _eventReady += Pt::slot(*this, &Window::onScrollEvent);
+    _eventReady += Pt::slot(*this, &Window::processTouchEvent);
+    _eventReady += Pt::slot(*this, &Window::processScrollEvent);
     _eventReady += Pt::slot(*this, &Window::paintEvent);
     _eventReady += Pt::slot(*this, &Window::onActivateEvent);
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
@@ -436,12 +436,6 @@ void Window::onDetach(Widget& widget)
 
 void Window::onRaise(Widget& widget)
 {
-}
-
-
-Gfx::PointF Window::onToWindow(const Widget& child, const Gfx::PointF& pos) const
-{
-    return child.position() + pos;
 }
 
 
@@ -1535,6 +1529,17 @@ bool Window::onMouseEvent(const MouseEvent& ev)
 }
 
 
+void Window::touchEvent(const TouchEvent& ev)
+{
+}
+
+
+void Window::processTouchEvent(const TouchEvent& tev)
+{ 
+    onTouchEvent(tev);
+}
+
+
 void Window::onTouchEvent(const TouchEvent& tev)
 { 
     if( _windowManager.touchEvent(tev) )
@@ -1569,6 +1574,17 @@ void Window::onTouchEvent(const TouchEvent& tev)
         ev.setPosition( widget->fromWindow(tev.position()) );
         Application::instance().loop().commitEvent(ev); 
     }
+}
+
+
+void Window::scrollEvent(const ScrollEvent& ev)
+{
+}
+
+
+void Window::processScrollEvent(const ScrollEvent& sev)
+{
+    onScrollEvent(sev);
 }
 
 

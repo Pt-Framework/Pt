@@ -45,8 +45,6 @@ namespace Hmi {
 Widget::Widget()
 : _screen(0)
 , _window(0)
-, _parentWidget(0)
-, _parentWindow(0)
 , _parent(0)
 , _layouter(0)
 , _invalidates(0)
@@ -114,18 +112,6 @@ const Screen* Widget::screen() const
 }
 
 
-Widget* Widget::parentWidget()
-{
-    return _parentWidget;
-}
-
-
-const Widget* Widget::parentWidget() const
-{
-    return _parentWidget;
-}
-
-
 Visual* Widget::onGetVisual()
 {
     return this;
@@ -178,35 +164,26 @@ void Widget::onDetach(Widget& widget)
 }
 
 
-void Widget::setParent(LayoutManager* parent)
+void Widget::setParent(LayoutManager* layouter)
 {
     setWindow(0);
     setScreen(0);
 
-    _parentWidget = 0;
-    _parentWindow = 0;
     _parent = 0;
     _layouter = 0;
 
     onParentChanged(0);
 
-    if( ! parent )
+    if( ! layouter )
         return;
-    
-    _parentWidget = dynamic_cast<Widget*>(parent);
-    if(_parentWidget)
-        _parent = _parentWidget;
 
-    _parentWindow = dynamic_cast<Window*>(parent);
-    if(_parentWindow)
-        _parent = _parentWindow;
-    
-    _layouter = parent;
+    _layouter = layouter;
+    _parent = layouter->visual();
 
-    setWindow( parent->window() );
-    setScreen( parent->screen() );
+    setWindow( layouter->window() );
+    setScreen( layouter->screen() );
 
-    onParentChanged(_parentWidget);
+    onParentChanged(0);
 }
 
 
@@ -371,47 +348,18 @@ Widget* Widget::findWidget(const std::string& name)
 
 Gfx::PointF Widget::fromWindow(const Gfx::PointF& pos) const
 {
-    if( ! _parentWidget )
-        return pos;
-
-    Gfx::PointF p = _parentWidget->fromWindow(pos);
-    return p - _position;
+    return fromParent(_window, pos);
 }
 
 
 Gfx::PointF Widget::toWindow(const Gfx::PointF& pos) const
 {
-    //if( ! _parentWidget )
-    //    return pos;
-
-    //Gfx::PointF p = pos + _position;
-    //return _parentWidget->toWindow(p);
-
-    if(_layouter)
-        return _layouter->onToWindow(*this, pos);
-
-    return pos;
-}
-
-
-Gfx::PointF Widget::onToWindow(const Widget& child, const Gfx::PointF& pos) const
-{
-   Gfx::PointF p = child.position() + pos;
-
-   if(_layouter)
-      return _layouter->onToWindow(*this, p);
-
-   return p;
+    return toParent(_window, pos);
 }
 
 
 Visual* Widget::onParent() const
 {
-    //if(_parentWidget)
-    //    return _parentWidget;
-
-    //return _window;
-
     return _parent;
 }
 
@@ -670,64 +618,14 @@ void Widget::onInvalidate()
 }
 
 
-//void Widget::repaint()
-//{
-//    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-//    repaint(rect);
-//}
-//
-//
-//void Widget::repaint(const Gfx::RectF& rect)
-//{
-//    // Window* parentWindow = window();
-//    // Widget* parentWidget = parent();
-//
-//    // if(parentWidget)
-//    // {
-//    //     Gfx::PointF updatePos = toParent( rect.topLeft() );
-//    //     Gfx::RectF updateRect( updatePos, rect.size() );
-//
-//    //     parentWidget->repaint(updateRect);
-//    // }
-//    // else if(parentWindow)
-//    // {
-//    //     Gfx::PointF updatePos = toParent( rect.topLeft() );
-//    //     Gfx::RectF updateRect( updatePos, rect.size() );
-//
-//    //     parentWindow->repaint(updateRect);
-//    // }
-//
-//    Visual* pr = parent();
-//    if( ! pr )
-//        pr = window();
-//
-//    if( ! pr )
-//        return;
-//
-//    Gfx::PointF updatePos = toParent( rect.topLeft() );
-//    Gfx::RectF updateRect( updatePos, rect.size() );
-//    pr->repaint(updateRect);
-//}
-
-
 void Widget::onRepaint(const Gfx::RectF& rect)
 {
-     Visual* parentVisual = parent();
-     if(parentVisual)
+     if(_parent)
      {
          Gfx::PointF parentPos = toParent( rect.topLeft() );
          Gfx::RectF parentRect( parentPos, rect.size() );
-         parentVisual->repaint(parentRect);
+         _parent->repaint(parentRect);
      }
-
-    //Gfx::PointF parentPos = toParent( rect.topLeft() );
-    //Gfx::RectF parentRect( parentPos, rect.size() );
-
-    //if(_parentWidget)
-    //   _parentWidget->repaint(parentRect);
-    //
-    //if(_parentWindow)
-    //   _parentWindow->repaint(parentRect);
 }
 
 // onPaint
@@ -774,20 +672,8 @@ void Widget::onRelayout()
 {
     _isLayoutInvalid = true;
 
-    // Visual* parentVisual = parent();
-    // if(parentVisual)
-    //     parentVisual->relayout();
-
-
     if(_layouter)
         _layouter->relayout();
-
-
-    //if(_parentWidget)
-    //   _parentWidget->relayout();
-    //
-    //if(_parentWindow)
-    //   _parentWindow->relayout();
 }
 
 
@@ -998,9 +884,6 @@ void Widget::show(bool s)
 
     relayout();
 
-    //if( _layouter )
-    //    _layouter->relayout();
-
     ShowEvent ev(vid(), s);
     Application::instance().loop().commitEvent(ev);
 
@@ -1111,9 +994,6 @@ void Widget::setMargin(const Spacing& s)
     _margin = align(s);
 
     relayout();
-
-    //if( _layouter )
-    //    _layouter->relayout();
 }
 
 
@@ -1216,54 +1096,15 @@ void Widget::mouseEvent(const MouseEvent& ev)
   if( consumed )
      return;
 
-  if(_layouter)
+  if(_parent)
   {
-      Visual* parent = _layouter->visual();
-
       Gfx::PointF p = toParent( ev.position() );
 
       MouseEvent ev2(0);
       ev2.setPosition(p);
 
-      parent->mouseEvent(ev2);
+      _parent->mouseEvent(ev2);
   }
-}
-
-
-//void Widget::mouseEvent(const MouseEvent& ev)
-//{
-//  bool consumed = onMouseEvent(ev);
-//
-//  if( consumed )
-//     return;
-//
-//  Widget* parentWidget = this->parentWidget();
-//  if(parentWidget)
-//  {
-//      MouseEvent ev2(ev);
-//      ev2.setId (parentWidget->vid() );
-//      
-//      //Application::instance().loop().commitEvent(ev2);
-//      parentWidget->mouseEvent(ev);
-//  }
-//}
-
-void Widget::touchEvent(const TouchEvent& ev)
-{
-    bool consumed = onTouchEvent(ev);
-
-    if (consumed)
-        return;
-
-    Widget* parentWidget = this->parentWidget();
-    if(parentWidget)
-    {
-        TouchEvent ev2(ev);
-        ev2.setId( parentWidget->vid() );
-        
-        //Application::instance().loop().commitEvent(ev2);
-        parentWidget->touchEvent(ev);
-    }
 }
 
 
@@ -1275,6 +1116,24 @@ bool Widget::onMouseEvent(const MouseEvent& ev)
     }
 
     return false;
+}
+
+
+void Widget::touchEvent(const TouchEvent& ev)
+{
+    bool consumed = onTouchEvent(ev);
+    if (consumed)
+        return;
+
+    if(_parent)
+    {
+        Gfx::PointF p = toParent( ev.position() );
+
+        TouchEvent ev2(0);
+        ev2.setPosition(p);
+
+        _parent->touchEvent(ev2);
+    }
 }
 
 
@@ -1295,14 +1154,9 @@ void Widget::scrollEvent(const ScrollEvent& ev)
     if(consumed)
         return;
 
-    Widget* parentWidget = this->parentWidget();
-    if(parentWidget)
+    if(_parent)
     {
-        ScrollEvent ev2(ev);
-        ev2.setId( parentWidget->vid() );
-        
-        //Application::instance().loop().commitEvent(ev2);
-        parentWidget->scrollEvent(ev);
+        _parent->scrollEvent(ev);
     }
 }
 

@@ -36,6 +36,19 @@ namespace Pt {
 namespace Hmi {
 
 ///////////////////////////////////////////////////////////////////////
+// Responder
+///////////////////////////////////////////////////////////////////////
+
+Responder::Responder()
+{ 
+}
+
+
+Responder::~Responder()
+{
+}
+
+///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
@@ -72,9 +85,16 @@ Window* LayoutManager::window()
     return onGetWindow(); 
 }
 
+
 Screen* LayoutManager::screen()
 {
     return onGetScreen(); 
+}
+
+
+void LayoutManager::relayout()
+{
+    onRelayout();
 }
 
 
@@ -97,11 +117,6 @@ void LayoutManager::remove(Widget& widget)
     widget.setParent(0);
 }
 
-
-void LayoutManager::relayout()
-{
-    onRelayout();
-}
 
 } // namespace
 

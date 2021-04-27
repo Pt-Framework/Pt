@@ -311,7 +311,11 @@ class PT_HMI_API Window : public WindowBase
 
     virtual bool onMouseEvent( const MouseEvent& ev );
 
+    void processTouchEvent( const TouchEvent& ev );
+
     virtual void onTouchEvent( const TouchEvent& ev );
+
+    void processScrollEvent( const ScrollEvent& ev );
 
     virtual void onScrollEvent( const ScrollEvent& ev );
 
@@ -357,10 +361,12 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onRaise(Widget& widget);
 
-    virtual Gfx::PointF onToWindow(const Widget& child, 
-                                   const Gfx::PointF& pos) const;
+  protected:
+    virtual void mouseEvent(const MouseEvent& ev);
 
-    virtual void mouseEvent( const MouseEvent& ev );
+    virtual void touchEvent(const TouchEvent& ev);
+
+    virtual void scrollEvent(const ScrollEvent& ev);
 
   private:
     void addWidget(Widget& w);
