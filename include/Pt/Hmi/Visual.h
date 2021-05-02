@@ -195,21 +195,6 @@ class PT_HMI_API Visual : public Responder
 
         virtual double onScaleFactor() const = 0;
 
-     public:
-         void repaint()
-         {
-             Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-             onRepaint(rect);
-         }
-
-         void repaint(const Gfx::RectF& rect)
-         {
-             onRepaint(rect);
-         }
-
-    protected:
-        virtual void onRepaint(const Gfx::RectF& rect) = 0;
-
     public:
         Gfx::PointF toPhysical(const Gfx::PointF& p) const
         {
@@ -348,6 +333,25 @@ class LayoutManager
         Screen* screen();
 
         void relayout();
+
+     public:
+         void repaint()
+         {
+            Visual* v = visual();
+            if(v)
+            {
+                Gfx::RectF rect( Gfx::PointF(0, 0), v->size() );
+                onRepaint(rect);
+            }
+         }
+
+         void repaint(const Gfx::RectF& rect)
+         {
+             onRepaint(rect);
+         }
+
+    protected:
+        virtual void onRepaint(const Gfx::RectF& rect) = 0;
 
     protected:
         void add(Widget& widget);

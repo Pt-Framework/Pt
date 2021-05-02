@@ -622,11 +622,11 @@ void Widget::onInvalidate()
 
 void Widget::onRepaint(const Gfx::RectF& rect)
 {
-     if(_parent)
+     if(_layouter)
      {
          Gfx::PointF parentPos = toParent( rect.topLeft() );
          Gfx::RectF parentRect( parentPos, rect.size() );
-         _parent->repaint(parentRect);
+         _layouter->repaint(parentRect);
      }
 }
 

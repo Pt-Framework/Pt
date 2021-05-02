@@ -828,43 +828,13 @@ void Window::onRepaint(const Gfx::RectF& rect)
 
     _damageRect.unify(rect);
 
-    // Visual* p = Visual::parent();
-    // if(p)
-    // {
-    //     Gfx::PointF parentPos = toParent( rect.topLeft() );
-    //     Gfx::RectF parentRect( parentPos, rect.size() );
-    //     p->repaint(parentRect);
-    // }
-
-     Gfx::PointF parentPos = toParent( rect.topLeft() );
-     Gfx::RectF parentRect( parentPos, rect.size() );
-
-    if(_parentWindow)
-       _parentWindow->repaint(parentRect);
-    else if(_screen)
-       _screen->repaint(parentRect);
+    if(_parent)
+    {
+        Gfx::PointF parentPos = toParent( rect.topLeft() );
+        Gfx::RectF parentRect( parentPos, rect.size() );
+       _parent->repaint(parentRect);
+    }
 }
-
-
-//void Window::repaint()
-//{
-//    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-//    repaint(rect);
-//}
-//
-//
-//void Window::repaint(const Gfx::RectF& rect)
-//{
-//    _damageRect.unify(rect);
-//
-//    Gfx::PointF updatePos = toParent( rect.topLeft() );
-//    Gfx::RectF updateRect( updatePos, rect.size() );
-//
-//    if(_parentWindow)
-//        _parentWindow->repaint(updateRect);
-//    else if(_screen)
-//        _screen->repaint(updateRect);
-//}
 
 
 void Window::paintEvent(const PaintEvent& ev)
