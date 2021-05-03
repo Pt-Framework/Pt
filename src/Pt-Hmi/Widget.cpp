@@ -46,7 +46,7 @@ Widget::Widget()
 : _screen(0)
 , _window(0)
 , _parent(0)
-, _layouter(0)
+, _parentView(0)
 , _invalidates(0)
 , _isLayoutInvalid(true)
 , _visible(true)
@@ -83,8 +83,8 @@ Widget::~Widget()
     while( ! _children.empty() )
         remove( *_children.back() );
 
-    if(_layouter)
-        _layouter->remove(*this);
+    if(_parentView)
+        _parentView->remove(*this);
 }
 
 
@@ -166,24 +166,24 @@ void Widget::onDetach(Widget& widget)
 }
 
 
-void Widget::setParent(LayoutManager* layouter)
+void Widget::setParent(View* view)
 {
     setWindow(0);
     setScreen(0);
 
     _parent = 0;
-    _layouter = 0;
+    _parentView = 0;
 
     onParentChanged(0);
 
-    if( ! layouter )
+    if( ! view )
         return;
 
-    _layouter = layouter;
-    _parent = layouter->visual();
+    _parentView = view;
+    _parent = view->visual();
 
-    setWindow( layouter->window() );
-    setScreen( layouter->screen() );
+    setWindow( view->window() );
+    setScreen( view->screen() );
 
     onParentChanged(0);
 }
@@ -622,11 +622,11 @@ void Widget::onInvalidate()
 
 void Widget::onRepaint(const Gfx::RectF& rect)
 {
-     if(_layouter)
+     if(_parentView)
      {
          Gfx::PointF parentPos = toParent( rect.topLeft() );
          Gfx::RectF parentRect( parentPos, rect.size() );
-         _layouter->repaint(parentRect);
+         _parentView->repaint(parentRect);
      }
 }
 
@@ -674,8 +674,8 @@ void Widget::onRelayout()
 {
     _isLayoutInvalid = true;
 
-    if(_layouter)
-        _layouter->relayout();
+    if(_parentView)
+        _parentView->relayout();
 }
 
 
@@ -892,8 +892,8 @@ void Widget::show(bool s)
     
     onShow(s);
 
-    if(_layouter)
-      _layouter->onShow(*this, s);  
+    if(_parentView)
+      _parentView->onShow(*this, s);  
 }
 
 
@@ -947,8 +947,8 @@ void Widget::onEnable(bool e)
         w->onEnable(e);
     }
 
-    if( _layouter )
-        _layouter->onEnable(*this, e);
+    if( _parentView )
+        _parentView->onEnable(*this, e);
 
     invalidate();
 }
@@ -961,8 +961,8 @@ void Widget::onEnable(Widget& widget, bool isEnable)
 
 void Widget::raise()
 {
-    if( _layouter )
-        _layouter->onRaise(*this);
+    if(_parentView)
+        _parentView->onRaise(*this);
 }
 
 

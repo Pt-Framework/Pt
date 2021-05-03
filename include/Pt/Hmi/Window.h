@@ -63,7 +63,7 @@ class MainWindowImpl;
 class WindowStateEvent;
 
 class PT_HMI_API Window : public WindowBase
-                        , public LayoutManager
+                        , public View
 {
   friend class Widget; 
  

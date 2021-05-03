@@ -99,7 +99,7 @@ Window::Window(Window* parent, Window::Type type)
 Window::~Window()
 {
     if(_mainWidget)
-        LayoutManager::remove(*_mainWidget);
+        View::remove(*_mainWidget);
 
     while( ! _windows.empty() )
        remove( *_windows.back() );
@@ -393,10 +393,10 @@ const Widget* Window::content()  const
 void Window::setContent(Widget* widget)
 {
     if(_mainWidget)
-        LayoutManager::remove(*_mainWidget);
+        View::remove(*_mainWidget);
 
     if(widget)
-        LayoutManager::add(*widget);
+        View::add(*widget);
 }
 
 

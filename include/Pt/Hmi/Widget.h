@@ -65,11 +65,11 @@ class Screen;
 class Layouter;
 
 class PT_HMI_API Widget : public Visual
-                        , public LayoutManager
+                        , public View
 {
     friend class Window;
     friend class Layouter;
-    friend class LayoutManager;
+    friend class View;
 
     public:
         Widget();
@@ -382,7 +382,7 @@ class PT_HMI_API Widget : public Visual
         virtual void onShow(Widget& widget, bool isShown);
 
     private:
-        void setParent(LayoutManager* parent);
+        void setParent(View* parent);
 
         void setWindow(Window* window);
 
@@ -398,7 +398,7 @@ class PT_HMI_API Widget : public Visual
         Screen*                      _screen; 
         Window*                      _window; 
         Visual*                      _parent;
-        LayoutManager*               _layouter;
+        View*                        _parentView;
 
         int                          _invalidates;
         bool                         _isLayoutInvalid;

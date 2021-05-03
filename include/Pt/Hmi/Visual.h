@@ -48,6 +48,10 @@ namespace Pt {
 
 namespace Hmi {
 
+///////////////////////////////////////////////////////////////////////
+// Responder
+///////////////////////////////////////////////////////////////////////
+
 class PT_HMI_API Responder
 {
     public:
@@ -66,6 +70,9 @@ class PT_HMI_API Responder
         Responder();
 };
 
+///////////////////////////////////////////////////////////////////////
+// Visual
+///////////////////////////////////////////////////////////////////////
 
 class PT_HMI_API Visual : public Responder
                         , public Pt::Connectable
@@ -196,6 +203,11 @@ class PT_HMI_API Visual : public Responder
         virtual double onScaleFactor() const = 0;
 
     public:
+        double toPhysical(double n) const
+        {
+            return n * scaleFactor();
+        }
+
         Gfx::PointF toPhysical(const Gfx::PointF& p) const
         {
             return p * scaleFactor();
@@ -212,6 +224,11 @@ class PT_HMI_API Visual : public Responder
                                toPhysical( r.size() ) );
         }
 
+
+        double toLogical(double n) const
+        {
+            return n / scaleFactor();
+        }
         Gfx::PointF toLogical(const Gfx::PointF& p) const
         {
             return p / scaleFactor();
@@ -227,15 +244,6 @@ class PT_HMI_API Visual : public Responder
             return Gfx::RectF(toLogical(r.topLeft()), toLogical(r.size()));
         }
 
-        double toLogical(double n) const
-        {
-            return n / scaleFactor();
-        }
-
-        double toPhysical(double n) const
-        {
-            return n * scaleFactor();
-        }
 
         double align(double n) const
         {
@@ -309,21 +317,24 @@ class PT_HMI_API Visual : public Responder
         std::string  _name;
 };
 
+///////////////////////////////////////////////////////////////////////
+// View
+///////////////////////////////////////////////////////////////////////
+
 class Widget;
 class Window;
 class Screen;
 
-// View
-class LayoutManager
+class View
 {
     friend class Widget;
 
     protected:
-        LayoutManager()
+        View()
         {}
 
     public:
-        virtual ~LayoutManager()
+        virtual ~View()
         {}
 
         Visual* visual();

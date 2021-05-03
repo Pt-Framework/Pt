@@ -71,46 +71,46 @@ void Visual::processEvent(const Pt::Event& ev)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// LayoutManager
+// View
 ///////////////////////////////////////////////////////////////////////
 
-Visual* LayoutManager::visual()
+Visual* View::visual()
 {
     return onGetVisual(); 
 }
 
 
-Window* LayoutManager::window()
+Window* View::window()
 {
     return onGetWindow(); 
 }
 
 
-Screen* LayoutManager::screen()
+Screen* View::screen()
 {
     return onGetScreen(); 
 }
 
 
-void LayoutManager::relayout()
+void View::relayout()
 {
     onRelayout();
 }
 
 
-void LayoutManager::add(Widget& widget)
+void View::add(Widget& widget)
 {
-    if(widget._layouter)
-        widget._layouter->remove(widget);
+    if(widget._parentView)
+        widget._parentView->remove(widget);
 
     onAttach(widget);
     widget.setParent(this);
 }
 
 
-void LayoutManager::remove(Widget& widget)
+void View::remove(Widget& widget)
 {
-    if(widget._layouter != this)
+    if(widget._parentView != this)
         return;
 
     onDetach(widget);
