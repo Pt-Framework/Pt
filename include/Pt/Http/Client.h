@@ -32,6 +32,8 @@
 #include <Pt/Http/Api.h>
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
+#include <string>
+#include <iosfwd>
 #include <cstddef>
 
 namespace Pt {
