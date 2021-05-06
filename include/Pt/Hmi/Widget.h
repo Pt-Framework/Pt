@@ -64,8 +64,7 @@ class Window;
 class Screen;
 class Layouter;
 
-class PT_HMI_API Widget : public Visual
-                        , public View
+class PT_HMI_API Widget : public View
 {
     friend class Window;
     friend class Layouter;

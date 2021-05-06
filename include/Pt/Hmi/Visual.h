@@ -312,6 +312,21 @@ class PT_HMI_API Visual : public Responder
             return alignedSpacing;
         }
 
+        public:
+            void repaint()
+            {
+                Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+                onRepaint(rect);
+            }
+
+            void repaint(const Gfx::RectF& rect)
+            {
+                onRepaint(rect);
+            }
+
+        protected:
+            virtual void onRepaint(const Gfx::RectF& rect) = 0;
+
     private:
         Pt::uint64_t _vid;
         std::string  _name;
@@ -325,7 +340,7 @@ class Widget;
 class Window;
 class Screen;
 
-class View
+class View : public virtual Visual
 {
     friend class Widget;
 
@@ -345,24 +360,24 @@ class View
 
         void relayout();
 
-     public:
-         void repaint()
-         {
-            Visual* v = visual();
-            if(v)
-            {
-                Gfx::RectF rect( Gfx::PointF(0, 0), v->size() );
-                onRepaint(rect);
-            }
-         }
+    // public:
+    //     void repaint()
+    //     {
+    //        Visual* v = visual();
+    //        if(v)
+    //        {
+    //            Gfx::RectF rect( Gfx::PointF(0, 0), v->size() );
+    //            onRepaint(rect);
+    //        }
+    //     }
 
-         void repaint(const Gfx::RectF& rect)
-         {
-             onRepaint(rect);
-         }
+    //     void repaint(const Gfx::RectF& rect)
+    //     {
+    //         onRepaint(rect);
+    //     }
 
-    protected:
-        virtual void onRepaint(const Gfx::RectF& rect) = 0;
+    //protected:
+    //    virtual void onRepaint(const Gfx::RectF& rect) = 0;
 
     protected:
         void add(Widget& widget);
