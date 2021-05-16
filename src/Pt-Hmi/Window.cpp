@@ -837,6 +837,20 @@ void Window::onRepaint(const Gfx::RectF& rect)
 }
 
 
+void Window::onRepaintView(View& view, const Gfx::RectF& viewRect) 
+{
+    // Gfx::PointF pos = viewRect.topLeft() + view.position();
+    // Gfx::RectF rect( pos, viewRect.size() );
+
+    //_damageRect.unify(rect);
+
+    //if(_parent)
+    //    _parent->repaint(*this, rect);
+
+    // repaint(rect);
+}
+
+
 void Window::paintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& rect = _damageRect;

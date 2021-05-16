@@ -384,35 +384,34 @@ class View : public virtual Visual
         virtual ~View()
         {}
 
-        Visual* visual();
-
         Window* window();
 
         Screen* screen();
+
+        View* parentView()
+        { return 0; }
 
         void relayout();
 
     protected:
         virtual void onRelayout() = 0;
 
-    // public:
-    //     void repaint()
-    //     {
-    //        Visual* v = visual();
-    //        if(v)
-    //        {
-    //            Gfx::RectF rect( Gfx::PointF(0, 0), v->size() );
-    //            onRepaint(rect);
-    //        }
-    //     }
+    public:
+        // void repaint()
+        // {
+        //     Gfx::RectF rect( Gfx::PointF(0, 0), size() );
+        //     repaint(rect);
+        // }
 
-    //     void repaint(const Gfx::RectF& rect)
-    //     {
-    //         onRepaint(rect);
-    //     }
+        // void repaint(const Gfx::RectF& rect)
+        // {
+        //     View* parent = parentView();
+        //     if(parent)
+        //         parent->onRepaintView(*this, rect);
+        // }
 
-    //protected:
-    //    virtual void onRepaint(const Gfx::RectF& rect) = 0;
+    protected:
+       virtual void onRepaintView(View& view, const Gfx::RectF& rect) = 0;
 
     protected:
         void add(Widget& widget);

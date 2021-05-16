@@ -630,6 +630,15 @@ void Widget::onRepaint(const Gfx::RectF& rect)
      }
 }
 
+
+void Widget::onRepaintView(View& view, const Gfx::RectF& viewRect)
+{
+    // Gfx::PointF pos = viewRect.topLeft() + view.position();
+    // Gfx::RectF rect( pos, viewRect.size() );
+
+    // repaint(rect);
+}
+
 // onPaint
 void Widget::onPaintContent(const Gfx::RectF& r)
 {

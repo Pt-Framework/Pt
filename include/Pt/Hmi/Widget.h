@@ -302,6 +302,8 @@ class PT_HMI_API Widget : public View
 
         virtual void onRepaint(const Gfx::RectF& rect);
 
+        virtual void onRepaintView(View& view, const Gfx::RectF& rect);
+
     protected:
         virtual void onSetWindow(Window* w);
 

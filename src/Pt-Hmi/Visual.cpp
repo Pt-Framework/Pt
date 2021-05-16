@@ -74,12 +74,6 @@ void Visual::processEvent(const Pt::Event& ev)
 // View
 ///////////////////////////////////////////////////////////////////////
 
-Visual* View::visual()
-{
-    return onGetVisual(); 
-}
-
-
 Window* View::window()
 {
     return onGetWindow(); 
