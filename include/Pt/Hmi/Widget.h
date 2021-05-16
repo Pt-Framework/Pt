@@ -346,13 +346,17 @@ class PT_HMI_API Widget : public View
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     public:
-        void mouseEvent(const MouseEvent& ev);
-
         void touchEvent(const TouchEvent& ev);
 
         void scrollEvent( const ScrollEvent& ev);
 
     protected:
+        void processMouseEvent(const MouseEvent& ev);
+
+        virtual Responder* onNextResponder();
+
+        Gfx::PointF onToNextResponder(const Gfx::PointF& pos);
+
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -396,7 +400,7 @@ class PT_HMI_API Widget : public View
         
         Screen*                      _screen; 
         Window*                      _window; 
-        Visual*                      _parent;
+        //Visual*                      _parent;
         View*                        _parentView;
 
         int                          _invalidates;

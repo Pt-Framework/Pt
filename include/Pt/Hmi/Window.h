@@ -307,9 +307,13 @@ class PT_HMI_API Window : public WindowBase
   protected:
     virtual void onEvent(const Pt::Event& ev);
 
-    void processMouseEvent( const MouseEvent& ev );
+    void processMouseEvent(const MouseEvent& ev);
 
-    virtual bool onMouseEvent( const MouseEvent& ev );
+    virtual Responder* onNextResponder();
+
+    virtual Gfx::PointF onToNextResponder(const Gfx::PointF& pos);
+
+    virtual bool onMouseEvent(const MouseEvent& ev);
 
     void processTouchEvent( const TouchEvent& ev );
 
@@ -366,8 +370,6 @@ class PT_HMI_API Window : public WindowBase
     virtual void onShow(Widget& widget, bool isShown);
 
   protected:
-    virtual void mouseEvent(const MouseEvent& ev);
-
     virtual void touchEvent(const TouchEvent& ev);
 
     virtual void scrollEvent(const ScrollEvent& ev);

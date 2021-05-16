@@ -1457,23 +1457,10 @@ void Window::onEvent(const Pt::Event& ev)
 }
 
 
-void Window::mouseEvent(const MouseEvent& ev)
-{
-}
-
-
-void Window::processMouseEvent( const MouseEvent& ev )
-{
-    bool consumed = onMouseEvent(ev);
-    if(consumed)
-        return;
-}
-
-
-bool Window::onMouseEvent(const MouseEvent& ev)
+void Window::processMouseEvent(const MouseEvent& ev)
 {
     if( _windowManager.mouseEvent(ev) )
-        return true;
+        return;
 
     Widget* widget = findWidget( ev.position(), true );
     if( ! widget )
@@ -1493,7 +1480,7 @@ bool Window::onMouseEvent(const MouseEvent& ev)
         }
     }
 
-    // widget may be null to unset the pointer widget
+    // widget may be null to unset the pointer widgetv
     Application::instance().setPointerWidget(widget);
 
     if( widget && widget->isEnabled() )
@@ -1501,11 +1488,32 @@ bool Window::onMouseEvent(const MouseEvent& ev)
         MouseEvent clientEv(ev);
         clientEv.setId( widget->vid() );
         clientEv.setPosition( widget->fromWindow(ev.position()) );
-        //Application::instance().loop().commitEvent(clientEv);
-        widget->mouseEvent(clientEv);
-    }
 
-    return true;
+        // pass down responder chain
+        widget->mouseEvent(clientEv);
+        //Application::instance().loop().commitEvent(clientEv);
+    }
+}
+
+
+Responder* Window::onNextResponder()
+{
+    if(_parent)
+        return _parent;
+
+    return 0;
+}
+
+
+Gfx::PointF Window::onToNextResponder(const Gfx::PointF& pos)
+{
+    return toParent(pos);
+}
+
+
+bool Window::onMouseEvent(const MouseEvent& ev)
+{
+    return false;
 }
 
 

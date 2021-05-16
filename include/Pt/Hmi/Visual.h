@@ -48,6 +48,8 @@ namespace Pt {
 
 namespace Hmi {
 
+class Visual;
+
 ///////////////////////////////////////////////////////////////////////
 // Responder
 ///////////////////////////////////////////////////////////////////////
@@ -57,14 +59,44 @@ class PT_HMI_API Responder
     public:
         virtual ~Responder();
 
-        virtual void mouseEvent(const MouseEvent& ev)
-        {}
+        void mouseEvent(const MouseEvent& ev)
+        {
+            //bool consumed = ev.isPress() ? onMouseDown(ev) 
+            //                             : onMouseUp(ev);
+            
+            bool consumed = onMouseEvent(ev);
+
+            if(consumed)
+                return;
+
+            Responder* next = onNextResponder();
+            if(next)
+            {
+                Gfx::PointF p = onToNextResponder( ev.position() );
+                
+                MouseEvent ev2(ev);
+                ev2.setPosition(p);
+
+                next->mouseEvent(ev);
+            }
+        }
 
         virtual void touchEvent(const TouchEvent& ev)
         {}
 
         virtual void scrollEvent(const ScrollEvent& ev)
         {}
+
+    protected:
+        virtual bool onMouseEvent(const MouseEvent& ev) = 0;
+
+        //virtual bool onMouseUp(const MouseEvent& ev) {}
+
+        //virtual bool onMouseDown(const MouseEvent& ev) {}
+
+        virtual Responder* onNextResponder() = 0;
+
+        virtual Gfx::PointF onToNextResponder(const Gfx::PointF& pos) = 0;
 
     protected:
         Responder();
@@ -360,6 +392,9 @@ class View : public virtual Visual
 
         void relayout();
 
+    protected:
+        virtual void onRelayout() = 0;
+
     // public:
     //     void repaint()
     //     {
@@ -390,8 +425,6 @@ class View : public virtual Visual
         virtual Window* onGetWindow() = 0;
 
         virtual Screen* onGetScreen() = 0;
-
-        virtual void onRelayout() = 0;
 
     private:
         virtual void onAttach(Widget& widget) = 0;

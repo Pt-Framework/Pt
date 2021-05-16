@@ -108,6 +108,24 @@ class PT_HMI_API Screen : public WindowBase
         // onPaintContent (screen specific)
         void onPaintScreen(const Gfx::RectF& rect);
 
+        Responder* onNextResponder()
+        {
+            // TODO: possibly pass on to application
+            return 0;
+        }
+
+        Gfx::PointF onToNextResponder(const Gfx::PointF& pos)
+        {
+            // TODO: possibly pass on to application
+            return pos;
+        }
+
+        virtual bool onMouseEvent(const MouseEvent& ev)
+        { 
+            // TODO: possibly pass on to application
+            return false; 
+        }
+
     protected:
         virtual void onInit(Window& w);
     

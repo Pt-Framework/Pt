@@ -45,7 +45,7 @@ namespace Hmi {
 Widget::Widget()
 : _screen(0)
 , _window(0)
-, _parent(0)
+//, _parent(0)
 , _parentView(0)
 , _invalidates(0)
 , _isLayoutInvalid(true)
@@ -65,7 +65,7 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::scrollEvent);
     _eventReady += Pt::slot(*this, &Widget::onMoveEvent);
     _eventReady += Pt::slot(*this, &Widget::onResizeEvent);
-    _eventReady += Pt::slot(*this, &Widget::mouseEvent);
+    _eventReady += Pt::slot(*this, &Widget::processMouseEvent);
     _eventReady += Pt::slot(*this, &Widget::touchEvent);
     _eventReady += Pt::slot(*this, &Widget::onEnterEvent);
     _eventReady += Pt::slot(*this, &Widget::onLeaveEvent);
@@ -171,7 +171,7 @@ void Widget::setParent(View* view)
     setWindow(0);
     setScreen(0);
 
-    _parent = 0;
+    //_parent = 0;
     _parentView = 0;
 
     onParentChanged(0);
@@ -180,7 +180,7 @@ void Widget::setParent(View* view)
         return;
 
     _parentView = view;
-    _parent = view->visual();
+    //_parent = view->visual();
 
     setWindow( view->window() );
     setScreen( view->screen() );
@@ -362,7 +362,7 @@ Gfx::PointF Widget::toWindow(const Gfx::PointF& pos) const
 
 Visual* Widget::onParent() const
 {
-    return _parent;
+    return _parentView;
 }
 
 
@@ -963,6 +963,8 @@ void Widget::raise()
 {
     if(_parentView)
         _parentView->onRaise(*this);
+
+    //onRaise();
 }
 
 
@@ -1114,26 +1116,44 @@ void Widget::onEvent(const Pt::Event& ev)
 }
 
 
-void Widget::mouseEvent(const MouseEvent& ev)
+void Widget::processMouseEvent(const MouseEvent& ev)
 {
-  bool consumed = onMouseEvent(ev);
-  if( consumed )
-     return;
+    mouseEvent(ev);
+}
 
-  if(_parent)
-  {
-      Gfx::PointF p = toParent( ev.position() );
 
-      MouseEvent ev2(0);
-      ev2.setPosition(p);
+Responder* Widget::onNextResponder()
+{
+    if(_parentView)
+        return _parentView;
 
-      _parent->mouseEvent(ev2);
-  }
+    return 0;
+}
+
+
+Gfx::PointF Widget::onToNextResponder(const Gfx::PointF& pos)
+{
+    return toParent(pos);
 }
 
 
 bool Widget::onMouseEvent(const MouseEvent& ev)
 {
+    // if(_parentView && ! consumed)
+    // {
+    //     Gfx::PointF p = toParent( ev.position() );
+
+    //     MouseEvent ev2(0);
+    //     ev2.setPosition(p);
+
+    //     _parentView->mouseEvent(ev2);
+    // }
+
+    // if( ev.isPress(MouseEvent::Left) )
+    // {
+    //     focus();
+    // }
+
     if( ev.isPress(MouseEvent::Left) )
     {
         focus();
@@ -1149,14 +1169,14 @@ void Widget::touchEvent(const TouchEvent& ev)
     if (consumed)
         return;
 
-    if(_parent)
+    if(_parentView)
     {
         Gfx::PointF p = toParent( ev.position() );
 
         TouchEvent ev2(0);
         ev2.setPosition(p);
 
-        _parent->touchEvent(ev2);
+        _parentView->touchEvent(ev2);
     }
 }
 
@@ -1178,9 +1198,9 @@ void Widget::scrollEvent(const ScrollEvent& ev)
     if(consumed)
         return;
 
-    if(_parent)
+    if(_parentView)
     {
-        _parent->scrollEvent(ev);
+        _parentView->scrollEvent(ev);
     }
 }
 
