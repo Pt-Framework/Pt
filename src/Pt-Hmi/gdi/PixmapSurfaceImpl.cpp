@@ -893,12 +893,10 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
 }
 
 
-Gfx::Image PixmapSurfaceImpl::toImage(const Gfx::ImageFormat& iformat) const
+Gfx::Image PixmapSurfaceImpl::toImage(const Gfx::ImageFormat& fmt) const
 {
-    Pt::Gfx::Image dest(iformat, round(_size));
-    Pt::uint8_t* srcBuffer;
-
     const size_t depth = 32;
+    
     BITMAPINFO bitmapInfo;
     ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
@@ -912,11 +910,13 @@ Gfx::Image PixmapSurfaceImpl::toImage(const Gfx::ImageFormat& iformat) const
     bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
     bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
 
-    int ret =  GetDIBits(_dc, _bitmap, 0, _size.height(), srcBuffer, &bitmapInfo, DIB_RGB_COLORS);
+    Pt::Gfx::Image source( Pt::Gfx::ImageFormat::argb32(), round(_size) );
+    Pt::uint8_t* srcBuffer = source.data();
 
+    int ret =  GetDIBits(_dc, _bitmap, 0, _size.height(), srcBuffer, 
+                         &bitmapInfo, DIB_RGB_COLORS);
 
-    Pt::Gfx::Image source(format(), srcBuffer, round(_size));
-
+    Pt::Gfx::Image dest( fmt, round(_size) );
     Pt::Gfx::copy(source.begin(), source.end(), dest.begin());
     return dest;
 }

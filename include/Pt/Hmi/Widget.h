@@ -52,6 +52,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <Pt/Delegate.h>
 
@@ -65,6 +66,7 @@ class Screen;
 class Layouter;
 
 class PT_HMI_API Widget : public View
+                        , public Pt::Connectable
 {
     friend class Window;
     friend class Layouter;

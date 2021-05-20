@@ -50,6 +50,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/SizePolicy.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <map>
 
@@ -64,6 +65,7 @@ class WindowStateEvent;
 
 class PT_HMI_API Window : public WindowBase
                         , public View
+                        , public Pt::Connectable
 {
   friend class Widget; 
  

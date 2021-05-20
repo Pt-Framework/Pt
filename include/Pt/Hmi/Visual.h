@@ -33,7 +33,6 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
-#include <Pt/Connectable.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -107,7 +106,6 @@ class PT_HMI_API Responder
 ///////////////////////////////////////////////////////////////////////
 
 class PT_HMI_API Visual : public Responder
-                        , public Pt::Connectable
 {
     public:
         virtual ~Visual();
