@@ -84,6 +84,8 @@ class PT_HMI_API Screen : public WindowBase
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
+        virtual const Gfx::PointF& onPosition() const;
+
         virtual const Gfx::SizeF& onSize() const;
 
         virtual double onScaleFactor() const;
@@ -160,6 +162,7 @@ class PT_HMI_API Screen : public WindowBase
     
     private:
         ScreenImpl*          _impl;
+        Gfx::PointF          _position;
         Gfx::SizeF           _size;
         Gfx::RectF           _updateRect;
         int                  _updates;

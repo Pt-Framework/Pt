@@ -204,8 +204,6 @@ class PT_HMI_API Widget : public View
     // layouting
     //
     public:
-        const Gfx::PointF& position() const;
-
         const Gfx::RectF geometry() const;
 
         const SizePolicy& sizePolicy() const;
@@ -293,6 +291,8 @@ class PT_HMI_API Widget : public View
         Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+        virtual const Gfx::PointF& onPosition() const;
 
         virtual const Gfx::SizeF& onSize() const;
 

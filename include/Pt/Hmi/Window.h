@@ -170,8 +170,6 @@ class PT_HMI_API Window : public WindowBase
 
     void releasePointer();
 
-    const Gfx::PointF& position() const;
-
     void move(const Gfx::PointF& p);
 
     void resize( const Gfx::SizeF& s );
@@ -265,6 +263,8 @@ class PT_HMI_API Window : public WindowBase
     Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
     Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+    virtual const Gfx::PointF& onPosition() const;
 
     virtual const Gfx::SizeF& onSize() const;
 

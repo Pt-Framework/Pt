@@ -721,6 +721,12 @@ Pt::Signal<const Pt::Event&>& Window::eventReady()
 }
 
 
+const Gfx::PointF& Window::onPosition() const
+{
+    return _position;
+}
+
+
 const Gfx::SizeF& Window::onSize() const
 {
     return _size;
@@ -1113,12 +1119,6 @@ void Window::grabPointer()
 void Window::releasePointer()
 {
     Application::instance().releasePointer(*this);
-}
-
-
-const Gfx::PointF& Window::position() const
-{
-    return _position;
 }
 
 

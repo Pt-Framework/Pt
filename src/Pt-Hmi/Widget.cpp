@@ -694,7 +694,7 @@ Gfx::SizeF Widget::preferredSize() const
 }
 
 
-const Gfx::PointF& Widget::position() const
+const Gfx::PointF& Widget::onPosition() const
 {
     return _position;
 }

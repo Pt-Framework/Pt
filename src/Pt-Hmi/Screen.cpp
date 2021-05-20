@@ -122,6 +122,12 @@ Gfx::PointF Screen::onFromParent(const Gfx::PointF& pos) const
 }
 
 
+const Gfx::PointF& Screen::onPosition() const
+{
+    return _position;
+}
+
+
 const Gfx::SizeF& Screen::onSize() const
 {   
     return _size;

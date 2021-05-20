@@ -145,6 +145,11 @@ class PT_HMI_API Visual : public Responder
           return onParent();
         }
 
+        const Gfx::PointF& position() const
+        {
+            return onPosition();
+        }
+
         const Gfx::SizeF& size() const
         {
             return onSize();
@@ -229,6 +234,8 @@ class PT_HMI_API Visual : public Responder
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const = 0;
+
+        virtual const Gfx::PointF& onPosition() const = 0;
 
         virtual const Gfx::SizeF& onSize() const = 0;
 
