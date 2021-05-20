@@ -393,30 +393,15 @@ class View : public virtual Visual
 
         Screen* screen();
 
-        View* parentView()
-        { return 0; }
-
         void relayout();
 
     protected:
         virtual void onRelayout() = 0;
 
-    public:
-        // void repaint()
-        // {
-        //     Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-        //     repaint(rect);
-        // }
-
-        // void repaint(const Gfx::RectF& rect)
-        // {
-        //     View* parent = parentView();
-        //     if(parent)
-        //         parent->onRepaintView(*this, rect);
-        // }
+        virtual void onRelayout(Widget& widget) = 0;
 
     protected:
-       virtual void onRepaintView(View& view, const Gfx::RectF& rect) = 0;
+       virtual void onRepaint(Widget& widget, const Gfx::RectF& rect) = 0;
 
     protected:
         void add(Widget& widget);
@@ -424,8 +409,6 @@ class View : public virtual Visual
         void remove(Widget& widget);
 
     private:
-        virtual Visual* onGetVisual() = 0;
-
         virtual Window* onGetWindow() = 0;
 
         virtual Screen* onGetScreen() = 0;

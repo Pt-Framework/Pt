@@ -259,6 +259,15 @@ void Screen::onRelayout()
 }
 
 
+void Screen::onRepaint(Window& w, const Gfx::RectF& windowRect)
+{
+     Pt::Gfx::PointF pos = toHost( w, windowRect.topLeft() );
+     Gfx::RectF rect( pos, windowRect.size() );
+   
+     onRepaint(rect);
+}
+
+
 void Screen::onRepaint(const Gfx::RectF& rect)
 {
     _updateRect.unify(rect);

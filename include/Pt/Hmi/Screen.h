@@ -129,6 +129,9 @@ class PT_HMI_API Screen : public WindowBase
         }
 
     protected:
+        virtual void onRepaint(Window& w, const Gfx::RectF& rect);
+
+    protected:
         virtual void onInit(Window& w);
     
         virtual void onDeinit(Window& w);

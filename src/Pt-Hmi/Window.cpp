@@ -400,12 +400,6 @@ void Window::setContent(Widget* widget)
 }
 
 
-Visual* Window::onGetVisual()
-{
-    return this;
-}
-
-
 Window* Window::onGetWindow()
 {
     return this;
@@ -775,6 +769,12 @@ void Window::onRelayout()
 }
 
 
+void Window::onRelayout(Widget& widget)
+{
+    onRelayout();
+}
+
+
 void Window::layoutEvent(const LayoutEvent& ev)
 {
     --_layouts;
@@ -834,26 +834,33 @@ void Window::onRepaint(const Gfx::RectF& rect)
 
     _damageRect.unify(rect);
 
+    //if(_parent)
+    //{
+    //    Gfx::PointF parentPos = toParent( rect.topLeft() );
+    //    Gfx::RectF parentRect( parentPos, rect.size() );
+    //   _parent->repaint(parentRect);
+    //}
+
     if(_parent)
-    {
-        Gfx::PointF parentPos = toParent( rect.topLeft() );
-        Gfx::RectF parentRect( parentPos, rect.size() );
-       _parent->repaint(parentRect);
-    }
+       _parent->onRepaint(*this, rect);
 }
 
 
-void Window::onRepaintView(View& view, const Gfx::RectF& viewRect) 
+void Window::onRepaint(Widget& widget, const Gfx::RectF& viewRect) 
 {
-    // Gfx::PointF pos = viewRect.topLeft() + view.position();
-    // Gfx::RectF rect( pos, viewRect.size() );
+    Gfx::PointF pos = viewRect.topLeft() + widget.position();
+    Gfx::RectF rect( pos, viewRect.size() );
 
-    //_damageRect.unify(rect);
+    onRepaint(rect);
+}
 
-    //if(_parent)
-    //    _parent->repaint(*this, rect);
 
-    // repaint(rect);
+void Window::onRepaint(Window& w, const Gfx::RectF& windowRect)
+{
+     Pt::Gfx::PointF pos = toHost( w, windowRect.topLeft() );
+     Gfx::RectF rect( pos, windowRect.size() );
+   
+     onRepaint(rect);
 }
 
 

@@ -45,7 +45,6 @@ namespace Hmi {
 Widget::Widget()
 : _screen(0)
 , _window(0)
-//, _parent(0)
 , _parentView(0)
 , _invalidates(0)
 , _isLayoutInvalid(true)
@@ -112,12 +111,6 @@ const Screen* Widget::screen() const
 }
 
 
-Visual* Widget::onGetVisual()
-{
-    return this;
-}
-
-
 Window* Widget::onGetWindow()
 {
     return _window;
@@ -171,7 +164,6 @@ void Widget::setParent(View* view)
     setWindow(0);
     setScreen(0);
 
-    //_parent = 0;
     _parentView = 0;
 
     onParentChanged(0);
@@ -180,7 +172,6 @@ void Widget::setParent(View* view)
         return;
 
     _parentView = view;
-    //_parent = view->visual();
 
     setWindow( view->window() );
     setScreen( view->screen() );
@@ -622,21 +613,24 @@ void Widget::onInvalidate()
 
 void Widget::onRepaint(const Gfx::RectF& rect)
 {
+     //if(_parentView)
+     //{
+     //    Gfx::PointF parentPos = toParent( rect.topLeft() );
+     //    Gfx::RectF parentRect( parentPos, rect.size() );
+     //    _parentView->repaint(parentRect);
+     //}
+
      if(_parentView)
-     {
-         Gfx::PointF parentPos = toParent( rect.topLeft() );
-         Gfx::RectF parentRect( parentPos, rect.size() );
-         _parentView->repaint(parentRect);
-     }
+         _parentView->onRepaint(*this, rect);
 }
 
 
-void Widget::onRepaintView(View& view, const Gfx::RectF& viewRect)
+void Widget::onRepaint(Widget& widget, const Gfx::RectF& viewRect)
 {
-    // Gfx::PointF pos = viewRect.topLeft() + view.position();
-    // Gfx::RectF rect( pos, viewRect.size() );
+    Gfx::PointF pos = viewRect.topLeft() + widget.position();
+    Gfx::RectF rect( pos, viewRect.size() );
 
-    // repaint(rect);
+    onRepaint(rect);
 }
 
 // onPaint
@@ -684,7 +678,13 @@ void Widget::onRelayout()
     _isLayoutInvalid = true;
 
     if(_parentView)
-        _parentView->relayout();
+        _parentView->onRelayout(*this);
+}
+
+
+void Widget::onRelayout(Widget& widget)
+{
+    onRelayout();
 }
 
 

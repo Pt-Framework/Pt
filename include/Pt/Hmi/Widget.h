@@ -300,11 +300,14 @@ class PT_HMI_API Widget : public View
 
         virtual double onScaleFactor() const;
 
-        virtual void onRelayout();
-
         virtual void onRepaint(const Gfx::RectF& rect);
 
-        virtual void onRepaintView(View& view, const Gfx::RectF& rect);
+        virtual void onRepaint(Widget& view, const Gfx::RectF& rect);
+
+    protected:
+        virtual void onRelayout();
+
+        virtual void onRelayout(Widget& widget);
 
     protected:
         virtual void onSetWindow(Window* w);
@@ -374,8 +377,6 @@ class PT_HMI_API Widget : public View
         virtual void onLeaveEvent(const LeaveEvent& ev);
 
     private:
-        virtual Visual* onGetVisual();
-
         virtual Window* onGetWindow();
 
         virtual Screen* onGetScreen();
@@ -404,7 +405,6 @@ class PT_HMI_API Widget : public View
         
         Screen*                      _screen; 
         Window*                      _window; 
-        //Visual*                      _parent;
         View*                        _parentView;
 
         int                          _invalidates;

@@ -72,20 +72,8 @@ class PT_HMI_API WindowBase : public virtual Visual
             return onFromHost(w, pos);
         }
 
-     public:
-         void repaint()
-         {
-             Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-             onRepaint(rect);
-         }
-
-         void repaint(const Gfx::RectF& rect)
-         {
-             onRepaint(rect);
-         }
-
     protected:
-        virtual void onRepaint(const Gfx::RectF& rect) = 0;
+        virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
 
     protected:
         virtual void onInit(Window& w) = 0;

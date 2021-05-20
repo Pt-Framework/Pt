@@ -274,9 +274,13 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onRelayout();
 
+    virtual void onRelayout(Widget& widget);
+
     virtual void onRepaint(const Gfx::RectF& rect);
 
-    virtual void onRepaintView(View& view, const Gfx::RectF& rect);
+    virtual void onRepaint(Widget& widget, const Gfx::RectF& rect);
+
+    virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
   protected:
     virtual void onInvalidate();
@@ -357,8 +361,6 @@ class PT_HMI_API Window : public WindowBase
     void setParent(Window* parent);
 
   private:
-    virtual Visual* onGetVisual();
-
     virtual Window* onGetWindow();
 
     virtual Screen* onGetScreen();
