@@ -158,11 +158,11 @@ class PT_HMI_API Visual : public Responder
             return onScaleFactor();
         }
         
-        /** @brief Converts local to parent coordinate.
+        /** @brief Converts to parent coordinate.
         */
         Gfx::PointF toParent(const Gfx::PointF& pos) const;
 
-        /** @brief Converts parent to local coordinate.
+        /** @brief Converts to client coordinate.
         */
         Gfx::PointF fromParent(const Gfx::PointF& pos) const;
         
@@ -178,7 +178,7 @@ class PT_HMI_API Visual : public Responder
         */
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
-        /** @brief Converts to local coordinate.
+        /** @brief Converts to client coordinate.
         */
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
