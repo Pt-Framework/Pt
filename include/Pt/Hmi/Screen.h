@@ -64,17 +64,6 @@ class PT_HMI_API Screen : public WindowBase
 
         const std::vector<Window*>& windows() const;
 
-        void repaint()
-        {
-            Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-            onRepaint(rect);
-        }
-
-        void repaint(const Gfx::RectF& rect)
-        {
-            onRepaint(rect);
-        }
-
         ScreenImpl* impl();
 
     protected:
@@ -89,8 +78,6 @@ class PT_HMI_API Screen : public WindowBase
         virtual const Gfx::SizeF& onSize() const;
 
         virtual double onScaleFactor() const;
-
-        virtual void onRelayout();
 
         virtual void onRepaint(const Gfx::RectF& r);
 

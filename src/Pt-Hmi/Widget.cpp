@@ -619,24 +619,13 @@ void Widget::onInvalidate()
 
 void Widget::onRepaint(const Gfx::RectF& rect)
 {
-     //if(_parent)
-     //{
-     //    Gfx::PointF parentPos = toParent( rect.topLeft() );
-     //    Gfx::RectF parentRect( parentPos, rect.size() );
-     //    _parent->repaint(parentRect);
-     //}
-
      if(_parent)
-         _parent->onRepaint(*this, rect);
-}
-
-
-void Widget::onRepaint(Widget& widget, const Gfx::RectF& viewRect)
-{
-    Gfx::PointF pos = viewRect.topLeft() + widget.position();
-    Gfx::RectF rect( pos, viewRect.size() );
-
-    onRepaint(rect);
+     {
+         Gfx::PointF parentPos = toParent( rect.topLeft() );
+         Gfx::RectF parentRect( parentPos, rect.size() );
+         
+         _parent->repaint(parentRect);
+     }
 }
 
 // onPaint
@@ -684,13 +673,7 @@ void Widget::onRelayout()
     _isLayoutInvalid = true;
 
     if(_parent)
-        _parent->onRelayout(*this);
-}
-
-
-void Widget::onRelayout(Widget& widget)
-{
-    onRelayout();
+        _parent->onRelayout();
 }
 
 

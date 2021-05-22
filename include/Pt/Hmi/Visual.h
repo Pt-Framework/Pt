@@ -349,8 +349,6 @@ class View : public virtual Visual
 
         Screen* screen();
 
-        void relayout();
-
         Gfx::PointF toWidget(const Widget& widget, const Gfx::PointF& pos) const
         { 
             return onToWidget(widget, pos); 
@@ -361,13 +359,10 @@ class View : public virtual Visual
             return onFromWidget(widget, pos); 
         }
 
+        void relayout();
+
     protected:
         virtual void onRelayout() = 0;
-
-        virtual void onRelayout(Widget& widget) = 0;
-
-    protected:
-       virtual void onRepaint(Widget& widget, const Gfx::RectF& rect) = 0;
 
     protected:
         void add(Widget& widget);

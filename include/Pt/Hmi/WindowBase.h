@@ -73,9 +73,6 @@ class PT_HMI_API WindowBase : public virtual Visual
         }
 
     protected:
-        virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
-
-    protected:
         virtual void onInit(Window& w) = 0;
 
         virtual void onDeinit(Window& w) = 0;

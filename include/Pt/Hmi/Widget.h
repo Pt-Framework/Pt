@@ -282,26 +282,22 @@ class PT_HMI_API Widget : public View
         //void remove(Widget& w);
 
     protected:
-        virtual Visual* onParent() const;
-
-        Gfx::PointF onToParent(const Gfx::PointF& pos) const;
-
-        Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
-
         virtual const Gfx::PointF& onPosition() const;
 
         virtual const Gfx::SizeF& onSize() const;
 
         virtual double onScaleFactor() const;
 
-        virtual void onRepaint(const Gfx::RectF& rect);
+        virtual Visual* onParent() const;
 
-        virtual void onRepaint(Widget& view, const Gfx::RectF& rect);
+        Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+        virtual void onRepaint(const Gfx::RectF& rect);
 
     protected:
         virtual void onRelayout();
-
-        virtual void onRelayout(Widget& widget);
 
     protected:
         virtual void onSetWindow(Window* w);

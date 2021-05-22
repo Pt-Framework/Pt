@@ -236,29 +236,6 @@ void Screen::onEvent(const Event& ev)
 }
 
 
-//
-//void Screen::repaint()
-//{
-//    Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-//    repaint(rect);
-//}
-//
-//
-//void Screen::repaint(const Gfx::RectF& updateRect)
-//{
-//    _updateRect.unify(updateRect);
-//    ++_updates;
-//
-//    PaintEvent uev(vid(), _updateRect);
-//    Application::instance().loop().commitEvent(uev);
-//}
-
-
-void Screen::onRelayout()
-{
-}
-
-
 void Screen::onRepaint(Window& w, const Gfx::RectF& windowRect)
 {
      Pt::Gfx::PointF pos = fromClient( windowRect.topLeft(), w );
