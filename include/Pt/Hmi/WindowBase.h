@@ -62,14 +62,14 @@ class PT_HMI_API WindowBase : public virtual Visual
             return onResize(w, to);
         }
 
-        Gfx::PointF toHost(const Window& w, const Gfx::PointF& pos)
+        Gfx::PointF fromWindow(const Window& w, const Gfx::PointF& pos)
         {
-            return onToHost(w, pos);
+            return onFromWindow(w, pos);
         }
 
-        Gfx::PointF fromHost(const Window& w, const Gfx::PointF& pos) const
+        Gfx::PointF toWindow(const Window& w, const Gfx::PointF& pos) const
         {
-            return onFromHost(w, pos);
+            return onToWindow(w, pos);
         }
 
     protected:
@@ -80,9 +80,9 @@ class PT_HMI_API WindowBase : public virtual Visual
 
         virtual void onDeinit(Window& w) = 0;
 
-        virtual Gfx::PointF onToHost(const Window& w, const Gfx::PointF& pos) const = 0;
+        virtual Gfx::PointF onFromWindow(const Window& w, const Gfx::PointF& pos) const = 0;
 
-        virtual Gfx::PointF onFromHost(const Window& w, const Gfx::PointF& pos) const = 0;
+        virtual Gfx::PointF onToWindow(const Window& w, const Gfx::PointF& pos) const = 0;
 
         virtual void onShow(Window& w, bool visible) = 0; 
 

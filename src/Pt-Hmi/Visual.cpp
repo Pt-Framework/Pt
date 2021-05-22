@@ -70,6 +70,68 @@ void Visual::processEvent(const Pt::Event& ev)
     this->onEvent(ev); 
 }
 
+
+Gfx::PointF Visual::toParent(const Gfx::PointF& pos) const
+{
+    return onToParent(pos);
+}
+
+
+Gfx::PointF Visual::fromParent(const Gfx::PointF& pos) const
+{
+    return onFromParent(pos);
+}
+    
+
+Gfx::PointF Visual::toClient(const Gfx::PointF& pos, const Visual& c) const
+{
+    const Visual* b = c.parent();
+    if( ! b )
+        return pos;
+
+    if(this == b)
+        return c.onFromParent(pos);
+
+    Gfx::PointF p = toClient(pos, *b);
+    return c.fromParent(p);
+}
+
+
+Gfx::PointF Visual::fromClient(const Gfx::PointF& pos, const Visual& c) const
+{
+    const Visual* b = c.parent();
+    if( ! b )
+        return pos;
+
+    if(this == b)
+        return c.toParent(pos);
+
+    Gfx::PointF p = c.toParent(pos);
+    return fromClient(p, *b);
+}
+
+
+Gfx::PointF Visual::toScreen(const Gfx::PointF& pos) const
+{
+    const Visual* _parent = parent();
+    if( ! _parent )
+        return pos;
+
+    Gfx::PointF p = toParent(pos);
+    return _parent->toScreen(p);
+}
+
+
+Gfx::PointF Visual::fromScreen(const Gfx::PointF& pos) const
+{
+    const Visual* _parent = parent();
+    if( ! _parent )
+        return pos;
+
+    Gfx::PointF parentPos = _parent->fromScreen(pos);
+    return fromParent(parentPos);
+}
+
 ///////////////////////////////////////////////////////////////////////
 // View
 ///////////////////////////////////////////////////////////////////////
@@ -94,8 +156,8 @@ void View::relayout()
 
 void View::add(Widget& widget)
 {
-    if(widget._parentView)
-        widget._parentView->remove(widget);
+    if(widget._parent)
+        widget._parent->remove(widget);
 
     onAttach(widget);
     widget.setParent(this);
@@ -104,7 +166,7 @@ void View::add(Widget& widget)
 
 void View::remove(Widget& widget)
 {
-    if(widget._parentView != this)
+    if(widget._parent != this)
         return;
 
     onDetach(widget);

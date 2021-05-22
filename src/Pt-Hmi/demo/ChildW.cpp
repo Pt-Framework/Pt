@@ -102,7 +102,7 @@ ChildW::ChildW(const std::string& title)
     Pt::Gfx::Image toggleImage(Pt::Gfx::ImageFormat::argb32(), Pt::Gfx::Size(10,10));
     Gfx::fill(toggleImage.begin(), toggleImage.end(), Gfx::Color());
     
-    _toggleButton.setName("ToggleButton");
+    _toggleButton.setName("toggle");
     _toggleButton.setText("&Toggle Me [CTRL+I]" );
     _toggleButton.setToggle(true);  
     _toggleButton.setShortcut( &key );
@@ -113,7 +113,7 @@ ChildW::ChildW(const std::string& title)
     //Dialog button
     Pt::Hmi::Key dKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::D);
     
-    _dialogButton.setName("DialogButton");  
+    _dialogButton.setName("dialog");  
     _dialogButton.setText("&&Dia&log [CTRL+D]&");
     _dialogButton.setShortcut( &dKey );
     _dialogButton.setMargin(5);
@@ -128,7 +128,7 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setAccentColor( Gfx::Color::fromRgb8(190, 30, 30) );
     _closeButton.setHighlightColor( Gfx::Color::fromRgb8(200, 70, 70) );
 
-    _closeButton.setName("CloseButton"); 
+    _closeButton.setName("close"); 
     _closeButton.setText("Close App [CTRL+X]");
     _closeButton.setShortcut(&xKey);
     _closeButton.setMargin(5);

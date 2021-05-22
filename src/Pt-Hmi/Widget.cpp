@@ -45,7 +45,7 @@ namespace Hmi {
 Widget::Widget()
 : _screen(0)
 , _window(0)
-, _parentView(0)
+, _parent(0)
 , _invalidates(0)
 , _isLayoutInvalid(true)
 , _visible(true)
@@ -82,8 +82,8 @@ Widget::~Widget()
     while( ! _children.empty() )
         remove( *_children.back() );
 
-    if(_parentView)
-        _parentView->remove(*this);
+    if(_parent)
+        _parent->remove(*this);
 }
 
 
@@ -164,14 +164,14 @@ void Widget::setParent(View* view)
     setWindow(0);
     setScreen(0);
 
-    _parentView = 0;
+    _parent = 0;
 
     onParentChanged(0);
 
     if( ! view )
         return;
 
-    _parentView = view;
+    _parent = view;
 
     setWindow( view->window() );
     setScreen( view->screen() );
@@ -276,7 +276,7 @@ Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
         if( ! child->geometry().contains(pos) )
             continue;
 
-        Gfx::PointF p = child->fromParent(pos);
+        Gfx::PointF p = toClient(pos, *child);
         Widget* found = child->findWidget(p, input);
 
         if( ! input)
@@ -339,42 +339,48 @@ Widget* Widget::findWidget(const std::string& name)
 }
 
 
-Gfx::PointF Widget::fromWindow(const Gfx::PointF& pos) const
-{
-    return fromParent(_window, pos);
-}
-
-
-Gfx::PointF Widget::toWindow(const Gfx::PointF& pos) const
-{
-    return toParent(_window, pos);
-}
-
-
-Visual* Widget::onParent() const
-{
-    return _parentView;
-}
-
-
-Gfx::PointF Widget::onToParent(const Gfx::PointF& pos) const
-{
-    return  pos + _position;
-}
-
-
-Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
-{
-    return pos - _position;
-}
-
-
 double Widget::onScaleFactor() const
 {
     if( window() )
         return window()->scaleFactor();
 
     return 1.0;
+}
+
+
+Visual* Widget::onParent() const
+{
+    return _parent;
+}
+
+
+Gfx::PointF Widget::onToParent(const Gfx::PointF& pos) const
+{
+    if(_parent)
+        return _parent->fromWidget(*this, pos);
+
+    return pos;
+}
+
+
+Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
+{
+    if(_parent)
+        return _parent->toWidget(*this, pos);
+
+    return pos;
+}
+
+
+Gfx::PointF Widget::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
+{
+    return pos - widget.position();
+}
+
+
+Gfx::PointF Widget::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
+{
+    return pos + widget.position();
 }
 
 
@@ -613,15 +619,15 @@ void Widget::onInvalidate()
 
 void Widget::onRepaint(const Gfx::RectF& rect)
 {
-     //if(_parentView)
+     //if(_parent)
      //{
      //    Gfx::PointF parentPos = toParent( rect.topLeft() );
      //    Gfx::RectF parentRect( parentPos, rect.size() );
-     //    _parentView->repaint(parentRect);
+     //    _parent->repaint(parentRect);
      //}
 
-     if(_parentView)
-         _parentView->onRepaint(*this, rect);
+     if(_parent)
+         _parent->onRepaint(*this, rect);
 }
 
 
@@ -659,7 +665,7 @@ void Widget::onPaintContent(const Gfx::RectF& r)
             continue;
 
         // paint widget rect
-        Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );
+        Gfx::PointF updatePos = toClient( updateRect.topLeft(), *w );
         updateRect.setOrigin(updatePos);
         
         //paintContent(*w, updateRect);
@@ -677,8 +683,8 @@ void Widget::onRelayout()
 {
     _isLayoutInvalid = true;
 
-    if(_parentView)
-        _parentView->onRelayout(*this);
+    if(_parent)
+        _parent->onRelayout(*this);
 }
 
 
@@ -901,8 +907,8 @@ void Widget::show(bool s)
     
     onShow(s);
 
-    if(_parentView)
-      _parentView->onShow(*this, s);  
+    if(_parent)
+      _parent->onShow(*this, s);  
 }
 
 
@@ -956,8 +962,8 @@ void Widget::onEnable(bool e)
         w->onEnable(e);
     }
 
-    if( _parentView )
-        _parentView->onEnable(*this, e);
+    if( _parent )
+        _parent->onEnable(*this, e);
 
     invalidate();
 }
@@ -970,8 +976,8 @@ void Widget::onEnable(Widget& widget, bool isEnable)
 
 void Widget::raise()
 {
-    if(_parentView)
-        _parentView->onRaise(*this);
+    if(_parent)
+        _parent->onRaise(*this);
 
     //onRaise();
 }
@@ -1133,8 +1139,8 @@ void Widget::processMouseEvent(const MouseEvent& ev)
 
 Responder* Widget::onNextResponder()
 {
-    if(_parentView)
-        return _parentView;
+    if(_parent)
+        return _parent;
 
     return 0;
 }
@@ -1148,14 +1154,14 @@ Gfx::PointF Widget::onToNextResponder(const Gfx::PointF& pos)
 
 bool Widget::onMouseEvent(const MouseEvent& ev)
 {
-    // if(_parentView && ! consumed)
+    // if(_parent && ! consumed)
     // {
     //     Gfx::PointF p = toParent( ev.position() );
 
     //     MouseEvent ev2(0);
     //     ev2.setPosition(p);
 
-    //     _parentView->mouseEvent(ev2);
+    //     _parent->mouseEvent(ev2);
     // }
 
     // if( ev.isPress(MouseEvent::Left) )
@@ -1178,14 +1184,14 @@ void Widget::touchEvent(const TouchEvent& ev)
     if (consumed)
         return;
 
-    if(_parentView)
+    if(_parent)
     {
         Gfx::PointF p = toParent( ev.position() );
 
         TouchEvent ev2(0);
         ev2.setPosition(p);
 
-        _parentView->touchEvent(ev2);
+        _parent->touchEvent(ev2);
     }
 }
 
@@ -1207,9 +1213,9 @@ void Widget::scrollEvent(const ScrollEvent& ev)
     if(consumed)
         return;
 
-    if(_parentView)
+    if(_parent)
     {
-        _parentView->scrollEvent(ev);
+        _parent->scrollEvent(ev);
     }
 }
 

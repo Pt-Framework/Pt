@@ -91,7 +91,7 @@ void MenuBarItem::toggle()
 void MenuBarItem::open()
 {
     Gfx::PointF menuPos(0, size().height());
-    menuPos = toWindow(menuPos);
+    menuPos = window()->fromClient(menuPos, *this);
 
     if( window() )
         menuPos = window()->toScreen(menuPos);

@@ -160,84 +160,40 @@ class PT_HMI_API Visual : public Responder
         
         /** @brief Converts local to parent coordinate.
         */
-        Gfx::PointF toParent(const Gfx::PointF& pos) const
-        {
-            return onToParent(pos);
-        }
+        Gfx::PointF toParent(const Gfx::PointF& pos) const;
 
-        /** @brief Converts local to parent coordinate.
+        /** @brief Converts parent to local coordinate.
         */
-        Gfx::PointF toParent(const Visual* v, const Gfx::PointF& pos) const
-        {
-            const Visual* _parent = parent();
-            if( ! _parent )
-                return pos;
-
-            if(this == v)
-                return pos;
-            
-            Gfx::PointF p = toParent(pos);
-            return _parent->toParent(v, p);
-        }
+        Gfx::PointF fromParent(const Gfx::PointF& pos) const;
         
-        /** @brief Converts parent to local coordinate.
+        /** @brief Converts to client coordinate.
         */
-        Gfx::PointF fromParent(const Gfx::PointF& pos) const
-        {
-            return onFromParent(pos);
-        }
+        Gfx::PointF toClient(const Gfx::PointF& pos, const Visual& v) const;
 
-        /** @brief Converts parent to local coordinate.
+        /** @brief Converts to parent coordinate.
         */
-        Gfx::PointF fromParent(const Visual* v, const Gfx::PointF& pos) const
-        {
-            const Visual* _parent = parent();
-            if( ! _parent )
-                return pos;
+        Gfx::PointF fromClient(const Gfx::PointF& pos, const Visual& v) const;
 
-            if(this == v)
-                return pos;
-
-            Gfx::PointF p = _parent->fromParent(v, pos);
-            return fromParent(p);
-        }
-
-        /** @brief Converts global to local coordinate.
+        /** @brief Converts to global coordinate.
         */
-        Gfx::PointF toScreen(const Gfx::PointF& pos) const
-        {
-            const Visual* _parent = parent();
-            if( ! _parent )
-                return pos;
+        Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
-            Gfx::PointF p = toParent(pos);
-            return _parent->toScreen(p);
-        }
-
-        /** @brief Converts local to global coordinate.
+        /** @brief Converts to local coordinate.
         */
-        Gfx::PointF fromScreen(const Gfx::PointF& pos) const
-        {
-            const Visual* _parent = parent();
-            if( ! _parent )
-                return pos;
-
-            Gfx::PointF parentPos = _parent->fromScreen(pos);
-            return fromParent(parentPos);
-        }
+        Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
     protected:
-        virtual Visual* onParent() const = 0;
-
-        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const = 0;
-
         virtual const Gfx::PointF& onPosition() const = 0;
 
         virtual const Gfx::SizeF& onSize() const = 0;
 
         virtual double onScaleFactor() const = 0;
+
+        virtual Visual* onParent() const = 0;
+
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const = 0;
 
     public:
         double toPhysical(double n) const
@@ -395,6 +351,16 @@ class View : public virtual Visual
 
         void relayout();
 
+        Gfx::PointF toWidget(const Widget& widget, const Gfx::PointF& pos) const
+        { 
+            return onToWidget(widget, pos); 
+        }
+
+        Gfx::PointF fromWidget(const Widget& widget, const Gfx::PointF& pos) const
+        { 
+            return onFromWidget(widget, pos); 
+        }
+
     protected:
         virtual void onRelayout() = 0;
 
@@ -412,6 +378,10 @@ class View : public virtual Visual
         virtual Window* onGetWindow() = 0;
 
         virtual Screen* onGetScreen() = 0;
+
+        virtual Gfx::PointF onToWidget(const Widget& widget, const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onFromWidget(const Widget& widget, const Gfx::PointF& pos) const = 0;
 
     private:
         virtual void onAttach(Widget& widget) = 0;

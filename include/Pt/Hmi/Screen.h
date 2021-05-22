@@ -136,9 +136,9 @@ class PT_HMI_API Screen : public WindowBase
     
         virtual void onDeinit(Window& w);
 
-        virtual Gfx::PointF onToHost(const Window& w, const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onFromWindow(const Window& w, const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromHost(const Window& w, const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onToWindow(const Window& w, const Gfx::PointF& pos) const;
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
 

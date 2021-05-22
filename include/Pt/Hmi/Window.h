@@ -290,9 +290,9 @@ class PT_HMI_API Window : public WindowBase
     
     virtual void onDeinit(Window& w);
 
-    virtual Gfx::PointF onToHost(const Window& w, const Gfx::PointF& pos) const;
+    virtual Gfx::PointF onFromWindow(const Window& w, const Gfx::PointF& pos) const;
 
-    virtual Gfx::PointF onFromHost(const Window& w, const Gfx::PointF& pos) const;
+    virtual Gfx::PointF onToWindow(const Window& w, const Gfx::PointF& pos) const;
 
     virtual void onShow(Window& w, bool visible);
 
@@ -364,6 +364,10 @@ class PT_HMI_API Window : public WindowBase
     virtual Window* onGetWindow();
 
     virtual Screen* onGetScreen();
+
+    virtual Gfx::PointF onToWidget(const Widget& widget, const Gfx::PointF& pos) const;
+
+    virtual Gfx::PointF onFromWidget(const Widget& widget, const Gfx::PointF& pos) const;
 
     virtual void onAttach(Widget& widget);
 

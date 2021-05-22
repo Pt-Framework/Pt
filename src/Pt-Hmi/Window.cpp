@@ -412,6 +412,18 @@ Screen* Window::onGetScreen()
 }
 
 
+Gfx::PointF Window::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
+{
+    return pos - widget.position();
+}
+
+
+Gfx::PointF Window::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
+{
+    return pos + widget.position();
+}
+
+
 void Window::onAttach(Widget& widget)
 {
     _mainWidget = &widget;
@@ -667,29 +679,29 @@ Visual* Window::onParent() const
 
 Gfx::PointF Window::onToParent(const Gfx::PointF& pos) const
 {
-    if( ! _parent )
-        return pos;
+    if(_parent)
+        return _parent->fromWindow(*this, pos);
 
-    return _parent->toHost(*this, pos);
+    return pos;
 }
 
 
 Gfx::PointF Window::onFromParent(const Gfx::PointF& pos) const
 {
-    if( ! _parent )
-        return pos;
+    if(_parent)
+        return _parent->toWindow(*this, pos);
 
-    return _parent->fromHost(*this, pos);
+    return pos;
 }
 
 
-Gfx::PointF Window::onToHost(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Window::onFromWindow(const Window& w, const Gfx::PointF& pos) const
 {
     return _windowManager.toParent(w, pos);
 }
 
 
-Gfx::PointF Window::onFromHost(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Window::onToWindow(const Window& w, const Gfx::PointF& pos) const
 {
     return _windowManager.fromParent(w, pos);
 }
@@ -857,7 +869,10 @@ void Window::onRepaint(Widget& widget, const Gfx::RectF& viewRect)
 
 void Window::onRepaint(Window& w, const Gfx::RectF& windowRect)
 {
-     Pt::Gfx::PointF pos = toHost( w, windowRect.topLeft() );
+     Pt::Gfx::PointF pos = fromClient( windowRect.topLeft(), w );
+
+     //Pt::Gfx::PointF pos2 = w.toParent( windowRect.topLeft() );
+
      Gfx::RectF rect( pos, windowRect.size() );
    
      onRepaint(rect);
@@ -889,7 +904,7 @@ void Window::paintEvent(const PaintEvent& ev)
     std::vector<Window*>::iterator child;
     for(child = _windows.begin(); child != _windows.end(); ++child)
     {
-        Gfx::PointF winPos = (*child)->fromParent( rect.topLeft() );
+        Gfx::PointF winPos = toClient( rect.topLeft(), **child );
         Gfx::RectF winRect( winPos, rect.size() );
 
         winRect = winRect.intersect( Gfx::RectF( (*child)->size() ) );
@@ -1501,16 +1516,18 @@ void Window::processMouseEvent(const MouseEvent& ev)
         }
     }
 
-    // widget may be null to unset the pointer widgetv
+    // widget may be null to unset the pointer widget
     Application::instance().setPointerWidget(widget);
 
     if( widget && widget->isEnabled() )
     {
+        Gfx::PointF pos = toClient( ev.position(), *widget );
+
         MouseEvent clientEv(ev);
         clientEv.setId( widget->vid() );
-        clientEv.setPosition( widget->fromWindow(ev.position()) );
+        clientEv.setPosition(pos);
 
-        // pass down responder chain
+        // TODO: pass down responder chain
         widget->mouseEvent(clientEv);
         //Application::instance().loop().commitEvent(clientEv);
     }
@@ -1528,7 +1545,10 @@ Responder* Window::onNextResponder()
 
 Gfx::PointF Window::onToNextResponder(const Gfx::PointF& pos)
 {
-    return toParent(pos);
+    if(_parent)
+        return _parent->toClient(pos, *this);
+    
+    return pos;
 }
 
 
@@ -1578,11 +1598,15 @@ void Window::onTouchEvent(const TouchEvent& tev)
 
     if( widget && widget->isEnabled() )
     {
+        Gfx::PointF pos = toClient( tev.position(), *widget );
+
         TouchEvent ev(tev);
         ev.setId( widget->vid() );
-        ev.setPosition( widget->fromWindow(tev.position()) );
-        //Application::instance().loop().commitEvent(ev); 
+        ev.setPosition(pos);
+
+        // TODO: pass down responder chain
         widget->touchEvent(ev);
+        //Application::instance().loop().commitEvent(ev); 
     }
 }
 

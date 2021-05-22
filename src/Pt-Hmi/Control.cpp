@@ -82,7 +82,7 @@ void Control::onSetWindow(Window* w)
         return;
     }
     
-    Gfx::PointF winpos = toWindow( Gfx::PointF(0, 0) );
+    Gfx::PointF winpos = w->fromClient( Gfx::PointF(0, 0), *this );
     Gfx::PaintSurface& windowSurface = w->surface();
 
     Gfx::RectF paintRect( winpos, size() );
@@ -117,10 +117,10 @@ void Control::onPaintEvent(const PaintEvent& ev)
 {
     Widget::onPaintEvent(ev);
 
-    Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
+    Gfx::PointF pos = window()->fromClient( Gfx::PointF(0, 0), *this );
     Gfx::RectF surfaceRect( pos, size() );
     _surface.reset(surfaceRect);
-
+    
     onPaint(_surface, ev.rect() );
 }
 

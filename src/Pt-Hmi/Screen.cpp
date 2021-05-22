@@ -151,13 +151,13 @@ ScreenImpl* Screen::impl()
 }
 
 
-Gfx::PointF Screen::onToHost(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Screen::onFromWindow(const Window& w, const Gfx::PointF& pos) const
 {
     return _impl->toParent(w, pos);
 }
 
 
-Gfx::PointF Screen::onFromHost(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Screen::onToWindow(const Window& w, const Gfx::PointF& pos) const
 {
     return _impl->fromParent(w, pos);
 }
@@ -261,7 +261,7 @@ void Screen::onRelayout()
 
 void Screen::onRepaint(Window& w, const Gfx::RectF& windowRect)
 {
-     Pt::Gfx::PointF pos = toHost( w, windowRect.topLeft() );
+     Pt::Gfx::PointF pos = fromClient( windowRect.topLeft(), w );
      Gfx::RectF rect( pos, windowRect.size() );
    
      onRepaint(rect);
@@ -299,7 +299,7 @@ void Screen::paintEvent(const PaintEvent& ev)
     {
         Window* window = *it;
 
-        Gfx::PointF winPos = window->fromParent( screenRect.topLeft() );
+        Gfx::PointF winPos = toClient( screenRect.topLeft(), *window );
         Gfx::RectF winRect( winPos, screenRect.size() );
 
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );

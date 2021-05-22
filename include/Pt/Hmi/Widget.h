@@ -49,6 +49,7 @@
 #include <Pt/Hmi/Spacing.h>
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Connectable.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
@@ -104,13 +105,6 @@ class PT_HMI_API Widget : public View
         void setTextInput(bool b);
 
         bool isTextInput() const;
-
-        //
-        // coordinate transformations
-        //
-        Gfx::PointF toWindow(const Gfx::PointF& p) const;
-
-        Gfx::PointF fromWindow(const Gfx::PointF& pos) const;
 
         //
         // focus handling
@@ -381,6 +375,10 @@ class PT_HMI_API Widget : public View
 
         virtual Screen* onGetScreen();
 
+        virtual Gfx::PointF onToWidget(const Widget& widget, const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromWidget(const Widget& widget, const Gfx::PointF& pos) const;
+
         virtual void onAttach(Widget& widget);
 
         virtual void onDetach(Widget& widget);
@@ -405,7 +403,7 @@ class PT_HMI_API Widget : public View
         
         Screen*                      _screen; 
         Window*                      _window; 
-        View*                        _parentView;
+        View*                        _parent;
 
         int                          _invalidates;
         bool                         _isLayoutInvalid;
