@@ -228,7 +228,7 @@ bool PushButton::isPressed() const
 void PushButton::setPressed(bool pressed)
 {
     _isPressed = pressed;
-
+    _isBeingToggled = false;
     invalidate();
 }
 
@@ -251,12 +251,16 @@ void PushButton::onReleased()
 {
     Base::onReleased();
 
-    _isBeingToggled = false;
-
-    if( ! isToggle() )
+    if(_isBeingToggled)
+    {
+        _isBeingToggled = false;
+        clicked().send();
+    }
+    else
+    {
         setPressed(false);
-
-    clicked().send();
+        clicked().send();
+    }
 }
 
 
@@ -264,13 +268,10 @@ void PushButton::onCanceled()
 {
     Base::onCanceled();
 
-    if( isToggle() )
+    if( _isBeingToggled )
     { 
-        if(_isBeingToggled)
-        {
-            _isBeingToggled = false;
-            setPressed( ! isPressed() );
-        }
+        _isBeingToggled = false;
+        setPressed( ! isPressed() );
     }
     else
         setPressed(false);
