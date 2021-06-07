@@ -67,6 +67,8 @@ class PT_HMI_API Icon
 
         const Gfx::Image& getImage(const Gfx::SizeF& area) const;
 
+        const System::Path& getPath(const Gfx::SizeF& sizeF) const;
+
         Gfx::SizeF minimumSize() const;
 
         Gfx::SizeF maximumSize() const;
