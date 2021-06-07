@@ -260,6 +260,16 @@ const Gfx::Image& Icon::getImage(const Gfx::SizeF& sizeF) const
 }
 
 
+const System::Path& Icon::getPath(const Gfx::SizeF& sizeF) const
+{
+    IconImpl::Entry* match = _impl->findBest(sizeF);
+    if( ! match )
+        throw std::logic_error("invalid icon");
+
+    return match->path;
+}
+
+
 Gfx::SizeF Icon::minimumSize() const
 {
     return _impl->minimumSize();
