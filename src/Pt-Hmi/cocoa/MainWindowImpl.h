@@ -104,6 +104,8 @@ class MainWindowImpl : public Pt::Connectable
 
         void grabPointer();
 
+        void releasePointer();
+
         NSView* view()
         { 
             return _view;

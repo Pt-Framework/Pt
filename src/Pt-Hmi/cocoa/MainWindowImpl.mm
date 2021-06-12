@@ -37,6 +37,23 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 
+@interface MainWindow : NSWindow
+{
+}
+
+- (BOOL) canBecomeKeyWindow;
+
+@end
+
+@implementation MainWindow
+
+- (BOOL) canBecomeKeyWindow
+{
+    return YES;
+}
+
+@end
+
 namespace Pt {
 
 namespace Hmi {
@@ -59,7 +76,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     switch(type)
     {
         case Window::Popup:
-            _windowStyle = NSWindowStyleMaskTitled | 
+            _windowStyle = NSWindowStyleMaskBorderless | 
                            NSWindowStyleMaskFullSizeContentView;
             break;
 
@@ -72,7 +89,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
             break;
     }
 
-    _window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), 
+    _window = [[MainWindow alloc] initWithContentRect:NSMakeRect(at.x(), 
                                                                at.y(), 
                                                                size.width(), 
                                                                size.height()) 
@@ -81,15 +98,15 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
                                                     defer:NO];
     
     [_window setReleasedWhenClosed: NO];
-    [_window setAcceptsMouseMovedEvents:YES];
+    //[_window setAcceptsMouseMovedEvents:YES];
     [_window setInitialFirstResponder: view];
     [_window setContentView: view];    
     [_window setDelegate: view];
 
     if(type == Window::Popup)
     {
-        [_window setTitlebarAppearsTransparent: YES];
-        [_window setTitleVisibility: NSWindowTitleHidden];
+        //[_window setTitlebarAppearsTransparent: YES];
+        //[_window setTitleVisibility: NSWindowTitleHidden];
         [_window setOpaque:NO];
     }
 
@@ -120,12 +137,10 @@ double MainWindowImpl::scaleFactor() const
 
 void MainWindowImpl::setType(Window::Type type)
 {
-    // TODO: NSWindowStyleMaskBorderless for Popups
-    
     switch(type)
     {
         case Window::Popup:
-            _windowStyle = NSWindowStyleMaskTitled |
+            _windowStyle = NSWindowStyleMaskBorderless |
                            NSWindowStyleMaskFullSizeContentView;
             break;
 
@@ -204,7 +219,7 @@ void MainWindowImpl::show(bool visible)
 
         [_window orderFront: nil];
         [_window makeKeyWindow];
-        [_window makeMainWindow];
+        //[_window makeMainWindow];
     }
     else
     {
@@ -362,7 +377,15 @@ void MainWindowImpl::setState(Window::State s)
 
 void MainWindowImpl::grabPointer()
 {
-  // pointer is always tracked, even if its outside the window
+    // pointer is always tracked, even if its outside the window
+    [_window setAcceptsMouseMovedEvents:YES];
+}
+
+
+void MainWindowImpl::releasePointer()
+{
+    // pointer is always tracked, even if its outside the window
+    [_window setAcceptsMouseMovedEvents:NO];
 }
 
 

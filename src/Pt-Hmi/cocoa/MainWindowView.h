@@ -43,6 +43,8 @@
 
 - (BOOL) acceptsFirstMouse: (NSEvent *) ev;
 
+- (BOOL) canBecomeKeyWindow;
+
 - (void) drawRect: (NSRect) rect;
 
 - (void) setFrameOrigin: (NSPoint) origin;

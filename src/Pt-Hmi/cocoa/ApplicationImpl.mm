@@ -29,6 +29,7 @@
 
 #import "ApplicationImpl.h"
 #import "PixmapSurfaceImpl.h"
+#import "MainWindowImpl.h"
 
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
@@ -166,13 +167,13 @@ void ApplicationImpl::nextEvent()
 
 void ApplicationImpl::grabPointer(Window& grabber)
 {
-  // pointer is always tracked, even if its outside the window
+    grabber.impl()->grabPointer();
 }
 
 
 void ApplicationImpl::releasePointer(Window& grabber)
 {
-  // pointer is always tracked, even if its outside the window
+    grabber.impl()->releasePointer();
 }
 
 
