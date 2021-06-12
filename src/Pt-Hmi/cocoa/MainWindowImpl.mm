@@ -76,8 +76,8 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     switch(type)
     {
         case Window::Popup:
-            _windowStyle = NSWindowStyleMaskBorderless | 
-                           NSWindowStyleMaskFullSizeContentView;
+            _windowStyle = NSWindowStyleMaskBorderless;
+                           //NSWindowStyleMaskFullSizeContentView;
             break;
 
         default:
@@ -140,8 +140,8 @@ void MainWindowImpl::setType(Window::Type type)
     switch(type)
     {
         case Window::Popup:
-            _windowStyle = NSWindowStyleMaskBorderless |
-                           NSWindowStyleMaskFullSizeContentView;
+            _windowStyle = NSWindowStyleMaskBorderless;
+                           //NSWindowStyleMaskFullSizeContentView;
             break;
 
         default:
