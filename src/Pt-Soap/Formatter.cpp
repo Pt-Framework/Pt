@@ -606,12 +606,14 @@ bool Formatter::advance(const Pt::Xml::Node& node)
     {
         const Type::TypeId typeId = _paramStack.back()->type()->typeId();
 
-        // TODO: handle empty binary base64 blocks
-        // TODO: handle empty arrays
-
-        // handle empty string values
+        // handle empty elements
         if(_state == OnStartElement || _state == OnBegin)
-            _composer->setString( Pt::String() );
+        {
+            if(typeId == Type::String)
+                _composer->setString( Pt::String() );
+            else if(typeId == Type::Base64)
+                _composer->setBinary("", 0);
+        }
 
         if( ! _str.empty() )
         {
