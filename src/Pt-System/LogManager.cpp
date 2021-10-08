@@ -132,6 +132,8 @@ LogManager::LogManager()
 
 LogManager::~LogManager()
 {
+    Pt::System::RecursiveLock lock( _mutex );
+
     // target hierachy
     std::map<std::string, LogTarget*>::iterator it;
     for( it = _targetMap.begin(); it != _targetMap.end(); ++it )
@@ -157,19 +159,57 @@ LogManager::~LogManager()
 
 void LogManager::loadPlugin(const std::string& sym, const Path& path)
 {
-  _pluginManager.loadPlugin(sym, path);
+    Pt::System::RecursiveLock lock(_mutex);
+
+    _pluginManager.loadPlugin(sym, path);
 }
 
 
 void LogManager::registerPlugin(Plugin<LogChannel>& plugin)
 {
-  _pluginManager.registerPlugin(plugin);
+    Pt::System::RecursiveLock lock(_mutex);
+    
+    _pluginManager.registerPlugin(plugin);
 }
 
 
 void LogManager::unregisterPlugin(Plugin<LogChannel>& plugin)
 {
-  _pluginManager.unregisterPlugin(plugin);
+    Pt::System::RecursiveLock lock(_mutex);
+
+    std::map<std::string, LogChannel*>::iterator iter;
+    for( iter = _channelMap.begin(); iter != _channelMap.end(); ++iter )
+    {
+        std::string url = iter->first;
+
+        std::size_t colon = url.find(':');
+        if(colon == std::string::npos)
+            continue;
+
+        std::string feature = url.substr(0, colon);
+        if( feature == plugin.feature() )
+            break;
+    }
+
+    if( iter == _channelMap.end() )
+        return;
+
+    LogChannel* channel = iter->second;
+
+    std::map<std::string, LogTarget*>::iterator it;
+    for( it = _targetMap.begin(); it != _targetMap.end(); ++it )
+    {
+        LogTarget* target = it->second;
+
+        if( channel == target->channel() )
+            target->removeChannel();
+    }
+
+    channel->close();
+    _pluginManager.destroy(channel);
+    _channelMap.erase(iter);
+
+    _pluginManager.unregisterPlugin(plugin);
 }
 
 
