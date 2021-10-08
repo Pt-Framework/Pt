@@ -220,7 +220,7 @@ std::size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, std::
     if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
     {
         DWORD err = GetLastError();
-        if( ERROR_BROKEN_PIPE == err )
+        if( ERROR_BROKEN_PIPE == err || ERROR_HANDLE_EOF == err )
         {
             eof = true;
         }
