@@ -248,13 +248,13 @@ int ProcessImpl::wait()
     if( 0 > waitpid(_pid, &iStatus, WUNTRACED) )
     {
         _state = Process::Failed;
-        throw SystemError( PT_ERROR_MSG("waitpid failed") );
+        throw SystemError("waitpid failed");
     }
 
     _state = Process::Finished;
     _pid = 0;
 
-    if (!WIFEXITED(iStatus))
+    if( ! WIFEXITED(iStatus) )
         throw ProcessFailed();
 
     return WEXITSTATUS(iStatus);
@@ -265,19 +265,19 @@ bool ProcessImpl::tryWait(int& status)
 {
     int iStatus;
     pid_t ret = waitpid(_pid, &iStatus, WUNTRACED|WNOHANG);
-    if (0 > ret)
+    if(0 > ret)
     {
         _state = Process::Failed;
         throw SystemError(std::strerror(errno));
     }
 
-    if (ret == 0)
+    if(ret == 0)
         return false;
 
     _state = Process::Finished;
     _pid = 0;
 
-    if (!WIFEXITED(status))
+    if( ! WIFEXITED(status) )
         throw ProcessFailed();
 
     status = WEXITSTATUS(iStatus);
