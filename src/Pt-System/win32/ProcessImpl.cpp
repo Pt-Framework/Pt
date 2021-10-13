@@ -213,6 +213,8 @@ void ProcessImpl::kill()
     {
         throw SystemError( PT_ERROR_MSG("TerminateProcess failed") );
     }
+
+    _state = Process::Finished;
 }
 
 
@@ -224,7 +226,7 @@ int ProcessImpl::wait()
     if( WAIT_FAILED == WaitForSingleObject(m_pid.hProcess, INFINITE) )
     {
         _state = Process::Failed;
-        throw SystemError( PT_ERROR_MSG("WaitForSingleObject Failed!") );
+        throw SystemError("WaitForSingleObject failed");
     }
 
     DWORD exitCode;
@@ -232,7 +234,6 @@ int ProcessImpl::wait()
     _state = Process::Finished;
 
     checkExitCode(exitCode);
-
     return exitCode;
 }
 
@@ -255,10 +256,10 @@ bool ProcessImpl::tryWait(int& status)
         _state = Process::Finished;
 
         checkExitCode(exitCode);
-
         return true;
     }
 
+    _state = Process::Failed;
     throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
     return false;
 }
