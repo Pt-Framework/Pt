@@ -43,7 +43,7 @@ class StreamBufferTest : public Pt::Unit::TestSuite
         StreamBufferTest()
         : Pt::Unit::TestSuite("StreamBufferTest")
         {
-            Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Trace);
+            //Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Trace);
             this->registerMethod("Handshake", *this, &StreamBufferTest::Handshake);
         }
 
@@ -133,5 +133,24 @@ void StreamBufferTest::Handshake()
 
     PT_UNIT_ASSERT( client.isConnected() );
     PT_UNIT_ASSERT( server.isConnected() );
+
+    data.clear();
+    data.str( std::string() );
+
+    client.sputn("Hello Server!", 13);
+    client.pubsync();
+
+    char buf[16] = {0};
+    server.sgetn( buf, sizeof(buf) - 1 );
+
+    data.clear();
+    data.str( std::string() );
+
+    server.sputn("Hello Client!", 13);
+    server.pubsync();
+
+    char buf2[16] = {0};
+    client.sgetn( buf2, sizeof(buf2) - 1 );
+    PT_UNIT_ASSERT( std::string(buf2) == "Hello Client!" );
 }
 

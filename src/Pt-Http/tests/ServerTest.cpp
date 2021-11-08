@@ -196,7 +196,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::System::Logger::setLogLevel("Pt", Pt::System::Error);
 
             _authent.setUser( Pt::Http::Credential("testo", "testpwd") );
-/*
+
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL
             this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
@@ -208,8 +208,8 @@ class ServerTest : public Pt::Unit::TestSuite
             this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
             this->registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
             this->registerMethod( "QueryString", *this, &ServerTest::QueryString);
-            */
-            this->registerMethod("Upgrate", *this, &ServerTest::Upgrade);
+
+            this->registerMethod("Upgrade", *this, &ServerTest::Upgrade);
         }
 
         void setUp()
@@ -599,8 +599,6 @@ class ServerTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(_reply, "a=4&b=Hello");
         }
 
-
-
         void Upgrade()
         {
             /*
@@ -619,9 +617,7 @@ class ServerTest : public Pt::Unit::TestSuite
             */
         }
 
-
         Pt::Http::IOStream* _ioStream;
-
 
         void onUpgradeInput()
         {

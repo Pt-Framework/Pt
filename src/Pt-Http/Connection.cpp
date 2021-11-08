@@ -442,7 +442,7 @@ void Connection::beginSendRequest(Request& request)
             return;
         }
 
-        if( _sslbuf.writeHandshake() )
+        if( _sslbuf.writeHandshake() || _sockbuf.out_avail() > 0 )
         {
             PT_LOG_DEBUG("writing SSL handshake");
             _sockbuf.beginWrite();
@@ -763,7 +763,7 @@ void Connection::beginReceiveRequest(Request& request)
             return;
         }
 
-        if( _sslbuf.writeHandshake() )
+        if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
         {
             PT_LOG_DEBUG("writing SSL handshake");
             _sockbuf.beginWrite();

@@ -526,18 +526,22 @@ OSStatus Connection::sslRead(void* data, std::size_t* n)
         return errSSLWouldBlock;
     }       
 
-    sb->sgetc();
     std::streamsize avail = sb->in_avail();
-
+    if(avail == 0 && _maxImport == 0)
+    {
+        _wantRead = true;
+        *n = 0;
+        return errSSLWouldBlock;
+    }
+    
     std::streamsize refill = static_cast<std::streamsize>(*n);
-    refill = std::min(refill, _maxImport);
-    refill = std::min(refill, avail);
+    if(_maxImport != 0)
+        refill = std::min(refill, _maxImport);
+    else
+        refill = std::min(refill, avail);
 
     std::streamsize gcount = sb->sgetn(reinterpret_cast<char*>(data), refill);
     PT_LOG_DEBUG("read " << gcount << " bytes from input");
-
-    if(gcount > 0)
-        _maxImport -= gcount;
 
     OSStatus ret = noErr;
     

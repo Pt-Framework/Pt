@@ -320,7 +320,7 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 
         // Move leftover in _obuffer to the front
         std::size_t leftover = avail - static_cast<std::size_t>(written);
-        if(leftover > 0)  
+        if(leftover > 0)
             traits_type::move(_obuffer, _obuffer + written, leftover);
         
         this->setp(_obuffer, _obuffer + _obufferSize);

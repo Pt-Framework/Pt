@@ -33,6 +33,7 @@
 #include <Pt/SmartPtr.h>
 #include <openssl/ssl.h>
 #include <openssl/crypto.h>
+#include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/pkcs12.h>
 //#include <openssl/pem.h>
