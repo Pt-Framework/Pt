@@ -77,7 +77,7 @@ void SSLInitImpl()
         sslmtx = new Pt::System::Mutex[numLocks];
 
         // enable multi-thread support after library initialisation for OpenSSL < 1.1
-	    CRYPTO_set_locking_callback(pt_locking_callback_impl);
+        CRYPTO_set_locking_callback(pt_locking_callback_impl);
 
         // If the application does not register a thread id callback, then
         // the system's default thread identifying API is used on windows

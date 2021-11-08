@@ -38,9 +38,182 @@
 
 PT_LOG_DEFINE("Pt.Ssl.StreamBuffer")
 
+namespace {
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+
+int BIO_get_new_index()
+{
+    return 0;
+}
+
+
+BIO_METHOD* BIO_meth_new(int type, const char* name)
+{
+    BIO_METHOD* m = new BIO_METHOD; 
+    *m = {
+	      type, name,
+	      NULL,
+	      NULL,
+	      NULL,
+	      NULL,
+	      NULL,
+	      NULL,
+	      NULL,
+	      NULL
+    };
+
+    return m;
+}
+
+
+void BIO_meth_free(BIO_METHOD* m)
+{
+    delete m;
+}
+
+
+void BIO_meth_set_create(BIO_METHOD* method, int (*create)(BIO *))
+{
+  method->create = create;
+}
+
+
+void BIO_meth_set_destroy(BIO_METHOD* method, int (*destroy)(BIO *))
+{
+  method->destroy = destroy;
+}
+
+
+void BIO_meth_set_ctrl(BIO_METHOD* method, long (*ctrl)(BIO *, int, long, void *))
+{
+  method->ctrl = ctrl;
+}
+
+
+void BIO_meth_set_write(BIO_METHOD* method, int (*bwrite)(BIO *, const char *, int))
+{
+  method->bwrite = bwrite;
+}
+
+
+void BIO_meth_set_read(BIO_METHOD* method, int (*bread)(BIO *, char *, int))
+{
+  method->bread = bread;
+}
+
+
+void BIO_set_data(BIO* bio, void *ptr)
+{
+    bio->ptr = ptr;
+}
+
+
+void* BIO_get_data(BIO* bio)
+{
+    return bio->ptr;
+}
+
+
+void BIO_set_init(BIO* bio, int init)
+{
+    bio->init = init;
+}
+
+
+int BIO_get_init(BIO* bio)
+{
+    return bio->init;
+}
+
+
+void BIO_set_shutdown(BIO* bio, int shut)
+{
+    bio->shutdown = shut;
+}
+
+
+int BIO_get_shutdown(BIO* bio)
+{
+    return bio->shutdown;
+}
+
+#endif
+
+} // namespace
+
 namespace Pt {
 
 namespace Ssl {
+
+
+int Connection::bio_create(BIO* bio)
+{
+    BIO_set_init(bio, 1);
+    return 1;
+}
+
+
+int Connection::bio_destroy(BIO* bio)
+{
+    if(bio == NULL) 
+        return 0;
+
+    return 1;
+}
+
+
+long Connection::bio_ctrl(BIO *bio, int cmd, long argn, void* argv)
+{
+    void* ptr = BIO_get_data(bio);
+    return static_cast<Connection*>(ptr)->bioCtrl(bio, cmd, argn, argv);
+}
+
+
+int Connection::bio_read(BIO* bio, char *buf, int len)
+{
+    void* ptr = BIO_get_data(bio);
+    return static_cast<Connection*>(ptr)->bioRead(buf, len);
+}
+
+
+int Connection::bio_write(BIO* bio, const char *buf, int len)
+{
+    void* ptr = BIO_get_data(bio);
+    return static_cast<Connection*>(ptr)->bioWrite(buf, len);
+}
+
+
+Connection::ReleaseMethod::~ReleaseMethod()
+{
+    if(Connection::_method)
+    {
+        BIO_meth_free(Connection::_method);
+        Connection::_method = 0;
+    }
+}
+
+
+Connection::ReleaseMethod Connection::_releaseMethod;
+
+
+BIO_METHOD* Connection::createMethod()
+{
+    int index = BIO_get_new_index();
+    BIO_METHOD* method = BIO_meth_new(index|BIO_TYPE_SOURCE_SINK, "pt-ssl");
+
+    BIO_meth_set_create(method, &Connection::bio_create);
+    BIO_meth_set_destroy(method, &Connection::bio_destroy);
+    BIO_meth_set_ctrl(method, &Connection::bio_ctrl);
+    BIO_meth_set_write(method, &Connection::bio_write);
+    BIO_meth_set_read(method, &Connection::bio_read);
+
+    return method;
+}
+
+
+BIO_METHOD* Connection::_method = createMethod();
+
 
 Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 : _ios(&ios)
@@ -48,15 +221,19 @@ Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 , _out(0)
 , _ssl(0)
 , _connected(false)
+, _isReading(false)
+, _maxImport(0)
+, _isWriting(false)
 {
-    // Create the SSL objects
-    _in  = BIO_new( BIO_s_mem() );
-    _out = BIO_new( BIO_s_mem() );
-    _ssl = SSL_new( ctx.impl()->ctx() );
-
-    // Connect the BIO
+    _in  = BIO_new(_method);
+    BIO_set_data(_in, this);
     BIO_set_nbio(_in, 1);
+
+    _out = BIO_new(_method);
+    BIO_set_data(_out, this);
     BIO_set_nbio(_out, 1);
+
+    _ssl = SSL_new( ctx.impl()->ctx() );
     SSL_set_bio(_ssl, _in, _out);
 
     if(omode == Accept)
@@ -71,7 +248,7 @@ Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 Connection::~Connection()
 {
     if(_ssl)
-        SSL_free(_ssl); 
+        SSL_free(_ssl);
 }
 
 
@@ -165,12 +342,17 @@ bool Connection::writeHandshake()
 {
     PT_LOG_TRACE("Connection::writeHandshake");
 
-    std::streambuf* sb = _ios->rdbuf();
-    if( ! sb)
+    if( SSL_want_read(_ssl) || _connected )      
         return false;
 
+    _isWriting = true;
+    _isReading = false;
+    _maxImport = 0;
+
     int ret = SSL_do_handshake(_ssl);
-    PT_LOG_DEBUG("SSL_do_handshake returns " << ret);
+    PT_LOG_DEBUG("SSL_do_handshake: " << ret);
+    
+    _isWriting = false;
 
     if(ret <= 0)
     {
@@ -194,19 +376,6 @@ bool Connection::writeHandshake()
         _connected = true;
     }
 
-    if( BIO_pending(_out) )
-    {
-        char buff[1000];
-        const int n = BIO_read(_out, buff, sizeof(buff));
-        PT_LOG_DEBUG("wrote " << n << " bytes to output");
-
-        if(n <= 0)
-            throw SslError("BIO_read");
-
-        sb->sputn(buff, n);
-        return true;
-    }
-
     return SSL_want_write(_ssl);   
 }
 
@@ -215,29 +384,18 @@ bool Connection::readHandshake()
 {
     PT_LOG_TRACE("Connection::readHandshake");
 
-    std::streambuf* sb = _ios->rdbuf();
-    if( ! sb)
-        return true;
+    if( SSL_want_write(_ssl) || _connected )
+        return false;
 
-    while(_ios->rdbuf()->in_avail() > 0)
-    {
-        const std::streamsize bufsize = 2000;
-        char buf[bufsize];
-
-        std::streamsize gsize = std::min( sb->in_avail(), bufsize );
-        std::streamsize n = sb->sgetn(buf, gsize);
-
-        const int written = BIO_write(_in, buf, static_cast<int>(n));
-        assert(written == n);
-
-        if(written <= 0 || written != n)
-            throw SslError("BIO_write");
-
-        PT_LOG_DEBUG("read " << n << " bytes from input");
-    }
-
+    _isWriting = false;
+    _isReading = true;
+    _maxImport = 0;
+    
     int ret = SSL_do_handshake(_ssl);
     PT_LOG_DEBUG("SSL_do_handshake returns " << ret);
+
+    _isReading = false;
+    _maxImport = 0;
 
     if( ret <= 0 )
     {
@@ -255,13 +413,13 @@ bool Connection::readHandshake()
         }
     }
 
-    if( ret == 1 && BIO_pending(_out) <= 0 )
+    if(ret == 1)
     {
         verifyPeerName();
         _connected = true;
-    }
+    }  
 
-    return BIO_pending(_out) <= 0 && SSL_want_read(_ssl);   
+    return SSL_want_read(_ssl); 
 }
 
 
@@ -272,30 +430,23 @@ bool Connection::shutdown()
     if( ! _connected )
         return true;
 
-    std::streambuf* sb = _ios->rdbuf();
-    if( ! sb)
-        return false;
-
     int state = SSL_get_shutdown(_ssl);
     PT_LOG_DEBUG("SSL_get_shutdown() = " << state);
 
     bool shutdownSent = (SSL_SENT_SHUTDOWN & state) == SSL_SENT_SHUTDOWN;
-
     if( ! shutdownSent )
     {
         // write shutdown notify
         PT_LOG_DEBUG("write shutdown notify");
 
+        _isWriting = true;
+        _isReading = false;
+        _maxImport = 0;
+
         int r = SSL_shutdown(_ssl);
         PT_LOG_DEBUG("SSL_shutdown() = " << r);
 
-        char buf[1000];
-        const int n = BIO_read(_out, buf, sizeof(buf));
-        if(n <= 0)
-            throw SslError("BIO_read");
-
-        sb->sputn(buf, n);
-        PT_LOG_DEBUG("wrote " << n << " bytes to output");
+        _isWriting = false;
 
         if(r == 1)
         {
@@ -309,19 +460,15 @@ bool Connection::shutdown()
     // read shutdown notify
     PT_LOG_DEBUG("read shutdown notify");
 
-    BUF_MEM* bm = 0;
-    BIO_get_mem_ptr(_in, &bm);
-
-    std::streamsize avail = sb->in_avail();
-    std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), avail);
-    PT_LOG_DEBUG("refill " << refill << " bytes");
-        
-    std::streamsize gcount = sb->sgetn(bm->data + bm->length, refill);
-    bm->length += static_cast<int>( gcount );
-    PT_LOG_DEBUG("got " << gcount << " bytes from input stream");
+    _isWriting = false;
+    _isReading = true;
+    _maxImport = 0;
 
     int r = SSL_shutdown(_ssl);
     PT_LOG_DEBUG("SSL_shutdown() = " << r);
+
+    _isReading = false;
+    _maxImport = 0;
 
     if(r == 1)
     {
@@ -352,21 +499,14 @@ bool Connection::isClosed() const
 
 std::streamsize Connection::write(const char* buf, std::size_t n)
 {
-    std::streambuf* sb = _ios->rdbuf();
-    if( ! sb)
-        return 0;
-
+    _isWriting = true;
+    _isReading = false;
+    _maxImport = 0;
+    
     std::streamsize written = SSL_write(_ssl, buf, n);
     PT_LOG_DEBUG("encrypted " << written << " bytes");
 
-    BUF_MEM* bm = 0;
-    BIO_get_mem_ptr(_out, &bm);
-    if(bm->length > 0)
-    {
-        sb->sputn(bm->data, bm->length);
-        PT_LOG_DEBUG("wrote " << bm->length << " bytes to output");
-        bm->length = 0;
-    }
+    _isWriting = false;
 
     return written;
 }
@@ -374,73 +514,142 @@ std::streamsize Connection::write(const char* buf, std::size_t n)
 
 std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxImport)
 {
-    std::streambuf* sb = _ios->rdbuf();
-    if( ! sb)
-        return 0;
+    _isWriting = false;
+    _isReading = true;
+    _maxImport = maxImport;
+    
+    const int readSize = SSL_read(_ssl, buf, n);
+    PT_LOG_DEBUG("Read " << readSize << " bytes from _ssl");
+    
+    _isReading = false;
+    _maxImport = 0;
+    
+    PT_LOG_DEBUG("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
 
-    PT_LOG_DEBUG("maxImport " << maxImport);
-    if(maxImport == 0) 
-        maxImport = sb->in_avail();
+    if(readSize >= 0)
+        return readSize;
 
-    while(true) 
+    long sslerr = SSL_get_error(_ssl, readSize);
+
+    // happens when the peer has send the shutdown alert
+    if(sslerr == SSL_ERROR_ZERO_RETURN)
     {
-        // decode data from BIO buffer
-        const int readSize = SSL_read(_ssl, buf, n);
-        PT_LOG_DEBUG("Read " << readSize << " bytes from _ssl");
-        PT_LOG_DEBUG("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
-
-        if(readSize > 0)
-            return readSize;
-
-        long sslerr = SSL_get_error(_ssl, readSize);
-
-        // happens when the peer has send the shutdown alert
-        if(sslerr == SSL_ERROR_ZERO_RETURN)
-        {
-            PT_LOG_DEBUG("SSL_ERROR_ZERO_RETURN");
-            return 0;
-        }
-
-        if(sslerr != SSL_ERROR_WANT_READ)
-        {
-            PT_LOG_DEBUG("ssl error occured");
-            while( (sslerr = ERR_get_error()) ) 
-            {
-                PT_LOG_DEBUG("ERR_error_string = " << ERR_error_string(sslerr, 0));
-            }
-            
-            throw SslError("SSL_read");
-        }
-
-        if(maxImport == 0)
-            return 0;
-
-        // refill the BIO with encoded bytes for decoding
-        BUF_MEM* bm = 0;
-        BIO_get_mem_ptr(_in, &bm);
-
-        if(bm->max == bm->length)
-            continue;
-
-        sb->sgetc();
-        std::streamsize avail = sb->in_avail();
-
-        std::streamsize refill = static_cast<std::streamsize>(bm->max - bm->length);
-        refill = std::min(refill, maxImport);
-        refill = std::min(refill, avail);
-        PT_LOG_DEBUG("get " << refill << " bytes from _ios");
-
-        std::streamsize gcount = sb->sgetn(bm->data + bm->length, refill);
-        if(gcount <= 0)
-            return 0;
-
-        bm->length += static_cast<int>(gcount);
-        PT_LOG_DEBUG("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
-
-        maxImport -= gcount;
+        PT_LOG_DEBUG("SSL_ERROR_ZERO_RETURN");
+        return 0;
     }
 
+    if(sslerr == SSL_ERROR_WANT_READ)
+    {
+        PT_LOG_DEBUG("SSL_ERROR_WANT_READ");
+        return 0;
+    }
+
+    PT_LOG_DEBUG("ssl error occured");
+    while( (sslerr = ERR_get_error()) ) 
+    {
+        PT_LOG_DEBUG("ERR_error_string = " << ERR_error_string(sslerr, 0));
+    }
+            
+    throw SslError("SSL input failed");
     return 0;
+}
+
+
+int Connection::bioRead(char *buf, int len)
+{
+    std::streambuf* sb = _ios->rdbuf();
+
+    if(_isWriting || ! sb )
+    {
+        BIO_set_retry_read(_in);
+        return -1;
+    }
+    
+    std::streamsize avail = sb->in_avail();
+    if(avail == 0 && _maxImport == 0)
+    {
+        BIO_set_retry_read(_in);
+        return -1;
+    }
+
+    std::streamsize n = static_cast<std::streamsize>(len);
+    if(_maxImport != 0)
+        n = std::min(n, _maxImport);
+    else
+        n = std::min(n, avail);
+        
+    std::streamsize r = sb->sgetn(buf, n);
+    return r;
+}
+
+
+int Connection::bioWrite(const char *buf, int len)
+{
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb )
+        return -1;
+
+    if(_isReading)
+    {
+        BIO_set_retry_write(_out);
+        return -1;
+    }
+
+    std::streamsize n = sb->sputn(buf, len);
+    return n;
+}
+
+
+long Connection::bioCtrl(BIO *bio, int cmd, long argn, void* argv)
+{
+    long ret = 0;
+
+    std::streambuf* sb = _ios->rdbuf();
+
+    switch(cmd)
+    {
+        case BIO_CTRL_RESET:
+            ret = 1;
+            break;
+        
+	      case BIO_CTRL_EOF:
+		        ret = _ios->eof() ? 1 : 0;
+		        break;
+
+	      case BIO_CTRL_INFO:
+		        ret =  sb ? sb->in_avail() : 0;
+		      break;
+
+        case BIO_CTRL_WPENDING:
+            ret = 0;
+            break;
+
+        case BIO_CTRL_PENDING:
+            ret = sb ? sb->in_avail() : 0;
+            break;
+
+        case BIO_CTRL_GET_CLOSE:
+            ret = BIO_get_shutdown(bio);
+            break;
+        
+        case BIO_CTRL_SET_CLOSE:
+            BIO_set_shutdown(bio, argn);
+            ret = 1;
+            break;
+      
+	      case BIO_CTRL_DUP:
+	      case BIO_CTRL_FLUSH:
+		        ret = 1;
+		        break;
+
+	      case BIO_CTRL_PUSH:
+	      case BIO_CTRL_POP:
+	      default:
+		        ret = 0;
+		        break;
+    }
+
+    return ret;
 }
 
 } // namespace Ssl

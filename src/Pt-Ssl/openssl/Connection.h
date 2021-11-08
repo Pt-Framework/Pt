@@ -40,6 +40,11 @@ namespace Ssl {
 
 class Connection
 {
+    struct ReleaseMethod
+    {
+        ~ReleaseMethod();
+    };
+
     public:
         Connection(Context& ctx, std::ios& ios, OpenMode omode);
 
@@ -64,18 +69,44 @@ class Connection
 
         std::streamsize write(const char* buf, size_t n);
 
-        std::streamsize read(char* buf, size_t n, std::streamsize isize);
+        std::streamsize read(char* buf, size_t n, std::streamsize maxImport);
+
+    protected:
+        static int bio_create(BIO* bio);
+
+        static int bio_destroy(BIO* bio);
+
+        static long bio_ctrl(BIO *bio, int cmd, long argn, void* argv);
+
+        static int bio_read(BIO *bio, char *buf, int len);
+
+        static int bio_write(BIO *bio, const char *buf, int len);
+
+    protected:
+        int bioRead(char *buf, int len);
+
+        int bioWrite(const char *buf, int len);
+
+        long bioCtrl(BIO *bio, int cmd, long argn, void* argv);
 
     protected:
         void verifyPeerName();
 
     private:
-        std::ios* _ios;
-        BIO* _in;
-        BIO* _out;
-        SSL* _ssl;
-        std::string _peerName;
-        bool _connected;
+        static BIO_METHOD* createMethod();
+
+    private:
+        static BIO_METHOD*     _method;
+        static ReleaseMethod   _releaseMethod;
+        std::ios*              _ios;
+        BIO*                   _in;
+        BIO*                   _out;
+        SSL*                   _ssl;
+        std::string            _peerName;
+        bool                   _connected;
+        bool                   _isWriting;
+        bool                   _isReading;
+        std::streamsize        _maxImport;
 };
 
 } // namespace Ssl
