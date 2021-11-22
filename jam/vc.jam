@@ -446,18 +446,25 @@ actions updated together piecemeal Archive
 {
   set PATH=$(VISUALC_PATH);%PATH%
 
-  set _inputfile_=archive.cmd
+  set _inputfile_=$(<:S=.input)
   echo "$(>)" > %_inputfile_%
 
   if exist $(<) set _$(<:B)_=$(<)
 
   "$(AR)" /NOLOGO /out:$(<) %_$(<:B)_% @%_inputfile_%
-
+  
   del %_inputfile_%
 }
-# set PATH=$(VISUALC)\Common7/IDE;%PATH%
-# if exist $(<) set _$(<:B)_=$(<)
-# "$(AR)" /out:$(<) %_$(<:B)_% $(>)
+
+
+#actions updated together piecemeal Archive
+#{
+#  set PATH=$(VISUALC_PATH);%PATH%
+#
+#  if exist $(<) set _$(<:B)_=$(<)
+#
+#  "$(AR)" /NOLOGO /out:$(<) %_$(<:B)_% $(>)
+#}
 
 
 #WINMDFILE = /WINMDFILE: ;
