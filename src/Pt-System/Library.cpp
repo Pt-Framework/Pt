@@ -27,6 +27,7 @@
  */
 
 #include "LibraryImpl.h"
+#include <Pt/SmartPtr.h>
 #include <Pt/System/Library.h>
 #include <Pt/System/Path.h>
 #include <Pt/System/IOError.h>
@@ -58,7 +59,7 @@ Library::Library()
 Library::Library(const Path& path)
 : _impl(0)
 {
-    std::auto_ptr<LibraryImpl> impl( new LibraryImpl() );
+    Pt::AutoPtr<LibraryImpl> impl( new LibraryImpl() );
     _impl = impl.get();
     open(path);
     impl.release();

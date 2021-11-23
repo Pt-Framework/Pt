@@ -63,14 +63,18 @@ namespace Pt {
 
     @ingroup Unicode
  */
-class Char
+struct Char
 {
     public:
+#if __cplusplus >= 201103L
+        //! @brief Default Constructor.
+        Char() = default;
+#else
         //! @brief Default Constructor.
         Char()
-        : _value(0)
+        : _value()
         {}
-
+#endif
         //! @brief Construct from char.
         Char(char ch)
         : _value( (unsigned char)ch )
@@ -95,11 +99,11 @@ class Char
         { return _value; }
 
         //! @brief Assignment operator.
-        Char& operator=(const Char& ch)
+        /*Char& operator=(const Char& ch)
         { 
             _value = ch._value; 
             return *this; 
-        }
+        }*/
 
         /** @brief Narrows the character to 8-bit.
          
@@ -115,6 +119,24 @@ class Char
         Pt::uint32_t _value;
 };
 
+} // namespace Pt
+
+// workaround for partial c++11 implementations like macOS
+#if _LIBCPP_VERSION >= 5000
+
+namespace std {
+
+template <>
+struct is_trivial<Pt::Char> {
+    static const bool value = true;
+};
+
+} // namespace
+
+#endif
+
+namespace Pt {
+	
 //! @internal @brief Returns the ctype mask for the \a ch.
 PT_API std::ctype_base::mask ctypeMask(const Char& ch);
 
@@ -248,15 +270,6 @@ struct MBState
 
 namespace std {
 
-#if _LIBCPP_VERSION >= 5000
-
-template <>
-struct is_pod<Pt::Char> {
-    static const bool value = true;
-};
-
-#endif
-
 template<>
 struct char_traits<Pt::Char>
 {
@@ -321,12 +334,16 @@ struct char_traits<Pt::Char>
 
     inline static char_type* move(char_type* s1, const char_type* s2, std::size_t n)
     {
-        return (Pt::Char*) std::memmove(s1, s2, n * sizeof(Pt::Char));
+        return (Pt::Char*) std::memmove( static_cast<void*>(s1),
+                                         static_cast<const void*>(s2),
+                                         n * sizeof(Pt::Char) );
     }
 
     inline static char_type* copy(char_type* s1, const char_type* s2, std::size_t n)
     {
-        return (Pt::Char*) std::memcpy(s1, s2, n * sizeof(Pt::Char));
+        return (Pt::Char*) std::memcpy( static_cast<void*>(s1),
+                                        static_cast<const void*>(s2),
+                                        n * sizeof(Pt::Char) );
     }
 
     inline static char_type* assign(char_type* s, std::size_t n, char_type a)

@@ -34,9 +34,9 @@
 #include <Pt/Http/Authorizer.h>
 #include <Pt/Http/HttpError.h>
 #include <Pt/System/Logger.h>
+#include <Pt/SmartPtr.h>
 
 #include <limits>
-#include <memory>
 #include <cassert>
 
 PT_LOG_DEFINE("Pt.Http.Server")
@@ -698,7 +698,7 @@ void ServerImpl::onAccept(Net::TcpServer& server)
     // TODO: we should only pass the TcpSocket to the worker thread so that 
     // an Acceptor can be constructed with an event loop there
 
-    std::auto_ptr<Acceptor> handler( new Acceptor(*this, server) );
+    Pt::AutoPtr<Acceptor> handler( new Acceptor(*this, server) );
 
     PT_LOG_DEBUG("handler timeouts: " << _timeout << ", " << _keepAliveTimeout);
     handler->setTimeout(_timeout);

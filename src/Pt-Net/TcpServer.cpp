@@ -30,6 +30,7 @@
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/SmartPtr.h>
 #include <stdexcept>
 #include <memory>
 
@@ -81,7 +82,7 @@ TcpServer::TcpServer(System::EventLoop& loop)
 , _impl(0)
 {
     _impl = new TcpServerImpl(*this);
-    std::auto_ptr<TcpServerImpl> impl(_impl);
+    Pt::AutoPtr<TcpServerImpl> impl(_impl);
 
     setActive(loop);
 
@@ -94,7 +95,7 @@ TcpServer::TcpServer(const Endpoint& ep)
 , _impl(0)
 {
     _impl = new TcpServerImpl(*this);
-    std::auto_ptr<TcpServerImpl> impl(_impl);
+    Pt::AutoPtr<TcpServerImpl> impl(_impl);
 
     this->listen(ep);
 

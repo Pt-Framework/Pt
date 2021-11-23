@@ -43,7 +43,7 @@
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Logger.h"
-#include <memory>
+#include "Pt/SmartPtr.h"
 
 namespace Pt {
 
@@ -206,7 +206,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void setUp()
         {
             _loop = new Pt::System::MainLoop();
-            std::auto_ptr<Pt::System::MainLoop> loopPtr(_loop);
+            Pt::AutoPtr<Pt::System::MainLoop> loopPtr(_loop);
 
             _exitTimer.setActive(*_loop);
             _exitTimer.start(20000);

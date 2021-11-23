@@ -29,6 +29,7 @@
 #include "TcpSocketImpl.h"
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/SmartPtr.h>
 #include <stdexcept>
 #include <memory>
 #include <cassert>
@@ -76,7 +77,7 @@ TcpSocket::TcpSocket(System::EventLoop& loop)
 , _isConnected(false)
 {
     _impl = new TcpSocketImpl(*this);
-    std::auto_ptr<TcpSocketImpl> impl(_impl);
+    Pt::AutoPtr<TcpSocketImpl> impl(_impl);
 
     setActive(loop);
     impl.release();
@@ -89,7 +90,7 @@ TcpSocket::TcpSocket(TcpServer& server)
 , _isConnected(false)
 {
     _impl = new TcpSocketImpl(*this);
-    std::auto_ptr<TcpSocketImpl> impl(_impl);
+    Pt::AutoPtr<TcpSocketImpl> impl(_impl);
 
     this->accept(server);
     impl.release();
@@ -102,7 +103,7 @@ TcpSocket::TcpSocket(const Endpoint& ep)
 , _isConnected(false)
 {
     _impl = new TcpSocketImpl(*this);
-    std::auto_ptr<TcpSocketImpl> impl(_impl);
+    Pt::AutoPtr<TcpSocketImpl> impl(_impl);
 
     this->connect(ep);
     impl.release();

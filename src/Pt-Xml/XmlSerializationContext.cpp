@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Pt/SmartPtr.h>
 #include <Pt/Xml/XmlSerializationContext.h>
 #include <Pt/Xml/XmlFormatter.h>
 #include <Pt/Convert.h>
@@ -240,7 +241,7 @@ void XmlSerializationContext::onBeginLoad(void* obj, const std::type_info& fixup
     //if( it != _targets.end() && (*it)->id() == id)
     //    throw SerializationError("object loaded twice");
 
-    std::auto_ptr<Fixup> ap( new Fixup(id, obj, 0, &fixupInfo) );
+    Pt::AutoPtr<Fixup> ap( new Fixup(id, obj, 0, &fixupInfo) );
     _targets.insert(it, ap.get());
     ap.release();
 }
@@ -297,7 +298,7 @@ void XmlSerializationContext::onPrepareFixup(void* obj, const char* id, FixupInf
     std::vector<Fixup*>::iterator it;
     it = lowerBound(_pointers.begin(), _pointers.end(), id, lessFixupId);
 
-    std::auto_ptr<Fixup> ap( new Fixup(id, obj, fh, 0, m) );
+    Pt::AutoPtr<Fixup> ap( new Fixup(id, obj, fh, 0, m) );
     _pointers.insert(it, ap.get());
     ap.release();
 }

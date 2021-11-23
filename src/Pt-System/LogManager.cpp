@@ -32,6 +32,7 @@
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
 #include <Pt/DateTime.h>
+#include <Pt/SmartPtr.h>
 #include <memory>
 #include <fstream>
 
@@ -119,7 +120,7 @@ LogManager::LogManager()
     _pluginManager.registerPlugin( _serialPlugin );
 
     // Set root target to logLevel 'Error' and output channel to 'console://'
-    std::auto_ptr<LogTarget> rootTarget( new LogTarget("", 0) );
+    Pt::AutoPtr<LogTarget> rootTarget( new LogTarget("", 0) );
     _rootTarget = rootTarget.get();
     _targetMap[""] = _rootTarget;
     _rootTarget->assignLogLevel(Pt::System::Error, false);

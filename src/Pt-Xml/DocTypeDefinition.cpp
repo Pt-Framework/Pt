@@ -27,6 +27,7 @@
  */
 
 #include "ElementModel.h"
+#include <Pt/SmartPtr.h>
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/Xml/Entity.h>
 #include <Pt/Xml/Notation.h>
@@ -156,7 +157,7 @@ Entity* DocTypeDefinition::declareEntity(const Pt::String& name)
         return 0;
     }
 
-    std::auto_ptr<Entity> ep( new Entity(name) );
+    Pt::AutoPtr<Entity> ep( new Entity(name) );
     _entities.insert(lbound, ep.get());
     return ep.release();
 }
@@ -200,7 +201,7 @@ Entity* DocTypeDefinition::declareParamEntity(const Pt::String& name)
         return 0;
     }
 
-    std::auto_ptr<Entity> ep( new Entity(name) );
+    Pt::AutoPtr<Entity> ep( new Entity(name) );
     _paramEntities.insert(lbound, ep.get());
     return ep.release();
 }
@@ -244,7 +245,7 @@ Notation* DocTypeDefinition::declareNotation(const Pt::String& name)
         return 0;
     }
 
-    std::auto_ptr<Notation> ep( new Notation(name) );
+    Pt::AutoPtr<Notation> ep( new Notation(name) );
     _notations.insert(lbound, ep.get());
     return ep.release();
 }
@@ -287,7 +288,7 @@ ContentModel& DocTypeDefinition::declareContent(const QName& name)
         return (*lbound)->content();
     }
 
-    std::auto_ptr<ElementModel> ep( new ElementModel(name) );
+    Pt::AutoPtr<ElementModel> ep( new ElementModel(name) );
     _elements.insert(lbound, ep.get());
 
     ElementModel* elemDecl = ep.release();
@@ -305,7 +306,7 @@ AttributeListModel& DocTypeDefinition::declareAttributeList(const QName& name)
         return (*lbound)->attributes();
     }
 
-    std::auto_ptr<ElementModel> ep( new ElementModel(name) );
+    Pt::AutoPtr<ElementModel> ep( new ElementModel(name) );
     _elements.insert(lbound, ep.get());
     
     ElementModel* elemDecl = ep.release();
