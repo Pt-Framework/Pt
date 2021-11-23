@@ -925,29 +925,55 @@ if --with-mfc in $(ARGV)
     EchoOption WITH_MFC : "MFC Support" ;
     Configure WITH_MFC ;
 
-    if ! $(VISUALC)
+	if ! $(MFC_INCLUDES)
+	{
+		MFC_INCLUDES = [ GLOB $(VISUALC)\\VC\\atlmfc : include  ] ;
+	}
+	
+	if ! $(MFC_INCLUDES)
+	{
+		MFC_INCLUDES = [ GLOB $(VISUALC)\\atlmfc : include  ] ;
+	}
+	
+    if ! $(MFC_INCLUDES)
     {
-        Exit "ERROR: MFC not supported on " $(TOOLSET) ;
+        Exit "ERROR: MFC includes not found." ;
     }
 
-    MFC_INCLUDES = \"$(VISUALC)\\VC\\atlmfc\\include\" ;
+    MFC_INCLUDES = \"$(MFC_INCLUDES)\" ;
     EchoOption MFC_INCLUDES : "MFC Include Directory" ;
     Configure MFC_INCLUDES ;
 
-    if $(TARGET_OSPLAT:L) = "x86_64"
-    {
-        MFC_LIBDIR = \"$(VISUALC)\\VC\\atlmfc\\lib\\amd64\" ;
-    }
-    else if $(TARGET_OSPLAT:L) = "x86"
-    {
-        MFC_LIBDIR = \"$(VISUALC)\\VC\\atlmfc\\lib\" ;
-    }
-    else
-    {
-        Exit "ERROR: MFC not supported on " $(TARGET_OSPLAT) ;
-    }
+	if ! $(MFC_LIBDIR)
+	{
+		if $(TARGET_OSPLAT:L) = "x86_64"
+		{	
+			MFC_LIBDIR = [ GLOB $(VISUALC)\\VC\\atlmfc\\lib : amd64  ] ;
+		}
+		else if $(TARGET_OSPLAT:L) = "x86"
+		{		
+			MFC_LIBDIR = [ GLOB $(VISUALC)\\VC\\atlmfc : lib  ] ;
+		}
+	}
+	
+	if ! $(MFC_LIBDIR)
+	{
+		if $(TARGET_OSPLAT:L) = "x86_64"
+		{	
+			MFC_LIBDIR = [ GLOB $(VISUALC)\\atlmfc\\lib : x64  ] ;
+		}
+		else if $(TARGET_OSPLAT:L) = "x86"
+		{		
+			MFC_LIBDIR = [ GLOB $(VISUALC)\\atlmfc\\lib : x86  ] ;
+		}
+	}
 
-    MFC_LINKFLAGS = /LIBPATH:$(MFC_LIBDIR) ;
+	if ! $(MFC_LIBDIR)
+	{
+		Exit "ERROR: MFC libraries not found." ;
+	}
+
+    MFC_LINKFLAGS = /LIBPATH:\"$(MFC_LIBDIR)\" ;
     EchoOption MFC_LINKFLAGS : "MFC Linker Flags" ;
     Configure MFC_LINKFLAGS ;
 }
