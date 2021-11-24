@@ -307,7 +307,7 @@ class Arg : public ArgBaseT<T>
             if (this->m_isset)
                 return false;
 
-            unsigned n = std::strlen(str);
+            std::size_t n = std::strlen(str);
             for (int i = 1; i < argc; ++i)
             {
                 if(argv[i] && (std::strncmp(argv[i], str, n) == 0))
