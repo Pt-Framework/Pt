@@ -143,11 +143,11 @@ class PT_HMI_API Screen : public WindowBase
         {
           // keep contour size when downscaling
           if( _scaling < 1.0 )
-              return toLogical(n);
+              return toLogical( static_cast<double>(n) );
 
-          double p = toPhysical(n);
+          double p = toPhysical( static_cast<double>(n) );
           size_t s = static_cast<size_t>(p);
-          return toLogical(s);
+          return toLogical(static_cast<double>(s) );
         }
 
         Gfx::PointF align(const Gfx::PointF& p) const
