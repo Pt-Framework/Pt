@@ -183,14 +183,14 @@ class PT_GFX_API Painter
 
         /** @brief Draws the outline of a circle.
           */
-        void drawCircle(const PointF& topLeft, std::size_t diameter)
+        void drawCircle(const PointF& topLeft, double diameter)
         {
             drawEllipse(topLeft, SizeF(diameter, diameter));
         }
 
         /** @brief Fills a circular area.
         */
-        inline void fillCircle(const PointF& topLeft, std::size_t diameter)
+        inline void fillCircle(const PointF& topLeft, double diameter)
         {
             fillEllipse(topLeft, SizeF(diameter, diameter));
         }
