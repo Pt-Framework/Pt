@@ -356,10 +356,6 @@ numpunct<Pt::Char>::numpunct(std::size_t refs)
 { }
 
 
-numpunct<Pt::Char>::~numpunct()
-{ }
-
-
 Pt::Char numpunct<Pt::Char>::decimal_point() const
 { return this->do_decimal_point(); }
 
@@ -938,12 +934,6 @@ ctype<Pt::Char>::ctype(std::size_t refs)
 
 #endif
 
-
-ctype<Pt::Char>::~ctype()
-{
-}
-
-
 bool ctype<Pt::Char>::do_is(mask m, Pt::Char c) const
 {
     return (m & ctypeMask(c)) != 0;
@@ -1078,9 +1068,6 @@ codecvt<Pt::Char, char, Pt::MBState>::codecvt(std::size_t ref)
 
 #endif
 
-codecvt<Pt::Char, char, Pt::MBState>::~codecvt()
-{}
-
 //
 // codecvt facet for char/char
 //
@@ -1101,7 +1088,35 @@ codecvt<char, char, Pt::MBState>::codecvt(std::size_t ref)
 
 #endif
 
-codecvt<char, char, Pt::MBState>::~codecvt()
-{}
-
 } // namespace std
+
+namespace Pt {
+
+InitLocale::InitLocale()
+{
+    std::locale loc = std::locale();
+
+    bool hasFacet = std::has_facet< std::ctype<Pt::Char> >(loc);
+    if( ! hasFacet )
+    {
+        std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+    }
+}
+
+
+InitLocale::~InitLocale()
+{
+    std::locale current = std::locale();
+
+    bool hasFacet = std::has_facet< std::ctype<Pt::Char> >(current);
+    if( hasFacet )
+    {
+        std::locale loc( std::locale::classic(), current, std::locale::all);
+        std::locale::global(loc);
+    }
+}
+
+} //namespace

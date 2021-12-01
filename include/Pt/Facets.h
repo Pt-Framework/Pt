@@ -58,8 +58,6 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
     public:
         explicit numpunct(std::size_t refs = 0);
 
-        virtual ~numpunct();
-
         char_type decimal_point() const;
 
         char_type thousands_sep() const;
@@ -134,9 +132,6 @@ class PT_API num_put< Pt::Char,
         { return id; }
 
     protected:
-        virtual ~num_put()
-        {}
-
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, bool val) const;
 
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long val) const;
@@ -250,8 +245,6 @@ class PT_API num_get< Pt::Char,
     public:
         explicit ctype(std::size_t refs = 0);
 
-        virtual ~ctype();
-
         bool is(mask m, Pt::Char c) const
         { return this->do_is(m, c); }
 
@@ -337,8 +330,6 @@ class PT_API num_get< Pt::Char,
 
     public:
         explicit codecvt(std::size_t ref = 0);
-
-        virtual ~codecvt();
 
         codecvt_base::result out(Pt::MBState& state, 
                                  const Pt::Char* from,
@@ -428,8 +419,6 @@ class PT_API num_get< Pt::Char,
     public:
         explicit codecvt(std::size_t ref = 0);
 
-        virtual ~codecvt();
-
         codecvt_base::result out(Pt::MBState& state, 
                                  const char* from,
                                  const char* from_end, 
@@ -502,22 +491,18 @@ class PT_API num_get< Pt::Char,
 
 } // namespace std
 
-
 namespace Pt {
 
 static std::ios_base::Init pt_stream_init;
 
-static struct PT_API InitLocale
+struct PT_API InitLocale
 {
-    InitLocale()
-    {
-        std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-        std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-        std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-        std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-        
-    }
-} pt_init_locale;
+    InitLocale();
+    
+    ~InitLocale();
+};
+
+static InitLocale pt_init_locale;
 
 } // namespace Pt
 
