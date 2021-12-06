@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 Marc Boris Dürner
+ * Copyright (C) 2014 Marc Boris Duerner
  * Copyright (C) 2014 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
