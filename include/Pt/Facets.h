@@ -88,41 +88,42 @@ class PT_API num_put< Pt::Char,
     public:
         typedef Pt::Char char_type;
         typedef ostreambuf_iterator<Pt::Char> iter_type;
+        typedef basic_ostream<Pt::Char> stream_type;
 
         explicit num_put(std::size_t refs = 0)
         : locale::facet(refs)
         { }
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, bool val) const
+        iter_type put(iter_type s, stream_type& f, char_type fill, bool val) const
         { return this->do_put( s, f, fill, val ); }
 
         // NOTE: rouguwave solaris
-        iter_type put(iter_type s, ios_base& f, char_type fill, int val) const
+        iter_type put(iter_type s, stream_type& f, char_type fill, int val) const
         { return this->do_put( s, f, fill, long(val) ); }
 
         // NOTE: rouguwave solaris
-        iter_type put(iter_type s, ios_base& f, char_type fill, unsigned val) const
+        iter_type put(iter_type s, stream_type& f, char_type fill, unsigned val) const
         { return this->do_put( s, f, fill, (unsigned long)(val) ); }
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, long val) const
+        iter_type put(iter_type s, stream_type& f, char_type fill, long val) const
         { return this->do_put( s, f, fill, val ); }
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, unsigned long val) const
+        iter_type put(iter_type s, stream_type& f, char_type fill, unsigned long val) const
         { return this->do_put( s, f, fill, val ); }
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, long long val) const
+        iter_type put(iter_type s, stream_type& f, char_type fill, long long val) const
         { return this->do_put( s, f, fill, val ); }
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, unsigned long long val) const
+        iter_type put(iter_type s, stream_type& f, char_type fill, unsigned long long val) const
         { return this->do_put( s, f, fill, val ); }
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, double val) const
+        iter_type put(iter_type s, stream_type& f, char_type fill, double val) const
         { return this->do_put( s, f, fill, val ); }
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, long double val) const
+        iter_type put(iter_type s, stream_type& f, char_type fill, long double val) const
         { return this->do_put( s, f, fill, val ); }
 
-         iter_type put(iter_type s, ios_base& f, char_type fill, const void* val) const
+         iter_type put(iter_type s, stream_type& f, char_type fill, const void* val) const
         { return this->do_put( s, f, fill, val ); }
 
         static locale::id id;
@@ -132,21 +133,21 @@ class PT_API num_put< Pt::Char,
         { return id; }
 
     protected:
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, bool val) const;
+        virtual iter_type do_put(iter_type s, stream_type& f, char_type fill, bool val) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long val) const;
+        virtual iter_type do_put(iter_type s, stream_type& f, char_type fill, long val) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, unsigned long val) const;
+        virtual iter_type do_put(iter_type s, stream_type& f, char_type fill, unsigned long val) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long long val) const;
+        virtual iter_type do_put(iter_type s, stream_type& f, char_type fill, long long val) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, unsigned long long val) const;
+        virtual iter_type do_put(iter_type s, stream_type& f, char_type fill, unsigned long long val) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, double val) const;
+        virtual iter_type do_put(iter_type s, stream_type& f, char_type fill, double val) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long double  val) const;
+        virtual iter_type do_put(iter_type s, stream_type& f, char_type fill, long double  val) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,  const void*) const;
+        virtual iter_type do_put(iter_type s, stream_type& f, char_type fill,  const void*) const;
 };
 
 
@@ -157,42 +158,43 @@ class PT_API num_get< Pt::Char,
     public:
         typedef Pt::Char char_type;
         typedef istreambuf_iterator<Pt::Char> iter_type;
+        typedef basic_istream<Pt::Char> stream_type;
 
         explicit num_get(std::size_t refs = 0)
         : locale::facet(refs)
         {}
 
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, bool& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, bool& val) const
         { return this->do_get(it, end, f, s, val); }
 
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, long& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, long& val) const
         { return this->do_get(it, end, f, s, val); }
 
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, long long int& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, long long int& val) const
         { return this->do_get(it, end, f, s, val); }
 
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, unsigned short& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, unsigned short& val) const
         { return this->do_get(it, end, f, s, val); }
 
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, unsigned int& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, unsigned int& val) const
         { return this->do_get(it, end, f, s, val); }
 
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, unsigned long& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, unsigned long& val) const
         { return this->do_get(it, end, f, s, val); }
         
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, unsigned long long & val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, unsigned long long & val) const
         { return this->do_get(it, end, f, s, val); }
         
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, float& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, float& val) const
         { return this->do_get(it, end, f, s, val); }
 
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, double& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, double& val) const
         { return this->do_get(it, end, f, s, val); }
 
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, long double& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, long double& val) const
         { return this->do_get(it, end, f, s, val); }
 
-        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, void*& val) const
+        iter_type get(iter_type it, iter_type end, stream_type& f, ios_base::iostate& s, void*& val) const
         { return this->do_get(it, end, f, s, val); }
 
         static locale::id id;
@@ -202,29 +204,28 @@ class PT_API num_get< Pt::Char,
         { return id; }
 
     protected:
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, bool&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, bool&) const;
 
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, long&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, long&) const;
         
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, long long&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, long long&) const;
         
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, unsigned short&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, unsigned short&) const;
 
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, unsigned int&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, unsigned int&) const;
 
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, unsigned long&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, unsigned long&) const;
 
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, unsigned long long&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, unsigned long long&) const;
 
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, float&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, float&) const;
 
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, double&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, double&) const;
 
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, long double&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, long double&) const;
 
-        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, void*&) const;
+        virtual iter_type do_get(iter_type, iter_type, stream_type&, ios_base::iostate&, void*&) const;
 };
-
 
 #if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
   template <>

@@ -409,14 +409,15 @@ locale::id num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::id;
 
 
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, bool val) const
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, stream_type& f, char_type fill, bool val) const
 {
     if( 0 == (f.flags() & ios_base::boolalpha) )
         return do_put(s, f, fill, static_cast<long>(val));
     
     typedef Pt::Char char_type;
-    const numpunct<char_type>& np = use_facet< numpunct<char_type> >( f.getloc() );
- 
+    //const numpunct<char_type>& np = use_facet< numpunct<char_type> >( f.getloc() );
+    const numpunct<char_type> np;
+
     Pt::String str = val ? np.truename() : np.falsename();
  
     streamsize width = f.width(0);
@@ -443,7 +444,7 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
 
 
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, long val) const
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, stream_type& f, char_type fill, long val) const
 {
 	// TODO: grouping
     //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
@@ -467,7 +468,7 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
 
 
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, long long val) const
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, stream_type& f, char_type fill, long long val) const
 {
 	// TODO: grouping
     //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
@@ -491,7 +492,7 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
 
 
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, unsigned long val) const
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, stream_type& f, char_type fill, unsigned long val) const
 {
 	// TODO: grouping
     //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
@@ -515,7 +516,7 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
 
 
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, unsigned long long val) const
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, stream_type& f, char_type fill, unsigned long long val) const
 {
 	// TODO: grouping
     //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
@@ -539,7 +540,7 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
 
 
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, double val) const
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, stream_type& f, char_type fill, double val) const
 {
     putFloat(s, val, f.flags(), f.width(0), fill, f.precision());
     return s;
@@ -547,7 +548,7 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
 
 
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, long double val) const
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, stream_type& f, char_type fill, long double val) const
 {
     putFloat(s, val, f.flags(), f.width(0), fill, f.precision());
     return s;
@@ -555,7 +556,7 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
 
 
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, const void* ptr) const
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, stream_type& f, char_type fill, const void* ptr) const
 {
     std::size_t val = reinterpret_cast<std::size_t>(ptr);
     putHex(s, val, f.flags(), f.width(0), fill);
@@ -571,12 +572,13 @@ locale::id num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::id;
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            bool& val) const
 {
     if(stream.flags() & ios_base::boolalpha) 
     {
-        const numpunct<Pt::Char>& np = use_facet< numpunct<Pt::Char> >(stream.getloc());
+        //const numpunct<Pt::Char>& np = use_facet< numpunct<Pt::Char> >(stream.getloc());
+        const numpunct<Pt::Char> np;
         const Pt::String truename  = np.truename();
         const Pt::String falsename = np.falsename();
         bool true_ok  = true;
@@ -636,7 +638,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            long& val) const
 {
     bool ok = false;
@@ -666,7 +668,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            long long& val) const
 {
     bool ok = false;
@@ -696,7 +698,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            unsigned short& val) const
 {
     bool ok = false;
@@ -726,7 +728,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            unsigned int& val) const
 {
     bool ok = false;
@@ -756,7 +758,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            unsigned long& val) const
 {    
     bool ok = false;
@@ -786,7 +788,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            unsigned long long& val) const
 {
     bool ok = false;
@@ -829,7 +831,8 @@ void Initialize_get_float(const ctype<Pt::Char>& ct, Pt::Char& Plus, Pt::Char& M
 */
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           basic_istream<Pt::Char>& stream, 
+                                                           stream_type::iostate& state, 
                                                            float& val) const
 {
     // accept scientific and fixed format. The respective maniuplators 
@@ -851,7 +854,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            double& val) const
 {
     // accept scientific and fixed format. The respective maniuplators 
@@ -872,7 +875,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            long double& val) const
 {
     // accept scientific and fixed format. The respective maniuplators 
@@ -893,7 +896,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
-                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           stream_type& stream, ios_base::iostate& state, 
                                                            void*& val) const
 {
     std::size_t addr = 0;
