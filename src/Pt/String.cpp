@@ -812,6 +812,72 @@ basic_string<Pt::Char> basic_string<Pt::Char>::widen(const std::string& str)
 
 
 INLINE
+basic_istream<Pt::Char>& operator>>(basic_istream<Pt::Char>& is, 
+                                    basic_string<Pt::Char>& str)
+{
+    typedef basic_istream<Pt::Char> stream_type;
+    typedef basic_istream<Pt::Char>::traits_type traits_type;
+    typedef std::ctype<Pt::Char> ctype;
+    typedef basic_string<Pt::Char>::size_type size_type;
+
+    std::ios_base::iostate state = std::ios_base::goodbit;
+    size_type gcount = 0;
+    
+    const stream_type::sentry sentry(is);
+    if(sentry) 
+    {
+        try 
+        {
+            // NOTE: use ctype from stream locale
+            std::ctype<Pt::Char> ct;
+            str.clear();
+
+            size_type width = static_cast<size_type>( is.width() );
+            size_type size = str.max_size();
+            
+            if ( is.width() > 0 && width < str.max_size() )
+                size = width;
+
+            traits_type::int_type c = is.rdbuf()->sgetc();
+
+            while( size-- > 0 ) 
+            {
+                bool isEof = traits_type::eq_int_type(traits_type::eof(), c);
+                if(isEof) 
+                {
+                    state |= std::ios_base::eofbit;
+                    break;
+                } 
+
+                Pt::Char ch = traits_type::to_char_type(c);
+                bool isSpace = ct.is(ctype::space, ch);
+                if(isSpace) 
+                    break;
+
+                str += ch;
+                ++gcount;
+
+                c = is.rdbuf()->snextc();
+            }
+        }
+        catch(...)
+        {
+            is.setstate(std::ios_base::badbit);
+            throw;
+        }
+    }
+
+    is.width(0);
+
+    if( gcount == 0 )
+        state |= std::ios_base::failbit;
+
+    is.setstate(state);
+    return is;
+}
+
+
+INLINE
 ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str)
 {
     Pt::TextOStream tout(out, new Pt::Utf8Codec());

@@ -1441,7 +1441,14 @@ inline bool operator>=(const basic_string<Pt::Char>& a, const char* b)
 inline bool operator>=(const char* b, const basic_string<Pt::Char>& a)
 { return a.compare(b) <= 0; }
 
-/** @brief Stream insertion operator.
+/** @brief Extraction operator.
+
+    @related std::basic_string<Pt::Char>
+*/
+PT_API basic_istream<Pt::Char>& operator>>(basic_istream<Pt::Char>& is, 
+                                           basic_string<Pt::Char>& _Str); 
+
+/** @brief Insertion operator.
 
     @related std::basic_string<Pt::Char>
 */
