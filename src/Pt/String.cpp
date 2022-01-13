@@ -885,4 +885,56 @@ ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str)
     return out;
 }
 
+//INLINE
+//basic_ostream<Pt::Char>& operator<<(basic_ostream<Pt::Char>& _Ostr,
+//                                    const basic_string<Pt::Char>& _Str)
+//{
+//	typedef basic_ostream<Pt::Char> _Myos;
+//  typedef basic_ostream<Pt::Char> _Myos;
+//	typedef basic_string<Pt::Char> _Mystr;
+//	typedef typename _Mystr::size_type _Mysizt;
+//
+//	ios_base::iostate _State = ios_base::goodbit;
+//	_Mysizt _Size = _Str.size();
+//	_Mysizt _Pad = _Ostr.width() <= 0 || (_Mysizt)_Ostr.width() <= _Size
+//		? 0 : (_Mysizt)_Ostr.width() - _Size;
+//	const typename _Myos::sentry _Ok(_Ostr);
+//
+//	if (!_Ok)
+//		_State |= ios_base::badbit;
+//	else
+//	{
+//	  try
+//    {
+//		  if ((_Ostr.flags() & ios_base::adjustfield) != ios_base::left)
+//			  for (; 0 < _Pad; --_Pad)	// pad on left
+//				  if (_Traits::eq_int_type(_Traits::eof(),
+//					  _Ostr.rdbuf()->sputc(_Ostr.fill())))
+//					  {	// insertion failed, quit
+//					  _State |= ios_base::badbit;
+//					  break;
+//					  }
+//
+//		  if (_State == ios_base::goodbit
+//			  && _Ostr.rdbuf()->sputn(_Str.c_str(), (streamsize)_Size)
+//				  != (streamsize)_Size)
+//				  _State |= ios_base::badbit;
+//		  else
+//			  for (; 0 < _Pad; --_Pad)	// pad on right
+//				  if (_Traits::eq_int_type(_Traits::eof(),
+//					  _Ostr.rdbuf()->sputc(_Ostr.fill())))
+//					  {	// insertion failed, quit
+//					  _State |= ios_base::badbit;
+//					  break;
+//					  }
+//		  _Ostr.width(0);
+//    }
+//		_CATCH_IO_(_Ostr)
+//	}
+//
+//	_Ostr.setstate(_State);
+//	return (_Ostr);
+//}
+
+
 } // namespace std

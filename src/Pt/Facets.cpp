@@ -26,6 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#define PT_HIDE_USE_FACET
+
+#include <Pt/Facets.h>
 #include <Pt/Convert.h>
 #include <algorithm>
 
@@ -1099,14 +1102,14 @@ InitLocale::InitLocale()
 {
     std::locale loc = std::locale();
 
-    bool hasFacet = std::has_facet< std::ctype<Pt::Char> >(loc);
-    if( ! hasFacet )
-    {
-        std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-        std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-        std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-        std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-    }
+    //bool hasFacet = std::has_facet< std::ctype<Pt::Char> >(loc);
+    //if( ! hasFacet )
+    //{
+    //    std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+    //    std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+    //    std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+    //    std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+    //}
 }
 
 
@@ -1120,6 +1123,30 @@ InitLocale::~InitLocale()
         std::locale loc( std::locale::classic(), current, std::locale::all);
         std::locale::global(loc);
     }
+}
+
+
+const std::ctype<Pt::Char>& useCType(const std::locale& loc)
+{
+  return std::use_facet< std::ctype<Pt::Char> >(loc);
+}
+
+
+const std::numpunct<Pt::Char>& useNumPunct(const std::locale& loc)
+{
+  return std::use_facet< std::numpunct<Pt::Char> >(loc);
+}
+
+
+const std::num_get<Pt::Char>& useNumGet(const std::locale& loc)
+{
+  return std::use_facet< std::num_get<Pt::Char> >(loc);
+}
+
+
+const std::num_put<Pt::Char>& useNumPut(const std::locale& loc)
+{
+  return std::use_facet< std::num_put<Pt::Char> >(loc);
 }
 
 } //namespace

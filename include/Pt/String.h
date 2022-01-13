@@ -1454,6 +1454,13 @@ PT_API basic_istream<Pt::Char>& operator>>(basic_istream<Pt::Char>& is,
 */
 PT_API ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str);
 
+/** @brief Insertion operator.
+
+    @related std::basic_string<Pt::Char>
+*/
+//PT_API basic_ostream<Pt::Char>& operator<<(basic_ostream<Pt::Char>& os,
+//                                           const basic_string<Pt::Char>& _Str);
+
 } // namespace std
 
 namespace Pt {

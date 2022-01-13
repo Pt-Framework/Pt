@@ -488,9 +488,70 @@ class PT_API num_get< Pt::Char,
                               std::size_t max) const = 0;
 
         virtual int do_max_length() const throw() = 0;
-}; 
+};
 
-} // namespace std
+} // namespace
+
+#ifndef PT_HIDE_USE_FACET
+
+namespace Pt {
+
+PT_API const std::ctype<Pt::Char>& useCType(const std::locale& l);
+PT_API const std::numpunct<Pt::Char>& useNumPunct(const std::locale& l);
+PT_API const std::num_get<Pt::Char>& useNumGet(const std::locale& l);
+PT_API const std::num_put<Pt::Char>& useNumPut(const std::locale& l);
+
+} // namespace
+
+namespace std {
+
+template<>
+inline const ctype<Pt::Char>& use_facet(const locale& loc)
+{
+  static const ctype<Pt::Char> ct;
+
+  if( has_facet< ctype<Pt::Char> >(loc) )
+    return Pt::useCType(loc);
+
+  return ct;
+}
+
+template<>
+inline const numpunct<Pt::Char>& use_facet(const locale& loc)
+{
+  static const numpunct<Pt::Char> ct;
+
+  if( has_facet< numpunct<Pt::Char> >(loc) )
+    return Pt::useNumPunct(loc);
+
+  return ct;
+}
+
+template<>
+inline const num_get<Pt::Char>& use_facet(const locale& loc)
+{
+  static const num_get<Pt::Char> ct;
+
+  if( has_facet< num_get<Pt::Char> >(loc) )
+    return Pt::useNumGet(loc);
+
+  return ct;
+}
+
+template<>
+inline const num_put<Pt::Char>& use_facet(const locale& loc)
+{
+  static const num_put<Pt::Char> ct;
+
+  if( has_facet< num_put<Pt::Char> >(loc) )
+    return Pt::useNumPut(loc);
+
+  return ct;
+}
+
+} // namespace
+
+#endif
 
 namespace Pt {
 
@@ -505,6 +566,6 @@ struct PT_API InitLocale
 
 static InitLocale pt_init_locale;
 
-} // namespace Pt
+} // namespace
 
 #endif
