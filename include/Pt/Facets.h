@@ -553,19 +553,4 @@ inline const num_put<Pt::Char>& use_facet(const locale& loc)
 
 #endif
 
-namespace Pt {
-
-static std::ios_base::Init pt_stream_init;
-
-struct PT_API InitLocale
-{
-    InitLocale();
-    
-    ~InitLocale();
-};
-
-static InitLocale pt_init_locale;
-
-} // namespace
-
 #endif
