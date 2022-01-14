@@ -1098,38 +1098,136 @@ codecvt<char, char, Pt::MBState>::codecvt(std::size_t ref)
 
 namespace Pt {
 
-ctype_default<Pt::Char>::ctype_default(std::size_t refs)
-: std::ctype<Pt::Char>(refs)
-{ }
+template<typename CharT>
+class ctype_default : public std::ctype<CharT>
+{};
 
 
-ctype_default<Pt::Char>::~ctype_default()
-{ }
+template<typename CharT>
+class numpunct_default : public std::numpunct<CharT>
+{};
 
 
-numpunct_default<Pt::Char>::numpunct_default(std::size_t refs)
-: std::numpunct<Pt::Char>(refs)
-{ }
+template<typename CharT, typename TraitsT = std::istreambuf_iterator<CharT> >
+class num_get_default : public std::num_get<CharT, TraitsT>
+{};
 
 
-numpunct_default<Pt::Char>::~numpunct_default()
-{ }
+template<typename CharT, typename TraitsT = std::ostreambuf_iterator<CharT> >
+class num_put_default : public std::num_put<CharT, TraitsT>
+{};
+
+} // namespace
+
+namespace {
+
+class DefaultFacets
+{
+    public:
+        DefaultFacets()
+        {
+            ctype();
+            numpunct();
+            num_get();
+            num_put();
+        }
+
+      static const std::ctype<Pt::Char>& ctype()
+      {
+          static const std::ctype<Pt::Char> ctype;
+          return ctype;
+      }
+
+      static const std::numpunct<Pt::Char>& numpunct()
+      {
+          static const std::numpunct<Pt::Char> npunct;
+          return npunct;
+      }
+
+      static const std::num_get<Pt::Char>& num_get()
+      {
+          static const std::num_get<Pt::Char> nget;
+          return nget;
+      }
+
+      static const std::num_put<Pt::Char>& num_put()
+      {
+          static const std::num_put<Pt::Char> nput;
+          return nput;
+      }
+};
+
+static const DefaultFacets defaultFacets;
+
+} // namespace
+
+namespace std {
+
+template<>
+bool has_facet< ctype<Pt::Char> >(const locale& loc)
+{
+  return true;
+}
 
 
-num_get_default< Pt::Char, std::istreambuf_iterator<Pt::Char> >::num_get_default(std::size_t refs)
-: std::num_get<Pt::Char>(refs)
-{ }
+template<>
+const ctype<Pt::Char>& use_facet(const locale& loc)
+{
+  if( has_facet< Pt::ctype_default<Pt::Char> >(loc) )
+    return std::use_facet< Pt::ctype_default<Pt::Char> >(loc);
+
+  return DefaultFacets::ctype();
+}
 
 
-num_get_default< Pt::Char, std::istreambuf_iterator<Pt::Char> >::~num_get_default()
-{ }
+template<>
+bool has_facet< numpunct<Pt::Char> >(const locale& loc)
+{
+  return true;
+}
 
 
-num_put_default< Pt::Char, std::ostreambuf_iterator<Pt::Char> >::num_put_default(std::size_t refs)
-: std::num_put<Pt::Char>(refs)
-{ }
+template<>
+const numpunct<Pt::Char>& use_facet(const locale& loc)
+{
+  if( has_facet< Pt::numpunct_default<Pt::Char> >(loc) )
+    return std::use_facet< Pt::numpunct_default<Pt::Char> >(loc);
 
-num_put_default< Pt::Char, std::ostreambuf_iterator<Pt::Char> >::~num_put_default()
-{ }
+  return DefaultFacets::numpunct();
+}
+
+
+template<>
+bool has_facet< num_get<Pt::Char> >(const locale& loc)
+{
+  return true;
+}
+
+
+template<>
+const num_get<Pt::Char>& use_facet(const locale& loc)
+{
+  if( has_facet< Pt::num_get_default<Pt::Char> >(loc) )
+    return std::use_facet< Pt::num_get_default<Pt::Char> >(loc);
+
+  return DefaultFacets::num_get();
+}
+
+
+template<>
+bool has_facet< num_put<Pt::Char> >(const locale& loc)
+{
+  return true;
+}
+
+
+template<>
+const num_put<Pt::Char>& use_facet(const locale& loc)
+{
+  if( has_facet< Pt::num_put_default<Pt::Char> >(loc) )
+    return std::use_facet< Pt::num_put_default<Pt::Char> >(loc);
+
+  return DefaultFacets::num_put();
+}
 
 } // namespace
