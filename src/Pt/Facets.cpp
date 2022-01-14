@@ -1096,35 +1096,40 @@ codecvt<char, char, Pt::MBState>::codecvt(std::size_t ref)
 
 } // namespace std
 
-
 namespace Pt {
 
 ctype_default<Pt::Char>::ctype_default(std::size_t refs)
 : std::ctype<Pt::Char>(refs)
 { }
 
+
 ctype_default<Pt::Char>::~ctype_default()
-{}
+{ }
+
 
 numpunct_default<Pt::Char>::numpunct_default(std::size_t refs)
 : std::numpunct<Pt::Char>(refs)
 { }
 
-numpunct_default<Pt::Char>::~numpunct_default()
-{}
 
-num_get_default<Pt::Char>::num_get_default(std::size_t refs)
+numpunct_default<Pt::Char>::~numpunct_default()
+{ }
+
+
+num_get_default< Pt::Char, std::istreambuf_iterator<Pt::Char> >::num_get_default(std::size_t refs)
 : std::num_get<Pt::Char>(refs)
 { }
 
-num_get_default<Pt::Char>::~num_get_default()
-{}
 
-num_put_default<Pt::Char>::num_put_default(std::size_t refs)
+num_get_default< Pt::Char, std::istreambuf_iterator<Pt::Char> >::~num_get_default()
+{ }
+
+
+num_put_default< Pt::Char, std::ostreambuf_iterator<Pt::Char> >::num_put_default(std::size_t refs)
 : std::num_put<Pt::Char>(refs)
 { }
 
-num_put_default<Pt::Char>::~num_put_default()
-{}
+num_put_default< Pt::Char, std::ostreambuf_iterator<Pt::Char> >::~num_put_default()
+{ }
 
-}
+} // namespace

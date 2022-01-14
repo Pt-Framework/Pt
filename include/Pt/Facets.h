@@ -494,11 +494,12 @@ class PT_API num_get< Pt::Char,
 
 namespace Pt {
 
-template<typename T>
-class ctype_default : public std::ctype<T>
+template<typename CharT>
+class ctype_default : public std::ctype<CharT>
 {
   public:
     explicit ctype_default(std::size_t refs = 0);
+    
     ~ctype_default();
 };
 
@@ -508,15 +509,17 @@ class PT_API ctype_default<Pt::Char> : public std::ctype<Pt::Char>
 {
   public:
     explicit ctype_default(std::size_t refs = 0);
+    
     ~ctype_default();
 };
 
 
-template<typename T>
-class numpunct_default : public std::numpunct<T>
+template<typename CharT>
+class numpunct_default : public std::numpunct<CharT>
 {
   public:
     explicit numpunct_default(std::size_t refs = 0);
+    
     ~numpunct_default();
 };
 
@@ -526,42 +529,49 @@ class PT_API numpunct_default<Pt::Char> : public std::numpunct<Pt::Char>
 {
   public:
     explicit numpunct_default(std::size_t refs = 0);
+    
     ~numpunct_default();
 };
 
 
-template<typename T>
-class num_get_default : public std::num_get<T>
+template<typename CharT, typename TraitsT = std::istreambuf_iterator<CharT> >
+class num_get_default : public std::num_get<CharT, TraitsT>
 {
   public:
     explicit num_get_default(std::size_t refs = 0);
+    
     ~num_get_default();
 };
 
 
 template<>
-class PT_API num_get_default<Pt::Char> : public std::num_get<Pt::Char>
+class PT_API num_get_default< Pt::Char,
+                              std::istreambuf_iterator<Pt::Char> > : public std::num_get<Pt::Char>
 {
   public:
     explicit num_get_default(std::size_t refs = 0);
+    
     ~num_get_default();
 };
 
 
-template<typename T>
-class num_put_default : public std::num_put<T>
+template<typename CharT, typename TraitsT = std::ostreambuf_iterator<CharT> >
+class num_put_default : public std::num_put<CharT, TraitsT>
 {
   public:
     explicit num_put_default(std::size_t refs = 0);
+    
     ~num_put_default();
 };
 
 
 template<>
-class PT_API num_put_default<Pt::Char> : public std::num_put<Pt::Char>
+class PT_API num_put_default< Pt::Char, 
+                              std::ostreambuf_iterator<Pt::Char> > : public std::num_put<Pt::Char>
 {
   public:
     explicit num_put_default(std::size_t refs = 0);
+    
     ~num_put_default();
 };
 
@@ -575,11 +585,13 @@ inline bool has_facet< ctype<Pt::Char> >(const locale& loc)
   return true;
 }
 
+
 template<>
 inline bool has_facet< numpunct<Pt::Char> >(const locale& loc)
 {
   return true;
 }
+
 
 template<>
 inline bool has_facet< num_get<Pt::Char> >(const locale& loc)
@@ -587,11 +599,13 @@ inline bool has_facet< num_get<Pt::Char> >(const locale& loc)
   return true;
 }
 
+
 template<>
 inline bool has_facet< num_put<Pt::Char> >(const locale& loc)
 {
   return true;
 }
+
 
 template<>
 inline const ctype<Pt::Char>& use_facet(const locale& loc)
@@ -604,6 +618,7 @@ inline const ctype<Pt::Char>& use_facet(const locale& loc)
   return ct;
 }
 
+
 template<>
 inline const numpunct<Pt::Char>& use_facet(const locale& loc)
 {
@@ -614,6 +629,7 @@ inline const numpunct<Pt::Char>& use_facet(const locale& loc)
 
   return ct;
 }
+
 
 template<>
 inline const num_get<Pt::Char>& use_facet(const locale& loc)
