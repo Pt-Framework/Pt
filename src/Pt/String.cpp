@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2004-2012 Marc Boris Duerner
  * Copyright (C) 2011 Tommi Maekitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -238,7 +238,7 @@ INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* str)
 {
     size_type length = traits_type::length(str);
-    
+
     // self-assignment check
     if (str != privdata_ro())
     {
@@ -285,9 +285,9 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::append(const Pt::Char* str, size
 {
     size_type l = length();
     privreserve(l + n);
-    
+
     traits_type::copy(privdata_rw() + l, str, n);
-    
+
     setLength(l + n);
     return *this;
 }
@@ -299,10 +299,10 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::append(size_type n, Pt::Char ch)
     size_type l = length();
     privreserve(l + n);
     Pt::Char* p = privdata_rw();
-    
+
     for (size_type nn = 0; nn < n; ++nn)
         p[l + nn] = ch;
-    
+
     setLength(l + n);
     return *this;
 }
@@ -331,7 +331,7 @@ INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, size_type n, Pt::Char ch)
 {
     size_type l = length();
-    
+
     if( pos > l )
         throw out_of_range("erase");
 
@@ -341,7 +341,7 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, size_type 
     traits_type::move(p + n, p, l - pos);
     for (size_type nn = 0; nn < n; ++nn)
         p[nn] = ch;
-    
+
     setLength(l + n);
     return *this;
 }
@@ -354,14 +354,14 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::erase(size_type pos, size_type n
 
     if( pos > l )
         throw out_of_range("erase");
-    
+
     Pt::Char* p = privdata_rw();
 
     if(n > l - pos)
         n = l - pos;
 
     traits_type::move(p + pos, p + pos + n, l - pos - n);
-    
+
     setLength(l - n);
     return *this;
 }
@@ -374,7 +374,7 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type
 
     if( pos > l )
         throw out_of_range("replace");
-    
+
     if(n > l - pos)
         n = l - pos;
 
@@ -403,7 +403,7 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type
 
     if( pos > l )
         throw out_of_range("replace");
-    
+
     if(n > l - pos)
         n = l - pos;
 
@@ -464,7 +464,7 @@ int basic_string<Pt::Char>::compare(const char* str) const
     size_type size = length();
     size_type n;
     const Pt::Char* p = privdata_ro();
-    
+
     for (n = 0; n < size && str[n]; ++n)
     {
         Pt::Char ch(str[n]);
@@ -482,7 +482,7 @@ int basic_string<Pt::Char>::compare(const char* str, size_type len) const
     size_type size = length();
     size_type n;
     const Pt::Char* p = privdata_ro();
-    
+
     for (n = 0; n < size && n < len; ++n)
     {
         Pt::Char ch(str[n]);
@@ -500,7 +500,7 @@ int basic_string<Pt::Char>::compare(const wchar_t* str) const
     size_type size = length();
     size_type n;
     const Pt::Char* p = privdata_ro();
-    
+
     for (n = 0; n < size && str[n]; ++n)
     {
         Pt::Char ch(str[n]);
@@ -518,7 +518,7 @@ int basic_string<Pt::Char>::compare(const wchar_t* str, size_type len) const
     size_type size = length();
     size_type n;
     const Pt::Char* p = privdata_ro();
-    
+
     for (n = 0; n < size && n < len; ++n)
     {
         Pt::Char ch(str[n]);
@@ -537,7 +537,7 @@ int basic_string<Pt::Char>::compare(size_type pos, size_type n, const Pt::Char* 
 
     if( pos > l )
         throw out_of_range("compare");
-    
+
     if(n > l - pos)
         n = l - pos;
 
@@ -563,9 +563,9 @@ basic_string<Pt::Char>::find(const Pt::Char* token, size_type pos, size_type n) 
 
     const Pt::Char* str = privdata_ro();
 
-    for( ; n <= size - pos; ++pos) 
+    for( ; n <= size - pos; ++pos)
     {
-        if( 0 == traits_type::compare( str + pos, token, n ) ) 
+        if( 0 == traits_type::compare( str + pos, token, n ) )
         {
             return pos;
         }
@@ -581,14 +581,14 @@ basic_string<Pt::Char>::find(Pt::Char ch, size_type pos) const
 {
     const size_type size = this->size();
 
-    if(pos >= size) 
+    if(pos >= size)
         return npos;
 
     const Pt::Char* str = privdata_ro();
     const size_type n = size - pos;
 
     const Pt::Char* found = traits_type::find(str + pos, n, ch);
-    if(found) 
+    if(found)
         return found - str;
 
     return npos;
@@ -607,7 +607,7 @@ basic_string<Pt::Char>::rfind(const Pt::Char* token, size_type pos, size_type n)
     pos = min(size - n, pos);
 
     const Pt::Char* str = privdata_ro();
-    do 
+    do
     {
         if (traits_type::compare(str + pos, token, n) == 0)
         return pos;
@@ -631,7 +631,7 @@ basic_string<Pt::Char>::rfind(Pt::Char ch, size_type pos) const
     if(--size > pos)
         size = pos;
 
-    for(++size; size-- > 0; ) 
+    for(++size; size-- > 0; )
     {
         if( traits_type::eq(str[size], ch) )
             return size;
@@ -648,7 +648,7 @@ basic_string<Pt::Char>::find_first_of(const Pt::Char* s, size_type pos, size_typ
     const Pt::Char* str = privdata_ro();
     const size_type size = this->size();
 
-    for (; pos < size; ++pos) 
+    for (; pos < size; ++pos)
     {
         if( traits_type::find(s, n, str[pos]) )
             return pos;
@@ -671,7 +671,7 @@ basic_string<Pt::Char>::find_last_of(const Pt::Char* s, size_type pos, size_type
     if (--size > pos)
         size = pos;
 
-    do 
+    do
     {
         if( traits_type::find(s, n, str[size]) )
             return size;
@@ -689,7 +689,7 @@ basic_string<Pt::Char>::find_first_not_of(const Pt::Char* tok, size_type pos, si
     const Pt::Char* str = privdata_ro();
     const size_type size = this->size();
 
-    for (; pos < size; ++pos) 
+    for (; pos < size; ++pos)
     {
         if ( ! traits_type::find(tok, n, str[pos]) )
             return pos;
@@ -706,7 +706,7 @@ basic_string<Pt::Char>::find_first_not_of(Pt::Char ch, size_type pos) const
     const Pt::Char* str = privdata_ro();
     const size_type size = this->size();
 
-    for (; pos < size; ++pos) 
+    for (; pos < size; ++pos)
     {
         if ( ! traits_type::eq(str[pos], ch) ) {
             return pos;
@@ -730,7 +730,7 @@ basic_string<Pt::Char>::find_last_not_of(const Pt::Char* tok, size_type pos, siz
     if (--size > pos)
         size = pos;
 
-    do 
+    do
     {
         if ( ! traits_type::find(tok, n, str[size]) )
             return size;
@@ -754,11 +754,11 @@ basic_string<Pt::Char>::find_last_not_of(Pt::Char ch, size_type pos) const
     if (--size > pos)
         size = pos;
 
-    do 
+    do
     {
         if( ! traits_type::eq(str[size], ch) )
             return size;
-    } 
+    }
     while (size--);
 
     return npos;
@@ -811,80 +811,74 @@ basic_string<Pt::Char> basic_string<Pt::Char>::widen(const std::string& str)
 }
 
 
-INLINE
-basic_istream<Pt::Char>& operator>>(basic_istream<Pt::Char>& is, 
-                                    basic_string<Pt::Char>& str)
-{
-    typedef basic_istream<Pt::Char> stream_type;
-    typedef basic_istream<Pt::Char>::traits_type traits_type;
-    typedef std::ctype<Pt::Char> ctype;
-    typedef basic_string<Pt::Char>::size_type size_type;
+// INLINE
+// basic_istream<Pt::Char>& operator>>(basic_istream<Pt::Char>& is,
+//                                     basic_string<Pt::Char>& str)
+// {
+//     typedef basic_istream<Pt::Char> stream_type;
+//     typedef basic_istream<Pt::Char>::traits_type traits_type;
+//     typedef std::ctype<Pt::Char> ctype;
+//     typedef basic_string<Pt::Char>::size_type size_type;
 
-    std::ios_base::iostate state = std::ios_base::goodbit;
-    size_type gcount = 0;
-    
-    const stream_type::sentry sentry(is);
-    if(sentry) 
-    {
-        try 
-        {
-            // NOTE: use ctype from stream locale
-            std::ctype<Pt::Char> ct;
-            str.clear();
+//     std::ios_base::iostate state = std::ios_base::goodbit;
+//     size_type gcount = 0;
 
-            size_type width = static_cast<size_type>( is.width() );
-            size_type size = str.max_size();
-            
-            if ( is.width() > 0 && width < str.max_size() )
-                size = width;
+//     const stream_type::sentry sentry(is);
+//     if(sentry)
+//     {
+//         try
+//         {
+//             // NOTE: use ctype from stream locale
+//             std::ctype<Pt::Char> ct;
+//             str.clear();
 
-            traits_type::int_type c = is.rdbuf()->sgetc();
+//             size_type width = static_cast<size_type>( is.width() );
+//             size_type size = str.max_size();
 
-            while( size-- > 0 ) 
-            {
-                bool isEof = traits_type::eq_int_type(traits_type::eof(), c);
-                if(isEof) 
-                {
-                    state |= std::ios_base::eofbit;
-                    break;
-                } 
+//             if ( is.width() > 0 && width < str.max_size() )
+//                 size = width;
 
-                Pt::Char ch = traits_type::to_char_type(c);
-                bool isSpace = ct.is(ctype::space, ch);
-                if(isSpace) 
-                    break;
+//             traits_type::int_type c = is.rdbuf()->sgetc();
 
-                str += ch;
-                ++gcount;
+//             while( size-- > 0 )
+//             {
+//                 bool isEof = traits_type::eq_int_type(traits_type::eof(), c);
+//                 if(isEof)
+//                 {
+//                     state |= std::ios_base::eofbit;
+//                     break;
+//                 }
 
-                c = is.rdbuf()->snextc();
-            }
-        }
-        catch(...)
-        {
-            std::ios::iostate exstate = is.exceptions();
+//                 Pt::Char ch = traits_type::to_char_type(c);
+//                 bool isSpace = ct.is(ctype::space, ch);
+//                 if(isSpace)
+//                     break;
 
-            if(exstate & std::ios_base::badbit)
-                is.exceptions(exstate &= ~std::ios_base::badbit);
-                
-             is.setstate(std::ios_base::badbit);
+//                 str += ch;
+//                 ++gcount;
 
-             if(exstate & std::ios_base::badbit)
-             {
-                is.exceptions(exstate);
-                throw;
-            }
-        }
-    }
+//                 c = is.rdbuf()->snextc();
+//             }
+//         }
+//         catch(...)
+//         {
+//             bool rethrow = false;
+//             try { is.setstate(std::ios_base::badbit); }
+//             catch(...) { rethrow = true; }
 
-    is.width(0);
+//             if(rethrow)
+//                 throw;
+//         }
+//     }
 
-    if( gcount == 0 )
-        state |= std::ios_base::failbit;
+//     is.width(0);
 
-    is.setstate(state);
-    return is;
-}
+//     if( gcount == 0 )
+//         state |= std::ios_base::failbit;
+
+//     is.setstate(state);
+//     return is;
+// }
 
 
 INLINE
@@ -894,57 +888,5 @@ ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str)
     tout << str;
     return out;
 }
-
-//INLINE
-//basic_ostream<Pt::Char>& operator<<(basic_ostream<Pt::Char>& _Ostr,
-//                                    const basic_string<Pt::Char>& _Str)
-//{
-//	typedef basic_ostream<Pt::Char> _Myos;
-//  typedef basic_ostream<Pt::Char> _Myos;
-//	typedef basic_string<Pt::Char> _Mystr;
-//	typedef typename _Mystr::size_type _Mysizt;
-//
-//	ios_base::iostate _State = ios_base::goodbit;
-//	_Mysizt _Size = _Str.size();
-//	_Mysizt _Pad = _Ostr.width() <= 0 || (_Mysizt)_Ostr.width() <= _Size
-//		? 0 : (_Mysizt)_Ostr.width() - _Size;
-//	const typename _Myos::sentry _Ok(_Ostr);
-//
-//	if (!_Ok)
-//		_State |= ios_base::badbit;
-//	else
-//	{
-//	  try
-//    {
-//		  if ((_Ostr.flags() & ios_base::adjustfield) != ios_base::left)
-//			  for (; 0 < _Pad; --_Pad)	// pad on left
-//				  if (_Traits::eq_int_type(_Traits::eof(),
-//					  _Ostr.rdbuf()->sputc(_Ostr.fill())))
-//					  {	// insertion failed, quit
-//					  _State |= ios_base::badbit;
-//					  break;
-//					  }
-//
-//		  if (_State == ios_base::goodbit
-//			  && _Ostr.rdbuf()->sputn(_Str.c_str(), (streamsize)_Size)
-//				  != (streamsize)_Size)
-//				  _State |= ios_base::badbit;
-//		  else
-//			  for (; 0 < _Pad; --_Pad)	// pad on right
-//				  if (_Traits::eq_int_type(_Traits::eof(),
-//					  _Ostr.rdbuf()->sputc(_Ostr.fill())))
-//					  {	// insertion failed, quit
-//					  _State |= ios_base::badbit;
-//					  break;
-//					  }
-//		  _Ostr.width(0);
-//    }
-//		_CATCH_IO_(_Ostr)
-//	}
-//
-//	_Ostr.setstate(_State);
-//	return (_Ostr);
-//}
-
 
 } // namespace std
