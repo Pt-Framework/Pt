@@ -862,8 +862,18 @@ basic_istream<Pt::Char>& operator>>(basic_istream<Pt::Char>& is,
         }
         catch(...)
         {
-            is.setstate(std::ios_base::badbit);
-            throw;
+            std::ios::iostate exstate = is.exceptions();
+
+            if(exstate & std::ios_base::badbit)
+                is.exceptions(exstate &= ~std::ios_base::badbit);
+                
+             is.setstate(std::ios_base::badbit);
+
+             if(exstate & std::ios_base::badbit)
+             {
+                is.exceptions(exstate);
+                throw;
+            }
         }
     }
 
