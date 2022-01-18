@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2004-2007 Marc Boris Duerner
  * Copyright (C) 2011 Tommi Maekitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -43,7 +43,7 @@
 namespace Pt {
 
 /** @brief Unicode character type.
- 
+
     The unicode character type Pt::Char can directly represent a unicode code
     point. It is used as the character type for Pt::String or Pt::StringStream.
     Characters can be classified or transformed using a set of functions
@@ -51,7 +51,7 @@ namespace Pt {
 
     @code
     Pt::Char ch = 'a';
-    
+
     // check character category
     assert( isalpha(ch) );
     assert( islower(ch) );
@@ -93,22 +93,22 @@ struct Char
         //! @brief Returns the unicode value.
         uint32_t value() const
         { return _value; }
-        
+
         //! @brief Returns the unicode value.
         operator uint32_t() const
         { return _value; }
 
         //! @brief Assignment operator.
         /*Char& operator=(const Char& ch)
-        { 
-            _value = ch._value; 
-            return *this; 
+        {
+            _value = ch._value;
+            return *this;
         }*/
 
         /** @brief Narrows the character to 8-bit.
-         
+
             The default character \a def is returned if the unicode value
-            is too large to be narrowed to char i.e. greater than 255. 
+            is too large to be narrowed to char i.e. greater than 255.
         */
         char narrow(char def = '?') const
         {
@@ -311,7 +311,7 @@ struct char_traits<Pt::Char>
     inline static std::size_t length(const char_type* s)
     {
         const Pt::Char term(0);
-        
+
         std::size_t n = 0;
         while( ! eq(s[n], term) )
             ++n;
@@ -321,7 +321,7 @@ struct char_traits<Pt::Char>
 
     inline static const char_type* find(const char_type* s, std::size_t n, const char_type& a)
     {
-        while(n-- > 0) 
+        while(n-- > 0)
         {
             if (*s == a)
                 return s;
@@ -380,10 +380,10 @@ struct char_traits<Pt::Char>
     }
 };
 
-/** @internal 
+/** @internal
 */
 template <>
-class PT_API basic_string<Pt::Char> 
+class PT_API basic_string<Pt::Char>
 {
     public:
         typedef Pt::Char value_type;
@@ -421,11 +421,11 @@ class PT_API basic_string<Pt::Char>
         /** @brief Constructor.
         */
         basic_string(const Pt::Char* str, const allocator_type& a = allocator_type());
-        
+
         /** @brief Constructor.
         */
         basic_string(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
-        
+
         /** @brief Constructor.
         */
         basic_string(const wchar_t* str, const allocator_type& a = allocator_type());
@@ -474,17 +474,17 @@ class PT_API basic_string<Pt::Char>
         */
         iterator begin()
         { return privdata_rw(); }
-        
+
         /**  @brief Returns an iterator to the end of the string.
         */
         iterator end()
         { return privdata_rw() + length(); }
-        
+
         /** @brief Returns an iterator to the begin of the string.
         */
         const_iterator begin() const
         { return privdata_ro(); }
-        
+
         /** @brief Returns an iterator to the end of the string.
         */
         const_iterator end() const
@@ -523,21 +523,21 @@ class PT_API basic_string<Pt::Char>
         /** @brief Random access to characters.
         */
         reference at(size_type n)
-        { 
+        {
             if( n >= size() )
                 throw out_of_range("at");
 
-            return privdata_rw()[n]; 
+            return privdata_rw()[n];
         }
 
         /** @brief Random access to characters.
         */
         const_reference at(size_type n) const
-        { 
+        {
             if( n >= size() )
                 throw out_of_range("at");
-            
-            return privdata_ro()[n]; 
+
+            return privdata_ro()[n];
         }
 
     public:
@@ -726,7 +726,7 @@ class PT_API basic_string<Pt::Char>
         /** @brief Replace portion of the string.
         */
         basic_string& replace(size_type pos, size_type n, const Pt::Char* str);
-        
+
         /** @brief Replace portion of the string.
         */
         basic_string& replace(size_type pos, size_type n, const Pt::Char* str, size_type n2);
@@ -1003,7 +1003,7 @@ class PT_API basic_string<Pt::Char>
             {
                 Pt::Char* str = reinterpret_cast<Pt::Char*>(&_u._s[0]);
                 *str = 0;
-                
+
                 _u._s[_nS - 1] = _nN - 1;
             }
 
@@ -1017,42 +1017,42 @@ class PT_API basic_string<Pt::Char>
     private:
         const Pt::Char* privdata_ro() const
         { return isShortString() ? shortStringData() : longStringData(); }
-        
+
         Pt::Char* privdata_rw()
         { return isShortString() ? shortStringData() : longStringData(); }
 
         void privreserve(std::size_t n);
 
-        bool isShortString() const                    
+        bool isShortString() const
         { return shortStringMagic() != 0xff; }
-        
-        void markLongString()                         
+
+        void markLongString()
         { shortStringMagic() = 0xff; }
-        
-        const Pt::Char* shortStringData() const       
+
+        const Pt::Char* shortStringData() const
         { return reinterpret_cast<const Pt::Char*>(&_d._u._s[0]); }
-        
-        Pt::Char* shortStringData()                   
+
+        Pt::Char* shortStringData()
         { return reinterpret_cast<Pt::Char*>(&_d._u._s[0]); }
-        
-        unsigned char shortStringMagic() const        
+
+        unsigned char shortStringMagic() const
         { return _d._u._s[_nS - 1]; }
-        
-        unsigned char& shortStringMagic()              
+
+        unsigned char& shortStringMagic()
         { return _d._u._s[_nS - 1]; }
-        
-        size_type shortStringLength() const           
+
+        size_type shortStringLength() const
         { return _nN - 1 - shortStringMagic(); }
-        
-        size_type shortStringCapacity() const         
+
+        size_type shortStringCapacity() const
         { return _nN - 1; }
-        
-        void setShortStringLength(size_type n)        
-        { 
-            shortStringData()[n] = Pt::Char(0); 
-            shortStringMagic() = static_cast<unsigned char>(_nN - n - 1); 
+
+        void setShortStringLength(size_type n)
+        {
+            shortStringData()[n] = Pt::Char(0);
+            shortStringMagic() = static_cast<unsigned char>(_nN - n - 1);
         }
-        
+
         void shortStringAssign(const Pt::Char* str, size_type n)
         {
             traits_type::copy(shortStringData(), str, n);
@@ -1067,18 +1067,18 @@ class PT_API basic_string<Pt::Char>
             shortStringMagic() = static_cast<unsigned char>(_nN - n - 1);
         }
 
-        const Pt::Char* longStringData() const          
+        const Pt::Char* longStringData() const
         { return _d._u._p._begin; }
-        
-        Pt::Char* longStringData()                      
+
+        Pt::Char* longStringData()
         { return _d._u._p._begin; }
-        
-        size_type longStringLength() const              
+
+        size_type longStringLength() const
         { return _d._u._p._end - _d._u._p._begin; }
-        
-        size_type longStringCapacity() const            
+
+        size_type longStringCapacity() const
         { return _d._u._p._capacity - _d._u._p._begin; }
-        
+
         void setLength(size_type n)
         {
             if (isShortString())
@@ -1441,7 +1441,14 @@ inline bool operator>=(const basic_string<Pt::Char>& a, const char* b)
 inline bool operator>=(const char* b, const basic_string<Pt::Char>& a)
 { return a.compare(b) <= 0; }
 
-/** @brief Stream insertion operator.
+/** @brief Extraction operator.
+
+    @related std::basic_string<Pt::Char>
+*/
+//PT_API basic_istream<Pt::Char>& operator>>(basic_istream<Pt::Char>& is,
+//                                           basic_string<Pt::Char>& str);
+
+/** @brief Insertion operator.
 
     @related std::basic_string<Pt::Char>
 */

@@ -38,10 +38,8 @@
 #endif
 
 #ifdef PT_WITH_STD_LOCALE
-
 #include <locale>
-
-#else // no locales
+#else
 
 namespace std {
 
