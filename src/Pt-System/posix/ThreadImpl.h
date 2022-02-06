@@ -38,15 +38,16 @@ namespace System {
 class ThreadImpl
 {
     public:
-        ThreadImpl()
-        : _cb(0)
-        , _id(0)
-        { }
+        ThreadImpl();
 
-        ~ThreadImpl()
-        { delete _cb; }
-
+        ~ThreadImpl();
+        
         void init(const Callable<void>& cb);
+
+        const Callable<void>* cb()
+        {
+            return _cb;
+        }
 
         void start();
 
@@ -54,6 +55,7 @@ class ThreadImpl
 
         void join();
 
+    public:
         static void exit()
         {
             ::pthread_exit( NULL );
@@ -69,8 +71,6 @@ class ThreadImpl
             usleep(ms * 1000);
         }
 
-        const Callable<void>* cb()
-        { return _cb; }
 
     private:
         const Callable<void>* _cb;

@@ -36,21 +36,20 @@ extern "C"
 {
     static void* thread_entry(void* arg)
     {
-        Pt::System::ThreadImpl* impl = (Pt::System::ThreadImpl*)arg;
-        if( impl->cb() )
+        const Pt::Callable<void>* cb = static_cast<const Pt::Callable<void>*>(arg);
+
+        if (!cb)
+            return 0;
+
+        try
         {
-            try
-            {
-                impl->cb()->call();
-            }
-            catch (const std::exception& e)
-            {
-                std::cerr << "exception occured: " << e.what() << std::endl;
-            }
-            catch (...)
-            {
-                std::cerr << "exception occured" << std::endl;
-            }
+            cb->call();
+            delete cb;
+        }
+        catch (...)
+        {
+            delete cb;
+            throw;
         }
 
         return 0;
@@ -61,6 +60,19 @@ namespace Pt {
 
 namespace System {
 
+ThreadImpl::ThreadImpl()
+: _cb(0)
+, _id(0)
+{ 
+}
+
+
+ThreadImpl::~ThreadImpl()
+{
+    delete _cb;
+}
+
+
 void ThreadImpl::init(const Callable<void>& cb)
 {
     delete _cb;
@@ -69,7 +81,7 @@ void ThreadImpl::init(const Callable<void>& cb)
 
 
 void ThreadImpl::start()
-{
+{    
     std::size_t stacksize = 0;
 
     pthread_attr_t attrs;
@@ -77,9 +89,9 @@ void ThreadImpl::start()
     //pthread_attr_setinheritsched(&attrs, PTHREAD_INHERIT_SCHED);
 
     if(stacksize > 0)
-        pthread_attr_setstacksize(&attrs ,stacksize);
+        pthread_attr_setstacksize(&attrs, stacksize);
 
-    int ret = pthread_create(&_id, &attrs, thread_entry, this);
+    int ret = pthread_create(&_id, &attrs, thread_entry, _cb->clone());
     pthread_attr_destroy(&attrs);
 
     if(ret != 0)
@@ -102,9 +114,10 @@ void ThreadImpl::join()
 {
     void* threadRet = 0;
     int ret = pthread_join(_id, &threadRet);
-
     if(ret != 0)
         throw SystemError("pthread_join");
+
+    _id = 0;
 }
 
 }

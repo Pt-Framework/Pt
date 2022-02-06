@@ -43,11 +43,11 @@ ThreadImpl::ThreadImpl()
 
 ThreadImpl::~ThreadImpl()
 {
-    if (_handle != 0) 
-    {
-        ::CloseHandle(_handle);
-        _handle = 0;
-    }
+    if (_handle == 0) 
+        return;
+    
+    ::CloseHandle(_handle);
+    _handle = 0;
 
     delete _cb;
 }
@@ -60,14 +60,14 @@ void ThreadImpl::init(const Callable<void>& cb)
 }
 
 
-void ThreadImpl::start() 
+void ThreadImpl::start()
 {
     unsigned stackSize = 0;
 
 #ifdef _WIN32_WCE
-    _handle = ::CreateThread(NULL, stackSize, entry, this, 0, &_id);
+    _handle = ::CreateThread(NULL, stackSize, entry, _cb->clone(), 0, &_id);
 #else
-    _handle = (HANDLE)_beginthreadex(NULL, stackSize, entry, this, 0, &_id);
+    _handle = (HANDLE)_beginthreadex(NULL, stackSize, entry, _cb->clone(), 0, &_id);
 #endif
 
     if(_handle == NULL) 
@@ -93,6 +93,12 @@ void ThreadImpl::join()
     DWORD status = ::WaitForSingleObject(_handle, INFINITE);
     if( status != WAIT_OBJECT_0 )
         throw SystemError("Could not join thread");
+
+    if (_handle != 0)
+    {
+        ::CloseHandle(_handle);
+        _handle = 0;
+    }
 
     _id = 0;
 }

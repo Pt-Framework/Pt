@@ -55,27 +55,43 @@ namespace System {
 
             void init(const Callable<void>& cb);
 
+            const Callable<void>* cb()
+            {
+                return _cb;
+            }
+
             void start();
 
             void detach();
 
             void join();
 
+        public:
             static void exit();
 
             static void yield();
 
             static void sleep(unsigned int ms);
 
-            const Callable<void>* cb()
-            { return _cb; }
-
         public:
             static threadid_t WINAPI entry(void* arg)
-            {
-                ThreadImpl* impl = (ThreadImpl*)arg;
-                const Callable<void>* cb = impl->cb();
-                if(cb) cb->call();
+            {                
+                const Callable<void>* cb = static_cast< const Callable<void>* >(arg);
+
+                if( ! cb ) 
+                    return 0;
+                    
+                try
+                {
+                    cb->call();
+                    delete cb;
+                }
+                catch (...)
+                {
+                    delete cb;
+                    throw;
+                }
+                
                 return 0;
             }
 

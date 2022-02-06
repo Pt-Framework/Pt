@@ -50,7 +50,7 @@ Thread::Thread(const Callable<void>& cb)
 , _impl(0)
 {
     _impl = new ThreadImpl();
-	  _impl->init(cb);
+    _impl->init(cb);
 }
 
 
@@ -75,45 +75,43 @@ Thread::~Thread()
 
 void Thread::init(const Callable<void>& cb)
 {
-    if( this->state() == Ready )
-    {
-        _impl->init(cb);
-    }
+    if(_state == Running)
+        throw SystemError("thread already running");
+
+    _impl->init(cb);
 }
 
 
 void Thread::start()
 {
-    if( _state == Ready )
-    {
-        _impl->start();
-        _state = Thread::Running;
+    if(_state == Running)
+        throw SystemError("thread already running");
 
-        if(_detach)
-            detach();
-    }
+    _impl->start();
+    _state = Thread::Running;
+
+    if(_detach)
+        detach();
 }
 
 
 void Thread::detach()
 {
-    if( _state == Ready )
+    if(_state != Running)
     {
         _detach = true;
         return;
     }
 
-    if( _state != Running && _state != Detached )
-        throw SystemError("thread not detachable");
-
     _impl->detach();
     _state = Detached;
+    _detach = false;
 }
 
 
 void Thread::join()
 {
-    if( _state != Running && _state != Joined )
+    if(_state != Running)
         throw SystemError("thread not joinable");
 
     _impl->join();
