@@ -50,8 +50,16 @@ Client::~Client()
 
 void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
-    _method = &method;
-    this->onBeginCall(r, method, argv, argc);
+    try
+    {
+        _method = &method;
+        this->onBeginCall(r, method, argv, argc);
+    }
+    catch(...)
+    {
+        _method = 0;
+        throw;
+    }
 }
 
 
@@ -73,8 +81,16 @@ void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned a
 
 void Client::endCall()
 {
-    this->onEndCall();
-    _method = 0;
+    try
+    {
+        this->onEndCall();
+        _method = 0;
+    }
+    catch(...)
+    {
+        _method = 0;
+        throw;
+    }
 }
 
 

@@ -105,6 +105,14 @@ Client::~Client()
 }
 
 
+void Client::reset(ServiceDeclaration& service)
+{
+    cancel();
+
+    _serviceDef = &service;
+}
+
+
 bool Client::isFailed() const
 {
     return _isFault;
@@ -189,7 +197,6 @@ void Client::onCancel()
 
     _isFault = false;
 }
-
 
 
 void Client::beginMessage(std::ostream& os)
