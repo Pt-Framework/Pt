@@ -62,6 +62,10 @@ class PT_SOAP_API Client : public Pt::Remoting::Client
         */
         virtual ~Client();
 
+        /** @brief Resets the client.
+        */
+        void reset(ServiceDeclaration& service);
+
         /** @brief Indicates if the procedure has failed.
         */
         bool isFailed() const;
