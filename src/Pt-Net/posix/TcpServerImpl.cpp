@@ -215,7 +215,6 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
     sockaddr_storage peeraddr;
     socklen_t peeraddr_len = sizeof(peeraddr);
     int fd = ::accept(this->fd(), reinterpret_cast <struct sockaddr*>(&peeraddr), &peeraddr_len);
-    PT_LOG_DEBUG("accepted: " << fd);
 
     if(fd != -1)
     {
@@ -227,7 +226,8 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 
     if(errno != EAGAIN && errno != EINPROGRESS) // EWOULDBLOCK
     {
-        PT_LOG_DEBUG("accept failed " << this->fd());
+        int ec = errno;
+        PT_LOG_DEBUG("accept failed: " << strerror(ec) << "(" << ec << ")");
         throw System::IOError("accept");
     }
 
