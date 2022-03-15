@@ -80,7 +80,6 @@ class WakePipe
         void wake()
         {
             ::write( _wakePipe[1], "W", 1);
-            ::fsync( _wakePipe[1] );
         }
 
         bool isReady()
