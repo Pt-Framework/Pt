@@ -40,6 +40,8 @@
 #include <cstring>
 #include <cassert>
 
+#include <Mstcpip.h>
+
 PT_LOG_DEFINE("Pt.Net.TcpSocket");
 
 namespace Pt {
@@ -95,6 +97,38 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 }
 
 
+void TcpSocketImpl::init()
+{
+    if( _opts.keepAlive() == 0 )
+    {
+        PT_LOG_DEBUG("using SO_KEEPALIVE");
+        BOOL val = TRUE;
+
+        int rv = ::setsockopt(_fd, SOL_SOCKET, SO_KEEPALIVE, (char*)&val, sizeof(val));
+        if(rv == SOCKET_ERROR)
+          throw IOError("setsockopt SO_KEEPALIVE");
+    }
+    else if( _opts.keepAlive() > 0 )
+    {
+        PT_LOG_DEBUG( "using keep-alive: " << _opts.keepAlive() );
+        DWORD msecs = _opts.keepAlive() * 1000;
+
+        struct tcp_keepalive vals;
+        vals.onoff = 1;
+        vals.keepalivetime = msecs;
+        vals.keepaliveinterval = msecs;
+
+        DWORD bytes_returned = 0;
+        int rv = WSAIoctl(_fd, SIO_KEEPALIVE_VALS, &vals,
+                          sizeof(vals), NULL, 0,
+                          &bytes_returned, NULL, NULL);
+
+        if(rv == SOCKET_ERROR)
+            throw IOError("ioctl SIO_KEEPALIVE_VALS");
+    }
+}
+
+
 void TcpSocketImpl::close()
 {
     if( _fd == INVALID_SOCKET )
@@ -110,16 +144,22 @@ void TcpSocketImpl::close()
 }
 
 
-void TcpSocketImpl::accept(TcpServer& server, const TcpSocketOptions&)
+void TcpSocketImpl::accept(TcpServer& server, const TcpSocketOptions& opts)
 {
+    _opts = opts;
+
     _fd = server.impl().accept();
     PT_LOG_DEBUG("accepted " << _fd);
+
+    init();
 }
 
 
-void TcpSocketImpl::connect(const Endpoint& ep, const TcpSocketOptions&)
+void TcpSocketImpl::connect(const Endpoint& ep, const TcpSocketOptions& opts)
 {
     PT_LOG_DEBUG("connect");
+
+    _opts = opts;
 
     _addrInfo.resolve( ep );
     _addrInfoPtr = _addrInfo.begin();
@@ -139,13 +179,15 @@ void TcpSocketImpl::connect()
         }
         
         _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
-        if (_fd < 0)
+        if(_fd == INVALID_SOCKET)
         {
-            PT_LOG_DEBUG("failed to create socket for address");
+            PT_LOG_DEBUG("create socket failed for: " << _addrInfoPtr->ai_family);
             continue;
         }
-        
-        // set socket to blocking mode, may not be meccessary
+
+        init();
+
+        // set socket to blocking mode
         u_long argp = 0;
         ::ioctlsocket(_fd, FIONBIO, &argp);
         PT_LOG_DEBUG("created socket " << _fd);
@@ -165,10 +207,12 @@ void TcpSocketImpl::connect()
 }
 
 
-bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, 
+                                 const Endpoint& ep, const TcpSocketOptions& opts)
 {
     PT_LOG_DEBUG("begin connect");
 
+    _opts = opts;
     _errorPending = false;
 
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
@@ -195,14 +239,18 @@ bool TcpSocketImpl::beginConnect()
         }
 
         _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
-        if (_fd == INVALID_SOCKET)
+        if(_fd == INVALID_SOCKET)
+        {
+            PT_LOG_DEBUG("create socket failed for: " << _addrInfoPtr->ai_family);
             continue;
+        }
     
-        PT_LOG_DEBUG("created socket " << _fd);
+        init();
 
         // set socket to non-blocking mode
         u_long argp = 1;
         ::ioctlsocket(_fd, FIONBIO, &argp);
+        PT_LOG_DEBUG("created socket " << _fd);
 
         socklen_t addrlen = static_cast<socklen_t>(_addrInfoPtr->ai_addrlen);
 

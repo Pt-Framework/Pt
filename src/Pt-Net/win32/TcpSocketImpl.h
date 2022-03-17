@@ -105,6 +105,8 @@ class TcpSocketImpl
         { return _timeout; }
 
     private:
+        void init();
+
         void connect();
         
         bool beginConnect();
@@ -116,6 +118,7 @@ class TcpSocketImpl
         int waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout);
 
     private:
+        TcpSocketOptions _opts;
         AddrInfo _addrInfo;
         AddrInfo::const_iterator _addrInfoPtr;
         bool _errorPending;

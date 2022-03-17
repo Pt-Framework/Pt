@@ -58,7 +58,7 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void remoteEndpoint(Endpoint& ep) const;
 
-        void connect(const Endpoint& ep, const TcpSocketOptions&);
+        void connect(const Endpoint& ep, const TcpSocketOptions& o);
 
         bool beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&);
 
@@ -67,14 +67,17 @@ class TcpSocketImpl : public System::IODeviceImpl
         void accept(TcpServer& server, const TcpSocketOptions& o);
 
     protected:
+        void init(int fd);
+
         void connect();
         
         bool beginConnect(System::EventLoop& loop);
 
     private:
-        TcpSocket& _socket;
-        bool _errorPending;
-        AddrInfo _addrInfo;
+        TcpSocket&               _socket;
+        TcpSocketOptions         _opts;
+        bool                     _errorPending;
+        AddrInfo                 _addrInfo;
         AddrInfo::const_iterator _addrInfoPtr;
 };
 
