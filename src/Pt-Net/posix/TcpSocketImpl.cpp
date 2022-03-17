@@ -65,6 +65,53 @@ TcpSocketImpl::~TcpSocketImpl()
 }
 
 
+void TcpSocketImpl::init(int fd)
+{
+    bool inherit = false;
+    IODeviceImpl::open(fd, inherit);
+    PT_LOG_DEBUG( "created socket " << this->fd() );
+
+    if( _opts.keepAlive() >= 0 )
+    {
+        PT_LOG_DEBUG("using SO_KEEPALIVE");
+
+        int on = 1;
+        if( ::setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) ) 
+        {
+            close();
+            throw System::SystemError("setsockopt SO_KEEPALIVE");
+        }
+    }
+        
+    if( _opts.keepAlive() > 0 )
+    {
+        PT_LOG_DEBUG( "using keep-alive: " << _opts.keepAlive() );
+
+#if defined(TCP_KEEPIDLE)
+        int secs = _opts.keepAlive();
+        if( ::setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &secs, sizeof(secs)) ) 
+        {
+            close();
+            throw System::SystemError("setsockopt TCP_KEEPIDLE");
+        }
+
+        if( ::setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &secs, sizeof(secs)) )
+        {
+            close();
+            throw System::SystemError("setsockopt TCP_KEEPINTVL");
+        }
+#elif defined(TCP_KEEPALIVE)
+        int secs = _opts.keepAlive();
+        if( ::setsockopt(fd, IPPROTO_TCP, TCP_KEEPALIVE, &secs, sizeof(secs)) )
+        {
+            close();
+            throw System::SystemError("setsockopt TCP_KEEPALIVE");
+        }
+#endif
+    }
+}
+
+
 void TcpSocketImpl::close()
 {
     if( this->isOpen() )
@@ -89,20 +136,22 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 }
 
 
-void TcpSocketImpl::accept(TcpServer& server, const TcpSocketOptions& o)
+void TcpSocketImpl::accept(TcpServer& server, const TcpSocketOptions& opts)
 {
-    int fd = server.impl().accept(o);
+    _opts = opts;
 
-    bool inherit = false;
-    System::IODeviceImpl::open(fd, inherit);
+    int fd = server.impl().accept(opts);
+    init(fd);
 
     PT_LOG_DEBUG( "accepted " << server.impl().fd() << " => " << this->fd() );
 }
 
 
-void TcpSocketImpl::connect(const Endpoint& ep, const TcpSocketOptions&)
+void TcpSocketImpl::connect(const Endpoint& ep, const TcpSocketOptions& opts)
 {
     PT_LOG_TRACE("connect");
+
+    _opts = opts;
 
     _addrInfo.resolve(ep);
     _addrInfoPtr = _addrInfo.begin();
@@ -121,15 +170,16 @@ void TcpSocketImpl::connect()
             throw System::AccessFailed( _addrInfo.host() );
         }
 
+        PT_LOG_DEBUG("connect to addr family:" << _addrInfoPtr->ai_family << ", socktype:" << _addrInfoPtr->ai_socktype);
+
         int fd = ::socket(_addrInfoPtr->ai_family, SOCK_STREAM, 0);
-        if (fd < 0)
+        if(fd < 0)
         {
-            PT_LOG_DEBUG("failed to create socket for address " << this->fd());
+            PT_LOG_DEBUG( "create socket failed for domain: " << _addrInfoPtr->ai_family );
             continue;
         }
 
-        IODeviceImpl::open(fd, false);
-        PT_LOG_INFO("created socket " << this->fd());
+        init(fd);
 
         if( ::connect(this->fd(), _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
         {
@@ -172,10 +222,12 @@ void TcpSocketImpl::connect()
 }
 
 
-bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, 
+                                 const Endpoint& ep, const TcpSocketOptions& opts)
 {
     PT_LOG_TRACE("begin connect");
 
+    _opts = opts;
     _errorPending = false;
     
     _addrInfo.resolve(ep);
@@ -195,18 +247,17 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop)
             throw System::AccessFailed( _addrInfo.host() );
         }
 
-        PT_LOG_TRACE("begin connect to addr family:" << _addrInfoPtr->ai_family << ", socktype:" << _addrInfoPtr->ai_socktype);
-    
+        PT_LOG_DEBUG("begin connect to addr family:" << _addrInfoPtr->ai_family << ", socktype:" << _addrInfoPtr->ai_socktype);
+
         int fd = ::socket(_addrInfoPtr->ai_family, SOCK_STREAM, 0);
-        if (fd < 0)
+        if(fd < 0)
         {
-            PT_LOG_DEBUG("failed to create socket for address " << this->fd());
+            PT_LOG_DEBUG( "create socket failed");
             continue;
         }
-    
-        IODeviceImpl::open(fd, false);
-        PT_LOG_DEBUG("created socket " << this->fd());
-    
+
+        init(fd);
+
         if( ::connect(this->fd(), _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
         {
             PT_LOG_DEBUG("connect imediately successful " << this->fd());

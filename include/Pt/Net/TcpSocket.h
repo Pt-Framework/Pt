@@ -60,12 +60,18 @@ class PT_NET_API TcpSocketOptions
         //! @brief Assignment operator.
         TcpSocketOptions& operator=(const TcpSocketOptions& opts);
 
+        int keepAlive() const
+        { return _keepAlive.i; }
+
+        void setKeepAlive(int n)
+        { _keepAlive.i = n; }
+
     private:
         Pt::uint32_t _flags;
-        int _sndbufSize;
-        varint_t _r0;
-        varint_t _r1;
-        varint_t _r2;
+        int          _sndbufSize;
+        varint_t     _keepAlive;
+        varint_t     _r1;
+        varint_t     _r2;
 };
 
 

@@ -40,12 +40,17 @@ namespace Net {
 
 TcpSocketOptions::TcpSocketOptions()
 : _flags(0)
+, _sndbufSize(0)
 {
+    _keepAlive.i = -1;
 }
 
 
 TcpSocketOptions::TcpSocketOptions(const TcpSocketOptions& opts)
+: _flags(opts._flags)
+, _sndbufSize(opts._sndbufSize)
 {
+    _keepAlive.i = opts._keepAlive.i;
 }
 
 
@@ -56,6 +61,9 @@ TcpSocketOptions::~TcpSocketOptions()
 
 TcpSocketOptions& TcpSocketOptions::operator=(const TcpSocketOptions& opts)
 {
+    _flags = opts._flags;
+    _sndbufSize = opts._sndbufSize;
+    _keepAlive.i = opts._keepAlive.i;
     return *this;
 }
 
