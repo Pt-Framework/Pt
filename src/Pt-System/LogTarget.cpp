@@ -79,6 +79,13 @@ void LogTarget::setChannel(const std::string& url)
 }
 
 
+void LogTarget::reset()
+{
+    // thread-safe
+    LogManager::instance().reset(*this);
+}
+
+
 LogTarget& LogTarget::get(const std::string& name)
 {
     // thread-safe

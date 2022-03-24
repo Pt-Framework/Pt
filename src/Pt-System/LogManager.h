@@ -79,6 +79,8 @@ class LogManager : private NonCopyable
 
         void setLogLevel(LogTarget &target, LogLevel level);
 
+        void reset(LogTarget& target);
+
         static LogManager& instance()
         {
             if( ! _instance )

@@ -206,6 +206,10 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         static void setChannel(const std::string& target, const std::string& url)
         { LogTarget::get(target).setChannel(url); }
 
+        //! @brief Resets log level and channel.
+        static void reset(const std::string& target)
+        { LogTarget::get(target).reset(); }
+
         /** @brief Returns true if the log level is enabled for the target
         */
         bool enabled(LogLevel level) const
