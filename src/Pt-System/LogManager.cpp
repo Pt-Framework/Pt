@@ -336,6 +336,42 @@ LogTarget& LogManager::target(const std::string& name)
 }
 
 
+void LogManager::reset(LogTarget& target)
+{
+    Pt::System::RecursiveLock lock( _mutex );
+
+    // set log level to default or parent's loglevel
+    LogLevel level = Fatal;
+
+    LogTarget* parent = target.parent();
+    if(parent)
+        level = static_cast<LogLevel>( parent->logLevel() );
+
+    target.assignLogLevel(level, true);
+    this->updateChildren(target, level);
+
+    // remove log channel from target 
+    std::map<std::string, LogChannel*>::iterator it;
+    for(it = _channelMap.begin(); it != _channelMap.end(); ++it)
+    {
+        LogChannel* channel = it->second;
+        if( channel == target.channel() )
+        {
+            target.removeChannel();
+
+            if( 0 == channel->unref() )
+            {
+                channel->close();
+                _pluginManager.destroy( channel );
+                _channelMap.erase(it);
+            }
+
+            break;
+        }
+    }
+}
+
+
 void LogManager::setLogLevel(LogTarget &t, LogLevel level)
 {
     Pt::System::RecursiveLock lock( _mutex );

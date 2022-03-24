@@ -102,6 +102,9 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
         */
         void setChannel(const std::string& url);
 
+        //! @brief Resets log level and channel.
+        void reset();
+
         //! @brief Write log record to this target
         void log(const LogRecord& record);
 
