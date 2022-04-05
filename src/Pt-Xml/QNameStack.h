@@ -30,7 +30,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/QName.h>
-#include <vector>
+#include <list>
 #include <cstddef>
 
 namespace Pt {
@@ -106,8 +106,13 @@ class QNameStack
 
         inline const QName& top() const
         {
-            return _extra.size() == 1 ? _names[BufSize-1]
-                                      : *(_cur - 1);
+            if( _extra.empty() )
+                return *(_cur - 1);
+
+            if( _extra.size() == 1 )
+                return _names[BufSize-1];
+
+            return *++_extra.rbegin();
         }
                 
         inline bool empty() const
@@ -117,13 +122,13 @@ class QNameStack
 
         inline std::size_t size() const
         {
-            return _extra.empty() ? _cur - _names : BufSize + _extra.size();
+            return _extra.empty() ? _cur - _names : BufSize + _extra.size() - 1;
         }
 
     private:
         QName* _cur;
         QName _names[BufSize];
-        std::vector<QName> _extra;
+        std::list<QName> _extra;
 };
 
 } // namespace Xml
