@@ -277,7 +277,7 @@ bool ProcessImpl::tryWait(int& status)
     _state = Process::Finished;
     _pid = 0;
 
-    if( ! WIFEXITED(status) )
+    if( ! WIFEXITED(iStatus) )
         throw ProcessFailed();
 
     status = WEXITSTATUS(iStatus);
