@@ -230,6 +230,7 @@ class SettingsReader
                     return OnSection::instance();
                 }
 
+                reader.setSequence(); 
                 reader.enterMember();
                 return OnCurly::instance();
             }
@@ -324,6 +325,7 @@ class SettingsReader
                     this->syntaxError(reader.line());
 
                 reader.pushTypeName();
+                reader.setSequence();
                 reader.enterMember();
                 return OnCurly::instance();
             }
@@ -411,6 +413,7 @@ class SettingsReader
 
             virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
             {
+                reader.setSequence();
                 reader.enterMember();
                 return OnCurly::instance();
             }
@@ -701,6 +704,7 @@ class SettingsReader
 
             virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
             {
+                reader.setSequence();
                 reader.enterMember();
                 return OnCurly::instance();
             }
@@ -922,6 +926,8 @@ class SettingsReader
 
         size_t line() const
         { return _line; }
+
+        void setSequence();
 
         void enterMember();
 

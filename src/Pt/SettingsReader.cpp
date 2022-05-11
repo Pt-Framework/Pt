@@ -64,6 +64,12 @@ void SettingsReader::parse(SerializationInfo& si)
 }
 
 
+void SettingsReader::setSequence()
+{
+  _current->setSequence();
+}
+
+
 void SettingsReader::enterMember()
 {
     //
@@ -110,13 +116,21 @@ void SettingsReader::enterMember()
         //
         Pt::SerializationInfo* current = _current->findMember( name );
         if(current == 0)
-            current = &( _current->addMember( name ) );
+        {
+            if( _current->isSequence() )
+                current = &( _current->addElement() );
+            else
+                current = &( _current->addMember( name ) );
+        }
 
         _current = current;
     }
     else
     {
-        _current = &( _current->addMember( _token.narrow() ) );
+        if( _current->isSequence() )
+            _current = &( _current->addElement() );
+        else
+            _current = &( _current->addMember( _token.narrow() ) );
     }
 
     ++_depth;
