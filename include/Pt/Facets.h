@@ -495,28 +495,28 @@ class PT_API num_get< Pt::Char,
 namespace std {
 
 template<>
-PT_API bool has_facet< ctype<Pt::Char> >(const locale& loc);
+PT_API bool has_facet< ctype<Pt::Char> >(const locale& loc) throw();
 
 template<>
 PT_API const ctype<Pt::Char>& use_facet(const locale& loc);
 
 
 template<>
-PT_API bool has_facet< numpunct<Pt::Char> >(const locale& loc);
+PT_API bool has_facet< numpunct<Pt::Char> >(const locale& loc) throw();
 
 template<>
 PT_API const numpunct<Pt::Char>& use_facet(const locale& loc);
 
 
 template<>
-PT_API bool has_facet< num_get<Pt::Char> >(const locale& loc);
+PT_API bool has_facet< num_get<Pt::Char> >(const locale& loc) throw();
 
 template<>
 PT_API const num_get<Pt::Char>& use_facet(const locale& loc);
 
 
 template<>
-PT_API bool has_facet< num_put<Pt::Char> >(const locale& loc);
+PT_API bool has_facet< num_put<Pt::Char> >(const locale& loc) throw();
 
 template<>
 PT_API const num_put<Pt::Char>& use_facet(const locale& loc);
