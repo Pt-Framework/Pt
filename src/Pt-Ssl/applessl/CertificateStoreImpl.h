@@ -62,6 +62,8 @@ class CertificateStoreImpl
             return CertificateStore::ConstIterator(cert); 
         }
 
+        void loadPem(const char* data, size_t len, const char* passwd);
+
         void loadPkcs12(const char* data, size_t len, const char* passwd);
 
         const Certificate* findCertificate(const std::string& subject);

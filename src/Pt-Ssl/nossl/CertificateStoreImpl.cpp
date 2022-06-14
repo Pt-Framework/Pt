@@ -47,6 +47,12 @@ CertificateStoreImpl::~CertificateStoreImpl()
 }
 
 
+void CertificateStoreImpl::loadPem(const char* pkcs12, std::size_t len, const char* passwd)
+{
+    PT_LOG_DEBUG("loadPkcs12: " << passwd);            
+}
+
+
 void CertificateStoreImpl::loadPkcs12(const char* pkcs12, std::size_t len, const char* passwd)
 {
     PT_LOG_DEBUG("loadPkcs12: " << passwd);            

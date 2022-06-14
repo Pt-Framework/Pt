@@ -63,6 +63,10 @@ class PT_SSL_API CertificateStore
         */
         void loadPkcs12(const char* data, std::size_t len, const char* passwd);
 
+        /** @brief Loads PEM data from memory.
+        */
+        void loadPem(const char* data, std::size_t len, const char* passwd);
+
         /** @brief Finds a certificate by subject.
 
             Searches for a certificate with the substring @a subject in it's

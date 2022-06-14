@@ -78,6 +78,12 @@ void CertificateStore::loadPkcs12(const char* data, std::size_t len, const char*
 }
 
 
+void CertificateStore::loadPem(const char* data, std::size_t len, const char* passwd)
+{
+    _impl->loadPem(data, len, passwd);
+}
+
+
 const Certificate* CertificateStore::findCertificate(const std::string& subject)
 {
     return _impl->findCertificate(subject); 

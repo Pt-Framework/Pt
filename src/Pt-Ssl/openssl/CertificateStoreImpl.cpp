@@ -54,6 +54,37 @@ CertificateStoreImpl::~CertificateStoreImpl()
 }
 
 
+void CertificateStoreImpl::loadPem(const char* pem, std::size_t len, const char* passwd)
+{
+    BioAutoPtr pkeyIn( BIO_new_mem_buf( (void*) pem, len ) );
+    EVP_PKEY* pkey = PEM_read_bio_PrivateKey(pkeyIn.get(), NULL, NULL, (void*)passwd);
+    if(pkey) 
+    {
+        PT_LOG_DEBUG("imported key");
+        EVP_PKEY_free(pkey);
+    }
+
+    BioAutoPtr certIn( BIO_new_mem_buf( (void*) pem, len ) );
+    X509* x509 = PEM_read_bio_X509_AUX(certIn.get(), NULL, NULL, (void*)passwd);
+    if(x509) 
+    {
+        X509AutoPtr x509Ptr(x509);
+        CertificateImpl* impl = new CertificateImpl(x509);
+        x509Ptr.release();
+
+        AutoPtr<CertificateImpl> implPtr(impl);
+        Certificate* cert = new Certificate(impl);
+        implPtr.release();
+
+        AutoPtr<Certificate> certPtr(cert);
+        _allCerts.push_back(cert);
+        certPtr.release();
+
+        PT_LOG_DEBUG("imported certificate: " << cert->subject());
+    }
+}
+
+
 void CertificateStoreImpl::loadPkcs12(const char* data, std::size_t len, const char* passwd)
 {
     EVP_PKEY* pkey = NULL;

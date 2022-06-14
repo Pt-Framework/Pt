@@ -57,6 +57,118 @@ CertificateStoreImpl::~CertificateStoreImpl()
     }
 }
 
+//
+// TODO: export end reimport selected key and certificate to build an identity later
+//  SecExternalFormat dataFormat = kSecFormatWrappedPKCS8;
+//  CFDataRef exportData = NULL;
+//
+//  SecItemImportExportKeyParameters keyParams = {};
+//  keyParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
+//  keyParams.passphrase = CFSTR("ExportImportPassphrase");
+//
+//  OSStatus status = SecItemExport(privateKey, dataFormat, 0, &keyParams, &exportData);
+//  SecExternalFormat actualFormat = dataFormat;
+//  SecExternalItemType actualType = kSecItemTypePrivateKey;
+//  CFArrayRef outItems = NULL;
+//
+//  if (status == noErr)
+//  {
+//      status =
+//          SecItemImport(exportData, nullptr, &actualFormat, &actualType, 0, &keyParams, targetKeychain, &outItems);
+//  }
+//  if (exportData != nullptr)
+//      CFRelease(exportData);
+//
+//  CFRelease(keyParams.passphrase);
+//  keyParams.passphrase = nullptr;
+//
+//  if (outItems != nullptr)
+//      CFRelease(outItems);
+//
+//  return status;
+//
+
+void CertificateStoreImpl::loadPem(const char* pem, std::size_t len, const char* passwd)
+{
+    PT_LOG_DEBUG("loadPem: " << passwd);
+
+    CFDataRef data = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(pem), len);
+    if( ! data )
+        throw std::runtime_error("CFDataCreate");
+
+    SecItemImportExportKeyParameters keyParams = {};
+    keyParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
+
+    CFStringRef password = NULL;
+    if(passwd)
+    {
+      password = CFStringCreateWithCString(NULL, passwd, kCFStringEncodingUTF8);
+      keyParams.passphrase = password;
+    }
+
+    CFStringRef extension = NULL;
+    SecExternalFormat pemFormat = kSecFormatPEMSequence;
+    SecExternalItemType* itemType = NULL;
+    SecItemImportExportFlags flags = 0;
+    SecKeychainRef keychain = NULL;
+    CFArrayRef items = NULL;
+
+    OSStatus status = SecItemImport(data, extension, &pemFormat, 
+                                    itemType, flags, keyParams, 
+                                    keychain, &items);
+
+    if(password)
+        CFRelease(password);
+
+    CFRelease(data);
+
+    if(status != noErr)
+    {
+        if(items)
+            CFRelease(items);
+            
+        throw InvalidCertificate("invalid PKCS12 data");
+    }
+
+    if( ! items)
+        return;
+
+    CFIndex count = CFArrayGetCount(items);
+
+    for(CFIndex n = 0; n < count; ++n)
+    {
+        CFDictionaryRef item = (CFDictionaryRef) CFArrayGetValueAtIndex(items, n);
+
+        SecIdentityRef identity = (SecIdentityRef) CFDictionaryGetValue(item, kSecImportItemIdentity);
+        if(identity)
+        {
+            CFRetain(identity);
+            Certificate* c = new Certificate( new CertificateImpl(identity) );
+            _allCerts.push_back(c);
+            
+            PT_LOG_DEBUG("imported identity: " << c->subject());
+        }
+
+        CFArrayRef certs = (CFArrayRef) CFDictionaryGetValue(item, kSecImportItemCertChain);
+        if(certs)
+        {
+            CFIndex certCount = CFArrayGetCount(certs);
+            for(CFIndex i = 0; i < certCount; ++i)
+            {
+                SecCertificateRef cert = (SecCertificateRef) CFArrayGetValueAtIndex(certs, i);
+
+                CFRetain(cert);
+                Certificate* c = new Certificate( new CertificateImpl(cert) );
+                _allCerts.push_back(c);
+
+                PT_LOG_DEBUG("imported certificate: " << c->subject());
+            }
+        }
+    }
+
+    CFRelease(items);
+}
+
 
 void CertificateStoreImpl::loadPkcs12(const char* pkcs12, std::size_t len, const char* passwd)
 {
