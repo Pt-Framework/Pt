@@ -230,12 +230,14 @@ void ProcessImpl::start()
 
 void ProcessImpl::kill()
 {
+    int ret = ::kill(_pid, SIGKILL);
+    if(ret < 0)
+      throw SystemError( std::strerror(errno) );
+
     int iStatus;
-    if( 0 > ::kill(_pid, SIGINT)
-        || 0 > ::waitpid(_pid, &iStatus, WNOHANG|WUNTRACED) )
-    {
-        throw SystemError(std::strerror(errno));
-    }
+    pid_t p = waitpid(_pid, &iStatus, 0);
+    if(p < 0)
+        throw SystemError( std::strerror(errno) );
 
     _state = Process::Finished;
     _pid = 0;
@@ -245,10 +247,11 @@ void ProcessImpl::kill()
 int ProcessImpl::wait()
 {
     int iStatus;
-    if( 0 > waitpid(_pid, &iStatus, WUNTRACED) )
+    pid_t p = waitpid(_pid, &iStatus, 0);
+    if(p < 0)
     {
         _state = Process::Failed;
-        throw SystemError("waitpid failed");
+        throw SystemError( std::strerror(errno) );
     }
 
     _state = Process::Finished;
@@ -264,14 +267,14 @@ int ProcessImpl::wait()
 bool ProcessImpl::tryWait(int& status)
 {
     int iStatus;
-    pid_t ret = waitpid(_pid, &iStatus, WUNTRACED|WNOHANG);
-    if(0 > ret)
+    pid_t p = waitpid(_pid, &iStatus, WNOHANG);
+    if(p < 0)
     {
         _state = Process::Failed;
-        throw SystemError(std::strerror(errno));
+        throw SystemError( std::strerror(errno) );
     }
 
-    if(ret == 0)
+    if(p == 0)
         return false;
 
     _state = Process::Finished;
@@ -286,4 +289,4 @@ bool ProcessImpl::tryWait(int& status)
 
 } // namespace Pt
 
-} //namespace System
+} // namespace System
