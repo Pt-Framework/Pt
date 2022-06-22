@@ -99,6 +99,10 @@ class ProcessInfo
         const std::string& arg(std::size_t idx) const
         { return _args.at(idx); }
 
+        /** @brief Returns full command line.
+        */
+        std::string toString() const;
+
         /** @brief Returns true if process should detach.
         */
         bool isDetached() const
@@ -236,6 +240,17 @@ inline ProcessInfo::ProcessInfo(const Path& command)
 , _stdoutMode(Close)
 , _stderrMode(Close)
 {
+}
+
+
+inline std::string ProcessInfo::toString() const
+{
+    std::string cmdline = _command.toLocal();
+
+    for( std::size_t i = 0; i < _args.size(); ++i )
+        cmdline += ' ' + _args[i];
+
+    return cmdline;
 }
 
 } // namespace System
