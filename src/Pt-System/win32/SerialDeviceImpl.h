@@ -40,9 +40,9 @@
 #include <string>
 #include <windows.h>
 
-namespace Pt{
+namespace Pt {
 
-namespace System{
+namespace System {
 
 #ifdef _WIN32_WCE
 class SerialDeviceImpl : public Pt::System::IODeviceImpl
@@ -100,6 +100,8 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         bool isCts() const;
 
         bool isDsr() const;
+		
+		void sync() const;
                 
 #ifdef _WIN32_WCE
         bool runRead(EventLoop&);
@@ -149,8 +151,8 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
 #endif
 };
 
-}//namespace System
+} //namespace System
 
-}//namespaec Pt
+} //namespaec Pt
 
 #endif

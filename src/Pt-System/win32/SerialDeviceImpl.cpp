@@ -791,6 +791,18 @@ bool SerialDeviceImpl::isDsr() const
 }
 
 
+void SerialDeviceImpl::sync() const
+{
+#ifdef _WIN32_WCE
+	Pt::System::IODeviceImpl::sync();
+#else
+	OverlappedIODeviceImpl::sync();
+#endif
+
+	::PurgeComm(handle(), PURGE_RXABORT|PURGE_TXABORT|PURGE_TXCLEAR|PURGE_RXCLEAR);
+}
+
+
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
     static const int ASCII_XON  = 0x11;
@@ -847,6 +859,6 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     return SerialDevice::FlowControlNone;
 }
 
-}//namespace System
+} //namespace System
 
-}//namespace Pt
+} //namespace Pt

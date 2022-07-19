@@ -52,7 +52,7 @@ class IODeviceImpl
 
         virtual void close();
 
-        void sync() const
+        virtual void sync() const
         {
             if( FALSE == ::FlushFileBuffers( handle() ) )
                 throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
