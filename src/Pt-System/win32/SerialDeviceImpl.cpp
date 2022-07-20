@@ -799,7 +799,7 @@ void SerialDeviceImpl::sync() const
 	OverlappedIODeviceImpl::sync();
 #endif
 
-	::PurgeComm(handle(), PURGE_RXABORT|PURGE_TXABORT|PURGE_TXCLEAR|PURGE_RXCLEAR);
+	::PurgeComm(handle(), PURGE_TXCLEAR|PURGE_RXCLEAR);
 }
 
 
