@@ -791,15 +791,19 @@ bool SerialDeviceImpl::isDsr() const
 }
 
 
+void SerialDeviceImpl::clear()
+{
+  ::PurgeComm(handle(), PURGE_TXCLEAR|PURGE_RXCLEAR);
+}
+
+
 void SerialDeviceImpl::sync() const
 {
 #ifdef _WIN32_WCE
-	Pt::System::IODeviceImpl::sync();
+  Pt::System::IODeviceImpl::sync();
 #else
-	OverlappedIODeviceImpl::sync();
+  OverlappedIODeviceImpl::sync();
 #endif
-
-	::PurgeComm(handle(), PURGE_TXCLEAR|PURGE_RXCLEAR);
 }
 
 

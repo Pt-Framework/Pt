@@ -100,9 +100,11 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         bool isCts() const;
 
         bool isDsr() const;
-		
-		void sync() const;
-                
+
+        void clear();
+
+        void sync() const;
+
 #ifdef _WIN32_WCE
         bool runRead(EventLoop&);
 

@@ -75,6 +75,8 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void sendBreak(int duration);
 
+        void clear();
+
         void sync() const;
 
     private:

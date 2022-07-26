@@ -524,9 +524,16 @@ void SerialDeviceImpl::sendBreak(int duration)
     return false;
 }
 */
+
+void SerialDeviceImpl::clear()
+{
+  ::tcflush(IODeviceImpl::fd(), TCIOFLUSH);
+}
+
+
 void SerialDeviceImpl::sync() const
 {
-    ::tcflush(IODeviceImpl::fd(), TCIFLUSH);
+    tcdrain( IODeviceImpl::fd() );
 }
 
 } //namespace System
