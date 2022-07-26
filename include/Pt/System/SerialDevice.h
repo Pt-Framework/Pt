@@ -196,6 +196,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
 		bool isDsr() const;
 
+    void clear();
+
     protected:
         // inherit docs
         void onClose();

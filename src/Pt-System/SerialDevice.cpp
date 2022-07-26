@@ -200,6 +200,12 @@ bool SerialDevice::isDsr() const
 }
 
 
+void SerialDevice::clear()
+{
+  return _impl->clear();
+}
+
+
 void SerialDevice::sendBreak(int duration)
 {
 	_impl->sendBreak(duration);
