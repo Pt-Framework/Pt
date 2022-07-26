@@ -30,6 +30,7 @@
 #define Pt_System_Uri_h
 
 #include <Pt/System/Api.h>
+#include <Pt/String.h>
 #include <string>
 #include <stdexcept>
 
@@ -113,6 +114,11 @@ class PT_SYSTEM_API Uri
         { return _fragment; }
 
         std::string str() const;
+
+    public:
+      static Pt::String decode(const std::string& s);
+    
+      static std::string encode(const Pt::String& s);
 
     private:
         std::string _protocol;
