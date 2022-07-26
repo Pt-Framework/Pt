@@ -89,12 +89,34 @@
 */
 
 #include <Pt/System/Uri.h>
+#include <Pt/Utf8Codec.h>
+#include <Pt/Convert.h>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <cctype>
 
 namespace {
+
+bool isReserved(char ch)
+{
+    if(ch >= 0x7F)
+        return true;
+
+    if(ch >= 'a' && ch <= 'z')
+        return false;
+
+    if(ch >= 'A' && ch <= 'Z')
+        return false;
+    
+    if(ch >= '0' && ch <= '9')
+        return false;
+
+    if( ch == '-' || ch == '.' || ch == '_' || ch == '~' )
+        return false;
+    
+    return true;
+}
 
 void throwInvalid(const std::string& uri)
 {
@@ -372,6 +394,7 @@ Uri::Uri(const std::string& uri)
     }
 }
 
+
 std::string Uri::str() const
 {
     std::ostringstream s;
@@ -404,6 +427,68 @@ std::string Uri::str() const
         s << '#' << _fragment;
 
     return s.str();
+}
+
+
+Pt::String Uri::decode(const std::string& s)
+{
+    std::string utf8;
+    std::string token;
+
+    for(std::string::const_iterator it = s.begin(); it != s.end(); ++it)
+    {
+        char ch = *it;    
+        
+        if( ch == '%' || ! token.empty() )
+          token += ch;
+        else
+          utf8 += ch;
+        
+        if(token.size() < 3)
+          continue;
+
+        int n = 0;
+        bool ok = true;
+        parseInt( ++token.begin(), token.end(), n, HexFormat<char>(), ok );
+
+        if( ! ok )
+            throw InvalidUri("invalid encoding");
+        
+        utf8 += static_cast<unsigned char>(n);
+        token.clear();
+  }
+
+  if( token.size() > 0 )
+      throw InvalidUri("invalid encoding");
+
+  utf8 += token;
+
+  return Utf8Codec::decode(utf8);
+}
+
+
+std::string Uri::encode(const Pt::String& s)
+{
+    std::string utf8 = Utf8Codec::encode(s);
+    std::string encoded;
+
+    for(std::string::const_iterator it = utf8.begin(); it != utf8.end(); ++it)
+    {
+        char ch = *it; 
+
+        if( ! isReserved(ch) )
+        {
+            encoded += ch;
+            continue;
+        }
+
+        encoded += "%";
+
+        unsigned n = static_cast<unsigned char>(ch);
+        formatInt( std::back_inserter(encoded), n, HexFormat<char>() );
+  }
+
+  return encoded;
 }
 
 } // namespace System
