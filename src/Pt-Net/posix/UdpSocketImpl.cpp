@@ -27,7 +27,6 @@
  */
 
 #include "UdpSocketImpl.h"
-#include "MainLoopImpl.h"
 #include "AddrInfo.h"
 #include "AdapterInfo.h"
 #include "EndpointImpl.h"

@@ -30,8 +30,10 @@
 #define PT_NET_UdpSocketImpl_H
 
 #include "IODeviceImpl.h"
+#include "Selector.h"
 #include <Pt/Net/Api.h>
 #include <Pt/Net/UdpSocket.h>
+#include <Pt/System/EventLoop.h>
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>

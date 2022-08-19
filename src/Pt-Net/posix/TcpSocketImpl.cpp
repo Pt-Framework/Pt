@@ -30,7 +30,6 @@
 #include "EndpointImpl.h"
 #include "TcpSocketImpl.h"
 #include "TcpServerImpl.h"
-#include "MainLoopImpl.h"
 #include "Pt/Net/Endpoint.h"
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"

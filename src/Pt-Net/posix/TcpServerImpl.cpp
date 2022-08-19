@@ -28,7 +28,6 @@
 
 #include "AddrInfo.h"
 #include "TcpServerImpl.h"
-#include "MainLoopImpl.h"
 #include "IODeviceImpl.h"
 #include <Pt/Net/Endpoint.h>
 #include <Pt/Net/AddressInUse.h>

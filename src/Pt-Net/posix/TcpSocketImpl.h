@@ -31,7 +31,9 @@
 
 #include "AddrInfo.h"
 #include "IODeviceImpl.h"
+#include "Selector.h"
 #include "Pt/Net/TcpSocket.h"
+#include "Pt/System/EventLoop.h"
 #include <string>
 
 namespace Pt {
