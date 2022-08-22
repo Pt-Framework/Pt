@@ -1161,73 +1161,41 @@ static const DefaultFacets defaultFacets;
 
 } // namespace
 
-namespace std {
+namespace Pt {
 
-template<>
-bool has_facet< ctype<Pt::Char> >(const locale& loc)
+const std::ctype<Pt::Char>& useCType(const std::locale& loc)
 {
-  return true;
-}
-
-
-template<>
-const ctype<Pt::Char>& use_facet(const locale& loc)
-{
-  if( has_facet< Pt::ctype_default<Pt::Char> >(loc) )
+  if( std::has_facet< Pt::ctype_default<Pt::Char> >(loc) )
     return std::use_facet< Pt::ctype_default<Pt::Char> >(loc);
 
   return DefaultFacets::ctype();
 }
 
 
-template<>
-bool has_facet< numpunct<Pt::Char> >(const locale& loc)
+const std::numpunct<Pt::Char>& useNumPunct(const std::locale& loc)
 {
-  return true;
-}
-
-
-template<>
-const numpunct<Pt::Char>& use_facet(const locale& loc)
-{
-  if( has_facet< Pt::numpunct_default<Pt::Char> >(loc) )
+  if( std::has_facet< Pt::numpunct_default<Pt::Char> >(loc) )
     return std::use_facet< Pt::numpunct_default<Pt::Char> >(loc);
 
   return DefaultFacets::numpunct();
 }
 
 
-template<>
-bool has_facet< num_get<Pt::Char> >(const locale& loc)
+const std::num_get<Pt::Char>& useNumGet(const std::locale& loc)
 {
-  return true;
-}
-
-
-template<>
-const num_get<Pt::Char>& use_facet(const locale& loc)
-{
-  if( has_facet< Pt::num_get_default<Pt::Char> >(loc) )
+  if( std::has_facet< Pt::num_get_default<Pt::Char> >(loc) )
     return std::use_facet< Pt::num_get_default<Pt::Char> >(loc);
 
   return DefaultFacets::num_get();
 }
 
 
-template<>
-bool has_facet< num_put<Pt::Char> >(const locale& loc)
+const std::num_put<Pt::Char>& useNumPut(const std::locale& loc)
 {
-  return true;
-}
-
-
-template<>
-const num_put<Pt::Char>& use_facet(const locale& loc)
-{
-  if( has_facet< Pt::num_put_default<Pt::Char> >(loc) )
+  if( std::has_facet< Pt::num_put_default<Pt::Char> >(loc) )
     return std::use_facet< Pt::num_put_default<Pt::Char> >(loc);
 
   return DefaultFacets::num_put();
 }
 
-} // namespace
+} // namespace Pt
