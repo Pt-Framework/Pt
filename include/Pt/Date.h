@@ -293,7 +293,7 @@ class Date
           
           y += n / 12;
 
-          int deltaM = std::abs(n) % 12;
+          unsigned deltaM = static_cast<unsigned>( std::abs(n) % 12 );
 
           if(n < 0)
           {
