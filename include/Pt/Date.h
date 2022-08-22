@@ -33,7 +33,7 @@
 #include <Pt/String.h>
 #include <string>
 #include <stdexcept>
-#include <cmath>
+#include <cstdlib>
 
 namespace Pt {
 
