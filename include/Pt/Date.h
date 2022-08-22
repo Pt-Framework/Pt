@@ -33,6 +33,7 @@
 #include <Pt/String.h>
 #include <string>
 #include <stdexcept>
+#include <cmath>
 
 namespace Pt {
 
@@ -290,13 +291,36 @@ class Date
           unsigned m = 0, d = 0;
           get(y, m, d);
           
-          m += n % 12;
           y += n / 12;
-          
-          if ( m > 12 )
+
+          int deltaM = std::abs(n) % 12;
+
+          if(n < 0)
           {
-            m -= 12;
-            y += 1;
+              if(m <= deltaM)
+              {
+                  m += 12;
+                  y -= 1;
+              }
+
+              m -= deltaM;
+          }
+          else
+          {
+              m += deltaM;
+
+              if(m > 12)
+              {
+                  m -= 12;
+                  y += 1;
+              }
+          }
+
+          Date dt(y, m, 1);
+          unsigned maxDays = dt.daysInMonth();
+          if(d > maxDays)
+          {
+              d = maxDays;
           }
 
           set(y, m, d);

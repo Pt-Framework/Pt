@@ -99,6 +99,19 @@ void DateTest::Increment()
   PT_UNIT_ASSERT( d1.day() == 6 );
   PT_UNIT_ASSERT( d1.month() == 5 );
   PT_UNIT_ASSERT( d1.year() == 3001 );
+
+  Pt::Date d2(2001, 1, 31);
+  d2.addMonths(1);
+  PT_UNIT_ASSERT( d2.day() == 28 );
+  PT_UNIT_ASSERT( d2.month() == 2 );
+  PT_UNIT_ASSERT( d2.year() == 2001 );
+
+  Pt::Date d3(2001, 4, 30);
+  d3.addMonths(-7);
+  PT_UNIT_ASSERT( d3.day() == 30 );
+  PT_UNIT_ASSERT( d3.month() == 9 );
+  PT_UNIT_ASSERT( d3.year() == 2000 );
+
 }
 
 void DateTest::IsoConvert()
@@ -112,4 +125,3 @@ void DateTest::IsoConvert()
     PT_UNIT_ASSERT( date.month() == 5 );
     PT_UNIT_ASSERT( date.day() == 12 );
 }
-
