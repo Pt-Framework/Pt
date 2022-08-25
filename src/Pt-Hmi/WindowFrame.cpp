@@ -34,10 +34,10 @@
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Shell.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
-
 #include <Pt/Gfx/Point.h>
 
 namespace {
@@ -80,7 +80,7 @@ WindowButton::~WindowButton()
 void WindowButton::update()
 {
     if(_frame)
-        _frame->update( _geometry);
+        _frame->repaint(_geometry);
 }
 
 
@@ -113,7 +113,7 @@ void WindowButton::leaveEvent(const LeaveEvent& lev)
 
 void WindowButton::mouseEvent(const MouseEvent& mev)
 {
-    Application::instance().setCursor( &Cursor::defaultCursor() );
+    Application::instance().setCursor(0);
 
     bool isPressed = mev.isPress() || (_isPressed && mev.isPressed());
 
@@ -397,8 +397,8 @@ void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 // WindowFrame
 //
 
-WindowFrame::WindowFrame(WindowManager& wm, Window& window)
-: _wm(&wm)
+WindowFrame::WindowFrame(Shell& shell, Window& window)
+: _wm(&shell)
 , _window(&window)
 , _borderWidth(0)
 , _titleHeight(0)
@@ -471,8 +471,20 @@ const Gfx::SizeF& WindowFrame::restoreSize() const
 
 void WindowFrame::setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size)
 {
-    _restorePos = _window->position();
-    _restoreSize = _window->size();
+    _restorePos = pos;
+    _restoreSize = size;
+}
+
+
+const Gfx::PointF& WindowFrame::position() const
+{
+    return _frameRect.topLeft();
+}
+
+
+const Gfx::SizeF& WindowFrame::size() const
+{
+    return _clientRect.size();
 }
 
 
@@ -490,8 +502,8 @@ const Gfx::RectF& WindowFrame::frameRect() const
 
 void WindowFrame::setFrame(double bw, double th)
 {
-    _borderWidth = _window->align(bw);
-    _titleHeight = _window->align(th);
+    _borderWidth = _window->surface().align(bw);
+    _titleHeight = _window->surface().align(th);
 }
 
 
@@ -529,19 +541,19 @@ void WindowFrame::onMenu()
 
 void WindowFrame::onMinimize()
 {
-    if(_state == Window::Minimized)
-        _window->setState(Window::Normal);
+    if(_state == WindowState::Minimized)
+        _window->setState(WindowState::Normal);
     else
-        _window->setState(Window::Minimized);
+        _window->setState(WindowState::Minimized);
 }
 
 
 void WindowFrame::onMaximize()
 {
-    if(_state == Window::Maximized)
-        _window->setState(Window::Normal);
+    if(_state == WindowState::Maximized)
+        _window->setState(WindowState::Normal);
     else
-        _window->setState(Window::Maximized);
+        _window->setState(WindowState::Maximized);
 }
 
 
@@ -551,24 +563,21 @@ void WindowFrame::onClose()
 }
 
 
-void WindowFrame::update()
+void WindowFrame::repaint()
 {
-    update(_frameRect);
+    repaint(_frameRect);
 }
 
 
-void WindowFrame::update(const Gfx::RectF& rect)
+void WindowFrame::repaint(const Gfx::RectF& rect)
 {
-    Gfx::PointF updatePos = _window->fromParent( rect.topLeft() );
-    Gfx::RectF updateRect(updatePos, rect.size());
-
-    _window->update(updateRect);
+    _wm->repaint(rect);
 }
 
 
 void WindowFrame::moveEvent(const Gfx::PointF& pos)
 {
-    _frameRect.setOrigin( pos );
+    _frameRect.setOrigin(pos);
 
     Gfx::PointF clientPos = pos;
     clientPos.addX(_borderWidth);
@@ -598,22 +607,34 @@ void WindowFrame::onLayout()
     double buttonWidth = _titleHeight - _borderWidth;
 
     Gfx::PointF menuPos(_frameRect.x() + _borderWidth, _frameRect.y() + _borderWidth);
-    _menuButton.moveEvent( MoveEvent(0, menuPos ) );
-    _menuButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
+    _menuButton.moveEvent( MoveEvent(*_window, menuPos ) );
+    _menuButton.resizeEvent( ResizeEvent(*_window, Gfx::SizeF(buttonWidth, buttonWidth) ) );
 
     double buttonX = _frameRect.x() + _frameRect.width() - (_borderWidth + buttonWidth);
     double buttonY = _frameRect.y() + _borderWidth;
 
-    _closeButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
-    _closeButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
+    _closeButton.moveEvent( MoveEvent(*_window, Gfx::PointF(buttonX, buttonY) ) );
+    _closeButton.resizeEvent( ResizeEvent(*_window, Gfx::SizeF(buttonWidth, buttonWidth) ) );
 
     buttonX -= _borderWidth + buttonWidth;
-    _maximizeButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
-    _maximizeButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
+    _maximizeButton.moveEvent( MoveEvent(*_window, Gfx::PointF(buttonX, buttonY) ) );
+    _maximizeButton.resizeEvent( ResizeEvent(*_window, Gfx::SizeF(buttonWidth, buttonWidth) ) );
 
     buttonX -= _borderWidth + buttonWidth;
-    _minimizeButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
-    _minimizeButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
+    _minimizeButton.moveEvent( MoveEvent(*_window, Gfx::PointF(buttonX, buttonY) ) );
+    _minimizeButton.resizeEvent( ResizeEvent(*_window, Gfx::SizeF(buttonWidth, buttonWidth) ) );
+}
+
+
+void WindowFrame::onEvent(const Pt::Event& ev)
+{
+
+}
+
+
+void WindowFrame::onSetCapture(bool capture)
+{
+    // TODO: implement WindowFrame as first-class Visual
 }
 
 
@@ -627,7 +648,7 @@ void WindowFrame::leaveEvent(const LeaveEvent& lev)
     if(_isClient)
     {
         _isClient = false;
-        LeaveEvent lev(_window->vid());
+        LeaveEvent lev(*_window);
         _window->processEvent(lev);
     }
 
@@ -645,7 +666,10 @@ void WindowFrame::leaveEvent(const LeaveEvent& lev)
 bool WindowFrame::mouseEvent(const MouseEvent& mev)
 {
     bool r = onMouseEvent(mev);
-    _lastPointer = mev.position();
+    
+    Gfx::PointF pos =  _wm->fromScreen( mev.position() );
+    _lastPointer = pos;
+    
     return r;
 }
 
@@ -653,48 +677,43 @@ bool WindowFrame::mouseEvent(const MouseEvent& mev)
 bool WindowFrame::touchEvent(const TouchEvent& tev)
 {
     bool r = onTouchEvent(tev);
-    _lastPointer = tev.position();
+
+    Gfx::PointF pos =  _window->fromScreen( tev.position() );
+    _lastPointer = pos;
+
     return r;
 }
 
 
 bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 {
-    Window* window = checkWindow( mev.position() );
+    Gfx::PointF pos =  _wm->fromScreen( mev.position() );
+
+    Window* window = checkWindow(pos);
     if(window)
     {
-        if( window->isEnabled() )
-        {
-            Gfx::PointF pos = mev.position() - _clientRect.topLeft();
-            MouseEvent mev2 = mev;
-            mev2.setId( window->vid() );
-            mev2.setPosition(pos);
-            
-            //window->processEvent(mev2);
-            Application::instance().loop().commitEvent(mev2);
-        }
-
+        window->processEvent(mev);
         return false;
     }
 
-    WindowButton* button = checkButton( mev.position() );
+    WindowButton* button = checkButton(pos);
     if(button)
     {
         button->mouseEvent(mev);
         return false;
     }
 
-    if( isTitle( mev.position() ) )
+    if( isTitle(pos) )
     {
         Application::instance().setCursor( &Cursor::moveCursor() );
 
-        return checkMove(mev.position(), mev.isPressed(), mev.isPress() );
+        return checkMove(pos, mev.isPressed(), mev.isPress() );
     }
 
-    bool onLeftBorder = isLeftBorder( mev.position() );
-    bool onRightBorder = isRightBorder( mev.position() );
-    bool onTopBorder = isTopBorder( mev.position() );
-    bool onBottomBorder = isBottomBorder( mev.position() );
+    bool onLeftBorder = isLeftBorder(pos);
+    bool onRightBorder = isRightBorder(pos);
+    bool onTopBorder = isTopBorder(pos);
+    bool onBottomBorder = isBottomBorder(pos);
 
     if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
     {
@@ -707,7 +726,7 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
         else if(onTopBorder || onBottomBorder)
             Application::instance().setCursor( &Hmi::Cursor::sizeNSCursor() );
 
-        return checkResize(mev.position(), mev.isPressed(), mev.isPress());
+        return checkResize(pos, mev.isPressed(), mev.isPress());
     }
 
     Application::instance().setCursor( &Cursor::defaultCursor() );
@@ -717,20 +736,12 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 
 bool WindowFrame::onTouchEvent(const TouchEvent& tev)
 {
+    Gfx::PointF pos =  _wm->fromScreen( tev.position() );
+
     Window* window = checkWindow( tev.position() );
     if(window)
     {
-        if( window->isEnabled() )
-        {
-            Gfx::PointF pos = tev.position() - _clientRect.topLeft();
-            TouchEvent tev2 = tev;
-            tev2.setId( window->vid() );
-            tev2.setPosition(pos);
-
-            //window->processEvent(tev2);
-            Application::instance().loop().commitEvent(tev2);
-        }
-
+        window->processEvent(tev);
         return false;
     }
 
@@ -837,8 +848,8 @@ Window* WindowFrame::checkWindow(const Gfx::PointF& pos)
             if( ! _isClient )
             {
                 _isClient = true;
-                EnterEvent eev(_window->vid());
-                _window->processEvent(eev);
+                //EnterEvent eev(*_window);
+                //_window->processEvent(eev);
             }
 
             return _window;
@@ -847,8 +858,8 @@ Window* WindowFrame::checkWindow(const Gfx::PointF& pos)
         if(_isClient)
         {
             _isClient = false;
-            LeaveEvent lev(_window->vid());
-            _window->processEvent(lev);
+            //LeaveEvent lev( *_window );
+            //_window->processEvent(lev);
         }
     }
 
@@ -874,7 +885,7 @@ WindowButton* WindowFrame::checkButton(const Gfx::PointF& pos)
             }
             else if(button->geometry().contains(_lastPointer) )
             {
-                button->leaveEvent( LeaveEvent(0) );
+                button->leaveEvent( LeaveEvent(*_window) );
             }
         }
     }
@@ -891,7 +902,7 @@ bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
 
         if(_isMoving && ! isPress)
         {
-            Gfx::PointF to = _window->position() + pos - _lastPointer;
+            Gfx::PointF to = position() + pos - _lastPointer;
             _window->move(to);
         }
 
@@ -921,32 +932,32 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 
         if(isResizing && ! isPress)
         {
-            Gfx::SizeF size = _window->size();
-            Gfx::PointF winpos = _window->position();
+            Gfx::SizeF winSize = size();
+            Gfx::PointF winpos = position();
             Gfx::PointF delta = pos - _lastPointer;
 
             if( _isLeftResizing )
             {
                 winpos.addX( delta.x() );
-                size.subWidth(delta.x());
+                winSize.subWidth(delta.x());
             }
 
             if(_isRightResizing)
-                size.addWidth( delta.x() );
+                winSize.addWidth( delta.x() );
 
             if(_isTopResizing)
             {
                 winpos.addY( delta.y() );
-                size.subHeight(delta.y());
+                winSize.subHeight(delta.y());
             }
 
             if(_isBottomResizing)
-                size.addHeight( delta.y() );
+                winSize.addHeight( delta.y() );
 
-            if( size != _window->size() )
-                _window->resize(size);
+            if( winSize != size() )
+                _window->resize(winSize);
 
-            if( winpos != _window->position() )
+            if( winpos != position() )
                 _window->move(winpos);
         }
 
@@ -1099,14 +1110,14 @@ void WindowFrame::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     //
     // grip area on title bar
     //
-    Gfx::Color gripColorLight( color.red() * 1.1f,
-                               color.green() * 1.1f,
-                               color.blue() * 1.1f );
+    Gfx::Color gripColorLight( (color.red() * 11) / 10,
+                               (color.green() * 11) / 10,
+                               (color.blue() * 11) / 10 );
     Gfx::Pen gripPenLight(gripColorLight, 1);
 
-    Gfx::Color gripColorDark( color.red() * 0.9f,
-                              color.green() * 0.9f,
-                              color.blue() * 0.9f );
+    Gfx::Color gripColorDark( (color.red() * 9) / 10,
+                              (color.green() * 9) / 10,
+                              (color.blue() * 9) / 10 );
     Gfx::Pen gripPenDark(gripColorDark, 1);
 
     unsigned linePenSize = static_cast<unsigned>( painter.toPhysical(penSize) );

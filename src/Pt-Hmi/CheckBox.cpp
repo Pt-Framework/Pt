@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/CheckBox.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/PixmapSurface.h>
@@ -186,7 +187,7 @@ void CheckBox::onCanceled()
 }
 
 
-Gfx::SizeF CheckBox::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
 {
     //Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, text() );
 

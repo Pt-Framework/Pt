@@ -50,12 +50,6 @@ Control::~Control()
 }
 
 
-Gfx::PaintSurface& Control::surface()
-{
-    return _surface;
-}
-
-
 bool Control::isHighlighted() const
 {
     return _isHighlighted;
@@ -74,74 +68,38 @@ void Control::onSetStyleOptions(const StyleOptions& o)
 }
 
 
-void Control::onSetWindow(Window* w)
-{
-    if( ! w )
-    {   
-        _surface.detach();
-        return;
-    }
-    
-    Gfx::PointF winpos = w->fromClient( Gfx::PointF(0, 0), *this );
-    Gfx::PaintSurface& windowSurface = w->surface();
-
-    Gfx::RectF paintRect( winpos, size() );
-    _surface.attach(windowSurface, paintRect);
-}
-
-
 void Control::onInvalidate()
 {
     Widget::onInvalidate();
-    update();
+
+    // TODO: repaint only if required in derived class
+    repaint();
 }
 
 
-void Control::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void Control::onLayout(const Gfx::RectF& rect)
 {
-     Widget::onLayout(layouter, rect);
+     Widget::onLayout(rect);
 }
 
 
-// void Control::onPaintContent(const Gfx::RectF& r)
-// {
-//     Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
-//     Gfx::RectF surfaceRect( pos, size() );
-//     _surface.reset(surfaceRect);
-
-//     Widget::onPaintContent(r);
-// }
-
-
-void Control::onPaintEvent(const PaintEvent& ev)
-{
-    Widget::onPaintEvent(ev);
-
-    Gfx::PointF pos = window()->fromClient( Gfx::PointF(0, 0), *this );
-    Gfx::RectF surfaceRect( pos, size() );
-    _surface.reset(surfaceRect);
-    
-    onPaint(_surface, ev.rect() );
-}
+//void Control::onPaintEvent(const PaintEvent& ev)
+//{
+//    Widget::onPaintEvent(ev); 
+//    
+//    onPaint( surface(), ev.rect() );   
+//}
 
 
 void Control::onMoveEvent(const MoveEvent& ev)
 {
     Widget::onMoveEvent(ev);
-
-    // Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
-    // Gfx::RectF surfaceRect( pos, size() );
-    // _surface.reset(surfaceRect);
 }
 
 
 void Control::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
-
-    // Gfx::PointF pos = toWindow( Gfx::PointF(0, 0) );
-    // Gfx::RectF surfaceRect( pos, size() );
-    // _surface.reset(surfaceRect);
 }
 
 
@@ -153,23 +111,25 @@ void Control::onFocusEvent(const FocusEvent& ev)
 }
 
 
-void Control::onEnterEvent( const EnterEvent& ev)
+bool Control::onEnterEvent( const EnterEvent& ev)
 {
     Widget::onEnterEvent(ev);
 
     _isHighlighted = true;
     
     invalidate();
+    return true;
 }
 
 
-void Control::onLeaveEvent(const LeaveEvent& ev)
+bool Control::onLeaveEvent(const LeaveEvent& ev)
 {
     Widget::onLeaveEvent(ev);
 
     _isHighlighted = false;
 
     invalidate();
+    return true;
 }
 
 } // namespace

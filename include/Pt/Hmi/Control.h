@@ -31,7 +31,6 @@
 
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Style.h>
-#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/PaintRegion.h>
 
@@ -46,8 +45,6 @@ class PT_HMI_API Control : public Widget
 
         virtual ~Control();
 
-        Gfx::PaintSurface& surface();
-
         // TODO: find better name
         bool isHighlighted() const;
 
@@ -57,20 +54,15 @@ class PT_HMI_API Control : public Widget
         virtual void onSetStyleOptions(const StyleOptions& o);
         
     protected:
-        virtual void onSetWindow(Window* w);
-
         virtual void onInvalidate();
 
-        virtual void onLayout(Layouter& layouter, 
-                              const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
-        virtual void onPaint(Gfx::PaintSurface& surface, 
-                             const Gfx::RectF& updateRect) = 0;
+        //virtual void onPaint(Gfx::PaintSurface& surface, 
+        //                     const Gfx::RectF& updateRect) = 0;
 
     protected:
-        //void onPaintContent(const Gfx::RectF& r);
-
-        virtual void onPaintEvent(const PaintEvent& ev);
+        //virtual void onPaintEvent(const PaintEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);
 
@@ -78,12 +70,11 @@ class PT_HMI_API Control : public Widget
 
         virtual void onFocusEvent(const FocusEvent& ev);
 
-        virtual void onEnterEvent( const EnterEvent& ev );
+        virtual bool onEnterEvent( const EnterEvent& ev );
 
-        virtual void onLeaveEvent(const LeaveEvent& ev );
+        virtual bool onLeaveEvent(const LeaveEvent& ev );
 
     private:
-        Gfx::PaintRegion  _surface;
         bool              _isHighlighted;
 }; 
 

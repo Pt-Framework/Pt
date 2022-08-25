@@ -43,19 +43,21 @@ namespace Hmi {
 
 class Screen;
 
-class MainWindowImpl
+class MainWindowImpl : public WindowImpl
 {
     public:
         MainWindowImpl(Window::Type type);
 
         ~MainWindowImpl();
 
-        void setType(Window::Type type);
+        double scaleFactor() const;
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
-    
+
+        void paint(const Gfx::RectF& rect);
+
         void show(bool v);
     
         void activate();
@@ -68,33 +70,30 @@ class MainWindowImpl
 
         void close();
 
-        void paint(const Gfx::RectF& rect);
-    
-        void setState(Window::State s);
-       
-        void setIcon(const Gfx::Image& p);
-    
-        void setMinimumSize(const Gfx::SizeF& s);
-    
-        void setMaximumSize(const Gfx::SizeF& s);
-
-        void setTitle( const std::string& t );
-
-        void setTopMost(bool e);
-
-        void grabPointer();
-
-        double scaleFactor() const;
+        //void grabPointer();
 
         HWND hwnd()
         {
             return _hwnd;
         }
 
+    protected:
+        virtual void onSetType(WindowType type);
+
+        virtual void onSetTitle(const std::string& text);
+
+        virtual void onSetIcon(const Gfx::Image& p);
+
+        virtual void onSetTopMost(bool isTop);
+
+        virtual void onSetState(Window::State s);
+
+        virtual void onSetMinimumSize(const Gfx::SizeF& s);
+    
+        virtual void onSetMaximumSize(const Gfx::SizeF& s);
+
     private:   
         HWND    _hwnd;
-        Screen& _screen;
-        bool    _isTopMost;
         double  _scalingFactor;
 };
 

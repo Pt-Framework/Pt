@@ -28,11 +28,8 @@
 */
 
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Layout.h>
+#include <Pt/Hmi/Sheet.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Screen.h>
-#include <Pt/Gfx/Brush.h>
 #include <Pt/String.h>
 
 #include <cmath>
@@ -43,9 +40,11 @@ namespace Pt {
 namespace Hmi {
 
 Widget::Widget()
-: _screen(0)
-, _window(0)
-, _parent(0)
+: _parent(0)
+, _sheet(0)
+, _nextResponder(0)
+, _pointer(0)
+, _capture(0)
 , _invalidates(0)
 , _isLayoutInvalid(true)
 , _visible(true)
@@ -54,72 +53,148 @@ Widget::Widget()
 , _hasFocus(false)
 , _focusPolicy(NoFocus)
 , _focusIndex(0)
-, _acceptsInput(true)
-, _textInput(false)
-, _cursor( Hmi::Cursor::defaultCursor() )
+, _hasCursor(false)
+, _cursor()
 , _actionKey(Key::Space)
 , _mnemonic(0)
 {
-    _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
-    _eventReady += Pt::slot(*this, &Widget::scrollEvent);
-    _eventReady += Pt::slot(*this, &Widget::onMoveEvent);
-    _eventReady += Pt::slot(*this, &Widget::onResizeEvent);
-    _eventReady += Pt::slot(*this, &Widget::processMouseEvent);
-    _eventReady += Pt::slot(*this, &Widget::touchEvent);
-    _eventReady += Pt::slot(*this, &Widget::onEnterEvent);
-    _eventReady += Pt::slot(*this, &Widget::onLeaveEvent);
-    //_eventReady += Pt::slot(*this, &Widget::onEnableEvent);
-    _eventReady += Pt::slot(*this, &Widget::onFocusEvent);
-    //_eventReady += Pt::slot(*this, &Widget::onShowEvent);
-    _eventReady += Pt::slot(*this, &Widget::onInvalidateEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessMouseEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessTouchEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessScrollEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessEnterEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessLeaveEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessKeyEvent);
+
+    _eventReceived += Pt::slot(*this, &Widget::onProcessInvalidateEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessPaintEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessLayoutEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessRescaleEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessMoveEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessResizeEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessShowEvent);
+    _eventReceived += Pt::slot(*this, &Widget::onProcessEnableEvent);
+    
+    _eventReceived += Pt::slot(*this, &Widget::onProcessFocusEvent);
 }
 
 
 Widget::~Widget()
 {
-    releasePointer();
-
     while( ! _children.empty() )
         remove( *_children.back() );
 
+    setParent(0);
+}
+
+// implment add method in derived class
+void Widget::add(Widget& w)
+{
+    w.setParent(this);
+}
+
+// implment remove method in derived class
+void Widget::remove(Widget& w)
+{
+    w.setParent(0);
+}
+
+
+void Widget::setNextResponder(Responder* r)
+{
+    _nextResponder = r;
+}
+
+
+Gfx::PaintSurface& Widget::surface()
+{
+    return _surface;
+}
+
+
+void Widget::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+{
+    if( ! surface )
+    {
+        _surface.detach();
+    }
+    else
+    {
+        Gfx::RectF clientRect( pos, size() );
+        _surface.attach(*surface, clientRect);
+    }
+
+    std::vector<Widget*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Widget* widget = *it;
+
+        Gfx::PaintSurface* surface = _surface.surface();
+        Gfx::PointF surfacePos = pos + widget->position();
+
+        widget->setSurface(surface, surfacePos);
+    }
+}
+
+
+const View* Widget::parent() const
+{
+    return _parent;
+}
+
+
+View* Widget::parent()
+{
+    return _parent;
+}
+
+
+void Widget::setParent(View* parent)
+{
+    if(_parent == parent)
+        return;
+
     if(_parent)
-        _parent->remove(*this);
+    {
+        _parent->onRelease(*this);
+        _parent->onDetach(*this);
+        _parent = 0;
+        
+        onParentChanged(_parent);
+    }
+
+    if(parent)
+    {
+        parent->onAttach(*this);
+        _parent = parent;
+
+        _parent->onInit(*this);
+
+        _parent->onEnable(*this, _enabled);
+        _parent->onShow(*this, _visible);
+
+        onParentChanged(_parent);
+    }
 }
 
 
-Window* Widget::window()
+void Widget::setSheet(Sheet* sheet)
 {
-    return _window;
-}
+    if(_sheet)
+        _sheet->onDeregister(*this);
 
+    _sheet = 0;
 
-const Window* Widget::window() const
-{
-    return _window;
-}
+    if(sheet)
+        sheet->onRegister(*this);
 
+    _sheet = sheet;
 
-Screen* Widget::screen()
-{
-    return _screen;
-}
-
-
-const Screen* Widget::screen() const
-{
-    return _screen;
-}
-
-
-Window* Widget::onGetWindow()
-{
-    return _window;
-}
-
-
-Screen* Widget::onGetScreen()
-{
-    return _screen;
+    std::vector<Widget*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Widget* widget = *it;
+        widget->setSheet(sheet);
+    }
 }
 
 
@@ -127,105 +202,53 @@ void Widget::onAttach(Widget& widget)
 {
     _children.push_back(&widget);
 
-    // disable child if this widget is disabled
-    if( ! isEnabled() && widget.isEnabled() )
-    {
-        //EnableEvent eev( widget.vid(), false);
-        //Application::instance().loop().commitEvent(eev);
-
-        widget.onEnable(false);
-    }
-
-    relayout();
-
     onAddWidget(widget);
 }
 
 
 void Widget::onDetach(Widget& widget)
 {
+    if(_pointer == &widget)
+        _pointer = 0;
+
+    if(_capture == &widget)
+        _capture = 0;
+
     std::vector<Widget*>::iterator it;
     it = std::find(_children.begin(), _children.end(), &widget);
     if( it != _children.end() )
         _children.erase(it);
 
-    // enable when indirectly disabled
-    if( ! widget._enabledState && widget._enabled)
-        widget.enable(true);
-
-    relayout();
-
     onRemoveWidget(widget);
 }
 
 
-void Widget::setParent(View* view)
+void Widget::onInit(Widget& widget)
 {
-    setWindow(0);
-    setScreen(0);
+    Gfx::PaintSurface* surface = _surface.surface();
+    Gfx::PointF surfacePos = _surface.area().topLeft() + widget.position();
 
-    _parent = 0;
+    widget.setSurface(surface, surfacePos);
+    widget.setNextResponder(this);
+    widget.setSheet(_sheet);
 
-    onParentChanged(0);
+    double scaling = _surface.scaleFactor();
+    
+    RescaleEvent ev(widget, scaling);
+    //w.processEvent(ev);
+    Application::instance().loop().commitEvent(ev);
 
-    if( ! view )
-        return;
-
-    _parent = view;
-
-    setWindow( view->window() );
-    setScreen( view->screen() );
-
-    onParentChanged(0);
+    relayout();
 }
 
 
-void Widget::setWindow(Window* window)
+void Widget::onRelease(Widget& widget)
 {
-    if(_window == window)
-        return;
+    widget.setSheet(0);
+    widget.setSurface( 0, widget.position() );
+    widget.setNextResponder(0);
 
-    if(_window)
-        _window->removeWidget(*this);
-
-    _window = window;
-
-    if( _window )
-        _window->addWidget(*this);
-
-    // this serves as the initial invalidate
-    invalidate();
-
-    // previous relayouts did not work without parent window
     relayout();
-
-    std::vector<Widget*>::iterator it;
-    for(it = _children.begin(); it != _children.end(); ++it)
-        (*it)->setWindow(window);
-
-    onSetWindow(window);
-}
-
-
-void Widget::setScreen(Screen* screen)
-{
-    if(_screen == screen)
-        return;
-
-    _screen = screen;
-
-    invalidate();
-    relayout();
-
-    _margin = align(_margin);
-    _padding = align(_padding);
-
-    _sizePolicy.setSize( align( _sizePolicy.size() ) );
-
-    for (size_t i = 0; i < _children.size(); ++i)
-        _children[i]->setScreen(screen);
-
-    onSetScreen(screen);
 }
 
 
@@ -239,17 +262,7 @@ void Widget::onRemoveWidget(Widget& w)
 }
 
 
-void Widget::onParentChanged(Widget* w)
-{
-}
-
-
-void Widget::onSetWindow(Window* w)
-{
-}
-
-
-void Widget::onSetScreen(Screen* s)
+void Widget::onParentChanged(View*)
 {
 }
 
@@ -260,44 +273,22 @@ const std::vector<Widget*>& Widget::widgets() const
 }
 
 
-Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
+Widget* Widget::findWidget(const Gfx::PointF& pos)
 {
-    if( ! isVisible() || ! isEnabled() )
-        return 0;
-
     std::vector<Widget*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
     {
-        Widget* child = *it;
+        Widget* widget = *it;
 
-        if( ! child->isVisible() || ! child->isEnabled() )
-            continue;
-
-        if( ! child->geometry().contains(pos) )
-            continue;
-
-        Gfx::PointF p = toClient(pos, *child);
-        Widget* found = child->findWidget(p, input);
-
-        if( ! input)
-            return found ? found : child;
-
-        if( found && found->acceptsInput() )
-            return found;
-
-        if( child->acceptsInput() )
-            return child;
-
-        break;
+        if( widget->geometry().contains(pos) )
+        {
+            Gfx::PointF p = toWidget(*widget, pos);
+            Widget* found = widget->findWidget(p);
+            return found ? found : widget;
+        }
     }
 
     return 0;
-}
-
-
-Widget* Widget::findWidget(const Gfx::PointF& pos)
-{
-    return findWidget(pos, false);
 }
 
 
@@ -339,34 +330,19 @@ Widget* Widget::findWidget(const std::string& name)
 }
 
 
-double Widget::onScaleFactor() const
-{
-    if( window() )
-        return window()->scaleFactor();
-
-    return 1.0;
-}
-
-
-Visual* Widget::onParent() const
-{
-    return _parent;
-}
-
-
-Gfx::PointF Widget::onToParent(const Gfx::PointF& pos) const
+Gfx::PointF Widget::onToScreen(const Gfx::PointF& pos) const
 {
     if(_parent)
-        return _parent->fromWidget(*this, pos);
+        return _parent->onToScreen(*this, pos);
 
     return pos;
 }
 
 
-Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
+Gfx::PointF Widget::onFromScreen(const Gfx::PointF& pos) const
 {
     if(_parent)
-        return _parent->toWidget(*this, pos);
+        return _parent->onFromScreen(*this, pos);
 
     return pos;
 }
@@ -374,43 +350,57 @@ Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
 
 Gfx::PointF Widget::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
-    return pos - widget.position();
+    const View* parentView = widget.parent();
+
+    if( parentView == this || ! parentView )
+        return pos - widget.position();
+
+    return pos - parentView->onToWidget(widget, pos);    
 }
 
 
 Gfx::PointF Widget::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
-    return pos + widget.position();
+    const View* parentView = widget.parent();
+
+    if( parentView == this || ! parentView )
+        return pos + widget.position();
+
+    return pos + parentView->onFromWidget(widget, pos);
 }
 
 
-bool Widget::acceptsInput() const
+Gfx::PointF Widget::onToScreen(const Widget& widget, 
+                               const Gfx::PointF& pos) const
 {
-  return _acceptsInput;
+    Gfx::PointF p = fromWidget(widget, pos);
+    return toScreen(p);
 }
 
 
-void Widget::setAcceptInput(bool a)
+Gfx::PointF Widget::onFromScreen(const Widget& widget, 
+                                 const Gfx::PointF& pos) const
 {
-    _acceptsInput = a;
+    Gfx::PointF p = fromScreen(pos);
+    return toWidget(widget, p);
 }
 
 
-void Widget::setTextInput(bool b)
+const Gfx::PointF& Widget::position() const
 {
-    _textInput = b;
+    return _position;
 }
 
 
-bool Widget::isTextInput() const
+const Gfx::SizeF& Widget::size() const
 {
-    return _textInput;
+    return _size;
 }
 
 
-void Widget::setFocusPolicy(FocusPolicy f)
+const Gfx::RectF Widget::geometry() const
 {
-    _focusPolicy = f;
+    return Gfx::RectF( position(), size() );
 }
 
 
@@ -420,9 +410,27 @@ Widget::FocusPolicy Widget::focusPolicy() const
 }
 
 
+void Widget::setFocusPolicy(FocusPolicy policy)
+{
+    _focusPolicy = policy;
+
+    if(_sheet)
+        _sheet->onSetFocusPolicy(*this, policy);
+}
+
+
 size_t Widget::focusIndex() const
 {
     return _focusIndex;
+}
+
+
+void Widget::setFocusIndex(size_t index)
+{
+    _focusIndex = index;
+    
+    if(_sheet)
+        _sheet->onSetFocusIndex(*this, index);
 }
 
 
@@ -434,23 +442,26 @@ bool Widget::hasFocus() const
 
 void Widget::focus()
 {
-    if(_window)
-        _window->setFocusWidget(this);
+    if(_sheet)
+        _sheet->onSetFocus(*this);
 }
 
 
-void Widget::setFocusIndex(size_t index)
+void Widget::onProcessFocusEvent(const FocusEvent& ev)
 {
-    _focusIndex = index;
-
-    if( _window )
-        _window->setFocusIndex(*this, index);
+    onFocusEvent(ev);
 }
 
 
 void Widget::onFocusEvent(const FocusEvent& ev)
 {
+    if( _hasFocus && ! ev.isFocused() )
+        Application::instance().inputMethod().finish();
+
     _hasFocus = ev.isFocused();
+
+    // onFocusGained
+    // onFocusLost
 }
 
 
@@ -463,12 +474,6 @@ Key Widget::actionKey() const
 void Widget::setActionKey(const Key& ak)
 {
     _actionKey = ak;
-    this->onSetActionKey(ak);
-}
-
-
-void Widget::onSetActionKey(const Key&)
-{
 }
 
 
@@ -486,22 +491,21 @@ const Key* Widget::shortcut() const
 }
 
 
-void Widget::setShortcut(const Key* k)
+void Widget::setShortcut(const Key* key)
 {
-    if( ! k )
+    if( ! key )
         _shortcutKey.set(Key::NoKey);
     else
-        _shortcutKey = *k;
+        _shortcutKey = *key;
 
-    if(_window)
-        _window->setShortcut(*this, k);
-
-    this->onSetShortcut(k);
+    if(_sheet)
+        _sheet->onSetShortcut(*this, key);
 }
 
 
-void Widget::onSetShortcut(const Key*)
+void Widget::processShortcut(const KeyEvent& kev)
 {
+    onShortcut(kev);
 }
 
 
@@ -521,8 +525,8 @@ void Widget::setMnemonic(const Char& ch)
     _mnemonic = ch;
 
     const Char* m = ch != 0 ? &ch : 0;
-    if( _window )
-        _window->setMnemonic(*this, m);
+    if(_sheet)
+        _sheet->onSetMnemonic(*this, m);
 }
 
 
@@ -569,9 +573,154 @@ void Widget::setMnemonicWidget(Widget* w)
 }
 
 
+void Widget::processMnemonic()
+{
+    onMnemonic();
+}
+
+
 void Widget::onMnemonic()
 {
     _mnemonicEntered.invoke();
+}
+
+
+void Widget::invalidate()
+{
+    ++_invalidates;
+
+    InvalidateEvent ev(*this);
+    Application::instance().commitEvent(ev);
+}
+
+
+void Widget::onProcessInvalidateEvent(const InvalidateEvent& ev)
+{
+    --_invalidates;
+
+    if(_invalidates > 0)
+      return;
+
+    onInvalidateEvent(ev);
+}
+
+
+void Widget::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    onInvalidate();
+}
+
+
+void Widget::onInvalidate()
+{
+    // TODO: relayout only if required in derived class
+    relayout();
+}
+
+
+void Widget::repaint()
+{
+    Gfx::RectF rect( size() );
+    repaint(rect);
+}
+
+
+void Widget::repaint(const Gfx::RectF& rect)
+{
+    if(_parent)
+        _parent->onRepaint(*this, rect);
+}
+
+
+void Widget::onRepaint(Widget& w, const Gfx::RectF& rect)
+{
+    Gfx::PointF widgetPos = fromWidget( w, rect.topLeft() );
+    Gfx::RectF widgetRect( widgetPos, rect.size() );
+
+    repaint(widgetRect);
+}
+
+
+void Widget::onProcessPaintEvent(const PaintEvent& ev)
+{    
+    const Gfx::RectF& r = ev.rect();
+
+    if( r.isNull() )
+        return;
+
+    if( ! isVisible() )
+        return;
+
+    // TODO: attach to sheet*s surface at position in sheet
+    //       _sheet->fromWidget( *this, Gfx::PointF(0, 0) );
+    //
+    //       reset surface of all clients on move and resize
+
+    //
+    // paint widget
+    //
+    //Gfx::RectF clientRect( position(), size() );
+    //_surface.reset(clientRect);
+
+    onPaintEvent(ev);
+
+    //
+    // paint child widgets
+    //
+    std::vector<Widget*>::const_iterator it;
+    for(it = _children.begin() ; it != _children.end(); ++it)
+    {
+        Widget* w = (*it);
+
+        // clip widget update rect
+        Gfx::RectF updateRect = w->geometry().intersect(r);
+        if( updateRect.isNull() )
+            continue;
+
+        // paint widget rect
+        Gfx::PointF updatePos = toWidget( *w , updateRect.topLeft() );
+        updateRect.setOrigin(updatePos);
+
+        PaintEvent pev( *w, updateRect );
+        w->processEvent(pev);
+    }
+}
+
+
+void Widget::onPaintEvent(const PaintEvent& ev)
+{    
+    const Gfx::RectF& rect = ev.rect();
+
+    //static int nnn = 0;
+    //std::clog << "PAINT EVENT: " << typeid(*this).name() << " " << ++nnn << std::endl;
+
+    Gfx::RectF updateRect = rect.intersect( Gfx::RectF(_size) );
+    onPaint(_surface, updateRect);
+}
+
+
+void Widget::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
+{
+}
+
+
+void Widget::onRelayout(Widget&)
+{   
+    //std::clog << "RELAYOUT" << name() <<  std::endl;
+
+    relayout();
+}
+
+
+void Widget::relayout()
+{
+    if(_isLayoutInvalid)
+        return;
+
+    _isLayoutInvalid = true;
+
+    if(_parent)
+        _parent->onRelayout(*this);
 }
 
 
@@ -584,96 +733,11 @@ const SizePolicy& Widget::sizePolicy() const
 void Widget::setSizePolicy(const SizePolicy& policy)
 {
     _sizePolicy = policy;
-    _sizePolicy.setSize( align(policy.size()) );
+
+    Gfx::SizeF alignedSize = _surface.align( policy.size() );
+    _sizePolicy.setSize(alignedSize);
 
     relayout();
-}
-
-
-void Widget::invalidate()
-{
-    ++_invalidates;
-
-    InvalidateEvent ev( vid() );
-    Application::instance().loop().commitEvent(ev);
-}
-
-
-void Widget::onInvalidateEvent(const InvalidateEvent& ev)
-{
-    --_invalidates;
-
-    if(_invalidates > 0)
-      return;
-
-    onInvalidate();
-
-    relayout();
-}
-
-
-void Widget::onInvalidate()
-{
-}
-
-
-void Widget::onRepaint(const Gfx::RectF& rect)
-{
-     if(_parent)
-     {
-         Gfx::PointF parentPos = toParent( rect.topLeft() );
-         Gfx::RectF parentRect( parentPos, rect.size() );
-         
-         _parent->repaint(parentRect);
-     }
-}
-
-// onPaint
-void Widget::onPaintContent(const Gfx::RectF& r)
-{
-    if( r.isNull() )
-        return;
-
-    if( ! isVisible() )
-        return;
-
-    Gfx::RectF rect = r.intersect( Gfx::RectF(_size) );
-
-    // onPaintContent (widget specific)
-    PaintEvent pev( vid(), rect );
-    onPaintEvent(pev);
-
-    std::vector<Widget*>::const_iterator it;
-    for(it = _children.begin() ; it != _children.end(); ++it)
-    {
-        Widget* w = (*it);
-
-        // clip widget update rect
-        Gfx::RectF updateRect = w->geometry().intersect(rect);
-        if( updateRect.isNull() )
-            continue;
-
-        // paint widget rect
-        Gfx::PointF updatePos = toClient( updateRect.topLeft(), *w );
-        updateRect.setOrigin(updatePos);
-        
-        //paintContent(*w, updateRect);
-        w->onPaintContent(updateRect);
-    }
-}
-
-// onPaintContent (widget specific)
-void Widget::onPaintEvent(const PaintEvent& ev)
-{
-}
-
-
-void Widget::onRelayout()
-{
-    _isLayoutInvalid = true;
-
-    if(_parent)
-        _parent->onRelayout();
 }
 
 
@@ -683,28 +747,10 @@ Gfx::SizeF Widget::preferredSize() const
 }
 
 
-const Gfx::PointF& Widget::onPosition() const
-{
-    return _position;
-}
-
-
-const Gfx::SizeF& Widget::onSize() const
-{
-    return _size;
-}
-
-
-const Gfx::RectF Widget::geometry() const
-{
-    return Gfx::RectF( position(), size() );
-}
-
-// onMeasure
 Gfx::SizeF Widget::measure(const SizePolicy& policy)
 {
-    //static int nn = 0;
-    //std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nn << std::endl;
+    //static int nnn = 0;
+    //std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nnn << std::endl;
 
     SizePolicy contentPolicy = _sizePolicy;
 
@@ -750,8 +796,9 @@ Gfx::SizeF Widget::measure(const SizePolicy& policy)
             contentPolicy.horizontal() != SizePolicy::Fixed ||
             ! widgets().empty() )
         {
-            Layouter layouter;
-            _preferredSize = onMeasure(layouter, contentPolicy);
+            //static int mmm = 0;
+            //std::clog << "ON MEASURE: " << typeid(*this).name() << " " << ++mmm << std::endl;
+            _preferredSize = onMeasure(contentPolicy);
         }
 
         // use fixed height, if size mode is fixed
@@ -775,97 +822,241 @@ Gfx::SizeF Widget::measure(const SizePolicy& policy)
                                                contentPolicy.width() ) );
     }
 
-    return _preferredSize;
+    return preferredSize();
 }
 
-// onMeasureContent (widget specific)
-Gfx::SizeF Widget::onMeasure(Layouter& layouter, const SizePolicy& policy)
+
+Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
 {
    return Gfx::SizeF(0, 0);
 }
 
-// onLayout
-void Widget::layout(const Gfx::RectF& r)
+
+void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
 {
-    //static int nn = 0;
-    //std::clog << "LAYOUT: " << typeid(*this).name() << " " << ++nn << std::endl;
+    if( ! _isLayoutInvalid )
+        return;
 
     //
     // align to physical pixel grid
     //
-    Gfx::RectF rect = align(r);
-
-    //
-    // update widget position
-    //
-    bool moved = rect.topLeft() != _position;
-    if(moved)
-    {
-        Gfx::PointF p = align( rect.topLeft() );
-        Gfx::PointF to = p - _position;
-
-        Gfx::RectF updateRect(_size);
-        updateRect.unify( Gfx::RectF(to, _size) );
-
-        MoveEvent mev(vid(), p);
-        onMoveEvent(mev);
-
-        repaint(updateRect);
+    //const Gfx::RectF& r = ev.rect();
     
-        _position = p;
-    }
+    const Gfx::RectF& r = geometry();
+    Gfx::RectF rect = _surface.align(r);
 
     //
-    // update widget size
+    // layout position and size of contents 
     //
-    bool resized = rect.size() != _size;
-    if(resized)
+    onLayout(rect);
+    
+    //
+    // layout content marked invalid
+    //
+    std::vector<Widget*>::const_iterator it;
+    for(it = _children.begin() ; it != _children.end(); ++it)
     {
-        const Gfx::SizeF& s = align( rect.size() );
+        Widget* w = (*it);
 
-        Gfx::SizeF updateSize( std::max( _size.width(), s.width()),
-                               std::max( _size.height(), s.height()) );
-
-        Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
-
-        ResizeEvent rev(vid(), s);
-        onResizeEvent(rev);
-
-        repaint(updateRect);
-
-        _size = s;
-    }
-
-    //
-    // layout content
-    //
-    if(resized /*|| moved*/)
-        _isLayoutInvalid = true;
-
-    if(_isLayoutInvalid)
-    {
-        Layouter layouter;
-        onLayout(layouter, rect);
+        LayoutEvent ev( w->vid(), w->geometry() );
+        w->processEvent(ev);
     }
 
     _isLayoutInvalid = false;
 }
 
-// onLayoutContent
-void Widget::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+
+void Widget::onLayout(const Gfx::RectF& rect)
 {
+    //
+    // TODO: no need to pass rect
+    //
+}
+
+
+void Widget::onProcessRescaleEvent(const RescaleEvent& ev)
+{
+    onRescaleEvent(ev);
+
+    double scaling = ev.scaleFactor();
+
+    for (size_t i = 0; i < _children.size(); ++i)
+    {
+        Widget* widget = _children[i];
+        RescaleEvent ev(*widget, scaling);
+        widget->processEvent(ev);
+    }
+}
+
+
+void Widget::onRescaleEvent(const RescaleEvent& ev)
+{
+    onRescale( ev.scaleFactor() );
+}
+
+
+void Widget::onRescale(double scaling)
+{
+    _margin.set( _surface.align( _margin.left() ),
+                 _surface.align( _margin.top() ),
+                 _surface.align( _margin.right() ),
+                 _surface.align( _margin.bottom() ) );
+
+    _padding.set( _surface.align( _padding.left() ),
+                  _surface.align( _padding.top() ),
+                  _surface.align( _padding.right() ),
+                  _surface.align( _padding.bottom() ) );
+    
+    _sizePolicy.setSize( _surface.align( _sizePolicy.size() ) );
+
+    invalidate();
+    relayout();
+}
+
+
+void Widget::move(const Gfx::PointF& pos)
+{
+    //
+    // align to physical pixel grid
+    //
+    Gfx::PointF aligedPos = _surface.align(pos);
+
+    if( _position == aligedPos )
+    {
+        //std::clog << "MOVE skipped: " << typeid(*this).name() << std::endl;
+        return;
+    }
+
+    //
+    // unified repaint area
+    //
+    Gfx::RectF updateRect(_size);
+    updateRect.unify( Gfx::RectF(aligedPos, _size) );
+
+    //
+    // send move event
+    //
+    MoveEvent mev(*this, aligedPos);
+    /// XXX Application::instance().processEvent(mev);
+    Application::instance().commitEvent(mev);
+
+    if(_parent)
+        _parent->onMove(*this, aligedPos);
+
+    //
+    // request repaint
+    //
+    //std::clog << "MOVE REPAINT: " << typeid(*this).name() << std::endl;
+    repaint(updateRect);
+}
+
+
+void Widget::onMove(Widget& widget, const Gfx::PointF& pos)
+{
+    Gfx::PointF surfacePos = _surface.area().topLeft() + pos;
+    Gfx::PaintSurface* surface = _surface.surface();
+    widget.setSurface(surface, surfacePos);
+}
+
+
+void Widget::onProcessMoveEvent(const MoveEvent& ev)
+{
+    onMoveEvent(ev);
 }
 
 
 void Widget::onMoveEvent(const MoveEvent& ev)
 {
+    if( _position == ev.position() )
+        return;
+
+    //static int nn = 0;
+    //std::clog << "MOVE: " << typeid(*this).name() << " " << ++nn << std::endl;
+
     _position = ev.position();
+}
+
+
+void Widget::resize(const Gfx::SizeF& size)
+{   
+    Gfx::SizeF alignedSize = _surface.align(size);
+
+    if(_size == alignedSize)
+    {
+        //std::clog << "RESIZE skipped: " << typeid(*this).name() << std::endl;
+        return;
+    }
+    
+    //
+    // maximum width and height
+    //
+    //if( alignedSize.width() > maximumSize().width() )
+    //    alignedSize.setWidth( maximumSize().width() );
+
+    //if( alignedSize.height() > maximumSize().height() )
+    //    alignedSize.setHeight( maximumSize().height() );
+
+    //if( alignedSize.width() < minimumSize().width() )
+    //    alignedSize.setWidth( minimumSize().width() );
+
+    //if( alignedSize.height() < minimumSize().height() )
+    //    alignedSize.setHeight( minimumSize().height() );
+
+    ResizeEvent rev(*this, alignedSize);
+    /// XXX Application::instance().processEvent(rev);
+    Application::instance().commitEvent(rev);
+
+    if(_parent)
+        _parent->onResize(*this, alignedSize);
+
+    //std::clog << "RESIZE REPAINT: " << typeid(*this).name() << std::endl;
+    Gfx::RectF updateRect(_size);
+
+    Gfx::RectF resizedRect(size);
+    updateRect.unify(resizedRect);
+
+    repaint(updateRect);
+}
+
+
+void Widget::onResize(Widget& widget, const Gfx::SizeF& size)
+{
+}
+
+
+void Widget::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    onResizeEvent(ev);
 }
 
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {
+    if( _size == ev.size() )
+        return;
+
+    //static int nn = 0;
+    //std::clog << "RESIZE: " << typeid(*this).name() << " " << ++nn << std::endl;
+
     _size = ev.size();
+    _surface.resize(_size);
+
+    //
+    // layout contents 
+    //
+    onLayout( geometry() );
+}
+
+
+bool Widget::acceptsInput() const
+{    
+    if( ! isEnabled() )
+        return false;
+
+    if( ! isVisible() )
+        return false;
+
+    return true;
 }
 
 
@@ -877,21 +1068,25 @@ bool Widget::isVisible() const
 
 void Widget::show(bool s)
 {
-    //if(_visible == s)
-    //    return;
-
-    //_visible = s;
-
-    //ShowEvent ev(vid(), s);
-    //Application::instance().loop().commitEvent(ev);
-
-    //relayout();
-    //repaint();
-    
-    onShow(s);
+    _visible = s;
 
     if(_parent)
-      _parent->onShow(*this, s);  
+        _parent->onShow(*this, s);
+    else  
+        _visible = s;
+}
+
+
+void Widget::onShow(Widget& widget, bool visible)
+{
+    ShowEvent sev(widget, visible);
+    widget.processEvent(sev);
+}
+
+
+void Widget::onProcessShowEvent(const ShowEvent& ev)
+{
+    onShow( ev.visible() );
 }
 
 
@@ -904,11 +1099,6 @@ void Widget::onShow(bool isShown)
 }
 
 
-void Widget::onShow(Widget& widget, bool isShown)
-{
-}
-
-
 bool Widget::isEnabled() const
 {
     return _enabledState && _enabled;
@@ -918,42 +1108,71 @@ bool Widget::isEnabled() const
 void Widget::enable(bool e)
 {
     _enabled = e;
-    _enabledState = e;
 
-    //EnableEvent eev( vid(), e);
-    //Application::instance().loop().commitEvent(eev);
+    if( ! _parent )
+    {
+        _enabledState = e;
+        return;
+    }
 
-    onEnable(e);
+    _parent->onEnable(*this, e);
 }
 
 
-void Widget::onEnable(bool e)
+void Widget::onEnable(Widget& widget, bool enable)
 {
-    _enabledState = e;
+    if( ! isEnabled() )
+      enable = false;
+
+    EnableEvent eev(widget, enable);
+    widget.processEvent(eev);
+}
+
+
+void Widget::onProcessEnableEvent(const EnableEvent& ev)
+{
+    onEnableEvent(ev);
 
     for( size_t i = 0; i < _children.size(); ++i)
     {
         Widget* w = _children[i];
-
-        // skip directly disabled children, because they are 
-        // either already disabled or they should not be enabled
-        if( ! w->_enabled )
-            continue;
-
-        //EnableEvent eev( w->vid(), ev.enabled());
-        //Application::instance().loop().commitEvent(eev);
-        w->onEnable(e);
+        onEnable( *w, ev.enabled() );
     }
+}
 
-    if( _parent )
-        _parent->onEnable(*this, e);
+
+void Widget::onEnableEvent(const EnableEvent& ev)
+{
+    bool wasEnabled = isEnabled();
+    
+    _enabledState = ev.enabled();
+
+    if( wasEnabled != isEnabled() )
+    {
+        onEnable( ev.enabled() );
+    }
 
     invalidate();
 }
 
 
-void Widget::onEnable(Widget& widget, bool isEnable)
+void Widget::onEnable(bool e)
 {
+}
+
+
+void Widget::activate(bool active)
+{
+    if(_parent)
+        _parent->onActivate(*this, active);
+}
+
+
+
+void Widget::onActivate(Widget& w, bool active)
+{
+    if(_parent)
+        _parent->onActivate(*this, active);
 }
 
 
@@ -961,8 +1180,6 @@ void Widget::raise()
 {
     if(_parent)
         _parent->onRaise(*this);
-
-    //onRaise();
 }
 
 
@@ -980,27 +1197,26 @@ void Widget::onRaise(Widget& w)
 }
 
 
-void Widget::grabPointer()
+const Cursor* Widget::cursor() const
 {
-    Application::instance().grabPointer(*this);
+    if( ! _hasCursor )
+        return 0;
+
+    return &_cursor;
 }
 
 
-void Widget::releasePointer()
+void Widget::setCursor(const Cursor* c)
 {
-    Application::instance().releasePointer(*this);
-}
+    if( ! c )
+    {
+        _hasCursor = false;
+        _cursor.clear();
+        return;
+    }
 
-
-const Cursor& Widget::cursor() const
-{
-    return  _cursor;
-}
-
-
-void Widget::setCursor(const Cursor& c)
-{
-    _cursor = c;
+    _hasCursor = true;
+    _cursor = *c;
 
     // TODO: if this is the pointer widget do the same as onEnterEvent
     // Application::instance().screen().setCursor( &cursor() );
@@ -1014,8 +1230,11 @@ const Spacing& Widget::margin() const
 
 
 void Widget::setMargin(const Spacing& s)
-{
-    _margin = align(s);
+{  
+    _margin.set( _surface.align( s.left() ),
+                 _surface.align( s.top() ),
+                 _surface.align( s.right() ),
+                 _surface.align( s.bottom() ) );
 
     relayout();
 }
@@ -1040,8 +1259,12 @@ const Spacing& Widget::padding() const
 
 
 void Widget::setPadding( const Spacing& p )
-{
-    _padding = align(p);
+{   
+    _padding.set( _surface.align( p.left() ),
+                  _surface.align( p.top() ),
+                  _surface.align( p.right() ),
+                  _surface.align( p.bottom() ) );
+
     relayout();
 }
 
@@ -1102,56 +1325,127 @@ void Widget::setMinimumHeight(double h)
 }
 
 
-Pt::Signal<const Pt::Event&>& Widget::eventReady()
+Pt::Signal<const Pt::Event&>& Widget::eventReceived()
 {
-    return _eventReady;
+    return _eventReceived;
 }
 
 
 void Widget::onEvent(const Pt::Event& ev)
 {
-    _eventReady.send(ev );
-}
-
-
-void Widget::processMouseEvent(const MouseEvent& ev)
-{
-    mouseEvent(ev);
+    _eventReceived.send(ev);
 }
 
 
 Responder* Widget::onNextResponder()
 {
-    if(_parent)
-        return _parent;
-
-    return 0;
+    return _nextResponder;
 }
 
 
-Gfx::PointF Widget::onToNextResponder(const Gfx::PointF& pos)
+void Widget::onSetCapture(bool capture)
 {
-    return toParent(pos);
+    if(_parent)
+        _parent->onSetCapture(*this, capture);
+
+    if( ! capture )
+    {
+        if(_capture)
+            _capture->setCapture(false);
+    }
+}
+
+
+void Widget::onSetCapture(Widget& widget, bool capture)
+{
+    if(capture)
+    {
+        if(_capture && _capture != &widget)
+            _capture->setCapture(false);
+
+        _capture = &widget;
+    }
+    else
+    {
+        if(_capture == &widget)
+        {
+            _capture = 0;
+        }
+    }
+}
+
+
+void Widget::onProcessMouseEvent(const MouseEvent& ev)
+{
+    if( ! acceptsInput() )
+        return;
+
+    //
+    // continue press sequence capture
+    // 
+    if(_capture)
+    {
+        _capture->processEvent(ev);
+
+        if( ev.isRelease() )
+            _capture = 0;
+
+        return;
+    }
+
+    Gfx::PointF pos = fromScreen( ev.position() );
+
+    //
+    // hit test
+    // 
+    Visual* visual = 0;
+
+    std::vector<Widget*>::reverse_iterator it;
+    for(it = _children.rbegin(); it != _children.rend(); ++it)
+    {
+        Widget* widget = *it;
+
+        if( widget->geometry().contains(pos) && 
+            widget->acceptsInput() )
+        {
+            visual = widget;
+            break;
+        }
+    }
+
+    _pointer = visual;
+
+    if(visual)
+    {
+        //
+        // start press sequence capture
+        // 
+        if( ev.isPress() )
+            visual->setCapture(true);
+
+      visual->processEvent(ev);
+      return;
+    }
+
+    //
+    // handle event
+    //
+    if(_parent)
+        _parent->onEnter(*this, *this);
+
+    mouseEvent(ev);
+}
+
+
+void Widget::onEnter(Widget& widget, Visual& v)
+{
+    if(_parent)
+        _parent->onEnter(*this, v);
 }
 
 
 bool Widget::onMouseEvent(const MouseEvent& ev)
 {
-    // if(_parent && ! consumed)
-    // {
-    //     Gfx::PointF p = toParent( ev.position() );
-
-    //     MouseEvent ev2(0);
-    //     ev2.setPosition(p);
-
-    //     _parent->mouseEvent(ev2);
-    // }
-
-    // if( ev.isPress(MouseEvent::Left) )
-    // {
-    //     focus();
-    // }
-
     if( ev.isPress(MouseEvent::Left) )
     {
         focus();
@@ -1161,21 +1455,65 @@ bool Widget::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void Widget::touchEvent(const TouchEvent& ev)
+void Widget::onProcessTouchEvent(const TouchEvent& ev)
 {
-    bool consumed = onTouchEvent(ev);
-    if (consumed)
+    if( ! acceptsInput() )
         return;
 
-    if(_parent)
+    //
+    // continue press sequence capture
+    // 
+    if(_capture)
     {
-        Gfx::PointF p = toParent( ev.position() );
+        _capture->processEvent(ev);
 
-        TouchEvent ev2(0);
-        ev2.setPosition(p);
+        if( ev.isRelease() )
+            _capture = 0;
 
-        _parent->touchEvent(ev2);
+        return;
     }
+
+    Gfx::PointF pos = fromScreen( ev.position() );
+
+    //
+    // hit test
+    // 
+    Visual* visual = 0;
+
+    std::vector<Widget*>::reverse_iterator it;
+    for(it = _children.rbegin(); it != _children.rend(); ++it)
+    {
+        Widget* widget = *it;
+
+        if( widget->geometry().contains(pos) && 
+            widget->acceptsInput() )
+        {
+            visual = widget;
+            break;
+        }
+    }
+
+    _pointer = visual;
+
+    if(visual)
+    {
+        //
+        // start press sequence capture
+        // 
+        if( ev.isPress() )
+            _capture = visual;
+
+      visual->processEvent(ev);
+      return;
+    }
+
+    //
+    // handle event
+    //
+    if(_parent)
+        _parent->onEnter(*this, *this);
+
+    touchEvent(ev);
 }
 
 
@@ -1190,16 +1528,18 @@ bool Widget::onTouchEvent(const TouchEvent& ev)
 }
 
 
-void Widget::scrollEvent(const ScrollEvent& ev)
+void Widget::onProcessScrollEvent(const ScrollEvent& ev)
 {
-    bool consumed = onScrollEvent(ev);
-    if(consumed)
+    if( ! acceptsInput() )
         return;
 
-    if(_parent)
+    if(_pointer)
     {
-        _parent->scrollEvent(ev);
+        _pointer->processEvent(ev);
+        return; 
     }
+
+    scrollEvent(ev);
 }
 
 
@@ -1209,38 +1549,52 @@ bool Widget::onScrollEvent(const ScrollEvent& ev)
 }
 
 
-void Widget::onKeyEvent(const KeyEvent& ev)
+void Widget::onProcessEnterEvent(const EnterEvent& ev)
 {
-    if( (ev.key().code() == Key::Tab) && ev.isPress() )
-    {
-        if( ev.key().modifiers() == Key::Shift )
-            _window->focusPrev();
-        else
-            _window->focusNext();
+    enterEvent(ev);
+}
 
-        Widget* focusWidget = _window->focusWidget();
 
-        if(focusWidget)
-            focusWidget->repaint();
+bool Widget::onEnterEvent( const EnterEvent& ev)
+{
+    //std::clog << "ENTER: " << typeid(*this).name() << " " << vid() << std::endl;
+    Application::instance().setCursor( cursor() );
+    return true;
+}
 
+
+void Widget::onProcessLeaveEvent(const LeaveEvent& ev)
+{
+    leaveEvent(ev);
+}
+
+
+bool Widget::onLeaveEvent(const LeaveEvent& ev)
+{
+    //std::clog << "LEAVE: " << typeid(*this).name() << " " << vid() << std::endl;
+    Application::instance().setCursor(0);
+    return true;
+}
+
+
+void Widget::onProcessKeyEvent(const KeyEvent& ev)
+{
+    if( ! acceptsInput() )
         return;
-    }
 
+    keyEvent(ev);
+}
+
+
+bool Widget::onKeyEvent(const KeyEvent& ev)
+{
     if( ev.key() == actionKey() && hasFocus() )
     {
         onActionKey(ev);
+        return true;
     }
-}
 
-
-void Widget::onEnterEvent( const EnterEvent& ev)
-{
-    Application::instance().setCursor( &cursor() );
-}
-
-
-void Widget::onLeaveEvent(const LeaveEvent& ev)
-{
+    return false;
 }
 
 } // namespace

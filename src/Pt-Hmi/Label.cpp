@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/LineEditor.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/FontMetrics.h>
 
@@ -205,7 +206,7 @@ Adjustment Label::adjustment() const
 }
 
 
-Gfx::SizeF Label::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 {
     //std::clog << _text.narrow() << " measure " << this << std::endl;
 
@@ -223,15 +224,15 @@ Gfx::SizeF Label::onMeasure(Layouter& layouter, const SizePolicy& policy)
         // NOTE: abbreviate text if text wrap is off and width is too small
 
         block.setMaxWidth(policy.size().width());
-        block.setLineSpacing(align(_font.size() / 3));
+        block.setLineSpacing(surface().align(_font.size() / 3));
         block.layout(_text, _font);
 
-        w = align(block.size().width());
-        h = align(block.size().height());
+        w = surface().align(block.size().width());
+        h = surface().align(block.size().height());
     }
     else
     {
-        Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+        Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
 
         w = static_cast<double>( pictureSize.width() );
         h = static_cast<double>( pictureSize.height() );
@@ -248,7 +249,7 @@ void Label::layoutText()
 
     _textBlock.setMaxWidth( size().width() - padding().leftRight() );
     _textBlock.setAdjustment(a);
-    _textBlock.setLineSpacing(align(_font.size() / 3.0));
+    _textBlock.setLineSpacing(surface().align(_font.size() / 3.0));
     _textBlock.layout(_text, _font);
 
     Gfx::PointF pos;
@@ -269,7 +270,7 @@ void Label::layoutText()
         case Alignment::Right:
         {
             double height = size().height() - padding().topBottom();
-            double y = (height -align( _textBlock.height())) / 2;
+            double y = (height - surface().align( _textBlock.height())) / 2;
             pos.set(padding().left(), y + padding().top());
             break;
         }
@@ -279,7 +280,7 @@ void Label::layoutText()
         case Alignment::BottomRight:
         {
             double height = size().height() - padding().topBottom();
-            double y = height - align(_textBlock.height());
+            double y = height - surface().align(_textBlock.height());
 
             pos.set( padding().left(), padding().top() + y);
             break;
@@ -292,7 +293,7 @@ void Label::layoutText()
 
 void Label::layoutImage()
 {
-    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
 
     switch( _alignment )
     {
@@ -382,11 +383,11 @@ void Label::layoutImage()
 }
 
 
-void Label::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void Label::onLayout(const Gfx::RectF& rect)
 {
     //std::clog  << " layout " << _text.narrow()<< this << std::endl;
 
-    Base::onLayout(layouter, rect);
+    Base::onLayout(rect);
     
     if( _icon.empty() )
         layoutText();
@@ -433,7 +434,7 @@ void Label::onInvalidate()
     }
     else
     {
-        const Gfx::SizeF scaledSize = toPhysical(_iconSize);
+        const Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _picture.set(iconImage);
 

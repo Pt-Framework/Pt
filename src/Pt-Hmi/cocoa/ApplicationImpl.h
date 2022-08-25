@@ -96,28 +96,16 @@ class ApplicationImpl : public Pt::System::EventLoop,
 
         virtual ~ApplicationImpl();
 
-        void processTimers();
-    
-        void nextEvent();
-
-        System::Selector& selector()
-        { 
-            return *this; 
-        }
-
         void setCursor(const Cursor* cursor)
         {}
 
+        void setFontDir(const Pt::System::Path& dir)
+        {}
+
+        void setDefaultFont(const std::string& fontName);
+
         Pt::Timespan inactivityTime() const
         { return Pt::Timespan(0); }
-
-        void grabPointer(Window& grabber);
-
-        void releasePointer(Window& grabber);
-
-        void grabPointer(Widget& grabber);
-        
-        void releasePointer(Widget& grabber);
 
         void sendKeyEvent(const KeyEvent& ev)
         {}
@@ -125,10 +113,15 @@ class ApplicationImpl : public Pt::System::EventLoop,
         void sendMouseEvent(const MouseEvent& ev)
         {}
 
-        void setFontDir(const Pt::System::Path& dir)
-        {}
+    public:
+        System::Selector& selector()
+        { 
+            return *this; 
+        }
 
-        void setDefaultFont(const std::string& fontName);
+        void processTimers();
+    
+        void nextEvent();
 
     protected:
         virtual void onAttachSelectable(System::Selectable&);

@@ -28,9 +28,14 @@
 */
 
 #include "ScreenImpl.h"
-#include "MainWindowImpl.h"
+
 #include <Pt/Hmi/Screen.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/LayoutEvent.h> // RescaleEvent
+#include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
+#include <Pt/Hmi/ScrollEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/Window.h>
 
@@ -41,10 +46,18 @@ namespace Hmi {
 Screen::Screen(ApplicationImpl& app)
 : _impl( new ScreenImpl(app) )
 , _updates(0)
+, _pointer(0)
 {
-    _impl->init(*this);
+    _impl->setParent(this);
+    _impl->setNextResponder(this);
 
-    _size = toLogical( _impl->size() );
+    _eventReceived += Pt::slot(*this, &Screen::onProcessMouseEvent);
+    _eventReceived += Pt::slot(*this, &Screen::onProcessTouchEvent);
+    _eventReceived += Pt::slot(*this, &Screen::onProcessScrollEvent);
+    _eventReceived += Pt::slot(*this, &Screen::onProcessKeyEvent);
+
+    _eventReceived += Pt::slot(*this, &Screen::onProcessRescaleEvent);
+    _eventReceived += Pt::slot(*this, &Screen::onProcessPaintEvent);
 }
 
 
@@ -54,27 +67,22 @@ Screen::~Screen()
 }
 
 
-void Screen::onInit(Window& w)
+void Screen::addWindow(Window& w)
 {
-    _windows.push_back(&w);
-    _impl->registerWindow(w);
+    _impl->addWindow(w);
 }
 
 
-void Screen::onDeinit(Window& w)
+void Screen::removeWindow(Window& w)
 {
-    _impl->unregisterWindow(w);
-
-    std::vector<Window*>::iterator it;
-    it = std::remove(_windows.begin(), _windows.end(), &w);
-    _windows.erase(it, _windows.end());
+    _impl->removeWindow(w);
 }
 
 
 Window* Screen::findWindow(const std::string& name)
 {
-    std::vector<Window*>::iterator it;
-    for(it = _windows.begin(); it != _windows.end(); ++it)
+    std::vector<Window*>::const_iterator it;
+    for(it = windows().begin(); it != windows().end(); ++it)
     {
         if( (*it)->name() == name )
             return *it;
@@ -86,12 +94,17 @@ Window* Screen::findWindow(const std::string& name)
 
 Widget* Screen::findWidget(const std::string& name)
 {
-    std::vector<Window*>::iterator it;
-    for(it = _windows.begin(); it != _windows.end(); ++it)
+    std::vector<Window*>::const_iterator it;
+    for(it = windows().begin(); it != windows().end(); ++it)
     {
-        Window* w = *it;
-        Widget* widget = w->findWidget(name);
-        if( widget )
+        Window* window = *it;
+        
+        Sheet* sheet = window->sheet();
+        if( ! sheet )
+            continue;
+
+        Widget* widget = sheet->findWidget(name);
+        if(widget)
             return widget;
     }
     
@@ -101,47 +114,45 @@ Widget* Screen::findWidget(const std::string& name)
 
 const std::vector<Window*>& Screen::windows() const
 {
-  return _windows;
+  return _impl->windows();
 }
 
 
-Visual* Screen::onParent() const
-{
-    return 0;
-}
-
-
-Gfx::PointF Screen::onToParent(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
-Gfx::PointF Screen::onFromParent(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
-
-const Gfx::PointF& Screen::onPosition() const
-{
-    return _position;
-}
-
-
-const Gfx::SizeF& Screen::onSize() const
+const Gfx::SizeF& Screen::size() const
 {   
-    return _size;
-
-    //return toLogical( _impl->size() );
+    return _impl->size();
 }
 
 
-double Screen::onScaleFactor() const
-{   
-    // TODO: support multiple screens
+void Screen::setPointer(Visual* visual)
+{
+    if( _pointer == visual )
+        return;
 
-    double scaling = Application::instance().scaleFactor();
-    return _impl->scaleFactor() * scaling;
+    if(_pointer)
+    {
+        Pt::Hmi::LeaveEvent ev ( *_pointer );
+        _pointer->processEvent(ev);
+    }
+
+    _pointer = visual;
+
+    if(_pointer)
+    {
+        EnterEvent ev( *_pointer );
+        _pointer->processEvent(ev);
+    }
+}
+
+
+void Screen::unsetPointer(Visual& visual)
+{
+    if( _pointer != &visual )
+        return;
+
+    Pt::Hmi::LeaveEvent ev ( *_pointer );
+    _pointer->processEvent(ev);
+    _pointer = 0;
 }
 
 
@@ -150,113 +161,83 @@ ScreenImpl* Screen::impl()
     return _impl;
 }
 
+///////////////////////////////////////////////////////////////////////
+// Responder
+///////////////////////////////////////////////////////////////////////
 
-Gfx::PointF Screen::onFromWindow(const Window& w, const Gfx::PointF& pos) const
+Responder* Screen::onNextResponder()
 {
-    return _impl->toParent(w, pos);
+    // TODO: possibly pass on to application
+    return 0;
 }
 
 
-Gfx::PointF Screen::onToWindow(const Window& w, const Gfx::PointF& pos) const
+Gfx::PointF Screen::onToScreen(const Gfx::PointF& pos) const
 {
-    return _impl->fromParent(w, pos);
+    return pos;
 }
 
 
-void Screen::onResize(Window& w, const Gfx::SizeF& s)
+Gfx::PointF Screen::onFromScreen(const Gfx::PointF& pos) const
 {
-    const Gfx::SizeF size = w.toPhysical(s);
-
-    w.impl()->resize(size);
-    _impl->onResize(w, s);
+    return pos;
 }
 
-
-void Screen::onMove(Window& w, const Gfx::PointF& p)
-{   
-    const Gfx::PointF point = w.toPhysical(p);
-
-    w.impl()->move(point);
-    _impl->onMove(w, p);
-}
-
-
-void Screen::onFrameChanged(Window& w)
-{
-    _impl->onFrameChanged(w);
-}
-
-
-void Screen::onStateChanged(Window& w)
-{
-    _impl->onStateChanged(w);
-}
-
-
-void Screen::onClosing(Window& w)
-{
-    w.impl()->close();
-    _impl->onClosing(w);
-}
-
-
-void Screen::onClose(Window& w)
-{
-    _impl->onClose(w);
-}
-
-
-void Screen::onShow(Window& w, bool visible)
-{
-    _impl->onShow(w, visible);
-}
-
-
-void Screen::onActivate(Window& w, bool active)
-{
-    w.impl()->activate();
-    _impl->onActivate(w, active);
-}
-
-
-void Screen::onEnable(Window& w, bool enable)
-{
-    w.impl()->enable(enable);
-    _impl->onEnable(w, enable);
-}
-
+///////////////////////////////////////////////////////////////////////
+// Visual
+///////////////////////////////////////////////////////////////////////
 
 void Screen::onEvent(const Event& ev)
 {
-    if(ev.typeInfo() == typeid(PaintEvent) )
-    {
-        const PaintEvent& pev = static_cast<const PaintEvent&>(ev);
-        paintEvent(pev);
-    }
+    _eventReceived.send(ev);
 }
 
 
-void Screen::onRepaint(Window& w, const Gfx::RectF& windowRect)
+void Screen::onSetCapture(bool capture)
 {
-     Pt::Gfx::PointF pos = fromClient( windowRect.topLeft(), w );
-     Gfx::RectF rect( pos, windowRect.size() );
-   
-     onRepaint(rect);
 }
 
 
-void Screen::onRepaint(const Gfx::RectF& rect)
+void Screen::onProcessRescaleEvent(const RescaleEvent& ev)
+{   
+    onRescaleEvent(ev);
+
+    double scaling = ev.scaleFactor();
+
+    RescaleEvent rev(*_impl, scaling);
+    _impl->processEvent(rev);
+}
+
+
+void Screen::onRescaleEvent(const RescaleEvent& ev)
+{
+    onRescale( ev.scaleFactor() );
+}
+
+
+void Screen::onRescale(double scaling)
+{
+}
+
+
+void Screen::repaint(const Gfx::RectF& rect)
 {
     _updateRect.unify(rect);
     ++_updates;
 
-    PaintEvent uev(vid(), _updateRect);
+    PaintEvent uev(*this, _updateRect);
     Application::instance().loop().commitEvent(uev);
 }
 
 
-void Screen::paintEvent(const PaintEvent& ev)
+void Screen::onProcessPaintEvent(const PaintEvent& ev)
 {
+    if(_updates == 0)
+    {
+        //std::clog << "PAINT EVENT screen skipped" << std::endl;
+        return;
+    }
+
     --_updates;
 
     // skip all updates except the last one
@@ -265,41 +246,17 @@ void Screen::paintEvent(const PaintEvent& ev)
     
     _updateRect.clear();
 
-    const Gfx::RectF& screenRect = ev.rect();
-    //onPaintContent(screenRect);
-
-    // onPaint
-    onPaintContent(screenRect);
-
-    std::vector<Window*>::iterator it;
-    for(it = _windows.begin(); it != _windows.end(); ++it)
-    {
-        Window* window = *it;
-
-        Gfx::PointF winPos = toClient( screenRect.topLeft(), *window );
-        Gfx::RectF winRect( winPos, screenRect.size() );
-
-        winRect = winRect.intersect( Gfx::RectF( window->size() ) );
-
-        //paintContent(*window, winRect);
-
-        // send paint event to window
-        window->impl()->paint(winRect);
-        //_impl->paint(*window, winRect);
-    }
-
-    _impl->paint(screenRect);
-}
-
-// onPaint
-void Screen::onPaintContent(const Gfx::RectF& screenRect)
-{
-    // onPaintContent (screen specific)
-    onPaintScreen(screenRect);
-
-    //std::clog << std::endl;
     //_clock.start();
-    //std::clog << "Screen::onPaintContent " << std::endl;
+
+    //
+    // paint screen
+    //
+    onPaintEvent(ev);
+
+    const Gfx::RectF& screenRect = ev.rect();
+    PaintEvent pev(*_impl, screenRect);
+    
+    _impl->processEvent(pev);
 
     //static int nnn = 0;
     //std::clog << "screen update: " 
@@ -309,10 +266,64 @@ void Screen::onPaintContent(const Gfx::RectF& screenRect)
     //          << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
 }
 
-// onPaintContent (screen specific)
-void Screen::onPaintScreen(const Gfx::RectF& rect)
+
+void Screen::onPaintEvent(const PaintEvent& ev)
+{    
+    const Gfx::RectF& rect = ev.rect();
+    onPaint(rect);
+}
+
+
+void Screen::onPaint(const Gfx::RectF& rect)
 {
-    // _impl->paintContent(rect);
+}
+
+
+void Screen::onProcessMouseEvent(const MouseEvent& ev)
+{
+    _impl->processEvent(ev);
+}
+
+
+bool Screen::onMouseEvent(const MouseEvent& ev)
+{ 
+    return false; 
+}
+
+
+void Screen::onProcessTouchEvent(const TouchEvent& ev)
+{
+    _impl->processEvent(ev);
+}
+
+
+bool Screen::onTouchEvent(const TouchEvent& ev)
+{ 
+    return false; 
+}
+
+
+void Screen::onProcessScrollEvent(const ScrollEvent& ev)
+{
+    _impl->processEvent(ev);
+}
+
+
+bool Screen::onScrollEvent(const ScrollEvent& ev)
+{ 
+    return false; 
+}
+
+
+void Screen::onProcessKeyEvent(const KeyEvent& ev)
+{
+    _impl->processEvent(ev);
+}
+
+
+bool Screen::onKeyEvent(const KeyEvent& ev)
+{ 
+    return false; 
 }
 
 } // namespace

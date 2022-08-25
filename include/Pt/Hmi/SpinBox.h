@@ -190,16 +190,16 @@ class PT_HMI_API SpinBox : public Control
         void onDown();
 
     protected:
-        virtual Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(Layouter& layouter, const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onInvalidate();
 
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
-        virtual void onKeyEvent(const KeyEvent& ev);
+        virtual bool onKeyEvent(const KeyEvent& ev);
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 

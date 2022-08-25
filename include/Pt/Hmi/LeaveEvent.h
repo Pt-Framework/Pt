@@ -29,16 +29,23 @@
 #ifndef Pt_Hmi_LeaveEvent_h
 #define Pt_Hmi_LeaveEvent_h
 
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
+#include <Pt/Types.h>
 #include <Pt/Event.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
 
-class LeaveEvent : public Pt::BasicEvent<LeaveEvent>
+namespace Hmi {
+
+class PT_HMI_API LeaveEvent : public Pt::BasicEvent<LeaveEvent>
 {
     public:
-        LeaveEvent(Pt::uint64_t vid)
-        : _vid(vid)
+        LeaveEvent(Visual& v)
+        : _vid( v.vid() )
+        , _visual(&v)
+        , _reserved0(0)
+        , _reserved1(0)
         {
         }
 
@@ -46,20 +53,25 @@ class LeaveEvent : public Pt::BasicEvent<LeaveEvent>
         {
         }
 
-        void setId(Pt::uint64_t vid)
-        {
-            _vid = vid;
-        }
-
         Pt::uint64_t vid() const
         {
             return _vid;
         }
 
+        Visual* visual() const
+        {
+            return _visual;
+        }
+
     private:
         Pt::uint64_t _vid;
+        Visual*      _visual;
+        void*        _reserved0;
+        Pt::uint64_t _reserved1;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

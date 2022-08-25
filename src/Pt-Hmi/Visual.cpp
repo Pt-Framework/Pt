@@ -30,6 +30,12 @@
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
+#include <Pt/Hmi/ScrollEvent.h>
+#include <Pt/Hmi/EnterEvent.h>
+#include <Pt/Hmi/LeaveEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
 
 namespace Pt {
 
@@ -48,6 +54,132 @@ Responder::~Responder()
 {
 }
 
+
+bool Responder::mouseEvent(const MouseEvent& ev)
+{
+    Gfx::PointF localPos = onFromScreen( ev.position() );
+
+    MouseEvent localEv(ev);
+    localEv.setPosition(localPos);
+
+    bool consumed = onMouseEvent(localEv);
+    if(consumed)
+        return true;
+
+    Responder* next = onNextResponder();
+    if(next)
+        return next->mouseEvent(ev);
+
+    return false;
+}
+
+
+bool Responder::onMouseEvent(const MouseEvent& ev)
+{
+    if( ev.isPress() )
+        return onMouseDown(ev);
+            
+    if( ev.isRelease() )
+        return onMouseUp(ev);
+             
+      return onMouseMove(ev);
+}
+
+
+void Responder::touchEvent(const TouchEvent& ev)
+{
+    Gfx::PointF localPos = onFromScreen( ev.position() );
+
+    TouchEvent localEv(ev);
+    localEv.setPosition(localPos);
+
+    bool consumed = onTouchEvent(localEv);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->touchEvent(ev);
+}
+
+
+bool Responder::onTouchEvent(const TouchEvent& ev)
+{
+    return false;
+}
+
+
+void Responder::scrollEvent(const ScrollEvent& ev)
+{
+    bool consumed = onScrollEvent(ev);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->scrollEvent(ev);
+}
+
+
+bool Responder::onScrollEvent(const ScrollEvent& ev)
+{ 
+    return false; 
+}
+
+
+void Responder::enterEvent(const EnterEvent& ev)
+{
+    bool consumed = onEnterEvent(ev);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->enterEvent(ev);
+}
+
+
+bool Responder::onEnterEvent(const EnterEvent& ev)
+{ 
+    return false; 
+}
+
+
+void Responder::leaveEvent(const LeaveEvent& ev)
+{
+    bool consumed = onLeaveEvent(ev);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->leaveEvent(ev);
+}
+
+
+bool Responder::onLeaveEvent(const LeaveEvent& ev)
+{ 
+    return false; 
+}
+
+
+void Responder::keyEvent(const KeyEvent& ev)
+{
+    bool consumed = onKeyEvent(ev);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->keyEvent(ev);
+}
+
+
+bool Responder::onKeyEvent(const KeyEvent& ev)
+{ 
+    return false; 
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
@@ -64,115 +196,18 @@ Visual::~Visual()
     Application::instance().unregisterVisual(*this);
 }
 
-        
-void Visual::processEvent(const Pt::Event& ev)
-{
-    this->onEvent(ev); 
-}
-
-
-Gfx::PointF Visual::toParent(const Gfx::PointF& pos) const
-{
-    return onToParent(pos);
-}
-
-
-Gfx::PointF Visual::fromParent(const Gfx::PointF& pos) const
-{
-    return onFromParent(pos);
-}
-    
-
-Gfx::PointF Visual::toClient(const Gfx::PointF& pos, const Visual& c) const
-{
-    const Visual* b = c.parent();
-    if( ! b )
-        return pos;
-
-    if(this == b)
-        return c.onFromParent(pos);
-
-    Gfx::PointF p = toClient(pos, *b);
-    return c.fromParent(p);
-}
-
-
-Gfx::PointF Visual::fromClient(const Gfx::PointF& pos, const Visual& c) const
-{
-    const Visual* b = c.parent();
-    if( ! b )
-        return pos;
-
-    if(this == b)
-        return c.toParent(pos);
-
-    Gfx::PointF p = c.toParent(pos);
-    return fromClient(p, *b);
-}
-
-
-Gfx::PointF Visual::toScreen(const Gfx::PointF& pos) const
-{
-    const Visual* _parent = parent();
-    if( ! _parent )
-        return pos;
-
-    Gfx::PointF p = toParent(pos);
-    return _parent->toScreen(p);
-}
-
-
-Gfx::PointF Visual::fromScreen(const Gfx::PointF& pos) const
-{
-    const Visual* _parent = parent();
-    if( ! _parent )
-        return pos;
-
-    Gfx::PointF parentPos = _parent->fromScreen(pos);
-    return fromParent(parentPos);
-}
-
 ///////////////////////////////////////////////////////////////////////
 // View
 ///////////////////////////////////////////////////////////////////////
 
-Window* View::window()
+View::View()
 {
-    return onGetWindow(); 
 }
 
 
-Screen* View::screen()
+View::~View()
 {
-    return onGetScreen(); 
 }
-
-
-void View::relayout()
-{
-    onRelayout();
-}
-
-
-void View::add(Widget& widget)
-{
-    if(widget._parent)
-        widget._parent->remove(widget);
-
-    onAttach(widget);
-    widget.setParent(this);
-}
-
-
-void View::remove(Widget& widget)
-{
-    if(widget._parent != this)
-        return;
-
-    onDetach(widget);
-    widget.setParent(0);
-}
-
 
 } // namespace
 

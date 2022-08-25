@@ -1,49 +1,52 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
- 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
- 
- As a special exception, you may use this file as part of a free
- software library without restriction. Specifically, if other files
- instantiate templates or use macros or inline functions from this
- file, or you compile this file and link it with other files to
- produce an executable, this file does not by itself cause the
- resulting executable to be covered by the GNU General Public
- License. This exception does not however invalidate any other
- reasons why the executable file might be covered by the GNU Library
- General Public License.
- 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
- 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
- 02110-1301  USA
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #ifndef Pt_Hmi_PaintEvent_h
 #define Pt_Hmi_PaintEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
-namespace Pt{
+namespace Pt {
 
-namespace Hmi{
+namespace Hmi {
 
 class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>
 {
     public:    
-        PaintEvent( Pt::uint64_t vid, const Gfx::RectF& rect )
-        : _rect( rect )
-        , _vid( vid )
+        PaintEvent(Visual& visual, const Gfx::RectF& rect)
+        : _vid( visual.vid() )
+        , _visual(&visual)
+        , _rect( rect )
         {
         }
 
@@ -51,48 +54,30 @@ class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>
         {
         }
 
-        const Gfx::RectF&  rect( ) const
-        {
-            return _rect;
-        }
-
         Pt::uint64_t vid() const
         {
             return _vid;
         }
 
-    private:
-        Gfx::RectF  _rect;
-        Pt::uint64_t _vid;
-};
-
-
-class PT_HMI_API UpdateEvent : public Pt::BasicEvent<UpdateEvent>
-{
-    public:    
-        UpdateEvent( Pt::uint64_t vid, const Gfx::RectF& rect )
-        : _rect( rect )
-        , _vid( vid )
+        Visual* visual() const
         {
+            return _visual;
         }
 
-        virtual ~UpdateEvent()
-        {
-        }
-
-        const Gfx::RectF&  rect( ) const
+        const Gfx::RectF& rect() const
         {
             return _rect;
         }
 
-        Pt::uint64_t vid() const
+        void setRect(const Gfx::RectF& r)
         {
-            return _vid;
+            _rect = r;
         }
 
     private:
-        Gfx::RectF  _rect;
         Pt::uint64_t _vid;
+        Visual*      _visual;
+        Gfx::RectF   _rect;
 };
 
 } // namespace

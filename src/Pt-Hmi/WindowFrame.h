@@ -45,7 +45,7 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
-class WindowManager;
+class Shell;
 class WindowFrame;
 class Application;
 class MouseEvent;
@@ -149,10 +149,11 @@ class MenuButton : public WindowButton
 };
 
 
-class WindowFrame : public Pt::Connectable
+class WindowFrame : public Visual
+                  , public Pt::Connectable
 {
     public:
-        WindowFrame(WindowManager& wm, Window& window);
+        WindowFrame(Shell& wm, Window& window);
 
         virtual ~WindowFrame();
 
@@ -170,6 +171,10 @@ class WindowFrame : public Pt::Connectable
         
         void setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size);
 
+        const Gfx::PointF& position() const;
+
+        const Gfx::SizeF& size() const;
+
         const Gfx::RectF& clientRect() const;
 
         const Gfx::RectF& frameRect() const;
@@ -182,9 +187,9 @@ class WindowFrame : public Pt::Connectable
 
         Gfx::SizeF fromFrame(const Gfx::SizeF& size) const;
 
-        void update();
+        void repaint();
 
-        void update(const Gfx::RectF& rect);
+        void repaint(const Gfx::RectF& rect);
 
         void moveEvent(const Gfx::PointF& pos);
 
@@ -201,6 +206,11 @@ class WindowFrame : public Pt::Connectable
         bool touchEvent(const TouchEvent& tev);
 
         void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+
+    protected:
+        virtual void onEvent(const Pt::Event& ev);
+
+        virtual void onSetCapture(bool capture);
 
     protected:
         bool onMouseEvent(const MouseEvent& mev);
@@ -239,7 +249,7 @@ class WindowFrame : public Pt::Connectable
         bool checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
     private:
-        WindowManager* _wm;
+        Shell*         _wm;
         Window*        _window;
         double         _borderWidth;
         double         _titleHeight;

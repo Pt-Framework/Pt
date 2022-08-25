@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/Slider.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -208,7 +209,7 @@ void Slider::setRenderer(SliderRenderer* renderer)
 }
 
 
-Gfx::SizeF Slider::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF Slider::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
 
@@ -263,11 +264,11 @@ bool Slider::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
-    if( ev.isPress() )
-        grabPointer();
+    //if( ev.isPress() )
+    //    grabPointer();
     
-    if( ev.isRelease() )
-        releasePointer();
+    //if( ev.isRelease() )
+    //    releasePointer();
 
     if( ev.isPressed() )
     {
@@ -286,11 +287,11 @@ bool Slider::onTouchEvent(const TouchEvent& ev)
 {
     Base::onTouchEvent(ev);
 
-    if( ev.isPress() )
-        grabPointer();
-    
-    if( ev.isRelease() )
-        releasePointer();
+    //if( ev.isPress() )
+    //    grabPointer();
+    //
+    //if( ev.isRelease() )
+    //    releasePointer();
 
     if( ev.isPressed() )
     {

@@ -1,4 +1,5 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -31,78 +32,38 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Screen.h>
-#include <Pt/Hmi/ResizeEvent.h>
-#include <Pt/Hmi/MouseEvent.h>
-#include <Pt/Hmi/TouchEvent.h>
-#include <Pt/Hmi/ScrollEvent.h>
-#include <Pt/Hmi/PaintEvent.h>
-#include <Pt/Hmi/MoveEvent.h>
-#include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/EnableEvent.h>
-#include <Pt/Hmi/ShowEvent.h>
-#include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/CloseEvent.h>
-#include <Pt/Hmi/EnterEvent.h>
-#include <Pt/Hmi/LeaveEvent.h>
-#include <Pt/Hmi/FocusEvent.h>
-#include <Pt/Hmi/InvalidateEvent.h>
-#include <Pt/Hmi/LayoutEvent.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/PlatinumStyle.h>
+#include <Pt/Hmi/InputMethod.h>
 #include <Pt/Hmi/Icon.h>
-#include <Pt/SmartPtr.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/System/Application.h>
 #include <Pt/System/Path.h>
-#include <Pt/Hmi/InputMethod.h>
 
 namespace Pt {
+
 namespace Hmi {
 
-
-class ApplicationImpl;
-class Window;
-class Widget;
-class Visual;
-class WindowStateEvent;
+class Cursor;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
     friend class Visual;
-    friend class Window;
-    friend class ApplicationImpl;
-    friend class MainWindowImpl;
 
     public:
         Application(int argc = 0, char** argv = 0);
 
         virtual ~Application();
 
+        ApplicationImpl* impl();
+
         static Application& instance();
 
         const Screen& screen() const;
 
         Screen& screen();
-
-        Window* pointerWindow();
-
-        const Window* pointerWindow() const;
-
-        Widget* pointerWidget();
-
-        const Widget* pointerWidget() const;
-
-        Visual* pointerGrabber();
-
-        void grabPointer(Window& w);
-
-        void releasePointer(Window& w);
-
-        void grabPointer(Widget& w);
-
-        void releasePointer(Widget& w);
 
         Pt::Timespan inactivityTime() const;
 
@@ -116,11 +77,34 @@ class PT_HMI_API Application : public Pt::System::Application
 
         StyleOptions& styleOptions();
 
+        void setFontDir(const Pt::System::Path& dir);
+
+        void setDefaultFont(const std::string& fontName);
+
+        void loadImage(const System::Path& path, Gfx::Image& image);
+
+        void setScaleFactor(double scale);
+
+        double scaleFactor() const;
+
         InputMethod& inputMethod();
 
         void setInputMethod(InputMethod& im);
 
         void removeInputMethod(InputMethod& im);
+
+        Pt::uint64_t makeId();
+
+        Visual* findVisual(Pt::uint64_t id);
+
+        // TODO: this might be the same as loop().waitNext()
+        void nextEvent();
+
+        void commitEvent(const Event& ev);
+
+        void processEvent(const Event& ev);
+
+        Pt::Signal<const Pt::Event&>& eventReceived();
 
         /** @brief Emulates a key event.
         */
@@ -130,105 +114,123 @@ class PT_HMI_API Application : public Pt::System::Application
         */
         void sendMouseEvent(const MouseEvent& ev);
 
-        void invalidate();
-
-        // TODO: this might be the same as loop().waitNext()
-        void nextEvent();
-
-        Pt::uint64_t makeId();
-
-        const Visual* findVisual(Pt::uint64_t id) const;
-
-        ApplicationImpl* impl();
-
-        void setFontDir(const Pt::System::Path& dir);
-
-        void setDefaultFont(const std::string& fontName);
-
-        void loadImage(const System::Path& path, Gfx::Image& image);
-
-        void setScaleFactor(double scale)
-        {
-            _scaling = scale;
-        }
-
-        double scaleFactor() const
-        {
-            return _scaling;
-        }
-
-    protected:
-        void onResizeEvent(const ResizeEvent& ev);
-
-        void onMouseEvent(const MouseEvent& ev);
-
-        void onTouchEvent(const TouchEvent& ev);
-
-        void onScrollEvent(const ScrollEvent& ev);
-
-        void onUpdateEvent(const UpdateEvent& ev);
-
-        void onPaintEvent(const PaintEvent& ev);
-
-        void onMoveEvent(const MoveEvent& ev);
-
-        void onActivateEvent(const ActivateEvent& ev);
-
-        void onEnableEvent(const EnableEvent& ev);
-
-        void onShowEvent(const ShowEvent& ev);
-
-        void onKeyEvent(const KeyEvent& ev);
-
-        void onCloseEvent(const CloseEvent& ev);
-
-        void onEnterEvent(const EnterEvent& ev);
-
-        void onLeaveEvent(const LeaveEvent& ev);
-
-        void onFocusEvent(const FocusEvent& ev);
-
-        void onWindowStateEvent(const WindowStateEvent& ev);
-
-        void onInvalidateEvent(const InvalidateEvent& ev);
-
-        void onLayoutEvent(const LayoutEvent& ev);
-
     private:
         void registerVisual(Visual& visual);
 
         void unregisterVisual(Visual& visual);
 
-        void grabLast();
+    private:
+        void onDispatchMouseEvent(const MouseEvent& ev);
 
-        void setPointerWindow(Window* w);
+        void onProcessMouseEvent(const MouseEvent& ev);
 
-        void setPointerWidget(Widget* widget);
 
-        void processTouchEvent(const TouchEvent& ev);
+        void onDispatchTouchEvent(const TouchEvent& ev);
 
-        void processMouseEvent(const MouseEvent& mev);
+        void onProcessTouchEvent(const TouchEvent& ev);
+
+
+        void onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
+                            bool isPress, bool isPressed);
+
+
+        void onDispatchScrollEvent(const ScrollEvent& ev);
+
+        void onProcessScrollEvent(const ScrollEvent& ev);
+
+
+        void onDispatchEnterEvent(const EnterEvent& ev);
+
+        void onProcessEnterEvent(const EnterEvent& ev);
+
+
+        void onDispatchLeaveEvent(const LeaveEvent& ev);
+
+        void onProcessLeaveEvent(const LeaveEvent& ev);
+
+
+        void onDispatchKeyEvent(const KeyEvent& ev);
+
+        void onProcessKeyEvent(const KeyEvent& ev);
+
+
+        void onDispatchInvalidateEvent(const InvalidateEvent& ev);
+
+        void onProcessInvalidateEvent(const InvalidateEvent& ev);
+
+
+        void onDispatchRelayoutEvent(const RelayoutEvent& ev);
+        
+        void onProcessRelayoutEvent(const RelayoutEvent& ev);
+
+
+        void onDispatchRescaleEvent(const RescaleEvent& ev);
+
+        void onProcessRescaleEvent(const RescaleEvent& ev);
+
+
+        void onDispatchPaintEvent(const PaintEvent& ev);
+
+        void onProcessPaintEvent(const PaintEvent& ev);
+
+
+        void onDispatchMoveEvent(const MoveEvent& ev);
+
+        void onProcessMoveEvent(const MoveEvent& ev);
+
+
+        void onDispatchResizeEvent(const ResizeEvent& ev);
+
+        void onProcessResizeEvent(const ResizeEvent& ev);
+
+
+        void onDispatchActivateEvent(const ActivateEvent& ev);
+
+        void onProcessActivateEvent(const ActivateEvent& ev);
+
+
+        void onDispatchEnableEvent(const EnableEvent& ev);
+
+        void onProcessEnableEvent(const EnableEvent& ev);
+
+
+        void onDispatchShowEvent(const ShowEvent& ev);
+
+        void onProcessShowEvent(const ShowEvent& ev);
+
+
+        void onDispatchCloseEvent(const CloseEvent& ev);
+
+        void onProcessCloseEvent(const CloseEvent& ev);
+
+
+        void onDispatchFocusEvent(const FocusEvent& ev);
+
+        void onProcessFocusEvent(const FocusEvent& ev);
+
+
+        void onDispatchWindowStateEvent(const WindowStateEvent& ev);
+
+        void onProcessWindowStateEvent(const WindowStateEvent& ev);
 
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 
-        ApplicationImpl*   _impl; 
-        Screen*            _mainScreen;
-        Pt::uint64_t       _lastId;
-        VisualMap          _visuals;
-        Window*            _pointerWindow;
-        Widget*            _pointerWidget;
-        Visual*            _pointerGrabber;
-        std::vector<Visual*> _grabbers;
-        Style              _style;
-        StyleOptions       _styleOptions;
-        DefaultInputMethod _defaultInputMethod;
-        InputMethod*       _inputMethod;
+        ApplicationImpl*             _impl;
+        Pt::Signal<const Pt::Event&> _eventReceived;
+        Screen*                      _mainScreen;
+        Pt::uint64_t                 _lastId;
+        VisualMap                    _visuals;
 
-        Gfx::PointF        _scrollFrom;
-        bool               _onScroll;
-        Gfx::PngReader     _iconReader;
-        double             _scaling;
+        Style                        _style;
+        StyleOptions                 _styleOptions;
+        DefaultInputMethod*          _defaultInputMethod;
+        InputMethod*                 _inputMethod;
+                                     
+        Gfx::PointF                  _scrollFrom;
+        bool                         _onScroll;
+        Gfx::PngReader               _iconReader;
+        double                       _scaling;
 };
 
 } // namespace

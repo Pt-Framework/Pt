@@ -30,6 +30,11 @@
 #ifndef PT_HMI_WIDGET_H
 #define PT_HMI_WIDGET_H
 
+#include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/Cursor.h>
+#include <Pt/Hmi/SizePolicy.h>
+#include <Pt/Hmi/Spacing.h>
+
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Hmi/ScrollEvent.h>
@@ -44,15 +49,13 @@
 #include <Pt/Hmi/LayoutEvent.h>
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
-#include <Pt/Hmi/Cursor.h>
-#include <Pt/Hmi/SizePolicy.h>
-#include <Pt/Hmi/Spacing.h>
-#include <Pt/Hmi/Visual.h>
-#include <Pt/Connectable.h>
+
 #include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/PaintRegion.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
+
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <Pt/Delegate.h>
@@ -61,34 +64,41 @@ namespace Pt {
 
 namespace Hmi {
 
-class Widget;
-class Window;
-class Screen;
-class Layouter;
+class Sheet;
 
 class PT_HMI_API Widget : public View
+                        , public Visual
+                        , public Responder
                         , public Pt::Connectable
 {
-    friend class Window;
-    friend class Layouter;
-    friend class View;
+    friend class Sheet;
 
     public:
         Widget();
 
         virtual ~Widget();
 
-        //
-        // widget hierachy
-        //
+    public:
+        const View* parent() const;
 
-        Window* window();
+        View* parent();
 
-        const Window* window() const;
+        void setParent(View* parent);
 
-        Screen* screen();
+        void setSheet(Sheet* sheet);
 
-        const Screen* screen() const;
+        Gfx::PaintSurface& surface();
+
+        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+
+        void setNextResponder(Responder* r);
+
+    public:
+        // implment add method in derived class
+        void add(Widget& widget);
+
+        // implment remove method in derived class
+        void remove(Widget& widget);
 
         const std::vector<Widget*>& widgets() const;
 
@@ -98,41 +108,24 @@ class PT_HMI_API Widget : public View
 
         Widget* findWidget(Pt::uint64_t vid);
 
-        bool acceptsInput() const;
-
-        void setAcceptInput( bool a );
-
-        void setTextInput(bool b);
-
-        bool isTextInput() const;
-
         //
         // focus handling
         // 
-
-        enum FocusPolicy
-        {
-            NoFocus,
-            KeepFocus,
-            NormalFocus
-        };
+        FocusPolicy focusPolicy() const;
 
         void setFocusPolicy(FocusPolicy f);
 
-        FocusPolicy focusPolicy() const;
+        size_t focusIndex() const;
+
+        void setFocusIndex(size_t index);  
 
         bool hasFocus() const;
 
         void focus();
 
-        size_t focusIndex() const;
-
-        void setFocusIndex(size_t index);
-
         //
         // keyboard input
         //
-
         Key actionKey() const;
 
         void setActionKey(const Key& ak);
@@ -149,10 +142,62 @@ class PT_HMI_API Widget : public View
 
         void setMnemonicWidget(Widget* w);
 
-        //
-        // widget operations
-        //
+        void processShortcut(const KeyEvent& kev);
 
+        void processMnemonic();
+
+      public:
+        bool acceptsInput() const;
+
+
+        bool isVisible() const;
+
+        void show( bool b = true );
+
+        
+        bool isEnabled() const;
+
+        void enable(bool b = true);
+
+        
+        void activate(bool active);
+
+        
+        void raise();
+
+
+        const Cursor* cursor() const;
+
+        void setCursor(const Cursor* c);
+
+    public:
+        const Gfx::PointF& position() const;
+
+        const Gfx::SizeF& size() const;
+
+        const Gfx::RectF geometry() const;
+
+        void move(const Gfx::PointF& pos);
+
+        void resize(const Gfx::SizeF& s);
+
+    //
+    // invalidation
+    // 
+    public:
+        void invalidate();
+
+    protected:
+        virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
+
+        virtual void onInvalidateEvent(const InvalidateEvent& ev);
+    
+        virtual void onInvalidate();
+
+    //
+    // painting
+    //  
+    public:
         // deprecated
         void update()
         { repaint(); }
@@ -161,75 +206,41 @@ class PT_HMI_API Widget : public View
         void update(const Gfx::RectF& rect)
         { repaint(rect); }
 
+        void repaint();
 
-        void invalidate();
+        void repaint(const Gfx::RectF& rect);
 
+    protected:
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
 
-        void repaint()
-        {
-            Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-            onRepaint(rect);
-        }
-
-        void repaint(const Gfx::RectF& rect)
-        {
-            onRepaint(rect);
-        }
-
-      public:
-        bool isVisible() const;
-
-        void show( bool b = true );
-
-        bool isEnabled() const;
-
-        void enable( bool b = true );
-
-        void raise();
-
-        void grabPointer();
-
-        void releasePointer();
-
-
-        const Cursor& cursor() const;
-
-        void setCursor(const Cursor& c);
+        virtual void onPaintEvent(const PaintEvent& ev);
+        
+        virtual void onPaint(Gfx::PaintSurface& surface, 
+                             const Gfx::RectF& rect);
 
     //
     // layouting
     //
     public:
-        const Gfx::RectF geometry() const;
-
         const SizePolicy& sizePolicy() const;
 
         void setSizePolicy(const SizePolicy& policy);
 
         Gfx::SizeF preferredSize() const;
 
+        Gfx::SizeF measure(const SizePolicy& policy);
+
+    public:
+        void relayout();
+
     protected:
-        // onMeasure
-        virtual Gfx::SizeF measure(const SizePolicy& policy);
+        //void onProcessMeasureEvent(const MeasureEvent& ev);
 
-        // onMeasureContent (widget specific)
-        virtual Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        
+        void onProcessLayoutEvent(const LayoutEvent& ev);
 
-        // onLayout
-        virtual void layout(const Gfx::RectF& rect);
-
-        // onLayoutContent (widget specific)
-        virtual void onLayout(Layouter& layouter, const Gfx::RectF& rect);
-
-    //
-    // painting
-    //
-    protected:
-        // onPaint
-        virtual void onPaintContent(const Gfx::RectF& r);
-
-        // onPaintContent (widget specific)
-        virtual void onPaintEvent(const PaintEvent& ev);
+        virtual void onLayout(const Gfx::RectF& rect);
 
     public:
         // outer spacing
@@ -273,86 +284,85 @@ class PT_HMI_API Widget : public View
         //
         // event processing
         //
-
-        Pt::Signal<const Pt::Event&>& eventReady();
-
-    protected:
-        //void add(Widget& w);
-
-        //void remove(Widget& w);
+        Pt::Signal<const Pt::Event&>& eventReceived();
 
     protected:
-        virtual const Gfx::PointF& onPosition() const;
-
-        virtual const Gfx::SizeF& onSize() const;
-
-        virtual double onScaleFactor() const;
-
-        virtual Visual* onParent() const;
-
-        Gfx::PointF onToParent(const Gfx::PointF& pos) const;
-
-        Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
-
-        virtual void onRepaint(const Gfx::RectF& rect);
-
-    protected:
-        virtual void onRelayout();
-
-    protected:
-        virtual void onSetWindow(Window* w);
-
-        virtual void onSetScreen(Screen* s);
-
-
         virtual void onAddWidget(Widget& w);
 
         virtual void onRemoveWidget(Widget& w);
 
-        virtual void onParentChanged(Widget* w);
-
-        virtual void onRaise(Widget& w);
-
-
-        virtual void onInvalidate();
-
-
-        virtual void onSetActionKey(const Key& ak);
+        virtual void onParentChanged(View* v);
 
         virtual void onActionKey(const KeyEvent& kev);
-
-        virtual void onSetShortcut(const Key* k);
 
         virtual void onShortcut(const KeyEvent& kev);
 
         virtual void onMnemonic();
 
+    //
+    // Visual
+    //
     protected:
-        virtual void onEvent(const Event& ev);
+        virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onInvalidateEvent(const InvalidateEvent& ev);
+        virtual void onSetCapture(bool capture);
 
+
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
+
+        virtual void onProcessTouchEvent(const TouchEvent& ev);
+
+        virtual void onProcessScrollEvent(const ScrollEvent& ev);
+
+        virtual void onProcessEnterEvent(const EnterEvent& ev);
+
+        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
+
+        virtual void onProcessKeyEvent(const KeyEvent& ev);
+
+
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnableEvent(const EnableEvent& ev);
+        
         virtual void onEnable(bool isEnable);
 
-        virtual void onShow(bool isShown);
+
+        virtual void onProcessShowEvent(const ShowEvent& ev);
+
+        virtual void onShow(bool visible);
+
+
+        virtual void onProcessFocusEvent(const FocusEvent& ev);
 
         virtual void onFocusEvent(const FocusEvent& ev);
 
+
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+        
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onRescale(double scaling);
+
+
+        virtual void onProcessMoveEvent(const MoveEvent& ev);
+
         virtual void onMoveEvent(const MoveEvent& ev);
+
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
-    public:
-        void touchEvent(const TouchEvent& ev);
-
-        void scrollEvent( const ScrollEvent& ev);
-
+    //
+    // Responder
+    //
     protected:
-        void processMouseEvent(const MouseEvent& ev);
-
         virtual Responder* onNextResponder();
 
-        Gfx::PointF onToNextResponder(const Gfx::PointF& pos);
+        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 
@@ -360,46 +370,69 @@ class PT_HMI_API Widget : public View
 
         virtual bool onScrollEvent( const ScrollEvent& ev);
 
-        virtual void onKeyEvent(const KeyEvent& ev);
+        virtual bool onKeyEvent(const KeyEvent& ev);
 
-        virtual void onEnterEvent( const EnterEvent& ev);
+        virtual bool onEnterEvent( const EnterEvent& ev);
 
-        virtual void onLeaveEvent(const LeaveEvent& ev);
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
 
-    private:
-        virtual Window* onGetWindow();
+    //
+    // View
+    //
+    protected:
+        virtual Gfx::PointF onToWidget(const Widget& widget, 
+                                       const Gfx::PointF& pos) const;
 
-        virtual Screen* onGetScreen();
+        virtual Gfx::PointF onFromWidget(const Widget& widget, 
+                                         const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onToWidget(const Widget& widget, const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onToScreen(const Widget& widget, 
+                                       const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromWidget(const Widget& widget, const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onFromScreen(const Widget& widget, 
+                                         const Gfx::PointF& pos) const;
 
         virtual void onAttach(Widget& widget);
 
         virtual void onDetach(Widget& widget);
 
+        virtual void onInit(Widget& widget);
+
+        virtual void onRelease(Widget& widget);
+
+        virtual void onRepaint(Widget& widget, const Gfx::RectF& rect);
+
+        virtual void onRelayout(Widget& widget);
+
         virtual void onEnable(Widget& widget, bool isEnable);
+
+        virtual void onActivate(Widget& w, bool active);
 
         virtual void onShow(Widget& widget, bool isShown);
 
+        virtual void onMove(Widget& widget, const Gfx::PointF& pos);
+
+        virtual void onResize(Widget& widget, const Gfx::SizeF& size);
+
+        virtual void onRaise(Widget& w);
+
+        virtual void onEnter(Widget& widget, Visual& v);
+
+        virtual void onSetCapture(Widget& widget, bool capture);
+
     private:
-        void setParent(View* parent);
+        Pt::Signal<const Pt::Event&> _eventReceived;
 
-        void setWindow(Window* window);
+        Gfx::PaintRegion             _surface;
 
-        void setScreen(Screen* screen);
-
-        Widget* findWidget( const Gfx::PointF& pos, bool input );
-
-    private:
-        Pt::Signal<const Pt::Event&> _eventReady;
-
-        std::vector<Widget*>         _children;
-        
-        Screen*                      _screen; 
-        Window*                      _window; 
         View*                        _parent;
+        std::vector<Widget*>         _children;
+
+        Sheet*                       _sheet;
+        Responder*                   _nextResponder;
+
+        Visual*                      _pointer;
+        Visual*                      _capture;
 
         int                          _invalidates;
         bool                         _isLayoutInvalid;
@@ -418,9 +451,8 @@ class PT_HMI_API Widget : public View
         bool                         _hasFocus;
         FocusPolicy                  _focusPolicy;
         size_t                       _focusIndex;
-        bool                         _acceptsInput;
-        bool                         _textInput;
 
+        bool                         _hasCursor;
         Hmi::Cursor                  _cursor;
         Key                          _actionKey;
         Key                          _shortcutKey;
@@ -429,36 +461,6 @@ class PT_HMI_API Widget : public View
         
         Spacing                      _padding;
         Spacing                      _margin;
-};
-
-
-class Layouter
-{
-    friend class Widget;
-    friend class Layout;
-
-    protected:
-        Layouter()
-        {}
-
-    public:
-        virtual ~Layouter()
-        {}
-
-        Gfx::SizeF measure(Widget& w, const SizePolicy& policy)
-        {
-            return w.measure(policy);
-        }
-
-        void layout(Widget& w, const Gfx::RectF& r)
-        {
-            w.layout(r);
-        }
-
-        void layout(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s)
-        {
-            w.layout( Gfx::RectF(p, s) );
-        }
 };
 
 } // namespace

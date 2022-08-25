@@ -36,6 +36,7 @@
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/System/Clock.h>
@@ -53,11 +54,27 @@ namespace Hmi {
 
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _frameBuffer( app.frameBuffer() )
-, _screen(0)
-, _cursorPos(0, 0)
+, _parent(0)
+, _nextResponder(0)
+, _capture(0)
+, _enabled(true)
+, _enabledState(true)
 , _dpi(96.0)
+, _cursorPos(0, 0)
 , _drawCursor(false)
 {
+    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessMouseEvent);
+    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessTouchEvent);
+    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessScrollEvent);
+    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
+
+    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
+    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
+    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
+
+    Gfx::Size fs = _frameBuffer.size();
+    _size = Gfx::SizeF( fs.width(), fs.height() );
+
     _surface.pixmapImpl()->resize( _frameBuffer.size(), 
                                    _frameBuffer.strideSize() );
 
@@ -69,6 +86,9 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     painter.setBrush( Gfx::Color(0, 0, 0) );
     painter.fillRect(rect);
 
+    _sheet.setContent(&_shell);
+    _sheet.setParent(this);
+
     updateScreen( Gfx::Rect(Gfx::Point(0, 0), _frameBuffer.size()) );
 }
 
@@ -78,38 +98,460 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::init(Screen& screen)
+void ScreenImpl::setParent(Screen* screen)
 {
-    _screen = &screen;
-    _windowManager.init(screen);
+    _parent = screen;
 }
 
 
-void ScreenImpl::registerWindow(Window& w)
+void ScreenImpl::setNextResponder(Responder* r)
 {
-    _windowManager.add(w);
+    _nextResponder = r;
 }
 
 
-void ScreenImpl::unregisterWindow(Window& w)
+void ScreenImpl::addWindow(Window& w)
 {
-    _windowManager.remove(w);
+    _shell.addWindow(w); 
 }
 
 
-const Gfx::Image& ScreenImpl::image() const
-{
-    return _surface.pixmapImpl()->image();
+void ScreenImpl::removeWindow(Window& w)
+{ 
+    _shell.removeWindow(w); 
 }
 
 
-Gfx::Image& ScreenImpl::image()
+const std::vector<Window*>& ScreenImpl::windows() const
 {
-    return _surface.pixmapImpl()->image();
+    return _windows;
 }
 
 
-void ScreenImpl::paint(const Gfx::RectF& updateRect)
+const Gfx::SizeF& ScreenImpl::size() const
+{
+    return _size;
+}
+
+
+double ScreenImpl::scaleFactor() const
+{
+    return 1.0;
+}
+
+
+void ScreenImpl::repaint(const Gfx::RectF& rect)
+{
+    if(_parent)
+        _parent->repaint(rect);
+}
+
+///////////////////////////////////////////////////////////////////////
+// Responder
+///////////////////////////////////////////////////////////////////////
+
+Responder* ScreenImpl::onNextResponder()
+{
+    return _nextResponder;
+}
+
+
+Gfx::PointF ScreenImpl::onToScreen(const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+Gfx::PointF ScreenImpl::onFromScreen(const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+///////////////////////////////////////////////////////////////////////
+// Visual
+///////////////////////////////////////////////////////////////////////
+
+void ScreenImpl::onEvent(const Event& ev)
+{
+    _eventReceived.send(ev);
+}
+
+///////////////////////////////////////////////////////////////////////
+// Form
+///////////////////////////////////////////////////////////////////////
+
+void ScreenImpl::onAttach(Sheet& sheet)
+{
+    Form::onAttach(sheet);
+}
+
+    
+void ScreenImpl::onDetach(Sheet& sheet)
+{
+    if(_capture == &sheet)
+        _capture = 0;
+
+    Form::onDetach(sheet);
+}
+
+
+void ScreenImpl::onInit(Sheet& sheet)
+{
+    sheet.setSurface(&_surface);
+    sheet.setNextResponder(this);
+
+    double scaling = _surface.scaleFactor();
+    
+    RescaleEvent ev(sheet, scaling);
+    //w.processEvent(ev);
+    Application::instance().loop().commitEvent(ev);
+}
+
+
+void ScreenImpl::onRelease(Sheet& sheet)
+{
+    sheet.setSurface(0);
+    sheet.setNextResponder(0);
+}
+
+
+Gfx::PointF ScreenImpl::onFromSheet(const Sheet& sheet, const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+Gfx::PointF ScreenImpl::onToSheet(const Sheet& sheet,  const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+Gfx::PointF ScreenImpl::onToScreen(const Sheet& sheet, const Gfx::PointF& pos) const
+{
+    Gfx::PointF p = onFromSheet(sheet, pos);
+    return toScreen(p);
+}
+
+
+Gfx::PointF ScreenImpl::onFromScreen(const Sheet& sheet, const Gfx::PointF& pos) const
+{
+    Gfx::PointF p = fromScreen(pos);
+    return onToSheet(sheet, p);
+}
+
+
+void ScreenImpl::onRepaint(Sheet& s, const Gfx::RectF& rect)
+{
+    Gfx::PointF clientPos = onFromSheet( s, rect.topLeft() );
+    Gfx::RectF clientRect( clientPos, rect.size() );
+
+    repaint(clientRect);
+}
+
+
+void ScreenImpl::onActivate(Sheet& w, bool active)
+{
+}
+
+
+void ScreenImpl::onMove(Sheet& sheet, const Gfx::PointF& pos)
+{   
+    //
+    // align to physical pixel grid
+    //
+    Gfx::PointF aligedPos = _surface.align(pos);
+
+    //
+    // send move event
+    //
+    MoveEvent mev(sheet, aligedPos);
+    ////Application::instance().processEvent(mev);
+    Application::instance().commitEvent(mev);
+
+    //
+    // request repaint
+    //
+    Gfx::RectF updateRect = sheet.geometry();
+    Gfx::RectF movedRect( aligedPos, sheet.size() );
+    updateRect.unify(movedRect);
+
+    repaint(updateRect);
+}
+
+
+void ScreenImpl::onResize(Sheet& sheet, const Gfx::SizeF& size)
+{
+    //
+    // align to physical pixel grid
+    //
+    Gfx::SizeF alignedSize = _surface.align(size);
+
+    //
+    // send resize event
+    //
+    ResizeEvent rev(sheet, alignedSize);
+    ////Application::instance().processEvent(rev);
+    Application::instance().commitEvent(rev);
+
+    //
+    // request repaint
+    //
+    Gfx::RectF updateRect = sheet.geometry();
+    Gfx::RectF resizedRect( sheet.position(), alignedSize );
+    updateRect.unify(resizedRect);
+
+    repaint(updateRect);
+}
+
+
+void ScreenImpl::onEnter(Sheet& sheet, Visual& v)
+{
+    Application::instance().screen().setPointer(&v);
+}
+
+///////////////////////////////////////////////////////////////////////
+// Implementation
+///////////////////////////////////////////////////////////////////////
+
+bool ScreenImpl::isEnabled() const
+{
+    return _enabledState;
+}
+
+
+void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
+{
+    bool wasEnabled = isEnabled();
+
+    _enabledState = ev.enabled();
+
+    if( wasEnabled != isEnabled() )
+    {
+        onEnable( ev.enabled() );
+    }
+
+    bool enable = ev.enabled();
+    if( ! isEnabled() )
+      enable = false;
+
+    EnableEvent sheetEvent(_sheet, enable);
+    Application::instance().loop().commitEvent(sheetEvent);
+}
+
+
+void ScreenImpl::onEnable(bool e)
+{
+}
+
+
+void ScreenImpl::onSetCapture(bool capture)
+{
+
+}
+
+
+void ScreenImpl::onSetCapture(Sheet& widget, bool capture)
+{
+    if(capture)
+    {
+        if(_capture && _capture != &widget)
+            _capture->setCapture(false);
+
+        _capture = &widget;
+    }
+    else
+    {
+        if(_capture == &widget)
+        {
+            _capture = 0;
+        }
+    }
+}
+
+
+void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
+{
+    //Gfx::PointF pos = fromScreen( ev.position() );
+
+    //std::clog << "ScreenImpl" << ": " << pos.x() << " " << pos.y() << std::endl;
+
+    //
+    // continue press sequence capture
+    // 
+    if(_capture)
+    {
+        _capture->processEvent(ev);
+
+        if( ev.isRelease() )
+        {
+            //std::clog << "ScreenImpl::CAPTURE END: " << typeid(*_capture).name() << std::endl;
+            _capture = 0;
+        }
+        
+        return;
+    }
+
+    Visual* hit = sheet();
+    if(hit)
+    {
+        //
+        // start press sequence capture
+        // 
+        if( ev.isPress() )
+        {
+            hit->setCapture(true);
+            //std::clog << "ScreenImpl::CAPTURE BEGIN: " << typeid(*_capture).name() << std::endl;
+        }
+
+      hit->processEvent(ev);
+      return;
+    }
+
+    _sheet.processEvent(ev);
+}
+
+
+bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
+{ 
+    return false; 
+}
+
+
+void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
+{ 
+    //Gfx::PointF pos = fromScreen( ev.position() );
+
+    //std::clog << title() << ": " << pos.x() << " " << pos.y() << std::endl;
+
+    //
+    // continue press sequence capture
+    //
+    if(_capture)
+    {
+        _capture->processEvent(ev);
+
+        if( ev.isRelease() )
+        {
+            //std::clog << "Widget::CAPTURE END: " << typeid(*_capture).name() << std::endl;
+            _capture = 0;
+        }
+        
+        return;
+    }
+
+    Visual* hit = sheet();
+    if(hit)
+    {
+        //
+        // start press sequence capture
+        // 
+        if( ev.isPress() )
+        {
+            _capture = hit;
+            //std::clog << "Window::CAPTURE BEGIN: " << typeid(*_capture).name() << std::endl;
+        }
+
+      hit->processEvent(ev);
+      return;
+    }
+    
+    _sheet.processEvent(ev);
+}
+
+
+bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
+{ 
+    return false;
+}
+
+
+void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
+{
+    if( ! isEnabled() )
+        return;
+  
+    _sheet.processEvent(ev);
+}
+
+
+bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
+{
+    return false;
+}
+
+
+void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
+{
+    if( ! isEnabled() )
+        return;
+    
+    KeyEvent kev = ev;
+    kev.setVisual(&_sheet);
+    _sheet.processEvent(kev);
+}
+
+
+bool ScreenImpl::onKeyEvent(const KeyEvent& ev)
+{
+    return false;
+}
+
+
+void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
+{   
+    double scaling = ev.scaleFactor();
+
+    RescaleEvent sheetEvent(_sheet, scaling);
+    _sheet.processEvent(sheetEvent);
+}
+
+
+void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
+{
+    const Gfx::RectF& screenRect = ev.rect();
+
+    if( screenRect.isNull() )
+        return;
+
+    //
+    // paint screen
+    //
+    PaintEvent pev(*this, screenRect);
+    onPaintEvent(pev);
+
+    //
+    //
+    // paint sheet
+    //
+    Gfx::RectF updateRect = _sheet.geometry().intersect(screenRect);
+ 
+    if( ! updateRect.isNull() )
+    {
+        PaintEvent pev( _sheet, updateRect );
+        _sheet.processEvent(pev);
+    }
+
+    //std::clog << "screen update2: " << clock.stop().toUSecs() << " usecs." << std::endl;
+    //std::clog << "update area2: " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
+    //          << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
+
+    //
+    // update the screen including the cursor
+    //
+    Pt::Gfx::RectF urect = _surface.toPhysical(screenRect);
+    updateScreen( Gfx::round(urect) );
+}
+
+
+void ScreenImpl::onPaintEvent(const PaintEvent& ev)
+{    
+    const Gfx::RectF& rect = ev.rect();
+    onPaint(_surface, rect);
+}
+
+
+void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     //
     // erase previous cursor area in back buffer
@@ -129,23 +571,32 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
     Gfx::Painter painter(_surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     painter.setBrush( Pt::Gfx::Color(0, 0, 0) );
-    painter.fillRect(updateRect);
-
-    _windowManager.paint(_surface, updateRect);
-
-    //std::clog << "screen update2: " << clock.stop().toUSecs() << " usecs." << std::endl;
-    //std::clog << "update area2: " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
-    //          << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
-
-    //
-    // update the screen including the cursor
-    //
-    Pt::Gfx::RectF urect  = Pt::Hmi::Application::instance().screen().toPhysical(updateRect);
-    updateScreen( Gfx::round(urect) );
+    painter.fillRect(rect);
 }
 
 
-void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
+const Gfx::Image& ScreenImpl::image() const
+{
+    return _surface.pixmapImpl()->image();
+}
+
+
+Gfx::Image& ScreenImpl::image()
+{
+    return _surface.pixmapImpl()->image();
+}
+
+
+void ScreenImpl::updateScreen(const Gfx::Rect& r)
+{
+    if(_drawCursor)
+        drawCursor( image().data() );
+    
+    _frameBuffer.output( image().data(), r );
+}
+
+
+void ScreenImpl::drawCursor(const Pt::Gfx::PointF& pos)
 {
     _drawCursor = true;
  
@@ -170,8 +621,8 @@ void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
     //
     const Cursor& cursor = Application::instance().impl()->cursor();
 
-    _cursorPos = Gfx::Point( mev.x() - cursor.xHotspot(),
-                             mev.y() - cursor.yHotspot() );
+    _cursorPos = Gfx::Point( pos.x() - cursor.xHotspot(),
+                             pos.y() - cursor.yHotspot() );
 
     PT_LOG_DEBUG("cursor hotspot position: " << _cursorPos.x() << "," << _cursorPos.y());
 
@@ -186,135 +637,6 @@ void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
 }
 
 
-void ScreenImpl::dispatchMouseEvent(const MouseEvent& ev)
-{
-    _windowManager.mouseEvent(ev);
-}
-
-
-void ScreenImpl::dispatchTouchEvent(const TouchEvent& ev)
-{
-    _windowManager.touchEvent(ev);
-}
-
-
-void ScreenImpl::dispatchScrollEvent(const ScrollEvent& ev)
-{
-    _windowManager.scrollEvent(ev);
-}
-
-
-void ScreenImpl::dispatchKeyEvent(const Pt::Hmi::KeyEvent& ev)
-{
-    _windowManager.keyEvent(ev);
-}
-
-
-Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
-{
-    //return w.impl()->toScreen(pos);
-    return _windowManager.toParent(w, pos);
-}
-
-
-Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
-{
-    //return w.impl()->fromScreen(pos);
-    return _windowManager.fromParent(w, pos);
-}
-
-
-void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
-{
-    ResizeEvent rev( w.vid(), s );
-    Application::instance().loop().commitEvent(rev);
-
-    _windowManager.onResize(w, s);
-}
-
-
-void ScreenImpl::onMove(Window& w, const Gfx::PointF& to)
-{
-    Gfx::RectF updateRect = _windowManager.frameRect(w);
-
-    _windowManager.onMove(w, to);
-
-    Gfx::RectF movedRect = _windowManager.frameRect(w);
-    updateRect.unify(movedRect);
-
-    MoveEvent mev( w.vid(), to );
-    Application::instance().loop().commitEvent(mev);
-
-    if(_screen)
-      _screen->repaint(updateRect);
-}
-
-
-void ScreenImpl::onFrameChanged(Window& w)
-{
-    Gfx::RectF updateRect = _windowManager.frameRect(w);
-    
-    _windowManager.onFrameChanged(w);
-
-    Gfx::RectF changedRect = _windowManager.frameRect(w);
-    updateRect.unify(changedRect);
-
-    if(_screen)
-      _screen->repaint(updateRect);
-}
-
-
-void ScreenImpl::onStateChanged(Window& w)
-{
-    _windowManager.onStateChanged(w);
-}
-
-
-void ScreenImpl::onClosing(Window& w)
-{
-    _windowManager.onClosing(w);
-}
-
-
-void ScreenImpl::onClose(Window& w)
-{
-    Gfx::RectF updateRect = _windowManager.frameRect(w);
-
-    // the window has been closed, clean up
-    _windowManager.onClose(w);
-
-    if(_screen)
-      _screen->repaint(updateRect);
-}
-
-
-void ScreenImpl::onShow(Window& w, bool visible)
-{
-    _windowManager.onShow(w, visible);
-}
-
-
-void ScreenImpl::onActivate(Window& w, bool active)
-{
-    _windowManager.onActivate(&w, active);
-}
-
-
-void ScreenImpl::onEnable(Window& w, bool enable)
-{
-    _windowManager.onEnable(w, enable);
-}
-
-
-void ScreenImpl::updateScreen(const Gfx::Rect& r)
-{
-    if(_drawCursor)
-        drawCursor( image().data() );
-    
-    _frameBuffer.output( image().data(), r );
-}
-
-
 void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 {
     const Cursor& cursor = Application::instance().impl()->cursor();
@@ -324,8 +646,8 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
         return;
     }
     
-    if( _cursorBackground.width() != cursor.width() ||
-        _cursorBackground.height() != cursor.height() )
+    if( _cursorBackground.width() != static_cast<int>( cursor.width() ) ||
+        _cursorBackground.height() != static_cast<int>( cursor.height() ) )
     {
         Gfx::Size size( cursor.width(), cursor.height() );
         _cursorBackground.reset(_frameBuffer.format(), size);
@@ -352,13 +674,15 @@ void ScreenImpl::grabImage(const Pt::uint8_t* buffer,
 {
     const size_t pixelSizeInByte = _frameBuffer.pixelSize();
     const Gfx::Size& imageSize = image.size();
-    const size_t yMax = std::min<size_t>(pos.y() + imageSize.height(), _frameBuffer.height() );
+    const Pt::ssize_t yMax = std::min<Pt::ssize_t>(pos.y() + imageSize.height(), _frameBuffer.height() );
 
-    size_t widthInPixel = (pos.x() + imageSize.width()) < _frameBuffer.width() ? imageSize.width()
-                                                                               : _frameBuffer.width() - pos.x();
+    int fbWidth = static_cast<int>( _frameBuffer.width() );
+
+    size_t widthInPixel = ( pos.x() + imageSize.width() ) < fbWidth ? imageSize.width()
+                                                                    : fbWidth - pos.x();
     const size_t widthInByte = widthInPixel * pixelSizeInByte;
 
-    for( Pt::ssize_t y = pos.y(); y < yMax; ++y )
+    for(Pt::ssize_t y = pos.y(); y < yMax; ++y)
     {
         size_t lineOffset = y * _frameBuffer.lineSize() +
                             pos.x() * pixelSizeInByte;

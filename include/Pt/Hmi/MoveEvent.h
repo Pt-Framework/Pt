@@ -31,10 +31,10 @@
 #define Pt_Hmi_MoveEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
-
 
 namespace Pt {
 
@@ -43,9 +43,9 @@ namespace Hmi {
 class MoveEvent : public Pt::BasicEvent<MoveEvent>
 {
     public:    
-        MoveEvent(Pt::uint64_t vid, 
-                  const Gfx::PointF& pos)
-        : _vid(vid)
+        MoveEvent(Visual& v, const Gfx::PointF& pos)
+        : _vid( v.vid() )
+        , _visual(&v)
         , _position(pos)
         {
         }
@@ -58,10 +58,10 @@ class MoveEvent : public Pt::BasicEvent<MoveEvent>
         {
             return _vid;
         }
-        
-        void setId(Pt::uint64_t vid)
+
+        Visual* visual() const
         {
-            _vid = vid;
+            return _visual;
         }
 
         const Gfx::PointF& position() const
@@ -76,6 +76,7 @@ class MoveEvent : public Pt::BasicEvent<MoveEvent>
 
     private:
         Pt::uint64_t _vid;
+        Visual*      _visual;
         Gfx::PointF _position;
 };
 

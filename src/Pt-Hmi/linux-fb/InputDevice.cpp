@@ -48,10 +48,10 @@ InputDevice::InputDevice(const char* deviceName)
 , _control(false)
 , _alt(false)
 , _meta(false)
-, _keyEvent(0)
-, _mouseEvent(0)
+, _keyEvent()
+, _mouseEvent()
 , _touchCount(0)
-, _touchEvent(0)
+, _touchEvent()
 {
     _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);
 
@@ -67,10 +67,10 @@ InputDevice::InputDevice()
 , _control(false)
 , _alt(false)
 , _meta(false)
-, _keyEvent(0)
-, _mouseEvent(0)
+, _keyEvent()
+, _mouseEvent()
 , _touchCount(0)
-, _touchEvent(0)
+, _touchEvent()
 {
     _ioh.fd = -1;
 }
@@ -150,7 +150,7 @@ bool InputDevice::onRun()
 
       ++count;
 
-      //std::clog << "\ninput on fd: " << _ioh.fd << " #" << events 
+      //std::clog << "\ninput on fd: " << _ioh.fd << " #" << count
       //          << " type: " << ev.type << std::endl;
 
       switch (ev.type)

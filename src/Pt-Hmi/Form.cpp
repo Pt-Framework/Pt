@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,25 +22,76 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
-#ifndef PT_HMI_WINDOWBASE_H
-#define PT_HMI_WINDOWBASE_H
-
-#include <Pt/Hmi/Visual.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
-
-#include <vector>
+#include <Pt/Hmi/Form.h>
+#include <Pt/Hmi/Sheet.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-} // namespace
+Form::Form()
+: _sheet(0)
+{
+}
+
+
+Form::~Form()
+{
+}
+
+
+Sheet* Form::sheet()
+{
+    return _sheet;
+}
+
+
+const Sheet* Form::sheet() const
+{
+    return _sheet;
+}
+
+
+void Form::setSheet(Sheet* sheet)
+{
+    _sheet->setParent(this);
+}
+
+
+Widget* Form::content() 
+{
+    return _sheet ? _sheet->content() : 0;
+}
+
+
+const Widget* Form::content()  const 
+{
+    return _sheet ? _sheet->content() : 0;
+}
+
+
+void Form::setContent(Widget* widget)
+{
+    if(_sheet)
+        _sheet->setContent(widget);
+}
+
+
+void Form::onAttach(Sheet& sheet)
+{
+    _sheet = &sheet;
+}
+
+
+void Form::onDetach(Sheet& sheet)
+{
+    _sheet = 0;
+}
 
 } // namespace
 
-#endif // include guard
+} // namespace

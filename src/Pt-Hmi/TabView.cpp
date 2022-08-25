@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Hmi/TabView.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -158,7 +159,7 @@ void TabBar::onInvalidate()
 }
 
 
-Gfx::SizeF TabBar::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF TabBar::onMeasure(const SizePolicy& policy)
 {
     if( ! _renderer)
         return Gfx::SizeF();
@@ -167,11 +168,11 @@ Gfx::SizeF TabBar::onMeasure(Layouter& layouter, const SizePolicy& policy)
 }
 
 
-void TabBar::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void TabBar::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(layouter, rect);
+    Base::onLayout(rect);
 
-    if( ! _renderer)
+    if( ! _renderer )
         return;
 
     _renderer->layoutTabs(_tabs, rect, _font);
@@ -366,17 +367,18 @@ void TabView::onInvalidate()
 }
 
 
-Gfx::SizeF TabView::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF TabView::onMeasure(const SizePolicy& policy)
 {
-    Base::onMeasure(layouter, policy);
+    Base::onMeasure(policy);
 
-    return layouter.measure(_layout, policy);
+    _layout.measure(policy);
+    return _layout.preferredSize();
 }
 
 
-void TabView::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void TabView::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(layouter, rect);
+    Base::onLayout(rect);
 
     Gfx::PointF pos(padding().left() + _layout.margin().left(), 
                     padding().top()  + _layout.margin().top());
@@ -388,13 +390,14 @@ void TabView::onLayout(Layouter& layouter, const Gfx::RectF& rect)
     size.setWidth( rect.width() - hspace );
     size.setHeight( rect.height() - vspace );
 
-    layouter.layout(_layout, pos, size);
+    _layout.move(pos);
+    _layout.resize(size);
 }
 
 
 void TabView::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
-    //Base::onPaint(surface, rect);
+    Base::onPaint(surface, rect);
 
     const StyleOptions& options = Application::instance().styleOptions();
 

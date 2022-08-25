@@ -80,7 +80,7 @@ void DockingLayout::onRemoveWidget(Widget& w)
 }
 
 
-Gfx::SizeF DockingLayout::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
 {
     Gfx::SizeF fillSize = policy.size();
     fillSize.subWidth( padding().leftRight() );
@@ -119,7 +119,7 @@ Gfx::SizeF DockingLayout::onMeasure(Layouter& layouter, const SizePolicy& policy
                 itemPolicy.setWidth( policy.size().width() - hspace );
                 itemPolicy.setHeight( fillSize.height() - (*it)->margin().topBottom() );
 
-                layouter.measure(**it, itemPolicy);
+                (*it)->measure(itemPolicy);
                 Gfx::SizeF itemSize = (*it)->preferredSize();
 
                 double itemWidth = itemSize.width() + (*it)->margin().leftRight();
@@ -134,7 +134,7 @@ Gfx::SizeF DockingLayout::onMeasure(Layouter& layouter, const SizePolicy& policy
                 itemPolicy.setWidth( fillSize.width() - (*it)->margin().leftRight() );
                 itemPolicy.setHeight( policy.size().height() - vspace );
 
-                layouter.measure(**it, itemPolicy);
+                (*it)->measure(itemPolicy);
                 Gfx::SizeF itemSize = (*it)->preferredSize();
 
                 double itemHeight = itemSize.height() + (*it)->margin().topBottom();
@@ -152,10 +152,8 @@ Gfx::SizeF DockingLayout::onMeasure(Layouter& layouter, const SizePolicy& policy
         itemPolicy.setWidth( fillSize.width() - fillWidget->margin().leftRight() );
         itemPolicy.setHeight( fillSize.height() - fillWidget->margin().topBottom() );
 
-        //fillWidget->measure(itemPolicy);
-        //Gfx::SizeF itemSize = fillWidget->preferredSize();
-
-        Gfx::SizeF itemSize = layouter.measure(*fillWidget, itemPolicy);
+        fillWidget->measure(itemPolicy);
+        Gfx::SizeF itemSize = fillWidget->preferredSize();
 
         double itemWidth = itemSize.width() + fillWidget->margin().leftRight();
         double itemHeight = itemSize.height() + fillWidget->margin().topBottom();
@@ -212,9 +210,9 @@ Gfx::SizeF DockingLayout::onMeasure(Layouter& layouter, const SizePolicy& policy
 }
 
 
-void DockingLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void DockingLayout::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(layouter, rect);
+    Base::onLayout(rect);
 
     std::vector<Widget*>::const_iterator it = this->widgets().begin();
     std::vector<Widget*>::const_iterator end = this->widgets().end();
@@ -255,7 +253,9 @@ void DockingLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
                                      (*it)->margin().topBottom() );
 
                 Gfx::PointF pos(x, y);
-                layouter.layout(**it, pos, itemSize);
+
+                (*it)->move(pos);
+                (*it)->resize(itemSize);
                 break;
             }
 
@@ -270,7 +270,10 @@ void DockingLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
                                      (*it)->preferredSize().height() );
 
                 Gfx::PointF pos(x, y);
-                layouter.layout(**it, pos, itemSize);
+  
+                (*it)->move(pos);
+                (*it)->resize(itemSize);
+
                 break;
             }
 
@@ -288,7 +291,9 @@ void DockingLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
                                      (*it)->margin().topBottom() );
 
                 Gfx::PointF pos(x, y);
-                layouter.layout(**it, pos, itemSize);
+
+                (*it)->move(pos);
+                (*it)->resize(itemSize);
                 break;
             }
 
@@ -297,7 +302,7 @@ void DockingLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
                 //
                 // TODO: align preferred size also in all other cases
                 //
-                double preferredHeight = (*it)->align( (*it)->preferredSize().height() );
+                double preferredHeight = (*it)->surface().align( (*it)->preferredSize().height() );
 
                 posBottom -= preferredHeight + (*it)->margin().bottom();
 
@@ -310,7 +315,9 @@ void DockingLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
                                      preferredHeight );
                 
                 Gfx::PointF pos(x, y);
-                layouter.layout(**it, pos, itemSize);
+
+                (*it)->move(pos);
+                (*it)->resize(itemSize);
                 break;
             }
         }
@@ -343,7 +350,8 @@ void DockingLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
             Gfx::SizeF itemSize( fillSize.width() - margin.leftRight(),
                                  fillSize.height() - margin.topBottom()  );
 
-            layouter.layout(**it, pos, itemSize);
+            (*it)->move(pos);
+            (*it)->resize(itemSize);
         }
     }
 }

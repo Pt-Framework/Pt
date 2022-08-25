@@ -41,6 +41,7 @@
 #include <Pt/Gfx/PaintSurface.h>
 
 namespace Pt {
+
 namespace Gfx {
 
 /** @brief Drawing region on another surface.
@@ -59,6 +60,10 @@ class PT_GFX_API PaintRegion : public virtual PaintSurface
         void detach();
 
         void reset(const Gfx::RectF& rect);
+
+        void move(const Gfx::PointF& size);
+
+        void resize(const Gfx::SizeF& size);
 
         virtual Image toImage(const Gfx::ImageFormat& format) const;
 
@@ -124,7 +129,10 @@ class PT_GFX_API PaintRegion : public virtual PaintSurface
 
         virtual double onScaleFactor() const
         {
-            return _surface->onScaleFactor();
+            if(_surface)
+                return _surface->onScaleFactor();
+
+            return 1.0;
         }
 
         virtual void onBegin(Painter& painter);
@@ -135,6 +143,11 @@ class PT_GFX_API PaintRegion : public virtual PaintSurface
         const Gfx::RectF& area() const
         {
             return _area;
+        }
+
+        PaintSurface* surface() const
+        {
+            return _surface;
         }
 
     private:

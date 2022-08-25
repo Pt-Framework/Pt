@@ -68,7 +68,9 @@ ChildW::ChildW(const std::string& title)
     _mainLayout.setDirection(FlowLayout::Top);
     _mainLayout.addItem(_menuBar);
 
-    setContent(&_mainLayout);
+    //_shell.setContent(&_mainLayout);
+
+    setContent(&_shell);
     
     setTitle(title);
     
@@ -94,7 +96,7 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setPadding(10);
     _textLabel.setBackground( Gfx::Color::fromRgb8(240, 220, 70) );
     _textLabel.setMnemonicWidget(&_toggleButton);
-    _textLabel.setCursor( Hmi::Cursor::waitCursor() ); 
+    _textLabel.setCursor( &Hmi::Cursor::waitCursor() ); 
     _textLabel.setContour(Gfx::Color::fromRgb8(200, 190, 60));
 
     //Toggle button
@@ -133,7 +135,6 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setShortcut(&xKey);
     _closeButton.setMargin(5);
     _closeButton.setPadding(5);
-    _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
       
     _checkBox.setState(CheckBox::Unspecified);
     _checkBox.setName("CheckBox"); 
@@ -210,7 +211,7 @@ ChildW::ChildW(const std::string& title)
     _childWindow2.resize( Gfx::SizeF(250, 500) );
     _childWindow2.setTitle("Child of " + title);
     _childWindow2.setContent(&_childView);
-    add( _childWindow2 );
+    _shell.addWindow( _childWindow2 );
 
     _childWindow2.show(true); // Child A/B
 }
@@ -269,11 +270,6 @@ void ChildW::onTextEntered(const Pt::String& text)
     _lineEdit.focus();
 }
 
-
-void ChildW::onCloseApp()
-{
-    mainWindow().close();
-}
 
 } // namespace
 

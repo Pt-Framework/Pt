@@ -124,9 +124,6 @@
     <Filter Include="Pt-Gfx\tests">
       <UniqueIdentifier>{95cc65fe-94a1-48f6-95de-b0af331fe0d2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\win32">
-      <UniqueIdentifier>{474bc573-d20c-4cd6-af07-ee7b27e994e9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Hmi\xorg">
       <UniqueIdentifier>{a778bad0-210f-4746-a155-f513e6568c2a}</UniqueIdentifier>
     </Filter>
@@ -138,6 +135,9 @@
     </Filter>
     <Filter Include="Pt-Gfx\skia">
       <UniqueIdentifier>{01684c40-b3e7-4aca-8071-3dddb309f154}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\winrt\win32">
+      <UniqueIdentifier>{474bc573-d20c-4cd6-af07-ee7b27e994e9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1435,22 +1435,22 @@
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\win32\KeyMap.h">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\win32\MainWindowImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ScreenImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\win32\win32.h">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\xorg\ApplicationImpl.h">
       <Filter>Pt-Hmi\xorg</Filter>
@@ -1601,6 +1601,24 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintData.h">
       <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowView.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Sheet.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowHost.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Shell.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Form.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ShellWidget.h">
+      <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2856,16 +2874,16 @@
       <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\win32\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
+      <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\xorg\ApplicationImpl.cpp">
       <Filter>Pt-Hmi\xorg</Filter>
@@ -2962,6 +2980,21 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintData.cpp">
       <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\WindowView.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Sheet.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Form.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Shell.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ShellWidget.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

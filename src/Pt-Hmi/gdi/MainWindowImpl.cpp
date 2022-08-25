@@ -38,8 +38,6 @@ namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(Window::Type type)
 : _hwnd(0)
-, _screen( Application::instance().screen() )
-, _isTopMost(false)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
   
@@ -48,13 +46,13 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     
     switch(type)
     {
-        case Window::Popup:
+        case WindowType::Popup:
             style = WS_POPUP;
-            exStyle = WS_EX_TOOLWINDOW;
+            exStyle = WS_EX_TOOLWINDOW|WS_EX_NOACTIVATE;
             break;
 
         default:
-        case Window::Normal:
+        case WindowType::Default:
             style = WS_OVERLAPPEDWINDOW;
             exStyle = WS_EX_APPWINDOW;
             break;
@@ -110,35 +108,29 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
 }
 
 
-void MainWindowImpl::close()
-{
-    if( _hwnd == 0)
-        return;
-
-    PostMessage(_hwnd, WM_CLOSE, 0, 0);
-}
-
-
 void MainWindowImpl::paint(const Gfx::RectF& rect)
 {
-    const Gfx::RectF pRect = _screen.toPhysical(rect);
-
     RECT wRect;
-    wRect.bottom = lround(pRect.bottom());
-    wRect.top    = lround(pRect.top());
-    wRect.left   = lround(pRect.left());
-    wRect.right  = lround(pRect.right());
+    wRect.bottom = lround( rect.bottom() );
+    wRect.top    = lround( rect.top() );
+    wRect.left   = lround( rect.left() );
+    wRect.right  = lround( rect.right() );
 
     InvalidateRect(_hwnd, &wRect, FALSE);
 }
 
 
-void MainWindowImpl::show( bool v)
+void MainWindowImpl::show(bool v)
 {
-    if( v )
+    if(v)
     {
-        setTopMost(_isTopMost);
-        ShowWindow(_hwnd, SW_SHOW);
+        onSetTopMost( isTopMost() );
+
+        LONG style = GetWindowLong(_hwnd, GWL_EXSTYLE);
+        if(style & WS_EX_NOACTIVATE)
+          ShowWindow(_hwnd, SW_SHOWNOACTIVATE);
+        else
+          ShowWindow(_hwnd, SW_SHOW);
     }
     else
     {
@@ -149,24 +141,13 @@ void MainWindowImpl::show( bool v)
 
 void MainWindowImpl::activate()
 {
-    SetActiveWindow( _hwnd );
+    SetActiveWindow(_hwnd);
 }
 
 
 void MainWindowImpl::enable(bool e)
 {
     EnableWindow(_hwnd, e);
-}
-
-
-void MainWindowImpl::setTopMost(bool e)
-{
-  _isTopMost = e;
-
-  if(e)
-    SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
-  else
-    SetWindowPos(_hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
 }
 
 
@@ -195,7 +176,22 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
-void MainWindowImpl::setType(Window::Type type)
+void MainWindowImpl::close()
+{
+    if( _hwnd == 0)
+        return;
+
+    PostMessage(_hwnd, WM_CLOSE, 0, 0);
+}
+
+
+//void MainWindowImpl::grabPointer()
+//{
+//    SetCapture(_hwnd);
+//}
+
+
+void MainWindowImpl::onSetType(WindowType type)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
     LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
@@ -208,13 +204,13 @@ void MainWindowImpl::setType(Window::Type type)
 
     switch(type)
     {
-        case Window::Popup:
+        case WindowType::Popup:
             style = WS_POPUP;
-            exStyle = WS_EX_TOOLWINDOW;
+            exStyle = WS_EX_TOOLWINDOW|WS_EX_NOACTIVATE;
             break;
 
         default:
-        case Window::Normal:
+        case WindowType::Default:
             style = WS_OVERLAPPEDWINDOW;
             exStyle = WS_EX_APPWINDOW;
             break;
@@ -237,7 +233,13 @@ void MainWindowImpl::setType(Window::Type type)
 }
 
 
-void MainWindowImpl::setIcon(const Gfx::Image& icon)
+void MainWindowImpl::onSetTitle(const std::string& text)
+{
+    SetWindowText(_hwnd, text.c_str());
+}
+
+
+void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
 {
     if(icon.width() == 0 || icon.height() == 0)
         return;
@@ -269,36 +271,29 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::setTitle(const std::string& text)
+void MainWindowImpl::onSetTopMost(bool isTop)
 {
-    SetWindowText(_hwnd, text.c_str());
+  if(isTop)
+    SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+  else
+    SetWindowPos(_hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
 }
 
 
-void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
-{
-}
-
-
-void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
-{
-}
-
-
-void MainWindowImpl::setState(Window::State s)
+void MainWindowImpl::onSetState(Window::State s)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
     switch(s)
     {
-        case Window::Normal:
+        case WindowState::Normal:
         break;
 
-        case Window::Maximized:
+        case WindowState::Maximized:
             style |= WS_MAXIMIZE;
         break;
 
-        case Pt::Hmi::Window::Minimized:
+        case WindowState::Minimized:
             style |= WS_MINIMIZE;
         break;
     }
@@ -307,9 +302,13 @@ void MainWindowImpl::setState(Window::State s)
 }
 
 
-void MainWindowImpl::grabPointer()
+void MainWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
 {
-    SetCapture(_hwnd);
+}
+
+
+void MainWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
+{
 }
 
 } // namespace

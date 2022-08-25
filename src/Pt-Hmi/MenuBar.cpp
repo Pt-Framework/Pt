@@ -47,7 +47,7 @@ MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
 , _menu(menu)
 , _hasRenderer(false)
 {
-    setFocusPolicy(Widget::NormalFocus);
+    setFocusPolicy(Widget::AcceptFocus);
     setText(text);
 
     setPadding( Spacing(8, 0, 8, 0) );
@@ -78,12 +78,12 @@ void MenuBarItem::toggle()
     if( ! _menu.isVisible() )
     {
         open();
-        grabPointer();
+        //grabPointer();
     }
     else
     {
         close();
-        releasePointer();
+        //releasePointer();
      }      
 }
 
@@ -91,10 +91,7 @@ void MenuBarItem::toggle()
 void MenuBarItem::open()
 {
     Gfx::PointF menuPos(0, size().height());
-    menuPos = window()->fromClient(menuPos, *this);
-
-    if( window() )
-        menuPos = window()->toScreen(menuPos);
+    menuPos = toScreen(menuPos);
 
     _menu.show(menuPos);
 }
@@ -133,7 +130,7 @@ bool MenuBarItem::onMouseEvent(const MouseEvent& ev)
     // navigate to sibling item if a sub menu is open
     if( _menuBar.selectedMenu() )
     {
-        Gfx::PointF pos = toParent( ev.position() );
+        Gfx::PointF pos = _menuBar.fromWidget( *this, ev.position() );
         MenuBarItem* item = _menuBar.findItem(pos);
         if(item)
         {
@@ -149,14 +146,14 @@ bool MenuBarItem::onMouseEvent(const MouseEvent& ev)
     MenuShell* menu = _menu.findMenu(screenPos);   
     if(menu)
     {   
-        releasePointer();
+        //releasePointer();
         return true;
     }
 
     // cancel when clicked outside any menu item
     if( ev.isPress() )
     {
-        releasePointer();
+        //releasePointer();
         _menu.cancel();
         return true;
     }
@@ -313,17 +310,19 @@ void MenuBarItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void MenuBarItem::onEnterEvent(const EnterEvent& ev)
+bool MenuBarItem::onEnterEvent(const EnterEvent& ev)
 {
     Base::onEnterEvent(ev);
     update();
+    return true;
 }
 
 
-void MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
+bool MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
 {
     Base::onLeaveEvent(ev);
     update();
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -449,8 +448,8 @@ void MenuBar::onCancel()
 
 void MenuBar::onEnter()
 {
-    if(_currentMenuItem)
-        _currentMenuItem->grabPointer();
+    //if(_currentMenuItem)
+    //    _currentMenuItem->grabPointer();
 }
 
 

@@ -44,6 +44,30 @@ namespace Pt {
 */
 namespace Hmi {
 
+class ActivateEvent;
+class CloseEvent;
+class EnableEvent;
+class EnterEvent;
+class FocusEvent;
+class InvalidateEvent;
+class KeyEvent;
+class LeaveEvent;
+class LayoutEvent;
+class MeasureEvent;
+class MouseEvent;
+class MoveEvent;
+class PaintEvent;
+class RelayoutEvent;
+class RescaleEvent;
+class ResizeEvent;
+class ScrollEvent;
+class ShowEvent;
+class TouchEvent;
+class Visual;
+class Widget;
+class Window;
+class WindowStateEvent;
+
 } // namespace
 
 } // namespace

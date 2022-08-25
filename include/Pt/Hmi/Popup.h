@@ -47,9 +47,17 @@ class PT_HMI_API Popup : public Window
     protected:
         void onShowEvent(const ShowEvent& ev);
 
+        void onGlobalMouseEvent(const MouseEvent& ev);
+
+        void onGlobalTouchEvent(const TouchEvent& ev);
+
+        void onGlobalActivateEvent(const ActivateEvent& ev);
+
+        void onGlobalMoveEvent(const MoveEvent& ev);
+
         bool onMouseEvent(const MouseEvent& ev);
 
-        void onTouchEvent(const TouchEvent& ev);
+        bool onTouchEvent(const TouchEvent& ev);
 };
 
 } // namespace

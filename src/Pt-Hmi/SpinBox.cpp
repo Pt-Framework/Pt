@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Hmi/SpinBox.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Convert.h>
 
@@ -162,8 +163,7 @@ SpinBox::SpinBox()
 , _spacing(0)
 , _hasRenderer(false)
 {
-    setTextInput(_isEditable);
-    setFocusPolicy(Widget::NormalFocus);
+    setFocusPolicy(Widget::AcceptFocus);
     
     _editor.setText("0");
 
@@ -189,8 +189,7 @@ bool SpinBox::isEditable() const
 void SpinBox::setEditable(bool e)
 {
     _isEditable = e;
-    setTextInput(_isEditable);
-    setFocusPolicy(_isEditable ? Widget::NormalFocus : Widget::NoFocus);
+    setFocusPolicy(_isEditable ? Widget::AcceptFocus : Widget::NoFocus);
     update();
 }
 
@@ -388,7 +387,7 @@ void SpinBox::setAccepted(bool a)
     }
     else
     {
-        setFocusPolicy(Widget::NormalFocus);
+        setFocusPolicy(Widget::AcceptFocus);
     }
 }
 
@@ -528,22 +527,22 @@ void SpinBox::setRenderer(SpinBoxRenderer* renderer)
 }
 
 
-Gfx::SizeF SpinBox::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF SpinBox::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
     double itemsHeight = _font.size() * 2.5;
 
-    layouter.measure(_downButton, policy);
-    layouter.measure(_upButton, policy);
+    _downButton.measure(policy);
+    _upButton.measure(policy);
 
     return Gfx::SizeF( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );
 }
 
 
-void SpinBox::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void SpinBox::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(layouter, rect);
+    Base::onLayout(rect);
 
     if( ! _renderer )
     {
@@ -559,8 +558,11 @@ void SpinBox::onLayout(Layouter& layouter, const Gfx::RectF& rect)
     
     _renderer->layout(*this, downRect, upRect, _textBox);
 
-    layouter.layout(_downButton, downRect);
-    layouter.layout(_upButton, upRect);
+    _downButton.move( downRect.topLeft() );
+    _downButton.resize( downRect.size() );
+
+    _upButton.move( upRect.topLeft() );
+    _upButton.resize( upRect.size() );
 
     Gfx::SizeF editSize = _textBox.size();
     editSize.subWidth(5);  // TODO: cursor
@@ -642,12 +644,12 @@ void SpinBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void SpinBox::onKeyEvent(const KeyEvent& ev)
+bool SpinBox::onKeyEvent(const KeyEvent& ev)
 {  
     Base::onKeyEvent(ev);
 
     if( ! ev.isPress() || ! _isEditable )
-        return;
+        return true;
 
     if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
     {
@@ -676,7 +678,7 @@ void SpinBox::onKeyEvent(const KeyEvent& ev)
         std::size_t cursorPosition = _editor.cursorPosition();
 
         if( cursorPosition >= _editor.text().size() )
-            return;
+            return true;
 
         Pt::String str = _editor.text();
         str.erase(cursorPosition, 1);
@@ -698,7 +700,7 @@ void SpinBox::onKeyEvent(const KeyEvent& ev)
         std::size_t cursorPosition = _editor.cursorPosition();
 
         if( --cursorPosition >= _editor.text().size() )
-            return;
+            return true;
 
         Pt::String str = _editor.text();
         str.erase(cursorPosition, 1);
@@ -737,6 +739,8 @@ void SpinBox::onKeyEvent(const KeyEvent& ev)
             }
         }
     }
+
+    return true;
 }
 
 

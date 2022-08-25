@@ -30,7 +30,6 @@ MA 02110-1301 USA
 
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 

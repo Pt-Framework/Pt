@@ -33,7 +33,8 @@
 
 #include "FrameBuffer.h"
 
-#include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/Form.h>
+#include <Pt/Hmi/Shell.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
@@ -45,84 +46,139 @@ namespace Hmi {
 class ApplicationImpl;
 class FrameBuffer;
 class Cursor;
+class Screen;
 
-class ScreenImpl : public Pt::Connectable
+class ScreenImpl : public Visual
+                 , public Responder
+                 , public Form
+                 , public Connectable
 {
     public:
         ScreenImpl(ApplicationImpl& app);
 
         virtual ~ScreenImpl();
 
-        void init(Screen& screen);
+        
+        void setParent(Screen* screen);
 
-        void registerWindow(Window& w);
+        void setNextResponder(Responder* r);
 
-        void unregisterWindow(Window& w);
 
-        const FrameBuffer& frameBuffer() const
-        {
-            return _frameBuffer;
-        }
+        void addWindow(Window& w);
 
-        void drawCursor(const Pt::Hmi::MouseEvent& mev);
+        void removeWindow(Window& w);
 
-        Gfx::SizeF size() const
-        {
-            Gfx::Size fs = _frameBuffer.size();
-            return Gfx::SizeF(fs.width(), fs.height());
-        }
+        const std::vector<Window*>& windows() const;
 
-        const Gfx::Image& image() const;
+        const Gfx::SizeF& size() const;
 
-        Gfx::Image& image();
+        double scaleFactor() const;
 
-        void paint(const Gfx::RectF& updateRect);
+        bool isEnabled() const;
 
-        WindowManager& windowManager()
-        {
-            return _windowManager;
-        }
-
-        double scaleFactor(const Window&) const
-        {
-            return 1.0;
-        }
-
-        double scaleFactor() const
-        {
-            return 1.0;
-        }
+        void repaint(const Gfx::RectF& rect);
 
     public:
-        void dispatchMouseEvent(const MouseEvent& ev);
+        void drawCursor(const Pt::Gfx::PointF& pos);
 
-        void dispatchTouchEvent(const TouchEvent& ev);
+    //
+    // Responder
+    //
+    protected:
+        virtual Responder* onNextResponder();
 
-        void dispatchScrollEvent(const ScrollEvent& ev);
+        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
 
-        void dispatchKeyEvent(const KeyEvent& ev);
+        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
 
-        Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
-        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
+        virtual bool onTouchEvent(const TouchEvent& ev);
 
-        void onResize(Window& w, const Gfx::SizeF& s);
+        virtual bool onScrollEvent(const ScrollEvent& ev);
 
-        void onMove(Window& w, const Gfx::PointF& pos);
+        virtual bool onKeyEvent(const KeyEvent& ev);
 
-        void onFrameChanged(Window& w);
+    //
+    // Visual
+    //
+    protected:
+        virtual void onEvent(const Event& ev);
 
-        void onStateChanged(Window& w);
+        virtual void onSetCapture(bool capture);
 
-        void onClosing(Window& w);
+    //
+    // Form
+    //
+    protected:
+        virtual void onAttach(Sheet& view);
+    
+        virtual void onDetach(Sheet& view);
 
-        void onClose(Window& w);
+        virtual void onInit(Sheet& view);
 
-        void onShow(Window& w, bool visible);
+        virtual void onRelease(Sheet& view);
 
-        void onActivate(Window& w, bool active);
+        virtual Gfx::PointF onFromSheet(const Sheet& sheet, 
+                                       const Gfx::PointF& pos) const;
 
-        void onEnable(Window& w, bool enable);
+        virtual Gfx::PointF onToSheet(const Sheet& sheet, 
+                                     const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onToScreen(const Sheet& sheet, 
+                                       const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromScreen(const Sheet& sheet, 
+                                         const Gfx::PointF& pos) const;
+
+        virtual void onRepaint(Sheet& view, const Gfx::RectF& rect);
+
+        virtual void onActivate(Sheet& w, bool active);
+
+        virtual void onMove(Sheet& sheet, const Gfx::PointF& pos);
+
+        virtual void onResize(Sheet& sheet, const Gfx::SizeF& size);
+
+        virtual void onEnter(Sheet& sheet, Visual& v);
+
+        virtual void onSetCapture(Sheet& sheet, bool capture);
+
+    //
+    // scaling
+    //
+    protected:
+        void onProcessRescaleEvent(const RescaleEvent& ev);
+
+    //
+    // enable
+    //
+    protected:
+        void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnable(bool e);
+
+    //
+    // painting
+    //
+    protected:
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaint(Gfx::PaintSurface& surface, 
+                             const Gfx::RectF& updateRect);
+
+    //
+    // input
+    //
+    protected:
+        void onProcessMouseEvent(const MouseEvent& ev);
+
+        void onProcessTouchEvent(const TouchEvent& ev);
+
+        void onProcessScrollEvent(const ScrollEvent& ev);
+
+        void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
         enum BlitOp
@@ -131,6 +187,10 @@ class ScreenImpl : public Pt::Connectable
             AndOp,
             XorOp
         };
+
+        const Gfx::Image& image() const;
+
+        Gfx::Image& image();
         
         void updateScreen(const Pt::Gfx::Rect& area);
 
@@ -143,14 +203,30 @@ class ScreenImpl : public Pt::Connectable
                      const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op);
 
     private:
-        FrameBuffer&  _frameBuffer;
-        Screen*       _screen;
-        Gfx::Image    _cursorBackground;
-        Gfx::Point    _cursorPos;
-        double        _dpi;
-        bool          _drawCursor;
-        WindowManager _windowManager;
-        PixmapSurface _surface;
+        Pt::Signal<const Pt::Event&> _eventReceived;
+
+        FrameBuffer&                 _frameBuffer;
+        PixmapSurface                _surface;
+
+        Screen*                      _parent;
+        Sheet                        _sheet;
+        Shell                        _shell;
+                                     
+        Responder*                   _nextResponder;
+        Visual*                      _capture;
+
+        Gfx::SizeF                   _size;
+
+        bool                         _enabled;
+        bool                         _enabledState;
+        
+        double                       _dpi;       
+        Gfx::Image                   _cursorBackground;
+        Gfx::Point                   _cursorPos;
+        bool                         _drawCursor;
+
+        // TODO: return windows from _shell
+        std::vector<Window*> _windows;
 };
 
 } // namespace

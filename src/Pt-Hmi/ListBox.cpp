@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Hmi/ListBox.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -236,13 +237,13 @@ void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 }
 
 
-Gfx::SizeF ListBoxItem::onMeasure(Layouter& layouter, const SizePolicy& p)
+Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 {
     Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, _text );
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
-    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
@@ -279,7 +280,7 @@ void ListBoxItem::onInvalidate()
     }
     else
     {
-        const Gfx::SizeF scaledSize = toPhysical(_iconSize);
+        const Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _picture.set(iconImage);
     }
@@ -325,7 +326,7 @@ void ListBoxItem::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& paint
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
-    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = painter.toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
@@ -430,7 +431,7 @@ ListBox::ListBox()
 , _hasFrame(true)
 , _hasRenderer(false)
 {
-    setAcceptInput(false);
+    //setAcceptInput(false);
 
     _scrollView.setContent(_layout);
     _scrollView.setContentMode(SizePolicy::Fixed, SizePolicy::Preferred);
@@ -560,24 +561,30 @@ int ListBox::maximumY() const
 }
 
 
-Gfx::SizeF ListBox::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
 {
     double hspace = padding().leftRight() + _scrollView.margin().leftRight();
     double vspace = padding().topBottom() + _scrollView.margin().topBottom();
 
-    SizePolicy contentPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
+    //SizePolicy contentPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
+
+    SizePolicy contentPolicy( policy.horizontal(), policy.vertical() );
     contentPolicy.setWidth( policy.size().width() - hspace );
     contentPolicy.setHeight( policy.size().height() - vspace );
 
-    layouter.measure(_scrollView, contentPolicy);
+    _scrollView.measure(contentPolicy);
+    Gfx::SizeF prefSize = _scrollView.preferredSize();
     
-    return policy.size();
+    prefSize.setWidth( maximumX() );
+    prefSize.setHeight( maximumY() );
+
+    return prefSize;
 }
 
 
-void ListBox::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void ListBox::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(layouter, rect);
+    Base::onLayout(rect);
     
     Gfx::PointF pos(padding().left() + _scrollView.margin().left(), 
                     padding().top()  + _scrollView.margin().top());
@@ -589,7 +596,8 @@ void ListBox::onLayout(Layouter& layouter, const Gfx::RectF& rect)
     size.setWidth( rect.width() - hspace );
     size.setHeight( rect.height() - vspace );
 
-    layouter.layout( _scrollView, pos, size );
+    _scrollView.move(pos);
+    _scrollView.resize(size);
 }
 
 

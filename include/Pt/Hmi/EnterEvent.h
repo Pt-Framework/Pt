@@ -29,16 +29,23 @@
 #ifndef Pt_Hmi_EnterEvent_h
 #define Pt_Hmi_EnterEvent_h
 
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
+#include <Pt/Types.h>
 #include <Pt/Event.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 class EnterEvent : public Pt::BasicEvent<EnterEvent>
 {
     public:
-        EnterEvent(Pt::uint64_t vid)
-        : _vid(vid)
+        EnterEvent(Visual& v)
+        : _vid( v.vid() )
+        , _visual(&v)
+        , _reserved0(0)
+        , _reserved1(0)
         {
         }
 
@@ -46,20 +53,25 @@ class EnterEvent : public Pt::BasicEvent<EnterEvent>
         {
         }
 
-        void setId(Pt::uint64_t vid)
-        {
-            _vid = vid;
-        }
-
         Pt::uint64_t vid() const
         {
             return _vid;
         }
 
+        Visual* visual() const
+        {
+            return _visual;
+        }
+
     private:
         Pt::uint64_t _vid;
+        Visual*      _visual;
+        void*        _reserved0;
+        Pt::uint64_t _reserved1;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

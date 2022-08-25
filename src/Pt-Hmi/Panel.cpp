@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
@@ -160,7 +161,7 @@ void Panel::onInvalidate()
 
     if (!_icon.empty())
     {
-        const Gfx::SizeF scaledSize = toPhysical(_iconSize);
+        const Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _picture.set(iconImage);
     }
@@ -171,7 +172,7 @@ void Panel::onInvalidate()
 }
 
 
-Gfx::SizeF Panel::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
 {
     if(_content)
     { 
@@ -182,7 +183,7 @@ Gfx::SizeF Panel::onMeasure(Layouter& layouter, const SizePolicy& policy)
         contentPolicy.setWidth( policy.size().width() - hspace );
         contentPolicy.setHeight( policy.size().height() - vspace );
         
-        layouter.measure(*_content, contentPolicy);
+        _content->measure(contentPolicy);
         return _content->preferredSize();
     }
 
@@ -190,9 +191,9 @@ Gfx::SizeF Panel::onMeasure(Layouter& layouter, const SizePolicy& policy)
 }
 
 
-void Panel::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void Panel::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(layouter, rect);
+    Base::onLayout(rect);
     
     if(_content)
     {
@@ -206,7 +207,8 @@ void Panel::onLayout(Layouter& layouter, const Gfx::RectF& rect)
         size.setWidth( rect.width() - hspace );
         size.setHeight( rect.height() - vspace );
 
-        layouter.layout( *_content, pos, size );
+        _content->move(pos);
+        _content->resize(size);
     }
 }
 

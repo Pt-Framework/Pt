@@ -62,10 +62,8 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 : _window(nil)
 , _view(nil)
 , _windowStyle(0)
-, _keyFlags(0)
-, _keyEvent(0)
-, _mouseEvent(0)
 , _level(0)
+, _keyFlags(0)
 {   
     MainWindowView* view = [[MainWindowView alloc] initWithImpl: this];
     _view = view;
@@ -135,41 +133,6 @@ double MainWindowImpl::scaleFactor() const
 }
 
 
-void MainWindowImpl::setType(Window::Type type)
-{
-    switch(type)
-    {
-        case Window::Popup:
-            _windowStyle = NSWindowStyleMaskBorderless;
-                           //NSWindowStyleMaskFullSizeContentView;
-            break;
-
-        default:
-        case Window::Normal:
-            _windowStyle = NSWindowStyleMaskTitled |
-                           NSWindowStyleMaskClosable |
-                           NSWindowStyleMaskMiniaturizable |
-                           NSWindowStyleMaskResizable;
-            break;
-    }
-
-    [_window setStyleMask:_windowStyle];
-    
-    if(type == Window::Popup)
-    {
-        [_window setTitlebarAppearsTransparent: YES];
-        [_window setTitleVisibility: NSWindowTitleHidden];
-        [_window setOpaque:NO];
-    }
-    else
-    {
-        [_window setTitlebarAppearsTransparent: NO];
-        [_window setTitleVisibility: NSWindowTitleVisible];
-        [_window setOpaque:YES];
-    }
-}
-
-
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
 {
     //std::clog << "TO SCREEN POS: " << pos.y() << std::endl;
@@ -208,6 +171,27 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
 }
 
 
+void MainWindowImpl::paint(const Gfx::RectF& rect)
+{
+    Gfx::RectF r( rect.topLeft(), rect.size() );
+
+    NSRect frameRect = [_window frame];
+    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
+    CGFloat contentHeight = contentRect.size.height;
+
+    CGFloat x = r.x();
+    CGFloat y = contentHeight - (r.y() + r.height());
+    CGFloat w = r.width();
+    CGFloat h = r.height();
+    
+    //std::clog << "PAINT: " << x << "," << y <<
+    //                   " " << w << "x" << h << std::endl;
+
+    NSRect invalidRect = NSMakeRect(x, y, w, h);
+    [_view setNeedsDisplayInRect:invalidRect ];
+}
+
+
 void MainWindowImpl::show(bool visible)
 {
     //std::clog << "SHOW: " << visible << std::endl;
@@ -229,34 +213,6 @@ void MainWindowImpl::show(bool visible)
 }
 
 
-void MainWindowImpl::close()
-{
-    [_window performClose:nil];
-}
-
-
-void MainWindowImpl::paint(const Gfx::RectF& rect)
-{
-    double scaling = Application::instance().scaleFactor();
-    Gfx::RectF r(rect.topLeft() * scaling, rect.size() * scaling);
-
-    NSRect frameRect = [_window frame];
-    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
-    CGFloat contentHeight = contentRect.size.height;
-
-    CGFloat x = r.x();
-    CGFloat y = contentHeight - (r.y() + r.height());
-    CGFloat w = r.width();
-    CGFloat h = r.height();
-    
-    //std::clog << "PAINT: " << x << "," << y <<
-    //                   " " << w << "x" << h << std::endl;
-
-    NSRect invalidRect = NSMakeRect(x, y, w, h);
-    [_view setNeedsDisplayInRect:invalidRect ];
-}
-
-
 void MainWindowImpl::activate()
 {
     [_window makeKeyWindow];
@@ -267,19 +223,6 @@ void MainWindowImpl::activate()
 void MainWindowImpl::enable(bool e)
 {
     // TODO
-}
-
-
-void MainWindowImpl::setTopMost(bool onTop)
-{
-    if(onTop)
-    {
-        [_window setLevel: NSMainMenuWindowLevel];
-    }
-    else
-    {
-        [_window setLevel: NSNormalWindowLevel];
-    }
 }
 
 
@@ -320,12 +263,48 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
-void MainWindowImpl::setIcon(const Gfx::Image& icon)
+void MainWindowImpl::close()
 {
+    [_window performClose:nil];
 }
 
 
-void MainWindowImpl::setTitle(const std::string& text)
+void MainWindowImpl::onSetType(WindowType type)
+{
+    switch(type)
+    {
+        case Window::Popup:
+            _windowStyle = NSWindowStyleMaskBorderless;
+                           //NSWindowStyleMaskFullSizeContentView;
+            break;
+
+        default:
+        case Window::Normal:
+            _windowStyle = NSWindowStyleMaskTitled |
+                           NSWindowStyleMaskClosable |
+                           NSWindowStyleMaskMiniaturizable |
+                           NSWindowStyleMaskResizable;
+            break;
+    }
+
+    [_window setStyleMask:_windowStyle];
+    
+    if(type == Window::Popup)
+    {
+        [_window setTitlebarAppearsTransparent: YES];
+        [_window setTitleVisibility: NSWindowTitleHidden];
+        [_window setOpaque:NO];
+    }
+    else
+    {
+        [_window setTitlebarAppearsTransparent: NO];
+        [_window setTitleVisibility: NSWindowTitleVisible];
+        [_window setOpaque:YES];
+    }
+}
+
+
+void MainWindowImpl::onSetTitle(const std::string& text)
 {
     _title = text;
 
@@ -335,21 +314,25 @@ void MainWindowImpl::setTitle(const std::string& text)
 }
 
 
-void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
+void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
 {
-    NSSize minSize = NSMakeSize( s.width(), s.height() );
-    [_window setMinSize:minSize];
 }
 
 
-void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
+void MainWindowImpl::onSetTopMost(bool isTop)
 {
-    NSSize maxSize = NSMakeSize( s.width(), s.height() );
-    [_window setMaxSize:maxSize];
+    if(onTop)
+    {
+        [_window setLevel: NSMainMenuWindowLevel];
+    }
+    else
+    {
+        [_window setLevel: NSNormalWindowLevel];
+    }
 }
 
 
-void MainWindowImpl::setState(Window::State s)
+void MainWindowImpl::onSetState(Window::State s)
 {
     switch(s)
     {
@@ -375,18 +358,32 @@ void MainWindowImpl::setState(Window::State s)
 }
 
 
-void MainWindowImpl::grabPointer()
+void MainWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
 {
-    // pointer is always tracked, even if its outside the window
-    [_window setAcceptsMouseMovedEvents:YES];
+    NSSize minSize = NSMakeSize( s.width(), s.height() );
+    [_window setMinSize:minSize];
 }
 
 
-void MainWindowImpl::releasePointer()
+void MainWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
 {
-    // pointer is always tracked, even if its outside the window
-    [_window setAcceptsMouseMovedEvents:NO];
+    NSSize maxSize = NSMakeSize( s.width(), s.height() );
+    [_window setMaxSize:maxSize];
 }
+
+
+//void MainWindowImpl::grabPointer()
+//{
+//    // pointer is always tracked, even if its outside the window
+//    [_window setAcceptsMouseMovedEvents:YES];
+//}
+//
+//
+//void MainWindowImpl::releasePointer()
+//{
+//    // pointer is always tracked, even if its outside the window
+//    [_window setAcceptsMouseMovedEvents:NO];
+//}
 
 
 Window* MainWindowImpl::findWindow(NSWindow* wnd)
@@ -433,7 +430,7 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 
     Gfx::RectF paintRect(pos, size);
 
-    PaintEvent pev(window->vid(), paintRect);
+    PaintEvent pev(*window), paintRect);
     window->processEvent(pev);
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
@@ -469,12 +466,8 @@ void MainWindowImpl::onShow(bool v)
     if( ! window )
         return;
 
-    Pt::uint64_t vid =  window->vid();
-
-    ShowEvent sev(vid, v);
-    Application::instance().impl()->commitEvent(sev);
-
-    window->invalidate();
+    ShowEvent sev(*window, v);
+    Application::instance().commitEvent(sev);
 }
 
 
@@ -483,8 +476,6 @@ void MainWindowImpl::onMove()
     Window* window = findWindow(_window);
     if( ! window )
         return;
-
-    Pt::uint64_t vid =  window->vid();
 
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
@@ -499,8 +490,8 @@ void MainWindowImpl::onMove()
     double scaling = Application::instance().scaleFactor();
     pos = pos / scaling;
 
-    MoveEvent ev(vid, pos);
-    Application::instance().impl()->commitEvent( ev );
+    MoveEvent ev(*window, pos);
+    Application::instance().processEvent(ev);
 }
 
 
@@ -512,8 +503,6 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     Window* window = findWindow(_window);
     if( ! window )
         return;
-
-    Pt::uint64_t vid =  window->vid();
 
     Window::State wstate = Window::Normal;
 
@@ -528,8 +517,8 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 
     if(window->state() != wstate)
     {
-        WindowStateEvent wse(vid, wstate);
-        Application::instance().impl()->commitEvent(wse);
+        WindowStateEvent wse(*window, wstate);
+        Application::instance().commitEvent(wse);
     }
 
     Gfx::SizeF to(viewSize.width, 
@@ -538,7 +527,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     double scaling = Application::instance().scaleFactor();
     to = to / scaling;
 
-    ResizeEvent rev(vid, to);
+    ResizeEvent rev(*window, to);
     window->processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
@@ -558,9 +547,7 @@ void MainWindowImpl::onClosing()
     if( ! window )
         return;
 
-    Pt::uint64_t vid =  window->vid();
-
-    CloseEvent closeEvent(vid);
+    CloseEvent closeEvent(*window);
     window->processEvent(closeEvent);
 }
 
@@ -572,8 +559,6 @@ void MainWindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
     Window* window = findWindow(_window);
     if( ! window )
         return;
-
-    Pt::uint64_t vid =  window->vid();
     
     Pt::uint32_t keyCode = Key::NoKey;
     if(vkey < keyMapSize)
@@ -586,9 +571,9 @@ void MainWindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
 
     Key key(_keyModifiers, keyCode);
     _keyEvent.setPress(key, ch);
-    _keyEvent.setId(vid);
+    _keyEvent.setVisual(window);
 
-    Application::instance().loop().commitEvent(_keyEvent);
+    Application::instance().processEvent(_keyEvent);
 }
 
 
@@ -599,8 +584,6 @@ void MainWindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
     Window* window = findWindow(_window);
     if( ! window )
         return;
-
-    Pt::uint64_t vid =  window->vid();
     
     Pt::uint32_t keyCode = Key::NoKey;
     if(vkey < keyMapSize)
@@ -613,9 +596,9 @@ void MainWindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
 
     Key key(_keyModifiers, keyCode);
     _keyEvent.setRelease(key, ch);
-    _keyEvent.setId(vid);
+    _keyEvent.setVisual(window);
 
-    Application::instance().loop().commitEvent(_keyEvent);
+    Application::instance().processEvent(_keyEvent);
 }
 
 
@@ -652,8 +635,6 @@ void MainWindowImpl::onKeyModifier(unsigned int mask)
     if( ! window )
         return;
 
-    Pt::uint64_t vid =  window->vid();
-
     Pt::uint32_t keyCode = Key::NoKey;
     if(wasShift != shift)
         keyCode = Key::ShiftKey;
@@ -673,14 +654,14 @@ void MainWindowImpl::onKeyModifier(unsigned int mask)
                       ( ! wasMeta    && meta);
 
     Key key(_keyModifiers, keyCode);
-    _keyEvent.setId(vid);
+    _keyEvent.setVisual(window);
 
     if(wasPressed)
         _keyEvent.setRelease( key, Pt::Char() );
     else
         _keyEvent.setPress( key, Pt::Char() );
 
-    Application::instance().loop().commitEvent(_keyEvent);
+    Application::instance().processEvent(_keyEvent);
 }
 
 
@@ -692,8 +673,6 @@ void MainWindowImpl::onLMouseDown(double x, double y)
     if( ! window )
         return;
 
-    Pt::uint64_t vid =  window->vid();
-
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
     y = height - y;
 
@@ -704,9 +683,9 @@ void MainWindowImpl::onLMouseDown(double x, double y)
 
     _mouseEvent.setPress(MouseEvent::Left);
     _mouseEvent.setPosition(pos);
-    _mouseEvent.setId(vid);
+    _mouseEvent.setVisual(window);
 
-    Application::instance().processMouseEvent(_mouseEvent);
+    Application::instance().processEvent(_mouseEvent);
 }
 
 
@@ -717,8 +696,6 @@ void MainWindowImpl::onLMouseUp(double x, double y)
     Window* window = findWindow(_window);
     if( ! window )
         return;
-
-    Pt::uint64_t vid =  window->vid();
     
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
     y = height - y;
@@ -730,9 +707,9 @@ void MainWindowImpl::onLMouseUp(double x, double y)
 
     _mouseEvent.setRelease(MouseEvent::Left);
     _mouseEvent.setPosition(pos);
-    _mouseEvent.setId(vid);
+    _mouseEvent.setVisual(window);
 
-    Application::instance().processMouseEvent(_mouseEvent);
+    Application::instance().processEvent(_mouseEvent);
 }
 
 
@@ -743,8 +720,6 @@ void MainWindowImpl::onMouseMove(double x, double y)
     Window* window = findWindow(_window);
     if( ! window )
         return;
-
-    Pt::uint64_t vid =  window->vid();
     
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
     y = height - y;
@@ -756,9 +731,9 @@ void MainWindowImpl::onMouseMove(double x, double y)
 
     _mouseEvent.setMove();
     _mouseEvent.setPosition(pos);
-    _mouseEvent.setId(vid);
+    _mouseEvent.setVisual(window);
 
-    Application::instance().processMouseEvent(_mouseEvent);
+    Application::instance().processEvent(_mouseEvent);
 }
 
 } // namespace

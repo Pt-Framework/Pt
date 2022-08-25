@@ -27,18 +27,48 @@
   02110-1301  USA
 */
 
-#ifndef PT_HMI_WINDOWBASE_H
-#define PT_HMI_WINDOWBASE_H
+#ifndef PT_HMI_WINDOWHOST_H
+#define PT_HMI_WINDOWHOST_H
 
+#include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-
-#include <vector>
+#include <Pt/Signal.h>
+#include <Pt/Connectable.h>
 
 namespace Pt {
 
 namespace Hmi {
+
+class WindowType
+{
+    public:
+        enum Type
+        {
+            Default = 0, // default window frame
+            Popup = 1    // frameless window
+        };
+
+        WindowType(Type t = Default)
+        : _type(t)
+        {}
+
+        WindowType& operator=(Type t)
+        {
+            _type = t;
+            return *this;
+        }
+
+        operator Pt::uint32_t() const
+        { 
+            return _type; 
+        }
+
+    private:
+        Pt::uint32_t _type;
+};
 
 } // namespace
 

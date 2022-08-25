@@ -30,6 +30,7 @@
 #define Pt_Hmi_KeyEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/Key.h>
 #include <Pt/Event.h>
 #include <Pt/String.h>
@@ -48,12 +49,36 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
 	      };
 
     public:	
-	      KeyEvent(Pt::uint64_t vid)
-          : _vid(vid)
-          ,  _action(Release)
+        KeyEvent()
+        : _vid(0)
+        , _visual(0)
+        , _action(Release)
 	      {
 	      }
 
+	      explicit KeyEvent(Visual& v)
+        : _vid( v.vid() )
+        , _visual(&v)
+        , _action(Release)
+	      {
+	      }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
+        Visual* visual() const
+        {
+            return _visual;
+        }
+        
+        void setVisual(Visual* v)
+        {
+            _visual = v;
+            _vid = v ? v->vid() : 0;
+        }
+        
         const Key& key() const
         {
             return _key;
@@ -88,21 +113,12 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
             _unicode = ch;
         }
 
-        void setId(Pt::uint64_t vid)
-        {
-            _vid = vid;
-        }
-
-        Pt::uint64_t vid() const
-        {
-            return _vid;
-        }
-
     private:
         Pt::uint64_t _vid;
-        Action   _action;
-        Key      _key;
-        Pt::Char _unicode;        
+        Visual*      _visual;
+        Action       _action;
+        Key          _key;
+        Pt::Char     _unicode;        
 };
 
 } // namespace

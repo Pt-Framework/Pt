@@ -125,11 +125,11 @@ class PT_GFX_API PaintSurface
             const double scaling = scaleFactor();
             // keep contour size when downscaling
             if (scaling < 1.0)
-                return toLogical(n);
+                return toLogical( static_cast<double>(n) );
 
-            double p = toPhysical(n);
+            double p = toPhysical( static_cast<double>(n) );
             size_t s = static_cast<size_t>(p);
-            return toLogical(s);
+            return toLogical( static_cast<double>(s) );
         }
 
         Gfx::PointF align(const Gfx::PointF& p) const

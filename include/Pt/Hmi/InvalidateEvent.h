@@ -30,8 +30,9 @@
 #ifndef Pt_Hmi_InvalidateEvent_h
 #define Pt_Hmi_InvalidateEvent_h
 
-#include <Pt/Types.h>
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
+#include <Pt/Types.h>
 #include <Pt/Event.h>
 
 namespace Pt {
@@ -40,23 +41,30 @@ namespace Hmi {
 
 class PT_HMI_API InvalidateEvent : public Pt::BasicEvent<InvalidateEvent>
 {
-  public:
-    InvalidateEvent(Pt::uint64_t vid)
-    : _vid(vid)
-    {
-    }
+    public:
+        explicit InvalidateEvent(Visual& v)
+        : _vid( v.vid() )
+        , _visual(&v)
+        {
+        }
 
-    virtual ~InvalidateEvent()
-    {
-    }
+        virtual ~InvalidateEvent()
+        {
+        }
 
-    Pt::uint64_t vid() const
-    {
-        return _vid;
-    }
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
+        Visual* visual() const
+        {
+            return _visual;
+        }
 
     private:
         Pt::uint64_t _vid;
+        Visual*      _visual;
 };
 
 } // namespace

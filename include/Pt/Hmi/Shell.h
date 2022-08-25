@@ -22,91 +22,76 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_ScreenImpl_H
-#define Pt_Hmi_ScreenImpl_H
+#ifndef PT_HMI_SHELL_H
+#define PT_HMI_SHELL_H
 
-#include <Pt/Hmi/Screen.h>
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/WindowManager.h>
-#include <Pt/Hmi/LayoutEvent.h> // RescaleEvent
-#include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Signal.h>
-#include <Pt/Connectable.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class ApplicationImpl;
-class Window;
-class WindowBase;
-class MouseEvent;
-class TouchEvent;
-class ScrollEvent;
+class WindowFrame;
 
-class ScreenImpl : public Visual
-                 , public Responder
-                 , public WindowManager
-                 , public Connectable
+class PT_HMI_API Shell : public Widget
+                       , public WindowManager
 {
     public:
-        ScreenImpl(ApplicationImpl& app);
-        
-        virtual ~ScreenImpl();
+        Shell();
 
+        virtual ~Shell();
 
-        void setParent(Screen* screen);
-
-        void setNextResponder(Responder* r);
-
-
+    public:
         void addWindow(Window& w);
 
         void removeWindow(Window& w);
 
-        const std::vector<Window*>& windows() const;
+    public:
+        Widget* content();
 
-        
-        const Gfx::SizeF& size() const;
+        const Widget* content()  const;
 
-        double scaleFactor() const;
+        void setContent(Widget* widget);
 
-        
-        void repaint(const Gfx::RectF& rect);
+    public:
+        double borderWidth() const
+        {
+            return _borderWidth;
+        }
 
-        
-        bool isEnabled() const;
+        double titleHeight()  const
+        {
+            return _titleHeight;
+        }
 
-    //
-    // Responder
-    //
-    protected:
-        virtual Responder* onNextResponder();
+        const Gfx::Color& inactiveColor() const
+        {
+            return _inactiveColor;
+        }
 
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
+        const Gfx::Color& activeColor() const
+        {
+            return _activeColor;
+        }
 
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
+        const Gfx::Color& textColor() const
+        {
+            return _textColor;
+        }
 
-        virtual bool onMouseEvent(const MouseEvent& ev);
-
-        virtual bool onTouchEvent(const TouchEvent& ev);
-
-        virtual bool onScrollEvent(const ScrollEvent& ev);
-
-        virtual bool onKeyEvent(const KeyEvent& ev);
-
-    //
-    // Visual
-    //
-    protected:
-        virtual void onEvent(const Event& ev);
-
-        virtual void onSetCapture(bool capture);
+        const Gfx::Color& inactiveTextColor() const
+        {
+            return _inactiveTextColor;
+        }
 
     //
     // WindowManager
@@ -115,7 +100,7 @@ class ScreenImpl : public Visual
         virtual WindowImpl* onCreateWindow(const WindowType& type);
 
         virtual void onAttach(Window& w);
-    
+
         virtual void onDetach(Window& w);
 
         virtual void onInit(Window& w);
@@ -138,7 +123,7 @@ class ScreenImpl : public Visual
 
         virtual void onShow(Window& w, bool visible); 
 
-        virtual void onActivate(Window& w, bool active);
+        virtual void onActivate(Window& w, bool active); 
 
         virtual void onEnable(Window& w, bool enable);
 
@@ -148,7 +133,7 @@ class ScreenImpl : public Visual
 
         virtual void onFrameChanged(Window& w);
 
-        virtual void onStateChanged(Window& w);
+        virtual void onStateChanged(Window& w); 
 
         virtual void onClosing(Window& w);
 
@@ -157,56 +142,63 @@ class ScreenImpl : public Visual
         virtual void onSetCapture(Window& w, bool capture);
 
     //
-    // scaling
+    // Widget
     //
     protected:
-        void onProcessRescaleEvent(const RescaleEvent& ev);
+        virtual void onSetCapture(bool capture);
 
-        virtual void onRescaleEvent(const RescaleEvent& ev);
+    protected:
+        virtual void onRemoveWidget(Widget& w);
+
+    protected:
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
+        virtual void onPaint(Gfx::PaintSurface&, const Gfx::RectF&);
+
+    protected:
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
         
-    //
-    // painting
-    //
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
     protected:
-        void onProcessPaintEvent(const PaintEvent& ev);
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
 
-        virtual void onPaintEvent(const PaintEvent& ev);
+        virtual void onProcessTouchEvent(const TouchEvent& ev);
 
-        virtual void onPaint(const Gfx::RectF& rect);
+        virtual void onProcessScrollEvent(const ScrollEvent& ev);
 
-    //
-    // enable
-    //
-    protected:
-        void onProcessEnableEvent(const EnableEvent& ev);
+        virtual void onProcessEnterEvent(const EnterEvent& ev);
 
-        virtual void onEnable(bool e);
+        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
 
-    //
-    // input
-    //
-    protected:
-        void onProcessMouseEvent(const MouseEvent& ev);
-
-        void onProcessTouchEvent(const TouchEvent& ev);
-
-        void onProcessScrollEvent(const ScrollEvent& ev);
-
-        void onProcessKeyEvent(const KeyEvent& ev);
+        virtual void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        Pt::Signal<const Pt::Event&> _eventReceived;
+        WindowFrame* findWindowFrame(const Gfx::PointF& p) const;
 
-        Screen*                      _parent;
-        std::vector<Window*>         _windows;
+        WindowFrame* getWindowFrame(const Window& w) const;
 
-        Responder*                   _nextResponder;
+    private:
+        Widget*                      _content;
+        Visual*                      _pointer;
+        Visual*                      _capture;
 
-        Gfx::SizeF                   _size;
-        double                       _scaling;
+        std::vector<WindowFrame*>    _windows;
 
-        bool                         _enabled;
-        bool                         _enabledState;
+        WindowFrame*                 _activeWindow;
+        WindowFrame*                 _grabbedFrame;
+        WindowFrame*                 _topMostWindow;
+
+        double                       _borderWidth;
+        double                       _titleHeight;
+        Gfx::Color                   _inactiveColor;
+        Gfx::Color                   _activeColor;
+        Gfx::Color                   _textColor;
+        Gfx::Color                   _inactiveTextColor;   
 };
 
 } // namespace

@@ -65,7 +65,7 @@ void GridLayout::removeItem(Widget& w)
 }
 
 
-Gfx::SizeF GridLayout::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF GridLayout::onMeasure(const SizePolicy& policy)
 {
     Gfx::SizeF contentSize;
 
@@ -73,11 +73,11 @@ Gfx::SizeF GridLayout::onMeasure(Layouter& layouter, const SizePolicy& policy)
     {
         default:
         case Vertical:
-            contentSize = onMeasureVertical(layouter, policy);
+            contentSize = onMeasureVertical(policy);
             break;
 
         case Horizontal:
-            contentSize = onMeasureHorizontal(layouter, policy);
+            contentSize = onMeasureHorizontal(policy);
             break;
     }
 
@@ -85,7 +85,7 @@ Gfx::SizeF GridLayout::onMeasure(Layouter& layouter, const SizePolicy& policy)
 }
 
 
-Gfx::SizeF GridLayout::onMeasureVertical(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
 {
     double itemsWidth = policy.size().width() - padding().leftRight();
     double itemsHeight = policy.size().height() - padding().topBottom();
@@ -106,8 +106,9 @@ Gfx::SizeF GridLayout::onMeasureVertical(Layouter& layouter, const SizePolicy& p
         itemPolicy.setWidth( itemsWidth - item->margin().leftRight() );
         itemPolicy.setHeight( itemsHeight - item->margin().topBottom() );
 
-        Gfx::SizeF prefSize = layouter.measure(*item, itemPolicy);
-        
+        item->measure(itemPolicy);
+        Gfx::SizeF prefSize =  item->preferredSize();
+
         double itemWidth = prefSize.width() + item->margin().leftRight();
         double itemHeight = prefSize.height() + item->margin().topBottom();
 
@@ -164,7 +165,7 @@ Gfx::SizeF GridLayout::onMeasureVertical(Layouter& layouter, const SizePolicy& p
 }
 
 
-Gfx::SizeF GridLayout::onMeasureHorizontal(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
 {
     double itemsWidth = policy.size().width() - padding().leftRight();
     double itemsHeight = policy.size().height() - padding().topBottom();
@@ -185,7 +186,8 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(Layouter& layouter, const SizePolicy&
         itemPolicy.setWidth( itemsWidth - item->margin().leftRight() );
         itemPolicy.setHeight( itemsHeight - item->margin().topBottom() );
 
-        Gfx::SizeF prefSize = layouter.measure(*item, itemPolicy);
+        item->measure(itemPolicy);
+        Gfx::SizeF prefSize = item->preferredSize();
 
         double itemWidth = prefSize.width() + item->margin().leftRight();
         double itemHeight = prefSize.height() + item->margin().topBottom();
@@ -243,9 +245,9 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(Layouter& layouter, const SizePolicy&
 }
 
 
-void GridLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void GridLayout::onLayout(const Gfx::RectF& rect)
 {
-    Layout::onLayout(layouter, rect);
+    Layout::onLayout(rect);
 
     //
     // determine the cell size from maximum item width and height
@@ -279,17 +281,17 @@ void GridLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
     {
         default:
         case Vertical:
-            onLayoutVertical(layouter, itemSize, rect);
+            onLayoutVertical(itemSize, rect);
             break;
 
         case Horizontal:
-            onLayoutHorizontal(layouter, itemSize, rect);
+            onLayoutHorizontal(itemSize, rect);
             break;
     }
 }
 
 
-void GridLayout::onLayoutVertical(Layouter& layouter, const Gfx::SizeF& itemSize, const Gfx::RectF& rect)
+void GridLayout::onLayoutVertical(const Gfx::SizeF& itemSize, const Gfx::RectF& rect)
 {
     std::size_t cols = _span;
 
@@ -327,7 +329,9 @@ void GridLayout::onLayoutVertical(Layouter& layouter, const Gfx::SizeF& itemSize
         double y = ( itemSize.height() - widget->preferredSize().height() ) / 2;
 
         Gfx::PointF pos(itemX + x, itemY + y);
-        layouter.layout( *widget, pos, widget->preferredSize() );
+        
+        widget->move(pos);
+        widget->resize( widget->preferredSize() );
 
         itemX += itemSize.width();
 
@@ -341,7 +345,7 @@ void GridLayout::onLayoutVertical(Layouter& layouter, const Gfx::SizeF& itemSize
 }
 
 
-void GridLayout::onLayoutHorizontal(Layouter& layouter, const Gfx::SizeF& itemSize, const Gfx::RectF& rect)
+void GridLayout::onLayoutHorizontal(const Gfx::SizeF& itemSize, const Gfx::RectF& rect)
 {
     std::size_t rows = _span;
 
@@ -379,7 +383,9 @@ void GridLayout::onLayoutHorizontal(Layouter& layouter, const Gfx::SizeF& itemSi
         double y = ( itemSize.height() - widget->preferredSize().height() ) / 2;
 
         Gfx::PointF pos(itemX + x, itemY + y);
-        layouter.layout( *widget, pos, widget->preferredSize() );
+
+        widget->move(pos);
+        widget->resize( widget->preferredSize() );
 
         itemY += itemSize.height();
 

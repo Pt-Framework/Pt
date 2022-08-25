@@ -114,7 +114,7 @@ class PT_HMI_API ListBoxItem : public Button
         virtual void onCanceled();
 
     protected:
-        virtual Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& p);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& p);
 
         virtual void onInvalidate();
     
@@ -222,9 +222,9 @@ class PT_HMI_API ListBox : public Control
     
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(Layouter& layouter, const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
     
     private:
         ScrollView                _scrollView;

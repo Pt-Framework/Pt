@@ -32,6 +32,7 @@
 #define Pt_Hmi_TouchEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Event.h>
 
@@ -50,14 +51,23 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         };
 
     public:
-        TouchEvent(Pt::uint64_t vid)
-        : _vid( vid )
+        explicit TouchEvent()
+        : _vid(0)
+        , _visual()
         , _pos(0, 0)
         , _action(Move)
         , _trackingId(0)
         , _pressure(1.0)
-        {
-        }
+        { }
+
+        TouchEvent(Visual& v)
+        : _vid( v.vid() )
+        , _visual(&v)
+        , _pos(0, 0)
+        , _action(Move)
+        , _trackingId(0)
+        , _pressure(1.0)
+        { }
         
         void clear()
         {
@@ -75,6 +85,17 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         Pt::uint64_t vid() const
         {
             return _vid;
+        }
+
+        Visual* visual() const
+        {
+            return _visual;
+        }
+
+        void setVisual(Visual* v)
+        {
+            _visual = v;
+            _vid = v ? v->vid() : 0;
         }
 
         const Gfx::PointF& position() const
@@ -169,11 +190,12 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         }
 
     private:
-        Pt::uint64_t _vid;
-        Gfx::PointF  _pos;
-        Action       _action;
-        Pt::uint32_t _trackingId;
-        double       _pressure;
+        Pt::uint64_t  _vid;
+        Visual*       _visual;
+        Gfx::PointF   _pos;
+        Action        _action;
+        Pt::uint32_t  _trackingId;
+        double        _pressure;
 };
 
 } // namespace

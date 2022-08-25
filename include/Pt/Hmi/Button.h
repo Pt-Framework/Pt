@@ -69,9 +69,9 @@ class PT_HMI_API Button : public Control
         virtual void onActionKey(const KeyEvent& kev);
 
     protected:
-        virtual void onEnterEvent(const EnterEvent& ev);
+        virtual bool onEnterEvent(const EnterEvent& ev);
 
-        virtual void onLeaveEvent(const LeaveEvent& ev);
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
 
         virtual void onFocusEvent(const FocusEvent& ev);
 

@@ -50,7 +50,7 @@ ScrollBar::ScrollBar(Orientation o)
 , _offsetPosition(0)
 , _hasRenderer(false)
 {
-    setAcceptInput(true);
+    //setAcceptInput(true);
 }
 
 
@@ -230,14 +230,14 @@ bool ScrollBar::onMouseEvent(const MouseEvent& ev)
     {
         if(_handleRect.contains( ev.position() ) )
         {
-            this->grabPointer();
+            //this->grabPointer();
             _dragging = true;
         }
     }
     else if( ev.isRelease(MouseEvent::Left) )
     {
         _dragging = false;
-        this->releasePointer();
+        //this->releasePointer();
     }
 
     if(_dragging)
@@ -310,7 +310,7 @@ double ScrollBar::positionToPixel(double pos)
 }
 
 
-Gfx::SizeF ScrollBar::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& policy)
 {
     if( _orientation == Vertical)
       return Gfx::SizeF( sizePolicy().width(), policy.size().height() );

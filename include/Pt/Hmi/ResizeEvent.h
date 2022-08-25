@@ -31,6 +31,7 @@
 #define Pt_Hmi_ResizeEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
@@ -42,9 +43,9 @@ namespace Hmi {
 class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 {
     public:
-        ResizeEvent(Pt::uint64_t vid, 
-                    const Gfx::SizeF& size)
-        : _vid(vid)
+        ResizeEvent(Visual& v, const Gfx::SizeF& size)
+        : _vid( v.vid() )
+        , _visual(&v)
         , _size(size)
         {
         }
@@ -58,9 +59,9 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
             return _vid;
         }
 
-        void setId(Pt::uint64_t vid)
+        Visual* visual() const
         {
-            _vid = vid;
+            return _visual;
         }
 
         const Gfx::SizeF& size() const
@@ -75,6 +76,7 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 
     private:
         Pt::uint64_t _vid;
+        Visual*      _visual;
         Gfx::SizeF   _size;
 };
 

@@ -60,13 +60,15 @@ MainWindow::MainWindow()
 , _scrollContainer(Hmi::FlowLayout::Top)
 , _scrollContainer2(Hmi::FlowLayout::Top)
 {
+    setContent(&_shell);
+
     setTitle("Main 1");
     move( Gfx::PointF(100, 30) );
     resize( Gfx::SizeF(500, 700) );
 
     //_child2.setTopMost(true);
     _child2.resize( Gfx::SizeF(550, 600) );
-    add( _child2 );
+    _shell.addWindow( _child2 );
 
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(10, 10) );
@@ -111,8 +113,6 @@ MainWindow::MainWindow()
 
     _scrollContainer.addItem(_scrollView2);
 
-    _btns[0].clicked() += Pt::slot(*this, &MainWindow::onButton);
-
     _bt2.setText("Ende");
     _bt2.setName("endbut");
     _bt2.setMinimumHeight(50);
@@ -142,7 +142,7 @@ MainWindow::MainWindow()
     _child2.setContent(&_scrollView);
     //_child2.show(true);  // SHOW DEMO WINDOW 2
 
-    add( _child1 );
+    _shell.addWindow( _child1 );
 
     _tabLabel1.setText("Tab Label 1");
     _tabLabel1.setAlignment(Alignment::Center);
@@ -164,7 +164,8 @@ MainWindow::MainWindow()
 
     _tabView.setCurrent(0);
 
-    _child1.setContent(&_tabView);
+    _child1.shell().setContent(&_tabView);
+    _child1.closeRequested() += Pt::slot(*this, &MainWindow::tryClose);
 
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30, 30));
@@ -212,9 +213,9 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::onPaintContent(const PaintEvent& ev)
+void MainWindow::onPaintEvent(const PaintEvent& ev)
 {
-    Window::onPaintContent(ev);
+    Window::onPaintEvent(ev);
     return;   
     
     const Gfx::RectF& rect = ev.rect();
@@ -509,7 +510,7 @@ void MainWindow::onPaintContent(const PaintEvent& ev)
     imagePainter.drawChord(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100), 180, 270);
 
     //fprintf(stderr, "AAAAA\n");
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(32757, 65535, 65535, 65535), 1.0) );
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(32757, 65535, 65535, 65535), 1) );
     imagePainter.drawCircle( Pt::Gfx::PointF(260, 250), 6.0);
     imagePainter.drawCircle( Pt::Gfx::PointF(270, 250), 7.0);
     imagePainter.drawCircle( Pt::Gfx::PointF(280, 250), 8.0);
@@ -518,32 +519,6 @@ void MainWindow::onPaintContent(const PaintEvent& ev)
 #endif
 
     painter.drawImage(Gfx::PointF(0, 0), image);
-}
-
-
-void MainWindow::onButton()
-{
-    //_btns[2].setMargin(10);
-
-    _tabView.setText(1, "New Tab");
-
-    Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
-    Pt::Hmi::Screen& screen = app.screen();
-    Pt::Hmi::Widget* w = &_bt2;
-
-    if( ! w  || ! w->parent() )
-        return;
-
-    Pt::Gfx::PointF pos = w->parent()->toScreen( w->position() );
-
-    Pt::Hmi::MouseEvent mev(0);
-    mev.setPosition(pos);
-
-    mev.setPress();
-    app.sendMouseEvent(mev);
-
-    mev.setRelease();
-    app.sendMouseEvent(mev);
 }
 
 

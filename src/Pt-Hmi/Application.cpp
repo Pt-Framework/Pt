@@ -1,4 +1,5 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -28,12 +29,28 @@
 
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
+
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/PaintEvent.h>
-#include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/InputMethod.h>
+#include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
+#include <Pt/Hmi/ScrollEvent.h>
+#include <Pt/Hmi/EnterEvent.h>
+#include <Pt/Hmi/LeaveEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/InvalidateEvent.h>
+#include <Pt/Hmi/LayoutEvent.h>
+#include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/MoveEvent.h>
+#include <Pt/Hmi/ActivateEvent.h>
+#include <Pt/Hmi/EnableEvent.h>
+#include <Pt/Hmi/ShowEvent.h>
+#include <Pt/Hmi/CloseEvent.h>
+#include <Pt/Hmi/FocusEvent.h>
+#include <Pt/Hmi/WindowStateEvent.h>
+
 #include <cmath>
 #include <cassert>
 #include <fstream>
@@ -47,9 +64,7 @@ Application::Application(int argc, char** argv)
 , _impl( new ApplicationImpl() ) 
 , _mainScreen(0)
 , _lastId(1)
-, _pointerWindow(0)
-, _pointerWidget(0)
-, _pointerGrabber(0)
+, _defaultInputMethod(0)
 , _inputMethod(0)
 , _onScroll(false)
 , _scaling(1)
@@ -61,26 +76,62 @@ Application::Application(int argc, char** argv)
 
     _mainScreen = new Screen(*_impl);
 
-    loop().eventReceived() += Pt::slot(*this, &Application::onResizeEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onMoveEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onKeyEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
-    loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
-    loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onTouchEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onScrollEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onActivateEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onEnableEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onShowEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onCloseEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onEnterEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onLeaveEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onFocusEvent );
-    loop().eventReceived() += Pt::slot(*this, &Application::onWindowStateEvent);
-    loop().eventReceived() += Pt::slot(*this, &Application::onInvalidateEvent);
-    loop().eventReceived() += Pt::slot(*this, &Application::onLayoutEvent);
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchMouseEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessMouseEvent);
+    
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchTouchEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessTouchEvent);
+    
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchScrollEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessScrollEvent);
+    
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchEnterEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessEnterEvent);
+    
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchLeaveEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessLeaveEvent);
+    
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchKeyEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessKeyEvent);
+    
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchInvalidateEvent );
+    _eventReceived += Pt::slot(*this, &Application::onProcessInvalidateEvent);
+    
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchRelayoutEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessRelayoutEvent);
 
-    setInputMethod(_defaultInputMethod);
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchRescaleEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessRescaleEvent);
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchPaintEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessPaintEvent);
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchResizeEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessResizeEvent);
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchMoveEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessMoveEvent);
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchActivateEvent );
+    _eventReceived += Pt::slot(*this, &Application::onProcessActivateEvent);
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchEnableEvent );
+    _eventReceived += Pt::slot(*this, &Application::onProcessEnableEvent );
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchShowEvent );
+    _eventReceived += Pt::slot(*this, &Application::onProcessShowEvent );
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchCloseEvent );
+    _eventReceived += Pt::slot(*this, &Application::onProcessCloseEvent );
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchFocusEvent );
+    _eventReceived += Pt::slot(*this, &Application::onProcessFocusEvent );
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchWindowStateEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessWindowStateEvent);
+
+    _defaultInputMethod = new DefaultInputMethod;
+    setInputMethod(*_defaultInputMethod);
 }
 
 
@@ -89,8 +140,16 @@ Application::~Application()
     if(_inputMethod)
         removeInputMethod(*_inputMethod);
 
+    delete _defaultInputMethod;
+
     delete _mainScreen;
     delete _impl;
+}
+
+
+ApplicationImpl* Application::impl()
+{
+    return _impl;
 }
 
 
@@ -112,403 +171,13 @@ Screen& Application::screen()
 }
 
 
-Window* Application::pointerWindow()
-{
-    return _pointerWindow;
-}
-
-
-const Window* Application::pointerWindow() const
-{
-    return _pointerWindow;
-}
-
-
-void Application::setPointerWindow(Window* w)
-{
-    if( _pointerWindow == w )
-        return;
-
-    if( _pointerWindow )
-    {
-        Pt::Hmi::LeaveEvent leaveEvent( _pointerWindow->vid() );
-        loop().commitEvent(leaveEvent);
-    }
-
-    _pointerWindow = w;
-
-    if( _pointerWindow )
-    {
-        Pt::Hmi::EnterEvent enterEvent(_pointerWindow->vid());
-        loop().commitEvent(enterEvent);
-    }
-}
-
-
-Widget* Application::pointerWidget()
-{
-    return _pointerWidget;
-}
-
-
-const Widget* Application::pointerWidget() const
-{
-    return _pointerWidget;
-}
-
-
-void Application::setPointerWidget(Widget* widget) 
-{
-    if( _pointerWidget == widget )
-        return;
-
-    if( _pointerWidget )
-    {
-        Widget* w = _pointerWidget;
-        _pointerWidget = widget;
-
-        LeaveEvent ev( w->vid() );
-        Application::instance().loop().commitEvent(ev);
-    }
-    else
-    {
-        _pointerWidget = widget;
-    }
-
-    if( _pointerWidget )
-    {
-        EnterEvent ev( _pointerWidget->vid() );
-        Application::instance().loop().commitEvent(ev);
-    }
-}
-
-
-Visual* Application::pointerGrabber()
-{ 
-    return _pointerGrabber; 
-}
-
-
-void Application::grabPointer(Window& grabber)
-{    
-   //std::clog << "GRAB:    " << typeid(grabber).name() << std::endl;
-    
-    std::vector<Visual*>::iterator it =
-        std::find(_grabbers.begin(), _grabbers.end(), &grabber);
-
-    if( it != _grabbers.end() )
-        _grabbers.erase(it);
-    
-    _impl->grabPointer(grabber);
-
-    setPointerWidget(0);
-
-    _pointerGrabber = &grabber;
-    _grabbers.push_back(&grabber);
-}
-
-
-void Application::releasePointer(Window& grabber)
-{  
-    _pointerGrabber = 0;
-
-    std::vector<Visual*>::iterator it =
-        std::find(_grabbers.begin(), _grabbers.end(), &grabber);
-
-    if( it != _grabbers.end() )
-    {
-        //std::clog << "RELEASE: " << typeid(grabber).name() << std::endl;
-        _grabbers.erase(it);
-        _impl->releasePointer(grabber);
-
-        grabLast();
-    }
-}
-
-
-void Application::grabPointer(Widget& grabber)
-{
-    //std::clog << "GRAB:    " << typeid(grabber).name() << " " << grabber.vid() << std::endl;
-
-    std::vector<Visual*>::iterator it =
-        std::find(_grabbers.begin(), _grabbers.end(), &grabber);
-
-    if( it != _grabbers.end() )
-        _grabbers.erase(it);
-
-    _impl->grabPointer(grabber);
-
-    setPointerWidget(&grabber);
-
-    _pointerGrabber = &grabber;
-    _grabbers.push_back(&grabber);
-}
-
-
-void Application::releasePointer(Widget& grabber)
-{
-    _pointerGrabber = 0;
-
-    std::vector<Visual*>::iterator it =
-        std::find(_grabbers.begin(), _grabbers.end(), &grabber);
-
-    if( it != _grabbers.end() )
-    {
-        //std::clog << "RELEASE: " << typeid(grabber).name() << std::endl;
-        _grabbers.erase(it);
-        _impl->releasePointer(grabber);
-
-        grabLast();
-    }
-}
-
-
-void Application::grabLast()
-{
-    // TODO: the ugly dynamic_Cast can be removed if Visual could return a
-    //       pointer to its window. Then grabPointer and releasePointer()
-    //       do not need to be overloaded for Window and Widget anymore. Add
-    //       such a virtual function to Visual later.
-
-    if( ! _grabbers.empty() )
-    {
-        Visual* visual = _grabbers.back();
-        Window* window = dynamic_cast<Window*>(visual);
-        if(window)
-        {
-            grabPointer(*window);
-        }
-        else
-        {
-            Widget* widget = dynamic_cast<Widget*>(visual);
-            if(widget)
-                grabPointer(*widget);
-        }
-    }
-}
-
-
-void Application::processTouchEvent(const TouchEvent& ev)
-{
-    VisualMap::iterator vit = _visuals.find( ev.vid() );
-    if( vit == _visuals.end() )
-        return;
-
-    //
-    // Detect scroll gestures
-    //
-
-    if( ev.isPress() )
-    {
-        //std::clog << "SCROLL START " << std::endl;
-        _scrollFrom = vit->second->toScreen( ev.position() );
-    }
-    else if( ev.isMove() )
-    {
-        Gfx::PointF scrollTo = vit->second->toScreen( ev.position() );
-        
-        double delta = scrollTo.y() - _scrollFrom.y();
-
-        if( ! _onScroll && std::fabs(delta) > 10 )
-        {
-            //std::clog << "SCROLL STARTED" << std::endl;
-            _onScroll = true;
-            _scrollFrom = scrollTo;
-        }
-        else if(_onScroll)
-        {
-            //std::clog << "SCROLLING: " << delta << std::endl;
-            Visual* grabber = pointerGrabber();
-
-            ScrollEvent sev(grabber ? grabber->vid() : ev.vid() );
-            sev.set(ScrollEvent::Vertical, delta);
-
-            if(grabber)
-                loop().commitEvent(sev);
-            else
-                _mainScreen->impl()->dispatchScrollEvent(sev);
-            
-            _scrollFrom = scrollTo;
-        }
-    }
-    else
-    {
-        //std::clog << "SCROLL STOP" << std::endl;
-        _onScroll = false;
-    }
-
-    //
-    // Dispatch event to the pointer grabber or the screen
-    //
-
-    TouchEvent tev = ev;
-
-    // IME window has priority
-    Window* ime = inputMethod().activeWindow();
-    if(ime)
-    {
-        // find grabber in IME window
-        for(std::vector<Visual*>::reverse_iterator it = _grabbers.rbegin(); 
-            it != _grabbers.rend(); ++it)
-        {
-            Widget* grabber = ime->findWidget( (*it)->vid() );
-            if(grabber)
-            {
-                Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-                tev.setPosition( grabber->fromScreen(screenPos) );
-                tev.setId( grabber->vid() );
-                loop().commitEvent(tev);
-                return;
-            }
-        }
-
-        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-        Gfx::PointF p = ime->fromScreen(screenPos);
-        Gfx::RectF rect( ime->size() );
-        if( rect.contains(p) )
-        {
-            tev.setPosition(p);
-            tev.setId( ime->vid() );
-            loop().commitEvent(tev);
-            return;
-        }
-    }
-
-    // pointer grab has priority
-    Visual* grabber = Application::instance().pointerGrabber();
-    if(grabber)
-    {
-        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-        tev.setPosition( grabber->fromScreen(screenPos) ); 
-        tev.setId( grabber->vid() );
-        loop().commitEvent(tev);
-        return;
-    }
-
-    _mainScreen->impl()->dispatchTouchEvent(tev);
-}
-
-
-void Application::processMouseEvent(const MouseEvent& ev)
-{
-    VisualMap::iterator vit = _visuals.find( ev.vid() );
-    if( vit == _visuals.end() )
-        return;
-
-    //
-    // Detect scroll gestures
-    //
-    
-    if( ev.isPress() )
-    {
-        //std::clog << "SCROLL START" << std::endl;
-        _scrollFrom = vit->second->toScreen( ev.position() );
-    }
-    else if( ev.isPressed() )
-    {
-        Gfx::PointF scrollTo = vit->second->toScreen( ev.position() );
-        
-        double delta = scrollTo.y() - _scrollFrom.y();
-        
-        if( ! _onScroll && std::fabs(delta) > 8 )
-        {
-            //std::clog << "SCROLL STARTED" << std::endl;
-            _onScroll = true;
-            _scrollFrom = scrollTo;
-        }
-        else if(_onScroll)
-        {
-            //std::clog << "SCROLLING: " << delta << std::endl;
-            Visual* grabber = pointerGrabber();
-
-            ScrollEvent sev(grabber ? grabber->vid() : ev.vid() );
-            sev.set(ScrollEvent::Vertical, delta);
-
-            if(grabber)
-                loop().commitEvent(sev);
-            else
-                _mainScreen->impl()->dispatchScrollEvent(sev);
-            
-            _scrollFrom = scrollTo;
-        }
-    }
-    else
-    {
-        //std::clog << "SCROLL STOP" << std::endl;
-        _onScroll = false;
-    }
-
-    //
-    // Dispatch event to the pointer grabber or the screen
-    //
-    
-    MouseEvent mev = ev;
-
-    // IME window has priority
-    Window* ime = inputMethod().activeWindow();
-    if(ime)
-    {
-        // find grabber in IME window
-        for(std::vector<Visual*>::reverse_iterator it = _grabbers.rbegin(); 
-            it != _grabbers.rend(); ++it)
-        {
-            Widget* grabber = ime->findWidget( (*it)->vid() );
-            if(grabber)
-            {
-                Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-                mev.setPosition( grabber->fromScreen(screenPos) );
-                mev.setId( grabber->vid() );
-                loop().commitEvent(mev);
-                return;
-            }
-        }
-
-        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-        Gfx::PointF p = ime->fromScreen(screenPos);
-        Gfx::RectF rect( ime->size() );
-        if( rect.contains(p) )
-        {
-            mev.setPosition(p);
-            mev.setId( ime->vid() );
-            loop().commitEvent(mev);
-            return;
-        }
-    }
-
-    // pointer grab has priority
-    Visual* grabber = pointerGrabber();
-    if(grabber)
-    {
-        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-        mev.setPosition( grabber->fromScreen(screenPos) );
-        mev.setId( grabber->vid() );
-        loop().commitEvent(mev);
-        return;
-    }
-
-    _mainScreen->impl()->dispatchMouseEvent(mev);
-}
-
-
-void Application::sendKeyEvent(const KeyEvent& ev)
-{
-    _impl->sendKeyEvent(ev);
-}
-
-
-void Application::sendMouseEvent(const MouseEvent& ev)
-{
-    _impl->sendMouseEvent(ev);
-}
-
-
 Pt::Timespan Application::inactivityTime() const
 {
     return _impl->inactivityTime();
 }
 
 
-void Application::setCursor( const Cursor* cursor )
+void Application::setCursor(const Cursor* cursor)
 {
     _impl->setCursor( cursor );
 }
@@ -538,6 +207,43 @@ StyleOptions& Application::styleOptions()
 }
 
 
+void Application::setFontDir(const Pt::System::Path& dir)
+{
+    _impl->setFontDir(dir);
+}
+
+
+void Application::setDefaultFont(const std::string& fontName)
+{
+    _impl->setDefaultFont(fontName);
+}
+
+
+void Application::loadImage(const System::Path& path, Gfx::Image& image)
+{
+    std::ifstream fs(path.toLocal().c_str(), std::ios::binary);
+
+    _iconReader.reset();
+    _iconReader.attach(fs, image);
+    _iconReader.get();
+}
+
+
+void Application::setScaleFactor(double scale)
+{
+    _scaling = scale;
+
+    RescaleEvent ev(*_mainScreen, _scaling);
+    _mainScreen->processEvent(ev);
+}
+
+
+double Application::scaleFactor() const
+{
+    return _scaling;
+}
+
+
 InputMethod& Application::inputMethod()
 {
     return *_inputMethod;
@@ -558,27 +264,9 @@ void Application::removeInputMethod(InputMethod& im)
 {
     if(_inputMethod == &im)
     {
-        _inputMethod = &_defaultInputMethod;
+        _inputMethod = _defaultInputMethod;
         im.unregisterApplication(*this);
     }
-}
-
-
-void Application::invalidate()
-{
-    VisualMap::iterator it = _visuals.begin();
-  
-    for( ; it != _visuals.end(); ++it)
-    {
-        InvalidateEvent ev(it->first);
-        loop().commitEvent(ev);
-    }
-}
-
-
-void Application::nextEvent()
-{
-    _impl->nextEvent();
 }
 
 
@@ -588,41 +276,14 @@ Pt::uint64_t Application::makeId()
 }
 
 
-const Visual* Application::findVisual(Pt::uint64_t id) const
+Visual* Application::findVisual(Pt::uint64_t id)
 {
-    VisualMap::const_iterator it =_visuals.find(id);
+    VisualMap::iterator it =_visuals.find(id);
     return it != _visuals.end() ? it->second : 0; 
 }
 
 
-ApplicationImpl* Application::impl()
-{
-    return _impl;
-}
-
-
-void Application::setFontDir(const Pt::System::Path& dir)
-{
-    _impl->setFontDir(dir);
-}
-
-
-void Application::setDefaultFont(const std::string& fontName)
-{
-    _impl->setDefaultFont(fontName);
-}
-
-void Application::loadImage(const System::Path& path, Gfx::Image& image)
-{
-    std::ifstream fs(path.toLocal().c_str(), std::ios::binary);
-
-    _iconReader.reset();
-    _iconReader.attach(fs, image);
-    _iconReader.get();
-}
-
-
-void Application::registerVisual( Visual& visual )
+void Application::registerVisual(Visual& visual)
 {
     VisualMap::const_iterator it = _visuals.find( visual.vid() );
     assert( it == _visuals.end() );
@@ -632,206 +293,471 @@ void Application::registerVisual( Visual& visual )
 }
 
 
-void Application::unregisterVisual( Visual& visual )
+void Application::unregisterVisual(Visual& visual)
 {
    _visuals.erase( visual.vid() );
 }
 
 
-void Application::onUpdateEvent(const UpdateEvent& ev)
+void Application::nextEvent()
 {
-    VisualMap::iterator vit = _visuals.find( ev.vid() );
-    if( vit == _visuals.end() )
-        return;
-
-    vit->second->processEvent(ev);
+    _impl->nextEvent();
 }
 
 
-void Application::onPaintEvent(const PaintEvent& ev)
+void Application::commitEvent(const Event& ev)
 {
-    VisualMap::iterator vit = _visuals.find( ev.vid() );
-
-    if( vit == _visuals.end() )
-        return;
-
-    vit->second->processEvent(ev);
+    loop().commitEvent(ev);
 }
 
 
-void Application::onResizeEvent(const ResizeEvent& ev)
+void Application::processEvent(const Event& ev)
 {
+    _eventReceived.send(ev);
+}
+
+
+Pt::Signal<const Pt::Event&>&  Application::eventReceived()
+{
+    return _eventReceived;
+}
+
+
+void Application::sendKeyEvent(const KeyEvent& ev)
+{
+    _impl->sendKeyEvent(ev);
+}
+
+
+void Application::sendMouseEvent(const MouseEvent& ev)
+{
+    _impl->sendMouseEvent(ev);
+}
+
+
+void Application::onDispatchMouseEvent(const MouseEvent& ev)
+{
+    // make sure receiver still exists
     VisualMap::iterator it = _visuals.find( ev.vid() );
-
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);
+    onProcessMouseEvent(ev);
 }
 
 
-void Application::onMouseEvent(const MouseEvent& ev)
+void Application::onProcessMouseEvent(const MouseEvent& ev)
 {
-    VisualMap::iterator it = _visuals.find( ev.vid() );
+    //std::clog << "APP MOUSE: " << ev.position().x() << ", " << ev.position().y() << std::endl;
 
-    if( it == _visuals.end() )
-        return;
+    Visual* visual = ev.visual();
+    Gfx::PointF screenPos = ev.position();
 
-    it->second->processEvent(ev);
+    //
+    // Detect scroll gestures
+    //
+    onDetectScroll( visual, screenPos, ev.isPress(), ev.isPressed() );
+
+    //
+    // Dispatch mouse event
+    //
+    
+    // IME window
+    Window* ime = inputMethod().activeWindow();
+    if(ime)
+    {
+        Gfx::PointF pos = ime->fromScreen(screenPos);
+        Gfx::RectF rect( ime->size() );
+        if( rect.contains(pos) )
+        {
+            ime->processEvent(ev);
+            return;
+        }
+    }
+
+    _mainScreen->processEvent(ev);
 }
 
 
-void Application::onTouchEvent(const TouchEvent& ev)
+void Application::onDispatchTouchEvent(const TouchEvent& ev)
 {
+    // make sure receiver still exists
     VisualMap::iterator it = _visuals.find( ev.vid() );
-
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);
+    onProcessTouchEvent(ev);
 }
 
 
-void Application::onScrollEvent(const ScrollEvent& ev )
+void Application::onProcessTouchEvent(const TouchEvent& ev)
 {
-    VisualMap::iterator it = _visuals.find( ev.vid() );
+    Visual* visual = ev.visual();
+    Gfx::PointF screenPos = ev.position();
 
-    if( it == _visuals.end() )
-        return;
+    //
+    // Detect scroll gestures
+    //
+    onDetectScroll( visual, screenPos, ev.isPress(), ev.isPressed() );
 
-    it->second->processEvent(ev);
+    //
+    // Dispatch touch event
+    //
+    
+    // IME window
+    Window* ime = inputMethod().activeWindow();
+    if(ime)
+    {
+        Gfx::PointF pos = ime->fromScreen(screenPos);
+        Gfx::RectF rect( ime->size() );
+        if( rect.contains(pos) )
+        {
+            ime->processEvent(ev);
+            return;
+        }
+    }
+
+    _mainScreen->processEvent(ev);
 }
 
 
-void Application::onMoveEvent(const MoveEvent& ev )
+void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
+                                 bool isPress, bool isPressed)
 {
-    VisualMap::iterator it = _visuals.find( ev.vid() );
+    //
+    // Detect scroll gestures
+    //
+    
+    if(isPress)
+    {
+        //std::clog << "SCROLL START" << std::endl;
+        _scrollFrom = screenPos;
+    }
+    else if(isPressed)
+    {
+        Gfx::PointF scrollTo = screenPos;
+        
+        double delta = scrollTo.y() - _scrollFrom.y();
+        
+        if( ! _onScroll && std::fabs(delta) > 8 )
+        {
+            //std::clog << "SCROLL STARTED" << std::endl;
+            _onScroll = true;
+            _scrollFrom = scrollTo;
+        }
+        else if(_onScroll)
+        {
+            //std::clog << "SCROLLING: " << delta << std::endl;
+            ScrollEvent sev(*visual);
+            sev.set(ScrollEvent::Vertical, delta);
+            processEvent(sev);
 
-    if( it == _visuals.end() )
-        return;
-
-    it->second->processEvent(ev);
+            _scrollFrom = scrollTo;
+        }
+    }
+    else
+    {
+        //std::clog << "SCROLL STOP" << std::endl;
+        _onScroll = false;
+    }
 }
 
 
-void Application::onActivateEvent( const ActivateEvent& ev )
+void Application::onDispatchScrollEvent(const ScrollEvent& ev)
 {
+    // make sure receiver still exists
     VisualMap::iterator it = _visuals.find( ev.vid() );
-
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);
+    onProcessScrollEvent(ev);
 }
 
 
-void Application::onEnableEvent( const EnableEvent& ev )
+void Application::onProcessScrollEvent(const ScrollEvent& ev)
 {
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-
-    if( it == _visuals.end() )
-        return;
-
-    it->second->processEvent(ev);
+    _mainScreen->processEvent(ev);
 }
 
 
-void Application::onShowEvent( const ShowEvent& ev )
+void Application::onDispatchEnterEvent(const EnterEvent& ev)
 {
+    // make sure receiver still exists
     VisualMap::iterator it = _visuals.find( ev.vid() );
-
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);
+    onProcessEnterEvent(ev);
 }
 
 
-void Application::onKeyEvent( const KeyEvent& ev )
+void Application::onProcessEnterEvent(const EnterEvent& ev)
 {
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-
-    if( it == _visuals.end() )
-        return;
-
-    it->second->processEvent(ev);
+    Visual* visual = ev.visual();
+    visual->processEvent(ev);
 }
 
 
-void Application::onCloseEvent(const CloseEvent& ev )
+void Application::onDispatchLeaveEvent(const LeaveEvent& ev)
 {
+    // make sure receiver still exists
     VisualMap::iterator it = _visuals.find( ev.vid() );
-
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);
+    onProcessLeaveEvent(ev);
 }
 
 
-void Application::onEnterEvent( const EnterEvent& ev )
+void Application::onProcessLeaveEvent(const LeaveEvent& ev)
 {
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-
-    if( it == _visuals.end() )
-        return;
-
-    it->second->processEvent(ev);
+    Visual* visual = ev.visual();
+    visual->processEvent(ev);
 }
 
 
-void Application::onLeaveEvent(const LeaveEvent& ev )
+void Application::onDispatchKeyEvent(const KeyEvent& ev)
 {
+    // make sure receiver still exists
     VisualMap::iterator it = _visuals.find( ev.vid() );
-
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);
+    onProcessKeyEvent(ev);
 }
 
 
-void Application::onFocusEvent(const FocusEvent& ev)
+void Application::onProcessKeyEvent(const KeyEvent& ev)
 {
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-
-    if( it == _visuals.end() )
-        return;
-
-    it->second->processEvent(ev);
+    _mainScreen->processEvent(ev);
 }
 
 
-void Application::onWindowStateEvent(const WindowStateEvent& ev )
+void Application::onDispatchInvalidateEvent(const InvalidateEvent& ev)
 {
+    // make sure receiver still exists
     VisualMap::iterator it = _visuals.find( ev.vid() );
-
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);
+    onProcessInvalidateEvent(ev);
 }
 
 
-void Application::onInvalidateEvent(const InvalidateEvent& ev)
+void Application::onProcessInvalidateEvent(const InvalidateEvent& ev)
 {
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-
-    if( it == _visuals.end() )
-        return;
-
-    it->second->processEvent(ev);
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
 }
 
 
-void Application::onLayoutEvent(const LayoutEvent& ev)
+void Application::onDispatchRelayoutEvent(const RelayoutEvent& ev)
 {
+    // make sure receiver still exists
     VisualMap::iterator it = _visuals.find( ev.vid() );
-
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);
+    onProcessRelayoutEvent(ev);
+}
+
+
+void Application::onProcessRelayoutEvent(const RelayoutEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchRescaleEvent(const RescaleEvent& ev)
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessRescaleEvent(ev);
+}
+
+
+void Application::onProcessRescaleEvent(const RescaleEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchPaintEvent(const PaintEvent& ev)
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessPaintEvent(ev);
+}
+
+
+void Application::onProcessPaintEvent(const PaintEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchMoveEvent(const MoveEvent& ev)
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessMoveEvent(ev);
+}
+
+
+void Application::onProcessMoveEvent(const MoveEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchResizeEvent(const ResizeEvent& ev)
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessResizeEvent(ev);
+}
+
+
+void Application::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchActivateEvent(const ActivateEvent& ev)
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessActivateEvent(ev);
+}
+
+
+void Application::onProcessActivateEvent(const ActivateEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchEnableEvent(const EnableEvent& ev)
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessEnableEvent(ev);
+}
+
+
+void Application::onProcessEnableEvent(const EnableEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchShowEvent(const ShowEvent& ev)
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessShowEvent(ev);
+}
+
+
+void Application::onProcessShowEvent(const ShowEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchCloseEvent(const CloseEvent& ev )
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessCloseEvent(ev);
+}
+
+
+void Application::onProcessCloseEvent(const CloseEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchFocusEvent(const FocusEvent& ev)
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessFocusEvent(ev);
+}
+
+
+void Application::onProcessFocusEvent(const FocusEvent& ev)
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
+}
+
+
+void Application::onDispatchWindowStateEvent(const WindowStateEvent& ev )
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessWindowStateEvent(ev);
+}
+
+
+void Application::onProcessWindowStateEvent(const WindowStateEvent& ev )
+{
+    Visual* visual = ev.visual();
+    if(visual)
+        visual->processEvent(ev);
 }
 
 } // namespace

@@ -152,42 +152,6 @@ void ApplicationImpl::setDefaultFont(const std::string& fontName)
     PixmapSurfaceImpl::setDefaultFont(fontName);
 }
 
-void ApplicationImpl::nextEvent()
-{
-    NSEvent* event = nil;
-
-    event = [NSApp nextEventMatchingMask: NSEventMaskAny
-                                untilDate: [NSDate distantFuture]
-                                    inMode: NSDefaultRunLoopMode
-                                    dequeue: YES];
-    
-    [NSApp sendEvent:event];
-}
-
-
-void ApplicationImpl::grabPointer(Window& grabber)
-{
-    grabber.impl()->grabPointer();
-}
-
-
-void ApplicationImpl::releasePointer(Window& grabber)
-{
-    grabber.impl()->releasePointer();
-}
-
-
-void ApplicationImpl::grabPointer(Widget& grabber)
-{
-  // pointer is always tracked, even if its outside the window
-}
-  
-        
-void ApplicationImpl::releasePointer(Widget& grabber)
-{
-  // pointer is always tracked, even if its outside the window
-}
-
 
 void ApplicationImpl::init()
 {
@@ -222,6 +186,34 @@ void ApplicationImpl::init()
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
+}
+
+
+void ApplicationImpl::nextEvent()
+{
+    NSEvent* event = nil;
+
+    event = [NSApp nextEventMatchingMask: NSEventMaskAny
+                                untilDate: [NSDate distantFuture]
+                                    inMode: NSDefaultRunLoopMode
+                                    dequeue: YES];
+    
+    [NSApp sendEvent:event];
+}
+
+
+void ApplicationImpl::processTimers()
+{ 
+    std::size_t nextTimer = _timerQueue.processTimers();
+
+    if(nextTimer == System::EventLoop::WaitInfinite)
+    {
+        nextTimer = std::numeric_limits<CFTimeInterval>::max();
+    }
+
+    CFTimeInterval interval = nextTimer / 1000.0;
+    CFAbsoluteTime fireDate = CFAbsoluteTimeGetCurrent() + interval;
+    CFRunLoopTimerSetNextFireDate(_masterTimer, fireDate);
 }
 
 
@@ -563,21 +555,6 @@ bool ApplicationImpl::isReady(System::IOHandle* h)
 bool ApplicationImpl::isError(System::IOHandle* h)
 {
     return false;
-}
-
-
-void ApplicationImpl::processTimers()
-{ 
-    std::size_t nextTimer = _timerQueue.processTimers();
-
-    if(nextTimer == System::EventLoop::WaitInfinite)
-    {
-        nextTimer = std::numeric_limits<CFTimeInterval>::max();
-    }
-
-    CFTimeInterval interval = nextTimer / 1000.0;
-    CFAbsoluteTime fireDate = CFAbsoluteTimeGetCurrent() + interval;
-    CFRunLoopTimerSetNextFireDate(_masterTimer, fireDate);
 }
 
 } // namespace

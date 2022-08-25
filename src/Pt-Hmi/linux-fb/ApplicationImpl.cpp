@@ -30,6 +30,7 @@
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
 
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Screen.h>
@@ -44,10 +45,12 @@
 #include <fstream>
 #include <cmath>
 
+#include <termios.h>
 #include <fcntl.h>
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
 #include <sys/kd.h>
+#include <sys/vt.h>
 
 PT_LOG_DEFINE("Pt.Hmi.Application")
 
@@ -58,7 +61,6 @@ namespace Hmi {
 ApplicationImpl::ApplicationImpl()
 : _mouseDevice(0)
 , _lastActivityTime( Pt::System::Clock::getSystemTime() )
-, _lastMouse(0)
 {           
     showConsole(false);
     
@@ -76,6 +78,7 @@ ApplicationImpl::ApplicationImpl()
         _mouseDevice->setActive(*this);
         _mouseDevice->begin();
         _mouseDevice->eventReady() += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
+        _mouseDevice->eventReady() += Pt::slot(*this, &ApplicationImpl::onScrollEvent);
         std::clog << "using mouse: " << mouse << std::endl;
     }
     catch(const std::exception& ex)
@@ -167,44 +170,6 @@ void ApplicationImpl::setDefaultFont(const std::string& fontName)
 }
 
 
-void ApplicationImpl::grabPointer(Window& grabber)
-{
-}
-
-
-void ApplicationImpl::releasePointer(Window& grabber)
-{
-    // TODO: if mouse is not enabled unset pointer widget
-    //Application::instance().setPointerWidget(0);
-
-    // send mouse move event with current button state
-    // so widget under the cursor gets an enter event 
-    _lastMouse.setMove(); 
-    _lastMouse.setId( Application::instance().screen().vid() );
-
-    Application::instance().processMouseEvent(_lastMouse);
-}
-
-
-void ApplicationImpl::grabPointer(Widget& grabber)
-{
-}
-
-
-void ApplicationImpl::releasePointer(Widget& grabber)
-{
-    // TODO: if mouse is not enabled unset pointer widget
-    //Application::instance().setPointerWidget(0);
-
-    // send mouse move event with current button state
-    // so widget under the cursor gets an enter event 
-    _lastMouse.setMove();
-    _lastMouse.setId( Application::instance().screen().vid() );
-
-    Application::instance().processMouseEvent(_lastMouse);
-}
-
-
 Pt::Timespan ApplicationImpl::inactivityTime() const
 {
     Pt::DateTime now = Pt::System::Clock::getSystemTime();
@@ -217,7 +182,7 @@ void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
 {
     _lastActivityTime = Pt::System::Clock::getSystemTime();
 
-    Application::instance().screen().impl()->dispatchKeyEvent(ev);
+    //Application::instance().screen().impl()->dispatchKeyEvent(ev);
 }
 
 
@@ -231,25 +196,31 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 {
     _lastActivityTime = Pt::System::Clock::getSystemTime();
    
-    MouseEvent mev = ev;
-    mev.setId( Application::instance().screen().vid() );
-
-    ScreenImpl* screen = Application::instance().screen().impl();
-    screen->drawCursor(ev);
+    Screen& screen = Application::instance().screen();
+    ScreenImpl* screenImpl = screen.impl();
+    screenImpl->drawCursor( ev.position() );
     
     double scaling = Application::instance().scaleFactor();
-
-    Gfx::PointF pos(ev.position().x() / scaling, 
-                    ev.position().y() / scaling);
+    Gfx::PointF pos = ev.position() / scaling;
+    
+    MouseEvent mev = ev;
+    mev.setVisual(&screen);
     mev.setPosition(pos);
 
-    _lastMouse = mev;
+    Application::instance().processEvent(mev);
+}
 
-    // TODO: call Application::processMouseEvent which returns true if the
-    //       event was consumed. If it returns false and the event was not
-    //       consumed call ScreenImpl::dispatchMouseEvent
 
-    Application::instance().processMouseEvent(mev);
+void ApplicationImpl::onScrollEvent(const ScrollEvent& ev)
+{
+    _lastActivityTime = Pt::System::Clock::getSystemTime();
+
+    Screen& screen = Application::instance().screen();
+
+    ScrollEvent sev = ev;
+    sev.setVisual(&screen);
+
+    Application::instance().processEvent(sev);
 }
 
 
@@ -257,21 +228,17 @@ void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
 {
     _lastActivityTime = Pt::System::Clock::getSystemTime();
 
-    Pt::Gfx::PointF pos = _touchTransform * ev.position();
+    Screen& screen = Application::instance().screen();
 
     double scaling = Application::instance().scaleFactor();
-    Gfx::PointF scaledPos(pos.x() / scaling,pos.y() / scaling);
-
+    Pt::Gfx::PointF pos = _touchTransform * ev.position();
+    pos /= scaling;
+    
     TouchEvent tev = ev;
-    tev.setId( Application::instance().screen().vid() );
-    tev.setPosition(scaledPos);
+    tev.setVisual(&screen);
+    tev.setPosition(pos);
 
-    //std::clog << "raw touch: " << ev.position().x() << ", " 
-    //                           << ev.position().y() << std::endl;
-    //std::clog << "transformed touch: " << pos.x() << ", " 
-    //                                   << pos.y() << std::endl;
-
-    Application::instance().processTouchEvent(tev);
+    Application::instance().processEvent(tev);
 }
 
 
@@ -280,7 +247,7 @@ void ApplicationImpl::onKeyEvent(const KeyEvent& ev)
     //TODO: VID???
     _lastActivityTime = Pt::System::Clock::getSystemTime();
 
-    Application::instance().screen().impl()->dispatchKeyEvent(ev);
+    Application::instance().processEvent(ev);
 }
 
 
@@ -298,13 +265,34 @@ void ApplicationImpl::showConsole(bool s)
     terminal = "/dev/" + terminal;
 
     int fd = open(terminal.c_str(), O_RDWR);
+
+    static struct termios tm_orig;
+
+    std::clog << terminal << " " << fd << std::endl;
     
     if( ! s )
-          ioctl( fd, KDSETMODE, KD_GRAPHICS );
-    else
-          ioctl( fd, KDSETMODE, KD_TEXT );
+    {
+        struct termios tm;
+        tcgetattr(STDIN_FILENO, &tm);
+        tm_orig = tm;
 
-    close( fd );
+        tm.c_iflag = tm.c_oflag = 0;
+        tm.c_cflag &= ~CSIZE;
+        tm.c_cflag |= CS8;
+        tm.c_lflag &= ~(ECHO | ISIG | ICANON);
+        tm.c_cc[VMIN] = 1; /* min data size (byte) */
+        tm.c_cc[VTIME] = 0; /* time out */
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &tm);
+
+         ioctl( fd, KDSETMODE, KD_GRAPHICS );
+    }
+    else
+    {
+        ioctl(fd, KDSETMODE, KD_TEXT);
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &tm_orig);
+    }
+
+    close(fd);
 }
 
 } // namespace

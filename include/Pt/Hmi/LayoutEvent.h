@@ -30,7 +30,9 @@
 #define Pt_Hmi_LayoutEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/SizePolicy.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
@@ -38,57 +40,147 @@ namespace Pt {
 
 namespace Hmi {
 
+class PT_HMI_API RelayoutEvent : public Pt::BasicEvent<RelayoutEvent>
+{
+    public:
+        explicit RelayoutEvent(Visual& visual)
+        : _vid( visual.vid() )
+        , _visual(&visual)
+        {
+        }
+
+        virtual ~RelayoutEvent()
+        {
+        }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
+        Visual* visual() const
+        {
+            return _visual;
+        }
+
+      private:
+          Pt::uint64_t _vid;
+          Visual*      _visual;
+};
+
+
+class PT_HMI_API RescaleEvent : public Pt::BasicEvent<RescaleEvent>
+{
+    public:
+        explicit RescaleEvent(Visual& visual,
+                              double scaleFactor = 1.0)
+        : _vid( visual.vid() )
+        , _visual(&visual)
+        , _scaleFactor(scaleFactor)
+        {
+        }
+
+        virtual ~RescaleEvent()
+        {
+        }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
+        Visual* visual() const
+        {
+            return _visual;
+        }
+
+        double scaleFactor() const
+        {
+            return _scaleFactor;
+        }
+
+      private:
+          Pt::uint64_t _vid;
+          Visual*      _visual;
+          double       _scaleFactor;
+};
+
+
 class PT_HMI_API MeasureEvent : public Pt::BasicEvent<MeasureEvent>
 {
-  public:
-    MeasureEvent(Pt::uint64_t vid)
-    : _vid(vid)
-    {
-    }
+    public:
+        MeasureEvent(Pt::uint64_t vid)
+        : _vid(vid)
+        {
+        }
 
-    virtual ~MeasureEvent()
-    {
-    }
+        MeasureEvent(Pt::uint64_t vid, const SizePolicy& policy)
+        : _vid(vid)
+        , _sizePolicy(policy)
+        {
+        }
 
-    Pt::uint64_t vid() const
-    {
-        return _vid;
-    }
+        virtual ~MeasureEvent()
+        {
+        }
 
-    const SizePolicy& sizePolicy() const
-    {
-        return _sizePolicy;
-    }
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
 
-    void setSizePolicy(const SizePolicy& policy)
-    {
-        _sizePolicy = policy;
-    }
+        const SizePolicy& sizePolicy() const
+        {
+            return _sizePolicy;
+        }
+
+        void setSizePolicy(const SizePolicy& policy)
+        {
+            _sizePolicy = policy;
+        }
 
     private:
         Pt::uint64_t _vid;
         SizePolicy   _sizePolicy;
 };
 
+
 class PT_HMI_API LayoutEvent : public Pt::BasicEvent<LayoutEvent>
 {
-  public:
-    LayoutEvent(Pt::uint64_t vid)
-    : _vid(vid)
-    {
-    }
+    public:
+        LayoutEvent(Pt::uint64_t vid)
+        : _vid(vid)
+        {
+        }
 
-    virtual ~LayoutEvent()
-    {
-    }
+        LayoutEvent(Pt::uint64_t vid, const Gfx::RectF& rect)
+        : _vid(vid)
+        , _rect(rect)
+        {
+        }
 
-    Pt::uint64_t vid() const
-    {
-        return _vid;
-    }
+        virtual ~LayoutEvent()
+        {
+        }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
+        const Gfx::RectF& rect() const
+        {
+            return _rect;
+        }
+
+        void setRect(const Gfx::RectF& r)
+        {
+            _rect = r;
+        }
 
     private:
         Pt::uint64_t _vid;
+        Gfx::RectF   _rect;
 };
 
 } // namespace

@@ -55,6 +55,9 @@ const Gfx::SizeF& PaintSurface::size() const
 
 void PaintSurface::begin(Painter& painter)
 {
+    if(_painter)
+        _painter->finish();
+
     onBegin(painter);
     _painter = &painter;
 }

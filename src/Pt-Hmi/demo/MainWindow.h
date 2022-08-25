@@ -34,6 +34,7 @@
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/TabView.h>
+#include <Pt/Hmi/Shell.h>
 #include "ChildW.h"
 
 namespace Pt {
@@ -50,13 +51,11 @@ class MainWindow : public Pt::Hmi::Window
         virtual ~MainWindow();
 
     protected:
-        virtual void onPaintContent(const PaintEvent& ev);
+        virtual void onPaintEvent(const PaintEvent& ev);
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onCloseEvent(const CloseEvent& ev);
-
-        void onButton();
 
     private:
         Menu     _menu;
@@ -69,6 +68,8 @@ class MainWindow : public Pt::Hmi::Window
         MenuItem _subItem2;
         MenuItem _subItem3;
             
+        Shell _shell;
+
         ChildW _child1;
         Window _child2;
 

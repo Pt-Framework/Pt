@@ -30,7 +30,7 @@
 #define Pt_Hmi_EnableEvent_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
@@ -40,35 +40,44 @@ namespace Hmi {
 
 class PT_HMI_API EnableEvent : public Pt::BasicEvent<EnableEvent>
 {
-	public:	
-		EnableEvent( Pt::uint64_t vid, bool enabled )
-		: _enabled( enabled )
-		, _vid( vid )
-		{
-		}
+    public:
+        EnableEvent(Visual& v, bool enabled)
+        : _vid( v.vid() )
+        , _visual(&v)
+        , _enabled(enabled)
+        {
+        }
 
-		EnableEvent()
-		{
-		}
+        EnableEvent()
+        : _vid(0)
+        , _visual(0)
+        , _enabled(false)
+        {
+        }
 
-		virtual ~EnableEvent()
-		{
-		}
+        virtual ~EnableEvent()
+        {
+        }
 
-		bool  enabled( ) const
-		{
-			return _enabled;
-		}
-
-        
         Pt::uint64_t vid() const
         {
             return _vid;
         }
 
-	private:
-		bool  _enabled;
+        Visual* visual() const
+        {
+            return _visual;
+        }
+
+        bool  enabled( ) const
+        {
+            return _enabled;
+        }
+
+    private:
         Pt::uint64_t _vid;
+        Visual*      _visual;
+        bool         _enabled;
 };
 
 } // namespace
@@ -76,4 +85,3 @@ class PT_HMI_API EnableEvent : public Pt::BasicEvent<EnableEvent>
 } // namespace
 
 #endif
-

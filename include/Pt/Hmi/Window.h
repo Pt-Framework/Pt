@@ -30,8 +30,14 @@
 #ifndef PT_HMI_WINDOW_H
 #define PT_HMI_WINDOW_H
 
-#include <Pt/Hmi/WindowBase.h>
-#include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/Form.h>
+#include <Pt/Hmi/Sheet.h>
+#include <Pt/Hmi/PixmapSurface.h>
+#include <Pt/Hmi/WindowType.h>
+#include <Pt/Hmi/SizePolicy.h>
+
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
@@ -42,407 +48,469 @@
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/EnterEvent.h>
 #include <Pt/Hmi/LeaveEvent.h>
-#include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/EnableEvent.h>
 #include <Pt/Hmi/InvalidateEvent.h>
-#include <Pt/Hmi/PixmapSurface.h>
-#include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/SizePolicy.h>
+
 #include <Pt/Gfx/Image.h>
-#include <Pt/Connectable.h>
 #include <Pt/Signal.h>
-#include <map>
+#include <Pt/Connectable.h>
+
+#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
 
-class Screen;
-class Widget;
+class WindowManager;
 class MainWindowImpl;
 class WindowStateEvent;
+class PaintEvent;
 
-class PT_HMI_API Window : public WindowBase
-                        , public View
+class WindowState
+{
+    public:
+        enum State
+        {
+            Normal = 0,
+            Minimized = 1,
+            Maximized = 2
+        };
+
+        WindowState(State t = Normal)
+        : _state(t)
+        {}
+
+        WindowState& operator=(State t)
+        {
+            _state = t;
+            return *this;
+        }
+
+        operator Pt::uint32_t() const
+        { 
+            return _state; 
+        }
+
+    private:
+        Pt::uint32_t _state;
+};
+
+/** @internal @brief Window implementation base class.
+*/
+class WindowImpl
+{
+    public:
+        WindowImpl(WindowType type = WindowType::Default);
+
+        virtual ~WindowImpl();
+
+        virtual double scaleFactor() const = 0;
+
+        WindowType type() const;
+
+        void setType(WindowType type);
+
+        const std::string& title() const;
+
+        void setTitle(const std::string& text);
+
+        const Gfx::Image& icon() const;
+       
+        void setIcon(const Gfx::Image& image);
+
+        void setTopMost(bool isTop);
+
+        bool isTopMost() const;
+
+        WindowState state() const;
+
+        void setState(WindowState s);
+
+        const Gfx::SizeF& minimumSize() const;
+        
+        void setMinimumSize(const Gfx::SizeF& s);
+
+        const Gfx::SizeF& maximumSize() const;
+    
+        void setMaximumSize(const Gfx::SizeF& s);
+
+    protected:
+        virtual void onSetType(WindowType type) = 0;
+
+        virtual void onSetTitle(const std::string& text) = 0;
+
+        virtual void onSetIcon(const Gfx::Image& p) = 0;
+
+        virtual void onSetTopMost(bool top) = 0;
+
+        virtual void onSetState(WindowState s) = 0;
+
+        virtual void onSetMinimumSize(const Gfx::SizeF& s) = 0;
+
+       virtual  void onSetMaximumSize(const Gfx::SizeF& s) = 0;
+
+    private:
+        //WindowParams*  _params;
+
+        WindowType    _type;
+        std::string   _title;
+        Gfx::Image    _icon;
+        bool          _isTopMost;
+        WindowState   _state;
+        Gfx::SizeF    _minimumSize;
+        Gfx::SizeF    _maximumSize;
+};
+
+/** @brief Window base class.
+*/
+class PT_HMI_API Window : public Visual
+                        , public Responder
+                        , public Form
                         , public Pt::Connectable
 {
-  friend class Widget; 
- 
-  public:
-    enum Type
-    {
-        Default = 0, // default window frame
-        Popup = 1    // frameless window
-    };
+    public:
+        typedef WindowType Type;
+        typedef WindowState State;
+
+    public:
+        explicit Window(WindowManager* parent = 0, WindowType type = WindowType::Default);
+
+        virtual ~Window();
+
     
-    enum State
-    {
-        Normal = 0,
-        Minimized = 1,
-        Maximized = 2
-    };
+        void setParent(WindowManager& parent);
 
-  public:
-    explicit Window(Window* parent = 0, Window::Type type = Default);
+        void unparent();
 
-    virtual ~Window();
 
-    PixmapSurface& surface();
+        PixmapSurface& surface();
 
-    //WindowBase* parent();
+        const PixmapSurface& surface() const;
 
-    //const WindowBase* parent() const;
+        void setNextResponder(Responder* r);
 
-    Screen* screen();
 
-    const Screen* screen() const;
+        double scaleFactor() const;
 
-    Window& mainWindow();
+        
+        void invalidate();
 
-    const Window& mainWindow() const;
 
-    Window* parentWindow();
+        void repaint();
 
-    const Window* parentWindow() const;
+        void repaint(const Gfx::RectF& rect);
 
-    const std::vector<Window*>& windows() const;
+       // deprecated
+        void update()
+        { repaint(); }
 
-    void add(Window& w);
+        // deprecated
+        void update(const Gfx::RectF& rect)
+        { repaint(rect); }
 
-    void remove(Window& w);
+        bool acceptsInput() const;
 
-    Widget* mainWidget();
 
-    const Widget* content()  const;
+        bool isActive() const;
 
-    void setContent(Widget* widget);
+        void activate(bool active = true);
 
-    Widget* findWidget(const Gfx::PointF& pos);
 
-    Widget* findWidget(const std::string& name);
+        bool isVisible() const;
 
-    Widget* findWidget(Pt::uint64_t vid);
+        void show( bool b = true );
 
-    Widget* focusWidget();
+        void showModal();
 
-    void focusNext();
 
-    void focusPrev();
+        bool isEnabled() const;
 
-    // deprecated
-    void update()
-    { repaint(); }
+        void enable(bool e = true);
 
-    // deprecated
-    void update(const Gfx::RectF& rect)
-    { repaint(rect); }
 
+        const Gfx::PointF& position() const;
 
-    void invalidate();
+        const Gfx::SizeF& size() const;
 
+        const Gfx::RectF& geometry() const;
 
-    void repaint()
-    {
-        Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-        onRepaint(rect);
-    }
+        void move(const Gfx::PointF& p);
 
-    void repaint(const Gfx::RectF& rect)
-    {
-        onRepaint(rect);
-    }
+        void resize(const Gfx::SizeF& s);
 
+        void resize(const SizePolicy& policy);
 
-    bool isActive() const;
 
-    void activate(bool active = true);
+        bool isClosed() const;
 
-    bool isVisible() const;
+        void tryClose();
 
-    void show( bool b = true );
+        void close(bool force = false);
 
-    void showModal();
 
-    bool isEnabled() const;
+        Type type() const;
 
-    void enable( bool e = true );
+        void setType(Type type);
 
-    void grabPointer();
 
-    void releasePointer();
+        const Gfx::Image& icon() const;
 
-    void move(const Gfx::PointF& p);
+        void setIcon(const Gfx::Image& i);
 
-    void resize( const Gfx::SizeF& s );
 
-    bool isClosed() const;
+        const std::string& title() const;
 
-    void close();
+        void setTitle( const std::string& t );
 
-    Type type() const;
 
-    void setType(Type type);
+        const Gfx::SizeF& minimumSize() const;
 
-    const Gfx::Image& icon() const;
+        void setMinimumSize(const Gfx::SizeF& s);
 
-    void setIcon(const Gfx::Image& i);
+        void setMinimumWidth(double w);
 
-    const std::string& title() const;
+        void setMinimumHeight(double h);
 
-    void setTitle( const std::string& t );
+        
+        const Gfx::SizeF& maximumSize() const;
 
-    const Gfx::SizeF& minimumSize() const;
+        void setMaximumSize(const Gfx::SizeF& s);
 
-    void setMinimumSize(const Gfx::SizeF& s);
+        void setMaximumWidth(double w);
 
-    const Gfx::SizeF& maximumSize() const;
+        void setMaximumHeight(double h);
 
-    void setMaximumSize(const Gfx::SizeF& s);
 
-    bool isTopMost() const;
+        bool isTopMost() const;
 
-    void setTopMost(bool top);
+        void setTopMost(bool top);
 
-    State state() const;
 
-    void setState(State s);
+        State state() const;
 
-    Pt::Signal<const Pt::Event&>& eventReady();
+        void setState(State s);
 
-    MainWindowImpl* impl();
 
-    const MainWindowImpl* impl() const; 
+        const Gfx::Brush& background() const;
 
-  public:
-    const Gfx::Brush& background() const;
+        void setBackground(const Gfx::Brush& b);
 
-    void setBackground(const Gfx::Brush& b);
+        Pt::Signal<const Pt::Event&>& eventReceived();
 
-  protected:
-    virtual void onSetScreen(Screen* screen);
+    public:
+        WindowImpl* impl();
 
-    virtual void onAddWindow(Window& w);
+        const WindowImpl* impl() const; 
 
-    virtual void onRemoveWindow(Window& w);
+    protected:
+        virtual void onParentChanged(WindowManager*);
 
-    virtual void onParentChanged(Window* w);
+    //
+    // Responder
+    //
+    protected:
+        virtual Responder* onNextResponder();
 
-    virtual void onAddWidget(Widget& w);
-
-    virtual void onRemoveWidget(Widget& w);
-  
-  //
-  // layouting
-  //
-  public:
-    //Gfx::SizeF setSizePolicy(const SizePolicy& policy);
-
-    // onMeasure
-    virtual Gfx::SizeF measure(const SizePolicy& policy);
-
-  protected:
-    // onLayout
-    virtual void layout(const Gfx::RectF& rect);
-
-    void layoutEvent(const LayoutEvent& ev);
-
-  //
-  // painting
-  //
-  protected:
-    // onPaint
-    virtual void onPaintContent(const Gfx::RectF& r);
-
-    // onPaintContent (window specific)
-    virtual void onPaintContent(const PaintEvent& ev);
-
-    void paintEvent(const PaintEvent& ev);
-
-  protected:
-    virtual Visual* onParent() const;
-
-    Gfx::PointF onToParent(const Gfx::PointF& pos) const;
-
-    Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
-
-    virtual const Gfx::PointF& onPosition() const;
-
-    virtual const Gfx::SizeF& onSize() const;
-
-    virtual double onScaleFactor() const;
-
-    virtual void onRelayout();
-
-    virtual void onRepaint(const Gfx::RectF& rect);
-
-  protected:
-    virtual void onInvalidate();
-
-  protected:
-    virtual void onInit(Window& w);
+        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
     
-    virtual void onDeinit(Window& w);
-
-    virtual Gfx::PointF onFromWindow(const Window& w, const Gfx::PointF& pos) const;
-
-    virtual Gfx::PointF onToWindow(const Window& w, const Gfx::PointF& pos) const;
-
-    virtual void onShow(Window& w, bool visible);
-
-    virtual void onActivate(Window& w, bool active);
-
-    virtual void onEnable(Window& w, bool enable);
-
-    virtual void onMove(Window& w, const Gfx::PointF& to);
-
-    virtual void onResize(Window& w, const Gfx::SizeF& to);
-
-    virtual void onFrameChanged(Window& w);
-
-    virtual void onStateChanged(Window& w);
-
-    virtual void onClose(Window& w);
-
-    virtual void onClosing(Window& w);
-
-  protected:
-    virtual void onEvent(const Pt::Event& ev);
-
-    void processMouseEvent(const MouseEvent& ev);
-
-    virtual Responder* onNextResponder();
-
-    virtual Gfx::PointF onToNextResponder(const Gfx::PointF& pos);
-
-    virtual bool onMouseEvent(const MouseEvent& ev);
-
-    void processTouchEvent( const TouchEvent& ev );
-
-    virtual void onTouchEvent( const TouchEvent& ev );
-
-    void processScrollEvent( const ScrollEvent& ev );
-
-    virtual void onScrollEvent( const ScrollEvent& ev );
-
-    virtual void onKeyEvent( const KeyEvent& ev );
-
-    virtual void onEnterEvent( const EnterEvent& ev );
-
-    virtual void onLeaveEvent(const LeaveEvent& ev );
-
-    virtual void onMoveEvent(const MoveEvent& ev);
-
-    virtual void onResizeEvent(const ResizeEvent& ev);
-
-    virtual void onCloseEvent(const CloseEvent& ev);
-
-    virtual void onActivateEvent(const ActivateEvent& ev);
-
-    virtual void onShowEvent( const ShowEvent& ev);
-
-    virtual void onEnableEvent(const EnableEvent& ev);
-
-    virtual void onWindowStateEvent(const WindowStateEvent& ev);
-
-    virtual void onInvalidateEvent(const InvalidateEvent& ev);
-
-  private:
-    void init(Window* parent);
-
-    void deinit();
-
-    void setParent(Window* parent);
-
-  private:
-    virtual Window* onGetWindow();
-
-    virtual Screen* onGetScreen();
-
-    virtual Gfx::PointF onToWidget(const Widget& widget, const Gfx::PointF& pos) const;
-
-    virtual Gfx::PointF onFromWidget(const Widget& widget, const Gfx::PointF& pos) const;
-
-    virtual void onAttach(Widget& widget);
-
-    virtual void onDetach(Widget& widget);
-
-    virtual void onRaise(Widget& widget);
-
-    virtual void onEnable(Widget& widget, bool isEnable);
-
-    virtual void onShow(Widget& widget, bool isShown);
-
-  protected:
-    virtual void touchEvent(const TouchEvent& ev);
-
-    virtual void scrollEvent(const ScrollEvent& ev);
-
-  private:
-    void addWidget(Widget& w);
-
-    void removeWidget(Widget& w);
-
-    void setFocusWidget(Widget* widget);
-
-    template <typename Iter>
-    void moveFocus(Iter begin, Iter end);
-
-    void addFocusWidget(Widget& w);
-
-    void removeFocusWidget(Widget& w);
-
-    void setFocusIndex(Widget& w, size_t index);
+        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
     
-    void setShortcut(Widget& w, const Key* key);
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
-    void setMnemonic(Widget& w, const Char* ch);
+        virtual bool onTouchEvent( const TouchEvent& ev );
+    
+        virtual bool onScrollEvent(const ScrollEvent& ev);
 
-    Widget* findWidget(const Gfx::PointF& pos, bool input);
+        virtual bool onKeyEvent(const KeyEvent& ev);
 
-    void setScreen(Screen* screen);
+        virtual bool onEnterEvent(const EnterEvent& ev);
 
-  private:
-    MainWindowImpl*              _impl;
-    WindowManager                _windowManager;
-    PixmapSurface                _surface;
-    Gfx::RectF                   _damageRect;
-    Pt::Signal<const Pt::Event&> _eventReady;
-    int                          _layouts;
-    int                          _invalidates;
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
 
-    std::vector<Window*>         _windows;
-    WindowBase*                  _parent;
-    Window*                      _parentWindow;
-    Screen*                      _screen; 
-    Widget*                      _mainWidget;
-    Widget*                      _focusWidget;
-    std::vector<Widget*>         _focusList;
-    std::map<Key, Widget*>       _shortcuts; 
-    std::map<Pt::Char, Widget*>  _mnemonics; 
+    //
+    // Visual
+    //
+    protected:
+        virtual void onEvent(const Pt::Event& ev);
 
-    bool                         _init;
-    bool                         _visible; 
-    bool                         _isActive;
-    bool                         _enabled; 
-    bool                         _enabledState;
-    bool                         _isClosed; 
-    Gfx::PointF                  _position;
-    Gfx::SizeF                   _size;
-    Type                         _type;
-    std::string                  _title;
-    Gfx::Image                   _icon;
-    Gfx::SizeF                   _minimumSize;
-    Gfx::SizeF                   _maximumSize;
-    State                        _state;
-    bool                         _topMost;
+        virtual void onSetCapture(bool capture);
+
+    //
+    // Form
+    //
+    protected:
+        virtual void onAttach(Sheet& view);
+    
+        virtual void onDetach(Sheet& view);
+
+        virtual void onInit(Sheet& view);
+
+        virtual void onRelease(Sheet& view);
+
+        virtual Gfx::PointF onFromSheet(const Sheet& sheet, 
+                                       const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onToSheet(const Sheet& sheet, 
+                                     const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onToScreen(const Sheet& sheet, 
+                                       const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromScreen(const Sheet& sheet, 
+                                         const Gfx::PointF& pos) const;
+
+        virtual void onRepaint(Sheet& view, const Gfx::RectF& rect);
+
+        virtual void onActivate(Sheet& w, bool active);
+
+        virtual void onMove(Sheet& sheet, const Gfx::PointF& pos);
+
+        virtual void onResize(Sheet& sheet, const Gfx::SizeF& size);
+
+        virtual void onEnter(Sheet& sheet, Visual& v);
+
+        virtual void onSetCapture(Sheet& sheet, bool capture);
+
+    //
+    // invalidation
+    //
+    protected:
+        void onProcessInvalidateEvent(const InvalidateEvent& ev);
+
+        virtual void onInvalidateEvent(const InvalidateEvent& ev);
+
+        virtual void onInvalidate();
+
+    //
+    // painting
+    //
+    protected:
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaint(Gfx::PaintSurface& surface, 
+                             const Gfx::RectF& updateRect);
+
+    //
+    // input
+    //
+    protected:
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
+
+        virtual void onProcessTouchEvent(const TouchEvent& ev);
+
+        virtual void onProcessScrollEvent(const ScrollEvent& ev);
+
+        virtual void onProcessEnterEvent(const EnterEvent& ev);
+
+        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
+
+        virtual void onProcessKeyEvent(const KeyEvent& ev);
+
+    //
+    // scaling
+    //
+    protected:
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onRescale(double scaling);
+
+    //
+    // geometry
+    //
+    protected:
+        virtual void onProcessMoveEvent(const MoveEvent& ev);
+
+        virtual void onMoveEvent(const MoveEvent& ev);
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
+    //
+    // closing
+    //
+    protected:
+        virtual void onProcessCloseEvent(const CloseEvent& ev);
+
+        virtual void onCloseEvent(const CloseEvent& ev);
+
+    //
+    // activation
+    //
+    protected:
+        virtual void onProcessActivateEvent(const ActivateEvent& ev);
+
+        virtual void onActivateEvent(const ActivateEvent& ev);
+
+    //
+    // visibility
+    //
+    protected:
+        virtual void onProcessShowEvent(const ShowEvent& ev);
+
+        virtual void onShowEvent(const ShowEvent& ev);
+
+    //
+    // enabling
+    //
+    protected:
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnable(bool e);
+
+    //
+    // window state
+    //
+    protected:
+        virtual void onProcessWindowStateEvent(const WindowStateEvent& ev);
+
+        virtual void onWindowStateEvent(const WindowStateEvent& ev);
+
+    private:
+        WindowImpl*                  _impl;
+        Pt::Signal<const Pt::Event&> _eventReceived;
+
+        PixmapSurface                _surface;
+        Gfx::RectF                   _damageRect;
+
+        Sheet                        _sheet;
+
+        WindowManager*               _parent;
+        Responder*                   _nextResponder;
+        Visual*                      _capture;
    
-    AutoPtr<Gfx::Brush>          _background;
-    Gfx::Brush                   _backgroundBrush;
+        int                          _invalidates;
+        bool                         _visible; 
+        bool                         _isActive;
+        bool                         _enabled; 
+        bool                         _enabledState;
+        bool                         _isClosed; 
+
+        Gfx::PointF                  _requestedPosition;
+        Gfx::SizeF                   _requestedSize;
+        Gfx::RectF                   _geometry;
+
+        Type                         _type;
+        std::string                  _title;
+        Gfx::Image                   _icon;
+        Gfx::SizeF                   _minimumSize;
+        Gfx::SizeF                   _maximumSize;
+        State                        _state;
+        bool                         _topMost;
+   
+        AutoPtr<Gfx::Brush>          _background;
+        Gfx::Brush                   _backgroundBrush;
 };
 
 } // namespace
 
 } // namespace
 
-#endif // PT_HMI_WINDOW_H
+#endif // include guard

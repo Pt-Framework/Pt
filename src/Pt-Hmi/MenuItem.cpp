@@ -96,7 +96,7 @@ MenuItem::MenuItem()
 , _hasRenderer(false)
 {
 
-    setFocusPolicy(Widget::NormalFocus);
+    setFocusPolicy(Widget::AcceptFocus);
     
     setPadding( Spacing(4, 2, 4, 2) );
     setMargin(0);
@@ -266,9 +266,9 @@ void MenuItem::onTriggered()
 }
 
 
-void MenuItem::onParentChanged(Widget* w)
+void MenuItem::onParentChanged(View* v)
 {
-    if( ! w && _menu)
+    if( ! v && _menu)
         _menu->removeItem(*this);
 }
 
@@ -424,17 +424,19 @@ bool MenuItem::onTouchEvent(const TouchEvent& ev)
 }
 
 
-void MenuItem::onEnterEvent(const EnterEvent& ev)
+bool MenuItem::onEnterEvent(const EnterEvent& ev)
 {
     Base::onEnterEvent(ev);
     update();
+    return true;
 }
 
 
-void MenuItem::onLeaveEvent(const LeaveEvent& ev)
+bool MenuItem::onLeaveEvent(const LeaveEvent& ev)
 {
     Base::onLeaveEvent(ev);
     update();
+    return true;
 }
 
 

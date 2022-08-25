@@ -1,5 +1,4 @@
 /* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -61,51 +60,36 @@ namespace Pt {
 
 namespace Hmi {
 
-class MainWindowImpl : public Pt::Connectable
+class MainWindowImpl : public WindowImpl
+                     , public Pt::Connectable
 {
     public:
         MainWindowImpl(Window::Type type);
 
         virtual ~MainWindowImpl();
 
-        double scaleFactor() const;
 
-        void setType(Window::Type type);
+        double scaleFactor() const;
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
-        void show(bool v);
-
-        void close();
-
         void paint(const Gfx::RectF& rect);
 
+        void show(bool v);
+    
         void activate();
 
-        void enable(bool e);
-
-        void setTopMost(bool e);
-
-        void move(const Gfx::PointF& p);
+        void enable(bool e);  
+       
+        void move(const Gfx::PointF& pos);
 
         void resize(const Gfx::SizeF& size);
 
-        void setIcon(const Gfx::Image& icon);
+        void close();
 
-        void setTitle(const std::string& text);
-
-        void setMinimumSize(const Gfx::SizeF& s);
-
-        void setMaximumSize(const Gfx::SizeF& s);
-
-        void setState(Window::State p);
-
-        void grabPointer();
-
-        void releasePointer();
-
+    public:
         NSView* view()
         { 
             return _view;
@@ -146,14 +130,12 @@ class MainWindowImpl : public Pt::Connectable
         NSWindow*                _window;
         NSView*                  _view;
         int                      _windowStyle;
+        int                      _level;
 
         unsigned                 _keyFlags;
         Key::Modifiers           _keyModifiers;
         KeyEvent                 _keyEvent;
         MouseEvent               _mouseEvent;
-
-        int                      _level;
-        std::string              _title;
 };
 
 } // namespace

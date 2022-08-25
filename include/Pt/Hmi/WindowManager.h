@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2015 Marc Boris Duerner
+/* Copyright (C) 2015 Marc Boris Duerner
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,138 +26,75 @@
   02110-1301 USA
 */
 
-#ifndef Pt_Hmi_WindowManager_h
-#define Pt_Hmi_WindowManager_h
+#ifndef Pt_Hmi_WindowManagerBase_h
+#define Pt_Hmi_WindowManagerBase_h
 
-#include <Pt/Hmi/WindowBase.h>
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/WindowType.h>
 #include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Connectable.h>
-#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
 
 class Window;
-class Screen;
-class WindowFrame;
-class MouseEvent;
-class TouchEvent;
-class ScrollEvent;
-class KeyEvent;
-class EnterEvent;
-class LeaveEvent;
+class WindowImpl;
 
-class WindowManager : public Pt::Connectable
+class WindowManager
 {
-    public:
-        WindowManager();
-
-        virtual ~WindowManager();
-
-        void init(WindowBase& parent);
-
-        void add(Window& w);
-
-        void remove(Window& window);
-
-        Window* activeWindow();
-
-        void setScreen(Screen* screen);
-
-        Gfx::RectF frameRect(Window& w) const;
-
-        double borderWidth() const
-        {
-            return _borderWidth;
-        }
-
-        double titleHeight()  const
-        {
-            return _titleHeight;
-        }
-
-        const Gfx::Color& inactiveColor() const
-        {
-            return _inactiveColor;
-        }
-
-        const Gfx::Color& activeColor() const
-        {
-            return _activeColor;
-        }
-
-        const Gfx::Color& textColor() const
-        {
-            return _textColor;
-        }
-
-        const Gfx::Color& inactiveTextColor() const
-        {
-            return _inactiveTextColor;
-        }
-                  
-    public:
-        void enterEvent(const EnterEvent& ev);
-
-        void leaveEvent(const LeaveEvent& ev);
-
-        bool keyEvent(const KeyEvent& keyEvent);
-        
-        bool mouseEvent(const MouseEvent& mev);
-
-        bool touchEvent(const TouchEvent& tev);
-
-        bool scrollEvent(const ScrollEvent& ev);
-
-        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+    friend class Window;
 
     public:
-        void onResize(Window& w, const Gfx::SizeF& to);
+        WindowManager()
+        {}
 
-        void onMove(Window& w, const Gfx::PointF& to);
+        virtual ~WindowManager()
+        {}
 
-        void onShow( Window& w, bool visible );
+    protected:
+        virtual WindowImpl* onCreateWindow(const WindowType& type) = 0;
 
-        void onActivate(Window* w, bool active);
+        virtual void onAttach(Window& w) = 0;
 
-        void onEnable(Window& w, bool enable);
+        virtual void onDetach(Window& w) = 0;
 
-        void onFrameChanged(Window& w);
+        virtual void onInit(Window& w) = 0;
 
-        void onStateChanged(Window& w);
+        virtual void onRelease(Window& w) = 0;
 
-        void onClosing(Window& w);
+        //virtual Gfx::PointF onToWindow(const Window& w, 
+        //                               const Gfx::PointF& pos) const = 0;
 
-        void onClose(Window& w);
+        //virtual Gfx::PointF onFromWindow(const Window& w, 
+        //                                 const Gfx::PointF& pos) const = 0;
 
-        Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onToScreen(const Window& w, 
+                                       const Gfx::PointF& pos) const = 0;
 
-        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onFromScreen(const Window& w, 
+                                         const Gfx::PointF& pos) const = 0;
 
-    private:
-        WindowFrame* findWindow(const Gfx::PointF& p);
+        virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
 
-        WindowFrame* findWindow(const Window& w) const;
+        virtual void onShow(Window& w, bool visible) = 0; 
 
-    private:
-        WindowBase*               _parent; 
-        std::vector<WindowFrame*> _windows;
-        
-        WindowFrame*              _activeWindow;
-        WindowFrame*              _currentWindow;
-        WindowFrame*              _grabbedWindow;
-        WindowFrame*              _topMostWindow;
+        virtual void onActivate(Window& w, bool active) = 0; 
 
-        double                    _borderWidth;
-        double                    _titleHeight;
-        Gfx::Color                _inactiveColor;
-        Gfx::Color                _activeColor;
-        Gfx::Color                _textColor;
-        Gfx::Color                _inactiveTextColor;                        
+        virtual void onEnable(Window& w, bool enable) = 0;
+
+        virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
+
+        virtual void onResize(Window& w, const Gfx::SizeF& to) = 0;
+
+        virtual void onFrameChanged(Window& w) = 0;
+
+        virtual void onStateChanged(Window& w) = 0; 
+
+        virtual void onClosing(Window& w) = 0;
+
+        virtual void onEnter(Window& w, Visual& v) = 0;
+
+        virtual void onSetCapture(Window& w, bool capture) = 0;
 };
 
 } // namespace
@@ -166,4 +102,3 @@ class WindowManager : public Pt::Connectable
 } // namespace
 
 #endif
-

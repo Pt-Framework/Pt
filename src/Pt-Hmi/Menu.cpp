@@ -37,7 +37,7 @@ namespace Pt {
 namespace Hmi {
 
 Menu::Menu()
-: Window(0, Window::Popup)
+: Window(0, WindowType::Popup)
 , _parentShell(0)
 , _parentMenu(0)
 , _currentMenu(0)
@@ -223,7 +223,7 @@ void Menu::onCancel()
 
 void Menu::onEnter()
 {
-    grabPointer();
+    //grabPointer();
 }
 
 
@@ -379,7 +379,7 @@ bool Menu::onMouseEvent(const MouseEvent& ev)
     if(menu && menu != this)
     {
         // navigate through menu chain
-        releasePointer();
+        //releasePointer();
         menu->onEnter();
     }
     else if( ev.isPress() )
@@ -394,7 +394,7 @@ bool Menu::onMouseEvent(const MouseEvent& ev)
 
 void Menu::onCloseEvent(const CloseEvent& ev)
 {
-    releasePointer();
+    //releasePointer();
 
     if( _currentMenu )
     {
@@ -433,7 +433,7 @@ void Menu::onShowEvent(const ShowEvent& ev)
 
     if( ! ev.visible() )
     {
-        releasePointer();
+        //releasePointer();
 
         if( parentShell() )
             parentShell()->onCloseMenu(*this);
@@ -443,23 +443,27 @@ void Menu::onShowEvent(const ShowEvent& ev)
         if( parentShell() )
             parentShell()->onOpenMenu(*this);
 
-        if( ! parentShell() )
-            grabPointer();
+        //if( ! parentShell() )
+            //grabPointer();
     }
 }
 
 
-void Menu::onEnterEvent( const EnterEvent& ev )
+bool Menu::onEnterEvent( const EnterEvent& ev )
 {
     Base::onEnterEvent(ev);
 
     onEnter();
+
+    return true;
 }
 
 
-void Menu::onLeaveEvent( const LeaveEvent& ev )
+bool Menu::onLeaveEvent( const LeaveEvent& ev )
 {
     Base::onLeaveEvent(ev);
+
+    return true;
 }
 
 } // namespace

@@ -103,9 +103,9 @@ class MenuBarItem : public Control
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
 
-        virtual void onEnterEvent( const EnterEvent& ev);
+        virtual bool onEnterEvent( const EnterEvent& ev);
 
-        virtual void onLeaveEvent(const LeaveEvent& ev);
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
 
     private:
         MenuBar&   _menuBar;

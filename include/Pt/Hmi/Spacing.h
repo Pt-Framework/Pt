@@ -124,7 +124,15 @@ class Spacing
     void setBottom(double bottom)
     {
       _bottom = bottom;
-    } 
+    }
+
+    bool operator==(const Spacing& s) const
+    {
+        return (s._left == _left)   &&
+               (s._top == _top)     &&
+               (s._right == _right) &&
+               (s._bottom == _bottom);
+    }
 
   private:
     double _left;

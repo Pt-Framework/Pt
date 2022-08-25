@@ -32,6 +32,8 @@
 #define Pt_Hmi_ScrollEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
+#include <Pt/Types.h>
 #include <Pt/Event.h>
 
 namespace Pt {
@@ -48,11 +50,34 @@ class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
             Depth = 2
         };
 
-        ScrollEvent(Pt::uint64_t vid)
-        : _vid(vid)
+        ScrollEvent()
+        : _vid(0)
+        , _visual(0)
         , _wheel(Vertical)
         , _delta(0)
         { }
+
+        explicit ScrollEvent(Visual& v)
+        : _vid( v.vid() )
+        , _visual(&v)
+        , _wheel(Vertical)
+        , _delta(0)
+        { }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
+        Visual* visual() const
+        {
+            return _visual;
+        }
+
+        void setVisual(Visual* v)
+        {
+            _visual = v;
+        }
 
         Pt::uint32_t wheel() const
         {
@@ -69,21 +94,12 @@ class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
             _wheel = wheel;
             _delta = d;
         }
-        
-        void setId(Pt::uint64_t vid)
-        {
-            _vid = vid;
-        }
-
-        Pt::uint64_t vid() const
-        {
-            return _vid;
-        }
 
     private:
-        Pt::uint64_t _vid;
-        Pt::uint32_t _wheel;
-        double       _delta;
+        Pt::uint64_t  _vid;
+        Visual*       _visual;
+        Pt::uint32_t  _wheel;
+        double        _delta;
 };
 
 } // namespace

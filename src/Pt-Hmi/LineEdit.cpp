@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/LineEdit.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -42,8 +43,7 @@ LineEdit::LineEdit()
 , _spacing(0)
 , _hasRenderer(false)
 {
-    setTextInput(_isEditable);
-    setFocusPolicy(Widget::NormalFocus);
+    setFocusPolicy(Widget::AcceptFocus);
 }
 
 
@@ -61,8 +61,7 @@ bool LineEdit::isEditable() const
 void LineEdit::setEditable(bool e)
 {
     _isEditable = e;
-    setTextInput(_isEditable);
-    setFocusPolicy(_isEditable ? Widget::NormalFocus : Widget::NoFocus);
+    setFocusPolicy(_isEditable ? Widget::AcceptFocus : Widget::NoFocus);
     update();
 }
 
@@ -164,7 +163,7 @@ void LineEdit::setAccepted(bool a)
     }
     else
     {
-        setFocusPolicy(Widget::NormalFocus);
+        setFocusPolicy(Widget::AcceptFocus);
     }
 }
 
@@ -281,7 +280,7 @@ void LineEdit::setRenderer(LineEditRenderer* renderer)
 }
 
 
-Gfx::SizeF LineEdit::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF LineEdit::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
     double itemsHeight = _font.size() * 2.5;
@@ -403,12 +402,12 @@ void LineEdit::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void LineEdit::onKeyEvent(const KeyEvent& ev)
+bool LineEdit::onKeyEvent(const KeyEvent& ev)
 {  
     Base::onKeyEvent(ev);
 
     if( ! ev.isPress() || ! _isEditable )
-        return;
+        return true;
 
     if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
     {
@@ -455,6 +454,8 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
             _textEdited.send( _editor.text() );
         }
     }
+
+    return true;
 }
 
 

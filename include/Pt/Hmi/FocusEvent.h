@@ -29,6 +29,9 @@
 #ifndef Pt_Hmi_FocusEvent_h
 #define Pt_Hmi_FocusEvent_h
 
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Visual.h>
+#include <Pt/Types.h>
 #include <Pt/Event.h>
 
 namespace Pt {
@@ -38,8 +41,9 @@ namespace Hmi {
 class FocusEvent : public Pt::BasicEvent<FocusEvent>
 {
     public:
-        FocusEvent(Pt::uint64_t vid, bool focus)
-        : _vid(vid)
+        FocusEvent(Visual& v, bool focus)
+        : _vid( v.vid() )
+        , _visual(&v)
         , _isFocused(focus)
         {
         }
@@ -48,14 +52,14 @@ class FocusEvent : public Pt::BasicEvent<FocusEvent>
         {
         }
 
-        void setId(Pt::uint64_t vid)
-        {
-            _vid = vid;
-        }
-
         Pt::uint64_t vid() const
         {
             return _vid;
+        }
+
+        Visual* visual() const
+        {
+            return _visual;
         }
 
         bool isFocused() const
@@ -65,7 +69,8 @@ class FocusEvent : public Pt::BasicEvent<FocusEvent>
 
     private:
         Pt::uint64_t _vid;
-        bool _isFocused;
+        Visual*      _visual;
+        bool         _isFocused;
 };
 
 } // namespace

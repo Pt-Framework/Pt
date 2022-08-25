@@ -666,10 +666,7 @@ void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
     BYTE keyboardState[256];
     GetKeyboardState(keyboardState);
 
-    //std::clog << "KEY: " << std::hex << vkey << std::endl;
-
-    wchar_t wc = 0;
-    ToUnicode(vkey, scanCode, (BYTE*)keyboardState, &wc, 1, 0);    
+    //std::clog << "KEY: " << std::hex << vkey << std::endl;  
 
     bool shift = (keyboardState[VK_SHIFT] & 0x80) == 0x80;
     bool control = (keyboardState[VK_CONTROL] & 0x80) == 0x80;
@@ -689,6 +686,13 @@ void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
 
     if(rwin || lwin)
         modifiers.add(Key::Meta);
+
+    // remove control modifier for ToUnicode
+    if(control)
+        keyboardState[VK_CONTROL] = 0;
+
+    wchar_t wc = 0;
+    ToUnicode(vkey, scanCode, (BYTE*)keyboardState, &wc, 1, 0); 
 
     Pt::uint32_t keyCode = Key::NoKey;
     if(vkey < keyMapSize)

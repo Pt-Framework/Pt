@@ -124,7 +124,7 @@ void TableLayout::setRow(std::size_t row, SizeMode mode, double size)
 }
 
 
-Gfx::SizeF TableLayout::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width() - padding().leftRight();
     double itemsHeight = policy.height() - padding().topBottom();
@@ -166,7 +166,7 @@ Gfx::SizeF TableLayout::onMeasure(Layouter& layouter, const SizePolicy& policy)
                 itemPolicy.setHeight( rowPolicy.size() );
             }
 
-            layouter.measure(*item, itemPolicy);
+            item->measure(itemPolicy);
             Gfx::SizeF prefSize = item->preferredSize();
 
             double itemWidth = prefSize.width() + item->margin().leftRight();
@@ -186,9 +186,9 @@ Gfx::SizeF TableLayout::onMeasure(Layouter& layouter, const SizePolicy& policy)
 }
 
 
-void TableLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void TableLayout::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(layouter, rect);
+    Base::onLayout(rect);
 
     //
     // calculate row sizes
@@ -250,7 +250,7 @@ void TableLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
                 if( ! item )
                     continue;
 
-                double preferredWidth = item->align( item->preferredSize().width() );
+                double preferredWidth = item->surface().align( item->preferredSize().width() );
                 double width = preferredWidth + item->margin().leftRight();
                 width = std::max<double>(columnPolicy.size(), width);
 
@@ -298,7 +298,8 @@ void TableLayout::onLayout(Layouter& layouter, const Gfx::RectF& rect)
                 Gfx::SizeF size( columnSize - item->margin().leftRight(),
                                  rowSize - item->margin().topBottom() );
 
-                layouter.layout(*item, pos, size);
+                item->move(pos);
+                item->resize(size);
             }
 
             x += columnSize;

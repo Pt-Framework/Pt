@@ -105,7 +105,7 @@ class PT_HMI_API MenuItem : public Control
         // TODO: rename onSelected
         virtual void onTriggered();
         
-        virtual void onParentChanged(Widget* w);
+        virtual void onParentChanged(View* v);
         
         virtual void onShortcut(const KeyEvent& kev);
 
@@ -121,9 +121,9 @@ class PT_HMI_API MenuItem : public Control
 
         virtual bool onTouchEvent(const TouchEvent& ev);
 
-        virtual void onEnterEvent( const EnterEvent& ev);
+        virtual bool onEnterEvent( const EnterEvent& ev);
 
-        virtual void onLeaveEvent(const LeaveEvent& ev);
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 

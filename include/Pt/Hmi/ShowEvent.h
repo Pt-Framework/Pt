@@ -30,7 +30,7 @@
 #define Pt_Hmi_ShowEvent_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
@@ -40,35 +40,44 @@ namespace Hmi {
 
 class PT_HMI_API ShowEvent : public Pt::BasicEvent<ShowEvent>
 {
-	public:	
-		ShowEvent( Pt::uint64_t vid, bool visible )
-		: _visible( visible )
-		, _vid( vid )
-		{
-		}
+    public:
+        ShowEvent(Visual& v, bool visible)
+        : _vid( v.vid() )
+        , _visual(&v)
+        , _visible(visible)
+        {
+        }
 
-		ShowEvent()
-		{
-		}
+        ShowEvent()
+        : _vid(0)
+        , _visual(0)
+        , _visible(false)
+        {
+        }
 
-		virtual ~ShowEvent()
-		{
-		}
+        virtual ~ShowEvent()
+        {
+        }
 
-		bool  visible( ) const
-		{
-			return _visible;
-		}
-
-        
         Pt::uint64_t vid() const
         {
             return _vid;
         }
 
-	private:
-		bool  _visible;
+        Visual* visual() const
+        {
+            return _visual;
+        }
+
+        bool  visible( ) const
+        {
+            return _visible;
+        }
+
+    private:
         Pt::uint64_t _vid;
+        Visual*      _visual;
+        bool         _visible;
 };
 
 } // namespace
@@ -76,4 +85,3 @@ class PT_HMI_API ShowEvent : public Pt::BasicEvent<ShowEvent>
 } // namespace
 
 #endif
-

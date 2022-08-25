@@ -41,7 +41,6 @@ namespace Hmi {
 InputMethod::InputMethod()
 : _app(0)
 , _receiver(0)
-, _keyEvent(0)
 , _isVisible(false)
 {
 }
@@ -98,9 +97,13 @@ void InputMethod::sendEvent(const KeyEvent& ev)
     if(_receiver == 0)
         return;
 
-    _keyEvent = ev;
-    _keyEvent.setId(_receiver);
-     Application::instance().loop().commitEvent(_keyEvent);
+    Visual* visual = Application::instance().findVisual(_receiver);
+    if(visual)
+    {
+        _keyEvent = ev;
+        _keyEvent.setVisual(visual);
+         Application::instance().loop().commitEvent(_keyEvent);
+    }
 }
 
 
@@ -120,24 +123,21 @@ DefaultInputMethod::DefaultInputMethod()
 : _window(0)
 , _keyButton(0)
 {
-    //_window = new Window();
-    //_window->setTopMost(true);
-    //_window->move( Gfx::PointF(500, 500) );
-    //_window->resize( Gfx::SizeF(100, 100) );
+
 }
 
 
 DefaultInputMethod::~DefaultInputMethod()
 {
-    //delete _keyButton;
-    //delete _window;
+    delete _keyButton;
+    delete _window;
 }
 
 
 void DefaultInputMethod::onKeyPress()
 {
     //std::clog << "KEY PRESS" << std::endl;
-    KeyEvent kev(0);
+    KeyEvent kev;
     kev.setPress(Key(Key::A), 'a');
 
     sendEvent(kev);
@@ -146,24 +146,34 @@ void DefaultInputMethod::onKeyPress()
 
 void DefaultInputMethod::onBegin()
 {
-    //if( ! _keyButton)
-    //{
-    //    _keyButton = new PushButton();
-    //    _keyButton->setText("a");
-    //    _keyButton->setTextInput(true);
-    //    _window->setMainWidget(_keyButton);
-    //    _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
-    //}
-    //
-    //_window->show(true);
+    if( ! _window )
+    {
+        _window = new Window();
+        _window->setTopMost(true);
+        _window->move( Gfx::PointF(500, 500) );
+        _window->resize( Gfx::SizeF(100, 100) );
+        _window->setTitle("Input Method");
+    }
 
-    //std::clog << "INPUTMETHOD BEGIN" << std::endl;
+    if( ! _keyButton)
+    {
+        _keyButton = new PushButton();
+        _keyButton->setText("a");
+        _window->setContent(_keyButton);
+        _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
+    }
+    
+    _window->show(true);
+
+    //std::clog << "INPUT_METHOD BEGIN" << std::endl;
 }
 
 void DefaultInputMethod::onFinish()
 {
-    //_window->show(false);
-    //std::clog << "INPUTMETHOD FINISH" << std::endl;
+    if( _window->isVisible() )
+        _window->show(false);
+    
+    //std::clog << "INPUT_METHOD FINISH" << std::endl;
 }
 
 

@@ -73,9 +73,9 @@ class PT_HMI_API ScrollView : public Widget
         void onScrolledY(double n);
 
     protected:
-        virtual Gfx::SizeF onMeasure(Layouter& layouter, const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(Layouter& layouter, const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
     
     private:
         void updateScrollBar(ScrollBar& scroll, double maxRange);

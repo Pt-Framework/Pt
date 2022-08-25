@@ -31,85 +31,111 @@
 #define PT_HMI_VISUAL_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Types.h>
-#include <Pt/Event.h>
+#include <Pt/Hmi/Spacing.h>
+#include <Pt/Hmi/SizePolicy.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Hmi/Spacing.h>
-#include <Pt/Hmi/SizePolicy.h>
-#include <Pt/Hmi/MouseEvent.h>
-#include <Pt/Hmi/TouchEvent.h>
-#include <Pt/Hmi/ScrollEvent.h>
+#include <Pt/String.h>
+#include <Pt/Event.h>
+#include <Pt/Types.h>
+
 #include <string>
 
 namespace Pt {
 
 namespace Hmi {
 
-class Visual;
-
 ///////////////////////////////////////////////////////////////////////
 // Responder
 ///////////////////////////////////////////////////////////////////////
 
+class MouseEvent;
+class TouchEvent;
+class ScrollEvent;
+class EnterEvent;
+class LeaveEvent;
+class KeyEvent;
+
 class PT_HMI_API Responder
 {
+    protected:
+        Responder();
+
+    public:
+        /** @brief Converts to global coordinate.
+        */
+        Gfx::PointF toScreen(const Gfx::PointF& pos) const
+        {
+            return onToScreen(pos); 
+        }
+        
+        /** @brief Converts to local coordinate.
+        */
+        Gfx::PointF fromScreen(const Gfx::PointF& pos) const
+        {
+            return onFromScreen(pos); 
+        }
+
     public:
         virtual ~Responder();
 
-        void mouseEvent(const MouseEvent& ev)
-        {
-            //bool consumed = ev.isPress() ? onMouseDown(ev) 
-            //                             : onMouseUp(ev);
-            
-            bool consumed = onMouseEvent(ev);
+        bool mouseEvent(const MouseEvent& ev);
 
-            if(consumed)
-                return;
+        void touchEvent(const TouchEvent& ev);
 
-            Responder* next = onNextResponder();
-            if(next)
-            {
-                Gfx::PointF p = onToNextResponder( ev.position() );
-                
-                MouseEvent ev2(ev);
-                ev2.setPosition(p);
+        void scrollEvent(const ScrollEvent& ev);
 
-                next->mouseEvent(ev);
-            }
-        }
+        void enterEvent(const EnterEvent& ev);
 
-        virtual void touchEvent(const TouchEvent& ev)
-        {}
+        void leaveEvent(const LeaveEvent& ev);
 
-        virtual void scrollEvent(const ScrollEvent& ev)
-        {}
+        void keyEvent(const KeyEvent& ev);
 
     protected:
-        virtual bool onMouseEvent(const MouseEvent& ev) = 0;
-
-        //virtual bool onMouseUp(const MouseEvent& ev) {}
-
-        //virtual bool onMouseDown(const MouseEvent& ev) {}
-
         virtual Responder* onNextResponder() = 0;
 
-        virtual Gfx::PointF onToNextResponder(const Gfx::PointF& pos) = 0;
+        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const = 0;
 
     protected:
-        Responder();
+        virtual bool onMouseEvent(const MouseEvent& ev);
+
+        virtual bool onTouchEvent(const TouchEvent& ev);
+
+        virtual bool onScrollEvent(const ScrollEvent& ev);
+
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
+        virtual bool onKeyEvent(const KeyEvent& ev);
+
+    protected:
+        virtual bool onMouseUp(const MouseEvent& ev) 
+        { return false; }
+
+        virtual bool onMouseDown(const MouseEvent& ev) 
+        { return false; }
+
+        virtual bool onMouseMove(const MouseEvent& ev) 
+        { return false; }
 };
 
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
-class PT_HMI_API Visual : public Responder
+class PT_HMI_API Visual
 {
+    protected:
+        Visual();
+
     public:
         virtual ~Visual();
-
+        
         Pt::uint64_t vid() const
         {
             return _vid;
@@ -125,200 +151,20 @@ class PT_HMI_API Visual : public Responder
             return _name;
         }
 
-        void processEvent(const Pt::Event& ev);
+        void processEvent(const Pt::Event& ev)
+        {
+            this->onEvent(ev);
+        }
 
+        virtual void setCapture(bool capture)
+        {
+            this->onSetCapture(capture);
+        }
+    
     protected:
-        Visual();
-        
         virtual void onEvent(const Pt::Event& ev) = 0;
 
-    public:
-        const Visual* parent() const
-        {
-          return onParent();
-        }
-
-        Visual* parent()
-        {
-          return onParent();
-        }
-
-        const Gfx::PointF& position() const
-        {
-            return onPosition();
-        }
-
-        const Gfx::SizeF& size() const
-        {
-            return onSize();
-        }
-
-        double scaleFactor() const
-        {
-            return onScaleFactor();
-        }
-        
-        /** @brief Converts to parent coordinate.
-        */
-        Gfx::PointF toParent(const Gfx::PointF& pos) const;
-
-        /** @brief Converts to client coordinate.
-        */
-        Gfx::PointF fromParent(const Gfx::PointF& pos) const;
-        
-        /** @brief Converts to client coordinate.
-        */
-        Gfx::PointF toClient(const Gfx::PointF& pos, const Visual& v) const;
-
-        /** @brief Converts to parent coordinate.
-        */
-        Gfx::PointF fromClient(const Gfx::PointF& pos, const Visual& v) const;
-
-        /** @brief Converts to global coordinate.
-        */
-        Gfx::PointF toScreen(const Gfx::PointF& pos) const;
-
-        /** @brief Converts to client coordinate.
-        */
-        Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
-
-    protected:
-        virtual const Gfx::PointF& onPosition() const = 0;
-
-        virtual const Gfx::SizeF& onSize() const = 0;
-
-        virtual double onScaleFactor() const = 0;
-
-        virtual Visual* onParent() const = 0;
-
-        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const = 0;
-
-    public:
-        double toPhysical(double n) const
-        {
-            return n * scaleFactor();
-        }
-
-        Gfx::PointF toPhysical(const Gfx::PointF& p) const
-        {
-            return p * scaleFactor();
-        }
-
-        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const
-        {
-            return s * scaleFactor();
-        }
-
-        Gfx::RectF toPhysical(const Gfx::RectF& r) const
-        {
-            return Gfx::RectF( toPhysical( r.topLeft() ), 
-                               toPhysical( r.size() ) );
-        }
-
-
-        double toLogical(double n) const
-        {
-            return n / scaleFactor();
-        }
-        Gfx::PointF toLogical(const Gfx::PointF& p) const
-        {
-            return p / scaleFactor();
-        }
-
-        Gfx::SizeF toLogical(const Gfx::SizeF& s) const
-        {
-            return s / scaleFactor();
-        }
-
-        Gfx::RectF toLogical(const Gfx::RectF& r) const
-        {
-            return Gfx::RectF(toLogical(r.topLeft()), toLogical(r.size()));
-        }
-
-
-        double align(double n) const
-        {
-            // better name: alignGrid()
-
-            double p = toPhysical(n);
-            p = lround(p);
-            return toLogical(p);
-        }
-
-        double alignPixel(double n) const
-        {
-            double p = toPhysical(n);
-            p = lround(p + 0.5) - 0.5;
-            return toLogical(p);
-        }
-
-        double alignContour(size_t n) const
-        {
-            const double scaling = scaleFactor();
-            // keep contour size when downscaling
-            if (scaling < 1.0)
-                return toLogical(n);
-
-            double p = toPhysical(n);
-            size_t s = static_cast<size_t>(p);
-            return toLogical(s);
-        }
-
-        Gfx::PointF align(const Gfx::PointF& p) const
-        {
-            Gfx::PointF pos = toPhysical(p);
-            pos.setX(lround(pos.x()));
-            pos.setY(lround(pos.y()));
-            return toLogical(pos);
-        }
-
-        Gfx::SizeF align(const Gfx::SizeF& s) const
-        {
-            Gfx::SizeF size = toPhysical(s);
-            size.setWidth(lround(size.width()));
-            size.setHeight(lround(size.height()));
-            return toLogical(size);
-        }
-
-        Gfx::RectF align(const Gfx::RectF& rect) const
-        {
-            Gfx::PointF pos = toPhysical(rect.topLeft());
-            pos.setX(lround(pos.x()));
-            pos.setY(lround(pos.y()));
-
-            Gfx::SizeF size = toPhysical(rect.size());
-            size.setWidth(lround(size.width()));
-            size.setHeight(lround(size.height()));
-
-            return toLogical(Gfx::RectF(pos, size));
-        }
-
-        Spacing align(const Spacing& spacing) const
-        {
-            Spacing alignedSpacing(align(spacing.left()),
-                align(spacing.top()),
-                align(spacing.right()),
-                align(spacing.bottom()));
-
-            return alignedSpacing;
-        }
-
-        public:
-            void repaint()
-            {
-                Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-                onRepaint(rect);
-            }
-
-            void repaint(const Gfx::RectF& rect)
-            {
-                onRepaint(rect);
-            }
-
-        protected:
-            virtual void onRepaint(const Gfx::RectF& rect) = 0;
+        virtual void onSetCapture(bool capture) = 0;
 
     private:
         Pt::uint64_t _vid;
@@ -330,64 +176,84 @@ class PT_HMI_API Visual : public Responder
 ///////////////////////////////////////////////////////////////////////
 
 class Widget;
-class Window;
-class Screen;
+class View;
+class Key;
 
-class View : public virtual Visual
+// View -> ViewManager (interface)
+// Widget -> View
+// Widget -> Control
+
+class PT_HMI_API View
 {
     friend class Widget;
-
-    protected:
-        View()
-        {}
+    friend class Shell;
 
     public:
-        virtual ~View()
-        {}
+        enum FocusPolicy
+        {
+            NoFocus,
+            AcceptFocus,
+            KeepFocus
+        };
 
-        Window* window();
+    protected:
+        View();
 
-        Screen* screen();
+    public:
+        virtual ~View();
 
-        Gfx::PointF toWidget(const Widget& widget, const Gfx::PointF& pos) const
+        Gfx::PointF toWidget(const Widget& widget, 
+                             const Gfx::PointF& pos) const
         { 
             return onToWidget(widget, pos); 
         }
 
-        Gfx::PointF fromWidget(const Widget& widget, const Gfx::PointF& pos) const
+        Gfx::PointF fromWidget(const Widget& widget,
+                               const Gfx::PointF& pos) const
         { 
             return onFromWidget(widget, pos); 
         }
 
-        void relayout();
-
     protected:
-        virtual void onRelayout() = 0;
-
-    protected:
-        void add(Widget& widget);
-
-        void remove(Widget& widget);
-
-    private:
-        virtual Window* onGetWindow() = 0;
-
-        virtual Screen* onGetScreen() = 0;
-
-        virtual Gfx::PointF onToWidget(const Widget& widget, const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onFromWidget(const Widget& widget, const Gfx::PointF& pos) const = 0;
-
-    private:
         virtual void onAttach(Widget& widget) = 0;
-
+        
         virtual void onDetach(Widget& widget) = 0;
 
-        virtual void onRaise(Widget& widget) = 0;
+        virtual void onInit(Widget& widget) = 0;
+
+        virtual void onRelease(Widget& widget) = 0;
+
+        virtual Gfx::PointF onToWidget(const Widget& widget, 
+                                       const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onFromWidget(const Widget& widget, 
+                                         const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onToScreen(const Widget& widget, 
+                                       const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onFromScreen(const Widget& widget, 
+                                         const Gfx::PointF& pos) const = 0;
+
+        virtual void onRepaint(Widget& widget, const Gfx::RectF& rect) = 0;
+
+        virtual void onRelayout(Widget& widget) = 0;
 
         virtual void onEnable(Widget& widget, bool isEnable) = 0;
 
+        virtual void onActivate(Widget& w, bool active) = 0;
+
         virtual void onShow(Widget& widget, bool isShown) = 0;
+
+        virtual void onMove(Widget& widget, const Gfx::PointF& pos) = 0;
+
+        virtual void onResize(Widget& widget, const Gfx::SizeF& size) = 0;
+
+        virtual void onRaise(Widget& widget) = 0;
+
+        virtual void onEnter(Widget& widget, Visual& v) = 0;
+
+        virtual void onSetCapture(Widget& widget, bool capture) = 0;
 };
 
 } // namespace

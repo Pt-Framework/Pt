@@ -3,6 +3,7 @@
 
 #include "Dialog1.h"
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Shell.h>
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/ComboBox.h>
@@ -32,6 +33,14 @@ class ChildW : public Hmi::Window
         
         ~ChildW();
 
+        Shell& shell()
+        {
+            return _shell;
+        }
+
+        Pt::Signal<>& closeRequested()
+        { return _closeButton.clicked(); }
+
     private:
         void onShowDialog();
 
@@ -40,9 +49,7 @@ class ChildW : public Hmi::Window
         void onComboSelected(Pt::Hmi::ListBoxItem& item);
 
         void onTextEntered(const Pt::String& text);
-        
-        void onCloseApp();
-        
+
         void checkInput(const Pt::String& s);
 
         void checkSpinBox(int value);
@@ -50,6 +57,8 @@ class ChildW : public Hmi::Window
     private:
         FlowLayout _mainLayout;
         MenuBar _menuBar;
+
+        Shell _shell;
 
         Menu     _fileMenu;
         MenuItem _item1;

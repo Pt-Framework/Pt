@@ -68,34 +68,25 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         virtual ~ApplicationImpl();
 
-        Pt::System::Selector& selector()
-        { 
-            return _selector; 
-        }
-
-        void nextEvent();
-
         void setCursor(const Cursor* cursor);
 
-        void setFontDir(const Pt::System::Path& dir)
-        {
-        }
+        void setFontDir(const Pt::System::Path& dir);
 
         void setDefaultFont(const std::string& fontName);
 
         Pt::Timespan inactivityTime() const;
 
-        void grabPointer(Window& grabber);
-
-        void releasePointer(Window& grabber);
-
-        void grabPointer(Widget& grabber);
-
-        void releasePointer(Widget& grabber);
-
         void sendKeyEvent(const KeyEvent& ev);
 
         void sendMouseEvent(const MouseEvent& ev);
+
+        void nextEvent();
+
+    public:
+        virtual Pt::System::Selector& selector()
+        { 
+            return _selector; 
+        }
 
     protected:
         virtual void onAttachSelectable(System::Selectable&);
@@ -161,12 +152,11 @@ class ApplicationImpl : public Pt::System::EventLoop
         ULONG_PTR                        _gdiplusToken;
         MouseEvent                       _mouseEvent;
         KeyEvent                         _keyEvent;
-        bool                             _pointerInWindow;
+        HWND                             _pointerWindow;
+        //Visual*                          _grabber;
+        HCURSOR                          _defaultCursorHandle;
         HCURSOR                          _cursorHandle;
         const Cursor*                    _currentCursor;
-
-        bool                             _onScroll;
-        Gfx::Point                       _scrollFrom;
 };
 
 } // namespace

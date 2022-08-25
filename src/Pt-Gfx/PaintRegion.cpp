@@ -76,6 +76,18 @@ void PaintRegion::reset(const Gfx::RectF& rect)
 }
 
 
+void PaintRegion::move(const Gfx::PointF& pos)
+{
+    _area.setOrigin(pos);
+}
+
+
+void PaintRegion::resize(const Gfx::SizeF& size)
+{
+    _area.setSize(size);
+}
+
+
 void PaintRegion::detach()
 {
     if(_surface)

@@ -291,7 +291,7 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 }
 
 
-Gfx::SizeF PushButton::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
     Gfx::Painter _painter( surface() );
     _painter.setFont(_font);
@@ -303,7 +303,7 @@ Gfx::SizeF PushButton::onMeasure(Layouter& layouter, const SizePolicy& policy)
     // use descent as additional spacing
     double textHeight = _textMetrics.height() + _textMetrics.descent(); 
 
-    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = 0;
@@ -330,9 +330,9 @@ Gfx::SizeF PushButton::onMeasure(Layouter& layouter, const SizePolicy& policy)
 }
 
 
-void PushButton::onLayout(Layouter& layouter, const Gfx::RectF& rect)
+void PushButton::onLayout(const Gfx::RectF& rect)
 {    
-    Base::onLayout(layouter, rect);
+    Base::onLayout(rect);
 
     // bool isInvalid = isLayoutInvalid();
 
@@ -345,7 +345,7 @@ void PushButton::onLayout(Layouter& layouter, const Gfx::RectF& rect)
 
     double spacing = _picture.empty() || text().empty() ? 0 : _textMetrics.height() * 0.5;
     
-    Gfx::SizeF pictureSize = toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = _textMetrics.width() + spacing + pictureWidth;
@@ -400,11 +400,11 @@ void PushButton::onLayout(Layouter& layouter, const Gfx::RectF& rect)
         _iconPos.set(pictureX + pictureXOff, 
                      pictureY + pictureYOff);
 
-        _iconPos = align(_iconPos);
+        _iconPos = surface().align(_iconPos);
     }
 
     _textPos.set(textX, textY);
-    _textPos = align(_textPos);
+    _textPos = surface().align(_textPos);
 }
 
 
@@ -422,7 +422,7 @@ void PushButton::onIconChanged()
 
     if( ! _icon.empty() )
     {
-        const Gfx::SizeF scaledSize = toPhysical(_iconSize);
+        const Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _renderer->prepareIcon(*this, options, iconImage, _picture);
     }
@@ -453,7 +453,7 @@ void PushButton::onInvalidate()
     //// onIconChanged()
     if( ! _icon.empty() )
     {
-        const Gfx::SizeF scaledSize = toPhysical(_iconSize);
+        const Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _renderer->prepareIcon(*this, options, iconImage, _picture);
     }

@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Hmi/ComboBox.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -41,11 +42,12 @@ ComboBox::ComboBox()
 , _isTextChanged(false)
 , _hasRenderer(false)
 {
-    setTextInput(_isEditable);
-    setFocusPolicy(Widget::NormalFocus);
+    setFocusPolicy(Widget::AcceptFocus);
 
     _popup.setContent(&_items);
-    _popup.eventReady() += Pt::slot(*this, &ComboBox::processKeyEvent);
+
+    // process key events in the combo box edit field when popup is open
+    _popup.eventReceived() += Pt::slot(*this, &ComboBox::processKeyEvent);
     
     _items.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
 }
@@ -79,7 +81,6 @@ bool ComboBox::isEditable() const
 void ComboBox::setEditable(bool e)
 {
     _isEditable = e;
-    setTextInput(_isEditable);
     update();
 }
 
@@ -100,7 +101,7 @@ void ComboBox::setAccepted(bool a)
     }
     else
     {
-        setFocusPolicy(Widget::NormalFocus);
+        setFocusPolicy(Widget::AcceptFocus);
     }
 }
 
@@ -145,25 +146,42 @@ void ComboBox::setMaxHeight(double height)
 }
 
 
+//void ComboBox::showPopup()
+//{
+//    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
+//    policy.setWidth( size().width() );
+//    policy.setHeight(0);
+//    _popup.setSizePolicy(policy);
+//
+//    _popup.setMaximumHeight(_maxHeight);
+//
+//    Gfx::SizeF popupSize = _popup.measure(policy);
+//    _popup.resize(popupSize);
+//    
+//    Gfx::PointF popupPos(0, size().height() );
+//    popupPos = this->toScreen(popupPos);
+//    _popup.move(popupPos);
+//
+//    _popup.setTopMost(true);
+//    _popup.show();
+//}
+
+
 void ComboBox::showPopup()
 {
+    _popup.setMaximumHeight(_maxHeight);
+
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
     policy.setWidth( size().width() );
-    policy.setHeight(_maxHeight);
-
-    Gfx::SizeF popupSize = _popup.measure(policy);
-
-    int maxY = _items.maximumY();
-    popupSize.setHeight( std::min<double>(maxY, _maxHeight) );
-    
-    _popup.resize(popupSize);
+    policy.setHeight(0);
+    _popup.resize(policy);
     
     Gfx::PointF popupPos(0, size().height() );
     popupPos = this->toScreen(popupPos);
     _popup.move(popupPos);
 
+    _popup.setTopMost(true);
     _popup.show();
-    _popup.activate();
 }
 
 
@@ -316,13 +334,13 @@ void ComboBox::onItemSelected(ListBoxItem& item)
     Application::instance().inputMethod().finish();
     _editor.setText( item.text() );
 
-    _popup.show(false);
+    hidePopup();
     
     invalidate();
 }
 
 
-Gfx::SizeF ComboBox::onMeasure(Layouter& layouter, const SizePolicy& policy)
+Gfx::SizeF ComboBox::onMeasure(const SizePolicy& policy)
 {
     // TODO: width of widest item?
     double itemsWidth = policy.width();
@@ -496,11 +514,13 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
 }
 
 
-void ComboBox::onKeyEvent(const KeyEvent& ev)
+bool ComboBox::onKeyEvent(const KeyEvent& ev)
 {
     Base::onKeyEvent(ev);
 
     processKeyEvent(ev);
+
+    return true;
 }
 
 

@@ -30,6 +30,7 @@
 
 #include "MouseDevice.h"
 
+#include <Pt/Hmi/ScrollEvent.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/String.h>
 
@@ -48,10 +49,10 @@ MouseDevice::MouseDevice(const char* deviceName)
 , _control(false)
 , _alt(false)
 , _meta(false)
-, _keyEvent(0)
-, _mouseEvent(0)
+, _keyEvent()
+, _mouseEvent()
 , _touchMove(0)
-, _touchEvent(0)
+, _touchEvent()
 {
     _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);
 
@@ -75,10 +76,10 @@ MouseDevice::MouseDevice()
 , _control(false)
 , _alt(false)
 , _meta(false)
-, _keyEvent(0)
-, _mouseEvent(0)
+, _keyEvent()
+, _mouseEvent()
 , _touchMove(0)
-, _touchEvent(0)
+, _touchEvent()
 {
     _ioh.fd = -1;
 }
@@ -158,8 +159,8 @@ bool MouseDevice::onRun()
 
       ++count;
 
-    //  std::clog << "\ninput on fd: " << _ioh.fd << " #" << count 
-    //            << " type: " << ev.type << std::endl;
+      //std::clog << "\ninput on fd: " << _ioh.fd << " #" << count 
+      //          << " type: " << ev.type << std::endl;
 
       switch (ev.type)
       {
@@ -191,6 +192,16 @@ void MouseDevice::onRelative(const input_event& ev)
 {
     //std::clog << "EV_REL " << ev.code << " " << ev.value << std::endl;
 
+    if (ev.code == REL_WHEEL)
+    {
+        int delta = ev.value;
+
+        ScrollEvent sev;
+        sev.set(ScrollEvent::Vertical, delta * 20);
+        _eventReady.send(sev);
+        return;
+    }
+
     _mouseEvent.setMove();
 
     if(ev.code == REL_X)
@@ -216,6 +227,8 @@ void MouseDevice::onRelative(const input_event& ev)
 
 void MouseDevice::onAbsolute(const input_event& ev)
 {
+    //std::clog << "EV_ABS " << ev.code << " " << ev.value << std::endl;
+
     _mouseEvent.setMove();
 
     if(ev.code == ABS_X)
@@ -241,8 +254,7 @@ void MouseDevice::onAbsolute(const input_event& ev)
 
 void MouseDevice::onKey(const input_event& ev)
 {
-    //std::clog << "EV_KEY on fd: " << _ioh.fd << " " 
-    //          << ev.code << " " << ev.value << std::endl;
+    //std::clog << "EV_KEY on fd: " << _ioh.fd << " " << ev.code << " " << ev.value << std::endl;
     
     if( ev.code == 272)    
     {

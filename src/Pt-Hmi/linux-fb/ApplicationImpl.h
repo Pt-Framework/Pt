@@ -44,9 +44,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class Widget;
-class Window;
-
 class ApplicationImpl : public Pt::System::MainLoop
 {
     public:
@@ -54,38 +51,33 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         virtual ~ApplicationImpl();
 
+        const Cursor& cursor()
+        { return _cursor; }
+
         void setCursor(const Cursor* cursor );
 
         void setFontDir(const Pt::System::Path& dir);
 
         void setDefaultFont(const std::string& fontName);
 
-        const Cursor& cursor()
-        { return _cursor; }
-
         Pt::Timespan inactivityTime() const;
-
-        void grabPointer(Window& grabber);
-
-        void releasePointer(Window& grabber);
-
-        void grabPointer(Widget& grabber);
-
-        void releasePointer(Widget& grabber);
 
         void sendKeyEvent(const KeyEvent& ev);
 
         void sendMouseEvent(const MouseEvent& ev);
     
+        void nextEvent();
+
+    public:
         FrameBuffer& frameBuffer()
         {
             return _frameBuffer;
         }
 
-        void nextEvent();
-
     private:
         void onMouseEvent(const MouseEvent& ev);
+
+        void onScrollEvent(const ScrollEvent& ev);
 
         void onTouchEvent(const TouchEvent& ev);
 
@@ -102,7 +94,6 @@ class ApplicationImpl : public Pt::System::MainLoop
         Gfx::Transform               _touchTransform;      
         Cursor                       _cursor;
         Pt::DateTime                 _lastActivityTime;
-        MouseEvent                   _lastMouse;
 };
 
 } // namespace

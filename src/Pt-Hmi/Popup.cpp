@@ -27,14 +27,18 @@
 */
 
 #include <Pt/Hmi/Popup.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Screen.h>
+#include <algorithm>
 
 namespace Pt {
 
 namespace Hmi {
 
 Popup::Popup()
-: Window(0, Window::Popup)
+: Window(0, WindowType::Popup)
 {
+    setTitle("Popup");
 }
 
 
@@ -49,44 +53,93 @@ void Popup::onShowEvent(const ShowEvent& ev)
 
     if( ev.visible() )
     {
-        grabPointer();
+        //std::clog << "POPUP SHOW: " << vid() << std::endl;
+        //grabPointer();
+        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalMouseEvent);
+        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalTouchEvent);
+        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalActivateEvent);
+        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalMoveEvent);
     }
     else
     {
-        releasePointer();
+        //std::clog << "POPUP HIDE: " << vid() << std::endl;
+        //releasePointer();
+        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalMouseEvent);
+        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalTouchEvent);
+        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalActivateEvent);
+        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalMoveEvent);
     }
+}
+
+
+void Popup::onGlobalMouseEvent(const MouseEvent& ev)
+{
+    //std::clog << "POPUP GLOBAL MOUSE: " << ev.visual()->vid() << std::endl;
+
+    if( ev.isPress() )
+    {
+        Gfx::PointF pos = fromScreen( ev.position() );
+        Gfx::RectF rect( size() );
+
+        if( ! rect.contains(pos) )
+        {
+            show(false);
+        }
+    }
+}
+
+
+void Popup::onGlobalTouchEvent(const TouchEvent& ev)
+{
+    if( ev.isPress() )
+    {
+        Gfx::PointF pos = fromScreen( ev.position() );
+        Gfx::RectF rect( size() );
+
+        if( ! rect.contains(pos) )
+        {
+            show(false);
+        }
+    }
+}
+
+
+void Popup::onGlobalActivateEvent(const ActivateEvent& ev)
+{
+    show(false);
+}
+
+
+void Popup::onGlobalMoveEvent(const MoveEvent& ev)
+{
+    // ignore moving children !!! REMOVE !!! )
+    //for( Visual* v = ev.visual(); v != 0; v = v->parent() )
+    //{
+    //    if(v == this)
+    //        return;
+    //}
+
+    // react only to moving top level windows
+    Screen& screen = Application::instance().screen();
+    const std::vector<Window*>& windows = screen.windows();
+
+    std::vector<Window*>::const_iterator it = std::find( windows.begin(),
+                                                         windows.end(), 
+                                                         ev.visual() );
+    if( it != windows.end() )
+        show(false);
 }
 
 
 bool Popup::onMouseEvent(const MouseEvent& ev)
 {
-    bool r = Base::onMouseEvent(ev);
-
-    Gfx::RectF rect( size() );
-    if( rect.contains( ev.position() ) )
-        return r;
-
-    if( ev.isPress() )
-    {
-        show(false);
-    }
-
-    return true;
+    return Base::onMouseEvent(ev);
 }
 
 
-void Popup::onTouchEvent(const TouchEvent& ev)
+bool Popup::onTouchEvent(const TouchEvent& ev)
 {
-    Base::onTouchEvent(ev);
-
-    Gfx::RectF rect( size() );
-    if( rect.contains( ev.position() ) )
-        return;
-
-    if( ev.isPress() )
-    {
-        show(false);
-    }
+    return Base::onTouchEvent(ev);
 }
 
 } // namespace

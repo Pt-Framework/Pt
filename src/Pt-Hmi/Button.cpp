@@ -39,7 +39,7 @@ namespace Hmi {
 Button::Button()
 : _onClickBegin(false)
 {
-    setFocusPolicy(Widget::NormalFocus);
+    setFocusPolicy(Widget::AcceptFocus);
 }
 
   
@@ -110,26 +110,24 @@ void Button::onActionKey( const KeyEvent& kev )
 }
 
 
-void Button::onShortcut( const KeyEvent& kev )
+void Button::onShortcut(const KeyEvent& kev)
 {
     Base::onShortcut(kev);
 
-    if( kev.isPress() )
-        onPressed();
-    else if( kev.isRelease() )
-        onReleased();
+    onPressed();
+    onReleased();
 }
 
 
-void Button::onEnterEvent(const EnterEvent& ev)
+bool Button::onEnterEvent(const EnterEvent& ev)
 {
-    Base::onEnterEvent(ev);
+    return Base::onEnterEvent(ev);
 }
 
 
-void Button::onLeaveEvent(const LeaveEvent& ev)
+bool Button::onLeaveEvent(const LeaveEvent& ev)
 {
-    Base::onLeaveEvent(ev);
+    return Base::onLeaveEvent(ev);
 }
 
 
@@ -146,7 +144,7 @@ bool Button::onMouseEvent(const MouseEvent& ev)
     if( ev.isPress() )
     {
         _onClickBegin = true;
-        grabPointer();
+        //grabPointer();
         onPressed();
     }
     else if( ev.isRelease() )
@@ -161,7 +159,7 @@ bool Button::onMouseEvent(const MouseEvent& ev)
         if(_onClickBegin)
         {
             _onClickBegin = false;
-            releasePointer();
+            //releasePointer();
         }
         
         if(isClick)
@@ -185,7 +183,7 @@ bool Button::onTouchEvent(const TouchEvent& ev)
     if( ev.isPress() )
     {
         _onClickBegin = true;
-        grabPointer();
+        //grabPointer();
         onPressed();
     }
     else if( ev.isRelease() )
@@ -200,7 +198,7 @@ bool Button::onTouchEvent(const TouchEvent& ev)
         if(_onClickBegin)
         {
             _onClickBegin = false;
-            releasePointer();
+            //releasePointer();
         }
 
         if(isClick)
@@ -222,7 +220,7 @@ bool Button::onScrollEvent(const ScrollEvent& ev)
     if(_onClickBegin)
     {
         _onClickBegin = false;
-        releasePointer();
+        //releasePointer();
         onCanceled();
     }
 

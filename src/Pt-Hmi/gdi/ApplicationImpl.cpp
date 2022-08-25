@@ -45,7 +45,6 @@
 #include <Pt/String.h>
 #include <Pt/Types.h>
 
-
 using std::max;
 using std::min;
 #include <WindowsX.h>
@@ -136,16 +135,17 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles,
 // ApplicationImpl
 /////////////////////////////////////////////////////////////////////////////
 
+static const Cursor noCursor;
+
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
 , _instanceHandle(NULL)
 , _gdiplusToken(0)
-, _mouseEvent(0)
-, _keyEvent(0)
-, _pointerInWindow(false)
+, _pointerWindow(NULL)
+//, _grabber(0)
+, _defaultCursorHandle(0)
 , _cursorHandle(0)
-, _currentCursor(0)
-, _onScroll(false)
+, _currentCursor(&noCursor)
 {
 #ifdef NDEBUG  
     FreeConsole();
@@ -170,6 +170,8 @@ ApplicationImpl::ApplicationImpl()
     winClass.lpszMenuName  = NULL;
     winClass.lpszClassName = "Pt-Hmi";
     RegisterClass(&winClass);
+
+    _defaultCursorHandle = LoadCursor(NULL, IDC_ARROW);
 }
 
 
@@ -177,6 +179,8 @@ ApplicationImpl::~ApplicationImpl()
 {
     if( _cursorHandle != 0 )
        DestroyCursor( _cursorHandle );
+
+    DestroyCursor(_defaultCursorHandle);
 
     Gdiplus::GdiplusShutdown(_gdiplusToken);
 
@@ -186,16 +190,22 @@ ApplicationImpl::~ApplicationImpl()
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
 {      
-    if( _currentCursor == cursor )
+    if(_currentCursor == cursor)
         return;
 
     _currentCursor = cursor;
 
-    if( cursor == 0 )
-        return;
+    if(_cursorHandle)
+    {
+        DestroyCursor(_cursorHandle);
+        _cursorHandle = 0;
+    }
 
-   if( _cursorHandle != 0 )            
-       DestroyCursor( _cursorHandle );
+    if(cursor == 0)
+    {
+        SetCursor(_defaultCursorHandle);
+        return;
+    }
 
     if( cursor->empty() )
     {
@@ -223,6 +233,11 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
+void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
+{
+}
+
+
 void ApplicationImpl::setDefaultFont(const std::string& fontName)
 {
     PaintData::setDefaultFont(fontName);
@@ -243,34 +258,6 @@ Pt::Timespan ApplicationImpl::inactivityTime() const
 }	
 
 
-void ApplicationImpl::grabPointer(Window& grabber)
-{
-    grabber.mainWindow().impl()->grabPointer();
-}
-
-
-void ApplicationImpl::releasePointer(Window& grabber)
-{
-    ReleaseCapture();
-}
-
-
-void ApplicationImpl::grabPointer(Widget& grabber)
-{
-    Window* w = grabber.window();
-    if( ! w )
-        return;
-
-    w->mainWindow().impl()->grabPointer();
-}
-
-
-void ApplicationImpl::releasePointer(Widget& grabber)
-{
-    ReleaseCapture();
-}
-
-
 void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
 {
     HWND hwnd = GetActiveWindow();
@@ -282,7 +269,7 @@ void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
         return;
 
     KeyEvent kev = ev;
-    kev.setId( window->vid() );
+    kev.setVisual(window);
     commitEvent(kev);
 }
 
@@ -303,19 +290,19 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 
     MouseEvent mev = ev;
     mev.setPosition(pos);
-    mev.setId( w->vid() );
+    mev.setVisual(w);
     
-    if( ! _pointerInWindow )
-    {
-        Application::instance().setPointerWindow(w);
-        _pointerInWindow = true;
-    }
+    //if( ! _pointerInWindow )
+    //{
+        //Application::instance().setPointerWindow(w);
+        //_pointerInWindow = true;
+    //}
 
     // TODO: call Application::processMouseEvent which returns true if the
     //       event was consumed. If it returns false and the event was not
     //       consumed call ApplicationImpl::dispatchMouseEvent
 
-    Application::instance().processMouseEvent(mev);
+    Application::instance().processEvent(mev);
 }
 
 
@@ -445,12 +432,21 @@ long CALLBACK ApplicationImpl::wndProc(HWND hwnd, UINT msg,
 {
     Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
+    if(msg == WM_MOUSEACTIVATE)
+    {
+        Window* w = app.impl()->findWindow(hwnd);
+        if(w && w->type() == WindowType::Popup)
+            return MA_NOACTIVATE;
+    }
+
     bool handled = app.impl()->processMessage(hwnd, msg, wparam, lparam);
     if( ! handled )
         return DefWindowProc(hwnd, msg, wparam, lparam);
 
     if(msg == WM_ERASEBKGND)
         return TRUE;
+
+
 
     return handled ? 0 : 1;
 }
@@ -463,11 +459,12 @@ Window* ApplicationImpl::findWindow(HWND hwnd)
     for(size_t i = 0; i < windows.size(); ++i)
     {
         Window* w = windows[i];
-
-        if( ! w->impl() )
-            continue;
         
-        if( w->impl()->hwnd() == hwnd )
+        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w->impl() );
+        if( ! impl )
+            continue;
+
+        if( impl->hwnd() == hwnd )
             return w;
     }
     
@@ -488,8 +485,6 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
     {
         case WM_MOUSEMOVE:
         {
-          TRACKMOUSEEVENT tme = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, hwnd, 0 };
-          TrackMouseEvent(&tme);
           onMouse(*w, msg, wparam, lparam);
           handled = true;
           break;
@@ -514,10 +509,12 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
         {
             int delta = GET_WHEEL_DELTA_WPARAM(wparam);
 
-            ScrollEvent sev( w->vid() );
+            ScrollEvent sev(*w);
             sev.set(ScrollEvent::Vertical, (delta/WHEEL_DELTA)*20);
 
-            commitEvent(sev);
+            //commitEvent(sev);
+            Application::instance().processEvent(sev);
+            
             handled = true;
             break;
         }
@@ -618,11 +615,18 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
         }
 
         case WM_MOUSELEAVE:
+            //std::clog << "pointer leaves window: " << w->title() << std::endl;
+
+            //LeaveEvent ev(*w);
+            //w->processEvent(ev);
+
+            Application::instance().screen().setPointer(0);
+
+            // entered screen
+            _currentCursor = &noCursor;
+            _pointerWindow = NULL;
+
             handled = true;  
-            //_mouseEvent.clear();
-            Application::instance().setCursor(0);
-            Application::instance().setPointerWindow(0);
-            _pointerInWindow = false;
             break;
     }
 
@@ -632,7 +636,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
 
 void ApplicationImpl::onShow(Window& w,  bool v)
 {
-    ShowEvent sev(w.vid(), v);
+    ShowEvent sev(w, v);
     commitEvent( sev );
 
     // w.invalidate();
@@ -643,7 +647,7 @@ bool ApplicationImpl::onClose(Window& w)
 {  
     Pt::uint64_t id =  w.vid();
 
-    CloseEvent ev(id);
+    CloseEvent ev(w);
     w.processEvent(ev);
 
     const Visual* v = Application::instance().findVisual(id);
@@ -657,14 +661,14 @@ bool ApplicationImpl::onClose(Window& w)
 
 void ApplicationImpl::onActivate(Window& w, bool a)
 {
-    ActivateEvent aev( w.vid(), a );
+    ActivateEvent aev(w, a);
     commitEvent(aev);
 }
 
 
 void ApplicationImpl::onEnable(Window& w, bool e)
 {
-    EnableEvent eev( w.vid(), e );
+    EnableEvent eev(w, e);
     commitEvent( eev );
 
     w.invalidate();
@@ -673,13 +677,10 @@ void ApplicationImpl::onEnable(Window& w, bool e)
 
 void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
 {
-    BYTE keyboardState[256];
+    BYTE keyboardState[256] = { 0 };
     GetKeyboardState(keyboardState);
 
-    //std::clog << "KEY: " << std::hex << vkey << std::endl;
-
-    wchar_t wc = 0;
-    ToUnicode(vkey, scanCode, (BYTE*)keyboardState, &wc, 1, 0);    
+    //std::clog << "KEY: " << std::hex << vkey << std::endl;   
 
     bool shift = (keyboardState[VK_SHIFT] & 0x80) == 0x80;
     bool control = (keyboardState[VK_CONTROL] & 0x80) == 0x80;
@@ -700,6 +701,13 @@ void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
     if(rwin || lwin)
         modifiers.add(Key::Meta);
 
+    // remove control modifier for ToUnicode
+    if(control)
+        keyboardState[VK_CONTROL] = 0;
+
+    wchar_t wc = 0;
+    ToUnicode(vkey, scanCode, (BYTE*)keyboardState, &wc, 1, 0); 
+
     Pt::uint32_t keyCode = Key::NoKey;
     if(vkey < keyMapSize)
     {
@@ -718,8 +726,10 @@ void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
     else
         _keyEvent.setRelease(key, wc); 
 
-    _keyEvent.setId( w.vid() );
-    commitEvent(_keyEvent);
+    _keyEvent.setVisual(&w);
+    //commitEvent(_keyEvent);
+
+    Application::instance().processEvent(_keyEvent);
 }
 
 
@@ -727,6 +737,8 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
 {    
     int xPos = GET_X_LPARAM(lparam); 
     int yPos = GET_Y_LPARAM(lparam); 
+    
+    //std::clog << "MOUSE: " << xPos << ", " << yPos << std::endl;
 
     switch(msg)
     {
@@ -761,23 +773,38 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     
     const double scaling = w.scaleFactor();
 
-    Gfx::PointF pos(Gfx::PointF(xPos / scaling, 
-                                yPos / scaling));
+    Gfx::PointF pos(xPos / scaling, yPos / scaling);
     
-    _mouseEvent.setPosition(pos);
-    _mouseEvent.setId( w.vid() );
-    
-    if( ! _pointerInWindow )
+    _mouseEvent.setPosition( w.toScreen(pos) );
+    _mouseEvent.setVisual(&w);
+
+    if( _mouseEvent.isPress() )
     {
-        Application::instance().setPointerWindow(&w);
-        _pointerInWindow = true;
+        //std::clog << "window capture set: "<< w.title() << std::endl;
+        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+        SetCapture( impl->hwnd() );
+    }
+    else if( _mouseEvent.isRelease() )
+    {
+        //std::clog << "window capture release" << std::endl;
+        ReleaseCapture();
     }
 
-    // TODO: call Application::processMouseEvent which returns true if the
-    //       event was consumed. If it returns false and the event was not
-    //       consumed call ApplicationImpl::dispatchMouseEvent
+    if( ! _pointerWindow )
+    {
+        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+        _pointerWindow = impl->hwnd();
+        //std::clog << "pointer enters window: " << w.title() << std::endl;
+        
+        //EnterEvent eev(w);
+        //w.processEvent(eev);
+        
+        // enable WM_MOUSELEAVE
+        TRACKMOUSEEVENT tme = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, _pointerWindow, 0 };
+        TrackMouseEvent(&tme);
+    }
 
-    Application::instance().processMouseEvent(_mouseEvent);
+    Application::instance().processEvent(_mouseEvent);
 }
 
 
@@ -790,10 +817,11 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
     int y = info.top;
 
     Gfx::PointF pos(x, y);
-    pos = w.toLogical(pos);
+    pos = w.surface().toLogical(pos);
 
-    MoveEvent ev(w.vid(), pos);
-    commitEvent( ev );
+    MoveEvent ev(w, pos);
+    //commitEvent(ev);
+    Application::instance().processEvent(ev);
 }
 
 
@@ -808,15 +836,15 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
             break;
 
         case SIZE_MAXIMIZED:
-            wstate = Window::Maximized;
+            wstate = WindowState::Maximized;
             break;
 
         case SIZE_MINIMIZED:
-            wstate = Window::Minimized;
+            wstate = WindowState::Minimized;
             break;
 
         case SIZE_RESTORED:
-            wstate = Window::Normal;
+            wstate = WindowState::Normal;
             break;
 
         default:
@@ -825,7 +853,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
     if(w.state() != wstate)
     {
-        WindowStateEvent wse(w.vid(), wstate);
+        WindowStateEvent wse(w, wstate);
         commitEvent(wse);
     }
 
@@ -833,13 +861,15 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     int height = HIWORD(lParam);
 
     Gfx::SizeF to(width, height);
-    to = w.toLogical(to);
+    to = w.surface().toLogical(to);
 
-    ResizeEvent rev(w.vid(), to);
+    ResizeEvent rev(w, to);
     w.processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
     w.repaint(updateRect);
+    
+    Application::instance().loop().processEvents();
 }
 
 
@@ -850,7 +880,7 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
 
     const Gfx::RectF r(updateRect.left, updateRect.right, updateRect.top, updateRect.bottom);
 
-    PaintEvent ev(w.vid(),r);
+    PaintEvent ev(w, r);
     w.processEvent(ev);
 
     PAINTSTRUCT ps;
