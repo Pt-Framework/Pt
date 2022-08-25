@@ -198,6 +198,21 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 
         void removeRoute(const Slot& slot);
 
+        // TODO: Pt 2.0
+
+        //template <typename R>
+        //void removeRoute(const BasicSlot<R, const Event&>& slot)
+        //{
+        //    this->removeRoute(0, slot);
+        //}
+
+        //template <typename R, typename EventT>
+        //void removeRoute(const BasicSlot<R, const EventT&>& slot)
+        //{
+        //    const std::type_info& ti = typeid(EventT);
+        //    this->removeRoute(&ti, slot);
+        //}
+
         void removeRoute(const std::type_info* ti, const Slot& slot);
 
     private:

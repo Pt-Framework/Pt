@@ -359,14 +359,16 @@ void Signal<const Pt::Event&>::addRoute(const std::type_info* ti, IEventRoute* r
 void Signal<const Pt::Event&>::removeRoute(const Slot& slot)
 {
     RouteMap::iterator it = _routes.begin();
-    while( it != _routes.end() && it->first == 0 )
+    while( it != _routes.end() )
     {
         IEventRoute* route = it->second;
-        if(route->connection().slot()->equals(slot) )
+        if( route->connection().slot()->equals(slot) )
         {
             route->connection().close();
             break;
         }
+
+        ++it;
     }
 }
 
@@ -382,6 +384,8 @@ void Signal<const Pt::Event&>::removeRoute(const std::type_info* ti, const Slot&
             route->connection().close();
             break;
         }
+
+        ++it;
     }
 }
 
