@@ -203,6 +203,7 @@ class ScreenImpl : public Visual
         Responder*                   _nextResponder;
 
         Gfx::SizeF                   _size;
+        double                       _screenScaling;
         double                       _scaling;
 
         bool                         _enabled;

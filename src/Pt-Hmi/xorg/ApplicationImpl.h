@@ -69,26 +69,18 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         Pt::Timespan inactivityTime() const;
 
-        void grabPointer(Window& grabber);
-
-        void releasePointer(Window& grabber);
-
-        void grabPointer(Widget& grabber);
-
-        void releasePointer(Widget& grabber);
-
         void sendKeyEvent(const KeyEvent& ev);
 
         void sendMouseEvent(const MouseEvent& ev);
 
         void nextEvent();
 
+    public:
         void processEvent(XEvent& xev)
         {
             onEvent(xev);
         }
 
-    public:
         ::Display* display() const
         {
             return _display;

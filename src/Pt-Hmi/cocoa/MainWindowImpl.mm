@@ -682,7 +682,7 @@ void MainWindowImpl::onLMouseDown(double x, double y)
                         y / scaling);
 
     _mouseEvent.setPress(MouseEvent::Left);
-    _mouseEvent.setPosition(pos);
+    _mouseEvent.setPosition( window.toScreen(pos) );
     _mouseEvent.setVisual(window);
 
     Application::instance().processEvent(_mouseEvent);
@@ -706,7 +706,7 @@ void MainWindowImpl::onLMouseUp(double x, double y)
                         y / scaling);
 
     _mouseEvent.setRelease(MouseEvent::Left);
-    _mouseEvent.setPosition(pos);
+    _mouseEvent.setPosition( window.toScreen(pos) );
     _mouseEvent.setVisual(window);
 
     Application::instance().processEvent(_mouseEvent);
@@ -730,7 +730,7 @@ void MainWindowImpl::onMouseMove(double x, double y)
                         y / scaling);
 
     _mouseEvent.setMove();
-    _mouseEvent.setPosition(pos);
+    _mouseEvent.setPosition( window.toScreen(pos) );
     _mouseEvent.setVisual(window);
 
     Application::instance().processEvent(_mouseEvent);

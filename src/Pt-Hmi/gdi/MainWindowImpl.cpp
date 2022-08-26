@@ -38,6 +38,7 @@ namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(Window::Type type)
 : _hwnd(0)
+, _scalingFactor(1.0)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
   

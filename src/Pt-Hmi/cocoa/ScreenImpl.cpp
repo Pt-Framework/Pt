@@ -41,13 +41,20 @@ namespace Hmi {
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _parent(0)
 , _nextResponder(0)
+, _screenScaling(1.0)
 , _scaling(1.0)
 , _enabled(true)
 , _enabledState(true)
 {
+    _screenScaling = 1.0;
+    _scaling = _screenScaling;
+
+    // TODO:
+    //NSScreen* mainScreen = [NSScreen mainScreen];
+    //NSRect screenRect = [mainScreen visibleFrame];
+    //_size = Gfx::SizeF(screenRect.width, screenRect.height);
     _size = Gfx::SizeF(640, 480);
 
-    
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessMouseEvent);
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessTouchEvent);
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessScrollEvent);
@@ -268,6 +275,10 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
 
     //w.impl()->scaleFactor(); ???
 
+    //
+    // TODO: scale here instead of in MainWindowImpl
+    //
+
     MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
     impl->move(aligedPos);
 }
@@ -341,7 +352,7 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 
 void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 {
-    _scaling = ev.scaleFactor();
+    _scaling = ev.scaleFactor() * _screenScaling;
 
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)

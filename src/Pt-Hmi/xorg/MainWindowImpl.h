@@ -39,31 +39,24 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 
-#include <Pt/Connectable.h>
-#include <Pt/Signal.h>
-
-#include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/ResizeEvent.h>
-#include <Pt/Hmi/CloseEvent.h>
-#include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/Application.h>
-
 namespace Pt {
 
 namespace Hmi {
 
-class MainWindowImpl : public Pt::Connectable
+class MainWindowImpl : public WindowImpl
 {
     public:
         MainWindowImpl(Window::Type type);
 
         virtual ~MainWindowImpl();
 
-        void setType(Window::Type type);
+        double scaleFactor() const;
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
+
+        void paint(const Gfx::RectF& rect);
 
         void show(bool visible);
 
@@ -77,21 +70,22 @@ class MainWindowImpl : public Pt::Connectable
 
         void close();
 
-        void paint(const Gfx::RectF& rect);
-    
-        void setState(Window::State s);
-       
-        void setIcon(const Gfx::Image& p);
-    
-        void setMinimumSize(const Gfx::SizeF& s);
-    
-        void setMaximumSize(const Gfx::SizeF& s);
+    protected:
+        virtual void onSetType(WindowType type);
 
-        void setTitle( const std::string& t );
+        virtual void onSetTitle(const std::string& text);
 
-        void setTopMost(bool e);
+        virtual void onSetIcon(const Gfx::Image& p);
 
-        void grabPointer();
+        virtual void onSetTopMost(bool isTop);
+
+        virtual void onSetState(Window::State s);
+
+        virtual void onSetMinimumSize(const Gfx::SizeF& s);
+    
+        virtual void onSetMaximumSize(const Gfx::SizeF& s);
+
+        //void grabPointer();
 
     public:
         ::Window& window()
@@ -128,6 +122,7 @@ class MainWindowImpl : public Pt::Connectable
         ::Window    _window;
         ::Display*  _display;
         bool        _hasFirstShow;
+        double      _scalingFactor;
         int         _width;
         int         _height;
 };

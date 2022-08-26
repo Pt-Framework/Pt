@@ -41,11 +41,23 @@ class PixmapSurface;
 
 class PixmapSurfaceImpl : public Gfx::ImageSurface
 {
+    friend class PixmapImpl;
+
     public:        
         PixmapSurfaceImpl();
         
-        ~PixmapSurfaceImpl();  
+        ~PixmapSurfaceImpl();
 
+        void begin(Gfx::Painter& painter)
+        {
+            Gfx::ImageSurface::onBegin(painter);
+        }
+
+        void finish()
+        {
+            Gfx::ImageSurface::onFinish();
+        }
+        
         void clear(const Gfx::Color& c)
         {
         }
@@ -66,11 +78,11 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
 
     private:
-        Gfx::Image            _image;
+        Gfx::Image _image;
 };
 
 } // namespace
 
-}  // namespace
+} // namespace
 
 #endif
