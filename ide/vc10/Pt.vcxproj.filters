@@ -124,9 +124,6 @@
     <Filter Include="Pt-Gfx\tests">
       <UniqueIdentifier>{95cc65fe-94a1-48f6-95de-b0af331fe0d2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\xorg">
-      <UniqueIdentifier>{a778bad0-210f-4746-a155-f513e6568c2a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Hmi\gdiplus">
       <UniqueIdentifier>{0214d853-7964-4279-a744-a21c00166642}</UniqueIdentifier>
     </Filter>
@@ -1452,27 +1449,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\win32\win32.h">
       <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\ApplicationImpl.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\CursorImpl.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\KeyHandler.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\MainWindowImpl.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\PixmapSurfaceImpl.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\ScreenImpl.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\xorg\X11Fd.h">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
@@ -1598,9 +1574,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintData.h">
       <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintData.h">
-      <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowView.h">
       <Filter>Pt-Hmi</Filter>
@@ -2885,27 +2858,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ScreenImpl.cpp">
       <Filter>Pt-Hmi\winrt\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\xorg\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\xorg\CursorImpl.cpp">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\xorg\KeyHandler.cpp">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\xorg\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\xorg\PixmapSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\xorg\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\xorg\X11Fd.cpp">
-      <Filter>Pt-Hmi\xorg</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
@@ -2977,9 +2929,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\skia\SkiaBlitter.cpp">
       <Filter>Pt-Gfx\skia</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintData.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\WindowView.cpp">
       <Filter>Pt-Hmi</Filter>
