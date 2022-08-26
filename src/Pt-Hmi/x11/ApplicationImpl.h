@@ -62,22 +62,12 @@ class ApplicationImpl : public Pt::System::MainLoop
         virtual ~ApplicationImpl();
 
         void setCursor(const Cursor* cursor);
+        
+        void setFontDir(const Pt::System::Path& dir);
 
-        void setFontDir(const Pt::System::Path& dir)
-        {
-        }
-
-        void setDefaultFont(const std::string& fontName);
+        void setDefaultFont(const std::string& fname);
 
         Pt::Timespan inactivityTime() const;
-
-        void grabPointer(Window& grabber);
-
-        void releasePointer(Window& grabber);
-
-        void grabPointer(Widget& grabber);
-
-        void releasePointer(Widget& grabber);
 
         void sendKeyEvent(const KeyEvent& ev);
 
@@ -85,12 +75,12 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         void nextEvent();
 
+    public:
         void processEvent(XEvent& xev)
         {
             onEvent(xev);
         }
 
-    public:
         ::Display* display() const
         {
             return _display;

@@ -279,8 +279,7 @@ void ApplicationImpl::onLeaveNotify(Window& window, XEvent& xev)
 void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 {
     MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
-    const Gfx::Image& image = window.surface().pixmapImpl()->image();
-
+    
     size_t width = xev.xexpose.width;
     size_t height = xev.xexpose.height;
     size_t x = xev.xexpose.x;
@@ -293,23 +292,30 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     PaintEvent pev(window, rect);
     window.processEvent(pev);
 
-    Display* display = Application::instance().impl()->display();
-    ::Visual* visual = Application::instance().impl()->visual();
-    int depth = Application::instance().impl()->depth();
+#ifdef PT_HMI_X11_CORE
+    ::Drawable from = window.surface().pixmapImpl()->drawable();
+    ::Window to = windowImpl->window();
+
+    XCopyArea( _display, from, to,
+               _paintGc, x, y, width, height, x, y);
+#endif
+
+#ifdef PT_HMI_X11_RASTER   
+    Gfx::Image& image = window.surface().pixmapImpl()->pimage();
+
+    XImage* ximage = XCreateImage(_display, _visual, _depth, ZPixmap, 0, 
+                                  (char*)image.data(), image.width(), image.height(), 
+                                  _depth == 24 ? 32 : _depth, 0);
     
-    XImage* ximage = XCreateImage(display, visual, depth, ZPixmap, 0, 
-                                  (char*)image.data(), 
-                                  image.width(), image.height(), 
-                                  depth == 24 ? 32 : depth, 0);
-    
-    unsigned int screen = DefaultScreen(display);
+    unsigned int screen = DefaultScreen(_display);
     ::Window drawable = windowImpl->window();
-    GC gc = DefaultGC(display, screen);
+    GC gc = DefaultGC(_display, screen);
     
-    XPutImage( display, drawable, gc, ximage, x, y, x, y, width, height);
+    XPutImage( _display, drawable, gc, ximage, x, y, x, y, width, height);
     
     ximage->data = NULL;
     XDestroyImage(ximage); 
+#endif
 
     XFlush(_display);
 }

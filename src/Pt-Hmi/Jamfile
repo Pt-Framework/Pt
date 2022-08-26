@@ -1,16 +1,26 @@
 SubDir PT_TOP src Pt-Hmi ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-System ;
-SubDirHdrs $(PT_TOP)/src/Pt-Hmi/$(GUI:L) ;
+SubDirHdrs $(PT_TOP)/src/Pt-Hmi/xorg ;
 SubDirC++Flags [ FDefines PT_HMI_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi ;
+
+if $(PT_WITH_X11_BACKEND) = x11-core
+{
+    SubDirC++Flags [ FDefines PT_HMI_X11_CORE ] ;
+}
+
+if $(PT_WITH_X11_BACKEND) = raster
+{
+    SubDirC++Flags [ FDefines PT_HMI_X11_RASTER ] ;
+}
 
 if $(GUI_INCLUDES)
 {
     SubDirHdrs $(GUI_INCLUDES) ;
 }
 
-if $(GUI:L) = xorg || $(GUI:L) = x11
+if $(GUI:L) = x11
 {
     SubDirHdrs $(FREETYPE_INCLUDES) ;
     SubDirHdrs $(X11_INCLUDES) ;

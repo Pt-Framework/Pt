@@ -1,44 +1,112 @@
-/*
- * Copyright (C) 2017 Marc Boris Duerner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
- * MA 02110-1301 USA
- */
+ /* Copyright (C) 2015 Marc Boris Duerner 
+    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
 
-#ifndef Pt_Hmi_X11_PixmapSurfaceImpl_h
-#define Pt_Hmi_X11_PixmapSurfaceImpl_h
-
-#include "PaintData.h"
+#ifndef Pt_Hmi_PixmapSurfaceImpl_h
+#define Pt_Hmi_PixmapSurfaceImpl_h
 
 #include <Pt/Hmi/Api.h>
+
+#ifndef PT_HMI_X11_CORE
+#define PT_HMI_X11_RASTER 1
+#endif
+
+#ifdef PT_HMI_X11_RASTER
+
+#include <Pt/Gfx/ImageSurface.h>
+
+namespace Pt {
+
+namespace Hmi {
+
+class PixmapSurface;
+
+class PixmapSurfaceImpl : public Gfx::ImageSurface
+{
+    friend class PixmapImpl;
+
+    public:        
+        PixmapSurfaceImpl();
+        
+        ~PixmapSurfaceImpl();
+
+        Gfx::Image& pimage()
+        {
+            return _image;
+        }
+
+        void begin(Gfx::Painter& painter)
+        {
+            Gfx::ImageSurface::onBegin(painter);
+        }
+
+        void finish()
+        {
+            Gfx::ImageSurface::onFinish();
+        }
+        
+        void clear(const Gfx::Color& c)
+        {
+        }
+
+        void resize(const Gfx::SizeF& size)
+        {
+            _image.reset(_image.format(), round(size));
+            setImage(_image);
+        }
+
+        void set(const Gfx::Image& s)
+        {
+            _image = s;
+        }
+
+        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+
+        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
+
+    private:
+        Gfx::Image _image;
+};
+
+} // namespace
+
+} // namespace
+
+#endif // PT_HMI_X11_RASTER
+
+#ifdef PT_HMI_X11_CORE
+
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/System/Path.h>
@@ -47,11 +115,51 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 
+struct _XftFont;
 struct _XftDraw;
 
 namespace Pt {
 
 namespace Hmi {
+
+class PaintData : public Gfx::PaintData
+{
+    public:
+        PaintData();
+
+        ~PaintData();
+
+        void setPen(const Gfx::Pen& pen);
+
+        GC& pen();
+
+        void setBrush(const Gfx::Brush& brush);
+
+        GC& brush();
+
+        void setClip(const Gfx::RectF& rectF);
+
+        void resetClip();
+
+        void setFont(const Gfx::Font& font);
+
+        _XftFont* font();
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
+                                            const Pt::String& text);
+
+    protected:
+        void create();
+        
+        void destroy();
+
+        long toXColor(const Gfx::Color& color);
+
+    private:
+        GC         _penGc;
+        GC         _brushGc;
+        _XftFont*  _xftFont;
+};
 
 class PixmapSurface;
 
@@ -164,4 +272,6 @@ class PixmapSurfaceImpl
 
 } // namespace
 
-#endif // include guard
+#endif // PT_HMI_X11_CORE
+
+#endif

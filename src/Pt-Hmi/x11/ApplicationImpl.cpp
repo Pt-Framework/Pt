@@ -48,8 +48,6 @@ ApplicationImpl::ApplicationImpl()
 , _visual(0)
 , _depth(0)
 , _xfd(_display)
-, _mouseEvent(0)
-, _keyEvent(0)
 {
     // Open a X11 display connection
     //_display = XOpenDisplay(NULL);
@@ -110,9 +108,14 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::setDefaultFont(const std::string& fontName)
+void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 {
-    PixmapSurfaceImpl::setDefaultFont(fontName);
+    PixmapSurfaceImpl::setFontDir(dir);
+}
+
+void ApplicationImpl::setDefaultFont(const std::string& fname)
+{
+    PixmapSurfaceImpl::setDefaultFont(fname);
 }
 
 
@@ -120,34 +123,6 @@ Pt::Timespan ApplicationImpl::inactivityTime() const
 {
   return Pt::Timespan(0);
 }	
-
-
-void ApplicationImpl::grabPointer(Window& grabber)
-{
-    grabber.mainWindow().impl()->grabPointer();
-}
-
-
-void ApplicationImpl::releasePointer(Window& grabber)
-{
-    XUngrabPointer(_display, CurrentTime);
-}
-
-
-void ApplicationImpl::grabPointer(Widget& grabber)
-{
-    Window* w = grabber.window();
-    if( ! w )
-        return;
-
-    w->mainWindow().impl()->grabPointer();
-}
-
-
-void ApplicationImpl::releasePointer(Widget& grabber)
-{
-    XUngrabPointer(_display, CurrentTime);
-}
 
 
 void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
@@ -180,7 +155,7 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 
     MouseEvent mev = ev;
     mev.setPosition(pos);
-    mev.setId( w->vid() );
+    mev.setVisual(w);
 
     // TODO dispatch synthetic mouse event
 }
@@ -209,7 +184,9 @@ Window* ApplicationImpl::findWindow(::Window window)
         if( ! w->impl() )
             continue;
 
-        if( w->impl()->window() == window )
+        MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( w->impl() );
+
+        if( windowImpl->window() == window )
             return w;
     }
 
@@ -287,7 +264,7 @@ void ApplicationImpl::onEvent(XEvent& ev)
 void ApplicationImpl::onEnterNotify(Window& window, XEvent& xev)
 {
     //std::clog << "EnterNotify" << std::endl;
-    Application::instance().setPointerWindow(&window);
+    //Application::instance().setPointerWindow(&window);
 }
 
 
@@ -295,31 +272,50 @@ void ApplicationImpl::onLeaveNotify(Window& window, XEvent& xev)
 {
     //std::clog << "LeaveNotify" << std::endl;
 
-    Application::instance().setCursor(0);
-    Application::instance().setPointerWindow(0);
+    Application::instance().screen().setPointer(0);
 }
 
 
 void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 {
-    const size_t width = xev.xexpose.width;
-    const size_t height = xev.xexpose.height;
-    const size_t x = xev.xexpose.x;
-    const size_t y = xev.xexpose.y;
-
-    //std::clog << "   ### Expose: " << width << "x" << height << std::endl;
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
+    
+    size_t width = xev.xexpose.width;
+    size_t height = xev.xexpose.height;
+    size_t x = xev.xexpose.x;
+    size_t y = xev.xexpose.y;
 
     Gfx::PointF pos(x, y);
     Gfx::SizeF size(width, height);
+    Gfx::RectF rect(pos, size);
 
-    PaintEvent pev(window.vid(), Gfx::Rectf(pos, size) );
-    window->processEvent(pev);
+    PaintEvent pev(window, rect);
+    window.processEvent(pev);
 
+#ifdef PT_HMI_X11_CORE
     ::Drawable from = window.surface().pixmapImpl()->drawable();
-    ::Window to = window.impl()->window();
+    ::Window to = windowImpl->window();
 
     XCopyArea( _display, from, to,
                _paintGc, x, y, width, height, x, y);
+#endif
+
+#ifdef PT_HMI_X11_RASTER   
+    Gfx::Image& image = window.surface().pixmapImpl()->pimage();
+
+    XImage* ximage = XCreateImage(_display, _visual, _depth, ZPixmap, 0, 
+                                  (char*)image.data(), image.width(), image.height(), 
+                                  _depth == 24 ? 32 : _depth, 0);
+    
+    unsigned int screen = DefaultScreen(_display);
+    ::Window drawable = windowImpl->window();
+    GC gc = DefaultGC(_display, screen);
+    
+    XPutImage( _display, drawable, gc, ximage, x, y, x, y, width, height);
+    
+    ximage->data = NULL;
+    XDestroyImage(ximage); 
+#endif
 
     XFlush(_display);
 }
@@ -327,13 +323,11 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 
 void ApplicationImpl::onClientMessage(Window& window, XEvent& xev)
 {
-    Pt::uint64_t id =  window.vid();
-
     if( xev.xclient.message_type == _wmProtocols )
     {
         if( (Atom) xev.xclient.data.l[0] == _wmDeleteWindow)
         {
-            CloseEvent closeEvent(id);
+            CloseEvent closeEvent(window);
             window.processEvent(closeEvent);
         }
     }
@@ -344,11 +338,8 @@ void ApplicationImpl::onShow(Window& w, bool v)
 {
     //std::clog << "   ### MapNotify: " << std::boolalpha << v << std::endl;
 
-    ShowEvent sev(w.vid(), v);
+    ShowEvent sev(w, v);
     commitEvent( sev );
-
-    w.invalidate();
-    w.update();
 }
 
 
@@ -357,16 +348,17 @@ void ApplicationImpl::onMotionNotify(Window& window, XEvent& xev)
     std::size_t x = xev.xmotion.x;
     std::size_t y = xev.xmotion.y;
 
-    Pt::Gfx::PointF pos(x, y);
-    _mouseEvent.setPosition(pos);
-    _mouseEvent.setId( window.vid() );
+    const double scaling = window.scaleFactor();
+
+    Pt::Gfx::PointF pos(x/scaling, y/scaling);
+
+    _mouseEvent.setPosition( window.toScreen(pos) );
+    _mouseEvent.setVisual(&window);
     _mouseEvent.setMove();
 
-    // TODO: call Application::processMouseEvent which returns true if the
-    //       event was consumed. If it returns false and the event was not
-    //       consumed call ApplicationImpl::dispatchMouseEvent
+    //std::clog << "MOVE: " << x << ", " << y << std::endl;
 
-    Application::instance().processMouseEvent(_mouseEvent);
+    Application::instance().processEvent(_mouseEvent);
 }
 
 
@@ -394,17 +386,24 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
         default:
             return;
     }
+    
+    //XGrabPointer(_display, _window, True,
+    //             ButtonPressMask|ButtonReleaseMask|
+    //             PointerMotionMask,
+    //             GrabModeAsync,
+    //             GrabModeAsync,
+    //             None, None, CurrentTime);
 
-    Pt::Gfx::PointF pos(x, y);
-    _mouseEvent.setPosition(pos);
+    const double scaling = window.scaleFactor();
+
+    Pt::Gfx::PointF pos(x/scaling, y/scaling);
+    _mouseEvent.setPosition( window.toScreen(pos) );
     _mouseEvent.setPress(button);
-    _mouseEvent.setId( window.vid() );
+    _mouseEvent.setVisual(&window);
 
-    // TODO: call Application::processMouseEvent which returns true if the
-    //       event was consumed. If it returns false and the event was not
-    //       consumed call ApplicationImpl::dispatchMouseEvent
+    //std::clog << "PRESS: " << x << ", " << y << std::endl;
 
-    Application::instance().processMouseEvent(_mouseEvent);
+    Application::instance().processEvent(_mouseEvent);
 }
 
 
@@ -433,17 +432,17 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
 
         case Button4: // wheel up
         {
-            ScrollEvent sev( window.vid() );
+            ScrollEvent sev(window);
             sev.set(ScrollEvent::Vertical, 20);
-            commitEvent(sev);
+            Application::instance().processEvent(sev);
             return;
         }
 
         case Button5: // wheel down;
         {
-            ScrollEvent sev( window.vid() );
+            ScrollEvent sev(window);
             sev.set(ScrollEvent::Vertical, -20);
-            commitEvent(sev);
+            Application::instance().processEvent(sev);
             return;
         }
 
@@ -451,16 +450,18 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
             return;
     }
 
-    Pt::Gfx::PointF pos(x, y);
-    _mouseEvent.setPosition(pos);
+    // TODO: XUngrabPointer(_display, CurrentTime);
+
+    const double scaling = window.scaleFactor();
+
+    Pt::Gfx::PointF pos(x/scaling, y/scaling);
+    _mouseEvent.setPosition( window.toScreen(pos) );
     _mouseEvent.setRelease(button);
-    _mouseEvent.setId( window.vid() );
+    _mouseEvent.setVisual(&window);
 
-    // TODO: call Application::processMouseEvent which returns true if the
-    //       event was consumed. If it returns false and the event was not
-    //       consumed call ApplicationImpl::dispatchMouseEvent
+    //std::clog << "RELEASE: " << x << ", " << y << std::endl;
 
-    Application::instance().processMouseEvent(_mouseEvent);
+    Application::instance().processEvent(_mouseEvent);
 }
 
 
@@ -488,11 +489,11 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
     }
     if(xev.xkey.state & Mod5Mask)
     {
-            modifiers.add(Key::Alt);
+        modifiers.add(Key::Alt);
     }
     if(xev.xkey.state & Mod4Mask)
     {
-           modifiers.add(Key::Meta);
+        modifiers.add(Key::Meta);
     }
 
     Pt::Char ch = KeyHandler::keySymToUtf(keySym);
@@ -505,8 +506,9 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
     else
         _keyEvent.setRelease(key, ch);
 
-    _keyEvent.setId( window.vid() );
-    commitEvent(_keyEvent);
+    _keyEvent.setVisual(&window);
+    
+    Application::instance().processEvent(_keyEvent);
 }
 
 
@@ -527,19 +529,22 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
     // else
     //     _resizeEvent.setState( WindowState::Normal );
 
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
+
     const int width  = xev.xconfigure.width;
     const int height = xev.xconfigure.height;
     const int x      = xev.xconfigure.x;
     const int y      = xev.xconfigure.y;
 
-    if( window.impl()->width() != width || window.impl()->height() != height )
+    if( windowImpl->width() != width || windowImpl->height() != height )
     {
-        window.impl()->setSize(width, height);
+        windowImpl->setSize(width, height);
 
         //std::clog << "   ### resize event: " << width << "x" << height << std::endl;
         Gfx::SizeF to(width, height);
-
-        ResizeEvent rev( window.vid(), to );
+        to = window.surface().toLogical(to);
+    
+        ResizeEvent rev(window, to);
         window.processEvent(rev);
 
         Gfx::RectF updateRect(Gfx::PointF(0,0), to);
@@ -550,8 +555,10 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
     {
         //std::clog << "   ### move event: " << x << "x" << y << std::endl;
         Gfx::PointF to(x, y);
-        MoveEvent ev(window.vid(), to);
-        commitEvent( ev );
+        to = window.surface().toLogical(to);
+
+        MoveEvent ev(window, to);
+        Application::instance().processEvent(ev);
     }
 }
 

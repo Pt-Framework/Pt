@@ -29,9 +29,15 @@
 #ifndef Pt_Hmi_ScreenImpl_H
 #define Pt_Hmi_ScreenImpl_H
 
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Screen.h>
+#include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/LayoutEvent.h> // RescaleEvent
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Signal.h>
+#include <Pt/Connectable.h>
 
 namespace Pt {
 
@@ -44,63 +50,165 @@ class MouseEvent;
 class TouchEvent;
 class ScrollEvent;
 
-class ScreenImpl
+class ScreenImpl : public Visual
+                 , public Responder
+                 , public WindowManager
+                 , public Connectable
 {
     public:
         ScreenImpl(ApplicationImpl& app);
         
         virtual ~ScreenImpl();
 
-        void init(WindowBase& w);
+        
+        void setParent(Screen* screen);
 
-        void registerWindow(Window& w);
+        void setNextResponder(Responder* r);
 
-        void unregisterWindow(Window& w);
+        
+        void addWindow(Window& w);
 
-        Gfx::SizeF size() const;
+        void removeWindow(Window& w);
 
-        void dispatchMouseEvent(const MouseEvent& ev);
+        const std::vector<Window*>& windows() const;
 
-        void dispatchTouchEvent(const TouchEvent& ev);
+        
+        const Gfx::SizeF& size() const;
 
-        void dispatchScrollEvent(const ScrollEvent& ev);
+        double scaleFactor() const;
 
-        Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
+        
+        void repaint(const Gfx::RectF& rect);
 
-        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
+        
+        bool isEnabled() const;
 
-        void paint(const Gfx::RectF& rect);
+    //
+    // Responder
+    //
+    protected:
+        virtual Responder* onNextResponder();
 
-        void onResize(Window& w, const Gfx::SizeF& s);
+        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
 
-        void onMove(Window& w, const Gfx::PointF& p);
+        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
 
-        void onFrameChanged(Window& w);
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
-        void onStateChanged(Window& w);
+        virtual bool onTouchEvent(const TouchEvent& ev);
 
-        void onClosing(Window& w);
+        virtual bool onScrollEvent(const ScrollEvent& ev);
 
-        void onClose(Window& w);
+        virtual bool onKeyEvent(const KeyEvent& ev);
 
-        void onShow(Window& w, bool visible);
+    //
+    // Visual
+    //
+    protected:
+        virtual void onEvent(const Event& ev);
 
-        void onActivate(Window& w, bool active);
+        virtual void onSetCapture(bool capture);
 
-        void onEnable(Window& w, bool enable);
+    //
+    // WindowManager
+    //
+    protected:
+        virtual WindowImpl* onCreateWindow(const WindowType& type);
 
-        double scaleFactor(const Window&) const
-        {
-            return 1.0;
-        }
+        virtual void onAttach(Window& w);
+    
+        virtual void onDetach(Window& w);
 
-        double scaleFactor() const
-        {
-            return 1.0;
-        }
+        virtual void onInit(Window& w);
+
+        virtual void onRelease(Window& w);
+
+        virtual Gfx::PointF onToWindow(const Window& w, 
+                                       const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromWindow(const Window& w, 
+                                         const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onToScreen(const Window& w, 
+                                       const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromScreen(const Window& w, 
+                                         const Gfx::PointF& pos) const;
+
+        virtual void onRepaint(Window& w, const Gfx::RectF& rect);
+
+        virtual void onShow(Window& w, bool visible); 
+
+        virtual void onActivate(Window& w, bool active);
+
+        virtual void onEnable(Window& w, bool enable);
+
+        virtual void onMove(Window& w, const Gfx::PointF& to);
+
+        virtual void onResize(Window& w, const Gfx::SizeF& to);
+
+        virtual void onFrameChanged(Window& w);
+
+        virtual void onStateChanged(Window& w);
+
+        virtual void onClosing(Window& w);
+
+        virtual void onEnter(Window& w, Visual& v);
+
+        virtual void onSetCapture(Window& w, bool capture);
+
+    //
+    // scaling
+    //
+    protected:
+        void onProcessRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
+    //
+    // painting
+    //
+    protected:
+        void onProcessPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaint(const Gfx::RectF& rect);
+
+    //
+    // enable
+    //
+    protected:
+        void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnable(bool e);
+    
+    //
+    // input
+    //
+    protected:
+        void onProcessMouseEvent(const MouseEvent& ev);
+
+        void onProcessTouchEvent(const TouchEvent& ev);
+
+        void onProcessScrollEvent(const ScrollEvent& ev);
+
+        void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        ApplicationImpl& _app;
+        Pt::Signal<const Pt::Event&> _eventReceived;
+
+        Screen*                      _parent;
+        std::vector<Window*>         _windows;
+
+        Responder*                   _nextResponder;
+
+        Gfx::SizeF                   _size;
+        double                       _screenScaling;
+        double                       _scaling;
+
+        bool                         _enabled;
+        bool                         _enabledState;
 };
 
 } // namespace

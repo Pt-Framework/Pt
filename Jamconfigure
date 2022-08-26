@@ -1135,6 +1135,19 @@ if $(WITH_QT)
 # GUI libraries and includes
 #############################################################################
 
+if --with-x11 in $(ARGV)
+{
+    GUI ?= x11 ;
+}
+if --with-x11-raster in $(ARGV)
+{
+    GUI ?= x11 ;
+}
+else if --with-x11-core in $(ARGV)
+{
+    GUI ?= x11 ;
+}
+
 if ! $(GUI) || $(GUI:L) = "gdi" || $(GUI:L) = "gdiplus" || $(GUI:L) = "win32"
 {
     Load winui.jam ;
@@ -1184,7 +1197,7 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
     }
 }
 
-if ! $(GUI) || $(GUI:L) = "x11" || $(GUI:L) = "xorg"
+if ! $(GUI) || $(GUI:L) = "x11"
 {
     Load x11.jam ;
 
@@ -1201,6 +1214,18 @@ if ! $(GUI) || $(GUI:L) = "x11" || $(GUI:L) = "xorg"
             GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
         }
     }
+
+    if --with-x11-core in $(ARGV)
+    {
+        PT_WITH_X11_BACKEND = x11-core ;
+    }
+    else
+    {
+        PT_WITH_X11_BACKEND = raster ;
+    }
+
+    Configure PT_WITH_X11_BACKEND ;
+    EchoOption PT_WITH_X11_BACKEND : "Graphics UI lib flags" ;
 }
 
 if $(GUI:L) = "photon"

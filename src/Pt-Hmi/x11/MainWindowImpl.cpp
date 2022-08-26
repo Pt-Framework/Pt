@@ -43,6 +43,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 : _window(None)
 , _display(0)
 , _hasFirstShow(false)
+, _scalingFactor(1.0)
 , _width(240)
 , _height(160)
 {
@@ -107,7 +108,7 @@ void MainWindowImpl::create(Window::Type type)
     wattr.cursor = None;
 
     // no WM interaction if True
-    wattr.override_redirect = type == Window::Popup ? True : False;
+    wattr.override_redirect = type == WindowType::Popup ? True : False;
 
     // Determines which fields from XSetWindowAttributes are used
     unsigned long winMask = CWWinGravity|CWBitGravity|
@@ -148,6 +149,12 @@ void MainWindowImpl::destroy()
 }
 
 
+double MainWindowImpl::scaleFactor() const
+{
+    return _scalingFactor;
+}
+
+
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 {
     ::Window root = DefaultRootWindow(_display);
@@ -180,33 +187,18 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
 }
 
 
-void MainWindowImpl::close()
-{
-    XEvent ev;
-    memset(&ev, 0, sizeof (ev));
-
-    ev.xclient.type         = ClientMessage;
-    ev.xclient.window       = _window;
-    ev.xclient.message_type = Application::instance().impl()->wmProtocols();
-    ev.xclient.format       = 32;
-    ev.xclient.data.l[0]    = Application::instance().impl()->wmDeleteWindow();
-    ev.xclient.data.l[1]    = CurrentTime;
-    XSendEvent(_display, _window, False, NoEventMask, &ev);
-}
-
-
 void MainWindowImpl::paint(const Gfx::RectF& rectF)
 {
     //std::clog << "XMainWindowImpl::paint" << rectF.x() << ", " << rectF.y()
     //          << " " << rectF.width() << "x" << rectF.height() << std::endl;
-
+  
     Gfx::Rect rect = Gfx::round(rectF);
 
     XExposeEvent ev = { Expose, 0, True, _display, _window,
-                       static_cast<int>( rect.x() ),
-                       static_cast<int>( rect.y() ),
-                       static_cast<int>( rect.width() ),
-                       static_cast<int>( rect.height() ),
+                       static_cast<int>( rect.x()),
+                       static_cast<int>( rect.y()),
+                       static_cast<int>( rect.width()),
+                       static_cast<int>( rect.height()),
                        0 };
 
     Application::instance().impl()->processEvent( (XEvent&)ev);
@@ -295,7 +287,81 @@ void MainWindowImpl::enable(bool enabled)
 }
 
 
-void MainWindowImpl::setTopMost(bool topMost)
+void MainWindowImpl::move(const Gfx::PointF& pos)
+{
+    //std::clog  << "XMoveWindow: " << pos.x() << ", " << pos.y() << std::endl;
+    XMoveWindow(_display, _window, pos.x(), pos.y());
+}
+
+
+void MainWindowImpl::resize(const Gfx::SizeF& size)
+{
+    //std::clog  << "XResizeWindow: " << size.width() 
+    //           << "x" << size.height() << std::endl;
+    XResizeWindow( _display, _window, size.width(), size.height() );
+}
+
+
+void MainWindowImpl::close()
+{
+    XEvent ev;
+    memset(&ev, 0, sizeof (ev));
+
+    ev.xclient.type         = ClientMessage;
+    ev.xclient.window       = _window;
+    ev.xclient.message_type = Application::instance().impl()->wmProtocols();
+    ev.xclient.format       = 32;
+    ev.xclient.data.l[0]    = Application::instance().impl()->wmDeleteWindow();
+    ev.xclient.data.l[1]    = CurrentTime;
+    XSendEvent(_display, _window, False, NoEventMask, &ev);
+}
+
+
+void MainWindowImpl::onSetType(Window::Type type)
+{
+    //std::clog << "XChangeWindowAttributes: " << type << std::endl;
+
+    XSetWindowAttributes swattr;
+    swattr.override_redirect = (type == WindowType::Popup) ? True : False;
+
+    XChangeWindowAttributes(_display, _window, CWOverrideRedirect, &swattr);
+
+    XWindowAttributes wattr;
+    XGetWindowAttributes(_display, _window, &wattr);
+
+    if(wattr.map_state != IsUnmapped)
+    {
+        XUnmapWindow(_display, _window);
+        XMapWindow(_display,_window);
+    }
+}
+
+
+void MainWindowImpl::onSetTitle(const std::string& text)
+{
+    XStoreName(_display, _window, text.c_str());
+}
+
+
+void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
+{
+    //std::clog << "XAllocWMHints" << std::endl;
+    
+    XWMHints* hints = XAllocWMHints();
+    if ( ! hints )
+        return;
+
+    hints->flags = IconPixmapHint | IconPositionHint;
+    hints->icon_pixmap = None;
+    hints->icon_x = 0;
+    hints->icon_y = 0;
+
+    XSetWMHints(_display, _window, hints);
+    XFree(hints);
+}
+
+
+void MainWindowImpl::onSetTopMost(bool topMost)
 {
     //std::clog << "setTopMost: " << topMost << std::endl;
 
@@ -326,92 +392,7 @@ void MainWindowImpl::setTopMost(bool topMost)
 }
 
 
-void MainWindowImpl::move(const Gfx::PointF& pos)
-{
-    //std::clog  << "XMoveWindow: " << pos.x() << ", " << pos.y() << std::endl;
-    XMoveWindow(_display, _window, pos.x(), pos.y());
-}
-
-
-void MainWindowImpl::resize(const Gfx::SizeF& size)
-{
-    //std::clog  << "XResizeWindow: " << size.width() 
-    //           << "x" << size.height() << std::endl;
-    XResizeWindow( _display, _window, size.width(), size.height() );
-}
-
-
-void MainWindowImpl::setType(Window::Type type)
-{
-    //std::clog << "XChangeWindowAttributes: " << type << std::endl;
-
-    XSetWindowAttributes swattr;
-    swattr.override_redirect = (type == Window::Popup) ? True : False;
-
-    XChangeWindowAttributes(_display, _window, CWOverrideRedirect, &swattr);
-
-    XWindowAttributes wattr;
-    XGetWindowAttributes(_display, _window, &wattr);
-
-    if(wattr.map_state != IsUnmapped)
-    {
-        XUnmapWindow(_display, _window);
-        XMapWindow(_display,_window);
-    }
-}
-
-
-void MainWindowImpl::setIcon(const Gfx::Image& icon)
-{
-    //std::clog << "XAllocWMHints" << std::endl;
-    
-    XWMHints* hints = XAllocWMHints();
-    if ( ! hints )
-        return;
-
-    hints->flags = IconPixmapHint | IconPositionHint;
-    hints->icon_pixmap = None;
-    hints->icon_x = 0;
-    hints->icon_y = 0;
-
-    XSetWMHints(_display, _window, hints);
-    XFree(hints);
-}
-
-
-void MainWindowImpl::setTitle(const std::string& text)
-{
-    XStoreName(_display, _window, text.c_str());
-}
-
-
-void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
-{
-    XSizeHints hints;
-    memset(&hints, 0, sizeof(hints));
-
-    hints.flags = PMinSize;
-    hints.min_width  = lround( s.width() );
-    hints.min_height = lround( s.height() );
-
-    XSetWMNormalHints(_display, _window, &hints);
-}
-
-
-void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
-{
-    XSizeHints hints;
-    memset(&hints, 0, sizeof(hints));
-
-    hints.flags = PMaxSize;
-    hints.max_width  = lround( s.width() );
-    hints.max_height = lround( s.height() );
-
-    XSetWMNormalHints(_display, _window, &hints);
-}
-
-
-void MainWindowImpl::setState(Window::State s)
+void MainWindowImpl::onSetState(Window::State s)
 {
     //std::clog  << "setState: " << s << std::endl;
 
@@ -425,17 +406,17 @@ void MainWindowImpl::setState(Window::State s)
     switch(s)
     {
         default:
-        case Window::Normal:
+        case WindowState::Normal:
             ev.message_type = Application::instance().impl()->wmChangeState();
             ev.data.l[0] = NormalState;
             break;
 
-        case Window::Minimized:
+        case WindowState::Minimized:
             ev.message_type = Application::instance().impl()->wmChangeState();
             ev.data.l[0] = IconicState;
             break;
 
-        case Window::Maximized:
+        case WindowState::Maximized:
             ev.message_type = Application::instance().impl()->netWmState();
             ev.data.l[0]  = 1ul;
             ev.data.l[1]  = Application::instance().impl()->netWmStateMaximizedVert();
@@ -451,15 +432,42 @@ void MainWindowImpl::setState(Window::State s)
 }
 
 
-void MainWindowImpl::grabPointer()
+
+void MainWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
 {
-    XGrabPointer(_display, _window, True,
-                 ButtonPressMask|ButtonReleaseMask|
-                 PointerMotionMask,
-                 GrabModeAsync,
-                 GrabModeAsync,
-                 None, None, CurrentTime);
+    XSizeHints hints;
+    memset(&hints, 0, sizeof(hints));
+
+    hints.flags = PMinSize;
+    hints.min_width  = lround( s.width() );
+    hints.min_height = lround( s.height() );
+
+    XSetWMNormalHints(_display, _window, &hints);
 }
+
+
+void MainWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
+{
+    XSizeHints hints;
+    memset(&hints, 0, sizeof(hints));
+
+    hints.flags = PMaxSize;
+    hints.max_width  = lround( s.width() );
+    hints.max_height = lround( s.height() );
+
+    XSetWMNormalHints(_display, _window, &hints);
+}
+
+
+//void MainWindowImpl::grabPointer()
+//{
+//    XGrabPointer(_display, _window, True,
+//                 ButtonPressMask|ButtonReleaseMask|
+//                 PointerMotionMask,
+//                 GrabModeAsync,
+//                 GrabModeAsync,
+//                 None, None, CurrentTime);
+//}
 
 
 bool MainWindowImpl::isMinimized()

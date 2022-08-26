@@ -31,6 +31,13 @@
 #define Pt_Hmi_PixmapSurfaceImpl_h
 
 #include <Pt/Hmi/Api.h>
+
+#ifndef PT_HMI_X11_CORE
+#define PT_HMI_X11_RASTER 1
+#endif
+
+#ifdef PT_HMI_X11_RASTER
+
 #include <Pt/Gfx/ImageSurface.h>
 
 namespace Pt {
@@ -47,6 +54,11 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
         PixmapSurfaceImpl();
         
         ~PixmapSurfaceImpl();
+
+        Gfx::Image& pimage()
+        {
+            return _image;
+        }
 
         void begin(Gfx::Painter& painter)
         {
@@ -84,5 +96,182 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
 } // namespace
 
 } // namespace
+
+#endif // PT_HMI_X11_RASTER
+
+#ifdef PT_HMI_X11_CORE
+
+#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/CompositionMode.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/System/Path.h>
+#include <Pt/String.h>
+
+#include <X11/X.h>
+#include <X11/Xlib.h>
+
+struct _XftFont;
+struct _XftDraw;
+
+namespace Pt {
+
+namespace Hmi {
+
+class PaintData : public Gfx::PaintData
+{
+    public:
+        PaintData();
+
+        ~PaintData();
+
+        void setPen(const Gfx::Pen& pen);
+
+        GC& pen();
+
+        void setBrush(const Gfx::Brush& brush);
+
+        GC& brush();
+
+        void setClip(const Gfx::RectF& rectF);
+
+        void resetClip();
+
+        void setFont(const Gfx::Font& font);
+
+        _XftFont* font();
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
+                                            const Pt::String& text);
+
+    protected:
+        void create();
+        
+        void destroy();
+
+        long toXColor(const Gfx::Color& color);
+
+    private:
+        GC         _penGc;
+        GC         _brushGc;
+        _XftFont*  _xftFont;
+};
+
+class PixmapSurface;
+
+class PixmapSurfaceImpl
+{
+    public:
+        PixmapSurfaceImpl();
+        
+        virtual ~PixmapSurfaceImpl();
+
+        void clear(const Gfx::Color& c);
+
+        void resize(const Pt::Gfx::SizeF& size);
+
+        const Pt::Gfx::SizeF& size() const;
+
+        void begin(Gfx::Painter& painter);  
+        
+        void finish();
+
+
+        void setClip( const Gfx::RectF& clip);
+
+        void resetClip();
+         
+        void setCompositionMode(const Gfx::CompositionMode& mode);
+
+        const Gfx::ImageFormat& format() const;
+
+        void setPen(const Gfx::Pen& pen);
+
+        void setBrush(const Gfx::Brush& brush);
+
+        void setFont(const Gfx::Font& font);
+
+        Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+
+        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+
+        void drawText(const Gfx::PointF& to, const Pt::String& text);
+
+        void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans)
+        {
+            drawText(to, text);
+        }
+
+        void drawRect(const Gfx::RectF& rectangle);
+
+        void fillRect(const Gfx::RectF& rectangle);
+
+        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+
+        void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        void drawPath(const Gfx::Path& path, float smoothness)
+        {}
+
+        void fillPath(const Gfx::Path& path, float smoothness)
+        {}
+
+        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+
+        void drawSurface(const Gfx::PointF& toF, 
+                         const PixmapSurface& pm,
+                         const Gfx::RectF& pmRect);
+
+        void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+        void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
+
+        Gfx::Image toImage(const Gfx::ImageFormat& format) const;
+
+        void set(const Gfx::Image& image);
+
+        static std::string defaultFont();
+
+        static void setDefaultFont(const std::string& name);
+
+        static std::string& getDefaultFont();
+
+        static std::vector<std::string> fontNames();
+
+        static void setFontDir(const System::Path& path);
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+
+        ::Drawable drawable()
+        {
+            return _drawable;
+        }
+
+    private:
+        void create(const Pt::Gfx::SizeF& size);
+        
+        void destroy();
+
+    private:
+        Gfx::SizeF     _size;
+        PaintData*     _paintData;
+        Gfx::Painter*  _painter;
+        ::Drawable     _drawable;
+        _XftDraw*      _xftDraw;
+};
+
+} // namespace
+
+} // namespace
+
+#endif // PT_HMI_X11_CORE
 
 #endif
