@@ -1,7 +1,7 @@
 SubDir PT_TOP src Pt-Hmi ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-System ;
-SubDirHdrs $(PT_TOP)/src/Pt-Hmi/xorg ;
+SubDirHdrs $(PT_TOP)/src/Pt-Hmi/$(GUI) ;
 SubDirC++Flags [ FDefines PT_HMI_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi ;
 
