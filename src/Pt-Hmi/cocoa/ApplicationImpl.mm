@@ -126,6 +126,17 @@ ApplicationImpl::ApplicationImpl()
 : System::EventLoop()
 {
     init();
+
+    // [NSEvent addLocalMonitorForEventsMatchingMask: NSEventMaskAny
+    //          handler:^NSEvent*(NSEvent* event) 
+    //          {
+    //             NSEventType eventType = [event type];
+    //             if (eventType == NSEventTypeLeftMouseDown ||
+    //                 eventType == NSEventTypeRightMouseDown)
+    //                 std::clog << "EVENT MOUSE DOWN" << std::endl;
+                
+    //             return event;
+    //         }];
 }
 
 

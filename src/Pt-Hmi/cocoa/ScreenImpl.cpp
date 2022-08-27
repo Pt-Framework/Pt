@@ -116,6 +116,13 @@ double ScreenImpl::scaleFactor() const
     return _scaling;
 }
 
+
+void ScreenImpl::repaint(const Gfx::RectF& rect)
+{
+    if(_parent)
+        _parent->repaint(rect);
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Responder
 ///////////////////////////////////////////////////////////////////////

@@ -71,6 +71,12 @@
 }
 
 
+- (BOOL) resignFirstResponder 
+{
+    return TRUE;
+}
+
+
 - (void) keyDown: (NSEvent*) ev
 {
     NSString* chars = [ev characters];

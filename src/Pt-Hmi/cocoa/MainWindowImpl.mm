@@ -36,6 +36,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowStateEvent.h>
+#include <Pt/Hmi/PaintEvent.h>
 
 @interface MainWindow : NSWindow
 {
@@ -43,11 +44,18 @@
 
 - (BOOL) canBecomeKeyWindow;
 
+- (BOOL) canBecomeMainWindow;
+
 @end
 
 @implementation MainWindow
 
 - (BOOL) canBecomeKeyWindow
+{
+    return YES;
+}
+
+- (BOOL) canBecomeMainWindow
 {
     return YES;
 }
@@ -73,13 +81,13 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 
     switch(type)
     {
-        case Window::Popup:
+        case WindowType::Popup:
             _windowStyle = NSWindowStyleMaskBorderless;
                            //NSWindowStyleMaskFullSizeContentView;
             break;
 
         default:
-        case Window::Normal:
+        case WindowType::Default:
             _windowStyle = NSWindowStyleMaskTitled |
                            NSWindowStyleMaskClosable |
                            NSWindowStyleMaskMiniaturizable |
@@ -101,7 +109,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     [_window setContentView: view];    
     [_window setDelegate: view];
 
-    if(type == Window::Popup)
+    if(type == WindowType::Popup)
     {
         //[_window setTitlebarAppearsTransparent: YES];
         //[_window setTitleVisibility: NSWindowTitleHidden];
@@ -273,13 +281,13 @@ void MainWindowImpl::onSetType(WindowType type)
 {
     switch(type)
     {
-        case Window::Popup:
+        case WindowType::Popup:
             _windowStyle = NSWindowStyleMaskBorderless;
                            //NSWindowStyleMaskFullSizeContentView;
             break;
 
         default:
-        case Window::Normal:
+        case WindowType::Default:
             _windowStyle = NSWindowStyleMaskTitled |
                            NSWindowStyleMaskClosable |
                            NSWindowStyleMaskMiniaturizable |
@@ -289,7 +297,7 @@ void MainWindowImpl::onSetType(WindowType type)
 
     [_window setStyleMask:_windowStyle];
     
-    if(type == Window::Popup)
+    if(type == WindowType::Popup)
     {
         [_window setTitlebarAppearsTransparent: YES];
         [_window setTitleVisibility: NSWindowTitleHidden];
@@ -306,9 +314,7 @@ void MainWindowImpl::onSetType(WindowType type)
 
 void MainWindowImpl::onSetTitle(const std::string& text)
 {
-    _title = text;
-
-    NSString* title = [NSString stringWithCString:_title.c_str() 
+    NSString* title = [NSString stringWithCString:text.c_str() 
                                 encoding:[NSString defaultCStringEncoding]];
     [_window setTitle: title];
 }
@@ -321,7 +327,7 @@ void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
 
 void MainWindowImpl::onSetTopMost(bool isTop)
 {
-    if(onTop)
+    if(isTop)
     {
         [_window setLevel: NSMainMenuWindowLevel];
     }
@@ -336,7 +342,7 @@ void MainWindowImpl::onSetState(Window::State s)
 {
     switch(s)
     {
-        case Window::Normal:
+        case WindowState::Normal:
             if( [_window isMiniaturized] )
                 [_window deminiaturize: nil];
             
@@ -345,12 +351,12 @@ void MainWindowImpl::onSetState(Window::State s)
             
             break;
 
-        case Window::Maximized:
+        case WindowState::Maximized:
             if( ! [_window isZoomed] )
                 [_window zoom: nil];
             break;
 
-        case Window::Minimized:
+        case WindowState::Minimized:
             if( ! [_window isMiniaturized] )
                 [_window miniaturize: nil];
             break;
@@ -395,7 +401,8 @@ Window* MainWindowImpl::findWindow(NSWindow* wnd)
     {
         Window* window = *it;
 
-        if( window->impl() && window->impl()->window() == wnd )
+        MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
+        if( window->impl() && impl->window() == wnd )
             return window;
     }
     
@@ -430,7 +437,7 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 
     Gfx::RectF paintRect(pos, size);
 
-    PaintEvent pev(*window), paintRect);
+    PaintEvent pev(*window, paintRect);
     window->processEvent(pev);
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
@@ -504,15 +511,15 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     if( ! window )
         return;
 
-    Window::State wstate = Window::Normal;
+    Window::State wstate = WindowState::Normal;
 
     if( [_window isZoomed] )
     {		
-        wstate = Window::Maximized;
+        wstate = WindowState::Maximized;
     }
     else if( [_window isMiniaturized] )
     {
-        wstate = Window::Minimized;
+        wstate = WindowState::Minimized;
     }
 
     if(window->state() != wstate)
@@ -682,7 +689,7 @@ void MainWindowImpl::onLMouseDown(double x, double y)
                         y / scaling);
 
     _mouseEvent.setPress(MouseEvent::Left);
-    _mouseEvent.setPosition( window.toScreen(pos) );
+    _mouseEvent.setPosition( window->toScreen(pos) );
     _mouseEvent.setVisual(window);
 
     Application::instance().processEvent(_mouseEvent);
@@ -706,7 +713,7 @@ void MainWindowImpl::onLMouseUp(double x, double y)
                         y / scaling);
 
     _mouseEvent.setRelease(MouseEvent::Left);
-    _mouseEvent.setPosition( window.toScreen(pos) );
+    _mouseEvent.setPosition( window->toScreen(pos) );
     _mouseEvent.setVisual(window);
 
     Application::instance().processEvent(_mouseEvent);
@@ -730,7 +737,7 @@ void MainWindowImpl::onMouseMove(double x, double y)
                         y / scaling);
 
     _mouseEvent.setMove();
-    _mouseEvent.setPosition( window.toScreen(pos) );
+    _mouseEvent.setPosition( window->toScreen(pos) );
     _mouseEvent.setVisual(window);
 
     Application::instance().processEvent(_mouseEvent);

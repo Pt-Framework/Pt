@@ -99,6 +99,20 @@ class MainWindowImpl : public WindowImpl
         {
             return _window;
         }
+    protected:
+        virtual void onSetType(WindowType type);
+
+        virtual void onSetTitle(const std::string& text);
+
+        virtual void onSetIcon(const Gfx::Image& p);
+
+        virtual void onSetTopMost(bool isTop);
+
+        virtual void onSetState(Window::State s);
+
+        virtual void onSetMinimumSize(const Gfx::SizeF& s);
+    
+        virtual void onSetMaximumSize(const Gfx::SizeF& s);
 
     public:
         void onPaint(const NSRect& rect);

@@ -43,7 +43,7 @@
 
 - (BOOL) acceptsFirstMouse: (NSEvent *) ev;
 
-- (BOOL) canBecomeKeyWindow;
+- (BOOL) resignFirstResponder;
 
 - (void) drawRect: (NSRect) rect;
 
