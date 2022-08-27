@@ -114,7 +114,7 @@ void CertificateStoreImpl::loadPem(const char* pem, std::size_t len, const char*
     CFArrayRef items = NULL;
 
     OSStatus status = SecItemImport(data, extension, &pemFormat, 
-                                    itemType, flags, keyParams, 
+                                    itemType, flags, &keyParams, 
                                     keychain, &items);
 
     if(password)
