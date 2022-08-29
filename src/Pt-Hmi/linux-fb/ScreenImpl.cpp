@@ -75,17 +75,17 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     Gfx::Size fs = _frameBuffer.size();
     _size = Gfx::SizeF( fs.width(), fs.height() );
 
+    _surface.resize(_size);
     _surface.pixmapImpl()->resize( _frameBuffer.size(), 
                                    _frameBuffer.strideSize() );
 
-    Gfx::Image& background = _surface.pixmapImpl()->image();
-    Gfx::ImageSurface backgroundSurface(background);
-    Gfx::Painter painter(backgroundSurface);
+    Gfx::Painter painter(_surface);
 
     Gfx::RectF rect( Gfx::PointF(0, 0), _surface.size() );
     painter.setBrush( Gfx::Color(0, 0, 0) );
     painter.fillRect(rect);
 
+    _sheet.resize(_size);
     _sheet.setContent(&_shell);
     _sheet.setParent(this);
 
