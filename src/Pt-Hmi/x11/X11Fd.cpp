@@ -73,6 +73,8 @@ void X11Fd::begin()
 
     Pt::System::Selector& selector = _loop->selector();
     selector.beginRead(&_ioh);
+
+    //std::clog << "BEGIN X11FD" << std::endl;
 }
 
 
@@ -91,7 +93,7 @@ void X11Fd::flush()
     // TODO: flush may not be neccessary
 
     while( XPending(_display) > 0 ) 
-	{
+    {
         XNextEvent(_display, &_xev);
 
         // if(_xev.xany.type == ConfigureNotify)
@@ -99,7 +101,7 @@ void X11Fd::flush()
         // else
         //     std::clog << "EVENT: " <<  _xev.xany.type << std::endl;
 
-		_eventReady.send(_xev);
+        _eventReady.send(_xev);
     }
 }
 
@@ -116,7 +118,7 @@ bool X11Fd::onRun()
     //selector.endRead(&_ioh);
 
     while( XPending(_display) > 0 ) 
-	{
+    {
         XNextEvent(_display, &_xev);
         
         // if(_xev.xany.type == ConfigureNotify)
@@ -124,7 +126,7 @@ bool X11Fd::onRun()
         // else
         //     std::clog << "EVENT: " <<  _xev.xany.type << std::endl;
 
-		_eventReady.send(_xev);
+        _eventReady.send(_xev);
     }
 
     //selector.beginRead(&_ioh);

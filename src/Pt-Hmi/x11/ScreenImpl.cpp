@@ -386,8 +386,8 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );
 
         // send (native) paint event to window
-        winRect = Gfx::RectF( winRect.topLeft() * _scaling, 
-                              winRect.size() * _scaling);
+        winRect = Gfx::RectF( winRect.topLeft() * window->scaleFactor(), 
+                              winRect.size() * window->scaleFactor());
 
         MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
         impl->paint(winRect);

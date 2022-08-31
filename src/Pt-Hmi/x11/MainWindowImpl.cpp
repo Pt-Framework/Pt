@@ -194,14 +194,23 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
   
     Gfx::Rect rect = Gfx::round(rectF);
 
-    XExposeEvent ev = { Expose, 0, True, _display, _window,
-                       static_cast<int>( rect.x()),
-                       static_cast<int>( rect.y()),
-                       static_cast<int>( rect.width()),
-                       static_cast<int>( rect.height()),
-                       0 };
+    //XExposeEvent ev = { Expose, 0, True, _display, _window,
+    //                   static_cast<int>( rect.x()),
+    //                   static_cast<int>( rect.y()),
+    //                   static_cast<int>( rect.width()),
+    //                   static_cast<int>( rect.height()),
+    //                   0 };
 
-    Application::instance().impl()->processEvent( (XEvent&)ev);
+    //Application::instance().impl()->processEvent( (XEvent&)ev);
+
+    XClearArea(_display, _window, 
+               static_cast<int>( rect.x() ),
+               static_cast<int>( rect.y() ),
+               static_cast<int>( rect.width() ),
+               static_cast<int>( rect.height() ), 
+               True);
+
+    XFlush(_display);
 }
 
 
@@ -213,20 +222,13 @@ void MainWindowImpl::show(bool visible)
         XMapWindow(_display, _window);
         XFlush(_display);
 
-        if( ! _hasFirstShow )
-        {
-            _hasFirstShow = true;
-            XEvent xev;
+        //while( XPending(_display) > 0 ) 
+        //{
+        //    XEvent xev;
+        //    XNextEvent(_display, &xev);
 
-            while(true)
-            {
-                XNextEvent(_display, &xev);
-                Application::instance().impl()->processEvent(xev);
-
-                if(xev.xany.type == Expose)
-                    break;
-            }
-        }
+        //    Application::instance().impl()->processEvent(xev);
+        //}
     }
     else
     {
@@ -291,6 +293,7 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
 {
     //std::clog  << "XMoveWindow: " << pos.x() << ", " << pos.y() << std::endl;
     XMoveWindow(_display, _window, pos.x(), pos.y());
+    XFlush(_display);
 }
 
 
@@ -298,7 +301,20 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
     //std::clog  << "XResizeWindow: " << size.width() 
     //           << "x" << size.height() << std::endl;
+
     XResizeWindow( _display, _window, size.width(), size.height() );
+    XFlush(_display);
+    
+    //XClearArea(_display, _window, 0, 0, size.width(), size.height(), True);
+    //XFlush(_display);
+
+    //while( XPending(_display) > 0 ) 
+    //{
+    //    XEvent xev;
+    //    XNextEvent(_display, &xev);
+
+    //    Application::instance().impl()->processEvent(xev);
+    //}
 }
 
 
