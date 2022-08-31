@@ -50,14 +50,14 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 , _enabledState(true)
 {
     HWND desktop = GetDesktopWindow();
-    HDC screenDC = GetDC(desktop);
+    //HDC screenDC = GetDC(desktop);
 
-    int dpix = GetDeviceCaps(screenDC, LOGPIXELSX);
+    //int dpix = GetDeviceCaps(screenDC, LOGPIXELSX);
 
     //std::clog << "SCALING DPI: " << dpix << std::endl;
     //std::clog << "SCALING: " << dpix / 96.0 << std::endl;
+    //_screenScaling = dpix / 96.0;
 
-    _screenScaling = dpix / 96.0;
     _scaling = _screenScaling;
 
     RECT r;   
@@ -66,7 +66,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     _size.set(r.right, r.bottom);
     _size /= _scaling;
 
-    ReleaseDC(desktop, screenDC);
+    //ReleaseDC(desktop, screenDC);
 
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessMouseEvent);
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessTouchEvent);
@@ -397,8 +397,8 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );
 
         // send (native) paint event to window
-        winRect = Gfx::RectF( winRect.topLeft() * _scaling, 
-                              winRect.size() * _scaling);
+        winRect = Gfx::RectF( winRect.topLeft() * window->scaleFactor(), 
+                              winRect.size() * window->scaleFactor());
 
         MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
         impl->paint(winRect);

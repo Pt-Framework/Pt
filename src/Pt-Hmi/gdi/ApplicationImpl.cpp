@@ -600,10 +600,10 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
 
         case WM_GETMINMAXINFO:
         {
-            double minWidth = w->minimumSize().width();
-            double minHeight = w->minimumSize().height();
-            double maxWidth = w->maximumSize().width();
-            double maxHeight = w->maximumSize().height();
+            double minWidth = w->minimumSize().width() * w->scaleFactor();
+            double minHeight = w->minimumSize().height() * w->scaleFactor();
+            double maxWidth = w->maximumSize().width() * w->scaleFactor();
+            double maxHeight = w->maximumSize().height() * w->scaleFactor();
 
             MINMAXINFO* mmi = (MINMAXINFO*)lparam;
             mmi->ptMaxTrackSize.x = static_cast<LONG>(maxWidth);
@@ -771,9 +771,8 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
         break;
     }
     
-    const double scaling = w.scaleFactor();
-
-    Gfx::PointF pos(xPos / scaling, yPos / scaling);
+    Gfx::PointF pos(xPos, yPos);
+    pos /= w.scaleFactor();
     
     _mouseEvent.setPosition( w.toScreen(pos) );
     _mouseEvent.setVisual(&w);
@@ -817,7 +816,7 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
     int y = info.top;
 
     Gfx::PointF pos(x, y);
-    pos = w.surface().toLogical(pos);
+    pos /= w.scaleFactor();
 
     MoveEvent ev(w, pos);
     //commitEvent(ev);
@@ -861,7 +860,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     int height = HIWORD(lParam);
 
     Gfx::SizeF to(width, height);
-    to = w.surface().toLogical(to);
+    to /= w.scaleFactor();
 
     ResizeEvent rev(w, to);
     w.processEvent(rev);
