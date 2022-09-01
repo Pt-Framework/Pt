@@ -74,6 +74,7 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
         void set(const Gfx::Image& s)
         {
             _image = s;
+            setImage(_image);
         }
 
         const Gfx::Image& image() const
