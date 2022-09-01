@@ -301,10 +301,11 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 #endif
 
 #ifdef PT_HMI_X11_RASTER   
-    Gfx::Image& image = window.surface().pixmapImpl()->pimage();
+    const Gfx::Image& image = window.surface().pixmapImpl()->image();
+    char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
 
     XImage* ximage = XCreateImage(_display, _visual, _depth, ZPixmap, 0, 
-                                  (char*)image.data(), image.width(), image.height(), 
+                                  data, image.width(), image.height(), 
                                   _depth == 24 ? 32 : _depth, 0);
     
     unsigned int screen = DefaultScreen(_display);
