@@ -3785,24 +3785,52 @@ void Rasterizer::image( const Point& to, const Image& img)
 }
 
 
-void Rasterizer::image(const Point& to, const Image& from, const Rect& fromRect)
+//void Rasterizer::image(const Point& to, const Image& from, const Rect& fromRect)
+//{
+//  // clip fromRect to fit into the clip/image rect
+//  const ClipRect currentClip = updateClip();
+//
+//  Point d = currentClip.topLeft() - to;
+//  Point fromPos = fromRect.topLeft() + d;
+//
+//  Rect fromClip( fromPos, currentClip.size() );
+//  fromClip = fromRect.intersect(fromClip);
+//
+//  if( fromClip.isNull() )
+//      return;
+//
+//  // account for smaller fromRect
+//  Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
+//
+//  _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
+//}
+
+
+void Rasterizer::image(const Point& to, const Image& from, const Rect& rect)
 {
-  // clip fromRect to fit into the clip/image rect
-  const ClipRect currentClip = updateClip();
+  ClipRect currentClip = updateClip();
+ 
+  // clip against source boundaries
+  Rect fromRect = Rect( from.size() );
+  fromRect = fromRect.intersect(rect);
 
-  Point d = currentClip.topLeft() - to;
-  Point fromPos = fromRect.topLeft() + d;
+  // update target position if rect got smaller
+  Point toPos = to;
+  toPos += fromRect.topLeft() - rect.topLeft();
 
-  Rect fromClip( fromPos, currentClip.size() );
-  fromClip = fromRect.intersect(fromClip);
+  // clip against target boundaries
+  Rect toRect = Rect( toPos, fromRect.size() );
+  toRect = toRect.intersect(currentClip);
 
-  if( fromClip.isNull() )
-      return;
+  // update source position if rect got smaller
+  Point fromPos = fromRect.topLeft();
+  fromPos += toRect.topLeft() - toPos;
+  fromRect.setOrigin(fromPos);
 
-  // account for smaller fromRect
-  Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
+  // update source size if rect got smaller
+  fromRect.setSize( toRect.size() );
 
-  _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
+  _image->format().copy(_image->view(), toRect.topLeft(), from.view(), fromRect, _compositionMode);
 }
 
 
