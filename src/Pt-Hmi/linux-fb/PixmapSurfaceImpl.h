@@ -41,10 +41,9 @@ class PixmapSurface;
 class PixmapSurfaceImpl : public Gfx::ImageSurface
 {
     public:
-        PixmapSurfaceImpl()
-        : ImageSurface(_image)
-        {
-        }
+        PixmapSurfaceImpl();
+
+        ~PixmapSurfaceImpl();
 
         void clear(const Gfx::Color& c)
         {
@@ -60,6 +59,16 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
         {
             _image.reset(_image.format(), round(size));
             setImage(_image);
+        }
+
+        void begin(Gfx::Painter& painter)
+        {
+            Gfx::PaintSurface::begin(painter);
+        }
+
+        void finish()
+        {
+            Gfx::PaintSurface::finish();
         }
 
         void set(const Gfx::Image& s)
@@ -80,16 +89,6 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
-
-        void begin(Gfx::Painter& painter)
-        {
-            Gfx::PaintSurface::begin(painter);
-        }
-
-        void finish()
-        {
-            Gfx::PaintSurface::finish();
-        }
 
     private:
         Gfx::Image _image;

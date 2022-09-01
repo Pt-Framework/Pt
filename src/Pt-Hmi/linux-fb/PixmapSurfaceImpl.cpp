@@ -34,10 +34,29 @@ namespace Pt {
 
 namespace Hmi {
 
+const Gfx::ImageFormat& getScreenFormat()
+{
+    return Gfx::ImageFormat::argb32();
+}
+
+
+PixmapSurfaceImpl::PixmapSurfaceImpl()
+: ImageSurface(_image)
+, _image( getScreenFormat() )
+{
+}
+
+
+PixmapSurfaceImpl::~PixmapSurfaceImpl()
+{
+}
+
+
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
 {
     Gfx::ImageSurface::drawSurface(toF, *surface.impl());
 }
+
 
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface, const Gfx::RectF& pmRect)
 {
