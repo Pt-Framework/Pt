@@ -287,7 +287,7 @@ void Shell::onRelease(Window& w)
 
 
 Gfx::PointF Shell::onToWindow(const Window& w, 
-                                      const Gfx::PointF& pos) const
+                              const Gfx::PointF& pos) const
 {
     WindowFrame* frame = getWindowFrame(w);
     if( ! frame )
@@ -299,7 +299,7 @@ Gfx::PointF Shell::onToWindow(const Window& w,
 
 
 Gfx::PointF Shell::onFromWindow(const Window& w, 
-                                        const Gfx::PointF& pos) const
+                                const Gfx::PointF& pos) const
 {
     WindowFrame* frame = getWindowFrame(w);
     if( ! frame )
@@ -697,11 +697,11 @@ void Shell::onProcessPaintEvent(const PaintEvent& ev)
         if( frameRect.isNull() )
             continue;
 
-        // clip client rect
-        Gfx::RectF updateRect = frame->clientRect().intersect(rect);
-
         // paint frame rect
         frame->paint( surface(), frameRect );
+
+        // clip client rect
+        Gfx::RectF updateRect = frame->clientRect().intersect(rect);
 
         // paint client rect
         Gfx::PointF surfacePos = onToWindow( *w, updateRect.topLeft() );
