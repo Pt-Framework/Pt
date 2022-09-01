@@ -77,7 +77,8 @@ double ImageSurface::onScaleFactor() const
 const Gfx::SizeF& ImageSurface::onSize() const
 {
     //TODO: Remove mutable _size!
-    _size = SizeF(_rasterizer->image().size().width(), _rasterizer->image().size().height());
+    _size = SizeF( _rasterizer->image().size().width(), 
+                   _rasterizer->image().size().height() );
     return _size;
 }
 
@@ -277,9 +278,10 @@ std::vector<std::string> ImageSurface::fontNames()
 void ImageSurface::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
 {
     const ImageSurface* isurface = dynamic_cast<const ImageSurface*>(&surface);
-    if (isurface)
+    if(isurface)
     {
-        drawImage(toF, isurface->_rasterizer->image());
+        const Gfx::Image& image = isurface->image();
+        drawImage(toF, image);
         return;
     }
 
@@ -288,12 +290,14 @@ void ImageSurface::drawSurface(const Gfx::PointF& toF, const PaintSurface& surfa
 }
 
 
-void ImageSurface::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface, const Gfx::RectF& pmRect)
+void ImageSurface::drawSurface(const Gfx::PointF& toF, 
+                               const PaintSurface& surface, const Gfx::RectF& pmRect)
 {
     const ImageSurface* isurface = dynamic_cast<const ImageSurface*>(&surface);
-    if (isurface)
+    if(isurface)
     {
-        drawImage(toF, isurface->_rasterizer->image(), pmRect);
+        const Gfx::Image& image = isurface->image();
+        drawImage(toF, image, pmRect);
         return;
     }
 
