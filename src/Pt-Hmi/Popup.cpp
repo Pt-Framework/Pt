@@ -83,6 +83,7 @@ void Popup::onGlobalMouseEvent(const MouseEvent& ev)
 
         if( ! rect.contains(pos) )
         {
+            //std::clog << "POPUP HIDE MOUSE: " << vid() << std::endl;
             show(false);
         }
     }
@@ -98,6 +99,7 @@ void Popup::onGlobalTouchEvent(const TouchEvent& ev)
 
         if( ! rect.contains(pos) )
         {
+            //std::clog << "POPUP HIDE TOUCH: " << vid() << std::endl;
             show(false);
         }
     }
@@ -126,8 +128,15 @@ void Popup::onGlobalMoveEvent(const MoveEvent& ev)
     std::vector<Window*>::const_iterator it = std::find( windows.begin(),
                                                          windows.end(), 
                                                          ev.visual() );
+    
+    if( this == ev.visual() )
+      return;
+
     if( it != windows.end() )
+    {
+        //std::clog << "POPUP HIDE MOVE: " << (*it)->title() << std::endl;
         show(false);
+    }
 }
 
 
