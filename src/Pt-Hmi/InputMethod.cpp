@@ -120,8 +120,8 @@ void InputMethod::unregisterApplication(Application&)
 
 
 DefaultInputMethod::DefaultInputMethod()
-: _window(0)
-, _keyButton(0)
+//: _window(0)
+//, _keyButton(0)
 {
 
 }
@@ -129,49 +129,50 @@ DefaultInputMethod::DefaultInputMethod()
 
 DefaultInputMethod::~DefaultInputMethod()
 {
-    delete _keyButton;
-    delete _window;
+    //delete _keyButton;
+    //delete _window;
 }
 
 
 void DefaultInputMethod::onKeyPress()
 {
     //std::clog << "KEY PRESS" << std::endl;
-    KeyEvent kev;
-    kev.setPress(Key(Key::A), 'a');
 
-    sendEvent(kev);
+    //KeyEvent kev;
+    //kev.setPress(Key(Key::A), 'a');
+
+    //sendEvent(kev);
 }
 
 
 void DefaultInputMethod::onBegin()
 {
-    if( ! _window )
-    {
-        _window = new Window();
-        _window->setTopMost(true);
-        _window->move( Gfx::PointF(500, 500) );
-        _window->resize( Gfx::SizeF(100, 100) );
-        _window->setTitle("Input Method");
-    }
+    //if( ! _window )
+    //{
+    //    _window = new Window();
+    //    _window->setTopMost(true);
+    //    _window->move( Gfx::PointF(500, 500) );
+    //    _window->resize( Gfx::SizeF(100, 100) );
+    //    _window->setTitle("Input Method");
+    //}
 
-    if( ! _keyButton)
-    {
-        _keyButton = new PushButton();
-        _keyButton->setText("a");
-        _window->setContent(_keyButton);
-        _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
-    }
-    
-    _window->show(true);
+    //if( ! _keyButton)
+    //{
+    //    _keyButton = new PushButton();
+    //    _keyButton->setText("a");
+    //    _window->setContent(_keyButton);
+    //    _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
+    //}
+    //
+    //_window->show(true);
 
     //std::clog << "INPUT_METHOD BEGIN" << std::endl;
 }
 
 void DefaultInputMethod::onFinish()
 {
-    if( _window->isVisible() )
-        _window->show(false);
+    //if( _window->isVisible() )
+    //    _window->show(false);
     
     //std::clog << "INPUT_METHOD FINISH" << std::endl;
 }
@@ -179,7 +180,8 @@ void DefaultInputMethod::onFinish()
 
 Window* DefaultInputMethod::onActiveWindow()
 {
-    return _window;
+    //return _window;
+    return 0;
 }
 
 } // namespace
