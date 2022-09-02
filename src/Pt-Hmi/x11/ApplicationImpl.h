@@ -96,8 +96,6 @@ class ApplicationImpl : public Pt::System::MainLoop
             return _depth;
         }
 
-        void setReady();
-
         Atom wmProtocols() const
         { return _wmProtocols; }
 

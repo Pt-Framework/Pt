@@ -67,7 +67,7 @@ class X11Fd : public System::Selectable
 
         void close();
 
-        void flush();
+        void processEvents();
 
         Pt::Signal<XEvent&>& eventReady()
         { return _eventReady; }
@@ -82,11 +82,11 @@ class X11Fd : public System::Selectable
         void onDetach(System::EventLoop& loop);    
 
     private:
-        Display* _display;
-        XEvent _xev;
-        Pt::System::IOHandle _ioh;
+        Display*               _display;
+        XEvent                 _xev;
+        Pt::System::IOHandle   _ioh;
         Pt::System::EventLoop* _loop;
-        Pt::Signal<XEvent&> _eventReady; 
+        Pt::Signal<XEvent&>    _eventReady; 
 };
 
 } // namespace

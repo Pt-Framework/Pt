@@ -213,12 +213,7 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
                static_cast<int>( rect.height() ), 
                True);
 
-
-   //std::clog << "  XPending: " << XPending(_display) << std::endl;
-   Application::instance().impl()->setReady();
-   //XFlush(_display);
-    
-    //XSync(_display, _window);
+    //XFlush(_display);
 }
 
 

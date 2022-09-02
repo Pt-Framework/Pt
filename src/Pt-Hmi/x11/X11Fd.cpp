@@ -28,28 +28,14 @@
 */
 
 #include "X11Fd.h"
-#include "ApplicationImpl.h"
-
-#include <Pt/Hmi/Application.h>
-#include <Pt/SourceInfo.h>
-
-#ifndef _AIX
-#include <X11/Xft/Xft.h>
-#endif
-
 #include <stdexcept>
-#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
 
-void onConnection(Display *display,
-      XPointer client_data,
-      int fd,
-      Bool opening,
-      XPointer *watch_data
-      )
+void onConnectionChanged(Display* display, XPointer client_data, 
+                         int fd, Bool opening, XPointer *watch_data)
 {
   std::clog << "### CONECTION ###   " << fd << std::endl;
 }
@@ -60,12 +46,13 @@ X11Fd::X11Fd(Display* display)
 , _ioh(*this)
 , _loop(0)
 {
-     XAddConnectionWatch(_display, &onConnection, 0);
+     XAddConnectionWatch(_display, &onConnectionChanged, 0);
 
     _ioh.fd = XConnectionNumber(_display);
     if( _ioh.fd < 0 )
         throw Pt::System::AccessFailed("invalid X11 display");
 }
+
 
 X11Fd::~X11Fd()
 {
@@ -88,9 +75,6 @@ void X11Fd::begin()
     Pt::System::Selector& selector = _loop->selector();
     selector.beginRead(&_ioh);
 
-    //std::clog << "  XPending: " << XPending(_display) << std::endl;
-    //XFlush(_display);
-
     //std::clog << "BEGIN X11FD" << std::endl;
 }
 
@@ -105,10 +89,8 @@ void X11Fd::close()
 }
 
 
-void X11Fd::flush()
+void X11Fd::processEvents()
 { 
-    // TODO: flush may not be neccessary
-
     while( XPending(_display) > 0 ) 
     {
         XNextEvent(_display, &_xev);
@@ -128,26 +110,14 @@ bool X11Fd::onRun()
     //std::clog << "X11Fd::onRun BEGIN" << std::endl;
 
     Pt::System::Selector& selector = _loop->selector();
-    bool isAvail = selector.isReadable(&_ioh) || (XPending(_display) > 0);
+    bool isAvail = selector.isReadable(&_ioh);
     if( ! isAvail ) 
         return isAvail;
 
     selector.endRead(&_ioh);
     selector.beginRead(&_ioh);
 
-    XFlush(_display);
-
-    while( XPending(_display) > 0 ) 
-    {
-        XNextEvent(_display, &_xev);
-        
-        // if(_xev.xany.type == ConfigureNotify)
-        //     std::clog << "ConfigureNotify " <<  _xev.xany.type  << std::endl;
-        // else
-        //     std::clog << "EVENT: " <<  _xev.xany.type << std::endl;
-
-        _eventReady.send(_xev);
-    }
+    processEvents();
 
     //std::clog << "X11Fd::onRun END" << std::endl;  
 

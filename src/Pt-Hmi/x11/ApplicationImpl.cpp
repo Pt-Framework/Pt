@@ -26,6 +26,7 @@
  * MA  02110-1301  USA
  */
 
+#include "posix/MainLoopImpl.h"
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
 #include "PixmapSurfaceImpl.h"
@@ -161,15 +162,6 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 }
 
 
-void ApplicationImpl::setReady()
-{
-    //std::clog << "  XPending: " << XPending(_display) << std::endl;
-
-    if( XPending(_display) > 0 )
-        MainLoop::setReady(_xfd);
-}
-
-
 void ApplicationImpl::nextEvent()
 {
     MainLoop::waitNext();
@@ -178,7 +170,12 @@ void ApplicationImpl::nextEvent()
 
 void ApplicationImpl::onRun()
 {
-    MainLoop::onRun();
+    _xfd.processEvents();
+
+    while( MainLoop::impl()->waitNext() )
+    {
+        _xfd.processEvents();
+    }
 }
 
 

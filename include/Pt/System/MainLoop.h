@@ -36,6 +36,8 @@ namespace Pt {
 
 namespace System {
 
+class MainLoopImpl;
+
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 
     The following example uses a %MainLoop to wait on acitvity on
@@ -82,6 +84,9 @@ class PT_SYSTEM_API MainLoop : public EventLoop
         //! @internal
         bool waitNext();
 
+        MainLoopImpl* impl()
+        { return _impl; }
+
     protected:
         virtual void onAttachSelectable(Selectable&);
 
@@ -108,7 +113,7 @@ class PT_SYSTEM_API MainLoop : public EventLoop
         virtual void onDetachTimer(Timer& timer);
 
     private:
-        class MainLoopImpl* _impl;
+        MainLoopImpl* _impl;
 };
 
 } // namespace System
