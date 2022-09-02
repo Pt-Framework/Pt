@@ -161,6 +161,15 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 }
 
 
+void ApplicationImpl::setReady()
+{
+    //std::clog << "  XPending: " << XPending(_display) << std::endl;
+
+    if( XPending(_display) > 0 )
+        MainLoop::setReady(_xfd);
+}
+
+
 void ApplicationImpl::nextEvent()
 {
     MainLoop::waitNext();
@@ -289,6 +298,12 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     Gfx::SizeF size(width, height);
     Gfx::RectF rect(pos, size);
 
+    //static int eee = 0;
+    //std::clog << "EXPOSE NOTIFY " << eee++ << " "
+    //                              << window.title() << " "
+    //                              << rect.x() << ", " << rect.y() << " " 
+    //                              << rect.width() << "x" << rect.height() << std::endl;
+
     PaintEvent pev(window, rect);
     window.processEvent(pev);
 
@@ -304,6 +319,10 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     const Gfx::Image& image = window.surface().pixmapImpl()->image();
     char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
 
+    //std::clog << "  EXPOSE " << window.title() << " "
+    //                              << x << ", " << y << " " 
+    //                              << image.width() << "x" << image.height() << std::endl;
+
     XImage* ximage = XCreateImage(_display, _visual, _depth, ZPixmap, 0, 
                                   data, image.width(), image.height(), 
                                   _depth == 24 ? 32 : _depth, 0);
@@ -318,7 +337,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     XDestroyImage(ximage); 
 #endif
 
-    XFlush(_display);
+    //XFlush(_display);
 }
 
 
@@ -515,6 +534,10 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
 
 void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
 {
+    //static int ccc = 0;
+    //std::clog << "CONFIGURE NOTIFY: " << ccc++ << " "
+    //                                  << window.title() << std::endl;
+
     // Use only last configure event for the window in queue
     //XPending(_display);
 
@@ -541,7 +564,10 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
     {
         windowImpl->setSize(width, height);
 
-        //std::clog << "   ### resize event: " << width << "x" << height << std::endl;
+        //static int rrr = 0;
+        //std::clog << "  RESIZE: " << rrr++ << " "
+        //                          << window.title() << " " 
+        //                          << width << "x" << height << std::endl;
         Gfx::SizeF to(width, height);
         to = window.surface().toLogical(to);
     
@@ -552,9 +578,14 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         window.repaint(updateRect);
     }
 
-    if( window.position().x() != x || window.position().y() != y)
+    Gfx::PointF currentPos = window.surface().toPhysical( window.position() );
+
+    if( x != currentPos.x() || y != currentPos.y() )
     {
-        //std::clog << "   ### move event: " << x << "x" << y << std::endl;
+        //static int mmm = 0;
+        //std::clog << "  MOVE: " << mmm++ << " " 
+        //                        << window.title() << " " 
+        //                        << x << "," << y << std::endl;
         Gfx::PointF to(x, y);
         to = window.surface().toLogical(to);
 

@@ -82,7 +82,7 @@ void MainWindowImpl::create(Window::Type type)
                        FocusChangeMask|EnterWindowMask|
                        LeaveWindowMask;
 
-    wattr.do_not_propagate_mask = 0;/*KeyPressMask|KeyReleaseMask|
+    wattr.do_not_propagate_mask = NoEventMask;/*KeyPressMask|KeyReleaseMask|
                                   ButtonPressMask| ButtonReleaseMask|
                                   PointerMotionMask|ButtonMotionMask;*/
 
@@ -189,11 +189,14 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
 
 void MainWindowImpl::paint(const Gfx::RectF& rectF)
 {
-    //std::clog << "XMainWindowImpl::paint" << rectF.x() << ", " << rectF.y()
-    //          << " " << rectF.width() << "x" << rectF.height() << std::endl;
-  
     Gfx::Rect rect = Gfx::round(rectF);
+    if( rect.isNull() )
+      return;
 
+    //std::clog << "XClearArea " << title() << " "
+    //                           << rectF.x() << ", " << rectF.y() << " " 
+    //                           << rectF.width() << "x" << rectF.height() << std::endl;
+  
     //XExposeEvent ev = { Expose, 0, True, _display, _window,
     //                   static_cast<int>( rect.x()),
     //                   static_cast<int>( rect.y()),
@@ -210,7 +213,12 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
                static_cast<int>( rect.height() ), 
                True);
 
-    XFlush(_display);
+
+   //std::clog << "  XPending: " << XPending(_display) << std::endl;
+   Application::instance().impl()->setReady();
+   //XFlush(_display);
+    
+    //XSync(_display, _window);
 }
 
 
@@ -220,7 +228,7 @@ void MainWindowImpl::show(bool visible)
     {
         //std::clog  << "XMapWindow" << std::endl;
         XMapWindow(_display, _window);
-        XFlush(_display);
+        //XFlush(_display);
 
         //while( XPending(_display) > 0 ) 
         //{
@@ -232,9 +240,9 @@ void MainWindowImpl::show(bool visible)
     }
     else
     {
-        //std::clog  << "XMapWindow" << std::endl;
+        //std::clog  << "XUnmapWindow" << std::endl;
         XUnmapWindow(_display, _window);
-        XFlush(_display);
+        //XFlush(_display);
     }
 }
 
@@ -259,7 +267,7 @@ void MainWindowImpl::activate()
     XSendEvent(_display, XDefaultRootWindow(_display), 
                False, SubstructureNotifyMask|SubstructureRedirectMask, &xev);
 
-    XFlush(_display);
+    //XFlush(_display);
 }
 
 
@@ -285,7 +293,7 @@ void MainWindowImpl::enable(bool enabled)
     }
 
     XChangeWindowAttributes(_display, _window, CWEventMask, &wattr);
-    XFlush(_display);
+    //XFlush(_display);
 }
 
 
@@ -293,7 +301,15 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
 {
     //std::clog  << "XMoveWindow: " << pos.x() << ", " << pos.y() << std::endl;
     XMoveWindow(_display, _window, pos.x(), pos.y());
-    XFlush(_display);
+    //XFlush(_display);
+
+    //while( XPending(_display) > 0 ) 
+    //{
+    //    XEvent xev;
+    //    XNextEvent(_display, &xev);
+
+    //    Application::instance().impl()->processEvent(xev);
+    //}
 }
 
 
@@ -303,7 +319,7 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
     //           << "x" << size.height() << std::endl;
 
     XResizeWindow( _display, _window, size.width(), size.height() );
-    XFlush(_display);
+    //XFlush(_display);
     
     //XClearArea(_display, _window, 0, 0, size.width(), size.height(), True);
     //XFlush(_display);
@@ -444,7 +460,7 @@ void MainWindowImpl::onSetState(Window::State s)
                SubstructureRedirectMask,
                (XEvent*)&ev);
 
-    XFlush(_display);
+    //XFlush(_display);
 }
 
 

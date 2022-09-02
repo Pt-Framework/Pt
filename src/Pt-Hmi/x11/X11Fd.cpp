@@ -44,13 +44,25 @@ namespace Pt {
 
 namespace Hmi {
 
+void onConnection(Display *display,
+      XPointer client_data,
+      int fd,
+      Bool opening,
+      XPointer *watch_data
+      )
+{
+  std::clog << "### CONECTION ###   " << fd << std::endl;
+}
+
+
 X11Fd::X11Fd(Display* display)
 : _display(display)
 , _ioh(*this)
 , _loop(0)
 {
-    _ioh.fd = XConnectionNumber(_display);
+     XAddConnectionWatch(_display, &onConnection, 0);
 
+    _ioh.fd = XConnectionNumber(_display);
     if( _ioh.fd < 0 )
         throw Pt::System::AccessFailed("invalid X11 display");
 }
@@ -68,11 +80,16 @@ X11Fd::~X11Fd()
 
 void X11Fd::begin()
 {      
+    //std::clog << "X11Fd BEGIN" << std::endl;
+
     if( ! _loop )
         throw std::logic_error("I/O device not active");
 
     Pt::System::Selector& selector = _loop->selector();
     selector.beginRead(&_ioh);
+
+    //std::clog << "  XPending: " << XPending(_display) << std::endl;
+    //XFlush(_display);
 
     //std::clog << "BEGIN X11FD" << std::endl;
 }
@@ -111,11 +128,14 @@ bool X11Fd::onRun()
     //std::clog << "X11Fd::onRun BEGIN" << std::endl;
 
     Pt::System::Selector& selector = _loop->selector();
-    bool isAvail = selector.isReadable(&_ioh);
+    bool isAvail = selector.isReadable(&_ioh) || (XPending(_display) > 0);
     if( ! isAvail ) 
         return isAvail;
 
-    //selector.endRead(&_ioh);
+    selector.endRead(&_ioh);
+    selector.beginRead(&_ioh);
+
+    XFlush(_display);
 
     while( XPending(_display) > 0 ) 
     {
@@ -129,7 +149,7 @@ bool X11Fd::onRun()
         _eventReady.send(_xev);
     }
 
-    //selector.beginRead(&_ioh);
+    //std::clog << "X11Fd::onRun END" << std::endl;  
 
     return isAvail;
 }

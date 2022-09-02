@@ -214,6 +214,9 @@ void Window::setParent(WindowManager& parent)
 
     _isClosed = false;
 
+    //if( _title == "Main_1")
+    //std::clog << "REALIZE " << title() << std::endl;
+
     parent.onAttach(*this);
     _parent = &parent;
 
@@ -659,6 +662,7 @@ bool Window::isVisible() const
 
 void Window::show(bool b)
 {
+    //if( _title == "Main_1")
     //std::clog << "SHOW: " << title() << " init: " << (_parent != 0) << std::endl;
     
     if( ! _parent )
@@ -812,6 +816,10 @@ void Window::onRescale(double scaling)
 
     _surface.setScaleFactor(scaling);
 
+    //if( _title == "Main_1")
+    //std::clog << "+W RESCALE EVENT: " << this->title() << " "
+    //          << _surface.scaleFactor() << std::endl;
+
     // realign geometry
     move(_requestedPosition);
     resize(_requestedSize);
@@ -883,7 +891,8 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     //if( _size == ev.size() )
     //    return;
 
-    //std::clog << "RESIZE EVENT: " << this->title() << " "
+    //if( _title == "Main_1")
+    //std::clog << "W RESIZE EVENT: " << this->title() << " "
     //          << ev.size().width() << "x" << ev.size().height() << std::endl;
 
     _geometry.setSize( ev.size() );
