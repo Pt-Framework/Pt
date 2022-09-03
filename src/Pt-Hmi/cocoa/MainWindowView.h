@@ -82,6 +82,10 @@
 
 - (void) windowDidResignKey:(NSNotification*) notification;
 
+- (void) windowDidBecomeMain: (NSNotification*) notification;
+
+- (void) windowDidResignMain: (NSNotification*) notification;
+
 - (BOOL) windowShouldClose: (id) sender;
 
 - (void) windowDidChangeBackingProperties: (NSNotification*) notification;

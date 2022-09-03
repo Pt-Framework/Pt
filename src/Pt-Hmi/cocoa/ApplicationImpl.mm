@@ -48,6 +48,8 @@
 
 - (void) dealloc;
 
+- (void) sendEvent: (NSEvent*) event;
+
 @end
 
 @implementation PtGuiApplication
@@ -61,6 +63,27 @@
 {
     [super dealloc];
     [pool release];
+}
+
+- (void) sendEvent: (NSEvent*) event
+{
+    // static int nnn = 0;
+
+    // switch( [event type] ) 
+    // {
+    //     case NSEventTypeLeftMouseDown:
+    //         std::clog << "### MOUSE DOWN " << nnn++ << std::endl;
+    //         break;
+
+    //     case NSEventTypeMouseMoved:
+    //         std::clog << "# MOUSE MOVE " << nnn++ << std::endl;
+    //         break;
+
+    //     default:
+    //         break;
+    // }
+
+    [super sendEvent: event];
 }
 
 @end
@@ -127,15 +150,17 @@ ApplicationImpl::ApplicationImpl()
 {
     init();
 
-    // [NSEvent addLocalMonitorForEventsMatchingMask: NSEventMaskAny
-    //          handler:^NSEvent*(NSEvent* event) 
+    // local monitors will only capture events on the window frame
+
+    // [NSEvent addGlobalMonitorForEventsMatchingMask: NSEventMaskAny
+    //          handler:^ void (NSEvent* event) 
     //          {
     //             NSEventType eventType = [event type];
     //             if (eventType == NSEventTypeLeftMouseDown ||
     //                 eventType == NSEventTypeRightMouseDown)
     //                 std::clog << "EVENT MOUSE DOWN" << std::endl;
                 
-    //             return event;
+    //             return;
     //         }];
 }
 
@@ -167,6 +192,12 @@ void ApplicationImpl::setDefaultFont(const std::string& fontName)
 void ApplicationImpl::init()
 {
     [PtGuiApplication sharedApplication];
+    
+    // activate the application when launched from shell. 
+    // dispatch_async(dispatch_get_main_queue(), ^{
+    //     [NSApp activateIgnoringOtherApps:YES];
+    // });
+
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
     [NSApp initPool];
 
@@ -268,6 +299,7 @@ void ApplicationImpl::onRun()
 {
     // NOTE: instead of a master timer we could also iterate using
     //         NSApp runUntil().
+
     [NSApp run];
 }
 

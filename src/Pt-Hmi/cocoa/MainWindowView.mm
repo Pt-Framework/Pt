@@ -65,7 +65,7 @@
 }
 
 
-- (BOOL) acceptsFirstMouse: (NSEvent*) ev;
+- (BOOL) acceptsFirstMouse: (NSEvent*) ev
 {
     return TRUE;
 }
@@ -165,7 +165,7 @@
 
 - (void) mouseDown: (NSEvent*) ev
 {
-    //std::clog << "MOUSE DOWN" << std::endl;
+    //std::clog << "MOUSE DOWN " << std::endl;
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onLMouseDown(mp.x,mp.y);
 }
@@ -189,7 +189,8 @@
 
 - (void) mouseMoved: (NSEvent *) ev
 {
-    //std::clog << "MOUSE MOVED" << std::endl;
+    // static int nnn = 0;
+    // std::clog << "MOUSE MOVED " << nnn++ << std::endl;
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onMouseMove(mp.x,mp.y);
 }
@@ -244,12 +245,26 @@
 - (void) windowDidBecomeKey:(NSNotification*) notification
 {
     //std::clog << "WINDOW BECAME KEY" << std::endl;
+    _windowImpl->onActivate(true);
 }
 
 
 - (void) windowDidResignKey:(NSNotification*) notification
 {
     //std::clog << "WINDOW RESIGNED KEY" << std::endl;
+    _windowImpl->onActivate(false);
+}
+
+
+- (void) windowDidBecomeMain: (NSNotification*) notification
+{
+    //std::clog << "WINDOW BECAME MAIN" << std::endl;
+}
+
+
+- (void) windowDidResignMain: (NSNotification*) notification
+{
+    //std::clog << "WINDOW RESIGNED MAIN" << std::endl;
 }
 
 

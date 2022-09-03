@@ -63,6 +63,12 @@ class PT_HMI_API LeaveEvent : public Pt::BasicEvent<LeaveEvent>
             return _visual;
         }
 
+        void* r0()
+        { return _reserved0; }
+        
+        Pt::uint64_t r1()
+        { return _reserved1; }
+
     private:
         Pt::uint64_t _vid;
         Visual*      _visual;

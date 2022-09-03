@@ -654,7 +654,7 @@ void Application::onDispatchActivateEvent(const ActivateEvent& ev)
     if( it == _visuals.end() )
         return;
 
-    onProcessActivateEvent(ev);
+    _eventReceived.send(ev);
 }
 
 

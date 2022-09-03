@@ -117,6 +117,8 @@ class MainWindowImpl : public WindowImpl
     public:
         void onPaint(const NSRect& rect);
 
+        void onActivate(bool isActive);
+
         void onShow(bool v);
 
         void onMove();

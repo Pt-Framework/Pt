@@ -38,30 +38,6 @@
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/PaintEvent.h>
 
-@interface MainWindow : NSWindow
-{
-}
-
-- (BOOL) canBecomeKeyWindow;
-
-- (BOOL) canBecomeMainWindow;
-
-@end
-
-@implementation MainWindow
-
-- (BOOL) canBecomeKeyWindow
-{
-    return YES;
-}
-
-- (BOOL) canBecomeMainWindow
-{
-    return YES;
-}
-
-@end
-
 namespace Pt {
 
 namespace Hmi {
@@ -72,7 +48,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 , _windowStyle(0)
 , _level(0)
 , _keyFlags(0)
-{   
+{
     MainWindowView* view = [[MainWindowView alloc] initWithImpl: this];
     _view = view;
 
@@ -83,7 +59,6 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     {
         case WindowType::Popup:
             _windowStyle = NSWindowStyleMaskBorderless;
-                           //NSWindowStyleMaskFullSizeContentView;
             break;
 
         default:
@@ -95,26 +70,19 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
             break;
     }
 
-    _window = [[MainWindow alloc] initWithContentRect:NSMakeRect(at.x(), 
-                                                               at.y(), 
-                                                               size.width(), 
-                                                               size.height()) 
-                                                    styleMask:_windowStyle 
-                                                    backing:NSBackingStoreBuffered 
-                                                    defer:NO];
+    NSRect windowRect = NSMakeRect( at.x(), at.y(), 
+                                    size.width(),  size.height() );
+
+    _window = [[NSWindow alloc] initWithContentRect: windowRect 
+                                          styleMask: _windowStyle 
+                                            backing: NSBackingStoreBuffered 
+                                              defer: NO];
     
     [_window setReleasedWhenClosed: NO];
     //[_window setAcceptsMouseMovedEvents:YES];
     [_window setInitialFirstResponder: view];
     [_window setContentView: view];    
     [_window setDelegate: view];
-
-    if(type == WindowType::Popup)
-    {
-        //[_window setTitlebarAppearsTransparent: YES];
-        //[_window setTitleVisibility: NSWindowTitleHidden];
-        [_window setOpaque:NO];
-    }
 
     _level = [_window level];
 }
@@ -206,12 +174,9 @@ void MainWindowImpl::show(bool visible)
 
     if(visible)
     {
-        //[NSApp activateIgnoringOtherApps:YES];
         [_view setHidden:NO];
-
-        [_window orderFront: nil];
-        [_window makeKeyWindow];
-        //[_window makeMainWindow];
+        [_window orderFrontRegardless];
+        //[_window makeKeyAndOrderFront:nil];
     }
     else
     {
@@ -223,8 +188,10 @@ void MainWindowImpl::show(bool visible)
 
 void MainWindowImpl::activate()
 {
-    [_window makeKeyWindow];
+    //std::clog << "ACTIVATE: " << std::endl;
+
     [_window makeMainWindow];
+    [_window makeKeyWindow];
 }
 
 
@@ -283,7 +250,6 @@ void MainWindowImpl::onSetType(WindowType type)
     {
         case WindowType::Popup:
             _windowStyle = NSWindowStyleMaskBorderless;
-                           //NSWindowStyleMaskFullSizeContentView;
             break;
 
         default:
@@ -297,18 +263,18 @@ void MainWindowImpl::onSetType(WindowType type)
 
     [_window setStyleMask:_windowStyle];
     
-    if(type == WindowType::Popup)
-    {
-        [_window setTitlebarAppearsTransparent: YES];
-        [_window setTitleVisibility: NSWindowTitleHidden];
-        [_window setOpaque:NO];
-    }
-    else
-    {
-        [_window setTitlebarAppearsTransparent: NO];
-        [_window setTitleVisibility: NSWindowTitleVisible];
-        [_window setOpaque:YES];
-    }
+    // if(type == WindowType::Popup)
+    // {
+    //     [_window setTitlebarAppearsTransparent: YES];
+    //     [_window setTitleVisibility: NSWindowTitleHidden];
+    //     [_window setOpaque:NO];
+    // }
+    // else
+    // {
+    //     [_window setTitlebarAppearsTransparent: NO];
+    //     [_window setTitleVisibility: NSWindowTitleVisible];
+    //     [_window setOpaque:YES];
+    // }
 }
 
 
@@ -464,6 +430,17 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     CGContextDrawImage(windowContext, rect, subImage);
 
     CGImageRelease(image);
+}
+
+
+void MainWindowImpl::onActivate(bool isActive)
+{
+    Window* window = findWindow(_window);
+    if( ! window )
+        return;
+
+    ActivateEvent ev(*window, isActive);
+    Application::instance().commitEvent(ev);
 }
 
 

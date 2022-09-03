@@ -264,6 +264,9 @@ void ScreenImpl::onShow(Window& w, bool visible)
 
 void ScreenImpl::onActivate(Window& w, bool active)
 {
+    if( ! active )
+        return;
+
     MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
     impl->activate();
 }
