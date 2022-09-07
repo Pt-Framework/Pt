@@ -59,6 +59,7 @@ void Popup::onShowEvent(const ShowEvent& ev)
         Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalTouchEvent);
         Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalActivateEvent);
         Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalMoveEvent);
+        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalResizeEvent);
     }
     else
     {
@@ -68,6 +69,7 @@ void Popup::onShowEvent(const ShowEvent& ev)
         Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalTouchEvent);
         Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalActivateEvent);
         Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalMoveEvent);
+        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalResizeEvent);
     }
 }
 
@@ -114,12 +116,8 @@ void Popup::onGlobalActivateEvent(const ActivateEvent& ev)
 
 void Popup::onGlobalMoveEvent(const MoveEvent& ev)
 {
-    // ignore moving children !!! REMOVE !!! )
-    //for( Visual* v = ev.visual(); v != 0; v = v->parent() )
-    //{
-    //    if(v == this)
-    //        return;
-    //}
+    if( this == ev.visual() )
+      return;
 
     // react only to moving top level windows
     Screen& screen = Application::instance().screen();
@@ -128,13 +126,31 @@ void Popup::onGlobalMoveEvent(const MoveEvent& ev)
     std::vector<Window*>::const_iterator it = std::find( windows.begin(),
                                                          windows.end(), 
                                                          ev.visual() );
-    
-    if( this == ev.visual() )
-      return;
 
     if( it != windows.end() )
     {
         //std::clog << "POPUP HIDE MOVE: " << (*it)->title() << std::endl;
+        show(false);
+    }
+}
+
+
+void Popup::onGlobalResizeEvent(const ResizeEvent& ev)
+{
+    if( this == ev.visual() )
+      return;
+
+    // react only to moving top level windows
+    Screen& screen = Application::instance().screen();
+    const std::vector<Window*>& windows = screen.windows();
+
+    std::vector<Window*>::const_iterator it = std::find( windows.begin(),
+                                                         windows.end(), 
+                                                         ev.visual() );
+
+    if( it != windows.end() )
+    {
+        //std::clog << "POPUP HIDE RESIZE: " << (*it)->title() << std::endl;
         show(false);
     }
 }

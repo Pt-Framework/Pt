@@ -616,7 +616,7 @@ void Application::onDispatchMoveEvent(const MoveEvent& ev)
     if( it == _visuals.end() )
         return;
 
-    onProcessMoveEvent(ev);
+    processEvent(ev);
 }
 
 
@@ -635,7 +635,7 @@ void Application::onDispatchResizeEvent(const ResizeEvent& ev)
     if( it == _visuals.end() )
         return;
 
-    onProcessResizeEvent(ev);
+    processEvent(ev);
 }
 
 
@@ -654,7 +654,7 @@ void Application::onDispatchActivateEvent(const ActivateEvent& ev)
     if( it == _visuals.end() )
         return;
 
-    _eventReceived.send(ev);
+    processEvent(ev);
 }
 
 

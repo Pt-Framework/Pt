@@ -55,6 +55,8 @@ class PT_HMI_API Popup : public Window
 
         void onGlobalMoveEvent(const MoveEvent& ev);
 
+        void onGlobalResizeEvent(const ResizeEvent& ev);
+
         bool onMouseEvent(const MouseEvent& ev);
 
         bool onTouchEvent(const TouchEvent& ev);

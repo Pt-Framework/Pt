@@ -512,7 +512,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     to = to / scaling;
 
     ResizeEvent rev(*window, to);
-    window->processEvent(rev);
+    Application::instance().processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
     window->repaint(updateRect);
