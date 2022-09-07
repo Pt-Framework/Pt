@@ -21,12 +21,12 @@ int main(int argc, char* args[])
 
 #ifdef OLDAPP
         Pt::Hmi::Demo::MainWindow window;
-        window.setTitle("Main 1");
+        window.setTitle("Main_1");
         window.show();
         window.activate();
 #else
         Pt::Hmi::Window w1;
-        w1.setTitle("Window 1");
+        w1.setTitle("Window_1");
         w1.move( Pt::Gfx::PointF(50, 50) );
         w1.resize( Pt::Gfx::SizeF(200, 200) );
         w1.show();
