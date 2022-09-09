@@ -531,14 +531,17 @@ actions updated together piecemeal Archive
 {
   set PATH=$(VISUALC_PATH);%PATH%
 
-  set _inputfile_=archive.cmd
-  echo "$(>)" > %_inputfile_%
+  set JAM_OBJECTS=$(<:D)\archive-$(<:B).cmd
+  echo "$(>)" > %JAM_OBJECTS%
 
-  if exist $(<) set _$(<:B)_=$(<)
+  if exist $(<) set JAM_LIBRARY=$(<)
 
-  "$(AR)" /NOLOGO /out:$(<) %_$(<:B)_% @%_inputfile_%
+  "$(AR)" /NOLOGO /out:$(<) %JAM_LIBRARY% @%JAM_OBJECTS%
+  set JAM_EXITCODE=%errorlevel%
 
-  del %_inputfile_%
+  del %JAM_OBJECTS%
+
+  exit %JAM_EXITCODE%
 }
 # set PATH=$(VISUALC)\Common7/IDE;%PATH%
 # if exist $(<) set _$(<:B)_=$(<)
