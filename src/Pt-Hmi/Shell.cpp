@@ -737,7 +737,12 @@ void Shell::onSetCapture(bool capture)
     if( ! capture )
     {
         if(_capture)
-            _capture->setCapture(false);
+        {
+          if(_capture == this)
+              _capture = 0;
+          else
+              _capture->setCapture(false);
+        }
 
         if(_grabbedFrame)
             _grabbedFrame = 0;
