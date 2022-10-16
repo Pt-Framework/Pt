@@ -346,39 +346,33 @@ void Application::onDispatchMouseEvent(const MouseEvent& ev)
 }
 
 
+Visual* Application::capture() const
+{
+    if( ! _capture.empty() )
+        return _capture.back();
+
+    if( ! _popups.empty() )
+        return _popups.back();
+
+    return 0;
+}
+
+
 void Application::onSetCapture(Window& w, Visual& target, bool capture)
 {
     std::list<Visual*>::iterator it = std::find(_capture.begin(), 
                                                 _capture.end(), &target);
     
-     if( ! capture && it == _capture.end() )
-        return;
-
     if( it != _capture.end() )
         _capture.erase(it);
 
-    if(capture)
-    {
-        //std::clog << "SET CAPTURE " << typeid(target).name() << std::endl;
-        
+    if(capture) 
         _capture.push_back(&target);
-        _mainScreen->impl()->setCaptureWindow(&w);
-    }
-    else
-    {
-        //std::clog << "RELEASE CAPTURE" << std::endl;
 
-        if( ! _capture.empty() )
-        {
-            Visual* last = _capture.back();
-            _mainScreen->impl()->setCaptureWindow(last);
-        }
-        else
-        {
-            Window* transient = ! _popups.empty() ? _popups.back() : 0;
-            _mainScreen->impl()->setCaptureWindow(transient);
-        }
-    }
+    //if(capture)
+    //    std::clog << "SET CAPTURE " << typeid(target).name() << std::endl;
+    //else
+    //    std::clog << "RELEASE CAPTURE" << std::endl;
 }
 
 
@@ -390,19 +384,11 @@ void Application::onSetTransient(Window& w, bool transient)
         _popups.erase(it);
 
     if(transient)
-    {
         _popups.push_back(&w);
-    }
-        
-    if( _capture.empty() )
-    {
-        Window* transient = ! _popups.empty() ? _popups.back() : 0;
-        _mainScreen->impl()->setCaptureWindow(transient);
-    }
 }
 
 
-bool Application::isDescendantOf(Window& w, Window& top) const
+bool Application::isPopupOf(Window& w, Window& top) const
 {
   Visual* peer = w.peer();
   if( peer->isDescendantOf(top) || peer == &top )
@@ -414,7 +400,7 @@ bool Application::isDescendantOf(Window& w, Window& top) const
       Window* popup = *it;
       
       if( peer->isDescendantOf(*popup) || peer == popup )
-          return isDescendantOf(*popup, top);
+          return isPopupOf(*popup, top);
   }
 
   return false;
@@ -423,18 +409,6 @@ bool Application::isDescendantOf(Window& w, Window& top) const
 
 void Application::onClosePopups(const Gfx::PointF& screenPos)
 {
-    Window* ime = inputMethod().activeWindow();
-    if(ime)
-    {
-        // TODO: hit test
-        Gfx::PointF pos = ime->fromScreen(screenPos);
-        Gfx::RectF rect( ime->size() );
-        if( ! rect.contains(pos) )
-        {
-            ime = 0;
-        }
-    }
-
     Window* hit = 0;
 
     Visual* capture = ! _capture.empty() ? _capture.back() : 0;
@@ -485,22 +459,33 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
         }
     }
 
+    Window* ime = inputMethod().activeWindow();
+    if(ime)
+    {
+        // TODO: hit test
+        Gfx::PointF pos = ime->fromScreen(screenPos);
+        Gfx::RectF rect( ime->size() );
+        bool imeHit = rect.contains(pos);
+        
+        bool imePopupHit = hit && isPopupOf(*hit, *ime);
+
+        if( ! imeHit && ! imePopupHit )
+        {
+            ime = 0;
+        }
+    }
+
     std::list<Window*>::iterator pit = _popups.begin();
     while( pit != _popups.end() )
     {
         Window* popup = *pit++;
 
-        //bool keepOpen = hit ? popup == hit || 
-        //                      popup->isDescendantOf(*hit) || 
-        //                      hit->isDescendantOf(*popup)
-        //                    : false;
-
         bool keepOpen = hit ? popup == hit || 
-                              isDescendantOf(*popup, *hit) || 
-                              isDescendantOf(*hit, *popup)
+                              isPopupOf(*popup, *hit) || 
+                              isPopupOf(*hit, *popup)
                             : false;
         
-        if( ime && ! isDescendantOf(*popup, *ime) )
+        if( ime && ! isPopupOf(*popup, *ime) )
             keepOpen = true;
 
         if( ! keepOpen )

@@ -118,14 +118,16 @@ class PT_HMI_API Application : public Pt::System::Application
         */
         void sendMouseEvent(const MouseEvent& ev);
 
+        Visual* capture() const;
+
     protected:
         void onSetCapture(Window& w, Visual& target, bool capture);
 
         void onSetTransient(Window& w, bool transient);
 
-        void onClosePopups(const Gfx::PointF& screenPos);
+        bool isPopupOf(Window& w, Window& top) const;
 
-        bool isDescendantOf(Window& w, Window& top) const;
+        void onClosePopups(const Gfx::PointF& screenPos);
 
     private:
         void registerVisual(Visual& visual);

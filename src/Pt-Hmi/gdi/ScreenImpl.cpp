@@ -382,17 +382,19 @@ void ScreenImpl::setCaptureWindow(Visual* capture)
 
 void ScreenImpl::onSetCapture(Window& w, Visual& target, bool capture)
 {
-    // TODO: SetCapture on HWND
-
     Application::instance().onSetCapture(w, target, capture);
+
+    Visual* visual = Application::instance().capture();
+    setCaptureWindow(visual);
 }
 
 
 void ScreenImpl::onSetTransient(Window& w, bool transient)
 {
-    // TODO: SetCapture on HWND
-
     Application::instance().onSetTransient(w, transient);
+
+    Visual* visual = Application::instance().capture();
+    setCaptureWindow(visual);
 }
 
 
