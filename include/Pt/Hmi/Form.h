@@ -122,7 +122,9 @@ class PT_HMI_API Form
 
         virtual void onEnter(Sheet& sheet, Visual& v) = 0;
 
-        virtual void onSetCapture(Sheet& sheet, bool capture) = 0;
+        virtual void onSetCapture(Sheet& sheet, Visual& target, bool capture) = 0;
+
+        virtual bool onIsDescendantOf(const Sheet& widget, Visual& top) const = 0;
 
     private:
         Sheet* _sheet;

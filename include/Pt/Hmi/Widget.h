@@ -307,7 +307,9 @@ class PT_HMI_API Widget : public View
 
         virtual void onSetCapture(bool capture);
 
+        bool onIsDescendantOf(Visual& v) const;
 
+    protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);
 
         virtual void onProcessTouchEvent(const TouchEvent& ev);
@@ -418,7 +420,10 @@ class PT_HMI_API Widget : public View
 
         virtual void onEnter(Widget& widget, Visual& v);
 
-        virtual void onSetCapture(Widget& widget, bool capture);
+        virtual void onSetCapture(Widget& widget, Visual& target, bool capture);
+
+        virtual bool onIsDescendantOf(const Widget& widget, Visual& top) const;
+
 
     private:
         Pt::Signal<const Pt::Event&> _eventReceived;
@@ -433,6 +438,7 @@ class PT_HMI_API Widget : public View
 
         Visual*                      _pointer;
         Visual*                      _capture;
+        bool                         _isCapture;
 
         int                          _invalidates;
         bool                         _isLayoutInvalid;

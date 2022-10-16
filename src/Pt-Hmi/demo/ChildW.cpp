@@ -48,7 +48,7 @@ ChildW::ChildW(const std::string& title)
     _item3.setShortcut(&ctrlA);
     _fileMenu.addItem(_item3);
 
-    _editMenu.setName("FileMenu");
+    _editMenu.setName("EditMenu");
     
     _edit1.setText("Cut");
     _editMenu.addItem(_edit1);
@@ -65,10 +65,9 @@ ChildW::ChildW(const std::string& title)
     _menuBar.addMenu(_fileMenu, "File");
     _menuBar.addMenu(_editMenu, "Edit");
 
-    _mainLayout.setDirection(FlowLayout::Top);
-    _mainLayout.addItem(_menuBar);
+    _mainLayout.addItem(_menuBar, DockingLayout::Top);
 
-    //_shell.setContent(&_mainLayout);
+    _shell.setContent(&_mainLayout);
 
     setContent(&_shell);
     

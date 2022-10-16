@@ -186,6 +186,7 @@ bool Responder::onKeyEvent(const KeyEvent& ev)
 
 Visual::Visual()
 : _vid( Application::instance().makeId()  )
+, _r1(0)
 { 
     Application::instance().registerVisual(*this);
 }
@@ -193,6 +194,7 @@ Visual::Visual()
 
 Visual::~Visual()
 {
+    _closed.send();
     Application::instance().unregisterVisual(*this);
 }
 

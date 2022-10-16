@@ -130,6 +130,9 @@ class PT_HMI_API ComboBox : public Control
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
+
+    protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
 
         virtual bool onKeyEvent(const KeyEvent& ev);

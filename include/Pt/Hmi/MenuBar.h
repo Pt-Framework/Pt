@@ -49,7 +49,7 @@ class MenuBarItem : public Control
     typedef Control Base;
 
     public:
-        MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text);
+        MenuBarItem(Menu& menu, const Pt::String& text);
 
         ~MenuBarItem();
 
@@ -60,11 +60,8 @@ class MenuBarItem : public Control
 
         void setText(const String& t);
 
-        void toggle();
-
-        void open();
-
-        void close();
+        Pt::Signal<MenuBarItem&>& clicked()
+        { return _clicked; }
     
     public:
         const Gfx::Brush& background() const;
@@ -94,38 +91,40 @@ class MenuBarItem : public Control
         void setRenderer(MenuBarRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
-
         virtual void onInvalidate();
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
 
+        virtual bool onTouchEvent(const TouchEvent& ev);
+
         virtual bool onEnterEvent( const EnterEvent& ev);
 
         virtual bool onLeaveEvent(const LeaveEvent& ev);
 
     private:
-        MenuBar&   _menuBar;
-        Menu&      _menu;
-        Pt::String _text;
+        Pt::Signal<MenuBarItem&>  _clicked;
+        Menu&                     _menu;
+        Pt::String                _text;
 
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         AutoPtr<std::string>      _fontName;
         AutoPtr<std::size_t>      _fontSize;
-        AutoPtr<std::string> _fontStyle;
+        AutoPtr<std::string>      _fontStyle;
 
         FacetPtr<MenuBarRenderer> _renderer;
         bool                      _hasRenderer;
 
-        Gfx::Brush               _brush;
-        Gfx::Pen                 _pen;
-        Gfx::Pen                 _textPen;
-        Gfx::Font                _font;
+        Gfx::Brush                 _brush;
+        Gfx::Pen                   _pen;
+        Gfx::Pen                   _textPen;
+        Gfx::Font                  _font;
 };
 
 
@@ -138,10 +137,6 @@ class PT_HMI_API MenuBar : public MenuShell
         MenuBar();
     
         virtual ~MenuBar();
-
-        Menu* selectedMenu();
-
-        MenuBarItem* findItem(const Gfx::PointF& pos);
 
     public:
         const Gfx::Brush& background() const;
@@ -159,43 +154,47 @@ class PT_HMI_API MenuBar : public MenuShell
 
         virtual void onRemoveMenu(Menu& menu);
 
+        virtual Visual* onFindMenu(const Gfx::PointF& screenPos);
+
         virtual void onOpenMenu(Menu& menu);
 
         virtual void onCloseMenu(Menu& menu);
 
         virtual void onCancel();
 
-        virtual void onEnter();
-
-        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
+    protected:
+        void onItemClicked(MenuBarItem& item);
 
     protected:
         virtual void onInvalidate();
 
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+
+    protected:
+        void onProcessMouseEvent(const MouseEvent& ev);
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
 
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
-    private:
-        void onMenuTriggered(MenuBarItem& m);
+        virtual bool onTouchEvent(const TouchEvent& ev);
 
     private:
         FlowLayout                _layout;
         std::vector<MenuBarItem*> _menus;
         Menu*                     _currentMenu;
-        MenuBarItem*              _currentMenuItem;
 
         FacetPtr<MenuBarRenderer> _renderer;
         bool                      _hasRenderer;
 
         AutoPtr<Gfx::Brush>       _background;
-        AutoPtr<Gfx::Pen>          _contour;
+        AutoPtr<Gfx::Pen>         _contour;
 
-        Gfx::Brush               _brush;
-        Gfx::Pen                 _pen;
+        Gfx::Brush                _brush;
+        Gfx::Pen                  _pen;
 };
 
 } // namespace

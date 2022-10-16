@@ -124,6 +124,8 @@ class Sheet : public Visual
 
         virtual void onSetCapture(bool capture);
 
+        bool onIsDescendantOf(Visual& top) const;
+
     //
     // Responder
     //
@@ -192,7 +194,9 @@ class Sheet : public Visual
 
         virtual void onEnter(Widget& widget, Visual& v);
 
-        virtual void onSetCapture(Widget& widget, bool capture);
+        virtual void onSetCapture(Widget& widget, Visual& target, bool capture);
+
+        virtual bool onIsDescendantOf(const Widget& widget, Visual& top) const;
 
     //
     // Sheet

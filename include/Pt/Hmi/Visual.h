@@ -39,6 +39,7 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
 #include <Pt/Event.h>
+#include <Pt/Signal.h>
 #include <Pt/Types.h>
 
 #include <string>
@@ -128,6 +129,8 @@ class PT_HMI_API Responder
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
+class Window;
+
 class PT_HMI_API Visual
 {
     protected:
@@ -135,6 +138,9 @@ class PT_HMI_API Visual
 
     public:
         virtual ~Visual();
+
+        Pt::Signal<>& closed()
+        { return _closed; }
         
         Pt::uint64_t vid() const
         {
@@ -155,10 +161,15 @@ class PT_HMI_API Visual
         {
             this->onEvent(ev);
         }
-
+       
         virtual void setCapture(bool capture)
         {
             this->onSetCapture(capture);
+        }
+
+        bool isDescendantOf(Visual& v) const
+        {
+            return onIsDescendantOf(v);
         }
     
     protected:
@@ -166,9 +177,20 @@ class PT_HMI_API Visual
 
         virtual void onSetCapture(bool capture) = 0;
 
+        virtual bool onIsDescendantOf(Visual& v) const
+        {
+            return false;
+        }
+
     private:
-        Pt::uint64_t _vid;
-        std::string  _name;
+        void setR1(void* r)
+        { _r1 = r; }
+
+    private:
+        Pt::Signal<>  _closed;
+        Pt::uint64_t  _vid;
+        std::string   _name;
+        void*         _r1;
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -253,7 +275,9 @@ class PT_HMI_API View
 
         virtual void onEnter(Widget& widget, Visual& v) = 0;
 
-        virtual void onSetCapture(Widget& widget, bool capture) = 0;
+        virtual void onSetCapture(Widget& widget, Visual& target, bool capture) = 0;
+
+        virtual bool onIsDescendantOf(const Widget& widget, Visual& top) const = 0;
 };
 
 } // namespace

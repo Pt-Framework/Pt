@@ -37,8 +37,7 @@ namespace Pt {
 namespace Hmi {
 
 Menu::Menu()
-: Window(0, WindowType::Popup)
-, _parentShell(0)
+: _parentShell(0)
 , _parentMenu(0)
 , _currentMenu(0)
 , _layout(FlowLayout::Top)
@@ -51,6 +50,8 @@ Menu::Menu()
 
 Menu::~Menu()
 {
+    //Application::instance().releasePopup(*this);
+
     if( parentShell() )
         parentShell()->removeMenu(*this);
 
@@ -84,13 +85,6 @@ MenuShell& Menu::rootShell()
 }
 
 
-void Menu::show(const Gfx::PointF& pos)
-{
-    Window::move(pos);
-    Window::show();
-}
-
-
 void Menu::addItem(MenuItem& item)
 {
     if(item._menu == this)
@@ -115,7 +109,7 @@ void Menu::removeItem(MenuItem& item)
 
     _layout.removeItem(item);
 
-    invalidate();
+    //invalidate();
 }
 
 
@@ -139,7 +133,7 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
     _subMenus.push_back(item);
     menu._parentMenu = this;
 
-    //invalidate();
+    menu.setTransient(this);
 }
 
 
@@ -154,6 +148,8 @@ void Menu::onRemoveMenu(Menu& menu)
 
             _subMenus.erase(it);
             menu._parentMenu = 0;
+
+            menu.setTransient(0);
 
             if(_currentMenu == &menu)
                 _currentMenu = 0;
@@ -176,17 +172,23 @@ void Menu::onMenuTriggered(MenuItem& item)
     {
         Gfx::PointF topRight(item.size().width(), 0);
         Gfx::PointF menuPos = item.toScreen(topRight);
+        menu->move(menuPos);
 
-        menu->show(menuPos);
+        SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
+        menu->resize(policy);
+
+        menu->setTopMost(true);
+        menu->show();
+        //menu->onEnter();
     }
     else
     {
-       menu->close();
+        menu->close();
     }
 }
 
 
-MenuShell* Menu::onFindMenu(const Gfx::PointF& screenPos)
+Visual* Menu::onFindMenu(const Gfx::PointF& screenPos)
 {
     if( ! isVisible() )
         return 0;
@@ -221,13 +223,7 @@ void Menu::onCancel()
 }
 
 
-void Menu::onEnter()
-{
-    //grabPointer();
-}
-
-
-Pt::ssize_t Menu::iconWidth() const
+double Menu::iconWidth() const
 {
     return _iconWidth > 0 ? _iconWidth + _layout.padding().left()
                           : 0;
@@ -271,65 +267,9 @@ void Menu::setRenderer(MenuRenderer* renderer)
 }
 
 
-/* TODO:
-this happens when item->resize() is called in onInvalidate
-One soluton is to assign the _size member in Window::resize immediately
-and not only when the ResizeEvent is received
-
-1 Menu Resize      10x10    (setMainWidget)
-2 Item Resize      43x16    (Menu::add)
-3 Menu Resize      43x60
-
-4 Menu ResizeEvent 10x10
-5 Item ResizeEvent 10x0
-6 Menu ResizeEvent 43x60
-
-7 Item ResizeEvent 10x0    (von 4) !!!!
-*/
 void Menu::onInvalidate()
 {
     Base::onInvalidate();
-
-    _iconWidth = 0;
-
-    double menuWidth = 0;
-    double menuHeight = 0;
-
-    // determine menu size
-    for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
-    {
-        MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
-
-        // item size with margin
-        Gfx::SizeF itemSize = item->preferredSize();
-        itemSize.addWidth( item->margin().leftRight() );
-        itemSize.addHeight( item->margin().topBottom() );
-
-        // the width of the menu is the width of the widest item
-        menuWidth = std::max<double>( menuWidth, itemSize.width() );
-
-        // the height of the menu is the sum of the item heights
-        menuHeight += itemSize.height();
-
-        _iconWidth = std::max<double>(item->icon().width(), _iconWidth);
-    }
-
-    int iconPadding = 4;
-    int menuPadding = 4;
-
-    if(_iconWidth > 0)
-    {
-        _iconWidth += 2 * iconPadding;
-        menuWidth += 2 * iconPadding;
-    }
-
-    _layout.setPadding(menuPadding);
-
-    Gfx::SizeF size(menuWidth, menuHeight);
-    size.addWidth( _layout.padding().leftRight() );
-    size.addHeight( _layout.padding().topBottom() );
-
-    resize(size);
 
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
@@ -347,16 +287,16 @@ void Menu::onInvalidate()
 }
 
 
-void Menu::onPaintBackground(const Gfx::RectF& rect)
+void Menu::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
-    //Base::onPaintBackground(rect);
+    Base::onPaint(surface, rect);
 
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Gfx::Painter painter( surface() );
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->renderBackground(*this, options, painter, rect,
@@ -364,37 +304,65 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
 }
 
 
-bool Menu::onMouseEvent(const MouseEvent& ev)
+void Menu::onProcessMouseEvent(const MouseEvent& ev)
 {
-    Base::onMouseEvent(ev);
-
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-
-    if( rect.contains( ev.position() ) )
-        return true;
-
-    Gfx::PointF screenPos = toScreen( ev.position() );
-    MenuShell* menu = rootShell().findMenu(screenPos);
-
-    if(menu && menu != this)
+    const Gfx::PointF& screenPos = ev.position();
+    Visual* menu = rootShell().findMenu(screenPos);
+    if(menu)
     {
-        // navigate through menu chain
-        //releasePointer();
-        menu->onEnter();
+        if(menu == this)
+            Base::onProcessMouseEvent(ev);
+        else
+            menu->processEvent(ev);
+        
+        return;
     }
-    else if( ev.isPress() )
+
+    if( ev.isPress() )
     {
-        // cancel when clicked outside menu chain
         rootShell().cancel();
+        return;
     }
+}
 
-    return true;
+
+void Menu::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
+
+    if( ev.visible() )
+    {
+        if( parentShell() )
+            parentShell()->onOpenMenu(*this);
+
+        if( ! parentShell() )
+        {
+            //setCapture(true);
+        }
+
+        //Application::instance().setPopup(*this);
+    }
+    else
+    {
+        if( ! parentShell() )
+        {
+            //setCapture(false);
+        }
+
+        //Application::instance().releasePopup(*this);
+
+        if( parentShell() )
+            parentShell()->onCloseMenu(*this);
+    }
 }
 
 
 void Menu::onCloseEvent(const CloseEvent& ev)
 {
-    //releasePointer();
+    //Application::instance().releasePopup(*this);
+
+    //if( ! parentShell() )
+    //    setCapture(false);
 
     if( _currentMenu )
     {
@@ -409,61 +377,21 @@ void Menu::onCloseEvent(const CloseEvent& ev)
 }
 
 
-void Menu::onResizeEvent(const ResizeEvent& ev)
+bool Menu::onMouseEvent(const MouseEvent& ev)
 {
-    for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
-    {
-        MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
-
-        item->setIconPadding(_iconWidth);
-
-        Gfx::SizeF itemSize = item->preferredSize();
-//TODO:        item->resize(itemSize);
-    }
-
-    // _layout positions the items now in onResizeEvent
-    // TODO: our overall design should make this clearer
-    Base::onResizeEvent(ev);
+    return Base::onMouseEvent(ev);
 }
 
 
-void Menu::onShowEvent(const ShowEvent& ev)
+bool Menu::onEnterEvent(const EnterEvent& ev)
 {
-    Base::onShowEvent(ev);
-
-    if( ! ev.visible() )
-    {
-        //releasePointer();
-
-        if( parentShell() )
-            parentShell()->onCloseMenu(*this);
-    }
-    else
-    {
-        if( parentShell() )
-            parentShell()->onOpenMenu(*this);
-
-        //if( ! parentShell() )
-            //grabPointer();
-    }
+    return Base::onEnterEvent(ev);
 }
 
 
-bool Menu::onEnterEvent( const EnterEvent& ev )
+bool Menu::onLeaveEvent(const LeaveEvent& ev)
 {
-    Base::onEnterEvent(ev);
-
-    onEnter();
-
-    return true;
-}
-
-
-bool Menu::onLeaveEvent( const LeaveEvent& ev )
-{
-    Base::onLeaveEvent(ev);
-
-    return true;
+    return Base::onLeaveEvent(ev);
 }
 
 } // namespace

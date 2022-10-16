@@ -109,10 +109,10 @@ class PT_HMI_API MenuItem : public Control
         
         virtual void onShortcut(const KeyEvent& kev);
 
-        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
-
     protected:
         virtual void onInvalidate();
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
         
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
   
@@ -124,8 +124,6 @@ class PT_HMI_API MenuItem : public Control
         virtual bool onEnterEvent( const EnterEvent& ev);
 
         virtual bool onLeaveEvent(const LeaveEvent& ev);
-
-        virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
         Menu*             _menu;

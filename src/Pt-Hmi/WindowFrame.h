@@ -249,7 +249,7 @@ class WindowFrame : public Visual
         bool checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
     private:
-        Shell*         _wm;
+        Shell*       _wm;
         Window*        _window;
         double         _borderWidth;
         double         _titleHeight;

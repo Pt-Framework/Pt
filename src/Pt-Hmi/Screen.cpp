@@ -131,6 +131,7 @@ void Screen::setPointer(Visual* visual)
 
     if(_pointer)
     {
+        //std::clog << "POINTER LEAVE: " << typeid(*_pointer).name() << std::endl;
         Pt::Hmi::LeaveEvent ev ( *_pointer );
         _pointer->processEvent(ev);
     }
@@ -139,6 +140,7 @@ void Screen::setPointer(Visual* visual)
 
     if(_pointer)
     {
+        //std::clog << "POINTER ENTER: " << typeid(*visual).name() << std::endl;
         EnterEvent ev( *_pointer );
         _pointer->processEvent(ev);
     }
@@ -195,6 +197,7 @@ void Screen::onEvent(const Event& ev)
 
 void Screen::onSetCapture(bool capture)
 {
+    _impl->setCapture(capture);
 }
 
 
@@ -305,6 +308,12 @@ bool Screen::onTouchEvent(const TouchEvent& ev)
 
 void Screen::onProcessScrollEvent(const ScrollEvent& ev)
 {
+    if(_pointer)
+    {
+        _pointer->processEvent(ev);
+        return; 
+    }
+
     _impl->processEvent(ev);
 }
 

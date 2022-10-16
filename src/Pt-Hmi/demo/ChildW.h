@@ -33,9 +33,9 @@ class ChildW : public Hmi::Window
         
         ~ChildW();
 
-        Shell& shell()
+        DockingLayout& layout()
         {
-            return _shell;
+            return _mainLayout;
         }
 
         Pt::Signal<>& closeRequested()
@@ -55,7 +55,7 @@ class ChildW : public Hmi::Window
         void checkSpinBox(int value);
 
     private:
-        FlowLayout _mainLayout;
+        DockingLayout _mainLayout;
         MenuBar _menuBar;
 
         Shell _shell;

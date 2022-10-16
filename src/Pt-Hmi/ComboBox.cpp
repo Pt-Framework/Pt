@@ -181,12 +181,20 @@ void ComboBox::showPopup()
     _popup.move(popupPos);
 
     _popup.setTopMost(true);
+    _popup.setTransient(this);
+    
     _popup.show();
+    
+    //Application::instance().setPopup(_popup);
+    //setCapture(true);
 }
 
 
 void ComboBox::hidePopup()
 {
+    //setCapture(false);   
+    //Application::instance().releasePopup(_popup);
+    
     _popup.show(false);
 }
 
@@ -524,6 +532,24 @@ bool ComboBox::onKeyEvent(const KeyEvent& ev)
 }
 
 
+void ComboBox::onProcessMouseEvent(const MouseEvent& ev)
+{
+    const Gfx::PointF& screenPos = ev.position();
+
+    if( _popup.isVisible() )
+    {
+        Gfx::RectF rect( _popup.position(), _popup.size() );
+        if( rect.contains(screenPos) )
+        {
+            _popup.processEvent(ev);
+            return;
+        }
+    }
+
+    Base::onProcessMouseEvent(ev);
+}
+
+
 bool ComboBox::onMouseEvent(const MouseEvent& ev)
 {    
     Base::onMouseEvent(ev);
@@ -531,11 +557,21 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
     if( ! ev.isPress() )
         return true;
 
+    Gfx::RectF rect( size() );
+    if( ! rect.contains(ev.position()) )
+    {
+        hidePopup();
+        return true;
+    }
+
     double buttonX = size().width() - _buttonSize.width();
         
     if( ev.position().x() > buttonX )
     {
-        showPopup();
+        if( ! _popup.isVisible() )
+            showPopup();
+        else
+            hidePopup();
     }
     else if(_isEditable)
     {

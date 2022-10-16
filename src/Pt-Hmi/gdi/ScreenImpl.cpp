@@ -44,6 +44,7 @@ namespace Hmi {
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _parent(0)
 , _nextResponder(0)
+//, _capture(0)
 , _screenScaling(1.0)
 , _scaling(1.0)
 , _enabled(true)
@@ -167,9 +168,24 @@ void ScreenImpl::onEvent(const Event& ev)
 }
 
 
+//void ScreenImpl::onSetCapture(bool capture)
+//{
+//    if( ! capture )
+//    {
+//      std::vector<Window*>::iterator wit;
+//      for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+//      {
+//          Window* window = *wit;
+//          window->setCapture(false);
+//      }
+//    }
+//}
+
+
 void ScreenImpl::onSetCapture(bool capture)
 {
 }
+
 
 ///////////////////////////////////////////////////////////////////////
 // WindowManager
@@ -339,8 +355,50 @@ void ScreenImpl::onEnter(Window& w, Visual& v)
 }
 
 
-void ScreenImpl::onSetCapture(Window& w, bool capture)
+void ScreenImpl::setCaptureWindow(Visual* capture)
 {
+    if( ! capture )
+    {
+        //std::clog << "RELEASE CAPTURE HWND" << std::endl;
+        ::ReleaseCapture();
+        return;
+    }
+
+    std::vector<Window*>::iterator wit;
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    {
+        Window* window = *wit;
+        
+        if( capture == window || capture->isDescendantOf(*window) )
+        {
+            MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
+            ::SetCapture( impl->hwnd() );
+            //std::clog << "SET CAPTURE HWND: " << impl->hwnd() << std::endl;
+            return;
+        }
+    }
+}
+
+
+void ScreenImpl::onSetCapture(Window& w, Visual& target, bool capture)
+{
+    // TODO: SetCapture on HWND
+
+    Application::instance().onSetCapture(w, target, capture);
+}
+
+
+void ScreenImpl::onSetTransient(Window& w, bool transient)
+{
+    // TODO: SetCapture on HWND
+
+    Application::instance().onSetTransient(w, transient);
+}
+
+
+bool ScreenImpl::onIsDescendantOf(const Window& widget, Visual& top) const
+{
+    return this == &top;
 }
 
 ///////////////////////////////////////////////////////////////////////

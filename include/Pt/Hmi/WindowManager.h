@@ -94,7 +94,13 @@ class WindowManager
 
         virtual void onEnter(Window& w, Visual& v) = 0;
 
-        virtual void onSetCapture(Window& w, bool capture) = 0;
+        virtual void onSetTransient(Window& w, bool transient)
+        {
+        }
+
+        virtual void onSetCapture(Window& w, Visual& target, bool capture) = 0;
+
+        virtual bool onIsDescendantOf(const Window& w, Visual& top) const = 0;
 };
 
 } // namespace

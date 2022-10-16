@@ -153,7 +153,6 @@ class ApplicationImpl : public Pt::System::EventLoop
         MouseEvent                       _mouseEvent;
         KeyEvent                         _keyEvent;
         HWND                             _pointerWindow;
-        //Visual*                          _grabber;
         HCURSOR                          _defaultCursorHandle;
         HCURSOR                          _cursorHandle;
         const Cursor*                    _currentCursor;

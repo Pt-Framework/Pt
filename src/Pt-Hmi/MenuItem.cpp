@@ -95,10 +95,9 @@ MenuItem::MenuItem()
 , _subMenu(0)
 , _hasRenderer(false)
 {
-
     setFocusPolicy(Widget::AcceptFocus);
     
-    setPadding( Spacing(4, 2, 4, 2) );
+    setPadding( Spacing(8, 8) );
     setMargin(0);
 }
 
@@ -281,29 +280,6 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 }
 
 
-Gfx::SizeF MenuItem::onAutoSize(const SizePolicy& policy) const
-{
-    Gfx::FontMetrics fm = PixmapSurface::fontMetrics(_font, _text);
-
-    double contentHeight = std::max<Pt::ssize_t>( fm.height(), _icon.height() );
-    double contentWidth = fm.width() + _picture.width();
-
-    const Key* sk = shortcut();
-    if(sk)
-    {
-        Pt::String text = shortcutText(*sk);
-        contentWidth += fm.height() * 2.5; // spacing towards shortcut text
-        contentWidth += PixmapSurface::fontMetrics(_font, text).width();
-    }
-
-    if(_subMenu)
-        contentWidth += fm.height() * 4;
-
-    return Gfx::SizeF( contentWidth + padding().leftRight(),
-                       contentHeight + padding().topBottom() );
-}
-
-
 void MenuItem::onInvalidate()
 {
     Base::onInvalidate();
@@ -326,6 +302,29 @@ void MenuItem::onInvalidate()
 
     _renderer->prepareItem(*this, options, _icon, 
                            _picture, _brush, _pen, _font, _textPen);
+}
+
+
+Gfx::SizeF MenuItem::onMeasure(const SizePolicy& policy)
+{
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics(_font, _text);
+
+    double contentHeight = std::max<Pt::ssize_t>( fm.height(), _icon.height() );
+    double contentWidth = fm.width() + _picture.width();
+
+    const Key* sk = shortcut();
+    if(sk)
+    {
+        Pt::String text = shortcutText(*sk);
+        contentWidth += fm.height() * 2.5; // spacing towards shortcut text
+        contentWidth += PixmapSurface::fontMetrics(_font, text).width();
+    }
+
+    if(_subMenu)
+        contentWidth += fm.height() * 4;
+
+    return Gfx::SizeF( contentWidth + padding().leftRight(),
+                       contentHeight + padding().topBottom() );
 }
 
 
@@ -426,23 +425,13 @@ bool MenuItem::onTouchEvent(const TouchEvent& ev)
 
 bool MenuItem::onEnterEvent(const EnterEvent& ev)
 {
-    Base::onEnterEvent(ev);
-    update();
-    return true;
+    return Base::onEnterEvent(ev);
 }
 
 
 bool MenuItem::onLeaveEvent(const LeaveEvent& ev)
 {
-    Base::onLeaveEvent(ev);
-    update();
-    return true;
-}
-
-
-void MenuItem::onResizeEvent(const ResizeEvent& ev)
-{
-    Base::onResizeEvent(ev);
+    return Base::onLeaveEvent(ev);
 }
 
 } // namespace

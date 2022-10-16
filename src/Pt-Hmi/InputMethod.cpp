@@ -118,70 +118,79 @@ void InputMethod::unregisterApplication(Application&)
     _app = 0;
 }
 
+//#define PT_WITH_TEST_IME 1
 
 DefaultInputMethod::DefaultInputMethod()
-//: _window(0)
-//, _keyButton(0)
+: _window(0)
+, _keyButton(0)
 {
-
 }
 
 
 DefaultInputMethod::~DefaultInputMethod()
 {
-    //delete _keyButton;
-    //delete _window;
+#ifdef PT_WITH_TEST_IME
+    delete _keyButton;
+    delete _window;
+#endif
 }
 
 
 void DefaultInputMethod::onKeyPress()
 {
-    //std::clog << "KEY PRESS" << std::endl;
+#ifdef PT_WITH_TEST_IME
+    std::clog << "KEY PRESS" << std::endl;
 
-    //KeyEvent kev;
-    //kev.setPress(Key(Key::A), 'a');
+    KeyEvent kev;
+    kev.setPress(Key(Key::A), 'a');
 
-    //sendEvent(kev);
+    sendEvent(kev);
+#endif
 }
 
 
 void DefaultInputMethod::onBegin()
 {
-    //if( ! _window )
-    //{
-    //    _window = new Window();
-    //    _window->setTopMost(true);
-    //    _window->move( Gfx::PointF(500, 500) );
-    //    _window->resize( Gfx::SizeF(100, 100) );
-    //    _window->setTitle("Input Method");
-    //}
+#ifdef PT_WITH_TEST_IME
+    if( ! _window )
+    {
+        _window = new Window(0, WindowType::Default);
+        _window->setTopMost(true);
+        _window->move( Gfx::PointF(500, 500) );
+        _window->resize( Gfx::SizeF(100, 100) );
+        _window->setTitle("Input Method");
+    }
 
-    //if( ! _keyButton)
-    //{
-    //    _keyButton = new PushButton();
-    //    _keyButton->setText("a");
-    //    _window->setContent(_keyButton);
-    //    _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
-    //}
-    //
-    //_window->show(true);
+    if( ! _keyButton)
+    {
+        _keyButton = new PushButton();
+        _keyButton->setText("a");
+        _window->setContent(_keyButton);
+        _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
+    }
+    
+    _window->show(true);
 
-    //std::clog << "INPUT_METHOD BEGIN" << std::endl;
+    std::clog << "INPUT_METHOD BEGIN" << std::endl;
+#endif
 }
 
 void DefaultInputMethod::onFinish()
 {
-    //if( _window->isVisible() )
-    //    _window->show(false);
+#ifdef PT_WITH_TEST_IME
+    if( _window->isVisible() )
+        _window->show(false);
     
-    //std::clog << "INPUT_METHOD FINISH" << std::endl;
+    std::clog << "INPUT_METHOD FINISH" << std::endl;
+#endif
 }
 
 
 Window* DefaultInputMethod::onActiveWindow()
 {
-    //return _window;
-    return 0;
+    return _window;
+
+    //return 0;
 }
 
 } // namespace

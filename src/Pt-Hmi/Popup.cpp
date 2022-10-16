@@ -44,6 +44,7 @@ Popup::Popup()
 
 Popup::~Popup()
 {
+  //Application::instance().releasePopup(*this);
 }
 
 
@@ -51,26 +52,31 @@ void Popup::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
 
-    if( ev.visible() )
-    {
-        //std::clog << "POPUP SHOW: " << vid() << std::endl;
-        //grabPointer();
-        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalMouseEvent);
-        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalTouchEvent);
-        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalActivateEvent);
-        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalMoveEvent);
-        Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalResizeEvent);
-    }
-    else
-    {
-        //std::clog << "POPUP HIDE: " << vid() << std::endl;
-        //releasePointer();
-        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalMouseEvent);
-        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalTouchEvent);
-        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalActivateEvent);
-        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalMoveEvent);
-        Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalResizeEvent);
-    }
+    //if( ev.visible() )
+    //    Application::instance().setPopup(*this);
+    //else
+    //    Application::instance().releasePopup(*this);
+
+    //if( ev.visible() )
+    //{
+    //    std::clog << "POPUP SHOW: " << vid() << std::endl;
+    //    //grabPointer();
+    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalMouseEvent);
+    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalTouchEvent);
+    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalActivateEvent);
+    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalMoveEvent);
+    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalResizeEvent);
+    //}
+    //else
+    //{
+    //    std::clog << "POPUP HIDE: " << vid() << std::endl;
+    //    //releasePointer();
+    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalMouseEvent);
+    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalTouchEvent);
+    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalActivateEvent);
+    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalMoveEvent);
+    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalResizeEvent);
+    //}
 }
 
 

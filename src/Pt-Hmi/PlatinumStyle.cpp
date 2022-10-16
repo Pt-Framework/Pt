@@ -605,7 +605,11 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
                                               const Gfx::Brush& brush,
                                               const Gfx::Pen& contour) const
 {
-    const Gfx::SizeF& size = m.size();
+    Gfx::SizeF size = m.size();
+
+    size -= 1;
+
+    double inset = painter.alignContour( contour.size() ) / 2;
 
     //
     // icon strip on the left side
@@ -630,7 +634,9 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
     //
     // menu border
     //
-    Gfx::RectF borderRect(size);
+    Gfx::RectF borderRect( m.size() );
+    borderRect.shift(inset, inset);
+    borderRect.shrink(2 * inset, 2 * inset);
 
     painter.setPen(contour);
     painter.drawRect(borderRect);

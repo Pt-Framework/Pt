@@ -45,6 +45,7 @@ Widget::Widget()
 , _nextResponder(0)
 , _pointer(0)
 , _capture(0)
+, _isCapture(false)
 , _invalidates(0)
 , _isLayoutInvalid(true)
 , _visible(true)
@@ -155,6 +156,9 @@ void Widget::setParent(View* parent)
 
     if(_parent)
     {
+        if( ! parent )
+            setCapture(false);
+
         _parent->onRelease(*this);
         _parent->onDetach(*this);
         _parent = 0;
@@ -1343,35 +1347,77 @@ Responder* Widget::onNextResponder()
 }
 
 
+//void Widget::onSetCapture(bool capture)
+//{
+//    if(_parent)
+//        _parent->onSetCapture(*this, capture);
+//
+//    if( ! capture )
+//    {
+//        if(_capture)
+//            _capture->setCapture(false);
+//    }
+//}
+
+
+bool Widget::onIsDescendantOf(Visual& top) const
+{
+    if( _parent && _parent->onIsDescendantOf(*this, top) )
+        return true;
+
+    return false;
+}
+
+
+bool Widget::onIsDescendantOf(const Widget& widget, Visual& top) const
+{
+    if(this == &top)
+        return true;
+
+    return isDescendantOf(top);
+}
+
+
+//void Widget::onSetCapture(Widget& widget, bool capture)
+//{
+//    if(capture)
+//    {
+//        if(_capture && _capture != &widget)
+//            _capture->setCapture(false);
+//
+//        _capture = &widget;
+//    }
+//    else
+//    {
+//        if(_capture == &widget)
+//        {
+//            _capture = 0;
+//        }
+//    }
+//}
+
+
 void Widget::onSetCapture(bool capture)
 {
     if(_parent)
-        _parent->onSetCapture(*this, capture);
-
-    if( ! capture )
     {
-        if(_capture)
-            _capture->setCapture(false);
+        _parent->onSetCapture(*this, *this, capture);
+        _isCapture = capture;
     }
 }
 
 
-void Widget::onSetCapture(Widget& widget, bool capture)
+void Widget::onSetCapture(Widget& widget, Visual& target, bool capture)
 {
-    if(capture)
-    {
-        if(_capture && _capture != &widget)
-            _capture->setCapture(false);
+    if(_parent)
+        _parent->onSetCapture(*this, target, capture);
+}
 
-        _capture = &widget;
-    }
-    else
-    {
-        if(_capture == &widget)
-        {
-            _capture = 0;
-        }
-    }
+
+void Widget::onEnter(Widget& widget, Visual& v)
+{
+    if(_parent)
+        _parent->onEnter(*this, v);
 }
 
 
@@ -1381,24 +1427,18 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
         return;
 
     //
-    // continue press sequence capture
+    // stop capture on press
     // 
-    if(_capture)
+    if(_isCapture)
     {
-        _capture->processEvent(ev);
-
         if( ev.isRelease() )
-            _capture = 0;
-
-        return;
+            setCapture(false);
     }
-
-    Gfx::PointF pos = fromScreen( ev.position() );
 
     //
     // hit test
     // 
-    Visual* visual = 0;
+    Gfx::PointF pos = fromScreen( ev.position() );
 
     std::vector<Widget*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
@@ -1408,39 +1448,27 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
         if( widget->geometry().contains(pos) && 
             widget->acceptsInput() )
         {
-            visual = widget;
-            break;
+            widget->processEvent(ev);
+            return;
         }
     }
 
-    _pointer = visual;
-
-    if(visual)
-    {
-        //
-        // start press sequence capture
-        // 
-        if( ev.isPress() )
-            visual->setCapture(true);
-
-      visual->processEvent(ev);
-      return;
-    }
-
     //
-    // handle event
+    // pointer enter
     //
     if(_parent)
         _parent->onEnter(*this, *this);
 
+    //
+    // start capture on press
+    //
+    if( ev.isPress() )
+        setCapture(true);
+
+    //
+    // handle event
+    //
     mouseEvent(ev);
-}
-
-
-void Widget::onEnter(Widget& widget, Visual& v)
-{
-    if(_parent)
-        _parent->onEnter(*this, v);
 }
 
 
@@ -1533,11 +1561,11 @@ void Widget::onProcessScrollEvent(const ScrollEvent& ev)
     if( ! acceptsInput() )
         return;
 
-    if(_pointer)
-    {
-        _pointer->processEvent(ev);
-        return; 
-    }
+    //if(_pointer)
+    //{
+    //    _pointer->processEvent(ev);
+    //    return; 
+    //}
 
     scrollEvent(ev);
 }

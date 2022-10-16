@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2022 Marc Boris Duerner 
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,43 +26,55 @@
   02110-1301  USA
 */
 
-#ifndef PT_HMI_SHELL_H
-#define PT_HMI_SHELL_H
+#ifndef PT_HMI_SHELL_WM_H
+#define PT_HMI_SHELL_WM_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Connectable.h>
 
 namespace Pt {
 
 namespace Hmi {
 
 class WindowFrame;
+class Shell;
 
-class PT_HMI_API Shell : public Widget
-                       , public WindowManager
+class ShellWM : public Visual
+              , public Responder
+              , public WindowManager
+              , public Connectable
 {
     public:
-        Shell();
+        ShellWM();
 
-        virtual ~Shell();
+        virtual ~ShellWM();
 
+        void setParent(Shell* shell);
+
+        void setNextResponder(Responder* r);
+
+        void setSurface(Gfx::PaintSurface* surface);
+
+        void repaint();
+
+        void repaint(const Gfx::RectF& rect);
+
+        void activate(bool active);
+    
     public:
-        void addWindow(Window& w);
+        WindowFrame* activeWindow();
 
-        void removeWindow(Window& w);
+        void deactivate();
 
-    public:
-        Widget* content();
+        WindowFrame* findWindowFrame(const Gfx::PointF& p) const;
 
-        const Widget* content()  const;
+        WindowFrame* getWindowFrame(const Window& w) const;
 
-        void setContent(Widget* widget);
-
-    public:
         double borderWidth() const
         {
             return _borderWidth;
@@ -92,6 +104,26 @@ class PT_HMI_API Shell : public Widget
         {
             return _inactiveTextColor;
         }
+
+    //
+    // Visual
+    //
+    protected:
+        virtual void onEvent(const Pt::Event& ev);
+
+        virtual void onSetCapture(bool capture);
+
+        virtual bool onIsDescendantOf(Visual& v) const;
+    
+    //
+    // Responder
+    //
+    protected:
+        virtual Responder* onNextResponder();
+
+        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
 
     //
     // WindowManager
@@ -142,34 +174,18 @@ class PT_HMI_API Shell : public Widget
         virtual void onSetCapture(Window& w, Visual& target, bool capture);
 
         virtual bool onIsDescendantOf(const Window& widget, Visual& top) const;
-
+    
     //
-    // Visual
+    // Implementation
     //
-    protected:
-       virtual void onSetCapture(bool capture);
-
-    //
-    // Widget
-    //
-    protected:
-        virtual void onRemoveWidget(Widget& w);
-
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-        virtual void onLayout(const Gfx::RectF& rect);
-
-        virtual void onPaint(Gfx::PaintSurface&, const Gfx::RectF&);
-
     protected:
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
         virtual void onProcessPaintEvent(const PaintEvent& ev);
         
-        virtual void onProcessEnableEvent(const EnableEvent& ev);
-
-    protected:
-        virtual void onProcessMouseEvent(const MouseEvent& ev);
+        virtual void onProcessEnableEvent(const EnableEvent& ev); 
+        
+        virtual void onProcessMouseEvent(const MouseEvent& ev);    
 
         virtual void onProcessTouchEvent(const TouchEvent& ev);
 
@@ -182,14 +198,11 @@ class PT_HMI_API Shell : public Widget
         virtual void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        WindowFrame* activeWindow();
+        Pt::Signal<const Pt::Event&> _eventReceived;
+        Shell*                       _parent;
 
-        WindowFrame* getWindowFrame(const Window& w) const;
-
-    private:
-        Widget*                      _content;
-        Visual*                      _pointer;
-        Visual*                      _capture;
+        Gfx::PaintSurface*           _surface;
+        Responder*                   _nextResponder;
 
         std::vector<WindowFrame*>    _windows;
 
@@ -202,7 +215,7 @@ class PT_HMI_API Shell : public Widget
         Gfx::Color                   _inactiveColor;
         Gfx::Color                   _activeColor;
         Gfx::Color                   _textColor;
-        Gfx::Color                   _inactiveTextColor;   
+        Gfx::Color                   _inactiveTextColor;  
 };
 
 } // namespace

@@ -42,15 +42,14 @@ namespace Hmi {
 // MenuBarItem
 ///////////////////////////////////////////////////////////////////////////////
 
-MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
-: _menuBar(mb)
-, _menu(menu)
+MenuBarItem::MenuBarItem(Menu& menu, const Pt::String& text)
+: _menu(menu)
 , _hasRenderer(false)
 {
     setFocusPolicy(Widget::AcceptFocus);
     setText(text);
 
-    setPadding( Spacing(8, 0, 8, 0) );
+    setPadding( Spacing(8, 8) );
     setMargin(0);
 }
 
@@ -70,95 +69,6 @@ void MenuBarItem::setText(const Pt::String& t)
 {   
     _text = t;
     invalidate();
-}
-
-
-void MenuBarItem::toggle()
-{
-    if( ! _menu.isVisible() )
-    {
-        open();
-        //grabPointer();
-    }
-    else
-    {
-        close();
-        //releasePointer();
-     }      
-}
-
-
-void MenuBarItem::open()
-{
-    Gfx::PointF menuPos(0, size().height());
-    menuPos = toScreen(menuPos);
-
-    _menu.show(menuPos);
-}
-
-
-void MenuBarItem::close()
-{
-    _menu.close();       
-}
-
-
-Gfx::SizeF MenuBarItem::onAutoSize(const SizePolicy& policy) const
-{
-    Gfx::FontMetrics fm = PixmapSurface::fontMetrics(_font, _text);
-
-    return Gfx::SizeF( fm.width() + padding().leftRight(), 
-                       fm.height() + padding().topBottom() );
-}
-
-
-bool MenuBarItem::onMouseEvent(const MouseEvent& ev)
-{ 
-    Base::onMouseEvent(ev);
-
-    bool inside = Gfx::RectF( size() ).contains( ev.position() );
-
-    if( inside && ev.isRelease() )
-    {
-        toggle();
-    }
-
-    // nothing to highlight if outside
-    if( inside )
-        return true;
-
-    // navigate to sibling item if a sub menu is open
-    if( _menuBar.selectedMenu() )
-    {
-        Gfx::PointF pos = _menuBar.fromWidget( *this, ev.position() );
-        MenuBarItem* item = _menuBar.findItem(pos);
-        if(item)
-        {
-            toggle();
-            
-            item->toggle();
-            return true;
-        }
-    }
-
-    // navigate to open sub menu
-    Gfx::PointF screenPos = toScreen( ev.position() );
-    MenuShell* menu = _menu.findMenu(screenPos);   
-    if(menu)
-    {   
-        //releasePointer();
-        return true;
-    }
-
-    // cancel when clicked outside any menu item
-    if( ev.isPress() )
-    {
-        //releasePointer();
-        _menu.cancel();
-        return true;
-    }
-
-    return true;
 }
 
 
@@ -278,8 +188,19 @@ void MenuBarItem::onInvalidate()
 }
 
 
+Gfx::SizeF MenuBarItem::onMeasure(const SizePolicy& policy)
+{
+    Gfx::FontMetrics fm = PixmapSurface::fontMetrics(_font, _text);
+
+    return Gfx::SizeF( fm.width() + padding().leftRight(), 
+                       fm.height() + padding().topBottom() );
+}
+
+
 void MenuBarItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
+    Base::onPaint(surface, rect);
+
     const StyleOptions& options = Application::instance().styleOptions();
     
     if( ! _renderer )
@@ -310,19 +231,41 @@ void MenuBarItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
+bool MenuBarItem::onMouseEvent(const MouseEvent& ev)
+{ 
+    Base::onMouseEvent(ev);
+
+    if( ev.isPress() )
+    {
+        _clicked.send(*this);
+    }
+
+    return true;
+}
+
+
+bool MenuBarItem::onTouchEvent(const TouchEvent& ev)
+{ 
+    Base::onTouchEvent(ev);
+
+    if( ev.isPress() )
+    {
+        _clicked.send(*this);
+    }
+
+    return true;
+}
+
+
 bool MenuBarItem::onEnterEvent(const EnterEvent& ev)
 {
-    Base::onEnterEvent(ev);
-    update();
-    return true;
+    return Base::onEnterEvent(ev);
 }
 
 
 bool MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
 {
-    Base::onLeaveEvent(ev);
-    update();
-    return true;
+    return Base::onLeaveEvent(ev);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -332,15 +275,13 @@ bool MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
 MenuBar::MenuBar()
 : _layout(FlowLayout::Left)
 , _currentMenu(0)
-, _currentMenuItem(0)
 , _hasRenderer(false)
 {
     //this->setBackground( Gfx::Color(58981, 58981, 58981) );
     //this->setBorderColor( Gfx::Color(32767, 32767, 32767)  );
     //this->setBorderStyle(Panel::NoBorder);
 
-    //_layout.move( Gfx::PointF(0,0) );
-    _layout.setPadding(1);
+    //_layout.setPadding(4);
 
     add(_layout);
 }
@@ -353,121 +294,6 @@ MenuBar::~MenuBar()
     {
         delete *it;
     }
-}
-
-
-Menu* MenuBar::selectedMenu()
-{ 
-    return _currentMenu; 
-}
-
-
-MenuBarItem* MenuBar::findItem(const Gfx::PointF& pos)
-{
-    MenuBarItem* item = 0;
-
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
-    {
-        if( (*it)->geometry().contains(pos) )
-        {
-            item = *it;
-            break;
-        }
-    }
-
-    return item;
-}
-
-
-void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
-{
-    MenuBarItem* item = new MenuBarItem(*this, menu, text);
-//TODO:    item->resize( Gfx::SizeF(50, 0) );
-
-    _menus.push_back(item);
-    _layout.addItem(*item);
-
-    update();
-}
-
-
-void MenuBar::onRemoveMenu(Menu& menu)
-{
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
-    {
-        if( &(*it)->menu() == &menu )
-        {           
-            delete *it;
-            _menus.erase(it);
-            break;
-        }
-    }
-
-    if(_currentMenu == &menu)
-    {
-        _currentMenu = 0;
-        _currentMenuItem = 0;
-    }
-
-    update();
-}
-
-
-void MenuBar::onOpenMenu(Menu& menu)
-{
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
-    {
-        if( &(*it)->menu() == &menu)
-        {
-            _currentMenu = &menu;
-            _currentMenuItem = *it;
-        }
-    }
-}
-
-
-void MenuBar::onCloseMenu(Menu& menu)
-{
-    if(_currentMenu == &menu)
-    {
-        _currentMenu = 0;
-        _currentMenuItem = 0;
-    }
-}
-
-
-void MenuBar::onCancel()
-{
-    if(_currentMenu)
-        _currentMenu->cancel();
-}
-
-
-void MenuBar::onEnter()
-{
-    //if(_currentMenuItem)
-    //    _currentMenuItem->grabPointer();
-}
-
-
-MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
-{ 
-    if( ! isVisible() )
-        return 0;
-
-    Gfx::PointF pos = this->fromScreen(screenPos);
-
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    if( rect.contains( pos ) )
-        return this;
-
-    if( ! _currentMenu)
-        return 0;
-
-    return _currentMenu->findMenu(screenPos);
 }
 
 
@@ -508,6 +334,110 @@ void MenuBar::setRenderer(MenuBarRenderer* renderer)
 }
 
 
+void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
+{
+    MenuBarItem* item = new MenuBarItem(menu, text);
+    
+    _menus.push_back(item);
+    _layout.addItem(*item);
+
+    menu.setTransient(this);
+
+    item->clicked() += Pt::slot(*this, &MenuBar::onItemClicked);
+}
+
+
+void MenuBar::onRemoveMenu(Menu& menu)
+{
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        if( &(*it)->menu() == &menu )
+        {           
+            delete *it;
+            _menus.erase(it);
+
+            menu.setTransient(0);
+            break;
+        }
+    }
+
+    if(_currentMenu == &menu)
+    {
+        _currentMenu = 0;
+        //setCapture(false);
+    }
+}
+
+
+Visual* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
+{ 
+    if( ! isVisible() )
+        return 0;
+
+    Gfx::PointF pos = this->fromScreen(screenPos);
+
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( rect.contains( pos ) )
+        return this;
+
+    if( ! _currentMenu)
+        return 0;
+
+    return _currentMenu->findMenu(screenPos);
+}
+
+
+void MenuBar::onOpenMenu(Menu& menu)
+{
+    if(_currentMenu)
+        _currentMenu->close();
+    
+    _currentMenu = &menu;
+    //setCapture(true);
+}
+
+
+void MenuBar::onCloseMenu(Menu& menu)
+{
+    if(_currentMenu == &menu)
+    {
+        _currentMenu = 0;
+        //setCapture(false);
+    }
+}
+
+
+void MenuBar::onCancel()
+{
+    if(_currentMenu)
+        _currentMenu->cancel();
+}
+
+
+void MenuBar::onItemClicked(MenuBarItem& item)
+{
+    Menu& menu = item.menu();
+
+    if( ! menu.isVisible() )
+    {
+        Gfx::PointF menuPos( 0, item.size().height() );
+        menuPos = item.toScreen(menuPos);
+        menu.move(menuPos);
+
+        SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
+        menu.resize(policy);
+
+        menu.setTopMost(true);
+        menu.show();
+    }
+    else
+    {
+        menu.close();
+    }
+}
+
+
 void MenuBar::onInvalidate()
 {
     Base::onInvalidate();
@@ -528,8 +458,44 @@ void MenuBar::onInvalidate()
 }
 
 
+Gfx::SizeF MenuBar::onMeasure(const SizePolicy& policy)
+{
+    double hspace = padding().leftRight() + _layout.margin().leftRight();
+    double vspace = padding().topBottom() + _layout.margin().topBottom();
+
+    SizePolicy contentPolicy = policy;
+    contentPolicy.setWidth( policy.size().width() - hspace );
+    contentPolicy.setHeight( policy.size().height() - vspace );
+        
+    _layout.measure(contentPolicy);
+    return _layout.preferredSize();
+}
+
+
+void MenuBar::onLayout(const Gfx::RectF& rect)
+{
+    Base::onLayout(rect);
+    
+
+    Gfx::PointF pos(padding().left() + _layout.margin().left(), 
+                    padding().top()  + _layout.margin().top());
+        
+    double hspace = padding().leftRight() + _layout.margin().leftRight();
+    double vspace = padding().topBottom() + _layout.margin().topBottom();
+
+    Gfx::SizeF size;
+    size.setWidth( rect.width() - hspace );
+    size.setHeight( rect.height() - vspace );
+
+    _layout.move(pos);
+    _layout.resize(size);
+}
+
+
 void MenuBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
+    Base::onPaint(surface, rect);
+
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
@@ -543,26 +509,47 @@ void MenuBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
+void MenuBar::onProcessMouseEvent(const MouseEvent& ev)
+{
+    const Gfx::PointF& screenPos = ev.position();
+    Visual* menu = findMenu(screenPos);
+    if(menu)
+    {
+        if(menu == this)
+            Base::onProcessMouseEvent(ev);
+        else
+            menu->processEvent(ev);
+        
+        return;
+    }
+
+    if( ev.isPress() )
+    {
+        cancel();
+        return;
+    }
+}
+
+
 bool MenuBar::onMouseEvent(const MouseEvent& ev)
 { 
+    if( _currentMenu && ev.isPress() )
+    {
+        _currentMenu->close();
+    }
+
     return Base::onMouseEvent(ev);
 }
 
 
-void MenuBar::onResizeEvent(const ResizeEvent& ev)
-{
-    for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
+bool MenuBar::onTouchEvent(const TouchEvent& ev)
+{ 
+    if( _currentMenu && ev.isPress() )
     {
-        Widget* item = _layout.widgets().at(i);
-        Gfx::SizeF itemSize = item->preferredSize();
- //TODO:       item->resize(itemSize);
+        _currentMenu->close();
     }
 
- //TODO:   _layout.resize( ev.size() );
-
-    // _layout positions the items now in OnResizeEvent
-    // TODO: our overall design should make this clearer
-    Base::onResizeEvent(ev);
+    return Base::onTouchEvent(ev);
 }
 
 } // namespace

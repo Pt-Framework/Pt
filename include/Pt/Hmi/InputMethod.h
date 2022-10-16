@@ -103,8 +103,8 @@ class DefaultInputMethod : public InputMethod
         void onKeyPress();
 
     private:
-        //Window* _window;
-        //PushButton* _keyButton;
+        Window*     _window;
+        PushButton* _keyButton;
 };
 
 } // namespace

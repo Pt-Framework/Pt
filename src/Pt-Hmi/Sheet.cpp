@@ -857,35 +857,67 @@ void Sheet::onSetMnemonic(Widget& w, const Char* ch)
 }
 
 
+//void Sheet::onSetCapture(bool capture)
+//{
+//    if(_parent)
+//        _parent->onSetCapture(*this, capture);
+//
+//    if( ! capture )
+//    {
+//        if(_capture)
+//            _capture->setCapture(false);
+//    }
+//}
+//
+//
+//void Sheet::onSetCapture(Widget& widget, bool capture)
+//{
+//    if(capture)
+//    {
+//        if(_capture && _capture != &widget)
+//            _capture->setCapture(false);
+//
+//        _capture = &widget;
+//    }
+//    else
+//    {
+//        if(_capture == &widget)
+//        {
+//            _capture = 0;
+//        }
+//    }
+//}
+
+
 void Sheet::onSetCapture(bool capture)
 {
     if(_parent)
-        _parent->onSetCapture(*this, capture);
-
-    if( ! capture )
-    {
-        if(_capture)
-            _capture->setCapture(false);
-    }
+        _parent->onSetCapture(*this, *this, capture);
 }
 
 
-void Sheet::onSetCapture(Widget& widget, bool capture)
+void Sheet::onSetCapture(Widget& widget, Visual& target, bool capture)
 {
-    if(capture)
-    {
-        if(_capture && _capture != &widget)
-            _capture->setCapture(false);
+    if(_parent)
+        _parent->onSetCapture(*this, target, capture);
+}
 
-        _capture = &widget;
-    }
-    else
-    {
-        if(_capture == &widget)
-        {
-            _capture = 0;
-        }
-    }
+
+bool Sheet::onIsDescendantOf(Visual& top) const
+{
+    if( _parent && _parent->onIsDescendantOf(*this, top) )
+        return true;
+
+    return false;
+}
+
+
+bool Sheet::onIsDescendantOf(const Widget& widget, Visual& top) const
+{
+    if(this == &top)
+        return true;
+
+    return isDescendantOf(top);
 }
 
 
@@ -894,51 +926,19 @@ void Sheet::onProcessMouseEvent(const MouseEvent& ev)
     if( ! acceptsInput() )
         return;
 
-    //
-    // continue press sequence capture
-    //  
-    if(_capture)
-    {
-        _capture->processEvent(ev);
-
-        if( ev.isRelease() )
-            _capture = 0;
-        
-        return;
-    }
-
     Gfx::PointF pos = fromScreen( ev.position() );
 
-    //
-    // hit test
-    // 
-    Widget* widget = 0;
-    
     if(_mainWidget && 
        _mainWidget->geometry().contains(pos) && 
        _mainWidget->acceptsInput() )
     {
-        widget = _mainWidget;
-    }
-
-    _pointer = _mainWidget;
-
-    if(widget)
-    {
-        //
-        // start press sequence capture
-        // 
-        if( ev.isPress() )
-            _capture = widget;
-
-        widget->processEvent(ev);
+        _mainWidget->processEvent(ev);
         return;
     }
 
     //
-    // handle event
+    // process event
     // 
-
     if(_parent)
         _parent->onEnter(*this, *this);
     
@@ -1025,6 +1025,11 @@ void Sheet::onProcessScrollEvent(const ScrollEvent& ev)
     if( ! acceptsInput() )
         return;
 
+    //
+    // TODO: disptch by responder chain obsoletes dispatch 
+    //       to _active and _focus
+    //
+
     if(_active)
     {
         _active->processEvent(ev);
@@ -1037,11 +1042,11 @@ void Sheet::onProcessScrollEvent(const ScrollEvent& ev)
         return;
     }
 
-    if(_pointer)
-    {
-        _pointer->processEvent(ev);
-        return; 
-    }
+    //if(_pointer)
+    //{
+    //    _pointer->processEvent(ev);
+    //    return; 
+    //}
 
     scrollEvent(ev);
 }

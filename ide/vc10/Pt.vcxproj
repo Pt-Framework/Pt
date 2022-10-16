@@ -113,6 +113,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Sheet.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Shell.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ShellWidget.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ShellWM.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ShowEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\SizePolicy.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Slider.h" />
@@ -663,6 +664,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Sheet.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Shell.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ShellWidget.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ShellWM.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Slider.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\SpinBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\StackLayout.cpp" />

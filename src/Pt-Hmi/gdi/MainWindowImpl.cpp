@@ -49,7 +49,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     {
         case WindowType::Popup:
             style = WS_POPUP;
-            exStyle = WS_EX_TOOLWINDOW|WS_EX_NOACTIVATE;
+            exStyle = WS_EX_NOACTIVATE;
             break;
 
         default:
@@ -207,7 +207,7 @@ void MainWindowImpl::onSetType(WindowType type)
     {
         case WindowType::Popup:
             style = WS_POPUP;
-            exStyle = WS_EX_TOOLWINDOW|WS_EX_NOACTIVATE;
+            exStyle = WS_EX_NOACTIVATE;
             break;
 
         default:

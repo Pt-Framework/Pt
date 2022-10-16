@@ -164,7 +164,7 @@ MainWindow::MainWindow()
 
     _tabView.setCurrent(0);
 
-    _child1.shell().setContent(&_tabView);
+    _child1.layout().addItem(_tabView, DockingLayout::Fill);
     _child1.closeRequested() += Pt::slot(*this, &MainWindow::tryClose);
 
     //_child1.setTopMost(true);
@@ -174,6 +174,7 @@ MainWindow::MainWindow()
 
     // context menu
     _menu.setName("All Music");
+    _menu.setTransient(this);
 
     _item1.setText("Heavy Metal");
 
@@ -530,8 +531,12 @@ bool MainWindow::onMouseEvent(const MouseEvent& ev)
     {
         Gfx::PointF menuPos = this->toScreen( ev.position() );
 
-        std::clog << std::endl;
-        //_menu.show(menuPos);
+        SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
+        _menu.resize(policy);
+
+        _menu.move(menuPos);
+        _menu.setTopMost(true);
+        _menu.show();
     }
 
     return true;

@@ -158,6 +158,7 @@ Window::Window(WindowManager* parent, WindowType type)
 , _parent(0)
 , _nextResponder(0)
 , _capture(0)
+, _peer(0)
 , _invalidates(0)
 , _visible(false)
 , _isActive(false)
@@ -240,7 +241,7 @@ void Window::setParent(WindowManager& parent)
     _parent->onEnable(*this, _enabled);
     _parent->onStateChanged(*this);
     _parent->onShow(*this, _visible);
-
+    
     onParentChanged(_parent);
 }
 
@@ -249,6 +250,9 @@ void Window::unparent()
 {
     if(_parent)
     {
+        if(_peer)
+            _parent->onSetTransient(*this, false);
+
         _parent->onRelease(*this);
         _parent->onDetach(*this);
         _parent = 0;
@@ -263,6 +267,67 @@ void Window::unparent()
 
 void Window::onParentChanged(WindowManager* )
 {
+}
+
+
+Visual* Window::peer() const
+{
+    return _peer;
+}
+
+
+void Window::setTransient(Visual* peer)
+{
+    if(_peer == peer)
+        return;
+
+    onTransientPeerClosed();
+
+    if(peer)
+    {
+        peer->closed() += Pt::slot(*this, &Window::onTransientPeerClosed);
+        _peer = peer;
+
+        if(_parent && _visible)
+            _parent->onSetTransient(*this, true);
+    }
+}
+
+
+void Window::onTransientPeerClosed()
+{
+    if(_peer)
+    {
+        if(_parent)
+            _parent->onSetTransient(*this, false);
+
+        _peer->closed() -= Pt::slot(*this, &Window::onTransientPeerClosed);
+        _peer = 0;
+    }
+}
+
+
+bool Window::onIsDescendantOf(Visual& top) const
+{
+    //if( _peer == &top )
+    //    return true;
+
+    //if( _peer && _peer->isDescendantOf(top) )
+    //    return true;
+
+    if( _parent && _parent->onIsDescendantOf(*this, top) )
+        return true;
+
+    return false;
+}
+
+
+bool Window::onIsDescendantOf(const Sheet& widget, Visual& top) const
+{
+    if(this == &top)
+        return true;
+
+    return isDescendantOf(top);
 }
 
 
@@ -685,6 +750,12 @@ void Window::onProcessShowEvent(const ShowEvent& ev)
 
 void Window::onShowEvent(const ShowEvent& ev)
 {
+    if(_peer)
+    {
+        if(_parent)
+            _parent->onSetTransient( *this, ev.visible() );
+    }
+
     _visible = ev.visible();
 
     if(_capture && ! _visible)
@@ -909,6 +980,7 @@ bool Window::isClosed() const
 
 void Window::tryClose()
 {
+
     close();
 }
 
@@ -1121,35 +1193,49 @@ const WindowImpl* Window::impl() const
 }
 
 
+//void Window::onSetCapture(bool capture)
+//{
+//    if(_parent)
+//        _parent->onSetCapture(*this, capture);
+//
+//    if( ! capture )
+//    {
+//        if(_capture)
+//            _capture->setCapture(false);
+//    }
+//}
+//
+//
+//void Window::onSetCapture(Sheet& sheet, bool capture)
+//{
+//    if(capture)
+//    {
+//        if(_capture && _capture != &sheet)
+//            _capture->setCapture(false);
+//
+//        _capture = &sheet;
+//    }
+//    else
+//    {
+//        if(_capture == &sheet)
+//        {
+//            _capture = 0;
+//        }
+//    }
+//}
+
+
 void Window::onSetCapture(bool capture)
 {
     if(_parent)
-        _parent->onSetCapture(*this, capture);
-
-    if( ! capture )
-    {
-        if(_capture)
-            _capture->setCapture(false);
-    }
+        _parent->onSetCapture(*this, *this, capture);
 }
 
 
-void Window::onSetCapture(Sheet& sheet, bool capture)
+void Window::onSetCapture(Sheet& sheet, Visual& target, bool capture)
 {
-    if(capture)
-    {
-        if(_capture && _capture != &sheet)
-            _capture->setCapture(false);
-
-        _capture = &sheet;
-    }
-    else
-    {
-        if(_capture == &sheet)
-        {
-            _capture = 0;
-        }
-    }
+    if(_parent)
+        _parent->onSetCapture(*this, target, capture);
 }
 
 
@@ -1165,18 +1251,18 @@ void Window::onProcessMouseEvent(const MouseEvent& ev)
     //
     // continue press sequence capture
     // 
-    if(_capture)
-    {
-        _capture->processEvent(ev);
+    //if(_capture)
+    //{
+    //    _capture->processEvent(ev);
 
-        if( ev.isRelease() )
-        {
-            //std::clog << "Window::CAPTURE END: " << typeid(*_capture).name() <<  _capture->vid() << std::endl;
-            _capture = 0;
-        }
-        
-        return;
-    }
+    //    if( ev.isRelease() )
+    //    {
+    //        //std::clog << "Window::CAPTURE END: " << typeid(*_capture).name() <<  _capture->vid() << std::endl;
+    //        _capture = 0;
+    //    }
+    //    
+    //    return;
+    //}
 
     Visual* hit = 0;
 
@@ -1193,11 +1279,11 @@ void Window::onProcessMouseEvent(const MouseEvent& ev)
         //
         // start press sequence capture
         // 
-        if( ev.isPress() )
-        {
-            _capture = hit;
-            //std::clog << "Window::CAPTURE BEGIN: " << typeid(*_capture).name() << _capture->vid() << std::endl;
-        }
+        //if( ev.isPress() )
+        //{
+        //    _capture = hit;
+        //    //std::clog << "Window::CAPTURE BEGIN: " << typeid(*_capture).name() << _capture->vid() << std::endl;
+        //}
 
       hit->processEvent(ev);
       return;

@@ -346,6 +346,172 @@ void Application::onDispatchMouseEvent(const MouseEvent& ev)
 }
 
 
+void Application::onSetCapture(Window& w, Visual& target, bool capture)
+{
+    std::list<Visual*>::iterator it = std::find(_capture.begin(), 
+                                                _capture.end(), &target);
+    
+     if( ! capture && it == _capture.end() )
+        return;
+
+    if( it != _capture.end() )
+        _capture.erase(it);
+
+    if(capture)
+    {
+        //std::clog << "SET CAPTURE " << typeid(target).name() << std::endl;
+        
+        _capture.push_back(&target);
+        _mainScreen->impl()->setCaptureWindow(&w);
+    }
+    else
+    {
+        //std::clog << "RELEASE CAPTURE" << std::endl;
+
+        if( ! _capture.empty() )
+        {
+            Visual* last = _capture.back();
+            _mainScreen->impl()->setCaptureWindow(last);
+        }
+        else
+        {
+            Window* transient = ! _popups.empty() ? _popups.back() : 0;
+            _mainScreen->impl()->setCaptureWindow(transient);
+        }
+    }
+}
+
+
+void Application::onSetTransient(Window& w, bool transient)
+{
+    std::list<Window*>::iterator it = std::find(_popups.begin(), 
+                                                _popups.end(), &w);
+    if( it != _popups.end() )
+        _popups.erase(it);
+
+    if(transient)
+    {
+        _popups.push_back(&w);
+    }
+        
+    if( _capture.empty() )
+    {
+        Window* transient = ! _popups.empty() ? _popups.back() : 0;
+        _mainScreen->impl()->setCaptureWindow(transient);
+    }
+}
+
+
+bool Application::isDescendantOf(Window& w, Window& top) const
+{
+  Visual* peer = w.peer();
+  if( peer->isDescendantOf(top) || peer == &top )
+      return true;
+
+  std::list<Window*>::const_iterator it = _popups.begin();
+  for(it = _popups.begin(); it != _popups.end(); ++it )
+  {
+      Window* popup = *it;
+      
+      if( peer->isDescendantOf(*popup) || peer == popup )
+          return isDescendantOf(*popup, top);
+  }
+
+  return false;
+}
+
+
+void Application::onClosePopups(const Gfx::PointF& screenPos)
+{
+    Window* ime = inputMethod().activeWindow();
+    if(ime)
+    {
+        // TODO: hit test
+        Gfx::PointF pos = ime->fromScreen(screenPos);
+        Gfx::RectF rect( ime->size() );
+        if( ! rect.contains(pos) )
+        {
+            ime = 0;
+        }
+    }
+
+    Window* hit = 0;
+
+    Visual* capture = ! _capture.empty() ? _capture.back() : 0;
+    if(capture)
+    {
+        std::list<Window*>::iterator pit;
+        for(pit = _popups.begin(); pit != _popups.end(); ++pit )
+        {
+            Window* popup = *pit;
+
+            if( capture == popup || 
+                capture == popup->peer() ||
+                capture->isDescendantOf(*popup) )
+            {
+                hit = popup;
+                break;
+            }
+        }
+    }
+
+    if( ! hit )
+    {
+        std::list<Window*>::iterator pit = _popups.begin();
+        for(pit = _popups.begin(); pit != _popups.end(); ++pit )
+        {
+            Window* popup = *pit;
+
+            // TODO: hit test
+            Gfx::PointF popupPos = popup->fromScreen(screenPos);
+            Gfx::RectF popupRect( popup->size() );
+            if( popupRect.contains(popupPos) )
+            {
+                hit = popup;
+                break;
+            }
+                
+            Widget* owner = dynamic_cast<Widget*>( popup->peer() );
+            if(owner)
+            {
+                Gfx::PointF pos = owner->fromScreen(screenPos);
+                Gfx::RectF rect( owner->size() );
+                if( rect.contains(pos) )
+                {
+                    hit = popup;
+                    break;
+                }
+            }
+        }
+    }
+
+    std::list<Window*>::iterator pit = _popups.begin();
+    while( pit != _popups.end() )
+    {
+        Window* popup = *pit++;
+
+        //bool keepOpen = hit ? popup == hit || 
+        //                      popup->isDescendantOf(*hit) || 
+        //                      hit->isDescendantOf(*popup)
+        //                    : false;
+
+        bool keepOpen = hit ? popup == hit || 
+                              isDescendantOf(*popup, *hit) || 
+                              isDescendantOf(*hit, *popup)
+                            : false;
+        
+        if( ime && ! isDescendantOf(*popup, *ime) )
+            keepOpen = true;
+
+        if( ! keepOpen )
+        {
+            //std::clog << "AUTO_CLOSE: " << popup->name() << std::endl;
+            popup->close();
+        }
+    }
+}
+
+
 void Application::onProcessMouseEvent(const MouseEvent& ev)
 {
     //std::clog << "APP MOUSE: " << ev.position().x() << ", " << ev.position().y() << std::endl;
@@ -359,23 +525,52 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     onDetectScroll( visual, screenPos, ev.isPress(), ev.isPressed() );
 
     //
-    // Dispatch mouse event
+    // close popups 
     //
-    
+    if( ev.isPress() )
+    {
+        onClosePopups( ev.position() );
+    }
+
+    Visual* capture = ! _capture.empty() ? _capture.back() : 0;
+
+    //
     // IME window
+    //
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
+        // TODO: hit test
         Gfx::PointF pos = ime->fromScreen(screenPos);
         Gfx::RectF rect( ime->size() );
         if( rect.contains(pos) )
         {
-            ime->processEvent(ev);
+            // TODO: also if capture is in a popup that is a descendant of the IME
+            if( capture && capture->isDescendantOf(*ime) )
+            {
+                capture->processEvent(ev);
+            }
+            else
+            {
+                ime->processEvent(ev);
+            }
+
             return;
         }
     }
 
-    _mainScreen->processEvent(ev);
+    //
+    // dispatch event
+    //
+    if(capture)
+    {
+        //std::clog << "CAPTURE EVENT: " << _capture->name() << std::endl;
+        capture->processEvent(ev);
+    }
+    else
+    {
+        _mainScreen->processEvent(ev);
+    }
 }
 
 

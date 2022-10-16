@@ -142,7 +142,6 @@ ApplicationImpl::ApplicationImpl()
 , _instanceHandle(NULL)
 , _gdiplusToken(0)
 , _pointerWindow(NULL)
-//, _grabber(0)
 , _defaultCursorHandle(0)
 , _cursorHandle(0)
 , _currentCursor(&noCursor)
@@ -777,23 +776,33 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     _mouseEvent.setPosition( w.toScreen(pos) );
     _mouseEvent.setVisual(&w);
 
-    if( _mouseEvent.isPress() )
-    {
-        //std::clog << "window capture set: "<< w.title() << std::endl;
-        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-        SetCapture( impl->hwnd() );
-    }
-    else if( _mouseEvent.isRelease() )
-    {
-        //std::clog << "window capture release" << std::endl;
-        ReleaseCapture();
-    }
+    //if( GetCapture() != NULL )
+    //{
+    //    POINT p;
+    //    p.x = xPos;
+    //    p.y = yPos;
+
+    //    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    //    ClientToScreen(_popup, &p);
+
+    //    HWND hwnd = WindowFromPoint(p);
+    //    
+    //    Window* win = findWindow(hwnd);
+    //    if(win)
+    //    {
+    //      //char text[20];
+    //      //GetWindowText(hwnd, text, 20); 
+    //      //std::clog << "WindowFromPoint: " << text << std::endl;
+    //      
+    //      _mouseEvent.setVisual(win);
+    //    }
+    //}
 
     if( ! _pointerWindow )
     {
         MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
         _pointerWindow = impl->hwnd();
-        //std::clog << "pointer enters window: " << w.title() << std::endl;
+        //std::clog << "pointer enters window: " << w.title() << " " << w.name() << std::endl;
         
         //EnterEvent eev(w);
         //w.processEvent(eev);

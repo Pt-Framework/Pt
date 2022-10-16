@@ -42,6 +42,8 @@
 #include <Pt/System/Application.h>
 #include <Pt/System/Path.h>
 
+#include <list>
+
 namespace Pt {
 
 namespace Hmi {
@@ -51,6 +53,8 @@ class Cursor;
 class PT_HMI_API Application : public Pt::System::Application
 {
     friend class Visual;
+    friend class Screen;
+    friend class ScreenImpl;
 
     public:
         Application(int argc = 0, char** argv = 0);
@@ -113,6 +117,15 @@ class PT_HMI_API Application : public Pt::System::Application
         /** @brief Emulates a mouse event.
         */
         void sendMouseEvent(const MouseEvent& ev);
+
+    protected:
+        void onSetCapture(Window& w, Visual& target, bool capture);
+
+        void onSetTransient(Window& w, bool transient);
+
+        void onClosePopups(const Gfx::PointF& screenPos);
+
+        bool isDescendantOf(Window& w, Window& top) const;
 
     private:
         void registerVisual(Visual& visual);
@@ -224,8 +237,12 @@ class PT_HMI_API Application : public Pt::System::Application
 
         Style                        _style;
         StyleOptions                 _styleOptions;
+        
         DefaultInputMethod*          _defaultInputMethod;
         InputMethod*                 _inputMethod;
+        
+        std::list<Window*>           _popups;
+        std::list<Visual*>           _capture;
                                      
         Gfx::PointF                  _scrollFrom;
         bool                         _onScroll;

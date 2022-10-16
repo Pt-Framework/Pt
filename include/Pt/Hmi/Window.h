@@ -184,6 +184,14 @@ class PT_HMI_API Window : public Visual
         void unparent();
 
 
+        Visual* peer() const;
+
+        void setTransient(Visual* owner);
+
+    protected:
+        void onTransientPeerClosed();
+
+    public:
         PixmapSurface& surface();
 
         const PixmapSurface& surface() const;
@@ -336,6 +344,8 @@ class PT_HMI_API Window : public Visual
 
         virtual void onSetCapture(bool capture);
 
+        virtual bool onIsDescendantOf(Visual& v) const;
+
     //
     // Form
     //
@@ -370,7 +380,9 @@ class PT_HMI_API Window : public Visual
 
         virtual void onEnter(Sheet& sheet, Visual& v);
 
-        virtual void onSetCapture(Sheet& sheet, bool capture);
+        virtual void onSetCapture(Sheet& sheet, Visual& target, bool capture);
+
+        virtual bool onIsDescendantOf(const Sheet& widget, Visual& top) const;
 
     //
     // invalidation
@@ -485,6 +497,7 @@ class PT_HMI_API Window : public Visual
         WindowManager*               _parent;
         Responder*                   _nextResponder;
         Visual*                      _capture;
+        Visual*                      _peer;
    
         int                          _invalidates;
         bool                         _visible; 

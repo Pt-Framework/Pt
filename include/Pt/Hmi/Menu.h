@@ -30,7 +30,7 @@
 #ifndef Pt_Hmi_Menu_H
 #define Pt_Hmi_Menu_H
 
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Popup.h>
 #include <Pt/Hmi/MenuShell.h>
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/FlowLayout.h>
@@ -42,11 +42,11 @@ namespace Pt {
 namespace Hmi {
 
 class PT_HMI_API Menu : public MenuShell
-                      , public Window
+                      , public Popup
 {
     friend class MenuShell;
 
-    typedef Window Base;
+    typedef Popup Base;
 
     public:
         Menu();
@@ -61,9 +61,7 @@ class PT_HMI_API Menu : public MenuShell
 
         void removeItem(MenuItem& item);
 
-        void show(const Gfx::PointF& pos);
-
-        Pt::ssize_t iconWidth() const;
+        double iconWidth() const;
 
         const Gfx::Brush& background() const;
 
@@ -86,19 +84,18 @@ class PT_HMI_API Menu : public MenuShell
 
         virtual void onCancel();
 
-        virtual void onEnter();
-
-        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
+        virtual Visual* onFindMenu(const Gfx::PointF& screenPos);
 
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaintBackground(const Gfx::RectF& rect);
+        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+
+    protected:
+        void onProcessMouseEvent(const MouseEvent& ev);
 
     protected:
         virtual void onCloseEvent(const CloseEvent& ev);
-
-        virtual void onResizeEvent(const ResizeEvent& ev);
 
         virtual void onShowEvent(const ShowEvent& ev);
 
@@ -111,8 +108,6 @@ class PT_HMI_API Menu : public MenuShell
     private:
         void onItemTriggered(MenuItem& m);
 
-        void onItemRemoved(MenuItem& m);
-
         void onMenuTriggered(MenuItem& m);
 
     private:
@@ -121,6 +116,7 @@ class PT_HMI_API Menu : public MenuShell
         std::vector<MenuItem*> _subMenus;
         Menu*                  _currentMenu;
         FlowLayout             _layout;
+
         Pt::ssize_t            _iconWidth;
 
         FacetPtr<MenuRenderer> _renderer;
