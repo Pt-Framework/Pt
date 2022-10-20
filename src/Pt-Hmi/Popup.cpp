@@ -86,7 +86,7 @@ void Popup::onGlobalMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        Gfx::PointF pos = fromScreen( ev.position() );
+        Gfx::PointF pos = fromGlobal( ev.position() );
         Gfx::RectF rect( size() );
 
         if( ! rect.contains(pos) )
@@ -102,7 +102,7 @@ void Popup::onGlobalTouchEvent(const TouchEvent& ev)
 {
     if( ev.isPress() )
     {
-        Gfx::PointF pos = fromScreen( ev.position() );
+        Gfx::PointF pos = fromGlobal( ev.position() );
         Gfx::RectF rect( size() );
 
         if( ! rect.contains(pos) )

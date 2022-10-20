@@ -15,7 +15,7 @@ int main(int argc, char* args[])
         Pt::System::Logger::setLogLevel( "Pt.Hmi", Pt::System::Debug );
 
         Pt::Hmi::Application app(argc, args);
-        //app.setScaleFactor(1.25);
+        app.setScaleFactor(1.25);
 
 #define OLDAPP 1
 

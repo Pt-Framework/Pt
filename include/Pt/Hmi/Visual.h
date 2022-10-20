@@ -65,21 +65,6 @@ class PT_HMI_API Responder
         Responder();
 
     public:
-        /** @brief Converts to global coordinate.
-        */
-        Gfx::PointF toScreen(const Gfx::PointF& pos) const
-        {
-            return onToScreen(pos); 
-        }
-        
-        /** @brief Converts to local coordinate.
-        */
-        Gfx::PointF fromScreen(const Gfx::PointF& pos) const
-        {
-            return onFromScreen(pos); 
-        }
-
-    public:
         virtual ~Responder();
 
         bool mouseEvent(const MouseEvent& ev);
@@ -97,9 +82,9 @@ class PT_HMI_API Responder
     protected:
         virtual Responder* onNextResponder() = 0;
 
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const = 0;
+        virtual Gfx::PointF onToGlobal(const Gfx::PointF& pos) const = 0;
 
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const = 0;
+        virtual Gfx::PointF onFromGlobal(const Gfx::PointF& pos) const = 0;
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
@@ -129,9 +114,7 @@ class PT_HMI_API Responder
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
-class Window;
-
-class PT_HMI_API Visual
+class PT_HMI_API Visual : public Responder
 {
     protected:
         Visual();
@@ -140,7 +123,9 @@ class PT_HMI_API Visual
         virtual ~Visual();
 
         Pt::Signal<>& closed()
-        { return _closed; }
+        { 
+            return _closed; 
+        }
         
         Pt::uint64_t vid() const
         {
@@ -161,26 +146,73 @@ class PT_HMI_API Visual
         {
             this->onEvent(ev);
         }
-       
-        virtual void setCapture(bool capture)
+
+        Visual* parent()
+        {
+            return onGetParent();
+        }
+
+        const Visual* parent() const
+        {
+            return onGetParent();
+        }
+
+        bool isDescendantOf(const Visual& v) const;
+
+        bool isAncestorOf(const Visual& v) const;
+
+        /** @brief Converts to parent coordinate.
+        */
+        Gfx::PointF toParent(const Gfx::PointF& pos) const
+        {
+            return onToParent(pos);
+        }
+
+        /** @brief Converts from parent coordinate.
+        */
+        Gfx::PointF fromParent(const Gfx::PointF& pos) const
+        {
+            return onFromParent(pos);
+        }
+
+        /** @brief Converts to global coordinate.
+        */
+        Gfx::PointF toGlobal(const Gfx::PointF& pos) const
+        {
+            return onToGlobal(pos); 
+        }
+        
+        /** @brief Converts to local coordinate.
+        */
+        Gfx::PointF fromGlobal(const Gfx::PointF& pos) const
+        {
+            return onFromGlobal(pos);
+        }
+
+        void setCapture(bool capture)
         {
             this->onSetCapture(capture);
         }
-
-        bool isDescendantOf(Visual& v) const
-        {
-            return onIsDescendantOf(v);
-        }
     
     protected:
+        virtual Visual* onGetParent() const = 0;
+
+        
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onToGlobal(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromGlobal(const Gfx::PointF& pos) const;
+
+
         virtual void onEvent(const Pt::Event& ev) = 0;
 
-        virtual void onSetCapture(bool capture) = 0;
 
-        virtual bool onIsDescendantOf(Visual& v) const
-        {
-            return false;
-        }
+        virtual void onSetCapture(bool capture);
+
+        virtual void onSetCapture(Visual& target, bool capture);
 
     private:
         void setR1(void* r)
@@ -224,6 +256,11 @@ class PT_HMI_API View
     public:
         virtual ~View();
 
+        Visual& visual()
+        {
+            return onGetVisual();
+        }
+
         Gfx::PointF toWidget(const Widget& widget, 
                              const Gfx::PointF& pos) const
         { 
@@ -237,6 +274,8 @@ class PT_HMI_API View
         }
 
     protected:
+        virtual Visual& onGetVisual() = 0;
+
         virtual void onAttach(Widget& widget) = 0;
         
         virtual void onDetach(Widget& widget) = 0;
@@ -249,12 +288,6 @@ class PT_HMI_API View
                                        const Gfx::PointF& pos) const = 0;
 
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
-                                         const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onToScreen(const Widget& widget, 
-                                       const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onFromScreen(const Widget& widget, 
                                          const Gfx::PointF& pos) const = 0;
 
         virtual void onRepaint(Widget& widget, const Gfx::RectF& rect) = 0;
@@ -275,9 +308,7 @@ class PT_HMI_API View
 
         virtual void onEnter(Widget& widget, Visual& v) = 0;
 
-        virtual void onSetCapture(Widget& widget, Visual& target, bool capture) = 0;
-
-        virtual bool onIsDescendantOf(const Widget& widget, Visual& top) const = 0;
+        //virtual void onSetCapture(Widget& widget, Visual& target, bool capture) = 0;
 };
 
 } // namespace

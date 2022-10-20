@@ -307,30 +307,6 @@ void Window::onTransientPeerClosed()
 }
 
 
-bool Window::onIsDescendantOf(Visual& top) const
-{
-    //if( _peer == &top )
-    //    return true;
-
-    //if( _peer && _peer->isDescendantOf(top) )
-    //    return true;
-
-    if( _parent && _parent->onIsDescendantOf(*this, top) )
-        return true;
-
-    return false;
-}
-
-
-bool Window::onIsDescendantOf(const Sheet& widget, Visual& top) const
-{
-    if(this == &top)
-        return true;
-
-    return isDescendantOf(top);
-}
-
-
 PixmapSurface& Window::surface()
 {
     return _surface;
@@ -392,7 +368,6 @@ Pt::Signal<const Pt::Event&>& Window::eventReceived()
     return _eventReceived;
 }
 
-
 ///////////////////////////////////////////////////////////////////////
 // Responder
 ///////////////////////////////////////////////////////////////////////
@@ -402,31 +377,36 @@ Responder* Window::onNextResponder()
     return _nextResponder;
 }
 
-
-Gfx::PointF Window::onToScreen(const Gfx::PointF& pos) const
-{
-    if(_parent)
-    {
-        return _parent->onToScreen(*this, pos);
-    }
-
-    return pos;
-}
-
-
-Gfx::PointF Window::onFromScreen(const Gfx::PointF& pos) const
-{
-    if(_parent)
-    {
-        return _parent->onFromScreen(*this, pos);
-    }
-
-    return pos;
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
+
+Visual* Window::onGetParent() const
+{
+    if( ! _parent )
+        return 0;
+
+    return &_parent->visual();
+}
+
+
+Gfx::PointF Window::onToParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onFromWindow(*this, pos);
+}
+
+
+Gfx::PointF Window::onFromParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onToWindow(*this, pos);
+}
+
 
 void Window::onEvent(const Pt::Event& ev)
 {
@@ -436,6 +416,12 @@ void Window::onEvent(const Pt::Event& ev)
 ///////////////////////////////////////////////////////////////////////
 // Form
 ///////////////////////////////////////////////////////////////////////
+
+Visual& Window::onGetVisual()
+{
+    return *this;
+}
+
 
 void Window::onAttach(Sheet& sheet)
 {
@@ -481,20 +467,6 @@ Gfx::PointF Window::onFromSheet(const Sheet& sheet, const Gfx::PointF& pos) cons
 Gfx::PointF Window::onToSheet(const Sheet& sheet,  const Gfx::PointF& pos) const
 {
     return pos;
-}
-
-
-Gfx::PointF Window::onToScreen(const Sheet& sheet, const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = onFromSheet(sheet, pos);
-    return toScreen(p);
-}
-
-
-Gfx::PointF Window::onFromScreen(const Sheet& sheet, const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = fromScreen(pos);
-    return onToSheet(sheet, p);
 }
 
 
@@ -1193,58 +1165,12 @@ const WindowImpl* Window::impl() const
 }
 
 
-//void Window::onSetCapture(bool capture)
-//{
-//    if(_parent)
-//        _parent->onSetCapture(*this, capture);
-//
-//    if( ! capture )
-//    {
-//        if(_capture)
-//            _capture->setCapture(false);
-//    }
-//}
-//
-//
-//void Window::onSetCapture(Sheet& sheet, bool capture)
-//{
-//    if(capture)
-//    {
-//        if(_capture && _capture != &sheet)
-//            _capture->setCapture(false);
-//
-//        _capture = &sheet;
-//    }
-//    else
-//    {
-//        if(_capture == &sheet)
-//        {
-//            _capture = 0;
-//        }
-//    }
-//}
-
-
-void Window::onSetCapture(bool capture)
-{
-    if(_parent)
-        _parent->onSetCapture(*this, *this, capture);
-}
-
-
-void Window::onSetCapture(Sheet& sheet, Visual& target, bool capture)
-{
-    if(_parent)
-        _parent->onSetCapture(*this, target, capture);
-}
-
-
 void Window::onProcessMouseEvent(const MouseEvent& ev)
 {
     if( ! acceptsInput() )
         return;
 
-    Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     //std::clog << title() << ": " << pos.x() << " " << pos.y() << std::endl;
 
@@ -1298,7 +1224,7 @@ void Window::onProcessTouchEvent(const TouchEvent& ev)
     if( ! acceptsInput() )
         return;
 
-    Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     //std::clog << title() << ": " << pos.x() << " " << pos.y() << std::endl;
 

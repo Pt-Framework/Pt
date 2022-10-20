@@ -112,18 +112,14 @@ class ShellWM : public Visual
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onSetCapture(bool capture);
-
-        virtual bool onIsDescendantOf(Visual& v) const;
+        
+        virtual void onSetCapture(Visual& target, bool capture);
     
     //
     // Responder
     //
     protected:
         virtual Responder* onNextResponder();
-
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
 
     //
     // WindowManager
@@ -143,12 +139,6 @@ class ShellWM : public Visual
                                        const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromWindow(const Window& w, 
-                                         const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onToScreen(const Window& w, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Window& w, 
                                          const Gfx::PointF& pos) const;
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
@@ -171,10 +161,6 @@ class ShellWM : public Visual
 
         virtual void onEnter(Window& w, Visual& v);
 
-        virtual void onSetCapture(Window& w, Visual& target, bool capture);
-
-        virtual bool onIsDescendantOf(const Window& widget, Visual& top) const;
-    
     //
     // Implementation
     //

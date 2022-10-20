@@ -173,21 +173,39 @@ Responder* Screen::onNextResponder()
     return 0;
 }
 
-
-Gfx::PointF Screen::onToScreen(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
-
-Gfx::PointF Screen::onFromScreen(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
+
+Visual* Screen::onGetParent() const
+{
+    return 0;
+}
+
+
+Gfx::PointF Screen::onToParent(const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+Gfx::PointF Screen::onFromParent(const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+Gfx::PointF Screen::onToGlobal(const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+Gfx::PointF Screen::onFromGlobal(const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
 
 void Screen::onEvent(const Event& ev)
 {
@@ -197,7 +215,13 @@ void Screen::onEvent(const Event& ev)
 
 void Screen::onSetCapture(bool capture)
 {
-    _impl->setCapture(capture);
+    Visual::onSetCapture(capture);
+}
+
+
+void Screen::onSetCapture(Visual& target, bool capture)
+{
+    Application::instance().onSetCapture(target, capture);
 }
 
 

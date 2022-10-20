@@ -44,7 +44,6 @@ namespace Hmi {
 class Form;
 
 class Sheet : public Visual
-            , public Responder
             , public View
             , public Pt::Connectable
 {
@@ -120,21 +119,19 @@ class Sheet : public Visual
     // Visual
     //
     protected:
+        virtual Visual* onGetParent() const;
+
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
         virtual void onEvent(const Pt::Event& ev);
-
-        virtual void onSetCapture(bool capture);
-
-        bool onIsDescendantOf(Visual& top) const;
 
     //
     // Responder
     //
     protected:
         virtual Responder* onNextResponder();
-
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
 
         virtual bool onMouseEvent(const MouseEvent& ev);
         
@@ -152,6 +149,8 @@ class Sheet : public Visual
     // View
     //
     protected:
+        virtual Visual& onGetVisual();
+
         virtual void onAttach(Widget& widget);
 
         virtual void onDetach(Widget& widget);
@@ -170,12 +169,6 @@ class Sheet : public Visual
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
                                           const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onToScreen(const Widget& widget, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Widget& widget, 
-                                         const Gfx::PointF& pos) const;
-
         virtual void onRepaint(Widget& widget, const Gfx::RectF& rect);
 
         virtual void onRelayout(Widget& widget);
@@ -193,10 +186,6 @@ class Sheet : public Visual
         virtual void onRaise(Widget& widget);
 
         virtual void onEnter(Widget& widget, Visual& v);
-
-        virtual void onSetCapture(Widget& widget, Visual& target, bool capture);
-
-        virtual bool onIsDescendantOf(const Widget& widget, Visual& top) const;
 
     //
     // Sheet

@@ -177,7 +177,7 @@ void ComboBox::showPopup()
     _popup.resize(policy);
     
     Gfx::PointF popupPos(0, size().height() );
-    popupPos = this->toScreen(popupPos);
+    popupPos = this->toGlobal(popupPos);
     _popup.move(popupPos);
 
     _popup.setTopMost(true);

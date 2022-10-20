@@ -56,7 +56,6 @@ class ScrollEvent;
 class KeyEvent;
 
 class ScreenImpl : public Visual
-                 , public Responder
                  , public WindowManager
                  , public Connectable
 {
@@ -97,10 +96,6 @@ class ScreenImpl : public Visual
     protected:
         virtual Responder* onNextResponder();
 
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
-
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -113,14 +108,25 @@ class ScreenImpl : public Visual
     // Visual
     //
     protected:
+        virtual Visual* onGetParent() const;
+
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
         virtual void onEvent(const Event& ev);
 
         virtual void onSetCapture(bool capture);
+
+        virtual void onSetCapture(Visual& target, bool capture);
 
     //
     // WindowManager
     //
     protected:
+        virtual Visual& onGetVisual()
+        { return *this; }
+
         virtual WindowImpl* onCreateWindow(const WindowType& type);
 
         virtual void onAttach(Window& w);
@@ -135,12 +141,6 @@ class ScreenImpl : public Visual
                                        const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromWindow(const Window& w, 
-                                         const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onToScreen(const Window& w, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Window& w, 
                                          const Gfx::PointF& pos) const;
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
@@ -163,11 +163,9 @@ class ScreenImpl : public Visual
 
         virtual void onEnter(Window& w, Visual& v);
 
-        virtual void onSetCapture(Window& w, Visual& target, bool capture);
+        
 
         virtual void onSetTransient(Window& w, bool transient);
-
-        virtual bool onIsDescendantOf(const Window& widget, Visual& top) const;
 
     //
     // scaling

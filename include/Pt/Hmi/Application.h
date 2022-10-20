@@ -121,7 +121,7 @@ class PT_HMI_API Application : public Pt::System::Application
         Visual* capture() const;
 
     protected:
-        void onSetCapture(Window& w, Visual& target, bool capture);
+        void onSetCapture(Visual& target, bool capture);
 
         void onSetTransient(Window& w, bool transient);
 

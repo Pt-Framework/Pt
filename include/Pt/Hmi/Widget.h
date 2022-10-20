@@ -68,7 +68,6 @@ class Sheet;
 
 class PT_HMI_API Widget : public View
                         , public Visual
-                        , public Responder
                         , public Pt::Connectable
 {
     friend class Sheet;
@@ -303,11 +302,13 @@ class PT_HMI_API Widget : public View
     // Visual
     //
     protected:
+        virtual Visual* onGetParent() const;
+
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
         virtual void onEvent(const Pt::Event& ev);
-
-        virtual void onSetCapture(bool capture);
-
-        bool onIsDescendantOf(Visual& v) const;
 
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);
@@ -362,10 +363,6 @@ class PT_HMI_API Widget : public View
     protected:
         virtual Responder* onNextResponder();
 
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
-
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -382,16 +379,12 @@ class PT_HMI_API Widget : public View
     // View
     //
     protected:
+        virtual Visual& onGetVisual();
+
         virtual Gfx::PointF onToWidget(const Widget& widget, 
                                        const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
-                                         const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onToScreen(const Widget& widget, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Widget& widget, 
                                          const Gfx::PointF& pos) const;
 
         virtual void onAttach(Widget& widget);
@@ -419,11 +412,6 @@ class PT_HMI_API Widget : public View
         virtual void onRaise(Widget& w);
 
         virtual void onEnter(Widget& widget, Visual& v);
-
-        virtual void onSetCapture(Widget& widget, Visual& target, bool capture);
-
-        virtual bool onIsDescendantOf(const Widget& widget, Visual& top) const;
-
 
     private:
         Pt::Signal<const Pt::Event&> _eventReceived;

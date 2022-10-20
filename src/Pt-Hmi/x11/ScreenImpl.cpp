@@ -134,18 +134,6 @@ Responder* ScreenImpl::onNextResponder()
     return _nextResponder;
 }
 
-
-Gfx::PointF ScreenImpl::onToScreen(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
-
-Gfx::PointF ScreenImpl::onFromScreen(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////

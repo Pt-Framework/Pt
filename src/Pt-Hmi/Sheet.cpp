@@ -185,6 +185,33 @@ Widget* Sheet::findWidget(Pt::uint64_t vid)
 }
 
 
+Visual* Sheet::onGetParent() const
+{
+    if( ! _parent )
+        return 0;
+
+    return &_parent->visual();
+}
+
+
+Gfx::PointF Sheet::onToParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onFromSheet(*this, pos);
+}
+
+
+Gfx::PointF Sheet::onFromParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onToSheet(*this, pos);
+}
+
+
 void Sheet::onEvent(const Pt::Event& ev)
 {
     _eventReceived.send(ev);
@@ -200,24 +227,6 @@ void Sheet::setNextResponder(Responder* r)
 Responder* Sheet::onNextResponder()
 {
     return _nextResponder;
-}
-
-
-Gfx::PointF Sheet::onToScreen(const Gfx::PointF& pos) const
-{
-    if(_parent)
-        return _parent->onToScreen(*this, pos);
-
-    return pos;
-}
-
-
-Gfx::PointF Sheet::onFromScreen(const Gfx::PointF& pos) const
-{
-    if(_parent)
-        return _parent->onFromScreen(*this, pos);
-
-    return pos;
 }
 
 
@@ -243,19 +252,9 @@ Gfx::PointF Sheet::onFromWidget(const Widget& widget, const Gfx::PointF& pos) co
 }
 
 
-Gfx::PointF Sheet::onToScreen(const Widget& widget, 
-                              const Gfx::PointF& pos) const
+Visual& Sheet::onGetVisual()
 {
-    Gfx::PointF p = onFromWidget(widget, pos);
-    return toScreen(p);
-}
-
-
-Gfx::PointF Sheet::onFromScreen(const Widget& widget, 
-                                const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = fromScreen(pos);
-    return onToWidget(widget, p);
+    return *this;
 }
 
 
@@ -857,76 +856,12 @@ void Sheet::onSetMnemonic(Widget& w, const Char* ch)
 }
 
 
-//void Sheet::onSetCapture(bool capture)
-//{
-//    if(_parent)
-//        _parent->onSetCapture(*this, capture);
-//
-//    if( ! capture )
-//    {
-//        if(_capture)
-//            _capture->setCapture(false);
-//    }
-//}
-//
-//
-//void Sheet::onSetCapture(Widget& widget, bool capture)
-//{
-//    if(capture)
-//    {
-//        if(_capture && _capture != &widget)
-//            _capture->setCapture(false);
-//
-//        _capture = &widget;
-//    }
-//    else
-//    {
-//        if(_capture == &widget)
-//        {
-//            _capture = 0;
-//        }
-//    }
-//}
-
-
-void Sheet::onSetCapture(bool capture)
-{
-    if(_parent)
-        _parent->onSetCapture(*this, *this, capture);
-}
-
-
-void Sheet::onSetCapture(Widget& widget, Visual& target, bool capture)
-{
-    if(_parent)
-        _parent->onSetCapture(*this, target, capture);
-}
-
-
-bool Sheet::onIsDescendantOf(Visual& top) const
-{
-    if( _parent && _parent->onIsDescendantOf(*this, top) )
-        return true;
-
-    return false;
-}
-
-
-bool Sheet::onIsDescendantOf(const Widget& widget, Visual& top) const
-{
-    if(this == &top)
-        return true;
-
-    return isDescendantOf(top);
-}
-
-
 void Sheet::onProcessMouseEvent(const MouseEvent& ev)
 {
     if( ! acceptsInput() )
         return;
 
-    Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     if(_mainWidget && 
        _mainWidget->geometry().contains(pos) && 
@@ -973,7 +908,7 @@ void Sheet::onProcessTouchEvent(const TouchEvent& ev)
         return;
     }
 
-    Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     //
     // hit test

@@ -202,6 +202,12 @@ void Widget::setSheet(Sheet* sheet)
 }
 
 
+Visual& Widget::onGetVisual()
+{
+    return *this;
+}
+
+
 void Widget::onAttach(Widget& widget)
 {
     _children.push_back(&widget);
@@ -334,24 +340,6 @@ Widget* Widget::findWidget(const std::string& name)
 }
 
 
-Gfx::PointF Widget::onToScreen(const Gfx::PointF& pos) const
-{
-    if(_parent)
-        return _parent->onToScreen(*this, pos);
-
-    return pos;
-}
-
-
-Gfx::PointF Widget::onFromScreen(const Gfx::PointF& pos) const
-{
-    if(_parent)
-        return _parent->onFromScreen(*this, pos);
-
-    return pos;
-}
-
-
 Gfx::PointF Widget::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
     const View* parentView = widget.parent();
@@ -371,22 +359,6 @@ Gfx::PointF Widget::onFromWidget(const Widget& widget, const Gfx::PointF& pos) c
         return pos + widget.position();
 
     return pos + parentView->onFromWidget(widget, pos);
-}
-
-
-Gfx::PointF Widget::onToScreen(const Widget& widget, 
-                               const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = fromWidget(widget, pos);
-    return toScreen(p);
-}
-
-
-Gfx::PointF Widget::onFromScreen(const Widget& widget, 
-                                 const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = fromScreen(pos);
-    return toWidget(widget, p);
 }
 
 
@@ -1335,6 +1307,33 @@ Pt::Signal<const Pt::Event&>& Widget::eventReceived()
 }
 
 
+Visual* Widget::onGetParent() const
+{
+    if( ! _parent )
+        return 0;
+
+    return &_parent->visual();
+}
+
+
+Gfx::PointF Widget::onToParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onFromWidget(*this, pos);
+}
+
+
+Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onToWidget(*this, pos);
+}
+
+
 void Widget::onEvent(const Pt::Event& ev)
 {
     _eventReceived.send(ev);
@@ -1344,73 +1343,6 @@ void Widget::onEvent(const Pt::Event& ev)
 Responder* Widget::onNextResponder()
 {
     return _nextResponder;
-}
-
-
-//void Widget::onSetCapture(bool capture)
-//{
-//    if(_parent)
-//        _parent->onSetCapture(*this, capture);
-//
-//    if( ! capture )
-//    {
-//        if(_capture)
-//            _capture->setCapture(false);
-//    }
-//}
-
-
-bool Widget::onIsDescendantOf(Visual& top) const
-{
-    if( _parent && _parent->onIsDescendantOf(*this, top) )
-        return true;
-
-    return false;
-}
-
-
-bool Widget::onIsDescendantOf(const Widget& widget, Visual& top) const
-{
-    if(this == &top)
-        return true;
-
-    return isDescendantOf(top);
-}
-
-
-//void Widget::onSetCapture(Widget& widget, bool capture)
-//{
-//    if(capture)
-//    {
-//        if(_capture && _capture != &widget)
-//            _capture->setCapture(false);
-//
-//        _capture = &widget;
-//    }
-//    else
-//    {
-//        if(_capture == &widget)
-//        {
-//            _capture = 0;
-//        }
-//    }
-//}
-
-
-void Widget::onSetCapture(bool capture)
-{
-    if(_parent)
-    {
-        _parent->onSetCapture(*this, *this, capture);
-        _isCapture = capture;
-    }
-}
-
-
-void Widget::onSetCapture(Widget& widget, Visual& target, bool capture)
-{
-    if(_parent)
-        _parent->onSetCapture(*this, target, capture);
 }
 
 
@@ -1432,13 +1364,16 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
     if(_isCapture)
     {
         if( ev.isRelease() )
+        {
             setCapture(false);
+            _isCapture = false;
+        }
     }
 
     //
     // hit test
     // 
-    Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     std::vector<Widget*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
@@ -1463,7 +1398,10 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
     // start capture on press
     //
     if( ev.isPress() )
+    {
         setCapture(true);
+        _isCapture = true;
+    }
 
     //
     // handle event
@@ -1501,7 +1439,7 @@ void Widget::onProcessTouchEvent(const TouchEvent& ev)
         return;
     }
 
-    Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     //
     // hit test

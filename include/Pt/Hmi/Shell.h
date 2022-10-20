@@ -97,6 +97,9 @@ class PT_HMI_API Shell : public Widget
     // WindowManager
     //
     protected:
+        virtual Visual& onGetVisual()
+        { return *this; }
+
         virtual WindowImpl* onCreateWindow(const WindowType& type);
 
         virtual void onAttach(Window& w);
@@ -111,12 +114,6 @@ class PT_HMI_API Shell : public Widget
                                        const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromWindow(const Window& w, 
-                                         const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onToScreen(const Window& w, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Window& w, 
                                          const Gfx::PointF& pos) const;
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
@@ -139,15 +136,13 @@ class PT_HMI_API Shell : public Widget
 
         virtual void onEnter(Window& w, Visual& v);
 
-        virtual void onSetCapture(Window& w, Visual& target, bool capture);
-
-        virtual bool onIsDescendantOf(const Window& widget, Visual& top) const;
-
     //
     // Visual
     //
     protected:
        virtual void onSetCapture(bool capture);
+
+       virtual void onSetCapture(Visual& target, bool capture);
 
     //
     // Widget

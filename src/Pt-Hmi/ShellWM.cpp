@@ -190,24 +190,6 @@ Responder* ShellWM::onNextResponder()
 }
 
 
-Gfx::PointF ShellWM::onToScreen(const Gfx::PointF& pos) const
-{
-    if(_parent)
-        return _parent->onToScreen(*this, pos);
-
-    return pos;
-}
-
-
-Gfx::PointF ShellWM::onFromScreen(const Gfx::PointF& pos) const
-{
-    if(_parent)
-        return _parent->onFromScreen(*this, pos);
-
-    return pos;
-}
-
-
 WindowFrame* ShellWM::activeWindow()
 {
     return _activeWindow;
@@ -356,22 +338,6 @@ Gfx::PointF ShellWM::onFromWindow(const Window& w,
         return pos;
 
     return w.position() + frame->toFrame(pos);
-}
-
-
-Gfx::PointF ShellWM::onToScreen(const Window& w, 
-                                const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = onFromWindow(w, pos);
-    return toScreen(p);
-}
-
-
-Gfx::PointF ShellWM::onFromScreen(const Window& w, 
-                                  const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = fromScreen(pos);
-    return onToWindow(w, p);
 }
 
 
@@ -761,27 +727,9 @@ void ShellWM::onSetCapture(bool capture)
 }
 
 
-void ShellWM::onSetCapture(Window& w, Visual& target, bool capture)
+void ShellWM::onSetCapture(Visual& target, bool capture)
 {
-    _parent->onSetCapture(*this, target, capture);
-}
-
-
-bool ShellWM::onIsDescendantOf(Visual& top) const
-{
-    if( _parent && _parent->onIsDescendantOf(*this, top) )
-        return true;
-
-    return false;
-}
-
-
-bool ShellWM::onIsDescendantOf(const Window& w, Visual& top) const
-{    
-    if(this == &top)
-        return true;
-
-    return isDescendantOf(top);
+    _parent->onSetCapture(target, capture);
 }
 
 

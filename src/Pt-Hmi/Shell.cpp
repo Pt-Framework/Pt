@@ -201,6 +201,9 @@ void Shell::setContent(Widget* widget)
     }
 }
 
+///////////////////////////////////////////////////////////////////////
+// Widget
+///////////////////////////////////////////////////////////////////////
 
 void Shell::onRemoveWidget(Widget& w)
 {
@@ -209,6 +212,28 @@ void Shell::onRemoveWidget(Widget& w)
     if(&w == _content)
         _content = 0;
 }
+
+///////////////////////////////////////////////////////////////////////
+// Visual
+///////////////////////////////////////////////////////////////////////
+
+void Shell::onSetCapture(bool capture)
+{
+    Widget::onSetCapture(capture);
+
+    if( ! capture )
+    {
+        if(_grabbedFrame)
+            _grabbedFrame = 0;
+    }
+}
+
+
+void Shell::onSetCapture(Visual& target, bool capture)
+{
+    Widget::onSetCapture(target, capture);
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 // WindowManager
@@ -306,22 +331,6 @@ Gfx::PointF Shell::onFromWindow(const Window& w,
         return pos;
 
     return w.position() + frame->toFrame(pos);
-}
-
-
-Gfx::PointF Shell::onToScreen(const Window& w, 
-                                      const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = onFromWindow(w, pos);
-    return toScreen(p);
-}
-
-
-Gfx::PointF Shell::onFromScreen(const Window& w, 
-                                        const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = fromScreen(pos);
-    return onToWindow(w, p);
 }
 
 
@@ -730,33 +739,6 @@ void Shell::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
-void Shell::onSetCapture(bool capture)
-{
-    Widget::onSetCapture(capture);
-
-    if( ! capture )
-    {
-        if(_grabbedFrame)
-            _grabbedFrame = 0;
-    }
-}
-
-
-void Shell::onSetCapture(Window& w, Visual& target, bool capture)
-{
-    Widget::onSetCapture(*this, target, capture);
-}
-
-
-bool Shell::onIsDescendantOf(const Window& w, Visual& top) const
-{    
-    if(this == &top)
-        return true;
-
-    return isDescendantOf(top);
-}
-
-
 void Shell::onProcessMouseEvent(const MouseEvent& ev)
 {
     if( ! acceptsInput() )
@@ -778,7 +760,7 @@ void Shell::onProcessMouseEvent(const MouseEvent& ev)
         return;
     }
 
-    Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     //
     // hit test
@@ -881,7 +863,7 @@ void Shell::onProcessTouchEvent(const TouchEvent& ev)
         return;
     }
 
-    Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     //
     // hit test

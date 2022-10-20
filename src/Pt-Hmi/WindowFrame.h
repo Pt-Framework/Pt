@@ -208,9 +208,28 @@ class WindowFrame : public Visual
         void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
-        virtual void onEvent(const Pt::Event& ev);
+        Responder* onNextResponder()
+        {
+            return 0;
+        }
+        
+    protected:
+        Visual* onGetParent() const
+        {
+            return 0;
+        }
 
-        virtual void onSetCapture(bool capture);
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const
+        { 
+            return pos; 
+        }
+        
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const
+        { 
+            return pos; 
+        }
+
+        virtual void onEvent(const Pt::Event& ev);
 
     protected:
         bool onMouseEvent(const MouseEvent& mev);
@@ -249,7 +268,7 @@ class WindowFrame : public Visual
         bool checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
     private:
-        Shell*       _wm;
+        Shell*         _wm;
         Window*        _window;
         double         _borderWidth;
         double         _titleHeight;

@@ -529,7 +529,7 @@ bool MainWindow::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isRelease(MouseEvent::Right) )
     {
-        Gfx::PointF menuPos = this->toScreen( ev.position() );
+        Gfx::PointF menuPos = this->toGlobal( ev.position() );
 
         SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
         _menu.resize(policy);

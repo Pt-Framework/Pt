@@ -52,7 +52,6 @@ class RescaleEvent;
 /** @brief Screen of a display.
 */
 class PT_HMI_API Screen : public Visual
-                        , public Responder
                         , public Pt::Connectable
 {
     public:
@@ -97,10 +96,6 @@ class PT_HMI_API Screen : public Visual
     protected:
         Responder* onNextResponder();
 
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
-
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -113,10 +108,21 @@ class PT_HMI_API Screen : public Visual
     // Visual
     //
     protected:
+        virtual Visual* onGetParent() const;
+
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onToGlobal(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromGlobal(const Gfx::PointF& pos) const;
+
         virtual void onEvent( const Event& ev );
 
         virtual void onSetCapture(bool capture);
 
+        virtual void onSetCapture(Visual& target, bool capture);
     //
     // scaling
     //

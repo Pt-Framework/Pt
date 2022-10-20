@@ -165,7 +165,6 @@ class WindowImpl
 /** @brief Window base class.
 */
 class PT_HMI_API Window : public Visual
-                        , public Responder
                         , public Form
                         , public Pt::Connectable
 {
@@ -320,10 +319,7 @@ class PT_HMI_API Window : public Visual
     protected:
         virtual Responder* onNextResponder();
 
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
-    
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
-    
+   
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent( const TouchEvent& ev );
@@ -340,16 +336,20 @@ class PT_HMI_API Window : public Visual
     // Visual
     //
     protected:
+        virtual Visual* onGetParent() const;
+
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
         virtual void onEvent(const Pt::Event& ev);
-
-        virtual void onSetCapture(bool capture);
-
-        virtual bool onIsDescendantOf(Visual& v) const;
 
     //
     // Form
     //
     protected:
+        virtual Visual& onGetVisual();
+
         virtual void onAttach(Sheet& view);
     
         virtual void onDetach(Sheet& view);
@@ -364,12 +364,6 @@ class PT_HMI_API Window : public Visual
         virtual Gfx::PointF onToSheet(const Sheet& sheet, 
                                      const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onToScreen(const Sheet& sheet, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Sheet& sheet, 
-                                         const Gfx::PointF& pos) const;
-
         virtual void onRepaint(Sheet& view, const Gfx::RectF& rect);
 
         virtual void onActivate(Sheet& w, bool active);
@@ -379,10 +373,6 @@ class PT_HMI_API Window : public Visual
         virtual void onResize(Sheet& sheet, const Gfx::SizeF& size);
 
         virtual void onEnter(Sheet& sheet, Visual& v);
-
-        virtual void onSetCapture(Sheet& sheet, Visual& target, bool capture);
-
-        virtual bool onIsDescendantOf(const Sheet& widget, Visual& top) const;
 
     //
     // invalidation

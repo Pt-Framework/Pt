@@ -375,7 +375,7 @@ Visual* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
     if( ! isVisible() )
         return 0;
 
-    Gfx::PointF pos = this->fromScreen(screenPos);
+    Gfx::PointF pos = this->fromGlobal(screenPos);
 
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
     if( rect.contains( pos ) )
@@ -422,7 +422,7 @@ void MenuBar::onItemClicked(MenuBarItem& item)
     if( ! menu.isVisible() )
     {
         Gfx::PointF menuPos( 0, item.size().height() );
-        menuPos = item.toScreen(menuPos);
+        menuPos = item.toGlobal(menuPos);
         menu.move(menuPos);
 
         SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);

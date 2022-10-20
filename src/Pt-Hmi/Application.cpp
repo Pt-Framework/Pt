@@ -358,7 +358,7 @@ Visual* Application::capture() const
 }
 
 
-void Application::onSetCapture(Window& w, Visual& target, bool capture)
+void Application::onSetCapture(Visual& target, bool capture)
 {
     std::list<Visual*>::iterator it = std::find(_capture.begin(), 
                                                 _capture.end(), &target);
@@ -437,7 +437,7 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
             Window* popup = *pit;
 
             // TODO: hit test
-            Gfx::PointF popupPos = popup->fromScreen(screenPos);
+            Gfx::PointF popupPos = popup->fromGlobal(screenPos);
             Gfx::RectF popupRect( popup->size() );
             if( popupRect.contains(popupPos) )
             {
@@ -448,7 +448,7 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
             Widget* owner = dynamic_cast<Widget*>( popup->peer() );
             if(owner)
             {
-                Gfx::PointF pos = owner->fromScreen(screenPos);
+                Gfx::PointF pos = owner->fromGlobal(screenPos);
                 Gfx::RectF rect( owner->size() );
                 if( rect.contains(pos) )
                 {
@@ -463,7 +463,7 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
     if(ime)
     {
         // TODO: hit test
-        Gfx::PointF pos = ime->fromScreen(screenPos);
+        Gfx::PointF pos = ime->fromGlobal(screenPos);
         Gfx::RectF rect( ime->size() );
         bool imeHit = rect.contains(pos);
         
@@ -526,7 +526,7 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     if(ime)
     {
         // TODO: hit test
-        Gfx::PointF pos = ime->fromScreen(screenPos);
+        Gfx::PointF pos = ime->fromGlobal(screenPos);
         Gfx::RectF rect( ime->size() );
         if( rect.contains(pos) )
         {
@@ -588,7 +588,7 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
-        Gfx::PointF pos = ime->fromScreen(screenPos);
+        Gfx::PointF pos = ime->fromGlobal(screenPos);
         Gfx::RectF rect( ime->size() );
         if( rect.contains(pos) )
         {

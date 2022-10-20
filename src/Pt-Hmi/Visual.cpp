@@ -57,7 +57,7 @@ Responder::~Responder()
 
 bool Responder::mouseEvent(const MouseEvent& ev)
 {
-    Gfx::PointF localPos = onFromScreen( ev.position() );
+    Gfx::PointF localPos = onFromGlobal( ev.position() );
 
     MouseEvent localEv(ev);
     localEv.setPosition(localPos);
@@ -88,7 +88,7 @@ bool Responder::onMouseEvent(const MouseEvent& ev)
 
 void Responder::touchEvent(const TouchEvent& ev)
 {
-    Gfx::PointF localPos = onFromScreen( ev.position() );
+    Gfx::PointF localPos = onFromGlobal( ev.position() );
 
     TouchEvent localEv(ev);
     localEv.setPosition(localPos);
@@ -196,6 +196,63 @@ Visual::~Visual()
 {
     _closed.send();
     Application::instance().unregisterVisual(*this);
+}
+
+
+bool Visual::isDescendantOf(const Visual& v) const
+{
+    const Visual* parent = this->parent();
+    if( ! parent )
+        return false;
+
+    if( parent == &v )
+        return true;
+
+    return parent->isDescendantOf(v);
+}
+
+
+bool Visual::isAncestorOf(const Visual& v) const
+{
+    return v.isDescendantOf(*this);
+}
+
+
+Gfx::PointF Visual::onToGlobal(const Gfx::PointF& pos) const
+{
+    const Visual* parent = this->parent();
+    if( ! parent )
+        return pos;
+
+      Gfx::PointF parentPos = toParent(pos);
+      return parent->toGlobal(parentPos);
+}
+
+
+Gfx::PointF Visual::onFromGlobal(const Gfx::PointF& pos) const
+{
+    const Visual* parent = this->parent();
+    if( ! parent )
+        return pos;
+
+    Gfx::PointF parentPos = parent->fromGlobal(pos);
+    return fromParent(parentPos);
+}
+
+
+void Visual::onSetCapture(bool capture)
+{
+    Visual* parent = onGetParent();
+    if(parent)
+        parent->onSetCapture(*this, capture);
+}
+
+
+void Visual::onSetCapture(Visual& target, bool capture)
+{
+    Visual* parent = onGetParent();
+    if(parent)
+        parent->onSetCapture(target, capture);
 }
 
 ///////////////////////////////////////////////////////////////////////

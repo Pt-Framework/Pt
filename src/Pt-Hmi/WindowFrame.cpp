@@ -628,13 +628,6 @@ void WindowFrame::onLayout()
 
 void WindowFrame::onEvent(const Pt::Event& ev)
 {
-
-}
-
-
-void WindowFrame::onSetCapture(bool capture)
-{
-    // TODO: implement WindowFrame as first-class Visual
 }
 
 
@@ -667,7 +660,7 @@ bool WindowFrame::mouseEvent(const MouseEvent& mev)
 {
     bool r = onMouseEvent(mev);
     
-    Gfx::PointF pos =  _wm->fromScreen( mev.position() );
+    Gfx::PointF pos =  _wm->fromGlobal( mev.position() );
     _lastPointer = pos;
     
     return r;
@@ -678,7 +671,7 @@ bool WindowFrame::touchEvent(const TouchEvent& tev)
 {
     bool r = onTouchEvent(tev);
 
-    Gfx::PointF pos =  _window->fromScreen( tev.position() );
+    Gfx::PointF pos =  _window->fromGlobal( tev.position() );
     _lastPointer = pos;
 
     return r;
@@ -687,7 +680,7 @@ bool WindowFrame::touchEvent(const TouchEvent& tev)
 
 bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 {
-    Gfx::PointF pos =  _wm->fromScreen( mev.position() );
+    Gfx::PointF pos =  _wm->fromGlobal( mev.position() );
 
     Window* window = checkWindow(pos);
     if(window)
@@ -736,7 +729,7 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 
 bool WindowFrame::onTouchEvent(const TouchEvent& tev)
 {
-    Gfx::PointF pos =  _wm->fromScreen( tev.position() );
+    Gfx::PointF pos =  _wm->fromGlobal( tev.position() );
 
     Window* window = checkWindow( tev.position() );
     if(window)

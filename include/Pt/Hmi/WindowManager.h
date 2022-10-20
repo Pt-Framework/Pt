@@ -51,7 +51,26 @@ class WindowManager
         virtual ~WindowManager()
         {}
 
+        Visual& visual()
+        {
+            return onGetVisual();
+        }
+
+        Gfx::PointF toWindow(const Window& w, 
+                             const Gfx::PointF& pos) const
+        { 
+            return onToWindow(w, pos); 
+        }
+
+        Gfx::PointF fromWindow(const Window& w,
+                               const Gfx::PointF& pos) const
+        { 
+            return onFromWindow(w, pos); 
+        }
+
     protected:
+        virtual Visual& onGetVisual() = 0;
+
         virtual WindowImpl* onCreateWindow(const WindowType& type) = 0;
 
         virtual void onAttach(Window& w) = 0;
@@ -62,16 +81,10 @@ class WindowManager
 
         virtual void onRelease(Window& w) = 0;
 
-        //virtual Gfx::PointF onToWindow(const Window& w, 
-        //                               const Gfx::PointF& pos) const = 0;
-
-        //virtual Gfx::PointF onFromWindow(const Window& w, 
-        //                                 const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onToScreen(const Window& w, 
+        virtual Gfx::PointF onToWindow(const Window& w, 
                                        const Gfx::PointF& pos) const = 0;
 
-        virtual Gfx::PointF onFromScreen(const Window& w, 
+        virtual Gfx::PointF onFromWindow(const Window& w, 
                                          const Gfx::PointF& pos) const = 0;
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
@@ -97,10 +110,6 @@ class WindowManager
         virtual void onSetTransient(Window& w, bool transient)
         {
         }
-
-        virtual void onSetCapture(Window& w, Visual& target, bool capture) = 0;
-
-        virtual bool onIsDescendantOf(const Window& w, Visual& top) const = 0;
 };
 
 } // namespace

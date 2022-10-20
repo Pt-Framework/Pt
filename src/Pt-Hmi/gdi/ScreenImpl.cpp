@@ -146,21 +146,33 @@ Responder* ScreenImpl::onNextResponder()
     return _nextResponder;
 }
 
-
-Gfx::PointF ScreenImpl::onToScreen(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
-
-Gfx::PointF ScreenImpl::onFromScreen(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
+
+Visual* ScreenImpl::onGetParent() const
+{
+    return _parent;
+}
+
+
+Gfx::PointF ScreenImpl::onToParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->toParent(pos);
+}
+
+
+Gfx::PointF ScreenImpl::onFromParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->fromParent(pos);
+}
+
 
 void ScreenImpl::onEvent(const Event& ev)
 {
@@ -168,24 +180,19 @@ void ScreenImpl::onEvent(const Event& ev)
 }
 
 
-//void ScreenImpl::onSetCapture(bool capture)
-//{
-//    if( ! capture )
-//    {
-//      std::vector<Window*>::iterator wit;
-//      for(wit = _windows.begin(); wit != _windows.end(); ++wit)
-//      {
-//          Window* window = *wit;
-//          window->setCapture(false);
-//      }
-//    }
-//}
-
-
 void ScreenImpl::onSetCapture(bool capture)
 {
+    Visual::onSetCapture(capture);
 }
 
+
+void ScreenImpl::onSetCapture(Visual& target, bool capture)
+{
+    Visual::onSetCapture(target, capture);
+
+    Visual* visual = Application::instance().capture();
+    setCaptureWindow(visual);
+}
 
 ///////////////////////////////////////////////////////////////////////
 // WindowManager
@@ -249,22 +256,6 @@ Gfx::PointF ScreenImpl::onToWindow(const Window& w,
     Gfx::PointF windowPos = impl->fromScreen(physicalPos);
     Gfx::PointF logicalPos = w.surface().toLogical(windowPos);
     return logicalPos;
-}
-
-
-Gfx::PointF ScreenImpl::onToScreen(const Window& w, 
-                                   const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = onFromWindow(w, pos);
-    return toScreen(p);
-}
-
-
-Gfx::PointF ScreenImpl::onFromScreen(const Window& w, 
-                                     const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = fromScreen(pos);
-    return onToWindow(w, p);
 }
 
 
@@ -380,27 +371,14 @@ void ScreenImpl::setCaptureWindow(Visual* capture)
 }
 
 
-void ScreenImpl::onSetCapture(Window& w, Visual& target, bool capture)
-{
-    Application::instance().onSetCapture(w, target, capture);
-
-    Visual* visual = Application::instance().capture();
-    setCaptureWindow(visual);
-}
-
-
 void ScreenImpl::onSetTransient(Window& w, bool transient)
 {
+    // TODO: call Screen::onSetTransient()
+
     Application::instance().onSetTransient(w, transient);
 
     Visual* visual = Application::instance().capture();
     setCaptureWindow(visual);
-}
-
-
-bool ScreenImpl::onIsDescendantOf(const Window& widget, Visual& top) const
-{
-    return this == &top;
 }
 
 ///////////////////////////////////////////////////////////////////////

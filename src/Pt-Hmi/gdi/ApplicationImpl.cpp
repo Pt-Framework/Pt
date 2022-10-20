@@ -285,7 +285,7 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
         return;
 
     // screen to window coordinates
-    Gfx::PointF pos = w->fromScreen( ev.position() );
+    Gfx::PointF pos = w->fromGlobal( ev.position() );
 
     MouseEvent mev = ev;
     mev.setPosition(pos);
@@ -773,7 +773,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     Gfx::PointF pos(xPos, yPos);
     pos /= w.scaleFactor();
     
-    _mouseEvent.setPosition( w.toScreen(pos) );
+    _mouseEvent.setPosition( w.toGlobal(pos) );
     _mouseEvent.setVisual(&w);
 
     //if( GetCapture() != NULL )

@@ -58,9 +58,17 @@ class Sheet;
 class PT_HMI_API Form
 {
     friend class Sheet;
+    
+    protected:
+        Form();
 
     public:
         virtual ~Form();
+
+        Visual& visual()
+        {
+            return onGetVisual();
+        }
 
 
         Sheet* sheet();
@@ -90,7 +98,7 @@ class PT_HMI_API Form
         }
 
     protected:
-        Form();
+        virtual Visual& onGetVisual() = 0;
 
         virtual void onAttach(Sheet& sheet) = 0;
     
@@ -106,12 +114,6 @@ class PT_HMI_API Form
         virtual Gfx::PointF onToSheet(const Sheet& sheet, 
                                       const Gfx::PointF& pos) const = 0;
 
-        virtual Gfx::PointF onToScreen(const Sheet& sheet, 
-                                       const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onFromScreen(const Sheet& sheet, 
-                                         const Gfx::PointF& pos) const = 0;
-
         virtual void onRepaint(Sheet& sheet, const Gfx::RectF& rect) = 0;
 
         virtual void onActivate(Sheet& w, bool active) = 0;
@@ -121,10 +123,6 @@ class PT_HMI_API Form
         virtual void onResize(Sheet& sheet, const Gfx::SizeF& size) = 0;
 
         virtual void onEnter(Sheet& sheet, Visual& v) = 0;
-
-        virtual void onSetCapture(Sheet& sheet, Visual& target, bool capture) = 0;
-
-        virtual bool onIsDescendantOf(const Sheet& widget, Visual& top) const = 0;
 
     private:
         Sheet* _sheet;
