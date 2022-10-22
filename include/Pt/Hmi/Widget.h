@@ -84,6 +84,8 @@ class PT_HMI_API Widget : public View
 
         void setParent(View* parent);
 
+        void unparent();
+
         void setSheet(Sheet* sheet);
 
         Gfx::PaintSurface& surface();
@@ -310,6 +312,8 @@ class PT_HMI_API Widget : public View
 
         virtual void onEvent(const Pt::Event& ev);
 
+        virtual void onRelease();
+
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);
 
@@ -410,8 +414,6 @@ class PT_HMI_API Widget : public View
         virtual void onResize(Widget& widget, const Gfx::SizeF& size);
 
         virtual void onRaise(Widget& w);
-
-        virtual void onEnter(Widget& widget, Visual& v);
 
     private:
         Pt::Signal<const Pt::Event&> _eventReceived;

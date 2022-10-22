@@ -49,7 +49,6 @@ class Sheet;
 //  - enter leave events - DONE
 //  - capture - DONE
 //  - focus - DONE
-//  - onEnter() - DONE
 //  - rescaling - DONE
 //  - input method - DONE
 //  - mouse cursor - DONE
@@ -121,8 +120,6 @@ class PT_HMI_API Form
         virtual void onMove(Sheet& sheet, const Gfx::PointF& pos) = 0;
 
         virtual void onResize(Sheet& sheet, const Gfx::SizeF& size) = 0;
-
-        virtual void onEnter(Sheet& sheet, Visual& v) = 0;
 
     private:
         Sheet* _sheet;

@@ -45,7 +45,6 @@ class WindowFrame;
 class Shell;
 
 class ShellWM : public Visual
-              , public Responder
               , public WindowManager
               , public Connectable
 {
@@ -112,8 +111,6 @@ class ShellWM : public Visual
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onSetCapture(bool capture);
-        
-        virtual void onSetCapture(Visual& target, bool capture);
     
     //
     // Responder
@@ -158,8 +155,6 @@ class ShellWM : public Visual
         virtual void onStateChanged(Window& w); 
 
         virtual void onClosing(Window& w);
-
-        virtual void onEnter(Window& w, Visual& v);
 
     //
     // Implementation

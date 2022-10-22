@@ -104,12 +104,6 @@ class WindowManager
         virtual void onStateChanged(Window& w) = 0; 
 
         virtual void onClosing(Window& w) = 0;
-
-        virtual void onEnter(Window& w, Visual& v) = 0;
-
-        virtual void onSetTransient(Window& w, bool transient)
-        {
-        }
 };
 
 } // namespace

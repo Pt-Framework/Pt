@@ -85,7 +85,7 @@ class PT_HMI_API Screen : public Visual
         
         void setPointer(Visual* visual);
 
-        void unsetPointer(Visual& visual);
+        void setPointer(Visual& visual, bool isPointer);
 
     public:
         ScreenImpl* impl();
@@ -120,9 +120,6 @@ class PT_HMI_API Screen : public Visual
 
         virtual void onEvent( const Event& ev );
 
-        virtual void onSetCapture(bool capture);
-
-        virtual void onSetCapture(Visual& target, bool capture);
     //
     // scaling
     //

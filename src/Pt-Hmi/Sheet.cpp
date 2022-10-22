@@ -90,12 +90,7 @@ void Sheet::setParent(Form* parent)
     if(_parent == parent)
         return;
 
-    if(_parent)
-    {
-        _parent->onRelease(*this);
-        _parent->onDetach(*this);
-        _parent = 0;
-    }
+    unparent();
 
     if(parent)
     {
@@ -107,6 +102,29 @@ void Sheet::setParent(Form* parent)
         _parent->onMove(*this, _requestedGeometry.topLeft());
         _parent->onResize(*this, _requestedGeometry.size());
     }
+}
+
+
+void Sheet::unparent()
+{
+    if( ! _parent)
+        return;
+
+    release();
+
+    _parent->onRelease(*this);
+    _parent->onDetach(*this);
+    _parent = 0;
+}
+
+
+void Sheet::onRelease()
+{
+    setPointer(false);
+    setCapture(false);
+
+    if(_mainWidget)
+        _mainWidget->release();
 }
 
 
@@ -325,13 +343,11 @@ void Sheet::onRegister(Widget& widget)
 
 void Sheet::onDeregister(Widget& widget)
 {
-  if(_active == &widget)
-      _active = 0;
+    if(_active == &widget)
+        _active = 0;
     
     if(_pointer == &widget)
         _pointer = 0;
-
-    Application::instance().screen().unsetPointer(widget);
 
     //
     // focus handling
@@ -720,13 +736,6 @@ void Sheet::onRaise(Widget& widget)
 }
 
 
-void Sheet::onEnter(Widget& widget, Visual& v)
-{
-    if(_parent)
-        _parent->onEnter(*this, v);
-}
-
-
 Widget* Sheet::focusWidget()
 {
     return _focusWidget;
@@ -874,8 +883,7 @@ void Sheet::onProcessMouseEvent(const MouseEvent& ev)
     //
     // process event
     // 
-    if(_parent)
-        _parent->onEnter(*this, *this);
+    setPointer(true);
     
     mouseEvent(ev);
 }
@@ -939,8 +947,7 @@ void Sheet::onProcessTouchEvent(const TouchEvent& ev)
     //
     // handle event
     // 
-    if(_parent)
-        _parent->onEnter(*this, *this);
+    setPointer(true);
 
     touchEvent(ev);
 }

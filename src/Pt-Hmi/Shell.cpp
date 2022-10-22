@@ -229,11 +229,20 @@ void Shell::onSetCapture(bool capture)
 }
 
 
-void Shell::onSetCapture(Visual& target, bool capture)
+void Shell::onRelease()
 {
-    Widget::onSetCapture(target, capture);
-}
+    Widget::onRelease();
 
+    setPointer(false);
+    setCapture(false);
+
+    std::vector<WindowFrame*>::iterator wit;
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    {
+        WindowFrame* windowFrame = *wit;
+        windowFrame->window()->release();
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////
 // WindowManager
@@ -264,8 +273,6 @@ void Shell::onDetach(Window& w)
 {
     w.setNextResponder(0);
 
-    Application::instance().screen().unsetPointer(w);
-
     std::vector<WindowFrame*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
@@ -282,8 +289,6 @@ void Shell::onDetach(Window& w)
 
             if(_topMostWindow && _topMostWindow->window() == &w)
                 _topMostWindow = 0;
-
-            Application::instance().screen().unsetPointer(**wit);
 
             delete *wit;
             _windows.erase(wit);
@@ -588,12 +593,6 @@ void Shell::onClosing(Window& w)
     Application::instance().loop().commitEvent(ev);
 }
 
-
-void Shell::onEnter(Window& w, Visual& v)
-{
-    Widget::onEnter(*this, v);
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Implementation
 ///////////////////////////////////////////////////////////////////////
@@ -811,7 +810,7 @@ void Shell::onProcessMouseEvent(const MouseEvent& ev)
                 setCapture(true);
 
                 // TODO: make WindowFrame a proper Visual to handle events
-                Widget::onEnter(*this, *windowFrame);
+                //windowFrame->setPointer(true);
             }
         }
 
@@ -918,7 +917,7 @@ void Shell::onProcessTouchEvent(const TouchEvent& ev)
                 _grabbedFrame = windowFrame;
 
             // TODO: make WindowFrame a proper Visual to handle events
-            Widget::onEnter(*this, *windowFrame);
+            //windowFrame->setPointer(true);
         }
 
         windowFrame->touchEvent(ev);

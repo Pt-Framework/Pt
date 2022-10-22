@@ -179,21 +179,6 @@ void ScreenImpl::onEvent(const Event& ev)
     _eventReceived.send(ev);
 }
 
-
-void ScreenImpl::onSetCapture(bool capture)
-{
-    Visual::onSetCapture(capture);
-}
-
-
-void ScreenImpl::onSetCapture(Visual& target, bool capture)
-{
-    Visual::onSetCapture(target, capture);
-
-    Visual* visual = Application::instance().capture();
-    setCaptureWindow(visual);
-}
-
 ///////////////////////////////////////////////////////////////////////
 // WindowManager
 ///////////////////////////////////////////////////////////////////////
@@ -340,13 +325,7 @@ void ScreenImpl::onClosing(Window& w)
 }
 
 
-void ScreenImpl::onEnter(Window& w, Visual& v)
-{
-    Application::instance().screen().setPointer(&v);
-}
-
-
-void ScreenImpl::setCaptureWindow(Visual* capture)
+void ScreenImpl::setCapture(Visual* capture)
 {
     if( ! capture )
     {
@@ -368,17 +347,6 @@ void ScreenImpl::setCaptureWindow(Visual* capture)
             return;
         }
     }
-}
-
-
-void ScreenImpl::onSetTransient(Window& w, bool transient)
-{
-    // TODO: call Screen::onSetTransient()
-
-    Application::instance().onSetTransient(w, transient);
-
-    Visual* visual = Application::instance().capture();
-    setCaptureWindow(visual);
 }
 
 ///////////////////////////////////////////////////////////////////////

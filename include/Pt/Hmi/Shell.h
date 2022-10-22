@@ -134,15 +134,13 @@ class PT_HMI_API Shell : public Widget
 
         virtual void onClosing(Window& w);
 
-        virtual void onEnter(Window& w, Visual& v);
-
     //
     // Visual
     //
     protected:
        virtual void onSetCapture(bool capture);
 
-       virtual void onSetCapture(Visual& target, bool capture);
+       virtual void onRelease();
 
     //
     // Widget

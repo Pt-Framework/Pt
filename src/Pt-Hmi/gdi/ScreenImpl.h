@@ -77,7 +77,7 @@ class ScreenImpl : public Visual
         const std::vector<Window*>& windows() const;
 
 
-        void setCaptureWindow(Visual* capture);
+        void setCapture(Visual* capture);
 
         
         const Gfx::SizeF& size() const;
@@ -115,10 +115,6 @@ class ScreenImpl : public Visual
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
         virtual void onEvent(const Event& ev);
-
-        virtual void onSetCapture(bool capture);
-
-        virtual void onSetCapture(Visual& target, bool capture);
 
     //
     // WindowManager
@@ -160,12 +156,6 @@ class ScreenImpl : public Visual
         virtual void onStateChanged(Window& w);
 
         virtual void onClosing(Window& w);
-
-        virtual void onEnter(Window& w, Visual& v);
-
-        
-
-        virtual void onSetTransient(Window& w, bool transient);
 
     //
     // scaling

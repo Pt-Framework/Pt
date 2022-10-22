@@ -154,17 +154,7 @@ void Widget::setParent(View* parent)
     if(_parent == parent)
         return;
 
-    if(_parent)
-    {
-        if( ! parent )
-            setCapture(false);
-
-        _parent->onRelease(*this);
-        _parent->onDetach(*this);
-        _parent = 0;
-        
-        onParentChanged(_parent);
-    }
+    unparent();
 
     if(parent)
     {
@@ -177,6 +167,37 @@ void Widget::setParent(View* parent)
         _parent->onShow(*this, _visible);
 
         onParentChanged(_parent);
+    }
+}
+
+
+void Widget::unparent()
+{
+    if( ! _parent )
+        return;
+
+    release();
+
+    _parent->onRelease(*this);
+    _parent->onDetach(*this);
+    _parent = 0;
+        
+    onParentChanged(0);
+}
+
+
+void Widget::onRelease()
+{
+    setPointer(false);
+
+    setCapture(false);
+    _isCapture = false;
+
+    std::vector<Widget*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Widget* widget = *it;
+        widget->release();
     }
 }
 
@@ -1346,13 +1367,6 @@ Responder* Widget::onNextResponder()
 }
 
 
-void Widget::onEnter(Widget& widget, Visual& v)
-{
-    if(_parent)
-        _parent->onEnter(*this, v);
-}
-
-
 void Widget::onProcessMouseEvent(const MouseEvent& ev)
 {
     if( ! acceptsInput() )
@@ -1391,8 +1405,8 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
     //
     // pointer enter
     //
-    if(_parent)
-        _parent->onEnter(*this, *this);
+    setPointer(true);
+
 
     //
     // start capture on press
@@ -1476,8 +1490,7 @@ void Widget::onProcessTouchEvent(const TouchEvent& ev)
     //
     // handle event
     //
-    if(_parent)
-        _parent->onEnter(*this, *this);
+    setPointer(true);
 
     touchEvent(ev);
 }

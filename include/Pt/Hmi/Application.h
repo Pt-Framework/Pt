@@ -53,8 +53,8 @@ class Cursor;
 class PT_HMI_API Application : public Pt::System::Application
 {
     friend class Visual;
+    friend class Window;
     friend class Screen;
-    friend class ScreenImpl;
 
     public:
         Application(int argc = 0, char** argv = 0);
@@ -121,6 +121,8 @@ class PT_HMI_API Application : public Pt::System::Application
         Visual* capture() const;
 
     protected:
+        void onSetPointer(Visual& v, bool isPointer);
+
         void onSetCapture(Visual& target, bool capture);
 
         void onSetTransient(Window& w, bool transient);

@@ -344,6 +344,8 @@ class PT_HMI_API Window : public Visual
 
         virtual void onEvent(const Pt::Event& ev);
 
+        virtual void onRelease();
+
     //
     // Form
     //
@@ -371,8 +373,6 @@ class PT_HMI_API Window : public Visual
         virtual void onMove(Sheet& sheet, const Gfx::PointF& pos);
 
         virtual void onResize(Sheet& sheet, const Gfx::SizeF& size);
-
-        virtual void onEnter(Sheet& sheet, Visual& v);
 
     //
     // invalidation

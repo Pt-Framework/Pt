@@ -127,38 +127,47 @@ class PT_HMI_API Visual : public Responder
             return _closed; 
         }
         
+        /** @brief Returns the ID.
+        */
         Pt::uint64_t vid() const
         {
             return _vid;
         }
 
+        /** @brief Returns the name.
+        */
+        const std::string& name() const
+        {
+            return _name;
+        }
+        
+        /** @brief Sets the name.
+        */
         void setName(const std::string& n)
         {
             _name = n;
         }
 
-        const std::string& name() const
-        {
-            return _name;
-        }
-
-        void processEvent(const Pt::Event& ev)
-        {
-            this->onEvent(ev);
-        }
-
+        /** @brief Returns the parent.
+        */
         Visual* parent()
         {
             return onGetParent();
         }
 
+        /** @brief Returns the parent.
+        */
         const Visual* parent() const
         {
             return onGetParent();
         }
 
+        /** @brief Returns true if an descendant.
+        */
         bool isDescendantOf(const Visual& v) const;
 
+        /** @brief Returns true if an ancestor.
+        */
         bool isAncestorOf(const Visual& v) const;
 
         /** @brief Converts to parent coordinate.
@@ -188,10 +197,30 @@ class PT_HMI_API Visual : public Responder
         {
             return onFromGlobal(pos);
         }
-
+        
+        /** @brief Pointer input capture.
+        */
         void setCapture(bool capture)
         {
-            this->onSetCapture(capture);
+            onSetCapture(capture);
+        }
+
+        /** @brief Pointer enter.
+        */
+        void setPointer(bool isPointer);
+
+        /** @brief Releases all.
+        */
+        void release()
+        {
+            onRelease();
+        }
+
+        /** @brief Process event.
+        */
+        void processEvent(const Pt::Event& ev)
+        {
+            this->onEvent(ev);
         }
     
     protected:
@@ -209,10 +238,9 @@ class PT_HMI_API Visual : public Responder
 
         virtual void onEvent(const Pt::Event& ev) = 0;
 
+        virtual void onRelease();
 
         virtual void onSetCapture(bool capture);
-
-        virtual void onSetCapture(Visual& target, bool capture);
 
     private:
         void setR1(void* r)
@@ -305,10 +333,6 @@ class PT_HMI_API View
         virtual void onResize(Widget& widget, const Gfx::SizeF& size) = 0;
 
         virtual void onRaise(Widget& widget) = 0;
-
-        virtual void onEnter(Widget& widget, Visual& v) = 0;
-
-        //virtual void onSetCapture(Widget& widget, Visual& target, bool capture) = 0;
 };
 
 } // namespace

@@ -194,6 +194,8 @@ Visual::Visual()
 
 Visual::~Visual()
 {
+    setPointer(false);
+
     _closed.send();
     Application::instance().unregisterVisual(*this);
 }
@@ -215,6 +217,12 @@ bool Visual::isDescendantOf(const Visual& v) const
 bool Visual::isAncestorOf(const Visual& v) const
 {
     return v.isDescendantOf(*this);
+}
+
+
+void Visual::setPointer(bool isPointer)
+{
+    Application::instance().onSetPointer(*this, isPointer);
 }
 
 
@@ -244,15 +252,12 @@ void Visual::onSetCapture(bool capture)
 {
     Visual* parent = onGetParent();
     if(parent)
-        parent->onSetCapture(*this, capture);
+        Application::instance().onSetCapture(*this, capture);
 }
 
 
-void Visual::onSetCapture(Visual& target, bool capture)
+void Visual::onRelease()
 {
-    Visual* parent = onGetParent();
-    if(parent)
-        parent->onSetCapture(target, capture);
 }
 
 ///////////////////////////////////////////////////////////////////////

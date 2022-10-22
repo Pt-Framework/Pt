@@ -215,9 +215,6 @@ void Window::setParent(WindowManager& parent)
 
     _isClosed = false;
 
-    //if( _title == "Main_1")
-    //std::clog << "REALIZE " << title() << std::endl;
-
     parent.onAttach(*this);
     _parent = &parent;
 
@@ -248,20 +245,31 @@ void Window::setParent(WindowManager& parent)
 
 void Window::unparent()
 {
-    if(_parent)
-    {
-        if(_peer)
-            _parent->onSetTransient(*this, false);
+    if( ! _parent )
+        return;
 
-        _parent->onRelease(*this);
-        _parent->onDetach(*this);
-        _parent = 0;
+    release();
 
-        delete _impl;
-        _impl = 0;
+    _parent->onRelease(*this);
+    _parent->onDetach(*this);
+    _parent = 0;
+
+    delete _impl;
+    _impl = 0;
         
-        onParentChanged(0);
-    }
+    onParentChanged(0);
+}
+
+
+void Window::onRelease()
+{
+    setPointer(false);
+    setCapture(false);
+
+    if(_peer)
+        Application::instance().onSetTransient(*this, false);
+
+    _sheet.release();
 }
 
 
@@ -288,8 +296,8 @@ void Window::setTransient(Visual* peer)
         peer->closed() += Pt::slot(*this, &Window::onTransientPeerClosed);
         _peer = peer;
 
-        if(_parent && _visible)
-            _parent->onSetTransient(*this, true);
+        if(_visible)
+            Application::instance().onSetTransient(*this, true);
     }
 }
 
@@ -299,7 +307,7 @@ void Window::onTransientPeerClosed()
     if(_peer)
     {
         if(_parent)
-            _parent->onSetTransient(*this, false);
+            Application::instance().onSetTransient(*this, false);
 
         _peer->closed() -= Pt::slot(*this, &Window::onTransientPeerClosed);
         _peer = 0;
@@ -533,14 +541,6 @@ void Window::onResize(Sheet& sheet, const Gfx::SizeF& size)
     repaint(updateRect);
 }
 
-
-void Window::onEnter(Sheet& sheet, Visual& v)
-{
-    if(_parent)
-        _parent->onEnter(*this, v);
-}
-
-
 ///////////////////////////////////////////////////////////////////////
 // Implementation
 ///////////////////////////////////////////////////////////////////////
@@ -724,8 +724,7 @@ void Window::onShowEvent(const ShowEvent& ev)
 {
     if(_peer)
     {
-        if(_parent)
-            _parent->onSetTransient( *this, ev.visible() );
+        Application::instance().onSetTransient( *this, ev.visible() );
     }
 
     _visible = ev.visible();

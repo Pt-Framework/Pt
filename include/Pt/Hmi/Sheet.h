@@ -56,6 +56,8 @@ class Sheet : public Visual
     
         void setParent(Form* parent);
 
+        void unparent();
+
         void setSurface(Gfx::PaintSurface* surface);
 
         void setNextResponder(Responder* r);
@@ -127,6 +129,8 @@ class Sheet : public Visual
 
         virtual void onEvent(const Pt::Event& ev);
 
+        virtual void onRelease();
+
     //
     // Responder
     //
@@ -184,8 +188,6 @@ class Sheet : public Visual
         virtual void onResize(Widget& widget, const Gfx::SizeF& size);
 
         virtual void onRaise(Widget& widget);
-
-        virtual void onEnter(Widget& widget, Visual& v);
 
     //
     // Sheet

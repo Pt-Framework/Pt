@@ -179,7 +179,6 @@ void Menu::onMenuTriggered(MenuItem& item)
 
         menu->setTopMost(true);
         menu->show();
-        //menu->onEnter();
     }
     else
     {

@@ -595,13 +595,6 @@ void ShellWM::onClosing(Window& w)
     Application::instance().loop().commitEvent(ev);
 }
 
-
-void ShellWM::onEnter(Window& w, Visual& v)
-{
-    if(_parent)
-        _parent->onEnter(*this, v);
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Implementation
 ///////////////////////////////////////////////////////////////////////
@@ -717,19 +710,13 @@ void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
 
 void ShellWM::onSetCapture(bool capture)
 {
-    _parent->onSetCapture(*this, *this, capture);
+    Visual::onSetCapture(capture);
 
     if( ! capture )
     {
         if(_grabbedFrame)
             _grabbedFrame = 0;
     }
-}
-
-
-void ShellWM::onSetCapture(Visual& target, bool capture)
-{
-    _parent->onSetCapture(target, capture);
 }
 
 
@@ -802,7 +789,7 @@ void ShellWM::onProcessMouseEvent(const MouseEvent& ev)
                 setCapture(true);
 
                 // TODO: make WindowFrame a proper Visual to handle events
-                _parent->onEnter(*this, *windowFrame);
+                windowFrame->setPointer(true);
             }
         }
 

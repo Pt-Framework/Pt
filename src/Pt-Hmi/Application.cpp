@@ -346,6 +346,12 @@ void Application::onDispatchMouseEvent(const MouseEvent& ev)
 }
 
 
+void Application::onSetPointer(Visual& v, bool isPointer)
+{
+    _mainScreen->setPointer(v, isPointer);
+}
+
+
 Visual* Application::capture() const
 {
     if( ! _capture.empty() )
@@ -358,7 +364,7 @@ Visual* Application::capture() const
 }
 
 
-void Application::onSetCapture(Visual& target, bool capture)
+void Application::onSetCapture(Visual& target, bool isCapture)
 {
     std::list<Visual*>::iterator it = std::find(_capture.begin(), 
                                                 _capture.end(), &target);
@@ -366,10 +372,13 @@ void Application::onSetCapture(Visual& target, bool capture)
     if( it != _capture.end() )
         _capture.erase(it);
 
-    if(capture) 
+    if(isCapture) 
         _capture.push_back(&target);
 
-    //if(capture)
+    Visual* capture = this->capture();
+    _mainScreen->impl()->setCapture(capture);
+
+    //if(isCapture)
     //    std::clog << "SET CAPTURE " << typeid(target).name() << std::endl;
     //else
     //    std::clog << "RELEASE CAPTURE" << std::endl;
@@ -385,6 +394,14 @@ void Application::onSetTransient(Window& w, bool transient)
 
     if(transient)
         _popups.push_back(&w);
+
+    Visual* capture = this->capture();
+    _mainScreen->impl()->setCapture(capture);
+
+    //if(transient)
+    //    std::clog << "SET TRANSIENT " << typeid(w).name() << std::endl;
+    //else
+    //    std::clog << "RELEASE TRANSIENT" << std::endl;
 }
 
 
@@ -610,6 +627,8 @@ void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
     
     if(isPress)
     {
+        // TODO: start scroll only if within visual
+
         //std::clog << "SCROLL START" << std::endl;
         _scrollFrom = screenPos;
     }

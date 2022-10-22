@@ -147,14 +147,18 @@ void Screen::setPointer(Visual* visual)
 }
 
 
-void Screen::unsetPointer(Visual& visual)
+void Screen::setPointer(Visual& visual, bool isPointer)
 {
-    if( _pointer != &visual )
-        return;
+    if( ! isPointer )
+    {
+        if( _pointer == &visual )
+            setPointer(0);
+    }
 
-    Pt::Hmi::LeaveEvent ev ( *_pointer );
-    _pointer->processEvent(ev);
-    _pointer = 0;
+    if(isPointer)
+    {
+        setPointer(&visual);
+    }
 }
 
 
@@ -211,19 +215,6 @@ void Screen::onEvent(const Event& ev)
 {
     _eventReceived.send(ev);
 }
-
-
-void Screen::onSetCapture(bool capture)
-{
-    Visual::onSetCapture(capture);
-}
-
-
-void Screen::onSetCapture(Visual& target, bool capture)
-{
-    Application::instance().onSetCapture(target, capture);
-}
-
 
 void Screen::onProcessRescaleEvent(const RescaleEvent& ev)
 {   
