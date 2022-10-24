@@ -100,20 +100,13 @@ void FileInfo::createDirectory(const Path& path)
 
 void FileInfo::createDirectories(const Path& path)
 {   
-    if( path.empty() )
+    if( path.empty() || FileInfo::exists(path) )
       return;
 
     Pt::System::Path subDir( path.dirName() );
-
-    if( ! subDir.empty() )
-    {
-      createDirectories(subDir);
-    }
+    createDirectories(subDir);
     
-    if( ! Pt::System::FileInfo::exists(path) )
-    {
-      createDirectory(path);
-    }
+    createDirectory(path);
 }
 
 
