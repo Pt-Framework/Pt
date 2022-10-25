@@ -138,6 +138,8 @@ class PT_HMI_API Shell : public Widget
     // Visual
     //
     protected:
+       Visual* onHitTest(const Gfx::PointF& p);
+
        virtual void onSetCapture(bool capture);
 
        virtual void onRelease();

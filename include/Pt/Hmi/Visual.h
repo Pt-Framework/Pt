@@ -121,11 +121,6 @@ class PT_HMI_API Visual : public Responder
 
     public:
         virtual ~Visual();
-
-        Pt::Signal<>& closed()
-        { 
-            return _closed; 
-        }
         
         /** @brief Returns the ID.
         */
@@ -162,13 +157,24 @@ class PT_HMI_API Visual : public Responder
             return onGetParent();
         }
 
-        /** @brief Returns true if an descendant.
-        */
-        bool isDescendantOf(const Visual& v) const;
 
-        /** @brief Returns true if an ancestor.
+        void addPeer(Visual& peer);
+
+        void removePeer(Visual& peer);
+
+        
+        /** @brief Returns true if an descendant of @top.
         */
-        bool isAncestorOf(const Visual& v) const;
+        bool isDescendantOf(const Visual& top) const;
+
+        /** @brief Returns true if an ancestor of @child.
+        */
+        bool isAncestorOf(const Visual& child) const;
+
+        Visual* hitTest(const Gfx::PointF& pos)
+        {
+            return onHitTest(pos);
+        }
 
         /** @brief Converts to parent coordinate.
         */
@@ -226,6 +232,16 @@ class PT_HMI_API Visual : public Responder
     protected:
         virtual Visual* onGetParent() const = 0;
 
+        virtual Visual* onHitTest(const Gfx::PointF& pos)
+        {
+            return 0;
+        }
+
+
+        virtual void onAttachPeer(Visual& peer);
+
+        virtual void onDetachPeer(Visual& peer);
+
         
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
 
@@ -247,10 +263,10 @@ class PT_HMI_API Visual : public Responder
         { _r1 = r; }
 
     private:
-        Pt::Signal<>  _closed;
-        Pt::uint64_t  _vid;
-        std::string   _name;
-        void*         _r1;
+        Pt::uint64_t         _vid;
+        std::string          _name;
+        std::vector<Visual*> _peers;
+        void*                _r1;
 };
 
 ///////////////////////////////////////////////////////////////////////

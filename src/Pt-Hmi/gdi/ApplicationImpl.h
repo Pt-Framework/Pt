@@ -68,6 +68,8 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         virtual ~ApplicationImpl();
 
+        Window* findWindow(HWND h);
+
         void setCursor(const Cursor* cursor);
 
         void setFontDir(const Pt::System::Path& dir);
@@ -115,8 +117,6 @@ class ApplicationImpl : public Pt::System::EventLoop
 
     private:
         bool waitNext();
-
-        Window* findWindow(HWND h);
 
         bool processMessage(HWND hwnd, UINT msg, 
                             WPARAM wparam, LPARAM lparam);

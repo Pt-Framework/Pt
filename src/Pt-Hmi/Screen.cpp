@@ -187,6 +187,12 @@ Visual* Screen::onGetParent() const
 }
 
 
+Visual* Screen::onHitTest(const Gfx::PointF& pos)
+{
+    return _impl->hitTest(pos);
+}
+
+
 Gfx::PointF Screen::onToParent(const Gfx::PointF& pos) const
 {
     return pos;
@@ -215,6 +221,10 @@ void Screen::onEvent(const Event& ev)
 {
     _eventReceived.send(ev);
 }
+
+///////////////////////////////////////////////////////////////////////
+// Implementation
+///////////////////////////////////////////////////////////////////////
 
 void Screen::onProcessRescaleEvent(const RescaleEvent& ev)
 {   

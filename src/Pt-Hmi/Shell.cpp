@@ -217,6 +217,30 @@ void Shell::onRemoveWidget(Widget& w)
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
+Visual* Shell::onHitTest(const Gfx::PointF& p)
+{
+    std::vector<WindowFrame*>::const_reverse_iterator rit;
+    for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
+    {
+        WindowFrame* frame = *rit;
+        Window* w = frame->window();
+
+        if( ! w->isVisible() )
+            continue;
+
+        Gfx::PointF pos = toWindow(*w, p);
+        Visual* hit = w->hitTest(pos);
+        if(hit)
+            return hit;
+
+        if( frame->frameRect().contains(p) )
+            return 0;
+    }
+
+    return Widget::onHitTest(p);
+}
+
+
 void Shell::onSetCapture(bool capture)
 {
     Widget::onSetCapture(capture);

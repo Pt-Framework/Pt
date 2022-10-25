@@ -1337,6 +1337,26 @@ Visual* Widget::onGetParent() const
 }
 
 
+Visual* Widget::onHitTest(const Gfx::PointF& p)
+{
+    std::vector<Widget*>::reverse_iterator it;
+    for(it = _children.rbegin(); it != _children.rend(); ++it)
+    {
+        Widget* w = *it;
+        Gfx::PointF pos = toWidget(*w, p);
+        Visual* hit = w->hitTest(pos);
+        if(hit)
+            return hit;
+    }
+
+    Gfx::RectF bounds( size() );
+    if( bounds.contains(p) )
+        return this;
+
+    return 0;
+}
+
+
 Gfx::PointF Widget::onToParent(const Gfx::PointF& pos) const
 {
     if( ! _parent )

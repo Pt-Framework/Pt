@@ -306,6 +306,8 @@ class PT_HMI_API Widget : public View
     protected:
         virtual Visual* onGetParent() const;
 
+        virtual Visual* onHitTest(const Gfx::PointF& p);
+
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;

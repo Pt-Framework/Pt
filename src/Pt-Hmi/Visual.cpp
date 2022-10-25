@@ -196,8 +196,42 @@ Visual::~Visual()
 {
     setPointer(false);
 
-    _closed.send();
+    while( ! _peers.empty() )
+    {
+        removePeer( *_peers.back() );
+    }
+
     Application::instance().unregisterVisual(*this);
+}
+
+
+void Visual::addPeer(Visual& peer)
+{
+    peer.onAttachPeer(*this);
+    onAttachPeer(peer);
+}
+
+
+void Visual::removePeer(Visual& peer)
+{
+    peer.onDetachPeer(*this);
+    onDetachPeer(peer);
+}
+
+
+void Visual::onAttachPeer(Visual& peer)
+{
+    _peers.push_back(&peer);
+}
+
+
+void Visual::onDetachPeer(Visual& peer)
+{
+    std::vector<Visual*>::iterator it;
+    it = std::find( _peers.begin(), _peers.end(), &peer );
+    
+    if( it != _peers.end() )
+        _peers.erase(it);
 }
 
 

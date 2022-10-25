@@ -381,7 +381,7 @@ void Application::onSetCapture(Visual& target, bool isCapture)
     //if(isCapture)
     //    std::clog << "SET CAPTURE " << typeid(target).name() << std::endl;
     //else
-    //    std::clog << "RELEASE CAPTURE" << std::endl;
+    //    std::clog << "RELEASE CAPTURE " << typeid(target).name() << std::endl;
 }
 
 
@@ -401,95 +401,63 @@ void Application::onSetTransient(Window& w, bool transient)
     //if(transient)
     //    std::clog << "SET TRANSIENT " << typeid(w).name() << std::endl;
     //else
-    //    std::clog << "RELEASE TRANSIENT" << std::endl;
+    //    std::clog << "RELEASE TRANSIENT " << typeid(w).name() << std::endl;
 }
 
 
 bool Application::isPopupOf(Window& w, Window& top) const
 {
-  Visual* peer = w.peer();
-  if( peer->isDescendantOf(top) || peer == &top )
-      return true;
+    if( w.isPopupOf(top) )
+        return true;
 
-  std::list<Window*>::const_iterator it = _popups.begin();
-  for(it = _popups.begin(); it != _popups.end(); ++it )
-  {
-      Window* popup = *it;
-      
-      if( peer->isDescendantOf(*popup) || peer == popup )
-          return isPopupOf(*popup, top);
-  }
+    std::list<Window*>::const_iterator it = _popups.begin();
+    for(it = _popups.begin(); it != _popups.end(); ++it )
+    {
+        Window* popup = *it;
+        if( w.isPopupOf(*popup) )
+            return isPopupOf(*popup, top);
+    }
 
-  return false;
+    return false;
 }
 
 
 void Application::onClosePopups(const Gfx::PointF& screenPos)
 {
-    Window* hit = 0;
+    Window* popupHit = 0;
 
-    Visual* capture = ! _capture.empty() ? _capture.back() : 0;
-    if(capture)
+    Visual* hit = _mainScreen->hitTest(screenPos);
+    if(hit)
     {
-        std::list<Window*>::iterator pit;
-        for(pit = _popups.begin(); pit != _popups.end(); ++pit )
-        {
-            Window* popup = *pit;
+        // find the popup that was hit or its peer was hit
 
-            if( capture == popup || 
-                capture == popup->peer() ||
-                capture->isDescendantOf(*popup) )
-            {
-                hit = popup;
-                break;
-            }
-        }
-    }
-
-    if( ! hit )
-    {
         std::list<Window*>::iterator pit = _popups.begin();
         for(pit = _popups.begin(); pit != _popups.end(); ++pit )
         {
             Window* popup = *pit;
+            
+            if(popup == hit || popup->isAncestorOf(*hit) )
+                popupHit = popup;
 
-            // TODO: hit test
-            Gfx::PointF popupPos = popup->fromGlobal(screenPos);
-            Gfx::RectF popupRect( popup->size() );
-            if( popupRect.contains(popupPos) )
+            Visual* peer = popup->transientFor();
+            if(peer)
             {
-                hit = popup;
-                break;
-            }
-                
-            Widget* owner = dynamic_cast<Widget*>( popup->peer() );
-            if(owner)
-            {
-                Gfx::PointF pos = owner->fromGlobal(screenPos);
-                Gfx::RectF rect( owner->size() );
-                if( rect.contains(pos) )
-                {
-                    hit = popup;
-                    break;
-                }
+                if(hit == peer || peer->isAncestorOf(*hit) )
+                    popupHit = popup;
             }
         }
     }
 
+    // IME window or one of its popups was hit
+    bool imeHit = false;
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
-        // TODO: hit test
-        Gfx::PointF pos = ime->fromGlobal(screenPos);
-        Gfx::RectF rect( ime->size() );
-        bool imeHit = rect.contains(pos);
-        
-        bool imePopupHit = hit && isPopupOf(*hit, *ime);
+        if(hit)
+            imeHit = ime == hit || ime->isAncestorOf(*hit);
 
-        if( ! imeHit && ! imePopupHit )
-        {
-            ime = 0;
-        }
+        if( ! imeHit )
+            imeHit = popupHit && isPopupOf(*popupHit, *ime);
     }
 
     std::list<Window*>::iterator pit = _popups.begin();
@@ -497,12 +465,14 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
     {
         Window* popup = *pit++;
 
-        bool keepOpen = hit ? popup == hit || 
-                              isPopupOf(*popup, *hit) || 
-                              isPopupOf(*hit, *popup)
-                            : false;
+        // keep all popups that are related to the hit
+        bool keepOpen = popupHit ? popup == popupHit || 
+                                   isPopupOf(*popup, *popupHit) || 
+                                   isPopupOf(*popupHit, *popup)
+                                 : false;
         
-        if( ime && ! isPopupOf(*popup, *ime) )
+        // if IME is used keep all popups not related to IME window
+        if( imeHit && ! isPopupOf(*popup, *ime) )
             keepOpen = true;
 
         if( ! keepOpen )
@@ -529,7 +499,7 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     //
     // close popups 
     //
-    if( ev.isPress() )
+    if( ev.isPress(MouseEvent::Left) || ev.isPress(MouseEvent::Right) )
     {
         onClosePopups( ev.position() );
     }
@@ -542,22 +512,23 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
-        // TODO: hit test
-        Gfx::PointF pos = ime->fromGlobal(screenPos);
-        Gfx::RectF rect( ime->size() );
-        if( rect.contains(pos) )
+        Visual* hit = _mainScreen->hitTest(screenPos);
+        if(hit)
         {
-            // TODO: also if capture is in a popup that is a descendant of the IME
-            if( capture && capture->isDescendantOf(*ime) )
+            if( ime == hit || ime->isAncestorOf(*hit) )
             {
-                capture->processEvent(ev);
-            }
-            else
-            {
-                ime->processEvent(ev);
-            }
+                // TODO: also if capture is in a popup that is related to the IME
+                if( capture && capture->isDescendantOf(*ime) )
+                {
+                    capture->processEvent(ev);
+                }
+                else
+                {
+                    ime->processEvent(ev);
+                }
 
-            return;
+                return;
+            }
         }
     }
 

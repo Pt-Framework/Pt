@@ -158,7 +158,8 @@ Window::Window(WindowManager* parent, WindowType type)
 , _parent(0)
 , _nextResponder(0)
 , _capture(0)
-, _peer(0)
+, _isTransient(false)
+, _transientFor(0)
 , _invalidates(0)
 , _visible(false)
 , _isActive(false)
@@ -266,7 +267,7 @@ void Window::onRelease()
     setPointer(false);
     setCapture(false);
 
-    if(_peer)
+    if(_isTransient)
         Application::instance().onSetTransient(*this, false);
 
     _sheet.release();
@@ -278,40 +279,63 @@ void Window::onParentChanged(WindowManager* )
 }
 
 
-Visual* Window::peer() const
+Visual* Window::transientFor() const
 {
-    return _peer;
+    return _transientFor;
 }
 
 
-void Window::setTransient(Visual* peer)
+bool Window::isPopupOf(Window& top) const
 {
-    if(_peer == peer)
-        return;
+  if( ! _transientFor )
+      return false;
 
-    onTransientPeerClosed();
+  if( _transientFor->isDescendantOf(top) || _transientFor == &top )
+      return true;
+
+  return false;
+}
+
+
+void Window::setTransient(bool transient, Visual* peer)
+{
+    if(_transientFor)
+        removePeer(*_transientFor);
+
+    if( ! transient )
+    {
+        Application::instance().onSetTransient(*this, false);
+        _isTransient = false;
+        return;
+    }
 
     if(peer)
     {
-        peer->closed() += Pt::slot(*this, &Window::onTransientPeerClosed);
-        _peer = peer;
-
-        if(_visible)
-            Application::instance().onSetTransient(*this, true);
+        addPeer(*peer);
+        _transientFor = peer;
     }
+
+    _isTransient = true;
+
+    if(_visible)
+        Application::instance().onSetTransient(*this, true);
 }
 
 
-void Window::onTransientPeerClosed()
+void Window::onAttachPeer(Visual& peer)
 {
-    if(_peer)
-    {
-        if(_parent)
-            Application::instance().onSetTransient(*this, false);
+    Visual::onAttachPeer(peer);
+}
 
-        _peer->closed() -= Pt::slot(*this, &Window::onTransientPeerClosed);
-        _peer = 0;
+
+void Window::onDetachPeer(Visual& peer)
+{
+    if(_transientFor == & peer)
+    {
+        _transientFor = 0;
     }
+
+    Visual::onDetachPeer(peer);
 }
 
 
@@ -395,6 +419,21 @@ Visual* Window::onGetParent() const
         return 0;
 
     return &_parent->visual();
+}
+
+
+Visual* Window::onHitTest(const Gfx::PointF& p)
+{
+    Gfx::PointF pos = toSheet(_sheet, p);
+    Visual* hit = _sheet.hitTest(pos);
+    if(hit)
+        return hit;
+
+    Gfx::RectF bounds( size() );
+    if( bounds.contains(p) )
+        return this;
+
+    return 0;
 }
 
 
@@ -722,7 +761,7 @@ void Window::onProcessShowEvent(const ShowEvent& ev)
 
 void Window::onShowEvent(const ShowEvent& ev)
 {
-    if(_peer)
+    if(_isTransient)
     {
         Application::instance().onSetTransient( *this, ev.visible() );
     }
@@ -1173,22 +1212,6 @@ void Window::onProcessMouseEvent(const MouseEvent& ev)
 
     //std::clog << title() << ": " << pos.x() << " " << pos.y() << std::endl;
 
-    //
-    // continue press sequence capture
-    // 
-    //if(_capture)
-    //{
-    //    _capture->processEvent(ev);
-
-    //    if( ev.isRelease() )
-    //    {
-    //        //std::clog << "Window::CAPTURE END: " << typeid(*_capture).name() <<  _capture->vid() << std::endl;
-    //        _capture = 0;
-    //    }
-    //    
-    //    return;
-    //}
-
     Visual* hit = 0;
 
     Sheet* sheet = this->sheet();
@@ -1201,15 +1224,6 @@ void Window::onProcessMouseEvent(const MouseEvent& ev)
 
     if(hit)
     {
-        //
-        // start press sequence capture
-        // 
-        //if( ev.isPress() )
-        //{
-        //    _capture = hit;
-        //    //std::clog << "Window::CAPTURE BEGIN: " << typeid(*_capture).name() << _capture->vid() << std::endl;
-        //}
-
       hit->processEvent(ev);
       return;
     }

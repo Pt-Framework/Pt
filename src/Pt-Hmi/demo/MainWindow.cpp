@@ -174,7 +174,7 @@ MainWindow::MainWindow()
 
     // context menu
     _menu.setName("All Music");
-    _menu.setTransient(this);
+    _menu.setTransient(true);
 
     _item1.setText("Heavy Metal");
 

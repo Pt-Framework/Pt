@@ -212,6 +212,24 @@ Visual* Sheet::onGetParent() const
 }
 
 
+Visual* Sheet::onHitTest(const Gfx::PointF& p)
+{
+    if(_mainWidget)
+    {
+        Gfx::PointF pos = toWidget(*_mainWidget, p);
+        Visual* hit = _mainWidget->hitTest(pos);
+        if(hit)
+            return hit;
+    }
+
+    Gfx::RectF bounds( size() );
+    if( bounds.contains(p) )
+        return this;
+
+    return 0;
+}
+
+
 Gfx::PointF Sheet::onToParent(const Gfx::PointF& pos) const
 {
     if( ! _parent )

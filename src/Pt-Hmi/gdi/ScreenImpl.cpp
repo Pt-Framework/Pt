@@ -156,6 +156,22 @@ Visual* ScreenImpl::onGetParent() const
 }
 
 
+Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
+{
+    POINT pnt;
+    pnt.x = p.x() * scaleFactor();
+    pnt.y = p.y() * scaleFactor();
+
+    HWND hwnd = WindowFromPoint(pnt);
+    Window* win = Application::instance().impl()->findWindow(hwnd);
+    if( ! win )
+        return 0;
+
+    Gfx::PointF pos = toWindow(*win, p);
+    return win->hitTest(pos);
+}
+
+
 Gfx::PointF ScreenImpl::onToParent(const Gfx::PointF& pos) const
 {
     if( ! _parent )

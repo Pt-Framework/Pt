@@ -123,6 +123,8 @@ class Sheet : public Visual
     protected:
         virtual Visual* onGetParent() const;
 
+        virtual Visual* onHitTest(const Gfx::PointF& pos);
+
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
