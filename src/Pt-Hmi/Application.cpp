@@ -376,13 +376,13 @@ void Application::onSetCapture(Visual& target, bool isCapture)
     if(isCapture) 
         _capture.push_back(&target);
 
-    Visual* capture = this->capture();
-    _mainScreen->impl()->setCapture(capture);
-
     //if(isCapture)
     //    std::clog << "SET CAPTURE " << typeid(target).name() << std::endl;
     //else
     //    std::clog << "RELEASE CAPTURE " << typeid(target).name() << std::endl;
+
+    Visual* capture = this->capture();
+    _mainScreen->impl()->setCapture(capture);
 }
 
 
@@ -396,13 +396,13 @@ void Application::onShowPopup(Popup& w, bool transient)
     if(transient)
         _popups.push_back(&w);
 
-    Visual* capture = this->capture();
-    _mainScreen->impl()->setCapture(capture);
-
     //if(transient)
     //    std::clog << "SET POPUP " << typeid(w).name() << std::endl;
     //else
     //    std::clog << "RELEASE POPUP " << typeid(w).name() << std::endl;
+
+    Visual* capture = this->capture();
+    _mainScreen->impl()->setCapture(capture);
 }
 
 
@@ -516,7 +516,8 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
         onClosePopups( ev.position() );
     }
 
-    Visual* capture = ! _capture.empty() ? _capture.back() : 0;
+    //Visual* capture = ! _capture.empty() ? _capture.back() : 0;
+    Visual* capture = this->capture();
 
     //
     // IME window
@@ -549,7 +550,7 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     //
     if(capture)
     {
-        //std::clog << "CAPTURE EVENT: " << _capture->name() << std::endl;
+        //std::clog << "PROCESS CAPTURED MOUSE: " << capture->name() << std::endl;
         capture->processEvent(ev);
     }
     else

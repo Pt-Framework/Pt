@@ -334,12 +334,12 @@ void ScreenImpl::onClosing(Window& w)
 
 void ScreenImpl::setCapture(Visual* capture)
 {
-    if( ! capture )
+    //if( ! capture )
     {
-        //std::clog << "RELEASE CAPTURE HWND" << std::endl;
+        //std::clog << "RELEASE POINTER " << std::endl;
         Display* display = Application::instance().impl()->display();
         ::XUngrabPointer(display, CurrentTime);
-        return;
+        //return;
     }
 
     std::vector<Window*>::iterator wit;
@@ -352,13 +352,14 @@ void ScreenImpl::setCapture(Visual* capture)
             MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
 
             Display* display = Application::instance().impl()->display();
-            XGrabPointer(display, impl->window(), True,
+            XGrabPointer(display, impl->window(), False,
                          ButtonPressMask|ButtonReleaseMask|
                          PointerMotionMask,
                          GrabModeAsync,
                          GrabModeAsync,
                          None, None, CurrentTime);
-            //std::clog << "SET CAPTURE HWND: " << impl->window() << std::endl;
+            
+            //std::clog << "GRAB POINTER: " << typeid(*capture).name() << std::endl;
             return;
         }
     }
