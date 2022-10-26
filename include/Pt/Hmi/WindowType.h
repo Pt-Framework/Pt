@@ -47,8 +47,9 @@ class WindowType
     public:
         enum Type
         {
-            Default = 0, // default window frame
-            Popup = 1    // frameless window
+            Default = 0,  // default window frame
+            Frameless = 1,     // no decoration
+            Popup = Frameless
         };
 
         WindowType(Type t = Default)

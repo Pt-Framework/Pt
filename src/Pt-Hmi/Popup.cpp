@@ -37,6 +37,7 @@ namespace Hmi {
 
 Popup::Popup()
 : Window(0, WindowType::Popup)
+, _anchor(0)
 {
     setTitle("Popup");
 }
@@ -44,133 +45,53 @@ Popup::Popup()
 
 Popup::~Popup()
 {
-  //Application::instance().releasePopup(*this);
+}
+
+
+Visual* Popup::anchor()
+{
+    return _anchor;
+}
+
+
+void Popup::setAnchor(Visual* anchor)
+{
+    if(_anchor)
+        removePeer(*_anchor);
+
+    if(anchor)
+    {
+        addPeer(*anchor);
+        _anchor = anchor;
+    }
+}
+
+
+void Popup::onAttachPeer(Visual& peer)
+{
+    Visual::onAttachPeer(peer);
+}
+
+
+void Popup::onDetachPeer(Visual& peer)
+{
+    if(_anchor == & peer)
+        _anchor = 0;
+
+    Visual::onDetachPeer(peer);
+}
+
+
+void Popup::onRelease()
+{
+    Application::instance().onShowPopup(*this, false);
 }
 
 
 void Popup::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
-
-    //if( ev.visible() )
-    //    Application::instance().setPopup(*this);
-    //else
-    //    Application::instance().releasePopup(*this);
-
-    //if( ev.visible() )
-    //{
-    //    std::clog << "POPUP SHOW: " << vid() << std::endl;
-    //    //grabPointer();
-    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalMouseEvent);
-    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalTouchEvent);
-    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalActivateEvent);
-    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalMoveEvent);
-    //    Application::instance().eventReceived() += Pt::slot(*this, &Popup::onGlobalResizeEvent);
-    //}
-    //else
-    //{
-    //    std::clog << "POPUP HIDE: " << vid() << std::endl;
-    //    //releasePointer();
-    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalMouseEvent);
-    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalTouchEvent);
-    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalActivateEvent);
-    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalMoveEvent);
-    //    Application::instance().eventReceived() -= Pt::slot(*this, &Popup::onGlobalResizeEvent);
-    //}
-}
-
-
-void Popup::onGlobalMouseEvent(const MouseEvent& ev)
-{
-    //std::clog << "POPUP GLOBAL MOUSE: " << ev.visual()->vid() << std::endl;
-
-    if( ev.isPress() )
-    {
-        Gfx::PointF pos = fromGlobal( ev.position() );
-        Gfx::RectF rect( size() );
-
-        if( ! rect.contains(pos) )
-        {
-            //std::clog << "POPUP HIDE MOUSE: " << vid() << std::endl;
-            show(false);
-        }
-    }
-}
-
-
-void Popup::onGlobalTouchEvent(const TouchEvent& ev)
-{
-    if( ev.isPress() )
-    {
-        Gfx::PointF pos = fromGlobal( ev.position() );
-        Gfx::RectF rect( size() );
-
-        if( ! rect.contains(pos) )
-        {
-            //std::clog << "POPUP HIDE TOUCH: " << vid() << std::endl;
-            show(false);
-        }
-    }
-}
-
-
-void Popup::onGlobalActivateEvent(const ActivateEvent& ev)
-{
-    show(false);
-}
-
-
-void Popup::onGlobalMoveEvent(const MoveEvent& ev)
-{
-    if( this == ev.visual() )
-      return;
-
-    // react only to moving top level windows
-    Screen& screen = Application::instance().screen();
-    const std::vector<Window*>& windows = screen.windows();
-
-    std::vector<Window*>::const_iterator it = std::find( windows.begin(),
-                                                         windows.end(), 
-                                                         ev.visual() );
-
-    if( it != windows.end() )
-    {
-        //std::clog << "POPUP HIDE MOVE: " << (*it)->title() << std::endl;
-        show(false);
-    }
-}
-
-
-void Popup::onGlobalResizeEvent(const ResizeEvent& ev)
-{
-    if( this == ev.visual() )
-      return;
-
-    // react only to moving top level windows
-    Screen& screen = Application::instance().screen();
-    const std::vector<Window*>& windows = screen.windows();
-
-    std::vector<Window*>::const_iterator it = std::find( windows.begin(),
-                                                         windows.end(), 
-                                                         ev.visual() );
-
-    if( it != windows.end() )
-    {
-        //std::clog << "POPUP HIDE RESIZE: " << (*it)->title() << std::endl;
-        show(false);
-    }
-}
-
-
-bool Popup::onMouseEvent(const MouseEvent& ev)
-{
-    return Base::onMouseEvent(ev);
-}
-
-
-bool Popup::onTouchEvent(const TouchEvent& ev)
-{
-    return Base::onTouchEvent(ev);
+    Application::instance().onShowPopup( *this, ev.visible() );
 }
 
 } // namespace

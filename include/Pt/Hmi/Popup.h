@@ -44,22 +44,22 @@ class PT_HMI_API Popup : public Window
 		
         virtual ~Popup();
 
+        Visual* anchor();
+
+        void setAnchor(Visual* anchor = 0);
+
+    protected:
+        virtual void onAttachPeer(Visual& peer);
+
+        virtual void onDetachPeer(Visual& peer);
+
+        virtual void onRelease();
+
     protected:
         void onShowEvent(const ShowEvent& ev);
 
-        void onGlobalMouseEvent(const MouseEvent& ev);
-
-        void onGlobalTouchEvent(const TouchEvent& ev);
-
-        void onGlobalActivateEvent(const ActivateEvent& ev);
-
-        void onGlobalMoveEvent(const MoveEvent& ev);
-
-        void onGlobalResizeEvent(const ResizeEvent& ev);
-
-        bool onMouseEvent(const MouseEvent& ev);
-
-        bool onTouchEvent(const TouchEvent& ev);
+    private:
+        Visual* _anchor;
 };
 
 } // namespace

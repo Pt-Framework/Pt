@@ -181,7 +181,7 @@ void ComboBox::showPopup()
     _popup.move(popupPos);
 
     _popup.setTopMost(true);
-    _popup.setTransient(true, this);
+    _popup.setAnchor(this);
     
     _popup.show();
     

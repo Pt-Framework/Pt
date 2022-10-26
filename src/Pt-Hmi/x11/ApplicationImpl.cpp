@@ -152,7 +152,7 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
         return;
 
     // screen to window coordinates
-    Gfx::PointF pos = w->fromScreen( ev.position() );
+    Gfx::PointF pos = w->fromGlobal( ev.position() );
 
     MouseEvent mev = ev;
     mev.setPosition(pos);
@@ -369,7 +369,7 @@ void ApplicationImpl::onMotionNotify(Window& window, XEvent& xev)
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
 
-    _mouseEvent.setPosition( window.toScreen(pos) );
+    _mouseEvent.setPosition( window.toGlobal(pos) );
     _mouseEvent.setVisual(&window);
     _mouseEvent.setMove();
 
@@ -414,7 +414,7 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
     const double scaling = window.scaleFactor();
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
-    _mouseEvent.setPosition( window.toScreen(pos) );
+    _mouseEvent.setPosition( window.toGlobal(pos) );
     _mouseEvent.setPress(button);
     _mouseEvent.setVisual(&window);
 
@@ -472,7 +472,7 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
     const double scaling = window.scaleFactor();
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
-    _mouseEvent.setPosition( window.toScreen(pos) );
+    _mouseEvent.setPosition( window.toGlobal(pos) );
     _mouseEvent.setRelease(button);
     _mouseEvent.setVisual(&window);
 

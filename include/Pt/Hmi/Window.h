@@ -182,13 +182,6 @@ class PT_HMI_API Window : public Visual
 
         void unparent();
 
-
-        Visual* transientFor() const;
-
-        bool isPopupOf(Window& top) const;
-
-        void setTransient(bool transient, Visual* peer = 0);
-
     public:
         PixmapSurface& surface();
 
@@ -256,8 +249,6 @@ class PT_HMI_API Window : public Visual
 
 
         Type type() const;
-
-        void setType(Type type);
 
 
         const Gfx::Image& icon() const;
@@ -339,9 +330,7 @@ class PT_HMI_API Window : public Visual
 
         Visual* onHitTest(const Gfx::PointF& p);
 
-        virtual void onAttachPeer(Visual& peer);
 
-        virtual void onDetachPeer(Visual& peer);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
@@ -492,9 +481,6 @@ class PT_HMI_API Window : public Visual
         WindowManager*               _parent;
         Responder*                   _nextResponder;
         Visual*                      _capture;
-
-        bool                         _isTransient;
-        Visual*                      _transientFor;
    
         int                          _invalidates;
         bool                         _visible; 

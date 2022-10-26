@@ -158,8 +158,6 @@ Window::Window(WindowManager* parent, WindowType type)
 , _parent(0)
 , _nextResponder(0)
 , _capture(0)
-, _isTransient(false)
-, _transientFor(0)
 , _invalidates(0)
 , _visible(false)
 , _isActive(false)
@@ -267,75 +265,12 @@ void Window::onRelease()
     setPointer(false);
     setCapture(false);
 
-    if(_isTransient)
-        Application::instance().onSetTransient(*this, false);
-
     _sheet.release();
 }
 
 
 void Window::onParentChanged(WindowManager* )
 {
-}
-
-
-Visual* Window::transientFor() const
-{
-    return _transientFor;
-}
-
-
-bool Window::isPopupOf(Window& top) const
-{
-  if( ! _transientFor )
-      return false;
-
-  if( _transientFor->isDescendantOf(top) || _transientFor == &top )
-      return true;
-
-  return false;
-}
-
-
-void Window::setTransient(bool transient, Visual* peer)
-{
-    if(_transientFor)
-        removePeer(*_transientFor);
-
-    if( ! transient )
-    {
-        Application::instance().onSetTransient(*this, false);
-        _isTransient = false;
-        return;
-    }
-
-    if(peer)
-    {
-        addPeer(*peer);
-        _transientFor = peer;
-    }
-
-    _isTransient = true;
-
-    if(_visible)
-        Application::instance().onSetTransient(*this, true);
-}
-
-
-void Window::onAttachPeer(Visual& peer)
-{
-    Visual::onAttachPeer(peer);
-}
-
-
-void Window::onDetachPeer(Visual& peer)
-{
-    if(_transientFor == & peer)
-    {
-        _transientFor = 0;
-    }
-
-    Visual::onDetachPeer(peer);
 }
 
 
@@ -761,11 +696,6 @@ void Window::onProcessShowEvent(const ShowEvent& ev)
 
 void Window::onShowEvent(const ShowEvent& ev)
 {
-    if(_isTransient)
-    {
-        Application::instance().onSetTransient( *this, ev.visible() );
-    }
-
     _visible = ev.visible();
 
     if(_capture && ! _visible)
@@ -1029,16 +959,16 @@ Window::Type Window::type() const
 }
 
 
-void Window::setType(Type type)
-{
-    if( _impl )
-        _impl->setType(type);
-
-    _type = type;
-
-    if(_parent)
-        _parent->onFrameChanged(*this);
-}
+//void Window::setType(Type type)
+//{
+//    if( _impl )
+//        _impl->setType(type);
+//
+//    _type = type;
+//
+//    if(_parent)
+//        _parent->onFrameChanged(*this);
+//}
 
 
 const Gfx::Image& Window::icon() const

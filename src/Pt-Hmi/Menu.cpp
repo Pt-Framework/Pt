@@ -133,7 +133,7 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
     _subMenus.push_back(item);
     menu._parentMenu = this;
 
-    menu.setTransient(true, this);
+    menu.setAnchor(this);
 }
 
 
@@ -149,7 +149,7 @@ void Menu::onRemoveMenu(Menu& menu)
             _subMenus.erase(it);
             menu._parentMenu = 0;
 
-            menu.setTransient(true, 0);
+            menu.setAnchor(0);
 
             if(_currentMenu == &menu)
                 _currentMenu = 0;

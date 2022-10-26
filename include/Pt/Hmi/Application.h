@@ -49,11 +49,13 @@ namespace Pt {
 namespace Hmi {
 
 class Cursor;
+class Popup;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
     friend class Visual;
     friend class Window;
+    friend class Popup;
     friend class Screen;
 
     public:
@@ -125,9 +127,11 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void onSetCapture(Visual& target, bool capture);
 
-        void onSetTransient(Window& w, bool transient);
+        void onShowPopup(Popup& w, bool transient);
 
-        bool isPopupOf(Window& w, Window& top) const;
+        bool isAnchoredTo(Popup& w, Window& top) const;
+
+        bool isPopupOf(Popup& w, Window& top) const;
 
         void onClosePopups(const Gfx::PointF& screenPos);
 
@@ -245,7 +249,7 @@ class PT_HMI_API Application : public Pt::System::Application
         DefaultInputMethod*          _defaultInputMethod;
         InputMethod*                 _inputMethod;
         
-        std::list<Window*>           _popups;
+        std::list<Popup*>            _popups;
         std::list<Visual*>           _capture;
                                      
         Gfx::PointF                  _scrollFrom;

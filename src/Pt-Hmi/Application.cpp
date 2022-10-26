@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Popup.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/TouchEvent.h>
@@ -385,10 +386,10 @@ void Application::onSetCapture(Visual& target, bool isCapture)
 }
 
 
-void Application::onSetTransient(Window& w, bool transient)
+void Application::onShowPopup(Popup& w, bool transient)
 {
-    std::list<Window*>::iterator it = std::find(_popups.begin(), 
-                                                _popups.end(), &w);
+    std::list<Popup*>::iterator it = std::find(_popups.begin(), 
+                                               _popups.end(), &w);
     if( it != _popups.end() )
         _popups.erase(it);
 
@@ -399,22 +400,33 @@ void Application::onSetTransient(Window& w, bool transient)
     _mainScreen->impl()->setCapture(capture);
 
     //if(transient)
-    //    std::clog << "SET TRANSIENT " << typeid(w).name() << std::endl;
+    //    std::clog << "SET POPUP " << typeid(w).name() << std::endl;
     //else
-    //    std::clog << "RELEASE TRANSIENT " << typeid(w).name() << std::endl;
+    //    std::clog << "RELEASE POPUP " << typeid(w).name() << std::endl;
 }
 
 
-bool Application::isPopupOf(Window& w, Window& top) const
+bool Application::isAnchoredTo(Popup& p, Window& top) const
 {
-    if( w.isPopupOf(top) )
+  Visual* anchor = p.anchor();
+  if( ! anchor )
+      return false;
+
+  bool isAnchored = anchor == &top || anchor->isDescendantOf(top);
+  return isAnchored;
+}
+
+
+bool Application::isPopupOf(Popup& p, Window& top) const
+{
+    if( isAnchoredTo(p, top) )
         return true;
 
-    std::list<Window*>::const_iterator it = _popups.begin();
+    std::list<Popup*>::const_iterator it = _popups.begin();
     for(it = _popups.begin(); it != _popups.end(); ++it )
     {
-        Window* popup = *it;
-        if( w.isPopupOf(*popup) )
+        Popup* popup = *it;
+        if( isAnchoredTo(p, *popup) )
             return isPopupOf(*popup, top);
     }
 
@@ -424,25 +436,25 @@ bool Application::isPopupOf(Window& w, Window& top) const
 
 void Application::onClosePopups(const Gfx::PointF& screenPos)
 {
-    Window* popupHit = 0;
+    Popup* popupHit = 0;
 
     Visual* hit = _mainScreen->hitTest(screenPos);
     if(hit)
     {
-        // find the popup that was hit or its peer was hit
-
-        std::list<Window*>::iterator pit = _popups.begin();
+        std::list<Popup*>::iterator pit = _popups.begin();
         for(pit = _popups.begin(); pit != _popups.end(); ++pit )
         {
-            Window* popup = *pit;
+            Popup* popup = *pit;
             
+            // popup or its content was hit
             if(popup == hit || popup->isAncestorOf(*hit) )
                 popupHit = popup;
 
-            Visual* peer = popup->transientFor();
-            if(peer)
+            // popup anchor or its content was hit
+            Visual* anchor = popup->anchor();
+            if(anchor)
             {
-                if(hit == peer || peer->isAncestorOf(*hit) )
+                if(anchor == hit || anchor->isAncestorOf(*hit) )
                     popupHit = popup;
             }
         }
@@ -460,10 +472,10 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
             imeHit = popupHit && isPopupOf(*popupHit, *ime);
     }
 
-    std::list<Window*>::iterator pit = _popups.begin();
+    std::list<Popup*>::iterator pit = _popups.begin();
     while( pit != _popups.end() )
     {
-        Window* popup = *pit++;
+        Popup* popup = *pit++;
 
         // keep all popups that are related to the hit
         bool keepOpen = popupHit ? popup == popupHit || 

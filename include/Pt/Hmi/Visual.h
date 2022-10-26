@@ -215,7 +215,7 @@ class PT_HMI_API Visual : public Responder
         */
         void setPointer(bool isPointer);
 
-        /** @brief Releases all.
+        /** @brief Release to default initial state.
         */
         void release()
         {

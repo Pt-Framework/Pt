@@ -341,7 +341,7 @@ void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
     _menus.push_back(item);
     _layout.addItem(*item);
 
-    menu.setTransient(true, this);
+    menu.setAnchor(this);
 
     item->clicked() += Pt::slot(*this, &MenuBar::onItemClicked);
 }
@@ -357,7 +357,7 @@ void MenuBar::onRemoveMenu(Menu& menu)
             delete *it;
             _menus.erase(it);
 
-            menu.setTransient(true, 0);
+            menu.setAnchor(0);
             break;
         }
     }

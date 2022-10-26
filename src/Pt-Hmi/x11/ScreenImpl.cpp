@@ -138,14 +138,52 @@ Responder* ScreenImpl::onNextResponder()
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
-void ScreenImpl::onEvent(const Event& ev)
+Visual* ScreenImpl::onGetParent() const
 {
-    _eventReceived.send(ev);
+    return _parent;
 }
 
 
-void ScreenImpl::onSetCapture(bool capture)
+Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
+    // TODO: stacking order, visibility...
+
+    std::vector<Window*>::reverse_iterator it;
+    for(it = _windows.rbegin(); it != _windows.rend(); ++it)
+    {
+        Window* win = *it;
+        Gfx::PointF pos = toWindow(*win, p);
+
+        Visual* hit = win->hitTest(pos);
+        if(hit)
+            return hit;
+    }
+
+    return 0;
+}
+
+
+Gfx::PointF ScreenImpl::onToParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->toParent(pos);
+}
+
+
+Gfx::PointF ScreenImpl::onFromParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->fromParent(pos);
+}
+
+
+void ScreenImpl::onEvent(const Event& ev)
+{
+    _eventReceived.send(ev);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -210,22 +248,6 @@ Gfx::PointF ScreenImpl::onToWindow(const Window& w,
     Gfx::PointF windowPos = impl->fromScreen(physicalPos);
     Gfx::PointF logicalPos = w.surface().toLogical(windowPos);
     return logicalPos;
-}
-
-
-Gfx::PointF ScreenImpl::onToScreen(const Window& w, 
-                                   const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = onFromWindow(w, pos);
-    return toScreen(p);
-}
-
-
-Gfx::PointF ScreenImpl::onFromScreen(const Window& w, 
-                                     const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = fromScreen(pos);
-    return onToWindow(w, p);
 }
 
 
@@ -310,14 +332,36 @@ void ScreenImpl::onClosing(Window& w)
 }
 
 
-void ScreenImpl::onEnter(Window& w, Visual& v)
+void ScreenImpl::setCapture(Visual* capture)
 {
-    Application::instance().screen().setPointer(&v);
-}
+    if( ! capture )
+    {
+        //std::clog << "RELEASE CAPTURE HWND" << std::endl;
+        Display* display = Application::instance().impl()->display();
+        ::XUngrabPointer(display, CurrentTime);
+        return;
+    }
 
+    std::vector<Window*>::iterator wit;
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    {
+        Window* window = *wit;
+        
+        if( capture == window || capture->isDescendantOf(*window) )
+        {
+            MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
 
-void ScreenImpl::onSetCapture(Window& w, bool capture)
-{
+            Display* display = Application::instance().impl()->display();
+            XGrabPointer(display, impl->window(), True,
+                         ButtonPressMask|ButtonReleaseMask|
+                         PointerMotionMask,
+                         GrabModeAsync,
+                         GrabModeAsync,
+                         None, None, CurrentTime);
+            //std::clog << "SET CAPTURE HWND: " << impl->window() << std::endl;
+            return;
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////
