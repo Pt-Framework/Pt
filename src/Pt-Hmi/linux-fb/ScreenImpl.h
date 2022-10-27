@@ -148,6 +148,10 @@ class ScreenImpl : public Visual
     protected:
         void onProcessRescaleEvent(const RescaleEvent& ev);
 
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onRescale(double scaling);
+
     //
     // enable
     //

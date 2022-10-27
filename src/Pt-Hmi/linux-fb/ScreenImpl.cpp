@@ -422,10 +422,24 @@ bool ScreenImpl::onKeyEvent(const KeyEvent& ev)
 
 void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {   
+    onRescaleEvent(ev);
+
     double scaling = ev.scaleFactor();
 
     RescaleEvent sheetEvent(_sheet, scaling);
     _sheet.processEvent(sheetEvent);
+}
+
+
+void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
+{
+    onRescale( ev.scaleFactor() );
+}
+
+
+void ScreenImpl::onRescale(double scaling)
+{
+    _surface.setScaleFactor(scaling);
 }
 
 
