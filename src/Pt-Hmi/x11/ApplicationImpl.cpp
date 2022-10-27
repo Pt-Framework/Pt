@@ -286,10 +286,10 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 {
     MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
     
-    size_t width = xev.xexpose.width;
-    size_t height = xev.xexpose.height;
-    size_t x = xev.xexpose.x;
-    size_t y = xev.xexpose.y;
+    int width = xev.xexpose.width;
+    int height = xev.xexpose.height;
+    int x = xev.xexpose.x;
+    int y = xev.xexpose.y;
 
     Gfx::PointF pos(x, y);
     Gfx::SizeF size(width, height);
@@ -362,8 +362,8 @@ void ApplicationImpl::onShow(Window& w, bool v)
 
 void ApplicationImpl::onMotionNotify(Window& window, XEvent& xev)
 {
-    std::size_t x = xev.xmotion.x;
-    std::size_t y = xev.xmotion.y;
+    int x = xev.xmotion.x;
+    int y = xev.xmotion.y;
 
     const double scaling = window.scaleFactor();
 
@@ -382,8 +382,8 @@ void ApplicationImpl::onMotionNotify(Window& window, XEvent& xev)
 void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
 {
     //bool isPress = ButtonPress == xev.xbutton.type;
-    std::size_t x = xev.xbutton.x;
-    std::size_t y = xev.xbutton.y;
+    int x = xev.xbutton.x;
+    int y = xev.xbutton.y;
     MouseEvent::Button button = MouseEvent::Left;
 
     switch(xev.xbutton.button)
@@ -427,8 +427,8 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
 void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
 {
     //bool isPress = ButtonPress == xev.xbutton.type;
-    std::size_t x = xev.xbutton.x;
-    std::size_t y = xev.xbutton.y;
+    int x = xev.xbutton.x;
+    int y = xev.xbutton.y;
     MouseEvent::Button button = MouseEvent::Left;
 
     // ev.xbutton.state contains pressed buttons
