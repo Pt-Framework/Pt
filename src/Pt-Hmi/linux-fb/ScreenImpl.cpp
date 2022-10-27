@@ -56,7 +56,6 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _frameBuffer( app.frameBuffer() )
 , _parent(0)
 , _nextResponder(0)
-, _capture(0)
 , _enabled(true)
 , _enabledState(true)
 , _dpi(96.0)
@@ -155,21 +154,39 @@ Responder* ScreenImpl::onNextResponder()
     return _nextResponder;
 }
 
-
-Gfx::PointF ScreenImpl::onToScreen(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
-
-Gfx::PointF ScreenImpl::onFromScreen(const Gfx::PointF& pos) const
-{
-    return pos;
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
+
+Visual* ScreenImpl::onGetParent() const
+{
+    return _parent;
+}
+
+
+Visual* ScreenImpl::onHitTest(const Gfx::PointF& pos)
+{
+    return _sheet.hitTest(pos);
+}
+
+
+Gfx::PointF ScreenImpl::onToParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->toParent(pos);
+}
+
+
+Gfx::PointF ScreenImpl::onFromParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->fromParent(pos);
+}
+
 
 void ScreenImpl::onEvent(const Event& ev)
 {
@@ -188,9 +205,6 @@ void ScreenImpl::onAttach(Sheet& sheet)
     
 void ScreenImpl::onDetach(Sheet& sheet)
 {
-    if(_capture == &sheet)
-        _capture = 0;
-
     Form::onDetach(sheet);
 }
 
@@ -224,20 +238,6 @@ Gfx::PointF ScreenImpl::onFromSheet(const Sheet& sheet, const Gfx::PointF& pos) 
 Gfx::PointF ScreenImpl::onToSheet(const Sheet& sheet,  const Gfx::PointF& pos) const
 {
     return pos;
-}
-
-
-Gfx::PointF ScreenImpl::onToScreen(const Sheet& sheet, const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = onFromSheet(sheet, pos);
-    return toScreen(p);
-}
-
-
-Gfx::PointF ScreenImpl::onFromScreen(const Sheet& sheet, const Gfx::PointF& pos) const
-{
-    Gfx::PointF p = fromScreen(pos);
-    return onToSheet(sheet, p);
 }
 
 
@@ -305,9 +305,8 @@ void ScreenImpl::onResize(Sheet& sheet, const Gfx::SizeF& size)
 }
 
 
-void ScreenImpl::onEnter(Sheet& sheet, Visual& v)
+void ScreenImpl::setCapture(Visual* capture)
 {
-    Application::instance().screen().setPointer(&v);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -345,65 +344,24 @@ void ScreenImpl::onEnable(bool e)
 }
 
 
-void ScreenImpl::onSetCapture(bool capture)
-{
-
-}
-
-
-void ScreenImpl::onSetCapture(Sheet& widget, bool capture)
-{
-    if(capture)
-    {
-        if(_capture && _capture != &widget)
-            _capture->setCapture(false);
-
-        _capture = &widget;
-    }
-    else
-    {
-        if(_capture == &widget)
-        {
-            _capture = 0;
-        }
-    }
-}
-
-
 void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 {
-    //Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
-    //std::clog << "ScreenImpl" << ": " << pos.x() << " " << pos.y() << std::endl;
+    //std::clog << title() << ": " << pos.x() << " " << pos.y() << std::endl;
 
-    //
-    // continue press sequence capture
-    // 
-    if(_capture)
+    Visual* hit = 0;
+
+    Sheet* sheet = this->sheet();
+    if(sheet && 
+       sheet->geometry().contains(pos) && 
+       sheet->acceptsInput() )
     {
-        _capture->processEvent(ev);
-
-        if( ev.isRelease() )
-        {
-            //std::clog << "ScreenImpl::CAPTURE END: " << typeid(*_capture).name() << std::endl;
-            _capture = 0;
-        }
-        
-        return;
+        hit = sheet;
     }
 
-    Visual* hit = sheet();
     if(hit)
     {
-        //
-        // start press sequence capture
-        // 
-        if( ev.isPress() )
-        {
-            hit->setCapture(true);
-            //std::clog << "ScreenImpl::CAPTURE BEGIN: " << typeid(*_capture).name() << std::endl;
-        }
-
       hit->processEvent(ev);
       return;
     }
@@ -420,43 +378,7 @@ bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
 
 void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
 { 
-    //Gfx::PointF pos = fromScreen( ev.position() );
 
-    //std::clog << title() << ": " << pos.x() << " " << pos.y() << std::endl;
-
-    //
-    // continue press sequence capture
-    //
-    if(_capture)
-    {
-        _capture->processEvent(ev);
-
-        if( ev.isRelease() )
-        {
-            //std::clog << "Widget::CAPTURE END: " << typeid(*_capture).name() << std::endl;
-            _capture = 0;
-        }
-        
-        return;
-    }
-
-    Visual* hit = sheet();
-    if(hit)
-    {
-        //
-        // start press sequence capture
-        // 
-        if( ev.isPress() )
-        {
-            _capture = hit;
-            //std::clog << "Window::CAPTURE BEGIN: " << typeid(*_capture).name() << std::endl;
-        }
-
-      hit->processEvent(ev);
-      return;
-    }
-    
-    _sheet.processEvent(ev);
 }
 
 

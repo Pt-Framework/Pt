@@ -49,7 +49,6 @@ class Cursor;
 class Screen;
 
 class ScreenImpl : public Visual
-                 , public Responder
                  , public Form
                  , public Connectable
 {
@@ -70,9 +69,14 @@ class ScreenImpl : public Visual
 
         const std::vector<Window*>& windows() const;
 
+
+        void setCapture(Visual* capture);
+
+
         const Gfx::SizeF& size() const;
 
         double scaleFactor() const;
+
 
         bool isEnabled() const;
 
@@ -87,10 +91,6 @@ class ScreenImpl : public Visual
     protected:
         virtual Responder* onNextResponder();
 
-        virtual Gfx::PointF onToScreen(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
-
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -103,14 +103,23 @@ class ScreenImpl : public Visual
     // Visual
     //
     protected:
-        virtual void onEvent(const Event& ev);
+        virtual Visual* onGetParent() const;
 
-        virtual void onSetCapture(bool capture);
+        virtual Visual* onHitTest(const Gfx::PointF& pos);
+
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+        virtual void onEvent(const Event& ev);
 
     //
     // Form
     //
     protected:
+        virtual Visual& onGetVisual()
+        { return *this; }
+
         virtual void onAttach(Sheet& view);
     
         virtual void onDetach(Sheet& view);
@@ -125,12 +134,6 @@ class ScreenImpl : public Visual
         virtual Gfx::PointF onToSheet(const Sheet& sheet, 
                                      const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onToScreen(const Sheet& sheet, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromScreen(const Sheet& sheet, 
-                                         const Gfx::PointF& pos) const;
-
         virtual void onRepaint(Sheet& view, const Gfx::RectF& rect);
 
         virtual void onActivate(Sheet& w, bool active);
@@ -138,10 +141,6 @@ class ScreenImpl : public Visual
         virtual void onMove(Sheet& sheet, const Gfx::PointF& pos);
 
         virtual void onResize(Sheet& sheet, const Gfx::SizeF& size);
-
-        virtual void onEnter(Sheet& sheet, Visual& v);
-
-        virtual void onSetCapture(Sheet& sheet, bool capture);
 
     //
     // scaling
@@ -213,7 +212,6 @@ class ScreenImpl : public Visual
         Shell                        _shell;
                                      
         Responder*                   _nextResponder;
-        Visual*                      _capture;
 
         Gfx::SizeF                   _size;
 
