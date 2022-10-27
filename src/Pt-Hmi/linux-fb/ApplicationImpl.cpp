@@ -266,30 +266,32 @@ void ApplicationImpl::showConsole(bool s)
 
     int fd = open(terminal.c_str(), O_RDWR);
 
-    static struct termios tm_orig;
+    //static struct termios tm_orig;
 
-    std::clog << terminal << " " << fd << std::endl;
-    
     if( ! s )
     {
-        struct termios tm;
-        tcgetattr(STDIN_FILENO, &tm);
-        tm_orig = tm;
+        // NOTE: the code below did not work for serial consoles
+        //       app output like logging was indented
 
-        tm.c_iflag = tm.c_oflag = 0;
-        tm.c_cflag &= ~CSIZE;
-        tm.c_cflag |= CS8;
-        tm.c_lflag &= ~(ECHO | ISIG | ICANON);
-        tm.c_cc[VMIN] = 1; /* min data size (byte) */
-        tm.c_cc[VTIME] = 0; /* time out */
-        tcsetattr(STDIN_FILENO, TCSAFLUSH, &tm);
+        //struct termios tm;
+        //tcgetattr(STDIN_FILENO, &tm);
+        //tm_orig = tm;
 
-         ioctl( fd, KDSETMODE, KD_GRAPHICS );
+        //tm.c_iflag = tm.c_oflag = 0;
+        //tm.c_cflag &= ~CSIZE;
+        //tm.c_cflag |= CS8;
+        //tm.c_lflag &= ~(ECHO | ISIG | ICANON);
+        //tm.c_cc[VMIN] = 1; /* min data size (byte) */
+        //tm.c_cc[VTIME] = 0; /* time out */
+        //tcsetattr(STDIN_FILENO, TCSAFLUSH, &tm);
+
+        ioctl( fd, KDSETMODE, KD_GRAPHICS );
     }
     else
     {
         ioctl(fd, KDSETMODE, KD_TEXT);
-        tcsetattr(STDIN_FILENO, TCSAFLUSH, &tm_orig);
+        
+        //tcsetattr(STDIN_FILENO, TCSAFLUSH, &tm_orig);
     }
 
     close(fd);
