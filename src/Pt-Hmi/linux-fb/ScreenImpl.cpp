@@ -135,7 +135,7 @@ const Gfx::SizeF& ScreenImpl::size() const
 
 double ScreenImpl::scaleFactor() const
 {
-    return 1.0;
+    return _surface.scaleFactor();
 }
 
 
