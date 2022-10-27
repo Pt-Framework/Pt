@@ -144,6 +144,8 @@ void MainWindowImpl::destroy()
     if( _window == 0)
         return;
 
+    //std::clog << std::hex << "XDestroyWindow: " << _window << std::dec << std::endl;
+
     XDestroyWindow(_display, _window);
     _window = 0;
 }

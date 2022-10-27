@@ -403,14 +403,7 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
         default:
             return;
     }
-    
-    //XGrabPointer(_display, _window, True,
-    //             ButtonPressMask|ButtonReleaseMask|
-    //             PointerMotionMask,
-    //             GrabModeAsync,
-    //             GrabModeAsync,
-    //             None, None, CurrentTime);
-
+   
     const double scaling = window.scaleFactor();
 
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
@@ -466,8 +459,6 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
         default:
             return;
     }
-
-    // TODO: XUngrabPointer(_display, CurrentTime);
 
     const double scaling = window.scaleFactor();
 

@@ -355,21 +355,14 @@ void ScreenImpl::setCapture(Visual* capture)
             MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
 
             Display* display = Application::instance().impl()->display();
-            XGrabPointer(display, impl->window(), True,
-                         ButtonPressMask|ButtonReleaseMask|
-                         PointerMotionMask,
-                         GrabModeAsync,
-                         GrabModeAsync,
-                         None, None, CurrentTime);
 
-            //XGrabPointer(display, impl->window(), True,
-            //             ButtonPressMask|ButtonReleaseMask|
-            //             PointerMotionMask,
-            //             GrabModeAsync,
-            //             GrabModeAsync,
-            //             None, None, CurrentTime);
+            XGrabPointer(display, impl->window(), False,
+                         ButtonPressMask|ButtonReleaseMask|
+                         ButtonMotionMask|PointerMotionMask,
+                         GrabModeAsync, GrabModeAsync,
+                         None, None, CurrentTime);
             
-            //std::clog << "GRAB POINTER: " << typeid(*capture).name() << std::endl;
+            //std::clog << "GRAB POINTER: " << typeid(*capture).name() << " " << impl->window() << std::endl;
             return;
         }
     }

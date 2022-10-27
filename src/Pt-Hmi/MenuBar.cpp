@@ -420,7 +420,7 @@ void MenuBar::onItemClicked(MenuBarItem& item)
     Menu& menu = item.menu();
 
     if( ! menu.isVisible() )
-    {
+    {     
         Gfx::PointF menuPos( 0, item.size().height() );
         menuPos = item.toGlobal(menuPos);
         menu.move(menuPos);

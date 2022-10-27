@@ -930,6 +930,8 @@ void Window::close(bool force)
     if(force)
     {
         show(false);
+        _visible = false;
+        
         unparent();
         _isClosed = true;
     }
@@ -948,6 +950,8 @@ void Window::onProcessCloseEvent(const CloseEvent& ev)
 void Window::onCloseEvent(const CloseEvent& ev)
 {
     show(false);
+    _visible = false;
+    
     unparent();
     _isClosed = true;
 }
