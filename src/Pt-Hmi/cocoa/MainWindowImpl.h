@@ -140,9 +140,6 @@ class MainWindowImpl : public WindowImpl
         void onMouseMove(double x, double y);
 
     private:
-        Window* findWindow(NSWindow* w);
-
-    private:
         NSWindow*                _window;
         NSView*                  _view;
         int                      _windowStyle;

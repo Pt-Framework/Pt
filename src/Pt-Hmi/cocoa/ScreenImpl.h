@@ -29,6 +29,7 @@
 #ifndef Pt_Hmi_ScreenImpl_H
 #define Pt_Hmi_ScreenImpl_H
 
+#include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Screen.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/LayoutEvent.h> // RescaleEvent
@@ -40,10 +41,10 @@
 
 #ifdef __OBJC__
     #import <AppKit/NSWindow.h>
+    #import <AppKit/NSApplication.h>
 #else
     struct NSPoint;
     struct NSWindow;
-    struct NSResponder;
 #endif
 
 namespace Pt {
@@ -91,6 +92,8 @@ class ScreenImpl : public Visual
 
         
         bool isEnabled() const;
+
+        Window* findWindow(NSWindow* wnd);
 
     //
     // Responder
@@ -207,6 +210,7 @@ class ScreenImpl : public Visual
         std::vector<Window*>         _windows;
 
         Responder*                   _nextResponder;
+        void*                        _captureMonitor;
 
         Gfx::SizeF                   _size;
         double                       _screenScaling;

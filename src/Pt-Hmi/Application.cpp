@@ -396,10 +396,10 @@ void Application::onShowPopup(Popup& w, bool transient)
     if(transient)
         _popups.push_back(&w);
 
-    //if(transient)
-    //    std::clog << "SET POPUP " << typeid(w).name() << std::endl;
-    //else
-    //    std::clog << "RELEASE POPUP " << typeid(w).name() << std::endl;
+    // if(transient)
+    //     std::clog << "SET POPUP " << typeid(w).name() << std::endl;
+    // else
+    //     std::clog << "RELEASE POPUP " << typeid(w).name() << std::endl;
 
     Visual* capture = this->capture();
     _mainScreen->impl()->setCapture(capture);

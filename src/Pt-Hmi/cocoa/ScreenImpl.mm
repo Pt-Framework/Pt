@@ -41,6 +41,7 @@ namespace Hmi {
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _parent(0)
 , _nextResponder(0)
+, _captureMonitor(0)
 , _screenScaling(1.0)
 , _scaling(1.0)
 , _enabled(true)
@@ -123,6 +124,24 @@ void ScreenImpl::repaint(const Gfx::RectF& rect)
         _parent->repaint(rect);
 }
 
+
+Window* ScreenImpl::findWindow(NSWindow* wnd)
+{
+    const std::vector<Window*>& windows = Application::instance().screen().windows();
+
+    std::vector<Window*>::const_iterator it;
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        Window* window = *it;
+
+        MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
+        if( window->impl() && impl->window() == wnd )
+            return window;
+    }
+    
+    return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Responder
 ///////////////////////////////////////////////////////////////////////
@@ -144,21 +163,23 @@ Visual* ScreenImpl::onGetParent() const
 
 Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
-    // NSPoint pnt;// = NSMakePoint( p.x() * scaleFactor(),  
-    //              //              p.y() * scaleFactor() );
+     NSPoint pnt = NSMakePoint( p.x() * scaleFactor(),  
+                                p.y() * scaleFactor() );
 
-    // [ NSWindow windowNumberAtPoint: pnt
-    //            belowWindowWithWindowNumber: 0 ];
+    NSInteger n =  [ NSWindow windowNumberAtPoint: pnt
+                              belowWindowWithWindowNumber: 0 ];
 
-    // HWND hwnd = WindowFromPoint(pnt);
-    // Window* win = Application::instance().impl()->findWindow(hwnd);
-    // if( ! win )
-    //     return 0;
+    NSApplication* nsapp = [NSApplication sharedApplication];
+    NSWindow* nswin = [nsapp windowWithWindowNumber: n];
 
-    // Gfx::PointF pos = toWindow(*win, p);
-    // return win->hitTest(pos);
+    Window* win = findWindow(nswin);
+     if( ! win )
+         return 0;
 
-    return 0;
+    
+
+     Gfx::PointF pos = toWindow(*win, p);
+     return win->hitTest(pos);
 }
 
 
@@ -353,12 +374,15 @@ void ScreenImpl::onClosing(Window& w)
 
 void ScreenImpl::setCapture(Visual* capture)
 {
-    if( ! capture )
+    if(_captureMonitor)
     {
-        //std::clog << "RELEASE CAPTURE HWND" << std::endl;
-        //::ReleaseCapture();
-        return;
+        //std::clog << "RELEASE CAPTURE NSWINDOW: " << _captureMonitor << std::endl;
+        [NSEvent removeMonitor: (id)_captureMonitor];
+        _captureMonitor = 0;
     }
+
+    if( ! capture )
+        return;
 
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
@@ -367,9 +391,25 @@ void ScreenImpl::setCapture(Visual* capture)
         
         if( capture == window || capture->isDescendantOf(*window) )
         {
-            //MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
-            //::SetCapture( impl->hwnd() );
-            //std::clog << "SET CAPTURE HWND: " << impl->hwnd() << std::endl;
+            MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
+            //std::clog << "SET CAPTURE NSWINDOW: " << impl->window() << std::endl;
+
+            // local monitors will only capture events on the window frame
+
+            _captureMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask: NSEventMaskAny
+                                       handler:^ void (NSEvent* event) 
+                                       {
+                                           NSEventType eventType = [event type];
+                                           if (eventType == NSEventTypeLeftMouseDown ||
+                                               eventType == NSEventTypeRightMouseDown)
+                                               {
+                                                   //std::clog << "EVENT MOUSE DOWN: " << std::endl;
+                                                   [impl->view() mouseDown:event];
+                                               }
+
+                                           return;
+                                       }];
+
             return;
         }
     }

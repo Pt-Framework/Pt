@@ -270,6 +270,7 @@
 
 - (BOOL) windowShouldClose: (id) sender 
 {
+    std::clog << "WINDOW SHOULD CLOSE" << std::endl;
     _windowImpl->onClosing();
     return FALSE;
 }

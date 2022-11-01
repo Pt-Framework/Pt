@@ -28,12 +28,14 @@
 */
 
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
 #include "MainWindowImpl.h"
 #include "MainWindowView.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
 
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Screen.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/PaintEvent.h>
@@ -240,7 +242,9 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 
 void MainWindowImpl::close()
 {
-    [_window performClose:nil];
+    std::clog << "CLOSE" << std::endl;
+    onClosing();
+    [_window close];
 }
 
 
@@ -358,27 +362,10 @@ void MainWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
 //}
 
 
-Window* MainWindowImpl::findWindow(NSWindow* wnd)
-{
-    const std::vector<Window*>& windows = Application::instance().screen().windows();
-
-    std::vector<Window*>::const_iterator it;
-    for(it = windows.begin(); it != windows.end(); ++it)
-    {
-        Window* window = *it;
-
-        MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
-        if( window->impl() && impl->window() == wnd )
-            return window;
-    }
-    
-    return 0;
-}
-
-
 void MainWindowImpl::onPaint(const NSRect& rect)
 {
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
 
@@ -435,7 +422,8 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 
 void MainWindowImpl::onActivate(bool isActive)
 {
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
 
@@ -446,7 +434,8 @@ void MainWindowImpl::onActivate(bool isActive)
 
 void MainWindowImpl::onShow(bool v)
 {
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
 
@@ -457,7 +446,8 @@ void MainWindowImpl::onShow(bool v)
 
 void MainWindowImpl::onMove()
 {
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
 
@@ -484,7 +474,8 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     //std::clog << "RESIZE: " << viewSize.width << "x" 
     //                        << viewSize.height << std::endl;
 
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
 
@@ -527,10 +518,12 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 
 void MainWindowImpl::onClosing()
 {
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
 
+    std::clog << "CLOSE EVENT" << std::endl;
     CloseEvent closeEvent(*window);
     window->processEvent(closeEvent);
 }
@@ -540,7 +533,8 @@ void MainWindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
 {
     //std::clog << "KEY DOWN: " << vkey << std::endl;
 
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
     
@@ -565,7 +559,8 @@ void MainWindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
 {
     //std::clog << "KEY UP: " << vkey << std::endl;
 
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
     
@@ -615,7 +610,8 @@ void MainWindowImpl::onKeyModifier(unsigned int mask)
     //
     // send key event for modifier keys
     //
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
 
@@ -653,7 +649,8 @@ void MainWindowImpl::onLMouseDown(double x, double y)
 {
     //std::clog << "MOUSE PRESS: " << x << ", " << y << std::endl;
 
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
 
@@ -677,7 +674,8 @@ void MainWindowImpl::onLMouseUp(double x, double y)
 {
     //std::clog << "MOUSE RELEASE: " << x << ", " << y << std::endl;
 
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
     
@@ -701,7 +699,8 @@ void MainWindowImpl::onMouseMove(double x, double y)
 {
     //std::clog << "MOUSE MOVE: " << x << ", " << y << std::endl;
 
-    Window* window = findWindow(_window);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    Window* window = screen->findWindow(_window);
     if( ! window )
         return;
     
