@@ -515,6 +515,7 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.mm" />
+    <None Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\demo\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\Jamfile" />
     <None Include="..\..\src\Pt-Http\Jamfile" />
@@ -590,7 +591,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\CheckBox.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ComboBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Control.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />

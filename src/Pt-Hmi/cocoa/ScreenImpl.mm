@@ -163,8 +163,8 @@ Visual* ScreenImpl::onGetParent() const
 
 Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
-     NSPoint pnt = NSMakePoint( p.x() * scaleFactor(),  
-                                p.y() * scaleFactor() );
+    NSPoint pnt = NSMakePoint( p.x() * scaleFactor(),  
+                               p.y() * scaleFactor() );
 
     NSInteger n =  [ NSWindow windowNumberAtPoint: pnt
                               belowWindowWithWindowNumber: 0 ];
@@ -175,8 +175,6 @@ Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
     Window* win = findWindow(nswin);
      if( ! win )
          return 0;
-
-    
 
      Gfx::PointF pos = toWindow(*win, p);
      return win->hitTest(pos);
@@ -384,35 +382,42 @@ void ScreenImpl::setCapture(Visual* capture)
     if( ! capture )
         return;
 
+    Window* window = 0
+
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
-    {
-        Window* window = *wit;
-        
-        if( capture == window || capture->isDescendantOf(*window) )
+    {      
+        if( capture == *wit || capture->isDescendantOf(**wit) )
         {
-            MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
-            //std::clog << "SET CAPTURE NSWINDOW: " << impl->window() << std::endl;
-
-            // local monitors will only capture events on the window frame
-
-            _captureMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask: NSEventMaskAny
-                                       handler:^ void (NSEvent* event) 
-                                       {
-                                           NSEventType eventType = [event type];
-                                           if (eventType == NSEventTypeLeftMouseDown ||
-                                               eventType == NSEventTypeRightMouseDown)
-                                               {
-                                                   //std::clog << "EVENT MOUSE DOWN: " << std::endl;
-                                                   [impl->view() mouseDown:event];
-                                               }
-
-                                           return;
-                                       }];
-
-            return;
+            window = *wit;
+            break;
         }
     }
+
+    if( ! window )
+        return;
+
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
+    //std::clog << "SET CAPTURE NSWINDOW: " << impl->window() << std::endl;
+
+    // local monitors will only capture events on the window frame
+
+    mask = NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown |
+           NSEventMaskOtherMouseDown;
+
+    _captureMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask: mask
+                               handler:^ void (NSEvent* event) 
+                               {
+                                   NSEventType eventType = [event type];
+                                   
+                                   if(eventType == NSEventTypeLeftMouseDown ||
+                                      eventType == NSEventTypeRightMouseDown ||
+                                      eventType == NSEventTypeOtherMouseDown)
+                                   {
+                                       //std::clog << "EVENT MOUSE DOWN: " << std::endl;
+                                       [impl->view() mouseDown:event];
+                                   }
+                               }];
 }
 
 ///////////////////////////////////////////////////////////////////////

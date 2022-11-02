@@ -242,6 +242,8 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 
 void MainWindowImpl::close()
 {
+    //[_window performClose:nil];
+
     std::clog << "CLOSE" << std::endl;
     onClosing();
     [_window close];
@@ -516,16 +518,25 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 }
 
 
-void MainWindowImpl::onClosing()
+bool MainWindowImpl::onClosing()
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
     if( ! window )
         return;
 
+    Pt::uint64_t id =  window->vid();
+
     std::clog << "CLOSE EVENT" << std::endl;
     CloseEvent closeEvent(*window);
     window->processEvent(closeEvent);
+
+    const Visual* v = Application::instance().findVisual(id);
+    if( ! v )
+        return true;
+        
+    bool isClosed = ! window->isClosed();
+    return isClosed;
 }
 
 

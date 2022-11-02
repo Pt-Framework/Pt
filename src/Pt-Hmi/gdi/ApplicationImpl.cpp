@@ -649,6 +649,9 @@ bool ApplicationImpl::onClose(Window& w)
     CloseEvent ev(w);
     w.processEvent(ev);
 
+    //commitEvent(ev);
+    //return true;
+
     const Visual* v = Application::instance().findVisual(id);
     if( ! v )
         return true;

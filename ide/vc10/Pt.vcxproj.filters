@@ -1731,6 +1731,9 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt\Atomicity.cpp">
@@ -2869,9 +2872,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\win32\IONotifierImpl.cpp">
       <Filter>Pt-System\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\cocoa</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Icon.cpp">
       <Filter>Pt-Hmi</Filter>

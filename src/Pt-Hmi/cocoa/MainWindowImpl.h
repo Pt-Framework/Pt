@@ -125,7 +125,7 @@ class MainWindowImpl : public WindowImpl
 
         void onResize(const NSSize& frameSize);
 
-        void onClosing();
+        bool onClosing();
 
         void onKeyDown(unsigned key, Pt::Char ch);
 
