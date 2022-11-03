@@ -402,8 +402,8 @@ void ScreenImpl::setCapture(Visual* capture)
 
     // local monitors will only capture events on the window frame
 
-    mask = NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown |
-           NSEventMaskOtherMouseDown;
+    NSEventMask mask = NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown |
+                       NSEventMaskOtherMouseDown;
 
     _captureMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask: mask
                                handler:^ void (NSEvent* event) 

@@ -920,7 +920,6 @@ bool Window::isClosed() const
 
 void Window::tryClose()
 {
-
     close();
 }
 

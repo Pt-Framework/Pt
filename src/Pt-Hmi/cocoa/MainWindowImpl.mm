@@ -246,7 +246,7 @@ void MainWindowImpl::close()
 
     std::clog << "CLOSE" << std::endl;
     onClosing();
-    [_window close];
+    //[_window close];
 }
 
 
@@ -525,18 +525,18 @@ bool MainWindowImpl::onClosing()
     if( ! window )
         return;
 
-    Pt::uint64_t id =  window->vid();
+    //Pt::uint64_t id =  window->vid();
 
     std::clog << "CLOSE EVENT" << std::endl;
     CloseEvent closeEvent(*window);
     window->processEvent(closeEvent);
 
-    const Visual* v = Application::instance().findVisual(id);
-    if( ! v )
-        return true;
-        
-    bool isClosed = ! window->isClosed();
-    return isClosed;
+    //const Visual* v = Application::instance().findVisual(id);
+    //if( ! v )
+    //    return true;
+    //    
+    //bool isClosed = ! window->isClosed();
+    //return isClosed;
 }
 
 

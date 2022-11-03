@@ -278,7 +278,7 @@
 {
     std::clog << "WINDOW SHOULD CLOSE" << std::endl;
     bool isClosed = _windowImpl->onClosing();
-    return isClosed ? TRUE : FALSE;
+    return FALSE;
 }
 
 
