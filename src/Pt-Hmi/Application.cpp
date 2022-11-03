@@ -491,6 +491,7 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
         {
             //std::clog << "AUTO_CLOSE: " << popup->name() << std::endl;
             popup->close();
+            pit = _popups.begin();
         }
     }
 }

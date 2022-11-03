@@ -243,9 +243,9 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 void MainWindowImpl::close()
 {
     //[_window performClose:nil];
+    //[_window close];
 
     onClosing();
-    //[_window close];
 }
 
 
@@ -524,17 +524,8 @@ void MainWindowImpl::onClosing()
     if( ! window )
         return;
 
-    //Pt::uint64_t id =  window->vid();
-
     CloseEvent closeEvent(*window);
     window->processEvent(closeEvent);
-
-    //const Visual* v = Application::instance().findVisual(id);
-    //if( ! v )
-    //    return true;
-    //    
-    //bool isClosed = ! window->isClosed();
-    //return isClosed;
 }
 
 

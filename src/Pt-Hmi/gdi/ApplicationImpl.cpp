@@ -644,20 +644,9 @@ void ApplicationImpl::onShow(Window& w,  bool v)
 
 bool ApplicationImpl::onClose(Window& w)
 {  
-    //Pt::uint64_t id =  w.vid();
-
     CloseEvent ev(w);
     w.processEvent(ev);
-
-    //commitEvent(ev);
     return true;
-
-    //const Visual* v = Application::instance().findVisual(id);
-    //if( ! v )
-    //    return true;
-    //    
-    //bool isClosed = ! w.isClosed();
-    //return isClosed;
 }
 
 
