@@ -163,8 +163,12 @@ Visual* ScreenImpl::onGetParent() const
 
 Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
-    NSPoint pnt = NSMakePoint( p.x() * scaleFactor(),  
-                               p.y() * scaleFactor() );
+    double scaling = scaleFactor();
+
+    CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
+    CGFloat y = screenHeight - p.y() / scaling;
+    
+    NSPoint pnt = NSMakePoint(p.x() / scaling, y);
 
     NSInteger n =  [ NSWindow windowNumberAtPoint: pnt
                               belowWindowWithWindowNumber: 0 ];
@@ -382,7 +386,7 @@ void ScreenImpl::setCapture(Visual* capture)
     if( ! capture )
         return;
 
-    Window* window = 0
+    Window* window = 0;
 
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
@@ -414,7 +418,6 @@ void ScreenImpl::setCapture(Visual* capture)
                                       eventType == NSEventTypeRightMouseDown ||
                                       eventType == NSEventTypeOtherMouseDown)
                                    {
-                                       //std::clog << "EVENT MOUSE DOWN: " << std::endl;
                                        [impl->view() mouseDown:event];
                                    }
                                }];

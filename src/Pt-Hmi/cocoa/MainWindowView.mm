@@ -167,13 +167,13 @@
 {
     //std::clog << "MOUSE DOWN " << std::endl;
 
-    NSPoint location = [ev locationInWindow];
-    NSWindow* window = [ev window];
-    NSPoint point = [impl->window() convertPoint:location fromView:window];
-    _windowImpl->onLMouseDown(point.x, point.y);
+    // NSPoint location = [ev locationInWindow];
+    // NSWindow* window = [ev window];
+    // NSPoint point = [_windowImpl->view() convertPoint:location fromView:window];
+    // _windowImpl->onLMouseDown(point.x, point.y);
 
-    //NSPoint mp = [ev locationInWindow];
-    //_windowImpl->onLMouseDown(mp.x, mp.y);
+    NSPoint mp = [ev locationInWindow];
+    _windowImpl->onLMouseDown(mp.x, mp.y);
 }
 
 
@@ -276,8 +276,8 @@
 
 - (BOOL) windowShouldClose: (id) sender 
 {
-    std::clog << "WINDOW SHOULD CLOSE" << std::endl;
-    bool isClosed = _windowImpl->onClosing();
+    //std::clog << "WINDOW SHOULD CLOSE" << std::endl;
+    _windowImpl->onClosing();
     return FALSE;
 }
 

@@ -244,7 +244,6 @@ void MainWindowImpl::close()
 {
     //[_window performClose:nil];
 
-    std::clog << "CLOSE" << std::endl;
     onClosing();
     //[_window close];
 }
@@ -518,7 +517,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 }
 
 
-bool MainWindowImpl::onClosing()
+void MainWindowImpl::onClosing()
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
@@ -527,7 +526,6 @@ bool MainWindowImpl::onClosing()
 
     //Pt::uint64_t id =  window->vid();
 
-    std::clog << "CLOSE EVENT" << std::endl;
     CloseEvent closeEvent(*window);
     window->processEvent(closeEvent);
 
