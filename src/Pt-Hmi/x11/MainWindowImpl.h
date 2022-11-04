@@ -68,8 +68,6 @@ class MainWindowImpl : public WindowImpl
 
         void resize(const Gfx::SizeF& size);
 
-        void close();
-
     protected:
         virtual void onSetType(WindowType type);
 

@@ -74,11 +74,6 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
 }
 
 
-void MainWindowImpl::close()
-{
-}
-
-
 void MainWindowImpl::setType(Window::Type type)
 {
 }

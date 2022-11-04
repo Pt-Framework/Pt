@@ -68,10 +68,6 @@ class MainWindowImpl : public WindowImpl
 
         void resize(const Gfx::SizeF& size);
 
-        void close();
-
-        //void grabPointer();
-
         HWND hwnd()
         {
             return _hwnd;

@@ -240,15 +240,6 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
-void MainWindowImpl::close()
-{
-    //[_window performClose:nil];
-    //[_window close];
-
-    onClosing();
-}
-
-
 void MainWindowImpl::onSetType(WindowType type)
 {
     switch(type)
@@ -524,8 +515,10 @@ void MainWindowImpl::onClosing()
     if( ! window )
         return;
 
-    CloseEvent closeEvent(*window);
-    window->processEvent(closeEvent);
+    window->close();
+
+    //CloseEvent closeEvent(*window);
+    //window->processEvent(closeEvent);
 }
 
 

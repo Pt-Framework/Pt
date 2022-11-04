@@ -331,21 +331,6 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
-void MainWindowImpl::close()
-{
-    XEvent ev;
-    memset(&ev, 0, sizeof (ev));
-
-    ev.xclient.type         = ClientMessage;
-    ev.xclient.window       = _window;
-    ev.xclient.message_type = Application::instance().impl()->wmProtocols();
-    ev.xclient.format       = 32;
-    ev.xclient.data.l[0]    = Application::instance().impl()->wmDeleteWindow();
-    ev.xclient.data.l[1]    = CurrentTime;
-    XSendEvent(_display, _window, False, NoEventMask, &ev);
-}
-
-
 void MainWindowImpl::onSetType(Window::Type type)
 {
     //std::clog << "XChangeWindowAttributes: " << type << std::endl;

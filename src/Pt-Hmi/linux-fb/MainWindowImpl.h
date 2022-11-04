@@ -61,8 +61,6 @@ class MainWindowImpl
 
         void resize(const Gfx::SizeF& size);
 
-        void close();
-
         void setState(Window::State s);
 
         void setType(Window::Type type);

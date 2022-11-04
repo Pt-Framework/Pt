@@ -177,21 +177,6 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
-void MainWindowImpl::close()
-{
-    if( _hwnd == 0)
-        return;
-
-    PostMessage(_hwnd, WM_CLOSE, 0, 0);
-}
-
-
-//void MainWindowImpl::grabPointer()
-//{
-//    SetCapture(_hwnd);
-//}
-
-
 void MainWindowImpl::onSetType(WindowType type)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);

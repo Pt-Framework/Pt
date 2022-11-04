@@ -344,8 +344,10 @@ void ApplicationImpl::onClientMessage(Window& window, XEvent& xev)
     {
         if( (Atom) xev.xclient.data.l[0] == _wmDeleteWindow)
         {
-            CloseEvent closeEvent(window);
-            window.processEvent(closeEvent);
+            //CloseEvent closeEvent(window);
+            //window.processEvent(closeEvent);
+            
+            window.close();
         }
     }
 }

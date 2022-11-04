@@ -370,7 +370,10 @@ void ScreenImpl::onStateChanged(Window& w)
 void ScreenImpl::onClosing(Window& w)
 {
     //MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    //impl->close();
+    //NSWindow* nswin = impl->window();
+
+    //[nswin performClose:nil];
+    //[nswin close];
 
     CloseEvent ev(w);
     w.processEvent(ev);

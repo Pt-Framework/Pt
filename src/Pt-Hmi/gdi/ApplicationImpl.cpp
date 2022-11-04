@@ -28,19 +28,21 @@
 */
 
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
 #include "MainWindowImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
 #include "PaintData.h"
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Screen.h>
+#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
-#include <Pt/Hmi/Window.h>
 #include <Pt/System/IOError.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
@@ -644,8 +646,12 @@ void ApplicationImpl::onShow(Window& w,  bool v)
 
 bool ApplicationImpl::onClose(Window& w)
 {  
-    CloseEvent ev(w);
-    w.processEvent(ev);
+    //CloseEvent ev(w);
+    //w.processEvent(ev);
+    
+    //Application::instance().screen().impl()->onClosing(w);
+    
+    w.close();
     return true;
 }
 
