@@ -62,21 +62,6 @@ class ShellWindowImpl : public WindowImpl
         virtual ~ShellWindowImpl();
 
         virtual double scaleFactor() const;
-
-    protected:
-        virtual void onSetType(WindowType type);
-
-        virtual void onSetTitle(const std::string& text);
-
-        virtual void onSetIcon(const Gfx::Image& p);
-
-        virtual void onSetTopMost(bool top);
-
-        virtual void onSetState(WindowState s);
-
-        virtual void onSetMinimumSize(const Gfx::SizeF& s);
-
-        virtual  void onSetMaximumSize(const Gfx::SizeF& s);
 };
 
 
@@ -94,41 +79,6 @@ ShellWindowImpl::~ShellWindowImpl()
 double ShellWindowImpl::scaleFactor() const
 {
     return 1.0;
-}
-
-
-void ShellWindowImpl::onSetType(WindowType type)
-{
-}
-
-
-void ShellWindowImpl::onSetTitle(const std::string& text)
-{
-}
-
-
-void ShellWindowImpl::onSetIcon(const Gfx::Image& p)
-{
-}
-
-
-void ShellWindowImpl::onSetTopMost(bool top)
-{
-}
-
-
-void ShellWindowImpl::onSetState(WindowState s)
-{
-}
-
-
-void ShellWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
-{
-}
-
-
-void ShellWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
-{
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -615,6 +565,12 @@ void Shell::onSetState(Window& w, const WindowState& state)
         WindowStateEvent wse(w, state);
         Application::instance().loop().commitEvent(wse);
     }
+}
+
+
+void Shell::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                       const Gfx::SizeF& maxSize)
+{
 }
 
 

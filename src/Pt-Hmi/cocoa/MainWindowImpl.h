@@ -97,6 +97,10 @@ class MainWindowImpl : public WindowImpl
 
         void setState(const WindowState& s);
 
+        void setMinimumSize(const Gfx::SizeF& s);
+    
+        void setMaximumSize(const Gfx::SizeF& s);
+
     public:
         NSView* view()
         { 
@@ -106,11 +110,6 @@ class MainWindowImpl : public WindowImpl
         NSWindow* window()
         {
             return _window;
-        }
-    protected:
-        virtual void onSetMinimumSize(const Gfx::SizeF& s);
-    
-        virtual void onSetMaximumSize(const Gfx::SizeF& s);
 
     public:
         void onPaint(const NSRect& rect);

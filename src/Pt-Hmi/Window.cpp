@@ -47,8 +47,6 @@ namespace Hmi {
 
 WindowImpl::WindowImpl(WindowType type) 
 : _type(type)
-, _minimumSize(0, 0)
-, _maximumSize(64000, 64000)
 {
 }
 
@@ -61,32 +59,6 @@ WindowImpl::~WindowImpl()
 WindowType WindowImpl::type() const
 {
     return _type;
-}
-
-
-const Gfx::SizeF& WindowImpl::minimumSize() const
-{
-    return _minimumSize;;
-}
-
-     
-void WindowImpl::setMinimumSize(const Gfx::SizeF& s)
-{
-    onSetMinimumSize(s);
-    _minimumSize = s;
-}
-
-
-const Gfx::SizeF& WindowImpl::maximumSize() const
-{
-    return _maximumSize;
-}
-
-
-void WindowImpl::setMaximumSize(const Gfx::SizeF& s)
-{
-    onSetMaximumSize(s);
-    _maximumSize = s;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -160,13 +132,7 @@ void Window::setParent(WindowManager& parent)
     _impl = _parent->onCreateWindow(_type);
    
     _parent->onInit(*this);
-
-    if(_impl)
-    {
-        _impl->setMinimumSize(_minimumSize);
-        _impl->setMaximumSize(_maximumSize);
-    }
-
+    _parent->onSetSizeLimits(*this, _minimumSize, _maximumSize);
     _parent->onSetState(*this, _state);
     _parent->onSetTitle(*this, _title);
     _parent->onSetIcon(*this, _icon);
@@ -966,12 +932,10 @@ const Gfx::SizeF& Window::minimumSize() const
 
 void Window::setMinimumSize(const Gfx::SizeF& s)
 {
-    if( _impl ) 
-        _impl->setMinimumSize(s);
-
     _minimumSize = s;
 
-    // TODO: notify parent?
+    if(_parent)
+        _parent->onSetSizeLimits(*this, _minimumSize, _maximumSize);
 }
 
 
@@ -999,12 +963,10 @@ const Gfx::SizeF& Window::maximumSize() const
 
 void Window::setMaximumSize(const Gfx::SizeF& s)
 {
-    if( _impl )
-        _impl->setMaximumSize(s);
-
     _maximumSize = s;
 
-    // TODO: notify parent?
+    if(_parent)
+        _parent->onSetSizeLimits(*this, _minimumSize, _maximumSize);
 }
 
 

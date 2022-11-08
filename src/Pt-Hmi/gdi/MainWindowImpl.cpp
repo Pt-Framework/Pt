@@ -293,12 +293,12 @@ void MainWindowImpl::setState(const WindowState& s)
 }
 
 
-void MainWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
+void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
 }
 
 
-void MainWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
+void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
 }
 

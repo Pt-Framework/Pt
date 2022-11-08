@@ -80,25 +80,9 @@ class WindowImpl
 
         WindowType type() const;
 
-        const Gfx::SizeF& minimumSize() const;
-        
-        void setMinimumSize(const Gfx::SizeF& s);
-
-        const Gfx::SizeF& maximumSize() const;
-    
-        void setMaximumSize(const Gfx::SizeF& s);
-
-    protected:
-        virtual void onSetMinimumSize(const Gfx::SizeF& s) = 0;
-
-       virtual  void onSetMaximumSize(const Gfx::SizeF& s) = 0;
-
     private:
         //WindowParams*  _params;
-
         WindowType    _type;
-        Gfx::SizeF    _minimumSize;
-        Gfx::SizeF    _maximumSize;
 };
 
 /** @brief Window base class.

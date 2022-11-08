@@ -78,15 +78,14 @@ class MainWindowImpl : public WindowImpl
 
         void setState(const WindowState& s);
 
+        void setMinimumSize(const Gfx::SizeF& s);
+    
+        void setMaximumSize(const Gfx::SizeF& s);
+
         HWND hwnd()
         {
             return _hwnd;
         }
-
-    protected:
-        virtual void onSetMinimumSize(const Gfx::SizeF& s);
-    
-        virtual void onSetMaximumSize(const Gfx::SizeF& s);
 
     private:   
         HWND    _hwnd;

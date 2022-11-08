@@ -107,6 +107,9 @@ class WindowManager
 
         virtual void onSetState(Window& w, const WindowState& state) = 0;
 
+        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                                const Gfx::SizeF& maxSize) = 0;
+
         virtual void onClosing(Window& w) = 0;
 };
 
