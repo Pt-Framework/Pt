@@ -343,6 +343,14 @@ void ScreenImpl::onSetState(Window& w, const WindowState& state)
 }
 
 
+void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
+                                            const Gfx::SizeF& maxSize)
+{
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    impl->setSizeLimits(minSize, maxSize);
+}
+
+
 void ScreenImpl::onFrameChanged(Window& w)
 {
 }

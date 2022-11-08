@@ -78,11 +78,10 @@ class MainWindowImpl : public WindowImpl
 
         void setIcon(const Gfx::Image& icon);
 
+        void setSizeLimits(const Gfx::SizeF& minSize,
+                           const Gfx::SizeF& maxSize);
+
     protected:
-        virtual void onSetMinimumSize(const Gfx::SizeF& s);
-
-        virtual void onSetMaximumSize(const Gfx::SizeF& s);
-
         //void grabPointer();
 
     public:

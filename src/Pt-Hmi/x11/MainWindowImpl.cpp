@@ -446,28 +446,17 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-
-void MainWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
+void MainWindowImpl::setSizeLimits(const Gfx::SizeF& minSize,
+                                   const Gfx::SizeF& maxSize)
 {
     XSizeHints hints;
     memset(&hints, 0, sizeof(hints));
 
-    hints.flags = PMinSize;
-    hints.min_width  = lround( s.width() );
-    hints.min_height = lround( s.height() );
-
-    XSetWMNormalHints(_display, _window, &hints);
-}
-
-
-void MainWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
-{
-    XSizeHints hints;
-    memset(&hints, 0, sizeof(hints));
-
-    hints.flags = PMaxSize;
-    hints.max_width  = lround( s.width() );
-    hints.max_height = lround( s.height() );
+    hints.flags = PMinSize | PMaxSize;
+    hints.min_width  = lround( minSize.width() );
+    hints.min_height = lround( minSize.height() );
+    hints.max_width  = lround( maxSize.width() );
+    hints.max_height = lround( maxSize.height() );
 
     XSetWMNormalHints(_display, _window, &hints);
 }

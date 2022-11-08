@@ -155,6 +155,9 @@ class ScreenImpl : public Visual
 
         virtual void onSetState(Window& w, const WindowState& state);
 
+        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
+                                                const Gfx::SizeF& smax);
+
         virtual void onFrameChanged(Window& w);
 
         virtual void onStateChanged(Window& w);
