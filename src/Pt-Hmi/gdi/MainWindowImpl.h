@@ -50,7 +50,7 @@ class MainWindowImpl : public WindowImpl
 
         ~MainWindowImpl();
 
-        virtual void setType(WindowType type);
+        void setType(WindowType type);
 
         double scaleFactor() const;
 
