@@ -867,18 +867,6 @@ Window::Type Window::type() const
 }
 
 
-//void Window::setType(Type type)
-//{
-//    if( _impl )
-//        _impl->setType(type);
-//
-//    _type = type;
-//
-//    if(_parent)
-//        _parent->onFrameChanged(*this);
-//}
-
-
 const Gfx::Image& Window::icon() const
 {
     return _icon;
