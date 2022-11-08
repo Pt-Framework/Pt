@@ -68,6 +68,8 @@ class MainWindowImpl : public WindowImpl
 
         void resize(const Gfx::SizeF& size);
 
+        void setAbove(bool isTop);
+
         HWND hwnd()
         {
             return _hwnd;
@@ -79,8 +81,6 @@ class MainWindowImpl : public WindowImpl
         virtual void onSetTitle(const std::string& text);
 
         virtual void onSetIcon(const Gfx::Image& p);
-
-        virtual void onSetTopMost(bool isTop);
 
         virtual void onSetState(Window::State s);
 

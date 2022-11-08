@@ -125,9 +125,8 @@ void MainWindowImpl::show(bool v)
 {
     if(v)
     {
-        onSetTopMost( isTopMost() );
-
         LONG style = GetWindowLong(_hwnd, GWL_EXSTYLE);
+
         if(style & WS_EX_NOACTIVATE)
           ShowWindow(_hwnd, SW_SHOWNOACTIVATE);
         else
@@ -257,12 +256,12 @@ void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::onSetTopMost(bool isTop)
+void MainWindowImpl::setAbove(bool isTop)
 {
-  if(isTop)
-    SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
-  else
-    SetWindowPos(_hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+    HWND insertBelow = isTop ? HWND_TOPMOST : HWND_NOTOPMOST;
+    
+    SetWindowPos(_hwnd, insertBelow, 0, 0, 0, 0, 
+                 SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
 }
 
 

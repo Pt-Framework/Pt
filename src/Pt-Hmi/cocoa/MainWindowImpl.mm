@@ -240,6 +240,12 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
+void MainWindowImpl::setAbove(bool isTop)
+{
+    // set NSWindowLevel floating window
+}
+
+
 void MainWindowImpl::onSetType(WindowType type)
 {
     switch(type)

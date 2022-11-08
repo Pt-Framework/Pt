@@ -180,7 +180,7 @@ void ComboBox::showPopup()
     popupPos = this->toGlobal(popupPos);
     _popup.move(popupPos);
 
-    _popup.setTopMost(true);
+    _popup.setAbove(true);
     _popup.setAnchor(this);
     
     _popup.show();

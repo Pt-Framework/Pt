@@ -328,6 +328,13 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
 }
 
 
+void ScreenImpl::onSetAbove(Window& w, bool above)
+{
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    impl->setAbove(above);
+}
+
+
 void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
     //

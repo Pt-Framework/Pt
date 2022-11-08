@@ -119,10 +119,6 @@ class WindowImpl
        
         void setIcon(const Gfx::Image& image);
 
-        void setTopMost(bool isTop);
-
-        bool isTopMost() const;
-
         WindowState state() const;
 
         void setState(WindowState s);
@@ -142,8 +138,6 @@ class WindowImpl
 
         virtual void onSetIcon(const Gfx::Image& p) = 0;
 
-        virtual void onSetTopMost(bool top) = 0;
-
         virtual void onSetState(WindowState s) = 0;
 
         virtual void onSetMinimumSize(const Gfx::SizeF& s) = 0;
@@ -156,7 +150,6 @@ class WindowImpl
         WindowType    _type;
         std::string   _title;
         Gfx::Image    _icon;
-        bool          _isTopMost;
         WindowState   _state;
         Gfx::SizeF    _minimumSize;
         Gfx::SizeF    _maximumSize;
@@ -279,9 +272,9 @@ class PT_HMI_API Window : public Visual
         void setMaximumHeight(double h);
 
 
-        bool isTopMost() const;
+        bool isAbove() const;
 
-        void setTopMost(bool top);
+        void setAbove(bool top);
 
 
         State state() const;
@@ -499,7 +492,7 @@ class PT_HMI_API Window : public Visual
         Gfx::SizeF                   _minimumSize;
         Gfx::SizeF                   _maximumSize;
         State                        _state;
-        bool                         _topMost;
+        bool                         _isAbove;
    
         AutoPtr<Gfx::Brush>          _background;
         Gfx::Brush                   _backgroundBrush;

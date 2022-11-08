@@ -514,6 +514,34 @@ void Shell::onResize(Window& w, const Gfx::SizeF& s)
 }
 
 
+void Shell::onSetAbove(Window& w, bool above)
+{
+    WindowFrame* frame = getWindowFrame(w);
+    if( ! frame )
+        return;
+
+    if(above)
+    {
+        if(_topMostWindow && _topMostWindow != frame)
+            _topMostWindow->window()->setAbove(false);
+
+        // move top most frame to the back
+        std::vector<WindowFrame*>::iterator it = std::find(_windows.begin(), 
+                                                           _windows.end(), frame);
+        if( it != _windows.end() )
+            _windows.erase(it);
+        
+        _windows.push_back(frame);
+
+        _topMostWindow = frame;
+    }
+    else if(_topMostWindow == frame)
+    {
+        _topMostWindow = 0;
+    }
+}
+
+
 void Shell::onFrameChanged(Window& w)
 {
     WindowFrame* frame = getWindowFrame(w);
@@ -588,25 +616,6 @@ void Shell::onStateChanged(Window& w)
 
         WindowStateEvent wse(w, state);
         Application::instance().loop().commitEvent(wse);
-    }
-
-    if( w.isTopMost() )
-    {
-        if(_topMostWindow && _topMostWindow != frame)
-            _topMostWindow->window()->setTopMost(false);
-
-        // move top most frame to the back
-        std::vector<WindowFrame*>::iterator it =
-            std::find(_windows.begin(), _windows.end(), frame);
-
-        _windows.erase(it);
-        _windows.push_back(frame);
-
-        _topMostWindow = frame;
-    }
-    else if(_topMostWindow == frame)
-    {
-        _topMostWindow = 0;
     }
 }
 

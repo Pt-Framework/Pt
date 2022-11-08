@@ -99,6 +99,8 @@ class WindowManager
 
         virtual void onResize(Window& w, const Gfx::SizeF& to) = 0;
 
+        virtual void onSetAbove(Window& w, bool above) = 0;
+
         virtual void onFrameChanged(Window& w) = 0;
 
         virtual void onStateChanged(Window& w) = 0; 

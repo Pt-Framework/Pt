@@ -153,6 +153,8 @@ class ScreenImpl : public Visual
 
         virtual void onResize(Window& w, const Gfx::SizeF& to);
 
+        virtual void onSetAbove(Window& w, bool above);
+
         virtual void onFrameChanged(Window& w);
 
         virtual void onStateChanged(Window& w);

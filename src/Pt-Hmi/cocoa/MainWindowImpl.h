@@ -87,6 +87,8 @@ class MainWindowImpl : public WindowImpl
 
         void resize(const Gfx::SizeF& size);
 
+        void setAbove(bool isTop);
+
     public:
         NSView* view()
         { 

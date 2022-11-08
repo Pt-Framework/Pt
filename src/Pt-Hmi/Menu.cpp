@@ -177,7 +177,7 @@ void Menu::onMenuTriggered(MenuItem& item)
         SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
         menu->resize(policy);
 
-        menu->setTopMost(true);
+        menu->setAbove(true);
         menu->show();
     }
     else

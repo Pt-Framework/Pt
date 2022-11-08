@@ -534,7 +534,7 @@ bool MainWindow::onMouseEvent(const MouseEvent& ev)
         _menu.resize(policy);
 
         _menu.move(menuPos);
-        _menu.setTopMost(true);
+        _menu.setAbove(true);
         _menu.show();
     }
 

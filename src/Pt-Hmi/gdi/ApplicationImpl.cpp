@@ -648,9 +648,7 @@ bool ApplicationImpl::onClose(Window& w)
 {  
     //CloseEvent ev(w);
     //w.processEvent(ev);
-    
-    //Application::instance().screen().impl()->onClosing(w);
-    
+
     w.close();
     return true;
 }

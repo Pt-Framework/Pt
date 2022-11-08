@@ -128,6 +128,8 @@ class PT_HMI_API Shell : public Widget
 
         virtual void onResize(Window& w, const Gfx::SizeF& to);
 
+        virtual void onSetAbove(Window& w, bool above);
+
         virtual void onFrameChanged(Window& w);
 
         virtual void onStateChanged(Window& w); 

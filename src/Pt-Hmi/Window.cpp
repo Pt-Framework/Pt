@@ -47,7 +47,6 @@ namespace Hmi {
 
 WindowImpl::WindowImpl(WindowType type) 
 : _type(type)
-, _isTopMost(false)
 , _state(WindowState::Normal)
 , _minimumSize(0, 0)
 , _maximumSize(64000, 64000)
@@ -95,19 +94,6 @@ void WindowImpl::setIcon(const Gfx::Image& image)
 {
     onSetIcon(image);
     _icon = image;
-}
-
-
-bool WindowImpl::isTopMost() const
-{
-    return _isTopMost;
-}
-
-
-void WindowImpl::setTopMost(bool top)
-{
-    onSetTopMost(top);
-    _isTopMost = top;
 }
 
 
@@ -171,7 +157,7 @@ Window::Window(WindowManager* parent, WindowType type)
 , _minimumSize(0, 0)
 , _maximumSize(64000, 64000)
 , _state(WindowState::Normal)
-, _topMost(false)
+, _isAbove(false)
 {
     _sheet.setParent(this);
 
@@ -225,12 +211,12 @@ void Window::setParent(WindowManager& parent)
     {
         _impl->setTitle(_title);
         _impl->setIcon(_icon);
-        _impl->setTopMost(_topMost);
         _impl->setState(_state);
         _impl->setMinimumSize(_minimumSize);
         _impl->setMaximumSize(_maximumSize);
     }
 
+    _parent->onSetAbove(*this, _isAbove);
     _parent->onMove(*this, _requestedPosition);
     _parent->onResize(*this, _requestedSize);
     _parent->onActivate(*this, _isActive);
@@ -1010,21 +996,18 @@ void Window::setTitle(const std::string& t)
 }
 
 
-bool Window::isTopMost() const
+bool Window::isAbove() const
 {
-    return _topMost;
+    return _isAbove;
 }
 
 
-void Window::setTopMost(bool top)
+void Window::setAbove(bool above)
 {
-    if( _impl )
-          _impl->setTopMost(top);
-
-    _topMost = top;
+    _isAbove = above;
 
     if(_parent)
-        _parent->onStateChanged(*this);
+        _parent->onSetAbove(*this, above);
 }
 
 
