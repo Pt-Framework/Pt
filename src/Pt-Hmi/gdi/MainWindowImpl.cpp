@@ -218,24 +218,26 @@ void MainWindowImpl::onSetType(WindowType type)
 }
 
 
-void MainWindowImpl::onSetTitle(const std::string& text)
+void MainWindowImpl::setTitle(const std::string& text)
 {
     SetWindowText(_hwnd, text.c_str());
 }
 
 
-void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
+void MainWindowImpl::setIcon(const Gfx::Image& icon)
 {
     if(icon.width() == 0 || icon.height() == 0)
+    {
+        SendMessage(_hwnd, WM_SETICON, ICON_SMALL, 0);
         return;
+    }
 
-    HINSTANCE hInstance = GetModuleHandle(NULL);
     const size_t planes = 4;
     std::vector<Pt::uint8_t> bitmapBuffer(icon.width() * icon.height() * planes);
         
     for(size_t y = 0; y < icon.height(); ++y)
     {
-        const size_t offsetLine = y * (icon.width()*planes);
+        const size_t offsetLine = y * (icon.width() * planes);
 
         for(size_t x = 0; x < icon.width(); ++x)
         {
@@ -251,8 +253,12 @@ void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
         }        
     }
 
-    HICON hIcon = ::CreateIcon(hInstance, icon.width(), icon.height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
-    SetClassLongPtr(_hwnd, GCLP_HICON, reinterpret_cast<LONG_PTR>(hIcon));     
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+    HICON hIcon = ::CreateIcon(hInstance, icon.width(), icon.height(), 
+                               4, 8, 0, (BYTE*)&bitmapBuffer[0]);
+
+    SendMessage(_hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+    DestroyIcon(hIcon);   
 }
 
 

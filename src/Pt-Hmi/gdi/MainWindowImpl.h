@@ -70,6 +70,10 @@ class MainWindowImpl : public WindowImpl
 
         void setAbove(bool isTop);
 
+        void setIcon(const Gfx::Image& p);
+
+        void setTitle(const std::string& text);
+
         HWND hwnd()
         {
             return _hwnd;
@@ -77,10 +81,6 @@ class MainWindowImpl : public WindowImpl
 
     protected:
         virtual void onSetType(WindowType type);
-
-        virtual void onSetTitle(const std::string& text);
-
-        virtual void onSetIcon(const Gfx::Image& p);
 
         virtual void onSetState(Window::State s);
 

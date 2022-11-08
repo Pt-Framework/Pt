@@ -282,12 +282,22 @@ void Shell::onAttach(Window& w)
 {
     WindowFrame* frame = new WindowFrame(*this, w);
 
+    switch( w.type() )
+    {
+        case WindowType::Popup:
+            frame->setFrame(0, 0);
+            break;
+        
+        default:
+        case WindowType::Default:
+            frame->setFrame(_borderWidth, _titleHeight);
+            break;
+    }
+
     if(_topMostWindow)
         _windows.insert( --_windows.end(), frame );
     else
         _windows.push_back(frame);
-
-    onFrameChanged(w);
 
     w.setNextResponder(this);
 }
@@ -542,30 +552,19 @@ void Shell::onSetAbove(Window& w, bool above)
 }
 
 
-void Shell::onFrameChanged(Window& w)
+void Shell::onSetTitle(Window& w, const std::string& text)
 {
     WindowFrame* frame = getWindowFrame(w);
     if( ! frame )
         return;
 
     Gfx::RectF updateRect = frame->frameRect();
-
-    switch( w.type() )
-    {
-        case WindowType::Popup:
-            frame->setFrame(0, 0);
-            break;
-        
-        default:
-        case WindowType::Default:
-            frame->setFrame(_borderWidth, _titleHeight);
-            break;
-    }
-
-    Gfx::RectF changedRect = frame->frameRect();
-    updateRect.unify(changedRect);
-
     repaint(updateRect);
+}
+
+
+void Shell::onSetIcon(Window& w, const Gfx::Image& icon)
+{
 }
 
 

@@ -72,31 +72,6 @@ void WindowImpl::setType(WindowType type)
 }
 
 
-const std::string& WindowImpl::title() const
-{
-    return _title;
-}
-
-void WindowImpl::setTitle(const std::string& s)
-{
-    onSetTitle(s);
-    _title = s;
-}
-
-
-const Gfx::Image& WindowImpl::icon() const
-{
-    return _icon;
-}
-
-       
-void WindowImpl::setIcon(const Gfx::Image& image)
-{
-    onSetIcon(image);
-    _icon = image;
-}
-
-
 WindowState WindowImpl::state() const
 {
     return _state;
@@ -209,13 +184,13 @@ void Window::setParent(WindowManager& parent)
 
     if(_impl)
     {
-        _impl->setTitle(_title);
-        _impl->setIcon(_icon);
         _impl->setState(_state);
         _impl->setMinimumSize(_minimumSize);
         _impl->setMaximumSize(_maximumSize);
     }
 
+    _parent->onSetTitle(*this, _title);
+    _parent->onSetIcon(*this, _icon);
     _parent->onSetAbove(*this, _isAbove);
     _parent->onMove(*this, _requestedPosition);
     _parent->onResize(*this, _requestedSize);
@@ -966,15 +941,12 @@ const Gfx::Image& Window::icon() const
 }
 
 
-void Window::setIcon(const Gfx::Image& i)
+void Window::setIcon(const Gfx::Image& icon)
 {
-    if( _impl )
-        _impl->setIcon(i);
-
-    _icon = i;
+    _icon = icon;
 
     if(_parent)
-        _parent->onFrameChanged(*this);
+        _parent->onSetIcon(*this, _icon);
 }
 
 
@@ -986,13 +958,10 @@ const std::string& Window::title() const
 
 void Window::setTitle(const std::string& t)
 {
-    if( _impl )
-        _impl->setTitle(t);
-
     _title = t;
 
     if(_parent)
-        _parent->onFrameChanged(*this);
+        _parent->onSetTitle(*this, _title);
 }
 
 

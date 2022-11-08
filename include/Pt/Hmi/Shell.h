@@ -130,7 +130,9 @@ class PT_HMI_API Shell : public Widget
 
         virtual void onSetAbove(Window& w, bool above);
 
-        virtual void onFrameChanged(Window& w);
+        virtual void onSetTitle(Window& w, const std::string& text);
+
+        virtual void onSetIcon(Window& w, const Gfx::Image& icon);
 
         virtual void onStateChanged(Window& w); 
 

@@ -331,8 +331,17 @@ void ScreenImpl::onSetAbove(Window& w, bool above)
 }
 
 
-void ScreenImpl::onFrameChanged(Window& w)
+void ScreenImpl::onSetTitle(Window& w, const std::string& text)
 {
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    impl->setTitle(text);
+}
+
+
+void ScreenImpl::onSetIcon(Window& w, const Gfx::Image& icon)
+{
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    impl->setIcon(icon);
 }
 
 

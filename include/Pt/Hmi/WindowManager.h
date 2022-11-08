@@ -101,7 +101,9 @@ class WindowManager
 
         virtual void onSetAbove(Window& w, bool above) = 0;
 
-        virtual void onFrameChanged(Window& w) = 0;
+        virtual void onSetTitle(Window& w, const std::string& text) = 0;
+
+        virtual void onSetIcon(Window& w, const Gfx::Image& icon) = 0;
 
         virtual void onStateChanged(Window& w) = 0; 
 

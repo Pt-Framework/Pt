@@ -111,14 +111,6 @@ class WindowImpl
 
         void setType(WindowType type);
 
-        const std::string& title() const;
-
-        void setTitle(const std::string& text);
-
-        const Gfx::Image& icon() const;
-       
-        void setIcon(const Gfx::Image& image);
-
         WindowState state() const;
 
         void setState(WindowState s);
@@ -134,10 +126,6 @@ class WindowImpl
     protected:
         virtual void onSetType(WindowType type) = 0;
 
-        virtual void onSetTitle(const std::string& text) = 0;
-
-        virtual void onSetIcon(const Gfx::Image& p) = 0;
-
         virtual void onSetState(WindowState s) = 0;
 
         virtual void onSetMinimumSize(const Gfx::SizeF& s) = 0;
@@ -148,8 +136,6 @@ class WindowImpl
         //WindowParams*  _params;
 
         WindowType    _type;
-        std::string   _title;
-        Gfx::Image    _icon;
         WindowState   _state;
         Gfx::SizeF    _minimumSize;
         Gfx::SizeF    _maximumSize;
