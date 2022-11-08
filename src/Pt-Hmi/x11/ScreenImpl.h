@@ -153,6 +153,8 @@ class ScreenImpl : public Visual
 
         virtual void onSetIcon(Window& w, const Gfx::Image& icon);
 
+        virtual void onSetState(Window& w, const WindowState& state);
+
         virtual void onFrameChanged(Window& w);
 
         virtual void onStateChanged(Window& w);

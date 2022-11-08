@@ -336,6 +336,13 @@ void ScreenImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 }
 
 
+void ScreenImpl::onSetState(Window& w, const WindowState& state)
+{
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    impl->setState(state);
+}
+
+
 void ScreenImpl::onFrameChanged(Window& w)
 {
 }

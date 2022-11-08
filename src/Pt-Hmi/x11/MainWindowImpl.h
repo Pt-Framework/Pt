@@ -50,6 +50,8 @@ class MainWindowImpl : public WindowImpl
 
         virtual ~MainWindowImpl();
 
+        void setType(Window::Type type);
+
         double scaleFactor() const;
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
@@ -57,6 +59,8 @@ class MainWindowImpl : public WindowImpl
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
         void paint(const Gfx::RectF& rect);
+
+        void setState(const WindowState& s);
 
         void show(bool visible);
 
@@ -70,15 +74,11 @@ class MainWindowImpl : public WindowImpl
 
         void setAbove(bool above);
 
-        void setTitle(Window& w, const std::string& text);
+        void setTitle(const std::string& text);
 
-        void setIcon(Window& w, const Gfx::Image& icon);
+        void setIcon(const Gfx::Image& icon);
 
     protected:
-        virtual void onSetType(WindowType type);
-
-        virtual void onSetState(Window::State s);
-
         virtual void onSetMinimumSize(const Gfx::SizeF& s);
 
         virtual void onSetMaximumSize(const Gfx::SizeF& s);

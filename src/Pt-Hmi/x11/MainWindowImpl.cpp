@@ -219,6 +219,46 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
 }
 
 
+void MainWindowImpl::setState(const WindowState& s)
+{
+    //std::clog  << "setState: " << s << std::endl;
+
+    XClientMessageEvent ev;
+    ev.type       = ClientMessage;
+    ev.serial     = 0;
+    ev.window     = _window;
+    ev.format     = 32;
+    ev.send_event = True;
+
+    switch(s)
+    {
+        default:
+        case WindowState::Normal:
+            ev.message_type = Application::instance().impl()->wmChangeState();
+            ev.data.l[0] = NormalState;
+            break;
+
+        case WindowState::Minimized:
+            ev.message_type = Application::instance().impl()->wmChangeState();
+            ev.data.l[0] = IconicState;
+            break;
+
+        case WindowState::Maximized:
+            ev.message_type = Application::instance().impl()->netWmState();
+            ev.data.l[0]  = 1ul;
+            ev.data.l[1]  = Application::instance().impl()->netWmStateMaximizedVert();
+            ev.data.l[2]  = Application::instance().impl()->netWmStateMaximizedHorz();
+            break;
+    }
+
+    XSendEvent(_display, XDefaultRootWindow(_display),False,
+               SubstructureRedirectMask,
+               (XEvent*)&ev);
+
+    //XFlush(_display);
+}
+
+
 void MainWindowImpl::show(bool visible)
 {
     if(visible)
@@ -331,7 +371,7 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
-void MainWindowImpl::onSetType(Window::Type type)
+void MainWindowImpl::setType(Window::Type type)
 {
     //std::clog << "XChangeWindowAttributes: " << type << std::endl;
 
@@ -382,13 +422,13 @@ void MainWindowImpl::setAbove(bool above)
 }
 
 
-void MainWindowImpl::setTitle(Window& w, const std::string& text)
+void MainWindowImpl::setTitle(const std::string& text)
 {
     XStoreName(_display, _window, text.c_str());
 }
 
 
-void MainWindowImpl::setIcon(Window& w, const Gfx::Image& icon)
+void MainWindowImpl::setIcon(const Gfx::Image& icon)
 {
     //std::clog << "XAllocWMHints" << std::endl;
 
@@ -403,46 +443,6 @@ void MainWindowImpl::setIcon(Window& w, const Gfx::Image& icon)
 
     XSetWMHints(_display, _window, hints);
     XFree(hints);
-}
-
-
-void MainWindowImpl::onSetState(Window::State s)
-{
-    //std::clog  << "setState: " << s << std::endl;
-
-    XClientMessageEvent ev;
-    ev.type       = ClientMessage;
-    ev.serial     = 0;
-    ev.window     = _window;
-    ev.format     = 32;
-    ev.send_event = True;
-
-    switch(s)
-    {
-        default:
-        case WindowState::Normal:
-            ev.message_type = Application::instance().impl()->wmChangeState();
-            ev.data.l[0] = NormalState;
-            break;
-
-        case WindowState::Minimized:
-            ev.message_type = Application::instance().impl()->wmChangeState();
-            ev.data.l[0] = IconicState;
-            break;
-
-        case WindowState::Maximized:
-            ev.message_type = Application::instance().impl()->netWmState();
-            ev.data.l[0]  = 1ul;
-            ev.data.l[1]  = Application::instance().impl()->netWmStateMaximizedVert();
-            ev.data.l[2]  = Application::instance().impl()->netWmStateMaximizedHorz();
-            break;
-    }
-
-    XSendEvent(_display, XDefaultRootWindow(_display),False,
-               SubstructureRedirectMask,
-               (XEvent*)&ev);
-
-    //XFlush(_display);
 }
 
 
