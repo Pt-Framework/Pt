@@ -105,7 +105,7 @@ class WindowManager
 
         virtual void onSetIcon(Window& w, const Gfx::Image& icon) = 0;
 
-        virtual void onStateChanged(Window& w) = 0; 
+        virtual void onSetState(Window& w, const WindowState& state) = 0;
 
         virtual void onClosing(Window& w) = 0;
 };

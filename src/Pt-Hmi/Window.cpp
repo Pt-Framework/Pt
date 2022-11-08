@@ -47,7 +47,6 @@ namespace Hmi {
 
 WindowImpl::WindowImpl(WindowType type) 
 : _type(type)
-, _state(WindowState::Normal)
 , _minimumSize(0, 0)
 , _maximumSize(64000, 64000)
 {
@@ -62,26 +61,6 @@ WindowImpl::~WindowImpl()
 WindowType WindowImpl::type() const
 {
     return _type;
-}
-
-
-void WindowImpl::setType(WindowType type)
-{
-    onSetType(type);
-    _type = type;
-}
-
-
-WindowState WindowImpl::state() const
-{
-    return _state;
-}
-
-
-void WindowImpl::setState(WindowState s)
-{
-    onSetState(s);
-    _state = s;
 }
 
 
@@ -184,11 +163,11 @@ void Window::setParent(WindowManager& parent)
 
     if(_impl)
     {
-        _impl->setState(_state);
         _impl->setMinimumSize(_minimumSize);
         _impl->setMaximumSize(_maximumSize);
     }
 
+    _parent->onSetState(*this, _state);
     _parent->onSetTitle(*this, _title);
     _parent->onSetIcon(*this, _icon);
     _parent->onSetAbove(*this, _isAbove);
@@ -196,7 +175,6 @@ void Window::setParent(WindowManager& parent)
     _parent->onResize(*this, _requestedSize);
     _parent->onActivate(*this, _isActive);
     _parent->onEnable(*this, _enabled);
-    _parent->onStateChanged(*this);
     _parent->onShow(*this, _visible);
     
     onParentChanged(_parent);
@@ -1046,21 +1024,18 @@ void Window::setMaximumHeight(double h)
 }
 
 
-Window::State Window::state() const
+WindowState Window::state() const
 {   
     return _state;
 }
 
 
-void Window::setState(Window::State s)
+void Window::setState(const WindowState& s)
 {
-    if( _impl )
-        _impl->setState(s);
-
     _state = s;
 
     if(_parent)
-        _parent->onStateChanged(*this);
+        _parent->onSetState(*this, _state);
 }
 
 

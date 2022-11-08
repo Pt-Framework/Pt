@@ -71,6 +71,35 @@ class WindowType
         Pt::uint32_t _type;
 };
 
+class WindowState
+{
+    public:
+        enum State
+        {
+            Normal = 0,
+            Minimized = 1,
+            Maximized = 2
+        };
+
+        WindowState(State t = Normal)
+        : _state(t)
+        {}
+
+        WindowState& operator=(State t)
+        {
+            _state = t;
+            return *this;
+        }
+
+        operator Pt::uint32_t() const
+        { 
+            return _state; 
+        }
+
+    private:
+        Pt::uint32_t _state;
+};
+
 } // namespace
 
 } // namespace

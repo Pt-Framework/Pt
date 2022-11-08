@@ -67,35 +67,6 @@ class MainWindowImpl;
 class WindowStateEvent;
 class PaintEvent;
 
-class WindowState
-{
-    public:
-        enum State
-        {
-            Normal = 0,
-            Minimized = 1,
-            Maximized = 2
-        };
-
-        WindowState(State t = Normal)
-        : _state(t)
-        {}
-
-        WindowState& operator=(State t)
-        {
-            _state = t;
-            return *this;
-        }
-
-        operator Pt::uint32_t() const
-        { 
-            return _state; 
-        }
-
-    private:
-        Pt::uint32_t _state;
-};
-
 /** @internal @brief Window implementation base class.
 */
 class WindowImpl
@@ -109,12 +80,6 @@ class WindowImpl
 
         WindowType type() const;
 
-        void setType(WindowType type);
-
-        WindowState state() const;
-
-        void setState(WindowState s);
-
         const Gfx::SizeF& minimumSize() const;
         
         void setMinimumSize(const Gfx::SizeF& s);
@@ -124,10 +89,6 @@ class WindowImpl
         void setMaximumSize(const Gfx::SizeF& s);
 
     protected:
-        virtual void onSetType(WindowType type) = 0;
-
-        virtual void onSetState(WindowState s) = 0;
-
         virtual void onSetMinimumSize(const Gfx::SizeF& s) = 0;
 
        virtual  void onSetMaximumSize(const Gfx::SizeF& s) = 0;
@@ -136,7 +97,6 @@ class WindowImpl
         //WindowParams*  _params;
 
         WindowType    _type;
-        WindowState   _state;
         Gfx::SizeF    _minimumSize;
         Gfx::SizeF    _maximumSize;
 };
@@ -263,9 +223,9 @@ class PT_HMI_API Window : public Visual
         void setAbove(bool top);
 
 
-        State state() const;
+        WindowState state() const;
 
-        void setState(State s);
+        void setState(const WindowState& s);
 
 
         const Gfx::Brush& background() const;

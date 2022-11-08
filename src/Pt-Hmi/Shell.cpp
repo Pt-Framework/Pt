@@ -568,13 +568,12 @@ void Shell::onSetIcon(Window& w, const Gfx::Image& icon)
 }
 
 
-void Shell::onStateChanged(Window& w)
+void Shell::onSetState(Window& w, const WindowState& state)
 {
     WindowFrame* frame = getWindowFrame(w);
     if( ! frame )
         return;
 
-    Window::State state = w.state();
     Window::State oldState = frame->state();
     
     if(state != oldState)

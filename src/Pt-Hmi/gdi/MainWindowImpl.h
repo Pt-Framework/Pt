@@ -50,6 +50,8 @@ class MainWindowImpl : public WindowImpl
 
         ~MainWindowImpl();
 
+        virtual void setType(WindowType type);
+
         double scaleFactor() const;
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
@@ -74,16 +76,14 @@ class MainWindowImpl : public WindowImpl
 
         void setTitle(const std::string& text);
 
+        void setState(const WindowState& s);
+
         HWND hwnd()
         {
             return _hwnd;
         }
 
     protected:
-        virtual void onSetType(WindowType type);
-
-        virtual void onSetState(Window::State s);
-
         virtual void onSetMinimumSize(const Gfx::SizeF& s);
     
         virtual void onSetMaximumSize(const Gfx::SizeF& s);

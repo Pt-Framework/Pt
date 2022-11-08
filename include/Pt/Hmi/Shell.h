@@ -134,7 +134,7 @@ class PT_HMI_API Shell : public Widget
 
         virtual void onSetIcon(Window& w, const Gfx::Image& icon);
 
-        virtual void onStateChanged(Window& w); 
+        virtual void onSetState(Window& w, const WindowState& state); 
 
         virtual void onClosing(Window& w);
 
