@@ -68,6 +68,8 @@ class MainWindowImpl : public WindowImpl
 
         virtual ~MainWindowImpl();
 
+        
+        void setType(WindowType type);
 
         double scaleFactor() const;
 
@@ -93,6 +95,8 @@ class MainWindowImpl : public WindowImpl
 
         void setTitle(const std::string& text);
 
+        void setState(const WindowState& s);
+
     public:
         NSView* view()
         { 
@@ -104,10 +108,6 @@ class MainWindowImpl : public WindowImpl
             return _window;
         }
     protected:
-        virtual void onSetType(WindowType type);
-
-        virtual void onSetState(Window::State s);
-
         virtual void onSetMinimumSize(const Gfx::SizeF& s);
     
         virtual void onSetMaximumSize(const Gfx::SizeF& s);

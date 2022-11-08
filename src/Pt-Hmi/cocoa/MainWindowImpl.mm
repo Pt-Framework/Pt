@@ -105,6 +105,40 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
+void MainWindowImpl::setType(WindowType type)
+{
+    switch(type)
+    {
+        case WindowType::Popup:
+            _windowStyle = NSWindowStyleMaskBorderless;
+            break;
+
+        default:
+        case WindowType::Default:
+            _windowStyle = NSWindowStyleMaskTitled |
+                           NSWindowStyleMaskClosable |
+                           NSWindowStyleMaskMiniaturizable |
+                           NSWindowStyleMaskResizable;
+            break;
+    }
+
+    [_window setStyleMask:_windowStyle];
+    
+    // if(type == WindowType::Popup)
+    // {
+    //     [_window setTitlebarAppearsTransparent: YES];
+    //     [_window setTitleVisibility: NSWindowTitleHidden];
+    //     [_window setOpaque:NO];
+    // }
+    // else
+    // {
+    //     [_window setTitlebarAppearsTransparent: NO];
+    //     [_window setTitleVisibility: NSWindowTitleVisible];
+    //     [_window setOpaque:YES];
+    // }
+}
+
+
 double MainWindowImpl::scaleFactor() const
 {
     return [_window backingScaleFactor];
@@ -266,41 +300,7 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::onSetType(WindowType type)
-{
-    switch(type)
-    {
-        case WindowType::Popup:
-            _windowStyle = NSWindowStyleMaskBorderless;
-            break;
-
-        default:
-        case WindowType::Default:
-            _windowStyle = NSWindowStyleMaskTitled |
-                           NSWindowStyleMaskClosable |
-                           NSWindowStyleMaskMiniaturizable |
-                           NSWindowStyleMaskResizable;
-            break;
-    }
-
-    [_window setStyleMask:_windowStyle];
-    
-    // if(type == WindowType::Popup)
-    // {
-    //     [_window setTitlebarAppearsTransparent: YES];
-    //     [_window setTitleVisibility: NSWindowTitleHidden];
-    //     [_window setOpaque:NO];
-    // }
-    // else
-    // {
-    //     [_window setTitlebarAppearsTransparent: NO];
-    //     [_window setTitleVisibility: NSWindowTitleVisible];
-    //     [_window setOpaque:YES];
-    // }
-}
-
-
-void MainWindowImpl::onSetState(Window::State s)
+void MainWindowImpl::setState(const WindowState& s)
 {
     switch(s)
     {
