@@ -196,9 +196,9 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
       return;
 
     //std::clog << "XClearArea " << title() << " "
-    //                           << rectF.x() << ", " << rectF.y() << " " 
+    //                           << rectF.x() << ", " << rectF.y() << " "
     //                           << rectF.width() << "x" << rectF.height() << std::endl;
-  
+
     //XExposeEvent ev = { Expose, 0, True, _display, _window,
     //                   static_cast<int>( rect.x()),
     //                   static_cast<int>( rect.y()),
@@ -208,11 +208,11 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
 
     //Application::instance().impl()->processEvent( (XEvent&)ev);
 
-    XClearArea(_display, _window, 
+    XClearArea(_display, _window,
                static_cast<int>( rect.x() ),
                static_cast<int>( rect.y() ),
                static_cast<int>( rect.width() ),
-               static_cast<int>( rect.height() ), 
+               static_cast<int>( rect.height() ),
                True);
 
     //XFlush(_display);
@@ -227,7 +227,7 @@ void MainWindowImpl::show(bool visible)
         XMapWindow(_display, _window);
         //XFlush(_display);
 
-        //while( XPending(_display) > 0 ) 
+        //while( XPending(_display) > 0 )
         //{
         //    XEvent xev;
         //    XNextEvent(_display, &xev);
@@ -260,8 +260,8 @@ void MainWindowImpl::activate()
 
     XWindowAttributes wattr;
     XGetWindowAttributes(_display, _window, &wattr);
-    
-    XSendEvent(_display, XDefaultRootWindow(_display), 
+
+    XSendEvent(_display, XDefaultRootWindow(_display),
                False, SubstructureNotifyMask|SubstructureRedirectMask, &xev);
 
     //XFlush(_display);
@@ -300,7 +300,7 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
     XMoveWindow(_display, _window, pos.x(), pos.y());
     //XFlush(_display);
 
-    //while( XPending(_display) > 0 ) 
+    //while( XPending(_display) > 0 )
     //{
     //    XEvent xev;
     //    XNextEvent(_display, &xev);
@@ -312,16 +312,16 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
-    //std::clog  << "XResizeWindow: " << size.width() 
+    //std::clog  << "XResizeWindow: " << size.width()
     //           << "x" << size.height() << std::endl;
 
     XResizeWindow( _display, _window, size.width(), size.height() );
     //XFlush(_display);
-    
+
     //XClearArea(_display, _window, 0, 0, size.width(), size.height(), True);
     //XFlush(_display);
 
-    //while( XPending(_display) > 0 ) 
+    //while( XPending(_display) > 0 )
     //{
     //    XEvent xev;
     //    XNextEvent(_display, &xev);
@@ -351,31 +351,7 @@ void MainWindowImpl::onSetType(Window::Type type)
 }
 
 
-void MainWindowImpl::onSetTitle(const std::string& text)
-{
-    XStoreName(_display, _window, text.c_str());
-}
-
-
-void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
-{
-    //std::clog << "XAllocWMHints" << std::endl;
-    
-    XWMHints* hints = XAllocWMHints();
-    if ( ! hints )
-        return;
-
-    hints->flags = IconPixmapHint | IconPositionHint;
-    hints->icon_pixmap = None;
-    hints->icon_x = 0;
-    hints->icon_y = 0;
-
-    XSetWMHints(_display, _window, hints);
-    XFree(hints);
-}
-
-
-void MainWindowImpl::onSetTopMost(bool topMost)
+void MainWindowImpl::setAbove(bool above)
 {
     //std::clog << "setTopMost: " << topMost << std::endl;
 
@@ -394,8 +370,8 @@ void MainWindowImpl::onSetTopMost(bool topMost)
     ev.xclient.window = _window; // modified window
     ev.xclient.message_type = Application::instance().impl()->netWmState();
     ev.xclient.format = 32; // use data.l
-    ev.xclient.data.l[0] = topMost ? _NET_WM_STATE_ADD
-                                   : _NET_WM_STATE_REMOVE;
+    ev.xclient.data.l[0] = above ? _NET_WM_STATE_ADD
+                                 : _NET_WM_STATE_REMOVE;
     ev.xclient.data.l[1] = Application::instance().impl()->netWmStateAbove();
     ev.xclient.data.l[2] = 0;
     ev.xclient.data.l[3] = 0;
@@ -403,6 +379,30 @@ void MainWindowImpl::onSetTopMost(bool topMost)
 
     XSendEvent(_display, XDefaultRootWindow(_display), False,
                SubstructureRedirectMask, &ev);
+}
+
+
+void MainWindowImpl::setTitle(Window& w, const std::string& text)
+{
+    XStoreName(_display, _window, text.c_str());
+}
+
+
+void MainWindowImpl::setIcon(Window& w, const Gfx::Image& icon)
+{
+    //std::clog << "XAllocWMHints" << std::endl;
+
+    XWMHints* hints = XAllocWMHints();
+    if ( ! hints )
+        return;
+
+    hints->flags = IconPixmapHint | IconPositionHint;
+    hints->icon_pixmap = None;
+    hints->icon_x = 0;
+    hints->icon_y = 0;
+
+    XSetWMHints(_display, _window, hints);
+    XFree(hints);
 }
 
 
@@ -416,7 +416,7 @@ void MainWindowImpl::onSetState(Window::State s)
     ev.window     = _window;
     ev.format     = 32;
     ev.send_event = True;
-    
+
     switch(s)
     {
         default:
@@ -438,7 +438,7 @@ void MainWindowImpl::onSetState(Window::State s)
             break;
     }
 
-    XSendEvent(_display, XDefaultRootWindow(_display),False, 
+    XSendEvent(_display, XDefaultRootWindow(_display),False,
                SubstructureRedirectMask,
                (XEvent*)&ev);
 

@@ -1,10 +1,10 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-  
+/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -56,15 +56,15 @@ class ScreenImpl : public Visual
 {
     public:
         ScreenImpl(ApplicationImpl& app);
-        
+
         virtual ~ScreenImpl();
 
-        
+
         void setParent(Screen* screen);
 
         void setNextResponder(Responder* r);
 
-        
+
         void addWindow(Window& w);
 
         void removeWindow(Window& w);
@@ -73,15 +73,15 @@ class ScreenImpl : public Visual
 
         void setCapture(Visual* capture);
 
-        
+
         const Gfx::SizeF& size() const;
 
         double scaleFactor() const;
 
-        
+
         void repaint(const Gfx::RectF& rect);
 
-        
+
         bool isEnabled() const;
 
     //
@@ -122,22 +122,22 @@ class ScreenImpl : public Visual
         virtual WindowImpl* onCreateWindow(const WindowType& type);
 
         virtual void onAttach(Window& w);
-    
+
         virtual void onDetach(Window& w);
 
         virtual void onInit(Window& w);
 
         virtual void onRelease(Window& w);
 
-        virtual Gfx::PointF onToWindow(const Window& w, 
+        virtual Gfx::PointF onToWindow(const Window& w,
                                        const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromWindow(const Window& w, 
+        virtual Gfx::PointF onFromWindow(const Window& w,
                                          const Gfx::PointF& pos) const;
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
-        virtual void onShow(Window& w, bool visible); 
+        virtual void onShow(Window& w, bool visible);
 
         virtual void onActivate(Window& w, bool active);
 
@@ -146,6 +146,12 @@ class ScreenImpl : public Visual
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& to);
+
+        virtual void onSetAbove(Window& w, bool above);
+
+        virtual void onSetTitle(Window& w, const std::string& text);
+
+        virtual void onSetIcon(Window& w, const Gfx::Image& icon);
 
         virtual void onFrameChanged(Window& w);
 
@@ -178,7 +184,7 @@ class ScreenImpl : public Visual
         void onProcessEnableEvent(const EnableEvent& ev);
 
         virtual void onEnable(bool e);
-    
+
     //
     // input
     //

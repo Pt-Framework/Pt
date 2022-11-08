@@ -1,10 +1,10 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-  
+/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -91,13 +91,13 @@ void ScreenImpl::setNextResponder(Responder* r)
 
 void ScreenImpl::addWindow(Window& w)
 {
-    w.setParent(*this); 
+    w.setParent(*this);
 }
 
 
 void ScreenImpl::removeWindow(Window& w)
-{ 
-    w.unparent(); 
+{
+    w.unparent();
 }
 
 
@@ -114,8 +114,8 @@ const Gfx::SizeF& ScreenImpl::size() const
 
 
 double ScreenImpl::scaleFactor() const
-{ 
-    return _scaling; 
+{
+    return _scaling;
 }
 
 
@@ -227,7 +227,7 @@ void ScreenImpl::onRelease(Window& w)
 }
 
 
-Gfx::PointF ScreenImpl::onFromWindow(const Window& w, 
+Gfx::PointF ScreenImpl::onFromWindow(const Window& w,
                                      const Gfx::PointF& pos) const
 {
     const MainWindowImpl* impl = static_cast<const MainWindowImpl*>( w.impl() );
@@ -239,7 +239,7 @@ Gfx::PointF ScreenImpl::onFromWindow(const Window& w,
 }
 
 
-Gfx::PointF ScreenImpl::onToWindow(const Window& w, 
+Gfx::PointF ScreenImpl::onToWindow(const Window& w,
                                    const Gfx::PointF& pos) const
 {
     const MainWindowImpl* impl = static_cast<const MainWindowImpl*>( w.impl() );
@@ -315,6 +315,27 @@ void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 }
 
 
+void ScreenImpl::onSetAbove(Window& w, bool above)
+{
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    impl->setAbove(above);
+}
+
+
+void ScreenImpl::onSetTitle(Window& w, const std::string& text)
+{
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    impl->setTitle(text);
+}
+
+
+void ScreenImpl::onSetIcon(Window& w, const Gfx::Image& icon)
+{
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    impl->setIcon(icon);
+}
+
+
 void ScreenImpl::onFrameChanged(Window& w)
 {
 }
@@ -364,7 +385,7 @@ void ScreenImpl::setCapture(Visual* capture)
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         Window* window = *wit;
-        
+
         if( capture == window || capture->isDescendantOf(*window) )
         {
             MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
@@ -376,7 +397,7 @@ void ScreenImpl::setCapture(Visual* capture)
                          ButtonMotionMask|PointerMotionMask,
                          GrabModeAsync, GrabModeAsync,
                          None, None, CurrentTime);
-            
+
             //std::clog << "GRAB POINTER: " << typeid(*capture).name() << " " << impl->window() << std::endl;
             return;
         }
@@ -401,7 +422,7 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         Window* window = *wit;
-        
+
         RescaleEvent ev(*window, _scaling);
         window->processEvent(ev);
     }
@@ -440,7 +461,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );
 
         // send (native) paint event to window
-        winRect = Gfx::RectF( winRect.topLeft() * window->scaleFactor(), 
+        winRect = Gfx::RectF( winRect.topLeft() * window->scaleFactor(),
                               winRect.size() * window->scaleFactor());
 
         MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
@@ -450,7 +471,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 
 
 void ScreenImpl::onPaintEvent(const PaintEvent& ev)
-{    
+{
     const Gfx::RectF& rect = ev.rect();
     onPaint(rect);
 }
@@ -498,9 +519,9 @@ void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 
 
 bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
-{ 
+{
     // TODO: possibly pass on to application
-    return false; 
+    return false;
 }
 
 
@@ -511,9 +532,9 @@ void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
 
 
 bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
-{ 
+{
     // TODO: possibly pass on to application
-    return false; 
+    return false;
 }
 
 
@@ -524,9 +545,9 @@ void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
 
 
 bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
-{ 
+{
     // TODO: possibly pass on to application
-    return false; 
+    return false;
 }
 
 
@@ -537,9 +558,9 @@ void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 
 
 bool ScreenImpl::onKeyEvent(const KeyEvent& ev)
-{ 
+{
     // TODO: possibly pass on to application
-    return false; 
+    return false;
 }
 
 } // namespace
