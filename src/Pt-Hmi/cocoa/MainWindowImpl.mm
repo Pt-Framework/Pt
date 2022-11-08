@@ -240,9 +240,29 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
-void MainWindowImpl::setAbove(bool isTop)
+void MainWindowImpl::setAbove(bool above)
 {
-    // set NSWindowLevel floating window
+    if(above)
+    {
+        [_window setLevel: NSFloatingWindowLevel];
+    }
+    else
+    {
+        [_window setLevel: NSNormalWindowLevel];
+    }
+}
+
+
+void MainWindowImpl::setTitle(const std::string& text)
+{
+    NSString* title = [NSString stringWithCString:text.c_str() 
+                                encoding:[NSString defaultCStringEncoding]];
+    [_window setTitle: title];
+}
+
+
+void MainWindowImpl::setIcon(const Gfx::Image& icon)
+{
 }
 
 
@@ -277,32 +297,6 @@ void MainWindowImpl::onSetType(WindowType type)
     //     [_window setTitleVisibility: NSWindowTitleVisible];
     //     [_window setOpaque:YES];
     // }
-}
-
-
-void MainWindowImpl::onSetTitle(const std::string& text)
-{
-    NSString* title = [NSString stringWithCString:text.c_str() 
-                                encoding:[NSString defaultCStringEncoding]];
-    [_window setTitle: title];
-}
-
-
-void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
-{
-}
-
-
-void MainWindowImpl::onSetTopMost(bool isTop)
-{
-    if(isTop)
-    {
-        [_window setLevel: NSMainMenuWindowLevel];
-    }
-    else
-    {
-        [_window setLevel: NSNormalWindowLevel];
-    }
 }
 
 

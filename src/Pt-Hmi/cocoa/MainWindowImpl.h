@@ -89,6 +89,10 @@ class MainWindowImpl : public WindowImpl
 
         void setAbove(bool isTop);
 
+        void setIcon(const Gfx::Image& p);
+
+        void setTitle(const std::string& text);
+
     public:
         NSView* view()
         { 
@@ -101,12 +105,6 @@ class MainWindowImpl : public WindowImpl
         }
     protected:
         virtual void onSetType(WindowType type);
-
-        virtual void onSetTitle(const std::string& text);
-
-        virtual void onSetIcon(const Gfx::Image& p);
-
-        virtual void onSetTopMost(bool isTop);
 
         virtual void onSetState(Window::State s);
 
