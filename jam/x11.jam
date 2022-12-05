@@ -9,9 +9,9 @@ X11_INCLUDE_PATHS = /usr/include
                     /opt/X11R6/include ;
 
 X11_LIBRARY_PATHS = /usr/lib
+                    /usr/lib/x86_64-linux-gnu
                     /usr/lib/i386-linux-gnu
-		    /usr/lib/arm-linux-gnueabihf
-	            /usr/lib/x86_64-linux-gnu
+                    /usr/lib/arm-linux-gnueabihf
                     /usr/X11R7/lib
                     /usr/X11R6/lib
                     /opt/X11R6/lib
