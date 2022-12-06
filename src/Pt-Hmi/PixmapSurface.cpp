@@ -63,6 +63,12 @@ void PixmapSurface::clear(const Gfx::Color& c)
 }
 
 
+Gfx::Image PixmapSurface::getImage() const
+{
+    return _impl->getImage();
+}
+
+
 const Gfx::SizeF& PixmapSurface::onSize() const
 {
     return _logicSize;

@@ -56,6 +56,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         const Gfx::SizeF& size() const;
 
+        Gfx::Image getImage() const;
+
         void begin(Painter& painter);  
         
         void finish();           

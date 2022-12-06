@@ -114,6 +114,13 @@ const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 }
 
 
+Gfx::Image PixmapSurfaceImpl::getImage() const
+{
+    // TODO Create image from pixmap content
+    return Gfx::Image();
+}
+
+
 void PixmapSurfaceImpl::begin(Painter& painter)
 {
     _painter = &painter;

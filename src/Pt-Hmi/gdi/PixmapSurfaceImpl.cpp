@@ -179,6 +179,35 @@ const Gfx::SizeF& PixmapSurfaceImpl::size() const
 }
 
 
+Gfx::Image PixmapSurfaceImpl::getImage() const
+{
+    int width = lround( _size.width() );
+    int height = lround( _size.height() );
+
+    Gfx::Image image(Gfx::ImageFormat::argb32(), Gfx::Size(width, height));
+
+    const size_t depth = image.view().pixelStride() * 8;
+     
+    BITMAPINFO bitmapInfo;
+    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+    bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); 
+    bitmapInfo.bmiHeader.biWidth       = width;
+    bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // top-down image
+    bitmapInfo.bmiHeader.biPlanes      = 1;                 // always 1            
+    bitmapInfo.bmiHeader.biBitCount    = depth;             // 32-bit 
+    bitmapInfo.bmiHeader.biCompression = BI_RGB;            // uncompressed RGB
+    bitmapInfo.bmiHeader.biSizeImage   = 0;                 // automatic
+    bitmapInfo.bmiHeader.biClrUsed     = 0;                 // no color table
+    bitmapInfo.bmiHeader.biClrImportant= 0;                 // no color table
+
+    GetDIBits(_dc, _bitmap, 0, (UINT)height, image.data(),
+              (LPBITMAPINFO)&bitmapInfo, DIB_RGB_COLORS);
+
+    return image;
+}
+
+
 void PixmapSurfaceImpl::begin(Painter& painter)
 {
     _painter = &painter;

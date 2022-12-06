@@ -84,6 +84,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         const Gfx::ImageFormat& format() const;
 
+        Gfx::Image getImage() const;
+
         void begin(Painter& painter);  
         
         void finish();

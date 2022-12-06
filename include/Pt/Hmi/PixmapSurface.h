@@ -60,6 +60,8 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
+        Gfx::Image getImage() const;
+
         PixmapSurfaceImpl* pixmapImpl() const;
 
     protected:

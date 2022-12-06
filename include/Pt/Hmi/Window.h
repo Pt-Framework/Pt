@@ -194,7 +194,12 @@ class PT_HMI_API Window : public WindowBase
 
     MainWindowImpl* impl();
 
-    const MainWindowImpl* impl() const; 
+    const MainWindowImpl* impl() const;
+
+    Gfx::Image getImage() const
+    {
+      return _surface.getImage();
+    }
 
   public:
     const Gfx::Brush& background() const;
