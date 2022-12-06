@@ -53,6 +53,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Path.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\PngWriter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb16Format.h" />
@@ -562,6 +563,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Path.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\PngWriter.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Polygonizer.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Arc.cpp" />

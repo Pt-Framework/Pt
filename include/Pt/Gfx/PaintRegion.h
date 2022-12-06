@@ -65,7 +65,7 @@ class PT_GFX_API PaintRegion : public virtual PaintSurface
 
         void resize(const Gfx::SizeF& size);
 
-        virtual Image toImage(const Gfx::ImageFormat& format) const;
+        virtual Image toImage() const;
 
     protected:
         virtual const Gfx::ImageFormat& format() const;

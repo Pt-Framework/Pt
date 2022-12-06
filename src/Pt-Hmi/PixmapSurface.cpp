@@ -30,7 +30,7 @@
 #include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/PixmapSurface.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
 
@@ -49,25 +49,11 @@ PixmapSurface::~PixmapSurface()
 }
 
 
-
-void PixmapSurface::resize(const Gfx::SizeF& size)
-{
-    _logicSize = size;
-    _impl->resize( toPhysical(size) );
-}
-
-
 void PixmapSurface::set(const Gfx::Image& image)
 {
     _logicSize = toLogical( Gfx::SizeF( image.size().width(), 
                                         image.size().height() ) );
     _impl->set(image);
-}
-
-
-void PixmapSurface::clear(const Gfx::Color& c)
-{
-    _impl->clear(c);
 }
 
 
@@ -89,6 +75,37 @@ double PixmapSurface::height() const
 }
 
 
+void PixmapSurface::resize(const Gfx::SizeF& size)
+{
+    _logicSize = size;
+    _impl->resize( toPhysical(size) );
+}
+
+
+void PixmapSurface::clear(const Gfx::Color& c)
+{
+    _impl->clear(c);
+}
+
+
+void PixmapSurface::setScaleFactor(double v)
+{
+    _scaleFactor = v;
+}
+
+
+const Gfx::ImageFormat& PixmapSurface::format() const
+{
+    return _impl->format();
+}
+
+
+Gfx::Image PixmapSurface::toImage() const
+{
+    return _impl->toImage();
+}
+
+
 void PixmapSurface::onBegin(Gfx::Painter& painter)
 {
     _impl->begin(painter);
@@ -100,11 +117,6 @@ void PixmapSurface::onFinish()
     _impl->finish();
 }
 
-
-const Gfx::ImageFormat& PixmapSurface::format() const
-{
-    return _impl->format();
-}
 
 void PixmapSurface::setClip(const Gfx::RectF& clip)
 {
@@ -280,41 +292,62 @@ void PixmapSurface::drawSurface(const Gfx::PointF& to, const Gfx::PaintSurface& 
     const PixmapSurface* pixSurface = dynamic_cast<const PixmapSurface*>(&surface);
     if (pixSurface)
     {
-        _impl->drawSurface(toPhysical(to), *pixSurface);
+        drawPixmap(to, *pixSurface);
         return;
     }
 
-    Pt::Gfx::Image image = surface.toImage(_impl->format());
-    _impl->drawImage(toPhysical(to), image);
+    Pt::Gfx::Image image = surface.toImage();
+    if( image.format() == format() )
+    {
+        _impl->drawImage(toPhysical(to), image);
+        return;
+    }
+
+    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    _impl->drawImage(toPhysical(to), dest);
 }
 
 
 void PixmapSurface::drawSurface(const Gfx::PointF& to,
-                                  const Gfx::PaintSurface& surface,
-                                  const Gfx::RectF& pmRect)
+                                const Gfx::PaintSurface& surface,
+                                const Gfx::RectF& pmRect)
 {
     const PixmapSurface* pixSurface = dynamic_cast<const PixmapSurface*>(&surface);
     if (pixSurface)
     {
-        _impl->drawSurface(toPhysical(to), *pixSurface, toPhysical(pmRect));
+        drawPixmap(to, *pixSurface, pmRect);
         return;
     }
 
-    Pt::Gfx::Image image = surface.toImage(_impl->format());
-    _impl->drawImage(toPhysical(to), image, toPhysical(pmRect));
+    Pt::Gfx::Image image = surface.toImage();
+    if( image.format() == format() )
+    {
+        _impl->drawImage(toPhysical(to), image, toPhysical(pmRect));
+        return;
+    }
+
+    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    _impl->drawImage(toPhysical(to), dest, toPhysical(pmRect));
+
+    //Pt::Gfx::Image image = surface.toImage( _impl->format() );
+    //_impl->drawImage(toPhysical(to), image, toPhysical(pmRect));
 }
 
 
-Gfx::Image PixmapSurface::toImage(const Gfx::ImageFormat& format) const
+void PixmapSurface::drawPixmap(const Gfx::PointF& to, const PixmapSurface& pm)
 {
-    return _impl->toImage(format);
+    _impl->drawSurface(toPhysical(to), pm);
 }
 
 
-PixmapSurfaceImpl* PixmapSurface::pixmapImpl() const
+void PixmapSurface::drawPixmap(const Gfx::PointF& to, const PixmapSurface& pm, 
+                               const Gfx::RectF& pmRect)
 {
-    return _impl;
+    _impl->drawSurface(toPhysical(to), pm, toPhysical(pmRect));
 }
+
 
 void PixmapSurface::setFontDir(const System::Path& path)
 {
@@ -327,15 +360,18 @@ std::string PixmapSurface::defaultFont()
     return PixmapSurfaceImpl::defaultFont();
 }
 
+
 void PixmapSurface::setDefaultFont(const std::string& name)
 {
     PixmapSurfaceImpl::setDefaultFont(name);
 }
 
+
 std::vector<std::string> PixmapSurface::fontNames()
 {
     return PixmapSurfaceImpl::fontNames();
 }
+
 
 Gfx::FontMetrics PixmapSurface::fontMetrics(const Gfx::Font& font, const Pt::String& text)
 {

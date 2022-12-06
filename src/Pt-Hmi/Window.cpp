@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Algorithm.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 
@@ -176,6 +177,12 @@ void Window::onRelease()
 
 void Window::onParentChanged(WindowManager* )
 {
+}
+
+
+Gfx::Image Window::getImage()
+{
+    return _surface.toImage();
 }
 
 

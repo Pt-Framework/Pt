@@ -320,9 +320,9 @@ void Painter::drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const 
 }
 
 
-Image Painter::toImage(const Gfx::ImageFormat& format) const
+Image Painter::toImage() const
 {
-    return _surface->toImage(format);
+    return _surface->toImage();
 }
 
 

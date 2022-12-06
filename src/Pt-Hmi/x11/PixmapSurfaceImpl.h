@@ -228,7 +228,7 @@ class PixmapSurfaceImpl
 
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
 
-        Gfx::Image toImage(const Gfx::ImageFormat& format) const;
+        Gfx::Image toImage() const;
 
         void set(const Gfx::Image& image);
 

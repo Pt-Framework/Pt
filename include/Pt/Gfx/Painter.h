@@ -233,7 +233,7 @@ class PT_GFX_API Painter
 
         void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect);
 
-        Image toImage(const Gfx::ImageFormat& format) const;
+        Image toImage() const;
 
     public:
         double scaleFactor() const;

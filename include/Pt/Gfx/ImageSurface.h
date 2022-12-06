@@ -65,6 +65,8 @@ protected:
 public:
     virtual const Gfx::ImageFormat& format() const;
 
+    virtual Image toImage() const;
+
     virtual void setClip(const Gfx::RectF& clip);
 
     virtual void resetClip();
@@ -118,8 +120,6 @@ public:
     virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& surface);
 
     virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect);
-
-    virtual Image toImage(const Gfx::ImageFormat& format) const;
 
   public:
     static void setFontDir(const System::Path& path);

@@ -59,6 +59,8 @@ class PT_GFX_API PaintSurface
         
         const Gfx::SizeF& size() const;
 
+        virtual const Gfx::ImageFormat& format() const = 0;
+
         double scaleFactor() const
         {
             return onScaleFactor();
@@ -161,10 +163,10 @@ class PT_GFX_API PaintSurface
             return toLogical(Gfx::RectF(pos, size));
         }
 
+        virtual Image toImage() const = 0;
+
     public:
         PaintSurface();
-
-        virtual Image toImage(const Gfx::ImageFormat& format) const = 0;
 
     protected:
         void begin(Painter& painter);
@@ -183,8 +185,6 @@ class PT_GFX_API PaintSurface
         virtual void onFinish() = 0;
     
     protected:
-        virtual const Gfx::ImageFormat& format() const = 0;
-
         virtual void setClip(const Gfx::RectF& clip) = 0;
 
         virtual void resetClip() = 0;

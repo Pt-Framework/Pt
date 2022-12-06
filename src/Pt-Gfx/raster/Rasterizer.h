@@ -158,7 +158,7 @@ class Rasterizer
 
     void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
 
-    Image toImage(const Gfx::ImageFormat& format) const;
+    Image toImage() const;
 
 
   public:

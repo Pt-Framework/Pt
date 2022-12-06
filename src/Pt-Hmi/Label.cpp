@@ -232,7 +232,7 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
     }
     else
     {
-        Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+        Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );
 
         w = static_cast<double>( pictureSize.width() );
         h = static_cast<double>( pictureSize.height() );
@@ -293,7 +293,7 @@ void Label::layoutText()
 
 void Label::layoutImage()
 {
-    Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );;
 
     switch( _alignment )
     {

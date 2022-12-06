@@ -45,7 +45,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class Picture;
 class PixmapSurfaceImpl;
 
 /** @brief A back buffer drawing surface.
@@ -57,17 +56,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         virtual ~PixmapSurface();
 
-        void resize(const Gfx::SizeF& size);
-
-        void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
-
-        PixmapSurfaceImpl* pixmapImpl() const;
-
-        void setScaleFactor(double v)
-        {
-            _scaleFactor = v;
-        }
-
         void set(const Gfx::Image& image);
 
         bool empty() const;
@@ -75,6 +63,21 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
         double width() const;
 
         double height() const;
+
+        void resize(const Gfx::SizeF& size);
+
+        void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
+
+        void setScaleFactor(double v);
+
+        virtual const Gfx::ImageFormat& format() const;
+
+        virtual Gfx::Image toImage() const;
+
+        PixmapSurfaceImpl* pixmapImpl() const
+        {
+            return _impl;
+        }
 
         PixmapSurfaceImpl* impl()
         {
@@ -105,8 +108,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
         virtual void onFinish();
 
     protected:
-        virtual const Gfx::ImageFormat& format() const;
-
         virtual void setClip(const Gfx::RectF& clip);
 
         virtual void resetClip();
@@ -158,11 +159,15 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
         virtual void drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
 
     protected:
-        virtual void drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& surface);
+        virtual void drawSurface(const Gfx::PointF& to, const Gfx::PaintSurface& surface);
 
-        virtual void drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
+        virtual void drawSurface(const Gfx::PointF& to, const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
 
-        virtual Gfx::Image toImage(const Gfx::ImageFormat& format) const;
+    public:
+        void drawPixmap(const Gfx::PointF& to, const PixmapSurface& pm);
+
+        void drawPixmap(const Gfx::PointF& to, const PixmapSurface& pm, 
+                        const Gfx::RectF& pmRect);
 
     public:
         static void setFontDir(const System::Path& path);

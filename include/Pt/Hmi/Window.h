@@ -105,6 +105,8 @@ class PT_HMI_API Window : public Visual
 
         void unparent();
 
+        Gfx::Image getImage();
+
     public:
         PixmapSurface& surface();
 

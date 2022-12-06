@@ -309,9 +309,9 @@ void PaintRegion::drawSurface(const Gfx::PointF& toF, const PaintSurface& surfac
 }
 
 
-Image PaintRegion::toImage(const Gfx::ImageFormat& format) const
+Image PaintRegion::toImage() const
 {
-    return _surface ? _surface->toImage(format)
+    return _surface ? _surface->toImage()
                     : Image();
 }
 

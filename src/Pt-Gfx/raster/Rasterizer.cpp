@@ -383,17 +383,12 @@ void Rasterizer::drawArc(const PointF& topLeft, const SizeF& size, float degBegi
 {
 }
 
-Image Rasterizer::toImage(const Gfx::ImageFormat& format) const
+Image Rasterizer::toImage() const
 {
     if( ! _image )
-        return Image(format, Size(0, 0));
+        return Image();
     
-    if(_image->format() == format)
-        return *_image;
-
-    Image image (_image->format(), _image->size() );
-    Gfx::copy( _image->begin(), _image->end(), image.begin() );
-    return image;
+     return *_image;
 }
 
 

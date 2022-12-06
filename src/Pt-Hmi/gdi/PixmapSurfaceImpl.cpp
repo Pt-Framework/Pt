@@ -893,32 +893,28 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
 }
 
 
-Gfx::Image PixmapSurfaceImpl::toImage(const Gfx::ImageFormat& fmt) const
+Gfx::Image PixmapSurfaceImpl::toImage() const
 {
-    const size_t depth = 32;
-    
     BITMAPINFO bitmapInfo;
     ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
     bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bitmapInfo.bmiHeader.biWidth = _size.width();
-    bitmapInfo.bmiHeader.biHeight = -(ssize_t)_size.height(); // top-down image
-    bitmapInfo.bmiHeader.biPlanes = 1;                        // always 1
-    bitmapInfo.bmiHeader.biBitCount = static_cast<WORD>(depth); // bits per pixel
-    bitmapInfo.bmiHeader.biCompression = BI_RGB;                   // uncompressed RGB
-    bitmapInfo.bmiHeader.biSizeImage = 0;                        // automatic
+    bitmapInfo.bmiHeader.biHeight = -(ssize_t)_size.height();  // top-down image
+    bitmapInfo.bmiHeader.biPlanes = 1;                         // always 1
+    bitmapInfo.bmiHeader.biBitCount = 32;                      // bits per pixel
+    bitmapInfo.bmiHeader.biCompression = BI_RGB;               // uncompressed RGB
+    bitmapInfo.bmiHeader.biSizeImage = 0;                      // automatic
     bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
-    bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
+    bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
 
-    Pt::Gfx::Image source( Pt::Gfx::ImageFormat::argb32(), round(_size) );
-    Pt::uint8_t* srcBuffer = source.data();
+    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), round(_size) );
+    Pt::uint8_t* data = image.data();
 
-    int ret =  GetDIBits(_dc, _bitmap, 0, _size.height(), srcBuffer, 
-                         &bitmapInfo, DIB_RGB_COLORS);
+    int ret = GetDIBits(_dc, _bitmap, 0, _size.height(), data, 
+                        &bitmapInfo, DIB_RGB_COLORS);
 
-    Pt::Gfx::Image dest( fmt, round(_size) );
-    Pt::Gfx::copy(source.begin(), source.end(), dest.begin());
-    return dest;
+    return image;
 }
 
 

@@ -27,7 +27,8 @@
   02110-1301 USA
 */
 
-#include <Pt/Math.h>
+#include "Rasterizer.h"
+
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Pen.h>
@@ -35,10 +36,10 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Algorithm.h>
+#include <Pt/System/Clock.h>
 #include <Pt/String.h>
-#include "Pt/System/Clock.h"
-#include "Rasterizer.h"
-
+#include <Pt/Math.h>
 
 namespace Pt {
 
@@ -285,8 +286,16 @@ void ImageSurface::drawSurface(const Gfx::PointF& toF, const PaintSurface& surfa
         return;
     }
 
-    Image image = surface.toImage(format());
-    drawImage(toF, image);
+    Pt::Gfx::Image image = surface.toImage();
+    if( image.format() == format() )
+    {
+        drawImage(toPhysical(toF), image);
+        return;
+    }
+
+    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    drawImage(toF, dest);
 }
 
 
@@ -301,14 +310,22 @@ void ImageSurface::drawSurface(const Gfx::PointF& toF,
         return;
     }
 
-    Image image = surface.toImage(format());
-    drawImage(toF, image, pmRect);
+    Pt::Gfx::Image image = surface.toImage();
+    if( image.format() == format() )
+    {
+        drawImage(toPhysical(toF), image, pmRect);
+        return;
+    }
+
+    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    drawImage(toF, dest, pmRect);
 }
 
 
-Image ImageSurface::toImage(const Gfx::ImageFormat& format) const
+Image ImageSurface::toImage() const
 {
-    return _rasterizer->toImage(format);
+    return _rasterizer->toImage();
 }
 
 } // namespace

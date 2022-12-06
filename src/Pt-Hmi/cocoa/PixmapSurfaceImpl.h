@@ -134,7 +134,7 @@ class PixmapSurfaceImpl
 
         Pt::Gfx::PointF transform(const Pt::Gfx::PointF& p);
 
-        Gfx::Image toImage(const Gfx::ImageFormat& format) const;
+        Gfx::Image toImage() const;
 
         void set(const Gfx::Image& image);
 

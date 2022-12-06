@@ -896,7 +896,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF,
 }
 
 
-Gfx::Image PixmapSurfaceImpl::toImage(const Gfx::ImageFormat& iformat) const
+Gfx::Image PixmapSurfaceImpl::toImage() const
 {
     return Gfx::Image();
 }
