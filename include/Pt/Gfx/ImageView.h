@@ -48,6 +48,14 @@ class ImageView;
 class Pixel
 {
     public:
+        Pixel()
+        : _view(0)
+        , _base(0)
+        , _x(0)
+        , _y(0)
+        {  
+        }
+
         Pixel(ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Pixel(const Pixel& p)
@@ -135,6 +143,14 @@ class Pixel
 class ConstPixel
 {
     public:
+        ConstPixel()
+        : _view(0)
+        , _base(0)
+        , _x(0)
+        , _y(0)
+        {
+        }
+
         ConstPixel(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
 
         ConstPixel(const ConstPixel& p)
@@ -378,6 +394,14 @@ class ImageView
 
         Pt::ssize_t padding() const
         { return _padding; }
+
+        void clear()
+        {
+            _data = 0;
+            _size.set(0, 0);
+            _padding = 0;
+            _stride = 0;
+        }
 
     private:
         const ImageFormat* _format;
