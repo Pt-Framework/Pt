@@ -303,7 +303,7 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
     // use descent as additional spacing
     double textHeight = _textMetrics.height() + _textMetrics.descent(); 
 
-    Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = 0;
@@ -334,18 +334,9 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 {    
     Base::onLayout(rect);
 
-    // bool isInvalid = isLayoutInvalid();
-
-    // if( ! isInvalid )
-    // {
-    //   //static int nn = 0;
-    //   //std::clog << ++nn << " SKIP LAYOUT: " << typeid(*this).name() << std::endl;
-    //   return;
-    // }
-
     double spacing = _picture.empty() || text().empty() ? 0 : _textMetrics.height() * 0.5;
     
-    Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = _textMetrics.width() + spacing + pictureWidth;

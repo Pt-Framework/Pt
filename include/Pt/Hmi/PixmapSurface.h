@@ -60,19 +60,11 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         bool empty() const;
 
-        double width() const;
-
-        double height() const;
-
         void resize(const Gfx::SizeF& size);
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
         void setScaleFactor(double v);
-
-        virtual const Gfx::ImageFormat& format() const;
-
-        virtual Gfx::Image toImage() const;
 
         PixmapSurfaceImpl* pixmapImpl() const
         {
@@ -90,6 +82,10 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
         }
 
     public:
+        virtual const Gfx::ImageFormat& format() const;
+
+        virtual Gfx::Image toImage() const;
+
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
     protected:

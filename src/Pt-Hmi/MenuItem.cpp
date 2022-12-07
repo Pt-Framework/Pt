@@ -310,7 +310,7 @@ Gfx::SizeF MenuItem::onMeasure(const SizePolicy& policy)
     Gfx::FontMetrics fm = PixmapSurface::fontMetrics(_font, _text);
 
     double contentHeight = std::max<Pt::ssize_t>( fm.height(), _icon.height() );
-    double contentWidth = fm.width() + _picture.width();
+    double contentWidth = fm.width() + surface().toLogical( _picture.size().width() );
 
     const Key* sk = shortcut();
     if(sk)

@@ -63,18 +63,6 @@ bool PixmapSurface::empty() const
 }
 
 
-double PixmapSurface::width() const
-{
-    return _impl->size().width();
-}
-
-
-double PixmapSurface::height() const
-{
-    return _impl->size().height();
-}
-
-
 void PixmapSurface::resize(const Gfx::SizeF& size)
 {
     _logicSize = size;

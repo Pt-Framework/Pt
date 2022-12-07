@@ -248,8 +248,8 @@ void Panel::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter)
 
     Gfx::PointF imagePosition;
         
-    double rightX = size().width() - _picture.width();
-    double bottomY = size().height() - _picture.height();
+    double rightX = size().width() - surface.toLogical( _picture.size().width() );
+    double bottomY = size().height() - surface.toLogical( _picture.size().height() );
         
     double centerX = rightX / 2;
     double centerY = bottomY / 2;

@@ -243,7 +243,7 @@ Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
-    Gfx::SizeF pictureSize = surface().toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
@@ -326,7 +326,7 @@ void ListBoxItem::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& paint
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
-    Gfx::SizeF pictureSize = painter.toLogical(Gfx::SizeF(_picture.width(), _picture.height()));
+    Gfx::SizeF pictureSize = painter.toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
