@@ -29,6 +29,8 @@
 
 #include "PixmapSurfaceImpl.h"
 
+#include <Pt/Byteorder.h>
+
 #ifdef PT_HMI_X11_RASTER
 
 #include "ApplicationImpl.h"
@@ -892,13 +894,59 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF,
     ximage->data = NULL;
 
     //std::clog << "XDestroyImage" << std::endl;
-    XDestroyImage(ximage); 
+    XDestroyImage(ximage);
 }
 
 
 Gfx::Image PixmapSurfaceImpl::toImage() const
 {
-    return Gfx::Image();
+    int width = lround( _size.width() );
+    int height = lround( _size.height() );
+
+    Display* display = Application::instance().impl()->display();
+
+    XImage* ximage = XGetImage( display, _drawable,
+                                0, 0, width, height,
+                                AllPlanes, ZPixmap );
+    if( ! ximage )
+        return Gfx::Image();
+
+    Gfx::Image image;
+    const Gfx::ImageFormat* format = 0;
+    
+    if(ximage->depth == 24 ||  ximage->depth == 32)
+        format = &Gfx::ImageFormat::argb32();
+    else if(ximage->depth == 16)
+        format = &Gfx::ImageFormat::rgb16();
+
+    if( format )
+    { 
+        if( (ximage->byte_order == LSBFirst && isLittleEndian()) ||
+            (ximage->byte_order == MSBFirst && isBigEndian()) )
+        {
+            Pt::size_t padding = ximage->bytes_per_line - (width * ximage->bits_per_pixel / 8);
+            image = Gfx::Image(*format,
+                               reinterpret_cast<Pt::uint8_t*>(ximage->data),
+                               Gfx::Size(width, height), padding);
+        }
+        else 
+        {
+            image = Gfx::Image(*format, Gfx::Size(width, height));
+            for(int y = 0; y < ximage->height; ++y)
+            {
+                for(int x = 0; x < ximage->width; ++x )
+                {
+                    unsigned long pixel = XGetPixel(ximage, x, y);
+                    Gfx::Image::PixelIterator it  = image.pixel(x,y);
+                    std::memcpy(it->base(), &pixel, image.format().pixelStride());
+                } 
+            }
+        }
+    }
+
+    XDestroyImage(ximage);
+
+    return image;
 }
 
 
