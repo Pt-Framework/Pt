@@ -843,7 +843,7 @@ void PixmapSurfaceImpl::drawSurface(const Pt::Gfx::PointF& toF,
     GC& brushGc = _paintData->brush();
     ::Drawable source = pm.pixmapImpl()->drawable();
 
-    Pt::Gfx::Size size =  Gfx::round( pm.size() );
+    Pt::Gfx::Size size =  Gfx::round( pmRect.size() );
     Pt::Gfx::Point to =  Gfx::round( toF );
     const Gfx::Point from = Gfx::round( pmRect.topLeft() );
 
