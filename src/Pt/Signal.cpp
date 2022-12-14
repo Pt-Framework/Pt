@@ -32,10 +32,10 @@ namespace Pt {
 
 SignalBase::Sentry::Sentry(SignalBase* signal)
 : _signal(signal)
+, _next(signal->_sentry)
 {
     _signal->_sentry = this;
     _signal->_sending = true;
-    _signal->_dirty = false;
 }
 
 
@@ -46,14 +46,26 @@ SignalBase::Sentry::~Sentry()
 }
 
 
+void SignalBase::Sentry::detachAll()
+{
+    if(_signal)
+        detach();
+
+    if(_next)
+        _next->detachAll();
+}
+
+
 void SignalBase::Sentry::detach()
 {
-    _signal->_sending = false;
+    if( ! _next )
+        _signal->_sending = false;
 
-    if( _signal->_dirty == false )
+    if( ! _signal->_dirty || _next )
     {
-        _signal->_sentry = 0;
+        _signal->_sentry = _next;
         _signal = 0;
+        _next = 0;
         return;
     }
 
@@ -73,6 +85,7 @@ void SignalBase::Sentry::detach()
     _signal->_dirty = false;
     _signal->_sentry = 0;
     _signal = 0;
+    _next = 0;
 }
 
 
@@ -86,9 +99,7 @@ SignalBase::SignalBase()
 SignalBase::~SignalBase()
 {
     if(_sentry)
-    {
-        _sentry->detach();
-    }
+        _sentry->detachAll();
 }
 
 
@@ -185,28 +196,40 @@ bool CompareEventTypeInfo::operator()(const std::type_info* t1,
 
 Signal<const Pt::Event&>::Sentry::Sentry(Signal* signal)
 : _signal(signal)
+, _next(signal->_sentry)
 {
     _signal->_sentry = this;
     _signal->_sending = true;
-    _signal->_dirty = false;
 }
 
 
 Signal<const Pt::Event&>::Sentry::~Sentry()
 {
-    if( _signal )
+    if(_signal)
         this->detach();
+}
+
+
+void Signal<const Pt::Event&>::Sentry::detachAll()
+{
+    if(_signal)
+        detach();
+
+    if(_next)
+        _next->detachAll();
 }
 
 
 void Signal<const Pt::Event&>::Sentry::detach()
 {
-    _signal->_sending = false;
+    if( ! _next )
+        _signal->_sending = false;
 
-    if( _signal->_dirty == false )
+    if( ! _signal->_dirty || _next )
     {
-        _signal->_sentry = 0;
+        _signal->_sentry = _next;
         _signal = 0;
+        _next = 0;
         return;
     }
 
@@ -227,6 +250,7 @@ void Signal<const Pt::Event&>::Sentry::detach()
     _signal->_dirty = false;
     _signal->_sentry = 0;
     _signal = 0;
+    _next = 0;
 }
 
 
@@ -240,7 +264,7 @@ Signal<const Pt::Event&>::Signal()
 Signal<const Pt::Event&>::~Signal()
 {
     if(_sentry)
-        _sentry->detach();
+        _sentry->detachAll();
 
     while( ! _routes.empty() )
     {

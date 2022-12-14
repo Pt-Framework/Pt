@@ -50,12 +50,15 @@ class PT_API SignalBase : public Connectable
 
             ~Sentry();
 
+            void detachAll();
+
             void detach();
 
             bool operator!() const
             { return _signal == 0; }
 
             SignalBase* _signal;
+            Sentry*     _next;
         };
 
         SignalBase();
@@ -99,10 +102,13 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 
         void detach();
 
+        void detachAll();
+
         bool operator!() const
         { return _signal == 0; }
 
-        Signal* _signal;
+        Signal*  _signal;
+        Sentry*  _next;
     };
 
     class IEventRoute
@@ -198,7 +204,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 
         void removeRoute(const Slot& slot);
 
-        // TODO: Pt 2.0
+        // TODO: Pt 2.0 (better performance)
 
         //template <typename R>
         //void removeRoute(const BasicSlot<R, const Event&>& slot)
