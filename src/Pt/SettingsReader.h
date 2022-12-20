@@ -777,7 +777,7 @@ class SettingsReader
             virtual State* onComma(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
-                    this->syntaxError(reader.line());
+                    return BeginStatement::instance();
 
                 reader.enterMember();
                 return BeginStatement::instance();
