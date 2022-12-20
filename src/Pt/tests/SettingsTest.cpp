@@ -49,7 +49,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "SimpleValue", *this, &SettingsTest::SimpleValue );
             Pt::Unit::TestSuite::registerMethod( "SimpleTypedValue", *this, &SettingsTest::SimpleTypedValue );
             Pt::Unit::TestSuite::registerMethod( "SimpleQoutedValue", *this, &SettingsTest::SimpleQoutedValue );
-
+            
             Pt::Unit::TestSuite::registerMethod( "SimpleArray", *this, &SettingsTest::SimpleArray );
             Pt::Unit::TestSuite::registerMethod( "SimpleNamedArray", *this, &SettingsTest::SimpleNamedArray );
             Pt::Unit::TestSuite::registerMethod( "SimpleQoutedArray", *this, &SettingsTest::SimpleQoutedArray );
@@ -68,12 +68,14 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "ConstEntry", *this, &SettingsTest::ConstEntry );
 
             Pt::Unit::TestSuite::registerMethod( "EmptyElements", *this, &SettingsTest::EmptyElements );
+            Pt::Unit::TestSuite::registerMethod( "FlatValues", *this, &SettingsTest::FlatValues );
 
             //Pt::Unit::TestSuite::registerMethod( "Writer", *this, &SettingsTest::Writer );
         }
 
     protected:
         void EmptyElements();
+        void FlatValues();
         void EscapeString();
         void Writer();
         void Comment();
@@ -317,6 +319,7 @@ void SettingsTest::ArrayWithBrackets()
     PT_UNIT_ASSERT(3 == vecOfStr.size() );
 }
 
+
 void SettingsTest::SimpleValue()
 {
     std::stringstream ss;
@@ -326,11 +329,11 @@ void SettingsTest::SimpleValue()
 
     Pt::Settings settings;
     settings.load(ts);
-    
+
     int a = 0;
     settings.entry("a").get(a);
     PT_UNIT_ASSERT(5 == a );
-    
+
     int b = 0;
     settings.entry("b").get(b);
     PT_UNIT_ASSERT(6 == b );
@@ -377,7 +380,7 @@ void SettingsTest::SimpleQoutedValue()
 void SettingsTest::SimpleArray()
 {
     std::stringstream ss;
-    ss << "a={1,2,3}\n";
+    ss << "a={1,2,3},";
     ss << "b = { 4 , 5 , 6 } \n";
     ss << "c.x = 5\n";
     ss << "c.y = 6\n";
@@ -519,6 +522,32 @@ void SettingsTest::EmptyElements()
     PT_UNIT_ASSERT( v.empty() );
 
     PT_UNIT_ASSERT( settings.entry("y") );
+}
+
+void SettingsTest::FlatValues()
+{
+    std::stringstream ss;
+    ss << "a=5 b=\"b\", c=[1] d={2}, z=1, ";
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
+
+    Pt::Settings settings;
+    settings.load(ts);
+
+    int a = 0;
+    settings.entry("a").get(a);
+    PT_UNIT_ASSERT(a == 5);
+
+    std::string b;
+    settings.entry("b").get(b);
+    PT_UNIT_ASSERT(b == "b");
+
+    std::vector<int> c;
+    settings.entry("c").get(c);
+    PT_UNIT_ASSERT(c.size() == 1);
+
+    std::vector<int> d;
+    settings.entry("d").get(d);
+    PT_UNIT_ASSERT(d.size() == 1);
 }
 
 void SettingsTest::Section()
