@@ -260,6 +260,12 @@ void Visual::setPointer(bool isPointer)
 }
 
 
+Visual* Visual::onHitTest(const Gfx::PointF& pos)
+{
+    return 0;
+}
+
+
 Gfx::PointF Visual::onToGlobal(const Gfx::PointF& pos) const
 {
     const Visual* parent = this->parent();
@@ -293,6 +299,78 @@ void Visual::onSetCapture(bool capture)
 void Visual::onRelease()
 {
 }
+
+
+void Visual::onEvent(const Pt::Event& ev)
+{
+    if( ev.typeInfo() == typeid(PaintEvent) )
+    {
+      const PaintEvent& e = static_cast<const PaintEvent&>(ev);
+      onProcessPaintEvent(e);
+    }
+    else if( ev.typeInfo() == typeid(InvalidateEvent) )
+    {
+      const InvalidateEvent& e = static_cast<const InvalidateEvent&>(ev);
+      onProcessInvalidateEvent(e);
+    }
+}
+
+//
+// invalidation
+//
+
+void Visual::onInvalidateRequest()
+{
+    //++_invalidates;
+
+    //InvalidateEvent ev(*this);
+    //Application::instance().commitEvent(ev);
+}
+
+
+void Visual::onProcessInvalidateEvent(const InvalidateEvent& ev)
+{
+    //--_invalidates;
+
+    //if(_invalidates > 0)
+    //  return;
+
+    onInvalidateEvent(ev);
+}
+
+
+void Visual::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    onInvalidate();
+}
+
+    
+void Visual::onInvalidate()
+{
+}
+
+//
+// painting
+//
+
+void Visual::onRepaintRequest(const Gfx::RectF& rect)
+{
+}
+
+
+void Visual::onProcessPaintEvent(const PaintEvent& ev)
+{
+    if( ev.rect().isNull() )
+        return;
+
+    onPaintEvent(ev);
+}
+
+
+void Visual::onPaintEvent(const PaintEvent& ev)
+{
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 // View

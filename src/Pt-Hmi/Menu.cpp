@@ -322,6 +322,8 @@ void Menu::onProcessMouseEvent(const MouseEvent& ev)
     //    rootShell().cancel();
     //    return;
     //}
+
+    Base::onProcessMouseEvent(ev);
 }
 
 

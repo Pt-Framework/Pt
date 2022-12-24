@@ -64,13 +64,13 @@ namespace Pt {
 
 namespace Hmi {
 
-class Sheet;
+class Form;
 
 class PT_HMI_API Widget : public View
                         , public Visual
                         , public Pt::Connectable
 {
-    friend class Sheet;
+    friend class Form;
 
     public:
         Widget();
@@ -86,7 +86,7 @@ class PT_HMI_API Widget : public View
 
         void unparent();
 
-        void setSheet(Sheet* sheet);
+        void setForm(Form* form);
 
         Gfx::PaintSurface& surface();
 
@@ -186,7 +186,9 @@ class PT_HMI_API Widget : public View
     // invalidation
     // 
     public:
-        void invalidate();
+        //void invalidate();
+
+        virtual void onInvalidateRequest();
 
     protected:
         virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
@@ -425,7 +427,7 @@ class PT_HMI_API Widget : public View
         View*                        _parent;
         std::vector<Widget*>         _children;
 
-        Sheet*                       _sheet;
+        Form*                        _form;
         Responder*                   _nextResponder;
 
         Visual*                      _pointer;

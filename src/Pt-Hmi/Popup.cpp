@@ -94,6 +94,38 @@ void Popup::onShowEvent(const ShowEvent& ev)
     Application::instance().onShowPopup( *this, ev.visible() );
 }
 
+
+void Popup::onProcessMouseEvent(const MouseEvent& ev)
+{
+    if(_anchor)
+    {
+        Visual* hit = Application::instance().screen().hitTest( ev.position() );
+        if(hit == _anchor)
+        {
+            _anchor->processEvent(ev);
+            return;
+        }
+    }
+  
+    Base::onProcessMouseEvent(ev);
+}
+
+
+void Popup::onProcessTouchEvent(const TouchEvent& ev)
+{
+    if(_anchor)
+    {
+        Visual* hit = Application::instance().screen().hitTest( ev.position() );        
+        if(hit == _anchor)
+        {
+            _anchor->processEvent(ev);
+            return;
+        }
+    }
+
+    Base::onProcessTouchEvent(ev);
+}
+
 } // namespace
 
 } // namespace

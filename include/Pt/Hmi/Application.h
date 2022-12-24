@@ -112,6 +112,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         Pt::Signal<const Pt::Event&>& eventReceived();
 
+        void invalidate();
+
         /** @brief Emulates a key event.
         */
         void sendKeyEvent(const KeyEvent& ev);

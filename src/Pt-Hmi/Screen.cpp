@@ -99,11 +99,7 @@ Widget* Screen::findWidget(const std::string& name)
     {
         Window* window = *it;
         
-        Sheet* sheet = window->sheet();
-        if( ! sheet )
-            continue;
-
-        Widget* widget = sheet->findWidget(name);
+        Widget* widget = window->findWidget(name);
         if(widget)
             return widget;
     }

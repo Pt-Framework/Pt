@@ -152,7 +152,7 @@ ApplicationImpl::ApplicationImpl()
     FreeConsole();
 #endif
 
-    SetProcessDPIAware();
+    //SetProcessDPIAware();
 
     _instanceHandle = (HINSTANCE) GetModuleHandle(NULL);
 
@@ -882,9 +882,13 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     RECT updateRect;
     GetUpdateRect(hwnd, &updateRect, FALSE);
 
-    const Gfx::RectF r(updateRect.left, updateRect.right, updateRect.top, updateRect.bottom);
+    Gfx::RectF winRect(updateRect.left, updateRect.right, 
+                       updateRect.top, updateRect.bottom);
 
-    PaintEvent ev(w, r);
+    winRect = Gfx::RectF( winRect.topLeft() / w.scaleFactor(), 
+                          winRect.size() / w.scaleFactor() );
+
+    PaintEvent ev(w, winRect);
     w.processEvent(ev);
 
     PAINTSTRUCT ps;

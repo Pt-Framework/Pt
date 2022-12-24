@@ -292,6 +292,8 @@ void Shell::onInit(Window& w)
     RescaleEvent ev(w, scaling);
     //w.processEvent(ev);
     Application::instance().loop().commitEvent(ev);
+
+    //onMove( w, w.requestedGeometry().topLeft() );
 }
 
 

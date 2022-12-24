@@ -33,7 +33,6 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/Form.h>
-#include <Pt/Hmi/Sheet.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/WindowType.h>
 #include <Pt/Hmi/SizePolicy.h>
@@ -87,9 +86,7 @@ class WindowImpl
 
 /** @brief Window base class.
 */
-class PT_HMI_API Window : public Visual
-                        , public Form
-                        , public Pt::Connectable
+class PT_HMI_API Window : public Form
 {
     public:
         typedef WindowType Type;
@@ -105,33 +102,31 @@ class PT_HMI_API Window : public Visual
 
         void unparent();
 
-        Gfx::Image getImage();
+        Gfx::Image getImage() const;
 
     public:
         PixmapSurface& surface();
 
         const PixmapSurface& surface() const;
 
-        void setNextResponder(Responder* r);
-
 
         double scaleFactor() const;
 
         
-        void invalidate();
+        //void invalidate();
 
 
-        void repaint();
+       // void repaint();
 
-        void repaint(const Gfx::RectF& rect);
+       // void repaint(const Gfx::RectF& rect);
 
-       // deprecated
-        void update()
-        { repaint(); }
+       //// deprecated
+       // void update()
+       // { repaint(); }
 
-        // deprecated
-        void update(const Gfx::RectF& rect)
-        { repaint(rect); }
+       // // deprecated
+       // void update(const Gfx::RectF& rect)
+       // { repaint(rect); }
 
         bool acceptsInput() const;
 
@@ -153,17 +148,17 @@ class PT_HMI_API Window : public Visual
         void enable(bool e = true);
 
 
-        const Gfx::PointF& position() const;
+        //const Gfx::RectF& geometry() const;
 
-        const Gfx::SizeF& size() const;
-
-        const Gfx::RectF& geometry() const;
+        //const Gfx::PointF& position() const;
 
         void move(const Gfx::PointF& p);
 
+        //const Gfx::SizeF& size() const;
+
         void resize(const Gfx::SizeF& s);
 
-        void resize(const SizePolicy& policy);
+        Gfx::SizeF resize(const SizePolicy& policy);
 
 
         bool isClosed() const;
@@ -209,6 +204,8 @@ class PT_HMI_API Window : public Visual
         void setAbove(bool top);
 
 
+        // TODO: setFullScreen()
+
         WindowState state() const;
 
         void setState(const WindowState& s);
@@ -232,9 +229,6 @@ class PT_HMI_API Window : public Visual
     // Responder
     //
     protected:
-        virtual Responder* onNextResponder();
-
-   
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent( const TouchEvent& ev );
@@ -255,8 +249,6 @@ class PT_HMI_API Window : public Visual
 
         Visual* onHitTest(const Gfx::PointF& p);
 
-
-
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
@@ -269,35 +261,13 @@ class PT_HMI_API Window : public Visual
     // Form
     //
     protected:
-        virtual Visual& onGetVisual();
-
-        virtual void onAttach(Sheet& view);
-    
-        virtual void onDetach(Sheet& view);
-
-        virtual void onInit(Sheet& view);
-
-        virtual void onRelease(Sheet& view);
-
-        virtual Gfx::PointF onFromSheet(const Sheet& sheet, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onToSheet(const Sheet& sheet, 
-                                     const Gfx::PointF& pos) const;
-
-        virtual void onRepaint(Sheet& view, const Gfx::RectF& rect);
-
-        virtual void onActivate(Sheet& w, bool active);
-
-        virtual void onMove(Sheet& sheet, const Gfx::PointF& pos);
-
-        virtual void onResize(Sheet& sheet, const Gfx::SizeF& size);
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
 
     //
     // invalidation
     //
     protected:
-        void onProcessInvalidateEvent(const InvalidateEvent& ev);
+        virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
 
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
 
@@ -399,12 +369,8 @@ class PT_HMI_API Window : public Visual
         Pt::Signal<const Pt::Event&> _eventReceived;
 
         PixmapSurface                _surface;
-        Gfx::RectF                   _damageRect;
-
-        Sheet                        _sheet;
 
         WindowManager*               _parent;
-        Responder*                   _nextResponder;
         Visual*                      _capture;
    
         int                          _invalidates;
@@ -416,7 +382,7 @@ class PT_HMI_API Window : public Visual
 
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
-        Gfx::RectF                   _geometry;
+        //Gfx::RectF                   _geometry;
 
         Type                         _type;
         std::string                  _title;

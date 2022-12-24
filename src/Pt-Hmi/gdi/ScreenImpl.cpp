@@ -410,6 +410,13 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 {
     _scaling = ev.scaleFactor() * _screenScaling;
 
+    HWND desktop = GetDesktopWindow();
+    RECT r;   
+    GetWindowRect(desktop, &r);
+    
+    _size.set(r.right, r.bottom);
+    _size /= _scaling;
+
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {

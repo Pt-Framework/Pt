@@ -339,7 +339,8 @@ void ComboBox::setRenderer(ComboBoxRenderer* renderer)
 
 void ComboBox::onItemSelected(ListBoxItem& item)
 {
-    Application::instance().inputMethod().finish();
+    //Application::instance().inputMethod().finish();
+    
     _editor.setText( item.text() );
 
     hidePopup();

@@ -43,6 +43,7 @@ namespace Hmi {
 class Widget;
 class Window;
 class PushButton;
+class FlowLayout;
 class Application;
 
 class PT_HMI_API InputMethod
@@ -61,6 +62,8 @@ class PT_HMI_API InputMethod
         void begin(Widget& widget);
 
         void finish();
+
+        Visual* receiver() const;
 
         void sendEvent(const KeyEvent& ev);
 
@@ -104,7 +107,9 @@ class DefaultInputMethod : public InputMethod
 
     private:
         Window*     _window;
-        PushButton* _keyButton;
+        FlowLayout* _layout;
+        PushButton* _keyButtonA;
+        PushButton* _keyButtonB;
 };
 
 } // namespace

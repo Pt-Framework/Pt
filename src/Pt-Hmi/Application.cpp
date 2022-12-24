@@ -324,6 +324,17 @@ Pt::Signal<const Pt::Event&>&  Application::eventReceived()
 }
 
 
+void Application::invalidate()
+{
+    VisualMap::iterator it = _visuals.begin();
+  
+    for( ; it != _visuals.end(); ++it)
+    {
+        it->second->invalidate();
+    }
+}
+
+
 void Application::sendKeyEvent(const KeyEvent& ev)
 {
     _impl->sendKeyEvent(ev);
@@ -543,6 +554,22 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
 
                 return;
             }
+        }
+    }
+
+    //
+    // hide IME window
+    //
+    if( ev.isPress(MouseEvent::Left) )
+    {
+        Visual* hit = _mainScreen->hitTest(screenPos);
+        Visual* receiver = inputMethod().receiver();
+        if(hit && receiver)
+        {
+            bool keepOpen = receiver == hit ||
+                            hit->isDescendantOf(*receiver);
+            if( ! keepOpen )
+                inputMethod().finish();
         }
     }
 

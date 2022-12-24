@@ -56,7 +56,11 @@ class PT_HMI_API Popup : public Window
         virtual void onRelease();
 
     protected:
-        void onShowEvent(const ShowEvent& ev);
+        virtual void onShowEvent(const ShowEvent& ev);
+
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
+
+        virtual void onProcessTouchEvent(const TouchEvent& ev);
 
     private:
         Visual* _anchor;

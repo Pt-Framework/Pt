@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/FlowLayout.h>
 #include <Pt/Hmi/PushButton.h>
 #include <iostream>
 
@@ -92,6 +93,16 @@ void InputMethod::finish()
 }
 
 
+Visual* InputMethod::receiver() const
+{
+    if(_receiver == 0)
+        return 0;
+
+    Visual* visual = Application::instance().findVisual(_receiver);
+    return visual;
+}
+
+
 void InputMethod::sendEvent(const KeyEvent& ev)
 {
     if(_receiver == 0)
@@ -122,7 +133,9 @@ void InputMethod::unregisterApplication(Application&)
 
 DefaultInputMethod::DefaultInputMethod()
 : _window(0)
-, _keyButton(0)
+, _layout(0)
+, _keyButtonA(0)
+, _keyButtonB(0)
 {
 }
 
@@ -130,7 +143,9 @@ DefaultInputMethod::DefaultInputMethod()
 DefaultInputMethod::~DefaultInputMethod()
 {
 #ifdef PT_WITH_TEST_IME
-    delete _keyButton;
+    delete _keyButtonB;
+    delete _keyButtonA;
+    delete _layout;
     delete _window;
 #endif
 }
@@ -155,20 +170,33 @@ void DefaultInputMethod::onBegin()
     if( ! _window )
     {
         _window = new Window(0, WindowType::Default);
-        _window->setTopMost(true);
+        _window->setAbove(true);
         _window->move( Gfx::PointF(500, 500) );
-        _window->resize( Gfx::SizeF(100, 100) );
+        _window->resize( Gfx::SizeF(200, 50) );
         _window->setTitle("Input Method");
     }
 
-    if( ! _keyButton)
+    if( ! _layout)
     {
-        _keyButton = new PushButton();
-        _keyButton->setText("a");
-        _window->setContent(_keyButton);
-        _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
+        _layout = new FlowLayout();
+        _window->setContent(_layout);
+    }
+
+    if( ! _keyButtonA)
+    {
+        _keyButtonA = new PushButton();
+        _keyButtonA->setText("  a  ");
+        _layout->addItem(*_keyButtonA);
+        _keyButtonA->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
     }
     
+    if( ! _keyButtonB)
+    {
+        _keyButtonB = new PushButton();
+        _keyButtonB->setText("  b  ");
+        _layout->addItem(*_keyButtonB);
+    }
+
     _window->show(true);
 
     std::clog << "INPUT_METHOD BEGIN" << std::endl;

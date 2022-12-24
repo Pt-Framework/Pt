@@ -204,6 +204,14 @@ class PT_HMI_API Visual : public Responder
             return onFromGlobal(pos);
         }
         
+
+        /** @brief Process event.
+        */
+        void processEvent(const Pt::Event& ev)
+        {
+            onEvent(ev);
+        }
+
         /** @brief Pointer input capture.
         */
         void setCapture(bool capture)
@@ -214,7 +222,7 @@ class PT_HMI_API Visual : public Responder
         /** @brief Pointer enter.
         */
         void setPointer(bool isPointer);
-
+    
         /** @brief Release to default initial state.
         */
         void release()
@@ -222,20 +230,24 @@ class PT_HMI_API Visual : public Responder
             onRelease();
         }
 
-        /** @brief Process event.
-        */
-        void processEvent(const Pt::Event& ev)
+        virtual void invalidate()
         {
-            this->onEvent(ev);
+            onInvalidateRequest();
         }
-    
+
+        virtual void repaint(const Gfx::RectF& rect)
+        {
+            onRepaintRequest(rect);
+        }
+
+        // deprecated
+        void update(const Gfx::RectF& rect)
+        { repaint(rect); }
+
     protected:
         virtual Visual* onGetParent() const = 0;
 
-        virtual Visual* onHitTest(const Gfx::PointF& pos)
-        {
-            return 0;
-        }
+        virtual Visual* onHitTest(const Gfx::PointF& pos);
 
 
         virtual void onAttachPeer(Visual& peer);
@@ -252,21 +264,38 @@ class PT_HMI_API Visual : public Responder
         virtual Gfx::PointF onFromGlobal(const Gfx::PointF& pos) const;
 
 
-        virtual void onEvent(const Pt::Event& ev) = 0;
+        virtual void onEvent(const Pt::Event& ev);
 
         virtual void onRelease();
 
         virtual void onSetCapture(bool capture);
+
+    protected:
+        virtual void onInvalidateRequest();
+
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
+
+    protected:
+        virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
+
+        virtual void onInvalidateEvent(const InvalidateEvent& ev);
+    
+        virtual void onInvalidate();
+
+    protected:
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintEvent(const PaintEvent& ev);
 
     private:
         void setR1(void* r)
         { _r1 = r; }
 
     private:
-        Pt::uint64_t         _vid;
-        std::string          _name;
-        std::vector<Visual*> _peers;
-        void*                _r1;
+        Pt::uint64_t             _vid;
+        std::string              _name;
+        std::vector<Visual*>     _peers;
+        void*                    _r1;
 };
 
 ///////////////////////////////////////////////////////////////////////

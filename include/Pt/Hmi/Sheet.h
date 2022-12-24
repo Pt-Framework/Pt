@@ -26,8 +26,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_HMI_FORM_H
-#define PT_HMI_FORM_H
+#ifndef PT_HMI_SHEET_H
+#define PT_HMI_SHEET_H
 
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/PaintRegion.h>

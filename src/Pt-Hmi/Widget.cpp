@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/Sheet.h>
+#include <Pt/Hmi/Form.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/String.h>
 
@@ -41,7 +41,7 @@ namespace Hmi {
 
 Widget::Widget()
 : _parent(0)
-, _sheet(0)
+, _form(0)
 , _nextResponder(0)
 , _pointer(0)
 , _capture(0)
@@ -202,23 +202,23 @@ void Widget::onRelease()
 }
 
 
-void Widget::setSheet(Sheet* sheet)
+void Widget::setForm(Form* form)
 {
-    if(_sheet)
-        _sheet->onDeregister(*this);
+    if(_form)
+        _form->onDeregister(*this);
 
-    _sheet = 0;
+    _form = 0;
 
-    if(sheet)
-        sheet->onRegister(*this);
+    if(form)
+        form->onRegister(*this);
 
-    _sheet = sheet;
+    _form = form;
 
     std::vector<Widget*>::iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
     {
         Widget* widget = *it;
-        widget->setSheet(sheet);
+        widget->setForm(form);
     }
 }
 
@@ -261,7 +261,7 @@ void Widget::onInit(Widget& widget)
 
     widget.setSurface(surface, surfacePos);
     widget.setNextResponder(this);
-    widget.setSheet(_sheet);
+    widget.setForm(_form);
 
     double scaling = _surface.scaleFactor();
     
@@ -275,7 +275,7 @@ void Widget::onInit(Widget& widget)
 
 void Widget::onRelease(Widget& widget)
 {
-    widget.setSheet(0);
+    widget.setForm(0);
     widget.setSurface( 0, widget.position() );
     widget.setNextResponder(0);
 
@@ -411,8 +411,8 @@ void Widget::setFocusPolicy(FocusPolicy policy)
 {
     _focusPolicy = policy;
 
-    if(_sheet)
-        _sheet->onSetFocusPolicy(*this, policy);
+    if(_form)
+        _form->onSetFocusPolicy(*this, policy);
 }
 
 
@@ -426,8 +426,8 @@ void Widget::setFocusIndex(size_t index)
 {
     _focusIndex = index;
     
-    if(_sheet)
-        _sheet->onSetFocusIndex(*this, index);
+    if(_form)
+        _form->onSetFocusIndex(*this, index);
 }
 
 
@@ -439,8 +439,8 @@ bool Widget::hasFocus() const
 
 void Widget::focus()
 {
-    if(_sheet)
-        _sheet->onSetFocus(*this);
+    if(_form)
+        _form->onSetFocus(*this);
 }
 
 
@@ -452,8 +452,8 @@ void Widget::onProcessFocusEvent(const FocusEvent& ev)
 
 void Widget::onFocusEvent(const FocusEvent& ev)
 {
-    if( _hasFocus && ! ev.isFocused() )
-        Application::instance().inputMethod().finish();
+    //if( _hasFocus && ! ev.isFocused() )
+    //    Application::instance().inputMethod().finish();
 
     _hasFocus = ev.isFocused();
 
@@ -495,8 +495,8 @@ void Widget::setShortcut(const Key* key)
     else
         _shortcutKey = *key;
 
-    if(_sheet)
-        _sheet->onSetShortcut(*this, key);
+    if(_form)
+        _form->onSetShortcut(*this, key);
 }
 
 
@@ -522,8 +522,8 @@ void Widget::setMnemonic(const Char& ch)
     _mnemonic = ch;
 
     const Char* m = ch != 0 ? &ch : 0;
-    if(_sheet)
-        _sheet->onSetMnemonic(*this, m);
+    if(_form)
+        _form->onSetMnemonic(*this, m);
 }
 
 
@@ -582,7 +582,16 @@ void Widget::onMnemonic()
 }
 
 
-void Widget::invalidate()
+//void Widget::invalidate()
+//{
+//    ++_invalidates;
+//
+//    InvalidateEvent ev(*this);
+//    Application::instance().commitEvent(ev);
+//}
+
+
+void Widget::onInvalidateRequest()
 {
     ++_invalidates;
 
@@ -648,8 +657,8 @@ void Widget::onProcessPaintEvent(const PaintEvent& ev)
     if( ! isVisible() )
         return;
 
-    // TODO: attach to sheet*s surface at position in sheet
-    //       _sheet->fromWidget( *this, Gfx::PointF(0, 0) );
+    // TODO: attach to form*s surface at position in form
+    //       _form->fromWidget( *this, Gfx::PointF(0, 0) );
     //
     //       reset surface of all clients on move and resize
 
