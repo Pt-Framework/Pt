@@ -273,9 +273,6 @@ class PT_HMI_API Visual : public Responder
     protected:
         virtual void onInvalidateRequest();
 
-        virtual void onRepaintRequest(const Gfx::RectF& rect);
-
-    protected:
         virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
 
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
@@ -283,6 +280,8 @@ class PT_HMI_API Visual : public Responder
         virtual void onInvalidate();
 
     protected:
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
+
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
