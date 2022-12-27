@@ -372,6 +372,60 @@ void Visual::onPaintEvent(const PaintEvent& ev)
 }
 
 ///////////////////////////////////////////////////////////////////////
+// Extended Visual API
+///////////////////////////////////////////////////////////////////////
+
+VisualExt::VisualExt()
+{
+}
+
+
+VisualExt::~VisualExt()
+{
+}
+
+void VisualExt::onEvent(const Pt::Event& ev)
+{
+    Visual::onEvent(ev);
+
+    if( ev.typeInfo() == typeid(MoveEvent) )
+    {
+      const MoveEvent& e = static_cast<const MoveEvent&>(ev);
+      onProcessMoveEvent(e);
+    }
+    else if( ev.typeInfo() == typeid(ResizeEvent) )
+    {
+      const ResizeEvent& e = static_cast<const ResizeEvent&>(ev);
+      onProcessResizeEvent(e);
+    }
+}
+
+
+void VisualExt::onProcessMoveEvent(const MoveEvent& ev)
+{
+    onMoveEvent(ev);
+}
+
+
+void VisualExt::onMoveEvent(const MoveEvent& ev)
+{
+    _alignedGeometry.setOrigin( ev.position() );
+}
+
+
+void VisualExt::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    onResizeEvent(ev);
+}
+
+
+void VisualExt::onResizeEvent(const ResizeEvent& ev)
+{
+    _alignedGeometry.setSize( ev.size() );
+    _bounds.setSize( ev.size() );
+}
+
+///////////////////////////////////////////////////////////////////////
 // View
 ///////////////////////////////////////////////////////////////////////
 

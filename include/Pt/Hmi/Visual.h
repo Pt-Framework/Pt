@@ -298,6 +298,52 @@ class PT_HMI_API Visual : public Responder
 };
 
 ///////////////////////////////////////////////////////////////////////
+// Extended Visual API
+///////////////////////////////////////////////////////////////////////
+
+class PT_HMI_API VisualExt : public Visual
+{
+    protected:
+        VisualExt();
+
+        const Gfx::PointF& position() const
+        {
+            return _alignedGeometry.topLeft();
+        }
+
+        const Gfx::SizeF& size() const
+        {
+            return _alignedGeometry.size();
+        }
+
+        const Gfx::RectF& bounds() const
+        {
+            return _bounds;
+        }
+
+    protected:
+        virtual void onEvent(const Pt::Event& ev);
+
+        
+        virtual void onProcessMoveEvent(const MoveEvent& ev);
+
+        virtual void onMoveEvent(const MoveEvent& ev);
+
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
+    public:
+        virtual ~VisualExt();
+
+    private:
+        Gfx::RectF _alignedGeometry;
+        Gfx::RectF _bounds;
+};
+
+
+///////////////////////////////////////////////////////////////////////
 // View
 ///////////////////////////////////////////////////////////////////////
 
