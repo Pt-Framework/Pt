@@ -73,7 +73,7 @@ void Control::onInvalidate()
     Widget::onInvalidate();
 
     // TODO: repaint only if required in derived class
-    repaint();
+    repaint( bounds() );
 }
 
 

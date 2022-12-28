@@ -97,19 +97,19 @@ class PT_HMI_API Form : public View
         //bool isEnabled() const;
 
     public:
-        const Gfx::RectF& geometry() const;
+        //const Gfx::RectF& geometry() const;
 
-        const Gfx::RectF& bounds() const;
+        //const Gfx::RectF& bounds() const;
 
 
 
-        const Gfx::PointF& position() const;
+        //const Gfx::PointF& position() const;
 
-    //    void move(const Gfx::PointF&);
+        //void move(const Gfx::PointF&);
 
-        const Gfx::SizeF& size() const;
+        //const Gfx::SizeF& size() const;
 
-    //    void resize(const Gfx::SizeF& s);
+        //void resize(const Gfx::SizeF& s);
 
     public:
         Widget* focusWidget();
@@ -246,11 +246,11 @@ class PT_HMI_API Form : public View
     // geometry
     //
     protected:
-        virtual void onProcessMoveEvent(const MoveEvent& ev);
+        //virtual void onProcessMoveEvent(const MoveEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);
 
-        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+        //virtual void onProcessResizeEvent(const ResizeEvent& ev);
         
         virtual void onResizeEvent(const ResizeEvent& ev);
 
@@ -297,8 +297,8 @@ class PT_HMI_API Form : public View
         bool                         _enabled;
         bool                         _enabledState;
 
-        Gfx::RectF                   _alignedGeometry;
-        Gfx::RectF                   _bounds;
+        //Gfx::RectF                   _alignedGeometry;
+        //Gfx::RectF                   _bounds;
         //Gfx::RectF                   _requestedGeometry;
         
         Visual*                      _pointer;

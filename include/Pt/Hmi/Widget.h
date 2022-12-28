@@ -171,10 +171,6 @@ class PT_HMI_API Widget : public View
         void setCursor(const Cursor* c);
 
     public:
-        const Gfx::PointF& position() const;
-
-        const Gfx::SizeF& size() const;
-
         const Gfx::RectF geometry() const;
 
         void move(const Gfx::PointF& pos);
@@ -199,18 +195,8 @@ class PT_HMI_API Widget : public View
     //
     // painting
     //  
-    public:
-        // deprecated
-        void update()
-        { repaint(); }
-
-        // deprecated
-        void update(const Gfx::RectF& rect)
-        { repaint(rect); }
-
-        void repaint();
-
-        void repaint(const Gfx::RectF& rect);
+    protected:
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
 
     protected:
         virtual void onProcessPaintEvent(const PaintEvent& ev);
@@ -355,12 +341,12 @@ class PT_HMI_API Widget : public View
         virtual void onRescale(double scaling);
 
 
-        virtual void onProcessMoveEvent(const MoveEvent& ev);
+        //virtual void onProcessMoveEvent(const MoveEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);
 
 
-        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+        //virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
@@ -437,8 +423,6 @@ class PT_HMI_API Widget : public View
         bool                         _visible;
         bool                         _enabled;
         bool                         _enabledState;
-        Gfx::PointF                  _position;
-        Gfx::SizeF                   _size;
         
         Gfx::SizeF                   _minimumSize;
         SizePolicy                   _sizePolicy;

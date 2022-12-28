@@ -81,7 +81,7 @@ bool ComboBox::isEditable() const
 void ComboBox::setEditable(bool e)
 {
     _isEditable = e;
-    update();
+    repaint( bounds() );
 }
 
 
@@ -578,7 +578,7 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
     {
         std::size_t n = _line.xToCursor( ev.x() );
         _editor.setCursorPosition(n);
-        update();
+        repaint( bounds() );
             
         Application::instance().inputMethod().begin(*this);
     }
@@ -604,7 +604,7 @@ bool ComboBox::onTouchEvent(const TouchEvent& ev)
     {
         std::size_t n = _line.xToCursor( ev.x() );
         _editor.setCursorPosition(n);
-        update();
+        repaint( bounds() );
 
         Application::instance().inputMethod().begin(*this);
     }

@@ -375,16 +375,22 @@ void Visual::onPaintEvent(const PaintEvent& ev)
 // Extended Visual API
 ///////////////////////////////////////////////////////////////////////
 
-VisualExt::VisualExt()
+
+///////////////////////////////////////////////////////////////////////
+// View
+///////////////////////////////////////////////////////////////////////
+
+View::View()
 {
 }
 
 
-VisualExt::~VisualExt()
+View::~View()
 {
 }
 
-void VisualExt::onEvent(const Pt::Event& ev)
+
+void View::onEvent(const Pt::Event& ev)
 {
     Visual::onEvent(ev);
 
@@ -401,41 +407,28 @@ void VisualExt::onEvent(const Pt::Event& ev)
 }
 
 
-void VisualExt::onProcessMoveEvent(const MoveEvent& ev)
+void View::onProcessMoveEvent(const MoveEvent& ev)
 {
     onMoveEvent(ev);
 }
 
 
-void VisualExt::onMoveEvent(const MoveEvent& ev)
+void View::onMoveEvent(const MoveEvent& ev)
 {
     _alignedGeometry.setOrigin( ev.position() );
 }
 
 
-void VisualExt::onProcessResizeEvent(const ResizeEvent& ev)
+void View::onProcessResizeEvent(const ResizeEvent& ev)
 {
     onResizeEvent(ev);
 }
 
 
-void VisualExt::onResizeEvent(const ResizeEvent& ev)
+void View::onResizeEvent(const ResizeEvent& ev)
 {
     _alignedGeometry.setSize( ev.size() );
     _bounds.setSize( ev.size() );
-}
-
-///////////////////////////////////////////////////////////////////////
-// View
-///////////////////////////////////////////////////////////////////////
-
-View::View()
-{
-}
-
-
-View::~View()
-{
 }
 
 } // namespace

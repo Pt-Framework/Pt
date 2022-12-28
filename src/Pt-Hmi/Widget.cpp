@@ -66,12 +66,12 @@ Widget::Widget()
     _eventReceived += Pt::slot(*this, &Widget::onProcessLeaveEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessKeyEvent);
 
-    _eventReceived += Pt::slot(*this, &Widget::onProcessInvalidateEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessPaintEvent);
+    //_eventReceived += Pt::slot(*this, &Widget::onProcessInvalidateEvent);
+    //_eventReceived += Pt::slot(*this, &Widget::onProcessPaintEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessLayoutEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessRescaleEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessMoveEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessResizeEvent);
+    //_eventReceived += Pt::slot(*this, &Widget::onProcessMoveEvent);
+    //_eventReceived += Pt::slot(*this, &Widget::onProcessResizeEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessShowEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessEnableEvent);
     
@@ -377,16 +377,16 @@ Gfx::PointF Widget::onFromWidget(const Widget& widget, const Gfx::PointF& pos) c
 }
 
 
-const Gfx::PointF& Widget::position() const
-{
-    return _position;
-}
-
-
-const Gfx::SizeF& Widget::size() const
-{
-    return _size;
-}
+//const Gfx::PointF& Widget::position() const
+//{
+//    return _position;
+//}
+//
+//
+//const Gfx::SizeF& Widget::size() const
+//{
+//    return _size;
+//}
 
 
 const Gfx::RectF Widget::geometry() const
@@ -618,14 +618,7 @@ void Widget::onInvalidate()
 }
 
 
-void Widget::repaint()
-{
-    Gfx::RectF rect( size() );
-    repaint(rect);
-}
-
-
-void Widget::repaint(const Gfx::RectF& rect)
+void Widget::onRepaintRequest(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->onRepaint(*this, rect);
@@ -644,25 +637,13 @@ void Widget::onRepaint(Widget& w, const Gfx::RectF& rect)
 void Widget::onProcessPaintEvent(const PaintEvent& ev)
 {    
     const Gfx::RectF& r = ev.rect();
-
     if( r.isNull() )
         return;
 
     if( ! isVisible() )
         return;
-
-    // TODO: attach to form*s surface at position in form
-    //       _form->fromWidget( *this, Gfx::PointF(0, 0) );
-    //
-    //       reset surface of all clients on move and resize
-
-    //
-    // paint widget
-    //
-    //Gfx::RectF clientRect( position(), size() );
-    //_surface.reset(clientRect);
-
-    onPaintEvent(ev);
+        
+    View::onProcessPaintEvent(ev);
 
     //
     // paint child widgets
@@ -689,12 +670,14 @@ void Widget::onProcessPaintEvent(const PaintEvent& ev)
 
 void Widget::onPaintEvent(const PaintEvent& ev)
 {    
+    View::onPaintEvent(ev);
+
     const Gfx::RectF& rect = ev.rect();
 
     //static int nnn = 0;
     //std::clog << "PAINT EVENT: " << typeid(*this).name() << " " << ++nnn << std::endl;
 
-    Gfx::RectF updateRect = rect.intersect( Gfx::RectF(_size) );
+    Gfx::RectF updateRect = rect.intersect( bounds() );
     onPaint(_surface, updateRect);
 }
 
@@ -921,7 +904,7 @@ void Widget::move(const Gfx::PointF& pos)
     //
     Gfx::PointF aligedPos = _surface.align(pos);
 
-    if( _position == aligedPos )
+    if( position() == aligedPos )
     {
         //std::clog << "MOVE skipped: " << typeid(*this).name() << std::endl;
         return;
@@ -930,8 +913,8 @@ void Widget::move(const Gfx::PointF& pos)
     //
     // unified repaint area
     //
-    Gfx::RectF updateRect(_size);
-    updateRect.unify( Gfx::RectF(aligedPos, _size) );
+    Gfx::RectF updateRect( size() );
+    updateRect.unify( Gfx::RectF(aligedPos, size()) );
 
     //
     // send move event
@@ -959,21 +942,23 @@ void Widget::onMove(Widget& widget, const Gfx::PointF& pos)
 }
 
 
-void Widget::onProcessMoveEvent(const MoveEvent& ev)
-{
-    onMoveEvent(ev);
-}
+//void Widget::onProcessMoveEvent(const MoveEvent& ev)
+//{
+//    onMoveEvent(ev);
+//}
 
 
 void Widget::onMoveEvent(const MoveEvent& ev)
 {
-    if( _position == ev.position() )
-        return;
+    View::onMoveEvent(ev);
 
-    //static int nn = 0;
-    //std::clog << "MOVE: " << typeid(*this).name() << " " << ++nn << std::endl;
-
-    _position = ev.position();
+//    if( _position == ev.position() )
+//        return;
+//
+//    //static int nn = 0;
+//    //std::clog << "MOVE: " << typeid(*this).name() << " " << ++nn << std::endl;
+//
+//    _position = ev.position();
 }
 
 
@@ -981,7 +966,7 @@ void Widget::resize(const Gfx::SizeF& size)
 {   
     Gfx::SizeF alignedSize = _surface.align(size);
 
-    if(_size == alignedSize)
+    if( this->size() == alignedSize )
     {
         //std::clog << "RESIZE skipped: " << typeid(*this).name() << std::endl;
         return;
@@ -1010,7 +995,7 @@ void Widget::resize(const Gfx::SizeF& size)
         _parent->onResize(*this, alignedSize);
 
     //std::clog << "RESIZE REPAINT: " << typeid(*this).name() << std::endl;
-    Gfx::RectF updateRect(_size);
+    Gfx::RectF updateRect( this->size() );
 
     Gfx::RectF resizedRect(size);
     updateRect.unify(resizedRect);
@@ -1024,27 +1009,30 @@ void Widget::onResize(Widget& widget, const Gfx::SizeF& size)
 }
 
 
-void Widget::onProcessResizeEvent(const ResizeEvent& ev)
-{
-    onResizeEvent(ev);
-}
+//void Widget::onProcessResizeEvent(const ResizeEvent& ev)
+//{
+//    onResizeEvent(ev);
+//}
 
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {
-    if( _size == ev.size() )
+    if( size() == ev.size() )
         return;
+
+    View::onResizeEvent(ev);
 
     //static int nn = 0;
     //std::clog << "RESIZE: " << typeid(*this).name() << " " << ++nn << std::endl;
 
-    _size = ev.size();
-    _surface.resize(_size);
+    //_size = ev.size();
+    _surface.resize( ev.size() );
 
     //
     // layout contents 
     //
-    onLayout( geometry() );
+    Gfx::RectF geometry( position(), ev.size() );
+    onLayout(geometry);
 }
 
 
@@ -1095,7 +1083,7 @@ void Widget::onShow(bool isShown)
     _visible = isShown;
 
     relayout();
-    repaint();
+    repaint( bounds() );
 }
 
 
@@ -1168,7 +1156,6 @@ void Widget::activate(bool active)
 }
 
 
-
 void Widget::onActivate(Widget& w, bool active)
 {
     if(_parent)
@@ -1193,7 +1180,7 @@ void Widget::onRaise(Widget& w)
     _children.erase(it);
     _children.push_back(&w);
 
-    w.repaint();
+    w.repaint( w.bounds() );
 }
 
 
@@ -1377,6 +1364,8 @@ Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
 
 void Widget::onEvent(const Pt::Event& ev)
 {
+    View::onEvent(ev);
+
     _eventReceived.send(ev);
 }
 

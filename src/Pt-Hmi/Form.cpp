@@ -60,8 +60,8 @@ Form::Form()
 {
     //_eventReceived += Pt::slot(*this, &Form::onProcessPaintEvent);
     _eventReceived += Pt::slot(*this, &Form::onProcessRescaleEvent);
-    _eventReceived += Pt::slot(*this, &Form::onProcessMoveEvent);
-    _eventReceived += Pt::slot(*this, &Form::onProcessResizeEvent);
+    //_eventReceived += Pt::slot(*this, &Form::onProcessMoveEvent);
+    //_eventReceived += Pt::slot(*this, &Form::onProcessResizeEvent);
     _eventReceived += Pt::slot(*this, &Form::onProcessEnableEvent);
 
     _eventReceived += Pt::slot(*this, &Form::onProcessMouseEvent);
@@ -214,7 +214,7 @@ Visual* Form::onHitTest(const Gfx::PointF& p)
 
 void Form::onEvent(const Pt::Event& ev)
 {
-    Visual::onEvent(ev);
+    View::onEvent(ev);
 
     _eventReceived.send(ev);
 }
@@ -402,7 +402,7 @@ void Form::onProcessPaintEvent(const PaintEvent& ev)
     if( rect.isNull() )
         return;
 
-    Visual::onProcessPaintEvent(ev);
+    View::onProcessPaintEvent(ev);
 
     //
     // paint main widget
@@ -424,7 +424,7 @@ void Form::onProcessPaintEvent(const PaintEvent& ev)
 
 void Form::onPaintEvent(const PaintEvent& ev)
 {
-    Visual::onPaintEvent(ev);
+    View::onPaintEvent(ev);
 }
 
 
@@ -565,24 +565,24 @@ void Form::onRescale(double scaling)
     //relayout();
 }
 
-
-const Gfx::RectF& Form::geometry() const
-{
-    return _alignedGeometry;
-}
-
-
-const Gfx::RectF& Form::bounds() const
-{
-    return _bounds;
-}
-
-
-
-const Gfx::PointF& Form::position() const
-{
-    return _alignedGeometry.topLeft();
-}
+//
+//const Gfx::RectF& Form::geometry() const
+//{
+//    return _alignedGeometry;
+//}
+//
+//
+//const Gfx::RectF& Form::bounds() const
+//{
+//    return _bounds;
+//}
+//
+//
+//
+//const Gfx::PointF& Form::position() const
+//{
+//    return _alignedGeometry.topLeft();
+//}
 
 
 //void Form::move(const Gfx::PointF& pos)
@@ -596,22 +596,23 @@ const Gfx::PointF& Form::position() const
 //}
 
 
-void Form::onProcessMoveEvent(const MoveEvent& ev)
-{
-    onMoveEvent(ev);
-}
+//void Form::onProcessMoveEvent(const MoveEvent& ev)
+//{
+//    onMoveEvent(ev);
+//}
 
 
 void Form::onMoveEvent(const MoveEvent& ev)
-{    
-    _alignedGeometry.setOrigin( ev.position() );
-}
-
-
-const Gfx::SizeF& Form::size() const
 {
-    return _alignedGeometry.size();
+    View::onMoveEvent(ev);
+//    _alignedGeometry.setOrigin( ev.position() );
 }
+
+
+//const Gfx::SizeF& Form::size() const
+//{
+//    return _alignedGeometry.size();
+//}
 
 
 //void Form::resize(const Gfx::SizeF& s)
@@ -625,16 +626,18 @@ const Gfx::SizeF& Form::size() const
 //}
 
 
-void Form::onProcessResizeEvent(const ResizeEvent& ev)
-{
-    onResizeEvent(ev);
-}
+//void Form::onProcessResizeEvent(const ResizeEvent& ev)
+//{
+//    onResizeEvent(ev);
+//}
 
 
 void Form::onResizeEvent(const ResizeEvent& ev)
 {
-    _alignedGeometry.setSize( ev.size() );
-    _bounds.setSize( ev.size() );
+    View::onResizeEvent(ev);
+
+    //_alignedGeometry.setSize( ev.size() );
+    //_bounds.setSize( ev.size() );
 
     relayout();
 }

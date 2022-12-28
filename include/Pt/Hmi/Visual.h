@@ -240,10 +240,6 @@ class PT_HMI_API Visual : public Responder
             onRepaintRequest(rect);
         }
 
-        // deprecated
-        void update(const Gfx::RectF& rect)
-        { repaint(rect); }
-
     protected:
         virtual Visual* onGetParent() const = 0;
 
@@ -298,13 +294,42 @@ class PT_HMI_API Visual : public Responder
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Extended Visual API
+// View
 ///////////////////////////////////////////////////////////////////////
 
-class PT_HMI_API VisualExt : public Visual
+class Widget;
+class View;
+class Key;
+
+class PT_HMI_API View : public Visual
 {
+    friend class Widget;
+
+    public:
+        enum FocusPolicy
+        {
+            NoFocus,
+            AcceptFocus,
+            KeepFocus
+        };
+    
     protected:
-        VisualExt();
+        View();
+    
+    public:
+        virtual ~View();
+
+        Gfx::PointF toWidget(const Widget& widget, 
+                             const Gfx::PointF& pos) const
+        { 
+            return onToWidget(widget, pos); 
+        }
+
+        Gfx::PointF fromWidget(const Widget& widget,
+                               const Gfx::PointF& pos) const
+        { 
+            return onFromWidget(widget, pos);
+        }
 
         const Gfx::PointF& position() const
         {
@@ -321,6 +346,14 @@ class PT_HMI_API VisualExt : public Visual
             return _bounds;
         }
 
+        // deprecated
+        void update()
+        { repaint( bounds() ); }
+
+        // deprecated
+        void update(const Gfx::RectF& rect)
+        { repaint(rect); }
+
     protected:
         virtual void onEvent(const Pt::Event& ev);
 
@@ -334,58 +367,7 @@ class PT_HMI_API VisualExt : public Visual
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
-    public:
-        virtual ~VisualExt();
-
-    private:
-        Gfx::RectF _alignedGeometry;
-        Gfx::RectF _bounds;
-};
-
-///////////////////////////////////////////////////////////////////////
-// View
-///////////////////////////////////////////////////////////////////////
-
-class Widget;
-class View;
-class Key;
-
-// View -> ViewManager (interface)
-// Widget -> View
-// Widget -> Control
-
-class PT_HMI_API View : public Visual
-{
-    friend class Widget;
-
-    public:
-        enum FocusPolicy
-        {
-            NoFocus,
-            AcceptFocus,
-            KeepFocus
-        };
-
     protected:
-        View();
-
-    public:
-        virtual ~View();
-
-        Gfx::PointF toWidget(const Widget& widget, 
-                             const Gfx::PointF& pos) const
-        { 
-            return onToWidget(widget, pos); 
-        }
-
-        Gfx::PointF fromWidget(const Widget& widget,
-                               const Gfx::PointF& pos) const
-        { 
-            return onFromWidget(widget, pos);
-        }
-
-    protected:
-
         virtual void onAttach(Widget& widget) = 0;
         
         virtual void onDetach(Widget& widget) = 0;
@@ -415,6 +397,10 @@ class PT_HMI_API View : public Visual
         virtual void onResize(Widget& widget, const Gfx::SizeF& size) = 0;
 
         virtual void onRaise(Widget& widget) = 0;
+
+    private:
+        Gfx::RectF _alignedGeometry;
+        Gfx::RectF _bounds;
 };
 
 } // namespace
