@@ -31,7 +31,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/ShellWM.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -40,10 +40,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class WindowFrame;
-
 class PT_HMI_API Shell : public Widget
-                       , public WindowManager
 {
     public:
         Shell();
@@ -61,85 +58,6 @@ class PT_HMI_API Shell : public Widget
         const Widget* content()  const;
 
         void setContent(Widget* widget);
-
-    public:
-        double borderWidth() const
-        {
-            return _borderWidth;
-        }
-
-        double titleHeight()  const
-        {
-            return _titleHeight;
-        }
-
-        const Gfx::Color& inactiveColor() const
-        {
-            return _inactiveColor;
-        }
-
-        const Gfx::Color& activeColor() const
-        {
-            return _activeColor;
-        }
-
-        const Gfx::Color& textColor() const
-        {
-            return _textColor;
-        }
-
-        const Gfx::Color& inactiveTextColor() const
-        {
-            return _inactiveTextColor;
-        }
-
-    //
-    // WindowManager
-    //
-    protected:
-        virtual Visual& onGetVisual()
-        { return *this; }
-
-        virtual WindowImpl* onCreateWindow(const WindowType& type);
-
-        virtual void onAttach(Window& w);
-
-        virtual void onDetach(Window& w);
-
-        virtual void onInit(Window& w);
-
-        virtual void onRelease(Window& w);
-
-        virtual Gfx::PointF onToWindow(const Window& w, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromWindow(const Window& w, 
-                                         const Gfx::PointF& pos) const;
-
-        virtual void onRepaint(Window& w, const Gfx::RectF& rect);
-
-        virtual void onShow(Window& w, bool visible); 
-
-        virtual void onActivate(Window& w, bool active); 
-
-        virtual void onEnable(Window& w, bool enable);
-
-        virtual void onMove(Window& w, const Gfx::PointF& to);
-
-        virtual void onResize(Window& w, const Gfx::SizeF& to);
-
-        virtual void onSetAbove(Window& w, bool above);
-
-        virtual void onSetTitle(Window& w, const std::string& text);
-
-        virtual void onSetIcon(Window& w, const Gfx::Image& icon);
-
-        virtual void onSetState(Window& w, const WindowState& state);
-        
-        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-                                                const Gfx::SizeF& maxSize); 
-
-        virtual void onClosing(Window& w);
 
     //
     // Visual
@@ -184,27 +102,9 @@ class PT_HMI_API Shell : public Widget
         virtual void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        WindowFrame* activeWindow();
-
-        WindowFrame* getWindowFrame(const Window& w) const;
-
-    private:
+        ShellWM                      _wm;
         Widget*                      _content;
         Visual*                      _pointer;
-        Visual*                      _capture;
-
-        std::vector<WindowFrame*>    _windows;
-
-        WindowFrame*                 _activeWindow;
-        WindowFrame*                 _grabbedFrame;
-        WindowFrame*                 _topMostWindow;
-
-        double                       _borderWidth;
-        double                       _titleHeight;
-        Gfx::Color                   _inactiveColor;
-        Gfx::Color                   _activeColor;
-        Gfx::Color                   _textColor;
-        Gfx::Color                   _inactiveTextColor;   
 };
 
 } // namespace

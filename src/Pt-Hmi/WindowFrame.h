@@ -45,7 +45,7 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
-class Shell;
+class ShellWM;
 class WindowFrame;
 class Application;
 class MouseEvent;
@@ -153,7 +153,7 @@ class WindowFrame : public Visual
                   , public Pt::Connectable
 {
     public:
-        WindowFrame(Shell& wm, Window& window);
+        WindowFrame(ShellWM& wm, Window& window);
 
         virtual ~WindowFrame();
 
@@ -268,7 +268,7 @@ class WindowFrame : public Visual
         bool checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
     private:
-        Shell*         _wm;
+        ShellWM*       _wm;
         Window*        _window;
         double         _borderWidth;
         double         _titleHeight;

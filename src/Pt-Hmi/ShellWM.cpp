@@ -51,21 +51,6 @@ class ShellWindowImpl : public WindowImpl
         virtual ~ShellWindowImpl();
 
         virtual double scaleFactor() const;
-
-    protected:
-        virtual void onSetType(WindowType type);
-
-        virtual void onSetTitle(const std::string& text);
-
-        virtual void onSetIcon(const Gfx::Image& p);
-
-        virtual void onSetTopMost(bool top);
-
-        virtual void onSetState(WindowState s);
-
-        virtual void onSetMinimumSize(const Gfx::SizeF& s);
-
-        virtual  void onSetMaximumSize(const Gfx::SizeF& s);
 };
 
 
@@ -83,41 +68,6 @@ ShellWindowImpl::~ShellWindowImpl()
 double ShellWindowImpl::scaleFactor() const
 {
     return 1.0;
-}
-
-
-void ShellWindowImpl::onSetType(WindowType type)
-{
-}
-
-
-void ShellWindowImpl::onSetTitle(const std::string& text)
-{
-}
-
-
-void ShellWindowImpl::onSetIcon(const Gfx::Image& p)
-{
-}
-
-
-void ShellWindowImpl::onSetTopMost(bool top)
-{
-}
-
-
-void ShellWindowImpl::onSetState(WindowState s)
-{
-}
-
-
-void ShellWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
-{
-}
-
-
-void ShellWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
-{
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -199,16 +149,7 @@ WindowFrame* ShellWM::activeWindow()
 void ShellWM::activate(bool active)
 {
     if(_parent)
-        _parent->onActivate(*this, active);
-}
-
-
-void ShellWM::deactivate()
-{
-    if(_activeWindow)
-    {
-        _activeWindow->window()->activate(false);
-    }
+        _parent->activate(active);
 }
 
 
@@ -246,6 +187,85 @@ WindowFrame* ShellWM::getWindowFrame(const Window& w) const
 }
 
 ///////////////////////////////////////////////////////////////////////
+// Visual
+///////////////////////////////////////////////////////////////////////
+
+Visual* ShellWM::onGetParent() const
+{
+    return _parent;
+}
+
+
+Gfx::PointF ShellWM::onToParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->toParent(pos);
+}
+
+
+Gfx::PointF ShellWM::onFromParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->fromParent(pos);
+}
+
+
+Visual* ShellWM::onHitTest(const Gfx::PointF& p)
+{
+    std::vector<WindowFrame*>::const_reverse_iterator rit;
+    for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
+    {
+        WindowFrame* frame = *rit;
+        Window* w = frame->window();
+
+        if( ! w->isVisible() )
+            continue;
+
+        Gfx::PointF pos = toWindow(*w, p);
+        Visual* hit = w->hitTest(pos);
+        if(hit)
+            return hit;
+
+        if( frame->frameRect().contains(p) )
+            return 0;
+    }
+
+    return 0;
+}
+
+
+void ShellWM::onSetCapture(bool capture)
+{
+    Visual::onSetCapture(capture);
+
+    if( ! capture )
+    {
+        if(_grabbedFrame)
+            _grabbedFrame = 0;
+    }
+}
+
+
+void ShellWM::onRelease()
+{
+    Visual::onRelease();
+
+    setPointer(false);
+    setCapture(false);
+
+    std::vector<WindowFrame*>::iterator wit;
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    {
+        WindowFrame* windowFrame = *wit;
+        windowFrame->window()->release();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////
 // WindowManager
 ///////////////////////////////////////////////////////////////////////
 
@@ -259,12 +279,22 @@ void ShellWM::onAttach(Window& w)
 {
     WindowFrame* frame = new WindowFrame(*this, w);
 
+    switch( w.type() )
+    {
+        case WindowType::Popup:
+            frame->setFrame(0, 0);
+            break;
+        
+        default:
+        case WindowType::Default:
+            frame->setFrame(_borderWidth, _titleHeight);
+            break;
+    }
+
     if(_topMostWindow)
         _windows.insert( --_windows.end(), frame );
     else
         _windows.push_back(frame);
-
-    onFrameChanged(w);
 
     w.setNextResponder(this);
 }
@@ -273,8 +303,6 @@ void ShellWM::onAttach(Window& w)
 void ShellWM::onDetach(Window& w)
 {
     w.setNextResponder(0);
-
-    Application::instance().screen().unsetPointer(w);
 
     std::vector<WindowFrame*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
@@ -292,8 +320,6 @@ void ShellWM::onDetach(Window& w)
 
             if(_topMostWindow && _topMostWindow->window() == &w)
                 _topMostWindow = 0;
-
-            Application::instance().screen().unsetPointer(**wit);
 
             delete *wit;
             _windows.erase(wit);
@@ -492,40 +518,56 @@ void ShellWM::onResize(Window& w, const Gfx::SizeF& s)
 }
 
 
-void ShellWM::onFrameChanged(Window& w)
+void ShellWM::onSetAbove(Window& w, bool above)
+{
+    WindowFrame* frame = getWindowFrame(w);
+    if( ! frame )
+        return;
+
+    if(above)
+    {
+        if(_topMostWindow && _topMostWindow != frame)
+            _topMostWindow->window()->setAbove(false);
+
+        // move top most frame to the back
+        std::vector<WindowFrame*>::iterator it = std::find(_windows.begin(), 
+                                                           _windows.end(), frame);
+        if( it != _windows.end() )
+            _windows.erase(it);
+        
+        _windows.push_back(frame);
+
+        _topMostWindow = frame;
+    }
+    else if(_topMostWindow == frame)
+    {
+        _topMostWindow = 0;
+    }
+}
+
+
+void ShellWM::onSetTitle(Window& w, const std::string& text)
 {
     WindowFrame* frame = getWindowFrame(w);
     if( ! frame )
         return;
 
     Gfx::RectF updateRect = frame->frameRect();
-
-    switch( w.type() )
-    {
-        case WindowType::Popup:
-            frame->setFrame(0, 0);
-            break;
-        
-        default:
-        case WindowType::Default:
-            frame->setFrame(_borderWidth, _titleHeight);
-            break;
-    }
-
-    Gfx::RectF changedRect = frame->frameRect();
-    updateRect.unify(changedRect);
-
     repaint(updateRect);
 }
 
 
-void ShellWM::onStateChanged(Window& w)
+void ShellWM::onSetIcon(Window& w, const Gfx::Image& icon)
+{
+}
+
+
+void ShellWM::onSetState(Window& w, const WindowState& state)
 {
     WindowFrame* frame = getWindowFrame(w);
     if( ! frame )
         return;
 
-    Window::State state = w.state();
     Window::State oldState = frame->state();
     
     if(state != oldState)
@@ -567,25 +609,12 @@ void ShellWM::onStateChanged(Window& w)
         WindowStateEvent wse(w, state);
         Application::instance().loop().commitEvent(wse);
     }
+}
 
-    if( w.isTopMost() )
-    {
-        if(_topMostWindow && _topMostWindow != frame)
-            _topMostWindow->window()->setTopMost(false);
 
-        // move top most frame to the back
-        std::vector<WindowFrame*>::iterator it =
-            std::find(_windows.begin(), _windows.end(), frame);
-
-        _windows.erase(it);
-        _windows.push_back(frame);
-
-        _topMostWindow = frame;
-    }
-    else if(_topMostWindow == frame)
-    {
-        _topMostWindow = 0;
-    }
+void ShellWM::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                       const Gfx::SizeF& maxSize)
+{
 }
 
 
@@ -628,7 +657,7 @@ void ShellWM::repaint()
 void ShellWM::repaint(const Gfx::RectF& rect)
 {
     if(_parent)
-        _parent->onRepaint(*this, rect);
+        _parent->repaint(rect);
 }
 
 
@@ -708,15 +737,84 @@ void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
-void ShellWM::onSetCapture(bool capture)
+bool ShellWM::processMouseEvent(const MouseEvent& ev)
 {
-    Visual::onSetCapture(capture);
-
-    if( ! capture )
+    //
+    // continue press sequence capture
+    // 
+    if(_grabbedFrame)
     {
-        if(_grabbedFrame)
+        _grabbedFrame->mouseEvent(ev);
+
+        if( ev.isRelease() )
+        {
+            setCapture(false);
             _grabbedFrame = 0;
+        }
+
+        return true;
     }
+
+    Gfx::PointF pos = fromGlobal( ev.position() );
+
+    //
+    // hit test
+    //
+    WindowFrame* windowFrame = 0;
+
+    std::vector<WindowFrame*>::const_reverse_iterator rit;
+    for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
+    {
+        WindowFrame* frame = *rit;
+        Window* window = frame->window();
+
+        if( frame->frameRect().contains(pos) && 
+            window->acceptsInput() )
+        {
+            windowFrame = frame;
+            break;
+        }
+    }
+    
+    //
+    // window activation
+    //
+    if( ev.isPress() )
+    {
+        if( ! windowFrame && _activeWindow )
+        {
+            _activeWindow->window()->activate(false);
+        }
+        
+        if( windowFrame && ! windowFrame->window()->isActive() )
+        {
+            windowFrame->window()->activate();
+        }
+    }
+
+    //
+    // propagate event to window frame
+    //
+    if(windowFrame)
+    {
+        bool isClient = windowFrame->clientRect().contains(pos);
+        if( ! isClient )
+        {
+            if( ev.isPress() )
+            {
+                _grabbedFrame = windowFrame;
+                setCapture(true);
+
+                // TODO: make WindowFrame a proper Visual to handle events
+                //windowFrame->setPointer(true);
+            }
+        }
+
+        windowFrame->mouseEvent(ev);
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -738,7 +836,7 @@ void ShellWM::onProcessMouseEvent(const MouseEvent& ev)
         return;
     }
 
-    Gfx::PointF pos = fromScreen( ev.position() );
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     //
     // hit test
@@ -789,7 +887,7 @@ void ShellWM::onProcessMouseEvent(const MouseEvent& ev)
                 setCapture(true);
 
                 // TODO: make WindowFrame a proper Visual to handle events
-                windowFrame->setPointer(true);
+                //windowFrame->setPointer(true);
             }
         }
 

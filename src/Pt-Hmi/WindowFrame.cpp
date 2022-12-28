@@ -27,14 +27,12 @@
   MA 02110-1301 USA
 */
 
-#include <vector>
-
 #include "WindowFrame.h"
 
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Shell.h>
+#include <Pt/Hmi/ShellWM.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
@@ -397,7 +395,7 @@ void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 // WindowFrame
 //
 
-WindowFrame::WindowFrame(Shell& shell, Window& window)
+WindowFrame::WindowFrame(ShellWM& shell, Window& window)
 : _wm(&shell)
 , _window(&window)
 , _borderWidth(0)

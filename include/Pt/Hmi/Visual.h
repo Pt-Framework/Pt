@@ -388,7 +388,7 @@ class PT_HMI_API View
         Gfx::PointF fromWidget(const Widget& widget,
                                const Gfx::PointF& pos) const
         { 
-            return onFromWidget(widget, pos); 
+            return onFromWidget(widget, pos);
         }
 
     protected:

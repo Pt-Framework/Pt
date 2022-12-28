@@ -42,6 +42,7 @@ namespace Pt {
 namespace Hmi {
 
 class WindowFrame;
+
 class Shell;
 
 class ShellWM : public Visual
@@ -64,11 +65,11 @@ class ShellWM : public Visual
         void repaint(const Gfx::RectF& rect);
 
         void activate(bool active);
+
+        bool processMouseEvent(const MouseEvent& ev);
     
     public:
         WindowFrame* activeWindow();
-
-        void deactivate();
 
         WindowFrame* findWindowFrame(const Gfx::PointF& p) const;
 
@@ -108,9 +109,19 @@ class ShellWM : public Visual
     // Visual
     //
     protected:
+        virtual Visual* onGetParent() const;
+
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+        Visual* onHitTest(const Gfx::PointF& p);
+
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onSetCapture(bool capture);
+
+        virtual void onRelease();
     
     //
     // Responder
@@ -122,6 +133,9 @@ class ShellWM : public Visual
     // WindowManager
     //
     protected:
+        virtual Visual& onGetVisual()
+        { return *this; }
+
         virtual WindowImpl* onCreateWindow(const WindowType& type);
 
         virtual void onAttach(Window& w);
@@ -150,9 +164,16 @@ class ShellWM : public Visual
 
         virtual void onResize(Window& w, const Gfx::SizeF& to);
 
-        virtual void onFrameChanged(Window& w);
+        virtual void onSetAbove(Window& w, bool above);
 
-        virtual void onStateChanged(Window& w); 
+        virtual void onSetTitle(Window& w, const std::string& text);
+
+        virtual void onSetIcon(Window& w, const Gfx::Image& icon);
+
+        virtual void onSetState(Window& w, const WindowState& state);
+        
+        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                                const Gfx::SizeF& maxSize); 
 
         virtual void onClosing(Window& w);
 
