@@ -215,6 +215,7 @@ Visual* Form::onHitTest(const Gfx::PointF& p)
 void Form::onEvent(const Pt::Event& ev)
 {
     Visual::onEvent(ev);
+
     _eventReceived.send(ev);
 }
 
@@ -250,12 +251,6 @@ Gfx::PointF Form::onFromWidget(const Widget& widget, const Gfx::PointF& pos) con
         return pos + widget.position();
 
     return pos + parentView->fromWidget(widget, pos);
-}
-
-
-Visual& Form::onGetVisual()
-{
-    return *this;
 }
 
 
@@ -438,7 +433,7 @@ void Form::onRepaint(Widget& w, const Gfx::RectF& rect)
     Gfx::PointF widgetPos = onFromWidget( w, rect.topLeft() );
     Gfx::RectF widgetRect( widgetPos, rect.size() );
 
-    Visual::repaint(widgetRect);
+    repaint(widgetRect);
 }
 
 

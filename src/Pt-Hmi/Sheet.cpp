@@ -288,12 +288,6 @@ Gfx::PointF Sheet::onFromWidget(const Widget& widget, const Gfx::PointF& pos) co
 }
 
 
-Visual& Sheet::onGetVisual()
-{
-    return *this;
-}
-
-
 void Sheet::onAttach(Widget& widget)
 {
     _mainWidget = &widget;

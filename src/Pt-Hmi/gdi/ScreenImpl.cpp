@@ -64,8 +64,11 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     RECT r;   
     GetWindowRect(desktop, &r);
     
-    _size.set(r.right, r.bottom);
-    _size /= _scaling;
+    Gfx::SizeF size(r.right, r.bottom);
+    size /= _scaling;
+
+    ResizeEvent rev(*this, size);
+    processEvent(rev);
 
     //ReleaseDC(desktop, screenDC);
 
@@ -116,12 +119,6 @@ void ScreenImpl::removeWindow(Window& w)
 const std::vector<Window*>& ScreenImpl::windows() const
 {
     return _windows;
-}
-
-
-const Gfx::SizeF& ScreenImpl::size() const
-{
-    return _size;
 }
 
 
@@ -413,9 +410,12 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     HWND desktop = GetDesktopWindow();
     RECT r;   
     GetWindowRect(desktop, &r);
-    
-    _size.set(r.right, r.bottom);
-    _size /= _scaling;
+
+    Gfx::SizeF size(r.right, r.bottom);
+    size /= _scaling;
+
+    ResizeEvent rev(*this, size);
+    processEvent(rev);
 
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)

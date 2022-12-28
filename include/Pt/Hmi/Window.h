@@ -257,10 +257,6 @@ class PT_HMI_API Window : public Form
 
         virtual void onRelease();
 
-    //
-    // Form
-    //
-    protected:
         virtual void onRepaintRequest(const Gfx::RectF& rect);
 
     //

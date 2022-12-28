@@ -45,8 +45,7 @@ class WindowFrame;
 
 class Shell;
 
-class ShellWM : public Visual
-              , public WindowManager
+class ShellWM : public WindowManager
               , public Connectable
 {
     public:
@@ -59,10 +58,6 @@ class ShellWM : public Visual
         void setNextResponder(Responder* r);
 
         void setSurface(Gfx::PaintSurface* surface);
-
-        void repaint();
-
-        void repaint(const Gfx::RectF& rect);
 
         void activate(bool active);
 
@@ -122,6 +117,8 @@ class ShellWM : public Visual
         virtual void onSetCapture(bool capture);
 
         virtual void onRelease();
+
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
     
     //
     // Responder
@@ -133,9 +130,6 @@ class ShellWM : public Visual
     // WindowManager
     //
     protected:
-        virtual Visual& onGetVisual()
-        { return *this; }
-
         virtual WindowImpl* onCreateWindow(const WindowType& type);
 
         virtual void onAttach(Window& w);

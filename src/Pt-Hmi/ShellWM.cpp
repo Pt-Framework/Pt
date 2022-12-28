@@ -96,7 +96,7 @@ ShellWM::ShellWM()
     _eventReceived += Pt::slot(*this, &ShellWM::onProcessKeyEvent);
 
     _eventReceived += Pt::slot(*this, &ShellWM::onProcessRescaleEvent);
-    _eventReceived += Pt::slot(*this, &ShellWM::onProcessPaintEvent);
+    //_eventReceived += Pt::slot(*this, &ShellWM::onProcessPaintEvent);
     _eventReceived += Pt::slot(*this, &ShellWM::onProcessEnableEvent);
 }
 
@@ -130,6 +130,8 @@ void ShellWM::setNextResponder(Responder* r)
 
 void ShellWM::onEvent(const Pt::Event& ev)
 {
+    WindowManager::onEvent(ev);
+
     _eventReceived.send(ev);
 }
 
@@ -579,7 +581,7 @@ void ShellWM::onSetState(Window& w, const WindowState& state)
 
         if(state == WindowState::Maximized)
         {
-            Gfx::SizeF maxSize = _parent->size();
+            Gfx::SizeF maxSize = size();
             maxSize = frame->fromFrame(maxSize);
 
             w.move( Gfx::PointF(0,0) );
@@ -647,14 +649,7 @@ void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void ShellWM::repaint()
-{
-    Gfx::RectF rect( _parent->size() );
-    repaint(rect);
-}
-
-
-void ShellWM::repaint(const Gfx::RectF& rect)
+void ShellWM::onRepaintRequest(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->repaint(rect);
@@ -664,12 +659,10 @@ void ShellWM::repaint(const Gfx::RectF& rect)
 void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& rect = ev.rect();
-
-    //std::clog << "  PAINT(" << "ShellWM" << "): " 
-    //          << rect.width() << "x" << rect.height() << std::endl;
-
     if( rect.isNull() )
         return;
+
+    Visual::onProcessPaintEvent(ev);
 
     //
     // paint child windows

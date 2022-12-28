@@ -58,8 +58,7 @@ class MouseEvent;
 class TouchEvent;
 class ScrollEvent;
 
-class ScreenImpl : public Visual
-                 , public WindowManager
+class ScreenImpl : public WindowManager
                  , public Connectable
 {
     public:
@@ -127,9 +126,6 @@ class ScreenImpl : public Visual
     // WindowManager
     //
     protected:
-        virtual Visual& onGetVisual()
-        { return *this; }
-
         virtual WindowImpl* onCreateWindow(const WindowType& type);
 
         virtual void onAttach(Window& w);

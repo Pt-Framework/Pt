@@ -67,7 +67,6 @@ namespace Hmi {
 class Form;
 
 class PT_HMI_API Widget : public View
-                        , public Visual
                         , public Pt::Connectable
 {
     friend class Form;
@@ -387,8 +386,6 @@ class PT_HMI_API Widget : public View
     // View
     //
     protected:
-        virtual Visual& onGetVisual();
-
         virtual Gfx::PointF onToWidget(const Widget& widget, 
                                        const Gfx::PointF& pos) const;
 

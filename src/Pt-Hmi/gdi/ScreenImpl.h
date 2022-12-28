@@ -55,8 +55,7 @@ class TouchEvent;
 class ScrollEvent;
 class KeyEvent;
 
-class ScreenImpl : public Visual
-                 , public WindowManager
+class ScreenImpl : public WindowManager
                  , public Connectable
 {
     public:
@@ -79,8 +78,6 @@ class ScreenImpl : public Visual
 
         void setCapture(Visual* capture);
 
-        
-        const Gfx::SizeF& size() const;
 
         double scaleFactor() const;
 
@@ -122,9 +119,6 @@ class ScreenImpl : public Visual
     // WindowManager
     //
     protected:
-        virtual Visual& onGetVisual()
-        { return *this; }
-
         virtual WindowImpl* onCreateWindow(const WindowType& type);
 
         virtual void onAttach(Window& w);
@@ -213,7 +207,6 @@ class ScreenImpl : public Visual
         Responder*                   _nextResponder;
         //Window*                      _capture;
 
-        Gfx::SizeF                   _size;
         double                       _screenScaling;
         double                       _scaling;
 

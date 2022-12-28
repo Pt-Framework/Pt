@@ -37,9 +37,7 @@ namespace Hmi {
 //// old ShellBase
 /////////////////////////////////////////////////////////////////////////
 
-//class ShellBase : public Visual
-//                , public Responder
-//                , public WindowManager
+//class ShellBase : public WindowManager
 //                , public Pt::Connectable
 //{
 //    public:

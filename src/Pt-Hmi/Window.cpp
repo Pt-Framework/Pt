@@ -341,10 +341,7 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 
 Visual* Window::onGetParent() const
 {
-    if( ! _parent )
-        return 0;
-
-    return &_parent->visual();
+    return _parent;
 }
 
 

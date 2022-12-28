@@ -28,10 +28,44 @@
 */
 
 #include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/ResizeEvent.h>
 
 namespace Pt {
 
 namespace Hmi {
+
+WindowManager::WindowManager()
+{
+}
+
+
+WindowManager::~WindowManager()
+{
+}
+
+
+void WindowManager::onEvent(const Pt::Event& ev)
+{
+    Visual::onEvent(ev);
+
+    if( ev.typeInfo() == typeid(ResizeEvent) )
+    {
+      const ResizeEvent& e = static_cast<const ResizeEvent&>(ev);
+      onProcessResizeEvent(e);
+    }
+}
+
+
+void WindowManager::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    onResizeEvent(ev);
+}
+
+
+void WindowManager::onResizeEvent(const ResizeEvent& ev)
+{
+    _size = ev.size();
+}
 
 } // namespace
 

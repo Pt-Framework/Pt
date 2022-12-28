@@ -355,10 +355,9 @@ class Key;
 // Widget -> View
 // Widget -> Control
 
-class PT_HMI_API View
+class PT_HMI_API View : public Visual
 {
     friend class Widget;
-    friend class Shell;
 
     public:
         enum FocusPolicy
@@ -374,11 +373,6 @@ class PT_HMI_API View
     public:
         virtual ~View();
 
-        Visual& visual()
-        {
-            return onGetVisual();
-        }
-
         Gfx::PointF toWidget(const Widget& widget, 
                              const Gfx::PointF& pos) const
         { 
@@ -392,7 +386,6 @@ class PT_HMI_API View
         }
 
     protected:
-        virtual Visual& onGetVisual() = 0;
 
         virtual void onAttach(Widget& widget) = 0;
         

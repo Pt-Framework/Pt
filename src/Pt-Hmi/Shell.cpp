@@ -211,6 +211,15 @@ void Shell::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
+void Shell::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Widget::onProcessResizeEvent(ev);
+
+    ResizeEvent rev(_wm, ev.size());
+    _wm.processEvent(rev);
+}
+
+
 void Shell::onProcessEnableEvent(const EnableEvent& ev)
 {
     Widget::onProcessEnableEvent(ev);

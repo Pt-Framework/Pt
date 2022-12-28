@@ -84,6 +84,8 @@ class PT_HMI_API Shell : public Widget
     protected:
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
         virtual void onProcessPaintEvent(const PaintEvent& ev);
         
         virtual void onProcessEnableEvent(const EnableEvent& ev);

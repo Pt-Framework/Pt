@@ -54,8 +54,7 @@ namespace Hmi {
 //  - set Decorator on Window to translate positions
 //
 
-class PT_HMI_API Form : public Visual
-                      , public View
+class PT_HMI_API Form : public View
                       , public Pt::Connectable
 {
     friend class Widget;
@@ -157,8 +156,6 @@ class PT_HMI_API Form : public Visual
     // View
     //
     protected:
-        virtual Visual& onGetVisual();
-
         virtual void onAttach(Widget& widget);
 
         virtual void onDetach(Widget& widget);

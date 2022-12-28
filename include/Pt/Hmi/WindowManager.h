@@ -40,21 +40,14 @@ namespace Hmi {
 class Window;
 class WindowImpl;
 
-class WindowManager
+class WindowManager : public Visual
 {
     friend class Window;
 
     public:
-        WindowManager()
-        {}
+        WindowManager();
 
-        virtual ~WindowManager()
-        {}
-
-        Visual& visual()
-        {
-            return onGetVisual();
-        }
+        virtual ~WindowManager();
 
         Gfx::PointF toWindow(const Window& w, 
                              const Gfx::PointF& pos) const
@@ -68,9 +61,19 @@ class WindowManager
             return onFromWindow(w, pos); 
         }
 
-    protected:
-        virtual Visual& onGetVisual() = 0;
+        const Gfx::SizeF& size() const
+        {
+            return _size;
+        }
 
+    protected:
+        virtual void onEvent(const Pt::Event& ev);
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
+    protected:
         virtual WindowImpl* onCreateWindow(const WindowType& type) = 0;
 
         virtual void onAttach(Window& w) = 0;
@@ -111,6 +114,9 @@ class WindowManager
                                                 const Gfx::SizeF& maxSize) = 0;
 
         virtual void onClosing(Window& w) = 0;
+
+    private:
+        Gfx::SizeF _size;
 };
 
 } // namespace

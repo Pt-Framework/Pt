@@ -223,12 +223,6 @@ void Widget::setForm(Form* form)
 }
 
 
-Visual& Widget::onGetVisual()
-{
-    return *this;
-}
-
-
 void Widget::onAttach(Widget& widget)
 {
     _children.push_back(&widget);
@@ -1339,10 +1333,7 @@ Pt::Signal<const Pt::Event&>& Widget::eventReceived()
 
 Visual* Widget::onGetParent() const
 {
-    if( ! _parent )
-        return 0;
-
-    return &_parent->visual();
+    return _parent;
 }
 
 

@@ -43,8 +43,7 @@ namespace Hmi {
 
 class Form;
 
-class Sheet : public Visual
-            , public View
+class Sheet : public View
             , public Pt::Connectable
 {
     friend class Widget;
@@ -155,8 +154,6 @@ class Sheet : public Visual
     // View
     //
     protected:
-        virtual Visual& onGetVisual();
-
         virtual void onAttach(Widget& widget);
 
         virtual void onDetach(Widget& widget);

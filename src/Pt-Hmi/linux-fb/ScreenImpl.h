@@ -117,9 +117,6 @@ class ScreenImpl : public Visual
     // Form
     //
     protected:
-        virtual Visual& onGetVisual()
-        { return *this; }
-
         virtual void onAttach(Sheet& view);
     
         virtual void onDetach(Sheet& view);
