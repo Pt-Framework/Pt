@@ -48,10 +48,11 @@ class FrameBuffer;
 class Cursor;
 class Screen;
 
-class ScreenImpl : public Visual
-                 , public Form
+class ScreenImpl : public Form
                  , public Connectable
 {
+    typedef Form Base;
+
     public:
         ScreenImpl(ApplicationImpl& app);
 
@@ -72,15 +73,11 @@ class ScreenImpl : public Visual
 
         void setCapture(Visual* capture);
 
-
-        const Gfx::SizeF& size() const;
-
+        
         double scaleFactor() const;
 
 
         bool isEnabled() const;
-
-        void repaint(const Gfx::RectF& rect);
 
     public:
         void drawCursor(const Pt::Gfx::PointF& pos);
@@ -112,6 +109,8 @@ class ScreenImpl : public Visual
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
         virtual void onEvent(const Event& ev);
+
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
 
     //
     // Form
@@ -213,8 +212,6 @@ class ScreenImpl : public Visual
         Shell                        _shell;
                                      
         Responder*                   _nextResponder;
-
-        Gfx::SizeF                   _size;
 
         bool                         _enabled;
         bool                         _enabledState;

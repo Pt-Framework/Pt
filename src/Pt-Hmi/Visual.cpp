@@ -272,8 +272,8 @@ Gfx::PointF Visual::onToGlobal(const Gfx::PointF& pos) const
     if( ! parent )
         return pos;
 
-      Gfx::PointF parentPos = toParent(pos);
-      return parent->toGlobal(parentPos);
+    Gfx::PointF parentPos = toParent(pos);
+    return parent->toGlobal(parentPos);
 }
 
 
@@ -312,6 +312,16 @@ void Visual::onEvent(const Pt::Event& ev)
     {
       const InvalidateEvent& e = static_cast<const InvalidateEvent&>(ev);
       onProcessInvalidateEvent(e);
+    }
+    else if( ev.typeInfo() == typeid(MoveEvent) )
+    {
+      const MoveEvent& e = static_cast<const MoveEvent&>(ev);
+      onProcessMoveEvent(e);
+    }
+    else if( ev.typeInfo() == typeid(ResizeEvent) )
+    {
+      const ResizeEvent& e = static_cast<const ResizeEvent&>(ev);
+      onProcessResizeEvent(e);
     }
 }
 
@@ -371,10 +381,33 @@ void Visual::onPaintEvent(const PaintEvent& ev)
 {
 }
 
-///////////////////////////////////////////////////////////////////////
-// Extended Visual API
-///////////////////////////////////////////////////////////////////////
+//
+// geometry
+//
 
+void Visual::onProcessMoveEvent(const MoveEvent& ev)
+{
+    onMoveEvent(ev);
+}
+
+
+void Visual::onMoveEvent(const MoveEvent& ev)
+{
+    _pos = ev.position();
+}
+
+
+void Visual::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    onResizeEvent(ev);
+}
+
+
+void Visual::onResizeEvent(const ResizeEvent& ev)
+{
+    _size = ev.size();
+    _bounds.setSize( ev.size() );
+}
 
 ///////////////////////////////////////////////////////////////////////
 // View
@@ -387,48 +420,6 @@ View::View()
 
 View::~View()
 {
-}
-
-
-void View::onEvent(const Pt::Event& ev)
-{
-    Visual::onEvent(ev);
-
-    if( ev.typeInfo() == typeid(MoveEvent) )
-    {
-      const MoveEvent& e = static_cast<const MoveEvent&>(ev);
-      onProcessMoveEvent(e);
-    }
-    else if( ev.typeInfo() == typeid(ResizeEvent) )
-    {
-      const ResizeEvent& e = static_cast<const ResizeEvent&>(ev);
-      onProcessResizeEvent(e);
-    }
-}
-
-
-void View::onProcessMoveEvent(const MoveEvent& ev)
-{
-    onMoveEvent(ev);
-}
-
-
-void View::onMoveEvent(const MoveEvent& ev)
-{
-    _alignedGeometry.setOrigin( ev.position() );
-}
-
-
-void View::onProcessResizeEvent(const ResizeEvent& ev)
-{
-    onResizeEvent(ev);
-}
-
-
-void View::onResizeEvent(const ResizeEvent& ev)
-{
-    _alignedGeometry.setSize( ev.size() );
-    _bounds.setSize( ev.size() );
 }
 
 } // namespace

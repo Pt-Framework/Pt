@@ -54,6 +54,8 @@ class RescaleEvent;
 class PT_HMI_API Screen : public Visual
                         , public Pt::Connectable
 {
+    typedef Visual Base;
+
     public:
         Screen(ApplicationImpl& app);
 
@@ -70,19 +72,6 @@ class PT_HMI_API Screen : public Visual
 
         const std::vector<Window*>& windows() const;
 
-        
-        const Gfx::SizeF& size() const;
-
-        
-        void repaint()
-        {
-            Gfx::RectF rect( Gfx::PointF(0, 0), size() );
-            repaint(rect);
-        }
-
-        void repaint(const Gfx::RectF& r);
-
-        
         void setPointer(Visual* visual);
 
         void setPointer(Visual& visual, bool isPointer);
@@ -122,6 +111,8 @@ class PT_HMI_API Screen : public Visual
 
         virtual void onEvent( const Event& ev );
 
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
+
     //
     // scaling
     //
@@ -141,6 +132,14 @@ class PT_HMI_API Screen : public Visual
 
         virtual void onPaint(const Gfx::RectF& rect);
         
+    //
+    // geometry
+    //
+    protected:
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
     //
     // input
     //

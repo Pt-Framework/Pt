@@ -58,6 +58,8 @@ class KeyEvent;
 class ScreenImpl : public WindowManager
                  , public Connectable
 {
+    typedef WindowManager Base;
+
     public:
         ScreenImpl(ApplicationImpl& app);
         
@@ -80,9 +82,6 @@ class ScreenImpl : public WindowManager
 
 
         double scaleFactor() const;
-
-        
-        void repaint(const Gfx::RectF& rect);
 
         
         bool isEnabled() const;
@@ -114,6 +113,8 @@ class ScreenImpl : public WindowManager
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
         virtual void onEvent(const Event& ev);
+
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
 
     //
     // WindowManager

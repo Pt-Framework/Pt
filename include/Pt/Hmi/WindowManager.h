@@ -61,18 +61,6 @@ class WindowManager : public Visual
             return onFromWindow(w, pos); 
         }
 
-        const Gfx::SizeF& size() const
-        {
-            return _size;
-        }
-
-    protected:
-        virtual void onEvent(const Pt::Event& ev);
-
-        virtual void onProcessResizeEvent(const ResizeEvent& ev);
-
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
     protected:
         virtual WindowImpl* onCreateWindow(const WindowType& type) = 0;
 
@@ -114,9 +102,6 @@ class WindowManager : public Visual
                                                 const Gfx::SizeF& maxSize) = 0;
 
         virtual void onClosing(Window& w) = 0;
-
-    private:
-        Gfx::SizeF _size;
 };
 
 } // namespace

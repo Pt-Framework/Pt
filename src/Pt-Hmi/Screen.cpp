@@ -57,7 +57,7 @@ Screen::Screen(ApplicationImpl& app)
     _eventReceived += Pt::slot(*this, &Screen::onProcessKeyEvent);
 
     _eventReceived += Pt::slot(*this, &Screen::onProcessRescaleEvent);
-    _eventReceived += Pt::slot(*this, &Screen::onProcessPaintEvent);
+    //_eventReceived += Pt::slot(*this, &Screen::onProcessPaintEvent);
 }
 
 
@@ -111,12 +111,6 @@ Widget* Screen::findWidget(const std::string& name)
 const std::vector<Window*>& Screen::windows() const
 {
   return _impl->windows();
-}
-
-
-const Gfx::SizeF& Screen::size() const
-{   
-    return _impl->size();
 }
 
 
@@ -215,6 +209,7 @@ Gfx::PointF Screen::onFromGlobal(const Gfx::PointF& pos) const
 
 void Screen::onEvent(const Event& ev)
 {
+    Base::onEvent(ev);
     _eventReceived.send(ev);
 }
 
@@ -244,7 +239,7 @@ void Screen::onRescale(double scaling)
 }
 
 
-void Screen::repaint(const Gfx::RectF& rect)
+void Screen::onRepaintRequest(const Gfx::RectF& rect)
 {
     _updateRect.unify(rect);
     ++_updates;
@@ -272,10 +267,7 @@ void Screen::onProcessPaintEvent(const PaintEvent& ev)
 
     //_clock.start();
 
-    //
-    // paint screen
-    //
-    onPaintEvent(ev);
+    Base::onProcessPaintEvent(ev);
 
     const Gfx::RectF& screenRect = ev.rect();
     PaintEvent pev(*_impl, screenRect);
@@ -293,6 +285,8 @@ void Screen::onProcessPaintEvent(const PaintEvent& ev)
 
 void Screen::onPaintEvent(const PaintEvent& ev)
 {    
+    Base::onPaintEvent(ev);
+
     const Gfx::RectF& rect = ev.rect();
     onPaint(rect);
 }
@@ -300,6 +294,20 @@ void Screen::onPaintEvent(const PaintEvent& ev)
 
 void Screen::onPaint(const Gfx::RectF& rect)
 {
+}
+
+
+void Screen::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
+
+    _impl->processEvent(ev);
+}
+
+
+void Screen::onResizeEvent(const ResizeEvent& ev)
+{
+    Base::onResizeEvent(ev);
 }
 
 

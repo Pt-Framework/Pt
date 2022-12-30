@@ -54,21 +54,11 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     //HDC screenDC = GetDC(desktop);
 
     //int dpix = GetDeviceCaps(screenDC, LOGPIXELSX);
-
     //std::clog << "SCALING DPI: " << dpix << std::endl;
-    //std::clog << "SCALING: " << dpix / 96.0 << std::endl;
-    //_screenScaling = dpix / 96.0;
-
-    _scaling = _screenScaling;
-
-    RECT r;   
-    GetWindowRect(desktop, &r);
     
-    Gfx::SizeF size(r.right, r.bottom);
-    size /= _scaling;
-
-    ResizeEvent rev(*this, size);
-    processEvent(rev);
+    _scaling = _screenScaling;
+    //_screenScaling = dpix / 96.0;
+    //std::clog << "SCALING: " << _screenScaling << std::endl;
 
     //ReleaseDC(desktop, screenDC);
 
@@ -78,7 +68,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
 
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
 }
 
@@ -95,6 +85,20 @@ ScreenImpl::~ScreenImpl()
 void ScreenImpl::setParent(Screen* screen)
 {
     _parent = screen;
+
+    if(_parent)
+    {
+        HWND desktop = GetDesktopWindow();
+
+        RECT r;   
+        GetWindowRect(desktop, &r);
+    
+        Gfx::SizeF size(r.right, r.bottom);
+        size /= _scaling;
+
+        ResizeEvent rev(*_parent, size);
+        _parent->processEvent(rev);
+    }
 }
 
 
@@ -125,13 +129,6 @@ const std::vector<Window*>& ScreenImpl::windows() const
 double ScreenImpl::scaleFactor() const
 { 
     return _scaling; 
-}
-
-
-void ScreenImpl::repaint(const Gfx::RectF& rect)
-{
-    if(_parent)
-        _parent->repaint(rect);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -189,7 +186,15 @@ Gfx::PointF ScreenImpl::onFromParent(const Gfx::PointF& pos) const
 
 void ScreenImpl::onEvent(const Event& ev)
 {
+    Base::onEvent(ev);
     _eventReceived.send(ev);
+}
+
+
+void ScreenImpl::onRepaintRequest(const Gfx::RectF& rect)
+{
+    if(_parent)
+        _parent->repaint(rect);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -414,8 +419,8 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     Gfx::SizeF size(r.right, r.bottom);
     size /= _scaling;
 
-    ResizeEvent rev(*this, size);
-    processEvent(rev);
+    ResizeEvent rev(*_parent, size);
+    _parent->processEvent(rev);
 
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
@@ -441,10 +446,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& screenRect = ev.rect();
 
-    //
-    // paint screen
-    //
-    onPaintEvent(ev);
+    Base::onProcessPaintEvent(ev);
 
     //
     // paint child windows
@@ -471,6 +473,8 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 
 void ScreenImpl::onPaintEvent(const PaintEvent& ev)
 {    
+    Base::onPaintEvent(ev);
+
     const Gfx::RectF& rect = ev.rect();
     onPaint(rect);
 }

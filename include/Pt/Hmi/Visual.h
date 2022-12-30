@@ -204,6 +204,21 @@ class PT_HMI_API Visual : public Responder
             return onFromGlobal(pos);
         }
         
+        const Gfx::PointF& position() const
+        {
+            return _pos;
+        }
+
+        const Gfx::SizeF& size() const
+        {
+            return _size;
+        }
+
+        const Gfx::RectF& bounds() const
+        {
+            return _bounds;
+        }
+
 
         /** @brief Process event.
         */
@@ -239,6 +254,19 @@ class PT_HMI_API Visual : public Responder
         {
             onRepaintRequest(rect);
         }
+
+        virtual void repaint()
+        {
+            repaint( bounds() );
+        }
+
+        // deprecated
+        void update()
+        { repaint( bounds() ); }
+
+        // deprecated
+        void update(const Gfx::RectF& rect)
+        { repaint(rect); }
 
     protected:
         virtual Visual* onGetParent() const = 0;
@@ -282,15 +310,29 @@ class PT_HMI_API Visual : public Responder
 
         virtual void onPaintEvent(const PaintEvent& ev);
 
+    protected:
+        virtual void onProcessMoveEvent(const MoveEvent& ev);
+
+        virtual void onMoveEvent(const MoveEvent& ev);
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
     private:
         void setR1(void* r)
         { _r1 = r; }
 
     private:
-        Pt::uint64_t             _vid;
-        std::string              _name;
-        std::vector<Visual*>     _peers;
-        void*                    _r1;
+        Pt::uint64_t          _vid;
+        std::string           _name;
+        std::vector<Visual*>  _peers;
+
+        Gfx::PointF           _pos;
+        Gfx::SizeF            _size;
+        Gfx::RectF            _bounds;
+
+        void*                 _r1;
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -331,42 +373,6 @@ class PT_HMI_API View : public Visual
             return onFromWidget(widget, pos);
         }
 
-        const Gfx::PointF& position() const
-        {
-            return _alignedGeometry.topLeft();
-        }
-
-        const Gfx::SizeF& size() const
-        {
-            return _alignedGeometry.size();
-        }
-
-        const Gfx::RectF& bounds() const
-        {
-            return _bounds;
-        }
-
-        // deprecated
-        void update()
-        { repaint( bounds() ); }
-
-        // deprecated
-        void update(const Gfx::RectF& rect)
-        { repaint(rect); }
-
-    protected:
-        virtual void onEvent(const Pt::Event& ev);
-
-        
-        virtual void onProcessMoveEvent(const MoveEvent& ev);
-
-        virtual void onMoveEvent(const MoveEvent& ev);
-
-
-        virtual void onProcessResizeEvent(const ResizeEvent& ev);
-
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
     protected:
         virtual void onAttach(Widget& widget) = 0;
         
@@ -397,10 +403,6 @@ class PT_HMI_API View : public Visual
         virtual void onResize(Widget& widget, const Gfx::SizeF& size) = 0;
 
         virtual void onRaise(Widget& widget) = 0;
-
-    private:
-        Gfx::RectF _alignedGeometry;
-        Gfx::RectF _bounds;
 };
 
 } // namespace

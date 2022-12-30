@@ -37,6 +37,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/System/Clock.h>
@@ -68,13 +69,13 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
 
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
 
     Gfx::Size fs = _frameBuffer.size();
-    _size = Gfx::SizeF( fs.width(), fs.height() );
+    Gfx::SizeF size( fs.width(), fs.height() );
 
-    _surface.resize(_size);
+    _surface.resize(size);
     _surface.pixmapImpl()->resize( _frameBuffer.size(), 
                                    _frameBuffer.strideSize() );
 
@@ -84,7 +85,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     painter.setBrush( Gfx::Color(0, 0, 0) );
     painter.fillRect(rect);
 
-    _sheet.resize(_size);
+    _sheet.resize(size);
     _sheet.setContent(&_shell);
     _sheet.setParent(this);
 
@@ -100,6 +101,15 @@ ScreenImpl::~ScreenImpl()
 void ScreenImpl::setParent(Screen* screen)
 {
     _parent = screen;
+
+    if(_parent)
+    {
+        Gfx::Size fs = _frameBuffer.size();
+        Gfx::SizeF size( fs.width(), fs.height() );
+
+        ResizeEvent rev(*_parent, size);
+        _parent->processEvent(rev);
+    }
 }
 
 
@@ -127,22 +137,9 @@ const std::vector<Window*>& ScreenImpl::windows() const
 }
 
 
-const Gfx::SizeF& ScreenImpl::size() const
-{
-    return _size;
-}
-
-
 double ScreenImpl::scaleFactor() const
 {
     return _surface.scaleFactor();
-}
-
-
-void ScreenImpl::repaint(const Gfx::RectF& rect)
-{
-    if(_parent)
-        _parent->repaint(rect);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -190,7 +187,15 @@ Gfx::PointF ScreenImpl::onFromParent(const Gfx::PointF& pos) const
 
 void ScreenImpl::onEvent(const Event& ev)
 {
+    Base::onEvent(ev);
     _eventReceived.send(ev);
+}
+
+
+void ScreenImpl::onRepaintRequest(const Gfx::RectF& rect)
+{
+    if(_parent)
+        _parent->repaint(rect);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -450,11 +455,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     if( screenRect.isNull() )
         return;
 
-    //
-    // paint screen
-    //
-    PaintEvent pev(*this, screenRect);
-    onPaintEvent(pev);
+    Base::onProcessPaintEvent(ev);
 
     //
     //
@@ -482,6 +483,8 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 
 void ScreenImpl::onPaintEvent(const PaintEvent& ev)
 {    
+    Base::onPaintEvent(ev);
+
     const Gfx::RectF& rect = ev.rect();
     onPaint(_surface, rect);
 }
