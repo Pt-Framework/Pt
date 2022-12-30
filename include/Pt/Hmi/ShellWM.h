@@ -48,6 +48,8 @@ class Shell;
 class ShellWM : public WindowManager
               , public Connectable
 {
+    typedef WindowManager Base;
+
     public:
         ShellWM();
 

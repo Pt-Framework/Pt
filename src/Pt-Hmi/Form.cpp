@@ -52,8 +52,8 @@ Form::Form()
 , _nextResponder(0)
 , _invalidates(0)
 , _layouts(0)
-, _enabled(true)
-, _enabledState(true)
+//, _enabled(true)
+//, _enabledState(true)
 , _pointer(0)
 , _active(0)
 , _focusWidget(0)
@@ -62,7 +62,7 @@ Form::Form()
     _eventReceived += Pt::slot(*this, &Form::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &Form::onProcessMoveEvent);
     //_eventReceived += Pt::slot(*this, &Form::onProcessResizeEvent);
-    _eventReceived += Pt::slot(*this, &Form::onProcessEnableEvent);
+    //_eventReceived += Pt::slot(*this, &Form::onProcessEnableEvent);
 
     _eventReceived += Pt::slot(*this, &Form::onProcessMouseEvent);
     _eventReceived += Pt::slot(*this, &Form::onProcessTouchEvent);
@@ -660,31 +660,31 @@ void Form::onResizeEvent(const ResizeEvent& ev)
 
 void Form::onProcessEnableEvent(const EnableEvent& ev)
 {
-    onEnableEvent(ev);
+    Base::onProcessEnableEvent(ev);
 
     if(_mainWidget)
     {
-        onEnable( *_mainWidget, ev.enabled() );
+        EnableEvent eev( *_mainWidget, ev.enabled() );
+        _mainWidget->processEvent(eev);
     }
 }
 
 
 void Form::onEnableEvent(const EnableEvent& ev)
 {    
-    _enabledState = ev.enabled(); 
-
-    onEnable( ev.enabled() );
+    Base::onEnableEvent(ev);
 }
 
 
 void Form::onEnable(bool e)
 {
+    Base::onEnable(e);
 }
 
 
 void Form::onEnable(Widget& widget, bool enable)
 {
-    if( ! _enabledState )
+    if( ! isEnabled() )
       enable = false;
 
     EnableEvent eev(widget, enable);

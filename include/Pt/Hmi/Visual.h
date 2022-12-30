@@ -268,6 +268,11 @@ class PT_HMI_API Visual : public Responder
         void update(const Gfx::RectF& rect)
         { repaint(rect); }
 
+        bool isEnabled() const
+        {
+            return _enabledState;
+        }
+
     protected:
         virtual Visual* onGetParent() const = 0;
 
@@ -311,6 +316,13 @@ class PT_HMI_API Visual : public Responder
         virtual void onPaintEvent(const PaintEvent& ev);
 
     protected:
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnable(bool e);
+
+    protected:
         virtual void onProcessMoveEvent(const MoveEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);
@@ -329,6 +341,8 @@ class PT_HMI_API Visual : public Responder
         std::vector<Visual*>  _peers;
 
         int                   _invalidates;
+
+        bool                  _enabledState;
 
         Gfx::PointF           _pos;
         Gfx::SizeF            _size;
@@ -405,6 +419,8 @@ class PT_HMI_API View : public Visual
         virtual void onResize(Widget& widget, const Gfx::SizeF& size) = 0;
 
         virtual void onRaise(Widget& widget) = 0;
+
+        using Visual::onEnable;
 };
 
 } // namespace

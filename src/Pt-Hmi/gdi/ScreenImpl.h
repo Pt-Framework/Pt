@@ -183,10 +183,12 @@ class ScreenImpl : public WindowManager
     // enable
     //
     protected:
-        void onProcessEnableEvent(const EnableEvent& ev);
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnableEvent(const EnableEvent& ev);
 
         virtual void onEnable(bool e);
-    
+
     //
     // input
     //
@@ -211,8 +213,8 @@ class ScreenImpl : public WindowManager
         double                       _screenScaling;
         double                       _scaling;
 
-        bool                         _enabled;
-        bool                         _enabledState;
+        //bool                         _enabled;
+        //bool                         _enabledState;
 };
 
 } // namespace

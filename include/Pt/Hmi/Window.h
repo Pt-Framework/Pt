@@ -128,7 +128,7 @@ class PT_HMI_API Window : public Form
         void showModal();
 
 
-        bool isEnabled() const;
+        //bool isEnabled() const;
 
         void enable(bool e = true);
 
@@ -355,12 +355,10 @@ class PT_HMI_API Window : public Form
         bool                         _visible; 
         bool                         _isActive;
         bool                         _enabled; 
-        bool                         _enabledState;
         bool                         _isClosed; 
 
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
-        //Gfx::RectF                   _geometry;
 
         Type                         _type;
         std::string                  _title;

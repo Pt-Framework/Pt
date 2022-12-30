@@ -97,7 +97,7 @@ ShellWM::ShellWM()
 
     _eventReceived += Pt::slot(*this, &ShellWM::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &ShellWM::onProcessPaintEvent);
-    _eventReceived += Pt::slot(*this, &ShellWM::onProcessEnableEvent);
+    //_eventReceived += Pt::slot(*this, &ShellWM::onProcessEnableEvent);
 }
 
 
@@ -447,7 +447,7 @@ void ShellWM::onEnable(Window& w, bool enable)
 {
     // TODO: move updating to frame
 
-    if( ! _parent->isEnabled() )
+    if( ! isEnabled() )
       enable = false;
 
     EnableEvent eev(w, enable);
@@ -716,15 +716,15 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
 
 void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
 {
-    bool enable = ev.enabled();
-    if( ! _parent->isEnabled() )
-      enable = false;
+    Base::onProcessEnableEvent(ev);
 
     for( size_t i = 0; i < _windows.size(); ++i)
     {
         WindowFrame* frame = _windows[i];
         Window* w = frame->window();
-        onEnable( *w, enable );
+
+        EnableEvent eev(*w, ev.enabled());
+        Application::instance().loop().commitEvent(eev);
     }
 }
 

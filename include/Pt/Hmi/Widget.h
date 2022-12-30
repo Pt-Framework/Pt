@@ -157,7 +157,7 @@ class PT_HMI_API Widget : public View
         void show( bool b = true );
 
         
-        bool isEnabled() const;
+        //bool isEnabled() const;
 
         void enable(bool b = true);
 
@@ -416,7 +416,7 @@ class PT_HMI_API Widget : public View
 
         bool                         _visible;
         bool                         _enabled;
-        bool                         _enabledState;
+        //bool                         _enabledState;
         
         Gfx::SizeF                   _minimumSize;
         SizePolicy                   _sizePolicy;

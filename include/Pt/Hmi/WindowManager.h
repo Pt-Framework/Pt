@@ -102,6 +102,8 @@ class WindowManager : public Visual
                                                 const Gfx::SizeF& maxSize) = 0;
 
         virtual void onClosing(Window& w) = 0;
+
+        using Visual::onEnable;
 };
 
 } // namespace

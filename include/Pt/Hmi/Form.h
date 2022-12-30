@@ -59,6 +59,8 @@ class PT_HMI_API Form : public View
 {
     friend class Widget;
 
+    typedef View Base;
+
     public:
         Form();
 
@@ -294,8 +296,8 @@ class PT_HMI_API Form : public View
         int                          _invalidates;
         int                          _layouts;
 
-        bool                         _enabled;
-        bool                         _enabledState;
+        //bool                         _enabled;
+        //bool                         _enabledState;
 
         //Gfx::RectF                   _alignedGeometry;
         //Gfx::RectF                   _bounds;

@@ -224,11 +224,7 @@ void Shell::onProcessEnableEvent(const EnableEvent& ev)
 {
     Widget::onProcessEnableEvent(ev);
 
-    bool enable = ev.enabled();
-    if( ! isEnabled() )
-      enable = false;
-
-    EnableEvent eev(_wm, enable);
+    EnableEvent eev(_wm, ev.enabled());
     _wm.processEvent(eev);
 }
 

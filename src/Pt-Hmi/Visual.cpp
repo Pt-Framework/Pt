@@ -187,6 +187,7 @@ bool Responder::onKeyEvent(const KeyEvent& ev)
 Visual::Visual()
 : _vid( Application::instance().makeId()  )
 , _invalidates(0)
+, _enabledState(true)
 , _r1(0)
 { 
     Application::instance().registerVisual(*this);
@@ -324,6 +325,11 @@ void Visual::onEvent(const Pt::Event& ev)
       const ResizeEvent& e = static_cast<const ResizeEvent&>(ev);
       onProcessResizeEvent(e);
     }
+    else if( ev.typeInfo() == typeid(EnableEvent) )
+    {
+      const EnableEvent& e = static_cast<const EnableEvent&>(ev);
+      onProcessEnableEvent(e);
+    }
 }
 
 //
@@ -379,6 +385,28 @@ void Visual::onProcessPaintEvent(const PaintEvent& ev)
 
 
 void Visual::onPaintEvent(const PaintEvent& ev)
+{
+}
+
+//
+// enabling
+//
+
+void Visual::onProcessEnableEvent(const EnableEvent& ev)
+{
+    onEnableEvent(ev);
+}
+
+
+void Visual::onEnableEvent(const EnableEvent& ev)
+{    
+    _enabledState = ev.enabled(); 
+
+    onEnable( ev.enabled() );
+}
+
+
+void Visual::onEnable(bool e)
 {
 }
 

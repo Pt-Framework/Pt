@@ -47,8 +47,8 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 //, _capture(0)
 , _screenScaling(1.0)
 , _scaling(1.0)
-, _enabled(true)
-, _enabledState(true)
+//, _enabled(true)
+//, _enabledState(true)
 {
     HWND desktop = GetDesktopWindow();
     //HDC screenDC = GetDC(desktop);
@@ -69,7 +69,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
 }
 
 
@@ -485,22 +485,9 @@ void ScreenImpl::onPaint(const Gfx::RectF& rect)
 }
 
 
-bool ScreenImpl::isEnabled() const
-{
-    return _enabledState;
-}
-
-
 void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
 {
-    bool wasEnabled = isEnabled();
-
-    _enabledState = ev.enabled();
-
-    if( wasEnabled != isEnabled() )
-    {
-        onEnable( ev.enabled() );
-    }
+    Base::onProcessEnableEvent(ev);
 
     for( size_t i = 0; i < _windows.size(); ++i)
     {
@@ -510,8 +497,15 @@ void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
+void ScreenImpl::onEnableEvent(const EnableEvent& ev)
+{    
+    Base::onEnableEvent(ev);
+}
+
+
 void ScreenImpl::onEnable(bool e)
 {
+    Base::onEnable(e);
 }
 
 

@@ -73,7 +73,6 @@ Window::Window(WindowManager* parent, WindowType type)
 , _visible(false)
 , _isActive(false)
 , _enabled(true)
-, _enabledState(true)
 , _isClosed(false)
 , _requestedPosition(0, 0)
 , _requestedSize(80, 80)
@@ -575,48 +574,38 @@ void Window::showModal()
 }
 
 
-bool Window::isEnabled() const
-{
-    return _enabledState && _enabled;
-}
+//bool Window::isEnabled() const
+//{
+//    return _enabledState && _enabled;
+//}
 
 
 void Window::enable(bool e)
 {
     _enabled = e;
 
-    if( ! _parent )
-    {
-        _enabledState = e;
-        return;
-    }
-
-    _parent->onEnable(*this, e);
+    if(_parent)
+        _parent->onEnable(*this, e);
 }
 
 
 void Window::onProcessEnableEvent(const EnableEvent& ev)
 {
-    bool enableChanged = _enabledState != ev.enabled();
-
-    if(enableChanged)
-        Form::onProcessEnableEvent(ev);
+    Base::onProcessEnableEvent(ev);
 }
 
 
 void Window::onEnableEvent(const EnableEvent& ev)
 {        
-    _enabledState = ev.enabled();
-
-    Form::onEnableEvent(ev);
+    Base::onEnableEvent(ev);
 }
 
 
 void Window::onEnable(bool e)
 {
-    invalidate();
+    Base::onEnable(e);
 
-    Form::onEnable(e);
+    invalidate();
 }
 
 

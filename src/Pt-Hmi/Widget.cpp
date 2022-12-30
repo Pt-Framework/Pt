@@ -49,7 +49,7 @@ Widget::Widget()
 , _isLayoutInvalid(true)
 , _visible(true)
 , _enabled(true)
-, _enabledState(true)
+//, _enabledState(true)
 , _hasFocus(false)
 , _focusPolicy(NoFocus)
 , _focusIndex(0)
@@ -72,7 +72,7 @@ Widget::Widget()
     //_eventReceived += Pt::slot(*this, &Widget::onProcessMoveEvent);
     //_eventReceived += Pt::slot(*this, &Widget::onProcessResizeEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessShowEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessEnableEvent);
+    //_eventReceived += Pt::slot(*this, &Widget::onProcessEnableEvent);
     
     _eventReceived += Pt::slot(*this, &Widget::onProcessFocusEvent);
 }
@@ -1088,23 +1088,46 @@ void Widget::onShow(bool isShown)
 }
 
 
-bool Widget::isEnabled() const
-{
-    return _enabledState && _enabled;
-}
+//bool Widget::isEnabled() const
+//{
+//    return _enabledState && _enabled;
+//}
 
 
 void Widget::enable(bool e)
 {
     _enabled = e;
 
-    if( ! _parent )
-    {
-        _enabledState = e;
-        return;
-    }
+    if(_parent)
+        _parent->onEnable(*this, e);
+}
 
-    _parent->onEnable(*this, e);
+
+void Widget::onProcessEnableEvent(const EnableEvent& ev)
+{
+    Base::onProcessEnableEvent(ev);
+
+    for( size_t i = 0; i < _children.size(); ++i)
+    {
+        Widget* w = _children[i];
+        
+        EnableEvent eev(*w, ev.enabled());
+        w->processEvent(eev);
+    }
+}
+
+
+void Widget::onEnableEvent(const EnableEvent& ev)
+{
+    Base::onEnableEvent(ev);
+}
+
+
+void Widget::onEnable(bool e)
+{
+    Base::onEnable(e);
+
+    invalidate();
 }
 
 
@@ -1115,38 +1138,6 @@ void Widget::onEnable(Widget& widget, bool enable)
 
     EnableEvent eev(widget, enable);
     widget.processEvent(eev);
-}
-
-
-void Widget::onProcessEnableEvent(const EnableEvent& ev)
-{
-    onEnableEvent(ev);
-
-    for( size_t i = 0; i < _children.size(); ++i)
-    {
-        Widget* w = _children[i];
-        onEnable( *w, ev.enabled() );
-    }
-}
-
-
-void Widget::onEnableEvent(const EnableEvent& ev)
-{
-    bool wasEnabled = isEnabled();
-    
-    _enabledState = ev.enabled();
-
-    if( wasEnabled != isEnabled() )
-    {
-        onEnable( ev.enabled() );
-    }
-
-    invalidate();
-}
-
-
-void Widget::onEnable(bool e)
-{
 }
 
 
