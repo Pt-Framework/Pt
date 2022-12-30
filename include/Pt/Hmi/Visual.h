@@ -328,6 +328,8 @@ class PT_HMI_API Visual : public Responder
         std::string           _name;
         std::vector<Visual*>  _peers;
 
+        int                   _invalidates;
+
         Gfx::PointF           _pos;
         Gfx::SizeF            _size;
         Gfx::RectF            _bounds;

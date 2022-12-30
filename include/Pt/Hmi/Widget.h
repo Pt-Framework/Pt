@@ -69,6 +69,8 @@ class Form;
 class PT_HMI_API Widget : public View
                         , public Pt::Connectable
 {
+    typedef View Base;
+
     friend class Form;
 
     public:
@@ -77,9 +79,9 @@ class PT_HMI_API Widget : public View
         virtual ~Widget();
 
     public:
-        const View* parent() const;
+        //const View* parent() const;
 
-        View* parent();
+        //View* parent();
 
         void setParent(View* parent);
 
@@ -180,14 +182,7 @@ class PT_HMI_API Widget : public View
     //
     // invalidation
     // 
-    public:
-        //void invalidate();
-
-        virtual void onInvalidateRequest();
-
     protected:
-        virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
-
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
     
         virtual void onInvalidate();
@@ -198,7 +193,6 @@ class PT_HMI_API Widget : public View
     protected:
         virtual void onRepaintRequest(const Gfx::RectF& rect);
 
-    protected:
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -417,7 +411,7 @@ class PT_HMI_API Widget : public View
         Visual*                      _capture;
         bool                         _isCapture;
 
-        int                          _invalidates;
+        
         bool                         _isLayoutInvalid;
 
         bool                         _visible;

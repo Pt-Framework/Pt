@@ -70,7 +70,6 @@ Window::Window(WindowManager* parent, WindowType type)
 : _impl(0)
 , _parent(0)
 , _capture(0)
-, _invalidates(0)
 , _visible(false)
 , _isActive(false)
 , _enabled(true)
@@ -386,76 +385,20 @@ void Window::onEvent(const Pt::Event& ev)
 // Implementation
 ///////////////////////////////////////////////////////////////////////
 
-//void Window::invalidate()
-//{
-//    ++_invalidates;
-//
-//    InvalidateEvent ev(*this);
-//    Application::instance().commitEvent(ev);
-//}
-
-
-//void Window::onProcessInvalidateEvent(const InvalidateEvent& ev)
-//{
-//    --_invalidates;
-//
-//    if(_invalidates > 0)
-//      return;
-//
-//    onInvalidateEvent(ev);
-//}
-
-
-//void Window::onInvalidateEvent(const InvalidateEvent& ev)
-//{
-//    onInvalidate();
-//}
-
-
-//void Window::onInvalidate()
-//{
-//    _backgroundBrush = background();
-//
-//    repaint();
-//}
-
-
-void Window::onProcessInvalidateEvent(const InvalidateEvent& ev)
-{
-    Form::onProcessInvalidateEvent(ev);
-}
-
-
 void Window::onInvalidateEvent(const InvalidateEvent& ev)
 {
-    Form::onInvalidateEvent(ev);
+    Base::onInvalidateEvent(ev);
 }
 
 
 void Window::onInvalidate()
 {
-    Form::onInvalidate();
+    Base::onInvalidate();
 
     _backgroundBrush = background();
 
     repaint( bounds() );
 }
-
-
-//void Window::repaint()
-//{
-//    Gfx::RectF rect( size() );
-//    repaint(rect);
-//}
-//
-//
-//void Window::repaint(const Gfx::RectF& rect)
-//{
-//    //std::clog << "REPAINT: " << title() << std::endl;
-//
-//    if(_parent)
-//        _parent->onRepaint(*this, rect);
-//}
 
 
 void Window::onRepaintRequest(const Gfx::RectF& rect)
@@ -481,7 +424,7 @@ void Window::onProcessPaintEvent(const PaintEvent& ev)
     if( ! updateRect.isNull() )
     {
         PaintEvent pev( *this, updateRect );
-        Form::onProcessPaintEvent(pev);
+        Base::onProcessPaintEvent(pev);
     }
 }
 
@@ -491,7 +434,7 @@ void Window::onPaintEvent(const PaintEvent& ev)
     //static int nnn = 0;
     //std::clog << "PAINT EVENT: " << typeid(*this).name() << " " << ++nnn << std::endl;
 
-    Form::onPaintEvent(ev);
+    Base::onPaintEvent(ev);
 
     Gfx::RectF updateRect = bounds().intersect( ev.rect() );
     onPaint(_surface, updateRect);

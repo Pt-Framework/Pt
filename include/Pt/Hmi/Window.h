@@ -89,6 +89,7 @@ class WindowImpl
 class PT_HMI_API Window : public Form
 {
     public:
+        typedef Form Base;
         typedef WindowType Type;
         typedef WindowState State;
 
@@ -111,22 +112,6 @@ class PT_HMI_API Window : public Form
 
 
         double scaleFactor() const;
-
-        
-        //void invalidate();
-
-
-       // void repaint();
-
-       // void repaint(const Gfx::RectF& rect);
-
-       //// deprecated
-       // void update()
-       // { repaint(); }
-
-       // // deprecated
-       // void update(const Gfx::RectF& rect)
-       // { repaint(rect); }
 
         bool acceptsInput() const;
 
@@ -263,8 +248,6 @@ class PT_HMI_API Window : public Form
     // invalidation
     //
     protected:
-        virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
-
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
 
         virtual void onInvalidate();
@@ -368,8 +351,7 @@ class PT_HMI_API Window : public Form
 
         WindowManager*               _parent;
         Visual*                      _capture;
-   
-        int                          _invalidates;
+
         bool                         _visible; 
         bool                         _isActive;
         bool                         _enabled; 

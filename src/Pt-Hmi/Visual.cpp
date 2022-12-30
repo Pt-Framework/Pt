@@ -186,6 +186,7 @@ bool Responder::onKeyEvent(const KeyEvent& ev)
 
 Visual::Visual()
 : _vid( Application::instance().makeId()  )
+, _invalidates(0)
 , _r1(0)
 { 
     Application::instance().registerVisual(*this);
@@ -331,19 +332,19 @@ void Visual::onEvent(const Pt::Event& ev)
 
 void Visual::onInvalidateRequest()
 {
-    //++_invalidates;
+    ++_invalidates;
 
-    //InvalidateEvent ev(*this);
-    //Application::instance().commitEvent(ev);
+    InvalidateEvent ev(*this);
+    Application::instance().commitEvent(ev);
 }
 
 
 void Visual::onProcessInvalidateEvent(const InvalidateEvent& ev)
 {
-    //--_invalidates;
+    --_invalidates;
 
-    //if(_invalidates > 0)
-    //  return;
+    if(_invalidates > 0)
+      return;
 
     onInvalidateEvent(ev);
 }

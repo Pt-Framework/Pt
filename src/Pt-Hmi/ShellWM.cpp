@@ -353,8 +353,7 @@ Gfx::PointF ShellWM::onToWindow(const Window& w,
     if( ! frame )
         return pos;
 
-    Gfx::PointF p = frame->fromFrame(pos) - w.position();
-    return p;
+    return frame->fromFrame(pos) - w.position();
 }
 
 

@@ -46,7 +46,6 @@ Widget::Widget()
 , _pointer(0)
 , _capture(0)
 , _isCapture(false)
-, _invalidates(0)
 , _isLayoutInvalid(true)
 , _visible(true)
 , _enabled(true)
@@ -137,16 +136,16 @@ void Widget::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 }
 
 
-const View* Widget::parent() const
-{
-    return _parent;
-}
-
-
-View* Widget::parent()
-{
-    return _parent;
-}
+//const View* Widget::parent() const
+//{
+//    return _parent;
+//}
+//
+//
+//View* Widget::parent()
+//{
+//    return _parent;
+//}
 
 
 void Widget::setParent(View* parent)
@@ -357,23 +356,23 @@ Widget* Widget::findWidget(const std::string& name)
 
 Gfx::PointF Widget::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
-    const View* parentView = widget.parent();
+    //const Visual* parentView = widget.parent();
 
-    if( parentView == this || ! parentView )
+    //if( parentView == this || ! parentView )
         return pos - widget.position();
 
-    return pos - parentView->onToWidget(widget, pos);    
+    //return pos - parentView->onToWidget(widget, pos);    
 }
 
 
 Gfx::PointF Widget::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
-    const View* parentView = widget.parent();
+    //const View* parentView = widget.parent();
 
-    if( parentView == this || ! parentView )
+    //if( parentView == this || ! parentView )
         return pos + widget.position();
 
-    return pos + parentView->onFromWidget(widget, pos);
+//    return pos + parentView->onFromWidget(widget, pos);
 }
 
 
@@ -585,34 +584,36 @@ void Widget::onMnemonic()
 //}
 
 
-void Widget::onInvalidateRequest()
-{
-    ++_invalidates;
+//void Widget::onInvalidateRequest()
+//{
+//    ++_invalidates;
+//
+//    InvalidateEvent ev(*this);
+//    Application::instance().commitEvent(ev);
+//}
 
-    InvalidateEvent ev(*this);
-    Application::instance().commitEvent(ev);
-}
 
-
-void Widget::onProcessInvalidateEvent(const InvalidateEvent& ev)
-{
-    --_invalidates;
-
-    if(_invalidates > 0)
-      return;
-
-    onInvalidateEvent(ev);
-}
+//void Widget::onProcessInvalidateEvent(const InvalidateEvent& ev)
+//{
+//    --_invalidates;
+//
+//    if(_invalidates > 0)
+//      return;
+//
+//    onInvalidateEvent(ev);
+//}
 
 
 void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 {
-    onInvalidate();
+    Base::onInvalidateEvent(ev);
 }
 
 
 void Widget::onInvalidate()
 {
+    Base::onInvalidate();
+
     // TODO: relayout only if required in derived class
     relayout();
 }
