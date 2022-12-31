@@ -85,6 +85,8 @@ class PT_HMI_API Widget : public View
 
         void setParent(View* parent);
 
+        // TODO: virtual unparent/detach in Visual
+
         void unparent();
 
         void setForm(Form* form);

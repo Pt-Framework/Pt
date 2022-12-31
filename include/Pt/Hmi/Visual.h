@@ -238,6 +238,8 @@ class PT_HMI_API Visual : public Responder
         */
         void setPointer(bool isPointer);
     
+        // TODO: virtual detach/release/unparent
+
         /** @brief Release to default initial state.
         */
         void release()

@@ -83,9 +83,6 @@ class ScreenImpl : public WindowManager
 
         double scaleFactor() const;
 
-        
-        bool isEnabled() const;
-
     //
     // Responder
     //
