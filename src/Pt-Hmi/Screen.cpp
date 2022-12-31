@@ -56,7 +56,7 @@ Screen::Screen(ApplicationImpl& app)
     _eventReceived += Pt::slot(*this, &Screen::onProcessScrollEvent);
     _eventReceived += Pt::slot(*this, &Screen::onProcessKeyEvent);
 
-    _eventReceived += Pt::slot(*this, &Screen::onProcessRescaleEvent);
+    //_eventReceived += Pt::slot(*this, &Screen::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &Screen::onProcessPaintEvent);
 }
 
@@ -219,7 +219,7 @@ void Screen::onEvent(const Event& ev)
 
 void Screen::onProcessRescaleEvent(const RescaleEvent& ev)
 {   
-    onRescaleEvent(ev);
+    Base::onProcessRescaleEvent(ev);
 
     double scaling = ev.scaleFactor();
 
@@ -230,12 +230,13 @@ void Screen::onProcessRescaleEvent(const RescaleEvent& ev)
 
 void Screen::onRescaleEvent(const RescaleEvent& ev)
 {
-    onRescale( ev.scaleFactor() );
+    Base::onRescaleEvent(ev);
 }
 
 
 void Screen::onRescale(double scaling)
 {
+    Base::onRescale(scaling);
 }
 
 

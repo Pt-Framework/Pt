@@ -81,7 +81,7 @@ class ScreenImpl : public WindowManager
         void setCapture(Visual* capture);
 
 
-        double scaleFactor() const;
+        //double scaleFactor() const;
 
     //
     // Responder
@@ -139,7 +139,7 @@ class ScreenImpl : public WindowManager
 
         virtual void onActivate(Window& w, bool active);
 
-        virtual void onEnable(Window& w, bool enable);
+        virtual void onEnableRequest(Window& w, bool enable);
 
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
@@ -208,7 +208,7 @@ class ScreenImpl : public WindowManager
         //Window*                      _capture;
 
         double                       _screenScaling;
-        double                       _scaling;
+        //double                       _scaling;
 
         //bool                         _enabled;
         //bool                         _enabledState;

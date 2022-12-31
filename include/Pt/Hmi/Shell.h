@@ -42,6 +42,8 @@ namespace Hmi {
 
 class PT_HMI_API Shell : public Widget
 {
+    typedef Widget Base;
+
     public:
         Shell();
 

@@ -46,7 +46,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 , _nextResponder(0)
 //, _capture(0)
 , _screenScaling(1.0)
-, _scaling(1.0)
+//, _scaling(1.0)
 //, _enabled(true)
 //, _enabledState(true)
 {
@@ -56,7 +56,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     //int dpix = GetDeviceCaps(screenDC, LOGPIXELSX);
     //std::clog << "SCALING DPI: " << dpix << std::endl;
     
-    _scaling = _screenScaling;
+    //_scaling = _screenScaling;
     //_screenScaling = dpix / 96.0;
     //std::clog << "SCALING: " << _screenScaling << std::endl;
 
@@ -67,7 +67,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessScrollEvent);
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
 
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
     //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
 }
@@ -94,7 +94,7 @@ void ScreenImpl::setParent(Screen* screen)
         GetWindowRect(desktop, &r);
     
         Gfx::SizeF size(r.right, r.bottom);
-        size /= _scaling;
+        size /= scaleFactor();
 
         ResizeEvent rev(*_parent, size);
         _parent->processEvent(rev);
@@ -126,10 +126,10 @@ const std::vector<Window*>& ScreenImpl::windows() const
 }
 
 
-double ScreenImpl::scaleFactor() const
-{ 
-    return _scaling; 
-}
+//double ScreenImpl::scaleFactor() const
+//{ 
+//    return _scaling; 
+//}
 
 ///////////////////////////////////////////////////////////////////////
 // Responder
@@ -227,7 +227,7 @@ void ScreenImpl::onDetach(Window& w)
 
 void ScreenImpl::onInit(Window& w)
 {
-    RescaleEvent ev(w, _scaling);
+    RescaleEvent ev( w, scaleFactor() );
     //w.processEvent(ev);
     Application::instance().loop().commitEvent(ev);
 }
@@ -279,7 +279,7 @@ void ScreenImpl::onActivate(Window& w, bool active)
 }
 
 
-void ScreenImpl::onEnable(Window& w, bool enable)
+void ScreenImpl::onEnableRequest(Window& w, bool enable)
 {
     MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
     impl->enable(enable);
@@ -404,32 +404,35 @@ void ScreenImpl::setCapture(Visual* capture)
 
 void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    onRescaleEvent(ev);
-}
+    double scaling = ev.scaleFactor() * _screenScaling;
 
-
-void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
-{
-    _scaling = ev.scaleFactor() * _screenScaling;
-
-    HWND desktop = GetDesktopWindow();
-    RECT r;   
-    GetWindowRect(desktop, &r);
-
-    Gfx::SizeF size(r.right, r.bottom);
-    size /= _scaling;
-
-    ResizeEvent rev(*_parent, size);
-    _parent->processEvent(rev);
+    RescaleEvent rev(*this, scaling);
+    Base::onProcessRescaleEvent(rev);
 
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         Window* window = *wit;
         
-        RescaleEvent ev(*window, _scaling);
+        RescaleEvent ev(*window, scaling);
         window->processEvent(ev);
     }
+}
+
+
+void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
+
+    HWND desktop = GetDesktopWindow();
+    RECT r;   
+    GetWindowRect(desktop, &r);
+
+    Gfx::SizeF size(r.right, r.bottom);
+    size /= ev.scaleFactor();
+
+    ResizeEvent rev(*_parent, size);
+    _parent->processEvent(rev);
 }
 
 
@@ -492,7 +495,7 @@ void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
     for( size_t i = 0; i < _windows.size(); ++i)
     {
         Window* w = _windows[i];
-        onEnable( *w, ev.enabled() );
+        onEnableRequest( *w, ev.enabled() );
     }
 }
 

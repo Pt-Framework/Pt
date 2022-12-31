@@ -68,7 +68,7 @@ Widget::Widget()
     //_eventReceived += Pt::slot(*this, &Widget::onProcessInvalidateEvent);
     //_eventReceived += Pt::slot(*this, &Widget::onProcessPaintEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessLayoutEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessRescaleEvent);
+    //_eventReceived += Pt::slot(*this, &Widget::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &Widget::onProcessMoveEvent);
     //_eventReceived += Pt::slot(*this, &Widget::onProcessResizeEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessShowEvent);
@@ -162,7 +162,7 @@ void Widget::setParent(View* parent)
 
         _parent->onInit(*this);
 
-        _parent->onEnable(*this, _enabled);
+        _parent->onEnableRequest(*this, _enabled);
         _parent->onShow(*this, _visible);
 
         onParentChanged(_parent);
@@ -256,7 +256,7 @@ void Widget::onInit(Widget& widget)
     widget.setNextResponder(this);
     widget.setForm(_form);
 
-    double scaling = _surface.scaleFactor();
+    double scaling = scaleFactor();
     
     RescaleEvent ev(widget, scaling);
     //w.processEvent(ev);
@@ -860,7 +860,7 @@ void Widget::onLayout(const Gfx::RectF& rect)
 
 void Widget::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    onRescaleEvent(ev);
+    Base::onProcessRescaleEvent(ev);
 
     double scaling = ev.scaleFactor();
 
@@ -875,12 +875,14 @@ void Widget::onProcessRescaleEvent(const RescaleEvent& ev)
 
 void Widget::onRescaleEvent(const RescaleEvent& ev)
 {
-    onRescale( ev.scaleFactor() );
+    Base::onRescaleEvent(ev);
 }
 
 
 void Widget::onRescale(double scaling)
 {
+    Base::onRescale(scaling);
+
     _margin.set( _surface.align( _margin.left() ),
                  _surface.align( _margin.top() ),
                  _surface.align( _margin.right() ),
@@ -1099,7 +1101,7 @@ void Widget::enable(bool e)
     _enabled = e;
 
     if(_parent)
-        _parent->onEnable(*this, e);
+        _parent->onEnableRequest(*this, e);
 }
 
 
@@ -1131,7 +1133,7 @@ void Widget::onEnable(bool e)
 }
 
 
-void Widget::onEnable(Widget& widget, bool enable)
+void Widget::onEnableRequest(Widget& widget, bool enable)
 {
     if( ! isEnabled() )
       enable = false;

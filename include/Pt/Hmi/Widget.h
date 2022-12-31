@@ -386,7 +386,7 @@ class PT_HMI_API Widget : public View
 
         virtual void onRelayout(Widget& widget);
 
-        virtual void onEnable(Widget& widget, bool isEnable);
+        virtual void onEnableRequest(Widget& widget, bool isEnable);
 
         virtual void onActivate(Widget& w, bool active);
 

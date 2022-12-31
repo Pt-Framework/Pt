@@ -188,6 +188,7 @@ Visual::Visual()
 : _vid( Application::instance().makeId()  )
 , _invalidates(0)
 , _enabledState(true)
+, _scaleFactor(1.0)
 , _r1(0)
 { 
     Application::instance().registerVisual(*this);
@@ -330,6 +331,11 @@ void Visual::onEvent(const Pt::Event& ev)
       const EnableEvent& e = static_cast<const EnableEvent&>(ev);
       onProcessEnableEvent(e);
     }
+    else if( ev.typeInfo() == typeid(RescaleEvent) )
+    {
+      const RescaleEvent& e = static_cast<const RescaleEvent&>(ev);
+      onProcessRescaleEvent(e);
+    }
 }
 
 //
@@ -408,6 +414,27 @@ void Visual::onEnableEvent(const EnableEvent& ev)
 
 void Visual::onEnable(bool e)
 {
+}
+
+//
+// scaling
+//
+
+void Visual::onProcessRescaleEvent(const RescaleEvent& ev)
+{
+    onRescaleEvent(ev);
+}
+
+
+void Visual::onRescaleEvent(const RescaleEvent& ev)
+{
+    onRescale( ev.scaleFactor() );
+}
+
+
+void Visual::onRescale(double scaling)
+{
+    _scaleFactor = scaling;
 }
 
 //

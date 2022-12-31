@@ -124,7 +124,7 @@ void Window::setParent(WindowManager& parent)
     _parent->onMove(*this, _requestedPosition);
     _parent->onResize( *this, _requestedSize);
     _parent->onActivate(*this, _isActive);
-    _parent->onEnable(*this, _enabled);
+    _parent->onEnableRequest(*this, _enabled);
     _parent->onShow(*this, _visible);
     
     onParentChanged(_parent);
@@ -181,10 +181,10 @@ const PixmapSurface& Window::surface() const
 }
 
 
-double Window::scaleFactor() const
-{
-    return _surface.scaleFactor();
-}
+//double Window::scaleFactor() const
+//{
+//    return _surface.scaleFactor();
+//}
 
 
 const Gfx::Brush& Window::background() const
@@ -585,7 +585,7 @@ void Window::enable(bool e)
     _enabled = e;
 
     if(_parent)
-        _parent->onEnable(*this, e);
+        _parent->onEnableRequest(*this, e);
 }
 
 
@@ -609,17 +609,6 @@ void Window::onEnable(bool e)
 }
 
 
-//void Window::onProcessRescaleEvent(const RescaleEvent& ev)
-//{
-//    onRescaleEvent(ev);
-//
-//    double scaling = _surface.scaleFactor();
-//
-//    //RescaleEvent sheetEvent(_sheet, scaling);
-//    //_sheet.processEvent(sheetEvent);
-//}
-
-
 void Window::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
@@ -628,50 +617,29 @@ void Window::onProcessRescaleEvent(const RescaleEvent& ev)
         scaling *= _impl->scaleFactor();
 
     RescaleEvent rev(*this, scaling);
-    Form::onProcessRescaleEvent(rev);
+    Base::onProcessRescaleEvent(rev);
 }
 
-
-//void Window::onRescaleEvent(const RescaleEvent& ev)
-//{
-//    onRescale( ev.scaleFactor() );
-//    Form::onRescaleEvent(ev);
-//}
 
 void Window::onRescaleEvent(const RescaleEvent& ev)
 {
-    _surface.setScaleFactor( ev.scaleFactor() );
-    Form::onRescaleEvent(ev);
+    Base::onRescaleEvent(ev);
 }
-
-//void Window::onRescale(double scaling)
-//{   
-//    if(_impl)
-//        scaling *= _impl->scaleFactor();
-//
-//    _surface.setScaleFactor(scaling);
-//
-//    //if( _title == "Main_1")
-//    //std::clog << "+W RESCALE EVENT: " << this->title() << " "
-//    //          << _surface.scaleFactor() << std::endl;
-//
-//    // realign geometry
-//    move(_requestedPosition);
-//    resize(_requestedSize);
-//}
 
 
 void Window::onRescale(double scaling)
 {   
+    Base::onRescale(scaling);
+
     //if( _title == "Main_1")
     //std::clog << "+W RESCALE EVENT: " << this->title() << " "
     //          << _surface.scaleFactor() << std::endl;
 
+    _surface.setScaleFactor(scaling);
+
     // realign geometry
     move(_requestedPosition);
     resize(_requestedSize);
-
-    Form::onRescale(scaling);
 }
 
 

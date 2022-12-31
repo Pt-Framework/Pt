@@ -95,7 +95,7 @@ ShellWM::ShellWM()
     _eventReceived += Pt::slot(*this, &ShellWM::onProcessLeaveEvent);
     _eventReceived += Pt::slot(*this, &ShellWM::onProcessKeyEvent);
 
-    _eventReceived += Pt::slot(*this, &ShellWM::onProcessRescaleEvent);
+    //_eventReceived += Pt::slot(*this, &ShellWM::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &ShellWM::onProcessPaintEvent);
     //_eventReceived += Pt::slot(*this, &ShellWM::onProcessEnableEvent);
 }
@@ -333,7 +333,7 @@ void ShellWM::onDetach(Window& w)
 
 void ShellWM::onInit(Window& w)
 {
-    double scaling = _surface->scaleFactor();
+    double scaling = scaleFactor();
     
     RescaleEvent ev(w, scaling);
     //w.processEvent(ev);
@@ -443,7 +443,7 @@ void ShellWM::onActivate(Window& w, bool active)
 }
 
 
-void ShellWM::onEnable(Window& w, bool enable)
+void ShellWM::onEnableRequest(Window& w, bool enable)
 {
     // TODO: move updating to frame
 
@@ -631,6 +631,8 @@ void ShellWM::onClosing(Window& w)
 
 void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
 {
+    Base::onProcessRescaleEvent(ev);
+
     double scaling = ev.scaleFactor();
 
     std::vector<WindowFrame*>::iterator wit;

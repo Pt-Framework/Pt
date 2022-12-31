@@ -84,7 +84,7 @@ class WindowManager : public Visual
 
         virtual void onActivate(Window& w, bool active) = 0; 
 
-        virtual void onEnable(Window& w, bool enable) = 0;
+        virtual void onEnableRequest(Window& w, bool enable) = 0;
 
         virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
 
@@ -102,8 +102,6 @@ class WindowManager : public Visual
                                                 const Gfx::SizeF& maxSize) = 0;
 
         virtual void onClosing(Window& w) = 0;
-
-        using Visual::onEnable;
 };
 
 } // namespace

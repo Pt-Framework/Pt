@@ -203,6 +203,11 @@ class PT_HMI_API Visual : public Responder
         {
             return onFromGlobal(pos);
         }
+
+        double scaleFactor() const
+        {
+            return _scaleFactor;
+        }
         
         const Gfx::PointF& position() const
         {
@@ -325,6 +330,13 @@ class PT_HMI_API Visual : public Responder
         virtual void onEnable(bool e);
 
     protected:
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+        
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onRescale(double scaling);
+
+    protected:
         virtual void onProcessMoveEvent(const MoveEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);
@@ -345,6 +357,7 @@ class PT_HMI_API Visual : public Responder
         int                   _invalidates;
 
         bool                  _enabledState;
+        double                _scaleFactor;
 
         Gfx::PointF           _pos;
         Gfx::SizeF            _size;
@@ -410,7 +423,7 @@ class PT_HMI_API View : public Visual
 
         virtual void onRelayout(Widget& widget) = 0;
 
-        virtual void onEnable(Widget& widget, bool isEnable) = 0;
+        virtual void onEnableRequest(Widget& widget, bool isEnable) = 0;
 
         virtual void onActivate(Widget& w, bool active) = 0;
 
@@ -421,8 +434,6 @@ class PT_HMI_API View : public Visual
         virtual void onResize(Widget& widget, const Gfx::SizeF& size) = 0;
 
         virtual void onRaise(Widget& widget) = 0;
-
-        using Visual::onEnable;
 };
 
 } // namespace

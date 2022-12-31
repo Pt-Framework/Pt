@@ -191,10 +191,9 @@ void Shell::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
 void Shell::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    Widget::onProcessRescaleEvent(ev);
+    Base::onProcessRescaleEvent(ev);
 
     double scaling = ev.scaleFactor();
-
     RescaleEvent rev(_wm, scaling);
     _wm.processEvent(rev);
 }

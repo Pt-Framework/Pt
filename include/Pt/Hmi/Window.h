@@ -111,7 +111,7 @@ class PT_HMI_API Window : public Form
         const PixmapSurface& surface() const;
 
 
-        double scaleFactor() const;
+        //double scaleFactor() const;
 
         bool acceptsInput() const;
 

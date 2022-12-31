@@ -59,7 +59,7 @@ Form::Form()
 , _focusWidget(0)
 {
     //_eventReceived += Pt::slot(*this, &Form::onProcessPaintEvent);
-    _eventReceived += Pt::slot(*this, &Form::onProcessRescaleEvent);
+    //_eventReceived += Pt::slot(*this, &Form::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &Form::onProcessMoveEvent);
     //_eventReceived += Pt::slot(*this, &Form::onProcessResizeEvent);
     //_eventReceived += Pt::slot(*this, &Form::onProcessEnableEvent);
@@ -283,8 +283,7 @@ void Form::onInit(Widget& widget)
     widget.setNextResponder(this);
     widget.setForm(this);
 
-    double scaling = _surface ? _surface->scaleFactor() : 1.0;
-
+    double scaling = scaleFactor();
     RescaleEvent ev(widget, scaling);
     //w.processEvent(ev);
     Application::instance().loop().commitEvent(ev);
@@ -539,7 +538,7 @@ void Form::onLayout(const Gfx::RectF& rect)
 
 void Form::onProcessRescaleEvent(const RescaleEvent& ev)
 {   
-    onRescaleEvent(ev);
+    Base::onProcessRescaleEvent(ev);
 
     if(_mainWidget)
     {
@@ -552,12 +551,14 @@ void Form::onProcessRescaleEvent(const RescaleEvent& ev)
 
 void Form::onRescaleEvent(const RescaleEvent& ev)
 {
-    onRescale( ev.scaleFactor() );
+    Base::onRescaleEvent(ev);
 }
 
 
 void Form::onRescale(double scaling)
 {
+    Base::onRescale(scaling);
+
     // realign geometry
     //move( _requestedGeometry.topLeft() );
     //resize( _requestedGeometry.size() );
@@ -682,7 +683,7 @@ void Form::onEnable(bool e)
 }
 
 
-void Form::onEnable(Widget& widget, bool enable)
+void Form::onEnableRequest(Widget& widget, bool enable)
 {
     if( ! isEnabled() )
       enable = false;
