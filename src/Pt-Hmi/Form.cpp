@@ -1044,7 +1044,7 @@ void Form::onProcessKeyEvent(const KeyEvent& ev)
     //
     if( _focusWidget )
     {       
-        _focusWidget->keyEvent(ev);
+        _focusWidget->processEvent(ev);
     }
     else
     {
