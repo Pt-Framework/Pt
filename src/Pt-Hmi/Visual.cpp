@@ -342,7 +342,7 @@ void Visual::onEvent(const Pt::Event& ev)
 // invalidation
 //
 
-void Visual::onInvalidateRequest()
+void Visual::invalidate()
 {
     ++_invalidates;
 

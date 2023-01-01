@@ -252,10 +252,7 @@ class PT_HMI_API Visual : public Responder
             onRelease();
         }
 
-        virtual void invalidate()
-        {
-            onInvalidateRequest();
-        }
+        void invalidate();
 
         virtual void repaint(const Gfx::RectF& rect)
         {
@@ -307,8 +304,6 @@ class PT_HMI_API Visual : public Responder
         virtual void onSetCapture(bool capture);
 
     protected:
-        virtual void onInvalidateRequest();
-
         virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
 
         virtual void onInvalidateEvent(const InvalidateEvent& ev);

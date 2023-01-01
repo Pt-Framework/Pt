@@ -151,7 +151,7 @@ WindowFrame* ShellWM::activeWindow()
 void ShellWM::activate(bool active)
 {
     if(_parent)
-        _parent->activate(active);
+        _parent->onActivate(*this, active);
 }
 
 
@@ -653,7 +653,7 @@ void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
 void ShellWM::onRepaintRequest(const Gfx::RectF& rect)
 {
     if(_parent)
-        _parent->repaint(rect);
+        _parent->onRepaint(*this, rect);
 }
 
 

@@ -350,34 +350,36 @@ void Form::onDeregister(Widget& widget)
 //}
 
 
-void Form::onInvalidateRequest()
-{
-    ++_invalidates;
+//void Form::onInvalidateRequest()
+//{
+//    ++_invalidates;
+//
+//    InvalidateEvent ev(*this);
+//    Application::instance().commitEvent(ev);
+//}
 
-    InvalidateEvent ev(*this);
-    Application::instance().commitEvent(ev);
-}
 
-
-void Form::onProcessInvalidateEvent(const InvalidateEvent& ev)
-{
-    --_invalidates;
-
-    if(_invalidates > 0)
-      return;
-
-    onInvalidateEvent(ev);
-}
+//void Form::onProcessInvalidateEvent(const InvalidateEvent& ev)
+//{
+//    --_invalidates;
+//
+//    if(_invalidates > 0)
+//      return;
+//
+//    onInvalidateEvent(ev);
+//}
 
 
 void Form::onInvalidateEvent(const InvalidateEvent& ev)
 {
-    onInvalidate();
+    Base::onInvalidateEvent(ev);
 }
 
 
 void Form::onInvalidate()
 {
+    Base::onInvalidate();
+    
     relayout();
 }
 

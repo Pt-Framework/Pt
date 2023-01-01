@@ -42,6 +42,8 @@ namespace Hmi {
 
 class PT_HMI_API Shell : public Widget
 {
+    friend class ShellWM;
+
     typedef Widget Base;
 
     public:
@@ -66,8 +68,6 @@ class PT_HMI_API Shell : public Widget
     //
     protected:
        Visual* onHitTest(const Gfx::PointF& p);
-
-       virtual void onSetCapture(bool capture);
 
        virtual void onRelease();
 
@@ -104,6 +104,14 @@ class PT_HMI_API Shell : public Widget
         virtual void onProcessLeaveEvent(const LeaveEvent& ev);
 
         virtual void onProcessKeyEvent(const KeyEvent& ev);
+
+    //
+    // WindowManager
+    //
+    protected:
+        virtual void onRepaint(WindowManager& wm, const Gfx::RectF& rect);
+
+        virtual void onActivate(WindowManager& wm, bool active);
 
     private:
         ShellWM                      _wm;

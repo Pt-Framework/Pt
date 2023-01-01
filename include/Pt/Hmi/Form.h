@@ -83,9 +83,6 @@ class PT_HMI_API Form : public View
 
         Widget* findWidget(Pt::uint64_t vid);
 
-    protected:
-        virtual void onInvalidateRequest();
-
     public:
         void relayout();
 
@@ -210,8 +207,6 @@ class PT_HMI_API Form : public View
     // invalidation
     //
     protected:
-        virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
-
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
     
         virtual void onInvalidate();

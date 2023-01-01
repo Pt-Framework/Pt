@@ -129,12 +129,6 @@ Visual* Shell::onHitTest(const Gfx::PointF& p)
 }
 
 
-void Shell::onSetCapture(bool capture)
-{
-    Widget::onSetCapture(capture);
-}
-
-
 void Shell::onRelease()
 {
     Widget::onRelease();
@@ -146,7 +140,7 @@ void Shell::onRelease()
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Implementation
+// Widget
 ///////////////////////////////////////////////////////////////////////
 
 Gfx::SizeF Shell::onMeasure(const SizePolicy& policy)
@@ -289,6 +283,21 @@ void Shell::onProcessKeyEvent(const KeyEvent& ev)
     }
 
     Widget::onProcessKeyEvent(ev);
+}
+
+///////////////////////////////////////////////////////////////////////
+// WindowManager
+///////////////////////////////////////////////////////////////////////
+
+void Shell::onRepaint(WindowManager& wm, const Gfx::RectF& rect)
+{
+    repaint(rect);;
+}
+
+
+void Shell::onActivate(WindowManager& wm, bool active)
+{
+    activate(active);
 }
 
 } // namespace
