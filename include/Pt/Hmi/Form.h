@@ -88,8 +88,6 @@ class PT_HMI_API Form : public View
 
         Gfx::SizeF measure(const SizePolicy& policy);
 
-        void layout(const Gfx::RectF& rect);
-
     public:
         //bool acceptsInput() const;
 
@@ -223,7 +221,7 @@ class PT_HMI_API Form : public View
     // layouting
     //
     protected:
-        virtual void onProcessRelayoutEvent(const RelayoutEvent& ev);
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
     
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 

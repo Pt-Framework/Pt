@@ -218,8 +218,6 @@ class PT_HMI_API Widget : public View
         void relayout();
 
     protected:
-        //void onProcessMeasureEvent(const MeasureEvent& ev);
-
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
         
         void onProcessLayoutEvent(const LayoutEvent& ev);

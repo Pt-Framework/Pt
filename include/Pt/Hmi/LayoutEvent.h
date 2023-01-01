@@ -40,35 +40,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API RelayoutEvent : public Pt::BasicEvent<RelayoutEvent>
-{
-    public:
-        explicit RelayoutEvent(Visual& visual)
-        : _vid( visual.vid() )
-        , _visual(&visual)
-        {
-        }
-
-        virtual ~RelayoutEvent()
-        {
-        }
-
-        Pt::uint64_t vid() const
-        {
-            return _vid;
-        }
-
-        Visual* visual() const
-        {
-            return _visual;
-        }
-
-      private:
-          Pt::uint64_t _vid;
-          Visual*      _visual;
-};
-
-
 class PT_HMI_API RescaleEvent : public Pt::BasicEvent<RescaleEvent>
 {
     public:
@@ -148,13 +119,15 @@ class PT_HMI_API MeasureEvent : public Pt::BasicEvent<MeasureEvent>
 class PT_HMI_API LayoutEvent : public Pt::BasicEvent<LayoutEvent>
 {
     public:
-        LayoutEvent(Pt::uint64_t vid)
-        : _vid(vid)
+        LayoutEvent(Visual& v)
+        : _vid( v.vid() )
+        , _visual(&v)
         {
         }
 
-        LayoutEvent(Pt::uint64_t vid, const Gfx::RectF& rect)
-        : _vid(vid)
+        LayoutEvent(Visual& v, const Gfx::RectF& rect)
+        : _vid( v.vid() )
+        , _visual(&v)
         , _rect(rect)
         {
         }
@@ -166,6 +139,11 @@ class PT_HMI_API LayoutEvent : public Pt::BasicEvent<LayoutEvent>
         Pt::uint64_t vid() const
         {
             return _vid;
+        }
+
+        Visual* visual() const
+        {
+            return _visual;
         }
 
         const Gfx::RectF& rect() const
@@ -180,6 +158,7 @@ class PT_HMI_API LayoutEvent : public Pt::BasicEvent<LayoutEvent>
 
     private:
         Pt::uint64_t _vid;
+        Visual*      _visual;
         Gfx::RectF   _rect;
 };
 

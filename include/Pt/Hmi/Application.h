@@ -182,9 +182,9 @@ class PT_HMI_API Application : public Pt::System::Application
         void onProcessInvalidateEvent(const InvalidateEvent& ev);
 
 
-        void onDispatchRelayoutEvent(const RelayoutEvent& ev);
+        void onDispatchLayoutEvent(const LayoutEvent& ev);
         
-        void onProcessRelayoutEvent(const RelayoutEvent& ev);
+        void onProcessLayoutEvent(const LayoutEvent& ev);
 
 
         void onDispatchRescaleEvent(const RescaleEvent& ev);

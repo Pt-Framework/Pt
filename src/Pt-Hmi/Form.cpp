@@ -27,10 +27,10 @@
 */
 
 #include <Pt/Hmi/Form.h>
-#include <Pt/Hmi/Form.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/LayoutEvent.h>
 
 namespace {
 
@@ -71,7 +71,7 @@ Form::Form()
     _eventReceived += Pt::slot(*this, &Form::onProcessLeaveEvent);
     _eventReceived += Pt::slot(*this, &Form::onProcessKeyEvent);
 
-    _eventReceived += Pt::slot(*this, &Form::onProcessRelayoutEvent);
+    _eventReceived += Pt::slot(*this, &Form::onProcessLayoutEvent);
 }
 
 
@@ -452,12 +452,12 @@ void Form::relayout()
 
     _layouts++;
 
-    RelayoutEvent ev(*this);
+    LayoutEvent ev( *this, bounds() );
     Application::instance().loop().commitEvent(ev);
 }
 
 
-void Form::onProcessRelayoutEvent(const RelayoutEvent& ev)
+void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 {
     if(_layouts == 0)
     {
@@ -488,14 +488,14 @@ void Form::onProcessRelayoutEvent(const RelayoutEvent& ev)
     //
     // 2. Pass layout position and size of contents
     //
-    layout(rect);
+    onLayout(rect);
 
     // layout content marked invalid
     if( _mainWidget )
     {
         Gfx::RectF widgetRect( rect.size() );
         
-        LayoutEvent lev(_mainWidget->vid(), widgetRect);
+        LayoutEvent lev(*_mainWidget, widgetRect);
         _mainWidget->processEvent(lev);
     }
 }
@@ -513,12 +513,6 @@ Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
         return _mainWidget->measure(policy);
 
     return policy.size();
-}
-
-
-void Form::layout(const Gfx::RectF& rect)
-{
-    onLayout(rect);
 }
 
 

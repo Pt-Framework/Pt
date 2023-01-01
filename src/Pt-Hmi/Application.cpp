@@ -97,9 +97,9 @@ Application::Application(int argc, char** argv)
     
     loop().eventReceived() += Pt::slot(*this, &Application::onDispatchInvalidateEvent );
     _eventReceived += Pt::slot(*this, &Application::onProcessInvalidateEvent);
-    
-    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchRelayoutEvent);
-    _eventReceived += Pt::slot(*this, &Application::onProcessRelayoutEvent);
+
+    loop().eventReceived() += Pt::slot(*this, &Application::onDispatchLayoutEvent);
+    _eventReceived += Pt::slot(*this, &Application::onProcessLayoutEvent);
 
     loop().eventReceived() += Pt::slot(*this, &Application::onDispatchRescaleEvent);
     _eventReceived += Pt::slot(*this, &Application::onProcessRescaleEvent);
@@ -763,18 +763,18 @@ void Application::onProcessInvalidateEvent(const InvalidateEvent& ev)
 }
 
 
-void Application::onDispatchRelayoutEvent(const RelayoutEvent& ev)
+void Application::onDispatchLayoutEvent(const LayoutEvent& ev)
 {
     // make sure receiver still exists
     VisualMap::iterator it = _visuals.find( ev.vid() );
     if( it == _visuals.end() )
         return;
 
-    onProcessRelayoutEvent(ev);
+    onProcessLayoutEvent(ev);
 }
 
 
-void Application::onProcessRelayoutEvent(const RelayoutEvent& ev)
+void Application::onProcessLayoutEvent(const LayoutEvent& ev)
 {
     Visual* visual = ev.visual();
     if(visual)

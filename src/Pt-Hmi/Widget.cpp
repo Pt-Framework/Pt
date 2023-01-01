@@ -840,10 +840,10 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
     std::vector<Widget*>::const_iterator it;
     for(it = _children.begin() ; it != _children.end(); ++it)
     {
-        Widget* w = (*it);
+        Widget* widget = (*it);
 
-        LayoutEvent ev( w->vid(), w->geometry() );
-        w->processEvent(ev);
+        LayoutEvent ev( *widget, widget->geometry() );
+        widget->processEvent(ev);
     }
 
     _isLayoutInvalid = false;
