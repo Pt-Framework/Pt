@@ -293,9 +293,7 @@ Gfx::PointF Visual::onFromGlobal(const Gfx::PointF& pos) const
 
 void Visual::onSetCapture(bool capture)
 {
-    Visual* parent = onGetParent();
-    if(parent)
-        Application::instance().onSetCapture(*this, capture);
+    Application::instance().onSetCapture(*this, capture);
 }
 
 

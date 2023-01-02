@@ -1410,7 +1410,6 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
     //
     setPointer(true);
 
-
     //
     // start capture on press
     //

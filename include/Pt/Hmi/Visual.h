@@ -242,10 +242,10 @@ class PT_HMI_API Visual : public Responder
         /** @brief Pointer enter.
         */
         void setPointer(bool isPointer);
-    
-        // TODO: virtual detach/release/unparent
 
         /** @brief Release to default initial state.
+
+            TODO: rename reset()
         */
         void release()
         {
