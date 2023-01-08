@@ -251,22 +251,6 @@ void ShellWM::onSetCapture(bool capture)
     }
 }
 
-
-void ShellWM::onRelease()
-{
-    Visual::onRelease();
-
-    setPointer(false);
-    setCapture(false);
-
-    std::vector<WindowFrame*>::iterator wit;
-    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
-    {
-        WindowFrame* windowFrame = *wit;
-        windowFrame->window()->release();
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////
 // WindowManager
 ///////////////////////////////////////////////////////////////////////

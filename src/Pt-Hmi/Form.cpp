@@ -82,16 +82,6 @@ Form::~Form()
 }
 
 
-void Form::onRelease()
-{
-    setPointer(false);
-    setCapture(false);
-
-    if(_mainWidget)
-        _mainWidget->release();
-}
-
-
 void Form::setSurface(Gfx::PaintSurface* surface)
 {
     if(_mainWidget)
@@ -857,12 +847,7 @@ void Form::onProcessMouseEvent(const MouseEvent& ev)
         return;
     }
 
-    //
-    // process event
-    // 
-    setPointer(true);
-    
-    mouseEvent(ev);
+    Base::onProcessMouseEvent(ev);
 }
 
 
@@ -871,7 +856,7 @@ bool Form::onMouseEvent(const MouseEvent& ev)
     //if(ev.isPress(MouseEvent::Left) )
     //    Application::instance().inputMethod().finish();
 
-    return false;
+    return Base::onMouseEvent(ev);
 }
 
 
@@ -892,10 +877,8 @@ void Form::onProcessTouchEvent(const TouchEvent& ev)
 
     //
     // process event
-    // 
-    setPointer(true);
-    
-    touchEvent(ev);
+    //    
+    Base::onProcessTouchEvent(ev);
 }
 
 
@@ -904,7 +887,7 @@ bool Form::onTouchEvent(const TouchEvent& ev)
     //if(ev.isPress() )
     //    Application::instance().inputMethod().finish();
 
-    return false;
+    return Base::onTouchEvent(ev);
 }
 
 

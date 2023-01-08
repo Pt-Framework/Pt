@@ -45,6 +45,7 @@ Popup::Popup()
 
 Popup::~Popup()
 {
+    Application::instance().onShowPopup(*this, false);
 }
 
 
@@ -82,16 +83,17 @@ void Popup::onDetachPeer(Visual& peer)
 }
 
 
-void Popup::onRelease()
-{
-    Application::instance().onShowPopup(*this, false);
-}
-
-
 void Popup::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
     Application::instance().onShowPopup( *this, ev.visible() );
+}
+
+
+void Popup::onCloseEvent(const CloseEvent& ev)
+{
+    Base::onCloseEvent(ev);
+    Application::instance().onShowPopup(*this, false);
 }
 
 

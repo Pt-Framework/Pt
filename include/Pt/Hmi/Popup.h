@@ -53,10 +53,10 @@ class PT_HMI_API Popup : public Window
 
         virtual void onDetachPeer(Visual& peer);
 
-        virtual void onRelease();
-
     protected:
         virtual void onShowEvent(const ShowEvent& ev);
+
+        virtual void onCloseEvent(const CloseEvent& ev);
 
         virtual void onProcessMouseEvent(const MouseEvent& ev);
 

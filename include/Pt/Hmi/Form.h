@@ -129,8 +129,6 @@ class PT_HMI_API Form : public View
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onRelease();
-
     //
     // Responder
     //

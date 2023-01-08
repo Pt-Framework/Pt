@@ -110,21 +110,9 @@ void Sheet::unparent()
     if( ! _parent)
         return;
 
-    release();
-
     _parent->onRelease(*this);
     _parent->onDetach(*this);
     _parent = 0;
-}
-
-
-void Sheet::onRelease()
-{
-    setPointer(false);
-    setCapture(false);
-
-    if(_mainWidget)
-        _mainWidget->release();
 }
 
 

@@ -293,8 +293,6 @@ class PT_HMI_API Widget : public View
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onRelease();
-
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);
 

@@ -130,8 +130,6 @@ class Sheet : public View
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onRelease();
-
     //
     // Responder
     //

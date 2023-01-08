@@ -175,29 +175,11 @@ void Widget::unparent()
     if( ! _parent )
         return;
 
-    release();
-
     _parent->onRelease(*this);
     _parent->onDetach(*this);
     _parent = 0;
         
     onParentChanged(0);
-}
-
-
-void Widget::onRelease()
-{
-    setPointer(false);
-
-    setCapture(false);
-    _isCapture = false;
-
-    std::vector<Widget*>::iterator it;
-    for(it = _children.begin(); it != _children.end(); ++it)
-    {
-        Widget* widget = *it;
-        widget->release();
-    }
 }
 
 
@@ -1406,11 +1388,6 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
     }
 
     //
-    // pointer enter
-    //
-    setPointer(true);
-
-    //
     // start capture on press
     //
     if( ev.isPress() )
@@ -1419,15 +1396,14 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
         _isCapture = true;
     }
 
-    //
-    // handle event
-    //
-    mouseEvent(ev);
+    Base::onProcessMouseEvent(ev);
 }
 
 
 bool Widget::onMouseEvent(const MouseEvent& ev)
 {
+    Base::onMouseEvent(ev);
+
     if( ev.isPress(MouseEvent::Left) )
     {
         focus();
@@ -1492,14 +1468,14 @@ void Widget::onProcessTouchEvent(const TouchEvent& ev)
     //
     // handle event
     //
-    setPointer(true);
-
-    touchEvent(ev);
+   Base::onProcessTouchEvent(ev);
 }
 
 
 bool Widget::onTouchEvent(const TouchEvent& ev)
 {
+    Base::onTouchEvent(ev);
+
     if( ev.isPress() )
     {
         focus();

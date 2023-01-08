@@ -128,17 +128,6 @@ Visual* Shell::onHitTest(const Gfx::PointF& p)
     return Widget::onHitTest(p);
 }
 
-
-void Shell::onRelease()
-{
-    Widget::onRelease();
-
-    setPointer(false);
-    setCapture(false);
-
-    _wm.release();
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Widget
 ///////////////////////////////////////////////////////////////////////

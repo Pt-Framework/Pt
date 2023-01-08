@@ -239,19 +239,6 @@ class PT_HMI_API Visual : public Responder
             onSetCapture(capture);
         }
 
-        /** @brief Pointer enter.
-        */
-        void setPointer(bool isPointer);
-
-        /** @brief Release to default initial state.
-
-            TODO: rename reset()
-        */
-        void release()
-        {
-            onRelease();
-        }
-
         void invalidate();
 
         virtual void repaint(const Gfx::RectF& rect)
@@ -299,8 +286,6 @@ class PT_HMI_API Visual : public Responder
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onRelease();
-
         virtual void onSetCapture(bool capture);
 
     protected:
@@ -339,6 +324,15 @@ class PT_HMI_API Visual : public Responder
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
+
+    protected:
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
+
+        virtual bool onMouseEvent(const MouseEvent& ev);
+
+        virtual void onProcessTouchEvent(const TouchEvent& ev);
+
+        virtual bool onTouchEvent(const TouchEvent& ev);
 
     private:
         void setR1(void* r)

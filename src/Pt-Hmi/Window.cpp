@@ -136,8 +136,6 @@ void Window::unparent()
     if( ! _parent )
         return;
 
-    release();
-
     _parent->onRelease(*this);
     _parent->onDetach(*this);
     _parent = 0;
@@ -146,15 +144,6 @@ void Window::unparent()
     _impl = 0;
         
     onParentChanged(0);
-}
-
-
-void Window::onRelease()
-{
-    setPointer(false);
-    setCapture(false);
-
-    Form::onRelease();
 }
 
 

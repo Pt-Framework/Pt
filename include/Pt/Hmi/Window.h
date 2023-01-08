@@ -240,8 +240,6 @@ class PT_HMI_API Window : public Form
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onRelease();
-
         virtual void onRepaintRequest(const Gfx::RectF& rect);
 
     //

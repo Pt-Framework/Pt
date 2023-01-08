@@ -197,7 +197,9 @@ Visual::Visual()
 
 Visual::~Visual()
 {
-    setPointer(false);
+    setCapture(false);
+    
+    Application::instance().onSetPointer(*this, false);
 
     while( ! _peers.empty() )
     {
@@ -257,12 +259,6 @@ bool Visual::isAncestorOf(const Visual& v) const
 }
 
 
-void Visual::setPointer(bool isPointer)
-{
-    Application::instance().onSetPointer(*this, isPointer);
-}
-
-
 Visual* Visual::onHitTest(const Gfx::PointF& pos)
 {
     return 0;
@@ -294,11 +290,6 @@ Gfx::PointF Visual::onFromGlobal(const Gfx::PointF& pos) const
 void Visual::onSetCapture(bool capture)
 {
     Application::instance().onSetCapture(*this, capture);
-}
-
-
-void Visual::onRelease()
-{
 }
 
 
@@ -461,6 +452,34 @@ void Visual::onResizeEvent(const ResizeEvent& ev)
 {
     _size = ev.size();
     _bounds.setSize( ev.size() );
+}
+
+
+void Visual::onProcessMouseEvent(const MouseEvent& ev)
+{
+    Application::instance().onSetPointer(*this, true);
+
+    mouseEvent(ev);
+}
+
+
+bool Visual::onMouseEvent(const MouseEvent& ev)
+{
+    return false;
+}
+
+
+void Visual::onProcessTouchEvent(const TouchEvent& ev)
+{
+    Application::instance().onSetPointer(*this, true);
+
+    touchEvent(ev);
+}
+
+
+bool Visual::onTouchEvent(const TouchEvent& ev)
+{
+    return false;
 }
 
 ///////////////////////////////////////////////////////////////////////

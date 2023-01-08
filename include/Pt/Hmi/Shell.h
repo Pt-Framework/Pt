@@ -69,8 +69,6 @@ class PT_HMI_API Shell : public Widget
     protected:
        Visual* onHitTest(const Gfx::PointF& p);
 
-       virtual void onRelease();
-
     //
     // Widget
     //
