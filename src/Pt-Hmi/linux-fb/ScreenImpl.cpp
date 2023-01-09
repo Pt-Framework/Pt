@@ -68,9 +68,9 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessScrollEvent);
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
 
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
 
     Gfx::Size fs = _frameBuffer.size();
     Gfx::SizeF size( fs.width(), fs.height() );
@@ -85,9 +85,9 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     painter.setBrush( Gfx::Color(0, 0, 0) );
     painter.fillRect(rect);
 
-    _sheet.resize(size);
-    _sheet.setContent(&_shell);
-    _sheet.setParent(this);
+    _form.resize(size);
+    _form.setContent(&_shell);
+    _form.setParent(this);
 
     updateScreen( Gfx::Rect(Gfx::Point(0, 0), _frameBuffer.size()) );
 }
@@ -137,10 +137,10 @@ const std::vector<Window*>& ScreenImpl::windows() const
 }
 
 
-double ScreenImpl::scaleFactor() const
-{
-    return _surface.scaleFactor();
-}
+//double ScreenImpl::scaleFactor() const
+//{
+//    return _surface.scaleFactor();
+//}
 
 ///////////////////////////////////////////////////////////////////////
 // Responder
@@ -163,7 +163,7 @@ Visual* ScreenImpl::onGetParent() const
 
 Visual* ScreenImpl::onHitTest(const Gfx::PointF& pos)
 {
-    return _sheet.hitTest(pos);
+    return _form.hitTest(pos);
 }
 
 
@@ -199,68 +199,68 @@ void ScreenImpl::onRepaintRequest(const Gfx::RectF& rect)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Form
+// Sheet
 ///////////////////////////////////////////////////////////////////////
 
-void ScreenImpl::onAttach(Sheet& sheet)
+void ScreenImpl::onAttach(Form& form)
 {
-    Form::onAttach(sheet);
+    Sheet::onAttach(form);
 }
 
     
-void ScreenImpl::onDetach(Sheet& sheet)
+void ScreenImpl::onDetach(Form& form)
 {
-    Form::onDetach(sheet);
+    Sheet::onDetach(form);
 }
 
 
-void ScreenImpl::onInit(Sheet& sheet)
+void ScreenImpl::onInit(Form& form)
 {
-    sheet.setSurface(&_surface);
-    sheet.setNextResponder(this);
+    form.setSurface(&_surface);
+    form.setNextResponder(this);
 
-    double scaling = _surface.scaleFactor();
+    double scaling = scaleFactor();
     
-    RescaleEvent ev(sheet, scaling);
+    RescaleEvent ev(form, scaling);
     //w.processEvent(ev);
     Application::instance().loop().commitEvent(ev);
 }
 
 
-void ScreenImpl::onRelease(Sheet& sheet)
+void ScreenImpl::onRelease(Form& form)
 {
-    sheet.setSurface(0);
-    sheet.setNextResponder(0);
+    form.setSurface(0);
+    form.setNextResponder(0);
 }
 
 
-Gfx::PointF ScreenImpl::onFromSheet(const Sheet& sheet, const Gfx::PointF& pos) const
+Gfx::PointF ScreenImpl::onFromForm(const Form& form, const Gfx::PointF& pos) const
 {
     return pos;
 }
 
 
-Gfx::PointF ScreenImpl::onToSheet(const Sheet& sheet,  const Gfx::PointF& pos) const
+Gfx::PointF ScreenImpl::onToForm(const Form& form,  const Gfx::PointF& pos) const
 {
     return pos;
 }
 
 
-void ScreenImpl::onRepaint(Sheet& s, const Gfx::RectF& rect)
+void ScreenImpl::onRepaint(Form& s, const Gfx::RectF& rect)
 {
-    Gfx::PointF clientPos = onFromSheet( s, rect.topLeft() );
+    Gfx::PointF clientPos = onFromForm( s, rect.topLeft() );
     Gfx::RectF clientRect( clientPos, rect.size() );
 
     repaint(clientRect);
 }
 
 
-void ScreenImpl::onActivate(Sheet& w, bool active)
+void ScreenImpl::onActivate(Form& w, bool active)
 {
 }
 
 
-void ScreenImpl::onMove(Sheet& sheet, const Gfx::PointF& pos)
+void ScreenImpl::onMove(Form& form, const Gfx::PointF& pos)
 {   
     //
     // align to physical pixel grid
@@ -270,22 +270,22 @@ void ScreenImpl::onMove(Sheet& sheet, const Gfx::PointF& pos)
     //
     // send move event
     //
-    MoveEvent mev(sheet, aligedPos);
+    MoveEvent mev(form, aligedPos);
     ////Application::instance().processEvent(mev);
     Application::instance().commitEvent(mev);
 
     //
     // request repaint
     //
-    Gfx::RectF updateRect = sheet.geometry();
-    Gfx::RectF movedRect( aligedPos, sheet.size() );
+    Gfx::RectF updateRect( form.position(), form.size() );
+    Gfx::RectF movedRect( aligedPos, form.size() );
     updateRect.unify(movedRect);
 
     repaint(updateRect);
 }
 
 
-void ScreenImpl::onResize(Sheet& sheet, const Gfx::SizeF& size)
+void ScreenImpl::onResize(Form& form, const Gfx::SizeF& size)
 {
     //
     // align to physical pixel grid
@@ -295,15 +295,15 @@ void ScreenImpl::onResize(Sheet& sheet, const Gfx::SizeF& size)
     //
     // send resize event
     //
-    ResizeEvent rev(sheet, alignedSize);
+    ResizeEvent rev(form, alignedSize);
     ////Application::instance().processEvent(rev);
     Application::instance().commitEvent(rev);
 
     //
     // request repaint
     //
-    Gfx::RectF updateRect = sheet.geometry();
-    Gfx::RectF resizedRect( sheet.position(), alignedSize );
+    Gfx::RectF updateRect( form.position(), form.size() );
+    Gfx::RectF resizedRect( form.position(), alignedSize );
     updateRect.unify(resizedRect);
 
     repaint(updateRect);
@@ -318,60 +318,41 @@ void ScreenImpl::setCapture(Visual* capture)
 // Implementation
 ///////////////////////////////////////////////////////////////////////
 
-bool ScreenImpl::isEnabled() const
-{
-    return _enabledState;
-}
+//bool ScreenImpl::isEnabled() const
+//{
+//    return _enabledState;
+//}
 
 
 void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
 {
-    bool wasEnabled = isEnabled();
+    //bool wasEnabled = isEnabled();
 
-    _enabledState = ev.enabled();
+    //_enabledState = ev.enabled();
 
-    if( wasEnabled != isEnabled() )
-    {
-        onEnable( ev.enabled() );
-    }
+    //if( wasEnabled != isEnabled() )
+    //{
+    //    onEnable( ev.enabled() );
+    //}
 
-    bool enable = ev.enabled();
-    if( ! isEnabled() )
-      enable = false;
+    //bool enable = ev.enabled();
+    //if( ! isEnabled() )
+    //  enable = false;
 
-    EnableEvent sheetEvent(_sheet, enable);
-    Application::instance().loop().commitEvent(sheetEvent);
+    EnableEvent formEvent(_form, ev.enabled());
+    Application::instance().loop().commitEvent(formEvent);
 }
 
 
 void ScreenImpl::onEnable(bool e)
 {
+    Base::onEnable(e);
 }
 
 
 void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 {
-    Gfx::PointF pos = fromGlobal( ev.position() );
-
-    //std::clog << title() << ": " << pos.x() << " " << pos.y() << std::endl;
-
-    Visual* hit = 0;
-
-    Sheet* sheet = this->sheet();
-    if(sheet && 
-       sheet->geometry().contains(pos) && 
-       sheet->acceptsInput() )
-    {
-        hit = sheet;
-    }
-
-    if(hit)
-    {
-      hit->processEvent(ev);
-      return;
-    }
-
-    _sheet.processEvent(ev);
+    _form.processEvent(ev);
 }
 
 
@@ -398,7 +379,7 @@ void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
     if( ! isEnabled() )
         return;
   
-    _sheet.processEvent(ev);
+    _form.processEvent(ev);
 }
 
 
@@ -414,8 +395,8 @@ void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
         return;
     
     KeyEvent kev = ev;
-    kev.setVisual(&_sheet);
-    _sheet.processEvent(kev);
+    kev.setVisual(&_form);
+    _form.processEvent(kev);
 }
 
 
@@ -427,23 +408,25 @@ bool ScreenImpl::onKeyEvent(const KeyEvent& ev)
 
 void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {   
-    onRescaleEvent(ev);
+    Base::onProcessRescaleEvent(ev);
 
     double scaling = ev.scaleFactor();
 
-    RescaleEvent sheetEvent(_sheet, scaling);
-    _sheet.processEvent(sheetEvent);
+    RescaleEvent formEvent(_form, scaling);
+    _form.processEvent(formEvent);
 }
 
 
 void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 {
-    onRescale( ev.scaleFactor() );
+    Base::onRescaleEvent(ev);
 }
 
 
 void ScreenImpl::onRescale(double scaling)
 {
+    Base::onRescale(scaling);
+
     _surface.setScaleFactor(scaling);
 }
 
@@ -459,14 +442,14 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 
     //
     //
-    // paint sheet
+    // paint form
     //
-    Gfx::RectF updateRect = _sheet.geometry().intersect(screenRect);
+    Gfx::RectF updateRect = bounds().intersect(screenRect);
  
     if( ! updateRect.isNull() )
     {
-        PaintEvent pev( _sheet, updateRect );
-        _sheet.processEvent(pev);
+        PaintEvent pev( _form, updateRect );
+        _form.processEvent(pev);
     }
 
     //std::clog << "screen update2: " << clock.stop().toUSecs() << " usecs." << std::endl;

@@ -34,6 +34,7 @@
 #include "FrameBuffer.h"
 
 #include <Pt/Hmi/Form.h>
+#include <Pt/Hmi/Sheet.h>
 #include <Pt/Hmi/Shell.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Gfx/Color.h>
@@ -48,10 +49,10 @@ class FrameBuffer;
 class Cursor;
 class Screen;
 
-class ScreenImpl : public Form
+class ScreenImpl : public Sheet
                  , public Connectable
 {
-    typedef Form Base;
+    typedef Sheet Base;
 
     public:
         ScreenImpl(ApplicationImpl& app);
@@ -74,10 +75,10 @@ class ScreenImpl : public Form
         void setCapture(Visual* capture);
 
         
-        double scaleFactor() const;
+        //double scaleFactor() const;
 
 
-        bool isEnabled() const;
+        //bool isEnabled() const;
 
     public:
         void drawCursor(const Pt::Gfx::PointF& pos);
@@ -113,30 +114,30 @@ class ScreenImpl : public Form
         virtual void onRepaintRequest(const Gfx::RectF& rect);
 
     //
-    // Form
+    // Sheet
     //
     protected:
-        virtual void onAttach(Sheet& view);
+        virtual void onAttach(Form& form);
     
-        virtual void onDetach(Sheet& view);
+        virtual void onDetach(Form& form);
 
-        virtual void onInit(Sheet& view);
+        virtual void onInit(Form& form);
 
-        virtual void onRelease(Sheet& view);
+        virtual void onRelease(Form& form);
 
-        virtual Gfx::PointF onFromSheet(const Sheet& sheet, 
+        virtual Gfx::PointF onFromForm(const Form& form, 
                                        const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onToSheet(const Sheet& sheet, 
+        virtual Gfx::PointF onToForm(const Form& form, 
                                      const Gfx::PointF& pos) const;
 
-        virtual void onRepaint(Sheet& view, const Gfx::RectF& rect);
+        virtual void onRepaint(Form& form, const Gfx::RectF& rect);
 
-        virtual void onActivate(Sheet& w, bool active);
+        virtual void onActivate(Form& form, bool active);
 
-        virtual void onMove(Sheet& sheet, const Gfx::PointF& pos);
+        virtual void onMove(Form& form, const Gfx::PointF& pos);
 
-        virtual void onResize(Sheet& sheet, const Gfx::SizeF& size);
+        virtual void onResize(Form& form, const Gfx::SizeF& size);
 
     //
     // scaling
@@ -208,7 +209,7 @@ class ScreenImpl : public Form
         PixmapSurface                _surface;
 
         Screen*                      _parent;
-        Sheet                        _sheet;
+        Form                         _form;
         Shell                        _shell;
                                      
         Responder*                   _nextResponder;
