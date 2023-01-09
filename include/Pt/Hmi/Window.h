@@ -31,7 +31,7 @@
 #define PT_HMI_WINDOW_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/Sheet.h>
 #include <Pt/Hmi/Form.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/WindowType.h>
@@ -86,10 +86,11 @@ class WindowImpl
 
 /** @brief Window base class.
 */
-class PT_HMI_API Window : public Form
+class PT_HMI_API Window : public Sheet
+                        , public Pt::Connectable
 {
     public:
-        typedef Form Base;
+        typedef Sheet Base;
         typedef WindowType Type;
         typedef WindowState State;
 
@@ -106,9 +107,30 @@ class PT_HMI_API Window : public Form
         Gfx::Image getImage() const;
 
     public:
+        Widget* content()
+        { return _form.content(); }
+
+        const Widget* content()  const
+        { return _form.content(); }
+
+        void setContent(Widget* widget)
+        { _form.setContent(widget); }
+
+        Widget* findWidget(const Gfx::PointF& pos)
+        { return _form.findWidget(pos); }
+
+        Widget* findWidget(const std::string& name)
+        { return _form.findWidget(name); }
+
+        Widget* findWidget(Pt::uint64_t vid)
+        { return _form.findWidget(vid); }
+
+    public:
         PixmapSurface& surface();
 
         const PixmapSurface& surface() const;
+
+        void setNextResponder(Responder* r);
 
 
         //double scaleFactor() const;
@@ -214,6 +236,8 @@ class PT_HMI_API Window : public Form
     // Responder
     //
     protected:
+        virtual Responder* onNextResponder();
+
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent( const TouchEvent& ev );
@@ -241,6 +265,32 @@ class PT_HMI_API Window : public Form
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onRepaintRequest(const Gfx::RectF& rect);
+
+    //
+    // Sheet
+    //
+    protected:
+        virtual void onAttach(Form& form);
+    
+        virtual void onDetach(Form& form);
+
+        virtual void onInit(Form& form);
+
+        virtual void onRelease(Form& form);
+
+        virtual Gfx::PointF onFromForm(const Form& form, 
+                                       const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onToForm(const Form& form, 
+                                     const Gfx::PointF& pos) const;
+
+        virtual void onRepaint(Form& form, const Gfx::RectF& rect);
+
+        virtual void onActivate(Form& form, bool active);
+
+        virtual void onMove(Form& form, const Gfx::PointF& pos);
+
+        virtual void onResize(Form& form, const Gfx::SizeF& size);
 
     //
     // invalidation
@@ -346,9 +396,10 @@ class PT_HMI_API Window : public Form
         Pt::Signal<const Pt::Event&> _eventReceived;
 
         PixmapSurface                _surface;
+        Responder*                   _nextResponder;
+        Form                         _form;
 
         WindowManager*               _parent;
-        Visual*                      _capture;
 
         bool                         _visible; 
         bool                         _isActive;

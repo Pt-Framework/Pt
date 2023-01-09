@@ -47,6 +47,7 @@ namespace Hmi {
 
 Form::Form()
 : _eventReceived()
+, _parent(0)
 , _mainWidget(0)
 , _surface(0)
 , _nextResponder(0)
@@ -79,6 +80,38 @@ Form::~Form()
 {
     if(_mainWidget)
         _mainWidget->setParent(0);
+
+    unparent();
+}
+
+
+void Form::setParent(Sheet* parent)
+{
+    if(_parent == parent)
+        return;
+
+    unparent();
+
+    if(parent)
+    {
+        parent->onAttach(*this);
+        _parent = parent;
+
+        _parent->onInit(*this);
+        _parent->onMove(*this, _requestedPosition);
+        _parent->onResize(*this, _requestedSize);
+    }
+}
+
+
+void Form::unparent()
+{
+    if( ! _parent)
+        return;
+
+    _parent->onRelease(*this);
+    _parent->onDetach(*this);
+    _parent = 0;
 }
 
 
@@ -157,13 +190,10 @@ Widget* Form::findWidget(Pt::uint64_t vid)
 }
 
 
-//Visual* Form::onGetParent() const
-//{
-//    if( ! _parent )
-//        return 0;
-//
-//    return &_parent->visual();
-//}
+Visual* Form::onGetParent() const
+{
+    return _parent;
+}
 
 
 Visual* Form::onHitTest(const Gfx::PointF& p)
@@ -184,22 +214,22 @@ Visual* Form::onHitTest(const Gfx::PointF& p)
 }
 
 
-//Gfx::PointF Form::onToParent(const Gfx::PointF& pos) const
-//{
-//    if( ! _parent )
-//        return pos;
-//
-//    return _parent->onFromForm(*this, pos);
-//}
-//
-//
-//Gfx::PointF Form::onFromParent(const Gfx::PointF& pos) const
-//{
-//    if( ! _parent )
-//        return pos;
-//
-//    return _parent->onToForm(*this, pos);
-//}
+Gfx::PointF Form::onToParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onFromForm(*this, pos);
+}
+
+
+Gfx::PointF Form::onFromParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onToForm(*this, pos);
+}
 
 
 void Form::onEvent(const Pt::Event& ev)
@@ -385,6 +415,14 @@ void Form::onInvalidate()
 //{
 //    onRepaint(rect);
 //}
+
+void Form::onRepaintRequest(const Gfx::RectF& rect)
+{
+    //std::clog << "REPAINT: " << title() << std::endl;
+
+    if(_parent)
+        _parent->onRepaint(*this, rect);
+}
 
 
 void Form::onProcessPaintEvent(const PaintEvent& ev)
@@ -572,15 +610,13 @@ void Form::onRescale(double scaling)
 //}
 
 
-//void Form::move(const Gfx::PointF& pos)
-//{
-//    _requestedGeometry.setOrigin(pos);
-//
-//    if(_parent)
-//        _parent->onMove(*this, pos);
-//    else
-//        _alignedGeometry.setOrigin(pos);
-//}
+void Form::move(const Gfx::PointF& pos)
+{
+    _requestedPosition = pos;
+
+    if(_parent)
+        _parent->onMove(*this, pos);
+}
 
 
 //void Form::onProcessMoveEvent(const MoveEvent& ev)
@@ -602,15 +638,13 @@ void Form::onMoveEvent(const MoveEvent& ev)
 //}
 
 
-//void Form::resize(const Gfx::SizeF& s)
-//{
-//    _requestedGeometry.setSize(s);
-//    
-//    if(_parent)
-//        _parent->onResize(*this, s);
-//    else
-//        _alignedGeometry.setSize(s);
-//}
+void Form::resize(const Gfx::SizeF& s)
+{
+    _requestedSize = s;
+    
+    if(_parent)
+        _parent->onResize(*this, s);
+}
 
 
 //void Form::onProcessResizeEvent(const ResizeEvent& ev)

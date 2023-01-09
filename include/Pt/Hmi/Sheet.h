@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2022 Marc Boris Duerner
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -29,13 +29,11 @@
 #ifndef PT_HMI_SHEET_H
 #define PT_HMI_SHEET_H
 
+#include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Visual.h>
-#include <Pt/Gfx/PaintRegion.h>
-#include <Pt/Connectable.h>
-#include <Pt/Signal.h>
-
-#include <vector>
-#include <map>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 
 namespace Pt {
 
@@ -43,274 +41,71 @@ namespace Hmi {
 
 class Form;
 
-class Sheet : public View
-            , public Pt::Connectable
+class PT_HMI_API Sheet : public Visual
 {
-    friend class Widget;
+    friend class Form;
 
     public:
-        Sheet();
-
         virtual ~Sheet();
-    
-        void setParent(Form* parent);
 
-        void unparent();
 
-        void setSurface(Gfx::PaintSurface* surface);
+        Form* form();
 
-        void setNextResponder(Responder* r);
+        const Form* form() const;
 
-    public:
+        void setForm(Form* form);
+
+
         Widget* content();
 
-        const Widget* content()  const;
+        const Widget* content() const;
 
         void setContent(Widget* widget);
 
-        Widget* findWidget(const Gfx::PointF& pos);
 
-        Widget* findWidget(const std::string& name);
-
-        Widget* findWidget(Pt::uint64_t vid);
-
-    public:
-        void invalidate();
-
-    public:
-        void repaint()
-        {
-            Gfx::RectF rect( size() );
-            repaint(rect);
+        Gfx::PointF toForm(const Form& form, 
+                           const Gfx::PointF& pos) const
+        { 
+            return onToForm(form, pos); 
         }
 
-        void repaint(const Gfx::RectF& rect);
+        Gfx::PointF fromForm(const Form& form, 
+                             const Gfx::PointF& pos) const
+        { 
+            return onFromForm(form, pos); 
+        }
 
-    public:
-        void relayout();
-
-        Gfx::SizeF measure(const SizePolicy& policy);
-
-        void layout(const Gfx::RectF& rect);
-
-    public:
-        bool acceptsInput() const;
-
-        bool isEnabled() const;
-
-    public:
-        const Gfx::RectF& geometry() const;
-
-        const Gfx::PointF& position() const;
-
-        void move(const Gfx::PointF&);
-
-        const Gfx::SizeF& size() const;
-
-        void resize(const Gfx::SizeF& s);
-
-    public:
-        Widget* focusWidget();
-
-        void focusNext();
-
-        void focusPrev();
-
-    //
-    // Visual
-    //
     protected:
-        virtual Visual* onGetParent() const;
+        Sheet();
 
-        virtual Visual* onHitTest(const Gfx::PointF& pos);
-
-        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
-
-        virtual void onEvent(const Pt::Event& ev);
-
-    //
-    // Responder
-    //
-    protected:
-        virtual Responder* onNextResponder();
-
-        virtual bool onMouseEvent(const MouseEvent& ev);
-        
-        virtual bool onTouchEvent(const TouchEvent& ev);
-        
-        virtual bool onScrollEvent(const ScrollEvent& ev);
-
-        virtual bool onEnterEvent(const EnterEvent& ev);
-
-        virtual bool onLeaveEvent(const LeaveEvent& ev);
-
-        virtual bool onKeyEvent(const KeyEvent& ev);
-
-    //
-    // View
-    //
-    protected:
-        virtual void onAttach(Widget& widget);
-
-        virtual void onDetach(Widget& widget);
-
-        virtual void onInit(Widget& widget);
-
-        virtual void onRelease(Widget& widget);
-
-        virtual void onRegister(Widget& widget);
-
-        virtual void onDeregister(Widget& widget);
-
-        virtual Gfx::PointF onToWidget(const Widget& widget, 
-                                        const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromWidget(const Widget& widget, 
-                                          const Gfx::PointF& pos) const;
-
-        virtual void onRepaint(Widget& widget, const Gfx::RectF& rect);
-
-        virtual void onRelayout(Widget& widget);
-
-        virtual void onEnable(Widget& widget, bool isEnable);
-
-        virtual void onActivate(Widget& w, bool active);
-
-        virtual void onShow(Widget& widget, bool isShown);
-
-        virtual void onMove(Widget& widget, const Gfx::PointF& pos);
-
-        virtual void onResize(Widget& widget, const Gfx::SizeF& size);
-
-        virtual void onRaise(Widget& widget);
-
-    //
-    // Sheet
-    //
-    protected:
-        virtual void onSetFocusPolicy(Widget& w, FocusPolicy policy);
-
-        virtual void onSetFocusIndex(Widget& w, unsigned index);
-
-        virtual void onSetFocus(Widget& w);
-
-        virtual void onSetShortcut(Widget& w, const Key* key);
-
-        virtual void onSetMnemonic(Widget& w, const Char* ch);
-
-    //
-    // invalidation
-    //
-    protected:
-        virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
-
-        virtual void onInvalidateEvent(const InvalidateEvent& ev);
+        virtual void onAttach(Form& form) = 0;
     
-        virtual void onInvalidate();
+        virtual void onDetach(Form& form) = 0;
 
-    //
-    // painting
-    //
-    protected:
-        virtual void onProcessPaintEvent(const PaintEvent& ev);
+        virtual void onInit(Form& form) = 0;
 
-        virtual void onPaintEvent(const PaintEvent& ev);
-        
-        virtual void onPaint(Gfx::PaintSurface& surface, 
-                             const Gfx::RectF& rect);
+        virtual void onRelease(Form& form) = 0;
 
-    //
-    // layouting
-    //
-    protected:
-        virtual void onProcessRelayoutEvent(const RelayoutEvent& ev);
-    
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::PointF onFromForm(const Form& form, 
+                                       const Gfx::PointF& pos) const = 0;
 
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual Gfx::PointF onToForm(const Form& form, 
+                                     const Gfx::PointF& pos) const = 0;
 
-    //
-    // scaling
-    //
-    protected:
-        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+        virtual void onRepaint(Form& form, const Gfx::RectF& rect) = 0;
 
-        virtual void onRescaleEvent(const RescaleEvent& ev);
+        virtual void onActivate(Form& form, bool active) = 0;
 
-        virtual void onRescale(double scaling);
-    
-    //
-    // geometry
-    //
-    protected:
-        virtual void onProcessMoveEvent(const MoveEvent& ev);
+        virtual void onMove(Form& form, const Gfx::PointF& pos) = 0;
 
-        virtual void onMoveEvent(const MoveEvent& ev);
-
-        virtual void onProcessResizeEvent(const ResizeEvent& ev);
-
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
-    //
-    // enabling
-    //
-    protected:
-        virtual void onProcessEnableEvent(const EnableEvent& ev);
-
-        virtual void onEnable(bool e);
-    
-    //
-    // input
-    //
-    protected:
-        virtual void onProcessMouseEvent(const MouseEvent& ev);
-        
-        virtual void onProcessTouchEvent(const TouchEvent& ev);
-
-        virtual void onProcessScrollEvent(const ScrollEvent& sev);
-
-        virtual void onProcessEnterEvent(const EnterEvent& ev);
-
-        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
-
-        virtual void onProcessKeyEvent(const KeyEvent& ev);
+        virtual void onResize(Form& form, const Gfx::SizeF& size) = 0;
 
     private:
-        template <typename Iter>
-        void moveFocus(Iter begin, Iter end);
-    
-    private:
-        Pt::Signal<const Pt::Event&> _eventReceived;
-        Form*                        _parent;
-        Widget*                      _mainWidget;
-
-        Gfx::PaintSurface*           _surface;
-        Responder*                   _nextResponder;
-
-        int                          _invalidates;
-        int                          _layouts;
-
-        bool                         _enabled;
-        bool                         _enabledState;
-
-        Gfx::RectF                   _alignedGeometry;
-        Gfx::RectF                   _requestedGeometry;
-        
-        Visual*                      _pointer;
-        Visual*                      _capture;
-        Widget*                      _active;
-
-        std::vector<Widget*>         _focusList;
-        Widget*                      _focusWidget;
-
-        std::map<Key, Widget*>       _shortcuts;
-        std::map<Pt::Char, Widget*>  _mnemonics;
+        Form* _form;
 };
 
 } // namespace
 
 } // namespace
 
-#endif // include guard
+#endif

@@ -30,6 +30,7 @@
 #define PT_HMI_FORM_H
 
 #include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/Sheet.h>
 #include <Pt/Gfx/PaintRegion.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
@@ -65,6 +66,10 @@ class PT_HMI_API Form : public View
         Form();
 
         virtual ~Form();
+
+        void setParent(Sheet* parent);
+
+        void unparent();
     
         void setSurface(Gfx::PaintSurface* surface);
 
@@ -102,11 +107,11 @@ class PT_HMI_API Form : public View
 
         //const Gfx::PointF& position() const;
 
-        //void move(const Gfx::PointF&);
+        void move(const Gfx::PointF&);
 
         //const Gfx::SizeF& size() const;
 
-        //void resize(const Gfx::SizeF& s);
+        void resize(const Gfx::SizeF& s);
 
     public:
         Widget* focusWidget();
@@ -119,15 +124,17 @@ class PT_HMI_API Form : public View
     // Visual
     //
     protected:
-        //virtual Visual* onGetParent() const;
+        virtual Visual* onGetParent() const;
 
         virtual Visual* onHitTest(const Gfx::PointF& pos);
 
-        //virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
-        //virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
         virtual void onEvent(const Pt::Event& ev);
+
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
 
     //
     // Responder
@@ -279,6 +286,7 @@ class PT_HMI_API Form : public View
     
     private:
         Pt::Signal<const Pt::Event&> _eventReceived;
+        Sheet*                       _parent;
         Widget*                      _mainWidget;
 
         Gfx::PaintSurface*           _surface;
@@ -293,6 +301,9 @@ class PT_HMI_API Form : public View
         //Gfx::RectF                   _alignedGeometry;
         //Gfx::RectF                   _bounds;
         //Gfx::RectF                   _requestedGeometry;
+
+        Gfx::PointF                  _requestedPosition;
+        Gfx::SizeF                   _requestedSize;
         
         Visual*                      _pointer;
         Widget*                      _active;

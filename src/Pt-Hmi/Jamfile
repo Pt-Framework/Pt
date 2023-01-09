@@ -65,6 +65,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        ScrollBar.cpp
                        ScrollView.cpp
                        ScrollLayout.cpp
+                       Sheet.cpp
                        Shell.cpp
                        ShellWM.cpp
                        Slider.cpp

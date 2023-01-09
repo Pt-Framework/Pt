@@ -68,8 +68,8 @@ WindowType WindowImpl::type() const
 
 Window::Window(WindowManager* parent, WindowType type)
 : _impl(0)
+, _nextResponder(0)
 , _parent(0)
-, _capture(0)
 , _visible(false)
 , _isActive(false)
 , _enabled(true)
@@ -83,12 +83,20 @@ Window::Window(WindowManager* parent, WindowType type)
 , _state(WindowState::Normal)
 , _isAbove(false)
 {
-    Form::setSurface(&_surface);
+    //Form::setSurface(&_surface);
+    _form.setParent(this);
 
     _eventReceived += Pt::slot(*this, &Window::onProcessShowEvent);
     _eventReceived += Pt::slot(*this, &Window::onProcessActivateEvent);
     _eventReceived += Pt::slot(*this, &Window::onProcessCloseEvent);
     _eventReceived += Pt::slot(*this, &Window::onProcessWindowStateEvent);
+
+    _eventReceived += Pt::slot(*this, &Window::onProcessMouseEvent);
+    _eventReceived += Pt::slot(*this, &Window::onProcessTouchEvent);
+    _eventReceived += Pt::slot(*this, &Window::onProcessScrollEvent);
+    _eventReceived += Pt::slot(*this, &Window::onProcessEnterEvent);
+    _eventReceived += Pt::slot(*this, &Window::onProcessLeaveEvent);
+    _eventReceived += Pt::slot(*this, &Window::onProcessKeyEvent);
 
     if(parent)
         setParent(*parent);
@@ -195,6 +203,18 @@ Pt::Signal<const Pt::Event&>& Window::eventReceived()
     return _eventReceived;
 }
 
+
+void Window::setNextResponder(Responder* r)
+{
+    _nextResponder = r;
+}
+
+
+Responder* Window::onNextResponder()
+{
+    return _nextResponder;
+}
+
 ///////////////////////////////////////////////////////////////////////
 // geometry
 ///////////////////////////////////////////////////////////////////////
@@ -243,13 +263,13 @@ void Window::move(const Gfx::PointF& pos)
 
 void Window::onProcessMoveEvent(const MoveEvent& ev)
 {
-    Form::onProcessMoveEvent(ev);
+    Base::onProcessMoveEvent(ev);
 }
 
 
 void Window::onMoveEvent(const MoveEvent& ev)
 {    
-    Form::onMoveEvent(ev);
+    Base::onMoveEvent(ev);
 }
 
 
@@ -270,8 +290,8 @@ void Window::resize(const Gfx::SizeF& s)
 
 Gfx::SizeF Window::resize(const SizePolicy& policy)
 {
-    Gfx::SizeF size = Form::measure(policy);
-    ///Gfx::SizeF size = _form.measure(policy);
+    //Gfx::SizeF size = Form::measure(policy);
+    Gfx::SizeF size = _form.measure(policy);
 
     resize(size);
 
@@ -281,15 +301,16 @@ Gfx::SizeF Window::resize(const SizePolicy& policy)
 
 void Window::onProcessResizeEvent(const ResizeEvent& ev)
 {
-    Form::onProcessResizeEvent(ev);
+    Base::onProcessResizeEvent(ev);
 }
 
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
-    Form::onResizeEvent(ev);
+    Base::onResizeEvent(ev);
 
     _surface.resize( ev.size() );
+    _form.resize( ev.size() );
 }
 
 
@@ -332,13 +353,14 @@ Visual* Window::onGetParent() const
 }
 
 
-Visual* Window::onHitTest(const Gfx::PointF& pos)
+Visual* Window::onHitTest(const Gfx::PointF& p)
 {
-    Visual* hit = Form::onHitTest(pos);
+    Gfx::PointF pos = toForm(_form, p);
+    Visual* hit = _form.hitTest(pos);
     if(hit)
         return hit;
 
-    if( bounds().contains(pos) )
+    if( bounds().contains(p) )
         return this;
 
     return 0;
@@ -365,8 +387,119 @@ Gfx::PointF Window::onFromParent(const Gfx::PointF& pos) const
 
 void Window::onEvent(const Pt::Event& ev)
 {
-    Form::onEvent(ev);
+    Base::onEvent(ev);
     _eventReceived.send(ev);
+}
+
+///////////////////////////////////////////////////////////////////////
+// Sheet
+///////////////////////////////////////////////////////////////////////
+
+void Window::onAttach(Form& form)
+{
+    Sheet::onAttach(form);
+}
+
+    
+void Window::onDetach(Form& form)
+{
+    Sheet::onDetach(form);
+}
+
+
+void Window::onInit(Form& form)
+{
+    form.setSurface(&_surface);
+    form.setNextResponder(this);
+
+    double scaling = scaleFactor();
+    
+    RescaleEvent ev(form, scaling);
+    //w.processEvent(ev);
+    Application::instance().loop().commitEvent(ev);
+}
+
+
+void Window::onRelease(Form& form)
+{
+    form.setSurface(0);
+    form.setNextResponder(0);
+}
+
+
+Gfx::PointF Window::onFromForm(const Form& form, const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+Gfx::PointF Window::onToForm(const Form& form, const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+void Window::onRepaint(Form& form, const Gfx::RectF& rect)
+{
+    Gfx::PointF clientPos = onFromForm( form, rect.topLeft() );
+    Gfx::RectF clientRect( clientPos, rect.size() );
+
+    repaint(clientRect);
+}
+
+
+void Window::onActivate(Form& form, bool active)
+{
+}
+
+
+void Window::onMove(Form& form, const Gfx::PointF& pos)
+{   
+    //
+    // align to physical pixel grid
+    //
+    Gfx::PointF aligedPos = _surface.align(pos);
+
+    //
+    // send move event
+    //
+    MoveEvent mev(form, aligedPos);
+    ////Application::instance().processEvent(mev);
+    Application::instance().commitEvent(mev);
+
+    //
+    // request repaint
+    //
+    Gfx::RectF updateRect( form.position(), form.size() );
+    Gfx::RectF movedRect( aligedPos, form.size() );
+    updateRect.unify(movedRect);
+
+    repaint(updateRect);
+}
+
+
+void Window::onResize(Form& form, const Gfx::SizeF& size)
+{
+    //
+    // align to physical pixel grid
+    //
+    Gfx::SizeF alignedSize = _surface.align(size);
+
+    //
+    // send resize event
+    //
+    ResizeEvent rev(form, alignedSize);
+    ////Application::instance().processEvent(rev);
+    Application::instance().commitEvent(rev);
+
+    //
+    // request repaint
+    //
+    Gfx::RectF updateRect( form.position(), form.size() );
+    Gfx::RectF resizedRect( form.position(), alignedSize );
+    updateRect.unify(resizedRect);
+
+    repaint(updateRect);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -407,12 +540,14 @@ void Window::onProcessPaintEvent(const PaintEvent& ev)
     if( ! this->isVisible() )
         return;
 
+    Base::onProcessPaintEvent(ev);
+
     Gfx::RectF updateRect = bounds().intersect(rect);
 
     if( ! updateRect.isNull() )
     {
         PaintEvent pev( *this, updateRect );
-        Base::onProcessPaintEvent(pev);
+        _form.processEvent(pev);
     }
 }
 
@@ -510,11 +645,6 @@ void Window::onProcessShowEvent(const ShowEvent& ev)
 void Window::onShowEvent(const ShowEvent& ev)
 {
     _visible = ev.visible();
-
-    if(_capture && ! _visible)
-    {
-        _capture->setCapture(false);
-    }
 }
 
 
@@ -581,6 +711,9 @@ void Window::enable(bool e)
 void Window::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
+
+    EnableEvent eev(_form, ev.enabled());
+    _form.processEvent(eev);
 }
 
 
@@ -607,6 +740,8 @@ void Window::onProcessRescaleEvent(const RescaleEvent& ev)
 
     RescaleEvent rev(*this, scaling);
     Base::onProcessRescaleEvent(rev);
+
+    _form.processEvent(rev);
 }
 
 
@@ -862,7 +997,7 @@ void Window::onProcessMouseEvent(const MouseEvent& ev)
     if( ! acceptsInput() )
         return;
 
-    Form::onProcessMouseEvent(ev);
+    _form.processEvent(ev);
 }
 
 
@@ -871,7 +1006,7 @@ void Window::onProcessTouchEvent(const TouchEvent& ev)
     if( ! acceptsInput() )
         return;
 
-    Form::onProcessTouchEvent(ev);
+    _form.processEvent(ev);
 }
 
 
@@ -881,7 +1016,7 @@ void Window::onProcessScrollEvent(const ScrollEvent& ev)
     if( ! acceptsInput() )
         return;
   
-    Form::onProcessScrollEvent(ev);
+    _form.processEvent(ev);
 }
 
 
@@ -902,11 +1037,9 @@ void Window::onProcessKeyEvent(const KeyEvent& ev)
     if( ! acceptsInput() )
         return;
     
-    //KeyEvent kev = ev;
-    //kev.setVisual(&_sheet);
-    //_sheet.processEvent(kev);
-
-    Form::onProcessKeyEvent(ev);
+    KeyEvent kev = ev;
+    kev.setVisual(&_form);
+    _form.processEvent(kev);
 }
 
 
@@ -921,7 +1054,7 @@ bool Window::onMouseEvent(const MouseEvent& ev)
     //    }
     //}
 
-    return Form::onMouseEvent(ev);
+    return Base::onMouseEvent(ev);
 }
 
 
