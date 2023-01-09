@@ -213,9 +213,6 @@ class ScreenImpl : public Sheet
         Shell                        _shell;
                                      
         Responder*                   _nextResponder;
-
-        bool                         _enabled;
-        bool                         _enabledState;
         
         double                       _dpi;       
         Gfx::Image                   _cursorBackground;
