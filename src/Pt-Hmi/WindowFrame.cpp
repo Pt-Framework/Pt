@@ -638,7 +638,7 @@ void WindowFrame::onEvent(const Pt::Event& ev)
 
 void WindowFrame::enterEvent(const EnterEvent& eev)
 {
-    std::clog << "ENTER: " << " frame " << " " << vid() << std::endl;
+    //std::clog << "ENTER: " << " frame " << " " << vid() << std::endl;
 }
 
 
@@ -660,7 +660,7 @@ void WindowFrame::leaveEvent(const LeaveEvent& lev)
             button->leaveEvent(lev);
     }
 
-    std::clog << "LEAVE: " << " frame " << " " << vid() << std::endl;
+    //std::clog << "LEAVE: " << " frame " << " " << vid() << std::endl;
 }
 
 
