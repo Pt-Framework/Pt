@@ -483,6 +483,8 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
             imeHit = popupHit && isPopupOf(*popupHit, *ime);
     }
 
+    std::list<Popup*> closePopups;
+
     std::list<Popup*>::iterator pit = _popups.begin();
     while( pit != _popups.end() )
     {
@@ -501,9 +503,16 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
         if( ! keepOpen )
         {
             //std::clog << "AUTO_CLOSE: " << popup->name() << std::endl;
-            popup->close();
-            pit = _popups.begin();
+            //popup->close();
+            closePopups.push_back(popup);
+            
+            //pit = _popups.begin();
         }
+    }
+
+    for( pit = closePopups.begin(); pit != closePopups.end(); ++pit)
+    {
+        (*pit)->close();
     }
 }
 
