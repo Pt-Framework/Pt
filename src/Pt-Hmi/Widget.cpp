@@ -241,8 +241,8 @@ void Widget::onInit(Widget& widget)
     double scaling = scaleFactor();
     
     RescaleEvent ev(widget, scaling);
-    //w.processEvent(ev);
-    Application::instance().loop().commitEvent(ev);
+    widget.processEvent(ev);
+    //Application::instance().loop().commitEvent(ev);
 
     relayout();
 }

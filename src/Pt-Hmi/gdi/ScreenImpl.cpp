@@ -67,7 +67,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessScrollEvent);
     _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
 
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescale Event);
     //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
     //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
 }
@@ -228,8 +228,8 @@ void ScreenImpl::onDetach(Window& w)
 void ScreenImpl::onInit(Window& w)
 {
     RescaleEvent ev( w, scaleFactor() );
-    //w.processEvent(ev);
-    Application::instance().loop().commitEvent(ev);
+    w.processEvent(ev);
+    //Application::instance().loop().commitEvent(ev);
 }
 
 

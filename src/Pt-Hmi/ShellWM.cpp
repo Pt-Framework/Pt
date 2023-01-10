@@ -320,8 +320,8 @@ void ShellWM::onInit(Window& w)
     double scaling = scaleFactor();
     
     RescaleEvent ev(w, scaling);
-    //w.processEvent(ev);
-    Application::instance().loop().commitEvent(ev);
+    w.processEvent(ev);
+    //Application::instance().loop().commitEvent(ev);
 }
 
 

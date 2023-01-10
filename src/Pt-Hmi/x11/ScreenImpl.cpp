@@ -217,8 +217,8 @@ void ScreenImpl::onDetach(Window& w)
 void ScreenImpl::onInit(Window& w)
 {
     RescaleEvent ev(w, _scaling);
-    //w.processEvent(ev);
-    Application::instance().loop().commitEvent(ev);
+    w.processEvent(ev);
+    //Application::instance().loop().commitEvent(ev);
 }
 
 

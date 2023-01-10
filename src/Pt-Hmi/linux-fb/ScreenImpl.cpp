@@ -220,8 +220,8 @@ void ScreenImpl::onInit(Form& form)
     double scaling = scaleFactor();
     
     RescaleEvent ev(form, scaling);
-    //w.processEvent(ev);
-    Application::instance().loop().commitEvent(ev);
+    form.processEvent(ev);
+    //Application::instance().loop().commitEvent(ev);
 }
 
 
