@@ -34,7 +34,6 @@ namespace Pt {
 namespace Hmi {
 
 Sheet::Sheet()
-: _form(0)
 {
 }
 
@@ -44,52 +43,13 @@ Sheet::~Sheet()
 }
 
 
-Form* Sheet::form()
-{
-    return _form;
-}
-
-
-const Form* Sheet::form() const
-{
-    return _form;
-}
-
-
-void Sheet::setForm(Form* form)
-{
-    form->setParent(this);
-}
-
-
-Widget* Sheet::content() 
-{
-    return _form ? _form->content() : 0;
-}
-
-
-const Widget* Sheet::content()  const 
-{
-    return _form ? _form->content() : 0;
-}
-
-
-void Sheet::setContent(Widget* widget)
-{
-    if(_form)
-        _form->setContent(widget);
-}
-
-
 void Sheet::onAttach(Form& form)
 {
-    _form = &form;
 }
 
 
 void Sheet::onDetach(Form& form)
 {
-    _form = 0;
 }
 
 } // namespace

@@ -48,21 +48,6 @@ class PT_HMI_API Sheet : public Visual
     public:
         virtual ~Sheet();
 
-
-        Form* form();
-
-        const Form* form() const;
-
-        void setForm(Form* form);
-
-
-        Widget* content();
-
-        const Widget* content() const;
-
-        void setContent(Widget* widget);
-
-
         Gfx::PointF toForm(const Form& form, 
                            const Gfx::PointF& pos) const
         { 
@@ -99,9 +84,6 @@ class PT_HMI_API Sheet : public Visual
         virtual void onMove(Form& form, const Gfx::PointF& pos) = 0;
 
         virtual void onResize(Form& form, const Gfx::SizeF& size) = 0;
-
-    private:
-        Form* _form;
 };
 
 } // namespace
