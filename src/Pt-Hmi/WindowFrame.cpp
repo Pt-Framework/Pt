@@ -626,11 +626,19 @@ void WindowFrame::onLayout()
 
 void WindowFrame::onEvent(const Pt::Event& ev)
 {
+    //Visual::onEvent(ev);
+
+    //if( ev.typeInfo() == typeid(MouseEvent) )
+    //{
+    //  const MouseEvent& e = static_cast<const MouseEvent&>(ev);
+    //  onProcessMouseEvent(e);
+    //}
 }
 
 
 void WindowFrame::enterEvent(const EnterEvent& eev)
 {
+    std::clog << "ENTER: " << " frame " << " " << vid() << std::endl;
 }
 
 
@@ -651,17 +659,19 @@ void WindowFrame::leaveEvent(const LeaveEvent& lev)
         if( button->geometry().contains(_lastPointer) )
             button->leaveEvent(lev);
     }
+
+    std::clog << "LEAVE: " << " frame " << " " << vid() << std::endl;
 }
 
 
-bool WindowFrame::mouseEvent(const MouseEvent& mev)
+void WindowFrame::onProcessMouseEvent(const MouseEvent& mev)
 {
-    bool r = onMouseEvent(mev);
+    Visual::onProcessMouseEvent(mev);
+
+    //bool r = onMouseEvent(mev);
     
     Gfx::PointF pos =  _wm->fromGlobal( mev.position() );
     _lastPointer = pos;
-    
-    return r;
 }
 
 

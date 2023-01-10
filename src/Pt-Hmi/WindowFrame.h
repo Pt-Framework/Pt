@@ -200,7 +200,7 @@ class WindowFrame : public Visual
         void leaveEvent(const LeaveEvent& lev);
 
         //! @brief Returns true if window was grabbed for moving or resizing.
-        bool mouseEvent(const MouseEvent& mev);
+        void onProcessMouseEvent(const MouseEvent& mev);
 
         //! @brief Returns true if window was grabbed for moving or resizing.
         bool touchEvent(const TouchEvent& tev);

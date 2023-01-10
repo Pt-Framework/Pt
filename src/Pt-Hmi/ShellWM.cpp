@@ -722,7 +722,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
     // 
     if(_grabbedFrame)
     {
-        _grabbedFrame->mouseEvent(ev);
+        _grabbedFrame->onProcessMouseEvent(ev);
 
         if( ev.isRelease() )
         {
@@ -788,7 +788,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
             }
         }
 
-        windowFrame->mouseEvent(ev);
+        windowFrame->onProcessMouseEvent(ev);
         return true;
     }
 
@@ -798,80 +798,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
 
 void ShellWM::onProcessMouseEvent(const MouseEvent& ev)
 {
-    //
-    // continue press sequence capture
-    // 
-    if(_grabbedFrame)
-    {
-        _grabbedFrame->mouseEvent(ev);
-
-        if( ev.isRelease() )
-        {
-            setCapture(false);
-            _grabbedFrame = 0;
-        }
-
-        return;
-    }
-
-    Gfx::PointF pos = fromGlobal( ev.position() );
-
-    //
-    // hit test
-    //
-    WindowFrame* windowFrame = 0;
-
-    std::vector<WindowFrame*>::const_reverse_iterator rit;
-    for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
-    {
-        WindowFrame* frame = *rit;
-        Window* window = frame->window();
-
-        if( frame->frameRect().contains(pos) && 
-            window->acceptsInput() )
-        {
-            windowFrame = frame;
-            break;
-        }
-    }
-    
-    //
-    // window activation
-    //
-    if( ev.isPress() )
-    {
-        if( ! windowFrame && _activeWindow )
-        {
-            _activeWindow->window()->activate(false);
-        }
-        
-        if( windowFrame && ! windowFrame->window()->isActive() )
-        {
-            windowFrame->window()->activate();
-        }
-    }
-
-    //
-    // window frame
-    //
-    if(windowFrame)
-    {
-        bool isClient = windowFrame->clientRect().contains(pos);
-        if( ! isClient )
-        {
-            if( ev.isPress() )
-            {
-                _grabbedFrame = windowFrame;
-                setCapture(true);
-
-                // TODO: make WindowFrame a proper Visual to handle events
-                //windowFrame->setPointer(true);
-            }
-        }
-
-        windowFrame->mouseEvent(ev);
-        return;
-    }
+    processMouseEvent(ev);
 }
 
 
