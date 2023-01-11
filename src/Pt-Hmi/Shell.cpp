@@ -226,7 +226,8 @@ void Shell::onProcessMouseEvent(const MouseEvent& ev)
 
 void Shell::onProcessTouchEvent(const TouchEvent& ev)
 {
-    if( ! acceptsInput() )
+    bool consumed = _wm.processTouchEvent(ev);
+    if(consumed)
         return;
 
     Widget::onProcessTouchEvent(ev);

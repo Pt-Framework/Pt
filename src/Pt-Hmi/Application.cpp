@@ -347,17 +347,6 @@ void Application::sendMouseEvent(const MouseEvent& ev)
 }
 
 
-void Application::onDispatchMouseEvent(const MouseEvent& ev)
-{
-    // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
-        return;
-
-    onProcessMouseEvent(ev);
-}
-
-
 void Application::onSetPointer(Visual& v, bool isPointer)
 {
     _mainScreen->setPointer(v, isPointer);
@@ -517,6 +506,17 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
 }
 
 
+void Application::onDispatchMouseEvent(const MouseEvent& ev)
+{
+    // make sure receiver still exists
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+    if( it == _visuals.end() )
+        return;
+
+    onProcessMouseEvent(ev);
+}
+
+
 void Application::onProcessMouseEvent(const MouseEvent& ev)
 {
     //std::clog << "APP MOUSE: " << ev.position().x() << ", " << ev.position().y() << std::endl;
@@ -537,7 +537,6 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
         onClosePopups( ev.position() );
     }
 
-    //Visual* capture = ! _capture.empty() ? _capture.back() : 0;
     Visual* capture = this->capture();
 
     //
@@ -587,7 +586,6 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     //
     if(capture)
     {
-        //std::clog << "PROCESS CAPTURED MOUSE: " << capture->name() << std::endl;
         capture->processEvent(ev);
     }
     else
@@ -610,6 +608,8 @@ void Application::onDispatchTouchEvent(const TouchEvent& ev)
 
 void Application::onProcessTouchEvent(const TouchEvent& ev)
 {
+    //std::clog << "APP TOUCH: " << ev.position().x() << ", " << ev.position().y() << std::endl;
+
     Visual* visual = ev.visual();
     Gfx::PointF screenPos = ev.position();
 
@@ -619,25 +619,69 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
     onDetectScroll( visual, screenPos, ev.isPress(), ev.isPressed() );
 
     //
-    // Dispatch touch event
+    // close popups 
     //
-    
+    if( ev.isPress() )
+    {
+        onClosePopups( ev.position() );
+    }
+
+    Visual* capture = this->capture();
+
+    //
     // IME window
+    //
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
-        Gfx::PointF pos = ime->fromGlobal(screenPos);
-        Gfx::RectF rect( ime->size() );
-        if( rect.contains(pos) )
+        Visual* hit = _mainScreen->hitTest(screenPos);
+        if(hit)
         {
-            ime->processEvent(ev);
-            return;
+            if( ime == hit || ime->isAncestorOf(*hit) )
+            {
+                // TODO: also if capture is in a popup that is related to the IME
+                if( capture && capture->isDescendantOf(*ime) )
+                {
+                    capture->processEvent(ev);
+                }
+                else
+                {
+                    ime->processEvent(ev);
+                }
+
+                return;
+            }
         }
     }
 
-    _mainScreen->processEvent(ev);
-}
+    //
+    // hide IME window
+    //
+    if( ev.isPress() )
+    {
+        Visual* hit = _mainScreen->hitTest(screenPos);
+        Visual* receiver = inputMethod().receiver();
+        if(hit && receiver)
+        {
+            bool keepOpen = receiver == hit ||
+                            hit->isDescendantOf(*receiver);
+            if( ! keepOpen )
+                inputMethod().finish();
+        }
+    }
 
+    //
+    // dispatch event
+    //
+    if(capture)
+    {
+        capture->processEvent(ev);
+    }
+    else
+    {
+        _mainScreen->processEvent(ev);
+    }
+}
 
 void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
                                  bool isPress, bool isPressed)

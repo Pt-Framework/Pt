@@ -403,11 +403,8 @@ class PT_HMI_API Widget : public View
         Form*                        _form;
         Responder*                   _nextResponder;
 
-        Visual*                      _pointer;
-        Visual*                      _capture;
         bool                         _isCapture;
 
-        
         bool                         _isLayoutInvalid;
 
         bool                         _visible;

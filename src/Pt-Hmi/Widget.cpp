@@ -43,8 +43,6 @@ Widget::Widget()
 : _parent(0)
 , _form(0)
 , _nextResponder(0)
-, _pointer(0)
-, _capture(0)
 , _isCapture(false)
 , _isLayoutInvalid(true)
 , _visible(true)
@@ -214,12 +212,6 @@ void Widget::onAttach(Widget& widget)
 
 void Widget::onDetach(Widget& widget)
 {
-    if(_pointer == &widget)
-        _pointer = 0;
-
-    if(_capture == &widget)
-        _capture = 0;
-
     std::vector<Widget*>::iterator it;
     it = std::find(_children.begin(), _children.end(), &widget);
     if( it != _children.end() )
@@ -1419,24 +1411,21 @@ void Widget::onProcessTouchEvent(const TouchEvent& ev)
         return;
 
     //
-    // continue press sequence capture
+    // stop capture on press
     // 
-    if(_capture)
+    if(_isCapture)
     {
-        _capture->processEvent(ev);
-
         if( ev.isRelease() )
-            _capture = 0;
-
-        return;
+        {
+            setCapture(false);
+            _isCapture = false;
+        }
     }
-
-    Gfx::PointF pos = fromGlobal( ev.position() );
 
     //
     // hit test
     // 
-    Visual* visual = 0;
+    Gfx::PointF pos = fromGlobal( ev.position() );
 
     std::vector<Widget*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
@@ -1446,29 +1435,21 @@ void Widget::onProcessTouchEvent(const TouchEvent& ev)
         if( widget->geometry().contains(pos) && 
             widget->acceptsInput() )
         {
-            visual = widget;
-            break;
+            widget->processEvent(ev);
+            return;
         }
     }
 
-    _pointer = visual;
-
-    if(visual)
+    //
+    // start capture on press
+    //
+    if( ev.isPress() )
     {
-        //
-        // start press sequence capture
-        // 
-        if( ev.isPress() )
-            _capture = visual;
-
-      visual->processEvent(ev);
-      return;
+        setCapture(true);
+        _isCapture = true;
     }
 
-    //
-    // handle event
-    //
-   Base::onProcessTouchEvent(ev);
+    Base::onProcessTouchEvent(ev);
 }
 
 
@@ -1489,12 +1470,6 @@ void Widget::onProcessScrollEvent(const ScrollEvent& ev)
 {
     if( ! acceptsInput() )
         return;
-
-    //if(_pointer)
-    //{
-    //    _pointer->processEvent(ev);
-    //    return; 
-    //}
 
     scrollEvent(ev);
 }

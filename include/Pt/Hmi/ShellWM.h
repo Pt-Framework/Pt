@@ -64,6 +64,8 @@ class ShellWM : public WindowManager
         void activate(bool active);
 
         bool processMouseEvent(const MouseEvent& ev);
+
+        bool processTouchEvent(const TouchEvent& ev);
     
     public:
         WindowFrame* activeWindow();
@@ -113,6 +115,8 @@ class ShellWM : public WindowManager
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
         Visual* onHitTest(const Gfx::PointF& p);
+
+        WindowFrame* onHitTestFrame(const Gfx::PointF& p);
 
         virtual void onEvent(const Pt::Event& ev);
 

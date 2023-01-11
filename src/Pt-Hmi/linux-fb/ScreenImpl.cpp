@@ -362,7 +362,7 @@ bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
 
 void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
 { 
-
+    _form.processEvent(ev);
 }
 
 

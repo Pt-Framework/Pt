@@ -675,20 +675,20 @@ void WindowFrame::onProcessMouseEvent(const MouseEvent& mev)
 }
 
 
-bool WindowFrame::touchEvent(const TouchEvent& tev)
+void WindowFrame::onProcessTouchEvent(const TouchEvent& tev)
 {
-    bool r = onTouchEvent(tev);
+    Visual::onProcessTouchEvent(tev);
+    
+    //bool r = onTouchEvent(tev);
 
     Gfx::PointF pos =  _window->fromGlobal( tev.position() );
     _lastPointer = pos;
-
-    return r;
 }
 
 
 bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 {
-    Gfx::PointF pos =  _wm->fromGlobal( mev.position() );
+    Gfx::PointF pos = _wm->fromGlobal( mev.position() );
 
     Window* window = checkWindow(pos);
     if(window)
@@ -737,7 +737,7 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 
 bool WindowFrame::onTouchEvent(const TouchEvent& tev)
 {
-    Gfx::PointF pos =  _wm->fromGlobal( tev.position() );
+    Gfx::PointF pos = _wm->fromGlobal( tev.position() );
 
     Window* window = checkWindow( tev.position() );
     if(window)
@@ -746,23 +746,41 @@ bool WindowFrame::onTouchEvent(const TouchEvent& tev)
         return false;
     }
 
-    WindowButton* button = checkButton( tev.position() );
+    WindowButton* button = checkButton(pos);
     if(button)
     {
         button->touchEvent(tev);
         return false;
     }
 
-    bool isDrag = tev.isPress() || tev.isMove();
-    bool isPress = tev.isPress();
-
-    bool isMove = checkMove(tev.position(), isDrag, isPress);
-    if(isMove)
+    if( isTitle(pos) )
     {
-        return true;
+        Application::instance().setCursor( &Cursor::moveCursor() );
+
+        return checkMove(pos, tev.isPressed(), tev.isPress() );
     }
 
-    return checkResize(tev.position(), isDrag, isPress);
+    bool onLeftBorder = isLeftBorder(pos);
+    bool onRightBorder = isRightBorder(pos);
+    bool onTopBorder = isTopBorder(pos);
+    bool onBottomBorder = isBottomBorder(pos);
+
+    if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
+    {
+        if( (onTopBorder && onRightBorder) || (onBottomBorder && onLeftBorder) )
+            Application::instance().setCursor( &Hmi::Cursor::sizeNESWCursor() );
+        else if((onTopBorder && onLeftBorder) || (onBottomBorder && onRightBorder) )
+            Application::instance().setCursor( &Hmi::Cursor::sizeNWSECursor() );
+        else if(onRightBorder || onLeftBorder)
+            Application::instance().setCursor( &Hmi::Cursor::sizeWECursor() );
+        else if(onTopBorder || onBottomBorder)
+            Application::instance().setCursor( &Hmi::Cursor::sizeNSCursor() );
+
+        return checkResize(pos, tev.isPressed(), tev.isPress());
+    }
+
+    Application::instance().setCursor( &Cursor::defaultCursor() );
+    return false;
 }
 
 

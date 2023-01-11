@@ -240,6 +240,28 @@ Visual* ShellWM::onHitTest(const Gfx::PointF& p)
 }
 
 
+WindowFrame* ShellWM::onHitTestFrame(const Gfx::PointF& pos)
+{
+    WindowFrame* windowFrame = 0;
+
+    std::vector<WindowFrame*>::const_reverse_iterator rit;
+    for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
+    {
+        WindowFrame* frame = *rit;
+        Window* window = frame->window();
+
+        if( frame->frameRect().contains(pos) && 
+            window->acceptsInput() )
+        {
+            windowFrame = frame;
+            break;
+        }
+    }
+
+    return windowFrame;
+}
+
+
 void ShellWM::onSetCapture(bool capture)
 {
     Visual::onSetCapture(capture);
@@ -738,21 +760,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
     //
     // hit test
     //
-    WindowFrame* windowFrame = 0;
-
-    std::vector<WindowFrame*>::const_reverse_iterator rit;
-    for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
-    {
-        WindowFrame* frame = *rit;
-        Window* window = frame->window();
-
-        if( frame->frameRect().contains(pos) && 
-            window->acceptsInput() )
-        {
-            windowFrame = frame;
-            break;
-        }
-    }
+    WindowFrame* windowFrame = onHitTestFrame(pos);
     
     //
     // window activation
@@ -789,6 +797,73 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
         }
 
         windowFrame->onProcessMouseEvent(ev);
+        return true;
+    }
+
+    return false;
+}
+
+
+bool ShellWM::processTouchEvent(const TouchEvent& ev)
+{
+    //
+    // continue press sequence capture
+    // 
+    if(_grabbedFrame)
+    {
+        _grabbedFrame->onProcessTouchEvent(ev);
+
+        if( ev.isRelease() )
+        {
+            setCapture(false);
+            _grabbedFrame = 0;
+        }
+
+        return true;
+    }
+
+    Gfx::PointF pos = fromGlobal( ev.position() );
+
+    //
+    // hit test
+    //
+    WindowFrame* windowFrame = onHitTestFrame(pos);
+    
+    //
+    // window activation
+    //
+    if( ev.isPress() )
+    {
+        if( ! windowFrame && _activeWindow )
+        {
+            _activeWindow->window()->activate(false);
+        }
+        
+        if( windowFrame && ! windowFrame->window()->isActive() )
+        {
+            windowFrame->window()->activate();
+        }
+    }
+
+    //
+    // propagate event to window frame
+    //
+    if(windowFrame)
+    {
+        bool isClient = windowFrame->clientRect().contains(pos);
+        if( ! isClient )
+        {
+            if( ev.isPress() )
+            {
+                _grabbedFrame = windowFrame;
+                setCapture(true);
+
+                // TODO: make WindowFrame a proper Visual to handle events
+                //windowFrame->setPointer(true);
+            }
+        }
+
+        windowFrame->onProcessTouchEvent(ev);
         return true;
     }
 
