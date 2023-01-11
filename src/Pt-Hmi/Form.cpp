@@ -992,7 +992,11 @@ bool Form::onLeaveEvent(const LeaveEvent& ev )
 
 void Form::onActivate(Widget& widget, bool active)
 {
-    _active = active ? &widget : 0;
+    if(active)
+        _active = &widget;
+
+    if( ! active && _active == &widget )
+        _active = 0;
 }
 
 
