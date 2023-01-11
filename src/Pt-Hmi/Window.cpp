@@ -1082,7 +1082,6 @@ bool Window::onKeyEvent(const KeyEvent& ev)
 bool Window::onEnterEvent(const EnterEvent& ev)
 {
     //std::clog << "ENTER: " << _title << " " << vid() << std::endl;
-    Application::instance().setCursor(0);
     return true;
 }
 
@@ -1090,7 +1089,6 @@ bool Window::onEnterEvent(const EnterEvent& ev)
 bool Window::onLeaveEvent(const LeaveEvent& ev )
 {
     //std::clog << "LEAVE: " << _title << " " << vid() << std::endl;
-    Application::instance().setCursor(0);
     return true;
 }
 

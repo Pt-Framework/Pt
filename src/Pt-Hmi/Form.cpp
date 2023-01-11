@@ -972,7 +972,6 @@ void Form::onProcessEnterEvent(const EnterEvent& ev)
 bool Form::onEnterEvent(const EnterEvent& ev)
 {
     //std::clog << "ENTER Form: " << name() << " " << vid() << std::endl;
-    Application::instance().setCursor(0);
     return true;
 }
 
@@ -986,7 +985,6 @@ void Form::onProcessLeaveEvent(const LeaveEvent& ev)
 bool Form::onLeaveEvent(const LeaveEvent& ev )
 {
     //std::clog << "LEAVE Form: " << name()  << " " << vid() << std::endl;
-    Application::instance().setCursor(0);
     _pointer = 0;
     return true;
 }
