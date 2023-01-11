@@ -879,6 +879,7 @@ void ShellWM::onProcessMouseEvent(const MouseEvent& ev)
 
 void ShellWM::onProcessTouchEvent(const TouchEvent& ev)
 {
+    processTouchEvent(ev);
 }
 
 
