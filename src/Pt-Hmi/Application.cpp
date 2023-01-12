@@ -557,7 +557,9 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
                 }
                 else
                 {
-                    ime->processEvent(ev);
+                    MouseEvent mev = ev;
+                    mev.setVisual(ime);
+                    _mainScreen->processEvent(mev);
                 }
 
                 return;
@@ -646,7 +648,9 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
                 }
                 else
                 {
-                    ime->processEvent(ev);
+                    TouchEvent tev = ev;
+                    tev.setVisual(ime);
+                    _mainScreen->processEvent(tev);
                 }
 
                 return;
@@ -793,7 +797,12 @@ void Application::onDispatchKeyEvent(const KeyEvent& ev)
 
 void Application::onProcessKeyEvent(const KeyEvent& ev)
 {
-    _mainScreen->processEvent(ev);
+    Visual* visual = ev.visual();
+
+    if(visual)
+        visual->processEvent(ev);
+    else
+        _mainScreen->processEvent(ev);
 }
 
 

@@ -392,9 +392,7 @@ void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
     if( ! isEnabled() )
         return;
     
-    KeyEvent kev = ev;
-    kev.setVisual(&_form);
-    _form.processEvent(kev);
+    _form.processEvent(ev);
 }
 
 

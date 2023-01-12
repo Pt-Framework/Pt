@@ -553,7 +553,11 @@ bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
 
 void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    Visual* visual = ev.visual();
+    if(visual)
+        ev.visual()->processEvent(ev);
+
+    // TODO: dispatch to active HWND
 }
 
 

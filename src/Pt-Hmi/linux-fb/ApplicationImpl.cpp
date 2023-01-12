@@ -247,7 +247,11 @@ void ApplicationImpl::onKeyEvent(const KeyEvent& ev)
     //TODO: VID???
     _lastActivityTime = Pt::System::Clock::getSystemTime();
 
-    Application::instance().processEvent(ev);
+    Screen& screen = Application::instance().screen();
+
+    KeyEvent kev = ev;
+    kev.setVisual(&screen);
+    Application::instance().processEvent(kev);
 }
 
 
