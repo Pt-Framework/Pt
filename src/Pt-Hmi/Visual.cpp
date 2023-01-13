@@ -192,6 +192,19 @@ Visual::Visual()
 , _r1(0)
 { 
     Application::instance().registerVisual(*this);
+
+    _dispatcher += Pt::slot(*this, &Visual::onProcessInvalidateEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessPaintEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessRescaleEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessMoveEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessResizeEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessEnableEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessMouseEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessTouchEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessScrollEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessEnterEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessLeaveEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessKeyEvent);
 }
 
 
@@ -295,36 +308,9 @@ void Visual::onSetCapture(bool capture)
 
 void Visual::onEvent(const Pt::Event& ev)
 {
-    if( ev.typeInfo() == typeid(PaintEvent) )
-    {
-      const PaintEvent& e = static_cast<const PaintEvent&>(ev);
-      onProcessPaintEvent(e);
-    }
-    else if( ev.typeInfo() == typeid(InvalidateEvent) )
-    {
-      const InvalidateEvent& e = static_cast<const InvalidateEvent&>(ev);
-      onProcessInvalidateEvent(e);
-    }
-    else if( ev.typeInfo() == typeid(MoveEvent) )
-    {
-      const MoveEvent& e = static_cast<const MoveEvent&>(ev);
-      onProcessMoveEvent(e);
-    }
-    else if( ev.typeInfo() == typeid(ResizeEvent) )
-    {
-      const ResizeEvent& e = static_cast<const ResizeEvent&>(ev);
-      onProcessResizeEvent(e);
-    }
-    else if( ev.typeInfo() == typeid(EnableEvent) )
-    {
-      const EnableEvent& e = static_cast<const EnableEvent&>(ev);
-      onProcessEnableEvent(e);
-    }
-    else if( ev.typeInfo() == typeid(RescaleEvent) )
-    {
-      const RescaleEvent& e = static_cast<const RescaleEvent&>(ev);
-      onProcessRescaleEvent(e);
-    }
+    _dispatcher.send(ev);
+
+
 }
 
 //
@@ -478,6 +464,52 @@ void Visual::onProcessTouchEvent(const TouchEvent& ev)
 
 
 bool Visual::onTouchEvent(const TouchEvent& ev)
+{
+    return false;
+}
+
+void Visual::onProcessScrollEvent(const ScrollEvent& ev)
+{
+    scrollEvent(ev);
+}
+
+bool Visual::onScrollEvent(const ScrollEvent& ev)
+{
+    return false;
+}
+
+
+void Visual::onProcessEnterEvent(const EnterEvent& ev)
+{
+    enterEvent(ev);
+}
+
+
+bool Visual::onEnterEvent( const EnterEvent& ev)
+{
+    return true;
+}
+
+
+void Visual::onProcessLeaveEvent(const LeaveEvent& ev)
+{
+    leaveEvent(ev);
+}
+
+
+bool Visual::onLeaveEvent(const LeaveEvent& ev)
+{
+    return true;
+}
+
+
+void Visual::onProcessKeyEvent(const KeyEvent& ev)
+{
+    keyEvent(ev);
+}
+
+
+bool Visual::onKeyEvent(const KeyEvent& ev)
 {
     return false;
 }

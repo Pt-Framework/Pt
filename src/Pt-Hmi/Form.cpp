@@ -59,19 +59,6 @@ Form::Form()
 , _active(0)
 , _focusWidget(0)
 {
-    //_eventReceived += Pt::slot(*this, &Form::onProcessPaintEvent);
-    //_eventReceived += Pt::slot(*this, &Form::onProcessRescaleEvent);
-    //_eventReceived += Pt::slot(*this, &Form::onProcessMoveEvent);
-    //_eventReceived += Pt::slot(*this, &Form::onProcessResizeEvent);
-    //_eventReceived += Pt::slot(*this, &Form::onProcessEnableEvent);
-
-    _eventReceived += Pt::slot(*this, &Form::onProcessMouseEvent);
-    _eventReceived += Pt::slot(*this, &Form::onProcessTouchEvent);
-    _eventReceived += Pt::slot(*this, &Form::onProcessScrollEvent);
-    _eventReceived += Pt::slot(*this, &Form::onProcessEnterEvent);
-    _eventReceived += Pt::slot(*this, &Form::onProcessLeaveEvent);
-    _eventReceived += Pt::slot(*this, &Form::onProcessKeyEvent);
-
     _eventReceived += Pt::slot(*this, &Form::onProcessLayoutEvent);
 }
 
@@ -952,32 +939,32 @@ void Form::onProcessScrollEvent(const ScrollEvent& ev)
     //    return; 
     //}
 
-    scrollEvent(ev);
+    Base::onProcessScrollEvent(ev);
 }
 
 
 bool Form::onScrollEvent(const ScrollEvent& ev)
 {
-    return false;
+    return Base::onScrollEvent(ev);
 }
 
 
 void Form::onProcessEnterEvent(const EnterEvent& ev)
 {
-    enterEvent(ev);
+    Base::onProcessEnterEvent(ev);
 }
 
 
 bool Form::onEnterEvent(const EnterEvent& ev)
 {
     //std::clog << "ENTER Form: " << name() << " " << vid() << std::endl;
-    return true;
+    return Base::onEnterEvent(ev);
 }
 
 
 void Form::onProcessLeaveEvent(const LeaveEvent& ev)
 {
-    leaveEvent(ev);
+    Base::onProcessLeaveEvent(ev);
 }
 
 
@@ -985,7 +972,8 @@ bool Form::onLeaveEvent(const LeaveEvent& ev )
 {
     //std::clog << "LEAVE Form: " << name()  << " " << vid() << std::endl;
     _pointer = 0;
-    return true;
+    
+    return Base::onLeaveEvent(ev);
 }
 
 
@@ -1062,14 +1050,14 @@ void Form::onProcessKeyEvent(const KeyEvent& ev)
     }
     else
     {
-        keyEvent(ev);
+        Base::onProcessKeyEvent(ev);
     }
 }
 
 
 bool Form::onKeyEvent(const KeyEvent& ev)
 {
-    return false;
+    return Base::onKeyEvent(ev);
 }
 
 } // namespace

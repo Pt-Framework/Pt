@@ -37,7 +37,6 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Signal.h>
-#include <Pt/Connectable.h>
 #include <vector>
 
 namespace Pt {
@@ -150,7 +149,6 @@ class MenuButton : public WindowButton
 
 
 class WindowFrame : public Visual
-                  , public Pt::Connectable
 {
     public:
         WindowFrame(ShellWM& wm, Window& window);

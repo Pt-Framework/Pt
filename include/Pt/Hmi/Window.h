@@ -53,7 +53,6 @@
 
 #include <Pt/Gfx/Image.h>
 #include <Pt/Signal.h>
-#include <Pt/Connectable.h>
 
 #include <vector>
 
@@ -87,7 +86,6 @@ class WindowImpl
 /** @brief Window base class.
 */
 class PT_HMI_API Window : public Sheet
-                        , public Pt::Connectable
 {
     public:
         typedef Sheet Base;

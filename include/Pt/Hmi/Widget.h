@@ -56,7 +56,6 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
 
-#include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <Pt/Delegate.h>
 
@@ -67,7 +66,6 @@ namespace Hmi {
 class Form;
 
 class PT_HMI_API Widget : public View
-                        , public Pt::Connectable
 {
     typedef View Base;
 

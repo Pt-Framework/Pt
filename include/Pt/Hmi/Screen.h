@@ -35,7 +35,6 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Signal.h>
-#include <Pt/Connectable.h>
 
 #include <vector>
 
@@ -52,7 +51,6 @@ class RescaleEvent;
 /** @brief Screen of a display.
 */
 class PT_HMI_API Screen : public Visual
-                        , public Pt::Connectable
 {
     typedef Visual Base;
 

@@ -61,15 +61,6 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     //std::clog << "SCALING: " << _screenScaling << std::endl;
 
     //ReleaseDC(desktop, screenDC);
-
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessMouseEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessTouchEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessScrollEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
-
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescale Event);
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
 }
 
 
@@ -521,7 +512,7 @@ void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
 { 
     // TODO: possibly pass on to application
-    return false; 
+    return Base::onMouseEvent(ev);
 }
 
 
@@ -534,7 +525,7 @@ void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
 bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
 { 
     // TODO: possibly pass on to application
-    return false; 
+    return Base::onTouchEvent(ev);
 }
 
 
@@ -547,7 +538,7 @@ void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
 bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
 { 
     // TODO: possibly pass on to application
-    return false; 
+    return Base::onScrollEvent(ev);
 }
 
 
@@ -564,7 +555,7 @@ void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 bool ScreenImpl::onKeyEvent(const KeyEvent& ev)
 { 
     // TODO: possibly pass on to application
-    return false; 
+    return Base::onKeyEvent(ev); 
 }
 
 } // namespace

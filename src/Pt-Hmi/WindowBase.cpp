@@ -38,7 +38,6 @@ namespace Hmi {
 /////////////////////////////////////////////////////////////////////////
 
 //class ShellBase : public WindowManager
-//                , public Pt::Connectable
 //{
 //    public:
 //        ShellBase();

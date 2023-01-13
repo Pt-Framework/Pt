@@ -51,10 +51,10 @@ Screen::Screen(ApplicationImpl& app)
     _impl->setParent(this);
     _impl->setNextResponder(this);
 
-    _eventReceived += Pt::slot(*this, &Screen::onProcessMouseEvent);
-    _eventReceived += Pt::slot(*this, &Screen::onProcessTouchEvent);
-    _eventReceived += Pt::slot(*this, &Screen::onProcessScrollEvent);
-    _eventReceived += Pt::slot(*this, &Screen::onProcessKeyEvent);
+    //_eventReceived += Pt::slot(*this, &Screen::onProcessMouseEvent);
+    //_eventReceived += Pt::slot(*this, &Screen::onProcessTouchEvent);
+    //_eventReceived += Pt::slot(*this, &Screen::onProcessScrollEvent);
+    //_eventReceived += Pt::slot(*this, &Screen::onProcessKeyEvent);
 
     //_eventReceived += Pt::slot(*this, &Screen::onProcessRescaleEvent);
     //_eventReceived += Pt::slot(*this, &Screen::onProcessPaintEvent);
@@ -320,7 +320,7 @@ void Screen::onProcessMouseEvent(const MouseEvent& ev)
 
 bool Screen::onMouseEvent(const MouseEvent& ev)
 { 
-    return false; 
+    return Base::onMouseEvent(ev);
 }
 
 
@@ -332,7 +332,7 @@ void Screen::onProcessTouchEvent(const TouchEvent& ev)
 
 bool Screen::onTouchEvent(const TouchEvent& ev)
 { 
-    return false; 
+    return Base::onTouchEvent(ev);
 }
 
 
@@ -350,7 +350,7 @@ void Screen::onProcessScrollEvent(const ScrollEvent& ev)
 
 bool Screen::onScrollEvent(const ScrollEvent& ev)
 { 
-    return false; 
+    return Base::onScrollEvent(ev);
 }
 
 
@@ -362,7 +362,7 @@ void Screen::onProcessKeyEvent(const KeyEvent& ev)
 
 bool Screen::onKeyEvent(const KeyEvent& ev)
 { 
-    return false; 
+    return Base::onKeyEvent(ev);
 }
 
 } // namespace

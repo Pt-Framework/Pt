@@ -35,7 +35,6 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Connectable.h>
 
 namespace Pt {
 
@@ -46,7 +45,6 @@ class WindowFrame;
 class Shell;
 
 class ShellWM : public WindowManager
-              , public Connectable
 {
     typedef WindowManager Base;
 

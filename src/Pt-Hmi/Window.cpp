@@ -91,13 +91,6 @@ Window::Window(WindowManager* parent, WindowType type)
     _eventReceived += Pt::slot(*this, &Window::onProcessCloseEvent);
     _eventReceived += Pt::slot(*this, &Window::onProcessWindowStateEvent);
 
-    _eventReceived += Pt::slot(*this, &Window::onProcessMouseEvent);
-    _eventReceived += Pt::slot(*this, &Window::onProcessTouchEvent);
-    _eventReceived += Pt::slot(*this, &Window::onProcessScrollEvent);
-    _eventReceived += Pt::slot(*this, &Window::onProcessEnterEvent);
-    _eventReceived += Pt::slot(*this, &Window::onProcessLeaveEvent);
-    _eventReceived += Pt::slot(*this, &Window::onProcessKeyEvent);
-
     if(parent)
         setParent(*parent);
 }
@@ -1022,13 +1015,13 @@ void Window::onProcessScrollEvent(const ScrollEvent& ev)
 
 void Window::onProcessEnterEvent(const EnterEvent& ev)
 {
-    enterEvent(ev);
+    Base::onProcessEnterEvent(ev);
 }
 
 
 void Window::onProcessLeaveEvent(const LeaveEvent& ev)
 {
-    leaveEvent(ev);
+    Base::onProcessLeaveEvent(ev);
 }
 
 
@@ -1063,33 +1056,33 @@ bool Window::onTouchEvent(const TouchEvent& ev)
     //if(ev.isPress() )
     //    Application::instance().inputMethod().finish();
 
-    return false;
+    return Base::onTouchEvent(ev);
 }
 
 
 bool Window::onScrollEvent(const ScrollEvent& ev)
 {
-    return false;
+    return Base::onScrollEvent(ev);
 }
 
 
 bool Window::onKeyEvent(const KeyEvent& ev)
 {
-    return false;
+    return Base::onKeyEvent(ev);
 }
 
 
 bool Window::onEnterEvent(const EnterEvent& ev)
 {
     //std::clog << "ENTER: " << _title << " " << vid() << std::endl;
-    return true;
+    return Base::onEnterEvent(ev);
 }
 
 
 bool Window::onLeaveEvent(const LeaveEvent& ev )
 {
     //std::clog << "LEAVE: " << _title << " " << vid() << std::endl;
-    return true;
+    return Base::onLeaveEvent(ev);
 }
 
 } // namespace

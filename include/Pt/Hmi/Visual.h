@@ -39,6 +39,7 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
 #include <Pt/Event.h>
+#include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <Pt/Types.h>
 
@@ -115,6 +116,7 @@ class PT_HMI_API Responder
 ///////////////////////////////////////////////////////////////////////
 
 class PT_HMI_API Visual : public Responder
+                        , public Pt::Connectable
 {
     protected:
         Visual();
@@ -328,17 +330,36 @@ class PT_HMI_API Visual : public Responder
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);
 
-        virtual bool onMouseEvent(const MouseEvent& ev);
-
         virtual void onProcessTouchEvent(const TouchEvent& ev);
 
+        virtual void onProcessScrollEvent(const ScrollEvent& ev);
+
+        virtual void onProcessEnterEvent(const EnterEvent& ev);
+
+        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
+
+        virtual void onProcessKeyEvent(const KeyEvent& ev);
+
+    protected:
+        virtual bool onMouseEvent(const MouseEvent& ev);
+
         virtual bool onTouchEvent(const TouchEvent& ev);
+
+        virtual bool onScrollEvent( const ScrollEvent& ev);
+
+        virtual bool onEnterEvent( const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
+        virtual bool onKeyEvent(const KeyEvent& ev);
 
     private:
         void setR1(void* r)
         { _r1 = r; }
 
     private:
+        Pt::Signal<const Pt::Event&> _dispatcher;
+
         Pt::uint64_t          _vid;
         std::string           _name;
         std::vector<Visual*>  _peers;

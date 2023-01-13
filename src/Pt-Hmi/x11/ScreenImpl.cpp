@@ -57,14 +57,14 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     _size.set(w, h);
     _size /= _scaling;
 
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessMouseEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessTouchEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessScrollEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessMouseEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessTouchEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessScrollEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
 
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
-    _eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
+    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
 }
 
 

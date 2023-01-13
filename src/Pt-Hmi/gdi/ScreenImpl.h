@@ -38,7 +38,6 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Signal.h>
-#include <Pt/Connectable.h>
 
 #include <vector>
 
@@ -56,7 +55,6 @@ class ScrollEvent;
 class KeyEvent;
 
 class ScreenImpl : public WindowManager
-                 , public Connectable
 {
     typedef WindowManager Base;
 

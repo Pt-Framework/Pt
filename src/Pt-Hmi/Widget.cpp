@@ -56,22 +56,8 @@ Widget::Widget()
 , _actionKey(Key::Space)
 , _mnemonic(0)
 {
-    _eventReceived += Pt::slot(*this, &Widget::onProcessMouseEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessTouchEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessScrollEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessEnterEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessLeaveEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessKeyEvent);
-
-    //_eventReceived += Pt::slot(*this, &Widget::onProcessInvalidateEvent);
-    //_eventReceived += Pt::slot(*this, &Widget::onProcessPaintEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessLayoutEvent);
-    //_eventReceived += Pt::slot(*this, &Widget::onProcessRescaleEvent);
-    //_eventReceived += Pt::slot(*this, &Widget::onProcessMoveEvent);
-    //_eventReceived += Pt::slot(*this, &Widget::onProcessResizeEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessShowEvent);
-    //_eventReceived += Pt::slot(*this, &Widget::onProcessEnableEvent);
-    
+    _eventReceived += Pt::slot(*this, &Widget::onProcessLayoutEvent);
     _eventReceived += Pt::slot(*this, &Widget::onProcessFocusEvent);
 }
 
@@ -1474,19 +1460,19 @@ void Widget::onProcessScrollEvent(const ScrollEvent& ev)
     if( ! acceptsInput() )
         return;
 
-    scrollEvent(ev);
+    Base::onProcessScrollEvent(ev);
 }
 
 
 bool Widget::onScrollEvent(const ScrollEvent& ev)
 {
-    return false;
+    return Base::onScrollEvent(ev);
 }
 
 
 void Widget::onProcessEnterEvent(const EnterEvent& ev)
 {
-    enterEvent(ev);
+    Base::onProcessEnterEvent(ev);
 }
 
 
@@ -1494,13 +1480,14 @@ bool Widget::onEnterEvent( const EnterEvent& ev)
 {
     //std::clog << "ENTER: " << typeid(*this).name() << " " << vid() << std::endl;
     Application::instance().setCursor( cursor() );
-    return true;
+
+    return Base::onEnterEvent(ev);
 }
 
 
 void Widget::onProcessLeaveEvent(const LeaveEvent& ev)
 {
-    leaveEvent(ev);
+    Base::onProcessLeaveEvent(ev);
 }
 
 
@@ -1508,7 +1495,8 @@ bool Widget::onLeaveEvent(const LeaveEvent& ev)
 {
     //std::clog << "LEAVE: " << typeid(*this).name() << " " << vid() << std::endl;
     Application::instance().setCursor(0);
-    return true;
+    
+    return Base::onLeaveEvent(ev);
 }
 
 
@@ -1517,7 +1505,7 @@ void Widget::onProcessKeyEvent(const KeyEvent& ev)
     if( ! acceptsInput() )
         return;
 
-    keyEvent(ev);
+    Base::onProcessKeyEvent(ev);
 }
 
 
@@ -1529,7 +1517,7 @@ bool Widget::onKeyEvent(const KeyEvent& ev)
         return true;
     }
 
-    return false;
+    return Base::onKeyEvent(ev);
 }
 
 } // namespace

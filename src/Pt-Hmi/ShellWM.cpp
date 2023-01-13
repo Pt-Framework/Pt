@@ -88,16 +88,6 @@ ShellWM::ShellWM()
 , _textColor( Gfx::Color::fromRgb8(255, 255, 255) )
 , _inactiveTextColor( Gfx::Color::fromRgb8(50, 50, 50) )
 {
-    _eventReceived += Pt::slot(*this, &ShellWM::onProcessMouseEvent);
-    _eventReceived += Pt::slot(*this, &ShellWM::onProcessTouchEvent);
-    _eventReceived += Pt::slot(*this, &ShellWM::onProcessScrollEvent);
-    _eventReceived += Pt::slot(*this, &ShellWM::onProcessEnterEvent);
-    _eventReceived += Pt::slot(*this, &ShellWM::onProcessLeaveEvent);
-    _eventReceived += Pt::slot(*this, &ShellWM::onProcessKeyEvent);
-
-    //_eventReceived += Pt::slot(*this, &ShellWM::onProcessRescaleEvent);
-    //_eventReceived += Pt::slot(*this, &ShellWM::onProcessPaintEvent);
-    //_eventReceived += Pt::slot(*this, &ShellWM::onProcessEnableEvent);
 }
 
 
@@ -885,11 +875,13 @@ void ShellWM::onProcessTouchEvent(const TouchEvent& ev)
 
 void ShellWM::onProcessEnterEvent(const EnterEvent& ev)
 {
+    Base::onProcessEnterEvent(ev);
 }
 
 
 void ShellWM::onProcessLeaveEvent(const LeaveEvent& ev)
 {
+    Base::onProcessLeaveEvent(ev);
 }
 
 

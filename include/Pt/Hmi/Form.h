@@ -32,7 +32,6 @@
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/Sheet.h>
 #include <Pt/Gfx/PaintRegion.h>
-#include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 
 #include <vector>
@@ -56,7 +55,6 @@ namespace Hmi {
 //
 
 class PT_HMI_API Form : public View
-                      , public Pt::Connectable
 {
     friend class Widget;
 
