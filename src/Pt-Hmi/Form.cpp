@@ -722,7 +722,6 @@ void Form::onShow(Widget& widget, bool isShown)
 
 void Form::onMove(Widget& widget, const Gfx::PointF& pos)
 {
-    widget.setSurface(_surface, pos);
 }
 
 

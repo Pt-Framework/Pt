@@ -913,9 +913,6 @@ void Widget::move(const Gfx::PointF& pos)
 
 void Widget::onMove(Widget& widget, const Gfx::PointF& pos)
 {
-    Gfx::PointF surfacePos = _surface.area().topLeft() + pos;
-    Gfx::PaintSurface* surface = _surface.surface();
-    widget.setSurface(surface, surfacePos);
 }
 
 
@@ -927,6 +924,12 @@ void Widget::onMove(Widget& widget, const Gfx::PointF& pos)
 
 void Widget::onMoveEvent(const MoveEvent& ev)
 {
+    Gfx::PointF delta = ev.position() - position();
+    Gfx::PointF surfacePos = _surface.area().topLeft() + delta;
+
+    Gfx::PaintSurface* surface = _surface.surface();
+    setSurface(surface, surfacePos);
+
     View::onMoveEvent(ev);
 
 //    if( _position == ev.position() )
