@@ -227,11 +227,11 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
         block.setLineSpacing(surface().align(_font.size() / 3));
         block.layout(_text, _font);
 
-        //w = surface().align(block.size().width());
-        //h = surface().align(block.size().height());
-
         w = block.size().width() + surface().toLogical(0.5);
         h = block.size().height() + surface().toLogical(0.5);
+
+        w = surface().align(w);
+        h = surface().align(h);
     }
     else
     {
