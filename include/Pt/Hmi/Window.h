@@ -220,8 +220,6 @@ class PT_HMI_API Window : public Sheet
 
         void setBackground(const Gfx::Brush& b);
 
-        Pt::Signal<const Pt::Event&>& eventReceived();
-
     public:
         WindowImpl* impl();
 
@@ -391,7 +389,6 @@ class PT_HMI_API Window : public Sheet
 
     private:
         WindowImpl*                  _impl;
-        Pt::Signal<const Pt::Event&> _eventReceived;
 
         PixmapSurface                _surface;
         Responder*                   _nextResponder;

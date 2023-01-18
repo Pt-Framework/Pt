@@ -177,7 +177,6 @@ Gfx::PointF ScreenImpl::onFromParent(const Gfx::PointF& pos) const
 void ScreenImpl::onEvent(const Event& ev)
 {
     Base::onEvent(ev);
-    _eventReceived.send(ev);
 }
 
 

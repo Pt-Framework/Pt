@@ -259,11 +259,6 @@ class PT_HMI_API Widget : public View
 
         void setMinimumHeight(double h);
 
-        //
-        // event processing
-        //
-        Pt::Signal<const Pt::Event&>& eventReceived();
-
     protected:
         virtual void onAddWidget(Widget& w);
 
@@ -391,8 +386,6 @@ class PT_HMI_API Widget : public View
         virtual void onRaise(Widget& w);
 
     private:
-        Pt::Signal<const Pt::Event&> _eventReceived;
-
         Gfx::PaintRegion             _surface;
 
         View*                        _parent;

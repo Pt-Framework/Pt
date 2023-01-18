@@ -197,8 +197,6 @@ class ScreenImpl : public WindowManager
         void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        Pt::Signal<const Pt::Event&> _eventReceived;
-
         Screen*                      _parent;
         std::vector<Window*>         _windows;
 

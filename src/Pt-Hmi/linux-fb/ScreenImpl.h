@@ -203,8 +203,6 @@ class ScreenImpl : public Sheet
                      const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op);
 
     private:
-        Pt::Signal<const Pt::Event&> _eventReceived;
-
         FrameBuffer&                 _frameBuffer;
         PixmapSurface                _surface;
 

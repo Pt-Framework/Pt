@@ -50,14 +50,6 @@ Screen::Screen(ApplicationImpl& app)
 {
     _impl->setParent(this);
     _impl->setNextResponder(this);
-
-    //_eventReceived += Pt::slot(*this, &Screen::onProcessMouseEvent);
-    //_eventReceived += Pt::slot(*this, &Screen::onProcessTouchEvent);
-    //_eventReceived += Pt::slot(*this, &Screen::onProcessScrollEvent);
-    //_eventReceived += Pt::slot(*this, &Screen::onProcessKeyEvent);
-
-    //_eventReceived += Pt::slot(*this, &Screen::onProcessRescaleEvent);
-    //_eventReceived += Pt::slot(*this, &Screen::onProcessPaintEvent);
 }
 
 
@@ -210,7 +202,6 @@ Gfx::PointF Screen::onFromGlobal(const Gfx::PointF& pos) const
 void Screen::onEvent(const Event& ev)
 {
     Base::onEvent(ev);
-    _eventReceived.send(ev);
 }
 
 ///////////////////////////////////////////////////////////////////////

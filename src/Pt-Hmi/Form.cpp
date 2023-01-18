@@ -46,8 +46,7 @@ namespace Pt {
 namespace Hmi {
 
 Form::Form()
-: _eventReceived()
-, _parent(0)
+: _parent(0)
 , _mainWidget(0)
 , _surface(0)
 , _nextResponder(0)
@@ -59,7 +58,7 @@ Form::Form()
 , _active(0)
 , _focusWidget(0)
 {
-    _eventReceived += Pt::slot(*this, &Form::onProcessLayoutEvent);
+    eventReceived() += Pt::slot(*this, &Form::onProcessLayoutEvent);
 }
 
 
@@ -222,8 +221,6 @@ Gfx::PointF Form::onFromParent(const Gfx::PointF& pos) const
 void Form::onEvent(const Pt::Event& ev)
 {
     View::onEvent(ev);
-
-    _eventReceived.send(ev);
 }
 
 

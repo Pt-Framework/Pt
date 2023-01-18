@@ -234,6 +234,8 @@ class PT_HMI_API Visual : public Responder
             onEvent(ev);
         }
 
+        Pt::Signal<const Pt::Event&>& eventReceived();
+
         /** @brief Pointer input capture.
         */
         void setCapture(bool capture)

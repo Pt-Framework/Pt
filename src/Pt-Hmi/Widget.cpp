@@ -56,9 +56,9 @@ Widget::Widget()
 , _actionKey(Key::Space)
 , _mnemonic(0)
 {
-    _eventReceived += Pt::slot(*this, &Widget::onProcessShowEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessLayoutEvent);
-    _eventReceived += Pt::slot(*this, &Widget::onProcessFocusEvent);
+    eventReceived() += Pt::slot(*this, &Widget::onProcessShowEvent);
+    eventReceived() += Pt::slot(*this, &Widget::onProcessLayoutEvent);
+    eventReceived() += Pt::slot(*this, &Widget::onProcessFocusEvent);
 }
 
 
@@ -1269,12 +1269,6 @@ void Widget::setMinimumHeight(double h)
 }
 
 
-Pt::Signal<const Pt::Event&>& Widget::eventReceived()
-{
-    return _eventReceived;
-}
-
-
 Visual* Widget::onGetParent() const
 {
     return _parent;
@@ -1322,8 +1316,6 @@ Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
 void Widget::onEvent(const Pt::Event& ev)
 {
     View::onEvent(ev);
-
-    _eventReceived.send(ev);
 }
 
 

@@ -86,10 +86,10 @@ Window::Window(WindowManager* parent, WindowType type)
     //Form::setSurface(&_surface);
     _form.setParent(this);
 
-    _eventReceived += Pt::slot(*this, &Window::onProcessShowEvent);
-    _eventReceived += Pt::slot(*this, &Window::onProcessActivateEvent);
-    _eventReceived += Pt::slot(*this, &Window::onProcessCloseEvent);
-    _eventReceived += Pt::slot(*this, &Window::onProcessWindowStateEvent);
+    eventReceived() += Pt::slot(*this, &Window::onProcessShowEvent);
+    eventReceived() += Pt::slot(*this, &Window::onProcessActivateEvent);
+    eventReceived() += Pt::slot(*this, &Window::onProcessCloseEvent);
+    eventReceived() += Pt::slot(*this, &Window::onProcessWindowStateEvent);
 
     if(parent)
         setParent(*parent);
@@ -188,12 +188,6 @@ void Window::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
     invalidate();
-}
-
-
-Pt::Signal<const Pt::Event&>& Window::eventReceived()
-{
-    return _eventReceived;
 }
 
 
@@ -381,7 +375,6 @@ Gfx::PointF Window::onFromParent(const Gfx::PointF& pos) const
 void Window::onEvent(const Pt::Event& ev)
 {
     Base::onEvent(ev);
-    _eventReceived.send(ev);
 }
 
 ///////////////////////////////////////////////////////////////////////

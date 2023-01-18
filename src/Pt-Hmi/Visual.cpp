@@ -309,8 +309,12 @@ void Visual::onSetCapture(bool capture)
 void Visual::onEvent(const Pt::Event& ev)
 {
     _dispatcher.send(ev);
+}
 
 
+Pt::Signal<const Pt::Event&>& Visual::eventReceived()
+{
+    return _dispatcher;
 }
 
 //

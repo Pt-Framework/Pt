@@ -283,7 +283,6 @@ class PT_HMI_API Form : public View
         void moveFocus(Iter begin, Iter end);
     
     private:
-        Pt::Signal<const Pt::Event&> _eventReceived;
         Sheet*                       _parent;
         Widget*                      _mainWidget;
 
