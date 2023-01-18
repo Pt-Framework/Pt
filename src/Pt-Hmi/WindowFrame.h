@@ -150,6 +150,21 @@ class MenuButton : public WindowButton
 
 class WindowFrame : public Visual
 {
+    enum FrameItem
+    {
+        OnNone,
+        OnTitle,
+        OnButton,
+        OnFrameLeft,
+        OnFrameTopLeft,
+        OnFrameTop,
+        OnFrameTopRight,
+        OnFrameRight,
+        OnFrameBottomRight,
+        OnFrameBottom,
+        OnFrameBottomLeft
+    };
+
     public:
         WindowFrame(ShellWM& wm, Window& window);
 
@@ -263,6 +278,8 @@ class WindowFrame : public Visual
         //! @brief Returns true if window was grabbed for moving or resizing.
         bool checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
+        void setCurrentFrameItem(FrameItem item);
+
     private:
         ShellWM*       _wm;
         Window*        _window;
@@ -281,6 +298,8 @@ class WindowFrame : public Visual
         bool           _isRightResizing;
         bool           _isTopResizing;
         bool           _isBottomResizing;
+
+        FrameItem      _currentFrameItem;
 
         std::vector<WindowButton*> _buttons;
 

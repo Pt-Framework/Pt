@@ -137,8 +137,6 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles,
 // ApplicationImpl
 /////////////////////////////////////////////////////////////////////////////
 
-static const Cursor noCursor;
-
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
 , _instanceHandle(NULL)
@@ -146,7 +144,7 @@ ApplicationImpl::ApplicationImpl()
 , _pointerWindow(NULL)
 , _defaultCursorHandle(0)
 , _cursorHandle(0)
-, _currentCursor(&noCursor)
+, _currentCursor(0)
 {
 #ifdef NDEBUG  
     FreeConsole();
@@ -191,8 +189,12 @@ ApplicationImpl::~ApplicationImpl()
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
 {      
+    //std::clog << "CURSOR SET " << cursor << std::endl;
+
     if(_currentCursor == cursor)
         return;
+
+    //std::clog << "### CURSOR CHANGED ###: " << cursor << std::endl;
 
     _currentCursor = cursor;
 
@@ -618,13 +620,9 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
         case WM_MOUSELEAVE:
             //std::clog << "pointer leaves window: " << w->title() << std::endl;
 
-            //LeaveEvent ev(*w);
-            //w->processEvent(ev);
-
-            Application::instance().screen().setPointer(0);
-
             // entered screen
-            _currentCursor = &noCursor;
+            Application::instance().setCursor(0);
+            Application::instance().screen().setPointer(0);
             _pointerWindow = NULL;
 
             handled = true;  
@@ -772,36 +770,15 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     _mouseEvent.setPosition( w.toGlobal(pos) );
     _mouseEvent.setVisual(&w);
 
-    //if( GetCapture() != NULL )
-    //{
-    //    POINT p;
-    //    p.x = xPos;
-    //    p.y = yPos;
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
 
-    //    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    //    ClientToScreen(_popup, &p);
-
-    //    HWND hwnd = WindowFromPoint(p);
-    //    
-    //    Window* win = findWindow(hwnd);
-    //    if(win)
-    //    {
-    //      //char text[20];
-    //      //GetWindowText(hwnd, text, 20); 
-    //      //std::clog << "WindowFromPoint: " << text << std::endl;
-    //      
-    //      _mouseEvent.setVisual(win);
-    //    }
-    //}
-
-    if( ! _pointerWindow )
+    if( _pointerWindow != impl->hwnd() )
     {
-        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
         _pointerWindow = impl->hwnd();
-        //std::clog << "pointer enters window: " << w.title() << " " << w.name() << std::endl;
         
-        //EnterEvent eev(w);
-        //w.processEvent(eev);
+        //std::clog << "pointer enters window: " << w.title() << " " << w.name() << std::endl;
+        Application::instance().setCursor(0);
+        Application::instance().screen().setPointer(&w);
         
         // enable WM_MOUSELEAVE
         TRACKMOUSEEVENT tme = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, _pointerWindow, 0 };

@@ -111,8 +111,6 @@ void WindowButton::leaveEvent(const LeaveEvent& lev)
 
 void WindowButton::mouseEvent(const MouseEvent& mev)
 {
-    Application::instance().setCursor(0);
-
     bool isPressed = mev.isPress() || (_isPressed && mev.isPressed());
 
     if(_isPressed != isPressed)
@@ -407,6 +405,7 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
 , _isRightResizing(false)
 , _isTopResizing(false)
 , _isBottomResizing(false)
+, _currentFrameItem(OnNone)
 {
     _maximizeButton.setParent(*this);
     _maximizeButton.clicked() += Pt::slot(*this, &WindowFrame::onMaximize);
@@ -628,39 +627,32 @@ void WindowFrame::onEvent(const Pt::Event& ev)
 {
     //Visual::onEvent(ev);
 
-    //if( ev.typeInfo() == typeid(MouseEvent) )
-    //{
-    //  const MouseEvent& e = static_cast<const MouseEvent&>(ev);
-    //  onProcessMouseEvent(e);
-    //}
+    if( ev.typeInfo() == typeid(EnterEvent) )
+    {
+      const EnterEvent& e = static_cast<const EnterEvent&>(ev);
+      enterEvent(e);
+    } 
+    else if( ev.typeInfo() == typeid(LeaveEvent) )
+    {
+      const LeaveEvent& e = static_cast<const LeaveEvent&>(ev);
+      leaveEvent(e);
+    }
 }
 
 
 void WindowFrame::enterEvent(const EnterEvent& eev)
 {
     //std::clog << "ENTER: " << " frame " << " " << vid() << std::endl;
+
+    _currentFrameItem = OnNone;
 }
 
 
 void WindowFrame::leaveEvent(const LeaveEvent& lev)
 {
-    if(_isClient)
-    {
-        _isClient = false;
-        LeaveEvent lev(*_window);
-        _window->processEvent(lev);
-    }
-
-    std::vector<WindowButton*>::iterator it;
-    for(it = _buttons.begin(); it != _buttons.end(); ++it)
-    {
-        WindowButton* button = *it;
-
-        if( button->geometry().contains(_lastPointer) )
-            button->leaveEvent(lev);
-    }
-
     //std::clog << "LEAVE: " << " frame " << " " << vid() << std::endl;
+
+    _currentFrameItem = OnNone;
 }
 
 
@@ -701,12 +693,12 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
     WindowButton* button = checkButton(pos);
     if(button)
     {
+        setCurrentFrameItem(OnButton);
         button->mouseEvent(mev);
     }
     else if( isTitle(pos) )
     {
-        Application::instance().setCursor( &Cursor::moveCursor() );
-
+        setCurrentFrameItem(OnTitle);
         checkMove(pos, mev.isPressed(), mev.isPress() );
     }
     else
@@ -718,20 +710,28 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 
         if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
         {
-            if( (onTopBorder && onRightBorder) || (onBottomBorder && onLeftBorder) )
-                Application::instance().setCursor( &Hmi::Cursor::sizeNESWCursor() );
-            else if((onTopBorder && onLeftBorder) || (onBottomBorder && onRightBorder) )
-                Application::instance().setCursor( &Hmi::Cursor::sizeNWSECursor() );
-            else if(onRightBorder || onLeftBorder)
-                Application::instance().setCursor( &Hmi::Cursor::sizeWECursor() );
-            else if(onTopBorder || onBottomBorder)
-                Application::instance().setCursor( &Hmi::Cursor::sizeNSCursor() );
+            if(onTopBorder && onLeftBorder) 
+                setCurrentFrameItem(OnFrameTopLeft);
+            else if(onTopBorder && onRightBorder) 
+                setCurrentFrameItem(OnFrameTopRight);
+            else if(onTopBorder)
+                setCurrentFrameItem(OnFrameTop);
+            else if(onBottomBorder && onLeftBorder) 
+                setCurrentFrameItem(OnFrameBottomLeft);
+            else if(onBottomBorder && onRightBorder) 
+                setCurrentFrameItem(OnFrameBottomRight);
+            else if(onBottomBorder)
+                setCurrentFrameItem(OnFrameBottom);
+            else if(onLeftBorder)
+                setCurrentFrameItem(OnFrameLeft);
+            else if(onRightBorder)
+                setCurrentFrameItem(OnFrameRight);
 
             checkResize(pos, mev.isPressed(), mev.isPress());
         }
         else
         {
-            Application::instance().setCursor( &Cursor::defaultCursor() );
+            setCurrentFrameItem(OnNone);
         }
     }
 
@@ -747,12 +747,12 @@ bool WindowFrame::onTouchEvent(const TouchEvent& tev)
     WindowButton* button = checkButton(pos);
     if(button)
     {
+        setCurrentFrameItem(OnButton);
         button->touchEvent(tev);
     }
     else if( isTitle(pos) )
     {
-        Application::instance().setCursor( &Cursor::moveCursor() );
-
+        setCurrentFrameItem(OnTitle);
         checkMove(pos, tev.isPressed(), tev.isPress() );
     }
     else
@@ -764,20 +764,28 @@ bool WindowFrame::onTouchEvent(const TouchEvent& tev)
 
         if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
         {
-            if( (onTopBorder && onRightBorder) || (onBottomBorder && onLeftBorder) )
-                Application::instance().setCursor( &Hmi::Cursor::sizeNESWCursor() );
-            else if((onTopBorder && onLeftBorder) || (onBottomBorder && onRightBorder) )
-                Application::instance().setCursor( &Hmi::Cursor::sizeNWSECursor() );
-            else if(onRightBorder || onLeftBorder)
-                Application::instance().setCursor( &Hmi::Cursor::sizeWECursor() );
-            else if(onTopBorder || onBottomBorder)
-                Application::instance().setCursor( &Hmi::Cursor::sizeNSCursor() );
+            if(onTopBorder && onLeftBorder) 
+                setCurrentFrameItem(OnFrameTopLeft);
+            else if(onTopBorder && onRightBorder) 
+                setCurrentFrameItem(OnFrameTopRight);
+            else if(onTopBorder)
+                setCurrentFrameItem(OnFrameTop);
+            else if(onBottomBorder && onLeftBorder) 
+                setCurrentFrameItem(OnFrameBottomLeft);
+            else if(onBottomBorder && onRightBorder) 
+                setCurrentFrameItem(OnFrameBottomRight);
+            else if(onBottomBorder)
+                setCurrentFrameItem(OnFrameBottom);
+            else if(onLeftBorder)
+                setCurrentFrameItem(OnFrameLeft);
+            else if(onRightBorder)
+                setCurrentFrameItem(OnFrameRight);
 
             checkResize(pos, tev.isPressed(), tev.isPress());
         }
         else
         {
-            Application::instance().setCursor( &Cursor::defaultCursor() );
+            setCurrentFrameItem(OnNone);
         }
     }
 
@@ -786,11 +794,53 @@ bool WindowFrame::onTouchEvent(const TouchEvent& tev)
 }
 
 
+void WindowFrame::setCurrentFrameItem(FrameItem item)
+{
+    if(_currentFrameItem == item)
+        return;
+
+    switch(item)
+    {
+      case OnFrameLeft:
+      case OnFrameRight:
+          Application::instance().setCursor( &Hmi::Cursor::sizeWECursor() );
+          break;
+
+      case OnFrameTopLeft:
+      case OnFrameBottomRight:
+          Application::instance().setCursor( &Hmi::Cursor::sizeNWSECursor() );
+          break;
+
+      case OnFrameTop:
+      case OnFrameBottom:
+          Application::instance().setCursor( &Hmi::Cursor::sizeNSCursor() );
+          break;
+
+      case OnFrameBottomLeft:
+      case OnFrameTopRight:
+          Application::instance().setCursor( &Hmi::Cursor::sizeNESWCursor() );
+          break;
+
+      case OnTitle:
+          Application::instance().setCursor( &Cursor::moveCursor() );
+          break;
+
+      case OnButton:
+          Application::instance().setCursor( &Cursor::defaultCursor() );
+          break;
+
+      default:
+          Application::instance().setCursor( &Cursor::defaultCursor() );
+    }
+    
+    _currentFrameItem = item;
+}
+
+
 bool WindowFrame::isTitle(const Gfx::PointF& p) const
 {
     bool isResizing = _isLeftResizing || _isRightResizing ||
                       _isTopResizing || _isBottomResizing;
-
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
 

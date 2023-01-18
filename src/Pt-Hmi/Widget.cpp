@@ -1144,7 +1144,7 @@ void Widget::onRaise(Widget& w)
 const Cursor* Widget::cursor() const
 {
     if( ! _hasCursor )
-        return 0;
+        return &Cursor::defaultCursor();
 
     return &_cursor;
 }
@@ -1494,7 +1494,7 @@ void Widget::onProcessLeaveEvent(const LeaveEvent& ev)
 bool Widget::onLeaveEvent(const LeaveEvent& ev)
 {
     //std::clog << "LEAVE: " << typeid(*this).name() << " " << vid() << std::endl;
-    Application::instance().setCursor(0);
+    Application::instance().setCursor( &Cursor::defaultCursor() );
     
     return Base::onLeaveEvent(ev);
 }
