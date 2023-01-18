@@ -86,8 +86,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         virtual Gfx::Image toImage() const;
 
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
-
     protected:
         virtual double onScaleFactor() const
         {

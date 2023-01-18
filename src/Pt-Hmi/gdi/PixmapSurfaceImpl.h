@@ -67,6 +67,8 @@ class PixmapSurfaceImpl
         
         const Gfx::ImageFormat& format() const;
 
+        void setScaleFactor(double scaling);
+
         void setClip( const Gfx::RectF& clip);
 
         void resetClip();
@@ -123,13 +125,9 @@ class PixmapSurfaceImpl
 
         static void setDefaultFont(const std::string& name);
 
-        static std::string& getDefaultFont();
-
         static std::vector<std::string> fontNames();
 
         static void setFontDir(const System::Path& path);
-
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
         HDC deviceContext() const;
 
@@ -142,6 +140,7 @@ class PixmapSurfaceImpl
 
     private:
         Gfx::SizeF     _size;
+        double         _scaleFactor;
         PaintData*     _paintData;
         Gfx::Painter*  _painter;
         HDC            _dc;

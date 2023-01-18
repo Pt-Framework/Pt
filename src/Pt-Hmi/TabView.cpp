@@ -164,7 +164,7 @@ Gfx::SizeF TabBar::onMeasure(const SizePolicy& policy)
     if( ! _renderer)
         return Gfx::SizeF();
 
-    return _renderer->measureTabs(_tabs, _font);
+    return _renderer->measureTabs(surface(), _tabs, _font);
 }
 
 
@@ -175,7 +175,7 @@ void TabBar::onLayout(const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
-    _renderer->layoutTabs(_tabs, rect, _font);
+    _renderer->layoutTabs(surface(), _tabs, rect, _font);
 }
 
 

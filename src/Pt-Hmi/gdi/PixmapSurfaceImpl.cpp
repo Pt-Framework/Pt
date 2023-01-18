@@ -42,18 +42,6 @@ using std::min;
 
 namespace {
 
-std::string getWin32DefaultFont()
-{
-    HDC dc = GetDC(NULL);
-
-    std::vector<TCHAR> buffer(32);
-    GetTextFace(dc, buffer.size(), &buffer[0]);
-
-    ReleaseDC(NULL, dc);
-
-    return Pt::win32::toMultiByte(&buffer[0]);
-}
-
 #ifdef _WIN32_WCE
 
 static int CALLBACK EnumFontsProc(LOGFONT* logFont, TEXTMETRIC* physFont, DWORD type, LPARAM param)
@@ -160,6 +148,7 @@ namespace Hmi {
 
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(0, 0)
+, _scaleFactor(1.0)
 , _paintData(0)
 , _painter(0)
 , _dc(0)
@@ -257,6 +246,12 @@ const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 }
 
 
+void PixmapSurfaceImpl::setScaleFactor(double scaling)
+{
+    _scaleFactor = scaling;
+}
+
+
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
     _paintData->setClip(clipRect);
@@ -340,9 +335,25 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
     
+    XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
+    GetWorldTransform(_dc, &oldTrans);
+
+    Gfx::Transform tt;
+    tt.scale(_scaleFactor, _scaleFactor);
+
+    XFORM newTrans = { static_cast<FLOAT>( tt.m11() ), 
+                       static_cast<FLOAT>( tt.m12() ),
+                       static_cast<FLOAT>( tt.m21() ), 
+                       static_cast<FLOAT>( tt.m22() ),
+                       static_cast<FLOAT>( tt.dx() ),  
+                       static_cast<FLOAT>( tt.dy() ) };
+
+    SetWorldTransform(_dc, &newTrans);
+
     SIZE textSize;
     GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
     
+    SetWorldTransform(_dc, &oldTrans);
 
     long asc = tm.tmAscent;
     long des = tm.tmDescent;
@@ -357,6 +368,8 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     fm.setCapHeight(cap);
     fm.setLeading(exl);
     fm.setWidth(textSize.cx);
+
+    //std::clog << "### " << text.narrow() << " " << fm.width() << std::endl;
     return fm;
 }
 
@@ -969,20 +982,13 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
 
 std::string PixmapSurfaceImpl::defaultFont()
 {
-    return getDefaultFont();
+    return PaintData::getDefaultFont();
 }
 
 
 void PixmapSurfaceImpl::setDefaultFont(const std::string& f)
 {
-    getDefaultFont() = f;
-}
-
-
-std::string& PixmapSurfaceImpl::getDefaultFont()
-{
-    static std::string _defaultFont = getWin32DefaultFont();
-    return _defaultFont;
+    PaintData::getDefaultFont() = f;
 }
 
 
@@ -1011,12 +1017,6 @@ std::vector<std::string> PixmapSurfaceImpl::fontNames()
 
 void PixmapSurfaceImpl::setFontDir(const System::Path& path)
 {
-}
-
-
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
-{
-    return PaintData::fontMetrics(font, text);
 }
 
 

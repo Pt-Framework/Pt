@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/String.h>
 #include <vector>
@@ -66,19 +67,17 @@ class PT_HMI_API TextLine
 
         const Pt::String& text() const;
 
-        void setText(const Pt::String& text, const Gfx::Font& font);
+        //void setText(const Pt::String& text, const Gfx::Font& font);
 
-        void setText(const Pt::String& text, const Gfx::Font& font,
-                     const Gfx::FontMetrics& tm);
+        void setText(const Pt::String& text, const Gfx::FontMetrics& tm);
 
-        double cursorToX(std::size_t n) const;
+        double cursorToX(const Gfx::Painter& painter, std::size_t n) const;
 
-        std::size_t xToCursor(double x) const;
+        std::size_t xToCursor(const Gfx::Painter& painter, double x) const;
 
     private:
         Gfx::PointF      _position;
         Pt::String       _text;
-        Gfx::Font        _font;
         Gfx::FontMetrics _textMetrics;
 };
 
@@ -129,12 +128,10 @@ class PT_HMI_API TextBlock
 
         ConstIterator end() const;
 
-        void layout(const Pt::String& text, const Gfx::Font& font);
+        void layout(const Gfx::Painter& painter, const Pt::String& text);
 
     private:
-        void addLine(const Pt::String& line, 
-                     const Gfx::Font& font, 
-                     const Gfx::FontMetrics& tm);
+        void addLine(const Pt::String& line, const Gfx::FontMetrics& tm);
 
         double align(double v) const
         {

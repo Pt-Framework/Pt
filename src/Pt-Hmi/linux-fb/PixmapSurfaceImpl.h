@@ -71,6 +71,10 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
             Gfx::PaintSurface::finish();
         }
 
+        void setScaleFactor(double scaling)
+        {
+        }
+
         void set(const Gfx::Image& s)
         {
             _image = s;

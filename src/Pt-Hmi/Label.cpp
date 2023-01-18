@@ -222,10 +222,12 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 
         // TODO: set max width if text wrap is enabled
         // NOTE: abbreviate text if text wrap is off and width is too small
+        Gfx::Painter _painter( surface() );
+        _painter.setFont(_font);
 
         block.setMaxWidth(policy.size().width());
         block.setLineSpacing(surface().align(_font.size() / 3));
-        block.layout(_text, _font);
+        block.layout(_painter, _text);
 
         w = block.size().width() + surface().toLogical(0.5);
         h = block.size().height() + surface().toLogical(0.5);
@@ -250,10 +252,13 @@ void Label::layoutText()
 {
     Adjustment a = adjustment();
 
+    Gfx::Painter _painter( surface() );
+    _painter.setFont(_font);
+
     _textBlock.setMaxWidth( size().width() - padding().leftRight() );
     _textBlock.setAdjustment(a);
     _textBlock.setLineSpacing(surface().align(_font.size() / 3.0));
-    _textBlock.layout(_text, _font);
+    _textBlock.layout(_painter, _text);
 
     Gfx::PointF pos;
 

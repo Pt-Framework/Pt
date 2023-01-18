@@ -908,18 +908,20 @@ void TabViewRenderer::render(const TabView& tv,
 }  
 
 
-Gfx::SizeF TabViewRenderer::measureTabs(const std::vector<TabItem>& tabs,
+Gfx::SizeF TabViewRenderer::measureTabs(Gfx::PaintSurface& surface,
+                                        const std::vector<TabItem>& tabs,
                                         const Gfx::Font& font) const
 {
-    return onMeasureTabs(tabs, font);
+    return onMeasureTabs(surface, tabs, font);
 }
 
 
-void TabViewRenderer::layoutTabs(std::vector<TabItem>& tabs,
+void TabViewRenderer::layoutTabs(Gfx::PaintSurface& surface,
+                                 std::vector<TabItem>& tabs,
                                  const Gfx::RectF& rect, 
                                  const Gfx::Font& font) const
 {
-    onLayoutTabs(tabs, rect, font);
+    onLayoutTabs(surface, tabs, rect, font);
 }
 
 

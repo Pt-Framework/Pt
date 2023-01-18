@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Hmi/LineEditor.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -130,18 +131,6 @@ const Pt::String& LineEditor::displayText() const
 }
 
 
-const Gfx::Font& LineEditor::font() const
-{
-    return _font;
-}
-
-
-void LineEditor::setFont(const Gfx::Font& font)
-{
-    _font = font;
-}
-
-
 std::size_t LineEditor::cursorPosition() const
 {
     return _cursorPosition;
@@ -219,15 +208,16 @@ void LineEditor::backspace()
 }
 
 
-void LineEditor::layout(TextLine& line)
+void LineEditor::layout(Gfx::Painter& painter, TextLine& line)
 {
-    layout( displayText(), line );
+    layout( painter, displayText(), line );
 }
 
 
-void LineEditor::layout(const Pt::String& text, TextLine& line)
+void LineEditor::layout(Gfx::Painter& painter, const Pt::String& text, TextLine& line)
 {
-    line.setText(text, _font);
+    Gfx::FontMetrics fm = painter.fontMetrics(text);
+    line.setText(text, fm);
 
     double lineX = 0;
     double lineY = (_size.height() - line.maxHeight()) / 2;
@@ -250,7 +240,7 @@ void LineEditor::layout(const Pt::String& text, TextLine& line)
     
     if( line.width() >= _size.width() )
     {
-        double cursorX = line.cursorToX(_cursorPosition);
+        double cursorX = line.cursorToX(painter, _cursorPosition);
         double maxX = _size.width() + _scrollOffset;
 
         if( cursorX > maxX )

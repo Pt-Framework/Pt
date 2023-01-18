@@ -310,12 +310,13 @@ void LineEdit::onInvalidate()
 
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 
-    _editor.setFont(_font);
+    Gfx::Painter _painter( surface() );
+    _painter.setFont(_font);
 
     if( _editor.isEmpty() && ! hasFocus() )
-        _editor.layout(_placeholderText, _line);
+        _editor.layout(_painter, _placeholderText, _line);
     else
-        _editor.layout(_line);
+        _editor.layout(_painter, _line);
 }
 
 
@@ -328,7 +329,7 @@ void LineEdit::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
     Gfx::Painter painter(surface);
     painter.setClip(rect);
-    
+
     //
     // text box
     //
@@ -348,7 +349,8 @@ void LineEdit::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
     if( _isEditable && hasFocus() )
     {
-        double cursorX = _line.cursorToX( _editor.cursorPosition() );
+        painter.setFont(_font);
+        double cursorX = _line.cursorToX( painter, _editor.cursorPosition() );
         cursorX += _line.position().x();
         
         double cursorWidth = 1;
@@ -395,10 +397,13 @@ void LineEdit::onResizeEvent(const ResizeEvent& ev)
     editSize.addWidth(-3 * _spacing);
     _editor.setSize(editSize);
 
+    Gfx::Painter _painter( surface() );
+    _painter.setFont(_font);
+
     if( _editor.isEmpty() && ! hasFocus() )
-        _editor.layout(_placeholderText, _line);
+        _editor.layout(_painter, _placeholderText, _line);
     else
-        _editor.layout(_line);
+        _editor.layout(_painter, _line);
 }
 
 
@@ -471,7 +476,10 @@ bool LineEdit::onMouseEvent(const MouseEvent& mev)
 
     if(_isEditable)
     {
-        std::size_t n = _line.xToCursor( mev.x() );
+        Gfx::Painter _painter( surface() );
+        _painter.setFont(_font);
+
+        std::size_t n = _line.xToCursor( _painter, mev.x() );
         _editor.setCursorPosition(n);
         update();
 
@@ -494,7 +502,10 @@ bool LineEdit::onTouchEvent(const TouchEvent& tev)
 
     if(_isEditable)
     {
-        std::size_t n = _line.xToCursor( tev.x() );
+        Gfx::Painter _painter( surface() );
+        _painter.setFont(_font);
+
+        std::size_t n = _line.xToCursor( _painter, tev.x() );
         _editor.setCursorPosition(n);
         update();
 

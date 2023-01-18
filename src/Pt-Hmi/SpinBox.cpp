@@ -567,10 +567,12 @@ void SpinBox::onLayout(const Gfx::RectF& rect)
     Gfx::SizeF editSize = _textBox.size();
     editSize.subWidth(5);  // TODO: cursor
 
-    _editor.setFont(_font);
+    Gfx::Painter _painter( surface() );
+    _painter.setFont(_font);
+
     _editor.setPosition( _textBox.topLeft() );
     _editor.setSize( _textBox.size() );
-    _editor.layout(_line);
+    _editor.layout(_painter, _line);
 }
 
 
@@ -622,7 +624,8 @@ void SpinBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
     if( _isEditable && hasFocus() )
     {
-        double cursorX = _line.cursorToX( _editor.cursorPosition() );
+        painter.setFont(_font);
+        double cursorX = _line.cursorToX( painter, _editor.cursorPosition() );
         cursorX += _line.position().x();
         
         cursorRect.set(Gfx::PointF( cursorX, _line.position().y() ),
@@ -753,7 +756,10 @@ bool SpinBox::onMouseEvent(const MouseEvent& ev)
 
     if(_isEditable)
     {
-        std::size_t n = _line.xToCursor( ev.x() );
+        Gfx::Painter _painter( surface() );
+        _painter.setFont(_font);
+
+        std::size_t n = _line.xToCursor( _painter, ev.x() );
         _editor.setCursorPosition(n);
         update();
             
@@ -773,7 +779,10 @@ bool SpinBox::onTouchEvent(const TouchEvent& ev)
 
     if(_isEditable)
     {
-        std::size_t n = _line.xToCursor( ev.x() );
+        Gfx::Painter _painter( surface() );
+        _painter.setFont(_font);
+
+        std::size_t n = _line.xToCursor( _painter, ev.x() );
         _editor.setCursorPosition(n);
         update();
 

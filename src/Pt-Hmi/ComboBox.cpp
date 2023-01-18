@@ -382,8 +382,9 @@ void ComboBox::onInvalidate()
     _renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush,
                        _pen, _font, _textPen);
     
-    _editor.setFont(_font);
-    _editor.layout(_line);
+    Gfx::Painter _painter( surface() );
+    _painter.setFont(_font);
+    _editor.layout(_painter, _line);
 }
 
 
@@ -419,7 +420,8 @@ void ComboBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
     if( _isEditable && hasFocus() )
     {
-        double cursorX = _line.cursorToX( _editor.cursorPosition() );
+        painter.setFont(_font);
+        double cursorX = _line.cursorToX( painter, _editor.cursorPosition() );
         cursorX += _line.position().x();
         
         double cursorWidth = 1;
@@ -466,7 +468,10 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
     editSize.addWidth(-3 * _spacing); // left, right, cursor
     _editor.setSize(editSize);
 
-    _editor.layout(_line);
+    Gfx::Painter _painter( surface() );
+    _painter.setFont(_font);
+
+    _editor.layout(_painter, _line);
 }
 
 
@@ -576,7 +581,10 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
     }
     else if(_isEditable)
     {
-        std::size_t n = _line.xToCursor( ev.x() );
+        Gfx::Painter _painter( surface() );
+        _painter.setFont(_font);
+
+        std::size_t n = _line.xToCursor( _painter, ev.x() );
         _editor.setCursorPosition(n);
         repaint( bounds() );
             
@@ -602,7 +610,10 @@ bool ComboBox::onTouchEvent(const TouchEvent& ev)
     }
     else if(_isEditable)
     {
-        std::size_t n = _line.xToCursor( ev.x() );
+        Gfx::Painter _painter( surface() );
+        _painter.setFont(_font);
+
+        std::size_t n = _line.xToCursor( _painter, ev.x() );
         _editor.setCursorPosition(n);
         repaint( bounds() );
 

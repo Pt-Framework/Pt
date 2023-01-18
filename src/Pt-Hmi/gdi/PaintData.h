@@ -252,119 +252,22 @@ class PaintData : public Gfx::PaintData
             return _font;
         }
         
-#ifndef PT_HMI_GDIPLUS
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
-                                            const Pt::String& text)
-        {   
-            HDC dc = GetDC(NULL);
-            HFONT newFont = getFont(font);
-            HGDIOBJ oldFont = SelectObject(dc, newFont);
-
-            TEXTMETRIC tm;
-            GetTextMetrics(dc, &tm);
-
-            std::wstring wtext;
-            text.toUtf16( std::back_inserter(wtext) );
-    
-            SIZE textSize;
-            GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
-    
-            SelectObject(dc, oldFont);
-            DeleteObject(newFont);
-            ReleaseDC(NULL, dc);
-
-            long asc = tm.tmAscent;
-            long des = tm.tmDescent;
-            long inl = tm.tmInternalLeading;
-            long cap = tm.tmAscent - tm.tmInternalLeading;
-            long exl = tm.tmExternalLeading;
-            long lh = asc + des + exl;
-
-            Gfx::FontMetrics fm;
-            fm.setAscent(asc);
-            fm.setDescent(des);
-            fm.setCapHeight(cap);
-            fm.setLeading(exl);
-            fm.setWidth(textSize.cx);
-            return fm;
-        }
-
-#else
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
-                                            const Pt::String& text)
-        {   
-            std::wstring wtext;
-            text.toUtf16( std::back_inserter(wtext) );
-
-            HDC dc = GetDC(NULL);
-            HFONT newFont = getFont(font);
-            HGDIOBJ oldFont = SelectObject(dc, newFont);
-
-            Gdiplus::Font gdiFont(dc);
-            Gdiplus::Graphics graphics(dc);
-            graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
-            graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
-
-            const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
-
-            Gdiplus::FontFamily family;
-            gdiFont.GetFamily(&family);
-
-            Gdiplus::REAL lineSpacingF = gdiFont.GetHeight(graphics.GetDpiY());
-            Gdiplus::REAL sizeUnits = gdiFont.GetSize();
-
-            UINT16 ascentUnits = family.GetCellAscent(gdiFont.GetStyle());
-            UINT16 descentUnits = family.GetCellDescent(gdiFont.GetStyle());
-            UINT16 lineSpacingUnits = family.GetLineSpacing(gdiFont.GetStyle());
-            UINT16 emHeightUnits = family.GetEmHeight(gdiFont.GetStyle());
-
-            Gdiplus::REAL pixelsPerUnit = lineSpacingF / lineSpacingUnits;
-            Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
-            Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
-            Gdiplus::REAL heightF = ascentF + descentF;
-            Gdiplus::REAL emHeightF = emHeightUnits * pixelsPerUnit;
-
-            Gdiplus::REAL asc = ascentF;
-            Gdiplus::REAL des = descentF;
-            Gdiplus::REAL cap = emHeightF - descentF;
-            Gdiplus::REAL inl = ascentF - cap;
-            Gdiplus::REAL exl = lineSpacingF - heightF;
-            Gdiplus::REAL lh = asc + des + exl;
-
-            Gdiplus::RectF textRect;
-            graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
-                                   Gdiplus::PointF(0, 0), format, &textRect);
-
-            int dpix = GetDeviceCaps(dc, LOGPIXELSX);
-            double scaling = 96.0 / dpix;
-
-            SelectObject(dc, oldFont);
-            DeleteObject(newFont);
-            ReleaseDC(NULL, dc);
-
-            Gfx::FontMetrics fm;
-            fm.setAscent(asc * scaling);
-            fm.setDescent(des * scaling);
-            fm.setCapHeight(cap * scaling);
-            fm.setLeading(exl* scaling);
-            fm.setWidth(textRect.Width * scaling);
-            return fm;
-        }
-#endif
         static std::string defaultFont()
         {
             return getDefaultFont();
         }
+
 
         static void setDefaultFont(const std::string& f)
         {
             getDefaultFont() = f;
         }
 
+
         static std::string& getDefaultFont()
-        { 
-            static std::string _defaultFont;
-            return _defaultFont; 
+        {
+            static std::string _defaultFont = getWin32DefaultFont();
+            return _defaultFont;
         }
     
     private:
@@ -479,6 +382,18 @@ class PaintData : public Gfx::PaintData
 
             HFONT hf = CreateFontIndirect(&lf);
             return hf;
+        }
+
+        static std::string getWin32DefaultFont()
+        {
+            HDC dc = GetDC(NULL);
+
+            std::vector<TCHAR> buffer(32);
+            GetTextFace(dc, buffer.size(), &buffer[0]);
+
+            ReleaseDC(NULL, dc);
+
+            return Pt::win32::toMultiByte(&buffer[0]);
         }
 
     private:

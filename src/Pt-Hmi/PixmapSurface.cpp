@@ -76,9 +76,10 @@ void PixmapSurface::clear(const Gfx::Color& c)
 }
 
 
-void PixmapSurface::setScaleFactor(double v)
+void PixmapSurface::setScaleFactor(double scaling)
 {
-    _scaleFactor = v;
+    _scaleFactor = scaling;
+    _impl->setScaleFactor(scaling);
 }
 
 
@@ -358,12 +359,6 @@ void PixmapSurface::setDefaultFont(const std::string& name)
 std::vector<std::string> PixmapSurface::fontNames()
 {
     return PixmapSurfaceImpl::fontNames();
-}
-
-
-Gfx::FontMetrics PixmapSurface::fontMetrics(const Gfx::Font& font, const Pt::String& text)
-{
-    return PixmapSurfaceImpl::fontMetrics(font, text);
 }
 
 } // namespace

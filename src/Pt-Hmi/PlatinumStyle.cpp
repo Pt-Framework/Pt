@@ -1399,7 +1399,8 @@ void PlatinumTabViewRenderer::onRender(const TabView& tv,
 }
 
 
-Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(const std::vector<TabItem>& tabs,
+Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(Gfx::PaintSurface& surface,
+                                                  const std::vector<TabItem>& tabs,
                                                   const Gfx::Font& font) const
 {
     Spacing spacing(font.size() / 2, font.size() / 2 );
@@ -1407,10 +1408,13 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(const std::vector<TabItem>& ta
     Gfx::SizeF s;
     s.setHeight(font.size() * 2.4);
 
+    Gfx::Painter _painter(surface);
+    _painter.setFont(font);
+
     std::vector<TabItem>::const_iterator it;
     for(it = tabs.begin(); it != tabs.end(); ++it)
     {
-        Gfx::FontMetrics fm = PixmapSurface::fontMetrics( font, it->text() );
+        Gfx::FontMetrics fm = _painter.fontMetrics( it->text() );
         s.addWidth( fm.width() + spacing.leftRight() );
     }
 
@@ -1418,7 +1422,8 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(const std::vector<TabItem>& ta
 }
 
 
-void PlatinumTabViewRenderer::onLayoutTabs(std::vector<TabItem>& tabs,
+void PlatinumTabViewRenderer::onLayoutTabs(Gfx::PaintSurface& surface,
+                                           std::vector<TabItem>& tabs,
                                            const Gfx::RectF& rect, 
                                            const Gfx::Font& font) const
 {
@@ -1426,10 +1431,13 @@ void PlatinumTabViewRenderer::onLayoutTabs(std::vector<TabItem>& tabs,
 
     Gfx::PointF tabPos;
 
+    Gfx::Painter _painter(surface);
+    _painter.setFont(font);
+
     std::vector<TabItem>::iterator it;
     for(it = tabs.begin(); it != tabs.end(); ++it)
     {
-        Gfx::FontMetrics fm = PixmapSurface::fontMetrics( font, it->text() );
+        Gfx::FontMetrics fm = _painter.fontMetrics( it->text() );
 
         double tabWidth = fm.width() + spacing.leftRight();
         
@@ -1478,7 +1486,7 @@ void PlatinumTabViewRenderer::onRenderTabs(const std::vector<TabItem>& tabs,
 
         painter.setFont(font);
 
-        Gfx::FontMetrics fm = PixmapSurface::fontMetrics( font, it->text() );
+        Gfx::FontMetrics fm = painter.fontMetrics( it->text() );
         
         double textX = it->geometry().left() + spacing.left();
         double textY = it->geometry().height() / 2 + fm.ascent() / 2;

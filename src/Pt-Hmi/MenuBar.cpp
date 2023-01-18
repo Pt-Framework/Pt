@@ -190,7 +190,10 @@ void MenuBarItem::onInvalidate()
 
 Gfx::SizeF MenuBarItem::onMeasure(const SizePolicy& policy)
 {
-    Gfx::FontMetrics fm = PixmapSurface::fontMetrics(_font, _text);
+    Gfx::Painter _painter( surface() );
+    _painter.setFont(_font);
+
+    Gfx::FontMetrics fm = _painter.fontMetrics(_text);
 
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );

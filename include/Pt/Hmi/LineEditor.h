@@ -69,10 +69,6 @@ class LineEditor
 
         const Pt::String& displayText() const;
 
-        const Gfx::Font& font() const;
-
-        void setFont(const Gfx::Font& font);
-
         std::size_t cursorPosition() const;
         
         void setCursorPosition(std::size_t n);
@@ -91,9 +87,9 @@ class LineEditor
 
         void backspace();
 
-        void layout(TextLine& line);
+        void layout(Gfx::Painter& painter, TextLine& line);
 
-        void layout(const Pt::String& text, TextLine& line);
+        void layout(Gfx::Painter& painter, const Pt::String& text, TextLine& line);
 
     private:
         Gfx::PointF _position;
@@ -102,7 +98,6 @@ class LineEditor
         bool        _isMasked;
         Pt::String  _text;
         Pt::String  _displayText;
-        Gfx::Font   _font;
         std::size_t _cursorPosition;
         double      _scrollOffset;
 };

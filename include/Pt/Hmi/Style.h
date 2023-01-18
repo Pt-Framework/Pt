@@ -1073,10 +1073,12 @@ class PT_HMI_API TabViewRenderer : public Style::Facet
                     const Gfx::Brush& foreground,
                     const Gfx::Pen& contour) const;
 
-        Gfx::SizeF measureTabs(const std::vector<TabItem>& tabs,
+        Gfx::SizeF measureTabs(Gfx::PaintSurface& surface,
+                               const std::vector<TabItem>& tabs,
                                const Gfx::Font& font) const;
 
-        void layoutTabs(std::vector<TabItem>& tabs,
+        void layoutTabs(Gfx::PaintSurface& surface,
+                        std::vector<TabItem>& tabs,
                         const Gfx::RectF& rect, 
                         const Gfx::Font& font) const;
 
@@ -1113,10 +1115,12 @@ class PT_HMI_API TabViewRenderer : public Style::Facet
                               const Gfx::Brush& foreground,
                               const Gfx::Pen& contour) const = 0;
 
-        virtual Gfx::SizeF onMeasureTabs(const std::vector<TabItem>& tabs,
+        virtual Gfx::SizeF onMeasureTabs(Gfx::PaintSurface& surface,
+                                         const std::vector<TabItem>& tabs,
                                          const Gfx::Font& font) const = 0;
 
-        virtual void onLayoutTabs(std::vector<TabItem>& tabs,
+        virtual void onLayoutTabs(Gfx::PaintSurface& surface,
+                                  std::vector<TabItem>& tabs,
                                   const Gfx::RectF& rect, 
                                   const Gfx::Font& font) const = 0;
         

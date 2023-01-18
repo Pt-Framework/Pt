@@ -239,7 +239,10 @@ void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 
 Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 {
-    Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, _text );
+    Gfx::Painter _painter( surface() );
+    _painter.setFont(_font);
+
+    Gfx::FontMetrics fm = _painter.fontMetrics(_text);
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
