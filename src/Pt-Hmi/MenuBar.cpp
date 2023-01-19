@@ -221,6 +221,7 @@ void MenuBarItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     //
     // item text
     //
+    painter.setFont(_font);
     Gfx::FontMetrics fm = painter.fontMetrics(_text);
     double textX = padding().left();
     double textY = (size().height() - fm.height()) / 2;
