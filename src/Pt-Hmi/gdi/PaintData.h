@@ -266,7 +266,7 @@ class PaintData : public Gfx::PaintData
 
         static std::string& getDefaultFont()
         {
-            static std::string _defaultFont = getWin32DefaultFont();
+            static std::string _defaultFont;// = getWin32DefaultFont();
             return _defaultFont;
         }
     
