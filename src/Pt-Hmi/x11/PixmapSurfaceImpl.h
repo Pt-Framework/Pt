@@ -143,9 +143,6 @@ class PaintData : public Gfx::PaintData
 
         _XftFont* font();
 
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
-                                            const Pt::String& text);
-
     protected:
         void create();
         
@@ -178,6 +175,9 @@ class PixmapSurfaceImpl
         
         void finish();
 
+        void setScaleFactor(double scaling)
+        {
+        }
 
         void setClip( const Gfx::RectF& clip);
 
@@ -245,8 +245,6 @@ class PixmapSurfaceImpl
         static std::vector<std::string> fontNames();
 
         static void setFontDir(const System::Path& path);
-
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
         ::Drawable drawable()
         {

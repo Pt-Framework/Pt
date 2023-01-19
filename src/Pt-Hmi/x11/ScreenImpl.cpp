@@ -42,29 +42,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _parent(0)
 , _nextResponder(0)
 , _screenScaling(1.0)
-, _scaling(1.0)
-, _enabled(true)
-, _enabledState(true)
 {
-    _screenScaling = 1.0;
-    _scaling = _screenScaling;
-
-    ::Display* display = app.display();
-    ::Screen * screen = XDefaultScreenOfDisplay(display);
-    int w = WidthOfScreen(screen);
-    int h = HeightOfScreen(screen);
-
-    _size.set(w, h);
-    _size /= _scaling;
-
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessMouseEvent);
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessTouchEvent);
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessScrollEvent);
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessKeyEvent);
-
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessRescaleEvent);
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessPaintEvent);
-    //_eventReceived += Pt::slot(*this, &ScreenImpl::onProcessEnableEvent);
 }
 
 
@@ -80,6 +58,20 @@ ScreenImpl::~ScreenImpl()
 void ScreenImpl::setParent(Screen* screen)
 {
     _parent = screen;
+
+    if(_parent)
+    {
+        ::Display* display = app.display();
+        ::Screen * screen = XDefaultScreenOfDisplay(display);
+        int w = WidthOfScreen(screen);
+        int h = HeightOfScreen(screen);
+    
+        Gfx::SizeF size(w, h);
+        size /= scaleFactor();
+
+        ResizeEvent rev(*_parent, size);
+        _parent->processEvent(rev);
+    }
 }
 
 
@@ -106,25 +98,6 @@ const std::vector<Window*>& ScreenImpl::windows() const
     return _windows;
 }
 
-
-const Gfx::SizeF& ScreenImpl::size() const
-{
-    return _size;
-}
-
-
-double ScreenImpl::scaleFactor() const
-{
-    return _scaling;
-}
-
-
-void ScreenImpl::repaint(const Gfx::RectF& rect)
-{
-    if(_parent)
-        _parent->repaint(rect);
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Responder
 ///////////////////////////////////////////////////////////////////////
@@ -147,6 +120,7 @@ Visual* ScreenImpl::onGetParent() const
 Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
     // TODO: stacking order, visibility...
+    //       XQueryPointer
 
     std::vector<Window*>::reverse_iterator it;
     for(it = _windows.rbegin(); it != _windows.rend(); ++it)
@@ -186,6 +160,13 @@ void ScreenImpl::onEvent(const Event& ev)
     Base::onEvent(ev);
 }
 
+
+void ScreenImpl::onRepaintRequest(const Gfx::RectF& rect)
+{
+    if(_parent)
+        _parent->repaint(rect);
+}
+
 ///////////////////////////////////////////////////////////////////////
 // WindowManager
 ///////////////////////////////////////////////////////////////////////
@@ -216,7 +197,7 @@ void ScreenImpl::onDetach(Window& w)
 
 void ScreenImpl::onInit(Window& w)
 {
-    RescaleEvent ev(w, _scaling);
+    RescaleEvent ev( w, scaleFactor() );
     w.processEvent(ev);
     //Application::instance().loop().commitEvent(ev);
 }
@@ -268,7 +249,7 @@ void ScreenImpl::onActivate(Window& w, bool active)
 }
 
 
-void ScreenImpl::onEnable(Window& w, bool enable)
+void ScreenImpl::onEnableRequest(Window& w, bool enable)
 {
     MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
     impl->enable(enable);
@@ -351,16 +332,6 @@ void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
 }
 
 
-void ScreenImpl::onFrameChanged(Window& w)
-{
-}
-
-
-void ScreenImpl::onStateChanged(Window& w)
-{
-}
-
-
 void ScreenImpl::onClosing(Window& w)
 {
     //MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
@@ -385,13 +356,9 @@ void ScreenImpl::onClosing(Window& w)
 
 void ScreenImpl::setCapture(Visual* capture)
 {
-    //if( ! capture )
-    {
-        //std::clog << "RELEASE POINTER " << std::endl;
-        Display* display = Application::instance().impl()->display();
-        ::XUngrabPointer(display, CurrentTime);
-        //return;
-    }
+    //std::clog << "RELEASE POINTER " << std::endl;
+    Display* display = Application::instance().impl()->display();
+    ::XUngrabPointer(display, CurrentTime);
 
     if( ! capture )
         return;
@@ -425,22 +392,36 @@ void ScreenImpl::setCapture(Visual* capture)
 
 void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    onRescaleEvent(ev);
-}
+    double scaling = ev.scaleFactor() * _screenScaling;
 
-
-void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
-{
-    _scaling = ev.scaleFactor() * _screenScaling;
+    RescaleEvent rev(*this, scaling);
+    Base::onProcessRescaleEvent(rev);
 
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         Window* window = *wit;
 
-        RescaleEvent ev(*window, _scaling);
+        RescaleEvent ev(*window, scaling);
         window->processEvent(ev);
     }
+}
+
+
+void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
+
+    ::Display* display = app.display();
+    ::Screen * screen = XDefaultScreenOfDisplay(display);
+    int w = WidthOfScreen(screen);
+    int h = HeightOfScreen(screen);
+    
+    Gfx::SizeF size(w, h);
+    size /= scaleFactor();
+
+    ResizeEvent rev(*_parent, size);
+    _parent->processEvent(rev);
 }
 
 
@@ -457,10 +438,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& screenRect = ev.rect();
 
-    //
-    // paint screen
-    //
-    onPaintEvent(ev);
+    Base::onProcessPaintEvent(ev);
 
     //
     // paint child windows
@@ -487,6 +465,8 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 
 void ScreenImpl::onPaintEvent(const PaintEvent& ev)
 {
+    Base::onPaintEvent(ev);
+
     const Gfx::RectF& rect = ev.rect();
     onPaint(rect);
 }
@@ -497,33 +477,27 @@ void ScreenImpl::onPaint(const Gfx::RectF& rect)
 }
 
 
-bool ScreenImpl::isEnabled() const
-{
-    return _enabledState;
-}
-
-
 void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
 {
-    bool wasEnabled = isEnabled();
-
-    _enabledState = ev.enabled();
-
-    if( wasEnabled != isEnabled() )
-    {
-        onEnable( ev.enabled() );
-    }
+    Base::onProcessEnableEvent(ev);
 
     for( size_t i = 0; i < _windows.size(); ++i)
     {
         Window* w = _windows[i];
-        onEnable( *w, ev.enabled() );
+        onEnableRequest( *w, ev.enabled() );
     }
+}
+
+
+void ScreenImpl::onEnableEvent(const EnableEvent& ev)
+{    
+    Base::onEnableEvent(ev);
 }
 
 
 void ScreenImpl::onEnable(bool e)
 {
+    Base::onEnable(e);
 }
 
 
@@ -536,7 +510,7 @@ void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
 {
     // TODO: possibly pass on to application
-    return false;
+    return Base::onMouseEvent(ev);
 }
 
 
@@ -549,7 +523,7 @@ void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
 bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
 {
     // TODO: possibly pass on to application
-    return false;
+    return Base::onTouchEvent(ev);
 }
 
 
@@ -562,20 +536,24 @@ void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
 bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
 {
     // TODO: possibly pass on to application
-    return false;
+    return Base::onScrollEvent(ev);
 }
 
 
 void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    Visual* visual = ev.visual();
+    if(visual)
+        ev.visual()->processEvent(ev);
+
+    // TODO: dispatch to active Window handle
 }
 
 
 bool ScreenImpl::onKeyEvent(const KeyEvent& ev)
 {
     // TODO: possibly pass on to application
-    return false;
+    return Base::onKeyEvent(ev); 
 }
 
 } // namespace

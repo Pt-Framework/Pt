@@ -419,35 +419,6 @@ _XftFont* PaintData::font()
 }
 
 
-Gfx::FontMetrics PaintData::fontMetrics(const Gfx::Font& font, 
-                                          const Pt::String& text)
-{
-#ifndef _AIX
-    _XftFont* xftFont = openFont(font);
-    if( ! xftFont )
-        return Gfx::FontMetrics();
-
-    Display* display = Application::instance().impl()->display();
-    
-    XGlyphInfo info;
-    XftTextExtents32(display, xftFont, (XftChar32*)text.c_str(), text.size(), &info);
-    
-    // TODO: use XftLockFace() to get FT_face instead
-
-    XftFontClose(display, xftFont);
-
-    Gfx::FontMetrics fm;
-    fm.setAscent(xftFont->ascent);
-    fm.setDescent(xftFont->descent);
-    fm.setCapHeight(xftFont->ascent - xftFont->descent / 2.0);
-    fm.setLeading(xftFont->descent / 2.0);
-    fm.setWidth(info.width);
-    return fm;
-#else
-    return Gfx::FontMetrics();
-#endif     
-}
-
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(10, 10)
 , _paintData(0)
@@ -625,13 +596,13 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     XftTextExtents32(display, font, (XftChar32*)text.c_str(), text.size(), &info);
 
     Gfx::FontMetrics fm;
-
     fm.setAscent(font->ascent);
     fm.setDescent(font->descent);
+    fm.setCapHeight(font->ascent - font->descent / 2.0);
+    fm.setLeading(font->descent / 2.0);
     fm.setWidth(info.width);
-    fm.setCapHeight(2);
 
-    return fm; //Gfx::FontMetrics(font->ascent, font->descent, info.width, font->height);
+    return fm;
 #else
     return Gfx::FontMetrics();
 #endif     
@@ -1004,12 +975,6 @@ std::vector<std::string> PixmapSurfaceImpl::fontNames()
 
 void PixmapSurfaceImpl::setFontDir(const System::Path& path)
 {
-}
-
-
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
-{
-    return PaintData::fontMetrics(font, text);
 }
 
 } // namespace

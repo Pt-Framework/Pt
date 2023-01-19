@@ -217,6 +217,37 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
+void MainWindowImpl::setAbove(bool isTop)
+{
+    HWND insertBelow = isTop ? HWND_TOPMOST : HWND_NOTOPMOST;
+    
+    SetWindowPos(_hwnd, insertBelow, 0, 0, 0, 0, 
+                 SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+}
+
+
+void MainWindowImpl::setState(const WindowState& s)
+{
+    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+
+    switch(s)
+    {
+        case WindowState::Normal:
+        break;
+
+        case WindowState::Maximized:
+            style |= WS_MAXIMIZE;
+        break;
+
+        case WindowState::Minimized:
+            style |= WS_MINIMIZE;
+        break;
+    }
+
+    SetWindowLong(_hwnd, GWL_STYLE, style); 
+}
+
+
 void MainWindowImpl::setTitle(const std::string& text)
 {
     SetWindowText(_hwnd, text.c_str());
@@ -258,37 +289,6 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 
     SendMessage(_hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
     DestroyIcon(hIcon);   
-}
-
-
-void MainWindowImpl::setAbove(bool isTop)
-{
-    HWND insertBelow = isTop ? HWND_TOPMOST : HWND_NOTOPMOST;
-    
-    SetWindowPos(_hwnd, insertBelow, 0, 0, 0, 0, 
-                 SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
-}
-
-
-void MainWindowImpl::setState(const WindowState& s)
-{
-    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-
-    switch(s)
-    {
-        case WindowState::Normal:
-        break;
-
-        case WindowState::Maximized:
-            style |= WS_MAXIMIZE;
-        break;
-
-        case WindowState::Minimized:
-            style |= WS_MINIMIZE;
-        break;
-    }
-
-    SetWindowLong(_hwnd, GWL_STYLE, style); 
 }
 
 

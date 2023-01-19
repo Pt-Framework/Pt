@@ -60,8 +60,6 @@ class MainWindowImpl : public WindowImpl
 
         void paint(const Gfx::RectF& rect);
 
-        void setState(const WindowState& s);
-
         void show(bool visible);
 
         void activate();
@@ -74,15 +72,14 @@ class MainWindowImpl : public WindowImpl
 
         void setAbove(bool above);
 
+        void setState(const WindowState& s);
+
         void setTitle(const std::string& text);
 
-        void setIcon(const Gfx::Image& icon);
+        void setIcon(const Gfx::Image& p);
 
         void setSizeLimits(const Gfx::SizeF& minSize,
                            const Gfx::SizeF& maxSize);
-
-    protected:
-        //void grabPointer();
 
     public:
         ::Window& window()
@@ -90,21 +87,21 @@ class MainWindowImpl : public WindowImpl
             return _window;
         }
 
-        int width() const
-        {
-            return _width;
-        }
+        //int width() const
+        //{
+        //    return _width;
+        //}
 
-        int height() const
-        {
-            return _height;
-        }
+        //int height() const
+        //{
+        //    return _height;
+        //}
 
-        void setSize(int w, int h)
-        {
-            _width = w;
-            _height = h;
-        }
+        //void setSize(int w, int h)
+        //{
+        //    _width = w;
+        //    _height = h;
+        //}
 
     private:
         void create(Window::Type type);

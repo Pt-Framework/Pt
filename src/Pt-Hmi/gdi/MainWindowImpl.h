@@ -72,11 +72,11 @@ class MainWindowImpl : public WindowImpl
 
         void setAbove(bool isTop);
 
-        void setIcon(const Gfx::Image& p);
+        void setState(const WindowState& s);
 
         void setTitle(const std::string& text);
 
-        void setState(const WindowState& s);
+        void setIcon(const Gfx::Image& p);
 
         void setMinimumSize(const Gfx::SizeF& s);
     

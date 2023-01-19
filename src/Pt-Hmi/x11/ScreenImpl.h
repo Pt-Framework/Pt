@@ -37,7 +37,8 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Signal.h>
-#include <Pt/Connectable.h>
+
+#include <vector>
 
 namespace Pt {
 
@@ -51,8 +52,9 @@ class TouchEvent;
 class ScrollEvent;
 
 class ScreenImpl : public WindowManager
-                 , public Connectable
 {
+    typedef WindowManager Base;
+
     public:
         ScreenImpl(ApplicationImpl& app);
 
@@ -71,17 +73,6 @@ class ScreenImpl : public WindowManager
         const std::vector<Window*>& windows() const;
 
         void setCapture(Visual* capture);
-
-
-        const Gfx::SizeF& size() const;
-
-        double scaleFactor() const;
-
-
-        void repaint(const Gfx::RectF& rect);
-
-
-        bool isEnabled() const;
 
     //
     // Responder
@@ -111,6 +102,8 @@ class ScreenImpl : public WindowManager
 
         virtual void onEvent(const Event& ev);
 
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
+
     //
     // WindowManager
     //
@@ -137,7 +130,7 @@ class ScreenImpl : public WindowManager
 
         virtual void onActivate(Window& w, bool active);
 
-        virtual void onEnable(Window& w, bool enable);
+        virtual void onEnableRequest(Window& w, bool enable);
 
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
@@ -154,10 +147,6 @@ class ScreenImpl : public WindowManager
         virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
                                                 const Gfx::SizeF& smax);
 
-        virtual void onFrameChanged(Window& w);
-
-        virtual void onStateChanged(Window& w);
-
         virtual void onClosing(Window& w);
 
     //
@@ -172,7 +161,7 @@ class ScreenImpl : public WindowManager
     // painting
     //
     protected:
-        void onProcessPaintEvent(const PaintEvent& ev);
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
 
@@ -182,7 +171,9 @@ class ScreenImpl : public WindowManager
     // enable
     //
     protected:
-        void onProcessEnableEvent(const EnableEvent& ev);
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnableEvent(const EnableEvent& ev);
 
         virtual void onEnable(bool e);
 
@@ -199,17 +190,12 @@ class ScreenImpl : public WindowManager
         void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        Screen*                      _parent;
-        std::vector<Window*>         _windows;
+        Screen*                 _parent;
+        std::vector<Window*>    _windows;
 
-        Responder*                   _nextResponder;
-
-        Gfx::SizeF                   _size;
-        double                       _screenScaling;
-        double                       _scaling;
-
-        bool                         _enabled;
-        bool                         _enabledState;
+        Responder*              _nextResponder;
+        
+        double                  _screenScaling;
 };
 
 } // namespace

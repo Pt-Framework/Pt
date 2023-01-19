@@ -151,6 +151,26 @@ void MainWindowImpl::destroy()
 }
 
 
+void MainWindowImpl::setType(Window::Type type)
+{
+    //std::clog << "XChangeWindowAttributes: " << type << std::endl;
+
+    XSetWindowAttributes swattr;
+    swattr.override_redirect = (type == WindowType::Popup) ? True : False;
+
+    XChangeWindowAttributes(_display, _window, CWOverrideRedirect, &swattr);
+
+    XWindowAttributes wattr;
+    XGetWindowAttributes(_display, _window, &wattr);
+
+    if(wattr.map_state != IsUnmapped)
+    {
+        XUnmapWindow(_display, _window);
+        XMapWindow(_display,_window);
+    }
+}
+
+
 double MainWindowImpl::scaleFactor() const
 {
     return _scalingFactor;
@@ -214,46 +234,6 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
                static_cast<int>( rect.width() ),
                static_cast<int>( rect.height() ),
                True);
-
-    //XFlush(_display);
-}
-
-
-void MainWindowImpl::setState(const WindowState& s)
-{
-    //std::clog  << "setState: " << s << std::endl;
-
-    XClientMessageEvent ev;
-    ev.type       = ClientMessage;
-    ev.serial     = 0;
-    ev.window     = _window;
-    ev.format     = 32;
-    ev.send_event = True;
-
-    switch(s)
-    {
-        default:
-        case WindowState::Normal:
-            ev.message_type = Application::instance().impl()->wmChangeState();
-            ev.data.l[0] = NormalState;
-            break;
-
-        case WindowState::Minimized:
-            ev.message_type = Application::instance().impl()->wmChangeState();
-            ev.data.l[0] = IconicState;
-            break;
-
-        case WindowState::Maximized:
-            ev.message_type = Application::instance().impl()->netWmState();
-            ev.data.l[0]  = 1ul;
-            ev.data.l[1]  = Application::instance().impl()->netWmStateMaximizedVert();
-            ev.data.l[2]  = Application::instance().impl()->netWmStateMaximizedHorz();
-            break;
-    }
-
-    XSendEvent(_display, XDefaultRootWindow(_display),False,
-               SubstructureRedirectMask,
-               (XEvent*)&ev);
 
     //XFlush(_display);
 }
@@ -371,26 +351,6 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
-void MainWindowImpl::setType(Window::Type type)
-{
-    //std::clog << "XChangeWindowAttributes: " << type << std::endl;
-
-    XSetWindowAttributes swattr;
-    swattr.override_redirect = (type == WindowType::Popup) ? True : False;
-
-    XChangeWindowAttributes(_display, _window, CWOverrideRedirect, &swattr);
-
-    XWindowAttributes wattr;
-    XGetWindowAttributes(_display, _window, &wattr);
-
-    if(wattr.map_state != IsUnmapped)
-    {
-        XUnmapWindow(_display, _window);
-        XMapWindow(_display,_window);
-    }
-}
-
-
 void MainWindowImpl::setAbove(bool above)
 {
     //std::clog << "setTopMost: " << topMost << std::endl;
@@ -419,6 +379,46 @@ void MainWindowImpl::setAbove(bool above)
 
     XSendEvent(_display, XDefaultRootWindow(_display), False,
                SubstructureRedirectMask, &ev);
+}
+
+
+void MainWindowImpl::setState(const WindowState& s)
+{
+    //std::clog  << "setState: " << s << std::endl;
+
+    XClientMessageEvent ev;
+    ev.type       = ClientMessage;
+    ev.serial     = 0;
+    ev.window     = _window;
+    ev.format     = 32;
+    ev.send_event = True;
+
+    switch(s)
+    {
+        default:
+        case WindowState::Normal:
+            ev.message_type = Application::instance().impl()->wmChangeState();
+            ev.data.l[0] = NormalState;
+            break;
+
+        case WindowState::Minimized:
+            ev.message_type = Application::instance().impl()->wmChangeState();
+            ev.data.l[0] = IconicState;
+            break;
+
+        case WindowState::Maximized:
+            ev.message_type = Application::instance().impl()->netWmState();
+            ev.data.l[0]  = 1ul;
+            ev.data.l[1]  = Application::instance().impl()->netWmStateMaximizedVert();
+            ev.data.l[2]  = Application::instance().impl()->netWmStateMaximizedHorz();
+            break;
+    }
+
+    XSendEvent(_display, XDefaultRootWindow(_display),False,
+               SubstructureRedirectMask,
+               (XEvent*)&ev);
+
+    //XFlush(_display);
 }
 
 
@@ -460,17 +460,6 @@ void MainWindowImpl::setSizeLimits(const Gfx::SizeF& minSize,
 
     XSetWMNormalHints(_display, _window, &hints);
 }
-
-
-//void MainWindowImpl::grabPointer()
-//{
-//    XGrabPointer(_display, _window, True,
-//                 ButtonPressMask|ButtonReleaseMask|
-//                 PointerMotionMask,
-//                 GrabModeAsync,
-//                 GrabModeAsync,
-//                 None, None, CurrentTime);
-//}
 
 
 bool MainWindowImpl::isMinimized()
