@@ -295,6 +295,9 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     Gfx::SizeF size(width, height);
     Gfx::RectF rect(pos, size);
 
+    rect = Gfx::RectF( rect.topLeft() / window.scaleFactor(), 
+                       rect.size() / window.scaleFactor() );
+
     //static int eee = 0;
     //std::clog << "EXPOSE NOTIFY " << eee++ << " "
     //                              << window.title() << " "
