@@ -258,7 +258,7 @@ void ImageSurface::setFontDir(const Pt::System::Path& path)
 }
 
 
-std::string ImageSurface::defaultFont()
+const std::string& ImageSurface::defaultFont()
 {
     return Rasterizer::defaultFont();
 }

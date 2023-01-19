@@ -37,7 +37,6 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Signal.h>
-#include <Pt/Connectable.h>
 
 #ifdef __OBJC__
     #import <AppKit/NSWindow.h>
@@ -59,7 +58,6 @@ class TouchEvent;
 class ScrollEvent;
 
 class ScreenImpl : public WindowManager
-                 , public Connectable
 {
     public:
         ScreenImpl(ApplicationImpl& app);
@@ -80,17 +78,6 @@ class ScreenImpl : public WindowManager
 
 
         void setCapture(Visual* capture);
-
-        
-        const Gfx::SizeF& size() const;
-
-        double scaleFactor() const;
-
-        
-        void repaint(const Gfx::RectF& rect);
-
-        
-        bool isEnabled() const;
 
         Window* findWindow(NSWindow* wnd);
 
@@ -122,6 +109,8 @@ class ScreenImpl : public WindowManager
 
         virtual void onEvent(const Event& ev);
 
+        virtual void onRepaintRequest(const Gfx::RectF& rect);
+
     //
     // WindowManager
     //
@@ -148,7 +137,7 @@ class ScreenImpl : public WindowManager
 
         virtual void onActivate(Window& w, bool active);
 
-        virtual void onEnable(Window& w, bool enable);
+        virtual void onEnableRequest(Window& w, bool enable);
 
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
@@ -189,7 +178,9 @@ class ScreenImpl : public WindowManager
     // enable
     //
     protected:
-        void onProcessEnableEvent(const EnableEvent& ev);
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnableEvent(const EnableEvent& ev);
 
         virtual void onEnable(bool e);
 
@@ -212,12 +203,7 @@ class ScreenImpl : public WindowManager
         Responder*                   _nextResponder;
         void*                        _captureMonitor;
 
-        Gfx::SizeF                   _size;
         double                       _screenScaling;
-        double                       _scaling;
-
-        bool                         _enabled;
-        bool                         _enabledState;
 };
 
 } // namespace

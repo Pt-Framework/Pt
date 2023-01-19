@@ -83,6 +83,10 @@ class PixmapSurfaceImpl
 
         const Gfx::ImageFormat& format() const;
 
+        void setScaleFactor(double scaling)
+        {
+        }
+
         void setClip(const Gfx::RectF& clip);
 
         void resetClip();
@@ -138,7 +142,7 @@ class PixmapSurfaceImpl
 
         void set(const Gfx::Image& image);
 
-        static std::string defaultFont();
+        static const std::string& defaultFont();
 
         static void setDefaultFont(const std::string& name);
 
@@ -147,8 +151,6 @@ class PixmapSurfaceImpl
         static std::vector<std::string> fontNames();
 
         static void setFontDir(const System::Path& path);
-
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
         CGContextRef context() const
         { return _context; }

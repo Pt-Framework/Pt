@@ -135,7 +135,7 @@ class Rasterizer
     public:
       static void setFontDir(const System::Path& path);
 
-      static std::string defaultFont();
+      static const std::string& defaultFont();
 
       static void setDefaultFont(const std::string& name);
 

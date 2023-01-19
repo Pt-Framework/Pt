@@ -243,7 +243,7 @@ void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 
 void ApplicationImpl::setDefaultFont(const std::string& fontName)
 {
-    PaintData::setDefaultFont(fontName);
+    PixmapSurfaceImpl::setDefaultFont(fontName);
 }
 
 

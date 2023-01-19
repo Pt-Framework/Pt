@@ -162,7 +162,7 @@ class PaintData : public Gfx::PaintData
             //std::clog << "font: " << font.name() 
             //          << "size: " << font.size() << std::endl;
 
-            const char* fontName = font.name().empty() ? PixmapSurfaceImpl::getDefaultFont().c_str()
+            const char* fontName = font.name().empty() ? PixmapSurfaceImpl::defaultFont().c_str()
                                                        : font.name().c_str();
 
             const char* fontStyle = font.style().c_str();

@@ -30,6 +30,7 @@
 #define Pt_Hmi_PaintData_h
 
 #include "win32.h"
+#include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Pen.h>
@@ -252,24 +253,6 @@ class PaintData : public Gfx::PaintData
             return _font;
         }
         
-        static std::string defaultFont()
-        {
-            return getDefaultFont();
-        }
-
-
-        static void setDefaultFont(const std::string& f)
-        {
-            getDefaultFont() = f;
-        }
-
-
-        static std::string& getDefaultFont()
-        {
-            static std::string _defaultFont;// = getWin32DefaultFont();
-            return _defaultFont;
-        }
-    
     private:
         DWORD getPenStyle(const Pt::Gfx::Pen& pen)
         {
@@ -373,7 +356,8 @@ class PaintData : public Gfx::PaintData
 
             if( font.name().empty() )
             {
-                memcpy(lf.lfFaceName, defaultFont().c_str(), std::min<size_t>( LF_FACESIZE, defaultFont().size() + 1) );
+                const std::string& fontName = PixmapSurfaceImpl::defaultFont();
+                memcpy(lf.lfFaceName, fontName.c_str(), std::min<size_t>( LF_FACESIZE, fontName.size() + 1) );
             }
             else
             {
@@ -382,18 +366,6 @@ class PaintData : public Gfx::PaintData
 
             HFONT hf = CreateFontIndirect(&lf);
             return hf;
-        }
-
-        static std::string getWin32DefaultFont()
-        {
-            HDC dc = GetDC(NULL);
-
-            std::vector<TCHAR> buffer(32);
-            GetTextFace(dc, buffer.size(), &buffer[0]);
-
-            ReleaseDC(NULL, dc);
-
-            return Pt::win32::toMultiByte(&buffer[0]);
         }
 
     private:

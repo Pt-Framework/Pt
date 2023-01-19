@@ -28,6 +28,7 @@
 */
 
 #include "win32.h"
+#include "PaintData.h"
 #include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
@@ -980,15 +981,35 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
 }
 
 
-std::string PixmapSurfaceImpl::defaultFont()
+const std::string& PixmapSurfaceImpl::defaultFont()
 {
-    return PaintData::getDefaultFont();
+    return getDefaultFont();
 }
 
 
 void PixmapSurfaceImpl::setDefaultFont(const std::string& f)
 {
-    PaintData::getDefaultFont() = f;
+    getDefaultFont() = f;
+}
+
+
+std::string& PixmapSurfaceImpl::getDefaultFont()
+{
+    static std::string _defaultFont; // = getSystemFont();
+    return _defaultFont;
+}
+
+
+std::string PixmapSurfaceImpl::getSystemFont()
+{
+    HDC dc = GetDC(NULL);
+
+    std::vector<TCHAR> buffer(32);
+    GetTextFace(dc, buffer.size(), &buffer[0]);
+
+    ReleaseDC(NULL, dc);
+
+    return Pt::win32::toMultiByte(&buffer[0]);
 }
 
 

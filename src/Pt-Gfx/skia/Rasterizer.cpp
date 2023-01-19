@@ -410,7 +410,7 @@ void Rasterizer::setFontDir(const Pt::System::Path& path)
 }
 
 
-std::string Rasterizer::defaultFont()
+const std::string& Rasterizer::defaultFont()
 {
     return  FreeType::instance().defaultFont();
 }

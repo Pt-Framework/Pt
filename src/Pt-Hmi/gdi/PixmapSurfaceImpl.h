@@ -30,8 +30,6 @@
 #ifndef Pt_Hmi_PixmalSurfaceImpl_h
 #define Pt_Hmi_PixmalSurfaceImpl_h
 
-#include "PaintData.h"
-
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
@@ -46,6 +44,7 @@ namespace Pt {
 
 namespace Hmi {
 
+class PaintData;
 class PixmapSurface;
 
 class PixmapSurfaceImpl
@@ -121,7 +120,7 @@ class PixmapSurfaceImpl
 
         void set(const Gfx::Image& image);
 
-        static std::string defaultFont();
+        static const std::string& defaultFont();
 
         static void setDefaultFont(const std::string& name);
 
@@ -137,6 +136,10 @@ class PixmapSurfaceImpl
 
         static void toPreMulAlpha(const Pt::Gfx::Image& image, 
                                   std::vector<Pt::uint8_t>& preMul);
+
+        static std::string& getDefaultFont();
+
+        std::string getSystemFont();
 
     private:
         Gfx::SizeF     _size;

@@ -624,7 +624,7 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
 }
 
 
-std::string PixmapSurfaceImpl::defaultFont()
+const std::string& PixmapSurfaceImpl::defaultFont()
 {
     return getDefaultFont();
 }
@@ -676,12 +676,6 @@ std::vector<std::string> PixmapSurfaceImpl::fontNames()
 
 void PixmapSurfaceImpl::setFontDir(const System::Path& path)
 {
-}
-
-
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
-{
-    return PaintData::fontMetrics(font, text);
 }
 
 } // namespace
