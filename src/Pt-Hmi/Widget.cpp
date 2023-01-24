@@ -233,6 +233,7 @@ void Widget::onRelease(Widget& widget)
     widget.setNextResponder(0);
 
     relayout();
+    repaint( widget.geometry() );
 }
 
 
@@ -658,9 +659,6 @@ void Widget::onRelayout(Widget&)
 
 void Widget::relayout()
 {
-    if(_isLayoutInvalid)
-        return;
-
     _isLayoutInvalid = true;
 
     if(_parent)
@@ -741,7 +739,7 @@ Gfx::SizeF Widget::measure(const SizePolicy& policy)
             ! widgets().empty() )
         {
             //static int mmm = 0;
-            //std::clog << "ON MEASURE: " << typeid(*this).name() << " " << ++mmm << std::endl;
+            //std::clog << "MEASURE: " << name() << std::endl;
             _preferredSize = onMeasure(contentPolicy);
         }
 
@@ -803,7 +801,7 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
         Widget* widget = (*it);
 
         LayoutEvent ev( *widget, widget->geometry() );
-        widget->processEvent(ev);
+        Application::instance().commitEvent(ev);
     }
 
     _isLayoutInvalid = false;
@@ -869,31 +867,17 @@ void Widget::move(const Gfx::PointF& pos)
 
     if( position() == aligedPos )
     {
-        //std::clog << "MOVE skipped: " << typeid(*this).name() << std::endl;
         return;
     }
-
-    //
-    // unified repaint area
-    //
-    Gfx::RectF updateRect( size() );
-    updateRect.unify( Gfx::RectF(aligedPos, size()) );
 
     //
     // send move event
     //
     MoveEvent mev(*this, aligedPos);
-    /// XXX Application::instance().processEvent(mev);
     Application::instance().commitEvent(mev);
 
     if(_parent)
         _parent->onMove(*this, aligedPos);
-
-    //
-    // request repaint
-    //
-    //std::clog << "MOVE REPAINT: " << typeid(*this).name() << std::endl;
-    repaint(updateRect);
 }
 
 
@@ -910,21 +894,22 @@ void Widget::onMove(Widget& widget, const Gfx::PointF& pos)
 
 void Widget::onMoveEvent(const MoveEvent& ev)
 {
+    if( position() == ev.position() )
+    {
+        return;
+    }
+
     Gfx::PointF delta = ev.position() - position();
     Gfx::PointF surfacePos = _surface.area().topLeft() + delta;
 
     Gfx::PaintSurface* surface = _surface.surface();
     setSurface(surface, surfacePos);
 
-    View::onMoveEvent(ev);
+    Gfx::RectF updateRect( size() );
+    updateRect.unify( Gfx::RectF(delta, size()) );
+    repaint(updateRect);
 
-//    if( _position == ev.position() )
-//        return;
-//
-//    //static int nn = 0;
-//    //std::clog << "MOVE: " << typeid(*this).name() << " " << ++nn << std::endl;
-//
-//    _position = ev.position();
+    View::onMoveEvent(ev);
 }
 
 
@@ -934,10 +919,11 @@ void Widget::resize(const Gfx::SizeF& size)
 
     if( this->size() == alignedSize )
     {
-        //std::clog << "RESIZE skipped: " << typeid(*this).name() << std::endl;
         return;
     }
     
+    _isLayoutInvalid = true;
+
     //
     // maximum width and height
     //
@@ -954,19 +940,10 @@ void Widget::resize(const Gfx::SizeF& size)
     //    alignedSize.setHeight( minimumSize().height() );
 
     ResizeEvent rev(*this, alignedSize);
-    /// XXX Application::instance().processEvent(rev);
     Application::instance().commitEvent(rev);
 
     if(_parent)
         _parent->onResize(*this, alignedSize);
-
-    //std::clog << "RESIZE REPAINT: " << typeid(*this).name() << std::endl;
-    Gfx::RectF updateRect( this->size() );
-
-    Gfx::RectF resizedRect(size);
-    updateRect.unify(resizedRect);
-
-    repaint(updateRect);
 }
 
 
@@ -984,21 +961,17 @@ void Widget::onResize(Widget& widget, const Gfx::SizeF& size)
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {
     if( size() == ev.size() )
+    {
         return;
+    }
 
-    View::onResizeEvent(ev);
+    Gfx::RectF updateRect( size() );
+    updateRect.unify( Gfx::RectF( ev.size() ) );
+    repaint(updateRect);
 
-    //static int nn = 0;
-    //std::clog << "RESIZE: " << typeid(*this).name() << " " << ++nn << std::endl;
-
-    //_size = ev.size();
     _surface.resize( ev.size() );
 
-    //
-    // layout contents 
-    //
-    Gfx::RectF geometry( position(), ev.size() );
-    onLayout(geometry);
+    View::onResizeEvent(ev);
 }
 
 

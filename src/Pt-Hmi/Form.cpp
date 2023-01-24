@@ -508,7 +508,7 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
         Gfx::RectF widgetRect( rect.size() );
         
         LayoutEvent lev(*_mainWidget, widgetRect);
-        _mainWidget->processEvent(lev);
+        Application::instance().commitEvent(lev);
     }
 }
 
