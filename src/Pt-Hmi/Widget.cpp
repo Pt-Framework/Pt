@@ -132,9 +132,10 @@ void Widget::setParent(View* parent)
         _parent = parent;
 
         _parent->onInit(*this);
-
         _parent->onEnableRequest(*this, _enabled);
         _parent->onShow(*this, _visible);
+
+        invalidate();
 
         onParentChanged(_parent);
     }
@@ -799,7 +800,6 @@ void Widget::onRescale(double scaling)
     
     _sizePolicy.setSize( _surface.align( _sizePolicy.size() ) );
 
-    invalidate();
     relayout();
 }
 
