@@ -47,7 +47,6 @@ Widget::Widget()
 , _isLayoutInvalid(true)
 , _visible(true)
 , _enabled(true)
-//, _enabledState(true)
 , _hasFocus(false)
 , _focusPolicy(NoFocus)
 , _focusIndex(0)
@@ -118,18 +117,6 @@ void Widget::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
         widget->setSurface(surface, surfacePos);
     }
 }
-
-
-//const View* Widget::parent() const
-//{
-//    return _parent;
-//}
-//
-//
-//View* Widget::parent()
-//{
-//    return _parent;
-//}
 
 
 void Widget::setParent(View* parent)
@@ -337,18 +324,6 @@ Gfx::PointF Widget::onFromWidget(const Widget& widget, const Gfx::PointF& pos) c
 }
 
 
-//const Gfx::PointF& Widget::position() const
-//{
-//    return _position;
-//}
-//
-//
-//const Gfx::SizeF& Widget::size() const
-//{
-//    return _size;
-//}
-
-
 const Gfx::RectF Widget::geometry() const
 {
     return Gfx::RectF( position(), size() );
@@ -534,35 +509,6 @@ void Widget::onMnemonic()
 {
     _mnemonicEntered.invoke();
 }
-
-
-//void Widget::invalidate()
-//{
-//    ++_invalidates;
-//
-//    InvalidateEvent ev(*this);
-//    Application::instance().commitEvent(ev);
-//}
-
-
-//void Widget::onInvalidateRequest()
-//{
-//    ++_invalidates;
-//
-//    InvalidateEvent ev(*this);
-//    Application::instance().commitEvent(ev);
-//}
-
-
-//void Widget::onProcessInvalidateEvent(const InvalidateEvent& ev)
-//{
-//    --_invalidates;
-//
-//    if(_invalidates > 0)
-//      return;
-//
-//    onInvalidateEvent(ev);
-//}
 
 
 void Widget::onInvalidateEvent(const InvalidateEvent& ev)
@@ -1024,12 +970,6 @@ void Widget::onShow(bool isShown)
     relayout();
     repaint( bounds() );
 }
-
-
-//bool Widget::isEnabled() const
-//{
-//    return _enabledState && _enabled;
-//}
 
 
 void Widget::enable(bool e)

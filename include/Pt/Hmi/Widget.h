@@ -77,10 +77,6 @@ class PT_HMI_API Widget : public View
         virtual ~Widget();
 
     public:
-        //const View* parent() const;
-
-        //View* parent();
-
         void setParent(View* parent);
 
         void unparent();
@@ -154,15 +150,10 @@ class PT_HMI_API Widget : public View
 
         void show( bool b = true );
 
-        
-        //bool isEnabled() const;
-
         void enable(bool b = true);
 
-        
         void activate(bool active);
 
-        
         void raise();
 
 
@@ -400,7 +391,6 @@ class PT_HMI_API Widget : public View
 
         bool                         _visible;
         bool                         _enabled;
-        //bool                         _enabledState;
         
         Gfx::SizeF                   _minimumSize;
         SizePolicy                   _sizePolicy;
