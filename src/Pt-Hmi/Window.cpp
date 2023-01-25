@@ -277,11 +277,14 @@ void Window::resize(const Gfx::SizeF& s)
 
 Gfx::SizeF Window::resize(const SizePolicy& policy)
 {
-    //Gfx::SizeF size = Form::measure(policy);
+    if( ! _parent )
+    {
+        Screen& screen = Application::instance().screen();
+        screen.addWindow(*this);
+    }
+    
     Gfx::SizeF size = _form.measure(policy);
-
     resize(size);
-
     return size;
 }
 
