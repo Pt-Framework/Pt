@@ -800,6 +800,8 @@ void Widget::onRescale(double scaling)
     
     _sizePolicy.setSize( _surface.align( _sizePolicy.size() ) );
 
+    // TODO: invalidate in derived class only when neccessary
+    invalidate();
     relayout();
 }
 
@@ -1005,6 +1007,7 @@ void Widget::onEnable(bool e)
 {
     Base::onEnable(e);
 
+    // TODO: invalidate in derived class only when neccessary
     invalidate();
 }
 
