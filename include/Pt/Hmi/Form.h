@@ -92,22 +92,7 @@ class PT_HMI_API Form : public View
         Gfx::SizeF measure(const SizePolicy& policy);
 
     public:
-        //bool acceptsInput() const;
-
-        //bool isEnabled() const;
-
-    public:
-        //const Gfx::RectF& geometry() const;
-
-        //const Gfx::RectF& bounds() const;
-
-
-
-        //const Gfx::PointF& position() const;
-
         void move(const Gfx::PointF&);
-
-        //const Gfx::SizeF& size() const;
 
         void resize(const Gfx::SizeF& s);
 
@@ -289,15 +274,7 @@ class PT_HMI_API Form : public View
         Gfx::PaintSurface*           _surface;
         Responder*                   _nextResponder;
 
-        int                          _invalidates;
         int                          _layouts;
-
-        //bool                         _enabled;
-        //bool                         _enabledState;
-
-        //Gfx::RectF                   _alignedGeometry;
-        //Gfx::RectF                   _bounds;
-        //Gfx::RectF                   _requestedGeometry;
 
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;

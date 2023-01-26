@@ -44,11 +44,7 @@ namespace Hmi {
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _parent(0)
 , _nextResponder(0)
-//, _capture(0)
 , _screenScaling(1.0)
-//, _scaling(1.0)
-//, _enabled(true)
-//, _enabledState(true)
 {
     HWND desktop = GetDesktopWindow();
     //HDC screenDC = GetDC(desktop);
@@ -115,12 +111,6 @@ const std::vector<Window*>& ScreenImpl::windows() const
 {
     return _windows;
 }
-
-
-//double ScreenImpl::scaleFactor() const
-//{ 
-//    return _scaling; 
-//}
 
 ///////////////////////////////////////////////////////////////////////
 // Responder
@@ -219,7 +209,6 @@ void ScreenImpl::onInit(Window& w)
 {
     RescaleEvent ev( w, scaleFactor() );
     w.processEvent(ev);
-    //Application::instance().loop().commitEvent(ev);
 }
 
 

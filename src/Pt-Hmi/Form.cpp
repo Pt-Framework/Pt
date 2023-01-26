@@ -50,10 +50,7 @@ Form::Form()
 , _mainWidget(0)
 , _surface(0)
 , _nextResponder(0)
-, _invalidates(0)
 , _layouts(0)
-//, _enabled(true)
-//, _enabledState(true)
 , _pointer(0)
 , _active(0)
 , _focusWidget(0)
@@ -290,7 +287,6 @@ void Form::onInit(Widget& widget)
     double scaling = scaleFactor();
     RescaleEvent ev(widget, scaling);
     widget.processEvent(ev);
-    //Application::instance().loop().commitEvent(ev);
 }
 
 
@@ -348,32 +344,6 @@ void Form::onDeregister(Widget& widget)
 }
 
 
-//void Form::invalidate()
-//{
-//    onInvalidateRequest();
-//}
-
-
-//void Form::onInvalidateRequest()
-//{
-//    ++_invalidates;
-//
-//    InvalidateEvent ev(*this);
-//    Application::instance().commitEvent(ev);
-//}
-
-
-//void Form::onProcessInvalidateEvent(const InvalidateEvent& ev)
-//{
-//    --_invalidates;
-//
-//    if(_invalidates > 0)
-//      return;
-//
-//    onInvalidateEvent(ev);
-//}
-
-
 void Form::onInvalidateEvent(const InvalidateEvent& ev)
 {
     Base::onInvalidateEvent(ev);
@@ -388,22 +358,8 @@ void Form::onInvalidate()
 }
 
 
-//void Form::repaint()
-//{
-//    Gfx::RectF rect( size() );
-//    onRepaint(rect);
-//}
-//
-//
-//void Form::repaint(const Gfx::RectF& rect)
-//{
-//    onRepaint(rect);
-//}
-
 void Form::onRepaintRequest(const Gfx::RectF& rect)
 {
-    //std::clog << "REPAINT: " << title() << std::endl;
-
     if(_parent)
         _parent->onRepaint(*this, rect);
 }
@@ -452,16 +408,12 @@ void Form::onRepaint(Widget& w, const Gfx::RectF& rect)
 
 void Form::onRelayout(Widget& widget)
 {   
-    //std::clog << "RELAYOUT" << name() <<  std::endl;
-
     relayout();
 }
 
 
 void Form::relayout()
 {
-    //std::clog << "RELAYOUT" << name() <<  std::endl;
-
     _layouts++;
 
     LayoutEvent ev( *this, bounds() );
@@ -473,7 +425,7 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 {
     if(_layouts == 0)
     {
-        //std::clog << "RELAYOUT EVENT " << title() << " skipped" << std::endl;
+        //std::clog << "RELAYOUT EVENT " << name() << " skipped" << std::endl;
         return;
     }
 
@@ -566,32 +518,7 @@ void Form::onRescaleEvent(const RescaleEvent& ev)
 void Form::onRescale(double scaling)
 {
     Base::onRescale(scaling);
-
-    // realign geometry
-    //move( _requestedGeometry.topLeft() );
-    //resize( _requestedGeometry.size() );
-
-    //relayout();
 }
-
-//
-//const Gfx::RectF& Form::geometry() const
-//{
-//    return _alignedGeometry;
-//}
-//
-//
-//const Gfx::RectF& Form::bounds() const
-//{
-//    return _bounds;
-//}
-//
-//
-//
-//const Gfx::PointF& Form::position() const
-//{
-//    return _alignedGeometry.topLeft();
-//}
 
 
 void Form::move(const Gfx::PointF& pos)
@@ -612,14 +539,7 @@ void Form::move(const Gfx::PointF& pos)
 void Form::onMoveEvent(const MoveEvent& ev)
 {
     View::onMoveEvent(ev);
-//    _alignedGeometry.setOrigin( ev.position() );
 }
-
-
-//const Gfx::SizeF& Form::size() const
-//{
-//    return _alignedGeometry.size();
-//}
 
 
 void Form::resize(const Gfx::SizeF& s)
@@ -641,26 +561,8 @@ void Form::onResizeEvent(const ResizeEvent& ev)
 {
     View::onResizeEvent(ev);
 
-    //_alignedGeometry.setSize( ev.size() );
-    //_bounds.setSize( ev.size() );
-
     relayout();
 }
-
-
-//bool Form::acceptsInput() const
-//{    
-//    if( ! isEnabled() )
-//        return false;
-//
-//    return true;
-//}
-
-
-//bool Form::isEnabled() const
-//{
-//    return _enabledState;
-//}
 
 
 void Form::onProcessEnableEvent(const EnableEvent& ev)
@@ -870,9 +772,6 @@ void Form::onProcessMouseEvent(const MouseEvent& ev)
 
 bool Form::onMouseEvent(const MouseEvent& ev)
 {
-    //if(ev.isPress(MouseEvent::Left) )
-    //    Application::instance().inputMethod().finish();
-
     return Base::onMouseEvent(ev);
 }
 
@@ -901,9 +800,6 @@ void Form::onProcessTouchEvent(const TouchEvent& ev)
 
 bool Form::onTouchEvent(const TouchEvent& ev)
 {
-    //if(ev.isPress() )
-    //    Application::instance().inputMethod().finish();
-
     return Base::onTouchEvent(ev);
 }
 
@@ -929,12 +825,6 @@ void Form::onProcessScrollEvent(const ScrollEvent& ev)
         _focusWidget->scrollEvent(ev);
         return;
     }
-
-    //if(_pointer)
-    //{
-    //    _pointer->processEvent(ev);
-    //    return; 
-    //}
 
     Base::onProcessScrollEvent(ev);
 }

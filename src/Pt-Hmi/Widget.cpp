@@ -598,8 +598,6 @@ void Widget::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
 
 void Widget::onRelayout(Widget&)
 {   
-    //std::clog << "RELAYOUT" << name() <<  std::endl;
-
     relayout();
 }
 
@@ -638,9 +636,6 @@ Gfx::SizeF Widget::preferredSize() const
 
 Gfx::SizeF Widget::measure(const SizePolicy& policy)
 {
-    //static int nnn = 0;
-    //std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nnn << std::endl;
-
     SizePolicy contentPolicy = _sizePolicy;
 
     // use stricter size mode of parent and, if parent is fixed,

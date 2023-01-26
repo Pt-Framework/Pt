@@ -131,8 +131,6 @@ class PT_HMI_API Window : public Sheet
         void setNextResponder(Responder* r);
 
 
-        //double scaleFactor() const;
-
         bool acceptsInput() const;
 
 
@@ -148,18 +146,10 @@ class PT_HMI_API Window : public Sheet
         void showModal();
 
 
-        //bool isEnabled() const;
-
         void enable(bool e = true);
 
 
-        //const Gfx::RectF& geometry() const;
-
-        //const Gfx::PointF& position() const;
-
         void move(const Gfx::PointF& p);
-
-        //const Gfx::SizeF& size() const;
 
         void resize(const Gfx::SizeF& s);
 

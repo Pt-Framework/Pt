@@ -76,14 +76,12 @@ Window::Window(WindowManager* parent, WindowType type)
 , _isClosed(false)
 , _requestedPosition(0, 0)
 , _requestedSize(80, 80)
-//, _geometry(_requestedPosition, _requestedSize)
 , _type(type)
 , _minimumSize(0, 0)
 , _maximumSize(64000, 64000)
 , _state(WindowState::Normal)
 , _isAbove(false)
 {
-    //Form::setSurface(&_surface);
     _form.setParent(this);
 
     eventReceived() += Pt::slot(*this, &Window::onProcessShowEvent);
@@ -171,12 +169,6 @@ const PixmapSurface& Window::surface() const
 }
 
 
-//double Window::scaleFactor() const
-//{
-//    return _surface.scaleFactor();
-//}
-
-
 const Gfx::Brush& Window::background() const
 {
     return _background ? *_background
@@ -206,33 +198,6 @@ Responder* Window::onNextResponder()
 // geometry
 ///////////////////////////////////////////////////////////////////////
 
-//const Gfx::RectF& Window::geometry() const
-//{
-//    return _geometry;
-//}
-
-
-//const Gfx::PointF& Window::position() const
-//{
-//    return _geometry.topLeft();
-//}
-
-
-//void Window::onProcessMoveEvent(const MoveEvent& ev)
-//{
-//    onMoveEvent(ev);
-//}
-//
-//
-//void Window::onMoveEvent(const MoveEvent& ev)
-//{    
-//    //std::clog << "MOVE EVENT: " << this->title() << " "
-//    //          << ev.position().x() << ", " << ev.position().y() << std::endl;
-//    
-//    _geometry.setOrigin( ev.position() );
-//}
-
-
 void Window::move(const Gfx::PointF& pos)
 {
     _requestedPosition = pos;
@@ -241,10 +206,6 @@ void Window::move(const Gfx::PointF& pos)
     {
         _parent->onMove(*this, _requestedPosition);
     }
-    //else
-    //{
-    //    _geometry.setOrigin(_requestedPosition);
-    //}
 }
 
 
@@ -268,15 +229,14 @@ void Window::resize(const Gfx::SizeF& s)
     {
         _parent->onResize(*this, _requestedSize);
     }
-    //else
-    //{
-    //    _geometry.setSize(_requestedSize);
-    //}
 }
 
 
 Gfx::SizeF Window::resize(const SizePolicy& policy)
 {
+    //
+    // TODO: remove delayed initialization
+    //
     if( ! _parent )
     {
         Screen& screen = Application::instance().screen();
@@ -302,36 +262,6 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _surface.resize( ev.size() );
     _form.resize( ev.size() );
 }
-
-
-//const Gfx::SizeF& Window::size() const
-//{
-//    return _geometry.size();
-//}
-
-
-//void Window::onProcessResizeEvent(const ResizeEvent& ev)
-//{
-//    onResizeEvent(ev);
-//}
-
-
-//void Window::onResizeEvent(const ResizeEvent& ev)
-//{
-//    //if( _size == ev.size() )
-//    //    return;
-//
-//    //if( _title == "Main_1")
-//    //std::clog << "W RESIZE EVENT: " << this->title() << " "
-//    //          << ev.size().width() << "x" << ev.size().height() << std::endl;
-//
-//    _geometry.setSize( ev.size() );
-//    _surface.resize( ev.size() );
-//    //_sheet.resize( ev.size() );
-//
-//    relayout();
-//}
-
 
 ///////////////////////////////////////////////////////////////////////
 // Visual
@@ -405,7 +335,6 @@ void Window::onInit(Form& form)
     
     RescaleEvent ev(form, scaling);
     form.processEvent(ev);
-    //Application::instance().loop().commitEvent(ev);
 }
 
 
@@ -453,7 +382,6 @@ void Window::onMove(Form& form, const Gfx::PointF& pos)
     // send move event
     //
     MoveEvent mev(form, aligedPos);
-    ////Application::instance().processEvent(mev);
     Application::instance().commitEvent(mev);
 
     //
@@ -478,7 +406,6 @@ void Window::onResize(Form& form, const Gfx::SizeF& size)
     // send resize event
     //
     ResizeEvent rev(form, alignedSize);
-    ////Application::instance().processEvent(rev);
     Application::instance().commitEvent(rev);
 
     //
@@ -609,10 +536,7 @@ bool Window::isVisible() const
 
 
 void Window::show(bool b)
-{
-    //if( _title == "Main_1")
-    //std::clog << "SHOW: " << title() << " init: " << (_parent != 0) << std::endl;
-    
+{   
     if( ! _parent )
     {
         Screen& screen = Application::instance().screen();
@@ -682,12 +606,6 @@ void Window::showModal()
 }
 
 
-//bool Window::isEnabled() const
-//{
-//    return _enabledState && _enabled;
-//}
-
-
 void Window::enable(bool e)
 {
     _enabled = e;
@@ -744,13 +662,14 @@ void Window::onRescale(double scaling)
 {   
     Base::onRescale(scaling);
 
-    //if( _title == "Main_1")
-    //std::clog << "+W RESCALE EVENT: " << this->title() << " "
+    //std::clog << "+W RESCALE EVENT: " << title() << " "
     //          << _surface.scaleFactor() << std::endl;
 
     _surface.setScaleFactor(scaling);
 
+    //
     // realign geometry
+    //
     move(_requestedPosition);
     resize(_requestedSize);
 }
@@ -952,35 +871,6 @@ const WindowImpl* Window::impl() const
 }
 
 
-//void Window::onProcessMouseEvent(const MouseEvent& ev)
-//{
-//    if( ! acceptsInput() )
-//        return;
-//
-//    Gfx::PointF pos = fromGlobal( ev.position() );
-//
-//    //std::clog << title() << ": " << pos.x() << " " << pos.y() << std::endl;
-//
-//    Visual* hit = 0;
-//
-//    Sheet* sheet = this->sheet();
-//    if(sheet && 
-//       sheet->geometry().contains(pos) && 
-//       sheet->acceptsInput() )
-//    {
-//        hit = sheet;
-//    }
-//
-//    if(hit)
-//    {
-//      hit->processEvent(ev);
-//      return;
-//    }
-//
-//    _sheet.processEvent(ev);
-//}
-
-
 void Window::onProcessMouseEvent(const MouseEvent& ev)
 {
     if( ! acceptsInput() )
@@ -997,7 +887,6 @@ void Window::onProcessTouchEvent(const TouchEvent& ev)
 
     _form.processEvent(ev);
 }
-
 
 
 void Window::onProcessScrollEvent(const ScrollEvent& ev)
@@ -1034,24 +923,12 @@ void Window::onProcessKeyEvent(const KeyEvent& ev)
 
 bool Window::onMouseEvent(const MouseEvent& ev)
 {
-    //if(ev.isPress(MouseEvent::Left) )
-    //{
-    //    InputMethod& ime = Application::instance().inputMethod();
-    //    if( this != ime.activeWindow() )
-    //    {
-    //        Application::instance().inputMethod().finish();
-    //    }
-    //}
-
     return Base::onMouseEvent(ev);
 }
 
 
 bool Window::onTouchEvent(const TouchEvent& ev)
 { 
-    //if(ev.isPress() )
-    //    Application::instance().inputMethod().finish();
-
     return Base::onTouchEvent(ev);
 }
 

@@ -197,17 +197,10 @@ class ScreenImpl : public WindowManager
         void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        Screen*                      _parent;
-        std::vector<Window*>         _windows;
-
-        Responder*                   _nextResponder;
-        //Window*                      _capture;
-
-        double                       _screenScaling;
-        //double                       _scaling;
-
-        //bool                         _enabled;
-        //bool                         _enabledState;
+        Screen*               _parent;
+        std::vector<Window*>  _windows;
+        Responder*            _nextResponder;
+        double                _screenScaling;
 };
 
 } // namespace
