@@ -40,6 +40,7 @@ namespace Hmi {
 
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _parent(0)
+, _display(app.display())
 , _nextResponder(0)
 , _screenScaling(1.0)
 {
@@ -61,8 +62,7 @@ void ScreenImpl::setParent(Screen* screen)
 
     if(_parent)
     {
-        ::Display* display = app.display();
-        ::Screen * screen = XDefaultScreenOfDisplay(display);
+        ::Screen * screen = XDefaultScreenOfDisplay(_display);
         int w = WidthOfScreen(screen);
         int h = HeightOfScreen(screen);
     
@@ -412,8 +412,7 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 {
     Base::onRescaleEvent(ev);
 
-    ::Display* display = app.display();
-    ::Screen * screen = XDefaultScreenOfDisplay(display);
+    ::Screen * screen = XDefaultScreenOfDisplay(_display);
     int w = WidthOfScreen(screen);
     int h = HeightOfScreen(screen);
     

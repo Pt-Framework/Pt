@@ -87,21 +87,21 @@ class MainWindowImpl : public WindowImpl
             return _window;
         }
 
-        //int width() const
-        //{
-        //    return _width;
-        //}
+        int width() const
+        {
+           return _width;
+        }
 
-        //int height() const
-        //{
-        //    return _height;
-        //}
+        int height() const
+        {
+           return _height;
+        }
 
-        //void setSize(int w, int h)
-        //{
-        //    _width = w;
-        //    _height = h;
-        //}
+        void setSize(int w, int h)
+        {
+           _width = w;
+           _height = h;
+        }
 
     private:
         void create(Window::Type type);

@@ -38,6 +38,10 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Signal.h>
 
+//#include <X11/X.h>
+#include <X11/Xlib.h>
+//#include <X11/Xatom.h>
+
 #include <vector>
 
 namespace Pt {
@@ -192,6 +196,7 @@ class ScreenImpl : public WindowManager
     private:
         Screen*                 _parent;
         std::vector<Window*>    _windows;
+        ::Display*              _display;
 
         Responder*              _nextResponder;
         
