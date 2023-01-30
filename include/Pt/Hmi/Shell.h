@@ -56,6 +56,8 @@ class PT_HMI_API Shell : public Widget
 
         void removeWindow(Window& w);
 
+        const std::vector<Window*>& windows() const;
+
     public:
         Widget* content();
 

@@ -178,6 +178,12 @@ WindowFrame* ShellWM::getWindowFrame(const Window& w) const
     return 0;
 }
 
+
+const std::vector<Window*>& ShellWM::windows() const
+{
+    return _windowList;
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
@@ -294,6 +300,8 @@ void ShellWM::onAttach(Window& w)
     else
         _windows.push_back(frame);
 
+    _windowList.push_back(&w);
+
     w.setNextResponder(this);
 }
 
@@ -301,6 +309,9 @@ void ShellWM::onAttach(Window& w)
 void ShellWM::onDetach(Window& w)
 {
     w.setNextResponder(0);
+
+    _windowList.erase( std::remove(_windowList.begin(), _windowList.end(), &w), 
+                       _windowList.end() );
 
     std::vector<WindowFrame*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)

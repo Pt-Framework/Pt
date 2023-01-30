@@ -216,9 +216,6 @@ class ScreenImpl : public Sheet
         Gfx::Image                   _cursorBackground;
         Gfx::Point                   _cursorPos;
         bool                         _drawCursor;
-
-        // TODO: return windows from _shell
-        std::vector<Window*> _windows;
 };
 
 } // namespace

@@ -122,7 +122,7 @@ void ScreenImpl::removeWindow(Window& w)
 
 const std::vector<Window*>& ScreenImpl::windows() const
 {
-    return _windows;
+    return _shell.windows();
 }
 
 

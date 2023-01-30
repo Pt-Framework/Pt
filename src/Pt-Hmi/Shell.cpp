@@ -76,6 +76,12 @@ void Shell::removeWindow(Window& w)
 }
 
 
+const std::vector<Window*>& Shell::windows() const
+{
+    return _wm.windows();
+}
+
+
 Widget* Shell::content() 
 {
     return _content;

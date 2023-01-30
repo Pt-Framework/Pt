@@ -72,6 +72,8 @@ class ShellWM : public WindowManager
 
         WindowFrame* getWindowFrame(const Window& w) const;
 
+        const std::vector<Window*>& windows() const;
+
         double borderWidth() const
         {
             return _borderWidth;
@@ -203,6 +205,7 @@ class ShellWM : public WindowManager
         Responder*                   _nextResponder;
 
         std::vector<WindowFrame*>    _windows;
+        std::vector<Window*>         _windowList;
 
         WindowFrame*                 _activeWindow;
         WindowFrame*                 _grabbedFrame;
