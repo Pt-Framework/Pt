@@ -497,7 +497,7 @@ void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 
     if( visual && visual != this && visual != _parent )
     {
-        ev.visual()->processEvent(ev);
+        visual->processEvent(ev);
         return;
     }
 
@@ -566,7 +566,7 @@ void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
     Visual* visual = ev.visual();
     if(visual && visual != this && visual != _parent)
     {
-        ev.visual()->processEvent(ev);
+        visual->processEvent(ev);
         return;
     }
 
