@@ -493,7 +493,38 @@ void ScreenImpl::onEnable(bool e)
 
 void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    Visual* visual = ev.visual();
+
+    if( visual && visual != this && visual != _parent )
+    {
+        ev.visual()->processEvent(ev);
+        return;
+    }
+
+    POINT screenPos;
+    screenPos.x = ev.position().x() * scaleFactor();
+    screenPos.y = ev.position().y() * scaleFactor();
+
+    Window* window = 0;
+        
+    for(HWND h = GetTopWindow(NULL); h != NULL; h = GetWindow(h, GW_HWNDNEXT))
+    {
+        RECT rect;
+        GetClientRect(h, &rect);
+
+        POINT pos = screenPos;
+        ScreenToClient(h, &pos);
+            
+        if( PtInRect(&rect, pos) )
+        {
+            window = Application::instance().impl()->findWindow(h);
+            if(window)
+                break;
+        }
+    }
+
+    if(window)
+        window->processEvent(ev);
 }
 
 
