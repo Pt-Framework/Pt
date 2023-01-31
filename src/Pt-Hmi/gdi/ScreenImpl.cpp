@@ -564,10 +564,17 @@ bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
 void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 {
     Visual* visual = ev.visual();
-    if(visual)
+    if(visual && visual != this && visual != _parent)
+    {
         ev.visual()->processEvent(ev);
+        return;
+    }
 
-    // TODO: dispatch to active HWND
+    HWND h = GetActiveWindow();
+
+    Window* window = Application::instance().impl()->findWindow(h);
+    if(window)
+        window->processEvent(ev);
 }
 
 
