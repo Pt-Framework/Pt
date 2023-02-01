@@ -507,7 +507,7 @@ PT_API const std::num_put<Pt::Char>& useNumPut(const std::locale& loc);
 namespace std {
 
 template<>
-inline bool has_facet< ctype<Pt::Char> >(const locale& loc) throw()
+inline bool has_facet< ctype<Pt::Char> >(const locale& /*loc*/) throw()
 { 
     return true; 
 }
@@ -520,7 +520,7 @@ inline const ctype<Pt::Char>& use_facet(const locale& loc)
 
 
 template<>
-inline bool has_facet< numpunct<Pt::Char> >(const locale& loc) throw()
+inline bool has_facet< numpunct<Pt::Char> >(const locale& /*loc*/) throw()
 { 
     return true; 
 }
@@ -533,7 +533,7 @@ inline const numpunct<Pt::Char>& use_facet(const locale& loc)
 
 
 template<>
-inline bool has_facet< num_get<Pt::Char> >(const locale& loc) throw()
+inline bool has_facet< num_get<Pt::Char> >(const locale& /*loc*/) throw()
 { 
     return true; 
 }
@@ -546,7 +546,7 @@ inline const num_get<Pt::Char>& use_facet(const locale& loc)
 
 
 template<>
-inline bool has_facet< num_put<Pt::Char> >(const locale& loc) throw()
+inline bool has_facet< num_put<Pt::Char> >(const locale& /*loc*/) throw()
 { 
     return true; 
 }
