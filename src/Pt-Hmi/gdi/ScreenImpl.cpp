@@ -524,7 +524,12 @@ void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
     }
 
     if(window)
+    {
         window->processEvent(ev);
+        return;
+    }
+
+    Base::onProcessMouseEvent(ev);
 }
 
 
