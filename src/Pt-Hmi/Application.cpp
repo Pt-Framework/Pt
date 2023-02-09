@@ -714,7 +714,7 @@ void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
                 _scrollFrom.subY(threshold);
 
             deltaY = screenPos.y() - _scrollFrom.y();
-            std::clog << "SCROLL STARTED: " << deltaY << std::endl;
+            //std::clog << "SCROLL STARTED: " << deltaY << std::endl;
             
             ScrollEvent sev(*visual);
             sev.set(ScrollEvent::Vertical, deltaY);
@@ -724,7 +724,7 @@ void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
         }
         else if(_onScroll)
         {
-            std::clog << "SCROLLING: " << deltaY << std::endl;
+            //std::clog << "SCROLLING: " << deltaY << std::endl;
             ScrollEvent sev(*visual);
             sev.set(ScrollEvent::Vertical, deltaY);
             processEvent(sev);
