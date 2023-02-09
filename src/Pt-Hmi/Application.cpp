@@ -687,46 +687,58 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
     }
 }
 
+
 void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
                                  bool isPress, bool isPressed)
 {
-    //
-    // Detect scroll gestures
-    //
+    const double threshold = 8;
     
+    // TODO: start scroll only if within visual
+
     if(isPress)
     {
-        // TODO: start scroll only if within visual
-
         //std::clog << "SCROLL START" << std::endl;
         _scrollFrom = screenPos;
     }
     else if(isPressed)
     {
-        Gfx::PointF scrollTo = screenPos;
+        double deltaY = screenPos.y() - _scrollFrom.y();
         
-        double delta = scrollTo.y() - _scrollFrom.y();
-        
-        if( ! _onScroll && std::fabs(delta) > 8 )
+        if( ! _onScroll && std::fabs(deltaY) > threshold )
         {
-            //std::clog << "SCROLL STARTED" << std::endl;
             _onScroll = true;
-            _scrollFrom = scrollTo;
+
+            if(deltaY > 0)
+                _scrollFrom.addY(threshold);
+            else
+                _scrollFrom.subY(threshold);
+
+            deltaY = screenPos.y() - _scrollFrom.y();
+            std::clog << "SCROLL STARTED: " << deltaY << std::endl;
+            
+            ScrollEvent sev(*visual);
+            sev.set(ScrollEvent::Vertical, deltaY);
+            processEvent(sev);
+
+            _scrollFrom = screenPos;
         }
         else if(_onScroll)
         {
-            //std::clog << "SCROLLING: " << delta << std::endl;
+            std::clog << "SCROLLING: " << deltaY << std::endl;
             ScrollEvent sev(*visual);
-            sev.set(ScrollEvent::Vertical, delta);
+            sev.set(ScrollEvent::Vertical, deltaY);
             processEvent(sev);
 
-            _scrollFrom = scrollTo;
+            _scrollFrom = screenPos;
         }
     }
     else
     {
-        //std::clog << "SCROLL STOP" << std::endl;
-        _onScroll = false;
+        if(_onScroll)
+        {
+            //std::clog << "SCROLL STOP" << std::endl;
+            _onScroll = false;
+        }
     }
 }
 
