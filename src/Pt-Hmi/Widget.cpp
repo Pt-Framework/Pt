@@ -980,14 +980,19 @@ void Widget::enable(bool e)
 
 void Widget::onProcessEnableEvent(const EnableEvent& ev)
 {
-    Base::onProcessEnableEvent(ev);
+    bool isEnabled = ev.enabled();
+    if( ! _enabled )
+        isEnabled = false;
+
+    EnableEvent eev(*this, isEnabled);
+    Base::onProcessEnableEvent(eev);
 
     for( size_t i = 0; i < _children.size(); ++i)
     {
         Widget* w = _children[i];
         
-        EnableEvent eev(*w, ev.enabled());
-        w->processEvent(eev);
+        EnableEvent widgetEvent(*w, isEnabled);
+        w->processEvent(widgetEvent);
     }
 }
 

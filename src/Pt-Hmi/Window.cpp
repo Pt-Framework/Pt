@@ -617,10 +617,15 @@ void Window::enable(bool e)
 
 void Window::onProcessEnableEvent(const EnableEvent& ev)
 {
+    bool isEnabled = ev.enabled();
+    if( ! _enabled )
+        isEnabled = false;
+
+    EnableEvent eev(*this, isEnabled);
     Base::onProcessEnableEvent(ev);
 
-    EnableEvent eev(_form, ev.enabled());
-    _form.processEvent(eev);
+    EnableEvent formEvent(_form, isEnabled);
+    _form.processEvent(formEvent);
 }
 
 
