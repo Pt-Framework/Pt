@@ -66,6 +66,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "LoadSaveSerializable", *this, &SettingsTest::LoadSaveSerializable );
             Pt::Unit::TestSuite::registerMethod( "Entry", *this, &SettingsTest::Entry );
             Pt::Unit::TestSuite::registerMethod( "ConstEntry", *this, &SettingsTest::ConstEntry );
+            Pt::Unit::TestSuite::registerMethod( "SequenceEntry", *this, &SettingsTest::SequenceEntry );
 
             Pt::Unit::TestSuite::registerMethod( "EmptyElements", *this, &SettingsTest::EmptyElements );
             Pt::Unit::TestSuite::registerMethod( "FlatValues", *this, &SettingsTest::FlatValues );
@@ -96,6 +97,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         void LoadSaveSerializable();
         void Entry();
         void ConstEntry();
+        void SequenceEntry();
 };
 
 Pt::Unit::RegisterTest<SettingsTest> register_SettingsTest;
@@ -236,6 +238,30 @@ void SettingsTest::ConstEntry()
     PT_UNIT_ASSERT( entry.get(n) );
     PT_UNIT_ASSERT( n == 42 );
 }
+
+
+void SettingsTest::SequenceEntry()
+{
+    Pt::Settings settings;
+
+    Pt::Settings::Entry& list = settings.addEntry("numbers");
+    list.addEntry().set(1);
+    list.addEntry().set(2);
+    list.addEntry().set(3);
+
+    std::vector<int> numbers;
+    settings["numbers"].get(numbers);
+    PT_UNIT_ASSERT( numbers.size() == 3 );
+    PT_UNIT_ASSERT( numbers.at(0) == 1 );
+    PT_UNIT_ASSERT( numbers.at(1) == 2 );
+    PT_UNIT_ASSERT( numbers.at(2) == 3 );
+
+    std::stringstream ss;
+    Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+    settings.save(tos);
+    tos.flush();
+}
+
 
 void SettingsTest::LoadSaveSerializable()
 {
