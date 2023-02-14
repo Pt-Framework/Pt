@@ -237,6 +237,17 @@ class PT_API Settings : private SerializationInfo
                     return Entry(&si);
                 }
 
+                /** @brief Adds a sub entry.
+                */
+                Entry addEntry()
+                {
+                    if( ! _si )
+                        return Entry();
+
+                    SerializationInfo& si = _si->addElement();
+                    return Entry(&si);
+                }
+
                 /** @brief Removes a sub entry.
                 */
                 void removeEntry(const std::string& name)
