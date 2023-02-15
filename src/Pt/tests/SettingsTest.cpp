@@ -244,7 +244,7 @@ void SettingsTest::SequenceEntry()
 {
     Pt::Settings settings;
 
-    Pt::Settings::Entry& list = settings.addEntry("numbers");
+    Pt::Settings::Entry list = settings.addEntry("numbers");
     list.addEntry().set(1);
     list.addEntry().set(2);
     list.addEntry().set(3);
