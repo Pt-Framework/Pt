@@ -52,6 +52,8 @@ class RescaleEvent;
 */
 class PT_HMI_API Screen : public Visual
 {
+    friend class ScreenImpl;
+
     typedef Visual Base;
 
     public:
@@ -66,9 +68,9 @@ class PT_HMI_API Screen : public Visual
 
         const std::vector<Window*>& windows() const;
 
-        Window* findWindow(const std::string& name);
+        Window* findWindow2(const std::string& name);
 
-        Widget* findWidget(const std::string& name);
+        Widget* findWidget2(const std::string& name);
 
         
         void setPointer(Visual* visual);
@@ -111,6 +113,14 @@ class PT_HMI_API Screen : public Visual
         virtual void onEvent( const Event& ev );
 
         virtual void onRepaintRequest(const Gfx::RectF& rect);
+
+    protected:
+        virtual void onInit(ScreenImpl& s);
+
+        virtual void onRelease(ScreenImpl& s);
+
+        virtual void onResize(ScreenImpl& s, const Gfx::SizeF& size);
+
 
     //
     // scaling

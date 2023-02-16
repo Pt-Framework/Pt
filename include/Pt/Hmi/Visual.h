@@ -268,6 +268,8 @@ class PT_HMI_API Visual : public Responder
             return _enabledState;
         }
 
+        bool isVisible() const;
+
     protected:
         virtual Visual* onGetParent() const = 0;
 
@@ -312,6 +314,13 @@ class PT_HMI_API Visual : public Responder
         virtual void onEnableEvent(const EnableEvent& ev);
 
         virtual void onEnable(bool e);
+
+    protected:
+        virtual void onProcessShowEvent(const ShowEvent& ev);
+
+        virtual void onShowEvent(const ShowEvent& ev);
+
+        virtual void onShow(bool visible);
 
     protected:
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
@@ -374,6 +383,8 @@ class PT_HMI_API Visual : public Responder
         Gfx::PointF           _pos;
         Gfx::SizeF            _size;
         Gfx::RectF            _bounds;
+
+        bool                  _isVisible;
 
         void*                 _r1;
 };
@@ -439,7 +450,7 @@ class PT_HMI_API View : public Visual
 
         virtual void onActivate(Widget& w, bool active) = 0;
 
-        virtual void onShow(Widget& widget, bool isShown) = 0;
+        virtual void onShowRequest(Widget& widget, bool isShown) = 0;
 
         virtual void onMove(Widget& widget, const Gfx::PointF& pos) = 0;
 

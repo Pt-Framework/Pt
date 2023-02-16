@@ -96,8 +96,7 @@ void ScreenImpl::setParent(Screen* screen)
         Gfx::Size fs = _frameBuffer.size();
         Gfx::SizeF size( fs.width(), fs.height() );
 
-        ResizeEvent rev(*_parent, size);
-        _parent->processEvent(rev);
+        _parent->onResize(*this, size);
     }
 }
 
@@ -245,6 +244,13 @@ void ScreenImpl::onRepaint(Form& s, const Gfx::RectF& rect)
 
 void ScreenImpl::onActivate(Form& w, bool active)
 {
+}
+
+
+void ScreenImpl::onShowRequest(Form& form, bool isShow)
+{
+    ShowEvent ev(form, isShow);
+    Application::instance().commitEvent(ev);
 }
 
 

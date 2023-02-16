@@ -51,6 +51,7 @@ Form::Form()
 , _surface(0)
 , _nextResponder(0)
 , _layouts(0)
+, _show(true)
 , _active(0)
 , _focusWidget(0)
 {
@@ -80,6 +81,7 @@ void Form::setParent(Sheet* parent)
         _parent = parent;
 
         _parent->onInit(*this);
+        _parent->onShowRequest(*this, _show);
         _parent->onMove(*this, _requestedPosition);
         _parent->onResize(*this, _requestedSize);
     }
@@ -132,14 +134,14 @@ void Form::setContent(Widget* widget)
 }
 
 
-Widget* Form::findWidget(const Gfx::PointF& pos)
+Widget* Form::findWidget2(const Gfx::PointF& pos)
 {
     if( _mainWidget )
     {
         if( _mainWidget->geometry().contains(pos) )
         {
             Gfx::PointF p = onToWidget(*_mainWidget, pos);
-            Widget* found = _mainWidget->findWidget(p);
+            Widget* found = _mainWidget->findWidget2(p);
             return found ? found : _mainWidget;
         }
     }
@@ -148,7 +150,7 @@ Widget* Form::findWidget(const Gfx::PointF& pos)
 }
 
 
-Widget* Form::findWidget(const std::string& name)
+Widget* Form::findWidget2(const std::string& name)
 {
     if( ! _mainWidget )
         return 0;
@@ -156,11 +158,11 @@ Widget* Form::findWidget(const std::string& name)
     if( _mainWidget->name() == name )
         return _mainWidget;
 
-    return _mainWidget->findWidget(name);
+    return _mainWidget->findWidget2(name);
 }
 
 
-Widget* Form::findWidget(Pt::uint64_t vid)
+Widget* Form::findWidget2(Pt::uint64_t vid)
 {
     if( ! _mainWidget )
         return 0;
@@ -168,7 +170,7 @@ Widget* Form::findWidget(Pt::uint64_t vid)
     if( _mainWidget->vid() == vid )
         return _mainWidget;
 
-    return _mainWidget->findWidget(vid);
+    return _mainWidget->findWidget2(vid);
 }
 
 
@@ -592,7 +594,25 @@ void Form::onEnableRequest(Widget& widget, bool enable)
 }
 
 
-void Form::onShow(Widget& widget, bool isShown)
+void Form::onProcessShowEvent(const ShowEvent& ev)
+{
+    Base::onProcessShowEvent(ev);
+}
+
+
+void Form::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
+}
+
+
+void Form::onShow(bool visible)
+{
+    Base::onShow(visible);
+}
+
+
+void Form::onShowRequest(Widget& widget, bool isShown)
 {
     ShowEvent sev(widget, isShown);
     widget.processEvent(sev);

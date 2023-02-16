@@ -99,11 +99,11 @@ class PT_HMI_API Widget : public View
 
         const std::vector<Widget*>& widgets() const;
 
-        Widget* findWidget(const Gfx::PointF& pos);
+        Widget* findWidget2(const Gfx::PointF& pos);
 
-        Widget* findWidget(const std::string& name);
+        Widget* findWidget2(const std::string& name);
 
-        Widget* findWidget(Pt::uint64_t vid);
+        Widget* findWidget2(Pt::uint64_t vid);
 
         //
         // focus handling
@@ -144,10 +144,9 @@ class PT_HMI_API Widget : public View
         void processMnemonic();
 
       public:
+        // TODO: obsolete when processEvent return true/false if consumed
         bool acceptsInput() const;
 
-
-        bool isVisible() const;
 
         void show( bool b = true );
 
@@ -208,7 +207,7 @@ class PT_HMI_API Widget : public View
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
         
-        void onProcessLayoutEvent(const LayoutEvent& ev);
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
 
         virtual void onLayout(const Gfx::RectF& rect);
 
@@ -301,6 +300,8 @@ class PT_HMI_API Widget : public View
 
         virtual void onProcessShowEvent(const ShowEvent& ev);
 
+        virtual void onShowEvent(const ShowEvent& ev);
+
         virtual void onShow(bool visible);
 
 
@@ -369,7 +370,7 @@ class PT_HMI_API Widget : public View
 
         virtual void onActivate(Widget& w, bool active);
 
-        virtual void onShow(Widget& widget, bool isShown);
+        virtual void onShowRequest(Widget& widget, bool isShown);
 
         virtual void onMove(Widget& widget, const Gfx::PointF& pos);
 
@@ -390,7 +391,7 @@ class PT_HMI_API Widget : public View
 
         bool                         _isLayoutInvalid;
 
-        bool                         _visible;
+        bool                         _show;
         bool                         _enabled;
         
         Gfx::SizeF                   _minimumSize;

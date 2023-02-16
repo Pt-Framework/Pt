@@ -189,6 +189,7 @@ Visual::Visual()
 , _invalidates(0)
 , _enabledState(true)
 , _scaleFactor(1.0)
+, _isVisible(false)
 , _r1(0)
 { 
     Application::instance().registerVisual(*this);
@@ -199,6 +200,7 @@ Visual::Visual()
     _dispatcher += Pt::slot(*this, &Visual::onProcessMoveEvent);
     _dispatcher += Pt::slot(*this, &Visual::onProcessResizeEvent);
     _dispatcher += Pt::slot(*this, &Visual::onProcessEnableEvent);
+    _dispatcher += Pt::slot(*this, &Visual::onProcessShowEvent);
     _dispatcher += Pt::slot(*this, &Visual::onProcessMouseEvent);
     _dispatcher += Pt::slot(*this, &Visual::onProcessTouchEvent);
     _dispatcher += Pt::slot(*this, &Visual::onProcessScrollEvent);
@@ -393,6 +395,33 @@ void Visual::onEnableEvent(const EnableEvent& ev)
 
 void Visual::onEnable(bool e)
 {
+}
+
+//
+// visibility
+//
+
+bool Visual::isVisible() const
+{
+    return _isVisible;
+}
+
+
+void Visual::onProcessShowEvent(const ShowEvent& ev)
+{
+    onShowEvent(ev);
+}
+
+
+void Visual::onShowEvent(const ShowEvent& ev)
+{
+    onShow( ev.visible() );
+}
+
+
+void Visual::onShow(bool isShown)
+{
+    _isVisible = isShown;
 }
 
 //

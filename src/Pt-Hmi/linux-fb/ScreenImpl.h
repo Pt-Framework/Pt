@@ -135,6 +135,8 @@ class ScreenImpl : public Sheet
 
         virtual void onActivate(Form& form, bool active);
 
+        virtual void onShowRequest(Form& form, bool isShow);
+
         virtual void onMove(Form& form, const Gfx::PointF& pos);
 
         virtual void onResize(Form& form, const Gfx::SizeF& size);

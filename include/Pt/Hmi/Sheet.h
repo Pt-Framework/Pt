@@ -81,6 +81,8 @@ class PT_HMI_API Sheet : public Visual
 
         virtual void onActivate(Form& form, bool active) = 0;
 
+        virtual void onShowRequest(Form& form, bool isShow) = 0;
+
         virtual void onMove(Form& form, const Gfx::PointF& pos) = 0;
 
         virtual void onResize(Form& form, const Gfx::SizeF& size) = 0;

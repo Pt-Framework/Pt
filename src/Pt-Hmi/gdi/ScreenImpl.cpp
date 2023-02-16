@@ -83,8 +83,7 @@ void ScreenImpl::setParent(Screen* screen)
         Gfx::SizeF size(r.right, r.bottom);
         size /= scaleFactor();
 
-        ResizeEvent rev(*_parent, size);
-        _parent->processEvent(rev);
+        _parent->onResize(*this, size);
     }
 }
 
@@ -410,8 +409,7 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     Gfx::SizeF size(r.right, r.bottom);
     size /= ev.scaleFactor();
 
-    ResizeEvent rev(*_parent, size);
-    _parent->processEvent(rev);
+    _parent->onResize(*this, size);
 }
 
 

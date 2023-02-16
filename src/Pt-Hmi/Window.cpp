@@ -70,7 +70,7 @@ Window::Window(WindowManager* parent, WindowType type)
 : _impl(0)
 , _nextResponder(0)
 , _parent(0)
-, _visible(false)
+, _show(false)
 , _isActive(false)
 , _enabled(true)
 , _isClosed(false)
@@ -84,7 +84,6 @@ Window::Window(WindowManager* parent, WindowType type)
 {
     _form.setParent(this);
 
-    eventReceived() += Pt::slot(*this, &Window::onProcessShowEvent);
     eventReceived() += Pt::slot(*this, &Window::onProcessActivateEvent);
     eventReceived() += Pt::slot(*this, &Window::onProcessCloseEvent);
     eventReceived() += Pt::slot(*this, &Window::onProcessWindowStateEvent);
@@ -124,7 +123,7 @@ void Window::setParent(WindowManager& parent)
     _parent->onResize( *this, _requestedSize);
     _parent->onActivate(*this, _isActive);
     _parent->onEnableRequest(*this, _enabled);
-    _parent->onShow(*this, _visible);
+    _parent->onShow(*this, _show);
     
     onParentChanged(_parent);
 }
@@ -371,6 +370,13 @@ void Window::onActivate(Form& form, bool active)
 }
 
 
+void Window::onShowRequest(Form& form, bool isShow)
+{
+    ShowEvent ev(form, isShow);
+    Application::instance().commitEvent(ev);
+}
+
+
 void Window::onMove(Form& form, const Gfx::PointF& pos)
 {   
     //
@@ -529,14 +535,10 @@ void Window::onActivateEvent(const ActivateEvent& ev)
 }
 
 
-bool Window::isVisible() const
-{
-    return _visible;
-}
-
-
 void Window::show(bool b)
 {   
+    _show = b;
+
     if( ! _parent )
     {
         Screen& screen = Application::instance().screen();
@@ -551,13 +553,19 @@ void Window::show(bool b)
 
 void Window::onProcessShowEvent(const ShowEvent& ev)
 {
-    onShowEvent(ev);
+    Base::onProcessShowEvent(ev);
 }
 
 
 void Window::onShowEvent(const ShowEvent& ev)
 {
-    _visible = ev.visible();
+    Base::onShowEvent(ev);
+}
+
+
+void Window::onShow(bool visible)
+{
+    Base::onShow(visible);
 }
 
 
@@ -697,7 +705,6 @@ void Window::close(bool force)
     if(force)
     {
         show(false);
-        _visible = false;
         
         unparent();
         _isClosed = true;
@@ -717,7 +724,6 @@ void Window::onProcessCloseEvent(const CloseEvent& ev)
 void Window::onCloseEvent(const CloseEvent& ev)
 {
     show(false);
-    _visible = false;
     
     unparent();
     _isClosed = true;

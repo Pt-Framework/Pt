@@ -45,7 +45,7 @@ Widget::Widget()
 , _nextResponder(0)
 , _isCapture(false)
 , _isLayoutInvalid(true)
-, _visible(true)
+, _show(true)
 , _enabled(true)
 , _hasFocus(false)
 , _focusPolicy(NoFocus)
@@ -55,7 +55,6 @@ Widget::Widget()
 , _actionKey(Key::Space)
 , _mnemonic(0)
 {
-    eventReceived() += Pt::slot(*this, &Widget::onProcessShowEvent);
     eventReceived() += Pt::slot(*this, &Widget::onProcessLayoutEvent);
     eventReceived() += Pt::slot(*this, &Widget::onProcessFocusEvent);
 }
@@ -133,7 +132,7 @@ void Widget::setParent(View* parent)
 
         _parent->onInit(*this);
         _parent->onEnableRequest(*this, _enabled);
-        _parent->onShow(*this, _visible);
+        _parent->onShowRequest(*this, _show);
 
         invalidate();
 
@@ -246,7 +245,7 @@ const std::vector<Widget*>& Widget::widgets() const
 }
 
 
-Widget* Widget::findWidget(const Gfx::PointF& pos)
+Widget* Widget::findWidget2(const Gfx::PointF& pos)
 {
     std::vector<Widget*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
@@ -256,7 +255,7 @@ Widget* Widget::findWidget(const Gfx::PointF& pos)
         if( widget->geometry().contains(pos) )
         {
             Gfx::PointF p = toWidget(*widget, pos);
-            Widget* found = widget->findWidget(p);
+            Widget* found = widget->findWidget2(p);
             return found ? found : widget;
         }
     }
@@ -265,7 +264,7 @@ Widget* Widget::findWidget(const Gfx::PointF& pos)
 }
 
 
-Widget* Widget::findWidget(Pt::uint64_t vid)
+Widget* Widget::findWidget2(Pt::uint64_t vid)
 {
     std::vector<Widget*>::const_iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
@@ -275,7 +274,7 @@ Widget* Widget::findWidget(Pt::uint64_t vid)
         if( child->vid() == vid )
             return child;
 
-        Widget* widget = child->findWidget(vid);
+        Widget* widget = child->findWidget2(vid);
         if( widget )
             return widget;
     }
@@ -284,7 +283,7 @@ Widget* Widget::findWidget(Pt::uint64_t vid)
 }
 
 
-Widget* Widget::findWidget(const std::string& name)
+Widget* Widget::findWidget2(const std::string& name)
 {
     std::vector<Widget*>::const_iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
@@ -294,7 +293,7 @@ Widget* Widget::findWidget(const std::string& name)
         if( child->name() == name )
             return child;
 
-        Widget* widget = child->findWidget(name);
+        Widget* widget = child->findWidget2(name);
         if( widget )
             return widget;
     }
@@ -930,42 +929,40 @@ bool Widget::acceptsInput() const
 }
 
 
-bool Widget::isVisible() const
+void Widget::show(bool isShown)
 {
-    return _visible;
-}
-
-
-void Widget::show(bool s)
-{
-    _visible = s;
+    _show = isShown;
 
     if(_parent)
-        _parent->onShow(*this, s);
-    else  
-        _visible = s;
-}
-
-
-void Widget::onShow(Widget& widget, bool visible)
-{
-    ShowEvent sev(widget, visible);
-    widget.processEvent(sev);
+        _parent->onShowRequest(*this, isShown);
 }
 
 
 void Widget::onProcessShowEvent(const ShowEvent& ev)
 {
-    onShow( ev.visible() );
+    Base::onProcessShowEvent(ev);
+}
+
+
+void Widget::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
 }
 
 
 void Widget::onShow(bool isShown)
 {
-    _visible = isShown;
+    Base::onShow(isShown);
 
     relayout();
     repaint( bounds() );
+}
+
+
+void Widget::onShowRequest(Widget& widget, bool visible)
+{
+    ShowEvent sev(widget, visible);
+    widget.processEvent(sev);
 }
 
 

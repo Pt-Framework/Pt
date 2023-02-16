@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Screen.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/LayoutEvent.h> // RescaleEvent
+#include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Hmi/ScrollEvent.h>
@@ -48,6 +49,9 @@ Screen::Screen(ApplicationImpl& app)
 , _updates(0)
 , _pointer(0)
 {
+    ShowEvent showEv(*this, true);
+    processEvent(showEv);
+
     _impl->setParent(this);
     _impl->setNextResponder(this);
 }
@@ -56,6 +60,23 @@ Screen::Screen(ApplicationImpl& app)
 Screen::~Screen()
 {
     delete _impl;
+}
+
+
+void Screen::onInit(ScreenImpl& s)
+{
+}
+
+
+void Screen::onRelease(ScreenImpl& s)
+{
+}
+
+
+void Screen::onResize(ScreenImpl& s, const Gfx::SizeF& size)
+{
+    ResizeEvent rev(*this, size);
+    processEvent(rev);
 }
 
 
@@ -71,7 +92,7 @@ void Screen::removeWindow(Window& w)
 }
 
 
-Window* Screen::findWindow(const std::string& name)
+Window* Screen::findWindow2(const std::string& name)
 {
     std::vector<Window*>::const_iterator it;
     for(it = windows().begin(); it != windows().end(); ++it)
@@ -84,14 +105,14 @@ Window* Screen::findWindow(const std::string& name)
 }
 
 
-Widget* Screen::findWidget(const std::string& name)
+Widget* Screen::findWidget2(const std::string& name)
 {
     std::vector<Window*>::const_iterator it;
     for(it = windows().begin(); it != windows().end(); ++it)
     {
         Window* window = *it;
         
-        Widget* widget = window->findWidget(name);
+        Widget* widget = window->findWidget2(name);
         if(widget)
             return widget;
     }

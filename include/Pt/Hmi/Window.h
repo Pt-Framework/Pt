@@ -114,14 +114,14 @@ class PT_HMI_API Window : public Sheet
         void setContent(Widget* widget)
         { _form.setContent(widget); }
 
-        Widget* findWidget(const Gfx::PointF& pos)
-        { return _form.findWidget(pos); }
+        Widget* findWidget2(const Gfx::PointF& pos)
+        { return _form.findWidget2(pos); }
 
-        Widget* findWidget(const std::string& name)
-        { return _form.findWidget(name); }
+        Widget* findWidget2(const std::string& name)
+        { return _form.findWidget2(name); }
 
-        Widget* findWidget(Pt::uint64_t vid)
-        { return _form.findWidget(vid); }
+        Widget* findWidget2(Pt::uint64_t vid)
+        { return _form.findWidget2(vid); }
 
     public:
         PixmapSurface& surface();
@@ -138,8 +138,6 @@ class PT_HMI_API Window : public Sheet
 
         void activate(bool active = true);
 
-
-        bool isVisible() const;
 
         void show( bool b = true );
 
@@ -274,6 +272,8 @@ class PT_HMI_API Window : public Sheet
 
         virtual void onActivate(Form& form, bool active);
 
+        virtual void onShowRequest(Form& form, bool isShow);
+
         virtual void onMove(Form& form, const Gfx::PointF& pos);
 
         virtual void onResize(Form& form, const Gfx::SizeF& size);
@@ -359,6 +359,8 @@ class PT_HMI_API Window : public Sheet
 
         virtual void onShowEvent(const ShowEvent& ev);
 
+        virtual void onShow(bool visible);
+
     //
     // enabling
     //
@@ -386,7 +388,7 @@ class PT_HMI_API Window : public Sheet
 
         WindowManager*               _parent;
 
-        bool                         _visible; 
+        bool                         _show; 
         bool                         _isActive;
         bool                         _enabled; 
         bool                         _isClosed; 

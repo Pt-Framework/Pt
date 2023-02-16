@@ -80,11 +80,11 @@ class PT_HMI_API Form : public View
 
         void setContent(Widget* widget);
 
-        Widget* findWidget(const Gfx::PointF& pos);
+        Widget* findWidget2(const Gfx::PointF& pos);
 
-        Widget* findWidget(const std::string& name);
+        Widget* findWidget2(const std::string& name);
 
-        Widget* findWidget(Pt::uint64_t vid);
+        Widget* findWidget2(Pt::uint64_t vid);
 
     public:
         void relayout();
@@ -163,7 +163,7 @@ class PT_HMI_API Form : public View
 
         virtual void onActivate(Widget& w, bool active);
 
-        virtual void onShow(Widget& widget, bool isShown);
+        virtual void onShowRequest(Widget& widget, bool isShown);
 
         virtual void onMove(Widget& widget, const Gfx::PointF& pos);
 
@@ -247,6 +247,13 @@ class PT_HMI_API Form : public View
 
         virtual void onEnable(bool e);
     
+    protected:
+        virtual void onProcessShowEvent(const ShowEvent& ev);
+
+        virtual void onShowEvent(const ShowEvent& ev);
+
+        virtual void onShow(bool visible);
+
     //
     // input
     //
@@ -278,6 +285,8 @@ class PT_HMI_API Form : public View
 
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
+
+        bool                         _show;
         
         Widget*                      _active;
 
