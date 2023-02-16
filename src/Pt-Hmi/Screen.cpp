@@ -49,9 +49,6 @@ Screen::Screen(ApplicationImpl& app)
 , _updates(0)
 , _pointer(0)
 {
-    ShowEvent showEv(*this, true);
-    processEvent(showEv);
-
     _impl->setParent(this);
     _impl->setNextResponder(this);
 }
@@ -77,6 +74,13 @@ void Screen::onResize(ScreenImpl& s, const Gfx::SizeF& size)
 {
     ResizeEvent rev(*this, size);
     processEvent(rev);
+}
+
+
+void Screen::onShow(ScreenImpl& s, bool isShow)
+{
+    ShowEvent showEv(*this, true);
+    processEvent(showEv);
 }
 
 

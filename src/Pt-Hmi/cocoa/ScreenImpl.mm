@@ -71,8 +71,8 @@ void ScreenImpl::setParent(Screen* screen)
 
         size /= scaleFactor();
 
-        ResizeEvent rev(*_parent, size);
-        _parent->processEvent(rev);
+        _parent->onResize(*this, size);
+        _parent->onShow(*this, true);
     }
 }
 
@@ -462,8 +462,7 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 
     size /= scaleFactor();
 
-    ResizeEvent rev(*_parent, size);
-    _parent->processEvent(rev);
+    _parent->onResize(*this, size);
 }
 
 

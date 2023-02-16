@@ -84,6 +84,7 @@ void ScreenImpl::setParent(Screen* screen)
         size /= scaleFactor();
 
         _parent->onResize(*this, size);
+        _parent->onShow(*this, true);
     }
 }
 

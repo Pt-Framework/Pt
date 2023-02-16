@@ -121,6 +121,7 @@ class PT_HMI_API Screen : public Visual
 
         virtual void onResize(ScreenImpl& s, const Gfx::SizeF& size);
 
+        virtual void onShow(ScreenImpl& s, bool isShow);
 
     //
     // scaling

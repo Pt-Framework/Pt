@@ -97,6 +97,7 @@ void ScreenImpl::setParent(Screen* screen)
         Gfx::SizeF size( fs.width(), fs.height() );
 
         _parent->onResize(*this, size);
+        _parent->onShow(*this, true);
     }
 }
 
