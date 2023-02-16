@@ -149,10 +149,6 @@ class PT_HMI_API Form : public View
 
         virtual void onRelease(Widget& widget);
 
-        virtual void onRegister(Widget& widget);
-
-        virtual void onDeregister(Widget& widget);
-
         virtual Gfx::PointF onToWidget(const Widget& widget, 
                                         const Gfx::PointF& pos) const;
 
@@ -179,6 +175,10 @@ class PT_HMI_API Form : public View
     // Form
     //
     protected:
+        virtual void onRegister(Widget& widget);
+
+        virtual void onDeregister(Widget& widget);
+
         virtual void onSetFocusPolicy(Widget& w, FocusPolicy policy);
 
         virtual void onSetFocusIndex(Widget& w, unsigned index);
@@ -279,7 +279,6 @@ class PT_HMI_API Form : public View
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
         
-        Visual*                      _pointer;
         Widget*                      _active;
 
         std::vector<Widget*>         _focusList;

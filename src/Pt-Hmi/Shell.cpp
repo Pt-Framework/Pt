@@ -287,7 +287,7 @@ void Shell::onProcessKeyEvent(const KeyEvent& ev)
 
 void Shell::onRepaint(WindowManager& wm, const Gfx::RectF& rect)
 {
-    repaint(rect);;
+    repaint(rect);
 }
 
 

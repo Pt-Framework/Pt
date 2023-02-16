@@ -81,13 +81,14 @@ class PT_HMI_API Widget : public View
 
         void unparent();
 
-        void setForm(Form* form);
-
         Gfx::PaintSurface& surface();
 
         void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
         void setNextResponder(Responder* r);
+
+    private:
+        void setForm(Form* form);
 
     public:
         // implment add method in derived class

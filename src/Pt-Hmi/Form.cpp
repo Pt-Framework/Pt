@@ -51,7 +51,6 @@ Form::Form()
 , _surface(0)
 , _nextResponder(0)
 , _layouts(0)
-, _pointer(0)
 , _active(0)
 , _focusWidget(0)
 {
@@ -268,9 +267,6 @@ void Form::onDetach(Widget& widget)
   if(_active == &widget)
       _active = 0;
 
-    if(_pointer == &widget)
-        _pointer = 0;
-
     if(_mainWidget == &widget)
         _mainWidget = 0;
 
@@ -319,9 +315,6 @@ void Form::onDeregister(Widget& widget)
 {
     if(_active == &widget)
         _active = 0;
-    
-    if(_pointer == &widget)
-        _pointer = 0;
 
     //
     // focus handling
@@ -858,8 +851,6 @@ void Form::onProcessLeaveEvent(const LeaveEvent& ev)
 bool Form::onLeaveEvent(const LeaveEvent& ev )
 {
     //std::clog << "LEAVE Form: " << name()  << " " << vid() << std::endl;
-    _pointer = 0;
-    
     return Base::onLeaveEvent(ev);
 }
 

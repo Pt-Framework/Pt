@@ -155,27 +155,6 @@ void Widget::unparent()
 }
 
 
-void Widget::setForm(Form* form)
-{
-    if(_form)
-        _form->onDeregister(*this);
-
-    _form = 0;
-
-    if(form)
-        form->onRegister(*this);
-
-    _form = form;
-
-    std::vector<Widget*>::iterator it;
-    for(it = _children.begin(); it != _children.end(); ++it)
-    {
-        Widget* widget = *it;
-        widget->setForm(form);
-    }
-}
-
-
 void Widget::onAttach(Widget& widget)
 {
     _children.push_back(&widget);
@@ -222,6 +201,27 @@ void Widget::onRelease(Widget& widget)
 
     relayout();
     repaint( widget.geometry() );
+}
+
+
+void Widget::setForm(Form* form)
+{
+    if(_form)
+        _form->onDeregister(*this);
+
+    _form = 0;
+
+    if(form)
+        form->onRegister(*this);
+
+    _form = form;
+
+    std::vector<Widget*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Widget* widget = *it;
+        widget->setForm(form);
+    }
 }
 
 
