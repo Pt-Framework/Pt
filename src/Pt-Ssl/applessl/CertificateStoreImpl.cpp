@@ -171,6 +171,39 @@ void CertificateStoreImpl::loadPem(const char* pem, std::size_t len, const char*
 
 #ifdef PT_SSL_EXPERIMENTAL_KEY_IMPORT
 
+/*
+https://developer.apple.com/forums/thread/69642
+
+You need to do three things:
+
+    Before adding the certificate to the keychain, delete the public key from the keychain. There are situations where the presence of the public key confuses the identity matching code (r. 15615260).
+
+    Identity matching is done via the public key hash, which should be stored in the
+
+    kSecAttrLabel
+
+    kSecAttrApplicationLabel
+
+    attribute of the private key and the
+
+    kSecAttrPublicKeyHash
+
+    attribute of the certificate. After you’ve got both items in the keychain, get these attributes to confirm that they match up.
+
+    Once the above is sorted out, you can get the identity by calling
+
+    SecItemCopyMatching
+
+    looking for items where the
+
+    kSecClass
+
+    is
+
+    kSecClassIdentity
+
+    .
+*/
 // https://stackoverflow.com/questions/45997841/how-to-get-a-secidentityref-from-a-seccertificateref-and-a-seckeyref
 
 static OSStatus AddKeyToKeychain(SecKeyRef privateKey, SecKeychainRef targetKeychain)
