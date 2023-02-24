@@ -71,15 +71,15 @@ void Control::onSetStyleOptions(const StyleOptions& o)
 void Control::onInvalidate()
 {
     Widget::onInvalidate();
-
-    // TODO: repaint only if required in derived class
-    repaint( bounds() );
 }
 
 
 void Control::onLayout(const Gfx::RectF& rect)
 {
      Widget::onLayout(rect);
+
+     // TODO: repaint only if required in derived class
+     repaint();
 }
 
 

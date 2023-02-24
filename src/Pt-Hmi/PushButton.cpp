@@ -72,8 +72,6 @@ void PushButton::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
     _iconSize = iconSize;
     
     //onIconChanged();
-    //relayout();
-
     invalidate();
 }
 
@@ -396,6 +394,8 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 
     _textPos.set(textX, textY);
     _textPos = surface().align(_textPos);
+
+    repaint();
 }
 
 
@@ -457,6 +457,8 @@ void PushButton::onInvalidate()
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 
     Base::onInvalidate();
+
+    relayout();
 }
 
 

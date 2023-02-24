@@ -58,7 +58,6 @@ void Button::setText(const Pt::String& text)
 {
     _text = Widget::setMnemonic(text);
     relayout();
-    repaint( bounds() );
 }
 
 

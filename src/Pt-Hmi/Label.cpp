@@ -401,6 +401,8 @@ void Label::onLayout(const Gfx::RectF& rect)
         layoutText();
     else
         layoutImage();
+
+    repaint();
 }
 
 
@@ -448,6 +450,8 @@ void Label::onInvalidate()
 
         //layoutImage();
     }
+
+    relayout();
 }
 
 
