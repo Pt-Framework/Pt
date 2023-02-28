@@ -147,21 +147,19 @@ class PT_HMI_API Visual : public Responder
 
         /** @brief Returns the parent.
         */
-        Visual* parent()
-        {
-            return onGetParent();
-        }
+        Visual* parent();
 
         /** @brief Returns the parent.
         */
-        const Visual* parent() const
-        {
-            return onGetParent();
-        }
+        const Visual* parent() const;
 
 
+        /** @brief Adds a peer.
+        */
         void addPeer(Visual& peer);
 
+        /** @brief Removes a peer.
+        */
         void removePeer(Visual& peer);
 
         
@@ -262,6 +260,8 @@ class PT_HMI_API Visual : public Responder
 
         bool isVisible() const;
 
+        virtual void show(bool b = true);
+
         bool isEnabled() const
         {
             return _enabledState;
@@ -273,18 +273,9 @@ class PT_HMI_API Visual : public Responder
 
         virtual void resize(const Gfx::SizeF& s);
 
-    protected:
-        //
-        // TODO:
-        //
-        // reparent notification so virtual get parent is obsolete
-        //
-        // alternative names: onSetParent
-        //
+    protected:       
+        virtual void onSetParent(Visual* visual);
 
-        //virtual void onParentChanged(Visual* parent);
-
-        virtual Visual* onGetParent() const = 0;
 
         virtual Visual* onHitTest(const Gfx::PointF& pos);
 
@@ -310,6 +301,8 @@ class PT_HMI_API Visual : public Responder
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
         virtual void onRequestEnable(bool isEnable);
+
+        virtual void onRequestShow(bool e);
 
         virtual void onRequestMove(const Gfx::PointF& pos);
 
@@ -392,6 +385,8 @@ class PT_HMI_API Visual : public Responder
 
         Pt::uint64_t          _vid;
         std::string           _name;
+
+        Visual*               _parent;
         std::vector<Visual*>  _peers;
 
         int                   _invalidates;

@@ -136,7 +136,7 @@ void Widget::setParent(View* parent)
 
         invalidate();
 
-        onParentChanged(_parent);
+        onSetParent(_parent);
     }
 }
 
@@ -150,7 +150,7 @@ void Widget::unparent()
     _parent->onDetach(*this);
     _parent = 0;
         
-    onParentChanged(0);
+    onSetParent(0);
 }
 
 
@@ -230,11 +230,6 @@ void Widget::onAddWidget(Widget& w)
 
 
 void Widget::onRemoveWidget(Widget& w)
-{
-}
-
-
-void Widget::onParentChanged(View*)
 {
 }
 
@@ -930,7 +925,16 @@ bool Widget::acceptsInput() const
 }
 
 
-void Widget::show(bool isShown)
+//void Widget::show(bool isShown)
+//{
+//    _show = isShown;
+//
+//    if(_parent)
+//        _parent->onShowRequest(*this, isShown);
+//}
+
+
+void Widget::onRequestShow(bool isShown)
 {
     _show = isShown;
 
@@ -1189,12 +1193,6 @@ void Widget::setMinimumHeight(double h)
 {
     _minimumSize.setHeight(h);
     relayout();
-}
-
-
-Visual* Widget::onGetParent() const
-{
-    return _parent;
 }
 
 

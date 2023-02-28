@@ -125,7 +125,7 @@ void Window::setParent(WindowManager& parent)
     _parent->onEnableRequest(*this, _enabled);
     _parent->onShow(*this, _show);
     
-    onParentChanged(_parent);
+    onSetParent(_parent);
 }
 
 
@@ -141,12 +141,7 @@ void Window::unparent()
     delete _impl;
     _impl = 0;
         
-    onParentChanged(0);
-}
-
-
-void Window::onParentChanged(WindowManager* )
-{
+    onSetParent(_parent);
 }
 
 
@@ -265,12 +260,6 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
-
-Visual* Window::onGetParent() const
-{
-    return _parent;
-}
-
 
 Visual* Window::onHitTest(const Gfx::PointF& p)
 {
@@ -535,7 +524,23 @@ void Window::onActivateEvent(const ActivateEvent& ev)
 }
 
 
-void Window::show(bool b)
+//void Window::show(bool b)
+//{   
+//    _show = b;
+//
+//    if( ! _parent )
+//    {
+//        Screen& screen = Application::instance().screen();
+//        screen.addWindow(*this);
+//    }
+//    
+//    invalidate();
+//
+//    _parent->onShow(*this, b);
+//}
+
+
+void Window::onRequestShow(bool b)
 {   
     _show = b;
 
@@ -614,7 +619,16 @@ void Window::showModal()
 }
 
 
-void Window::enable(bool e)
+//void Window::enable(bool e)
+//{
+//    _enabled = e;
+//
+//    if(_parent)
+//        _parent->onEnableRequest(*this, e);
+//}
+
+
+void Window::onRequestEnable(bool e)
 {
     _enabled = e;
 

@@ -99,8 +99,6 @@ class ScreenImpl : public WindowManager
     // Visual
     //
     protected:
-        virtual Visual* onGetParent() const;
-
         virtual Visual* onHitTest(const Gfx::PointF& pos);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;

@@ -148,7 +148,7 @@ class PT_HMI_API Widget : public View
         bool acceptsInput() const;
 
 
-        void show( bool b = true );
+        //void show( bool b = true );
 
         //void enable(bool b = true);
 
@@ -255,12 +255,6 @@ class PT_HMI_API Widget : public View
 
         virtual void onRemoveWidget(Widget& w);
 
-        //
-        // TODO:
-        //
-        // onParentChanged in Visual base class
-        //
-        virtual void onParentChanged(View* v);
 
         virtual void onActionKey(const KeyEvent& kev);
 
@@ -272,8 +266,6 @@ class PT_HMI_API Widget : public View
     // Visual
     //
     protected:
-        virtual Visual* onGetParent() const;
-
         virtual Visual* onHitTest(const Gfx::PointF& p);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
@@ -283,6 +275,8 @@ class PT_HMI_API Widget : public View
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onRequestEnable(bool isEnable);
+
+        virtual void onRequestShow(bool isShown);
 
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);

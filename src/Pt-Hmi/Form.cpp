@@ -84,6 +84,8 @@ void Form::setParent(Sheet* parent)
         _parent->onShowRequest(*this, _show);
         _parent->onMove(*this, _requestedPosition);
         _parent->onResize(*this, _requestedSize);
+
+        onSetParent(_parent);
     }
 }
 
@@ -96,6 +98,8 @@ void Form::unparent()
     _parent->onRelease(*this);
     _parent->onDetach(*this);
     _parent = 0;
+
+    onSetParent(_parent);
 }
 
 
@@ -171,12 +175,6 @@ Widget* Form::findWidget2(Pt::uint64_t vid)
         return _mainWidget;
 
     return _mainWidget->findWidget2(vid);
-}
-
-
-Visual* Form::onGetParent() const
-{
-    return _parent;
 }
 
 

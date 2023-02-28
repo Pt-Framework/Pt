@@ -108,8 +108,6 @@ class ShellWM : public WindowManager
     // Visual
     //
     protected:
-        virtual Visual* onGetParent() const;
-
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;

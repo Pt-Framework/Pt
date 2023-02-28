@@ -139,12 +139,12 @@ class PT_HMI_API Window : public Sheet
         void activate(bool active = true);
 
 
-        void show( bool b = true );
+        //void show( bool b = true );
 
         void showModal();
 
 
-        void enable(bool e = true);
+        //void enable(bool e = true);
 
 
         void move(const Gfx::PointF& p);
@@ -213,9 +213,6 @@ class PT_HMI_API Window : public Sheet
 
         const WindowImpl* impl() const; 
 
-    protected:
-        virtual void onParentChanged(WindowManager*);
-
     //
     // Responder
     //
@@ -238,8 +235,6 @@ class PT_HMI_API Window : public Sheet
     // Visual
     //
     protected:
-        virtual Visual* onGetParent() const;
-
         Visual* onHitTest(const Gfx::PointF& p);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
@@ -249,6 +244,10 @@ class PT_HMI_API Window : public Sheet
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onRequestRepaint(const Gfx::RectF& rect);
+
+        virtual void onRequestEnable(bool isEnable);
+
+        virtual void onRequestShow(bool isShown);
 
     //
     // Sheet

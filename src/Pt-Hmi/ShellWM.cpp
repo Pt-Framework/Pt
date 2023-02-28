@@ -103,6 +103,8 @@ ShellWM::~ShellWM()
 void ShellWM::setParent(Shell* shell)
 {
     _parent = shell;
+
+    onSetParent(_parent);
 }
 
 
@@ -187,12 +189,6 @@ const std::vector<Window*>& ShellWM::windows() const
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
-
-Visual* ShellWM::onGetParent() const
-{
-    return _parent;
-}
-
 
 Gfx::PointF ShellWM::onToParent(const Gfx::PointF& pos) const
 {

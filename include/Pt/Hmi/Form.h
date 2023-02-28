@@ -107,8 +107,6 @@ class PT_HMI_API Form : public View
     // Visual
     //
     protected:
-        virtual Visual* onGetParent() const;
-
         virtual Visual* onHitTest(const Gfx::PointF& pos);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;

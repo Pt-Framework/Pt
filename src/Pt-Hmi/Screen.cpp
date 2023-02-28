@@ -188,12 +188,6 @@ Responder* Screen::onNextResponder()
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
-Visual* Screen::onGetParent() const
-{
-    return 0;
-}
-
-
 Visual* Screen::onHitTest(const Gfx::PointF& pos)
 {
     return _impl->hitTest(pos);

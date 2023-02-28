@@ -225,11 +225,6 @@ class WindowFrame : public Visual
         }
         
     protected:
-        Visual* onGetParent() const
-        {
-            return 0;
-        }
-
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const
         { 
             return pos; 

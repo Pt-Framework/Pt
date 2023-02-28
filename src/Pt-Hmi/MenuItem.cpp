@@ -265,9 +265,11 @@ void MenuItem::onTriggered()
 }
 
 
-void MenuItem::onParentChanged(View* v)
+void MenuItem::onSetParent(Visual* visual)
 {
-    if( ! v && _menu)
+    Base::onSetParent(visual);
+    
+    if( ! visual && _menu)
         _menu->removeItem(*this);
 }
 

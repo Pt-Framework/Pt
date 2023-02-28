@@ -186,6 +186,7 @@ bool Responder::onKeyEvent(const KeyEvent& ev)
 
 Visual::Visual()
 : _vid( Application::instance().makeId()  )
+, _parent(0)
 , _invalidates(0)
 , _enabledState(true)
 , _scaleFactor(1.0)
@@ -222,6 +223,24 @@ Visual::~Visual()
     }
 
     Application::instance().unregisterVisual(*this);
+}
+
+
+Visual* Visual::parent()
+{
+    return _parent;
+}
+
+
+const Visual* Visual::parent() const
+{
+    return _parent;
+}
+
+
+void Visual::onSetParent(Visual* visual)
+{
+    _parent = visual;
 }
 
 
@@ -417,6 +436,45 @@ void Visual::onEnable(bool isEnable)
 }
 
 //
+// visibility
+//
+
+bool Visual::isVisible() const
+{
+    return _isVisible;
+}
+
+
+void Visual::show(bool b)
+{
+    onRequestShow(b);
+}
+
+
+void Visual::onRequestShow(bool e)
+{
+}
+
+
+void Visual::onProcessShowEvent(const ShowEvent& ev)
+{
+    onShowEvent(ev);
+}
+
+
+void Visual::onShowEvent(const ShowEvent& ev)
+{
+    onShow( ev.visible() );
+}
+
+
+// TODO: remove and only use onShowEvent
+void Visual::onShow(bool isShown)
+{
+    _isVisible = isShown;
+}
+
+//
 // geometry
 //
 
@@ -439,34 +497,6 @@ void Visual::resize(const Gfx::SizeF& s)
 
 void Visual::onRequestResize(const Gfx::SizeF& s)
 {
-}
-
-//
-// visibility
-//
-
-bool Visual::isVisible() const
-{
-    return _isVisible;
-}
-
-
-void Visual::onProcessShowEvent(const ShowEvent& ev)
-{
-    onShowEvent(ev);
-}
-
-
-void Visual::onShowEvent(const ShowEvent& ev)
-{
-    onShow( ev.visible() );
-}
-
-
-// TODO: remove and only use onShowEvent
-void Visual::onShow(bool isShown)
-{
-    _isVisible = isShown;
 }
 
 //

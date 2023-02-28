@@ -104,8 +104,8 @@ class PT_HMI_API MenuItem : public Control
     protected:
         // TODO: rename onSelected
         virtual void onTriggered();
-        
-        virtual void onParentChanged(View* v);
+
+        virtual void onSetParent(Visual* visual);
         
         virtual void onShortcut(const KeyEvent& kev);
 

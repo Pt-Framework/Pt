@@ -99,6 +99,8 @@ void ScreenImpl::setParent(Screen* screen)
         _parent->onResize(*this, size);
         _parent->onShow(*this, true);
     }
+
+    onSetParent(_parent);
 }
 
 
@@ -143,12 +145,6 @@ Responder* ScreenImpl::onNextResponder()
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
-
-Visual* ScreenImpl::onGetParent() const
-{
-    return _parent;
-}
-
 
 Visual* ScreenImpl::onHitTest(const Gfx::PointF& pos)
 {
