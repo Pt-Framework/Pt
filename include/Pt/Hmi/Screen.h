@@ -112,7 +112,7 @@ class PT_HMI_API Screen : public Visual
 
         virtual void onEvent( const Event& ev );
 
-        virtual void onRepaintRequest(const Gfx::RectF& rect);
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
 
     protected:
         virtual void onInit(ScreenImpl& s);

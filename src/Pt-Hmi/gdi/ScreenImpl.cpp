@@ -171,7 +171,7 @@ void ScreenImpl::onEvent(const Event& ev)
 }
 
 
-void ScreenImpl::onRepaintRequest(const Gfx::RectF& rect)
+void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->repaint(rect);

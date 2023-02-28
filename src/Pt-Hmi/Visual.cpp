@@ -77,10 +77,10 @@ bool Responder::mouseEvent(const MouseEvent& ev)
 bool Responder::onMouseEvent(const MouseEvent& ev)
 {
     if( ev.isPress() )
-        return onMouseDown(ev);
+        return onMousePress(ev);
             
     if( ev.isRelease() )
-        return onMouseUp(ev);
+        return onMouseRelease(ev);
              
       return onMouseMove(ev);
 }
@@ -332,6 +332,7 @@ void Visual::invalidate()
 }
 
 
+// TODO: invalidate() should lead to an update event
 void Visual::onProcessInvalidateEvent(const InvalidateEvent& ev)
 {
     --_invalidates;
@@ -343,6 +344,7 @@ void Visual::onProcessInvalidateEvent(const InvalidateEvent& ev)
 }
 
 
+// TODO: remove and only use onInvalidateEvent
 void Visual::onInvalidateEvent(const InvalidateEvent& ev)
 {
     onInvalidate();
@@ -357,7 +359,13 @@ void Visual::onInvalidate()
 // painting
 //
 
-void Visual::onRepaintRequest(const Gfx::RectF& rect)
+void Visual::repaint(const Gfx::RectF& rect)
+{
+    onRequestRepaint(rect);
+}
+
+
+void Visual::onRequestRepaint(const Gfx::RectF& rect)
 {
 }
 
@@ -379,6 +387,17 @@ void Visual::onPaintEvent(const PaintEvent& ev)
 // enabling
 //
 
+void Visual::enable(bool isEnable)
+{
+    onRequestEnable(isEnable);
+}
+
+
+void Visual::onRequestEnable(bool e)
+{
+}
+
+
 void Visual::onProcessEnableEvent(const EnableEvent& ev)
 {
     onEnableEvent(ev);
@@ -393,7 +412,32 @@ void Visual::onEnableEvent(const EnableEvent& ev)
 }
 
 
-void Visual::onEnable(bool e)
+void Visual::onEnable(bool isEnable)
+{
+}
+
+//
+// geometry
+//
+
+void Visual::move(const Gfx::PointF& pos)
+{
+    onRequestMove(pos);
+}
+
+
+void Visual::onRequestMove(const Gfx::PointF& pos)
+{
+}
+
+
+void Visual::resize(const Gfx::SizeF& s)
+{
+    onRequestResize(s);
+}
+
+
+void Visual::onRequestResize(const Gfx::SizeF& s)
 {
 }
 
@@ -419,6 +463,7 @@ void Visual::onShowEvent(const ShowEvent& ev)
 }
 
 
+// TODO: remove and only use onShowEvent
 void Visual::onShow(bool isShown)
 {
     _isVisible = isShown;

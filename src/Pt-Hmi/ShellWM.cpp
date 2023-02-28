@@ -657,7 +657,7 @@ void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void ShellWM::onRepaintRequest(const Gfx::RectF& rect)
+void ShellWM::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->onRepaint(*this, rect);

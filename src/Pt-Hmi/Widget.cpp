@@ -526,7 +526,7 @@ void Widget::onInvalidate()
 }
 
 
-void Widget::onRepaintRequest(const Gfx::RectF& rect)
+void Widget::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->onRepaint(*this, rect);
@@ -749,6 +749,7 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
 }
 
 
+// TODO: onLayoutEvent
 void Widget::onLayout(const Gfx::RectF& rect)
 {
     //
@@ -966,12 +967,21 @@ void Widget::onShowRequest(Widget& widget, bool visible)
 }
 
 
-void Widget::enable(bool e)
+//void Widget::enable(bool e)
+//{
+//    _enabled = e;
+//
+//    if(_parent)
+//        _parent->onEnableRequest(*this, e);
+//}
+
+
+void Widget::onRequestEnable(bool isEnable)
 {
-    _enabled = e;
+    _enabled = isEnable;
 
     if(_parent)
-        _parent->onEnableRequest(*this, e);
+        _parent->onEnableRequest(*this, isEnable);
 }
 
 

@@ -111,7 +111,7 @@ class ScreenImpl : public Sheet
 
         virtual void onEvent(const Event& ev);
 
-        virtual void onRepaintRequest(const Gfx::RectF& rect);
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
 
     //
     // Sheet

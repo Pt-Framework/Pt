@@ -353,7 +353,7 @@ void Form::onInvalidate()
 }
 
 
-void Form::onRepaintRequest(const Gfx::RectF& rect)
+void Form::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->onRepaint(*this, rect);

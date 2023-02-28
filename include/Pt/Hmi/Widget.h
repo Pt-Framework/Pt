@@ -150,7 +150,7 @@ class PT_HMI_API Widget : public View
 
         void show( bool b = true );
 
-        void enable(bool b = true);
+        //void enable(bool b = true);
 
         void activate(bool active);
 
@@ -180,7 +180,7 @@ class PT_HMI_API Widget : public View
     // painting
     //  
     protected:
-        virtual void onRepaintRequest(const Gfx::RectF& rect);
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
 
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
@@ -255,6 +255,11 @@ class PT_HMI_API Widget : public View
 
         virtual void onRemoveWidget(Widget& w);
 
+        //
+        // TODO:
+        //
+        // onParentChanged in Visual base class
+        //
         virtual void onParentChanged(View* v);
 
         virtual void onActionKey(const KeyEvent& kev);
@@ -276,6 +281,8 @@ class PT_HMI_API Widget : public View
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
         virtual void onEvent(const Pt::Event& ev);
+
+        virtual void onRequestEnable(bool isEnable);
 
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);

@@ -256,7 +256,7 @@ void Screen::onRescale(double scaling)
 }
 
 
-void Screen::onRepaintRequest(const Gfx::RectF& rect)
+void Screen::onRequestRepaint(const Gfx::RectF& rect)
 {
     _updateRect.unify(rect);
     ++_updates;

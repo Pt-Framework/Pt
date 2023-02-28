@@ -117,7 +117,7 @@ class PT_HMI_API Form : public View
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onRepaintRequest(const Gfx::RectF& rect);
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
 
     //
     // Responder

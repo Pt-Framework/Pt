@@ -248,7 +248,7 @@ class PT_HMI_API Window : public Sheet
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onRepaintRequest(const Gfx::RectF& rect);
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
 
     //
     // Sheet

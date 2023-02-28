@@ -122,7 +122,7 @@ class ShellWM : public WindowManager
 
         virtual void onSetCapture(bool capture);
 
-        virtual void onRepaintRequest(const Gfx::RectF& rect);
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
     
     //
     // Responder

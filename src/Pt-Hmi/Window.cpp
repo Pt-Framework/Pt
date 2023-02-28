@@ -444,7 +444,7 @@ void Window::onInvalidate()
 }
 
 
-void Window::onRepaintRequest(const Gfx::RectF& rect)
+void Window::onRequestRepaint(const Gfx::RectF& rect)
 {
     //std::clog << "REPAINT: " << title() << std::endl;
 

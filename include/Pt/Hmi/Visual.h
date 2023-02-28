@@ -101,10 +101,10 @@ class PT_HMI_API Responder
         virtual bool onKeyEvent(const KeyEvent& ev);
 
     protected:
-        virtual bool onMouseUp(const MouseEvent& ev) 
+        virtual bool onMousePress(const MouseEvent& ev) 
         { return false; }
 
-        virtual bool onMouseDown(const MouseEvent& ev) 
+        virtual bool onMouseRelease(const MouseEvent& ev) 
         { return false; }
 
         virtual bool onMouseMove(const MouseEvent& ev) 
@@ -245,10 +245,7 @@ class PT_HMI_API Visual : public Responder
 
         void invalidate();
 
-        virtual void repaint(const Gfx::RectF& rect)
-        {
-            onRepaintRequest(rect);
-        }
+        virtual void repaint(const Gfx::RectF& rect);
 
         virtual void repaint()
         {
@@ -263,14 +260,30 @@ class PT_HMI_API Visual : public Responder
         void update(const Gfx::RectF& rect)
         { repaint(rect); }
 
+        bool isVisible() const;
+
         bool isEnabled() const
         {
             return _enabledState;
         }
 
-        bool isVisible() const;
+        virtual void enable(bool isEnable = true);
+
+        virtual void move(const Gfx::PointF& pos);
+
+        virtual void resize(const Gfx::SizeF& s);
 
     protected:
+        //
+        // TODO:
+        //
+        // reparent notification so virtual get parent is obsolete
+        //
+        // alternative names: onSetParent
+        //
+
+        //virtual void onParentChanged(Visual* parent);
+
         virtual Visual* onGetParent() const = 0;
 
         virtual Visual* onHitTest(const Gfx::PointF& pos);
@@ -294,6 +307,14 @@ class PT_HMI_API Visual : public Responder
 
         virtual void onSetCapture(bool capture);
 
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
+
+        virtual void onRequestEnable(bool isEnable);
+
+        virtual void onRequestMove(const Gfx::PointF& pos);
+
+        virtual void onRequestResize(const Gfx::SizeF& s);
+
     protected:
         virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
 
@@ -302,8 +323,6 @@ class PT_HMI_API Visual : public Responder
         virtual void onInvalidate();
 
     protected:
-        virtual void onRepaintRequest(const Gfx::RectF& rect);
-
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
