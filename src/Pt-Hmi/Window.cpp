@@ -470,8 +470,7 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
     Base::onPaintEvent(ev);
 
-    Gfx::RectF updateRect = bounds().intersect( ev.rect() );
-    onPaint(_surface, updateRect);
+    onPaint( _surface, ev.rect() );
 }
 
 

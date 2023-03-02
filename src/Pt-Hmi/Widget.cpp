@@ -573,15 +573,12 @@ void Widget::onProcessPaintEvent(const PaintEvent& ev)
 
 void Widget::onPaintEvent(const PaintEvent& ev)
 {    
-    View::onPaintEvent(ev);
-
-    const Gfx::RectF& rect = ev.rect();
-
     //static int nnn = 0;
     //std::clog << "PAINT EVENT: " << typeid(*this).name() << " " << ++nnn << std::endl;
 
-    Gfx::RectF updateRect = rect.intersect( bounds() );
-    onPaint(_surface, updateRect);
+    Base::onPaintEvent(ev);
+
+    onPaint( _surface, ev.rect() );
 }
 
 
