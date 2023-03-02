@@ -41,6 +41,8 @@ namespace Pt {
 
 namespace Hmi {
 
+class Key;
+
 ///////////////////////////////////////////////////////////////////////
 // TODO: move base functionality to Visual API
 //       surface in Form
@@ -153,21 +155,22 @@ class PT_HMI_API Form : public View
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
                                           const Gfx::PointF& pos) const;
 
-        virtual void onRepaint(Widget& widget, const Gfx::RectF& rect);
+    protected:
+        virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);
 
-        virtual void onRelayout(Widget& widget);
+        virtual void onRelayoutRequest(Widget& widget);
 
         virtual void onEnableRequest(Widget& widget, bool isEnable);
 
-        virtual void onActivate(Widget& w, bool active);
+        virtual void onActivateRequest(Widget& w, bool active);
 
         virtual void onShowRequest(Widget& widget, bool isShown);
 
-        virtual void onMove(Widget& widget, const Gfx::PointF& pos);
+        virtual void onMoveRequest(Widget& widget, const Gfx::PointF& pos);
 
-        virtual void onResize(Widget& widget, const Gfx::SizeF& size);
+        virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size);
 
-        virtual void onRaise(Widget& widget);
+        virtual void onRaiseRequest(Widget& widget);
 
     //
     // Form

@@ -118,7 +118,7 @@ class ShellWM : public WindowManager
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onSetCapture(bool capture);
+        virtual void onRequestCapture(bool capture);
 
         virtual void onRequestRepaint(const Gfx::RectF& rect);
     

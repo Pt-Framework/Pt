@@ -524,11 +524,11 @@ void Widget::onInvalidate()
 void Widget::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
-        _parent->onRepaint(*this, rect);
+        _parent->onRepaintRequest(*this, rect);
 }
 
 
-void Widget::onRepaint(Widget& w, const Gfx::RectF& rect)
+void Widget::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
 {
     Gfx::PointF widgetPos = fromWidget( w, rect.topLeft() );
     Gfx::RectF widgetRect( widgetPos, rect.size() );
@@ -587,7 +587,7 @@ void Widget::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
 }
 
 
-void Widget::onRelayout(Widget&)
+void Widget::onRelayoutRequest(Widget&)
 {   
     relayout();
 }
@@ -598,7 +598,7 @@ void Widget::relayout()
     _isLayoutInvalid = true;
 
     if(_parent)
-        _parent->onRelayout(*this);
+        _parent->onRelayoutRequest(*this);
 }
 
 
@@ -793,7 +793,7 @@ void Widget::onRescale(double scaling)
 }
 
 
-void Widget::move(const Gfx::PointF& pos)
+void Widget::onRequestMove(const Gfx::PointF& pos)
 {
     //
     // align to physical pixel grid
@@ -812,11 +812,11 @@ void Widget::move(const Gfx::PointF& pos)
     Application::instance().commitEvent(mev);
 
     if(_parent)
-        _parent->onMove(*this, aligedPos);
+        _parent->onMoveRequest(*this, aligedPos);
 }
 
 
-void Widget::onMove(Widget& widget, const Gfx::PointF& pos)
+void Widget::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
 {
 }
 
@@ -848,7 +848,7 @@ void Widget::onMoveEvent(const MoveEvent& ev)
 }
 
 
-void Widget::resize(const Gfx::SizeF& size)
+void Widget::onRequestResize(const Gfx::SizeF& size)
 {   
     Gfx::SizeF alignedSize = _surface.align(size);
 
@@ -878,11 +878,11 @@ void Widget::resize(const Gfx::SizeF& size)
     Application::instance().commitEvent(rev);
 
     if(_parent)
-        _parent->onResize(*this, alignedSize);
+        _parent->onResizeRequest(*this, alignedSize);
 }
 
 
-void Widget::onResize(Widget& widget, const Gfx::SizeF& size)
+void Widget::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 {
 }
 
@@ -1033,25 +1033,25 @@ void Widget::onEnableRequest(Widget& widget, bool enable)
 void Widget::activate(bool active)
 {
     if(_parent)
-        _parent->onActivate(*this, active);
+        _parent->onActivateRequest(*this, active);
 }
 
 
-void Widget::onActivate(Widget& w, bool active)
+void Widget::onActivateRequest(Widget& w, bool active)
 {
     if(_parent)
-        _parent->onActivate(*this, active);
+        _parent->onActivateRequest(*this, active);
 }
 
 
 void Widget::raise()
 {
     if(_parent)
-        _parent->onRaise(*this);
+        _parent->onRaiseRequest(*this);
 }
 
 
-void Widget::onRaise(Widget& w)
+void Widget::onRaiseRequest(Widget& w)
 {
     std::vector<Widget*>::iterator it = std::find(_children.begin(), 
                                                   _children.end(), &w);

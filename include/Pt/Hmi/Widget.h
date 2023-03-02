@@ -64,6 +64,7 @@ namespace Pt {
 namespace Hmi {
 
 class Form;
+class Key;
 
 class PT_HMI_API Widget : public View
 {
@@ -164,10 +165,6 @@ class PT_HMI_API Widget : public View
     public:
         const Gfx::RectF geometry() const;
 
-        void move(const Gfx::PointF& pos);
-
-        void resize(const Gfx::SizeF& s);
-
     //
     // invalidation
     // 
@@ -180,8 +177,6 @@ class PT_HMI_API Widget : public View
     // painting
     //  
     protected:
-        virtual void onRequestRepaint(const Gfx::RectF& rect);
-
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -201,7 +196,6 @@ class PT_HMI_API Widget : public View
 
         Gfx::SizeF measure(const SizePolicy& policy);
 
-    public:
         void relayout();
 
     protected:
@@ -272,24 +266,19 @@ class PT_HMI_API Widget : public View
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
-        virtual void onEvent(const Pt::Event& ev);
-
-        virtual void onRequestEnable(bool isEnable);
+        
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
 
         virtual void onRequestShow(bool isShown);
 
-    protected:
-        virtual void onProcessMouseEvent(const MouseEvent& ev);
+        virtual void onRequestEnable(bool isEnable);
 
-        virtual void onProcessTouchEvent(const TouchEvent& ev);
+        virtual void onRequestMove(const Gfx::PointF& pos);
 
-        virtual void onProcessScrollEvent(const ScrollEvent& ev);
+        virtual void onRequestResize(const Gfx::SizeF& s);
 
-        virtual void onProcessEnterEvent(const EnterEvent& ev);
-
-        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
-
-        virtual void onProcessKeyEvent(const KeyEvent& ev);
+        
+        virtual void onEvent(const Pt::Event& ev);
 
 
         virtual void onProcessEnableEvent(const EnableEvent& ev);
@@ -327,6 +316,19 @@ class PT_HMI_API Widget : public View
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
+
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
+
+        virtual void onProcessTouchEvent(const TouchEvent& ev);
+
+        virtual void onProcessScrollEvent(const ScrollEvent& ev);
+
+        virtual void onProcessEnterEvent(const EnterEvent& ev);
+
+        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
+
+        virtual void onProcessKeyEvent(const KeyEvent& ev);
+
     //
     // Responder
     //
@@ -363,21 +365,22 @@ class PT_HMI_API Widget : public View
 
         virtual void onRelease(Widget& widget);
 
-        virtual void onRepaint(Widget& widget, const Gfx::RectF& rect);
+    protected:
+        virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);
 
-        virtual void onRelayout(Widget& widget);
+        virtual void onRelayoutRequest(Widget& widget);
 
         virtual void onEnableRequest(Widget& widget, bool isEnable);
 
-        virtual void onActivate(Widget& w, bool active);
+        virtual void onActivateRequest(Widget& w, bool active);
 
         virtual void onShowRequest(Widget& widget, bool isShown);
 
-        virtual void onMove(Widget& widget, const Gfx::PointF& pos);
+        virtual void onMoveRequest(Widget& widget, const Gfx::PointF& pos);
 
-        virtual void onResize(Widget& widget, const Gfx::SizeF& size);
+        virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size);
 
-        virtual void onRaise(Widget& w);
+        virtual void onRaiseRequest(Widget& w);
 
     private:
         Gfx::PaintRegion             _surface;

@@ -127,7 +127,7 @@ class PT_HMI_API Application : public Pt::System::Application
     protected:
         void onSetPointer(Visual& v, bool isPointer);
 
-        void onSetCapture(Visual& target, bool capture);
+        void onRequestCapture(Visual& target, bool capture);
 
         void onShowPopup(Popup& w, bool transient);
 

@@ -365,7 +365,7 @@ Visual* Application::capture() const
 }
 
 
-void Application::onSetCapture(Visual& target, bool isCapture)
+void Application::onRequestCapture(Visual& target, bool isCapture)
 {
     std::list<Visual*>::iterator it = std::find(_capture.begin(), 
                                                 _capture.end(), &target);

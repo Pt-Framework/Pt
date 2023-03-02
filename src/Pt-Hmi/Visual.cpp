@@ -188,8 +188,8 @@ Visual::Visual()
 : _vid( Application::instance().makeId()  )
 , _parent(0)
 , _invalidates(0)
-, _enabledState(true)
 , _scaleFactor(1.0)
+, _enabledState(true)
 , _isVisible(false)
 , _r1(0)
 { 
@@ -225,6 +225,30 @@ Visual::~Visual()
     Application::instance().unregisterVisual(*this);
 }
 
+//
+// global identifier
+// 
+
+Pt::uint64_t Visual::vid() const
+{
+    return _vid;
+}
+
+
+const std::string& Visual::name() const
+{
+    return _name;
+}
+        
+
+void Visual::setName(const std::string& n)
+{
+    _name = n;
+}
+
+//
+// hierachy management
+// 
 
 Visual* Visual::parent()
 {
@@ -243,6 +267,86 @@ void Visual::onSetParent(Visual* visual)
     _parent = visual;
 }
 
+
+bool Visual::isDescendantOf(const Visual& v) const
+{
+    const Visual* parent = this->parent();
+    if( ! parent )
+        return false;
+
+    if( parent == &v )
+        return true;
+
+    return parent->isDescendantOf(v);
+}
+
+
+bool Visual::isAncestorOf(const Visual& v) const
+{
+    return v.isDescendantOf(*this);
+}
+
+
+Visual* Visual::hitTest(const Gfx::PointF& pos)
+{
+    return onHitTest(pos);
+}
+
+
+Visual* Visual::onHitTest(const Gfx::PointF& pos)
+{
+    return 0;
+}
+
+
+Gfx::PointF Visual::toParent(const Gfx::PointF& pos) const
+{
+    return onToParent(pos);
+}
+
+
+Gfx::PointF Visual::fromParent(const Gfx::PointF& pos) const
+{
+    return onFromParent(pos);
+}
+
+
+Gfx::PointF Visual::toGlobal(const Gfx::PointF& pos) const
+{
+    return onToGlobal(pos); 
+}
+        
+
+Gfx::PointF Visual::fromGlobal(const Gfx::PointF& pos) const
+{
+    return onFromGlobal(pos);
+}
+
+
+Gfx::PointF Visual::onToGlobal(const Gfx::PointF& pos) const
+{
+    const Visual* parent = this->parent();
+    if( ! parent )
+        return pos;
+
+    Gfx::PointF parentPos = toParent(pos);
+    return parent->toGlobal(parentPos);
+}
+
+
+Gfx::PointF Visual::onFromGlobal(const Gfx::PointF& pos) const
+{
+    const Visual* parent = this->parent();
+    if( ! parent )
+        return pos;
+
+    Gfx::PointF parentPos = parent->fromGlobal(pos);
+    return fromParent(parentPos);
+}
+
+//
+// peer relationship
+// 
 
 void Visual::addPeer(Visual& peer)
 {
@@ -273,57 +377,13 @@ void Visual::onDetachPeer(Visual& peer)
         _peers.erase(it);
 }
 
+//
+// event processing
+//
 
-bool Visual::isDescendantOf(const Visual& v) const
+void Visual::processEvent(const Pt::Event& ev)
 {
-    const Visual* parent = this->parent();
-    if( ! parent )
-        return false;
-
-    if( parent == &v )
-        return true;
-
-    return parent->isDescendantOf(v);
-}
-
-
-bool Visual::isAncestorOf(const Visual& v) const
-{
-    return v.isDescendantOf(*this);
-}
-
-
-Visual* Visual::onHitTest(const Gfx::PointF& pos)
-{
-    return 0;
-}
-
-
-Gfx::PointF Visual::onToGlobal(const Gfx::PointF& pos) const
-{
-    const Visual* parent = this->parent();
-    if( ! parent )
-        return pos;
-
-    Gfx::PointF parentPos = toParent(pos);
-    return parent->toGlobal(parentPos);
-}
-
-
-Gfx::PointF Visual::onFromGlobal(const Gfx::PointF& pos) const
-{
-    const Visual* parent = this->parent();
-    if( ! parent )
-        return pos;
-
-    Gfx::PointF parentPos = parent->fromGlobal(pos);
-    return fromParent(parentPos);
-}
-
-
-void Visual::onSetCapture(bool capture)
-{
-    Application::instance().onSetCapture(*this, capture);
+    onEvent(ev);
 }
 
 
@@ -384,6 +444,12 @@ void Visual::repaint(const Gfx::RectF& rect)
 }
 
 
+void Visual::repaint()
+{
+    repaint( bounds() );
+}
+
+
 void Visual::onRequestRepaint(const Gfx::RectF& rect)
 {
 }
@@ -403,36 +469,30 @@ void Visual::onPaintEvent(const PaintEvent& ev)
 }
 
 //
-// enabling
+// scaling
 //
 
-void Visual::enable(bool isEnable)
+double Visual::scaleFactor() const
 {
-    onRequestEnable(isEnable);
+    return _scaleFactor;
 }
 
 
-void Visual::onRequestEnable(bool e)
+void Visual::onProcessRescaleEvent(const RescaleEvent& ev)
 {
+    onRescaleEvent(ev);
 }
 
 
-void Visual::onProcessEnableEvent(const EnableEvent& ev)
+void Visual::onRescaleEvent(const RescaleEvent& ev)
 {
-    onEnableEvent(ev);
+    onRescale( ev.scaleFactor() );
 }
 
 
-void Visual::onEnableEvent(const EnableEvent& ev)
-{    
-    _enabledState = ev.enabled(); 
-
-    onEnable( ev.enabled() );
-}
-
-
-void Visual::onEnable(bool isEnable)
+void Visual::onRescale(double scaling)
 {
+    _scaleFactor = scaling;
 }
 
 //
@@ -475,8 +535,53 @@ void Visual::onShow(bool isShown)
 }
 
 //
+// enabling
+//
+
+bool Visual::isEnabled() const
+{
+    return _enabledState;
+}
+
+
+void Visual::enable(bool isEnable)
+{
+    onRequestEnable(isEnable);
+}
+
+
+void Visual::onRequestEnable(bool e)
+{
+}
+
+
+void Visual::onProcessEnableEvent(const EnableEvent& ev)
+{
+    onEnableEvent(ev);
+}
+
+
+void Visual::onEnableEvent(const EnableEvent& ev)
+{    
+    _enabledState = ev.enabled(); 
+
+    onEnable( ev.enabled() );
+}
+
+
+void Visual::onEnable(bool isEnable)
+{
+}
+
+//
 // geometry
 //
+
+const Gfx::PointF& Visual::position() const
+{
+    return _pos;
+}
+
 
 void Visual::move(const Gfx::PointF& pos)
 {
@@ -489,41 +594,6 @@ void Visual::onRequestMove(const Gfx::PointF& pos)
 }
 
 
-void Visual::resize(const Gfx::SizeF& s)
-{
-    onRequestResize(s);
-}
-
-
-void Visual::onRequestResize(const Gfx::SizeF& s)
-{
-}
-
-//
-// scaling
-//
-
-void Visual::onProcessRescaleEvent(const RescaleEvent& ev)
-{
-    onRescaleEvent(ev);
-}
-
-
-void Visual::onRescaleEvent(const RescaleEvent& ev)
-{
-    onRescale( ev.scaleFactor() );
-}
-
-
-void Visual::onRescale(double scaling)
-{
-    _scaleFactor = scaling;
-}
-
-//
-// geometry
-//
-
 void Visual::onProcessMoveEvent(const MoveEvent& ev)
 {
     onMoveEvent(ev);
@@ -533,6 +603,29 @@ void Visual::onProcessMoveEvent(const MoveEvent& ev)
 void Visual::onMoveEvent(const MoveEvent& ev)
 {
     _pos = ev.position();
+}
+
+
+const Gfx::SizeF& Visual::size() const
+{
+    return _size;
+}
+
+
+const Gfx::RectF& Visual::bounds() const
+{
+    return _bounds;
+}
+
+
+void Visual::resize(const Gfx::SizeF& s)
+{
+    onRequestResize(s);
+}
+
+
+void Visual::onRequestResize(const Gfx::SizeF& s)
+{
 }
 
 
@@ -548,6 +641,24 @@ void Visual::onResizeEvent(const ResizeEvent& ev)
     _bounds.setSize( ev.size() );
 }
 
+//
+// input capture
+//
+
+void Visual::setCapture(bool capture)
+{
+    onRequestCapture(capture);
+}
+
+
+void Visual::onRequestCapture(bool capture)
+{
+    Application::instance().onRequestCapture(*this, capture);
+}
+
+//
+// input processing
+//
 
 void Visual::onProcessMouseEvent(const MouseEvent& ev)
 {
@@ -576,10 +687,12 @@ bool Visual::onTouchEvent(const TouchEvent& ev)
     return false;
 }
 
+
 void Visual::onProcessScrollEvent(const ScrollEvent& ev)
 {
     scrollEvent(ev);
 }
+
 
 bool Visual::onScrollEvent(const ScrollEvent& ev)
 {
@@ -634,6 +747,22 @@ View::View()
 View::~View()
 {
 }
+
+
+Gfx::PointF View::toWidget(const Widget& widget, 
+                      const Gfx::PointF& pos) const
+{ 
+    return onToWidget(widget, pos); 
+}
+
+
+Gfx::PointF View::fromWidget(const Widget& widget,
+                        const Gfx::PointF& pos) const
+{ 
+    return onFromWidget(widget, pos);
+}
+
+
 
 } // namespace
 

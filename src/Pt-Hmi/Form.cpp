@@ -258,7 +258,7 @@ void Form::onAttach(Widget& widget)
 {
     _mainWidget = &widget;
     
-    onRelayout(widget);
+    onRelayoutRequest(widget);
 }
 
 
@@ -270,7 +270,7 @@ void Form::onDetach(Widget& widget)
     if(_mainWidget == &widget)
         _mainWidget = 0;
 
-    onRelayout(widget);
+    onRelayoutRequest(widget);
 }
 
 
@@ -390,7 +390,7 @@ void Form::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Form::onRepaint(Widget& w, const Gfx::RectF& rect)
+void Form::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
 {
     Gfx::PointF widgetPos = onFromWidget( w, rect.topLeft() );
     Gfx::RectF widgetRect( widgetPos, rect.size() );
@@ -399,7 +399,7 @@ void Form::onRepaint(Widget& w, const Gfx::RectF& rect)
 }
 
 
-void Form::onRelayout(Widget& widget)
+void Form::onRelayoutRequest(Widget& widget)
 {   
     relayout();
 }
@@ -617,17 +617,17 @@ void Form::onShowRequest(Widget& widget, bool isShown)
 }
 
 
-void Form::onMove(Widget& widget, const Gfx::PointF& pos)
+void Form::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
 {
 }
 
 
-void Form::onResize(Widget& widget, const Gfx::SizeF& size)
+void Form::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 {
 }
 
 
-void Form::onRaise(Widget& widget)
+void Form::onRaiseRequest(Widget& widget)
 {
 }
 
@@ -873,7 +873,7 @@ bool Form::onLeaveEvent(const LeaveEvent& ev )
 }
 
 
-void Form::onActivate(Widget& widget, bool active)
+void Form::onActivateRequest(Widget& widget, bool active)
 {
     if(active)
         _active = &widget;

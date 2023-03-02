@@ -254,9 +254,9 @@ WindowFrame* ShellWM::onHitTestFrame(const Gfx::PointF& pos)
 }
 
 
-void ShellWM::onSetCapture(bool capture)
+void ShellWM::onRequestCapture(bool capture)
 {
-    Visual::onSetCapture(capture);
+    Visual::onRequestCapture(capture);
 
     if( ! capture )
     {
