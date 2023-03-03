@@ -56,7 +56,6 @@ Widget::Widget()
 , _actionKey(Key::Space)
 , _mnemonic(0)
 {
-    eventReceived() += Pt::slot(*this, &Widget::onProcessLayoutEvent);
     eventReceived() += Pt::slot(*this, &Widget::onProcessFocusEvent);
 }
 

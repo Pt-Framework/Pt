@@ -744,6 +744,7 @@ bool Visual::onKeyEvent(const KeyEvent& ev)
 
 View::View()
 {
+    eventReceived() += Pt::slot(*this, &View::onProcessLayoutEvent);
 }
 
 

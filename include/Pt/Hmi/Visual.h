@@ -437,6 +437,9 @@ class PT_HMI_API View : public Visual
                                          const Gfx::PointF& pos) const = 0;
     
     protected:
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev) = 0;
+
+    protected:
         virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect) = 0;
 
         virtual void onRelayoutRequest(Widget& widget) = 0;

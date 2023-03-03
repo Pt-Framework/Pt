@@ -55,7 +55,6 @@ Form::Form()
 , _active(0)
 , _focusWidget(0)
 {
-    eventReceived() += Pt::slot(*this, &Form::onProcessLayoutEvent);
 }
 
 
@@ -258,7 +257,7 @@ void Form::onAttach(Widget& widget)
 {
     _mainWidget = &widget;
     
-    onRelayoutRequest(widget);
+    relayout();
 }
 
 
@@ -270,7 +269,7 @@ void Form::onDetach(Widget& widget)
     if(_mainWidget == &widget)
         _mainWidget = 0;
 
-    onRelayoutRequest(widget);
+    relayout();
 }
 
 
