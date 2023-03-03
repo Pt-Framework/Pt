@@ -192,7 +192,7 @@ Responder* Window::onNextResponder()
 // geometry
 ///////////////////////////////////////////////////////////////////////
 
-void Window::move(const Gfx::PointF& pos)
+void Window::onRequestMove(const Gfx::PointF& pos)
 {
     _requestedPosition = pos;
 
@@ -215,7 +215,7 @@ void Window::onMoveEvent(const MoveEvent& ev)
 }
 
 
-void Window::resize(const Gfx::SizeF& s)
+void Window::onRequestResize(const Gfx::SizeF& s)
 {
     _requestedSize = s;
     
@@ -523,22 +523,6 @@ void Window::onActivateEvent(const ActivateEvent& ev)
 }
 
 
-//void Window::show(bool b)
-//{   
-//    _show = b;
-//
-//    if( ! _parent )
-//    {
-//        Screen& screen = Application::instance().screen();
-//        screen.addWindow(*this);
-//    }
-//    
-//    invalidate();
-//
-//    _parent->onShow(*this, b);
-//}
-
-
 void Window::onRequestShow(bool b)
 {   
     _show = b;
@@ -616,15 +600,6 @@ void Window::showModal()
             activeWindow->activate();
     }
 }
-
-
-//void Window::enable(bool e)
-//{
-//    _enabled = e;
-//
-//    if(_parent)
-//        _parent->onEnableRequest(*this, e);
-//}
 
 
 void Window::onRequestEnable(bool e)

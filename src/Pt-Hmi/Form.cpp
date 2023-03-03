@@ -521,7 +521,7 @@ void Form::onRescale(double scaling)
 }
 
 
-void Form::move(const Gfx::PointF& pos)
+void Form::onRequestMove(const Gfx::PointF& pos)
 {
     _requestedPosition = pos;
 
@@ -542,7 +542,7 @@ void Form::onMoveEvent(const MoveEvent& ev)
 }
 
 
-void Form::resize(const Gfx::SizeF& s)
+void Form::onRequestResize(const Gfx::SizeF& s)
 {
     _requestedSize = s;
     

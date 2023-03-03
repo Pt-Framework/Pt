@@ -139,17 +139,11 @@ class PT_HMI_API Window : public Sheet
         void activate(bool active = true);
 
 
-        //void show( bool b = true );
-
         void showModal();
 
 
-        //void enable(bool e = true);
-
-
-        void move(const Gfx::PointF& p);
-
-        void resize(const Gfx::SizeF& s);
+        // TODO: naming
+        using Base::resize;
 
         Gfx::SizeF resize(const SizePolicy& policy);
 
@@ -248,6 +242,10 @@ class PT_HMI_API Window : public Sheet
         virtual void onRequestEnable(bool isEnable);
 
         virtual void onRequestShow(bool isShown);
+
+        virtual void onRequestMove(const Gfx::PointF& pos);
+
+        virtual void onRequestResize(const Gfx::SizeF& s);
 
     //
     // Sheet

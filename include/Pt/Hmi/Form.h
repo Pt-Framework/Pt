@@ -89,11 +89,6 @@ class PT_HMI_API Form : public View
         Widget* findWidget2(Pt::uint64_t vid);
 
     public:
-        void move(const Gfx::PointF&);
-
-        void resize(const Gfx::SizeF& s);
-
-    public:
         Widget* focusWidget();
 
         void focusNext();
@@ -113,6 +108,10 @@ class PT_HMI_API Form : public View
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onRequestRepaint(const Gfx::RectF& rect);
+
+        virtual void onRequestMove(const Gfx::PointF& pos);
+
+        virtual void onRequestResize(const Gfx::SizeF& s);
 
     //
     // Responder
