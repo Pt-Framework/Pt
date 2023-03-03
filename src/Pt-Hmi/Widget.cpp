@@ -44,6 +44,7 @@ Widget::Widget()
 , _form(0)
 , _nextResponder(0)
 , _isCapture(false)
+, _isMeasureInvalid(true)
 , _isLayoutInvalid(true)
 , _show(true)
 , _enabled(true)
@@ -595,6 +596,7 @@ void Widget::onRelayoutRequest(Widget&)
 
 void Widget::relayout()
 {
+    _isMeasureInvalid = true;
     _isLayoutInvalid = true;
 
     if(_parent)
@@ -661,8 +663,7 @@ Gfx::SizeF Widget::measure(const SizePolicy& policy)
         contentPolicy.setWidth( _minimumSize.width() );
     }
 
-    bool doMeasure = contentPolicy != _lastPolicy || _isLayoutInvalid;
-
+    bool doMeasure = contentPolicy != _lastPolicy || _isMeasureInvalid;
     if(doMeasure)
     {
         _lastPolicy = contentPolicy;
@@ -695,6 +696,9 @@ Gfx::SizeF Widget::measure(const SizePolicy& policy)
         if(contentPolicy.horizontal() == SizePolicy::Maximum)
             _preferredSize.setWidth( std::min( _preferredSize.width(),
                                                contentPolicy.width() ) );
+    
+        _isMeasureInvalid = false;
+        _isLayoutInvalid = true; // relayout()
     }
 
     return preferredSize();

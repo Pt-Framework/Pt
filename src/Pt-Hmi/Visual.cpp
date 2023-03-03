@@ -505,9 +505,12 @@ bool Visual::isVisible() const
 }
 
 
-void Visual::show(bool b)
+void Visual::show(bool isShow)
 {
-    onRequestShow(b);
+    if(_isVisible == isShow)
+        return;
+
+    onRequestShow(isShow);
 }
 
 

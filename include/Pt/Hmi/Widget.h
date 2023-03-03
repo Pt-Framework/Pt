@@ -393,6 +393,7 @@ class PT_HMI_API Widget : public View
 
         bool                         _isCapture;
 
+        bool                         _isMeasureInvalid;
         bool                         _isLayoutInvalid;
 
         bool                         _show;
