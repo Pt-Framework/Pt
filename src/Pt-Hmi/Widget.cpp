@@ -926,15 +926,6 @@ bool Widget::acceptsInput() const
 }
 
 
-//void Widget::show(bool isShown)
-//{
-//    _show = isShown;
-//
-//    if(_parent)
-//        _parent->onShowRequest(*this, isShown);
-//}
-
-
 void Widget::onRequestShow(bool isShown)
 {
     _show = isShown;
@@ -970,15 +961,6 @@ void Widget::onShowRequest(Widget& widget, bool visible)
     ShowEvent sev(widget, visible);
     widget.processEvent(sev);
 }
-
-
-//void Widget::enable(bool e)
-//{
-//    _enabled = e;
-//
-//    if(_parent)
-//        _parent->onEnableRequest(*this, e);
-//}
 
 
 void Widget::onRequestEnable(bool isEnable)

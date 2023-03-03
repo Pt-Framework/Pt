@@ -149,10 +149,6 @@ class PT_HMI_API Widget : public View
         bool acceptsInput() const;
 
 
-        //void show( bool b = true );
-
-        //void enable(bool b = true);
-
         void activate(bool active);
 
         void raise();
