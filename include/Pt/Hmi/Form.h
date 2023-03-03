@@ -89,11 +89,6 @@ class PT_HMI_API Form : public View
         Widget* findWidget2(Pt::uint64_t vid);
 
     public:
-        void relayout();
-
-        Gfx::SizeF measure(const SizePolicy& policy);
-
-    public:
         void move(const Gfx::PointF&);
 
         void resize(const Gfx::SizeF& s);
@@ -155,6 +150,19 @@ class PT_HMI_API Form : public View
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
                                           const Gfx::PointF& pos) const;
 
+        virtual Gfx::SizeF onRequestMeasure(const SizePolicy& policy);
+
+        virtual void onRequestRelayout();
+
+    protected:
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
+
+        virtual void onLayoutEvent(const LayoutEvent& ev);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
     protected:
         virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);
 
@@ -205,16 +213,6 @@ class PT_HMI_API Form : public View
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
-
-    //
-    // layouting
-    //
-    protected:
-        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
-    
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-        virtual void onLayout(const Gfx::RectF& rect);
 
     //
     // scaling

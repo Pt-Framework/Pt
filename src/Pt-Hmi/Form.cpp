@@ -398,13 +398,28 @@ void Form::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
 }
 
 
+Gfx::SizeF Form::onRequestMeasure(const SizePolicy& policy)
+{
+    return onMeasure(policy);
+}
+
+
+Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
+{
+    if( _mainWidget )
+        return _mainWidget->measure(policy);
+
+    return policy.size();
+}
+
+
 void Form::onRelayoutRequest(Widget& widget)
-{   
+{
     relayout();
 }
 
 
-void Form::relayout()
+void Form::onRequestRelayout()
 {
     _layouts++;
 
@@ -444,7 +459,9 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
     //
     // 2. Pass layout position and size of contents
     //
-    onLayout(rect);
+    LayoutEvent lev(*this);
+    lev.setRect(rect);
+    onLayoutEvent(lev);
 
     // layout content marked invalid
     if( _mainWidget )
@@ -457,18 +474,9 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 }
 
 
-Gfx::SizeF Form::measure(const SizePolicy& policy)
+void Form::onLayoutEvent(const LayoutEvent& ev)
 {
-    return onMeasure(policy);
-}
-
-
-Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
-{
-    if( _mainWidget )
-        return _mainWidget->measure(policy);
-
-    return policy.size();
+    onLayout( ev.rect() );
 }
 
 

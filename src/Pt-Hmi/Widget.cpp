@@ -588,12 +588,12 @@ void Widget::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
 
 
 void Widget::onRelayoutRequest(Widget&)
-{   
+{
     relayout();
 }
 
 
-void Widget::relayout()
+void Widget::onRequestRelayout()
 {
     _isMeasureInvalid = true;
     _isLayoutInvalid = true;
@@ -626,7 +626,7 @@ Gfx::SizeF Widget::preferredSize() const
 }
 
 
-Gfx::SizeF Widget::measure(const SizePolicy& policy)
+Gfx::SizeF Widget::onRequestMeasure(const SizePolicy& policy)
 {
     SizePolicy contentPolicy = _sizePolicy;
 
@@ -726,7 +726,9 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
     //
     // layout position and size of contents 
     //
-    onLayout(rect);
+    LayoutEvent lev(*this);
+    lev.setRect(rect);
+    onLayoutEvent(lev);
     
     //
     // layout content marked invalid
@@ -745,6 +747,12 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
 
 
 // TODO: onLayoutEvent
+void Widget::onLayoutEvent(const LayoutEvent& ev)
+{
+    onLayout( ev.rect() );
+}
+
+
 void Widget::onLayout(const Gfx::RectF& rect)
 {
     //

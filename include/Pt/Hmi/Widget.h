@@ -184,20 +184,25 @@ class PT_HMI_API Widget : public View
     // layouting
     //
     public:
+        // TODO: move to base class
         const SizePolicy& sizePolicy() const;
 
+        // TODO: move to base class
         void setSizePolicy(const SizePolicy& policy);
 
+        // TODO: move to base class
         Gfx::SizeF preferredSize() const;
 
-        Gfx::SizeF measure(const SizePolicy& policy);
-
-        void relayout();
-
     protected:
+        virtual Gfx::SizeF onRequestMeasure(const SizePolicy& policy);
+
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-        
+
+        virtual void onRequestRelayout();
+
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);
+
+        virtual void onLayoutEvent(const LayoutEvent& ev);
 
         virtual void onLayout(const Gfx::RectF& rect);
 

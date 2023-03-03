@@ -421,6 +421,12 @@ class PT_HMI_API View : public Visual
         Gfx::PointF fromWidget(const Widget& widget,
                                const Gfx::PointF& pos) const;
 
+        //TODO maintain size policy and preferred size here
+
+        Gfx::SizeF measure(const SizePolicy& policy);
+
+        void relayout();
+
     protected:
         virtual void onAttach(Widget& widget) = 0;
         
@@ -435,9 +441,17 @@ class PT_HMI_API View : public Visual
 
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
                                          const Gfx::PointF& pos) const = 0;
-    
+
+        virtual Gfx::SizeF onRequestMeasure(const SizePolicy& policy) = 0;
+
+        virtual void onRequestRelayout() = 0;
+
     protected:
-        virtual void onProcessLayoutEvent(const LayoutEvent& ev) = 0;
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
+
+        virtual void onLayoutEvent(const LayoutEvent& ev);
 
     protected:
         virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect) = 0;
