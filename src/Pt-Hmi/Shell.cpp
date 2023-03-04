@@ -53,7 +53,6 @@ Shell::Shell()
 , _pointer(0)
 {
     _wm.setParent(this);
-    _wm.setSurface( &this->surface() );
 
     setFocusPolicy(Widget::AcceptFocus);
 }
@@ -112,6 +111,14 @@ void Shell::setContent(Widget* widget)
 ///////////////////////////////////////////////////////////////////////
 // Widget
 ///////////////////////////////////////////////////////////////////////
+
+void Shell::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+{
+    Base::setSurface(surface, pos);
+
+    _wm.setSurface( surface, pos );
+}
+
 
 void Shell::onRemoveWidget(Widget& w)
 {

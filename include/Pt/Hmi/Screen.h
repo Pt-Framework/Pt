@@ -84,8 +84,6 @@ class PT_HMI_API Screen : public Visual
     // Responder
     //
     protected:
-        Responder* onNextResponder();
-
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);

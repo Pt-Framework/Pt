@@ -48,8 +48,6 @@ namespace Hmi {
 Form::Form()
 : _parent(0)
 , _mainWidget(0)
-, _surface(0)
-, _nextResponder(0)
 , _layouts(0)
 , _show(true)
 , _active(0)
@@ -102,12 +100,32 @@ void Form::unparent()
 }
 
 
-void Form::setSurface(Gfx::PaintSurface* surface)
+Gfx::PaintSurface& Form::surface()
 {
-    if(_mainWidget)
-        _mainWidget->setSurface( surface, _mainWidget->position() );
+    return _surface;
+}
 
-    _surface = surface;
+
+const Gfx::PaintSurface& Form::surface() const
+{
+    return _surface;
+}
+
+
+void Form::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+{
+    if( ! surface )
+    {
+        _surface.detach();
+    }
+    else
+    {
+        Gfx::RectF surfaceRect( pos, size() );
+        _surface.attach(*surface, surfaceRect);
+    }
+
+    if(_mainWidget)
+        _mainWidget->setSurface( surface, pos );
 }
 
 
@@ -219,18 +237,6 @@ void Form::onProcessEvent(const Pt::Event& ev)
 }
 
 
-void Form::setNextResponder(Responder* r)
-{
-    _nextResponder = r;
-}
-
-
-Responder* Form::onNextResponder()
-{
-    return _nextResponder;
-}
-
-
 Gfx::PointF Form::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
     //const View* parentView = widget.parent();
@@ -275,7 +281,10 @@ void Form::onDetach(Widget& widget)
 
 void Form::onInit(Widget& widget)
 {
-    widget.setSurface( _surface, widget.position() );
+    Gfx::PaintSurface* surface = _surface.surface();
+    Gfx::PointF surfacePos = _surface.area().topLeft() + widget.position();
+
+    widget.setSurface(surface, surfacePos);
     widget.setNextResponder(this);
     widget.setForm(this);
 
@@ -452,9 +461,7 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 
     // align to physical pixel grid
     Gfx::RectF rect( size() );
-
-    if(_surface)
-        rect = _surface->align(rect);
+    rect = _surface.align(rect);
 
     //
     // 2. Pass layout position and size of contents

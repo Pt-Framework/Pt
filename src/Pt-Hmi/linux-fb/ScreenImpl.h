@@ -62,9 +62,6 @@ class ScreenImpl : public Sheet
         
         void setParent(Screen* screen);
 
-        void setNextResponder(Responder* r);
-
-
         void addWindow(Window& w);
 
         void removeWindow(Window& w);
@@ -87,8 +84,6 @@ class ScreenImpl : public Sheet
     // Responder
     //
     protected:
-        virtual Responder* onNextResponder();
-
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -209,8 +204,6 @@ class ScreenImpl : public Sheet
         Screen*                      _parent;
         Form                         _form;
         Shell                        _shell;
-                                     
-        Responder*                   _nextResponder;
         
         double                       _dpi;       
         Gfx::Image                   _cursorBackground;

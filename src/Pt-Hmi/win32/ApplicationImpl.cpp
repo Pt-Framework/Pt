@@ -850,7 +850,8 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);
 
-    const Pt::Gfx::Image& image = w.surface().pixmapImpl()->image();
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( w.impl() );
+    const Pt::Gfx::Image& image = windowImpl->surface().pixmapImpl()->image();
 
     const size_t depth = image.view().pixelStride() * 8;
     const Pt::uint8_t* data = image.data();

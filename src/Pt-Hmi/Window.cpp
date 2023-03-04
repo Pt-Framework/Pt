@@ -62,13 +62,25 @@ WindowType WindowImpl::type() const
     return _type;
 }
 
+
+PixmapSurface& WindowImpl::surface()
+{
+    return _surface;
+}
+
+
+const PixmapSurface& WindowImpl::surface() const
+{
+    return _surface;
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 // Window
 ///////////////////////////////////////////////////////////////////////
 
 Window::Window(WindowManager* parent, WindowType type)
 : _impl(0)
-, _nextResponder(0)
 , _parent(0)
 , _show(false)
 , _isActive(false)
@@ -112,6 +124,8 @@ void Window::setParent(WindowManager& parent)
     _parent = &parent;
 
     _impl = _parent->onCreateWindow(_type);
+
+    _form.setSurface( &_impl->surface(), Gfx::PointF(0, 0) );
    
     _parent->onInit(*this);
     _parent->onSetSizeLimits(*this, _minimumSize, _maximumSize);
@@ -138,6 +152,8 @@ void Window::unparent()
     _parent->onDetach(*this);
     _parent = 0;
 
+    _form.setSurface( 0, Gfx::PointF(0, 0) );
+
     delete _impl;
     _impl = 0;
         
@@ -147,19 +163,25 @@ void Window::unparent()
 
 Gfx::Image Window::getImage() const
 {
-    return _surface.toImage();
+    return surface().toImage();
 }
 
 
-PixmapSurface& Window::surface()
+Gfx::PaintSurface& Window::surface()
 {
-    return _surface;
+    if( ! _impl )
+        return _noSurface;
+
+    return _impl->surface();
 }
 
 
-const PixmapSurface& Window::surface() const
+const Gfx::PaintSurface& Window::surface() const
 {
-    return _surface;
+    if( ! _impl )
+        return _noSurface;
+
+    return _impl->surface();
 }
 
 
@@ -174,18 +196,6 @@ void Window::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
     invalidate();
-}
-
-
-void Window::setNextResponder(Responder* r)
-{
-    _nextResponder = r;
-}
-
-
-Responder* Window::onNextResponder()
-{
-    return _nextResponder;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -253,7 +263,9 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
 
-    _surface.resize( ev.size() );
+    if(_impl)
+        _impl->surface().resize( ev.size() );
+    
     _form.resize( ev.size() );
 }
 
@@ -316,7 +328,9 @@ void Window::onDetach(Form& form)
 
 void Window::onInit(Form& form)
 {
-    form.setSurface(&_surface);
+    if(_impl)
+      form.setSurface( &_impl->surface(), Gfx::PointF(0, 0) );
+    
     form.setNextResponder(this);
 
     double scaling = scaleFactor();
@@ -328,7 +342,7 @@ void Window::onInit(Form& form)
 
 void Window::onRelease(Form& form)
 {
-    form.setSurface(0);
+    form.setSurface( 0, Gfx::PointF(0, 0) );
     form.setNextResponder(0);
 }
 
@@ -371,7 +385,7 @@ void Window::onMove(Form& form, const Gfx::PointF& pos)
     //
     // align to physical pixel grid
     //
-    Gfx::PointF aligedPos = _surface.align(pos);
+    Gfx::PointF aligedPos = surface().align(pos);
 
     //
     // send move event
@@ -395,7 +409,7 @@ void Window::onResize(Form& form, const Gfx::SizeF& size)
     //
     // align to physical pixel grid
     //
-    Gfx::SizeF alignedSize = _surface.align(size);
+    Gfx::SizeF alignedSize = surface().align(size);
 
     //
     // send resize event
@@ -470,15 +484,9 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
     Base::onPaintEvent(ev);
 
-    onPaint( _surface, ev.rect() );
-}
-
-
-void Window::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
-{
-    Gfx::Painter painter(surface);
+    Gfx::Painter painter( surface() );
     painter.setBrush(_backgroundBrush);
-    painter.fillRect(rect);
+    painter.fillRect( ev.rect() );
 }
 
 
@@ -664,9 +672,10 @@ void Window::onRescale(double scaling)
     Base::onRescale(scaling);
 
     //std::clog << "+W RESCALE EVENT: " << title() << " "
-    //          << _surface.scaleFactor() << std::endl;
+    //          << surface().scaleFactor() << std::endl;
 
-    _surface.setScaleFactor(scaling);
+    if( _impl )
+        _impl->surface().setScaleFactor(scaling);
 
     //
     // realign geometry

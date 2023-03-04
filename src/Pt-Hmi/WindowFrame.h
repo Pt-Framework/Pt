@@ -217,12 +217,6 @@ class WindowFrame : public Visual
         void onProcessTouchEvent(const TouchEvent& tev);
 
         void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
-
-    protected:
-        Responder* onNextResponder()
-        {
-            return 0;
-        }
         
     protected:
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const

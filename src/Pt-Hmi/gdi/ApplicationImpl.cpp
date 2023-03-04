@@ -204,7 +204,7 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
         _cursorHandle = 0;
     }
 
-    if(cursor == 0)
+    if(cursor == 0 || cursor == &Cursor::defaultCursor() )
     {
         SetCursor(_defaultCursorHandle);
         return;
@@ -871,7 +871,9 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);
 
-    HDC bitmapContext = w.surface().pixmapImpl()->deviceContext();
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( w.impl() );
+    HDC bitmapContext = windowImpl->surface().pixmapImpl()->deviceContext();
+    
     BitBlt(windowContext, updateRect.left, updateRect.top, 
            updateRect.right - updateRect.left, updateRect.bottom - updateRect.top, 
            bitmapContext, updateRect.left,  updateRect.top, SRCCOPY);

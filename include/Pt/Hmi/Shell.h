@@ -75,6 +75,8 @@ class PT_HMI_API Shell : public Widget
     // Widget
     //
     protected:
+        virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+
         virtual void onRemoveWidget(Widget& w);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);

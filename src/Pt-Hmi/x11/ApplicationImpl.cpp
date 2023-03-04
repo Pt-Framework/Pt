@@ -308,15 +308,17 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     window.processEvent(pev);
 
 #ifdef PT_HMI_X11_CORE
-    ::Drawable from = window.surface().pixmapImpl()->drawable();
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
+    ::Drawable from = windowImpl->surface().pixmapImpl()->drawable();
     ::Window to = windowImpl->window();
 
     XCopyArea( _display, from, to,
                _paintGc, x, y, width, height, x, y);
 #endif
 
-#ifdef PT_HMI_X11_RASTER   
-    const Gfx::Image& image = window.surface().pixmapImpl()->image();
+#ifdef PT_HMI_X11_RASTER
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
+    const Gfx::Image& image = windowImpl->surface().pixmapImpl()->image();
     char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
 
     //std::clog << "  EXPOSE " << window.title() << " "

@@ -67,8 +67,6 @@ class ScreenImpl : public WindowManager
 
         void setParent(Screen* screen);
 
-        void setNextResponder(Responder* r);
-
 
         void addWindow(Window& w);
 
@@ -82,8 +80,6 @@ class ScreenImpl : public WindowManager
     // Responder
     //
     protected:
-        virtual Responder* onNextResponder();
-
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -195,8 +191,6 @@ class ScreenImpl : public WindowManager
         Screen*                 _parent;
         std::vector<Window*>    _windows;
         ::Display*              _display;
-
-        Responder*              _nextResponder;
         
         double                  _screenScaling;
 };

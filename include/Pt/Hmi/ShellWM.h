@@ -55,9 +55,7 @@ class ShellWM : public WindowManager
 
         void setParent(Shell* shell);
 
-        void setNextResponder(Responder* r);
-
-        void setSurface(Gfx::PaintSurface* surface);
+        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
         void activate(bool active);
 
@@ -121,12 +119,6 @@ class ShellWM : public WindowManager
         virtual void onRequestCapture(bool capture);
 
         virtual void onRequestRepaint(const Gfx::RectF& rect);
-    
-    //
-    // Responder
-    //
-    protected:
-        virtual Responder* onNextResponder();
 
     //
     // WindowManager
@@ -199,8 +191,7 @@ class ShellWM : public WindowManager
         Pt::Signal<const Pt::Event&> _eventReceived;
         Shell*                       _parent;
 
-        Gfx::PaintSurface*           _surface;
-        Responder*                   _nextResponder;
+        Gfx::PaintRegion             _surface;
 
         std::vector<WindowFrame*>    _windows;
         std::vector<Window*>         _windowList;

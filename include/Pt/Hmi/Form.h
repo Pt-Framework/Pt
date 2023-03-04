@@ -71,9 +71,11 @@ class PT_HMI_API Form : public View
 
         void unparent();
     
-        void setSurface(Gfx::PaintSurface* surface);
+        Gfx::PaintSurface& surface();
 
-        void setNextResponder(Responder* r);
+        const Gfx::PaintSurface& surface() const;
+
+        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
     public:
         Widget* content();
@@ -117,8 +119,6 @@ class PT_HMI_API Form : public View
     // Responder
     //
     protected:
-        virtual Responder* onNextResponder();
-
         virtual bool onMouseEvent(const MouseEvent& ev);
         
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -276,8 +276,7 @@ class PT_HMI_API Form : public View
         Sheet*                       _parent;
         Widget*                      _mainWidget;
 
-        Gfx::PaintSurface*           _surface;
-        Responder*                   _nextResponder;
+        Gfx::PaintRegion             _surface;
 
         int                          _layouts;
 

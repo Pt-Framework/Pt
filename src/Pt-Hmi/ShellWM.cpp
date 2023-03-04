@@ -76,8 +76,6 @@ double ShellWindowImpl::scaleFactor() const
 
 ShellWM::ShellWM()
 : _parent(0)
-, _surface(0)
-, _nextResponder(0)
 , _activeWindow(0)
 , _grabbedFrame(0)
 , _topMostWindow(0)
@@ -108,15 +106,17 @@ void ShellWM::setParent(Shell* shell)
 }
 
 
-void ShellWM::setSurface(Gfx::PaintSurface* surface)
+void ShellWM::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
-    _surface = surface;
-}
-
-
-void ShellWM::setNextResponder(Responder* r)
-{
-    _nextResponder = r;
+    if( ! surface )
+    {
+        _surface.detach();
+    }
+    else
+    {
+        Gfx::RectF surfaceRect( pos, size() );
+        _surface.attach(*surface, surfaceRect);
+    }
 }
 
 
@@ -125,12 +125,6 @@ void ShellWM::onProcessEvent(const Pt::Event& ev)
     WindowManager::onProcessEvent(ev);
 
     _eventReceived.send(ev);
-}
-
-
-Responder* ShellWM::onNextResponder()
-{
-    return _nextResponder;
 }
 
 
@@ -472,7 +466,7 @@ void ShellWM::onMove(Window& w, const Gfx::PointF& pos)
     if( ! frame )
         return;
 
-    Gfx::PointF aligedPos = _surface->align(pos);
+    Gfx::PointF aligedPos = _surface.align(pos);
 
     Gfx::RectF updateRect = frame->frameRect();
     frame->moveEvent(aligedPos);
@@ -490,7 +484,7 @@ void ShellWM::onMove(Window& w, const Gfx::PointF& pos)
 
 void ShellWM::onResize(Window& w, const Gfx::SizeF& s)
 { 
-    Gfx::SizeF alignedSize = _surface->align(s);
+    Gfx::SizeF alignedSize = _surface.align(s);
 
     if( alignedSize.width() > w.maximumSize().width() )
         alignedSize.setWidth( w.maximumSize().width() );
@@ -704,7 +698,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
             continue;
 
         // paint frame rect
-        frame->paint( *_surface, frameRect );
+        frame->paint( _surface, frameRect );
 
         // clip client rect
         Gfx::RectF updateRect = frame->clientRect().intersect(rect);
@@ -713,7 +707,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::PointF surfacePos = onToWindow( *w, updateRect.topLeft() );
         Gfx::RectF surfaceRect( surfacePos, updateRect.size() );
 
-        Pt::Gfx::Painter painter(*_surface);
+        Pt::Gfx::Painter painter(_surface);
         painter.drawSurface(updateRect.topLeft(), w->surface(), surfaceRect);
     }
 }

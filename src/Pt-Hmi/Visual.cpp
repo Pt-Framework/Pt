@@ -187,6 +187,7 @@ bool Responder::onKeyEvent(const KeyEvent& ev)
 Visual::Visual()
 : _vid( Application::instance().makeId()  )
 , _parent(0)
+, _nextResponder(0)
 , _invalidates(0)
 , _scaleFactor(1.0)
 , _enabledState(true)
@@ -662,6 +663,18 @@ void Visual::onRequestCapture(bool capture)
 //
 // input processing
 //
+
+void Visual::setNextResponder(Responder* r)
+{
+    _nextResponder = r;
+}
+
+
+Responder* Visual::onNextResponder()
+{
+    return _nextResponder;
+}
+
 
 void Visual::onProcessMouseEvent(const MouseEvent& ev)
 {

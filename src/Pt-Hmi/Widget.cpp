@@ -42,7 +42,6 @@ namespace Hmi {
 Widget::Widget()
 : _parent(0)
 , _form(0)
-, _nextResponder(0)
 , _isCapture(false)
 , _isMeasureInvalid(true)
 , _isLayoutInvalid(true)
@@ -81,13 +80,13 @@ void Widget::remove(Widget& w)
 }
 
 
-void Widget::setNextResponder(Responder* r)
+Gfx::PaintSurface& Widget::surface()
 {
-    _nextResponder = r;
+    return _surface;
 }
 
 
-Gfx::PaintSurface& Widget::surface()
+const Gfx::PaintSurface& Widget::surface() const
 {
     return _surface;
 }
@@ -105,6 +104,8 @@ void Widget::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
         _surface.attach(*surface, clientRect);
     }
 
+    onSetSurface(surface, pos);
+
     std::vector<Widget*>::iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
     {
@@ -115,6 +116,11 @@ void Widget::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 
         widget->setSurface(surface, surfacePos);
     }
+}
+
+
+void Widget::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+{
 }
 
 
@@ -1227,12 +1233,6 @@ Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
 void Widget::onProcessEvent(const Pt::Event& ev)
 {
     View::onProcessEvent(ev);
-}
-
-
-Responder* Widget::onNextResponder()
-{
-    return _nextResponder;
 }
 
 

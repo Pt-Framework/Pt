@@ -286,19 +286,19 @@ void Menu::onInvalidate()
 }
 
 
-void Menu::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void Menu::onPaintEvent(const PaintEvent& ev)
 {
-    Base::onPaint(surface, rect);
+    Base::onPaintEvent(ev);
 
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Gfx::Painter painter(surface);
-    painter.setClip(rect);
+    Gfx::Painter painter( surface() );
+    painter.setClip( ev.rect() );
 
-    _renderer->renderBackground(*this, options, painter, rect,
+    _renderer->renderBackground(*this, options, painter, ev.rect(),
                                 _brush, _pen);
 }
 

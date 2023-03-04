@@ -136,6 +136,10 @@ class PT_HMI_API Visual : public Responder
         */
         void setName(const std::string& n);
 
+        /** @brief Sets the next responder.
+        */
+        void setNextResponder(Responder* r);
+
     public:
         /** @brief Returns the parent.
         */
@@ -351,7 +355,12 @@ class PT_HMI_API Visual : public Responder
 
         virtual void onProcessKeyEvent(const KeyEvent& ev);
 
+    //
+    // Responder
+    //
     protected:
+        virtual Responder* onNextResponder();
+
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -376,6 +385,8 @@ class PT_HMI_API Visual : public Responder
 
         Visual*               _parent;
         std::vector<Visual*>  _peers;
+
+        Responder*            _nextResponder;
 
         int                   _invalidates;
 

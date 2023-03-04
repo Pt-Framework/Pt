@@ -89,7 +89,7 @@ class PT_HMI_API Menu : public MenuShell
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void onPaintEvent(const PaintEvent& ev);
 
     protected:
         void onProcessMouseEvent(const MouseEvent& ev);

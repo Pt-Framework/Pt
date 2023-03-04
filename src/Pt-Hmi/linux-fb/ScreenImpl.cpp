@@ -56,7 +56,6 @@ namespace Hmi {
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _frameBuffer( app.frameBuffer() )
 , _parent(0)
-, _nextResponder(0)
 , _dpi(96.0)
 , _cursorPos(0, 0)
 , _drawCursor(false)
@@ -104,12 +103,6 @@ void ScreenImpl::setParent(Screen* screen)
 }
 
 
-void ScreenImpl::setNextResponder(Responder* r)
-{
-    _nextResponder = r;
-}
-
-
 void ScreenImpl::addWindow(Window& w)
 {
     _shell.addWindow(w); 
@@ -132,15 +125,6 @@ const std::vector<Window*>& ScreenImpl::windows() const
 //{
 //    return _surface.scaleFactor();
 //}
-
-///////////////////////////////////////////////////////////////////////
-// Responder
-///////////////////////////////////////////////////////////////////////
-
-Responder* ScreenImpl::onNextResponder()
-{
-    return _nextResponder;
-}
 
 ///////////////////////////////////////////////////////////////////////
 // Visual

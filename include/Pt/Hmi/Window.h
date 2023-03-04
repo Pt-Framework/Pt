@@ -78,8 +78,13 @@ class WindowImpl
 
         WindowType type() const;
 
+        PixmapSurface& surface();
+
+        const PixmapSurface& surface() const;
+
     private:
-        WindowType    _type;
+        WindowType     _type;
+        PixmapSurface  _surface;
 };
 
 /** @brief Window base class.
@@ -123,11 +128,9 @@ class PT_HMI_API Window : public Sheet
         { return _form.findWidget2(vid); }
 
     public:
-        PixmapSurface& surface();
+        Gfx::PaintSurface& surface();
 
-        const PixmapSurface& surface() const;
-
-        void setNextResponder(Responder* r);
+        const Gfx::PaintSurface& surface() const;
 
 
         bool acceptsInput() const;
@@ -206,8 +209,6 @@ class PT_HMI_API Window : public Sheet
     // Responder
     //
     protected:
-        virtual Responder* onNextResponder();
-
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent( const TouchEvent& ev );
@@ -285,9 +286,6 @@ class PT_HMI_API Window : public Sheet
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
-
-        virtual void onPaint(Gfx::PaintSurface& surface, 
-                             const Gfx::RectF& updateRect);
 
     //
     // input
@@ -374,8 +372,7 @@ class PT_HMI_API Window : public Sheet
     private:
         WindowImpl*                  _impl;
 
-        PixmapSurface                _surface;
-        Responder*                   _nextResponder;
+        Gfx::PaintRegion             _noSurface;
         Form                         _form;
 
         WindowManager*               _parent;

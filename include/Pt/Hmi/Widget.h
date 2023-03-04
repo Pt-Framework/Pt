@@ -84,9 +84,9 @@ class PT_HMI_API Widget : public View
 
         Gfx::PaintSurface& surface();
 
-        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+        const Gfx::PaintSurface& surface() const;
 
-        void setNextResponder(Responder* r);
+        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
     private:
         void setForm(Form* form);
@@ -246,6 +246,8 @@ class PT_HMI_API Widget : public View
         void setMinimumHeight(double h);
 
     protected:
+        virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+
         virtual void onAddWidget(Widget& w);
 
         virtual void onRemoveWidget(Widget& w);
@@ -334,8 +336,6 @@ class PT_HMI_API Widget : public View
     // Responder
     //
     protected:
-        virtual Responder* onNextResponder();
-
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -390,7 +390,6 @@ class PT_HMI_API Widget : public View
         std::vector<Widget*>         _children;
 
         Form*                        _form;
-        Responder*                   _nextResponder;
 
         bool                         _isCapture;
 

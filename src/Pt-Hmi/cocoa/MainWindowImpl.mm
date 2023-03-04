@@ -388,7 +388,8 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
 
-    Pt::Hmi::PixmapSurfaceImpl* pixmap = window->surface().pixmapImpl();
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window->impl() );
+    Pt::Hmi::PixmapSurfaceImpl* pixmap = windowImpl->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
     
     CGImageRef image = CGBitmapContextCreateImage(pixmapContext);

@@ -43,7 +43,6 @@ namespace Hmi {
 
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _parent(0)
-, _nextResponder(0)
 , _screenScaling(1.0)
 {
     HWND desktop = GetDesktopWindow();
@@ -91,12 +90,6 @@ void ScreenImpl::setParent(Screen* screen)
 }
 
 
-void ScreenImpl::setNextResponder(Responder* r)
-{
-    _nextResponder = r;
-}
-
-
 void ScreenImpl::addWindow(Window& w)
 {
     w.setParent(*this); 
@@ -112,15 +105,6 @@ void ScreenImpl::removeWindow(Window& w)
 const std::vector<Window*>& ScreenImpl::windows() const
 {
     return _windows;
-}
-
-///////////////////////////////////////////////////////////////////////
-// Responder
-///////////////////////////////////////////////////////////////////////
-
-Responder* ScreenImpl::onNextResponder()
-{
-    return _nextResponder;
 }
 
 ///////////////////////////////////////////////////////////////////////
