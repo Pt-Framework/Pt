@@ -141,11 +141,7 @@ class PT_HMI_API Window : public Sheet
 
         void showModal();
 
-
-        // TODO: naming
-        using Base::resize;
-
-        Gfx::SizeF resize(const SizePolicy& policy);
+        Gfx::SizeF resizeToFit(const SizePolicy& policy);
 
 
         bool isClosed() const;

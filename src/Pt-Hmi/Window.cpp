@@ -226,7 +226,7 @@ void Window::onRequestResize(const Gfx::SizeF& s)
 }
 
 
-Gfx::SizeF Window::resize(const SizePolicy& policy)
+Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
 {
     //
     // TODO: remove delayed initialization

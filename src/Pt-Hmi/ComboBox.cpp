@@ -174,7 +174,7 @@ void ComboBox::showPopup()
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
     policy.setWidth( size().width() );
     policy.setHeight(0);
-    _popup.resize(policy);
+    _popup.resizeToFit(policy);
     
     Gfx::PointF popupPos(0, size().height() );
     popupPos = this->toGlobal(popupPos);

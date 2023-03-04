@@ -531,7 +531,7 @@ bool MainWindow::onMouseEvent(const MouseEvent& ev)
         Gfx::PointF menuPos = this->toGlobal( ev.position() );
 
         SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
-        _menu.resize(policy);
+        _menu.resizeToFit(policy);
 
         _menu.move(menuPos);
         _menu.setAbove(true);
