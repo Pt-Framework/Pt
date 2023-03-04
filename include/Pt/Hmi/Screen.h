@@ -108,7 +108,7 @@ class PT_HMI_API Screen : public Visual
 
         virtual Gfx::PointF onFromGlobal(const Gfx::PointF& pos) const;
 
-        virtual void onEvent( const Event& ev );
+        virtual void onProcessEvent( const Event& ev );
 
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 

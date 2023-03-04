@@ -116,7 +116,7 @@ class ShellWM : public WindowManager
 
         WindowFrame* onHitTestFrame(const Gfx::PointF& p);
 
-        virtual void onEvent(const Pt::Event& ev);
+        virtual void onProcessEvent(const Pt::Event& ev);
 
         virtual void onRequestCapture(bool capture);
 

@@ -120,9 +120,9 @@ void ShellWM::setNextResponder(Responder* r)
 }
 
 
-void ShellWM::onEvent(const Pt::Event& ev)
+void ShellWM::onProcessEvent(const Pt::Event& ev)
 {
-    WindowManager::onEvent(ev);
+    WindowManager::onProcessEvent(ev);
 
     _eventReceived.send(ev);
 }

@@ -102,7 +102,7 @@ class ScreenImpl : public WindowManager
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
-        virtual void onEvent(const Event& ev);
+        virtual void onProcessEvent(const Event& ev);
 
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 

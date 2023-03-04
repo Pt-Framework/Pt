@@ -623,9 +623,9 @@ void WindowFrame::onLayout()
 }
 
 
-void WindowFrame::onEvent(const Pt::Event& ev)
+void WindowFrame::onProcessEvent(const Pt::Event& ev)
 {
-    //Visual::onEvent(ev);
+    //Visual::onProcessEvent(ev);
 
     if( ev.typeInfo() == typeid(EnterEvent) )
     {

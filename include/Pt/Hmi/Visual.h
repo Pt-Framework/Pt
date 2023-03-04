@@ -294,7 +294,7 @@ class PT_HMI_API Visual : public Responder
         virtual void onRequestCapture(bool capture);
 
     protected:
-        virtual void onEvent(const Pt::Event& ev);
+        virtual void onProcessEvent(const Pt::Event& ev);
 
     protected:
         virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);

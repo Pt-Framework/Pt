@@ -151,9 +151,9 @@ Gfx::PointF ScreenImpl::onFromParent(const Gfx::PointF& pos) const
 }
 
 
-void ScreenImpl::onEvent(const Event& ev)
+void ScreenImpl::onProcessEvent(const Event& ev)
 {
-    Base::onEvent(ev);
+    Base::onProcessEvent(ev);
 }
 
 

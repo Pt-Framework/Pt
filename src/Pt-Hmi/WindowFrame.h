@@ -235,7 +235,7 @@ class WindowFrame : public Visual
             return pos; 
         }
 
-        virtual void onEvent(const Pt::Event& ev);
+        virtual void onProcessEvent(const Pt::Event& ev);
 
     protected:
         bool onMouseEvent(const MouseEvent& mev);

@@ -78,7 +78,7 @@ class ApplicationImpl : public Pt::System::MainLoop
     public:
         void processEvent(XEvent& xev)
         {
-            onEvent(xev);
+            onProcessXEvent(xev);
         }
 
         ::Display* display() const
@@ -129,7 +129,7 @@ class ApplicationImpl : public Pt::System::MainLoop
     private:
         Window* findWindow(::Window w);
 
-        void onEvent(XEvent& ev);
+        void onProcessXEvent(XEvent& ev);
 
         void onEnterNotify(Window& window, XEvent& xev);
 

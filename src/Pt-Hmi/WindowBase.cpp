@@ -70,7 +70,7 @@ namespace Hmi {
 //        Gfx::PointF onFromScreen(const Gfx::PointF& pos) const;
 //
 //    protected:
-//        void onEvent(const Pt::Event& ev);
+//        void onProcessEvent(const Pt::Event& ev);
 //
 //        
 //        void onProcessMoveEvent(const MoveEvent& ev);
@@ -217,7 +217,7 @@ namespace Hmi {
 //}
 //
 //
-//void ShellBase::onEvent(const Pt::Event& ev)
+//void ShellBase::onProcessEvent(const Pt::Event& ev)
 //{
 //    _eventReceived.send(ev);
 //}

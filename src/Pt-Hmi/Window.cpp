@@ -293,9 +293,9 @@ Gfx::PointF Window::onFromParent(const Gfx::PointF& pos) const
 }
 
 
-void Window::onEvent(const Pt::Event& ev)
+void Window::onProcessEvent(const Pt::Event& ev)
 {
-    Base::onEvent(ev);
+    Base::onProcessEvent(ev);
 }
 
 ///////////////////////////////////////////////////////////////////////

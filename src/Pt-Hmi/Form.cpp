@@ -213,9 +213,9 @@ Gfx::PointF Form::onFromParent(const Gfx::PointF& pos) const
 }
 
 
-void Form::onEvent(const Pt::Event& ev)
+void Form::onProcessEvent(const Pt::Event& ev)
 {
-    View::onEvent(ev);
+    View::onProcessEvent(ev);
 }
 
 

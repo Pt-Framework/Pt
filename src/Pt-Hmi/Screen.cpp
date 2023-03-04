@@ -218,9 +218,9 @@ Gfx::PointF Screen::onFromGlobal(const Gfx::PointF& pos) const
 }
 
 
-void Screen::onEvent(const Event& ev)
+void Screen::onProcessEvent(const Event& ev)
 {
-    Base::onEvent(ev);
+    Base::onProcessEvent(ev);
 }
 
 ///////////////////////////////////////////////////////////////////////

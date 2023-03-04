@@ -76,7 +76,7 @@ ApplicationImpl::ApplicationImpl()
     _xfd.setActive(*this);
     _xfd.begin();
     //_xfd.flush();
-    _xfd.eventReady() += Pt::slot(*this, &ApplicationImpl::onEvent);
+    _xfd.eventReady() += Pt::slot(*this, &ApplicationImpl::onProcessXEvent);
 
     _paintGc = XCreateGC(_display, root, 0, NULL);
 
@@ -200,7 +200,7 @@ Window* ApplicationImpl::findWindow(::Window window)
 }
 
 
-void ApplicationImpl::onEvent(XEvent& ev)
+void ApplicationImpl::onProcessXEvent(XEvent& ev)
 {
     Window* w = findWindow(ev.xany.window);
     if( ! w )

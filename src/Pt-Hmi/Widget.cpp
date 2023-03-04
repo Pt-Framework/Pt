@@ -1224,9 +1224,9 @@ Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
 }
 
 
-void Widget::onEvent(const Pt::Event& ev)
+void Widget::onProcessEvent(const Pt::Event& ev)
 {
-    View::onEvent(ev);
+    View::onProcessEvent(ev);
 }
 
 

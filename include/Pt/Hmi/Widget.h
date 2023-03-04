@@ -279,7 +279,7 @@ class PT_HMI_API Widget : public View
         virtual void onRequestResize(const Gfx::SizeF& s);
 
         
-        virtual void onEvent(const Pt::Event& ev);
+        virtual void onProcessEvent(const Pt::Event& ev);
 
 
         virtual void onProcessEnableEvent(const EnableEvent& ev);

@@ -383,11 +383,11 @@ void Visual::onDetachPeer(Visual& peer)
 
 void Visual::processEvent(const Pt::Event& ev)
 {
-    onEvent(ev);
+    onProcessEvent(ev);
 }
 
 
-void Visual::onEvent(const Pt::Event& ev)
+void Visual::onProcessEvent(const Pt::Event& ev)
 {
     _dispatcher.send(ev);
 }
