@@ -74,19 +74,18 @@ class PT_HMI_API Form : public View
 
         void unparent();
     
+        Widget* content();
+
+        const Widget* content()  const;
+
+        void setContent(Widget* widget);
+
     public:
         Gfx::PaintSurface& surface();
 
         const Gfx::PaintSurface& surface() const;
 
         void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
-
-    public:
-        Widget* content();
-
-        const Widget* content()  const;
-
-        void setContent(Widget* widget);
 
     public:
         Widget* focusWidget();
@@ -96,38 +95,22 @@ class PT_HMI_API Form : public View
         void focusPrev();
 
     //
-    // Visual
+    // Form
     //
     protected:
-        virtual Visual* onHitTest(const Gfx::PointF& pos);
+        virtual void onAddElement(Widget& widget);
 
-        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+        virtual void onRemoveElement(Widget& widget);
 
-        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+        virtual void onSetFocusPolicy(Widget& w, FocusPolicy policy);
 
-        virtual void onProcessEvent(const Pt::Event& ev);
+        virtual void onSetFocusIndex(Widget& w, unsigned index);
 
-        virtual void onRequestRepaint(const Gfx::RectF& rect);
+        virtual void onSetFocus(Widget& w);
 
-        virtual void onRequestMove(const Gfx::PointF& pos);
+        virtual void onSetShortcut(Widget& w, const Key* key);
 
-        virtual void onRequestResize(const Gfx::SizeF& s);
-
-    //
-    // Responder
-    //
-    protected:
-        virtual bool onMouseEvent(const MouseEvent& ev);
-        
-        virtual bool onTouchEvent(const TouchEvent& ev);
-        
-        virtual bool onScrollEvent(const ScrollEvent& ev);
-
-        virtual bool onEnterEvent(const EnterEvent& ev);
-
-        virtual bool onLeaveEvent(const LeaveEvent& ev);
-
-        virtual bool onKeyEvent(const KeyEvent& ev);
+        virtual void onSetMnemonic(Widget& w, const Char* ch);
 
     //
     // View
@@ -147,6 +130,7 @@ class PT_HMI_API Form : public View
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
                                           const Gfx::PointF& pos) const;
 
+    protected:
         virtual Gfx::SizeF onRequestMeasure(const SizePolicy& policy);
 
         virtual void onRequestRelayout();
@@ -178,22 +162,30 @@ class PT_HMI_API Form : public View
         virtual void onRaiseRequest(Widget& widget);
 
     //
-    // Form
+    // Visual
     //
     protected:
-        virtual void onRegister(Widget& widget);
+        virtual Visual* onHitTest(const Gfx::PointF& pos);
 
-        virtual void onDeregister(Widget& widget);
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
-        virtual void onSetFocusPolicy(Widget& w, FocusPolicy policy);
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
-        virtual void onSetFocusIndex(Widget& w, unsigned index);
+    protected:
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
 
-        virtual void onSetFocus(Widget& w);
+        virtual void onRequestShow(bool e);
 
-        virtual void onSetShortcut(Widget& w, const Key* key);
+        virtual void onRequestEnable(bool isEnable);
 
-        virtual void onSetMnemonic(Widget& w, const Char* ch);
+        virtual void onRequestMove(const Gfx::PointF& pos);
+
+        virtual void onRequestResize(const Gfx::SizeF& s);
+
+        virtual void onRequestCapture(bool capture);
+    
+    protected:
+        virtual void onProcessEvent(const Pt::Event& ev);
 
     //
     // invalidation
@@ -220,19 +212,7 @@ class PT_HMI_API Form : public View
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescale(double scaling);
-    
-    //
-    // geometry
-    //
-    protected:
-        //virtual void onProcessMoveEvent(const MoveEvent& ev);
-
-        virtual void onMoveEvent(const MoveEvent& ev);
-
-        //virtual void onProcessResizeEvent(const ResizeEvent& ev);
-        
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
+   
     //
     // enabling
     //
@@ -243,12 +223,27 @@ class PT_HMI_API Form : public View
 
         virtual void onEnable(bool e);
     
+    //
+    // visibility
+    //
     protected:
         virtual void onProcessShowEvent(const ShowEvent& ev);
 
         virtual void onShowEvent(const ShowEvent& ev);
 
         virtual void onShow(bool visible);
+
+    //
+    // geometry
+    //
+    protected:
+        virtual void onProcessMoveEvent(const MoveEvent& ev);
+
+        virtual void onMoveEvent(const MoveEvent& ev);
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+        
+        virtual void onResizeEvent(const ResizeEvent& ev);
 
     //
     // input
@@ -266,6 +261,22 @@ class PT_HMI_API Form : public View
 
         virtual void onProcessKeyEvent(const KeyEvent& ev);
 
+    //
+    // Responder
+    //
+    protected:
+        virtual bool onMouseEvent(const MouseEvent& ev);
+        
+        virtual bool onTouchEvent(const TouchEvent& ev);
+        
+        virtual bool onScrollEvent(const ScrollEvent& ev);
+
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
+        virtual bool onKeyEvent(const KeyEvent& ev);
+
     private:
         template <typename Iter>
         void moveFocus(Iter begin, Iter end);
@@ -282,6 +293,7 @@ class PT_HMI_API Form : public View
         Gfx::SizeF                   _requestedSize;
 
         bool                         _show;
+        bool                         _enabled;
         
         Widget*                      _active;
 

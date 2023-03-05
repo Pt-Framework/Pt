@@ -82,6 +82,14 @@ class PT_HMI_API Widget : public View
 
         void unparent();
 
+        // implment add method in derived class
+        void add(Widget& widget);
+
+        // implment remove method in derived class
+        void remove(Widget& widget);
+
+        const std::vector<Widget*>& widgets() const;
+
     public:
         Gfx::PaintSurface& surface();
 
@@ -93,14 +101,6 @@ class PT_HMI_API Widget : public View
         void setForm(Form* form);
 
     public:
-        // implment add method in derived class
-        void add(Widget& widget);
-
-        // implment remove method in derived class
-        void remove(Widget& widget);
-
-        const std::vector<Widget*>& widgets() const;
-
         //
         // focus handling
         // 

@@ -453,6 +453,7 @@ class PT_HMI_API View : public Visual
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
                                          const Gfx::PointF& pos) const = 0;
 
+    protected:
         virtual Gfx::SizeF onRequestMeasure(const SizePolicy& policy) = 0;
 
         virtual void onRequestRelayout() = 0;

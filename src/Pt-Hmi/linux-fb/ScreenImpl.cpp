@@ -75,7 +75,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
     _form.resize(size);
     _form.setContent(&_shell);
-    _form.setParent(this);
+    _form.setParent(*this);
 
     updateScreen( Gfx::Rect(Gfx::Point(0, 0), _frameBuffer.size()) );
 }
@@ -184,7 +184,7 @@ void ScreenImpl::onDetach(Form& form)
 
 void ScreenImpl::onInit(Form& form)
 {
-    form.setSurface(&_surface);
+    form.setSurface(&_surface, Gfx::PointF(0, 0) );
     form.setNextResponder(this);
 
     double scaling = scaleFactor();
@@ -197,7 +197,7 @@ void ScreenImpl::onInit(Form& form)
 
 void ScreenImpl::onRelease(Form& form)
 {
-    form.setSurface(0);
+    form.setSurface( 0, Gfx::PointF(0, 0) );
     form.setNextResponder(0);
 }
 
@@ -214,7 +214,7 @@ Gfx::PointF ScreenImpl::onToForm(const Form& form,  const Gfx::PointF& pos) cons
 }
 
 
-void ScreenImpl::onRepaint(Form& s, const Gfx::RectF& rect)
+void ScreenImpl::onRepaintRequest(Form& s, const Gfx::RectF& rect)
 {
     Gfx::PointF clientPos = onFromForm( s, rect.topLeft() );
     Gfx::RectF clientRect( clientPos, rect.size() );
@@ -223,7 +223,7 @@ void ScreenImpl::onRepaint(Form& s, const Gfx::RectF& rect)
 }
 
 
-void ScreenImpl::onActivate(Form& w, bool active)
+void ScreenImpl::onActivateRequest(Form& w, bool active)
 {
 }
 
@@ -235,7 +235,7 @@ void ScreenImpl::onShowRequest(Form& form, bool isShow)
 }
 
 
-void ScreenImpl::onMove(Form& form, const Gfx::PointF& pos)
+void ScreenImpl::onMoveRequest(Form& form, const Gfx::PointF& pos)
 {   
     //
     // align to physical pixel grid
@@ -260,7 +260,7 @@ void ScreenImpl::onMove(Form& form, const Gfx::PointF& pos)
 }
 
 
-void ScreenImpl::onResize(Form& form, const Gfx::SizeF& size)
+void ScreenImpl::onResizeRequest(Form& form, const Gfx::SizeF& size)
 {
     //
     // align to physical pixel grid

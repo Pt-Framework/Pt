@@ -68,62 +68,6 @@ Widget::~Widget()
 }
 
 
-void Widget::add(Widget& w)
-{
-    w.setParent(*this);
-}
-
-
-void Widget::remove(Widget& w)
-{
-    w.unparent();
-}
-
-
-Gfx::PaintSurface& Widget::surface()
-{
-    return _surface;
-}
-
-
-const Gfx::PaintSurface& Widget::surface() const
-{
-    return _surface;
-}
-
-
-void Widget::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
-{
-    if( ! surface )
-    {
-        _surface.detach();
-    }
-    else
-    {
-        Gfx::RectF clientRect( pos, size() );
-        _surface.attach(*surface, clientRect);
-    }
-
-    onSetSurface(surface, pos);
-
-    std::vector<Widget*>::iterator it;
-    for(it = _children.begin(); it != _children.end(); ++it)
-    {
-        Widget* widget = *it;
-
-        Gfx::PaintSurface* surface = _surface.surface();
-        Gfx::PointF surfacePos = pos + widget->position();
-
-        widget->setSurface(surface, surfacePos);
-    }
-}
-
-
-void Widget::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
-{
-}
-
-
 void Widget::setParent(View& parent)
 {
     if(_parent == &parent)
@@ -137,6 +81,8 @@ void Widget::setParent(View& parent)
     _parent->onInit(*this);
     _parent->onEnableRequest(*this, _enabled);
     _parent->onShowRequest(*this, _show);
+
+    // TODO: onMoveRequest, onResizeRequest...
 
     invalidate();
 
@@ -209,12 +155,12 @@ void Widget::onRelease(Widget& widget)
 void Widget::setForm(Form* form)
 {
     if(_form)
-        _form->onDeregister(*this);
+        _form->onRemoveElement(*this);
 
     _form = 0;
 
     if(form)
-        form->onRegister(*this);
+        form->onAddElement(*this);
 
     _form = form;
 
@@ -224,6 +170,18 @@ void Widget::setForm(Form* form)
         Widget* widget = *it;
         widget->setForm(form);
     }
+}
+
+
+void Widget::add(Widget& w)
+{
+    w.setParent(*this);
+}
+
+
+void Widget::remove(Widget& w)
+{
+    w.unparent();
 }
 
 
@@ -240,6 +198,50 @@ void Widget::onRemoveWidget(Widget& w)
 const std::vector<Widget*>& Widget::widgets() const
 {
     return _children;
+}
+
+
+Gfx::PaintSurface& Widget::surface()
+{
+    return _surface;
+}
+
+
+const Gfx::PaintSurface& Widget::surface() const
+{
+    return _surface;
+}
+
+
+void Widget::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+{
+    if( ! surface )
+    {
+        _surface.detach();
+    }
+    else
+    {
+        Gfx::RectF clientRect( pos, size() );
+        _surface.attach(*surface, clientRect);
+    }
+
+    onSetSurface(surface, pos);
+
+    std::vector<Widget*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Widget* widget = *it;
+
+        Gfx::PaintSurface* surface = _surface.surface();
+        Gfx::PointF surfacePos = pos + widget->position();
+
+        widget->setSurface(surface, surfacePos);
+    }
+}
+
+
+void Widget::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+{
 }
 
 
@@ -752,29 +754,26 @@ void Widget::onRescale(double scaling)
 
 void Widget::onRequestMove(const Gfx::PointF& pos)
 {
+    if(_parent)
+        _parent->onMoveRequest(*this, pos);
+}
+
+
+void Widget::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
+{
     //
     // align to physical pixel grid
     //
     Gfx::PointF aligedPos = _surface.align(pos);
 
     if( position() == aligedPos )
-    {
         return;
-    }
 
     //
     // send move event
     //
-    MoveEvent mev(*this, aligedPos);
+    MoveEvent mev(widget, aligedPos);
     Application::instance().commitEvent(mev);
-
-    if(_parent)
-        _parent->onMoveRequest(*this, aligedPos);
-}
-
-
-void Widget::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
-{
 }
 
 

@@ -252,15 +252,17 @@ class PT_HMI_API Window : public Sheet
         virtual Gfx::PointF onToForm(const Form& form, 
                                      const Gfx::PointF& pos) const;
 
-        virtual void onRepaint(Form& form, const Gfx::RectF& rect);
+        virtual void onRepaintRequest(Form& form, const Gfx::RectF& rect);
 
-        virtual void onActivate(Form& form, bool active);
+        virtual void onActivateRequest(Form& form, bool active);
+
+        virtual void onEnableRequest(Form& form, bool isEnable);
 
         virtual void onShowRequest(Form& form, bool isShow);
 
-        virtual void onMove(Form& form, const Gfx::PointF& pos);
+        virtual void onMoveRequest(Form& form, const Gfx::PointF& pos);
 
-        virtual void onResize(Form& form, const Gfx::SizeF& size);
+        virtual void onResizeRequest(Form& form, const Gfx::SizeF& size);
 
     //
     // invalidation

@@ -50,6 +50,7 @@ Form::Form()
 , _mainWidget(0)
 , _layouts(0)
 , _show(true)
+, _enabled(true)
 , _active(0)
 , _focusWidget(0)
 {
@@ -77,9 +78,10 @@ void Form::setParent(Sheet& parent)
     _parent = &parent;
 
     _parent->onInit(*this);
+    _parent->onEnableRequest(*this, _enabled);
     _parent->onShowRequest(*this, _show);
-    _parent->onMove(*this, _requestedPosition);
-    _parent->onResize(*this, _requestedSize);
+    _parent->onMoveRequest(*this, _requestedPosition);
+    _parent->onResizeRequest(*this, _requestedSize);
 
     onSetParent(_parent);
 }
@@ -95,6 +97,32 @@ void Form::unparent()
     _parent = 0;
 
     onSetParent(_parent);
+}
+
+
+Widget* Form::content() 
+{
+    return _mainWidget;
+}
+
+
+const Widget* Form::content()  const 
+{
+    return _mainWidget;
+}
+
+
+void Form::setContent(Widget* widget)
+{
+    if(_mainWidget)
+    {
+        _mainWidget->unparent();
+    }
+
+    if(widget)
+    {
+        widget->setParent(*this);
+    }
 }
 
 
@@ -127,482 +155,9 @@ void Form::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 }
 
 
-Widget* Form::content() 
-{
-    return _mainWidget;
-}
-
-
-const Widget* Form::content()  const 
-{
-    return _mainWidget;
-}
-
-
-void Form::setContent(Widget* widget)
-{
-    if(_mainWidget)
-    {
-        _mainWidget->unparent();
-    }
-
-    if(widget)
-    {
-        widget->setParent(*this);
-    }
-}
-
-
-Visual* Form::onHitTest(const Gfx::PointF& p)
-{
-    if(_mainWidget)
-    {
-        Gfx::PointF pos = toWidget(*_mainWidget, p);
-        Visual* hit = _mainWidget->hitTest(pos);
-        if(hit)
-            return hit;
-    }
-
-    Gfx::RectF bounds( size() );
-    if( bounds.contains(p) )
-        return this;
-
-    return 0;
-}
-
-
-Gfx::PointF Form::onToParent(const Gfx::PointF& pos) const
-{
-    if( ! _parent )
-        return pos;
-
-    return _parent->onFromForm(*this, pos);
-}
-
-
-Gfx::PointF Form::onFromParent(const Gfx::PointF& pos) const
-{
-    if( ! _parent )
-        return pos;
-
-    return _parent->onToForm(*this, pos);
-}
-
-
-void Form::onProcessEvent(const Pt::Event& ev)
-{
-    View::onProcessEvent(ev);
-}
-
-
-Gfx::PointF Form::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
-{
-    //const View* parentView = widget.parent();
-
-    //if( parentView == this || ! parentView )
-        return pos - widget.position();
-
-    //return pos - parentView->toWidget(widget, pos);    
-}
-
-
-Gfx::PointF Form::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
-{
-    //const View* parentView = widget.parent();
-
-    //if( parentView == this || ! parentView )
-        return pos + widget.position();
-
-    //return pos + parentView->fromWidget(widget, pos);
-}
-
-
-void Form::onAttach(Widget& widget)
-{
-    _mainWidget = &widget;
-    
-    relayout();
-}
-
-
-void Form::onDetach(Widget& widget)
-{
-  if(_active == &widget)
-      _active = 0;
-
-    if(_mainWidget == &widget)
-        _mainWidget = 0;
-
-    relayout();
-}
-
-
-void Form::onInit(Widget& widget)
-{
-    Gfx::PaintSurface* surface = _surface.surface();
-    Gfx::PointF surfacePos = _surface.area().topLeft() + widget.position();
-
-    widget.setSurface(surface, surfacePos);
-    widget.setNextResponder(this);
-    widget.setForm(this);
-
-    double scaling = scaleFactor();
-    RescaleEvent ev(widget, scaling);
-    widget.processEvent(ev);
-}
-
-
-void Form::onRelease(Widget& widget)
-{
-    widget.setForm(0);
-    widget.setSurface( 0, widget.position() );
-    widget.setNextResponder(0);
-}
-
-
-void Form::onRegister(Widget& widget)
-{
-    //
-    // focus handling
-    //
-    if( _focusList.empty() )
-        widget.setFocusIndex(0);
-    else
-        widget.setFocusIndex( _focusList.back()->focusIndex() + 1);
-
-    _focusList.push_back(&widget);
-
-    onSetShortcut( widget, widget.shortcut() );
-    onSetMnemonic( widget, widget.mnemonic() );
-}
-
-
-void Form::onDeregister(Widget& widget)
-{
-    if(_active == &widget)
-        _active = 0;
-
-    //
-    // focus handling
-    //
-    if( _focusWidget == &widget )
-    {
-        FocusEvent fev(*_focusWidget, false);
-        _focusWidget->processEvent(fev);
-        _focusWidget = 0;
-    }
-
-    std::vector<Widget*>::iterator it;
-    it = std::find(_focusList.begin(), _focusList.end(), &widget);
-
-    if( it != _focusList.end() )
-        _focusList.erase(it);
-
-    onSetShortcut(widget, 0);
-    onSetMnemonic(widget, 0);
-}
-
-
-void Form::onInvalidateEvent(const InvalidateEvent& ev)
-{
-    Base::onInvalidateEvent(ev);
-}
-
-
-void Form::onInvalidate()
-{
-    Base::onInvalidate();
-    
-    relayout();
-}
-
-
-void Form::onRequestRepaint(const Gfx::RectF& rect)
-{
-    if(_parent)
-        _parent->onRepaint(*this, rect);
-}
-
-
-void Form::onProcessPaintEvent(const PaintEvent& ev)
-{    
-    const Gfx::RectF& rect = ev.rect();
-    if( rect.isNull() )
-        return;
-
-    View::onProcessPaintEvent(ev);
-
-    //
-    // paint main widget
-    //
-    if(_mainWidget)
-    {
-        Gfx::RectF updateRect = _mainWidget->geometry().intersect(rect);
-        if( updateRect.isNull() )
-            return;
-
-        Gfx::PointF updatePos = onToWidget( *_mainWidget, updateRect.topLeft() );
-        updateRect.setOrigin(updatePos);
-
-        PaintEvent pev( *_mainWidget, updateRect );
-        _mainWidget->processEvent(pev);
-    }
-}
-
-
-void Form::onPaintEvent(const PaintEvent& ev)
-{
-    View::onPaintEvent(ev);
-}
-
-
-void Form::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
-{
-    Gfx::PointF widgetPos = onFromWidget( w, rect.topLeft() );
-    Gfx::RectF widgetRect( widgetPos, rect.size() );
-
-    repaint(widgetRect);
-}
-
-
-Gfx::SizeF Form::onRequestMeasure(const SizePolicy& policy)
-{
-    return onMeasure(policy);
-}
-
-
-Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
-{
-    if( _mainWidget )
-        return _mainWidget->measure(policy);
-
-    return policy.size();
-}
-
-
-void Form::onRelayoutRequest(Widget& widget)
-{
-    relayout();
-}
-
-
-void Form::onRequestRelayout()
-{
-    _layouts++;
-
-    LayoutEvent ev( *this, bounds() );
-    Application::instance().loop().commitEvent(ev);
-}
-
-
-void Form::onProcessLayoutEvent(const LayoutEvent& ev)
-{
-    if(_layouts == 0)
-    {
-        //std::clog << "RELAYOUT EVENT " << name() << " skipped" << std::endl;
-        return;
-    }
-
-    --_layouts;
-
-    if(_layouts > 0)
-        return;
-
-    //std::clog << "RELAYOUT EVENT " << name() << std::endl;
-
-    //
-    // 1. Pass
-    //  
-    SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
-    policy.setSize( size() );
-    measure(policy);
-
-    // align to physical pixel grid
-    Gfx::RectF rect( size() );
-    rect = _surface.align(rect);
-
-    //
-    // 2. Pass layout position and size of contents
-    //
-    LayoutEvent lev(*this);
-    lev.setRect(rect);
-    onLayoutEvent(lev);
-
-    // layout content marked invalid
-    if( _mainWidget )
-    {
-        Gfx::RectF widgetRect( rect.size() );
-        
-        LayoutEvent lev(*_mainWidget, widgetRect);
-        Application::instance().commitEvent(lev);
-    }
-}
-
-
-void Form::onLayoutEvent(const LayoutEvent& ev)
-{
-    onLayout( ev.rect() );
-}
-
-
-void Form::onLayout(const Gfx::RectF& rect)
-{
-    //
-    // TODO: no need to pass rect
-    //
-
-    if( _mainWidget )
-    {
-        Gfx::RectF widgetRect( rect.size() );
-
-        _mainWidget->move( widgetRect.topLeft() );
-        _mainWidget->resize( widgetRect.size() );
-    }
-}
-
-
-void Form::onProcessRescaleEvent(const RescaleEvent& ev)
-{   
-    Base::onProcessRescaleEvent(ev);
-
-    if(_mainWidget)
-    {
-        double scaling = ev.scaleFactor();
-        RescaleEvent ev(*_mainWidget, scaling);
-        _mainWidget->processEvent(ev);
-    }
-}  
-
-
-void Form::onRescaleEvent(const RescaleEvent& ev)
-{
-    Base::onRescaleEvent(ev);
-}
-
-
-void Form::onRescale(double scaling)
-{
-    Base::onRescale(scaling);
-}
-
-
-void Form::onRequestMove(const Gfx::PointF& pos)
-{
-    _requestedPosition = pos;
-
-    if(_parent)
-        _parent->onMove(*this, pos);
-}
-
-
-//void Form::onProcessMoveEvent(const MoveEvent& ev)
-//{
-//    onMoveEvent(ev);
-//}
-
-
-void Form::onMoveEvent(const MoveEvent& ev)
-{
-    View::onMoveEvent(ev);
-}
-
-
-void Form::onRequestResize(const Gfx::SizeF& s)
-{
-    _requestedSize = s;
-    
-    if(_parent)
-        _parent->onResize(*this, s);
-}
-
-
-//void Form::onProcessResizeEvent(const ResizeEvent& ev)
-//{
-//    onResizeEvent(ev);
-//}
-
-
-void Form::onResizeEvent(const ResizeEvent& ev)
-{
-    View::onResizeEvent(ev);
-
-    relayout();
-}
-
-
-void Form::onProcessEnableEvent(const EnableEvent& ev)
-{
-    Base::onProcessEnableEvent(ev);
-
-    if(_mainWidget)
-    {
-        EnableEvent eev( *_mainWidget, ev.enabled() );
-        _mainWidget->processEvent(eev);
-    }
-}
-
-
-void Form::onEnableEvent(const EnableEvent& ev)
-{    
-    Base::onEnableEvent(ev);
-}
-
-
-void Form::onEnable(bool e)
-{
-    Base::onEnable(e);
-}
-
-
-void Form::onEnableRequest(Widget& widget, bool enable)
-{
-    if( ! isEnabled() )
-      enable = false;
-
-    EnableEvent eev(widget, enable);
-    widget.processEvent(eev);
-}
-
-
-void Form::onProcessShowEvent(const ShowEvent& ev)
-{
-    Base::onProcessShowEvent(ev);
-}
-
-
-void Form::onShowEvent(const ShowEvent& ev)
-{
-    Base::onShowEvent(ev);
-}
-
-
-void Form::onShow(bool visible)
-{
-    Base::onShow(visible);
-}
-
-
-void Form::onShowRequest(Widget& widget, bool isShown)
-{
-    ShowEvent sev(widget, isShown);
-    widget.processEvent(sev);
-}
-
-
-void Form::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
-{
-}
-
-
-void Form::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
-{
-}
-
-
-void Form::onRaiseRequest(Widget& widget)
-{
-}
-
+//
+// input focus
+//
 
 Widget* Form::focusWidget()
 {
@@ -734,6 +289,545 @@ void Form::onSetMnemonic(Widget& w, const Char* ch)
 }
 
 
+void Form::onRaiseRequest(Widget& widget)
+{
+}
+
+//
+// View
+//
+
+void Form::onAttach(Widget& widget)
+{
+    _mainWidget = &widget;
+    
+    relayout();
+}
+
+
+void Form::onDetach(Widget& widget)
+{
+  if(_active == &widget)
+      _active = 0;
+
+    if(_mainWidget == &widget)
+        _mainWidget = 0;
+
+    relayout();
+}
+
+
+void Form::onInit(Widget& widget)
+{
+    Gfx::PaintSurface* surface = _surface.surface();
+    Gfx::PointF surfacePos = _surface.area().topLeft() + widget.position();
+
+    widget.setSurface(surface, surfacePos);
+    widget.setNextResponder(this);
+    widget.setForm(this);
+
+    double scaling = scaleFactor();
+    RescaleEvent ev(widget, scaling);
+    widget.processEvent(ev);
+}
+
+
+void Form::onRelease(Widget& widget)
+{
+    widget.setForm(0);
+    widget.setSurface( 0, widget.position() );
+    widget.setNextResponder(0);
+}
+
+
+void Form::onAddElement(Widget& widget)
+{
+    //
+    // focus handling
+    //
+    if( _focusList.empty() )
+        widget.setFocusIndex(0);
+    else
+        widget.setFocusIndex( _focusList.back()->focusIndex() + 1);
+
+    _focusList.push_back(&widget);
+
+    onSetShortcut( widget, widget.shortcut() );
+    onSetMnemonic( widget, widget.mnemonic() );
+}
+
+
+void Form::onRemoveElement(Widget& widget)
+{
+    if(_active == &widget)
+        _active = 0;
+
+    //
+    // focus handling
+    //
+    if( _focusWidget == &widget )
+    {
+        FocusEvent fev(*_focusWidget, false);
+        _focusWidget->processEvent(fev);
+        _focusWidget = 0;
+    }
+
+    std::vector<Widget*>::iterator it;
+    it = std::find(_focusList.begin(), _focusList.end(), &widget);
+
+    if( it != _focusList.end() )
+        _focusList.erase(it);
+
+    onSetShortcut(widget, 0);
+    onSetMnemonic(widget, 0);
+}
+
+
+Gfx::PointF Form::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
+{
+    //const View* parentView = widget.parent();
+
+    //if( parentView == this || ! parentView )
+        return pos - widget.position();
+
+    //return pos - parentView->toWidget(widget, pos);    
+}
+
+
+Gfx::PointF Form::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
+{
+    //const View* parentView = widget.parent();
+
+    //if( parentView == this || ! parentView )
+        return pos + widget.position();
+
+    //return pos + parentView->fromWidget(widget, pos);
+}
+
+//
+// layout
+//
+
+Gfx::SizeF Form::onRequestMeasure(const SizePolicy& policy)
+{
+    return onMeasure(policy);
+}
+
+
+Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
+{
+    if( _mainWidget )
+        return _mainWidget->measure(policy);
+
+    return policy.size();
+}
+
+
+void Form::onRelayoutRequest(Widget& widget)
+{
+    relayout();
+}
+
+
+void Form::onRequestRelayout()
+{
+    _layouts++;
+
+    LayoutEvent ev( *this, bounds() );
+    Application::instance().loop().commitEvent(ev);
+}
+
+
+void Form::onProcessLayoutEvent(const LayoutEvent& ev)
+{
+    if(_layouts == 0)
+    {
+        //std::clog << "RELAYOUT EVENT " << name() << " skipped" << std::endl;
+        return;
+    }
+
+    --_layouts;
+
+    if(_layouts > 0)
+        return;
+
+    //std::clog << "RELAYOUT EVENT " << name() << std::endl;
+
+    //
+    // 1. Pass
+    //  
+    SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
+    policy.setSize( size() );
+    measure(policy);
+
+    // align to physical pixel grid
+    Gfx::RectF rect( size() );
+    rect = _surface.align(rect);
+
+    //
+    // 2. Pass layout position and size of contents
+    //
+    LayoutEvent lev(*this);
+    lev.setRect(rect);
+    onLayoutEvent(lev);
+
+    // layout content marked invalid
+    if( _mainWidget )
+    {
+        Gfx::RectF widgetRect( rect.size() );
+        
+        LayoutEvent lev(*_mainWidget, widgetRect);
+        Application::instance().commitEvent(lev);
+    }
+}
+
+
+void Form::onLayoutEvent(const LayoutEvent& ev)
+{
+    onLayout( ev.rect() );
+}
+
+
+void Form::onLayout(const Gfx::RectF& rect)
+{
+    //
+    // TODO: no need to pass rect
+    //
+
+    if( _mainWidget )
+    {
+        Gfx::RectF widgetRect( rect.size() );
+
+        _mainWidget->move( widgetRect.topLeft() );
+        _mainWidget->resize( widgetRect.size() );
+    }
+}
+
+//
+// Visual
+//
+
+Visual* Form::onHitTest(const Gfx::PointF& p)
+{
+    if(_mainWidget)
+    {
+        Gfx::PointF pos = toWidget(*_mainWidget, p);
+        Visual* hit = _mainWidget->hitTest(pos);
+        if(hit)
+            return hit;
+    }
+
+    Gfx::RectF bounds( size() );
+    if( bounds.contains(p) )
+        return this;
+
+    return 0;
+}
+
+
+Gfx::PointF Form::onToParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onFromForm(*this, pos);
+}
+
+
+Gfx::PointF Form::onFromParent(const Gfx::PointF& pos) const
+{
+    if( ! _parent )
+        return pos;
+
+    return _parent->onToForm(*this, pos);
+}
+
+
+void Form::onProcessEvent(const Pt::Event& ev)
+{
+    View::onProcessEvent(ev);
+}
+
+//
+// invalidation
+//
+
+void Form::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    Base::onInvalidateEvent(ev);
+}
+
+
+void Form::onInvalidate()
+{
+    Base::onInvalidate();
+    
+    relayout();
+}
+
+//
+// painting
+//
+
+void Form::onRequestRepaint(const Gfx::RectF& rect)
+{
+    if(_parent)
+        _parent->onRepaintRequest(*this, rect);
+}
+
+
+void Form::onProcessPaintEvent(const PaintEvent& ev)
+{    
+    const Gfx::RectF& rect = ev.rect();
+    if( rect.isNull() )
+        return;
+
+    View::onProcessPaintEvent(ev);
+
+    //
+    // paint main widget
+    //
+    if(_mainWidget)
+    {
+        Gfx::RectF updateRect = _mainWidget->geometry().intersect(rect);
+        if( updateRect.isNull() )
+            return;
+
+        Gfx::PointF updatePos = onToWidget( *_mainWidget, updateRect.topLeft() );
+        updateRect.setOrigin(updatePos);
+
+        PaintEvent pev( *_mainWidget, updateRect );
+        _mainWidget->processEvent(pev);
+    }
+}
+
+
+void Form::onPaintEvent(const PaintEvent& ev)
+{
+    View::onPaintEvent(ev);
+}
+
+
+void Form::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
+{
+    Gfx::PointF widgetPos = onFromWidget( w, rect.topLeft() );
+    Gfx::RectF widgetRect( widgetPos, rect.size() );
+
+    repaint(widgetRect);
+}
+
+//
+// scaling
+//
+
+void Form::onProcessRescaleEvent(const RescaleEvent& ev)
+{   
+    Base::onProcessRescaleEvent(ev);
+
+    if(_mainWidget)
+    {
+        double scaling = ev.scaleFactor();
+        RescaleEvent ev(*_mainWidget, scaling);
+        _mainWidget->processEvent(ev);
+    }
+}  
+
+
+void Form::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
+}
+
+
+void Form::onRescale(double scaling)
+{
+    Base::onRescale(scaling);
+}
+
+//
+// enable
+//
+
+void Form::onRequestEnable(bool e)
+{
+    _enabled = e;
+
+    if(_parent)
+        _parent->onEnableRequest(*this, e);
+}
+
+
+void Form::onProcessEnableEvent(const EnableEvent& ev)
+{
+    bool isEnabled = ev.enabled();
+    if( ! _enabled )
+        isEnabled = false;
+
+    EnableEvent eev(*this, isEnabled);
+    Base::onProcessEnableEvent(ev);
+
+    if(_mainWidget)
+    {
+        EnableEvent eev( *_mainWidget, ev.enabled() );
+        _mainWidget->processEvent(eev);
+    }
+}
+
+
+void Form::onEnableEvent(const EnableEvent& ev)
+{    
+    Base::onEnableEvent(ev);
+}
+
+
+void Form::onEnable(bool e)
+{
+    Base::onEnable(e);
+}
+
+
+void Form::onEnableRequest(Widget& widget, bool enable)
+{
+    if( ! isEnabled() )
+      enable = false;
+
+    EnableEvent eev(widget, enable);
+    widget.processEvent(eev);
+}
+
+//
+// activation
+//
+
+void Form::onActivateRequest(Widget& widget, bool active)
+{
+    if(active)
+        _active = &widget;
+
+    if( ! active && _active == &widget )
+        _active = 0;
+}
+
+//
+// visibility
+//
+
+void Form::onRequestShow(bool isShown)
+{
+    _show = isShown;
+
+    if(_parent)
+        _parent->onShowRequest(*this, isShown);
+}
+
+
+void Form::onProcessShowEvent(const ShowEvent& ev)
+{
+    Base::onProcessShowEvent(ev);
+}
+
+
+void Form::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
+}
+
+
+void Form::onShow(bool visible)
+{
+    Base::onShow(visible);
+}
+
+
+void Form::onShowRequest(Widget& widget, bool isShown)
+{
+    ShowEvent sev(widget, isShown);
+    widget.processEvent(sev);
+}
+
+//
+// geometry
+//
+
+void Form::onRequestMove(const Gfx::PointF& pos)
+{
+    _requestedPosition = pos;
+
+    if(_parent)
+        _parent->onMoveRequest(*this, pos);
+}
+
+
+void Form::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
+{
+    //
+    // align to physical pixel grid
+    //
+    Gfx::PointF aligedPos = _surface.align(pos);
+
+    if( position() == aligedPos )
+        return;
+
+    //
+    // send move event
+    //
+    MoveEvent mev(widget, aligedPos);
+    Application::instance().commitEvent(mev);
+}
+
+
+void Form::onProcessMoveEvent(const MoveEvent& ev)
+{
+    Base::onProcessMoveEvent(ev);
+}
+
+
+void Form::onMoveEvent(const MoveEvent& ev)
+{
+    View::onMoveEvent(ev);
+}
+
+
+void Form::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
+{
+}
+
+
+void Form::onRequestResize(const Gfx::SizeF& s)
+{
+    _requestedSize = s;
+    
+    if(_parent)
+        _parent->onResizeRequest(*this, s);
+}
+
+
+void Form::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
+}
+
+
+void Form::onResizeEvent(const ResizeEvent& ev)
+{
+    View::onResizeEvent(ev);
+
+    relayout();
+}
+
+//
+// input capture
+//
+
+void Form::onRequestCapture(bool capture)
+{
+    Base::onRequestCapture(capture);
+}
+
+//
+// input
+//
+
 void Form::onProcessMouseEvent(const MouseEvent& ev)
 {
     //if( ! acceptsInput() )
@@ -842,16 +936,6 @@ bool Form::onLeaveEvent(const LeaveEvent& ev )
 {
     //std::clog << "LEAVE Form: " << name()  << " " << vid() << std::endl;
     return Base::onLeaveEvent(ev);
-}
-
-
-void Form::onActivateRequest(Widget& widget, bool active)
-{
-    if(active)
-        _active = &widget;
-
-    if( ! active && _active == &widget )
-        _active = 0;
 }
 
 

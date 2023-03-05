@@ -359,7 +359,7 @@ Gfx::PointF Window::onToForm(const Form& form, const Gfx::PointF& pos) const
 }
 
 
-void Window::onRepaint(Form& form, const Gfx::RectF& rect)
+void Window::onRepaintRequest(Form& form, const Gfx::RectF& rect)
 {
     Gfx::PointF clientPos = onFromForm( form, rect.topLeft() );
     Gfx::RectF clientRect( clientPos, rect.size() );
@@ -368,7 +368,7 @@ void Window::onRepaint(Form& form, const Gfx::RectF& rect)
 }
 
 
-void Window::onActivate(Form& form, bool active)
+void Window::onActivateRequest(Form& form, bool active)
 {
 }
 
@@ -380,7 +380,7 @@ void Window::onShowRequest(Form& form, bool isShow)
 }
 
 
-void Window::onMove(Form& form, const Gfx::PointF& pos)
+void Window::onMoveRequest(Form& form, const Gfx::PointF& pos)
 {   
     //
     // align to physical pixel grid
@@ -404,7 +404,7 @@ void Window::onMove(Form& form, const Gfx::PointF& pos)
 }
 
 
-void Window::onResize(Form& form, const Gfx::SizeF& size)
+void Window::onResizeRequest(Form& form, const Gfx::SizeF& size)
 {
     //
     // align to physical pixel grid
@@ -607,6 +607,16 @@ void Window::showModal()
         if( activeWindow && activeWindow->vid() == w->vid() )
             activeWindow->activate();
     }
+}
+
+
+void Window::onEnableRequest(Form& form, bool enable)
+{
+    if( ! isEnabled() )
+      enable = false;
+
+    EnableEvent eev(form, enable);
+    form.processEvent(eev);
 }
 
 
