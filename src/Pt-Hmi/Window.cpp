@@ -94,7 +94,7 @@ Window::Window(WindowManager* parent, WindowType type)
 , _state(WindowState::Normal)
 , _isAbove(false)
 {
-    _form.setParent(this);
+    _form.setParent(*this);
 
     eventReceived() += Pt::slot(*this, &Window::onProcessActivateEvent);
     eventReceived() += Pt::slot(*this, &Window::onProcessCloseEvent);

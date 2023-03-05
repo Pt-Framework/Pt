@@ -78,7 +78,7 @@ class PT_HMI_API Widget : public View
         virtual ~Widget();
 
     public:
-        void setParent(View* parent);
+        void setParent(View& parent);
 
         void unparent();
 

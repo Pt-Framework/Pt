@@ -59,31 +59,29 @@ Form::Form()
 Form::~Form()
 {
     if(_mainWidget)
-        _mainWidget->setParent(0);
+        _mainWidget->unparent();
 
     unparent();
 }
 
 
-void Form::setParent(Sheet* parent)
+void Form::setParent(Sheet& parent)
 {
-    if(_parent == parent)
+    if(_parent == &parent)
         return;
 
     unparent();
 
-    if(parent)
-    {
-        parent->onAttach(*this);
-        _parent = parent;
 
-        _parent->onInit(*this);
-        _parent->onShowRequest(*this, _show);
-        _parent->onMove(*this, _requestedPosition);
-        _parent->onResize(*this, _requestedSize);
+    parent.onAttach(*this);
+    _parent = &parent;
 
-        onSetParent(_parent);
-    }
+    _parent->onInit(*this);
+    _parent->onShowRequest(*this, _show);
+    _parent->onMove(*this, _requestedPosition);
+    _parent->onResize(*this, _requestedSize);
+
+    onSetParent(_parent);
 }
 
 
@@ -145,53 +143,13 @@ void Form::setContent(Widget* widget)
 {
     if(_mainWidget)
     {
-        _mainWidget->setParent(0);
+        _mainWidget->unparent();
     }
 
     if(widget)
     {
-        widget->setParent(this);
+        widget->setParent(*this);
     }
-}
-
-
-Widget* Form::findWidget2(const Gfx::PointF& pos)
-{
-    if( _mainWidget )
-    {
-        if( _mainWidget->geometry().contains(pos) )
-        {
-            Gfx::PointF p = onToWidget(*_mainWidget, pos);
-            Widget* found = _mainWidget->findWidget2(p);
-            return found ? found : _mainWidget;
-        }
-    }
-
-    return 0;
-}
-
-
-Widget* Form::findWidget2(const std::string& name)
-{
-    if( ! _mainWidget )
-        return 0;
-
-    if( _mainWidget->name() == name )
-        return _mainWidget;
-
-    return _mainWidget->findWidget2(name);
-}
-
-
-Widget* Form::findWidget2(Pt::uint64_t vid)
-{
-    if( ! _mainWidget )
-        return 0;
-
-    if( _mainWidget->vid() == vid )
-        return _mainWidget;
-
-    return _mainWidget->findWidget2(vid);
 }
 
 

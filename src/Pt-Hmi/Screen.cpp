@@ -96,35 +96,6 @@ void Screen::removeWindow(Window& w)
 }
 
 
-Window* Screen::findWindow2(const std::string& name)
-{
-    std::vector<Window*>::const_iterator it;
-    for(it = windows().begin(); it != windows().end(); ++it)
-    {
-        if( (*it)->name() == name )
-            return *it;
-    }
-    
-    return 0;
-}
-
-
-Widget* Screen::findWidget2(const std::string& name)
-{
-    std::vector<Window*>::const_iterator it;
-    for(it = windows().begin(); it != windows().end(); ++it)
-    {
-        Window* window = *it;
-        
-        Widget* widget = window->findWidget2(name);
-        if(widget)
-            return widget;
-    }
-    
-    return 0;
-}
-
-
 const std::vector<Window*>& Screen::windows() const
 {
   return _impl->windows();

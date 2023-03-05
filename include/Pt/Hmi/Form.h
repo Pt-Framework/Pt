@@ -70,7 +70,7 @@ class PT_HMI_API Form : public View
 
         virtual ~Form();
 
-        void setParent(Sheet* parent);
+        void setParent(Sheet& parent);
 
         void unparent();
     
@@ -86,12 +86,6 @@ class PT_HMI_API Form : public View
         const Widget* content()  const;
 
         void setContent(Widget* widget);
-
-        Widget* findWidget2(const Gfx::PointF& pos);
-
-        Widget* findWidget2(const std::string& name);
-
-        Widget* findWidget2(Pt::uint64_t vid);
 
     public:
         Widget* focusWidget();

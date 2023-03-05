@@ -67,12 +67,7 @@ class PT_HMI_API Screen : public Visual
         void removeWindow(Window& w);
 
         const std::vector<Window*>& windows() const;
-
-        Window* findWindow2(const std::string& name);
-
-        Widget* findWidget2(const std::string& name);
-
-        
+       
         void setPointer(Visual* visual);
 
         void setPointer(Visual& visual, bool isPointer);

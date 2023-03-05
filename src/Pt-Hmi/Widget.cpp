@@ -64,19 +64,19 @@ Widget::~Widget()
     while( ! _children.empty() )
         remove( *_children.back() );
 
-    setParent(0);
+    unparent();
 }
 
-// implment add method in derived class
+
 void Widget::add(Widget& w)
 {
-    w.setParent(this);
+    w.setParent(*this);
 }
 
-// implment remove method in derived class
+
 void Widget::remove(Widget& w)
 {
-    w.setParent(0);
+    w.unparent();
 }
 
 
@@ -124,26 +124,23 @@ void Widget::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 }
 
 
-void Widget::setParent(View* parent)
+void Widget::setParent(View& parent)
 {
-    if(_parent == parent)
+    if(_parent == &parent)
         return;
 
     unparent();
 
-    if(parent)
-    {
-        parent->onAttach(*this);
-        _parent = parent;
+    parent.onAttach(*this);
+    _parent = &parent;
 
-        _parent->onInit(*this);
-        _parent->onEnableRequest(*this, _enabled);
-        _parent->onShowRequest(*this, _show);
+    _parent->onInit(*this);
+    _parent->onEnableRequest(*this, _enabled);
+    _parent->onShowRequest(*this, _show);
 
-        invalidate();
+    invalidate();
 
-        onSetParent(_parent);
-    }
+    onSetParent(_parent);
 }
 
 

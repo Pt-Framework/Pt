@@ -97,14 +97,14 @@ void Shell::setContent(Widget* widget)
 {
     if(_content)
     {
-        _content->setParent(0);
+        _content->unparent();
     }
 
     _content = widget;
 
     if(widget)
     {
-        widget->setParent(this);
+        widget->setParent(*this);
     }
 }
 
@@ -114,7 +114,7 @@ void Shell::setContent(Widget* widget)
 
 void Shell::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
-    Base::setSurface(surface, pos);
+    Base::onSetSurface(surface, pos);
 
     _wm.setSurface( surface, pos );
 }

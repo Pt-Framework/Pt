@@ -118,15 +118,6 @@ class PT_HMI_API Window : public Sheet
         void setContent(Widget* widget)
         { _form.setContent(widget); }
 
-        Widget* findWidget2(const Gfx::PointF& pos)
-        { return _form.findWidget2(pos); }
-
-        Widget* findWidget2(const std::string& name)
-        { return _form.findWidget2(name); }
-
-        Widget* findWidget2(Pt::uint64_t vid)
-        { return _form.findWidget2(vid); }
-
     public:
         Gfx::PaintSurface& surface();
 
