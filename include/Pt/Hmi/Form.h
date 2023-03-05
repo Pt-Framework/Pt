@@ -49,6 +49,9 @@ class Key;
 //       size limits in Visual
 //       activate in visual
 //       size policy in View
+//       margin and padding
+//       where to align
+//       when is invalidate, relayout end repaint called
 //       
 ///////////////////////////////////////////////////////////////////////
 
