@@ -74,6 +74,7 @@ class PT_HMI_API Form : public View
 
         void unparent();
     
+    public:
         Gfx::PaintSurface& surface();
 
         const Gfx::PaintSurface& surface() const;

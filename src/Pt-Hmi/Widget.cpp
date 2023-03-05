@@ -243,63 +243,6 @@ const std::vector<Widget*>& Widget::widgets() const
 }
 
 
-Widget* Widget::findWidget2(const Gfx::PointF& pos)
-{
-    std::vector<Widget*>::reverse_iterator it;
-    for(it = _children.rbegin(); it != _children.rend(); ++it)
-    {
-        Widget* widget = *it;
-
-        if( widget->geometry().contains(pos) )
-        {
-            Gfx::PointF p = toWidget(*widget, pos);
-            Widget* found = widget->findWidget2(p);
-            return found ? found : widget;
-        }
-    }
-
-    return 0;
-}
-
-
-Widget* Widget::findWidget2(Pt::uint64_t vid)
-{
-    std::vector<Widget*>::const_iterator it;
-    for(it = _children.begin(); it != _children.end(); ++it)
-    {
-        Widget* child = *it;
-
-        if( child->vid() == vid )
-            return child;
-
-        Widget* widget = child->findWidget2(vid);
-        if( widget )
-            return widget;
-    }
-
-    return 0;
-}
-
-
-Widget* Widget::findWidget2(const std::string& name)
-{
-    std::vector<Widget*>::const_iterator it;
-    for(it = _children.begin(); it != _children.end(); ++it)
-    {
-        Widget* child = *it;
-
-        if( child->name() == name )
-            return child;
-
-        Widget* widget = child->findWidget2(name);
-        if( widget )
-            return widget;
-    }
-
-    return 0;
-}
-
-
 Gfx::PointF Widget::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
     //const Visual* parentView = widget.parent();

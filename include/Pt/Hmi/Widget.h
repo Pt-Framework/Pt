@@ -82,6 +82,7 @@ class PT_HMI_API Widget : public View
 
         void unparent();
 
+    public:
         Gfx::PaintSurface& surface();
 
         const Gfx::PaintSurface& surface() const;
@@ -99,12 +100,6 @@ class PT_HMI_API Widget : public View
         void remove(Widget& widget);
 
         const std::vector<Widget*>& widgets() const;
-
-        Widget* findWidget2(const Gfx::PointF& pos);
-
-        Widget* findWidget2(const std::string& name);
-
-        Widget* findWidget2(Pt::uint64_t vid);
 
         //
         // focus handling
