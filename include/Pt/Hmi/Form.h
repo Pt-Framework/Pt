@@ -45,8 +45,11 @@ class Key;
 
 ///////////////////////////////////////////////////////////////////////
 // TODO: move base functionality to Visual API
-//       surface in Form
-//       responder in Form or Window
+//
+//       size limits in Visual
+//       activate in visual
+//       size policy in View
+//       
 ///////////////////////////////////////////////////////////////////////
 
 //
