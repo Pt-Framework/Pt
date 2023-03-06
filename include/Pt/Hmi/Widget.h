@@ -390,6 +390,9 @@ class PT_HMI_API Widget : public View
 
         bool                         _show;
         bool                         _enabled;
+
+        Gfx::PointF                  _requestedPosition;
+        Gfx::SizeF                   _requestedSize;
         
         Gfx::SizeF                   _minimumSize;
         SizePolicy                   _sizePolicy;

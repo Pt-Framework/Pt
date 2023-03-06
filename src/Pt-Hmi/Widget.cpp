@@ -81,8 +81,8 @@ void Widget::setParent(View& parent)
     _parent->onInit(*this);
     _parent->onEnableRequest(*this, _enabled);
     _parent->onShowRequest(*this, _show);
-
-    // TODO: onMoveRequest, onResizeRequest...
+    _parent->onMoveRequest(*this, _requestedPosition);
+    _parent->onResizeRequest(*this, _requestedSize);
 
     invalidate();
 
@@ -148,7 +148,6 @@ void Widget::onRelease(Widget& widget)
     widget.setNextResponder(0);
 
     relayout();
-    repaint( widget.geometry() );
 }
 
 
@@ -748,14 +747,15 @@ void Widget::onRescale(double scaling)
 
     // TODO: invalidate in derived class only when neccessary
     invalidate();
-    relayout();
 }
 
 
 void Widget::onRequestMove(const Gfx::PointF& pos)
 {
+    _requestedPosition = pos;
+
     if(_parent)
-        _parent->onMoveRequest(*this, pos);
+        _parent->onMoveRequest(*this, _requestedPosition);
 }
 
 
@@ -765,9 +765,6 @@ void Widget::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
     // align to physical pixel grid
     //
     Gfx::PointF aligedPos = _surface.align(pos);
-
-    if( position() == aligedPos )
-        return;
 
     //
     // send move event
@@ -786,9 +783,7 @@ void Widget::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
 void Widget::onMoveEvent(const MoveEvent& ev)
 {
     if( position() == ev.position() )
-    {
         return;
-    }
 
     Gfx::PointF delta = ev.position() - position();
     Gfx::PointF surfacePos = _surface.area().topLeft() + delta;
@@ -806,13 +801,8 @@ void Widget::onMoveEvent(const MoveEvent& ev)
 
 void Widget::onRequestResize(const Gfx::SizeF& size)
 {   
-    Gfx::SizeF alignedSize = _surface.align(size);
+    _requestedSize = size;
 
-    if( this->size() == alignedSize )
-    {
-        return;
-    }
-    
     _isLayoutInvalid = true;
 
     //
@@ -830,16 +820,17 @@ void Widget::onRequestResize(const Gfx::SizeF& size)
     //if( alignedSize.height() < minimumSize().height() )
     //    alignedSize.setHeight( minimumSize().height() );
 
-    ResizeEvent rev(*this, alignedSize);
-    Application::instance().commitEvent(rev);
-
     if(_parent)
-        _parent->onResizeRequest(*this, alignedSize);
+        _parent->onResizeRequest(*this, _requestedSize);
 }
 
 
 void Widget::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 {
+    Gfx::SizeF alignedSize = _surface.align(size);
+
+    ResizeEvent rev(widget, alignedSize);
+    Application::instance().commitEvent(rev);
 }
 
 
@@ -852,9 +843,7 @@ void Widget::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {
     if( size() == ev.size() )
-    {
         return;
-    }
 
     Gfx::RectF updateRect( size() );
     updateRect.unify( Gfx::RectF( ev.size() ) );
@@ -904,7 +893,6 @@ void Widget::onShow(bool isShown)
     Base::onShow(isShown);
 
     relayout();
-    repaint( bounds() );
 }
 
 
@@ -946,15 +934,14 @@ void Widget::onProcessEnableEvent(const EnableEvent& ev)
 void Widget::onEnableEvent(const EnableEvent& ev)
 {
     Base::onEnableEvent(ev);
+
+    invalidate();
 }
 
 
 void Widget::onEnable(bool e)
 {
     Base::onEnable(e);
-
-    // TODO: invalidate in derived class only when neccessary
-    invalidate();
 }
 
 
