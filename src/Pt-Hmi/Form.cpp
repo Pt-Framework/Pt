@@ -509,6 +509,9 @@ void Form::onLayout(const Gfx::RectF& rect)
 
 Visual* Form::onHitTest(const Gfx::PointF& p)
 {
+    if( ! bounds().contains(p) )
+        return 0;
+
     if(_mainWidget)
     {
         Gfx::PointF pos = toWidget(*_mainWidget, p);
@@ -517,11 +520,7 @@ Visual* Form::onHitTest(const Gfx::PointF& p)
             return hit;
     }
 
-    Gfx::RectF bounds( size() );
-    if( bounds.contains(p) )
-        return this;
-
-    return 0;
+    return this;
 }
 
 

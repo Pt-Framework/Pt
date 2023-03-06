@@ -149,9 +149,19 @@ ScreenImpl* Screen::impl()
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
-Visual* Screen::onHitTest(const Gfx::PointF& pos)
+Visual* Screen::onHitTest(const Gfx::PointF& p)
 {
-    return _impl->hitTest(pos);
+    if( ! bounds().contains(p) )
+        return 0;
+
+    // TODO: convert to WM coordinates
+    Gfx::PointF pos = p;
+    
+    Visual* hit = _impl->hitTest(pos);
+    if(hit)
+        return hit;
+
+    return this;
 }
 
 

@@ -130,9 +130,17 @@ const std::vector<Window*>& ScreenImpl::windows() const
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
-Visual* ScreenImpl::onHitTest(const Gfx::PointF& pos)
+Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
-    return _form.hitTest(pos);
+    if( ! bounds().contains(p) )
+        return 0;
+
+    Gfx::PointF pos = toForm(_form, p);
+    Visual* hit = _form.hitTest(pos);
+    if(hit)
+        return hit;
+
+    return 0;
 }
 
 

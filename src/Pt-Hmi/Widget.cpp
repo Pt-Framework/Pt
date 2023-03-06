@@ -1127,6 +1127,9 @@ void Widget::setMinimumHeight(double h)
 
 Visual* Widget::onHitTest(const Gfx::PointF& p)
 {
+    if( ! bounds().contains(p) )
+        return 0;
+
     std::vector<Widget*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
     {
@@ -1137,11 +1140,7 @@ Visual* Widget::onHitTest(const Gfx::PointF& p)
             return hit;
     }
 
-    Gfx::RectF bounds( size() );
-    if( bounds.contains(p) )
-        return this;
-
-    return 0;
+    return this;
 }
 
 

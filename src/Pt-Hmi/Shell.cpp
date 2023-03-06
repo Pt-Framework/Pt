@@ -134,6 +134,11 @@ void Shell::onRemoveWidget(Widget& w)
 
 Visual* Shell::onHitTest(const Gfx::PointF& p)
 {
+    if( ! bounds().contains(p) )
+        return 0;
+
+    // TODO: convert to WM coordinates
+
     Visual* hit = _wm.hitTest(p);
     if(hit)
         return hit;

@@ -275,15 +275,15 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 
 Visual* Window::onHitTest(const Gfx::PointF& p)
 {
+    if( ! bounds().contains(p) )
+        return 0;
+
     Gfx::PointF pos = toForm(_form, p);
     Visual* hit = _form.hitTest(pos);
     if(hit)
         return hit;
 
-    if( bounds().contains(p) )
-        return this;
-
-    return 0;
+    return this;
 }
 
 

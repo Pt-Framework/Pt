@@ -204,6 +204,9 @@ Gfx::PointF ShellWM::onFromParent(const Gfx::PointF& pos) const
 
 Visual* ShellWM::onHitTest(const Gfx::PointF& p)
 {
+    if( ! bounds().contains(p) )
+        return 0;
+
     std::vector<WindowFrame*>::const_reverse_iterator rit;
     for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
     {
