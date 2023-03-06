@@ -127,7 +127,7 @@ class ScreenImpl : public Sheet
 
         virtual void onActivateRequest(Form& form, bool active);
 
-        virtual void onEnableRequest(Form& form, bool isEnable) = 0;
+        virtual void onEnableRequest(Form& form, bool isEnable);
 
         virtual void onShowRequest(Form& form, bool isShow);
 
