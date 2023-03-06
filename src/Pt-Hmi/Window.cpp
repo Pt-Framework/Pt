@@ -787,6 +787,9 @@ void Window::setAbove(bool above)
         _parent->onSetAbove(*this, above);
 }
 
+//
+// minimum size
+// 
 
 const Gfx::SizeF& Window::minimumSize() const
 {
@@ -800,6 +803,12 @@ void Window::setMinimumSize(const Gfx::SizeF& s)
 
     if(_parent)
         _parent->onSetSizeLimits(*this, _minimumSize, _maximumSize);
+}
+
+
+void Window::setMinimumSize(double w, double h)
+{
+    setMinimumSize( Gfx::SizeF(w, h) );
 }
 
 
@@ -818,6 +827,9 @@ void Window::setMinimumHeight(double h)
     setMinimumSize(s);
 }
 
+//
+// maximum size
+// 
 
 const Gfx::SizeF& Window::maximumSize() const
 {
@@ -831,6 +843,12 @@ void Window::setMaximumSize(const Gfx::SizeF& s)
 
     if(_parent)
         _parent->onSetSizeLimits(*this, _minimumSize, _maximumSize);
+}
+
+
+void Window::setMaximumSize(double w, double h)
+{
+    setMaximumSize( Gfx::SizeF(w, h) );
 }
 
 

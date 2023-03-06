@@ -156,10 +156,12 @@ class PT_HMI_API Window : public Sheet
 
         void setTitle( const std::string& t );
 
-
+    public:
         const Gfx::SizeF& minimumSize() const;
 
         void setMinimumSize(const Gfx::SizeF& s);
+
+        void setMinimumSize(double w, double h);
 
         void setMinimumWidth(double w);
 
@@ -169,6 +171,8 @@ class PT_HMI_API Window : public Sheet
         const Gfx::SizeF& maximumSize() const;
 
         void setMaximumSize(const Gfx::SizeF& s);
+
+        void setMaximumSize(double w, double h);
 
         void setMaximumWidth(double w);
 

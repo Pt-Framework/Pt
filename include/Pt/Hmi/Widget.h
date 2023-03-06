@@ -226,17 +226,14 @@ class PT_HMI_API Widget : public View
         // inner spacing
         void setPadding(double horiz, double vertical);
 
+    public:
         const Gfx::SizeF& minimumSize() const;
 
         void setMinimumSize(const Gfx::SizeF&);
 
         void setMinimumSize(double w, double h);
 
-        double minimumWidth() const;
-
         void setMinimumWidth(double w);
-
-        double minimumHeight() const;
 
         void setMinimumHeight(double h);
 

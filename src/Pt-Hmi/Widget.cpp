@@ -1086,6 +1086,9 @@ void Widget::setPadding(double horiz, double vertical)
     setPadding( Spacing(horiz, vertical) );
 }
 
+//
+// minimum size
+// 
 
 const Gfx::SizeF& Widget::minimumSize() const
 {
@@ -1105,22 +1108,10 @@ void Widget::setMinimumSize(double w, double h)
 }
 
 
-double Widget::minimumWidth() const
-{
-    return _minimumSize.width();
-}
-
-
 void Widget::setMinimumWidth(double h)
 {
     _minimumSize.setWidth(h);
     relayout();
-}
-
-
-double Widget::minimumHeight() const
-{
-    return _minimumSize.height();
 }
 
 
@@ -1130,6 +1121,9 @@ void Widget::setMinimumHeight(double h)
     relayout();
 }
 
+//
+// Visual
+//
 
 Visual* Widget::onHitTest(const Gfx::PointF& p)
 {
