@@ -50,7 +50,6 @@ class Cursor;
 class Screen;
 
 class ScreenImpl : public Sheet
-                 , public Connectable
 {
     typedef Sheet Base;
 
@@ -127,6 +126,8 @@ class ScreenImpl : public Sheet
         virtual void onRepaintRequest(Form& form, const Gfx::RectF& rect);
 
         virtual void onActivateRequest(Form& form, bool active);
+
+        virtual void onEnableRequest(Form& form, bool isEnable) = 0;
 
         virtual void onShowRequest(Form& form, bool isShow);
 

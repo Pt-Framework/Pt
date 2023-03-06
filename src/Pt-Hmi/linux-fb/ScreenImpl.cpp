@@ -225,6 +225,17 @@ void ScreenImpl::onRepaintRequest(Form& s, const Gfx::RectF& rect)
 
 void ScreenImpl::onActivateRequest(Form& w, bool active)
 {
+
+}
+
+
+void ScreenImpl::onEnableRequest(Form& form, bool enable)
+{
+    if( ! isEnabled() )
+      enable = false;
+
+    EnableEvent eev(form, enable);
+    form.processEvent(eev);
 }
 
 
