@@ -107,6 +107,7 @@ void Control::onFocusEvent(const FocusEvent& ev)
 {
     Widget::onFocusEvent(ev);
 
+    // TODO: move to derived classes
     invalidate();
 }
 

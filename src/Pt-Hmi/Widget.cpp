@@ -885,14 +885,15 @@ void Widget::onProcessShowEvent(const ShowEvent& ev)
 void Widget::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
+
+    // parent should only layout visible children
+    relayout();
 }
 
 
 void Widget::onShow(bool isShown)
 {
     Base::onShow(isShown);
-
-    relayout();
 }
 
 
@@ -935,6 +936,7 @@ void Widget::onEnableEvent(const EnableEvent& ev)
 {
     Base::onEnableEvent(ev);
 
+    // TODO: move to derived classes
     invalidate();
 }
 
@@ -1086,26 +1088,25 @@ const Gfx::SizeF& Widget::minimumSize() const
 void Widget::setMinimumSize(const Gfx::SizeF& s)
 {
     _minimumSize = s;
+    relayout();
 }
 
 
 void Widget::setMinimumSize(double w, double h)
 {
-    _minimumSize.set(w, h);
+    setMinimumSize( Gfx::SizeF(w, h) );
 }
 
 
-void Widget::setMinimumWidth(double h)
+void Widget::setMinimumWidth(double w)
 {
-    _minimumSize.setWidth(h);
-    relayout();
+    setMinimumSize( w, _minimumSize.height() );
 }
 
 
 void Widget::setMinimumHeight(double h)
 {
-    _minimumSize.setHeight(h);
-    relayout();
+    setMinimumSize( _minimumSize.width(), h );
 }
 
 //
