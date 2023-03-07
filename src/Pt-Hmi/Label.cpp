@@ -414,7 +414,7 @@ void Label::onLayout(const Gfx::RectF& rect)
 {
     //std::clog  << " layout " << _text.narrow()<< this << std::endl;
 
-    //Base::onLayout(rect);
+    Base::onLayout(rect);
     
     if( _icon.empty() )
         layoutText();
@@ -446,7 +446,7 @@ void Label::onResizeEvent(const ResizeEvent& ev)
 
 void Label::onInvalidate()
 {
-    //Base::onInvalidate();
+    Base::onInvalidate();
 
     bool needsRelayout = false;
 
