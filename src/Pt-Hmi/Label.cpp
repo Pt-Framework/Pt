@@ -39,7 +39,9 @@ namespace Hmi {
 
 Label::Label()
 : _alignment(Alignment::Left)
+, _iconInvalid(false)
 , _hasRenderer(false)
+, _styleInvalid(true)
 {
 }
 
@@ -58,7 +60,7 @@ Alignment Label::alignment() const
 void Label::setAlignment(Alignment a)
 {
     _alignment = a;
-    invalidate();
+    relayout();
 }
 
 
@@ -71,16 +73,22 @@ const Pt::String& Label::text() const
 void Label::setText(const Pt::String& text)
 {
     _text = text;
+    
     _icon.clear();
     _iconSize.set(0, 0);
-    invalidate();
+    
+    _picture.set( Pt::Gfx::Image() );
+
+    relayout();
 }
 
 
 void Label::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
 {
-    _icon     = icon;
+    _icon = icon;
     _iconSize = iconSize;
+    
+    _iconInvalid = true;
     invalidate();
 }
 
@@ -94,7 +102,7 @@ const Gfx::Brush* Label::background() const
 void Label::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
-    update();
+    repaint();
 }
 
 
@@ -107,7 +115,9 @@ const Gfx::Pen* Label::contour() const
 void Label::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
-    update();
+
+    _styleInvalid = true;
+    invalidate();
 }
 
 
@@ -121,6 +131,8 @@ const Gfx::Color& Label::textColor() const
 void Label::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
+
+    _styleInvalid = true;
     invalidate();
 }
 
@@ -135,6 +147,8 @@ const std::string& Label::font() const
 void Label::setFont(const std::string& fontName)
 {
     _fontName.reset( new std::string(fontName) );
+
+    _styleInvalid = true;
     invalidate();
 }
 
@@ -150,6 +164,8 @@ std::size_t Label::fontSize() const
 void Label::setFontSize(const std::size_t s)
 {
     _fontSize.reset( new std::size_t(s) );
+
+    _styleInvalid = true;
     invalidate();
 }
 
@@ -164,6 +180,8 @@ const std::string& Label::fontStyle() const
 void Label::setFontStyle(const std::string& style)
 {
     _fontStyle.reset( new std::string(style) );
+
+    _styleInvalid = true;
     invalidate();
 }
 
@@ -173,6 +191,7 @@ void Label::setRenderer(LabelRenderer* renderer)
     _renderer.reset(renderer);
     _hasRenderer = renderer != 0;
 
+    _styleInvalid = true;
     invalidate();
 }
 
@@ -213,7 +232,7 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
     double w = 0;
     double h = 0;
 
-    if(_icon.empty())
+    if( _icon.empty() )
     {
         Adjustment a = adjustment();
 
@@ -301,7 +320,7 @@ void Label::layoutText()
 
 void Label::layoutImage()
 {
-    Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );;
+    Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );
 
     switch( _alignment )
     {
@@ -395,7 +414,7 @@ void Label::onLayout(const Gfx::RectF& rect)
 {
     //std::clog  << " layout " << _text.narrow()<< this << std::endl;
 
-    Base::onLayout(rect);
+    //Base::onLayout(rect);
     
     if( _icon.empty() )
         layoutText();
@@ -403,6 +422,18 @@ void Label::onLayout(const Gfx::RectF& rect)
         layoutImage();
 
     repaint();
+}
+
+
+void Label::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
+
+    if( ! _icon.empty() )
+    {
+        _iconInvalid = true;
+        invalidate();
+    }
 }
 
 
@@ -415,43 +446,53 @@ void Label::onResizeEvent(const ResizeEvent& ev)
 
 void Label::onInvalidate()
 {
-    Base::onInvalidate();
+    //Base::onInvalidate();
 
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
+    bool needsRelayout = false;
 
-    _textPen = textColor();
-    _font = Gfx::Font(font(), fontSize(), fontStyle());
+    // TODO: style changed notification
+    _styleInvalid |= _font.name() != font();
+    _styleInvalid |= _font.size() != fontSize();
+    _styleInvalid |= _font.style() != fontStyle();
 
-    const Gfx::Pen* pen = contour();
-    if(pen)
+    if(_styleInvalid)
     {
-        _pen = *pen;
+        _styleInvalid = false;
+
+        const StyleOptions& options = Application::instance().styleOptions();
+        const Style& style = Application::instance().style();
+
+        _textPen = textColor();
+        _font = Gfx::Font(font(), fontSize(), fontStyle());
+
+        const Gfx::Pen* pen = contour();
+        if(pen)
+        {
+            _pen = *pen;
+        }
+
+        if( ! _hasRenderer )
+            _renderer.reset( style.get<LabelRenderer>() );
+
+        if( _renderer )
+            _renderer->prepare(*this, options, _font, _pen, _textPen);
+
+        needsRelayout = true;
     }
 
-    if( ! _hasRenderer )
-        _renderer.reset( style.get<LabelRenderer>() );
-
-    if( ! _renderer )
-        return;
-
-    _renderer->prepare(*this, options, _font, _pen, _textPen);
-
-    if( _icon.empty() )
+    if(_iconInvalid)
     {
-        _picture.set( Pt::Gfx::Image() );
-        //layoutText();
-    }
-    else
-    {
-        const Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
+        _iconInvalid = false;
+
+        Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _picture.set(iconImage);
 
-        //layoutImage();
+        needsRelayout = true;
     }
 
-    relayout();
+    if(needsRelayout)
+        relayout();
 }
 
 

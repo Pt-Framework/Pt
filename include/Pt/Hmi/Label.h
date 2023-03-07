@@ -95,6 +95,8 @@ class PT_HMI_API Label : public Control
 
         virtual void onLayout(const Gfx::RectF& rect);
 
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     protected:
@@ -102,7 +104,7 @@ class PT_HMI_API Label : public Control
 
         virtual void onPaint(Gfx::PaintSurface& surface, 
                              const Gfx::RectF& rect);
-        
+
     private:
         Adjustment adjustment() const;
 
@@ -120,21 +122,23 @@ class PT_HMI_API Label : public Control
         Icon        _icon;
         Gfx::PointF _iconPos;
         Gfx::SizeF  _iconSize;
+        bool        _iconInvalid;
+
+        FacetPtr<LabelRenderer>   _renderer;
+        bool                      _hasRenderer;
 
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         AutoPtr<std::string>      _fontName;
         AutoPtr<std::size_t>      _fontSize;
-        AutoPtr<std::string> _fontStyle;
+        AutoPtr<std::string>      _fontStyle;
+        bool                      _styleInvalid;
         
-        FacetPtr<LabelRenderer>  _renderer;
-        bool                     _hasRenderer;
-
-        Gfx::Pen  _textPen;
-        Gfx::Pen  _pen;
-        Gfx::Font _font;
-        PixmapSurface   _picture;
+        Gfx::Pen       _textPen;
+        Gfx::Pen       _pen;
+        Gfx::Font      _font;
+        PixmapSurface  _picture;
 };
 
 } // namespace
