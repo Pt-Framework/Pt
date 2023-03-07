@@ -508,9 +508,6 @@ bool Visual::isVisible() const
 
 void Visual::show(bool isShow)
 {
-    if(_isVisible == isShow)
-        return;
-
     onRequestShow(isShow);
 }
 
@@ -522,6 +519,9 @@ void Visual::onRequestShow(bool e)
 
 void Visual::onProcessShowEvent(const ShowEvent& ev)
 {
+    if( _isVisible == ev.visible() )
+        return;
+
     onShowEvent(ev);
 }
 
