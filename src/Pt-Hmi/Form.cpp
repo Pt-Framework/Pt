@@ -73,7 +73,6 @@ void Form::setParent(Sheet& parent)
 
     unparent();
 
-
     parent.onAttach(*this);
     _parent = &parent;
 
