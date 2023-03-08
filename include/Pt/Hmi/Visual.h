@@ -485,6 +485,10 @@ class PT_HMI_API View : public Visual
                                          const Gfx::PointF& pos) const = 0;
 
     protected:
+        virtual Gfx::SizeF onProcessMeasure(const SizePolicy& policy);
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
         virtual void onRequestRelayout() = 0;
 
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);

@@ -614,14 +614,7 @@ Gfx::SizeF Widget::measure(const SizePolicy& policy)
     {
         _lastPolicy = contentPolicy;
 
-        if( contentPolicy.vertical() != SizePolicy::Fixed ||
-            contentPolicy.horizontal() != SizePolicy::Fixed ||
-            ! widgets().empty() )
-        {
-            //static int mmm = 0;
-            //std::clog << "MEASURE: " << name() << " " << ++mmm << std::endl;
-            _preferredSize = onMeasure(contentPolicy);
-        }
+        _preferredSize = onProcessMeasure(contentPolicy);
 
         // use fixed height, if size mode is fixed
         if(contentPolicy.vertical() == SizePolicy::Fixed)
@@ -644,10 +637,27 @@ Gfx::SizeF Widget::measure(const SizePolicy& policy)
                                                contentPolicy.width() ) );
     
         _isMeasureInvalid = false;
-        _isLayoutInvalid = true; // relayout()
+        _isLayoutInvalid = true;
     }
 
     return preferredSize();
+}
+
+
+Gfx::SizeF Widget::onProcessMeasure(const SizePolicy& policy)
+{
+    if( policy.vertical() == SizePolicy::Fixed &&
+        policy.horizontal() == SizePolicy::Fixed &&
+        widgets().empty() )
+    {
+        return policy.size();
+    }
+
+    //static int mmm = 0;
+    //std::clog << "MEASURE: " << name() << " " << ++mmm << std::endl;
+    return onMeasure(policy);
+
+
 }
 
 

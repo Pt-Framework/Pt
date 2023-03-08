@@ -858,6 +858,18 @@ void View::relayout()
 }
 
 
+Gfx::SizeF View::onProcessMeasure(const SizePolicy& policy)
+{
+   return onMeasure(policy);
+}
+
+
+Gfx::SizeF View::onMeasure(const SizePolicy& policy)
+{
+   return Gfx::SizeF(0, 0);
+}
+
+
 void View::onProcessLayoutEvent(const LayoutEvent& ev)
 {
     onLayoutEvent(ev);
