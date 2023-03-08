@@ -128,6 +128,7 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setForeground( Gfx::Color::fromRgb8(220, 80, 80) );
     _closeButton.setAccentColor( Gfx::Color::fromRgb8(190, 30, 30) );
     _closeButton.setHighlightColor( Gfx::Color::fromRgb8(200, 70, 70) );
+    _closeButton.setMinimumHeight(40);
 
     _closeButton.setName("close"); 
     _closeButton.setText("Close App [CTRL+X]");

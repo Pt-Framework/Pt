@@ -226,16 +226,9 @@ class PT_HMI_API Widget : public View
         // inner spacing
         void setPadding(double horiz, double vertical);
 
-    public:
-        const Gfx::SizeF& minimumSize() const;
-
-        void setMinimumSize(const Gfx::SizeF&);
-
-        void setMinimumSize(double w, double h);
-
-        void setMinimumWidth(double w);
-
-        void setMinimumHeight(double h);
+    protected:
+        virtual void onSetSizeLimits(const Gfx::SizeF& minSize,
+                                     const Gfx::SizeF& maxSize);
 
     protected:
         virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
@@ -394,7 +387,6 @@ class PT_HMI_API Widget : public View
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
         
-        Gfx::SizeF                   _minimumSize;
         SizePolicy                   _sizePolicy;
         SizePolicy                   _lastPolicy;
         Gfx::SizeF                   _preferredSize;

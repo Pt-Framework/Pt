@@ -247,7 +247,30 @@ class PT_HMI_API Visual : public Responder
         /** @brief Returns the current inner bounds.
         */
         const Gfx::RectF& bounds() const;
-        
+
+
+        const Gfx::SizeF& minimumSize() const;
+
+        void setMinimumSize(const Gfx::SizeF& s);
+
+        void setMinimumSize(double w, double h);
+
+        void setMinimumWidth(double w);
+
+        void setMinimumHeight(double h);
+
+
+        const Gfx::SizeF& maximumSize() const;
+
+        void setMaximumSize(const Gfx::SizeF& s);
+
+        void setMaximumSize(double w, double h);
+
+        void setMaximumWidth(double w);
+
+        void setMaximumHeight(double h);
+
+
         /** @brief Resizes the visual to a new size.
         */
         virtual void resize(const Gfx::SizeF& s);
@@ -292,6 +315,9 @@ class PT_HMI_API Visual : public Responder
         virtual void onRequestEnable(bool isEnable);
 
         virtual void onRequestMove(const Gfx::PointF& pos);
+
+        virtual void onSetSizeLimits(const Gfx::SizeF& minSize,
+                                     const Gfx::SizeF& maxSize);
 
         virtual void onRequestResize(const Gfx::SizeF& s);
 
@@ -398,6 +424,9 @@ class PT_HMI_API Visual : public Responder
         Gfx::PointF           _pos;
         Gfx::SizeF            _size;
         Gfx::RectF            _bounds;
+
+        Gfx::SizeF            _minimumSize;
+        Gfx::SizeF            _maximumSize;
 
         void*                 _r1;
 };

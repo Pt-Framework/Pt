@@ -597,16 +597,16 @@ Gfx::SizeF Widget::onRequestMeasure(const SizePolicy& policy)
 
     // apply minimum height, unless the size mode is fixed
     if( contentPolicy.vertical() != SizePolicy::Fixed &&
-        contentPolicy.height() < _minimumSize.height() )
+        contentPolicy.height() < minimumSize().height() )
     {
-        contentPolicy.setHeight( _minimumSize.height() );
+        contentPolicy.setHeight( minimumSize().height() );
     }
 
     // apply minimum width, unless the size mode is fixed
     if( contentPolicy.horizontal() != SizePolicy::Fixed &&
-        contentPolicy.width() < _minimumSize.width() )
+        contentPolicy.width() < minimumSize().width() )
     {
-        contentPolicy.setWidth( _minimumSize.width() );
+        contentPolicy.setWidth( minimumSize().width() );
     }
 
     bool doMeasure = contentPolicy != _lastPolicy || _isMeasureInvalid;
@@ -618,16 +618,16 @@ Gfx::SizeF Widget::onRequestMeasure(const SizePolicy& policy)
             contentPolicy.horizontal() != SizePolicy::Fixed ||
             ! widgets().empty() )
         {
-            //static int mmm = 0;
-            //std::clog << "MEASURE: " << name() << std::endl;
-            _preferredSize = onMeasure(contentPolicy);
+            static int mmm = 0;
+            //std::clog << "MEASURE: " << name() << " " << ++mmm << std::endl;
+            //_preferredSize = onMeasure(contentPolicy);
         }
 
         // use fixed height, if size mode is fixed
         if(contentPolicy.vertical() == SizePolicy::Fixed)
             _preferredSize.setHeight( contentPolicy.height() );
-        else if( _preferredSize.height() < _minimumSize.height() )
-            _preferredSize.setHeight( _minimumSize.height() );
+        else if( _preferredSize.height() < minimumSize().height() )
+            _preferredSize.setHeight( minimumSize().height() );
 
         if(contentPolicy.vertical() == SizePolicy::Maximum)
             _preferredSize.setHeight( std::min( _preferredSize.height(),
@@ -636,8 +636,8 @@ Gfx::SizeF Widget::onRequestMeasure(const SizePolicy& policy)
         // use fixed width, if size mode is fixed
         if(contentPolicy.horizontal() == SizePolicy::Fixed)
             _preferredSize.setWidth( contentPolicy.width() );
-        else if( _preferredSize.width() < _minimumSize.width() )
-            _preferredSize.setWidth( _minimumSize.width() );
+        else if( _preferredSize.width() < minimumSize().width() )
+            _preferredSize.setWidth( minimumSize().width() );
 
         if(contentPolicy.horizontal() == SizePolicy::Maximum)
             _preferredSize.setWidth( std::min( _preferredSize.width(),
@@ -669,6 +669,9 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
     
     const Gfx::RectF& r = geometry();
     Gfx::RectF rect = _surface.align(r);
+
+    //static int lll = 0;
+    //std::clog << "LAYOUT: " << name() << " " << ++lll << std::endl;
 
     //
     // layout position and size of contents 
@@ -799,6 +802,14 @@ void Widget::onMoveEvent(const MoveEvent& ev)
 }
 
 
+void Widget::onSetSizeLimits(const Gfx::SizeF& minSize,
+                             const Gfx::SizeF& maxSize)
+{
+    Base::onSetSizeLimits(minSize, maxSize);
+    relayout();
+}
+
+
 void Widget::onRequestResize(const Gfx::SizeF& size)
 {   
     _requestedSize = size;
@@ -850,6 +861,12 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
     repaint(updateRect);
 
     _surface.resize( ev.size() );
+
+    //
+    // TODO: layout content
+    //
+    //LayoutEvent lev( *this, geometry() );
+    //Application::instance().commitEvent(lev);
 
     View::onResizeEvent(ev);
 }
@@ -1073,40 +1090,6 @@ void Widget::setPadding(double n)
 void Widget::setPadding(double horiz, double vertical)
 {
     setPadding( Spacing(horiz, vertical) );
-}
-
-//
-// minimum size
-// 
-
-const Gfx::SizeF& Widget::minimumSize() const
-{
-    return _minimumSize;
-}
-
-
-void Widget::setMinimumSize(const Gfx::SizeF& s)
-{
-    _minimumSize = s;
-    relayout();
-}
-
-
-void Widget::setMinimumSize(double w, double h)
-{
-    setMinimumSize( Gfx::SizeF(w, h) );
-}
-
-
-void Widget::setMinimumWidth(double w)
-{
-    setMinimumSize( w, _minimumSize.height() );
-}
-
-
-void Widget::setMinimumHeight(double h)
-{
-    setMinimumSize( _minimumSize.width(), h );
 }
 
 //

@@ -192,6 +192,8 @@ Visual::Visual()
 , _scaleFactor(1.0)
 , _enabledState(true)
 , _isVisible(false)
+, _minimumSize(0, 0)
+, _maximumSize(64000, 64000)
 , _r1(0)
 { 
     Application::instance().registerVisual(*this);
@@ -619,6 +621,76 @@ const Gfx::SizeF& Visual::size() const
 const Gfx::RectF& Visual::bounds() const
 {
     return _bounds;
+}
+
+
+const Gfx::SizeF& Visual::minimumSize() const
+{
+    return _minimumSize;
+}
+
+
+void Visual::setMinimumSize(const Gfx::SizeF& s)
+{
+    _minimumSize = s;
+
+    onSetSizeLimits(_minimumSize, _maximumSize);
+}
+
+
+void Visual::setMinimumSize(double w, double h)
+{
+    setMinimumSize( Gfx::SizeF(w, h) );
+}
+
+
+void Visual::setMinimumWidth(double w)
+{
+    setMinimumSize( w, _minimumSize.height() );
+}
+
+
+void Visual::setMinimumHeight(double h)
+{
+    setMinimumSize( _minimumSize.width(), h );
+}
+
+
+const Gfx::SizeF& Visual::maximumSize() const
+{
+    return _maximumSize;
+}
+
+
+void Visual::setMaximumSize(const Gfx::SizeF& s)
+{
+    _maximumSize = s;
+
+    onSetSizeLimits(_minimumSize, _maximumSize);
+}
+
+
+void Visual::setMaximumSize(double w, double h)
+{
+    setMaximumSize( Gfx::SizeF(w, h) );
+}
+
+
+void Visual::setMaximumWidth(double w)
+{
+    setMaximumSize( w, _maximumSize.height() );
+}
+
+
+void Visual::setMaximumHeight(double h)
+{
+    setMaximumSize( _maximumSize.width(), h );
+}
+
+
+void Visual::onSetSizeLimits(const Gfx::SizeF& minSize, 
+                             const Gfx::SizeF& maxSize)
+{
 }
 
 

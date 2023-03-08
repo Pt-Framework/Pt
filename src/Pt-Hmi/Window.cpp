@@ -89,8 +89,6 @@ Window::Window(WindowManager* parent, WindowType type)
 , _requestedPosition(0, 0)
 , _requestedSize(80, 80)
 , _type(type)
-, _minimumSize(0, 0)
-, _maximumSize(64000, 64000)
 , _state(WindowState::Normal)
 , _isAbove(false)
 {
@@ -128,7 +126,7 @@ void Window::setParent(WindowManager& parent)
     _form.setSurface( &_impl->surface(), Gfx::PointF(0, 0) );
    
     _parent->onInit(*this);
-    _parent->onSetSizeLimits(*this, _minimumSize, _maximumSize);
+    _parent->onSetSizeLimits(*this, minimumSize(), maximumSize());
     _parent->onSetState(*this, _state);
     _parent->onSetTitle(*this, _title);
     _parent->onSetIcon(*this, _icon);
@@ -222,6 +220,16 @@ void Window::onProcessMoveEvent(const MoveEvent& ev)
 void Window::onMoveEvent(const MoveEvent& ev)
 {    
     Base::onMoveEvent(ev);
+}
+
+
+void Window::onSetSizeLimits(const Gfx::SizeF& minSize,
+                             const Gfx::SizeF& maxSize)
+{
+    Base::onSetSizeLimits(minSize, maxSize);
+    
+    if(_parent)
+        _parent->onSetSizeLimits(*this, minSize, maxSize);
 }
 
 
@@ -785,86 +793,6 @@ void Window::setAbove(bool above)
 
     if(_parent)
         _parent->onSetAbove(*this, above);
-}
-
-//
-// minimum size
-// 
-
-const Gfx::SizeF& Window::minimumSize() const
-{
-    return _minimumSize;
-}
-
-
-void Window::setMinimumSize(const Gfx::SizeF& s)
-{
-    _minimumSize = s;
-
-    if(_parent)
-        _parent->onSetSizeLimits(*this, _minimumSize, _maximumSize);
-}
-
-
-void Window::setMinimumSize(double w, double h)
-{
-    setMinimumSize( Gfx::SizeF(w, h) );
-}
-
-
-void Window::setMinimumWidth(double w)
-{
-    Gfx::SizeF s = _minimumSize;
-    s.setWidth(w);
-    setMinimumSize(s);
-}
-
-
-void Window::setMinimumHeight(double h)
-{
-    Gfx::SizeF s = _minimumSize;
-    s.setHeight(h);
-    setMinimumSize(s);
-}
-
-//
-// maximum size
-// 
-
-const Gfx::SizeF& Window::maximumSize() const
-{
-    return _maximumSize;
-}
-
-
-void Window::setMaximumSize(const Gfx::SizeF& s)
-{
-    _maximumSize = s;
-
-    if(_parent)
-        _parent->onSetSizeLimits(*this, _minimumSize, _maximumSize);
-}
-
-
-void Window::setMaximumSize(double w, double h)
-{
-    setMaximumSize( Gfx::SizeF(w, h) );
-}
-
-
-void Window::setMaximumWidth(double w)
-{
-    Gfx::SizeF s = _maximumSize;
-    s.setWidth(w);
-    setMaximumSize(s);
-}
-
-
-void Window::setMaximumHeight(double h)
-{
-    Gfx::SizeF s = _maximumSize;
-    s.setHeight(h);
-    setMaximumSize(s);
 }
 
 
