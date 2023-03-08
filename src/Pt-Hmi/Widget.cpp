@@ -618,9 +618,9 @@ Gfx::SizeF Widget::onRequestMeasure(const SizePolicy& policy)
             contentPolicy.horizontal() != SizePolicy::Fixed ||
             ! widgets().empty() )
         {
-            static int mmm = 0;
+            //static int mmm = 0;
             //std::clog << "MEASURE: " << name() << " " << ++mmm << std::endl;
-            //_preferredSize = onMeasure(contentPolicy);
+            _preferredSize = onMeasure(contentPolicy);
         }
 
         // use fixed height, if size mode is fixed
