@@ -308,19 +308,25 @@ class PT_HMI_API Visual : public Responder
         virtual void onDetachPeer(Visual& peer);
 
     protected:
+        // onRepaint
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
+        // onSetVisible, onShow
         virtual void onRequestShow(bool e);
 
+        // onSetEnabled, onEnable
         virtual void onRequestEnable(bool isEnable);
 
+        // onSetPosition, onMove
         virtual void onRequestMove(const Gfx::PointF& pos);
 
         virtual void onSetSizeLimits(const Gfx::SizeF& minSize,
                                      const Gfx::SizeF& maxSize);
 
+        // onSetSize, onResize
         virtual void onRequestResize(const Gfx::SizeF& s);
 
+        // onSetCapture, onCapture
         virtual void onRequestCapture(bool capture);
 
     protected:

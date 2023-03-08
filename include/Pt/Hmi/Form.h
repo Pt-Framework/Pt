@@ -46,7 +46,6 @@ class Key;
 ///////////////////////////////////////////////////////////////////////
 // TODO: move base functionality to Visual API
 //
-//       size limits in Visual
 //       size policy in View
 //       margin and padding
 //       where to align
