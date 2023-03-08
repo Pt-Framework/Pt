@@ -97,6 +97,11 @@ class PT_HMI_API Form : public View
 
         void focusPrev();
 
+    public:
+        Gfx::SizeF measure(const SizePolicy& policy);
+    
+    protected:
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
     //
     // Form
     //
@@ -134,12 +139,7 @@ class PT_HMI_API Form : public View
                                           const Gfx::PointF& pos) const;
 
     protected:
-        virtual Gfx::SizeF onRequestMeasure(const SizePolicy& policy);
-
         virtual void onRequestRelayout();
-
-    protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);
 

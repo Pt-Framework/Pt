@@ -188,11 +188,12 @@ class PT_HMI_API Widget : public View
         // TODO: move to base class
         Gfx::SizeF preferredSize() const;
 
-    protected:
-        virtual Gfx::SizeF onRequestMeasure(const SizePolicy& policy);
+        Gfx::SizeF measure(const SizePolicy& policy);
 
+    protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+    protected:
         virtual void onRequestRelayout();
 
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);

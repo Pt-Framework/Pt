@@ -235,6 +235,8 @@ void Window::onSetSizeLimits(const Gfx::SizeF& minSize,
 
 void Window::onRequestResize(const Gfx::SizeF& s)
 {
+    // Fixed, Fixed, size
+
     _requestedSize = s;
     
     if(_parent)
@@ -246,6 +248,8 @@ void Window::onRequestResize(const Gfx::SizeF& s)
 
 Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
 {
+    // use given size policy in defered init
+
     //
     // TODO: remove delayed initialization
     //
@@ -364,6 +368,11 @@ Gfx::PointF Window::onFromForm(const Form& form, const Gfx::PointF& pos) const
 Gfx::PointF Window::onToForm(const Form& form, const Gfx::PointF& pos) const
 {
     return pos;
+}
+
+
+void Window::onRelayoutRequest(Form& form) 
+{
 }
 
 

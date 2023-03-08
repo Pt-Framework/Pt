@@ -573,7 +573,7 @@ Gfx::SizeF Widget::preferredSize() const
 }
 
 
-Gfx::SizeF Widget::onRequestMeasure(const SizePolicy& policy)
+Gfx::SizeF Widget::measure(const SizePolicy& policy)
 {
     SizePolicy contentPolicy = _sizePolicy;
 

@@ -77,6 +77,8 @@ class PT_HMI_API Sheet : public Visual
         virtual Gfx::PointF onToForm(const Form& form, 
                                      const Gfx::PointF& pos) const = 0;
 
+        virtual void onRelayoutRequest(Form& form) = 0;
+
         virtual void onRepaintRequest(Form& form, const Gfx::RectF& rect) = 0;
 
         virtual void onActivateRequest(Form& form, bool active) = 0;

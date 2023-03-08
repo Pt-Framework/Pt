@@ -222,6 +222,11 @@ Gfx::PointF ScreenImpl::onToForm(const Form& form,  const Gfx::PointF& pos) cons
 }
 
 
+void ScreenImpl::onRelayoutRequest(Form& form) 
+{
+}
+
+
 void ScreenImpl::onRepaintRequest(Form& s, const Gfx::RectF& rect)
 {
     Gfx::PointF clientPos = onFromForm( s, rect.topLeft() );

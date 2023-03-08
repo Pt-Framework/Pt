@@ -852,23 +852,9 @@ Gfx::PointF View::fromWidget(const Widget& widget,
 }
 
 
-Gfx::SizeF View::measure(const SizePolicy& policy)
-{
-    // TODO: handle size policy in Form and Widget in the same way
-
-    return onRequestMeasure(policy);
-}
-
-
 void View::relayout()
 {
     onRequestRelayout();
-}
-
-
-Gfx::SizeF View::onMeasure(const SizePolicy& policy)
-{
-    return Gfx::SizeF(0, 0);
 }
 
 

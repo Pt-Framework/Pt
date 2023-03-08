@@ -407,7 +407,7 @@ Gfx::PointF Form::onFromWidget(const Widget& widget, const Gfx::PointF& pos) con
 // layout
 //
 
-Gfx::SizeF Form::onRequestMeasure(const SizePolicy& policy)
+Gfx::SizeF Form::measure(const SizePolicy& policy)
 {
     return onMeasure(policy);
 }
