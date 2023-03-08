@@ -47,11 +47,12 @@ class Key;
 // TODO: move base functionality to Visual API
 //
 //       size limits in Visual
-//       activate in visual
 //       size policy in View
 //       margin and padding
 //       where to align
-//       when is invalidate, relayout end repaint called
+//       when is invalidate, relayout, repaint called
+//       activate in Visual
+//       onXYZRequested handlers in Visual
 //       
 ///////////////////////////////////////////////////////////////////////
 
