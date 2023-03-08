@@ -179,16 +179,7 @@ class PT_HMI_API Widget : public View
     // layouting
     //
     public:
-        // TODO: move to base class
-        const SizePolicy& sizePolicy() const;
-
-        // TODO: move to base class
-        void setSizePolicy(const SizePolicy& policy);
-
-        // TODO: move to base class
-        Gfx::SizeF preferredSize() const;
-
-        Gfx::SizeF measure(const SizePolicy& policy);
+        virtual void setSizePolicy(const SizePolicy& policy);
 
     protected:
         virtual Gfx::SizeF onProcessMeasure(const SizePolicy& policy);
@@ -380,8 +371,6 @@ class PT_HMI_API Widget : public View
         Form*                        _form;
 
         bool                         _isCapture;
-
-        bool                         _isMeasureInvalid;
         bool                         _isLayoutInvalid;
 
         bool                         _show;
@@ -389,10 +378,6 @@ class PT_HMI_API Widget : public View
 
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
-        
-        SizePolicy                   _sizePolicy;
-        SizePolicy                   _lastPolicy;
-        Gfx::SizeF                   _preferredSize;
 
         bool                         _hasFocus;
         FocusPolicy                  _focusPolicy;
@@ -404,7 +389,7 @@ class PT_HMI_API Widget : public View
         Key                          _shortcutKey;
         Pt::Char                     _mnemonic;
         Pt::Delegate<void>           _mnemonicEntered;
-        
+
         Spacing                      _padding;
         Spacing                      _margin;
 };

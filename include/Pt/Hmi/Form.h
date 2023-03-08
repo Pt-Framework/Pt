@@ -96,9 +96,6 @@ class PT_HMI_API Form : public View
         void focusNext();
 
         void focusPrev();
-
-    public:
-        Gfx::SizeF measure(const SizePolicy& policy);
     
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);

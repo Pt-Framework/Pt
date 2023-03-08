@@ -828,6 +828,7 @@ bool Visual::onKeyEvent(const KeyEvent& ev)
 ///////////////////////////////////////////////////////////////////////
 
 View::View()
+: _isMeasureInvalid(true)
 {
     eventReceived() += Pt::slot(*this, &View::onProcessLayoutEvent);
 }
@@ -855,6 +856,96 @@ Gfx::PointF View::fromWidget(const Widget& widget,
 void View::relayout()
 {
     onRequestRelayout();
+}
+
+
+const SizePolicy& View::sizePolicy() const
+{
+    return _sizePolicy;
+}
+
+
+void View::setSizePolicy(const SizePolicy& policy)
+{
+    _sizePolicy = policy;
+
+    relayout();
+}
+
+
+Gfx::SizeF View::preferredSize() const
+{
+    return _preferredSize;
+}
+
+
+Gfx::SizeF View::measure(const SizePolicy& policy)
+{
+    SizePolicy contentPolicy = _sizePolicy;
+
+    // use stricter size mode of parent and, if parent is fixed,
+    // we also use the parents fixed width
+    if( policy.horizontal() > _sizePolicy.horizontal() ||
+        policy.horizontal() == SizePolicy::Fixed )
+    {
+        contentPolicy.setHorizontal( policy.horizontal() );
+        contentPolicy.setWidth( policy.width() );
+    }
+
+    // use stricter size mode of parent and, if parent is fixed,
+    // we also use the parents fixed height
+    if( policy.vertical() > _sizePolicy.vertical() ||
+        policy.vertical() == SizePolicy::Fixed )
+    {
+        contentPolicy.setVertical( policy.vertical() );
+        contentPolicy.setHeight( policy.height() );
+    }
+
+    // apply minimum height, unless the size mode is fixed
+    if( contentPolicy.vertical() != SizePolicy::Fixed &&
+        contentPolicy.height() < minimumSize().height() )
+    {
+        contentPolicy.setHeight( minimumSize().height() );
+    }
+
+    // apply minimum width, unless the size mode is fixed
+    if( contentPolicy.horizontal() != SizePolicy::Fixed &&
+        contentPolicy.width() < minimumSize().width() )
+    {
+        contentPolicy.setWidth( minimumSize().width() );
+    }
+
+    bool doMeasure = contentPolicy != _lastPolicy || _isMeasureInvalid;
+    if(doMeasure)
+    {
+        _lastPolicy = contentPolicy;
+
+        _preferredSize = onProcessMeasure(contentPolicy);
+
+        // use fixed height, if size mode is fixed
+        if(contentPolicy.vertical() == SizePolicy::Fixed)
+            _preferredSize.setHeight( contentPolicy.height() );
+        else if( _preferredSize.height() < minimumSize().height() )
+            _preferredSize.setHeight( minimumSize().height() );
+
+        if(contentPolicy.vertical() == SizePolicy::Maximum)
+            _preferredSize.setHeight( std::min( _preferredSize.height(),
+                                                contentPolicy.height() ) );
+
+        // use fixed width, if size mode is fixed
+        if(contentPolicy.horizontal() == SizePolicy::Fixed)
+            _preferredSize.setWidth( contentPolicy.width() );
+        else if( _preferredSize.width() < minimumSize().width() )
+            _preferredSize.setWidth( minimumSize().width() );
+
+        if(contentPolicy.horizontal() == SizePolicy::Maximum)
+            _preferredSize.setWidth( std::min( _preferredSize.width(),
+                                               contentPolicy.width() ) );
+    
+        _isMeasureInvalid = false;
+    }
+
+    return preferredSize();
 }
 
 

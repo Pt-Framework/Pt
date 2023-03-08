@@ -384,34 +384,18 @@ void Form::onRemoveElement(Widget& widget)
 
 Gfx::PointF Form::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
-    //const View* parentView = widget.parent();
-
-    //if( parentView == this || ! parentView )
-        return pos - widget.position();
-
-    //return pos - parentView->toWidget(widget, pos);    
+    return pos - widget.position();   
 }
 
 
 Gfx::PointF Form::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
-    //const View* parentView = widget.parent();
-
-    //if( parentView == this || ! parentView )
-        return pos + widget.position();
-
-    //return pos + parentView->fromWidget(widget, pos);
+    return pos + widget.position();
 }
 
 //
 // layout
 //
-
-Gfx::SizeF Form::measure(const SizePolicy& policy)
-{
-    return onMeasure(policy);
-}
-
 
 Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
 {
