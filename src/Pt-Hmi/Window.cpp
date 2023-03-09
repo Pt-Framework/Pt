@@ -248,20 +248,19 @@ void Window::onRequestResize(const Gfx::SizeF& s)
 
 Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
 {
-    // use given size policy in defered init
-
     //
-    // TODO: remove delayed initialization
+    // TODO: remove delayed initialization (only in show)
     //
     if( ! _parent )
     {
         Screen& screen = Application::instance().screen();
         screen.addWindow(*this);
     }
+
+    // use given size policy in defered init
+    setSizePolicy(policy);
     
-    Gfx::SizeF size = _form.measure(policy);
-    resize(size);
-    return size;
+    return _form.measure(policy);
 }
 
 
@@ -373,6 +372,7 @@ Gfx::PointF Window::onToForm(const Form& form, const Gfx::PointF& pos) const
 
 void Window::onRelayoutRequest(Form& form) 
 {
+    Base::onRelayoutRequest(form);
 }
 
 

@@ -224,6 +224,7 @@ Gfx::PointF ScreenImpl::onToForm(const Form& form,  const Gfx::PointF& pos) cons
 
 void ScreenImpl::onRelayoutRequest(Form& form) 
 {
+    Base::onRelayoutRequest(form);
 }
 
 

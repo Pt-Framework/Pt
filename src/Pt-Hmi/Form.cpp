@@ -48,7 +48,6 @@ namespace Hmi {
 Form::Form()
 : _parent(0)
 , _mainWidget(0)
-, _layouts(0)
 , _show(true)
 , _enabled(true)
 , _active(0)
@@ -414,42 +413,17 @@ void Form::onRelayoutRequest(Widget& widget)
 
 void Form::onRequestRelayout()
 {
-    _layouts++;
-
-    LayoutEvent ev( *this, bounds() );
-    Application::instance().loop().commitEvent(ev);
+    if(_parent)
+        _parent->onRelayoutRequest(*this);
 }
 
 
 void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 {
-    if(_layouts == 0)
-    {
-        //std::clog << "RELAYOUT EVENT " << name() << " skipped" << std::endl;
-        return;
-    }
-
-    --_layouts;
-
-    if(_layouts > 0)
-        return;
-
-    //std::clog << "RELAYOUT EVENT " << name() << std::endl;
-
-    //
-    // 1. Pass
-    //  
-    SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
-    policy.setSize( size() );
-    measure(policy);
-
     // align to physical pixel grid
     Gfx::RectF rect( size() );
     rect = _surface.align(rect);
 
-    //
-    // 2. Pass layout position and size of contents
-    //
     LayoutEvent lev(*this);
     lev.setRect(rect);
     onLayoutEvent(lev);

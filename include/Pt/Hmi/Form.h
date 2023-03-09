@@ -287,8 +287,6 @@ class PT_HMI_API Form : public View
 
         Gfx::PaintRegion             _surface;
 
-        int                          _layouts;
-
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
 

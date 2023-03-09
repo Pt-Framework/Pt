@@ -855,6 +855,7 @@ Gfx::PointF View::fromWidget(const Widget& widget,
 
 void View::relayout()
 {
+    _isMeasureInvalid = true;
     onRequestRelayout();
 }
 
@@ -969,6 +970,14 @@ void View::onProcessLayoutEvent(const LayoutEvent& ev)
 
 void View::onLayoutEvent(const LayoutEvent& ev)
 {
+}
+
+
+void View::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
+    
+    relayout();
 }
 
 } // namespace

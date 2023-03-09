@@ -447,6 +447,8 @@ class PT_HMI_API View : public Visual
 {
     friend class Widget;
 
+    typedef Visual Base;
+
     public:
         enum FocusPolicy
         {
@@ -519,6 +521,9 @@ class PT_HMI_API View : public Visual
         virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size) = 0;
 
         virtual void onRaiseRequest(Widget& widget) = 0;
+
+    protected:
+        virtual void onRescaleEvent(const RescaleEvent& ev);
 
     private:
         bool        _isMeasureInvalid;

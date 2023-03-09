@@ -541,7 +541,6 @@ void Widget::onRelayoutRequest(Widget&)
 
 void Widget::onRequestRelayout()
 {
-    _isMeasureInvalid = true;
     _isLayoutInvalid = true;
 
     if(_parent)

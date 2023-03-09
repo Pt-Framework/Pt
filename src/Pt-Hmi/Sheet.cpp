@@ -28,13 +28,21 @@
 
 #include <Pt/Hmi/Sheet.h>
 #include <Pt/Hmi/Form.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/LayoutEvent.h>
 
 namespace Pt {
 
 namespace Hmi {
 
 Sheet::Sheet()
+: _form(0)
+, _layouts(0)
+, _autoSize(false)
 {
+    _sizePolicy = SizePolicy(SizePolicy::Preferred, SizePolicy::Preferred);
+
+    eventReceived() += Pt::slot(*this, &Sheet::onProcessLayoutEvent);
 }
 
 
@@ -45,11 +53,84 @@ Sheet::~Sheet()
 
 void Sheet::onAttach(Form& form)
 {
+    _form = &form;
 }
 
 
 void Sheet::onDetach(Form& form)
 {
+    if(_form == &form)
+        _form = 0;
+}
+
+
+void Sheet::setSizePolicy(const SizePolicy& policy)
+{
+    _sizePolicy = policy;
+    _autoSize = true;
+
+    relayout();
+}
+
+
+void Sheet::relayout()
+{
+    _layouts++;
+
+    LayoutEvent ev( *this, bounds() );
+    Application::instance().loop().commitEvent(ev);
+}
+
+
+void Sheet::onRelayoutRequest(Form& form)
+{
+    relayout();
+}
+
+
+void Sheet::onProcessLayoutEvent(const LayoutEvent& ev)
+{
+    if(_layouts == 0)
+    {
+        //std::clog << "RELAYOUT EVENT " << " skipped" << std::endl;
+        return;
+    }
+
+    --_layouts;
+
+    if(_layouts > 0)
+        return;
+
+    //std::clog << "RELAYOUT EVENT" << std::endl;
+
+    if(_form)
+    {
+        //
+        // 1. Pass
+        //  
+        if(_autoSize)
+        {
+            _form->measure(_sizePolicy);
+        }
+        else
+        {
+            SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
+            policy.setSize( size() );
+            _form->measure(policy);
+        }
+
+        //
+        // 2. Pass layout position and size of contents
+        //
+        Gfx::RectF rect( size() );
+        LayoutEvent lev(*_form, rect);
+        _form->processEvent(lev);
+
+        if(_autoSize)
+        {
+            resize( _form->preferredSize() );
+        }
+    }
 }
 
 } // namespace

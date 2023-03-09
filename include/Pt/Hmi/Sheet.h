@@ -60,6 +60,10 @@ class PT_HMI_API Sheet : public Visual
             return onFromForm(form, pos); 
         }
 
+        void setSizePolicy(const SizePolicy& policy);
+
+        void relayout();
+
     protected:
         Sheet();
 
@@ -90,6 +94,15 @@ class PT_HMI_API Sheet : public Visual
         virtual void onMoveRequest(Form& form, const Gfx::PointF& pos) = 0;
 
         virtual void onResizeRequest(Form& form, const Gfx::SizeF& size) = 0;
+
+    protected:
+        void onProcessLayoutEvent(const LayoutEvent& ev);
+
+    private:
+        Form*       _form;
+        int         _layouts;
+        SizePolicy  _sizePolicy;
+        bool        _autoSize;
 };
 
 } // namespace
