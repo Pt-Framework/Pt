@@ -49,18 +49,14 @@ class PT_HMI_API Sheet : public Visual
         virtual ~Sheet();
 
         Gfx::PointF toForm(const Form& form, 
-                           const Gfx::PointF& pos) const
-        { 
-            return onToForm(form, pos); 
-        }
+                           const Gfx::PointF& pos) const;
 
         Gfx::PointF fromForm(const Form& form, 
-                             const Gfx::PointF& pos) const
-        { 
-            return onFromForm(form, pos); 
-        }
+                             const Gfx::PointF& pos) const;
 
-        void setSizePolicy(const SizePolicy& policy);
+        bool isAutoSize() const;
+
+        void setAutoSize(const SizePolicy& policy);
 
         void relayout();
 
@@ -80,6 +76,8 @@ class PT_HMI_API Sheet : public Visual
 
         virtual Gfx::PointF onToForm(const Form& form, 
                                      const Gfx::PointF& pos) const = 0;
+
+        virtual void onSetAutoSize(const SizePolicy& policy);
 
         virtual void onRelayoutRequest(Form& form) = 0;
 

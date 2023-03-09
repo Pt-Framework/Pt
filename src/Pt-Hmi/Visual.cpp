@@ -764,7 +764,7 @@ bool Visual::onMouseEvent(const MouseEvent& ev)
 
 void Visual::onProcessTouchEvent(const TouchEvent& ev)
 {
-    Application::instance().onSetPointer(*this, true);
+    Application::instance().onSetPointer( *this, ev.isPressed() );
 
     touchEvent(ev);
 }

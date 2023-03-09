@@ -40,14 +40,26 @@ Sheet::Sheet()
 , _layouts(0)
 , _autoSize(false)
 {
-    _sizePolicy = SizePolicy(SizePolicy::Preferred, SizePolicy::Preferred);
-
     eventReceived() += Pt::slot(*this, &Sheet::onProcessLayoutEvent);
 }
 
 
 Sheet::~Sheet()
 {
+}
+
+
+Gfx::PointF Sheet::toForm(const Form& form, 
+                          const Gfx::PointF& pos) const
+{ 
+    return onToForm(form, pos); 
+}
+
+
+Gfx::PointF Sheet::fromForm(const Form& form, 
+                            const Gfx::PointF& pos) const
+{ 
+    return onFromForm(form, pos); 
 }
 
 
@@ -64,12 +76,25 @@ void Sheet::onDetach(Form& form)
 }
 
 
-void Sheet::setSizePolicy(const SizePolicy& policy)
+bool Sheet::isAutoSize() const
 {
+    return _autoSize;
+}
+
+
+void Sheet::setAutoSize(const SizePolicy& policy)
+{
+    onSetAutoSize(policy);
+    
     _sizePolicy = policy;
     _autoSize = true;
 
     relayout();
+}
+
+
+void Sheet::onSetAutoSize(const SizePolicy& policy)
+{
 }
 
 

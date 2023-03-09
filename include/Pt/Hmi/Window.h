@@ -237,6 +237,8 @@ class PT_HMI_API Window : public Sheet
         virtual Gfx::PointF onToForm(const Form& form, 
                                      const Gfx::PointF& pos) const;
 
+        virtual void onSetAutoSize(const SizePolicy& policy);
+
         virtual void onRelayoutRequest(Form& form);
 
         virtual void onRepaintRequest(Form& form, const Gfx::RectF& rect);

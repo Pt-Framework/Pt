@@ -737,6 +737,9 @@ void Form::onProcessMoveEvent(const MoveEvent& ev)
 
 void Form::onMoveEvent(const MoveEvent& ev)
 {
+    if( position() == ev.position() )
+        return;
+
     View::onMoveEvent(ev);
 }
 
@@ -767,6 +770,9 @@ void Form::onProcessResizeEvent(const ResizeEvent& ev)
 
 void Form::onResizeEvent(const ResizeEvent& ev)
 {
+    if( size() == ev.size() )
+        return;
+
     View::onResizeEvent(ev);
 
     relayout();

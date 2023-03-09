@@ -132,7 +132,10 @@ void Window::setParent(WindowManager& parent)
     _parent->onSetIcon(*this, _icon);
     _parent->onSetAbove(*this, _isAbove);
     _parent->onMove(*this, _requestedPosition);
-    _parent->onResize( *this, _requestedSize);
+
+    if( ! isAutoSize() )
+        _parent->onResize( *this, _requestedSize);
+    
     _parent->onActivate(*this, _isActive);
     _parent->onEnableRequest(*this, _enabled);
     _parent->onShow(*this, _show);
@@ -248,19 +251,24 @@ void Window::onRequestResize(const Gfx::SizeF& s)
 
 Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
 {
+    setAutoSize(policy);
+    
+    return _form.measure(policy);
+}
+
+
+void Window::onSetAutoSize(const SizePolicy& policy)
+{
     //
     // TODO: remove delayed initialization (only in show)
     //
-    if( ! _parent )
-    {
-        Screen& screen = Application::instance().screen();
-        screen.addWindow(*this);
-    }
+    //if( ! _parent )
+    //{
+    //    Screen& screen = Application::instance().screen();
+    //    screen.addWindow(*this);
+    //}
 
-    // use given size policy in defered init
-    setSizePolicy(policy);
-    
-    return _form.measure(policy);
+    Base::onSetAutoSize(policy);
 }
 
 
