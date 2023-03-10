@@ -31,6 +31,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -39,68 +40,220 @@ namespace Pt {
 
 namespace Hmi {
 
-class Form;
-
-class PT_HMI_API Sheet : public Visual
+class PT_HMI_API Sheet : public View
 {
-    friend class Form;
+    friend class Widget;
+
+    typedef View Base;
 
     public:
         virtual ~Sheet();
 
-        Gfx::PointF toForm(const Form& form, 
-                           const Gfx::PointF& pos) const;
+    public:
+        Widget* content();
 
-        Gfx::PointF fromForm(const Form& form, 
-                             const Gfx::PointF& pos) const;
+        const Widget* content()  const;
 
+        void setContent(Widget* widget);
+
+    public:
         bool isAutoSize() const;
 
         void setAutoSize(const SizePolicy& policy);
 
-        void relayout();
+    public:
+        Widget* focusWidget();
+
+        void focusNext();
+
+        void focusPrev();
 
     protected:
         Sheet();
 
-        virtual void onAttach(Form& form) = 0;
-    
-        virtual void onDetach(Form& form) = 0;
-
-        virtual void onInit(Form& form) = 0;
-
-        virtual void onRelease(Form& form) = 0;
-
-        virtual Gfx::PointF onFromForm(const Form& form, 
-                                       const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onToForm(const Form& form, 
-                                     const Gfx::PointF& pos) const = 0;
+        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
         virtual void onSetAutoSize(const SizePolicy& policy);
 
-        virtual void onRelayoutRequest(Form& form) = 0;
+    protected:
+        virtual void onAddElement(Widget& widget);
 
-        virtual void onRepaintRequest(Form& form, const Gfx::RectF& rect) = 0;
+        virtual void onRemoveElement(Widget& widget);
 
-        virtual void onActivateRequest(Form& form, bool active) = 0;
+        virtual void onSetFocusPolicy(Widget& w, FocusPolicy policy);
 
-        virtual void onEnableRequest(Form& form, bool isEnable) = 0;
+        virtual void onSetFocusIndex(Widget& w, unsigned index);
 
-        virtual void onShowRequest(Form& form, bool isShow) = 0;
+        virtual void onSetFocus(Widget& w);
 
-        virtual void onMoveRequest(Form& form, const Gfx::PointF& pos) = 0;
+        virtual void onSetShortcut(Widget& w, const Key* key);
 
-        virtual void onResizeRequest(Form& form, const Gfx::SizeF& size) = 0;
+        virtual void onSetMnemonic(Widget& w, const Char* ch);
+
+    //
+    // View
+    //
+    protected:
+        virtual void onAttach(Widget& widget);
+
+        virtual void onDetach(Widget& widget);
+
+        virtual void onInit(Widget& widget);
+
+        virtual void onRelease(Widget& widget);
+
+        virtual Gfx::PointF onToWidget(const Widget& widget, 
+                                        const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromWidget(const Widget& widget, 
+                                          const Gfx::PointF& pos) const;
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onRequestRelayout();
+
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
+        
+        virtual void onLayoutEvent(const LayoutEvent& ev);
+
+        virtual void onLayout(const Gfx::RectF& rect);
 
     protected:
-        void onProcessLayoutEvent(const LayoutEvent& ev);
+        virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);
+
+        virtual void onRelayoutRequest(Widget& widget);
+
+        virtual void onEnableRequest(Widget& widget, bool isEnable);
+
+        virtual void onActivateRequest(Widget& w, bool active);
+
+        virtual void onShowRequest(Widget& widget, bool isShown);
+
+        virtual void onMoveRequest(Widget& widget, const Gfx::PointF& pos);
+
+        virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size);
+
+        virtual void onRaiseRequest(Widget& widget);
+
+    //
+    // Visual
+    //
+    protected:
+        virtual Visual* onHitTest(const Gfx::PointF& pos);
+
+        virtual void onRequestCapture(bool capture);
+
+    protected:
+        virtual void onProcessEvent(const Pt::Event& ev);
+
+    //
+    // invalidation
+    //
+    protected:
+        virtual void onInvalidateEvent(const InvalidateEvent& ev);
+    
+        virtual void onInvalidate();
+
+    //
+    // painting
+    //
+    protected:
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+    //
+    // scaling
+    //
+    protected:
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onRescale(double scaling);
+
+    //
+    // enabling
+    //
+    protected:
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnable(bool e);
+
+    //
+    // visibility
+    //
+    protected:
+        virtual void onProcessShowEvent(const ShowEvent& ev);
+
+        virtual void onShowEvent(const ShowEvent& ev);
+
+        virtual void onShow(bool visible);
+
+    //
+    // geometry
+    //
+    protected:
+        virtual void onProcessMoveEvent(const MoveEvent& ev);
+
+        virtual void onMoveEvent(const MoveEvent& ev);
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+        
+        virtual void onResizeEvent(const ResizeEvent& ev);
+    //
+    // input
+    //
+    protected:
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
+        
+        virtual void onProcessTouchEvent(const TouchEvent& ev);
+
+        virtual void onProcessScrollEvent(const ScrollEvent& sev);
+
+        virtual void onProcessEnterEvent(const EnterEvent& ev);
+
+        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
+
+        virtual void onProcessKeyEvent(const KeyEvent& ev);
+
+    //
+    // Responder
+    //
+    protected:
+        virtual bool onMouseEvent(const MouseEvent& ev);
+        
+        virtual bool onTouchEvent(const TouchEvent& ev);
+        
+        virtual bool onScrollEvent(const ScrollEvent& ev);
+
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
+        virtual bool onKeyEvent(const KeyEvent& ev);
+    
+    private:
+        template <typename Iter>
+        void moveFocus(Iter begin, Iter end);
 
     private:
-        Form*       _form;
-        int         _layouts;
-        SizePolicy  _sizePolicy;
-        bool        _autoSize;
+        Gfx::PaintRegion             _surface;
+        Widget*                      _mainWidget;
+                                     
+        int                          _layouts;
+        SizePolicy                   _sizePolicy;
+        bool                         _autoSize;
+
+        Widget*                      _active;
+
+        std::vector<Widget*>         _focusList;
+        Widget*                      _focusWidget;
+
+        std::map<Key, Widget*>       _shortcuts;
+        std::map<Pt::Char, Widget*>  _mnemonics;
 };
 
 } // namespace

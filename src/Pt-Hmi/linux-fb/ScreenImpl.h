@@ -33,7 +33,6 @@
 
 #include "FrameBuffer.h"
 
-#include <Pt/Hmi/Form.h>
 #include <Pt/Hmi/Sheet.h>
 #include <Pt/Hmi/Shell.h>
 #include <Pt/Hmi/Window.h>
@@ -106,38 +105,6 @@ class ScreenImpl : public Sheet
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
     //
-    // Sheet
-    //
-    protected:
-        virtual void onAttach(Form& form);
-    
-        virtual void onDetach(Form& form);
-
-        virtual void onInit(Form& form);
-
-        virtual void onRelease(Form& form);
-
-        virtual Gfx::PointF onFromForm(const Form& form, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onToForm(const Form& form, 
-                                     const Gfx::PointF& pos) const;
-
-        virtual void onRelayoutRequest(Form& form);
-
-        virtual void onRepaintRequest(Form& form, const Gfx::RectF& rect);
-
-        virtual void onActivateRequest(Form& form, bool active);
-
-        virtual void onEnableRequest(Form& form, bool isEnable);
-
-        virtual void onShowRequest(Form& form, bool isShow);
-
-        virtual void onMoveRequest(Form& form, const Gfx::PointF& pos);
-
-        virtual void onResizeRequest(Form& form, const Gfx::SizeF& size);
-
-    //
     // scaling
     //
     protected:
@@ -205,7 +172,6 @@ class ScreenImpl : public Sheet
         PixmapSurface                _surface;
 
         Screen*                      _parent;
-        Form                         _form;
         Shell                        _shell;
         
         double                       _dpi;       

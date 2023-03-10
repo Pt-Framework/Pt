@@ -976,6 +976,12 @@ void View::onLayoutEvent(const LayoutEvent& ev)
 void View::onRescaleEvent(const RescaleEvent& ev)
 {
     Base::onRescaleEvent(ev);
+}
+
+
+void View::onRescale(double scaling)
+{
+    Base::onRescale(scaling);
     
     relayout();
 }

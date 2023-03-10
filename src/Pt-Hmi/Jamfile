@@ -42,7 +42,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        Cursor.cpp
                        DockingLayout.cpp
                        FlowLayout.cpp
-                       Form.cpp
+                       #Form.cpp
                        GridLayout.cpp
                        Icon.cpp
                        InputMethod.cpp

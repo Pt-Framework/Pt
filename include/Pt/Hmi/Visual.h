@@ -525,6 +525,8 @@ class PT_HMI_API View : public Visual
     protected:
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
+        virtual void onRescale(double scaling);
+
     private:
         bool        _isMeasureInvalid;
 

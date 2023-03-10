@@ -36,14 +36,17 @@ ChildW::ChildW(const std::string& title)
     _fileMenu.setName("FileMenu");
 
     _item1.setText("New");
+    _item1.setName("NewItem");
     Key f3(Key::F3); 
     _item1.setShortcut(&f3);
     _fileMenu.addItem(_item1);
 
     _item2.setText("Open");
+    _item2.setName("OpenItem");
     _fileMenu.addItem(_item2);
 
     _item3.setText("Exit");
+    _item3.setName("ExitItem");
     Key ctrlA(Key::Control, Key::A);
     _item3.setShortcut(&ctrlA);
     _fileMenu.addItem(_item3);

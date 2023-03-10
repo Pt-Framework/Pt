@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/Form.h>
+#include <Pt/Hmi/Sheet.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/String.h>
 
@@ -150,7 +150,7 @@ void Widget::onRelease(Widget& widget)
 }
 
 
-void Widget::setForm(Form* form)
+void Widget::setForm(Sheet* form)
 {
     if(_form)
         _form->onRemoveElement(*this);
@@ -780,6 +780,8 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
 {
     if( size() == ev.size() )
         return;
+
+    //std::clog << "RESIZE: " << name() << ev.size().width() << std::endl;
 
     Gfx::RectF updateRect( size() );
     updateRect.unify( Gfx::RectF( ev.size() ) );

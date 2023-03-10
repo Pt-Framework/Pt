@@ -32,7 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Sheet.h>
-#include <Pt/Hmi/Form.h>
+
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/WindowType.h>
 #include <Pt/Hmi/SizePolicy.h>
@@ -107,16 +107,6 @@ class PT_HMI_API Window : public Sheet
         void unparent();
 
         Gfx::Image getImage() const;
-
-    public:
-        Widget* content()
-        { return _form.content(); }
-
-        const Widget* content()  const
-        { return _form.content(); }
-
-        void setContent(Widget* widget)
-        { _form.setContent(widget); }
 
     public:
         Gfx::PaintSurface& surface();
@@ -223,35 +213,7 @@ class PT_HMI_API Window : public Sheet
     // Sheet
     //
     protected:
-        virtual void onAttach(Form& form);
-    
-        virtual void onDetach(Form& form);
-
-        virtual void onInit(Form& form);
-
-        virtual void onRelease(Form& form);
-
-        virtual Gfx::PointF onFromForm(const Form& form, 
-                                       const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onToForm(const Form& form, 
-                                     const Gfx::PointF& pos) const;
-
         virtual void onSetAutoSize(const SizePolicy& policy);
-
-        virtual void onRelayoutRequest(Form& form);
-
-        virtual void onRepaintRequest(Form& form, const Gfx::RectF& rect);
-
-        virtual void onActivateRequest(Form& form, bool active);
-
-        virtual void onEnableRequest(Form& form, bool isEnable);
-
-        virtual void onShowRequest(Form& form, bool isShow);
-
-        virtual void onMoveRequest(Form& form, const Gfx::PointF& pos);
-
-        virtual void onResizeRequest(Form& form, const Gfx::SizeF& size);
 
     //
     // invalidation
@@ -355,7 +317,6 @@ class PT_HMI_API Window : public Sheet
         WindowImpl*                  _impl;
 
         Gfx::PaintRegion             _noSurface;
-        Form                         _form;
 
         WindowManager*               _parent;
 
