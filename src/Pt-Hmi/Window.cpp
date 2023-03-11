@@ -160,12 +160,6 @@ void Window::unparent()
 }
 
 
-Gfx::Image Window::getImage() const
-{
-    return surface().toImage();
-}
-
-
 Gfx::PaintSurface& Window::surface()
 {
     if( ! _impl )
@@ -181,6 +175,12 @@ const Gfx::PaintSurface& Window::surface() const
         return _noSurface;
 
     return _impl->surface();
+}
+
+
+Gfx::Image Window::getImage() const
+{
+    return surface().toImage();
 }
 
 
@@ -247,26 +247,19 @@ void Window::onRequestResize(const Gfx::SizeF& s)
 }
 
 
-Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
+void Window::onSetAutoSize(const SizePolicy& policy)
 {
-    setAutoSize(policy);
-    
-    return Form::measure(policy);
+    if( ! _parent )
+    {
+        Screen& screen = Application::instance().screen();
+        screen.addWindow(*this);
+    }
 }
 
 
-void Window::onSetAutoSize(const SizePolicy& policy)
+Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
 {
-    //
-    // TODO: remove delayed initialization (only in show)
-    //
-    //if( ! _parent )
-    //{
-    //    Screen& screen = Application::instance().screen();
-    //    screen.addWindow(*this);
-    //}
-
-    Base::onSetAutoSize(policy);
+    return setAutoSize(policy);
 }
 
 

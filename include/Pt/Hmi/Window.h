@@ -106,12 +106,12 @@ class PT_HMI_API Window : public Form
 
         void unparent();
 
-        Gfx::Image getImage() const;
-
     public:
         Gfx::PaintSurface& surface();
 
         const Gfx::PaintSurface& surface() const;
+
+        Gfx::Image getImage() const;
 
 
         bool acceptsInput() const;
@@ -169,6 +169,12 @@ class PT_HMI_API Window : public Form
         const WindowImpl* impl() const; 
 
     //
+    // Form
+    //
+    protected:
+        virtual void onSetAutoSize(const SizePolicy& policy);
+
+    //
     // Responder
     //
     protected:
@@ -208,12 +214,6 @@ class PT_HMI_API Window : public Form
 
         virtual void onSetSizeLimits(const Gfx::SizeF& minSize,
                                      const Gfx::SizeF& maxSize);
-
-    //
-    // Sheet
-    //
-    protected:
-        virtual void onSetAutoSize(const SizePolicy& policy);
 
     //
     // invalidation

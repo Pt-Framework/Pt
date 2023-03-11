@@ -46,6 +46,7 @@ Widget::Widget()
 , _isLayoutInvalid(true)
 , _show(true)
 , _enabled(true)
+, _isMeasureInvalid(true)
 , _hasFocus(false)
 , _focusPolicy(NoFocus)
 , _focusIndex(0)
@@ -54,6 +55,7 @@ Widget::Widget()
 , _actionKey(Key::Space)
 , _mnemonic(0)
 {
+    eventReceived() += Pt::slot(*this, &Widget::onProcessLayoutEvent);
     eventReceived() += Pt::slot(*this, &Widget::onProcessFocusEvent);
 }
 
@@ -539,8 +541,9 @@ void Widget::onRelayoutRequest(Widget&)
 }
 
 
-void Widget::onRequestRelayout()
+void Widget::relayout()
 {
+    _isMeasureInvalid = true;
     _isLayoutInvalid = true;
 
     if(_parent)
@@ -548,31 +551,105 @@ void Widget::onRequestRelayout()
 }
 
 
-void Widget::setSizePolicy(const SizePolicy& policy)
+const SizePolicy& Widget::sizePolicy() const
 {
-     Gfx::SizeF alignedSize = _surface.align( policy.size() );
-    
-    SizePolicy alignedPolicy = policy;
-    alignedPolicy.setSize(alignedSize);
-  
-    Base::setSizePolicy(alignedPolicy);
+    return _sizePolicy;
 }
 
 
-Gfx::SizeF Widget::onProcessMeasure(const SizePolicy& policy)
+void Widget::setSizePolicy(const SizePolicy& policy)
 {
-    _isLayoutInvalid = true;
+    Gfx::SizeF alignedSize = _surface.align( policy.size() );
+    
+    _sizePolicy = policy;
+    _sizePolicy.setSize(alignedSize);
 
-    if( policy.vertical() == SizePolicy::Fixed &&
-        policy.horizontal() == SizePolicy::Fixed &&
-        widgets().empty() )
+    relayout();
+}
+
+
+Gfx::SizeF Widget::preferredSize() const
+{
+    return _preferredSize;
+}
+
+
+Gfx::SizeF Widget::measure(const SizePolicy& policy)
+{
+    SizePolicy contentPolicy = _sizePolicy;
+
+    // use stricter size mode of parent and, if parent is fixed,
+    // we also use the parents fixed width
+    if( policy.horizontal() > _sizePolicy.horizontal() ||
+        policy.horizontal() == SizePolicy::Fixed )
     {
-        return policy.size();
+        contentPolicy.setHorizontal( policy.horizontal() );
+        contentPolicy.setWidth( policy.width() );
     }
 
-    //static int mmm = 0;
-    //std::clog << "MEASURE: " << name() << " " << ++mmm << std::endl;
-    return onMeasure(policy);
+    // use stricter size mode of parent and, if parent is fixed,
+    // we also use the parents fixed height
+    if( policy.vertical() > _sizePolicy.vertical() ||
+        policy.vertical() == SizePolicy::Fixed )
+    {
+        contentPolicy.setVertical( policy.vertical() );
+        contentPolicy.setHeight( policy.height() );
+    }
+
+    // apply minimum height, unless the size mode is fixed
+    if( contentPolicy.vertical() != SizePolicy::Fixed &&
+        contentPolicy.height() < minimumSize().height() )
+    {
+        contentPolicy.setHeight( minimumSize().height() );
+    }
+
+    // apply minimum width, unless the size mode is fixed
+    if( contentPolicy.horizontal() != SizePolicy::Fixed &&
+        contentPolicy.width() < minimumSize().width() )
+    {
+        contentPolicy.setWidth( minimumSize().width() );
+    }
+
+    bool doMeasure = contentPolicy != _lastPolicy || _isMeasureInvalid;
+    if(doMeasure)
+    {
+        _lastPolicy = contentPolicy;
+
+        //static int mmm = 0;
+        //std::clog << "MEASURE: " << name() << " " << ++mmm << std::endl;
+
+        bool isFixed = contentPolicy.vertical() == SizePolicy::Fixed &&
+                       contentPolicy.horizontal() == SizePolicy::Fixed &&
+                       widgets().empty();
+
+        _preferredSize = isFixed ? contentPolicy.size()
+                                 : onMeasure(contentPolicy);
+
+        // use fixed height, if size mode is fixed
+        if(contentPolicy.vertical() == SizePolicy::Fixed)
+            _preferredSize.setHeight( contentPolicy.height() );
+        else if( _preferredSize.height() < minimumSize().height() )
+            _preferredSize.setHeight( minimumSize().height() );
+
+        if(contentPolicy.vertical() == SizePolicy::Maximum)
+            _preferredSize.setHeight( std::min( _preferredSize.height(),
+                                                contentPolicy.height() ) );
+
+        // use fixed width, if size mode is fixed
+        if(contentPolicy.horizontal() == SizePolicy::Fixed)
+            _preferredSize.setWidth( contentPolicy.width() );
+        else if( _preferredSize.width() < minimumSize().width() )
+            _preferredSize.setWidth( minimumSize().width() );
+
+        if(contentPolicy.horizontal() == SizePolicy::Maximum)
+            _preferredSize.setWidth( std::min( _preferredSize.width(),
+                                               contentPolicy.width() ) );
+    
+        _isMeasureInvalid = false;
+        _isLayoutInvalid = true;
+    }
+
+    return preferredSize();
 }
 
 
@@ -675,6 +752,8 @@ void Widget::onRescale(double scaling)
 
     // TODO: invalidate in derived class only when neccessary
     invalidate();
+    
+    relayout();
 }
 
 

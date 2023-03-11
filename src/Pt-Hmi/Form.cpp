@@ -101,7 +101,7 @@ void Form::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
     }
 
     if(_mainWidget)
-        _mainWidget->setSurface( surface, pos );
+        _mainWidget->setSurface(surface, pos);
 }
 
 
@@ -111,14 +111,17 @@ bool Form::isAutoSize() const
 }
 
 
-void Form::setAutoSize(const SizePolicy& policy)
-{
-    onSetAutoSize(policy);
-    
+Gfx::SizeF Form::setAutoSize(const SizePolicy& policy)
+{   
     _sizePolicy = policy;
     _autoSize = true;
 
+    onSetAutoSize(policy);
+
     relayout();
+
+    return _mainWidget ? _mainWidget->measure(_sizePolicy)
+                       : _sizePolicy.size();
 }
 
 
@@ -127,16 +130,7 @@ void Form::onSetAutoSize(const SizePolicy& policy)
 }
 
 
-Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
-{
-    if( _mainWidget )
-        return _mainWidget->measure(policy);
-
-    return policy.size();
-}
-
-
-void Form::onRequestRelayout()
+void Form::relayout()
 {
     _layouts++;
 
@@ -208,14 +202,10 @@ void Form::onLayout(const Gfx::RectF& rect)
     
     if( _mainWidget )
     {
-        //std::clog << "Form::onLayout " << name() << " " << size().width() << std::endl;
-
         Gfx::PointF widgetPos(0, 0);
-        Gfx::SizeF widgetSize = size();
+        Gfx::SizeF widgetSize = size();      
+        //std::clog << "Form::onLayout " << _mainWidget->name() << " " << widgetSize.height() << std::endl;
         
-        //Gfx::SizeF widgetSize = _autoSize ? _mainWidget->preferredSize()
-        //                                  : size();
-
         _mainWidget->move(widgetPos);
         _mainWidget->resize(widgetSize);
     }

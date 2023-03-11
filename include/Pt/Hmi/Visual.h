@@ -469,16 +469,6 @@ class PT_HMI_API View : public Visual
         Gfx::PointF fromWidget(const Widget& widget,
                                const Gfx::PointF& pos) const;
 
-        const SizePolicy& sizePolicy() const;
-
-        void setSizePolicy(const SizePolicy& policy);
-
-        Gfx::SizeF preferredSize() const;
-
-        void relayout();
-
-        Gfx::SizeF measure(const SizePolicy& policy);
-
     protected:
         virtual void onAttach(Widget& widget) = 0;
         
@@ -493,17 +483,6 @@ class PT_HMI_API View : public Visual
 
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
                                          const Gfx::PointF& pos) const = 0;
-
-    protected:
-        virtual Gfx::SizeF onProcessMeasure(const SizePolicy& policy);
-
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-        virtual void onRequestRelayout() = 0;
-
-        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
-
-        virtual void onLayoutEvent(const LayoutEvent& ev);
 
     protected:
         virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect) = 0;
@@ -521,18 +500,6 @@ class PT_HMI_API View : public Visual
         virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size) = 0;
 
         virtual void onRaiseRequest(Widget& widget) = 0;
-
-    protected:
-        virtual void onRescaleEvent(const RescaleEvent& ev);
-
-        virtual void onRescale(double scaling);
-
-    private:
-        bool        _isMeasureInvalid;
-
-        SizePolicy  _sizePolicy;
-        SizePolicy  _lastPolicy;
-        Gfx::SizeF  _preferredSize;
 };
 
 } // namespace

@@ -59,7 +59,9 @@ class PT_HMI_API Form : public View
     public:
         bool isAutoSize() const;
 
-        void setAutoSize(const SizePolicy& policy);
+        Gfx::SizeF setAutoSize(const SizePolicy& policy);
+
+        void relayout();
 
     public:
         Widget* focusWidget();
@@ -76,6 +78,13 @@ class PT_HMI_API Form : public View
         virtual void onSetAutoSize(const SizePolicy& policy);
 
     protected:
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
+        
+        virtual void onLayoutEvent(const LayoutEvent& ev);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
+    protected:
         virtual void onAddElement(Widget& widget);
 
         virtual void onRemoveElement(Widget& widget);
@@ -89,7 +98,7 @@ class PT_HMI_API Form : public View
         virtual void onSetShortcut(Widget& w, const Key* key);
 
         virtual void onSetMnemonic(Widget& w, const Char* ch);
-
+    
     //
     // View
     //
@@ -107,16 +116,6 @@ class PT_HMI_API Form : public View
 
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
                                           const Gfx::PointF& pos) const;
-
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-        virtual void onRequestRelayout();
-
-        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
-        
-        virtual void onLayoutEvent(const LayoutEvent& ev);
-
-        virtual void onLayout(const Gfx::RectF& rect);
 
     protected:
         virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);

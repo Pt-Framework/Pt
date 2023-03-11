@@ -153,8 +153,7 @@ class PT_HMI_API Widget : public View
 
         void setCursor(const Cursor* c);
 
-    public:
-        const Gfx::RectF geometry() const;
+
 
     //
     // invalidation
@@ -179,16 +178,21 @@ class PT_HMI_API Widget : public View
     // layouting
     //
     public:
-        virtual void setSizePolicy(const SizePolicy& policy);
+        const Gfx::RectF geometry() const;
+
+        const SizePolicy& sizePolicy() const;
+
+        void setSizePolicy(const SizePolicy& policy);
+
+        Gfx::SizeF preferredSize() const;
+
+        Gfx::SizeF measure(const SizePolicy& policy);
+
+        void relayout();
 
     protected:
-        virtual Gfx::SizeF onProcessMeasure(const SizePolicy& policy);
-
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-    protected:
-        virtual void onRequestRelayout();
-
+       
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);
 
         virtual void onLayoutEvent(const LayoutEvent& ev);
@@ -378,6 +382,12 @@ class PT_HMI_API Widget : public View
 
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
+
+        bool                         _isMeasureInvalid;
+                                    
+        SizePolicy                   _sizePolicy;
+        SizePolicy                   _lastPolicy;
+        Gfx::SizeF                   _preferredSize;
 
         bool                         _hasFocus;
         FocusPolicy                  _focusPolicy;
