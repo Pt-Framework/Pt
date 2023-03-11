@@ -200,20 +200,24 @@ void Form::onLayout(const Gfx::RectF& rect)
     //
     // TODO: no need to pass rect
     //
-
+    
     if(_autoSize)
     {
         resize( _mainWidget->preferredSize() );
     }
-
+    
     if( _mainWidget )
     {
         //std::clog << "Form::onLayout " << name() << " " << size().width() << std::endl;
 
-        Gfx::RectF widgetRect( size() );
+        Gfx::PointF widgetPos(0, 0);
+        Gfx::SizeF widgetSize = size();
+        
+        //Gfx::SizeF widgetSize = _autoSize ? _mainWidget->preferredSize()
+        //                                  : size();
 
-        _mainWidget->move( widgetRect.topLeft() );
-        _mainWidget->resize( widgetRect.size() );
+        _mainWidget->move(widgetPos);
+        _mainWidget->resize(widgetSize);
     }
 }
 
