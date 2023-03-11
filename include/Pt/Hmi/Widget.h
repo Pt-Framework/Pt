@@ -63,14 +63,14 @@ namespace Pt {
 
 namespace Hmi {
 
-class Sheet;
+class Form;
 class Key;
 
 class PT_HMI_API Widget : public View
 {
     typedef View Base;
 
-    friend class Sheet;
+    friend class Form;
 
     public:
         Widget();
@@ -98,7 +98,7 @@ class PT_HMI_API Widget : public View
         void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
     private:
-        void setForm(Sheet* form);
+        void setForm(Form* form);
 
     public:
         //
@@ -368,7 +368,7 @@ class PT_HMI_API Widget : public View
         View*                        _parent;
         std::vector<Widget*>         _children;
 
-        Sheet*                       _form;
+        Form*                        _form;
 
         bool                         _isCapture;
         bool                         _isLayoutInvalid;

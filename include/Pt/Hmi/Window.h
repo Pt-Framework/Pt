@@ -31,7 +31,7 @@
 #define PT_HMI_WINDOW_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Sheet.h>
+#include <Pt/Hmi/Form.h>
 
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/WindowType.h>
@@ -89,10 +89,10 @@ class WindowImpl
 
 /** @brief Window base class.
 */
-class PT_HMI_API Window : public Sheet
+class PT_HMI_API Window : public Form
 {
     public:
-        typedef Sheet Base;
+        typedef Form Base;
         typedef WindowType Type;
         typedef WindowState State;
 

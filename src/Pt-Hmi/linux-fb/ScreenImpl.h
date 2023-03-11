@@ -33,7 +33,7 @@
 
 #include "FrameBuffer.h"
 
-#include <Pt/Hmi/Sheet.h>
+#include <Pt/Hmi/Form.h>
 #include <Pt/Hmi/Shell.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Gfx/Color.h>
@@ -48,9 +48,9 @@ class FrameBuffer;
 class Cursor;
 class Screen;
 
-class ScreenImpl : public Sheet
+class ScreenImpl : public Form
 {
-    typedef Sheet Base;
+    typedef Form Base;
 
     public:
         ScreenImpl(ApplicationImpl& app);

@@ -1578,9 +1578,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowView.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Sheet.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowHost.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -2937,9 +2934,6 @@
       <Filter>Pt-Gfx\skia</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\WindowView.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Sheet.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Form.cpp">

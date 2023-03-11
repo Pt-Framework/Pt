@@ -26,7 +26,7 @@
   02110-1301 USA
 */
 
-#include <Pt/Hmi/Sheet.h>
+#include <Pt/Hmi/Form.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/LayoutEvent.h>
@@ -44,37 +44,37 @@ namespace Pt {
 
 namespace Hmi {
 
-Sheet::Sheet()
+Form::Form()
 : _mainWidget(0)
 , _layouts(0)
 , _autoSize(false)
 , _active(0)
 , _focusWidget(0)
 {
-    eventReceived() += Pt::slot(*this, &Sheet::onProcessLayoutEvent);
+    eventReceived() += Pt::slot(*this, &Form::onProcessLayoutEvent);
 }
 
 
-Sheet::~Sheet()
+Form::~Form()
 {
     if(_mainWidget)
         _mainWidget->unparent();
 }
 
 
-Widget* Sheet::content() 
+Widget* Form::content() 
 {
     return _mainWidget;
 }
 
 
-const Widget* Sheet::content()  const 
+const Widget* Form::content()  const 
 {
     return _mainWidget;
 }
 
 
-void Sheet::setContent(Widget* widget)
+void Form::setContent(Widget* widget)
 {
     if(_mainWidget)
     {
@@ -88,7 +88,7 @@ void Sheet::setContent(Widget* widget)
 }
 
 
-void Sheet::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+void Form::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
     if( ! surface )
     {
@@ -105,13 +105,13 @@ void Sheet::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 }
 
 
-bool Sheet::isAutoSize() const
+bool Form::isAutoSize() const
 {
     return _autoSize;
 }
 
 
-void Sheet::setAutoSize(const SizePolicy& policy)
+void Form::setAutoSize(const SizePolicy& policy)
 {
     onSetAutoSize(policy);
     
@@ -122,12 +122,12 @@ void Sheet::setAutoSize(const SizePolicy& policy)
 }
 
 
-void Sheet::onSetAutoSize(const SizePolicy& policy)
+void Form::onSetAutoSize(const SizePolicy& policy)
 {
 }
 
 
-Gfx::SizeF Sheet::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
 {
     if( _mainWidget )
         return _mainWidget->measure(policy);
@@ -136,7 +136,7 @@ Gfx::SizeF Sheet::onMeasure(const SizePolicy& policy)
 }
 
 
-void Sheet::onRequestRelayout()
+void Form::onRequestRelayout()
 {
     _layouts++;
 
@@ -145,7 +145,7 @@ void Sheet::onRequestRelayout()
 }
 
 
-void Sheet::onProcessLayoutEvent(const LayoutEvent& ev)
+void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 {
     if(_layouts == 0)
     {
@@ -189,13 +189,13 @@ void Sheet::onProcessLayoutEvent(const LayoutEvent& ev)
 }
 
 
-void Sheet::onLayoutEvent(const LayoutEvent& ev)
+void Form::onLayoutEvent(const LayoutEvent& ev)
 {
     onLayout( ev.rect() );
 }
 
 
-void Sheet::onLayout(const Gfx::RectF& rect)
+void Form::onLayout(const Gfx::RectF& rect)
 {
     //
     // TODO: no need to pass rect
@@ -208,7 +208,7 @@ void Sheet::onLayout(const Gfx::RectF& rect)
 
     if( _mainWidget )
     {
-        //std::clog << "Sheet::onLayout " << name() << " " << size().width() << std::endl;
+        //std::clog << "Form::onLayout " << name() << " " << size().width() << std::endl;
 
         Gfx::RectF widgetRect( size() );
 
@@ -218,26 +218,26 @@ void Sheet::onLayout(const Gfx::RectF& rect)
 }
 
 
-Widget* Sheet::focusWidget()
+Widget* Form::focusWidget()
 {
     return _focusWidget;
 }
 
 
-void Sheet::focusPrev()
+void Form::focusPrev()
 {
     moveFocus(_focusList.rbegin(), _focusList.rend());
 }
 
 
-void Sheet::focusNext()
+void Form::focusNext()
 {
     moveFocus(_focusList.begin(), _focusList.end());
 }
 
 
 template <typename Iter>
-void Sheet::moveFocus(Iter begin, Iter end)
+void Form::moveFocus(Iter begin, Iter end)
 {
     Iter current = std::find(begin, end, _focusWidget);
     Iter it = current;
@@ -265,7 +265,7 @@ void Sheet::moveFocus(Iter begin, Iter end)
 }
 
 
-void Sheet::onSetFocusPolicy(Widget& w, FocusPolicy policy)
+void Form::onSetFocusPolicy(Widget& w, FocusPolicy policy)
 {
     if( _focusWidget == &w && policy == View::NoFocus )
     {
@@ -276,13 +276,13 @@ void Sheet::onSetFocusPolicy(Widget& w, FocusPolicy policy)
 }
 
 
-void Sheet::onSetFocusIndex(Widget& w, unsigned index)
+void Form::onSetFocusIndex(Widget& w, unsigned index)
 {
     std::sort(_focusList.begin(), _focusList.end(), &lowerFocusIndex);
 }
 
 
-void Sheet::onSetFocus(Widget& widget)
+void Form::onSetFocus(Widget& widget)
 {
     if( _focusWidget == &widget )
         return;
@@ -316,7 +316,7 @@ void Sheet::onSetFocus(Widget& widget)
 }
 
 
-void Sheet::onSetShortcut(Widget& w, const Key* key)
+void Form::onSetShortcut(Widget& w, const Key* key)
 {
     std::map<Key, Widget*>::iterator it = _shortcuts.begin();
     while( it != _shortcuts.end() )
@@ -332,7 +332,7 @@ void Sheet::onSetShortcut(Widget& w, const Key* key)
 }
 
 
-void Sheet::onSetMnemonic(Widget& w, const Char* ch)
+void Form::onSetMnemonic(Widget& w, const Char* ch)
 {
     std::map<Char, Widget*>::iterator it = _mnemonics.begin();
     while( it != _mnemonics.end() )
@@ -348,7 +348,7 @@ void Sheet::onSetMnemonic(Widget& w, const Char* ch)
 }
 
 
-void Sheet::onAddElement(Widget& widget)
+void Form::onAddElement(Widget& widget)
 {
     //
     // focus handling
@@ -365,7 +365,7 @@ void Sheet::onAddElement(Widget& widget)
 }
 
 
-void Sheet::onRemoveElement(Widget& widget)
+void Form::onRemoveElement(Widget& widget)
 {
     if(_active == &widget)
         _active = 0;
@@ -395,7 +395,7 @@ void Sheet::onRemoveElement(Widget& widget)
 // View
 //
 
-void Sheet::onAttach(Widget& widget)
+void Form::onAttach(Widget& widget)
 {
     _mainWidget = &widget;
     
@@ -403,7 +403,7 @@ void Sheet::onAttach(Widget& widget)
 }
 
 
-void Sheet::onDetach(Widget& widget)
+void Form::onDetach(Widget& widget)
 {
   if(_active == &widget)
       _active = 0;
@@ -415,7 +415,7 @@ void Sheet::onDetach(Widget& widget)
 }
 
 
-void Sheet::onInit(Widget& widget)
+void Form::onInit(Widget& widget)
 {
     Gfx::PaintSurface* surface = _surface.surface();
     Gfx::PointF surfacePos = _surface.area().topLeft() + widget.position();
@@ -430,7 +430,7 @@ void Sheet::onInit(Widget& widget)
 }
 
 
-void Sheet::onRelease(Widget& widget)
+void Form::onRelease(Widget& widget)
 {
     widget.setForm(0);
     widget.setSurface( 0, widget.position() );
@@ -438,28 +438,27 @@ void Sheet::onRelease(Widget& widget)
 }
 
 
-Gfx::PointF Sheet::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
+Gfx::PointF Form::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
     return pos - widget.position();   
 }
 
 
-Gfx::PointF Sheet::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
+Gfx::PointF Form::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
 {
     return pos + widget.position();
 }
 
 
-void Sheet::onRaiseRequest(Widget& widget)
+void Form::onRaiseRequest(Widget& widget)
 {
 }
-
 
 //
 // Visual
 //
 
-Visual* Sheet::onHitTest(const Gfx::PointF& p)
+Visual* Form::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )
         return 0;
@@ -475,7 +474,7 @@ Visual* Sheet::onHitTest(const Gfx::PointF& p)
     return this;
 }
 
-void Sheet::onProcessEvent(const Pt::Event& ev)
+void Form::onProcessEvent(const Pt::Event& ev)
 {
     Base::onProcessEvent(ev);
 }
@@ -484,13 +483,13 @@ void Sheet::onProcessEvent(const Pt::Event& ev)
 // invalidation
 //
 
-void Sheet::onInvalidateEvent(const InvalidateEvent& ev)
+void Form::onInvalidateEvent(const InvalidateEvent& ev)
 {
     Base::onInvalidateEvent(ev);
 }
 
 
-void Sheet::onInvalidate()
+void Form::onInvalidate()
 {
     Base::onInvalidate();
     
@@ -501,7 +500,7 @@ void Sheet::onInvalidate()
 // painting
 //
 
-void Sheet::onProcessPaintEvent(const PaintEvent& ev)
+void Form::onProcessPaintEvent(const PaintEvent& ev)
 {    
     const Gfx::RectF& rect = ev.rect();
     if( rect.isNull() )
@@ -527,13 +526,13 @@ void Sheet::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
-void Sheet::onPaintEvent(const PaintEvent& ev)
+void Form::onPaintEvent(const PaintEvent& ev)
 {
     Base::onPaintEvent(ev);
 }
 
 
-void Sheet::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
+void Form::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
 {
     Gfx::PointF widgetPos = onFromWidget( w, rect.topLeft() );
     Gfx::RectF widgetRect( widgetPos, rect.size() );
@@ -542,7 +541,7 @@ void Sheet::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
 }
 
 
-void Sheet::onRelayoutRequest(Widget& widget)
+void Form::onRelayoutRequest(Widget& widget)
 {
     relayout();
 }
@@ -551,7 +550,7 @@ void Sheet::onRelayoutRequest(Widget& widget)
 // scaling
 //
 
-void Sheet::onProcessRescaleEvent(const RescaleEvent& ev)
+void Form::onProcessRescaleEvent(const RescaleEvent& ev)
 {   
     Base::onProcessRescaleEvent(ev);
 
@@ -564,7 +563,7 @@ void Sheet::onProcessRescaleEvent(const RescaleEvent& ev)
 }  
 
 
-void Sheet::onRescaleEvent(const RescaleEvent& ev)
+void Form::onRescaleEvent(const RescaleEvent& ev)
 {
     //if(_mainWidget)
     //{
@@ -577,7 +576,7 @@ void Sheet::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void Sheet::onRescale(double scaling)
+void Form::onRescale(double scaling)
 {
     Base::onRescale(scaling);
 }
@@ -586,7 +585,7 @@ void Sheet::onRescale(double scaling)
 // enable
 //
 
-void Sheet::onProcessEnableEvent(const EnableEvent& ev)
+void Form::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
 
@@ -598,19 +597,19 @@ void Sheet::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
-void Sheet::onEnableEvent(const EnableEvent& ev)
+void Form::onEnableEvent(const EnableEvent& ev)
 {    
     Base::onEnableEvent(ev);
 }
 
 
-void Sheet::onEnable(bool e)
+void Form::onEnable(bool e)
 {
     Base::onEnable(e);
 }
 
 
-void Sheet::onEnableRequest(Widget& widget, bool enable)
+void Form::onEnableRequest(Widget& widget, bool enable)
 {
     if( ! isEnabled() )
       enable = false;
@@ -623,7 +622,7 @@ void Sheet::onEnableRequest(Widget& widget, bool enable)
 // activation
 //
 
-void Sheet::onActivateRequest(Widget& widget, bool active)
+void Form::onActivateRequest(Widget& widget, bool active)
 {
     if(active)
         _active = &widget;
@@ -636,25 +635,25 @@ void Sheet::onActivateRequest(Widget& widget, bool active)
 // visibility
 //
 
-void Sheet::onProcessShowEvent(const ShowEvent& ev)
+void Form::onProcessShowEvent(const ShowEvent& ev)
 {
     Base::onProcessShowEvent(ev);
 }
 
 
-void Sheet::onShowEvent(const ShowEvent& ev)
+void Form::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
 }
 
 
-void Sheet::onShow(bool visible)
+void Form::onShow(bool visible)
 {
     Base::onShow(visible);
 }
 
 
-void Sheet::onShowRequest(Widget& widget, bool isShown)
+void Form::onShowRequest(Widget& widget, bool isShown)
 {
     ShowEvent sev(widget, isShown);
     widget.processEvent(sev);
@@ -664,7 +663,7 @@ void Sheet::onShowRequest(Widget& widget, bool isShown)
 // geometry
 //
 
-void Sheet::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
+void Form::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
 {
     //
     // align to physical pixel grid
@@ -679,13 +678,13 @@ void Sheet::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
 }
 
 
-void Sheet::onProcessMoveEvent(const MoveEvent& ev)
+void Form::onProcessMoveEvent(const MoveEvent& ev)
 {
     Base::onProcessMoveEvent(ev);
 }
 
 
-void Sheet::onMoveEvent(const MoveEvent& ev)
+void Form::onMoveEvent(const MoveEvent& ev)
 {
     if( position() == ev.position() )
         return;
@@ -694,7 +693,7 @@ void Sheet::onMoveEvent(const MoveEvent& ev)
 }
 
 
-void Sheet::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
+void Form::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 {
     Gfx::SizeF alignedSize = _surface.align(size);
 
@@ -703,13 +702,13 @@ void Sheet::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 }
 
 
-void Sheet::onProcessResizeEvent(const ResizeEvent& ev)
+void Form::onProcessResizeEvent(const ResizeEvent& ev)
 {
     Base::onProcessResizeEvent(ev);
 }
 
 
-void Sheet::onResizeEvent(const ResizeEvent& ev)
+void Form::onResizeEvent(const ResizeEvent& ev)
 {
     if( size() == ev.size() )
         return;
@@ -723,7 +722,7 @@ void Sheet::onResizeEvent(const ResizeEvent& ev)
 // input capture
 //
 
-void Sheet::onRequestCapture(bool capture)
+void Form::onRequestCapture(bool capture)
 {
     Base::onRequestCapture(capture);
 }
@@ -732,7 +731,7 @@ void Sheet::onRequestCapture(bool capture)
 // input
 //
 
-void Sheet::onProcessMouseEvent(const MouseEvent& ev)
+void Form::onProcessMouseEvent(const MouseEvent& ev)
 {
     //if( ! acceptsInput() )
     //    return;
@@ -751,13 +750,13 @@ void Sheet::onProcessMouseEvent(const MouseEvent& ev)
 }
 
 
-bool Sheet::onMouseEvent(const MouseEvent& ev)
+bool Form::onMouseEvent(const MouseEvent& ev)
 {
     return Base::onMouseEvent(ev);
 }
 
 
-void Sheet::onProcessTouchEvent(const TouchEvent& ev)
+void Form::onProcessTouchEvent(const TouchEvent& ev)
 { 
     //if( ! acceptsInput() )
     //    return;
@@ -779,13 +778,13 @@ void Sheet::onProcessTouchEvent(const TouchEvent& ev)
 }
 
 
-bool Sheet::onTouchEvent(const TouchEvent& ev)
+bool Form::onTouchEvent(const TouchEvent& ev)
 {
     return Base::onTouchEvent(ev);
 }
 
 
-void Sheet::onProcessScrollEvent(const ScrollEvent& ev)
+void Form::onProcessScrollEvent(const ScrollEvent& ev)
 {
     //if( ! acceptsInput() )
     //    return;
@@ -811,39 +810,39 @@ void Sheet::onProcessScrollEvent(const ScrollEvent& ev)
 }
 
 
-bool Sheet::onScrollEvent(const ScrollEvent& ev)
+bool Form::onScrollEvent(const ScrollEvent& ev)
 {
     return Base::onScrollEvent(ev);
 }
 
 
-void Sheet::onProcessEnterEvent(const EnterEvent& ev)
+void Form::onProcessEnterEvent(const EnterEvent& ev)
 {
     Base::onProcessEnterEvent(ev);
 }
 
 
-bool Sheet::onEnterEvent(const EnterEvent& ev)
+bool Form::onEnterEvent(const EnterEvent& ev)
 {
     //std::clog << "ENTER Form: " << name() << " " << vid() << std::endl;
     return Base::onEnterEvent(ev);
 }
 
 
-void Sheet::onProcessLeaveEvent(const LeaveEvent& ev)
+void Form::onProcessLeaveEvent(const LeaveEvent& ev)
 {
     Base::onProcessLeaveEvent(ev);
 }
 
 
-bool Sheet::onLeaveEvent(const LeaveEvent& ev )
+bool Form::onLeaveEvent(const LeaveEvent& ev )
 {
     //std::clog << "LEAVE Form: " << name()  << " " << vid() << std::endl;
     return Base::onLeaveEvent(ev);
 }
 
 
-void Sheet::onProcessKeyEvent(const KeyEvent& ev)
+void Form::onProcessKeyEvent(const KeyEvent& ev)
 {
     //if( ! acceptsInput() )
     //    return;
@@ -911,7 +910,7 @@ void Sheet::onProcessKeyEvent(const KeyEvent& ev)
 }
 
 
-bool Sheet::onKeyEvent(const KeyEvent& ev)
+bool Form::onKeyEvent(const KeyEvent& ev)
 {
     return Base::onKeyEvent(ev);
 }

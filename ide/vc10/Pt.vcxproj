@@ -111,7 +111,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollView.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Sheet.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Shell.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ShellWidget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ShellWM.h" />
@@ -663,7 +662,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\Sheet.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Shell.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ShellWidget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ShellWM.cpp" />

@@ -73,7 +73,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     painter.setBrush( Gfx::Color(0, 0, 0) );
     painter.fillRect(rect);
 
-    Sheet::setSurface(&_surface, Gfx::PointF(0, 0) );
+    Form::setSurface(&_surface, Gfx::PointF(0, 0) );
 
     setContent(&_shell);
 
@@ -135,7 +135,7 @@ Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
     if( ! bounds().contains(p) )
         return 0;
 
-    Visual* hit = Sheet::onHitTest(p);
+    Visual* hit = Form::onHitTest(p);
     if(hit)
         return hit;
 

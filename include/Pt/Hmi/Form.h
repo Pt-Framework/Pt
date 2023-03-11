@@ -26,8 +26,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_HMI_SHEET_H
-#define PT_HMI_SHEET_H
+#ifndef PT_HMI_FORM_H
+#define PT_HMI_FORM_H
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Visual.h>
@@ -40,14 +40,14 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Sheet : public View
+class PT_HMI_API Form : public View
 {
     friend class Widget;
 
     typedef View Base;
 
     public:
-        virtual ~Sheet();
+        virtual ~Form();
 
     public:
         Widget* content();
@@ -69,7 +69,7 @@ class PT_HMI_API Sheet : public View
         void focusPrev();
 
     protected:
-        Sheet();
+        Form();
 
         void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 

@@ -42,6 +42,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        Cursor.cpp
                        DockingLayout.cpp
                        FlowLayout.cpp
+                       Form.cpp
                        GridLayout.cpp
                        Icon.cpp
                        InputMethod.cpp
@@ -64,7 +65,6 @@ SharedLibrary Pt-Hmi : Application.cpp
                        ScrollBar.cpp
                        ScrollView.cpp
                        ScrollLayout.cpp
-                       Sheet.cpp
                        Shell.cpp
                        ShellWM.cpp
                        Slider.cpp

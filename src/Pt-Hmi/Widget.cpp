@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/Sheet.h>
+#include <Pt/Hmi/Form.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/String.h>
 
@@ -150,7 +150,7 @@ void Widget::onRelease(Widget& widget)
 }
 
 
-void Widget::setForm(Sheet* form)
+void Widget::setForm(Form* form)
 {
     if(_form)
         _form->onRemoveElement(*this);

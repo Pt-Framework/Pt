@@ -121,7 +121,7 @@ void Window::setParent(WindowManager& parent)
 
     _impl = _parent->onCreateWindow(_type);
 
-    Sheet::setSurface( &_impl->surface(), Gfx::PointF(0, 0) );
+    Form::setSurface( &_impl->surface(), Gfx::PointF(0, 0) );
    
     _parent->onInit(*this);
     _parent->onSetSizeLimits(*this, minimumSize(), maximumSize());
@@ -151,7 +151,7 @@ void Window::unparent()
     _parent->onDetach(*this);
     _parent = 0;
 
-    Sheet::setSurface( 0, Gfx::PointF(0, 0) );
+    Form::setSurface( 0, Gfx::PointF(0, 0) );
 
     delete _impl;
     _impl = 0;
@@ -251,7 +251,7 @@ Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
 {
     setAutoSize(policy);
     
-    return Sheet::measure(policy);
+    return Form::measure(policy);
 }
 
 
@@ -293,7 +293,7 @@ Visual* Window::onHitTest(const Gfx::PointF& p)
     if( ! bounds().contains(p) )
         return 0;
 
-    Visual* hit = Sheet::onHitTest(p);
+    Visual* hit = Form::onHitTest(p);
     if(hit)
         return hit;
 
