@@ -68,6 +68,8 @@ class PT_HMI_API Screen : public Visual
 
         const std::vector<Window*>& windows() const;
        
+        Visual* underPointer();
+
         void setPointer(Visual* visual);
 
         void setPointer(Visual& visual, bool isPointer);

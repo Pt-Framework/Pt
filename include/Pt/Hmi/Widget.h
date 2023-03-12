@@ -31,7 +31,6 @@
 #define PT_HMI_WIDGET_H
 
 #include <Pt/Hmi/Visual.h>
-#include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/SizePolicy.h>
 #include <Pt/Hmi/Spacing.h>
 
@@ -147,11 +146,6 @@ class PT_HMI_API Widget : public View
         void activate(bool active);
 
         void raise();
-
-
-        const Cursor* cursor() const;
-
-        void setCursor(const Cursor* c);
 
     //
     // invalidation
@@ -391,8 +385,6 @@ class PT_HMI_API Widget : public View
         FocusPolicy                  _focusPolicy;
         size_t                       _focusIndex;
 
-        bool                         _hasCursor;
-        Hmi::Cursor                  _cursor;
         Key                          _actionKey;
         Key                          _shortcutKey;
         Pt::Char                     _mnemonic;

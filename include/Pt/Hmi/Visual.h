@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Spacing.h>
 #include <Pt/Hmi/SizePolicy.h>
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -281,6 +282,11 @@ class PT_HMI_API Visual : public Responder
         void setCapture(bool capture);
 
     public:
+        const Cursor* cursor() const;
+
+        void setCursor(const Cursor* c);
+
+    public:
         /** @brief Process event.
         */
         void processEvent(const Pt::Event& ev);
@@ -433,6 +439,9 @@ class PT_HMI_API Visual : public Responder
 
         Gfx::SizeF            _minimumSize;
         Gfx::SizeF            _maximumSize;
+
+        bool                  _hasCursor;
+        Hmi::Cursor           _cursor;
 
         void*                 _r1;
 };

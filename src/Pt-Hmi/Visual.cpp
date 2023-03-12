@@ -194,6 +194,8 @@ Visual::Visual()
 , _isVisible(false)
 , _minimumSize(0, 0)
 , _maximumSize(64000, 64000)
+, _hasCursor(false)
+, _cursor()
 , _r1(0)
 { 
     Application::instance().registerVisual(*this);
@@ -733,6 +735,33 @@ void Visual::onRequestCapture(bool capture)
 }
 
 //
+// cursor
+//
+
+const Cursor* Visual::cursor() const
+{
+    if( ! _hasCursor )
+        return &Cursor::defaultCursor();
+
+    return &_cursor;
+}
+
+
+void Visual::setCursor(const Cursor* csr)
+{
+    if( ! csr )
+        _cursor.clear();
+    else        
+        _cursor = *csr;
+
+    _hasCursor = csr != 0;
+
+    Visual* underPointer = Application::instance().screen().underPointer();
+    if(underPointer == this)
+        Application::instance().setCursor( cursor() );
+}
+
+//
 // input processing
 //
 
@@ -796,6 +825,9 @@ void Visual::onProcessEnterEvent(const EnterEvent& ev)
 
 bool Visual::onEnterEvent( const EnterEvent& ev)
 {
+    //std::clog << "ENTER: " << typeid(*this).name() << " " << vid() << std::endl;
+    Application::instance().setCursor( cursor() );
+
     return true;
 }
 
@@ -808,6 +840,9 @@ void Visual::onProcessLeaveEvent(const LeaveEvent& ev)
 
 bool Visual::onLeaveEvent(const LeaveEvent& ev)
 {
+    //std::clog << "LEAVE: " << typeid(*this).name() << " " << vid() << std::endl;
+    Application::instance().setCursor( &Cursor::defaultCursor() );
+
     return true;
 }
 

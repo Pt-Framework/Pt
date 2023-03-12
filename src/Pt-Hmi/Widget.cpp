@@ -50,8 +50,6 @@ Widget::Widget()
 , _hasFocus(false)
 , _focusPolicy(NoFocus)
 , _focusIndex(0)
-, _hasCursor(false)
-, _cursor()
 , _actionKey(Key::Space)
 , _mnemonic(0)
 {
@@ -1015,32 +1013,6 @@ void Widget::onRaiseRequest(Widget& w)
 }
 
 
-const Cursor* Widget::cursor() const
-{
-    if( ! _hasCursor )
-        return &Cursor::defaultCursor();
-
-    return &_cursor;
-}
-
-
-void Widget::setCursor(const Cursor* c)
-{
-    if( ! c )
-    {
-        _hasCursor = false;
-        _cursor.clear();
-        return;
-    }
-
-    _hasCursor = true;
-    _cursor = *c;
-
-    // TODO: if this is the pointer widget do the same as onEnterEvent
-    // Application::instance().screen().setCursor( &cursor() );
-}
-
-
 const Spacing& Widget::margin() const
 {
     return _margin;
@@ -1290,8 +1262,7 @@ void Widget::onProcessEnterEvent(const EnterEvent& ev)
 
 bool Widget::onEnterEvent( const EnterEvent& ev)
 {
-    //std::clog << "ENTER: " << typeid(*this).name() << " " << vid() << std::endl;
-    Application::instance().setCursor( cursor() );
+
 
     return Base::onEnterEvent(ev);
 }
@@ -1305,9 +1276,6 @@ void Widget::onProcessLeaveEvent(const LeaveEvent& ev)
 
 bool Widget::onLeaveEvent(const LeaveEvent& ev)
 {
-    //std::clog << "LEAVE: " << typeid(*this).name() << " " << vid() << std::endl;
-    Application::instance().setCursor( &Cursor::defaultCursor() );
-    
     return Base::onLeaveEvent(ev);
 }
 

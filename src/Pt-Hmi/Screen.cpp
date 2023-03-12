@@ -102,6 +102,12 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
+Visual* Screen::underPointer()
+{
+    return _pointer;
+}
+
+
 void Screen::setPointer(Visual* visual)
 {
     if( _pointer == visual )
