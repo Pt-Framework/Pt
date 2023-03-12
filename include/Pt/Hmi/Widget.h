@@ -285,12 +285,12 @@ class PT_HMI_API Widget : public View
         virtual void onRescale(double scaling);
 
 
-        //virtual void onProcessMoveEvent(const MoveEvent& ev);
+        virtual void onProcessMoveEvent(const MoveEvent& ev);
 
         virtual void onMoveEvent(const MoveEvent& ev);
 
 
-        //virtual void onProcessResizeEvent(const ResizeEvent& ev);
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 

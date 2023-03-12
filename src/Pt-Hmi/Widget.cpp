@@ -779,10 +779,10 @@ void Widget::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
 }
 
 
-//void Widget::onProcessMoveEvent(const MoveEvent& ev)
-//{
-//    onMoveEvent(ev);
-//}
+void Widget::onProcessMoveEvent(const MoveEvent& ev)
+{
+    Base::onProcessMoveEvent(ev);
+}
 
 
 void Widget::onMoveEvent(const MoveEvent& ev)
@@ -847,10 +847,10 @@ void Widget::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 }
 
 
-//void Widget::onProcessResizeEvent(const ResizeEvent& ev)
-//{
-//    onResizeEvent(ev);
-//}
+void Widget::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
+}
 
 
 void Widget::onResizeEvent(const ResizeEvent& ev)

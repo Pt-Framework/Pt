@@ -45,7 +45,6 @@ namespace Hmi {
 //
 //       where to align
 //       when is invalidate, relayout, repaint called
-//       activate in Visual
 //       some onXYZRequested handlers in Visual
 //       
 ///////////////////////////////////////////////////////////////////////

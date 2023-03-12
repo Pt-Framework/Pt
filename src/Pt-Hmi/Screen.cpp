@@ -60,30 +60,6 @@ Screen::~Screen()
 }
 
 
-void Screen::onInit(ScreenImpl& s)
-{
-}
-
-
-void Screen::onRelease(ScreenImpl& s)
-{
-}
-
-
-void Screen::onResize(ScreenImpl& s, const Gfx::SizeF& size)
-{
-    ResizeEvent rev(*this, size);
-    processEvent(rev);
-}
-
-
-void Screen::onShow(ScreenImpl& s, bool isShow)
-{
-    ShowEvent showEv(*this, true);
-    processEvent(showEv);
-}
-
-
 void Screen::addWindow(Window& w)
 {
     _impl->addWindow(w);
@@ -145,10 +121,37 @@ void Screen::setPointer(Visual& visual, bool isPointer)
     }
 }
 
+///////////////////////////////////////////////////////////////////////
+// ScreenImpl
+///////////////////////////////////////////////////////////////////////
 
 ScreenImpl* Screen::impl()
 {
     return _impl;
+}
+
+
+void Screen::onInit(ScreenImpl& s)
+{
+}
+
+
+void Screen::onRelease(ScreenImpl& s)
+{
+}
+
+
+void Screen::onResize(ScreenImpl& s, const Gfx::SizeF& size)
+{
+    ResizeEvent rev(*this, size);
+    processEvent(rev);
+}
+
+
+void Screen::onShow(ScreenImpl& s, bool isShow)
+{
+    ShowEvent showEv(*this, true);
+    processEvent(showEv);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -200,9 +203,9 @@ void Screen::onProcessEvent(const Event& ev)
     Base::onProcessEvent(ev);
 }
 
-///////////////////////////////////////////////////////////////////////
-// Implementation
-///////////////////////////////////////////////////////////////////////
+//
+// scaling
+//
 
 void Screen::onProcessRescaleEvent(const RescaleEvent& ev)
 {   
@@ -226,6 +229,9 @@ void Screen::onRescale(double scaling)
     Base::onRescale(scaling);
 }
 
+//
+// painting
+//
 
 void Screen::onRequestRepaint(const Gfx::RectF& rect)
 {
@@ -284,6 +290,9 @@ void Screen::onPaint(const Gfx::RectF& rect)
 {
 }
 
+//
+// geometry
+//
 
 void Screen::onProcessResizeEvent(const ResizeEvent& ev)
 {
@@ -298,6 +307,9 @@ void Screen::onResizeEvent(const ResizeEvent& ev)
     Base::onResizeEvent(ev);
 }
 
+//
+// input
+//
 
 void Screen::onProcessMouseEvent(const MouseEvent& ev)
 {

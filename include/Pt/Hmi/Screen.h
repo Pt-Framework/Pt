@@ -68,6 +68,7 @@ class PT_HMI_API Screen : public Visual
 
         const std::vector<Window*>& windows() const;
        
+        
         Visual* underPointer();
 
         void setPointer(Visual* visual);
@@ -76,18 +77,15 @@ class PT_HMI_API Screen : public Visual
 
     public:
         ScreenImpl* impl();
-
-    //
-    // Responder
-    //
+    
     protected:
-        virtual bool onMouseEvent(const MouseEvent& ev);
+        virtual void onInit(ScreenImpl& s);
 
-        virtual bool onTouchEvent(const TouchEvent& ev);
+        virtual void onRelease(ScreenImpl& s);
 
-        virtual bool onScrollEvent(const ScrollEvent& ev);
+        virtual void onResize(ScreenImpl& s, const Gfx::SizeF& size);
 
-        virtual bool onKeyEvent(const KeyEvent& ev);
+        virtual void onShow(ScreenImpl& s, bool isShow);
 
     //
     // Visual
@@ -108,26 +106,12 @@ class PT_HMI_API Screen : public Visual
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
     protected:
-        virtual void onInit(ScreenImpl& s);
-
-        virtual void onRelease(ScreenImpl& s);
-
-        virtual void onResize(ScreenImpl& s, const Gfx::SizeF& size);
-
-        virtual void onShow(ScreenImpl& s, bool isShow);
-
-    //
-    // scaling
-    //
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescale(double scaling);
 
-    //
-    // painting
-    //
     protected:
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
@@ -135,17 +119,11 @@ class PT_HMI_API Screen : public Visual
 
         virtual void onPaint(const Gfx::RectF& rect);
         
-    //
-    // geometry
-    //
     protected:
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
-    //
-    // input
-    //
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);
 
@@ -155,12 +133,24 @@ class PT_HMI_API Screen : public Visual
 
         virtual void onProcessKeyEvent(const KeyEvent& ev);
 
+    //
+    // Responder
+    //
+    protected:
+        virtual bool onMouseEvent(const MouseEvent& ev);
+
+        virtual bool onTouchEvent(const TouchEvent& ev);
+
+        virtual bool onScrollEvent(const ScrollEvent& ev);
+
+        virtual bool onKeyEvent(const KeyEvent& ev);
+
     private:
-        ScreenImpl*                   _impl;
-        Gfx::RectF                    _updateRect;
-        int                           _updates;
-        Visual*                       _pointer;
-        Pt::System::Clock             _clock;
+        ScreenImpl*        _impl;
+        Gfx::RectF         _updateRect;
+        int                _updates;
+        Visual*            _pointer;
+        Pt::System::Clock  _clock;
 };
 
 } // namespace
