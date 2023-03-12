@@ -143,8 +143,6 @@ class PT_HMI_API Widget : public View
         bool acceptsInput() const;
 
 
-        void activate(bool active);
-
         void raise();
 
     //
@@ -243,13 +241,15 @@ class PT_HMI_API Widget : public View
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
-
+        
         
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
         virtual void onRequestShow(bool isShown);
 
         virtual void onRequestEnable(bool isEnable);
+
+        virtual void onRequestActivate(bool active);
 
         virtual void onRequestMove(const Gfx::PointF& pos);
 

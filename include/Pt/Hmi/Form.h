@@ -40,6 +40,23 @@ namespace Pt {
 
 namespace Hmi {
 
+///////////////////////////////////////////////////////////////////////
+// TODO: move base functionality to Visual API
+//
+//       where to align
+//       when is invalidate, relayout, repaint called
+//       activate in Visual
+//       some onXYZRequested handlers in Visual
+//       
+///////////////////////////////////////////////////////////////////////
+
+//
+// TODO:
+//  - alignment for move/resize of window
+//  - WindowImpl for native and framework windows
+//  - set Decorator on Window to translate positions
+//
+
 class PT_HMI_API Form : public View
 {
     friend class Widget;

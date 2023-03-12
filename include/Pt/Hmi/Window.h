@@ -124,8 +124,6 @@ class PT_HMI_API Window : public Form
 
         bool isActive() const;
 
-        void activate(bool active = true);
-
 
         void showModal();
 
@@ -209,6 +207,8 @@ class PT_HMI_API Window : public Form
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
         virtual void onRequestEnable(bool isEnable);
+
+        virtual void onRequestActivate(bool active);
 
         virtual void onRequestShow(bool isShown);
 

@@ -57,8 +57,6 @@ class ShellWM : public WindowManager
 
         void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
-        void activate(bool active);
-
         bool processMouseEvent(const MouseEvent& ev);
 
         bool processTouchEvent(const TouchEvent& ev);
@@ -114,11 +112,15 @@ class ShellWM : public WindowManager
 
         WindowFrame* onHitTestFrame(const Gfx::PointF& p);
 
-        virtual void onProcessEvent(const Pt::Event& ev);
-
-        virtual void onRequestCapture(bool capture);
 
         virtual void onRequestRepaint(const Gfx::RectF& rect);
+
+        virtual void onRequestActivate(bool active);
+        
+        virtual void onRequestCapture(bool capture);
+
+        
+        virtual void onProcessEvent(const Pt::Event& ev);
 
     //
     // WindowManager

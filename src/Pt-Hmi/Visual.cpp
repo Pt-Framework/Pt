@@ -582,6 +582,20 @@ void Visual::onEnable(bool isEnable)
 }
 
 //
+// activation
+//
+
+void Visual::activate(bool active)
+{
+    onRequestActivate(active);
+}
+
+
+void Visual::onRequestActivate(bool active)
+{
+}
+
+//
 // geometry
 //
 

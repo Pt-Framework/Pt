@@ -426,7 +426,7 @@ bool Window::isActive() const
 }
 
 
-void Window::activate(bool active)
+void Window::onRequestActivate(bool active)
 {
     _isActive = active;
 

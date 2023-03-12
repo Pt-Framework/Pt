@@ -978,7 +978,7 @@ void Widget::onEnableRequest(Widget& widget, bool enable)
 }
 
 
-void Widget::activate(bool active)
+void Widget::onRequestActivate(bool active)
 {
     if(_parent)
         _parent->onActivateRequest(*this, active);

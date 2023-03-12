@@ -233,6 +233,9 @@ class PT_HMI_API Visual : public Responder
         virtual void enable(bool isEnable = true);
 
     public:
+        void activate(bool active = true);
+
+    public:
         /** @brief Returns the current position.
         */
         const Gfx::PointF& position() const;
@@ -322,6 +325,8 @@ class PT_HMI_API Visual : public Responder
 
         // onSetEnabled, onEnable
         virtual void onRequestEnable(bool isEnable);
+
+        virtual void onRequestActivate(bool active);
 
         // onSetPosition, onMove
         virtual void onRequestMove(const Gfx::PointF& pos);

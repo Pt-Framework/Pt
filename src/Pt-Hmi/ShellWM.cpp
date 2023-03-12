@@ -134,7 +134,7 @@ WindowFrame* ShellWM::activeWindow()
 }
 
 
-void ShellWM::activate(bool active)
+void ShellWM::onRequestActivate(bool active)
 {
     if(_parent)
         _parent->onActivate(*this, active);
