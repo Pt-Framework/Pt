@@ -54,7 +54,6 @@ class Popup;
 class PT_HMI_API Application : public Pt::System::Application
 {
     friend class Visual;
-    friend class Window;
     friend class Popup;
     friend class Screen;
 
