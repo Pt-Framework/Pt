@@ -47,7 +47,6 @@ namespace Hmi {
 Form::Form()
 : _mainWidget(0)
 , _layouts(0)
-, _autoSize(false)
 , _active(0)
 , _focusWidget(0)
 {
@@ -105,31 +104,6 @@ void Form::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 }
 
 
-bool Form::isAutoSize() const
-{
-    return _autoSize;
-}
-
-
-Gfx::SizeF Form::setAutoSize(const SizePolicy& policy)
-{   
-    _sizePolicy = policy;
-    _autoSize = true;
-
-    onSetAutoSize(policy);
-
-    relayout();
-
-    return _mainWidget ? _mainWidget->measure(_sizePolicy)
-                       : _sizePolicy.size();
-}
-
-
-void Form::onSetAutoSize(const SizePolicy& policy)
-{
-}
-
-
 void Form::relayout()
 {
     _layouts++;
@@ -159,16 +133,7 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
         //
         // 1. Pass
         //  
-        if(_autoSize)
-        {
-            _mainWidget->measure(_sizePolicy);
-        }
-        else
-        {
-            SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
-            policy.setSize( size() );
-            _mainWidget->measure(policy);
-        }
+        onMeasure();
 
         //
         // 2. Pass layout position and size of contents
@@ -183,23 +148,18 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 }
 
 
-void Form::onLayoutEvent(const LayoutEvent& ev)
+Gfx::SizeF Form::onMeasure()
 {
-    onLayout( ev.rect() );
+    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
+    policy.setSize( size() );
+    
+    return _mainWidget ? _mainWidget->measure(policy)
+                       : policy.size();
 }
 
 
-void Form::onLayout(const Gfx::RectF& rect)
-{
-    //
-    // TODO: no need to pass rect
-    //
-    
-    if(_autoSize)
-    {
-        resize( _mainWidget->preferredSize() );
-    }
-    
+void Form::onLayoutEvent(const LayoutEvent& ev)
+{   
     if( _mainWidget )
     {
         Gfx::PointF widgetPos(0, 0);

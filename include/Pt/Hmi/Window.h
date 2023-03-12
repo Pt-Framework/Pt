@@ -101,7 +101,7 @@ class PT_HMI_API Window : public Form
 
         virtual ~Window();
 
-    
+    public:
         void setParent(WindowManager& parent);
 
         void unparent();
@@ -113,6 +113,11 @@ class PT_HMI_API Window : public Form
 
         Gfx::Image getImage() const;
 
+    public:
+        bool isAutoSize() const;
+
+        Gfx::SizeF setAutoSize(const SizePolicy& policy);
+
 
         bool acceptsInput() const;
 
@@ -123,8 +128,6 @@ class PT_HMI_API Window : public Form
 
 
         void showModal();
-
-        Gfx::SizeF resizeToFit(const SizePolicy& policy);
 
 
         bool isClosed() const;
@@ -146,7 +149,6 @@ class PT_HMI_API Window : public Form
 
         void setTitle( const std::string& t );
 
-    public:
         bool isAbove() const;
 
         void setAbove(bool top);
@@ -158,7 +160,7 @@ class PT_HMI_API Window : public Form
 
         void setState(const WindowState& s);
 
-
+    public:
         const Gfx::Brush& background() const;
 
         void setBackground(const Gfx::Brush& b);
@@ -172,7 +174,9 @@ class PT_HMI_API Window : public Form
     // Form
     //
     protected:
-        virtual void onSetAutoSize(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure();
+
+        virtual void onLayoutEvent(const LayoutEvent& ev);
 
     //
     // Responder
@@ -327,6 +331,9 @@ class PT_HMI_API Window : public Form
 
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
+
+        SizePolicy                   _sizePolicy;
+        bool                         _autoSize;
 
         Type                         _type;
         std::string                  _title;

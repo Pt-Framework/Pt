@@ -153,8 +153,6 @@ class PT_HMI_API Widget : public View
 
         void setCursor(const Cursor* c);
 
-
-
     //
     // invalidation
     // 

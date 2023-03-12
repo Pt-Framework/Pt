@@ -430,7 +430,7 @@ void MenuBar::onItemClicked(MenuBarItem& item)
         menu.move(menuPos);
 
         SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
-        menu.resizeToFit(policy);
+        menu.setAutoSize(policy);
 
         menu.setAbove(true);
         menu.show();

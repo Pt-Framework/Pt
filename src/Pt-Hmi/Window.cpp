@@ -88,6 +88,7 @@ Window::Window(WindowManager* parent, WindowType type)
 , _isClosed(false)
 , _requestedPosition(0, 0)
 , _requestedSize(80, 80)
+, _autoSize(false)
 , _type(type)
 , _state(WindowState::Normal)
 , _isAbove(false)
@@ -201,6 +202,57 @@ void Window::setBackground(const Gfx::Brush& b)
 // geometry
 ///////////////////////////////////////////////////////////////////////
 
+bool Window::isAutoSize() const
+{
+    return _autoSize;
+}
+
+
+Gfx::SizeF Window::setAutoSize(const SizePolicy& policy)
+{   
+    _sizePolicy = policy;
+    _autoSize = true;
+
+    if( ! _parent )
+    {
+        Screen& screen = Application::instance().screen();
+        screen.addWindow(*this);
+    }
+
+    relayout();
+
+    Widget* mainWidget = content();
+    return mainWidget ? mainWidget->measure(_sizePolicy)
+                      : _sizePolicy.size();
+}
+
+
+Gfx::SizeF Window::onMeasure()
+{
+    if(_autoSize)
+    {
+        Widget* mainWidget = content();
+        return mainWidget ? mainWidget->measure(_sizePolicy)
+                          : _sizePolicy.size();
+    }
+
+    return Form::onMeasure();
+}
+
+
+void Window::onLayoutEvent(const LayoutEvent& ev)
+{
+    if(_autoSize)
+    {
+        Widget* mainWidget = content();
+        if(mainWidget)
+            resize( mainWidget->preferredSize() );
+    }
+
+    Base::onLayoutEvent(ev);
+}
+
+
 void Window::onRequestMove(const Gfx::PointF& pos)
 {
     _requestedPosition = pos;
@@ -244,22 +296,6 @@ void Window::onRequestResize(const Gfx::SizeF& s)
     {
         _parent->onResize(*this, _requestedSize);
     }
-}
-
-
-void Window::onSetAutoSize(const SizePolicy& policy)
-{
-    if( ! _parent )
-    {
-        Screen& screen = Application::instance().screen();
-        screen.addWindow(*this);
-    }
-}
-
-
-Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
-{
-    return setAutoSize(policy);
 }
 
 

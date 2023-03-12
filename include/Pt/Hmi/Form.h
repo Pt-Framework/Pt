@@ -54,14 +54,7 @@ class PT_HMI_API Form : public View
 
         const Widget* content()  const;
 
-        void setContent(Widget* widget);
-
-    public:
-        bool isAutoSize() const;
-
-        Gfx::SizeF setAutoSize(const SizePolicy& policy);
-
-        void relayout();
+        void setContent(Widget* widget);       
 
     public:
         Widget* focusWidget();
@@ -75,14 +68,14 @@ class PT_HMI_API Form : public View
 
         void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
-        virtual void onSetAutoSize(const SizePolicy& policy);
+        void relayout();
 
     protected:
+        virtual Gfx::SizeF onMeasure();
+
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);
         
         virtual void onLayoutEvent(const LayoutEvent& ev);
-
-        virtual void onLayout(const Gfx::RectF& rect);
 
     protected:
         virtual void onAddElement(Widget& widget);
@@ -243,8 +236,6 @@ class PT_HMI_API Form : public View
         Widget*                      _mainWidget;
                                      
         int                          _layouts;
-        SizePolicy                   _sizePolicy;
-        bool                         _autoSize;
 
         Widget*                      _active;
 
