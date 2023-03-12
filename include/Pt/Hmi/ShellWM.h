@@ -190,7 +190,6 @@ class ShellWM : public WindowManager
         virtual void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        Pt::Signal<const Pt::Event&> _eventReceived;
         Shell*                       _parent;
 
         Gfx::PaintRegion             _surface;

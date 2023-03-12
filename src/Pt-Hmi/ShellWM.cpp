@@ -123,8 +123,6 @@ void ShellWM::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 void ShellWM::onProcessEvent(const Pt::Event& ev)
 {
     WindowManager::onProcessEvent(ev);
-
-    _eventReceived.send(ev);
 }
 
 
