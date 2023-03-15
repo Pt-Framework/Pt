@@ -117,14 +117,16 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 {
     if(_layouts == 0)
     {
-        //std::clog << "RELAYOUT EVENT " << " skipped" << std::endl;
         return;
     }
 
     --_layouts;
 
     if(_layouts > 0)
+    {
+        //std::clog << "RELAYOUT EVENT " << " deferred" << std::endl;
         return;
+    }
 
     //std::clog << "RELAYOUT EVENT" << std::endl;
 
