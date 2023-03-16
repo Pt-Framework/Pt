@@ -112,7 +112,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollView.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Shell.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\ShellWidget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ShellWM.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ShowEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\SizePolicy.h" />
@@ -130,10 +129,8 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBase.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowHost.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStateEvent.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowView.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authenticator.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authorizer.h" />
@@ -663,7 +660,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Shell.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\ShellWidget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ShellWM.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Slider.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\SpinBox.cpp" />
@@ -683,7 +679,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\WindowBase.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowFrame.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowManager.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\WindowView.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp" />
