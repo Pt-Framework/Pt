@@ -45,14 +45,14 @@ class Screen;
 
 class MainWindowImpl : public WindowImpl
 {
+    typedef WindowImpl Base;
+
     public:
         MainWindowImpl(Window::Type type);
 
         ~MainWindowImpl();
 
         void setType(WindowType type);
-
-        double scaleFactor() const;
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
@@ -87,9 +87,13 @@ class MainWindowImpl : public WindowImpl
             return _hwnd;
         }
 
+    protected:
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+        
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
     private:   
         HWND    _hwnd;
-        double  _scalingFactor;
 };
 
 } // namespace

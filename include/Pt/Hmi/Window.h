@@ -67,23 +67,61 @@ class PaintEvent;
 
 /** @internal @brief Window implementation base class.
 */
-class WindowImpl
+class WindowImpl : public Visual
 {
+    typedef Visual Base;
+
     public:
-        WindowImpl(WindowType type = WindowType::Default);
+        WindowImpl();
 
         virtual ~WindowImpl();
-
-        virtual double scaleFactor() const = 0;
-
-        WindowType type() const;
 
         PixmapSurface& surface();
 
         const PixmapSurface& surface() const;
 
+        virtual void setTitle(const std::string& text) = 0;
+
+        virtual void setIcon(const Gfx::Image& icon) = 0;
+
+        virtual void setState(const WindowState& s) = 0;
+
+    protected:
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const
+        { 
+            return pos; 
+        }
+        
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const
+        { 
+            return pos; 
+        }
+
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev)
+        {
+            Base::onProcessRescaleEvent(ev);
+        }
+
+        virtual void onRescaleEvent(const RescaleEvent& ev)
+        {
+            _surface.setScaleFactor( ev.scaleFactor() );
+
+            Base::onRescaleEvent(ev);
+        }
+
+        void onProcessResizeEvent(const ResizeEvent& ev)
+        {
+            Visual::onProcessResizeEvent(ev);
+        }
+
+        void onResizeEvent(const ResizeEvent& ev)
+        {
+            Visual::onResizeEvent(ev);
+
+            _surface.resize( ev.size() );
+        }
+
     private:
-        WindowType     _type;
         PixmapSurface  _surface;
 };
 

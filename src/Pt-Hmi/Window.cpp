@@ -46,20 +46,13 @@ namespace Hmi {
 // WindowImpl
 ///////////////////////////////////////////////////////////////////////
 
-WindowImpl::WindowImpl(WindowType type) 
-: _type(type)
+WindowImpl::WindowImpl() 
 {
 }
 
 
 WindowImpl::~WindowImpl()
 {
-}
-
-
-WindowType WindowImpl::type() const
-{
-    return _type;
 }
 
 
@@ -74,6 +67,10 @@ const PixmapSurface& WindowImpl::surface() const
     return _surface;
 }
 
+
+void WindowImpl::setState(const WindowState& s)
+{
+}
 
 ///////////////////////////////////////////////////////////////////////
 // Window
@@ -117,10 +114,8 @@ void Window::setParent(WindowManager& parent)
 
     _isClosed = false;
 
-    parent.onAttach(*this);
+    _impl = parent.onAttach(*this);
     _parent = &parent;
-
-    _impl = _parent->onCreateWindow(_type);
 
     Form::setSurface( &_impl->surface(), Gfx::PointF(0, 0) );
    
@@ -148,15 +143,15 @@ void Window::unparent()
     if( ! _parent )
         return;
 
+    Form::setSurface( 0, Gfx::PointF(0, 0) );
+
     _parent->onRelease(*this);
     _parent->onDetach(*this);
     _parent = 0;
 
-    Form::setSurface( 0, Gfx::PointF(0, 0) );
-
     delete _impl;
     _impl = 0;
-        
+
     onSetParent(_parent);
 }
 
@@ -266,6 +261,12 @@ void Window::onRequestMove(const Gfx::PointF& pos)
 
 void Window::onProcessMoveEvent(const MoveEvent& ev)
 {
+    if(_impl)
+    {
+        MoveEvent mev( *_impl, ev.position() );
+        _impl->processEvent(mev);
+    }
+
     Base::onProcessMoveEvent(ev);
 }
 
@@ -288,8 +289,6 @@ void Window::onSetSizeLimits(const Gfx::SizeF& minSize,
 
 void Window::onRequestResize(const Gfx::SizeF& s)
 {
-    // Fixed, Fixed, size
-
     _requestedSize = s;
     
     if(_parent)
@@ -301,6 +300,12 @@ void Window::onRequestResize(const Gfx::SizeF& s)
 
 void Window::onProcessResizeEvent(const ResizeEvent& ev)
 {
+    if(_impl)
+    {
+        ResizeEvent rev( *_impl, ev.size() );
+        _impl->processEvent(rev);
+    }
+
     Base::onProcessResizeEvent(ev);
 }
 
@@ -308,9 +313,6 @@ void Window::onProcessResizeEvent(const ResizeEvent& ev)
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
-
-    if(_impl)
-        _impl->surface().resize( ev.size() );
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -439,6 +441,12 @@ void Window::onRequestActivate(bool active)
 
 void Window::onProcessActivateEvent(const ActivateEvent& ev)
 {
+    if(_impl)
+    {
+        ActivateEvent aev( *_impl, ev.isActive() );
+        _impl->processEvent(aev);
+    }
+
     onActivateEvent(ev);
 }
 
@@ -467,6 +475,12 @@ void Window::onRequestShow(bool b)
 
 void Window::onProcessShowEvent(const ShowEvent& ev)
 {
+    if(_impl)
+    {
+        ShowEvent sev( *_impl, ev.visible() );
+        _impl->processEvent(sev);
+    }
+
     Base::onProcessShowEvent(ev);
 }
 
@@ -543,6 +557,12 @@ void Window::onProcessEnableEvent(const EnableEvent& ev)
     if( ! _enabled )
         isEnabled = false;
 
+    if(_impl)
+    {
+        EnableEvent eev(*_impl, isEnabled);
+        _impl->processEvent(eev);
+    }
+
     EnableEvent eev(*this, isEnabled);
     Base::onProcessEnableEvent(eev);
 }
@@ -567,7 +587,12 @@ void Window::onProcessRescaleEvent(const RescaleEvent& ev)
     double scaling = ev.scaleFactor();
 
     if(_impl)
-        scaling *= _impl->scaleFactor();
+    {
+        RescaleEvent rev(*_impl, scaling);
+        _impl->processEvent(rev);
+
+        scaling = _impl->scaleFactor();
+    }       
 
     RescaleEvent rev(*this, scaling);
     Base::onProcessRescaleEvent(rev);
@@ -576,9 +601,6 @@ void Window::onProcessRescaleEvent(const RescaleEvent& ev)
 
 void Window::onRescaleEvent(const RescaleEvent& ev)
 {
-    if( _impl )
-        _impl->surface().setScaleFactor( ev.scaleFactor() );
-
     Base::onRescaleEvent(ev);
 }
 

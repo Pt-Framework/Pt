@@ -116,7 +116,6 @@ class MainWindowImpl : public WindowImpl
         ::Window    _window;
         ::Display*  _display;
         bool        _hasFirstShow;
-        double      _scalingFactor;
         int         _width;
         int         _height;
 };

@@ -63,6 +63,8 @@ namespace Hmi {
 class MainWindowImpl : public WindowImpl
                      , public Pt::Connectable
 {
+    typedef WindowImpl Base;
+
     public:
         MainWindowImpl(Window::Type type);
 
@@ -135,6 +137,11 @@ class MainWindowImpl : public WindowImpl
         void onLMouseUp(double x, double y);
 
         void onMouseMove(double x, double y);
+
+    protected:
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+        
+        virtual void onRescaleEvent(const RescaleEvent& ev);
 
     private:
         NSWindow*                _window;

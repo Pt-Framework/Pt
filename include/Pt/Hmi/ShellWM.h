@@ -62,11 +62,7 @@ class ShellWM : public WindowManager
         bool processTouchEvent(const TouchEvent& ev);
     
     public:
-        WindowFrame* activeWindow();
-
-        WindowFrame* findWindowFrame(const Gfx::PointF& p) const;
-
-        WindowFrame* getWindowFrame(const Window& w) const;
+        Window* activeWindow();
 
         const std::vector<Window*>& windows() const;
 
@@ -126,9 +122,7 @@ class ShellWM : public WindowManager
     // WindowManager
     //
     protected:
-        virtual WindowImpl* onCreateWindow(const WindowType& type);
-
-        virtual void onAttach(Window& w);
+        virtual WindowImpl* onAttach(Window& w);
 
         virtual void onDetach(Window& w);
 
@@ -194,12 +188,11 @@ class ShellWM : public WindowManager
 
         Gfx::PaintRegion             _surface;
 
-        std::vector<WindowFrame*>    _windows;
         std::vector<Window*>         _windowList;
 
-        WindowFrame*                 _activeWindow;
+        Window*                      _activeWindow;
         WindowFrame*                 _grabbedFrame;
-        WindowFrame*                 _topMostWindow;
+        Window*                      _topMostWindow;
 
         double                       _borderWidth;
         double                       _titleHeight;

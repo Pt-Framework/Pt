@@ -74,8 +74,6 @@ class MainWindowImpl
         void setTitle(const std::string& title);
 
         void setTopMost(bool m);
-
-        double scaleFactor() const;
 };
 
 } // namespace

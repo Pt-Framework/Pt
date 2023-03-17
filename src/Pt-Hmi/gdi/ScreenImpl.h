@@ -109,9 +109,7 @@ class ScreenImpl : public WindowManager
     // WindowManager
     //
     protected:
-        virtual WindowImpl* onCreateWindow(const WindowType& type);
-
-        virtual void onAttach(Window& w);
+        virtual WindowImpl* onAttach(Window& w);
     
         virtual void onDetach(Window& w);
 

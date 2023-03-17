@@ -148,8 +148,11 @@ class MenuButton : public WindowButton
 };
 
 
-class WindowFrame : public Visual
+class WindowFrame : public WindowImpl
+
 {
+    typedef WindowImpl Base;
+
     enum FrameItem
     {
         OnNone,
@@ -166,7 +169,7 @@ class WindowFrame : public Visual
     };
 
     public:
-        WindowFrame(ShellWM& wm, Window& window);
+        WindowFrame(ShellWM& wm, WindowType type);
 
         virtual ~WindowFrame();
 
@@ -174,19 +177,21 @@ class WindowFrame : public Visual
 
         const Window* window() const;
 
+        void setWindow(Window* w);
+
+        virtual void setTitle(const std::string& text);
+
+        virtual void setIcon(const Gfx::Image& icon);
+
         Window::State state() const;
 
-        void setState(Window::State state);
+        void setState(const WindowState& s);
 
         const Gfx::PointF& restorePosition() const;
 
         const Gfx::SizeF& restoreSize() const;
         
         void setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size);
-
-        const Gfx::PointF& position() const;
-
-        const Gfx::SizeF& size() const;
 
         const Gfx::RectF& clientRect() const;
 
@@ -230,6 +235,36 @@ class WindowFrame : public Visual
         }
 
         virtual void onProcessEvent(const Pt::Event& ev);
+
+        
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+        
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
+
+        virtual void onProcessShowEvent(const ShowEvent& ev);
+
+        virtual void onShowEvent(const ShowEvent& ev);
+
+        
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnableEvent(const EnableEvent& ev);
+
+
+        virtual void onProcessActivateEvent(const ActivateEvent& ev);
+
+        virtual void onActivateEvent(const ActivateEvent& ev);
+
+
+        virtual void onProcessMoveEvent(const MoveEvent& ev);
+
+        virtual void onMoveEvent(const MoveEvent& ev);
+
+        
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
 
     protected:
         bool onMouseEvent(const MouseEvent& mev);

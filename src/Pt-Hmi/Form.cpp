@@ -521,13 +521,6 @@ void Form::onProcessRescaleEvent(const RescaleEvent& ev)
 
 void Form::onRescaleEvent(const RescaleEvent& ev)
 {
-    //if(_mainWidget)
-    //{
-    //    double scaling = ev.scaleFactor();
-    //    RescaleEvent ev(*_mainWidget, scaling);
-    //    _mainWidget->processEvent(ev);
-    //}
-
     Base::onRescaleEvent(ev);
 }
 

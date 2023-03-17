@@ -178,17 +178,13 @@ void ScreenImpl::onRepaintRequest(const Gfx::RectF& rect)
 // WindowManager
 ///////////////////////////////////////////////////////////////////////
 
-WindowImpl* ScreenImpl::onCreateWindow(const WindowType& type)
-{
-    return new MainWindowImpl(type);
-}
-
-
-void ScreenImpl::onAttach(Window& w)
+WindowImpl* ScreenImpl::onAttach(Window& w)
 {
     _windows.push_back(&w);
 
     w.setNextResponder(this);
+
+    return new MainWindowImpl( w.type() );
 }
 
 

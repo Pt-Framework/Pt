@@ -38,7 +38,6 @@ namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(Window::Type type)
 : _hwnd(0)
-, _scalingFactor(1.0)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
   
@@ -62,15 +61,6 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     _hwnd = CreateWindowEx(exStyle, "Pt-Hmi", "", style,
                            0, 0, 10, 10, GetDesktopWindow(), 
                            NULL, hInstance, NULL);
-
-    //HDC screen = GetDC(_hwnd);
-
-    //int dpix = GetDeviceCaps(screen, LOGPIXELSX);
-    //_scalingFactor = dpix / 96.0;
-    //std::clog << "SCALING DPI: " << dpix << std::endl;
-    //std::clog << "SCALING: " << dpix / 96.0 << std::endl;
- 
-    //ReleaseDC(_hwnd, screen);
 }
 
 
@@ -122,12 +112,6 @@ void MainWindowImpl::setType(WindowType type)
 }
 
 
-double MainWindowImpl::scaleFactor() const
-{
-    return _scalingFactor;
-}
-
-
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 {
     POINT p = { lround(windowPos.x()), 
@@ -159,6 +143,29 @@ void MainWindowImpl::paint(const Gfx::RectF& rect)
     wRect.right  = lround( rect.right() );
 
     InvalidateRect(_hwnd, &wRect, FALSE);
+}
+
+
+void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
+{
+    double scaling = ev.scaleFactor();
+
+    //HDC screen = GetDC(_hwnd);
+    //int dpix = GetDeviceCaps(screen, LOGPIXELSX);
+    //std::clog << "HWND SCALING DPI: " << dpix << std::endl;
+
+    //double hwndScaleFactor = dpix / 96.0;
+    //std::clog << "HWND SCALING: " << dpix / 96.0 << std::endl;
+    //scaling *= hwndScaleFactor;
+
+    RescaleEvent rev(*this, scaling);
+    Base::onProcessRescaleEvent(rev);
+}
+
+
+void MainWindowImpl::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
 }
 
 

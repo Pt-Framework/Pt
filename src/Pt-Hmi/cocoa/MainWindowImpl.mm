@@ -139,9 +139,20 @@ void MainWindowImpl::setType(WindowType type)
 }
 
 
-double MainWindowImpl::scaleFactor() const
+void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    return [_window backingScaleFactor];
+    double scaling = ev.scaleFactor();
+
+    scaling *= [_window backingScaleFactor];
+
+    RescaleEvent rev(*this, scaling);
+    Base::onProcessRescaleEvent(rev);
+}
+
+
+void MainWindowImpl::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
 }
 
 

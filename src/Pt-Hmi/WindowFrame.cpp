@@ -34,6 +34,7 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/ShellWM.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Gfx/Point.h>
@@ -393,12 +394,13 @@ void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 // WindowFrame
 //
 
-WindowFrame::WindowFrame(ShellWM& shell, Window& window)
-: _wm(&shell)
-, _window(&window)
+WindowFrame::WindowFrame(ShellWM& shell, WindowType type)
+: WindowImpl()
+, _wm(&shell)
+, _window(0)
 , _borderWidth(0)
 , _titleHeight(0)
-, _state( window.state() )
+, _state(WindowState::Normal)
 , _isClient(false)
 , _isMoving(false)
 , _isLeftResizing(false)
@@ -407,6 +409,8 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
 , _isBottomResizing(false)
 , _currentFrameItem(OnNone)
 {
+    eventReceived() += Pt::slot(*this, &WindowFrame::onProcessActivateEvent);
+
     _maximizeButton.setParent(*this);
     _maximizeButton.clicked() += Pt::slot(*this, &WindowFrame::onMaximize);
     _buttons.push_back(&_maximizeButton);
@@ -442,15 +446,76 @@ const Window* WindowFrame::window() const
 }
 
 
+void WindowFrame::setWindow(Window* w)
+{
+    _window = w;
+}
+
+
+void WindowFrame::setTitle(const std::string& text)
+{
+    Gfx::RectF updateRect = frameRect();
+    repaint(updateRect);
+}
+
+
+void WindowFrame::setIcon(const Gfx::Image& icon)
+{
+}
+
+
 Window::State WindowFrame::state() const
 {
     return _state;
 }
 
 
-void WindowFrame::setState(Window::State state)
+void WindowFrame::setState(const WindowState& state)
 {
+    Window::State oldState = _state;
+    
+    if(state == oldState)
+        return;
+
+    if( ! _window )
+        return;
+
     _state = state;
+
+    if(oldState == WindowState::Normal)
+        setRestore( _window->position(), _window->size() );
+
+    if(state == WindowState::Maximized)
+    {
+        Gfx::SizeF maxSize = _wm->size();
+        maxSize = fromFrame(maxSize);
+
+        _window->move( Gfx::PointF(0,0) );
+        _window->resize(maxSize);
+    }
+    else if(state == WindowState::Minimized)
+    {
+        if(oldState == WindowState::Normal)
+        {
+            Gfx::SizeF minSize(_window->size().width(), 0);
+            _window->resize(minSize);
+        }
+        else
+        {
+            _window->move( restorePosition() );
+
+            Gfx::SizeF minSize(restoreSize().width(), 0);
+            _window->resize(minSize);
+        }
+    }
+    else if(state == WindowState::Normal)
+    {
+        _window->move( restorePosition() );
+        _window->resize( restoreSize() );
+    }
+
+    WindowStateEvent wse(*_window, state);
+    Application::instance().loop().commitEvent(wse);
 }
 
 
@@ -473,18 +538,6 @@ void WindowFrame::setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size)
 }
 
 
-const Gfx::PointF& WindowFrame::position() const
-{
-    return _frameRect.topLeft();
-}
-
-
-const Gfx::SizeF& WindowFrame::size() const
-{
-    return _clientRect.size();
-}
-
-
 const Gfx::RectF& WindowFrame::clientRect() const
 {
     return _clientRect;
@@ -499,8 +552,8 @@ const Gfx::RectF& WindowFrame::frameRect() const
 
 void WindowFrame::setFrame(double bw, double th)
 {
-    _borderWidth = _window->surface().align(bw);
-    _titleHeight = _window->surface().align(th);
+    _borderWidth = surface().align(bw);
+    _titleHeight = surface().align(th);
 }
 
 
@@ -581,7 +634,7 @@ void WindowFrame::moveEvent(const Gfx::PointF& pos)
     clientPos.addY(_borderWidth + _titleHeight);
     _clientRect.setOrigin(clientPos);
 
-    onLayout();
+    //onLayout();
 }
 
 
@@ -595,7 +648,7 @@ void WindowFrame::resizeEvent(const Gfx::SizeF& size)
     frameSize.addHeight(_titleHeight);
     _frameRect.setSize(frameSize);
 
-    onLayout();
+    //onLayout();
 }
 
 
@@ -625,8 +678,6 @@ void WindowFrame::onLayout()
 
 void WindowFrame::onProcessEvent(const Pt::Event& ev)
 {
-    //Visual::onProcessEvent(ev);
-
     if( ev.typeInfo() == typeid(EnterEvent) )
     {
       const EnterEvent& e = static_cast<const EnterEvent&>(ev);
@@ -637,6 +688,127 @@ void WindowFrame::onProcessEvent(const Pt::Event& ev)
       const LeaveEvent& e = static_cast<const LeaveEvent&>(ev);
       leaveEvent(e);
     }
+    else
+    {
+        Visual::onProcessEvent(ev);
+    }
+}
+
+
+void WindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onProcessRescaleEvent(ev);
+}
+
+
+void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
+
+    // align frame
+    setFrame(_borderWidth, _titleHeight);
+}
+
+
+void WindowFrame::onProcessShowEvent(const ShowEvent& ev)
+{
+    Base::onProcessShowEvent(ev);
+}
+
+
+void WindowFrame::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
+
+    Gfx::RectF updateRect = frameRect();
+    repaint(updateRect);
+}
+
+
+void WindowFrame::onProcessEnableEvent(const EnableEvent& ev)
+{
+    Base::onProcessEnableEvent(ev);
+}
+
+
+void WindowFrame::onEnableEvent(const EnableEvent& ev)
+{    
+    Base::onEnableEvent(ev);
+
+    Gfx::RectF updateRect = frameRect();
+    repaint(updateRect);
+}
+
+
+void WindowFrame::onProcessActivateEvent(const ActivateEvent& ev)
+{
+    onActivateEvent(ev);
+}
+
+
+void WindowFrame::onActivateEvent(const ActivateEvent& ev)
+{
+    Gfx::RectF updateRect = frameRect();
+    repaint(updateRect);
+}
+
+
+void WindowFrame::onProcessMoveEvent(const MoveEvent& ev)
+{
+    Base::onProcessMoveEvent(ev);
+}
+
+
+void WindowFrame::onMoveEvent(const MoveEvent& ev)
+{
+    Gfx::RectF updateRect( position(), size() ) ;
+    updateRect.expand(2 * _borderWidth, 2 * _borderWidth);
+    updateRect.expand(0, _titleHeight);
+
+    Base::onMoveEvent(ev);
+
+    _frameRect.setOrigin( ev.position() );
+
+    Gfx::PointF clientPos = ev.position();
+    clientPos.addX(_borderWidth);
+    clientPos.addY(_borderWidth + _titleHeight);
+    _clientRect.setOrigin(clientPos);
+
+    onLayout();
+
+    updateRect.unify(_frameRect);
+
+    _wm->repaint(updateRect);
+}
+
+
+void WindowFrame::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
+}
+
+
+void WindowFrame::onResizeEvent(const ResizeEvent& ev)
+{
+    Gfx::RectF updateRect( position(), size() ) ;
+    updateRect.expand(2 * _borderWidth, 2 * _borderWidth);
+    updateRect.expand(0, _titleHeight);
+
+    Base::onResizeEvent(ev);
+
+    _clientRect.setSize( ev.size() );
+
+    Gfx::SizeF frameSize = ev.size();
+    frameSize.addWidth(2 * _borderWidth);
+    frameSize.addHeight(2 * _borderWidth);
+    frameSize.addHeight(_titleHeight);
+    _frameRect.setSize(frameSize);
+
+    updateRect.unify(_frameRect);
+
+    onLayout();
+
+    _wm->repaint(updateRect);
 }
 
 
@@ -656,18 +828,18 @@ void WindowFrame::leaveEvent(const LeaveEvent& lev)
 }
 
 
-void WindowFrame::onProcessMouseEvent(const MouseEvent& mev)
+void WindowFrame::onProcessMouseEvent(const MouseEvent& ev)
 {
-    Gfx::PointF pos = _wm->fromGlobal( mev.position() );
+    Gfx::PointF pos = _wm->fromGlobal( ev.position() );
 
     Window* window = checkWindow(pos);
     if(window)
     {
-        window->processEvent(mev);
+        window->processEvent(ev);
         return;
     }
         
-    Visual::onProcessMouseEvent(mev);
+    Visual::onProcessMouseEvent(ev);
 }
 
 
@@ -975,6 +1147,8 @@ bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
         {
             Gfx::PointF to = position() + pos - _lastPointer;
             _window->move(to);
+
+            moveEvent(to);
         }
 
         return _isMoving;
@@ -1003,8 +1177,8 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 
         if(isResizing && ! isPress)
         {
-            Gfx::SizeF winSize = size();
-            Gfx::PointF winpos = position();
+            Gfx::SizeF winSize = _clientRect.size();
+            Gfx::PointF winpos = _frameRect.topLeft();
             Gfx::PointF delta = pos - _lastPointer;
 
             if( _isLeftResizing )
@@ -1025,11 +1199,14 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
             if(_isBottomResizing)
                 winSize.addHeight( delta.y() );
 
-            if( winSize != size() )
+            if( winSize != _clientRect.size() )
                 _window->resize(winSize);
 
-            if( winpos != position() )
+            if( winpos != _frameRect.topLeft() )
                 _window->move(winpos);
+
+            resizeEvent(winSize);
+            moveEvent(winpos);
         }
 
         return isResizing;

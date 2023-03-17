@@ -62,9 +62,7 @@ class WindowManager : public Visual
         }
 
     protected:
-        virtual WindowImpl* onCreateWindow(const WindowType& type) = 0;
-
-        virtual void onAttach(Window& w) = 0;
+        virtual WindowImpl* onAttach(Window& w) = 0;
 
         virtual void onDetach(Window& w) = 0;
 

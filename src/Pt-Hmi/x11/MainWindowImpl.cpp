@@ -43,7 +43,6 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 : _window(None)
 , _display(0)
 , _hasFirstShow(false)
-, _scalingFactor(1.0)
 , _width(240)
 , _height(160)
 {
@@ -168,12 +167,6 @@ void MainWindowImpl::setType(Window::Type type)
         XUnmapWindow(_display, _window);
         XMapWindow(_display,_window);
     }
-}
-
-
-double MainWindowImpl::scaleFactor() const
-{
-    return _scalingFactor;
 }
 
 

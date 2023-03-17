@@ -39,41 +39,6 @@ namespace Pt {
 
 namespace Hmi {
 
-///////////////////////////////////////////////////////////////////////
-// ShellWindowImpl
-///////////////////////////////////////////////////////////////////////
-
-class ShellWindowImpl : public WindowImpl
-{
-    public:
-        ShellWindowImpl(WindowType type = WindowType::Default);
-
-        virtual ~ShellWindowImpl();
-
-        virtual double scaleFactor() const;
-};
-
-
-ShellWindowImpl::ShellWindowImpl(WindowType type)
-: WindowImpl(type)
-{
-}
-
-
-ShellWindowImpl::~ShellWindowImpl()
-{
-}
-
-
-double ShellWindowImpl::scaleFactor() const
-{
-    return 1.0;
-}
-
-///////////////////////////////////////////////////////////////////////
-// ShellWM
-///////////////////////////////////////////////////////////////////////
-
 ShellWM::ShellWM()
 : _parent(0)
 , _activeWindow(0)
@@ -91,9 +56,9 @@ ShellWM::ShellWM()
 
 ShellWM::~ShellWM()
 {
-    while( ! _windows.empty() )
+    while( ! _windowList.empty() )
     {
-        _windows.front()->window()->unparent();
+        _windowList.front()->unparent();
     }
 }
 
@@ -126,7 +91,7 @@ void ShellWM::onProcessEvent(const Pt::Event& ev)
 }
 
 
-WindowFrame* ShellWM::activeWindow()
+Window* ShellWM::activeWindow()
 {
     return _activeWindow;
 }
@@ -136,40 +101,6 @@ void ShellWM::onRequestActivate(bool active)
 {
     if(_parent)
         _parent->onActivate(*this, active);
-}
-
-
-WindowFrame* ShellWM::findWindowFrame(const Gfx::PointF& p) const
-{
-    if(_grabbedFrame)
-        return _grabbedFrame;
-  
-    std::vector<WindowFrame*>::const_reverse_iterator rit;
-    for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
-    {
-        if( ! (*rit)->window()->isVisible() )
-            continue;
-
-        if( ! (*rit)->frameRect().contains(p) )
-            continue;
-
-        return *rit;
-    }
-
-    return 0;
-}
-
-
-WindowFrame* ShellWM::getWindowFrame(const Window& w) const
-{
-    std::vector<WindowFrame*>::const_iterator it;
-    for(it = _windows.begin(); it != _windows.end(); ++it)
-    {
-        if( (*it)->window() == &w)
-            return *it;
-    }
-
-    return 0;
 }
 
 
@@ -205,17 +136,17 @@ Visual* ShellWM::onHitTest(const Gfx::PointF& p)
     if( ! bounds().contains(p) )
         return 0;
 
-    std::vector<WindowFrame*>::const_reverse_iterator rit;
-    for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
+    std::vector<Window*>::const_reverse_iterator rit;
+    for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
-        WindowFrame* frame = *rit;
-        Window* w = frame->window();
+        Window* window = *rit;
+        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
 
-        if( ! w->isVisible() )
+        if( ! window->isVisible() )
             continue;
 
-        Gfx::PointF pos = toWindow(*w, p);
-        Visual* hit = w->hitTest(pos);
+        Gfx::PointF pos = toWindow(*window, p);
+        Visual* hit = window->hitTest(pos);
         if(hit)
             return hit;
 
@@ -231,11 +162,11 @@ WindowFrame* ShellWM::onHitTestFrame(const Gfx::PointF& pos)
 {
     WindowFrame* windowFrame = 0;
 
-    std::vector<WindowFrame*>::const_reverse_iterator rit;
-    for(rit = _windows.rbegin() ; rit != _windows.rend(); ++rit )
+    std::vector<Window*>::const_reverse_iterator rit;
+    for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
-        WindowFrame* frame = *rit;
-        Window* window = frame->window();
+        Window* window = *rit;
+        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
 
         if( frame->frameRect().contains(pos) && 
             window->acceptsInput() )
@@ -264,15 +195,10 @@ void ShellWM::onRequestCapture(bool capture)
 // WindowManager
 ///////////////////////////////////////////////////////////////////////
 
-WindowImpl* ShellWM::onCreateWindow(const WindowType& type)
+WindowImpl* ShellWM::onAttach(Window& w)
 {
-    return new ShellWindowImpl(type);
-}
-
-
-void ShellWM::onAttach(Window& w)
-{
-    WindowFrame* frame = new WindowFrame(*this, w);
+    WindowFrame* frame = new WindowFrame( *this, w.type() );
+    frame->setWindow(&w);
 
     switch( w.type() )
     {
@@ -287,13 +213,13 @@ void ShellWM::onAttach(Window& w)
     }
 
     if(_topMostWindow)
-        _windows.insert( --_windows.end(), frame );
+        _windowList.insert( --_windowList.end(), &w );
     else
-        _windows.push_back(frame);
-
-    _windowList.push_back(&w);
+        _windowList.push_back(&w);
 
     w.setNextResponder(this);
+
+    return frame;
 }
 
 
@@ -301,28 +227,27 @@ void ShellWM::onDetach(Window& w)
 {
     w.setNextResponder(0);
 
-    _windowList.erase( std::remove(_windowList.begin(), _windowList.end(), &w), 
-                       _windowList.end() );
-
-    std::vector<WindowFrame*>::iterator wit;
-    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    std::vector<Window*>::iterator wit;
+    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
-        if((*wit)->window() == &w)
+        Window* window = *wit;
+
+        if(window == &w)
         {
-            if(_grabbedFrame && _grabbedFrame->window() == &w)
+            if( _grabbedFrame && _grabbedFrame == w.impl() )
             {
                 setCapture(false);
                 _grabbedFrame = 0;
             }
 
-            if(_activeWindow && _activeWindow->window() == &w)
+            if(_activeWindow && _activeWindow == &w)
                 _activeWindow  = 0;
 
-            if(_topMostWindow && _topMostWindow->window() == &w)
+            if(_topMostWindow && _topMostWindow == &w)
                 _topMostWindow = 0;
 
-            delete *wit;
-            _windows.erase(wit);
+            //delete *wit;
+            _windowList.erase(wit);
             break;
         }
     }
@@ -341,13 +266,19 @@ void ShellWM::onInit(Window& w)
 
 void ShellWM::onRelease(Window& w)
 {
+    if( w.isVisible() )
+    {
+        const WindowFrame* frame = static_cast<const WindowFrame*>( w.impl() );
+        if(frame)
+            repaint( frame->frameRect() );
+    }
 }
 
 
 Gfx::PointF ShellWM::onToWindow(const Window& w, 
                                 const Gfx::PointF& pos) const
 {
-    WindowFrame* frame = getWindowFrame(w);
+    const WindowFrame* frame = static_cast<const WindowFrame*>( w.impl() );
     if( ! frame )
         return pos;
 
@@ -358,7 +289,7 @@ Gfx::PointF ShellWM::onToWindow(const Window& w,
 Gfx::PointF ShellWM::onFromWindow(const Window& w, 
                                   const Gfx::PointF& pos) const
 {
-    WindowFrame* frame = getWindowFrame(w);
+    const WindowFrame* frame = static_cast<const WindowFrame*>( w.impl() );
     if( ! frame )
         return pos;
 
@@ -377,109 +308,69 @@ void ShellWM::onRepaint(Window& w, const Gfx::RectF& rect)
 
 void ShellWM::onShow(Window& w, bool visible)
 {
-    WindowFrame* frame = getWindowFrame(w);
-    if( ! frame )
-        return;
-
-    ShowEvent sev( w, visible );
-    Application::instance().loop().commitEvent(sev);
-
-    // TODO: move updating to frame
-
-    Gfx::RectF updateRect = frame->frameRect();
-
-    // w.invalidate();
-    repaint(updateRect);
+    ShowEvent windowEvent( w, visible );
+    Application::instance().loop().commitEvent(windowEvent);
 }
 
 
 void ShellWM::onActivate(Window& w, bool active)
 {
-    ActivateEvent aev(*this, active);
-    Application::instance().loop().commitEvent(aev);
-
-    WindowFrame* frame = getWindowFrame(w);
-    if( ! frame )
-        return;
-
     if(active)
     {
         //
         // deactivate other active window
         //
-        if(_activeWindow && _activeWindow != frame)
-            _activeWindow->window()->activate(false);
+        if(_activeWindow && _activeWindow != &w)
+            _activeWindow->activate(false);
 
         //
         // raise to top of window stack
         //
-        std::vector<WindowFrame*>::iterator it =
-            std::find(_windows.begin(), _windows.end(), frame);
+        std::vector<Window*>::iterator it =
+            std::find(_windowList.begin(), _windowList.end(), &w);
 
-        _windows.erase(it);
+        _windowList.erase(it);
 
-        if(_topMostWindow && frame != _topMostWindow)
+        if(_topMostWindow && _topMostWindow != &w)
         {
-            _windows.insert(--_windows.end(), frame);
+            _windowList.insert(--_windowList.end(), &w);
         }
         else
         {
-            _windows.push_back(frame);
+            _windowList.push_back(&w);
         }
 
-        _activeWindow = frame;
+        _activeWindow = &w;
     }
     else
     {
-        if(frame == _activeWindow)
+        if(_activeWindow == &w)
             _activeWindow = 0;
     }
 
-    frame->repaint();
-
+    ActivateEvent aev(w, active);
+    Application::instance().loop().commitEvent(aev);
+    
     activate(active);
 }
 
 
 void ShellWM::onEnableRequest(Window& w, bool enable)
 {
-    // TODO: move updating to frame
-
     if( ! isEnabled() )
       enable = false;
 
     EnableEvent eev(w, enable);
     Application::instance().loop().commitEvent(eev);
-    
-    WindowFrame* frame = getWindowFrame(w);
-    if( ! frame )
-        return;
-
-    Gfx::RectF updateRect = frame->frameRect();
-
-    repaint(updateRect);
 }
 
 
 void ShellWM::onMove(Window& w, const Gfx::PointF& pos)
 {
-    WindowFrame* frame = getWindowFrame(w);
-    if( ! frame )
-        return;
-
     Gfx::PointF aligedPos = _surface.align(pos);
 
-    Gfx::RectF updateRect = frame->frameRect();
-    frame->moveEvent(aligedPos);
-
-    Gfx::RectF movedRect = frame->frameRect();
-    updateRect.unify(movedRect);
-
     MoveEvent mev(w, aligedPos);
-    Application::instance().loop().commitEvent(mev);
-    //Application::instance().processEvent(mev);
-
-    repaint(updateRect);
+    Application::instance().commitEvent(mev);
 }
 
 
@@ -499,46 +390,29 @@ void ShellWM::onResize(Window& w, const Gfx::SizeF& s)
     if( alignedSize.height() < w.minimumSize().height() )
         alignedSize.setHeight( w.minimumSize().height() );
 
-    WindowFrame* frame = getWindowFrame(w);
-    if( ! frame )
-        return;
-
-    Gfx::RectF updateRect = frame->frameRect();
-    frame->resizeEvent(alignedSize);
-
-    Gfx::RectF resizedRect = frame->frameRect();
-    updateRect.unify(resizedRect);
-
     ResizeEvent rev(w, alignedSize);
-    Application::instance().loop().commitEvent(rev);
-    //Application::instance().processEvent(rev);
-
-    repaint(updateRect);
+    Application::instance().commitEvent(rev);
 }
 
 
 void ShellWM::onSetAbove(Window& w, bool above)
 {
-    WindowFrame* frame = getWindowFrame(w);
-    if( ! frame )
-        return;
-
     if(above)
     {
-        if(_topMostWindow && _topMostWindow != frame)
-            _topMostWindow->window()->setAbove(false);
+        if(_topMostWindow && _topMostWindow != &w)
+            _topMostWindow->setAbove(false);
 
         // move top most frame to the back
-        std::vector<WindowFrame*>::iterator it = std::find(_windows.begin(), 
-                                                           _windows.end(), frame);
-        if( it != _windows.end() )
-            _windows.erase(it);
+        std::vector<Window*>::iterator it = std::find(_windowList.begin(), 
+                                                      _windowList.end(), &w);
+        if( it != _windowList.end() )
+            _windowList.erase(it);
         
-        _windows.push_back(frame);
+        _windowList.push_back(&w);
 
-        _topMostWindow = frame;
+        _topMostWindow = &w;
     }
-    else if(_topMostWindow == frame)
+    else if(_topMostWindow == &w)
     {
         _topMostWindow = 0;
     }
@@ -547,72 +421,26 @@ void ShellWM::onSetAbove(Window& w, bool above)
 
 void ShellWM::onSetTitle(Window& w, const std::string& text)
 {
-    WindowFrame* frame = getWindowFrame(w);
-    if( ! frame )
-        return;
-
-    Gfx::RectF updateRect = frame->frameRect();
-    repaint(updateRect);
+    w.impl()->setTitle(text);
 }
 
 
 void ShellWM::onSetIcon(Window& w, const Gfx::Image& icon)
 {
+    w.impl()->setIcon(icon);
 }
 
 
 void ShellWM::onSetState(Window& w, const WindowState& state)
 {
-    WindowFrame* frame = getWindowFrame(w);
-    if( ! frame )
-        return;
+    // TODO: send WindowStateEvent to impl/frame
 
-    Window::State oldState = frame->state();
-    
-    if(state != oldState)
-    {
-        frame->setState(state);
-
-        if(oldState == WindowState::Normal)
-            frame->setRestore(w.position(), w.size());
-
-        if(state == WindowState::Maximized)
-        {
-            Gfx::SizeF maxSize = size();
-            maxSize = frame->fromFrame(maxSize);
-
-            w.move( Gfx::PointF(0,0) );
-            w.resize(maxSize);
-        }
-        else if(state == WindowState::Minimized)
-        {
-            if(oldState == WindowState::Normal)
-            {
-                Gfx::SizeF minSize(w.size().width(), 0);
-                w.resize(minSize);
-            }
-            else
-            {
-                w.move( frame->restorePosition() );
-
-                Gfx::SizeF minSize(frame->restoreSize().width(), 0);
-                w.resize(minSize);
-            }
-        }
-        else if(state == WindowState::Normal)
-        {
-            w.move( frame->restorePosition() );
-            w.resize( frame->restoreSize() );
-        }
-
-        WindowStateEvent wse(w, state);
-        Application::instance().loop().commitEvent(wse);
-    }
+    w.impl()->setState(state);
 }
 
 
 void ShellWM::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-                                       const Gfx::SizeF& maxSize)
+                                         const Gfx::SizeF& maxSize)
 {
 }
 
@@ -633,17 +461,13 @@ void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
 
     double scaling = ev.scaleFactor();
 
-    std::vector<WindowFrame*>::iterator wit;
-    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    std::vector<Window*>::iterator wit;
+    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
-        WindowFrame* frame = *wit;
-        Window* window = frame->window();
+        Window* window = *wit;
 
         RescaleEvent rev(*window, scaling);
         window->processEvent(rev);
-
-        // align frame via child window
-        frame->setFrame(_borderWidth, _titleHeight);
     }
 }
 
@@ -666,11 +490,10 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
     //
     // paint child windows
     //
-    std::vector<WindowFrame*>::iterator wit;
-    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    std::vector<Window*>::iterator wit;
+    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
-        WindowFrame* frame = *wit;
-        Window* window = frame->window();
+        Window* window = *wit;
 
         Gfx::PointF winPos = onToWindow( *window, rect.topLeft() );
         Gfx::RectF winRect( winPos, rect.size() );
@@ -684,13 +507,13 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
     //
     // paint child window contents and frames on surface
     //
-    std::vector<WindowFrame*>::iterator it;
-    for(it = _windows.begin(); it != _windows.end(); ++it )
+    std::vector<Window*>::iterator it;
+    for(it = _windowList.begin(); it != _windowList.end(); ++it )
     {
-        WindowFrame* frame = *it;
-        Window* w = frame->window();
+        Window* window = *it;
+        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
         
-        if( ! w || ! w->isVisible() )
+        if( ! window || ! window->isVisible() )
             continue; 
 
         // clip window frame rect
@@ -698,18 +521,18 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
         if( frameRect.isNull() )
             continue;
 
-        // paint frame rect
+        // TODO: use PaintEvent
         frame->paint( _surface, frameRect );
 
         // clip client rect
         Gfx::RectF updateRect = frame->clientRect().intersect(rect);
 
         // paint client rect
-        Gfx::PointF surfacePos = onToWindow( *w, updateRect.topLeft() );
+        Gfx::PointF surfacePos = onToWindow( *window, updateRect.topLeft() );
         Gfx::RectF surfaceRect( surfacePos, updateRect.size() );
 
         Pt::Gfx::Painter painter(_surface);
-        painter.drawSurface(updateRect.topLeft(), w->surface(), surfaceRect);
+        painter.drawSurface(updateRect.topLeft(), window->surface(), surfaceRect);
     }
 }
 
@@ -718,12 +541,12 @@ void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
 
-    for( size_t i = 0; i < _windows.size(); ++i)
+    std::vector<Window*>::iterator wit;
+    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
-        WindowFrame* frame = _windows[i];
-        Window* w = frame->window();
+        Window* window = *wit;
 
-        EnableEvent eev(*w, ev.enabled());
+        EnableEvent eev( *window, ev.enabled() );
         Application::instance().loop().commitEvent(eev);
     }
 }
@@ -761,7 +584,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
     {
         if( ! windowFrame && _activeWindow )
         {
-            _activeWindow->window()->activate(false);
+            _activeWindow->activate(false);
         }
         
         if( windowFrame && ! windowFrame->window()->isActive() )
@@ -828,7 +651,7 @@ bool ShellWM::processTouchEvent(const TouchEvent& ev)
     {
         if( ! windowFrame && _activeWindow )
         {
-            _activeWindow->window()->activate(false);
+            _activeWindow->activate(false);
         }
         
         if( windowFrame && ! windowFrame->window()->isActive() )
@@ -894,12 +717,8 @@ void ShellWM::onProcessScrollEvent(const ScrollEvent& ev)
 
     if( _activeWindow )
     {
-        Window* window = _activeWindow->window();
-        if(window)
-        {
-            window->processEvent(ev);
-            return;
-        }
+        _activeWindow->processEvent(ev);
+        return;
     }
 }
 
@@ -909,16 +728,13 @@ void ShellWM::onProcessKeyEvent(const KeyEvent& ev)
     //if( ! acceptsInput() )
     //    return;
 
+
     if(_activeWindow)
     {
-        Window* window = _activeWindow->window();
-        if(window)
-        {
-            KeyEvent kev = ev;
-            kev.setVisual(window);
-            window->processEvent(ev);
-            return;
-        }
+        KeyEvent kev = ev;
+        kev.setVisual(_activeWindow);
+        _activeWindow->processEvent(ev);
+        return;
     }
 }
 
