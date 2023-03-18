@@ -45,10 +45,13 @@ namespace Demo {
 
 class MainWindow : public Pt::Hmi::Window
 {
-      public:
+    public:
         MainWindow();
-        
-        virtual ~MainWindow();
+
+      virtual ~MainWindow();
+
+    protected:
+        void onZoom(MenuItem&);
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -67,6 +70,11 @@ class MainWindow : public Pt::Hmi::Window
         MenuItem _subItem1;
         MenuItem _subItem2;
         MenuItem _subItem3;
+
+        Menu     _zoomMenu;
+        MenuItem _zoomItem1;
+        MenuItem _zoomItem2;
+        MenuItem _zoomItem3;
             
         Shell _shell;
 

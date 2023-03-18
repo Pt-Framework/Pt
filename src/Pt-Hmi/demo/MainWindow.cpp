@@ -176,7 +176,7 @@ MainWindow::MainWindow()
     _menu.setName("All Music");
 
     _item1.setText("Heavy Metal");
-
+    
     Key f3(Key::F3);
     _item1.setShortcut( &f3 );
     _menu.addItem(_item1);
@@ -204,12 +204,39 @@ MainWindow::MainWindow()
 
     _menu.addMenu(_subMenu, "Other Music");
 
+    // zoom sub menu
+    _zoomMenu.setName("Zoom");
+
+    _zoomItem1.setText("100%");
+    _zoomItem1.triggered() += Pt::slot(*this, &MainWindow::onZoom);
+    _zoomMenu.addItem(_zoomItem1);
+
+    _zoomItem2.setText("125%");
+    _zoomItem2.triggered() += Pt::slot(*this, &MainWindow::onZoom);
+    _zoomMenu.addItem(_zoomItem2);
+
+    _zoomItem3.setText("133%");
+    _zoomItem3.triggered() += Pt::slot(*this, &MainWindow::onZoom);
+    _zoomMenu.addItem(_zoomItem3);
+
+    _menu.addMenu(_zoomMenu, "Zoom");
+
     Hmi::PixmapSurface::fontNames();
 }
 
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::onZoom(MenuItem& item)
+{
+    if(item.text() == "100%")
+        Application::instance().setScaleFactor(1.0);
+    else if(item.text() == "125%")
+        Application::instance().setScaleFactor(1.25);
+    else if(item.text() == "133%")
+        Application::instance().setScaleFactor(1.33);
 }
 
 
