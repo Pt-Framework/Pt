@@ -169,7 +169,7 @@ class WindowFrame : public WindowImpl
     };
 
     public:
-        WindowFrame(ShellWM& wm, WindowType type);
+        WindowFrame(ShellWM& wm, Window& window);
 
         virtual ~WindowFrame();
 
@@ -177,15 +177,13 @@ class WindowFrame : public WindowImpl
 
         const Window* window() const;
 
-        void setWindow(Window* w);
-
         virtual void setTitle(const std::string& text);
 
         virtual void setIcon(const Gfx::Image& icon);
 
         Window::State state() const;
 
-        void setState(const WindowState& s);
+        virtual void setState(const WindowState& s);
 
         const Gfx::PointF& restorePosition() const;
 
@@ -199,11 +197,9 @@ class WindowFrame : public WindowImpl
 
         void setFrame(double bw, double th);
 
-        Gfx::PointF toFrame(const Gfx::PointF& pos) const;
+        Gfx::PointF toWindow(const Gfx::PointF& pos) const;
 
-        Gfx::PointF fromFrame(const Gfx::PointF& pos) const;
-
-        Gfx::SizeF fromFrame(const Gfx::SizeF& size) const;
+        Gfx::PointF fromWindow(const Gfx::PointF& pos) const;
 
         void repaint();
 
@@ -224,19 +220,18 @@ class WindowFrame : public WindowImpl
         void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
         
     protected:
-        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const
-        { 
-            return pos; 
-        }
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
         
-        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const
-        { 
-            return pos; 
-        }
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
         virtual void onProcessEvent(const Pt::Event& ev);
 
         
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
         
         virtual void onRescaleEvent(const RescaleEvent& ev);

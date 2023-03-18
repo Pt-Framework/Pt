@@ -394,12 +394,12 @@ void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 // WindowFrame
 //
 
-WindowFrame::WindowFrame(ShellWM& shell, WindowType type)
+WindowFrame::WindowFrame(ShellWM& shell, Window& window)
 : WindowImpl()
 , _wm(&shell)
-, _window(0)
-, _borderWidth(0)
-, _titleHeight(0)
+, _window(&window)
+, _borderWidth( shell.borderWidth() )
+, _titleHeight( shell.titleHeight() )
 , _state(WindowState::Normal)
 , _isClient(false)
 , _isMoving(false)
@@ -410,6 +410,18 @@ WindowFrame::WindowFrame(ShellWM& shell, WindowType type)
 , _currentFrameItem(OnNone)
 {
     eventReceived() += Pt::slot(*this, &WindowFrame::onProcessActivateEvent);
+
+    switch( window.type() )
+    {
+        case WindowType::Popup:
+            setFrame(0, 0);
+            break;
+        
+        default:
+        case WindowType::Default:
+            setFrame(_borderWidth, _titleHeight);
+            break;
+    }
 
     _maximizeButton.setParent(*this);
     _maximizeButton.clicked() += Pt::slot(*this, &WindowFrame::onMaximize);
@@ -443,12 +455,6 @@ Window* WindowFrame::window()
 const Window* WindowFrame::window() const
 {
     return _window;
-}
-
-
-void WindowFrame::setWindow(Window* w)
-{
-    _window = w;
 }
 
 
@@ -488,7 +494,8 @@ void WindowFrame::setState(const WindowState& state)
     if(state == WindowState::Maximized)
     {
         Gfx::SizeF maxSize = _wm->size();
-        maxSize = fromFrame(maxSize);
+        maxSize.subWidth( 2 * _borderWidth );
+        maxSize.subHeight( (2 * _borderWidth) + _titleHeight );
 
         _window->move( Gfx::PointF(0,0) );
         _window->resize(maxSize);
@@ -557,16 +564,7 @@ void WindowFrame::setFrame(double bw, double th)
 }
 
 
-Gfx::PointF WindowFrame::toFrame(const Gfx::PointF& pos) const
-{
-    double offY = _borderWidth + _titleHeight;
-    double offX = _borderWidth;
-
-    return pos + Gfx::PointF(offX, offY);
-}
-
-
-Gfx::PointF WindowFrame::fromFrame(const Gfx::PointF& pos) const
+Gfx::PointF WindowFrame::toWindow(const Gfx::PointF& pos) const
 {
     double offY = _borderWidth + _titleHeight;
     double offX = _borderWidth;
@@ -575,12 +573,12 @@ Gfx::PointF WindowFrame::fromFrame(const Gfx::PointF& pos) const
 }
 
 
-Gfx::SizeF WindowFrame::fromFrame(const Gfx::SizeF& size) const
+Gfx::PointF WindowFrame::fromWindow(const Gfx::PointF& pos) const
 {
-    double offY = (2*_borderWidth) + _titleHeight;
-    double offX = 2*_borderWidth;
+    double offY = _borderWidth + _titleHeight;
+    double offX = _borderWidth;
 
-    return Gfx::SizeF(size.width() - offX, size.height() - offY);
+    return pos + Gfx::PointF(offX, offY);
 }
 
 
@@ -676,6 +674,30 @@ void WindowFrame::onLayout()
 }
 
 
+Gfx::PointF WindowFrame::onToParent(const Gfx::PointF& pos) const
+{ 
+    if( ! _window )
+        return pos;
+
+    double offY = _borderWidth + _titleHeight;
+    double offX = _borderWidth;
+
+    return pos + Gfx::PointF(offX, offY); 
+}
+
+        
+Gfx::PointF WindowFrame::onFromParent(const Gfx::PointF& pos) const
+{ 
+    if( ! _window )
+        return pos;
+
+    double offY = _borderWidth + _titleHeight;
+    double offX = _borderWidth;
+
+    return pos - Gfx::PointF(offX, offY); 
+}
+
+
 void WindowFrame::onProcessEvent(const Pt::Event& ev)
 {
     if( ev.typeInfo() == typeid(EnterEvent) )
@@ -692,6 +714,38 @@ void WindowFrame::onProcessEvent(const Pt::Event& ev)
     {
         Visual::onProcessEvent(ev);
     }
+}
+
+
+void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
+{
+    Base::onProcessPaintEvent(ev);
+
+    double offX = 2 * _borderWidth;
+    double offY = (2 * _borderWidth) + _titleHeight;
+
+    Gfx::PointF pos = _wm->fromWindow( *_window, ev.rect().topLeft() );
+    pos.subX(_borderWidth);
+    pos.subY(_borderWidth + _titleHeight);
+
+    Gfx::SizeF size = ev.rect().size();
+    size.addWidth(offX);
+    size.addHeight(offY);
+
+    Gfx::RectF rect(pos, size);
+
+    // clip window frame rect
+    Gfx::RectF frameRect = this->frameRect().intersect(rect);
+    if( frameRect.isNull() )
+        return;
+
+    paint( _wm->surface(), frameRect );
+}
+
+
+void WindowFrame::onPaintEvent(const PaintEvent& ev)
+{
+    Base::onPaintEvent(ev);
 }
 
 
@@ -794,8 +848,6 @@ void WindowFrame::onResizeEvent(const ResizeEvent& ev)
     updateRect.expand(2 * _borderWidth, 2 * _borderWidth);
     updateRect.expand(0, _titleHeight);
 
-    Base::onResizeEvent(ev);
-
     _clientRect.setSize( ev.size() );
 
     Gfx::SizeF frameSize = ev.size();
@@ -805,6 +857,9 @@ void WindowFrame::onResizeEvent(const ResizeEvent& ev)
     _frameRect.setSize(frameSize);
 
     updateRect.unify(_frameRect);
+
+    ResizeEvent rev(*this, frameSize);
+    Base::onResizeEvent(rev);
 
     onLayout();
 

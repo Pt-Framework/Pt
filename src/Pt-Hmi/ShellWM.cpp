@@ -71,6 +71,18 @@ void ShellWM::setParent(Shell* shell)
 }
 
 
+Gfx::PaintSurface& ShellWM::surface()
+{
+    return _surface;
+}
+
+
+const Gfx::PaintSurface& ShellWM::surface() const
+{
+    return _surface;
+}
+
+
 void ShellWM::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
     if( ! surface )
@@ -197,20 +209,7 @@ void ShellWM::onRequestCapture(bool capture)
 
 WindowImpl* ShellWM::onAttach(Window& w)
 {
-    WindowFrame* frame = new WindowFrame( *this, w.type() );
-    frame->setWindow(&w);
-
-    switch( w.type() )
-    {
-        case WindowType::Popup:
-            frame->setFrame(0, 0);
-            break;
-        
-        default:
-        case WindowType::Default:
-            frame->setFrame(_borderWidth, _titleHeight);
-            break;
-    }
+    WindowFrame* frame = new WindowFrame(*this, w);
 
     if(_topMostWindow)
         _windowList.insert( --_windowList.end(), &w );
@@ -282,7 +281,7 @@ Gfx::PointF ShellWM::onToWindow(const Window& w,
     if( ! frame )
         return pos;
 
-    return frame->fromFrame(pos) - w.position();
+    return frame->toWindow(pos) - w.position();
 }
 
 
@@ -293,7 +292,7 @@ Gfx::PointF ShellWM::onFromWindow(const Window& w,
     if( ! frame )
         return pos;
 
-    return w.position() + frame->toFrame(pos);
+    return w.position() + frame->fromWindow(pos);
 }
 
 
@@ -402,7 +401,7 @@ void ShellWM::onSetAbove(Window& w, bool above)
         if(_topMostWindow && _topMostWindow != &w)
             _topMostWindow->setAbove(false);
 
-        // move top most frame to the back
+        // move top most to the back
         std::vector<Window*>::iterator it = std::find(_windowList.begin(), 
                                                       _windowList.end(), &w);
         if( it != _windowList.end() )
@@ -433,8 +432,6 @@ void ShellWM::onSetIcon(Window& w, const Gfx::Image& icon)
 
 void ShellWM::onSetState(Window& w, const WindowState& state)
 {
-    // TODO: send WindowStateEvent to impl/frame
-
     w.impl()->setState(state);
 }
 
@@ -498,34 +495,28 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::PointF winPos = onToWindow( *window, rect.topLeft() );
         Gfx::RectF winRect( winPos, rect.size() );
 
-        winRect = winRect.intersect( Gfx::RectF( window->size() ) );
+        winRect = winRect.intersect( Gfx::RectF( window->impl()->size() ) );
 
         PaintEvent pev( *window, winRect );
         window->processEvent(pev);
     }
 
     //
-    // paint child window contents and frames on surface
+    // paint child window contents on surface
     //
     std::vector<Window*>::iterator it;
     for(it = _windowList.begin(); it != _windowList.end(); ++it )
     {
         Window* window = *it;
-        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
         
         if( ! window || ! window->isVisible() )
             continue; 
 
-        // clip window frame rect
-        Gfx::RectF frameRect = frame->frameRect().intersect(rect);
-        if( frameRect.isNull() )
-            continue;
-
-        // TODO: use PaintEvent
-        frame->paint( _surface, frameRect );
-
         // clip client rect
-        Gfx::RectF updateRect = frame->clientRect().intersect(rect);
+        Gfx::PointF clientPos = fromWindow( *window, Gfx::PointF(0, 0) );
+        Gfx::RectF clientRect(clientPos, window->size() );
+
+        Gfx::RectF updateRect = clientRect.intersect(rect);
 
         // paint client rect
         Gfx::PointF surfacePos = onToWindow( *window, updateRect.topLeft() );
