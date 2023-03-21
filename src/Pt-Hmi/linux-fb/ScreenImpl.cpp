@@ -275,6 +275,12 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     
     size /= scaleFactor();
 
+    _surface.resize(size);
+    _surface.setScaleFactor( scaleFactor() );
+    
+    _surface.pixmapImpl()->resize( _frameBuffer.size(), 
+                                   _frameBuffer.strideSize() );
+
     if(_parent)
         _parent->onResize(*this, size);
 }
@@ -283,8 +289,6 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 void ScreenImpl::onRescale(double scaling)
 {
     Base::onRescale(scaling);
-
-    _surface.setScaleFactor(scaling);
 }
 
 
