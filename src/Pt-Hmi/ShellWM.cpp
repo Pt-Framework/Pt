@@ -465,6 +465,11 @@ void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
 
         RescaleEvent rev(*window, scaling);
         window->processEvent(rev);
+
+        if(window->state() == WindowState::Maximized)
+        {
+            window->setState(WindowState::Maximized);
+        }
     }
 }
 
@@ -539,6 +544,29 @@ void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
 
         EnableEvent eev( *window, ev.enabled() );
         Application::instance().loop().commitEvent(eev);
+    }
+}
+
+
+void ShellWM::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
+}
+
+
+void ShellWM::onResizeEvent(const ResizeEvent& ev)
+{
+    Base::onResizeEvent(ev);
+
+    std::vector<Window*>::iterator wit;
+    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
+    {
+        Window* window = *wit;
+
+        if(window->state() == WindowState::Maximized)
+        {
+            window->setState(WindowState::Maximized);
+        }
     }
 }
 

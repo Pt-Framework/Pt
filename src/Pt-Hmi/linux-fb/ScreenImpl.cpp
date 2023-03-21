@@ -95,6 +95,8 @@ void ScreenImpl::setParent(Screen* screen)
         Gfx::Size fs = _frameBuffer.size();
         Gfx::SizeF size( fs.width(), fs.height() );
 
+        size /= scaleFactor();
+
         _parent->onResize(*this, size);
         _parent->onShow(*this, true);
     }
@@ -267,6 +269,14 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 {
     Base::onRescaleEvent(ev);
+
+    Gfx::Size fs = _frameBuffer.size();
+    Gfx::SizeF size( fs.width(), fs.height() );
+    
+    size /= scaleFactor();
+
+    if(_parent)
+        _parent->onResize(*this, size);
 }
 
 

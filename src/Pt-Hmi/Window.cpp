@@ -125,10 +125,14 @@ void Window::setParent(WindowManager& parent)
     _parent->onSetTitle(*this, _title);
     _parent->onSetIcon(*this, _icon);
     _parent->onSetAbove(*this, _isAbove);
-    _parent->onMove(*this, _requestedPosition);
 
-    if( ! isAutoSize() )
-        _parent->onResize( *this, _requestedSize);
+    if(_state == WindowState::Normal)
+    {
+        _parent->onMove(*this, _requestedPosition);
+
+        if( ! isAutoSize() )
+            _parent->onResize( *this, _requestedSize);
+    }
     
     _parent->onActivate(*this, _isActive);
     _parent->onEnableRequest(*this, _enabled);
@@ -252,6 +256,8 @@ void Window::onRequestMove(const Gfx::PointF& pos)
 {
     _requestedPosition = pos;
 
+    setState(WindowState::Normal);
+
     if(_parent)
     {
         _parent->onMove(*this, _requestedPosition);
@@ -290,6 +296,8 @@ void Window::onSetSizeLimits(const Gfx::SizeF& minSize,
 void Window::onRequestResize(const Gfx::SizeF& s)
 {
     _requestedSize = s;
+
+    setState(WindowState::Normal);
     
     if(_parent)
     {
@@ -619,10 +627,13 @@ void Window::onRescale(double scaling)
     // realign geometry
     //
     bool isInitialized = parent() != 0;
-    if( isInitialized )
+    if(isInitialized)
     {
-        move(_requestedPosition);
-        resize(_requestedSize);
+        if(_state == WindowState::Normal)
+        {
+            move(_requestedPosition);
+            resize(_requestedSize);
+        }
     }
 }
 

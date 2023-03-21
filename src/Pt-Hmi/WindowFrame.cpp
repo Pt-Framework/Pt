@@ -480,8 +480,8 @@ void WindowFrame::setState(const WindowState& state)
 {
     Window::State oldState = _state;
     
-    if(state == oldState)
-        return;
+    //if(state == oldState)
+    //    return;
 
     if( ! _window )
         return;
@@ -497,28 +497,26 @@ void WindowFrame::setState(const WindowState& state)
         maxSize.subWidth( 2 * _borderWidth );
         maxSize.subHeight( (2 * _borderWidth) + _titleHeight );
 
-        _window->move( Gfx::PointF(0,0) );
-        _window->resize(maxSize);
+        _wm->onMove( *_window, Gfx::PointF(0, 0) );
+        _wm->onResize( *_window, maxSize );
     }
     else if(state == WindowState::Minimized)
     {
-        if(oldState == WindowState::Normal)
+        if(oldState == WindowState::Maximized)
         {
-            Gfx::SizeF minSize(_window->size().width(), 0);
-            _window->resize(minSize);
+            _wm->onMove( *_window, restorePosition() );
         }
-        else
-        {
-            _window->move( restorePosition() );
 
-            Gfx::SizeF minSize(restoreSize().width(), 0);
-            _window->resize(minSize);
-        }
+        Gfx::SizeF minSize(restoreSize().width(), 0);
+        _wm->onResize(*_window, minSize);
     }
     else if(state == WindowState::Normal)
     {
-        _window->move( restorePosition() );
-        _window->resize( restoreSize() );
+        if(oldState != WindowState::Normal)
+        {
+            _wm->onMove( *_window, restorePosition() );
+            _wm->onResize( *_window, restoreSize() );
+        }
     }
 
     WindowStateEvent wse(*_window, state);

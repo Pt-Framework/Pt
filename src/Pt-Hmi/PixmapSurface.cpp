@@ -78,8 +78,13 @@ void PixmapSurface::clear(const Gfx::Color& c)
 
 void PixmapSurface::setScaleFactor(double scaling)
 {
+    if(_scaleFactor == scaling)
+        return;
+
     _scaleFactor = scaling;
     _impl->setScaleFactor(scaling);
+
+    _impl->resize( toPhysical(_logicSize) );
 }
 
 

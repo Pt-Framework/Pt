@@ -48,6 +48,8 @@ class ShellWM : public WindowManager
 {
     typedef WindowManager Base;
 
+    friend class WindowFrame;
+
     public:
         ShellWM();
 
@@ -173,7 +175,11 @@ class ShellWM : public WindowManager
 
         virtual void onProcessPaintEvent(const PaintEvent& ev);
         
-        virtual void onProcessEnableEvent(const EnableEvent& ev); 
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
         
         virtual void onProcessMouseEvent(const MouseEvent& ev);    
 
