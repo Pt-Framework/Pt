@@ -31,6 +31,7 @@
 #define Pt_Hmi_WindowFrame_h
 
 #include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/PaintRegion.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/Point.h>
@@ -149,7 +150,6 @@ class MenuButton : public WindowButton
 
 
 class WindowFrame : public WindowImpl
-
 {
     typedef WindowImpl Base;
 
@@ -185,6 +185,8 @@ class WindowFrame : public WindowImpl
 
         virtual void setState(const WindowState& s);
 
+        virtual Gfx::PointF clientPos() const;
+
         const Gfx::PointF& restorePosition() const;
 
         const Gfx::SizeF& restoreSize() const;
@@ -201,29 +203,24 @@ class WindowFrame : public WindowImpl
 
         Gfx::PointF fromWindow(const Gfx::PointF& pos) const;
 
-        void repaint();
-
-        void repaint(const Gfx::RectF& rect);
-
-        void moveEvent(const Gfx::PointF& pos);
-
-        void resizeEvent(const Gfx::SizeF& size);
-
-        void enterEvent(const EnterEvent& eev);
-
-        void leaveEvent(const LeaveEvent& lev);
-
         void onProcessMouseEvent(const MouseEvent& mev);
 
         void onProcessTouchEvent(const TouchEvent& tev);
 
-        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
-        
     protected:
+        virtual Visual* onHitTest(const Gfx::PointF& pos);
+
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
         
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
+
+        virtual void onRequestMove(const Gfx::PointF& pos);
+
+        virtual void onRequestResize(const Gfx::SizeF& size);
+
+        
         virtual void onProcessEvent(const Pt::Event& ev);
 
         
@@ -262,10 +259,15 @@ class WindowFrame : public WindowImpl
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     protected:
-        bool onMouseEvent(const MouseEvent& mev);
+        virtual bool onMouseEvent(const MouseEvent& mev);
 
-        bool onTouchEvent(const TouchEvent& tev);
+        virtual bool onTouchEvent(const TouchEvent& tev);
 
+        virtual bool onEnterEvent( const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
+    protected:
         void onLayout();
 
         void onMenu();
@@ -299,13 +301,17 @@ class WindowFrame : public WindowImpl
 
         void setCurrentFrameItem(FrameItem item);
 
+        void paintFrame(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+
     private:
         ShellWM*       _wm;
         Window*        _window;
         double         _borderWidth;
         double         _titleHeight;
         Gfx::RectF     _frameRect;
+        Gfx::RectF     _frameBounds;
         Gfx::RectF     _clientRect;
+        Gfx::RectF     _clientBounds;
         Gfx::PointF    _restorePos;
         Gfx::SizeF     _restoreSize;
         Window::State  _state;

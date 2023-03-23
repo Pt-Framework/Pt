@@ -78,6 +78,11 @@ class WindowImpl : public Visual
 
         PixmapSurface& surface();
 
+        virtual Gfx::PointF clientPos() const
+        {
+            return Gfx::PointF(0, 0);
+        }
+
         const PixmapSurface& surface() const;
 
         virtual void setTitle(const std::string& text) = 0;
@@ -358,7 +363,7 @@ class PT_HMI_API Window : public Form
     private:
         WindowImpl*                  _impl;
 
-        Gfx::PaintRegion             _noSurface;
+        Gfx::PaintRegion             _surface;
 
         WindowManager*               _parent;
 

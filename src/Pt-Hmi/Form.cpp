@@ -662,6 +662,8 @@ void Form::onResizeEvent(const ResizeEvent& ev)
     if( size() == ev.size() )
         return;
 
+    _surface.resize( ev.size() );
+
     Base::onResizeEvent(ev);
 
     relayout();

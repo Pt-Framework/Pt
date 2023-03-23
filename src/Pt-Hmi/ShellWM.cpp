@@ -152,8 +152,7 @@ Visual* ShellWM::onHitTest(const Gfx::PointF& p)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
-
+        
         if( ! window->isVisible() )
             continue;
 
@@ -162,6 +161,7 @@ Visual* ShellWM::onHitTest(const Gfx::PointF& p)
         if(hit)
             return hit;
 
+        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
         if( frame->frameRect().contains(p) )
             return 0;
     }
@@ -374,7 +374,7 @@ void ShellWM::onMove(Window& w, const Gfx::PointF& pos)
 
 
 void ShellWM::onResize(Window& w, const Gfx::SizeF& s)
-{ 
+{
     Gfx::SizeF alignedSize = _surface.align(s);
 
     if( alignedSize.width() > w.maximumSize().width() )
@@ -489,6 +489,8 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
 
     Visual::onProcessPaintEvent(ev);
 
+    //std::clog << "SHELL: " << ev.rect().width() << "x" << ev.rect().height() << std::endl;
+
     //
     // paint child windows
     //
@@ -497,38 +499,28 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
     {
         Window* window = *wit;
 
-        Gfx::PointF winPos = onToWindow( *window, rect.topLeft() );
-        Gfx::RectF winRect( winPos, rect.size() );
+        if( ! window->isVisible() )
+            continue;
 
-        winRect = winRect.intersect( Gfx::RectF( window->impl()->size() ) );
+        WindowImpl* frame = window->impl();
+
+        Gfx::RectF frameRect( frame->position(), frame->size() );
+        frameRect = rect.intersect(frameRect);
+
+        Gfx::PointF winPos = onToWindow( *window, frameRect.topLeft() );
+        Gfx::RectF winRect( winPos, rect.size() );
 
         PaintEvent pev( *window, winRect );
         window->processEvent(pev);
-    }
 
-    //
-    // paint child window contents on surface
-    //
-    std::vector<Window*>::iterator it;
-    for(it = _windowList.begin(); it != _windowList.end(); ++it )
-    {
-        Window* window = *it;
-        
-        if( ! window || ! window->isVisible() )
-            continue; 
+        Gfx::PointF surfacePos = frameRect.topLeft() - frame->position();
+        Gfx::RectF surfaceRect( surfacePos, frameRect.size() );
 
-        // clip client rect
-        Gfx::PointF clientPos = fromWindow( *window, Gfx::PointF(0, 0) );
-        Gfx::RectF clientRect(clientPos, window->size() );
+        Pt::Gfx::Painter painter( surface() );
+        painter.drawSurface(frameRect.topLeft(), frame->surface(), surfaceRect);
 
-        Gfx::RectF updateRect = clientRect.intersect(rect);
-
-        // paint client rect
-        Gfx::PointF surfacePos = onToWindow( *window, updateRect.topLeft() );
-        Gfx::RectF surfaceRect( surfacePos, updateRect.size() );
-
-        Pt::Gfx::Painter painter(_surface);
-        painter.drawSurface(updateRect.topLeft(), window->surface(), surfaceRect);
+        //std::clog << "BLIT: " << surfaceRect.width() << "x" 
+        //                      << surfaceRect.height() << std::endl;
     }
 }
 

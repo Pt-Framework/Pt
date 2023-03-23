@@ -394,6 +394,7 @@ void Visual::processEvent(const Pt::Event& ev)
 
 void Visual::onProcessEvent(const Pt::Event& ev)
 {
+    //std::clog << typeid(ev).name() << std::endl;
     _dispatcher.send(ev);
 }
 
