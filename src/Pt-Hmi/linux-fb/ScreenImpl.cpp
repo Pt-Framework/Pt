@@ -83,6 +83,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
 ScreenImpl::~ScreenImpl()
 {
+    Form::setSurface(0, Gfx::PointF(0, 0) );
 }
 
 
