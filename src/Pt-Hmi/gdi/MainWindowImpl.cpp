@@ -36,15 +36,16 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(Window::Type type)
-: _hwnd(0)
+MainWindowImpl::MainWindowImpl(WindowManager& wm, Window& w)
+: WindowImpl(wm, w)
+, _hwnd(0)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
   
     LONG style = 0;
     LONG exStyle = 0;
     
-    switch(type)
+    switch( w.type() )
     {
         case WindowType::Popup:
             style = WS_POPUP;

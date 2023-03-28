@@ -167,7 +167,7 @@ WindowImpl* ScreenImpl::onAttach(Window& w)
 
     w.setNextResponder(this);
 
-    return new MainWindowImpl( w.type() );
+    return new MainWindowImpl(*this, w);
 }
 
 

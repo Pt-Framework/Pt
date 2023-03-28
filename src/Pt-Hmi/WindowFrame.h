@@ -207,6 +207,9 @@ class WindowFrame : public WindowImpl
 
         void onProcessTouchEvent(const TouchEvent& tev);
 
+    public:
+        void onResize(Window& w, const Gfx::SizeF& s);
+
     protected:
         virtual Visual* onHitTest(const Gfx::PointF& pos);
 

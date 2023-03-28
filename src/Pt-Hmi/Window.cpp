@@ -46,7 +46,9 @@ namespace Hmi {
 // WindowImpl
 ///////////////////////////////////////////////////////////////////////
 
-WindowImpl::WindowImpl() 
+WindowImpl::WindowImpl(WindowManager& wm, Window& window)
+: _window(window)
+, _wm(wm)
 {
 }
 
@@ -70,6 +72,21 @@ const PixmapSurface& WindowImpl::surface() const
 
 void WindowImpl::setState(const WindowState& s)
 {
+}
+
+
+void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
+{
+    _wm.onResize(w, s);
+}
+
+
+void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
+
+    ResizeEvent rev( _window, ev.size() );
+    _window.processEvent(rev);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -134,7 +151,7 @@ void Window::setParent(WindowManager& parent)
         _parent->onMove(*this, _requestedPosition);
 
         if( ! isAutoSize() )
-            _parent->onResize( *this, _requestedSize);
+            _impl->onResize(*this, _requestedSize);
     }
     
     _parent->onActivate(*this, _isActive);
@@ -298,20 +315,25 @@ void Window::onRequestResize(const Gfx::SizeF& s)
 
     setState(WindowState::Normal);
     
-    if(_parent)
+    if(_impl)
     {
-        _parent->onResize(*this, _requestedSize);
+        _impl->onResize(*this, _requestedSize);
     }
+
+    //if(_parent)
+    //{
+    //    _parent->onResize(*this, _requestedSize);
+    //}
 }
 
 
 void Window::onProcessResizeEvent(const ResizeEvent& ev)
 {
-    if(_impl)
-    {
-        ResizeEvent rev( *_impl, ev.size() );
-        _impl->processEvent(rev);
-    }
+    //if(_impl)
+    //{
+    //    ResizeEvent rev( *_impl, ev.size() );
+    //    _impl->processEvent(rev);
+    //}
 
     Base::onProcessResizeEvent(ev);
 }

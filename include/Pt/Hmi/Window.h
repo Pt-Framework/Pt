@@ -64,6 +64,7 @@ class WindowManager;
 class MainWindowImpl;
 class WindowStateEvent;
 class PaintEvent;
+class Window;
 
 /** @internal @brief Window implementation base class.
 */
@@ -71,8 +72,10 @@ class WindowImpl : public Visual
 {
     typedef Visual Base;
 
+    friend class Window;
+
     public:
-        WindowImpl();
+        WindowImpl(WindowManager& wm, Window& window);
 
         virtual ~WindowImpl();
 
@@ -114,10 +117,7 @@ class WindowImpl : public Visual
             Base::onRescaleEvent(ev);
         }
 
-        void onProcessResizeEvent(const ResizeEvent& ev)
-        {
-            Visual::onProcessResizeEvent(ev);
-        }
+        void onProcessResizeEvent(const ResizeEvent& ev);
 
         void onResizeEvent(const ResizeEvent& ev)
         {
@@ -126,7 +126,12 @@ class WindowImpl : public Visual
             _surface.resize( ev.size() );
         }
 
+    protected:
+        virtual void onResize(Window& w, const Gfx::SizeF& s);
+
     private:
+        WindowManager& _wm;
+        Window&        _window;
         PixmapSurface  _surface;
 };
 

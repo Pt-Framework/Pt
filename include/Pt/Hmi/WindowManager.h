@@ -43,6 +43,7 @@ class WindowImpl;
 class WindowManager : public Visual
 {
     friend class Window;
+    friend class WindowImpl;
 
     public:
         WindowManager();

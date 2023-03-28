@@ -48,7 +48,7 @@ class MainWindowImpl : public WindowImpl
     typedef WindowImpl Base;
 
     public:
-        MainWindowImpl(Window::Type type);
+        MainWindowImpl(WindowManager& wm,  Window& w);
 
         ~MainWindowImpl();
 

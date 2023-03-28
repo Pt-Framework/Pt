@@ -167,6 +167,8 @@ class ShellWM : public WindowManager
 
         virtual void onClosing(Window& w);
 
+        virtual void onResize(WindowFrame& w, const Gfx::SizeF& to);
+
     //
     // Implementation
     //

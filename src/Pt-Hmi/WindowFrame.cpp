@@ -395,7 +395,7 @@ void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 //
 
 WindowFrame::WindowFrame(ShellWM& shell, Window& window)
-: WindowImpl()
+: WindowImpl(shell, window)
 , _wm(&shell)
 , _window(&window)
 , _borderWidth( shell.borderWidth() )
@@ -499,7 +499,8 @@ void WindowFrame::setState(const WindowState& state)
         maxSize.subHeight( (2 * _borderWidth) + _titleHeight );
 
         _wm->onMove( *_window, Gfx::PointF(0, 0) );
-        _wm->onResize( *_window, maxSize );
+        //_wm->onResize( *_window, maxSize );
+        _wm->onResize(*this, maxSize);
     }
     else if(state == WindowState::Minimized)
     {
@@ -509,14 +510,16 @@ void WindowFrame::setState(const WindowState& state)
         }
 
         Gfx::SizeF minSize(restoreSize().width(), 0);
-        _wm->onResize(*_window, minSize);
+        //_wm->onResize(*_window, minSize);
+        _wm->onResize(*this, minSize);
     }
     else if(state == WindowState::Normal)
     {
         if(oldState != WindowState::Normal)
         {
             _wm->onMove( *_window, restorePosition() );
-            _wm->onResize( *_window, restoreSize() );
+            //_wm->onResize( *_window, restoreSize() );
+            _wm->onResize(*this, restoreSize());
         }
     }
 
@@ -628,33 +631,6 @@ void WindowFrame::onRequestRepaint(const Gfx::RectF& rect)
     Gfx::RectF updateRect( updatePos, rect.size() );
     
     _wm->repaint(updateRect);
-}
-
-
-void WindowFrame::onRequestMove(const Gfx::PointF& pos)
-{
-    _frameRect.setOrigin(pos);
-
-    Gfx::PointF clientPos = pos;
-    clientPos.addX(_borderWidth);
-    clientPos.addY(_borderWidth + _titleHeight);
-    _clientRect.setOrigin(clientPos);
-}
-
-
-void WindowFrame::onRequestResize(const Gfx::SizeF& size)
-{
-    _clientRect.setSize(size);
-
-    _clientBounds.setSize(size);
-
-    Gfx::SizeF frameSize = size;
-    frameSize.addWidth(2 * _borderWidth);
-    frameSize.addHeight(2 * _borderWidth);
-    frameSize.addHeight(_titleHeight);
-    _frameRect.setSize(frameSize);
-
-    _frameBounds.setSize(frameSize);
 }
 
 
@@ -776,6 +752,17 @@ void WindowFrame::onActivateEvent(const ActivateEvent& ev)
 }
 
 
+void WindowFrame::onRequestMove(const Gfx::PointF& pos)
+{
+    _frameRect.setOrigin(pos);
+
+    Gfx::PointF clientPos = pos;
+    clientPos.addX(_borderWidth);
+    clientPos.addY(_borderWidth + _titleHeight);
+    _clientRect.setOrigin(clientPos);
+}
+
+
 void WindowFrame::onProcessMoveEvent(const MoveEvent& ev)
 {
     Base::onProcessMoveEvent(ev);
@@ -800,6 +787,44 @@ void WindowFrame::onMoveEvent(const MoveEvent& ev)
     _clientRect.setOrigin(clientPos);
 
     Base::onMoveEvent(ev);
+}
+
+
+void WindowFrame::onRequestResize(const Gfx::SizeF& size)
+{
+    _clientRect.setSize(size);
+
+    _clientBounds.setSize(size);
+
+    Gfx::SizeF frameSize = size;
+    frameSize.addWidth(2 * _borderWidth);
+    frameSize.addHeight(2 * _borderWidth);
+    frameSize.addHeight(_titleHeight);
+    _frameRect.setSize(frameSize);
+
+    _frameBounds.setSize(frameSize);
+
+    _wm->onResize(*this, size);
+}
+
+
+void WindowFrame::onResize(Window& w, const Gfx::SizeF& s)
+{
+    Gfx::SizeF alignedSize = surface().align(s);
+
+    if( alignedSize.width() > w.maximumSize().width() )
+        alignedSize.setWidth( w.maximumSize().width() );
+
+    if( alignedSize.height() > w.maximumSize().height() )
+        alignedSize.setHeight( w.maximumSize().height() );
+
+    if( alignedSize.width() < w.minimumSize().width() )
+        alignedSize.setWidth( w.minimumSize().width() );
+
+    if( alignedSize.height() < w.minimumSize().height() )
+        alignedSize.setHeight( w.minimumSize().height() );
+
+    onRequestResize(alignedSize);
 }
 
 
@@ -1172,7 +1197,6 @@ bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
         {
             Gfx::PointF to = _frameRect.topLeft() + pos - _lastPointer;
             _window->move(to);
-
             move(to);
         }
 
@@ -1226,7 +1250,7 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 
             if( winSize != _clientBounds.size() )
             {
-                _window->resize(winSize);
+                //_window->resize(winSize);
                 resize(winSize);
             }
 

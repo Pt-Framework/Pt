@@ -846,7 +846,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
     //Application::instance().loop().processEvents();
 
-    ResizeEvent rev(w, to);
+    ResizeEvent rev(*w.impl(), to);
     Application::instance().processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
