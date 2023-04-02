@@ -87,8 +87,6 @@ class WindowManager : public Visual
 
         virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
 
-        virtual void onResize(Window& w, const Gfx::SizeF& to) = 0;
-
         virtual void onSetAbove(Window& w, bool above) = 0;
 
         virtual void onSetTitle(Window& w, const std::string& text) = 0;

@@ -152,8 +152,6 @@ class ShellWM : public WindowManager
 
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
-        virtual void onResize(Window& w, const Gfx::SizeF& to);
-
         virtual void onSetAbove(Window& w, bool above);
 
         virtual void onSetTitle(Window& w, const std::string& text);
@@ -167,6 +165,7 @@ class ShellWM : public WindowManager
 
         virtual void onClosing(Window& w);
 
+    protected:
         virtual void onResize(WindowFrame& w, const Gfx::SizeF& to);
 
     //

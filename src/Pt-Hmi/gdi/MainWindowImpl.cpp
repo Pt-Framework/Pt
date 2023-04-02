@@ -38,6 +38,7 @@ namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(WindowManager& wm, Window& w)
 : WindowImpl(wm, w)
+, _window(w)
 , _hwnd(0)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
@@ -207,24 +208,6 @@ void MainWindowImpl::move(const Gfx::PointF& p)
 }
 
 
-void MainWindowImpl::resize(const Gfx::SizeF& size)
-{
-    RECT clientRect;
-    SetRect(&clientRect, 0, 0, lround(size.width()) - 1, 
-                               lround(size.height()) - 1);
-
-    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-    LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
-
-    AdjustWindowRectEx(&clientRect, style, FALSE, exStyle);
-    
-    LONG clientWidth  = clientRect.right  - clientRect.left + 1;
-    LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
-    SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, 
-                 SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
-}
-
-
 void MainWindowImpl::setAbove(bool isTop)
 {
     HWND insertBelow = isTop ? HWND_TOPMOST : HWND_NOTOPMOST;
@@ -308,6 +291,56 @@ void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
 }
+
+
+void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& s)
+{
+    //
+    // align to physical pixel grid
+    //
+    Gfx::SizeF alignedSize = surface().align(s);
+
+    //
+    // maximum width and height
+    //
+    if( alignedSize.width() > w.maximumSize().width() )
+        alignedSize.setWidth( w.maximumSize().width() );
+
+    if( alignedSize.height() > w.maximumSize().height() )
+        alignedSize.setHeight( w.maximumSize().height() );
+
+    if( alignedSize.width() < w.minimumSize().width() )
+        alignedSize.setWidth( w.minimumSize().width() );
+
+    if( alignedSize.height() < w.minimumSize().height() )
+        alignedSize.setHeight( w.minimumSize().height() );
+
+    const Gfx::SizeF size = w.surface().toPhysical(alignedSize);
+
+    RECT clientRect;
+    SetRect(&clientRect, 0, 0, lround(size.width()) - 1, 
+                               lround(size.height()) - 1);
+
+    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+    LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+
+    AdjustWindowRectEx(&clientRect, style, FALSE, exStyle);
+    
+    LONG clientWidth  = clientRect.right  - clientRect.left + 1;
+    LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
+    SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, 
+                 SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
+}
+
+
+void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
+
+    ResizeEvent rev( _window, ev.size() );
+    _window.processEvent(rev);
+}
+
 
 } // namespace
 

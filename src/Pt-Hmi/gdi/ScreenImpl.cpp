@@ -254,30 +254,7 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
 
 void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
-    //
-    // align to physical pixel grid
-    //
-    Gfx::SizeF alignedSize = w.surface().align(s);
 
-    //
-    // maximum width and height
-    //
-    if( alignedSize.width() > w.maximumSize().width() )
-        alignedSize.setWidth( w.maximumSize().width() );
-
-    if( alignedSize.height() > w.maximumSize().height() )
-        alignedSize.setHeight( w.maximumSize().height() );
-
-    if( alignedSize.width() < w.minimumSize().width() )
-        alignedSize.setWidth( w.minimumSize().width() );
-
-    if( alignedSize.height() < w.minimumSize().height() )
-        alignedSize.setHeight( w.minimumSize().height() );
-
-    const Gfx::SizeF size = w.surface().toPhysical(alignedSize);
-
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->resize(size);
 }
 
 

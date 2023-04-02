@@ -68,8 +68,6 @@ class MainWindowImpl : public WindowImpl
        
         void move(const Gfx::PointF& pos);
 
-        void resize(const Gfx::SizeF& size);
-
         void setAbove(bool isTop);
 
         void setState(const WindowState& s);
@@ -88,11 +86,16 @@ class MainWindowImpl : public WindowImpl
         }
 
     protected:
+        void onResize(Window& w, const Gfx::SizeF& s);
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
         
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
-    private:   
+    private:
+        Window& _window;
         HWND    _hwnd;
 };
 

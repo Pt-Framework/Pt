@@ -520,32 +520,9 @@ void ShellWM::onMove(Window& w, const Gfx::PointF& pos)
 }
 
 
-void ShellWM::onResize(Window& w, const Gfx::SizeF& s)
+void ShellWM::onResize(WindowFrame& frame, const Gfx::SizeF& to)
 {
-    //Gfx::SizeF alignedSize = _surface.align(s);
-
-    //if( alignedSize.width() > w.maximumSize().width() )
-    //    alignedSize.setWidth( w.maximumSize().width() );
-
-    //if( alignedSize.height() > w.maximumSize().height() )
-    //    alignedSize.setHeight( w.maximumSize().height() );
-
-    //if( alignedSize.width() < w.minimumSize().width() )
-    //    alignedSize.setWidth( w.minimumSize().width() );
-
-    //if( alignedSize.height() < w.minimumSize().height() )
-    //    alignedSize.setHeight( w.minimumSize().height() );
-
-    //ResizeEvent rev( *w.impl(), s);
-    //Application::instance().commitEvent(rev);
-
-    std::clog << "Warning: SHELL WM onResize directly called" << std::endl;
-}
-
-
-void ShellWM::onResize(WindowFrame& frame, const Gfx::SizeF& s)
-{
-    ResizeEvent rev(frame, s);
+    ResizeEvent rev(frame, to);
     Application::instance().commitEvent(rev);
 }
 

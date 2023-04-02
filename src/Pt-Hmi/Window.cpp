@@ -75,18 +75,9 @@ void WindowImpl::setState(const WindowState& s)
 }
 
 
-void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
-{
-    _wm.onResize(w, s);
-}
-
-
 void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 {
     Base::onProcessResizeEvent(ev);
-
-    ResizeEvent rev( _window, ev.size() );
-    _window.processEvent(rev);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -319,22 +310,11 @@ void Window::onRequestResize(const Gfx::SizeF& s)
     {
         _impl->onResize(*this, _requestedSize);
     }
-
-    //if(_parent)
-    //{
-    //    _parent->onResize(*this, _requestedSize);
-    //}
 }
 
 
 void Window::onProcessResizeEvent(const ResizeEvent& ev)
 {
-    //if(_impl)
-    //{
-    //    ResizeEvent rev( *_impl, ev.size() );
-    //    _impl->processEvent(rev);
-    //}
-
     Base::onProcessResizeEvent(ev);
 }
 

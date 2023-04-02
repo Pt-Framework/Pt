@@ -95,6 +95,9 @@ class WindowImpl : public Visual
         virtual void setState(const WindowState& s) = 0;
 
     protected:
+        virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;
+
+    protected:
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const
         { 
             return pos; 
@@ -125,9 +128,6 @@ class WindowImpl : public Visual
 
             _surface.resize( ev.size() );
         }
-
-    protected:
-        virtual void onResize(Window& w, const Gfx::SizeF& s);
 
     private:
         WindowManager& _wm;

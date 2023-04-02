@@ -28,6 +28,8 @@
 */
 
 #include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/ResizeEvent.h>
 
 namespace Pt {

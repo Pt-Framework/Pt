@@ -30,6 +30,7 @@
 #include "WindowFrame.h"
 
 #include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/ShellWM.h>
@@ -500,7 +501,7 @@ void WindowFrame::setState(const WindowState& state)
 
         _wm->onMove( *_window, Gfx::PointF(0, 0) );
         //_wm->onResize( *_window, maxSize );
-        _wm->onResize(*this, maxSize);
+        onResize(*_window, maxSize);
     }
     else if(state == WindowState::Minimized)
     {
@@ -511,7 +512,7 @@ void WindowFrame::setState(const WindowState& state)
 
         Gfx::SizeF minSize(restoreSize().width(), 0);
         //_wm->onResize(*_window, minSize);
-        _wm->onResize(*this, minSize);
+        onResize(*_window, minSize);
     }
     else if(state == WindowState::Normal)
     {
@@ -519,7 +520,7 @@ void WindowFrame::setState(const WindowState& state)
         {
             _wm->onMove( *_window, restorePosition() );
             //_wm->onResize( *_window, restoreSize() );
-            _wm->onResize(*this, restoreSize());
+            onResize(*_window, restoreSize());
         }
     }
 
@@ -804,7 +805,7 @@ void WindowFrame::onRequestResize(const Gfx::SizeF& size)
 
     _frameBounds.setSize(frameSize);
 
-    _wm->onResize(*this, size);
+    //_wm->onResize(*this, size);
 }
 
 
@@ -824,23 +825,10 @@ void WindowFrame::onResize(Window& w, const Gfx::SizeF& s)
     if( alignedSize.height() < w.minimumSize().height() )
         alignedSize.setHeight( w.minimumSize().height() );
 
-    onRequestResize(alignedSize);
-}
+    _clientRect.setSize(alignedSize);
+    _clientBounds.setSize(alignedSize);
 
-
-void WindowFrame::onProcessResizeEvent(const ResizeEvent& ev)
-{
-    Base::onProcessResizeEvent(ev);
-}
-
-
-void WindowFrame::onResizeEvent(const ResizeEvent& ev)
-{
-    _clientRect.setSize( ev.size() );
-
-    _clientBounds.setSize( ev.size() );
-
-    Gfx::SizeF frameSize = ev.size();
+    Gfx::SizeF frameSize = alignedSize;
     frameSize.addWidth(2 * _borderWidth);
     frameSize.addHeight(2 * _borderWidth);
     frameSize.addHeight(_titleHeight);
@@ -848,15 +836,40 @@ void WindowFrame::onResizeEvent(const ResizeEvent& ev)
 
     _frameBounds.setSize(frameSize);
 
-    Gfx::RectF updateRect( size() );
-    updateRect.unify( Gfx::RectF(frameSize) );
+    _wm->onResize(*this, frameSize);
+}
 
-    ResizeEvent rev(*this, frameSize);
-    Base::onResizeEvent(rev);
+
+void WindowFrame::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Gfx::SizeF clientSize = ev.size();
+    clientSize.subWidth(2 * _borderWidth);
+    clientSize.subHeight(2 * _borderWidth);
+    clientSize.subHeight(_titleHeight);
+    
+    _clientRect.setSize(clientSize);
+    _clientBounds.setSize(clientSize);
+
+    _frameRect.setSize( ev.size() );
+    _frameBounds.setSize( ev.size() );
+
+    Base::onProcessResizeEvent(ev);
+
+    ResizeEvent rev(*_window, clientSize);
+    _window->processEvent(rev);
+}
+
+
+void WindowFrame::onResizeEvent(const ResizeEvent& ev)
+{
+    Gfx::RectF updateRect( size() );
+    updateRect.unify( Gfx::RectF(ev.size()) );
+
+    Base::onResizeEvent(ev);
 
     onLayout();
 
-    onRequestRepaint(updateRect);
+    repaint(updateRect);
 }
 
 
@@ -1250,8 +1263,8 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 
             if( winSize != _clientBounds.size() )
             {
-                //_window->resize(winSize);
-                resize(winSize);
+                _window->resize(winSize);
+                //resize(winSize);
             }
 
             if( winpos != _frameRect.topLeft() )
