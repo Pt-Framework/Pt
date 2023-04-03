@@ -66,7 +66,7 @@ class MainWindowImpl : public WindowImpl
     typedef WindowImpl Base;
 
     public:
-        MainWindowImpl(Window::Type type);
+        MainWindowImpl(WindowManager& wm,  Window& w);
 
         virtual ~MainWindowImpl();
 
@@ -139,11 +139,16 @@ class MainWindowImpl : public WindowImpl
         void onMouseMove(double x, double y);
 
     protected:
+        void onResize(Window& w, const Gfx::SizeF& s);
+
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
         
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
     private:
+        Window&                  _client;
         NSWindow*                _window;
         NSView*                  _view;
         int                      _windowStyle;

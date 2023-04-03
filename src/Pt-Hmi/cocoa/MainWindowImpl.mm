@@ -44,8 +44,10 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(Window::Type type)
-: _window(nil)
+MainWindowImpl::MainWindowImpl(WindowManager& wm,  Window& w)
+: WindowImpl(wm, w)
+, _client(w)
+, _window(nil)
 , _view(nil)
 , _windowStyle(0)
 , _level(0)
@@ -57,7 +59,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
     Gfx::PointF at(0, 0);
     Gfx::SizeF size(100, 50);
 
-    switch(type)
+    switch( w.type() )
     {
         case WindowType::Popup:
             _windowStyle = NSWindowStyleMaskBorderless;
@@ -285,6 +287,35 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 }
 
 
+void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& size)
+{
+    //std::clog << "RESIZE: " << size.width() << "," 
+    //                        << size.height() << std::endl;
+
+    double scaling = scaleFactor();
+
+    NSRect frameRect = [_window frame];
+    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
+
+    contentRect.origin.y += contentRect.size.height - size.height() / scaling;
+    
+    contentRect.size.width = size.width() / scaling;
+    contentRect.size.height = size.height() / scaling;
+
+    frameRect = [_window frameRectForContentRect:contentRect];
+    [_window setFrame:frameRect display:NO animate:NO];
+}
+
+
+void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
+
+    ResizeEvent rev( _client, ev.size() );
+    _client.processEvent(rev);
+}
+
+
 void MainWindowImpl::setAbove(bool above)
 {
     if(above)
@@ -506,7 +537,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     double scaling = Application::instance().scaleFactor();
     to = to / scaling;
 
-    ResizeEvent rev(*window, to);
+    ResizeEvent rev(*window.impl(), to);
     Application::instance().processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);

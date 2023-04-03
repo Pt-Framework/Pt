@@ -341,7 +341,6 @@ void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
     _window.processEvent(rev);
 }
 
-
 } // namespace
 
 } // namespace

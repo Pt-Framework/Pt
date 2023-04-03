@@ -180,7 +180,13 @@ void ScreenImpl::onRepaintRequest(const Gfx::RectF& rect)
 
 WindowImpl* ScreenImpl::onAttach(Window& w)
 {
+    MainWindowImpl* frame = new MainWindowImpl(*this, w);
+
     _windows.push_back(&w);
+
+    Gfx::PaintSurface& surface = frame->surface();
+    Gfx::PointF surfacePos(0, 0);
+    w.setSurface(&surface, surfacePos);
 
     w.setNextResponder(this);
 
@@ -191,6 +197,7 @@ WindowImpl* ScreenImpl::onAttach(Window& w)
 void ScreenImpl::onDetach(Window& w)
 {
     w.setNextResponder(0);
+    w.setSurface( 0, Gfx::PointF() );
 
     std::vector<Window*>::iterator it;
     it = std::remove(_windows.begin(), _windows.end(), &w);
