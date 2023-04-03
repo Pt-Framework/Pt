@@ -45,6 +45,8 @@ namespace Hmi {
 
 class MainWindowImpl : public WindowImpl
 {
+    typedef WindowImpl Base;
+
     public:
         MainWindowImpl(WindowManager& wm,  Window& w);
 

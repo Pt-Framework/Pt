@@ -284,8 +284,6 @@ void ApplicationImpl::onLeaveNotify(Window& window, XEvent& xev)
 
 void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 {
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
-    
     int width = xev.xexpose.width;
     int height = xev.xexpose.height;
     int x = xev.xexpose.x;

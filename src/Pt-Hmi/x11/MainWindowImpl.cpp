@@ -361,8 +361,13 @@ void MainWindowImpl::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& size)
+void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
+    Gfx::SizeF alignedSize = surface().align(s);
+
+    Gfx::SizeF psize = w.surface().toPhysical(alignedSize);
+    Gfx::Size size = round(psize);
+
     XResizeWindow( _display, _window, size.width(), size.height() );
 }
 
@@ -371,8 +376,8 @@ void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 {
     Base::onProcessResizeEvent(ev);
 
-    ResizeEvent rev( _window, ev.size() );
-    _window.processEvent(rev);
+    ResizeEvent rev( _client, ev.size() );
+    _client.processEvent(rev);
 }
 
 
