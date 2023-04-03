@@ -566,7 +566,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         Gfx::SizeF to(width, height);
         to = window.surface().toLogical(to);
     
-        ResizeEvent rev(window, to);
+        ResizeEvent rev(*window.impl(), to);
         Application::instance().processEvent(rev);
 
         Gfx::RectF updateRect(Gfx::PointF(0,0), to);

@@ -325,24 +325,54 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
 }
 
 
-void MainWindowImpl::resize(const Gfx::SizeF& size)
+//void MainWindowImpl::resize(const Gfx::SizeF& size)
+//{
+//    //std::clog  << "XResizeWindow: " << size.width()
+//    //           << "x" << size.height() << std::endl;
+//
+//    XResizeWindow( _display, _window, size.width(), size.height() );
+//    //XFlush(_display);
+//
+//    //XClearArea(_display, _window, 0, 0, size.width(), size.height(), True);
+//    //XFlush(_display);
+//
+//    //while( XPending(_display) > 0 )
+//    //{
+//    //    XEvent xev;
+//    //    XNextEvent(_display, &xev);
+//
+//    //    Application::instance().impl()->processEvent(xev);
+//    //}
+//}
+
+
+void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    //std::clog  << "XResizeWindow: " << size.width()
-    //           << "x" << size.height() << std::endl;
+    double scaling = ev.scaleFactor();
 
+    RescaleEvent rev(*this, scaling);
+    Base::onProcessRescaleEvent(rev);
+}
+
+
+void MainWindowImpl::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
+}
+
+
+void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& size)
+{
     XResizeWindow( _display, _window, size.width(), size.height() );
-    //XFlush(_display);
+}
 
-    //XClearArea(_display, _window, 0, 0, size.width(), size.height(), True);
-    //XFlush(_display);
 
-    //while( XPending(_display) > 0 )
-    //{
-    //    XEvent xev;
-    //    XNextEvent(_display, &xev);
+void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
 
-    //    Application::instance().impl()->processEvent(xev);
-    //}
+    ResizeEvent rev( _window, ev.size() );
+    _window.processEvent(rev);
 }
 
 
