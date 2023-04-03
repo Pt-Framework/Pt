@@ -87,6 +87,18 @@ void Form::setContent(Widget* widget)
 }
 
 
+Gfx::PaintSurface& Form::surface()
+{
+    return _surface;
+}
+
+
+const Gfx::PaintSurface& Form::surface() const
+{
+    return _surface;
+}
+
+
 void Form::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
     if( ! surface )

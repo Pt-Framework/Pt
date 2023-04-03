@@ -81,11 +81,6 @@ class WindowImpl : public Visual
 
         PixmapSurface& surface();
 
-        virtual Gfx::PointF clientPos() const
-        {
-            return Gfx::PointF(0, 0);
-        }
-
         const PixmapSurface& surface() const;
 
         virtual void setTitle(const std::string& text) = 0;
@@ -122,12 +117,7 @@ class WindowImpl : public Visual
 
         void onProcessResizeEvent(const ResizeEvent& ev);
 
-        void onResizeEvent(const ResizeEvent& ev)
-        {
-            Visual::onResizeEvent(ev);
-
-            _surface.resize( ev.size() );
-        }
+        void onResizeEvent(const ResizeEvent& ev);
 
     private:
         WindowManager& _wm;
@@ -155,10 +145,6 @@ class PT_HMI_API Window : public Form
         void unparent();
 
     public:
-        Gfx::PaintSurface& surface();
-
-        const Gfx::PaintSurface& surface() const;
-
         Gfx::Image getImage() const;
 
     public:
@@ -367,9 +353,6 @@ class PT_HMI_API Window : public Form
 
     private:
         WindowImpl*                  _impl;
-
-        Gfx::PaintRegion             _surface;
-
         WindowManager*               _parent;
 
         bool                         _show; 

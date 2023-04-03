@@ -46,7 +46,7 @@ namespace Hmi {
 class MainWindowImpl : public WindowImpl
 {
     public:
-        MainWindowImpl(Window::Type type);
+        MainWindowImpl(WindowManager& wm,  Window& w);
 
         virtual ~MainWindowImpl();
 
@@ -113,6 +113,7 @@ class MainWindowImpl : public WindowImpl
         bool isMaximized();
 
     private:
+        Window&     _client;
         ::Window    _window;
         ::Display*  _display;
         bool        _hasFirstShow;

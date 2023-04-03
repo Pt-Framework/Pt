@@ -80,6 +80,14 @@ void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
     Base::onProcessResizeEvent(ev);
 }
 
+
+void WindowImpl::onResizeEvent(const ResizeEvent& ev)
+{
+    Visual::onResizeEvent(ev);
+
+    _surface.resize( ev.size() );
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Window
 ///////////////////////////////////////////////////////////////////////
@@ -124,11 +132,6 @@ void Window::setParent(WindowManager& parent)
 
     _impl = parent.onAttach(*this);
     _parent = &parent;
-
-    Gfx::RectF surfaceRect( _impl->clientPos(), size() );
-    _surface.attach(_impl->surface(), surfaceRect);
-
-    Form::setSurface( &_impl->surface(), _impl->clientPos() );
    
     _parent->onInit(*this);
     _parent->onSetSizeLimits(*this, minimumSize(), maximumSize());
@@ -158,10 +161,6 @@ void Window::unparent()
     if( ! _parent )
         return;
 
-    Form::setSurface( 0, Gfx::PointF(0, 0) );
-
-    _surface.detach();
-
     _parent->onRelease(*this);
     _parent->onDetach(*this);
     _parent = 0;
@@ -170,18 +169,6 @@ void Window::unparent()
     _impl = 0;
 
     onSetParent(_parent);
-}
-
-
-Gfx::PaintSurface& Window::surface()
-{
-    return _surface;
-}
-
-
-const Gfx::PaintSurface& Window::surface() const
-{
-    return _surface;
 }
 
 
@@ -321,8 +308,6 @@ void Window::onProcessResizeEvent(const ResizeEvent& ev)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
-    _surface.resize( ev.size() );
-
     Base::onResizeEvent(ev);
 }
 
@@ -421,7 +406,7 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
     Base::onPaintEvent(ev);
 
-    Gfx::Painter painter(_surface);
+    Gfx::Painter painter( surface() );
     painter.setBrush(_backgroundBrush);
     painter.fillRect( ev.rect() );
 }

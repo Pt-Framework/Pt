@@ -664,7 +664,15 @@ Visual* WindowFrame::onHitTest(const Gfx::PointF& pos)
     if( ! bounds().contains(pos) )
         return 0;
 
-    return 0;
+    if(_window)
+    {
+        Gfx::PointF p = toWindow(pos);
+        Visual* hit = _window->hitTest(p);
+        if(hit)
+            return hit;
+    }
+
+    return this;
 }
 
 

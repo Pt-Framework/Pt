@@ -39,8 +39,10 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(Window::Type type)
-: _window(None)
+MainWindowImpl::MainWindowImpl(WindowManager& wm, Window& w)
+: WindowImpl(wm, w)
+, _client(w)
+, _window(None)
 , _display(0)
 , _hasFirstShow(false)
 , _width(240)
@@ -48,7 +50,7 @@ MainWindowImpl::MainWindowImpl(Window::Type type)
 {
   _display = Application::instance().impl()->display();
 
-  create(type);
+  create( w.type() );
 }
 
 

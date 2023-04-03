@@ -216,6 +216,10 @@ WindowImpl* ShellWM::onAttach(Window& w)
     else
         _windowList.push_back(&w);
 
+    Gfx::PaintSurface& surface = frame->surface();
+    Gfx::PointF surfacePos = frame->clientPos();
+    w.setSurface(&surface, surfacePos);
+
     w.setNextResponder(this);
 
     return frame;
@@ -225,6 +229,7 @@ WindowImpl* ShellWM::onAttach(Window& w)
 void ShellWM::onDetach(Window& w)
 {
     w.setNextResponder(0);
+    w.setSurface( 0, Gfx::PointF() );
 
     std::vector<Window*>::iterator wit;
     for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)

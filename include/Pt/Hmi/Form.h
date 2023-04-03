@@ -72,6 +72,13 @@ class PT_HMI_API Form : public View
 
         void setContent(Widget* widget);       
 
+
+        Gfx::PaintSurface& surface();
+
+        const Gfx::PaintSurface& surface() const;
+
+        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+
     public:
         Widget* focusWidget();
 
@@ -81,8 +88,6 @@ class PT_HMI_API Form : public View
 
     protected:
         Form();
-
-        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
         void relayout();
 
