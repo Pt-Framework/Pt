@@ -154,9 +154,9 @@ class ShellWM : public WindowManager
 
         virtual void onSetAbove(Window& w, bool above);
 
-        virtual void onSetTitle(Window& w, const std::string& text);
+        //virtual void onSetTitle(Window& w, const std::string& text);
 
-        virtual void onSetIcon(Window& w, const Gfx::Image& icon);
+        //virtual void onSetIcon(Window& w, const Gfx::Image& icon);
 
         //virtual void onSetState(Window& w, const WindowState& state);
         

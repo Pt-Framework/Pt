@@ -272,18 +272,18 @@ void ScreenImpl::onSetAbove(Window& w, bool above)
 }
 
 
-void ScreenImpl::onSetTitle(Window& w, const std::string& text)
-{
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->setTitle(text);
-}
+//void ScreenImpl::onSetTitle(Window& w, const std::string& text)
+//{
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->setTitle(text);
+//}
 
 
-void ScreenImpl::onSetIcon(Window& w, const Gfx::Image& icon)
-{
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->setIcon(icon);
-}
+//void ScreenImpl::onSetIcon(Window& w, const Gfx::Image& icon)
+//{
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->setIcon(icon);
+//}
 
 
 //void ScreenImpl::onSetState(Window& w, const WindowState& state)

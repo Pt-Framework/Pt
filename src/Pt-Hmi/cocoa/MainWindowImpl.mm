@@ -329,7 +329,7 @@ void MainWindowImpl::setAbove(bool above)
 }
 
 
-void MainWindowImpl::setTitle(const std::string& text)
+void MainWindowImpl::onSetTitle(Window& w, const std::string& text)
 {
     NSString* title = [NSString stringWithCString:text.c_str() 
                                 encoding:[NSString defaultCStringEncoding]];
@@ -337,7 +337,7 @@ void MainWindowImpl::setTitle(const std::string& text)
 }
 
 
-void MainWindowImpl::setIcon(const Gfx::Image& icon)
+void MainWindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 {
 }
 

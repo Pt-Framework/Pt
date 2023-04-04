@@ -83,11 +83,11 @@ class WindowImpl : public Visual
 
         const PixmapSurface& surface() const;
 
-        virtual void setTitle(const std::string& text) = 0;
-
-        virtual void setIcon(const Gfx::Image& icon) = 0;
-
     protected:
+        virtual void onSetTitle(Window& w, const std::string& text) = 0;
+
+        virtual void onSetIcon(Window& w, const Gfx::Image& icon) = 0;
+
         virtual void onSetState(Window& w, const WindowState& state) = 0;
 
         virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;

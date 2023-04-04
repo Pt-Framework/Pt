@@ -177,14 +177,6 @@ class WindowFrame : public WindowImpl
 
         const Window* window() const;
 
-        virtual void setTitle(const std::string& text);
-
-        virtual void setIcon(const Gfx::Image& icon);
-
-        Window::State state() const;
-
-        //virtual void setState(const WindowState& s);
-
         virtual Gfx::PointF clientPos() const;
 
         const Gfx::PointF& restorePosition() const;
@@ -208,6 +200,10 @@ class WindowFrame : public WindowImpl
         void onProcessTouchEvent(const TouchEvent& tev);
 
     public:
+        virtual void onSetTitle(Window& w, const std::string& text);
+
+        virtual void onSetIcon(Window& w, const Gfx::Image& icon);
+
         virtual void onSetState(Window& w, const WindowState& state);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);

@@ -93,9 +93,9 @@ class MainWindowImpl : public WindowImpl
 
         void setAbove(bool isTop);
 
-        void setIcon(const Gfx::Image& p);
+        //void setIcon(const Gfx::Image& p);
 
-        void setTitle(const std::string& text);
+        //void setTitle(const std::string& text);
 
         //void setState(const WindowState& s);
 
@@ -139,6 +139,10 @@ class MainWindowImpl : public WindowImpl
         void onMouseMove(double x, double y);
 
     protected:
+        virtual void onSetTitle(Window& w, const std::string& text);
+
+        virtual void onSetIcon(Window& w, const Gfx::Image& icon);
+
         virtual void onSetState(Window& w, const WindowState& state);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);

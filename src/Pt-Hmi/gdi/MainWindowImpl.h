@@ -72,9 +72,9 @@ class MainWindowImpl : public WindowImpl
 
         //void setState(const WindowState& s);
 
-        void setTitle(const std::string& text);
+        //void setTitle(const std::string& text);
 
-        void setIcon(const Gfx::Image& p);
+        //void setIcon(const Gfx::Image& p);
 
         void setMinimumSize(const Gfx::SizeF& s);
     
@@ -86,6 +86,10 @@ class MainWindowImpl : public WindowImpl
         }
 
     protected:
+        virtual void onSetTitle(Window& w, const std::string& text);
+
+        virtual void onSetIcon(Window& w, const Gfx::Image& icon);
+
         virtual void onSetState(Window& w, const WindowState& state);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);

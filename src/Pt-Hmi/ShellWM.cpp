@@ -394,16 +394,16 @@ void ShellWM::onSetAbove(Window& w, bool above)
 }
 
 
-void ShellWM::onSetTitle(Window& w, const std::string& text)
-{
-    w.impl()->setTitle(text);
-}
+//void ShellWM::onSetTitle(Window& w, const std::string& text)
+//{
+//    w.impl()->setTitle(text);
+//}
 
 
-void ShellWM::onSetIcon(Window& w, const Gfx::Image& icon)
-{
-    w.impl()->setIcon(icon);
-}
+//void ShellWM::onSetIcon(Window& w, const Gfx::Image& icon)
+//{
+//    w.impl()->setIcon(icon);
+//}
 
 
 //void ShellWM::onSetState(Window& w, const WindowState& state)

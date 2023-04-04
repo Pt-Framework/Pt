@@ -181,8 +181,8 @@ void Window::setParent(WindowManager& parent)
     _parent->onInit(*this);
     _parent->onSetSizeLimits(*this, minimumSize(), maximumSize());
     _impl->onSetState(*this, _state);
-    _parent->onSetTitle(*this, _title);
-    _parent->onSetIcon(*this, _icon);
+    _impl->onSetTitle(*this, _title);
+    _impl->onSetIcon(*this, _icon);
     _parent->onSetAbove(*this, _isAbove);
 
     if(_state == WindowState::Normal)
@@ -717,8 +717,8 @@ void Window::setIcon(const Gfx::Image& icon)
 {
     _icon = icon;
 
-    if(_parent)
-        _parent->onSetIcon(*this, _icon);
+    if(_impl)
+        _impl->onSetIcon(*this, _icon);
 }
 
 
@@ -732,8 +732,8 @@ void Window::setTitle(const std::string& t)
 {
     _title = t;
 
-    if(_parent)
-        _parent->onSetTitle(*this, _title);
+    if(_impl)
+        _impl->onSetTitle(*this, _title);
 }
 
 

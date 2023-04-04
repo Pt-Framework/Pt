@@ -276,13 +276,19 @@ void MainWindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-void MainWindowImpl::setTitle(const std::string& text)
+//void MainWindowImpl::setTitle(const std::string& text)
+//{
+//    SetWindowText(_hwnd, text.c_str());
+//}
+
+
+void MainWindowImpl::onSetTitle(Window& w, const std::string& text)
 {
-    SetWindowText(_hwnd, text.c_str());
+    SetWindowText( _hwnd, text.c_str() );
 }
 
 
-void MainWindowImpl::setIcon(const Gfx::Image& icon)
+void MainWindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 {
     if(icon.width() == 0 || icon.height() == 0)
     {

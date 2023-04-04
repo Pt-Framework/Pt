@@ -461,72 +461,16 @@ const Window* WindowFrame::window() const
 }
 
 
-void WindowFrame::setTitle(const std::string& text)
+void WindowFrame::onSetTitle(Window& w, const std::string& text)
 {
-    onRequestRepaint(_frameBounds);
+    repaint();
 }
 
 
-void WindowFrame::setIcon(const Gfx::Image& icon)
+void WindowFrame::onSetIcon(Window& w, const Gfx::Image& icon)
 {
+    repaint();
 }
-
-
-Window::State WindowFrame::state() const
-{
-    return _state;
-}
-
-
-//void WindowFrame::setState(const WindowState& state)
-//{
-//    Window::State oldState = _state;
-//    
-//    //if(state == oldState)
-//    //    return;
-//
-//    if( ! _window )
-//        return;
-//
-//    _state = state;
-//
-//    if(oldState == WindowState::Normal)
-//        setRestore( _window->position(), _window->size() );
-//
-//    if(state == WindowState::Maximized)
-//    {
-//        Gfx::SizeF maxSize = _wm->size();
-//        maxSize.subWidth( 2 * _borderWidth );
-//        maxSize.subHeight( (2 * _borderWidth) + _titleHeight );
-//
-//        _wm->onMove( *_window, Gfx::PointF(0, 0) );
-//        //_wm->onResize( *_window, maxSize );
-//        onResize(*_window, maxSize);
-//    }
-//    else if(state == WindowState::Minimized)
-//    {
-//        if(oldState == WindowState::Maximized)
-//        {
-//            _wm->onMove( *_window, restorePosition() );
-//        }
-//
-//        Gfx::SizeF minSize(restoreSize().width(), 0);
-//        //_wm->onResize(*_window, minSize);
-//        onResize(*_window, minSize);
-//    }
-//    else if(state == WindowState::Normal)
-//    {
-//        if(oldState != WindowState::Normal)
-//        {
-//            _wm->onMove( *_window, restorePosition() );
-//            //_wm->onResize( *_window, restoreSize() );
-//            onResize(*_window, restoreSize());
-//        }
-//    }
-//
-//    WindowStateEvent wse(*_window, state);
-//    Application::instance().loop().commitEvent(wse);
-//}
 
 
 void WindowFrame::onSetState(Window& w, const WindowState& state)

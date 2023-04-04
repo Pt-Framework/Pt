@@ -539,13 +539,13 @@ void MainWindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-void MainWindowImpl::setTitle(const std::string& text)
+void MainWindowImpl::onSetTitle(Window& w, const std::string& text)
 {
     XStoreName(_display, _window, text.c_str());
 }
 
 
-void MainWindowImpl::setIcon(const Gfx::Image& icon)
+void MainWindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 {
     //std::clog << "XAllocWMHints" << std::endl;
 
