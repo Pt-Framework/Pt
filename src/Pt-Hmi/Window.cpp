@@ -632,24 +632,13 @@ bool Window::isClosed() const
 }
 
 
-void Window::tryClose()
+void Window::close()
 {
-    close();
-}
+    if(_impl)
+      _impl->onClose(*this);
 
-
-void Window::close(bool force)
-{
-    if(force)
-    {
-        show(false);
-        
-        unparent();
-        _isClosed = true;
-    }
-
-    if(_parent)
-        _parent->onClosing(*this);
+    //if(_parent)
+    //    _parent->onClosing(*this);
 }
 
 
@@ -661,9 +650,11 @@ void Window::onProcessCloseEvent(const CloseEvent& ev)
 
 void Window::onCloseEvent(const CloseEvent& ev)
 {
-    show(false);
+    ShowEvent sev(*this, false);
+    Application::instance().processEvent(sev);
     
     unparent();
+    
     _isClosed = true;
 }
 

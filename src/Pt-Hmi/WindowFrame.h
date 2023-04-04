@@ -208,7 +208,9 @@ class WindowFrame : public WindowImpl
         void onProcessTouchEvent(const TouchEvent& tev);
 
     public:
-        void onResize(Window& w, const Gfx::SizeF& s);
+        virtual void onResize(Window& w, const Gfx::SizeF& s);
+
+        virtual void onClose(Window& w);
 
     protected:
         virtual Visual* onHitTest(const Gfx::PointF& pos);
@@ -261,6 +263,11 @@ class WindowFrame : public WindowImpl
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
+        
+        virtual void onProcessCloseEvent(const CloseEvent& ev);
+
+        virtual void onCloseEvent(const CloseEvent& ev);
+
     protected:
         virtual bool onMouseEvent(const MouseEvent& mev);
 
@@ -279,7 +286,7 @@ class WindowFrame : public WindowImpl
 
         void onMaximize();
 
-        void onClose();
+        void onCloseButton();
 
     private:
         bool isTitle(const Gfx::PointF& p) const;

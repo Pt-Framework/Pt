@@ -424,6 +424,13 @@ void ShellWM::onClosing(Window& w)
     Application::instance().loop().commitEvent(ev);
 }
 
+
+void ShellWM::onClose(WindowFrame& wf)
+{
+    CloseEvent ev(wf);
+    Application::instance().loop().commitEvent(ev);
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Implementation
 ///////////////////////////////////////////////////////////////////////

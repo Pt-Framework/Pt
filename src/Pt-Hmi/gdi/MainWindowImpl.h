@@ -86,13 +86,22 @@ class MainWindowImpl : public WindowImpl
         }
 
     protected:
-        void onResize(Window& w, const Gfx::SizeF& s);
+        virtual void onResize(Window& w, const Gfx::SizeF& s);
 
+        virtual void onClose(Window& w);
+
+    protected:
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
+        
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
         
         virtual void onRescaleEvent(const RescaleEvent& ev);
+
+        
+        virtual void onProcessCloseEvent(const CloseEvent& ev);
+
+        virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
         Window& _window;

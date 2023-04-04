@@ -92,6 +92,8 @@ class WindowImpl : public Visual
     protected:
         virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;
 
+        virtual void onClose(Window& w) = 0;
+
     protected:
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const
         { 
@@ -164,9 +166,7 @@ class PT_HMI_API Window : public Form
 
         bool isClosed() const;
 
-        void tryClose();
-
-        void close(bool force = false);
+        void close();
 
 
         Type type() const;

@@ -165,7 +165,7 @@ MainWindow::MainWindow()
     _tabView.setCurrent(0);
 
     _child1.layout().addItem(_tabView, DockingLayout::Fill);
-    _child1.closeRequested() += Pt::slot(*this, &MainWindow::tryClose);
+    _child1.closeRequested() += Pt::slot(*this, &MainWindow::close);
 
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30, 30));

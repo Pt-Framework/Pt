@@ -48,6 +48,8 @@ MainWindowImpl::MainWindowImpl(WindowManager& wm, Window& w)
 , _width(240)
 , _height(160)
 {
+    eventReceived() += Pt::slot(*this, &MainWindowImpl::onProcessCloseEvent);
+
   _display = Application::instance().impl()->display();
 
   create( w.type() );
@@ -378,6 +380,42 @@ void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 
     ResizeEvent rev( _client, ev.size() );
     _client.processEvent(rev);
+}
+
+
+void MainWindowImpl::onClose(Window& w)
+{
+    //MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    //if(impl)
+    //{
+    //    XEvent ev;
+    //    memset(&ev, 0, sizeof (ev));
+
+    //    ev.xclient.type         = ClientMessage;
+    //    ev.xclient.window       = impl->window();
+    //    ev.xclient.message_type = Application::instance().impl()->wmProtocols();
+    //    ev.xclient.format       = 32;
+    //    ev.xclient.data.l[0]    = Application::instance().impl()->wmDeleteWindow();
+    //    ev.xclient.data.l[1]    = CurrentTime;
+    //    XSendEvent(_display, _window, False, NoEventMask, &ev);
+    //}
+
+    CloseEvent ev(w);
+    w.processEvent(ev);
+}
+
+
+void MainWindowImpl::onProcessCloseEvent(const CloseEvent& ev)
+{
+    onCloseEvent(ev);
+
+    CloseEvent cev(_client);
+    _client.processEvent(cev);
+}
+
+
+void MainWindowImpl::onCloseEvent(const CloseEvent& ev)
+{
 }
 
 

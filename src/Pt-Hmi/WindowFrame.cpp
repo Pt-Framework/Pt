@@ -413,6 +413,7 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
     Base::onSetParent(&window);
 
     eventReceived() += Pt::slot(*this, &WindowFrame::onProcessActivateEvent);
+    eventReceived() += Pt::slot(*this, &WindowFrame::onProcessCloseEvent);
 
     switch( window.type() )
     {
@@ -435,7 +436,7 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
     _buttons.push_back(&_minimizeButton);
 
     _closeButton.setParent(*this);
-    _closeButton.clicked() += Pt::slot(*this, &WindowFrame::onClose);
+    _closeButton.clicked() += Pt::slot(*this, &WindowFrame::onCloseButton);
     _buttons.push_back(&_closeButton);
 
     _menuButton.setParent(*this);
@@ -620,9 +621,29 @@ void WindowFrame::onMaximize()
 }
 
 
-void WindowFrame::onClose()
+void WindowFrame::onCloseButton()
 {
     _window->close();
+}
+
+
+void WindowFrame::onClose(Window& w)
+{
+    _wm->onClose(*this);
+}
+
+
+void WindowFrame::onProcessCloseEvent(const CloseEvent& ev)
+{
+    onCloseEvent(ev);
+
+    CloseEvent cev(*_window);
+    _window->processEvent(cev);
+}
+
+
+void WindowFrame::onCloseEvent(const CloseEvent& ev)
+{
 }
 
 

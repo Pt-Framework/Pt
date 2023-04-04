@@ -41,6 +41,8 @@ MainWindowImpl::MainWindowImpl(WindowManager& wm, Window& w)
 , _window(w)
 , _hwnd(0)
 {
+    eventReceived() += Pt::slot(*this, &MainWindowImpl::onProcessCloseEvent);
+
     HINSTANCE hInstance = GetModuleHandle(NULL);
   
     LONG style = 0;
@@ -339,6 +341,26 @@ void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 
     ResizeEvent rev( _window, ev.size() );
     _window.processEvent(rev);
+}
+
+
+void MainWindowImpl::onClose(Window& w)
+{
+    PostMessage(_hwnd, WM_CLOSE, 0, 0);
+}
+
+
+void MainWindowImpl::onProcessCloseEvent(const CloseEvent& ev)
+{
+    onCloseEvent(ev);
+
+    CloseEvent cev(_window);
+    _window.processEvent(cev);
+}
+
+
+void MainWindowImpl::onCloseEvent(const CloseEvent& ev)
+{
 }
 
 } // namespace

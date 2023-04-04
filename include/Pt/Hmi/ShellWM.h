@@ -168,6 +168,8 @@ class ShellWM : public WindowManager
     protected:
         virtual void onResize(WindowFrame& w, const Gfx::SizeF& to);
 
+        virtual void onClose(WindowFrame& w);
+
     //
     // Implementation
     //

@@ -644,10 +644,12 @@ void ApplicationImpl::onShow(Window& w,  bool v)
 
 bool ApplicationImpl::onClose(Window& w)
 {  
-    //CloseEvent ev(w);
-    //w.processEvent(ev);
+    WindowImpl* frame = w.impl();
+    
+    CloseEvent ev(*frame);
+    commitEvent(ev);
 
-    w.close();
+    //w.close();
     return true;
 }
 
