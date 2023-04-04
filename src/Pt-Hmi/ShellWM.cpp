@@ -406,10 +406,10 @@ void ShellWM::onSetIcon(Window& w, const Gfx::Image& icon)
 }
 
 
-void ShellWM::onSetState(Window& w, const WindowState& state)
-{
-    w.impl()->setState(state);
-}
+//void ShellWM::onSetState(Window& w, const WindowState& state)
+//{
+//    w.impl()->setState(state);
+//}
 
 
 void ShellWM::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 

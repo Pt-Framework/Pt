@@ -93,7 +93,7 @@ class WindowManager : public Visual
 
         virtual void onSetIcon(Window& w, const Gfx::Image& icon) = 0;
 
-        virtual void onSetState(Window& w, const WindowState& state) = 0;
+        //virtual void onSetState(Window& w, const WindowState& state) = 0;
 
         virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
                                                 const Gfx::SizeF& maxSize) = 0;

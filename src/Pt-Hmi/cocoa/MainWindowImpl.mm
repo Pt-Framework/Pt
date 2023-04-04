@@ -53,8 +53,6 @@ MainWindowImpl::MainWindowImpl(WindowManager& wm,  Window& w)
 , _level(0)
 , _keyFlags(0)
 {
-    eventReceived() += Pt::slot(*this, &MainWindowImpl::onProcessCloseEvent);
-
     MainWindowView* view = [[MainWindowView alloc] initWithImpl: this];
     _view = view;
 
@@ -344,7 +342,33 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::setState(const WindowState& s)
+//void MainWindowImpl::setState(const WindowState& s)
+//{
+//    switch(s)
+//    {
+//        case WindowState::Normal:
+//            if( [_window isMiniaturized] )
+//                [_window deminiaturize: nil];
+//            
+//            if( [_window isZoomed] )
+//                [_window zoom: nil];
+//            
+//            break;
+//
+//        case WindowState::Maximized:
+//            if( ! [_window isZoomed] )
+//                [_window zoom: nil];
+//            break;
+//
+//        case WindowState::Minimized:
+//            if( ! [_window isMiniaturized] )
+//                [_window miniaturize: nil];
+//            break;
+//    }
+//}
+
+
+void MainWindowImpl::onSetState(Window& w, const WindowState& s)
 {
     switch(s)
     {
@@ -367,6 +391,20 @@ void MainWindowImpl::setState(const WindowState& s)
                 [_window miniaturize: nil];
             break;
     }
+}
+
+
+void MainWindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
+{
+    Base::onProcessWindowStateEvent(ev);
+
+    WindowStateEvent wse( _client, ev.state() );
+    Application::instance().processEvent(wse);
+}
+
+
+void MainWindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
+{
 }
 
 
@@ -529,7 +567,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 
     if(window->state() != wstate)
     {
-        WindowStateEvent wse(*window, wstate);
+        WindowStateEvent wse( *window.impl(), wstate );
         Application::instance().commitEvent(wse);
     }
 

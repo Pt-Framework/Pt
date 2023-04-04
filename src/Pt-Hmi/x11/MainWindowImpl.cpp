@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowStateEvent.h>
 
 #include <cassert>
 
@@ -48,8 +49,6 @@ MainWindowImpl::MainWindowImpl(WindowManager& wm, Window& w)
 , _width(240)
 , _height(160)
 {
-    eventReceived() += Pt::slot(*this, &MainWindowImpl::onProcessCloseEvent);
-
   _display = Application::instance().impl()->display();
 
   create( w.type() );
@@ -447,7 +446,47 @@ void MainWindowImpl::setAbove(bool above)
 }
 
 
-void MainWindowImpl::setState(const WindowState& s)
+//void MainWindowImpl::setState(const WindowState& s)
+//{
+//    //std::clog  << "setState: " << s << std::endl;
+//
+//    XClientMessageEvent ev;
+//    ev.type       = ClientMessage;
+//    ev.serial     = 0;
+//    ev.window     = _window;
+//    ev.format     = 32;
+//    ev.send_event = True;
+//
+//    switch(s)
+//    {
+//        default:
+//        case WindowState::Normal:
+//            ev.message_type = Application::instance().impl()->wmChangeState();
+//            ev.data.l[0] = NormalState;
+//            break;
+//
+//        case WindowState::Minimized:
+//            ev.message_type = Application::instance().impl()->wmChangeState();
+//            ev.data.l[0] = IconicState;
+//            break;
+//
+//        case WindowState::Maximized:
+//            ev.message_type = Application::instance().impl()->netWmState();
+//            ev.data.l[0]  = 1ul;
+//            ev.data.l[1]  = Application::instance().impl()->netWmStateMaximizedVert();
+//            ev.data.l[2]  = Application::instance().impl()->netWmStateMaximizedHorz();
+//            break;
+//    }
+//
+//    XSendEvent(_display, XDefaultRootWindow(_display),False,
+//               SubstructureRedirectMask,
+//               (XEvent*)&ev);
+//
+//    //XFlush(_display);
+//}
+
+
+void MainWindowImpl::onSetState(Window& w, const WindowState& s)
 {
     //std::clog  << "setState: " << s << std::endl;
 
@@ -479,11 +518,24 @@ void MainWindowImpl::setState(const WindowState& s)
             break;
     }
 
-    XSendEvent(_display, XDefaultRootWindow(_display),False,
-               SubstructureRedirectMask,
-               (XEvent*)&ev);
+    XSendEvent(_display, XDefaultRootWindow(_display), False,
+               SubstructureRedirectMask, (XEvent*)&ev);
 
     //XFlush(_display);
+}
+
+
+void MainWindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
+{
+    Base::onProcessWindowStateEvent(ev);
+
+    WindowStateEvent wse( _client, ev.state() );
+    Application::instance().processEvent(wse);
+}
+
+
+void MainWindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
+{
 }
 
 

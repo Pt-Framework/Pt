@@ -29,6 +29,7 @@
 
 #include "MainWindowImpl.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Math.h>
 #include <cassert>
 
@@ -41,8 +42,6 @@ MainWindowImpl::MainWindowImpl(WindowManager& wm, Window& w)
 , _window(w)
 , _hwnd(0)
 {
-    eventReceived() += Pt::slot(*this, &MainWindowImpl::onProcessCloseEvent);
-
     HINSTANCE hInstance = GetModuleHandle(NULL);
   
     LONG style = 0;
@@ -219,11 +218,33 @@ void MainWindowImpl::setAbove(bool isTop)
 }
 
 
-void MainWindowImpl::setState(const WindowState& s)
+//void MainWindowImpl::setState(const WindowState& s)
+//{
+//    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+//
+//    switch(s)
+//    {
+//        case WindowState::Normal:
+//        break;
+//
+//        case WindowState::Maximized:
+//            style |= WS_MAXIMIZE;
+//        break;
+//
+//        case WindowState::Minimized:
+//            style |= WS_MINIMIZE;
+//        break;
+//    }
+//
+//    SetWindowLong(_hwnd, GWL_STYLE, style); 
+//}
+
+
+void MainWindowImpl::onSetState(Window& w, const WindowState& state)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
-    switch(s)
+    switch(state)
     {
         case WindowState::Normal:
         break;
@@ -238,6 +259,20 @@ void MainWindowImpl::setState(const WindowState& s)
     }
 
     SetWindowLong(_hwnd, GWL_STYLE, style); 
+}
+
+
+void MainWindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
+{
+    Base::onProcessWindowStateEvent(ev);
+
+    WindowStateEvent wse( _window, ev.state() );
+    Application::instance().processEvent(wse);
+}
+
+
+void MainWindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
+{
 }
 
 

@@ -413,8 +413,7 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
     Base::onSetParent(&window);
 
     eventReceived() += Pt::slot(*this, &WindowFrame::onProcessActivateEvent);
-    eventReceived() += Pt::slot(*this, &WindowFrame::onProcessCloseEvent);
-
+    
     switch( window.type() )
     {
         case WindowType::Popup:
@@ -479,15 +478,60 @@ Window::State WindowFrame::state() const
 }
 
 
-void WindowFrame::setState(const WindowState& state)
+//void WindowFrame::setState(const WindowState& state)
+//{
+//    Window::State oldState = _state;
+//    
+//    //if(state == oldState)
+//    //    return;
+//
+//    if( ! _window )
+//        return;
+//
+//    _state = state;
+//
+//    if(oldState == WindowState::Normal)
+//        setRestore( _window->position(), _window->size() );
+//
+//    if(state == WindowState::Maximized)
+//    {
+//        Gfx::SizeF maxSize = _wm->size();
+//        maxSize.subWidth( 2 * _borderWidth );
+//        maxSize.subHeight( (2 * _borderWidth) + _titleHeight );
+//
+//        _wm->onMove( *_window, Gfx::PointF(0, 0) );
+//        //_wm->onResize( *_window, maxSize );
+//        onResize(*_window, maxSize);
+//    }
+//    else if(state == WindowState::Minimized)
+//    {
+//        if(oldState == WindowState::Maximized)
+//        {
+//            _wm->onMove( *_window, restorePosition() );
+//        }
+//
+//        Gfx::SizeF minSize(restoreSize().width(), 0);
+//        //_wm->onResize(*_window, minSize);
+//        onResize(*_window, minSize);
+//    }
+//    else if(state == WindowState::Normal)
+//    {
+//        if(oldState != WindowState::Normal)
+//        {
+//            _wm->onMove( *_window, restorePosition() );
+//            //_wm->onResize( *_window, restoreSize() );
+//            onResize(*_window, restoreSize());
+//        }
+//    }
+//
+//    WindowStateEvent wse(*_window, state);
+//    Application::instance().loop().commitEvent(wse);
+//}
+
+
+void WindowFrame::onSetState(Window& w, const WindowState& state)
 {
     Window::State oldState = _state;
-    
-    //if(state == oldState)
-    //    return;
-
-    if( ! _window )
-        return;
 
     _state = state;
 
@@ -501,7 +545,6 @@ void WindowFrame::setState(const WindowState& state)
         maxSize.subHeight( (2 * _borderWidth) + _titleHeight );
 
         _wm->onMove( *_window, Gfx::PointF(0, 0) );
-        //_wm->onResize( *_window, maxSize );
         onResize(*_window, maxSize);
     }
     else if(state == WindowState::Minimized)
@@ -512,7 +555,6 @@ void WindowFrame::setState(const WindowState& state)
         }
 
         Gfx::SizeF minSize(restoreSize().width(), 0);
-        //_wm->onResize(*_window, minSize);
         onResize(*_window, minSize);
     }
     else if(state == WindowState::Normal)
@@ -520,13 +562,26 @@ void WindowFrame::setState(const WindowState& state)
         if(oldState != WindowState::Normal)
         {
             _wm->onMove( *_window, restorePosition() );
-            //_wm->onResize( *_window, restoreSize() );
             onResize(*_window, restoreSize());
         }
     }
 
-    WindowStateEvent wse(*_window, state);
+    WindowStateEvent wse(*this, state);
     Application::instance().loop().commitEvent(wse);
+}
+
+
+void WindowFrame::onProcessWindowStateEvent(const WindowStateEvent& ev)
+{
+    WindowStateEvent wse( *_window, ev.state() );
+    Application::instance().processEvent(wse);
+
+    Base::onProcessWindowStateEvent(ev);
+}
+
+
+void WindowFrame::onWindowStateEvent(const WindowStateEvent& ev)
+{
 }
 
 

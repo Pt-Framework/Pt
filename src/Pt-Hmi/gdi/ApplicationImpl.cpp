@@ -836,7 +836,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
     if(w.state() != wstate)
     {
-        WindowStateEvent wse(w, wstate);
+        WindowStateEvent wse(*w.impl(), wstate);
         commitEvent(wse);
     }
 

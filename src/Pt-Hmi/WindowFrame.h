@@ -183,7 +183,7 @@ class WindowFrame : public WindowImpl
 
         Window::State state() const;
 
-        virtual void setState(const WindowState& s);
+        //virtual void setState(const WindowState& s);
 
         virtual Gfx::PointF clientPos() const;
 
@@ -208,6 +208,8 @@ class WindowFrame : public WindowImpl
         void onProcessTouchEvent(const TouchEvent& tev);
 
     public:
+        virtual void onSetState(Window& w, const WindowState& state);
+
         virtual void onResize(Window& w, const Gfx::SizeF& s);
 
         virtual void onClose(Window& w);
@@ -262,6 +264,11 @@ class WindowFrame : public WindowImpl
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
+
+        
+        virtual void onProcessWindowStateEvent(const WindowStateEvent& ev);
+
+        virtual void onWindowStateEvent(const WindowStateEvent& ev);
 
         
         virtual void onProcessCloseEvent(const CloseEvent& ev);

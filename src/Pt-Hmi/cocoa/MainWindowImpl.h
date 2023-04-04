@@ -97,7 +97,7 @@ class MainWindowImpl : public WindowImpl
 
         void setTitle(const std::string& text);
 
-        void setState(const WindowState& s);
+        //void setState(const WindowState& s);
 
         void setMinimumSize(const Gfx::SizeF& s);
     
@@ -139,6 +139,8 @@ class MainWindowImpl : public WindowImpl
         void onMouseMove(double x, double y);
 
     protected:
+        virtual void onSetState(Window& w, const WindowState& state);
+
         virtual void onResize(Window& w, const Gfx::SizeF& s);
 
         virtual void onClose(Window& w);
@@ -152,6 +154,11 @@ class MainWindowImpl : public WindowImpl
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
         
+        virtual void onProcessWindowStateEvent(const WindowStateEvent& ev);
+
+        virtual void onWindowStateEvent(const WindowStateEvent& ev);
+
+
         virtual void onProcessCloseEvent(const CloseEvent& ev);
 
         virtual void onCloseEvent(const CloseEvent& ev);

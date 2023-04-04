@@ -87,39 +87,37 @@ class WindowImpl : public Visual
 
         virtual void setIcon(const Gfx::Image& icon) = 0;
 
-        virtual void setState(const WindowState& s) = 0;
-
     protected:
+        virtual void onSetState(Window& w, const WindowState& state) = 0;
+
         virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;
 
         virtual void onClose(Window& w) = 0;
 
     protected:
-        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const
-        { 
-            return pos; 
-        }
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
         
-        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const
-        { 
-            return pos; 
-        }
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
-        virtual void onProcessRescaleEvent(const RescaleEvent& ev)
-        {
-            Base::onProcessRescaleEvent(ev);
-        }
+        
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
-        virtual void onRescaleEvent(const RescaleEvent& ev)
-        {
-            _surface.setScaleFactor( ev.scaleFactor() );
+        virtual void onRescaleEvent(const RescaleEvent& ev);
 
-            Base::onRescaleEvent(ev);
-        }
+        
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
-        void onProcessResizeEvent(const ResizeEvent& ev);
+        virtual void onResizeEvent(const ResizeEvent& ev);
 
-        void onResizeEvent(const ResizeEvent& ev);
+        
+        virtual void onProcessWindowStateEvent(const WindowStateEvent& ev);
+
+        virtual void onWindowStateEvent(const WindowStateEvent& ev);
+
+        
+        virtual void onProcessCloseEvent(const CloseEvent& ev);
+
+        virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
         WindowManager& _wm;

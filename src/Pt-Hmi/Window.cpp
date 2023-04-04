@@ -50,6 +50,8 @@ WindowImpl::WindowImpl(WindowManager& wm, Window& window)
 : _window(window)
 , _wm(wm)
 {
+    eventReceived() += Pt::slot(*this, &WindowImpl::onProcessCloseEvent);
+    eventReceived() += Pt::slot(*this, &WindowImpl::onProcessWindowStateEvent);
 }
 
 
@@ -70,8 +72,29 @@ const PixmapSurface& WindowImpl::surface() const
 }
 
 
-void WindowImpl::setState(const WindowState& s)
+Gfx::PointF WindowImpl::onToParent(const Gfx::PointF& pos) const
+{ 
+    return pos; 
+}
+     
+        
+Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
+{ 
+    return pos; 
+}
+
+
+void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
+    Base::onProcessRescaleEvent(ev);
+}
+
+
+void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
+{
+    _surface.setScaleFactor( ev.scaleFactor() );
+
+    Base::onRescaleEvent(ev);
 }
 
 
@@ -86,6 +109,28 @@ void WindowImpl::onResizeEvent(const ResizeEvent& ev)
     Visual::onResizeEvent(ev);
 
     _surface.resize( ev.size() );
+}
+
+
+void WindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
+{
+    onWindowStateEvent(ev);
+}
+
+
+void WindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
+{
+}
+
+
+void WindowImpl::onProcessCloseEvent(const CloseEvent& ev)
+{
+    onCloseEvent(ev);
+}
+
+
+void WindowImpl::onCloseEvent(const CloseEvent& ev)
+{
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -135,7 +180,7 @@ void Window::setParent(WindowManager& parent)
    
     _parent->onInit(*this);
     _parent->onSetSizeLimits(*this, minimumSize(), maximumSize());
-    _parent->onSetState(*this, _state);
+    _impl->onSetState(*this, _state);
     _parent->onSetTitle(*this, _title);
     _parent->onSetIcon(*this, _icon);
     _parent->onSetAbove(*this, _isAbove);
@@ -717,8 +762,8 @@ void Window::setState(const WindowState& s)
 {
     _state = s;
 
-    if(_parent)
-        _parent->onSetState(*this, _state);
+    if(_impl)
+        _impl->onSetState(*this, _state);
 }
 
 
