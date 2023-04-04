@@ -97,8 +97,6 @@ class WindowManager : public Visual
 
         virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
                                                 const Gfx::SizeF& maxSize) = 0;
-
-        virtual void onClosing(Window& w) = 0;
 };
 
 } // namespace

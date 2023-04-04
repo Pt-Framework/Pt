@@ -636,9 +636,6 @@ void Window::close()
 {
     if(_impl)
       _impl->onClose(*this);
-
-    //if(_parent)
-    //    _parent->onClosing(*this);
 }
 
 

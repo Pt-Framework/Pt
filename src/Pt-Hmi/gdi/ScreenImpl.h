@@ -146,8 +146,6 @@ class ScreenImpl : public WindowManager
         virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
                                                 const Gfx::SizeF& maxSize);
 
-        virtual void onClosing(Window& w);
-
     //
     // scaling
     //

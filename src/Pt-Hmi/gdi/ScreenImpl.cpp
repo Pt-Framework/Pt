@@ -302,17 +302,6 @@ void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
 }
 
 
-void ScreenImpl::onClosing(Window& w)
-{
-    //MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    //if(impl)
-    //    PostMessage(impl->hwnd(), WM_CLOSE, 0, 0);
-
-    CloseEvent ev(w);
-    w.processEvent(ev);
-}
-
-
 void ScreenImpl::setCapture(Visual* capture)
 {
     if( ! capture )
