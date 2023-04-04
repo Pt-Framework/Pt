@@ -385,23 +385,20 @@ void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 
 void MainWindowImpl::onClose(Window& w)
 {
-    //MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    //if(impl)
-    //{
-    //    XEvent ev;
-    //    memset(&ev, 0, sizeof (ev));
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    if(impl)
+    {
+        XEvent ev;
+        memset(&ev, 0, sizeof (ev));
 
-    //    ev.xclient.type         = ClientMessage;
-    //    ev.xclient.window       = impl->window();
-    //    ev.xclient.message_type = Application::instance().impl()->wmProtocols();
-    //    ev.xclient.format       = 32;
-    //    ev.xclient.data.l[0]    = Application::instance().impl()->wmDeleteWindow();
-    //    ev.xclient.data.l[1]    = CurrentTime;
-    //    XSendEvent(_display, _window, False, NoEventMask, &ev);
-    //}
-
-    CloseEvent ev(w);
-    w.processEvent(ev);
+        ev.xclient.type         = ClientMessage;
+        ev.xclient.window       = impl->window();
+        ev.xclient.message_type = Application::instance().impl()->wmProtocols();
+        ev.xclient.format       = 32;
+        ev.xclient.data.l[0]    = Application::instance().impl()->wmDeleteWindow();
+        ev.xclient.data.l[1]    = CurrentTime;
+        XSendEvent(_display, _window, False, NoEventMask, &ev);
+    }
 }
 
 

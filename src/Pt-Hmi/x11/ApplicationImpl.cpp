@@ -345,12 +345,12 @@ void ApplicationImpl::onClientMessage(Window& window, XEvent& xev)
 {
     if( xev.xclient.message_type == _wmProtocols )
     {
-        if( (Atom) xev.xclient.data.l[0] == _wmDeleteWindow)
+        if( (Atom) xev.xclient.data.l[0] == _wmDeleteWindow )
         {
-            //CloseEvent closeEvent(window);
-            //window.processEvent(closeEvent);
-            
-            window.close();
+            WindowImpl* frame = window.impl();
+
+            CloseEvent ev(*frame);
+            commitEvent(ev);
         }
     }
 }

@@ -53,6 +53,8 @@ MainWindowImpl::MainWindowImpl(WindowManager& wm,  Window& w)
 , _level(0)
 , _keyFlags(0)
 {
+    eventReceived() += Pt::slot(*this, &MainWindowImpl::onProcessCloseEvent);
+
     MainWindowView* view = [[MainWindowView alloc] initWithImpl: this];
     _view = view;
 
@@ -553,15 +555,46 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 
 void MainWindowImpl::onClosing()
 {
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-
-    window->close();
+    //ScreenImpl* screen = Application::instance().screen().impl();
+    //Window* window = screen->findWindow(_window);
+    //if( ! window )
+    //    return;
+    //
+    //window->close();
 
     //CloseEvent closeEvent(*window);
     //window->processEvent(closeEvent);
+
+    WindowImpl* frame = this;
+
+    CloseEvent ev(*frame);
+    commitEvent(ev);
+}
+
+
+void MainWindowImpl::onClose(Window& w)
+{
+    //[_window performClose:nil];
+    //[_window close];
+
+    WindowImpl* frame = this;
+
+    CloseEvent ev(*frame);
+    w.processEvent(ev);
+}
+
+
+void MainWindowImpl::onProcessCloseEvent(const CloseEvent& ev)
+{
+    onCloseEvent(ev);
+
+    CloseEvent cev(_client);
+    _client.processEvent(cev);
+}
+
+
+void MainWindowImpl::onCloseEvent(const CloseEvent& ev)
+{
 }
 
 
