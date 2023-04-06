@@ -47,8 +47,8 @@ namespace Hmi {
 ///////////////////////////////////////////////////////////////////////
 
 WindowImpl::WindowImpl(WindowManager& wm, Window& window)
-: _window(window)
-, _wm(wm)
+: _wm(wm)
+, _window(window)
 {
     eventReceived() += Pt::slot(*this, &WindowImpl::onProcessCloseEvent);
     eventReceived() += Pt::slot(*this, &WindowImpl::onProcessWindowStateEvent);

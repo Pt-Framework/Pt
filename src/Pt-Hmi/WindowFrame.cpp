@@ -1329,8 +1329,8 @@ void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
 {
     Base::onProcessPaintEvent(ev);
 
-    double offX = 2 * _borderWidth;
-    double offY = (2 * _borderWidth) + _titleHeight;
+    //double offX = 2 * _borderWidth;
+    //double offY = (2 * _borderWidth) + _titleHeight;
 
     Gfx::PointF pos = ev.rect().topLeft();
     pos.addX(_borderWidth);

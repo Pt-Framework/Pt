@@ -211,8 +211,8 @@ class ShellWM : public WindowManager
 
         double                       _borderWidth;
         double                       _titleHeight;
-        Gfx::Color                   _inactiveColor;
         Gfx::Color                   _activeColor;
+        Gfx::Color                   _inactiveColor;
         Gfx::Color                   _textColor;
         Gfx::Color                   _inactiveTextColor;  
 };
