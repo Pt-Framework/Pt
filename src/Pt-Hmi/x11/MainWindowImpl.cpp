@@ -310,10 +310,14 @@ void MainWindowImpl::enable(bool enabled)
 }
 
 
-void MainWindowImpl::move(const Gfx::PointF& pos)
+void MainWindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
+    Gfx::PointF aligedPos = w.surface().align(pos);
+
+    Gfx::PointF p = w.surface().toPhysical(aligedPos);
+
     //std::clog  << "XMoveWindow: " << pos.x() << ", " << pos.y() << std::endl;
-    XMoveWindow(_display, _window, pos.x(), pos.y());
+    XMoveWindow(_display, _window, p.x(), p.y());
     //XFlush(_display);
 
     //while( XPending(_display) > 0 )
@@ -324,27 +328,6 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
     //    Application::instance().impl()->processEvent(xev);
     //}
 }
-
-
-//void MainWindowImpl::resize(const Gfx::SizeF& size)
-//{
-//    //std::clog  << "XResizeWindow: " << size.width()
-//    //           << "x" << size.height() << std::endl;
-//
-//    XResizeWindow( _display, _window, size.width(), size.height() );
-//    //XFlush(_display);
-//
-//    //XClearArea(_display, _window, 0, 0, size.width(), size.height(), True);
-//    //XFlush(_display);
-//
-//    //while( XPending(_display) > 0 )
-//    //{
-//    //    XEvent xev;
-//    //    XNextEvent(_display, &xev);
-//
-//    //    Application::instance().impl()->processEvent(xev);
-//    //}
-//}
 
 
 void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
@@ -364,12 +347,42 @@ void MainWindowImpl::onRescaleEvent(const RescaleEvent& ev)
 
 void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
+    //std::clog  << "XResizeWindow: " << s.width() << "x" << s.height() << std::endl;
+
     Gfx::SizeF alignedSize = surface().align(s);
+
+    //
+    // maximum width and height
+    //
+    if( alignedSize.width() > w.maximumSize().width() )
+        alignedSize.setWidth( w.maximumSize().width() );
+
+    if( alignedSize.height() > w.maximumSize().height() )
+        alignedSize.setHeight( w.maximumSize().height() );
+
+    if( alignedSize.width() < w.minimumSize().width() )
+        alignedSize.setWidth( w.minimumSize().width() );
+
+    if( alignedSize.height() < w.minimumSize().height() )
+        alignedSize.setHeight( w.minimumSize().height() );
 
     Gfx::SizeF psize = w.surface().toPhysical(alignedSize);
     Gfx::Size size = round(psize);
 
     XResizeWindow( _display, _window, size.width(), size.height() );
+
+    //XFlush(_display);
+
+    //XClearArea(_display, _window, 0, 0, size.width(), size.height(), True);
+    //XFlush(_display);
+
+    //while( XPending(_display) > 0 )
+    //{
+    //    XEvent xev;
+    //    XNextEvent(_display, &xev);
+
+    //    Application::instance().impl()->processEvent(xev);
+    //}
 }
 
 

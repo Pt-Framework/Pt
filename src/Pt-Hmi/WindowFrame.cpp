@@ -488,14 +488,14 @@ void WindowFrame::onSetState(Window& w, const WindowState& state)
         maxSize.subWidth( 2 * _borderWidth );
         maxSize.subHeight( (2 * _borderWidth) + _titleHeight );
 
-        _wm->onMove( *_window, Gfx::PointF(0, 0) );
+        onMove( *_window, Gfx::PointF(0, 0) );
         onResize(*_window, maxSize);
     }
     else if(state == WindowState::Minimized)
     {
         if(oldState == WindowState::Maximized)
         {
-            _wm->onMove( *_window, restorePosition() );
+            onMove( *_window, restorePosition() );
         }
 
         Gfx::SizeF minSize(restoreSize().width(), 0);
@@ -505,7 +505,7 @@ void WindowFrame::onSetState(Window& w, const WindowState& state)
     {
         if(oldState != WindowState::Normal)
         {
-            _wm->onMove( *_window, restorePosition() );
+            onMove( *_window, restorePosition() );
             onResize(*_window, restoreSize());
         }
     }
@@ -792,9 +792,25 @@ void WindowFrame::onRequestMove(const Gfx::PointF& pos)
 }
 
 
+void WindowFrame::onMove(Window& w, const Gfx::PointF& pos)
+{
+    _frameRect.setOrigin(pos);
+
+    Gfx::PointF clientPos = pos;
+    clientPos.addX(_borderWidth);
+    clientPos.addY(_borderWidth + _titleHeight);
+    _clientRect.setOrigin(clientPos);
+
+    _wm->onMove(*this, pos);
+}
+
+
 void WindowFrame::onProcessMoveEvent(const MoveEvent& ev)
 {
     Base::onProcessMoveEvent(ev);
+
+    MoveEvent mev( *_window, ev.position() );
+    _window->processEvent(mev);
 }
 
 
@@ -806,7 +822,7 @@ void WindowFrame::onMoveEvent(const MoveEvent& ev)
     Gfx::RectF updateRect = _frameBounds;
     updateRect.unify( Gfx::RectF(delta, _frameBounds.size()) );
 
-    onRequestRepaint(updateRect);
+    repaint(updateRect);
 
     _frameRect.setOrigin( ev.position() );
 
@@ -1238,7 +1254,7 @@ bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
         {
             Gfx::PointF to = _frameRect.topLeft() + pos - _lastPointer;
             _window->move(to);
-            move(to);
+            //move(to);
         }
 
         return _isMoving;
@@ -1298,7 +1314,7 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
             if( winpos != _frameRect.topLeft() )
             {
                 _window->move(winpos);
-                move(winpos);
+                //move(winpos);
             }
         }
 

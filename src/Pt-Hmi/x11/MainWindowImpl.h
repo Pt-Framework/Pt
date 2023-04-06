@@ -68,7 +68,7 @@ class MainWindowImpl : public WindowImpl
 
         void enable(bool e);
 
-        void move(const Gfx::PointF& pos);
+        //void move(const Gfx::PointF& pos);
 
         //void resize(const Gfx::SizeF& size);
 
@@ -111,6 +111,8 @@ class MainWindowImpl : public WindowImpl
         virtual void onSetIcon(Window& w, const Gfx::Image& icon);
 
         virtual void onSetState(Window& w, const WindowState& state);
+
+        virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
 

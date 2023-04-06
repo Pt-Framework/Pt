@@ -239,44 +239,44 @@ void ScreenImpl::onEnableRequest(Window& w, bool enable)
 }
 
 
-void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
-{
-    Gfx::PointF aligedPos = w.surface().align(pos);
+//void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
+//{
+//    Gfx::PointF aligedPos = w.surface().align(pos);
+//
+//    const Gfx::PointF point = w.surface().toPhysical(aligedPos);
+//
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->move(point);
+//}
 
-    const Gfx::PointF point = w.surface().toPhysical(aligedPos);
 
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->move(point);
-}
-
-
-void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
-{
-    //
-    // align to physical pixel grid
-    //
-    Gfx::SizeF alignedSize = w.surface().align(s);
-
-    //
-    // maximum width and height
-    //
-    if( alignedSize.width() > w.maximumSize().width() )
-        alignedSize.setWidth( w.maximumSize().width() );
-
-    if( alignedSize.height() > w.maximumSize().height() )
-        alignedSize.setHeight( w.maximumSize().height() );
-
-    if( alignedSize.width() < w.minimumSize().width() )
-        alignedSize.setWidth( w.minimumSize().width() );
-
-    if( alignedSize.height() < w.minimumSize().height() )
-        alignedSize.setHeight( w.minimumSize().height() );
-
-    const Gfx::SizeF size = w.surface().toPhysical(alignedSize);
-
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->resize(size);
-}
+//void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
+//{
+//    //
+//    // align to physical pixel grid
+//    //
+//    Gfx::SizeF alignedSize = w.surface().align(s);
+//
+//    //
+//    // maximum width and height
+//    //
+//    if( alignedSize.width() > w.maximumSize().width() )
+//        alignedSize.setWidth( w.maximumSize().width() );
+//
+//    if( alignedSize.height() > w.maximumSize().height() )
+//        alignedSize.setHeight( w.maximumSize().height() );
+//
+//    if( alignedSize.width() < w.minimumSize().width() )
+//        alignedSize.setWidth( w.minimumSize().width() );
+//
+//    if( alignedSize.height() < w.minimumSize().height() )
+//        alignedSize.setHeight( w.minimumSize().height() );
+//
+//    const Gfx::SizeF size = w.surface().toPhysical(alignedSize);
+//
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->resize(size);
+//}
 
 
 void ScreenImpl::onSetAbove(Window& w, bool above)

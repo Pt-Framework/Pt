@@ -85,7 +85,7 @@ class WindowManager : public Visual
 
         virtual void onEnableRequest(Window& w, bool enable) = 0;
 
-        virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
+        //virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
 
         virtual void onSetAbove(Window& w, bool above) = 0;
 

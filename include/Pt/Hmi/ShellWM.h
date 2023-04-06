@@ -150,7 +150,7 @@ class ShellWM : public WindowManager
 
         virtual void onEnableRequest(Window& w, bool enable);
 
-        virtual void onMove(Window& w, const Gfx::PointF& to);
+        //virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onSetAbove(Window& w, bool above);
 
@@ -166,6 +166,8 @@ class ShellWM : public WindowManager
         virtual void onClosing(Window& w);
 
     protected:
+        virtual void onMove(WindowFrame& w, const Gfx::PointF& to);
+
         virtual void onResize(WindowFrame& w, const Gfx::SizeF& to);
 
         virtual void onClose(WindowFrame& w);

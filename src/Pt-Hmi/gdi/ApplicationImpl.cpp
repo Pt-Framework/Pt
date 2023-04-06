@@ -802,7 +802,7 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
     Gfx::PointF pos(x, y);
     pos /= w.scaleFactor();
 
-    MoveEvent ev(w, pos);
+    MoveEvent ev( *w.impl(), pos );
     //commitEvent(ev);
     Application::instance().processEvent(ev);
 }

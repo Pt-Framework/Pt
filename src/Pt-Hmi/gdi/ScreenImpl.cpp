@@ -248,21 +248,21 @@ void ScreenImpl::onEnableRequest(Window& w, bool enable)
 }
 
 
-void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
-{
-    Gfx::PointF aligedPos = w.surface().align(pos);
+//void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
+//{
+//    Gfx::PointF aligedPos = w.surface().align(pos);
+//
+//    const Gfx::PointF point = w.surface().toPhysical(aligedPos);
+//
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->move(point);
+//}
 
-    const Gfx::PointF point = w.surface().toPhysical(aligedPos);
 
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->move(point);
-}
-
-
-void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
-{
-
-}
+//void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
+//{
+//
+//}
 
 
 void ScreenImpl::onSetAbove(Window& w, bool above)

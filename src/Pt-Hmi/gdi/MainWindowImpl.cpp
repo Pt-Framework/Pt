@@ -202,8 +202,12 @@ void MainWindowImpl::enable(bool e)
 }
 
 
-void MainWindowImpl::move(const Gfx::PointF& p)
+void MainWindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
+    Gfx::PointF aligedPos = w.surface().align(pos);
+
+    Gfx::PointF p = w.surface().toPhysical(aligedPos);
+
     SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, 
                  SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
 }

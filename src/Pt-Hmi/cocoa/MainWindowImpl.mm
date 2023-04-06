@@ -250,7 +250,44 @@ void MainWindowImpl::enable(bool e)
 }
 
 
-void MainWindowImpl::move(const Gfx::PointF& p)
+//void MainWindowImpl::move(const Gfx::PointF& p)
+//{
+//    //std::clog << "MOVE: " << p.x() << "," 
+//    //                      << p.y() << std::endl;
+//
+//    double scaling = scaleFactor();
+//
+//    CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
+//    CGFloat windowHeight = [_window frame].size.height;
+//
+//    CGFloat y = screenHeight - p.y() / scaling - windowHeight;
+//    NSPoint origin = NSMakePoint(p.x() / scaling, y);
+//
+//    [_window setFrameOrigin:origin];
+//}
+//
+//
+//void MainWindowImpl::resize(const Gfx::SizeF& size)
+//{
+//    //std::clog << "RESIZE: " << size.width() << "," 
+//    //                        << size.height() << std::endl;
+//
+//    double scaling = scaleFactor();
+//
+//    NSRect frameRect = [_window frame];
+//    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
+//
+//    contentRect.origin.y += contentRect.size.height - size.height() / scaling;
+//    
+//    contentRect.size.width = size.width() / scaling;
+//    contentRect.size.height = size.height() / scaling;
+//
+//    frameRect = [_window frameRectForContentRect:contentRect];
+//    [_window setFrame:frameRect display:NO animate:NO];
+//}
+
+
+void MainWindowImpl::onMove(Window& w, const Gfx::PointF& to)
 {
     //std::clog << "MOVE: " << p.x() << "," 
     //                      << p.y() << std::endl;
@@ -264,26 +301,6 @@ void MainWindowImpl::move(const Gfx::PointF& p)
     NSPoint origin = NSMakePoint(p.x() / scaling, y);
 
     [_window setFrameOrigin:origin];
-}
-
-
-void MainWindowImpl::resize(const Gfx::SizeF& size)
-{
-    //std::clog << "RESIZE: " << size.width() << "," 
-    //                        << size.height() << std::endl;
-
-    double scaling = scaleFactor();
-
-    NSRect frameRect = [_window frame];
-    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
-
-    contentRect.origin.y += contentRect.size.height - size.height() / scaling;
-    
-    contentRect.size.width = size.width() / scaling;
-    contentRect.size.height = size.height() / scaling;
-
-    frameRect = [_window frameRectForContentRect:contentRect];
-    [_window setFrame:frameRect display:NO animate:NO];
 }
 
 
@@ -539,7 +556,7 @@ void MainWindowImpl::onMove()
     double scaling = Application::instance().scaleFactor();
     pos = pos / scaling;
 
-    MoveEvent ev(*window, pos);
+    MoveEvent ev(*window->impl(), pos);
     Application::instance().processEvent(ev);
 }
 
@@ -567,7 +584,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 
     if(window->state() != wstate)
     {
-        WindowStateEvent wse( *window.impl(), wstate );
+        WindowStateEvent wse( *window->impl(), wstate );
         Application::instance().commitEvent(wse);
     }
 
@@ -577,7 +594,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     double scaling = Application::instance().scaleFactor();
     to = to / scaling;
 
-    ResizeEvent rev(*window.impl(), to);
+    ResizeEvent rev(*window->impl(), to);
     Application::instance().processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);

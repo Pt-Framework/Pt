@@ -90,6 +90,8 @@ class WindowImpl : public Visual
 
         virtual void onSetState(Window& w, const WindowState& state) = 0;
 
+        virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
+
         virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;
 
         virtual void onClose(Window& w) = 0;

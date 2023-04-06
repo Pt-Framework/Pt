@@ -582,7 +582,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         Gfx::PointF to(x, y);
         to = window.surface().toLogical(to);
 
-        MoveEvent ev(window, to);
+        MoveEvent ev(*window.impl(), to);
         Application::instance().processEvent(ev);
     }
 }

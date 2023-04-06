@@ -187,7 +187,7 @@ void Window::setParent(WindowManager& parent)
 
     if(_state == WindowState::Normal)
     {
-        _parent->onMove(*this, _requestedPosition);
+        _impl->onMove(*this, _requestedPosition);
 
         if( ! isAutoSize() )
             _impl->onResize(*this, _requestedSize);
@@ -297,21 +297,15 @@ void Window::onRequestMove(const Gfx::PointF& pos)
 
     setState(WindowState::Normal);
 
-    if(_parent)
+    if(_impl)
     {
-        _parent->onMove(*this, _requestedPosition);
+        _impl->onMove(*this, _requestedPosition);
     }
 }
 
 
 void Window::onProcessMoveEvent(const MoveEvent& ev)
 {
-    if(_impl)
-    {
-        MoveEvent mev( *_impl, ev.position() );
-        _impl->processEvent(mev);
-    }
-
     Base::onProcessMoveEvent(ev);
 }
 
