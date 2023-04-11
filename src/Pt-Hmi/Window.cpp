@@ -429,12 +429,6 @@ void Window::onProcessPaintEvent(const PaintEvent& ev)
         return;
 
     Base::onProcessPaintEvent(ev);
-
-    //if(_impl)
-    //{
-    //    PaintEvent pev(*_impl, rect);
-    //    _impl->processEvent(pev);
-    //}
 }
 
 

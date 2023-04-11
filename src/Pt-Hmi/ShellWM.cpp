@@ -511,12 +511,6 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
         PaintEvent pev( *frame, winRect );
         frame->processEvent(pev);
 
-        //Gfx::PointF winPos = onToWindow( *window, frameRect.topLeft() );
-        //Gfx::RectF winRect( winPos, rect.size() );
-
-        //PaintEvent pev( *window, winRect );
-        //window->processEvent(pev);
-
         Gfx::PointF surfacePos = frameRect.topLeft() - frame->position();
         Gfx::RectF surfaceRect( surfacePos, frameRect.size() );
 
