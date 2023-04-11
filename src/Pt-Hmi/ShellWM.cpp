@@ -264,7 +264,7 @@ void ShellWM::onInit(Window& w)
     
     WindowImpl* frame = w.impl();
     RescaleEvent ev(*frame, scaling);
-    w.processEvent(ev);
+    frame->processEvent(ev);
     //Application::instance().loop().commitEvent(ev);
 }
 
