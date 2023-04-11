@@ -356,7 +356,7 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 
 Visual* Window::onHitTest(const Gfx::PointF& p)
 {
-    if( ! bounds().contains(p) )
+    if( ! bounds().contains(p) || ! isVisible() )
         return 0;
 
     Visual* hit = Form::onHitTest(p);

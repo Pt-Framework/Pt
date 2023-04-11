@@ -403,6 +403,7 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
 , _titleHeight( shell.titleHeight() )
 , _state(WindowState::Normal)
 , _isClient(false)
+, _isCapture(false)
 , _isMoving(false)
 , _isLeftResizing(false)
 , _isRightResizing(false)
@@ -446,18 +447,6 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
 
 WindowFrame::~WindowFrame()
 {
-}
-
-
-Window* WindowFrame::window()
-{
-    return _window;
-}
-
-
-const Window* WindowFrame::window() const
-{
-    return _window;
 }
 
 
@@ -672,7 +661,7 @@ void WindowFrame::onLayout()
 
 Visual* WindowFrame::onHitTest(const Gfx::PointF& pos)
 {
-    if( ! bounds().contains(pos) )
+    if( ! bounds().contains(pos) || ! isVisible() )
         return 0;
 
     if(_window)
@@ -931,6 +920,24 @@ bool WindowFrame::onLeaveEvent(const LeaveEvent& ev)
 
 void WindowFrame::onProcessMouseEvent(const MouseEvent& ev)
 {
+    if( ! window().acceptsInput() )
+        return;
+
+    //
+    // stop capture on press
+    // 
+    if(_isCapture)
+    {
+        if( ev.isRelease() )
+        {
+            setCapture(false);
+            _isCapture = false;
+        }
+    }
+
+    //
+    // hit test
+    //
     Gfx::PointF pos = fromGlobal( ev.position() );
 
     Window* window = checkWindow(pos);
@@ -938,6 +945,15 @@ void WindowFrame::onProcessMouseEvent(const MouseEvent& ev)
     {
         window->processEvent(ev);
         return;
+    }
+
+    //
+    // start capture on press
+    //
+    if( ev.isPress() )
+    {
+        setCapture(true);
+        _isCapture = true;
     }
         
     Visual::onProcessMouseEvent(ev);

@@ -110,11 +110,9 @@ class ShellWM : public WindowManager
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
-        Visual* onHitTest(const Gfx::PointF& p);
+        virtual Visual* onHitTest(const Gfx::PointF& p);
 
-        WindowFrame* onHitTestFrame(const Gfx::PointF& p);
-
-
+        
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
         virtual void onRequestActivate(bool active);
@@ -166,11 +164,11 @@ class ShellWM : public WindowManager
         virtual void onClosing(Window& w);
 
     protected:
-        Gfx::PointF onToFrame(const WindowImpl& w, 
-                              const Gfx::PointF& pos) const;
+        Gfx::PointF toFrame(const WindowImpl& w, 
+                            const Gfx::PointF& pos) const;
 
-        Gfx::PointF onFromFrame(const WindowImpl& w, 
-                                const Gfx::PointF& pos) const;
+        Gfx::PointF fromFrame(const WindowImpl& w, 
+                              const Gfx::PointF& pos) const;
 
         virtual void onMove(WindowFrame& w, const Gfx::PointF& to);
 
@@ -212,7 +210,6 @@ class ShellWM : public WindowManager
         std::vector<Window*>         _windowList;
 
         Window*                      _activeWindow;
-        WindowFrame*                 _grabbedFrame;
         Window*                      _topMostWindow;
 
         double                       _borderWidth;

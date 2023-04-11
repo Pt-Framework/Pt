@@ -42,7 +42,6 @@ namespace Hmi {
 ShellWM::ShellWM()
 : _parent(0)
 , _activeWindow(0)
-, _grabbedFrame(0)
 , _topMostWindow(0)
 , _borderWidth(4.0)
 , _titleHeight(20.0)
@@ -152,55 +151,24 @@ Visual* ShellWM::onHitTest(const Gfx::PointF& p)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        
+        WindowImpl* frame = window->impl();
+
         if( ! window->isVisible() )
             continue;
 
-        Gfx::PointF pos = toWindow(*window, p);
-        Visual* hit = window->hitTest(pos);
+        Gfx::PointF pos = toFrame(*frame, p);
+        Visual* hit = frame->hitTest(pos);
         if(hit)
             return hit;
-
-        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
-        if( frame->frameRect().contains(p) )
-            return 0;
     }
 
     return 0;
 }
 
 
-WindowFrame* ShellWM::onHitTestFrame(const Gfx::PointF& pos)
-{
-    WindowFrame* windowFrame = 0;
-
-    std::vector<Window*>::const_reverse_iterator rit;
-    for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
-    {
-        Window* window = *rit;
-        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
-
-        if( frame->frameRect().contains(pos) && 
-            window->acceptsInput() )
-        {
-            windowFrame = frame;
-            break;
-        }
-    }
-
-    return windowFrame;
-}
-
-
 void ShellWM::onRequestCapture(bool capture)
 {
     Visual::onRequestCapture(capture);
-
-    if( ! capture )
-    {
-        if(_grabbedFrame)
-            _grabbedFrame = 0;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -238,12 +206,6 @@ void ShellWM::onDetach(Window& w)
 
         if(window == &w)
         {
-            if( _grabbedFrame && _grabbedFrame == w.impl() )
-            {
-                setCapture(false);
-                _grabbedFrame = 0;
-            }
-
             if(_activeWindow && _activeWindow == &w)
                 _activeWindow  = 0;
 
@@ -273,9 +235,9 @@ void ShellWM::onRelease(Window& w)
 {
     if( w.isVisible() )
     {
-        const WindowFrame* frame = static_cast<const WindowFrame*>( w.impl() );
-        if(frame)
-            repaint( frame->frameRect() );
+        WindowImpl* frame = w.impl();
+        Gfx::RectF frameRect( frame->position(), frame->size() );
+        repaint(frameRect);
     }
 }
 
@@ -466,14 +428,14 @@ void ShellWM::onRequestRepaint(const Gfx::RectF& rect)
 }
 
 
-Gfx::PointF ShellWM::onToFrame(const WindowImpl& w, 
+Gfx::PointF ShellWM::toFrame(const WindowImpl& w, 
                                const Gfx::PointF& pos) const
 {
     return pos - w.position();
 }
 
 
-Gfx::PointF ShellWM::onFromFrame(const WindowImpl& w, 
+Gfx::PointF ShellWM::fromFrame(const WindowImpl& w, 
                                  const Gfx::PointF& pos) const
 {
     return pos + w.position();
@@ -505,7 +467,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::RectF frameRect( frame->position(), frame->size() );
         frameRect = rect.intersect(frameRect);
 
-        Gfx::PointF winPos = onToFrame( *frame, frameRect.topLeft() );
+        Gfx::PointF winPos = toFrame( *frame, frameRect.topLeft() );
         Gfx::RectF winRect( winPos, rect.size() );
 
         PaintEvent pev( *frame, winRect );
@@ -579,64 +541,53 @@ void ShellWM::onResizeEvent(const ResizeEvent& ev)
 
 bool ShellWM::processMouseEvent(const MouseEvent& ev)
 {
-    //
-    // continue press sequence capture
-    // 
-    if(_grabbedFrame)
-    {
-        _grabbedFrame->onProcessMouseEvent(ev);
-
-        if( ev.isRelease() )
-        {
-            setCapture(false);
-            _grabbedFrame = 0;
-        }
-
-        return true;
-    }
-
-    Gfx::PointF pos = fromGlobal( ev.position() );
+    //if( ! acceptsInput() )
+    //    return;
 
     //
     // hit test
     //
-    WindowFrame* windowFrame = onHitTestFrame(pos);
-    
+    Gfx::PointF pos = fromGlobal( ev.position() );
+
+    WindowImpl* hitFrame = 0;
+
+    std::vector<Window*>::const_reverse_iterator rit;
+    for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
+    {
+        Window* window = *rit;
+        WindowImpl* frame = window->impl();
+
+        Gfx::PointF p = toFrame(*frame, pos);
+        Visual* hit = frame->hitTest(p);
+        if(hit)
+        {
+            hitFrame = frame;
+            break;
+        }
+    }
+
     //
     // window activation
     //
     if( ev.isPress() )
     {
-        if( ! windowFrame && _activeWindow )
+        if( ! hitFrame && _activeWindow )
         {
             _activeWindow->activate(false);
         }
         
-        if( windowFrame && ! windowFrame->window()->isActive() )
+        if( hitFrame && ! hitFrame->window().isActive() )
         {
-            windowFrame->window()->activate();
+            hitFrame->window().activate();
         }
     }
 
     //
     // propagate event to window frame
     //
-    if(windowFrame)
+    if(hitFrame)
     {
-        bool isClient = windowFrame->clientRect().contains(pos);
-        if( ! isClient )
-        {
-            if( ev.isPress() )
-            {
-                _grabbedFrame = windowFrame;
-                setCapture(true);
-
-                // TODO: make WindowFrame a proper Visual to handle events
-                //windowFrame->setPointer(true);
-            }
-        }
-
-        windowFrame->onProcessMouseEvent(ev);
+        hitFrame->processEvent(ev);
         return true;
     }
 
@@ -646,64 +597,53 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
 
 bool ShellWM::processTouchEvent(const TouchEvent& ev)
 {
-    //
-    // continue press sequence capture
-    // 
-    if(_grabbedFrame)
-    {
-        _grabbedFrame->onProcessTouchEvent(ev);
-
-        if( ev.isRelease() )
-        {
-            setCapture(false);
-            _grabbedFrame = 0;
-        }
-
-        return true;
-    }
-
-    Gfx::PointF pos = fromGlobal( ev.position() );
+    //if( ! acceptsInput() )
+    //    return;
 
     //
     // hit test
     //
-    WindowFrame* windowFrame = onHitTestFrame(pos);
-    
+    Gfx::PointF pos = fromGlobal( ev.position() );
+
+    WindowImpl* hitFrame = 0;
+
+    std::vector<Window*>::const_reverse_iterator rit;
+    for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
+    {
+        Window* window = *rit;
+        WindowImpl* frame = window->impl();
+
+        Gfx::PointF p = toFrame(*frame, pos);
+        Visual* hit = frame->hitTest(p);
+        if(hit)
+        {
+            hitFrame = frame;
+            break;
+        }
+    }
+
     //
     // window activation
     //
     if( ev.isPress() )
     {
-        if( ! windowFrame && _activeWindow )
+        if( ! hitFrame && _activeWindow )
         {
             _activeWindow->activate(false);
         }
         
-        if( windowFrame && ! windowFrame->window()->isActive() )
+        if( hitFrame && ! hitFrame->window().isActive() )
         {
-            windowFrame->window()->activate();
+            hitFrame->window().activate();
         }
     }
 
     //
     // propagate event to window frame
     //
-    if(windowFrame)
+    if(hitFrame)
     {
-        bool isClient = windowFrame->clientRect().contains(pos);
-        if( ! isClient )
-        {
-            if( ev.isPress() )
-            {
-                _grabbedFrame = windowFrame;
-                setCapture(true);
-
-                // TODO: make WindowFrame a proper Visual to handle events
-                //windowFrame->setPointer(true);
-            }
-        }
-
-        windowFrame->onProcessTouchEvent(ev);
+        hitFrame->processEvent(ev);
         return true;
     }
 

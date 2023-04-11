@@ -83,6 +83,16 @@ class WindowImpl : public Visual
 
         const PixmapSurface& surface() const;
 
+        Window& window()
+        {
+            return _window;
+        }
+
+        const Window& window() const
+        {
+            return _window;
+        }
+
     protected:
         virtual void onSetTitle(Window& w, const std::string& text) = 0;
 

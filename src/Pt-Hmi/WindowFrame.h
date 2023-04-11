@@ -173,10 +173,6 @@ class WindowFrame : public WindowImpl
 
         virtual ~WindowFrame();
 
-        Window* window();
-
-        const Window* window() const;
-
         virtual Gfx::PointF clientPos() const;
 
         const Gfx::PointF& restorePosition() const;
@@ -332,6 +328,7 @@ class WindowFrame : public WindowImpl
         Window::State  _state;
 
         Gfx::PointF    _lastPointer;
+        bool           _isCapture;
         bool           _isClient;
         bool           _isMoving;
         bool           _isLeftResizing;
