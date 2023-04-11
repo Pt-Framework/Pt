@@ -869,8 +869,9 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     winRect = Gfx::RectF( winRect.topLeft() / w.scaleFactor(), 
                           winRect.size() / w.scaleFactor() );
 
-    PaintEvent ev(w, winRect);
-    w.processEvent(ev);
+    WindowImpl* frame = w.impl();
+    PaintEvent ev(*frame, winRect);
+    frame->processEvent(ev);
 
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);

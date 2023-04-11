@@ -392,13 +392,13 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void ScreenImpl::onRepaint(Window& w, const Gfx::RectF& rect)
-{
-    Gfx::PointF screenPos = onFromWindow( w, rect.topLeft() );
-    Gfx::RectF screenRect( screenPos, rect.size() );
-
-    repaint(screenRect);
-}
+//void ScreenImpl::onRepaint(Window& w, const Gfx::RectF& rect)
+//{
+//    Gfx::PointF screenPos = onFromWindow( w, rect.topLeft() );
+//    Gfx::RectF screenRect( screenPos, rect.size() );
+//
+//    repaint(screenRect);
+//}
 
 
 void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
@@ -414,6 +414,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         Window* window = *it;
+        WindowImpl* frame = window->impl();
 
         Gfx::PointF winPos = onToWindow( *window, screenRect.topLeft() );
         Gfx::RectF winRect( winPos, screenRect.size() );

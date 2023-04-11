@@ -302,13 +302,13 @@ Gfx::PointF ShellWM::onFromWindow(const Window& w,
 }
 
 
-void ShellWM::onRepaint(Window& w, const Gfx::RectF& rect)
-{
-    Gfx::PointF windowPos = onFromWindow( w, rect.topLeft() );
-    Gfx::RectF windowRect( windowPos, rect.size() );
-
-    repaint(windowRect);
-}
+//void ShellWM::onRepaint(Window& w, const Gfx::RectF& rect)
+//{
+//    Gfx::PointF windowPos = onFromWindow( w, rect.topLeft() );
+//    Gfx::RectF windowRect( windowPos, rect.size() );
+//
+//    repaint(windowRect);
+//}
 
 
 void ShellWM::onShow(Window& w, bool visible)
@@ -466,6 +466,20 @@ void ShellWM::onRequestRepaint(const Gfx::RectF& rect)
 }
 
 
+Gfx::PointF ShellWM::onToFrame(const WindowImpl& w, 
+                               const Gfx::PointF& pos) const
+{
+    return pos - w.position();
+}
+
+
+Gfx::PointF ShellWM::onFromFrame(const WindowImpl& w, 
+                                 const Gfx::PointF& pos) const
+{
+    return pos + w.position();
+}
+
+
 void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& rect = ev.rect();
@@ -483,20 +497,25 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
     for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
         Window* window = *wit;
+        WindowImpl* frame = window->impl();
 
         if( ! window->isVisible() )
             continue;
 
-        WindowImpl* frame = window->impl();
-
         Gfx::RectF frameRect( frame->position(), frame->size() );
         frameRect = rect.intersect(frameRect);
 
-        Gfx::PointF winPos = onToWindow( *window, frameRect.topLeft() );
+        Gfx::PointF winPos = onToFrame( *frame, frameRect.topLeft() );
         Gfx::RectF winRect( winPos, rect.size() );
 
-        PaintEvent pev( *window, winRect );
-        window->processEvent(pev);
+        PaintEvent pev( *frame, winRect );
+        frame->processEvent(pev);
+
+        //Gfx::PointF winPos = onToWindow( *window, frameRect.topLeft() );
+        //Gfx::RectF winRect( winPos, rect.size() );
+
+        //PaintEvent pev( *window, winRect );
+        //window->processEvent(pev);
 
         Gfx::PointF surfacePos = frameRect.topLeft() - frame->position();
         Gfx::RectF surfaceRect( surfacePos, frameRect.size() );

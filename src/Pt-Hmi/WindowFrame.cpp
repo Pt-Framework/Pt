@@ -581,8 +581,8 @@ void WindowFrame::setFrame(double bw, double th)
 
 Gfx::PointF WindowFrame::toWindow(const Gfx::PointF& pos) const
 {
-    double offY = _borderWidth + _titleHeight;
     double offX = _borderWidth;
+    double offY = _borderWidth + _titleHeight;
 
     return pos - Gfx::PointF(offX, offY);
 }
@@ -590,8 +590,8 @@ Gfx::PointF WindowFrame::toWindow(const Gfx::PointF& pos) const
 
 Gfx::PointF WindowFrame::fromWindow(const Gfx::PointF& pos) const
 {
-    double offY = _borderWidth + _titleHeight;
     double offX = _borderWidth;
+    double offY = _borderWidth + _titleHeight;
 
     return pos + Gfx::PointF(offX, offY);
 }
@@ -643,15 +643,6 @@ void WindowFrame::onProcessCloseEvent(const CloseEvent& ev)
 
 void WindowFrame::onCloseEvent(const CloseEvent& ev)
 {
-}
-
-
-void WindowFrame::onRequestRepaint(const Gfx::RectF& rect)
-{
-    Gfx::PointF updatePos = rect.topLeft() + position();
-    Gfx::RectF updateRect( updatePos, rect.size() );
-    
-    _wm->repaint(updateRect);
 }
 
 
@@ -756,7 +747,7 @@ void WindowFrame::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
 
-    onRequestRepaint(_frameBounds);
+    repaint(_frameBounds);
 }
 
 
@@ -770,7 +761,7 @@ void WindowFrame::onEnableEvent(const EnableEvent& ev)
 {    
     Base::onEnableEvent(ev);
 
-    onRequestRepaint(_frameBounds);
+    repaint(_frameBounds);
 }
 
 
@@ -782,7 +773,7 @@ void WindowFrame::onProcessActivateEvent(const ActivateEvent& ev)
 
 void WindowFrame::onActivateEvent(const ActivateEvent& ev)
 {
-    onRequestRepaint(_frameBounds);
+    repaint(_frameBounds);
 }
 
 
@@ -1330,36 +1321,48 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 }
 
 
+void WindowFrame::onRepaint(Window& w, const Gfx::RectF& rect)
+{
+    Gfx::PointF windowPos = fromWindow( rect.topLeft() );
+    Gfx::RectF windowRect( windowPos, rect.size() );
+
+    repaint(windowRect);
+}
+
+
+void WindowFrame::onRequestRepaint(const Gfx::RectF& rect)
+{
+    Gfx::PointF updatePos = rect.topLeft() + position();
+    Gfx::RectF updateRect( updatePos, rect.size() );
+    
+    _wm->repaint(updateRect);
+}
+
+
 void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
 {
+    const Gfx::RectF& rect = ev.rect();
+    
+    Gfx::PointF winPos = toWindow( rect.topLeft() );
+    Gfx::RectF winRect( winPos, rect.size() );
+
+    PaintEvent pev(*_window, winRect);
+    _window->processEvent(pev);
+
     Base::onProcessPaintEvent(ev);
-
-    //double offX = 2 * _borderWidth;
-    //double offY = (2 * _borderWidth) + _titleHeight;
-
-    Gfx::PointF pos = ev.rect().topLeft();
-    pos.addX(_borderWidth);
-    pos.addY(_borderWidth + _titleHeight);
-
-    Gfx::SizeF size = ev.rect().size();
-    Gfx::RectF rect(pos, size);
-
-    paintFrame( this->surface(), rect );
 }
 
 
 void WindowFrame::onPaintEvent(const PaintEvent& ev)
 {
     Base::onPaintEvent(ev);
-}
 
-
-void WindowFrame::paintFrame(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
-{
     if( _borderWidth < 0.1 && _titleHeight < 0.1  )
         return;
 
-    Gfx::Painter painter(surface);
+        const Gfx::RectF& rect = ev.rect();
+
+    Gfx::Painter painter( surface() );
     painter.setClip(rect);
 
     Gfx::Color color = _window->isActive() ? _wm->activeColor()
@@ -1547,7 +1550,7 @@ void WindowFrame::paintFrame(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
         if( buttonUpdateRect.isNull() )
             continue;
 
-        button->paint(surface, buttonUpdateRect);
+        button->paint(surface(), buttonUpdateRect);
     }
 }
 

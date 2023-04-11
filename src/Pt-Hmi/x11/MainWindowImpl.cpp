@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 
 #include <cassert>
@@ -42,6 +43,7 @@ namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(WindowManager& wm, Window& w)
 : WindowImpl(wm, w)
+, _wm(wm)
 , _client(w)
 , _window(None)
 , _display(0)
@@ -232,6 +234,33 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
                True);
 
     //XFlush(_display);
+}
+
+
+void MainWindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
+{
+    Gfx::PointF pos = surface().toPhysical( rect.topLeft() );
+    Gfx::PointF screenPos = toScreen(pos);
+    screenPos = surface().toLogical(screenPos);
+
+    Gfx::RectF screenRect( screenPos, rect.size() );
+
+    _wm.repaint(screenRect);
+}
+
+
+void MainWindowImpl::onProcessPaintEvent(const PaintEvent& ev)
+{
+    Base::onProcessPaintEvent(ev);
+
+    PaintEvent rev( _window, ev.rect() );
+    _window.processEvent(rev);
+}
+
+
+void MainWindowImpl::onPaintEvent(const PaintEvent& ev)
+{
+    Base::onPaintEvent(ev);
 }
 
 

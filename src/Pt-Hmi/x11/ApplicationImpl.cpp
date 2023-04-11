@@ -302,8 +302,9 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     //                              << rect.x() << ", " << rect.y() << " " 
     //                              << rect.width() << "x" << rect.height() << std::endl;
 
-    PaintEvent pev(window, rect);
-    window.processEvent(pev);
+    WindowImpl* frame = window.impl();
+    PaintEvent pev(*frame, rect);
+    frame->processEvent(pev);
 
 #ifdef PT_HMI_X11_CORE
     MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );

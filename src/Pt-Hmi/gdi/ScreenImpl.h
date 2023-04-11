@@ -123,7 +123,7 @@ class ScreenImpl : public WindowManager
         virtual Gfx::PointF onFromWindow(const Window& w, 
                                          const Gfx::PointF& pos) const;
 
-        virtual void onRepaint(Window& w, const Gfx::RectF& rect);
+        //virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
         virtual void onShow(Window& w, bool visible); 
 

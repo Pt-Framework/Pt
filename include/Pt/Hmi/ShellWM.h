@@ -142,7 +142,7 @@ class ShellWM : public WindowManager
         virtual Gfx::PointF onFromWindow(const Window& w, 
                                          const Gfx::PointF& pos) const;
 
-        virtual void onRepaint(Window& w, const Gfx::RectF& rect);
+        //virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
         virtual void onShow(Window& w, bool visible); 
 
@@ -166,6 +166,12 @@ class ShellWM : public WindowManager
         virtual void onClosing(Window& w);
 
     protected:
+        Gfx::PointF onToFrame(const WindowImpl& w, 
+                              const Gfx::PointF& pos) const;
+
+        Gfx::PointF onFromFrame(const WindowImpl& w, 
+                                const Gfx::PointF& pos) const;
+
         virtual void onMove(WindowFrame& w, const Gfx::PointF& to);
 
         virtual void onResize(WindowFrame& w, const Gfx::SizeF& to);

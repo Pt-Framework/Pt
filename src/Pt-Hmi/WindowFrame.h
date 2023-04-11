@@ -206,6 +206,8 @@ class WindowFrame : public WindowImpl
 
         virtual void onSetState(Window& w, const WindowState& state);
 
+        virtual void onRepaint(Window& w, const Gfx::RectF& rect);
+
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
@@ -315,8 +317,6 @@ class WindowFrame : public WindowImpl
         bool checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
         void setCurrentFrameItem(FrameItem item);
-
-        void paintFrame(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     private:
         ShellWM*       _wm;

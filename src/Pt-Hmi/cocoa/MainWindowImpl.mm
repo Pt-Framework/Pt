@@ -37,6 +37,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Screen.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/PaintEvent.h>
 
@@ -46,6 +47,7 @@ namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(WindowManager& wm,  Window& w)
 : WindowImpl(wm, w)
+, _wm(wm)
 , _client(w)
 , _window(nil)
 , _view(nil)
@@ -216,6 +218,34 @@ void MainWindowImpl::paint(const Gfx::RectF& rect)
 
     NSRect invalidRect = NSMakeRect(x, y, w, h);
     [_view setNeedsDisplayInRect:invalidRect ];
+}
+
+
+void MainWindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
+{
+    //Gfx::PointF pos = surface().toPhysical( rect.topLeft() );
+    //Gfx::PointF screenPos = toScreen(pos);
+    //screenPos = surface().toLogical(screenPos);
+
+    Gfx::PointF screenPos = toScreen(pos);
+    
+    Gfx::RectF screenRect( screenPos, rect.size() );
+    _wm.repaint(screenRect);
+}
+
+
+void MainWindowImpl::onProcessPaintEvent(const PaintEvent& ev)
+{
+    Base::onProcessPaintEvent(ev);
+
+    PaintEvent rev( _window, ev.rect() );
+    _window.processEvent(rev);
+}
+
+
+void MainWindowImpl::onPaintEvent(const PaintEvent& ev)
+{
+    Base::onPaintEvent(ev);
 }
 
 
@@ -483,8 +513,9 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 
     Gfx::RectF paintRect(pos, size);
 
-    PaintEvent pev(*window, paintRect);
-    window->processEvent(pev);
+    WindowImpl* frame = window.impl();
+    PaintEvent pev(*frame, paintRect);
+    frame->processEvent(pev);
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];

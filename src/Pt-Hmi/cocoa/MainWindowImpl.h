@@ -145,6 +145,8 @@ class MainWindowImpl : public WindowImpl
 
         virtual void onSetState(Window& w, const WindowState& state);
 
+        virtual void onRepaint(Window& w, const Gfx::RectF& rect);
+
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
@@ -152,6 +154,11 @@ class MainWindowImpl : public WindowImpl
         virtual void onClose(Window& w);
 
     protected:
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         
@@ -170,6 +177,7 @@ class MainWindowImpl : public WindowImpl
         virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
+        WindowManager&           _wm;
         Window&                  _client;
         NSWindow*                _window;
         NSView*                  _view;

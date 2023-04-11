@@ -414,8 +414,8 @@ void Window::onRequestRepaint(const Gfx::RectF& rect)
 {
     //std::clog << "REPAINT: " << title() << std::endl;
 
-    if(_parent)
-        _parent->onRepaint(*this, rect);
+    if(_impl)
+        _impl->onRepaint(*this, rect);
 }
 
 
@@ -430,11 +430,11 @@ void Window::onProcessPaintEvent(const PaintEvent& ev)
 
     Base::onProcessPaintEvent(ev);
 
-    if(_impl)
-    {
-        PaintEvent pev(*_impl, rect);
-        _impl->processEvent(pev);
-    }
+    //if(_impl)
+    //{
+    //    PaintEvent pev(*_impl, rect);
+    //    _impl->processEvent(pev);
+    //}
 }
 
 

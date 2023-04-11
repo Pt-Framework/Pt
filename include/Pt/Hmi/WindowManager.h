@@ -77,7 +77,7 @@ class WindowManager : public Visual
         virtual Gfx::PointF onFromWindow(const Window& w, 
                                          const Gfx::PointF& pos) const = 0;
 
-        virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
+        //virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
 
         virtual void onShow(Window& w, bool visible) = 0; 
 
