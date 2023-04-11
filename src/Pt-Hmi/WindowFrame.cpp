@@ -729,6 +729,11 @@ void WindowFrame::onProcessEvent(const Pt::Event& ev)
 void WindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);
+
+    double scaling = ev.scaleFactor();
+
+    RescaleEvent rev(*_window, scaling);
+    _window->processEvent(rev);
 }
 
 

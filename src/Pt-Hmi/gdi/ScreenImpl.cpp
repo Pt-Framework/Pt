@@ -190,8 +190,9 @@ void ScreenImpl::onDetach(Window& w)
 
 void ScreenImpl::onInit(Window& w)
 {
-    RescaleEvent ev( w, scaleFactor() );
-    w.processEvent(ev);
+    WindowImpl* frame = w.impl();
+    RescaleEvent ev( *frame, scaleFactor() );
+    frame->processEvent(ev);
 }
 
 
@@ -341,9 +342,10 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         Window* window = *wit;
-        
-        RescaleEvent ev(*window, scaling);
-        window->processEvent(ev);
+        WindowImpl* frame = window->impl();
+
+        RescaleEvent ev(*frame, scaling);
+        frame->processEvent(ev);
     }
 }
 

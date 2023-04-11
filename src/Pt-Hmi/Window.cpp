@@ -627,13 +627,13 @@ void Window::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
 
-    if(_impl)
-    {
-        RescaleEvent rev(*_impl, scaling);
-        _impl->processEvent(rev);
+    //if(_impl)
+    //{
+    //    RescaleEvent rev(*_impl, scaling);
+    //    _impl->processEvent(rev);
 
-        scaling = _impl->scaleFactor();
-    }       
+    //    scaling = _impl->scaleFactor();
+    //}       
 
     RescaleEvent rev(*this, scaling);
     Base::onProcessRescaleEvent(rev);

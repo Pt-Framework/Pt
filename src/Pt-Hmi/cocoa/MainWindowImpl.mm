@@ -144,11 +144,13 @@ void MainWindowImpl::setType(WindowType type)
 void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
-
     scaling *= [_window backingScaleFactor];
 
     RescaleEvent rev(*this, scaling);
     Base::onProcessRescaleEvent(rev);
+
+    RescaleEvent rev2(_client, scaling);
+    _client.processEvent(rev2);
 }
 
 

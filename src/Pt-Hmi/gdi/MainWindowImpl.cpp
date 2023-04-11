@@ -151,8 +151,6 @@ void MainWindowImpl::paint(const Gfx::RectF& rect)
 
 void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    double scaling = ev.scaleFactor();
-
     //HDC screen = GetDC(_hwnd);
     //int dpix = GetDeviceCaps(screen, LOGPIXELSX);
     //std::clog << "HWND SCALING DPI: " << dpix << std::endl;
@@ -161,8 +159,11 @@ void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
     //std::clog << "HWND SCALING: " << dpix / 96.0 << std::endl;
     //scaling *= hwndScaleFactor;
 
-    RescaleEvent rev(*this, scaling);
-    Base::onProcessRescaleEvent(rev);
+    Base::onProcessRescaleEvent(ev);
+
+    double scaling = ev.scaleFactor();
+    RescaleEvent rev(_window, scaling);
+    _window.processEvent(rev);
 }
 
 

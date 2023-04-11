@@ -262,7 +262,8 @@ void ShellWM::onInit(Window& w)
 {
     double scaling = scaleFactor();
     
-    RescaleEvent ev(w, scaling);
+    WindowImpl* frame = w.impl();
+    RescaleEvent ev(*frame, scaling);
     w.processEvent(ev);
     //Application::instance().loop().commitEvent(ev);
 }
@@ -445,9 +446,10 @@ void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
     for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
         Window* window = *wit;
+        WindowImpl* frame = window->impl();
 
-        RescaleEvent rev(*window, scaling);
-        window->processEvent(rev);
+        RescaleEvent rev(*frame, scaling);
+        frame->processEvent(rev);
 
         if(window->state() == WindowState::Maximized)
         {

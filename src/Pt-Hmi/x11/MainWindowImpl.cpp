@@ -332,10 +332,11 @@ void MainWindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 
 void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    double scaling = ev.scaleFactor();
+    Base::onProcessRescaleEvent(ev);
 
-    RescaleEvent rev(*this, scaling);
-    Base::onProcessRescaleEvent(rev);
+    double scaling = ev.scaleFactor();
+    RescaleEvent rev(_client, scaling);
+    _client.processEvent(rev);
 }
 
 
