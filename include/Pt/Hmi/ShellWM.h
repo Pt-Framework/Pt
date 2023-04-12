@@ -134,11 +134,11 @@ class ShellWM : public WindowManager
 
         virtual void onRelease(Window& w);
 
-        virtual Gfx::PointF onToWindow(const Window& w, 
-                                       const Gfx::PointF& pos) const;
+        //virtual Gfx::PointF onToWindow(const Window& w, 
+        //                               const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromWindow(const Window& w, 
-                                         const Gfx::PointF& pos) const;
+        //virtual Gfx::PointF onFromWindow(const Window& w, 
+        //                                 const Gfx::PointF& pos) const;
 
         //virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
@@ -164,10 +164,10 @@ class ShellWM : public WindowManager
         virtual void onClosing(Window& w);
 
     protected:
-        Gfx::PointF toFrame(const WindowImpl& w, 
+        Gfx::PointF toFrame(const WindowFrame& w, 
                             const Gfx::PointF& pos) const;
 
-        Gfx::PointF fromFrame(const WindowImpl& w, 
+        Gfx::PointF fromFrame(const WindowFrame& w, 
                               const Gfx::PointF& pos) const;
 
         virtual void onMove(WindowFrame& w, const Gfx::PointF& to);

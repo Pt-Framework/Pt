@@ -29,9 +29,8 @@
 #ifndef Pt_Hmi_WindowManagerBase_h
 #define Pt_Hmi_WindowManagerBase_h
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/WindowType.h>
-#include <Pt/Gfx/Point.h>
+#include <Pt/Hmi/Visual.h>
+#include <Pt/Gfx/Size.h>
 
 namespace Pt {
 
@@ -43,24 +42,11 @@ class WindowImpl;
 class WindowManager : public Visual
 {
     friend class Window;
-    friend class WindowImpl;
 
     public:
         WindowManager();
 
         virtual ~WindowManager();
-
-        Gfx::PointF toWindow(const Window& w, 
-                             const Gfx::PointF& pos) const
-        { 
-            return onToWindow(w, pos); 
-        }
-
-        Gfx::PointF fromWindow(const Window& w,
-                               const Gfx::PointF& pos) const
-        { 
-            return onFromWindow(w, pos); 
-        }
 
     protected:
         virtual WindowImpl* onAttach(Window& w) = 0;
@@ -71,29 +57,14 @@ class WindowManager : public Visual
 
         virtual void onRelease(Window& w) = 0;
 
-        virtual Gfx::PointF onToWindow(const Window& w, 
-                                       const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onFromWindow(const Window& w, 
-                                         const Gfx::PointF& pos) const = 0;
-
-        //virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
-
+    protected:
         virtual void onShow(Window& w, bool visible) = 0; 
 
         virtual void onActivate(Window& w, bool active) = 0; 
 
         virtual void onEnableRequest(Window& w, bool enable) = 0;
 
-        //virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
-
         virtual void onSetAbove(Window& w, bool above) = 0;
-
-        //virtual void onSetTitle(Window& w, const std::string& text) = 0;
-
-        //virtual void onSetIcon(Window& w, const Gfx::Image& icon) = 0;
-
-        //virtual void onSetState(Window& w, const WindowState& state) = 0;
 
         virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
                                                 const Gfx::SizeF& maxSize) = 0;

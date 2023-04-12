@@ -48,6 +48,7 @@ namespace Pt {
 namespace Hmi {
 
 class ApplicationImpl;
+class MainWindowImpl;
 class Window;
 class MouseEvent;
 class TouchEvent;
@@ -57,6 +58,8 @@ class KeyEvent;
 class ScreenImpl : public WindowManager
 {
     typedef WindowManager Base;
+
+    friend class MainWindowImpl;
 
     public:
         ScreenImpl(ApplicationImpl& app);
@@ -76,8 +79,13 @@ class ScreenImpl : public WindowManager
 
         void setCapture(Visual* capture);
 
+    
+    protected:
+        Gfx::PointF toFrame(const MainWindowImpl& w, 
+                            const Gfx::PointF& pos) const;
 
-        //double scaleFactor() const;
+        Gfx::PointF fromFrame(const MainWindowImpl& w, 
+                              const Gfx::PointF& pos) const;
 
     //
     // Responder
@@ -117,11 +125,11 @@ class ScreenImpl : public WindowManager
 
         virtual void onRelease(Window& w);
 
-        virtual Gfx::PointF onToWindow(const Window& w, 
-                                       const Gfx::PointF& pos) const;
+        //virtual Gfx::PointF onToWindow(const Window& w, 
+        //                               const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromWindow(const Window& w, 
-                                         const Gfx::PointF& pos) const;
+        //virtual Gfx::PointF onFromWindow(const Window& w, 
+        //                                 const Gfx::PointF& pos) const;
 
         //virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 

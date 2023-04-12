@@ -93,6 +93,20 @@ const std::vector<Window*>& ScreenImpl::windows() const
     return _windows;
 }
 
+
+Gfx::PointF ScreenImpl::toFrame(const MainWindowImpl& frame, 
+                                const Gfx::PointF& pos) const
+{
+    return frame.fromScreen(pos);
+}
+
+
+Gfx::PointF ScreenImpl::fromFrame(const MainWindowImpl& frame, 
+                                  const Gfx::PointF& pos) const
+{
+    return frame.toScreen(pos);
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
@@ -106,7 +120,9 @@ Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
     for(it = _windows.rbegin(); it != _windows.rend(); ++it)
     {
         Window* win = *it;
-        Gfx::PointF pos = toWindow(*win, p);
+        MainWindowImpl* frame = static_cast<MainWindowImpl*>( win->impl() );
+
+        Gfx::PointF pos = toFrame(*frame, p);
 
         Visual* hit = win->hitTest(pos);
         if(hit)
@@ -119,19 +135,13 @@ Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 
 Gfx::PointF ScreenImpl::onToParent(const Gfx::PointF& pos) const
 {
-    if( ! _parent )
-        return pos;
-
-    return _parent->toParent(pos);
+    return pos + position();;
 }
 
 
 Gfx::PointF ScreenImpl::onFromParent(const Gfx::PointF& pos) const
 {
-    if( ! _parent )
-        return pos;
-
-    return _parent->fromParent(pos);
+    return pos - position();
 }
 
 
@@ -188,30 +198,6 @@ void ScreenImpl::onInit(Window& w)
 
 void ScreenImpl::onRelease(Window& w)
 {
-}
-
-
-Gfx::PointF ScreenImpl::onFromWindow(const Window& w,
-                                     const Gfx::PointF& pos) const
-{
-    const MainWindowImpl* impl = static_cast<const MainWindowImpl*>( w.impl() );
-
-    Gfx::PointF physicalPos = w.surface().toPhysical(pos);
-    Gfx::PointF parentPos = impl->toScreen(physicalPos);
-    Gfx::PointF logicalPos = w.surface().toLogical(parentPos);
-    return logicalPos;
-}
-
-
-Gfx::PointF ScreenImpl::onToWindow(const Window& w,
-                                   const Gfx::PointF& pos) const
-{
-    const MainWindowImpl* impl = static_cast<const MainWindowImpl*>( w.impl() );
-
-    Gfx::PointF physicalPos = w.surface().toPhysical(pos);
-    Gfx::PointF windowPos = impl->fromScreen(physicalPos);
-    Gfx::PointF logicalPos = w.surface().toLogical(windowPos);
-    return logicalPos;
 }
 
 
@@ -414,9 +400,9 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         Window* window = *it;
-        WindowImpl* frame = window->impl();
+        MainWindowImpl* frame = static_cast<MainWindowImpl*>( window->impl() );
 
-        Gfx::PointF winPos = onToWindow( *window, screenRect.topLeft() );
+        Gfx::PointF winPos = toFrame( *frame, screenRect.topLeft() );
         Gfx::RectF winRect( winPos, screenRect.size() );
 
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );
@@ -425,8 +411,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         winRect = Gfx::RectF( winRect.topLeft() * window->scaleFactor(),
                               winRect.size() * window->scaleFactor());
 
-        MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
-        impl->paint(winRect);
+        frame->paint(winRect);
     }
 }
 

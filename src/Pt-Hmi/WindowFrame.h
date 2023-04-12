@@ -187,15 +187,18 @@ class WindowFrame : public WindowImpl
 
         void setFrame(double bw, double th);
 
-        Gfx::PointF toWindow(const Gfx::PointF& pos) const;
-
-        Gfx::PointF fromWindow(const Gfx::PointF& pos) const;
-
+    public:
         void onProcessMouseEvent(const MouseEvent& mev);
 
         void onProcessTouchEvent(const TouchEvent& tev);
 
     public:
+        virtual Gfx::PointF onToWindow(const Window& w, 
+                                       const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromWindow(const Window& w, 
+                                         const Gfx::PointF& pos) const;
+
         virtual void onSetTitle(Window& w, const std::string& text);
 
         virtual void onSetIcon(Window& w, const Gfx::Image& icon);

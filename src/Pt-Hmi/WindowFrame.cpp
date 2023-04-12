@@ -411,7 +411,7 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
 , _isBottomResizing(false)
 , _currentFrameItem(OnNone)
 {
-    Base::onSetParent(&window);
+    Base::onSetParent(&shell);
 
     eventReceived() += Pt::slot(*this, &WindowFrame::onProcessActivateEvent);
     
@@ -568,24 +568,6 @@ void WindowFrame::setFrame(double bw, double th)
 }
 
 
-Gfx::PointF WindowFrame::toWindow(const Gfx::PointF& pos) const
-{
-    double offX = _borderWidth;
-    double offY = _borderWidth + _titleHeight;
-
-    return pos - Gfx::PointF(offX, offY);
-}
-
-
-Gfx::PointF WindowFrame::fromWindow(const Gfx::PointF& pos) const
-{
-    double offX = _borderWidth;
-    double offY = _borderWidth + _titleHeight;
-
-    return pos + Gfx::PointF(offX, offY);
-}
-
-
 void WindowFrame::onMenu()
 {
 }
@@ -659,6 +641,26 @@ void WindowFrame::onLayout()
 }
 
 
+Gfx::PointF WindowFrame::onToWindow(const Window& w, 
+                                    const Gfx::PointF& pos) const
+{
+    double offX = _borderWidth;
+    double offY = _borderWidth + _titleHeight;
+
+    return pos - Gfx::PointF(offX, offY);
+}
+
+
+Gfx::PointF WindowFrame::onFromWindow(const Window& w, 
+                                      const Gfx::PointF& pos) const
+{
+    double offX = _borderWidth;
+    double offY = _borderWidth + _titleHeight;
+
+    return pos + Gfx::PointF(offX, offY);
+}
+
+
 Visual* WindowFrame::onHitTest(const Gfx::PointF& pos)
 {
     if( ! bounds().contains(pos) || ! isVisible() )
@@ -666,7 +668,7 @@ Visual* WindowFrame::onHitTest(const Gfx::PointF& pos)
 
     if(_window)
     {
-        Gfx::PointF p = toWindow(pos);
+        Gfx::PointF p = onToWindow(*_window, pos);
         Visual* hit = _window->hitTest(p);
         if(hit)
             return hit;
@@ -678,25 +680,13 @@ Visual* WindowFrame::onHitTest(const Gfx::PointF& pos)
 
 Gfx::PointF WindowFrame::onToParent(const Gfx::PointF& pos) const
 { 
-    if( ! _window )
-        return pos;
-
-    double offY = _borderWidth + _titleHeight;
-    double offX = _borderWidth;
-
-    return pos - Gfx::PointF(offX, offY); 
+    return _wm->fromFrame(*this, pos);
 }
 
         
 Gfx::PointF WindowFrame::onFromParent(const Gfx::PointF& pos) const
-{ 
-    if( ! _window )
-        return pos;
-
-    double offY = _borderWidth + _titleHeight;
-    double offX = _borderWidth;
-
-    return pos + Gfx::PointF(offX, offY); 
+{
+    return _wm->toFrame(*this, pos);
 }
 
 
@@ -1339,7 +1329,7 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 
 void WindowFrame::onRepaint(Window& w, const Gfx::RectF& rect)
 {
-    Gfx::PointF windowPos = fromWindow( rect.topLeft() );
+    Gfx::PointF windowPos = onFromWindow( *_window, rect.topLeft() );
     Gfx::RectF windowRect( windowPos, rect.size() );
 
     repaint(windowRect);
@@ -1359,7 +1349,7 @@ void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& rect = ev.rect();
     
-    Gfx::PointF winPos = toWindow( rect.topLeft() );
+    Gfx::PointF winPos = onToWindow( *_window, rect.topLeft() );
     Gfx::RectF winRect( winPos, rect.size() );
 
     PaintEvent pev(*_window, winRect);

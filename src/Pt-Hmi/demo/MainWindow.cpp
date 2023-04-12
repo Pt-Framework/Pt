@@ -68,7 +68,7 @@ MainWindow::MainWindow()
 
     //_child2.setTopMost(true);
     _child2.resize( Gfx::SizeF(550, 600) );
-    _shell.addWindow( _child2 );
+    //_shell.addWindow( _child2 );
 
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(10, 10) );

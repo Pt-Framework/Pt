@@ -42,13 +42,14 @@ namespace Pt {
 namespace Hmi {
 
 class Screen;
+class ScreenImpl;
 
 class MainWindowImpl : public WindowImpl
 {
     typedef WindowImpl Base;
 
     public:
-        MainWindowImpl(WindowManager& wm,  Window& w);
+        MainWindowImpl(ScreenImpl& wm,  Window& w);
 
         ~MainWindowImpl();
 
@@ -86,6 +87,12 @@ class MainWindowImpl : public WindowImpl
         }
 
     protected:
+        virtual Gfx::PointF onToWindow(const Window& w, 
+                                       const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromWindow(const Window& w, 
+                                         const Gfx::PointF& pos) const;
+
         virtual void onSetTitle(Window& w, const std::string& text);
 
         virtual void onSetIcon(Window& w, const Gfx::Image& icon);
@@ -101,6 +108,11 @@ class MainWindowImpl : public WindowImpl
         virtual void onClose(Window& w);
 
     protected:
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+        
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -124,7 +136,7 @@ class MainWindowImpl : public WindowImpl
         virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
-        WindowManager& _wm;
+        ScreenImpl&    _wm;
         Window&        _window;
         HWND           _hwnd;
 };

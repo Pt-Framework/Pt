@@ -94,6 +94,12 @@ class WindowImpl : public Visual
         }
 
     protected:
+        virtual Gfx::PointF onToWindow(const Window& w, 
+                                       const Gfx::PointF& pos) const = 0;
+
+        virtual Gfx::PointF onFromWindow(const Window& w, 
+                                         const Gfx::PointF& pos) const = 0;
+
         virtual void onSetTitle(Window& w, const std::string& text) = 0;
 
         virtual void onSetIcon(Window& w, const Gfx::Image& icon) = 0;
@@ -109,11 +115,6 @@ class WindowImpl : public Visual
         virtual void onClose(Window& w) = 0;
 
     protected:
-        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
-        
-        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
-
-        
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescaleEvent(const RescaleEvent& ev);
@@ -365,7 +366,7 @@ class PT_HMI_API Window : public Form
 
     private:
         WindowImpl*                  _impl;
-        WindowManager*               _parent;
+        WindowManager*               _wm;
 
         bool                         _show; 
         bool                         _isActive;

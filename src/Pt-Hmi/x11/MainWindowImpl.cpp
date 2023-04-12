@@ -28,6 +28,7 @@
 
 #include "MainWindowImpl.h"
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
 #include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
@@ -41,7 +42,7 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(WindowManager& wm, Window& w)
+MainWindowImpl::MainWindowImpl(ScreenImpl& wm, Window& w)
 : WindowImpl(wm, w)
 , _wm(wm)
 , _client(w)
@@ -140,6 +141,8 @@ void MainWindowImpl::create(Window::Type type)
 
     Atom atomDeleteWindow = Application::instance().impl()->wmDeleteWindow();
     XSetWMProtocols(_display, _window, &atomDeleteWindow, 1);
+
+    Base::onSetParent(&wm);
 }
 
 
@@ -175,11 +178,13 @@ void MainWindowImpl::setType(Window::Type type)
 }
 
 
-Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
+Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
 {
+    Gfx::PointF physicalPos = surface().toPhysical(pos);
+
     ::Window root = DefaultRootWindow(_display);
-    int windowX = lround( windowPos.x() );
-    int windowY = lround( windowPos.y() );
+    int windowX = lround( physicalPos.x() );
+    int windowY = lround( physicalPos.y() );
     int screenX = 0;
     int screenY = 0;
     ::Window child = 0;
@@ -187,15 +192,19 @@ Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
     XTranslateCoordinates(_display, _window, root,
                           windowX, windowY, &screenX, &screenY, &child);
 
-    return Gfx::PointF(screenX, screenY);
+    Gfx::PointF screenPos(screenX, screenY);
+    Gfx::PointF logicalPos = surface().toLogical(screenPos);
+    return logicalPos;
 }
 
 
-Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
+Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
 {
+    Gfx::PointF physicalPos = surface().toPhysical(pos);
+
     ::Window root = DefaultRootWindow(_display);
-    int screenX = lround( screenPos.x() );
-    int screenY = lround( screenPos.y() );
+    int screenX = lround( physicalPos.x() );
+    int screenY = lround( physicalPos.y() );
     int windowX = 0;
     int windowY = 0;
     ::Window child = 0;
@@ -203,7 +212,35 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
     XTranslateCoordinates(_display, root, _window,
                           screenX, screenY, &windowX, &windowY, &child);
 
-    return Gfx::PointF(windowX, windowY);
+    Gfx::PointF clientPos(windowX, windowY);
+    Gfx::PointF logicalPos = surface().toLogical(clientPos);
+    return logicalPos;
+}
+
+
+Gfx::PointF MainWindowImpl::onToWindow(const Window& w, 
+                                       const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+Gfx::PointF MainWindowImpl::onFromWindow(const Window& w, 
+                                         const Gfx::PointF& pos) const
+{
+    return pos;
+}
+
+
+Gfx::PointF MainWindowImpl::onToParent(const Gfx::PointF& pos) const
+{
+    return _wm.fromFrame(*this, pos); 
+}
+     
+        
+Gfx::PointF MainWindowImpl::onFromParent(const Gfx::PointF& pos) const
+{ 
+    return _wm.toFrame(*this, pos); 
 }
 
 
@@ -239,10 +276,7 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
 
 void MainWindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
 {
-    Gfx::PointF pos = surface().toPhysical( rect.topLeft() );
-    Gfx::PointF screenPos = toScreen(pos);
-    screenPos = surface().toLogical(screenPos);
-
+    Gfx::PointF screenPos = toScreen( rect.topLeft() );
     Gfx::RectF screenRect( screenPos, rect.size() );
 
     _wm.repaint(screenRect);

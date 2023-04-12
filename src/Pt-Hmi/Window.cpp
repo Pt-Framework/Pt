@@ -72,18 +72,6 @@ const PixmapSurface& WindowImpl::surface() const
 }
 
 
-Gfx::PointF WindowImpl::onToParent(const Gfx::PointF& pos) const
-{ 
-    return pos; 
-}
-     
-        
-Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
-{ 
-    return pos; 
-}
-
-
 void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);
@@ -139,7 +127,7 @@ void WindowImpl::onCloseEvent(const CloseEvent& ev)
 
 Window::Window(WindowManager* parent, WindowType type)
 : _impl(0)
-, _parent(0)
+, _wm(0)
 , _show(false)
 , _isActive(false)
 , _enabled(true)
@@ -168,7 +156,7 @@ Window::~Window()
 
 void Window::setParent(WindowManager& parent)
 {
-    if(_parent == &parent)
+    if(_wm == &parent)
         return;
 
     unparent();
@@ -176,14 +164,14 @@ void Window::setParent(WindowManager& parent)
     _isClosed = false;
 
     _impl = parent.onAttach(*this);
-    _parent = &parent;
+    _wm = &parent;
    
-    _parent->onInit(*this);
-    _parent->onSetSizeLimits(*this, minimumSize(), maximumSize());
+    _wm->onInit(*this);
+    _wm->onSetSizeLimits(*this, minimumSize(), maximumSize());
     _impl->onSetState(*this, _state);
     _impl->onSetTitle(*this, _title);
     _impl->onSetIcon(*this, _icon);
-    _parent->onSetAbove(*this, _isAbove);
+    _wm->onSetAbove(*this, _isAbove);
 
     if(_state == WindowState::Normal)
     {
@@ -193,27 +181,27 @@ void Window::setParent(WindowManager& parent)
             _impl->onResize(*this, _requestedSize);
     }
     
-    _parent->onActivate(*this, _isActive);
-    _parent->onEnableRequest(*this, _enabled);
-    _parent->onShow(*this, _show);
+    _wm->onActivate(*this, _isActive);
+    _wm->onEnableRequest(*this, _enabled);
+    _wm->onShow(*this, _show);
     
-    onSetParent(_parent);
+    onSetParent(_impl);
 }
 
 
 void Window::unparent()
 {
-    if( ! _parent )
+    if( ! _wm )
         return;
 
-    _parent->onRelease(*this);
-    _parent->onDetach(*this);
-    _parent = 0;
+    _wm->onRelease(*this);
+    _wm->onDetach(*this);
+    _wm = 0;
 
     delete _impl;
     _impl = 0;
 
-    onSetParent(_parent);
+    onSetParent(0);
 }
 
 
@@ -251,7 +239,7 @@ Gfx::SizeF Window::setAutoSize(const SizePolicy& policy)
     _sizePolicy = policy;
     _autoSize = true;
 
-    if( ! _parent )
+    if( ! _wm )
     {
         Screen& screen = Application::instance().screen();
         screen.addWindow(*this);
@@ -321,8 +309,8 @@ void Window::onSetSizeLimits(const Gfx::SizeF& minSize,
 {
     Base::onSetSizeLimits(minSize, maxSize);
     
-    if(_parent)
-        _parent->onSetSizeLimits(*this, minSize, maxSize);
+    if(_wm)
+        _wm->onSetSizeLimits(*this, minSize, maxSize);
 }
 
 
@@ -369,19 +357,19 @@ Visual* Window::onHitTest(const Gfx::PointF& p)
 
 Gfx::PointF Window::onToParent(const Gfx::PointF& pos) const
 {
-    if( ! _parent )
+    if( ! _impl )
         return pos;
 
-    return _parent->onFromWindow(*this, pos);
+    return _impl->onFromWindow(*this, pos);
 }
 
 
 Gfx::PointF Window::onFromParent(const Gfx::PointF& pos) const
 {
-    if( ! _parent )
+    if( ! _impl )
         return pos;
 
-    return _parent->onToWindow(*this, pos);
+    return _impl->onToWindow(*this, pos);
 }
 
 
@@ -467,8 +455,8 @@ void Window::onRequestActivate(bool active)
 {
     _isActive = active;
 
-    if( _parent )
-        _parent->onActivate(*this, active);
+    if( _wm )
+        _wm->onActivate(*this, active);
     else
         _isActive = active;
 }
@@ -496,7 +484,7 @@ void Window::onRequestShow(bool b)
 {   
     _show = b;
 
-    if( ! _parent )
+    if( ! _wm )
     {
         Screen& screen = Application::instance().screen();
         screen.addWindow(*this);
@@ -504,7 +492,7 @@ void Window::onRequestShow(bool b)
     
     invalidate();
 
-    _parent->onShow(*this, b);
+    _wm->onShow(*this, b);
 }
 
 
@@ -581,8 +569,8 @@ void Window::onRequestEnable(bool e)
 {
     _enabled = e;
 
-    if(_parent)
-        _parent->onEnableRequest(*this, e);
+    if(_wm)
+        _wm->onEnableRequest(*this, e);
 }
 
 
@@ -724,8 +712,8 @@ void Window::setAbove(bool above)
 {
     _isAbove = above;
 
-    if(_parent)
-        _parent->onSetAbove(*this, above);
+    if(_wm)
+        _wm->onSetAbove(*this, above);
 }
 
 

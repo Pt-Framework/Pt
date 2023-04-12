@@ -43,12 +43,14 @@ namespace Pt {
 
 namespace Hmi {
 
+class ScreenImpl;
+
 class MainWindowImpl : public WindowImpl
 {
     typedef WindowImpl Base;
 
     public:
-        MainWindowImpl(WindowManager& wm,  Window& w);
+        MainWindowImpl(ScreenImpl& wm,  Window& w);
 
         virtual ~MainWindowImpl();
 
@@ -106,6 +108,12 @@ class MainWindowImpl : public WindowImpl
         }
 
     protected:
+        virtual Gfx::PointF onToWindow(const Window& w, 
+                                       const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromWindow(const Window& w, 
+                                         const Gfx::PointF& pos) const;
+        
         virtual void onSetTitle(Window& w, const std::string& text);
 
         virtual void onSetIcon(Window& w, const Gfx::Image& icon);
@@ -121,6 +129,11 @@ class MainWindowImpl : public WindowImpl
         virtual void onClose(Window& w);
 
     protected:
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+        
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+        
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -153,7 +166,7 @@ class MainWindowImpl : public WindowImpl
         bool isMaximized();
 
     private:
-        WindowManager& _wm;
+        ScreenImpl&    _wm;
         Window&        _client;
         ::Window       _window;
         ::Display*     _display;
