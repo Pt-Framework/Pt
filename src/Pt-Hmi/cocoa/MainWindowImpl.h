@@ -159,6 +159,8 @@ class MainWindowImpl : public WindowImpl
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
+        virtual void onShow(Window& w, bool visible);
+
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
