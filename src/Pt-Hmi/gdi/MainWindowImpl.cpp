@@ -310,9 +310,33 @@ void MainWindowImpl::onShowEvent(const ShowEvent& ev)
 }
 
 
-void MainWindowImpl::activate()
+//void MainWindowImpl::activate()
+//{
+//    SetActiveWindow(_hwnd);
+//}
+
+
+void MainWindowImpl::onActivate(Window& w, bool active)
 {
+    if( ! active )
+        return;
+
     SetActiveWindow(_hwnd);
+}
+
+
+void MainWindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
+{
+    Base::onProcessActivateEvent(ev);
+
+    ActivateEvent aev( _window, ev.isActive() );
+    _window.processEvent(aev);
+}
+
+
+void MainWindowImpl::onActivateEvent(const ActivateEvent& ev)
+{
+    Base::onActivateEvent(ev);
 }
 
 

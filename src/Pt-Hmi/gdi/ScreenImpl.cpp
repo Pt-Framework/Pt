@@ -213,14 +213,14 @@ void ScreenImpl::onRelease(WindowImpl& w)
 //}
 
 
-void ScreenImpl::onActivate(Window& w, bool active)
-{
-    if( ! active )
-        return;
-
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->activate();
-}
+//void ScreenImpl::onActivate(Window& w, bool active)
+//{
+//    if( ! active )
+//        return;
+//
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->activate();
+//}
 
 
 void ScreenImpl::onEnableRequest(Window& w, bool enable)

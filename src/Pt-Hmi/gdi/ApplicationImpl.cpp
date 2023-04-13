@@ -656,7 +656,7 @@ bool ApplicationImpl::onClose(Window& w)
 
 void ApplicationImpl::onActivate(Window& w, bool a)
 {
-    ActivateEvent aev(w, a);
+    ActivateEvent aev(*w.impl(), a);
     commitEvent(aev);
 }
 

@@ -385,8 +385,35 @@ void MainWindowImpl::onShowEvent(const ShowEvent& ev)
 }
 
 
-void MainWindowImpl::activate()
+//void MainWindowImpl::activate()
+//{
+//    //XSetInputFocus(_display, _window, RevertToNone, CurrentTime);
+//
+//    XEvent xev;
+//    memset(&xev, 0, sizeof(xev));
+//    xev.type = ClientMessage;
+//    xev.xclient.display      = _display;
+//    xev.xclient.window       = _window;
+//    xev.xclient.message_type = Application::instance().impl()->netWmActiveWindow();
+//    xev.xclient.format       = 32;
+//    xev.xclient.data.l[0]    = 2L; /* 2 == Message from a window pager */
+//    xev.xclient.data.l[1]    = CurrentTime;
+//
+//    XWindowAttributes wattr;
+//    XGetWindowAttributes(_display, _window, &wattr);
+//
+//    XSendEvent(_display, XDefaultRootWindow(_display),
+//               False, SubstructureNotifyMask|SubstructureRedirectMask, &xev);
+//
+//    //XFlush(_display);
+//}
+
+
+void MainWindowImpl::onActivate(Window& w, bool active)
 {
+    if( ! active )
+        return;
+
     //XSetInputFocus(_display, _window, RevertToNone, CurrentTime);
 
     XEvent xev;
@@ -406,6 +433,21 @@ void MainWindowImpl::activate()
                False, SubstructureNotifyMask|SubstructureRedirectMask, &xev);
 
     //XFlush(_display);
+}
+
+
+void MainWindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
+{
+    Base::onProcessActivateEvent(ev);
+
+    ActivateEvent aev( _window, ev.isActive() );
+    _window.processEvent(aev);
+}
+
+
+void MainWindowImpl::onActivateEvent(const ActivateEvent& ev)
+{
+    Base::onActivateEvent(ev);
 }
 
 

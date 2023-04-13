@@ -114,6 +114,8 @@ class WindowImpl : public Visual
 
         virtual void onShow(Window& w, bool visible) = 0;
 
+        virtual void onActivate(Window& w, bool active) = 0;
+
         virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
 
         virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;
@@ -131,6 +133,11 @@ class WindowImpl : public Visual
         virtual void onResizeEvent(const ResizeEvent& ev);
 
         
+        virtual void onProcessActivateEvent(const ActivateEvent& ev);
+
+        virtual void onActivateEvent(const ActivateEvent& ev);
+
+
         virtual void onProcessWindowStateEvent(const WindowStateEvent& ev);
 
         virtual void onWindowStateEvent(const WindowStateEvent& ev);

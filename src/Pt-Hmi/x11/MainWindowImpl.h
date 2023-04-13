@@ -128,6 +128,8 @@ class MainWindowImpl : public WindowImpl
 
         virtual void onShow(Window& w, bool visible);
 
+        virtual void onActivate(Window& w, bool active);
+
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
@@ -148,6 +150,11 @@ class MainWindowImpl : public WindowImpl
         virtual void onProcessShowEvent(const ShowEvent& ev);
 
         virtual void onShowEvent(const ShowEvent& ev);
+
+
+        virtual void onProcessActivateEvent(const ActivateEvent& ev);
+
+        virtual void onActivateEvent(const ActivateEvent& ev);
 
 
         virtual void onProcessResizeEvent(const ResizeEvent& ev);

@@ -50,6 +50,7 @@ WindowImpl::WindowImpl(WindowManager& wm, Window& window)
 : _wm(wm)
 , _window(window)
 {
+    eventReceived() += Pt::slot(*this, &WindowImpl::onProcessActivateEvent);
     eventReceived() += Pt::slot(*this, &WindowImpl::onProcessCloseEvent);
     eventReceived() += Pt::slot(*this, &WindowImpl::onProcessWindowStateEvent);
 }
@@ -97,6 +98,17 @@ void WindowImpl::onResizeEvent(const ResizeEvent& ev)
     Visual::onResizeEvent(ev);
 
     _surface.resize( ev.size() );
+}
+
+
+void WindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
+{
+    onActivateEvent(ev);
+}
+
+
+void WindowImpl::onActivateEvent(const ActivateEvent& ev)
+{
 }
 
 
@@ -183,7 +195,9 @@ void Window::setParent(WindowManager& wm)
             _impl->onResize(*this, _requestedSize);
     }
     
-    _wm->onActivate(*this, _isActive);
+    // TODO: do not activate popups
+    _impl->onActivate(*this, _isActive);
+
     _wm->onEnableRequest(*this, _enabled);
     _impl->onShow(*this, _show);
     
@@ -459,8 +473,8 @@ void Window::onRequestActivate(bool active)
 {
     _isActive = active;
 
-    if( _wm )
-        _wm->onActivate(*this, active);
+    if( _impl )
+        _impl->onActivate(*this, active);
     else
         _isActive = active;
 }
@@ -468,11 +482,11 @@ void Window::onRequestActivate(bool active)
 
 void Window::onProcessActivateEvent(const ActivateEvent& ev)
 {
-    if(_impl)
-    {
-        ActivateEvent aev( *_impl, ev.isActive() );
-        _impl->processEvent(aev);
-    }
+    //if(_impl)
+    //{
+    //    ActivateEvent aev( *_impl, ev.isActive() );
+    //    _impl->processEvent(aev);
+    //}
 
     onActivateEvent(ev);
 }

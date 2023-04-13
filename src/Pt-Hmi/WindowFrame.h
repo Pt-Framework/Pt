@@ -213,6 +213,8 @@ class WindowFrame : public WindowImpl
 
         virtual void onShow(Window& w, bool visible);
 
+        virtual void onActivate(Window& w, bool visible);
+
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);

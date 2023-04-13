@@ -58,8 +58,6 @@ class WindowManager : public Visual
         virtual void onRelease(WindowImpl& w) = 0;
 
     protected:
-        virtual void onActivate(Window& w, bool active) = 0; 
-
         virtual void onEnableRequest(Window& w, bool enable) = 0;
 
         virtual void onSetAbove(Window& w, bool above) = 0;

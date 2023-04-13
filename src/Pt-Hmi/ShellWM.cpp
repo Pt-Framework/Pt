@@ -249,8 +249,10 @@ void ShellWM::onShow(WindowFrame& frame, bool visible)
 }
 
 
-void ShellWM::onActivate(Window& w, bool active)
+void ShellWM::onActivate(WindowFrame& frame, bool active)
 {
+    Window& w = frame.window();
+
     if(active)
     {
         //
@@ -284,7 +286,7 @@ void ShellWM::onActivate(Window& w, bool active)
             _activeWindow = 0;
     }
 
-    ActivateEvent aev(w, active);
+    ActivateEvent aev(frame, active);
     Application::instance().loop().commitEvent(aev);
     
     activate(active);

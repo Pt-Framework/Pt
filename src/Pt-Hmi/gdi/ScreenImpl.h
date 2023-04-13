@@ -135,7 +135,7 @@ class ScreenImpl : public WindowManager
 
         //virtual void onShow(Window& w, bool visible); 
 
-        virtual void onActivate(Window& w, bool active);
+        //virtual void onActivate(Window& w, bool active);
 
         virtual void onEnableRequest(Window& w, bool enable);
 

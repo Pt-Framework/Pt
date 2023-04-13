@@ -412,8 +412,6 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
 , _currentFrameItem(OnNone)
 {
     Base::onSetParent(&shell);
-
-    eventReceived() += Pt::slot(*this, &WindowFrame::onProcessActivateEvent);
     
     switch( window.type() )
     {
@@ -775,14 +773,25 @@ void WindowFrame::onEnableEvent(const EnableEvent& ev)
 }
 
 
+void WindowFrame::onActivate(Window& w, bool active)
+{
+    _wm->onActivate(*this, active);
+}
+
+
 void WindowFrame::onProcessActivateEvent(const ActivateEvent& ev)
 {
-    onActivateEvent(ev);
+    Base::onProcessActivateEvent(ev);
+
+    ActivateEvent aev( *_window, ev.isActive() );
+    _window->processEvent(aev);
 }
 
 
 void WindowFrame::onActivateEvent(const ActivateEvent& ev)
 {
+    Base::onActivateEvent(ev);
+
     repaint(_frameBounds);
 }
 

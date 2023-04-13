@@ -345,12 +345,39 @@ void MainWindowImpl::onShowEvent(const ShowEvent& ev)
 }
 
 
-void MainWindowImpl::activate()
+//void MainWindowImpl::activate()
+//{
+//    //std::clog << "ACTIVATE: " << std::endl;
+//
+//    [_window makeMainWindow];
+//    [_window makeKeyWindow];
+//}
+
+
+void MainWindowImpl::onActivate(Window& w, bool active)
 {
+    if( ! active )
+        return;
+
     //std::clog << "ACTIVATE: " << std::endl;
 
     [_window makeMainWindow];
     [_window makeKeyWindow];
+}
+
+
+void MainWindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
+{
+    Base::onProcessActivateEvent(ev);
+
+    ActivateEvent aev( _window, ev.isActive() );
+    _window.processEvent(aev);
+}
+
+
+void MainWindowImpl::onActivateEvent(const ActivateEvent& ev)
+{
+    Base::onActivateEvent(ev);
 }
 
 
@@ -630,7 +657,7 @@ void MainWindowImpl::onActivate(bool isActive)
     if( ! window )
         return;
 
-    ActivateEvent ev(*window, isActive);
+    ActivateEvent ev(*window->impl(), isActive);
     Application::instance().commitEvent(ev);
 }
 
