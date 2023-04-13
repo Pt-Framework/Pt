@@ -347,17 +347,17 @@ void ShellWM::onSetAbove(WindowFrame& frame, bool above)
 //}
 
 
-void ShellWM::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-                                         const Gfx::SizeF& maxSize)
+void ShellWM::onSetSizeLimits(WindowFrame& w, const Gfx::SizeF& minSize, 
+                                              const Gfx::SizeF& maxSize)
 {
 }
 
 
-void ShellWM::onClosing(Window& w)
-{         
-    CloseEvent ev(w);
-    Application::instance().loop().commitEvent(ev);
-}
+//void ShellWM::onClosing(Window& w)
+//{         
+//    CloseEvent ev(w);
+//    Application::instance().loop().commitEvent(ev);
+//}
 
 
 void ShellWM::onClose(WindowFrame& wf)

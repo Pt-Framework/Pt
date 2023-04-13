@@ -82,8 +82,8 @@ class MainWindowImpl : public WindowImpl
 
         //void setIcon(const Gfx::Image& p);
 
-        void setSizeLimits(const Gfx::SizeF& minSize,
-                           const Gfx::SizeF& maxSize);
+        //void setSizeLimits(const Gfx::SizeF& minSize,
+        //                   const Gfx::SizeF& maxSize);
 
     public:
         ::Window& window()
@@ -125,6 +125,9 @@ class MainWindowImpl : public WindowImpl
         virtual void onSetState(Window& w, const WindowState& state);
 
         virtual void onSetAbove(Window& w, bool above);
+
+        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                                const Gfx::SizeF& maxSize);
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 

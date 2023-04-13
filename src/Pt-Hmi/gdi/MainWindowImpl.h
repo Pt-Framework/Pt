@@ -79,9 +79,9 @@ class MainWindowImpl : public WindowImpl
 
         //void setIcon(const Gfx::Image& p);
 
-        void setMinimumSize(const Gfx::SizeF& s);
+        //void setMinimumSize(const Gfx::SizeF& s);
     
-        void setMaximumSize(const Gfx::SizeF& s);
+        //void setMaximumSize(const Gfx::SizeF& s);
 
         HWND hwnd()
         {
@@ -106,6 +106,9 @@ class MainWindowImpl : public WindowImpl
         virtual void onSetState(Window& w, const WindowState& state);
 
         virtual void onSetAbove(Window& w, bool above);
+
+        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                                const Gfx::SizeF& maxSize);
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 

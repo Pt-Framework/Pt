@@ -785,8 +785,8 @@ void MainWindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::setSizeLimits(const Gfx::SizeF& minSize,
-                                   const Gfx::SizeF& maxSize)
+void MainWindowImpl::setSizeLimits(Window& w, const Gfx::SizeF& minSize,
+                                              const Gfx::SizeF& maxSize)
 {
     XSizeHints hints;
     memset(&hints, 0, sizeof(hints));

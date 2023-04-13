@@ -151,10 +151,10 @@ class ShellWM : public WindowManager
 
         //virtual void onSetState(Window& w, const WindowState& state);
         
-        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-                                                const Gfx::SizeF& maxSize); 
+         //virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+         //                                       const Gfx::SizeF& maxSize);
 
-        virtual void onClosing(Window& w);
+        //virtual void onClosing(Window& w);
 
     protected:
         Gfx::PointF toFrame(const WindowFrame& w, 
@@ -164,6 +164,9 @@ class ShellWM : public WindowManager
                               const Gfx::PointF& pos) const;
 
         virtual void onSetAbove(WindowFrame& w, bool above);
+
+        virtual void onSetSizeLimits(WindowFrame& w, const Gfx::SizeF& minSize, 
+                                                const Gfx::SizeF& maxSize);
 
         virtual void onShow(WindowFrame& w, bool visible);
 

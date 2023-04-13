@@ -173,7 +173,7 @@ class WindowFrame : public WindowImpl
 
         virtual ~WindowFrame();
 
-        virtual Gfx::PointF clientPos() const;
+        //virtual Gfx::PointF clientPos() const;
 
         const Gfx::PointF& restorePosition() const;
 
@@ -210,6 +210,9 @@ class WindowFrame : public WindowImpl
         virtual void onSetState(Window& w, const WindowState& state);
 
         virtual void onSetAbove(Window& w, bool above);
+
+        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                                const Gfx::SizeF& maxSize);
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 

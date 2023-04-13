@@ -26,8 +26,8 @@
   02110-1301 USA
 */
 
-#ifndef Pt_Hmi_WindowManagerBase_h
-#define Pt_Hmi_WindowManagerBase_h
+#ifndef PT_HMI_WINDOWMANAGER_H
+#define PT_HMI_WINDOWMANAGER_H
 
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Size.h>
@@ -56,10 +56,6 @@ class WindowManager : public Visual
         virtual void onInit(WindowImpl& w) = 0;
 
         virtual void onRelease(WindowImpl& w) = 0;
-
-    protected:
-        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-                                                const Gfx::SizeF& maxSize) = 0;
 };
 
 } // namespace

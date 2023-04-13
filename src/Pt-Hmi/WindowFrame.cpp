@@ -451,7 +451,7 @@ WindowFrame::~WindowFrame()
 void WindowFrame::onInit(Window& w)
 {
     Gfx::PaintSurface& surface = this->surface();
-    Gfx::PointF surfacePos = clientPos();
+    Gfx::PointF surfacePos = _clientBounds.topLeft();
     w.setSurface(&surface, surfacePos);
 
     w.setNextResponder(this);
@@ -543,6 +543,14 @@ void WindowFrame::onSetAbove(Window& w, bool above)
     _wm->onSetAbove(*this, above);
 }
 
+
+void WindowFrame::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                             const Gfx::SizeF& maxSize)
+{
+    _wm->onSetSizeLimits(*this, minSize, maxSize);
+}
+
+
 const Gfx::PointF& WindowFrame::restorePosition() const
 {
     return _restorePos;
@@ -562,13 +570,13 @@ void WindowFrame::setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size)
 }
 
 
-Gfx::PointF WindowFrame::clientPos() const
-{
-    double x = _borderWidth;
-    double y = _borderWidth + _titleHeight;
-
-    return Gfx::PointF(x, y);
-}
+//Gfx::PointF WindowFrame::clientPos() const
+//{
+//    double x = _borderWidth;
+//    double y = _borderWidth + _titleHeight;
+//
+//    return Gfx::PointF(x, y);
+//}
 
 
 const Gfx::RectF& WindowFrame::clientRect() const

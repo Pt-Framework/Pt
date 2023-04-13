@@ -112,6 +112,9 @@ class WindowImpl : public Visual
 
         virtual void onSetAbove(Window& w, bool above) = 0;
 
+        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                                const Gfx::SizeF& maxSize) = 0;
+
         virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
 
         virtual void onShow(Window& w, bool visible) = 0;

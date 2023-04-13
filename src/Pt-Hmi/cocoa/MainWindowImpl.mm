@@ -577,16 +577,13 @@ void MainWindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
+void MainWindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                                const Gfx::SizeF& maxSize)
 {
-    NSSize minSize = NSMakeSize( s.width(), s.height() );
+    NSSize minSize = NSMakeSize( minSize.width(), minSize.height() );
     [_window setMinSize:minSize];
-}
 
-
-void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
-{
-    NSSize maxSize = NSMakeSize( s.width(), s.height() );
+    NSSize maxSize = NSMakeSize( maxSize.width(), maxSize.height() );
     [_window setMaxSize:maxSize];
 }
 

@@ -181,7 +181,7 @@ void Window::setParent(WindowManager& wm)
 
     _impl->onInit(*this);
 
-    _wm->onSetSizeLimits(*this, minimumSize(), maximumSize());
+    _impl->onSetSizeLimits(*this, minimumSize(), maximumSize());
     _impl->onSetState(*this, _state);
     _impl->onSetTitle(*this, _title);
     _impl->onSetIcon(*this, _icon);
@@ -327,8 +327,8 @@ void Window::onSetSizeLimits(const Gfx::SizeF& minSize,
 {
     Base::onSetSizeLimits(minSize, maxSize);
     
-    if(_wm)
-        _wm->onSetSizeLimits(*this, minSize, maxSize);
+    if(_impl)
+        _impl->onSetSizeLimits(*this, minSize, maxSize);
 }
 
 

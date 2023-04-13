@@ -495,12 +495,8 @@ void MainWindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
-{
-}
-
-
-void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
+void MainWindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+                                                const Gfx::SizeF& maxSize)
 {
 }
 

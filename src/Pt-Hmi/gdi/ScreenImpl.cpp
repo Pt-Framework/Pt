@@ -275,13 +275,13 @@ void ScreenImpl::onRelease(WindowImpl& w)
 //}
 
 
-void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-                                            const Gfx::SizeF& maxSize)
-{
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->setMinimumSize(minSize);
-    impl->setMaximumSize(maxSize);
-}
+//void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+//                                            const Gfx::SizeF& maxSize)
+//{
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->setMinimumSize(minSize);
+//    impl->setMaximumSize(maxSize);
+//}
 
 
 void ScreenImpl::setCapture(Visual* capture)
