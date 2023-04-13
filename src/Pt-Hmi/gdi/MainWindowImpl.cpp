@@ -259,9 +259,27 @@ void MainWindowImpl::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void MainWindowImpl::show(bool v)
+//void MainWindowImpl::show(bool v)
+//{
+//    if(v)
+//    {
+//        LONG style = GetWindowLong(_hwnd, GWL_EXSTYLE);
+//
+//        if(style & WS_EX_NOACTIVATE)
+//          ShowWindow(_hwnd, SW_SHOWNOACTIVATE);
+//        else
+//          ShowWindow(_hwnd, SW_SHOW);
+//    }
+//    else
+//    {
+//        ShowWindow(_hwnd, SW_HIDE);
+//    }
+//}
+
+
+void MainWindowImpl::onShow(Window& w, bool visible)
 {
-    if(v)
+    if(visible)
     {
         LONG style = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
@@ -274,6 +292,21 @@ void MainWindowImpl::show(bool v)
     {
         ShowWindow(_hwnd, SW_HIDE);
     }
+}
+
+
+void MainWindowImpl::onProcessShowEvent(const ShowEvent& ev)
+{
+    Base::onProcessShowEvent(ev);
+
+    ShowEvent rev( _window, ev.visible() );
+    _window.processEvent(rev);
+}
+
+
+void MainWindowImpl::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
 }
 
 

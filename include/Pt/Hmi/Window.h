@@ -112,6 +112,8 @@ class WindowImpl : public Visual
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
 
+        virtual void onShow(Window& w, bool visible) = 0;
+
         virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
 
         virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;

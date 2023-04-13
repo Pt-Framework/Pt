@@ -738,9 +738,18 @@ void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
+void WindowFrame::onShow(Window& w, bool visible)
+{
+    _wm->onShow(*this, visible);
+}
+
+
 void WindowFrame::onProcessShowEvent(const ShowEvent& ev)
 {
     Base::onProcessShowEvent(ev);
+
+    ShowEvent rev( *_window, ev.visible() );
+    _window->processEvent(rev);
 }
 
 

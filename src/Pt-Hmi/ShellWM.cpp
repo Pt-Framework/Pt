@@ -242,9 +242,9 @@ void ShellWM::onRelease(WindowImpl& frame)
 }
 
 
-void ShellWM::onShow(Window& w, bool visible)
+void ShellWM::onShow(WindowFrame& frame, bool visible)
 {
-    ShowEvent windowEvent( w, visible );
+    ShowEvent windowEvent( frame, visible );
     Application::instance().loop().commitEvent(windowEvent);
 }
 

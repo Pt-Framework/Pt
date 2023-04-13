@@ -185,7 +185,7 @@ void Window::setParent(WindowManager& wm)
     
     _wm->onActivate(*this, _isActive);
     _wm->onEnableRequest(*this, _enabled);
-    _wm->onShow(*this, _show);
+    _impl->onShow(*this, _show);
     
     onSetParent(_impl);
 }
@@ -243,7 +243,7 @@ Gfx::SizeF Window::setAutoSize(const SizePolicy& policy)
     _sizePolicy = policy;
     _autoSize = true;
 
-    if( ! _wm )
+    if( ! _impl )
     {
         Screen& screen = Application::instance().screen();
         screen.addWindow(*this);
@@ -488,7 +488,7 @@ void Window::onRequestShow(bool b)
 {   
     _show = b;
 
-    if( ! _wm )
+    if( ! _impl )
     {
         Screen& screen = Application::instance().screen();
         screen.addWindow(*this);
@@ -496,17 +496,17 @@ void Window::onRequestShow(bool b)
     
     invalidate();
 
-    _wm->onShow(*this, b);
+    _impl->onShow(*this, b);
 }
 
 
 void Window::onProcessShowEvent(const ShowEvent& ev)
 {
-    if(_impl)
-    {
-        ShowEvent sev( *_impl, ev.visible() );
-        _impl->processEvent(sev);
-    }
+    //if(_impl)
+    //{
+    //    ShowEvent sev( *_impl, ev.visible() );
+    //    _impl->processEvent(sev);
+    //}
 
     Base::onProcessShowEvent(ev);
 }
@@ -661,7 +661,7 @@ void Window::onProcessCloseEvent(const CloseEvent& ev)
 
 void Window::onCloseEvent(const CloseEvent& ev)
 {
-    ShowEvent sev(*this, false);
+    ShowEvent sev(*_impl, false);
     Application::instance().processEvent(sev);
     
     unparent();

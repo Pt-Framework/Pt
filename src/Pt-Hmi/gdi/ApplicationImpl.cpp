@@ -635,8 +635,8 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
 
 void ApplicationImpl::onShow(Window& w,  bool v)
 {
-    ShowEvent sev(w, v);
-    commitEvent( sev );
+    ShowEvent sev( *w.impl(), v);
+    commitEvent(sev);
 
     // w.invalidate();
 }

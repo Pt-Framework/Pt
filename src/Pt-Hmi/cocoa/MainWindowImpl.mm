@@ -294,7 +294,25 @@ void MainWindowImpl::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void MainWindowImpl::show(bool visible)
+//void MainWindowImpl::show(bool visible)
+//{
+//    //std::clog << "SHOW: " << visible << std::endl;
+//
+//    if(visible)
+//    {
+//        [_view setHidden:NO];
+//        [_window orderFrontRegardless];
+//        //[_window makeKeyAndOrderFront:nil];
+//    }
+//    else
+//    {
+//        [_window orderOut:_window];
+//        [_view setHidden:YES];
+//    }
+//}
+
+
+void MainWindowImpl::onShow(Window& w, bool visible)
 {
     //std::clog << "SHOW: " << visible << std::endl;
 
@@ -309,6 +327,21 @@ void MainWindowImpl::show(bool visible)
         [_window orderOut:_window];
         [_view setHidden:YES];
     }
+}
+
+
+void MainWindowImpl::onProcessShowEvent(const ShowEvent& ev)
+{
+    Base::onProcessShowEvent(ev);
+
+    ShowEvent rev( _window, ev.visible() );
+    _window.processEvent(rev);
+}
+
+
+void MainWindowImpl::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
 }
 
 
@@ -609,7 +642,7 @@ void MainWindowImpl::onShow(bool v)
     if( ! window )
         return;
 
-    ShowEvent sev(*window, v);
+    ShowEvent sev(*window->impl(), v);
     Application::instance().commitEvent(sev);
 }
 

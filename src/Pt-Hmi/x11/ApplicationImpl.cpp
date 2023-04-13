@@ -361,7 +361,7 @@ void ApplicationImpl::onShow(Window& w, bool v)
 {
     //std::clog << "   ### MapNotify: " << std::boolalpha << v << std::endl;
 
-    ShowEvent sev(w, v);
+    ShowEvent sev(*w.impl(), v);
     commitEvent( sev );
 }
 

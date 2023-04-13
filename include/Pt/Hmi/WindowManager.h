@@ -58,7 +58,7 @@ class WindowManager : public Visual
         virtual void onRelease(WindowImpl& w) = 0;
 
     protected:
-        virtual void onShow(Window& w, bool visible) = 0; 
+        //virtual void onShow(Window& w, bool visible) = 0; 
 
         virtual void onActivate(Window& w, bool active) = 0; 
 

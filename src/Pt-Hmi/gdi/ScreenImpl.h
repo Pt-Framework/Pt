@@ -133,7 +133,7 @@ class ScreenImpl : public WindowManager
 
         //virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
-        virtual void onShow(Window& w, bool visible); 
+        //virtual void onShow(Window& w, bool visible); 
 
         virtual void onActivate(Window& w, bool active);
 

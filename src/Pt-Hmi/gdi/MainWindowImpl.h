@@ -61,7 +61,7 @@ class MainWindowImpl : public WindowImpl
 
         void paint(const Gfx::RectF& rect);
 
-        void show(bool v);
+        //void show(bool v);
     
         void activate();
 
@@ -105,6 +105,8 @@ class MainWindowImpl : public WindowImpl
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
+        virtual void onShow(Window& w, bool visible);
+
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
@@ -120,6 +122,11 @@ class MainWindowImpl : public WindowImpl
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
+
+
+        virtual void onProcessShowEvent(const ShowEvent& ev);
+
+        virtual void onShowEvent(const ShowEvent& ev);
 
 
         virtual void onProcessResizeEvent(const ResizeEvent& ev);

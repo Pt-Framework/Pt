@@ -135,7 +135,7 @@ class ShellWM : public WindowManager
         virtual void onRelease(WindowImpl& w);
 
     protected:
-        virtual void onShow(Window& w, bool visible); 
+        //virtual void onShow(Window& w, bool visible); 
 
         virtual void onActivate(Window& w, bool active); 
 
@@ -162,6 +162,8 @@ class ShellWM : public WindowManager
 
         Gfx::PointF fromFrame(const WindowFrame& w, 
                               const Gfx::PointF& pos) const;
+
+        virtual void onShow(WindowFrame& w, bool visible); 
 
         virtual void onMove(WindowFrame& w, const Gfx::PointF& to);
 

@@ -206,11 +206,11 @@ void ScreenImpl::onRelease(WindowImpl& w)
 }
 
 
-void ScreenImpl::onShow(Window& w, bool visible)
-{
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->show(visible);
-}
+//void ScreenImpl::onShow(Window& w, bool visible)
+//{
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->show(visible);
+//}
 
 
 void ScreenImpl::onActivate(Window& w, bool active)

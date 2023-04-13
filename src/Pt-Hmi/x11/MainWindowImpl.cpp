@@ -320,7 +320,32 @@ void MainWindowImpl::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void MainWindowImpl::show(bool visible)
+//void MainWindowImpl::show(bool visible)
+//{
+//    if(visible)
+//    {
+//        //std::clog  << "XMapWindow" << std::endl;
+//        XMapWindow(_display, _window);
+//        //XFlush(_display);
+//
+//        //while( XPending(_display) > 0 )
+//        //{
+//        //    XEvent xev;
+//        //    XNextEvent(_display, &xev);
+//
+//        //    Application::instance().impl()->processEvent(xev);
+//        //}
+//    }
+//    else
+//    {
+//        //std::clog  << "XUnmapWindow" << std::endl;
+//        XUnmapWindow(_display, _window);
+//        //XFlush(_display);
+//    }
+//}
+
+
+void MainWindowImpl::onShow(Window& w, bool visible)
 {
     if(visible)
     {
@@ -342,6 +367,21 @@ void MainWindowImpl::show(bool visible)
         XUnmapWindow(_display, _window);
         //XFlush(_display);
     }
+}
+
+
+void MainWindowImpl::onProcessShowEvent(const ShowEvent& ev)
+{
+    Base::onProcessShowEvent(ev);
+
+    ShowEvent rev( _window, ev.visible() );
+    _window.processEvent(rev);
+}
+
+
+void MainWindowImpl::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
 }
 
 
