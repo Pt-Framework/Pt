@@ -234,7 +234,7 @@ void ShellWM::onInit(WindowImpl& frame)
 
 void ShellWM::onRelease(WindowImpl& frame)
 {
-    if( frame.window().isVisible() )
+    if( frame.isVisible() )
     {
         Gfx::RectF frameRect( frame.position(), frame.size() );
         repaint(frameRect);

@@ -661,7 +661,8 @@ void Window::onProcessCloseEvent(const CloseEvent& ev)
 
 void Window::onCloseEvent(const CloseEvent& ev)
 {
-    ShowEvent sev(*_impl, false);
+    // TODO: find better solution to set base class visible
+    ShowEvent sev(*this, false);
     Application::instance().processEvent(sev);
     
     unparent();
