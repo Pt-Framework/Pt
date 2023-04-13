@@ -213,11 +213,11 @@ void ScreenImpl::onRelease(WindowImpl& frame)
 //}
 
 
-void ScreenImpl::onEnableRequest(Window& w, bool enable)
-{
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->enable(enable);
-}
+//void ScreenImpl::onEnableRequest(Window& w, bool enable)
+//{
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->enable(enable);
+//}
 
 
 //void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
@@ -432,7 +432,9 @@ void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
     for( size_t i = 0; i < _windows.size(); ++i)
     {
         Window* w = _windows[i];
-        onEnableRequest( *w, ev.enabled() );
+        MainWindowImpl* frame = static_cast<MainWindowImpl*>( w->impl() );
+
+        frame->onEnable(*w, ev.enabled() );
     }
 }
 

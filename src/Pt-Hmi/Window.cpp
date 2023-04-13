@@ -198,7 +198,7 @@ void Window::setParent(WindowManager& wm)
     // TODO: do not activate popups
     _impl->onActivate(*this, _isActive);
 
-    _wm->onEnableRequest(*this, _enabled);
+    _impl->onEnable(*this, _enabled);
     _impl->onShow(*this, _show);
     
     onSetParent(_impl);
@@ -587,8 +587,8 @@ void Window::onRequestEnable(bool e)
 {
     _enabled = e;
 
-    if(_wm)
-        _wm->onEnableRequest(*this, e);
+    if(_impl)
+        _impl->onEnable(*this, e);
 }
 
 
@@ -598,11 +598,11 @@ void Window::onProcessEnableEvent(const EnableEvent& ev)
     if( ! _enabled )
         isEnabled = false;
 
-    if(_impl)
-    {
-        EnableEvent eev(*_impl, isEnabled);
-        _impl->processEvent(eev);
-    }
+    //if(_impl)
+    //{
+    //    EnableEvent eev(*_impl, isEnabled);
+    //    _impl->processEvent(eev);
+    //}
 
     EnableEvent eev(*this, isEnabled);
     Base::onProcessEnableEvent(eev);

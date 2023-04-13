@@ -381,9 +381,24 @@ void MainWindowImpl::onActivateEvent(const ActivateEvent& ev)
 }
 
 
-void MainWindowImpl::enable(bool e)
+void MainWindowImpl::onEnable(Window& w, bool enable)
 {
     // TODO
+}
+
+
+void MainWindowImpl::onProcessEnableEvent(const EnableEvent& ev)
+{
+    Base::onProcessEnableEvent(ev);
+
+    EnableEvent eev( _window, ev.enabled() );
+    _window.processEvent(eev);
+}
+
+
+void MainWindowImpl::onEnableEvent(const EnableEvent& ev)
+{    
+    Base::onEnableEvent(ev);
 }
 
 

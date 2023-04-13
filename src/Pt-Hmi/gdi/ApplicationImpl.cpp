@@ -663,7 +663,7 @@ void ApplicationImpl::onActivate(Window& w, bool a)
 
 void ApplicationImpl::onEnable(Window& w, bool e)
 {
-    EnableEvent eev(w, e);
+    EnableEvent eev(*w.impl(), e);
     commitEvent( eev );
 
     w.invalidate();

@@ -116,6 +116,8 @@ class WindowImpl : public Visual
 
         virtual void onActivate(Window& w, bool active) = 0;
 
+        virtual void onEnable(Window& w, bool enable) = 0;
+
         virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
 
         virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;

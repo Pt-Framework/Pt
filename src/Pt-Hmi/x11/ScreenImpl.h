@@ -128,7 +128,7 @@ class ScreenImpl : public WindowManager
 
         //virtual void onActivate(Window& w, bool active);
 
-        virtual void onEnableRequest(Window& w, bool enable);
+        //virtual void onEnableRequest(Window& w, bool enable);
 
         //virtual void onMove(Window& w, const Gfx::PointF& to);
 

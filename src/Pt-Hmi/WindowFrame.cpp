@@ -759,9 +759,18 @@ void WindowFrame::onShowEvent(const ShowEvent& ev)
 }
 
 
+void WindowFrame::onEnable(Window& w, bool enable)
+{
+    _wm->onEnable(*this, enable);
+}
+
+
 void WindowFrame::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
+
+    EnableEvent eev( *_window, ev.enabled() );
+    _window->processEvent(eev);
 }
 
 

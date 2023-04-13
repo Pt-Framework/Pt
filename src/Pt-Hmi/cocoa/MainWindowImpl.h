@@ -67,6 +67,8 @@ class MainWindowImpl : public WindowImpl
 {
     typedef WindowImpl Base;
 
+    friend class ScreenImpl;
+
     public:
         MainWindowImpl(ScreenImpl& wm,  Window& w);
 
@@ -75,19 +77,17 @@ class MainWindowImpl : public WindowImpl
         
         void setType(WindowType type);
 
-        double scaleFactor() const;
-
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
         void paint(const Gfx::RectF& rect);
 
-        void show(bool v);
+        //void show(bool v);
     
-        void activate();
+        //void activate();
 
-        void enable(bool e);  
+        //void enable(bool e);  
        
         //void move(const Gfx::PointF& pos);
 
@@ -163,6 +163,8 @@ class MainWindowImpl : public WindowImpl
 
         virtual void onActivate(Window& w, bool active);
 
+        virtual void onEnable(Window& w, bool enable);
+
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
@@ -183,6 +185,11 @@ class MainWindowImpl : public WindowImpl
         virtual void onProcessShowEvent(const ShowEvent& ev);
 
         virtual void onShowEvent(const ShowEvent& ev);
+
+
+        virtual void onProcessEnableEvent(const EnableEvent& ev);
+
+        virtual void onEnableEvent(const EnableEvent& ev);
 
 
         virtual void onProcessActivateEvent(const ActivateEvent& ev);

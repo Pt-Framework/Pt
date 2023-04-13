@@ -451,7 +451,33 @@ void MainWindowImpl::onActivateEvent(const ActivateEvent& ev)
 }
 
 
-void MainWindowImpl::enable(bool enabled)
+//void MainWindowImpl::enable(bool enabled)
+//{
+//    //std::clog  << "XChangeWindowAttributes: " << enabled << std::endl;
+//
+//    XSetWindowAttributes wattr;
+//
+//    if(enabled)
+//    {
+//        wattr.event_mask = StructureNotifyMask|ExposureMask|
+//                           PropertyChangeMask|EnterWindowMask|
+//                           LeaveWindowMask|KeyPressMask|
+//                           KeyReleaseMask|KeymapStateMask|
+//                           ButtonPressMask|ButtonReleaseMask|
+//                           PointerMotionMask|FocusChangeMask|
+//                           SubstructureNotifyMask;
+//    }
+//    else
+//    {
+//        wattr.event_mask = 0;
+//    }
+//
+//    XChangeWindowAttributes(_display, _window, CWEventMask, &wattr);
+//    //XFlush(_display);
+//}
+
+
+void MainWindowImpl::onEnable(Window& w, bool enable)
 {
     //std::clog  << "XChangeWindowAttributes: " << enabled << std::endl;
 
@@ -474,6 +500,21 @@ void MainWindowImpl::enable(bool enabled)
 
     XChangeWindowAttributes(_display, _window, CWEventMask, &wattr);
     //XFlush(_display);
+}
+
+
+void MainWindowImpl::onProcessEnableEvent(const EnableEvent& ev)
+{
+    Base::onProcessEnableEvent(ev);
+
+    EnableEvent eev( _window, ev.enabled() );
+    _window.processEvent(eev);
+}
+
+
+void MainWindowImpl::onEnableEvent(const EnableEvent& ev)
+{    
+    Base::onEnableEvent(ev);
 }
 
 

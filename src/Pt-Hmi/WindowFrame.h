@@ -215,6 +215,8 @@ class WindowFrame : public WindowImpl
 
         virtual void onActivate(Window& w, bool visible);
 
+        virtual void onEnable(Window& w, bool enable);
+
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
         virtual void onResize(Window& w, const Gfx::SizeF& s);
@@ -238,6 +240,7 @@ class WindowFrame : public WindowImpl
         virtual void onProcessEvent(const Pt::Event& ev);
 
         
+    protected:
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);

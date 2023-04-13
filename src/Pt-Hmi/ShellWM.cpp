@@ -287,21 +287,20 @@ void ShellWM::onActivate(WindowFrame& frame, bool active)
     }
 
     ActivateEvent aev(frame, active);
-    Application::instance().loop().commitEvent(aev);
+    Application::instance().commitEvent(aev);
     
     activate(active);
 }
 
 
-void ShellWM::onEnableRequest(Window& w, bool enable)
+void ShellWM::onEnable(WindowFrame& frame, bool enable)
 {
     if( ! isEnabled() )
       enable = false;
 
-    EnableEvent eev(w, enable);
-    Application::instance().loop().commitEvent(eev);
+    EnableEvent eev(frame, enable);
+    Application::instance().commitEvent(eev);
 }
-
 
 
 void ShellWM::onSetAbove(Window& w, bool above)
