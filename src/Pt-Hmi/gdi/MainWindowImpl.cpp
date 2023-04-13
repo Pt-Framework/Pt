@@ -378,9 +378,9 @@ void MainWindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 }
 
 
-void MainWindowImpl::setAbove(bool isTop)
+void MainWindowImpl::onSetAbove(Window& w, bool above)
 {
-    HWND insertBelow = isTop ? HWND_TOPMOST : HWND_NOTOPMOST;
+    HWND insertBelow = above ? HWND_TOPMOST : HWND_NOTOPMOST;
     
     SetWindowPos(_hwnd, insertBelow, 0, 0, 0, 0, 
                  SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);

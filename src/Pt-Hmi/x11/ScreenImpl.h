@@ -134,7 +134,7 @@ class ScreenImpl : public WindowManager
 
         //virtual void onResize(Window& w, const Gfx::SizeF& to);
 
-        virtual void onSetAbove(Window& w, bool above);
+        //virtual void onSetAbove(Window& w, bool above);
 
         //virtual void onSetTitle(Window& w, const std::string& text);
 

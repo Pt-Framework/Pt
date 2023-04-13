@@ -303,8 +303,10 @@ void ShellWM::onEnable(WindowFrame& frame, bool enable)
 }
 
 
-void ShellWM::onSetAbove(Window& w, bool above)
+void ShellWM::onSetAbove(WindowFrame& frame, bool above)
 {
+    Window& w = frame.window();
+
     if(above)
     {
         if(_topMostWindow && _topMostWindow != &w)

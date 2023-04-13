@@ -538,6 +538,11 @@ void WindowFrame::onWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
+void WindowFrame::onSetAbove(Window& w, bool above)
+{
+    _wm->onSetAbove(*this, above);
+}
+
 const Gfx::PointF& WindowFrame::restorePosition() const
 {
     return _restorePos;

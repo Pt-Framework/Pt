@@ -58,8 +58,6 @@ class WindowManager : public Visual
         virtual void onRelease(WindowImpl& w) = 0;
 
     protected:
-        virtual void onSetAbove(Window& w, bool above) = 0;
-
         virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
                                                 const Gfx::SizeF& maxSize) = 0;
 };

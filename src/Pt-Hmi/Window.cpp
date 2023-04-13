@@ -185,7 +185,7 @@ void Window::setParent(WindowManager& wm)
     _impl->onSetState(*this, _state);
     _impl->onSetTitle(*this, _title);
     _impl->onSetIcon(*this, _icon);
-    _wm->onSetAbove(*this, _isAbove);
+    _impl->onSetAbove(*this, _isAbove);
 
     if(_state == WindowState::Normal)
     {
@@ -731,8 +731,8 @@ void Window::setAbove(bool above)
 {
     _isAbove = above;
 
-    if(_wm)
-        _wm->onSetAbove(*this, above);
+    if(_impl)
+        _impl->onSetAbove(*this, above);
 }
 
 

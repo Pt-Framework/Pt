@@ -485,7 +485,7 @@ void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 }
 
 
-void MainWindowImpl::setAbove(bool above)
+void MainWindowImpl::onSetAbove(Window& w, bool above)
 {
     if(above)
     {

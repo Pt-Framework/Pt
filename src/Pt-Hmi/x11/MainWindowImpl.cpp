@@ -637,7 +637,7 @@ void MainWindowImpl::onCloseEvent(const CloseEvent& ev)
 }
 
 
-void MainWindowImpl::setAbove(bool above)
+void MainWindowImpl::onSetAbove(Window& w, bool above)
 {
     //std::clog << "setTopMost: " << topMost << std::endl;
 

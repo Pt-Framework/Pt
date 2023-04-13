@@ -110,6 +110,8 @@ class WindowImpl : public Visual
 
         virtual void onSetState(Window& w, const WindowState& state) = 0;
 
+        virtual void onSetAbove(Window& w, bool above) = 0;
+
         virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
 
         virtual void onShow(Window& w, bool visible) = 0;

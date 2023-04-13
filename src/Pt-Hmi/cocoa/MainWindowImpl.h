@@ -93,7 +93,7 @@ class MainWindowImpl : public WindowImpl
 
         //void resize(const Gfx::SizeF& size);
 
-        void setAbove(bool isTop);
+        //void setAbove(bool isTop);
 
         //void setIcon(const Gfx::Image& p);
 
@@ -156,6 +156,8 @@ class MainWindowImpl : public WindowImpl
         virtual void onSetIcon(Window& w, const Gfx::Image& icon);
 
         virtual void onSetState(Window& w, const WindowState& state);
+
+        virtual void onSetAbove(Window& w, bool above);
 
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 

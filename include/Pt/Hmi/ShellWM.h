@@ -143,7 +143,7 @@ class ShellWM : public WindowManager
 
         //virtual void onMove(Window& w, const Gfx::PointF& to);
 
-        virtual void onSetAbove(Window& w, bool above);
+        //virtual void onSetAbove(Window& w, bool above);
 
         //virtual void onSetTitle(Window& w, const std::string& text);
 
@@ -162,6 +162,8 @@ class ShellWM : public WindowManager
 
         Gfx::PointF fromFrame(const WindowFrame& w, 
                               const Gfx::PointF& pos) const;
+
+        virtual void onSetAbove(WindowFrame& w, bool above);
 
         virtual void onShow(WindowFrame& w, bool visible);
 

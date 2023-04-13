@@ -209,6 +209,8 @@ class WindowFrame : public WindowImpl
 
         virtual void onSetState(Window& w, const WindowState& state);
 
+        virtual void onSetAbove(Window& w, bool above);
+
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
         virtual void onShow(Window& w, bool visible);

@@ -292,11 +292,11 @@ void ScreenImpl::onRelease(WindowImpl& frame)
 //}
 
 
-void ScreenImpl::onSetAbove(Window& w, bool above)
-{
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->setAbove(above);
-}
+//void ScreenImpl::onSetAbove(Window& w, bool above)
+//{
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->setAbove(above);
+//}
 
 
 //void ScreenImpl::onSetTitle(Window& w, const std::string& text)
