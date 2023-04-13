@@ -119,11 +119,11 @@ class ScreenImpl : public WindowManager
     protected:
         virtual WindowImpl* onAttach(Window& w);
     
-        virtual void onDetach(Window& w);
+        virtual void onDetach(WindowImpl& w);
 
-        virtual void onInit(Window& w);
+        virtual void onInit(WindowImpl& w);
 
-        virtual void onRelease(Window& w);
+        virtual void onRelease(WindowImpl& w);
 
         //virtual Gfx::PointF onToWindow(const Window& w, 
         //                               const Gfx::PointF& pos) const;

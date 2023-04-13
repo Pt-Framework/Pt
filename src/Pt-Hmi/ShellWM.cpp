@@ -186,26 +186,22 @@ void ShellWM::onRequestCapture(bool capture)
 WindowImpl* ShellWM::onAttach(Window& w)
 {
     WindowFrame* frame = new WindowFrame(*this, w);
+    frame->setNextResponder(this);
 
     if(_topMostWindow)
         _windowList.insert( --_windowList.end(), &w );
     else
         _windowList.push_back(&w);
 
-    Gfx::PaintSurface& surface = frame->surface();
-    Gfx::PointF surfacePos = frame->clientPos();
-    w.setSurface(&surface, surfacePos);
-
-    w.setNextResponder(this);
-
     return frame;
 }
 
 
-void ShellWM::onDetach(Window& w)
+void ShellWM::onDetach(WindowImpl& frame)
 {
-    w.setNextResponder(0);
-    w.setSurface( 0, Gfx::PointF() );
+    frame.setNextResponder(0);
+
+    Window& w = frame.window();
 
     std::vector<Window*>::iterator wit;
     for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
@@ -227,57 +223,23 @@ void ShellWM::onDetach(Window& w)
 }
 
 
-void ShellWM::onInit(Window& w)
+void ShellWM::onInit(WindowImpl& frame)
 {
     double scaling = scaleFactor();
     
-    WindowImpl* frame = w.impl();
-    RescaleEvent ev(*frame, scaling);
-    frame->processEvent(ev);
-    //Application::instance().loop().commitEvent(ev);
+    RescaleEvent ev(frame, scaling);
+    frame.processEvent(ev);
 }
 
 
-void ShellWM::onRelease(Window& w)
+void ShellWM::onRelease(WindowImpl& frame)
 {
-    if( w.isVisible() )
+    if( frame.window().isVisible() )
     {
-        WindowImpl* frame = w.impl();
-        Gfx::RectF frameRect( frame->position(), frame->size() );
+        Gfx::RectF frameRect( frame.position(), frame.size() );
         repaint(frameRect);
     }
 }
-
-
-//Gfx::PointF ShellWM::onToWindow(const Window& w, 
-//                                const Gfx::PointF& pos) const
-//{
-//    const WindowFrame* frame = static_cast<const WindowFrame*>( w.impl() );
-//    if( ! frame )
-//        return pos;
-//
-//    return frame->toWindow(pos) - w.position();
-//}
-//
-//
-//Gfx::PointF ShellWM::onFromWindow(const Window& w, 
-//                                  const Gfx::PointF& pos) const
-//{
-//    const WindowFrame* frame = static_cast<const WindowFrame*>( w.impl() );
-//    if( ! frame )
-//        return pos;
-//
-//    return w.position() + frame->fromWindow(pos);
-//}
-
-
-//void ShellWM::onRepaint(Window& w, const Gfx::RectF& rect)
-//{
-//    Gfx::PointF windowPos = onFromWindow( w, rect.topLeft() );
-//    Gfx::RectF windowRect( windowPos, rect.size() );
-//
-//    repaint(windowRect);
-//}
 
 
 void ShellWM::onShow(Window& w, bool visible)

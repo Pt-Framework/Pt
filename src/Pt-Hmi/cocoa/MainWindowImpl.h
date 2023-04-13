@@ -141,6 +141,10 @@ class MainWindowImpl : public WindowImpl
         void onMouseMove(double x, double y);
 
     protected:
+        virtual void onInit(Window& w);
+
+        virtual void onRelease(Window& w);
+
         virtual Gfx::PointF onToWindow(const Window& w, 
                                        const Gfx::PointF& pos) const;
 

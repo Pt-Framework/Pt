@@ -450,6 +450,28 @@ WindowFrame::~WindowFrame()
 }
 
 
+void WindowFrame::onInit(Window& w)
+{
+    Gfx::PaintSurface& surface = this->surface();
+    Gfx::PointF surfacePos = clientPos();
+    w.setSurface(&surface, surfacePos);
+
+    w.setNextResponder(this);
+
+    double scaling = scaleFactor();
+    
+    RescaleEvent ev(w, scaling);
+    w.processEvent(ev);
+}
+
+
+void WindowFrame::onRelease(Window& w)
+{
+    w.setNextResponder(0);
+    w.setSurface( 0, Gfx::PointF() );
+}
+
+
 void WindowFrame::onSetTitle(Window& w, const std::string& text)
 {
     repaint();

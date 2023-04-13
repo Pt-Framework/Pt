@@ -94,6 +94,10 @@ class WindowImpl : public Visual
         }
 
     protected:
+        virtual void onInit(Window& w) = 0;
+
+        virtual void onRelease(Window& w) = 0;
+
         virtual Gfx::PointF onToWindow(const Window& w, 
                                        const Gfx::PointF& pos) const = 0;
 

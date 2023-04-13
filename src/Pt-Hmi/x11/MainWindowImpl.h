@@ -108,6 +108,10 @@ class MainWindowImpl : public WindowImpl
         }
 
     protected:
+        virtual void onInit(Window& w);
+
+        virtual void onRelease(Window& w);
+
         virtual Gfx::PointF onToWindow(const Window& w, 
                                        const Gfx::PointF& pos) const;
 

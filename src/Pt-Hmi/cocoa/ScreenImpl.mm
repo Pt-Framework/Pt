@@ -95,6 +95,7 @@ const std::vector<Window*>& ScreenImpl::windows() const
     return _windows;
 }
 
+
 Window* ScreenImpl::findWindow(NSWindow* wnd)
 {
     const std::vector<Window*>& windows = Application::instance().screen().windows();
@@ -174,9 +175,9 @@ Gfx::PointF ScreenImpl::onFromParent(const Gfx::PointF& pos) const
 }
 
 
-void ScreenImpl::onEvent(const Event& ev)
+void ScreenImpl::onProcessEvent(const Event& ev)
 {
-    _eventReceived.send(ev);
+    Base::onProcessEvent(ev);
 }
 
 
@@ -193,23 +194,19 @@ void ScreenImpl::onRepaintRequest(const Gfx::RectF& rect)
 WindowImpl* ScreenImpl::onAttach(Window& w)
 {
     MainWindowImpl* frame = new MainWindowImpl(*this, w);
+    frame->setNextResponder(this);
 
     _windows.push_back(&w);
 
-    Gfx::PaintSurface& surface = frame->surface();
-    Gfx::PointF surfacePos(0, 0);
-    w.setSurface(&surface, surfacePos);
-
-    w.setNextResponder(this);
-
-    return new MainWindowImpl( w.type() );
+    return frame;
 }
 
 
-void ScreenImpl::onDetach(Window& w)
+void ScreenImpl::onDetach(WindowImpl& frame)
 {
-    w.setNextResponder(0);
-    w.setSurface( 0, Gfx::PointF() );
+    frame.setNextResponder(0);
+
+    Window& w = frame.window();
 
     std::vector<Window*>::iterator it;
     it = std::remove(_windows.begin(), _windows.end(), &w);
@@ -217,15 +214,14 @@ void ScreenImpl::onDetach(Window& w)
 }
 
 
-void ScreenImpl::onInit(Window& w)
+void ScreenImpl::onInit(WindowImpl& frame)
 {
-    WindowImpl* frame = w.impl();
-    RescaleEvent ev( *frame, scaleFactor() );
-    frame->processEvent(ev);
+    RescaleEvent ev( frame, scaleFactor() );
+    frame.processEvent(ev);
 }
 
 
-void ScreenImpl::onRelease(Window& w)
+void ScreenImpl::onRelease(WindowImpl& frame)
 {
 }
 
@@ -254,46 +250,46 @@ void ScreenImpl::onEnableRequest(Window& w, bool enable)
 }
 
 
-void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
-{
-    Gfx::PointF aligedPos = w.surface().align(pos);
-
-    //
-    // TODO: scale here instead of in MainWindowImpl
-    //
-
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->move(aligedPos);
-}
-
-
-void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
-{
-    //
-    // align to physical pixel grid
-    //
-    Gfx::SizeF alignedSize = w.surface().align(s);
-
-    //
-    // maximum width and height
-    //
-    if( alignedSize.width() > w.maximumSize().width() )
-        alignedSize.setWidth( w.maximumSize().width() );
-
-    if( alignedSize.height() > w.maximumSize().height() )
-        alignedSize.setHeight( w.maximumSize().height() );
-
-    if( alignedSize.width() < w.minimumSize().width() )
-        alignedSize.setWidth( w.minimumSize().width() );
-
-    if( alignedSize.height() < w.minimumSize().height() )
-        alignedSize.setHeight( w.minimumSize().height() );
-
-    //w.impl()->scaleFactor(); ???
-
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
-    impl->resize(alignedSize);
-}
+//void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
+//{
+//    Gfx::PointF aligedPos = w.surface().align(pos);
+//
+//    //
+//    // TODO: scale here instead of in MainWindowImpl
+//    //
+//
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->move(aligedPos);
+//}
+//
+//
+//void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
+//{
+//    //
+//    // align to physical pixel grid
+//    //
+//    Gfx::SizeF alignedSize = w.surface().align(s);
+//
+//    //
+//    // maximum width and height
+//    //
+//    if( alignedSize.width() > w.maximumSize().width() )
+//        alignedSize.setWidth( w.maximumSize().width() );
+//
+//    if( alignedSize.height() > w.maximumSize().height() )
+//        alignedSize.setHeight( w.maximumSize().height() );
+//
+//    if( alignedSize.width() < w.minimumSize().width() )
+//        alignedSize.setWidth( w.minimumSize().width() );
+//
+//    if( alignedSize.height() < w.minimumSize().height() )
+//        alignedSize.setHeight( w.minimumSize().height() );
+//
+//    //w.impl()->scaleFactor(); ???
+//
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    impl->resize(alignedSize);
+//}
 
 
 void ScreenImpl::onSetAbove(Window& w, bool above)

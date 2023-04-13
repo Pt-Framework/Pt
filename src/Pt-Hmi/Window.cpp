@@ -154,19 +154,21 @@ Window::~Window()
 }
 
 
-void Window::setParent(WindowManager& parent)
+void Window::setParent(WindowManager& wm)
 {
-    if(_wm == &parent)
+    if(_wm == &wm)
         return;
 
     unparent();
 
     _isClosed = false;
 
-    _impl = parent.onAttach(*this);
-    _wm = &parent;
-   
-    _wm->onInit(*this);
+    _wm = &wm;
+    _impl = wm.onAttach(*this);
+    wm.onInit(*_impl);
+
+    _impl->onInit(*this);
+
     _wm->onSetSizeLimits(*this, minimumSize(), maximumSize());
     _impl->onSetState(*this, _state);
     _impl->onSetTitle(*this, _title);
@@ -191,11 +193,13 @@ void Window::setParent(WindowManager& parent)
 
 void Window::unparent()
 {
-    if( ! _wm )
+    if( ! _impl )
         return;
 
-    _wm->onRelease(*this);
-    _wm->onDetach(*this);
+    _impl->onRelease(*this);
+
+    _wm->onRelease(*_impl);
+    _wm->onDetach(*_impl);
     _wm = 0;
 
     delete _impl;

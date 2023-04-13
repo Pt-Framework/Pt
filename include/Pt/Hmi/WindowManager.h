@@ -51,11 +51,11 @@ class WindowManager : public Visual
     protected:
         virtual WindowImpl* onAttach(Window& w) = 0;
 
-        virtual void onDetach(Window& w) = 0;
+        virtual void onDetach(WindowImpl& w) = 0;
 
-        virtual void onInit(Window& w) = 0;
+        virtual void onInit(WindowImpl& w) = 0;
 
-        virtual void onRelease(Window& w) = 0;
+        virtual void onRelease(WindowImpl& w) = 0;
 
     protected:
         virtual void onShow(Window& w, bool visible) = 0; 

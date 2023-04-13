@@ -79,6 +79,28 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
+void MainWindowImpl::onInit(Window& w)
+{
+    Gfx::PaintSurface& surface = this->surface();
+    Gfx::PointF surfacePos(0, 0);
+    w.setSurface(&surface, surfacePos);
+
+    w.setNextResponder(this);
+
+    double scaling = scaleFactor();
+    
+    RescaleEvent ev(w, scaling);
+    w.processEvent(ev);
+}
+
+
+void MainWindowImpl::onRelease(Window& w)
+{
+    w.setNextResponder(0);
+    w.setSurface( 0, Gfx::PointF() );
+}
+
+
 void MainWindowImpl::setType(WindowType type)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
