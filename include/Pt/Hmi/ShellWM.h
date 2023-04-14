@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class WindowFrame;
+class ShellWindowFrame;
 
 class Shell;
 
@@ -48,7 +48,7 @@ class ShellWM : public WindowManager
 {
     typedef WindowManager Base;
 
-    friend class WindowFrame;
+    friend class ShellWindowFrame;
 
     public:
         ShellWM();
@@ -157,28 +157,29 @@ class ShellWM : public WindowManager
         //virtual void onClosing(Window& w);
 
     protected:
-        Gfx::PointF toFrame(const WindowFrame& w, 
+        Gfx::PointF toFrame(const ShellWindowFrame& w, 
                             const Gfx::PointF& pos) const;
 
-        Gfx::PointF fromFrame(const WindowFrame& w, 
+        Gfx::PointF fromFrame(const ShellWindowFrame& w, 
                               const Gfx::PointF& pos) const;
 
-        virtual void onSetAbove(WindowFrame& w, bool above);
+        virtual void onSetAbove(ShellWindowFrame& w, bool above);
 
-        virtual void onSetSizeLimits(WindowFrame& w, const Gfx::SizeF& minSize, 
-                                                const Gfx::SizeF& maxSize);
+        virtual void onSetSizeLimits(ShellWindowFrame& w, 
+                                     const Gfx::SizeF& minSize, 
+                                     const Gfx::SizeF& maxSize);
 
-        virtual void onShow(WindowFrame& w, bool visible);
+        virtual void onShow(ShellWindowFrame& w, bool visible);
 
-        virtual void onActivate(WindowFrame& w, bool active); 
+        virtual void onActivate(ShellWindowFrame& w, bool active); 
 
-        virtual void onEnable(WindowFrame& w, bool enable);
+        virtual void onEnable(ShellWindowFrame& w, bool enable);
 
-        virtual void onMove(WindowFrame& w, const Gfx::PointF& to);
+        virtual void onMove(ShellWindowFrame& w, const Gfx::PointF& to);
 
-        virtual void onResize(WindowFrame& w, const Gfx::SizeF& to);
+        virtual void onResize(ShellWindowFrame& w, const Gfx::SizeF& to);
 
-        virtual void onClose(WindowFrame& w);
+        virtual void onClose(ShellWindowFrame& w);
 
     //
     // Implementation

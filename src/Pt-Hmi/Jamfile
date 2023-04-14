@@ -67,6 +67,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        ScrollLayout.cpp
                        Shell.cpp
                        ShellWM.cpp
+                       ShellWindowFrame.cpp
                        Slider.cpp
                        SpinBox.cpp
                        StackLayout.cpp
@@ -79,7 +80,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        Widget.cpp
                        WindowBase.cpp
                        Window.cpp
-                       WindowFrame.cpp
+                       #WindowFrame.cpp
                        WindowManager.cpp
                        $(PT_HMI_IMPL) ;
 

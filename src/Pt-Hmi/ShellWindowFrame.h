@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_WindowFrame_h
-#define Pt_Hmi_WindowFrame_h
+#ifndef PT_HMI_SHELL_WINDOWFRAME_H
+#define PT_HMI_SHELL_WINDOWFRAME_H
 
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/PaintRegion.h>
@@ -46,7 +46,7 @@ namespace Hmi {
 
 class Window;
 class ShellWM;
-class WindowFrame;
+class ShellWindowFrame;
 class Application;
 class MouseEvent;
 class KeyEvent;
@@ -63,10 +63,10 @@ class WindowButton
 
         virtual ~WindowButton();
 
-        WindowFrame* parent()
+        ShellWindowFrame* parent()
         { return _frame; }
 
-        void setParent(WindowFrame& frame)
+        void setParent(ShellWindowFrame& frame)
         { _frame  = &frame; }
 
         const Gfx::RectF&  geometry() const
@@ -98,11 +98,11 @@ class WindowButton
         virtual void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     private:
-        Signal<>       _clicked;
-        WindowFrame*   _frame;
-        Gfx::RectF     _geometry;
-        Gfx::Color     _color;
-        bool           _isPressed;
+        Signal<>           _clicked;
+        ShellWindowFrame*  _frame;
+        Gfx::RectF         _geometry;
+        Gfx::Color         _color;
+        bool               _isPressed;
 };
 
 class MinimizeButton : public WindowButton
@@ -149,7 +149,7 @@ class MenuButton : public WindowButton
 };
 
 
-class WindowFrame : public WindowImpl
+class ShellWindowFrame : public WindowImpl
 {
     typedef WindowImpl Base;
 
@@ -169,9 +169,9 @@ class WindowFrame : public WindowImpl
     };
 
     public:
-        WindowFrame(ShellWM& wm, Window& window);
+        ShellWindowFrame(ShellWM& wm, Window& window);
 
-        virtual ~WindowFrame();
+        virtual ~ShellWindowFrame();
 
         //virtual Gfx::PointF clientPos() const;
 

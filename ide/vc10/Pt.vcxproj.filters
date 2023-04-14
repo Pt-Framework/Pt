@@ -1587,6 +1587,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\PngWriter.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\ShellWindowFrame.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2935,6 +2938,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\PngWriter.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ShellWindowFrame.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

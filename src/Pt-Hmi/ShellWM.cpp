@@ -26,7 +26,7 @@
   02110-1301  USA
 */
 
-#include "WindowFrame.h"
+#include "ShellWindowFrame.h"
 
 #include <Pt/Hmi/ShellWM.h>
 #include <Pt/Hmi/Shell.h>
@@ -121,14 +121,14 @@ const std::vector<Window*>& ShellWM::windows() const
 }
 
 
-Gfx::PointF ShellWM::toFrame(const WindowFrame& w, 
+Gfx::PointF ShellWM::toFrame(const ShellWindowFrame& w, 
                              const Gfx::PointF& pos) const
 {
     return pos - w.position();
 }
 
 
-Gfx::PointF ShellWM::fromFrame(const WindowFrame& w, 
+Gfx::PointF ShellWM::fromFrame(const ShellWindowFrame& w, 
                                const Gfx::PointF& pos) const
 {
     return pos + w.position();
@@ -159,7 +159,7 @@ Visual* ShellWM::onHitTest(const Gfx::PointF& p)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
+        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->impl() );
 
         if( ! window->isVisible() )
             continue;
@@ -185,7 +185,7 @@ void ShellWM::onRequestCapture(bool capture)
 
 WindowImpl* ShellWM::onAttach(Window& w)
 {
-    WindowFrame* frame = new WindowFrame(*this, w);
+    ShellWindowFrame* frame = new ShellWindowFrame(*this, w);
     frame->setNextResponder(this);
 
     if(_topMostWindow)
@@ -242,14 +242,14 @@ void ShellWM::onRelease(WindowImpl& frame)
 }
 
 
-void ShellWM::onShow(WindowFrame& frame, bool visible)
+void ShellWM::onShow(ShellWindowFrame& frame, bool visible)
 {
     ShowEvent windowEvent( frame, visible );
     Application::instance().loop().commitEvent(windowEvent);
 }
 
 
-void ShellWM::onActivate(WindowFrame& frame, bool active)
+void ShellWM::onActivate(ShellWindowFrame& frame, bool active)
 {
     Window& w = frame.window();
 
@@ -293,7 +293,7 @@ void ShellWM::onActivate(WindowFrame& frame, bool active)
 }
 
 
-void ShellWM::onEnable(WindowFrame& frame, bool enable)
+void ShellWM::onEnable(ShellWindowFrame& frame, bool enable)
 {
     if( ! isEnabled() )
       enable = false;
@@ -303,7 +303,7 @@ void ShellWM::onEnable(WindowFrame& frame, bool enable)
 }
 
 
-void ShellWM::onSetAbove(WindowFrame& frame, bool above)
+void ShellWM::onSetAbove(ShellWindowFrame& frame, bool above)
 {
     Window& w = frame.window();
 
@@ -347,8 +347,9 @@ void ShellWM::onSetAbove(WindowFrame& frame, bool above)
 //}
 
 
-void ShellWM::onSetSizeLimits(WindowFrame& w, const Gfx::SizeF& minSize, 
-                                              const Gfx::SizeF& maxSize)
+void ShellWM::onSetSizeLimits(ShellWindowFrame& w, 
+                              const Gfx::SizeF& minSize, 
+                              const Gfx::SizeF& maxSize)
 {
 }
 
@@ -360,7 +361,7 @@ void ShellWM::onSetSizeLimits(WindowFrame& w, const Gfx::SizeF& minSize,
 //}
 
 
-void ShellWM::onClose(WindowFrame& wf)
+void ShellWM::onClose(ShellWindowFrame& wf)
 {
     CloseEvent ev(wf);
     Application::instance().loop().commitEvent(ev);
@@ -417,7 +418,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
     for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
         Window* window = *wit;
-        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
+        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->impl() );
 
         if( ! window->isVisible() )
             continue;
@@ -458,7 +459,7 @@ void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
-void ShellWM::onMove(WindowFrame& frame, const Gfx::PointF& pos)
+void ShellWM::onMove(ShellWindowFrame& frame, const Gfx::PointF& pos)
 {
     Gfx::PointF aligedPos = _surface.align(pos);
 
@@ -467,7 +468,7 @@ void ShellWM::onMove(WindowFrame& frame, const Gfx::PointF& pos)
 }
 
 
-void ShellWM::onResize(WindowFrame& frame, const Gfx::SizeF& to)
+void ShellWM::onResize(ShellWindowFrame& frame, const Gfx::SizeF& to)
 {
     ResizeEvent rev(frame, to);
     Application::instance().commitEvent(rev);
@@ -513,7 +514,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
+        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->impl() );
 
         Gfx::PointF p = toFrame(*frame, pos);
         
@@ -570,7 +571,7 @@ bool ShellWM::processTouchEvent(const TouchEvent& ev)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        WindowFrame* frame = static_cast<WindowFrame*>( window->impl() );
+        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->impl() );
 
         Gfx::PointF p = toFrame(*frame, pos);
         Visual* hit = frame->hitTest(p);

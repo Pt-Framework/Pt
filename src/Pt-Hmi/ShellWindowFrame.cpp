@@ -27,7 +27,7 @@
   MA 02110-1301 USA
 */
 
-#include "WindowFrame.h"
+#include "ShellWindowFrame.h"
 
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Window.h>
@@ -392,10 +392,10 @@ void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 //
-// WindowFrame
+// ShellWindowFrame
 //
 
-WindowFrame::WindowFrame(ShellWM& shell, Window& window)
+ShellWindowFrame::ShellWindowFrame(ShellWM& shell, Window& window)
 : WindowImpl(shell, window)
 , _wm(&shell)
 , _window(&window)
@@ -426,29 +426,29 @@ WindowFrame::WindowFrame(ShellWM& shell, Window& window)
     }
 
     _maximizeButton.setParent(*this);
-    _maximizeButton.clicked() += Pt::slot(*this, &WindowFrame::onMaximize);
+    _maximizeButton.clicked() += Pt::slot(*this, &ShellWindowFrame::onMaximize);
     _buttons.push_back(&_maximizeButton);
 
     _minimizeButton.setParent(*this);
-    _minimizeButton.clicked() += Pt::slot(*this, &WindowFrame::onMinimize);
+    _minimizeButton.clicked() += Pt::slot(*this, &ShellWindowFrame::onMinimize);
     _buttons.push_back(&_minimizeButton);
 
     _closeButton.setParent(*this);
-    _closeButton.clicked() += Pt::slot(*this, &WindowFrame::onCloseButton);
+    _closeButton.clicked() += Pt::slot(*this, &ShellWindowFrame::onCloseButton);
     _buttons.push_back(&_closeButton);
 
     _menuButton.setParent(*this);
-    _menuButton.clicked() += Pt::slot(*this, &WindowFrame::onMenu);
+    _menuButton.clicked() += Pt::slot(*this, &ShellWindowFrame::onMenu);
     _buttons.push_back(&_menuButton);
 }
 
 
-WindowFrame::~WindowFrame()
+ShellWindowFrame::~ShellWindowFrame()
 {
 }
 
 
-void WindowFrame::onInit(Window& w)
+void ShellWindowFrame::onInit(Window& w)
 {
     Gfx::PaintSurface& surface = this->surface();
     Gfx::PointF surfacePos = _clientBounds.topLeft();
@@ -463,26 +463,26 @@ void WindowFrame::onInit(Window& w)
 }
 
 
-void WindowFrame::onRelease(Window& w)
+void ShellWindowFrame::onRelease(Window& w)
 {
     w.setNextResponder(0);
     w.setSurface( 0, Gfx::PointF() );
 }
 
 
-void WindowFrame::onSetTitle(Window& w, const std::string& text)
+void ShellWindowFrame::onSetTitle(Window& w, const std::string& text)
 {
     repaint();
 }
 
 
-void WindowFrame::onSetIcon(Window& w, const Gfx::Image& icon)
+void ShellWindowFrame::onSetIcon(Window& w, const Gfx::Image& icon)
 {
     repaint();
 }
 
 
-void WindowFrame::onSetState(Window& w, const WindowState& state)
+void ShellWindowFrame::onSetState(Window& w, const WindowState& state)
 {
     Window::State oldState = _state;
 
@@ -524,7 +524,7 @@ void WindowFrame::onSetState(Window& w, const WindowState& state)
 }
 
 
-void WindowFrame::onProcessWindowStateEvent(const WindowStateEvent& ev)
+void ShellWindowFrame::onProcessWindowStateEvent(const WindowStateEvent& ev)
 {
     WindowStateEvent wse( *_window, ev.state() );
     Application::instance().processEvent(wse);
@@ -533,44 +533,45 @@ void WindowFrame::onProcessWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-void WindowFrame::onWindowStateEvent(const WindowStateEvent& ev)
+void ShellWindowFrame::onWindowStateEvent(const WindowStateEvent& ev)
 {
 }
 
 
-void WindowFrame::onSetAbove(Window& w, bool above)
+void ShellWindowFrame::onSetAbove(Window& w, bool above)
 {
     _wm->onSetAbove(*this, above);
 }
 
 
-void WindowFrame::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-                                             const Gfx::SizeF& maxSize)
+void ShellWindowFrame::onSetSizeLimits(Window& w, 
+                                       const Gfx::SizeF& minSize, 
+                                       const Gfx::SizeF& maxSize)
 {
     _wm->onSetSizeLimits(*this, minSize, maxSize);
 }
 
 
-const Gfx::PointF& WindowFrame::restorePosition() const
+const Gfx::PointF& ShellWindowFrame::restorePosition() const
 {
     return _restorePos;
 }
 
 
-const Gfx::SizeF& WindowFrame::restoreSize() const
+const Gfx::SizeF& ShellWindowFrame::restoreSize() const
 {
     return _restoreSize;
 }
 
 
-void WindowFrame::setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size)
+void ShellWindowFrame::setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size)
 {
     _restorePos = pos;
     _restoreSize = size;
 }
 
 
-//Gfx::PointF WindowFrame::clientPos() const
+//Gfx::PointF ShellWindowFrame::clientPos() const
 //{
 //    double x = _borderWidth;
 //    double y = _borderWidth + _titleHeight;
@@ -579,19 +580,19 @@ void WindowFrame::setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size)
 //}
 
 
-const Gfx::RectF& WindowFrame::clientRect() const
+const Gfx::RectF& ShellWindowFrame::clientRect() const
 {
     return _clientRect;
 }
 
 
-const Gfx::RectF& WindowFrame::frameRect() const
+const Gfx::RectF& ShellWindowFrame::frameRect() const
 {
     return _frameRect;
 }
 
 
-void WindowFrame::setFrame(double bw, double th)
+void ShellWindowFrame::setFrame(double bw, double th)
 {
     _borderWidth = surface().align(bw);
     _titleHeight = surface().align(th);
@@ -601,12 +602,12 @@ void WindowFrame::setFrame(double bw, double th)
 }
 
 
-void WindowFrame::onMenu()
+void ShellWindowFrame::onMenu()
 {
 }
 
 
-void WindowFrame::onMinimize()
+void ShellWindowFrame::onMinimize()
 {
     if(_state == WindowState::Minimized)
         _window->setState(WindowState::Normal);
@@ -615,7 +616,7 @@ void WindowFrame::onMinimize()
 }
 
 
-void WindowFrame::onMaximize()
+void ShellWindowFrame::onMaximize()
 {
     if(_state == WindowState::Maximized)
         _window->setState(WindowState::Normal);
@@ -624,19 +625,19 @@ void WindowFrame::onMaximize()
 }
 
 
-void WindowFrame::onCloseButton()
+void ShellWindowFrame::onCloseButton()
 {
     _window->close();
 }
 
 
-void WindowFrame::onClose(Window& w)
+void ShellWindowFrame::onClose(Window& w)
 {
     _wm->onClose(*this);
 }
 
 
-void WindowFrame::onProcessCloseEvent(const CloseEvent& ev)
+void ShellWindowFrame::onProcessCloseEvent(const CloseEvent& ev)
 {
     onCloseEvent(ev);
 
@@ -645,12 +646,12 @@ void WindowFrame::onProcessCloseEvent(const CloseEvent& ev)
 }
 
 
-void WindowFrame::onCloseEvent(const CloseEvent& ev)
+void ShellWindowFrame::onCloseEvent(const CloseEvent& ev)
 {
 }
 
 
-void WindowFrame::onLayout()
+void ShellWindowFrame::onLayout()
 {
     double buttonWidth = _titleHeight - _borderWidth;
 
@@ -674,8 +675,8 @@ void WindowFrame::onLayout()
 }
 
 
-Gfx::PointF WindowFrame::onToWindow(const Window& w, 
-                                    const Gfx::PointF& pos) const
+Gfx::PointF ShellWindowFrame::onToWindow(const Window& w, 
+                                         const Gfx::PointF& pos) const
 {
     double offX = _borderWidth;
     double offY = _borderWidth + _titleHeight;
@@ -684,8 +685,8 @@ Gfx::PointF WindowFrame::onToWindow(const Window& w,
 }
 
 
-Gfx::PointF WindowFrame::onFromWindow(const Window& w, 
-                                      const Gfx::PointF& pos) const
+Gfx::PointF ShellWindowFrame::onFromWindow(const Window& w, 
+                                           const Gfx::PointF& pos) const
 {
     double offX = _borderWidth;
     double offY = _borderWidth + _titleHeight;
@@ -694,7 +695,7 @@ Gfx::PointF WindowFrame::onFromWindow(const Window& w,
 }
 
 
-Visual* WindowFrame::onHitTest(const Gfx::PointF& pos)
+Visual* ShellWindowFrame::onHitTest(const Gfx::PointF& pos)
 {
     if( ! bounds().contains(pos) || ! isVisible() )
         return 0;
@@ -711,25 +712,25 @@ Visual* WindowFrame::onHitTest(const Gfx::PointF& pos)
 }
 
 
-Gfx::PointF WindowFrame::onToParent(const Gfx::PointF& pos) const
+Gfx::PointF ShellWindowFrame::onToParent(const Gfx::PointF& pos) const
 { 
     return _wm->fromFrame(*this, pos);
 }
 
         
-Gfx::PointF WindowFrame::onFromParent(const Gfx::PointF& pos) const
+Gfx::PointF ShellWindowFrame::onFromParent(const Gfx::PointF& pos) const
 {
     return _wm->toFrame(*this, pos);
 }
 
 
-void WindowFrame::onProcessEvent(const Pt::Event& ev)
+void ShellWindowFrame::onProcessEvent(const Pt::Event& ev)
 {
     Base::onProcessEvent(ev);
 }
 
 
-void WindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
+void ShellWindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);
 
@@ -740,7 +741,7 @@ void WindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
+void ShellWindowFrame::onRescaleEvent(const RescaleEvent& ev)
 {
     Base::onRescaleEvent(ev);
 
@@ -749,13 +750,13 @@ void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void WindowFrame::onShow(Window& w, bool visible)
+void ShellWindowFrame::onShow(Window& w, bool visible)
 {
     _wm->onShow(*this, visible);
 }
 
 
-void WindowFrame::onProcessShowEvent(const ShowEvent& ev)
+void ShellWindowFrame::onProcessShowEvent(const ShowEvent& ev)
 {
     Base::onProcessShowEvent(ev);
 
@@ -764,7 +765,7 @@ void WindowFrame::onProcessShowEvent(const ShowEvent& ev)
 }
 
 
-void WindowFrame::onShowEvent(const ShowEvent& ev)
+void ShellWindowFrame::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
 
@@ -772,13 +773,13 @@ void WindowFrame::onShowEvent(const ShowEvent& ev)
 }
 
 
-void WindowFrame::onEnable(Window& w, bool enable)
+void ShellWindowFrame::onEnable(Window& w, bool enable)
 {
     _wm->onEnable(*this, enable);
 }
 
 
-void WindowFrame::onProcessEnableEvent(const EnableEvent& ev)
+void ShellWindowFrame::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
 
@@ -787,7 +788,7 @@ void WindowFrame::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
-void WindowFrame::onEnableEvent(const EnableEvent& ev)
+void ShellWindowFrame::onEnableEvent(const EnableEvent& ev)
 {    
     Base::onEnableEvent(ev);
 
@@ -795,13 +796,13 @@ void WindowFrame::onEnableEvent(const EnableEvent& ev)
 }
 
 
-void WindowFrame::onActivate(Window& w, bool active)
+void ShellWindowFrame::onActivate(Window& w, bool active)
 {
     _wm->onActivate(*this, active);
 }
 
 
-void WindowFrame::onProcessActivateEvent(const ActivateEvent& ev)
+void ShellWindowFrame::onProcessActivateEvent(const ActivateEvent& ev)
 {
     Base::onProcessActivateEvent(ev);
 
@@ -810,7 +811,7 @@ void WindowFrame::onProcessActivateEvent(const ActivateEvent& ev)
 }
 
 
-void WindowFrame::onActivateEvent(const ActivateEvent& ev)
+void ShellWindowFrame::onActivateEvent(const ActivateEvent& ev)
 {
     Base::onActivateEvent(ev);
 
@@ -818,7 +819,7 @@ void WindowFrame::onActivateEvent(const ActivateEvent& ev)
 }
 
 
-void WindowFrame::onRequestMove(const Gfx::PointF& pos)
+void ShellWindowFrame::onRequestMove(const Gfx::PointF& pos)
 {
     _frameRect.setOrigin(pos);
 
@@ -829,7 +830,7 @@ void WindowFrame::onRequestMove(const Gfx::PointF& pos)
 }
 
 
-void WindowFrame::onMove(Window& w, const Gfx::PointF& pos)
+void ShellWindowFrame::onMove(Window& w, const Gfx::PointF& pos)
 {
     _frameRect.setOrigin(pos);
 
@@ -842,7 +843,7 @@ void WindowFrame::onMove(Window& w, const Gfx::PointF& pos)
 }
 
 
-void WindowFrame::onProcessMoveEvent(const MoveEvent& ev)
+void ShellWindowFrame::onProcessMoveEvent(const MoveEvent& ev)
 {
     Base::onProcessMoveEvent(ev);
 
@@ -851,7 +852,7 @@ void WindowFrame::onProcessMoveEvent(const MoveEvent& ev)
 }
 
 
-void WindowFrame::onMoveEvent(const MoveEvent& ev)
+void ShellWindowFrame::onMoveEvent(const MoveEvent& ev)
 {
     Gfx::PointF delta = ev.position() - position();
     _lastPointer = _lastPointer - delta;
@@ -872,7 +873,7 @@ void WindowFrame::onMoveEvent(const MoveEvent& ev)
 }
 
 
-void WindowFrame::onRequestResize(const Gfx::SizeF& size)
+void ShellWindowFrame::onRequestResize(const Gfx::SizeF& size)
 {
     _clientRect.setSize(size);
 
@@ -890,7 +891,7 @@ void WindowFrame::onRequestResize(const Gfx::SizeF& size)
 }
 
 
-void WindowFrame::onResize(Window& w, const Gfx::SizeF& s)
+void ShellWindowFrame::onResize(Window& w, const Gfx::SizeF& s)
 {
     Gfx::SizeF alignedSize = surface().align(s);
 
@@ -921,7 +922,7 @@ void WindowFrame::onResize(Window& w, const Gfx::SizeF& s)
 }
 
 
-void WindowFrame::onProcessResizeEvent(const ResizeEvent& ev)
+void ShellWindowFrame::onProcessResizeEvent(const ResizeEvent& ev)
 {
     Gfx::SizeF clientSize = ev.size();
     clientSize.subWidth(2 * _borderWidth);
@@ -941,7 +942,7 @@ void WindowFrame::onProcessResizeEvent(const ResizeEvent& ev)
 }
 
 
-void WindowFrame::onResizeEvent(const ResizeEvent& ev)
+void ShellWindowFrame::onResizeEvent(const ResizeEvent& ev)
 {
     Gfx::RectF updateRect( size() );
     updateRect.unify( Gfx::RectF(ev.size()) );
@@ -954,7 +955,7 @@ void WindowFrame::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-bool WindowFrame::onEnterEvent( const EnterEvent& ev)
+bool ShellWindowFrame::onEnterEvent( const EnterEvent& ev)
 {
     _currentFrameItem = OnNone;
 
@@ -962,7 +963,7 @@ bool WindowFrame::onEnterEvent( const EnterEvent& ev)
 }
 
 
-bool WindowFrame::onLeaveEvent(const LeaveEvent& ev)
+bool ShellWindowFrame::onLeaveEvent(const LeaveEvent& ev)
 {
     _currentFrameItem = OnNone;
 
@@ -970,7 +971,7 @@ bool WindowFrame::onLeaveEvent(const LeaveEvent& ev)
 }
 
 
-void WindowFrame::onProcessMouseEvent(const MouseEvent& ev)
+void ShellWindowFrame::onProcessMouseEvent(const MouseEvent& ev)
 {
     if( ! window().acceptsInput() )
         return;
@@ -1012,7 +1013,7 @@ void WindowFrame::onProcessMouseEvent(const MouseEvent& ev)
 }
 
 
-void WindowFrame::onProcessTouchEvent(const TouchEvent& tev)
+void ShellWindowFrame::onProcessTouchEvent(const TouchEvent& tev)
 {
     Gfx::PointF pos = fromGlobal( tev.position() );
 
@@ -1027,7 +1028,7 @@ void WindowFrame::onProcessTouchEvent(const TouchEvent& tev)
 }
 
 
-bool WindowFrame::onMouseEvent(const MouseEvent& mev)
+bool ShellWindowFrame::onMouseEvent(const MouseEvent& mev)
 {
     Gfx::PointF pos = mev.position();
 
@@ -1082,7 +1083,7 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 }
 
 
-bool WindowFrame::onTouchEvent(const TouchEvent& tev)
+bool ShellWindowFrame::onTouchEvent(const TouchEvent& tev)
 {
     Gfx::PointF pos = tev.position();
 
@@ -1137,7 +1138,7 @@ bool WindowFrame::onTouchEvent(const TouchEvent& tev)
 }
 
 
-void WindowFrame::setCurrentFrameItem(FrameItem item)
+void ShellWindowFrame::setCurrentFrameItem(FrameItem item)
 {
     if(_currentFrameItem == item)
         return;
@@ -1180,7 +1181,7 @@ void WindowFrame::setCurrentFrameItem(FrameItem item)
 }
 
 
-bool WindowFrame::isTitle(const Gfx::PointF& p) const
+bool ShellWindowFrame::isTitle(const Gfx::PointF& p) const
 {
     bool isResizing = _isLeftResizing || _isRightResizing ||
                       _isTopResizing || _isBottomResizing;
@@ -1196,7 +1197,7 @@ bool WindowFrame::isTitle(const Gfx::PointF& p) const
 }
 
 
-bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
+bool ShellWindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 {
     Gfx::PointF localPos = p - _frameBounds.topLeft();
 
@@ -1209,7 +1210,7 @@ bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 }
 
 
-bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
+bool ShellWindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 {
     Gfx::PointF localPos = p - _frameBounds.topLeft();
 
@@ -1222,7 +1223,7 @@ bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 }
 
 
-bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
+bool ShellWindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 {
     Gfx::PointF localPos = p - _frameBounds.topLeft();
 
@@ -1235,7 +1236,7 @@ bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 }
 
 
-bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
+bool ShellWindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
 {
     Gfx::PointF localPos = p - _frameBounds.topLeft();
 
@@ -1250,7 +1251,7 @@ bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
 }
 
 
-Window* WindowFrame::checkWindow(const Gfx::PointF& pos)
+Window* ShellWindowFrame::checkWindow(const Gfx::PointF& pos)
 {
     bool isResizing = _isLeftResizing || _isRightResizing ||
                       _isTopResizing || _isBottomResizing;
@@ -1281,7 +1282,7 @@ Window* WindowFrame::checkWindow(const Gfx::PointF& pos)
 }
 
 
-WindowButton* WindowFrame::checkButton(const Gfx::PointF& pos)
+WindowButton* ShellWindowFrame::checkButton(const Gfx::PointF& pos)
 {
     bool isResizing = _isLeftResizing || _isRightResizing ||
                       _isTopResizing || _isBottomResizing;
@@ -1308,7 +1309,7 @@ WindowButton* WindowFrame::checkButton(const Gfx::PointF& pos)
 }
 
 
-bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
+bool ShellWindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
 {
     if( isTitle(pos) )
     {
@@ -1328,7 +1329,7 @@ bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
 }
 
 
-bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
+bool ShellWindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 {
     bool onLeftBorder = isLeftBorder(pos);
     bool onRightBorder = isRightBorder(pos);
@@ -1389,7 +1390,7 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 }
 
 
-void WindowFrame::onRepaint(Window& w, const Gfx::RectF& rect)
+void ShellWindowFrame::onRepaint(Window& w, const Gfx::RectF& rect)
 {
     Gfx::PointF windowPos = onFromWindow( *_window, rect.topLeft() );
     Gfx::RectF windowRect( windowPos, rect.size() );
@@ -1398,7 +1399,7 @@ void WindowFrame::onRepaint(Window& w, const Gfx::RectF& rect)
 }
 
 
-void WindowFrame::onRequestRepaint(const Gfx::RectF& rect)
+void ShellWindowFrame::onRequestRepaint(const Gfx::RectF& rect)
 {
     Gfx::PointF updatePos = rect.topLeft() + position();
     Gfx::RectF updateRect( updatePos, rect.size() );
@@ -1407,7 +1408,7 @@ void WindowFrame::onRequestRepaint(const Gfx::RectF& rect)
 }
 
 
-void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
+void ShellWindowFrame::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& rect = ev.rect();
     
@@ -1421,7 +1422,7 @@ void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
-void WindowFrame::onPaintEvent(const PaintEvent& ev)
+void ShellWindowFrame::onPaintEvent(const PaintEvent& ev)
 {
     Base::onPaintEvent(ev);
 
