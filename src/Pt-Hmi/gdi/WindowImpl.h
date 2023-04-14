@@ -27,8 +27,8 @@
    MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_MainWindowImpl_H
-#define Pt_Hmi_MainWindowImpl_H
+#ifndef PT_HMI_WIN32_WINDOWIMPL_H
+#define PT_HMI_WIN32_WINDOWIMPL_H
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowFrame.h>
@@ -41,19 +41,18 @@ namespace Pt {
 
 namespace Hmi {
 
-class Screen;
 class ScreenImpl;
 
-class MainWindowImpl : public WindowFrame
+class WindowImpl : public WindowFrame
 {
     typedef WindowFrame Base;
 
     friend class ScreenImpl;
 
     public:
-        MainWindowImpl(ScreenImpl& wm,  Window& w);
+        WindowImpl(ScreenImpl& wm,  Window& w);
 
-        ~MainWindowImpl();
+        ~WindowImpl();
 
         void setType(WindowType type);
 

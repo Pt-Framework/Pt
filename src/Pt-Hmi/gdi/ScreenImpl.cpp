@@ -29,7 +29,7 @@
 
 #include "ScreenImpl.h"
 #include "ApplicationImpl.h"
-#include "MainWindowImpl.h"
+#include "WindowImpl.h"
 
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
@@ -108,14 +108,14 @@ const std::vector<Window*>& ScreenImpl::windows() const
 }
 
 
-Gfx::PointF ScreenImpl::toFrame(const MainWindowImpl& frame, 
+Gfx::PointF ScreenImpl::toFrame(const WindowImpl& frame, 
                                 const Gfx::PointF& pos) const
 {
     return frame.fromScreen(pos);
 }
 
 
-Gfx::PointF ScreenImpl::fromFrame(const MainWindowImpl& frame, 
+Gfx::PointF ScreenImpl::fromFrame(const WindowImpl& frame, 
                                   const Gfx::PointF& pos) const
 {
     return frame.toScreen(pos);
@@ -138,7 +138,7 @@ void ScreenImpl::setCapture(Visual* capture)
         
         if( capture == window || capture->isDescendantOf(*window) )
         {
-            MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->frame() );
+            WindowImpl* impl = static_cast<WindowImpl*>( window->frame() );
             ::SetCapture( impl->hwnd() );
             //std::clog << "SET CAPTURE HWND: " << impl->hwnd() << std::endl;
             return;
@@ -161,7 +161,7 @@ Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
     if( ! win )
         return 0;
 
-    MainWindowImpl* frame = static_cast<MainWindowImpl*>( win->frame() );
+    WindowImpl* frame = static_cast<WindowImpl*>( win->frame() );
     Gfx::PointF pos = toFrame(*frame, p);
     
     return win->hitTest(pos);
@@ -198,7 +198,7 @@ void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
 
 WindowFrame* ScreenImpl::onAttach(Window& w)
 {
-    MainWindowImpl* frame = new MainWindowImpl(*this, w);
+    WindowImpl* frame = new WindowImpl(*this, w);
     frame->setNextResponder(this);
 
     _windows.push_back(&w);
@@ -281,7 +281,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         Window* window = *it;
-        MainWindowImpl* frame = static_cast<MainWindowImpl*>( window->frame() );
+        WindowImpl* frame = static_cast<WindowImpl*>( window->frame() );
 
         Gfx::PointF winPos = toFrame( *frame, screenRect.topLeft() );
         Gfx::RectF winRect( winPos, screenRect.size() );
@@ -318,7 +318,7 @@ void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
     for( size_t i = 0; i < _windows.size(); ++i)
     {
         Window* w = _windows[i];
-        MainWindowImpl* frame = static_cast<MainWindowImpl*>( w->frame() );
+        WindowImpl* frame = static_cast<WindowImpl*>( w->frame() );
 
         frame->onEnable(*w, ev.enabled() );
     }

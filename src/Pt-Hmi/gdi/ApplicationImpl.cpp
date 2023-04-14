@@ -29,7 +29,7 @@
 
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
-#include "MainWindowImpl.h"
+#include "WindowImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
 #include "PaintData.h"
@@ -463,7 +463,7 @@ Window* ApplicationImpl::findWindow(HWND hwnd)
     {
         Window* w = windows[i];
         
-        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w->frame() );
+        WindowImpl* impl = static_cast<WindowImpl*>( w->frame() );
         if( ! impl )
             continue;
 
@@ -771,7 +771,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     _mouseEvent.setPosition( w.toGlobal(pos) );
     _mouseEvent.setVisual(&w);
 
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
+    WindowImpl* impl = static_cast<WindowImpl*>( w.frame() );
 
     if( _pointerWindow != impl->hwnd() )
     {
@@ -875,7 +875,7 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);
 
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( w.frame() );
+    WindowImpl* windowImpl = static_cast<WindowImpl*>( w.frame() );
     HDC bitmapContext = windowImpl->surface().pixmapImpl()->deviceContext();
     
     BitBlt(windowContext, updateRect.left, updateRect.top, 

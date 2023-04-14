@@ -1035,9 +1035,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\ArrowCursor.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1589,6 +1586,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowFrame.h">
       <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\WindowImpl.h">
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2525,9 +2525,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
@@ -2941,6 +2938,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\ShellWindowFrame.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\WindowImpl.cpp">
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
