@@ -121,6 +121,31 @@ Gfx::PointF ScreenImpl::fromFrame(const MainWindowImpl& frame,
     return frame.toScreen(pos);
 }
 
+
+void ScreenImpl::setCapture(Visual* capture)
+{
+    if( ! capture )
+    {
+        //std::clog << "RELEASE CAPTURE HWND" << std::endl;
+        ::ReleaseCapture();
+        return;
+    }
+
+    std::vector<Window*>::iterator wit;
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    {
+        Window* window = *wit;
+        
+        if( capture == window || capture->isDescendantOf(*window) )
+        {
+            MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->frame() );
+            ::SetCapture( impl->hwnd() );
+            //std::clog << "SET CAPTURE HWND: " << impl->hwnd() << std::endl;
+            return;
+        }
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
@@ -205,109 +230,6 @@ void ScreenImpl::onRelease(WindowFrame& w)
 {
 }
 
-
-//void ScreenImpl::onShow(Window& w, bool visible)
-//{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
-//    impl->show(visible);
-//}
-
-
-//void ScreenImpl::onActivate(Window& w, bool active)
-//{
-//    if( ! active )
-//        return;
-//
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
-//    impl->activate();
-//}
-
-
-//void ScreenImpl::onEnableRequest(Window& w, bool enable)
-//{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
-//    impl->enable(enable);
-//}
-
-
-//void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
-//{
-//    Gfx::PointF aligedPos = w.surface().align(pos);
-//
-//    const Gfx::PointF point = w.surface().toPhysical(aligedPos);
-//
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
-//    impl->move(point);
-//}
-
-
-//void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
-//{
-//
-//}
-
-
-//void ScreenImpl::onSetAbove(Window& w, bool above)
-//{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
-//    impl->setAbove(above);
-//}
-
-
-//void ScreenImpl::onSetTitle(Window& w, const std::string& text)
-//{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
-//    impl->setTitle(text);
-//}
-
-
-//void ScreenImpl::onSetIcon(Window& w, const Gfx::Image& icon)
-//{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
-//    impl->setIcon(icon);
-//}
-
-
-//void ScreenImpl::onSetState(Window& w, const WindowState& state)
-//{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
-//    impl->setState(state);
-//}
-
-
-//void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-//                                            const Gfx::SizeF& maxSize)
-//{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
-//    impl->setMinimumSize(minSize);
-//    impl->setMaximumSize(maxSize);
-//}
-
-
-void ScreenImpl::setCapture(Visual* capture)
-{
-    if( ! capture )
-    {
-        //std::clog << "RELEASE CAPTURE HWND" << std::endl;
-        ::ReleaseCapture();
-        return;
-    }
-
-    std::vector<Window*>::iterator wit;
-    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
-    {
-        Window* window = *wit;
-        
-        if( capture == window || capture->isDescendantOf(*window) )
-        {
-            MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->frame() );
-            ::SetCapture( impl->hwnd() );
-            //std::clog << "SET CAPTURE HWND: " << impl->hwnd() << std::endl;
-            return;
-        }
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Implementation
 ///////////////////////////////////////////////////////////////////////
@@ -344,15 +266,6 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 
     _parent->onResize(*this, size);
 }
-
-
-//void ScreenImpl::onRepaint(Window& w, const Gfx::RectF& rect)
-//{
-//    Gfx::PointF screenPos = onFromWindow( w, rect.topLeft() );
-//    Gfx::RectF screenRect( screenPos, rect.size() );
-//
-//    repaint(screenRect);
-//}
 
 
 void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)

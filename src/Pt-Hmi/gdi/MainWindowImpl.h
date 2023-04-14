@@ -63,26 +63,6 @@ class MainWindowImpl : public WindowFrame
 
         void paint(const Gfx::RectF& rect);
 
-        //void show(bool v);
-    
-        //void activate();
-
-        //void enable(bool e);  
-       
-        //void move(const Gfx::PointF& pos);
-
-        //void setAbove(bool isTop);
-
-        //void setState(const WindowState& s);
-
-        //void setTitle(const std::string& text);
-
-        //void setIcon(const Gfx::Image& p);
-
-        //void setMinimumSize(const Gfx::SizeF& s);
-    
-        //void setMaximumSize(const Gfx::SizeF& s);
-
         HWND hwnd()
         {
             return _hwnd;

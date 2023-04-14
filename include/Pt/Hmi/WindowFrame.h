@@ -63,6 +63,31 @@ class WindowFrame : public Visual
         const PixmapSurface& surface() const;
 
     protected:
+        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
+        
+        virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
+        
+        virtual void onProcessActivateEvent(const ActivateEvent& ev);
+
+        virtual void onActivateEvent(const ActivateEvent& ev);
+
+
+        virtual void onProcessWindowStateEvent(const WindowStateEvent& ev);
+
+        virtual void onWindowStateEvent(const WindowStateEvent& ev);
+
+        
+        virtual void onProcessCloseEvent(const CloseEvent& ev);
+
+        virtual void onCloseEvent(const CloseEvent& ev);
+
+    protected:
         virtual void onInit(Window& w) = 0;
 
         virtual void onRelease(Window& w) = 0;
@@ -97,31 +122,6 @@ class WindowFrame : public Visual
         virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;
 
         virtual void onClose(Window& w) = 0;
-
-    protected:
-        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
-
-        virtual void onRescaleEvent(const RescaleEvent& ev);
-
-        
-        virtual void onProcessResizeEvent(const ResizeEvent& ev);
-
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
-        
-        virtual void onProcessActivateEvent(const ActivateEvent& ev);
-
-        virtual void onActivateEvent(const ActivateEvent& ev);
-
-
-        virtual void onProcessWindowStateEvent(const WindowStateEvent& ev);
-
-        virtual void onWindowStateEvent(const WindowStateEvent& ev);
-
-        
-        virtual void onProcessCloseEvent(const CloseEvent& ev);
-
-        virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
         WindowManager& _wm;

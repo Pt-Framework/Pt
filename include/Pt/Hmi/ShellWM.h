@@ -103,26 +103,6 @@ class ShellWM : public WindowManager
         }
 
     //
-    // Visual
-    //
-    protected:
-        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
-
-        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
-
-        virtual Visual* onHitTest(const Gfx::PointF& p);
-
-        
-        virtual void onRequestRepaint(const Gfx::RectF& rect);
-
-        virtual void onRequestActivate(bool active);
-        
-        virtual void onRequestCapture(bool capture);
-
-        
-        virtual void onProcessEvent(const Pt::Event& ev);
-
-    //
     // WindowManager
     //
     protected:
@@ -133,28 +113,6 @@ class ShellWM : public WindowManager
         virtual void onInit(WindowFrame& w);
 
         virtual void onRelease(WindowFrame& w);
-
-    protected:
-        //virtual void onShow(Window& w, bool visible); 
-
-        //virtual void onActivate(Window& w, bool active); 
-
-        //virtual void onEnableRequest(Window& w, bool enable);
-
-        //virtual void onMove(Window& w, const Gfx::PointF& to);
-
-        //virtual void onSetAbove(Window& w, bool above);
-
-        //virtual void onSetTitle(Window& w, const std::string& text);
-
-        //virtual void onSetIcon(Window& w, const Gfx::Image& icon);
-
-        //virtual void onSetState(Window& w, const WindowState& state);
-        
-         //virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-         //                                       const Gfx::SizeF& maxSize);
-
-        //virtual void onClosing(Window& w);
 
     protected:
         Gfx::PointF toFrame(const ShellWindowFrame& w, 
@@ -180,6 +138,26 @@ class ShellWM : public WindowManager
         virtual void onResize(ShellWindowFrame& w, const Gfx::SizeF& to);
 
         virtual void onClose(ShellWindowFrame& w);
+
+    //
+    // Visual
+    //
+    protected:
+        virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
+        virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
+
+        virtual Visual* onHitTest(const Gfx::PointF& p);
+
+        
+        virtual void onRequestRepaint(const Gfx::RectF& rect);
+
+        virtual void onRequestActivate(bool active);
+        
+        virtual void onRequestCapture(bool capture);
+
+        
+        virtual void onProcessEvent(const Pt::Event& ev);
 
     //
     // Implementation

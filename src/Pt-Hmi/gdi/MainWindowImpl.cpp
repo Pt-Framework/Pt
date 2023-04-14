@@ -259,24 +259,6 @@ void MainWindowImpl::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
-//void MainWindowImpl::show(bool v)
-//{
-//    if(v)
-//    {
-//        LONG style = GetWindowLong(_hwnd, GWL_EXSTYLE);
-//
-//        if(style & WS_EX_NOACTIVATE)
-//          ShowWindow(_hwnd, SW_SHOWNOACTIVATE);
-//        else
-//          ShowWindow(_hwnd, SW_SHOW);
-//    }
-//    else
-//    {
-//        ShowWindow(_hwnd, SW_HIDE);
-//    }
-//}
-
-
 void MainWindowImpl::onShow(Window& w, bool visible)
 {
     if(visible)
@@ -310,12 +292,6 @@ void MainWindowImpl::onShowEvent(const ShowEvent& ev)
 }
 
 
-//void MainWindowImpl::activate()
-//{
-//    SetActiveWindow(_hwnd);
-//}
-
-
 void MainWindowImpl::onActivate(Window& w, bool active)
 {
     if( ! active )
@@ -338,12 +314,6 @@ void MainWindowImpl::onActivateEvent(const ActivateEvent& ev)
 {
     Base::onActivateEvent(ev);
 }
-
-
-//void MainWindowImpl::enable(bool e)
-//{
-//    EnableWindow(_hwnd, e);
-//}
 
 
 void MainWindowImpl::onEnable(Window& w, bool enable)
@@ -387,28 +357,6 @@ void MainWindowImpl::onSetAbove(Window& w, bool above)
 }
 
 
-//void MainWindowImpl::setState(const WindowState& s)
-//{
-//    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-//
-//    switch(s)
-//    {
-//        case WindowState::Normal:
-//        break;
-//
-//        case WindowState::Maximized:
-//            style |= WS_MAXIMIZE;
-//        break;
-//
-//        case WindowState::Minimized:
-//            style |= WS_MINIMIZE;
-//        break;
-//    }
-//
-//    SetWindowLong(_hwnd, GWL_STYLE, style); 
-//}
-
-
 void MainWindowImpl::onSetState(Window& w, const WindowState& state)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
@@ -443,12 +391,6 @@ void MainWindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
 void MainWindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 {
 }
-
-
-//void MainWindowImpl::setTitle(const std::string& text)
-//{
-//    SetWindowText(_hwnd, text.c_str());
-//}
 
 
 void MainWindowImpl::onSetTitle(Window& w, const std::string& text)
