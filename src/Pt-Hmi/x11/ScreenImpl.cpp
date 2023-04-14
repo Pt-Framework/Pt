@@ -120,7 +120,7 @@ Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
     for(it = _windows.rbegin(); it != _windows.rend(); ++it)
     {
         Window* win = *it;
-        MainWindowImpl* frame = static_cast<MainWindowImpl*>( win->impl() );
+        MainWindowImpl* frame = static_cast<MainWindowImpl*>( win->frame() );
 
         Gfx::PointF pos = toFrame(*frame, p);
 
@@ -198,7 +198,7 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 
 //void ScreenImpl::onShow(Window& w, bool visible)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->show(visible);
 //}
 
@@ -208,14 +208,14 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //    if( ! active )
 //        return;
 //
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->activate();
 //}
 
 
 //void ScreenImpl::onEnableRequest(Window& w, bool enable)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->enable(enable);
 //}
 
@@ -226,7 +226,7 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //
 //    const Gfx::PointF point = w.surface().toPhysical(aligedPos);
 //
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->move(point);
 //}
 
@@ -255,35 +255,35 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //
 //    const Gfx::SizeF size = w.surface().toPhysical(alignedSize);
 //
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->resize(size);
 //}
 
 
 //void ScreenImpl::onSetAbove(Window& w, bool above)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setAbove(above);
 //}
 
 
 //void ScreenImpl::onSetTitle(Window& w, const std::string& text)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setTitle(text);
 //}
 
 
 //void ScreenImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setIcon(icon);
 //}
 
 
 //void ScreenImpl::onSetState(Window& w, const WindowState& state)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setState(state);
 //}
 
@@ -291,7 +291,7 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
 //                                            const Gfx::SizeF& maxSize)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setSizeLimits(minSize, maxSize);
 //}
 //
@@ -319,7 +319,7 @@ void ScreenImpl::setCapture(Visual* capture)
 
         if( capture == window || capture->isDescendantOf(*window) )
         {
-            MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
+            MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->frame() );
 
             Display* display = Application::instance().impl()->display();
 
@@ -350,7 +350,7 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         Window* window = *wit;
-        WindowFrame* frame = window->impl();
+        WindowFrame* frame = window->frame();
 
         RescaleEvent ev(*frame, scaling);
         frame->processEvent(ev);
@@ -395,7 +395,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         Window* window = *it;
-        MainWindowImpl* frame = static_cast<MainWindowImpl*>( window->impl() );
+        MainWindowImpl* frame = static_cast<MainWindowImpl*>( window->frame() );
 
         Gfx::PointF winPos = toFrame( *frame, screenRect.topLeft() );
         Gfx::RectF winRect( winPos, screenRect.size() );
@@ -432,7 +432,7 @@ void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
     for( size_t i = 0; i < _windows.size(); ++i)
     {
         Window* w = _windows[i];
-        MainWindowImpl* frame = static_cast<MainWindowImpl*>( w->impl() );
+        MainWindowImpl* frame = static_cast<MainWindowImpl*>( w->frame() );
 
         frame->onEnable(*w, ev.enabled() );
     }

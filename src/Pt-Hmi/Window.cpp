@@ -28,23 +28,18 @@
 
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowFrame.h>
-#include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Algorithm.h>
-#include <Pt/Hmi/FocusEvent.h>
-#include <Pt/Hmi/WindowStateEvent.h>
-
-#include <cassert>
-#include <fstream>
 
 namespace Pt {
 
 namespace Hmi {
 
 Window::Window(WindowManager* parent, WindowType type)
-: _impl(0)
+: _frame(0)
 , _wm(0)
 , _show(false)
 , _isActive(false)
@@ -82,56 +77,119 @@ void Window::setParent(WindowManager& wm)
     _isClosed = false;
 
     _wm = &wm;
-    _impl = wm.onAttach(*this);
-    wm.onInit(*_impl);
+    _frame = wm.onAttach(*this);
+    wm.onInit(*_frame);
 
-    _impl->onInit(*this);
+    _frame->onInit(*this);
 
-    _impl->onSetSizeLimits(*this, minimumSize(), maximumSize());
-    _impl->onSetState(*this, _state);
-    _impl->onSetTitle(*this, _title);
-    _impl->onSetIcon(*this, _icon);
-    _impl->onSetAbove(*this, _isAbove);
+    _frame->onSetSizeLimits(*this, minimumSize(), maximumSize());
+    _frame->onSetState(*this, _state);
+    _frame->onSetTitle(*this, _title);
+    _frame->onSetIcon(*this, _icon);
+    _frame->onSetAbove(*this, _isAbove);
 
     if(_state == WindowState::Normal)
     {
-        _impl->onMove(*this, _requestedPosition);
+        _frame->onMove(*this, _requestedPosition);
 
         if( ! isAutoSize() )
-            _impl->onResize(*this, _requestedSize);
+            _frame->onResize(*this, _requestedSize);
     }
     
     // TODO: do not activate popups
-    _impl->onActivate(*this, _isActive);
+    _frame->onActivate(*this, _isActive);
 
-    _impl->onEnable(*this, _enabled);
-    _impl->onShow(*this, _show);
+    _frame->onEnable(*this, _enabled);
+    _frame->onShow(*this, _show);
     
-    onSetParent(_impl);
+    onSetParent(_frame);
 }
 
 
 void Window::unparent()
 {
-    if( ! _impl )
+    if( ! _frame )
         return;
 
-    _impl->onRelease(*this);
+    _frame->onRelease(*this);
 
-    _wm->onRelease(*_impl);
-    _wm->onDetach(*_impl);
+    _wm->onRelease(*_frame);
+    _wm->onDetach(*_frame);
     _wm = 0;
 
-    delete _impl;
-    _impl = 0;
+    delete _frame;
+    _frame = 0;
 
     onSetParent(0);
+}
+
+
+WindowFrame* Window::frame()
+{
+    return _frame;   
+}
+
+
+const WindowFrame* Window::frame() const
+{
+    return _frame;
 }
 
 
 Gfx::Image Window::getImage() const
 {
     return surface().toImage();
+}
+
+
+Window::Type Window::type() const
+{
+    return _type;
+}
+
+
+const Gfx::Image& Window::icon() const
+{
+    return _icon;
+}
+
+
+void Window::setIcon(const Gfx::Image& icon)
+{
+    _icon = icon;
+
+    if(_frame)
+        _frame->onSetIcon(*this, _icon);
+}
+
+
+const std::string& Window::title() const
+{
+    return _title;
+}
+
+
+void Window::setTitle(const std::string& t)
+{
+    _title = t;
+
+    if(_frame)
+        _frame->onSetTitle(*this, _title);
+}
+
+
+bool Window::isAbove() const
+{
+    return _isAbove;
+}
+
+
+void Window::setAbove(bool above)
+{
+    _isAbove = above;
+
+    if(_frame)
+        _frame->onSetAbove(*this, above);
 }
 
 
@@ -149,7 +207,7 @@ void Window::setBackground(const Gfx::Brush& b)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// geometry
+// layouting
 ///////////////////////////////////////////////////////////////////////
 
 bool Window::isAutoSize() const
@@ -163,7 +221,7 @@ Gfx::SizeF Window::setAutoSize(const SizePolicy& policy)
     _sizePolicy = policy;
     _autoSize = true;
 
-    if( ! _impl )
+    if( ! _frame )
     {
         Screen& screen = Application::instance().screen();
         screen.addWindow(*this);
@@ -202,66 +260,6 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     Base::onLayoutEvent(ev);
 }
 
-
-void Window::onRequestMove(const Gfx::PointF& pos)
-{
-    _requestedPosition = pos;
-
-    setState(WindowState::Normal);
-
-    if(_impl)
-    {
-        _impl->onMove(*this, _requestedPosition);
-    }
-}
-
-
-void Window::onProcessMoveEvent(const MoveEvent& ev)
-{
-    Base::onProcessMoveEvent(ev);
-}
-
-
-void Window::onMoveEvent(const MoveEvent& ev)
-{    
-    Base::onMoveEvent(ev);
-}
-
-
-void Window::onSetSizeLimits(const Gfx::SizeF& minSize,
-                             const Gfx::SizeF& maxSize)
-{
-    Base::onSetSizeLimits(minSize, maxSize);
-    
-    if(_impl)
-        _impl->onSetSizeLimits(*this, minSize, maxSize);
-}
-
-
-void Window::onRequestResize(const Gfx::SizeF& s)
-{
-    _requestedSize = s;
-
-    setState(WindowState::Normal);
-    
-    if(_impl)
-    {
-        _impl->onResize(*this, _requestedSize);
-    }
-}
-
-
-void Window::onProcessResizeEvent(const ResizeEvent& ev)
-{
-    Base::onProcessResizeEvent(ev);
-}
-
-
-void Window::onResizeEvent(const ResizeEvent& ev)
-{
-    Base::onResizeEvent(ev);
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Visual
 ///////////////////////////////////////////////////////////////////////
@@ -281,19 +279,19 @@ Visual* Window::onHitTest(const Gfx::PointF& p)
 
 Gfx::PointF Window::onToParent(const Gfx::PointF& pos) const
 {
-    if( ! _impl )
+    if( ! _frame )
         return pos;
 
-    return _impl->onFromWindow(*this, pos);
+    return _frame->onFromWindow(*this, pos);
 }
 
 
 Gfx::PointF Window::onFromParent(const Gfx::PointF& pos) const
 {
-    if( ! _impl )
+    if( ! _frame )
         return pos;
 
-    return _impl->onToWindow(*this, pos);
+    return _frame->onToWindow(*this, pos);
 }
 
 
@@ -303,7 +301,7 @@ void Window::onProcessEvent(const Pt::Event& ev)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Implementation
+// invalidation
 ///////////////////////////////////////////////////////////////////////
 
 void Window::onInvalidateEvent(const InvalidateEvent& ev)
@@ -321,13 +319,16 @@ void Window::onInvalidate()
     repaint( bounds() );
 }
 
+///////////////////////////////////////////////////////////////////////
+// painting
+///////////////////////////////////////////////////////////////////////
 
 void Window::onRequestRepaint(const Gfx::RectF& rect)
 {
     //std::clog << "REPAINT: " << title() << std::endl;
 
-    if(_impl)
-        _impl->onRepaint(*this, rect);
+    if(_frame)
+        _frame->onRepaint(*this, rect);
 }
 
 
@@ -356,59 +357,112 @@ void Window::onPaintEvent(const PaintEvent& ev)
     painter.fillRect( ev.rect() );
 }
 
+///////////////////////////////////////////////////////////////////////
+// scaling
+///////////////////////////////////////////////////////////////////////
 
-bool Window::acceptsInput() const
+void Window::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    if( ! isEnabled() )
-        return false;
-
-    if( ! isVisible() )
-        return false;
-
-    return true;
+    Base::onProcessRescaleEvent(ev);
 }
 
 
-bool Window::isActive() const
+void Window::onRescaleEvent(const RescaleEvent& ev)
 {
-    return _isActive;
+    Base::onRescaleEvent(ev);
 }
 
 
-void Window::onRequestActivate(bool active)
-{
-    _isActive = active;
+void Window::onRescale(double scaling)
+{   
+    Base::onRescale(scaling);
 
-    if( _impl )
-        _impl->onActivate(*this, active);
-    else
-        _isActive = active;
+    //
+    // realign geometry
+    //
+    bool isInitialized = parent() != 0;
+    if(isInitialized)
+    {
+        if(_state == WindowState::Normal)
+        {
+            move(_requestedPosition);
+            resize(_requestedSize);
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////
+// geometry
+///////////////////////////////////////////////////////////////////////
+
+void Window::onRequestMove(const Gfx::PointF& pos)
+{
+    _requestedPosition = pos;
+
+    setState(WindowState::Normal);
+
+    if(_frame)
+    {
+        _frame->onMove(*this, _requestedPosition);
+    }
 }
 
 
-void Window::onProcessActivateEvent(const ActivateEvent& ev)
+void Window::onProcessMoveEvent(const MoveEvent& ev)
 {
-    //if(_impl)
-    //{
-    //    ActivateEvent aev( *_impl, ev.isActive() );
-    //    _impl->processEvent(aev);
-    //}
-
-    onActivateEvent(ev);
+    Base::onProcessMoveEvent(ev);
 }
 
 
-void Window::onActivateEvent(const ActivateEvent& ev)
-{
-    _isActive = ev.isActive();
+void Window::onMoveEvent(const MoveEvent& ev)
+{    
+    Base::onMoveEvent(ev);
 }
 
+
+void Window::onSetSizeLimits(const Gfx::SizeF& minSize,
+                             const Gfx::SizeF& maxSize)
+{
+    Base::onSetSizeLimits(minSize, maxSize);
+    
+    if(_frame)
+        _frame->onSetSizeLimits(*this, minSize, maxSize);
+}
+
+
+void Window::onRequestResize(const Gfx::SizeF& s)
+{
+    _requestedSize = s;
+
+    setState(WindowState::Normal);
+    
+    if(_frame)
+    {
+        _frame->onResize(*this, _requestedSize);
+    }
+}
+
+
+void Window::onProcessResizeEvent(const ResizeEvent& ev)
+{
+    Base::onProcessResizeEvent(ev);
+}
+
+
+void Window::onResizeEvent(const ResizeEvent& ev)
+{
+    Base::onResizeEvent(ev);
+}
+
+///////////////////////////////////////////////////////////////////////
+// visibility
+///////////////////////////////////////////////////////////////////////
 
 void Window::onRequestShow(bool b)
 {   
     _show = b;
 
-    if( ! _impl )
+    if( ! _frame )
     {
         Screen& screen = Application::instance().screen();
         screen.addWindow(*this);
@@ -416,18 +470,12 @@ void Window::onRequestShow(bool b)
     
     invalidate();
 
-    _impl->onShow(*this, b);
+    _frame->onShow(*this, b);
 }
 
 
 void Window::onProcessShowEvent(const ShowEvent& ev)
 {
-    //if(_impl)
-    //{
-    //    ShowEvent sev( *_impl, ev.visible() );
-    //    _impl->processEvent(sev);
-    //}
-
     Base::onProcessShowEvent(ev);
 }
 
@@ -488,13 +536,16 @@ void Window::showModal()
     }
 }
 
+///////////////////////////////////////////////////////////////////////
+// enabling
+///////////////////////////////////////////////////////////////////////
 
 void Window::onRequestEnable(bool e)
 {
     _enabled = e;
 
-    if(_impl)
-        _impl->onEnable(*this, e);
+    if(_frame)
+        _frame->onEnable(*this, e);
 }
 
 
@@ -503,12 +554,6 @@ void Window::onProcessEnableEvent(const EnableEvent& ev)
     bool isEnabled = ev.enabled();
     if( ! _enabled )
         isEnabled = false;
-
-    //if(_impl)
-    //{
-    //    EnableEvent eev(*_impl, isEnabled);
-    //    _impl->processEvent(eev);
-    //}
 
     EnableEvent eev(*this, isEnabled);
     Base::onProcessEnableEvent(eev);
@@ -528,37 +573,71 @@ void Window::onEnable(bool e)
     invalidate();
 }
 
+///////////////////////////////////////////////////////////////////////
+// activation
+///////////////////////////////////////////////////////////////////////
 
-void Window::onProcessRescaleEvent(const RescaleEvent& ev)
+bool Window::isActive() const
 {
-    Base::onProcessRescaleEvent(ev);
+    return _isActive;
 }
 
 
-void Window::onRescaleEvent(const RescaleEvent& ev)
+void Window::onRequestActivate(bool active)
 {
-    Base::onRescaleEvent(ev);
+    _isActive = active;
+
+    if( _frame )
+        _frame->onActivate(*this, active);
+    else
+        _isActive = active;
 }
 
 
-void Window::onRescale(double scaling)
+void Window::onProcessActivateEvent(const ActivateEvent& ev)
+{
+    onActivateEvent(ev);
+}
+
+
+void Window::onActivateEvent(const ActivateEvent& ev)
+{
+    _isActive = ev.isActive();
+}
+
+///////////////////////////////////////////////////////////////////////
+// window state
+///////////////////////////////////////////////////////////////////////
+
+WindowState Window::state() const
 {   
-    Base::onRescale(scaling);
-
-    //
-    // realign geometry
-    //
-    bool isInitialized = parent() != 0;
-    if(isInitialized)
-    {
-        if(_state == WindowState::Normal)
-        {
-            move(_requestedPosition);
-            resize(_requestedSize);
-        }
-    }
+    return _state;
 }
 
+
+void Window::setState(const WindowState& s)
+{
+    _state = s;
+
+    if(_frame)
+        _frame->onSetState(*this, _state);
+}
+
+
+void Window::onProcessWindowStateEvent(const WindowStateEvent& ev)
+{
+    onWindowStateEvent(ev);
+}
+
+
+void Window::onWindowStateEvent(const WindowStateEvent& ev)
+{
+    _state = ev.state();
+}
+
+///////////////////////////////////////////////////////////////////////
+// closing
+///////////////////////////////////////////////////////////////////////
 
 bool Window::isClosed() const
 {
@@ -568,8 +647,8 @@ bool Window::isClosed() const
 
 void Window::close()
 {
-    if(_impl)
-      _impl->onClose(*this);
+    if(_frame)
+      _frame->onClose(*this);
 }
 
 
@@ -590,94 +669,19 @@ void Window::onCloseEvent(const CloseEvent& ev)
     _isClosed = true;
 }
 
+///////////////////////////////////////////////////////////////////////
+// input
+///////////////////////////////////////////////////////////////////////
 
-Window::Type Window::type() const
+bool Window::acceptsInput() const
 {
-    return _type;
-}
+    if( ! isEnabled() )
+        return false;
 
+    if( ! isVisible() )
+        return false;
 
-const Gfx::Image& Window::icon() const
-{
-    return _icon;
-}
-
-
-void Window::setIcon(const Gfx::Image& icon)
-{
-    _icon = icon;
-
-    if(_impl)
-        _impl->onSetIcon(*this, _icon);
-}
-
-
-const std::string& Window::title() const
-{
-    return _title;
-}
-
-
-void Window::setTitle(const std::string& t)
-{
-    _title = t;
-
-    if(_impl)
-        _impl->onSetTitle(*this, _title);
-}
-
-
-bool Window::isAbove() const
-{
-    return _isAbove;
-}
-
-
-void Window::setAbove(bool above)
-{
-    _isAbove = above;
-
-    if(_impl)
-        _impl->onSetAbove(*this, above);
-}
-
-
-WindowState Window::state() const
-{   
-    return _state;
-}
-
-
-void Window::setState(const WindowState& s)
-{
-    _state = s;
-
-    if(_impl)
-        _impl->onSetState(*this, _state);
-}
-
-
-void Window::onProcessWindowStateEvent(const WindowStateEvent& ev)
-{
-    onWindowStateEvent(ev);
-}
-
-
-void Window::onWindowStateEvent(const WindowStateEvent& ev)
-{
-    _state = ev.state();
-}
-
-
-WindowFrame* Window::impl()
-{
-    return _impl;   
-}
-
-
-const WindowFrame* Window::impl() const
-{
-    return _impl;
+    return true;
 }
 
 

@@ -463,7 +463,7 @@ Window* ApplicationImpl::findWindow(HWND hwnd)
     {
         Window* w = windows[i];
         
-        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w->impl() );
+        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w->frame() );
         if( ! impl )
             continue;
 
@@ -635,7 +635,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
 
 void ApplicationImpl::onShow(Window& w,  bool v)
 {
-    ShowEvent sev( *w.impl(), v);
+    ShowEvent sev( *w.frame(), v);
     commitEvent(sev);
 
     // w.invalidate();
@@ -644,7 +644,7 @@ void ApplicationImpl::onShow(Window& w,  bool v)
 
 bool ApplicationImpl::onClose(Window& w)
 {  
-    WindowFrame* frame = w.impl();
+    WindowFrame* frame = w.frame();
     CloseEvent ev(*frame);
     commitEvent(ev);
 
@@ -655,14 +655,14 @@ bool ApplicationImpl::onClose(Window& w)
 
 void ApplicationImpl::onActivate(Window& w, bool a)
 {
-    ActivateEvent aev(*w.impl(), a);
+    ActivateEvent aev(*w.frame(), a);
     commitEvent(aev);
 }
 
 
 void ApplicationImpl::onEnable(Window& w, bool e)
 {
-    EnableEvent eev(*w.impl(), e);
+    EnableEvent eev(*w.frame(), e);
     commitEvent( eev );
 
     w.invalidate();
@@ -771,7 +771,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     _mouseEvent.setPosition( w.toGlobal(pos) );
     _mouseEvent.setVisual(&w);
 
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 
     if( _pointerWindow != impl->hwnd() )
     {
@@ -801,7 +801,7 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
     Gfx::PointF pos(x, y);
     pos /= w.scaleFactor();
 
-    MoveEvent ev( *w.impl(), pos );
+    MoveEvent ev( *w.frame(), pos );
     //commitEvent(ev);
     Application::instance().processEvent(ev);
 }
@@ -835,7 +835,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
     if(w.state() != wstate)
     {
-        WindowStateEvent wse(*w.impl(), wstate);
+        WindowStateEvent wse(*w.frame(), wstate);
         commitEvent(wse);
     }
 
@@ -847,7 +847,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
     //Application::instance().loop().processEvents();
 
-    ResizeEvent rev(*w.impl(), to);
+    ResizeEvent rev(*w.frame(), to);
     Application::instance().processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
@@ -868,14 +868,14 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     winRect = Gfx::RectF( winRect.topLeft() / w.scaleFactor(), 
                           winRect.size() / w.scaleFactor() );
 
-    WindowFrame* frame = w.impl();
+    WindowFrame* frame = w.frame();
     PaintEvent ev(*frame, winRect);
     frame->processEvent(ev);
 
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);
 
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( w.impl() );
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( w.frame() );
     HDC bitmapContext = windowImpl->surface().pixmapImpl()->deviceContext();
     
     BitBlt(windowContext, updateRect.left, updateRect.top, 

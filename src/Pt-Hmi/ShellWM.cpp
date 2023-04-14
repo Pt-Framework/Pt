@@ -159,7 +159,7 @@ Visual* ShellWM::onHitTest(const Gfx::PointF& p)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->impl() );
+        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->frame() );
 
         if( ! window->isVisible() )
             continue;
@@ -331,19 +331,19 @@ void ShellWM::onSetAbove(ShellWindowFrame& frame, bool above)
 
 //void ShellWM::onSetTitle(Window& w, const std::string& text)
 //{
-//    w.impl()->setTitle(text);
+//    w.frame())->setTitle(text);
 //}
 
 
 //void ShellWM::onSetIcon(Window& w, const Gfx::Image& icon)
 //{
-//    w.impl()->setIcon(icon);
+//    w.frame())->setIcon(icon);
 //}
 
 
 //void ShellWM::onSetState(Window& w, const WindowState& state)
 //{
-//    w.impl()->setState(state);
+//    w.frame())->setState(state);
 //}
 
 
@@ -381,7 +381,7 @@ void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
     for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
         Window* window = *wit;
-        WindowFrame* frame = window->impl();
+        WindowFrame* frame = window->frame();
 
         RescaleEvent rev(*frame, scaling);
         frame->processEvent(rev);
@@ -418,7 +418,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
     for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
         Window* window = *wit;
-        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->impl() );
+        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->frame() );
 
         if( ! window->isVisible() )
             continue;
@@ -514,7 +514,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->impl() );
+        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->frame() );
 
         Gfx::PointF p = toFrame(*frame, pos);
         
@@ -571,7 +571,7 @@ bool ShellWM::processTouchEvent(const TouchEvent& ev)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->impl() );
+        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->frame() );
 
         Gfx::PointF p = toFrame(*frame, pos);
         Visual* hit = frame->hitTest(p);

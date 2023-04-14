@@ -630,14 +630,14 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 
     Gfx::RectF paintRect(pos, size);
 
-    WindowFrame* frame = window.impl();
+    WindowFrame* frame = window.frame();
     PaintEvent pev(*frame, paintRect);
     frame->processEvent(pev);
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
 
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window->impl() );
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window->frame() );
     Pt::Hmi::PixmapSurfaceImpl* pixmap = windowImpl->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
     
@@ -669,7 +669,7 @@ void MainWindowImpl::onActivate(bool isActive)
     if( ! window )
         return;
 
-    ActivateEvent ev(*window->impl(), isActive);
+    ActivateEvent ev(*window->frame(), isActive);
     Application::instance().commitEvent(ev);
 }
 
@@ -681,7 +681,7 @@ void MainWindowImpl::onShow(bool v)
     if( ! window )
         return;
 
-    ShowEvent sev(*window->impl(), v);
+    ShowEvent sev(*window->frame(), v);
     Application::instance().commitEvent(sev);
 }
 
@@ -706,7 +706,7 @@ void MainWindowImpl::onMove()
     double scaling = Application::instance().scaleFactor();
     pos = pos / scaling;
 
-    MoveEvent ev(*window->impl(), pos);
+    MoveEvent ev(*window->frame(), pos);
     Application::instance().processEvent(ev);
 }
 
@@ -734,7 +734,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 
     if(window->state() != wstate)
     {
-        WindowStateEvent wse( *window->impl(), wstate );
+        WindowStateEvent wse( *window->frame(), wstate );
         Application::instance().commitEvent(wse);
     }
 
@@ -744,7 +744,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
     double scaling = Application::instance().scaleFactor();
     to = to / scaling;
 
-    ResizeEvent rev(*window->impl(), to);
+    ResizeEvent rev(*window->frame(), to);
     Application::instance().processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);

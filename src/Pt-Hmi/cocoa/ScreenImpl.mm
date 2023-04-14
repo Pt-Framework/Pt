@@ -105,8 +105,8 @@ Window* ScreenImpl::findWindow(NSWindow* wnd)
     {
         Window* window = *it;
 
-        MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
-        if( window->impl() && impl->window() == wnd )
+        MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->frame() );
+        if( window->frame() && impl->window() == wnd )
             return window;
     }
     
@@ -156,7 +156,7 @@ Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
      if( ! win )
          return 0;
 
-    MainWindowImpl* frame = static_cast<MainWindowImpl*>( win->impl() );
+    MainWindowImpl* frame = static_cast<MainWindowImpl*>( win->frame() );
     Gfx::PointF pos = toFrame(*frame, p);
     
     return win->hitTest(pos);
@@ -228,7 +228,7 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 
 //void ScreenImpl::onShow(Window& w, bool visible)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->show(visible);
 //}
 
@@ -238,14 +238,14 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //    if( ! active )
 //        return;
 //
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->activate();
 //}
 
 
 //void ScreenImpl::onEnableRequest(Window& w, bool enable)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->enable(enable);
 //}
 
@@ -258,7 +258,7 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //    // TODO: scale here instead of in MainWindowImpl
 //    //
 //
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->move(aligedPos);
 //}
 //
@@ -285,37 +285,37 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //    if( alignedSize.height() < w.minimumSize().height() )
 //        alignedSize.setHeight( w.minimumSize().height() );
 //
-//    //w.impl()->scaleFactor(); ???
+//    //w.frame()->scaleFactor(); ???
 //
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->resize(alignedSize);
 //}
 
 
 //void ScreenImpl::onSetAbove(Window& w, bool above)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setAbove(above);
 //}
 
 
 //void ScreenImpl::onSetTitle(Window& w, const std::string& text)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setTitle(text);
 //}
 
 
 //void ScreenImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setIcon(icon);
 //}
 
 
 //void ScreenImpl::onSetState(Window& w, const WindowState& state)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setState(state);
 //}
 
@@ -323,7 +323,7 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
 //                                            const Gfx::SizeF& maxSize)
 //{
-//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    impl->setMinimumSize(minSize);
 //    impl->setMaximumSize(maxSize);
 //}
@@ -331,7 +331,7 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 
 //void ScreenImpl::onClosing(Window& w)
 //{
-//    //MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+//    //MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.frame() );
 //    //NSWindow* nswin = impl->window();
 //
 //    //[nswin performClose:nil];
@@ -385,7 +385,7 @@ void ScreenImpl::setCapture(Visual* capture)
                                       eventType == NSEventTypeRightMouseDown ||
                                       eventType == NSEventTypeOtherMouseDown)
                                    {
-                                       MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->impl() );
+                                       MainWindowImpl* impl = static_cast<MainWindowImpl*>( window->frame() );
                                        [impl->view() mouseDown:event];
                                    }
                                }];

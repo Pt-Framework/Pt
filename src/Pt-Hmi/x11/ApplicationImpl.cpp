@@ -187,10 +187,10 @@ Window* ApplicationImpl::findWindow(::Window window)
     {
         Window* w = windows[i];
 
-        if( ! w->impl() )
+        if( ! w->frame() )
             continue;
 
-        MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( w->impl() );
+        MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( w->frame() );
 
         if( windowImpl->window() == window )
             return w;
@@ -302,12 +302,12 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     //                              << rect.x() << ", " << rect.y() << " " 
     //                              << rect.width() << "x" << rect.height() << std::endl;
 
-    WindowFrame* frame = window.impl();
+    WindowFrame* frame = window.frame();
     PaintEvent pev(*frame, rect);
     frame->processEvent(pev);
 
 #ifdef PT_HMI_X11_CORE
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.frame() );
     ::Drawable from = windowImpl->surface().pixmapImpl()->drawable();
     ::Window to = windowImpl->window();
 
@@ -316,7 +316,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 #endif
 
 #ifdef PT_HMI_X11_RASTER
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.frame() );
     const Gfx::Image& image = windowImpl->surface().pixmapImpl()->image();
     char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
 
@@ -348,7 +348,7 @@ void ApplicationImpl::onClientMessage(Window& window, XEvent& xev)
     {
         if( (Atom) xev.xclient.data.l[0] == _wmDeleteWindow )
         {
-            WindowFrame* frame = window.impl();
+            WindowFrame* frame = window.frame();
 
             CloseEvent ev(*frame);
             commitEvent(ev);
@@ -361,7 +361,7 @@ void ApplicationImpl::onShow(Window& w, bool v)
 {
     //std::clog << "   ### MapNotify: " << std::boolalpha << v << std::endl;
 
-    ShowEvent sev(*w.impl(), v);
+    ShowEvent sev(*w.frame(), v);
     commitEvent( sev );
 }
 
@@ -547,7 +547,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
     // else
     //     _resizeEvent.setState( WindowState::Normal );
 
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.impl() );
+    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.frame() );
 
     const int width  = xev.xconfigure.width;
     const int height = xev.xconfigure.height;
@@ -565,7 +565,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         Gfx::SizeF to(width, height);
         to = window.surface().toLogical(to);
     
-        ResizeEvent rev(*window.impl(), to);
+        ResizeEvent rev(*window.frame(), to);
         Application::instance().processEvent(rev);
 
         Gfx::RectF updateRect(Gfx::PointF(0,0), to);
@@ -583,7 +583,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         Gfx::PointF to(x, y);
         to = window.surface().toLogical(to);
 
-        MoveEvent ev(*window.impl(), to);
+        MoveEvent ev(*window.frame(), to);
         Application::instance().processEvent(ev);
     }
 }

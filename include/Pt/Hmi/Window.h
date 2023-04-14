@@ -70,7 +70,8 @@ class PT_HMI_API Window : public Form
         typedef WindowState State;
 
     public:
-        explicit Window(WindowManager* parent = 0, WindowType type = WindowType::Default);
+        explicit Window(WindowManager* parent = 0, 
+                        WindowType type = WindowType::Default);
 
         virtual ~Window();
 
@@ -78,6 +79,10 @@ class PT_HMI_API Window : public Form
         void setParent(WindowManager& parent);
 
         void unparent();
+
+        WindowFrame* frame();
+
+        const WindowFrame* frame() const; 
 
     public:
         Gfx::Image getImage() const;
@@ -88,10 +93,31 @@ class PT_HMI_API Window : public Form
         Gfx::SizeF setAutoSize(const SizePolicy& policy);
 
 
-        bool acceptsInput() const;
+        Type type() const;
 
+        
+        const Gfx::Image& icon() const;
 
+        void setIcon(const Gfx::Image& i);
+
+        const std::string& title() const;
+
+        void setTitle( const std::string& t );
+
+        
+        bool isAbove() const;
+
+        void setAbove(bool top);
+
+        
         bool isActive() const;
+
+
+        // TODO: setFullScreen()
+
+        WindowState state() const;
+
+        void setState(const WindowState& s);
 
 
         void showModal();
@@ -102,38 +128,12 @@ class PT_HMI_API Window : public Form
         void close();
 
 
-        Type type() const;
-
-
-        const Gfx::Image& icon() const;
-
-        void setIcon(const Gfx::Image& i);
-
-
-        const std::string& title() const;
-
-        void setTitle( const std::string& t );
-
-        bool isAbove() const;
-
-        void setAbove(bool top);
-
-
-        // TODO: setFullScreen()
-
-        WindowState state() const;
-
-        void setState(const WindowState& s);
+        bool acceptsInput() const;
 
     public:
         const Gfx::Brush& background() const;
 
         void setBackground(const Gfx::Brush& b);
-
-    public:
-        WindowFrame* impl();
-
-        const WindowFrame* impl() const; 
 
     //
     // Form
@@ -142,22 +142,6 @@ class PT_HMI_API Window : public Form
         virtual Gfx::SizeF onMeasure();
 
         virtual void onLayoutEvent(const LayoutEvent& ev);
-
-    //
-    // Responder
-    //
-    protected:
-        virtual bool onMouseEvent(const MouseEvent& ev);
-
-        virtual bool onTouchEvent( const TouchEvent& ev );
-    
-        virtual bool onScrollEvent(const ScrollEvent& ev);
-
-        virtual bool onKeyEvent(const KeyEvent& ev);
-
-        virtual bool onEnterEvent(const EnterEvent& ev);
-
-        virtual bool onLeaveEvent(const LeaveEvent& ev);
 
     //
     // Visual
@@ -203,22 +187,6 @@ class PT_HMI_API Window : public Form
         virtual void onPaintEvent(const PaintEvent& ev);
 
     //
-    // input
-    //
-    protected:
-        virtual void onProcessMouseEvent(const MouseEvent& ev);
-
-        virtual void onProcessTouchEvent(const TouchEvent& ev);
-
-        virtual void onProcessScrollEvent(const ScrollEvent& ev);
-
-        virtual void onProcessEnterEvent(const EnterEvent& ev);
-
-        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
-
-        virtual void onProcessKeyEvent(const KeyEvent& ev);
-
-    //
     // scaling
     //
     protected:
@@ -241,22 +209,6 @@ class PT_HMI_API Window : public Form
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     //
-    // closing
-    //
-    protected:
-        virtual void onProcessCloseEvent(const CloseEvent& ev);
-
-        virtual void onCloseEvent(const CloseEvent& ev);
-
-    //
-    // activation
-    //
-    protected:
-        virtual void onProcessActivateEvent(const ActivateEvent& ev);
-
-        virtual void onActivateEvent(const ActivateEvent& ev);
-
-    //
     // visibility
     //
     protected:
@@ -277,6 +229,14 @@ class PT_HMI_API Window : public Form
         virtual void onEnable(bool e);
 
     //
+    // activation
+    //
+    protected:
+        virtual void onProcessActivateEvent(const ActivateEvent& ev);
+
+        virtual void onActivateEvent(const ActivateEvent& ev);
+
+    //
     // window state
     //
     protected:
@@ -284,8 +244,48 @@ class PT_HMI_API Window : public Form
 
         virtual void onWindowStateEvent(const WindowStateEvent& ev);
 
+    //
+    // closing
+    //
+    protected:
+        virtual void onProcessCloseEvent(const CloseEvent& ev);
+
+        virtual void onCloseEvent(const CloseEvent& ev);
+
+    //
+    // input
+    //
+    protected:
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
+
+        virtual void onProcessTouchEvent(const TouchEvent& ev);
+
+        virtual void onProcessScrollEvent(const ScrollEvent& ev);
+
+        virtual void onProcessEnterEvent(const EnterEvent& ev);
+
+        virtual void onProcessLeaveEvent(const LeaveEvent& ev);
+
+        virtual void onProcessKeyEvent(const KeyEvent& ev);
+
+    //
+    // Responder
+    //
+    protected:
+        virtual bool onMouseEvent(const MouseEvent& ev);
+
+        virtual bool onTouchEvent( const TouchEvent& ev );
+    
+        virtual bool onScrollEvent(const ScrollEvent& ev);
+
+        virtual bool onKeyEvent(const KeyEvent& ev);
+
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
     private:
-        WindowFrame*                 _impl;
+        WindowFrame*                 _frame;
         WindowManager*               _wm;
 
         bool                         _show; 
