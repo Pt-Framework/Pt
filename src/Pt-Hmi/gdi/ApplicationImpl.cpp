@@ -644,8 +644,7 @@ void ApplicationImpl::onShow(Window& w,  bool v)
 
 bool ApplicationImpl::onClose(Window& w)
 {  
-    WindowImpl* frame = w.impl();
-    
+    WindowFrame* frame = w.impl();
     CloseEvent ev(*frame);
     commitEvent(ev);
 
@@ -869,7 +868,7 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     winRect = Gfx::RectF( winRect.topLeft() / w.scaleFactor(), 
                           winRect.size() / w.scaleFactor() );
 
-    WindowImpl* frame = w.impl();
+    WindowFrame* frame = w.impl();
     PaintEvent ev(*frame, winRect);
     frame->processEvent(ev);
 

@@ -129,6 +129,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBase.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowFrame.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
@@ -415,7 +416,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\win32.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\WindowFrame.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h" />

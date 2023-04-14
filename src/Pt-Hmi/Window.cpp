@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowFrame.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/WindowManager.h>
@@ -41,101 +42,6 @@
 namespace Pt {
 
 namespace Hmi {
-
-///////////////////////////////////////////////////////////////////////
-// WindowImpl
-///////////////////////////////////////////////////////////////////////
-
-WindowImpl::WindowImpl(WindowManager& wm, Window& window)
-: _wm(wm)
-, _window(window)
-{
-    eventReceived() += Pt::slot(*this, &WindowImpl::onProcessActivateEvent);
-    eventReceived() += Pt::slot(*this, &WindowImpl::onProcessCloseEvent);
-    eventReceived() += Pt::slot(*this, &WindowImpl::onProcessWindowStateEvent);
-}
-
-
-WindowImpl::~WindowImpl()
-{
-}
-
-
-PixmapSurface& WindowImpl::surface()
-{
-    return _surface;
-}
-
-
-const PixmapSurface& WindowImpl::surface() const
-{
-    return _surface;
-}
-
-
-void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
-{
-    Base::onProcessRescaleEvent(ev);
-}
-
-
-void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
-{
-    _surface.setScaleFactor( ev.scaleFactor() );
-
-    Base::onRescaleEvent(ev);
-}
-
-
-void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
-{
-    Base::onProcessResizeEvent(ev);
-}
-
-
-void WindowImpl::onResizeEvent(const ResizeEvent& ev)
-{
-    Visual::onResizeEvent(ev);
-
-    _surface.resize( ev.size() );
-}
-
-
-void WindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
-{
-    onActivateEvent(ev);
-}
-
-
-void WindowImpl::onActivateEvent(const ActivateEvent& ev)
-{
-}
-
-
-void WindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
-{
-    onWindowStateEvent(ev);
-}
-
-
-void WindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
-{
-}
-
-
-void WindowImpl::onProcessCloseEvent(const CloseEvent& ev)
-{
-    onCloseEvent(ev);
-}
-
-
-void WindowImpl::onCloseEvent(const CloseEvent& ev)
-{
-}
-
-///////////////////////////////////////////////////////////////////////
-// Window
-///////////////////////////////////////////////////////////////////////
 
 Window::Window(WindowManager* parent, WindowType type)
 : _impl(0)
@@ -763,13 +669,13 @@ void Window::onWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-WindowImpl* Window::impl()
+WindowFrame* Window::impl()
 {
     return _impl;   
 }
 
 
-const WindowImpl* Window::impl() const
+const WindowFrame* Window::impl() const
 {
     return _impl;
 }

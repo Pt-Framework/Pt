@@ -41,7 +41,7 @@ namespace Pt {
 namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(ScreenImpl& wm, Window& w)
-: WindowImpl(wm, w)
+: WindowFrame(wm, w)
 , _wm(wm)
 , _window(w)
 , _hwnd(0)

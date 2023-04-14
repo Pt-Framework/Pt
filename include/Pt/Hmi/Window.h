@@ -32,11 +32,9 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Form.h>
-
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/WindowType.h>
 #include <Pt/Hmi/SizePolicy.h>
-
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
@@ -50,115 +48,17 @@
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/EnableEvent.h>
 #include <Pt/Hmi/InvalidateEvent.h>
-
 #include <Pt/Gfx/Image.h>
 #include <Pt/Signal.h>
-
-#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
 
+class WindowFrame;
 class WindowManager;
-class MainWindowImpl;
 class WindowStateEvent;
 class PaintEvent;
-class Window;
-
-/** @internal @brief Window implementation base class.
-*/
-class WindowImpl : public Visual
-{
-    typedef Visual Base;
-
-    friend class Window;
-
-    public:
-        WindowImpl(WindowManager& wm, Window& window);
-
-        virtual ~WindowImpl();
-
-        PixmapSurface& surface();
-
-        const PixmapSurface& surface() const;
-
-        Window& window()
-        {
-            return _window;
-        }
-
-        const Window& window() const
-        {
-            return _window;
-        }
-
-    protected:
-        virtual void onInit(Window& w) = 0;
-
-        virtual void onRelease(Window& w) = 0;
-
-        virtual Gfx::PointF onToWindow(const Window& w, 
-                                       const Gfx::PointF& pos) const = 0;
-
-        virtual Gfx::PointF onFromWindow(const Window& w, 
-                                         const Gfx::PointF& pos) const = 0;
-
-        virtual void onSetTitle(Window& w, const std::string& text) = 0;
-
-        virtual void onSetIcon(Window& w, const Gfx::Image& icon) = 0;
-
-        virtual void onSetState(Window& w, const WindowState& state) = 0;
-
-        virtual void onSetAbove(Window& w, bool above) = 0;
-
-        virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-                                                const Gfx::SizeF& maxSize) = 0;
-
-        virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
-
-        virtual void onShow(Window& w, bool visible) = 0;
-
-        virtual void onActivate(Window& w, bool active) = 0;
-
-        virtual void onEnable(Window& w, bool enable) = 0;
-
-        virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
-
-        virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;
-
-        virtual void onClose(Window& w) = 0;
-
-    protected:
-        virtual void onProcessRescaleEvent(const RescaleEvent& ev);
-
-        virtual void onRescaleEvent(const RescaleEvent& ev);
-
-        
-        virtual void onProcessResizeEvent(const ResizeEvent& ev);
-
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
-        
-        virtual void onProcessActivateEvent(const ActivateEvent& ev);
-
-        virtual void onActivateEvent(const ActivateEvent& ev);
-
-
-        virtual void onProcessWindowStateEvent(const WindowStateEvent& ev);
-
-        virtual void onWindowStateEvent(const WindowStateEvent& ev);
-
-        
-        virtual void onProcessCloseEvent(const CloseEvent& ev);
-
-        virtual void onCloseEvent(const CloseEvent& ev);
-
-    private:
-        WindowManager& _wm;
-        Window&        _window;
-        PixmapSurface  _surface;
-};
 
 /** @brief Window base class.
 */
@@ -231,9 +131,9 @@ class PT_HMI_API Window : public Form
         void setBackground(const Gfx::Brush& b);
 
     public:
-        WindowImpl* impl();
+        WindowFrame* impl();
 
-        const WindowImpl* impl() const; 
+        const WindowFrame* impl() const; 
 
     //
     // Form
@@ -385,7 +285,7 @@ class PT_HMI_API Window : public Form
         virtual void onWindowStateEvent(const WindowStateEvent& ev);
 
     private:
-        WindowImpl*                  _impl;
+        WindowFrame*                 _impl;
         WindowManager*               _wm;
 
         bool                         _show; 

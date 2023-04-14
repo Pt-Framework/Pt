@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2015 Marc Boris Duerner
+/* Copyright (C) 2015 Marc Boris Duerner
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -32,7 +31,7 @@
 
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/PaintRegion.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowFrame.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -149,9 +148,9 @@ class MenuButton : public WindowButton
 };
 
 
-class ShellWindowFrame : public WindowImpl
+class ShellWindowFrame : public WindowFrame
 {
-    typedef WindowImpl Base;
+    typedef WindowFrame Base;
 
     enum FrameItem
     {
@@ -344,7 +343,7 @@ class ShellWindowFrame : public WindowImpl
         Gfx::RectF     _clientBounds;
         Gfx::PointF    _restorePos;
         Gfx::SizeF     _restoreSize;
-        Window::State  _state;
+        WindowState    _state;
 
         Gfx::PointF    _lastPointer;
         bool           _isCapture;

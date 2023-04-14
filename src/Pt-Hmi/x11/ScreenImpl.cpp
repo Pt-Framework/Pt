@@ -161,7 +161,7 @@ void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
 // WindowManager
 ///////////////////////////////////////////////////////////////////////
 
-WindowImpl* ScreenImpl::onAttach(Window& w)
+WindowFrame* ScreenImpl::onAttach(Window& w)
 {
     MainWindowImpl* frame = new MainWindowImpl(*this, w);
     frame->setNextResponder(this);
@@ -172,7 +172,7 @@ WindowImpl* ScreenImpl::onAttach(Window& w)
 }
 
 
-void ScreenImpl::onDetach(WindowImpl& frame)
+void ScreenImpl::onDetach(WindowFrame& frame)
 {
     frame.setNextResponder(0);
 
@@ -184,14 +184,14 @@ void ScreenImpl::onDetach(WindowImpl& frame)
 }
 
 
-void ScreenImpl::onInit(WindowImpl& frame)
+void ScreenImpl::onInit(WindowFrame& frame)
 {
     RescaleEvent ev( frame, scaleFactor() );
     frame.processEvent(ev);
 }
 
 
-void ScreenImpl::onRelease(WindowImpl& frame)
+void ScreenImpl::onRelease(WindowFrame& frame)
 {
 }
 
@@ -350,7 +350,7 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         Window* window = *wit;
-        WindowImpl* frame = window->impl();
+        WindowFrame* frame = window->impl();
 
         RescaleEvent ev(*frame, scaling);
         frame->processEvent(ev);

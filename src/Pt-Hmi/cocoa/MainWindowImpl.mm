@@ -46,7 +46,7 @@ namespace Pt {
 namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(ScreenImpl& wm,  Window& w)
-: WindowImpl(wm, w)
+: WindowFrame(wm, w)
 , _wm(wm)
 , _client(w)
 , _window(nil)
@@ -630,7 +630,7 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 
     Gfx::RectF paintRect(pos, size);
 
-    WindowImpl* frame = window.impl();
+    WindowFrame* frame = window.impl();
     PaintEvent pev(*frame, paintRect);
     frame->processEvent(pev);
 
@@ -770,7 +770,7 @@ void MainWindowImpl::onClosing()
     //CloseEvent closeEvent(*window);
     //window->processEvent(closeEvent);
 
-    WindowImpl* frame = this;
+    WindowFrame* frame = this;
 
     CloseEvent ev(*frame);
     commitEvent(ev);
@@ -782,7 +782,7 @@ void MainWindowImpl::onClose(Window& w)
     //[_window performClose:nil];
     //[_window close];
 
-    WindowImpl* frame = this;
+    WindowFrame* frame = this;
 
     CloseEvent ev(*frame);
     w.processEvent(ev);

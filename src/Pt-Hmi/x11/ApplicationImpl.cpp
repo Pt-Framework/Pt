@@ -302,7 +302,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     //                              << rect.x() << ", " << rect.y() << " " 
     //                              << rect.width() << "x" << rect.height() << std::endl;
 
-    WindowImpl* frame = window.impl();
+    WindowFrame* frame = window.impl();
     PaintEvent pev(*frame, rect);
     frame->processEvent(pev);
 
@@ -348,7 +348,7 @@ void ApplicationImpl::onClientMessage(Window& window, XEvent& xev)
     {
         if( (Atom) xev.xclient.data.l[0] == _wmDeleteWindow )
         {
-            WindowImpl* frame = window.impl();
+            WindowFrame* frame = window.impl();
 
             CloseEvent ev(*frame);
             commitEvent(ev);

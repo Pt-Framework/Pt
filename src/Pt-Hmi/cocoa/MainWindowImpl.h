@@ -36,7 +36,7 @@
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowFrame.h>
 #include <Pt/Connectable.h>
 
 #ifdef __OBJC__
@@ -62,10 +62,10 @@ namespace Hmi {
 
 class ScreenImpl;
 
-class MainWindowImpl : public WindowImpl
+class MainWindowImpl : public WindowFrame
                      , public Pt::Connectable
 {
-    typedef WindowImpl Base;
+    typedef WindowFrame Base;
 
     friend class ScreenImpl;
 

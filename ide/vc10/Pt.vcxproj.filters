@@ -1233,9 +1233,6 @@
     <ClInclude Include="..\..\src\Pt-Qt\win32\MainLoopImpl.h">
       <Filter>Pt-Qt\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\WindowFrame.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1588,6 +1585,9 @@
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\ShellWindowFrame.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowFrame.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>

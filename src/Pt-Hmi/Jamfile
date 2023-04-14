@@ -80,7 +80,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        Widget.cpp
                        WindowBase.cpp
                        Window.cpp
-                       #WindowFrame.cpp
+                       WindowFrame.cpp
                        WindowManager.cpp
                        $(PT_HMI_IMPL) ;
 

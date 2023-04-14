@@ -37,7 +37,7 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
-class WindowImpl;
+class WindowFrame;
 
 class WindowManager : public Visual
 {
@@ -49,13 +49,13 @@ class WindowManager : public Visual
         virtual ~WindowManager();
 
     protected:
-        virtual WindowImpl* onAttach(Window& w) = 0;
+        virtual WindowFrame* onAttach(Window& w) = 0;
 
-        virtual void onDetach(WindowImpl& w) = 0;
+        virtual void onDetach(WindowFrame& w) = 0;
 
-        virtual void onInit(WindowImpl& w) = 0;
+        virtual void onInit(WindowFrame& w) = 0;
 
-        virtual void onRelease(WindowImpl& w) = 0;
+        virtual void onRelease(WindowFrame& w) = 0;
 };
 
 } // namespace

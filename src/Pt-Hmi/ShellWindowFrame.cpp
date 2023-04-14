@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2015 Marc Boris Duerner
+/* Copyright (C) 2015 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -396,7 +395,7 @@ void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 //
 
 ShellWindowFrame::ShellWindowFrame(ShellWM& shell, Window& window)
-: WindowImpl(shell, window)
+: WindowFrame(shell, window)
 , _wm(&shell)
 , _window(&window)
 , _borderWidth( shell.borderWidth() )

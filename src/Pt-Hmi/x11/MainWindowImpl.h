@@ -34,7 +34,7 @@
 #include <X11/Xatom.h>
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowFrame.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -45,9 +45,9 @@ namespace Hmi {
 
 class ScreenImpl;
 
-class MainWindowImpl : public WindowImpl
+class MainWindowImpl : public WindowFrame
 {
-    typedef WindowImpl Base;
+    typedef WindowFrame Base;
 
     friend class ScreenImpl;
 

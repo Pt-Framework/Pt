@@ -183,7 +183,7 @@ void ShellWM::onRequestCapture(bool capture)
 // WindowManager
 ///////////////////////////////////////////////////////////////////////
 
-WindowImpl* ShellWM::onAttach(Window& w)
+WindowFrame* ShellWM::onAttach(Window& w)
 {
     ShellWindowFrame* frame = new ShellWindowFrame(*this, w);
     frame->setNextResponder(this);
@@ -197,7 +197,7 @@ WindowImpl* ShellWM::onAttach(Window& w)
 }
 
 
-void ShellWM::onDetach(WindowImpl& frame)
+void ShellWM::onDetach(WindowFrame& frame)
 {
     frame.setNextResponder(0);
 
@@ -223,7 +223,7 @@ void ShellWM::onDetach(WindowImpl& frame)
 }
 
 
-void ShellWM::onInit(WindowImpl& frame)
+void ShellWM::onInit(WindowFrame& frame)
 {
     double scaling = scaleFactor();
     
@@ -232,7 +232,7 @@ void ShellWM::onInit(WindowImpl& frame)
 }
 
 
-void ShellWM::onRelease(WindowImpl& frame)
+void ShellWM::onRelease(WindowFrame& frame)
 {
     if( frame.isVisible() )
     {
@@ -381,7 +381,7 @@ void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
     for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
         Window* window = *wit;
-        WindowImpl* frame = window->impl();
+        WindowFrame* frame = window->impl();
 
         RescaleEvent rev(*frame, scaling);
         frame->processEvent(rev);
@@ -508,7 +508,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
     //
     Gfx::PointF pos = fromGlobal( ev.position() );
 
-    WindowImpl* hitFrame = 0;
+    WindowFrame* hitFrame = 0;
 
     std::vector<Window*>::const_reverse_iterator rit;
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
@@ -565,7 +565,7 @@ bool ShellWM::processTouchEvent(const TouchEvent& ev)
     //
     Gfx::PointF pos = fromGlobal( ev.position() );
 
-    WindowImpl* hitFrame = 0;
+    WindowFrame* hitFrame = 0;
 
     std::vector<Window*>::const_reverse_iterator rit;
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
