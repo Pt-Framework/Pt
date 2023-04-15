@@ -132,6 +132,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowFrame.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStateEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowType.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authenticator.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authorizer.h" />
@@ -354,11 +355,11 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\KeyMap.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintData.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowView.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\AtesionIcon.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\ChildW.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\DemoImage.h" />
@@ -422,9 +423,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\KeyHandler.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ScreenImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\WindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h" />
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-Http\Connection.h" />
@@ -510,10 +511,10 @@
     <None Include="..\..\src\Pt-Gfx\tests\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm" />
-    <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowImpl.mm" />
-    <None Include="..\..\src\Pt-Hmi\cocoa\MainWindowView.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.mm" />
+    <None Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.mm" />
+    <None Include="..\..\src\Pt-Hmi\cocoa\WindowView.mm" />
     <None Include="..\..\src\Pt-Hmi\demo\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\Jamfile" />
     <None Include="..\..\src\Pt-Http\Jamfile" />
@@ -687,9 +688,9 @@
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\KeyHandler.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ScreenImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authenticator.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authorizer.cpp" />
