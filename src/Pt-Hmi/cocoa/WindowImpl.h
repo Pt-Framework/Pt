@@ -26,8 +26,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_HMI_MAINWINDOW_IMPL_H
-#define PT_HMI_MAINWINDOW_IMPL_H
+#ifndef PT_HMI_WINDOW_IMPL_H
+#define PT_HMI_WINDOW_IMPL_H
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
@@ -62,17 +62,17 @@ namespace Hmi {
 
 class ScreenImpl;
 
-class MainWindowImpl : public WindowFrame
-                     , public Pt::Connectable
+class WindowImpl : public WindowFrame
+                 , public Pt::Connectable
 {
     typedef WindowFrame Base;
 
     friend class ScreenImpl;
 
     public:
-        MainWindowImpl(ScreenImpl& wm,  Window& w);
+        WindowImpl(ScreenImpl& wm,  Window& w);
 
-        virtual ~MainWindowImpl();
+        virtual ~WindowImpl();
 
         
         void setType(WindowType type);

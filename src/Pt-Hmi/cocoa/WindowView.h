@@ -27,17 +27,17 @@
  * */
 
 #include <Pt/Hmi/Api.h>
-#include "MainWindowImpl.h"
+#include "WindowImpl.h"
 
 #import <AppKit/NSView.h>
 #import <AppKit/NSWindowController.h>
 
-@interface MainWindowView : NSView<NSWindowDelegate>
+@interface WindowView : NSView<NSWindowDelegate>
 {
-    Pt::Hmi::MainWindowImpl* _windowImpl;
+    Pt::Hmi::WindowImpl* _windowImpl;
 }
     
-- (MainWindowView*) initWithImpl: (Pt::Hmi::MainWindowImpl*) window ;
+- (WindowView*) initWithImpl: (Pt::Hmi::WindowImpl*) window ;
 
 - (BOOL) acceptsFirstResponder;
 

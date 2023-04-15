@@ -26,7 +26,7 @@
  * MA  02110-1301  USA
  */
 
-#import "MainWindowView.h"
+#import "WindowView.h"
 
 #include <Pt/Hmi/Application.h>
 
@@ -37,9 +37,9 @@
 #include <CoreGraphics/CoreGraphics.h>
 
 
-@implementation MainWindowView
+@implementation WindowView
 
-- (MainWindowView*) initWithImpl: (Pt::Hmi::MainWindowImpl*) window
+- (WindowView*) initWithImpl: (Pt::Hmi::WindowImpl*) window
 {
     self = [super init];
     _windowImpl = window;

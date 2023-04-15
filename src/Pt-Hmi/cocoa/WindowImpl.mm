@@ -29,8 +29,8 @@
 
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
-#include "MainWindowImpl.h"
-#include "MainWindowView.h"
+#include "WindowImpl.h"
+#include "WindowView.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
 
@@ -45,7 +45,7 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(ScreenImpl& wm,  Window& w)
+WindowImpl::WindowImpl(ScreenImpl& wm,  Window& w)
 : WindowFrame(wm, w)
 , _wm(wm)
 , _client(w)
@@ -55,7 +55,7 @@ MainWindowImpl::MainWindowImpl(ScreenImpl& wm,  Window& w)
 , _level(0)
 , _keyFlags(0)
 {
-    MainWindowView* view = [[MainWindowView alloc] initWithImpl: this];
+    WindowView* view = [[WindowView alloc] initWithImpl: this];
     _view = view;
 
     Gfx::PointF at(0, 0);
@@ -96,7 +96,7 @@ MainWindowImpl::MainWindowImpl(ScreenImpl& wm,  Window& w)
 }
 
 
-MainWindowImpl::~MainWindowImpl()
+WindowImpl::~WindowImpl()
 {
     if( _window == nil )
         return;
@@ -110,7 +110,7 @@ MainWindowImpl::~MainWindowImpl()
     _view = nil;
 }
 
-void MainWindowImpl::onInit(Window& w)
+void WindowImpl::onInit(Window& w)
 {
     Gfx::PaintSurface& surface = this->surface();
     Gfx::PointF surfacePos(0, 0);
@@ -125,14 +125,14 @@ void MainWindowImpl::onInit(Window& w)
 }
 
 
-void MainWindowImpl::onRelease(Window& w)
+void WindowImpl::onRelease(Window& w)
 {
     w.setNextResponder(0);
     w.setSurface( 0, Gfx::PointF() );
 }
 
 
-void MainWindowImpl::setType(WindowType type)
+void WindowImpl::setType(WindowType type)
 {
     switch(type)
     {
@@ -166,7 +166,7 @@ void MainWindowImpl::setType(WindowType type)
 }
 
 
-void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
+void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
     scaling *= [_window backingScaleFactor];
@@ -179,13 +179,13 @@ void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void MainWindowImpl::onRescaleEvent(const RescaleEvent& ev)
+void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
 {
     Base::onRescaleEvent(ev);
 }
 
 
-Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
     //std::clog << "TO SCREEN POS: " << pos.y() << std::endl;
 
@@ -204,7 +204,7 @@ Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
 {   
     //std::clog << "FROM SCREEN POS: " << pos.y() << std::endl;
     
@@ -223,33 +223,33 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF MainWindowImpl::onToWindow(const Window& w, 
+Gfx::PointF WindowImpl::onToWindow(const Window& w, 
                                        const Gfx::PointF& pos) const
 {
     return pos;
 }
 
 
-Gfx::PointF MainWindowImpl::onFromWindow(const Window& w, 
+Gfx::PointF WindowImpl::onFromWindow(const Window& w, 
                                          const Gfx::PointF& pos) const
 {
     return pos;
 }
 
 
-Gfx::PointF MainWindowImpl::onToParent(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::onToParent(const Gfx::PointF& pos) const
 {
     return _wm.fromFrame(*this, pos); 
 }
      
         
-Gfx::PointF MainWindowImpl::onFromParent(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
 { 
     return _wm.toFrame(*this, pos); 
 }
 
 
-void MainWindowImpl::paint(const Gfx::RectF& rect)
+void WindowImpl::paint(const Gfx::RectF& rect)
 {
     Gfx::RectF r( rect.topLeft(), rect.size() );
 
@@ -270,7 +270,7 @@ void MainWindowImpl::paint(const Gfx::RectF& rect)
 }
 
 
-void MainWindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
+void WindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
 {
     Gfx::PointF screenPos = toScreen( rect.topLeft() );
     
@@ -279,7 +279,7 @@ void MainWindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
 }
 
 
-void MainWindowImpl::onProcessPaintEvent(const PaintEvent& ev)
+void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
     Base::onProcessPaintEvent(ev);
 
@@ -288,13 +288,13 @@ void MainWindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
-void MainWindowImpl::onPaintEvent(const PaintEvent& ev)
+void WindowImpl::onPaintEvent(const PaintEvent& ev)
 {
     Base::onPaintEvent(ev);
 }
 
 
-//void MainWindowImpl::show(bool visible)
+//void WindowImpl::show(bool visible)
 //{
 //    //std::clog << "SHOW: " << visible << std::endl;
 //
@@ -312,7 +312,7 @@ void MainWindowImpl::onPaintEvent(const PaintEvent& ev)
 //}
 
 
-void MainWindowImpl::onShow(Window& w, bool visible)
+void WindowImpl::onShow(Window& w, bool visible)
 {
     //std::clog << "SHOW: " << visible << std::endl;
 
@@ -330,7 +330,7 @@ void MainWindowImpl::onShow(Window& w, bool visible)
 }
 
 
-void MainWindowImpl::onProcessShowEvent(const ShowEvent& ev)
+void WindowImpl::onProcessShowEvent(const ShowEvent& ev)
 {
     Base::onProcessShowEvent(ev);
 
@@ -339,22 +339,22 @@ void MainWindowImpl::onProcessShowEvent(const ShowEvent& ev)
 }
 
 
-void MainWindowImpl::onShowEvent(const ShowEvent& ev)
+void WindowImpl::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
 }
 
 
-//void MainWindowImpl::activate()
+//void WindowImpl::activate()
 //{
 //    //std::clog << "ACTIVATE: " << std::endl;
 //
-//    [_window makeMainWindow];
+//    [_window makeWindow];
 //    [_window makeKeyWindow];
 //}
 
 
-void MainWindowImpl::onActivate(Window& w, bool active)
+void WindowImpl::onActivate(Window& w, bool active)
 {
     if( ! active )
         return;
@@ -366,7 +366,7 @@ void MainWindowImpl::onActivate(Window& w, bool active)
 }
 
 
-void MainWindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
+void WindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
 {
     Base::onProcessActivateEvent(ev);
 
@@ -375,19 +375,19 @@ void MainWindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
 }
 
 
-void MainWindowImpl::onActivateEvent(const ActivateEvent& ev)
+void WindowImpl::onActivateEvent(const ActivateEvent& ev)
 {
     Base::onActivateEvent(ev);
 }
 
 
-void MainWindowImpl::onEnable(Window& w, bool enable)
+void WindowImpl::onEnable(Window& w, bool enable)
 {
     // TODO
 }
 
 
-void MainWindowImpl::onProcessEnableEvent(const EnableEvent& ev)
+void WindowImpl::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
 
@@ -396,13 +396,13 @@ void MainWindowImpl::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
-void MainWindowImpl::onEnableEvent(const EnableEvent& ev)
+void WindowImpl::onEnableEvent(const EnableEvent& ev)
 {    
     Base::onEnableEvent(ev);
 }
 
 
-//void MainWindowImpl::move(const Gfx::PointF& p)
+//void WindowImpl::move(const Gfx::PointF& p)
 //{
 //    //std::clog << "MOVE: " << p.x() << "," 
 //    //                      << p.y() << std::endl;
@@ -419,7 +419,7 @@ void MainWindowImpl::onEnableEvent(const EnableEvent& ev)
 //}
 //
 //
-//void MainWindowImpl::resize(const Gfx::SizeF& size)
+//void WindowImpl::resize(const Gfx::SizeF& size)
 //{
 //    //std::clog << "RESIZE: " << size.width() << "," 
 //    //                        << size.height() << std::endl;
@@ -439,7 +439,7 @@ void MainWindowImpl::onEnableEvent(const EnableEvent& ev)
 //}
 
 
-void MainWindowImpl::onMove(Window& w, const Gfx::PointF& to)
+void WindowImpl::onMove(Window& w, const Gfx::PointF& to)
 {
     //std::clog << "MOVE: " << p.x() << "," 
     //                      << p.y() << std::endl;
@@ -456,7 +456,7 @@ void MainWindowImpl::onMove(Window& w, const Gfx::PointF& to)
 }
 
 
-void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& size)
+void WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
 {
     //std::clog << "RESIZE: " << size.width() << "," 
     //                        << size.height() << std::endl;
@@ -476,7 +476,7 @@ void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& size)
 }
 
 
-void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
+void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 {
     Base::onProcessResizeEvent(ev);
 
@@ -485,7 +485,7 @@ void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 }
 
 
-void MainWindowImpl::onSetAbove(Window& w, bool above)
+void WindowImpl::onSetAbove(Window& w, bool above)
 {
     if(above)
     {
@@ -498,7 +498,7 @@ void MainWindowImpl::onSetAbove(Window& w, bool above)
 }
 
 
-void MainWindowImpl::onSetTitle(Window& w, const std::string& text)
+void WindowImpl::onSetTitle(Window& w, const std::string& text)
 {
     NSString* title = [NSString stringWithCString:text.c_str() 
                                 encoding:[NSString defaultCStringEncoding]];
@@ -506,12 +506,12 @@ void MainWindowImpl::onSetTitle(Window& w, const std::string& text)
 }
 
 
-void MainWindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
+void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 {
 }
 
 
-//void MainWindowImpl::setState(const WindowState& s)
+//void WindowImpl::setState(const WindowState& s)
 //{
 //    switch(s)
 //    {
@@ -537,7 +537,7 @@ void MainWindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 //}
 
 
-void MainWindowImpl::onSetState(Window& w, const WindowState& s)
+void WindowImpl::onSetState(Window& w, const WindowState& s)
 {
     switch(s)
     {
@@ -563,7 +563,7 @@ void MainWindowImpl::onSetState(Window& w, const WindowState& s)
 }
 
 
-void MainWindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
+void WindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
 {
     Base::onProcessWindowStateEvent(ev);
 
@@ -572,12 +572,12 @@ void MainWindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-void MainWindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
+void WindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 {
 }
 
 
-void MainWindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
                                                 const Gfx::SizeF& maxSize)
 {
     NSSize minSize = NSMakeSize( minSize.width(), minSize.height() );
@@ -588,21 +588,21 @@ void MainWindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
 }
 
 
-//void MainWindowImpl::grabPointer()
+//void WindowImpl::grabPointer()
 //{
 //    // pointer is always tracked, even if its outside the window
 //    [_window setAcceptsMouseMovedEvents:YES];
 //}
 //
 //
-//void MainWindowImpl::releasePointer()
+//void WindowImpl::releasePointer()
 //{
 //    // pointer is always tracked, even if its outside the window
 //    [_window setAcceptsMouseMovedEvents:NO];
 //}
 
 
-void MainWindowImpl::onPaint(const NSRect& rect)
+void WindowImpl::onPaint(const NSRect& rect)
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
@@ -637,7 +637,7 @@ void MainWindowImpl::onPaint(const NSRect& rect)
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
 
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window->frame() );
+    WindowImpl* windowImpl = static_cast<WindowImpl*>( window->frame() );
     Pt::Hmi::PixmapSurfaceImpl* pixmap = windowImpl->surface().pixmapImpl();
     CGContextRef pixmapContext = pixmap->context();
     
@@ -662,7 +662,7 @@ void MainWindowImpl::onPaint(const NSRect& rect)
 }
 
 
-void MainWindowImpl::onActivate(bool isActive)
+void WindowImpl::onActivate(bool isActive)
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
@@ -674,7 +674,7 @@ void MainWindowImpl::onActivate(bool isActive)
 }
 
 
-void MainWindowImpl::onShow(bool v)
+void WindowImpl::onShow(bool v)
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
@@ -686,7 +686,7 @@ void MainWindowImpl::onShow(bool v)
 }
 
 
-void MainWindowImpl::onMove()
+void WindowImpl::onMove()
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
@@ -711,7 +711,7 @@ void MainWindowImpl::onMove()
 }
 
 
-void MainWindowImpl::onResize(const NSSize& viewSize)
+void WindowImpl::onResize(const NSSize& viewSize)
 {   
     //std::clog << "RESIZE: " << viewSize.width << "x" 
     //                        << viewSize.height << std::endl;
@@ -758,7 +758,7 @@ void MainWindowImpl::onResize(const NSSize& viewSize)
 }
 
 
-void MainWindowImpl::onClosing()
+void WindowImpl::onClosing()
 {
     //ScreenImpl* screen = Application::instance().screen().impl();
     //Window* window = screen->findWindow(_window);
@@ -777,7 +777,7 @@ void MainWindowImpl::onClosing()
 }
 
 
-void MainWindowImpl::onClose(Window& w)
+void WindowImpl::onClose(Window& w)
 {
     //[_window performClose:nil];
     //[_window close];
@@ -789,7 +789,7 @@ void MainWindowImpl::onClose(Window& w)
 }
 
 
-void MainWindowImpl::onProcessCloseEvent(const CloseEvent& ev)
+void WindowImpl::onProcessCloseEvent(const CloseEvent& ev)
 {
     onCloseEvent(ev);
 
@@ -798,12 +798,12 @@ void MainWindowImpl::onProcessCloseEvent(const CloseEvent& ev)
 }
 
 
-void MainWindowImpl::onCloseEvent(const CloseEvent& ev)
+void WindowImpl::onCloseEvent(const CloseEvent& ev)
 {
 }
 
 
-void MainWindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
+void WindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
 {
     //std::clog << "KEY DOWN: " << vkey << std::endl;
 
@@ -829,7 +829,7 @@ void MainWindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
 }
 
 
-void MainWindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
+void WindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
 {
     //std::clog << "KEY UP: " << vkey << std::endl;
 
@@ -855,7 +855,7 @@ void MainWindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
 }
 
 
-void MainWindowImpl::onKeyModifier(unsigned int mask)
+void WindowImpl::onKeyModifier(unsigned int mask)
 {
     //std::clog << "KEY MODIFIER: " << mask << std::endl;
 
@@ -919,7 +919,7 @@ void MainWindowImpl::onKeyModifier(unsigned int mask)
 }
 
 
-void MainWindowImpl::onLMouseDown(double x, double y)
+void WindowImpl::onLMouseDown(double x, double y)
 {
     //std::clog << "MOUSE PRESS: " << x << ", " << y << std::endl;
 
@@ -944,7 +944,7 @@ void MainWindowImpl::onLMouseDown(double x, double y)
 }
 
 
-void MainWindowImpl::onLMouseUp(double x, double y)
+void WindowImpl::onLMouseUp(double x, double y)
 {
     //std::clog << "MOUSE RELEASE: " << x << ", " << y << std::endl;
 
@@ -969,7 +969,7 @@ void MainWindowImpl::onLMouseUp(double x, double y)
 }
 
 
-void MainWindowImpl::onMouseMove(double x, double y)
+void WindowImpl::onMouseMove(double x, double y)
 {
     //std::clog << "MOUSE MOVE: " << x << ", " << y << std::endl;
 

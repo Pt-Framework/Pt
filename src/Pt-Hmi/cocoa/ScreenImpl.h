@@ -51,7 +51,7 @@ namespace Pt {
 namespace Hmi {
 
 class ApplicationImpl;
-class MainWindowImpl;
+class WindowImpl;
 class Window;
 class WindowBase;
 class MouseEvent;
@@ -60,7 +60,7 @@ class ScrollEvent;
 
 class ScreenImpl : public WindowManager
 {
-    friend class MainWindowImpl;
+    friend class WindowImpl;
 
     public:
         ScreenImpl(ApplicationImpl& app);
@@ -83,10 +83,10 @@ class ScreenImpl : public WindowManager
         Window* findWindow(NSWindow* wnd);
 
     protected:
-        Gfx::PointF toFrame(const MainWindowImpl& w, 
+        Gfx::PointF toFrame(const WindowImpl& w, 
                             const Gfx::PointF& pos) const;
 
-        Gfx::PointF fromFrame(const MainWindowImpl& w, 
+        Gfx::PointF fromFrame(const WindowImpl& w, 
                               const Gfx::PointF& pos) const;
 
     //

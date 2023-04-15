@@ -28,7 +28,7 @@
 
 #include "posix/MainLoopImpl.h"
 #include "ApplicationImpl.h"
-#include "MainWindowImpl.h"
+#include "WindowImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyHandler.h"
 
@@ -190,7 +190,7 @@ Window* ApplicationImpl::findWindow(::Window window)
         if( ! w->frame() )
             continue;
 
-        MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( w->frame() );
+        WindowImpl* windowImpl = static_cast<WindowImpl*>( w->frame() );
 
         if( windowImpl->window() == window )
             return w;
@@ -307,7 +307,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     frame->processEvent(pev);
 
 #ifdef PT_HMI_X11_CORE
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.frame() );
+    WindowImpl* windowImpl = static_cast<WindowImpl*>( window.frame() );
     ::Drawable from = windowImpl->surface().pixmapImpl()->drawable();
     ::Window to = windowImpl->window();
 
@@ -316,7 +316,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 #endif
 
 #ifdef PT_HMI_X11_RASTER
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.frame() );
+    WindowImpl* windowImpl = static_cast<WindowImpl*>( window.frame() );
     const Gfx::Image& image = windowImpl->surface().pixmapImpl()->image();
     char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
 
@@ -547,7 +547,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
     // else
     //     _resizeEvent.setState( WindowState::Normal );
 
-    MainWindowImpl* windowImpl = static_cast<MainWindowImpl*>( window.frame() );
+    WindowImpl* windowImpl = static_cast<WindowImpl*>( window.frame() );
 
     const int width  = xev.xconfigure.width;
     const int height = xev.xconfigure.height;

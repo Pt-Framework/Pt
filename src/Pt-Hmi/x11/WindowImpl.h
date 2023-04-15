@@ -26,8 +26,8 @@
    MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_MainWindowImpl_h
-#define Pt_Hmi_MainWindowImpl_h
+#ifndef Pt_Hmi_WindowImpl_h
+#define Pt_Hmi_WindowImpl_h
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -45,16 +45,16 @@ namespace Hmi {
 
 class ScreenImpl;
 
-class MainWindowImpl : public WindowFrame
+class WindowImpl : public WindowFrame
 {
     typedef WindowFrame Base;
 
     friend class ScreenImpl;
 
     public:
-        MainWindowImpl(ScreenImpl& wm,  Window& w);
+        WindowImpl(ScreenImpl& wm,  Window& w);
 
-        virtual ~MainWindowImpl();
+        virtual ~WindowImpl();
 
         void setType(Window::Type type);
 

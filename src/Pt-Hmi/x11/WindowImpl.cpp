@@ -26,7 +26,7 @@
    MA 02110-1301 USA
 */
 
-#include "MainWindowImpl.h"
+#include "WindowImpl.h"
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
 #include "PixmapSurfaceImpl.h"
@@ -42,7 +42,7 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(ScreenImpl& wm, Window& w)
+WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 : WindowFrame(wm, w)
 , _wm(wm)
 , _client(w)
@@ -58,13 +58,13 @@ MainWindowImpl::MainWindowImpl(ScreenImpl& wm, Window& w)
 }
 
 
-MainWindowImpl::~MainWindowImpl()
+WindowImpl::~WindowImpl()
 {
     destroy();
 }
 
 
-void MainWindowImpl::create(Window::Type type)
+void WindowImpl::create(Window::Type type)
 {
     // Display and Screen are inited in Application
     unsigned int screen = XDefaultScreen(_display);
@@ -146,7 +146,7 @@ void MainWindowImpl::create(Window::Type type)
 }
 
 
-void MainWindowImpl::destroy()
+void WindowImpl::destroy()
 {
     if( _window == 0)
         return;
@@ -158,7 +158,7 @@ void MainWindowImpl::destroy()
 }
 
 
-void MainWindowImpl::onInit(Window& w)
+void WindowImpl::onInit(Window& w)
 {
     Gfx::PaintSurface& surface = this->surface();
     Gfx::PointF surfacePos(0, 0);
@@ -173,14 +173,14 @@ void MainWindowImpl::onInit(Window& w)
 }
 
 
-void MainWindowImpl::onRelease(Window& w)
+void WindowImpl::onRelease(Window& w)
 {
     w.setNextResponder(0);
     w.setSurface( 0, Gfx::PointF() );
 }
 
 
-void MainWindowImpl::setType(Window::Type type)
+void WindowImpl::setType(Window::Type type)
 {
     //std::clog << "XChangeWindowAttributes: " << type << std::endl;
 
@@ -200,7 +200,7 @@ void MainWindowImpl::setType(Window::Type type)
 }
 
 
-Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF physicalPos = surface().toPhysical(pos);
 
@@ -220,7 +220,7 @@ Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF physicalPos = surface().toPhysical(pos);
 
@@ -240,33 +240,33 @@ Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF MainWindowImpl::onToWindow(const Window& w, 
+Gfx::PointF WindowImpl::onToWindow(const Window& w, 
                                        const Gfx::PointF& pos) const
 {
     return pos;
 }
 
 
-Gfx::PointF MainWindowImpl::onFromWindow(const Window& w, 
+Gfx::PointF WindowImpl::onFromWindow(const Window& w, 
                                          const Gfx::PointF& pos) const
 {
     return pos;
 }
 
 
-Gfx::PointF MainWindowImpl::onToParent(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::onToParent(const Gfx::PointF& pos) const
 {
     return _wm.fromFrame(*this, pos); 
 }
      
         
-Gfx::PointF MainWindowImpl::onFromParent(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
 { 
     return _wm.toFrame(*this, pos); 
 }
 
 
-void MainWindowImpl::paint(const Gfx::RectF& rectF)
+void WindowImpl::paint(const Gfx::RectF& rectF)
 {
     Gfx::Rect rect = Gfx::round(rectF);
     if( rect.isNull() )
@@ -296,7 +296,7 @@ void MainWindowImpl::paint(const Gfx::RectF& rectF)
 }
 
 
-void MainWindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
+void WindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
 {
     Gfx::PointF screenPos = toScreen( rect.topLeft() );
     Gfx::RectF screenRect( screenPos, rect.size() );
@@ -305,7 +305,7 @@ void MainWindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
 }
 
 
-void MainWindowImpl::onProcessPaintEvent(const PaintEvent& ev)
+void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
     Base::onProcessPaintEvent(ev);
 
@@ -314,13 +314,13 @@ void MainWindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
-void MainWindowImpl::onPaintEvent(const PaintEvent& ev)
+void WindowImpl::onPaintEvent(const PaintEvent& ev)
 {
     Base::onPaintEvent(ev);
 }
 
 
-//void MainWindowImpl::show(bool visible)
+//void WindowImpl::show(bool visible)
 //{
 //    if(visible)
 //    {
@@ -345,7 +345,7 @@ void MainWindowImpl::onPaintEvent(const PaintEvent& ev)
 //}
 
 
-void MainWindowImpl::onShow(Window& w, bool visible)
+void WindowImpl::onShow(Window& w, bool visible)
 {
     if(visible)
     {
@@ -370,7 +370,7 @@ void MainWindowImpl::onShow(Window& w, bool visible)
 }
 
 
-void MainWindowImpl::onProcessShowEvent(const ShowEvent& ev)
+void WindowImpl::onProcessShowEvent(const ShowEvent& ev)
 {
     Base::onProcessShowEvent(ev);
 
@@ -379,13 +379,13 @@ void MainWindowImpl::onProcessShowEvent(const ShowEvent& ev)
 }
 
 
-void MainWindowImpl::onShowEvent(const ShowEvent& ev)
+void WindowImpl::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
 }
 
 
-//void MainWindowImpl::activate()
+//void WindowImpl::activate()
 //{
 //    //XSetInputFocus(_display, _window, RevertToNone, CurrentTime);
 //
@@ -409,7 +409,7 @@ void MainWindowImpl::onShowEvent(const ShowEvent& ev)
 //}
 
 
-void MainWindowImpl::onActivate(Window& w, bool active)
+void WindowImpl::onActivate(Window& w, bool active)
 {
     if( ! active )
         return;
@@ -436,7 +436,7 @@ void MainWindowImpl::onActivate(Window& w, bool active)
 }
 
 
-void MainWindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
+void WindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
 {
     Base::onProcessActivateEvent(ev);
 
@@ -445,13 +445,13 @@ void MainWindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
 }
 
 
-void MainWindowImpl::onActivateEvent(const ActivateEvent& ev)
+void WindowImpl::onActivateEvent(const ActivateEvent& ev)
 {
     Base::onActivateEvent(ev);
 }
 
 
-//void MainWindowImpl::enable(bool enabled)
+//void WindowImpl::enable(bool enabled)
 //{
 //    //std::clog  << "XChangeWindowAttributes: " << enabled << std::endl;
 //
@@ -477,7 +477,7 @@ void MainWindowImpl::onActivateEvent(const ActivateEvent& ev)
 //}
 
 
-void MainWindowImpl::onEnable(Window& w, bool enable)
+void WindowImpl::onEnable(Window& w, bool enable)
 {
     //std::clog  << "XChangeWindowAttributes: " << enabled << std::endl;
 
@@ -503,7 +503,7 @@ void MainWindowImpl::onEnable(Window& w, bool enable)
 }
 
 
-void MainWindowImpl::onProcessEnableEvent(const EnableEvent& ev)
+void WindowImpl::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
 
@@ -512,13 +512,13 @@ void MainWindowImpl::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
-void MainWindowImpl::onEnableEvent(const EnableEvent& ev)
+void WindowImpl::onEnableEvent(const EnableEvent& ev)
 {    
     Base::onEnableEvent(ev);
 }
 
 
-void MainWindowImpl::onMove(Window& w, const Gfx::PointF& pos)
+void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
     Gfx::PointF aligedPos = w.surface().align(pos);
 
@@ -538,7 +538,7 @@ void MainWindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 }
 
 
-void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
+void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);
 
@@ -548,13 +548,13 @@ void MainWindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void MainWindowImpl::onRescaleEvent(const RescaleEvent& ev)
+void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
 {
     Base::onRescaleEvent(ev);
 }
 
 
-void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& s)
+void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
     //std::clog  << "XResizeWindow: " << s.width() << "x" << s.height() << std::endl;
 
@@ -595,7 +595,7 @@ void MainWindowImpl::onResize(Window& w, const Gfx::SizeF& s)
 }
 
 
-void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
+void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 {
     Base::onProcessResizeEvent(ev);
 
@@ -604,9 +604,9 @@ void MainWindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 }
 
 
-void MainWindowImpl::onClose(Window& w)
+void WindowImpl::onClose(Window& w)
 {
-    MainWindowImpl* impl = static_cast<MainWindowImpl*>( w.impl() );
+    WindowImpl* impl = static_cast<WindowImpl*>( w.impl() );
     if(impl)
     {
         XEvent ev;
@@ -623,7 +623,7 @@ void MainWindowImpl::onClose(Window& w)
 }
 
 
-void MainWindowImpl::onProcessCloseEvent(const CloseEvent& ev)
+void WindowImpl::onProcessCloseEvent(const CloseEvent& ev)
 {
     onCloseEvent(ev);
 
@@ -632,12 +632,12 @@ void MainWindowImpl::onProcessCloseEvent(const CloseEvent& ev)
 }
 
 
-void MainWindowImpl::onCloseEvent(const CloseEvent& ev)
+void WindowImpl::onCloseEvent(const CloseEvent& ev)
 {
 }
 
 
-void MainWindowImpl::onSetAbove(Window& w, bool above)
+void WindowImpl::onSetAbove(Window& w, bool above)
 {
     //std::clog << "setTopMost: " << topMost << std::endl;
 
@@ -668,7 +668,7 @@ void MainWindowImpl::onSetAbove(Window& w, bool above)
 }
 
 
-//void MainWindowImpl::setState(const WindowState& s)
+//void WindowImpl::setState(const WindowState& s)
 //{
 //    //std::clog  << "setState: " << s << std::endl;
 //
@@ -708,7 +708,7 @@ void MainWindowImpl::onSetAbove(Window& w, bool above)
 //}
 
 
-void MainWindowImpl::onSetState(Window& w, const WindowState& s)
+void WindowImpl::onSetState(Window& w, const WindowState& s)
 {
     //std::clog  << "setState: " << s << std::endl;
 
@@ -747,7 +747,7 @@ void MainWindowImpl::onSetState(Window& w, const WindowState& s)
 }
 
 
-void MainWindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
+void WindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
 {
     Base::onProcessWindowStateEvent(ev);
 
@@ -756,18 +756,18 @@ void MainWindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-void MainWindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
+void WindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 {
 }
 
 
-void MainWindowImpl::onSetTitle(Window& w, const std::string& text)
+void WindowImpl::onSetTitle(Window& w, const std::string& text)
 {
     XStoreName(_display, _window, text.c_str());
 }
 
 
-void MainWindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
+void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 {
     //std::clog << "XAllocWMHints" << std::endl;
 
@@ -785,7 +785,7 @@ void MainWindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::setSizeLimits(Window& w, const Gfx::SizeF& minSize,
+void WindowImpl::setSizeLimits(Window& w, const Gfx::SizeF& minSize,
                                               const Gfx::SizeF& maxSize)
 {
     XSizeHints hints;
@@ -801,7 +801,7 @@ void MainWindowImpl::setSizeLimits(Window& w, const Gfx::SizeF& minSize,
 }
 
 
-bool MainWindowImpl::isMinimized()
+bool WindowImpl::isMinimized()
 {
     Atom actual_type;
     int actual_format;
@@ -830,7 +830,7 @@ bool MainWindowImpl::isMinimized()
 }
 
 
-bool MainWindowImpl::isMaximized()
+bool WindowImpl::isMaximized()
 {
     Atom actual_type;
     int actual_format;

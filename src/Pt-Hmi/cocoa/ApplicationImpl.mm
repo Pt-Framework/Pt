@@ -29,7 +29,7 @@
 
 #import "ApplicationImpl.h"
 #import "PixmapSurfaceImpl.h"
-#import "MainWindowImpl.h"
+#import "WindowImpl.h"
 
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
