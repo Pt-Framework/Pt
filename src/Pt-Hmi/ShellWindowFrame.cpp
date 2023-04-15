@@ -485,8 +485,6 @@ void ShellWindowFrame::onSetState(Window& w, const WindowState& state)
 {
     Window::State oldState = _state;
 
-    _state = state;
-
     if(oldState == WindowState::Normal)
         setRestore( _window->position(), _window->size() );
 
@@ -534,6 +532,7 @@ void ShellWindowFrame::onProcessWindowStateEvent(const WindowStateEvent& ev)
 
 void ShellWindowFrame::onWindowStateEvent(const WindowStateEvent& ev)
 {
+    _state = ev.state();
 }
 
 
