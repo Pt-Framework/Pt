@@ -64,7 +64,7 @@ WindowImpl::~WindowImpl()
 }
 
 
-void WindowImpl::create(Window::Type type)
+void WindowImpl::create(WindowType type)
 {
     // Display and Screen are inited in Application
     unsigned int screen = XDefaultScreen(_display);

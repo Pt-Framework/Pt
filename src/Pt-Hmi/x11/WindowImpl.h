@@ -187,7 +187,7 @@ class WindowImpl : public WindowFrame
         virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
-        void create(Window::Type type);
+        void create(WindowType type);
 
         void destroy();
 
