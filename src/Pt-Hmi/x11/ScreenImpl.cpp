@@ -176,7 +176,7 @@ void ScreenImpl::onDetach(WindowFrame& frame)
 {
     frame.setNextResponder(0);
 
-    Window& w = frame.window()
+    Window& w = frame.window();
 
     std::vector<Window*>::iterator it;
     it = std::remove(_windows.begin(), _windows.end(), &w);

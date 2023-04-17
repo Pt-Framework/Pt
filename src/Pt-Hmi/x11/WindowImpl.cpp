@@ -142,7 +142,7 @@ void WindowImpl::create(Window::Type type)
     Atom atomDeleteWindow = Application::instance().impl()->wmDeleteWindow();
     XSetWMProtocols(_display, _window, &atomDeleteWindow, 1);
 
-    Base::onSetParent(&wm);
+    Base::onSetParent(&_wm);
 }
 
 
@@ -180,7 +180,7 @@ void WindowImpl::onRelease(Window& w)
 }
 
 
-void WindowImpl::setType(Window::Type type)
+void WindowImpl::setType(WindowType type)
 {
     //std::clog << "XChangeWindowAttributes: " << type << std::endl;
 
@@ -309,8 +309,8 @@ void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
     Base::onProcessPaintEvent(ev);
 
-    PaintEvent rev( _window, ev.rect() );
-    _window.processEvent(rev);
+    PaintEvent rev( _client, ev.rect() );
+    _client.processEvent(rev);
 }
 
 
@@ -374,8 +374,8 @@ void WindowImpl::onProcessShowEvent(const ShowEvent& ev)
 {
     Base::onProcessShowEvent(ev);
 
-    ShowEvent rev( _window, ev.visible() );
-    _window.processEvent(rev);
+    ShowEvent rev( _client, ev.visible() );
+    _client.processEvent(rev);
 }
 
 
@@ -440,8 +440,8 @@ void WindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
 {
     Base::onProcessActivateEvent(ev);
 
-    ActivateEvent aev( _window, ev.isActive() );
-    _window.processEvent(aev);
+    ActivateEvent aev( _client, ev.isActive() );
+    _client.processEvent(aev);
 }
 
 
@@ -483,7 +483,7 @@ void WindowImpl::onEnable(Window& w, bool enable)
 
     XSetWindowAttributes wattr;
 
-    if(enabled)
+    if(enable)
     {
         wattr.event_mask = StructureNotifyMask|ExposureMask|
                            PropertyChangeMask|EnterWindowMask|
@@ -507,8 +507,8 @@ void WindowImpl::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
 
-    EnableEvent eev( _window, ev.enabled() );
-    _window.processEvent(eev);
+    EnableEvent eev( _client, ev.enabled() );
+    _client.processEvent(eev);
 }
 
 
@@ -606,14 +606,14 @@ void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 
 void WindowImpl::onClose(Window& w)
 {
-    WindowImpl* impl = static_cast<WindowImpl*>( w.impl() );
-    if(impl)
+    WindowImpl* frame = static_cast<WindowImpl*>( w.frame() );
+    if(frame)
     {
         XEvent ev;
         memset(&ev, 0, sizeof (ev));
 
         ev.xclient.type         = ClientMessage;
-        ev.xclient.window       = impl->window();
+        ev.xclient.window       = frame->window();
         ev.xclient.message_type = Application::instance().impl()->wmProtocols();
         ev.xclient.format       = 32;
         ev.xclient.data.l[0]    = Application::instance().impl()->wmDeleteWindow();
@@ -785,8 +785,8 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 }
 
 
-void WindowImpl::setSizeLimits(Window& w, const Gfx::SizeF& minSize,
-                                              const Gfx::SizeF& maxSize)
+void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
+                                            const Gfx::SizeF& maxSize)
 {
     XSizeHints hints;
     memset(&hints, 0, sizeof(hints));

@@ -31,6 +31,7 @@
 #include "ScreenImpl.h"
 
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Math.h>

@@ -56,7 +56,7 @@ class WindowImpl : public WindowFrame
 
         virtual ~WindowImpl();
 
-        void setType(Window::Type type);
+        void setType(WindowType type);
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 

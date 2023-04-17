@@ -283,8 +283,8 @@ void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
     Base::onProcessPaintEvent(ev);
 
-    PaintEvent rev( _window, ev.rect() );
-    _window.processEvent(rev);
+    PaintEvent rev( _client, ev.rect() );
+    _client.processEvent(rev);
 }
 
 
@@ -370,8 +370,8 @@ void WindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
 {
     Base::onProcessActivateEvent(ev);
 
-    ActivateEvent aev( _window, ev.isActive() );
-    _window.processEvent(aev);
+    ActivateEvent aev( _client, ev.isActive() );
+    _client.processEvent(aev);
 }
 
 
@@ -391,8 +391,8 @@ void WindowImpl::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
 
-    EnableEvent eev( _window, ev.enabled() );
-    _window.processEvent(eev);
+    EnableEvent eev( _client, ev.enabled() );
+    _client.processEvent(eev);
 }
 
 

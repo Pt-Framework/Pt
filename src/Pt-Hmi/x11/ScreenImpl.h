@@ -49,9 +49,8 @@ namespace Pt {
 namespace Hmi {
 
 class ApplicationImpl;
-class WindowImpl
+class WindowImpl;
 class Window;
-class WindowBase;
 class MouseEvent;
 class TouchEvent;
 class ScrollEvent;

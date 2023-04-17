@@ -1427,7 +1427,7 @@ void ShellWindowFrame::onPaintEvent(const PaintEvent& ev)
     if( _borderWidth < 0.1 && _titleHeight < 0.1  )
         return;
 
-        const Gfx::RectF& rect = ev.rect();
+    const Gfx::RectF& rect = ev.rect();
 
     Gfx::Painter painter( surface() );
     painter.setClip(rect);
