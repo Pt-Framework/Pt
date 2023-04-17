@@ -102,10 +102,13 @@ void Popup::onProcessMouseEvent(const MouseEvent& ev)
     if(_anchor)
     {
         Visual* hit = Application::instance().screen().hitTest( ev.position() );
-        if( hit && (hit == _anchor || hit->isDescendantOf(*_anchor)) )
+        if(hit)
         {
-            _anchor->processEvent(ev);
-            return;
+            if( hit == _anchor || hit->isDescendantOf(*_anchor) )
+            {
+                _anchor->processEvent(ev);
+                return;
+            }
         }
     }
   
@@ -118,10 +121,13 @@ void Popup::onProcessTouchEvent(const TouchEvent& ev)
     if(_anchor)
     {
         Visual* hit = Application::instance().screen().hitTest( ev.position() );        
-        if( hit && (hit == _anchor || hit->isDescendantOf(*_anchor)) )
+        if(hit)
         {
-            _anchor->processEvent(ev);
-            return;
+            if( hit == _anchor || hit->isDescendantOf(*_anchor) )
+            {
+                _anchor->processEvent(ev);
+                return;
+            }
         }
     }
 
