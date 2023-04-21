@@ -108,7 +108,7 @@ class JsonReaderImpl
             }
             else if(ch == '"')
             {
-                _token.clear();
+                _member.name().clear();
                 _parse = &JsonReaderImpl::onMemberName;
             }
             else
@@ -123,13 +123,12 @@ class JsonReaderImpl
 
             if(ch == '"')
             {
-                _member.name() = _token;
                 _current.push_back(&_member);
                 _parse = &JsonReaderImpl::onMemberNameEnd;
                 return;
             }
 
-            _token += ch;
+            _member.name() += ch;
         }
 
         void onMemberNameEnd(int_type c)
@@ -241,7 +240,7 @@ class JsonReaderImpl
             }
             else if(ch == '"')
             {
-                _token.clear();
+                _string.clear();
                 _parse = &JsonReaderImpl::onString;
             }
             else if(ch == 'n')
@@ -315,13 +314,12 @@ class JsonReaderImpl
 
             if(ch == '"')
             {
-                _string.value() = _token;
                 _current.push_back(&_string);
                 popParseState();
                 return;
             }
 
-            _token += ch;
+            _string.value() += ch;
         }
 
         void onNumber(int_type c)
@@ -475,8 +473,8 @@ class JsonReaderImpl
 
             _token.clear(); 
             _current.clear();
-
-            // nodes are cleared before they are parsed
+            _member.clear();
+            _string.clear();
         }
 
         std::basic_istream<Pt::Char>* input()

@@ -68,7 +68,7 @@ void JsonReaderTest::EmptyDocument()
   using namespace Pt;
   using namespace Pt::Json;
 
-  Pt::String s = "{\"a\":\"b\",\"o\":{\"x\":[\"y\", 1, 2.1], \"f\":3.14},\"i\":123, \"b\":true, \"z\":null}";
+  Pt::String s = "{\"a\":\"abc\",\"o\":{\"x\":[\"y\", 1, 2.1], \"f\":3.14},\"i\":123, \"b\":true, \"z\":null}";
   //Pt::String s = "{}";
   //Pt::String s = " { } ";
 
