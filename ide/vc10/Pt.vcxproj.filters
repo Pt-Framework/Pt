@@ -1614,6 +1614,30 @@
     <ClInclude Include="..\..\include\Pt\Json\Node.h">
       <Filter>Pt-Json</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\StartArray.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\EndArray.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Integer.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\String.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\EndObject.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\StartObject.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Boolean.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Null.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

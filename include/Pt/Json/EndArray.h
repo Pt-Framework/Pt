@@ -27,70 +27,70 @@
    MA 02110-1301 USA
 */
 
-#include <Pt/Unit/TestSuite.h>
-#include <Pt/Unit/TestMain.h>
-#include <Pt/Unit/RegisterTest.h>
+#ifndef PT_JSON_ENDARRAY_H
+#define PT_JSON_ENDARRAY_H
 
-#include <Pt/Json/EndDocument.h>
-#include <Pt/Json/JsonReader.h>
-#include <Pt/StringStream.h>
+#include <Pt/Json/Api.h>
+#include <Pt/Json/Node.h>
 
-class JsonReaderTest : public Pt::Unit::TestSuite
+namespace Pt {
+
+namespace Json {
+
+/** @brief Represents the end of an array.
+*/
+class EndArray : public Node 
 {
-  public:
-    JsonReaderTest()
-    : Pt::Unit::TestSuite("JsonReaderTest")
-    {
-      this->registerMethod("EmptyDocument", *this, &JsonReaderTest::EmptyDocument);
-    }
+    public:
+        /** @brief Constructor.
+        */
+        EndArray()
+        : Node(Node::EndArray)
+        { }
 
-    void EmptyDocument();
+        //! @internal
+        inline static const Node::Type nodeId()
+        { return Node::EndArray; }
 };
 
+/** @brief Casts a generic node to a EndArray node.
 
-Pt::Unit::RegisterTest<JsonReaderTest> register_PtJsonTest;
-
-
-void JsonReaderTest::EmptyDocument()
+    @related EndArray
+*/
+inline EndArray* toEndArray(Node* node)
 {
-  using namespace Pt;
-  using namespace Pt::Json;
-
-  //String s = "{\"a\":\"b\",\"o\":{\"x\":\"y\"}}";
-  //String s = "{}";
-  //String s = " { } ";
-
-  //String s = "[\"a\",\"b\"]";
-  //String s = "[]";
-  //String s = " [ ] ";
-  
-  //String s = " \"Hello\" ";
-
-  String s = "123";
-
-  IStringStream iss(s);
-  JsonReader reader(iss);
-
-  std::clog << std::endl;
-
-  while( reader.next().type() != Node::EndDocument )
-  {
-      Node& node = reader.get();
-
-      if(node.type() == Node::StartObject)
-      {
-          std::clog << "OBJECT START" << std::endl;
-      }
-      if(node.type() == Node::EndObject)
-      {
-          std::clog << "OBJECT END" << std::endl;
-      }
-      if(node.type() == Node::Integer)
-      {
-          std::clog << "INTEGER" << std::endl;
-      }
-  }
-
-  Node& node = reader.get();
-  EndDocument& endDoc = toEndDocument(node);
+    return nodeCast<EndArray>(node);
 }
+
+/** @brief Casts a generic node to a EndArray node.
+
+    @related EndArray
+*/
+inline const EndArray* toEndArray(const Node* node)
+{
+    return nodeCast<EndArray>(node);
+}
+
+/** @brief Casts a generic node to a EndArray node.
+
+    @related EndArray
+*/
+inline EndArray& toEndArray(Node& node)
+{
+    return nodeCast<EndArray>(node);
+}
+
+/** @brief Casts a generic node to a EndArray node.
+
+    @related EndArray
+*/
+inline const EndArray& toEndArray(const Node& node)
+{
+    return nodeCast<EndArray>(node);
+}
+
+} // namespace
+
+} // namespace
+
+#endif // include guard

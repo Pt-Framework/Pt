@@ -27,8 +27,8 @@
    MA 02110-1301 USA
 */
 
-#ifndef Pt_Json_Node_h
-#define Pt_Json_Node_h
+#ifndef PT_JSON_NODE_H
+#define PT_JSON_NODE_H
 
 #include <Pt/Json/Api.h>
 #include <Pt/Json/JsonError.h>
@@ -39,14 +39,14 @@ namespace Json {
 
 /** @brief JSON document node.
 
-    The XmlReader reports the content of a XML document as XML nodes. A node
-    might be a start element, an end element, characters, a comment or a
-    doctype declaration. The specialized node classes have methods and data
-    members to process the information specific to the node. So, this class
-    serves more or less as an anchor for casting and as a common token type. 
+    The JsonReader reports the content of a JSON document as nodes. A node
+    might be a start object, an end object, string, a start ducument or an
+    end document. The specialized node classes have methods and data members
+    to process the information specific to the node. So, this class serves
+    more or less as an anchor for casting and as a common token type. 
     
     To cast to a derived node, a static_cast can be done after checking the
-    node type, or the helper functions such as toStartElement() can be used.
+    node type, or the helper functions such as toStartObject() can be used.
 */
 class Node 
 {
@@ -54,16 +54,18 @@ class Node
         enum Type 
         {
             Unknown = 0,
-            //DocType = 1,
-            //EndDocType = 2,
-            //StartDocument = 3,
-            EndDocument = 4,
-            //StartElement = 5,
-            //EndElement = 6,
-            //Characters = 7,
-            //Comment = 8,
-            //ProcessingInstruction = 9,
-            //EntityReference = 10
+            StartDocument = 1,
+            EndDocument = 2,
+            Null = 3,
+            Boolean = 4,
+            String = 5,
+            Integer = 6,
+            Float = 7,
+            StartArray = 8,
+            EndArray = 9,
+            StartObject = 10,
+            Member = 11,
+            EndObject = 12
         };
 
         //! @brief Destructor.

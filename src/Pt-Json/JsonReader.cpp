@@ -29,7 +29,17 @@
 
 #include <Pt/Json/JsonReader.h>
 #include <Pt/Json/JsonError.h>
+//#include <Pt/Json/StartDocument.h>
 #include <Pt/Json/EndDocument.h>
+#include <Pt/Json/Null.h>
+#include <Pt/Json/Boolean.h>
+#include <Pt/Json/String.h>
+#include <Pt/Json/Integer.h>
+//#include <Pt/Json/Float.h>
+#include <Pt/Json/StartObject.h>
+#include <Pt/Json/EndObject.h>
+#include <Pt/Json/StartArray.h>
+#include <Pt/Json/EndArray.h>
 #include <Pt/System/Logger.h>
 #include <Pt/Convert.h>
 
@@ -53,7 +63,6 @@ class JsonReaderImpl
         {
             if( c == std::char_traits<Char>::eof() )
             {
-                std::clog << "DOCUMENT END" << std::endl;
                 _current = &_endDoc;
                 return;
             }
@@ -63,8 +72,6 @@ class JsonReaderImpl
             if( isSpace(ch) )
                 return;
 
-            std::clog << std::endl;
-            std::clog << "DOCUMENT BEGIN" << std::endl;
             pushParseState(&JsonReaderImpl::onDocumentEnd);
             onElement(c);
         }
@@ -75,7 +82,6 @@ class JsonReaderImpl
 
             if( c == std::char_traits<Char>::eof() )
             {
-                std::clog << "DOCUMENT END" << std::endl;
                 _current = &_endDoc;
                 return;
             }
@@ -95,7 +101,7 @@ class JsonReaderImpl
 
             if(ch == '}')
             {
-                std::clog << "OBJECT END" << std::endl;
+                _current = &_endObject;
                 popParseState();
             }
             else if(ch == '"')
@@ -160,7 +166,7 @@ class JsonReaderImpl
 
             if(ch == '}')
             {
-                std::clog << "OBJECT END" << std::endl;
+                _current = &_endObject;
                 popParseState();
             }
             else if(ch == ',')
@@ -182,7 +188,7 @@ class JsonReaderImpl
 
             if(ch == ']')
             {
-                std::clog << "ARRAY END" << std::endl;
+                _current = &_endArray;
                 popParseState();
                 return;
             }
@@ -200,7 +206,7 @@ class JsonReaderImpl
 
             if(ch == ']')
             {
-                std::clog << "ARRAY END" << std::endl;
+                _current = &_endArray;
                 popParseState();
             }
             else if(ch == ',')
@@ -222,12 +228,12 @@ class JsonReaderImpl
 
             if(ch == '{')
             {
-                std::clog << "OBJECT BEGIN" << std::endl;
+                _current = &_startObject;
                 _parse = &JsonReaderImpl::onObject;
             }
             else if(ch == '[')
             {
-                std::clog << "ARRAY BEGIN" << std::endl;
+                _current = &_startArray;
                 _parse = &JsonReaderImpl::onArray;
             }
             else if(ch == '"')
@@ -253,8 +259,7 @@ class JsonReaderImpl
 
             if(ch == '"')
             {
-                std::clog << "STRING: " << _token.narrow() << std::endl;
-
+                _current = &_string;
                 popParseState();
                 return;
             }
@@ -264,21 +269,48 @@ class JsonReaderImpl
 
         void onNumber(int_type c)
         {
+            bool isEof = c == std::char_traits<Char>::eof();
+            
             Char ch = c;
-
-            if( c != std::char_traits<Char>::eof() )
+            
+            if( isNumber(ch) && ! isEof )
             {
-                if( isdigit(ch) || ch == '-' || ch == '+' )
-                {
-                    _token += ch;
-                    return;
-                }
+                _token += ch;
+                return;
+            }
+
+            if(ch == '.')
+            {
+                _token += ch;
+                _parse = &JsonReaderImpl::onFraction;
+                return;
+            }
+
+            int n = 0;
+            Pt::parseInt(_token.begin(), _token.end(), n);
+
+            _current = &_integer;
+            popParseState();
+            (this->*_parse)(c);
+        }
+
+        void onFraction(int_type c)
+        {
+            bool isEof = c == std::char_traits<Char>::eof();
+            
+            Char ch = c;
+            
+            if( isNumber(ch) && ! isEof )
+            {
+                _token += ch;
+                return;
             }
 
             double n = 0;
             Pt::parseFloat(_token.begin(), _token.end(), n);
-            std::clog << "NUMBER: " << _token.narrow() << std::endl;
+            std::clog << "FRACTION: " << _token.narrow() << " -> " << n << std::endl;
 
+            //_current = &_float;
             popParseState();
             (this->*_parse)(c);
         }
@@ -297,6 +329,11 @@ class JsonReaderImpl
         inline bool isSpace(Char ch) const
         {
             return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
+        }
+
+        inline bool isNumber(Char ch) const
+        {
+            return isdigit(ch) || ch == '-' || ch == '+' || ch == 'e' || ch == 'E';
         }
 
         inline void pushParseState(ParseFunc parse)
@@ -504,7 +541,7 @@ class JsonReaderImpl
         ParseFunc             _parse;
         std::stack<ParseFunc> _parseStack;
 
-        String       _token;
+        Pt::String   _token;
         std::size_t  _line;
         std::size_t  _depth;
         std::size_t  _usedSize;
@@ -515,6 +552,16 @@ class JsonReaderImpl
 
         Node*     _current;
         EndDocument _endDoc;
+
+        Null        _null;
+        Boolean     _boolean;
+        String      _string;
+        Integer     _integer;
+        //Float       _float;
+        StartObject _startObject;
+        EndObject   _endObject;
+        StartArray  _startArray;
+        EndArray    _endArray;
 };
 
 
