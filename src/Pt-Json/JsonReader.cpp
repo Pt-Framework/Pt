@@ -244,6 +244,24 @@ class JsonReaderImpl
                 _token.clear();
                 _parse = &JsonReaderImpl::onString;
             }
+            else if(ch == 'n')
+            {
+                _token.clear();
+                _parse = &JsonReaderImpl::onLiteral;
+                (this->*_parse)(c);
+            }
+            else if(ch == 't')
+            {
+                _token.clear();
+                _parse = &JsonReaderImpl::onLiteral;
+                (this->*_parse)(c);
+            }
+            else if(ch == 'f')
+            {
+                _token.clear();
+                _parse = &JsonReaderImpl::onLiteral;
+                (this->*_parse)(c);
+            }
             else if( isdigit(ch) || ch == '-' )
             {
                 _token.clear();
@@ -254,6 +272,41 @@ class JsonReaderImpl
             {
                 throw SyntaxError("JSON syntax error", line());
             }
+        }
+
+        void onLiteral(int_type c)
+        {
+            bool isEof = c == std::char_traits<Char>::eof();
+            
+            Char ch = c;
+            
+            if( isalpha(ch) && ! isEof )
+            {
+                _token += ch;
+                return;
+            }
+
+            if(_token == "null")
+            {
+                _current.push_back(&_null);
+            }
+            else if(_token == "true")
+            {
+                _boolean.setValue(true);
+                _current.push_back(&_boolean);
+            }
+            else if(_token == "false")
+            {
+                _boolean.setValue(false);
+                _current.push_back(&_boolean);
+            }
+            else
+            {
+                throw SyntaxError("JSON syntax error", line());
+            }
+            
+            popParseState();
+            (this->*_parse)(c);
         }
 
         void onString(int_type c)

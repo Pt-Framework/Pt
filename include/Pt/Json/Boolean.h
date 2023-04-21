@@ -48,9 +48,24 @@ class Boolean : public Node
         : Node(Node::Boolean)
         { }
 
+        bool value() const
+        {
+            return _value;
+        }
+
+        void setValue(bool n)
+        {
+            _value = n;
+        }
+
         //! @internal
         inline static const Node::Type nodeId()
-        { return Node::Boolean; }
+        { 
+            return Node::Boolean; 
+        }
+
+    private:
+        bool _value;
 };
 
 /** @brief Casts a generic node to a boolean node.

@@ -37,7 +37,7 @@
 #include <Pt/Json/Boolean.h>
 #include <Pt/Json/String.h>
 #include <Pt/Json/Integer.h>
-//#include <Pt/Json/Float.h>
+#include <Pt/Json/Float.h>
 #include <Pt/Json/StartObject.h>
 #include <Pt/Json/Member.h>
 #include <Pt/Json/EndObject.h>
@@ -68,17 +68,23 @@ void JsonReaderTest::EmptyDocument()
   using namespace Pt;
   using namespace Pt::Json;
 
-  Pt::String s = "{\"a\":\"b\",\"o\":{\"x\":\"y\"},\"n\":123}";
-  //String s = "{}";
-  //String s = " { } ";
+  Pt::String s = "{\"a\":\"b\",\"o\":{\"x\":\"y\", \"f\":3.14},\"i\":123, \"b\":true, \"z\":null}";
+  //Pt::String s = "{}";
+  //Pt::String s = " { } ";
 
-  //String s = "[\"a\",\"b\"]";
-  //String s = "[]";
-  //String s = " [ ] ";
+  //Pt::String s = "[\"a\",\"b\"]";
+  //Pt::String s = "[]";
+  //Pt::String s = " [ ] ";
   
-  //String s = " \"Hello\" ";
+  //Pt::String s = " \"Hello\" ";
 
-  //String s = "123";
+  //Pt::String s = "123";
+
+  //Pt::String s = "null";
+
+  //Pt::String s = "true";
+
+  //Pt::String s = "false";
 
   IStringStream iss(s);
   JsonReader reader(iss);
@@ -105,9 +111,21 @@ void JsonReaderTest::EmptyDocument()
       {
           std::clog << "INTEGER: " << toInteger(node).value() << std::endl;
       }
+      if(node.type() == Node::Float)
+      {
+          std::clog << "FLOAT: " << toFloat(node).value() << std::endl;
+      }
       if(node.type() == Node::String)
       {
           std::clog << "STRING: "  << toString(node).value().narrow() << std::endl;
+      }
+      if(node.type() == Node::Boolean)
+      {
+          std::clog << "BOOL: "  << std::boolalpha << toBoolean(node).value() << std::endl;
+      }
+      if(node.type() == Node::Null)
+      {
+          std::clog << "NULL" << std::endl;
       }
   }
 
