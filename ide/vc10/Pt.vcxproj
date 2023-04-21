@@ -155,6 +155,7 @@
     <ClInclude Include="..\..\include\Pt\Json\EndArray.h" />
     <ClInclude Include="..\..\include\Pt\Json\EndDocument.h" />
     <ClInclude Include="..\..\include\Pt\Json\EndObject.h" />
+    <ClInclude Include="..\..\include\Pt\Json\Float.h" />
     <ClInclude Include="..\..\include\Pt\Json\Integer.h" />
     <ClInclude Include="..\..\include\Pt\Json\JsonError.h" />
     <ClInclude Include="..\..\include\Pt\Json\JsonReader.h" />

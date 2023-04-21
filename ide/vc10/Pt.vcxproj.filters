@@ -1641,6 +1641,9 @@
     <ClInclude Include="..\..\include\Pt\Json\Member.h">
       <Filter>Pt-Json</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Float.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

@@ -35,7 +35,7 @@
 #include <Pt/Json/Boolean.h>
 #include <Pt/Json/String.h>
 #include <Pt/Json/Integer.h>
-//#include <Pt/Json/Float.h>
+#include <Pt/Json/Float.h>
 #include <Pt/Json/StartObject.h>
 #include <Pt/Json/Member.h>
 #include <Pt/Json/EndObject.h>
@@ -295,6 +295,7 @@ class JsonReaderImpl
 
             _integer.setValue(n);
             _current.push_back(&_integer);
+            
             popParseState();
             (this->*_parse)(c);
         }
@@ -313,9 +314,10 @@ class JsonReaderImpl
 
             double n = 0;
             Pt::parseFloat(_token.begin(), _token.end(), n);
-            std::clog << "FRACTION: " << _token.narrow() << " -> " << n << std::endl;
-
-            //_current = &_float;
+            
+            _float.setValue(n);
+            _current.push_back(&_float);
+            
             popParseState();
             (this->*_parse)(c);
         }
@@ -544,7 +546,7 @@ class JsonReaderImpl
         Boolean     _boolean;
         String      _string;
         Integer     _integer;
-        //Float       _float;
+        Float       _float;
         StartObject _startObject;
         Member      _member;
         EndObject   _endObject;
