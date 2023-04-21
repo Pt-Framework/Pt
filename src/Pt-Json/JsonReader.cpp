@@ -37,6 +37,7 @@
 #include <Pt/Json/Integer.h>
 //#include <Pt/Json/Float.h>
 #include <Pt/Json/StartObject.h>
+#include <Pt/Json/Member.h>
 #include <Pt/Json/EndObject.h>
 #include <Pt/Json/StartArray.h>
 #include <Pt/Json/EndArray.h>
@@ -122,7 +123,8 @@ class JsonReaderImpl
 
             if(ch == '"')
             {
-                std::clog << "MEMBER: " << _token.narrow() << std::endl;
+                _member.name() = _token;
+                _current.push_back(&_member);
                 _parse = &JsonReaderImpl::onMemberNameEnd;
                 return;
             }
@@ -260,6 +262,7 @@ class JsonReaderImpl
 
             if(ch == '"')
             {
+                _string.value() = _token;
                 _current.push_back(&_string);
                 popParseState();
                 return;
@@ -290,6 +293,7 @@ class JsonReaderImpl
             int n = 0;
             Pt::parseInt(_token.begin(), _token.end(), n);
 
+            _integer.setValue(n);
             _current.push_back(&_integer);
             popParseState();
             (this->*_parse)(c);
@@ -542,6 +546,7 @@ class JsonReaderImpl
         Integer     _integer;
         //Float       _float;
         StartObject _startObject;
+        Member      _member;
         EndObject   _endObject;
         StartArray  _startArray;
         EndArray    _endArray;

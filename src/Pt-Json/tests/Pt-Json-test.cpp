@@ -31,7 +31,19 @@
 #include <Pt/Unit/TestMain.h>
 #include <Pt/Unit/RegisterTest.h>
 
+//#include <Pt/Json/StartDocument.h>
 #include <Pt/Json/EndDocument.h>
+#include <Pt/Json/Null.h>
+#include <Pt/Json/Boolean.h>
+#include <Pt/Json/String.h>
+#include <Pt/Json/Integer.h>
+//#include <Pt/Json/Float.h>
+#include <Pt/Json/StartObject.h>
+#include <Pt/Json/Member.h>
+#include <Pt/Json/EndObject.h>
+#include <Pt/Json/StartArray.h>
+#include <Pt/Json/EndArray.h>
+
 #include <Pt/Json/JsonReader.h>
 #include <Pt/StringStream.h>
 
@@ -56,7 +68,7 @@ void JsonReaderTest::EmptyDocument()
   using namespace Pt;
   using namespace Pt::Json;
 
-  String s = "{\"a\":\"b\",\"o\":{\"x\":\"y\"},\"n\":123}";
+  Pt::String s = "{\"a\":\"b\",\"o\":{\"x\":\"y\"},\"n\":123}";
   //String s = "{}";
   //String s = " { } ";
 
@@ -81,17 +93,21 @@ void JsonReaderTest::EmptyDocument()
       {
           std::clog << "OBJECT START" << std::endl;
       }
+      if(node.type() == Node::Member)
+      {
+          std::clog << "MEMBER: " << toMember(node).name().narrow() << std::endl;
+      }
       if(node.type() == Node::EndObject)
       {
           std::clog << "OBJECT END" << std::endl;
       }
       if(node.type() == Node::Integer)
       {
-          std::clog << "INTEGER" << std::endl;
+          std::clog << "INTEGER: " << toInteger(node).value() << std::endl;
       }
       if(node.type() == Node::String)
       {
-          std::clog << "STRING" << std::endl;
+          std::clog << "STRING: "  << toString(node).value().narrow() << std::endl;
       }
   }
 

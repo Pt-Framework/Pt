@@ -48,9 +48,24 @@ class Integer : public Node
         : Node(Node::Integer)
         { }
 
+        int value() const
+        {
+            return _value;
+        }
+
+        void setValue(int n)
+        {
+            _value = n;
+        }
+
         //! @internal
         inline static const Node::Type nodeId()
-        { return Node::Integer; }
+        { 
+            return Node::Integer;
+        }
+
+    private:
+        int _value;
 };
 
 /** @brief Casts a generic node to a integer node.

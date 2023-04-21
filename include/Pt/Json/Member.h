@@ -27,8 +27,8 @@
    MA 02110-1301 USA
 */
 
-#ifndef PT_JSON_STRING_H
-#define PT_JSON_STRING_H
+#ifndef PT_JSON_MEMBER_H
+#define PT_JSON_MEMBER_H
 
 #include <Pt/Json/Api.h>
 #include <Pt/Json/Node.h>
@@ -37,76 +37,76 @@ namespace Pt {
 
 namespace Json {
 
-/** @brief Represents a string.
+/** @brief Represents a object member.
 */
-class String : public Node 
+class Member : public Node 
 {
     public:
         /** @brief Constructor.
         */
-        String()
-        : Node(Node::String)
+        Member()
+        : Node(Node::Member)
         { }
 
-        const Pt::String& value() const
+        const Pt::String& name() const
         {
-            return _value;
+            return _name;
         }
 
-        Pt::String& value()
+        Pt::String& name()
         {
-            return _value;
+            return _name;
         }
 
         void clear()
         {
-            _value.clear();
+            _name.clear();
         }
 
         //! @internal
         inline static const Node::Type nodeId()
         { 
-            return Node::String; 
+            return Node::Member; 
         }
 
     private:
-        Pt::String _value;
+        Pt::String _name;
 };
 
-/** @brief Casts a generic node to a string node.
+/** @brief Casts a generic node to a object member node.
 
-    @related String
+    @related Member
 */
-inline String* toString(Node* node)
+inline Member* toMember(Node* node)
 {
-    return nodeCast<String>(node);
+    return nodeCast<Member>(node);
 }
 
-/** @brief Casts a generic node to a string node.
+/** @brief Casts a generic node to a object member node.
 
-    @related String
+    @related Member
 */
-inline const String* toString(const Node* node)
+inline const Member* toMember(const Node* node)
 {
-    return nodeCast<String>(node);
+    return nodeCast<Member>(node);
 }
 
-/** @brief Casts a generic node to a string node.
+/** @brief Casts a generic node to a object member node.
 
-    @related String
+    @related Member
 */
-inline String& toString(Node& node)
+inline Member& toMember(Node& node)
 {
-    return nodeCast<String>(node);
+    return nodeCast<Member>(node);
 }
 
-/** @brief Casts a generic node to a string node.
+/** @brief Casts a generic node to a object member node.
 
-    @related String
+    @related Member
 */
-inline const String& toString(const Node& node)
+inline const Member& toMember(const Node& node)
 {
-    return nodeCast<String>(node);
+    return nodeCast<Member>(node);
 }
 
 } // namespace

@@ -23,7 +23,7 @@ PT_XML_SOURCES = AttributeModel.cpp
                  ;
 
 SharedLibrary Pt-Xml : $(PT_XML_SOURCES) ;
-LinkSharedLibraries Pt-Xml :  Pt Pt-System ;
+LinkSharedLibraries Pt-Xml : Pt Pt-System ;
 MakeLocate Pt-Xml : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Xml : $(PT_INSTALL_LIBDIR) ;
 

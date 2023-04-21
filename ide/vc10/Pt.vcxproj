@@ -158,6 +158,7 @@
     <ClInclude Include="..\..\include\Pt\Json\Integer.h" />
     <ClInclude Include="..\..\include\Pt\Json\JsonError.h" />
     <ClInclude Include="..\..\include\Pt\Json\JsonReader.h" />
+    <ClInclude Include="..\..\include\Pt\Json\Member.h" />
     <ClInclude Include="..\..\include\Pt\Json\Node.h" />
     <ClInclude Include="..\..\include\Pt\Json\Null.h" />
     <ClInclude Include="..\..\include\Pt\Json\StartArray.h" />
