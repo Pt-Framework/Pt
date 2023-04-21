@@ -419,8 +419,8 @@ class JsonReaderImpl
         , _line(1)
         , _usedSize(0)
         , _maxSize(2048)
-        , _maxChunkSize(2048)
         , _chunkSize(0) 
+        , _maxChunkSize(2048)
         {
             _parse = &JsonReaderImpl::onDocument;
         }
@@ -431,8 +431,8 @@ class JsonReaderImpl
         , _line(1)
         , _usedSize(0)
         , _maxSize(2048)
-        , _maxChunkSize(2048)
         , _chunkSize(0)
+        , _maxChunkSize(2048)
         {
             _parse = &JsonReaderImpl::onDocument;
         }
@@ -543,38 +543,36 @@ class JsonReaderImpl
 
         Node* advance()
         {
-            //_current = 0;
+            if( ! _current.empty() )
+                _current.erase( _current.begin() );
 
-            //do
-            //{
-            //    std::streamsize n = _input.avail();            
+            if( ! _current.empty() )
+                return _current.front();
 
-            //    if(n > 0)
-            //    {
-            //        std::char_traits<Char>::int_type c = _input.get();
-            //        
-            //        (this->*_parse)(c);
+            if( ! _is || ! _is->rdbuf() )
+                throw JsonError("no input");
 
-            //        if(c == '\n')
-            //            _input.bumpLine();
-            //    }
-            //    else if(n < 0)
-            //    {
-            //        _input.removeInput();
+            do
+            {
+                std::streamsize n = _is->rdbuf()->in_avail();            
+                if(n > 0)
+                {
+                    std::char_traits<Char>::int_type c = _is->get();
+                    
+                    (this->*_parse)(c);
 
-            //        if( _input.empty() )
-            //            (this->*_parse)( std::char_traits<Char>::eof() );
-            //    }
-            //    else if (n == 0)
-            //    {
-            //        n = _input.import();
-            //        if(n == 0)
-            //            break;
-            //    }
-            //} 
-            //while( ! _current);
+                    if(c == '\n')
+                        bumpLine();
+                }
+                else if(n < 0)
+                {
+                    (this->*_parse)( std::char_traits<Char>::eof() );
+                }
+            } 
+            while( _current.empty() );
 
-            //return _current;
+            if( ! _current.empty() )
+                return _current.front();
 
             return 0;
         }
@@ -589,8 +587,8 @@ class JsonReaderImpl
         std::size_t  _line;
         std::size_t  _usedSize;
         std::size_t  _maxSize;
-        std::size_t  _maxChunkSize;
         std::size_t  _chunkSize;
+        std::size_t  _maxChunkSize;
 
         std::vector<Node*> _current;
  
