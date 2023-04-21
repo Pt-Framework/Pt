@@ -108,10 +108,6 @@ class PT_JSON_API JsonReader : private NonCopyable
         */
         std::size_t usedSize() const;
 
-        /** @brief Returns the JSON tree depth.
-        */
-        std::size_t depth() const;
-
         /** @brief Returns the current line of the primary input source.
         */
         std::size_t line() const;

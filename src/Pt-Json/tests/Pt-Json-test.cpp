@@ -56,7 +56,7 @@ void JsonReaderTest::EmptyDocument()
   using namespace Pt;
   using namespace Pt::Json;
 
-  //String s = "{\"a\":\"b\",\"o\":{\"x\":\"y\"}}";
+  String s = "{\"a\":\"b\",\"o\":{\"x\":\"y\"},\"n\":123}";
   //String s = "{}";
   //String s = " { } ";
 
@@ -66,7 +66,7 @@ void JsonReaderTest::EmptyDocument()
   
   //String s = " \"Hello\" ";
 
-  String s = "123";
+  //String s = "123";
 
   IStringStream iss(s);
   JsonReader reader(iss);
@@ -89,8 +89,13 @@ void JsonReaderTest::EmptyDocument()
       {
           std::clog << "INTEGER" << std::endl;
       }
+      if(node.type() == Node::String)
+      {
+          std::clog << "STRING" << std::endl;
+      }
   }
 
   Node& node = reader.get();
   EndDocument& endDoc = toEndDocument(node);
+  std::clog << "DOCUMENT END" << std::endl;
 }

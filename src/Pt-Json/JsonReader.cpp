@@ -44,6 +44,7 @@
 #include <Pt/Convert.h>
 
 #include <stack>
+#include <vector>
 #include <cassert>
 
 PT_LOG_DEFINE("Pt.Json.JsonReader")
@@ -63,7 +64,7 @@ class JsonReaderImpl
         {
             if( c == std::char_traits<Char>::eof() )
             {
-                _current = &_endDoc;
+                _current.push_back(&_endDoc);
                 return;
             }
 
@@ -82,7 +83,7 @@ class JsonReaderImpl
 
             if( c == std::char_traits<Char>::eof() )
             {
-                _current = &_endDoc;
+                _current.push_back(&_endDoc);
                 return;
             }
             
@@ -101,7 +102,7 @@ class JsonReaderImpl
 
             if(ch == '}')
             {
-                _current = &_endObject;
+                _current.push_back(&_endObject);
                 popParseState();
             }
             else if(ch == '"')
@@ -166,7 +167,7 @@ class JsonReaderImpl
 
             if(ch == '}')
             {
-                _current = &_endObject;
+                _current.push_back(&_endObject);
                 popParseState();
             }
             else if(ch == ',')
@@ -188,7 +189,7 @@ class JsonReaderImpl
 
             if(ch == ']')
             {
-                _current = &_endArray;
+                _current.push_back(&_endArray);
                 popParseState();
                 return;
             }
@@ -206,7 +207,7 @@ class JsonReaderImpl
 
             if(ch == ']')
             {
-                _current = &_endArray;
+                _current.push_back(&_endArray);
                 popParseState();
             }
             else if(ch == ',')
@@ -228,12 +229,12 @@ class JsonReaderImpl
 
             if(ch == '{')
             {
-                _current = &_startObject;
+                _current.push_back(&_startObject);
                 _parse = &JsonReaderImpl::onObject;
             }
             else if(ch == '[')
             {
-                _current = &_startArray;
+                _current.push_back(&_startArray);
                 _parse = &JsonReaderImpl::onArray;
             }
             else if(ch == '"')
@@ -259,7 +260,7 @@ class JsonReaderImpl
 
             if(ch == '"')
             {
-                _current = &_string;
+                _current.push_back(&_string);
                 popParseState();
                 return;
             }
@@ -289,7 +290,7 @@ class JsonReaderImpl
             int n = 0;
             Pt::parseInt(_token.begin(), _token.end(), n);
 
-            _current = &_integer;
+            _current.push_back(&_integer);
             popParseState();
             (this->*_parse)(c);
         }
@@ -357,12 +358,10 @@ class JsonReaderImpl
         : _is(0)
         , _parse(0)
         , _line(1)
-        , _depth(0)
         , _usedSize(0)
         , _maxSize(2048)
         , _maxChunkSize(2048)
         , _chunkSize(0) 
-        , _current(0)
         {
             _parse = &JsonReaderImpl::onDocument;
         }
@@ -371,12 +370,10 @@ class JsonReaderImpl
         : _is(&is)
         , _parse(0)
         , _line(1)
-        , _depth(0)
         , _usedSize(0)
         , _maxSize(2048)
         , _maxChunkSize(2048)
         , _chunkSize(0)
-        , _current(0)
         {
             _parse = &JsonReaderImpl::onDocument;
         }
@@ -409,7 +406,6 @@ class JsonReaderImpl
             _is = 0;
            
             _line = 1;
-            _depth = 0;
             _usedSize = 0;
             _chunkSize = 0;
 
@@ -419,7 +415,7 @@ class JsonReaderImpl
                 _parseStack.pop();
 
             _token.clear(); 
-            _current = 0;
+            _current.clear();
 
             // nodes are cleared before they are parsed
         }
@@ -440,21 +436,6 @@ class JsonReaderImpl
             _is = &is;
         }
 
-        std::size_t depth() const
-        { 
-            return _depth; 
-        }
-
-        inline void incDepth()
-        {           
-            _depth++;
-        }
-
-        inline void decDepth()
-        {
-            _depth--;
-        }
-
         std::size_t line() const
         { 
             return _line; 
@@ -467,41 +448,43 @@ class JsonReaderImpl
 
         Node& get()
         {
-            if( ! _current )
+            if( _current.empty() )
             {
                 this->next();
             }
 
-            assert(_current != 0);
+            assert( ! _current.empty() );
 
-            return *_current;
+            return *_current.front();
         }
 
         Node& next()
         {
-            _current = 0;
-            const std::char_traits<Char>::int_type eof = std::char_traits<Char>::eof();
-            
+            if( ! _current.empty() )
+                _current.erase( _current.begin() );
+
+            if( ! _current.empty() )
+                return *_current.front();
+
             if( ! _is )
                 throw JsonError("no input");
 
-            while( ! _current )
+            while( _current.empty() )
             {
                 std::char_traits<Char>::int_type c = _is->get();
 
-                //std::cerr << char(c) << " (" << c << ")\n";
                 (this->*_parse)(c);
 
                 if(c == '\n')
                     bumpLine();
             }
 
-            return *_current;
+            return *_current.front();
         }
 
         Node* advance()
         {
-            _current = 0;
+            //_current = 0;
 
             //do
             //{
@@ -532,7 +515,9 @@ class JsonReaderImpl
             //} 
             //while( ! _current);
 
-            return _current;
+            //return _current;
+
+            return 0;
         }
 
     private:
@@ -543,16 +528,14 @@ class JsonReaderImpl
 
         Pt::String   _token;
         std::size_t  _line;
-        std::size_t  _depth;
         std::size_t  _usedSize;
         std::size_t  _maxSize;
+        std::size_t  _maxChunkSize;
+        std::size_t  _chunkSize;
 
-        std::size_t _maxChunkSize;
-        std::size_t _chunkSize;
-
-        Node*     _current;
+        std::vector<Node*> _current;
+ 
         EndDocument _endDoc;
-
         Null        _null;
         Boolean     _boolean;
         String      _string;
@@ -630,12 +613,6 @@ std::size_t JsonReader::usedSize() const
 void JsonReader::setChunkSize(std::size_t n)
 {
     return _impl->setChunkSize(n);
-}
-
-
-std::size_t JsonReader::depth() const
-{
-    return _impl->depth();
 }
 
 
