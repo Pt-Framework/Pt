@@ -68,7 +68,7 @@ void JsonReaderTest::EmptyDocument()
   using namespace Pt;
   using namespace Pt::Json;
 
-  Pt::String s = "{\"a\":\"b\",\"o\":{\"x\":\"y\", \"f\":3.14},\"i\":123, \"b\":true, \"z\":null}";
+  Pt::String s = "{\"a\":\"b\",\"o\":{\"x\":[\"y\", 1, 2.1], \"f\":3.14},\"i\":123, \"b\":true, \"z\":null}";
   //Pt::String s = "{}";
   //Pt::String s = " { } ";
 
@@ -95,6 +95,14 @@ void JsonReaderTest::EmptyDocument()
   {
       Node& node = reader.get();
 
+      if(node.type() == Node::StartArray)
+      {
+          std::clog << "ARRAY START" << std::endl;
+      }
+      if(node.type() == Node::EndArray)
+      {
+          std::clog << "ARRAY END" << std::endl;
+      }
       if(node.type() == Node::StartObject)
       {
           std::clog << "OBJECT START" << std::endl;
@@ -107,6 +115,10 @@ void JsonReaderTest::EmptyDocument()
       {
           std::clog << "OBJECT END" << std::endl;
       }
+      if(node.type() == Node::Boolean)
+      {
+          std::clog << "BOOL: "  << std::boolalpha << toBoolean(node).value() << std::endl;
+      }
       if(node.type() == Node::Integer)
       {
           std::clog << "INTEGER: " << toInteger(node).value() << std::endl;
@@ -118,10 +130,6 @@ void JsonReaderTest::EmptyDocument()
       if(node.type() == Node::String)
       {
           std::clog << "STRING: "  << toString(node).value().narrow() << std::endl;
-      }
-      if(node.type() == Node::Boolean)
-      {
-          std::clog << "BOOL: "  << std::boolalpha << toBoolean(node).value() << std::endl;
       }
       if(node.type() == Node::Null)
       {
