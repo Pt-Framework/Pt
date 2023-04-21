@@ -1,0 +1,15 @@
+SubDir PT_TOP src Pt-Json ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_JSON_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Json ;
+
+PT_JSON_SOURCES = JsonError.cpp
+                  JsonReader.cpp
+                  ;
+
+SharedLibrary Pt-Json : $(PT_JSON_SOURCES) ;
+LinkSharedLibraries Pt-Json : Pt Pt-System ;
+MakeLocate Pt-Json : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Json : $(PT_INSTALL_LIBDIR) ;
+
+SubInclude PT_TOP src Pt-Json tests ;

@@ -141,6 +141,7 @@ InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Hmi ] : $(PT_INSTALL_INCLUDES
 SubInclude PT_TOP src Pt ;
 SubInclude PT_TOP src Pt-Reflex ;
 SubInclude PT_TOP src Pt-Unit ;
+SubInclude PT_TOP src Pt-Json ;
 SubInclude PT_TOP src Pt-Xml ;
 
 if $(WITH_BUILTIN_SKIA)

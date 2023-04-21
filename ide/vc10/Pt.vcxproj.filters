@@ -136,6 +136,12 @@
     <Filter Include="Pt-Hmi\winrt\win32">
       <UniqueIdentifier>{474bc573-d20c-4cd6-af07-ee7b27e994e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Json">
+      <UniqueIdentifier>{b49ad2cc-57c3-4b53-9cde-26cf0974f25c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Json\tests">
+      <UniqueIdentifier>{db7e6288-7d79-458c-8a7a-258939a0b2fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1593,6 +1599,21 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowType.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Api.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\JsonError.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\JsonReader.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\EndDocument.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Node.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1730,6 +1751,12 @@
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\WindowView.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Json\Jamfile">
+      <Filter>Pt-Json</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Json\tests\Jamfile">
+      <Filter>Pt-Json\tests</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2944,6 +2971,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Json\JsonError.cpp">
+      <Filter>Pt-Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Json\JsonReader.cpp">
+      <Filter>Pt-Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Json\tests\Pt-Json-test.cpp">
+      <Filter>Pt-Json\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

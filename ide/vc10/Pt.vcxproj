@@ -150,6 +150,11 @@
     <ClInclude Include="..\..\include\Pt\Invokable.h" />
     <ClInclude Include="..\..\include\Pt\IOError.h" />
     <ClInclude Include="..\..\include\Pt\IOStream.h" />
+    <ClInclude Include="..\..\include\Pt\Json\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Json\EndDocument.h" />
+    <ClInclude Include="..\..\include\Pt\Json\JsonError.h" />
+    <ClInclude Include="..\..\include\Pt\Json\JsonReader.h" />
+    <ClInclude Include="..\..\include\Pt\Json\Node.h" />
     <ClInclude Include="..\..\include\Pt\Latin1Codec.h" />
     <ClInclude Include="..\..\include\Pt\LiteralPtr.h" />
     <ClInclude Include="..\..\include\Pt\Locale.h" />
@@ -519,6 +524,8 @@
     <None Include="..\..\src\Pt-Hmi\Jamfile" />
     <None Include="..\..\src\Pt-Http\Jamfile" />
     <None Include="..\..\src\Pt-Http\tests\Jamfile" />
+    <None Include="..\..\src\Pt-Json\Jamfile" />
+    <None Include="..\..\src\Pt-Json\tests\Jamfile" />
     <None Include="..\..\src\Pt-Mfc\demo\Jamfile" />
     <None Include="..\..\src\Pt-Mfc\Jamfile" />
     <None Include="..\..\src\Pt-Net\Jamfile" />
@@ -712,6 +719,9 @@
     <ClCompile Include="..\..\src\Pt-Http\tests\ParserTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\Pt-Http-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\ServerTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Json\JsonError.cpp" />
+    <ClCompile Include="..\..\src\Pt-Json\JsonReader.cpp" />
+    <ClCompile Include="..\..\src\Pt-Json\tests\Pt-Json-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Mfc\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Mfc\demo\MfcApplication.cpp" />
     <ClCompile Include="..\..\src\Pt-Mfc\demo\mfcdemo.cpp" />

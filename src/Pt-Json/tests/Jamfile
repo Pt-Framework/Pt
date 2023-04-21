@@ -1,0 +1,9 @@
+SubDir PT_TOP src Pt-Json tests ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Json ;
+
+Main Pt-Json-test : Pt-Json-test.cpp ;
+
+LinkSharedLibraries Pt-Json-test : Pt-Json Pt-System Pt-Unit Pt ;
+MakeLocate Pt-Json-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Json-test : $(PT_OUTPUT_TEST) ;
