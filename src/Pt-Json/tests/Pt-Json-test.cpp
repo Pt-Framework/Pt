@@ -31,6 +31,7 @@
 #include <Pt/Unit/TestMain.h>
 #include <Pt/Unit/RegisterTest.h>
 
+#include <Pt/Json/Document.h>
 //#include <Pt/Json/StartDocument.h>
 #include <Pt/Json/EndDocument.h>
 #include <Pt/Json/Null.h>
@@ -45,6 +46,8 @@
 #include <Pt/Json/EndArray.h>
 
 #include <Pt/Json/JsonReader.h>
+
+#include <Pt/Composer.h>
 #include <Pt/StringStream.h>
 
 class JsonReaderTest : public Pt::Unit::TestSuite
@@ -87,9 +90,25 @@ void JsonReaderTest::EmptyDocument()
   //Pt::String s = "false";
 
   IStringStream iss(s);
-  JsonReader reader(iss);
+  
+  Document doc;
+  doc.load(iss);
+
+  std::string y;
+  doc["o"]["x"].begin().get(y);
+  return;
 
   std::clog << std::endl;
+
+  JsonReader reader(iss);
+
+  //std::vector<std::string> array;
+  //BasicComposer< std::vector<std::string> > composer;
+  //composer.begin(array);
+
+  //JsonFormatter formatter(reader);
+  //formatter.beginParse(composer);
+  //formatter.parse();
 
   while( reader.next().type() != Node::EndDocument )
   {
