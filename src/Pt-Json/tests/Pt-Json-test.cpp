@@ -50,6 +50,8 @@
 #include <Pt/Composer.h>
 #include <Pt/StringStream.h>
 
+#include <vector>
+
 class JsonReaderTest : public Pt::Unit::TestSuite
 {
   public:
@@ -57,9 +59,15 @@ class JsonReaderTest : public Pt::Unit::TestSuite
     : Pt::Unit::TestSuite("JsonReaderTest")
     {
       this->registerMethod("EmptyDocument", *this, &JsonReaderTest::EmptyDocument);
+      this->registerMethod("Float", *this, &JsonReaderTest::Float);
+      this->registerMethod("SimpleArray", *this, &JsonReaderTest::SimpleArray);
+      this->registerMethod("SimpleObject", *this, &JsonReaderTest::SimpleObject);
     }
 
     void EmptyDocument();
+    void Float();
+    void SimpleArray();
+    void SimpleObject();
 };
 
 
@@ -71,94 +79,81 @@ void JsonReaderTest::EmptyDocument()
   using namespace Pt;
   using namespace Pt::Json;
 
-  //Pt::String s = "{\"a\":\"abc\",\"o\":{\"x\":[\"y\", 1, 2.1], \"f\":3.14},\"i\":123, \"b\":true, \"z\":null}";
-  //Pt::String s = "{}";
-  //Pt::String s = " { } ";
-
-  //Pt::String s = "[\"a\",\"b\"]";
-  //Pt::String s = "[]";
-  //Pt::String s = " [ ] ";
-  
-  //Pt::String s = " \"Hello\" ";
-
-  //Pt::String s = "123";
-
-  //Pt::String s = "null";
-
-  //Pt::String s = "true";
-
-  //Pt::String s = "false";
-
-  Pt::String s = "{ \"x\":[0.3, 1, 2.1], \"f\":3.14 }";
-
+  Pt::String s = "{}";
   IStringStream iss(s);
   
   Document doc;
   doc.load(iss);
+}
 
-  double f = 0.0;
-  doc["f"].get(f);
-  //return;
 
-  std::clog << std::endl;
+void JsonReaderTest::Float()
+{
+    using namespace Pt;
+    using namespace Pt::Json;
 
-  JsonReader reader(iss);
+    Pt::String s = "{\"a\":1.1,\"b\":[2.1, 2.2],\"c\":3.3}";
+    IStringStream iss(s);
 
-  //std::vector<std::string> array;
-  //BasicComposer< std::vector<std::string> > composer;
-  //composer.begin(array);
+    Document doc;
+    doc.load(iss);
 
-  //JsonFormatter formatter(reader);
-  //formatter.beginParse(composer);
-  //formatter.parse();
+    double a = 0;
+    doc["a"].get(a);
+    PT_UNIT_ASSERT( std::abs(a - 1.1) < 0.01 );
 
-  while( reader.next().type() != Node::EndDocument )
-  {
-      Node& node = reader.get();
+    std::vector<double> b;
+    doc["b"].get(b);
+    PT_UNIT_ASSERT( std::abs(b[0] - 2.1) < 0.01 );
+    PT_UNIT_ASSERT( std::abs(b[1] - 2.2) < 0.01 );
 
-      if(node.type() == Node::StartArray)
-      {
-          std::clog << "ARRAY START" << std::endl;
-      }
-      if(node.type() == Node::EndArray)
-      {
-          std::clog << "ARRAY END" << std::endl;
-      }
-      if(node.type() == Node::StartObject)
-      {
-          std::clog << "OBJECT START" << std::endl;
-      }
-      if(node.type() == Node::Member)
-      {
-          std::clog << "MEMBER: " << toMember(node).name().narrow() << std::endl;
-      }
-      if(node.type() == Node::EndObject)
-      {
-          std::clog << "OBJECT END" << std::endl;
-      }
-      if(node.type() == Node::Boolean)
-      {
-          std::clog << "BOOL: "  << std::boolalpha << toBoolean(node).value() << std::endl;
-      }
-      if(node.type() == Node::Integer)
-      {
-          std::clog << "INTEGER: " << toInteger(node).value() << std::endl;
-      }
-      if(node.type() == Node::Float)
-      {
-          std::clog << "FLOAT: " << toFloat(node).value() << std::endl;
-      }
-      if(node.type() == Node::String)
-      {
-          std::clog << "STRING: "  << toString(node).value().narrow() << std::endl;
-      }
-      if(node.type() == Node::Null)
-      {
-          std::clog << "NULL" << std::endl;
-      }
-  }
+    double c = 0;
+    doc["c"].get(c);
+    PT_UNIT_ASSERT( std::abs(c - 3.3) < 0.01 );
+}
 
-  Node& node = reader.get();
-  EndDocument& endDoc = toEndDocument(node);
-  std::clog << "DOCUMENT END" << std::endl;
+
+void JsonReaderTest::SimpleArray()
+{
+    using namespace Pt;
+    using namespace Pt::Json;
+
+    Pt::String s = "[\"a\",\"b\",\"c\"]";
+    IStringStream iss(s);
+
+    Document doc;
+    doc.load(iss);
+
+    std::vector<std::string> vec;
+    doc.root().get(vec);
+    PT_UNIT_ASSERT_EQUAL(vec[0], "a");
+    PT_UNIT_ASSERT_EQUAL(vec[1], "b");
+    PT_UNIT_ASSERT_EQUAL(vec[2], "c");
+}
+
+
+void JsonReaderTest::SimpleObject()
+{
+    using namespace Pt;
+    using namespace Pt::Json;
+
+    //Pt::String s = "{\"a\":\"abc\",\"o\":{\"x\":[\"y\", 1, 2.1], \"f\":3.14},\"i\":123, \"b\":true, \"z\":null}";
+
+    Pt::String s = "{\"a\":1,\"b\":2,\"c\":3}";
+    IStringStream iss(s);
+
+    Document doc;
+    doc.load(iss);
+
+    int a = 0;
+    doc["a"].get(a);
+    PT_UNIT_ASSERT_EQUAL(a, 1);
+
+    int b = 0;
+    doc["b"].get(b);
+    PT_UNIT_ASSERT_EQUAL(b, 2);
+
+    int c = 0;
+    doc["c"].get(c);
+    PT_UNIT_ASSERT_EQUAL(c, 1);
 }
