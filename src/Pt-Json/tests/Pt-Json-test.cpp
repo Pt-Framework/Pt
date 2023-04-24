@@ -71,7 +71,7 @@ void JsonReaderTest::EmptyDocument()
   using namespace Pt;
   using namespace Pt::Json;
 
-  Pt::String s = "{\"a\":\"abc\",\"o\":{\"x\":[\"y\", 1, 2.1], \"f\":3.14},\"i\":123, \"b\":true, \"z\":null}";
+  //Pt::String s = "{\"a\":\"abc\",\"o\":{\"x\":[\"y\", 1, 2.1], \"f\":3.14},\"i\":123, \"b\":true, \"z\":null}";
   //Pt::String s = "{}";
   //Pt::String s = " { } ";
 
@@ -89,14 +89,16 @@ void JsonReaderTest::EmptyDocument()
 
   //Pt::String s = "false";
 
+  Pt::String s = "{ \"x\":[0.3, 1, 2.1], \"f\":3.14 }";
+
   IStringStream iss(s);
   
   Document doc;
   doc.load(iss);
 
-  std::string y;
-  doc["o"]["x"].begin().get(y);
-  return;
+  double f = 0.0;
+  doc["f"].get(f);
+  //return;
 
   std::clog << std::endl;
 

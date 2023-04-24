@@ -202,8 +202,8 @@ void DocumentReader::onArray(const Node& node)
         {
             _current = _current->parent();
 
-            _parse = _parseStack.top();
             _parseStack.pop();
+            _parse = _parseStack.top();
             break;
         }
 
@@ -299,8 +299,8 @@ void DocumentReader::onObject(const Node& node)
         {
             _current = _current->parent();
 
-            _parse = _parseStack.top();
             _parseStack.pop();
+            _parse = _parseStack.top();
             break;
         }
 
