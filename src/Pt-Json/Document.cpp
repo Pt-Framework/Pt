@@ -123,7 +123,7 @@ void DocumentReader::onRoot(const Node& node)
         case Node::StartArray:
         {
             _current->setTypeName("array");
-            
+
             _parse = &DocumentReader::onArray;
             _parseStack.push(_parse);
             break;
@@ -132,7 +132,7 @@ void DocumentReader::onRoot(const Node& node)
         case Node::StartObject:
         {
             _current->setTypeName("object");
-            
+
             _parse = &DocumentReader::onObject;
             _parseStack.push(_parse);
             break;
@@ -146,8 +146,16 @@ void DocumentReader::onRoot(const Node& node)
             break;
         }
 
+        case Node::Float:
+        {
+            const Float& f = toFloat(node);
+            _current->setDouble( f.value() );
+            _current = _current->parent();
+            break;
+        }
+
         case Node::Integer:
-        {           
+        { 
             const Integer& i = toInteger(node);
             _current->setInt64( i.value() );
             _current = _current->parent();
@@ -215,6 +223,16 @@ void DocumentReader::onArray(const Node& node)
 
             const String& s = toString(node);
             _current->setString( s.value() );
+            _current = _current->parent();
+            break;
+        }
+
+        case Node::Float:
+        {
+            _current = &_current->addElement();
+
+            const Float& f = toFloat(node);
+            _current->setDouble( f.value() );
             _current = _current->parent();
             break;
         }
@@ -297,6 +315,14 @@ void DocumentReader::onObject(const Node& node)
         {
             const String& s = toString(node);
             _current->setString( s.value() );
+            _current = _current->parent();
+            break;
+        }
+
+        case Node::Float:
+        {           
+            const Float& f = toFloat(node);
+            _current->setDouble( f.value() );
             _current = _current->parent();
             break;
         }
