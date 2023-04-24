@@ -408,6 +408,14 @@ class PT_JSON_API Document
         */
         bool isEmpty() const;
 
+        /** @brief Loads a document from a input stream.
+        */
+        void load( std::basic_istream<Pt::Char>& is );
+
+        /** @brief Saves a document to a output stream.
+        */
+        void save( std::basic_ostream<Pt::Char>& os ) const;
+
         /** @brief Begin of elements.
         */
         ConstElement begin() const
@@ -437,14 +445,6 @@ class PT_JSON_API Document
         */
         Element root()
         { return Element(&_root); }
-
-        /** @brief Loads document from a input stream.
-        */
-        void load( std::basic_istream<Pt::Char>& is );
-
-        /** @brief Saves document to a output stream.
-        */
-        void save( std::basic_ostream<Pt::Char>& os ) const;
 
         /** @brief Returns a top level element.
         */
@@ -490,6 +490,20 @@ class PT_JSON_API Document
             return Element(si);
         }
 
+        /** @brief Returns a top level element.
+        */
+        Element operator[] (const std::string& name)
+        {
+            return this->element(name);
+        }
+
+        /** @brief Returns a top level element.
+        */
+        Element operator[] (const char* name)
+        {
+            return this->element(name);
+        }
+
         /** @brief Adds a top level element.
         */
         Element addElement(const char* name)
@@ -530,20 +544,6 @@ class PT_JSON_API Document
         void removeElement(const std::string& name)
         {
             root().removeElement(name);
-        }
-
-        /** @brief Returns a top level element.
-        */
-        Element operator[] (const std::string& name)
-        {
-            return this->element(name);
-        }
-
-        /** @brief Returns a top level element.
-        */
-        Element operator[] (const char* name)
-        {
-            return this->element(name);
         }
 
     private:
