@@ -428,8 +428,7 @@ class PT_JSON_API Document
         */
         Element getMember(const std::string& name)
         {
-            SerializationInfo* si = _root.findMember(name);
-            return Element(si);
+            return root().getMember(name);
         }
 
         /** @brief Returns a top level element.
@@ -443,8 +442,7 @@ class PT_JSON_API Document
         */
         Element getMember(const char* name)
         {
-            SerializationInfo* si = _root.findMember(name);
-            return Element(si);
+            return root().getMember(name);
         }
 
         /** @brief Returns a top level element.
@@ -458,28 +456,28 @@ class PT_JSON_API Document
         */
         Element operator[] (const std::string& name)
         {
-            return this->getMember(name);
+            return root().getMember(name);
         }
 
         /** @brief Returns a top level element.
         */
         ConstElement operator[] (const std::string& name) const
         {
-            return this->getMember(name);
+            return root().getMember(name);
         }
 
         /** @brief Returns a top level element.
         */
         Element operator[] (const char* name)
         {
-            return this->getMember(name);
+            return root().getMember(name);
         }
 
         /** @brief Returns a top level element.
         */
         ConstElement operator[] (const char* name) const
         {
-            return this->getMember(name);
+            return root().getMember(name);
         }
 
         /** @brief Adds a top level element.
