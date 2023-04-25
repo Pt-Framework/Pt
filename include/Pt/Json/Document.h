@@ -63,10 +63,15 @@ class PT_JSON_API Document
                     return *this;
                 }
 
+                /** @brief Returns the element name.
+                */
+                const char* name() const
+                { return _si->name(); }
+
                 /** @brief Gets the value.
                 */
                 template <typename T>
-                bool get(T& value) const
+                bool getValue(T& value) const
                 {
                     if( ! _si )
                         return false;
@@ -78,72 +83,13 @@ class PT_JSON_API Document
                 /** @brief Sets the value.
                 */
                 template <typename T>
-                void set(const T& value)
+                void setValue(const T& value)
                 {
                     if( _si )
                     {
                         _si->setVoid();
                         *_si <<= value;
                     }
-                }
-
-                /** @brief Adds a sub element.
-                */
-                Element addElement(const std::string& name)
-                {
-                    if( ! _si )
-                        return Element();
-
-                    SerializationInfo& si = _si->addMember(name);
-                    return Element(&si);
-                }
-
-                /** @brief Adds a sub element.
-                */
-                Element addElement(const char* name)
-                {
-                    if( ! _si )
-                        return Element();
-
-                    SerializationInfo& si = _si->addMember(name);
-                    return Element(&si);
-                }
-
-                /** @brief Adds a sub element.
-                */
-                Element addElement()
-                {
-                    if( ! _si )
-                        return Element();
-
-                    SerializationInfo& si = _si->addElement();
-                    return Element(&si);
-                }
-
-                /** @brief Removes a sub element.
-                */
-                void removeElement(const std::string& name)
-                {
-                    if( _si )
-                        _si->removeMember(name);
-                }
-                
-                /** @brief Removes a sub element.
-                */
-                void removeElement(const char* name)
-                {
-                    if( _si )
-                        _si->removeMember(name);
-                }
-
-                /** @brief Removes a sub element.
-                */
-                void removeElement(const Element& e)
-                {
-                    if( ! _si || ! e._si )
-                      return;
-
-                    _si->removeMember( *e._si );
                 }
 
                 /** @brief Begin of sub elements.
@@ -170,7 +116,7 @@ class PT_JSON_API Document
 
                 /** @brief Returns a sub element.
                 */
-                Element element(const std::string& name) const
+                Element getMember(const std::string& name) const
                 {
                     if( ! _si )
                         return this->end();
@@ -181,40 +127,12 @@ class PT_JSON_API Document
                 
                 /** @brief Returns a sub element.
                 */
-                Element element(const char* name) const
+                Element getMember(const char* name) const
                 {
                     if( ! _si )
                         return this->end();
 
                     SerializationInfo* si = _si->findMember(name);
-                    return Element(si);
-                }
-
-                /** @brief Returns a sub element.
-                */
-                Element makeElement(const char* name)
-                {
-                    if( ! _si )
-                        return this->end();
-
-                    SerializationInfo* si = _si->findMember(name);
-                    if( ! si )
-                        si = &_si->addMember(name);
-                    
-                    return Element(si);
-                }
-
-                /** @brief Returns a sub element.
-                */
-                Element makeElement(const std::string& name)
-                {
-                    if( ! _si )
-                        return this->end();
-
-                    SerializationInfo* si = _si->findMember(name);
-                    if( ! si )
-                        si = &_si->addMember(name);
-                    
                     return Element(si);
                 }
                 
@@ -222,20 +140,80 @@ class PT_JSON_API Document
                 */
                 Element operator[] (const std::string& name) const
                 {
-                    return this->element(name);
+                    return this->getMember(name);
                 }
 
                 /** @brief Returns a sub element.
                 */
                 Element operator[] (const char* name) const
                 {
-                    return this->element(name);
+                    return this->getMember(name);
                 }
 
-                /** @brief Returns the element name.
+                /** @brief Adds a sub element.
                 */
-                const char* name() const
-                { return _si->name(); }
+                Element addMember(const char* name)
+                {
+                    if( ! _si )
+                        return Element();
+
+                    SerializationInfo* si = _si->findMember(name);
+                    if( ! si )
+                        si = &_si->addMember(name);
+                    
+                    return Element(si);
+                }
+
+                /** @brief Adds a sub element.
+                */
+                Element addMember(const std::string& name)
+                {
+                    if( ! _si )
+                        return Element();
+
+                    SerializationInfo* si = _si->findMember(name);
+                    if( ! si )
+                        si = &_si->addMember(name);
+                    
+                    return Element(si);
+                }
+
+                /** @brief Adds a sub element.
+                */
+                Element addElement()
+                {
+                    if( ! _si )
+                        return Element();
+
+                    SerializationInfo& si = _si->addElement();
+                    return Element(&si);
+                }
+
+                /** @brief Removes a sub element.
+                */
+                void removeMember(const std::string& name)
+                {
+                    if( _si )
+                        _si->removeMember(name);
+                }
+                
+                /** @brief Removes a sub element.
+                */
+                void removeMember(const char* name)
+                {
+                    if( _si )
+                        _si->removeMember(name);
+                }
+
+                /** @brief Removes a sub element.
+                */
+                void removeElement(const Element& e)
+                {
+                    if( ! _si || ! e._si )
+                      return;
+
+                    _si->removeMember( *e._si );
+                }
 
                 /** @brief Allows using the element like an iterator.
                 */
@@ -283,10 +261,15 @@ class PT_JSON_API Document
                 : _si(si)
                 {}
 
+                /** @brief Returns the element name.
+                */
+                const char* name() const
+                { return _si->name(); }
+
                 /** @brief Gets the value.
                 */
                 template <typename T>
-                bool get(T& value) const
+                bool getValue(T& value) const
                 {
                     if( ! _si )
                         return false;
@@ -319,7 +302,7 @@ class PT_JSON_API Document
 
                 /** @brief Returns a sub element.
                 */
-                ConstElement element(const std::string& name) const
+                ConstElement getMember(const std::string& name) const
                 {
                     if( ! _si )
                         return end();
@@ -330,7 +313,7 @@ class PT_JSON_API Document
 
                 /** @brief Returns a sub element.
                 */
-                ConstElement element(const char* name) const
+                ConstElement getMember(const char* name) const
                 {
                     if( ! _si )
                         return end();
@@ -343,20 +326,15 @@ class PT_JSON_API Document
                 */
                 ConstElement operator[] (const std::string& name) const
                 {
-                    return this->element(name);
+                    return this->getMember(name);
                 }
 
                 /** @brief Returns a sub element.
                 */
                 ConstElement operator[] (const char* name) const
                 {
-                    return this->element(name);
+                    return this->getMember(name);
                 }
-
-                /** @brief Returns the element name.
-                */
-                const char* name() const
-                { return _si->name(); }
 
                 /** @brief Allows using the element like an iterator.
                 */
@@ -416,15 +394,10 @@ class PT_JSON_API Document
         */
         void save( std::basic_ostream<Pt::Char>& os ) const;
 
-        /** @brief Begin of elements.
+        /** @brief Returns the root element.
         */
-        ConstElement begin() const
-        { return root().begin(); }
-
-        /** @brief End of elements.
-        */
-        ConstElement end() const
-        { return root().end(); }
+        Element root()
+        { return Element(&_root); }
 
         /** @brief Returns the root element.
         */
@@ -436,47 +409,24 @@ class PT_JSON_API Document
         Element begin()
         { return root().begin(); }
 
+        /** @brief Begin of elements.
+        */
+        ConstElement begin() const
+        { return root().begin(); }
+
         /** @brief End of elements.
         */
         Element end()
         { return root().end(); }
 
-        /** @brief Returns the root v.
+        /** @brief End of elements.
         */
-        Element root()
-        { return Element(&_root); }
+        ConstElement end() const
+        { return root().end(); }
 
         /** @brief Returns a top level element.
         */
-        ConstElement element(const std::string& name) const
-        {
-            return root().element(name);
-        }
-
-        /** @brief Returns a top level element.
-        */
-        ConstElement element(const char* name) const
-        {
-            return root().element(name);
-        }
-
-        /** @brief Returns a top level element.
-        */
-        ConstElement operator[] (const std::string& name) const
-        {
-            return this->element(name);
-        }
-
-        /** @brief Returns a top level element.
-        */
-        ConstElement operator[] (const char* name) const
-        {
-            return this->element(name);
-        }
-
-        /** @brief Returns a top level element.
-        */
-        Element element(const std::string& name)
+        Element getMember(const std::string& name)
         {
             SerializationInfo* si = _root.findMember(name);
             return Element(si);
@@ -484,66 +434,94 @@ class PT_JSON_API Document
 
         /** @brief Returns a top level element.
         */
-        Element element(const char* name)
+        ConstElement getMember(const std::string& name) const
+        {
+            return root().getMember(name);
+        }
+
+        /** @brief Returns a top level element.
+        */
+        Element getMember(const char* name)
         {
             SerializationInfo* si = _root.findMember(name);
             return Element(si);
+        }
+
+        /** @brief Returns a top level element.
+        */
+        ConstElement getMember(const char* name) const
+        {
+            return root().getMember(name);
         }
 
         /** @brief Returns a top level element.
         */
         Element operator[] (const std::string& name)
         {
-            return this->element(name);
+            return this->getMember(name);
+        }
+
+        /** @brief Returns a top level element.
+        */
+        ConstElement operator[] (const std::string& name) const
+        {
+            return this->getMember(name);
         }
 
         /** @brief Returns a top level element.
         */
         Element operator[] (const char* name)
         {
-            return this->element(name);
+            return this->getMember(name);
+        }
+
+        /** @brief Returns a top level element.
+        */
+        ConstElement operator[] (const char* name) const
+        {
+            return this->getMember(name);
         }
 
         /** @brief Adds a top level element.
         */
-        Element addElement(const char* name)
+        Element addMember(const char* name)
         {
-            return root().addElement(name);
+            return root().addMember(name);
         }
 
         /** @brief Adds a top level element.
         */
-        Element addElement(const std::string& name)
+        Element addMember(const std::string& name)
         {
-            return root().addElement(name);
+            return root().addMember(name);
         }
 
-        /** @brief Makes a top level element.
+        /** @brief Adds a top level element.
         */
-        Element makeElement(const char* name)
+        Element addElement()
         {
-            return root().makeElement(name);
-        }
-
-        /** @brief Makes a top level element.
-        */
-        Element makeElement(const std::string& name)
-        {
-            return root().makeElement(name);
+            return root().addElement();
         }
 
         /** @brief Removes a top level element.
         */
-        void removeElement(const char* name)
+        void removeMember(const char* name)
         {
-            root().removeElement(name);
+            root().removeMember(name);
         }
 
         /** @brief Removes a top level element.
         */
-        void removeElement(const std::string& name)
+        void removeMember(const std::string& name)
         {
-            root().removeElement(name);
+            root().removeMember(name);
+        }
+
+        /** @brief Removes a top level element.
+        */
+        void removeElement(const Element& e)
+        {
+            root().removeElement(e);
         }
 
     private:

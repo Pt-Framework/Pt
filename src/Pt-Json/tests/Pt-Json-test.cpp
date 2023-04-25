@@ -99,16 +99,16 @@ void JsonReaderTest::Float()
     doc.load(iss);
 
     double a = 0;
-    doc["a"].get(a);
+    doc["a"].getValue(a);
     PT_UNIT_ASSERT( std::abs(a - 1.1) < 0.01 );
 
     std::vector<double> b;
-    doc["b"].get(b);
+    doc["b"].getValue(b);
     PT_UNIT_ASSERT( std::abs(b[0] - 2.1) < 0.01 );
     PT_UNIT_ASSERT( std::abs(b[1] - 2.2) < 0.01 );
 
     double c = 0;
-    doc["c"].get(c);
+    doc["c"].getValue(c);
     PT_UNIT_ASSERT( std::abs(c - 3.3) < 0.01 );
 }
 
@@ -125,7 +125,7 @@ void JsonReaderTest::SimpleArray()
     doc.load(iss);
 
     std::vector<std::string> vec;
-    doc.root().get(vec);
+    doc.root().getValue(vec);
     PT_UNIT_ASSERT_EQUAL(vec[0], "a");
     PT_UNIT_ASSERT_EQUAL(vec[1], "b");
     PT_UNIT_ASSERT_EQUAL(vec[2], "c");
@@ -146,14 +146,14 @@ void JsonReaderTest::SimpleObject()
     doc.load(iss);
 
     int a = 0;
-    doc["a"].get(a);
+    doc["a"].getValue(a);
     PT_UNIT_ASSERT_EQUAL(a, 1);
 
     int b = 0;
-    doc["b"].get(b);
+    doc["b"].getValue(b);
     PT_UNIT_ASSERT_EQUAL(b, 2);
 
     int c = 0;
-    doc["c"].get(c);
+    doc["c"].getValue(c);
     PT_UNIT_ASSERT_EQUAL(c, 1);
 }
