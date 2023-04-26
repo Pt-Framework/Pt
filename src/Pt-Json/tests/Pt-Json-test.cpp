@@ -51,6 +51,7 @@
 #include <Pt/StringStream.h>
 
 #include <vector>
+#include <cmath>
 
 class JsonReaderTest : public Pt::Unit::TestSuite
 {
