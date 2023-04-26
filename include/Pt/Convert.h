@@ -222,7 +222,7 @@ InIterT parseInt(InIterT it, InIterT end, T& n)
      
     @ingroup Utilities
 */
-template <typename InIter, typename T>
+template <typename T, typename InIter>
 T parseInt(InIter it, InIter end)
 {
     T n = T();
