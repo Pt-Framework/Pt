@@ -570,35 +570,17 @@ class PT_JSON_API DocumentReader
     typedef void (DocumentReader::*ParseFunc)(const Node&);
     
     public:
-        DocumentReader(SerializationInfo& si)
-        : _current(&si)
-        , _doc(0)
-        {
-            _parse = &DocumentReader::onRoot;
-            _parseStack.push(_parse);
-        }
+        DocumentReader();
 
-        DocumentReader(Document& doc)
-        : _current( doc.root() )
-        , _doc(&doc)
-        {
-            _parse = &DocumentReader::onRoot;
-            _parseStack.push(_parse);
-        }
+        DocumentReader(std::basic_istream<Pt::Char>& is, Document& doc);
 
-        void setInput(std::basic_istream<Pt::Char>& is)
-        {
-          _reader.setInput(is);
-        }
+        void reset();
 
-        void reset(std::basic_istream<Pt::Char>& is)
-        {
-          _reader.reset(is);
-        }
+        void reset(std::basic_istream<Pt::Char>& is, Document& doc);
 
-        void parse(std::basic_istream<Pt::Char>& is);
+        Document& read();
 
-        bool advance();
+        Document* advance();
 
     protected:
         void onRoot(const Node& node);
@@ -608,10 +590,10 @@ class PT_JSON_API DocumentReader
         void onObject(const Node& node);
 
     private:
-        JsonReader             _reader;
         ParseFunc              _parse;
         std::stack<ParseFunc>  _parseStack;
-        //SerializationInfo*     _current;
+
+        JsonReader             _reader;
         Document*              _doc;
         Document::Element      _current;
 };

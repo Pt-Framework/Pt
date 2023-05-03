@@ -488,7 +488,7 @@ class JsonReaderImpl
             _is = &is;
         }
 
-        void setInput(std::basic_istream<Pt::Char>& is)
+        void attach(std::basic_istream<Pt::Char>& is)
         { 
             _is = &is;
         }
@@ -552,7 +552,10 @@ class JsonReaderImpl
 
             do
             {
-                std::streamsize n = _is->rdbuf()->in_avail();            
+                std::streamsize n = _is->rdbuf()->in_avail();  
+                if(n == 0)
+                  break;
+          
                 if(n > 0)
                 {
                     std::char_traits<Char>::int_type c = _is->get();
@@ -642,9 +645,9 @@ void JsonReader::reset(std::basic_istream<Pt::Char>& is)
 }
 
 
-void JsonReader::setInput(std::basic_istream<Pt::Char>& in)
+void JsonReader::attach(std::basic_istream<Pt::Char>& in)
 {
-    _impl->setInput(in);
+    _impl->attach(in);
 }
 
 

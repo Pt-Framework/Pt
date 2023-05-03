@@ -97,10 +97,7 @@ void JsonReaderTest::Float()
     IStringStream iss(s);
 
     Document doc;
-    DocumentReader reader(doc);
-    reader.parse(iss);
-
-    //doc.load(iss);
+    doc.load(iss);
 
     double a = 0;
     doc["a"].getValue(a);

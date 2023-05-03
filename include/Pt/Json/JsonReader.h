@@ -66,13 +66,9 @@ class PT_JSON_API JsonReader : private NonCopyable
         */
         std::basic_istream<Pt::Char>* input();
 
-        /** @brief Adds an external input source.
-
-            This method can be used to add additional input streams e.g.
-            to resolve an external entity reference, indicated by an
-            EntityReference node.
+        /** @brief Sets the input source.
         */
-        void setInput(std::basic_istream<Pt::Char>& is);
+        void attach(std::basic_istream<Pt::Char>& is);
 
         /** @brief Clears the reader state and input.
 

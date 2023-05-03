@@ -65,8 +65,10 @@ bool Document::isEmpty() const
 
 void Document::load(std::basic_istream<Pt::Char>& is)
 {
-    DocumentReader reader(_root);
-    reader.parse(is);
+    clear();
+    
+    DocumentReader reader(is, *this);
+    reader.read();
 }
 
 
@@ -74,33 +76,86 @@ void Document::save(std::basic_ostream<Pt::Char>& os) const
 {
 }
 
+//
+// DocumentReader
+//
 
-void DocumentReader::parse(std::basic_istream<Pt::Char>& is)
+DocumentReader::DocumentReader()
+: _parse(&DocumentReader::onRoot)
+, _current(0)
+, _doc(0)
 {
-    _reader.setInput(is);
+    reset();
+}
+
+
+DocumentReader::DocumentReader(std::basic_istream<Pt::Char>& is, Document& doc)
+: _parse(&DocumentReader::onRoot)
+, _current( doc.root() )
+, _doc(&doc)
+{
+    reset(is, doc);
+}
+
+
+void DocumentReader::reset()
+{
+    _parse = &DocumentReader::onRoot;
+    _parseStack.push(_parse);
+            
+    _reader.reset();
+
+    _doc = 0;
+    _current = Document::Element();
+}
+
+
+void DocumentReader::reset(std::basic_istream<Pt::Char>& is, Document& doc)
+{
+    _parse = &DocumentReader::onRoot;
+    _parseStack.push(_parse);
+            
+    _reader.reset(is);
+
+    doc.clear();
+
+    _doc = &doc;
+    _current = doc.root();
+}
+
+
+Document& DocumentReader::read()
+{
+    if( ! _doc )
+        throw JsonError("invalid document"); 
 
     InputIterator it = _reader.current();
     for( ; it != _reader.end(); ++it)
     {
         (this->*_parse)(*it);
     }
+
+    return *_doc;
 }
 
 
-bool DocumentReader::advance()
+Document* DocumentReader::advance()
 {
+    if( ! _doc )
+        throw JsonError("invalid document"); 
+
     Node* node = _reader.advance();
     while(node)
     {
       (this->*_parse)(*node);
       
       if(node->type() == Node::EndDocument)
-        return true;
+          return _doc;
 
       node = _reader.advance();
     }
 
-    return false;
+    return 0;
 }
 
 
