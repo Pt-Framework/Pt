@@ -92,7 +92,7 @@ class PT_JSON_API JsonReader : private NonCopyable
         /** @brief Sets the max size of a characters block.
 
             If an JSON element contains more character data than this limit,
-            the content is reported as multiple Characters or CData nodes.
+            the content is reported as multiple nodes.
         */
         void setChunkSize(std::size_t n);
 

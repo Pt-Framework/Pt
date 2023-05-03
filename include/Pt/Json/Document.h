@@ -35,6 +35,9 @@
 #include <string>
 #include <cstddef>
 
+#include <Pt/Json/JsonReader.h>
+#include <stack>
+
 namespace Pt {
 
 namespace Json {
@@ -90,6 +93,34 @@ class PT_JSON_API Document
                         _si->setVoid();
                         *_si <<= value;
                     }
+                }
+
+                /** @brief Returns true if element is null.
+                */
+                bool isNull() const
+                {
+                  return _si ? _si->isVoid() : true;
+                }
+
+                /** @brief Sets element to null.
+                */
+                void setNull()
+                {
+                    if( _si )
+                    {
+                        _si->setVoid();
+ 
+                    }
+                }
+
+                /** @brief Returns the parent element.
+                */
+                Element parent() const
+                {
+                  if( ! _si )
+                    return Element();
+
+                  return Element( _si->parent() );
                 }
 
                 /** @brief Begin of sub elements.
@@ -276,6 +307,13 @@ class PT_JSON_API Document
 
                     *_si >>= value;
                     return true;
+                }
+
+                /** @brief Returns true if element is null.
+                */
+                bool isNull() const
+                {
+                  return _si ? _si->isVoid() : true;
                 }
 
                 /** @brief Begin of sub elements.
@@ -524,6 +562,58 @@ class PT_JSON_API Document
 
     private:
         SerializationInfo _root;
+};
+
+
+class PT_JSON_API DocumentReader
+{
+    typedef void (DocumentReader::*ParseFunc)(const Node&);
+    
+    public:
+        DocumentReader(SerializationInfo& si)
+        : _current(&si)
+        , _doc(0)
+        {
+            _parse = &DocumentReader::onRoot;
+            _parseStack.push(_parse);
+        }
+
+        DocumentReader(Document& doc)
+        : _current( doc.root() )
+        , _doc(&doc)
+        {
+            _parse = &DocumentReader::onRoot;
+            _parseStack.push(_parse);
+        }
+
+        void setInput(std::basic_istream<Pt::Char>& is)
+        {
+          _reader.setInput(is);
+        }
+
+        void reset(std::basic_istream<Pt::Char>& is)
+        {
+          _reader.reset(is);
+        }
+
+        void parse(std::basic_istream<Pt::Char>& is);
+
+        bool advance();
+
+    protected:
+        void onRoot(const Node& node);
+        
+        void onArray(const Node& node);
+        
+        void onObject(const Node& node);
+
+    private:
+        JsonReader             _reader;
+        ParseFunc              _parse;
+        std::stack<ParseFunc>  _parseStack;
+        //SerializationInfo*     _current;
+        Document*              _doc;
+        Document::Element      _current;
 };
 
 } // namespace

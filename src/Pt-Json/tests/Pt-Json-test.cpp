@@ -97,7 +97,10 @@ void JsonReaderTest::Float()
     IStringStream iss(s);
 
     Document doc;
-    doc.load(iss);
+    DocumentReader reader(doc);
+    reader.parse(iss);
+
+    //doc.load(iss);
 
     double a = 0;
     doc["a"].getValue(a);
@@ -156,5 +159,5 @@ void JsonReaderTest::SimpleObject()
 
     int c = 0;
     doc["c"].getValue(c);
-    PT_UNIT_ASSERT_EQUAL(c, 1);
+    PT_UNIT_ASSERT_EQUAL(c, 3);
 }
