@@ -32,11 +32,9 @@
 
 #include <Pt/Json/Api.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/String.h>
 #include <string>
 #include <cstddef>
-
-#include <Pt/Json/JsonReader.h>
-#include <stack>
 
 namespace Pt {
 
@@ -562,40 +560,6 @@ class PT_JSON_API Document
 
     private:
         SerializationInfo _root;
-};
-
-
-class PT_JSON_API DocumentReader
-{
-    typedef void (DocumentReader::*ParseFunc)(const Node&);
-    
-    public:
-        DocumentReader();
-
-        DocumentReader(std::basic_istream<Pt::Char>& is, Document& doc);
-
-        void reset();
-
-        void reset(std::basic_istream<Pt::Char>& is, Document& doc);
-
-        Document& read();
-
-        Document* advance();
-
-    protected:
-        void onRoot(const Node& node);
-        
-        void onArray(const Node& node);
-        
-        void onObject(const Node& node);
-
-    private:
-        ParseFunc              _parse;
-        std::stack<ParseFunc>  _parseStack;
-
-        JsonReader             _reader;
-        Document*              _doc;
-        Document::Element      _current;
 };
 
 } // namespace

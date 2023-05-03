@@ -27,53 +27,58 @@
    MA 02110-1301 USA
 */
 
+#ifndef PT_JSON_DOCUMENT_READER_H
+#define PT_JSON_DOCUMENT_READER_H
+
+#include <Pt/Json/Api.h>
+#include <Pt/Json/JsonReader.h>
 #include <Pt/Json/Document.h>
-#include <Pt/Json/DocumentReader.h>
-#include <Pt/Json/StartObject.h>
-#include <Pt/Json/Member.h>
-#include <Pt/Json/EndObject.h>
-#include <Pt/Json/StartArray.h>
-#include <Pt/Json/EndArray.h>
-#include <Pt/Json/String.h>
-#include <Pt/Json/Float.h>
-#include <Pt/Json/Integer.h>
-#include <Pt/Json/Boolean.h>
-#include <Pt/Json/Null.h>
+#include <Pt/String.h>
+#include <stack>
 
 namespace Pt {
 
 namespace Json {
 
-Document::Document()
+class Document;
+
+/** @brief JSON Document reader.
+*/
+class PT_JSON_API DocumentReader
 {
-}
-
-
-void Document::clear()
-{
-    _root.clear();
-}
-
-
-bool Document::isEmpty() const
-{
-    return _root.isVoid();
-}
-
-
-void Document::load(std::basic_istream<Pt::Char>& is)
-{
-    clear();
+    typedef void (DocumentReader::*ParseFunc)(const Node&);
     
-    DocumentReader reader(is, *this);
-    reader.read();
-}
+    public:
+        DocumentReader();
 
+        DocumentReader(std::basic_istream<Pt::Char>& is, Document& doc);
 
-void Document::save(std::basic_ostream<Pt::Char>& os) const
-{
-}
+        void reset();
+
+        void reset(std::basic_istream<Pt::Char>& is, Document& doc);
+
+        Document& read();
+
+        Document* advance();
+
+    protected:
+        void onRoot(const Node& node);
+        
+        void onArray(const Node& node);
+        
+        void onObject(const Node& node);
+
+    private:
+        ParseFunc              _parse;
+        std::stack<ParseFunc>  _parseStack;
+
+        JsonReader             _reader;
+        Document*              _doc;
+        Document::Element      _current;
+};
 
 } // namespace
 
 } // namespace
+
+#endif
