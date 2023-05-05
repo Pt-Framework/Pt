@@ -438,8 +438,8 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 
     Gfx::Transform tt = trans;
 
-    const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
-    const double scaling = 96.0 / dpix;
+    //const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
+    //const double scaling = 96.0 / dpix;
 
 #ifndef PT_HMI_GDIPLUS
     tt.translate(to.x(), to.y());

@@ -46,16 +46,15 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 , _screenScaling(1.0)
 {
     HWND desktop = GetDesktopWindow();
-    //HDC screenDC = GetDC(desktop);
+    HDC screenDC = GetDC(desktop);
 
-    //int dpix = GetDeviceCaps(screenDC, LOGPIXELSX);
-    //std::clog << "SCALING DPI: " << dpix << std::endl;
+    int dpix = GetDeviceCaps(screenDC, LOGPIXELSX);
+    std::clog << "SCREEN SCALING DPI: " << dpix << std::endl;
     
-    //_scaling = _screenScaling;
-    //_screenScaling = dpix / 96.0;
-    //std::clog << "SCALING: " << _screenScaling << std::endl;
+    _screenScaling = dpix / 96.0;
+    std::clog << "SCREEN SCALING: " << _screenScaling << std::endl;
 
-    //ReleaseDC(desktop, screenDC);
+    ReleaseDC(desktop, screenDC);
 }
 
 
@@ -153,8 +152,8 @@ void ScreenImpl::setCapture(Visual* capture)
 Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
     POINT pnt;
-    pnt.x = p.x() * scaleFactor();
-    pnt.y = p.y() * scaleFactor();
+    pnt.x = p.x() * scaleFactor() * _screenScaling;
+    pnt.y = p.y() * scaleFactor() * _screenScaling;
 
     HWND hwnd = WindowFromPoint(pnt);
     Window* win = Application::instance().impl()->findWindow(hwnd);
@@ -236,7 +235,7 @@ void ScreenImpl::onRelease(WindowFrame& w)
 
 void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    double scaling = ev.scaleFactor() * _screenScaling;
+    double scaling = ev.scaleFactor();
 
     RescaleEvent rev(*this, scaling);
     Base::onProcessRescaleEvent(rev);

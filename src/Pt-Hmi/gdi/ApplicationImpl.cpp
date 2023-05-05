@@ -150,7 +150,10 @@ ApplicationImpl::ApplicationImpl()
     FreeConsole();
 #endif
 
-    //SetProcessDPIAware();
+    // SetProcessDpiAwareness
+
+    BOOL isDpiAware = SetProcessDPIAware();
+    //std::clog << "DPI AWARE: " << isDpiAware << std::endl;
 
     _instanceHandle = (HINSTANCE) GetModuleHandle(NULL);
 
