@@ -152,8 +152,8 @@ void ScreenImpl::setCapture(Visual* capture)
 Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
     POINT pnt;
-    pnt.x = p.x() * scaleFactor() * _screenScaling;
-    pnt.y = p.y() * scaleFactor() * _screenScaling;
+    pnt.x = p.x() * scaleFactor();
+    pnt.y = p.y() * scaleFactor();
 
     HWND hwnd = WindowFromPoint(pnt);
     Window* win = Application::instance().impl()->findWindow(hwnd);
@@ -220,7 +220,9 @@ void ScreenImpl::onDetach(WindowFrame& frame)
 
 void ScreenImpl::onInit(WindowFrame& frame)
 {
-    RescaleEvent ev( frame, scaleFactor() );
+    double windowScaling = scaleFactor() / _screenScaling;
+
+    RescaleEvent ev( frame, windowScaling );
     frame.processEvent(ev);
 }
 
@@ -237,7 +239,7 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
 
-    RescaleEvent rev(*this, scaling);
+    RescaleEvent rev(*this, scaling * _screenScaling);
     Base::onProcessRescaleEvent(rev);
 
     std::vector<Window*>::iterator wit;
@@ -246,8 +248,8 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
         Window* window = *wit;
         WindowFrame* frame = window->frame();
 
-        RescaleEvent ev(*frame, scaling);
-        frame->processEvent(ev);
+        RescaleEvent wev(*frame, scaling);
+        frame->processEvent(wev);
     }
 }
 

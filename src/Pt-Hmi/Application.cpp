@@ -535,13 +535,6 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     //
     if( ev.isPress(MouseEvent::Left) || ev.isPress(MouseEvent::Right) )
     {
-        if(bbb)
-        {
-          bbb = false;
-        }
-
-        bbb = true;
-
         onClosePopups( ev.position() );
     }
 
