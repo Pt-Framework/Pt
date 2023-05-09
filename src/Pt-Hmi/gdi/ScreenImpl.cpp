@@ -49,10 +49,10 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     HDC screenDC = GetDC(desktop);
 
     int dpix = GetDeviceCaps(screenDC, LOGPIXELSX);
-    std::clog << "SCREEN SCALING DPI: " << dpix << std::endl;
+    //std::clog << "SCREEN SCALING DPI: " << dpix << std::endl;
     
     _screenScaling = dpix / 96.0;
-    std::clog << "SCREEN SCALING: " << _screenScaling << std::endl;
+    //std::clog << "SCREEN SCALING: " << _screenScaling << std::endl;
 
     ReleaseDC(desktop, screenDC);
 }
