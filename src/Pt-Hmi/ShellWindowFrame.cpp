@@ -597,6 +597,10 @@ void ShellWindowFrame::setFrame(double bw, double th)
 
     Gfx::PointF clientBoundsPos(_borderWidth, _borderWidth + _titleHeight);
     _clientBounds.setOrigin(clientBoundsPos);
+
+    Gfx::PaintSurface& surface = this->surface();
+    Gfx::PointF surfacePos = _clientBounds.topLeft();
+    _window->setSurface(&surface, surfacePos);
 }
 
 
