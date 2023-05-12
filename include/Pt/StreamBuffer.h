@@ -118,6 +118,10 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
         { return 0; }
 };
 
+#if defined(_MSC_VER)
+    template class PT_EXPORT BasicStreamBuffer<char>;
+#endif
+
 } // namespace Pt
 
 #endif
