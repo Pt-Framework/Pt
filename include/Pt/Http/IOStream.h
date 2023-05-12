@@ -29,9 +29,10 @@
 #ifndef Pt_Http_IOStream_h
 #define Pt_Http_IOStream_h
 
-
 #include <Pt/Http/Api.h>
 #include <Pt/System/IOStream.h>
+#include <Pt/Signal.h>
+#include <Pt/Connectable.h>
 
 namespace Pt {
 
