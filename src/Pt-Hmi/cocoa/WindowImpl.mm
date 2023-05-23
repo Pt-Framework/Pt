@@ -456,6 +456,15 @@ void WindowImpl::onMove(Window& w, const Gfx::PointF& to)
 }
 
 
+void WindowImpl::onProcessMoveEvent(const MoveEvent& ev)
+{
+    Base::onProcessMoveEvent(ev);
+
+    MoveEvent mev( _client, ev.position() );
+    _client.processEvent(mev);
+}
+
+
 void WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
 {
     //std::clog << "RESIZE: " << size.width() << "," 

@@ -351,6 +351,15 @@ void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 }
 
 
+void WindowImpl::onProcessMoveEvent(const MoveEvent& ev)
+{
+    Base::onProcessMoveEvent(ev);
+
+    MoveEvent mev( _window, ev.position() );
+    _window.processEvent(mev);
+}
+
+
 void WindowImpl::onSetAbove(Window& w, bool above)
 {
     HWND insertBelow = above ? HWND_TOPMOST : HWND_NOTOPMOST;

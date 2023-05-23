@@ -538,6 +538,15 @@ void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 }
 
 
+void WindowImpl::onProcessMoveEvent(const MoveEvent& ev)
+{
+    Base::onProcessMoveEvent(ev);
+
+    MoveEvent mev( _client, ev.position() );
+    _client.processEvent(mev);
+}
+
+
 void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);

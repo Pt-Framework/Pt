@@ -129,6 +129,8 @@ class WindowImpl : public WindowFrame
         virtual void onActivateEvent(const ActivateEvent& ev);
 
 
+        virtual void onProcessMoveEvent(const MoveEvent& ev);
+
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         
