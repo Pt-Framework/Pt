@@ -51,6 +51,7 @@
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
+#include <Pt/System/FileInfo.h>
 
 #include <cmath>
 #include <cassert>
@@ -222,6 +223,12 @@ void Application::setDefaultFont(const std::string& fontName)
 
 void Application::loadImage(const System::Path& path, Gfx::Image& image)
 {
+    if( ! System::FileInfo::exists(path) )
+    {
+        image = Gfx::Image();
+        return;
+    }
+
     std::ifstream fs(path.toLocal().c_str(), std::ios::binary);
 
     _iconReader.reset();
