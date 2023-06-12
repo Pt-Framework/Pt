@@ -55,19 +55,17 @@ class PT_SYSTEM_API Path
         */
         Path(const Path& p);
 
-        // TODO: explicit? Path p = "x"; not allowed?
-
         /** @brief Construct from a path name.
         */
-        explicit Path(const Pt::String& s);
+        Path(const Pt::String& s);
 
         /** @brief Construct from an UTF-8 encoded path name.
         */
-        explicit Path(const char* s);
+        Path(const char* s);
 
         /** @brief Construct from an UTF-8 encoded path name.
         */
-        explicit Path(const char* s, std::size_t n);
+        Path(const char* s, std::size_t n);
 
         /** @brief Destructor.
         */
