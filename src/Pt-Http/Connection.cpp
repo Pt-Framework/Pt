@@ -112,6 +112,7 @@ Connection::Connection()
 
 Connection::~Connection()
 {
+  cancel();
 }
 
 
