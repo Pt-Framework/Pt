@@ -890,7 +890,8 @@ void Application::onDispatchPaintEvent(const PaintEvent& ev)
     if( it == _visuals.end() )
         return;
 
-    onProcessPaintEvent(ev);
+    //onProcessPaintEvent(ev);
+    processEvent(ev);
 }
 
 
