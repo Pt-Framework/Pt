@@ -46,6 +46,7 @@ class ScreenImpl;
 class ApplicationImpl;
 
 class Window;
+class WindowManager;
 class RescaleEvent;
 
 /** @brief Screen of a display.
@@ -67,6 +68,8 @@ class PT_HMI_API Screen : public Visual
         void removeWindow(Window& w);
 
         const std::vector<Window*>& windows() const;
+
+        WindowManager& windowManager();
        
         
         Visual* underPointer();
@@ -146,11 +149,12 @@ class PT_HMI_API Screen : public Visual
         virtual bool onKeyEvent(const KeyEvent& ev);
 
     private:
-        ScreenImpl*        _impl;
-        Gfx::RectF         _updateRect;
-        int                _updates;
-        Visual*            _pointer;
-        Pt::System::Clock  _clock;
+        ScreenImpl*         _impl;
+        Pt::Signal<Window&> _surfaceChanged;
+        Gfx::RectF          _updateRect;
+        int                 _updates;
+        Visual*             _pointer;
+        Pt::System::Clock   _clock;
 };
 
 } // namespace

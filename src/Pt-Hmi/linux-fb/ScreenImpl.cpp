@@ -124,6 +124,12 @@ const std::vector<Window*>& ScreenImpl::windows() const
 }
 
 
+WindowManager& ScreenImpl::windowManager()
+{
+    return _shell.windowManager();
+}
+
+
 //double ScreenImpl::scaleFactor() const
 //{
 //    return _surface.scaleFactor();

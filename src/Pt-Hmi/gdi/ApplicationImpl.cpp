@@ -886,6 +886,8 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
            bitmapContext, updateRect.left,  updateRect.top, SRCCOPY);
     
     EndPaint(hwnd, &ps);
+
+    Application::instance().screen().impl()->surfaceChanged().send(w);
 }
 
 } // namespace

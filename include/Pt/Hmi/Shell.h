@@ -58,6 +58,8 @@ class PT_HMI_API Shell : public Widget
 
         const std::vector<Window*>& windows() const;
 
+        WindowManager& windowManager();
+
     public:
         Widget* content();
 

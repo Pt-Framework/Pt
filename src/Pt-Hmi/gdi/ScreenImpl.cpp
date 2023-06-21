@@ -107,6 +107,12 @@ const std::vector<Window*>& ScreenImpl::windows() const
 }
 
 
+WindowManager& ScreenImpl::windowManager()
+{
+    return *this;
+}
+
+
 Gfx::PointF ScreenImpl::toFrame(const WindowImpl& frame, 
                                 const Gfx::PointF& pos) const
 {

@@ -81,6 +81,12 @@ const std::vector<Window*>& Shell::windows() const
 }
 
 
+WindowManager& Shell::windowManager()
+{
+    return _wm;
+}
+
+
 Widget* Shell::content() 
 {
     return _content;

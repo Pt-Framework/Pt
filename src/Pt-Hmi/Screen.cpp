@@ -78,6 +78,12 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
+WindowManager& Screen::windowManager()
+{
+  return _impl->windowManager();
+}
+
+
 Visual* Screen::underPointer()
 {
     return _pointer;

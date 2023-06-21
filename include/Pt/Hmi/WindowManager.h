@@ -48,6 +48,11 @@ class WindowManager : public Visual
 
         virtual ~WindowManager();
 
+        Pt::Signal<Window&>& surfaceChanged()
+        {
+          return _surfaceChanged;
+        }
+
     protected:
         virtual WindowFrame* onAttach(Window& w) = 0;
 
@@ -56,6 +61,9 @@ class WindowManager : public Visual
         virtual void onInit(WindowFrame& w) = 0;
 
         virtual void onRelease(WindowFrame& w) = 0;
+
+    private:
+      Pt::Signal<Window&> _surfaceChanged;
 };
 
 } // namespace

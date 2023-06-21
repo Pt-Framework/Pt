@@ -60,11 +60,14 @@ class ScreenImpl : public Form
         
         void setParent(Screen* screen);
 
+        
         void addWindow(Window& w);
 
         void removeWindow(Window& w);
 
         const std::vector<Window*>& windows() const;
+
+        WindowManager& windowManager();
 
 
         void setCapture(Visual* capture);
