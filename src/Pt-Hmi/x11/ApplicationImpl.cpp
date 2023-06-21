@@ -28,6 +28,7 @@
 
 #include "posix/MainLoopImpl.h"
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
 #include "WindowImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyHandler.h"
@@ -37,6 +38,7 @@
 #endif
 
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Screen..h>
 #include <Pt/IOError.h>
 #include <Pt/SourceInfo.h>
 
@@ -337,6 +339,8 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     ximage->data = NULL;
     XDestroyImage(ximage); 
 #endif
+
+    Application::instance().screen().impl()->surfaceChanged().send(window);
 
     //XFlush(_display);
 }

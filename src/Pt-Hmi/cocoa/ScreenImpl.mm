@@ -96,6 +96,12 @@ const std::vector<Window*>& ScreenImpl::windows() const
 }
 
 
+WindowManager& ScreenImpl::windowManager()
+{
+    return *this;
+}
+
+
 Window* ScreenImpl::findWindow(NSWindow* wnd)
 {
     const std::vector<Window*>& windows = Application::instance().screen().windows();

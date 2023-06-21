@@ -76,6 +76,9 @@ class ScreenImpl : public WindowManager
 
         const std::vector<Window*>& windows() const;
 
+        WindowManager& windowManager();
+
+
         void setCapture(Visual* capture);
 
     protected:

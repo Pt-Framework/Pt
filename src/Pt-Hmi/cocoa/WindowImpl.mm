@@ -668,6 +668,8 @@ void WindowImpl::onPaint(const NSRect& rect)
     CGContextDrawImage(windowContext, rect, subImage);
 
     CGImageRelease(image);
+
+    _wm.surfaceChanged().send(*window);
 }
 
 
