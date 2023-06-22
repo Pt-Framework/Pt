@@ -584,7 +584,7 @@ MessageProgress Connection::endSendRequest()
 // NOTE: maybe add a flag to cause a flush in the future
 void Connection::beginSendReply(Reply& reply)
 {
-    PT_LOG_TRACE("Connection::beginSendReply");
+    PT_LOG_DEBUG("Connection::beginSendReply");
 
     _reply = &reply;
 
@@ -594,7 +594,7 @@ void Connection::beginSendReply(Reply& reply)
 
     _keepAlive = _keepAlive && header.isKeepAlive();
 
-    if( ! _keepAlive && outputAvailable() )
+    if( outputAvailable() )
     {
         beginWrite();
         return;
@@ -649,6 +649,8 @@ void Connection::beginSendReply(Reply& reply)
         os << std::hex << mbuf.size() << std::dec << "\r\n";
         os.write( mbuf.data(), mbuf.size() );
         os.write("\r\n", 2);
+        
+        mbuf.discard();
     }
 
     // TODO: only if over 8K data to send
@@ -669,7 +671,7 @@ MessageProgress Connection::endSendReply()
     if(_isFailed)
         throw System::IOError("I/O Error");
         
-    if( ! _reply->isFinished() || ! _keepAlive)
+    if( ! _reply->isFinished() || ! _keepAlive )
     {
         endWrite();
     }
@@ -679,21 +681,24 @@ MessageProgress Connection::endSendReply()
         throw System::IOError("connection lost");
     }
 
-    // keepalive -> leave data in the output buffer
-    // close -> make sure we sent all data
-    if( ! _keepAlive && outputAvailable() )
+    if( _keepAlive && _reply->isFinished() )
+    {
+        PT_LOG_DEBUG("pipelined reply is finished");
+        progress.setFinished();
+        return progress;
+    }
+
+    if( outputAvailable() )
     {
         PT_LOG_DEBUG("still data to send");
         return progress;
     }
-  
+
     progress.setFinished();
 
     if( ! _reply->isFinished() )
     {
         PT_LOG_DEBUG("reply is not finished");
-
-        // indicates that chunk was completely written
         return progress;
     }
 
