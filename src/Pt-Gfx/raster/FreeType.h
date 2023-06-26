@@ -111,7 +111,8 @@ class FreeType : public Pt::Singleton<FreeType>
         {
             inline bool operator()(const Font& a, const Font& b) const
             {
-                return a.name() < b.name() && a.style() < b.style();
+                return a.name() == b.name() ? a.style() < b.style()
+                                            : a.name() < b.name();
             }
         };
 
