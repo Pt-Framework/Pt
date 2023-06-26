@@ -159,6 +159,9 @@ void FreeType::setFontDir(const System::Path& path)
 
     for( ; it != end; ++it)
     {
+        if( it->path().fileName() == "." || it->path().fileName() == ".." )
+          continue;
+
         System::Path fontFile = _fontDir / it->path();
 
         FT_Face face;
