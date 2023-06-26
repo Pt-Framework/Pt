@@ -164,10 +164,16 @@ void FreeType::setFontDir(const System::Path& path)
         FT_Face face;
         FT_Error err = FT_New_Face(_ft, fontFile.toLocal().c_str(), 0, &face);
         if(err != 0)
+        {
+            PT_LOG_WARN( "font error: " << fontFile.toLocal() << ' ' << err );
             continue;
+        }
 
         if ((face->face_flags & FT_FACE_FLAG_SCALABLE) == 0)
+        {
+            PT_LOG_WARN( "font skipped: " << fontFile.toLocal() << " not scalable");
             continue;
+        }
 
         Font font(face->family_name, DefaultFontSize, face->style_name);
         PT_LOG_INFO( "loaded font: " << font.name() << ' ' << font.style() );
