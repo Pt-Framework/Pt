@@ -32,15 +32,20 @@
 #include "DejaVuSansBold.h"
 #include "DejaVuSansItalic.h"
 #include "DejaVuSansBoldItalic.h"
+
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/System/Directory.h>
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/IOError.h>
+#include <Pt/System/Logger.h>
+
 #include <stdexcept>
 #include <limits>
 #include <iostream>
+
+PT_LOG_DEFINE("Pt.Gfx.FreeType");
 
 namespace {
 
@@ -165,6 +170,7 @@ void FreeType::setFontDir(const System::Path& path)
             continue;
 
         Font font(face->family_name, DefaultFontSize, face->style_name);
+        PT_LOG_INFO( "loaded font: " << font.name() << ' ' << font.style() );
 
         System::Path& fontPath = _fonts[font];
         fontPath = fontFile;
