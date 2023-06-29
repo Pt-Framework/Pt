@@ -362,6 +362,7 @@ ServerThread::ServerThread()
     _loop.eventReceived() += Pt::slot(*this, &ServerThread::onAccept);
     _loop.eventReceived() += Pt::slot(*this, &ServerThread::onRemoveServlet);
     _loop.eventReceived() += Pt::slot(*this, &ServerThread::onIsServletIdle);
+    
     _thread.start();
 }
 
@@ -389,7 +390,9 @@ void ServerThread::serve(Acceptor* conn)
 void ServerThread::stop()
 {
     _loop.exit();
-    _thread.join();
+
+    if( _thread.isJoinable() )
+      _thread.join();
 
     std::vector<Acceptor*>::iterator it;
     for(it = _handlers.begin(); it != _handlers.end(); ++it)
