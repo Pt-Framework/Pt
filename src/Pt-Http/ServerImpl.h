@@ -84,7 +84,6 @@ class Acceptor : public Pt::Connectable
         Signal<Acceptor&>& finished()
         { return _finished; }
 
-
         Servlet* servlet()
         { return _servlet; }
 
@@ -94,6 +93,8 @@ class Acceptor : public Pt::Connectable
             _conn = 0;
             return conn;
         }
+
+        void setFinished(bool isDone);
 
     protected:
         void releaseResponder();
@@ -116,6 +117,7 @@ class Acceptor : public Pt::Connectable
         Connection* _conn;
         Request _request;
         Reply _reply;
+        bool _isReply;
         MessageProgress _requestProgress;
         Signal<Acceptor&> _finished;
 };

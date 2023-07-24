@@ -42,18 +42,23 @@ void Request::beginReceive()
 }
 
 
+MessageProgress Request::endReceive()
+{ 
+    setReceiving(false);
+    
+    MessageProgress progress = connection().endReceiveRequest();
+    if( progress.finished() )
+        setFinished(true);
+
+    return progress;
+}
+
+
 void Request::send(bool finish)
 {
     setFinished(finish);
     Message::setBuffer(Message::buffer());
     connection().sendRequest(*this); 
-}
-
-
-MessageProgress Request::endReceive()
-{ 
-    setReceiving(false);
-    return connection().endReceiveRequest(); 
 }
 
 

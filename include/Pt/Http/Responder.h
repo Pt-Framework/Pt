@@ -42,11 +42,20 @@ namespace Http {
 class Request;
 class Reply;
 class Service;
+class Acceptor;
 
 /** @brief HTTP service responder.
 */
 class PT_HTTP_API Responder
 {
+    public:
+        enum Status
+        {
+          Pending = 0,
+          Continue = 1,
+          Done = 2
+        };
+
     public:
         /** @brief Construct with service.
         */
@@ -66,41 +75,53 @@ class PT_HTTP_API Responder
         const Service& service() const
         { return _service; }
 
+        void setAcceptor(Acceptor& a)
+        { _acceptor = &a; }
+
         /** @brief Called when the request header was received.
         */
-        void beginRequest(Request& request, Reply& reply, System::EventLoop& loop);
+        Status beginRequest(Request& request, Reply& reply, 
+                            System::EventLoop& loop);
         
         /** @brief Called when request body data was received.
         */
-        void readRequest(Request& request, Reply& reply, System::EventLoop& loop);
+        Status readRequest(Request& request, Reply& reply, 
+                           System::EventLoop& loop);
 
         /** @brief Called when request is complete.
         */
-        void beginReply(const Request& request, Reply& reply, System::EventLoop& loop);
+        Status beginReply(const Request& request, Reply& reply, 
+                          System::EventLoop& loop);
 
         /** @brief Write responding reply.
         */
-        void writeReply(const Request& request, Reply& reply, System::EventLoop& loop);
+        Status writeReply(const Request& request, Reply& reply, 
+                          System::EventLoop& loop);
 
     protected:
         /** @brief Called when the request header was received.
         */
-        virtual void onBeginRequest(Request& request, Reply& reply, System::EventLoop& loop) = 0;
+        virtual Status onBeginRequest(Request& request, Reply& reply, 
+                                      System::EventLoop& loop) = 0;
         
-        /** @brief Called when request body data was received.
-        */
-        virtual void onReadRequest(Request& request, Reply& reply, System::EventLoop& loop) = 0;
+        virtual Status onReadRequest(Request& request, Reply& reply, 
+                                     System::EventLoop& loop) = 0;
 
         /** @brief Called when request is complete.
         */
-        virtual void onBeginReply(const Request& request, Reply& reply, System::EventLoop& loop) = 0;
+        virtual Status onBeginReply(const Request& request, Reply& reply, 
+                                    System::EventLoop& loop) = 0;
 
         /** @brief Write responding reply.
         */
-        virtual void onWriteReply(const Request& request, Reply& reply, System::EventLoop& loop) = 0;
+        virtual Status onWriteReply(const Request& request, Reply& reply, 
+                                    System::EventLoop& loop) = 0;
+
+        void setFinished(bool isFinished);
 
     private:
-        Service& _service;
+        Service&  _service;
+        Acceptor* _acceptor;
 };
 
 } // namespace Http

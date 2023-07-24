@@ -439,7 +439,9 @@ class PT_HTTP_API Message
         
         //! @internal
         void setFinished(bool b)
-        { _finished = b; }
+        { 
+          _finished = b; 
+        }
 
     private:
         Http::Connection* _conn;

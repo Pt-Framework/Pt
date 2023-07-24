@@ -51,23 +51,28 @@ class WsdlResponder : public Pt::Http::Responder
 
     protected:
         // inheritdoc
-        void onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
-        {}
-
-        // inheritdoc
-        void onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
-        {}
-
-        // inheritdoc
-        void onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+        Status onBeginRequest(Http::Request& request, Http::Reply& reply, 
+                              System::EventLoop& loop)
         {
-            _serviceDecl.toWsdl( reply.body() );
-            reply.beginSend(true);
+          return Continue;
         }
 
         // inheritdoc
-        void onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
-        {}
+        Status onReadRequest(Http::Request& request, Http::Reply& reply, 
+                             System::EventLoop& loop)
+        { return Continue; }
+
+        // inheritdoc
+        Status onBeginReply(const Http::Request& request, Http::Reply& reply,                                   System::EventLoop& loop)
+        {
+            _serviceDecl.toWsdl( reply.body() );
+            return Done;
+        }
+
+        // inheritdoc
+        Status onWriteReply(const Http::Request& request, Http::Reply& reply,
+                            System::EventLoop& loop)
+        { return Done; }
 
     private:
         const ServiceDeclaration& _serviceDecl;

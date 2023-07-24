@@ -54,6 +54,7 @@ Acceptor::Acceptor(ServerImpl& server, Net::TcpServer& tcpServer)
 , _conn(new Connection())
 , _request(*_conn)
 , _reply(*_conn)
+, _isReply(false)
 {
     _conn->accept(tcpServer);
     _request.inputReceived() += Pt::slot(*this, &Acceptor::onRequestReceived);
@@ -220,10 +221,22 @@ void Acceptor::onRequest(MessageProgress progress)
         {
             PT_LOG_DEBUG("received request header");
             assert(_responder == 0);
-            _responder = _servlet->service()->getResponder( _request );
             
+            _responder = _servlet->service()->getResponder( _request );
             assert(_responder);
-            _responder->beginRequest( _request, _reply, *_conn->loop() );
+
+            _responder->setAcceptor(*this);
+
+            _isReply = false;
+            Responder::Status status = _responder->beginRequest( _request, _reply, 
+                                                                 *_conn->loop() );
+            if(status == Responder::Pending)
+            {
+                PT_LOG_DEBUG("request pending");
+                return;
+            }
+
+            // TODO: Done
 
             if( _reply.isSending() )
             {
@@ -237,7 +250,14 @@ void Acceptor::onRequest(MessageProgress progress)
             if( _responder)
             {
                 PT_LOG_DEBUG("received request body");
-                _responder->readRequest(_request, _reply, *_conn->loop());
+                _isReply = false;
+                Responder::Status status = _responder->readRequest( _request, _reply, 
+                                                                    *_conn->loop() );
+                if(status == Responder::Pending)
+                {
+                    PT_LOG_DEBUG("request pending");
+                    return;
+                }
 
                 if( _reply.isSending() )
                 {
@@ -265,7 +285,19 @@ void Acceptor::onRequest(MessageProgress progress)
             if(_responder)
             {
                 PT_LOG_DEBUG("request body finished, begin reply");
-                _responder->beginReply(_request, _reply, *_conn->loop());
+                _isReply = true;
+                Responder::Status status = _responder->beginReply(_request, _reply, 
+                                                                  *_conn->loop());
+                if(status == Responder::Done)
+                {
+                  _reply.beginSend(true);
+                }
+        
+                if(status == Responder::Continue)
+                {
+                  _reply.beginSend(false);
+                }
+                
                 return;
             }
 
@@ -281,7 +313,40 @@ void Acceptor::onRequest(MessageProgress progress)
         PT_LOG_WARN("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
+}
 
+
+void Acceptor::setFinished(bool isFinished)
+{
+    if(_isReply)
+    {
+        _reply.beginSend(isFinished);
+        return;
+    }
+
+    bool isRequestFinished = _request.isFinished();
+    if(isRequestFinished || isFinished)
+    {
+        assert(_responder);
+
+        PT_LOG_DEBUG("request body finished, begin reply");
+        _isReply = true;
+        Responder::Status status = _responder->beginReply(_request, _reply, 
+                                                          *_conn->loop());
+        if(status == Responder::Done)
+        {
+          _reply.beginSend(true);
+        }
+        
+        if(status == Responder::Continue)
+        {
+          _reply.beginSend(false);
+        }
+        
+        return;
+    }
+
+    _request.beginReceive();
 }
 
 
@@ -318,7 +383,7 @@ void Acceptor::onReplySent(Reply& r)
             _reply.clear();
             _request.clear();
 
-            if (_conn == 0 || !_conn->isConnected())
+            if( _conn == 0 || ! _conn->isConnected() )
             {
                 PT_LOG_DEBUG("not connected anymore");
                 _finished.send(*this);
@@ -341,7 +406,17 @@ void Acceptor::onReplySent(Reply& r)
         _reply.discard();
         assert(_responder);
 
-        _responder->writeReply(_request, _reply, *_conn->loop());        
+        _isReply = true;
+        Responder::Status status = _responder->writeReply(_request, _reply, *_conn->loop());
+        if(status == Responder::Done)
+        {
+          _reply.beginSend(true);
+        }
+        
+        if(status == Responder::Continue)
+        {
+          _reply.beginSend(false);
+        }
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {

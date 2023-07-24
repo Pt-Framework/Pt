@@ -55,36 +55,53 @@ HttpResponder::~HttpResponder()
 
 
 // pass only ReplyHeader and body stream
-void HttpResponder::onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
+HttpResponder::Status HttpResponder::onBeginRequest(Http::Request& request, 
+                                                    Pt::Http::Reply& reply,
+                                                    System::EventLoop& loop)
 {
     _request = &request;
     _reply = 0;
     
     beginMessage( request.body() );
+
+    return HttpResponder::Continue;
 }
 
 
 // pass only ReplyHeader and body stream
-void HttpResponder::onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
+HttpResponder::Status HttpResponder::onReadRequest(Http::Request& request, 
+                                                   Pt::Http::Reply& reply,
+                                                   System::EventLoop& loop)
 {
     parseMessage();
+
+    return HttpResponder::Continue;
 }
 
 
-void HttpResponder::onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+HttpResponder::Status HttpResponder::onBeginReply(const Http::Request& request, 
+                                                  Http::Reply& reply,
+                                                  System::EventLoop& loop)
 {
     _reply = &reply;
     finishMessage(loop);
+
+    return Pending;
 }
 
 
-void HttpResponder::onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+HttpResponder::Status HttpResponder::onWriteReply(const Http::Request& request, 
+                                                  Http::Reply& reply,
+                                                  System::EventLoop& loop)
 {
-    advanceReply(reply);
+    bool isFinished = advanceReply(reply);
+
+    return isFinished ? HttpResponder::Done
+                      : HttpResponder::Continue;
 }
 
 
-void HttpResponder::advanceReply(Http::Reply& reply)
+bool HttpResponder::advanceReply(Http::Reply& reply)
 {
     try
     {
@@ -92,13 +109,14 @@ void HttpResponder::advanceReply(Http::Reply& reply)
         {
             if(reply.buffer().size() > 8192)
             {
-                reply.beginSend(false);
-                return;
+                //reply.beginSend(false);
+                return false;
             }
         }
 
         finishResult();
-        reply.beginSend(true);
+        //reply.beginSend(true);
+        return true;
     }
     catch(const Xml::XmlError& e)
     {
@@ -112,6 +130,8 @@ void HttpResponder::advanceReply(Http::Reply& reply)
     {
       throw System::IOError( e.what() );
     }
+
+    return true;
 }
 
 
@@ -123,7 +143,9 @@ void HttpResponder::onResult()
     {
         _reply->header().set("Content-Type", "text/xml");
         beginResult(_reply->body() );
-        advanceReply(*_reply);
+        
+        bool isFinished = advanceReply(*_reply);
+        setFinished(isFinished);
     }
 }
 
@@ -137,7 +159,9 @@ void HttpResponder::onFault(const Fault& fault)
         _reply->header().set("Content-Type", "text/xml");
         _reply->header().set("Connection", "close");
         beginFault(_reply->body(), fault );
-        advanceReply(*_reply);
+        
+        bool isFinished = advanceReply(*_reply);
+        setFinished(isFinished);
     }
 }
 

@@ -26,6 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "ServerImpl.h"
+
 #include <Pt/Http/Responder.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Request.h>
@@ -39,46 +41,57 @@ namespace Http {
 
 Responder::Responder(Service& s)
 : _service(s)
-{ }
+{
+}
 
 
 Responder::~Responder() 
-{ }
-
-
-void Responder::beginRequest(Request& request, Reply& reply, System::EventLoop& loop)
-{    
-    onBeginRequest(request, reply, loop);
-}
-
-
-void Responder::readRequest(Request& request, Reply& reply, System::EventLoop& loop)
 {
-    onReadRequest(request, reply, loop);
-
-    // ignore everything the responder didn't consume
-    std::streambuf* sb = request.body().rdbuf();
-    if(sb)
-    {
-        // cannot use std::streambuf::ignore, because on some implementations
-        // undeflow will be called when the last character is extracted
-        
-        std::streamsize n = sb->in_avail();
-        while(n--)
-            sb->sbumpc();
-    }
 }
 
 
-void Responder::beginReply(const Request& request, Reply& reply, System::EventLoop& loop)
-{ 
-    onBeginReply(request, reply, loop);
+void Responder::setFinished(bool isFinished)
+{
+    if(_acceptor)
+        _acceptor->setFinished(isFinished);
 }
 
 
-void Responder::writeReply(const Request& request, Reply& reply, System::EventLoop& loop)
+Responder::Status Responder::beginRequest(Request& request, Reply& reply, 
+                                          System::EventLoop& loop)
+{    
+    Status status = onBeginRequest(request, reply, loop);
+
+    if(status == Done)
+        request.discard();
+
+    return status;
+}
+
+
+Responder::Status Responder::readRequest(Request& request, Reply& reply, 
+                                         System::EventLoop& loop)
+{
+    Status status = onReadRequest(request, reply, loop);
+
+    if(status != Pending)
+        request.discard();
+
+    return status;
+}
+
+
+Responder::Status Responder::beginReply(const Request& request, Reply& reply, 
+                                        System::EventLoop& loop)
 { 
-    onWriteReply(request, reply, loop); 
+    return onBeginReply(request, reply, loop);
+}
+
+
+Responder::Status Responder::writeReply(const Request& request, Reply& reply, 
+                                        System::EventLoop& loop)
+{ 
+    return onWriteReply(request, reply, loop); 
 }
 
 } // namespace Http

@@ -55,16 +55,20 @@ class PT_XMLRPC_API HttpResponder : public Http::Responder
 
     protected:
         // inheritdoc
-        void onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop);
+        Status onBeginRequest(Http::Request& request, Http::Reply& reply, 
+                              System::EventLoop& loop);
 
         // inheritdoc
-        void onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop);
+        Status onReadRequest(Http::Request& request, Http::Reply& reply, 
+                             System::EventLoop& loop);
 
         // inheritdoc
-        void onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+        Status onBeginReply(const Http::Request& request, Http::Reply& reply,
+                            System::EventLoop& loop);
 
         // inheritdoc
-        void onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+        Status onWriteReply(const Http::Request& request, Http::Reply& reply,
+                            System::EventLoop& loop);
 
     protected:
         // inheritdoc
@@ -77,7 +81,7 @@ class PT_XMLRPC_API HttpResponder : public Http::Responder
         virtual void onCancel();
 
     private:
-        void advanceReply(Http::Reply& reply);
+        bool advanceReply(Http::Reply& reply);
 
     private:
         Http::Request* _request;
