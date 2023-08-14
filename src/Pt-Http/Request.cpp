@@ -57,7 +57,7 @@ MessageProgress Request::endReceive()
 void Request::send(bool finish)
 {
     setFinished(finish);
-    Message::setBuffer(Message::buffer());
+    Message::setBuffer( Message::buffer() );
     connection().sendRequest(*this); 
 }
 
@@ -82,9 +82,13 @@ void Request::clear()
 {
     _method = "GET";
     _qparams.clear();
+
     Message::header().clear();
     Message::body().clear();
     Message::discard();
+
+    setReceiving(false);
+    setSending(false);
     setFinished(false);
 }
 

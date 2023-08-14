@@ -48,6 +48,7 @@ namespace Http {
 
 Acceptor::Acceptor(ServerImpl& server, Net::TcpServer& tcpServer)
 : _server(server)
+, _state(OnBeginRequest)
 , _auth(0)
 , _servlet(0)
 , _responder(0)
@@ -220,56 +221,40 @@ void Acceptor::onRequest(MessageProgress progress)
         if( progress.header() )
         {
             PT_LOG_DEBUG("received request header");
+
+            _state = OnBeginRequest;
+
             assert(_responder == 0);
-            
             _responder = _servlet->service()->getResponder( _request );
             assert(_responder);
 
             _responder->setAcceptor(*this);
-
-            _isReply = false;
-            Responder::Status status = _responder->beginRequest( _request, _reply, 
-                                                                 *_conn->loop() );
-            if(status == Responder::Pending)
-            {
-                PT_LOG_DEBUG("request pending");
-                return;
-            }
-
-            // TODO: Done
-
-            if( _reply.isSending() )
-            {
-                PT_LOG_DEBUG("request interrupted");
-                return;
-            }
+            _responder->beginRequest( _request, _reply, *_conn->loop() );
+            return;
         }
     
         if( progress.body() )
-        {     
-            if( _responder)
-            {
-                PT_LOG_DEBUG("received request body");
-                _isReply = false;
-                Responder::Status status = _responder->readRequest( _request, _reply, 
-                                                                    *_conn->loop() );
-                if(status == Responder::Pending)
-                {
-                    PT_LOG_DEBUG("request pending");
-                    return;
-                }
+        {
+            PT_LOG_DEBUG("received request body");
 
-                if( _reply.isSending() )
+            _state = OnReadRequest;
+
+            if( ! _responder )
+            {
+                // request was interrupted and remaining body will be ignored
+                PT_LOG_DEBUG("ignoring request body");
+                _request.discard();
+
+                if( ! progress.finished() )
                 {
-                    PT_LOG_DEBUG("request interrupted");
-                    return;
+                    PT_LOG_DEBUG("reading discarded request");
+                    _request.beginReceive();
                 }
             }
             else
             {
-                // no responder means that request was interruped and will be ignored
-                PT_LOG_DEBUG("ignoring request body");
-                _request.discard();
+                _responder->readRequest( _request, _reply, *_conn->loop() );
+                return;
             }
         }
 
@@ -285,19 +270,10 @@ void Acceptor::onRequest(MessageProgress progress)
             if(_responder)
             {
                 PT_LOG_DEBUG("request body finished, begin reply");
-                _isReply = true;
-                Responder::Status status = _responder->beginReply(_request, _reply, 
-                                                                  *_conn->loop());
-                if(status == Responder::Done)
-                {
-                  _reply.beginSend(true);
-                }
-        
-                if(status == Responder::Continue)
-                {
-                  _reply.beginSend(false);
-                }
-                
+
+                _state = OnBeginReply;
+
+                _responder->beginReply(_request, _reply, *_conn->loop());
                 return;
             }
 
@@ -305,7 +281,7 @@ void Acceptor::onRequest(MessageProgress progress)
             // read completely. In this case the remaining request will be ignored
         }
 
-        PT_LOG_DEBUG("read request");
+        PT_LOG_DEBUG("continue reading request");
         _request.beginReceive();
     }
     catch(const System::IOError& e) 
@@ -313,40 +289,6 @@ void Acceptor::onRequest(MessageProgress progress)
         PT_LOG_WARN("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
-}
-
-
-void Acceptor::setFinished(bool isFinished)
-{
-    if(_isReply)
-    {
-        _reply.beginSend(isFinished);
-        return;
-    }
-
-    bool isRequestFinished = _request.isFinished();
-    if(isRequestFinished || isFinished)
-    {
-        assert(_responder);
-
-        PT_LOG_DEBUG("request body finished, begin reply");
-        _isReply = true;
-        Responder::Status status = _responder->beginReply(_request, _reply, 
-                                                          *_conn->loop());
-        if(status == Responder::Done)
-        {
-          _reply.beginSend(true);
-        }
-        
-        if(status == Responder::Continue)
-        {
-          _reply.beginSend(false);
-        }
-        
-        return;
-    }
-
-    _request.beginReceive();
 }
 
 
@@ -360,7 +302,7 @@ void Acceptor::onReplySent(Reply& r)
 
         if( ! progress.finished() )
         {
-            PT_LOG_DEBUG("writing more reply data");
+            PT_LOG_DEBUG("continue writing reply");
             bool finished = _reply.isFinished();
             _reply.beginSend(finished);
             return;
@@ -368,7 +310,7 @@ void Acceptor::onReplySent(Reply& r)
 
         if( _reply.isFinished() )
         {
-            PT_LOG_DEBUG("response finished");
+            PT_LOG_DEBUG("reply finished");
 
             if (r.statusCode() == 101)
             {
@@ -395,6 +337,17 @@ void Acceptor::onReplySent(Reply& r)
         }
 
         // reply chunks are written while reading request
+        //
+        // TODO: is this still possible?
+        //
+        //  probably need setReady(Input|Output|Done) ?
+        //
+        //  - read part of request
+        //  - write part of reply
+        //  - switch back to read next part of request
+        //  - switch back to write next part of reply
+
+        // TODO: same as _request->isFinished()
         if( ! _requestProgress.finished() )
         {
             PT_LOG_DEBUG("continuing request");
@@ -402,26 +355,50 @@ void Acceptor::onReplySent(Reply& r)
             return;
         }
 
-        PT_LOG_DEBUG("continuing response");
+        PT_LOG_DEBUG("continuing reply");
         _reply.discard();
-        assert(_responder);
-
-        _isReply = true;
-        Responder::Status status = _responder->writeReply(_request, _reply, *_conn->loop());
-        if(status == Responder::Done)
-        {
-          _reply.beginSend(true);
-        }
         
-        if(status == Responder::Continue)
-        {
-          _reply.beginSend(false);
-        }
+        _state = OnWriteReply;
+
+        assert(_responder);
+        _responder->writeReply(_request, _reply, *_conn->loop());
+
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
         PT_LOG_WARN("EXCEPTION: " << e.what());
         _finished.send(*this);
+    }
+}
+
+
+void Acceptor::setFinished(bool isFinished)
+{
+    if(_state == OnBeginRequest || _state == OnReadRequest)
+    {
+        if(isFinished)
+        {
+            _request.discard();
+            _reply.beginSend(true);
+            return;
+        }
+
+        bool isRequestFinished = _request.isFinished();
+        if( ! _request.isFinished() )
+        {
+            _request.beginReceive();
+            return;
+        }
+
+        _state = OnBeginReply;
+        _responder->beginReply( _request, _reply, *_conn->loop() );
+        return;
+    }
+
+    if(_state == OnBeginReply || _state == OnWriteReply)
+    {
+        _reply.beginSend(isFinished);
+        return;
     }
 }
 

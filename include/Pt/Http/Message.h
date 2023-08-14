@@ -390,6 +390,7 @@ class PT_HTTP_API Message
         //! @brief Constructs with connection to use.
         explicit Message(Http::Connection& conn);
 
+        //! @brief Returns the used connection.
         Connection& connection()
         { return *_conn; }
 
@@ -405,6 +406,15 @@ class PT_HTTP_API Message
         std::iostream& body()
         { return _ios; }
 
+        //! @brief Returns the number of bytes available to read.
+        std::size_t available() const;
+
+        //! @brief Returns the number of bytes pending to be written.
+        std::size_t pending() const;
+
+        //! @brief Discards the message body.
+        void discard();
+
         //! @internal
         bool isSending() const
         { return _isSending; }
@@ -417,9 +427,6 @@ class PT_HTTP_API Message
         bool isFinished() const
         { return _finished; }
 
-        //! @brief Discards the message body.
-        void discard();
-   
         //! @internal
         MessageBuffer& buffer()
         { return _buf; }
@@ -439,18 +446,16 @@ class PT_HTTP_API Message
         
         //! @internal
         void setFinished(bool b)
-        { 
-          _finished = b; 
-        }
+        { _finished = b; }
 
     private:
         Http::Connection* _conn;
-        MessageHeader _header;
-        MessageBuffer _buf;
-        std::iostream _ios;
-        bool _isSending;
-        bool _isReceiving;
-        bool _finished;
+        MessageHeader     _header;
+        MessageBuffer     _buf;
+        std::iostream     _ios;
+        bool              _isSending;
+        bool              _isReceiving;
+        bool              _finished;
 };
 
 } // namespace Http

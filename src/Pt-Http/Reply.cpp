@@ -44,7 +44,7 @@ void Reply::receive()
 void Reply::beginReceive()
 { 
     setReceiving(true);
-    Message::setBuffer(connection().buffer());
+    Message::setBuffer( connection().buffer() );
     connection().beginReceiveReply(*this); 
 }
 
@@ -60,7 +60,7 @@ void Reply::beginSend(bool finish)
 { 
     setFinished(finish);
     setSending(true);
-    Message::setBuffer(Message::buffer());
+    Message::setBuffer( Message::buffer() );
     connection().beginSendReply(*this); 
 }
 
@@ -76,9 +76,13 @@ void Reply::clear()
 {
     _statusCode = 200;
     _statusText = "OK";
+
     Message::header().clear();
     Message::body().clear();
     Message::discard();
+
+    setReceiving(false);
+    setSending(false);
     setFinished(false);
 }
 

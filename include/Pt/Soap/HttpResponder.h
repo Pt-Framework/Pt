@@ -59,20 +59,20 @@ class PT_SOAP_API HttpResponder : public Http::Responder
 
     protected:
         // inheritdoc
-        Status onBeginRequest(Http::Request& request, Http::Reply& reply, 
-                              System::EventLoop& loop);
-
-        // inheritdoc
-        Status onReadRequest(Http::Request& request, Http::Reply& reply, 
-                             System::EventLoop& loop);
-
-        // inheritdoc
-        Status onBeginReply(const Http::Request& request, Http::Reply& reply, 
+        void onBeginRequest(Http::Request& request, Http::Reply& reply, 
                             System::EventLoop& loop);
 
         // inheritdoc
-        Status onWriteReply(const Http::Request& request, Http::Reply& reply,
-                            System::EventLoop& loop);
+        void onReadRequest(Http::Request& request, Http::Reply& reply, 
+                           System::EventLoop& loop);
+
+        // inheritdoc
+        void onBeginReply(const Http::Request& request, Http::Reply& reply, 
+                          System::EventLoop& loop);
+
+        // inheritdoc
+        void onWriteReply(const Http::Request& request, Http::Reply& reply,
+                          System::EventLoop& loop);
 
     protected:
         // inheritdoc

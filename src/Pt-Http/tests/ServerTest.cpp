@@ -56,26 +56,29 @@ class EchoQueryResponder : public Pt::Http::Responder
         : Pt::Http::Responder(s)
         {}
         
-        Status onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
-                              Pt::System::EventLoop& loop)
-        { return Continue; }
+        void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
+                            Pt::System::EventLoop& loop)
+        { 
+            setReady(false); 
+        }
         
-        Status onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
+        void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
                              Pt::System::EventLoop& loop)
-        { return Continue; }
+        { 
+            setReady(false); 
+        }
 
-        Status onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
+        void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
                             Pt::System::EventLoop& loop)
         { 
           return onWriteReply(request, reply, loop); 
         }
 
-        Status onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
+        void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
                             Pt::System::EventLoop& loop)
         {
             reply.body() << request.qparams();
-            reply.beginSend(true);
-            return Done;
+            setReady(true); 
         }
 };
 
@@ -134,17 +137,34 @@ class WebSocketService : public  Pt::Http::BasicService<WebSocketService>
 };
 */
 
+class Counter
+{
+    public:
+        Counter()
+        : _n(1)
+        { }
+
+        int count()
+        {
+            return _n++;
+        }
+
+    private:
+        int _n;
+};
+
 class HelloResponder : public Pt::Http::Responder
                      , public Pt::Connectable
 {
     public:
-        HelloResponder(Pt::Http::Service& s)
+        HelloResponder(Pt::Http::Service& s, Counter& c)
         : Pt::Http::Responder(s)
+        , _counter(c)
         {
         }
         
-        virtual Status onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
-                                      Pt::System::EventLoop& loop)
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
+                                    Pt::System::EventLoop& loop)
         {
           _request = &request;
           _reply = &reply;
@@ -153,14 +173,14 @@ class HelloResponder : public Pt::Http::Responder
           return onReadRequest(request, reply, loop);
         }
         
-        virtual Status onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
-                                     Pt::System::EventLoop& loop)
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
+                                   Pt::System::EventLoop& loop)
         {
           _timer.setActive(loop);
           _timer.timeout() += Pt::slot(*this, &HelloResponder::onTimeout);
           _timer.start(200);
 
-          return Pending;
+          //onTimeout();
         }
 
         void onTimeout()
@@ -170,40 +190,62 @@ class HelloResponder : public Pt::Http::Responder
           char body[64] = {};
           _request->body().readsome( body, sizeof(body) );
 
-          setFinished(true);
+          setReady(false);
         }
 
-        virtual Status onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
-                                    Pt::System::EventLoop& loop)
+        virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
+                                  Pt::System::EventLoop& loop)
         { 
           return onWriteReply(request, reply, loop); 
         }
 
-        virtual Status onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
-                                    Pt::System::EventLoop& loop)
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
+                                  Pt::System::EventLoop& loop)
         {
             _timer.timeout().disconnect();
             _timer.timeout() += Pt::slot(*this, &HelloResponder::onTimeout2);
             _timer.start(200);
 
-            return Pending; 
+            //onTimeout2();
         }
 
         void onTimeout2()
         {
           _timer.stop();
-          _reply->body() << "Hello World!";
-          setFinished(true);
+          _reply->body() << "Hello World #" << _counter.count();
+          
+          setReady(true);
         }
 
     private:
+        Counter&                _counter;
         Pt::System::Timer       _timer;
         Pt::Http::Request*      _request;
         Pt::Http::Reply*        _reply;
         Pt::System::EventLoop*  _loop;
 };
 
-typedef Pt::Http::BasicService<HelloResponder> HelloService;
+
+class HelloService : public Pt::Http::Service
+{
+    public:
+        HelloService()
+        {}
+
+        virtual Pt::Http::Responder* onGetResponder(const Pt::Http::Request&)
+        {
+            return new HelloResponder(*this, _counter);
+        }
+        
+        virtual void onReleaseResponder(Pt::Http::Responder* r)
+        {
+            delete r;
+        }
+
+    private:
+        Counter _counter;
+};
+
 
 class ChunkedResponder : public Pt::Http::Responder
 {
@@ -213,26 +255,32 @@ class ChunkedResponder : public Pt::Http::Responder
         , _chunks(5)
         {}
       
-        virtual Status onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
-                                      Pt::System::EventLoop& loop)
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
+                                    Pt::System::EventLoop& loop)
         { 
-          _chunks = 5; 
-          return Continue;
+            _chunks = 5;
+            setReady(false);
         }
         
-        virtual Status onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
-                                     Pt::System::EventLoop& loop)
-        { return Continue; }
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
+                                   Pt::System::EventLoop& loop)
+        { 
+            setReady(false); 
+        }
 
-        virtual Status onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
-                                    Pt::System::EventLoop& loop)
-        { return onWriteReply(request, reply, loop); }
+        virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
+                                  Pt::System::EventLoop& loop)
+        {
+            return onWriteReply(request, reply, loop); 
+        }
 
-        virtual Status onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
-                                    Pt::System::EventLoop& loop)
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
+                                  Pt::System::EventLoop& loop)
         {
             reply.body() << "Chunk" << _chunks--;
-            return _chunks == 0 ? Done : Continue;
+
+            bool isDone = _chunks == 0;
+            setReady(isDone);
         }
 
     private:
@@ -254,19 +302,18 @@ class ServerTest : public Pt::Unit::TestSuite
 
             _authent.setUser( Pt::Http::Credential("testo", "testpwd") );
 
-            this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
+            registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL
-            this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
+            registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
 #endif
-
-            //this->registerMethod( "BasicAuthentication", *this, &ServerTest::BasicAuthentication);
-            this->registerMethod( "ReplyWithBody", *this, &ServerTest::ReplyWithBody);
-            //this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
-            //this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
-            //this->registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
-            //this->registerMethod( "QueryString", *this, &ServerTest::QueryString);
-
-            //this->registerMethod("Upgrade", *this, &ServerTest::Upgrade);
+            registerMethod( "BasicAuthentication", *this, &ServerTest::BasicAuthentication);
+            registerMethod( "ReplyWithBody", *this, &ServerTest::ReplyWithBody);
+            registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
+            registerMethod( "PipelinedRequests", *this,  &ServerTest::PipelinedRequests);
+            registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
+            registerMethod( "QueryString", *this, &ServerTest::QueryString);
+            
+            //registerMethod("Upgrade", *this, &ServerTest::Upgrade);
         }
 
         void setUp()
@@ -336,6 +383,9 @@ class ServerTest : public Pt::Unit::TestSuite
 
             Pt::Http::Server server(*_loop, ep);
             server.addServlet(mapurl);
+            server.setKeepAliveTimeout(999999);
+            server.setTimeout(999999);
+
 
             Pt::Http::Client client(*_loop);
             client.setHost(ep);
@@ -349,8 +399,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
-
-            PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!Hello World!");
+            PT_UNIT_ASSERT_EQUALS(_reply, "Hello World #1Hello World #2");
         }
 
         void onPipelinedSent(Pt::Http::Client& client)
@@ -391,7 +440,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                if( _reply == "Hello World!Hello World!")
+                if( _reply == "Hello World #1Hello World #2")
                 {
                     _loop->exit();
                     return;
@@ -548,7 +597,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
-            PT_UNIT_ASSERT_EQUALS(_reply, "Authorization Required Hello World!");
+            PT_UNIT_ASSERT_EQUALS(_reply, "Authorization Required Hello World #1");
         }
 
         void onBasicAuthenticationReceived(Pt::Http::Client& client)
@@ -609,7 +658,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
-            PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
+            PT_UNIT_ASSERT_EQUALS(_reply, "Hello World #1");
         }
 
         void onHelloReceived(Pt::Http::Client& client)

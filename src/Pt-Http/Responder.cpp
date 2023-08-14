@@ -50,6 +50,13 @@ Responder::~Responder()
 }
 
 
+void Responder::setReady(bool isFinished)
+{
+    if(_acceptor)
+        _acceptor->setFinished(isFinished);
+}
+
+
 void Responder::setFinished(bool isFinished)
 {
     if(_acceptor)
@@ -57,41 +64,31 @@ void Responder::setFinished(bool isFinished)
 }
 
 
-Responder::Status Responder::beginRequest(Request& request, Reply& reply, 
-                                          System::EventLoop& loop)
+void Responder::beginRequest(Request& request, Reply& reply, 
+                             System::EventLoop& loop)
 {    
-    Status status = onBeginRequest(request, reply, loop);
-
-    if(status == Done)
-        request.discard();
-
-    return status;
+    onBeginRequest(request, reply, loop);
 }
 
 
-Responder::Status Responder::readRequest(Request& request, Reply& reply, 
-                                         System::EventLoop& loop)
+void Responder::readRequest(Request& request, Reply& reply, 
+                            System::EventLoop& loop)
 {
-    Status status = onReadRequest(request, reply, loop);
-
-    if(status != Pending)
-        request.discard();
-
-    return status;
+    onReadRequest(request, reply, loop);
 }
 
 
-Responder::Status Responder::beginReply(const Request& request, Reply& reply, 
-                                        System::EventLoop& loop)
+void Responder::beginReply(const Request& request, Reply& reply, 
+                           System::EventLoop& loop)
 { 
-    return onBeginReply(request, reply, loop);
+    onBeginReply(request, reply, loop);
 }
 
 
-Responder::Status Responder::writeReply(const Request& request, Reply& reply, 
-                                        System::EventLoop& loop)
+void Responder::writeReply(const Request& request, Reply& reply, 
+                           System::EventLoop& loop)
 { 
-    return onWriteReply(request, reply, loop); 
+    onWriteReply(request, reply, loop); 
 }
 
 } // namespace Http

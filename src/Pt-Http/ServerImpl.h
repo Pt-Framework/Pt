@@ -62,6 +62,14 @@ class ServerThread;
 
 class Acceptor : public Pt::Connectable
 {
+    enum State
+    {
+        OnBeginRequest,
+        OnReadRequest,
+        OnBeginReply,
+        OnWriteReply
+    };
+
     public:
         Acceptor(ServerImpl& server, Net::TcpServer& tcpServer);
 
@@ -111,6 +119,7 @@ class Acceptor : public Pt::Connectable
 
     private:
         ServerImpl& _server;
+        State       _state;
         Authorization* _auth;
         Servlet* _servlet;
         Responder* _responder;

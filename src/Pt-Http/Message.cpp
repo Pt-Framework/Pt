@@ -339,6 +339,19 @@ Message::Message(Http::Connection& conn)
 }
 
 
+std::size_t Message::available() const
+{
+    std::streambuf* sb = _ios.rdbuf();
+    return sb ? _ios.rdbuf()->in_avail() : 0;
+}
+
+
+std::size_t Message::pending() const
+{
+    return _buf.size();
+}
+
+
 void Message::discard()
 { 
     _buf.discard();

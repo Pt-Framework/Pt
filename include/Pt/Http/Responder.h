@@ -49,14 +49,6 @@ class Acceptor;
 class PT_HTTP_API Responder
 {
     public:
-        enum Status
-        {
-          Pending = 0,
-          Continue = 1,
-          Done = 2
-        };
-
-    public:
         /** @brief Construct with service.
         */
         explicit Responder(Service& s);
@@ -80,42 +72,46 @@ class PT_HTTP_API Responder
 
         /** @brief Called when the request header was received.
         */
-        Status beginRequest(Request& request, Reply& reply, 
-                            System::EventLoop& loop);
+        void beginRequest(Request& request, Reply& reply, 
+                          System::EventLoop& loop);
         
         /** @brief Called when request body data was received.
         */
-        Status readRequest(Request& request, Reply& reply, 
-                           System::EventLoop& loop);
+        void readRequest(Request& request, Reply& reply, 
+                         System::EventLoop& loop);
 
         /** @brief Called when request is complete.
         */
-        Status beginReply(const Request& request, Reply& reply, 
-                          System::EventLoop& loop);
+        void beginReply(const Request& request, Reply& reply, 
+                        System::EventLoop& loop);
 
         /** @brief Write responding reply.
         */
-        Status writeReply(const Request& request, Reply& reply, 
-                          System::EventLoop& loop);
+        void writeReply(const Request& request, Reply& reply, 
+                        System::EventLoop& loop);
 
     protected:
         /** @brief Called when the request header was received.
         */
-        virtual Status onBeginRequest(Request& request, Reply& reply, 
-                                      System::EventLoop& loop) = 0;
+        virtual void onBeginRequest(Request& request, Reply& reply, 
+                                    System::EventLoop& loop) = 0;
         
-        virtual Status onReadRequest(Request& request, Reply& reply, 
-                                     System::EventLoop& loop) = 0;
+        virtual void onReadRequest(Request& request, Reply& reply, 
+                                   System::EventLoop& loop) = 0;
 
         /** @brief Called when request is complete.
         */
-        virtual Status onBeginReply(const Request& request, Reply& reply, 
-                                    System::EventLoop& loop) = 0;
+        virtual void onBeginReply(const Request& request, Reply& reply, 
+                                  System::EventLoop& loop) = 0;
 
         /** @brief Write responding reply.
         */
-        virtual Status onWriteReply(const Request& request, Reply& reply, 
-                                    System::EventLoop& loop) = 0;
+        virtual void onWriteReply(const Request& request, Reply& reply, 
+                                  System::EventLoop& loop) = 0;
+
+        // TODO: setFinished() -> setReady()
+
+        void setReady(bool isFinished);
 
         void setFinished(bool isFinished);
 

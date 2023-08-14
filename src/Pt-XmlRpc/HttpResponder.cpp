@@ -55,49 +55,49 @@ HttpResponder::~HttpResponder()
 
 
 // pass only ReplyHeader and body stream
-HttpResponder::Status HttpResponder::onBeginRequest(Http::Request& request, 
-                                                    Pt::Http::Reply& reply,
-                                                    System::EventLoop& loop)
+void HttpResponder::onBeginRequest(Http::Request& request, 
+                                   Pt::Http::Reply& reply,
+                                   System::EventLoop& loop)
 {
     _request = &request;
     _reply = 0;
     
     beginMessage( request.body() );
+    parseMessage();
 
-    return HttpResponder::Continue;
+    Http::Responder::setReady(false);
 }
 
 
 // pass only ReplyHeader and body stream
-HttpResponder::Status HttpResponder::onReadRequest(Http::Request& request, 
-                                                   Pt::Http::Reply& reply,
-                                                   System::EventLoop& loop)
+void HttpResponder::onReadRequest(Http::Request& request, 
+                                  Pt::Http::Reply& reply,
+                                  System::EventLoop& loop)
 {
     parseMessage();
 
-    return HttpResponder::Continue;
+    Http::Responder::setReady(false);
 }
 
 
-HttpResponder::Status HttpResponder::onBeginReply(const Http::Request& request, 
-                                                  Http::Reply& reply,
-                                                  System::EventLoop& loop)
+void HttpResponder::onBeginReply(const Http::Request& request, 
+                                 Http::Reply& reply,
+                                 System::EventLoop& loop)
 {
     _reply = &reply;
     finishMessage(loop);
 
-    return Pending;
+    // not ready yet...
 }
 
 
-HttpResponder::Status HttpResponder::onWriteReply(const Http::Request& request, 
-                                                  Http::Reply& reply,
-                                                  System::EventLoop& loop)
+void HttpResponder::onWriteReply(const Http::Request& request, 
+                                 Http::Reply& reply,
+                                 System::EventLoop& loop)
 {
     bool isFinished = advanceReply(reply);
-
-    return isFinished ? HttpResponder::Done
-                      : HttpResponder::Continue;
+    
+    Http::Responder::setReady(isFinished);
 }
 
 

@@ -594,6 +594,11 @@ void Connection::beginSendReply(Reply& reply)
 
     _keepAlive = _keepAlive && header.isKeepAlive();
 
+    //
+    // TODO: compare previous revision
+    //
+
+    // if( ! _keepAlive && outputAvailable() )
     if( outputAvailable() )
     {
         beginWrite();
@@ -627,9 +632,11 @@ void Connection::beginSendReply(Reply& reply)
 
         if( _keepAlive )
         {
+            // TODO: obsolete?
+
             // signal that output was sent, so the reply data can be pipelined
             // until we begin receiving the next request from the client
-            setOutputReady(); 
+            setOutputReady();
         }
         else
             beginWrite();
@@ -681,6 +688,7 @@ MessageProgress Connection::endSendReply()
         throw System::IOError("connection lost");
     }
 
+    // TODO: obsolete?
     if( _keepAlive && _reply->isFinished() )
     {
         PT_LOG_DEBUG("pipelined reply is finished");
@@ -787,7 +795,14 @@ void Connection::beginReceiveRequest(Request& request)
 
     // send remaining pipelined replies, if no further requests
     // are in the pipeline.
-    if( outputAvailable() && ! inputAvailable() )
+    
+    // TODO: obsolete?
+
+    // TODO: send remaining pipelined reply data before processing 
+    //       further requests
+
+    // HEAD: if( outputAvailable() && ! inputAvailable() )
+    if( outputAvailable() )
     {
         PT_LOG_DEBUG("sending remaining reply data");
         beginWrite();
