@@ -150,7 +150,6 @@ class PT_HMI_API Screen : public Visual
 
     private:
         ScreenImpl*         _impl;
-        Pt::Signal<Window&> _surfaceChanged;
         Gfx::RectF          _updateRect;
         int                 _updates;
         Visual*             _pointer;

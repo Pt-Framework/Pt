@@ -124,6 +124,18 @@ void Window::unparent()
 }
 
 
+WindowManager* Window::windowManager()
+{
+    return _wm;
+}
+
+
+const WindowManager* Window::windowManager() const
+{
+    return _wm;
+}
+
+
 WindowFrame* Window::frame()
 {
     return _frame;   
@@ -342,6 +354,9 @@ void Window::onProcessPaintEvent(const PaintEvent& ev)
         return;
 
     Base::onProcessPaintEvent(ev);
+
+    if(_wm)
+      _wm->surfaceChanged().send(*this);
 }
 
 

@@ -437,8 +437,6 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
 
         Pt::Gfx::Painter painter( surface() );
         painter.drawSurface(frameRect.topLeft(), frame->surface(), surfaceRect);
-
-        surfaceChanged().send(*window);
     }
 }
 

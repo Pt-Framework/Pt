@@ -30,6 +30,7 @@
 #define PT_HMI_WINDOWMANAGER_H
 
 #include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Gfx/Size.h>
 
 namespace Pt {
@@ -53,6 +54,34 @@ class WindowManager : public Visual
           return _surfaceChanged;
         }
 
+        // TODO:
+
+        //void addWindow(Window& w)
+        //{
+        //    w.setParent(*this);
+        //}
+
+        //void removeWindow(Window& w)
+        //{
+        //    if(w.windowManager() == this)
+        //        w.unparent();
+        //}
+
+        //std::vector<Pt::Hmi::Window*>& windows()
+        //{
+        //  return _windows;
+        //}
+
+        //Pt::Signal<Window&>& windowAdded()
+        //{
+        //  return _windowAdded;
+        //}
+
+        //Pt::Signal<Window&>& windowRemoved()
+        //{
+        //  return _windowRemoved;
+        //}
+
     protected:
         virtual WindowFrame* onAttach(Window& w) = 0;
 
@@ -64,6 +93,10 @@ class WindowManager : public Visual
 
     private:
       Pt::Signal<Window&> _surfaceChanged;
+
+      std::vector<Pt::Hmi::Window*> _windows;
+      Pt::Signal<Window&>           _windowAdded;
+      Pt::Signal<Window&>           _windowRemoved;
 };
 
 } // namespace

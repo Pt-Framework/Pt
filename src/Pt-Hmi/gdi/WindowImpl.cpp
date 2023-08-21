@@ -29,6 +29,7 @@
 
 #include "WindowImpl.h"
 #include "ScreenImpl.h"
+#include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
@@ -223,16 +224,31 @@ void WindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
 
 void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
-    Base::onProcessPaintEvent(ev);
-
     PaintEvent rev( _window, ev.rect() );
     _window.processEvent(rev);
+
+    Base::onProcessPaintEvent(ev);
 }
 
 
 void WindowImpl::onPaintEvent(const PaintEvent& ev)
 {
     Base::onPaintEvent(ev);
+
+    Gfx::RectF updateRect = ev.rect();
+    updateRect = Gfx::RectF( updateRect.topLeft() * scaleFactor(), 
+                             updateRect.size() * scaleFactor() );
+
+    PAINTSTRUCT ps;
+    HDC windowContext = BeginPaint(_hwnd, &ps);
+
+    HDC bitmapContext = surface().pixmapImpl()->deviceContext();
+
+    BitBlt(windowContext, updateRect.x(), updateRect.y(), 
+           updateRect.width(), updateRect.height(), 
+           bitmapContext, updateRect.x(),  updateRect.y(), SRCCOPY);
+
+    EndPaint(_hwnd, &ps);
 }
 
 

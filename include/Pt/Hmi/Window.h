@@ -80,6 +80,10 @@ class PT_HMI_API Window : public Form
 
         void unparent();
 
+        WindowManager* windowManager();
+
+        const WindowManager* windowManager() const; 
+
         WindowFrame* frame();
 
         const WindowFrame* frame() const; 

@@ -875,19 +875,17 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     PaintEvent ev(*frame, winRect);
     frame->processEvent(ev);
 
-    PAINTSTRUCT ps;
-    HDC windowContext = BeginPaint(hwnd, &ps);
+    //PAINTSTRUCT ps;
+    //HDC windowContext = BeginPaint(hwnd, &ps);
 
-    WindowImpl* windowImpl = static_cast<WindowImpl*>( w.frame() );
-    HDC bitmapContext = windowImpl->surface().pixmapImpl()->deviceContext();
-    
-    BitBlt(windowContext, updateRect.left, updateRect.top, 
-           updateRect.right - updateRect.left, updateRect.bottom - updateRect.top, 
-           bitmapContext, updateRect.left,  updateRect.top, SRCCOPY);
-    
-    EndPaint(hwnd, &ps);
-
-    Application::instance().screen().impl()->surfaceChanged().send(w);
+    //WindowImpl* windowImpl = static_cast<WindowImpl*>( w.frame() );
+    //HDC bitmapContext = windowImpl->surface().pixmapImpl()->deviceContext();
+    //
+    //BitBlt(windowContext, updateRect.left, updateRect.top, 
+    //       updateRect.right - updateRect.left, updateRect.bottom - updateRect.top, 
+    //       bitmapContext, updateRect.left,  updateRect.top, SRCCOPY);
+    //
+    //EndPaint(hwnd, &ps);
 }
 
 } // namespace

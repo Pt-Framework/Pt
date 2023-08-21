@@ -340,8 +340,6 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     XDestroyImage(ximage); 
 #endif
 
-    Application::instance().screen().impl()->surfaceChanged().send(window);
-
     //XFlush(_display);
 }
 
