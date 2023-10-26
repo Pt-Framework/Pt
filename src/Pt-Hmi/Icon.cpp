@@ -30,16 +30,19 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/PngReader.h>
 
+#include <map>
+#include <algorithm>
+
 namespace Pt {
 
 namespace Hmi {
 
 /////////////////////////////////////////////////////////////////////////////
-// IconImpl
+// DefaultIconProvider
 /////////////////////////////////////////////////////////////////////////////
 
-class IconImpl
-{
+class DefaultIconProvider : public IconProvider
+{    
     public:
         struct Entry
         {
@@ -59,49 +62,43 @@ class IconImpl
         };
 
     public:
-        IconImpl()
-        : refCount(1)
-        { }
+        DefaultIconProvider()
+        {
+        }
 
+        virtual ~DefaultIconProvider()
+        {
+        }
+        
         bool empty() const
         {
-          return images.empty();
-        }
-
-        const Entry& front() const
-        {
-            return images.begin()->second;
-        }
-
-        const Entry& back() const
-        { 
-            return images.rbegin()->second;
+          return _images.empty();
         }
 
         void clear()
         {
-            images.clear();
+            _images.clear();
         }
 
-        void insert(const Gfx::SizeF& size, const Gfx::Image& image)
+        void addImage(const Gfx::SizeF& size, const Gfx::Image& image)
         {
-            images[size] = IconImpl::Entry(image);
+            _images[size] = Entry(image);
         }
 
-        void insert(const Gfx::SizeF& size, const System::Path& path)
+        void addImage(const Gfx::SizeF& size, const System::Path& path)
         {
-            images[size] = IconImpl::Entry(path);
+            _images[size] = Entry(path);
         }
 
-        Entry* findBest(const Gfx::SizeF& sizeF)
+        virtual const Gfx::Image& getImage(const Gfx::SizeF& sizeF)
         {
             const Gfx::Size size = round(sizeF);
 
-            std::map<Gfx::SizeF, IconImpl::Entry>::iterator match;
-            match = images.begin();
+            std::map<Gfx::SizeF, Entry>::iterator match;
+            match = _images.begin();
 
-            std::map<Gfx::SizeF, IconImpl::Entry>::iterator it;
-            for(it = images.begin(); it != images.end(); ++it)
+            std::map<Gfx::SizeF, Entry>::iterator it;
+            for(it = _images.begin(); it != _images.end(); ++it)
             {
                 const Gfx::SizeF& imageSize = it->first;
                 double imageArea = imageSize.width() * imageSize.height();
@@ -117,40 +114,185 @@ class IconImpl
                 }
             }
 
-            return match == images.end() ? 0 : &(match->second);
+            if( match == _images.end() )
+                return _missing;
+
+            Entry& entry = match->second;
+            if( entry.image.empty() )
+                Application::instance().loadImage(entry.path, entry.image);
+
+            return entry.image;
+        }
+
+        const System::Path* getPath(const Gfx::SizeF& sizeF) const
+        {
+            return 0;;
         }
 
         Gfx::SizeF minimumSize() const
         {
-            return empty() ? Gfx::SizeF() : images.begin()->first;
+            return empty() ? Gfx::SizeF() : _images.begin()->first;
         }
 
 
         Gfx::SizeF maximumSize() const
         {
-            return empty() ? Gfx::SizeF() : images.rbegin()->first;
+            return empty() ? Gfx::SizeF() : _images.rbegin()->first;
+        }
+
+    private:
+        std::map<Gfx::SizeF, Entry> _images;
+        Gfx::Image                  _missing;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// IconImpl
+/////////////////////////////////////////////////////////////////////////////
+
+class IconImpl
+{
+    public:
+        IconImpl()
+        : _refCount(1)
+        , _provider(0)
+        , _defaultProvider(0)
+        { 
+            _defaultProvider = new DefaultIconProvider;
+            _provider = _defaultProvider;
+        }
+
+        IconImpl(const IconImpl& other)
+        : _refCount(1)
+        , _provider(0)
+        , _defaultProvider(0)
+        { 
+            if(other._defaultProvider)
+            {
+                _defaultProvider = new DefaultIconProvider(*_defaultProvider);
+                _provider = _defaultProvider;
+            }
+            else
+            {
+                setProvider(other._provider);
+            }
+        }
+
+        IconImpl(IconProvider& provider)
+        : _refCount(1)
+        , _provider(0)
+        , _defaultProvider(0)
+        {
+            setProvider(&provider);
+        }
+
+        ~IconImpl()
+        {
+            if(_defaultProvider)
+            {
+                delete _provider;
+            }
+            else
+            {
+                setProvider(0);
+            }
+        }
+
+        void setProvider(IconProvider* provider)
+        {
+            if(_provider)
+                _provider->detachIcon(this);
+
+            _provider = provider;
+
+            if(_provider)
+                _provider->attachIcon(this);
+        }
+
+        bool empty() const
+        {
+          return _provider->empty();
+        }
+
+        void clear()
+        {
+            _provider->clear();
+        }
+
+        void addImage(const Gfx::SizeF& size, const Gfx::Image& image)
+        {
+            _provider->addImage(size, image);
+        }
+
+        void addImage(const Gfx::SizeF& size, const System::Path& path)
+        {
+            _provider->addImage(size, path);
+        }
+
+        const Gfx::Image& getImage(const Gfx::SizeF& sizeF)
+        {
+            return _provider->getImage(sizeF);
+        }
+
+        Gfx::SizeF minimumSize() const
+        {
+            return _provider->minimumSize();
+        }
+
+        Gfx::SizeF maximumSize() const
+        {
+            return _provider->maximumSize();
         }
 
     public:
         size_t refs() const
         {
-            return refCount;
+            return _refCount;
         }
 
         void ref()
         {
-            refCount++;
+            _refCount++;
         }
 
         size_t unref()
         {
-            return --refCount;
+            return --_refCount;
         }
 
     private:
-        std::map<Gfx::SizeF, Entry> images;
-        size_t refCount;
+        size_t               _refCount;
+        IconProvider*        _provider;
+        DefaultIconProvider* _defaultProvider;
 };
+
+
+/////////////////////////////////////////////////////////////////////////////
+// IconProvider
+/////////////////////////////////////////////////////////////////////////////
+
+IconProvider::IconProvider()
+{
+}
+
+
+IconProvider::~IconProvider()
+{
+    while( ! _icons.empty() )
+      _icons.back()->setProvider(0);
+}
+
+
+void IconProvider::attachIcon(IconImpl* icon)
+{
+    _icons.push_back(icon);
+}
+
+
+void IconProvider::detachIcon(IconImpl* icon)
+{
+    _icons.erase( std::remove(_icons.begin(), _icons.end(), icon),
+                  _icons.end() );
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Icon
@@ -160,6 +302,13 @@ Icon::Icon()
 : _impl(0)
 {
     _impl = new IconImpl();
+}
+
+
+Icon::Icon(IconProvider& provider)
+: _impl(0)
+{
+  _impl = new IconImpl(provider);
 }
 
 
@@ -221,7 +370,7 @@ void Icon::clear()
 
 void Icon::addImage(const Gfx::Image& image)
 {
-    Gfx::SizeF size(image.width(), image.height());
+    Gfx::SizeF size( image.width(), image.height() );
     addImage(size, image);
 }
 
@@ -229,14 +378,14 @@ void Icon::addImage(const Gfx::Image& image)
 void Icon::addImage(const Gfx::SizeF& size, const Gfx::Image& image)
 {
     detach();
-    _impl->insert(size, image);
+    _impl->addImage(size, image);
 }
 
 
 void Icon::addImage(const Gfx::SizeF& size, const System::Path& path)
 {
     detach();
-    _impl->insert(size, path);
+    _impl->addImage(size, path);
 }
 
 
@@ -249,24 +398,13 @@ void Icon::addImage(double width, double height, const System::Path& path)
 
 const Gfx::Image& Icon::getImage(const Gfx::SizeF& sizeF) const
 {
-    IconImpl::Entry* match = _impl->findBest(sizeF);
-    if( ! match )
-        throw std::logic_error("invalid icon");
-
-    if( match->image.empty() )
-        Application::instance().loadImage(match->path, match->image);
-
-    return match->image;
+    return _impl->getImage(sizeF);
 }
 
 
 const System::Path* Icon::getPath(const Gfx::SizeF& sizeF) const
 {
-    IconImpl::Entry* match = _impl->findBest(sizeF);
-    if( ! match )
-        return 0;
-
-    return &(match->path);
+    return 0;
 }
 
 

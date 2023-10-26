@@ -35,21 +35,56 @@
 #include <Pt/System/Path.h>
 #include <Pt/SmartPtr.h>
 
-#include <map>
+#include <vector>
 #include <cstddef>
 
 namespace Pt {
 
 namespace Hmi {
 
+class IconProvider
+{
+    friend class IconImpl;
+
+    public:
+        IconProvider();
+
+        virtual ~IconProvider();
+
+        virtual bool empty() const = 0;
+
+        virtual void clear() = 0;
+
+        virtual void addImage(const Gfx::SizeF& size, const Gfx::Image& image) = 0;
+
+        virtual void addImage(const Gfx::SizeF& size, const System::Path& path) = 0;
+
+        virtual Gfx::SizeF minimumSize() const = 0;
+        
+        virtual Gfx::SizeF maximumSize() const = 0;
+
+        virtual const Gfx::Image& getImage(const Gfx::SizeF& area) = 0;
+
+    private:
+        void attachIcon(IconImpl* parent);
+
+        void detachIcon(IconImpl* parent);
+
+    private:
+        std::vector<IconImpl*> _icons;
+};
+
+
 class PT_HMI_API Icon
 {
     public:
         Icon();
 
-        ~Icon();
-
         Icon(const Icon& icon);
+
+        Icon(IconProvider& provider);
+
+        ~Icon();
 
         Icon& operator=(const Icon& icon);
 
@@ -73,7 +108,7 @@ class PT_HMI_API Icon
 
         Gfx::SizeF maximumSize() const;
 
-    protected:
+    private:
         void detach();
 
     private:
