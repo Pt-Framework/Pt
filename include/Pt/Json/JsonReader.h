@@ -27,8 +27,8 @@
    MA 02110-1301 USA
 */
 
-#ifndef Pt_Xml_XmlReader_h
-#define Pt_Xml_XmlReader_h
+#ifndef PT_JSON_JSON_READER_H
+#define PT_JSON_JSON_READER_H
 
 #include <Pt/Json/Api.h>
 #include <Pt/Json/Node.h>

@@ -27,8 +27,8 @@
    MA 02110-1301 USA
 */
 
-#ifndef Pt_Json_Error_h
-#define Pt_Json_Error_h
+#ifndef PT_JSON_ERROR_H
+#define PT_JSON_ERROR_H
 
 #include <Pt/Json/Api.h>
 #include <string>
