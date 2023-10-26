@@ -42,7 +42,9 @@ namespace Pt {
 
 namespace Hmi {
 
-class IconProvider
+class IconImpl;
+
+class PT_HMI_API IconProvider
 {
     friend class IconImpl;
 
