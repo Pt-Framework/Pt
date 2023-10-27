@@ -1167,7 +1167,7 @@ void SerializationInfo::setString(const Pt::Char* value, std::size_t len)
 }
 
 
-void SerializationInfo::getChar(char c) const
+void SerializationInfo::getChar(char& c) const
 {
     Pt::Char ch;
     this->getChar(ch);

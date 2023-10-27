@@ -318,7 +318,7 @@ class PT_API SerializationInfo
 
         /** @brief Get value as a character.
         */
-        void getChar(char c) const;
+        void getChar(char& c) const;
 
         /** @brief Set to character value.
         */
