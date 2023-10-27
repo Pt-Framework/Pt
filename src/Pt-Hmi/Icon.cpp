@@ -211,37 +211,43 @@ class IconImpl
 
         bool empty() const
         {
-          return _provider->empty();
+            return _provider ? _provider->empty() : true;
         }
 
         void clear()
         {
-            _provider->clear();
+            if(_provider)
+                _provider->clear();
         }
 
         void addImage(const Gfx::SizeF& size, const Gfx::Image& image)
         {
-            _provider->addImage(size, image);
+            if(_provider)
+                _provider->addImage(size, image);
         }
 
         void addImage(const Gfx::SizeF& size, const System::Path& path)
         {
-            _provider->addImage(size, path);
+            if(_provider)
+                _provider->addImage(size, path);
         }
 
         const Gfx::Image& getImage(const Gfx::SizeF& sizeF)
         {
+            if( ! _provider )
+                throw std::logic_error("invalid provider");
+            
             return _provider->getImage(sizeF);
         }
 
         Gfx::SizeF minimumSize() const
         {
-            return _provider->minimumSize();
+            return _provider ? _provider->minimumSize() : Gfx::SizeF();
         }
 
         Gfx::SizeF maximumSize() const
         {
-            return _provider->maximumSize();
+            return _provider ? _provider->maximumSize() : Gfx::SizeF();
         }
 
     public:
