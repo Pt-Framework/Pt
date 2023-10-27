@@ -33,10 +33,8 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/System/Path.h>
-#include <Pt/SmartPtr.h>
 
 #include <vector>
-#include <cstddef>
 
 namespace Pt {
 
@@ -103,8 +101,6 @@ class PT_HMI_API Icon
         void addImage(double width, double height, const System::Path& path);
 
         const Gfx::Image& getImage(const Gfx::SizeF& area) const;
-
-        const System::Path* getPath(const Gfx::SizeF& sizeF) const;
 
         Gfx::SizeF minimumSize() const;
 

@@ -32,6 +32,7 @@
 
 #include <map>
 #include <algorithm>
+#include <cstddef>
 
 namespace Pt {
 
@@ -399,12 +400,6 @@ void Icon::addImage(double width, double height, const System::Path& path)
 const Gfx::Image& Icon::getImage(const Gfx::SizeF& sizeF) const
 {
     return _impl->getImage(sizeF);
-}
-
-
-const System::Path* Icon::getPath(const Gfx::SizeF& sizeF) const
-{
-    return 0;
 }
 
 
