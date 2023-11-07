@@ -169,7 +169,7 @@ class IconImpl
         { 
             if(other._defaultProvider)
             {
-                _defaultProvider = new DefaultIconProvider(*_defaultProvider);
+                _defaultProvider = new DefaultIconProvider(*other._defaultProvider);
                 _provider = _defaultProvider;
             }
             else
