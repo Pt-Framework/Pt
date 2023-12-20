@@ -1,32 +1,31 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
-   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public
-   License as published by the Free Software Foundation; either
-   version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-   As a special exception, you may use this file as part of a free
-   software library without restriction. Specifically, if other files
-   instantiate templates or use macros or inline functions from this
-   file, or you compile this file and link it with other files to
-   produce an executable, this file does not by itself cause the
-   resulting executable to be covered by the GNU General Public
-   License. This exception does not however invalidate any other
-   reasons why the executable file might be covered by the GNU Library
-   General Public License.
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
 
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-   MA 02110-1301 USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
 */
-
 #include <Pt/Hmi/MenuBar.h>
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Gfx/Painter.h>
@@ -35,439 +34,183 @@
 #include <Pt/Hmi/StyleOptions.h>
 
 namespace Pt {
-
 namespace Hmi {
 
-///////////////////////////////////////////////////////////////////////////////
-// MenuBarItem
-///////////////////////////////////////////////////////////////////////////////
-
-MenuBarItem::MenuBarItem(Menu& menu, const Pt::String& text)
-: _menu(menu)
-, _hasRenderer(false)
-{
-    setFocusPolicy(Widget::AcceptFocus);
-    setText(text);
-
-    setPadding( Spacing(8, 8) );
-    setMargin(0);
-}
-
-
-MenuBarItem::~MenuBarItem()
-{
-}
-
-
-const String& MenuBarItem::text() const 
-{
-    return _text;
-}
-
-
-void MenuBarItem::setText(const Pt::String& t)
-{   
-    _text = t;
-    invalidate();
-}
-
-
-const Gfx::Brush& MenuBarItem::background() const
-{
-    return _background ? *_background
-                       : Application::instance().styleOptions().background();
-}
-
-
-void MenuBarItem::setBackground(const Gfx::Brush& b)
-{
-    _background.reset( new Gfx::Brush(b) );
-    invalidate();
-}
-
-
-const Gfx::Pen& MenuBarItem::contour() const
-{
-    return _contour ? *_contour
-                    : Application::instance().styleOptions().contour();
-}
-
-
-void MenuBarItem::setContour(const Gfx::Pen& p)
-{
-    _contour.reset( new Gfx::Pen(p) );
-    invalidate();
-}
-
-
-const Gfx::Color& MenuBarItem::textColor() const
-{
-    return _textColor ? *_textColor
-                      : Application::instance().styleOptions().textColor();
-}
-
-
-void MenuBarItem::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    invalidate();
-}
-
-
-const std::string& MenuBarItem::font() const
-{
-    return _fontName ? *_fontName
-                     : Application::instance().styleOptions().font().name();
-}
-
-
-void MenuBarItem::setFont(const std::string& fontName)
-{
-    _fontName.reset( new std::string(fontName) );
-    invalidate();
-}
-
-
-std::size_t MenuBarItem::fontSize() const
-{
-
-    return _fontSize ? *_fontSize
-                     : Application::instance().styleOptions().font().size();
-}
-
-
-void MenuBarItem::setFontSize(const std::size_t s)
-{
-    _fontSize.reset( new std::size_t(s) );
-    invalidate();
-}
-
-
-const std::string& MenuBarItem::fontStyle() const
-{
-    return _fontStyle ? *_fontStyle
-                      : Application::instance().styleOptions().font().style();
-}
-
-
-void MenuBarItem::setFontStyle(const std::string& style)
-{
-    _fontStyle.reset( new std::string(style) );
-    invalidate();
-}
-
-
-void MenuBarItem::setRenderer(MenuBarRenderer* renderer)
-{
-    _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
-
-    invalidate();
-}
-
-
-void MenuBarItem::onInvalidate()
-{
-    Base::onInvalidate();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
-
-    _brush = background();
-    _pen = contour();
-    _textPen = textColor();
-    _font = Gfx::Font(font(), fontSize(), fontStyle());
-
-    if( ! _hasRenderer )
-        _renderer.reset( style.get<MenuBarRenderer>() );
-    
-    if( ! _renderer )
-        return;
-
-    _renderer->prepareItem(*this, options, _brush, _pen, _font, _textPen);
-}
-
-
-Gfx::SizeF MenuBarItem::onMeasure(const SizePolicy& policy)
-{
-    Gfx::Painter _painter( surface() );
-    _painter.setFont(_font);
-
-    Gfx::FontMetrics fm = _painter.fontMetrics(_text);
-
-    return Gfx::SizeF( fm.width() + padding().leftRight(), 
-                       fm.height() + padding().topBottom() );
-}
-
-
-void MenuBarItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
-{
-    Base::onPaint(surface, rect);
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    
-    if( ! _renderer )
-        return;
-
-    Gfx::Painter painter(surface);
-    painter.setClip(rect);
-
-    //
-    // item background
-    //
-    _renderer->renderItem(*this, options, painter, rect, 
-                          _brush, _pen);
-
-    //
-    // item text
-    //
-    painter.setFont(_font);
-    Gfx::FontMetrics fm = painter.fontMetrics(_text);
-    double textX = padding().left();
-    double textY = (size().height() - fm.height()) / 2;
-    textY += fm.ascent();
-    Gfx::PointF textPos(textX, textY);
-
-    Gfx::RectF mnemonicRect; // TODO
-    
-    _renderer->renderItemText(*this, options, painter, rect,
-                              _text, textPos, _font, _textPen, mnemonicRect);
-}
-
-
-bool MenuBarItem::onMouseEvent(const MouseEvent& ev)
-{ 
-    Base::onMouseEvent(ev);
-
-    if( ev.isPress() )
-    {
-        _clicked.send(*this);
-    }
-
-    return true;
-}
-
-
-bool MenuBarItem::onTouchEvent(const TouchEvent& ev)
-{ 
-    Base::onTouchEvent(ev);
-
-    if( ev.isPress() )
-    {
-        _clicked.send(*this);
-    }
-
-    return true;
-}
-
-
-bool MenuBarItem::onEnterEvent(const EnterEvent& ev)
-{
-    return Base::onEnterEvent(ev);
-}
-
-
-bool MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
-{
-    return Base::onLeaveEvent(ev);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// MenuBar
-///////////////////////////////////////////////////////////////////////////////
-
 MenuBar::MenuBar()
-: _layout(FlowLayout::Left)
-, _currentMenu(0)
-, _hasRenderer(false)
+: _layout(Pt::Hmi::FlowLayout::Left)
+, _currentItem(0)
 {
-    //this->setBackground( Gfx::Color(58981, 58981, 58981) );
-    //this->setBorderColor( Gfx::Color(32767, 32767, 32767)  );
-    //this->setBorderStyle(Panel::NoBorder);
-
-    //_layout.setPadding(4);
-
-    add(_layout);
+    Control::add(_layout);
 }
-
 
 MenuBar::~MenuBar()
 {
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
-    {
-        delete *it;
-    }
 }
 
 
-const Gfx::Brush& MenuBar::background() const
+const Pt::Gfx::Brush& MenuBar::background() const
 {
     return _background ? *_background
-                       : Application::instance().styleOptions().background();
+                       : Pt::Hmi::Application::instance().styleOptions().background();
 }
 
 
-void MenuBar::setBackground(const Gfx::Brush& b)
+void MenuBar::setBackground(const Pt::Gfx::Brush& b)
 {
-    _background.reset( new Gfx::Brush(b) );
+    _background.reset( new Pt::Gfx::Brush(b) );
     invalidate();
 }
 
 
-const Gfx::Pen& MenuBar::contour() const
+const Pt::Gfx::Pen& MenuBar::contour() const
 {
     return _contour ? *_contour
-                    : Application::instance().styleOptions().contour();
+                    : Pt::Hmi::Application::instance().styleOptions().contour();
 }
 
 
-void MenuBar::setContour(const Gfx::Pen& p)
+void MenuBar::setContour(const Pt::Gfx::Pen& p)
 {
-    _contour.reset( new Gfx::Pen(p) );
+    _contour.reset( new Pt::Gfx::Pen(p) );
     invalidate();
 }
 
 
-void MenuBar::setRenderer(MenuBarRenderer* renderer)
-{
-    _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
 
-    invalidate();
+void MenuBar::addItem(MenuBarItem& item)
+{    
+    _layout.addItem(item);
+
+    if(item.menu())
+        item.menu()->setAnchor(this);
+
+    item.triggered() += Pt::slot(*this, &MenuBar::onItemClicked);
+    item.setParentMenu(this);
 }
 
 
-void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
-{
-    MenuBarItem* item = new MenuBarItem(menu, text);
-    
-    _menus.push_back(item);
-    _layout.addItem(*item);
+void MenuBar::removeItem(MenuBarItem& item)
+{    
+    _layout.removeItem(item);
 
-    menu.setAnchor(this);
+    item.triggered() -= Pt::slot(*this, &MenuBar::onItemClicked);
 
-    item->clicked() += Pt::slot(*this, &MenuBar::onItemClicked);
+    item.setParentMenu(0);
+
+    if(_currentItem == &item)
+        _currentItem = 0;     
 }
 
-
-void MenuBar::onRemoveMenu(Menu& menu)
+void MenuBar::onAddMenu(MenuMenuItem& item)
 {
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
-    {
-        if( &(*it)->menu() == &menu )
-        {           
-            delete *it;
-            _menus.erase(it);
-
-            menu.setAnchor(0);
-            break;
-        }
-    }
-
-    if(_currentMenu == &menu)
-    {
-        _currentMenu = 0;
-        //setCapture(false);
-    }
+    item.menu()->setAnchor(this);
 }
 
+void MenuBar::onRemoveMenu(MenuMenuItem& item)
+{
+    item.menu()->setAnchor(0);
+}
 
-Visual* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
+Pt::Hmi::Visual* MenuBar::onFindMenu(const Pt::Gfx::PointF& screenPos)
 { 
     if( ! isVisible() )
         return 0;
 
-    Gfx::PointF pos = this->fromGlobal(screenPos);
+    Pt::Gfx::PointF pos = this->fromGlobal(screenPos);
 
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    Pt::Gfx::RectF rect( Pt::Gfx::PointF(0,0), size() );
+
     if( rect.contains( pos ) )
         return this;
 
-    if( ! _currentMenu)
+    if( ! _currentItem)
         return 0;
 
-    return _currentMenu->findMenu(screenPos);
+    if(_currentItem->menu() == 0)
+        return 0;
+
+    return _currentItem->menu()->findMenu(screenPos);
 }
 
 
-void MenuBar::onOpenMenu(Menu& menu)
+void MenuBar::onOpenMenu(MenuMenuItem& item)
 {
-    if(_currentMenu)
-        _currentMenu->close();
-    
-    _currentMenu = &menu;
-    //setCapture(true);
-}
-
-
-void MenuBar::onCloseMenu(Menu& menu)
-{
-    if(_currentMenu == &menu)
+    if(_currentItem)
     {
-        _currentMenu = 0;
+        if(_currentItem->menu())
+            _currentItem->menu()->close();
+    }
+    
+    _currentItem = &item;
+    
+}
+
+
+void MenuBar::onCloseMenu(MenuMenuItem& item)
+{
+    if(_currentItem == &item)
+    {
+        _currentItem = 0;
         //setCapture(false);
     }
+    
+    invalidate();
 }
 
 
 void MenuBar::onCancel()
 {
-    if(_currentMenu)
-        _currentMenu->cancel();
+    if(_currentItem)
+        _currentItem->cancel();
 }
 
 
-void MenuBar::onItemClicked(MenuBarItem& item)
+void MenuBar::onItemClicked(MenuBaseItem& item)
 {
-    Menu& menu = item.menu();
+    MenuBarItem * bari = (MenuBarItem*)&item;
 
-    if( ! menu.isVisible() )
+    Menu* menu = bari->menu();
+
+    if( menu == 0 )
+        return;
+
+    if( ! menu->isVisible() )
     {     
-        Gfx::PointF menuPos( 0, item.size().height() );
+        Pt::Gfx::PointF menuPos( 0, item.size().height() );
         menuPos = item.toGlobal(menuPos);
-        menu.move(menuPos);
+        menu->move(menuPos);
 
-        SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
-        menu.setAutoSize(policy);
+        Pt::Hmi::SizePolicy policy(Pt::Hmi::SizePolicy::Preferred, Pt::Hmi::SizePolicy::Preferred);
+        menu->setAutoSize(policy);
 
-        menu.setAbove(true);
-        menu.show();
+        menu->setAbove(true);
+        menu->show();
     }
     else
     {
-        menu.close();
+        menu->close();
     }
 }
 
 
 void MenuBar::onInvalidate()
 {
-    Base::onInvalidate();
+    Pt::Hmi::Control::onInvalidate();
 
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
+    const Pt::Hmi::StyleOptions& options = Pt::Hmi::Application::instance().styleOptions();
+    const Pt::Hmi::Style& style = Pt::Hmi::Application::instance().style();
     
     _brush = background();
     _pen = contour();
-
-    if( ! _hasRenderer )
-        _renderer.reset( style.get<MenuBarRenderer>() );
-    
-    if( ! _renderer )
-        return;
-
-    _renderer->prepare(*this, options, _brush, _pen);
 }
 
 
-Gfx::SizeF MenuBar::onMeasure(const SizePolicy& policy)
+Pt::Gfx::SizeF MenuBar::onMeasure(const Pt::Hmi::SizePolicy& policy)
 {
     double hspace = padding().leftRight() + _layout.margin().leftRight();
     double vspace = padding().topBottom() + _layout.margin().topBottom();
 
-    SizePolicy contentPolicy = policy;
+    Pt::Hmi::SizePolicy contentPolicy = policy;
     contentPolicy.setWidth( policy.size().width() - hspace );
     contentPolicy.setHeight( policy.size().height() - vspace );
         
@@ -476,18 +219,18 @@ Gfx::SizeF MenuBar::onMeasure(const SizePolicy& policy)
 }
 
 
-void MenuBar::onLayout(const Gfx::RectF& rect)
+void MenuBar::onLayout(const Pt::Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Pt::Hmi::Control::onLayout(rect);
     
 
-    Gfx::PointF pos(padding().left() + _layout.margin().left(), 
+    Pt::Gfx::PointF pos(padding().left() + _layout.margin().left(), 
                     padding().top()  + _layout.margin().top());
         
     double hspace = padding().leftRight() + _layout.margin().leftRight();
     double vspace = padding().topBottom() + _layout.margin().topBottom();
 
-    Gfx::SizeF size;
+    Pt::Gfx::SizeF size;
     size.setWidth( rect.width() - hspace );
     size.setHeight( rect.height() - vspace );
 
@@ -496,31 +239,29 @@ void MenuBar::onLayout(const Gfx::RectF& rect)
 }
 
 
-void MenuBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void MenuBar::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& rect)
 {
-    Base::onPaint(surface, rect);
+    Pt::Hmi::Control::onPaint(surface, rect);
 
-    const StyleOptions& options = Application::instance().styleOptions();
+    const Pt::Hmi::StyleOptions& options = Pt::Hmi::Application::instance().styleOptions();
 
-    if( ! _renderer )
-        return;
-
-    Gfx::Painter painter(surface);
+    Pt::Gfx::Painter painter(surface);
     painter.setClip(rect);
 
-    _renderer->renderBackground(*this, options, painter, rect, 
-                                _brush, _pen);
+    painter.setBrush(_brush);
+    painter.fillRect(rect);
+    
 }
 
 
-void MenuBar::onProcessMouseEvent(const MouseEvent& ev)
+void MenuBar::onProcessMouseEvent(const Pt::Hmi::MouseEvent& ev)
 {
-    const Gfx::PointF& screenPos = ev.position();
+    const Pt::Gfx::PointF& screenPos = ev.position();
     Visual* menu = findMenu(screenPos);
     if(menu)
     {
         if(menu == this)
-            Base::onProcessMouseEvent(ev);
+            Pt::Hmi::Control::onProcessMouseEvent(ev);
         else
             menu->processEvent(ev);
         
@@ -535,27 +276,25 @@ void MenuBar::onProcessMouseEvent(const MouseEvent& ev)
 }
 
 
-bool MenuBar::onMouseEvent(const MouseEvent& ev)
+bool MenuBar::onMouseEvent(const Pt::Hmi::MouseEvent& ev)
 { 
-    if( _currentMenu && ev.isPress() )
+    if( _currentItem && ev.isPress() )
     {
-        _currentMenu->close();
+        _currentItem->closeMenu();
     }
 
-    return Base::onMouseEvent(ev);
+    return Pt::Hmi::Control::onMouseEvent(ev);
 }
 
 
-bool MenuBar::onTouchEvent(const TouchEvent& ev)
+bool MenuBar::onTouchEvent(const Pt::Hmi::TouchEvent& ev)
 { 
-    if( _currentMenu && ev.isPress() )
+    if( _currentItem && ev.isPress() )
     {
-        _currentMenu->close();
+        _currentItem->closeMenu();
     }
 
-    return Base::onTouchEvent(ev);
+    return Pt::Hmi::Control::onTouchEvent(ev);
 }
 
-} // namespace
-
-} // namespace
+}}

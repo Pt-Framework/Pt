@@ -94,8 +94,12 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ListBox.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Menu.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MenuBar.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuBarItem.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuBase.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuBaseItem.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MenuItem.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\MenuShell.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuMenuItem.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuSubItem.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h" />
@@ -668,8 +672,12 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ListBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Menu.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuBar.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuBarItem.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuBase.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuBaseItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuItem.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\MenuShell.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuMenuItem.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuSubItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PlatinumStyle.cpp" />

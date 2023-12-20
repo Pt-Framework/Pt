@@ -41,10 +41,13 @@ ChildW::ChildW(const std::string& title)
     _item1.setShortcut(&f3);
     _fileMenu.addItem(_item1);
 
-    _item2.setText("Open");
+    _item2.setText("Op&en");
     _item2.setName("OpenItem");
+    _item2.setSeperator(true);
+    _item2.setContour(Gfx::Pen::Pen(Pt::Gfx::Color::fromRgb8(0,0,0), 2));
     _fileMenu.addItem(_item2);
 
+    _item3.triggered() += Pt::slot(*this, &ChildW::onMenuExit);
     _item3.setText("Exit");
     _item3.setName("ExitItem");
     Key ctrlA(Key::Control, Key::A);
@@ -64,9 +67,16 @@ ChildW::ChildW(const std::string& title)
 
     _edit3.setText("Paste");
     _editMenu.addItem(_edit3);
+    
+    _fileMenuItem.setText("File");
+    _fileMenuItem.setMenu(&_fileMenu);
 
-    _menuBar.addMenu(_fileMenu, "File");
-    _menuBar.addMenu(_editMenu, "Edit");
+    _menuBar.addItem(_fileMenuItem);
+
+    _editMenuItem.setText("Edit");
+    _editMenuItem.setMenu(&_editMenu);
+
+    _menuBar.addItem(_editMenuItem);
 
     _mainLayout.addItem(_menuBar, DockingLayout::Top);
 
@@ -229,6 +239,11 @@ ChildW::~ChildW()
     }
 }
 
+
+void ChildW::onMenuExit(MenuBaseItem& item)
+{
+    Pt::Hmi::Application::instance().exit();
+}
 
 void ChildW::onShowDialog()
 {

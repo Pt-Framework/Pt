@@ -26,27 +26,37 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
-#ifndef PT_HMI_MENUITEM_H
-#define PT_HMI_MENUITEM_H
+#ifndef PT_HMI_MENUBARITEM_H
+#define PT_HMI_MENUBARITEM_H
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/MenuBaseItem.h>
+#include <Pt/Hmi//Api.h>
+#include <Pt/Hmi//MenuMenuItem.h>
+#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/FlowLayout.h>
+#include <Pt/Signal.h>
+#include <vector>
 
 namespace Pt {
 namespace Hmi {
 
-class Menu;
+class MenuBar;
 
-class PT_HMI_API MenuItem : public MenuBaseItem
+class PT_HMI_API MenuBarItem : public MenuMenuItem
 {    
-    typedef MenuBaseItem Base;
+    public:
+        MenuBarItem();
 
-    public:        
-        MenuItem();
-    
-        virtual ~MenuItem();       
+        virtual ~MenuBarItem();
+
+    protected:
+        virtual Pt::Gfx::SizeF onMeasure(const Pt::Hmi::SizePolicy& policy);
+
+        virtual void onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& updateRect);
 };
 
 }}
 
 #endif
+
+

@@ -26,25 +26,65 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
-#ifndef PT_HMI_MENUITEM_H
-#define PT_HMI_MENUITEM_H
+#ifndef PT_HMI_MENUMENUITEM_H
+#define PT_HMI_MENUMENUITEM_H
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/MenuBase.h>
 #include <Pt/Hmi/MenuBaseItem.h>
 
 namespace Pt {
 namespace Hmi {
 
 class Menu;
+class MenuBar;
 
-class PT_HMI_API MenuItem : public MenuBaseItem
-{    
-    typedef MenuBaseItem Base;
+class PT_HMI_API MenuMenuItem : public MenuBaseItem
+{
+    public:
+        typedef MenuBaseItem Base;
 
-    public:        
-        MenuItem();
+    public:
+        MenuMenuItem();
+
+        virtual ~MenuMenuItem();
+
+        void setMenu(Menu* menu);
+
+        const Menu* menu() const
+        {
+            return _menu;
+        }
+
+
+        Menu* menu()
+        {
+            return _menu;
+        }
+
+        void setParentMenu(MenuBase* p)
+        {
+            _parentMenu = p;
+        }
+
+        void cancel();
+
     
-        virtual ~MenuItem();       
+        void closeMenu();
+
+        void openMenu();
+
+
+        bool isMenuOpen() const
+        {
+            return _isOpen;
+        }
+
+
+    private:
+        MenuBase* _parentMenu;
+        Menu* _menu;
+        bool _isOpen;
 };
 
 }}

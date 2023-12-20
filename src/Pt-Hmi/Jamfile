@@ -52,7 +52,11 @@ SharedLibrary Pt-Hmi : Application.cpp
                        Menu.cpp
                        MenuBar.cpp
                        MenuItem.cpp
-                       MenuShell.cpp
+                       MenuBarItem.cpp
+                       MenuBase.cpp
+                       MenuBaseItem.cpp
+                       MenuMenuItem.cpp
+                       MenuSubItem.cpp
                        Panel.cpp
                        PixmapSurface.cpp
                        PlatinumStyle.cpp

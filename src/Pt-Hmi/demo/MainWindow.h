@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/MenuItem.h>
+#include <Pt/Hmi/MenuSubItem.h>
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/TabView.h>
 #include <Pt/Hmi/Shell.h>
@@ -51,7 +52,7 @@ class MainWindow : public Pt::Hmi::Window
       virtual ~MainWindow();
 
     protected:
-        void onZoom(MenuItem&);
+        void onZoom(MenuBaseItem&);
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -67,10 +68,12 @@ class MainWindow : public Pt::Hmi::Window
         MenuItem _item3;
 
         Menu     _subMenu;
+        MenuSubItem _subMenuItem;
         MenuItem _subItem1;
         MenuItem _subItem2;
         MenuItem _subItem3;
 
+        MenuSubItem _zoomSubMenuItem;
         Menu     _zoomMenu;
         MenuItem _zoomItem1;
         MenuItem _zoomItem2;

@@ -192,7 +192,6 @@ MainWindow::MainWindow()
 
     // context sub menu
     _subMenu.setName("Other Music");
-
     _subItem1.setText("Vegetarian Progressive Grindcore");
     _subMenu.addItem(_subItem1);
 
@@ -202,7 +201,9 @@ MainWindow::MainWindow()
     _subItem3.setText("Romanian Polka");
     _subMenu.addItem(_subItem3);
 
-    _menu.addMenu(_subMenu, "Other Music");
+    _subMenuItem.setText("Other Music");
+    _subMenuItem.setMenu(&_subMenu);
+    _menu.addItem(_subMenuItem);
 
     // zoom sub menu
     _zoomMenu.setName("Zoom");
@@ -219,7 +220,9 @@ MainWindow::MainWindow()
     _zoomItem3.triggered() += Pt::slot(*this, &MainWindow::onZoom);
     _zoomMenu.addItem(_zoomItem3);
 
-    _menu.addMenu(_zoomMenu, "Zoom");
+    _zoomSubMenuItem.setText("Zoom");
+    _zoomSubMenuItem.setMenu(&_zoomMenu);
+    _menu.addItem(_zoomSubMenuItem);
 
     Hmi::PixmapSurface::fontNames();
 }
@@ -229,7 +232,7 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::onZoom(MenuItem& item)
+void MainWindow::onZoom(MenuBaseItem& item)
 {
     if(item.text() == "100%")
         Application::instance().setScaleFactor(1.0);

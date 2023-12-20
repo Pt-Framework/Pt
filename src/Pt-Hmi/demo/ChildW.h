@@ -7,6 +7,8 @@
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/ComboBox.h>
+#include <Pt/Hmi/MenuItem.h>
+#include <Pt/Hmi/MenuSubItem.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/LineEdit.h>
@@ -54,6 +56,8 @@ class ChildW : public Hmi::Window
 
         void checkSpinBox(int value);
 
+        void onMenuExit(MenuBaseItem& item);
+
     private:
         DockingLayout _mainLayout;
         MenuBar _menuBar;
@@ -61,11 +65,13 @@ class ChildW : public Hmi::Window
         Shell _shell;
 
         Menu     _fileMenu;
+        MenuBarItem _fileMenuItem;
         MenuItem _item1;
         MenuItem _item2;
         MenuItem _item3;
 
         Menu     _editMenu;
+        MenuBarItem _editMenuItem;
         MenuItem _edit1;
         MenuItem _edit2;
         MenuItem _edit3;

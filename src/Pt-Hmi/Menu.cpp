@@ -1,180 +1,102 @@
-/* Copyright (C) 2016 Marc Boris Duerner
-   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public
-   License as published by the Free Software Foundation; either
-   version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-   As a special exception, you may use this file as part of a free
-   software library without restriction. Specifically, if other files
-   instantiate templates or use macros or inline functions from this
-   file, or you compile this file and link it with other files to
-   produce an executable, this file does not by itself cause the
-   resulting executable to be covered by the GNU General Public
-   License. This exception does not however invalidate any other
-   reasons why the executable file might be covered by the GNU Library
-   General Public License.
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
 
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-   MA  02110-1301  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
 */
-
 #include <Pt/Hmi/Menu.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/MenuBar.h>
+#include <Pt/Hmi/MenuItem.h>
+#include <Pt/Hmi/MenuSubItem.h>
+#include <Pt/Hmi/MenuBarItem.h>
+#include <Pt/Hmi/MenuMenuItem.h>
 #include <Pt/Hmi/Application.h>
-#include <cassert>
+#include <Pt/Gfx/Painter.h>
+#include <assert.h>
 
 namespace Pt {
-
 namespace Hmi {
 
 Menu::Menu()
-: _parentShell(0)
-, _parentMenu(0)
-, _currentMenu(0)
-, _layout(FlowLayout::Top)
+: _currentItem(0)
+, _layout(Pt::Hmi::FlowLayout::Top)
 , _iconWidth(0)
-, _hasRenderer(false)
 {
-    setContent(&_layout);
+    setContent(&_layout);    
 }
 
 
 Menu::~Menu()
 {
-    //Application::instance().releasePopup(*this);
-
-    if( parentShell() )
-        parentShell()->removeMenu(*this);
-
-    std::vector<MenuItem*>::iterator it;
-    for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
-    {
-        Menu* menu = (*it)->subMenu();
-        assert(menu);
-
-        menu->_parentMenu = 0;
-        delete *it;
-    }
-}
-
-
-MenuShell* Menu::parentShell()
-{
-    return _parentShell;
-}
-
-
-MenuShell& Menu::rootShell()
-{
-    if( _parentMenu )
-        return _parentMenu->rootShell();
-
-    if( _parentShell )
-        return *_parentShell;
-
-    return *this;
 }
 
 
 void Menu::addItem(MenuItem& item)
 {
-    if(item._menu == this)
-        return;
-
    _layout.addItem(item);
-
-    item._menu = this;
-    item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
-
-    //invalidate();
+ 
 }
 
+void Menu::addItem(MenuSubItem& item)
+{
+    _layout.addItem(item);
+    
+    item.setParentMenu(this);
+    item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
+}
 
 void Menu::removeItem(MenuItem& item)
 {
-    if(item._menu != this)
-        return;
+    _layout.removeItem(item);    
+}
 
-    item._menu = 0;
+void Menu::removeItem(MenuSubItem& item)
+{
     item.triggered() -= Pt::slot(*this, &Menu::onItemTriggered);
-
+    item.setParentMenu(0);
     _layout.removeItem(item);
-
-    //invalidate();
 }
 
+void Menu::onItemTriggered(MenuBaseItem& item)
+{    
+    MenuSubItem* smi =dynamic_cast<MenuSubItem*>(&item);
 
-void Menu::onItemTriggered(MenuItem&)
-{
-    rootShell().cancel();
-}
+    assert(smi!= 0);
 
-
-void Menu::onAddMenu(Menu& menu, const Pt::String& text)
-{
-    MenuItem* item = new MenuItem();
-    item->setText(text);
-    item->setSubMenu(menu);
-
-    _layout.addItem(*item);
-
-    item->_menu = this;
-    item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
-
-    _subMenus.push_back(item);
-    menu._parentMenu = this;
-
-    menu.setAnchor(this);
-}
-
-
-void Menu::onRemoveMenu(Menu& menu)
-{
-    std::vector<MenuItem*>::iterator it;
-    for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
-    {
-        if( (*it)->subMenu() == &menu )
-        {
-            delete *it;
-
-            _subMenus.erase(it);
-            menu._parentMenu = 0;
-
-            menu.setAnchor(0);
-
-            if(_currentMenu == &menu)
-                _currentMenu = 0;
-
-            break;
-        }
-    }
-}
-
-
-void Menu::onMenuTriggered(MenuItem& item)
-{
-    Menu* menu = item.subMenu();
-    assert(menu);
+    Menu* menu = smi->menu();
 
     // TODO: open menu on mouse enter and close menu on mouse leave
     //       possibly delayed by a 500ms timer
 
     if( ! menu->isVisible() )
     {
-        Gfx::PointF topRight(item.size().width(), 0);
-        Gfx::PointF menuPos = item.toGlobal(topRight);
+        Pt::Gfx::PointF topRight(item.size().width(), 0);
+        Pt::Gfx::PointF menuPos = item.toGlobal(topRight);
         menu->move(menuPos);
 
-        SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
+        Pt::Hmi::SizePolicy policy(Pt::Hmi::SizePolicy::Preferred, Pt::Hmi::SizePolicy::Preferred);
         menu->setAutoSize(policy);
 
         menu->setAbove(true);
@@ -186,41 +108,45 @@ void Menu::onMenuTriggered(MenuItem& item)
     }
 }
 
-
-Visual* Menu::onFindMenu(const Gfx::PointF& screenPos)
+Pt::Hmi::Visual* Menu::onFindMenu(const Pt::Gfx::PointF& screenPos)
 {
     if( ! isVisible() )
         return 0;
 
-    Gfx::RectF rect( position(), size() );
+    Pt::Gfx::RectF rect( position(), size() );
+
     if( rect.contains(screenPos) )
         return this;
 
-    if( ! _currentMenu)
+    if( _currentItem == 0)
         return 0;
 
-    return _currentMenu->findMenu(screenPos);
+    MenuSubItem* smi = dynamic_cast<MenuSubItem*>(_currentItem);
+
+    if (smi == 0)
+        return 0;
+
+    if( smi->menu() == 0)
+        return 0;
+
+    return smi->menu()->onFindMenu(screenPos);
 }
 
-
-void Menu::onOpenMenu(Menu& menu)
+void Menu::onOpenMenu(MenuMenuItem& item)
 {
-    _currentMenu = &menu;
+    _currentItem = &item;
 }
 
-
-void Menu::onCloseMenu(Menu& menu)
+void Menu::onCloseMenu(MenuMenuItem& item)
 {
-    if(_currentMenu == &menu)
-        _currentMenu = 0;
+    if( _currentItem == &item)
+        _currentItem = 0;
 }
-
 
 void Menu::onCancel()
 {
     close();
 }
-
 
 double Menu::iconWidth() const
 {
@@ -228,173 +154,190 @@ double Menu::iconWidth() const
                           : 0;
 }
 
-
-const Gfx::Brush& Menu::background() const
+const Pt::Gfx::Brush& Menu::background() const
 {
     return _background ? *_background
-                       : Application::instance().styleOptions().background();
+                       : Pt::Hmi::Application::instance().styleOptions().background();
 }
 
-
-void Menu::setBackground(const Gfx::Brush& b)
+void Menu::setBackground(const Pt::Gfx::Brush& b)
 {
-    _background.reset( new Gfx::Brush(b) );
+    _background.reset( new Pt::Gfx::Brush(b) );
     invalidate();
 }
 
-
-const Gfx::Pen& Menu::contour() const
+const Pt::Gfx::Pen& Menu::contour() const
 {
     return _contour ? *_contour
-                    : Application::instance().styleOptions().contour();
+                    : Pt::Hmi::Application::instance().styleOptions().contour();
 }
 
-
-void Menu::setContour(const Gfx::Pen& p)
+void Menu::setContour(const Pt::Gfx::Pen& p)
 {
-    _contour.reset( new Gfx::Pen(p) );
+    _contour.reset( new Pt::Gfx::Pen(p) );
     invalidate();
 }
-
-
-void Menu::setRenderer(MenuRenderer* renderer)
-{
-    _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
-
-    invalidate();
-}
-
 
 void Menu::onInvalidate()
 {
-    Base::onInvalidate();
+    Pt::Hmi::Popup::onInvalidate();
 
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
+    const Pt::Hmi::StyleOptions& options = Pt::Hmi::Application::instance().styleOptions();
+    const Pt::Hmi::Style& style = Pt::Hmi::Application::instance().style();
 
     _brush = background();
     _pen = contour();
-
-    if( ! _hasRenderer )
-        _renderer.reset( style.get<MenuRenderer>() );
-
-    if( ! _renderer )
-        return;
-
-    _renderer->prepare(*this, options, _brush, _pen);
 }
 
-
-void Menu::onPaintEvent(const PaintEvent& ev)
+void Menu::onPaintEvent(const Pt::Hmi::PaintEvent& ev)
 {
-    Base::onPaintEvent(ev);
+    Pt::Hmi::Popup::onPaintEvent(ev);
 
-    const StyleOptions& options = Application::instance().styleOptions();
+    const Pt::Hmi::StyleOptions& options = Pt::Hmi::Application::instance().styleOptions();
 
-    if( ! _renderer )
-        return;
 
-    Gfx::Painter painter( surface() );
+    Pt::Gfx::Painter painter( surface() );
     painter.setClip( ev.rect() );
 
-    _renderer->renderBackground(*this, options, painter, ev.rect(),
-                                _brush, _pen);
+    onRenderBackground(options, painter, ev.rect());
 }
 
-
-void Menu::onProcessMouseEvent(const MouseEvent& ev)
+void Menu::drawBorder(Pt::Gfx::Painter& painter, const Pt::Gfx::RectF& borderRect) const
 {
-    const Gfx::PointF& screenPos = ev.position();
-    Visual* menu = rootShell().findMenu(screenPos);
+    const MenuBaseItem* p = parentItem();
+
+    if (!p)
+    {
+        painter.drawRect(borderRect);
+        return;
+    }        
+
+    const MenuBarItem * mbi = dynamic_cast<const MenuBarItem*>(p);
+
+    if (mbi == 0)
+    {
+        painter.drawRect(borderRect);
+    
+        return;
+    }
+
+    if (!mbi->isMenuOpen())
+    {
+        painter.drawRect(borderRect);
+        return;
+    }
+    
+    const double firstWidth = p->size().width();
+    const double x1 = borderRect.x();
+    const double y1 = borderRect.y();
+
+    const double x2 = borderRect.x() + borderRect.width();
+    const double y2 = borderRect.y() + borderRect.height();
+
+    painter.drawLine(Pt::Gfx::PointF(x1 + firstWidth, y1), Pt::Gfx::PointF(x2, y1));
+    painter.drawLine(Pt::Gfx::PointF(x2, y1), Pt::Gfx::PointF(x2, y2));
+    painter.drawLine(Pt::Gfx::PointF(x2, y2), Pt::Gfx::PointF(x1, y2));
+    painter.drawLine(Pt::Gfx::PointF(x1, y2), Pt::Gfx::PointF(x1, y1));            
+    
+}
+
+void Menu::onRenderBackground(const Pt::Hmi::StyleOptions& options, Pt::Gfx::Painter& painter, const Pt::Gfx::RectF& rect) const
+{    
+    Pt::Gfx::SizeF size = this->size();
+
+    size -= 1;
+
+    double inset = painter.alignContour(_pen.size()) / 2;
+
+    // icon strip on the left side
+
+    Pt::ssize_t iconWidth = this->iconWidth();
+
+    if (iconWidth > 0)
+    {
+        Pt::Gfx::RectF iconStrip(Pt::Gfx::PointF(0, 0),
+            Pt::Gfx::SizeF(iconWidth, size.height()));
+
+        Pt::Gfx::Brush brush = Pt::Gfx::Brush::verticalGradient(brush.color(),
+            Pt::Gfx::Color(65000, 65000, 65000));
+
+        painter.setBrush(brush);
+        painter.fillRect(iconStrip);
+    }
+
+    // menu border
+    Pt::Gfx::RectF borderRect(this->size());
+    borderRect.shift(inset, inset);
+    borderRect.shrink(2 * inset, 2 * inset);
+
+    painter.setPen(_pen);
+    drawBorder(painter, borderRect);
+}
+
+void Menu::onProcessMouseEvent(const Pt::Hmi::MouseEvent& ev)
+{
+    const Pt::Gfx::PointF& screenPos = ev.position();
+    Visual* menu = onFindMenu(screenPos);
+
     if(menu)
     {
         if(menu == this)
-            Base::onProcessMouseEvent(ev);
+            Pt::Hmi::Popup::onProcessMouseEvent(ev);
         else
             menu->processEvent(ev);
         
         return;
     }
-
-    //if( ev.isPress() )
-    //{
-    //    rootShell().cancel();
-    //    return;
-    //}
-
-    Base::onProcessMouseEvent(ev);
+    Pt::Hmi::Popup::onProcessMouseEvent(ev);
 }
 
-
-void Menu::onShowEvent(const ShowEvent& ev)
+void Menu::onShowEvent(const Pt::Hmi::ShowEvent& ev)
 {
-    Base::onShowEvent(ev);
+    Pt::Hmi::Popup::onShowEvent(ev);
 
-    if( ev.visible() )
+    MenuMenuItem* mi = dynamic_cast<MenuMenuItem*>(parentItem());
+
+    if (mi)
     {
-        if( parentShell() )
-            parentShell()->onOpenMenu(*this);
-
-        if( ! parentShell() )
-        {
-            //setCapture(true);
-        }
-
-        //Application::instance().setPopup(*this);
-    }
-    else
-    {
-        if( ! parentShell() )
-        {
-            //setCapture(false);
-        }
-
-        //Application::instance().releasePopup(*this);
-
-        if( parentShell() )
-            parentShell()->onCloseMenu(*this);
+        if( ev.visible() )
+            mi->openMenu();  
+        else
+            mi->closeMenu();
     }
 }
 
-
-void Menu::onCloseEvent(const CloseEvent& ev)
+void Menu::onCloseEvent(const Pt::Hmi::CloseEvent& ev)
 {
-    //Application::instance().releasePopup(*this);
+    MenuMenuItem* mi = dynamic_cast<MenuMenuItem*>(parentItem());
 
-    //if( ! parentShell() )
-    //    setCapture(false);
+    if( mi)
+        mi->closeMenu();
 
-    if( _currentMenu )
-    {
-        _currentMenu->close();
-        _currentMenu = 0;
-    }
-
-    if( parentShell() )
-        parentShell()->onCloseMenu(*this);
-
-    Base::onCloseEvent(ev);
+    Pt::Hmi::Popup::onCloseEvent(ev);
 }
 
 
-bool Menu::onMouseEvent(const MouseEvent& ev)
+bool Menu::onMouseEvent(const Pt::Hmi::MouseEvent& ev)
 {
-    return Base::onMouseEvent(ev);
+    return Pt::Hmi::Popup::onMouseEvent(ev);
 }
 
-
-bool Menu::onEnterEvent(const EnterEvent& ev)
+bool Menu::onEnterEvent(const Pt::Hmi::EnterEvent& ev)
 {
-    return Base::onEnterEvent(ev);
+    return Pt::Hmi::Popup::onEnterEvent(ev);
 }
 
-
-bool Menu::onLeaveEvent(const LeaveEvent& ev)
+bool Menu::onLeaveEvent(const Pt::Hmi::LeaveEvent& ev)
 {
-    return Base::onLeaveEvent(ev);
+    return Pt::Hmi::Popup::onLeaveEvent(ev);
 }
 
-} // namespace
+void Menu::onAddMenu(MenuMenuItem& item)
+{
+}
 
-} // namespace
+void Menu::onRemoveMenu(MenuMenuItem& item)
+{
+}
+
+}}
