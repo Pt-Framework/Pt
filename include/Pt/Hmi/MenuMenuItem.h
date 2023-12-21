@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/MenuBase.h>
 #include <Pt/Hmi/MenuBaseItem.h>
+#include <vector>
 
 namespace Pt {
 namespace Hmi {
@@ -41,6 +42,8 @@ class MenuBar;
 
 class PT_HMI_API MenuMenuItem : public MenuBaseItem
 {
+    friend class Menu;
+
     public:
         typedef MenuBaseItem Base;
 
@@ -80,6 +83,14 @@ class PT_HMI_API MenuMenuItem : public MenuBaseItem
             return _isOpen;
         }
 
+    protected:
+        virtual const std::vector<Key> onGetShortcuts();
+
+        virtual const std::vector<Pt::Char> onGetMnemonics();
+
+        virtual void onShortcut(const Key& key);
+
+        virtual void onMnemonic(Pt::Char m);
 
     private:
         MenuBase* _parentMenu;

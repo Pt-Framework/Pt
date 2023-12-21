@@ -365,18 +365,42 @@ void Widget::setShortcut(const Key* key)
     else
         _shortcutKey = *key;
 
-    if(_form)
-        _form->onSetShortcut(*this, key);
+    if(_form) 
+        _form->onSetShortcut(*this, onGetShortcuts());
 }
 
 
-void Widget::processShortcut(const KeyEvent& kev)
+void Widget::processShortcut(const Key& key)
 {
-    onShortcut(kev);
+    onShortcut(key);
 }
 
 
-void Widget::onShortcut(const KeyEvent& kev)
+const std::vector<Key> Widget::onGetShortcuts()
+{
+    std::vector<Key> shc;
+
+    if(_shortcutKey.empty())
+        return shc;
+
+    shc.push_back(_shortcutKey);
+
+    return shc;
+}
+
+const std::vector<Pt::Char> Widget::onGetMnemonics()
+{
+    std::vector<Pt::Char> mcs;
+
+    if(_mnemonic == 0)
+        return mcs;
+
+    mcs.push_back(_mnemonic);
+    return mcs;
+}
+
+
+void Widget::onShortcut(const Key& key)
 {
 }
 
@@ -390,10 +414,8 @@ const Pt::Char* Widget::mnemonic() const
 void Widget::setMnemonic(const Char& ch)
 {
     _mnemonic = ch;
-
-    const Char* m = ch != 0 ? &ch : 0;
     if(_form)
-        _form->onSetMnemonic(*this, m);
+        _form->onSetMnemonic(*this, onGetMnemonics());
 }
 
 
@@ -440,15 +462,15 @@ void Widget::setMnemonicWidget(Widget* w)
 }
 
 
-void Widget::processMnemonic()
+void Widget::processMnemonic(Pt::Char m)
 {
-    onMnemonic();
+    onMnemonic(m);
 }
 
 
-void Widget::onMnemonic()
+void Widget::onMnemonic(Pt::Char m)
 {
-    _mnemonicEntered.invoke();
+    _mnemonicEntered.send(m);
 }
 
 

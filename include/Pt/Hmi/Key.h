@@ -611,6 +611,12 @@ class Key
             return Pt::String();
         }
 
+        bool empty() const
+        {
+            return _code  == Key::NoKey;
+        }
+
+
     private:
         Pt::uint32_t _code;
         Modifiers _modifier;

@@ -109,9 +109,9 @@ class PT_HMI_API Form : public View
 
         virtual void onSetFocus(Widget& w);
 
-        virtual void onSetShortcut(Widget& w, const Key* key);
+        virtual void onSetShortcut(Widget& w, const std::vector<Key>& keys);
 
-        virtual void onSetMnemonic(Widget& w, const Char* ch);
+        virtual void onSetMnemonic(Widget& w, const std::vector<Char>& chs);
     
     //
     // View
@@ -252,6 +252,19 @@ class PT_HMI_API Form : public View
         template <typename Iter>
         void moveFocus(Iter begin, Iter end);
 
+    protected:
+
+        const std::map<Key, Widget*>& shortcuts() const
+        {
+            return _shortcuts;
+        }
+
+        const std::map<Pt::Char, Widget*>& mnemonics() const
+        {
+            return _mnemonics;
+        }
+
+
     private:
         Gfx::PaintRegion             _surface;
         Widget*                      _mainWidget;
@@ -261,10 +274,10 @@ class PT_HMI_API Form : public View
         Widget*                      _active;
 
         std::vector<Widget*>         _focusList;
-        Widget*                      _focusWidget;
-
+        Widget*                      _focusWidget;        
         std::map<Key, Widget*>       _shortcuts;
         std::map<Pt::Char, Widget*>  _mnemonics;
+
 };
 
 } // namespace

@@ -89,9 +89,9 @@ void Button::onCanceled()
 }
 
 
-void Button::onMnemonic()
+void Button::onMnemonic(Pt::Char m)
 {
-    Base::onMnemonic();
+    Base::onMnemonic(m);
     
     onPressed();
     onReleased();
@@ -109,9 +109,9 @@ void Button::onActionKey( const KeyEvent& kev )
 }
 
 
-void Button::onShortcut(const KeyEvent& kev)
+void Button::onShortcut(const Key& key)
 {
-    Base::onShortcut(kev);
+    Base::onShortcut(key);
 
     onPressed();
     onReleased();

@@ -62,9 +62,9 @@ class PT_HMI_API Button : public Control
         virtual void onCanceled();
 
     protected:
-        virtual void onMnemonic();
+        virtual void onMnemonic(Pt::Char m);
 
-        virtual void onShortcut(const KeyEvent& kev);
+        virtual void onShortcut(const Key& key);
 
         virtual void onActionKey(const KeyEvent& kev);
 

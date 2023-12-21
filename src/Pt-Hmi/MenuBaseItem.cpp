@@ -235,9 +235,9 @@ void MenuBaseItem::onTriggered()
 
 
 
-void MenuBaseItem::onShortcut(const Pt::Hmi::KeyEvent& kev)
+void MenuBaseItem::onShortcut(const Pt::Hmi::Key& key)
 {
-    Base::onShortcut(kev);
+    Base::onShortcut(key);
 
     onTriggered();
 }

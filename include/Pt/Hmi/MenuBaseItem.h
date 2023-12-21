@@ -97,13 +97,12 @@ class PT_HMI_API MenuBaseItem : public Pt::Hmi::Control
 
         void setFontStyle(const std::string& style);
 
-
     protected:
         static Pt::String shortcutText(const Pt::Hmi::Key& key);
 
-        virtual void onTriggered();        
+        virtual void onTriggered();
 
-        virtual void onShortcut(const Pt::Hmi::KeyEvent& kev);
+        virtual void onShortcut(const Pt::Hmi::Key& key);
 
         virtual void onInvalidate();
 
@@ -118,6 +117,7 @@ class PT_HMI_API MenuBaseItem : public Pt::Hmi::Control
         virtual bool onEnterEvent(const Pt::Hmi::EnterEvent& ev);
 
         virtual bool onLeaveEvent(const Pt::Hmi::LeaveEvent& ev);
+
 
     protected:
         Pt::Signal<MenuBaseItem&> _triggered;

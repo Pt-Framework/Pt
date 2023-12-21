@@ -77,7 +77,7 @@ class PT_HMI_API Menu : public Pt::Hmi::Popup, protected MenuBase
         void removeItem(MenuSubItem& item);
         
     protected:
-        //Pt::Hmi::Control
+        //Pt::Hmi::Popup
         virtual void onInvalidate();
 
         virtual void onPaintEvent(const Pt::Hmi::PaintEvent& ev);

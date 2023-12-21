@@ -81,6 +81,87 @@ void MenuMenuItem::setMenu(Menu* menu)
     }    
 }
 
+const std::vector<Key> MenuMenuItem::onGetShortcuts()
+{
+    std::vector<Key> sck = MenuBaseItem::onGetShortcuts();
+    
+    if(_menu == 0)
+        return sck;
+
+    std::map<Key, Widget*>::const_iterator  it = _menu->shortcuts().begin();
+
+    for( ;it != _menu->shortcuts().end(); ++it)
+        sck.push_back(it->first);
+
+    return sck;
+}
+
+const std::vector<Pt::Char> MenuMenuItem::onGetMnemonics()
+{
+    std::vector<Pt::Char> mns = MenuBaseItem::onGetMnemonics();
+
+    if (_menu == 0)
+        return mns;
+
+    std::map<Pt::Char, Widget*>::const_iterator  it = _menu->mnemonics().begin();
+
+    for (; it != _menu->mnemonics().end(); ++it)
+        mns.push_back(it->first);
+
+    return mns;
+}
+
+void MenuMenuItem::onMnemonic(Pt::Char m)
+{
+    const Char* myMn = mnemonic();
+
+    if (myMn)
+    {
+        if (m == *myMn)
+        {
+            MenuBaseItem::onMnemonic(m);
+            return;
+        }
+    }
+
+    std::map<Pt::Char, Widget*>::const_iterator  it = _menu->mnemonics().begin();
+
+    for (; it != _menu->mnemonics().end(); ++it)
+    {
+        if (it->first == m)
+        {
+            it->second->processMnemonic(m);
+            break;
+        }
+    }
+}
+
+void MenuMenuItem::onShortcut(const Key& key)
+{
+    const Key* myKey = shortcut();
+
+    if(myKey)
+    {
+        if( key == *myKey)
+        {
+            MenuBaseItem::onShortcut(key);
+            return;
+        }
+    }
+
+    std::map<Key, Widget*>::const_iterator  it = _menu->shortcuts().begin();
+
+    for (; it != _menu->shortcuts().end(); ++it)
+    {
+        if(it->first == key)
+        {
+            it->second->processShortcut(key);
+            break;
+        }
+    }
+}
+
+
 void MenuMenuItem::cancel()
 {
     if(_menu)

@@ -284,25 +284,27 @@ void Form::onSetFocus(Widget& widget)
 }
 
 
-void Form::onSetShortcut(Widget& w, const Key* key)
+void Form::onSetShortcut(Widget& w, const std::vector<Key>& keys)
 {
     std::map<Key, Widget*>::iterator it = _shortcuts.begin();
+
     while( it != _shortcuts.end() )
     {
-        if(it->second == &w)        
+        if(it->second == &w)
             _shortcuts.erase(it++);
         else
             ++it;
     }
 
-    if(key)
-        _shortcuts[*key] = &w;
+    for(size_t i = 0; i < keys.size();++i)
+        _shortcuts[keys[i]] = &w;
 }
 
 
-void Form::onSetMnemonic(Widget& w, const Char* ch)
+void Form::onSetMnemonic(Widget& w, const std::vector<Char>& chs)
 {
     std::map<Char, Widget*>::iterator it = _mnemonics.begin();
+
     while( it != _mnemonics.end() )
     {
         if(it->second == &w)
@@ -311,8 +313,8 @@ void Form::onSetMnemonic(Widget& w, const Char* ch)
             ++it;
     }
 
-    if(ch)
-        _mnemonics[*ch] = &w;
+    for( size_t i = 0; i < chs.size(); ++i)
+        _mnemonics[chs[i]] = &w;
 }
 
 
@@ -328,8 +330,8 @@ void Form::onAddElement(Widget& widget)
 
     _focusList.push_back(&widget);
 
-    onSetShortcut( widget, widget.shortcut() );
-    onSetMnemonic( widget, widget.mnemonic() );
+    onSetShortcut( widget, widget.onGetShortcuts() );
+    onSetMnemonic( widget, widget.onGetMnemonics() );
 }
 
 
@@ -354,8 +356,8 @@ void Form::onRemoveElement(Widget& widget)
     if( it != _focusList.end() )
         _focusList.erase(it);
 
-    onSetShortcut(widget, 0);
-    onSetMnemonic(widget, 0);
+    onSetShortcut(widget, std::vector<Pt::Hmi::Key>());
+    onSetMnemonic(widget, std::vector<Pt::Char>());
 }
 
 
@@ -824,7 +826,7 @@ void Form::onProcessKeyEvent(const KeyEvent& ev)
         std::map<Key, Widget*>::iterator s = _shortcuts.find( ev.key() );
         if( s != _shortcuts.end() )
         {
-            s->second->processShortcut(ev);
+            s->second->processShortcut(s->first);
             return;
         }
     }
@@ -837,7 +839,7 @@ void Form::onProcessKeyEvent(const KeyEvent& ev)
         std::map<Char, Widget*>::iterator m = _mnemonics.find( ev.unicode() );
         if( m != _mnemonics.end() )
         {
-            m->second->processMnemonic();
+            m->second->processMnemonic(m->first);
             return;
         }
     }

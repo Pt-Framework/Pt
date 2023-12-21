@@ -57,6 +57,7 @@
 
 #include <Pt/Signal.h>
 #include <Pt/Delegate.h>
+#include <vector>
 
 namespace Pt {
 
@@ -81,10 +82,10 @@ class PT_HMI_API Widget : public View
 
         void unparent();
 
-        // implment add method in derived class
+        // implement add method in derived class
         void add(Widget& widget);
 
-        // implment remove method in derived class
+        // implement remove method in derived class
         void remove(Widget& widget);
 
         const std::vector<Widget*>& widgets() const;
@@ -134,9 +135,9 @@ class PT_HMI_API Widget : public View
 
         void setMnemonicWidget(Widget* w);
 
-        void processShortcut(const KeyEvent& kev);
+        void processShortcut(const Key& key);
 
-        void processMnemonic();
+        void processMnemonic(Pt::Char m);
 
       public:
         // TODO: obsolete when processEvent return true/false if consumed
@@ -228,9 +229,9 @@ class PT_HMI_API Widget : public View
 
         virtual void onActionKey(const KeyEvent& kev);
 
-        virtual void onShortcut(const KeyEvent& kev);
+        virtual void onShortcut(const Key& kev);
 
-        virtual void onMnemonic();
+        virtual void onMnemonic(Pt::Char m);
 
     //
     // Visual
@@ -358,6 +359,10 @@ class PT_HMI_API Widget : public View
 
         virtual void onRaiseRequest(Widget& w);
 
+        virtual const std::vector<Key> onGetShortcuts();
+
+        virtual const std::vector<Char> onGetMnemonics();
+
     private:
         Gfx::PaintRegion             _surface;
 
@@ -388,7 +393,7 @@ class PT_HMI_API Widget : public View
         Key                          _actionKey;
         Key                          _shortcutKey;
         Pt::Char                     _mnemonic;
-        Pt::Delegate<void>           _mnemonicEntered;
+        Pt::Signal<Pt::Char>         _mnemonicEntered;
 
         Spacing                      _padding;
         Spacing                      _margin;
