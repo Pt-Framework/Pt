@@ -330,6 +330,15 @@ void MenuBaseItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF&
 
     painter.drawText(textPos, _text);
 
+    Pt::Gfx::RectF mnemonicRect; // TODO
+
+    
+    if (!mnemonicRect.isNull())
+    {
+        double menmonicY = textPos.y() + 1;
+        painter.drawLine(Pt::Gfx::PointF(mnemonicRect.left(), menmonicY),
+            Pt::Gfx::PointF(mnemonicRect.right(), menmonicY));
+    }
 
     // shortcut text    
     const Pt::Hmi::Key* sk = shortcut();

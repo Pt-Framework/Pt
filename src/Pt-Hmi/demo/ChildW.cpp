@@ -48,7 +48,7 @@ ChildW::ChildW(const std::string& title)
     _fileMenu.addItem(_item2);
 
     _item3.triggered() += Pt::slot(*this, &ChildW::onMenuExit);
-    _item3.setText("Exit");
+    _item3.setText("Exit");    
     _item3.setName("ExitItem");
     Key ctrlA(Key::Control, Key::A);
     _item3.setShortcut(&ctrlA);
@@ -68,6 +68,7 @@ ChildW::ChildW(const std::string& title)
     _edit3.setText("Paste");
     _editMenu.addItem(_edit3);
     
+    _fileMenuItem.setMnemonic("F&ile");
     _fileMenuItem.setText("File");
     _fileMenuItem.setMenu(&_fileMenu);
 
