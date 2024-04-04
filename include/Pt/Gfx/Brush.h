@@ -30,6 +30,7 @@
 #ifndef PT_GFX_BRUSH_H
 #define PT_GFX_BRUSH_H
 
+#include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/SmartPtr.h>
 
@@ -38,6 +39,7 @@ namespace Pt {
 namespace Gfx {
 
 class BrushData;
+class ImageSurface;
 
 class ColorStop
 {
@@ -234,6 +236,9 @@ class BrushData
         , _fillStyle(Brush::Solid)
         , _color(0, 0, 0)
         , _gradient(Brush::Horizontal)
+        , _ofsX(0)
+        , _ofsY(0)
+        , _texture(0)
         {}
 
         BrushData(const Color& color)
@@ -241,6 +246,9 @@ class BrushData
         , _fillStyle(Brush::Solid)
         , _color(color)
         , _gradient(Brush::Horizontal)
+        , _ofsX(0)
+        , _ofsY(0)
+        , _texture(0)
         {}
 
         BrushData(const Image& texture,
@@ -250,8 +258,7 @@ class BrushData
         BrushData(const Color& from, const Color& to,
                   Brush::GradientStyle g);
 
-        ~BrushData()
-        {}
+        ~BrushData();
 
         Brush::FillStyle fillStyle() const
         { return _fillStyle; }
@@ -312,8 +319,7 @@ class BrushData
         void setTexture(const Image& texture,
                         Pt::int32_t offsetX, Pt::int32_t offsetY);
 
-        const Image& texture() const
-        { return _texture; }
+        const Image& texture() const;
 
         Pt::int32_t offsetX() const
         { return _ofsX; }
@@ -345,7 +351,7 @@ class BrushData
 
         Pt::int32_t          _ofsX;
         Pt::int32_t          _ofsY;
-        Image                _texture;
+        ImageSurface*        _texture;
 };
 
 } // namespace

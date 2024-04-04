@@ -139,8 +139,8 @@ inline int stepAround( int v, int incr, int max )
   return (((v) + (incr) < 0) ? (max - 1) : ((v) + (incr) == max) ? 0 : ((v) + (incr)));
 }
 
-Rasterizer::Rasterizer(Image& image)
-: _image(&image)
+Rasterizer::Rasterizer()
+: _image( ImageFormat::argb32() )
 , _text( new DrawText() )
 , _compositionMode(CompositionMode::SourceCopy)
 {
@@ -154,24 +154,16 @@ Rasterizer::~Rasterizer()
 }
 
 
-void Rasterizer::setImage( Image& image )
-{
-    _image = &image;
-
-    _brushBuffer.reset(_image->format(), _brushBuffer.size());
-}
-
-
 const ImageFormat& Rasterizer::format() const
 {
-  return _image->format();
+  return _image.format();
 }
 
 
 void Rasterizer::setPen( const Pen& pen )
 {
     _pen = pen;
-    _penBuffer.reset(_image->format(), Size(64, 1));
+    _penBuffer.reset(_image.format(), Size(64, 1));
     Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
 
     _penPixel.reset(_penBuffer.view(), 0, 0);
@@ -186,16 +178,16 @@ void Rasterizer::setBrush( const Brush& brush )
     switch( brush.fillStyle() )
     {
         case Brush::Solid:
-            _brushBuffer.reset( _image->format(), Size(64, 1) );
+            _brushBuffer.reset( _image.format(), Size(64, 1) );
             Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
 
             _brushImage = &_brushBuffer;
             break;
 
         case Brush::Texture:
-            if( brush.texture().format() != _image->format() )
+            if( brush.texture().format() != _image.format() )
             {
-                _brushBuffer.reset( _image->format(), brush.texture().size() );
+                _brushBuffer.reset( _image.format(), brush.texture().size() );
                 Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
 
                 _brushImage = &_brushBuffer;
@@ -384,11 +376,8 @@ void Rasterizer::drawArc(const PointF& topLeft, const SizeF& size, float degBegi
 }
 
 Image Rasterizer::toImage() const
-{
-    if( ! _image )
-        return Image();
-    
-     return *_image;
+{   
+     return _image;
 }
 
 
@@ -2098,9 +2087,9 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
         if(fillLength)
         {
             ConstPixel sourcePixel(texture.view(),  textureXPos, textureYPos);
-            Pixel destPixel(_image->view(), xpos, ypos);
+            Pixel destPixel(_image.view(), xpos, ypos);
 
-            _image->format().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );
+            _image.format().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );
         }
 
         // Remaining unfilled pixels of the span
@@ -2148,9 +2137,9 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, int& length, const ClipRect& cl
 //                                       Pt::Gfx::Brush::GradientDirection style)
 //{
 //    if( style == Pt::Gfx::Brush::Horizontal )
-//      texture.reset( _image->format(), Size(width, 1));
+//      texture.reset( _image.format(), Size(width, 1));
 //    else
-//      texture.reset( _image->format(), Size(1, height));
+//      texture.reset( _image.format(), Size(1, height));
 //
 //    int length = texture.width() + texture.height() - 1;
 //
@@ -2205,8 +2194,8 @@ void Rasterizer::fillSolid(const Point& pos, int length)
 
         if( n )
         {
-            Pixel destPixel(_image->view(), xpos,ypos);
-           _image->format().copy(destPixel, _brushPixel, n, _compositionMode);
+            Pixel destPixel(_image.view(), xpos,ypos);
+           _image.format().copy(destPixel, _brushPixel, n, _compositionMode);
         }
 
         length -= n;
@@ -2218,14 +2207,14 @@ void Rasterizer::fillSolid(const Point& pos, int length)
 void Rasterizer::strokeText( const Point& to, const Pt::String& text, const ClipRect& currentClip)
 {
     _text->setClip(currentClip);
-    _text->draw( *_image, _pen.color(), to, text, _compositionMode );
+    _text->draw( _image, _pen.color(), to, text, _compositionMode );
 }
 
 
 void Rasterizer::strokeText(const Point& to, const Pt::String& text, const Transform& trans, const ClipRect& currentClip)
 {
     _text->setClip(currentClip);
-    _text->draw(*_image, _pen.color(), to, text, _compositionMode, trans);
+    _text->draw(_image, _pen.color(), to, text, _compositionMode, trans);
 }
 
 
@@ -2539,7 +2528,7 @@ void Rasterizer::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *
             if (right_x >= left_x)
             {
                 int xpos = std::max( left_x, 0 );
-                const int endx = std::min<int>( right_x, _image->width() -1);
+                const int endx = std::min<int>( right_x, _image.width() -1);
                 stroke( xpos, y, endx - xpos + 1, currentClip );
             }
 
@@ -3436,12 +3425,12 @@ void Rasterizer::updateGradientBrush(int width, int height)
     switch( _brush.gradient() )
     {
         case Pt::Gfx::Brush::Horizontal:
-          _brushBuffer.reset(_image->format(), Size(width, 1));
+          _brushBuffer.reset(_image.format(), Size(width, 1));
           height = 1;
           break;
 
         case Pt::Gfx::Brush::Vertical:
-          _brushBuffer.reset(_image->format(), Size(1, height));
+          _brushBuffer.reset(_image.format(), Size(1, height));
           width = 1;
           std::swap(gradientStart, gradientStop);
           break;
@@ -3666,8 +3655,8 @@ void Rasterizer::outputEdges(const ActiveEdgeTable& edges, const Point&  origin,
 
 void Rasterizer::outputSpan( const Point& topLeft, int x, int y, int width )
 {
-    const int imageWidth = static_cast<int>( _image->width() );
-    const int imageHeight = static_cast<int>( _image->height() );
+    const int imageWidth = static_cast<int>( _image.width() );
+    const int imageHeight = static_cast<int>( _image.height() );
 
     if( y >= imageHeight )
         return;
@@ -3797,7 +3786,7 @@ void Rasterizer::image( const Point& to, const Image& img)
 //  // account for smaller fromRect
 //  Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
 //
-//  _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
+//  _image.format().copy(_image.view(), toClip, from.view(), fromClip, _compositionMode);
 //}
 
 
@@ -3825,7 +3814,7 @@ void Rasterizer::image(const Point& to, const Image& from, const Rect& rect)
   // update source size if rect got smaller
   fromRect.setSize( toRect.size() );
 
-  _image->format().copy(_image->view(), toRect.topLeft(), from.view(), fromRect, _compositionMode);
+  _image.format().copy(_image.view(), toRect.topLeft(), from.view(), fromRect, _compositionMode);
 }
 
 
@@ -3835,8 +3824,8 @@ void Rasterizer::stroke(int x, int y, const ClipRect& clip)
         y < clip.y() || y >= clip.bottom())
         return;
 
-    Pixel pixel(_image->view(), x, y);
-    _image->format().setPixel(pixel, _penPixel, _compositionMode);
+    Pixel pixel(_image.view(), x, y);
+    _image.format().setPixel(pixel, _penPixel, _compositionMode);
 }
 
 
@@ -3851,8 +3840,8 @@ void Rasterizer::stroke(int xpos, int ypos, int length, const ClipRect& currentC
         int n = std::min(length, bufferWidth);
         if( n )
         {
-             Pixel destPixel( _image->view(), xpos, ypos);
-            _image->format().copy(destPixel, _penPixel, n, _compositionMode);
+             Pixel destPixel( _image.view(), xpos, ypos);
+            _image.format().copy(destPixel, _penPixel, n, _compositionMode);
         }
 
         length -= n;
@@ -3878,7 +3867,7 @@ void Rasterizer::setClip( const RectF& clip )
 
 void Rasterizer::resetClip()
 {
-    _clip = Rect( Gfx::Point(0,0), _image->size() );
+    _clip = Rect( Gfx::Point(0,0), _image.size() );
 }
 
 } // namespace

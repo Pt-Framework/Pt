@@ -85,16 +85,14 @@ class Rasterizer
     };
 
   public:
-    Rasterizer( Image& image );
+    Rasterizer();
 
     ~Rasterizer();
 
     const Image& image() const
     {
-        return *_image;
+        return _image;
     }
-
-    void setImage(Image& image);
 
     void begin(Gfx::Painter& painter)
     {}
@@ -102,8 +100,12 @@ class Rasterizer
     void finish()
     {}
 
-
     const ImageFormat& format() const;
+
+    void reset(const Gfx::Size& size, std::size_t stride)
+    {
+        _image.reset( _image.format(), size, stride );
+    }
 
     void setClip(const RectF& clip);
 
@@ -212,7 +214,7 @@ private:
 
     ClipRect updateClip() const
     {
-        const Rect imageRect( _image->size() );
+        const Rect imageRect( _image.size() );
         return _clip.intersect(imageRect);
     }
     
@@ -271,10 +273,8 @@ private:
 
     void updateGradientBrush(int width, int height);
 
-
-
   private:
-    Image*          _image;
+    Image           _image;
     DrawText*       _text;
     Rect            _clip;
     Font            _font;

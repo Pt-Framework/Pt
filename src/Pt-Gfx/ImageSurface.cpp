@@ -45,8 +45,8 @@ namespace Pt {
 
 namespace Gfx {
 
-ImageSurface::ImageSurface(Image& image)
-: _rasterizer( new Rasterizer(image))
+ImageSurface::ImageSurface()
+: _rasterizer(new Rasterizer)
 {
 }
 
@@ -63,12 +63,6 @@ const Gfx::Image& ImageSurface::image() const
 }
 
 
-void ImageSurface::setImage(Image& image)
-{
-    _rasterizer->setImage(image);
-}
-
-
 double ImageSurface::onScaleFactor() const
 {
     return 1.0;
@@ -81,6 +75,12 @@ const Gfx::SizeF& ImageSurface::onSize() const
     _size = SizeF( _rasterizer->image().size().width(), 
                    _rasterizer->image().size().height() );
     return _size;
+}
+
+
+void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
+{
+    _rasterizer->reset(size, stride);
 }
 
 

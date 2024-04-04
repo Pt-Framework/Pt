@@ -49,18 +49,6 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
         {
         }
 
-        void resize(const Gfx::Size& size, size_t stride)
-        {
-            _image.reset(_image.format(), size, stride);
-            setImage(_image);
-        }
-
-        void resize(const Gfx::SizeF& size)
-        {
-            _image.reset(_image.format(), round(size));
-            setImage(_image);
-        }
-
         void begin(Gfx::Painter& painter)
         {
             Gfx::PaintSurface::begin(painter);
@@ -75,28 +63,23 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
         {
         }
 
-        void set(const Gfx::Image& s)
+        void resize(const Gfx::SizeF& size)
         {
-            _image = s;
-            setImage(_image);
+            Gfx::Size sz( size.width(), size.height() );
+
+            Gfx::ImageSurface::reset(sz);
         }
 
-        const Gfx::Image& image() const
+        void set(const Gfx::Image& image)
         {
-            return _image;
-        }
+            reset( image.size(), image.padding() );
 
-        Gfx::Image& image()
-        {
-            return _image;
+            drawImage( Gfx::PointF(0,0), image );
         }
 
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
         void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
-
-    private:
-        Gfx::Image _image;
 };
 
 } // namespace

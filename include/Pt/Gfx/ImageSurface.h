@@ -44,12 +44,11 @@ class Rasterizer;
 class PT_GFX_API ImageSurface : public PaintSurface
 {
   public:
-    // TODO: Image as member of ImageSurface
-    ImageSurface( Image& image );
+    ImageSurface();
 
     virtual ~ImageSurface();
 
-    void setImage(Image& image);
+    void reset(const Gfx::Size& size, std::size_t stride = 0);
 
     const Gfx::Image& image() const;
 

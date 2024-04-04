@@ -41,8 +41,6 @@ const Gfx::ImageFormat& getScreenFormat()
 
 
 PixmapSurfaceImpl::PixmapSurfaceImpl()
-: ImageSurface(_image)
-, _image( getScreenFormat() )
 {
 }
 

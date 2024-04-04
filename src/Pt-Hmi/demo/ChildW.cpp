@@ -44,7 +44,7 @@ ChildW::ChildW(const std::string& title)
     _item2.setText("Op&en");
     _item2.setName("OpenItem");
     _item2.setSeperator(true);
-    _item2.setContour(Gfx::Pen::Pen(Pt::Gfx::Color::fromRgb8(0,0,0), 2));
+    _item2.setContour(Gfx::Pen(Pt::Gfx::Color::fromRgb8(0,0,0), 2));
     _fileMenu.addItem(_item2);
 
     _item3.triggered() += Pt::slot(*this, &ChildW::onMenuExit);

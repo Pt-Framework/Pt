@@ -157,8 +157,6 @@ class ScreenImpl : public Form
         };
 
         const Gfx::Image& image() const;
-
-        Gfx::Image& image();
         
         void updateScreen(const Pt::Gfx::Rect& area);
 

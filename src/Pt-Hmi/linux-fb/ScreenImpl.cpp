@@ -64,7 +64,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     Gfx::SizeF size( fs.width(), fs.height() );
 
     _surface.resize(size);
-    _surface.pixmapImpl()->resize( _frameBuffer.size(), 
+    _surface.pixmapImpl()->reset( _frameBuffer.size(), 
                                    _frameBuffer.strideSize() );
 
     Gfx::Painter painter(_surface);
@@ -285,8 +285,8 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     _surface.resize(size);
     _surface.setScaleFactor( scaleFactor() );
     
-    _surface.pixmapImpl()->resize( _frameBuffer.size(), 
-                                   _frameBuffer.strideSize() );
+    _surface.pixmapImpl()->reset( _frameBuffer.size(), 
+                                  _frameBuffer.strideSize() );
 
     if(_parent)
         _parent->onResize(*this, size);
@@ -340,7 +340,7 @@ void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
                  _cursorBackground.width(),
                  _cursorBackground.height(),
                  _cursorPos,
-                 image().data(), CopyOp );
+                 const_cast<uint8_t*>(image().data()), CopyOp );
     }
 
     //
@@ -359,16 +359,10 @@ const Gfx::Image& ScreenImpl::image() const
 }
 
 
-Gfx::Image& ScreenImpl::image()
-{
-    return _surface.pixmapImpl()->image();
-}
-
-
 void ScreenImpl::updateScreen(const Gfx::Rect& r)
 {
     if(_drawCursor)
-        drawCursor( image().data() );
+        drawCursor( const_cast<uint8_t*>( image().data() ) );
     
     _frameBuffer.output( image().data(), r );
 }
@@ -462,6 +456,9 @@ void ScreenImpl::grabImage(const Pt::uint8_t* buffer,
 
     for(Pt::ssize_t y = pos.y(); y < yMax; ++y)
     {
+        if(y < 0)
+            continue;
+
         size_t lineOffset = y * _frameBuffer.lineSize() +
                             pos.x() * pixelSizeInByte;
 
@@ -481,15 +478,21 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h,
     size_t yCursor = 0;
     size_t xCursor = 0;
 
-    for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
+    for( ssize_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
     {
+        if(yBuffer < 0)
+            continue;
+
         const size_t lineOffsetBuffer  = yBuffer * _frameBuffer.lineSize();
         const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
 
         xCursor = 0;
 
-        for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
+        for( ssize_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
         {
+            if(xBuffer < 0)
+                continue;
+
             Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
             const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
 

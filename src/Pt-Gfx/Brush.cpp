@@ -112,6 +112,7 @@ Brush::Brush(BrushData* data)
 {
 }
 
+
 Brush Brush::verticalGradient(const Color& from, const Color& to)
 {
     BrushData* data = new BrushData(from, to, Vertical);
@@ -317,6 +318,7 @@ BrushData::BrushData(const Image& texture,
 , _gradient(Brush::Horizontal)
 , _ofsX(0)
 , _ofsY(0)
+, _texture(0)
 {
     setTexture(texture, offsetX, offsetY);
 }
@@ -330,6 +332,7 @@ BrushData::BrushData(const Color& from, const Color& to,
 , _gradient(g)
 , _ofsX(0)
 , _ofsY(0)
+, _texture(0)
 {
     _gradientStops.add(0.0, from);
     _gradientStops.add(1.0, to);
@@ -347,13 +350,20 @@ BrushData::BrushData(const Color& from, const Color& to,
 }
 
 
+BrushData::~BrushData()
+{
+    delete _texture;
+}
+
+
 void BrushData::setSolid(const Color& color)
 {
     _fillStyle = Brush::Solid;
     _color     = color;
     _isNull    = false;
 
-    _texture   = Image();
+    delete _texture;
+    _texture = 0;
 }
 
 
@@ -368,7 +378,9 @@ void BrushData::set1DGradient(Brush::GradientStyle g, const ColorStops& colorSto
 
     _ofsX          = 0;
     _ofsY          = 0;
-    _texture       = Image();
+    
+    delete _texture;
+    _texture = 0;
 }
 
 
@@ -386,7 +398,9 @@ void BrushData::setLinearGradient(const PointF& begin, const PointF& end,
 
     _ofsX          = 0;
     _ofsY          = 0;
-    _texture       = Image();
+    
+    delete _texture;
+    _texture = 0;
 }
 
 
@@ -405,7 +419,9 @@ void BrushData::setLinearGradient(float beginX, float beginY,
 
     _ofsX          = 0;
     _ofsY          = 0;
-    _texture       = Image();
+    
+    delete _texture;
+    _texture = 0;
 }
 
 
@@ -426,7 +442,9 @@ void BrushData::setRadialGradient(const PointF& begin, float beginRadius,
 
     _ofsX          = 0;
     _ofsY          = 0;
-    _texture       = Image();
+    
+    delete _texture;
+    _texture = 0;
 }
 
 
@@ -447,25 +465,42 @@ void BrushData::setRadialGradient(float beginX, float beginY, float beginRadius,
 
     _ofsX          = 0;
     _ofsY          = 0;
-    _texture       = Image();
+    
+    delete _texture;
+    _texture = 0;
+}
+
+
+
+const Image& BrushData::texture() const
+{
+    if( ! _texture )
+        throw std::logic_error("invalid texture");
+
+    return _texture->image();
 }
 
 
 void BrushData::setTexture(const Image& texture,
                            Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
+    delete _texture;
+    _texture = 0;
+
+    _texture = new ImageSurface;
+
     // The texture has no offset
     if( ! offsetX && ! offsetY )
     {
-        _texture = texture;
+        _texture->reset( texture.size() );
+        _texture->drawImage(Gfx::PointF(0, 0), texture);
     }
     else // The texture has offset
     {
         // Prepare the destination texture
-        _texture.reset(texture.format(), texture.size());
+        _texture->reset( texture.size() );
 
-        ImageSurface surface(_texture);
-        Painter painter(surface);
+        Painter painter(*_texture);
         painter.setCompositionMode(CompositionMode::SourceCopy);
 
         // Calculate the source and destination coordinate
