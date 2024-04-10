@@ -51,6 +51,13 @@ ImageSurface::ImageSurface()
 }
 
 
+ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
+: _rasterizer(new Rasterizer)
+{
+  _rasterizer->reset(size, stride);
+}
+
+
 ImageSurface::~ImageSurface()
 {
   delete _rasterizer;
@@ -189,7 +196,7 @@ void ImageSurface::fillEllipse(const PointF& topLeft, const SizeF& size)
 
 void ImageSurface::drawPolyline(const PointF* ps, const size_t n)
 {
-  _rasterizer->drawPolyline( ps, n );
+    _rasterizer->drawPolyline( ps, n );
 }
 
 
@@ -201,13 +208,13 @@ void ImageSurface::fillPolygon(const PointF* ps, const size_t n)
 
 void ImageSurface::drawImage(const PointF& to, const Image& image)
 {
-  _rasterizer->drawImage( to, image);
+    _rasterizer->drawImage( to, image);
 }
 
 
 void ImageSurface::drawImage(const PointF& to, const Image& image, const RectF& imageRect)
 {
-  _rasterizer->drawImage(to, image, imageRect);
+    _rasterizer->drawImage(to, image, imageRect);
 }
 
 

@@ -102,7 +102,10 @@
     <ClInclude Include="..\..\include\Pt\Hmi\MenuSubItem.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintRegion.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PlatinumStyle.h" />
@@ -678,6 +681,9 @@
     <ClCompile Include="..\..\src\Pt-Hmi\MenuItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuMenuItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuSubItem.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\PaintRegion.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PlatinumStyle.cpp" />

@@ -30,6 +30,8 @@
 #define Pt_Hmi_PixmapSurface_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/PaintSurface.h>
+
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Pen.h>
@@ -38,7 +40,7 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/PaintSurface.h>
+
 #include <Pt/System/Path.h>
 
 namespace Pt {
@@ -49,7 +51,7 @@ class PixmapSurfaceImpl;
 
 /** @brief A back buffer drawing surface.
 */
-class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
+class PT_HMI_API PixmapSurface : public PaintSurface
 {
     public:
         PixmapSurface();

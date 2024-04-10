@@ -35,6 +35,9 @@
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Gfx/PaintSurface.h>
 
+#include <Pt/Hmi/PaintRegion.h>
+#include <Pt/Hmi/Painter.h>
+
 namespace Pt {
 
 namespace Hmi {
@@ -70,13 +73,13 @@ void ShellWM::setParent(Shell* shell)
 }
 
 
-Gfx::PaintSurface& ShellWM::surface()
+PaintSurface& ShellWM::surface()
 {
     return _surface;
 }
 
 
-const Gfx::PaintSurface& ShellWM::surface() const
+const PaintSurface& ShellWM::surface() const
 {
     return _surface;
 }
@@ -86,12 +89,12 @@ void ShellWM::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
     if( ! surface )
     {
-        _surface.detach();
+        _surface.reset();
     }
     else
     {
         Gfx::RectF surfaceRect( pos, size() );
-        _surface.attach(*surface, surfaceRect);
+        _surface.reset( dynamic_cast<PaintSurface&>(*surface), surfaceRect );
     }
 }
 
@@ -435,7 +438,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::PointF surfacePos = frameRect.topLeft() - frame->position();
         Gfx::RectF surfaceRect( surfacePos, frameRect.size() );
 
-        Pt::Gfx::Painter painter( surface() );
+        Painter painter( surface() );
         painter.drawSurface(frameRect.topLeft(), frame->surface(), surfaceRect);
     }
 }

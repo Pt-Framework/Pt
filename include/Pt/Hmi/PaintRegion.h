@@ -22,61 +22,54 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
- MA  02110-1301  USA
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+ 02110-1301 USA
 */
 
-#ifndef Pt_Gfx_PaintRegion_h
-#define Pt_Gfx_PaintRegion_h
+#ifndef Pt_Hmi_PaintRegion_h
+#define Pt_Hmi_PaintRegion_h
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Hmi/PaintSurface.h>
 
 namespace Pt {
 
-namespace Gfx {
+namespace Hmi {
+
+class PixmapSurface;
 
 /** @brief Drawing region on another surface.
 */
-class PT_GFX_API PaintRegion : public PaintSurface
+class PT_HMI_API PaintRegion : public PaintSurface
 {
     public:
         PaintRegion();
 
-        PaintRegion(PaintSurface& surface, const Gfx::RectF& rect);
+        PaintRegion(Hmi::PaintSurface& surface, const Gfx::RectF& rect);
 
         virtual ~PaintRegion();
 
-        void attach(PaintSurface& surface, const Gfx::RectF& rect);
+        void reset(Hmi::PaintSurface& surface, const Gfx::RectF& rect);
 
-        void detach();
+        void reset();
 
-        PaintSurface* surface() const;
-
-        const Gfx::RectF& area() const;
-
-        void move(const Gfx::PointF& size);
-
-        void resize(const Gfx::SizeF& size);
-
-        virtual Image toImage() const;
+        virtual Gfx::Image toImage() const;
 
     protected:
         virtual const Gfx::SizeF& onSize() const;
 
         virtual double onScaleFactor() const;
 
-        virtual void onBegin(Painter& painter);
+        virtual void onBegin(Gfx::Painter& painter);
 
         virtual void onFinish();
+
+    protected:
+        virtual void drawPixmap(const Gfx::PointF& toF, 
+                                const PixmapSurface& surface);
+
+        virtual void drawPixmap(const Gfx::PointF& toF, 
+                                const PixmapSurface& surface, 
+                                const Gfx::RectF& surfaceRect);
 
     protected:
         virtual const Gfx::ImageFormat& format() const;
@@ -119,25 +112,25 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual void drawPath(const Gfx::Path& path, float smoothness);
 
-        virtual void fillPath(const Path& path, float smoothness);
+        virtual void fillPath(const Gfx::Path& path, float smoothness);
 
-        virtual void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+        virtual void drawChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
 
-        virtual void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+        virtual void fillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
 
-        virtual void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+        virtual void drawPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
 
-        virtual void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+        virtual void fillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
 
-        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+        virtual void drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
 
-        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& surface);
+        virtual void drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& surface);
 
-        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect);
+        virtual void drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
 
     private:
-        PaintSurface* _surface;
-        Gfx::RectF    _area;
+        Hmi::PaintSurface* _surface;
+        Gfx::RectF         _area;
 };
 
 } // namespace

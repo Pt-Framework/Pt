@@ -27,11 +27,13 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Gfx/PaintRegion.h>
+#include <Pt/Hmi/PaintRegion.h>
+#include <Pt/Hmi/PixmapSurface.h>
+#include <Pt/Hmi/Painter.h>
 
 namespace Pt {
 
-namespace Gfx {
+namespace Hmi {
 
 PaintRegion::PaintRegion()
 : _surface(0)
@@ -40,10 +42,9 @@ PaintRegion::PaintRegion()
 
 
 PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
-: _surface(0)
-{           
-    _surface = &surface;
-    _area = rect; 
+: _surface(&surface)
+, _area(rect)
+{
 }
 
 
@@ -54,49 +55,25 @@ PaintRegion::~PaintRegion()
 }
 
 
-void PaintRegion::attach(PaintSurface& surface, const Gfx::RectF& rect)
+void PaintRegion::reset(Hmi::PaintSurface& surface, const Gfx::RectF& rect)
 {
     _surface = &surface;
     _area = rect;
 
     // restart currently attached painter
-    Painter* painter = this->painter();
+    Gfx::Painter* painter = this->painter();
     if(painter)
         painter->begin(*this);
 }
 
 
-void PaintRegion::detach()
+void PaintRegion::reset()
 {
     if(_surface)
         _surface->onFinish();
 
     _surface = 0;
     _area.clear(); 
-}
-
-
-PaintSurface* PaintRegion::surface() const
-{
-    return _surface;
-}
-
-
-const Gfx::RectF& PaintRegion::area() const
-{
-    return _area;
-}
-
-
-void PaintRegion::move(const Gfx::PointF& pos)
-{
-    _area.setOrigin(pos);
-}
-
-
-void PaintRegion::resize(const Gfx::SizeF& size)
-{
-    _area.setSize(size);
 }
 
 
@@ -115,7 +92,7 @@ double PaintRegion::onScaleFactor() const
 }
 
 
-void PaintRegion::onBegin(Painter& painter)
+void PaintRegion::onBegin(Gfx::Painter& painter)
 {
     if(_surface)
         _surface->onBegin(painter);
@@ -126,6 +103,23 @@ void PaintRegion::onFinish()
 {
     if(_surface)
         _surface->onFinish();
+}
+
+
+void PaintRegion::drawPixmap(const Gfx::PointF& toF, 
+                             const PixmapSurface& surface) 
+{
+    if(_surface)
+        _surface->drawPixmap(_area.topLeft() + toF, surface);
+}
+
+
+void PaintRegion::drawPixmap(const Gfx::PointF& toF, 
+                             const PixmapSurface& surface, 
+                             const Gfx::RectF& surfaceRect) 
+{
+    if(_surface)
+        _surface->drawPixmap(_area.topLeft() + toF, surface, surfaceRect);
 }
 
 
@@ -205,6 +199,7 @@ void PaintRegion::drawText(const Gfx::PointF& to, const Pt::String& text, const 
     if(_surface)
         _surface->drawText(to + _area.topLeft(), text, trans);
 }
+
 
 void PaintRegion::drawRect(const Gfx::RectF& r)
 {
@@ -292,7 +287,7 @@ void PaintRegion::drawPath(const Gfx::Path& path, float smoothness)
 }
 
 
-void PaintRegion::fillPath(const Path& path, float smoothness)
+void PaintRegion::fillPath(const Gfx::Path& path, float smoothness)
 {
     Gfx::Path tpath = path;
 
@@ -306,48 +301,48 @@ void PaintRegion::fillPath(const Path& path, float smoothness)
 }
 
 
-void PaintRegion::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
+void PaintRegion::drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& surface)
 {
     if(_surface)
         _surface->drawSurface(_area.topLeft() + toF, surface);
 }
 
 
-void PaintRegion::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface, const Gfx::RectF& pmRect)
+void PaintRegion::drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& surface, const Gfx::RectF& pmRect)
 {
     if(_surface)
-        _surface->drawSurface(_area.topLeft() + toF, surface, pmRect);
+        _surface->drawSurface(_area.topLeft() + toF, surface, pmRect);;
 }
 
 
-Image PaintRegion::toImage() const
+Gfx::Image PaintRegion::toImage() const
 {
     return _surface ? _surface->toImage()
-                    : Image();
+                    : Gfx::Image();
 }
 
 
-void PaintRegion::drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+void PaintRegion::drawChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
 {
 }
 
 
-void PaintRegion::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+void PaintRegion::fillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
 {
 }
 
 
-void PaintRegion::drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+void PaintRegion::drawPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
 {
 }
 
 
-void PaintRegion::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+void PaintRegion::fillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
 {
 }
 
 
-void PaintRegion::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+void PaintRegion::drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
 {
 }
 

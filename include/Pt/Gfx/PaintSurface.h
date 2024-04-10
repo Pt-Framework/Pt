@@ -165,10 +165,9 @@ class PT_GFX_API PaintSurface
 
         virtual Image toImage() const = 0;
 
-    public:
+    protected:
         PaintSurface();
 
-    protected:
         void begin(Painter& painter);
 
         void finish();
@@ -202,9 +201,9 @@ class PT_GFX_API PaintSurface
     
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to) = 0;
 
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text) = 0;
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& text) = 0;
 
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans) = 0;
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans) = 0;
 
         virtual void drawRect(const Gfx::RectF& rectangle) = 0;
 
@@ -236,9 +235,12 @@ class PT_GFX_API PaintSurface
 
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
 
-        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& surface) = 0;
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const PaintSurface& surface) = 0;
 
-        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect) = 0;
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const PaintSurface& surface, 
+                                  const Gfx::RectF& surfaceRect) = 0;
 
     private:
         Painter* _painter;

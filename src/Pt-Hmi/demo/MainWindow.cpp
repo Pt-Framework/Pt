@@ -64,7 +64,7 @@ MainWindow::MainWindow()
 
     setTitle("Main 1");
     move( Gfx::PointF(100, 30) );
-    resize( Gfx::SizeF(500, 700) );
+    resize( Gfx::SizeF(800, 700) );
 
     //_child2.setTopMost(true);
     _child2.resize( Gfx::SizeF(550, 600) );
@@ -168,8 +168,8 @@ MainWindow::MainWindow()
     _child1.closeRequested() += Pt::slot(*this, &MainWindow::close);
 
     //_child1.setTopMost(true);
-    _child1.move( Gfx::PointF(30, 30));
-    _child1.resize( Gfx::SizeF(300, 600) );
+    _child1.move( Gfx::PointF(500, 30));
+    _child1.resize( Gfx::SizeF(280, 600) );
     _child1.show(true); // SHOW DEMO WINDOW 1
 
     // context menu
@@ -246,7 +246,7 @@ void MainWindow::onZoom(MenuBaseItem& item)
 void MainWindow::onPaintEvent(const PaintEvent& ev)
 {
     Window::onPaintEvent(ev);
-    return;   
+    //return;   
     
     const Gfx::RectF& rect = ev.rect();
  
@@ -261,7 +261,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 
     painter.setPen( Gfx::Color::fromRgb8(255, 0, 0, 150) );
     painter.drawLine(Pt::Gfx::PointF(10, 15), Pt::Gfx::PointF(50, 15));
-    return;
+    //return;
 
 #ifdef DEMO_WITH_SKIA
     Gfx::Image img(Gfx::ImageFormat::argb32(), Gfx::Size(800, 400));
@@ -336,8 +336,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     return;
 #endif
 
-    Gfx::Image image( painter.format(), Gfx::Size(600, 600) );
-    Gfx::ImageSurface imageSurface(image);
+    Gfx::ImageSurface imageSurface(Gfx::Size(600, 600));
     Gfx::Painter imagePainter(imageSurface);
     //
     //imagePainter.setAntiAliasing(true);
@@ -504,7 +503,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 
     
     imagePainter.setFont( Pt::Gfx::Font("", 24) );
-   Pt::String str = "Hello World";
+    Pt::String str = "Hello World";
 
     imagePainter.drawText(Pt::Gfx::PointF(20, 260), str, trans);
 
@@ -548,7 +547,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 
 #endif
 
-    painter.drawImage(Gfx::PointF(0, 0), image);
+    painter.drawImage( Gfx::PointF(10, 30), imageSurface.image() );
 }
 
 

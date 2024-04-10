@@ -229,11 +229,13 @@ class PT_GFX_API Painter
         void fillChord(const PointF& topLeft, const SizeF& size,
                        float degBegin, float degEnd);
 
-        void drawSurface(const Gfx::PointF& toF, const PaintSurface& surface);
+    //private:
+    public:
+        void drawSurface(const Gfx::PointF& toF, 
+                         const PaintSurface& surface);
 
-        void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect);
-
-        Image toImage() const;
+        void drawSurface(const Gfx::PointF& toF, 
+                         const PaintSurface& pm, const Gfx::RectF& pmRect);
 
     public:
         double scaleFactor() const;
@@ -265,6 +267,9 @@ class PT_GFX_API Painter
         Gfx::SizeF align(const Gfx::SizeF& s) const;
 
         Gfx::RectF align(const Gfx::RectF& rect) const;
+
+    protected:
+        virtual void onFinish();
 
     private:
         PaintSurface*        _surface;

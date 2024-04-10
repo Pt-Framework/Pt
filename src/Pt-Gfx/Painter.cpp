@@ -52,7 +52,12 @@ Painter::Painter(PaintSurface& surface)
 
 Painter::~Painter()
 {
-    finish();
+    if( _surface )
+    {
+        _surface->finish();
+        _surface = 0;
+    }
+    
     delete _paintData;
 }
 
@@ -80,11 +85,18 @@ void Painter::begin(PaintSurface& surface)
 
 void Painter::finish()
 {
+    onFinish();
+
     if( _surface )
     {
         _surface->finish();
         _surface = 0;
     }
+}
+
+
+void Painter::onFinish()
+{
 }
 
 
@@ -138,13 +150,10 @@ void Painter::resetClip()
 
 void Painter::setPen(const Gfx::Pen& pen)
 {
-    if (_surface)
-    {
-        _surface->setPen(pen);
-    }
-
-    // keep pen in logical size
     _pen = pen;
+
+    if (_surface)
+        _surface->setPen(pen);
 }
 
 
@@ -317,12 +326,6 @@ void Painter::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
 void Painter::drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect)
 {
     _surface->drawSurface(toF, pm, pmRect);
-}
-
-
-Image Painter::toImage() const
-{
-    return _surface->toImage();
 }
 
 

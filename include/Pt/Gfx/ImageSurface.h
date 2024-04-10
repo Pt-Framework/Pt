@@ -23,8 +23,8 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #ifndef PT_GFX_ImageSurface_H
@@ -46,13 +46,15 @@ class PT_GFX_API ImageSurface : public PaintSurface
   public:
     ImageSurface();
 
+    ImageSurface(const Gfx::Size& size, std::size_t stride = 0);
+
     virtual ~ImageSurface();
 
     void reset(const Gfx::Size& size, std::size_t stride = 0);
 
     const Gfx::Image& image() const;
 
-protected:
+  protected:
     virtual double onScaleFactor() const;
 
     virtual const Gfx::SizeF& onSize() const;
@@ -61,7 +63,7 @@ protected:
 
     virtual void onFinish();
 
-public:
+  public:
     virtual const Gfx::ImageFormat& format() const;
 
     virtual Image toImage() const;
@@ -136,7 +138,9 @@ public:
     mutable SizeF   _size;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif
 
