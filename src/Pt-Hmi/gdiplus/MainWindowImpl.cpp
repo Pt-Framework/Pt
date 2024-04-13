@@ -124,10 +124,10 @@ void MainWindowImpl::paint(const Gfx::RectF& rect)
     const Gfx::RectF pRect = _screen.toPhysical(rect);
 
     RECT wRect;
-    wRect.bottom = lround(pRect.bottom());
-    wRect.top = lround(pRect.top());
-    wRect.left = lround(pRect.left());
-    wRect.right = lround(pRect.right());
+    wRect.left   = lround( rect.left() );
+    wRect.top    = lround( rect.top() );
+    wRect.right  = lround( rect.right() + 1 );
+    wRect.bottom = lround( rect.bottom() + 1 );
 
     InvalidateRect(_hwnd, &wRect, FALSE);
 }

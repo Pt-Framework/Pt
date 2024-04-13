@@ -204,11 +204,11 @@ Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
 void WindowImpl::paint(const Gfx::RectF& rect)
 {
     RECT wRect;
-    wRect.bottom = lround( rect.bottom() );
-    wRect.top    = lround( rect.top() );
     wRect.left   = lround( rect.left() );
-    wRect.right  = lround( rect.right() );
-
+    wRect.top    = lround( rect.top() );
+    wRect.right  = lround( rect.right() + 1 );
+    wRect.bottom = lround( rect.bottom() + 1 );
+    
     InvalidateRect(_hwnd, &wRect, FALSE);
 }
 
