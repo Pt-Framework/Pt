@@ -28,6 +28,7 @@
 
 #include "LibraryImpl.h"
 #include "PathImpl.h"
+#include <sstream>
 
 namespace Pt {
 
@@ -47,6 +48,8 @@ void LibraryImpl::open(const Path& path)
     _handle = ::dlopen(path.impl()->c_str(), flags);
     if( !_handle )
     {
+        std::stringstream ss;
+        ss << path.impl()->c_str() << " (" << ::dlerror() << ")" << std::endl;
         throw AccessFailed(path.impl()->c_str());
     }
 }
