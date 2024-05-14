@@ -405,6 +405,11 @@ class PT_JSON_API Document
                 bool operator!() const
                 { return _si == 0; }
 
+                const SerializationInfo* si() const
+                {
+                    return _si;
+                }
+
             private:
                 const SerializationInfo* _si;
         };

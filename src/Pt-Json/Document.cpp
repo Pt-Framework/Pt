@@ -29,6 +29,7 @@
 
 #include <Pt/Json/Document.h>
 #include <Pt/Json/DocumentReader.h>
+#include <Pt/Json/DocumentWriter.h>
 #include <Pt/Json/StartObject.h>
 #include <Pt/Json/Member.h>
 #include <Pt/Json/EndObject.h>
@@ -72,6 +73,9 @@ void Document::load(std::basic_istream<Pt::Char>& is)
 
 void Document::save(std::basic_ostream<Pt::Char>& os) const
 {
+    DocumenWriter write(os, *this);
+    write.write();
+    os.flush();
 }
 
 } // namespace

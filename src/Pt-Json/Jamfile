@@ -7,6 +7,7 @@ PT_JSON_SOURCES = Document.cpp
                   DocumentReader.cpp
                   JsonError.cpp
                   JsonReader.cpp
+                  DocumentWriter.cpp
                   ;
 
 SharedLibrary Pt-Json : $(PT_JSON_SOURCES) ;
