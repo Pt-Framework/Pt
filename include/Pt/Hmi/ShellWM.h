@@ -32,7 +32,6 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Visual.h>
-#include <Pt/Hmi/PaintRegion.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -58,9 +57,9 @@ class ShellWM : public WindowManager
 
         void setParent(Shell* shell);
 
-        PaintSurface& surface();
+        Gfx::PaintSurface& surface();
 
-        const PaintSurface& surface() const;
+        const Gfx::PaintSurface& surface() const;
 
         void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
@@ -189,7 +188,7 @@ class ShellWM : public WindowManager
     private:
         Shell*                       _parent;
 
-        PaintRegion                  _surface;
+        Gfx::PaintRegion             _surface;
 
         std::vector<Window*>         _windowList;
 

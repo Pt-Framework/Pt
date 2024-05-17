@@ -58,8 +58,6 @@ SharedLibrary Pt-Hmi : Application.cpp
                        MenuMenuItem.cpp
                        MenuSubItem.cpp
                        Panel.cpp
-                       Painter.cpp
-                       PaintRegion.cpp
                        PixmapSurface.cpp
                        PlatinumStyle.cpp
                        Popup.cpp
