@@ -1,420 +1,438 @@
 /*
-   Copyright (C) 2015-2023 by Dr. Marc Boris Duerner
-  
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public
-   License as published by the Free Software Foundation; either
-   version 2.1 of the License, or (at your option) any later version.
-   
-   As a special exception, you may use this file as part of a free
-   software library without restriction. Specifically, if other files
-   instantiate templates or use macros or inline functions from this
-   file, or you compile this file and link it with other files to
-   produce an executable, this file does not by itself cause the
-   resulting executable to be covered by the GNU General Public
-   License. This exception does not however invalidate any other
-   reasons why the executable file might be covered by the GNU Library
-   General Public License.
-   
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
-   
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-   MA 02110-1301 USA
+* Copyright (C) 2005-2014 by Dr. Marc Boris Duerner
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+*
+* As a special exception, you may use this file as part of a free
+* software library without restriction. Specifically, if other files
+* instantiate templates or use macros or inline functions from this
+* file, or you compile this file and link it with other files to
+* produce an executable, this file does not by itself cause the
+* resulting executable to be covered by the GNU General Public
+* License. This exception does not however invalidate any other
+* reasons why the executable file might be covered by the GNU Library
+* General Public License.
+*
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #include <Pt/Json/DocumentWriter.h>
-#include <Pt/Json/StartObject.h>
-#include <Pt/Json/Member.h>
-#include <Pt/Json/EndObject.h>
-#include <Pt/Json/StartArray.h>
-#include <Pt/Json/EndArray.h>
-#include <Pt/Json/String.h>
-#include <Pt/Json/Float.h>
-#include <Pt/Json/Integer.h>
-#include <Pt/Json/Boolean.h>
-#include <Pt/Json/Null.h>
+#include <Pt/Convert.h>
+#include <Pt/SerializationInfo.h>
+
+namespace {
+
+static const Pt::Char PT_SETTINGS_TRUE[] = { 't', 'r', 'u', 'e' };
+static const Pt::Char PT_SETTINGS_FALSE[] = { 'f', 'a', 'l', 's', 'e' };
+
+template<typename T>
+class array_appender : public std::iterator<std::output_iterator_tag, T>
+{
+public:
+    array_appender()
+        : _ptr(0)
+        , _end(0)
+    { }
+
+    array_appender(T* ptr, std::size_t length)
+        : _ptr(ptr)
+        , _end(ptr + length)
+    { }
+
+    array_appender<T>& operator=(const T& val)
+    {
+        if (_ptr != _end)
+            *_ptr = val;
+
+        return *this;
+    }
+
+    bool operator==(const array_appender<T>& it) const
+    {
+        return _ptr == it._ptr;
+    }
+
+    array_appender<T>& operator*()
+    {
+        return *this;
+    }
+
+    T* getPointer()
+    {
+        return _ptr;
+    }
+
+    array_appender<T>& operator++()
+    {
+        if (_ptr != _end)
+            ++_ptr;
+
+        return *this;
+    }
+
+    array_appender<T> operator++(int)
+    {
+        array_appender<T> tmp = *this;
+
+        if (_ptr != _end)
+            ++_ptr;
+
+        return tmp;
+    }
+
+private:
+    T* _ptr;
+    T* _end;
+};
+
+void formatName(std::basic_ostream<Pt::Char>& os, const char* name)
+{
+    if (*name)
+    {
+        os << "\"";
+
+        while (*name)
+            os << Pt::Char(*name++);
+
+        os << "\"";
+
+        os << Pt::Char(':') << Pt::Char(' ');
+    }
+}
+
+void formatIndent(std::basic_ostream<Pt::Char>& os, std::size_t level)
+{
+    std::size_t indent = level * 2;
+    while (indent--)
+        os << Pt::Char(' ');
+}
+
+} // namespace
 
 namespace Pt {
-
 namespace Json {
 
-DocumenWriter::DocumenWriter()
-: _doc(0)
-, _spaces(4)
-, _depth(0)
-, _os(0)
+DocumentWriter::DocumentWriter(std::basic_ostream<Char>& os)
+: _os(&os)
+, _state(0)
 {
-    reset();
 }
 
 
-DocumenWriter::DocumenWriter(std::basic_ostream<Pt::Char>& os, const Document& doc)
-: _doc(&doc)
-, _spaces(4)
-, _depth(0)
-, _os(&os)
+DocumentWriter::~DocumentWriter()
 {
-    
 }
 
 
-void DocumenWriter::reset()
+void DocumentWriter::attach(std::basic_ostream<Char>& os)
 {
-    _depth = 0;
-    _os = 0;
-    _doc = 0;
-}
-
-
-void DocumenWriter::reset(std::basic_ostream<Pt::Char>& os, const Document& doc)
-{
-    _depth = 0;
     _os = &os;
-    _doc = &doc;    
 }
 
 
-void DocumenWriter::write()
+void DocumentWriter::onAddString(const char* name, const char* type,
+    const Pt::Char* value, const char* id)
 {
-    if( ! _doc )
-        throw JsonError("invalid document"); 
+    formatName(*_os, name);
 
-    if (!_os )
-        throw JsonError("uninitialised output stream");
+    *_os << Char('"');
 
-    output(*_doc->root().si(), _spaces);
-}
-
-
-void DocumenWriter::output(const Pt::SerializationInfo& info, size_t spaces)
-{
-
-    _depth++;
-
-    (*_os) << "{";
-
-    if (spaces != 0)
-        (*_os) << std::endl;
-
-    Pt::SerializationInfo::ConstIterator it = info.begin();
-
-    while (it != info.end())
+    for (const Pt::Char* ch = value; *ch != 0; ++ch)
     {
-        const Pt::SerializationInfo& childEntry = *it;
-        ++it;
+        if (*ch == '"' || *ch == '\\')
+            *_os << Pt::Char('\\');
 
-        const bool last = (it == info.end());
-
-        switch (childEntry.type())
-        {
-            case Pt::SerializationInfo::Void:
-                outNull(childEntry, last);
-                break;
-
-            case Pt::SerializationInfo::Context:
-            case Pt::SerializationInfo::Reference:
-            case Pt::SerializationInfo::Dict:
-            case Pt::SerializationInfo::DictElement:
-            case Pt::SerializationInfo::Binary:
-                break;
-
-            case Pt::SerializationInfo::Boolean:
-                outBool(childEntry, last);
-                break;
-
-            case Pt::SerializationInfo::Char:
-            case Pt::SerializationInfo::Str:
-                outStr(childEntry, last);
-            break;
-
-            case Pt::SerializationInfo::Int8:
-            case Pt::SerializationInfo::Int16:
-            case Pt::SerializationInfo::Int32:
-            case Pt::SerializationInfo::Int64:
-            case Pt::SerializationInfo::UInt8:
-            case Pt::SerializationInfo::UInt16:
-            case Pt::SerializationInfo::UInt32:
-            case Pt::SerializationInfo::UInt64:
-            case Pt::SerializationInfo::Float:
-            case Pt::SerializationInfo::Double:
-            case Pt::SerializationInfo::LongDouble:
-                outValue(childEntry, last);
-            break;
-
-            case Pt::SerializationInfo::Struct:
-                outObject(childEntry, last);
-            break;
-
-            case Pt::SerializationInfo::Sequence:
-                outArray(childEntry, last);
-            break;
-        }
+        *_os << *ch;
     }
 
-    _depth--;
+    *_os << Char('"');
 
-    (*_os) << space().c_str() << "}";
 
-    if (_spaces != 0)
-        (*_os) << std::endl;
+    if (_stack.empty())
+        *_os << Pt::Char(',')<<std::endl;
 }
 
 
-void DocumenWriter::outBool(const Pt::SerializationInfo& entry, bool last)
+void DocumentWriter::onAddBool(const char* name, bool value,
+    const char* id)
 {
-    bool value = false;
+    formatName(*_os, name);
 
-    entry >>= value;
-
-    const Pt::String name = entry.name();
-
-    if (name.empty())
-    {
-        (*_os) << (value ? "true" : "false");
-    }
+    if (value)
+        _os->write(PT_SETTINGS_TRUE, sizeof(PT_SETTINGS_TRUE) / sizeof(Char));
     else
-    {
-        (*_os) << space().c_str() << '"' << entry.name() << "\":" << (value ? "true" : "false");
+        _os->write(PT_SETTINGS_FALSE, sizeof(PT_SETTINGS_FALSE) / sizeof(Char));
+    
 
-        if (!last)
-            (*_os) << ",";
-
-        if (_spaces != 0)
-            (*_os) << std::endl;
-    }
+    if (_stack.empty())
+        *_os << Pt::Char(',') <<std::endl;
 }
 
 
-void DocumenWriter::outStr(const Pt::SerializationInfo& entry, bool last)
+void DocumentWriter::onAddChar(const char* name, const Pt::Char& value,
+    const char* id)
 {
-    Pt::String value = "";
+    formatName(*_os, name);
 
-    entry >>= value;
+    *_os << Char('"') << value << Char('"');
+    
 
-    const Pt::String name = entry.name();
-
-    if (name.empty())
-    {
-        (*_os) << "\"" << value << "\"";
-    }
-    else
-    {
-        (*_os) << space().c_str() << '"' << entry.name() << "\":\"" << value << "\"";
-
-        if (!last)
-            (*_os) << ",";
-
-        if (_spaces != 0)
-            (*_os) << std::endl;
-    }
+    if (_stack.empty())
+        *_os << Pt::Char(',') << std::endl;
 }
 
 
-void DocumenWriter::outValue(const Pt::SerializationInfo& entry, bool last)
+void DocumentWriter::onAddInt8(const char* name, Pt::int8_t value, const char* id)
 {
-    double value = 0;
-
-    entry >>= value;
-
-    const Pt::String name = entry.name();
-
-    if (name.empty())
-    {
-        (*_os) << value;
-    }
-    else
-    {
-        (*_os) << space().c_str() << '"' << entry.name() << "\":" << value;
-
-        if (!last)
-            (*_os) << ",";
-
-        if (_spaces != 0)
-            (*_os) << std::endl;
-    }
+    this->onAddInt64(name, value, id);
 }
 
 
-void DocumenWriter::outNull(const Pt::SerializationInfo& entry, bool last)
+void DocumentWriter::onAddInt16(const char* name, Pt::int16_t value, const char* id)
 {
-    const Pt::String name = entry.name();
-
-    if (name.empty())
-    {
-        (*_os) << "null";
-    }
-    else
-    {
-        (*_os) << space().c_str() << '"' << entry.name() << "\":" << "null";
-
-        if (!last)
-            (*_os) << ",";
-
-        if (_spaces != 0)
-            (*_os) << std::endl;
-    }
+    this->onAddInt64(name, value, id);
 }
 
 
-void DocumenWriter::outArray(const Pt::SerializationInfo& entry, bool last)
+void DocumentWriter::onAddInt32(const char* name, Pt::int32_t value, const char* id)
 {
-    const Pt::String name = entry.name();
-
-    if (!name.empty())
-        (*_os) << space().c_str() << '"' << name << "\":";
-
-    (*_os) << "[";
-
-    Pt::SerializationInfo::ConstIterator it = entry.begin();
-
-    while (it != entry.end())
-    {
-        const Pt::SerializationInfo& childEntry = *it;
-
-        switch (childEntry.type())
-        {
-            case Pt::SerializationInfo::Void:
-                outNull(childEntry, false);
-                break;
-
-            case Pt::SerializationInfo::Context:
-            case Pt::SerializationInfo::Reference:
-            case Pt::SerializationInfo::Dict:
-            case Pt::SerializationInfo::DictElement:
-            case Pt::SerializationInfo::Binary:
-                break;
-
-            case Pt::SerializationInfo::Boolean:
-                outBool(childEntry, false);
-                break;
-
-            case Pt::SerializationInfo::Char:
-            case Pt::SerializationInfo::Str:
-                outStr(childEntry, false);
-                break;
-
-            case Pt::SerializationInfo::Int8:
-            case Pt::SerializationInfo::Int16:
-            case Pt::SerializationInfo::Int32:
-            case Pt::SerializationInfo::Int64:
-            case Pt::SerializationInfo::UInt8:
-            case Pt::SerializationInfo::UInt16:
-            case Pt::SerializationInfo::UInt32:
-            case Pt::SerializationInfo::UInt64:
-            case Pt::SerializationInfo::Float:
-            case Pt::SerializationInfo::Double:
-            case Pt::SerializationInfo::LongDouble:
-                outValue(childEntry, false);
-                break;
-
-            case Pt::SerializationInfo::Struct:
-                outObject(childEntry, false);
-                break;
-
-            case Pt::SerializationInfo::Sequence:
-                outArray(childEntry, false);
-                break;
-        }
-
-        ++it;
-
-        if (it != entry.end())
-            (*_os) << ',';
-    }
-
-    if (last)
-        (*_os) << "]";
-    else
-        (*_os) << "],";
-
-    if (_spaces != 0)
-        (*_os) << std::endl;
+    this->onAddInt64(name, value, id);
 }
 
 
-void DocumenWriter::outObject(const Pt::SerializationInfo& entry, bool last)
+void DocumentWriter::onAddInt64(const char* name, Pt::int64_t value, const char* id)
 {
-    const Pt::String name = entry.name();
+    const unsigned _bufsize = 64;
+    Pt::Char _buf[_bufsize];
 
-    if (!name.empty())
-        (*_os) << space().c_str() << "\"" << entry.name() << "\":{";
+    array_appender<Pt::Char> it(_buf, _bufsize);
+    it = formatInt(it, value);
 
-    if (_spaces != 0)
-        (*_os) << std::endl;
+    formatName(*_os, name);
 
-    Pt::SerializationInfo::ConstIterator it = entry.begin();
+    _os->write(_buf, it.getPointer() - _buf);
 
-    _depth++;
 
-    while (it != entry.end())
-    {
-        const Pt::SerializationInfo& childEntry = *it;
-        ++it;
-
-        bool childLast = (it == childEntry.end());
-
-        switch (childEntry.type())
-        {
-            case Pt::SerializationInfo::Void:
-                outNull(childEntry, childLast);
-                break;
-
-            case Pt::SerializationInfo::Context:
-            case Pt::SerializationInfo::Reference:
-            case Pt::SerializationInfo::Dict:
-            case Pt::SerializationInfo::DictElement:
-            case Pt::SerializationInfo::Binary:
-                break;
-
-            case Pt::SerializationInfo::Boolean:
-                outBool(childEntry, childLast);
-                break;
-
-            case Pt::SerializationInfo::Char:
-            case Pt::SerializationInfo::Str:
-                outStr(childEntry, childLast);
-                break;
-
-            case Pt::SerializationInfo::Int8:
-            case Pt::SerializationInfo::Int16:
-            case Pt::SerializationInfo::Int32:
-            case Pt::SerializationInfo::Int64:
-            case Pt::SerializationInfo::UInt8:
-            case Pt::SerializationInfo::UInt16:
-            case Pt::SerializationInfo::UInt32:
-            case Pt::SerializationInfo::UInt64:
-            case Pt::SerializationInfo::Float:
-            case Pt::SerializationInfo::Double:
-            case Pt::SerializationInfo::LongDouble:
-                outValue(childEntry, childLast);
-                break;
-
-            case Pt::SerializationInfo::Struct:
-                outObject(childEntry, childLast);
-                break;
-
-            case Pt::SerializationInfo::Sequence:
-                outArray(childEntry, childLast);
-                break;
-        }
-    }
-
-    _depth--;
-
-    if (last)
-        (*_os) << space().c_str() << "}";
-    else
-        (*_os) << space().c_str() << "},";
-
-    if (_spaces != 0)
-        (*_os) << std::endl;
+    if (_stack.empty())
+        *_os << Pt::Char(',') << std::endl;
 }
 
-} // namespace
 
-} // namespace
+void DocumentWriter::onAddUInt8(const char* name, Pt::uint8_t value, const char* id)
+{
+    this->onAddUInt64(name, value, id);
+}
+
+
+void DocumentWriter::onAddUInt16(const char* name, Pt::uint16_t value, const char* id)
+{
+    this->onAddUInt64(name, value, id);
+}
+
+
+void DocumentWriter::onAddUInt32(const char* name, Pt::uint32_t value, const char* id)
+{
+    this->onAddUInt64(name, value, id);
+}
+
+
+void DocumentWriter::onAddUInt64(const char* name, Pt::uint64_t value, const char* id)
+{
+    const unsigned _bufsize = 64;
+    Pt::Char _buf[_bufsize];
+
+    array_appender<Pt::Char> it(_buf, _bufsize);
+    it = formatInt(it, value);
+
+    formatName(*_os, name);
+
+    _os->write(_buf, it.getPointer() - _buf);
+    
+
+    if (_stack.empty())
+        *_os << Pt::Char(',') << std::endl;
+}
+
+
+void DocumentWriter::onAddFloat(const char* name, float value, const char* id)
+{
+    this->onAddDouble(name, value, id);
+}
+
+
+void DocumentWriter::onAddDouble(const char* name, double value, const char* id)
+{
+    const unsigned _bufsize = 64;
+    Pt::Char _buf[_bufsize];
+
+    array_appender<Pt::Char> it(_buf, _bufsize);
+    it = formatFloat(it, value);
+
+    formatName(*_os, name);
+
+    _os->write(_buf, it.getPointer() - _buf);
+    
+    if (_stack.empty())
+        *_os << Pt::Char(',') << std::endl;
+}
+
+
+void DocumentWriter::onAddLongDouble(const char* name, long double value, const char* id)
+{
+    this->onAddDouble(name, static_cast<double>(value), id);
+}
+
+
+void DocumentWriter::onAddBinary(const char* name, const char* type,
+    const char* data, std::size_t length, const char* id)
+{
+    throw SerializationError("binary data not supported");
+}
+
+
+void DocumentWriter::onAddReference(const char* name, const char* value)
+{
+    throw SerializationError("references not supported");
+}
+
+
+void DocumentWriter::onBeginSequence(const char* name, const char*,
+    const char*)
+{
+    // endl and indent nested sequence 
+    if (_state == '[' || _state == ']')
+    {
+        *_os << std::endl;
+        formatIndent(*_os, _stack.size());
+    }
+
+    formatName(*_os, name);
+    *_os << Char('[');
+
+    _stack.push_back(0);
+    _state = '[';
+}
+
+
+void DocumentWriter::onBeginElement()
+{
+    if (_stack.empty())
+        return;
+
+    // add comma unless first element
+    if (_stack.back() != 0)
+        *_os << Char(',') << Char(' ');
+
+    // increase element count
+    ++_stack.back();
+}
+
+
+void DocumentWriter::onFinishElement()
+{
+}
+
+
+void DocumentWriter::onFinishSequence()
+{
+    _stack.pop_back();
+
+    // no endl if sequence of scalars
+    if (_state == ']')
+    {
+        *_os << std::endl;
+        formatIndent(*_os, _stack.size());
+    }
+
+    *_os << Char(']');
+
+    // extra endl when root entry is finished
+    if (_stack.empty())
+        *_os << std::endl;
+
+    _state = _stack.empty() ? 0 : ']';
+}
+
+
+void DocumentWriter::onBeginStruct(const char* name, const char* type,
+    const char* id)
+{
+    // endl and indent nested sequence
+    if (_state == '[' || _state == ']')
+    {
+        *_os << std::endl;
+        formatIndent(*_os, _stack.size());
+    }
+
+    formatName(*_os, name);
+    *_os << Char('{');
+
+    _stack.push_back(0);
+    _state = 0;
+}
+
+
+void DocumentWriter::onBeginMember(const char*)
+{
+    if (_stack.empty())
+        return;
+
+    // add comma unless first member
+    if (_stack.back() != 0)
+        *_os << Char(',') << Char(' ');
+
+    // always endl after member
+    *_os << std::endl;
+    formatIndent(*_os, _stack.size());
+    _state = 0;
+
+    // increase element count
+    ++_stack.back();
+}
+
+
+void DocumentWriter::onFinishMember()
+{}
+
+
+void DocumentWriter::onFinishStruct()
+{
+    _stack.pop_back();
+
+    // always endl after last member
+    *_os << std::endl;
+    formatIndent(*_os, _stack.size());
+
+    *_os << Char('}');
+
+
+    // extra endl when root entry is finished
+    if (_stack.empty())
+        *_os << Pt::Char(',') << std::endl;
+
+    _state = _stack.empty() ? 0 : ']';
+}
+
+void DocumentWriter::onBeginParse(Composer&)
+{
+
+}
+
+
+void DocumentWriter::onParse()
+{
+
+}
+
+} // namespace Json
+} // namespace Pt

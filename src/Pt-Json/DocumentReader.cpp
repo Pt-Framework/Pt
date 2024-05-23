@@ -54,7 +54,7 @@ DocumentReader::DocumentReader()
 }
 
 
-DocumentReader::DocumentReader(std::basic_istream<Pt::Char>& is, Document& doc)
+DocumentReader::DocumentReader(std::basic_istream<Pt::Char>& is, Settings& doc)
 : _parse(&DocumentReader::onRoot)
 , _current( doc.root() )
 , _doc(&doc)
@@ -71,11 +71,11 @@ void DocumentReader::reset()
     _reader.reset();
 
     _doc = 0;
-    _current = Document::Element();
+    _current = Settings::Entry();
 }
 
 
-void DocumentReader::reset(std::basic_istream<Pt::Char>& is, Document& doc)
+void DocumentReader::reset(std::basic_istream<Pt::Char>& is, Settings& doc)
 {
     _parse = &DocumentReader::onRoot;
     _parseStack.push(_parse);
@@ -89,7 +89,7 @@ void DocumentReader::reset(std::basic_istream<Pt::Char>& is, Document& doc)
 }
 
 
-Document& DocumentReader::read()
+Settings& DocumentReader::read()
 {
     if( ! _doc )
         throw JsonError("invalid document"); 
@@ -104,7 +104,7 @@ Document& DocumentReader::read()
 }
 
 
-Document* DocumentReader::advance()
+Settings* DocumentReader::advance()
 {
     if( ! _doc )
         throw JsonError("invalid document"); 
@@ -150,7 +150,7 @@ void DocumentReader::onRoot(const Node& node)
         {
             const String& s = toString(node);
             //_current->setString( s.value() );
-            _current.setValue( s.value() );
+            _current.set( s.value() );
             _current = _current->parent();
             break;
         }
@@ -159,7 +159,7 @@ void DocumentReader::onRoot(const Node& node)
         {
             const Float& f = toFloat(node);
             //_current->setDouble( f.value() );
-            _current.setValue( f.value() );
+            _current.set( f.value() );
             _current = _current->parent();
             break;
         }
@@ -168,7 +168,7 @@ void DocumentReader::onRoot(const Node& node)
         { 
             const Integer& i = toInteger(node);
             //_current->setInt64( i.value() );
-            _current.setValue( i.value() );
+            _current.set( i.value() );
             _current = _current->parent();
             break;
         }
@@ -177,7 +177,7 @@ void DocumentReader::onRoot(const Node& node)
         {
             const Boolean& b = toBoolean(node);
             //_current->setBool( b.value() );
-            _current.setValue( b.value() );
+            _current.set( b.value() );
             _current = _current->parent();
             break;
         }
@@ -206,7 +206,7 @@ void DocumentReader::onArray(const Node& node)
             //_current = &_current->addElement();
             //_current->setTypeName("array");
 
-            _current = _current.addElement();
+            _current = _current.addEntry();
 
             _parse = &DocumentReader::onArray;
             _parseStack.push(_parse);
@@ -227,7 +227,7 @@ void DocumentReader::onArray(const Node& node)
             //_current = &_current->addElement();
             //_current->setTypeName("object");
 
-            _current = _current.addElement();
+            _current = _current.addEntry();
 
             _parse = &DocumentReader::onObject;
             _parseStack.push(_parse);
@@ -237,11 +237,11 @@ void DocumentReader::onArray(const Node& node)
         case Node::String:
         {
             //_current = &_current->addElement();
-            _current = _current.addElement();
+            _current = _current.addEntry();
 
             const String& s = toString(node);
             //_current->setString( s.value() );
-            _current->setValue( s.value() );
+            _current->set( s.value() );
 
             _current = _current->parent();
             break;
@@ -250,11 +250,11 @@ void DocumentReader::onArray(const Node& node)
         case Node::Float:
         {
             //_current = &_current->addElement();
-            _current = _current.addElement();
+            _current = _current.addEntry();
 
             const Float& f = toFloat(node);
             //_current->setDouble( f.value() );
-            _current->setValue( f.value() );
+            _current->set( f.value() );
             _current = _current->parent();
             break;
         }
@@ -262,11 +262,11 @@ void DocumentReader::onArray(const Node& node)
         case Node::Integer:
         {
             //_current = &_current->addElement();
-            _current = _current.addElement();
+            _current = _current.addEntry();
 
             const Integer& i = toInteger(node);
             //_current->setInt64( i.value() );
-            _current->setValue( i.value() );
+            _current->set( i.value() );
             _current = _current->parent();
             break;
         }
@@ -274,11 +274,11 @@ void DocumentReader::onArray(const Node& node)
         case Node::Boolean:
         {
             //_current = &_current->addElement();
-            _current = _current.addElement();
+            _current = _current.addEntry();
 
             const Boolean& b = toBoolean(node);
             //_current->setBool( b.value() );
-            _current->setValue( b.value() );
+            _current->set( b.value() );
             _current = _current->parent();
             break;
         }
@@ -286,7 +286,7 @@ void DocumentReader::onArray(const Node& node)
         case Node::Null:
         {
             //_current = &_current->addElement();
-            _current = _current.addElement();
+            _current = _current.addEntry();
 
             //const Null& n = toNull(node);
             //_current->setVoid();
@@ -336,7 +336,7 @@ void DocumentReader::onObject(const Node& node)
         {
             const Member& m = toMember(node);
             //_current = &_current->addMember( m.name().narrow() );
-            _current = _current->addMember( m.name().narrow() );
+            _current = _current->addEntry( m.name().narrow() );
             break;
         }
 
@@ -344,7 +344,7 @@ void DocumentReader::onObject(const Node& node)
         {
             const String& s = toString(node);
             //_current->setString( s.value() );
-            _current->setValue( s.value() );
+            _current->set( s.value() );
             _current = _current->parent();
             break;
         }
@@ -353,7 +353,7 @@ void DocumentReader::onObject(const Node& node)
         {           
             const Float& f = toFloat(node);
             //_current->setDouble( f.value() );
-            _current->setValue( f.value() );
+            _current->set( f.value() );
             _current = _current->parent();
             break;
         }
@@ -362,7 +362,7 @@ void DocumentReader::onObject(const Node& node)
         {
             const Integer& i = toInteger(node);
             //_current->setInt64( i.value() );
-            _current->setValue( i.value() );
+            _current->set( i.value() );
             _current = _current->parent();
             break;
         }
@@ -371,7 +371,7 @@ void DocumentReader::onObject(const Node& node)
         {
             const Boolean& b = toBoolean(node);
             //_current->setBool( b.value() );
-            _current->setValue( b.value() );
+            _current->set( b.value() );
             _current = _current->parent();
             break;
         }

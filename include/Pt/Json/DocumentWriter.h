@@ -31,94 +31,108 @@
 #define PT_JSON_DOCUMENT_WRITER_H
 
 #include <Pt/Json/Api.h>
-#include <Pt/Json/Document.h>
 #include <Pt/String.h>
+#include <Pt/Formatter.h>
+#include <Pt/NonCopyable.h>
+#include <vector>
+#include <iostream>
 #include <string>
 
 namespace Pt {
 
 namespace Json {
 
-class Document;
+class Settings;
 
 /** @brief JSON Document writer.
 */
-class PT_JSON_API DocumenWriter
+class PT_JSON_API DocumentWriter : public Pt::Formatter , private NonCopyable
 {
     
     public:
-        DocumenWriter();
+        DocumentWriter(std::basic_ostream<Pt::Char>& os);
 
-        DocumenWriter(std::basic_ostream<Pt::Char>& os, const Document& doc);
+        ~DocumentWriter();
 
-        void reset();
+        void attach(std::basic_ostream<Char>& os);
 
-        void reset(std::basic_ostream<Pt::Char>& os, const Document& doc);
-        
-        void write();
+    protected:
+        void onAddString(const char* name, const char* type,
+            const Pt::Char* value, const char* id);
 
-        size_t spaces() const
+        void onAddBool(const char* name, bool value,
+            const char* id);
+
+        void onAddChar(const char* name, const Pt::Char& value,
+            const char* id);
+
+        void onAddInt8(const char* name, Pt::int8_t value,
+            const char* id);
+
+        void onAddInt16(const char* name, Pt::int16_t value,
+            const char* id);
+
+        void onAddInt32(const char* name, Pt::int32_t value,
+            const char* id);
+
+        void onAddInt64(const char* name, Pt::int64_t value,
+            const char* id);
+
+        void onAddUInt8(const char* name, Pt::uint8_t value, const char* id);
+
+        void onAddUInt16(const char* name, Pt::uint16_t value, const char* id);
+
+        void onAddUInt32(const char* name, Pt::uint32_t value, const char* id);
+
+        void onAddUInt64(const char* name, Pt::uint64_t value, const char* id);
+
+        void onAddFloat(const char* name, float value,
+            const char* id);
+
+        void onAddDouble(const char* name, double value,
+            const char* id);
+
+        void onAddLongDouble(const char* name, long double value,
+            const char* id);
+
+        void onAddBinary(const char* name, const char* type,
+            const char* value, std::size_t length, const char* id);
+
+        void onAddReference(const char* name, const char* id);
+
+        void onBeginSequence(const char* name, const char* type,
+            const char* id);
+
+        virtual void onBeginElement();
+
+        virtual void onFinishElement();
+
+        void onFinishSequence();
+
+        void onBeginStruct(const char* name, const char* type,
+            const char* id);
+
+        void onBeginMember(const char* name);
+
+        void onFinishMember();
+
+        void onFinishStruct();
+
+    protected:
+        void onBeginParse(Composer&);
+
+        bool onParseSome()
         {
-            return _spaces;
+            return false;
         }
 
-        void setSpaces(size_t v)
-        {
-            _spaces = v;
-        }
+        void onParse();
 
-    private:
-        void output(const Pt::SerializationInfo& info, size_t spaces);
 
-        void outNull(const Pt::SerializationInfo& entry, bool last);
-
-        void outBool(const Pt::SerializationInfo& entry, bool last);
-
-        void outValue(const Pt::SerializationInfo& entry, bool last);
-
-        void outStr(const Pt::SerializationInfo& entry, bool last);
-
-        void outObject(const Pt::SerializationInfo& entry, bool last);
-
-        void outArray(const Pt::SerializationInfo& entry, bool last);
-
-        inline Pt::String space() const
-        {
-            const size_t spaces = _depth * _spaces;
-
-            switch (spaces)
-            {
-                case 4:
-                    return "    ";
-
-                case 8:
-                    return "        ";
-
-                case 16:
-                    return "                ";
-
-                case 32:
-                    return "                                ";
-
-                default:
-                {
-                    Pt::String str;
-
-                    for (size_t i = 0; i < spaces; ++i)
-                        str += " ";
-
-                    return str;
-                }
-            }
-
-            return "";
-        }
-
-    private:
-        const Document* _doc;
-        size_t        _spaces;
-        size_t        _depth;
-        std::basic_ostream<Pt::Char>* _os;
+private:
+    std::basic_ostream<Char>* _os;
+    std::vector<unsigned> _stack;
+    int _state;
 
 };
 

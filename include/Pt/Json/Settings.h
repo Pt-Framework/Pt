@@ -27,54 +27,34 @@
    MA 02110-1301 USA
 */
 
-#ifndef PT_JSON_DOCUMENT_READER_H
-#define PT_JSON_DOCUMENT_READER_H
+#ifndef PT_JSON_SETTINGS_H
+#define PT_JSON_SETTINGS_H
 
 #include <Pt/Json/Api.h>
-#include <Pt/Json/JsonReader.h>
-#include <Pt/Json/Settings.h>
+#include <Pt/SettingsBase.h>
 #include <Pt/String.h>
-#include <stack>
+#include <string>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Json {
 
-class Settings;
-
-/** @brief JSON Document reader.
+/** @brief JSON Document.
 */
-class PT_JSON_API DocumentReader
+class PT_JSON_API Settings : public Pt::SettingsBase
 {
-    typedef void (DocumentReader::*ParseFunc)(const Node&);
-    
     public:
-        DocumentReader();
-
-        DocumentReader(std::basic_istream<Pt::Char>& is, Settings& doc);
-
-        void reset();
-
-        void reset(std::basic_istream<Pt::Char>& is, Settings& doc);
-
-        Settings& read();
-
-        Settings* advance();
+        /** @brief Default constructor.
+        */
+        Settings();        
+       
 
     protected:
-        void onRoot(const Node& node);
-        
-        void onArray(const Node& node);
-        
-        void onObject(const Node& node);
+        virtual void onLoad(std::basic_istream<Pt::Char>& is);
 
-    private:
-        ParseFunc              _parse;
-        std::stack<ParseFunc>  _parseStack;
+        virtual void onSave(std::basic_ostream<Pt::Char>& os) const;
 
-        JsonReader             _reader;
-        Settings*              _doc;
-        Settings::Entry      _current;
 };
 
 } // namespace

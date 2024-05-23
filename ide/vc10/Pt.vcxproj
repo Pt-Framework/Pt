@@ -159,7 +159,7 @@
     <ClInclude Include="..\..\include\Pt\IOStream.h" />
     <ClInclude Include="..\..\include\Pt\Json\Api.h" />
     <ClInclude Include="..\..\include\Pt\Json\Boolean.h" />
-    <ClInclude Include="..\..\include\Pt\Json\Document.h" />
+    <ClInclude Include="..\..\include\Pt\Json\Settings.h" />
     <ClInclude Include="..\..\include\Pt\Json\DocumentReader.h" />
     <ClInclude Include="..\..\include\Pt\Json\DocumentWriter.h" />
     <ClInclude Include="..\..\include\Pt\Json\EndArray.h" />
@@ -230,6 +230,7 @@
     <ClInclude Include="..\..\include\Pt\SerializationSurrogate.h" />
     <ClInclude Include="..\..\include\Pt\Serializer.h" />
     <ClInclude Include="..\..\include\Pt\Settings.h" />
+    <ClInclude Include="..\..\include\Pt\SettingsBase.h" />
     <ClInclude Include="..\..\include\Pt\Signal.h" />
     <ClInclude Include="..\..\include\Pt\Singleton.h" />
     <ClInclude Include="..\..\include\Pt\Slot.h" />
@@ -746,7 +747,7 @@
     <ClCompile Include="..\..\src\Pt-Http\tests\ParserTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\Pt-Http-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\ServerTest.cpp" />
-    <ClCompile Include="..\..\src\Pt-Json\Document.cpp" />
+    <ClCompile Include="..\..\src\Pt-Json\Settings.cpp" />
     <ClCompile Include="..\..\src\Pt-Json\DocumentReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Json\DocumentWriter.cpp" />
     <ClCompile Include="..\..\src\Pt-Json\JsonError.cpp" />
@@ -946,6 +947,7 @@
     <ClCompile Include="..\..\src\Pt\SerializationInfo.cpp" />
     <ClCompile Include="..\..\src\Pt\Serializer.cpp" />
     <ClCompile Include="..\..\src\Pt\Settings.cpp" />
+    <ClCompile Include="..\..\src\Pt\SettingsBase.cpp" />
     <ClCompile Include="..\..\src\Pt\SettingsReader.cpp" />
     <ClCompile Include="..\..\src\Pt\SettingsWriter.cpp" />
     <ClCompile Include="..\..\src\Pt\Signal.cpp" />

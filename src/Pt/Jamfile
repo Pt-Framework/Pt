@@ -25,6 +25,7 @@ SharedLibrary Pt : Atomicity.cpp
                    Serializer.cpp
                    SerializationContext.cpp
                    Settings.cpp
+                   SettingsBase.cpp
                    SettingsReader.cpp
                    SettingsWriter.cpp
                    Signal.cpp

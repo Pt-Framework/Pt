@@ -27,7 +27,7 @@
    MA 02110-1301 USA
 */
 
-#include <Pt/Json/Document.h>
+#include <Pt/Json/Settings.h>
 #include <Pt/Json/DocumentReader.h>
 #include <Pt/Json/DocumentWriter.h>
 #include <Pt/Json/StartObject.h>
@@ -45,24 +45,13 @@ namespace Pt {
 
 namespace Json {
 
-Document::Document()
+
+Settings::Settings()
 {
+
 }
 
-
-void Document::clear()
-{
-    _root.clear();
-}
-
-
-bool Document::isEmpty() const
-{
-    return _root.isVoid();
-}
-
-
-void Document::load(std::basic_istream<Pt::Char>& is)
+void Settings::onLoad(std::basic_istream<Pt::Char>& is)
 {
     clear();
     
@@ -71,10 +60,19 @@ void Document::load(std::basic_istream<Pt::Char>& is)
 }
 
 
-void Document::save(std::basic_ostream<Pt::Char>& os) const
+void Settings::onSave(std::basic_ostream<Pt::Char>& os) const
 {
-    DocumenWriter write(os, *this);
-    write.write();
+    DocumentWriter formatter(os);
+
+    os <<"{"<<std::endl;
+    const SerializationInfo& si = *this;
+    SerializationInfo::ConstIterator it;
+    for (it = si.begin(); it != si.end(); ++it)
+    {
+        it->format(formatter);
+    }
+
+    os << "}" << std::endl;
     os.flush();
 }
 

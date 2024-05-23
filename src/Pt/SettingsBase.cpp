@@ -26,33 +26,41 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Settings.h>
-#include <SettingsReader.h>
-#include <SettingsWriter.h>
+#include <Pt/SettingsBase.h>
 
 namespace Pt {
 
-Settings::Settings()
-: SettingsBase()
+SettingsError::SettingsError(const char* what, std::size_t line)
+: SerializationError(what)
+, _line(line)
 {}
 
-void Settings::onLoad(std::basic_istream<Pt::Char>& is)
+
+SettingsBase::SettingsBase()
+{}
+
+
+void SettingsBase::clear()
 {
-    SettingsReader reader(is);
-    reader.parse(*this);
+    SerializationInfo::clear();
 }
 
 
-void Settings::onSave(std::basic_ostream<Pt::Char>& os ) const
+bool SettingsBase::isEmpty() const
 {
-    SettingsFormatter formatter(os);
+    return SerializationInfo::isVoid();
+}
 
-    const SerializationInfo& si = *this;
-    SerializationInfo::ConstIterator it;
-    for(it = si.begin(); it != si.end(); ++it)
-    {
-        it->format(formatter);
-    }
+
+void SettingsBase::load(std::basic_istream<Pt::Char>& is)
+{
+    onLoad(is);
+}
+
+
+void SettingsBase::save(std::basic_ostream<Pt::Char>& os ) const
+{
+    onSave(os);
 }
 
 } // namespace Pt
