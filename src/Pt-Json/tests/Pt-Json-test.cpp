@@ -31,7 +31,7 @@
 #include <Pt/Unit/TestMain.h>
 #include <Pt/Unit/RegisterTest.h>
 
-#include <Pt/Json/Settings.h>
+#include <Pt/Json/Document.h>
 //#include <Pt/Json/StartDocument.h>
 #include <Pt/Json/EndDocument.h>
 #include <Pt/Json/Null.h>
@@ -49,8 +49,6 @@
 
 #include <Pt/Composer.h>
 #include <Pt/StringStream.h>
-#include <Pt/TextStream.h>
-#include <Pt/Utf8Codec.h>
 
 #include <vector>
 #include <cmath>
@@ -85,7 +83,7 @@ void JsonReaderTest::EmptyDocument()
   Pt::String s = "{}";
   IStringStream iss(s);
   
-  Pt::Json::Settings doc;
+  Document doc;
   doc.load(iss);
 }
 
@@ -94,25 +92,25 @@ void JsonReaderTest::Float()
 {
     using namespace Pt;
     using namespace Pt::Json;
-    
+
     Pt::String s = "{\"a\":1.1,\"b\":[2.1, 2.2],\"c\":3.3}";
     IStringStream iss(s);
 
-    Pt::Json::Settings doc;
+    Document doc;
     doc.load(iss);
 
     double a = 0;
-    doc["a"].get(a);
+    doc["a"].getValue(a);
     PT_UNIT_ASSERT( std::abs(a - 1.1) < 0.01 );
 
     std::vector<double> b;
-    doc["b"].get(b);
+    doc["b"].getValue(b);
     PT_UNIT_ASSERT( std::abs(b[0] - 2.1) < 0.01 );
     PT_UNIT_ASSERT( std::abs(b[1] - 2.2) < 0.01 );
 
     double c = 0;
-    doc["c"].get(c);
-    PT_UNIT_ASSERT( std::abs(c - 3.3) < 0.01 );   
+    doc["c"].getValue(c);
+    PT_UNIT_ASSERT( std::abs(c - 3.3) < 0.01 );
 }
 
 
@@ -124,15 +122,14 @@ void JsonReaderTest::SimpleArray()
     Pt::String s = "[\"a\",\"b\",\"c\"]";
     IStringStream iss(s);
 
-    Pt::Json::Settings doc;
+    Document doc;
     doc.load(iss);
 
     std::vector<std::string> vec;
-    doc.root().get(vec);
+    doc.root().getValue(vec);
     PT_UNIT_ASSERT_EQUAL(vec[0], "a");
     PT_UNIT_ASSERT_EQUAL(vec[1], "b");
     PT_UNIT_ASSERT_EQUAL(vec[2], "c");
- 
 }
 
 
@@ -146,18 +143,18 @@ void JsonReaderTest::SimpleObject()
     Pt::String s = "{\"a\":1,\"b\":2,\"c\":3}";
     IStringStream iss(s);
 
-    Pt::Json::Settings doc;
+    Document doc;
     doc.load(iss);
 
     int a = 0;
-    doc["a"].get(a);
+    doc["a"].getValue(a);
     PT_UNIT_ASSERT_EQUAL(a, 1);
 
     int b = 0;
-    doc["b"].get(b);
+    doc["b"].getValue(b);
     PT_UNIT_ASSERT_EQUAL(b, 2);
 
     int c = 0;
-    doc["c"].get(c);
+    doc["c"].getValue(c);
     PT_UNIT_ASSERT_EQUAL(c, 3);
 }

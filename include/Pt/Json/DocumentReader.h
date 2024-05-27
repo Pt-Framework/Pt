@@ -32,7 +32,7 @@
 
 #include <Pt/Json/Api.h>
 #include <Pt/Json/JsonReader.h>
-#include <Pt/Json/Settings.h>
+#include <Pt/Json/Document.h>
 #include <Pt/String.h>
 #include <stack>
 
@@ -51,15 +51,15 @@ class PT_JSON_API DocumentReader
     public:
         DocumentReader();
 
-        DocumentReader(std::basic_istream<Pt::Char>& is, Settings& doc);
+        DocumentReader(std::basic_istream<Pt::Char>& is, Document& doc);
 
         void reset();
 
-        void reset(std::basic_istream<Pt::Char>& is, Settings& doc);
+        void reset(std::basic_istream<Pt::Char>& is, Document& doc);
 
-        Settings& read();
+        Document& read();
 
-        Settings* advance();
+        Document* advance();
 
     protected:
         void onRoot(const Node& node);
@@ -73,8 +73,8 @@ class PT_JSON_API DocumentReader
         std::stack<ParseFunc>  _parseStack;
 
         JsonReader             _reader;
-        Settings*              _doc;
-        Settings::Entry      _current;
+        Document*              _doc;
+        Document::Element      _current;
 };
 
 } // namespace

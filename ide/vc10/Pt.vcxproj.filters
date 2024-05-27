@@ -1641,9 +1641,6 @@
     <ClInclude Include="..\..\include\Pt\Json\Float.h">
       <Filter>Pt-Json</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Json\Settings.h">
-      <Filter>Pt-Json</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Json\DocumentReader.h">
       <Filter>Pt-Json</Filter>
     </ClInclude>
@@ -1674,8 +1671,8 @@
     <ClInclude Include="..\..\include\Pt\Json\DocumentWriter.h">
       <Filter>Pt-Json</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\SettingsBase.h">
-      <Filter>Pt</Filter>
+    <ClInclude Include="..\..\include\Pt\Json\Document.h">
+      <Filter>Pt-Json</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -3041,9 +3038,6 @@
     <ClCompile Include="..\..\src\Pt-Json\tests\Pt-Json-test.cpp">
       <Filter>Pt-Json\tests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Json\Settings.cpp">
-      <Filter>Pt-Json</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Json\DocumentReader.cpp">
       <Filter>Pt-Json</Filter>
     </ClCompile>
@@ -3074,8 +3068,8 @@
     <ClCompile Include="..\..\src\Pt-Json\DocumentWriter.cpp">
       <Filter>Pt-Json</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt\SettingsBase.cpp">
-      <Filter>Pt</Filter>
+    <ClCompile Include="..\..\src\Pt-Json\Document.cpp">
+      <Filter>Pt-Json</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

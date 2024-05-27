@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Json/DocumentWriter.h>
+#include <Pt/Json/Document.h>
 #include <Pt/Convert.h>
 #include <Pt/SerializationInfo.h>
 
@@ -138,7 +139,6 @@ void DocumentWriter::attach(std::basic_ostream<Char>& os)
 {
     _os = &os;
 }
-
 
 void DocumentWriter::onAddString(const char* name, const char* type,
     const Pt::Char* value, const char* id)

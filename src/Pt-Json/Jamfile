@@ -3,7 +3,7 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_JSON_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Json ;
 
-PT_JSON_SOURCES = Settings.cpp
+PT_JSON_SOURCES = Document.cpp
                   DocumentReader.cpp
                   JsonError.cpp
                   JsonReader.cpp

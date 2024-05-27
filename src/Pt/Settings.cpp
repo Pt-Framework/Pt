@@ -32,18 +32,36 @@
 
 namespace Pt {
 
-Settings::Settings()
-: SettingsBase()
+SettingsError::SettingsError(const char* what, std::size_t line)
+: SerializationError(what)
+, _line(line)
 {}
 
-void Settings::onLoad(std::basic_istream<Pt::Char>& is)
+
+Settings::Settings()
+{}
+
+
+void Settings::clear()
+{
+    SerializationInfo::clear();
+}
+
+
+bool Settings::isEmpty() const
+{
+    return SerializationInfo::isVoid();
+}
+
+
+void Settings::load(std::basic_istream<Pt::Char>& is)
 {
     SettingsReader reader(is);
     reader.parse(*this);
 }
 
 
-void Settings::onSave(std::basic_ostream<Pt::Char>& os ) const
+void Settings::save(std::basic_ostream<Pt::Char>& os ) const
 {
     SettingsFormatter formatter(os);
 

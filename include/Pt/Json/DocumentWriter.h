@@ -42,7 +42,8 @@ namespace Pt {
 
 namespace Json {
 
-class Settings;
+class Document;
+
 
 /** @brief JSON Document writer.
 */
