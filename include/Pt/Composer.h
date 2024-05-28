@@ -260,7 +260,7 @@ class Composer
         Composer* _parent;
 };
 
-/** @brief Manages the composition of types during serialization.
+/** @brief Composes serializable types during serialization.
 
     @ingroup Serialization
 */
@@ -405,6 +405,149 @@ class BasicComposer : public Composer
     private:
         T* _type;
         Pt::SerializationInfo _si;
+        Pt::SerializationInfo* _current;
+};
+
+/** @brief Composes a %SerializationInfo.
+
+    @ingroup Serialization
+*/
+template <>
+class BasicComposer<Pt::SerializationInfo> : public Composer
+{
+    public:
+        //! @brief Construct with context.
+        BasicComposer()
+        : _si(0)
+        , _current(_si)
+        { }
+
+        //! @brief Begin composing a type.
+        void begin(Pt::SerializationInfo& si)
+        {
+            if(_si)
+            {
+                _si->clear();
+            }
+
+            _si = &si;
+            _current = _si;
+        }
+
+    protected:
+        // inherit docs
+        void onSetId(const char* id, std::size_t len)
+        {
+            _current->setId(id, len);
+        }
+
+        // inherit docs
+        void onSetTypeName(const char* type, std::size_t len)
+        {
+            _current->setTypeName(type, len);
+        }
+
+        void onSetString(const Pt::Char* value, std::size_t len)
+        {
+            _current->setString(value, len);
+        }
+
+        // inherit docs
+        void onSetBinary(const char* data, std::size_t length)
+        {
+            _current->setBinary(data, length);
+        }
+
+        // inherit docs
+        void onSetChar(const Pt::Char& ch)
+        {
+            _current->setChar(ch);
+        }
+
+        // inherit docs
+        void onSetBool(bool value)
+        {
+            _current->setBool(value);
+        }
+
+        // inherit docs
+        void onSetInt(Pt::int64_t value)
+        {
+            _current->setInt64(value);
+        }
+
+        // inherit docs
+        void onSetUInt(Pt::uint64_t value)
+        {
+            _current->setUInt64(value);
+        }
+
+        // inherit docs
+        void onSetFloat(long double value)
+        {
+            _current->setLongDouble(value);
+        }
+
+        // inherit docs
+        void onSetReference(const char* id, std::size_t len)
+        {
+           _current->setReference(id, len);
+        }
+
+        // inherit docs
+        Composer* onBeginMember(const char* name, std::size_t len)
+        {
+            SerializationInfo& child = _current->addMember(name, len);
+            _current = &child;
+            return this;
+        }
+
+        // inherit docs
+        Composer* onBeginElement()
+        {
+            SerializationInfo& child = _current->addElement();
+            _current = &child;
+            return this;
+        }
+
+        // inherit docs
+        Composer* onBeginDictElement()
+        {
+            SerializationInfo& child = _current->addDictElement();
+            _current = &child;
+            return this;
+        }
+
+        // inherit docs
+        Composer* onBeginDictKey()
+        {
+            SerializationInfo& child = _current->addDictKey();
+            _current = &child;
+            return this;
+        }
+
+        // inherit docs
+        Composer* onBeginDictValue()
+        {
+            SerializationInfo& child = _current->addDictValue();
+            _current = &child;
+            return this;
+        }
+
+        // inherit docs
+        Composer* onFinish()
+        {
+            if( ! _current->parent() )
+            {
+                return parent();
+            }
+
+            _current = _current->parent();
+            return this;
+        }
+
+    private:
+        Pt::SerializationInfo* _si;
         Pt::SerializationInfo* _current;
 };
 
