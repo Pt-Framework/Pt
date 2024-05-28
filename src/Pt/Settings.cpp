@@ -71,7 +71,7 @@ void Settings::load(Pt::Formatter& formatter)
     
     formatter.beginParse(composer);
     
-    while( formatter.parseSome() )
+    while( ! formatter.parseSome() )
         ;
 }
 
