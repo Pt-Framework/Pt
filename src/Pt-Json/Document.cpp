@@ -29,7 +29,7 @@
 
 #include <Pt/Json/Document.h>
 #include <Pt/Json/DocumentReader.h>
-#include <Pt/Json/DocumentWriter.h>
+#include <Pt/Json/JsonFormatter.h>
 #include <Pt/Json/StartObject.h>
 #include <Pt/Json/Member.h>
 #include <Pt/Json/EndObject.h>
@@ -73,11 +73,10 @@ void Document::load(std::basic_istream<Pt::Char>& is)
 
 void Document::save(std::basic_ostream<Pt::Char>& os) const
 {
-    DocumentWriter formatter(os);
+    JsonFormatter formatter(os);
 
-    const SerializationInfo& si = this->_root;
     SerializationInfo::ConstIterator it;
-    for (it = si.begin(); it != si.end(); ++it)
+    for(it = _root.begin(); it != _root.end(); ++it)
     {
         it->format(formatter);
     }

@@ -1,35 +1,35 @@
 /*
-* Copyright (C) 2005-2014 by Dr. Marc Boris Duerner
-*
-* This library is free software; you can redistribute it and/or
-* modify it under the terms of the GNU Lesser General Public
-* License as published by the Free Software Foundation; either
-* version 2.1 of the License, or (at your option) any later version.
-*
-* As a special exception, you may use this file as part of a free
-* software library without restriction. Specifically, if other files
-* instantiate templates or use macros or inline functions from this
-* file, or you compile this file and link it with other files to
-* produce an executable, this file does not by itself cause the
-* resulting executable to be covered by the GNU General Public
-* License. This exception does not however invalidate any other
-* reasons why the executable file might be covered by the GNU Library
-* General Public License.
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with this library; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+   Copyright (C) 2015-2023 by Dr. Marc Boris Duerner
+  
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+   
+   As a special exception, you may use this file as part of a free
+   software library without restriction. Specifically, if other files
+   instantiate templates or use macros or inline functions from this
+   file, or you compile this file and link it with other files to
+   produce an executable, this file does not by itself cause the
+   resulting executable to be covered by the GNU General Public
+   License. This exception does not however invalidate any other
+   reasons why the executable file might be covered by the GNU Library
+   General Public License.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   MA 02110-1301 USA
 */
 
-#include <Pt/Json/DocumentWriter.h>
-#include <Pt/Json/Document.h>
+#include <Pt/Json/JsonFormatter.h>
+#include <Pt/SerializationError.h>
 #include <Pt/Convert.h>
-#include <Pt/SerializationInfo.h>
 
 namespace {
 
@@ -121,26 +121,27 @@ void formatIndent(std::basic_ostream<Pt::Char>& os, std::size_t level)
 } // namespace
 
 namespace Pt {
+
 namespace Json {
 
-DocumentWriter::DocumentWriter(std::basic_ostream<Char>& os)
+JsonFormatter::JsonFormatter(std::basic_ostream<Char>& os)
 : _os(&os)
 , _state(0)
 {
 }
 
 
-DocumentWriter::~DocumentWriter()
+JsonFormatter::~JsonFormatter()
 {
 }
 
 
-void DocumentWriter::attach(std::basic_ostream<Char>& os)
+void JsonFormatter::attach(std::basic_ostream<Char>& os)
 {
     _os = &os;
 }
 
-void DocumentWriter::onAddString(const char* name, const char* type,
+void JsonFormatter::onAddString(const char* name, const char* type,
     const Pt::Char* value, const char* id)
 {
     formatName(*_os, name);
@@ -163,7 +164,7 @@ void DocumentWriter::onAddString(const char* name, const char* type,
 }
 
 
-void DocumentWriter::onAddBool(const char* name, bool value,
+void JsonFormatter::onAddBool(const char* name, bool value,
     const char* id)
 {
     formatName(*_os, name);
@@ -179,7 +180,7 @@ void DocumentWriter::onAddBool(const char* name, bool value,
 }
 
 
-void DocumentWriter::onAddChar(const char* name, const Pt::Char& value,
+void JsonFormatter::onAddChar(const char* name, const Pt::Char& value,
     const char* id)
 {
     formatName(*_os, name);
@@ -192,25 +193,25 @@ void DocumentWriter::onAddChar(const char* name, const Pt::Char& value,
 }
 
 
-void DocumentWriter::onAddInt8(const char* name, Pt::int8_t value, const char* id)
+void JsonFormatter::onAddInt8(const char* name, Pt::int8_t value, const char* id)
 {
     this->onAddInt64(name, value, id);
 }
 
 
-void DocumentWriter::onAddInt16(const char* name, Pt::int16_t value, const char* id)
+void JsonFormatter::onAddInt16(const char* name, Pt::int16_t value, const char* id)
 {
     this->onAddInt64(name, value, id);
 }
 
 
-void DocumentWriter::onAddInt32(const char* name, Pt::int32_t value, const char* id)
+void JsonFormatter::onAddInt32(const char* name, Pt::int32_t value, const char* id)
 {
     this->onAddInt64(name, value, id);
 }
 
 
-void DocumentWriter::onAddInt64(const char* name, Pt::int64_t value, const char* id)
+void JsonFormatter::onAddInt64(const char* name, Pt::int64_t value, const char* id)
 {
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -228,25 +229,25 @@ void DocumentWriter::onAddInt64(const char* name, Pt::int64_t value, const char*
 }
 
 
-void DocumentWriter::onAddUInt8(const char* name, Pt::uint8_t value, const char* id)
+void JsonFormatter::onAddUInt8(const char* name, Pt::uint8_t value, const char* id)
 {
     this->onAddUInt64(name, value, id);
 }
 
 
-void DocumentWriter::onAddUInt16(const char* name, Pt::uint16_t value, const char* id)
+void JsonFormatter::onAddUInt16(const char* name, Pt::uint16_t value, const char* id)
 {
     this->onAddUInt64(name, value, id);
 }
 
 
-void DocumentWriter::onAddUInt32(const char* name, Pt::uint32_t value, const char* id)
+void JsonFormatter::onAddUInt32(const char* name, Pt::uint32_t value, const char* id)
 {
     this->onAddUInt64(name, value, id);
 }
 
 
-void DocumentWriter::onAddUInt64(const char* name, Pt::uint64_t value, const char* id)
+void JsonFormatter::onAddUInt64(const char* name, Pt::uint64_t value, const char* id)
 {
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -264,13 +265,13 @@ void DocumentWriter::onAddUInt64(const char* name, Pt::uint64_t value, const cha
 }
 
 
-void DocumentWriter::onAddFloat(const char* name, float value, const char* id)
+void JsonFormatter::onAddFloat(const char* name, float value, const char* id)
 {
     this->onAddDouble(name, value, id);
 }
 
 
-void DocumentWriter::onAddDouble(const char* name, double value, const char* id)
+void JsonFormatter::onAddDouble(const char* name, double value, const char* id)
 {
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -287,26 +288,26 @@ void DocumentWriter::onAddDouble(const char* name, double value, const char* id)
 }
 
 
-void DocumentWriter::onAddLongDouble(const char* name, long double value, const char* id)
+void JsonFormatter::onAddLongDouble(const char* name, long double value, const char* id)
 {
     this->onAddDouble(name, static_cast<double>(value), id);
 }
 
 
-void DocumentWriter::onAddBinary(const char* name, const char* type,
+void JsonFormatter::onAddBinary(const char* name, const char* type,
     const char* data, std::size_t length, const char* id)
 {
     throw SerializationError("binary data not supported");
 }
 
 
-void DocumentWriter::onAddReference(const char* name, const char* value)
+void JsonFormatter::onAddReference(const char* name, const char* value)
 {
     throw SerializationError("references not supported");
 }
 
 
-void DocumentWriter::onBeginSequence(const char* name, const char*,
+void JsonFormatter::onBeginSequence(const char* name, const char*,
     const char*)
 {
     // endl and indent nested sequence 
@@ -324,7 +325,7 @@ void DocumentWriter::onBeginSequence(const char* name, const char*,
 }
 
 
-void DocumentWriter::onBeginElement()
+void JsonFormatter::onBeginElement()
 {
     if (_stack.empty())
         return;
@@ -338,12 +339,12 @@ void DocumentWriter::onBeginElement()
 }
 
 
-void DocumentWriter::onFinishElement()
+void JsonFormatter::onFinishElement()
 {
 }
 
 
-void DocumentWriter::onFinishSequence()
+void JsonFormatter::onFinishSequence()
 {
     _stack.pop_back();
 
@@ -364,7 +365,7 @@ void DocumentWriter::onFinishSequence()
 }
 
 
-void DocumentWriter::onBeginStruct(const char* name, const char* type,
+void JsonFormatter::onBeginStruct(const char* name, const char* type,
     const char* id)
 {
     // endl and indent nested sequence
@@ -382,7 +383,7 @@ void DocumentWriter::onBeginStruct(const char* name, const char* type,
 }
 
 
-void DocumentWriter::onBeginMember(const char*)
+void JsonFormatter::onBeginMember(const char*)
 {
     if (_stack.empty())
         return;
@@ -401,11 +402,12 @@ void DocumentWriter::onBeginMember(const char*)
 }
 
 
-void DocumentWriter::onFinishMember()
-{}
+void JsonFormatter::onFinishMember()
+{
+}
 
 
-void DocumentWriter::onFinishStruct()
+void JsonFormatter::onFinishStruct()
 {
     _stack.pop_back();
 
@@ -423,16 +425,18 @@ void DocumentWriter::onFinishStruct()
     _state = _stack.empty() ? 0 : ']';
 }
 
-void DocumentWriter::onBeginParse(Composer&)
+
+void JsonFormatter::onBeginParse(Composer&)
 {
 
 }
 
 
-void DocumentWriter::onParse()
+void JsonFormatter::onParse()
 {
 
 }
 
 } // namespace Json
+
 } // namespace Pt

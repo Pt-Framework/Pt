@@ -27,13 +27,14 @@
    MA 02110-1301 USA
 */
 
-#ifndef PT_JSON_DOCUMENT_WRITER_H
-#define PT_JSON_DOCUMENT_WRITER_H
+#ifndef PT_JSON_FORMATTER_H
+#define PT_JSON_FORMATTER_H
 
 #include <Pt/Json/Api.h>
 #include <Pt/String.h>
 #include <Pt/Formatter.h>
 #include <Pt/NonCopyable.h>
+
 #include <vector>
 #include <iostream>
 #include <string>
@@ -42,18 +43,15 @@ namespace Pt {
 
 namespace Json {
 
-class Document;
-
-
-/** @brief JSON Document writer.
+/** @brief JSON Formatter.
 */
-class PT_JSON_API DocumentWriter : public Pt::Formatter , private NonCopyable
+class PT_JSON_API JsonFormatter : public Pt::Formatter
+                                , private NonCopyable
 {
-    
     public:
-        DocumentWriter(std::basic_ostream<Pt::Char>& os);
+        JsonFormatter(std::basic_ostream<Pt::Char>& os);
 
-        ~DocumentWriter();
+        ~JsonFormatter();
 
         void attach(std::basic_ostream<Char>& os);
 
