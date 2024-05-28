@@ -44,6 +44,8 @@ class SettingsFormatter : public Pt::Formatter
     public:
         SettingsFormatter(std::basic_ostream<Char>& os);
 
+        SettingsFormatter(std::basic_istream<Char>& is);
+
         ~SettingsFormatter();
 
         void attach(std::basic_ostream<Char>& os);
@@ -121,6 +123,7 @@ class SettingsFormatter : public Pt::Formatter
         {}
 
     private:
+        std::basic_istream<Char>* _is;
         std::basic_ostream<Char>* _os;
         std::vector<unsigned> _stack;
         int _state;

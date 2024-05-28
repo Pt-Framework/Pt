@@ -116,9 +116,18 @@ void formatIndent(std::basic_ostream<Pt::Char>& os, std::size_t level)
 namespace Pt {
 
 SettingsFormatter::SettingsFormatter(std::basic_ostream<Char>& os)
-: _os(&os)
+: _is(0)
+, _os(&os)
 , _state(0)
 { 
+}
+
+
+SettingsFormatter::SettingsFormatter(std::basic_istream<Char>& is)
+: _is(&is)
+, _os(0)
+, _state(0)
+{
 }
 
 

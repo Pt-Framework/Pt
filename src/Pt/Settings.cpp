@@ -27,8 +27,9 @@
  */
 
 #include <Pt/Settings.h>
-#include <SettingsReader.h>
-#include <SettingsWriter.h>
+#include <Pt/Composer.h>
+#include "SettingsReader.h"
+#include "SettingsWriter.h"
 
 namespace Pt {
 
@@ -61,11 +62,37 @@ void Settings::load(std::basic_istream<Pt::Char>& is)
 }
 
 
-void Settings::save(std::basic_ostream<Pt::Char>& os ) const
+void Settings::load(Pt::Formatter& formatter)
+{
+    SerializationInfo& si = *this;
+
+    BasicComposer<Pt::SerializationInfo> composer;
+    composer.begin(si);
+    
+    formatter.beginParse(composer);
+    
+    while( formatter.parseSome() )
+        ;
+}
+
+
+void Settings::save(std::basic_ostream<Pt::Char>& os) const
 {
     SettingsFormatter formatter(os);
 
     const SerializationInfo& si = *this;
+    SerializationInfo::ConstIterator it;
+    for(it = si.begin(); it != si.end(); ++it)
+    {
+        it->format(formatter);
+    }
+}
+
+
+void Settings::save(Pt::Formatter& formatter) const
+{
+    const SerializationInfo& si = *this;
+    
     SerializationInfo::ConstIterator it;
     for(it = si.begin(); it != si.end(); ++it)
     {

@@ -568,11 +568,19 @@ class PT_API Settings : private SerializationInfo
 
         /** @brief Loads settings from a input stream.
         */
-        void load( std::basic_istream<Pt::Char>& is );
+        void load(std::basic_istream<Pt::Char>& is);
+
+        /** @brief Loads settings using a formatter.
+        */
+        void load(Pt::Formatter& formatter);
 
         /** @brief Saves settings to a output stream.
         */
-        void save( std::basic_ostream<Pt::Char>& os ) const;
+        void save(std::basic_ostream<Pt::Char>& os) const;
+
+        /** @brief Saves settings using a formatter.
+        */
+        void save(Pt::Formatter& formatter) const;
 
         /** @brief Returns a top level entry.
         */
