@@ -139,9 +139,6 @@
     <Filter Include="Pt-Json\tests">
       <UniqueIdentifier>{db7e6288-7d79-458c-8a7a-258939a0b2fd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\win32">
-      <UniqueIdentifier>{474bc573-d20c-4cd6-af07-ee7b27e994e9}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1424,24 +1421,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ScreenImpl.h">
       <Filter>Pt-Hmi\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\KeyMap.h">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\MainWindowImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\ScreenImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\win32.h">
-      <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
@@ -2923,18 +2902,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ScreenImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
