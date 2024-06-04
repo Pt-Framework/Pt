@@ -166,9 +166,6 @@ void PaintSurface::detachRegion(PaintSurface& region)
 
 void PaintSurface::onDestroy(PaintSurface* region)
 {
-    //if(_painter)
-    //    _painter->onDetach(this);
-    
     if(_painter)
         _painter->finish();
 

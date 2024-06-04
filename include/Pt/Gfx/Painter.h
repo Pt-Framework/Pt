@@ -59,10 +59,13 @@ class PT_GFX_API PaintData
 {
     friend class Canvas;
     friend class Painter;
+    friend class Line;
+    friend class Polyline;
 
     public:
         virtual ~PaintData();
 
+    protected:
         Canvas* canvas();
 
         const RectF& region() const;
@@ -181,7 +184,7 @@ class Line
         const Gfx::PointF& _to;
 };
 
-/** @brief Line.
+/** @brief Polyline.
 */
 class Polyline
 {
