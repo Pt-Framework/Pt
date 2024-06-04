@@ -42,7 +42,7 @@
 
 #include <Windows.h>
 
-#define PT_HMI_PIXMAP_IMPL_IMAGE 1
+//#define PT_HMI_PIXMAP_IMPL_IMAGE 1
 
 namespace Pt {
 
@@ -92,7 +92,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         const Gfx::SizeF& size() const;
         
-        PaintData* getPaint(Gfx::PaintData* paint);
+        Gfx::PaintData* getPaint(Gfx::PaintData* paint);
 
         Gfx::Canvas* canvas();
 

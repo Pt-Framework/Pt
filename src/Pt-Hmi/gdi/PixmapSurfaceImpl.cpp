@@ -246,7 +246,7 @@ const Gfx::SizeF& PixmapSurfaceImpl::size() const
 }
 
 
-PaintData* PixmapSurfaceImpl::getPaint(Gfx::PaintData* p)
+Gfx::PaintData* PixmapSurfaceImpl::getPaint(Gfx::PaintData* p)
 {
     PaintData* paint = dynamic_cast<PaintData*>(p);
     if( ! paint )

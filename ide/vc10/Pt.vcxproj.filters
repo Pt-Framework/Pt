@@ -1650,6 +1650,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\JsonFormatter.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -3034,6 +3037,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintData.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Json\JsonFormatter.cpp">
+      <Filter>Pt-Json</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

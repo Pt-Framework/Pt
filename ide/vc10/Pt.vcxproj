@@ -167,6 +167,7 @@
     <ClInclude Include="..\..\include\Pt\Json\Float.h" />
     <ClInclude Include="..\..\include\Pt\Json\Integer.h" />
     <ClInclude Include="..\..\include\Pt\Json\JsonError.h" />
+    <ClInclude Include="..\..\include\Pt\Json\JsonFormatter.h" />
     <ClInclude Include="..\..\include\Pt\Json\JsonReader.h" />
     <ClInclude Include="..\..\include\Pt\Json\Member.h" />
     <ClInclude Include="..\..\include\Pt\Json\Node.h" />
@@ -739,6 +740,7 @@
     <ClCompile Include="..\..\src\Pt-Json\Document.cpp" />
     <ClCompile Include="..\..\src\Pt-Json\DocumentReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Json\JsonError.cpp" />
+    <ClCompile Include="..\..\src\Pt-Json\JsonFormatter.cpp" />
     <ClCompile Include="..\..\src\Pt-Json\JsonReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Json\tests\Pt-Json-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Mfc\Application.cpp" />
