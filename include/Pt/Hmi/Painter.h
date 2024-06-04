@@ -53,14 +53,14 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual ~Painter();
 
-        // TODO: conflicting begin() inherited from Gfx::Painter
-
         void begin(Hmi::PaintSurface& surface);
 
     protected:
+        virtual void onBegin();
+
         virtual void onFinish();
 
-    protected:
+    public:
         void drawPixmap(const Gfx::PointF& to, 
                         const PixmapSurface& surface);
 
@@ -70,6 +70,7 @@ class PT_HMI_API Painter : public Gfx::Painter
 
     private:
         Hmi::PaintSurface* _surface;
+        Hmi::PaintData*    _paint;
 };
 
 } // namespace

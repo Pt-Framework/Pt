@@ -32,6 +32,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Algorithm.h>
 #include <Pt/String.h>
 #include <Pt/System/Path.h>
 
@@ -94,13 +95,25 @@ class Rasterizer
         return _image;
     }
 
-    void begin(Gfx::Painter& painter)
-    {}
+    Gfx::PaintData* begin(Gfx::PaintData*)
+    { return 0; }
 
     void finish()
     {}
 
     const ImageFormat& format() const;
+
+    void reset(const Gfx::Image& image)
+    {
+        if( image.format() == _image.format() )
+        {
+          _image = image;
+          return;
+        }
+
+        _image.reset( format(), image.size() );
+        Pt::Gfx::copy( image.begin(), image.end(), _image.begin() );
+    }
 
     void reset(const Gfx::Size& size, std::size_t stride)
     {

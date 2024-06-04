@@ -41,31 +41,253 @@
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
 
+#include <vector>
+
 namespace Pt {
 
 namespace Gfx {
 
 class Painter;
+class PaintData;
+class Line;
+class Polyline;
+
+/** @brief Surface scaling.
+*/
+class Scaling
+{
+    public:
+        Scaling(double scaleFactor = 1.0)
+        : _scaleFactor(scaleFactor)
+        { }
+
+        double scaleFactor() const
+        {
+            return _scaleFactor;
+        }
+        
+        void setScaleFactor(double scaleFactor)
+        {
+            _scaleFactor = scaleFactor;
+        }
+
+    public:
+        double toPhysical(double n) const
+        {
+            return n * scaleFactor();
+        }
+
+        Gfx::PointF toPhysical(const Gfx::PointF& p) const
+        {
+            return p * scaleFactor();
+        }
+
+        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const
+        {
+            return s * scaleFactor();
+        }
+
+        Gfx::RectF toPhysical(const Gfx::RectF& r) const
+        {
+            Gfx::PointF p = toPhysical( r.topLeft() );
+            Gfx::SizeF s = toPhysical( r.size() );
+            return Gfx::RectF(p, s);
+        }
+
+        double toLogical(double n) const
+        {
+            return n / scaleFactor();
+        }
+
+        Gfx::PointF toLogical(const Gfx::PointF& p) const
+        {
+            return p / scaleFactor();
+        }
+
+        Gfx::SizeF toLogical(const Gfx::SizeF& s) const
+        {
+            return s / scaleFactor();
+        }
+
+        Gfx::RectF toLogical(const Gfx::RectF& r) const
+        {
+            Gfx::PointF p = toLogical( r.topLeft() );
+            Gfx::SizeF s = toLogical( r.size() );
+            return Gfx::RectF(p, s);
+        }
+
+    private:
+        double _scaleFactor;
+};
+
+class PaintSurface;
+
+/** @brief Paint canvas.
+*/
+class PT_GFX_API Canvas
+{
+    friend class PaintData;
+
+    public:
+        Canvas();
+
+        ~Canvas();
+
+        const Gfx::ImageFormat& format() const;
+
+        const Gfx::SizeF& size() const;
+
+        const Scaling& scaling() const;
+
+    private:
+        void attachPaint(PaintData& paint);
+
+        void detachPaint();
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const = 0;
+
+        virtual const Gfx::SizeF& onSize() const = 0;
+
+        virtual const Scaling& onGetScaling() const = 0;
+
+        virtual void onFinish() = 0;
+
+    protected:
+        virtual void setCompositionMode(const Gfx::CompositionMode& mode) = 0;
+
+        virtual void setPen(const Gfx::Pen& pen) = 0;
+
+        virtual void setBrush(const Gfx::Brush& brush) = 0;
+
+        virtual void setFont(const Gfx::Font& font) = 0;
+
+        virtual void setClip(const Gfx::RectF& clip) = 0;
+
+        virtual void resetClip() = 0;
+
+    protected:
+        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const = 0;
+
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& text) = 0;
+
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans) = 0;
+
+    protected:
+        virtual void drawLine(const Gfx::Line& line) = 0;
+    
+        virtual void drawPolyline(const Polyline& line) = 0;
+
+        virtual void fillPolygon(const Polyline& line) = 0;
+
+        virtual void drawRect(const Gfx::RectF& rectangle) = 0;
+
+        virtual void fillRect(const Gfx::RectF& rectangle) = 0;
+
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+        virtual void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
+
+        virtual void drawPath(const Gfx::Path& path, float smoothness) = 0;
+
+        virtual void fillPath(const Path& path, float smoothness) = 0;
+
+    protected:
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
+
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, 
+                               const Gfx::RectF& imgRect) = 0;
+
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const PaintSurface& surface) = 0;
+
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const PaintSurface& surface, 
+                                  const Gfx::RectF& surfaceRect) = 0;
+    
+    private:
+        PaintData* _paint;
+};
 
 /** @brief Paint target for painters.
 */
 class PT_GFX_API PaintSurface
 {
+    friend class PaintData;
     friend class Painter;
     friend class PaintRegion;
+
+    protected:
+        PaintSurface();
 
     public:
         virtual ~PaintSurface();
         
         const Gfx::SizeF& size() const;
 
-        virtual const Gfx::ImageFormat& format() const = 0;
+        const Gfx::ImageFormat& format() const;
+
+        const Scaling& scaling() const
+        {
+            return onGetScaling();
+        }
 
         double scaleFactor() const
         {
             return onScaleFactor();
         }
 
+        virtual Image toImage() const = 0;
+
+    protected:
+        Painter* painter();
+
+        PaintData* getPaint(PaintData* paint);
+
+        Canvas* canvas();
+
+        RectF region() const;
+
+    private:
+        void attachPainter(Painter& painter);
+
+        void detachPainter();
+
+    private:
+        void attachRegion(PaintSurface& region);
+        
+        void detachRegion(PaintSurface& region);
+
+        virtual void onDestroy(PaintSurface* region);
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const = 0;
+
+        virtual const Gfx::SizeF& onSize() const = 0;
+
+        virtual double onScaleFactor() const = 0;
+
+        virtual const Scaling& onGetScaling() const = 0;
+
+        virtual PaintData* onGetPaint(PaintData*) = 0;
+
+        virtual Canvas* onGetCanvas() = 0;
+
+        virtual RectF onGetRegion() const;
+
+        virtual void onReset();
+
+    public:
         Gfx::PointF toPhysical(const Gfx::PointF& p) const
         {
             return p * scaleFactor();
@@ -163,87 +385,9 @@ class PT_GFX_API PaintSurface
             return toLogical(Gfx::RectF(pos, size));
         }
 
-        virtual Image toImage() const = 0;
-
-    protected:
-        PaintSurface();
-
-        void begin(Painter& painter);
-
-        void finish();
-
-        Painter* painter();
-
-    protected:
-        virtual double onScaleFactor() const = 0;
-
-        virtual const Gfx::SizeF& onSize() const = 0;
-
-        virtual void onBegin(Painter& painter) = 0;
-
-        virtual void onFinish() = 0;
-    
-    protected:
-        virtual void setClip(const Gfx::RectF& clip) = 0;
-
-        virtual void resetClip() = 0;
-
-        virtual void setCompositionMode(const Gfx::CompositionMode& mode) = 0;
-
-    protected:
-        virtual void setPen(const Gfx::Pen& pen) = 0;
-
-        virtual void setBrush(const Gfx::Brush& brush) = 0;
-
-        virtual void setFont(const Gfx::Font& font) = 0;
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const = 0;
-    
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to) = 0;
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text) = 0;
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans) = 0;
-
-        virtual void drawRect(const Gfx::RectF& rectangle) = 0;
-
-        virtual void fillRect(const Gfx::RectF& rectangle) = 0;
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
-
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount) = 0;
-
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount) = 0;
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect) = 0;
-
-        virtual void drawPath(const Gfx::Path& path, float smoothness) = 0;
-
-        virtual void fillPath(const Path& path, float smoothness) = 0;
-
-        virtual void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const PaintSurface& surface) = 0;
-
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const PaintSurface& surface, 
-                                  const Gfx::RectF& surfaceRect) = 0;
-
     private:
-        Painter* _painter;
+        Painter*                   _painter;
+        std::vector<PaintSurface*> _regions;
 };
 
 } // namespace

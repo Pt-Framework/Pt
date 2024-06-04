@@ -492,8 +492,7 @@ void BrushData::setTexture(const Image& texture,
     // The texture has no offset
     if( ! offsetX && ! offsetY )
     {
-        _texture->reset( texture.size() );
-        _texture->drawImage(Gfx::PointF(0, 0), texture);
+        _texture->reset( texture);
     }
     else // The texture has offset
     {

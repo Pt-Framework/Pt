@@ -29,9 +29,6 @@
 #ifndef Pt_Hmi_PaintData_h
 #define Pt_Hmi_PaintData_h
 
-#include "win32.h"
-#include "PixmapSurfaceImpl.h"
-
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -58,325 +55,45 @@ namespace Hmi {
 class PaintData : public Gfx::PaintData
 {
     public:
-        PaintData()
-        : _pen(0)
-        , _penColor(0)
-        , _brush(0)
-        , _gradientBrush(false)
-        , _clipRect(0)
-        , _font(0)
-        { }
+        PaintData();
 
-        ~PaintData()
-        {
-            if(_pen)
-                DeleteObject(_pen);
+        ~PaintData();
 
-            if(_brush)
-                DeleteObject(_brush);
+        HPEN pen() const;
 
-            if(_font)
-                DeleteObject(_font);
+        Gfx::Color penColor() const;
 
-            if(_clipRect)
-                DeleteObject(_clipRect);
-        }
+        HBRUSH brush() const;
 
-        void setPen(const Gfx::Pen& pen)
-        {
-            if(_pen)
-            {
-                DeleteObject(_pen);
-                _pen = 0;
-            }
+        bool gradientBrush() const;
 
-            DWORD penStyle = getPenStyle(pen);
+        HFONT font() const;
 
-            _penColor = RGB( pen.color().red()  / 257, 
-                             pen.color().green() / 257, 
-                             pen.color().blue()  / 257 );
+        HRGN clipRect() const;
 
-#ifdef _WIN32_WCE
-            _pen = CreatePen(penStyle, pen.size(), _penColor);
-#else
-            LOGBRUSH brush;
-            brush.lbStyle = BS_SOLID;
-            brush.lbColor = _penColor;
+    protected:
+        virtual void onFinish();
 
-            _pen = ExtCreatePen(penStyle, pen.size(), &brush, 0, NULL);
-#endif
-        }
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
 
-        HPEN pen() const
-        {
-            return _pen;
-        }
+        virtual void onSetPen(const Gfx::Pen& pen);
 
-        DWORD penColor() const
-        {
-            return _penColor;
-        }
+        virtual void onSetBrush(const Gfx::Brush& brush);
 
-        void setBrush(const Gfx::Brush& brush)
-        {
-            if(_brush)
-            {
-                DeleteObject(_brush);
-                _brush = 0;
-            }
-           
+        virtual void onSetFont(const Gfx::Font& font);
 
-            _gradientBrush = false;
+        virtual void onSetClip(const Gfx::RectF& rectF);
 
-            DWORD brushColor = RGB(brush.color().red() / 257, 
-                                   brush.color().green() / 257, 
-                                   brush.color().blue() / 257);
-
-            switch( brush.fillStyle() ) 
-            {
-                case Gfx::Brush::Solid: 
-                {
-                    _brush = CreateSolidBrush(brushColor);
-                    break;
-                }
-
-                case Gfx::Brush::Texture: 
-                {
-                    const Gfx::Image& texture = brush.texture();
-
-                    // use an empty brush for empty textures
-                    if(texture.width() == 0)
-                    {
-                        _brush = (HBRUSH) GetStockObject(NULL_BRUSH);
-                        break;
-                    }
-
-                    BITMAPINFO bi;
-                    ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-                    std::size_t depth = texture.view().pixelStride() * 8;
-
-                    bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);    
-                    bi.bmiHeader.biWidth        = texture.width();
-                    bi.bmiHeader.biHeight       = -(ssize_t)texture.height(); // top-down image
-                    bi.bmiHeader.biPlanes       = 1;                          // always 1
-                    bi.bmiHeader.biBitCount     = static_cast<WORD>(depth);   // bits per pixel
-                    bi.bmiHeader.biCompression  = BI_RGB;                     // uncompressed RGB
-                    bi.bmiHeader.biSizeImage    = 0;                          // automatic
-                    bi.bmiHeader.biClrUsed      = 0;                          // no color table
-                    bi.bmiHeader.biClrImportant = 0;                          // no color table
-
-                    HDC dc = GetDC(NULL);
-
-                    VOID* imageBits;
-                    HBITMAP bitmap = CreateDIBSection(dc, &bi, 
-                                                      DIB_RGB_COLORS, &imageBits, NULL, 0);
-                    memcpy(imageBits, 
-                            texture.data(), 
-                            texture.width() * texture.height() * texture.view().pixelStride());
-
-                    _brush = CreatePatternBrush(bitmap);
-                    DeleteObject(bitmap);
-                    ReleaseDC(NULL, dc);
-                    break;     
-                }
-                
-                case Gfx::Brush::Gradient:
-                {
-                    _gradientBrush = true;
-                    break;
-                }
-                
-                default:
-                    break;
-            }
-        }
-
-        HBRUSH brush() const
-        {
-            return _brush;
-        }
-
-        bool gradientBrush() const
-        {
-            return _gradientBrush;
-        }
-
-        void setClip(const Gfx::RectF& rectF)
-        {
-            Gfx::Rect rect = round(rectF);
-
-            if(_clipRect)
-            {
-                DeleteObject(_clipRect);
-                _clipRect = NULL;
-            }
-            
-            // CreateRectRgn only includes the interior of the rect
-            _clipRect = CreateRectRgn( rect.x(), 
-                                       rect.y(), 
-                                       rect.bottomRight().x(), 
-                                       rect.bottomRight().y() );
-        }
-
-        void resetClip()
-        {
-            if(_clipRect)
-            {
-                DeleteObject(_clipRect);
-                _clipRect = NULL;
-            }
-        }
-
-        HRGN clipRect() const
-        {
-            return _clipRect;
-        }
-
-        void setCompositionMode(const Gfx::CompositionMode& mode)
-        {
-        }
-
-        void setFont(const Gfx::Font& font)
-        {
-            if(_font)
-            {
-                DeleteObject(_font);
-                _font = 0;
-            }
-
-            _font = getFont(font);
-        }
-        
-        HFONT font() const
-        {
-            return _font;
-        }
-        
-    private:
-        DWORD getPenStyle(const Pt::Gfx::Pen& pen)
-        {
-          using namespace Pt;
-
-#ifdef _WIN32_WCE
-            DWORD penStyle = 0;
-#else
-            DWORD penStyle = PS_GEOMETRIC;
-#endif
-
-            switch( pen.style() )
-            {
-                case Gfx::Pen::Solid:
-                    penStyle |= PS_SOLID;
-                    break;
-                
-                case Gfx::Pen::Dash:
-                    penStyle |= PS_DASH;
-                    break;
-
-                case Gfx::Pen::Dot:
-#ifdef _WIN32_WCE
-                    penStyle |= PS_DASH;
-#else
-                    penStyle |= PS_DOT;
-#endif
-                    break;
-            }
-
-#ifndef _WIN32_WCE
-            switch( pen.capStyle() )
-            {
-                case Gfx::Pen::FlatCap:
-                    penStyle |= PS_ENDCAP_FLAT;
-                    break;
-
-                case Gfx::Pen::RoundCap:
-                    penStyle |= PS_ENDCAP_ROUND;
-                    break;
-
-                case Gfx::Pen::SquareCap:
-                    penStyle |= PS_ENDCAP_SQUARE;
-                    break;
-            }
-
-            switch( pen.joinStyle() )
-            {
-                case Gfx::Pen::RoundJoin:
-                     penStyle |= PS_JOIN_ROUND;
-                    break;
-                
-                case Gfx::Pen::BevelJoin:
-                     penStyle |= PS_JOIN_BEVEL;
-                     break;
-
-                case Gfx::Pen::MiterJoin:
-                     penStyle |= PS_JOIN_MITER;
-                     break;
-            }
-#endif
-
-            return penStyle;
-        }
-
-        static HFONT getFont(const Pt::Gfx::Font& font)
-        {
-            int fontWeight = FW_NORMAL;
-    
-            std::string style = font.style();
-            std::transform(style.begin(), style.end(),  style.begin(), ::tolower);
-
-            if(style == "bold" || style == "bold italic" || style == "bolditalic")
-                fontWeight = FW_BOLD;
-
-            BYTE italic = (style == "italic" || style == "bold italic" || style == "bolditalic");
-
-            HDC dc = GetDC(NULL);
-            //int logicalPPI = GetDeviceCaps(dc, LOGPIXELSY);
-            int logicalPPI = 96;
-
-            int height = MulDiv(font.size(), logicalPPI, 72);
-            ReleaseDC(NULL, dc);
-
-            // If a negative value is used for lfHeight, the font is
-            // looked up by character size, which is only the ascent.
-            // Looking up fonts by ascent seems to be more portable.
-
-            LOGFONT lf;
-            lf.lfHeight         = -height;                     // will be converted to device units    
-            lf.lfWidth          = 0;                           // default width of the font
-            lf.lfEscapement     = 0;                           // escapement angle
-            lf.lfOrientation    = 0;                           // orientation
-            lf.lfWeight         = fontWeight;                  // font weight
-            lf.lfItalic         = italic;                      // italic
-            lf.lfUnderline      = FALSE;                       // underline
-            lf.lfStrikeOut      = FALSE;                       // strikeout
-            lf.lfCharSet        = DEFAULT_CHARSET;             // use the default charset
-            lf.lfOutPrecision   = OUT_DEFAULT_PRECIS;          // default output precision
-            lf.lfClipPrecision  = CLIP_DEFAULT_PRECIS;         // default clipping behaviour
-            lf.lfQuality        = DEFAULT_QUALITY;             // default quality
-            lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // default pitch and family
-
-            if( font.name().empty() )
-            {
-                const std::string& fontName = PixmapSurfaceImpl::defaultFont();
-                memcpy(lf.lfFaceName, fontName.c_str(), std::min<size_t>( LF_FACESIZE, fontName.size() + 1) );
-            }
-            else
-            {
-                memcpy(lf.lfFaceName, font.name().c_str(), std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
-            }
-
-            HFONT hf = CreateFontIndirect(&lf);
-            return hf;
-        }
+        virtual void onResetClip();
 
     private:
-        HPEN   _pen;
-        DWORD  _penColor;
-        HBRUSH _brush;
-        bool   _gradientBrush;
-        HRGN   _clipRect;
-        HFONT  _font;
+        Gfx::CompositionMode      _compositionMode;
+        HPEN                      _pen;
+        Gfx::Color                _penColor;
+        HBRUSH                    _brush;
+        bool                      _gradientBrush;
+        HRGN                      _clipRect;
+        HFONT                     _font;
 };
 
 } // namespace

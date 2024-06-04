@@ -40,46 +40,26 @@ class PixmapSurface;
 
 class PixmapSurfaceImpl : public Gfx::ImageSurface
 {
-    public:
-        PixmapSurfaceImpl();
+    friend class PixmapSurface;
 
-        ~PixmapSurfaceImpl();
+    public:
+        PixmapSurfaceImpl()
+        { }
 
         void clear(const Gfx::Color& c)
-        {
-        }
-
-        void begin(Gfx::Painter& painter)
-        {
-            Gfx::PaintSurface::begin(painter);
-        }
-
-        void finish()
-        {
-            Gfx::PaintSurface::finish();
-        }
-
-        void setScaleFactor(double scaling)
-        {
-        }
-
-        void resize(const Gfx::SizeF& size)
-        {
-            Gfx::Size sz( size.width(), size.height() );
-
-            Gfx::ImageSurface::reset(sz);
-        }
+        { }
 
         void set(const Gfx::Image& image)
         {
-            reset( image.size(), image.padding() );
-
-            drawImage( Gfx::PointF(0,0), image );
+            reset(image);
         }
 
-        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+    protected:
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const Gfx::PaintSurface& surface);
 
-        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
 };
 
 } // namespace

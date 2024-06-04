@@ -70,70 +70,23 @@ class PT_GFX_API PaintRegion : public PaintSurface
         virtual Image toImage() const;
 
     protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const;
+
         virtual const Gfx::SizeF& onSize() const;
+
+        virtual const Gfx::Scaling& onGetScaling() const;
 
         virtual double onScaleFactor() const;
 
-        virtual void onBegin(Painter& painter);
+        virtual PaintData* onGetPaint(PaintData*);
 
-        virtual void onFinish();
+        virtual Canvas* onGetCanvas();
 
-    protected:
-        virtual const Gfx::ImageFormat& format() const;
+        virtual RectF onGetRegion() const;
 
-        virtual void setClip( const Gfx::RectF& clip);
+        virtual void onDestroy(PaintSurface* region);
 
-        virtual void resetClip();
-
-        virtual void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        virtual void setPen(const Gfx::Pen& pen);
-
-        virtual void setBrush(const Gfx::Brush& brush);
-
-        virtual void setFont(const Gfx::Font& font);
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans);
-
-        virtual void drawRect(const Gfx::RectF& rectangle);
-
-        virtual void fillRect(const Gfx::RectF& rectangle);
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
-
-        virtual void drawPath(const Gfx::Path& path, float smoothness);
-
-        virtual void fillPath(const Path& path, float smoothness);
-
-        virtual void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-        virtual void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-        virtual void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-        virtual void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect);
+        virtual void onReset();       
 
     private:
         PaintSurface* _surface;

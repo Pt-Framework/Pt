@@ -242,11 +242,52 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(_hwnd, &ps);
 
+#ifdef PT_HMI_PIXMAP_IMPL_IMAGE
+    const Pt::Gfx::Image& image = surface().pixmapImpl()->image();
+    
+    const size_t depth = image.view().pixelStride() * 8;
+    const Pt::uint8_t* data = image.data();
+
+    HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
+
+    if (bitmap == NULL)
+    {
+        BITMAPINFO bitmapInfo;
+        ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+        bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        bitmapInfo.bmiHeader.biWidth = image.width();
+        bitmapInfo.bmiHeader.biHeight = -(ssize_t)image.height();  // top-down image
+        bitmapInfo.bmiHeader.biPlanes = 1;                         // always 1            
+        bitmapInfo.bmiHeader.biBitCount = depth;                   // 32-bit 
+        bitmapInfo.bmiHeader.biCompression = BI_RGB;               // uncompressed RGB
+        bitmapInfo.bmiHeader.biSizeImage = 0;                      // automatic
+        bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
+        bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
+
+        VOID* imageBits = 0;
+        bitmap = CreateDIBSection(windowContext, &bitmapInfo,
+                                  DIB_RGB_COLORS, &imageBits, NULL, 0);
+
+        memcpy(imageBits, data, image.width() * image.height() * 4);
+    }
+
+    HDC bitmapDC = CreateCompatibleDC(NULL);
+    SelectObject(bitmapDC, bitmap);
+
+    BitBlt(windowContext, updateRect.x(), updateRect.y(), 
+           updateRect.width(), updateRect.height(), 
+           bitmapDC, updateRect.x(),  updateRect.y(), SRCCOPY);
+
+    DeleteDC(bitmapDC);
+    DeleteObject(bitmap);
+#else
     HDC bitmapContext = surface().pixmapImpl()->deviceContext();
 
     BitBlt(windowContext, updateRect.x(), updateRect.y(), 
            updateRect.width(), updateRect.height(), 
            bitmapContext, updateRect.x(),  updateRect.y(), SRCCOPY);
+#endif
 
     EndPaint(_hwnd, &ps);
 }

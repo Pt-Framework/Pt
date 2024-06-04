@@ -245,6 +245,18 @@ void MainWindow::onZoom(MenuBaseItem& item)
 
 void MainWindow::onPaintEvent(const PaintEvent& ev)
 {
+    //{
+    //Gfx::Painter p;
+    //p.setPen( Pt::Gfx::Color::fromRgb8(0,0,0));
+    //PixmapSurface pm;
+    //PixmapSurface pm2;
+    //p.begin(pm);
+    //p.begin(pm2);
+
+    //Gfx::ImageSurface image( Gfx::Size(320, 240) );
+    //p.begin(image);
+    //}
+    
     Window::onPaintEvent(ev);
     //return;   
     

@@ -34,31 +34,32 @@ namespace Pt {
 
 namespace Hmi {
 
-const Gfx::ImageFormat& getScreenFormat()
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
+                                    const Gfx::PaintSurface& surface)
 {
-    return Gfx::ImageFormat::argb32();
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    if(pixmap)
+    {
+        Gfx::ImageSurface::drawSurface( to, *pixmap->impl() );
+        return;
+    }
+
+    ImageSurface::drawSurface(to, surface);
 }
 
 
-PixmapSurfaceImpl::PixmapSurfaceImpl()
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
+                                    const Gfx::PaintSurface& surface,
+                                    const Gfx::RectF& rect)
 {
-}
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    if(pixmap)
+    {
+        Gfx::ImageSurface::drawSurface(to, *pixmap->impl(), rect);
+        return;
+    }
 
-
-PixmapSurfaceImpl::~PixmapSurfaceImpl()
-{
-}
-
-
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
-{
-    Gfx::ImageSurface::drawSurface(toF, *surface.impl());
-}
-
-
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface, const Gfx::RectF& pmRect)
-{
-    Gfx::ImageSurface::drawSurface(toF, *surface.impl(), pmRect);
+    ImageSurface::drawSurface(to, surface, rect);
 }
 
 } // namespace

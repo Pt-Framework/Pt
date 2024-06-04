@@ -30,7 +30,7 @@
 #define Pt_Hmi_PixmapSurface_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/PaintSurface.h>
+//#include <Pt/Hmi/PaintSurface.h>
 
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -38,6 +38,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 
@@ -51,7 +52,7 @@ class PixmapSurfaceImpl;
 
 /** @brief A back buffer drawing surface.
 */
-class PT_HMI_API PixmapSurface : public PaintSurface
+class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 {
     public:
         PixmapSurface();
@@ -84,86 +85,23 @@ class PT_HMI_API PixmapSurface : public PaintSurface
         }
 
     public:
-        virtual const Gfx::ImageFormat& format() const;
-
         virtual Gfx::Image toImage() const;
 
     protected:
-        virtual double onScaleFactor() const
-        {
-            return _scaleFactor;
-        }
+        virtual double onScaleFactor() const;
+
+        virtual const Gfx::ImageFormat& onGetFormat() const;
 
         virtual const Gfx::SizeF& onSize() const
         {
             return _logicSize;
         }
 
-        virtual void onBegin(Gfx::Painter& painter);
+        virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* paint);
 
-        virtual void onFinish();
+        virtual Gfx::Canvas* onGetCanvas();
 
-    protected:
-        virtual void setClip(const Gfx::RectF& clip);
-
-        virtual void resetClip();
-
-        virtual void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        virtual void setPen(const Gfx::Pen& pen);
-
-        virtual void setBrush(const Gfx::Brush& brush);
-
-        virtual void setFont(const Gfx::Font& font);
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
-
-        virtual void drawRect(const Gfx::RectF& rectangle);
-
-        virtual void fillRect(const Gfx::RectF& rectangle);
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
-
-        virtual void drawPath(const Gfx::Path& path, float smoothness);
-
-        virtual void fillPath(const Gfx::Path& path, float smoothness);
-
-        virtual void drawChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-        virtual void fillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-        virtual void drawPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-        virtual void fillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-        virtual void drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-    protected:
-        virtual void drawSurface(const Gfx::PointF& to, const Gfx::PaintSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& to, const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
-
-    public:
-        void drawPixmap(const Gfx::PointF& to, const PixmapSurface& pm);
-
-        void drawPixmap(const Gfx::PointF& to, const PixmapSurface& pm, 
-                        const Gfx::RectF& pmRect);
+        virtual const Gfx::Scaling& onGetScaling() const;
 
     public:
         static void setFontDir(const System::Path& path);
@@ -176,8 +114,7 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
     private:
         PixmapSurfaceImpl* _impl;
-        Gfx::SizeF _logicSize;
-        double _scaleFactor;
+        Gfx::SizeF         _logicSize;
 };
 
 } // namespace

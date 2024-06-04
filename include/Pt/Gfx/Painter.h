@@ -49,21 +49,165 @@ namespace Pt {
 
 namespace Gfx {
 
+class Canvas;
+class Painter;
 class PaintSurface;
 
-/** @brief Paint attributes.
+/** @brief Paint context.
 */
-class PaintData
+class PT_GFX_API PaintData
 {
+    friend class Canvas;
+    friend class Painter;
+
     public:
-        virtual ~PaintData()
-        {
-        }
+        virtual ~PaintData();
+
+        Canvas* canvas();
+
+        const RectF& region() const;
+
+        const PointF& origin() const;
+
+    public:
+        void setCompositionMode(const Gfx::CompositionMode& mode);
+
+        void setPen(const Pen& pen);
+
+        void setBrush(const Brush& brush);
+
+        void setFont(const Gfx::Font& font);
+
+        void setClip(const RectF& clip);
+
+        void resetClip();
+
+    public:
+        void drawLine(const PointF& from, const PointF& to);
+
+        void drawRect(const Gfx::RectF& rectangle);
+
+        void fillRect(const Gfx::RectF& rectangle);
+
+        void drawPolyline(const Gfx::PointF* ps, const size_t n);
+
+        void fillPolygon(const Gfx::PointF* ps, const size_t n);
+
+        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        FontMetrics fontMetrics(const Pt::String& text) const;
+
+        void drawText(const PointF& to, const Pt::String& text);
+
+        void drawText(const PointF& to, const Pt::String& text, const Transform& t);
+
+        void drawImage(const Gfx::PointF& to, 
+                               const Gfx::Image& image);
+
+        void drawImage(const Gfx::PointF& to, 
+                               const Gfx::Image& image, 
+                               const Gfx::RectF& imgRect);
+
+        void drawSurface(const Gfx::PointF& to, 
+                         const Gfx::PaintSurface& surface);
+
+        void drawSurface(const Gfx::PointF& to,
+                         const Gfx::PaintSurface& surface,
+                         const Gfx::RectF& rect);
 
     protected:
-        PaintData()
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
+
+        virtual void onSetPen(const Pen& pen) = 0;
+
+        virtual void onSetBrush(const Brush& pen) = 0;
+
+        virtual void onSetFont(const Gfx::Font& font) = 0;
+
+        virtual void onResetClip() = 0;
+
+        virtual void onSetClip(const RectF& clip) = 0;
+
+    protected:
+        PaintData();
+
+        virtual void onFinish() = 0;
+
+    private:
+        void attachPainter(Painter& painter);
+
+        void begin(PaintSurface& surface);
+
+        void finish();
+
+        void onDetach(Canvas& canvas);
+
+    private:
+        Painter*       _painter;
+        Canvas*        _canvas;
+        RectF          _region;
+        bool           _isDirty;
+        double         _scaleFactor;
+};
+
+/** @brief Line.
+*/
+class Line
+{
+    public:
+        Line(PaintData& paint,
+             const Gfx::PointF& from, 
+             const Gfx::PointF& to)
+        : _paint(paint)
+        , _from(from)
+        , _to(to)
+        { }
+
+        Gfx::PointF from() const
         {
+            return _from + _paint.origin();
         }
+
+        Gfx::PointF to() const
+        {
+            return _to + _paint.origin();
+        }
+
+    private:
+        PaintData&         _paint;
+        const Gfx::PointF& _from;
+        const Gfx::PointF& _to;
+};
+
+/** @brief Line.
+*/
+class Polyline
+{
+    public:
+        Polyline(PaintData& paint,
+                 const Gfx::PointF* points, 
+                 std::size_t n)
+        : _paint(paint)
+        , _points(points)
+        , _n(n)
+        { }
+
+        Gfx::PointF at(std::size_t n) const
+        {
+            return _points[n] + _paint.origin();
+        }
+
+        std::size_t size() const
+        {
+            return _n;
+        }
+
+    private:
+        PaintData&         _paint;
+        const Gfx::PointF* _points;
+        std::size_t        _n;
 };
 
 /** @brief 2D painter interface.
@@ -83,22 +227,6 @@ class PT_GFX_API Painter
         void begin(PaintSurface& surface);
 
         void finish();
-
-        PaintData* paintData()
-        {
-            return _paintData;
-        }
-
-        void setPaintData(PaintData* data)
-        {
-            if(_paintData)
-            {
-                delete _paintData;
-                _paintData = 0;
-            }
-            
-            _paintData = data;
-        }
 
         /** @brief Returns the painters native image format.
         */
@@ -171,6 +299,8 @@ class PT_GFX_API Painter
         */
         void drawText(const PointF& to, const Pt::String& text);
 
+        /** @brief Draws a text block.
+        */
         void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
         /** @brief Draws the outline of a rectangle.
@@ -203,9 +333,14 @@ class PT_GFX_API Painter
         */
         void fillEllipse(const PointF& topLeft, const SizeF& size);
 
+        /** @brief Draws a path.
+        */
         void drawPath(const Path& path, float smoothness = 1.0f);
         
+        /** @brief Fills a path.
+        */
         void fillPath(const Path& path, float smoothness = 1.0f);
+        
         /** @brief Draws an image.
         */
         void drawImage(const PointF& to, const Image& im);
@@ -229,8 +364,6 @@ class PT_GFX_API Painter
         void fillChord(const PointF& topLeft, const SizeF& size,
                        float degBegin, float degEnd);
 
-    //private:
-    public:
         void drawSurface(const Gfx::PointF& toF, 
                          const PaintSurface& surface);
 
@@ -268,12 +401,12 @@ class PT_GFX_API Painter
 
         Gfx::RectF align(const Gfx::RectF& rect) const;
 
-    protected:
-        virtual void onFinish();
+    private:
+        void onDetach(PaintSurface& surface);
 
     private:
         PaintSurface*        _surface;
-        PaintData*           _paintData;
+        PaintData*           _paint;
         Gfx::Pen             _pen;
         Gfx::Brush           _brush;
         Gfx::Font            _font;

@@ -59,17 +59,13 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
         virtual double onScaleFactor() const;
 
-        virtual void onBegin(Gfx::Painter& painter);
+        virtual Gfx::PaintData* onBegin(Gfx::Painter& painter);
+
+        PaintData* onBeginPaint(Gfx::Painter& painter);
 
         virtual void onFinish();
 
-    protected:
-        virtual void drawPixmap(const Gfx::PointF& toF, 
-                                const PixmapSurface& surface);
-
-        virtual void drawPixmap(const Gfx::PointF& toF, 
-                                const PixmapSurface& surface, 
-                                const Gfx::RectF& surfaceRect);
+        virtual PaintData* paintContext();
 
     protected:
         virtual const Gfx::ImageFormat& format() const;

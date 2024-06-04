@@ -147,11 +147,40 @@ namespace Pt {
 
 namespace Hmi {
 
+#ifdef PT_HMI_PIXMAP_IMPL_IMAGE
+
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
+                                    const Gfx::PaintSurface& surface)
+{
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    if(pixmap)
+    {
+        Gfx::ImageSurface::drawSurface( to, *pixmap->impl() );
+        return;
+    }
+
+    ImageSurface::drawSurface(to, surface);
+}
+
+
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
+                                    const Gfx::PaintSurface& surface,
+                                    const Gfx::RectF& rect)
+{
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    if(pixmap)
+    {
+        Gfx::ImageSurface::drawSurface(to, *pixmap->impl(), rect);
+        return;
+    }
+
+    ImageSurface::drawSurface(to, surface, rect);
+}
+
+#else
+
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(0, 0)
-, _scaleFactor(1.0)
-, _paintData(0)
-, _painter(0)
 , _dc(0)
 , _gradientBrush(false)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
@@ -190,8 +219,10 @@ void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 }
 
 
-void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
+void PixmapSurfaceImpl::resize(const Gfx::SizeF& sizeF)
 {
+    Gfx::SizeF size = _scaling.toPhysical(sizeF);
+
     if( _size == size )
         return;
 
@@ -215,61 +246,48 @@ const Gfx::SizeF& PixmapSurfaceImpl::size() const
 }
 
 
-void PixmapSurfaceImpl::begin(Gfx::Painter& painter)
+PaintData* PixmapSurfaceImpl::getPaint(Gfx::PaintData* p)
 {
-    _painter = &painter;
+    PaintData* paint = dynamic_cast<PaintData*>(p);
+    if( ! paint )
+      paint = new PaintData();
 
-    Gfx::PaintData* pd = painter.paintData();
-    _paintData = dynamic_cast<PaintData*>(pd);
+    _paint = paint;
+    return _paint;
+}
 
-    if (_paintData == 0)
-    {
-        _paintData = new PaintData();
-        painter.setPaintData(_paintData);
-    }
+
+Gfx::Canvas* PixmapSurfaceImpl::canvas()
+{
+    return this;
 }
 
 
 void PixmapSurfaceImpl::finish()
 {
-    _paintData = 0;
-    _painter = 0;
-
     SelectObject(_dc, _oldPen);
     SelectObject(_dc, _oldBrush);
     SelectObject(_dc, _oldFont);
+
+    _paint = 0;
 }
 
 
-const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+const Gfx::ImageFormat& PixmapSurfaceImpl::onGetFormat() const
 {
     return Gfx::ImageFormat::argb32();
 }
 
 
-void PixmapSurfaceImpl::setScaleFactor(double scaling)
+double PixmapSurfaceImpl::scaleFactor() const
 {
-    _scaleFactor = scaling;
+    return _scaling.scaleFactor();
 }
 
 
-void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
+void PixmapSurfaceImpl::setScaleFactor(double scaleFactor)
 {
-    _paintData->setClip(clipRect);
-
-    HRGN hrgn = _paintData->clipRect();
-
-    if(hrgn)
-        SelectClipRgn(_dc, hrgn);
-    else
-        SelectClipRgn(_dc, NULL);
-}
-
-
-void PixmapSurfaceImpl::resetClip()
-{
-    _paintData->resetClip();
-    SelectClipRgn(_dc, NULL);
+    _scaling.setScaleFactor(scaleFactor);
 }
 
 
@@ -281,13 +299,16 @@ void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
 
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 {
-    _paintData->setPen(pen);
-
-    HPEN hpen = _paintData->pen();
+    HPEN hpen = _paint->pen();
     if(hpen)
         SelectObject(_dc, hpen);
 
-    DWORD penColor = _paintData->penColor();
+    _penColor = _paint->penColor();
+
+    DWORD penColor = RGB( _penColor.red()  / 257, 
+                          _penColor.green() / 257, 
+                          _penColor.blue()  / 257 );
+
     SetTextColor(_dc, penColor);
 }
 
@@ -296,9 +317,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 {
     _gradientBrush = false;
 
-    _paintData->setBrush(brush);
-
-    if(_paintData->gradientBrush() )
+    if( _paint->gradientBrush() )
     {
         _gradientBrush = true;
         _gradient = brush.gradient();
@@ -310,7 +329,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
         return;
     }
 
-    HBRUSH hbrush = _paintData->brush();
+    HBRUSH hbrush = _paint->brush();
     if(hbrush)
         SelectObject(_dc, hbrush);
 }
@@ -318,13 +337,28 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 
 void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 {
-    _paintData->setFont(font);
-
-    HFONT hfont = _paintData->font();
+    HFONT hfont = _paint->font();
     if(hfont)
         SelectObject(_dc, hfont);
 
     SetTextAlign(_dc, TA_BASELINE | TA_LEFT | TA_NOUPDATECP);
+}
+
+
+void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
+{
+    HRGN hrgn = _paint->clipRect();
+
+    if(hrgn)
+        SelectClipRgn(_dc, hrgn);
+    else
+        SelectClipRgn(_dc, NULL);
+}
+
+
+void PixmapSurfaceImpl::resetClip()
+{  
+    SelectClipRgn(_dc, NULL);
 }
 
 #ifndef PT_HMI_GDIPLUS
@@ -339,8 +373,9 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
     GetWorldTransform(_dc, &oldTrans);
 
+    double scaleFactor = _scaling.scaleFactor();
     Gfx::Transform tt;
-    tt.scale(_scaleFactor, _scaleFactor);
+    tt.scale(scaleFactor, scaleFactor);
 
     XFORM newTrans = { static_cast<FLOAT>( tt.m11() ), 
                        static_cast<FLOAT>( tt.m12() ),
@@ -429,20 +464,25 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 }
 #endif
 
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, 
+void PixmapSurfaceImpl::drawText(const Gfx::PointF& toF, 
                                  const Pt::String& text, 
-                                 const Gfx::Transform& trans)
+                                 const Gfx::Transform& t)
 {
-    _text.clear();
-    text.toUtf16(std::back_inserter(_text));
+    Pt::Gfx::PointF to = _scaling.toPhysical(toF); 
 
-    Gfx::Transform tt = trans;
+    _text.clear();
+    text.toUtf16( std::back_inserter(_text) );
+
+    Gfx::Transform tt = t;
+    
+    tt.scale( _scaling.scaleFactor(), 
+              _scaling.scaleFactor() );
 
     //const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
     //const double scaling = 96.0 / dpix;
 
 #ifndef PT_HMI_GDIPLUS
-    tt.translate(to.x(), to.y());
+    tt.translate( to.x(), to.y() );
 
     XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
     GetWorldTransform(_dc, &oldTrans);
@@ -460,7 +500,9 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 
     SetWorldTransform(_dc, &oldTrans);
 #else
-    tt.scale(scaling, scaling);
+    tt.scale( scaling, 
+              scaling );
+    
     tt.translate(to.x(), to.y());
 
     Gdiplus::Graphics graphics(_dc);
@@ -500,7 +542,7 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 
     graphics.SetTransform(&matrix);
 
-    const Gfx::Color& color = _painter->pen().color();
+    const Gfx::Color& color = _penColor;
     BYTE alpha = color.alpha() / 257;
     BYTE red   = color.red()   / 257;
     BYTE green = color.green() / 257; 
@@ -516,15 +558,18 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 }
 
 
-void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+void PixmapSurfaceImpl::drawLine(const Gfx::Line& line)
 {
+    Pt::Gfx::PointF p0 = _scaling.toPhysical( line.from() ); 
+    Pt::Gfx::PointF p1 = _scaling.toPhysical( line.to() );
+
     POINT points[2];
     
-    points[0].x = lround( from.x() - 0.4999 );
-    points[0].y = lround( from.y() - 0.4999 );
+    points[0].x = lround( p0.x() - 0.4999 );
+    points[0].y = lround( p0.y() - 0.4999 );
     
-    points[1].x = lround( to.x() - 0.4999 );
-    points[1].y = lround( to.y() - 0.4999 );
+    points[1].x = lround( p1.x() - 0.4999 );
+    points[1].y = lround( p1.y() - 0.4999 );
 
     Polyline(_dc, points, 2);
 }
@@ -532,12 +577,14 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 
 void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 {
+    Gfx::RectF r = _scaling.toPhysical(rect); 
+
     HBRUSH originalBrush = (HBRUSH) SelectObject(_dc, GetStockObject(NULL_BRUSH));
 
-    Rectangle(_dc, lround(rect.left()   - 0.4999), 
-                   lround(rect.top()    - 0.4999), 
-                   lround(rect.right()  - 0.4999), 
-                   lround(rect.bottom() - 0.4999));
+    Rectangle(_dc, lround(r.left()   - 0.4999), 
+                   lround(r.top()    - 0.4999), 
+                   lround(r.right()  - 0.4999), 
+                   lround(r.bottom() - 0.4999));
 
     SelectObject(_dc, originalBrush);
 }
@@ -545,19 +592,21 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 
 void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 {
+    Gfx::RectF r = _scaling.toPhysical(rect); 
+    
     RECT rectangle;
-    rectangle.left   =  lround( rect.left() );
-    rectangle.top    =  lround( rect.top() );
-    rectangle.right  =  lround( rect.right() + 0.001 );    
-    rectangle.bottom =  lround( rect.bottom() + 0.001 );
+    rectangle.left   =  lround( r.left() );
+    rectangle.top    =  lround( r.top() );
+    rectangle.right  =  lround( r.right() + 0.001);    
+    rectangle.bottom =  lround( r.bottom() + 0.001);
 
     if(_gradientBrush)
     {
-        HBRUSH brush = gradientBrush(_dc, lround(rect.width()), lround(rect.height()),
+        HBRUSH brush = gradientBrush(_dc, lround( r.width() ), lround( r.height() ),
                                      _gradientStart, _gradientStop, _gradient);
 
         POINT brushOrigin = {0};
-        SetBrushOrgEx(_dc, lround(rect.x()),  lround(rect.y()), &brushOrigin);
+        SetBrushOrgEx(_dc, lround(r.x()),  lround(r.y()), &brushOrigin);
 
         FillRect(_dc, &rectangle, brush);
 
@@ -571,23 +620,28 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 }
 
 
-void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
+    Gfx::PointF topLeft = _scaling.toPhysical(topLeftF);
+    Gfx::SizeF size = _scaling.toPhysical(sizeF);
+
     HBRUSH originalBrush = (HBRUSH)SelectObject(_dc, GetStockObject(NULL_BRUSH));
 
     Ellipse( _dc, lround( topLeft.x()),  
                   lround( topLeft.y()), 
-                  lround( topLeft.x() + size.width() -1), 
-                  lround( topLeft.y() + size.height() -1 ));
+                  lround( topLeft.x() + size.width() -1),     // - 0.999 ?
+                  lround( topLeft.y() + size.height() -1 ));  // - 0.999 ?
 
     SelectObject(_dc, originalBrush);
 }
 
 
-void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-    POINT brushOrigin = {0};
+    Gfx::PointF topLeft = _scaling.toPhysical( topLeftF);
+    Gfx::SizeF size = _scaling.toPhysical(sizeF);
 
+    POINT brushOrigin = {0};
     HGDIOBJ oldBrush = 0;
 
     if(_gradientBrush)
@@ -607,8 +661,8 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF
 
     Ellipse( _dc, lround( topLeft.x() ),
                   lround( topLeft.y() ),
-                  lround( topLeft.x() + size.width() - 1),
-                  lround( topLeft.y() + size.height() - 1) );
+                  lround( topLeft.x() + size.width() - 1),    // - 0.999 ?
+                  lround( topLeft.y() + size.height() - 1) ); // - 0.999 ?
 
     SelectObject(_dc, originalPen);
 
@@ -622,22 +676,28 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF
 }
 
 
-void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* ps, const size_t n)
+void PixmapSurfaceImpl::drawPolyline(const Gfx::Polyline& line)
 {
+    std::size_t n = line.size();
+
     std::vector<POINT> points(n);
 
     for(unsigned i = 0; i < n; i++)
     {
-        points[i].x = Pt::lround(ps[i].x() - 0.4999);
-        points[i].y = Pt::lround(ps[i].y() - 0.4999);
+        Gfx::PointF p = _scaling.toPhysical( line.at(i) );
+
+        points[i].x = Pt::lround(p.x() - 0.4999);
+        points[i].y = Pt::lround(p.y() - 0.4999);
     }
 
     Polyline( _dc, &points[0], points.size() );
 }
 
 
-void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* ps, const size_t n)
+void PixmapSurfaceImpl::fillPolygon(const Gfx::Polyline& line)
 {
+    std::size_t n = line.size();
+
     if( ! n ) 
         return;
 
@@ -652,11 +712,10 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* ps, const size_t n)
 
     for(size_t i = 0; i < n; i++)
     {
-        Gfx::Point p( Pt::lround(ps[i].x() - 0.4999),
-                      Pt::lround(ps[i].y() - 0.4999) );
+        Gfx::PointF p = _scaling.toPhysical( line.at(i) );
 
-        points[i].x = p.x();
-        points[i].y = p.y();
+        points[i].x = Pt::lround(p.x() - 0.4999);
+        points[i].y = Pt::lround(p.y() - 0.4999);
 
         if( p.y() < top)
             top = p.y();
@@ -700,9 +759,39 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* ps, const size_t n)
 
 
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
-                                    const PixmapSurface& surface)
+                                    const Gfx::PaintSurface& surface)
 {
-    const Gfx::Size size = Gfx::round( surface.size() );
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    if(pixmap)
+    {
+        drawPixmap(to, *pixmap);
+        return;
+    }
+
+    return Canvas::drawSurface(to, surface);
+}
+
+
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
+                                    const Gfx::PaintSurface& surface,
+                                    const Gfx::RectF& rect)
+{
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    if(pixmap)
+    {
+        drawPixmap(to, *pixmap, rect);
+        return;
+    }
+
+    return Canvas::drawSurface(to, surface, rect);
+}
+
+
+void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
+                                   const PixmapSurface& surface)
+{
+    Gfx::PointF to = _scaling.toPhysical(toF);
+    Gfx::Size size = Gfx::round( surface.size() );
 
     switch (_compositionMode)
     {
@@ -730,10 +819,13 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
 }
 
 
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
-                                    const PixmapSurface& pm, 
-                                    const Gfx::RectF& pmRect)
+void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
+                                   const PixmapSurface& pm, 
+                                   const Gfx::RectF& rectF)
 {
+    Gfx::PointF to = _scaling.toPhysical(toF);
+    Gfx::RectF& pmRect = _scaling.toPhysical(rectF);
+
     const Gfx::Size size = Gfx::round(pmRect.size());
     const Gfx::Point from = Gfx::round(pmRect.topLeft());
 
@@ -812,7 +904,8 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to,
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
-    Gfx::Point to = Gfx::round(toF);
+    Gfx::PointF toR = _scaling.toPhysical( toF );
+    Gfx::Point to = Gfx::round(toR);
 
     switch (_compositionMode)
     {
@@ -1004,6 +1097,8 @@ std::string PixmapSurfaceImpl::getSystemFont()
 {
     HDC dc = GetDC(NULL);
 
+    // TODO: returns a font named "System", which is useless... 
+
     std::vector<TCHAR> buffer(32);
     GetTextFace(dc, buffer.size(), &buffer[0]);
 
@@ -1045,6 +1140,8 @@ HDC PixmapSurfaceImpl::deviceContext() const
 {
     return _dc;
 }
+
+#endif // PT_HMI_PIXMAP_IMPL_IMAGE
 
 } // namespace
 

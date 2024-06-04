@@ -1641,6 +1641,9 @@
     <ClInclude Include="..\..\include\Pt\Json\Float.h">
       <Filter>Pt-Json</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Document.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Json\DocumentReader.h">
       <Filter>Pt-Json</Filter>
     </ClInclude>
@@ -1667,12 +1670,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
       <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Json\DocumentWriter.h">
-      <Filter>Pt-Json</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Json\Document.h">
-      <Filter>Pt-Json</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -3038,6 +3035,9 @@
     <ClCompile Include="..\..\src\Pt-Json\tests\Pt-Json-test.cpp">
       <Filter>Pt-Json\tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Json\Document.cpp">
+      <Filter>Pt-Json</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Json\DocumentReader.cpp">
       <Filter>Pt-Json</Filter>
     </ClCompile>
@@ -3065,11 +3065,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Json\DocumentWriter.cpp">
-      <Filter>Pt-Json</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Json\Document.cpp">
-      <Filter>Pt-Json</Filter>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintData.cpp">
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

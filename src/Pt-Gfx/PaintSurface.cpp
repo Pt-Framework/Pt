@@ -29,10 +29,103 @@
 
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Algorithm.h>
+
+#include <algorithm>
 
 namespace Pt {
 
 namespace Gfx {
+
+Canvas::Canvas()
+: _paint(0)
+{
+}
+
+
+Canvas::~Canvas()
+{
+    if(_paint)
+        _paint->onDetach(*this);
+}
+
+
+const Gfx::ImageFormat& Canvas::format() const
+{
+    return onGetFormat();
+}
+
+
+const Gfx::SizeF& Canvas::size() const
+{
+    return onSize();
+}
+
+
+const Scaling& Canvas::scaling() const
+{
+    return onGetScaling();
+}
+
+
+void Canvas::attachPaint(PaintData& paint)
+{
+    if(_paint)
+    {
+        _paint->finish();
+        _paint = 0;
+    }
+
+    _paint = &paint;
+}
+
+
+void Canvas::detachPaint()
+{
+    if(_paint)
+    {
+        onFinish();
+
+        _paint = 0;
+    }
+}
+
+
+void Canvas::drawSurface(const Gfx::PointF& to, 
+                         const Gfx::PaintSurface& surface)
+{
+    Pt::Gfx::Image image = surface.toImage();
+    if( image.format() == format() )
+    {
+        drawImage(to, image);
+        return;
+    }
+
+    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    drawImage(to, dest);
+}
+
+
+void Canvas::drawSurface(const Gfx::PointF& to,
+                         const Gfx::PaintSurface& surface,
+                         const Gfx::RectF& rect)
+{
+    Pt::Gfx::Image image = surface.toImage();
+    if( image.format() == format() )
+    {
+        drawImage(to, image, rect);
+        return;
+    }
+
+    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    drawImage(to, dest, rect);
+}
+
+///////////////////////////////////////////////////////////////////////
+// PaintSurface
+///////////////////////////////////////////////////////////////////////
 
 PaintSurface::PaintSurface()
 : _painter(0)
@@ -43,7 +136,66 @@ PaintSurface::PaintSurface()
 PaintSurface::~PaintSurface()
 {
     if(_painter)
-        _painter->_surface = 0;
+        _painter->onDetach(*this);
+
+    typedef std::vector<PaintSurface*>::iterator RegionIterator;
+    for( RegionIterator it = _regions.begin(); it != _regions.end(); ++it )
+    {
+        (*it)->onDestroy(this);
+    } 
+}
+
+
+void PaintSurface::attachRegion(PaintSurface& region)
+{
+    _regions.push_back(&region);
+}
+
+
+void PaintSurface::detachRegion(PaintSurface& region)
+{
+    typedef std::vector<PaintSurface*>::iterator RegionIterator;
+
+    RegionIterator rit = std::find(_regions.begin(), _regions.end(), &region);
+    if( rit != _regions.end() )
+    {
+        _regions.erase(rit);
+    }
+}
+
+
+void PaintSurface::onDestroy(PaintSurface* region)
+{
+    //if(_painter)
+    //    _painter->onDetach(this);
+    
+    if(_painter)
+        _painter->finish();
+
+    typedef std::vector<PaintSurface*>::iterator RegionIterator;
+    for( RegionIterator it = _regions.begin(); it != _regions.end(); ++it )
+    {
+        (*it)->onReset();
+    }
+}
+
+
+void PaintSurface::onReset()
+{
+    if(_painter)
+        _painter->finish();
+
+    typedef std::vector<PaintSurface*>::iterator RegionIterator;
+    for( RegionIterator it = _regions.begin(); it != _regions.end(); ++it )
+    {
+        (*it)->onReset();
+    }
+}
+
+
+const Gfx::ImageFormat& PaintSurface::format() const
+{
+    return onGetFormat();
 }
 
 
@@ -53,26 +205,56 @@ const Gfx::SizeF& PaintSurface::size() const
 }
 
 
-void PaintSurface::begin(Painter& painter)
+Painter* PaintSurface::painter()
+{
+    return _painter;
+}
+
+
+void PaintSurface::attachPainter(Painter& painter)
 {
     if(_painter)
+    {
         _painter->finish();
+        _painter = 0;
+    }
 
-    onBegin(painter);
     _painter = &painter;
 }
 
 
-void PaintSurface::finish()
+void PaintSurface::detachPainter()
 {
-    onFinish();
-    _painter = 0;
+    if(_painter)
+    {
+        //onFinish();
+
+        _painter = 0;
+    }
 }
 
 
-Painter* PaintSurface::painter()
+PaintData* PaintSurface::getPaint(PaintData* paint)
 {
-    return _painter;
+    return onGetPaint(paint);
+}
+
+
+Canvas* PaintSurface::canvas()
+{
+    return onGetCanvas();
+}
+
+
+RectF PaintSurface::region() const
+{
+    return onGetRegion();
+}
+
+
+RectF PaintSurface::onGetRegion() const
+{
+    return RectF( size() );
 }
 
 } // namespace

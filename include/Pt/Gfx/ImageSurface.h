@@ -31,6 +31,7 @@
 #define PT_GFX_ImageSurface_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
@@ -41,7 +42,39 @@ namespace Gfx {
 
 class Rasterizer;
 
-class PT_GFX_API ImageSurface : public PaintSurface
+class ImagePaint : public PaintData
+{
+    public:
+        ImagePaint();
+
+        ~ImagePaint();
+
+        const Pen& pen() const
+        {
+            return _pen;
+        }
+    
+    protected:
+        virtual void onFinish();
+
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
+
+        virtual void onSetPen(const Gfx::Pen& pen);
+
+        virtual void onSetBrush(const Gfx::Brush& brush);
+
+        virtual void onSetFont(const Gfx::Font& font);
+
+        virtual void onSetClip(const Gfx::RectF& rectF);
+
+        virtual void onResetClip();
+    
+    private:
+        Pen _pen;
+};
+
+class PT_GFX_API ImageSurface : public Gfx::PaintSurface
+                              , private Gfx::Canvas
 {
   public:
     ImageSurface();
@@ -50,24 +83,42 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     virtual ~ImageSurface();
 
+    using Gfx::PaintSurface::format;
+    using Gfx::PaintSurface::size;
+    using Gfx::PaintSurface::scaling;
+
+    void reset(const Gfx::Image& image);
+
     void reset(const Gfx::Size& size, std::size_t stride = 0);
 
     const Gfx::Image& image() const;
 
+    virtual Image toImage() const;
+
+    void resize(const Gfx::SizeF& size);
+
+    void setScaleFactor(double scaleFactor);
+
   protected:
     virtual double onScaleFactor() const;
 
+    virtual const Gfx::ImageFormat& onGetFormat() const;
+
     virtual const Gfx::SizeF& onSize() const;
 
-    virtual void onBegin(Painter& painter);
+    virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* p);
+
+    virtual Gfx::Canvas* onGetCanvas();
 
     virtual void onFinish();
 
-  public:
-    virtual const Gfx::ImageFormat& format() const;
+  protected:
+    virtual const Scaling& onGetScaling() const
+    {
+        return _scaling;
+    }
 
-    virtual Image toImage() const;
-
+  protected:
     virtual void setClip(const Gfx::RectF& clip);
 
     virtual void resetClip();
@@ -84,6 +135,8 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
+    virtual void drawLine(const Gfx::Line& line);
+
     virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
     virtual void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
@@ -99,6 +152,10 @@ class PT_GFX_API ImageSurface : public PaintSurface
     virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
 
     virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+    virtual void drawPolyline(const Gfx::Polyline& line);
+
+    virtual void fillPolygon(const Gfx::Polyline& line);
 
     virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
@@ -134,8 +191,10 @@ class PT_GFX_API ImageSurface : public PaintSurface
     static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
   private:
-    Rasterizer* _rasterizer;
-    mutable SizeF   _size;
+    Rasterizer*   _rasterizer;
+    ImagePaint*   _paint;
+    Scaling       _scaling;
+    SizeF         _size;
 };
 
 } // namespace

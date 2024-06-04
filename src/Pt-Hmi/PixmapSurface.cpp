@@ -38,7 +38,6 @@ namespace Hmi {
 
 PixmapSurface::PixmapSurface()
 : _impl( new PixmapSurfaceImpl )
-, _scaleFactor(1)
 {
 }
 
@@ -66,7 +65,7 @@ bool PixmapSurface::empty() const
 void PixmapSurface::resize(const Gfx::SizeF& size)
 {
     _logicSize = size;
-    _impl->resize( toPhysical(size) );
+    _impl->resize(size);
 }
 
 
@@ -76,19 +75,25 @@ void PixmapSurface::clear(const Gfx::Color& c)
 }
 
 
-void PixmapSurface::setScaleFactor(double scaling)
+double PixmapSurface::onScaleFactor() const
 {
-    if(_scaleFactor == scaling)
-        return;
-
-    _scaleFactor = scaling;
-    _impl->setScaleFactor(scaling);
-
-    _impl->resize( toPhysical(_logicSize) );
+    return _impl->scaleFactor();
 }
 
 
-const Gfx::ImageFormat& PixmapSurface::format() const
+void PixmapSurface::setScaleFactor(double scaling)
+{
+    if(_impl->scaleFactor() == scaling)
+        return;
+
+    _impl->setScaleFactor(scaling);
+
+    // should be done in setScaleFactor
+    _impl->resize(_logicSize);
+}
+
+
+const Gfx::ImageFormat& PixmapSurface::onGetFormat() const
 {
     return _impl->format();
 }
@@ -100,246 +105,22 @@ Gfx::Image PixmapSurface::toImage() const
 }
 
 
-void PixmapSurface::onBegin(Gfx::Painter& painter)
+Gfx::PaintData* PixmapSurface::onGetPaint(Gfx::PaintData* p)
 {
-    _impl->begin(painter);
+    Gfx::PaintData* paint = _impl->getPaint(p);
+    return paint;
 }
 
 
-void PixmapSurface::onFinish()
+Gfx::Canvas* PixmapSurface::onGetCanvas()
 {
-    _impl->finish();
+    return _impl->canvas();
 }
 
 
-void PixmapSurface::setClip(const Gfx::RectF& clip)
+const Gfx::Scaling& PixmapSurface::onGetScaling() const
 {
-    _impl->setClip(toPhysical(clip));
-}
-
-
-void PixmapSurface::resetClip()
-{
-    _impl->resetClip();
-}
-
-
-void PixmapSurface::setCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _impl->setCompositionMode(mode);
-}
-
-
-void PixmapSurface::setPen(const Gfx::Pen& pen)
-{
-    // keep pen size when downscaling
-    double scaledSize = _scaleFactor < 1.0 ? pen.size()
-                                           : _scaleFactor * pen.size();
-
-    size_t penSize = static_cast<size_t>(scaledSize);
-
-    Gfx::Pen scaledPen = pen;
-    scaledPen.setSize(penSize);
-
-    _impl->setPen(scaledPen);
-}
-
-
-void PixmapSurface::setBrush(const Gfx::Brush& brush)
-{
-    _impl->setBrush(brush);
-}
-
-
-void PixmapSurface::setFont(const Gfx::Font& font)
-{
-    _impl->setFont(font);
-}
-
-
-Gfx::FontMetrics PixmapSurface::fontMetrics(const Pt::String& text) const
-{
-    return _impl->fontMetrics(text);
-}
-
-
-void PixmapSurface::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
-{
-
-    _impl->drawLine(toPhysical(from), toPhysical(to));
-}
-
-
-void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text)
-{
-    Gfx::Transform trans;
-    trans.scale(_scaleFactor, _scaleFactor);
-
-    _impl->drawText(toPhysical(to), text, trans);
-}
-
-
-void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text,
-                             const Gfx::Transform& t)
-{
-    Gfx::Transform trans = t;
-
-    trans.scale(_scaleFactor, _scaleFactor);
-
-    _impl->drawText(toPhysical(to), text, trans);
-}
-
-
-void PixmapSurface::drawRect(const Gfx::RectF& r)
-{
-    _impl->drawRect(toPhysical(r));
-}
-
-
-void PixmapSurface::fillRect(const Gfx::RectF& r)
-{
-    _impl->fillRect(toPhysical(r));
-}
-
-
-void PixmapSurface::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
-{
-    _impl->drawEllipse(toPhysical(topLeft), toPhysical(size));
-}
-
-
-void PixmapSurface::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
-{
-    _impl->fillEllipse(toPhysical(topLeft), toPhysical(size));
-}
-
-
-void PixmapSurface::drawPolyline(const Gfx::PointF* points, size_t pointCount)
-{
-    std::vector<Gfx::PointF> ps;
-
-    for (size_t i = 0; i < pointCount; ++i)
-        ps.push_back(toPhysical(points[i]));
-
-    _impl->drawPolyline(&ps[0], pointCount);
-}
-
-
-void PixmapSurface::fillPolygon(const Gfx::PointF* points, size_t pointCount)
-{
-    std::vector<Gfx::PointF> ps;
-
-    for (size_t i = 0; i < pointCount; ++i)
-        ps.push_back(toPhysical(points[i]));
-
-    _impl->fillPolygon(&ps[0], pointCount);
-}
-
-
-void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
-{
-    _impl->drawImage(toPhysical(to), image);
-}
-
-
-void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r)
-{
-    _impl->drawImage(toPhysical(to), image, r);
-}
-
-
-void PixmapSurface::drawPath(const Gfx::Path& path, float smoothness)
-{
-    _impl->drawPath(path, smoothness);
-}
-
-
-void PixmapSurface::fillPath(const Gfx::Path& path, float smoothness)
-{
-    _impl->fillPath(path, smoothness);
-}
-
-
-void PixmapSurface::drawChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
-}
-
-void PixmapSurface::fillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
-}
-
-void PixmapSurface::drawPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
-}
-
-void PixmapSurface::fillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
-}
-
-void PixmapSurface::drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void PixmapSurface::drawSurface(const Gfx::PointF& to, const Gfx::PaintSurface& surface)
-{
-    const PixmapSurface* pixSurface = dynamic_cast<const PixmapSurface*>(&surface);
-    if (pixSurface)
-    {
-        drawPixmap(to, *pixSurface);
-        return;
-    }
-
-    Pt::Gfx::Image image = surface.toImage();
-    if( image.format() == format() )
-    {
-        _impl->drawImage(toPhysical(to), image);
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    _impl->drawImage(toPhysical(to), dest);
-}
-
-
-void PixmapSurface::drawSurface(const Gfx::PointF& to,
-                                const Gfx::PaintSurface& surface,
-                                const Gfx::RectF& pmRect)
-{
-    const PixmapSurface* pixSurface = dynamic_cast<const PixmapSurface*>(&surface);
-    if (pixSurface)
-    {
-        drawPixmap(to, *pixSurface, pmRect);
-        return;
-    }
-
-    Pt::Gfx::Image image = surface.toImage();
-    if( image.format() == format() )
-    {
-        _impl->drawImage(toPhysical(to), image, toPhysical(pmRect));
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    _impl->drawImage(toPhysical(to), dest, toPhysical(pmRect));
-
-    //Pt::Gfx::Image image = surface.toImage( _impl->format() );
-    //_impl->drawImage(toPhysical(to), image, toPhysical(pmRect));
-}
-
-
-void PixmapSurface::drawPixmap(const Gfx::PointF& to, const PixmapSurface& pm)
-{
-    _impl->drawSurface(toPhysical(to), pm);
-}
-
-
-void PixmapSurface::drawPixmap(const Gfx::PointF& to, const PixmapSurface& pm, 
-                               const Gfx::RectF& pmRect)
-{
-    _impl->drawSurface(toPhysical(to), pm, toPhysical(pmRect));
+    return _impl->scaling();
 }
 
 
