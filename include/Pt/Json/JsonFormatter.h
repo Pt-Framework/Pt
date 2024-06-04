@@ -36,12 +36,16 @@
 #include <Pt/NonCopyable.h>
 
 #include <vector>
+#include <stack>
 #include <iostream>
 #include <string>
 
 namespace Pt {
 
 namespace Json {
+
+class JsonReader;
+class Node;
 
 /** @brief JSON Formatter.
 */
@@ -54,6 +58,19 @@ class PT_JSON_API JsonFormatter : public Pt::Formatter
         ~JsonFormatter();
 
         void attach(std::basic_ostream<Char>& os);
+
+        /** @brief Attach to an %JsonReader.
+        */
+        void attach(JsonReader& reader);
+
+        /** @brief Returns the attached %JsonReader or a nullptr.
+        */
+        JsonReader* reader()
+        { return _reader; }
+
+        /** @brief Detach from its %JsonReader and %JsonWriter.
+        */
+        void detach();
 
     protected:
         void onAddString(const char* name, const char* type,
@@ -127,12 +144,33 @@ class PT_JSON_API JsonFormatter : public Pt::Formatter
 
         void onParse();
 
+    protected:
+        //! @internal
+        void OnBegin(const Node& node);
 
-private:
-    std::basic_ostream<Char>* _os;
-    std::vector<unsigned> _stack;
-    int _state;
+        //! @internal
+        void onArray(const Node& node);
+        
+        //! @internal
+        void onObject(const Node& node);
 
+    private:
+        //! @internal
+        JsonReader* _reader;
+
+        std::basic_ostream<Char>* _os;
+        std::vector<unsigned> _stack;
+        int _state;
+
+        //! @internal
+        typedef void (JsonFormatter::*ProcessNode)(const Node&);
+
+        //! @internal
+        ProcessNode             _parse;
+        std::stack<ProcessNode> _parseStack;
+
+        //! @internal
+        Composer* _composer;
 };
 
 } // namespace

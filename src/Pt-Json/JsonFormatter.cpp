@@ -28,7 +28,16 @@
 */
 
 #include <Pt/Json/JsonFormatter.h>
+#include <Pt/Json/JsonReader.h>
+#include <Pt/Json/Node.h>
+#include <Pt/Json/Member.h>
+#include <Pt/Json/Integer.h>
+#include <Pt/Json/Boolean.h>
+#include <Pt/Json/Float.h>
+#include <Pt/Json/String.h>
+#include <Pt/Json/Null.h>
 #include <Pt/SerializationError.h>
+#include <Pt/Composer.h>
 #include <Pt/Convert.h>
 
 namespace {
@@ -125,9 +134,12 @@ namespace Pt {
 namespace Json {
 
 JsonFormatter::JsonFormatter(std::basic_ostream<Char>& os)
-: _os(&os)
+: _reader(0)
+, _os(&os)
 , _state(0)
+, _composer(0)
 {
+    _parse = &JsonFormatter::OnBegin;
 }
 
 
@@ -140,6 +152,20 @@ void JsonFormatter::attach(std::basic_ostream<Char>& os)
 {
     _os = &os;
 }
+
+
+void JsonFormatter::attach(JsonReader& reader)
+{
+    _reader = &reader;
+}
+
+
+void JsonFormatter::detach()
+{
+    _os = 0;
+    _reader = 0;
+}
+
 
 void JsonFormatter::onAddString(const char* name, const char* type,
     const Pt::Char* value, const char* id)
@@ -426,15 +452,263 @@ void JsonFormatter::onFinishStruct()
 }
 
 
-void JsonFormatter::onBeginParse(Composer&)
+void JsonFormatter::onBeginParse(Composer& comp)
 {
-
+    _composer = &comp;
+    _parse = &JsonFormatter::OnBegin;
+    _parseStack.push(_parse);
 }
 
 
 void JsonFormatter::onParse()
 {
+    assert(_composer);
 
+    InputIterator it = _reader->current();
+    //if(it->type() == Node::EndElement)
+    //    ++it;
+
+    for( ; it != _reader->end(); ++it)
+    {
+        (this->*_parse)(*it);
+
+        if(_composer == 0)
+            break;
+    }
+}
+
+
+void JsonFormatter::OnBegin(const Node& node)
+{
+    switch( node.type() )
+    {
+        case Node::StartArray:
+        {
+            _parse = &JsonFormatter::onArray;
+            _parseStack.push(_parse);
+            break;
+        }
+
+        case Node::StartObject:
+        {
+            _parse = &JsonFormatter::onObject;
+            _parseStack.push(_parse);
+            break;
+        }
+        
+        case Node::String:
+        {
+            const String& s = toString(node);
+            _composer->setString( s.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Float:
+        {           
+            const Float& f = toFloat(node);
+            _composer->setFloat( f.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Integer:
+        {
+            const Integer& i = toInteger(node);
+            _composer->setInt( i.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Boolean:
+        {
+            const Boolean& b = toBoolean(node);
+            _composer->setBool( b.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Null:
+        {
+            //const Null& n = toNull(node);
+            //_composer->setVoid();
+            
+            _composer = _composer->finish();
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+
+void JsonFormatter::onArray(const Node& node)
+{
+    switch( node.type() )
+    {
+        case Node::StartArray:
+        {
+            _composer = _composer->beginElement();
+
+            _parse = &JsonFormatter::onArray;
+            _parseStack.push(_parse);
+            break;
+        }
+
+        case Node::EndArray:
+        {
+            _composer = _composer->finish();
+
+            _parseStack.pop();
+            _parse = _parseStack.top();
+            break;
+        }
+
+        case Node::StartObject:
+        {
+            _composer = _composer->beginElement();
+
+            _parse = &JsonFormatter::onObject;
+            _parseStack.push(_parse);
+            break;
+        }
+
+        case Node::String:
+        {
+            _composer = _composer->beginElement();
+
+            const String& s = toString(node);
+            _composer->setString( s.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Float:
+        {
+            _composer = _composer->beginElement();
+
+            const Float& f = toFloat(node);
+            _composer->setFloat( f.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Integer:
+        {
+            _composer = _composer->beginElement();
+
+            const Integer& i = toInteger(node);
+            _composer->setInt( i.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Boolean:
+        {
+            _composer = _composer->beginElement();
+
+            const Boolean& b = toBoolean(node);
+            _composer->setBool( b.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Null:
+        {
+            _composer = _composer->beginElement();
+
+            //const Null& n = toNull(node);
+            //_composer->setVoid();
+            
+            _composer = _composer->finish();
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+
+void JsonFormatter::onObject(const Node& node)
+{
+    switch( node.type() )
+    {
+        case Node::StartArray:
+        {
+            _parse = &JsonFormatter::onArray;
+            _parseStack.push(_parse);
+            break;
+        }
+
+        case Node::StartObject:
+        {          
+            _parse = &JsonFormatter::onObject;
+            _parseStack.push(_parse);
+            break;
+        }
+
+        case Node::EndObject:
+        {
+            _composer = _composer->finish();
+
+            _parseStack.pop();
+            _parse = _parseStack.top();
+            break;
+        }
+
+        case Node::Member:
+        {
+            const Member& m = toMember(node);
+            _composer = _composer->beginMember( m.name().narrow() );
+            break;
+        }
+
+        case Node::String:
+        {
+            const String& s = toString(node);
+            _composer->setString( s.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Float:
+        {           
+            const Float& f = toFloat(node);
+            _composer->setFloat( f.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Integer:
+        {
+            const Integer& i = toInteger(node);
+            _composer->setInt( i.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Boolean:
+        {
+            const Boolean& b = toBoolean(node);
+            _composer->setBool( b.value() );
+            _composer = _composer->finish();
+            break;
+        }
+
+        case Node::Null:
+        {
+            //const Null& n = toNull(node);
+            //_composer->setVoid();
+            
+            _composer = _composer->finish();
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 } // namespace Json
