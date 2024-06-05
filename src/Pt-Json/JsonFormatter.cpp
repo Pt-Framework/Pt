@@ -143,6 +143,16 @@ JsonFormatter::JsonFormatter(std::basic_ostream<Char>& os)
 }
 
 
+JsonFormatter::JsonFormatter(JsonReader& reader)
+: _reader(&reader)
+, _os(0)
+, _state(0)
+, _composer(0)
+{
+    _parse = &JsonFormatter::OnBegin;
+}
+
+
 JsonFormatter::~JsonFormatter()
 {
 }
@@ -460,13 +470,31 @@ void JsonFormatter::onBeginParse(Composer& comp)
 }
 
 
+bool JsonFormatter::onParseSome()
+{
+    assert(_composer);
+
+    while(_composer != 0)
+    {
+        const Node* node = _reader->advance();
+        if( ! node )
+            break;
+
+        if( node->type() == Node::EndDocument )
+            throw SerializationError("incomplete type");
+
+        (this->*_parse)(*node);
+    }
+
+    return _composer == 0;
+}
+
+
 void JsonFormatter::onParse()
 {
     assert(_composer);
 
     InputIterator it = _reader->current();
-    //if(it->type() == Node::EndElement)
-    //    ++it;
 
     for( ; it != _reader->end(); ++it)
     {

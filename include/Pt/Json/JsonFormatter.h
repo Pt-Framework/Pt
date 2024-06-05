@@ -55,6 +55,8 @@ class PT_JSON_API JsonFormatter : public Pt::Formatter
     public:
         JsonFormatter(std::basic_ostream<Pt::Char>& os);
 
+        JsonFormatter(JsonReader& reader);
+
         ~JsonFormatter();
 
         void attach(std::basic_ostream<Char>& os);
@@ -137,10 +139,7 @@ class PT_JSON_API JsonFormatter : public Pt::Formatter
     protected:
         void onBeginParse(Composer&);
 
-        bool onParseSome()
-        {
-            return false;
-        }
+        bool onParseSome();
 
         void onParse();
 

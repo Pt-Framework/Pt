@@ -41,6 +41,8 @@
 #include <Pt/Json/Boolean.h>
 #include <Pt/Json/Null.h>
 
+#include <Pt/Composer.h>
+
 namespace Pt {
 
 namespace Json {
@@ -65,9 +67,18 @@ bool Document::isEmpty() const
 void Document::load(std::basic_istream<Pt::Char>& is)
 {
     clear();
+
+    BasicComposer<Pt::SerializationInfo> composer;
+    composer.begin(_root);
+
+    JsonReader reader(is);
+    JsonFormatter formatter(reader);
+    formatter.attach(reader);
+
+    formatter.beginParse(composer);
     
-    DocumentReader reader(is, *this);
-    reader.read();
+    while( ! formatter.parseSome() )
+        ;
 }
 
 

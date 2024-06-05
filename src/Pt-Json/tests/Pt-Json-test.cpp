@@ -44,11 +44,10 @@
 #include <Pt/Json/EndObject.h>
 #include <Pt/Json/StartArray.h>
 #include <Pt/Json/EndArray.h>
-
 #include <Pt/Json/JsonReader.h>
 
-#include <Pt/Composer.h>
 #include <Pt/StringStream.h>
+#include <Pt/String.h>
 
 #include <vector>
 #include <cmath>
