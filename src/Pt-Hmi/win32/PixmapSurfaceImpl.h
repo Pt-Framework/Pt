@@ -42,7 +42,7 @@
 
 #include <Windows.h>
 
-//#define PT_HMI_PIXMAP_IMPL_IMAGE 1
+//#define PT_HMI_WIN32_RASTER 1
 
 namespace Pt {
 
@@ -51,7 +51,7 @@ namespace Hmi {
 class PaintData;
 class PixmapSurface;
 
-#ifdef PT_HMI_PIXMAP_IMPL_IMAGE
+#ifdef PT_HMI_WIN32_RASTER
 
 class PixmapSurfaceImpl : public Gfx::ImageSurface
 {

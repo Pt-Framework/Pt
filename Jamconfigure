@@ -1147,8 +1147,16 @@ else if --with-x11-core in $(ARGV)
 {
     GUI ?= x11 ;
 }
+else if --with-win32-gdi in $(ARGV)
+{
+    GUI ?= win32 ;
+}
+else if --with-win32-raster in $(ARGV)
+{
+    GUI ?= win32 ;
+}
 
-if ! $(GUI) || $(GUI:L) = "gdi" || $(GUI:L) = "gdiplus" || $(GUI:L) = "win32"
+if ! $(GUI) || $(GUI:L) = "win32"
 {
     Load winui.jam ;
 
@@ -1157,9 +1165,21 @@ if ! $(GUI) || $(GUI:L) = "gdi" || $(GUI:L) = "gdiplus" || $(GUI:L) = "win32"
 
     if $(WITH_GDI) && $(WITH_WINUI)
     {
-        GUI ?= gdi ;
+        GUI ?= win32 ;
         GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
     }
+    
+    if --with-win32-raster in $(ARGV)
+    {
+        PT_HMI_IMPL = win32-raster ;
+    }
+    else
+    {
+        PT_HMI_IMPL = win32-gdi ;
+    }
+
+    Configure PT_HMI_IMPL ;
+    EchoOption PT_HMI_IMPL : "UI platform" ;
 }
 
 if ! $(GUI) || $(GUI):L = "cocoa"

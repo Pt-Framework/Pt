@@ -242,7 +242,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(_hwnd, &ps);
 
-#ifdef PT_HMI_PIXMAP_IMPL_IMAGE
+#ifdef PT_HMI_WIN32_RASTER
     const Pt::Gfx::Image& image = surface().pixmapImpl()->image();
     
     const size_t depth = image.view().pixelStride() * 8;
@@ -281,7 +281,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 
     DeleteDC(bitmapDC);
     DeleteObject(bitmap);
-#else
+#elif PT_HMI_WIN32_GDI
     HDC bitmapContext = surface().pixmapImpl()->deviceContext();
 
     BitBlt(windowContext, updateRect.x(), updateRect.y(), 

@@ -147,7 +147,7 @@ namespace Pt {
 
 namespace Hmi {
 
-#ifdef PT_HMI_PIXMAP_IMPL_IMAGE
+#ifdef PT_HMI_WIN32_RASTER
 
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
                                     const Gfx::PaintSurface& surface)

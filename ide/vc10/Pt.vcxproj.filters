@@ -88,9 +88,6 @@
     <Filter Include="Pt-Hmi\cocoa">
       <UniqueIdentifier>{2b77b6e8-aec1-4d99-9506-f20e6b81d876}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\gdi">
-      <UniqueIdentifier>{947e0ceb-dc3d-4f25-b8ff-f29aad8e7be3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Hmi\winrt">
       <UniqueIdentifier>{0190cd64-c6e5-4b5d-ab0e-7d4e1a17e9c7}</UniqueIdentifier>
     </Filter>
@@ -138,6 +135,9 @@
     </Filter>
     <Filter Include="Pt-Json\tests">
       <UniqueIdentifier>{db7e6288-7d79-458c-8a7a-258939a0b2fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\win32">
+      <UniqueIdentifier>{947e0ceb-dc3d-4f25-b8ff-f29aad8e7be3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -816,9 +816,6 @@
     <ClInclude Include="..\..\src\Pt-XmlRpc\HttpResponder.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
@@ -1050,9 +1047,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
@@ -1260,9 +1254,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollBar.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1443,9 +1434,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\KeyMap.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\KeyMap.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Latin1Codec.h">
       <Filter>Pt</Filter>
     </ClInclude>
@@ -1478,9 +1466,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\PaintRegion.h">
       <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintData.h">
-      <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\raster\ClipPolygon.h">
       <Filter>Pt-Gfx\raster</Filter>
@@ -1559,9 +1544,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowFrame.h">
       <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\WindowImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
@@ -1652,6 +1634,27 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Json\JsonFormatter.h">
       <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\KeyMap.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\PaintData.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\ScreenImpl.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\win32.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\WindowImpl.h">
+      <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2408,9 +2411,6 @@
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpService.cpp">
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\Certificate.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
@@ -2603,9 +2603,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Screen.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt\tests\WindowsCodecTest.cpp">
       <Filter>Pt\tests</Filter>
     </ClCompile>
@@ -2740,9 +2737,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollBar.cpp">
       <Filter>Pt-Hmi</Filter>
@@ -2990,9 +2984,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ShellWindowFrame.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\WindowImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
@@ -3035,11 +3026,23 @@
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintData.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Json\JsonFormatter.cpp">
       <Filter>Pt-Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\win32\PaintData.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\win32\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\win32\WindowImpl.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
