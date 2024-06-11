@@ -158,42 +158,42 @@ void JsonReaderTest::SimpleObject()
     doc["c"].getValue(c);
     PT_UNIT_ASSERT_EQUAL(c, 3);
 
-    OStringStream oss(s);
-    JsonWriter writer(oss);
+    //OStringStream oss(s);
+    //JsonWriter writer(oss);
 
-    writer.writeObject();
+    //writer.writeObject();
 
-    writer.writeMember("person1");
-    writer.writeObject();
-    writer.writeMember("name");
-    writer.writeString("lorenzo");
-    writer.writeMember("age");
-    writer.writeString("42");
-    writer.writeObjectEnd();
+    //writer.writeMember("person1");
+    //writer.writeObject();
+    //writer.writeMember("name");
+    //writer.writeString("lorenzo");
+    //writer.writeMember("age");
+    //writer.writeString("42");
+    //writer.writeObjectEnd();
 
-    writer.writeMember("person2");
-    writer.writeObject();
-    
-    writer.writeMember("numbers");
-    writer.writeArray();
+    //writer.writeMember("person2");
+    //writer.writeObject();
+    //
+    //writer.writeMember("numbers");
+    //writer.writeArray();
 
-    writer.writeArray();
-    writer.writeString("1");
-    writer.writeString("2");
-    writer.writeString("3");
-    writer.writeArrayEnd();
+    //writer.writeArray();
+    //writer.writeString("1");
+    //writer.writeString("2");
+    //writer.writeString("3");
+    //writer.writeArrayEnd();
 
-    writer.writeArray();
-    writer.writeString("a");
-    writer.writeString("b");
-    writer.writeString("c");
-    writer.writeArrayEnd();
+    //writer.writeArray();
+    //writer.writeString("a");
+    //writer.writeString("b");
+    //writer.writeString("c");
+    //writer.writeArrayEnd();
 
-    writer.writeArrayEnd();
-    
-    writer.writeObjectEnd();
+    //writer.writeArrayEnd();
+    //
+    //writer.writeObjectEnd();
 
-    writer.writeObjectEnd();
+    //writer.writeObjectEnd();
 
-    std::cout << "\n" << oss.str().narrow() << std::endl;
+    //std::cout << "\n" << oss.str().narrow() << std::endl;
 }
