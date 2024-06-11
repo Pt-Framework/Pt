@@ -1131,6 +1131,7 @@ if $(WITH_QT)
         Exit "ERROR: Qt moc tool not found." ;
     }
 }
+
 #############################################################################
 # GUI libraries and includes
 #############################################################################
@@ -1169,17 +1170,17 @@ if ! $(GUI) || $(GUI:L) = "win32"
         GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
     }
     
-    if --with-win32-raster in $(ARGV)
+    if $(GUI)
     {
-        PT_HMI_IMPL = win32-raster ;
+        if --with-win32-raster in $(ARGV)
+        {
+            PT_HMI_IMPL = win32-raster ;
+        }
+        else
+        {
+            PT_HMI_IMPL = win32-gdi ;
+        }
     }
-    else
-    {
-        PT_HMI_IMPL = win32-gdi ;
-    }
-
-    Configure PT_HMI_IMPL ;
-    EchoOption PT_HMI_IMPL : "UI platform" ;
 }
 
 if ! $(GUI) || $(GUI):L = "cocoa"
@@ -1200,6 +1201,11 @@ if ! $(GUI) || $(GUI):L = "cocoa"
     # iOS aspen:
     #GUI     ?= uikit ;
     #GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
+    
+    if $(GUI)
+    {
+        PT_HMI_IMPL = cocoa ;
+    }
 }
 
 if ! $(GUI) || $(GUI:L) = "linux-fb"
@@ -1214,6 +1220,11 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
     if $(WITH_GUI)
     {
         GUI = linux-fb ;
+    }
+    
+    if $(GUI)
+    {
+        PT_HMI_IMPL = linux-fb ;
     }
 }
 
@@ -1235,28 +1246,31 @@ if ! $(GUI) || $(GUI:L) = "x11"
         }
     }
 
-    if --with-x11-core in $(ARGV)
+    if $(GUI)
     {
-        PT_WITH_X11_BACKEND = x11-core ;
+        if --with-x11-core in $(ARGV)
+        {
+            PT_HMI_IMPL = x11-core ;
+        }
+        else
+        {
+            PT_HMI_IMPL = x11-raster ;
+        }
     }
-    else
-    {
-        PT_WITH_X11_BACKEND = raster ;
-    }
-
-    Configure PT_WITH_X11_BACKEND ;
-    EchoOption PT_WITH_X11_BACKEND : "Graphics UI lib flags" ;
 }
 
 if $(GUI:L) = "photon"
 {
     GUI     ?= photon ;
+    PT_HMI_IMPL = photon ;
     GUILIBS = -lphrender -lph ;
 }
 
 if $(GUI:L) = "symbian-eikon"
 {
     GUI = symbian-eikon ;
+    PT_HMI_IMPL = symbian-eikon ;
+
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\eikcore.dso ;
@@ -1274,52 +1288,50 @@ if $(GUI:L) = "symbian-eikon"
 
 if --with-egl-gbm in $(ARGV)
 {
-    #GUI = egl-gbm ;
+    GUI = egl-gbm ;
+    PT_HMI_IMPL = egl-gbm ;
 
-	WITH_EGL_TEST = 1 ;
-	Configure WITH_EGL_TEST ;
+    WITH_EGL_TEST = 1 ;
+    Configure WITH_EGL_TEST ;
 
-	if $(TARGET_OS:L) = nt
-	{
-		GUI_INCLUDES = \"C:\\Temp\\Dev\\ilma\\Pt EGL\\GLES_SDK_v31\\include\" ;
-		GUI_INCLUDES = $(GUI_INCLUDES:J=" ") ;
-		Configure GUI_INCLUDES ;
+    if $(TARGET_OS:L) = nt
+    {
+	    GUI_INCLUDES = \"C:\\Temp\\Dev\\ilma\\Pt EGL\\GLES_SDK_v31\\include\" ;
+	    GUI_INCLUDES = $(GUI_INCLUDES:J=" ") ;
+	    Configure GUI_INCLUDES ;
 
-		EGL_LINKFLAGS = /LIBPATH:\"C:\\Temp\\Dev\\ilma\\Pt EGL\\GLES_SDK_v31\\x86\" ;
-		LINKFLAGS += $(EGL_LINKFLAGS:J=" ") ;
-		Configure GUI_INCLUDES ;
+	    EGL_LINKFLAGS = /LIBPATH:\"C:\\Temp\\Dev\\ilma\\Pt EGL\\GLES_SDK_v31\\x86\" ;
+	    LINKFLAGS += $(EGL_LINKFLAGS:J=" ") ;
+	    Configure GUI_INCLUDES ;
 
-		GUILIBS = libGLESv2.lib libEGL.lib gdi32.lib user32.lib ;
-		Configure GUILIBS ;
-	}
-	else
-	{
-		GUILIBS = -lGLESv2 -ldrm -lEGL -lgbm ;
-		Configure GUILIBS ;
+	    GUILIBS = libGLESv2.lib libEGL.lib gdi32.lib user32.lib ;
+	    Configure GUILIBS ;
+    }
+    else
+    {
+	    GUILIBS = -lGLESv2 -ldrm -lEGL -lgbm ;
+	    Configure GUILIBS ;
 
-		LINARO_RPATH = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib ] ;
-		LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH)\" ;
+	    LINARO_RPATH = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib ] ;
+	    LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH)\" ;
 
-		LINARO_RPATH2 = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib arm-linux-gnueabihf ] ;
-		LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH2)\" ;
-		Configure LINKFLAGS ;
-	}
+	    LINARO_RPATH2 = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib arm-linux-gnueabihf ] ;
+	    LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH2)\" ;
+	    Configure LINKFLAGS ;
+    }
+    
     #GUI_INCLUDES = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf libc usr include libdrm ] ;
     #Configure GUI_INCLUDES ;
 }
 
 Configure GUI ;
-EchoOption GUI : "Graphics UI" ;
+EchoOption GUI : "UI platform" : $(GUI:E="none") ;
 
 if $(GUI)
 {
-    Configure GUILIBS ;
-    EchoOption GUILIBS : "Graphics UI lib flags" ;
-}
+    Configure PT_HMI_IMPL ;
+    EchoOption PT_HMI_IMPL : "UI implementation" ;
 
-if --with-hmi in $(ARGV) || $(GUI)
-{
-    WITH_HMI = yes ;
-    Configure WITH_HMI ;
-    EchoOption WITH_HMI : "HMI module" ;
+    Configure GUILIBS ;
+    EchoOption GUILIBS : "UI platform linklibs" ;
 }

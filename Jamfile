@@ -223,7 +223,7 @@ if $(PT_SYSTEM)
         SubInclude PT_TOP src Pt-Qt ;
     }
 
-    if $(WITH_HMI) = yes
+    if $(GUI)
     {
         SubInclude PT_TOP src Pt-Hmi ;
     }

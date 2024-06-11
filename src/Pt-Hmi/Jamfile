@@ -5,12 +5,12 @@ SubDirHdrs $(PT_TOP)/src/Pt-Hmi/$(GUI) ;
 SubDirC++Flags [ FDefines PT_HMI_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi ;
 
-if $(PT_WITH_X11_BACKEND) = x11-core
+if $(PT_HMI_IMPL) = x11-core
 {
     SubDirC++Flags [ FDefines PT_HMI_X11_CORE ] ;
 }
 
-if $(PT_WITH_X11_BACKEND) = raster
+if $(PT_HMI_IMPL) = x11-raster
 {
     SubDirC++Flags [ FDefines PT_HMI_X11_RASTER ] ;
 }
