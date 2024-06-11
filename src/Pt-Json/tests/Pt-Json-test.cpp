@@ -45,6 +45,7 @@
 #include <Pt/Json/StartArray.h>
 #include <Pt/Json/EndArray.h>
 #include <Pt/Json/JsonReader.h>
+#include <Pt/Json/JsonWriter.h>
 
 #include <Pt/StringStream.h>
 #include <Pt/String.h>
@@ -156,4 +157,43 @@ void JsonReaderTest::SimpleObject()
     int c = 0;
     doc["c"].getValue(c);
     PT_UNIT_ASSERT_EQUAL(c, 3);
+
+    OStringStream oss(s);
+    JsonWriter writer(oss);
+
+    writer.writeObject();
+
+    writer.writeMember("person1");
+    writer.writeObject();
+    writer.writeMember("name");
+    writer.writeString("lorenzo");
+    writer.writeMember("age");
+    writer.writeString("42");
+    writer.writeObjectEnd();
+
+    writer.writeMember("person2");
+    writer.writeObject();
+    
+    writer.writeMember("numbers");
+    writer.writeArray();
+
+    writer.writeArray();
+    writer.writeString("1");
+    writer.writeString("2");
+    writer.writeString("3");
+    writer.writeArrayEnd();
+
+    writer.writeArray();
+    writer.writeString("a");
+    writer.writeString("b");
+    writer.writeString("c");
+    writer.writeArrayEnd();
+
+    writer.writeArrayEnd();
+    
+    writer.writeObjectEnd();
+
+    writer.writeObjectEnd();
+
+    std::cout << "\n" << oss.str().narrow() << std::endl;
 }

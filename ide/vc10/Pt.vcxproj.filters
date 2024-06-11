@@ -1656,6 +1656,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\win32\WindowImpl.h">
       <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\JsonWriter.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -3043,6 +3046,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\win32\WindowImpl.cpp">
       <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Json\JsonWriter.cpp">
+      <Filter>Pt-Json</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

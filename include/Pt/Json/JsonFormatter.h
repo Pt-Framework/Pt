@@ -35,16 +35,14 @@
 #include <Pt/Formatter.h>
 #include <Pt/NonCopyable.h>
 
-#include <vector>
 #include <stack>
-#include <iostream>
-#include <string>
 
 namespace Pt {
 
 namespace Json {
 
 class JsonReader;
+class JsonWriter;
 class Node;
 
 /** @brief JSON Formatter.
@@ -53,22 +51,39 @@ class PT_JSON_API JsonFormatter : public Pt::Formatter
                                 , private NonCopyable
 {
     public:
-        JsonFormatter(std::basic_ostream<Pt::Char>& os);
-
+        /** @brief Default constructor.
+        */
+        JsonFormatter();
+        
+        /** @brief Construct with a %JsonReader.
+        */
         JsonFormatter(JsonReader& reader);
 
-        ~JsonFormatter();
+        /** @brief Construct with a %JsonWriter.
+        */
+        JsonFormatter(JsonWriter& writer);
 
-        void attach(std::basic_ostream<Char>& os);
+        /** @brief Destructor.
+        */
+        ~JsonFormatter();
 
         /** @brief Attach to an %JsonReader.
         */
         void attach(JsonReader& reader);
 
+        /** @brief Attach to an %JsonWriter.
+        */
+        void attach(JsonWriter& writer);
+
         /** @brief Returns the attached %JsonReader or a nullptr.
         */
         JsonReader* reader()
         { return _reader; }
+
+        /** @brief Returns the attached %JsonWriter or a nullptr.
+        */
+        JsonWriter* writer()
+        { return _writer; }
 
         /** @brief Detach from its %JsonReader and %JsonWriter.
         */
@@ -76,25 +91,19 @@ class PT_JSON_API JsonFormatter : public Pt::Formatter
 
     protected:
         void onAddString(const char* name, const char* type,
-            const Pt::Char* value, const char* id);
+                         const Pt::Char* value, const char* id);
 
-        void onAddBool(const char* name, bool value,
-            const char* id);
+        void onAddBool(const char* name, bool value, const char* id);
 
-        void onAddChar(const char* name, const Pt::Char& value,
-            const char* id);
+        void onAddChar(const char* name, const Pt::Char& value, const char* id);
 
-        void onAddInt8(const char* name, Pt::int8_t value,
-            const char* id);
+        void onAddInt8(const char* name, Pt::int8_t value, const char* id);
 
-        void onAddInt16(const char* name, Pt::int16_t value,
-            const char* id);
+        void onAddInt16(const char* name, Pt::int16_t value, const char* id);
 
-        void onAddInt32(const char* name, Pt::int32_t value,
-            const char* id);
+        void onAddInt32(const char* name, Pt::int32_t value, const char* id);
 
-        void onAddInt64(const char* name, Pt::int64_t value,
-            const char* id);
+        void onAddInt64(const char* name, Pt::int64_t value, const char* id);
 
         void onAddUInt8(const char* name, Pt::uint8_t value, const char* id);
 
@@ -104,22 +113,18 @@ class PT_JSON_API JsonFormatter : public Pt::Formatter
 
         void onAddUInt64(const char* name, Pt::uint64_t value, const char* id);
 
-        void onAddFloat(const char* name, float value,
-            const char* id);
+        void onAddFloat(const char* name, float value, const char* id);
 
-        void onAddDouble(const char* name, double value,
-            const char* id);
+        void onAddDouble(const char* name, double value, const char* id);
 
-        void onAddLongDouble(const char* name, long double value,
-            const char* id);
+        void onAddLongDouble(const char* name, long double value, const char* id);
 
         void onAddBinary(const char* name, const char* type,
-            const char* value, std::size_t length, const char* id);
+                         const char* value, std::size_t length, const char* id);
 
         void onAddReference(const char* name, const char* id);
 
-        void onBeginSequence(const char* name, const char* type,
-            const char* id);
+        void onBeginSequence(const char* name, const char* type, const char* id);
 
         virtual void onBeginElement();
 
@@ -127,8 +132,7 @@ class PT_JSON_API JsonFormatter : public Pt::Formatter
 
         void onFinishSequence();
 
-        void onBeginStruct(const char* name, const char* type,
-            const char* id);
+        void onBeginStruct(const char* name, const char* type, const char* id);
 
         void onBeginMember(const char* name);
 
@@ -157,9 +161,8 @@ class PT_JSON_API JsonFormatter : public Pt::Formatter
         //! @internal
         JsonReader* _reader;
 
-        std::basic_ostream<Char>* _os;
-        std::vector<unsigned> _stack;
-        int _state;
+        //! @internal
+        JsonWriter* _writer;
 
         //! @internal
         typedef void (JsonFormatter::*ProcessNode)(const Node&);

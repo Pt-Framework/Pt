@@ -28,7 +28,8 @@
 */
 
 #include <Pt/Json/Document.h>
-#include <Pt/Json/DocumentReader.h>
+#include <Pt/Json/JsonReader.h>
+#include <Pt/Json/JsonWriter.h>
 #include <Pt/Json/JsonFormatter.h>
 #include <Pt/Json/StartObject.h>
 #include <Pt/Json/Member.h>
@@ -68,12 +69,11 @@ void Document::load(std::basic_istream<Pt::Char>& is)
 {
     clear();
 
-    BasicComposer<Pt::SerializationInfo> composer;
-    composer.begin(_root);
-
     JsonReader reader(is);
     JsonFormatter formatter(reader);
-    formatter.attach(reader);
+
+    BasicComposer<Pt::SerializationInfo> composer;
+    composer.begin(_root);
 
     formatter.beginParse(composer);
     
@@ -84,7 +84,8 @@ void Document::load(std::basic_istream<Pt::Char>& is)
 
 void Document::save(std::basic_ostream<Pt::Char>& os) const
 {
-    JsonFormatter formatter(os);
+    JsonWriter writer(os);
+    JsonFormatter formatter(writer);
 
     SerializationInfo::ConstIterator it;
     for(it = _root.begin(); it != _root.end(); ++it)
