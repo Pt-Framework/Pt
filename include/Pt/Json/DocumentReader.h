@@ -32,22 +32,18 @@
 
 #include <Pt/Json/Api.h>
 #include <Pt/Json/JsonReader.h>
+#include <Pt/Json/JsonFormatter.h>
 #include <Pt/Json/Document.h>
-#include <Pt/String.h>
-#include <stack>
+#include <Pt/Composer.h>
 
 namespace Pt {
 
 namespace Json {
 
-class Settings;
-
 /** @brief JSON Document reader.
 */
 class PT_JSON_API DocumentReader
 {
-    typedef void (DocumentReader::*ParseFunc)(const Node&);
-    
     public:
         DocumentReader();
 
@@ -61,20 +57,11 @@ class PT_JSON_API DocumentReader
 
         Document* advance();
 
-    protected:
-        void onRoot(const Node& node);
-        
-        void onArray(const Node& node);
-        
-        void onObject(const Node& node);
-
     private:
-        ParseFunc              _parse;
-        std::stack<ParseFunc>  _parseStack;
-
-        JsonReader             _reader;
-        Document*              _doc;
-        Document::Element      _current;
+        JsonReader                           _reader;
+        JsonFormatter                        _formatter;
+        BasicComposer<Pt::SerializationInfo> _composer;
+        Document*                            _doc;
 };
 
 } // namespace

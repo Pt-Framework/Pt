@@ -44,6 +44,8 @@ namespace Json {
 */
 class PT_JSON_API Document
 {
+    friend class DocumentReader;
+
     public:
         /** @brief Modifiable document element.
         */

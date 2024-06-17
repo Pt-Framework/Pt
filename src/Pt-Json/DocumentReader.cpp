@@ -28,26 +28,13 @@
 */
 
 #include <Pt/Json/DocumentReader.h>
-#include <Pt/Json/StartObject.h>
-#include <Pt/Json/Member.h>
-#include <Pt/Json/EndObject.h>
-#include <Pt/Json/StartArray.h>
-#include <Pt/Json/EndArray.h>
-#include <Pt/Json/String.h>
-#include <Pt/Json/Float.h>
-#include <Pt/Json/Integer.h>
-#include <Pt/Json/Boolean.h>
-#include <Pt/Json/Null.h>
-
-#include <stack>
 
 namespace Pt {
 
 namespace Json {
 
 DocumentReader::DocumentReader()
-: _parse(&DocumentReader::onRoot)
-, _current(0)
+: _formatter(_reader)
 , _doc(0)
 {
     reset();
@@ -55,8 +42,7 @@ DocumentReader::DocumentReader()
 
 
 DocumentReader::DocumentReader(std::basic_istream<Pt::Char>& is, Document& doc)
-: _parse(&DocumentReader::onRoot)
-, _current( doc.root() )
+: _formatter(_reader)
 , _doc(&doc)
 {
     reset(is, doc);
@@ -65,27 +51,20 @@ DocumentReader::DocumentReader(std::basic_istream<Pt::Char>& is, Document& doc)
 
 void DocumentReader::reset()
 {
-    _parse = &DocumentReader::onRoot;
-    _parseStack.push(_parse);
-            
     _reader.reset();
-
     _doc = 0;
-    _current = Document::Element();
 }
 
 
 void DocumentReader::reset(std::basic_istream<Pt::Char>& is, Document& doc)
 {
-    _parse = &DocumentReader::onRoot;
-    _parseStack.push(_parse);
-            
     _reader.reset(is);
 
     doc.clear();
-
     _doc = &doc;
-    _current = doc.root();
+
+    _composer.begin( _doc->_root );
+    _formatter.beginParse(_composer);
 }
 
 
@@ -94,11 +73,8 @@ Document& DocumentReader::read()
     if( ! _doc )
         throw JsonError("invalid document"); 
 
-    InputIterator it = _reader.current();
-    for( ; it != _reader.end(); ++it)
-    {
-        (this->*_parse)(*it);
-    }
+    while( ! _formatter.parseSome() )
+        ;
 
     return *_doc;
 }
@@ -109,285 +85,10 @@ Document* DocumentReader::advance()
     if( ! _doc )
         throw JsonError("invalid document"); 
 
-    Node* node = _reader.advance();
-    while(node)
-    {
-      (this->*_parse)(*node);
-      
-      if(node->type() == Node::EndDocument)
-          return _doc;
-
-      node = _reader.advance();
-    }
+    if( _formatter.parseSome() )
+        return _doc;
 
     return 0;
-}
-
-
-void DocumentReader::onRoot(const Node& node)
-{
-    switch( node.type() )
-    {
-        case Node::StartArray:
-        {
-            //_current->setTypeName("array");
-
-            _parse = &DocumentReader::onArray;
-            _parseStack.push(_parse);
-            break;
-        }
-
-        case Node::StartObject:
-        {
-            //_current->setTypeName("object");
-
-            _parse = &DocumentReader::onObject;
-            _parseStack.push(_parse);
-            break;
-        }
-        
-        case Node::String:
-        {
-            const String& s = toString(node);
-            //_current->setString( s.value() );
-            _current.setValue( s.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Float:
-        {
-            const Float& f = toFloat(node);
-            //_current->setDouble( f.value() );
-            _current.setValue( f.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Integer:
-        { 
-            const Integer& i = toInteger(node);
-            //_current->setInt64( i.value() );
-            _current.setValue( i.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Boolean:
-        {
-            const Boolean& b = toBoolean(node);
-            //_current->setBool( b.value() );
-            _current.setValue( b.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Null:
-        {
-            //const Null& n = toNull(node);
-            //_current->setVoid();
-            _current->setNull();
-            _current = _current->parent();
-            break;
-        }
-
-        default:
-            break;
-    }
-}
-
-
-void DocumentReader::onArray(const Node& node)
-{
-    switch( node.type() )
-    {
-        case Node::StartArray:
-        {
-            //_current = &_current->addElement();
-            //_current->setTypeName("array");
-
-            _current = _current.addElement();
-
-            _parse = &DocumentReader::onArray;
-            _parseStack.push(_parse);
-            break;
-        }
-
-        case Node::EndArray:
-        {
-            _current = _current->parent();
-
-            _parseStack.pop();
-            _parse = _parseStack.top();
-            break;
-        }
-
-        case Node::StartObject:
-        {
-            //_current = &_current->addElement();
-            //_current->setTypeName("object");
-
-            _current = _current.addElement();
-
-            _parse = &DocumentReader::onObject;
-            _parseStack.push(_parse);
-            break;
-        }
-
-        case Node::String:
-        {
-            //_current = &_current->addElement();
-            _current = _current.addElement();
-
-            const String& s = toString(node);
-            //_current->setString( s.value() );
-            _current->setValue( s.value() );
-
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Float:
-        {
-            //_current = &_current->addElement();
-            _current = _current.addElement();
-
-            const Float& f = toFloat(node);
-            //_current->setDouble( f.value() );
-            _current->setValue( f.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Integer:
-        {
-            //_current = &_current->addElement();
-            _current = _current.addElement();
-
-            const Integer& i = toInteger(node);
-            //_current->setInt64( i.value() );
-            _current->setValue( i.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Boolean:
-        {
-            //_current = &_current->addElement();
-            _current = _current.addElement();
-
-            const Boolean& b = toBoolean(node);
-            //_current->setBool( b.value() );
-            _current->setValue( b.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Null:
-        {
-            //_current = &_current->addElement();
-            _current = _current.addElement();
-
-            //const Null& n = toNull(node);
-            //_current->setVoid();
-            _current->setNull();
-            _current = _current->parent();
-            break;
-        }
-
-        default:
-            break;
-    }
-}
-
-
-void DocumentReader::onObject(const Node& node)
-{
-    switch( node.type() )
-    {
-        case Node::StartArray:
-        {
-            //_current->setTypeName("array");
-
-            _parse = &DocumentReader::onArray;
-            _parseStack.push(_parse);
-            break;
-        }
-
-        case Node::StartObject:
-        {
-            //_current->setTypeName("object");
-            
-            _parse = &DocumentReader::onObject;
-            _parseStack.push(_parse);
-            break;
-        }
-
-        case Node::EndObject:
-        {
-            _current = _current->parent();
-
-            _parseStack.pop();
-            _parse = _parseStack.top();
-            break;
-        }
-
-        case Node::Member:
-        {
-            const Member& m = toMember(node);
-            //_current = &_current->addMember( m.name().narrow() );
-            _current = _current->addMember( m.name().narrow() );
-            break;
-        }
-
-        case Node::String:
-        {
-            const String& s = toString(node);
-            //_current->setString( s.value() );
-            _current->setValue( s.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Float:
-        {           
-            const Float& f = toFloat(node);
-            //_current->setDouble( f.value() );
-            _current->setValue( f.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Integer:
-        {
-            const Integer& i = toInteger(node);
-            //_current->setInt64( i.value() );
-            _current->setValue( i.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Boolean:
-        {
-            const Boolean& b = toBoolean(node);
-            //_current->setBool( b.value() );
-            _current->setValue( b.value() );
-            _current = _current->parent();
-            break;
-        }
-
-        case Node::Null:
-        {
-            const Null& n = toNull(node);
-            //_current->setVoid();
-            _current->setNull();
-            _current = _current->parent();
-            break;
-        }
-
-        default:
-            break;
-    }
 }
 
 } // namespace
