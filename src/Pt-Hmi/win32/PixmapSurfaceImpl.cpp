@@ -798,7 +798,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
         case Gfx::CompositionMode::SourceCopy:
         {
             BitBlt(_dc, lround(to.x()), lround(to.y()), size.width(), size.height(),
-                   surface.pixmapImpl()->deviceContext(), 0, 0, SRCCOPY);
+                   surface.impl()->deviceContext(), 0, 0, SRCCOPY);
         }
         break;
 
@@ -811,7 +811,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
             bf.AlphaFormat = AC_SRC_ALPHA;
 
             AlphaBlend(_dc, to.x(), to.y(), size.width(), size.height(),
-                       surface.pixmapImpl()->deviceContext(), 
+                       surface.impl()->deviceContext(), 
                        0, 0, size.width(), size.height(), bf);
         }
         break;
@@ -834,7 +834,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
         case Gfx::CompositionMode::SourceCopy:
         {
             BitBlt(_dc, lround(to.x()), lround(to.y()), size.width(), size.height(),
-                   pm.pixmapImpl()->deviceContext(), from.x(), from.y(), SRCCOPY);
+                   pm.impl()->deviceContext(), from.x(), from.y(), SRCCOPY);
         }
         break;
 
@@ -847,7 +847,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
             bf.AlphaFormat = AC_SRC_ALPHA;
 
             AlphaBlend(_dc, to.x(), to.y(), size.width(), size.height(),
-                       pm.pixmapImpl()->deviceContext(), 
+                       pm.impl()->deviceContext(), 
                        from.x(), from.y(), size.width(), size.height(), bf);
         }
         break;

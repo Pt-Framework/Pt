@@ -69,11 +69,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         void setScaleFactor(double v);
 
-        PixmapSurfaceImpl* pixmapImpl() const
-        {
-            return _impl;
-        }
-
         PixmapSurfaceImpl* impl()
         {
             return _impl;

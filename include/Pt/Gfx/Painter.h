@@ -107,11 +107,11 @@ class PT_GFX_API PaintData
         void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
         void drawImage(const Gfx::PointF& to, 
-                               const Gfx::Image& image);
+                       const Gfx::Image& image);
 
         void drawImage(const Gfx::PointF& to, 
-                               const Gfx::Image& image, 
-                               const Gfx::RectF& imgRect);
+                       const Gfx::Image& image, 
+                       const Gfx::RectF& imgRect);
 
         void drawSurface(const Gfx::PointF& to, 
                          const Gfx::PaintSurface& surface);
