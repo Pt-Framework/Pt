@@ -41,7 +41,7 @@
 #include <limits>
 //#include <Mswsock.h>
 
-PT_LOG_DEFINE("Pt.System.TcpServer");
+PT_LOG_DEFINE("Pt.Net.TcpServer");
 
 namespace Pt {
 
