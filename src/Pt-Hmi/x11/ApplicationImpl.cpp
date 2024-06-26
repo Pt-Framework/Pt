@@ -38,7 +38,7 @@
 #endif
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Screen..h>
+#include <Pt/Hmi/Screen.h>
 #include <Pt/IOError.h>
 #include <Pt/SourceInfo.h>
 
