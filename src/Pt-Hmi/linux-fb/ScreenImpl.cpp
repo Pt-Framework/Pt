@@ -285,8 +285,8 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     _surface.resize(size);
     _surface.setScaleFactor( scaleFactor() );
     
-    _surface.pixmapImpl()->reset( _frameBuffer.size(), 
-                                  _frameBuffer.strideSize() );
+    _surface.impl()->reset( _frameBuffer.size(), 
+                            _frameBuffer.strideSize() );
 
     if(_parent)
         _parent->onResize(*this, size);
@@ -315,7 +315,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     //
     // update the screen including the cursor
     //
-    Pt::Gfx::RectF urect = _surface.toPhysical(screenRect);
+    Pt::Gfx::RectF urect = _surface.scaling().toPhysical(screenRect);
     updateScreen( Gfx::round(urect) );
 }
 
@@ -355,7 +355,7 @@ void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
 const Gfx::Image& ScreenImpl::image() const
 {
-    return _surface.pixmapImpl()->image();
+    return _surface.impl()->image();
 }
 
 
