@@ -45,8 +45,29 @@ namespace Pt {
 
 namespace System {
 
-Application::Application(int argc, char** argv)
-: _argc(argc)
+Application::Application()
+: _noArgs(0)
+, _argc(&_noArgs)
+, _argv(0)
+, _loop(0)
+, _owner(0)
+{
+    Application* app = ::getSystemAppPtr();
+    if( app )
+        throw std::logic_error("application not initialized");
+
+    ::getSystemAppPtr() = this;
+
+    _impl = new ApplicationImpl;
+
+    _owner = new MainLoop();
+    this->init(*_owner);
+}
+
+
+Application::Application(int& argc, char** argv)
+: _noArgs(0)
+, _argc(&argc)
 , _argv(argv)
 , _loop(0)
 , _owner(0)
@@ -64,8 +85,25 @@ Application::Application(int argc, char** argv)
 }
 
 
-Application::Application(EventLoop* loop, int argc, char** argv)
-: _argc(argc)
+Application::Application(EventLoop* loop)
+: _noArgs(0)
+, _argc(&_noArgs)
+, _argv(0)
+, _loop(0)
+, _owner(0)
+{
+    ::getSystemAppPtr() = this;
+
+    _impl = new ApplicationImpl;
+
+    if(loop)
+        this->init(*loop);
+}
+
+
+Application::Application(EventLoop* loop, int& argc, char** argv)
+: _noArgs(0)
+, _argc(&argc)
 , _argv(argv)
 , _loop(0)
 , _owner(0)
@@ -95,6 +133,13 @@ Application& Application::instance()
         throw std::logic_error("application not initialized");
 
     return *app;
+}
+
+
+void Application::setArgs(int& argc, char** argv)
+{
+    _argc = &argc;
+    _argv = argv;
 }
 
 

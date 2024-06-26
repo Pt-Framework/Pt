@@ -50,19 +50,25 @@ class ApplicationImpl;
     run() and can be exited with a call to exit(). The event loop can be
     obtained by calling loop(). Command line arguments can be parsed as Arg
     and static methods exist to set environment variables.
-
- 
 */
 class PT_SYSTEM_API Application : public Pt::Connectable
 {
     public:
+        /** @brief default Constructor.
+        */
+        Application();
+
         /** @brief Construct with command line arguments.
         */
-        explicit Application(int argc = 0, char** argv = 0);
+        explicit Application(int& argc, char** argv = 0);
+
+        /** @brief Default construct with custom event loop.
+        */
+        explicit Application(EventLoop* loop);
 
         /** @brief Construct with custom event loop.
         */
-        explicit Application(EventLoop* loop, int argc = 0, char** argv = 0);
+        Application(EventLoop* loop, int& argc, char** argv = 0);
 
         /** @brief Destructor.
         */
@@ -106,20 +112,24 @@ class PT_SYSTEM_API Application : public Pt::Connectable
 
         /** @brief Number of command line arguments.
         */
-        int argc() const
-        { return _argc; }
+        int& argc() const
+        { return *_argc; }
 
         /** @brief Command line arguments.
         */
         char** argv() const
         { return _argv; }
 
+	      /** @brief Set command line arguments.
+	      */
+	      void setArgs(int& argc, char** argv);
+
         /** @brief Returns the value of a long option.
         */
         template <typename T>
         Arg<T> getArg(const char* name)
         {
-            return Arg<T>(_argc, _argv, name);
+            return Arg<T>(*_argc, _argv, name);
         }
 
         /** @brief Returns the value of a long option.
@@ -127,7 +137,7 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         template <typename T>
         Arg<T> getArg(const char* name, const T& def)
         {
-            return Arg<T>(_argc, _argv, name, def);
+            return Arg<T>(*_argc, _argv, name, def);
         }
 
         /** @brief Returns the value of a short option.
@@ -135,7 +145,7 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         template <typename T>
         Arg<T> getArg(const char name)
         {
-            return Arg<T>(_argc, _argv, name);
+            return Arg<T>(*_argc, _argv, name);
         }
 
         /** @brief Returns the value of a short option.
@@ -143,7 +153,7 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         template <typename T>
         Arg<T> getArg(const char name, const T& def)
         {
-            return Arg<T>(_argc, _argv, name, def);
+            return Arg<T>(*_argc, _argv, name, def);
         }
 
     public:
@@ -196,7 +206,8 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         void init(EventLoop& loop);
 
     private:
-        int     _argc;
+        int     _noArgs;
+        int*    _argc;
         char**  _argv;
         ApplicationImpl* _impl;
         EventLoop* _loop;
