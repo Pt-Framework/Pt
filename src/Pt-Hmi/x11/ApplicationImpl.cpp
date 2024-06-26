@@ -319,7 +319,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 
 #ifdef PT_HMI_X11_RASTER
     WindowImpl* windowImpl = static_cast<WindowImpl*>( window.frame() );
-    const Gfx::Image& image = windowImpl->surface().pixmapImpl()->image();
+    const Gfx::Image& image = windowImpl->surface().impl()->image();
     char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
 
     //std::clog << "  EXPOSE " << window.title() << " "
