@@ -64,8 +64,8 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     Gfx::SizeF size( fs.width(), fs.height() );
 
     _surface.resize(size);
-    _surface.pixmapImpl()->reset( _frameBuffer.size(), 
-                                  _frameBuffer.strideSize() );
+    _surface.impl()->reset( _frameBuffer.size(), 
+                            _frameBuffer.strideSize() );
 
     Gfx::Painter painter(_surface);
 
