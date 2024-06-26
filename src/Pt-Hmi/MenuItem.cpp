@@ -27,7 +27,7 @@
   MA 02110-1301 USA
 */
 #include <Pt/Hmi/MenuItem.h>
-#include <Pt/hmi/Menu.h>
+#include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Painter.h>
 
