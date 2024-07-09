@@ -257,7 +257,6 @@ if --with-posix-select in $(ARGV)
     Configure WITH_POSIX_SELECT ;
 }
 
-
 if --with-posix-poll in $(ARGV)
 {
     WITH_SELECTOR = posix-poll ;
