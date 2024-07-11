@@ -58,6 +58,8 @@ class PT_SYSTEM_API IONotifier : public Selectable
 
         ~IONotifier();
 
+        void reset();
+
         void setFd(int fd);
 
         void setHandle(void* handle);

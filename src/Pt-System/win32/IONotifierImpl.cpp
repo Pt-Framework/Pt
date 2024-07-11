@@ -47,12 +47,22 @@ IONotifierImpl::~IONotifierImpl()
 }
 
 
+void IONotifierImpl::reset()
+{
+    _handle.setHandle(INVALID_HANDLE_VALUE);
+}
+
+
 void IONotifierImpl::setFd(int fd)
 {
 }
 
+
 void IONotifierImpl::setHandle(void* h)
 {
+    if(h == INVALID_HANDLE_VALUE)
+        throw IOError("invalid i/o handle");
+
     _handle.setHandle(h);
 }
 
@@ -67,12 +77,19 @@ void IONotifierImpl::cancel(EventLoop& loop)
 void IONotifierImpl::beginWait(EventLoop& loop, int flags)
 {
     _flags = flags;
+
+    if(_handle.handle() == INVALID_HANDLE_VALUE)
+        throw IOError("invalid i/o handle");
+
     loop.selector().enable(_handle);
 }
 
 
 int IONotifierImpl::endWait(EventLoop& loop)
 {
+    if(_handle.handle() == INVALID_HANDLE_VALUE)
+        throw IOError("invalid i/o handle");
+
     loop.selector().disable(_handle);
     int flags = _flags;
     _flags = 0;

@@ -45,11 +45,12 @@ class IONotifierImpl
 
         ~IONotifierImpl();
 
+        void reset();
+
         void setFd(int fd);
 
         void setHandle(void* h)
         {
-
         }
 
         void cancel(EventLoop& loop);

@@ -53,7 +53,6 @@ IONotifier::IONotifier(int fd)
 }
 
 
-
 IONotifier::IONotifier(void* handle)
     : _impl(0)
     , _loop(0)
@@ -66,7 +65,15 @@ IONotifier::IONotifier(void* handle)
 
 IONotifier::~IONotifier()
 {
+    reset();
     delete _impl;
+}
+
+
+void IONotifier::reset()
+{
+    cancel();
+    _impl->reset();
 }
 
 
@@ -76,12 +83,12 @@ void IONotifier::setFd(int fd)
     _impl->setFd(fd);
 }
 
+
 void IONotifier::setHandle(void* h)
 {
     cancel();
     _impl->setHandle(h);
 }
-
 
 
 void IONotifier::beginWait(int flags)
