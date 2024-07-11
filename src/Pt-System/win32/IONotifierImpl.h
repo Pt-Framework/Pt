@@ -42,6 +42,8 @@ class IONotifierImpl
 
         ~IONotifierImpl();
 
+        void reset();
+
         void setFd(int fd);
 
         void cancel(EventLoop& loop);

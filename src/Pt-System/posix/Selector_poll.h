@@ -245,6 +245,7 @@ class SelectorImpl : public Selector
         {
             const size_t maxMSecs = std::numeric_limits<int>::max();
 
+            // negative time for poll() means infinite
             int msecs = static_cast<int>(umsecs);
             if(umsecs == EventLoop::WaitInfinite)
                 msecs = -1;
@@ -266,7 +267,7 @@ class SelectorImpl : public Selector
                 if( avail > 0 || msecs == 0 )
                     break;
         
-                if(umsecs != EventLoop::WaitInfinite) // negative poll time means infinite
+                if(umsecs != EventLoop::WaitInfinite)
                 {
                     if(elapsed >= msecs)
                         return isWake; // timeout
@@ -275,30 +276,32 @@ class SelectorImpl : public Selector
                 }
             }
 
-            if( _pollfds[0].revents & POLLIN )
+            if(avail > 0)
             {
-                --avail;
-                isWake = _wakePipe.isReady();
+                if( _pollfds[0].revents & POLLIN )
+                {
+                    --avail;
+                    isWake = _wakePipe.isReady();
+                }
             }
 
             try
             {
-                for( _current = _devices.first(); _current != 0; )
+                _current = _devices.first();
+                
+                while( avail > 0 )
                 {
+                    if( ! _current )
+                        break;
+
                     Selectable* selectable = _current;
         
                     bool isAvail = selectable->run();
-        
                     if( isAvail )
                         --avail;
         
-                    if(avail <= 0)
-                        break;
-        
                     if(_current == selectable)
-                    {
                         _current = _current->next();
-                    }
                 }
 
                 _current = 0;

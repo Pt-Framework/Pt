@@ -29,13 +29,16 @@
 #include "IONotifierImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/EventLoop.h"
+#include "Selector.h"
 
 namespace Pt {
 
 namespace System {
 
-IONotifierImpl::IONotifierImpl(IONotifier&)
+IONotifierImpl::IONotifierImpl(IONotifier& ioNotifier)
+: _flags(0)
 {
+    _handle.init(ioNotifier);
 }
 
 
@@ -44,30 +47,59 @@ IONotifierImpl::~IONotifierImpl()
 }
 
 
+void IONotifierImpl::reset()
+{
+    _handle.setHandle(INVALID_HANDLE_VALUE);
+}
+
+
 void IONotifierImpl::setFd(int fd)
 {
 }
 
 
+void IONotifierImpl::setHandle(void* h)
+{
+    if(h == INVALID_HANDLE_VALUE)
+        throw IOError("invalid i/o handle");
+
+    _handle.setHandle(h);
+}
+
+
 void IONotifierImpl::cancel(EventLoop& loop)
 {
+    _flags = 0;
+    loop.selector().disable(_handle);
 }
 
 
 void IONotifierImpl::beginWait(EventLoop& loop, int flags)
 {
+    _flags = flags;
+
+    if(_handle.handle() == INVALID_HANDLE_VALUE)
+        throw IOError("invalid i/o handle");
+
+    loop.selector().enable(_handle);
 }
 
 
 int IONotifierImpl::endWait(EventLoop& loop)
 {
-    return 0;
+    if(_handle.handle() == INVALID_HANDLE_VALUE)
+        throw IOError("invalid i/o handle");
+
+    loop.selector().disable(_handle);
+    int flags = _flags;
+    _flags = 0;
+    return flags;
 }
 
 
 bool IONotifierImpl::runWait(EventLoop& loop)
 {
-    return false;
+    return true;
 }
 
 } // namespace

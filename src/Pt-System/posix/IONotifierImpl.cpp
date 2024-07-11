@@ -51,9 +51,19 @@ IONotifierImpl::~IONotifierImpl()
 }
 
 
+void IONotifierImpl::reset()
+{
+    assert( ! _ioh.isActive() );
+    _ioh.fd = -1;
+}
+
+
 void IONotifierImpl::setFd(int fd)
 {
     PT_LOG_DEBUG("set fd:" << fd);
+
+    if(fd < 0)
+        throw IOError("invalid i/o descriptor");
 
     _ioh.fd = fd;
 
@@ -78,6 +88,10 @@ void IONotifierImpl::cancel(EventLoop& loop)
 void IONotifierImpl::beginWait(EventLoop& loop, int flags)
 {
     PT_LOG_DEBUG("begin wait on fd:" << _ioh.fd);
+
+    if(_ioh.fd < 0)
+        throw IOError("invalid i/o descriptor");
+
     loop.selector().beginWait(&_ioh, flags);
 }
 
@@ -85,6 +99,9 @@ void IONotifierImpl::beginWait(EventLoop& loop, int flags)
 int IONotifierImpl::endWait(EventLoop& loop)
 {
     PT_LOG_DEBUG("end wait on fd:" << _ioh.fd);
+
+    if(_ioh.fd < 0)
+        throw IOError("invalid i/o descriptor");
 
     int flags = loop.selector().endWait(&_ioh);
 

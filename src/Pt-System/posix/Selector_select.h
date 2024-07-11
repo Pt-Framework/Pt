@@ -250,31 +250,33 @@ class SelectorImpl : public Selector
                     msecs -= int(elapsed);
                 }
             }
-        
-            if( FD_ISSET(_wakePipe.readFd(), &_rfdsOut) )
+
+            if(avail > 0)
             {
-                --avail;
-                isWake = _wakePipe.isReady();
+                if( FD_ISSET(_wakePipe.readFd(), &_rfdsOut) )
+                {
+                    --avail;
+                    isWake = _wakePipe.isReady();
+                }
             }
         
             try
             {
-                for( _current = _devices.first(); _current != 0; )
+                _current = _devices.first();
+
+                while(avail > 0)
                 {
+                    if( ! _current )
+                        break;
+
                     Selectable* selectable = _current;
         
                     bool isAvail = selectable->run();
-
                     if( isAvail )
                         --avail;
 
-                    if(avail <= 0)
-                        break;
-
                     if(_current == selectable)
-                    {
                         _current = _current->next();
-                    }
                 }
 
                 _current = 0;
