@@ -152,6 +152,7 @@ class WindowImpl : public WindowFrame
         ScreenImpl&    _wm;
         Window&        _window;
         HWND           _hwnd;
+        HICON          _iconHandle;
 };
 
 } // namespace

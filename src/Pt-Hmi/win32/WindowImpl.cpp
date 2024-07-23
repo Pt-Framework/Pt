@@ -47,6 +47,7 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 , _wm(wm)
 , _window(w)
 , _hwnd(0)
+, _iconHandle(0)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
   
@@ -78,6 +79,9 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 WindowImpl::~WindowImpl()
 {
     DestroyWindow( _hwnd);
+
+    if(_iconHandle != 0)
+        DestroyIcon(_iconHandle);
 }
 
 
@@ -470,6 +474,12 @@ void WindowImpl::onSetTitle(Window& w, const std::string& text)
 
 void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 {
+    if (_iconHandle != 0)
+    {
+        DestroyIcon(_iconHandle);
+        _iconHandle = 0;
+    }
+
     if(icon.width() == 0 || icon.height() == 0)
     {
         SendMessage(_hwnd, WM_SETICON, ICON_SMALL, 0);
@@ -498,11 +508,10 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
     }
 
     HINSTANCE hInstance = GetModuleHandle(NULL);
-    HICON hIcon = ::CreateIcon(hInstance, icon.width(), icon.height(), 
+    _iconHandle = ::CreateIcon(hInstance, icon.width(), icon.height(),
                                4, 8, 0, (BYTE*)&bitmapBuffer[0]);
 
-    SendMessage(_hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-    DestroyIcon(hIcon);   
+    SendMessage(_hwnd, WM_SETICON, ICON_SMALL, (LPARAM)_iconHandle);    
 }
 
 

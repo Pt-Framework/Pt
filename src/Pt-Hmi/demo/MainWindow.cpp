@@ -61,10 +61,23 @@ MainWindow::MainWindow()
 , _scrollContainer2(Hmi::FlowLayout::Top)
 {
     setContent(&_shell);
+    
+    Pt::Gfx::Image im;
 
+    std::stringstream ss;
+
+    ss.write((const char*)atesionIcon, atesionIconSize);
+
+
+
+    Pt::Gfx::PngReader reader(ss, im);
+    
     setTitle("Main 1");
     move( Gfx::PointF(100, 30) );
     resize( Gfx::SizeF(800, 700) );
+
+    im = reader.get();    
+    setIcon(im);
 
     //_child2.setTopMost(true);
     _child2.resize( Gfx::SizeF(550, 600) );
