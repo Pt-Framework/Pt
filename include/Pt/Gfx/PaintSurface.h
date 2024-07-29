@@ -197,9 +197,6 @@ class PT_GFX_API PaintSurface
         virtual void onReset();
 
     private:
-        //
-        // TODO: review region API
-        //
         void attachRegion(PaintRegion& region);
         
         void detachRegion(PaintRegion& region);
