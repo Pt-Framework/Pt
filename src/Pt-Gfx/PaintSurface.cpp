@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/PaintRegion.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Algorithm.h>
 
@@ -46,7 +47,7 @@ Canvas::Canvas()
 Canvas::~Canvas()
 {
     if(_paint)
-        _paint->onDetach(*this);
+        _paint->onDetachCanvas(*this);
 }
 
 
@@ -80,7 +81,7 @@ void Canvas::attachPaint(PaintData& paint)
 }
 
 
-void Canvas::detachPaint()
+void Canvas::detachPaint(PaintData& paint)
 {
     if(_paint)
     {
@@ -136,25 +137,25 @@ PaintSurface::PaintSurface()
 PaintSurface::~PaintSurface()
 {
     if(_painter)
-        _painter->onDetach(*this);
+        _painter->onDetachSurface(*this);
 
-    typedef std::vector<PaintSurface*>::iterator RegionIterator;
+    typedef std::vector<PaintRegion*>::iterator RegionIterator;
     for( RegionIterator it = _regions.begin(); it != _regions.end(); ++it )
     {
-        (*it)->onDestroy(this);
+        (*it)->onDetachSurface(this);
     } 
 }
 
 
-void PaintSurface::attachRegion(PaintSurface& region)
+void PaintSurface::attachRegion(PaintRegion& region)
 {
     _regions.push_back(&region);
 }
 
 
-void PaintSurface::detachRegion(PaintSurface& region)
+void PaintSurface::detachRegion(PaintRegion& region)
 {
-    typedef std::vector<PaintSurface*>::iterator RegionIterator;
+    typedef std::vector<PaintRegion*>::iterator RegionIterator;
 
     RegionIterator rit = std::find(_regions.begin(), _regions.end(), &region);
     if( rit != _regions.end() )
@@ -164,25 +165,12 @@ void PaintSurface::detachRegion(PaintSurface& region)
 }
 
 
-void PaintSurface::onDestroy(PaintSurface* region)
-{
-    if(_painter)
-        _painter->finish();
-
-    typedef std::vector<PaintSurface*>::iterator RegionIterator;
-    for( RegionIterator it = _regions.begin(); it != _regions.end(); ++it )
-    {
-        (*it)->onReset();
-    }
-}
-
-
 void PaintSurface::onReset()
 {
     if(_painter)
         _painter->finish();
 
-    typedef std::vector<PaintSurface*>::iterator RegionIterator;
+    typedef std::vector<PaintRegion*>::iterator RegionIterator;
     for( RegionIterator it = _regions.begin(); it != _regions.end(); ++it )
     {
         (*it)->onReset();
@@ -202,9 +190,9 @@ const Gfx::SizeF& PaintSurface::size() const
 }
 
 
-Painter* PaintSurface::painter()
+const Scaling& PaintSurface::scaling() const
 {
-    return _painter;
+    return onGetScaling();
 }
 
 
@@ -220,7 +208,7 @@ void PaintSurface::attachPainter(Painter& painter)
 }
 
 
-void PaintSurface::detachPainter()
+void PaintSurface::detachPainter(Painter& painter)
 {
     if(_painter)
     {
@@ -231,27 +219,15 @@ void PaintSurface::detachPainter()
 }
 
 
-PaintData* PaintSurface::getPaint(PaintData* paint)
+PaintData* PaintSurface::getPaint(PaintData* p)
 {
-    return onGetPaint(paint);
+    return onGetPaint(p);
 }
 
 
-Canvas* PaintSurface::canvas()
+Canvas* PaintSurface::beginPaint(PaintData& paint)
 {
-    return onGetCanvas();
-}
-
-
-RectF PaintSurface::region() const
-{
-    return onGetRegion();
-}
-
-
-RectF PaintSurface::onGetRegion() const
-{
-    return RectF( size() );
+    return onBeginPaint(paint);
 }
 
 } // namespace

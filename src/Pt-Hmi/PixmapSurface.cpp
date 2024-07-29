@@ -50,8 +50,8 @@ PixmapSurface::~PixmapSurface()
 
 void PixmapSurface::set(const Gfx::Image& image)
 {
-    _logicSize = toLogical( Gfx::SizeF( image.size().width(), 
-                                        image.size().height() ) );
+    _logicSize = scaling().toLogical( Gfx::SizeF( image.size().width(), 
+                                                  image.size().height() ) );
     _impl->set(image);
 }
 
@@ -75,15 +75,9 @@ void PixmapSurface::clear(const Gfx::Color& c)
 }
 
 
-double PixmapSurface::onScaleFactor() const
-{
-    return _impl->scaleFactor();
-}
-
-
 void PixmapSurface::setScaleFactor(double scaling)
 {
-    if(_impl->scaleFactor() == scaling)
+    if(_impl->scaling().scaleFactor() == scaling)
         return;
 
     _impl->setScaleFactor(scaling);
@@ -111,10 +105,9 @@ Gfx::PaintData* PixmapSurface::onGetPaint(Gfx::PaintData* p)
     return paint;
 }
 
-
-Gfx::Canvas* PixmapSurface::onGetCanvas()
+Gfx::Canvas* PixmapSurface::onBeginPaint(Gfx::PaintData& paint)
 {
-    return _impl->canvas();
+    return _impl->beginPaint(paint);
 }
 
 

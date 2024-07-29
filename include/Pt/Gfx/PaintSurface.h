@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
@@ -52,74 +53,6 @@ class PaintData;
 class Line;
 class Polyline;
 
-/** @brief Surface scaling.
-*/
-class Scaling
-{
-    public:
-        Scaling(double scaleFactor = 1.0)
-        : _scaleFactor(scaleFactor)
-        { }
-
-        double scaleFactor() const
-        {
-            return _scaleFactor;
-        }
-        
-        void setScaleFactor(double scaleFactor)
-        {
-            _scaleFactor = scaleFactor;
-        }
-
-    public:
-        double toPhysical(double n) const
-        {
-            return n * scaleFactor();
-        }
-
-        Gfx::PointF toPhysical(const Gfx::PointF& p) const
-        {
-            return p * scaleFactor();
-        }
-
-        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const
-        {
-            return s * scaleFactor();
-        }
-
-        Gfx::RectF toPhysical(const Gfx::RectF& r) const
-        {
-            Gfx::PointF p = toPhysical( r.topLeft() );
-            Gfx::SizeF s = toPhysical( r.size() );
-            return Gfx::RectF(p, s);
-        }
-
-        double toLogical(double n) const
-        {
-            return n / scaleFactor();
-        }
-
-        Gfx::PointF toLogical(const Gfx::PointF& p) const
-        {
-            return p / scaleFactor();
-        }
-
-        Gfx::SizeF toLogical(const Gfx::SizeF& s) const
-        {
-            return s / scaleFactor();
-        }
-
-        Gfx::RectF toLogical(const Gfx::RectF& r) const
-        {
-            Gfx::PointF p = toLogical( r.topLeft() );
-            Gfx::SizeF s = toLogical( r.size() );
-            return Gfx::RectF(p, s);
-        }
-
-    private:
-        double _scaleFactor;
-};
-
 class PaintSurface;
 
 /** @brief Paint canvas.
@@ -138,11 +71,6 @@ class PT_GFX_API Canvas
         const Gfx::SizeF& size() const;
 
         const Scaling& scaling() const;
-
-    private:
-        void attachPaint(PaintData& paint);
-
-        void detachPaint();
 
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
@@ -213,8 +141,13 @@ class PT_GFX_API Canvas
 
         virtual void drawSurface(const Gfx::PointF& to, 
                                  const PaintSurface& surface, 
-                                  const Gfx::RectF& surfaceRect) = 0;
+                                 const Gfx::RectF& surfaceRect) = 0;
     
+    private:
+        void attachPaint(PaintData& paint);
+
+        void detachPaint(PaintData& paint);
+
     private:
         PaintData* _paint;
 };
@@ -223,7 +156,6 @@ class PT_GFX_API Canvas
 */
 class PT_GFX_API PaintSurface
 {
-    friend class PaintData;
     friend class Painter;
     friend class PaintRegion;
 
@@ -233,161 +165,53 @@ class PT_GFX_API PaintSurface
     public:
         virtual ~PaintSurface();
         
+        //
+        // TODO: size/format/scaling same as Canvas, unify?
+        //
+        // TODO: protected setSize instead of virtual getter?
+        //
         const Gfx::SizeF& size() const;
 
         const Gfx::ImageFormat& format() const;
 
-        const Scaling& scaling() const
-        {
-            return onGetScaling();
-        }
+        const Scaling& scaling() const;
 
-        double scaleFactor() const
-        {
-            return onScaleFactor();
-        }
-
+    public:
         virtual Image toImage() const = 0;
-
-    protected:
-        Painter* painter();
 
         PaintData* getPaint(PaintData* paint);
 
-        Canvas* canvas();
-
-        RectF region() const;
-
-    private:
-        void attachPainter(Painter& painter);
-
-        void detachPainter();
-
-    private:
-        void attachRegion(PaintSurface& region);
-        
-        void detachRegion(PaintSurface& region);
-
-        virtual void onDestroy(PaintSurface* region);
+        Canvas* beginPaint(PaintData& paint);
 
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
         virtual const Gfx::SizeF& onSize() const = 0;
 
-        virtual double onScaleFactor() const = 0;
-
         virtual const Scaling& onGetScaling() const = 0;
 
-        virtual PaintData* onGetPaint(PaintData*) = 0;
+        virtual PaintData* onGetPaint(PaintData* paint) = 0;
 
-        virtual Canvas* onGetCanvas() = 0;
-
-        virtual RectF onGetRegion() const;
+        virtual Canvas* onBeginPaint(PaintData& paint) = 0;
 
         virtual void onReset();
 
-    public:
-        Gfx::PointF toPhysical(const Gfx::PointF& p) const
-        {
-            return p * scaleFactor();
-        }
-
-        Gfx::SizeF toPhysical(const Gfx::SizeF& s) const
-        {
-            return s * scaleFactor();
-        }
-
-        Gfx::RectF toPhysical(const Gfx::RectF& r) const
-        {
-            return Gfx::RectF(toPhysical(r.topLeft()), toPhysical(r.size()));
-        }
-
-        Gfx::PointF toLogical(const Gfx::PointF& p) const
-        {
-            return p / scaleFactor();
-        }
-
-        Gfx::SizeF toLogical(const Gfx::SizeF& s) const
-        {
-            return s / scaleFactor();
-        }
-
-        Gfx::RectF toLogical(const Gfx::RectF& r) const
-        {
-            return Gfx::RectF(toLogical(r.topLeft()), toLogical(r.size()));
-        }
-
-        double toLogical(double n) const
-        {
-            return n / scaleFactor();
-        }
-
-        double toPhysical(double n) const
-        {
-            return n * scaleFactor();
-        }
-
-        double align(double n) const
-        {
-            // better name: alignGrid()
-
-            double p = toPhysical(n);
-            p = lround(p);
-            return toLogical(p);
-        }
-
-        double alignPixel(double n) const
-        {
-            double p = toPhysical(n);
-            p = lround(p + 0.5) - 0.5;
-            return toLogical(p);
-        }
-
-        double alignContour(size_t n) const
-        {
-            const double scaling = scaleFactor();
-            // keep contour size when downscaling
-            if (scaling < 1.0)
-                return toLogical( static_cast<double>(n) );
-
-            double p = toPhysical( static_cast<double>(n) );
-            size_t s = static_cast<size_t>(p);
-            return toLogical( static_cast<double>(s) );
-        }
-
-        Gfx::PointF align(const Gfx::PointF& p) const
-        {
-            Gfx::PointF pos = toPhysical(p);
-            pos.setX(lround(pos.x()));
-            pos.setY(lround(pos.y()));
-            return toLogical(pos);
-        }
-
-        Gfx::SizeF align(const Gfx::SizeF& s) const
-        {
-            Gfx::SizeF size = toPhysical(s);
-            size.setWidth(lround(size.width()));
-            size.setHeight(lround(size.height()));
-            return toLogical(size);
-        }
-
-        Gfx::RectF align(const Gfx::RectF& rect) const
-        {
-            Gfx::PointF pos = toPhysical(rect.topLeft());
-            pos.setX(lround(pos.x()));
-            pos.setY(lround(pos.y()));
-
-            Gfx::SizeF size = toPhysical(rect.size());
-            size.setWidth(lround(size.width()));
-            size.setHeight(lround(size.height()));
-
-            return toLogical(Gfx::RectF(pos, size));
-        }
+    private:
+        //
+        // TODO: review region API
+        //
+        void attachRegion(PaintRegion& region);
+        
+        void detachRegion(PaintRegion& region);
 
     private:
-        Painter*                   _painter;
-        std::vector<PaintSurface*> _regions;
+        void attachPainter(Painter& painter);
+
+        void detachPainter(Painter& painter);
+
+    private:
+        Painter*                  _painter;
+        std::vector<PaintRegion*> _regions;
 };
 
 } // namespace

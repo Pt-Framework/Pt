@@ -239,6 +239,8 @@ void CheckBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Painter painter(surface);
     painter.setClip(rect);
 
+    const Gfx::Scaling& scaling = painter.scaling();
+
     double space = std::min<double>(_boxSize.width() / 2, _font.size() / 1.5);
 
     double boxX = space;
@@ -253,12 +255,12 @@ void CheckBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
     double textX = space + _boxSize.width() + space;
     //double textY = size().height() / 2.0 - tm.height() / 2.0 + tm.ascent();
-    double textY = painter.align(size().height() / 2.0) + tm.capHeight() / 2.0;
+    double textY = scaling.align(size().height() / 2.0) + tm.capHeight() / 2.0;
 
     // NOTE: textY needs to be aligned to match the alignment of the box rect
 
     Gfx::PointF textPos(textX, textY);
-    textPos = painter.align(textPos);
+    textPos = scaling.align(textPos);
 
     Gfx::RectF mnemonicRect;
 

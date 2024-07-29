@@ -631,7 +631,7 @@ void Form::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
     //
     // align to physical pixel grid
     //
-    Gfx::PointF aligedPos = _surface.align(pos);
+    Gfx::PointF aligedPos = _surface.scaling().align(pos);
 
     //
     // send move event
@@ -658,7 +658,7 @@ void Form::onMoveEvent(const MoveEvent& ev)
 
 void Form::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 {
-    Gfx::SizeF alignedSize = _surface.align(size);
+    Gfx::SizeF alignedSize = _surface.scaling().align(size);
 
     ResizeEvent rev(widget, alignedSize);
     Application::instance().commitEvent(rev);

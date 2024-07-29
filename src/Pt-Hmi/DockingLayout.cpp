@@ -302,7 +302,9 @@ void DockingLayout::onLayout(const Gfx::RectF& rect)
                 //
                 // TODO: align preferred size also in all other cases
                 //
-                double preferredHeight = (*it)->surface().align( (*it)->preferredSize().height() );
+                const Gfx::Scaling& scaling = (*it)->surface().scaling();
+
+                double preferredHeight = scaling.align( (*it)->preferredSize().height() );
 
                 posBottom -= preferredHeight + (*it)->margin().bottom();
 

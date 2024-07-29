@@ -217,10 +217,7 @@ Gfx::Color PaintData::penColor() const
 
 void PaintData::onSetPen(const Gfx::Pen& pen)
 {
-    Gfx::Canvas* canvas = this->canvas();
-
-    double scaledSize = canvas ? canvas->scaling().toPhysical( pen.size() )
-                               : 1.0;
+    double scaledSize = scaling().toPhysical( pen.size() );
 
     // keep pen size when downscaling
     size_t penSize = scaledSize < 1.0 ? 1 
@@ -365,9 +362,7 @@ HRGN PaintData::clipRect() const
 
 void PaintData::onSetClip(const Gfx::RectF& rectF)
 {
-    Gfx::Canvas* canvas = this->canvas();
-
-    Gfx::Rect rect = round( canvas->scaling().toPhysical(rectF) );
+    Gfx::Rect rect = round( scaling().toPhysical(rectF) );
             
     if(_clipRect)
     {

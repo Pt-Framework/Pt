@@ -94,11 +94,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         
         Gfx::PaintData* getPaint(Gfx::PaintData* paint);
 
-        Gfx::Canvas* canvas();
-
-        void finish();
-
-        double scaleFactor() const;
+        Gfx::Canvas* beginPaint(Gfx::PaintData& paint);
 
         void setScaleFactor(double scaleFactor);
 
@@ -124,10 +120,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
             return _scaling;
         }
 
-        virtual void onFinish()
-        {
-            finish();
-        }
+        virtual void onFinish();
 
     public:
         void setClip(const Gfx::RectF& clip);

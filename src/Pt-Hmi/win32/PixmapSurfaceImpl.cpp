@@ -257,13 +257,13 @@ Gfx::PaintData* PixmapSurfaceImpl::getPaint(Gfx::PaintData* p)
 }
 
 
-Gfx::Canvas* PixmapSurfaceImpl::canvas()
+Gfx::Canvas* PixmapSurfaceImpl::beginPaint(Gfx::PaintData& paint)
 {
     return this;
 }
 
 
-void PixmapSurfaceImpl::finish()
+void PixmapSurfaceImpl::onFinish()
 {
     SelectObject(_dc, _oldPen);
     SelectObject(_dc, _oldBrush);
@@ -276,12 +276,6 @@ void PixmapSurfaceImpl::finish()
 const Gfx::ImageFormat& PixmapSurfaceImpl::onGetFormat() const
 {
     return Gfx::ImageFormat::argb32();
-}
-
-
-double PixmapSurfaceImpl::scaleFactor() const
-{
-    return _scaling.scaleFactor();
 }
 
 

@@ -458,7 +458,7 @@ void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
 
 void ShellWM::onMove(ShellWindowFrame& frame, const Gfx::PointF& pos)
 {
-    Gfx::PointF aligedPos = _surface.align(pos);
+    Gfx::PointF aligedPos = _surface.scaling().align(pos);
 
     MoveEvent mev(frame, aligedPos);
     Application::instance().commitEvent(mev);

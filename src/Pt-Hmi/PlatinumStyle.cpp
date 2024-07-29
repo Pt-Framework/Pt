@@ -90,7 +90,7 @@ void PlatinumRendererBase::renderFrame(Gfx::Painter& painter,
                                        const Gfx::Pen& pen,
                                        double corner) const
 {
-    double inset = painter.alignContour( pen.size() ) / 2;
+    double inset = painter.scaling().alignContour( pen.size() ) / 2;
 
     Gfx::Polygon polygon = toPolygon(rect, inset, corner);
 
@@ -105,7 +105,7 @@ void PlatinumRendererBase::renderPlane(Gfx::Painter& painter,
                                        double corner) const
 
 {
-    double inset = painter.toLogical(0.5);
+    double inset = painter.scaling().toLogical(0.5);
 
     Gfx::Polygon polygon = toPolygon(rect, inset, corner);
 
@@ -237,15 +237,17 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
                                                 const Gfx::Brush& brush,
                                                 const Gfx::Pen& pen) const 
 {
-    double corner = painter.align(1.0);
+    const Gfx::Scaling& scaling = painter.scaling();
+
+    double corner = scaling.align(1.0);
     
     Gfx::RectF borderRect( button.size() );
     _baseRenderer.renderPlane(painter, borderRect, brush, corner);
 
     if( button.hasFocus() )
     {
-        double inset = painter.toLogical(0.5);
-        double focusOffset = painter.align(2.0) + inset;
+        double inset = scaling.toLogical(0.5);
+        double focusOffset = scaling.align(2.0) + inset;
 
         Gfx::RectF focusRect( button.size() );
         focusRect.shift(focusOffset, focusOffset);
@@ -319,11 +321,11 @@ void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
                                            const Gfx::Brush& brush,
                                            const Gfx::Pen& pen) const
 {
-    Gfx::RectF boxRect = painter.align(box);
+    const Gfx::Scaling& scaling = painter.scaling();
 
-    double inset = painter.toLogical(0.5);
-
-    double checkOffset = painter.alignContour(3);
+    Gfx::RectF boxRect = scaling.align(box);
+    double inset = scaling.toLogical(0.5);
+    double checkOffset = scaling.alignContour(3);
 
     Gfx::RectF checkRect = boxRect;
     checkRect.shift(checkOffset, checkOffset);
@@ -404,7 +406,7 @@ void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
                                                const Gfx::Brush& brush) const 
 {
     Gfx::RectF borderRect( p.size() );
-    double corner = painter.align(1.0);
+    double corner = painter.scaling().align(1.0);
 
     _baseRenderer.renderPlane(painter, borderRect, brush, corner);
 }
@@ -417,7 +419,7 @@ void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
                                           const Gfx::Pen& pen) const 
 {
     Gfx::RectF borderRect( p.size() );
-    double corner = painter.align(1.0);
+    double corner = painter.scaling().align(1.0);
 
     _baseRenderer.renderFrame(painter, borderRect, pen, corner);
 }
@@ -454,7 +456,7 @@ void PlatinumLabelRenderer::onRenderBackground(const Label& label,
                                                const Gfx::Brush& brush) const 
 {
     Gfx::RectF borderRect( label.size() );
-    double corner = painter.align(1.0);
+    double corner = painter.scaling().align(1.0);
 
     _baseRenderer.renderPlane(painter, borderRect, brush, corner);
 }
@@ -467,7 +469,7 @@ void PlatinumLabelRenderer::onRenderFrame(const Label& label,
                                           const Gfx::Pen& contour) const 
 {
     Gfx::RectF borderRect( label.size() );
-    double corner = painter.align(1.0); 
+    double corner = painter.scaling().align(1.0); 
 
     _baseRenderer.renderFrame(painter, borderRect, contour, corner);
 }
@@ -534,7 +536,7 @@ void PlatinumLineEditRenderer::onRenderBackground(const LineEdit& le,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& brush) const
 {
-    const double inset = painter.alignContour( contour.size() ) / 2;
+    const double inset = painter.scaling().alignContour( contour.size() ) / 2;
 
     Gfx::RectF borderRect( le.size() );
     borderRect.shift(inset, inset);
@@ -609,7 +611,7 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
 
     size -= 1;
 
-    double inset = painter.alignContour( contour.size() ) / 2;
+    double inset = painter.scaling().alignContour( contour.size() ) / 2;
 
     //
     // icon strip on the left side
@@ -811,7 +813,7 @@ void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
                                          const Gfx::Brush& foreground,
                                          const Gfx::Pen& contour) const
 {
-    const double inset = painter.alignContour( contour.size() ) / 2;
+    const double inset = painter.scaling().alignContour( contour.size() ) / 2;
 
     Gfx::RectF borderRect = Gfx::RectF( s.size() );
     borderRect.shift(inset, inset);
@@ -871,10 +873,12 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
                                             const Gfx::Font& font
                                          ) const
 {
-    double barHeight = painter.align(3.0);
+    const Gfx::Scaling& scaling = painter.scaling();
+
+    double barHeight = scaling.align(3.0);
     
     double boxY = p.size().height() / 2 - barHeight / 2;
-    boxY = painter.align(boxY);
+    boxY = scaling.align(boxY);
 
     Gfx::PointF barPos(0.0, boxY);
     Gfx::SizeF barSize(p.size().width(), barHeight);
@@ -1002,7 +1006,7 @@ void PlatinumListBoxRenderer::onRenderFrame(const ListBox& lb,
                                             const Gfx::RectF& rect,
                                             const Gfx::Pen& pen) const 
 {
-    const double inset = painter.alignContour( pen.size() ) / 2;
+    const double inset = painter.scaling().alignContour( pen.size() ) / 2;
 
     Gfx::RectF borderRect = Gfx::RectF( lb.size() );
     borderRect.shift(inset, inset);
@@ -1086,7 +1090,7 @@ void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& background) const
 {
-    const double inset = painter.alignContour( contour.size() ) / 2;
+    const double inset = painter.scaling().alignContour( contour.size() ) / 2;
 
     Gfx::RectF borderRect = Gfx::RectF( cb.size() );
     borderRect.shift(inset, inset);
@@ -1116,20 +1120,22 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
                                               const Gfx::Pen& contour,
                                               const Gfx::Brush& foreground) const
 {
-    double pixelWidth = painter.toLogical(1.0);
+    const Gfx::Scaling& scaling = painter.scaling();
+
+    double pixelWidth = scaling.toLogical(1.0);
     
     double buttonX = cb.size().width() - cb.size().height();
     double buttonWidth = cb.size().height();
     double buttonHeight = cb.size().height();
     
-    double gap = painter.align(5);
+    double gap = scaling.align(5);
 
     painter.setPen(contour);
     painter.drawLine( Gfx::PointF(buttonX + pixelWidth, gap),
                       Gfx::PointF(buttonX + pixelWidth, cb.size().height() - gap) );
 
     double triangleWidth = buttonWidth / 3.0;
-    triangleWidth = painter.align(triangleWidth);
+    triangleWidth = scaling.align(triangleWidth);
 
     // even number of pixels
     int widthPixels = Pt::lround(triangleWidth / pixelWidth);
@@ -1137,13 +1143,13 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
       triangleWidth += pixelWidth;
 
     double triangleHeight = triangleWidth / 2.0;
-    triangleHeight = painter.align(triangleHeight);
+    triangleHeight = scaling.align(triangleHeight);
 
     double x = (buttonWidth - triangleWidth) / 2;
-    x = buttonX + painter.align(x);
+    x = buttonX + scaling.align(x);
     
     double y = (buttonHeight - triangleHeight) / 2;
-    y = painter.align(y);
+    y = scaling.align(y);
 
     Gfx::PointF triangle[3];
     triangle[0] = Gfx::PointF(x, y);
@@ -1268,7 +1274,7 @@ void PlatinumSpinBoxRenderer::onRenderBackground(const SpinBox& sb,
     double buttonWidth = sb.size().height();
     double boxWidth = sb.size().width() - 2 * buttonWidth;
 
-    const double inset = painter.alignContour( contour.size() ) / 2;
+    const double inset = painter.scaling().alignContour( contour.size() ) / 2;
 
     Gfx::RectF boxRect( Gfx::PointF(buttonWidth, 0), 
                         Gfx::SizeF(boxWidth, sb.size().height() ) );
@@ -1291,12 +1297,14 @@ void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb,
                                              const Gfx::Brush& foreground,
                                              const Gfx::Pen& contour) const
 {
+    const Gfx::Scaling& scaling = painter.scaling();
+
     double buttonWidth = sb.size().height();
     double buttonHeight = sb.size().height();
-    double pixelWidth = painter.toLogical(1.0);
+    double pixelWidth = scaling.toLogical(1.0);
 
     double triangleWidth = buttonWidth / 3;
-    triangleWidth = painter.align(triangleWidth);
+    triangleWidth = scaling.align(triangleWidth);
 
     // even number of pixels
     int widthPixels = Pt::lround(triangleWidth / pixelWidth);
@@ -1304,13 +1312,13 @@ void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb,
       triangleWidth += pixelWidth;
 
     double triangleHeight = triangleWidth / 2.0;
-    triangleHeight = painter.align(triangleHeight);
+    triangleHeight = scaling.align(triangleHeight);
 
     double x = (buttonWidth - triangleWidth) / 2;
-    x = painter.align(x);
+    x = scaling.align(x);
     
     double y = (buttonHeight - triangleHeight) / 2;
-    y = painter.align(y);
+    y = scaling.align(y);
 
     Gfx::PointF triangle[4];
 

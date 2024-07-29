@@ -229,8 +229,10 @@ void MinimizeButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Painter painter(surface);
     painter.setClip(rect);
 
-    double inset = painter.align(3.0);
-    double height = painter.align(2.0);
+    const Gfx::Scaling& scaling = painter.scaling();
+
+    double inset = scaling.align(3.0);
+    double height = scaling.align(2.0);
 
     Gfx::RectF frameSymbol( geometry().left() + inset,
                             geometry().right() - inset,
@@ -263,7 +265,9 @@ void MaximizeButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Painter painter(surface);
     painter.setClip(rect);
 
-    double inset = painter.align(3.0) + painter.toLogical(0.5);
+    const Gfx::Scaling& scaling = painter.scaling();
+
+    double inset = scaling.align(3.0) + scaling.toLogical(0.5);
 
     Gfx::RectF frameSymbol( geometry().left() + inset,
                             geometry().right() - inset,
@@ -275,7 +279,7 @@ void MaximizeButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     painter.setPen(pen);
     painter.drawRect(frameSymbol);
 
-    frameSymbol.setHeight( painter.align(2.0) );
+    frameSymbol.setHeight( scaling.align(2.0) );
     
     painter.setBrush( Gfx::Color(65535, 65535, 65535) );
     painter.fillRect(frameSymbol);
@@ -303,9 +307,11 @@ void CloseButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Painter painter(surface);
     painter.setClip(rect);
 
-    double margin = painter.align(3.0);
-    double offset = painter.align(1.0);
-    double inset = painter.toLogical(0.5);
+    const Gfx::Scaling& scaling = painter.scaling();
+
+    double margin = scaling.align(3.0);
+    double offset = scaling.align(1.0);
+    double inset = scaling.toLogical(0.5);
 
     const Gfx::RectF& buttonRect = geometry();
 
@@ -357,10 +363,12 @@ void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Painter painter(surface);
     painter.setClip(rect);
 
-    double pixelWidth = painter.toLogical(1.0);
+    const Gfx::Scaling& scaling = painter.scaling();
+
+    double pixelWidth = scaling.toLogical(1.0);
 
     double triangleWidth = geometry().height() / 2.0;
-    triangleWidth = painter.align(triangleWidth);
+    triangleWidth = scaling.align(triangleWidth);
 
     // even number of pixels
     int pixelsPerWidth = Pt::lround(triangleWidth / pixelWidth);
@@ -368,13 +376,13 @@ void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
       triangleWidth += pixelWidth;
 
     double triangleHeight = triangleWidth / 2.0;
-    triangleHeight = painter.align(triangleHeight);
+    triangleHeight = scaling.align(triangleHeight);
 
     double x = (geometry().width() - triangleWidth) / 2.0;
-    x = geometry().x() + painter.align(x);
+    x = geometry().x() + scaling.align(x);
     
     double y = (geometry().height() - triangleHeight) / 2.0;
-    y = geometry().y() + painter.align(y - 1);
+    y = geometry().y() + scaling.align(y - 1);
 
     Gfx::PointF triangle[4];
     triangle[0] = Gfx::PointF(x, y);
@@ -592,8 +600,10 @@ const Gfx::RectF& ShellWindowFrame::frameRect() const
 
 void ShellWindowFrame::setFrame(double bw, double th)
 {
-    _borderWidth = surface().align(bw);
-    _titleHeight = surface().align(th);
+    const Gfx::Scaling& scaling = surface().scaling();
+
+    _borderWidth = scaling.align(bw);
+    _titleHeight = scaling.align(th);
 
     Gfx::PointF clientBoundsPos(_borderWidth, _borderWidth + _titleHeight);
     _clientBounds.setOrigin(clientBoundsPos);
@@ -895,7 +905,7 @@ void ShellWindowFrame::onRequestResize(const Gfx::SizeF& size)
 
 void ShellWindowFrame::onResize(Window& w, const Gfx::SizeF& s)
 {
-    Gfx::SizeF alignedSize = surface().align(s);
+    Gfx::SizeF alignedSize = surface().scaling().align(s);
 
     if( alignedSize.width() > w.maximumSize().width() )
         alignedSize.setWidth( w.maximumSize().width() );
@@ -1436,6 +1446,8 @@ void ShellWindowFrame::onPaintEvent(const PaintEvent& ev)
     Gfx::Painter painter( surface() );
     painter.setClip(rect);
 
+    const Gfx::Scaling& scaling = surface().scaling();
+
     Gfx::Color color = _window->isActive() ? _wm->activeColor()
                                            : _wm->inactiveColor();
     //
@@ -1481,8 +1493,8 @@ void ShellWindowFrame::onPaintEvent(const PaintEvent& ev)
     painter.fillRect(titleArea);
 
     const size_t penSize = 1;
-    unsigned scaledPenSize = static_cast<unsigned>( painter.toPhysical(penSize) );
-    const double offset = painter.toLogical(scaledPenSize) / 2.0;
+    unsigned scaledPenSize = static_cast<unsigned>( scaling.toPhysical(penSize) );
+    const double offset = scaling.toLogical(scaledPenSize) / 2.0;
 
     //
     // light outer and inner border contour
@@ -1581,17 +1593,17 @@ void ShellWindowFrame::onPaintEvent(const PaintEvent& ev)
                               (color.blue() * 9) / 10 );
     Gfx::Pen gripPenDark(gripColorDark, 1);
 
-    unsigned linePenSize = static_cast<unsigned>( painter.toPhysical(penSize) );
-    const double lineSize = painter.toLogical(linePenSize);
+    unsigned linePenSize = static_cast<unsigned>( scaling.toPhysical(penSize) );
+    const double lineSize = scaling.toLogical(linePenSize);
 
-    double lineOffset = painter.align(2.0);
+    double lineOffset = scaling.align(2.0);
     double gripHeight = (8 * lineSize) + (3 * lineOffset);
     
     double gripLeft = textPos.x() + fm.width() + _borderWidth;
     double gripRight = pos.x() + size().width() - _borderWidth - 3 * _titleHeight;
     double gripOffset = (_titleHeight + _borderWidth - gripHeight) / 2.0;
     
-    double gripY = pos.y() + painter.align(gripOffset);
+    double gripY = pos.y() + scaling.align(gripOffset);
     gripY += offset;
 
     for(int n = 0; n < 4; ++n)

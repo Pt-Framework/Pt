@@ -83,8 +83,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
         virtual Gfx::Image toImage() const;
 
     protected:
-        virtual double onScaleFactor() const;
-
         virtual const Gfx::ImageFormat& onGetFormat() const;
 
         virtual const Gfx::SizeF& onSize() const
@@ -94,7 +92,7 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* paint);
 
-        virtual Gfx::Canvas* onGetCanvas();
+        virtual Gfx::Canvas* onBeginPaint(Gfx::PaintData& paint);
 
         virtual const Gfx::Scaling& onGetScaling() const;
 

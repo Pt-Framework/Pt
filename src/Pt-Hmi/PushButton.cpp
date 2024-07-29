@@ -301,7 +301,7 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
     // use descent as additional spacing
     double textHeight = _textMetrics.height() + _textMetrics.descent(); 
 
-    Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );
+    Gfx::SizeF pictureSize = surface().scaling().toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = 0;
@@ -332,9 +332,11 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 {    
     Base::onLayout(rect);
 
+    const Gfx::Scaling& scaling = surface().scaling();
+
     double spacing = _picture.empty() || text().empty() ? 0 : _textMetrics.height() * 0.5;
     
-    Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );
+    Gfx::SizeF pictureSize = scaling.toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = _textMetrics.width() + spacing + pictureWidth;
@@ -389,11 +391,11 @@ void PushButton::onLayout(const Gfx::RectF& rect)
         _iconPos.set(pictureX + pictureXOff, 
                      pictureY + pictureYOff);
 
-        _iconPos = surface().align(_iconPos);
+        _iconPos = scaling.align(_iconPos);
     }
 
     _textPos.set(textX, textY);
-    _textPos = surface().align(_textPos);
+    _textPos = scaling.align(_textPos);
 
     repaint();
 }
@@ -413,7 +415,7 @@ void PushButton::onIconChanged()
 
     if( ! _icon.empty() )
     {
-        const Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
+        const Gfx::SizeF scaledSize = surface().scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _renderer->prepareIcon(*this, options, iconImage, _picture);
     }
@@ -444,7 +446,7 @@ void PushButton::onInvalidate()
     //// onIconChanged()
     if( ! _icon.empty() )
     {
-        const Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
+        const Gfx::SizeF scaledSize = surface().scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _renderer->prepareIcon(*this, options, iconImage, _picture);
     }

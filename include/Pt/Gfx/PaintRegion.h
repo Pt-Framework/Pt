@@ -48,6 +48,8 @@ namespace Gfx {
 */
 class PT_GFX_API PaintRegion : public PaintSurface
 {
+    friend class PaintSurface;
+
     public:
         PaintRegion();
 
@@ -76,21 +78,19 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual const Gfx::Scaling& onGetScaling() const;
 
-        virtual double onScaleFactor() const;
+        virtual PaintData* onGetPaint(PaintData* paint);
 
-        virtual PaintData* onGetPaint(PaintData*);
-
-        virtual Canvas* onGetCanvas();
-
-        virtual RectF onGetRegion() const;
-
-        virtual void onDestroy(PaintSurface* region);
+        virtual Canvas* onBeginPaint(PaintData& paint);
 
         virtual void onReset();       
 
     private:
+        virtual void onDetachSurface(PaintSurface* region);
+    
+    private:
         PaintSurface* _surface;
         Gfx::RectF    _area;
+        Gfx::Scaling  _scaling;
 };
 
 } // namespace

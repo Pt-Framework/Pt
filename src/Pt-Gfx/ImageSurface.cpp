@@ -71,10 +71,7 @@ void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode)
 
 void ImagePaint::onSetPen(const Gfx::Pen& pen)
 {
-    Gfx::Canvas* canvas = this->canvas();
-
-    double scaledSize = canvas ? canvas->scaling().toPhysical( pen.size() )
-                               : 1.0;
+    double scaledSize = scaling().toPhysical( pen.size() );
 
     // keep pen size when downscaling
     size_t penSize = scaledSize < 1.0 ? 1 
@@ -141,12 +138,6 @@ void ImageSurface::setScaleFactor(double scaleFactor)
 }
 
 
-double ImageSurface::onScaleFactor() const
-{
-    return _scaling.scaleFactor();
-}
-
-
 const Gfx::SizeF& ImageSurface::onSize() const
 {
     return _size;
@@ -193,7 +184,7 @@ Gfx::PaintData* ImageSurface::onGetPaint(Gfx::PaintData* p)
 }
 
 
-Gfx::Canvas* ImageSurface::onGetCanvas()
+Canvas* ImageSurface::onBeginPaint(PaintData&)
 {
     return this;
 }
@@ -457,14 +448,14 @@ std::vector<std::string> ImageSurface::fontNames()
 }
 
 
-void ImageSurface::drawSurface(const Gfx::PointF& toF2, const PaintSurface& surface)
+void ImageSurface::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
 {
-    Gfx::PointF to = _scaling.toPhysical(toF2);
+    Gfx::PointF to = _scaling.toPhysical(toF);
 
-    const ImageSurface* isurface = dynamic_cast<const ImageSurface*>(&surface);
-    if(isurface)
+    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
+    if(imageSurface)
     {
-        const Gfx::Image& image = isurface->image();
+        const Gfx::Image& image = imageSurface->image();
         drawImage(to, image);
         return;
     }
@@ -472,7 +463,7 @@ void ImageSurface::drawSurface(const Gfx::PointF& toF2, const PaintSurface& surf
     Pt::Gfx::Image image = surface.toImage();
     if( image.format() == format() )
     {
-        drawImage(toPhysical(to), image);
+        drawImage(to, image);
         return;
     }
 
@@ -482,16 +473,16 @@ void ImageSurface::drawSurface(const Gfx::PointF& toF2, const PaintSurface& surf
 }
 
 
-void ImageSurface::drawSurface(const Gfx::PointF& toF2, 
+void ImageSurface::drawSurface(const Gfx::PointF& toF, 
                                const PaintSurface& surface, const Gfx::RectF& pmRect2)
 {
-    Gfx::PointF to = _scaling.toPhysical(toF2);
+    Gfx::PointF to = _scaling.toPhysical(toF);
     Gfx::RectF rect = _scaling.toPhysical(pmRect2);
 
-    const ImageSurface* isurface = dynamic_cast<const ImageSurface*>(&surface);
-    if(isurface)
+    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
+    if(imageSurface)
     {
-        const Gfx::Image& image = isurface->image();
+        const Gfx::Image& image = imageSurface->image();
         drawImage(to, image, rect);
         return;
     }
@@ -499,7 +490,7 @@ void ImageSurface::drawSurface(const Gfx::PointF& toF2,
     Pt::Gfx::Image image = surface.toImage();
     if( image.format() == format() )
     {
-        drawImage(toPhysical(to), image, rect);
+        drawImage(to, image, rect);
         return;
     }
 

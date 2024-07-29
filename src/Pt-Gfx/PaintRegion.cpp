@@ -112,60 +112,40 @@ const Gfx::SizeF& PaintRegion::onSize() const
 }
 
 
-double PaintRegion::onScaleFactor() const
-{
-    if(_surface)
-        return _surface->scaleFactor();
-
-    return 1.0;
-}
-
-
-RectF PaintRegion::onGetRegion() const
-{
-    if(_surface)
-    {
-        RectF region = _surface->region();
-        region.shift( _area.topLeft().x(),
-                      _area.topLeft().y() );
-
-        region.setSize( _area.size() );
-
-        return region;
-    }
-
-    return _area;
-}
-
-
-Canvas* PaintRegion::onGetCanvas()
-{
-    Canvas* canvas = 0;
-
-    if(_surface)
-    {
-        canvas = _surface->onGetCanvas();
-    }
-
-    return canvas;
-}
-
-
 PaintData* PaintRegion::onGetPaint(PaintData* p)
 {
     if(_surface)
-        return _surface->onGetPaint(p);
+        return _surface->getPaint(p);
 
     return 0;
 }
 
 
-void PaintRegion::onDestroy(PaintSurface* region)
+Canvas* PaintRegion::onBeginPaint(PaintData& paint)
+{
+    if( ! _surface)
+        return 0;
+
+    Canvas* canvas = _surface->beginPaint(paint);
+
+    RectF r = paint.region();
+    r.shift( _area.topLeft().x(),
+              _area.topLeft().y() );
+
+    r.setSize( _area.size() );
+
+    paint.setRegion(r);
+
+    return canvas;
+}
+
+
+void PaintRegion::onDetachSurface(PaintSurface* region)
 {
     _surface = 0;
     _area.clear();
 
-    PaintSurface::onDestroy(region);
+    PaintSurface::onReset();
 }
 
 
@@ -184,7 +164,7 @@ const Gfx::ImageFormat& PaintRegion::onGetFormat() const
 
 const Gfx::Scaling& PaintRegion::onGetScaling() const
 {
-    return _surface->scaling();
+    return _surface ? _surface->scaling() : _scaling;
 }
 
 

@@ -87,7 +87,7 @@ double ScrollLayout::maximumY() const
 
 void ScrollLayout::scrollX(double posX)
 {
-    double xpos = surface().align(posX);
+    double xpos = surface().scaling().align(posX);
 
     double maxPosX = _maxX - size().width();
 
@@ -126,7 +126,7 @@ void ScrollLayout::scrollX(double posX)
 
 void ScrollLayout::scrollY(double posY)
 {
-    double ypos = surface().align(posY);
+    double ypos = surface().scaling().align(posY);
 
     double maxPosY = _maxY - size().height();
 

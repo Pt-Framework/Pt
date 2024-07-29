@@ -241,13 +241,15 @@ void Menu::drawBorder(Pt::Gfx::Painter& painter, const Pt::Gfx::RectF& borderRec
     
 }
 
-void Menu::onRenderBackground(const Pt::Hmi::StyleOptions& options, Pt::Gfx::Painter& painter, const Pt::Gfx::RectF& rect) const
+void Menu::onRenderBackground(const Pt::Hmi::StyleOptions& options, 
+                              Pt::Gfx::Painter& painter, const Pt::Gfx::RectF& rect) const
 {    
     Pt::Gfx::SizeF size = this->size();
 
     size -= 1;
 
-    double inset = painter.alignContour(_pen.size()) / 2;
+    const Gfx::Scaling& scaling = painter.scaling();
+    double inset = scaling.alignContour(_pen.size()) / 2;
 
     // icon strip on the left side
 

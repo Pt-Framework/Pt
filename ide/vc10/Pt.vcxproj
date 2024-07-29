@@ -47,6 +47,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter2.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Paint.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintRegion.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintSurface.h" />
@@ -58,6 +59,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb16Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Scaling.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Transform.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h" />
@@ -578,6 +580,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\ImageSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter2.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\JpegReader.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Paint.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Painter.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PaintRegion.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PaintSurface.cpp" />

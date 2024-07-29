@@ -34,330 +34,6 @@ namespace Pt {
 
 namespace Gfx {
 
-PaintData::PaintData()
-: _painter(0)
-, _canvas(0)
-, _isDirty(false)
-, _scaleFactor(1.0)
-{
-}
-
-
-PaintData::~PaintData()
-{
-    if(_canvas)
-    {
-        _canvas->detachPaint();
-        _canvas = 0;
-    }
-}
-
-
-void PaintData::onDetach(Canvas& canvas)
-{
-    if(_canvas)
-    {
-        onFinish();
-        _canvas = 0;
-    }
-}
-
-
-void PaintData::attachPainter(Painter& painter)
-{
-    _painter = &painter;
-    _isDirty = true;
-}
-
-
-void PaintData::begin(PaintSurface& surface)
-{
-    finish();
-
-    double scaleFactor = surface.scaling().scaleFactor();
-
-    if(_scaleFactor != scaleFactor)
-    {
-        _scaleFactor = scaleFactor;
-        _isDirty = true;
-    }
-
-    if(_isDirty)
-    {
-        onSetPen( _painter->pen() );
-        onSetCompositionMode( _painter->compositionMode() );
-        onSetBrush( _painter->brush() );
-        onSetFont( _painter->font() );
-
-        Gfx::RectF clip = _painter->clip();
-        if( clip.isNull() )
-        {
-            onResetClip();
-        }
-        else
-        {
-            clip.shift( origin().x(), origin().y() );
-            onSetClip(clip);
-        }
-
-        _isDirty = false;
-    }
-    
-    _region = surface.region();
-
-    Canvas* canvas = surface.canvas();
-    if(canvas)
-    {
-        canvas->attachPaint(*this);
-        _canvas = canvas;
-    }
-    
-    if(_canvas && _painter)
-    {
-        _canvas->setCompositionMode( _painter->compositionMode() );
-        _canvas->setPen( _painter->pen() );
-        _canvas->setBrush( _painter->brush() );
-        _canvas->setFont( _painter->font() );
-
-        Gfx::RectF clip = _painter->clip();
-        if( clip.isNull() )
-        {
-            _canvas->resetClip();
-        }
-        else
-        {
-          clip.shift( origin().x(), origin().y() );
-          _canvas->setClip(clip);
-        }
-    }
-}
-
-
-void PaintData::finish()
-{
-    if(_canvas)
-    {
-        onFinish();
-
-        _canvas->detachPaint();
-        _canvas = 0;
-    }
-}
-
-
-Canvas* PaintData::canvas()
-{
-    return _canvas;
-}
-
-
-const RectF& PaintData::region() const
-{
-    return _region;
-}
-
-
-const PointF& PaintData::origin() const
-{
-    return _region.topLeft();
-}
-
-
-void PaintData::setCompositionMode(const Gfx::CompositionMode& mode)
-{
-    if(_canvas)
-        _canvas->setCompositionMode(mode);
-}
-
-
-void PaintData::setPen(const Pen& pen)
-{
-    onSetPen(pen);
-
-    if(_canvas)
-        _canvas->setPen(pen);
-}
-
-
-void PaintData::setBrush(const Brush& brush)
-{
-    onSetBrush(brush);
-
-    if(_canvas)
-        _canvas->setBrush(brush);
-}
-
-
-void PaintData::setFont(const Gfx::Font& font)
-{
-    onSetFont(font);
-
-    if(_canvas)
-        _canvas->setFont(font);
-}
-
-
-void PaintData::setClip(const RectF& rect)
-{ 
-    Gfx::RectF clip = rect;
-    clip.shift( origin().x(), origin().y() );
-
-    onSetClip(clip);
-
-    if(_canvas)
-        _canvas->setClip(clip);
-}
-
-
-void PaintData::resetClip()
-{
-    onResetClip();
-
-    if(_canvas)
-        _canvas->resetClip();
-}
-
-
-void PaintData::drawLine(const PointF& from, const PointF& to)
-{   
-    if(_canvas)
-    {
-        Gfx::Line line(*this, from, to);
-        _canvas->drawLine(line);
-    }
-}
-
-
-void PaintData::drawRect(const Gfx::RectF& rect)
-{
-    Gfx::RectF r = rect;
-    
-    r.shift( origin().x(), 
-             origin().y() );
-
-    if(_canvas)
-        _canvas->drawRect(r);
-}
-
-
-void PaintData::fillRect(const Gfx::RectF& rect)
-{
-    Gfx::RectF r = rect;
-    
-    r.shift( origin().x(), 
-             origin().y() );
-
-    if(_canvas)
-        _canvas->fillRect(r);
-}
-
-
-void PaintData::drawPolyline(const Gfx::PointF* ps, const size_t n)
-{
-    if(_canvas)
-    {
-        Polyline line(*this, ps, n);
-        _canvas->drawPolyline(line);
-    }
-}
-
-
-void PaintData::fillPolygon(const Gfx::PointF* ps, const size_t n)
-{
-    if(_canvas)
-    {
-        Polyline line(*this, ps, n);
-        _canvas->fillPolygon(line);
-    }
-}
-
-
-void PaintData::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
-{
-    Pt::Gfx::PointF p = topLeft + origin();
-
-    if(_canvas)
-        _canvas->drawEllipse(p, size);
-}
-
-
-void PaintData::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
-{
-    Pt::Gfx::PointF p = topLeft + origin();
-
-    if(_canvas)
-        _canvas->fillEllipse(p, size);
-}
-
-
-FontMetrics PaintData::fontMetrics(const Pt::String& text) const
-{
-    if(_canvas)
-        return _canvas->fontMetrics(text);
-
-    return FontMetrics();
-}
-
-
-void PaintData::drawText(const PointF& to, const Pt::String& text)
-{
-    Pt::Gfx::PointF p = to + origin(); 
-    if(_canvas)
-        _canvas->drawText(p, text);
-}
-
-
-void PaintData::drawText(const PointF& to, const Pt::String& text, const Transform& t)
-{
-    Pt::Gfx::PointF p = to + origin(); 
-    if(_canvas)
-        _canvas->drawText(p, text, t);
-}
-
-
-void PaintData::drawImage(const Gfx::PointF& to, 
-                          const Gfx::Image& image)
-{
-    Pt::Gfx::PointF p = to + origin(); 
-    if(_canvas)
-        _canvas->drawImage(p, image);
-}
-
-
-void PaintData::drawImage(const Gfx::PointF& to, 
-                          const Gfx::Image& image, 
-                          const Gfx::RectF& rect)
-{
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_canvas)
-        _canvas->drawImage(p, image, rect);
-}
-
-
-void PaintData::drawSurface(const Gfx::PointF& to, 
-                            const Gfx::PaintSurface& surface)
-{
-    Pt::Gfx::PointF p = to + origin();
-    if(_canvas)
-        _canvas->drawSurface(p, surface);
-}
-
-
-void PaintData::drawSurface(const Gfx::PointF& to,
-                            const Gfx::PaintSurface& surface,
-                            const Gfx::RectF& rect)
-{
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_canvas)
-        _canvas->drawSurface(p, surface, rect);
-}
-
-//
-// Painter
-//
-
 Painter::Painter()
 : _surface(0)
 , _paint(0)
@@ -377,7 +53,7 @@ Painter::~Painter()
 {
     if( _surface )
     {
-        _surface->detachPainter();
+        _surface->detachPainter(*this);
         _surface = 0;
     }
 
@@ -396,13 +72,17 @@ void Painter::begin(PaintSurface& surface)
     if(_paint != paint)
     {
         delete _paint;
-        _paint = paint;
-
-        _paint->attachPainter(*this);
+        _paint = 0;
     }
     
-    if(_paint)
-        _paint->begin(*_surface);
+    if(paint)
+    {
+        paint->reset(*this);
+
+        Canvas* canvas = surface.beginPaint(*paint);
+        if(canvas)
+            paint->begin(*canvas);
+    }
 }
 
 
@@ -416,23 +96,48 @@ void Painter::finish()
 
     if( _surface )
     {
-        _surface->detachPainter();
+        _surface->detachPainter(*this);
         _surface = 0;
     }
 }
 
 
-void Painter::onDetach(PaintSurface& surface)
+void Painter::onDetachSurface(PaintSurface& surface)
 {
     _surface = 0;
 }
 
 
+void Painter::attachPaint(PaintData& paint)
+{
+    if(_paint)
+    {
+        _paint->reset();
+        _paint = 0;
+    }
+    
+    _paint = &paint;
+}
+
+
+void Painter::detachPaint(PaintData& paint)
+{
+    if(_paint)
+    {
+        _paint = 0;
+    }
+}
+
+
 const Gfx::ImageFormat& Painter::format() const
 {
-    Gfx::PaintSurface* surface = _surface;
+    return _surface ? _surface->format() : ImageFormat::argb32();
+}
 
-    return surface ? surface->format() : ImageFormat::argb32();
+
+const Scaling& Painter::scaling() const
+{
+    return _surface ? _surface->scaling() : _scaling;
 }
 
 
@@ -665,96 +370,6 @@ void Painter::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, 
 
 void Painter::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
-}
-
-
-double Painter::scaleFactor() const
-{
-    return _surface ? _surface->scaleFactor() : 1.0;
-}
-
-
-double Painter::toPhysical(double n) const
-{
-    return _surface->toPhysical(n);
-}
-
-
-Gfx::PointF Painter::toPhysical(const Gfx::PointF& p) const
-{
-    return _surface->toPhysical(p);
-}
-
-
-Gfx::SizeF Painter::toPhysical(const Gfx::SizeF& s) const
-{
-    return _surface->toPhysical(s);
-}
-
-
-Gfx::RectF Painter::toPhysical(const Gfx::RectF& r) const
-{
-    return _surface->toPhysical(r);
-}
-
-
-double Painter::toLogical(double n) const
-{
-    return _surface->toLogical(n);
-}
-
-
-Gfx::PointF Painter::toLogical(const Gfx::PointF& p) const
-{
-    return _surface->toLogical(p);
-}
-
-
-Gfx::SizeF Painter::toLogical(const Gfx::SizeF& s) const
-{
-    return _surface->toLogical(s);
-}
-
-
-Gfx::RectF Painter::toLogical(const Gfx::RectF& r) const
-{
-    return _surface->toLogical(r);
-}
-
-
-double Painter::align(double n) const
-{
-    return _surface->align(n);
-}
-
-
-double Painter::alignPixel(double n) const
-{
-    return _surface->alignPixel(n);
-}
-
-
-double Painter::alignContour(size_t n) const
-{
-    return _surface->alignContour(n);
-}
-
-
-Gfx::PointF Painter::align(const Gfx::PointF& p) const
-{
-    return _surface->align(p);
-}
-
-
-Gfx::SizeF Painter::align(const Gfx::SizeF& s) const
-{
-    return _surface->align(s);
-}
-
-
-Gfx::RectF Painter::align(const Gfx::RectF& rect) const
-{
-    return _surface->align(rect);
 }
 
 } // namespace

@@ -232,6 +232,8 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
     double w = 0;
     double h = 0;
 
+    const Gfx::Scaling& scaling = surface().scaling();
+
     if( _icon.empty() )
     {
         Adjustment a = adjustment();
@@ -245,18 +247,18 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
         _painter.setFont(_font);
 
         block.setMaxWidth(policy.size().width());
-        block.setLineSpacing(surface().align(_font.size() / 3));
+        block.setLineSpacing(scaling.align(_font.size() / 3));
         block.layout(_painter, _text);
 
-        w = block.size().width() + surface().toLogical(0.5);
-        h = block.size().height() + surface().toLogical(0.5);
+        w = block.size().width() + scaling.toLogical(0.5);
+        h = block.size().height() + scaling.toLogical(0.5);
 
-        w = surface().align(w);
-        h = surface().align(h);
+        w = scaling.align(w);
+        h = scaling.align(h);
     }
     else
     {
-        Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );
+        Gfx::SizeF pictureSize = scaling.toLogical( _picture.size() );
 
         w = static_cast<double>( pictureSize.width() );
         h = static_cast<double>( pictureSize.height() );
@@ -274,9 +276,11 @@ void Label::layoutText()
     Gfx::Painter _painter( surface() );
     _painter.setFont(_font);
 
+    const Gfx::Scaling& scaling = _painter.scaling();
+
     _textBlock.setMaxWidth( size().width() - padding().leftRight() );
     _textBlock.setAdjustment(a);
-    _textBlock.setLineSpacing(surface().align(_font.size() / 3.0));
+    _textBlock.setLineSpacing(scaling.align(_font.size() / 3.0));
     _textBlock.layout(_painter, _text);
 
     Gfx::PointF pos;
@@ -297,7 +301,7 @@ void Label::layoutText()
         case Alignment::Right:
         {
             double height = size().height() - padding().topBottom();
-            double y = (height - surface().align( _textBlock.height())) / 2;
+            double y = (height - scaling.align( _textBlock.height())) / 2;
             pos.set(padding().left(), y + padding().top());
             break;
         }
@@ -307,7 +311,7 @@ void Label::layoutText()
         case Alignment::BottomRight:
         {
             double height = size().height() - padding().topBottom();
-            double y = height - surface().align(_textBlock.height());
+            double y = height - scaling.align(_textBlock.height());
 
             pos.set( padding().left(), padding().top() + y);
             break;
@@ -320,7 +324,7 @@ void Label::layoutText()
 
 void Label::layoutImage()
 {
-    Gfx::SizeF pictureSize = surface().toLogical( _picture.size() );
+    Gfx::SizeF pictureSize = surface().scaling().toLogical( _picture.size() );
 
     switch( _alignment )
     {
@@ -484,7 +488,7 @@ void Label::onInvalidate()
     {
         _iconInvalid = false;
 
-        Gfx::SizeF scaledSize = surface().toPhysical(_iconSize);
+        Gfx::SizeF scaledSize = surface().scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _picture.set(iconImage);
 

@@ -272,7 +272,7 @@ Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Hmi::SizePolicy& policy)
     Pt::Gfx::FontMetrics fm = _painter.fontMetrics(_text);
 
     double contentHeight = std::max<Pt::ssize_t>(fm.height(), _icon.height());
-    double contentWidth = fm.width() + surface().toLogical(_picture.size().width());
+    double contentWidth = fm.width() + surface().scaling().toLogical(_picture.size().width());
 
     const Pt::Hmi::Key* sk = shortcut();
     if (sk)

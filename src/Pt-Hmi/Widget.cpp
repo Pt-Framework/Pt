@@ -579,7 +579,7 @@ const SizePolicy& Widget::sizePolicy() const
 
 void Widget::setSizePolicy(const SizePolicy& policy)
 {
-    Gfx::SizeF alignedSize = _surface.align( policy.size() );
+    Gfx::SizeF alignedSize = _surface.scaling().align( policy.size() );
     
     _sizePolicy = policy;
     _sizePolicy.setSize(alignedSize);
@@ -690,7 +690,7 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
     //const Gfx::RectF& r = ev.rect();
     
     const Gfx::RectF& r = geometry();
-    Gfx::RectF rect = _surface.align(r);
+    Gfx::RectF rect = _surface.scaling().align(r);
 
     //static int lll = 0;
     //std::clog << "LAYOUT: " << name() << " " << ++lll << std::endl;
@@ -754,21 +754,23 @@ void Widget::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void Widget::onRescale(double scaling)
+void Widget::onRescale(double scaleFactor)
 {
-    Base::onRescale(scaling);
+    Base::onRescale(scaleFactor);
 
-    _margin.set( _surface.align( _margin.left() ),
-                 _surface.align( _margin.top() ),
-                 _surface.align( _margin.right() ),
-                 _surface.align( _margin.bottom() ) );
+    const Gfx::Scaling& scaling = _surface.scaling();
 
-    _padding.set( _surface.align( _padding.left() ),
-                  _surface.align( _padding.top() ),
-                  _surface.align( _padding.right() ),
-                  _surface.align( _padding.bottom() ) );
+    _margin.set( scaling.align( _margin.left() ),
+                 scaling.align( _margin.top() ),
+                 scaling.align( _margin.right() ),
+                 scaling.align( _margin.bottom() ) );
+
+    _padding.set( scaling.align( _padding.left() ),
+                  scaling.align( _padding.top() ),
+                  scaling.align( _padding.right() ),
+                  scaling.align( _padding.bottom() ) );
     
-    _sizePolicy.setSize( _surface.align( _sizePolicy.size() ) );
+    _sizePolicy.setSize( scaling.align( _sizePolicy.size() ) );
 
     // TODO: invalidate in derived class only when neccessary
     invalidate();
@@ -791,7 +793,7 @@ void Widget::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
     //
     // align to physical pixel grid
     //
-    Gfx::PointF aligedPos = _surface.align(pos);
+    Gfx::PointF aligedPos = _surface.scaling().align(pos);
 
     //
     // send move event
@@ -862,7 +864,7 @@ void Widget::onRequestResize(const Gfx::SizeF& size)
 
 void Widget::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 {
-    Gfx::SizeF alignedSize = _surface.align(size);
+    Gfx::SizeF alignedSize = _surface.scaling().align(size);
 
     ResizeEvent rev(widget, alignedSize);
     Application::instance().commitEvent(rev);
@@ -1042,11 +1044,13 @@ const Spacing& Widget::margin() const
 
 
 void Widget::setMargin(const Spacing& s)
-{  
-    _margin.set( _surface.align( s.left() ),
-                 _surface.align( s.top() ),
-                 _surface.align( s.right() ),
-                 _surface.align( s.bottom() ) );
+{
+    const Gfx::Scaling& scaling = _surface.scaling();
+
+    _margin.set( scaling.align( s.left() ),
+                 scaling.align( s.top() ),
+                 scaling.align( s.right() ),
+                 scaling.align( s.bottom() ) );
 
     relayout();
 }
@@ -1071,11 +1075,13 @@ const Spacing& Widget::padding() const
 
 
 void Widget::setPadding( const Spacing& p )
-{   
-    _padding.set( _surface.align( p.left() ),
-                  _surface.align( p.top() ),
-                  _surface.align( p.right() ),
-                  _surface.align( p.bottom() ) );
+{
+    const Gfx::Scaling& scaling = _surface.scaling();
+
+    _padding.set( scaling.align( p.left() ),
+                  scaling.align( p.top() ),
+                  scaling.align( p.right() ),
+                  scaling.align( p.bottom() ) );
 
     relayout();
 }

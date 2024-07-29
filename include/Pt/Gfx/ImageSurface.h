@@ -100,15 +100,13 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
     void setScaleFactor(double scaleFactor);
 
   protected:
-    virtual double onScaleFactor() const;
-
     virtual const Gfx::ImageFormat& onGetFormat() const;
 
     virtual const Gfx::SizeF& onSize() const;
 
     virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* p);
 
-    virtual Gfx::Canvas* onGetCanvas();
+    virtual Canvas* onBeginPaint(PaintData& paint);
 
     virtual void onFinish();
 

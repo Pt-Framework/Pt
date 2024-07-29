@@ -151,7 +151,9 @@ void WindowImpl::setType(WindowType type)
 
 Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
-    Gfx::PointF physicalPos = surface().toPhysical(pos);
+    const Gfx::Scaling& scaling = surface().scaling();
+    
+    Gfx::PointF physicalPos = scaling.toPhysical(pos);
   
     POINT p = { lround(physicalPos.x()), 
                 lround(physicalPos.y()) };
@@ -159,14 +161,16 @@ Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
     ClientToScreen(_hwnd, &p);
 
     Gfx::PointF screenPos(p.x, p.y);
-    Gfx::PointF logicalPos = surface().toLogical(screenPos);
+    Gfx::PointF logicalPos = scaling.toLogical(screenPos);
     return logicalPos;
 }
 
 
 Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
 {
-    Gfx::PointF physicalPos = surface().toPhysical(pos);
+    const Gfx::Scaling& scaling = surface().scaling();
+
+    Gfx::PointF physicalPos = scaling.toPhysical(pos);
 
     POINT p = { lround(physicalPos.x()), 
                 lround(physicalPos.y()) };
@@ -174,7 +178,7 @@ Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
     ScreenToClient(_hwnd, &p);
 
     Gfx::PointF clientPos(p.x, p.y);
-    Gfx::PointF logicalPos = surface().toLogical(clientPos);
+    Gfx::PointF logicalPos = scaling.toLogical(clientPos);
     return logicalPos;
 }
 
@@ -403,9 +407,11 @@ void WindowImpl::onEnableEvent(const EnableEvent& ev)
 
 void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
-    Gfx::PointF aligedPos = w.surface().align(pos);
+    const Gfx::Scaling& scaling = w.surface().scaling();
 
-    Gfx::PointF p = w.surface().toPhysical(aligedPos);
+    Gfx::PointF aligedPos = scaling.align(pos);
+
+    Gfx::PointF p = scaling.toPhysical(aligedPos);
 
     SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, 
                  SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
@@ -526,7 +532,7 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     //
     // align to physical pixel grid
     //
-    Gfx::SizeF alignedSize = surface().align(s);
+    Gfx::SizeF alignedSize = surface().scaling().align(s);
 
     //
     // maximum width and height
@@ -543,7 +549,7 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     if( alignedSize.height() < w.minimumSize().height() )
         alignedSize.setHeight( w.minimumSize().height() );
 
-    const Gfx::SizeF size = w.surface().toPhysical(alignedSize);
+    const Gfx::SizeF size = w.surface().scaling().toPhysical(alignedSize);
 
     RECT clientRect;
     SetRect(&clientRect, 0, 0, lround(size.width()) - 1, 
