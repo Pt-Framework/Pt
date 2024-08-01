@@ -31,7 +31,8 @@
 #define PT_GFX_ImageSurface_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Paint.h>
+#include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>

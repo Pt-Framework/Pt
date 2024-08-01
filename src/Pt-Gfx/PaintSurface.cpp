@@ -29,105 +29,14 @@
 
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/PaintRegion.h>
+#include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Algorithm.h>
 
 #include <algorithm>
 
 namespace Pt {
 
 namespace Gfx {
-
-Canvas::Canvas(PaintSurface& surface)
-: _surface(&surface)
-, _paint(0)
-{
-}
-
-
-Canvas::~Canvas()
-{
-    if(_paint)
-        _paint->onDetachCanvas(*this);
-}
-
-
-const Gfx::ImageFormat& Canvas::format() const
-{
-    return onGetFormat();
-}
-
-
-const Gfx::SizeF& Canvas::size() const
-{   
-    return onGetSize();
-}
-
-
-const Scaling& Canvas::scaling() const
-{
-    return onGetScaling();
-}
-
-
-void Canvas::attachPaint(PaintData& paint)
-{
-    if(_paint)
-    {
-        _paint->finish();
-        _paint = 0;
-    }
-
-    _paint = &paint;
-}
-
-
-void Canvas::detachPaint(PaintData& paint)
-{
-    if(_paint)
-    {
-        onFinish();
-
-        _paint = 0;
-    }
-}
-
-
-void Canvas::drawSurface(const Gfx::PointF& to, 
-                         const Gfx::PaintSurface& surface)
-{
-    Pt::Gfx::Image image = surface.toImage();
-    if( image.format() == format() )
-    {
-        drawImage(to, image);
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest);
-}
-
-
-void Canvas::drawSurface(const Gfx::PointF& to,
-                         const Gfx::PaintSurface& surface,
-                         const Gfx::RectF& rect)
-{
-    Pt::Gfx::Image image = surface.toImage();
-    if( image.format() == format() )
-    {
-        drawImage(to, image, rect);
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest, rect);
-}
-
-///////////////////////////////////////////////////////////////////////
-// PaintSurface
-///////////////////////////////////////////////////////////////////////
 
 PaintSurface::PaintSurface()
 : _painter(0)

@@ -1665,6 +1665,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Paint.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Canvas.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -3057,6 +3060,9 @@
       <Filter>Pt-Json</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Paint.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Canvas.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>

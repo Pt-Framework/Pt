@@ -105,6 +105,7 @@ SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        Argb32Format.cpp
                        Argb32Image.cpp
                        Brush.cpp
+                       Canvas.cpp
                        Color.cpp
                        Font.cpp
                        FontMetrics.cpp

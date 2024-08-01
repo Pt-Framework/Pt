@@ -32,8 +32,7 @@
 
 #include <Pt/Gfx/ImageSurface.h>
 
-#include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/System/Path.h>

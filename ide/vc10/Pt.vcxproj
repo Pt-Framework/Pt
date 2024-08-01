@@ -37,6 +37,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BlockScale.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Brush.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Canvas.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Color.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\CompositionMode.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h" />
@@ -572,6 +573,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Argb32Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Argb32Image.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Brush.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Canvas.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Color.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Font.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\FontMetrics.cpp" />

@@ -32,15 +32,8 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Scaling.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Transform.h>
-#include <Pt/Gfx/Path.h>
 
 #include <vector>
 
@@ -48,110 +41,9 @@ namespace Pt {
 
 namespace Gfx {
 
+class Canvas;
 class Painter;
 class PaintData;
-class Line;
-class Polyline;
-
-class PaintSurface;
-
-/** @brief Paint canvas.
-*/
-class PT_GFX_API Canvas
-{
-    friend class PaintData;
-
-    public:
-        explicit Canvas(PaintSurface& surface);
-
-        ~Canvas();
-
-        const Gfx::ImageFormat& format() const;
-
-        const Gfx::SizeF& size() const;
-
-        const Scaling& scaling() const;
-
-    protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const = 0;
-
-        virtual const Gfx::SizeF& onGetSize() const = 0;
-
-        virtual const Scaling& onGetScaling() const = 0;
-
-        virtual void onFinish() = 0;
-
-    protected:
-        virtual void setCompositionMode(const Gfx::CompositionMode& mode) = 0;
-
-        virtual void setPen(const Gfx::Pen& pen) = 0;
-
-        virtual void setBrush(const Gfx::Brush& brush) = 0;
-
-        virtual void setFont(const Gfx::Font& font) = 0;
-
-        virtual void setClip(const Gfx::RectF& clip) = 0;
-
-        virtual void resetClip() = 0;
-
-    protected:
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const = 0;
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text) = 0;
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans) = 0;
-
-    protected:
-        virtual void drawLine(const Gfx::Line& line) = 0;
-    
-        virtual void drawPolyline(const Polyline& line) = 0;
-
-        virtual void fillPolygon(const Polyline& line) = 0;
-
-        virtual void drawRect(const Gfx::RectF& rectangle) = 0;
-
-        virtual void fillRect(const Gfx::RectF& rectangle) = 0;
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
-
-        virtual void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd) = 0;
-
-        virtual void drawPath(const Gfx::Path& path, float smoothness) = 0;
-
-        virtual void fillPath(const Path& path, float smoothness) = 0;
-
-    protected:
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, 
-                               const Gfx::RectF& imgRect) = 0;
-
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const PaintSurface& surface) = 0;
-
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const PaintSurface& surface, 
-                                 const Gfx::RectF& surfaceRect) = 0;
-
-    private:
-        void attachPaint(PaintData& paint);
-
-        void detachPaint(PaintData& paint);
-
-    private:
-        PaintSurface* _surface;
-        PaintData*    _paint;
-};
 
 /** @brief Paint target for painters.
 */
