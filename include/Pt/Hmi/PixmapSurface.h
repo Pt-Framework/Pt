@@ -79,22 +79,21 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
             return _impl;
         }
 
-    public:
-        virtual Gfx::Image toImage() const;
-
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const;
 
-        virtual const Gfx::SizeF& onSize() const
+        virtual const Gfx::SizeF& onGetSize() const
         {
             return _logicSize;
         }
+
+        virtual const Gfx::Scaling& onGetScaling() const;
 
         virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* paint);
 
         virtual Gfx::Canvas* onBeginPaint(Gfx::PaintData& paint);
 
-        virtual const Gfx::Scaling& onGetScaling() const;
+        virtual Gfx::Image onGetImage() const;
 
     public:
         static void setFontDir(const System::Path& path);

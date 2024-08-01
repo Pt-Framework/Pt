@@ -69,12 +69,10 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         void resize(const Gfx::SizeF& size);
 
-        virtual Image toImage() const;
-
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const;
 
-        virtual const Gfx::SizeF& onSize() const;
+        virtual const Gfx::SizeF& onGetSize() const;
 
         virtual const Gfx::Scaling& onGetScaling() const;
 
@@ -82,7 +80,9 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual Canvas* onBeginPaint(PaintData& paint);
 
-        virtual void onReset();       
+        virtual void onReset();
+
+        virtual Image onGetImage() const;
 
     private:
         virtual void onDetachSurface(PaintSurface* region);

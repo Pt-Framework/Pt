@@ -37,8 +37,9 @@ namespace Pt {
 namespace Hmi {
 
 PixmapSurface::PixmapSurface()
-: _impl( new PixmapSurfaceImpl )
+: _impl(0)
 {
+    _impl = new PixmapSurfaceImpl(*this);
 }
 
 
@@ -93,12 +94,6 @@ const Gfx::ImageFormat& PixmapSurface::onGetFormat() const
 }
 
 
-Gfx::Image PixmapSurface::toImage() const
-{
-    return _impl->toImage();
-}
-
-
 Gfx::PaintData* PixmapSurface::onGetPaint(Gfx::PaintData* p)
 {
     Gfx::PaintData* paint = _impl->getPaint(p);
@@ -114,6 +109,12 @@ Gfx::Canvas* PixmapSurface::onBeginPaint(Gfx::PaintData& paint)
 const Gfx::Scaling& PixmapSurface::onGetScaling() const
 {
     return _impl->scaling();
+}
+
+
+Gfx::Image PixmapSurface::onGetImage() const
+{
+    return _impl->toImage();
 }
 
 

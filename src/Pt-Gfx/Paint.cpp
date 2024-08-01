@@ -40,7 +40,7 @@ namespace Gfx {
 PaintData::PaintData()
 : _painter(0)
 , _canvas(0)
-, _isDirty(false)
+, _invalid(false)
 {
 }
 
@@ -109,7 +109,7 @@ void PaintData::resetPainter(Painter* painter)
             _painter = painter;
         }
 
-        _isDirty = true;
+        _invalid = true;
     }
 
     double unbounded = std::numeric_limits<double>::max();
@@ -130,10 +130,10 @@ void PaintData::begin(Canvas& canvas)
     if(_scaling != scaling)
     {
         _scaling = scaling;
-        _isDirty = true;
+        _invalid = true;
     }
 
-    if(_painter && _isDirty)
+    if(_painter && _invalid)
     {
         onSetPen( _painter->pen() );
         onSetCompositionMode( _painter->compositionMode() );
@@ -151,7 +151,7 @@ void PaintData::begin(Canvas& canvas)
             onSetClip(clip);
         }
 
-        _isDirty = false;
+        _invalid = false;
     }
 
     if(_painter && _canvas)
@@ -202,6 +202,12 @@ const PointF& PaintData::origin() const
 void PaintData::setRegion(const RectF& r)
 {
     _region = r;
+}
+
+
+const ImageFormat& PaintData::format() const
+{
+    return _canvas ? _canvas->format() : ImageFormat::argb32();
 }
 
 

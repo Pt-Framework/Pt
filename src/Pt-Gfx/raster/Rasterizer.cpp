@@ -375,11 +375,6 @@ void Rasterizer::drawArc(const PointF& topLeft, const SizeF& size, float degBegi
 {
 }
 
-Image Rasterizer::toImage() const
-{   
-     return _image;
-}
-
 
 FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
 {

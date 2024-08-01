@@ -53,13 +53,38 @@ class PixmapSurface;
 
 #ifdef PT_HMI_WIN32_RASTER
 
+class PixmapCanvas : public Gfx::ImageCanvas 
+{
+    public:
+        explicit PixmapCanvas(Gfx::ImageSurface& surface)
+        : Gfx::ImageCanvas(surface)
+        { }
+
+    protected:
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const Gfx::PaintSurface& surface) override;
+
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const Gfx::PaintSurface& pm, 
+                                 const Gfx::RectF& pmRect) override;
+};
+
+
 class PixmapSurfaceImpl : public Gfx::ImageSurface
 {
     friend class PixmapSurface;
 
     public:
-        PixmapSurfaceImpl()
-        { }
+        explicit PixmapSurfaceImpl(PixmapSurface&)
+        : _canvas(0)
+        {
+            _canvas = new PixmapCanvas(*this);
+        }
+
+        ~PixmapSurfaceImpl()
+        {
+            delete _canvas;
+        }
 
         void clear(const Gfx::Color& c)
         { }
@@ -69,48 +94,37 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
             reset(image);
         }
 
-    protected:
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const Gfx::PaintSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
+    private:
+        PixmapCanvas* _canvas;
 };
 
-#else
+#else // PT_HMI_WIN32_RASTER
 
 class PixmapSurfaceImpl : public Gfx::Canvas
 {
     public:
-        PixmapSurfaceImpl();
+        PixmapSurfaceImpl(PixmapSurface& surface);
 
         virtual ~PixmapSurfaceImpl();
         
         void clear(const Gfx::Color& c);
 
         void resize(const Gfx::SizeF& size);
-
-        const Gfx::SizeF& size() const;
         
-        Gfx::PaintData* getPaint(Gfx::PaintData* paint);
-
-        Gfx::Canvas* beginPaint(Gfx::PaintData& paint);
-
-        void setScaleFactor(double scaleFactor);
-
-        const Gfx::Scaling& scaling() const
-        {
-            return _scaling;
-        }
-
         Gfx::Image toImage() const;
 
         void set(const Gfx::Image& image);
 
+        void setScaleFactor(double scaleFactor);
+
+        Gfx::PaintData* getPaint(Gfx::PaintData* paint);
+
+        Gfx::Canvas* beginPaint(Gfx::PaintData& paint);
+
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const;
 
-        virtual const Gfx::SizeF& onSize() const
+        virtual const Gfx::SizeF& onGetSize() const
         {
             return _size;
         }
@@ -239,7 +253,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         Gfx::CompositionMode      _compositionMode;
 };
 
-#endif // PT_HMI_PIXMAP_IMPL_IMAGE
+#endif // PT_HMI_WIN32_RASTER
 
 } // namespace
 

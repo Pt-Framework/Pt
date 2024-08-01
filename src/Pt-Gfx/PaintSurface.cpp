@@ -38,8 +38,9 @@ namespace Pt {
 
 namespace Gfx {
 
-Canvas::Canvas()
-: _paint(0)
+Canvas::Canvas(PaintSurface& surface)
+: _surface(&surface)
+, _paint(0)
 {
 }
 
@@ -58,8 +59,8 @@ const Gfx::ImageFormat& Canvas::format() const
 
 
 const Gfx::SizeF& Canvas::size() const
-{
-    return onSize();
+{   
+    return onGetSize();
 }
 
 
@@ -186,13 +187,31 @@ const Gfx::ImageFormat& PaintSurface::format() const
 
 const Gfx::SizeF& PaintSurface::size() const
 {
-    return onSize();
+    return onGetSize();
 }
 
 
 const Scaling& PaintSurface::scaling() const
 {
     return onGetScaling();
+}
+
+
+PaintData* PaintSurface::getPaint(PaintData* p)
+{
+    return onGetPaint(p);
+}
+
+
+Canvas* PaintSurface::beginPaint(PaintData& paint)
+{
+    return onBeginPaint(paint);
+}
+
+
+Image PaintSurface::toImage() const
+{
+    return onGetImage();
 }
 
 
@@ -216,18 +235,6 @@ void PaintSurface::detachPainter(Painter& painter)
 
         _painter = 0;
     }
-}
-
-
-PaintData* PaintSurface::getPaint(PaintData* p)
-{
-    return onGetPaint(p);
-}
-
-
-Canvas* PaintSurface::beginPaint(PaintData& paint)
-{
-    return onBeginPaint(paint);
 }
 
 } // namespace

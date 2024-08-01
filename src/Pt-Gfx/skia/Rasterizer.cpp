@@ -395,15 +395,6 @@ void Rasterizer::drawArc(const PointF& topLeft, const SizeF& size, float degBegi
 }
 
 
-Image Rasterizer::toImage() const
-{
-    if( ! _image )
-        return Image();
-    
-    return *_image;
-}
-
-
 void Rasterizer::setFontDir(const Pt::System::Path& path)
 {
     FreeType::instance().setFontDir(path);

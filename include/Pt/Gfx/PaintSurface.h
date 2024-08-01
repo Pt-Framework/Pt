@@ -62,7 +62,7 @@ class PT_GFX_API Canvas
     friend class PaintData;
 
     public:
-        Canvas();
+        explicit Canvas(PaintSurface& surface);
 
         ~Canvas();
 
@@ -75,7 +75,7 @@ class PT_GFX_API Canvas
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
-        virtual const Gfx::SizeF& onSize() const = 0;
+        virtual const Gfx::SizeF& onGetSize() const = 0;
 
         virtual const Scaling& onGetScaling() const = 0;
 
@@ -142,14 +142,15 @@ class PT_GFX_API Canvas
         virtual void drawSurface(const Gfx::PointF& to, 
                                  const PaintSurface& surface, 
                                  const Gfx::RectF& surfaceRect) = 0;
-    
+
     private:
         void attachPaint(PaintData& paint);
 
         void detachPaint(PaintData& paint);
 
     private:
-        PaintData* _paint;
+        PaintSurface* _surface;
+        PaintData*    _paint;
 };
 
 /** @brief Paint target for painters.
@@ -165,28 +166,22 @@ class PT_GFX_API PaintSurface
     public:
         virtual ~PaintSurface();
         
-        //
-        // TODO: size/format/scaling same as Canvas, unify?
-        //
-        // TODO: protected setSize instead of virtual getter?
-        //
-        const Gfx::SizeF& size() const;
-
         const Gfx::ImageFormat& format() const;
 
-        const Scaling& scaling() const;
+        const Gfx::SizeF& size() const;
 
-    public:
-        virtual Image toImage() const = 0;
+        const Scaling& scaling() const;
 
         PaintData* getPaint(PaintData* paint);
 
         Canvas* beginPaint(PaintData& paint);
 
+        Image toImage() const;
+
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
-        virtual const Gfx::SizeF& onSize() const = 0;
+        virtual const Gfx::SizeF& onGetSize() const = 0;
 
         virtual const Scaling& onGetScaling() const = 0;
 
@@ -195,6 +190,8 @@ class PT_GFX_API PaintSurface
         virtual Canvas* onBeginPaint(PaintData& paint) = 0;
 
         virtual void onReset();
+
+        virtual Gfx::Image onGetImage() const = 0;
 
     private:
         void attachRegion(PaintRegion& region);

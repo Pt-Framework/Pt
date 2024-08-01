@@ -106,9 +106,22 @@ void PaintRegion::resize(const Gfx::SizeF& size)
 }
 
 
-const Gfx::SizeF& PaintRegion::onSize() const
+const Gfx::ImageFormat& PaintRegion::onGetFormat() const
+{
+    return _surface ? _surface->format()
+                    : Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& PaintRegion::onGetSize() const
 {
     return _area.size();
+}
+
+
+const Gfx::Scaling& PaintRegion::onGetScaling() const
+{
+    return _surface ? _surface->scaling() : _scaling;
 }
 
 
@@ -140,38 +153,25 @@ Canvas* PaintRegion::onBeginPaint(PaintData& paint)
 }
 
 
-void PaintRegion::onDetachSurface(PaintSurface* region)
-{
-    _surface = 0;
-    _area.clear();
-
-    PaintSurface::onReset();
-}
-
-
 void PaintRegion::onReset()
 {
     PaintSurface::onReset();
 }
 
 
-const Gfx::ImageFormat& PaintRegion::onGetFormat() const
-{
-    return _surface ? _surface->format()
-                    : Gfx::ImageFormat::argb32();
-}
-
-
-const Gfx::Scaling& PaintRegion::onGetScaling() const
-{
-    return _surface ? _surface->scaling() : _scaling;
-}
-
-
-Image PaintRegion::toImage() const
+Image PaintRegion::onGetImage() const
 {
     return _surface ? _surface->toImage()
                     : Image();
+}
+
+
+void PaintRegion::onDetachSurface(PaintSurface* region)
+{
+    _surface = 0;
+    _area.clear();
+
+    PaintSurface::onReset();
 }
 
 } // namespace

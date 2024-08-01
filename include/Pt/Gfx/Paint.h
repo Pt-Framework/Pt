@@ -54,6 +54,15 @@ class Painter;
 class Scaling;
 class PaintSurface;
 
+/** @todo TODO:
+
+    - distinguich between paint scaling and the physical/logical pixel ratio.
+      If these are separate attributes, Paint objects can perform scaling, if
+      needed for painting. The pixel ratio is reported by the implementation for
+      alignment purposes. Paint scaling can be 1.0 if the underlying implementation
+      works with logic pixels, even if the reported pixel ratio is higher.
+*/
+
 /** @brief Paint context.
 */
 class PT_GFX_API PaintData
@@ -71,6 +80,8 @@ class PT_GFX_API PaintData
         void begin(Canvas& canvas);
 
         void finish();
+
+        const ImageFormat& format() const;
 
         const Scaling& scaling() const;
 
@@ -158,7 +169,7 @@ class PT_GFX_API PaintData
         Canvas*        _canvas;
         RectF          _region;
         Gfx::Scaling   _scaling;
-        bool           _isDirty;
+        bool           _invalid;
 };
 
 /** @brief Line.

@@ -30,10 +30,13 @@
 #include "win32.h"
 #include "SerialDeviceImpl.h"
 #include "MainLoopImpl.h"
+
 #include "Pt/System/IODevice.h"
 #include "Pt/System/EventLoop.h"
 #include "Pt/System/SystemError.h"
-#include <iostream>
+#include "Pt/System/Logger.h"
+
+PT_LOG_DEFINE("Pt.System.SerialDevice")
 
 namespace Pt {
 
@@ -367,7 +370,8 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
 
     HANDLE h = INVALID_HANDLE_VALUE;
 
-    h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+    h = CreateFile( port.c_str(), openFlags, 0, NULL, 
+                    OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 
     if( h == INVALID_HANDLE_VALUE )
         throw AccessFailed(port_);
@@ -421,6 +425,8 @@ void SerialDeviceImpl::cancel(EventLoop& loop)
 
 size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
+    DWORD readBytes = 0;
+
     if(_readOv.hEvent == NULL)
     {
         loop.selector().enableOverlapped(_ioh);
@@ -428,51 +434,70 @@ size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool
         _writeOv.hEvent = _ioh.handle();
     }
 
-    DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
-    {
-        DWORD err = GetLastError();
-        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
-        {
-            eof = true;
-            return 0;
-        }
-
-        loop.selector().disableOverlapped(_ioh);
-        _readOv.hEvent = NULL;
-        _writeOv.hEvent = NULL;
-
-        throw IOError("read failed");
-    }
-
-    if(readBytes > 0)
-        return readBytes;
-
     SetCommMask(handle(), EV_RXCHAR);
-    
-    _eventMask = 0;
-    BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &_readOv);
-    if(ret == FALSE)
+
+    bool avail = false;
+    for(;;)
     {
-        DWORD err = GetLastError();
-        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+        BOOL ret = ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv);
+        if(ret == FALSE)
         {
-            eof = true;
-            return 0;
-        }
-        else if( err == ERROR_IO_PENDING )
-        {
-            return 0;
+            DWORD err = GetLastError();
+            if(ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err)
+            {
+                eof = true;
+                PT_LOG_DEBUG("read: EOF");
+                return 0;
+            }
+
+            loop.selector().disableOverlapped(_ioh);
+            _readOv.hEvent = NULL;
+            _writeOv.hEvent = NULL;
+
+            throw IOError("read failed");
         }
 
-        loop.selector().disableOverlapped(_ioh);
-        _readOv.hEvent = NULL;
-        _writeOv.hEvent = NULL;
-
-        throw IOError("read failed");
-    }
+        if(readBytes > 0)
+        {
+            PT_LOG_DEBUG("read: " << readBytes << " bytes");
+            break;
+        }
         
-    return 0;
+        if(avail)
+            throw IOError("invalid comm event");
+
+        _eventMask = 0;
+        ret = ::WaitCommEvent(handle(), &_eventMask, &_readOv);
+        if(ret == FALSE)
+        {
+            DWORD err = GetLastError();
+            if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+            {
+                eof = true;
+                PT_LOG_DEBUG("wait result: EOF");
+                return 0;
+            }
+            else if( err == ERROR_IO_PENDING )
+            {
+                PT_LOG_DEBUG("wait: I/O pending");
+                return 0;
+            }
+
+            loop.selector().disableOverlapped(_ioh);
+            _readOv.hEvent = NULL;
+            _writeOv.hEvent = NULL;
+
+            throw IOError("read failed");
+        }
+
+        if(_eventMask & EV_RXCHAR != 0)
+        {
+            PT_LOG_DEBUG("characters immediately available");
+            avail = true;
+        }
+    }
+
+    return readBytes;
 }
 
 
@@ -485,11 +510,21 @@ std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t
         if( ERROR_BROKEN_PIPE == err )
         {
             eof = true;
+            PT_LOG_DEBUG("wait result: EOF");
         }
         else
         {
             throw IOError("read failed");
         }
+    }
+
+    if(_eventMask & EV_RXCHAR != 0)
+    {
+        PT_LOG_DEBUG("characters available");
+    }
+    else
+    {
+        PT_LOG_INFO("invalid event received: " << _eventMask);
     }
 
     readBytes = 0;
@@ -499,6 +534,7 @@ std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t
         if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
         {
             eof = true;
+            PT_LOG_DEBUG("read: EOF");
             return 0;
         }
 
@@ -509,6 +545,7 @@ std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t
         throw IOError("read failed");
     }
 
+    PT_LOG_DEBUG("read:" << readBytes << " bytes");
     return readBytes;
 }
 
@@ -517,15 +554,18 @@ bool SerialDeviceImpl::runRead(EventLoop& loop)
 {  
     if( HasOverlappedIoCompleted(&_readOv) )
     {
-        COMSTAT stat;
-        ClearCommError(handle(), NULL, &stat);
-        if(stat.cbInQue > 0)
-          return true;
+        //COMSTAT stat;
+        //ClearCommError(handle(), NULL, &stat);
+        //if(stat.cbInQue > 0)
+        //  return true;
 
-        // TODO:
-        // sometimes he overlapped handle is signalled,
-        // but no data is available, so keep waiting
-        ::WaitCommEvent(handle(), &_eventMask, &_readOv);
+        //// TODO:
+        //// sometimes he overlapped handle is signalled,
+        //// but no data is available, so keep waiting
+        //::WaitCommEvent(handle(), &_eventMask, &_readOv);
+        //return false;
+
+        return true;
     }
 
     return false;

@@ -41,6 +41,46 @@ using std::max;
 using std::min;
 #include <Gdiplus.h>
 
+#ifdef PT_HMI_WIN32_RASTER
+
+namespace Pt {
+
+namespace Hmi {
+
+void PixmapCanvas::drawSurface(const Gfx::PointF& to, 
+                               const Gfx::PaintSurface& surface)
+{
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    if(pixmap)
+    {
+        Gfx::ImageCanvas::drawSurface( to, *pixmap->impl() );
+        return;
+    }
+
+    ImageCanvas::drawSurface(to, surface);
+}
+
+
+void PixmapCanvas::drawSurface(const Gfx::PointF& to,
+                               const Gfx::PaintSurface& surface,
+                               const Gfx::RectF& rect)
+{
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    if(pixmap)
+    {
+        Gfx::ImageCanvas::drawSurface(to, *pixmap->impl(), rect);
+        return;
+    }
+
+    ImageCanvas::drawSurface(to, surface, rect);
+}
+
+} // namespace
+
+} // namespace
+
+#else // PT_HMI_WIN32_RASTER
+
 namespace {
 
 #ifdef _WIN32_WCE
@@ -147,40 +187,9 @@ namespace Pt {
 
 namespace Hmi {
 
-#ifdef PT_HMI_WIN32_RASTER
-
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
-                                    const Gfx::PaintSurface& surface)
-{
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
-    if(pixmap)
-    {
-        Gfx::ImageSurface::drawSurface( to, *pixmap->impl() );
-        return;
-    }
-
-    ImageSurface::drawSurface(to, surface);
-}
-
-
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
-                                    const Gfx::PaintSurface& surface,
-                                    const Gfx::RectF& rect)
-{
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
-    if(pixmap)
-    {
-        Gfx::ImageSurface::drawSurface(to, *pixmap->impl(), rect);
-        return;
-    }
-
-    ImageSurface::drawSurface(to, surface, rect);
-}
-
-#else
-
-PixmapSurfaceImpl::PixmapSurfaceImpl()
-: _size(0, 0)
+PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
+: Gfx::Canvas(surface)
+, _size(0, 0)
 , _dc(0)
 , _gradientBrush(false)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
@@ -237,12 +246,6 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& sizeF)
     
     DeleteObject(_bitmap);
     _bitmap = bitmap;
-}
-
-
-const Gfx::SizeF& PixmapSurfaceImpl::size() const
-{
-    return _size;
 }
 
 
@@ -447,7 +450,6 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
     double scaling = 96.0 / dpix;
 
-    
     Gfx::FontMetrics fm;
     fm.setAscent(asc * scaling);
     fm.setDescent(des * scaling);
@@ -1135,8 +1137,8 @@ HDC PixmapSurfaceImpl::deviceContext() const
     return _dc;
 }
 
-#endif // PT_HMI_PIXMAP_IMPL_IMAGE
-
 } // namespace
 
 } // namespace
+
+#endif // PT_HMI_WIN32_RASTER

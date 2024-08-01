@@ -41,6 +41,8 @@ namespace Pt {
 namespace Gfx {
 
 class Rasterizer;
+class ImageSurface;
+
 
 class ImagePaint : public PaintData
 {
@@ -73,19 +75,16 @@ class ImagePaint : public PaintData
         Pen _pen;
 };
 
-class PT_GFX_API ImageSurface : public Gfx::PaintSurface
-                              , private Gfx::Canvas
+
+class PT_GFX_API ImageCanvas : public Canvas
 {
   public:
-    ImageSurface();
+    ImageCanvas(ImageSurface& surface);
 
-    ImageSurface(const Gfx::Size& size, std::size_t stride = 0);
+    ImageCanvas(ImageSurface& surface,
+                const Gfx::Size& size, std::size_t stride = 0);
 
-    virtual ~ImageSurface();
-
-    using Gfx::PaintSurface::format;
-    using Gfx::PaintSurface::size;
-    using Gfx::PaintSurface::scaling;
+    virtual ~ImageCanvas();
 
     void reset(const Gfx::Image& image);
 
@@ -93,28 +92,22 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     const Gfx::Image& image() const;
 
-    virtual Image toImage() const;
+    void setScaleFactor(double scaleFactor);
 
     void resize(const Gfx::SizeF& size);
 
-    void setScaleFactor(double scaleFactor);
+    Gfx::PaintData* getPaint(Gfx::PaintData* p);
+
+    Canvas* beginPaint(PaintData&);
 
   protected:
     virtual const Gfx::ImageFormat& onGetFormat() const;
 
-    virtual const Gfx::SizeF& onSize() const;
+    virtual const Gfx::SizeF& onGetSize() const;
 
-    virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* p);
-
-    virtual Canvas* onBeginPaint(PaintData& paint);
+    virtual const Scaling& onGetScaling() const;
 
     virtual void onFinish();
-
-  protected:
-    virtual const Scaling& onGetScaling() const
-    {
-        return _scaling;
-    }
 
   protected:
     virtual void setClip(const Gfx::RectF& clip);
@@ -177,6 +170,51 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect);
 
+  private:
+    Rasterizer*   _rasterizer;
+    Scaling       _scaling;
+    SizeF         _size;
+    ImagePaint*   _paint;
+};
+
+//
+// TODO: Image in ImageSurface used by Canvas to draw on
+//
+
+class PT_GFX_API ImageSurface : public Gfx::PaintSurface
+{
+  public:
+    ImageSurface();
+
+    ImageSurface(const Gfx::Size& size, std::size_t stride = 0);
+
+    ImageSurface(ImageCanvas& canvas);
+
+    virtual ~ImageSurface();
+
+    void reset(const Gfx::Image& image);
+
+    void reset(const Gfx::Size& size, std::size_t stride = 0);
+
+    const Gfx::Image& image() const;
+
+    void resize(const Gfx::SizeF& size);
+
+    void setScaleFactor(double scaleFactor);    
+
+  protected:
+    virtual const Gfx::ImageFormat& onGetFormat() const;
+
+    virtual const Gfx::SizeF& onGetSize() const;
+
+    virtual const Scaling& onGetScaling() const;
+
+    virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* p);
+
+    virtual Canvas* onBeginPaint(PaintData& paint);
+
+    virtual Image onGetImage() const;
+
   public:
     static void setFontDir(const System::Path& path);
 
@@ -189,8 +227,8 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
     static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
   private:
-    Rasterizer*   _rasterizer;
-    ImagePaint*   _paint;
+    ImageCanvas*  _canvas;
+    ImageCanvas*  _owner;
     Scaling       _scaling;
     SizeF         _size;
 };

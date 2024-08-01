@@ -173,9 +173,6 @@ class Rasterizer
 
     void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
 
-    Image toImage() const;
-
-
   public:
       static void setFontDir(const System::Path& path);
 
@@ -187,8 +184,7 @@ class Rasterizer
 
       static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
-private:
-
+  private:
     void image( const Point& to, const Image& image);
 
     void image(const Point& toIn,

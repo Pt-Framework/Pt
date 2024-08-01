@@ -98,6 +98,8 @@ void Painter::finish()
     {
         _surface->detachPainter(*this);
         _surface = 0;
+
+        _scaling = Scaling();
     }
 }
 
