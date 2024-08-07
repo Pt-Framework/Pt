@@ -65,7 +65,6 @@ void PaintData::onDetachCanvas(Canvas& canvas)
 {
     if(_canvas)
     {
-        onFinish();
         _canvas = 0;
     }
 }
@@ -75,67 +74,75 @@ void PaintData::onDetachPainter(Painter& painter)
 {
     if(_painter)
     {
-        onFinish();
+        onSetPainter(0);
         _painter = 0;
     }
 }
 
-
-void PaintData::reset(Painter& painter)
+/*
+void PaintData::attachCanvas(Canvas& canvas)
 {
-    resetPainter(&painter);
+    if(_canvas)
+    {
+        _canvas->onDetachPaint(*this);
+        _canvas = 0;
+    }
+
+    _canvas = &canvas;
 }
 
 
-void PaintData::reset()
+void PaintData::detachCanvas(Canvas& painter)
 {
-    resetPainter(0);
+    if(_canvas)
+    {
+        _canvas = 0;
+    }
+}
+*/
+
+
+void PaintData::setCanvas(Canvas* canvas)
+{
+    if(_canvas)
+    {
+        _canvas->detachPaint(*this);
+        _canvas = 0;
+    }
+
+    if(canvas)
+    {
+        canvas->attachPaint(*this);
+        _canvas = canvas;
+
+        const Scaling& scaling = _canvas->scaling();
+        if(_scaling != scaling)
+        {
+            _scaling = scaling;
+            _invalid = true;
+        }
+    }
 }
 
 
-void PaintData::resetPainter(Painter* painter)
+void PaintData::begin(Painter& painter)
 {
-    if(_painter != painter)
+    if(_painter != &painter)
     {
         if(_painter)
         {
             _painter->detachPaint(*this);
-            _painter = 0;
+            _painter = 0;               
         }
 
-        if(painter)
-        {
-            painter->attachPaint(*this);
-            _painter = painter;
-        }
-
+        painter.attachPaint(*this);
+        _painter = &painter;
         _invalid = true;
     }
 
-    double unbounded = std::numeric_limits<double>::max();
-
-    _region.clear();
-    _region.setSize( SizeF(unbounded, unbounded) );
-}
-
-
-void PaintData::begin(Canvas& canvas)
-{
-    finish();
-
-    canvas.attachPaint(*this);
-    _canvas = &canvas;
-
-    const Scaling& scaling = _canvas->scaling();
-    if(_scaling != scaling)
+    if(_invalid)
     {
-        _scaling = scaling;
-        _invalid = true;
-    }
-
-    if(_painter && _invalid)
-    {
-        onSetPen( _painter->pen() );
+        //onSetPen( _painter->pen() );
         onSetCompositionMode( _painter->compositionMode() );
         onSetBrush( _painter->brush() );
         onSetFont( _painter->font() );
@@ -151,13 +158,17 @@ void PaintData::begin(Canvas& canvas)
             onSetClip(clip);
         }
 
+        onSetPainter(_painter);
+
         _invalid = false;
     }
+
+    onBeginPaint(_painter);
 
     if(_painter && _canvas)
     {
         _canvas->setCompositionMode( _painter->compositionMode() );
-        _canvas->setPen( _painter->pen() );
+        //_canvas->setPen( _painter->pen() );
         _canvas->setBrush( _painter->brush() );
         _canvas->setFont( _painter->font() );
 
@@ -177,13 +188,10 @@ void PaintData::begin(Canvas& canvas)
 
 void PaintData::finish()
 {
-    if(_canvas)
-    {
-        onFinish();
+    double unbounded = std::numeric_limits<double>::max();
 
-        _canvas->detachPaint(*this);
-        _canvas = 0;
-    }
+    _region.clear();
+    _region.setSize( SizeF(unbounded, unbounded) );
 }
 
 
@@ -228,8 +236,8 @@ void PaintData::setPen(const Pen& pen)
 {
     onSetPen(pen);
 
-    if(_canvas)
-        _canvas->setPen(pen);
+    //if(_canvas)
+    //    _canvas->setPen(pen);
 }
 
 

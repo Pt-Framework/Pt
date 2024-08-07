@@ -50,6 +50,8 @@ namespace Gfx {
 ///////////////////////////////////////////////////////////////////////
 
 ImagePaint::ImagePaint()
+: _canvas(0)
+, _painter(0)
 {
 }
 
@@ -57,10 +59,31 @@ ImagePaint::ImagePaint()
 ImagePaint::~ImagePaint()
 {
 }
-  
 
-void ImagePaint::onFinish()
+
+void ImagePaint::setImageCanvas(ImageCanvas* canvas)
 {
+    _canvas = canvas;
+}
+
+
+void ImagePaint::onSetPainter(Gfx::Painter* painter)
+{
+    if(painter)
+    {
+        updatePen( painter->pen() );
+    }
+
+    _painter = painter;
+}
+
+
+void ImagePaint::onBeginPaint(Gfx::Painter* painter)
+{
+    if(_canvas)
+    {
+        _canvas->setPen(*this);
+    }
 }
 
 
@@ -69,7 +92,7 @@ void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode)
 }
 
 
-void ImagePaint::onSetPen(const Gfx::Pen& pen)
+void ImagePaint::updatePen(const Gfx::Pen& pen)
 {
     double scaledSize = scaling().toPhysical( pen.size() );
 
@@ -79,6 +102,15 @@ void ImagePaint::onSetPen(const Gfx::Pen& pen)
 
     _pen = pen;
     _pen.setSize(penSize);
+}
+
+
+void ImagePaint::onSetPen(const Gfx::Pen& pen)
+{
+    updatePen(pen);
+
+    if(_canvas)
+        _canvas->setPen(*this);
 }
 
 
@@ -153,25 +185,6 @@ void ImageCanvas::reset(const Gfx::Size& size, std::size_t stride)
 }
 
 
-Gfx::PaintData* ImageCanvas::getPaint(Gfx::PaintData* p)
-{
-    ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
-    if( ! paint )
-      paint = new ImagePaint();
-
-    _paint = paint;
-    return _paint;
-
-    //return _rasterizer->begin(p);
-}
-
-
-Canvas* ImageCanvas::beginPaint(PaintData&)
-{
-    return this;
-}
-
-
 const Gfx::ImageFormat& ImageCanvas::onGetFormat() const
 {
     return ImageFormat::argb32();
@@ -205,10 +218,27 @@ const Scaling& ImageCanvas::onGetScaling() const
 }
 
 
+PaintData* ImageCanvas::onBeginPaint(PaintData* p)
+{
+    ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
+    if( ! paint )
+      paint = new ImagePaint();
+
+    _paint = paint;
+    _paint->setImageCanvas(this);
+    return _paint;
+
+    //return _rasterizer->begin(p);
+}
+
+
 void ImageCanvas::onFinish()
 {
     //_rasterizer->finish();
-
+    
+    if(_paint)
+        _paint->setImageCanvas(0);
+    
     _paint = 0;
 }
 
@@ -229,6 +259,14 @@ void ImageCanvas::setClip(const RectF& rect)
 void ImageCanvas::resetClip()
 {
   _rasterizer->resetClip();
+}
+
+
+void ImageCanvas::setPen(const ImagePaint& paint)
+{
+    const Pen& p = paint.pen();
+
+    _rasterizer->setPen(p);
 }
 
 
@@ -560,13 +598,7 @@ void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
 }
 
 
-Gfx::PaintData* ImageSurface::onGetPaint(Gfx::PaintData* paint)
-{
-    return _canvas->getPaint(paint);
-}
-
-
-Canvas* ImageSurface::onBeginPaint(PaintData& paint)
+PaintData* ImageSurface::onBeginPaint(Gfx::PaintData* paint)
 {
     return _canvas->beginPaint(paint);
 }

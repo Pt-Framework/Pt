@@ -116,10 +116,6 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         void setScaleFactor(double scaleFactor);
 
-        Gfx::PaintData* getPaint(Gfx::PaintData* paint);
-
-        Gfx::Canvas* beginPaint(Gfx::PaintData& paint);
-
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const;
 
@@ -133,6 +129,8 @@ class PixmapSurfaceImpl : public Gfx::Canvas
             return _scaling;
         }
 
+        virtual Gfx::PaintData* onBeginPaint(Gfx::PaintData* paint) override;
+
         virtual void onFinish();
 
     public:
@@ -143,6 +141,8 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         void setCompositionMode(const Gfx::CompositionMode& mode);
 
         void setPen(const Gfx::Pen& pen);
+
+        void setPen(const PaintData& paint);
 
         void setBrush(const Gfx::Brush& brush);
 

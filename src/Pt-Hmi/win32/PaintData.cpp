@@ -31,6 +31,7 @@
 #include "win32.h"
 
 #include <Pt/Hmi/PixmapSurface.h>
+#include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Algorithm.h>
 
 using std::max;
@@ -162,8 +163,12 @@ namespace Pt {
 
 namespace Hmi {
 
+#ifndef PT_HMI_WIN32_RASTER
+
 PaintData::PaintData()
 : Gfx::PaintData()
+, _canvas(0)
+, _painter(0)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _pen(0)
 , _penColor()
@@ -192,8 +197,29 @@ PaintData::~PaintData()
 }
 
 
-void PaintData::onFinish()
-{   
+void PaintData::setCanvas(PixmapSurfaceImpl* canvas)
+{
+    _canvas = canvas;
+}
+
+
+void PaintData::onSetPainter(Gfx::Painter* painter)
+{
+    if(painter)
+    {
+        updatePen( painter->pen() );
+    }
+
+    _painter = painter;
+}
+
+
+void PaintData::onBeginPaint(Gfx::Painter* painter)
+{
+    if(_canvas)
+    {
+        _canvas->setPen(*this);
+    }
 }
 
 
@@ -215,7 +241,7 @@ Gfx::Color PaintData::penColor() const
 }
 
 
-void PaintData::onSetPen(const Gfx::Pen& pen)
+void PaintData::updatePen(const Gfx::Pen& pen)
 {
     double scaledSize = scaling().toPhysical( pen.size() );
 
@@ -234,8 +260,8 @@ void PaintData::onSetPen(const Gfx::Pen& pen)
     DWORD penStyle = getPenStyle(pen);
 
     DWORD color = RGB( _penColor.red()  / 257, 
-                       _penColor.green() / 257, 
-                       _penColor.blue()  / 257 );
+                        _penColor.green() / 257, 
+                        _penColor.blue()  / 257 );
                            
 #ifdef _WIN32_WCE
     _pen = CreatePen(penStyle, penSize, color);
@@ -246,6 +272,15 @@ void PaintData::onSetPen(const Gfx::Pen& pen)
 
     _pen = ExtCreatePen(penStyle, penSize, &brush, 0, NULL);
 #endif
+}
+
+
+void PaintData::onSetPen(const Gfx::Pen& pen)
+{
+    updatePen(pen);
+
+    if(_canvas)
+        _canvas->setPen(*this);
 }
 
 
@@ -386,6 +421,8 @@ void PaintData::onResetClip()
         _clipRect = NULL;
     }
 }
+
+#endif
 
 } // namespace
 

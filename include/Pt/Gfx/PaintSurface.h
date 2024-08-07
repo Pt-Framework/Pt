@@ -64,9 +64,7 @@ class PT_GFX_API PaintSurface
 
         const Scaling& scaling() const;
 
-        PaintData* getPaint(PaintData* paint);
-
-        Canvas* beginPaint(PaintData& paint);
+        PaintData* beginPaint(PaintData* paint);
 
         Image toImage() const;
 
@@ -77,9 +75,7 @@ class PT_GFX_API PaintSurface
 
         virtual const Scaling& onGetScaling() const = 0;
 
-        virtual PaintData* onGetPaint(PaintData* paint) = 0;
-
-        virtual Canvas* onBeginPaint(PaintData& paint) = 0;
+        virtual PaintData* onBeginPaint(PaintData* paint) = 0;
 
         virtual void onReset();
 

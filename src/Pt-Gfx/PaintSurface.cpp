@@ -106,15 +106,9 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-PaintData* PaintSurface::getPaint(PaintData* p)
+PaintData* PaintSurface::beginPaint(PaintData* p)
 {
-    return onGetPaint(p);
-}
-
-
-Canvas* PaintSurface::beginPaint(PaintData& paint)
-{
-    return onBeginPaint(paint);
+    return onBeginPaint(p);
 }
 
 
@@ -128,7 +122,7 @@ void PaintSurface::attachPainter(Painter& painter)
 {
     if(_painter)
     {
-        _painter->finish();
+        _painter->onDetachSurface(*this);
         _painter = 0;
     }
 
@@ -139,11 +133,7 @@ void PaintSurface::attachPainter(Painter& painter)
 void PaintSurface::detachPainter(Painter& painter)
 {
     if(_painter)
-    {
-        //onFinish();
-
         _painter = 0;
-    }
 }
 
 } // namespace

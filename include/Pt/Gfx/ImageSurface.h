@@ -43,7 +43,7 @@ namespace Gfx {
 
 class Rasterizer;
 class ImageSurface;
-
+class ImageCanvas;
 
 class ImagePaint : public PaintData
 {
@@ -56,10 +56,15 @@ class ImagePaint : public PaintData
         {
             return _pen;
         }
-    
-    protected:
-        virtual void onFinish();
 
+        void setImageCanvas(ImageCanvas* canvas);
+
+    protected:
+        virtual void onSetPainter(Gfx::Painter* painter) override;
+
+        virtual void onBeginPaint(Gfx::Painter* painter) override;
+
+    protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
 
         virtual void onSetPen(const Gfx::Pen& pen);
@@ -71,9 +76,14 @@ class ImagePaint : public PaintData
         virtual void onSetClip(const Gfx::RectF& rectF);
 
         virtual void onResetClip();
+
+    private:
+        void updatePen(const Gfx::Pen& pen);
     
     private:
-        Pen _pen;
+        ImageCanvas*   _canvas;
+        Gfx::Painter*  _painter;
+        Pen            _pen;
 };
 
 
@@ -97,9 +107,7 @@ class PT_GFX_API ImageCanvas : public Canvas
 
     void resize(const Gfx::SizeF& size);
 
-    Gfx::PaintData* getPaint(Gfx::PaintData* p);
-
-    Canvas* beginPaint(PaintData&);
+    void setPen(const ImagePaint& paint);
 
   protected:
     virtual const Gfx::ImageFormat& onGetFormat() const;
@@ -107,6 +115,8 @@ class PT_GFX_API ImageCanvas : public Canvas
     virtual const Gfx::SizeF& onGetSize() const;
 
     virtual const Scaling& onGetScaling() const;
+
+    virtual PaintData* onBeginPaint(PaintData* paint) override;
 
     virtual void onFinish();
 
@@ -210,9 +220,7 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     virtual const Scaling& onGetScaling() const;
 
-    virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* p);
-
-    virtual Canvas* onBeginPaint(PaintData& paint);
+    virtual PaintData* onBeginPaint(Gfx::PaintData* p);
 
     virtual Image onGetImage() const;
 

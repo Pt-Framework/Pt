@@ -67,11 +67,62 @@ const Scaling& Canvas::scaling() const
 }
 
 
+PaintData* Canvas::beginPaint(PaintData* p)
+{
+    finishPaint();
+
+    PaintData* paint = onBeginPaint(p);
+    if(paint)
+        paint->setCanvas(this);
+
+/*
+    finishPaint();
+
+    if(paint)
+    {
+        paint->attachCanvas(*this);
+        _paint = paint;
+    }
+*/
+
+    return paint;
+}
+
+/*
+
+void Canvas::finishPaint()
+{
+    if(_paint)
+    {
+        _paint->detachCanvas(*this);
+        onDetachPaint(*_paint);
+    }
+}
+
+void Canvas::onDetachPaint(PaintData& paint)
+{
+    if(_paint)
+    {
+        onFinish();
+        _paint = 0;
+    }
+}
+*/
+
+void Canvas::finishPaint()
+{
+    if(_paint)
+        _paint->setCanvas(0);
+}
+
+
 void Canvas::attachPaint(PaintData& paint)
 {
     if(_paint)
     {
-        _paint->finish();
+        _paint->onDetachCanvas(*this);
+        
+        onFinish();
         _paint = 0;
     }
 
@@ -84,7 +135,6 @@ void Canvas::detachPaint(PaintData& paint)
     if(_paint)
     {
         onFinish();
-
         _paint = 0;
     }
 }

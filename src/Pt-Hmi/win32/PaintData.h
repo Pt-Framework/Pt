@@ -29,6 +29,8 @@
 #ifndef Pt_Hmi_PaintData_h
 #define Pt_Hmi_PaintData_h
 
+#include "PixmapSurfaceImpl.h"
+
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -52,6 +54,10 @@ namespace Pt {
 
 namespace Hmi {
 
+class PixmapSurfaceImpl;
+
+#ifndef PT_HMI_WIN32_RASTER
+
 class PaintData : public Gfx::PaintData
 {
     public:
@@ -71,9 +77,14 @@ class PaintData : public Gfx::PaintData
 
         HRGN clipRect() const;
 
-    protected:
-        virtual void onFinish();
+        void setCanvas(PixmapSurfaceImpl* canvas);
 
+    protected:
+        virtual void onSetPainter(Gfx::Painter* painter) override;
+
+        virtual void onBeginPaint(Gfx::Painter* painter) override;
+
+    protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
 
         virtual void onSetPen(const Gfx::Pen& pen);
@@ -87,6 +98,11 @@ class PaintData : public Gfx::PaintData
         virtual void onResetClip();
 
     private:
+        void updatePen(const Gfx::Pen& pen);
+
+    private:
+        PixmapSurfaceImpl*        _canvas;
+        Gfx::Painter*             _painter;
         Gfx::CompositionMode      _compositionMode;
         HPEN                      _pen;
         Gfx::Color                _penColor;
@@ -95,6 +111,8 @@ class PaintData : public Gfx::PaintData
         HRGN                      _clipRect;
         HFONT                     _font;
 };
+
+#endif
 
 } // namespace
 

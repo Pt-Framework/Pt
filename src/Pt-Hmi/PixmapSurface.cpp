@@ -94,15 +94,9 @@ const Gfx::ImageFormat& PixmapSurface::onGetFormat() const
 }
 
 
-Gfx::PaintData* PixmapSurface::onGetPaint(Gfx::PaintData* p)
+Gfx::PaintData* PixmapSurface::onBeginPaint(Gfx::PaintData* p)
 {
-    Gfx::PaintData* paint = _impl->getPaint(p);
-    return paint;
-}
-
-Gfx::Canvas* PixmapSurface::onBeginPaint(Gfx::PaintData& paint)
-{
-    return _impl->beginPaint(paint);
+    return _impl->beginPaint(p);
 }
 
 

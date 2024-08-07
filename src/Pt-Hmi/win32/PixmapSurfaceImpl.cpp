@@ -249,20 +249,15 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& sizeF)
 }
 
 
-Gfx::PaintData* PixmapSurfaceImpl::getPaint(Gfx::PaintData* p)
+Gfx::PaintData* PixmapSurfaceImpl::onBeginPaint(Gfx::PaintData* p)
 {
     PaintData* paint = dynamic_cast<PaintData*>(p);
     if( ! paint )
       paint = new PaintData();
-
+    
     _paint = paint;
+    _paint->setCanvas(this);
     return _paint;
-}
-
-
-Gfx::Canvas* PixmapSurfaceImpl::beginPaint(Gfx::PaintData& paint)
-{
-    return this;
 }
 
 
@@ -272,6 +267,9 @@ void PixmapSurfaceImpl::onFinish()
     SelectObject(_dc, _oldBrush);
     SelectObject(_dc, _oldFont);
 
+    if(_paint)
+        _paint->setCanvas(0);
+    
     _paint = 0;
 }
 
@@ -294,19 +292,35 @@ void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
 }
 
 
-void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
+void PixmapSurfaceImpl::setPen(const PaintData& paint)
 {
-    HPEN hpen = _paint->pen();
+    HPEN hpen = paint.pen();
     if(hpen)
         SelectObject(_dc, hpen);
 
-    _penColor = _paint->penColor();
+    _penColor = paint.penColor();
 
     DWORD penColor = RGB( _penColor.red()  / 257, 
                           _penColor.green() / 257, 
                           _penColor.blue()  / 257 );
 
     SetTextColor(_dc, penColor);
+}
+
+
+void PixmapSurfaceImpl::setPen(const Gfx::Pen& )
+{
+    //HPEN hpen = _paint->pen();
+    //if(hpen)
+    //    SelectObject(_dc, hpen);
+
+    //_penColor = _paint->penColor();
+
+    //DWORD penColor = RGB( _penColor.red()  / 257, 
+    //                      _penColor.green() / 257, 
+    //                      _penColor.blue()  / 257 );
+
+    //SetTextColor(_dc, penColor);
 }
 
 

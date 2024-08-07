@@ -67,12 +67,18 @@ class PT_GFX_API Canvas
 
         const Scaling& scaling() const;
 
+        PaintData* beginPaint(PaintData* paint);
+
+        void finishPaint();
+
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
         virtual const Gfx::SizeF& onGetSize() const = 0;
 
         virtual const Scaling& onGetScaling() const = 0;
+
+        virtual PaintData* onBeginPaint(PaintData* paint) = 0;
 
         virtual void onFinish() = 0;
 

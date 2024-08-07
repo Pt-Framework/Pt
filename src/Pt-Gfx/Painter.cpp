@@ -57,10 +57,19 @@ Painter::~Painter()
         _surface = 0;
     }
 
+    if(_paint) 
+        _paint->onDetachPainter(*this);
+
     delete _paint;
 }
 
 
+/*
+  Painter -> PaintSurface
+
+  Paint -> Canvas
+  Paint -> Painter
+*/
 void Painter::begin(PaintSurface& surface)
 {
     finish();
@@ -68,7 +77,7 @@ void Painter::begin(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
 
-    PaintData* paint = surface.getPaint(_paint);
+    PaintData* paint = surface.beginPaint(_paint);
     if(_paint != paint)
     {
         delete _paint;
@@ -76,37 +85,30 @@ void Painter::begin(PaintSurface& surface)
     }
     
     if(paint)
-    {
-        paint->reset(*this);
-
-        Canvas* canvas = surface.beginPaint(*paint);
-        if(canvas)
-            paint->begin(*canvas);
-    }
+        paint->begin(*this);
 }
 
 
 void Painter::finish()
 {
     if(_paint)
-    {
         _paint->finish();
-        // keep paint
-    }
 
     if( _surface )
     {
         _surface->detachPainter(*this);
-        _surface = 0;
-
-        _scaling = Scaling();
+        onDetachSurface(*_surface);
     }
 }
 
 
 void Painter::onDetachSurface(PaintSurface& surface)
 {
-    _surface = 0;
+    if(_surface)
+    {
+        _scaling = Scaling();
+        _surface = 0;
+    }
 }
 
 
@@ -114,7 +116,7 @@ void Painter::attachPaint(PaintData& paint)
 {
     if(_paint)
     {
-        _paint->reset();
+        _paint->onDetachPainter(*this);
         _paint = 0;
     }
     
@@ -125,9 +127,7 @@ void Painter::attachPaint(PaintData& paint)
 void Painter::detachPaint(PaintData& paint)
 {
     if(_paint)
-    {
         _paint = 0;
-    }
 }
 
 
