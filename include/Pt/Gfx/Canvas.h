@@ -83,13 +83,7 @@ class PT_GFX_API Canvas
         virtual void onFinish() = 0;
 
     private:
-#ifndef PT_HMI_CANVAS_PAINT
         void onDetachPaint(PaintData& paint);
-#else
-        void attachPaint(PaintData& paint);
-
-        void detachPaint(PaintData& paint);
-#endif
     private:
         PaintSurface* _surface;
         PaintData*    _paint;

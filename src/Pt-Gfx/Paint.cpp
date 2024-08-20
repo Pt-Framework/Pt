@@ -49,19 +49,11 @@ PaintData::PaintData()
 
 PaintData::~PaintData()
 {
-#ifndef PT_HMI_CANVAS_PAINT
     if(_canvas)
     {
         _canvas->onDetachPaint(*this);
         _canvas = 0;
     }
-#else
-    if(_canvas)
-    {
-        _canvas->detachPaint(*this);
-        _canvas = 0;
-    }
-#endif
 
     if(_painter)
     {
@@ -70,7 +62,17 @@ PaintData::~PaintData()
     }
 }
 
-#ifndef PT_HMI_CANVAS_PAINT
+
+void PaintData::onDetachPainter(Painter& painter)
+{
+    if(_painter)
+    {
+        onSetPainter(0);
+        _painter = 0;
+    }
+}
+
+
 void PaintData::attachCanvas(Canvas& canvas)
 {
     if(_canvas)
@@ -95,53 +97,6 @@ void PaintData::detachCanvas(Canvas& canvas)
     if(_canvas)
     {
         _canvas = 0;
-    }
-}
-
-#else
-
-void PaintData::onDetachCanvas(Canvas& canvas)
-{
-    if(_canvas)
-    {
-        // onFinish();
-        _canvas = 0;
-    }
-}
-
-
-void PaintData::move(Canvas* canvas)
-{
-    if(_canvas)
-    {
-        _canvas->detachPaint(*this);
-        onDetachCanvas(*_canvas);
-    }
-
-    if(canvas)
-    {
-        canvas->attachPaint(*this);
-        _canvas = canvas;
-
-        const Scaling& scaling = _canvas->scaling();
-        if(_scaling != scaling)
-        {
-            _scaling = scaling;
-            _invalid = true;
-        }
-    }
-
-    return this;
-}
-#endif
-
-
-void PaintData::onDetachPainter(Painter& painter)
-{
-    if(_painter)
-    {
-        onSetPainter(0);
-        _painter = 0;
     }
 }
 

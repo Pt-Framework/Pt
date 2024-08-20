@@ -44,16 +44,21 @@ Canvas::Canvas(PaintSurface& surface)
 
 Canvas::~Canvas()
 {
-#ifndef PT_HMI_CANVAS_PAINT
     if(_paint)
     {
         _paint->detachCanvas(*this);
         _paint = 0;
     }
-#else
+}
+
+
+void Canvas::onDetachPaint(PaintData& paint)
+{
     if(_paint)
-        _paint->onDetachCanvas(*this);
-#endif
+    {
+        onFinish();
+        _paint = 0;
+    }
 }
 
 
@@ -81,29 +86,15 @@ PaintData* Canvas::getPaint(PaintData* p)
     finishPaint();
 
     PaintData* paint = onGetPaint(p);
-
-#ifndef PT_HMI_CANVAS_PAINT
     if(paint)
     {
         paint->attachCanvas(*this);
         _paint = paint;
     }
-#else
-    if(paint)
-        paint->move(this);
-#endif
 
     return paint;
 }
 
-
-PaintData* Canvas::onGetPaint(PaintData* paint)
-{
-    return 0;
-}
-
-
-#ifndef PT_HMI_CANVAS_PAINT
 
 void Canvas::finishPaint()
 {
@@ -114,49 +105,6 @@ void Canvas::finishPaint()
     }
 }
 
-
-void Canvas::onDetachPaint(PaintData& paint)
-{
-    if(_paint)
-    {
-        onFinish();
-        _paint = 0;
-    }
-}
-
-#else
-
-void Canvas::finishPaint()
-{
-    if(_paint)
-        _paint->move(0);
-}
-
-
-void Canvas::attachPaint(PaintData& paint)
-{
-    if(_paint)
-    {
-        _paint->onDetachCanvas(*this);
-        
-        onFinish();
-        _paint = 0;
-    }
-
-    _paint = &paint;
-}
-
-
-void Canvas::detachPaint(PaintData& paint)
-{
-    if(_paint)
-    {
-        onFinish();
-        _paint = 0;
-    }
-}
-
-#endif
 
 //void Canvas::drawSurface(const Gfx::PointF& to, 
 //                         const Gfx::PaintSurface& surface)

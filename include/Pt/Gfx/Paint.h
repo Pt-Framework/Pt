@@ -78,11 +78,6 @@ class PT_GFX_API PaintData
     public:
         virtual ~PaintData();
 
-#ifndef PT_HMI_CANVAS_PAINT
-#else
-        void move(Canvas* canvas);
-#endif
-
         void begin(Painter& painter);
 
         void finish();
@@ -209,13 +204,9 @@ class PT_GFX_API PaintData
         PaintData();
 
     private:
-#ifndef PT_HMI_CANVAS_PAINT
         void attachCanvas(Canvas& canvas);
 
         void detachCanvas(Canvas& canvas);
-#else
-        void onDetachCanvas(Canvas& canvas);
-#endif
 
     private:
         void onDetachPainter(Painter& painter);
