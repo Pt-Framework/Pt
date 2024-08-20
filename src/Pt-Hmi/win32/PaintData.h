@@ -65,6 +65,8 @@ class PaintData : public Gfx::PaintData
 
         ~PaintData();
 
+        void reset(PixmapSurfaceImpl* canvas);
+
         HPEN pen() const;
 
         Gfx::Color penColor() const;
@@ -77,12 +79,10 @@ class PaintData : public Gfx::PaintData
 
         HRGN clipRect() const;
 
-        void setCanvas(PixmapSurfaceImpl* canvas);
-
     protected:
         virtual void onSetPainter(Gfx::Painter* painter) override;
 
-        virtual void onBeginPaint(Gfx::Painter* painter) override;
+        virtual void onBeginPaint(Gfx::Painter& painter) override;
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
@@ -97,8 +97,56 @@ class PaintData : public Gfx::PaintData
 
         virtual void onResetClip();
 
+    protected:
+        virtual void onDrawLine(const Gfx::Line& line) override;
+
+        virtual void onDrawPolyline(const Gfx::Polyline& line) override;
+
+        virtual void onFillPolygon(const Gfx::Polyline& line) override;
+
+        virtual void onDrawRect(const Gfx::RectF& rectangle) override;
+
+        virtual void onFillRect(const Gfx::RectF& rectangle) override;
+
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) override;
+
+        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) override;
+
+    protected:
+        virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
+
+        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text) override;
+
+        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
+                                const Gfx::Transform& trans) override;
+
+    protected:
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image) override;
+
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image, 
+                                 const Gfx::RectF& imgRect) override;
+
+        virtual void onDrawSurface(const Gfx::PointF& to, 
+                                   const Gfx::PaintSurface& surface) override;
+
+        virtual void onDrawSurface(const Gfx::PointF& to,
+                                   const Gfx::PaintSurface& surface,
+                                   const Gfx::RectF& rect) override;
+
     private:
+        void updateMode(const Gfx::CompositionMode& mode);
+
         void updatePen(const Gfx::Pen& pen);
+
+        void updateBrush(const Gfx::Brush& brush);
+
+        void updateFont(const Gfx::Font& font);
+
+        void updateClip(const Gfx::RectF* clip);
 
     private:
         PixmapSurfaceImpl*        _canvas;

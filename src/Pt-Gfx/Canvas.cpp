@@ -44,14 +44,23 @@ Canvas::Canvas(PaintSurface& surface)
 
 Canvas::~Canvas()
 {
+#ifndef PT_HMI_CANVAS_PAINT
+    if(_paint)
+    {
+        _paint->detachCanvas(*this);
+        _paint = 0;
+    }
+#else
     if(_paint)
         _paint->onDetachCanvas(*this);
+#endif
 }
 
 
 const Gfx::ImageFormat& Canvas::format() const
 {
-    return onGetFormat();
+    return _surface->format();
+    //return onGetFormat();
 }
 
 
@@ -67,28 +76,34 @@ const Scaling& Canvas::scaling() const
 }
 
 
-PaintData* Canvas::beginPaint(PaintData* p)
+PaintData* Canvas::getPaint(PaintData* p)
 {
     finishPaint();
 
-    PaintData* paint = onBeginPaint(p);
-    if(paint)
-        paint->setCanvas(this);
+    PaintData* paint = onGetPaint(p);
 
-/*
-    finishPaint();
-
+#ifndef PT_HMI_CANVAS_PAINT
     if(paint)
     {
         paint->attachCanvas(*this);
         _paint = paint;
     }
-*/
+#else
+    if(paint)
+        paint->move(this);
+#endif
 
     return paint;
 }
 
-/*
+
+PaintData* Canvas::onGetPaint(PaintData* paint)
+{
+    return 0;
+}
+
+
+#ifndef PT_HMI_CANVAS_PAINT
 
 void Canvas::finishPaint()
 {
@@ -99,6 +114,7 @@ void Canvas::finishPaint()
     }
 }
 
+
 void Canvas::onDetachPaint(PaintData& paint)
 {
     if(_paint)
@@ -107,12 +123,13 @@ void Canvas::onDetachPaint(PaintData& paint)
         _paint = 0;
     }
 }
-*/
+
+#else
 
 void Canvas::finishPaint()
 {
     if(_paint)
-        _paint->setCanvas(0);
+        _paint->move(0);
 }
 
 
@@ -139,38 +156,39 @@ void Canvas::detachPaint(PaintData& paint)
     }
 }
 
+#endif
 
-void Canvas::drawSurface(const Gfx::PointF& to, 
-                         const Gfx::PaintSurface& surface)
-{
-    Pt::Gfx::Image image = surface.toImage();
-    if( image.format() == format() )
-    {
-        drawImage(to, image);
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest);
-}
-
-
-void Canvas::drawSurface(const Gfx::PointF& to,
-                         const Gfx::PaintSurface& surface,
-                         const Gfx::RectF& rect)
-{
-    Pt::Gfx::Image image = surface.toImage();
-    if( image.format() == format() )
-    {
-        drawImage(to, image, rect);
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest, rect);
-}
+//void Canvas::drawSurface(const Gfx::PointF& to, 
+//                         const Gfx::PaintSurface& surface)
+//{
+//    Pt::Gfx::Image image = surface.toImage();
+//    if( image.format() == format() )
+//    {
+//        drawImage(to, image);
+//        return;
+//    }
+//
+//    Pt::Gfx::Image dest( format(), image.size() );
+//    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+//    drawImage(to, dest);
+//}
+//
+//
+//void Canvas::drawSurface(const Gfx::PointF& to,
+//                         const Gfx::PaintSurface& surface,
+//                         const Gfx::RectF& rect)
+//{
+//    Pt::Gfx::Image image = surface.toImage();
+//    if( image.format() == format() )
+//    {
+//        drawImage(to, image, rect);
+//        return;
+//    }
+//
+//    Pt::Gfx::Image dest( format(), image.size() );
+//    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+//    drawImage(to, dest, rect);
+//}
 
 } // namespace
 

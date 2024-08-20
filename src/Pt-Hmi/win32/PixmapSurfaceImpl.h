@@ -102,7 +102,7 @@ class PixmapSurfaceImpl : public Gfx::ImageSurface
 class PixmapSurfaceImpl : public Gfx::Canvas
 {
     public:
-        PixmapSurfaceImpl(PixmapSurface& surface);
+        PixmapSurfaceImpl(Gfx::PaintSurface& surface);
 
         virtual ~PixmapSurfaceImpl();
         
@@ -116,39 +116,52 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         void setScaleFactor(double scaleFactor);
 
-    protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const;
-
-        virtual const Gfx::SizeF& onGetSize() const
-        {
-            return _size;
-        }
-
-        virtual const Gfx::Scaling& onGetScaling() const
-        {
-            return _scaling;
-        }
-
-        virtual Gfx::PaintData* onBeginPaint(Gfx::PaintData* paint) override;
-
-        virtual void onFinish();
+        const Gfx::ImageFormat& format() const;
 
     public:
-        void setClip(const Gfx::RectF& clip);
+        Gfx::Canvas* getCanvas();
 
-        void resetClip();
-         
+        void beginPaint(Gfx::PaintData& paint);
+
+    protected:
+        const Gfx::SizeF& onGetSize() const;
+
+        const Gfx::Scaling& onGetScaling() const;
+
+        virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* p) override;
+
+        virtual void onFinish() override;
+
+    public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        void setPen(const Gfx::Pen& pen);
 
         void setPen(const PaintData& paint);
 
-        void setBrush(const Gfx::Brush& brush);
+        void setBrush(const PaintData& paint, const Gfx::Brush& brush);
 
-        void setFont(const Gfx::Font& font);
+        void setFont(const PaintData& paint);
+
+        void setClip(const PaintData* paint);
+
+    public:
+        void drawLine(const Gfx::Line& line);
+
+        void drawPolyline(const Gfx::Polyline& line);
+
+        void fillPolygon(const Gfx::Polyline& line);
 
         Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+
+    public:
+        //void setPen(const Gfx::Pen& pen);
+
+        //void setBrush(const Gfx::Brush& brush);
+
+        //void setClip(const Gfx::RectF& clip);
+
+        //void resetClip();
+
+        //void setFont(const Gfx::Font& font);
 
         void drawText(const Gfx::PointF& to, const Pt::String& text)
         {
@@ -159,8 +172,6 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         void drawText(const Gfx::PointF& to, const Pt::String& text, 
                       const Gfx::Transform& trans);
    
-        void drawLine(const Gfx::Line& line);
-
         void drawRect(const Gfx::RectF& rect);
 
         void fillRect(const Gfx::RectF& rect);
@@ -168,10 +179,6 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
         void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        void drawPolyline(const Gfx::Polyline& line);
-
-        void fillPolygon(const Gfx::Polyline& line);
 
         void drawPath(const Gfx::Path& path, float smoothness)
         {}
@@ -194,11 +201,12 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         virtual void drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
         {}
 
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const Gfx::PaintSurface& surface);
 
-        virtual void drawSurface(const Gfx::PointF& to, const Gfx::PaintSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& to, const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
-
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const Gfx::PaintSurface& pm, 
+                                 const Gfx::RectF& pmRect);
 
         void drawPixmap(const Gfx::PointF& toF, const PixmapSurface& surface);
 

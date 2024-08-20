@@ -94,15 +94,26 @@ const Gfx::ImageFormat& PixmapSurface::onGetFormat() const
 }
 
 
-Gfx::PaintData* PixmapSurface::onBeginPaint(Gfx::PaintData* p)
+const Gfx::SizeF& PixmapSurface::onGetSize() const
 {
-    return _impl->beginPaint(p);
+    return _logicSize;
 }
 
 
 const Gfx::Scaling& PixmapSurface::onGetScaling() const
 {
     return _impl->scaling();
+}
+
+
+Gfx::Canvas* PixmapSurface::onGetCanvas()
+{
+    return _impl->getCanvas();
+}
+
+
+void PixmapSurface::onBeginPaint(Gfx::PaintData& paint)
+{
 }
 
 

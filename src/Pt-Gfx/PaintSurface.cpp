@@ -31,6 +31,7 @@
 #include <Pt/Gfx/PaintRegion.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Paint.h>
 
 #include <algorithm>
 
@@ -106,9 +107,31 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-PaintData* PaintSurface::beginPaint(PaintData* p)
+PaintData* PaintSurface::getPaint(PaintData* p)
 {
-    return onBeginPaint(p);
+    Canvas* canvas = onGetCanvas();
+    if( ! canvas )
+        return 0;
+
+    PaintData* paint = canvas->getPaint(p);
+    if(paint)
+    {
+        onBeginPaint(*paint);
+    }
+        
+    return paint;
+}
+
+
+Canvas* PaintSurface::getCanvas()
+{
+    return onGetCanvas();
+}
+
+
+void PaintSurface::beginPaint(PaintData& paint)
+{
+    return onBeginPaint(paint);
 }
 
 

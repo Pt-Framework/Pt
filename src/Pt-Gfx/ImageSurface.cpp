@@ -30,6 +30,7 @@
 #include "Rasterizer.h"
 
 #include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Point.h>
@@ -78,17 +79,38 @@ void ImagePaint::onSetPainter(Gfx::Painter* painter)
 }
 
 
-void ImagePaint::onBeginPaint(Gfx::Painter* painter)
+void ImagePaint::onBeginPaint(Gfx::Painter& painter)
 {
     if(_canvas)
     {
+        _canvas->setCompositionMode( painter.compositionMode() );
         _canvas->setPen(*this);
+        _canvas->setBrush( painter.brush() );
+        _canvas->setFont( painter.font() );
+
+        const Gfx::RectF& clip = painter.clip();
+        if( clip.isNull() )
+            _canvas->resetClip();
+        else
+            _canvas->setClip(clip);
+
     }
 }
 
 
 void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
+    if(_canvas)
+        _canvas->setCompositionMode(mode);
+}
+
+
+void ImagePaint::onSetPen(const Gfx::Pen& pen)
+{
+    updatePen(pen);
+
+    if(_canvas)
+        _canvas->setPen(*this);
 }
 
 
@@ -105,39 +127,176 @@ void ImagePaint::updatePen(const Gfx::Pen& pen)
 }
 
 
-void ImagePaint::onSetPen(const Gfx::Pen& pen)
-{
-    updatePen(pen);
-
-    if(_canvas)
-        _canvas->setPen(*this);
-}
-
-
 void ImagePaint::onSetBrush(const Gfx::Brush& brush)
 {
+    if(_canvas)
+        _canvas->setBrush(brush);
 }
 
 
 void ImagePaint::onSetFont(const Gfx::Font& font)
 {
+    if(_canvas)
+        _canvas->setFont(font);
 }
 
 
 void ImagePaint::onSetClip(const Gfx::RectF& rectF)
 {
+    if(_canvas)
+        _canvas->setClip(rectF);
 }
 
 
 void ImagePaint::onResetClip()
 {
+    if(_canvas)
+        _canvas->resetClip();
+}
+
+
+void ImagePaint::onDrawLine(const Gfx::Line& line)
+{
+    if(_canvas)
+    {
+        _canvas->drawLine(line);
+    }
+}
+
+
+void ImagePaint::onDrawPolyline(const Gfx::Polyline& line)
+{
+    if(_canvas)
+    {
+        _canvas->drawPolyline(line);
+    }
+}
+
+
+void ImagePaint::onFillPolygon(const Gfx::Polyline& line)
+{
+    if(_canvas)
+    {
+        _canvas->fillPolygon(line);
+    }
+}
+
+
+
+void ImagePaint::onDrawRect(const Gfx::RectF& rect)
+{
+    if(_canvas)
+    {
+        _canvas->drawRect(rect);
+    }
+}
+
+
+void ImagePaint::onFillRect(const Gfx::RectF& rect)
+{
+    if(_canvas)
+    {
+        _canvas->fillRect(rect);
+    }
+}
+
+
+void ImagePaint::onDrawEllipse(const Gfx::PointF& topLeft, 
+                               const Gfx::SizeF& size)
+{
+    if(_canvas)
+    {
+        _canvas->drawEllipse(topLeft, size);
+    }
+}
+
+
+void ImagePaint::onFillEllipse(const Gfx::PointF& topLeft, 
+                               const Gfx::SizeF& size)
+{
+    if(_canvas)
+    {
+        _canvas->fillEllipse(topLeft, size);
+    }
+}
+
+
+Gfx::FontMetrics ImagePaint::onGetFontMetrics(const Pt::String& text) const
+{
+    if(_canvas)
+    {
+        return _canvas->fontMetrics(text);
+    }
+
+    return Gfx::FontMetrics();
+}
+
+
+void ImagePaint::onDrawText(const Gfx::PointF& to, const Pt::String& text)
+{
+    if(_canvas)
+    {
+        _canvas->drawText(to, text);
+    }
+}
+
+
+void ImagePaint::onDrawText(const Gfx::PointF& to, const Pt::String& text, 
+                           const Gfx::Transform& tf)
+{
+    if(_canvas)
+    {
+        _canvas->drawText(to, text, tf);
+    }
+}
+
+
+void ImagePaint::onDrawImage(const Gfx::PointF& to, 
+                            const Gfx::Image& image)
+{
+    if(_canvas)
+    {
+        _canvas->drawImage(to, image);
+    }
+}
+
+
+void ImagePaint::onDrawImage(const Gfx::PointF& to, 
+                            const Gfx::Image& image, 
+                            const Gfx::RectF& rect)
+{
+    if(_canvas)
+    {
+        _canvas->drawImage(to, image, rect);
+    }
+}
+
+
+void ImagePaint::onDrawSurface(const Gfx::PointF& to, 
+                               const Gfx::PaintSurface& surface)
+{
+    if( ! _canvas)
+        return;
+
+    _canvas->drawSurface(to, surface);
+}
+
+
+void ImagePaint::onDrawSurface(const Gfx::PointF& to,
+                               const Gfx::PaintSurface& surface,
+                               const Gfx::RectF& rect)
+{
+    if( ! _canvas)
+        return;
+
+    _canvas->drawSurface(to, surface, rect);
 }
 
 ///////////////////////////////////////////////////////////////////////
 // ImageCanvas
 ///////////////////////////////////////////////////////////////////////
 
-ImageCanvas::ImageCanvas(ImageSurface& surface)
+ImageCanvas::ImageCanvas(PaintSurface& surface)
 : Canvas(surface)
 , _rasterizer(new Rasterizer)
 , _paint(0)
@@ -145,7 +304,7 @@ ImageCanvas::ImageCanvas(ImageSurface& surface)
 }
 
 
-ImageCanvas::ImageCanvas(ImageSurface& surface,
+ImageCanvas::ImageCanvas(PaintSurface& surface,
                          const Gfx::Size& size, std::size_t stride)
 : Canvas(surface)
 , _rasterizer(new Rasterizer)
@@ -185,7 +344,7 @@ void ImageCanvas::reset(const Gfx::Size& size, std::size_t stride)
 }
 
 
-const Gfx::ImageFormat& ImageCanvas::onGetFormat() const
+const Gfx::ImageFormat& ImageCanvas::format() const
 {
     return ImageFormat::argb32();
 }
@@ -200,15 +359,16 @@ void ImageCanvas::resize(const Gfx::SizeF& size)
 }
 
 
-const Gfx::SizeF& ImageCanvas::onGetSize() const
-{
-    return _size;
-}
-
-
 void ImageCanvas::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);
+}
+
+
+
+const Gfx::SizeF& ImageCanvas::onGetSize() const
+{
+    return _size;
 }
 
 
@@ -218,7 +378,7 @@ const Scaling& ImageCanvas::onGetScaling() const
 }
 
 
-PaintData* ImageCanvas::onBeginPaint(PaintData* p)
+Gfx::PaintData* ImageCanvas::onGetPaint(Gfx::PaintData* p)
 {
     ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
     if( ! paint )
@@ -226,10 +386,12 @@ PaintData* ImageCanvas::onBeginPaint(PaintData* p)
 
     _paint = paint;
     _paint->setImageCanvas(this);
+
     return _paint;
 
     //return _rasterizer->begin(p);
 }
+
 
 
 void ImageCanvas::onFinish()
@@ -565,18 +727,6 @@ void ImageSurface::setScaleFactor(double scaleFactor)
 }
 
 
-const Scaling& ImageSurface::onGetScaling() const
-{
-    return _scaling;
-}
-
-
-const Gfx::SizeF& ImageSurface::onGetSize() const
-{
-    return _size;
-}
-
-
 void ImageSurface::resize(const Gfx::SizeF& size)
 {
     _canvas->resize(size);
@@ -598,15 +748,32 @@ void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
 }
 
 
-PaintData* ImageSurface::onBeginPaint(Gfx::PaintData* paint)
-{
-    return _canvas->beginPaint(paint);
-}
-
-
 const ImageFormat& ImageSurface::onGetFormat() const
 {
     return ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& ImageSurface::onGetSize() const
+{
+    return _size;
+}
+
+
+const Scaling& ImageSurface::onGetScaling() const
+{
+    return _scaling;
+}
+
+
+Gfx::Canvas* ImageSurface::onGetCanvas()
+{
+    return _canvas;
+}
+
+
+void ImageSurface::onBeginPaint(Gfx::PaintData& paint)
+{
 }
 
 

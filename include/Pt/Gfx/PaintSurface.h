@@ -51,6 +51,7 @@ class PT_GFX_API PaintSurface
 {
     friend class Painter;
     friend class PaintRegion;
+    friend class PaintData;
 
     protected:
         PaintSurface();
@@ -64,18 +65,24 @@ class PT_GFX_API PaintSurface
 
         const Scaling& scaling() const;
 
-        PaintData* beginPaint(PaintData* paint);
-
         Image toImage() const;
 
-    protected:
+        PaintData* getPaint(PaintData* paint);
+
+        Canvas* getCanvas();
+
+        void beginPaint(PaintData& paint);
+
+    protected:      
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
         virtual const Gfx::SizeF& onGetSize() const = 0;
 
         virtual const Scaling& onGetScaling() const = 0;
 
-        virtual PaintData* onBeginPaint(PaintData* paint) = 0;
+        virtual Canvas* onGetCanvas() = 0;
+
+        virtual void onBeginPaint(PaintData& paint) = 0;
 
         virtual void onReset();
 

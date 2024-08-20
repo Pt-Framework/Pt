@@ -54,6 +54,9 @@ class Painter;
 class Scaling;
 class PaintSurface;
 
+class Line;
+class Polyline;
+
 /** @todo TODO:
 
     - distinguish between paint scaling and the physical/logical pixel ratio.
@@ -61,6 +64,8 @@ class PaintSurface;
       needed for painting. The pixel ratio is reported by the implementation for
       alignment purposes. Paint scaling can be 1.0 if the underlying implementation
       works with logic pixels, even if the reported pixel ratio is higher.
+
+    - PaintData -> Paint for attributes and PaintContext for implementation object
 */
 
 /** @brief Paint context.
@@ -73,7 +78,10 @@ class PT_GFX_API PaintData
     public:
         virtual ~PaintData();
 
-        void setCanvas(Canvas* canvas);
+#ifndef PT_HMI_CANVAS_PAINT
+#else
+        void move(Canvas* canvas);
+#endif
 
         void begin(Painter& painter);
 
@@ -92,7 +100,7 @@ class PT_GFX_API PaintData
     protected:
         virtual void onSetPainter(Painter* painter) = 0;
 
-        virtual void onBeginPaint(Painter* painter) = 0;
+        virtual void onBeginPaint(Painter& painter) = 0;
 
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
@@ -122,12 +130,14 @@ class PT_GFX_API PaintData
 
         void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
+    public:
         FontMetrics fontMetrics(const Pt::String& text) const;
 
         void drawText(const PointF& to, const Pt::String& text);
 
         void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
+    public:
         void drawImage(const Gfx::PointF& to, 
                        const Gfx::Image& image);
 
@@ -156,11 +166,58 @@ class PT_GFX_API PaintData
         virtual void onSetClip(const RectF& clip) = 0;
 
     protected:
+        virtual void onDrawLine(const Line& line) = 0;
+
+        virtual void onDrawPolyline(const Polyline& line) = 0;
+
+        virtual void onFillPolygon(const Polyline& line) = 0;
+
+        virtual void onDrawRect(const Gfx::RectF& rectangle) = 0;
+
+        virtual void onFillRect(const Gfx::RectF& rectangle) = 0;
+
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) = 0;
+
+        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) = 0;
+        
+    protected:
+        virtual FontMetrics onGetFontMetrics(const Pt::String& text) const = 0;
+
+        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text) = 0;
+
+        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
+                                const Gfx::Transform& trans) = 0;
+
+    protected:
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image) = 0;
+
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image, 
+                                 const Gfx::RectF& imgRect) = 0;
+
+        virtual void onDrawSurface(const Gfx::PointF& to, 
+                                   const Gfx::PaintSurface& surface) = 0;
+
+        virtual void onDrawSurface(const Gfx::PointF& to,
+                                   const Gfx::PaintSurface& surface,
+                                   const Gfx::RectF& rect) = 0;
+
+    protected:
         PaintData();
 
     private:
-        void onDetachCanvas(Canvas& canvas);
+#ifndef PT_HMI_CANVAS_PAINT
+        void attachCanvas(Canvas& canvas);
 
+        void detachCanvas(Canvas& canvas);
+#else
+        void onDetachCanvas(Canvas& canvas);
+#endif
+
+    private:
         void onDetachPainter(Painter& painter);
 
     private:

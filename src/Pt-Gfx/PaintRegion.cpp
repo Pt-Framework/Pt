@@ -125,24 +125,24 @@ const Gfx::Scaling& PaintRegion::onGetScaling() const
 }
 
 
-PaintData* PaintRegion::onBeginPaint(PaintData* p)
+Canvas* PaintRegion::onGetCanvas()
 {
-    if( ! _surface )
-        return 0;
+    return _surface ? _surface->getCanvas() : 0;
+}
 
-    PaintData* paint =_surface->beginPaint(p);
-    if(paint)
-    {
-        RectF r = paint->region();
-        r.shift( _area.topLeft().x(),
-                  _area.topLeft().y() );
 
-        r.setSize( _area.size() );
+void PaintRegion::onBeginPaint(Gfx::PaintData& paint)
+{
+    if(_surface)
+        _surface->beginPaint(paint);
 
-        paint->setRegion(r);
-    }
+    RectF r = paint.region();
+    r.shift( _area.topLeft().x(),
+              _area.topLeft().y() );
 
-    return paint;
+    r.setSize( _area.size() );
+
+    paint.setRegion(r);
 }
 
 
@@ -154,8 +154,7 @@ void PaintRegion::onReset()
 
 Image PaintRegion::onGetImage() const
 {
-    return _surface ? _surface->toImage()
-                    : Image();
+    return _surface ? _surface->toImage() : Image();
 }
 
 

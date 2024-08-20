@@ -62,7 +62,7 @@ class ImagePaint : public PaintData
     protected:
         virtual void onSetPainter(Gfx::Painter* painter) override;
 
-        virtual void onBeginPaint(Gfx::Painter* painter) override;
+        virtual void onBeginPaint(Gfx::Painter& painter) override;
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
@@ -77,6 +77,46 @@ class ImagePaint : public PaintData
 
         virtual void onResetClip();
 
+    protected:
+        virtual void onDrawLine(const Gfx::Line& line) override;
+
+        virtual void onDrawPolyline(const Gfx::Polyline& line) override;
+
+        virtual void onFillPolygon(const Gfx::Polyline& line) override;
+
+        virtual void onDrawRect(const Gfx::RectF& rectangle) override;
+
+        virtual void onFillRect(const Gfx::RectF& rectangle) override;
+
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) override;
+
+        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) override;
+
+    protected:
+        virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
+
+        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text) override;
+
+        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
+                                const Gfx::Transform& trans) override;
+
+    protected:
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image) override;
+
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image, 
+                                 const Gfx::RectF& imgRect) override;
+
+        virtual void onDrawSurface(const Gfx::PointF& to, 
+                                   const Gfx::PaintSurface& surface) override;
+
+        virtual void onDrawSurface(const Gfx::PointF& to,
+                                   const Gfx::PaintSurface& surface,
+                                   const Gfx::RectF& rect) override;
+
     private:
         void updatePen(const Gfx::Pen& pen);
     
@@ -87,12 +127,12 @@ class ImagePaint : public PaintData
 };
 
 
-class PT_GFX_API ImageCanvas : public Canvas
+class PT_GFX_API ImageCanvas : public Gfx::Canvas
 {
   public:
-    ImageCanvas(ImageSurface& surface);
+    ImageCanvas(PaintSurface& surface);
 
-    ImageCanvas(ImageSurface& surface,
+    ImageCanvas(PaintSurface& surface, 
                 const Gfx::Size& size, std::size_t stride = 0);
 
     virtual ~ImageCanvas();
@@ -109,18 +149,18 @@ class PT_GFX_API ImageCanvas : public Canvas
 
     void setPen(const ImagePaint& paint);
 
-  protected:
-    virtual const Gfx::ImageFormat& onGetFormat() const;
-
-    virtual const Gfx::SizeF& onGetSize() const;
-
-    virtual const Scaling& onGetScaling() const;
-
-    virtual PaintData* onBeginPaint(PaintData* paint) override;
-
-    virtual void onFinish();
+    const Gfx::ImageFormat& format() const;
 
   protected:
+    virtual const Gfx::SizeF& onGetSize() const override;
+
+    virtual const Scaling& onGetScaling() const override;
+
+    Gfx::PaintData* onGetPaint(Gfx::PaintData* p) override;
+
+    virtual void onFinish() override;
+  
+  public:
     virtual void setClip(const Gfx::RectF& clip);
 
     virtual void resetClip();
@@ -214,15 +254,17 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
     void setScaleFactor(double scaleFactor);    
 
   protected:
-    virtual const Gfx::ImageFormat& onGetFormat() const;
+    virtual const Gfx::ImageFormat& onGetFormat() const override;
 
-    virtual const Gfx::SizeF& onGetSize() const;
+    virtual const Gfx::SizeF& onGetSize() const override;
 
-    virtual const Scaling& onGetScaling() const;
+    virtual const Scaling& onGetScaling() const override;
 
-    virtual PaintData* onBeginPaint(Gfx::PaintData* p);
+    virtual Gfx::Canvas* onGetCanvas() override;
 
-    virtual Image onGetImage() const;
+    virtual void onBeginPaint(Gfx::PaintData& paint) override;
+
+    virtual Image onGetImage() const override;
 
   public:
     static void setFontDir(const System::Path& path);

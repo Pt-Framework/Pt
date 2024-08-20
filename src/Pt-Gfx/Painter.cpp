@@ -64,12 +64,6 @@ Painter::~Painter()
 }
 
 
-/*
-  Painter -> PaintSurface
-
-  Paint -> Canvas
-  Paint -> Painter
-*/
 void Painter::begin(PaintSurface& surface)
 {
     finish();
@@ -77,7 +71,7 @@ void Painter::begin(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
 
-    PaintData* paint = surface.beginPaint(_paint);
+    PaintData* paint = surface.getPaint(_paint);
     if(_paint != paint)
     {
         delete _paint;
@@ -133,13 +127,13 @@ void Painter::detachPaint(PaintData& paint)
 
 const Gfx::ImageFormat& Painter::format() const
 {
-    return _surface ? _surface->format() : ImageFormat::argb32();
+    return _paint ? _paint->format() : ImageFormat::argb32();
 }
 
 
 const Scaling& Painter::scaling() const
 {
-    return _surface ? _surface->scaling() : _scaling;
+    return _paint ? _paint->scaling() : _scaling;
 }
 
 

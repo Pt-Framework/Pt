@@ -76,7 +76,9 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual const Gfx::Scaling& onGetScaling() const;
 
-        virtual PaintData* onBeginPaint(PaintData* paint);
+        virtual Canvas* onGetCanvas() override;
+
+        virtual void onBeginPaint(Gfx::PaintData& paint) override;
 
         virtual void onReset();
 

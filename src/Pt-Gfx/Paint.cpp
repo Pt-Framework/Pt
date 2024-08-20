@@ -28,8 +28,10 @@
 */
 
 #include <Pt/Gfx/Paint.h>
-#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Canvas.h>
+#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/Algorithm.h>
 
 #include <limits>
 
@@ -47,11 +49,19 @@ PaintData::PaintData()
 
 PaintData::~PaintData()
 {
+#ifndef PT_HMI_CANVAS_PAINT
+    if(_canvas)
+    {
+        _canvas->onDetachPaint(*this);
+        _canvas = 0;
+    }
+#else
     if(_canvas)
     {
         _canvas->detachPaint(*this);
         _canvas = 0;
     }
+#endif
 
     if(_painter)
     {
@@ -60,26 +70,7 @@ PaintData::~PaintData()
     }
 }
 
-
-void PaintData::onDetachCanvas(Canvas& canvas)
-{
-    if(_canvas)
-    {
-        _canvas = 0;
-    }
-}
-
-
-void PaintData::onDetachPainter(Painter& painter)
-{
-    if(_painter)
-    {
-        onSetPainter(0);
-        _painter = 0;
-    }
-}
-
-/*
+#ifndef PT_HMI_CANVAS_PAINT
 void PaintData::attachCanvas(Canvas& canvas)
 {
     if(_canvas)
@@ -89,25 +80,42 @@ void PaintData::attachCanvas(Canvas& canvas)
     }
 
     _canvas = &canvas;
+
+    const Scaling& scaling = _canvas->scaling();
+    if(_scaling != scaling)
+    {
+        _scaling = scaling;
+        _invalid = true;
+    }
 }
 
 
-void PaintData::detachCanvas(Canvas& painter)
+void PaintData::detachCanvas(Canvas& canvas)
 {
     if(_canvas)
     {
         _canvas = 0;
     }
 }
-*/
+
+#else
+
+void PaintData::onDetachCanvas(Canvas& canvas)
+{
+    if(_canvas)
+    {
+        // onFinish();
+        _canvas = 0;
+    }
+}
 
 
-void PaintData::setCanvas(Canvas* canvas)
+void PaintData::move(Canvas* canvas)
 {
     if(_canvas)
     {
         _canvas->detachPaint(*this);
-        _canvas = 0;
+        onDetachCanvas(*_canvas);
     }
 
     if(canvas)
@@ -121,6 +129,19 @@ void PaintData::setCanvas(Canvas* canvas)
             _scaling = scaling;
             _invalid = true;
         }
+    }
+
+    return this;
+}
+#endif
+
+
+void PaintData::onDetachPainter(Painter& painter)
+{
+    if(_painter)
+    {
+        onSetPainter(0);
+        _painter = 0;
     }
 }
 
@@ -142,47 +163,12 @@ void PaintData::begin(Painter& painter)
 
     if(_invalid)
     {
-        //onSetPen( _painter->pen() );
-        onSetCompositionMode( _painter->compositionMode() );
-        onSetBrush( _painter->brush() );
-        onSetFont( _painter->font() );
-
-        Gfx::RectF clip = _painter->clip();
-        if( clip.isNull() )
-        {
-            onResetClip();
-        }
-        else
-        {
-            clip.shift( origin().x(), origin().y() );
-            onSetClip(clip);
-        }
-
         onSetPainter(_painter);
 
         _invalid = false;
     }
 
-    onBeginPaint(_painter);
-
-    if(_painter && _canvas)
-    {
-        _canvas->setCompositionMode( _painter->compositionMode() );
-        //_canvas->setPen( _painter->pen() );
-        _canvas->setBrush( _painter->brush() );
-        _canvas->setFont( _painter->font() );
-
-        Gfx::RectF clip = _painter->clip();
-        if( clip.isNull() )
-        {
-            _canvas->resetClip();
-        }
-        else
-        {
-          clip.shift( origin().x(), origin().y() );
-          _canvas->setClip(clip);
-        }
-    }
+    onBeginPaint(*_painter);
 }
 
 
@@ -227,35 +213,25 @@ const Scaling& PaintData::scaling() const
 
 void PaintData::setCompositionMode(const Gfx::CompositionMode& mode)
 {
-    if(_canvas)
-        _canvas->setCompositionMode(mode);
+    onSetCompositionMode(mode);
 }
 
 
 void PaintData::setPen(const Pen& pen)
 {
     onSetPen(pen);
-
-    //if(_canvas)
-    //    _canvas->setPen(pen);
 }
 
 
 void PaintData::setBrush(const Brush& brush)
 {
     onSetBrush(brush);
-
-    if(_canvas)
-        _canvas->setBrush(brush);
 }
 
 
 void PaintData::setFont(const Gfx::Font& font)
 {
     onSetFont(font);
-
-    if(_canvas)
-        _canvas->setFont(font);
 }
 
 
@@ -265,28 +241,19 @@ void PaintData::setClip(const RectF& rect)
     clip.shift( origin().x(), origin().y() );
 
     onSetClip(clip);
-
-    if(_canvas)
-        _canvas->setClip(clip);
 }
 
 
 void PaintData::resetClip()
 {
     onResetClip();
-
-    if(_canvas)
-        _canvas->resetClip();
 }
 
 
 void PaintData::drawLine(const PointF& from, const PointF& to)
 {   
-    if(_canvas)
-    {
-        Gfx::Line line(*this, from, to);
-        _canvas->drawLine(line);
-    }
+    Gfx::Line line(*this, from, to);
+    onDrawLine(line); 
 }
 
 
@@ -297,8 +264,7 @@ void PaintData::drawRect(const Gfx::RectF& rect)
     r.shift( origin().x(), 
              origin().y() );
 
-    if(_canvas)
-        _canvas->drawRect(r);
+    onDrawRect(r);
 }
 
 
@@ -309,71 +275,55 @@ void PaintData::fillRect(const Gfx::RectF& rect)
     r.shift( origin().x(), 
              origin().y() );
 
-    if(_canvas)
-        _canvas->fillRect(r);
+    onFillRect(r);
 }
 
 
 void PaintData::drawPolyline(const Gfx::PointF* ps, const size_t n)
 {
-    if(_canvas)
-    {
-        Polyline line(*this, ps, n);
-        _canvas->drawPolyline(line);
-    }
+    Polyline line(*this, ps, n);
+    onDrawPolyline(line);
 }
 
 
 void PaintData::fillPolygon(const Gfx::PointF* ps, const size_t n)
 {
-    if(_canvas)
-    {
-        Polyline line(*this, ps, n);
-        _canvas->fillPolygon(line);
-    }
+    Polyline line(*this, ps, n);
+    onFillPolygon(line);
 }
 
 
 void PaintData::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     Pt::Gfx::PointF p = topLeft + origin();
-
-    if(_canvas)
-        _canvas->drawEllipse(p, size);
+    onDrawEllipse(p, size);
 }
 
 
 void PaintData::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     Pt::Gfx::PointF p = topLeft + origin();
-
-    if(_canvas)
-        _canvas->fillEllipse(p, size);
+    onFillEllipse(p, size);
 }
 
 
 FontMetrics PaintData::fontMetrics(const Pt::String& text) const
 {
-    if(_canvas)
-        return _canvas->fontMetrics(text);
-
-    return FontMetrics();
+    return onGetFontMetrics(text);
 }
 
 
 void PaintData::drawText(const PointF& to, const Pt::String& text)
 {
-    Pt::Gfx::PointF p = to + origin(); 
-    if(_canvas)
-        _canvas->drawText(p, text);
+    Pt::Gfx::PointF p = to + origin();
+    onDrawText(p, text);
 }
 
 
-void PaintData::drawText(const PointF& to, const Pt::String& text, const Transform& t)
+void PaintData::drawText(const PointF& to, const Pt::String& text, const Transform& tf)
 {
     Pt::Gfx::PointF p = to + origin(); 
-    if(_canvas)
-        _canvas->drawText(p, text, t);
+    onDrawText(p, text, tf);
 }
 
 
@@ -381,8 +331,7 @@ void PaintData::drawImage(const Gfx::PointF& to,
                           const Gfx::Image& image)
 {
     Pt::Gfx::PointF p = to + origin(); 
-    if(_canvas)
-        _canvas->drawImage(p, image);
+    onDrawImage(p, image);
 }
 
 
@@ -391,9 +340,7 @@ void PaintData::drawImage(const Gfx::PointF& to,
                           const Gfx::RectF& rect)
 {
     Pt::Gfx::PointF p = to + origin();
-
-    if(_canvas)
-        _canvas->drawImage(p, image, rect);
+    onDrawImage(p, image, rect);
 }
 
 
@@ -401,8 +348,7 @@ void PaintData::drawSurface(const Gfx::PointF& to,
                             const Gfx::PaintSurface& surface)
 {
     Pt::Gfx::PointF p = to + origin();
-    if(_canvas)
-        _canvas->drawSurface(p, surface);
+    onDrawSurface(p, surface);
 }
 
 
@@ -411,9 +357,40 @@ void PaintData::drawSurface(const Gfx::PointF& to,
                             const Gfx::RectF& rect)
 {
     Pt::Gfx::PointF p = to + origin();
+    onDrawSurface(p, surface, rect);
+}
 
-    if(_canvas)
-        _canvas->drawSurface(p, surface, rect);
+
+void PaintData::onDrawSurface(const Gfx::PointF& to, 
+                              const Gfx::PaintSurface& surface)
+{
+    Pt::Gfx::Image image = surface.toImage();
+    if( image.format() == format() )
+    {
+        drawImage(to, image);
+        return;
+    }
+
+    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    drawImage(to, dest);
+}
+
+
+void PaintData::onDrawSurface(const Gfx::PointF& to,
+                              const Gfx::PaintSurface& surface,
+                              const Gfx::RectF& rect)
+{
+    Pt::Gfx::Image image = surface.toImage();
+    if( image.format() == format() )
+    {
+        drawImage(to, image, rect);
+        return;
+    }
+
+    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    drawImage(to, dest, rect);
 }
 
 } // namespace
