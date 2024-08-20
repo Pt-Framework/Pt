@@ -220,9 +220,12 @@ class PT_GFX_API Painter
     private:
         void onDetachSurface(PaintSurface& surface);
 
+    private:
         void attachPaint(PaintData& paint);
 
         void detachPaint(PaintData& paint);
+
+        //void onDetachPaint(PaintData& paint);
 
     private:
         PaintSurface*        _surface;

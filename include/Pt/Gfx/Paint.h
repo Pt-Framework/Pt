@@ -211,6 +211,10 @@ class PT_GFX_API PaintData
     private:
         void onDetachPainter(Painter& painter);
 
+        //void attachPainter(Painter& painter);
+
+        //void detachPainter(Painter& painter);
+
     private:
         Painter*       _painter;
         Canvas*        _canvas;

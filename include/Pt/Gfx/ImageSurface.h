@@ -151,14 +151,14 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     const Gfx::ImageFormat& format() const;
 
+    const Gfx::SizeF& size() const;
+
+    const Scaling& scaling() const;
+
   protected:
-    virtual const Gfx::SizeF& onGetSize() const override;
-
-    virtual const Scaling& onGetScaling() const override;
-
     Gfx::PaintData* onGetPaint(Gfx::PaintData* p) override;
 
-    virtual void onFinish() override;
+    virtual void onFinishPaint() override;
   
   public:
     virtual void setClip(const Gfx::RectF& clip);

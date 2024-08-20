@@ -108,29 +108,29 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         
         void clear(const Gfx::Color& c);
 
-        void resize(const Gfx::SizeF& size);
-        
         Gfx::Image toImage() const;
 
         void set(const Gfx::Image& image);
 
+        void resize(const Gfx::SizeF& size);
+        
         void setScaleFactor(double scaleFactor);
 
         const Gfx::ImageFormat& format() const;
+        
+        const Gfx::SizeF& size() const;
 
+        const Gfx::Scaling& scaling() const;
+    
     public:
         Gfx::Canvas* getCanvas();
 
         void beginPaint(Gfx::PaintData& paint);
 
     protected:
-        const Gfx::SizeF& onGetSize() const;
-
-        const Gfx::Scaling& onGetScaling() const;
-
         virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* p) override;
 
-        virtual void onFinish() override;
+        virtual void onFinishPaint() override;
 
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);

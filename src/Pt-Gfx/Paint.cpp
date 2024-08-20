@@ -73,6 +73,25 @@ void PaintData::onDetachPainter(Painter& painter)
 }
 
 
+//void PaintData::attachPainter(Painter& painter)
+//{
+//    if(_painter)
+//    {
+//        _painter->onDetachPaint(*this);
+//        _painter = 0;
+//    }
+//
+//    _painter = &painter;
+//}
+//
+//
+//void PaintData::detachPainter(Painter& painter)
+//{
+//    if(_painter)
+//        _painter = 0;
+//}
+
+
 void PaintData::attachCanvas(Canvas& canvas)
 {
     if(_canvas)

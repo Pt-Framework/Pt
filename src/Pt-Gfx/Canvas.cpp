@@ -56,7 +56,7 @@ void Canvas::onDetachPaint(PaintData& paint)
 {
     if(_paint)
     {
-        onFinish();
+        onFinishPaint();
         _paint = 0;
     }
 }
@@ -65,23 +65,22 @@ void Canvas::onDetachPaint(PaintData& paint)
 const Gfx::ImageFormat& Canvas::format() const
 {
     return _surface->format();
-    //return onGetFormat();
 }
 
 
 const Gfx::SizeF& Canvas::size() const
 {   
-    return onGetSize();
+    return _surface->size();
 }
 
 
 const Scaling& Canvas::scaling() const
 {
-    return onGetScaling();
+    return _surface->scaling();
 }
 
 
-PaintData* Canvas::getPaint(PaintData* p)
+PaintData* Canvas::beginPaint(PaintData* p)
 {
     finishPaint();
 

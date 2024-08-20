@@ -250,6 +250,30 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& sizeF)
 }
 
 
+void PixmapSurfaceImpl::setScaleFactor(double scaleFactor)
+{
+    _scaling.setScaleFactor(scaleFactor);
+}
+
+
+const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+{
+    return Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& PixmapSurfaceImpl::size() const
+{
+    return _size;
+}
+
+
+const Gfx::Scaling& PixmapSurfaceImpl::scaling() const
+{
+    return _scaling;
+}
+
+
 Gfx::Canvas* PixmapSurfaceImpl::getCanvas()
 {
     return this;
@@ -258,18 +282,6 @@ Gfx::Canvas* PixmapSurfaceImpl::getCanvas()
 
 void PixmapSurfaceImpl::beginPaint(Gfx::PaintData& p)
 {
-}
-
-
-const Gfx::SizeF& PixmapSurfaceImpl::onGetSize() const
-{
-    return _size;
-}
-
-
-const Gfx::Scaling& PixmapSurfaceImpl::onGetScaling() const
-{
-    return _scaling;
 }
 
 
@@ -286,7 +298,7 @@ Gfx::PaintData* PixmapSurfaceImpl::onGetPaint(Gfx::PaintData* p)
 }
 
 
-void PixmapSurfaceImpl::onFinish()
+void PixmapSurfaceImpl::onFinishPaint()
 {
     SelectObject(_dc, _oldPen);
     SelectObject(_dc, _oldBrush);
@@ -296,18 +308,6 @@ void PixmapSurfaceImpl::onFinish()
         _paint->reset(0);
     
     _paint = 0;
-}
-
-
-const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
-{
-    return Gfx::ImageFormat::argb32();
-}
-
-
-void PixmapSurfaceImpl::setScaleFactor(double scaleFactor)
-{
-    _scaling.setScaleFactor(scaleFactor);
 }
 
 

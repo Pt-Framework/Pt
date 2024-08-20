@@ -113,7 +113,7 @@ PaintData* PaintSurface::getPaint(PaintData* p)
     if( ! canvas )
         return 0;
 
-    PaintData* paint = canvas->getPaint(p);
+    PaintData* paint = canvas->beginPaint(p);
     if(paint)
     {
         onBeginPaint(*paint);

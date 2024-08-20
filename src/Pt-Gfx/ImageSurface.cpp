@@ -320,12 +320,6 @@ ImageCanvas::~ImageCanvas()
 }
 
 
-const Gfx::Image& ImageCanvas::image() const
-{
-    return _rasterizer->image();
-}
-
-
 void ImageCanvas::reset(const Gfx::Image& image)
 {
     _size = _scaling.toLogical( SizeF( image.width(), 
@@ -344,9 +338,15 @@ void ImageCanvas::reset(const Gfx::Size& size, std::size_t stride)
 }
 
 
-const Gfx::ImageFormat& ImageCanvas::format() const
+const Gfx::Image& ImageCanvas::image() const
 {
-    return ImageFormat::argb32();
+    return _rasterizer->image();
+}
+
+
+void ImageCanvas::setScaleFactor(double scaleFactor)
+{
+    _scaling.setScaleFactor(scaleFactor);
 }
 
 
@@ -359,20 +359,19 @@ void ImageCanvas::resize(const Gfx::SizeF& size)
 }
 
 
-void ImageCanvas::setScaleFactor(double scaleFactor)
+const Gfx::ImageFormat& ImageCanvas::format() const
 {
-    _scaling.setScaleFactor(scaleFactor);
+    return ImageFormat::argb32();
 }
 
 
-
-const Gfx::SizeF& ImageCanvas::onGetSize() const
+const Gfx::SizeF& ImageCanvas::size() const
 {
     return _size;
 }
 
 
-const Scaling& ImageCanvas::onGetScaling() const
+const Scaling& ImageCanvas::scaling() const
 {
     return _scaling;
 }
@@ -393,8 +392,7 @@ Gfx::PaintData* ImageCanvas::onGetPaint(Gfx::PaintData* p)
 }
 
 
-
-void ImageCanvas::onFinish()
+void ImageCanvas::onFinishPaint()
 {
     //_rasterizer->finish();
     

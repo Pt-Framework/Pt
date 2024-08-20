@@ -31,15 +31,8 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Scaling.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Transform.h>
-#include <Pt/Gfx/Path.h>
+#include <Pt/Gfx/ImageFormat.h>
 
 namespace Pt {
 
@@ -47,8 +40,6 @@ namespace Gfx {
 
 class PaintSurface;
 class PaintData;
-class Line;
-class Polyline;
 
 /** @brief Paint canvas.
 */
@@ -67,23 +58,18 @@ class PT_GFX_API Canvas
 
         const Scaling& scaling() const;
 
-        PaintData* getPaint(PaintData* paint);
+        PaintData* beginPaint(PaintData* paint);
 
         void finishPaint();
 
     protected:
-        //virtual const Gfx::ImageFormat& onGetFormat() const = 0;
-
-        virtual const Gfx::SizeF& onGetSize() const = 0;
-
-        virtual const Scaling& onGetScaling() const = 0;
-
         virtual PaintData* onGetPaint(PaintData* paint) = 0;
 
-        virtual void onFinish() = 0;
+        virtual void onFinishPaint() = 0;
 
     private:
         void onDetachPaint(PaintData& paint);
+    
     private:
         PaintSurface* _surface;
         PaintData*    _paint;

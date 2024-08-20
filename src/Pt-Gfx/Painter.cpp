@@ -100,10 +100,16 @@ void Painter::onDetachSurface(PaintSurface& surface)
 {
     if(_surface)
     {
-        _scaling = Scaling();
         _surface = 0;
     }
 }
+
+
+//void Painter::onDetachPaint(PaintData& paint)
+//{
+//    if(_paint)
+//        _paint = 0;
+//}
 
 
 void Painter::attachPaint(PaintData& paint)
