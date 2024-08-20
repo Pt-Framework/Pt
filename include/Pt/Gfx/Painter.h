@@ -79,20 +79,20 @@ class PT_GFX_API Painter
 
         const Scaling& scaling() const;
 
-        /** @brief Sets the composition mode.
-        */
-        void setCompositionMode(const CompositionMode& mode);
+    public:
+        const Paint& paint() const;
 
         /** @brief Returns the current composition mode.
         */
         const CompositionMode& compositionMode() const;
 
+        /** @brief Sets the composition mode.
+        */
+        void setCompositionMode(const CompositionMode& mode);
+
         /** @brief Returns the clipping rect.
         */
-        const RectF& clip() const
-        {
-            return _clip;
-        }
+        const RectF& clip() const;
 
         /** @brief Sets the clipping rect.
         */
@@ -102,30 +102,31 @@ class PT_GFX_API Painter
         */
         void resetClip();
 
-        /** @brief Sets the pen used to stroke lines.
-        */
-        void setPen(const Pen& pen);
-
         /** @brief Returns the current pen.
         */
         const Pen& pen() const;
 
-        /** @brief Sets the brush used to fill areas.
+        /** @brief Sets the pen used to stroke lines.
         */
-        void setBrush(const Brush& brush);
+        void setPen(const Pen& pen);
 
         /** @brief Returns the current brush.
         */
         const Brush& brush() const;
 
-        /** @brief Sets the font used to draw text.
+        /** @brief Sets the brush used to fill areas.
         */
-        void setFont(const Font& font);
+        void setBrush(const Brush& brush);
 
         /** @brief Returns the current font.
         */
         const Font& font() const;
 
+        /** @brief Sets the font used to draw text.
+        */
+        void setFont(const Font& font);
+
+    public:
         /** @brief Measures the metrics of a text block.
         */
         FontMetrics fontMetrics(const Pt::String& text) const;
@@ -160,17 +161,11 @@ class PT_GFX_API Painter
 
         /** @brief Draws the outline of a circle.
           */
-        void drawCircle(const PointF& topLeft, double diameter)
-        {
-            drawEllipse(topLeft, SizeF(diameter, diameter));
-        }
+        void drawCircle(const PointF& topLeft, double diameter);
 
         /** @brief Fills a circular area.
         */
-        inline void fillCircle(const PointF& topLeft, double diameter)
-        {
-            fillEllipse(topLeft, SizeF(diameter, diameter));
-        }
+        void fillCircle(const PointF& topLeft, double diameter);
 
         /** @brief Draws the outline of an ellipse.
         */
@@ -225,17 +220,11 @@ class PT_GFX_API Painter
 
         void detachPaint(PaintData& paint);
 
-        //void onDetachPaint(PaintData& paint);
-
     private:
         PaintSurface*        _surface;
-        PaintData*           _paint;
+        PaintData*           _paintContext;
         Scaling              _scaling;
-        Gfx::Pen             _pen;
-        Gfx::Brush           _brush;
-        Gfx::Font            _font;
-        Gfx::CompositionMode _compositionMode;
-        Gfx::RectF           _clip;
+        Paint                _paint;
 };
 
 } // namespace

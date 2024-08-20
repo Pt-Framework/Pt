@@ -39,6 +39,91 @@ namespace Pt {
 
 namespace Gfx {
 
+///////////////////////////////////////////////////////////////////////
+// Paint
+///////////////////////////////////////////////////////////////////////
+
+Paint::Paint()
+{
+}
+
+
+Paint::~Paint()
+{
+}
+
+
+const Gfx::CompositionMode& Paint::compositionMode() const
+{
+    return _compositionMode;
+}
+
+
+void Paint::setCompositionMode(const Gfx::CompositionMode& mode)
+{
+    _compositionMode = mode;
+}
+
+
+const RectF& Paint::clip() const
+{
+    return _clip;
+}
+
+
+void Paint::setClip(const Gfx::RectF& clip)
+{
+    _clip = clip;
+}
+
+
+void Paint::resetClip()
+{
+    // TODO: RECT-NULL
+    _clip = Gfx::RectF();
+}
+
+
+const Gfx::Pen& Paint::pen() const
+{
+    return _pen;
+}
+
+
+void Paint::setPen(const Gfx::Pen& pen)
+{
+    _pen = pen;
+}
+
+
+const Gfx::Brush& Paint::brush() const
+{
+    return _brush;
+}
+
+
+void Paint::setBrush(const Gfx::Brush& brush)
+{
+    _brush = brush;
+}
+
+
+const Gfx::Font& Paint::font() const
+{
+    return _font;
+}
+
+
+void Paint::setFont(const Gfx::Font& font)
+{
+    _font = font;
+
+}
+
+///////////////////////////////////////////////////////////////////////
+// PaintContext
+///////////////////////////////////////////////////////////////////////
+
 PaintData::PaintData()
 : _painter(0)
 , _canvas(0)
@@ -61,35 +146,6 @@ PaintData::~PaintData()
         _painter = 0;
     }
 }
-
-
-void PaintData::onDetachPainter(Painter& painter)
-{
-    if(_painter)
-    {
-        onSetPainter(0);
-        _painter = 0;
-    }
-}
-
-
-//void PaintData::attachPainter(Painter& painter)
-//{
-//    if(_painter)
-//    {
-//        _painter->onDetachPaint(*this);
-//        _painter = 0;
-//    }
-//
-//    _painter = &painter;
-//}
-//
-//
-//void PaintData::detachPainter(Painter& painter)
-//{
-//    if(_painter)
-//        _painter = 0;
-//}
 
 
 void PaintData::attachCanvas(Canvas& canvas)
@@ -120,6 +176,16 @@ void PaintData::detachCanvas(Canvas& canvas)
 }
 
 
+void PaintData::onDetachPainter(Painter& painter)
+{
+    if(_painter)
+    {
+        onSetPaint(0);
+        _painter = 0;
+    }
+}
+
+
 void PaintData::begin(Painter& painter)
 {
     if(_painter != &painter)
@@ -137,12 +203,11 @@ void PaintData::begin(Painter& painter)
 
     if(_invalid)
     {
-        onSetPainter(_painter);
-
+        onSetPaint( &_painter->paint() );
         _invalid = false;
     }
 
-    onBeginPaint(*_painter);
+    onBeginPaint( _painter->paint() );
 }
 
 

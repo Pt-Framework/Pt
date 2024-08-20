@@ -52,7 +52,6 @@ namespace Gfx {
 
 ImagePaint::ImagePaint()
 : _canvas(0)
-, _painter(0)
 {
 }
 
@@ -68,27 +67,25 @@ void ImagePaint::setImageCanvas(ImageCanvas* canvas)
 }
 
 
-void ImagePaint::onSetPainter(Gfx::Painter* painter)
+void ImagePaint::onSetPaint(const Gfx::Paint* paint)
 {
-    if(painter)
+    if(paint)
     {
-        updatePen( painter->pen() );
+        updatePen( paint->pen() );
     }
-
-    _painter = painter;
 }
 
 
-void ImagePaint::onBeginPaint(Gfx::Painter& painter)
+void ImagePaint::onBeginPaint(const Gfx::Paint& paint)
 {
     if(_canvas)
     {
-        _canvas->setCompositionMode( painter.compositionMode() );
+        _canvas->setCompositionMode( paint.compositionMode() );
         _canvas->setPen(*this);
-        _canvas->setBrush( painter.brush() );
-        _canvas->setFont( painter.font() );
+        _canvas->setBrush( paint.brush() );
+        _canvas->setFont( paint.font() );
 
-        const Gfx::RectF& clip = painter.clip();
+        const Gfx::RectF& clip = paint.clip();
         if( clip.isNull() )
             _canvas->resetClip();
         else

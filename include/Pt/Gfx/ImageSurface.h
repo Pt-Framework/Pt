@@ -60,9 +60,9 @@ class ImagePaint : public PaintData
         void setImageCanvas(ImageCanvas* canvas);
 
     protected:
-        virtual void onSetPainter(Gfx::Painter* painter) override;
+        virtual void onSetPaint(const Gfx::Paint* paint) override;
 
-        virtual void onBeginPaint(Gfx::Painter& painter) override;
+        virtual void onBeginPaint(const Gfx::Paint& paint) override;
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
@@ -122,7 +122,6 @@ class ImagePaint : public PaintData
     
     private:
         ImageCanvas*   _canvas;
-        Gfx::Painter*  _painter;
         Pen            _pen;
 };
 

@@ -167,7 +167,6 @@ namespace Hmi {
 PaintData::PaintData()
 : Gfx::PaintData()
 , _canvas(0)
-, _painter(0)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _pen(0)
 , _penColor()
@@ -201,33 +200,31 @@ void PaintData::reset(PixmapSurfaceImpl* canvas)
 }
 
 
-void PaintData::onSetPainter(Gfx::Painter* painter)
+void PaintData::onSetPaint(const Gfx::Paint* paint)
 {
-    if(painter)
+    if(paint)
     {
-        updateMode( painter->compositionMode() );
-        updatePen( painter->pen() );
-        updateBrush( painter->brush() );
-        updateFont( painter->font() );
+        updateMode( paint->compositionMode() );
+        updatePen( paint->pen() );
+        updateBrush( paint->brush() );
+        updateFont( paint->font() );
 
-        const Gfx::RectF& clip = painter->clip();
+        const Gfx::RectF& clip = paint->clip();
         updateClip( clip.isNull() ? 0 : &clip );
     }
-
-    _painter = painter;
 }
 
 
-void PaintData::onBeginPaint(Gfx::Painter& painter)
+void PaintData::onBeginPaint(const Gfx::Paint& paint)
 {
     if(_canvas)
     {
         _canvas->setCompositionMode(_compositionMode);
         _canvas->setPen(*this);
-        _canvas->setBrush(*this, painter.brush());
+        _canvas->setBrush(*this, paint.brush());
         _canvas->setFont(*this);
 
-        const Gfx::RectF& clip = painter.clip();
+        const Gfx::RectF& clip = paint.clip();
         _canvas->setClip( clip.isNull() ? 0 : this );
     }
 }

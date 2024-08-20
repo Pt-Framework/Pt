@@ -70,6 +70,67 @@ class Polyline;
 
 /** @brief Paint context.
 */
+
+class PT_GFX_API Paint
+{
+    public:
+        Paint();
+
+        ~Paint();
+
+        /** @brief Returns the current composition mode.
+        */
+        const CompositionMode& compositionMode() const;
+
+        /** @brief Sets the composition mode.
+        */
+        void setCompositionMode(const CompositionMode& mode);
+
+        /** @brief Returns the clipping rect.
+        */
+        const RectF& clip() const;
+
+        /** @brief Sets the clipping rect.
+        */
+        void setClip(const RectF& clip);
+
+        /** @brief Resets the clipping rect.
+        */
+        void resetClip();
+
+        /** @brief Returns the current pen.
+        */
+        const Pen& pen() const;
+
+        /** @brief Sets the pen used to stroke lines.
+        */
+        void setPen(const Pen& pen);
+
+        /** @brief Returns the current brush.
+        */
+        const Brush& brush() const;
+
+        /** @brief Sets the brush used to fill areas.
+        */
+        void setBrush(const Brush& brush);
+
+        /** @brief Returns the current font.
+        */
+        const Font& font() const;
+
+        /** @brief Sets the font used to draw text.
+        */
+        void setFont(const Font& font);
+
+    private:
+        Gfx::CompositionMode _compositionMode;
+        Gfx::RectF           _clip;
+        Gfx::Pen             _pen;
+        Gfx::Brush           _brush;
+        Gfx::Font            _font;
+};
+
+
 class PT_GFX_API PaintData
 {
     friend class Canvas;
@@ -77,10 +138,6 @@ class PT_GFX_API PaintData
 
     public:
         virtual ~PaintData();
-
-        void begin(Painter& painter);
-
-        void finish();
 
         const ImageFormat& format() const;
 
@@ -92,10 +149,14 @@ class PT_GFX_API PaintData
 
         void setRegion(const RectF& r);
 
-    protected:
-        virtual void onSetPainter(Painter* painter) = 0;
+        void begin(Painter& painter);
 
-        virtual void onBeginPaint(Painter& painter) = 0;
+        void finish();
+
+    protected:
+        virtual void onSetPaint(const Paint* paint) = 0;
+
+        virtual void onBeginPaint(const Paint& paint) = 0;
 
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
@@ -210,10 +271,6 @@ class PT_GFX_API PaintData
 
     private:
         void onDetachPainter(Painter& painter);
-
-        //void attachPainter(Painter& painter);
-
-        //void detachPainter(Painter& painter);
 
     private:
         Painter*       _painter;

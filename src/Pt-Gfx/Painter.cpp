@@ -36,14 +36,14 @@ namespace Gfx {
 
 Painter::Painter()
 : _surface(0)
-, _paint(0)
+, _paintContext(0)
 {
 }
 
 
 Painter::Painter(PaintSurface& surface)
 : _surface(0)
-, _paint(0)
+, _paintContext(0)
 {
     begin(surface);
 }
@@ -57,10 +57,10 @@ Painter::~Painter()
         _surface = 0;
     }
 
-    if(_paint) 
-        _paint->onDetachPainter(*this);
+    if(_paintContext) 
+        _paintContext->onDetachPainter(*this);
 
-    delete _paint;
+    delete _paintContext;
 }
 
 
@@ -71,22 +71,22 @@ void Painter::begin(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
 
-    PaintData* paint = surface.getPaint(_paint);
-    if(_paint != paint)
+    PaintData* ctx = surface.getPaint(_paintContext);
+    if(_paintContext != ctx)
     {
-        delete _paint;
-        _paint = 0;
+        delete _paintContext;
+        _paintContext = 0;
     }
     
-    if(paint)
-        paint->begin(*this);
+    if(ctx)
+        ctx->begin(*this);
 }
 
 
 void Painter::finish()
 {
-    if(_paint)
-        _paint->finish();
+    if(_paintContext)
+        _paintContext->finish();
 
     if( _surface )
     {
@@ -105,132 +105,136 @@ void Painter::onDetachSurface(PaintSurface& surface)
 }
 
 
-//void Painter::onDetachPaint(PaintData& paint)
-//{
-//    if(_paint)
-//        _paint = 0;
-//}
-
-
 void Painter::attachPaint(PaintData& paint)
 {
-    if(_paint)
+    if(_paintContext)
     {
-        _paint->onDetachPainter(*this);
-        _paint = 0;
+        _paintContext->onDetachPainter(*this);
+        _paintContext = 0;
     }
     
-    _paint = &paint;
+    _paintContext = &paint;
 }
 
 
 void Painter::detachPaint(PaintData& paint)
 {
-    if(_paint)
-        _paint = 0;
+    if(_paintContext)
+        _paintContext = 0;
 }
 
 
 const Gfx::ImageFormat& Painter::format() const
 {
-    return _paint ? _paint->format() : ImageFormat::argb32();
+    return _paintContext ? _paintContext->format() : ImageFormat::argb32();
 }
 
 
 const Scaling& Painter::scaling() const
 {
-    return _paint ? _paint->scaling() : _scaling;
+    return _paintContext ? _paintContext->scaling() : _scaling;
+}
+
+
+const Paint& Painter::paint() const
+{
+    return _paint;
 }
 
 
 const Gfx::CompositionMode& Painter::compositionMode() const
 {
-    return _compositionMode;
+    return _paint.compositionMode();
 }
 
 
 void Painter::setCompositionMode(const Gfx::CompositionMode& mode)
 {
-    _compositionMode = mode;
+    _paint.setCompositionMode(mode);
 
-    if(_paint)
-        _paint->setCompositionMode(_compositionMode);
+    if(_paintContext)
+        _paintContext->setCompositionMode(mode);
 }
 
 
-void Painter::setPen(const Gfx::Pen& pen)
+const RectF& Painter::clip() const
 {
-    _pen = pen;
-
-    if(_paint)
-        _paint->setPen(pen);
-}
-
-
-const Gfx::Pen& Painter::pen() const
-{
-    return _pen;
+    return _paint.clip();
 }
 
 
 void Painter::setClip(const Gfx::RectF& clip)
 {
-    _clip = clip;
+    _paint.setClip(clip);
 
-    if(_paint)
+    if(_paintContext)
     {
-        if( _clip.isNull() )
-            _paint->resetClip();
+        if( clip.isNull() )
+            _paintContext->resetClip();
         else
-            _paint->setClip(_clip);
+            _paintContext->setClip(clip);
     }
 }
 
 
 void Painter::resetClip()
 {
-    // TODO: RECT-NULL
-    _clip = Gfx::RectF();
+    _paint.resetClip();
 
-    if(_paint)
-        _paint->resetClip();
+    if(_paintContext)
+        _paintContext->resetClip();
 }
 
 
-void Painter::setBrush(const Gfx::Brush& brush)
+const Gfx::Pen& Painter::pen() const
 {
-    _brush = brush;
+    return _paint.pen();
+}
 
-    if(_paint)
-        _paint->setBrush(_brush);
+
+void Painter::setPen(const Gfx::Pen& pen)
+{
+    _paint.setPen(pen);
+
+    if(_paintContext)
+        _paintContext->setPen(pen);
 }
 
 
 const Gfx::Brush& Painter::brush() const
 {
-    return _brush;
+    return _paint.brush();
 }
 
 
-void Painter::setFont(const Gfx::Font& font)
+void Painter::setBrush(const Gfx::Brush& brush)
 {
-    _font = font;
+    _paint.setBrush(brush);
 
-    if(_paint)
-        _paint->setFont(_font);
+    if(_paintContext)
+        _paintContext->setBrush(brush);
 }
 
 
 const Gfx::Font& Painter::font() const
 {
-    return _font;
+    return _paint.font();
+}
+
+
+void Painter::setFont(const Gfx::Font& font)
+{
+    _paint.setFont(font);
+
+    if(_paintContext)
+        _paintContext->setFont(font);
 }
 
 
 Gfx::FontMetrics Painter::fontMetrics(const Pt::String& text) const
 {
-    if(_paint)
-        return _paint->fontMetrics(text);
+    if(_paintContext)
+        return _paintContext->fontMetrics(text);
 
     return Gfx::FontMetrics();
 }
@@ -238,79 +242,91 @@ Gfx::FontMetrics Painter::fontMetrics(const Pt::String& text) const
 
 void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
-    if( _pen.size() == 0 )
+    if( _paint.pen().size() == 0 )
         return;
 
-    if(_paint)
-        _paint->drawLine(from, to);
+    if(_paintContext)
+        _paintContext->drawLine(from, to);
 }
 
 
 void Painter::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
-    if(_paint)
-        _paint->drawText(to, text);
+    if(_paintContext)
+        _paintContext->drawText(to, text);
 }
 
 
 void Painter::drawText(const Gfx::PointF& to, const Pt::String& text, 
                        const Gfx::Transform& trans)
 {
-    if(_paint)
-        _paint->drawText(to, text, trans);
+    if(_paintContext)
+        _paintContext->drawText(to, text, trans);
 }
 
 
 void Painter::drawRect(const Gfx::RectF& rect)
 {
-    if(_paint)
-        _paint->drawRect(rect);
+    if(_paintContext)
+        _paintContext->drawRect(rect);
 }
 
 
 void Painter::fillRect(const Gfx::RectF& rect)
 {
-    if(_paint)
-        _paint->fillRect(rect);
+    if(_paintContext)
+        _paintContext->fillRect(rect);
+}
+
+
+void Painter::drawCircle(const PointF& topLeft, double diameter)
+{
+    drawEllipse(topLeft, SizeF(diameter, diameter));
+}
+
+
+void Painter::fillCircle(const PointF& topLeft, double diameter)
+{
+    fillEllipse(topLeft, SizeF(diameter, diameter));
 }
 
 
 void Painter::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    if(_paint)
-        _paint->drawEllipse(topLeft, size);
+    if(_paintContext)
+        _paintContext->drawEllipse(topLeft, size);
 }
 
 
 void Painter::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    if(_paint)
-        _paint->fillEllipse(topLeft, size);
+    if(_paintContext)
+        _paintContext->fillEllipse(topLeft, size);
 }
 
 
 void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
-    if (_pen.size() == 0)
+    if( _paint.pen().size() == 0 )
         return;
 
-    if(_paint)
-        _paint->drawPolyline(points, pointCount);
+    if(_paintContext)
+        _paintContext->drawPolyline(points, pointCount);
 }
 
 
 void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
-    if(_paint)
-        _paint->fillPolygon(points, pointCount);
+    if(_paintContext)
+        _paintContext->fillPolygon(points, pointCount);
 }
 
 
 void Painter::drawSurface(const Gfx::PointF& toF, 
                           const PaintSurface& surface)
 {
-    if(_paint)
-        _paint->drawSurface(toF, surface);
+    if(_paintContext)
+        _paintContext->drawSurface(toF, surface);
 }
 
 
@@ -318,16 +334,16 @@ void Painter::drawSurface(const Gfx::PointF& toF,
                           const PaintSurface& surface, 
                           const Gfx::RectF& surfaceRect)
 {
-    if(_paint)
-        _paint->drawSurface(toF, surface, surfaceRect);
+    if(_paintContext)
+        _paintContext->drawSurface(toF, surface, surfaceRect);
 }
 
 
 void Painter::drawImage(const Gfx::PointF& to, 
                         const Gfx::Image& image)
 {
-    if(_paint)
-        _paint->drawImage(to, image);
+    if(_paintContext)
+        _paintContext->drawImage(to, image);
 }
 
 
@@ -335,8 +351,8 @@ void Painter::drawImage(const Gfx::PointF& to,
                         const Gfx::Image& image, 
                         const Gfx::RectF& imageRect)
 {
-    if(_paint)
-        _paint->drawImage(to, image, imageRect);
+    if(_paintContext)
+        _paintContext->drawImage(to, image, imageRect);
 }
 
 
