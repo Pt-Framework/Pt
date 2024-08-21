@@ -78,7 +78,7 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual Canvas* onGetCanvas() override;
 
-        virtual void onBeginPaint(Gfx::PaintData& paint) override;
+        virtual void onBeginPaint(PaintContext& paint) override;
 
         virtual void onReset();
 

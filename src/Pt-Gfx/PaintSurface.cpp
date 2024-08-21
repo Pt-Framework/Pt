@@ -107,13 +107,13 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-PaintData* PaintSurface::getPaint(PaintData* p)
+PaintContext* PaintSurface::getPaintContext(PaintContext* p)
 {
     Canvas* canvas = onGetCanvas();
     if( ! canvas )
         return 0;
 
-    PaintData* paint = canvas->beginPaint(p);
+    PaintContext* paint = canvas->beginPaint(p);
     if(paint)
     {
         onBeginPaint(*paint);
@@ -123,13 +123,13 @@ PaintData* PaintSurface::getPaint(PaintData* p)
 }
 
 
-Canvas* PaintSurface::getCanvas()
+Canvas* PaintSurface::canvas()
 {
     return onGetCanvas();
 }
 
 
-void PaintSurface::beginPaint(PaintData& paint)
+void PaintSurface::beginPaint(PaintContext& paint)
 {
     return onBeginPaint(paint);
 }

@@ -374,7 +374,7 @@ const Scaling& ImageCanvas::scaling() const
 }
 
 
-Gfx::PaintData* ImageCanvas::onGetPaint(Gfx::PaintData* p)
+Gfx::PaintContext* ImageCanvas::onBeginPaint(Gfx::PaintContext* p)
 {
     ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
     if( ! paint )
@@ -767,7 +767,7 @@ Gfx::Canvas* ImageSurface::onGetCanvas()
 }
 
 
-void ImageSurface::onBeginPaint(Gfx::PaintData& paint)
+void ImageSurface::onBeginPaint(Gfx::PaintContext& paint)
 {
 }
 

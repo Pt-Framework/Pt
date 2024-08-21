@@ -95,12 +95,6 @@ class Rasterizer
         return _image;
     }
 
-    Gfx::PaintData* begin(Gfx::PaintData*)
-    { return 0; }
-
-    void finish()
-    {}
-
     const ImageFormat& format() const;
 
     void reset(const Gfx::Image& image)

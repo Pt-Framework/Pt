@@ -112,7 +112,7 @@ Gfx::Canvas* PixmapSurface::onGetCanvas()
 }
 
 
-void PixmapSurface::onBeginPaint(Gfx::PaintData& paint)
+void PixmapSurface::onBeginPaint(Gfx::PaintContext& paint)
 {
 }
 

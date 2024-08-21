@@ -130,14 +130,15 @@ class PT_GFX_API Paint
         Gfx::Font            _font;
 };
 
-
-class PT_GFX_API PaintData
+/** @brief Paint context.
+*/
+class PT_GFX_API PaintContext
 {
     friend class Canvas;
     friend class Painter;
 
     public:
-        virtual ~PaintData();
+        virtual ~PaintContext();
 
         const ImageFormat& format() const;
 
@@ -262,7 +263,7 @@ class PT_GFX_API PaintData
                                    const Gfx::RectF& rect) = 0;
 
     protected:
-        PaintData();
+        PaintContext();
 
     private:
         void attachCanvas(Canvas& canvas);
@@ -285,7 +286,7 @@ class PT_GFX_API PaintData
 class Line
 {
     public:
-        Line(PaintData& paint,
+        Line(PaintContext& paint,
              const Gfx::PointF& from, 
              const Gfx::PointF& to)
         : _paint(paint)
@@ -304,7 +305,7 @@ class Line
         }
 
     private:
-        PaintData&         _paint;
+        PaintContext&      _paint;
         const Gfx::PointF& _from;
         const Gfx::PointF& _to;
 };
@@ -314,7 +315,7 @@ class Line
 class Polyline
 {
     public:
-        Polyline(PaintData& paint,
+        Polyline(PaintContext& paint,
                  const Gfx::PointF* points, 
                  std::size_t n)
         : _paint(paint)
@@ -333,7 +334,7 @@ class Polyline
         }
 
     private:
-        PaintData&         _paint;
+        PaintContext&      _paint;
         const Gfx::PointF* _points;
         std::size_t        _n;
 };

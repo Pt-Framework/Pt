@@ -29,6 +29,7 @@
 
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/Canvas.h>
 
 namespace Pt {
 
@@ -71,7 +72,7 @@ void Painter::begin(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
 
-    PaintData* ctx = surface.getPaint(_paintContext);
+    PaintContext* ctx = surface.getPaintContext(_paintContext);
     if(_paintContext != ctx)
     {
         delete _paintContext;
@@ -105,7 +106,7 @@ void Painter::onDetachSurface(PaintSurface& surface)
 }
 
 
-void Painter::attachPaint(PaintData& paint)
+void Painter::attachPaintContext(PaintContext& paint)
 {
     if(_paintContext)
     {
@@ -117,7 +118,7 @@ void Painter::attachPaint(PaintData& paint)
 }
 
 
-void Painter::detachPaint(PaintData& paint)
+void Painter::detachPaintContext(PaintContext& paint)
 {
     if(_paintContext)
         _paintContext = 0;

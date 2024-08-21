@@ -45,7 +45,7 @@ class Rasterizer;
 class ImageSurface;
 class ImageCanvas;
 
-class ImagePaint : public PaintData
+class ImagePaint : public PaintContext
 {
     public:
         ImagePaint();
@@ -155,7 +155,7 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
     const Scaling& scaling() const;
 
   protected:
-    Gfx::PaintData* onGetPaint(Gfx::PaintData* p) override;
+    Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* p) override;
 
     virtual void onFinishPaint() override;
   
@@ -261,7 +261,7 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     virtual Gfx::Canvas* onGetCanvas() override;
 
-    virtual void onBeginPaint(Gfx::PaintData& paint) override;
+    virtual void onBeginPaint(Gfx::PaintContext& paint) override;
 
     virtual Image onGetImage() const override;
 

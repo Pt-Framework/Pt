@@ -52,7 +52,7 @@ Canvas::~Canvas()
 }
 
 
-void Canvas::onDetachPaint(PaintData& paint)
+void Canvas::onDetachPaintContext(PaintContext& paint)
 {
     if(_paint)
     {
@@ -80,11 +80,11 @@ const Scaling& Canvas::scaling() const
 }
 
 
-PaintData* Canvas::beginPaint(PaintData* p)
+PaintContext* Canvas::beginPaint(PaintContext* p)
 {
     finishPaint();
 
-    PaintData* paint = onGetPaint(p);
+    PaintContext* paint = onBeginPaint(p);
     if(paint)
     {
         paint->attachCanvas(*this);
@@ -100,7 +100,7 @@ void Canvas::finishPaint()
     if(_paint)
     {
         _paint->detachCanvas(*this);
-        onDetachPaint(*_paint);
+        onDetachPaintContext(*_paint);
     }
 }
 

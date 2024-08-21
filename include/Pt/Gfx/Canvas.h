@@ -39,13 +39,13 @@ namespace Pt {
 namespace Gfx {
 
 class PaintSurface;
-class PaintData;
+class PaintContext;
 
 /** @brief Paint canvas.
 */
 class PT_GFX_API Canvas
 {
-    friend class PaintData;
+    friend class PaintContext;
 
     public:
         explicit Canvas(PaintSurface& surface);
@@ -58,21 +58,21 @@ class PT_GFX_API Canvas
 
         const Scaling& scaling() const;
 
-        PaintData* beginPaint(PaintData* paint);
+        PaintContext* beginPaint(PaintContext* paint);
 
         void finishPaint();
 
     protected:
-        virtual PaintData* onGetPaint(PaintData* paint) = 0;
+        virtual PaintContext* onBeginPaint(PaintContext* paint) = 0;
 
         virtual void onFinishPaint() = 0;
 
     private:
-        void onDetachPaint(PaintData& paint);
+        void onDetachPaintContext(PaintContext& paint);
     
     private:
-        PaintSurface* _surface;
-        PaintData*    _paint;
+        PaintSurface*  _surface;
+        PaintContext*  _paint;
 };
 
 } // namespace

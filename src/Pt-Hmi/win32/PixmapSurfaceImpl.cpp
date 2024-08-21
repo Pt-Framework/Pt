@@ -280,12 +280,12 @@ Gfx::Canvas* PixmapSurfaceImpl::getCanvas()
 }
 
 
-void PixmapSurfaceImpl::beginPaint(Gfx::PaintData& p)
+void PixmapSurfaceImpl::beginPaint(Gfx::PaintContext& p)
 {
 }
 
 
-Gfx::PaintData* PixmapSurfaceImpl::onGetPaint(Gfx::PaintData* p)
+Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* p)
 {
     PaintData* paint = dynamic_cast<PaintData*>(p);
     if( ! paint )

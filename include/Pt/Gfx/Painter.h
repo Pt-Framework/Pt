@@ -59,7 +59,7 @@ class PaintSurface;
 class PT_GFX_API Painter
 {
     friend class PaintSurface;
-    friend class PaintData;
+    friend class PaintContext;
 
     public:
         Painter();
@@ -216,13 +216,13 @@ class PT_GFX_API Painter
         void onDetachSurface(PaintSurface& surface);
 
     private:
-        void attachPaint(PaintData& paint);
+        void attachPaintContext(PaintContext& paint);
 
-        void detachPaint(PaintData& paint);
+        void detachPaintContext(PaintContext& paint);
 
     private:
         PaintSurface*        _surface;
-        PaintData*           _paintContext;
+        PaintContext*        _paintContext;
         Scaling              _scaling;
         Paint                _paint;
 };

@@ -127,11 +127,11 @@ const Gfx::Scaling& PaintRegion::onGetScaling() const
 
 Canvas* PaintRegion::onGetCanvas()
 {
-    return _surface ? _surface->getCanvas() : 0;
+    return _surface ? _surface->canvas() : 0;
 }
 
 
-void PaintRegion::onBeginPaint(Gfx::PaintData& paint)
+void PaintRegion::onBeginPaint(PaintContext& paint)
 {
     if(_surface)
         _surface->beginPaint(paint);

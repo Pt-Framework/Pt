@@ -88,7 +88,7 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         virtual Gfx::Canvas* onGetCanvas() override;
 
-        virtual void onBeginPaint(Gfx::PaintData& paint) override;
+        virtual void onBeginPaint(Gfx::PaintContext& paint) override;
 
         virtual Gfx::Image onGetImage() const override;
 

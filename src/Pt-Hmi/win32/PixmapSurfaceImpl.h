@@ -125,10 +125,10 @@ class PixmapSurfaceImpl : public Gfx::Canvas
     public:
         Gfx::Canvas* getCanvas();
 
-        void beginPaint(Gfx::PaintData& paint);
+        void beginPaint(Gfx::PaintContext& paint);
 
     protected:
-        virtual Gfx::PaintData* onGetPaint(Gfx::PaintData* p) override;
+        virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* p) override;
 
         virtual void onFinishPaint() override;
 

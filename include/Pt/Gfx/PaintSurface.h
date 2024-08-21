@@ -43,7 +43,7 @@ namespace Gfx {
 
 class Canvas;
 class Painter;
-class PaintData;
+class PaintContext;
 
 /** @brief Paint target for painters.
 */
@@ -51,7 +51,7 @@ class PT_GFX_API PaintSurface
 {
     friend class Painter;
     friend class PaintRegion;
-    friend class PaintData;
+    friend class PaintContext;
 
     protected:
         PaintSurface();
@@ -67,11 +67,11 @@ class PT_GFX_API PaintSurface
 
         Image toImage() const;
 
-        PaintData* getPaint(PaintData* paint);
+        PaintContext* getPaintContext(PaintContext* paint);
 
-        Canvas* getCanvas();
+        Canvas* canvas();
 
-        void beginPaint(PaintData& paint);
+        void beginPaint(PaintContext& paint);
 
     protected:      
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
@@ -82,7 +82,7 @@ class PT_GFX_API PaintSurface
 
         virtual Canvas* onGetCanvas() = 0;
 
-        virtual void onBeginPaint(PaintData& paint) = 0;
+        virtual void onBeginPaint(PaintContext& paint) = 0;
 
         virtual void onReset();
 

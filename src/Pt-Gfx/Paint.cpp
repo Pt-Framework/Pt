@@ -124,7 +124,7 @@ void Paint::setFont(const Gfx::Font& font)
 // PaintContext
 ///////////////////////////////////////////////////////////////////////
 
-PaintData::PaintData()
+PaintContext::PaintContext()
 : _painter(0)
 , _canvas(0)
 , _invalid(false)
@@ -132,27 +132,27 @@ PaintData::PaintData()
 }
 
 
-PaintData::~PaintData()
+PaintContext::~PaintContext()
 {
     if(_canvas)
     {
-        _canvas->onDetachPaint(*this);
+        _canvas->onDetachPaintContext(*this);
         _canvas = 0;
     }
 
     if(_painter)
     {
-        _painter->detachPaint(*this);
+        _painter->detachPaintContext(*this);
         _painter = 0;
     }
 }
 
 
-void PaintData::attachCanvas(Canvas& canvas)
+void PaintContext::attachCanvas(Canvas& canvas)
 {
     if(_canvas)
     {
-        _canvas->onDetachPaint(*this);
+        _canvas->onDetachPaintContext(*this);
         _canvas = 0;
     }
 
@@ -167,7 +167,7 @@ void PaintData::attachCanvas(Canvas& canvas)
 }
 
 
-void PaintData::detachCanvas(Canvas& canvas)
+void PaintContext::detachCanvas(Canvas& canvas)
 {
     if(_canvas)
     {
@@ -176,7 +176,7 @@ void PaintData::detachCanvas(Canvas& canvas)
 }
 
 
-void PaintData::onDetachPainter(Painter& painter)
+void PaintContext::onDetachPainter(Painter& painter)
 {
     if(_painter)
     {
@@ -186,17 +186,17 @@ void PaintData::onDetachPainter(Painter& painter)
 }
 
 
-void PaintData::begin(Painter& painter)
+void PaintContext::begin(Painter& painter)
 {
     if(_painter != &painter)
     {
         if(_painter)
         {
-            _painter->detachPaint(*this);
+            _painter->detachPaintContext(*this);
             _painter = 0;               
         }
 
-        painter.attachPaint(*this);
+        painter.attachPaintContext(*this);
         _painter = &painter;
         _invalid = true;
     }
@@ -211,8 +211,14 @@ void PaintData::begin(Painter& painter)
 }
 
 
-void PaintData::finish()
+void PaintContext::finish()
 {
+    if(_canvas)
+    {
+        _canvas->onDetachPaintContext(*this);
+        _canvas = 0;
+    }
+
     double unbounded = std::numeric_limits<double>::max();
 
     _region.clear();
@@ -220,61 +226,61 @@ void PaintData::finish()
 }
 
 
-const RectF& PaintData::region() const
+const RectF& PaintContext::region() const
 {
     return _region;
 }
 
 
-const PointF& PaintData::origin() const
+const PointF& PaintContext::origin() const
 {
     return _region.topLeft();
 }
 
 
-void PaintData::setRegion(const RectF& r)
+void PaintContext::setRegion(const RectF& r)
 {
     _region = r;
 }
 
 
-const ImageFormat& PaintData::format() const
+const ImageFormat& PaintContext::format() const
 {
     return _canvas ? _canvas->format() : ImageFormat::argb32();
 }
 
 
-const Scaling& PaintData::scaling() const
+const Scaling& PaintContext::scaling() const
 {
     return _scaling;
 }
 
 
-void PaintData::setCompositionMode(const Gfx::CompositionMode& mode)
+void PaintContext::setCompositionMode(const Gfx::CompositionMode& mode)
 {
     onSetCompositionMode(mode);
 }
 
 
-void PaintData::setPen(const Pen& pen)
+void PaintContext::setPen(const Pen& pen)
 {
     onSetPen(pen);
 }
 
 
-void PaintData::setBrush(const Brush& brush)
+void PaintContext::setBrush(const Brush& brush)
 {
     onSetBrush(brush);
 }
 
 
-void PaintData::setFont(const Gfx::Font& font)
+void PaintContext::setFont(const Gfx::Font& font)
 {
     onSetFont(font);
 }
 
 
-void PaintData::setClip(const RectF& rect)
+void PaintContext::setClip(const RectF& rect)
 { 
     Gfx::RectF clip = rect;
     clip.shift( origin().x(), origin().y() );
@@ -283,20 +289,20 @@ void PaintData::setClip(const RectF& rect)
 }
 
 
-void PaintData::resetClip()
+void PaintContext::resetClip()
 {
     onResetClip();
 }
 
 
-void PaintData::drawLine(const PointF& from, const PointF& to)
+void PaintContext::drawLine(const PointF& from, const PointF& to)
 {   
     Gfx::Line line(*this, from, to);
     onDrawLine(line); 
 }
 
 
-void PaintData::drawRect(const Gfx::RectF& rect)
+void PaintContext::drawRect(const Gfx::RectF& rect)
 {
     Gfx::RectF r = rect;
     
@@ -307,7 +313,7 @@ void PaintData::drawRect(const Gfx::RectF& rect)
 }
 
 
-void PaintData::fillRect(const Gfx::RectF& rect)
+void PaintContext::fillRect(const Gfx::RectF& rect)
 {
     Gfx::RectF r = rect;
     
@@ -318,55 +324,55 @@ void PaintData::fillRect(const Gfx::RectF& rect)
 }
 
 
-void PaintData::drawPolyline(const Gfx::PointF* ps, const size_t n)
+void PaintContext::drawPolyline(const Gfx::PointF* ps, const size_t n)
 {
     Polyline line(*this, ps, n);
     onDrawPolyline(line);
 }
 
 
-void PaintData::fillPolygon(const Gfx::PointF* ps, const size_t n)
+void PaintContext::fillPolygon(const Gfx::PointF* ps, const size_t n)
 {
     Polyline line(*this, ps, n);
     onFillPolygon(line);
 }
 
 
-void PaintData::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PaintContext::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     Pt::Gfx::PointF p = topLeft + origin();
     onDrawEllipse(p, size);
 }
 
 
-void PaintData::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     Pt::Gfx::PointF p = topLeft + origin();
     onFillEllipse(p, size);
 }
 
 
-FontMetrics PaintData::fontMetrics(const Pt::String& text) const
+FontMetrics PaintContext::fontMetrics(const Pt::String& text) const
 {
     return onGetFontMetrics(text);
 }
 
 
-void PaintData::drawText(const PointF& to, const Pt::String& text)
+void PaintContext::drawText(const PointF& to, const Pt::String& text)
 {
     Pt::Gfx::PointF p = to + origin();
     onDrawText(p, text);
 }
 
 
-void PaintData::drawText(const PointF& to, const Pt::String& text, const Transform& tf)
+void PaintContext::drawText(const PointF& to, const Pt::String& text, const Transform& tf)
 {
     Pt::Gfx::PointF p = to + origin(); 
     onDrawText(p, text, tf);
 }
 
 
-void PaintData::drawImage(const Gfx::PointF& to, 
+void PaintContext::drawImage(const Gfx::PointF& to, 
                           const Gfx::Image& image)
 {
     Pt::Gfx::PointF p = to + origin(); 
@@ -374,7 +380,7 @@ void PaintData::drawImage(const Gfx::PointF& to,
 }
 
 
-void PaintData::drawImage(const Gfx::PointF& to, 
+void PaintContext::drawImage(const Gfx::PointF& to, 
                           const Gfx::Image& image, 
                           const Gfx::RectF& rect)
 {
@@ -383,7 +389,7 @@ void PaintData::drawImage(const Gfx::PointF& to,
 }
 
 
-void PaintData::drawSurface(const Gfx::PointF& to, 
+void PaintContext::drawSurface(const Gfx::PointF& to, 
                             const Gfx::PaintSurface& surface)
 {
     Pt::Gfx::PointF p = to + origin();
@@ -391,7 +397,7 @@ void PaintData::drawSurface(const Gfx::PointF& to,
 }
 
 
-void PaintData::drawSurface(const Gfx::PointF& to,
+void PaintContext::drawSurface(const Gfx::PointF& to,
                             const Gfx::PaintSurface& surface,
                             const Gfx::RectF& rect)
 {
@@ -400,7 +406,7 @@ void PaintData::drawSurface(const Gfx::PointF& to,
 }
 
 
-void PaintData::onDrawSurface(const Gfx::PointF& to, 
+void PaintContext::onDrawSurface(const Gfx::PointF& to, 
                               const Gfx::PaintSurface& surface)
 {
     Pt::Gfx::Image image = surface.toImage();
@@ -416,7 +422,7 @@ void PaintData::onDrawSurface(const Gfx::PointF& to,
 }
 
 
-void PaintData::onDrawSurface(const Gfx::PointF& to,
+void PaintContext::onDrawSurface(const Gfx::PointF& to,
                               const Gfx::PaintSurface& surface,
                               const Gfx::RectF& rect)
 {

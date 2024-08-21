@@ -58,7 +58,7 @@ class PixmapSurfaceImpl;
 
 #ifndef PT_HMI_WIN32_RASTER
 
-class PaintData : public Gfx::PaintData
+class PaintData : public Gfx::PaintContext
 {
     public:
         PaintData();
