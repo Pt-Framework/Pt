@@ -156,8 +156,6 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     const Scaling& scaling() const;
 
-    Gfx::PaintContext* beginPaint(Gfx::PaintContext* p);
-
   protected:
     virtual void onFinishPaint() override;
   
@@ -168,7 +166,7 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     virtual void setCompositionMode(const Gfx::CompositionMode& mode);
 
-    virtual void setPen(const Gfx::Pen& pen);
+    //virtual void setPen(const Gfx::Pen& pen);
 
     virtual void setBrush(const Gfx::Brush& brush);
 
@@ -226,7 +224,6 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
     Rasterizer*   _rasterizer;
     Scaling       _scaling;
     SizeF         _size;
-    ImagePaint*   _paint;
 };
 
 //

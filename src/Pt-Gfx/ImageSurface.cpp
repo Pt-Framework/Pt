@@ -302,7 +302,6 @@ void ImagePaint::onDrawSurface(const Gfx::PointF& to,
 ImageCanvas::ImageCanvas(PaintSurface& surface)
 : Canvas(surface)
 , _rasterizer(new Rasterizer)
-, _paint(0)
 {
 }
 
@@ -311,7 +310,6 @@ ImageCanvas::ImageCanvas(PaintSurface& surface,
                          const Gfx::Size& size, std::size_t stride)
 : Canvas(surface)
 , _rasterizer(new Rasterizer)
-, _paint(0)
 {
   _rasterizer->reset(size, stride);
 }
@@ -380,26 +378,9 @@ const Scaling& ImageCanvas::scaling() const
 }
 
 
-Gfx::PaintContext* ImageCanvas::beginPaint(Gfx::PaintContext* p)
-{
-    ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
-    if( ! paint )
-      paint = new ImagePaint();
-
-    paint->reset(*this);
-    _paint = paint;
-    
-    return _paint;
-
-    //return _rasterizer->begin(p);
-}
-
-
 void ImageCanvas::onFinishPaint()
 {
     //_rasterizer->finish();
-       
-    _paint = 0;
 }
 
 
@@ -430,23 +411,23 @@ void ImageCanvas::setPen(const ImagePaint& paint)
 }
 
 
-void ImageCanvas::setPen(const Pen& pen)
-{
-    const Pen& p = _paint->pen();
-
-  //double scaleFactor = _scaling.scaleFactor();
-
-  //// keep pen size when downscaling
-  //double scaledSize = scaleFactor < 1.0 ? pen.size()
-  //                                : scaleFactor * pen.size();
-
-  //size_t penSize = static_cast<size_t>(scaledSize);
-
-  //Gfx::Pen scaledPen = pen;
-  //scaledPen.setSize(penSize);
-
-  _rasterizer->setPen(p) ;
-}
+//void ImageCanvas::setPen(const Pen& pen)
+//{
+//    const Pen& p = _paint->pen();
+//
+//  //double scaleFactor = _scaling.scaleFactor();
+//
+//  //// keep pen size when downscaling
+//  //double scaledSize = scaleFactor < 1.0 ? pen.size()
+//  //                                : scaleFactor * pen.size();
+//
+//  //size_t penSize = static_cast<size_t>(scaledSize);
+//
+//  //Gfx::Pen scaledPen = pen;
+//  //scaledPen.setSize(penSize);
+//
+//  _rasterizer->setPen(p) ;
+//}
 
 
 void ImageCanvas::setBrush(const Brush& brush)
@@ -764,9 +745,14 @@ const Scaling& ImageSurface::onGetScaling() const
 }
 
 
-PaintContext* ImageSurface::onBeginPaint(PaintContext* paint)
+PaintContext* ImageSurface::onBeginPaint(PaintContext* p)
 {
-    return _canvas->beginPaint(paint);
+    ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
+    if( ! paint )
+      paint = new ImagePaint();
+
+    paint->reset(*_canvas);
+    return paint;
 }
 
 
