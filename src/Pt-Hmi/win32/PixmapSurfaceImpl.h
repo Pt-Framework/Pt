@@ -122,14 +122,9 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         const Gfx::Scaling& scaling() const;
     
-    public:
-        Gfx::Canvas* getCanvas();
-
-        void beginPaint(Gfx::PaintContext& paint);
+        Gfx::PaintContext* beginPaint(Gfx::PaintContext* p);
 
     protected:
-        virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* p) override;
-
         virtual void onFinishPaint() override;
 
     public:

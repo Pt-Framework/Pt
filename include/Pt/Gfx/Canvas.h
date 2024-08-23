@@ -58,17 +58,19 @@ class PT_GFX_API Canvas
 
         const Scaling& scaling() const;
 
-        PaintContext* beginPaint(PaintContext* paint);
+        //PaintContext* beginPaint(PaintContext* paint);
 
         void finishPaint();
 
     protected:
-        virtual PaintContext* onBeginPaint(PaintContext* paint) = 0;
+        //virtual PaintContext* onBeginPaint(PaintContext* paint) = 0;
 
         virtual void onFinishPaint() = 0;
 
     private:
         void onDetachPaintContext(PaintContext& paint);
+
+        void init(PaintContext* paint);
     
     private:
         PaintSurface*  _surface;

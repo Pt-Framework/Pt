@@ -67,11 +67,7 @@ class PT_GFX_API PaintSurface
 
         Image toImage() const;
 
-        PaintContext* getPaintContext(PaintContext* paint);
-
-        Canvas* canvas();
-
-        void beginPaint(PaintContext& paint);
+        PaintContext* beginPaint(PaintContext* paint);
 
     protected:      
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
@@ -80,9 +76,7 @@ class PT_GFX_API PaintSurface
 
         virtual const Scaling& onGetScaling() const = 0;
 
-        virtual Canvas* onGetCanvas() = 0;
-
-        virtual void onBeginPaint(PaintContext& paint) = 0;
+        virtual PaintContext* onBeginPaint(PaintContext* paint) = 0;
 
         virtual void onReset();
 

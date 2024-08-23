@@ -61,9 +61,10 @@ ImagePaint::~ImagePaint()
 }
 
 
-void ImagePaint::setImageCanvas(ImageCanvas* canvas)
+void ImagePaint::reset(ImageCanvas& canvas)
 {
-    _canvas = canvas;
+    _canvas = &canvas;
+    init(canvas);
 }
 
 
@@ -92,6 +93,11 @@ void ImagePaint::onBeginPaint(const Gfx::Paint& paint)
             _canvas->setClip(clip);
 
     }
+}
+
+void ImagePaint::onFinishPaint()
+{
+    _canvas = 0;
 }
 
 
@@ -374,15 +380,15 @@ const Scaling& ImageCanvas::scaling() const
 }
 
 
-Gfx::PaintContext* ImageCanvas::onBeginPaint(Gfx::PaintContext* p)
+Gfx::PaintContext* ImageCanvas::beginPaint(Gfx::PaintContext* p)
 {
     ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
     if( ! paint )
       paint = new ImagePaint();
 
+    paint->reset(*this);
     _paint = paint;
-    _paint->setImageCanvas(this);
-
+    
     return _paint;
 
     //return _rasterizer->begin(p);
@@ -392,10 +398,7 @@ Gfx::PaintContext* ImageCanvas::onBeginPaint(Gfx::PaintContext* p)
 void ImageCanvas::onFinishPaint()
 {
     //_rasterizer->finish();
-    
-    if(_paint)
-        _paint->setImageCanvas(0);
-    
+       
     _paint = 0;
 }
 
@@ -761,14 +764,9 @@ const Scaling& ImageSurface::onGetScaling() const
 }
 
 
-Gfx::Canvas* ImageSurface::onGetCanvas()
+PaintContext* ImageSurface::onBeginPaint(PaintContext* paint)
 {
-    return _canvas;
-}
-
-
-void ImageSurface::onBeginPaint(Gfx::PaintContext& paint)
-{
+    return _canvas->beginPaint(paint);
 }
 
 

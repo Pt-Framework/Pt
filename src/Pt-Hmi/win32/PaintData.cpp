@@ -194,9 +194,11 @@ PaintData::~PaintData()
 }
 
 
-void PaintData::reset(PixmapSurfaceImpl* canvas)
+void PaintData::reset(PixmapSurfaceImpl& canvas)
 {
-    _canvas = canvas;
+    _canvas = &canvas;
+
+    init(canvas);
 }
 
 
@@ -227,6 +229,12 @@ void PaintData::onBeginPaint(const Gfx::Paint& paint)
         const Gfx::RectF& clip = paint.clip();
         _canvas->setClip( clip.isNull() ? 0 : this );
     }
+}
+
+
+void PaintData::onFinishPaint()
+{
+    _canvas = 0;
 }
 
 

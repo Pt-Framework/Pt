@@ -274,24 +274,13 @@ const Gfx::Scaling& PixmapSurfaceImpl::scaling() const
 }
 
 
-Gfx::Canvas* PixmapSurfaceImpl::getCanvas()
-{
-    return this;
-}
-
-
-void PixmapSurfaceImpl::beginPaint(Gfx::PaintContext& p)
-{
-}
-
-
-Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* p)
+Gfx::PaintContext* PixmapSurfaceImpl::beginPaint(Gfx::PaintContext* p)
 {
     PaintData* paint = dynamic_cast<PaintData*>(p);
     if( ! paint )
       paint = new PaintData();
     
-    paint->reset(this);
+    paint->reset(*this);
     _paint = paint;
     
     return paint;
@@ -304,8 +293,8 @@ void PixmapSurfaceImpl::onFinishPaint()
     SelectObject(_dc, _oldBrush);
     SelectObject(_dc, _oldFont);
 
-    if(_paint)
-        _paint->reset(0);
+    //if(_paint)
+    //    _paint->reset(0);
     
     _paint = 0;
 }

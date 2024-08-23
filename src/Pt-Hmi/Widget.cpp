@@ -124,7 +124,7 @@ void Widget::onDetach(Widget& widget)
 void Widget::onInit(Widget& widget)
 {
     Gfx::PaintSurface* surface = _surface.surface();
-    Gfx::PointF surfacePos = _surface.area().topLeft() + widget.position();
+    Gfx::PointF surfacePos = _surface.position() + widget.position();
 
     widget.setSurface(surface, surfacePos);
     widget.setNextResponder(this);
@@ -815,7 +815,7 @@ void Widget::onMoveEvent(const MoveEvent& ev)
         return;
 
     Gfx::PointF delta = ev.position() - position();
-    Gfx::PointF surfacePos = _surface.area().topLeft() + delta;
+    Gfx::PointF surfacePos = _surface.position() + delta;
 
     Gfx::PaintSurface* surface = _surface.surface();
     setSurface(surface, surfacePos);

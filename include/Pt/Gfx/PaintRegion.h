@@ -32,12 +32,6 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/PaintSurface.h>
 
 namespace Pt {
@@ -57,13 +51,15 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual ~PaintRegion();
 
+        void attach(PaintSurface& surface);
+
         void attach(PaintSurface& surface, const Gfx::RectF& rect);
 
         void detach();
 
         PaintSurface* surface() const;
 
-        const Gfx::RectF& area() const;
+        const PointF& position() const;
 
         void move(const Gfx::PointF& size);
 
@@ -76,9 +72,7 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual const Gfx::Scaling& onGetScaling() const;
 
-        virtual Canvas* onGetCanvas() override;
-
-        virtual void onBeginPaint(PaintContext& paint) override;
+        virtual PaintContext* onBeginPaint(PaintContext* paint);
 
         virtual void onReset();
 
@@ -89,8 +83,9 @@ class PT_GFX_API PaintRegion : public PaintSurface
     
     private:
         PaintSurface* _surface;
-        Gfx::RectF    _area;
         Gfx::Scaling  _scaling;
+        Gfx::RectF    _area;
+        bool          _hasArea;
 };
 
 } // namespace

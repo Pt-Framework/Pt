@@ -65,7 +65,7 @@ class PaintData : public Gfx::PaintContext
 
         ~PaintData();
 
-        void reset(PixmapSurfaceImpl* canvas);
+        void reset(PixmapSurfaceImpl& canvas);
 
         HPEN pen() const;
 
@@ -83,6 +83,8 @@ class PaintData : public Gfx::PaintContext
         virtual void onSetPaint(const Gfx::Paint* paint) override;
 
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
+
+        virtual void onFinishPaint() override;
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);

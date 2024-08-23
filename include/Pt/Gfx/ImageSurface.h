@@ -57,12 +57,14 @@ class ImagePaint : public PaintContext
             return _pen;
         }
 
-        void setImageCanvas(ImageCanvas* canvas);
+        void reset(ImageCanvas& canvas);
 
     protected:
         virtual void onSetPaint(const Gfx::Paint* paint) override;
 
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
+
+        virtual void onFinishPaint() override;
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
@@ -154,9 +156,9 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     const Scaling& scaling() const;
 
-  protected:
-    Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* p) override;
+    Gfx::PaintContext* beginPaint(Gfx::PaintContext* p);
 
+  protected:
     virtual void onFinishPaint() override;
   
   public:
@@ -259,9 +261,7 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     virtual const Scaling& onGetScaling() const override;
 
-    virtual Gfx::Canvas* onGetCanvas() override;
-
-    virtual void onBeginPaint(Gfx::PaintContext& paint) override;
+    virtual PaintContext* onBeginPaint(PaintContext* paint) override;
 
     virtual Image onGetImage() const override;
 

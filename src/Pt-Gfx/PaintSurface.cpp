@@ -107,31 +107,9 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-PaintContext* PaintSurface::getPaintContext(PaintContext* p)
+PaintContext* PaintSurface::beginPaint(PaintContext* p)
 {
-    Canvas* canvas = onGetCanvas();
-    if( ! canvas )
-        return 0;
-
-    PaintContext* paint = canvas->beginPaint(p);
-    if(paint)
-    {
-        onBeginPaint(*paint);
-    }
-        
-    return paint;
-}
-
-
-Canvas* PaintSurface::canvas()
-{
-    return onGetCanvas();
-}
-
-
-void PaintSurface::beginPaint(PaintContext& paint)
-{
-    return onBeginPaint(paint);
+    return onBeginPaint(p);
 }
 
 

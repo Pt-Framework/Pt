@@ -72,15 +72,15 @@ void Painter::begin(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
 
-    PaintContext* ctx = surface.getPaintContext(_paintContext);
-    if(_paintContext != ctx)
+    PaintContext* paintContext = surface.beginPaint(_paintContext);
+    if(_paintContext != paintContext)
     {
         delete _paintContext;
         _paintContext = 0;
     }
     
-    if(ctx)
-        ctx->begin(*this);
+    if(paintContext)
+        paintContext->begin(*this);
 }
 
 

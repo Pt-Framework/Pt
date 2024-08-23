@@ -159,6 +159,8 @@ class PT_GFX_API PaintContext
 
         virtual void onBeginPaint(const Paint& paint) = 0;
 
+        virtual void onFinishPaint() = 0;
+
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
 
@@ -264,6 +266,8 @@ class PT_GFX_API PaintContext
 
     protected:
         PaintContext();
+
+        void init(Canvas& canvas);
 
     private:
         void attachCanvas(Canvas& canvas);

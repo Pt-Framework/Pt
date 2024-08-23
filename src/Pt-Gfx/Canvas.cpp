@@ -80,18 +80,30 @@ const Scaling& Canvas::scaling() const
 }
 
 
-PaintContext* Canvas::beginPaint(PaintContext* p)
+//PaintContext* Canvas::beginPaint(PaintContext* p)
+//{
+//    finishPaint();
+//
+//    PaintContext* paint = onBeginPaint(p);
+//    if(paint)
+//    {
+//        paint->attachCanvas(*this);
+//        _paint = paint;
+//    }
+//
+//    return paint;
+//}
+
+
+void Canvas::init(PaintContext* paint)
 {
     finishPaint();
 
-    PaintContext* paint = onBeginPaint(p);
     if(paint)
     {
         paint->attachCanvas(*this);
         _paint = paint;
     }
-
-    return paint;
 }
 
 

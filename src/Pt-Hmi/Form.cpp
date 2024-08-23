@@ -388,7 +388,7 @@ void Form::onDetach(Widget& widget)
 void Form::onInit(Widget& widget)
 {
     Gfx::PaintSurface* surface = _surface.surface();
-    Gfx::PointF surfacePos = _surface.area().topLeft() + widget.position();
+    Gfx::PointF surfacePos = _surface.position() + widget.position();
 
     widget.setSurface(surface, surfacePos);
     widget.setNextResponder(this);

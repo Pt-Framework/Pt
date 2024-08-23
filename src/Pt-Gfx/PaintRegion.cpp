@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Gfx/PaintRegion.h>
+#include <Pt/Gfx/Paint.h>
 
 namespace Pt {
 
@@ -35,15 +36,18 @@ namespace Gfx {
 
 PaintRegion::PaintRegion()
 : _surface(0)
+, _hasArea(false)
 {
 }
 
 
 PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
 : _surface(0)
+, _hasArea(false)
 {           
     _surface = &surface;
     _area = rect; 
+    _hasArea = true;
 }
 
 
@@ -54,6 +58,19 @@ PaintRegion::~PaintRegion()
 }
 
 
+void PaintRegion::attach(PaintSurface& surface)
+{
+    if(_surface)
+        detach();
+
+    _surface = &surface;
+    _area.clear();
+    _hasArea = false;
+
+    surface.attachRegion(*this);
+}
+
+
 void PaintRegion::attach(PaintSurface& surface, const Gfx::RectF& rect)
 {
     if(_surface)
@@ -61,6 +78,7 @@ void PaintRegion::attach(PaintSurface& surface, const Gfx::RectF& rect)
 
     _surface = &surface;
     _area = rect;
+    _hasArea = true;
 
     surface.attachRegion(*this);
 }
@@ -74,7 +92,9 @@ void PaintRegion::detach()
         _surface->detachRegion(*this);
 
     _surface = 0;
+    
     _area.clear();
+    _hasArea = false;
 }
 
 
@@ -84,9 +104,9 @@ PaintSurface* PaintRegion::surface() const
 }
 
 
-const Gfx::RectF& PaintRegion::area() const
+const PointF& PaintRegion::position() const
 {
-    return _area;
+    return _area.topLeft();
 }
 
 
@@ -95,6 +115,7 @@ void PaintRegion::move(const Gfx::PointF& pos)
     onReset();
     
     _area.setOrigin(pos);
+    _hasArea = true;
 }
 
 
@@ -103,6 +124,7 @@ void PaintRegion::resize(const Gfx::SizeF& size)
     onReset();
     
     _area.setSize(size);
+    _hasArea = true;
 }
 
 
@@ -115,7 +137,7 @@ const Gfx::ImageFormat& PaintRegion::onGetFormat() const
 
 const Gfx::SizeF& PaintRegion::onGetSize() const
 {
-    return _area.size();
+    return _surface && _hasArea ? _surface->size() : _area.size();
 }
 
 
@@ -125,25 +147,30 @@ const Gfx::Scaling& PaintRegion::onGetScaling() const
 }
 
 
-Canvas* PaintRegion::onGetCanvas()
+PaintContext* PaintRegion::onBeginPaint(PaintContext* p)
 {
-    return _surface ? _surface->canvas() : 0;
+    if( ! _surface )
+        return 0;
+
+    PaintContext* paint = _surface->beginPaint(p);
+    if( ! paint )
+        return 0;
+
+    if(_hasArea)
+    {
+        RectF r = paint->region();
+    
+        r.shift( _area.topLeft().x(),
+                 _area.topLeft().y() );
+
+        r.setSize( _area.size() );
+
+        paint->setRegion(r);
+    }
+
+    return paint;
 }
 
-
-void PaintRegion::onBeginPaint(PaintContext& paint)
-{
-    if(_surface)
-        _surface->beginPaint(paint);
-
-    RectF r = paint.region();
-    r.shift( _area.topLeft().x(),
-              _area.topLeft().y() );
-
-    r.setSize( _area.size() );
-
-    paint.setRegion(r);
-}
 
 
 void PaintRegion::onReset()
@@ -162,6 +189,7 @@ void PaintRegion::onDetachSurface(PaintSurface* region)
 {
     _surface = 0;
     _area.clear();
+    _hasArea = false;
 
     PaintSurface::onReset();
 }
