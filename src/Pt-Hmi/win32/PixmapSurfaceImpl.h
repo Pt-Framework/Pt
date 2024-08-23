@@ -235,7 +235,6 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         static std::string getSystemFont();
 
     private:
-        PaintData*     _paint;
         Gfx::SizeF     _size;
         Gfx::Scaling   _scaling;
         HDC            _dc;

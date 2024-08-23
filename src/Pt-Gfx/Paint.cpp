@@ -136,7 +136,7 @@ PaintContext::~PaintContext()
 {
     if(_canvas)
     {
-        _canvas->onDetachPaintContext(*this);
+        _canvas->detachPaintContext(*this);
         _canvas = 0;
     }
 
@@ -148,30 +148,10 @@ PaintContext::~PaintContext()
 }
 
 
-void PaintContext::attachCanvas(Canvas& canvas)
+void PaintContext::onDetachCanvas(Canvas& canvas)
 {
     if(_canvas)
     {
-        onFinishPaint();
-        _canvas->onDetachPaintContext(*this);
-        _canvas = 0;
-    }
-
-    _canvas = &canvas;
-
-    const Scaling& scaling = _canvas->scaling();
-    if(_scaling != scaling)
-    {
-        _scaling = scaling;
-        _invalid = true;
-    }
-}
-
-
-void PaintContext::detachCanvas(Canvas& canvas)
-{
-    if(_canvas)
-    {        
         onFinishPaint();
         _canvas = 0;
     }
@@ -190,7 +170,22 @@ void PaintContext::onDetachPainter(Painter& painter)
 
 void PaintContext::init(Canvas& canvas)
 {
-    canvas.init(this);
+    if(_canvas)
+    {
+        onFinishPaint();
+        _canvas->detachPaintContext(*this);
+        _canvas = 0;               
+    }
+
+    canvas.attachPaintContext(*this);
+    _canvas = &canvas;
+
+    const Scaling& scaling = _canvas->scaling();
+    if(_scaling != scaling)
+    {
+        _scaling = scaling;
+        _invalid = true;
+    }
 }
 
 
@@ -223,7 +218,9 @@ void PaintContext::finish()
 {
     if(_canvas)
     {
-        _canvas->finishPaint();
+        onFinishPaint();
+        _canvas->detachPaintContext(*this);
+        _canvas = 0;
     }
 
     double unbounded = std::numeric_limits<double>::max();

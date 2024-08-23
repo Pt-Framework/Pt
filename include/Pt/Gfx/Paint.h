@@ -270,9 +270,7 @@ class PT_GFX_API PaintContext
         void init(Canvas& canvas);
 
     private:
-        void attachCanvas(Canvas& canvas);
-
-        void detachCanvas(Canvas& canvas);
+        void onDetachCanvas(Canvas& canvas);
 
     private:
         void onDetachPainter(Painter& painter);

@@ -46,16 +46,29 @@ Canvas::~Canvas()
 {
     if(_paint)
     {
-        _paint->detachCanvas(*this);
+        _paint->onDetachCanvas(*this);
         _paint = 0;
     }
 }
 
 
-void Canvas::onDetachPaintContext(PaintContext& paint)
+void Canvas::attachPaintContext(PaintContext& paint)
 {
     if(_paint)
     {
+        onFinishPaint();
+        _paint->onDetachCanvas(*this);
+        _paint = 0;
+    }
+
+    _paint = &paint;
+}
+
+
+void Canvas::detachPaintContext(PaintContext& paint)
+{
+    if(_paint)
+    {        
         onFinishPaint();
         _paint = 0;
     }
@@ -77,43 +90,6 @@ const Gfx::SizeF& Canvas::size() const
 const Scaling& Canvas::scaling() const
 {
     return _surface->scaling();
-}
-
-
-//PaintContext* Canvas::beginPaint(PaintContext* p)
-//{
-//    finishPaint();
-//
-//    PaintContext* paint = onBeginPaint(p);
-//    if(paint)
-//    {
-//        paint->attachCanvas(*this);
-//        _paint = paint;
-//    }
-//
-//    return paint;
-//}
-
-
-void Canvas::init(PaintContext* paint)
-{
-    finishPaint();
-
-    if(paint)
-    {
-        paint->attachCanvas(*this);
-        _paint = paint;
-    }
-}
-
-
-void Canvas::finishPaint()
-{
-    if(_paint)
-    {
-        _paint->detachCanvas(*this);
-        onDetachPaintContext(*_paint);
-    }
 }
 
 

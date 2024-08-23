@@ -189,7 +189,6 @@ namespace Hmi {
 
 PixmapSurfaceImpl::PixmapSurfaceImpl(Gfx::PaintSurface& surface)
 : Gfx::Canvas(surface)
-, _paint(0)
 , _size(0, 0)
 , _dc(0)
 , _gradientBrush(false)
@@ -281,7 +280,6 @@ Gfx::PaintContext* PixmapSurfaceImpl::beginPaint(Gfx::PaintContext* p)
       paint = new PaintData();
     
     paint->reset(*this);
-    _paint = paint;
     
     return paint;
 }
@@ -292,11 +290,6 @@ void PixmapSurfaceImpl::onFinishPaint()
     SelectObject(_dc, _oldPen);
     SelectObject(_dc, _oldBrush);
     SelectObject(_dc, _oldFont);
-
-    //if(_paint)
-    //    _paint->reset(0);
-    
-    _paint = 0;
 }
 
 
