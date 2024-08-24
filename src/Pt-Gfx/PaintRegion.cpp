@@ -147,26 +147,27 @@ const Gfx::Scaling& PaintRegion::onGetScaling() const
 }
 
 
-PaintContext* PaintRegion::onBeginPaint(PaintContext* p)
+PaintContextPtr PaintRegion::onBeginPaint(PaintContext* p)
 {
     if( ! _surface )
-        return 0;
+        return PaintContextPtr();
 
-    PaintContext* paint = _surface->beginPaint(p);
+    PaintContextPtr paint = _surface->beginPaint(p);
     if( ! paint )
-        return 0;
+        return paint;
 
-    if(_hasArea)
-    {
-        RectF r = paint->region();
+    if( ! _hasArea )
+        return paint;
+
+
+    RectF r = paint->region();
     
-        r.shift( _area.topLeft().x(),
-                 _area.topLeft().y() );
+    r.shift( _area.topLeft().x(),
+             _area.topLeft().y() );
 
-        r.setSize( _area.size() );
+    r.setSize( _area.size() );
 
-        paint->setRegion(r);
-    }
+    paint->setRegion(r);
 
     return paint;
 }

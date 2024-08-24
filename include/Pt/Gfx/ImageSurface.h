@@ -157,6 +157,8 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
     const Scaling& scaling() const;
 
   protected:
+    virtual PaintContext* onBeginPaint(PaintContext* p) override;
+
     virtual void onFinishPaint() override;
   
   public:
@@ -258,7 +260,7 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     virtual const Scaling& onGetScaling() const override;
 
-    virtual PaintContext* onBeginPaint(PaintContext* paint) override;
+    virtual PaintContextPtr onBeginPaint(PaintContext* paint) override;
 
     virtual Image onGetImage() const override;
 

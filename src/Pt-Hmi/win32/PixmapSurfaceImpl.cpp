@@ -53,7 +53,7 @@ void PixmapCanvas::drawSurface(const Gfx::PointF& to,
     const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
     if(pixmap)
     {
-        Gfx::ImageCanvas::drawSurface( to, *pixmap->impl() );
+        Gfx::ImageCanvas::drawSurface( to, pixmap->impl()->imageSurface() );
         return;
     }
 
@@ -68,7 +68,7 @@ void PixmapCanvas::drawSurface(const Gfx::PointF& to,
     const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
     if(pixmap)
     {
-        Gfx::ImageCanvas::drawSurface(to, *pixmap->impl(), rect);
+        Gfx::ImageCanvas::drawSurface(to, pixmap->impl()->imageSurface(), rect);
         return;
     }
 
@@ -273,14 +273,13 @@ const Gfx::Scaling& PixmapSurfaceImpl::scaling() const
 }
 
 
-Gfx::PaintContext* PixmapSurfaceImpl::beginPaint(Gfx::PaintContext* p)
+Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* p)
 {
     PaintData* paint = dynamic_cast<PaintData*>(p);
     if( ! paint )
       paint = new PaintData();
     
     paint->reset(*this);
-    
     return paint;
 }
 

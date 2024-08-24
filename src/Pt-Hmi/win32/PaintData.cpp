@@ -198,7 +198,6 @@ void PaintData::reset(PixmapSurfaceImpl& canvas)
 {
     _canvas = &canvas;
 
-    init(canvas);
 }
 
 

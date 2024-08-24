@@ -69,32 +69,84 @@ class PixmapCanvas : public Gfx::ImageCanvas
 };
 
 
-class PixmapSurfaceImpl : public Gfx::ImageSurface
+class PixmapSurfaceImpl 
 {
-    friend class PixmapSurface;
-
     public:
         explicit PixmapSurfaceImpl(PixmapSurface&)
-        : _canvas(0)
-        {
-            _canvas = new PixmapCanvas(*this);
-        }
-
-        ~PixmapSurfaceImpl()
-        {
-            delete _canvas;
-        }
+        : _canvas(_image)
+        { }
 
         void clear(const Gfx::Color& c)
         { }
 
         void set(const Gfx::Image& image)
         {
-            reset(image);
+            _image.reset(image);
         }
 
+        void resize(const Gfx::SizeF& size)
+        {
+            _image.resize(size);
+        }
+
+        const Gfx::SizeF& size() const
+        {
+            return _image.size();
+        }
+
+        const Gfx::Scaling& scaling() const
+        {
+            return _image.scaling();
+        }
+
+        void setScaleFactor(double scaleFactor)
+        {
+            _image.setScaleFactor(scaleFactor);
+        }
+
+        const Gfx::ImageFormat& format() const
+        {
+            return _image.format();
+        }
+
+        Gfx::Image toImage() const
+        {
+            return _image.toImage();
+        }
+
+        Gfx::PaintContextPtr beginPaint(Gfx::PaintContext* p)
+        {
+            return _image.beginPaint(p);
+        }
+
+        const Gfx::ImageSurface& imageSurface() const
+        {
+            return _image;
+        }
+
+        static const std::string& defaultFont()
+        {
+            return Gfx::ImageSurface::defaultFont();
+        }
+
+        static void setDefaultFont(const std::string& name)
+        {
+            Gfx::ImageSurface::setDefaultFont(name);
+        }
+
+        static std::vector<std::string> fontNames()
+        {
+            return Gfx::ImageSurface::fontNames();
+        }
+        
+        static void setFontDir(const System::Path& path)
+        {
+            Gfx::ImageSurface::setFontDir(path);
+        }
+    
     private:
-        PixmapCanvas* _canvas;
+        Gfx::ImageSurface _image;
+        PixmapCanvas      _canvas;
 };
 
 #else // PT_HMI_WIN32_RASTER
@@ -122,9 +174,9 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         const Gfx::Scaling& scaling() const;
     
-        Gfx::PaintContext* beginPaint(Gfx::PaintContext* p);
-
     protected:
+        virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* p) override;
+
         virtual void onFinishPaint() override;
 
     public:

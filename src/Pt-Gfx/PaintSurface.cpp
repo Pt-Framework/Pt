@@ -107,7 +107,7 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-PaintContext* PaintSurface::beginPaint(PaintContext* p)
+PaintContextPtr PaintSurface::beginPaint(PaintContext* p)
 {
     return onBeginPaint(p);
 }

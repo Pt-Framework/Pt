@@ -189,12 +189,33 @@ void PaintContext::init(Canvas& canvas)
 }
 
 
+void PaintContext::reset()
+{
+    finish();
+
+    if(_canvas)
+    {
+        onFinishPaint();
+        _canvas->detachPaintContext(*this);
+        _canvas = 0;
+    }
+
+    if(_painter)
+    {
+        onSetPaint(0);
+        _painter->detachPaintContext(*this);
+        _painter = 0;               
+    }
+}
+
+
 void PaintContext::begin(Painter& painter)
 {
     if(_painter != &painter)
     {
         if(_painter)
         {
+            onSetPaint(0);
             _painter->detachPaintContext(*this);
             _painter = 0;               
         }
@@ -216,13 +237,6 @@ void PaintContext::begin(Painter& painter)
 
 void PaintContext::finish()
 {
-    if(_canvas)
-    {
-        onFinishPaint();
-        _canvas->detachPaintContext(*this);
-        _canvas = 0;
-    }
-
     double unbounded = std::numeric_limits<double>::max();
 
     _region.clear();

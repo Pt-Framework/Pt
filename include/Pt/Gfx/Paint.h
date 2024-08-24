@@ -154,6 +154,8 @@ class PT_GFX_API PaintContext
 
         void finish();
 
+        void reset();
+
     protected:
         virtual void onSetPaint(const Paint* paint) = 0;
 
@@ -281,6 +283,89 @@ class PT_GFX_API PaintContext
         RectF          _region;
         Gfx::Scaling   _scaling;
         bool           _invalid;
+};
+
+
+class PaintContextPtr
+{
+    friend class Canvas;
+
+    struct MoveRef
+    {
+        PaintContext* ptr;
+    
+        explicit MoveRef(PaintContext* rhs)
+        : ptr(rhs)
+        { }
+    };
+
+    public:
+        PaintContextPtr()
+        : _paint(0)
+        { }
+
+        PaintContextPtr(MoveRef p)
+        : _paint(p.ptr) 
+        { }
+
+        ~PaintContextPtr()
+        {
+            delete _paint;
+        }
+
+        PaintContextPtr& operator =(MoveRef rhs)
+        {
+            reset(rhs.ptr);
+            return *this;
+        }
+
+        PaintContext* operator->()
+        {
+          return _paint;
+        }
+
+        operator bool() const
+        { 
+            return _paint != 0; 
+        }
+
+        bool operator !() const 
+        {
+            return _paint == 0;
+        }
+
+        operator MoveRef()
+        {
+            return MoveRef( release() );
+        }
+
+        PaintContext* release() 
+        {
+            PaintContext* tmp(_paint);
+            _paint = 0;
+            return tmp;
+        }
+
+    private:
+        explicit PaintContextPtr(PaintContext* paint)
+        : _paint(paint)
+        { }
+
+        PaintContextPtr(PaintContextPtr& p);
+  
+        PaintContextPtr& operator =(PaintContextPtr& p);
+
+        void reset(PaintContext* ptr = 0) 
+        {
+            if(_paint != ptr) 
+            {
+                delete _paint;
+                _paint = ptr;
+            }
+        }
+
+    private:
+        PaintContext* _paint;
 };
 
 /** @brief Line.

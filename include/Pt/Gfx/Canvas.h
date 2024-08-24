@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Paint.h>
 
 namespace Pt {
 
@@ -58,7 +59,11 @@ class PT_GFX_API Canvas
 
         const Scaling& scaling() const;
 
+        PaintContextPtr beginPaint(PaintContext* paint);
+
     protected:
+        virtual PaintContext* onBeginPaint(PaintContext* p) = 0;
+
         virtual void onFinishPaint() = 0;
 
     private:

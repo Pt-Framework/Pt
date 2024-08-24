@@ -66,13 +66,13 @@ class PT_GFX_API PaintRegion : public PaintSurface
         void resize(const Gfx::SizeF& size);
 
     protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const;
+        virtual const Gfx::ImageFormat& onGetFormat() const override;
 
-        virtual const Gfx::SizeF& onGetSize() const;
+        virtual const Gfx::SizeF& onGetSize() const override;
 
-        virtual const Gfx::Scaling& onGetScaling() const;
+        virtual const Gfx::Scaling& onGetScaling() const override;
 
-        virtual PaintContext* onBeginPaint(PaintContext* paint);
+        virtual PaintContextPtr onBeginPaint(PaintContext* paint) override;
 
         virtual void onReset();
 

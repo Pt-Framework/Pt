@@ -106,7 +106,7 @@ const Gfx::Scaling& PixmapSurface::onGetScaling() const
 }
 
 
-Gfx::PaintContext* PixmapSurface::onBeginPaint(Gfx::PaintContext* p)
+Gfx::PaintContextPtr PixmapSurface::onBeginPaint(Gfx::PaintContext* p)
 {
     return _impl->beginPaint(p);
 }

@@ -93,6 +93,14 @@ const Scaling& Canvas::scaling() const
 }
 
 
+PaintContextPtr Canvas::beginPaint(PaintContext* p)
+{
+    PaintContext* paint = onBeginPaint(p);
+    paint->init(*this);
+    return PaintContextPtr(paint);
+}
+
+
 //void Canvas::drawSurface(const Gfx::PointF& to, 
 //                         const Gfx::PaintSurface& surface)
 //{

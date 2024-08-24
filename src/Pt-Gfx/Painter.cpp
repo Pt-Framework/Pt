@@ -72,7 +72,7 @@ void Painter::begin(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
 
-    PaintContext* paintContext = surface.beginPaint(_paintContext);
+    PaintContext* paintContext = surface.beginPaint(_paintContext).release();
     if(_paintContext != paintContext)
     {
         delete _paintContext;

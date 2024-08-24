@@ -64,7 +64,6 @@ ImagePaint::~ImagePaint()
 void ImagePaint::reset(ImageCanvas& canvas)
 {
     _canvas = &canvas;
-    init(canvas);
 }
 
 
@@ -375,6 +374,17 @@ const Gfx::SizeF& ImageCanvas::size() const
 const Scaling& ImageCanvas::scaling() const
 {
     return _scaling;
+}
+
+
+PaintContext* ImageCanvas::onBeginPaint(PaintContext* p)
+{
+    ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
+    if( ! paint )
+        paint = new ImagePaint();
+
+    paint->reset(*this);
+    return paint;
 }
 
 
@@ -745,14 +755,9 @@ const Scaling& ImageSurface::onGetScaling() const
 }
 
 
-PaintContext* ImageSurface::onBeginPaint(PaintContext* p)
+PaintContextPtr ImageSurface::onBeginPaint(PaintContext* paint)
 {
-    ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
-    if( ! paint )
-      paint = new ImagePaint();
-
-    paint->reset(*_canvas);
-    return paint;
+    return _canvas->beginPaint(paint);
 }
 
 

@@ -34,6 +34,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Paint.h>
 
 #include <vector>
 
@@ -44,6 +45,7 @@ namespace Gfx {
 class Canvas;
 class Painter;
 class PaintContext;
+class PaintContextPtr;
 
 /** @brief Paint target for painters.
 */
@@ -67,7 +69,7 @@ class PT_GFX_API PaintSurface
 
         Image toImage() const;
 
-        PaintContext* beginPaint(PaintContext* paint);
+        PaintContextPtr beginPaint(PaintContext* paint);
 
     protected:      
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
@@ -76,7 +78,7 @@ class PT_GFX_API PaintSurface
 
         virtual const Scaling& onGetScaling() const = 0;
 
-        virtual PaintContext* onBeginPaint(PaintContext* paint) = 0;
+        virtual PaintContextPtr onBeginPaint(PaintContext* paint) = 0;
 
         virtual void onReset();
 
