@@ -114,10 +114,9 @@ class PixmapSurfaceImpl
             return _image.toImage();
         }
 
-        Gfx::PaintContextPtr beginPaint(Gfx::PaintContext* context,
-                                        const Gfx::Paint& paint)
+        Gfx::PaintContextPtr beginPaint(Gfx::PaintContext* context)
         {
-            return _image.beginPaint(context, paint);
+            return _image.beginPaint(context);
         }
 
         const Gfx::ImageSurface& imageSurface() const
