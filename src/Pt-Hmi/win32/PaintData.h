@@ -80,8 +80,6 @@ class PaintData : public Gfx::PaintContext
         HRGN clipRect() const;
 
     protected:
-        virtual void onSetPaint(const Gfx::Paint& paint) override;
-
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
 
         virtual void onFinishPaint() override;

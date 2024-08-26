@@ -259,19 +259,13 @@ PaintContext::~PaintContext()
 }
 
 
-void PaintContext::setPaint(const Paint& paint)
+void PaintContext::beginPaint(const Paint& paint)
 {
     onBeginPaint(paint);
 }
 
 
-void PaintContext::begin(const Paint& paint)
-{
-    onBeginPaint(paint);
-}
-
-
-void PaintContext::finish()
+void PaintContext::finishPaint()
 {
     onFinishPaint();
 
@@ -284,7 +278,7 @@ void PaintContext::finish()
 
 void PaintContext::reset()
 {
-    finish();
+    finishPaint();
 
     onResetPaint();
 }

@@ -154,17 +154,13 @@ class PT_GFX_API PaintContext
 
         void setRegion(const RectF& r);
 
-        void setPaint(const Paint& paint);
+        void beginPaint(const Paint& paint);
 
-        void begin(const Paint& paint);
-
-        void finish();
+        void finishPaint();
 
         void reset();
 
     protected:
-        virtual void onSetPaint(const Paint& paint) = 0;
-
         virtual void onBeginPaint(const Paint& paint) = 0;
 
         virtual void onFinishPaint() = 0;

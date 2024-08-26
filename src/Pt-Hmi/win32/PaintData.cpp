@@ -202,18 +202,6 @@ void PaintData::reset(PixmapSurfaceImpl& canvas)
 }
 
 
-void PaintData::onSetPaint(const Gfx::Paint& paint)
-{
-    updateMode( paint.compositionMode() );
-    updatePen( paint.pen() );
-    updateBrush( paint.brush() );
-    updateFont( paint.font() );
-
-    const Gfx::RectF& clip = paint.clip();
-    updateClip( clip.isNull() ? 0 : &clip );
-}
-
-
 void PaintData::onBeginPaint(const Gfx::Paint& paint)
 {
     if(_canvas)

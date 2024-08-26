@@ -69,15 +69,6 @@ void ImagePaint::reset(ImageCanvas& canvas)
 }
 
 
-void ImagePaint::onSetPaint(const Gfx::Paint& paint)
-{
-    //updateMode( paint.compositionMode() );
-    updatePen( paint.pen() );
-    //updateBrush( paint.brush() );
-    //updateFont( paint.font() );
-}
-
-
 void ImagePaint::onBeginPaint(const Gfx::Paint& paint)
 {
     if(_canvas)
@@ -92,7 +83,6 @@ void ImagePaint::onBeginPaint(const Gfx::Paint& paint)
             _canvas->resetClip();
         else
             _canvas->setClip(clip);
-
     }
 }
 

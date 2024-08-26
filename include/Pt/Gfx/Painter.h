@@ -216,7 +216,7 @@ class PT_GFX_API Painter
 
     private:
         PaintSurface*        _surface;
-        PaintContextPtr      _handle;
+        PaintContextPtr      _paintContext;
         Scaling              _scaling;
         Paint                _paint;
 };
