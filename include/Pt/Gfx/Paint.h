@@ -64,9 +64,20 @@ class Polyline;
       needed for painting. The pixel ratio is reported by the implementation for
       alignment purposes. Paint scaling can be 1.0 if the underlying implementation
       works with logic pixels, even if the reported pixel ratio is higher.
-
-    - PaintData -> Paint for attributes and PaintContext for implementation object
 */
+
+//
+// TODO: active flag to defer paint updates
+//
+// if not active set only invalid flag otherwise apply
+// so changes are visible immediately during painting
+//
+
+//
+// TODO: PaintContextPtr is attached to Canvas
+//
+// rename PaintContxt -> PaintDevice
+// rename PaintContextPtr -> PaintContext
 
 /** @brief Paint context.
 */
@@ -134,15 +145,8 @@ class PT_GFX_API Paint
 */
 class PT_GFX_API PaintContext
 {
-    friend class Canvas;
-    friend class Painter;
-
     public:
         virtual ~PaintContext();
-
-        const ImageFormat& format() const;
-
-        const Scaling& scaling() const;
 
         const RectF& region() const;
 
@@ -150,19 +154,23 @@ class PT_GFX_API PaintContext
 
         void setRegion(const RectF& r);
 
-        void begin(Painter& painter);
+        void setPaint(const Paint& paint);
+
+        void begin(const Paint& paint);
 
         void finish();
 
         void reset();
 
     protected:
-        virtual void onSetPaint(const Paint* paint) = 0;
+        virtual void onSetPaint(const Paint& paint) = 0;
 
         virtual void onBeginPaint(const Paint& paint) = 0;
 
         virtual void onFinishPaint() = 0;
 
+        virtual void onResetPaint() = 0;
+        
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
 
@@ -269,20 +277,9 @@ class PT_GFX_API PaintContext
     protected:
         PaintContext();
 
-        void init(Canvas& canvas);
-
     private:
-        void onDetachCanvas(Canvas& canvas);
-
-    private:
-        void onDetachPainter(Painter& painter);
-
-    private:
-        Painter*       _painter;
-        Canvas*        _canvas;
         RectF          _region;
         Gfx::Scaling   _scaling;
-        bool           _invalid;
 };
 
 
@@ -292,36 +289,39 @@ class PaintContextPtr
 
     struct MoveRef
     {
-        PaintContext* ptr;
+        Canvas*       canvas;
+        PaintContext* paint;
     
-        explicit MoveRef(PaintContext* rhs)
-        : ptr(rhs)
+        explicit MoveRef(Canvas* c, PaintContext* p)
+        : canvas(c)
+        , paint(p)
         { }
     };
 
     public:
-        PaintContextPtr()
-        : _paint(0)
-        { }
+        PaintContextPtr();
 
-        PaintContextPtr(MoveRef p)
-        : _paint(p.ptr) 
-        { }
+        PaintContextPtr(MoveRef ref);
 
-        ~PaintContextPtr()
-        {
-            delete _paint;
-        }
+        ~PaintContextPtr();
 
-        PaintContextPtr& operator =(MoveRef rhs)
-        {
-            reset(rhs.ptr);
-            return *this;
-        }
+        PaintContextPtr& operator =(MoveRef ref);
+
+        operator MoveRef();
 
         PaintContext* operator->()
         {
           return _paint;
+        }
+
+        const PaintContext* operator->() const
+        {
+          return _paint;
+        }
+
+        const Canvas* canvas() const
+        {
+          return _canvas;
         }
 
         operator bool() const
@@ -334,37 +334,26 @@ class PaintContextPtr
             return _paint == 0;
         }
 
-        operator MoveRef()
+        PaintContext* get()
         {
-            return MoveRef( release() );
+            return _paint;
         }
 
-        PaintContext* release() 
-        {
-            PaintContext* tmp(_paint);
-            _paint = 0;
-            return tmp;
-        }
+        PaintContext* release();
+
+        void reset();
 
     private:
-        explicit PaintContextPtr(PaintContext* paint)
-        : _paint(paint)
-        { }
+        PaintContextPtr(Canvas& canvas, PaintContext* paint);
 
         PaintContextPtr(PaintContextPtr& p);
   
         PaintContextPtr& operator =(PaintContextPtr& p);
 
-        void reset(PaintContext* ptr = 0) 
-        {
-            if(_paint != ptr) 
-            {
-                delete _paint;
-                _paint = ptr;
-            }
-        }
+        void onDetachCanvas(Canvas& canvas);
 
     private:
+        Canvas*       _canvas;
         PaintContext* _paint;
 };
 

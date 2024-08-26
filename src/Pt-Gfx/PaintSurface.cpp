@@ -88,6 +88,10 @@ void PaintSurface::onReset()
     }
 }
 
+//
+// TODO: virtual canvas() function instead of format() and non-virtual
+//       accessors in Canvas base class
+//
 
 const Gfx::ImageFormat& PaintSurface::format() const
 {
@@ -107,9 +111,9 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-PaintContextPtr PaintSurface::beginPaint(PaintContext* p)
+PaintContextPtr PaintSurface::beginPaint(PaintContext* context)
 {
-    return onBeginPaint(p);
+    return onBeginPaint(context);
 }
 
 

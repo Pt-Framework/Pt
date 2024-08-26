@@ -114,9 +114,10 @@ class PixmapSurfaceImpl
             return _image.toImage();
         }
 
-        Gfx::PaintContextPtr beginPaint(Gfx::PaintContext* p)
+        Gfx::PaintContextPtr beginPaint(Gfx::PaintContext* context,
+                                        const Gfx::Paint& paint)
         {
-            return _image.beginPaint(p);
+            return _image.beginPaint(context, paint);
         }
 
         const Gfx::ImageSurface& imageSurface() const
@@ -175,7 +176,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         const Gfx::Scaling& scaling() const;
     
     protected:
-        virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* p) override;
+        virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* context) override;
 
         virtual void onFinishPaint() override;
 

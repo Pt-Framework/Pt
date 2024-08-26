@@ -46,7 +46,7 @@ class PaintContext;
 */
 class PT_GFX_API Canvas
 {
-    friend class PaintContext;
+    friend class PaintContextPtr;
 
     public:
         explicit Canvas(PaintSurface& surface);
@@ -59,21 +59,23 @@ class PT_GFX_API Canvas
 
         const Scaling& scaling() const;
 
-        PaintContextPtr beginPaint(PaintContext* paint);
+        PaintContextPtr beginPaint(Gfx::PaintContext* context);
 
     protected:
-        virtual PaintContext* onBeginPaint(PaintContext* p) = 0;
+        virtual PaintContext* onBeginPaint(Gfx::PaintContext* context) = 0;
 
         virtual void onFinishPaint() = 0;
 
     private:
-        void attachPaintContext(PaintContext& paint);
+        void attachPaintContext(PaintContextPtr& paint);
 
-        void detachPaintContext(PaintContext& paint);
+        void detachPaintContext(PaintContextPtr& paint);
+
+        void releasePaintContext();
     
     private:
-        PaintSurface*  _surface;
-        PaintContext*  _paint;
+        PaintSurface*     _surface;
+        PaintContextPtr*  _paintContext;
 };
 
 } // namespace

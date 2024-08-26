@@ -121,71 +121,164 @@ void Paint::setFont(const Gfx::Font& font)
 }
 
 ///////////////////////////////////////////////////////////////////////
+// PaintContextPtr
+///////////////////////////////////////////////////////////////////////
+
+PaintContextPtr::PaintContextPtr()
+: _canvas(0)
+, _paint(0)
+{ 
+}
+
+
+PaintContextPtr::PaintContextPtr(Canvas& canvas, PaintContext* paint)
+: _canvas(&canvas)
+, _paint(paint)
+{ 
+    _canvas->attachPaintContext(*this);
+}
+
+
+PaintContextPtr::PaintContextPtr(MoveRef ref)
+: _canvas(ref.canvas)
+, _paint(ref.paint) 
+{ 
+    _canvas->attachPaintContext(*this);
+}
+
+
+PaintContextPtr::~PaintContextPtr()
+{
+    if(_canvas)
+    {
+        _canvas->detachPaintContext(*this);
+        _canvas = 0;
+    }
+
+    delete _paint;
+}
+
+
+PaintContextPtr& PaintContextPtr::operator =(MoveRef ref)
+{
+    if(_canvas)
+    {
+        if(_paint)
+            _paint->reset();
+
+        _canvas->detachPaintContext(*this);
+        _canvas = 0;               
+    }
+
+    _canvas = ref.canvas;
+
+    if(_canvas)
+        _canvas->attachPaintContext(*this);
+    
+    if(_paint != ref.paint) 
+        delete _paint;
+
+    _paint = ref.paint;
+
+    return *this;
+}
+
+
+PaintContextPtr::operator MoveRef()
+{
+    Canvas* canvas = _canvas;
+
+    if(_canvas)
+    {
+        _canvas->releasePaintContext();
+        _canvas = 0;
+    }
+
+    PaintContext* paint = _paint;
+    _paint = 0;
+
+    return MoveRef(canvas, paint);
+}
+
+
+PaintContext* PaintContextPtr::release()
+{
+    PaintContext* paint = _paint;
+
+    if(_paint)
+    {
+        _paint->reset();
+        _paint = 0;
+    }
+
+    if(_canvas)
+    {
+        _canvas->detachPaintContext(*this);
+        _canvas = 0;
+    }
+
+    return paint;
+}
+
+
+void PaintContextPtr::reset()
+{
+    if(_canvas)
+    {
+        if(_paint)
+            _paint->reset();
+                
+        _canvas->detachPaintContext(*this);
+        _canvas = 0;               
+    }
+}
+
+
+void PaintContextPtr::onDetachCanvas(Canvas& canvas)
+{
+    if(_canvas)
+    {
+        if(_paint)
+            _paint->reset();
+        
+        _canvas = 0;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////
 // PaintContext
 ///////////////////////////////////////////////////////////////////////
 
 PaintContext::PaintContext()
-: _painter(0)
-, _canvas(0)
-, _invalid(false)
 {
 }
 
 
 PaintContext::~PaintContext()
 {
-    if(_canvas)
-    {
-        _canvas->detachPaintContext(*this);
-        _canvas = 0;
-    }
-
-    if(_painter)
-    {
-        _painter->detachPaintContext(*this);
-        _painter = 0;
-    }
 }
 
 
-void PaintContext::onDetachCanvas(Canvas& canvas)
+void PaintContext::setPaint(const Paint& paint)
 {
-    if(_canvas)
-    {
-        onFinishPaint();
-        _canvas = 0;
-    }
+    onBeginPaint(paint);
 }
 
 
-void PaintContext::onDetachPainter(Painter& painter)
+void PaintContext::begin(const Paint& paint)
 {
-    if(_painter)
-    {
-        onSetPaint(0);
-        _painter = 0;
-    }
+    onBeginPaint(paint);
 }
 
 
-void PaintContext::init(Canvas& canvas)
+void PaintContext::finish()
 {
-    if(_canvas)
-    {
-        onFinishPaint();
-        _canvas->detachPaintContext(*this);
-        _canvas = 0;               
-    }
+    onFinishPaint();
 
-    canvas.attachPaintContext(*this);
-    _canvas = &canvas;
+    double unbounded = std::numeric_limits<double>::max();
 
-    const Scaling& scaling = _canvas->scaling();
-    if(_scaling != scaling)
-    {
-        _scaling = scaling;
-        _invalid = true;
-    }
+    _region.clear();
+    _region.setSize( SizeF(unbounded, unbounded) );
 }
 
 
@@ -193,54 +286,7 @@ void PaintContext::reset()
 {
     finish();
 
-    if(_canvas)
-    {
-        onFinishPaint();
-        _canvas->detachPaintContext(*this);
-        _canvas = 0;
-    }
-
-    if(_painter)
-    {
-        onSetPaint(0);
-        _painter->detachPaintContext(*this);
-        _painter = 0;               
-    }
-}
-
-
-void PaintContext::begin(Painter& painter)
-{
-    if(_painter != &painter)
-    {
-        if(_painter)
-        {
-            onSetPaint(0);
-            _painter->detachPaintContext(*this);
-            _painter = 0;               
-        }
-
-        painter.attachPaintContext(*this);
-        _painter = &painter;
-        _invalid = true;
-    }
-
-    if(_invalid)
-    {
-        onSetPaint( &_painter->paint() );
-        _invalid = false;
-    }
-
-    onBeginPaint( _painter->paint() );
-}
-
-
-void PaintContext::finish()
-{
-    double unbounded = std::numeric_limits<double>::max();
-
-    _region.clear();
-    _region.setSize( SizeF(unbounded, unbounded) );
+    onResetPaint();
 }
 
 
@@ -259,18 +305,6 @@ const PointF& PaintContext::origin() const
 void PaintContext::setRegion(const RectF& r)
 {
     _region = r;
-}
-
-
-const ImageFormat& PaintContext::format() const
-{
-    return _canvas ? _canvas->format() : ImageFormat::argb32();
-}
-
-
-const Scaling& PaintContext::scaling() const
-{
-    return _scaling;
 }
 
 
@@ -421,39 +455,6 @@ void PaintContext::drawSurface(const Gfx::PointF& to,
 {
     Pt::Gfx::PointF p = to + origin();
     onDrawSurface(p, surface, rect);
-}
-
-
-void PaintContext::onDrawSurface(const Gfx::PointF& to, 
-                              const Gfx::PaintSurface& surface)
-{
-    Pt::Gfx::Image image = surface.toImage();
-    if( image.format() == format() )
-    {
-        drawImage(to, image);
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest);
-}
-
-
-void PaintContext::onDrawSurface(const Gfx::PointF& to,
-                              const Gfx::PaintSurface& surface,
-                              const Gfx::RectF& rect)
-{
-    Pt::Gfx::Image image = surface.toImage();
-    if( image.format() == format() )
-    {
-        drawImage(to, image, rect);
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest, rect);
 }
 
 } // namespace

@@ -42,6 +42,7 @@ namespace Pt {
 
 namespace Gfx {
 
+class Paint;
 class Canvas;
 class Painter;
 class PaintContext;
@@ -53,7 +54,6 @@ class PT_GFX_API PaintSurface
 {
     friend class Painter;
     friend class PaintRegion;
-    friend class PaintContext;
 
     protected:
         PaintSurface();
@@ -69,7 +69,7 @@ class PT_GFX_API PaintSurface
 
         Image toImage() const;
 
-        PaintContextPtr beginPaint(PaintContext* paint);
+        PaintContextPtr beginPaint(PaintContext* context);
 
     protected:      
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
@@ -78,7 +78,7 @@ class PT_GFX_API PaintSurface
 
         virtual const Scaling& onGetScaling() const = 0;
 
-        virtual PaintContextPtr onBeginPaint(PaintContext* paint) = 0;
+        virtual PaintContextPtr onBeginPaint(PaintContext* context) = 0;
 
         virtual void onReset();
 

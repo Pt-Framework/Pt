@@ -50,9 +50,10 @@ namespace Gfx {
 // ImageSurface
 ///////////////////////////////////////////////////////////////////////
 
-ImagePaint::ImagePaint()
-: _canvas(0)
+ImagePaint::ImagePaint(ImageCanvas& canvas)
+: _canvas(&canvas)
 {
+    _scaling = canvas.scaling();
 }
 
 
@@ -64,15 +65,16 @@ ImagePaint::~ImagePaint()
 void ImagePaint::reset(ImageCanvas& canvas)
 {
     _canvas = &canvas;
+    _scaling = canvas.scaling();
 }
 
 
-void ImagePaint::onSetPaint(const Gfx::Paint* paint)
+void ImagePaint::onSetPaint(const Gfx::Paint& paint)
 {
-    if(paint)
-    {
-        updatePen( paint->pen() );
-    }
+    //updateMode( paint.compositionMode() );
+    updatePen( paint.pen() );
+    //updateBrush( paint.brush() );
+    //updateFont( paint.font() );
 }
 
 
@@ -94,7 +96,13 @@ void ImagePaint::onBeginPaint(const Gfx::Paint& paint)
     }
 }
 
+
 void ImagePaint::onFinishPaint()
+{
+}
+
+
+void ImagePaint::onResetPaint()
 {
     _canvas = 0;
 }
@@ -118,7 +126,8 @@ void ImagePaint::onSetPen(const Gfx::Pen& pen)
 
 void ImagePaint::updatePen(const Gfx::Pen& pen)
 {
-    double scaledSize = scaling().toPhysical( pen.size() );
+    double scaledSize = _canvas ? _canvas->scaling().toPhysical( pen.size() )
+                                : 1.0;
 
     // keep pen size when downscaling
     size_t penSize = scaledSize < 1.0 ? 1 
@@ -377,14 +386,14 @@ const Scaling& ImageCanvas::scaling() const
 }
 
 
-PaintContext* ImageCanvas::onBeginPaint(PaintContext* p)
+PaintContext* ImageCanvas::onBeginPaint(Gfx::PaintContext* context)
 {
-    ImagePaint* paint = dynamic_cast<ImagePaint*>(p);
-    if( ! paint )
-        paint = new ImagePaint();
+    ImagePaint* paintContext = dynamic_cast<ImagePaint*>(context);
+    if( ! paintContext )
+        paintContext = new ImagePaint(*this);
 
-    paint->reset(*this);
-    return paint;
+    paintContext->reset(*this);
+    return paintContext;
 }
 
 
@@ -755,9 +764,9 @@ const Scaling& ImageSurface::onGetScaling() const
 }
 
 
-PaintContextPtr ImageSurface::onBeginPaint(PaintContext* paint)
+PaintContextPtr ImageSurface::onBeginPaint(Gfx::PaintContext* context)
 {
-    return _canvas->beginPaint(paint);
+    return _canvas->beginPaint(context);
 }
 
 

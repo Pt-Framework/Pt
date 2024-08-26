@@ -72,7 +72,7 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual const Gfx::Scaling& onGetScaling() const override;
 
-        virtual PaintContextPtr onBeginPaint(PaintContext* paint) override;
+        virtual PaintContextPtr onBeginPaint(Gfx::PaintContext* context) override;
 
         virtual void onReset();
 

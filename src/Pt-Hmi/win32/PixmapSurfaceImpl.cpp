@@ -273,14 +273,16 @@ const Gfx::Scaling& PixmapSurfaceImpl::scaling() const
 }
 
 
-Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* p)
+Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context)
 {
-    PaintData* paint = dynamic_cast<PaintData*>(p);
-    if( ! paint )
-      paint = new PaintData();
-    
-    paint->reset(*this);
-    return paint;
+    PaintData* paintContext = dynamic_cast<PaintData*>(context);
+    if( ! paintContext )
+    {
+      paintContext = new PaintData(*this);
+    }
+
+    paintContext->reset(*this);
+    return paintContext;
 }
 
 

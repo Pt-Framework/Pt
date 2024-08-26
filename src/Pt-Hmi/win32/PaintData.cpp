@@ -164,9 +164,9 @@ namespace Hmi {
 
 #ifndef PT_HMI_WIN32_RASTER
 
-PaintData::PaintData()
+PaintData::PaintData(PixmapSurfaceImpl& canvas)
 : Gfx::PaintContext()
-, _canvas(0)
+, _canvas(&canvas)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _pen(0)
 , _penColor()
@@ -175,6 +175,7 @@ PaintData::PaintData()
 , _clipRect(0)
 , _font(0)
 {
+    _scaling = canvas.scaling();
 }
 
 
@@ -197,22 +198,19 @@ PaintData::~PaintData()
 void PaintData::reset(PixmapSurfaceImpl& canvas)
 {
     _canvas = &canvas;
-
+    _scaling = canvas.scaling();
 }
 
 
-void PaintData::onSetPaint(const Gfx::Paint* paint)
+void PaintData::onSetPaint(const Gfx::Paint& paint)
 {
-    if(paint)
-    {
-        updateMode( paint->compositionMode() );
-        updatePen( paint->pen() );
-        updateBrush( paint->brush() );
-        updateFont( paint->font() );
+    updateMode( paint.compositionMode() );
+    updatePen( paint.pen() );
+    updateBrush( paint.brush() );
+    updateFont( paint.font() );
 
-        const Gfx::RectF& clip = paint->clip();
-        updateClip( clip.isNull() ? 0 : &clip );
-    }
+    const Gfx::RectF& clip = paint.clip();
+    updateClip( clip.isNull() ? 0 : &clip );
 }
 
 
@@ -232,6 +230,11 @@ void PaintData::onBeginPaint(const Gfx::Paint& paint)
 
 
 void PaintData::onFinishPaint()
+{
+}
+
+
+void PaintData::onResetPaint()
 {
     _canvas = 0;
 }
@@ -275,7 +278,8 @@ void PaintData::onSetPen(const Gfx::Pen& pen)
 
 void PaintData::updatePen(const Gfx::Pen& pen)
 {
-    double scaledSize = scaling().toPhysical( pen.size() );
+    double scaledSize = _canvas ? _canvas->scaling().toPhysical( pen.size() )
+                                : 1.0;
 
     // keep pen size when downscaling
     size_t penSize = scaledSize < 1.0 ? 1 
@@ -464,8 +468,9 @@ void PaintData::updateClip(const Gfx::RectF* rectF)
 
     if( ! rectF )
         return;
-            
-    Gfx::Rect rect = round( scaling().toPhysical(*rectF) );
+                                                       
+    Gfx::Rect rect = _canvas ? round( _canvas->scaling().toPhysical(*rectF) )
+                             : round(*rectF);
 
     // CreateRectRgn only includes the interior of the rect
     _clipRect = CreateRectRgn( rect.x(), 

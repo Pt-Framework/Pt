@@ -37,41 +37,47 @@ namespace Gfx {
 
 Canvas::Canvas(PaintSurface& surface)
 : _surface(&surface)
-, _paint(0)
+, _paintContext(0)
 {
 }
 
 
 Canvas::~Canvas()
 {
-    if(_paint)
+    if(_paintContext)
     {
-        _paint->onDetachCanvas(*this);
-        _paint = 0;
+        _paintContext->onDetachCanvas(*this);
+        _paintContext = 0;
     }
 }
 
 
-void Canvas::attachPaintContext(PaintContext& paint)
+void Canvas::attachPaintContext(PaintContextPtr& paint)
 {
-    if(_paint)
+    if(_paintContext)
     {
         onFinishPaint();
-        _paint->onDetachCanvas(*this);
-        _paint = 0;
+        _paintContext->onDetachCanvas(*this);
+        _paintContext = 0;
     }
 
-    _paint = &paint;
+    _paintContext = &paint;
 }
 
 
-void Canvas::detachPaintContext(PaintContext& paint)
+void Canvas::detachPaintContext(PaintContextPtr& paint)
 {
-    if(_paint)
+    if(_paintContext)
     {        
         onFinishPaint();
-        _paint = 0;
+        _paintContext = 0;
     }
+}
+
+
+void Canvas::releasePaintContext()
+{
+    _paintContext = 0;
 }
 
 
@@ -93,11 +99,10 @@ const Scaling& Canvas::scaling() const
 }
 
 
-PaintContextPtr Canvas::beginPaint(PaintContext* p)
+PaintContextPtr Canvas::beginPaint(Gfx::PaintContext* context)
 {
-    PaintContext* paint = onBeginPaint(p);
-    paint->init(*this);
-    return PaintContextPtr(paint);
+    PaintContext* paintContext = onBeginPaint(context);
+    return PaintContextPtr(*this, paintContext);
 }
 
 

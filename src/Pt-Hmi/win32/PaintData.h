@@ -61,7 +61,7 @@ class PixmapSurfaceImpl;
 class PaintData : public Gfx::PaintContext
 {
     public:
-        PaintData();
+        PaintData(PixmapSurfaceImpl& canvas);
 
         ~PaintData();
 
@@ -80,11 +80,13 @@ class PaintData : public Gfx::PaintContext
         HRGN clipRect() const;
 
     protected:
-        virtual void onSetPaint(const Gfx::Paint* paint) override;
+        virtual void onSetPaint(const Gfx::Paint& paint) override;
 
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
 
         virtual void onFinishPaint() override;
+
+        virtual void onResetPaint() override;
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
@@ -152,6 +154,7 @@ class PaintData : public Gfx::PaintContext
 
     private:
         PixmapSurfaceImpl*        _canvas;
+        Gfx::Scaling              _scaling;
         Gfx::CompositionMode      _compositionMode;
         HPEN                      _pen;
         Gfx::Color                _penColor;
