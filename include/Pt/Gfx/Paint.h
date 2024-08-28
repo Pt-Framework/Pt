@@ -67,6 +67,11 @@ class Polyline;
 */
 
 //
+// TODO: Paint objects shared/refcounted so PaintContext can recognise
+//       when paint attributes change
+//
+
+//
 // TODO: active flag to defer paint updates
 //
 // if not active set only invalid flag otherwise apply
