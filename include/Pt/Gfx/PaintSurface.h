@@ -71,7 +71,11 @@ class PT_GFX_API PaintSurface
 
         PaintContextPtr beginPaint(PaintContext* context);
 
-    protected:      
+        const Canvas* canvas() const;
+
+    protected:
+        virtual const Canvas* onGetCanvas() const = 0;   
+
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
         virtual const Gfx::SizeF& onGetSize() const = 0;

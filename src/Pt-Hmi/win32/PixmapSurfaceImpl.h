@@ -41,7 +41,7 @@
 
 #include <Windows.h>
 
-//#define PT_HMI_WIN32_RASTER 1
+#define PT_HMI_WIN32_RASTER 1
 
 namespace Pt {
 
@@ -52,29 +52,10 @@ class PixmapSurface;
 
 #ifdef PT_HMI_WIN32_RASTER
 
-class PixmapCanvas : public Gfx::ImageCanvas 
-{
-    public:
-        explicit PixmapCanvas(Gfx::ImageSurface& surface)
-        : Gfx::ImageCanvas(surface)
-        { }
-
-    protected:
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const Gfx::PaintSurface& surface) override;
-
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const Gfx::PaintSurface& pm, 
-                                 const Gfx::RectF& pmRect) override;
-};
-
-
 class PixmapSurfaceImpl 
 {
     public:
-        explicit PixmapSurfaceImpl(PixmapSurface&)
-        : _canvas(_image)
-        { }
+        explicit PixmapSurfaceImpl(PixmapSurface&);
 
         void clear(const Gfx::Color& c)
         { }
@@ -107,6 +88,11 @@ class PixmapSurfaceImpl
         const Gfx::ImageFormat& format() const
         {
             return _image.format();
+        }
+
+        const Gfx::Canvas* canvas() const
+        {
+            return _image.canvas();
         }
 
         Gfx::Image toImage() const
@@ -146,7 +132,6 @@ class PixmapSurfaceImpl
     
     private:
         Gfx::ImageSurface _image;
-        PixmapCanvas      _canvas;
 };
 
 #else // PT_HMI_WIN32_RASTER
@@ -173,6 +158,11 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         const Gfx::SizeF& size() const;
 
         const Gfx::Scaling& scaling() const;
+
+        const Canvas* canvas() const
+        { 
+            return this;
+        }
     
     protected:
         virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* context) override;
@@ -255,10 +245,12 @@ class PixmapSurfaceImpl : public Gfx::Canvas
                                  const Gfx::PaintSurface& pm, 
                                  const Gfx::RectF& pmRect);
 
-        void drawPixmap(const Gfx::PointF& toF, const PixmapSurface& surface);
+        void drawPixmap(const Gfx::PointF& toF, 
+                        const PixmapSurfaceImpl& surface);
 
         void drawPixmap(const Gfx::PointF& toF, 
-                        const PixmapSurface& surface, const Gfx::RectF& rect);
+                        const PixmapSurfaceImpl& surface, 
+                        const Gfx::RectF& rect);
 
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 

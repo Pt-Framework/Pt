@@ -93,6 +93,12 @@ void PaintSurface::onReset()
 //       accessors in Canvas base class
 //
 
+const Canvas* PaintSurface::canvas() const
+{
+    return onGetCanvas();
+}
+
+
 const Gfx::ImageFormat& PaintSurface::format() const
 {
     return onGetFormat();

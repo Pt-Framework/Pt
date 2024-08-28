@@ -47,32 +47,8 @@ namespace Pt {
 
 namespace Hmi {
 
-void PixmapCanvas::drawSurface(const Gfx::PointF& to, 
-                               const Gfx::PaintSurface& surface)
-{
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
-    if(pixmap)
-    {
-        Gfx::ImageCanvas::drawSurface( to, pixmap->impl()->imageSurface() );
-        return;
-    }
-
-    ImageCanvas::drawSurface(to, surface);
-}
-
-
-void PixmapCanvas::drawSurface(const Gfx::PointF& to,
-                               const Gfx::PaintSurface& surface,
-                               const Gfx::RectF& rect)
-{
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
-    if(pixmap)
-    {
-        Gfx::ImageCanvas::drawSurface(to, pixmap->impl()->imageSurface(), rect);
-        return;
-    }
-
-    ImageCanvas::drawSurface(to, surface, rect);
+PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface&)
+{ 
 }
 
 } // namespace
@@ -829,12 +805,20 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::Size
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
                                     const Gfx::PaintSurface& surface)
 {
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    const Canvas* canvas = surface.canvas();
+    const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(canvas);
     if(pixmap)
     {
         drawPixmap(to, *pixmap);
         return;
     }
+
+    //const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    //if(pixmap)
+    //{
+    //    drawPixmap(to, *pixmap);
+    //    return;
+    //}
 
     Pt::Gfx::Image image = surface.toImage();
     if( image.format() == format() )
@@ -853,12 +837,20 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
                                     const Gfx::PaintSurface& surface,
                                     const Gfx::RectF& rect)
 {
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    const Canvas* canvas = surface.canvas();
+    const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(canvas);
     if(pixmap)
     {
         drawPixmap(to, *pixmap, rect);
         return;
     }
+
+    //const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
+    //if(pixmap)
+    //{
+    //    drawPixmap(to, *pixmap, rect);
+    //    return;
+    //}
 
     Pt::Gfx::Image image = surface.toImage();
     if( image.format() == format() )
@@ -874,7 +866,7 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
 
 
 void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
-                                   const PixmapSurface& surface)
+                                   const PixmapSurfaceImpl& surface)
 {
     Gfx::PointF to = _scaling.toPhysical(toF);
     Gfx::Size size = Gfx::round( surface.size() );
@@ -884,7 +876,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
         case Gfx::CompositionMode::SourceCopy:
         {
             BitBlt(_dc, lround(to.x()), lround(to.y()), size.width(), size.height(),
-                   surface.impl()->deviceContext(), 0, 0, SRCCOPY);
+                   surface.deviceContext(), 0, 0, SRCCOPY);
         }
         break;
 
@@ -897,7 +889,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
             bf.AlphaFormat = AC_SRC_ALPHA;
 
             AlphaBlend(_dc, to.x(), to.y(), size.width(), size.height(),
-                       surface.impl()->deviceContext(), 
+                       surface.deviceContext(), 
                        0, 0, size.width(), size.height(), bf);
         }
         break;
@@ -906,7 +898,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
 
 
 void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
-                                   const PixmapSurface& pm, 
+                                   const PixmapSurfaceImpl& pm, 
                                    const Gfx::RectF& rectF)
 {
     Gfx::PointF to = _scaling.toPhysical(toF);
@@ -920,7 +912,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
         case Gfx::CompositionMode::SourceCopy:
         {
             BitBlt(_dc, lround(to.x()), lround(to.y()), size.width(), size.height(),
-                   pm.impl()->deviceContext(), from.x(), from.y(), SRCCOPY);
+                   pm.deviceContext(), from.x(), from.y(), SRCCOPY);
         }
         break;
 
@@ -933,7 +925,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
             bf.AlphaFormat = AC_SRC_ALPHA;
 
             AlphaBlend(_dc, to.x(), to.y(), size.width(), size.height(),
-                       pm.impl()->deviceContext(), 
+                       pm.deviceContext(), 
                        from.x(), from.y(), size.width(), size.height(), bf);
         }
         break;

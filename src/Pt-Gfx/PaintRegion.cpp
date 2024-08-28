@@ -128,6 +128,12 @@ void PaintRegion::resize(const Gfx::SizeF& size)
 }
 
 
+const Canvas* PaintRegion::onGetCanvas() const
+{
+    return _surface ? _surface->canvas() : 0;
+}
+
+
 const Gfx::ImageFormat& PaintRegion::onGetFormat() const
 {
     return _surface ? _surface->format()

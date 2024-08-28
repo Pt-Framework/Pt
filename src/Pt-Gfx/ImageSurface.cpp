@@ -649,13 +649,22 @@ void ImageCanvas::drawSurface(const Gfx::PointF& toF, const PaintSurface& surfac
 {
     Gfx::PointF to = _scaling.toPhysical(toF);
 
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
-    if(imageSurface)
+    const Canvas* canvas = surface.canvas();
+    const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(canvas);
+    if(imageCanvas)
     {
-        const Gfx::Image& image = imageSurface->image();
+        const Gfx::Image& image = imageCanvas->image();
         drawImage(to, image);
         return;
     }
+
+    //const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
+    //if(imageSurface)
+    //{
+    //    const Gfx::Image& image = imageSurface->image();
+    //    drawImage(to, image);
+    //    return;
+    //}
 
     Pt::Gfx::Image image = surface.toImage();
     if( image.format() == format() )
@@ -676,13 +685,22 @@ void ImageCanvas::drawSurface(const Gfx::PointF& toF,
     Gfx::PointF to = _scaling.toPhysical(toF);
     Gfx::RectF rect = _scaling.toPhysical(pmRect2);
 
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
-    if(imageSurface)
+    const Canvas* canvas = surface.canvas();
+    const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(canvas);
+    if(imageCanvas)
     {
-        const Gfx::Image& image = imageSurface->image();
+        const Gfx::Image& image = imageCanvas->image();
         drawImage(to, image, rect);
         return;
     }
+
+    //const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
+    //if(imageSurface)
+    //{
+    //    const Gfx::Image& image = imageSurface->image();
+    //    drawImage(to, image, rect);
+    //    return;
+    //}
 
     Pt::Gfx::Image image = surface.toImage();
     if( image.format() == format() )
@@ -763,6 +781,12 @@ void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
 {
     _canvas->reset(size, stride);
     _size = _canvas->size();
+}
+
+
+const Canvas* ImageSurface::onGetCanvas() const
+{
+    return _canvas;
 }
 
 

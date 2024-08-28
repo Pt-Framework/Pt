@@ -88,6 +88,12 @@ void PixmapSurface::setScaleFactor(double scaling)
 }
 
 
+const Gfx::Canvas* PixmapSurface::onGetCanvas() const
+{
+    return _impl->canvas();
+}
+
+
 const Gfx::ImageFormat& PixmapSurface::onGetFormat() const
 {
     return _impl->format();
