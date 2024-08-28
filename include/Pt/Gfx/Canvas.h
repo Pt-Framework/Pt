@@ -46,6 +46,7 @@ class PaintContext;
 */
 class PT_GFX_API Canvas
 {
+    friend class PaintContext;
     friend class PaintContextPtr;
 
     public:
@@ -67,15 +68,13 @@ class PT_GFX_API Canvas
         virtual void onFinishPaint() = 0;
 
     private:
-        void attachPaintContext(PaintContextPtr& paint);
+        void attachPaint(PaintContext& paint);
 
-        void detachPaintContext(PaintContextPtr& paint);
-
-        void releasePaintContext();
+        void detachPaint(PaintContext& paint);
     
     private:
         PaintSurface*     _surface;
-        PaintContextPtr*  _paintContext;
+        PaintContext*     _paint = 0;
 };
 
 } // namespace

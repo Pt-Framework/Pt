@@ -43,6 +43,7 @@ Painter::Painter()
 
 Painter::Painter(PaintSurface& surface)
 : _surface(0)
+, _ref(0)
 {
     begin(surface);
 }
@@ -64,48 +65,25 @@ void Painter::begin(PaintSurface& surface)
 
     surface.attachPainter(*this);
     _surface = &surface;
-
-    bool invalid = false;
-    
+   
     PaintContext* reuse = _paintContext.get();
     _paintContext = surface.beginPaint(reuse);
-    if(_paintContext.get() != reuse)
-    {
-        invalid = true;
-    }
-       
+          
     if(_paintContext)
     {
-        const Gfx::Scaling& scaling = _paintContext.canvas()->scaling();
-        if(_scaling != scaling)
-        {
-            _scaling = scaling;
-            invalid = true;
-        }
-
-        if(invalid)
-        {
-            _paintContext->setCompositionMode( _paint.compositionMode() );
-            _paintContext->setPen( _paint.pen() );
-            _paintContext->setBrush( _paint.brush() );
-            _paintContext->setFont( _paint.font() );
-
-            const Gfx::RectF& clip = _paint.clip();
-            if( clip.isNull() )
-                _paintContext->resetClip();
-            else
-                _paintContext->setClip(clip);
-        }
-            
+        _paintContext->setPainter(*this);
         _paintContext->beginPaint(_paint);
-    }   
+    }
 }
 
 
 void Painter::finish()
 {
     if(_paintContext)
-        _paintContext.reset();
+    {
+        _paintContext->finishPaint();
+        _paintContext->releaseCanvas();
+    }
 
     if( _surface )
     {
@@ -126,8 +104,8 @@ void Painter::onDetachSurface(PaintSurface& surface)
 
 const Gfx::ImageFormat& Painter::format() const
 {
-    return _paintContext.canvas() ? _paintContext.canvas()->format() 
-                                  : ImageFormat::argb32();
+    return _surface ? _surface->format() 
+                    : ImageFormat::argb32();
 }
 
 

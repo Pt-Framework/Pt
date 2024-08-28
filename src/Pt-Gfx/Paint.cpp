@@ -125,56 +125,31 @@ void Paint::setFont(const Gfx::Font& font)
 ///////////////////////////////////////////////////////////////////////
 
 PaintContextPtr::PaintContextPtr()
-: _canvas(0)
-, _paint(0)
+: _paint(0)
 { 
 }
 
 
-PaintContextPtr::PaintContextPtr(Canvas& canvas, PaintContext* paint)
-: _canvas(&canvas)
-, _paint(paint)
+PaintContextPtr::PaintContextPtr(PaintContext* paint)
+: _paint(paint)
 { 
-    _canvas->attachPaintContext(*this);
 }
 
 
 PaintContextPtr::PaintContextPtr(MoveRef ref)
-: _canvas(ref.canvas)
-, _paint(ref.paint) 
+: _paint(ref.paint) 
 { 
-    _canvas->attachPaintContext(*this);
 }
 
 
 PaintContextPtr::~PaintContextPtr()
 {
-    if(_canvas)
-    {
-        _canvas->detachPaintContext(*this);
-        _canvas = 0;
-    }
-
     delete _paint;
 }
 
 
 PaintContextPtr& PaintContextPtr::operator =(MoveRef ref)
-{
-    if(_canvas)
-    {
-        if(_paint)
-            _paint->reset();
-
-        _canvas->detachPaintContext(*this);
-        _canvas = 0;               
-    }
-
-    _canvas = ref.canvas;
-
-    if(_canvas)
-        _canvas->attachPaintContext(*this);
-    
+{  
     if(_paint != ref.paint) 
         delete _paint;
 
@@ -186,63 +161,10 @@ PaintContextPtr& PaintContextPtr::operator =(MoveRef ref)
 
 PaintContextPtr::operator MoveRef()
 {
-    Canvas* canvas = _canvas;
-
-    if(_canvas)
-    {
-        _canvas->releasePaintContext();
-        _canvas = 0;
-    }
-
     PaintContext* paint = _paint;
     _paint = 0;
 
-    return MoveRef(canvas, paint);
-}
-
-
-PaintContext* PaintContextPtr::release()
-{
-    PaintContext* paint = _paint;
-
-    if(_paint)
-    {
-        _paint->reset();
-        _paint = 0;
-    }
-
-    if(_canvas)
-    {
-        _canvas->detachPaintContext(*this);
-        _canvas = 0;
-    }
-
-    return paint;
-}
-
-
-void PaintContextPtr::reset()
-{
-    if(_canvas)
-    {
-        if(_paint)
-            _paint->reset();
-                
-        _canvas->detachPaintContext(*this);
-        _canvas = 0;               
-    }
-}
-
-
-void PaintContextPtr::onDetachCanvas(Canvas& canvas)
-{
-    if(_canvas)
-    {
-        if(_paint)
-            _paint->reset();
-        
-        _canvas = 0;
-    }
+    return MoveRef(paint);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -256,6 +178,86 @@ PaintContext::PaintContext()
 
 PaintContext::~PaintContext()
 {
+    if(_canvas)
+    {
+        _canvas->detachPaint(*this);
+        _canvas = 0;
+    }
+}
+
+
+void PaintContext::onDetachCanvas(Canvas& canvas)
+{
+    if(_canvas)
+    {
+        onReleaseCanvas(*_canvas);
+        _canvas = 0;
+    }
+}
+
+
+Canvas* PaintContext::canvas()
+{
+    return _canvas;
+}
+
+
+const Canvas* PaintContext::canvas() const
+{
+    return _canvas;
+}
+
+
+void PaintContext::setCanvas(Canvas& canvas)
+{
+    if(_canvas == &canvas)
+        return;
+
+    if(_canvas)
+    {        
+        onReleaseCanvas(*_canvas);
+        _canvas->detachPaint(*this);
+        _canvas = 0;
+    }
+
+    canvas.attachPaint(*this);
+    _canvas = &canvas;
+
+    onSetCanvas(canvas);
+}
+
+
+void PaintContext::releaseCanvas()
+{
+    finishPaint();
+
+    if(_canvas)
+    {        
+        onReleaseCanvas(*_canvas);
+        _canvas->detachPaint(*this);
+        _canvas = 0;
+    }
+}
+
+
+void PaintContext::setPainter(Painter& painter)
+{
+    if(_painter == &painter)
+        return;
+  
+    onSetPainter(painter);
+    _painter = &painter;
+
+}
+
+
+void PaintContext::releasePainter()
+{
+    if(_painter)
+    {
+        onReleasePainter(*_painter);
+        _painter = 0;
+    }
 }
 
 
@@ -273,14 +275,6 @@ void PaintContext::finishPaint()
 
     _region.clear();
     _region.setSize( SizeF(unbounded, unbounded) );
-}
-
-
-void PaintContext::reset()
-{
-    finishPaint();
-
-    onResetPaint();
 }
 
 

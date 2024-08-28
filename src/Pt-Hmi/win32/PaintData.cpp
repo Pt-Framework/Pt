@@ -167,6 +167,7 @@ namespace Hmi {
 PaintData::PaintData(PixmapSurfaceImpl& canvas)
 : Gfx::PaintContext()
 , _canvas(&canvas)
+, _invalid(false)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _pen(0)
 , _penColor()
@@ -175,7 +176,7 @@ PaintData::PaintData(PixmapSurfaceImpl& canvas)
 , _clipRect(0)
 , _font(0)
 {
-    _scaling = canvas.scaling();
+    setCanvas(canvas);
 }
 
 
@@ -198,12 +199,53 @@ PaintData::~PaintData()
 void PaintData::reset(PixmapSurfaceImpl& canvas)
 {
     _canvas = &canvas;
-    _scaling = canvas.scaling();
+    setCanvas(canvas);
+}
+
+
+void PaintData::onSetPainter(Gfx::Painter& painter)
+{
+    _invalid = true;
+}
+
+
+void PaintData::onReleasePainter(Gfx::Painter& painter)
+{
+}
+
+
+void PaintData::onSetCanvas(Gfx::Canvas& canvas)
+{
+   const Gfx::Scaling& scaling = canvas.scaling();
+    if(_scaling != scaling)
+    {
+        _scaling = scaling;
+        _invalid = true;
+    }
+}
+
+
+void PaintData::onReleaseCanvas(Gfx::Canvas& canvas)
+{
+    _canvas = 0;
 }
 
 
 void PaintData::onBeginPaint(const Gfx::Paint& paint)
 {
+    if(_invalid)
+    {
+        updateMode( paint.compositionMode() );
+        updatePen( paint.pen() );
+        updateBrush( paint.brush() );
+        updateFont( paint.font() );
+
+        const Gfx::RectF& clip = paint.clip();
+        updateClip( clip.isNull() ? 0 : &clip );
+
+        _invalid = false;
+    }
+
     if(_canvas)
     {
         _canvas->setCompositionMode(_compositionMode);
@@ -219,12 +261,6 @@ void PaintData::onBeginPaint(const Gfx::Paint& paint)
 
 void PaintData::onFinishPaint()
 {
-}
-
-
-void PaintData::onResetPaint()
-{
-    _canvas = 0;
 }
 
 

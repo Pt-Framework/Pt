@@ -60,11 +60,17 @@ class ImagePaint : public PaintContext
         }
 
     protected:
-        virtual void onBeginPaint(const Gfx::Paint& paint) override;
+        virtual void onSetPainter(Painter& painter) override;
+
+        virtual void onReleasePainter(Painter& painter) override;
+
+        virtual void onSetCanvas(Canvas& canvas) override;
+
+        virtual void onReleaseCanvas(Canvas& canvas) override;
+
+        virtual void onBeginPaint(const Paint& paint) override;
 
         virtual void onFinishPaint() override;
-
-        virtual void onResetPaint() override;
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
@@ -124,6 +130,7 @@ class ImagePaint : public PaintContext
     
     private:
         ImageCanvas*   _canvas;
+        bool           _invalid;
         Gfx::Scaling   _scaling;
         Pen            _pen;
 };

@@ -145,6 +145,8 @@ class PT_GFX_API Paint
 */
 class PT_GFX_API PaintContext
 {
+    friend class Canvas;
+
     public:
         virtual ~PaintContext();
 
@@ -154,18 +156,38 @@ class PT_GFX_API PaintContext
 
         void setRegion(const RectF& r);
 
+
+        Canvas* canvas();
+
+        const Canvas* canvas() const;
+
+        void setCanvas(Canvas& canvas);
+
+        void releaseCanvas();
+
+        
+        void setPainter(Painter& painter);
+
+        void releasePainter();
+
+
+     public:
         void beginPaint(const Paint& paint);
 
         void finishPaint();
 
-        void reset();
-
     protected:
+        virtual void onSetPainter(Painter& painter) = 0;
+
+        virtual void onReleasePainter(Painter& painter) = 0;
+
+        virtual void onSetCanvas(Canvas& canvas) = 0;
+
+        virtual void onReleaseCanvas(Canvas& canvas) = 0;
+
         virtual void onBeginPaint(const Paint& paint) = 0;
 
         virtual void onFinishPaint() = 0;
-
-        virtual void onResetPaint() = 0;
         
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
@@ -274,6 +296,11 @@ class PT_GFX_API PaintContext
         PaintContext();
 
     private:
+        void onDetachCanvas(Canvas& canvas);
+
+    private:
+        Canvas*        _canvas = 0;
+        Painter*       _painter = 0;
         RectF          _region;
         Gfx::Scaling   _scaling;
 };
@@ -282,15 +309,15 @@ class PT_GFX_API PaintContext
 class PaintContextPtr
 {
     friend class Canvas;
+    friend class PaintSurface;
+    friend class PaintRegion;
 
     struct MoveRef
     {
-        Canvas*       canvas;
         PaintContext* paint;
     
-        explicit MoveRef(Canvas* c, PaintContext* p)
-        : canvas(c)
-        , paint(p)
+        explicit MoveRef(PaintContext* p)
+        : paint(p)
         { }
     };
 
@@ -315,11 +342,6 @@ class PaintContextPtr
           return _paint;
         }
 
-        const Canvas* canvas() const
-        {
-          return _canvas;
-        }
-
         operator bool() const
         { 
             return _paint != 0; 
@@ -335,21 +357,14 @@ class PaintContextPtr
             return _paint;
         }
 
-        PaintContext* release();
-
-        void reset();
-
     private:
-        PaintContextPtr(Canvas& canvas, PaintContext* paint);
+        explicit PaintContextPtr(PaintContext* paint);
 
         PaintContextPtr(PaintContextPtr& p);
   
         PaintContextPtr& operator =(PaintContextPtr& p);
 
-        void onDetachCanvas(Canvas& canvas);
-
     private:
-        Canvas*       _canvas;
         PaintContext* _paint;
 };
 

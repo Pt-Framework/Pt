@@ -52,8 +52,9 @@ namespace Gfx {
 
 ImagePaint::ImagePaint(ImageCanvas& canvas)
 : _canvas(&canvas)
+, _invalid(false)
 {
-    _scaling = canvas.scaling();
+    setCanvas(canvas);
 }
 
 
@@ -65,12 +66,47 @@ ImagePaint::~ImagePaint()
 void ImagePaint::reset(ImageCanvas& canvas)
 {
     _canvas = &canvas;
-    _scaling = canvas.scaling();
+    setCanvas(canvas);
+}
+
+
+void ImagePaint::onSetPainter(Gfx::Painter& painter)
+{
+    _invalid = true;
+}
+
+
+void ImagePaint::onReleasePainter(Gfx::Painter& painter)
+{
+}
+
+
+void ImagePaint::onSetCanvas(Gfx::Canvas& canvas)
+{
+   const Gfx::Scaling& scaling = canvas.scaling();
+    if(_scaling != scaling)
+    {
+        _scaling = scaling;
+        _invalid = true;
+    }
+}
+
+
+void ImagePaint::onReleaseCanvas(Gfx::Canvas& canvas)
+{
+    _canvas = 0;
 }
 
 
 void ImagePaint::onBeginPaint(const Gfx::Paint& paint)
 {
+    if(_invalid)
+    {
+        updatePen( paint.pen() );
+
+        _invalid = false;
+    }
+
     if(_canvas)
     {
         _canvas->setCompositionMode( paint.compositionMode() );
@@ -89,12 +125,6 @@ void ImagePaint::onBeginPaint(const Gfx::Paint& paint)
 
 void ImagePaint::onFinishPaint()
 {
-}
-
-
-void ImagePaint::onResetPaint()
-{
-    _canvas = 0;
 }
 
 

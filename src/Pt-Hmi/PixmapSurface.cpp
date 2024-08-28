@@ -111,6 +111,14 @@ Gfx::PaintContextPtr PixmapSurface::onBeginPaint(Gfx::PaintContext* context)
     return _impl->beginPaint(context);
 }
 
+/*
+Gfx::PaintContext* PixmapSurface::onBeginPaint(Gfx::PaintContext* context)
+{
+    PaintDevice* device = ...;
+
+    device->setCanvas
+}
+*/
 
 Gfx::Image PixmapSurface::onGetImage() const
 {
