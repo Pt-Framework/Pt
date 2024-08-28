@@ -41,7 +41,7 @@
 
 #include <Windows.h>
 
-#define PT_HMI_WIN32_RASTER 1
+//#define PT_HMI_WIN32_RASTER 1
 
 namespace Pt {
 
