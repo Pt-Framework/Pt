@@ -55,7 +55,7 @@ void Canvas::attachPaint(PaintContext& paint)
 {
     if(_paint)
     {
-        onFinishPaint();
+        onReleasePaint();
         _paint->onDetachCanvas(*this);
         _paint = 0;
     }
@@ -68,7 +68,7 @@ void Canvas::detachPaint(PaintContext& paint)
 {
     if(_paint)
     {
-        onFinishPaint();
+        onReleasePaint();
         _paint = 0;
     }
 }
@@ -88,49 +88,59 @@ const Gfx::SizeF& Canvas::size() const
 
 const Scaling& Canvas::scaling() const
 {
-    return _surface->scaling();
+    return onGetScaling();
 }
 
 
-PaintContextPtr Canvas::beginPaint(Gfx::PaintContext* context)
+bool Canvas::beginPaint(Gfx::PaintContext* context,
+                        const Gfx::Paint& paint)
 {
-    PaintContext* paintDevice = onBeginPaint(context);
-    paintDevice->setCanvas(*this);
-    return PaintContextPtr(paintDevice);
+    if(_paint)
+    {
+        onReleasePaint();
+        _paint->onDetachCanvas(*this);
+        _paint = 0;
+    }
+
+    if( context->scaling() != scaling() )
+        return false;
+
+    bool isActive = onBeginPaint(context, paint);
+    if(isActive)
+        context->setCanvas(*this);
+    
+    return isActive;
 }
 
 
-//void Canvas::drawSurface(const Gfx::PointF& to, 
-//                         const Gfx::PaintSurface& surface)
-//{
-//    Pt::Gfx::Image image = surface.toImage();
-//    if( image.format() == format() )
-//    {
-//        drawImage(to, image);
-//        return;
-//    }
-//
-//    Pt::Gfx::Image dest( format(), image.size() );
-//    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-//    drawImage(to, dest);
-//}
-//
-//
-//void Canvas::drawSurface(const Gfx::PointF& to,
-//                         const Gfx::PaintSurface& surface,
-//                         const Gfx::RectF& rect)
-//{
-//    Pt::Gfx::Image image = surface.toImage();
-//    if( image.format() == format() )
-//    {
-//        drawImage(to, image, rect);
-//        return;
-//    }
-//
-//    Pt::Gfx::Image dest( format(), image.size() );
-//    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-//    drawImage(to, dest, rect);
-//}
+PaintContextPtr Canvas::beginPaint(const Gfx::Paint& paint)
+{
+    if(_paint)
+    {
+        onReleasePaint();
+        _paint->onDetachCanvas(*this);
+        _paint = 0;
+    }
+
+    Gfx::PaintContext* context = onBeginPaint(paint);
+    if(context)
+    {
+        context->setCanvas(*this);
+
+        context->setCompositionMode( paint.compositionMode() );
+        context->setPen( paint.pen() );
+        context->setBrush( paint.brush() );
+        context->setFont( paint.font() );
+
+        const Gfx::RectF& clip = paint.clip();
+        if( clip.isNull() )
+            context->resetClip();
+        else
+            context->setClip(clip);
+    }
+
+    return PaintContextPtr(context);
+}
 
 } // namespace
 

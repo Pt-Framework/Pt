@@ -47,7 +47,6 @@ class PaintContext;
 class PT_GFX_API Canvas
 {
     friend class PaintContext;
-    friend class PaintContextPtr;
 
     public:
         explicit Canvas(PaintSurface& surface);
@@ -60,12 +59,70 @@ class PT_GFX_API Canvas
 
         const Scaling& scaling() const;
 
-        PaintContextPtr beginPaint(Gfx::PaintContext* context);
+        bool beginPaint(Gfx::PaintContext* context,
+                        const Gfx::Paint& paint);
+
+        PaintContextPtr beginPaint(const Gfx::Paint& paint);
 
     protected:
-        virtual PaintContext* onBeginPaint(Gfx::PaintContext* context) = 0;
+        virtual const Scaling& onGetScaling() const = 0;
 
-        virtual void onFinishPaint() = 0;
+        virtual bool onBeginPaint(PaintContext* context,
+                                  const Gfx::Paint& paint) = 0;
+
+        virtual PaintContext* onBeginPaint(const Gfx::Paint& paint) = 0;
+
+        virtual void onReleasePaint() = 0;
+
+    protected:
+        virtual void setCompositionMode(const Gfx::CompositionMode& mode) = 0;
+
+        virtual void setPen(const Pen& pen) = 0;
+
+        virtual void setBrush(const Brush& brush) = 0;
+
+        virtual void setFont(const Gfx::Font& font) = 0;
+
+        virtual void setClip(const RectF& clip) = 0;
+
+        virtual void resetClip() = 0;
+
+    protected:
+        virtual void drawLine(const Line& line) = 0;
+
+        virtual void drawRect(const Gfx::RectF& rect) = 0;
+
+        virtual void fillRect(const Gfx::RectF& rect) = 0;
+
+        virtual void drawPolyline(const Gfx::Polyline& line) = 0;
+
+        virtual void fillPolygon(const Gfx::Polyline& line) = 0;
+        
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+    protected:
+        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const = 0;
+
+        virtual void drawText(const PointF& to, const Pt::String& text) = 0;
+
+        virtual void drawText(const PointF& to, const Pt::String& text, const Transform& t) = 0;
+
+    protected:
+        virtual void drawImage(const Gfx::PointF& to, 
+                               const Gfx::Image& image) = 0;
+
+        virtual void drawImage(const Gfx::PointF& to, 
+                               const Gfx::Image& image, 
+                               const Gfx::RectF& imgRect) = 0;
+
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const Gfx::PaintSurface& surface) = 0;
+
+        virtual void drawSurface(const Gfx::PointF& to,
+                                 const Gfx::PaintSurface& surface,
+                                 const Gfx::RectF& rect) = 0;
 
     private:
         void attachPaint(PaintContext& paint);

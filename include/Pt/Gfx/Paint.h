@@ -84,6 +84,17 @@ class Polyline;
 // rename PaintContxt -> PaintDevice
 // rename PaintContextPtr -> PaintContext
 
+
+/*
+  TODO:
+
+  drawLine in derived canvas should apply the necessary attribute
+  for the current begin/finsh paint session. then Canvas needs no
+  public apply* methods, but the NVI drawLine of canvas applies
+  the ccorrect attributes
+
+*/
+
 /** @brief Paint context.
 */
 
@@ -161,39 +172,10 @@ class PT_GFX_API PaintContext
 
         void setRegion(const RectF& r);
 
+        const Scaling& scaling() const;
 
-        Canvas* canvas();
+        void reset();
 
-        const Canvas* canvas() const;
-
-        void setCanvas(Canvas& canvas);
-
-        void releaseCanvas();
-
-        
-        void setPainter(Painter& painter);
-
-        void releasePainter();
-
-
-     public:
-        void beginPaint(const Paint& paint);
-
-        void finishPaint();
-
-    protected:
-        virtual void onSetPainter(Painter& painter) = 0;
-
-        virtual void onReleasePainter(Painter& painter) = 0;
-
-        virtual void onSetCanvas(Canvas& canvas) = 0;
-
-        virtual void onReleaseCanvas(Canvas& canvas) = 0;
-
-        virtual void onBeginPaint(const Paint& paint) = 0;
-
-        virtual void onFinishPaint() = 0;
-        
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
 
@@ -254,58 +236,20 @@ class PT_GFX_API PaintContext
         virtual void onSetFont(const Gfx::Font& font) = 0;
 
         virtual void onResetClip() = 0;
-
-        virtual void onSetClip(const RectF& clip) = 0;
-
-    protected:
-        virtual void onDrawLine(const Line& line) = 0;
-
-        virtual void onDrawPolyline(const Polyline& line) = 0;
-
-        virtual void onFillPolygon(const Polyline& line) = 0;
-
-        virtual void onDrawRect(const Gfx::RectF& rectangle) = 0;
-
-        virtual void onFillRect(const Gfx::RectF& rectangle) = 0;
-
-        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
-                                   const Gfx::SizeF& size) = 0;
-
-        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
-                                   const Gfx::SizeF& size) = 0;
         
-    protected:
-        virtual FontMetrics onGetFontMetrics(const Pt::String& text) const = 0;
-
-        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text) = 0;
-
-        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
-                                const Gfx::Transform& trans) = 0;
-
-    protected:
-        virtual void onDrawImage(const Gfx::PointF& to, 
-                                 const Gfx::Image& image) = 0;
-
-        virtual void onDrawImage(const Gfx::PointF& to, 
-                                 const Gfx::Image& image, 
-                                 const Gfx::RectF& imgRect) = 0;
-
-        virtual void onDrawSurface(const Gfx::PointF& to, 
-                                   const Gfx::PaintSurface& surface) = 0;
-
-        virtual void onDrawSurface(const Gfx::PointF& to,
-                                   const Gfx::PaintSurface& surface,
-                                   const Gfx::RectF& rect) = 0;
+        virtual void onSetClip(const RectF& clip) = 0;
 
     protected:
         PaintContext();
 
     private:
+        void setCanvas(Canvas& canvas);
+
         void onDetachCanvas(Canvas& canvas);
 
     private:
-        Canvas*        _canvas = 0;
-        Painter*       _painter = 0;
+        Canvas*        _canvas;
+        const Paint*   _paint = 0;
         RectF          _region;
         Gfx::Scaling   _scaling;
 };
@@ -388,12 +332,14 @@ class Line
 
         Gfx::PointF from() const
         {
-            return _from + _paint.origin();
+            Gfx::PointF p = _from + _paint.origin();
+            return _paint.scaling().toPhysical(p);
         }
 
         Gfx::PointF to() const
         {
-            return _to + _paint.origin();
+            Gfx::PointF p = _to + _paint.origin();
+            return _paint.scaling().toPhysical(p);
         }
 
     private:

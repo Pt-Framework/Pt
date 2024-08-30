@@ -78,7 +78,7 @@ void PixmapSurface::clear(const Gfx::Color& c)
 
 void PixmapSurface::setScaleFactor(double scaling)
 {
-    if(_impl->scaling().scaleFactor() == scaling)
+    if(_impl->surfaceScaling().scaleFactor() == scaling)
         return;
 
     _impl->setScaleFactor(scaling);
@@ -108,23 +108,21 @@ const Gfx::SizeF& PixmapSurface::onGetSize() const
 
 const Gfx::Scaling& PixmapSurface::onGetScaling() const
 {
-    return _impl->scaling();
+    return _impl->surfaceScaling();
 }
 
 
-Gfx::PaintContextPtr PixmapSurface::onBeginPaint(Gfx::PaintContext* context)
+bool PixmapSurface::onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint)
 {
-    return _impl->beginPaint(context);
+    return _impl->beginPaint(context, paint);
 }
 
-/*
-Gfx::PaintContext* PixmapSurface::onBeginPaint(Gfx::PaintContext* context)
+
+Gfx::PaintContextPtr PixmapSurface::onBeginPaint(const Gfx::Paint& paint)
 {
-    PaintDevice* device = ...;
-
-    device->setCanvas
+    return _impl->beginPaint(paint);
 }
-*/
+
 
 Gfx::Image PixmapSurface::onGetImage() const
 {

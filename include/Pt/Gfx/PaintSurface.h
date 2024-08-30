@@ -69,20 +69,24 @@ class PT_GFX_API PaintSurface
 
         Image toImage() const;
 
-        PaintContextPtr beginPaint(PaintContext* context);
-
         const Canvas* canvas() const;
+
+        bool beginPaint(PaintContext* context, const Gfx::Paint& paint);
+
+        PaintContextPtr beginPaint(const Gfx::Paint& paint);
 
     protected:
         virtual const Canvas* onGetCanvas() const = 0;   
+
+        virtual bool onBeginPaint(PaintContext* context, const Gfx::Paint& paint) = 0;
+
+        virtual PaintContextPtr onBeginPaint(const Gfx::Paint& paint) = 0;
 
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
         virtual const Gfx::SizeF& onGetSize() const = 0;
 
         virtual const Scaling& onGetScaling() const = 0;
-
-        virtual PaintContextPtr onBeginPaint(PaintContext* context) = 0;
 
         virtual void onReset();
 

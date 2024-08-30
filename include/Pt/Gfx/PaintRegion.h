@@ -68,13 +68,15 @@ class PT_GFX_API PaintRegion : public PaintSurface
     protected:
         virtual const Canvas* onGetCanvas() const override;
 
+        virtual bool onBeginPaint(PaintContext* context, const Gfx::Paint& paint) override;
+
+        virtual PaintContextPtr onBeginPaint(const Gfx::Paint& paint) override;
+
         virtual const Gfx::ImageFormat& onGetFormat() const override;
 
         virtual const Gfx::SizeF& onGetSize() const override;
 
         virtual const Gfx::Scaling& onGetScaling() const override;
-
-        virtual PaintContextPtr onBeginPaint(Gfx::PaintContext* context) override;
 
         virtual void onReset();
 

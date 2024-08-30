@@ -66,24 +66,32 @@ void Painter::begin(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
    
-    PaintContext* reuse = _paintContext.get();
-    _paintContext = surface.beginPaint(reuse);
-          
+   /*
+       Get Canvas from Surface and keep region in canvas. Begin painting
+       on the canvas instead of delegating through surface. Painter uses
+       Canvas directly instead of delegating through PaintContext.
+       PaintContext only maintains native paint attributes.
+   */
     if(_paintContext)
     {
-        _paintContext->setPainter(*this);
-        _paintContext->beginPaint(_paint);
-    }
+        PaintContext* reuse = _paintContext.get();
+        bool isActive = surface.beginPaint(reuse, _paint);
+        if( ! isActive )
+        {
+            _paintContext = surface.beginPaint(_paint);
+        }
+   }
+   else
+   {
+      _paintContext = surface.beginPaint(_paint);
+   }
 }
 
 
 void Painter::finish()
 {
     if(_paintContext)
-    {
-        _paintContext->finishPaint();
-        _paintContext->releaseCanvas();
-    }
+        _paintContext->reset();
 
     if( _surface )
     {

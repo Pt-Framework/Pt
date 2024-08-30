@@ -75,7 +75,7 @@ class PixmapSurfaceImpl
             return _image.size();
         }
 
-        const Gfx::Scaling& scaling() const
+        const Gfx::Scaling& surfaceScaling() const
         {
             return _image.scaling();
         }
@@ -100,9 +100,14 @@ class PixmapSurfaceImpl
             return _image.toImage();
         }
 
-        Gfx::PaintContextPtr beginPaint(Gfx::PaintContext* context)
+        bool beginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint)
         {
-            return _image.beginPaint(context);
+            return _image.beginPaint(context, paint);
+        }
+
+        Gfx::PaintContextPtr beginPaint(const Gfx::Paint& paint)
+        {
+            return _image.beginPaint(paint);
         }
 
         const Gfx::ImageSurface& imageSurface() const
@@ -153,11 +158,11 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         
         void setScaleFactor(double scaleFactor);
 
+        const Gfx::Scaling& surfaceScaling() const;
+
         const Gfx::ImageFormat& format() const;
         
         const Gfx::SizeF& size() const;
-
-        const Gfx::Scaling& scaling() const;
 
         const Canvas* canvas() const
         { 
@@ -165,12 +170,17 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         }
     
     protected:
-        virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* context) override;
+        virtual const Gfx::Scaling& onGetScaling() const override;
 
-        virtual void onFinishPaint() override;
+        virtual bool onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint) override;
+
+        Gfx::PaintContext* onBeginPaint(const Gfx::Paint& paint) override;
+
+        virtual void onReleasePaint() override;
+
 
     public:
-        void setCompositionMode(const Gfx::CompositionMode& mode);
+        void setCompositionMode(const PaintData& paint);
 
         void setPen(const PaintData& paint);
 
@@ -181,24 +191,31 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         void setClip(const PaintData* paint);
 
     public:
-        void drawLine(const Gfx::Line& line);
+        void setCompositionMode(const Gfx::CompositionMode& mode) override;
+
+        void setPen(const Gfx::Pen& pen) override;
+
+        void setBrush(const Gfx::Brush& brush) override;
+
+        void setFont(const Gfx::Font& font);
+
+        void setClip(const Gfx::RectF& clip) override;
+
+        void resetClip() override;
+
+    public:
+        void drawLine(const Gfx::Line& line) override;
+
+        void drawRect(const Gfx::RectF& rect) override;
+
+        void fillRect(const Gfx::RectF& rect) override;
+
 
         void drawPolyline(const Gfx::Polyline& line);
 
         void fillPolygon(const Gfx::Polyline& line);
 
         Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-    public:
-        //void setPen(const Gfx::Pen& pen);
-
-        //void setBrush(const Gfx::Brush& brush);
-
-        //void setClip(const Gfx::RectF& clip);
-
-        //void resetClip();
-
-        //void setFont(const Gfx::Font& font);
 
         void drawText(const Gfx::PointF& to, const Pt::String& text)
         {
@@ -209,9 +226,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         void drawText(const Gfx::PointF& to, const Pt::String& text, 
                       const Gfx::Transform& trans);
    
-        void drawRect(const Gfx::RectF& rect);
 
-        void fillRect(const Gfx::RectF& rect);
 
         void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
@@ -288,6 +303,8 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         HFONT          _oldFont;
         HBITMAP        _oldBitmap;
         std::wstring   _text;
+
+        PaintData*                _paint;
 
         Gfx::Color                _penColor;
 

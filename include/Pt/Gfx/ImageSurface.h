@@ -48,11 +48,9 @@ class ImageCanvas;
 class ImagePaint : public PaintContext
 {
     public:
-        ImagePaint(ImageCanvas& canvas);
+        ImagePaint();
 
         ~ImagePaint();
-
-        void reset(ImageCanvas& canvas);
 
         const Pen& pen() const
         {
@@ -60,77 +58,22 @@ class ImagePaint : public PaintContext
         }
 
     protected:
-        virtual void onSetPainter(Painter& painter) override;
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
 
-        virtual void onReleasePainter(Painter& painter) override;
+        virtual void onSetPen(const Gfx::Pen& pen) override;
 
-        virtual void onSetCanvas(Canvas& canvas) override;
+        virtual void onSetBrush(const Gfx::Brush& brush) override;
 
-        virtual void onReleaseCanvas(Canvas& canvas) override;
+        virtual void onSetFont(const Gfx::Font& font) override;
 
-        virtual void onBeginPaint(const Paint& paint) override;
+        virtual void onSetClip(const Gfx::RectF& rectF) override;
 
-        virtual void onFinishPaint() override;
+        virtual void onResetClip() override;
 
-    protected:
-        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode);
-
-        virtual void onSetPen(const Gfx::Pen& pen);
-
-        virtual void onSetBrush(const Gfx::Brush& brush);
-
-        virtual void onSetFont(const Gfx::Font& font);
-
-        virtual void onSetClip(const Gfx::RectF& rectF);
-
-        virtual void onResetClip();
-
-    protected:
-        virtual void onDrawLine(const Gfx::Line& line) override;
-
-        virtual void onDrawPolyline(const Gfx::Polyline& line) override;
-
-        virtual void onFillPolygon(const Gfx::Polyline& line) override;
-
-        virtual void onDrawRect(const Gfx::RectF& rectangle) override;
-
-        virtual void onFillRect(const Gfx::RectF& rectangle) override;
-
-        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
-                                   const Gfx::SizeF& size) override;
-
-        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
-                                   const Gfx::SizeF& size) override;
-
-    protected:
-        virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
-
-        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text) override;
-
-        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
-                                const Gfx::Transform& trans) override;
-
-    protected:
-        virtual void onDrawImage(const Gfx::PointF& to, 
-                                 const Gfx::Image& image) override;
-
-        virtual void onDrawImage(const Gfx::PointF& to, 
-                                 const Gfx::Image& image, 
-                                 const Gfx::RectF& imgRect) override;
-
-        virtual void onDrawSurface(const Gfx::PointF& to, 
-                                   const Gfx::PaintSurface& surface) override;
-
-        virtual void onDrawSurface(const Gfx::PointF& to,
-                                   const Gfx::PaintSurface& surface,
-                                   const Gfx::RectF& rect) override;
-
-    private:
+    public:
         void updatePen(const Gfx::Pen& pen);
     
     private:
-        ImageCanvas*   _canvas;
-        bool           _invalid;
         Gfx::Scaling   _scaling;
         Pen            _pen;
 };
@@ -162,26 +105,29 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     const Gfx::SizeF& size() const;
 
-    const Scaling& scaling() const;
-
   protected:
-    virtual PaintContext* onBeginPaint(Gfx::PaintContext* context) override;
+    virtual const Gfx::Scaling& onGetScaling() const override;
 
-    virtual void onFinishPaint() override;
+    virtual bool onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint) override;
+
+    Gfx::PaintContext* onBeginPaint(const Gfx::Paint& paint) override;
+
+    virtual void onReleasePaint() override;
   
   public:
-    virtual void setClip(const Gfx::RectF& clip);
-
-    virtual void resetClip();
-
     virtual void setCompositionMode(const Gfx::CompositionMode& mode);
 
-    //virtual void setPen(const Gfx::Pen& pen);
+    virtual void setPen(const Gfx::Pen& pen);
 
     virtual void setBrush(const Gfx::Brush& brush);
 
     virtual void setFont(const Gfx::Font& font);
 
+    virtual void setClip(const Gfx::RectF& clip);
+
+    virtual void resetClip();
+
+  public:
     virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
     virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
@@ -232,6 +178,7 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
   private:
     Rasterizer*   _rasterizer;
+    ImagePaint*   _paint;
     Scaling       _scaling;
     SizeF         _size;
 };
@@ -264,13 +211,15 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
   protected:
     virtual const Canvas* onGetCanvas() const override;
 
+    virtual bool onBeginPaint(PaintContext* context, const Gfx::Paint& paint) override;
+
+    virtual PaintContextPtr onBeginPaint(const Gfx::Paint& paint) override;
+
     virtual const Gfx::ImageFormat& onGetFormat() const override;
 
     virtual const Gfx::SizeF& onGetSize() const override;
 
     virtual const Scaling& onGetScaling() const override;
-
-    virtual PaintContextPtr onBeginPaint(Gfx::PaintContext* context) override;
 
     virtual Image onGetImage() const override;
 

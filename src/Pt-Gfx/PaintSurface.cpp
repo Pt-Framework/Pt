@@ -117,9 +117,15 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-PaintContextPtr PaintSurface::beginPaint(PaintContext* context)
+bool PaintSurface::beginPaint(PaintContext* context, const Gfx::Paint& paint)
 {
-    return onBeginPaint(context);
+    return onBeginPaint(context, paint);
+}
+
+
+PaintContextPtr PaintSurface::beginPaint(const Gfx::Paint& paint)
+{
+    return onBeginPaint(paint);
 }
 
 

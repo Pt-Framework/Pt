@@ -164,10 +164,8 @@ namespace Hmi {
 
 #ifndef PT_HMI_WIN32_RASTER
 
-PaintData::PaintData(PixmapSurfaceImpl& canvas)
+PaintData::PaintData()
 : Gfx::PaintContext()
-, _canvas(&canvas)
-, _invalid(false)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _pen(0)
 , _penColor()
@@ -176,7 +174,6 @@ PaintData::PaintData(PixmapSurfaceImpl& canvas)
 , _clipRect(0)
 , _font(0)
 {
-    setCanvas(canvas);
 }
 
 
@@ -196,80 +193,18 @@ PaintData::~PaintData()
 }
 
 
-void PaintData::reset(PixmapSurfaceImpl& canvas)
+
+const Gfx::CompositionMode& PaintData::compositionMode() const
 {
-    _canvas = &canvas;
-    setCanvas(canvas);
+    return _compositionMode;
 }
-
-
-void PaintData::onSetPainter(Gfx::Painter& painter)
-{
-    _invalid = true;
-}
-
-
-void PaintData::onReleasePainter(Gfx::Painter& painter)
-{
-}
-
-
-void PaintData::onSetCanvas(Gfx::Canvas& canvas)
-{
-   const Gfx::Scaling& scaling = canvas.scaling();
-    if(_scaling != scaling)
-    {
-        _scaling = scaling;
-        _invalid = true;
-    }
-}
-
-
-void PaintData::onReleaseCanvas(Gfx::Canvas& canvas)
-{
-    _canvas = 0;
-}
-
-
-void PaintData::onBeginPaint(const Gfx::Paint& paint)
-{
-    if(_invalid)
-    {
-        updateMode( paint.compositionMode() );
-        updatePen( paint.pen() );
-        updateBrush( paint.brush() );
-        updateFont( paint.font() );
-
-        const Gfx::RectF& clip = paint.clip();
-        updateClip( clip.isNull() ? 0 : &clip );
-
-        _invalid = false;
-    }
-
-    if(_canvas)
-    {
-        _canvas->setCompositionMode(_compositionMode);
-        _canvas->setPen(*this);
-        _canvas->setBrush(*this, paint.brush());
-        _canvas->setFont(*this);
-
-        const Gfx::RectF& clip = paint.clip();
-        _canvas->setClip( clip.isNull() ? 0 : this );
-    }
-}
-
-
-void PaintData::onFinishPaint()
-{
-}
-
 
 void PaintData::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
     updateMode(mode);
 
-    if(_canvas)
-        _canvas->setCompositionMode(mode);
+    //if(_canvas)
+    //    _canvas->setCompositionMode(mode);
 }
 
 
@@ -295,15 +230,14 @@ void PaintData::onSetPen(const Gfx::Pen& pen)
 {
     updatePen(pen);
 
-    if(_canvas)
-        _canvas->setPen(*this);
+    //if(_canvas)
+    //    _canvas->setPen(*this);
 }
 
 
 void PaintData::updatePen(const Gfx::Pen& pen)
 {
-    double scaledSize = _canvas ? _canvas->scaling().toPhysical( pen.size() )
-                                : 1.0;
+    double scaledSize = scaling().toPhysical( pen.size() );
 
     // keep pen size when downscaling
     size_t penSize = scaledSize < 1.0 ? 1 
@@ -351,8 +285,8 @@ void PaintData::onSetBrush(const Gfx::Brush& brush)
 {
     updateBrush(brush);
 
-    if(_canvas)
-        _canvas->setBrush(*this, brush);
+    //if(_canvas)
+    //    _canvas->setBrush(*this, brush);
 }
 
 
@@ -441,8 +375,8 @@ void PaintData::onSetFont(const Gfx::Font& font)
 {
     updateFont(font);
 
-    if(_canvas)
-        _canvas->setFont(*this);
+    //if(_canvas)
+    //    _canvas->setFont(*this);
 }
 
 
@@ -468,8 +402,8 @@ void PaintData::onSetClip(const Gfx::RectF& rectF)
 {
     updateClip(&rectF);
 
-    if(_canvas)
-        _canvas->setClip(this);
+    //if(_canvas)
+    //    _canvas->setClip(this);
 }
 
 
@@ -477,8 +411,8 @@ void PaintData::onResetClip()
 {
     updateClip(0);
 
-    if(_canvas)
-        _canvas->setClip(0);
+    //if(_canvas)
+    //    _canvas->setClip(0);
 }
 
 
@@ -493,151 +427,13 @@ void PaintData::updateClip(const Gfx::RectF* rectF)
     if( ! rectF )
         return;
                                                        
-    Gfx::Rect rect = _canvas ? round( _canvas->scaling().toPhysical(*rectF) )
-                             : round(*rectF);
-
+    Gfx::Rect rect = round( scaling().toPhysical(*rectF) );
+                            
     // CreateRectRgn only includes the interior of the rect
     _clipRect = CreateRectRgn( rect.x(), 
                                rect.y(), 
                                rect.bottomRight().x(), 
                                rect.bottomRight().y() );
-}
-
-
-void PaintData::onDrawLine(const Gfx::Line& line)
-{
-    if(_canvas)
-    {
-        _canvas->drawLine(line);
-    }
-}
-
-
-void PaintData::onDrawPolyline(const Gfx::Polyline& line)
-{
-    if(_canvas)
-    {
-        _canvas->drawPolyline(line);
-    }
-}
-
-
-void PaintData::onFillPolygon(const Gfx::Polyline& line)
-{
-    if(_canvas)
-    {
-        _canvas->fillPolygon(line);
-    }
-}
-
-
-void PaintData::onDrawRect(const Gfx::RectF& rect)
-{
-    if(_canvas)
-    {
-        _canvas->drawRect(rect);
-    }
-}
-
-
-void PaintData::onFillRect(const Gfx::RectF& rect)
-{
-    if(_canvas)
-    {
-        _canvas->fillRect(rect);
-    }
-}
-
-
-void PaintData::onDrawEllipse(const Gfx::PointF& topLeft, 
-                              const Gfx::SizeF& size)
-{
-    if(_canvas)
-    {
-        _canvas->drawEllipse(topLeft, size);
-    }
-}
-
-
-void PaintData::onFillEllipse(const Gfx::PointF& topLeft, 
-                              const Gfx::SizeF& size)
-{
-    if(_canvas)
-    {
-        _canvas->fillEllipse(topLeft, size);
-    }
-}
-
-
-Gfx::FontMetrics PaintData::onGetFontMetrics(const Pt::String& text) const
-{
-    if(_canvas)
-    {
-        return _canvas->fontMetrics(text);
-    }
-
-    return Gfx::FontMetrics();
-}
-
-
-void PaintData::onDrawText(const Gfx::PointF& to, const Pt::String& text)
-{
-    if(_canvas)
-    {
-        _canvas->drawText(to, text);
-    }
-}
-
-
-void PaintData::onDrawText(const Gfx::PointF& to, const Pt::String& text, 
-                           const Gfx::Transform& tf)
-{
-    if(_canvas)
-    {
-        _canvas->drawText(to, text, tf);
-    }
-}
-
-
-void PaintData::onDrawImage(const Gfx::PointF& to, 
-                            const Gfx::Image& image)
-{
-    if(_canvas)
-    {
-        _canvas->drawImage(to, image);
-    }
-}
-
-
-void PaintData::onDrawImage(const Gfx::PointF& to, 
-                            const Gfx::Image& image, 
-                            const Gfx::RectF& rect)
-{
-    if(_canvas)
-    {
-        _canvas->drawImage(to, image, rect);
-    }
-}
-
-
-void PaintData::onDrawSurface(const Gfx::PointF& to, 
-                              const Gfx::PaintSurface& surface)
-{
-    if( ! _canvas)
-        return;
-
-    _canvas->drawSurface(to, surface);
-}
-
-
-void PaintData::onDrawSurface(const Gfx::PointF& to,
-                              const Gfx::PaintSurface& surface,
-                              const Gfx::RectF& rect)
-{
-    if( ! _canvas)
-        return;
-
-    _canvas->drawSurface(to, surface, rect);
 }
 
 #endif

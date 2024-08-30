@@ -50,11 +50,8 @@ namespace Gfx {
 // ImageSurface
 ///////////////////////////////////////////////////////////////////////
 
-ImagePaint::ImagePaint(ImageCanvas& canvas)
-: _canvas(&canvas)
-, _invalid(false)
+ImagePaint::ImagePaint()
 {
-    setCanvas(canvas);
 }
 
 
@@ -63,91 +60,20 @@ ImagePaint::~ImagePaint()
 }
 
 
-void ImagePaint::reset(ImageCanvas& canvas)
-{
-    _canvas = &canvas;
-    setCanvas(canvas);
-}
-
-
-void ImagePaint::onSetPainter(Gfx::Painter& painter)
-{
-    _invalid = true;
-}
-
-
-void ImagePaint::onReleasePainter(Gfx::Painter& painter)
-{
-}
-
-
-void ImagePaint::onSetCanvas(Gfx::Canvas& canvas)
-{
-   const Gfx::Scaling& scaling = canvas.scaling();
-    if(_scaling != scaling)
-    {
-        _scaling = scaling;
-        _invalid = true;
-    }
-}
-
-
-void ImagePaint::onReleaseCanvas(Gfx::Canvas& canvas)
-{
-    _canvas = 0;
-}
-
-
-void ImagePaint::onBeginPaint(const Gfx::Paint& paint)
-{
-    if(_invalid)
-    {
-        updatePen( paint.pen() );
-
-        _invalid = false;
-    }
-
-    if(_canvas)
-    {
-        _canvas->setCompositionMode( paint.compositionMode() );
-        _canvas->setPen(*this);
-        _canvas->setBrush( paint.brush() );
-        _canvas->setFont( paint.font() );
-
-        const Gfx::RectF& clip = paint.clip();
-        if( clip.isNull() )
-            _canvas->resetClip();
-        else
-            _canvas->setClip(clip);
-    }
-}
-
-
-void ImagePaint::onFinishPaint()
-{
-}
-
-
 void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
-    if(_canvas)
-        _canvas->setCompositionMode(mode);
 }
 
 
 void ImagePaint::onSetPen(const Gfx::Pen& pen)
 {
     updatePen(pen);
-
-    if(_canvas)
-        _canvas->setPen(*this);
 }
 
 
 void ImagePaint::updatePen(const Gfx::Pen& pen)
 {
-    double scaledSize = _canvas ? _canvas->scaling().toPhysical( pen.size() )
-                                : 1.0;
+    double scaledSize = scaling().toPhysical( pen.size() );
 
     // keep pen size when downscaling
     size_t penSize = scaledSize < 1.0 ? 1 
@@ -160,167 +86,21 @@ void ImagePaint::updatePen(const Gfx::Pen& pen)
 
 void ImagePaint::onSetBrush(const Gfx::Brush& brush)
 {
-    if(_canvas)
-        _canvas->setBrush(brush);
 }
 
 
 void ImagePaint::onSetFont(const Gfx::Font& font)
 {
-    if(_canvas)
-        _canvas->setFont(font);
 }
 
 
 void ImagePaint::onSetClip(const Gfx::RectF& rectF)
 {
-    if(_canvas)
-        _canvas->setClip(rectF);
 }
 
 
 void ImagePaint::onResetClip()
 {
-    if(_canvas)
-        _canvas->resetClip();
-}
-
-
-void ImagePaint::onDrawLine(const Gfx::Line& line)
-{
-    if(_canvas)
-    {
-        _canvas->drawLine(line);
-    }
-}
-
-
-void ImagePaint::onDrawPolyline(const Gfx::Polyline& line)
-{
-    if(_canvas)
-    {
-        _canvas->drawPolyline(line);
-    }
-}
-
-
-void ImagePaint::onFillPolygon(const Gfx::Polyline& line)
-{
-    if(_canvas)
-    {
-        _canvas->fillPolygon(line);
-    }
-}
-
-
-
-void ImagePaint::onDrawRect(const Gfx::RectF& rect)
-{
-    if(_canvas)
-    {
-        _canvas->drawRect(rect);
-    }
-}
-
-
-void ImagePaint::onFillRect(const Gfx::RectF& rect)
-{
-    if(_canvas)
-    {
-        _canvas->fillRect(rect);
-    }
-}
-
-
-void ImagePaint::onDrawEllipse(const Gfx::PointF& topLeft, 
-                               const Gfx::SizeF& size)
-{
-    if(_canvas)
-    {
-        _canvas->drawEllipse(topLeft, size);
-    }
-}
-
-
-void ImagePaint::onFillEllipse(const Gfx::PointF& topLeft, 
-                               const Gfx::SizeF& size)
-{
-    if(_canvas)
-    {
-        _canvas->fillEllipse(topLeft, size);
-    }
-}
-
-
-Gfx::FontMetrics ImagePaint::onGetFontMetrics(const Pt::String& text) const
-{
-    if(_canvas)
-    {
-        return _canvas->fontMetrics(text);
-    }
-
-    return Gfx::FontMetrics();
-}
-
-
-void ImagePaint::onDrawText(const Gfx::PointF& to, const Pt::String& text)
-{
-    if(_canvas)
-    {
-        _canvas->drawText(to, text);
-    }
-}
-
-
-void ImagePaint::onDrawText(const Gfx::PointF& to, const Pt::String& text, 
-                           const Gfx::Transform& tf)
-{
-    if(_canvas)
-    {
-        _canvas->drawText(to, text, tf);
-    }
-}
-
-
-void ImagePaint::onDrawImage(const Gfx::PointF& to, 
-                            const Gfx::Image& image)
-{
-    if(_canvas)
-    {
-        _canvas->drawImage(to, image);
-    }
-}
-
-
-void ImagePaint::onDrawImage(const Gfx::PointF& to, 
-                            const Gfx::Image& image, 
-                            const Gfx::RectF& rect)
-{
-    if(_canvas)
-    {
-        _canvas->drawImage(to, image, rect);
-    }
-}
-
-
-void ImagePaint::onDrawSurface(const Gfx::PointF& to, 
-                               const Gfx::PaintSurface& surface)
-{
-    if( ! _canvas)
-        return;
-
-    _canvas->drawSurface(to, surface);
-}
-
-
-void ImagePaint::onDrawSurface(const Gfx::PointF& to,
-                               const Gfx::PaintSurface& surface,
-                               const Gfx::RectF& rect)
-{
-    if( ! _canvas)
-        return;
-
-    _canvas->drawSurface(to, surface, rect);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -330,6 +110,7 @@ void ImagePaint::onDrawSurface(const Gfx::PointF& to,
 ImageCanvas::ImageCanvas(PaintSurface& surface)
 : Canvas(surface)
 , _rasterizer(new Rasterizer)
+, _paint(0)
 {
 }
 
@@ -338,6 +119,7 @@ ImageCanvas::ImageCanvas(PaintSurface& surface,
                          const Gfx::Size& size, std::size_t stride)
 : Canvas(surface)
 , _rasterizer(new Rasterizer)
+, _paint(0)
 {
   _rasterizer->reset(size, stride);
 }
@@ -400,32 +182,83 @@ const Gfx::SizeF& ImageCanvas::size() const
 }
 
 
-const Scaling& ImageCanvas::scaling() const
+const Gfx::Scaling& ImageCanvas::onGetScaling() const
 {
     return _scaling;
 }
 
 
-PaintContext* ImageCanvas::onBeginPaint(Gfx::PaintContext* context)
+bool ImageCanvas::onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint)
 {
     ImagePaint* paintContext = dynamic_cast<ImagePaint*>(context);
     if( ! paintContext )
-        paintContext = new ImagePaint(*this);
+        return false;
 
-    paintContext->reset(*this);
+    _paint = paintContext;
+
+    setCompositionMode( paint.compositionMode() );
+    setPen(*paintContext);
+    setBrush(paint.brush());
+    setFont( paint.font() );
+    
+    const Gfx::RectF& clip = paint.clip();
+    if( clip.isNull() )
+        resetClip();
+    else
+        setClip(clip);
+
+    _paint = paintContext;
+    return true;
+}
+
+
+Gfx::PaintContext* ImageCanvas::onBeginPaint(const Gfx::Paint& paint)
+{
+    ImagePaint* paintContext = new ImagePaint();
+    
+    _paint = paintContext;
     return paintContext;
 }
 
 
-void ImageCanvas::onFinishPaint()
+void ImageCanvas::onReleasePaint()
 {
     //_rasterizer->finish();
+    _paint = 0;
 }
 
 
 void ImageCanvas::setCompositionMode(const CompositionMode& mode)
 {
   _rasterizer->setCompositionMode(mode);
+}
+
+
+void ImageCanvas::setPen(const Pen& pen)
+{
+    if( ! _paint )
+        return;
+
+    setPen(*_paint);
+}
+
+
+void ImageCanvas::setPen(const ImagePaint& paint)
+{
+    const Pen& p = paint.pen();
+    _rasterizer->setPen(p);
+}
+
+
+void ImageCanvas::setBrush(const Brush& brush)
+{
+    _rasterizer->setBrush(brush);
+}
+
+
+void ImageCanvas::setFont(const Font& font)
+{
+    _rasterizer->setFont(font);
 }
 
 
@@ -439,45 +272,6 @@ void ImageCanvas::setClip(const RectF& rect)
 void ImageCanvas::resetClip()
 {
   _rasterizer->resetClip();
-}
-
-
-void ImageCanvas::setPen(const ImagePaint& paint)
-{
-    const Pen& p = paint.pen();
-
-    _rasterizer->setPen(p);
-}
-
-
-//void ImageCanvas::setPen(const Pen& pen)
-//{
-//    const Pen& p = _paint->pen();
-//
-//  //double scaleFactor = _scaling.scaleFactor();
-//
-//  //// keep pen size when downscaling
-//  //double scaledSize = scaleFactor < 1.0 ? pen.size()
-//  //                                : scaleFactor * pen.size();
-//
-//  //size_t penSize = static_cast<size_t>(scaledSize);
-//
-//  //Gfx::Pen scaledPen = pen;
-//  //scaledPen.setSize(penSize);
-//
-//  _rasterizer->setPen(p) ;
-//}
-
-
-void ImageCanvas::setBrush(const Brush& brush)
-{
-  _rasterizer->setBrush(brush);
-}
-
-
-void ImageCanvas::setFont(const Font& font)
-{
-    _rasterizer->setFont(font);
 }
 
 
@@ -496,8 +290,10 @@ void ImageCanvas::drawLine(const PointF& from, const  PointF& to)
 
 void ImageCanvas::drawLine(const Gfx::Line& line)
 {
-    _rasterizer->drawLine( _scaling.toPhysical( line.from() ), 
-                           _scaling.toPhysical( line.to() ) );
+    //_rasterizer->drawLine( _scaling.toPhysical( line.from() ), 
+    //                       _scaling.toPhysical( line.to() ) );
+
+    _rasterizer->drawLine( line.from(), line.to() );
 }
 
 
@@ -808,9 +604,15 @@ const Scaling& ImageSurface::onGetScaling() const
 }
 
 
-PaintContextPtr ImageSurface::onBeginPaint(Gfx::PaintContext* context)
+bool ImageSurface::onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint)
 {
-    return _canvas->beginPaint(context);
+    return _canvas->beginPaint(context, paint);
+}
+
+
+PaintContextPtr ImageSurface::onBeginPaint(const Gfx::Paint& paint)
+{
+    return _canvas->beginPaint(paint);
 }
 
 
