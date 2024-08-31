@@ -37,13 +37,15 @@ namespace Gfx {
 
 Painter::Painter()
 : _surface(0)
+, _paintContext(0)
 {
 }
 
 
 Painter::Painter(PaintSurface& surface)
 : _surface(0)
-, _ref(0)
+, _paintContext(0)
+
 {
     begin(surface);
 }
@@ -56,6 +58,8 @@ Painter::~Painter()
         _surface->detachPainter(*this);
         _surface = 0;
     }
+
+    delete _paintContext;
 }
 
 
@@ -66,25 +70,11 @@ void Painter::begin(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
    
-   /*
-       Get Canvas from Surface and keep region in canvas. Begin painting
-       on the canvas instead of delegating through surface. Painter uses
-       Canvas directly instead of delegating through PaintContext.
-       PaintContext only maintains native paint attributes.
-   */
-    if(_paintContext)
-    {
-        PaintContext* reuse = _paintContext.get();
-        bool isActive = surface.beginPaint(reuse, _paint);
-        if( ! isActive )
-        {
-            _paintContext = surface.beginPaint(_paint);
-        }
-   }
-   else
-   {
-      _paintContext = surface.beginPaint(_paint);
-   }
+
+   PaintContext* reuse = _paintContext;
+   _paintContext = surface.beginPaint(_paint, reuse);
+   if(reuse != _paintContext)
+      delete reuse;
 }
 
 

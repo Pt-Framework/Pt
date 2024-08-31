@@ -59,10 +59,8 @@ class PT_GFX_API Canvas
 
         const Scaling& scaling() const;
 
-        bool beginPaint(Gfx::PaintContext* context,
-                        const Gfx::Paint& paint);
-
-        PaintContextPtr beginPaint(const Gfx::Paint& paint);
+        Gfx::PaintContext* beginPaint(const Gfx::Paint& paint,
+                                      Gfx::PaintContext* context);
 
     protected:
         virtual const Scaling& onGetScaling() const = 0;

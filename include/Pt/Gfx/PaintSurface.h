@@ -71,16 +71,16 @@ class PT_GFX_API PaintSurface
 
         const Canvas* canvas() const;
 
-        bool beginPaint(PaintContext* context, const Gfx::Paint& paint);
-
-        PaintContextPtr beginPaint(const Gfx::Paint& paint);
+        PaintContext* beginPaint(const Gfx::Paint& paint, PaintContext* context);
 
     protected:
-        virtual const Canvas* onGetCanvas() const = 0;   
+        void setCanvas(Canvas* canvas);
 
-        virtual bool onBeginPaint(PaintContext* context, const Gfx::Paint& paint) = 0;
-
-        virtual PaintContextPtr onBeginPaint(const Gfx::Paint& paint) = 0;
+    protected:
+        virtual const Canvas* onGetCanvas() const = 0;
+        
+        virtual PaintContext* onBeginPaint(const Gfx::Paint& paint, 
+                                           PaintContext* context);
 
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
@@ -103,8 +103,9 @@ class PT_GFX_API PaintSurface
         void detachPainter(Painter& painter);
 
     private:
-        Painter*                  _painter;
+        Canvas*                   _canvas;
         std::vector<PaintRegion*> _regions;
+        Painter*                  _painter;
 };
 
 } // namespace

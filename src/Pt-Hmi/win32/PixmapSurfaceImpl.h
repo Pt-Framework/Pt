@@ -164,6 +164,11 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         
         const Gfx::SizeF& size() const;
 
+        Canvas* canvas()
+        { 
+            return this;
+        }
+
         const Canvas* canvas() const
         { 
             return this;

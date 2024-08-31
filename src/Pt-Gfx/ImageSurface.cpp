@@ -520,6 +520,8 @@ ImageSurface::ImageSurface()
 {
     _canvas = new ImageCanvas(*this);
     _owner = _canvas;
+
+    setCanvas(_canvas);
 }
 
 
@@ -528,6 +530,8 @@ ImageSurface::ImageSurface(ImageCanvas& canvas)
 , _owner(0)
 {
     _canvas = &canvas;
+    
+    setCanvas(_canvas);
 }
 
 
@@ -537,6 +541,8 @@ ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
 {
     _canvas = new ImageCanvas(*this, size, stride);
     _owner = _canvas;
+    
+    setCanvas(_canvas);
 }
 
 
@@ -601,18 +607,6 @@ const Gfx::SizeF& ImageSurface::onGetSize() const
 const Scaling& ImageSurface::onGetScaling() const
 {
     return _scaling;
-}
-
-
-bool ImageSurface::onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint)
-{
-    return _canvas->beginPaint(context, paint);
-}
-
-
-PaintContextPtr ImageSurface::onBeginPaint(const Gfx::Paint& paint)
-{
-    return _canvas->beginPaint(paint);
 }
 
 

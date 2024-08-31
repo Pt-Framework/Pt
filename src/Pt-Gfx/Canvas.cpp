@@ -92,8 +92,7 @@ const Scaling& Canvas::scaling() const
 }
 
 
-bool Canvas::beginPaint(Gfx::PaintContext* context,
-                        const Gfx::Paint& paint)
+Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint, Gfx::PaintContext* reuse)
 {
     if(_paint)
     {
@@ -102,44 +101,45 @@ bool Canvas::beginPaint(Gfx::PaintContext* context,
         _paint = 0;
     }
 
-    if( context->scaling() != scaling() )
-        return false;
+    Gfx::PaintContext* context = reuse;
 
-    bool isActive = onBeginPaint(context, paint);
-    if(isActive)
-        context->setCanvas(*this);
-    
-    return isActive;
-}
-
-
-PaintContextPtr Canvas::beginPaint(const Gfx::Paint& paint)
-{
-    if(_paint)
-    {
-        onReleasePaint();
-        _paint->onDetachCanvas(*this);
-        _paint = 0;
-    }
-
-    Gfx::PaintContext* context = onBeginPaint(paint);
     if(context)
     {
-        context->setCanvas(*this);
-
-        context->setCompositionMode( paint.compositionMode() );
-        context->setPen( paint.pen() );
-        context->setBrush( paint.brush() );
-        context->setFont( paint.font() );
-
-        const Gfx::RectF& clip = paint.clip();
-        if( clip.isNull() )
-            context->resetClip();
-        else
-            context->setClip(clip);
+        if( context->scaling() != scaling() )
+            context = 0;
     }
 
-    return PaintContextPtr(context);
+    if(context)
+    {
+        bool isReused = onBeginPaint(context, paint);
+        if( ! isReused )
+            context = 0;
+    }
+
+    if( ! context )
+    {
+        context = onBeginPaint(paint);
+        if(context)
+        {
+            context->setCanvas(*this);
+
+            context->setCompositionMode( paint.compositionMode() );
+            context->setPen( paint.pen() );
+            context->setBrush( paint.brush() );
+            context->setFont( paint.font() );
+
+            const Gfx::RectF& clip = paint.clip();
+            if( clip.isNull() )
+                context->resetClip();
+            else
+                context->setClip(clip);
+        }
+    }
+
+    if(context)
+        context->setCanvas(*this);
+    
+    return context;
 }
 
 } // namespace

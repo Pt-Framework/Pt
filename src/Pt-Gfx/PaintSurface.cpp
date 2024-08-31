@@ -32,6 +32,7 @@
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Paint.h>
+#include <Pt/Gfx/Canvas.h>
 
 #include <algorithm>
 
@@ -40,7 +41,8 @@ namespace Pt {
 namespace Gfx {
 
 PaintSurface::PaintSurface()
-: _painter(0)
+: _canvas(0)
+, _painter(0)
 {
 }
 
@@ -95,7 +97,16 @@ void PaintSurface::onReset()
 
 const Canvas* PaintSurface::canvas() const
 {
+    if(_canvas)
+        return _canvas;
+
     return onGetCanvas();
+}
+
+
+void PaintSurface::setCanvas(Canvas* canvas)
+{
+    _canvas = canvas;
 }
 
 
@@ -117,16 +128,26 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-bool PaintSurface::beginPaint(PaintContext* context, const Gfx::Paint& paint)
+PaintContext* PaintSurface::beginPaint(const Gfx::Paint& paint, PaintContext* context)
 {
-    return onBeginPaint(context, paint);
+    if(_canvas)
+        return _canvas->beginPaint(paint, context);
+
+    return onBeginPaint(paint, context);
+
+    //Canvas* canvas = onOpenCanvas();
+    //if( ! canvas )
+    //    return 0;
+
+    //return _canvas->beginPaint(paint, context);
 }
 
 
-PaintContextPtr PaintSurface::beginPaint(const Gfx::Paint& paint)
+PaintContext* PaintSurface::onBeginPaint(const Gfx::Paint& paint, 
+                                         PaintContext* context) 
 {
-    return onBeginPaint(paint);
-}
+    return 0;
+}   
 
 
 Image PaintSurface::toImage() const
