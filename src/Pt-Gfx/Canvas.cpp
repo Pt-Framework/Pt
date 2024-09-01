@@ -99,6 +99,21 @@ Image Canvas::toImage() const
 }
 
 
+Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint)
+{
+    if(_paint)
+    {
+        onReleasePaint();
+        _paint->onDetachCanvas(*this);
+        _paint = 0;
+    }
+
+    Gfx::PaintContext* context = onBeginPaint();
+    context->setPaint(paint);
+    return context;
+}
+
+
 Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint, Gfx::PaintContext* reuse)
 {
     if(_paint)
@@ -108,8 +123,6 @@ Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint, Gfx::PaintContext
         _paint = 0;
     }
 
-    Gfx::PaintContext* context = 0;
-
     if(reuse)
     {
         if( reuse->scaling() != scaling() )
@@ -118,34 +131,16 @@ Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint, Gfx::PaintContext
 
     if(reuse)
     {
-        bool isReused = onBeginPaint(paint, reuse);
+        bool isReused = onBeginPaint(reuse);
         if( isReused )
-            context = reuse;
+        {
+            reuse->init(*this);
+            return reuse;
+        }
     }
 
-    if( ! context )
-        context = onBeginPaint(paint);
-
-    if( ! context )
-        return 0;
-
-    context->setCanvas(*this);
-
-    if( ! reuse )
-    {
-        context->setCompositionMode( paint.compositionMode() );
-        context->setPen( paint.pen() );
-        context->setBrush( paint.brush() );
-        context->setFont( paint.font() );
-    }
-
-    const Gfx::RectF& clip = paint.clip();
-
-    if( clip.isNull() )
-        context->resetClip();
-    else
-        context->setClip(clip);
-    
+    Gfx::PaintContext* context = onBeginPaint();
+    context->setPaint(paint);
     return context;
 }
 

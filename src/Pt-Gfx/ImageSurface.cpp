@@ -50,7 +50,8 @@ namespace Gfx {
 // ImageSurface
 ///////////////////////////////////////////////////////////////////////
 
-ImagePaint::ImagePaint()
+ImagePaint::ImagePaint(ImageCanvas& canvas)
+: PaintContext(canvas)
 {
 }
 
@@ -67,12 +68,6 @@ void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode)
 
 void ImagePaint::onSetPen(const Gfx::Pen& pen)
 {
-    updatePen(pen);
-}
-
-
-void ImagePaint::updatePen(const Gfx::Pen& pen)
-{
     double scaledSize = scaling().toPhysical( pen.size() );
 
     // keep pen size when downscaling
@@ -86,11 +81,13 @@ void ImagePaint::updatePen(const Gfx::Pen& pen)
 
 void ImagePaint::onSetBrush(const Gfx::Brush& brush)
 {
+    _brush = brush;
 }
 
 
 void ImagePaint::onSetFont(const Gfx::Font& font)
 {
+    _font = font;
 }
 
 
@@ -194,7 +191,7 @@ Gfx::Image ImageCanvas::onGetImage() const
 }
 
 
-bool ImageCanvas::onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context)
+bool ImageCanvas::onBeginPaint(Gfx::PaintContext* context)
 {
     ImagePaint* paintContext = dynamic_cast<ImagePaint*>(context);
     if( ! paintContext )
@@ -202,19 +199,19 @@ bool ImageCanvas::onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* conte
 
     _paint = paintContext;
 
-    setCompositionMode( paint.compositionMode() );
-    setPen(*paintContext);
-    setBrush(paint.brush());
-    setFont( paint.font() );
+    setCompositionMode( paintContext->compositionMode() );
+    setPen( paintContext->pen() );
+    setBrush( paintContext->brush() );
+    setFont( paintContext->font() );
 
     _paint = paintContext;
     return true;
 }
 
 
-Gfx::PaintContext* ImageCanvas::onBeginPaint(const Gfx::Paint& paint)
+Gfx::PaintContext* ImageCanvas::onBeginPaint()
 {
-    ImagePaint* paintContext = new ImagePaint();
+    ImagePaint* paintContext = new ImagePaint(*this);
     
     _paint = paintContext;
     return paintContext;
@@ -239,15 +236,10 @@ void ImageCanvas::setPen(const Pen& pen)
     if( ! _paint )
         return;
 
-    setPen(*_paint);
-}
-
-
-void ImageCanvas::setPen(const ImagePaint& paint)
-{
-    const Pen& p = paint.pen();
+    const Pen& p = _paint->pen();
     _rasterizer->setPen(p);
 }
+
 
 
 void ImageCanvas::setBrush(const Brush& brush)
@@ -508,7 +500,7 @@ ImageSurface::ImageSurface()
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this);
-    setCanvas(_canvas);
+    //setCanvas(_canvas);
 }
 
 
@@ -516,7 +508,7 @@ ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this, size, stride);
-    setCanvas(_canvas);
+    //setCanvas(_canvas);
 }
 
 
@@ -563,6 +555,16 @@ void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
 const Canvas* ImageSurface::onGetCanvas() const
 {
     return _canvas;
+}
+
+
+Gfx::PaintContext* ImageSurface::onBeginPaint(const Gfx::Paint& paint, 
+                                              Gfx::PaintContext* reuse) 
+{
+    if( reuse && reuse->reset(*_canvas) )
+        return reuse;
+
+    return _canvas->beginPaint(paint);
 }
 
 

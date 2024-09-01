@@ -77,8 +77,8 @@ class PT_GFX_API PaintSurface
     protected:
         virtual const Canvas* onGetCanvas() const = 0;
         
-        virtual PaintContext* onRedirectPaint(const Gfx::Paint& paint, 
-                                              PaintContext* context);
+        virtual PaintContext* onBeginPaint(const Gfx::Paint& paint, 
+                                           PaintContext* context);
 
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 

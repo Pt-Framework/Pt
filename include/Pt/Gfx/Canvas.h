@@ -70,6 +70,8 @@ class PT_GFX_API Canvas
 
         Image toImage() const;
 
+        Gfx::PaintContext* beginPaint(const Gfx::Paint& paint);
+
         Gfx::PaintContext* beginPaint(const Gfx::Paint& paint,
                                       Gfx::PaintContext* context);
 
@@ -78,9 +80,9 @@ class PT_GFX_API Canvas
 
         virtual Gfx::Image onGetImage() const = 0;
 
-        virtual bool onBeginPaint(const Gfx::Paint& paint, PaintContext* context) = 0;
+        virtual bool onBeginPaint(PaintContext* context) = 0;
 
-        virtual PaintContext* onBeginPaint(const Gfx::Paint& paint) = 0;
+        virtual PaintContext* onBeginPaint() = 0;
 
         virtual void onReleasePaint() = 0;
 

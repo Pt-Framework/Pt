@@ -124,9 +124,13 @@ void Paint::setFont(const Gfx::Font& font)
 // PaintContext
 ///////////////////////////////////////////////////////////////////////
 
-PaintContext::PaintContext()
+PaintContext::PaintContext(Canvas& canvas)
 : _canvas(0)
 {
+    canvas.attachPaint(*this);
+    _canvas = &canvas;
+
+    _scaling = canvas.scaling();
 }
 
 
@@ -140,15 +144,42 @@ PaintContext::~PaintContext()
 }
 
 
-const RectF& PaintContext::region() const
+void PaintContext::onDetachCanvas(Canvas& canvas)
 {
-    return _region;
+    if(_canvas)
+    {
+        _canvas = 0;
+    }
+}
+
+
+void PaintContext::init(Canvas& canvas)
+{
+    if(_canvas == &canvas)
+        return;
+
+    if(_canvas)
+    {        
+        _canvas->detachPaint(*this);
+        _canvas = 0;
+    }
+
+    canvas.attachPaint(*this);
+    _canvas = &canvas;
+
+    _scaling = canvas.scaling();
 }
 
 
 const PointF& PaintContext::origin() const
 {
     return _region.topLeft();
+}
+
+
+const RectF& PaintContext::region() const
+{
+    return _region;
 }
 
 
@@ -164,19 +195,31 @@ const Scaling& PaintContext::scaling() const
 }
 
 
-void PaintContext::onDetachCanvas(Canvas& canvas)
+void PaintContext::setPaint(const Gfx::Paint& paint)
 {
-    if(_canvas)
-    {
-        _canvas = 0;
-    }
+    setCompositionMode( paint.compositionMode() );
+    setPen( paint.pen() );
+    setBrush( paint.brush() );
+    setFont( paint.font() );
+
+    const Gfx::RectF& clip = paint.clip();
+
+    if( clip.isNull() )
+        resetClip();
+    else
+        setClip(clip);
 }
 
 
-void PaintContext::setCanvas(Canvas& canvas)
+bool PaintContext::reset(Canvas& canvas)
 {
     if(_canvas == &canvas)
-        return;
+        return true;
+
+
+    bool ok = canvas.onBeginPaint(this);
+    if( ! ok )
+        return false;
 
     if(_canvas)
     {        
@@ -188,6 +231,7 @@ void PaintContext::setCanvas(Canvas& canvas)
     _canvas = &canvas;
 
     _scaling = canvas.scaling();
+    return true;
 }
 
 

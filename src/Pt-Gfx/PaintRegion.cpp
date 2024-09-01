@@ -154,7 +154,7 @@ const Gfx::Scaling& PaintRegion::onGetScaling() const
 }
 
 
-PaintContext* PaintRegion::onRedirectPaint(const Gfx::Paint& paint, PaintContext* context) 
+PaintContext* PaintRegion::onBeginPaint(const Gfx::Paint& paint, PaintContext* context) 
 {
     if( ! _surface )
         return 0;

@@ -61,7 +61,7 @@ class PixmapSurfaceImpl;
 class PaintData : public Gfx::PaintContext
 {
     public:
-        PaintData();
+        PaintData(PixmapSurfaceImpl& canvas);
 
         ~PaintData();
 
@@ -72,6 +72,12 @@ class PaintData : public Gfx::PaintContext
         HBRUSH brush() const;
 
         bool gradientBrush() const;
+
+        const Gfx::Brush::GradientStyle& gradient() const;
+        
+        const Gfx::Color& gradientStart() const;
+        
+        const Gfx::Color& gradientStop() const;
 
         HFONT font() const;
 
@@ -110,6 +116,9 @@ class PaintData : public Gfx::PaintContext
         Gfx::Color                _penColor;
         HBRUSH                    _brush;
         bool                      _gradientBrush;
+        Gfx::Brush::GradientStyle _gradient;
+        Gfx::Color                _gradientStart;
+        Gfx::Color                _gradientStop;
         HRGN                      _clipRect;
         HFONT                     _font;
 };

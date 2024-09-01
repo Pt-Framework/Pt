@@ -170,13 +170,17 @@ class PT_GFX_API PaintContext
     public:
         virtual ~PaintContext();
 
-        const Scaling& scaling() const;
+        const PointF& origin() const;
 
         const RectF& region() const;
 
-        const PointF& origin() const;
-
         void setRegion(const RectF& r);
+
+        const Scaling& scaling() const;
+
+        void setPaint(const Gfx::Paint& paint);
+
+        bool reset(Canvas& canvas);
 
         void reset();
 
@@ -244,11 +248,11 @@ class PT_GFX_API PaintContext
         virtual void onSetClip(const RectF& clip) = 0;
 
     protected:
-        PaintContext();
+        PaintContext(Canvas& canvas);
+
+        void init(Canvas& canvas);
 
     private:
-        void setCanvas(Canvas& canvas);
-
         void onDetachCanvas(Canvas& canvas);
 
     private:

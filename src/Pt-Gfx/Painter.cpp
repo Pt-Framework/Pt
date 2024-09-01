@@ -75,6 +75,16 @@ void Painter::begin(PaintSurface& surface)
    
    if(reuse != _paintContext)
       delete reuse;
+
+    if(_paintContext)
+    {
+        const Gfx::RectF& clip = _paint.clip();
+
+        if( clip.isNull() )
+            _paintContext->resetClip();
+        else
+            _paintContext->setClip(clip);
+    }
 }
 
 

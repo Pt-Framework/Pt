@@ -256,7 +256,7 @@ const Gfx::Scaling& PixmapSurfaceImpl::onGetScaling() const
 }
 
 
-bool PixmapSurfaceImpl::onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context)
+bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context)
 {
     PaintData* paintContext = dynamic_cast<PaintData*>(context);
     if( ! paintContext )
@@ -266,15 +266,15 @@ bool PixmapSurfaceImpl::onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext*
 
     setCompositionMode(*_paint);
     setPen(*_paint);
-    setBrush(*_paint, paint.brush());
+    setBrush(*_paint);
     setFont(*_paint);
     return true;
 }
 
 
-Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint(const Gfx::Paint& paint)
+Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint()
 {
-    PaintData* paintContext  = new PaintData();
+    PaintData* paintContext  = new PaintData(*this);
 
     _paint = paintContext;
     return paintContext;
@@ -334,20 +334,20 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
     if( ! _paint )
         return;
 
-    setBrush(*_paint, brush);
+    setBrush(*_paint);
 }
 
 
-void PixmapSurfaceImpl::setBrush(const PaintData& paint, const Gfx::Brush& brush)
+void PixmapSurfaceImpl::setBrush(const PaintData& paint)
 {
     _gradientBrush = false;
 
     if( paint.gradientBrush() )
     {
         _gradientBrush = true;
-        _gradient = brush.gradient();
-        _gradientStart = brush.color();
-        _gradientStop = brush.gradientColor();
+        _gradient = paint.gradient();
+        _gradientStart = paint.gradientStart();
+        _gradientStop = paint.gradientStop();
 
         // do not set a brush now, because the gradient brush pattern can
         // only be calculated later, when the fill area is known

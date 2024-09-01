@@ -164,8 +164,8 @@ namespace Hmi {
 
 #ifndef PT_HMI_WIN32_RASTER
 
-PaintData::PaintData()
-: Gfx::PaintContext()
+PaintData::PaintData(PixmapSurfaceImpl& canvas)
+: Gfx::PaintContext(canvas)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _pen(0)
 , _penColor()
@@ -281,6 +281,24 @@ bool PaintData::gradientBrush() const
 }
 
 
+const Gfx::Brush::GradientStyle& PaintData::gradient() const
+{
+    return _gradient;
+}
+
+        
+const Gfx::Color& PaintData::gradientStart() const
+{
+    return _gradientStart;
+}
+
+
+const Gfx::Color& PaintData::gradientStop() const
+{
+    return _gradientStop;
+}
+
+
 void PaintData::onSetBrush(const Gfx::Brush& brush)
 {
     updateBrush(brush);
@@ -356,6 +374,9 @@ void PaintData::updateBrush(const Gfx::Brush& brush)
         case Gfx::Brush::Gradient:
         {
             _gradientBrush = true;
+            _gradient = brush.gradient();
+            _gradientStart = brush.color();
+            _gradientStop = brush.gradientColor();
             break;
         }
                 

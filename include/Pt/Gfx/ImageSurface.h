@@ -48,13 +48,28 @@ class ImageCanvas;
 class ImagePaint : public PaintContext
 {
     public:
-        ImagePaint();
+        ImagePaint(ImageCanvas& canvas);
 
         ~ImagePaint();
+
+        const Gfx::CompositionMode& compositionMode() const
+        {
+            return _compositionMode;
+        }
 
         const Pen& pen() const
         {
             return _pen;
+        }
+
+        const Brush& brush() const
+        {
+            return _brush;
+        }
+
+        const Font& font() const
+        {
+            return _font;
         }
 
     protected:
@@ -69,13 +84,13 @@ class ImagePaint : public PaintContext
         virtual void onSetClip(const Gfx::RectF& rectF) override;
 
         virtual void onResetClip() override;
-
-    public:
-        void updatePen(const Gfx::Pen& pen);
     
     private:
-        Gfx::Scaling   _scaling;
-        Pen            _pen;
+        Gfx::Scaling         _scaling;
+        Gfx::CompositionMode _compositionMode;
+        Pen                  _pen;
+        Gfx::Brush           _brush;
+        Gfx::Font            _font;
 };
 
 
@@ -99,8 +114,6 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     void resize(const Gfx::SizeF& size);
 
-    void setPen(const ImagePaint& paint);
-
     const Gfx::ImageFormat& format() const;
 
     const Gfx::SizeF& size() const;
@@ -110,9 +123,9 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     virtual Gfx::Image onGetImage() const override;
 
-    virtual bool onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context) override;
+    virtual bool onBeginPaint(Gfx::PaintContext* context) override;
 
-    Gfx::PaintContext* onBeginPaint(const Gfx::Paint& paint) override;
+    Gfx::PaintContext* onBeginPaint() override;
 
     virtual void onReleasePaint() override;
   
@@ -210,6 +223,9 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
   protected:
     virtual const Canvas* onGetCanvas() const override;
+
+    virtual Gfx::PaintContext* onBeginPaint(const Gfx::Paint& paint, 
+                                            Gfx::PaintContext* context) override;
 
     virtual const Gfx::ImageFormat& onGetFormat() const override;
 

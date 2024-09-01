@@ -128,26 +128,19 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-PaintContext* PaintSurface::beginPaint(const Gfx::Paint& paint, PaintContext* context)
+PaintContext* PaintSurface::beginPaint(const Gfx::Paint& paint, PaintContext* reuse)
 {
-    if(_canvas)
-        return _canvas->beginPaint(paint, context);
+    if( ! _canvas )
+        return onBeginPaint(paint, reuse);
 
-    //if(_redirect)
-    //    return onRedirectPaint(paint, context);
+    if( reuse && reuse->reset(*_canvas) )
+        return reuse;
 
-    return onRedirectPaint(paint, context);
-   
-    //onCloseCanvas();
-    //Canvas* canvas = onOpenCanvas();
-    //if( ! canvas )
-    //    return 0;
-
-    //return _canvas->beginPaint(paint, context);
+    return _canvas->beginPaint(paint);
 }
 
 
-PaintContext* PaintSurface::onRedirectPaint(const Gfx::Paint& paint, PaintContext* context) 
+PaintContext* PaintSurface::onBeginPaint(const Gfx::Paint& paint, PaintContext* context) 
 {
     return 0;
 }   

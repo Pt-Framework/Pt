@@ -172,9 +172,9 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         virtual Gfx::Image onGetImage() const override;
 
-        virtual bool onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context) override;
+        virtual bool onBeginPaint(Gfx::PaintContext* context) override;
 
-        Gfx::PaintContext* onBeginPaint(const Gfx::Paint& paint) override;
+        Gfx::PaintContext* onBeginPaint() override;
 
         virtual void onReleasePaint() override;
 
@@ -184,7 +184,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         void setPen(const PaintData& paint);
 
-        void setBrush(const PaintData& paint, const Gfx::Brush& brush);
+        void setBrush(const PaintData& paint);
 
         void setFont(const PaintData& paint);
 
