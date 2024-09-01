@@ -256,7 +256,7 @@ const Gfx::Scaling& PixmapSurfaceImpl::onGetScaling() const
 }
 
 
-bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint)
+bool PixmapSurfaceImpl::onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context)
 {
     PaintData* paintContext = dynamic_cast<PaintData*>(context);
     if( ! paintContext )
@@ -268,7 +268,6 @@ bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context, const Gfx::Pain
     setPen(*_paint);
     setBrush(*_paint, paint.brush());
     setFont(*_paint);
-    setClip(_paint);
     return true;
 }
 

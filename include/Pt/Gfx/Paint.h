@@ -41,6 +41,7 @@
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
+#include <Pt/Gfx/Canvas.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
 #include <cstddef>
@@ -79,10 +80,11 @@ class Polyline;
 //
 
 //
-// TODO: PaintContextPtr is attached to Canvas
+// TODO: PaintDevice is returned from Canvas::beginPaint
+//
+// PaintDevice is a movable type with the drawing ops and the region
 //
 // rename PaintContxt -> PaintDevice
-// rename PaintContextPtr -> PaintContext
 
 
 /*
@@ -166,13 +168,13 @@ class PT_GFX_API PaintContext
     public:
         virtual ~PaintContext();
 
+        const Scaling& scaling() const;
+
         const RectF& region() const;
 
         const PointF& origin() const;
 
         void setRegion(const RectF& r);
-
-        const Scaling& scaling() const;
 
         void reset();
 
@@ -249,72 +251,8 @@ class PT_GFX_API PaintContext
 
     private:
         Canvas*        _canvas;
-        const Paint*   _paint = 0;
         RectF          _region;
         Gfx::Scaling   _scaling;
-};
-
-
-class PaintContextPtr
-{
-    friend class Canvas;
-    friend class PaintSurface;
-    friend class PaintRegion;
-
-    struct MoveRef
-    {
-        PaintContext* paint;
-    
-        explicit MoveRef(PaintContext* p)
-        : paint(p)
-        { }
-    };
-
-    public:
-        PaintContextPtr();
-
-        PaintContextPtr(MoveRef ref);
-
-        ~PaintContextPtr();
-
-        PaintContextPtr& operator =(MoveRef ref);
-
-        operator MoveRef();
-
-        PaintContext* operator->()
-        {
-          return _paint;
-        }
-
-        const PaintContext* operator->() const
-        {
-          return _paint;
-        }
-
-        operator bool() const
-        { 
-            return _paint != 0; 
-        }
-
-        bool operator !() const 
-        {
-            return _paint == 0;
-        }
-
-        PaintContext* get()
-        {
-            return _paint;
-        }
-
-    private:
-        explicit PaintContextPtr(PaintContext* paint);
-
-        PaintContextPtr(PaintContextPtr& p);
-  
-        PaintContextPtr& operator =(PaintContextPtr& p);
-
-    private:
-        PaintContext* _paint;
 };
 
 /** @brief Line.

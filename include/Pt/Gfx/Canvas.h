@@ -31,9 +31,15 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Scaling.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/Paint.h>
 
 namespace Pt {
 
@@ -41,6 +47,9 @@ namespace Gfx {
 
 class PaintSurface;
 class PaintContext;
+class Paint;
+class Line;
+class Polyline;
 
 /** @brief Paint canvas.
 */
@@ -65,8 +74,7 @@ class PT_GFX_API Canvas
     protected:
         virtual const Scaling& onGetScaling() const = 0;
 
-        virtual bool onBeginPaint(PaintContext* context,
-                                  const Gfx::Paint& paint) = 0;
+        virtual bool onBeginPaint(const Gfx::Paint& paint, PaintContext* context) = 0;
 
         virtual PaintContext* onBeginPaint(const Gfx::Paint& paint) = 0;
 
@@ -129,7 +137,7 @@ class PT_GFX_API Canvas
     
     private:
         PaintSurface*     _surface;
-        PaintContext*     _paint = 0;
+        PaintContext*     _paint;
 };
 
 } // namespace

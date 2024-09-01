@@ -188,7 +188,7 @@ const Gfx::Scaling& ImageCanvas::onGetScaling() const
 }
 
 
-bool ImageCanvas::onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint)
+bool ImageCanvas::onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context)
 {
     ImagePaint* paintContext = dynamic_cast<ImagePaint*>(context);
     if( ! paintContext )
@@ -200,12 +200,6 @@ bool ImageCanvas::onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& pai
     setPen(*paintContext);
     setBrush(paint.brush());
     setFont( paint.font() );
-    
-    const Gfx::RectF& clip = paint.clip();
-    if( clip.isNull() )
-        resetClip();
-    else
-        setClip(clip);
 
     _paint = paintContext;
     return true;

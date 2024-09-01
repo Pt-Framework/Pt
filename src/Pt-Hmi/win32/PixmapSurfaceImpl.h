@@ -95,19 +95,19 @@ class PixmapSurfaceImpl
             return _image.canvas();
         }
 
+        Gfx::Canvas* canvas()
+        {
+            return 0;
+        }
+
         Gfx::Image toImage() const
         {
             return _image.toImage();
         }
 
-        bool beginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint)
+        Gfx::PaintContext* beginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context)
         {
-            return _image.beginPaint(context, paint);
-        }
-
-        Gfx::PaintContextPtr beginPaint(const Gfx::Paint& paint)
-        {
-            return _image.beginPaint(paint);
+            return _image.beginPaint(paint, context);
         }
 
         const Gfx::ImageSurface& imageSurface() const
@@ -177,7 +177,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
     protected:
         virtual const Gfx::Scaling& onGetScaling() const override;
 
-        virtual bool onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint) override;
+        virtual bool onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context) override;
 
         Gfx::PaintContext* onBeginPaint(const Gfx::Paint& paint) override;
 

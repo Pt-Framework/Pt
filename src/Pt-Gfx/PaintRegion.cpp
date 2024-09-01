@@ -29,6 +29,7 @@
 
 #include <Pt/Gfx/PaintRegion.h>
 #include <Pt/Gfx/Paint.h>
+#include <Pt/Gfx/Canvas.h>
 
 namespace Pt {
 
@@ -153,7 +154,7 @@ const Gfx::Scaling& PaintRegion::onGetScaling() const
 }
 
 
-PaintContext* PaintRegion::onBeginPaint(const Gfx::Paint& paint, PaintContext* context) 
+PaintContext* PaintRegion::onRedirectPaint(const Gfx::Paint& paint, PaintContext* context) 
 {
     if( ! _surface )
         return 0;
@@ -166,14 +167,11 @@ PaintContext* PaintRegion::onBeginPaint(const Gfx::Paint& paint, PaintContext* c
         return paintContext;
 
     RectF r = paintContext->region();
-    
     r.shift( _area.topLeft().x(),
              _area.topLeft().y() );
-
     r.setSize( _area.size() );
 
     paintContext->setRegion(r);
-
     return paintContext;
 }
 

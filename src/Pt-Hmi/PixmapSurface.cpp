@@ -94,6 +94,12 @@ const Gfx::Canvas* PixmapSurface::onGetCanvas() const
     return _impl->canvas();
 }
 
+Gfx::PaintContext* PixmapSurface::onRedirectPaint(const Gfx::Paint& paint, 
+                                                  Gfx::PaintContext* context) 
+{
+    return _impl->beginPaint(paint, context);
+}
+
 
 const Gfx::ImageFormat& PixmapSurface::onGetFormat() const
 {

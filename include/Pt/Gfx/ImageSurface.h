@@ -108,7 +108,7 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
   protected:
     virtual const Gfx::Scaling& onGetScaling() const override;
 
-    virtual bool onBeginPaint(Gfx::PaintContext* context, const Gfx::Paint& paint) override;
+    virtual bool onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context) override;
 
     Gfx::PaintContext* onBeginPaint(const Gfx::Paint& paint) override;
 

@@ -133,8 +133,12 @@ PaintContext* PaintSurface::beginPaint(const Gfx::Paint& paint, PaintContext* co
     if(_canvas)
         return _canvas->beginPaint(paint, context);
 
-    return onBeginPaint(paint, context);
+    //if(_redirect)
+    //    return onRedirectPaint(paint, context);
 
+    return onRedirectPaint(paint, context);
+   
+    //onCloseCanvas();
     //Canvas* canvas = onOpenCanvas();
     //if( ! canvas )
     //    return 0;
@@ -143,8 +147,7 @@ PaintContext* PaintSurface::beginPaint(const Gfx::Paint& paint, PaintContext* co
 }
 
 
-PaintContext* PaintSurface::onBeginPaint(const Gfx::Paint& paint, 
-                                         PaintContext* context) 
+PaintContext* PaintSurface::onRedirectPaint(const Gfx::Paint& paint, PaintContext* context) 
 {
     return 0;
 }   

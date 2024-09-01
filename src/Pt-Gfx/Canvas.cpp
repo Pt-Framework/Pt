@@ -37,6 +37,7 @@ namespace Gfx {
 
 Canvas::Canvas(PaintSurface& surface)
 : _surface(&surface)
+, _paint(0)
 {
 }
 
@@ -101,43 +102,43 @@ Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint, Gfx::PaintContext
         _paint = 0;
     }
 
-    Gfx::PaintContext* context = reuse;
+    Gfx::PaintContext* context = 0;
 
-    if(context)
+    if(reuse)
     {
-        if( context->scaling() != scaling() )
-            context = 0;
+        if( reuse->scaling() != scaling() )
+            reuse = 0;
     }
 
-    if(context)
+    if(reuse)
     {
-        bool isReused = onBeginPaint(context, paint);
-        if( ! isReused )
-            context = 0;
+        bool isReused = onBeginPaint(paint, reuse);
+        if( isReused )
+            context = reuse;
     }
 
     if( ! context )
-    {
         context = onBeginPaint(paint);
-        if(context)
-        {
-            context->setCanvas(*this);
 
-            context->setCompositionMode( paint.compositionMode() );
-            context->setPen( paint.pen() );
-            context->setBrush( paint.brush() );
-            context->setFont( paint.font() );
+    if( ! context )
+        return 0;
 
-            const Gfx::RectF& clip = paint.clip();
-            if( clip.isNull() )
-                context->resetClip();
-            else
-                context->setClip(clip);
-        }
+    context->setCanvas(*this);
+
+    if( ! reuse )
+    {
+        context->setCompositionMode( paint.compositionMode() );
+        context->setPen( paint.pen() );
+        context->setBrush( paint.brush() );
+        context->setFont( paint.font() );
     }
 
-    if(context)
-        context->setCanvas(*this);
+    const Gfx::RectF& clip = paint.clip();
+
+    if( clip.isNull() )
+        context->resetClip();
+    else
+        context->setClip(clip);
     
     return context;
 }

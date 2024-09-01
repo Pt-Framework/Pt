@@ -121,53 +121,6 @@ void Paint::setFont(const Gfx::Font& font)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// PaintContextPtr
-///////////////////////////////////////////////////////////////////////
-
-PaintContextPtr::PaintContextPtr()
-: _paint(0)
-{ 
-}
-
-
-PaintContextPtr::PaintContextPtr(PaintContext* paint)
-: _paint(paint)
-{ 
-}
-
-
-PaintContextPtr::PaintContextPtr(MoveRef ref)
-: _paint(ref.paint) 
-{ 
-}
-
-
-PaintContextPtr::~PaintContextPtr()
-{
-    delete _paint;
-}
-
-
-PaintContextPtr& PaintContextPtr::operator =(MoveRef ref)
-{  
-    if(_paint != ref.paint) 
-        delete _paint;
-
-    _paint = ref.paint;
-
-    return *this;
-}
-
-
-PaintContextPtr::operator MoveRef()
-{
-    PaintContext* paint = _paint;
-    _paint = 0;
-
-    return MoveRef(paint);
-}
-
-///////////////////////////////////////////////////////////////////////
 // PaintContext
 ///////////////////////////////////////////////////////////////////////
 
@@ -298,7 +251,9 @@ void PaintContext::setClip(const RectF& rect)
     onSetClip(clip);
 
     if(_canvas)
+    {
         _canvas->setClip(clip);
+    }
 }
 
 
@@ -322,7 +277,6 @@ void PaintContext::drawLine(const PointF& from, const PointF& to)
 void PaintContext::drawRect(const Gfx::RectF& rect)
 {
     Gfx::RectF r = rect;
-    
     r.shift( origin().x(), 
              origin().y() );
 
@@ -334,9 +288,8 @@ void PaintContext::drawRect(const Gfx::RectF& rect)
 void PaintContext::fillRect(const Gfx::RectF& rect)
 {
     Gfx::RectF r = rect;
-    
     r.shift( origin().x(), 
-             origin().y() );
+              origin().y() );
 
     if(_canvas)
         _canvas->fillRect(r);
@@ -362,16 +315,22 @@ void PaintContext::fillPolygon(const Gfx::PointF* ps, const size_t n)
 void PaintContext::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     Pt::Gfx::PointF p = topLeft + origin();
+
     if(_canvas)
+    {
         _canvas->drawEllipse(p, size);
+    }
 }
 
 
 void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     Pt::Gfx::PointF p = topLeft + origin();
+
     if(_canvas)
+    {
         _canvas->fillEllipse(p, size);
+    }
 }
 
 
@@ -387,25 +346,34 @@ FontMetrics PaintContext::fontMetrics(const Pt::String& text) const
 void PaintContext::drawText(const PointF& to, const Pt::String& text)
 {
     Pt::Gfx::PointF p = to + origin();
+
     if(_canvas)
+    {
         _canvas->drawText(p, text);
+    }
 }
 
 
 void PaintContext::drawText(const PointF& to, const Pt::String& text, const Transform& tf)
 {
-    Pt::Gfx::PointF p = to + origin(); 
+    Pt::Gfx::PointF p = to + origin();
+
     if(_canvas)
+    {
         _canvas->drawText(p, text, tf);
+    }
 }
 
 
 void PaintContext::drawImage(const Gfx::PointF& to, 
                           const Gfx::Image& image)
 {
-    Pt::Gfx::PointF p = to + origin(); 
+    Pt::Gfx::PointF p = to + origin();
+
     if(_canvas)
+    {
         _canvas->drawImage(p, image);
+    }
 }
 
 
@@ -414,8 +382,11 @@ void PaintContext::drawImage(const Gfx::PointF& to,
                           const Gfx::RectF& rect)
 {
     Pt::Gfx::PointF p = to + origin();
+
     if(_canvas)
+    {
         _canvas->drawImage(p, image, rect);
+    }
 }
 
 
@@ -423,8 +394,11 @@ void PaintContext::drawSurface(const Gfx::PointF& to,
                             const Gfx::PaintSurface& surface)
 {
     Pt::Gfx::PointF p = to + origin();
+
     if(_canvas)
+    {
         _canvas->drawSurface(p, surface);
+    }
 }
 
 
@@ -433,8 +407,11 @@ void PaintContext::drawSurface(const Gfx::PointF& to,
                             const Gfx::RectF& rect)
 {
     Pt::Gfx::PointF p = to + origin();
+    
     if(_canvas)
+    {
         _canvas->drawSurface(p, surface, rect);
+    }
 }
 
 } // namespace
