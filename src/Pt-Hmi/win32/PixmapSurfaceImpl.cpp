@@ -812,6 +812,9 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
                                     const Gfx::PaintSurface& surface)
 {
     const Canvas* canvas = surface.canvas();
+    if( ! canvas )
+        return;
+
     const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(canvas);
     if(pixmap)
     {
@@ -819,14 +822,7 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
         return;
     }
 
-    //const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
-    //if(pixmap)
-    //{
-    //    drawPixmap(to, *pixmap);
-    //    return;
-    //}
-
-    Pt::Gfx::Image image = surface.toImage();
+    Pt::Gfx::Image image = canvas->toImage();
     if( image.format() == format() )
     {
         drawImage(to, image);
@@ -844,6 +840,9 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
                                     const Gfx::RectF& rect)
 {
     const Canvas* canvas = surface.canvas();
+    if( ! canvas )
+        return;
+    
     const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(canvas);
     if(pixmap)
     {
@@ -851,14 +850,7 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
         return;
     }
 
-    //const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
-    //if(pixmap)
-    //{
-    //    drawPixmap(to, *pixmap, rect);
-    //    return;
-    //}
-
-    Pt::Gfx::Image image = surface.toImage();
+    Pt::Gfx::Image image = canvas->toImage();
     if( image.format() == format() )
     {
         drawImage(to, image, rect);
@@ -1084,7 +1076,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
 }
 
 
-Gfx::Image PixmapSurfaceImpl::toImage() const
+Gfx::Image PixmapSurfaceImpl::onGetImage() const
 {
     BITMAPINFO bitmapInfo;
     ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));

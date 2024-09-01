@@ -188,6 +188,12 @@ const Gfx::Scaling& ImageCanvas::onGetScaling() const
 }
 
 
+Gfx::Image ImageCanvas::onGetImage() const
+{
+    return image();
+}
+
+
 bool ImageCanvas::onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context)
 {
     ImagePaint* paintContext = dynamic_cast<ImagePaint*>(context);
@@ -437,9 +443,12 @@ void ImageCanvas::drawArc(const PointF& topLeft, const SizeF& size, float degBeg
 
 void ImageCanvas::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
 {
+    const Canvas* canvas = surface.canvas();
+    if( ! canvas )
+        return;
+
     Gfx::PointF to = _scaling.toPhysical(toF);
 
-    const Canvas* canvas = surface.canvas();
     const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(canvas);
     if(imageCanvas)
     {
@@ -448,15 +457,7 @@ void ImageCanvas::drawSurface(const Gfx::PointF& toF, const PaintSurface& surfac
         return;
     }
 
-    //const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
-    //if(imageSurface)
-    //{
-    //    const Gfx::Image& image = imageSurface->image();
-    //    drawImage(to, image);
-    //    return;
-    //}
-
-    Pt::Gfx::Image image = surface.toImage();
+    Pt::Gfx::Image image = canvas->toImage();
     if( image.format() == format() )
     {
         drawImage(to, image);
@@ -472,10 +473,13 @@ void ImageCanvas::drawSurface(const Gfx::PointF& toF, const PaintSurface& surfac
 void ImageCanvas::drawSurface(const Gfx::PointF& toF, 
                                const PaintSurface& surface, const Gfx::RectF& pmRect2)
 {
+    const Canvas* canvas = surface.canvas();
+    if( ! canvas )
+        return;
+
     Gfx::PointF to = _scaling.toPhysical(toF);
     Gfx::RectF rect = _scaling.toPhysical(pmRect2);
 
-    const Canvas* canvas = surface.canvas();
     const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(canvas);
     if(imageCanvas)
     {
@@ -484,15 +488,7 @@ void ImageCanvas::drawSurface(const Gfx::PointF& toF,
         return;
     }
 
-    //const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
-    //if(imageSurface)
-    //{
-    //    const Gfx::Image& image = imageSurface->image();
-    //    drawImage(to, image, rect);
-    //    return;
-    //}
-
-    Pt::Gfx::Image image = surface.toImage();
+    Pt::Gfx::Image image = canvas->toImage();
     if( image.format() == format() )
     {
         drawImage(to, image, rect);
@@ -510,39 +506,23 @@ void ImageCanvas::drawSurface(const Gfx::PointF& toF,
 
 ImageSurface::ImageSurface()
 : _canvas(0)
-, _owner(0)
 {
     _canvas = new ImageCanvas(*this);
-    _owner = _canvas;
-
-    setCanvas(_canvas);
-}
-
-
-ImageSurface::ImageSurface(ImageCanvas& canvas)
-: _canvas(0)
-, _owner(0)
-{
-    _canvas = &canvas;
-    
     setCanvas(_canvas);
 }
 
 
 ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
 : _canvas(0)
-, _owner(0)
 {
     _canvas = new ImageCanvas(*this, size, stride);
-    _owner = _canvas;
-    
     setCanvas(_canvas);
 }
 
 
 ImageSurface::~ImageSurface()
 {
-    delete _owner;
+    delete _canvas;
 }
 
 
@@ -601,12 +581,6 @@ const Gfx::SizeF& ImageSurface::onGetSize() const
 const Scaling& ImageSurface::onGetScaling() const
 {
     return _scaling;
-}
-
-
-Image ImageSurface::onGetImage() const
-{
-    return _canvas->image();
 }
 
 

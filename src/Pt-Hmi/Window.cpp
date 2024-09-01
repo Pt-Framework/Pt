@@ -150,7 +150,11 @@ const WindowFrame* Window::frame() const
 
 Gfx::Image Window::getImage() const
 {
-    return surface().toImage();
+    const Gfx::Canvas* canvas = surface().canvas();
+    if(canvas)
+        return canvas->toImage();
+
+    return Gfx::Image();
 }
 
 

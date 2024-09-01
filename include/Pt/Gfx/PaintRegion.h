@@ -79,8 +79,6 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual void onReset();
 
-        virtual Image onGetImage() const;
-
     private:
         virtual void onDetachSurface(PaintSurface* region);
     

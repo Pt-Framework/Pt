@@ -72,6 +72,7 @@ void Painter::begin(PaintSurface& surface)
    
    PaintContext* reuse = _paintContext;
    _paintContext = surface.beginPaint(_paint, reuse);
+   
    if(reuse != _paintContext)
       delete reuse;
 }

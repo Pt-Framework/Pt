@@ -40,7 +40,7 @@ PixmapSurface::PixmapSurface()
 : _impl(0)
 {
     _impl = new PixmapSurfaceImpl(*this);
-    setCanvas( _impl->canvas() );
+    setCanvas( _impl->implCanvas() );
 }
 
 
@@ -91,7 +91,7 @@ void PixmapSurface::setScaleFactor(double scaling)
 
 const Gfx::Canvas* PixmapSurface::onGetCanvas() const
 {
-    return _impl->canvas();
+    return _impl->getCanvas();
 }
 
 Gfx::PaintContext* PixmapSurface::onRedirectPaint(const Gfx::Paint& paint, 
@@ -116,12 +116,6 @@ const Gfx::SizeF& PixmapSurface::onGetSize() const
 const Gfx::Scaling& PixmapSurface::onGetScaling() const
 {
     return _impl->surfaceScaling();
-}
-
-
-Gfx::Image PixmapSurface::onGetImage() const
-{
-    return _impl->toImage();
 }
 
 

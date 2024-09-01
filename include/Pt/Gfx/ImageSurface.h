@@ -108,6 +108,8 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
   protected:
     virtual const Gfx::Scaling& onGetScaling() const override;
 
+    virtual Gfx::Image onGetImage() const override;
+
     virtual bool onBeginPaint(const Gfx::Paint& paint, Gfx::PaintContext* context) override;
 
     Gfx::PaintContext* onBeginPaint(const Gfx::Paint& paint) override;
@@ -194,8 +196,6 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     ImageSurface(const Gfx::Size& size, std::size_t stride = 0);
 
-    ImageSurface(ImageCanvas& canvas);
-
     virtual ~ImageSurface();
 
     void reset(const Gfx::Image& image);
@@ -217,8 +217,6 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     virtual const Scaling& onGetScaling() const override;
 
-    virtual Image onGetImage() const override;
-
   public:
     static void setFontDir(const System::Path& path);
 
@@ -232,7 +230,6 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
   private:
     ImageCanvas*  _canvas;
-    ImageCanvas*  _owner;
     Scaling       _scaling;
     SizeF         _size;
 };

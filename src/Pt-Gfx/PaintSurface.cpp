@@ -153,12 +153,6 @@ PaintContext* PaintSurface::onRedirectPaint(const Gfx::Paint& paint, PaintContex
 }   
 
 
-Image PaintSurface::toImage() const
-{
-    return onGetImage();
-}
-
-
 void PaintSurface::attachPainter(Painter& painter)
 {
     if(_painter)

@@ -182,12 +182,6 @@ void PaintRegion::onReset()
 }
 
 
-Image PaintRegion::onGetImage() const
-{
-    return _surface ? _surface->toImage() : Image();
-}
-
-
 void PaintRegion::onDetachSurface(PaintSurface* region)
 {
     _surface = 0;

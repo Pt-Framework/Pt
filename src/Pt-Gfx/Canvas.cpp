@@ -93,6 +93,12 @@ const Scaling& Canvas::scaling() const
 }
 
 
+Image Canvas::toImage() const
+{
+    return onGetImage();
+}
+
+
 Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint, Gfx::PaintContext* reuse)
 {
     if(_paint)

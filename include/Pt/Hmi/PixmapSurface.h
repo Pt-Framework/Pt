@@ -91,8 +91,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         virtual const Gfx::Scaling& onGetScaling() const override;
 
-        virtual Gfx::Image onGetImage() const override;
-
     public:
         static void setFontDir(const System::Path& path);
 

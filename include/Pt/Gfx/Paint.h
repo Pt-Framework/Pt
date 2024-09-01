@@ -65,6 +65,8 @@ class Polyline;
       needed for painting. The pixel ratio is reported by the implementation for
       alignment purposes. Paint scaling can be 1.0 if the underlying implementation
       works with logic pixels, even if the reported pixel ratio is higher.
+
+    - Apply paint scaling in PaintContext and not in every impl tha needs it
 */
 
 //

@@ -67,8 +67,6 @@ class PT_GFX_API PaintSurface
 
         const Scaling& scaling() const;
 
-        Image toImage() const;
-
         const Canvas* canvas() const;
 
         PaintContext* beginPaint(const Gfx::Paint& paint, PaintContext* context);
@@ -89,8 +87,6 @@ class PT_GFX_API PaintSurface
         virtual const Scaling& onGetScaling() const = 0;
 
         virtual void onReset();
-
-        virtual Gfx::Image onGetImage() const = 0;
 
     private:
         void attachRegion(PaintRegion& region);
