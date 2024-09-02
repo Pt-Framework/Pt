@@ -81,6 +81,9 @@ void WindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
 
 void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
 {
+    // TODO: the reported scale factor divided by the application
+    //       scale factor is the window specific one
+
     _surface.setScaleFactor( ev.scaleFactor() );
 
     Base::onRescaleEvent(ev);
