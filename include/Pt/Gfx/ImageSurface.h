@@ -143,8 +143,6 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
-    virtual void drawLine(const Gfx::Line& line);
-
     virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
     virtual void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
@@ -183,9 +181,12 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
 
-    virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& surface);
+    virtual void onDrawCanvas(const Gfx::PointF& to, 
+                              const Gfx::Canvas& surface) override;
 
-    virtual void drawSurface(const Gfx::PointF& toF, const PaintSurface& pm, const Gfx::RectF& pmRect);
+    virtual void onDrawCanvas(const Gfx::PointF& to, 
+                              const Gfx::Canvas& canvas, 
+                              const Gfx::RectF& pmRect) override;
 
   private:
     Rasterizer*   _rasterizer;

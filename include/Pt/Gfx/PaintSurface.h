@@ -69,6 +69,13 @@ class PT_GFX_API PaintSurface
 
         PaintContext* beginPaint(PaintContext* context);
 
+        void draw(Gfx::Canvas& canvas,
+                  const Gfx::PointF& to) const;
+        
+        void draw(Gfx::Canvas& canvas,
+                  const Gfx::PointF& to, 
+                  const Gfx::RectF& rect) const;
+    
     protected:
         void setCanvas(Canvas* canvas);
 
@@ -84,6 +91,14 @@ class PT_GFX_API PaintSurface
         virtual const Scaling& onGetScaling() const = 0;
 
         virtual void onReset();
+
+    protected:
+        virtual void onDraw(Gfx::Canvas& canvas,
+                            const Gfx::PointF& to) const;
+        
+        virtual void onDraw(Gfx::Canvas& canvas,
+                            const Gfx::PointF& to, 
+                            const Gfx::RectF& rect) const;
 
     private:
         void attachRegion(PaintRegion& region);

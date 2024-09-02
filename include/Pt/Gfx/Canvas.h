@@ -56,6 +56,7 @@ class Polyline;
 class PT_GFX_API Canvas
 {
     friend class PaintContext;
+    friend class PaintSurface;
 
     public:
         explicit Canvas(PaintSurface& surface);
@@ -97,7 +98,7 @@ class PT_GFX_API Canvas
         virtual void resetClip() = 0;
 
     protected:
-        virtual void drawLine(const Line& line) = 0;
+        virtual void drawLine(const PointF& from, const PointF& to) = 0;
 
         virtual void drawRect(const Gfx::RectF& rect) = 0;
 
@@ -126,12 +127,12 @@ class PT_GFX_API Canvas
                                const Gfx::Image& image, 
                                const Gfx::RectF& imgRect) = 0;
 
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const Gfx::PaintSurface& surface) = 0;
+        virtual void onDrawCanvas(const Gfx::PointF& to, 
+                                   const Gfx::Canvas& canvas) = 0;
 
-        virtual void drawSurface(const Gfx::PointF& to,
-                                 const Gfx::PaintSurface& surface,
-                                 const Gfx::RectF& rect) = 0;
+        virtual void onDrawCanvas(const Gfx::PointF& to,
+                                   const Gfx::Canvas& canvas,
+                                   const Gfx::RectF& rect) = 0;
 
     private:
         void onDetachPaint(PaintContext& paint);

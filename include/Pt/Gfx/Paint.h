@@ -253,37 +253,6 @@ class PT_GFX_API PaintContext
         Gfx::Scaling   _scaling;
 };
 
-/** @brief Line.
-*/
-class Line
-{
-    public:
-        Line(PaintContext& paint,
-             const Gfx::PointF& from, 
-             const Gfx::PointF& to)
-        : _paint(paint)
-        , _from(from)
-        , _to(to)
-        { }
-
-        Gfx::PointF from() const
-        {
-            Gfx::PointF p = _from + _paint.origin();
-            return _paint.scaling().toPhysical(p);
-        }
-
-        Gfx::PointF to() const
-        {
-            Gfx::PointF p = _to + _paint.origin();
-            return _paint.scaling().toPhysical(p);
-        }
-
-    private:
-        PaintContext&      _paint;
-        const Gfx::PointF& _from;
-        const Gfx::PointF& _to;
-};
-
 /** @brief Polyline.
 */
 class Polyline

@@ -191,7 +191,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         void resetClip() override;
 
     public:
-        void drawLine(const Gfx::Line& line) override;
+        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
 
         void drawRect(const Gfx::RectF& rect) override;
 
@@ -240,12 +240,12 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         virtual void drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
         {}
 
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const Gfx::PaintSurface& surface);
+        virtual void onDrawCanvas(const Gfx::PointF& to, 
+                                  const Gfx::Canvas& surface) override;
 
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const Gfx::PaintSurface& pm, 
-                                 const Gfx::RectF& pmRect);
+        virtual void onDrawCanvas(const Gfx::PointF& to, 
+                                  const Gfx::Canvas& canvas, 
+                                  const Gfx::RectF& pmRect) override;
 
         void drawPixmap(const Gfx::PointF& toF, 
                         const PixmapSurfaceImpl& surface);

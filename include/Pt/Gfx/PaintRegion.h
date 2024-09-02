@@ -76,7 +76,15 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual const Gfx::Scaling& onGetScaling() const override;
 
-        virtual void onReset();
+        virtual void onReset() override;
+
+    protected:
+        virtual void onDraw(Gfx::Canvas& canvas,
+                            const Gfx::PointF& to) const override;
+        
+        virtual void onDraw(Gfx::Canvas& canvas,
+                            const Gfx::PointF& to, 
+                            const Gfx::RectF& rect) const override;
 
     private:
         virtual void onDetachSurface(PaintSurface* region);

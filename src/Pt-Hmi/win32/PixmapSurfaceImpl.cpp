@@ -404,13 +404,10 @@ void PixmapSurfaceImpl::resetClip()
 }
 
 
-void PixmapSurfaceImpl::drawLine(const Gfx::Line& line)
+void PixmapSurfaceImpl::drawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
 {
     //Pt::Gfx::PointF p0 = _scaling.toPhysical( line.from() ); 
     //Pt::Gfx::PointF p1 = _scaling.toPhysical( line.to() );
-
-    Pt::Gfx::PointF p0 = line.from(); 
-    Pt::Gfx::PointF p1 = line.to();
 
     POINT points[2];
     
@@ -802,21 +799,17 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::Size
 }
 
 
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
-                                    const Gfx::PaintSurface& surface)
+void PixmapSurfaceImpl::onDrawCanvas(const Gfx::PointF& to, 
+                                     const Gfx::Canvas& canvas)
 {
-    const Canvas* canvas = surface.canvas();
-    if( ! canvas )
-        return;
-
-    const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(canvas);
+    const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(&canvas);
     if(pixmap)
     {
         drawPixmap(to, *pixmap);
         return;
     }
 
-    Pt::Gfx::Image image = canvas->toImage();
+    Pt::Gfx::Image image = canvas.toImage();
     if( image.format() == format() )
     {
         drawImage(to, image);
@@ -829,22 +822,18 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
 }
 
 
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
-                                    const Gfx::PaintSurface& surface,
-                                    const Gfx::RectF& rect)
+void PixmapSurfaceImpl::onDrawCanvas(const Gfx::PointF& to,
+                                     const Gfx::Canvas& canvas,
+                                     const Gfx::RectF& rect)
 {
-    const Canvas* canvas = surface.canvas();
-    if( ! canvas )
-        return;
-    
-    const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(canvas);
+    const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(&canvas);
     if(pixmap)
     {
         drawPixmap(to, *pixmap, rect);
         return;
     }
 
-    Pt::Gfx::Image image = canvas->toImage();
+    Pt::Gfx::Image image = canvas.toImage();
     if( image.format() == format() )
     {
         drawImage(to, image, rect);

@@ -265,17 +265,10 @@ FontMetrics ImageCanvas::fontMetrics(const String& text) const
 
 void ImageCanvas::drawLine(const PointF& from, const  PointF& to)
 {
-    _rasterizer->drawLine( _scaling.toPhysical(from), 
-                           _scaling.toPhysical(to) );
-}
+    //_rasterizer->drawLine( _scaling.toPhysical(from), 
+    //                       _scaling.toPhysical(to);
 
-
-void ImageCanvas::drawLine(const Gfx::Line& line)
-{
-    //_rasterizer->drawLine( _scaling.toPhysical( line.from() ), 
-    //                       _scaling.toPhysical( line.to() ) );
-
-    _rasterizer->drawLine( line.from(), line.to() );
+    _rasterizer->drawLine(from, to);
 }
 
 
@@ -423,15 +416,12 @@ void ImageCanvas::drawArc(const PointF& topLeft, const SizeF& size, float degBeg
 }
 
 
-void ImageCanvas::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
+void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF, 
+                               const Gfx::Canvas& canvas)
 {
-    const Canvas* canvas = surface.canvas();
-    if( ! canvas )
-        return;
-
     Gfx::PointF to = _scaling.toPhysical(toF);
 
-    const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(canvas);
+    const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(&canvas);
     if(imageCanvas)
     {
         const Gfx::Image& image = imageCanvas->image();
@@ -439,7 +429,7 @@ void ImageCanvas::drawSurface(const Gfx::PointF& toF, const PaintSurface& surfac
         return;
     }
 
-    Pt::Gfx::Image image = canvas->toImage();
+    Pt::Gfx::Image image = canvas.toImage();
     if( image.format() == format() )
     {
         drawImage(to, image);
@@ -452,17 +442,14 @@ void ImageCanvas::drawSurface(const Gfx::PointF& toF, const PaintSurface& surfac
 }
 
 
-void ImageCanvas::drawSurface(const Gfx::PointF& toF, 
-                               const PaintSurface& surface, const Gfx::RectF& pmRect2)
+void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF,
+                               const Gfx::Canvas& canvas,
+                               const Gfx::RectF& rectF)
 {
-    const Canvas* canvas = surface.canvas();
-    if( ! canvas )
-        return;
-
     Gfx::PointF to = _scaling.toPhysical(toF);
-    Gfx::RectF rect = _scaling.toPhysical(pmRect2);
+    Gfx::RectF rect = _scaling.toPhysical(rectF);
 
-    const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(canvas);
+    const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(&canvas);
     if(imageCanvas)
     {
         const Gfx::Image& image = imageCanvas->image();
@@ -470,7 +457,7 @@ void ImageCanvas::drawSurface(const Gfx::PointF& toF,
         return;
     }
 
-    Pt::Gfx::Image image = canvas->toImage();
+    Pt::Gfx::Image image = canvas.toImage();
     if( image.format() == format() )
     {
         drawImage(to, image, rect);

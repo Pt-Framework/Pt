@@ -255,9 +255,14 @@ void PaintContext::resetClip()
 
 void PaintContext::drawLine(const PointF& from, const PointF& to)
 {   
-    Gfx::Line line(*this, from, to);
+    Gfx::PointF p0 = from + origin();
+    Gfx::PointF p1 = to + origin();
+
+    p0 = _scaling.toPhysical(p0);
+    p1 = _scaling.toPhysical(p1);
+
     if(_canvas)
-        _canvas->drawLine(line);
+        _canvas->drawLine(p0, p1);
 }
 
 
@@ -378,26 +383,26 @@ void PaintContext::drawImage(const Gfx::PointF& to,
 
 
 void PaintContext::drawSurface(const Gfx::PointF& to, 
-                            const Gfx::PaintSurface& surface)
+                               const Gfx::PaintSurface& surface)
 {
     Pt::Gfx::PointF p = to + origin();
 
     if(_canvas)
     {
-        _canvas->drawSurface(p, surface);
+        surface.draw(*_canvas, p);
     }
 }
 
 
 void PaintContext::drawSurface(const Gfx::PointF& to,
-                            const Gfx::PaintSurface& surface,
-                            const Gfx::RectF& rect)
+                               const Gfx::PaintSurface& surface,
+                               const Gfx::RectF& rect)
 {
     Pt::Gfx::PointF p = to + origin();
     
     if(_canvas)
     {
-        _canvas->drawSurface(p, surface, rect);
+        surface.draw(*_canvas, p, rect);
     }
 }
 

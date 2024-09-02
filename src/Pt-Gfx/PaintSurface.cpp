@@ -128,6 +128,44 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
+void PaintSurface::draw(Gfx::Canvas& canvas, 
+                        const Gfx::PointF& to) const
+{
+    onDraw(canvas, to);
+}
+
+
+void PaintSurface::draw(Gfx::Canvas& canvas, 
+                        const Gfx::PointF& to, 
+                        const Gfx::RectF& rect) const
+{
+    onDraw(canvas, to, rect);
+}
+
+
+void PaintSurface::onDraw(Gfx::Canvas& canvas, 
+                          const Gfx::PointF& to) const
+{
+    const Canvas* content = onGetCanvas();
+    if( ! content )
+        return;
+
+    canvas.onDrawCanvas(to, *content);
+}
+
+
+void PaintSurface::onDraw(Gfx::Canvas& canvas, 
+                          const Gfx::PointF& to, 
+                          const Gfx::RectF& rect) const
+{
+    const Canvas* content = onGetCanvas();
+    if( ! content )
+        return;
+
+    canvas.onDrawCanvas(to, *content, rect);
+}
+
+
 PaintContext* PaintSurface::beginPaint(PaintContext* reuse)
 {
     if( ! _canvas )

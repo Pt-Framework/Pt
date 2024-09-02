@@ -59,6 +59,16 @@ PaintRegion::~PaintRegion()
 }
 
 
+void PaintRegion::onDetachSurface(PaintSurface* region)
+{
+    _surface = 0;
+    _area.clear();
+    _hasArea = false;
+
+    PaintSurface::onReset();
+}
+
+
 void PaintRegion::attach(PaintSurface& surface)
 {
     if(_surface)
@@ -182,13 +192,24 @@ void PaintRegion::onReset()
 }
 
 
-void PaintRegion::onDetachSurface(PaintSurface* region)
+void PaintRegion::onDraw(Gfx::Canvas& canvas, 
+                         const Gfx::PointF& to) const
 {
-    _surface = 0;
-    _area.clear();
-    _hasArea = false;
+    if(_surface)
+        _surface->draw(canvas, to, _area);
+}
 
-    PaintSurface::onReset();
+
+void PaintRegion::onDraw(Gfx::Canvas& canvas, 
+                         const Gfx::PointF& to, 
+                         const Gfx::RectF& rect) const
+{
+    Gfx::RectF r = rect;
+    r.shift( _area.topLeft().x(),
+             _area.topLeft().y() );
+    
+    if(_surface)
+        _surface->draw(canvas, to, r);
 }
 
 } // namespace
