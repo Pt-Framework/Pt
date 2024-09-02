@@ -46,26 +46,13 @@ Canvas::~Canvas()
 {
     if(_paint)
     {
-        _paint->onDetachCanvas(*this);
+        _paint->detachCanvas(*this);
         _paint = 0;
     }
 }
 
 
-void Canvas::attachPaint(PaintContext& paint)
-{
-    if(_paint)
-    {
-        onReleasePaint();
-        _paint->onDetachCanvas(*this);
-        _paint = 0;
-    }
-
-    _paint = &paint;
-}
-
-
-void Canvas::detachPaint(PaintContext& paint)
+void Canvas::onDetachPaint(PaintContext& canvas)
 {
     if(_paint)
     {
@@ -104,7 +91,7 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
     if(_paint)
     {
         onReleasePaint();
-        _paint->onDetachCanvas(*this);
+        _paint->detachCanvas(*this);
         _paint = 0;
     }
 
@@ -118,15 +105,14 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
     {
         bool isReused = onBeginPaint(reuse);
         if(isReused)
-        {
-            reuse->init(*this);
-            resetClip();
-            return reuse;
-        }
+            _paint = reuse;
     }
 
-    Gfx::PaintContext* context = onBeginPaint();
-    return context;
+    if( ! _paint )
+        _paint = onBeginPaint();
+    
+    _paint->attachCanvas(*this);
+    return _paint;
 }
 
 } // namespace

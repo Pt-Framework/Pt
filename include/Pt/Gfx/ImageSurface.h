@@ -48,7 +48,7 @@ class ImageCanvas;
 class ImagePaint : public PaintContext
 {
     public:
-        ImagePaint(ImageCanvas& canvas);
+        ImagePaint();
 
         ~ImagePaint();
 

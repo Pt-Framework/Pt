@@ -244,12 +244,12 @@ class PT_GFX_API PaintContext
         virtual void onSetClip(const RectF& clip) = 0;
 
     protected:
-        PaintContext(Canvas& canvas);
+        PaintContext();
 
     private:
-        void init(Canvas& canvas);
+        void attachCanvas(Canvas& canvas);
 
-        void onDetachCanvas(Canvas& canvas);
+        void detachCanvas(Canvas& canvas);
 
     private:
         Canvas*        _canvas;

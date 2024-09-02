@@ -134,9 +134,7 @@ class PT_GFX_API Canvas
                                  const Gfx::RectF& rect) = 0;
 
     private:
-        void attachPaint(PaintContext& paint);
-
-        void detachPaint(PaintContext& paint);
+        void onDetachPaint(PaintContext& paint);
     
     private:
         PaintSurface*     _surface;

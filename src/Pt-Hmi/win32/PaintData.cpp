@@ -164,8 +164,8 @@ namespace Hmi {
 
 #ifndef PT_HMI_WIN32_RASTER
 
-PaintData::PaintData(PixmapSurfaceImpl& canvas)
-: Gfx::PaintContext(canvas)
+PaintData::PaintData()
+: Gfx::PaintContext()
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _pen(0)
 , _penColor()

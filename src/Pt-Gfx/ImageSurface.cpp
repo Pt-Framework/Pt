@@ -50,8 +50,8 @@ namespace Gfx {
 // ImageSurface
 ///////////////////////////////////////////////////////////////////////
 
-ImagePaint::ImagePaint(ImageCanvas& canvas)
-: PaintContext(canvas)
+ImagePaint::ImagePaint()
+: PaintContext()
 {
 }
 
@@ -211,7 +211,7 @@ bool ImageCanvas::onBeginPaint(Gfx::PaintContext* context)
 
 Gfx::PaintContext* ImageCanvas::onBeginPaint()
 {
-    ImagePaint* paintContext = new ImagePaint(*this);
+    ImagePaint* paintContext = new ImagePaint();
     
     _paint = paintContext;
     return paintContext;

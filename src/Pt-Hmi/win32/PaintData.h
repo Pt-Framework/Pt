@@ -61,7 +61,7 @@ class PixmapSurfaceImpl;
 class PaintData : public Gfx::PaintContext
 {
     public:
-        PaintData(PixmapSurfaceImpl& canvas);
+        PaintData();
 
         ~PaintData();
 

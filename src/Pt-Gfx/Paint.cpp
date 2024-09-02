@@ -124,13 +124,9 @@ void Paint::setFont(const Gfx::Font& font)
 // PaintContext
 ///////////////////////////////////////////////////////////////////////
 
-PaintContext::PaintContext(Canvas& canvas)
+PaintContext::PaintContext()
 : _canvas(0)
 {
-    canvas.attachPaint(*this);
-    _canvas = &canvas;
-
-    _scaling = canvas.scaling();
 }
 
 
@@ -138,42 +134,40 @@ PaintContext::~PaintContext()
 {
     if(_canvas)
     {
-        _canvas->detachPaint(*this);
+        _canvas->onDetachPaint(*this);
         _canvas = 0;
     }
 }
 
 
-void PaintContext::onDetachCanvas(Canvas& canvas)
-{
-    if(_canvas)
-    {
-        _canvas = 0;
-    }
-}
-
-
-void PaintContext::init(Canvas& canvas)
+void PaintContext::attachCanvas(Canvas& canvas)
 {
     reset();
-
-    canvas.attachPaint(*this);
-    _canvas = &canvas;
+    
+    double unbounded = std::numeric_limits<double>::max();
+    _region.setSize( SizeF(unbounded, unbounded) );
 
     _scaling = canvas.scaling();
+    _canvas = &canvas;
+}
+
+
+void PaintContext::detachCanvas(Canvas& canvas)
+{
+    _region.clear();
+
+    if(_canvas)
+        _canvas = 0;
 }
 
 
 void PaintContext::reset()
 {
-    double unbounded = std::numeric_limits<double>::max();
-
     _region.clear();
-    _region.setSize( SizeF(unbounded, unbounded) );
 
     if(_canvas)
-    {        
-        _canvas->detachPaint(*this);
+    {
+        _canvas->onDetachPaint(*this);
         _canvas = 0;
     }
 }

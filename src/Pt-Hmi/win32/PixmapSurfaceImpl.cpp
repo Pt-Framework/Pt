@@ -274,7 +274,7 @@ bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context)
 
 Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint()
 {
-    PaintData* paintContext  = new PaintData(*this);
+    PaintData* paintContext  = new PaintData();
 
     _paint = paintContext;
     return paintContext;

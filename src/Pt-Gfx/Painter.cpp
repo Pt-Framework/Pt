@@ -103,7 +103,7 @@ void Painter::finish()
     if( _surface )
     {
         _surface->detachPainter(*this);
-        onDetachSurface(*_surface);
+        _surface = 0;
     }
 }
 
@@ -111,9 +111,7 @@ void Painter::finish()
 void Painter::onDetachSurface(PaintSurface& surface)
 {
     if(_surface)
-    {
         _surface = 0;
-    }
 }
 
 
