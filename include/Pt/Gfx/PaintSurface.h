@@ -69,10 +69,10 @@ class PT_GFX_API PaintSurface
 
         PaintContext* beginPaint(PaintContext* context);
 
-        void draw(Gfx::Canvas& canvas,
+        void draw(PaintContext& paint,
                   const Gfx::PointF& to) const;
         
-        void draw(Gfx::Canvas& canvas,
+        void draw(PaintContext& paint,
                   const Gfx::PointF& to, 
                   const Gfx::RectF& rect) const;
     
@@ -93,10 +93,10 @@ class PT_GFX_API PaintSurface
         virtual void onReset();
 
     protected:
-        virtual void onDraw(Gfx::Canvas& canvas,
+        virtual void onDraw(PaintContext& paint,
                             const Gfx::PointF& to) const;
         
-        virtual void onDraw(Gfx::Canvas& canvas,
+        virtual void onDraw(PaintContext& paint,
                             const Gfx::PointF& to, 
                             const Gfx::RectF& rect) const;
 

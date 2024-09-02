@@ -79,10 +79,10 @@ class PT_GFX_API PaintRegion : public PaintSurface
         virtual void onReset() override;
 
     protected:
-        virtual void onDraw(Gfx::Canvas& canvas,
+        virtual void onDraw(PaintContext& paint,
                             const Gfx::PointF& to) const override;
         
-        virtual void onDraw(Gfx::Canvas& canvas,
+        virtual void onDraw(PaintContext& paint,
                             const Gfx::PointF& to, 
                             const Gfx::RectF& rect) const override;
 

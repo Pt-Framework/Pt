@@ -56,7 +56,6 @@ class Polyline;
 class PT_GFX_API Canvas
 {
     friend class PaintContext;
-    friend class PaintSurface;
 
     public:
         explicit Canvas(PaintSurface& surface);

@@ -385,12 +385,7 @@ void PaintContext::drawImage(const Gfx::PointF& to,
 void PaintContext::drawSurface(const Gfx::PointF& to, 
                                const Gfx::PaintSurface& surface)
 {
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_canvas)
-    {
-        surface.draw(*_canvas, p);
-    }
+    surface.draw(*this, to);
 }
 
 
@@ -398,12 +393,28 @@ void PaintContext::drawSurface(const Gfx::PointF& to,
                                const Gfx::PaintSurface& surface,
                                const Gfx::RectF& rect)
 {
+    surface.draw(*this, to, rect);
+}
+
+
+void PaintContext::drawCanvas(const Gfx::PointF& to, 
+                              const Gfx::Canvas& canvas)
+{
     Pt::Gfx::PointF p = to + origin();
-    
+
     if(_canvas)
-    {
-        surface.draw(*_canvas, p, rect);
-    }
+        _canvas->onDrawCanvas(p, canvas);
+}
+
+
+void PaintContext::drawCanvas(const Gfx::PointF& to,
+                              const Gfx::Canvas& canvas,
+                              const Gfx::RectF& rect)
+{
+    Pt::Gfx::PointF p = to + origin();
+
+    if(_canvas)
+        _canvas->onDrawCanvas(p, canvas, rect);
 }
 
 } // namespace

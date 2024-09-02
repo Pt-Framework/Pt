@@ -192,15 +192,15 @@ void PaintRegion::onReset()
 }
 
 
-void PaintRegion::onDraw(Gfx::Canvas& canvas, 
+void PaintRegion::onDraw(PaintContext& paint, 
                          const Gfx::PointF& to) const
 {
     if(_surface)
-        _surface->draw(canvas, to, _area);
+        _surface->draw(paint, to, _area);
 }
 
 
-void PaintRegion::onDraw(Gfx::Canvas& canvas, 
+void PaintRegion::onDraw(PaintContext& paint, 
                          const Gfx::PointF& to, 
                          const Gfx::RectF& rect) const
 {
@@ -209,7 +209,7 @@ void PaintRegion::onDraw(Gfx::Canvas& canvas,
              _area.topLeft().y() );
     
     if(_surface)
-        _surface->draw(canvas, to, r);
+        _surface->draw(paint, to, r);
 }
 
 } // namespace

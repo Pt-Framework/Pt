@@ -128,33 +128,33 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-void PaintSurface::draw(Gfx::Canvas& canvas, 
+void PaintSurface::draw(PaintContext& paint, 
                         const Gfx::PointF& to) const
 {
-    onDraw(canvas, to);
+    onDraw(paint, to);
 }
 
 
-void PaintSurface::draw(Gfx::Canvas& canvas, 
+void PaintSurface::draw(PaintContext& paint, 
                         const Gfx::PointF& to, 
                         const Gfx::RectF& rect) const
 {
-    onDraw(canvas, to, rect);
+    onDraw(paint, to, rect);
 }
 
 
-void PaintSurface::onDraw(Gfx::Canvas& canvas, 
+void PaintSurface::onDraw(PaintContext& paint, 
                           const Gfx::PointF& to) const
 {
     const Canvas* content = onGetCanvas();
     if( ! content )
         return;
 
-    canvas.onDrawCanvas(to, *content);
+    paint.drawCanvas(to, *content);
 }
 
 
-void PaintSurface::onDraw(Gfx::Canvas& canvas, 
+void PaintSurface::onDraw(PaintContext& paint, 
                           const Gfx::PointF& to, 
                           const Gfx::RectF& rect) const
 {
@@ -162,7 +162,7 @@ void PaintSurface::onDraw(Gfx::Canvas& canvas,
     if( ! content )
         return;
 
-    canvas.onDrawCanvas(to, *content, rect);
+    paint.drawCanvas(to, *content, rect);
 }
 
 

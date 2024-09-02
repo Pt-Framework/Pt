@@ -101,7 +101,6 @@ class Polyline;
 
 /** @brief Paint context.
 */
-
 class PT_GFX_API Paint
 {
     public:
@@ -229,6 +228,13 @@ class PT_GFX_API PaintContext
         void drawSurface(const Gfx::PointF& to,
                          const Gfx::PaintSurface& surface,
                          const Gfx::RectF& rect);
+
+        void drawCanvas(const Gfx::PointF& to, 
+                        const Gfx::Canvas& canvas);
+
+        void drawCanvas(const Gfx::PointF& to,
+                        const Gfx::Canvas& canvas,
+                        const Gfx::RectF& rect);
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
