@@ -70,10 +70,7 @@ class PT_GFX_API Canvas
 
         Image toImage() const;
 
-        Gfx::PaintContext* beginPaint(const Gfx::Paint& paint);
-
-        Gfx::PaintContext* beginPaint(const Gfx::Paint& paint,
-                                      Gfx::PaintContext* context);
+        Gfx::PaintContext* beginPaint(Gfx::PaintContext* context);
 
     protected:
         virtual const Scaling& onGetScaling() const = 0;

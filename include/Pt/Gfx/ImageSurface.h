@@ -224,8 +224,7 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
   protected:
     virtual const Canvas* onGetCanvas() const override;
 
-    virtual Gfx::PaintContext* onBeginPaint(const Gfx::Paint& paint, 
-                                            Gfx::PaintContext* context) override;
+    virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* context) override;
 
     virtual const Gfx::ImageFormat& onGetFormat() const override;
 

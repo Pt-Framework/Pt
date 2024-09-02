@@ -40,7 +40,6 @@ PixmapSurface::PixmapSurface()
 : _impl(0)
 {
     _impl = new PixmapSurfaceImpl(*this);
-    setCanvas( _impl->implCanvas() );
 }
 
 
@@ -95,10 +94,9 @@ const Gfx::Canvas* PixmapSurface::onGetCanvas() const
 }
 
 
-Gfx::PaintContext* PixmapSurface::onBeginPaint(const Gfx::Paint& paint, 
-                                               Gfx::PaintContext* context) 
+Gfx::PaintContext* PixmapSurface::onBeginPaint(Gfx::PaintContext* context) 
 {
-    return _impl->beginPaint(paint, context);
+    return _impl->beginPaint(context);
 }
 
 

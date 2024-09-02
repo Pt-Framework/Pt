@@ -155,19 +155,27 @@ void PaintContext::onDetachCanvas(Canvas& canvas)
 
 void PaintContext::init(Canvas& canvas)
 {
-    if(_canvas == &canvas)
-        return;
+    reset();
+
+    canvas.attachPaint(*this);
+    _canvas = &canvas;
+
+    _scaling = canvas.scaling();
+}
+
+
+void PaintContext::reset()
+{
+    double unbounded = std::numeric_limits<double>::max();
+
+    _region.clear();
+    _region.setSize( SizeF(unbounded, unbounded) );
 
     if(_canvas)
     {        
         _canvas->detachPaint(*this);
         _canvas = 0;
     }
-
-    canvas.attachPaint(*this);
-    _canvas = &canvas;
-
-    _scaling = canvas.scaling();
 }
 
 
@@ -192,61 +200,6 @@ void PaintContext::setRegion(const RectF& r)
 const Scaling& PaintContext::scaling() const
 {
     return _scaling;
-}
-
-
-void PaintContext::setPaint(const Gfx::Paint& paint)
-{
-    setCompositionMode( paint.compositionMode() );
-    setPen( paint.pen() );
-    setBrush( paint.brush() );
-    setFont( paint.font() );
-
-    const Gfx::RectF& clip = paint.clip();
-
-    if( clip.isNull() )
-        resetClip();
-    else
-        setClip(clip);
-}
-
-
-bool PaintContext::reset(Canvas& canvas)
-{
-    if(_canvas == &canvas)
-        return true;
-
-
-    bool ok = canvas.onBeginPaint(this);
-    if( ! ok )
-        return false;
-
-    if(_canvas)
-    {        
-        _canvas->detachPaint(*this);
-        _canvas = 0;
-    }
-
-    canvas.attachPaint(*this);
-    _canvas = &canvas;
-
-    _scaling = canvas.scaling();
-    return true;
-}
-
-
-void PaintContext::reset()
-{
-    double unbounded = std::numeric_limits<double>::max();
-
-    _region.clear();
-    _region.setSize( SizeF(unbounded, unbounded) );
-
-    if(_canvas)
-    {        
-        _canvas->detachPaint(*this);
-        _canvas = 0;
-    }
 }
 
 

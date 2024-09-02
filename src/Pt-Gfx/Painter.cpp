@@ -70,11 +70,18 @@ void Painter::begin(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
    
-   PaintContext* reuse = _paintContext;
-   _paintContext = surface.beginPaint(_paint, reuse);
+    PaintContext* reuse = _paintContext;
+    _paintContext = surface.beginPaint(reuse);
    
-   if(reuse != _paintContext)
-      delete reuse;
+    if(reuse != _paintContext)
+    {
+        delete reuse;
+
+        _paintContext->setCompositionMode( _paint.compositionMode() );
+        _paintContext->setPen( _paint.pen() );
+        _paintContext->setBrush( _paint.brush() );
+        _paintContext->setFont( _paint.font() );
+    }
 
     if(_paintContext)
     {

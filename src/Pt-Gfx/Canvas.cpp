@@ -99,22 +99,7 @@ Image Canvas::toImage() const
 }
 
 
-Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint)
-{
-    if(_paint)
-    {
-        onReleasePaint();
-        _paint->onDetachCanvas(*this);
-        _paint = 0;
-    }
-
-    Gfx::PaintContext* context = onBeginPaint();
-    context->setPaint(paint);
-    return context;
-}
-
-
-Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint, Gfx::PaintContext* reuse)
+Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
 {
     if(_paint)
     {
@@ -132,15 +117,15 @@ Gfx::PaintContext* Canvas::beginPaint(const Gfx::Paint& paint, Gfx::PaintContext
     if(reuse)
     {
         bool isReused = onBeginPaint(reuse);
-        if( isReused )
+        if(isReused)
         {
             reuse->init(*this);
+            resetClip();
             return reuse;
         }
     }
 
     Gfx::PaintContext* context = onBeginPaint();
-    context->setPaint(paint);
     return context;
 }
 

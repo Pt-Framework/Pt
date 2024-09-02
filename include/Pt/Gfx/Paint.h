@@ -178,10 +178,6 @@ class PT_GFX_API PaintContext
 
         const Scaling& scaling() const;
 
-        void setPaint(const Gfx::Paint& paint);
-
-        bool reset(Canvas& canvas);
-
         void reset();
 
     public:
@@ -250,9 +246,9 @@ class PT_GFX_API PaintContext
     protected:
         PaintContext(Canvas& canvas);
 
+    private:
         void init(Canvas& canvas);
 
-    private:
         void onDetachCanvas(Canvas& canvas);
 
     private:

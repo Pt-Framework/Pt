@@ -558,13 +558,9 @@ const Canvas* ImageSurface::onGetCanvas() const
 }
 
 
-Gfx::PaintContext* ImageSurface::onBeginPaint(const Gfx::Paint& paint, 
-                                              Gfx::PaintContext* reuse) 
+Gfx::PaintContext* ImageSurface::onBeginPaint(Gfx::PaintContext* reuse) 
 {
-    if( reuse && reuse->reset(*_canvas) )
-        return reuse;
-
-    return _canvas->beginPaint(paint);
+    return _canvas->beginPaint(reuse);
 }
 
 
