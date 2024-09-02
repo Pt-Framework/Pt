@@ -239,8 +239,6 @@ void PaintContext::setClip(const RectF& rect)
     Gfx::RectF clip = rect;
     clip.shift( origin().x(), origin().y() );
 
-    onSetClip(clip);
-
     if(_canvas)
     {
         _canvas->setClip(clip);
@@ -250,8 +248,6 @@ void PaintContext::setClip(const RectF& rect)
 
 void PaintContext::resetClip()
 {
-    onResetClip();
-
     if(_canvas)
         _canvas->resetClip();
 }

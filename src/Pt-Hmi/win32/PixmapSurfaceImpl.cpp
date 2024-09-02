@@ -384,29 +384,23 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
     if( ! _paint )
         return;
 
-    setClip(_paint);
+    _paint->resetClip(&clipRect);
+    
+    HRGN hrgn = _paint->clipRect();
+    if(hrgn)
+        SelectClipRgn(_dc, hrgn);
+    else
+        SelectClipRgn(_dc, NULL);
 }
 
 
 void PixmapSurfaceImpl::resetClip()
 {  
-    setClip(0);
-}
-
-
-void PixmapSurfaceImpl::setClip(const PaintData* paint)
-{
-    if( ! paint )
-    {
-        SelectClipRgn(_dc, NULL);
+    if( ! _paint )
         return;
-    }
 
-    HRGN hrgn = paint->clipRect();
-    if(hrgn)
-        SelectClipRgn(_dc, hrgn);
-    else
-        SelectClipRgn(_dc, NULL);
+    _paint->resetClip();
+    SelectClipRgn(_dc, NULL);
 }
 
 

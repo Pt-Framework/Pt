@@ -419,26 +419,10 @@ HRGN PaintData::clipRect() const
 }
 
 
-void PaintData::onSetClip(const Gfx::RectF& rectF)
+void PaintData::resetClip(const Gfx::RectF* rectF)
 {
-    updateClip(&rectF);
+    // TODO: reuse HRGN instead of always creating a new one
 
-    //if(_canvas)
-    //    _canvas->setClip(this);
-}
-
-
-void PaintData::onResetClip()
-{
-    updateClip(0);
-
-    //if(_canvas)
-    //    _canvas->setClip(0);
-}
-
-
-void PaintData::updateClip(const Gfx::RectF* rectF)
-{
     if(_clipRect)
     {
         DeleteObject(_clipRect);

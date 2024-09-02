@@ -80,11 +80,7 @@ class ImagePaint : public PaintContext
         virtual void onSetBrush(const Gfx::Brush& brush) override;
 
         virtual void onSetFont(const Gfx::Font& font) override;
-
-        virtual void onSetClip(const Gfx::RectF& rectF) override;
-
-        virtual void onResetClip() override;
-    
+   
     private:
         Gfx::Scaling         _scaling;
         Gfx::CompositionMode _compositionMode;

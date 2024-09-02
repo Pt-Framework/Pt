@@ -83,6 +83,8 @@ class PaintData : public Gfx::PaintContext
 
         HRGN clipRect() const;
 
+        void resetClip(const Gfx::RectF* clip = 0);
+
         const Gfx::CompositionMode& compositionMode() const;
 
     protected:
@@ -94,10 +96,6 @@ class PaintData : public Gfx::PaintContext
 
         virtual void onSetFont(const Gfx::Font& font) override;
 
-        virtual void onSetClip(const Gfx::RectF& rectF) override;
-
-        virtual void onResetClip() override;
-
     public:
         void updateMode(const Gfx::CompositionMode& mode);
 
@@ -106,8 +104,6 @@ class PaintData : public Gfx::PaintContext
         void updateBrush(const Gfx::Brush& brush);
 
         void updateFont(const Gfx::Font& font);
-
-        void updateClip(const Gfx::RectF* clip);
 
     private:
         Gfx::Scaling              _scaling;

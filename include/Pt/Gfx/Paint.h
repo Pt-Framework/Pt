@@ -239,10 +239,6 @@ class PT_GFX_API PaintContext
 
         virtual void onSetFont(const Gfx::Font& font) = 0;
 
-        virtual void onResetClip() = 0;
-        
-        virtual void onSetClip(const RectF& clip) = 0;
-
     protected:
         PaintContext();
 

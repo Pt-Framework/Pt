@@ -90,16 +90,6 @@ void ImagePaint::onSetFont(const Gfx::Font& font)
     _font = font;
 }
 
-
-void ImagePaint::onSetClip(const Gfx::RectF& rectF)
-{
-}
-
-
-void ImagePaint::onResetClip()
-{
-}
-
 ///////////////////////////////////////////////////////////////////////
 // ImageCanvas
 ///////////////////////////////////////////////////////////////////////

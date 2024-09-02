@@ -168,7 +168,6 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         virtual void onReleasePaint() override;
 
-
     public:
         void setCompositionMode(const PaintData& paint);
 
@@ -177,8 +176,6 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         void setBrush(const PaintData& paint);
 
         void setFont(const PaintData& paint);
-
-        void setClip(const PaintData* paint);
 
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode) override;
