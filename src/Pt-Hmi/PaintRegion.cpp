@@ -27,8 +27,6 @@
   MA 02110-1301 USA
 */
 
-#include "PaintData.h"
-
 #include <Pt/Hmi/PaintRegion.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/Painter.h>
@@ -43,7 +41,7 @@ PaintRegion::PaintRegion()
 }
 
 
-PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
+PaintRegion::PaintRegion(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 : _surface(&surface)
 , _area(rect)
 {
@@ -55,300 +53,87 @@ PaintRegion::~PaintRegion()
 }
 
 
-void PaintRegion::reset(Hmi::PaintSurface& surface, const Gfx::RectF& rect)
+void PaintRegion::reset(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
+    if(_surface)
+        reset();
+
     _surface = &surface;
     _area = rect;
-
-    Gfx::Painter* painter = this->painter();
-    if(painter)
-        painter->begin(*this);
 }
 
 
 void PaintRegion::reset()
 {
-    Gfx::Painter* painter = this->painter();
-    if(painter)
-        painter->finish();
+    onReset();
 
     _surface = 0;
     _area.clear(); 
 }
 
 
-const Gfx::SizeF& PaintRegion::onSize() const
+const Gfx::Canvas* PaintRegion::onGetCanvas() const
 {
-    return _area.size();
+    return _surface ? _surface->canvas() : 0;
 }
 
 
-double PaintRegion::onScaleFactor() const
-{
-    if(_surface)
-        return _surface->scaleFactor();
-
-    return 1.0;
-}
-
-
-Gfx::PaintData* PaintRegion::onBegin(Gfx::Painter& painter)
-{
-    return onBeginPaint(painter);
-}
-
-
-PaintData* PaintRegion::onBeginPaint(Gfx::Painter& painter)
-{
-    PaintData* p = 0;
-
-    if(_surface)
-    {
-        p = _surface->onBeginPaint(painter);
-        p->beginRegion(_area);
-    }
-
-    return p;
-}
-
-
-void PaintRegion::onFinish()
-{
-}
-
-
-PaintData* PaintRegion::paintContext()
-{
-    if(_surface)
-        return _surface->paintContext();
-
-    return 0;
-}
-
-
-const Gfx::ImageFormat& PaintRegion::format() const
+const Gfx::ImageFormat& PaintRegion::onGetFormat() const
 {
     return _surface ? _surface->format()
                     : Gfx::ImageFormat::argb32();
 }
 
 
-void PaintRegion::setClip(const Gfx::RectF& clip)
+const Gfx::SizeF& PaintRegion::onGetSize() const
 {
-    //if(_surface)
-    //    _surface->setClip( Gfx::RectF( clip.topLeft() +  _area.topLeft(), clip.size()));
+    return _surface ? _surface->size() : _area.size();
 }
 
 
-void PaintRegion::resetClip()
+const Gfx::Scaling& PaintRegion::onGetScaling() const
 {
-    //if(_surface)
-    //    _surface->resetClip();
+    return _surface ? _surface->scaling() : _scaling;
 }
 
 
-void PaintRegion::setCompositionMode(const Gfx::CompositionMode& mode)
+Gfx::PaintContext* PaintRegion::onBeginPaint(Gfx::PaintContext* context) 
 {
-    //if(_surface)
-    //    _surface->setCompositionMode(mode);
+    if( ! _surface )
+        return 0;
+
+    Gfx::PaintContext* paintContext = _surface->beginPaint(context);
+    if( ! paintContext )
+        return paintContext;
+
+    Gfx::RectF r = paintContext->region();
+    r.shift( _area.topLeft().x(),
+             _area.topLeft().y() );
+    r.setSize( _area.size() );
+
+    paintContext->setRegion(r);
+    return paintContext;
 }
 
 
-void PaintRegion::setPen(const Gfx::Pen& pen)
+void PaintRegion::onDraw(Gfx::PaintContext& paint, 
+                         const Gfx::PointF& to) const
 {
     if(_surface)
-        _surface->setPen(pen);
+        _surface->draw(paint, to, _area);
 }
 
 
-void PaintRegion::setBrush(const Gfx::Brush& brush)
+void PaintRegion::onDraw(Gfx::PaintContext& paint, 
+                         const Gfx::PointF& to, 
+                         const Gfx::RectF& rect) const
 {
-    //if(_surface)
-    //    _surface->setBrush(brush);
-}
-
-
-void PaintRegion::setFont(const Gfx::Font& font)
-{
-    //if(_surface)
-    //    _surface->setFont(font);
-}
-
-
-Gfx::FontMetrics PaintRegion::fontMetrics(const Pt::String& text) const
-{
-    //return _surface ? _surface->fontMetrics(text)
-    //                : Gfx::FontMetrics();
-
-    return Gfx::FontMetrics();
-}
-
-
-void PaintRegion::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
-{
-    //if(_surface)
-    //    _surface->drawLine(fromF + _area.topLeft(),
-    //                       toF + _area.topLeft() );
-}
-
-
-void PaintRegion::drawText(const Gfx::PointF& toF, const Pt::String& text)
-{
-    //if(_surface)
-    //    _surface->drawText(toF + _area.topLeft(), text);
-}
-
-
-void PaintRegion::drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans)
-{
-    //if(_surface)
-    //    _surface->drawText(to + _area.topLeft(), text, trans);
-}
-
-
-void PaintRegion::drawRect(const Gfx::RectF& r)
-{
-    //Gfx::RectF rect(r);
-    //rect.setOrigin(r.topLeft() + _area.topLeft());
-
-    //if(_surface)
-    //    _surface->drawRect(rect);
-}
-
-
-void PaintRegion::fillRect(const Gfx::RectF& r)
-{
-    //Gfx::RectF rect(r);
-    //rect.setOrigin(r.topLeft() + _area.topLeft());
-
-    //if(_surface)
-    //    _surface->fillRect(rect);
-}
-
-
-void PaintRegion::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
-{
-    //if(_surface)
-    //    _surface->drawEllipse(topLeftF + _area.topLeft(), sizeF);
-}
-
-
-void PaintRegion::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
-{
-    //if(_surface)
-    //    _surface->fillEllipse(topLeftF + _area.topLeft(), sizeF);
-}
-
-
-void PaintRegion::drawPolyline(const Gfx::PointF* points, size_t pointCount)
-{
-    //std::vector<Gfx::PointF> translated(pointCount);
-
-    //for (size_t i = 0; i < pointCount; i++)
-    //    translated[i] = points[i] + _area.topLeft();
-
-    //if(_surface)
-    //    _surface->drawPolyline(&translated[0], pointCount);
-}
-
-
-void PaintRegion::fillPolygon(const Gfx::PointF* points, size_t pointCount)
-{
-    //std::vector<Gfx::PointF> translated(pointCount);
-
-    //for (size_t i = 0; i < pointCount; i++)
-    //  translated[i] = points[i] + _area.topLeft();
-
-    //if(_surface)
-    //    _surface->fillPolygon(&translated[0], pointCount);
-}
-
-
-void PaintRegion::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
-{
-    //if(_surface)
-    //    _surface->drawImage(toF + _area.topLeft(), image);
-}
-
-
-void PaintRegion::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect)
-{
-    //if(_surface)
-    //    _surface->drawImage(to + _area.topLeft(), image, imgRect);
-}
-
-
-void PaintRegion::drawPath(const Gfx::Path& path, float smoothness)
-{
-    //Gfx::Path tpath = path;
-
-    //Gfx::Transform trans;
-    //trans.translate(_area.topLeft().x(), _area.topLeft().y());
-
-    //tpath.transform(trans);
-
-    //if(_surface)
-    //    _surface->drawPath(tpath, smoothness);
-}
-
-
-void PaintRegion::fillPath(const Gfx::Path& path, float smoothness)
-{
-    //Gfx::Path tpath = path;
-
-    //Gfx::Transform trans;
-    //trans.translate(_area.topLeft().x(), _area.topLeft().y());
-
-    //tpath.transform(trans);
-
-    //if(_surface)
-    //    _surface->fillPath(tpath, smoothness);
-}
-
-
-void PaintRegion::drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& surface)
-{
-    //if(_surface)
-    //    _surface->drawSurface(_area.topLeft() + toF, surface);
-}
-
-
-void PaintRegion::drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& surface, const Gfx::RectF& pmRect)
-{
-    //if(_surface)
-    //    _surface->drawSurface(_area.topLeft() + toF, surface, pmRect);
-}
-
-
-Gfx::Image PaintRegion::toImage() const
-{
-    return _surface ? _surface->toImage()
-                    : Gfx::Image();
-}
-
-
-void PaintRegion::drawChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void PaintRegion::fillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void PaintRegion::drawPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void PaintRegion::fillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void PaintRegion::drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-{
+    Gfx::RectF r = rect;
+    r.shift( _area.topLeft().x(),
+             _area.topLeft().y() );
+    
+    if(_surface)
+        _surface->draw(paint, to, r);
 }
 
 } // namespace

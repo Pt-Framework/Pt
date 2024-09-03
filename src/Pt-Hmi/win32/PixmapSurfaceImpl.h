@@ -32,7 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 
-//#define PT_HMI_WIN32_RASTER 1
+#define PT_HMI_WIN32_RASTER 1
 
 #ifdef PT_HMI_WIN32_RASTER
 
@@ -107,6 +107,15 @@ class PixmapSurfaceImpl
         {
             return _image.beginPaint(context);
         }
+
+        void drawPixmap(const Gfx::PointF& toF, 
+                        const PixmapSurface& surface,
+                        const Gfx::CompositionMode& mode);
+
+        void drawPixmap(const Gfx::PointF& toF, 
+                        const PixmapSurface& surface, 
+                        const Gfx::RectF& rect,
+                        const Gfx::CompositionMode& mode);
 
         const Gfx::ImageSurface& imageSurface() const
         {
@@ -263,6 +272,15 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         void drawPixmap(const Gfx::PointF& toF, 
                         const PixmapSurfaceImpl& surface, 
                         const Gfx::RectF& rect);
+
+        void drawPixmap(const Gfx::PointF& toF, 
+                        const PixmapSurface& surface,
+                        const Gfx::CompositionMode& mode);
+
+        void drawPixmap(const Gfx::PointF& toF, 
+                        const PixmapSurface& surface, 
+                        const Gfx::RectF& rect,
+                        const Gfx::CompositionMode& mode);
 
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 

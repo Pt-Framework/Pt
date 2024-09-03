@@ -88,6 +88,23 @@ void PixmapSurface::setScaleFactor(double scaling)
 }
 
 
+void PixmapSurface::drawPixmap(const Gfx::PointF& to, 
+                               const PixmapSurface& pixmap,
+                               const Gfx::CompositionMode& mode)
+{
+    //_impl->drawPixmap(to, pixmap, mode);
+}
+
+
+void PixmapSurface::drawPixmap(const Gfx::PointF& to,
+                               const PixmapSurface& pixmap, 
+                               const Gfx::RectF& rect,
+                               const Gfx::CompositionMode& mode)
+{
+    //_impl->drawPixmap(to, pixmap, rect, mode);
+}
+
+
 const Gfx::Canvas* PixmapSurface::onGetCanvas() const
 {
     return _impl->getCanvas();

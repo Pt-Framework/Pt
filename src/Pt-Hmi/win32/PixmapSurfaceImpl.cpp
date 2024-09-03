@@ -51,6 +51,21 @@ PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
 { 
 }
 
+
+void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
+                                   const PixmapSurface& surface,
+                                   const Gfx::CompositionMode& mode)
+{
+}
+
+
+void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
+                                   const PixmapSurface& pm, 
+                                   const Gfx::RectF& rectF,
+                                   const Gfx::CompositionMode& mode)
+{
+}
+
 } // namespace
 
 } // namespace
@@ -843,6 +858,21 @@ void PixmapSurfaceImpl::onDrawCanvas(const Gfx::PointF& to,
     Pt::Gfx::Image dest( format(), image.size() );
     Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
     drawImage(to, dest, rect);
+}
+
+
+void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
+                                   const PixmapSurface& surface,
+                                   const Gfx::CompositionMode& mode)
+{
+}
+
+
+void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
+                                   const PixmapSurface& pm, 
+                                   const Gfx::RectF& rectF,
+                                   const Gfx::CompositionMode& mode)
+{
 }
 
 

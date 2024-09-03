@@ -79,6 +79,15 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
             return _impl;
         }
 
+        void drawPixmap(const Gfx::PointF& to, 
+                        const PixmapSurface& pixmap,
+                        const Gfx::CompositionMode& mode);
+
+        void drawPixmap(const Gfx::PointF& to,
+                        const PixmapSurface& pixmap, 
+                        const Gfx::RectF& rect,
+                        const Gfx::CompositionMode& mode);
+
     protected:
         virtual const Gfx::Canvas* onGetCanvas() const override;
 

@@ -29,7 +29,8 @@
 #ifndef Pt_Hmi_PaintRegion_h
 #define Pt_Hmi_PaintRegion_h
 
-#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/PaintSurface.h>
 
 namespace Pt {
 
@@ -39,94 +40,44 @@ class PixmapSurface;
 
 /** @brief Drawing region on another surface.
 */
-class PT_HMI_API PaintRegion : public PaintSurface
+class PT_HMI_API PaintRegion : public Gfx::PaintSurface
 {
     public:
         PaintRegion();
 
-        PaintRegion(Hmi::PaintSurface& surface, const Gfx::RectF& rect);
+        PaintRegion(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
         virtual ~PaintRegion();
 
-        void reset(Hmi::PaintSurface& surface, const Gfx::RectF& rect);
+        void reset(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
         void reset();
 
-        virtual Gfx::Image toImage() const;
+    protected:
+        virtual const Gfx::Canvas* onGetCanvas() const override;
+
+        virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* context) override;
+
+        virtual const Gfx::ImageFormat& onGetFormat() const override;
+
+        virtual const Gfx::SizeF& onGetSize() const override;
+
+        virtual const Gfx::Scaling& onGetScaling() const override;
+
+        virtual void onReset() override;
 
     protected:
-        virtual const Gfx::SizeF& onSize() const;
-
-        virtual double onScaleFactor() const;
-
-        virtual Gfx::PaintData* onBegin(Gfx::Painter& painter);
-
-        PaintData* onBeginPaint(Gfx::Painter& painter);
-
-        virtual void onFinish();
-
-        virtual PaintData* paintContext();
-
-    protected:
-        virtual const Gfx::ImageFormat& format() const;
-
-        virtual void setClip( const Gfx::RectF& clip);
-
-        virtual void resetClip();
-
-        virtual void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        virtual void setPen(const Gfx::Pen& pen);
-
-        virtual void setBrush(const Gfx::Brush& brush);
-
-        virtual void setFont(const Gfx::Font& font);
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text, const Gfx::Transform& trans);
-
-        virtual void drawRect(const Gfx::RectF& rectangle);
-
-        virtual void fillRect(const Gfx::RectF& rectangle);
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
-
-        virtual void drawPath(const Gfx::Path& path, float smoothness);
-
-        virtual void fillPath(const Gfx::Path& path, float smoothness);
-
-        virtual void drawChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-        virtual void fillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-        virtual void drawPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-        virtual void fillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-        virtual void drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
+        virtual void onDraw(Gfx::PaintContext& paint,
+                            const Gfx::PointF& to) const override;
+        
+        virtual void onDraw(Gfx::PaintContext& paint,
+                            const Gfx::PointF& to, 
+                            const Gfx::RectF& rect) const override;
 
     private:
-        Hmi::PaintSurface* _surface;
+        Gfx::PaintSurface* _surface;
         Gfx::RectF         _area;
+        Gfx::Scaling       _scaling;
 };
 
 } // namespace
