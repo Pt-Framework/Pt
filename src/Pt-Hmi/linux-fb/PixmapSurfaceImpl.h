@@ -30,6 +30,7 @@
 #ifndef Pt_Hmi_PixmapSurfaceImpl_h
 #define Pt_Hmi_PixmapSurfaceImpl_h
 
+#include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/ImageSurface.h>
 
 namespace Pt {
@@ -38,28 +39,81 @@ namespace Hmi {
 
 class PixmapSurface;
 
-class PixmapSurfaceImpl : public Gfx::ImageSurface
+class PixmapSurfaceImpl 
 {
-    friend class PixmapSurface;
-
     public:
-        PixmapSurfaceImpl()
-        { }
+        explicit PixmapSurfaceImpl(PixmapSurface& surface);
 
         void clear(const Gfx::Color& c)
         { }
 
         void set(const Gfx::Image& image)
         {
-            reset(image);
+            _image.reset(image);
         }
 
-    protected:
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const Gfx::PaintSurface& surface);
+        void resize(const Gfx::SizeF& size)
+        {
+            _image.resize(size);
+        }
 
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const Gfx::PaintSurface& pm, const Gfx::RectF& pmRect);
+        const Gfx::SizeF& size() const
+        {
+            return _image.size();
+        }
+
+        const Gfx::Scaling& surfaceScaling() const
+        {
+            return _image.scaling();
+        }
+
+        void setScaleFactor(double scaleFactor)
+        {
+            _image.setScaleFactor(scaleFactor);
+        }
+
+        const Gfx::ImageFormat& format() const
+        {
+            return _image.format();
+        }
+
+        const Gfx::Canvas* getCanvas() const
+        {
+            return _image.canvas();
+        }
+
+        Gfx::PaintContext* beginPaint(Gfx::PaintContext* context)
+        {
+            return _image.beginPaint(context);
+        }
+
+        const Gfx::ImageSurface& imageSurface() const
+        {
+            return _image;
+        }
+
+        static const std::string& defaultFont()
+        {
+            return Gfx::ImageSurface::defaultFont();
+        }
+
+        static void setDefaultFont(const std::string& name)
+        {
+            Gfx::ImageSurface::setDefaultFont(name);
+        }
+
+        static std::vector<std::string> fontNames()
+        {
+            return Gfx::ImageSurface::fontNames();
+        }
+        
+        static void setFontDir(const System::Path& path)
+        {
+            Gfx::ImageSurface::setFontDir(path);
+        }
+    
+    private:
+        Gfx::ImageSurface _image;
 };
 
 } // namespace

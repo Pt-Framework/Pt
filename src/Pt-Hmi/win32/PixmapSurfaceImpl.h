@@ -30,24 +30,32 @@
 #ifndef Pt_Hmi_PixmalSurfaceImpl_h
 #define Pt_Hmi_PixmalSurfaceImpl_h
 
+#include <Pt/Hmi/Api.h>
+
+//#define PT_HMI_WIN32_RASTER 1
+
+#ifdef PT_HMI_WIN32_RASTER
+
 #include <Pt/Gfx/ImageSurface.h>
+
+#else
 
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Path.h>
 #include <Pt/System/Path.h>
 
 #include <vector>
 
 #include <Windows.h>
 
-//#define PT_HMI_WIN32_RASTER 1
+#endif
 
 namespace Pt {
 
 namespace Hmi {
 
-class PaintData;
 class PixmapSurface;
 
 #ifdef PT_HMI_WIN32_RASTER
@@ -55,7 +63,7 @@ class PixmapSurface;
 class PixmapSurfaceImpl 
 {
     public:
-        explicit PixmapSurfaceImpl(PixmapSurface&);
+        explicit PixmapSurfaceImpl(PixmapSurface& surface);
 
         void clear(const Gfx::Color& c)
         { }
@@ -131,10 +139,12 @@ class PixmapSurfaceImpl
 
 #else // PT_HMI_WIN32_RASTER
 
+class PaintData;
+
 class PixmapSurfaceImpl : public Gfx::Canvas
 {
     public:
-        PixmapSurfaceImpl(Gfx::PaintSurface& surface);
+        PixmapSurfaceImpl(PixmapSurface& surface);
 
         virtual ~PixmapSurfaceImpl();
         

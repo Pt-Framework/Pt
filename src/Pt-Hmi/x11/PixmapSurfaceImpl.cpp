@@ -60,33 +60,10 @@ const Gfx::ImageFormat& getScreenFormat()
 }
 
 
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
-                                    const Gfx::PaintSurface& surface)
-{
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
-    if(pixmap)
-    {
-        Gfx::ImageSurface::drawSurface( to, *pixmap->impl() );
-        return;
-    }
-
-    ImageSurface::drawSurface(to, surface);
+PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
+{ 
 }
 
-
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
-                                    const Gfx::PaintSurface& surface,
-                                    const Gfx::RectF& rect)
-{
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
-    if(pixmap)
-    {
-        Gfx::ImageSurface::drawSurface(to, *pixmap->impl(), rect);
-        return;
-    }
-
-    ImageSurface::drawSurface(to, surface, rect);
-}
 
 } // namespace
 
