@@ -297,27 +297,25 @@ void ImageCanvas::drawText(const PointF& to, const Pt::String& text,
 
 void ImageCanvas::drawRect(const RectF& r)
 {
-    _rasterizer->drawRect( _scaling.toPhysical(r) );
+    _rasterizer->drawRect(r);
 }
 
 
 void ImageCanvas::fillRect(const RectF& r)
 {
-    _rasterizer->fillRect( _scaling.toPhysical(r) );
+    _rasterizer->fillRect(r);
 }
 
 
 void ImageCanvas::drawEllipse(const PointF& topLeft, const SizeF& size)
 {
-    _rasterizer->drawEllipse( _scaling.toPhysical(topLeft), 
-                              _scaling.toPhysical(size) );
+    _rasterizer->drawEllipse(topLeft, size);
 }
 
 
 void ImageCanvas::fillEllipse(const PointF& topLeft, const SizeF& size)
 {
-    _rasterizer->fillEllipse( _scaling.toPhysical(topLeft), 
-                              _scaling.toPhysical(size) );
+    _rasterizer->fillEllipse(topLeft, size);
 }
 
 
@@ -326,7 +324,7 @@ void ImageCanvas::drawPolyline(const PointF* points, const size_t n)
     std::vector<Gfx::PointF> ps;
 
     for (size_t i = 0; i < n; ++i)
-        ps.push_back( _scaling.toPhysical(points[i]) );
+        ps.push_back( points[i] );
 
     _rasterizer->drawPolyline(&ps[0], n);
 }
@@ -336,8 +334,8 @@ void ImageCanvas::fillPolygon(const PointF* points, const size_t n)
 {
     std::vector<Gfx::PointF> ps;
 
-    for (size_t i = 0; i < n; ++i)
-        ps.push_back( _scaling.toPhysical(points[i]) );
+    for(size_t i = 0; i < n; ++i)
+        ps.push_back( points[i] );
 
     _rasterizer->fillPolygon(&ps[0], n);
 }
@@ -349,8 +347,8 @@ void ImageCanvas::drawPolyline(const Gfx::Polyline& line)
 
     std::vector<Gfx::PointF> ps;
 
-    for (size_t i = 0; i < n; ++i)
-        ps.push_back( _scaling.toPhysical( line.at(i) ) );
+    for(size_t i = 0; i < n; ++i)
+        ps.push_back( line.at(i) );
 
     _rasterizer->drawPolyline(&ps[0], n);
 }
@@ -363,7 +361,7 @@ void ImageCanvas::fillPolygon(const Gfx::Polyline& line)
     std::vector<Gfx::PointF> ps;
 
     for (size_t i = 0; i < n; ++i)
-        ps.push_back( _scaling.toPhysical( line.at(i) ) );
+        ps.push_back( line.at(i) );
 
     _rasterizer->fillPolygon(&ps[0], n);
 }

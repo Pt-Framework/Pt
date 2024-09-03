@@ -272,6 +272,8 @@ void PaintContext::drawRect(const Gfx::RectF& rect)
     r.shift( origin().x(), 
              origin().y() );
 
+    r = _scaling.toPhysical(r); 
+
     if(_canvas)
         _canvas->drawRect(r);
 }
@@ -283,6 +285,8 @@ void PaintContext::fillRect(const Gfx::RectF& rect)
     r.shift( origin().x(), 
               origin().y() );
 
+    r = _scaling.toPhysical(r);
+
     if(_canvas)
         _canvas->fillRect(r);
 }
@@ -291,6 +295,7 @@ void PaintContext::fillRect(const Gfx::RectF& rect)
 void PaintContext::drawPolyline(const Gfx::PointF* ps, const size_t n)
 {
     Polyline line(*this, ps, n);
+    
     if(_canvas)
         _canvas->drawPolyline(line);
 }
@@ -299,6 +304,7 @@ void PaintContext::drawPolyline(const Gfx::PointF* ps, const size_t n)
 void PaintContext::fillPolygon(const Gfx::PointF* ps, const size_t n)
 {
     Polyline line(*this, ps, n);
+    
     if(_canvas)
         _canvas->fillPolygon(line);
 }
@@ -307,10 +313,13 @@ void PaintContext::fillPolygon(const Gfx::PointF* ps, const size_t n)
 void PaintContext::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     Pt::Gfx::PointF p = topLeft + origin();
+    p = _scaling.toPhysical(p);
+    
+    Gfx::SizeF s = _scaling.toPhysical(size);
 
     if(_canvas)
     {
-        _canvas->drawEllipse(p, size);
+        _canvas->drawEllipse(p, s);
     }
 }
 
@@ -318,10 +327,13 @@ void PaintContext::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& siz
 void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     Pt::Gfx::PointF p = topLeft + origin();
+    p = _scaling.toPhysical(p);
+    
+    Gfx::SizeF s = _scaling.toPhysical(size);
 
     if(_canvas)
     {
-        _canvas->fillEllipse(p, size);
+        _canvas->fillEllipse(p, s);
     }
 }
 
@@ -338,6 +350,10 @@ FontMetrics PaintContext::fontMetrics(const Pt::String& text) const
 void PaintContext::drawText(const PointF& to, const Pt::String& text)
 {
     Pt::Gfx::PointF p = to + origin();
+
+    //
+    // TODO: scaling from here downwards
+    //
 
     if(_canvas)
     {

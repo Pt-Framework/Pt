@@ -444,7 +444,7 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::Polyline& line)
 
     for(unsigned i = 0; i < n; i++)
     {
-        Gfx::PointF p = _scaling.toPhysical( line.at(i) );
+        Gfx::PointF p = line.at(i);
 
         points[i].x = Pt::lround(p.x() - 0.4999);
         points[i].y = Pt::lround(p.y() - 0.4999);
@@ -472,7 +472,7 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::Polyline& line)
 
     for(size_t i = 0; i < n; i++)
     {
-        Gfx::PointF p = _scaling.toPhysical( line.at(i) );
+        Gfx::PointF p = line.at(i);
 
         points[i].x = Pt::lround(p.x() - 0.4999);
         points[i].y = Pt::lround(p.y() - 0.4999);
@@ -713,10 +713,8 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& toF,
 #endif
 }
 
-void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
+void PixmapSurfaceImpl::drawRect(const Gfx::RectF& r)
 {
-    Gfx::RectF r = _scaling.toPhysical(rect); 
-
     HBRUSH originalBrush = (HBRUSH) SelectObject(_dc, GetStockObject(NULL_BRUSH));
 
     Rectangle(_dc, lround(r.left()   - 0.4999), 
@@ -728,10 +726,8 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 }
 
 
-void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
+void PixmapSurfaceImpl::fillRect(const Gfx::RectF& r)
 {
-    Gfx::RectF r = _scaling.toPhysical(rect); 
-    
     RECT rectangle;
     rectangle.left   =  lround( r.left() );
     rectangle.top    =  lround( r.top() );
@@ -758,11 +754,8 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 }
 
 
-void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
+void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    Gfx::PointF topLeft = _scaling.toPhysical(topLeftF);
-    Gfx::SizeF size = _scaling.toPhysical(sizeF);
-
     HBRUSH originalBrush = (HBRUSH)SelectObject(_dc, GetStockObject(NULL_BRUSH));
 
     Ellipse( _dc, lround( topLeft.x()),  
@@ -774,11 +767,8 @@ void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::Size
 }
 
 
-void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
+void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    Gfx::PointF topLeft = _scaling.toPhysical( topLeftF);
-    Gfx::SizeF size = _scaling.toPhysical(sizeF);
-
     POINT brushOrigin = {0};
     HGDIOBJ oldBrush = 0;
 

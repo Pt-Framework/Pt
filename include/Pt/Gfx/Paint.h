@@ -274,7 +274,8 @@ class Polyline
 
         Gfx::PointF at(std::size_t n) const
         {
-            return _points[n] + _paint.origin();
+            Gfx::PointF p = _points[n] + _paint.origin();
+            return _paint.scaling().toPhysical(p);
         }
 
         std::size_t size() const
