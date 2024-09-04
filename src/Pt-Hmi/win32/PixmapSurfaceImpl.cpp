@@ -328,7 +328,10 @@ bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context)
 
     // return type-safe delegate to onApplyPen(Gfx::PaintContext& paint)
     // Canvas should reject delegate if canvas not owner of paint context
-
+    //
+    // paintContext->setPaintDelegate(*this, PixmapSurfaceImpl::onApplyPen);
+    //
+    
     _paint = paintContext;
     return true;
 }
