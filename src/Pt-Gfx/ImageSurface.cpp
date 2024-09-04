@@ -63,6 +63,7 @@ ImagePaint::~ImagePaint()
 
 void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
+    _compositionMode = mode;
 }
 
 
@@ -182,13 +183,6 @@ bool ImageCanvas::onBeginPaint(Gfx::PaintContext* context)
         return false;
 
     _paint = paintContext;
-
-    setCompositionMode( paintContext->compositionMode() );
-    setPen( paintContext->pen() );
-    setBrush( paintContext->brush() );
-    setFont( paintContext->font() );
-
-    _paint = paintContext;
     return true;
 }
 
@@ -209,13 +203,17 @@ void ImageCanvas::onReleasePaint()
 }
 
 
-void ImageCanvas::onSetCompositionMode(const CompositionMode& mode)
+void ImageCanvas::onApplyCompositionMode(PaintContext& paint)
 {
-  _rasterizer->setCompositionMode(mode);
+    if( ! _paint )
+        return;
+
+  const CompositionMode& m =_paint->compositionMode();
+  _rasterizer->setCompositionMode(m);
 }
 
 
-void ImageCanvas::onSetPen(const Pen& pen)
+void ImageCanvas::onApplyPen(PaintContext& paint)
 {
     if( ! _paint )
         return;
@@ -225,15 +223,23 @@ void ImageCanvas::onSetPen(const Pen& pen)
 }
 
 
-void ImageCanvas::onSetBrush(const Brush& brush)
+void ImageCanvas::onApplyBrush(PaintContext& paint)
 {
-    _rasterizer->setBrush(brush);
+    if( ! _paint )
+        return;
+
+    const Brush& b = _paint->brush();
+    _rasterizer->setBrush(b);
 }
 
 
-void ImageCanvas::onSetFont(const Font& font)
+void ImageCanvas::onApplyFont(PaintContext& paint)
 {
-    _rasterizer->setFont(font);
+    if( ! _paint )
+        return;
+
+    const Font& f = _paint->font();
+    _rasterizer->setFont(f);
 }
 
 

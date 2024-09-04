@@ -157,7 +157,10 @@ void PaintContext::detachCanvas(Canvas& canvas)
     _region.clear();
 
     if(_canvas)
+    {
+        onReleasePaint();
         _canvas = 0;
+    }
 }
 
 
@@ -168,6 +171,8 @@ void PaintContext::reset()
     if(_canvas)
     {
         _canvas->onDetachPaint(*this);
+
+        onReleasePaint();
         _canvas = 0;
     }
 }
@@ -202,7 +207,7 @@ void PaintContext::setCompositionMode(const Gfx::CompositionMode& mode)
     onSetCompositionMode(mode);
 
     if(_canvas)
-        _canvas->setCompositionMode(mode);
+        _canvas->applyCompositionMode(*this);
 }
 
 
@@ -210,9 +215,8 @@ void PaintContext::setPen(const Pen& pen)
 {
     onSetPen(pen);
 
-    // notify that pen has changed
     if(_canvas)
-        _canvas->setPen(pen);
+        _canvas->applyPen(*this);
 }
 
 
@@ -221,7 +225,7 @@ void PaintContext::setBrush(const Brush& brush)
     onSetBrush(brush);
 
     if(_canvas)
-        _canvas->setBrush(brush);
+        _canvas->applyBrush(*this);
 }
 
 
@@ -230,7 +234,7 @@ void PaintContext::setFont(const Gfx::Font& font)
     onSetFont(font);
 
     if(_canvas)
-        _canvas->setFont(font);
+        _canvas->applyFont(*this);
 }
 
 

@@ -82,7 +82,6 @@ class ImagePaint : public PaintContext
         virtual void onSetFont(const Gfx::Font& font) override;
    
     private:
-        Gfx::Scaling         _scaling;
         Gfx::CompositionMode _compositionMode;
         Pen                  _pen;
         Gfx::Brush           _brush;
@@ -123,20 +122,21 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     virtual void onReleasePaint() override;
   
-  public:
-    virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
+  protected:
+      virtual void onApplyCompositionMode(PaintContext& paint) override;
 
-    virtual void onSetPen(const Gfx::Pen& pen) override;
+      virtual void onApplyPen(PaintContext& paint) override;
 
-    virtual void onSetBrush(const Gfx::Brush& brush) override;
+      virtual void onApplyBrush(PaintContext& paint) override;
 
-    virtual void onSetFont(const Gfx::Font& font);
+      virtual void onApplyFont(PaintContext& paint) override;
 
-    virtual void onSetClip(const Gfx::RectF& clip) override;
+  protected:
+      virtual void onSetClip(const Gfx::RectF& clip) override;
 
-    virtual void onResetClip() override;
+      virtual void onResetClip() override;
 
-  public:
+  protected:
     virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
 
     virtual void onDrawPolyline(const Gfx::Polyline& line) override;

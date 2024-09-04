@@ -99,13 +99,28 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
     {
         if( reuse->scaling() != scaling() )
             reuse = 0;
+
+        //
+        // invalidate state, so attributes get reattached
+        //
     }
 
     if(reuse)
     {
         bool isReused = onBeginPaint(reuse);
         if(isReused)
+        {
             _paint = reuse;
+
+            //
+            // invalidate state, so attributes get reattached
+            //
+
+            onApplyCompositionMode(*reuse);
+            onApplyPen(*reuse);
+            onApplyBrush(*reuse);
+            onApplyFont(*reuse);
+        }
     }
 
     if( ! _paint )
@@ -116,27 +131,27 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
 }
 
 
-void Canvas::setCompositionMode(const Gfx::CompositionMode& mode)
-{   
-    onSetCompositionMode(mode);
+void Canvas::applyCompositionMode(PaintContext& paint)
+{
+    onApplyCompositionMode(paint);
 }
 
 
-void Canvas::setPen(const Pen& pen)
-{   
-    onSetPen(pen);
+void Canvas::applyPen(PaintContext& paint)
+{
+    onApplyPen(paint);
 }
 
 
-void Canvas::setBrush(const Brush& brush)
-{   
-    onSetBrush(brush);
+void Canvas::applyBrush(PaintContext& paint)
+{
+    onApplyBrush(paint);
 }
 
 
-void Canvas::setFont(const Gfx::Font& font)
-{   
-    onSetFont(font);
+void Canvas::applyFont(PaintContext& paint)
+{
+    onApplyFont(paint);
 }
 
 

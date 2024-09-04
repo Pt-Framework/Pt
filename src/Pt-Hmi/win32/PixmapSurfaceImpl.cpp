@@ -326,12 +326,10 @@ bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context)
     if( ! paintContext )
         return false;
 
-    _paint = paintContext;
+    // return type-safe delegate to onApplyPen(Gfx::PaintContext& paint)
+    // Canvas should reject delegate if canvas not owner of paint context
 
-    setCompositionMode(*_paint);
-    setPen(*_paint);
-    setBrush(*_paint);
-    setFont(*_paint);
+    _paint = paintContext;
     return true;
 }
 
@@ -356,34 +354,26 @@ void PixmapSurfaceImpl::onReleasePaint()
 }
 
 
-void PixmapSurfaceImpl::onSetCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _compositionMode = mode;
-}
-
-
-void PixmapSurfaceImpl::setCompositionMode(const PaintData& paint)
-{
-    _compositionMode = paint.compositionMode();
-}
-
-
-void PixmapSurfaceImpl::onSetPen(const Gfx::Pen& pen)
+void PixmapSurfaceImpl::onApplyCompositionMode(Gfx::PaintContext& paint)
 {
     if( ! _paint )
         return;
 
-    setPen(*_paint);
+    const Gfx::CompositionMode& m =_paint->compositionMode();
+    _compositionMode = m;
 }
 
 
-void PixmapSurfaceImpl::setPen(const PaintData& paint)
+void PixmapSurfaceImpl::onApplyPen(Gfx::PaintContext& paint)
 {
-    HPEN hpen = paint.pen();
+    if( ! _paint )
+        return;
+
+    HPEN hpen = _paint->pen();
     if(hpen)
         SelectObject(_dc, hpen);
 
-    _penColor = paint.penColor();
+    _penColor = _paint->penColor();
 
     DWORD penColor = RGB( _penColor.red()  / 257, 
                           _penColor.green() / 257, 
@@ -393,49 +383,37 @@ void PixmapSurfaceImpl::setPen(const PaintData& paint)
 }
 
 
-void PixmapSurfaceImpl::onSetBrush(const Gfx::Brush& brush)
+void PixmapSurfaceImpl::onApplyBrush(Gfx::PaintContext& paint)
 {
     if( ! _paint )
         return;
 
-    setBrush(*_paint);
-}
-
-
-void PixmapSurfaceImpl::setBrush(const PaintData& paint)
-{
     _gradientBrush = false;
 
-    if( paint.gradientBrush() )
+    if( _paint->gradientBrush() )
     {
         _gradientBrush = true;
-        _gradient = paint.gradient();
-        _gradientStart = paint.gradientStart();
-        _gradientStop = paint.gradientStop();
+        _gradient = _paint->gradient();
+        _gradientStart = _paint->gradientStart();
+        _gradientStop = _paint->gradientStop();
 
         // do not set a brush now, because the gradient brush pattern can
         // only be calculated later, when the fill area is known
         return;
     }
 
-    HBRUSH hbrush = paint.brush();
+    HBRUSH hbrush = _paint->brush();
     if(hbrush)
         SelectObject(_dc, hbrush);
 }
 
 
-void PixmapSurfaceImpl::onSetFont(const Gfx::Font& font)
+void PixmapSurfaceImpl::onApplyFont(Gfx::PaintContext& paint)
 {
     if( ! _paint )
         return;
 
-    setFont(*_paint);
-}
-
-
-void PixmapSurfaceImpl::setFont(const PaintData& paint)
-{
-    HFONT hfont = paint.font();
+    HFONT hfont = _paint->font();
     if(hfont)
         SelectObject(_dc, hfont);
 
@@ -447,6 +425,10 @@ void PixmapSurfaceImpl::onSetClip(const Gfx::RectF& clipRect)
 {
     if( ! _paint )
         return;
+
+    //
+    // reuse native clip rect from surface impl
+    //
 
     _paint->resetClip(&clipRect);
     
@@ -462,6 +444,10 @@ void PixmapSurfaceImpl::onResetClip()
 {  
     if( ! _paint )
         return;
+
+    //
+    // reuse native clip rect from surface impl
+    //
 
     _paint->resetClip();
     SelectClipRgn(_dc, NULL);

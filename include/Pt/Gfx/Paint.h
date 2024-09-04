@@ -244,6 +244,8 @@ class PT_GFX_API PaintContext
 
         virtual void onSetFont(const Gfx::Font& font) = 0;
 
+        virtual void onReleasePaint() {}
+
     protected:
         PaintContext();
 

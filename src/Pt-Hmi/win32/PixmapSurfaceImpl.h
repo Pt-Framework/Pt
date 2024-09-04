@@ -185,24 +185,16 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         virtual void onReleasePaint() override;
 
-    private:
-        void setCompositionMode(const PaintData& paint);
+    protected:
+        virtual void onApplyCompositionMode(Gfx::PaintContext& paint) override;
 
-        void setPen(const PaintData& paint);
+        virtual void onApplyPen(Gfx::PaintContext& paint) override;
 
-        void setBrush(const PaintData& paint);
+        virtual void onApplyBrush(Gfx::PaintContext& paint) override;
 
-        void setFont(const PaintData& paint);
+        virtual void onApplyFont(Gfx::PaintContext& paint) override;
 
     protected:
-        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
-
-        virtual void onSetPen(const Gfx::Pen& pen) override;
-
-        virtual void onSetBrush(const Gfx::Brush& brush) override;
-
-        virtual void onSetFont(const Gfx::Font& font);
-
         virtual void onSetClip(const Gfx::RectF& clip) override;
 
         virtual void onResetClip() override;

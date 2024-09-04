@@ -199,6 +199,7 @@ const Gfx::CompositionMode& PaintData::compositionMode() const
     return _compositionMode;
 }
 
+
 void PaintData::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;
