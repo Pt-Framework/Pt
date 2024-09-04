@@ -124,20 +124,20 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
     virtual void onReleasePaint() override;
   
   public:
-    virtual void setCompositionMode(const Gfx::CompositionMode& mode);
+    void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
 
-    virtual void setPen(const Gfx::Pen& pen);
+    void onSetPen(const Gfx::Pen& pen) override;
 
-    virtual void setBrush(const Gfx::Brush& brush);
+    void onSetBrush(const Gfx::Brush& brush) override;
 
-    virtual void setFont(const Gfx::Font& font);
+    void onSetFont(const Gfx::Font& font);
 
-    virtual void setClip(const Gfx::RectF& clip);
+    void onSetClip(const Gfx::RectF& clip) override;
 
-    virtual void resetClip();
+    void onResetClip() override;
 
   public:
-    virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)override;
+    virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
 
     virtual void onDrawPolyline(const Gfx::Polyline& line) override;
 

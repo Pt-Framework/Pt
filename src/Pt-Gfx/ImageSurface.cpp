@@ -209,13 +209,13 @@ void ImageCanvas::onReleasePaint()
 }
 
 
-void ImageCanvas::setCompositionMode(const CompositionMode& mode)
+void ImageCanvas::onSetCompositionMode(const CompositionMode& mode)
 {
   _rasterizer->setCompositionMode(mode);
 }
 
 
-void ImageCanvas::setPen(const Pen& pen)
+void ImageCanvas::onSetPen(const Pen& pen)
 {
     if( ! _paint )
         return;
@@ -225,27 +225,26 @@ void ImageCanvas::setPen(const Pen& pen)
 }
 
 
-
-void ImageCanvas::setBrush(const Brush& brush)
+void ImageCanvas::onSetBrush(const Brush& brush)
 {
     _rasterizer->setBrush(brush);
 }
 
 
-void ImageCanvas::setFont(const Font& font)
+void ImageCanvas::onSetFont(const Font& font)
 {
     _rasterizer->setFont(font);
 }
 
 
-void ImageCanvas::setClip(const RectF& rect)
+void ImageCanvas::onSetClip(const RectF& rect)
 {
     RectF clip = _scaling.toPhysical(rect);
     _rasterizer->setClip(clip);
 }
 
 
-void ImageCanvas::resetClip()
+void ImageCanvas::onResetClip()
 {
     _rasterizer->resetClip();
 }

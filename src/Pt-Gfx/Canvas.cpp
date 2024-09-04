@@ -116,6 +116,42 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
 }
 
 
+void Canvas::setCompositionMode(const Gfx::CompositionMode& mode)
+{   
+    onSetCompositionMode(mode);
+}
+
+
+void Canvas::setPen(const Pen& pen)
+{   
+    onSetPen(pen);
+}
+
+
+void Canvas::setBrush(const Brush& brush)
+{   
+    onSetBrush(brush);
+}
+
+
+void Canvas::setFont(const Gfx::Font& font)
+{   
+    onSetFont(font);
+}
+
+
+void Canvas::setClip(const RectF& clip)
+{   
+    onSetClip(clip);
+}
+
+
+void Canvas::resetClip()
+{   
+    onResetClip();
+}
+
+
 void Canvas::drawLine(const PointF& from, const PointF& to)
 {   
     onDrawLine(from, to);

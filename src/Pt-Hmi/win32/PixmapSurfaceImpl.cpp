@@ -356,7 +356,7 @@ void PixmapSurfaceImpl::onReleasePaint()
 }
 
 
-void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
+void PixmapSurfaceImpl::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;
 }
@@ -368,7 +368,7 @@ void PixmapSurfaceImpl::setCompositionMode(const PaintData& paint)
 }
 
 
-void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
+void PixmapSurfaceImpl::onSetPen(const Gfx::Pen& pen)
 {
     if( ! _paint )
         return;
@@ -393,7 +393,7 @@ void PixmapSurfaceImpl::setPen(const PaintData& paint)
 }
 
 
-void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
+void PixmapSurfaceImpl::onSetBrush(const Gfx::Brush& brush)
 {
     if( ! _paint )
         return;
@@ -424,7 +424,7 @@ void PixmapSurfaceImpl::setBrush(const PaintData& paint)
 }
 
 
-void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
+void PixmapSurfaceImpl::onSetFont(const Gfx::Font& font)
 {
     if( ! _paint )
         return;
@@ -443,7 +443,7 @@ void PixmapSurfaceImpl::setFont(const PaintData& paint)
 }
 
 
-void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
+void PixmapSurfaceImpl::onSetClip(const Gfx::RectF& clipRect)
 {
     if( ! _paint )
         return;
@@ -458,7 +458,7 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 }
 
 
-void PixmapSurfaceImpl::resetClip()
+void PixmapSurfaceImpl::onResetClip()
 {  
     if( ! _paint )
         return;

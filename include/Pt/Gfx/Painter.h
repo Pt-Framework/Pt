@@ -89,18 +89,6 @@ class PT_GFX_API Painter
         */
         void setCompositionMode(const CompositionMode& mode);
 
-        /** @brief Returns the clipping rect.
-        */
-        const RectF& clip() const;
-
-        /** @brief Sets the clipping rect.
-        */
-        void setClip(const RectF& clip);
-
-        /** @brief Resets the clipping rect.
-        */
-        void resetClip();
-
         /** @brief Returns the current pen.
         */
         const Pen& pen() const;
@@ -124,6 +112,18 @@ class PT_GFX_API Painter
         /** @brief Sets the font used to draw text.
         */
         void setFont(const Font& font);
+
+        /** @brief Returns the clipping rect.
+        */
+        const RectF& clip() const;
+
+        /** @brief Sets the clipping rect.
+        */
+        void setClip(const RectF& clip);
+
+        /** @brief Resets the clipping rect.
+        */
+        void resetClip();
 
     public:
         /** @brief Draws a line between two points.

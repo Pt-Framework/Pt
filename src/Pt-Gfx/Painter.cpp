@@ -149,35 +149,6 @@ void Painter::setCompositionMode(const Gfx::CompositionMode& mode)
 }
 
 
-const RectF& Painter::clip() const
-{
-    return _paint.clip();
-}
-
-
-void Painter::setClip(const Gfx::RectF& clip)
-{
-    _paint.setClip(clip);
-
-    if(_paintContext)
-    {
-        if( clip.isNull() )
-            _paintContext->resetClip();
-        else
-            _paintContext->setClip(clip);
-    }
-}
-
-
-void Painter::resetClip()
-{
-    _paint.resetClip();
-
-    if(_paintContext)
-        _paintContext->resetClip();
-}
-
-
 const Gfx::Pen& Painter::pen() const
 {
     return _paint.pen();
@@ -223,27 +194,32 @@ void Painter::setFont(const Gfx::Font& font)
 }
 
 
-Gfx::FontMetrics Painter::fontMetrics(const Pt::String& text) const
+const RectF& Painter::clip() const
 {
-    if(_paintContext)
-        return _paintContext->fontMetrics(text);
-
-    return Gfx::FontMetrics();
+    return _paint.clip();
 }
 
 
-void Painter::drawText(const Gfx::PointF& to, const Pt::String& text)
+void Painter::setClip(const Gfx::RectF& clip)
 {
+    _paint.setClip(clip);
+
     if(_paintContext)
-        _paintContext->drawText(to, text);
+    {
+        if( clip.isNull() )
+            _paintContext->resetClip();
+        else
+            _paintContext->setClip(clip);
+    }
 }
 
 
-void Painter::drawText(const Gfx::PointF& to, const Pt::String& text, 
-                       const Gfx::Transform& transform)
+void Painter::resetClip()
 {
+    _paint.resetClip();
+
     if(_paintContext)
-        _paintContext->drawText(to, text, &transform);
+        _paintContext->resetClip();
 }
 
 
@@ -337,6 +313,30 @@ void Painter::drawPath(const Gfx::Path& path, float smoothness)
 
 void Painter::fillPath(const Path& path, float smoothness)
 {
+}
+
+
+Gfx::FontMetrics Painter::fontMetrics(const Pt::String& text) const
+{
+    if(_paintContext)
+        return _paintContext->fontMetrics(text);
+
+    return Gfx::FontMetrics();
+}
+
+
+void Painter::drawText(const Gfx::PointF& to, const Pt::String& text)
+{
+    if(_paintContext)
+        _paintContext->drawText(to, text);
+}
+
+
+void Painter::drawText(const Gfx::PointF& to, const Pt::String& text, 
+                       const Gfx::Transform& transform)
+{
+    if(_paintContext)
+        _paintContext->drawText(to, text, &transform);
 }
 
 
