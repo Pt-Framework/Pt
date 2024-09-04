@@ -126,10 +126,6 @@ class PT_GFX_API Painter
         void setFont(const Font& font);
 
     public:
-        /** @brief Measures the metrics of a text block.
-        */
-        FontMetrics fontMetrics(const Pt::String& text) const;
-
         /** @brief Draws a line between two points.
         */
         void drawLine(const PointF& from, const PointF& to);
@@ -141,14 +137,6 @@ class PT_GFX_API Painter
         /** @brief Fills a polygon.
         */
         void fillPolygon(const PointF* points, const size_t pointCount);
-
-        /** @brief Draws a text block.
-        */
-        void drawText(const PointF& to, const Pt::String& text);
-
-        /** @brief Draws a text block.
-        */
-        void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
         /** @brief Draws the outline of a rectangle.
         */
@@ -174,6 +162,15 @@ class PT_GFX_API Painter
         */
         void fillEllipse(const PointF& topLeft, const SizeF& size);
 
+        void drawArc(const PointF& topLeft, const SizeF& size,
+                     float degBegin, float degEnd);
+
+        void fillChord(const PointF& topLeft, const SizeF& size,
+                       float degBegin, float degEnd);
+
+        void fillPie(const PointF& topLeft, const SizeF& size,
+                     float degBegin, float degEnd);
+
         /** @brief Draws a path.
         */
         void drawPath(const Path& path, float smoothness = 1.0f);
@@ -181,7 +178,21 @@ class PT_GFX_API Painter
         /** @brief Fills a path.
         */
         void fillPath(const Path& path, float smoothness = 1.0f);
-        
+
+    public:
+        /** @brief Measures the metrics of a text block.
+        */
+        FontMetrics fontMetrics(const Pt::String& text) const;
+
+        /** @brief Draws a text block.
+        */
+        void drawText(const PointF& to, const Pt::String& text);
+
+        /** @brief Draws a text block.
+        */
+        void drawText(const PointF& to, const Pt::String& text, const Transform& t);
+
+    public:
         /** @brief Draws an image.
         */
         void drawImage(const PointF& to, const Image& im);
@@ -189,21 +200,6 @@ class PT_GFX_API Painter
         /** @brief Draws a part of an image.
         */
         void drawImage(const PointF& to, const Image& im, const RectF& rect);
-
-        void drawArc(const PointF& topLeft, const SizeF& size,
-                     float degBegin, float degEnd);
-
-        void drawChord(const PointF& topLeft, const SizeF& size,
-                       float degBegin, float degEnd);
-
-        void drawPie(const PointF& topLeft, const SizeF& size,
-                     float degBegin, float degEnd);
-
-        void fillPie(const PointF& topLeft, const SizeF& size,
-                     float degBegin, float degEnd);
-
-        void fillChord(const PointF& topLeft, const SizeF& size,
-                       float degBegin, float degEnd);
 
         void drawSurface(const Gfx::PointF& toF, 
                          const PaintSurface& surface);

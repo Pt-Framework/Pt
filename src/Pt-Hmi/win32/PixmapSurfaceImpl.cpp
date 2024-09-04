@@ -220,6 +220,55 @@ void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 }
 
 
+void PixmapSurfaceImpl::set(const Gfx::Image& image)
+{
+    resize( Gfx::SizeF(image.size().width(), 
+                       image.size().height() ) );
+
+    size_t _width = image.width();
+    size_t _height = image.height();
+
+    std::vector<Pt::uint8_t> bitmapData;
+    toPreMulAlpha(image, bitmapData);
+
+    const Pt::uint8_t* data = bitmapData.empty() ? 0 : &bitmapData[0];
+
+    const size_t depth = 32;
+
+    HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 
+                                  1, depth, (VOID*)data);
+
+    if (bitmap == NULL)
+    {
+        BITMAPINFO bitmapInfo;
+        ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+        bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
+        bitmapInfo.bmiHeader.biWidth        = image.width();
+        bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
+        bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
+        bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
+        bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
+        bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
+        bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
+        bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
+
+        VOID* imageBits = 0;
+        bitmap = CreateDIBSection(_dc, &bitmapInfo, DIB_RGB_COLORS, 
+                                  &imageBits, NULL, 0);
+        memcpy(imageBits, data, image.width() * image.height() * 4);
+    }
+
+    HDC bitmapDC = CreateCompatibleDC(NULL);
+    SelectObject(bitmapDC, bitmap);
+
+    BitBlt(_dc, 0, 0, image.width(), image.height(), bitmapDC, 0, 0, SRCCOPY);
+
+    DeleteDC(bitmapDC);
+    DeleteObject(bitmap);
+}
+
+
 void PixmapSurfaceImpl::resize(const Gfx::SizeF& sizeF)
 {
     Gfx::SizeF size = _scaling.toPhysical(sizeF);
@@ -247,6 +296,12 @@ void PixmapSurfaceImpl::setScaleFactor(double scaleFactor)
 }
 
 
+const Gfx::Scaling& PixmapSurfaceImpl::surfaceScaling() const
+{
+    return _scaling;
+}
+
+
 const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 {
     return Gfx::ImageFormat::argb32();
@@ -256,12 +311,6 @@ const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 const Gfx::SizeF& PixmapSurfaceImpl::size() const
 {
     return _size;
-}
-
-
-const Gfx::Scaling& PixmapSurfaceImpl::surfaceScaling() const
-{
-    return _scaling;
 }
 
 
@@ -419,11 +468,8 @@ void PixmapSurfaceImpl::resetClip()
 }
 
 
-void PixmapSurfaceImpl::drawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
+void PixmapSurfaceImpl::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
 {
-    //Pt::Gfx::PointF p0 = _scaling.toPhysical( line.from() ); 
-    //Pt::Gfx::PointF p1 = _scaling.toPhysical( line.to() );
-
     POINT points[2];
     
     points[0].x = lround( p0.x() - 0.4999 );
@@ -436,7 +482,7 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
 }
 
 
-void PixmapSurfaceImpl::drawPolyline(const Gfx::Polyline& line)
+void PixmapSurfaceImpl::onDrawPolyline(const Gfx::Polyline& line)
 {
     std::size_t n = line.size();
 
@@ -454,7 +500,7 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::Polyline& line)
 }
 
 
-void PixmapSurfaceImpl::fillPolygon(const Gfx::Polyline& line)
+void PixmapSurfaceImpl::onFillPolygon(const Gfx::Polyline& line)
 {
     std::size_t n = line.size();
 
@@ -518,35 +564,107 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::Polyline& line)
 }
 
 
+void PixmapSurfaceImpl::onDrawRect(const Gfx::RectF& r)
+{
+    HBRUSH originalBrush = (HBRUSH) SelectObject(_dc, GetStockObject(NULL_BRUSH));
+
+    Rectangle(_dc, lround(r.left()   - 0.4999), 
+                   lround(r.top()    - 0.4999), 
+                   lround(r.right()  - 0.4999), 
+                   lround(r.bottom() - 0.4999));
+
+    SelectObject(_dc, originalBrush);
+}
+
+
+void PixmapSurfaceImpl::onFillRect(const Gfx::RectF& r)
+{
+    RECT rectangle;
+    rectangle.left   =  lround( r.left() );
+    rectangle.top    =  lround( r.top() );
+    rectangle.right  =  lround( r.right() + 0.001);    
+    rectangle.bottom =  lround( r.bottom() + 0.001);
+
+    if(_gradientBrush)
+    {
+        HBRUSH brush = gradientBrush(_dc, lround( r.width() ), lround( r.height() ),
+                                     _gradientStart, _gradientStop, _gradient);
+
+        POINT brushOrigin = {0};
+        SetBrushOrgEx(_dc, lround(r.x()),  lround(r.y()), &brushOrigin);
+
+        FillRect(_dc, &rectangle, brush);
+
+        SetBrushOrgEx(_dc, brushOrigin.x, brushOrigin.y, NULL);
+        DeleteObject(brush);
+        return;
+    }
+
+    HBRUSH currentBrush = (HBRUSH) GetCurrentObject(_dc, OBJ_BRUSH);
+    FillRect(_dc, &rectangle, currentBrush);
+}
+
+void PixmapSurfaceImpl::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    HBRUSH originalBrush = (HBRUSH)SelectObject(_dc, GetStockObject(NULL_BRUSH));
+
+    Ellipse( _dc, lround( topLeft.x()),  
+                  lround( topLeft.y()), 
+                  lround( topLeft.x() + size.width() -1),     // - 0.999 ?
+                  lround( topLeft.y() + size.height() -1 ));  // - 0.999 ?
+
+    SelectObject(_dc, originalBrush);
+}
+
+
+void PixmapSurfaceImpl::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    POINT brushOrigin = {0};
+    HGDIOBJ oldBrush = 0;
+
+    if(_gradientBrush)
+    {
+        HBRUSH brush = gradientBrush(_dc, lround( size.width() ), 
+                                          lround( size.height() ),
+                                          _gradientStart, 
+                                          _gradientStop, 
+                                          _gradient);
+
+        oldBrush = SelectObject(_dc, brush);
+
+        SetBrushOrgEx(_dc, lround(topLeft.x()), lround(topLeft.y()), &brushOrigin);
+    }
+
+    HPEN originalPen = (HPEN) SelectObject(_dc, GetStockObject(NULL_PEN));
+
+    Ellipse( _dc, lround( topLeft.x() ),
+                  lround( topLeft.y() ),
+                  lround( topLeft.x() + size.width() - 1),    // - 0.999 ?
+                  lround( topLeft.y() + size.height() - 1) ); // - 0.999 ?
+
+    SelectObject(_dc, originalPen);
+
+    if(_gradientBrush)
+    {
+        HBRUSH brush = (HBRUSH) SelectObject(_dc, oldBrush);
+        DeleteObject(brush);
+
+        SetBrushOrgEx(_dc, brushOrigin.x, brushOrigin.y, NULL);
+    }
+}
+
 #ifndef PT_HMI_GDIPLUS
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
+
+Gfx::FontMetrics PixmapSurfaceImpl::onGetFontMetrics(const Pt::String& text) const
 {
     TEXTMETRIC tm;
     GetTextMetrics(_dc, &tm);
 
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
-    
-    XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
-    GetWorldTransform(_dc, &oldTrans);
-
-    double scaleFactor = _scaling.scaleFactor();
-    Gfx::Transform tt;
-    tt.scale(scaleFactor, scaleFactor);
-
-    XFORM newTrans = { static_cast<FLOAT>( tt.m11() ), 
-                       static_cast<FLOAT>( tt.m12() ),
-                       static_cast<FLOAT>( tt.m21() ), 
-                       static_cast<FLOAT>( tt.m22() ),
-                       static_cast<FLOAT>( tt.dx() ),  
-                       static_cast<FLOAT>( tt.dy() ) };
-
-    SetWorldTransform(_dc, &newTrans);
 
     SIZE textSize;
     GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
-    
-    SetWorldTransform(_dc, &oldTrans);
 
     long asc = tm.tmAscent;
     long des = tm.tmDescent;
@@ -567,7 +685,8 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 }
 
 #else
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
+
+Gfx::FontMetrics PixmapSurfaceImpl::onGetFontMetrics(const Pt::String& text) const
 {
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
@@ -608,58 +727,61 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
                             Gdiplus::PointF(0, 0), format, &textRect);
 
     int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
-    double scaling = 96.0 / dpix;
+    double pixelRatio = 96.0 / dpix;
 
     Gfx::FontMetrics fm;
-    fm.setAscent(asc * scaling);
-    fm.setDescent(des * scaling);
-    fm.setCapHeight(cap * scaling);
-    fm.setLeading(exl * scaling);
-    fm.setWidth(textRect.Width * scaling);
+    fm.setAscent(asc * pixelRatio);
+    fm.setDescent(des * pixelRatio);
+    fm.setCapHeight(cap * pixelRatio);
+    fm.setLeading(exl * pixelRatio);
+    fm.setWidth(textRect.Width * pixelRatio);
     return fm;
 }
+
 #endif
 
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& toF, 
-                                 const Pt::String& text, 
-                                 const Gfx::Transform& t)
+void PixmapSurfaceImpl::onDrawText(const Gfx::PointF& to, 
+                                   const Pt::String& text, 
+                                   const Gfx::Transform* transform)
 {
-    Pt::Gfx::PointF to = _scaling.toPhysical(toF); 
-
     _text.clear();
     text.toUtf16( std::back_inserter(_text) );
-
-    Gfx::Transform tt = t;
-    
-    tt.scale( _scaling.scaleFactor(), 
-              _scaling.scaleFactor() );
-
-    //const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
-    //const double scaling = 96.0 / dpix;
-
+   
 #ifndef PT_HMI_GDIPLUS
-    tt.translate( to.x(), to.y() );
+    XFORM xform = { 1, 0, 0, 1, to.x(), to.y() };
+    if(transform)
+    {
+        // possibly use ModifyWorldTransform
+        Gfx::Transform tt = *transform;
+        tt.translate( to.x(), to.y() ); 
 
-    XFORM oldTrans = { 1, 0, 0, 1, 0 , 0 };
-    GetWorldTransform(_dc, &oldTrans);
+        xform = { static_cast<FLOAT>( tt.m11() ), 
+                  static_cast<FLOAT>( tt.m12() ),
+                  static_cast<FLOAT>( tt.m21() ), 
+                  static_cast<FLOAT>( tt.m22() ),
+                  static_cast<FLOAT>( tt.dx() ),  
+                  static_cast<FLOAT>( tt.dy() ) };
+    }
 
-    XFORM newTrans = { static_cast<FLOAT>( tt.m11() ), 
-                       static_cast<FLOAT>( tt.m12() ),
-                       static_cast<FLOAT>( tt.m21() ), 
-                       static_cast<FLOAT>( tt.m22() ),
-                       static_cast<FLOAT>( tt.dx() ),  
-                       static_cast<FLOAT>( tt.dy() ) };
+    XFORM oldXForm = { 1, 0, 0, 1, 0 , 0 };
+    GetWorldTransform(_dc, &oldXForm);
 
-    SetWorldTransform(_dc, &newTrans);
-
+    SetWorldTransform(_dc, &xform);
     TextOutW(_dc, 0, 0, _text.c_str(), _text.size());
-
-    SetWorldTransform(_dc, &oldTrans);
+    SetWorldTransform(_dc, &oldXForm);
 #else
-    tt.scale( scaling, 
-              scaling );
-    
-    tt.translate(to.x(), to.y());
+    Gdiplus::Matrix matrix;
+    if(transform)
+    {
+        matrix.SetElements( static_cast<Gdiplus::REAL>( transform->m11() ), 
+                            static_cast<Gdiplus::REAL>( transform->m12() ),
+                            static_cast<Gdiplus::REAL>( transform->m21() ), 
+                            static_cast<Gdiplus::REAL>( transform->m22() ),
+                            static_cast<Gdiplus::REAL>( transform->dx() ), 
+                            static_cast<Gdiplus::REAL>( transform->dy() ) );
+    }
+
+    matrix.Translate( to.x(), to.y() );
 
     Gdiplus::Graphics graphics(_dc);
     graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
@@ -688,14 +810,6 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& toF,
 
     Gdiplus::Matrix oldMatrix;
     graphics.GetTransform(&oldMatrix);
-
-    Gdiplus::Matrix matrix( static_cast<Gdiplus::REAL>( tt.m11() ), 
-                            static_cast<Gdiplus::REAL>( tt.m12() ),
-                            static_cast<Gdiplus::REAL>( tt.m21() ), 
-                            static_cast<Gdiplus::REAL>( tt.m22() ),
-                            static_cast<Gdiplus::REAL>( tt.dx() ), 
-                            static_cast<Gdiplus::REAL>( tt.dy() ) );
-
     graphics.SetTransform(&matrix);
 
     const Gfx::Color& color = _penColor;
@@ -713,93 +827,135 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& toF,
 #endif
 }
 
-void PixmapSurfaceImpl::drawRect(const Gfx::RectF& r)
+
+Gfx::Image PixmapSurfaceImpl::onGetImage() const
 {
-    HBRUSH originalBrush = (HBRUSH) SelectObject(_dc, GetStockObject(NULL_BRUSH));
+    BITMAPINFO bitmapInfo;
+    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-    Rectangle(_dc, lround(r.left()   - 0.4999), 
-                   lround(r.top()    - 0.4999), 
-                   lround(r.right()  - 0.4999), 
-                   lround(r.bottom() - 0.4999));
+    bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bitmapInfo.bmiHeader.biWidth = _size.width();
+    bitmapInfo.bmiHeader.biHeight = -(ssize_t)_size.height();  // top-down image
+    bitmapInfo.bmiHeader.biPlanes = 1;                         // always 1
+    bitmapInfo.bmiHeader.biBitCount = 32;                      // bits per pixel
+    bitmapInfo.bmiHeader.biCompression = BI_RGB;               // uncompressed RGB
+    bitmapInfo.bmiHeader.biSizeImage = 0;                      // automatic
+    bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
+    bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
 
-    SelectObject(_dc, originalBrush);
+    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), round(_size) );
+    Pt::uint8_t* data = image.data();
+
+    int ret = GetDIBits(_dc, _bitmap, 0, _size.height(), data, 
+                        &bitmapInfo, DIB_RGB_COLORS);
+
+    return image;
 }
 
 
-void PixmapSurfaceImpl::fillRect(const Gfx::RectF& r)
+void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& to, 
+                                  const Gfx::Image& image, 
+                                  const Gfx::RectF& imgRect)
 {
-    RECT rectangle;
-    rectangle.left   =  lround( r.left() );
-    rectangle.top    =  lround( r.top() );
-    rectangle.right  =  lround( r.right() + 0.001);    
-    rectangle.bottom =  lround( r.bottom() + 0.001);
-
-    if(_gradientBrush)
-    {
-        HBRUSH brush = gradientBrush(_dc, lround( r.width() ), lround( r.height() ),
-                                     _gradientStart, _gradientStop, _gradient);
-
-        POINT brushOrigin = {0};
-        SetBrushOrgEx(_dc, lround(r.x()),  lround(r.y()), &brushOrigin);
-
-        FillRect(_dc, &rectangle, brush);
-
-        SetBrushOrgEx(_dc, brushOrigin.x, brushOrigin.y, NULL);
-        DeleteObject(brush);
-        return;
-    }
-
-    HBRUSH currentBrush = (HBRUSH) GetCurrentObject(_dc, OBJ_BRUSH);
-    FillRect(_dc, &rectangle, currentBrush);
+    // TODO
+    throw std::runtime_error("not implemented");
 }
 
 
-void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
-    HBRUSH originalBrush = (HBRUSH)SelectObject(_dc, GetStockObject(NULL_BRUSH));
+    Gfx::PointF toR = _scaling.toPhysical( toF );
+    Gfx::Point to = Gfx::round(toR);
 
-    Ellipse( _dc, lround( topLeft.x()),  
-                  lround( topLeft.y()), 
-                  lround( topLeft.x() + size.width() -1),     // - 0.999 ?
-                  lround( topLeft.y() + size.height() -1 ));  // - 0.999 ?
-
-    SelectObject(_dc, originalBrush);
-}
-
-
-void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
-{
-    POINT brushOrigin = {0};
-    HGDIOBJ oldBrush = 0;
-
-    if(_gradientBrush)
+    switch (_compositionMode)
     {
-        HBRUSH brush = gradientBrush(_dc, lround( size.width() ), 
-                                          lround( size.height() ),
-                                          _gradientStart, 
-                                          _gradientStop, 
-                                          _gradient);
+        case Gfx::CompositionMode::SourceCopy:
+        {
+            const Pt::uint8_t* data = image.data();
+            const size_t depth = image.view().pixelStride() * 8;
 
-        oldBrush = SelectObject(_dc, brush);
+            HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
+                                          depth, (VOID*)data);
+            if (bitmap == NULL)
+            {
+                BITMAPINFO bitmapInfo;
+                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-        SetBrushOrgEx(_dc, lround(topLeft.x()), lround(topLeft.y()), &brushOrigin);
-    }
+                bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
+                bitmapInfo.bmiHeader.biWidth        = image.width();
+                bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
+                bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
+                bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
+                bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
+                bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
+                bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
+                bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
 
-    HPEN originalPen = (HPEN) SelectObject(_dc, GetStockObject(NULL_PEN));
+                VOID* imageBits = 0;
+                bitmap = CreateDIBSection(_dc, &bitmapInfo,
+                                          DIB_RGB_COLORS, &imageBits, NULL, 0);
+                memcpy(imageBits, data, image.width() * image.height() * 4);
+            }
 
-    Ellipse( _dc, lround( topLeft.x() ),
-                  lround( topLeft.y() ),
-                  lround( topLeft.x() + size.width() - 1),    // - 0.999 ?
-                  lround( topLeft.y() + size.height() - 1) ); // - 0.999 ?
+            HDC bitmapDC = CreateCompatibleDC(NULL);
+            SelectObject(bitmapDC, bitmap);
 
-    SelectObject(_dc, originalPen);
+            BitBlt(_dc, to.x(), to.y(), image.width(), image.height(),
+                   bitmapDC, 0, 0, SRCCOPY);
 
-    if(_gradientBrush)
-    {
-        HBRUSH brush = (HBRUSH) SelectObject(_dc, oldBrush);
-        DeleteObject(brush);
+            DeleteDC(bitmapDC);
+            DeleteObject(bitmap);
+            break;
+        }
 
-        SetBrushOrgEx(_dc, brushOrigin.x, brushOrigin.y, NULL);
+        case Gfx::CompositionMode::SourceOver:
+        {
+            std::vector<Pt::uint8_t> bitmapData;
+            toPreMulAlpha(image, bitmapData);
+
+            const Pt::uint8_t* data = bitmapData.empty() ? 0 : &bitmapData[0];
+            size_t depth = 32;
+
+            HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
+                                          depth, (VOID*)data);
+            if (bitmap == NULL)
+            {
+                BITMAPINFO bitmapInfo;
+                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+                bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
+                bitmapInfo.bmiHeader.biWidth        = image.width();
+                bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
+                bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
+                bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
+                bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
+                bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
+                bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
+                bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
+
+                VOID* imageBits = 0;
+                bitmap = CreateDIBSection(_dc, &bitmapInfo,
+                                          DIB_RGB_COLORS, &imageBits, NULL, 0);
+                memcpy(imageBits, data, image.width() * image.height() * 4);
+            }
+
+            HDC bitmapDC = CreateCompatibleDC(NULL);
+
+            SelectObject(bitmapDC, bitmap);
+
+            BLENDFUNCTION bf;
+            bf.BlendOp = AC_SRC_OVER;
+            bf.BlendFlags = 0;
+            bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
+            bf.AlphaFormat = AC_SRC_ALPHA;
+
+            AlphaBlend(_dc, to.x(), to.y(), _size.width(), _size.height(), 
+                       bitmapDC, 0, 0, _size.width(), _size.height(), bf);
+
+            DeleteObject(bitmap);
+            DeleteDC(bitmapDC);
+            break;
+        }
     }
 }
 
@@ -969,187 +1125,6 @@ void PixmapSurfaceImpl::bitBlit( const Gfx::Point& to, size_t width, size_t heig
     BitBlt(_dc,  to.x(), to.y(), width, height, bitmapDC, 0, 0, op);
 
     DeleteDC(bitmapDC);
-}
-
-
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, 
-                                  const Gfx::Image& image, 
-                                  const Gfx::RectF& imgRect)
-{
-    // TODO
-    throw std::runtime_error("not implemented");
-}
-
-
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
-{
-    Gfx::PointF toR = _scaling.toPhysical( toF );
-    Gfx::Point to = Gfx::round(toR);
-
-    switch (_compositionMode)
-    {
-        case Gfx::CompositionMode::SourceCopy:
-        {
-            const Pt::uint8_t* data = image.data();
-            const size_t depth = image.view().pixelStride() * 8;
-
-            HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
-                                          depth, (VOID*)data);
-            if (bitmap == NULL)
-            {
-                BITMAPINFO bitmapInfo;
-                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-                bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
-                bitmapInfo.bmiHeader.biWidth        = image.width();
-                bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
-                bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
-                bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
-                bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
-                bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
-                bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
-                bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
-
-                VOID* imageBits = 0;
-                bitmap = CreateDIBSection(_dc, &bitmapInfo,
-                                          DIB_RGB_COLORS, &imageBits, NULL, 0);
-                memcpy(imageBits, data, image.width() * image.height() * 4);
-            }
-
-            HDC bitmapDC = CreateCompatibleDC(NULL);
-            SelectObject(bitmapDC, bitmap);
-
-            BitBlt(_dc, to.x(), to.y(), image.width(), image.height(),
-                   bitmapDC, 0, 0, SRCCOPY);
-
-            DeleteDC(bitmapDC);
-            DeleteObject(bitmap);
-            break;
-        }
-
-        case Gfx::CompositionMode::SourceOver:
-        {
-            std::vector<Pt::uint8_t> bitmapData;
-            toPreMulAlpha(image, bitmapData);
-
-            const Pt::uint8_t* data = bitmapData.empty() ? 0 : &bitmapData[0];
-            size_t depth = 32;
-
-            HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
-                                          depth, (VOID*)data);
-            if (bitmap == NULL)
-            {
-                BITMAPINFO bitmapInfo;
-                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-                bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
-                bitmapInfo.bmiHeader.biWidth        = image.width();
-                bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
-                bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
-                bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
-                bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
-                bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
-                bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
-                bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
-
-                VOID* imageBits = 0;
-                bitmap = CreateDIBSection(_dc, &bitmapInfo,
-                                          DIB_RGB_COLORS, &imageBits, NULL, 0);
-                memcpy(imageBits, data, image.width() * image.height() * 4);
-            }
-
-            HDC bitmapDC = CreateCompatibleDC(NULL);
-
-            SelectObject(bitmapDC, bitmap);
-
-            BLENDFUNCTION bf;
-            bf.BlendOp = AC_SRC_OVER;
-            bf.BlendFlags = 0;
-            bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
-            bf.AlphaFormat = AC_SRC_ALPHA;
-
-            AlphaBlend(_dc, to.x(), to.y(), _size.width(), _size.height(), 
-                       bitmapDC, 0, 0, _size.width(), _size.height(), bf);
-
-            DeleteObject(bitmap);
-            DeleteDC(bitmapDC);
-            break;
-        }
-    }
-}
-
-
-Gfx::Image PixmapSurfaceImpl::onGetImage() const
-{
-    BITMAPINFO bitmapInfo;
-    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-    bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bitmapInfo.bmiHeader.biWidth = _size.width();
-    bitmapInfo.bmiHeader.biHeight = -(ssize_t)_size.height();  // top-down image
-    bitmapInfo.bmiHeader.biPlanes = 1;                         // always 1
-    bitmapInfo.bmiHeader.biBitCount = 32;                      // bits per pixel
-    bitmapInfo.bmiHeader.biCompression = BI_RGB;               // uncompressed RGB
-    bitmapInfo.bmiHeader.biSizeImage = 0;                      // automatic
-    bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
-    bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
-
-    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), round(_size) );
-    Pt::uint8_t* data = image.data();
-
-    int ret = GetDIBits(_dc, _bitmap, 0, _size.height(), data, 
-                        &bitmapInfo, DIB_RGB_COLORS);
-
-    return image;
-}
-
-
-void PixmapSurfaceImpl::set(const Gfx::Image& image)
-{
-    resize( Gfx::SizeF(image.size().width(), 
-                       image.size().height() ) );
-
-    size_t _width = image.width();
-    size_t _height = image.height();
-
-    std::vector<Pt::uint8_t> bitmapData;
-    toPreMulAlpha(image, bitmapData);
-
-    const Pt::uint8_t* data = bitmapData.empty() ? 0 : &bitmapData[0];
-
-    const size_t depth = 32;
-
-    HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 
-                                  1, depth, (VOID*)data);
-
-    if (bitmap == NULL)
-    {
-        BITMAPINFO bitmapInfo;
-        ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-        bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
-        bitmapInfo.bmiHeader.biWidth        = image.width();
-        bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
-        bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
-        bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
-        bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
-        bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
-        bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
-        bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
-
-        VOID* imageBits = 0;
-        bitmap = CreateDIBSection(_dc, &bitmapInfo, DIB_RGB_COLORS, 
-                                  &imageBits, NULL, 0);
-        memcpy(imageBits, data, image.width() * image.height() * 4);
-    }
-
-    HDC bitmapDC = CreateCompatibleDC(NULL);
-    SelectObject(bitmapDC, bitmap);
-
-    BitBlt(_dc, 0, 0, image.width(), image.height(), bitmapDC, 0, 0, SRCCOPY);
-
-    DeleteDC(bitmapDC);
-    DeleteObject(bitmap);
 }
 
 

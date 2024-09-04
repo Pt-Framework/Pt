@@ -50,6 +50,7 @@ class PaintContext;
 class Paint;
 class Line;
 class Polyline;
+class Path;
 
 /** @brief Paint canvas.
 */
@@ -75,8 +76,6 @@ class PT_GFX_API Canvas
     protected:
         virtual const Scaling& onGetScaling() const = 0;
 
-        virtual Gfx::Image onGetImage() const = 0;
-
         virtual bool onBeginPaint(PaintContext* context) = 0;
 
         virtual PaintContext* onBeginPaint() = 0;
@@ -97,34 +96,87 @@ class PT_GFX_API Canvas
         virtual void resetClip() = 0;
 
     protected:
-        virtual void drawLine(const PointF& from, const PointF& to) = 0;
+        void drawLine(const PointF& from, const PointF& to);
 
-        virtual void drawRect(const Gfx::RectF& rect) = 0;
+        void drawPolyline(const Gfx::Polyline& line);
 
-        virtual void fillRect(const Gfx::RectF& rect) = 0;
+        void fillPolygon(const Gfx::Polyline& line);
 
-        virtual void drawPolyline(const Gfx::Polyline& line) = 0;
+        void drawRect(const Gfx::RectF& rect);
 
-        virtual void fillPolygon(const Gfx::Polyline& line) = 0;
-        
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+        void fillRect(const Gfx::RectF& rect);
 
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-    protected:
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const = 0;
-
-        virtual void drawText(const PointF& to, const Pt::String& text) = 0;
-
-        virtual void drawText(const PointF& to, const Pt::String& text, const Transform& t) = 0;
+        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
     protected:
-        virtual void drawImage(const Gfx::PointF& to, 
-                               const Gfx::Image& image) = 0;
+        FontMetrics fontMetrics(const Pt::String& text) const;
 
-        virtual void drawImage(const Gfx::PointF& to, 
-                               const Gfx::Image& image, 
-                               const Gfx::RectF& imgRect) = 0;
+        void drawText(const PointF& to, const Pt::String& text, 
+                      const Transform* t = 0);
+
+    protected:
+        void drawImage(const Gfx::PointF& to, 
+                       const Gfx::Image& image);
+
+        void drawImage(const Gfx::PointF& to, 
+                       const Gfx::Image& image, 
+                       const Gfx::RectF& imgRect);
+
+        void drawCanvas(const Gfx::PointF& to, 
+                        const Gfx::Canvas& canvas);
+
+        void drawCanvas(const Gfx::PointF& to,
+                        const Gfx::Canvas& canvas,
+                        const Gfx::RectF& rect);
+    
+    protected:
+        virtual void onDrawLine(const PointF& from, const PointF& to) = 0;
+
+        virtual void onDrawPolyline(const Gfx::Polyline& line) = 0;
+
+        virtual void onFillPolygon(const Gfx::Polyline& line) = 0;
+
+        virtual void onDrawRect(const Gfx::RectF& rect) = 0;
+
+        virtual void onFillRect(const Gfx::RectF& rect) = 0;
+
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) = 0;
+
+        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) = 0;
+
+        virtual void onDrawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                               float degBegin, float degEnd) = 0;
+
+        virtual void onFillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                                 float degBegin, float degEnd) = 0;
+
+        virtual void onFillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                               float degBegin, float degEnd) = 0;
+
+        virtual void onDrawPath(const Gfx::Path& path, float smoothness) = 0;
+
+        virtual void onFillPath(const Gfx::Path& path, float smoothness) = 0;
+
+    protected:
+        virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const = 0;
+
+        virtual void onDrawText(const PointF& to, 
+                                const Pt::String& text,
+                                const Transform* transform = 0) = 0;
+
+    protected:
+        virtual Gfx::Image onGetImage() const = 0;
+
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image) = 0;
+
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image, 
+                                 const Gfx::RectF& imgRect) = 0;
 
         virtual void onDrawCanvas(const Gfx::PointF& to, 
                                    const Gfx::Canvas& canvas) = 0;

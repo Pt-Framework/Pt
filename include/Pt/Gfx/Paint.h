@@ -195,13 +195,13 @@ class PT_GFX_API PaintContext
     public:
         void drawLine(const PointF& from, const PointF& to);
 
-        void drawRect(const Gfx::RectF& rectangle);
-
-        void fillRect(const Gfx::RectF& rectangle);
-
         void drawPolyline(const Gfx::PointF* ps, const size_t n);
 
         void fillPolygon(const Gfx::PointF* ps, const size_t n);
+
+        void drawRect(const Gfx::RectF& rectangle);
+
+        void fillRect(const Gfx::RectF& rectangle);
 
         void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
@@ -210,9 +210,8 @@ class PT_GFX_API PaintContext
     public:
         FontMetrics fontMetrics(const Pt::String& text) const;
 
-        void drawText(const PointF& to, const Pt::String& text);
-
-        void drawText(const PointF& to, const Pt::String& text, const Transform& t);
+        void drawText(const PointF& to, const Pt::String& text, 
+                      const Transform* t = 0);
 
     public:
         void drawImage(const Gfx::PointF& to, 

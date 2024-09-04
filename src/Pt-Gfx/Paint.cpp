@@ -258,37 +258,11 @@ void PaintContext::drawLine(const PointF& from, const PointF& to)
     Gfx::PointF p0 = from + origin();
     Gfx::PointF p1 = to + origin();
 
-    p0 = _scaling.toPhysical(p0);
-    p1 = _scaling.toPhysical(p1);
+     p0 = scaling().toPhysical(p0);
+     p1 = scaling().toPhysical(p1);
 
     if(_canvas)
         _canvas->drawLine(p0, p1);
-}
-
-
-void PaintContext::drawRect(const Gfx::RectF& rect)
-{
-    Gfx::RectF r = rect;
-    r.shift( origin().x(), 
-             origin().y() );
-
-    r = _scaling.toPhysical(r); 
-
-    if(_canvas)
-        _canvas->drawRect(r);
-}
-
-
-void PaintContext::fillRect(const Gfx::RectF& rect)
-{
-    Gfx::RectF r = rect;
-    r.shift( origin().x(), 
-              origin().y() );
-
-    r = _scaling.toPhysical(r);
-
-    if(_canvas)
-        _canvas->fillRect(r);
 }
 
 
@@ -310,6 +284,31 @@ void PaintContext::fillPolygon(const Gfx::PointF* ps, const size_t n)
 }
 
 
+void PaintContext::drawRect(const Gfx::RectF& rect)
+{
+    Gfx::RectF r = rect;
+    r.shift( origin().x(), origin().y() ); 
+    
+    r = scaling().toPhysical(r); 
+
+    if(_canvas)
+        _canvas->drawRect(r);
+}
+
+
+void PaintContext::fillRect(const Gfx::RectF& rect)
+{
+    Gfx::RectF r = rect;
+    r.shift( origin().x(), 
+              origin().y() );
+
+    r = scaling().toPhysical(r);
+
+    if(_canvas)
+        _canvas->fillRect(r);
+}
+
+
 void PaintContext::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     Pt::Gfx::PointF p = topLeft + origin();
@@ -318,9 +317,7 @@ void PaintContext::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& siz
     Gfx::SizeF s = _scaling.toPhysical(size);
 
     if(_canvas)
-    {
         _canvas->drawEllipse(p, s);
-    }
 }
 
 
@@ -332,9 +329,7 @@ void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& siz
     Gfx::SizeF s = _scaling.toPhysical(size);
 
     if(_canvas)
-    {
         _canvas->fillEllipse(p, s);
-    }
 }
 
 
@@ -347,28 +342,19 @@ FontMetrics PaintContext::fontMetrics(const Pt::String& text) const
 }
 
 
-void PaintContext::drawText(const PointF& to, const Pt::String& text)
+void PaintContext::drawText(const PointF& to, const Pt::String& text, 
+                            const Transform* transform)
 {
-    Pt::Gfx::PointF p = to + origin();
-
-    //
-    // TODO: scaling from here downwards
-    //
-
     if(_canvas)
     {
-        _canvas->drawText(p, text);
-    }
-}
+        Pt::Gfx::PointF p = to + origin();
+        p = scaling().toPhysical(p);
 
+        Gfx::Transform t = transform ? *transform : Gfx::Transform();
+        double scaleFactor = scaling().scaleFactor();
+        t.scale(scaleFactor, scaleFactor);
 
-void PaintContext::drawText(const PointF& to, const Pt::String& text, const Transform& tf)
-{
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_canvas)
-    {
-        _canvas->drawText(p, text, tf);
+        _canvas->drawText(p, text, &t);
     }
 }
 
@@ -419,7 +405,7 @@ void PaintContext::drawCanvas(const Gfx::PointF& to,
     Pt::Gfx::PointF p = to + origin();
 
     if(_canvas)
-        _canvas->onDrawCanvas(p, canvas);
+        _canvas->drawCanvas(p, canvas);
 }
 
 
@@ -430,7 +416,7 @@ void PaintContext::drawCanvas(const Gfx::PointF& to,
     Pt::Gfx::PointF p = to + origin();
 
     if(_canvas)
-        _canvas->onDrawCanvas(p, canvas, rect);
+        _canvas->drawCanvas(p, canvas, rect);
 }
 
 } // namespace

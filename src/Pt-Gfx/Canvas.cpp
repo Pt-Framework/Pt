@@ -115,6 +115,91 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
     return _paint;
 }
 
+
+void Canvas::drawLine(const PointF& from, const PointF& to)
+{   
+    onDrawLine(from, to);
+}
+
+
+void Canvas::drawPolyline(const Gfx::Polyline& line)
+{
+    onDrawPolyline(line);
+}
+
+
+void Canvas::fillPolygon(const Gfx::Polyline& line)
+{
+    onFillPolygon(line);
+}
+
+
+void Canvas::drawRect(const Gfx::RectF& rect)
+{
+    onDrawRect(rect);
+}
+
+
+void Canvas::fillRect(const Gfx::RectF& rect)
+{
+    onFillRect(rect);
+}
+
+
+void Canvas::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    onDrawEllipse(topLeft, size);
+}
+
+
+void Canvas::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    onFillEllipse(topLeft, size);
+}
+
+
+FontMetrics Canvas::fontMetrics(const Pt::String& text) const
+{
+    return onGetFontMetrics(text);
+}
+
+
+void Canvas::drawText(const PointF& to, const Pt::String& text, 
+                      const Transform* transform)
+{
+    onDrawText(to, text, transform);
+}
+
+
+void Canvas::drawImage(const Gfx::PointF& to, 
+                       const Gfx::Image& image)
+{
+    onDrawImage(to, image);
+}
+
+
+void Canvas::drawImage(const Gfx::PointF& to, 
+                       const Gfx::Image& image, 
+                       const Gfx::RectF& rect)
+{
+    onDrawImage(to, image, rect);
+}
+
+
+void Canvas::drawCanvas(const Gfx::PointF& to, 
+                        const Gfx::Canvas& canvas)
+{
+    onDrawCanvas(to, canvas);
+}
+
+
+void Canvas::drawCanvas(const Gfx::PointF& to,
+                        const Gfx::Canvas& canvas,
+                        const Gfx::RectF& rect)
+{
+    onDrawCanvas(to, canvas, rect);
+}
+
 } // namespace
 
 } // namespace

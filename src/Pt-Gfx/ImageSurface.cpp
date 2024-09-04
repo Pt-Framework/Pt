@@ -175,12 +175,6 @@ const Gfx::Scaling& ImageCanvas::onGetScaling() const
 }
 
 
-Gfx::Image ImageCanvas::onGetImage() const
-{
-    return image();
-}
-
-
 bool ImageCanvas::onBeginPaint(Gfx::PaintContext* context)
 {
     ImagePaint* paintContext = dynamic_cast<ImagePaint*>(context);
@@ -246,171 +240,104 @@ void ImageCanvas::setFont(const Font& font)
 
 void ImageCanvas::setClip(const RectF& rect)
 {
-  RectF clip = _scaling.toPhysical(rect);
-  _rasterizer->setClip(clip);
+    RectF clip = _scaling.toPhysical(rect);
+    _rasterizer->setClip(clip);
 }
 
 
 void ImageCanvas::resetClip()
 {
-  _rasterizer->resetClip();
+    _rasterizer->resetClip();
 }
 
 
-FontMetrics ImageCanvas::fontMetrics(const String& text) const
+void ImageCanvas::onDrawLine(const PointF& from, const  PointF& to)
 {
-	return _rasterizer->fontMetrics(text);
-}
-
-
-void ImageCanvas::drawLine(const PointF& from, const  PointF& to)
-{
-    //_rasterizer->drawLine( _scaling.toPhysical(from), 
-    //                       _scaling.toPhysical(to);
-
     _rasterizer->drawLine(from, to);
 }
 
 
-void ImageCanvas::drawText(const PointF& to, const String& text)
+void ImageCanvas::onDrawPolyline(const Gfx::Polyline& line)
 {
-    double scaleFactor = _scaling.scaleFactor();
+    std::size_t n = line.size();
 
-    Gfx::Transform trans;
-    trans.scale(scaleFactor, scaleFactor);
+    std::vector<Gfx::PointF> ps;
 
-    _rasterizer->drawText(_scaling.toPhysical(to), text, trans);
+    for(size_t i = 0; i < n; ++i)
+        ps.push_back( line.at(i) );
+
+    _rasterizer->drawPolyline(&ps[0], n);
 }
 
 
-void ImageCanvas::drawText(const PointF& to, const Pt::String& text, 
-                            const Transform& t)
+void ImageCanvas::onFillPolygon(const Gfx::Polyline& line)
 {
-    double scaleFactor = _scaling.scaleFactor();
+    std::size_t n = line.size();
 
-    Gfx::Transform trans = t;
-    trans.scale(scaleFactor, scaleFactor);
+    std::vector<Gfx::PointF> ps;
 
-    _rasterizer->drawText(_scaling.toPhysical(to), text, trans);
+    for (size_t i = 0; i < n; ++i)
+        ps.push_back( line.at(i) );
+
+    _rasterizer->fillPolygon(&ps[0], n);
 }
 
 
-void ImageCanvas::drawRect(const RectF& r)
+void ImageCanvas::onDrawRect(const RectF& r)
 {
     _rasterizer->drawRect(r);
 }
 
 
-void ImageCanvas::fillRect(const RectF& r)
+void ImageCanvas::onFillRect(const RectF& r)
 {
     _rasterizer->fillRect(r);
 }
 
 
-void ImageCanvas::drawEllipse(const PointF& topLeft, const SizeF& size)
+void ImageCanvas::onDrawEllipse(const PointF& topLeft, const SizeF& size)
 {
     _rasterizer->drawEllipse(topLeft, size);
 }
 
 
-void ImageCanvas::fillEllipse(const PointF& topLeft, const SizeF& size)
+void ImageCanvas::onFillEllipse(const PointF& topLeft, const SizeF& size)
 {
     _rasterizer->fillEllipse(topLeft, size);
 }
 
 
-void ImageCanvas::drawPolyline(const PointF* points, const size_t n)
+FontMetrics ImageCanvas::onGetFontMetrics(const String& text) const
 {
-    std::vector<Gfx::PointF> ps;
-
-    for (size_t i = 0; i < n; ++i)
-        ps.push_back( points[i] );
-
-    _rasterizer->drawPolyline(&ps[0], n);
+	return _rasterizer->fontMetrics(text);
 }
 
 
-void ImageCanvas::fillPolygon(const PointF* points, const size_t n)
+void ImageCanvas::onDrawText(const PointF& to, const Pt::String& text, 
+                            const Transform* xform)
 {
-    std::vector<Gfx::PointF> ps;
-
-    for(size_t i = 0; i < n; ++i)
-        ps.push_back( points[i] );
-
-    _rasterizer->fillPolygon(&ps[0], n);
+    if(xform)
+        _rasterizer->drawText(to, text, *xform);
+    else
+        _rasterizer->drawText(to, text);
 }
 
 
-void ImageCanvas::drawPolyline(const Gfx::Polyline& line)
+Gfx::Image ImageCanvas::onGetImage() const
 {
-    std::size_t n = line.size();
-
-    std::vector<Gfx::PointF> ps;
-
-    for(size_t i = 0; i < n; ++i)
-        ps.push_back( line.at(i) );
-
-    _rasterizer->drawPolyline(&ps[0], n);
+    return image();
 }
 
 
-void ImageCanvas::fillPolygon(const Gfx::Polyline& line)
-{
-    std::size_t n = line.size();
-
-    std::vector<Gfx::PointF> ps;
-
-    for (size_t i = 0; i < n; ++i)
-        ps.push_back( line.at(i) );
-
-    _rasterizer->fillPolygon(&ps[0], n);
-}
-
-
-void ImageCanvas::drawImage(const PointF& to, const Image& image)
+void ImageCanvas::onDrawImage(const PointF& to, const Image& image)
 {
     _rasterizer->drawImage( to, image);
 }
 
 
-void ImageCanvas::drawImage(const PointF& to, const Image& image, const RectF& imageRect)
+void ImageCanvas::onDrawImage(const PointF& to, const Image& image, const RectF& imageRect)
 {
     _rasterizer->drawImage(to, image, imageRect);
-}
-
-
-void ImageCanvas::drawPath(const Gfx::Path& path, float smoothness)
-{
-}
-
-
-void ImageCanvas::fillPath(const Path& path, float smoothness)
-{
-}
-
-
-void ImageCanvas::drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void ImageCanvas::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void ImageCanvas::drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void ImageCanvas::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void ImageCanvas::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
 }
 
 

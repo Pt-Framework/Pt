@@ -157,15 +157,11 @@ class Rasterizer
 
     void fillPath(const Path& path, float smoothness);
 
-    void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+    void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
 
     void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
 
-    void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
     void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-    void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
 
   public:
       static void setFontDir(const System::Path& path);

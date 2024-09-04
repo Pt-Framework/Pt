@@ -361,8 +361,13 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     return;
 #endif
 
+    //Gfx::Painter imagePainter(imageSurface);
+    Gfx::Painter imagePainter;
     Gfx::ImageSurface imageSurface(Gfx::Size(600, 600));
-    Gfx::Painter imagePainter(imageSurface);
+    //Gfx::Painter imagePainter2(imageSurface);
+    //imagePainter2.begin(imageSurface);
+    imagePainter.begin(imageSurface);
+
     //
     //imagePainter.setAntiAliasing(true);
     //imagePainter.setAntiAliasing(false);
@@ -558,10 +563,6 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 
     imagePainter.setPen(Gfx::Color(32767, 65535, 0, 0));
     imagePainter.drawEllipse(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100));
-    imagePainter.setPen(Gfx::Color(32767, 65535, 65535, 0));
-    imagePainter.drawPie(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100), 0, 90);
-    imagePainter.setPen(Gfx::Color(32767, 0, 65535, 0));
-    imagePainter.drawChord(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100), 180, 270);
 
     //fprintf(stderr, "AAAAA\n");
     imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(32757, 65535, 65535, 65535), 1) );

@@ -179,8 +179,6 @@ class PixmapSurfaceImpl : public Gfx::Canvas
     protected:
         virtual const Gfx::Scaling& onGetScaling() const override;
 
-        virtual Gfx::Image onGetImage() const override;
-
         virtual bool onBeginPaint(Gfx::PaintContext* context) override;
 
         Gfx::PaintContext* onBeginPaint() override;
@@ -209,55 +207,57 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         void resetClip() override;
 
-    public:
-        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
+    protected:
+        virtual void onDrawLine(const Gfx::PointF& from, 
+                                const Gfx::PointF& to) override;
 
-        void drawRect(const Gfx::RectF& rect) override;
+        virtual void onDrawPolyline(const Gfx::Polyline& line) override;
 
-        void fillRect(const Gfx::RectF& rect) override;
+        virtual void onFillPolygon(const Gfx::Polyline& line) override;
 
+        virtual void onDrawRect(const Gfx::RectF& rect) override;
 
-        void drawPolyline(const Gfx::Polyline& line);
+        virtual void onFillRect(const Gfx::RectF& rect) override;
 
-        void fillPolygon(const Gfx::Polyline& line);
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) override;
 
-        Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        void drawText(const Gfx::PointF& to, const Pt::String& text)
-        {
-            Gfx::Transform trans;
-            drawText(to, text, trans);
-        }
-
-        void drawText(const Gfx::PointF& to, const Pt::String& text, 
-                      const Gfx::Transform& trans);
-   
-
-
-        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        void drawPath(const Gfx::Path& path, float smoothness)
+        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) override;
+        
+        virtual void onDrawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                               float degBegin, float degEnd) override
         {}
 
-        void fillPath(const Gfx::Path& path, float smoothness)
+        virtual void onFillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                                 float degBegin, float degEnd) override
         {}
 
-        virtual void drawChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
+        virtual void onFillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                               float degBegin, float degEnd) override
         {}
 
-        virtual void fillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
+        virtual void onDrawPath(const Gfx::Path& path, float smoothness) override
         {}
 
-        virtual void drawPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
+        virtual void onFillPath(const Gfx::Path& path, float smoothness) override
         {}
 
-        virtual void fillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-        {}
+    protected:
+        virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
 
-        virtual void drawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, float degBegin, float degEnd)
-        {}
+        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
+                                const Gfx::Transform* trans) override;
+
+    protected:
+        virtual Gfx::Image onGetImage() const override;
+
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image) override;
+
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image, 
+                                 const Gfx::RectF& rect) override;
 
         virtual void onDrawCanvas(const Gfx::PointF& to, 
                                   const Gfx::Canvas& surface) override;
@@ -266,6 +266,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
                                   const Gfx::Canvas& canvas, 
                                   const Gfx::RectF& pmRect) override;
 
+    public:
         void drawPixmap(const Gfx::PointF& toF, 
                         const PixmapSurfaceImpl& surface);
 
@@ -282,11 +283,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
                         const Gfx::RectF& rect,
                         const Gfx::CompositionMode& mode);
 
-        void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        void drawImage(const Gfx::PointF& to, 
-                       const Gfx::Image& image, const Gfx::RectF& rect);
-
+    public:
         static const std::string& defaultFont();
 
         static void setDefaultFont(const std::string& name);

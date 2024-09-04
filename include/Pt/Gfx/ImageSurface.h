@@ -117,8 +117,6 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
   protected:
     virtual const Gfx::Scaling& onGetScaling() const override;
 
-    virtual Gfx::Image onGetImage() const override;
-
     virtual bool onBeginPaint(Gfx::PaintContext* context) override;
 
     Gfx::PaintContext* onBeginPaint() override;
@@ -139,47 +137,57 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
     virtual void resetClip();
 
   public:
-    virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+    virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)override;
 
-    virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+    virtual void onDrawPolyline(const Gfx::Polyline& line) override;
 
-    virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
+    virtual void onFillPolygon(const Gfx::Polyline& line) override;
 
-    virtual void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
+    virtual void onDrawRect(const Gfx::RectF& rectangle) override;
 
-    virtual void drawRect(const Gfx::RectF& rectangle);
+    virtual void onFillRect(const Gfx::RectF& rectangle) override;
 
-    virtual void fillRect(const Gfx::RectF& rectangle);
+    virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
+                               const Gfx::SizeF& size) override;
 
-    virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+    virtual void onFillEllipse(const Gfx::PointF& topLeft, 
+                               const Gfx::SizeF& size) override;
 
-    virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+    virtual void onDrawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                           float degBegin, float degEnd) override
+    {}
 
-    virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+    virtual void onFillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                             float degBegin, float degEnd) override
+    {}
 
-    virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+    virtual void onFillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                           float degBegin, float degEnd) override
+    {}
 
-    virtual void drawPolyline(const Gfx::Polyline& line);
+    virtual void onDrawPath(const Gfx::Path& path, float smoothness) override
+    {}
 
-    virtual void fillPolygon(const Gfx::Polyline& line);
+    virtual void onFillPath(const Gfx::Path& path, float smoothness) override
+    {}
 
-    virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+  protected:
+    virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
 
-    virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
+    virtual void onDrawText(const Gfx::PointF& to, 
+                            const Pt::String& text, 
+                            const Gfx::Transform* trans)override;
 
-    virtual void drawPath(const Gfx::Path& path, float smoothness);
 
-    virtual void fillPath(const Path& path, float smoothness);
+  protected:
+    virtual Gfx::Image onGetImage() const override;
 
-    virtual void drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+    virtual void onDrawImage(const Gfx::PointF& to, 
+                             const Gfx::Image& image) override;
 
-    virtual void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-    virtual void drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-    virtual void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-    virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+    virtual void onDrawImage(const Gfx::PointF& to, 
+                             const Gfx::Image& image, 
+                             const Gfx::RectF& imgRect) override;
 
     virtual void onDrawCanvas(const Gfx::PointF& to, 
                               const Gfx::Canvas& surface) override;

@@ -351,7 +351,7 @@ void Rasterizer::fillPath(const Path& path, float smoothness)
 }
 
 
-void Rasterizer::drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+void Rasterizer::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
 }
 
@@ -361,17 +361,7 @@ void Rasterizer::fillChord(const PointF& topLeft, const SizeF& size, float degBe
 }
 
 
-void Rasterizer::drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
 void Rasterizer::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void Rasterizer::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
 }
 

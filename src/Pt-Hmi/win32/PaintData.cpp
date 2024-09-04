@@ -116,12 +116,12 @@ HFONT getFont(const Pt::Gfx::Font& font)
 
     BYTE italic = (style == "italic" || style == "bold italic" || style == "bolditalic");
 
-    HDC dc = GetDC(NULL);
+    //HDC dc = GetDC(NULL);
     //int logicalPPI = GetDeviceCaps(dc, LOGPIXELSY);
     int logicalPPI = 96;
 
     int height = MulDiv(font.size(), logicalPPI, 72);
-    ReleaseDC(NULL, dc);
+    //ReleaseDC(NULL, dc);
 
     // If a negative value is used for lfHeight, the font is
     // looked up by character size, which is only the ascent.

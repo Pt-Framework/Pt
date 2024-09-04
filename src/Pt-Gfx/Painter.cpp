@@ -232,6 +232,21 @@ Gfx::FontMetrics Painter::fontMetrics(const Pt::String& text) const
 }
 
 
+void Painter::drawText(const Gfx::PointF& to, const Pt::String& text)
+{
+    if(_paintContext)
+        _paintContext->drawText(to, text);
+}
+
+
+void Painter::drawText(const Gfx::PointF& to, const Pt::String& text, 
+                       const Gfx::Transform& transform)
+{
+    if(_paintContext)
+        _paintContext->drawText(to, text, &transform);
+}
+
+
 void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     if( _paint.pen().size() == 0 )
@@ -242,18 +257,20 @@ void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 }
 
 
-void Painter::drawText(const Gfx::PointF& to, const Pt::String& text)
+void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
+    if( _paint.pen().size() == 0 )
+        return;
+
     if(_paintContext)
-        _paintContext->drawText(to, text);
+        _paintContext->drawPolyline(points, pointCount);
 }
 
 
-void Painter::drawText(const Gfx::PointF& to, const Pt::String& text, 
-                       const Gfx::Transform& trans)
+void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
     if(_paintContext)
-        _paintContext->drawText(to, text, trans);
+        _paintContext->fillPolygon(points, pointCount);
 }
 
 
@@ -297,37 +314,29 @@ void Painter::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 }
 
 
-void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
-{
-    if( _paint.pen().size() == 0 )
-        return;
 
-    if(_paintContext)
-        _paintContext->drawPolyline(points, pointCount);
+void Painter::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
 }
 
 
-void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
+void Painter::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
-    if(_paintContext)
-        _paintContext->fillPolygon(points, pointCount);
 }
 
 
-void Painter::drawSurface(const Gfx::PointF& toF, 
-                          const PaintSurface& surface)
+void Painter::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
-    if(_paintContext)
-        _paintContext->drawSurface(toF, surface);
 }
 
 
-void Painter::drawSurface(const Gfx::PointF& toF, 
-                          const PaintSurface& surface, 
-                          const Gfx::RectF& surfaceRect)
+void Painter::drawPath(const Gfx::Path& path, float smoothness)
 {
-    if(_paintContext)
-        _paintContext->drawSurface(toF, surface, surfaceRect);
+}
+
+
+void Painter::fillPath(const Path& path, float smoothness)
+{
 }
 
 
@@ -348,38 +357,20 @@ void Painter::drawImage(const Gfx::PointF& to,
 }
 
 
-void Painter::drawPath(const Gfx::Path& path, float smoothness)
+void Painter::drawSurface(const Gfx::PointF& toF, 
+                          const PaintSurface& surface)
 {
+    if(_paintContext)
+        _paintContext->drawSurface(toF, surface);
 }
 
 
-void Painter::fillPath(const Path& path, float smoothness)
+void Painter::drawSurface(const Gfx::PointF& toF, 
+                          const PaintSurface& surface, 
+                          const Gfx::RectF& surfaceRect)
 {
-}
-
-
-void Painter::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void Painter::drawChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void Painter::drawPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void Painter::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void Painter::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
+    if(_paintContext)
+        _paintContext->drawSurface(toF, surface, surfaceRect);
 }
 
 } // namespace
