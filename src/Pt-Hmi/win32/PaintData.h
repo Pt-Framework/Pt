@@ -96,15 +96,6 @@ class PaintData : public Gfx::PaintContext
 
         virtual void onSetFont(const Gfx::Font& font) override;
 
-    public:
-        void updateMode(const Gfx::CompositionMode& mode);
-
-        void updatePen(const Gfx::Pen& pen);
-
-        void updateBrush(const Gfx::Brush& brush);
-
-        void updateFont(const Gfx::Font& font);
-
     private:
         Gfx::Scaling              _scaling;
         Gfx::CompositionMode      _compositionMode;

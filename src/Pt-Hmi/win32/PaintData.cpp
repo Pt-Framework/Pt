@@ -201,15 +201,6 @@ const Gfx::CompositionMode& PaintData::compositionMode() const
 
 void PaintData::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
-    updateMode(mode);
-
-    //if(_canvas)
-    //    _canvas->setCompositionMode(mode);
-}
-
-
-void PaintData::updateMode(const Gfx::CompositionMode& mode)
-{
     _compositionMode = mode;
 }
 
@@ -227,15 +218,6 @@ Gfx::Color PaintData::penColor() const
 
 
 void PaintData::onSetPen(const Gfx::Pen& pen)
-{
-    updatePen(pen);
-
-    //if(_canvas)
-    //    _canvas->setPen(*this);
-}
-
-
-void PaintData::updatePen(const Gfx::Pen& pen)
 {
     double scaledSize = scaling().toPhysical( pen.size() );
 
@@ -300,15 +282,6 @@ const Gfx::Color& PaintData::gradientStop() const
 
 
 void PaintData::onSetBrush(const Gfx::Brush& brush)
-{
-    updateBrush(brush);
-
-    //if(_canvas)
-    //    _canvas->setBrush(*this, brush);
-}
-
-
-void PaintData::updateBrush(const Gfx::Brush& brush)
 {
     if(_brush)
     {
@@ -393,15 +366,6 @@ HFONT PaintData::font() const
 
 
 void PaintData::onSetFont(const Gfx::Font& font)
-{
-    updateFont(font);
-
-    //if(_canvas)
-    //    _canvas->setFont(*this);
-}
-
-
-void PaintData::updateFont(const Gfx::Font& font)
 {
     if(_font)
     {

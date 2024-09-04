@@ -181,7 +181,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         virtual bool onBeginPaint(Gfx::PaintContext* context) override;
 
-        Gfx::PaintContext* onBeginPaint() override;
+        virtual Gfx::PaintContext* onBeginPaint() override;
 
         virtual void onReleasePaint() override;
 
@@ -195,17 +195,17 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         void setFont(const PaintData& paint);
 
     protected:
-        void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
 
-        void onSetPen(const Gfx::Pen& pen) override;
+        virtual void onSetPen(const Gfx::Pen& pen) override;
 
-        void onSetBrush(const Gfx::Brush& brush) override;
+        virtual void onSetBrush(const Gfx::Brush& brush) override;
 
-        void onSetFont(const Gfx::Font& font);
+        virtual void onSetFont(const Gfx::Font& font);
 
-        void onSetClip(const Gfx::RectF& clip) override;
+        virtual void onSetClip(const Gfx::RectF& clip) override;
 
-        void onResetClip() override;
+        virtual void onResetClip() override;
 
     protected:
         virtual void onDrawLine(const Gfx::PointF& from, 

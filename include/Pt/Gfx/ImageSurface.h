@@ -119,22 +119,22 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     virtual bool onBeginPaint(Gfx::PaintContext* context) override;
 
-    Gfx::PaintContext* onBeginPaint() override;
+    virtual Gfx::PaintContext* onBeginPaint() override;
 
     virtual void onReleasePaint() override;
   
   public:
-    void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
+    virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
 
-    void onSetPen(const Gfx::Pen& pen) override;
+    virtual void onSetPen(const Gfx::Pen& pen) override;
 
-    void onSetBrush(const Gfx::Brush& brush) override;
+    virtual void onSetBrush(const Gfx::Brush& brush) override;
 
-    void onSetFont(const Gfx::Font& font);
+    virtual void onSetFont(const Gfx::Font& font);
 
-    void onSetClip(const Gfx::RectF& clip) override;
+    virtual void onSetClip(const Gfx::RectF& clip) override;
 
-    void onResetClip() override;
+    virtual void onResetClip() override;
 
   public:
     virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
@@ -177,7 +177,6 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
     virtual void onDrawText(const Gfx::PointF& to, 
                             const Pt::String& text, 
                             const Gfx::Transform* trans)override;
-
 
   protected:
     virtual Gfx::Image onGetImage() const override;
