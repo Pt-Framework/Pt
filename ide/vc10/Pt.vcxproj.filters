@@ -1641,9 +1641,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\win32\KeyMap.h">
       <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PaintData.h">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.h">
       <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
@@ -1667,6 +1664,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Canvas.h">
       <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\PaintContext.h">
+      <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -3044,9 +3044,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.cpp">
       <Filter>Pt-Hmi\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\PaintData.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.cpp">
       <Filter>Pt-Hmi\win32</Filter>
     </ClCompile>
@@ -3064,6 +3061,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Canvas.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\win32\PaintContext.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -26,7 +26,7 @@
   MA 02110-1301 USA
 */
 
-#include "PaintData.h"
+#include "PaintContext.h"
 #include "PixmapSurfaceImpl.h"
 #include "win32.h"
 
@@ -164,7 +164,7 @@ namespace Hmi {
 
 #ifndef PT_HMI_WIN32_RASTER
 
-PaintData::PaintData()
+PaintContext::PaintContext()
 : Gfx::PaintContext()
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _pen(0)
@@ -177,7 +177,7 @@ PaintData::PaintData()
 }
 
 
-PaintData::~PaintData()
+PaintContext::~PaintContext()
 {
     if(_pen)
         DeleteObject(_pen);
@@ -194,31 +194,31 @@ PaintData::~PaintData()
 
 
 
-const Gfx::CompositionMode& PaintData::compositionMode() const
+const Gfx::CompositionMode& PaintContext::compositionMode() const
 {
     return _compositionMode;
 }
 
 
-void PaintData::onSetCompositionMode(const Gfx::CompositionMode& mode)
+void PaintContext::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;
 }
 
 
-HPEN PaintData::pen() const
+HPEN PaintContext::pen() const
 {
     return _pen;
 }
 
 
-Gfx::Color PaintData::penColor() const
+Gfx::Color PaintContext::penColor() const
 {
     return _penColor;
 }
 
 
-void PaintData::onSetPen(const Gfx::Pen& pen)
+void PaintContext::onSetPen(const Gfx::Pen& pen)
 {
     double scaledSize = scaling().toPhysical( pen.size() );
 
@@ -252,37 +252,37 @@ void PaintData::onSetPen(const Gfx::Pen& pen)
 }
 
 
-HBRUSH PaintData::brush() const
+HBRUSH PaintContext::brush() const
 {
     return _brush;
 }
 
 
-bool PaintData::gradientBrush() const
+bool PaintContext::gradientBrush() const
 {
     return _gradientBrush;
 }
 
 
-const Gfx::Brush::GradientStyle& PaintData::gradient() const
+const Gfx::Brush::GradientStyle& PaintContext::gradient() const
 {
     return _gradient;
 }
 
         
-const Gfx::Color& PaintData::gradientStart() const
+const Gfx::Color& PaintContext::gradientStart() const
 {
     return _gradientStart;
 }
 
 
-const Gfx::Color& PaintData::gradientStop() const
+const Gfx::Color& PaintContext::gradientStop() const
 {
     return _gradientStop;
 }
 
 
-void PaintData::onSetBrush(const Gfx::Brush& brush)
+void PaintContext::onSetBrush(const Gfx::Brush& brush)
 {
     if(_brush)
     {
@@ -360,13 +360,13 @@ void PaintData::onSetBrush(const Gfx::Brush& brush)
 }
 
 
-HFONT PaintData::font() const
+HFONT PaintContext::font() const
 {
     return _font;
 }
 
 
-void PaintData::onSetFont(const Gfx::Font& font)
+void PaintContext::onSetFont(const Gfx::Font& font)
 {
     if(_font)
     {
@@ -378,13 +378,13 @@ void PaintData::onSetFont(const Gfx::Font& font)
 }
 
 
-HRGN PaintData::clipRect() const
+HRGN PaintContext::clipRect() const
 {
     return _clipRect;
 }
 
 
-void PaintData::resetClip(const Gfx::RectF* rectF)
+void PaintContext::resetClip(const Gfx::RectF* rectF)
 {
     // TODO: reuse HRGN instead of always creating a new one
 

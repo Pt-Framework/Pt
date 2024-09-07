@@ -32,7 +32,6 @@
 #include "WindowImpl.h"
 #include "PixmapSurfaceImpl.h"
 #include "KeyMap.h"
-#include "PaintData.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Screen.h>

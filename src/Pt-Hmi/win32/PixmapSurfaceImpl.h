@@ -148,7 +148,7 @@ class PixmapSurfaceImpl
 
 #else // PT_HMI_WIN32_RASTER
 
-class PaintData;
+class PaintContext;
 
 class PixmapSurfaceImpl : public Gfx::Canvas
 {
@@ -308,7 +308,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         HBITMAP        _oldBitmap;
         std::wstring   _text;
 
-        PaintData*                _paint;
+        PaintContext*             _paintContext;
 
         Gfx::Color                _penColor;
 

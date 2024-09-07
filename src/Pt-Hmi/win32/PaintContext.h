@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_PaintData_h
-#define Pt_Hmi_PaintData_h
+#ifndef PT_HMI_WIN32_PAINTCONTEXT_H
+#define PT_HMI_WIN32_PAINTCONTEXT_H
 
 #include "PixmapSurfaceImpl.h"
 
@@ -58,12 +58,12 @@ class PixmapSurfaceImpl;
 
 #ifndef PT_HMI_WIN32_RASTER
 
-class PaintData : public Gfx::PaintContext
+class PaintContext : public Gfx::PaintContext
 {
     public:
-        PaintData();
+        PaintContext();
 
-        ~PaintData();
+        ~PaintContext();
 
         HPEN pen() const;
 

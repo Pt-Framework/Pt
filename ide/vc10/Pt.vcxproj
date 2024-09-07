@@ -436,7 +436,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\ShellWindowFrame.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\KeyMap.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PaintData.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\PaintContext.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\win32.h" />
@@ -706,7 +706,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\PaintData.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\win32\PaintContext.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\WindowImpl.cpp" />

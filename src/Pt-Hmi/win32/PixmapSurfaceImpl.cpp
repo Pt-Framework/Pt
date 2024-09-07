@@ -28,8 +28,8 @@
 */
 
 #include "win32.h"
-#include "PaintData.h"
 #include "PixmapSurfaceImpl.h"
+#include "PaintContext.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PixmapSurface.h>
@@ -182,7 +182,7 @@ PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
 : Gfx::Canvas(surface)
 , _size(0, 0)
 , _dc(0)
-, _paint(0)
+, _paintContext(0)
 , _gradientBrush(false)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 {
@@ -322,7 +322,7 @@ const Gfx::Scaling& PixmapSurfaceImpl::onGetScaling() const
 
 bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context)
 {
-    PaintData* paintContext = dynamic_cast<PaintData*>(context);
+    PaintContext* paintContext = dynamic_cast<PaintContext*>(context);
     if( ! paintContext )
         return false;
 
@@ -332,16 +332,16 @@ bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context)
     // paintContext->setPaintDelegate(*this, PixmapSurfaceImpl::onApplyPen);
     //
     
-    _paint = paintContext;
+    _paintContext = paintContext;
     return true;
 }
 
 
 Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint()
 {
-    PaintData* paintContext  = new PaintData();
+    PaintContext* paintContext  = new PaintContext();
 
-    _paint = paintContext;
+    _paintContext = paintContext;
     return paintContext;
 }
 
@@ -353,30 +353,30 @@ void PixmapSurfaceImpl::onReleasePaint()
     SelectObject(_dc, _oldFont);
     SelectClipRgn(_dc, NULL);
 
-    _paint = 0;
+    _paintContext = 0;
 }
 
 
 void PixmapSurfaceImpl::onApplyCompositionMode(Gfx::PaintContext& paint)
 {
-    if( ! _paint )
+    if( ! _paintContext )
         return;
 
-    const Gfx::CompositionMode& m =_paint->compositionMode();
+    const Gfx::CompositionMode& m = _paintContext->compositionMode();
     _compositionMode = m;
 }
 
 
 void PixmapSurfaceImpl::onApplyPen(Gfx::PaintContext& paint)
 {
-    if( ! _paint )
+    if( ! _paintContext )
         return;
 
-    HPEN hpen = _paint->pen();
+    HPEN hpen = _paintContext->pen();
     if(hpen)
         SelectObject(_dc, hpen);
 
-    _penColor = _paint->penColor();
+    _penColor = _paintContext->penColor();
 
     DWORD penColor = RGB( _penColor.red()  / 257, 
                           _penColor.green() / 257, 
@@ -388,24 +388,24 @@ void PixmapSurfaceImpl::onApplyPen(Gfx::PaintContext& paint)
 
 void PixmapSurfaceImpl::onApplyBrush(Gfx::PaintContext& paint)
 {
-    if( ! _paint )
+    if( ! _paintContext )
         return;
 
     _gradientBrush = false;
 
-    if( _paint->gradientBrush() )
+    if( _paintContext->gradientBrush() )
     {
         _gradientBrush = true;
-        _gradient = _paint->gradient();
-        _gradientStart = _paint->gradientStart();
-        _gradientStop = _paint->gradientStop();
+        _gradient = _paintContext->gradient();
+        _gradientStart = _paintContext->gradientStart();
+        _gradientStop = _paintContext->gradientStop();
 
         // do not set a brush now, because the gradient brush pattern can
         // only be calculated later, when the fill area is known
         return;
     }
 
-    HBRUSH hbrush = _paint->brush();
+    HBRUSH hbrush = _paintContext->brush();
     if(hbrush)
         SelectObject(_dc, hbrush);
 }
@@ -413,10 +413,10 @@ void PixmapSurfaceImpl::onApplyBrush(Gfx::PaintContext& paint)
 
 void PixmapSurfaceImpl::onApplyFont(Gfx::PaintContext& paint)
 {
-    if( ! _paint )
+    if( ! _paintContext )
         return;
 
-    HFONT hfont = _paint->font();
+    HFONT hfont = _paintContext->font();
     if(hfont)
         SelectObject(_dc, hfont);
 
@@ -426,16 +426,16 @@ void PixmapSurfaceImpl::onApplyFont(Gfx::PaintContext& paint)
 
 void PixmapSurfaceImpl::onSetClip(const Gfx::RectF& clipRect)
 {
-    if( ! _paint )
+    if( ! _paintContext )
         return;
 
     //
     // reuse native clip rect from surface impl
     //
 
-    _paint->resetClip(&clipRect);
+    _paintContext->resetClip(&clipRect);
     
-    HRGN hrgn = _paint->clipRect();
+    HRGN hrgn = _paintContext->clipRect();
     if(hrgn)
         SelectClipRgn(_dc, hrgn);
     else
@@ -445,14 +445,14 @@ void PixmapSurfaceImpl::onSetClip(const Gfx::RectF& clipRect)
 
 void PixmapSurfaceImpl::onResetClip()
 {  
-    if( ! _paint )
+    if( ! _paintContext )
         return;
 
     //
     // reuse native clip rect from surface impl
     //
 
-    _paint->resetClip();
+    _paintContext->resetClip();
     SelectClipRgn(_dc, NULL);
 }
 
