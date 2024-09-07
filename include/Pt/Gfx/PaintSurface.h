@@ -61,7 +61,7 @@ class PT_GFX_API PaintSurface
         
         const Gfx::ImageFormat& format() const;
 
-        const Gfx::SizeF& size() const;
+        const Gfx::SizeF& logicalSize() const;
 
         const Scaling& scaling() const;
 
@@ -86,7 +86,7 @@ class PT_GFX_API PaintSurface
 
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
-        virtual const Gfx::SizeF& onGetSize() const = 0;
+        virtual const Gfx::SizeF& onGetLogicalSize() const = 0;
 
         virtual const Scaling& onGetScaling() const = 0;
 

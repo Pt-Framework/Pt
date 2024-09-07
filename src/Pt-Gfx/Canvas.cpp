@@ -68,9 +68,9 @@ const Gfx::ImageFormat& Canvas::format() const
 }
 
 
-const Gfx::SizeF& Canvas::size() const
+const Gfx::SizeF& Canvas::logicalSize() const
 {   
-    return _surface->size();
+    return _surface->logicalSize();
 }
 
 

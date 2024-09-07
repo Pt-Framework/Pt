@@ -65,7 +65,7 @@ class PT_GFX_API Canvas
 
         const Gfx::ImageFormat& format() const;
 
-        const Gfx::SizeF& size() const;
+        const Gfx::SizeF& logicalSize() const;
 
         const Scaling& scaling() const;
 

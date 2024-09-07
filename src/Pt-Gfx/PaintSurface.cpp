@@ -116,9 +116,9 @@ const Gfx::ImageFormat& PaintSurface::format() const
 }
 
 
-const Gfx::SizeF& PaintSurface::size() const
+const Gfx::SizeF& PaintSurface::logicalSize() const
 {
-    return onGetSize();
+    return onGetLogicalSize();
 }
 
 

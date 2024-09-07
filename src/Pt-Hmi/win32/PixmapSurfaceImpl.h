@@ -78,7 +78,7 @@ class PixmapSurfaceImpl
             _image.resize(size);
         }
 
-        const Gfx::SizeF& size() const
+        const Gfx::SizeF& pixmapSize() const
         {
             return _image.size();
         }
@@ -91,6 +91,11 @@ class PixmapSurfaceImpl
         void setScaleFactor(double scaleFactor)
         {
             _image.setScaleFactor(scaleFactor);
+        }
+
+        const Gfx::SizeF& pixmapLogicalSize() const
+        {
+            return _image.logicalSize();
         }
 
         const Gfx::ImageFormat& format() const
@@ -161,6 +166,8 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         void set(const Gfx::Image& image);
 
+        const Gfx::SizeF& pixmapSize() const;
+
         void resize(const Gfx::SizeF& size);
         
         void setScaleFactor(double scaleFactor);
@@ -169,7 +176,7 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
         const Gfx::ImageFormat& format() const;
         
-        const Gfx::SizeF& size() const;
+        const Gfx::SizeF& pixmapLogicalSize() const;
 
         const Canvas* getCanvas() const
         { 
@@ -298,10 +305,11 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         static std::string getSystemFont();
 
     private:
-        Gfx::SizeF     _size;
+        Gfx::SizeF     _logicalSize;
+        Gfx::SizeF     _physicalSize;
+        Gfx::Scaling   _scaling;
         LONG           _width;
         LONG           _height;
-        Gfx::Scaling   _scaling;
         HDC            _dc;
         HBITMAP        _bitmap;
         HPEN           _oldPen;

@@ -152,9 +152,9 @@ const Gfx::ImageFormat& PaintRegion::onGetFormat() const
 }
 
 
-const Gfx::SizeF& PaintRegion::onGetSize() const
+const Gfx::SizeF& PaintRegion::onGetLogicalSize() const
 {
-    return _surface && _hasArea ? _surface->size() : _area.size();
+    return _surface && _hasArea ? _surface->logicalSize() : _area.size();
 }
 
 

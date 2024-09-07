@@ -109,31 +109,34 @@ ImageCanvas::ImageCanvas(PaintSurface& surface,
 , _rasterizer(new Rasterizer)
 , _paint(0)
 {
-  _rasterizer->reset(size, stride);
+    _rasterizer->reset(size, stride);
+
+    _imageSize = SizeF( size.width(), size.height() );
+    _size = _scaling.toLogical(_imageSize);  
 }
 
 
 ImageCanvas::~ImageCanvas()
 {
-  delete _rasterizer;
+    delete _rasterizer;
 }
 
 
 void ImageCanvas::reset(const Gfx::Image& image)
 {
-    _size = _scaling.toLogical( SizeF( image.width(), 
-                                       image.height() ) );
-    
     _rasterizer->reset(image);
+
+    _imageSize = SizeF( image.width(), image.height() );
+    _size = _scaling.toLogical(_imageSize);   
 }
 
 
 void ImageCanvas::reset(const Gfx::Size& size, std::size_t stride)
 {
-    _size = _scaling.toLogical( SizeF( size.width(), 
-                                       size.height() ) );
-
     _rasterizer->reset(size, stride);
+
+    _imageSize = SizeF( size.width(), size.height() );
+    _size = _scaling.toLogical(_imageSize);   
 }
 
 
@@ -151,9 +154,7 @@ void ImageCanvas::setScaleFactor(double scaleFactor)
 
 void ImageCanvas::resize(const Gfx::SizeF& size)
 {
-    Gfx::SizeF physicalSize = _scaling.toPhysical(size);
-    Gfx::Size s = round(physicalSize);
-            
+    Gfx::Size s = round(size);       
     reset(s);
 }
 
@@ -164,9 +165,15 @@ const Gfx::ImageFormat& ImageCanvas::format() const
 }
 
 
-const Gfx::SizeF& ImageCanvas::size() const
+const Gfx::SizeF& ImageCanvas::imageLogicalSize() const
 {
     return _size;
+}
+
+
+const Gfx::SizeF& ImageCanvas::imageSize() const
+{
+    return _imageSize;
 }
 
 
@@ -436,6 +443,12 @@ void ImageSurface::setScaleFactor(double scaleFactor)
 }
 
 
+const Gfx::SizeF& ImageSurface::size() const
+{
+    return _canvas->imageSize();
+}
+
+
 void ImageSurface::resize(const Gfx::SizeF& size)
 {
     _canvas->resize(size);
@@ -472,9 +485,9 @@ const ImageFormat& ImageSurface::onGetFormat() const
 }
 
 
-const Gfx::SizeF& ImageSurface::onGetSize() const
+const Gfx::SizeF& ImageSurface::onGetLogicalSize() const
 {
-    return _canvas->size();
+    return _canvas->imageLogicalSize();
 }
 
 

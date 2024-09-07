@@ -72,7 +72,7 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         virtual const Gfx::ImageFormat& onGetFormat() const override;
 
-        virtual const Gfx::SizeF& onGetSize() const override;
+        virtual const Gfx::SizeF& onGetLogicalSize() const override;
 
         virtual const Gfx::Scaling& onGetScaling() const override;
 

@@ -50,7 +50,7 @@ namespace Hmi {
 
 class PixmapSurfaceImpl;
 
-/** @brief A back buffer drawing surface.
+/** @brief Back buffer drawing surface.
 */
 class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 {
@@ -63,21 +63,15 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         bool empty() const;
 
+        /** @brief Returns the size of the pixmap in device pixel. 
+        */
+        const Gfx::SizeF& size() const;
+
         void resize(const Gfx::SizeF& size);
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
         void setScaleFactor(double v);
-
-        PixmapSurfaceImpl* impl()
-        {
-            return _impl;
-        }
-
-        const PixmapSurfaceImpl* impl() const
-        {
-            return _impl;
-        }
 
         void drawPixmap(const Gfx::PointF& to, 
                         const PixmapSurface& pixmap,
@@ -95,7 +89,7 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         virtual const Gfx::ImageFormat& onGetFormat() const override;
 
-        virtual const Gfx::SizeF& onGetSize() const override;
+        virtual const Gfx::SizeF& onGetLogicalSize() const override;
 
         virtual const Gfx::Scaling& onGetScaling() const override;
 
@@ -108,6 +102,17 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         static std::vector<std::string> fontNames();
 
+    public:
+        PixmapSurfaceImpl* impl()
+        {
+            return _impl;
+        }
+
+        const PixmapSurfaceImpl* impl() const
+        {
+            return _impl;
+        }
+    
     private:
         PixmapSurfaceImpl* _impl;
 };

@@ -180,7 +180,8 @@ namespace Hmi {
 
 PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
 : Gfx::Canvas(surface)
-, _size(0, 0)
+, _logicalSize(0, 0)
+, _physicalSize(0, 0)
 , _width(0)
 , _height(0)
 , _dc(0)
@@ -227,7 +228,7 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
     size_t width = image.width();
     size_t height = image.height();
 
-    Gfx::SizeF size = _scaling.toLogical( Gfx::SizeF(width, height) );
+    Gfx::SizeF size(width, height);
     resize(size);
 
     std::vector<Pt::uint8_t> bitmapData;
@@ -271,10 +272,14 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
 }
 
 
-void PixmapSurfaceImpl::resize(const Gfx::SizeF& sizeF)
+const Gfx::SizeF& PixmapSurfaceImpl::pixmapSize() const
 {
-    Gfx::SizeF size = _scaling.toPhysical(sizeF);
+    return _physicalSize;
+}
 
+
+void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
+{
     LONG width = lround( size.width() );
     LONG height = lround( size.height() );
 
@@ -288,10 +293,11 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& sizeF)
     SelectObject(_dc, bitmap);
     DeleteObject(_bitmap);
     _bitmap = bitmap;
-
-    _size = sizeF;
     _width = width;
     _height = height;
+
+    _logicalSize = size;
+    _physicalSize.set(width, height);
 }
 
 
@@ -313,9 +319,9 @@ const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 }
 
 
-const Gfx::SizeF& PixmapSurfaceImpl::size() const
+const Gfx::SizeF& PixmapSurfaceImpl::pixmapLogicalSize() const
 {
-    return _size;
+    return _logicalSize;
 }
 
 
@@ -1020,7 +1026,7 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
                                    const PixmapSurfaceImpl& surface)
 {
     Gfx::PointF to = _scaling.toPhysical(toF);
-    Gfx::Size size = Gfx::round( surface.size() );
+    Gfx::Size size = Gfx::round( surface.pixmapSize() );
 
     switch (_compositionMode)
     {

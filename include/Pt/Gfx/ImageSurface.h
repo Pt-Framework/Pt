@@ -89,7 +89,7 @@ class ImagePaint : public PaintContext
 };
 
 
-class PT_GFX_API ImageCanvas : public Gfx::Canvas
+class ImageCanvas : public Gfx::Canvas
 {
   public:
     ImageCanvas(PaintSurface& surface);
@@ -107,11 +107,13 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
 
     void setScaleFactor(double scaleFactor);
 
+    const Gfx::SizeF& imageSize() const;
+
     void resize(const Gfx::SizeF& size);
 
-    const Gfx::ImageFormat& format() const;
+    const Gfx::SizeF& imageLogicalSize() const;
 
-    const Gfx::SizeF& size() const;
+    const Gfx::ImageFormat& format() const;
 
   protected:
     virtual const Gfx::Scaling& onGetScaling() const override;
@@ -200,9 +202,11 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
     ImagePaint*   _paint;
     Scaling       _scaling;
     SizeF         _size;
+    SizeF         _imageSize;
 };
 
-
+/** @brief Image drawing surface.
+*/
 class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 {
   public:
@@ -218,6 +222,10 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     const Gfx::Image& image() const;
 
+    /** @brief Returns the size of the image in device pixel. 
+    */
+    const Gfx::SizeF& size() const;
+
     void resize(const Gfx::SizeF& size);
 
     void setScaleFactor(double scaleFactor);    
@@ -229,7 +237,7 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     virtual const Gfx::ImageFormat& onGetFormat() const override;
 
-    virtual const Gfx::SizeF& onGetSize() const override;
+    virtual const Gfx::SizeF& onGetLogicalSize() const override;
 
     virtual const Scaling& onGetScaling() const override;
 
