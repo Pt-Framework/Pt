@@ -407,7 +407,6 @@ ImageSurface::ImageSurface()
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this);
-    //setCanvas(_canvas);
 }
 
 
@@ -415,7 +414,6 @@ ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this, size, stride);
-    //setCanvas(_canvas);
 }
 
 
@@ -441,21 +439,18 @@ void ImageSurface::setScaleFactor(double scaleFactor)
 void ImageSurface::resize(const Gfx::SizeF& size)
 {
     _canvas->resize(size);
-    _size = _canvas->size();
 }
 
 
 void ImageSurface::reset(const Gfx::Image& image)
 {
     _canvas->reset(image);
-    _size = _canvas->size();
 }
 
 
 void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
 {
     _canvas->reset(size, stride);
-    _size = _canvas->size();
 }
 
 
@@ -479,19 +474,13 @@ const ImageFormat& ImageSurface::onGetFormat() const
 
 const Gfx::SizeF& ImageSurface::onGetSize() const
 {
-    return _size;
+    return _canvas->size();
 }
 
 
 const Scaling& ImageSurface::onGetScaling() const
 {
     return _scaling;
-}
-
-
-FontMetrics ImageSurface::fontMetrics( const Font& font, const Pt::String& text )
-{
-  return Rasterizer::fontMetrics( font, text );
 }
 
 

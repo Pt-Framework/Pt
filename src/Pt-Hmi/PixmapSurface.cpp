@@ -51,8 +51,6 @@ PixmapSurface::~PixmapSurface()
 
 void PixmapSurface::set(const Gfx::Image& image)
 {
-    _logicSize = scaling().toLogical( Gfx::SizeF( image.size().width(), 
-                                                  image.size().height() ) );
     _impl->set(image);
 }
 
@@ -65,7 +63,6 @@ bool PixmapSurface::empty() const
 
 void PixmapSurface::resize(const Gfx::SizeF& size)
 {
-    _logicSize = size;
     _impl->resize(size);
 }
 
@@ -83,8 +80,8 @@ void PixmapSurface::setScaleFactor(double scaling)
 
     _impl->setScaleFactor(scaling);
 
-    // should be done in setScaleFactor
-    _impl->resize(_logicSize);
+    // TODO: should size change with scale factor?
+    _impl->resize( _impl->size() );
 }
 
 
@@ -125,7 +122,7 @@ const Gfx::ImageFormat& PixmapSurface::onGetFormat() const
 
 const Gfx::SizeF& PixmapSurface::onGetSize() const
 {
-    return _logicSize;
+    return _impl->size();
 }
 
 

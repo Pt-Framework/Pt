@@ -181,6 +181,8 @@ namespace Hmi {
 PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
 : Gfx::Canvas(surface)
 , _size(0, 0)
+, _width(0)
+, _height(0)
 , _dc(0)
 , _paintContext(0)
 , _gradientBrush(false)
@@ -222,11 +224,11 @@ void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 
 void PixmapSurfaceImpl::set(const Gfx::Image& image)
 {
-    resize( Gfx::SizeF(image.size().width(), 
-                       image.size().height() ) );
+    size_t width = image.width();
+    size_t height = image.height();
 
-    size_t _width = image.width();
-    size_t _height = image.height();
+    Gfx::SizeF size = _scaling.toLogical( Gfx::SizeF(width, height) );
+    resize(size);
 
     std::vector<Pt::uint8_t> bitmapData;
     toPreMulAlpha(image, bitmapData);
@@ -244,8 +246,8 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
         ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
         bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
-        bitmapInfo.bmiHeader.biWidth        = image.width();
-        bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
+        bitmapInfo.bmiHeader.biWidth        = width;
+        bitmapInfo.bmiHeader.biHeight       = -(ssize_t)height; // top-down image
         bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
         bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
         bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
@@ -273,20 +275,23 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& sizeF)
 {
     Gfx::SizeF size = _scaling.toPhysical(sizeF);
 
-    if( _size == size )
-        return;
+    LONG width = lround( size.width() );
+    LONG height = lround( size.height() );
 
-    _size = size;
+    if( _width == width && _height == height )
+        return;
     
     HDC screenDC = GetDC(NULL);
-    HBITMAP bitmap = CreateCompatibleBitmap(screenDC, lround( _size.width() ), 
-                                                      lround( _size.height() ) );
+    HBITMAP bitmap = CreateCompatibleBitmap(screenDC, width, height);
     ReleaseDC(NULL, screenDC);
 
     SelectObject(_dc, bitmap);
-    
     DeleteObject(_bitmap);
     _bitmap = bitmap;
+
+    _size = sizeF;
+    _width = width;
+    _height = height;
 }
 
 
@@ -823,8 +828,8 @@ Gfx::Image PixmapSurfaceImpl::onGetImage() const
     ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
     bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bitmapInfo.bmiHeader.biWidth = _size.width();
-    bitmapInfo.bmiHeader.biHeight = -(ssize_t)_size.height();  // top-down image
+    bitmapInfo.bmiHeader.biWidth = _width;
+    bitmapInfo.bmiHeader.biHeight = -(ssize_t)_height;  // top-down image
     bitmapInfo.bmiHeader.biPlanes = 1;                         // always 1
     bitmapInfo.bmiHeader.biBitCount = 32;                      // bits per pixel
     bitmapInfo.bmiHeader.biCompression = BI_RGB;               // uncompressed RGB
@@ -832,10 +837,10 @@ Gfx::Image PixmapSurfaceImpl::onGetImage() const
     bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
     bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
 
-    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), round(_size) );
+    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), Gfx::Size(_width, _height) );
     Pt::uint8_t* data = image.data();
 
-    int ret = GetDIBits(_dc, _bitmap, 0, _size.height(), data, 
+    int ret = GetDIBits(_dc, _bitmap, 0, _height, data, 
                         &bitmapInfo, DIB_RGB_COLORS);
 
     return image;
@@ -938,8 +943,8 @@ void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& toF, const Gfx::Image& im
             bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
             bf.AlphaFormat = AC_SRC_ALPHA;
 
-            AlphaBlend(_dc, to.x(), to.y(), _size.width(), _size.height(), 
-                       bitmapDC, 0, 0, _size.width(), _size.height(), bf);
+            AlphaBlend(_dc, to.x(), to.y(), _width, _height, 
+                       bitmapDC, 0, 0, _width, _height, bf);
 
             DeleteObject(bitmap);
             DeleteDC(bitmapDC);

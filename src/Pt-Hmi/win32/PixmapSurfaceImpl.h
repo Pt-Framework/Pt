@@ -299,6 +299,8 @@ class PixmapSurfaceImpl : public Gfx::Canvas
 
     private:
         Gfx::SizeF     _size;
+        LONG           _width;
+        LONG           _height;
         Gfx::Scaling   _scaling;
         HDC            _dc;
         HBITMAP        _bitmap;

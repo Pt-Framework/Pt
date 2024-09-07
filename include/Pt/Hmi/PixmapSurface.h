@@ -110,7 +110,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
     private:
         PixmapSurfaceImpl* _impl;
-        Gfx::SizeF         _logicSize;
 };
 
 } // namespace

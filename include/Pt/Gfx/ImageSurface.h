@@ -202,9 +202,6 @@ class PT_GFX_API ImageCanvas : public Gfx::Canvas
     SizeF         _size;
 };
 
-//
-// TODO: Image in ImageSurface used by Canvas to draw on
-//
 
 class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 {
@@ -245,12 +242,9 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     static std::vector<std::string> fontNames();
 
-    static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
-
   private:
     ImageCanvas*  _canvas;
     Scaling       _scaling;
-    SizeF         _size;
 };
 
 } // namespace
