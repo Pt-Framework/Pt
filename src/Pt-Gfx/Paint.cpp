@@ -204,10 +204,8 @@ const Scaling& PaintContext::scaling() const
 
 void PaintContext::setCompositionMode(const Gfx::CompositionMode& mode)
 {
-    onSetCompositionMode(mode);
-
     if(_canvas)
-        _canvas->applyCompositionMode(*this);
+        _canvas->setCompositionMode(mode);
 }
 
 

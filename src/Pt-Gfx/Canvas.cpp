@@ -99,10 +99,6 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
     {
         if( reuse->scaling() != scaling() )
             reuse = 0;
-
-        //
-        // invalidate state, so attributes get reattached
-        //
     }
 
     if(reuse)
@@ -113,10 +109,11 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
             _paint = reuse;
 
             //
-            // invalidate state, so attributes get reattached
+            // invalidate state to mark pen as dirty. Painter only sets
+            // common pen in PaintContext. In drawLine a pen is attached
+            // or created as appropriate depending on the dirty state. 
             //
 
-            onApplyCompositionMode(*reuse);
             onApplyPen(*reuse);
             onApplyBrush(*reuse);
             onApplyFont(*reuse);
@@ -128,12 +125,6 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
     
     _paint->attachCanvas(*this);
     return _paint;
-}
-
-
-void Canvas::applyCompositionMode(PaintContext& paint)
-{
-    onApplyCompositionMode(paint);
 }
 
 
@@ -152,6 +143,12 @@ void Canvas::applyBrush(PaintContext& paint)
 void Canvas::applyFont(PaintContext& paint)
 {
     onApplyFont(paint);
+}
+
+
+void Canvas::setCompositionMode(const CompositionMode& mode)
+{   
+    onSetCompositionMode(mode);
 }
 
 

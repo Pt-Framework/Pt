@@ -52,11 +52,6 @@ class ImagePaint : public PaintContext
 
         ~ImagePaint();
 
-        const Gfx::CompositionMode& compositionMode() const
-        {
-            return _compositionMode;
-        }
-
         const Pen& pen() const
         {
             return _pen;
@@ -73,8 +68,6 @@ class ImagePaint : public PaintContext
         }
 
     protected:
-        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
-
         virtual void onSetPen(const Gfx::Pen& pen) override;
 
         virtual void onSetBrush(const Gfx::Brush& brush) override;
@@ -82,7 +75,6 @@ class ImagePaint : public PaintContext
         virtual void onSetFont(const Gfx::Font& font) override;
    
     private:
-        Gfx::CompositionMode _compositionMode;
         Pen                  _pen;
         Gfx::Brush           _brush;
         Gfx::Font            _font;
@@ -125,7 +117,7 @@ class ImageCanvas : public Gfx::Canvas
     virtual void onReleasePaint() override;
   
   protected:
-      virtual void onApplyCompositionMode(PaintContext& paint) override;
+      virtual void onSetCompositionMode(const CompositionMode& mode) override;
 
       virtual void onApplyPen(PaintContext& paint) override;
 

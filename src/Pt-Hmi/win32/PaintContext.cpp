@@ -166,7 +166,6 @@ namespace Hmi {
 
 PaintContext::PaintContext()
 : Gfx::PaintContext()
-, _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _pen(0)
 , _penColor()
 , _brush(0)
@@ -190,19 +189,6 @@ PaintContext::~PaintContext()
 
     if(_clipRect)
         DeleteObject(_clipRect);
-}
-
-
-
-const Gfx::CompositionMode& PaintContext::compositionMode() const
-{
-    return _compositionMode;
-}
-
-
-void PaintContext::onSetCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _compositionMode = mode;
 }
 
 

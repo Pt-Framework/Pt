@@ -236,8 +236,6 @@ class PT_GFX_API PaintContext
                         const Gfx::RectF& rect);
 
     protected:
-        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
-
         virtual void onSetPen(const Pen& pen) = 0;
 
         virtual void onSetBrush(const Brush& pen) = 0;

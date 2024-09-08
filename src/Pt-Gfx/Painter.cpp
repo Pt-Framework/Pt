@@ -77,7 +77,7 @@ void Painter::begin(PaintSurface& surface)
     {
         delete reuse;
 
-        _paintContext->setCompositionMode( _paint.compositionMode() );
+        //_paintContext->setCompositionMode( _paint.compositionMode() );
         _paintContext->setPen( _paint.pen() );
         _paintContext->setBrush( _paint.brush() );
         _paintContext->setFont( _paint.font() );
@@ -85,6 +85,8 @@ void Painter::begin(PaintSurface& surface)
 
     if(_paintContext)
     {
+        _paintContext->setCompositionMode( _paint.compositionMode() );
+
         const Gfx::RectF& clip = _paint.clip();
 
         if( clip.isNull() )

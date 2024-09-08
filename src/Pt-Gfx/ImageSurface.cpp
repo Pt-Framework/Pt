@@ -61,12 +61,6 @@ ImagePaint::~ImagePaint()
 }
 
 
-void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _compositionMode = mode;
-}
-
-
 void ImagePaint::onSetPen(const Gfx::Pen& pen)
 {
     double scaledSize = scaling().toPhysical( pen.size() );
@@ -210,13 +204,9 @@ void ImageCanvas::onReleasePaint()
 }
 
 
-void ImageCanvas::onApplyCompositionMode(PaintContext& paint)
+void ImageCanvas::onSetCompositionMode(const CompositionMode& mode)
 {
-    if( ! _paint )
-        return;
-
-  const CompositionMode& m =_paint->compositionMode();
-  _rasterizer->setCompositionMode(m);
+    _rasterizer->setCompositionMode(mode);
 }
 
 

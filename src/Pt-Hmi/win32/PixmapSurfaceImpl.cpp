@@ -368,16 +368,6 @@ void PixmapSurfaceImpl::onReleasePaint()
 }
 
 
-void PixmapSurfaceImpl::onApplyCompositionMode(Gfx::PaintContext& paint)
-{
-    if( ! _paintContext )
-        return;
-
-    const Gfx::CompositionMode& m = _paintContext->compositionMode();
-    _compositionMode = m;
-}
-
-
 void PixmapSurfaceImpl::onApplyPen(Gfx::PaintContext& paint)
 {
     if( ! _paintContext )
@@ -432,6 +422,12 @@ void PixmapSurfaceImpl::onApplyFont(Gfx::PaintContext& paint)
         SelectObject(_dc, hfont);
 
     SetTextAlign(_dc, TA_BASELINE | TA_LEFT | TA_NOUPDATECP);
+}
+
+
+void PixmapSurfaceImpl::onSetCompositionMode(const Gfx::CompositionMode& mode)
+{
+    _compositionMode = mode;
 }
 
 

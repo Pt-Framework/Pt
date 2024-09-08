@@ -83,8 +83,6 @@ class PT_GFX_API Canvas
         virtual void onReleasePaint() = 0;
 
     protected:
-        void applyCompositionMode(PaintContext& paint);
-
         void applyPen(PaintContext& paint);
 
         void applyBrush(PaintContext& paint);
@@ -92,6 +90,8 @@ class PT_GFX_API Canvas
         void applyFont(PaintContext& paint);
 
     protected:
+        void setCompositionMode(const CompositionMode& mode);
+
         void setClip(const RectF& clip);
 
         void resetClip();
@@ -133,8 +133,6 @@ class PT_GFX_API Canvas
                         const Gfx::RectF& rect);
     
     protected:
-        virtual void onApplyCompositionMode(PaintContext& paint) = 0;
-
         virtual void onApplyPen(PaintContext& paint) = 0;
 
         virtual void onApplyBrush(PaintContext& paint) = 0;
@@ -142,6 +140,8 @@ class PT_GFX_API Canvas
         virtual void onApplyFont(PaintContext& paint) = 0;
 
     protected:
+        virtual void onSetCompositionMode(const CompositionMode& mode) = 0;
+
         virtual void onSetClip(const RectF& clip) = 0;
 
         virtual void onResetClip() = 0;
