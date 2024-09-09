@@ -166,9 +166,6 @@ void Screen::onShow(ScreenImpl& s, bool isShow)
 
 Visual* Screen::onHitTest(const Gfx::PointF& p)
 {
-    //if( ! bounds().contains(p) )
-    //    return 0;
-
     // TODO: convert to WM coordinates
     Gfx::PointF pos = p;
     
