@@ -45,6 +45,7 @@ namespace Gfx {
 class Canvas;
 class Painter;
 class PaintContext;
+class PaintRegion;
 
 /** @brief Paint target for painters.
 */
