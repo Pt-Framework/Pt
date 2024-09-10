@@ -60,10 +60,6 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _cursorPos(0, 0)
 , _drawCursor(false)
 {
-    Gfx::Size fs = _frameBuffer.size();
-    Gfx::SizeF size( fs.width(), fs.height() );
-
-    _surface.resize(size);
     _surface.impl()->reset( _frameBuffer.size(), 
                             _frameBuffer.strideSize() );
 
@@ -279,14 +275,9 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 
     Gfx::Size fs = _frameBuffer.size();
     Gfx::SizeF size( fs.width(), fs.height() );
-    
     size /= scaleFactor();
 
-    _surface.resize(size);
     _surface.setScaleFactor( scaleFactor() );
-    
-    _surface.impl()->reset( _frameBuffer.size(), 
-                            _frameBuffer.strideSize() );
 
     if(_parent)
         _parent->onResize(*this, size);

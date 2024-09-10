@@ -52,6 +52,11 @@ class PixmapSurfaceImpl
             _image.reset(image);
         }
 
+        void reset(const Gfx::Size& size, std::size_t stride)
+        {
+            _image.reset(size, stride);
+        }
+
         void resize(const Gfx::SizeF& size)
         {
             _image.resize(size);
