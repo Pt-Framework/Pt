@@ -65,6 +65,8 @@ class PaintContext : public Gfx::PaintContext
 
         ~PaintContext();
 
+        const Gfx::CompositionMode& compositionMode() const;
+
         HPEN pen() const;
 
         Gfx::Color penColor() const;
@@ -83,17 +85,20 @@ class PaintContext : public Gfx::PaintContext
 
         HRGN clipRect() const;
 
-        void resetClip(const Gfx::RectF* clip = 0);
-
     protected:
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
+
         virtual void onSetPen(const Gfx::Pen& pen) override;
 
         virtual void onSetBrush(const Gfx::Brush& brush) override;
 
         virtual void onSetFont(const Gfx::Font& font) override;
 
+        virtual void onSetClip(const Gfx::RectF* clip) override;
+
     private:
         Gfx::Scaling              _scaling;
+        Gfx::CompositionMode      _compositionMode;
         HPEN                      _pen;
         Gfx::Color                _penColor;
         HBRUSH                    _brush;

@@ -166,16 +166,16 @@ void PaintSurface::onDraw(PaintContext& paint,
 }
 
 
-PaintContext* PaintSurface::beginPaint(PaintContext* reuse)
+PaintContext* PaintSurface::getPaint(PaintContext* reuse)
 {
     if( ! _canvas )
-        return onBeginPaint(reuse);
+        return onGetPaint(reuse);
 
-    return _canvas->beginPaint(reuse);
+    return _canvas->getPaint(reuse);
 }
 
 
-PaintContext* PaintSurface::onBeginPaint(PaintContext* context)
+PaintContext* PaintSurface::onGetPaint(PaintContext* context)
 {
     return 0;
 }   

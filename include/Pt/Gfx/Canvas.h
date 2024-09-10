@@ -41,6 +41,8 @@
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImageFormat.h>
 
+#include <vector>
+
 namespace Pt {
 
 namespace Gfx {
@@ -71,30 +73,16 @@ class PT_GFX_API Canvas
 
         Image toImage() const;
 
-        Gfx::PaintContext* beginPaint(Gfx::PaintContext* context);
+        Gfx::PaintContext* getPaint(Gfx::PaintContext* context);
 
     protected:
         virtual const Scaling& onGetScaling() const = 0;
 
-        virtual bool onBeginPaint(PaintContext* context) = 0;
+        virtual bool onGetPaint(PaintContext* context) = 0;
 
-        virtual PaintContext* onBeginPaint() = 0;
+        virtual PaintContext* onGetPaint() = 0;
 
         virtual void onReleasePaint() = 0;
-
-    protected:
-        void applyPen(PaintContext& paint);
-
-        void applyBrush(PaintContext& paint);
-
-        void applyFont(PaintContext& paint);
-
-    protected:
-        void setCompositionMode(const CompositionMode& mode);
-
-        void setClip(const RectF& clip);
-
-        void resetClip();
 
     protected:
         void drawLine(const PointF& from, const PointF& to);
@@ -133,18 +121,15 @@ class PT_GFX_API Canvas
                         const Gfx::RectF& rect);
     
     protected:
-        virtual void onApplyPen(PaintContext& paint) = 0;
+        virtual void onCompositionModeChanged() = 0;
 
-        virtual void onApplyBrush(PaintContext& paint) = 0;
+        virtual void onPenChanged() = 0;
 
-        virtual void onApplyFont(PaintContext& paint) = 0;
+        virtual void onBrushChanged() = 0;
 
-    protected:
-        virtual void onSetCompositionMode(const CompositionMode& mode) = 0;
+        virtual void onFontChanged() = 0;
 
-        virtual void onSetClip(const RectF& clip) = 0;
-
-        virtual void onResetClip() = 0;
+        virtual void onClipChanged() = 0;
 
     protected:
         virtual void onDrawLine(const PointF& from, const PointF& to) = 0;
@@ -204,8 +189,12 @@ class PT_GFX_API Canvas
         void onDetachPaint(PaintContext& paint);
     
     private:
-        PaintSurface*     _surface;
-        PaintContext*     _paint;
+        PaintSurface*              _surface;
+        PaintContext*              _paint;
+
+        // TODO: multiple paint contexts attached, but one is active
+        std::vector<PaintContext*> _paints;
+        PaintContext*              _active;
 };
 
 } // namespace

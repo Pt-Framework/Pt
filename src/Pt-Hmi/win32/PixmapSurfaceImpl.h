@@ -108,9 +108,9 @@ class PixmapSurfaceImpl
             return _image.canvas();
         }
 
-        Gfx::PaintContext* beginPaint(Gfx::PaintContext* context)
+        Gfx::PaintContext* getPaint(Gfx::PaintContext* context)
         {
-            return _image.beginPaint(context);
+            return _image.getPaint(context);
         }
 
         void drawPixmap(const Gfx::PointF& toF, 
@@ -186,25 +186,22 @@ class PixmapSurfaceImpl : public Gfx::Canvas
     protected:
         virtual const Gfx::Scaling& onGetScaling() const override;
 
-        virtual bool onBeginPaint(Gfx::PaintContext* context) override;
+        virtual bool onGetPaint(Gfx::PaintContext* context) override;
 
-        virtual Gfx::PaintContext* onBeginPaint() override;
+        virtual Gfx::PaintContext* onGetPaint() override;
 
         virtual void onReleasePaint() override;
 
     protected:
-        virtual void onApplyPen(Gfx::PaintContext& paint) override;
+        virtual void onCompositionModeChanged() override;
 
-        virtual void onApplyBrush(Gfx::PaintContext& paint) override;
+        virtual void onPenChanged() override;
 
-        virtual void onApplyFont(Gfx::PaintContext& paint) override;
+        virtual void onBrushChanged() override;
 
-    protected:
-        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
+        virtual void onFontChanged() override;
 
-        virtual void onSetClip(const Gfx::RectF& clip) override;
-
-        virtual void onResetClip() override;
+        virtual void onClipChanged() override;
 
     protected:
         virtual void onDrawLine(const Gfx::PointF& from, 

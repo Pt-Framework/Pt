@@ -177,6 +177,12 @@ class PT_GFX_API PaintContext
 
         const Scaling& scaling() const;
 
+        void beginPaint();
+
+        void finishPaint();
+
+        bool isActive() const;
+
         void reset();
 
     public:
@@ -236,11 +242,15 @@ class PT_GFX_API PaintContext
                         const Gfx::RectF& rect);
 
     protected:
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
+
         virtual void onSetPen(const Pen& pen) = 0;
 
         virtual void onSetBrush(const Brush& pen) = 0;
 
         virtual void onSetFont(const Gfx::Font& font) = 0;
+
+        virtual void onSetClip(const Gfx::RectF* clip) = 0;
 
         virtual void onReleasePaint() {}
 
@@ -254,8 +264,10 @@ class PT_GFX_API PaintContext
 
     private:
         Canvas*        _canvas;
+        Canvas*        _active;
         RectF          _region;
         Gfx::Scaling   _scaling;
+        RectF          _clip;
 };
 
 /** @brief Polyline.

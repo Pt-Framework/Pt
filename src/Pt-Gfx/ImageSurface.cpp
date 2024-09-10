@@ -61,6 +61,12 @@ ImagePaint::~ImagePaint()
 }
 
 
+void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode) 
+{
+    _compositionMode = mode;
+}
+
+
 void ImagePaint::onSetPen(const Gfx::Pen& pen)
 {
     double scaledSize = scaling().toPhysical( pen.size() );
@@ -83,6 +89,15 @@ void ImagePaint::onSetBrush(const Gfx::Brush& brush)
 void ImagePaint::onSetFont(const Gfx::Font& font)
 {
     _font = font;
+}
+
+
+void ImagePaint::onSetClip(const Gfx::RectF* clip)
+{
+    if(clip)
+        _clip = *clip;
+    else
+        _clip.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -177,7 +192,7 @@ const Gfx::Scaling& ImageCanvas::onGetScaling() const
 }
 
 
-bool ImageCanvas::onBeginPaint(Gfx::PaintContext* context)
+bool ImageCanvas::onGetPaint(Gfx::PaintContext* context)
 {
     ImagePaint* paintContext = dynamic_cast<ImagePaint*>(context);
     if( ! paintContext )
@@ -188,7 +203,7 @@ bool ImageCanvas::onBeginPaint(Gfx::PaintContext* context)
 }
 
 
-Gfx::PaintContext* ImageCanvas::onBeginPaint()
+Gfx::PaintContext* ImageCanvas::onGetPaint()
 {
     ImagePaint* paintContext = new ImagePaint();
     
@@ -204,13 +219,17 @@ void ImageCanvas::onReleasePaint()
 }
 
 
-void ImageCanvas::onSetCompositionMode(const CompositionMode& mode)
+void ImageCanvas::onCompositionModeChanged()
 {
+    if( ! _paint )
+        return;
+
+    const Gfx::CompositionMode& mode = _paint->compositionMode();
     _rasterizer->setCompositionMode(mode);
 }
 
 
-void ImageCanvas::onApplyPen(PaintContext& paint)
+void ImageCanvas::onPenChanged()
 {
     if( ! _paint )
         return;
@@ -220,7 +239,7 @@ void ImageCanvas::onApplyPen(PaintContext& paint)
 }
 
 
-void ImageCanvas::onApplyBrush(PaintContext& paint)
+void ImageCanvas::onBrushChanged()
 {
     if( ! _paint )
         return;
@@ -230,7 +249,7 @@ void ImageCanvas::onApplyBrush(PaintContext& paint)
 }
 
 
-void ImageCanvas::onApplyFont(PaintContext& paint)
+void ImageCanvas::onFontChanged()
 {
     if( ! _paint )
         return;
@@ -240,16 +259,21 @@ void ImageCanvas::onApplyFont(PaintContext& paint)
 }
 
 
-void ImageCanvas::onSetClip(const RectF& rect)
+void ImageCanvas::onClipChanged()
 {
-    RectF clip = _scaling.toPhysical(rect);
-    _rasterizer->setClip(clip);
-}
+    if( ! _paint )
+        return;
 
-
-void ImageCanvas::onResetClip()
-{
-    _rasterizer->resetClip();
+    const RectF& clip = _paint->clip();
+    if( clip.isNull() )
+    {
+        _rasterizer->resetClip();
+    }
+    else
+    {
+        RectF rect = _scaling.toPhysical(clip);
+        _rasterizer->setClip(rect);
+    }
 }
 
 
@@ -463,9 +487,9 @@ const Canvas* ImageSurface::onGetCanvas() const
 }
 
 
-Gfx::PaintContext* ImageSurface::onBeginPaint(Gfx::PaintContext* reuse) 
+Gfx::PaintContext* ImageSurface::onGetPaint(Gfx::PaintContext* reuse) 
 {
-    return _canvas->beginPaint(reuse);
+    return _canvas->getPaint(reuse);
 }
 
 

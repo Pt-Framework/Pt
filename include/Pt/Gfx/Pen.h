@@ -162,8 +162,13 @@ class PT_GFX_API Pen
         */
         JoinStyle joinStyle() const;
 
+        const void* instance() const
+        {
+            return _penData.get();
+        }
+ 
     private:
-      SmartPtr<PenData> _penData;
+        SmartPtr<PenData> _penData;
 };
 
 

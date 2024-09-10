@@ -164,12 +164,12 @@ const Gfx::Scaling& PaintRegion::onGetScaling() const
 }
 
 
-PaintContext* PaintRegion::onBeginPaint(PaintContext* context) 
+PaintContext* PaintRegion::onGetPaint(PaintContext* context) 
 {
     if( ! _surface )
         return 0;
 
-    PaintContext* paintContext = _surface->beginPaint(context);
+    PaintContext* paintContext = _surface->getPaint(context);
     if( ! paintContext )
         return paintContext;
 

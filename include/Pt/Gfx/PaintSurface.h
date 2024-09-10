@@ -62,13 +62,14 @@ class PT_GFX_API PaintSurface
         
         const Gfx::ImageFormat& format() const;
 
+        // TODO: Return a metrics object
         const Gfx::SizeF& logicalSize() const;
 
         const Scaling& scaling() const;
 
         const Canvas* canvas() const;
 
-        PaintContext* beginPaint(PaintContext* context);
+        PaintContext* getPaint(PaintContext* context);
 
         void draw(PaintContext& paint,
                   const Gfx::PointF& to) const;
@@ -83,7 +84,7 @@ class PT_GFX_API PaintSurface
     protected:
         virtual const Canvas* onGetCanvas() const = 0;
         
-        virtual PaintContext* onBeginPaint(PaintContext* context);
+        virtual PaintContext* onGetPaint(PaintContext* context);
 
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 

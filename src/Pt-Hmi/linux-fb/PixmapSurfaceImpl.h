@@ -92,9 +92,9 @@ class PixmapSurfaceImpl
             return _image.canvas();
         }
 
-        Gfx::PaintContext* beginPaint(Gfx::PaintContext* context)
+        Gfx::PaintContext* getPaint(Gfx::PaintContext* context)
         {
-            return _image.beginPaint(context);
+            return _image.getPaint(context);
         }
 
         void drawPixmap(const Gfx::PointF& toF, 

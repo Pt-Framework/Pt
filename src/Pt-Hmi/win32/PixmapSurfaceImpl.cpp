@@ -331,7 +331,7 @@ const Gfx::Scaling& PixmapSurfaceImpl::onGetScaling() const
 }
 
 
-bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context)
+bool PixmapSurfaceImpl::onGetPaint(Gfx::PaintContext* context)
 {
     PaintContext* paintContext = dynamic_cast<PaintContext*>(context);
     if( ! paintContext )
@@ -348,7 +348,7 @@ bool PixmapSurfaceImpl::onBeginPaint(Gfx::PaintContext* context)
 }
 
 
-Gfx::PaintContext* PixmapSurfaceImpl::onBeginPaint()
+Gfx::PaintContext* PixmapSurfaceImpl::onGetPaint()
 {
     PaintContext* paintContext  = new PaintContext();
 
@@ -368,7 +368,7 @@ void PixmapSurfaceImpl::onReleasePaint()
 }
 
 
-void PixmapSurfaceImpl::onApplyPen(Gfx::PaintContext& paint)
+void PixmapSurfaceImpl::onPenChanged()
 {
     if( ! _paintContext )
         return;
@@ -387,7 +387,7 @@ void PixmapSurfaceImpl::onApplyPen(Gfx::PaintContext& paint)
 }
 
 
-void PixmapSurfaceImpl::onApplyBrush(Gfx::PaintContext& paint)
+void PixmapSurfaceImpl::onBrushChanged()
 {
     if( ! _paintContext )
         return;
@@ -412,7 +412,7 @@ void PixmapSurfaceImpl::onApplyBrush(Gfx::PaintContext& paint)
 }
 
 
-void PixmapSurfaceImpl::onApplyFont(Gfx::PaintContext& paint)
+void PixmapSurfaceImpl::onFontChanged()
 {
     if( ! _paintContext )
         return;
@@ -425,42 +425,25 @@ void PixmapSurfaceImpl::onApplyFont(Gfx::PaintContext& paint)
 }
 
 
-void PixmapSurfaceImpl::onSetCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _compositionMode = mode;
-}
-
-
-void PixmapSurfaceImpl::onSetClip(const Gfx::RectF& clipRect)
+void PixmapSurfaceImpl::onCompositionModeChanged()
 {
     if( ! _paintContext )
         return;
 
-    //
-    // reuse native clip rect from surface impl
-    //
+    _compositionMode = _paintContext->compositionMode();
+}
 
-    _paintContext->resetClip(&clipRect);
+
+void PixmapSurfaceImpl::onClipChanged()
+{
+    if( ! _paintContext )
+        return;
     
     HRGN hrgn = _paintContext->clipRect();
     if(hrgn)
         SelectClipRgn(_dc, hrgn);
     else
         SelectClipRgn(_dc, NULL);
-}
-
-
-void PixmapSurfaceImpl::onResetClip()
-{  
-    if( ! _paintContext )
-        return;
-
-    //
-    // reuse native clip rect from surface impl
-    //
-
-    _paintContext->resetClip();
-    SelectClipRgn(_dc, NULL);
 }
 
 

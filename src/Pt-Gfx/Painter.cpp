@@ -71,29 +71,30 @@ void Painter::begin(PaintSurface& surface)
     _surface = &surface;
    
     PaintContext* reuse = _paintContext;
-    _paintContext = surface.beginPaint(reuse);
+    _paintContext = surface.getPaint(reuse);
    
     if(reuse != _paintContext)
     {
         delete reuse;
 
-        //_paintContext->setCompositionMode( _paint.compositionMode() );
-        _paintContext->setPen( _paint.pen() );
-        _paintContext->setBrush( _paint.brush() );
-        _paintContext->setFont( _paint.font() );
+        // initialize new paint context
+        if(_paintContext)
+        {
+            _paintContext->setCompositionMode( _paint.compositionMode() );
+            _paintContext->setPen( _paint.pen() );
+            _paintContext->setBrush( _paint.brush() );
+            _paintContext->setFont( _paint.font() );
+
+            const Gfx::RectF& clip = _paint.clip();
+            if( clip.isNull() )
+                _paintContext->resetClip();
+            else
+                _paintContext->setClip(clip);
+        }
     }
 
     if(_paintContext)
-    {
-        _paintContext->setCompositionMode( _paint.compositionMode() );
-
-        const Gfx::RectF& clip = _paint.clip();
-
-        if( clip.isNull() )
-            _paintContext->resetClip();
-        else
-            _paintContext->setClip(clip);
-    }
+        _paintContext->beginPaint();
 }
 
 

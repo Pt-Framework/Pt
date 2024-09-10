@@ -126,6 +126,7 @@ void Paint::setFont(const Gfx::Font& font)
 
 PaintContext::PaintContext()
 : _canvas(0)
+, _active(0)
 {
 }
 
@@ -136,6 +137,7 @@ PaintContext::~PaintContext()
     {
         _canvas->onDetachPaint(*this);
         _canvas = 0;
+        _active = 0;
     }
 }
 
@@ -160,20 +162,7 @@ void PaintContext::detachCanvas(Canvas& canvas)
     {
         onReleasePaint();
         _canvas = 0;
-    }
-}
-
-
-void PaintContext::reset()
-{
-    _region.clear();
-
-    if(_canvas)
-    {
-        _canvas->onDetachPaint(*this);
-
-        onReleasePaint();
-        _canvas = 0;
+        _active = 0;
     }
 }
 
@@ -202,10 +191,75 @@ const Scaling& PaintContext::scaling() const
 }
 
 
-void PaintContext::setCompositionMode(const Gfx::CompositionMode& mode)
+void PaintContext::beginPaint()
 {
     if(_canvas)
-        _canvas->setCompositionMode(mode);
+    {
+        _canvas->onCompositionModeChanged();
+        _canvas->onPenChanged();
+        _canvas->onBrushChanged();
+        _canvas->onFontChanged();
+
+        if( _clip.isNull() )
+        {
+            onSetClip(0);
+        }
+        else
+        {
+            Gfx::RectF clip = _clip;
+            clip.shift( origin().x(), origin().y() );
+            onSetClip(&clip);
+        }
+
+        _canvas->onClipChanged();
+
+        // _canvas->beginPaint(*this);
+        _active = _canvas;
+    }
+}
+
+
+void PaintContext::finishPaint()
+{
+    if(_active)
+    {
+        // _canvas->finishPaint(*this);
+        _active = 0;
+    }
+}
+
+
+bool PaintContext::isActive() const
+{
+    return _active != 0;
+}
+
+
+void PaintContext::reset()
+{
+    finishPaint();
+
+    _region.clear();
+
+    if(_canvas)
+    {
+        _canvas->onDetachPaint(*this);
+
+        onReleasePaint();
+        _canvas = 0;
+        _active = 0;
+    }
+}
+
+
+void PaintContext::setCompositionMode(const Gfx::CompositionMode& mode)
+{
+    onSetCompositionMode(mode);
+
+    if(_active)
+    {
+        _active->onCompositionModeChanged();
+    }
 }
 
 
@@ -213,8 +267,10 @@ void PaintContext::setPen(const Pen& pen)
 {
     onSetPen(pen);
 
-    if(_canvas)
-        _canvas->applyPen(*this);
+    if(_active)
+    {
+        _active->onPenChanged();
+    }
 }
 
 
@@ -222,8 +278,10 @@ void PaintContext::setBrush(const Brush& brush)
 {
     onSetBrush(brush);
 
-    if(_canvas)
-        _canvas->applyBrush(*this);
+    if(_active)
+    {
+        _active->onBrushChanged();
+    }
 }
 
 
@@ -231,40 +289,52 @@ void PaintContext::setFont(const Gfx::Font& font)
 {
     onSetFont(font);
 
-    if(_canvas)
-        _canvas->applyFont(*this);
+    if(_active)
+    {
+        _active->onFontChanged();
+    }
 }
 
 
 void PaintContext::setClip(const RectF& rect)
 { 
-    Gfx::RectF clip = rect;
-    clip.shift( origin().x(), origin().y() );
-
-    if(_canvas)
+    if(_active)
     {
-        _canvas->setClip(clip);
+        Gfx::RectF clip = rect;
+        clip.shift( origin().x(), origin().y() );
+        onSetClip(&clip);
+
+        _active->onClipChanged();
     }
+
+    _clip = rect;
 }
 
 
 void PaintContext::resetClip()
 {
-    if(_canvas)
-        _canvas->resetClip();
+    if(_active)
+    {
+        onSetClip(0);
+        _active->onClipChanged();
+    }
+
+    _clip.clear();
 }
 
 
 void PaintContext::drawLine(const PointF& from, const PointF& to)
 {   
+    if( ! _active )
+        return;
+
     Gfx::PointF p0 = from + origin();
     Gfx::PointF p1 = to + origin();
 
-     p0 = scaling().toPhysical(p0);
-     p1 = scaling().toPhysical(p1);
+    p0 = scaling().toPhysical(p0);
+    p1 = scaling().toPhysical(p1);
 
-    if(_canvas)
-        _canvas->drawLine(p0, p1);
+    _active->drawLine(p0, p1);
 }
 
 
@@ -272,8 +342,8 @@ void PaintContext::drawPolyline(const Gfx::PointF* ps, const size_t n)
 {
     Polyline line(*this, ps, n);
     
-    if(_canvas)
-        _canvas->drawPolyline(line);
+    if(_active)
+        _active->drawPolyline(line);
 }
 
 
@@ -281,8 +351,8 @@ void PaintContext::fillPolygon(const Gfx::PointF* ps, const size_t n)
 {
     Polyline line(*this, ps, n);
     
-    if(_canvas)
-        _canvas->fillPolygon(line);
+    if(_active)
+        _active->fillPolygon(line);
 }
 
 
@@ -293,8 +363,8 @@ void PaintContext::drawRect(const Gfx::RectF& rect)
     
     r = scaling().toPhysical(r); 
 
-    if(_canvas)
-        _canvas->drawRect(r);
+    if(_active)
+        _active->drawRect(r);
 }
 
 
@@ -306,8 +376,8 @@ void PaintContext::fillRect(const Gfx::RectF& rect)
 
     r = scaling().toPhysical(r);
 
-    if(_canvas)
-        _canvas->fillRect(r);
+    if(_active)
+        _active->fillRect(r);
 }
 
 
@@ -318,8 +388,8 @@ void PaintContext::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& siz
     
     Gfx::SizeF s = _scaling.toPhysical(size);
 
-    if(_canvas)
-        _canvas->drawEllipse(p, s);
+    if(_active)
+        _active->drawEllipse(p, s);
 }
 
 
@@ -330,15 +400,15 @@ void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& siz
     
     Gfx::SizeF s = _scaling.toPhysical(size);
 
-    if(_canvas)
-        _canvas->fillEllipse(p, s);
+    if(_active)
+        _active->fillEllipse(p, s);
 }
 
 
 FontMetrics PaintContext::fontMetrics(const Pt::String& text) const
 {
-    if(_canvas)
-        return _canvas->fontMetrics(text);
+    if(_active)
+        return _active->fontMetrics(text);
 
     return FontMetrics();
 }
@@ -347,7 +417,7 @@ FontMetrics PaintContext::fontMetrics(const Pt::String& text) const
 void PaintContext::drawText(const PointF& to, const Pt::String& text, 
                             const Transform* transform)
 {
-    if(_canvas)
+    if(_active)
     {
         Pt::Gfx::PointF p = to + origin();
         p = scaling().toPhysical(p);
@@ -356,19 +426,19 @@ void PaintContext::drawText(const PointF& to, const Pt::String& text,
         double scaleFactor = scaling().scaleFactor();
         t.scale(scaleFactor, scaleFactor);
 
-        _canvas->drawText(p, text, &t);
+        _active->drawText(p, text, &t);
     }
 }
 
 
 void PaintContext::drawImage(const Gfx::PointF& to, 
-                          const Gfx::Image& image)
+                             const Gfx::Image& image)
 {
     Pt::Gfx::PointF p = to + origin();
 
-    if(_canvas)
+    if(_active)
     {
-        _canvas->drawImage(p, image);
+        _active->drawImage(p, image);
     }
 }
 
@@ -379,9 +449,9 @@ void PaintContext::drawImage(const Gfx::PointF& to,
 {
     Pt::Gfx::PointF p = to + origin();
 
-    if(_canvas)
+    if(_active)
     {
-        _canvas->drawImage(p, image, rect);
+        _active->drawImage(p, image, rect);
     }
 }
 
@@ -406,8 +476,8 @@ void PaintContext::drawCanvas(const Gfx::PointF& to,
 {
     Pt::Gfx::PointF p = to + origin();
 
-    if(_canvas)
-        _canvas->drawCanvas(p, canvas);
+    if(_active)
+        _active->drawCanvas(p, canvas);
 }
 
 
@@ -417,8 +487,8 @@ void PaintContext::drawCanvas(const Gfx::PointF& to,
 {
     Pt::Gfx::PointF p = to + origin();
 
-    if(_canvas)
-        _canvas->drawCanvas(p, canvas, rect);
+    if(_active)
+        _active->drawCanvas(p, canvas, rect);
 }
 
 } // namespace

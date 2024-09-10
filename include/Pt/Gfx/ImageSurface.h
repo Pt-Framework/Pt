@@ -52,6 +52,11 @@ class ImagePaint : public PaintContext
 
         ~ImagePaint();
 
+        const CompositionMode& compositionMode() const
+        {
+            return _compositionMode;
+        }
+
         const Pen& pen() const
         {
             return _pen;
@@ -67,17 +72,28 @@ class ImagePaint : public PaintContext
             return _font;
         }
 
+        const RectF& clip() const
+        {
+            return _clip;
+        }
+
     protected:
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
+
         virtual void onSetPen(const Gfx::Pen& pen) override;
 
         virtual void onSetBrush(const Gfx::Brush& brush) override;
 
         virtual void onSetFont(const Gfx::Font& font) override;
+
+        virtual void onSetClip(const Gfx::RectF* clip) override;
    
     private:
-        Pen                  _pen;
-        Gfx::Brush           _brush;
-        Gfx::Font            _font;
+        CompositionMode _compositionMode;
+        Pen             _pen;
+        Brush           _brush;
+        Font            _font;
+        RectF           _clip;
 };
 
 
@@ -110,25 +126,22 @@ class ImageCanvas : public Gfx::Canvas
   protected:
     virtual const Gfx::Scaling& onGetScaling() const override;
 
-    virtual bool onBeginPaint(Gfx::PaintContext* context) override;
+    virtual bool onGetPaint(Gfx::PaintContext* context) override;
 
-    virtual Gfx::PaintContext* onBeginPaint() override;
+    virtual Gfx::PaintContext* onGetPaint() override;
 
     virtual void onReleasePaint() override;
   
   protected:
-      virtual void onSetCompositionMode(const CompositionMode& mode) override;
+      virtual void onCompositionModeChanged() override;
 
-      virtual void onApplyPen(PaintContext& paint) override;
+      virtual void onPenChanged() override;
 
-      virtual void onApplyBrush(PaintContext& paint) override;
+      virtual void onBrushChanged() override;
 
-      virtual void onApplyFont(PaintContext& paint) override;
+      virtual void onFontChanged() override;
 
-  protected:
-      virtual void onSetClip(const Gfx::RectF& clip) override;
-
-      virtual void onResetClip() override;
+      virtual void onClipChanged() override;
 
   protected:
     virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
@@ -225,7 +238,7 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
   protected:
     virtual const Canvas* onGetCanvas() const override;
 
-    virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* context) override;
+    virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
     virtual const Gfx::ImageFormat& onGetFormat() const override;
 

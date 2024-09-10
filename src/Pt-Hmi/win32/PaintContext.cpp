@@ -192,6 +192,18 @@ PaintContext::~PaintContext()
 }
 
 
+const Gfx::CompositionMode& PaintContext::compositionMode() const
+{
+    return _compositionMode;
+}
+
+
+void PaintContext::onSetCompositionMode(const Gfx::CompositionMode& mode) 
+{
+    _compositionMode = mode;
+}
+
+
 HPEN PaintContext::pen() const
 {
     return _pen;
@@ -370,7 +382,7 @@ HRGN PaintContext::clipRect() const
 }
 
 
-void PaintContext::resetClip(const Gfx::RectF* rectF)
+void PaintContext::onSetClip(const Gfx::RectF* rectF)
 {
     // TODO: reuse HRGN instead of always creating a new one
 

@@ -32,48 +32,42 @@
 #define PT_GFX_FONT_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Types.h>
-#include <Pt/String.h>
+#include <Pt/SmartPtr.h>
+
+#include <string>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Gfx {
 
+class FontData;
+
 class PT_GFX_API Font
 {
     public:
+        //! @brief Constructa a null font.
         Font();
 
         //! @brief Construct a font.
-        Font( const std::string& name,
-              std::size_t size,
+        Font( const std::string& name, std::size_t size,
               const std::string& style = std::string() );
 
-        //! @brief Construct a font.
-        Font(const std::string& name, const Font& font);
+        /** @brief Returns true if null.
+        */
+        bool isNull() const;
 
         //! @brief Returns the name of the font
-        const std::string& name() const
-        {
-            return _name;
-        }
+        const std::string& name() const;
 
         //! @brief Returns the size of the font
-        size_t size() const
-        {
-            return _size;
-        }
+        std::size_t size() const;
 
         //! @brief Returns the style of the font
-        const std::string& style() const
-        {
-            return _style;
-        }
+        const std::string& style() const;
 
     private:
-        std::string _name;
-        size_t      _size;
-        std::string _style;
+        SmartPtr<FontData> _fontData;
 };
 
 
@@ -91,6 +85,52 @@ inline bool operator!=(const Font& a, const Font& b)
            a.style() != b.style() ||
            a.size()  != b.size();
 }
+
+
+class PT_GFX_API FontData
+{
+    public:
+        FontData()
+        : _name()
+        , _size(0)
+        {
+        }
+
+        FontData( const std::string& name, std::size_t size,
+                  const std::string& style = std::string() )
+        : _name(name)
+        ,  _size(size)
+        ,  _style(style)
+        {
+        }
+
+        FontData(const std::string& name, const FontData& font)
+        : _name(name)
+        , _size(font._size)
+        , _style(font._style)
+        {
+        }
+
+        const std::string& name() const
+        {
+            return _name;
+        }
+
+        std::size_t size() const
+        {
+            return _size;
+        }
+
+        const std::string& style() const
+        {
+            return _style;
+        }
+
+    private:
+        std::string _name;
+        std::size_t _size;
+        std::string _style;
+};
 
 } //namespace
 

@@ -64,7 +64,7 @@ class PixmapSurfaceImpl
             _image.resize(size);
         }
 
-        const Gfx::SizeF& size() const
+        const Gfx::SizeF& pixmapSize() const
         {
             return _image.size();
         }
@@ -79,6 +79,11 @@ class PixmapSurfaceImpl
             _image.setScaleFactor(scaleFactor);
         }
 
+        const Gfx::SizeF& pixmapLogicalSize() const
+        {
+            return _image.logicalSize();
+        }
+
         const Gfx::ImageFormat& format() const
         {
             return _image.format();
@@ -89,10 +94,19 @@ class PixmapSurfaceImpl
             return _image.canvas();
         }
 
-        Gfx::PaintContext* beginPaint(Gfx::PaintContext* context)
+        Gfx::PaintContext* getPaint(Gfx::PaintContext* context)
         {
-            return _image.beginPaint(context);
+            return _image.getPaint(context);
         }
+
+        void drawPixmap(const Gfx::PointF& toF, 
+                        const PixmapSurface& surface,
+                        const Gfx::CompositionMode& mode);
+
+        void drawPixmap(const Gfx::PointF& toF, 
+                        const PixmapSurface& surface, 
+                        const Gfx::RectF& rect,
+                        const Gfx::CompositionMode& mode);
 
         const Gfx::ImageSurface& imageSurface() const
         {

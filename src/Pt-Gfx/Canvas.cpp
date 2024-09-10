@@ -38,6 +38,7 @@ namespace Gfx {
 Canvas::Canvas(PaintSurface& surface)
 : _surface(&surface)
 , _paint(0)
+, _active(0)
 {
 }
 
@@ -86,7 +87,7 @@ Image Canvas::toImage() const
 }
 
 
-Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
+Gfx::PaintContext* Canvas::getPaint(Gfx::PaintContext* reuse)
 {
     if(_paint)
     {
@@ -103,64 +104,16 @@ Gfx::PaintContext* Canvas::beginPaint(Gfx::PaintContext* reuse)
 
     if(reuse)
     {
-        bool isReused = onBeginPaint(reuse);
+        bool isReused = onGetPaint(reuse);
         if(isReused)
-        {
             _paint = reuse;
-
-            //
-            // invalidate state to mark pen as dirty. Painter only sets
-            // common pen in PaintContext. In drawLine a pen is attached
-            // or created as appropriate depending on the dirty state. 
-            //
-
-            onApplyPen(*reuse);
-            onApplyBrush(*reuse);
-            onApplyFont(*reuse);
-        }
     }
 
     if( ! _paint )
-        _paint = onBeginPaint();
+        _paint = onGetPaint();
     
     _paint->attachCanvas(*this);
     return _paint;
-}
-
-
-void Canvas::applyPen(PaintContext& paint)
-{
-    onApplyPen(paint);
-}
-
-
-void Canvas::applyBrush(PaintContext& paint)
-{
-    onApplyBrush(paint);
-}
-
-
-void Canvas::applyFont(PaintContext& paint)
-{
-    onApplyFont(paint);
-}
-
-
-void Canvas::setCompositionMode(const CompositionMode& mode)
-{   
-    onSetCompositionMode(mode);
-}
-
-
-void Canvas::setClip(const RectF& clip)
-{   
-    onSetClip(clip);
-}
-
-
-void Canvas::resetClip()
-{   
-    onResetClip();
 }
 
 

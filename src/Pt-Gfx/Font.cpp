@@ -35,25 +35,38 @@ namespace Pt {
 namespace Gfx {
 
 Font::Font()
-: _name()
-, _size(0)
+: _fontData( new FontData() )
 {
 }
 
 
 Font::Font(const std::string& name, std::size_t size, const std::string& style)
-: _name(name)
-,  _size(size)
-,  _style(style)
+: _fontData( new FontData(name, size, style) )
 {
 }
 
 
-Font::Font( const std::string& name, const Font& font)
-: _name(name)
-, _size(font._size)
-, _style(font._style)
+bool Font::isNull() const
 {
+    return size() == 0;
+}
+
+
+const std::string& Font::name() const
+{
+    return _fontData->name();
+}
+
+
+size_t Font::size() const
+{
+    return _fontData->size();
+}
+
+
+const std::string& Font::style() const
+{
+    return _fontData->style();
 }
 
 } // namespace
