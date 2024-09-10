@@ -33,7 +33,7 @@
 namespace Pt {
 
 IOError::IOError(const std::string& msg)
-#if __cplusplus >= 201103L || _MSC_VER >= 1900
+#if (__cplusplus >= 201103L || _MSC_VER >= 1900) && (__GNUC__ >= 5)
 : std::ios::failure( msg, std::make_error_code(std::errc::io_error) )
 #else
 : std::ios::failure(msg)
@@ -43,7 +43,7 @@ IOError::IOError(const std::string& msg)
 
 
 IOError::IOError(const char* msg)
-#if __cplusplus >= 201103L || _MSC_VER >= 1900
+#if (__cplusplus >= 201103L || _MSC_VER >= 1900) && (__GNUC__ >= 5)
 : std::ios::failure( msg, std::make_error_code(std::errc::io_error) )
 #else
 : std::ios::failure(msg)
