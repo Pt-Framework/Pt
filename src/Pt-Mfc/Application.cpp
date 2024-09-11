@@ -69,7 +69,7 @@ BOOL WinApp::PumpMessage()
 
 WinAppEx::WinAppEx(BOOL bResourceSmartUpdate)
 : CWinAppEx(bResourceSmartUpdate)
-, Pt::System::Application(0, 0, 0)
+, Pt::System::Application()
 {
     init(_loop);
 }
