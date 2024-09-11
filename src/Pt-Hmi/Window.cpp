@@ -151,9 +151,9 @@ const WindowFrame* Window::frame() const
 
 Gfx::Image Window::getImage() const
 {
-    const Gfx::Canvas* canvas = surface().canvas();
-    if(canvas)
-        return canvas->toImage();
+    //const Gfx::Canvas* canvas = surface().canvas();
+    //if(canvas)
+    //    return canvas->toImage();
 
     Gfx::SizeF size = surface().logicalSize();
     size = surface().scaling().toPhysical(size);
