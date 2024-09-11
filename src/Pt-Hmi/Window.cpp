@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
@@ -154,7 +155,16 @@ Gfx::Image Window::getImage() const
     if(canvas)
         return canvas->toImage();
 
-    return Gfx::Image();
+    Gfx::SizeF size = surface().logicalSize();
+    size = surface().scaling().toPhysical(size);
+
+    Gfx::ImageSurface imageSurface;
+    imageSurface.resize(size);
+
+    Gfx::Painter painter(imageSurface);
+    painter.drawSurface( Gfx::PointF(0, 0), surface() );
+
+    return imageSurface.image();
 }
 
 
