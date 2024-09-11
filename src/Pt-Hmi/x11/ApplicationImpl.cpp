@@ -565,7 +565,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         //                          << window.title() << " " 
         //                          << width << "x" << height << std::endl;
         Gfx::SizeF to(width, height);
-        to = window.surface().toLogical(to);
+        to = window.surface().scaling().toLogical(to);
     
         ResizeEvent rev(*window.frame(), to);
         Application::instance().processEvent(rev);
@@ -574,7 +574,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         window.repaint(updateRect);
     }
 
-    Gfx::PointF currentPos = window.surface().toPhysical( window.position() );
+    Gfx::PointF currentPos = window.surface().scaling().toPhysical( window.position() );
 
     if( x != currentPos.x() || y != currentPos.y() )
     {
@@ -583,7 +583,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         //                        << window.title() << " " 
         //                        << x << "," << y << std::endl;
         Gfx::PointF to(x, y);
-        to = window.surface().toLogical(to);
+        to = window.surface().scaling().toLogical(to);
 
         MoveEvent ev(*window.frame(), to);
         Application::instance().processEvent(ev);
