@@ -127,7 +127,8 @@ const Gfx::ImageFormat& Painter::format() const
 
 const Scaling& Painter::scaling() const
 {
-    return _scaling;
+    return _surface ? _surface->scaling() 
+                    : _scaling;
 }
 
 
