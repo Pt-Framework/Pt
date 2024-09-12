@@ -69,11 +69,11 @@ void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode)
 
 void ImagePaint::onSetPen(const Gfx::Pen& pen)
 {
-    double scaledSize = scaling().toPhysical( pen.size() );
+    double scaleFactor = scaling().scaleFactor();
 
     // keep pen size when downscaling
-    size_t penSize = scaledSize < 1.0 ? 1 
-                                : static_cast<size_t>(scaledSize);
+    size_t penSize = scaleFactor < 1.0 ? pen.size() 
+                                       : static_cast<size_t>( pen.size() * scaleFactor );
 
     _pen = pen;
     _pen.setSize(penSize);

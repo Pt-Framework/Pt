@@ -218,11 +218,11 @@ Gfx::Color PaintContext::penColor() const
 
 void PaintContext::onSetPen(const Gfx::Pen& pen)
 {
-    double scaledSize = scaling().toPhysical( pen.size() );
+    double scaleFactor = scaling().scaleFactor();
 
     // keep pen size when downscaling
-    size_t penSize = scaledSize < 1.0 ? 1 
-                                : static_cast<size_t>(scaledSize);
+    size_t penSize = scaleFactor < 1.0 ? pen.size() 
+                                       : static_cast<size_t>( pen.size() * scaleFactor );
 
     if(_pen)
     {
@@ -235,8 +235,8 @@ void PaintContext::onSetPen(const Gfx::Pen& pen)
     DWORD penStyle = getPenStyle(pen);
 
     DWORD color = RGB( _penColor.red()  / 257, 
-                        _penColor.green() / 257, 
-                        _penColor.blue()  / 257 );
+                       _penColor.green() / 257, 
+                       _penColor.blue()  / 257 );
                            
 #ifdef _WIN32_WCE
     _pen = CreatePen(penStyle, penSize, color);
