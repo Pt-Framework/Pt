@@ -636,6 +636,22 @@ void PixmapSurfaceImpl::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::Siz
 
 Gfx::FontMetrics PixmapSurfaceImpl::onGetFontMetrics(const Pt::String& text) const
 {
+    double scaleFactor = scaling().scaleFactor();
+
+    Gfx::Transform tform;
+    tform.scale(scaleFactor, scaleFactor);
+
+    XFORM xform = { static_cast<FLOAT>( tform.m11() ), 
+                    static_cast<FLOAT>( tform.m12() ),
+                    static_cast<FLOAT>( tform.m21() ), 
+                    static_cast<FLOAT>( tform.m22() ),
+                    static_cast<FLOAT>( tform.dx() ),  
+                    static_cast<FLOAT>( tform.dy() ) };
+
+    XFORM oldXForm = { 1, 0, 0, 1, 0 , 0 };
+    GetWorldTransform(_dc, &oldXForm);
+    SetWorldTransform(_dc, &xform);
+
     TEXTMETRIC tm;
     GetTextMetrics(_dc, &tm);
 
@@ -644,6 +660,8 @@ Gfx::FontMetrics PixmapSurfaceImpl::onGetFontMetrics(const Pt::String& text) con
 
     SIZE textSize;
     GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
+
+    SetWorldTransform(_dc, &oldXForm);
 
     long asc = tm.tmAscent;
     long des = tm.tmDescent;
