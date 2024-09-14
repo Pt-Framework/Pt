@@ -70,19 +70,19 @@ void ShellWM::setParent(Shell* shell)
 }
 
 
-Hmi::PaintSurface& ShellWM::surface()
+Gfx::PaintSurface& ShellWM::surface()
 {
     return _surface;
 }
 
 
-const Hmi::PaintSurface& ShellWM::surface() const
+const Gfx::PaintSurface& ShellWM::surface() const
 {
     return _surface;
 }
 
 
-void ShellWM::setSurface(Hmi::PaintSurface* surface, const Gfx::PointF& pos)
+void ShellWM::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
     if( ! surface )
     {
