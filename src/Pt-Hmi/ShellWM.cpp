@@ -70,19 +70,19 @@ void ShellWM::setParent(Shell* shell)
 }
 
 
-Gfx::PaintSurface& ShellWM::surface()
+Hmi::PaintSurface& ShellWM::surface()
 {
     return _surface;
 }
 
 
-const Gfx::PaintSurface& ShellWM::surface() const
+const Hmi::PaintSurface& ShellWM::surface() const
 {
     return _surface;
 }
 
 
-void ShellWM::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+void ShellWM::setSurface(Hmi::PaintSurface* surface, const Gfx::PointF& pos)
 {
     if( ! surface )
     {
@@ -437,6 +437,9 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
 
         Gfx::Painter painter( surface() );
         painter.drawSurface(frameRect.topLeft(), frame->surface(), surfaceRect);
+
+        //surface().drawPixmap(frameRect.topLeft(), frame->surface(), 
+        //                     surfaceRect, Gfx::CompositionMode::SourceCopy);
     }
 }
 

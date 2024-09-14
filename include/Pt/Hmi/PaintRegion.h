@@ -30,7 +30,8 @@
 #define Pt_Hmi_PaintRegion_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Gfx/PaintRegion.h>
 
 namespace Pt {
 
@@ -40,44 +41,52 @@ class PixmapSurface;
 
 /** @brief Drawing region on another surface.
 */
-class PT_HMI_API PaintRegion : public Gfx::PaintSurface
+class PT_HMI_API PaintRegion : public PaintSurface
 {
     public:
         PaintRegion();
 
-        PaintRegion(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+        PaintRegion(Hmi::PaintSurface& surface, const Gfx::RectF& rect);
 
         virtual ~PaintRegion();
 
-        void reset(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+        void attach(Hmi::PaintSurface& surface, const Gfx::RectF& rect);
 
-        void reset();
+        void detach();
+
+        Hmi::PaintSurface* surface() const;
+
+        const Gfx::PointF& position() const;
+
+        void move(const Gfx::PointF& pos);
+
+        void resize(const Gfx::SizeF& size);
 
     protected:
-        virtual const Gfx::Canvas* onGetCanvas() const override;
+        virtual const Gfx::PaintInfo& onGetPaintInfo() const override;
 
-        virtual Gfx::PaintContext* onBeginPaint(Gfx::PaintContext* context) override;
-
-        virtual const Gfx::ImageFormat& onGetFormat() const override;
-
-        virtual const Gfx::SizeF& onGetSize() const override;
-
-        virtual const Gfx::Scaling& onGetScaling() const override;
-
-        virtual void onReset() override;
+        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
     protected:
         virtual void onDraw(Gfx::PaintContext& paint,
-                            const Gfx::PointF& to) const override;
+                            const Gfx::PointF& to) const;
         
         virtual void onDraw(Gfx::PaintContext& paint,
                             const Gfx::PointF& to, 
-                            const Gfx::RectF& rect) const override;
+                            const Gfx::RectF& rect) const;
+
+    protected:
+        virtual void onDrawPixmap(const Gfx::PointF& to, 
+                                  const PixmapSurface& pixmap,
+                                  const Gfx::CompositionMode& mode) override;
+
+        virtual void onDrawPixmap(const Gfx::PointF& to,
+                                  const PixmapSurface& pixmap, 
+                                  const Gfx::RectF& rect,
+                                  const Gfx::CompositionMode& mode) override;
 
     private:
-        Gfx::PaintSurface* _surface;
-        Gfx::RectF         _area;
-        Gfx::Scaling       _scaling;
+        Gfx::PaintRegion   _region;
 };
 
 } // namespace

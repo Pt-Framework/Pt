@@ -277,8 +277,9 @@ void PaintRegion::onDraw(PaintContext& paint,
                          const Gfx::RectF& rect) const
 {
     Gfx::RectF r = rect;
-    r.shift( _info.position().x(),
-             _info.position().y() );
+
+    const PointF& pos = position();
+    r.shift( pos.x(), pos.y() );
     
     if(_surface)
         _surface->draw(paint, to, r);

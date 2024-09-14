@@ -1000,18 +1000,28 @@ void PixmapSurfaceImpl::onDrawCanvas(const Gfx::PointF& to,
 }
 
 
-void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
-                                   const PixmapSurface& surface,
+void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& to, 
+                                   const PixmapSurface& pixmap,
                                    const Gfx::CompositionMode& mode)
 {
+    Gfx::CompositionMode restore = _compositionMode;
+    _compositionMode = mode;
+
+    drawPixmap(to, *pixmap.impl());
+    _compositionMode = restore;
 }
 
 
-void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
-                                   const PixmapSurface& pm, 
-                                   const Gfx::RectF& rectF,
+void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& to, 
+                                   const PixmapSurface& pixmap, 
+                                   const Gfx::RectF& rect,
                                    const Gfx::CompositionMode& mode)
 {
+    Gfx::CompositionMode restore = _compositionMode;
+    _compositionMode = mode;
+
+    drawPixmap(to, *pixmap.impl(), rect);
+    _compositionMode = restore;
 }
 
 

@@ -50,7 +50,9 @@ PaintSurface::PaintSurface()
 PaintSurface::~PaintSurface()
 {
     if(_painter)
+    {
         _painter->onDetachSurface(*this);
+    }
 
     typedef std::vector<PaintRegion*>::iterator RegionIterator;
     for( RegionIterator it = _regions.begin(); it != _regions.end(); ++it )

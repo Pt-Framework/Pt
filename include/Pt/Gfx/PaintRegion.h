@@ -100,7 +100,7 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         const PointF& position() const;
 
-        void move(const Gfx::PointF& size);
+        void move(const Gfx::PointF& pos);
 
         void resize(const Gfx::SizeF& size);
 

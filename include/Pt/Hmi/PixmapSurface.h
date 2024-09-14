@@ -30,7 +30,7 @@
 #define Pt_Hmi_PixmapSurface_h
 
 #include <Pt/Hmi/Api.h>
-//#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/PaintSurface.h>
 
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -38,7 +38,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/PaintSurface.h>
+//#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 
@@ -52,7 +52,7 @@ class PixmapSurfaceImpl;
 
 /** @brief Back buffer drawing surface.
 */
-class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
+class PT_HMI_API PixmapSurface : public Hmi::PaintSurface
 {
     public:
         PixmapSurface();
@@ -75,14 +75,15 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
-        void drawPixmap(const Gfx::PointF& to, 
-                        const PixmapSurface& pixmap,
-                        const Gfx::CompositionMode& mode);
+    protected:
+        virtual void onDrawPixmap(const Gfx::PointF& to, 
+                                  const PixmapSurface& pixmap,
+                                  const Gfx::CompositionMode& mode) override;;
 
-        void drawPixmap(const Gfx::PointF& to,
-                        const PixmapSurface& pixmap, 
-                        const Gfx::RectF& rect,
-                        const Gfx::CompositionMode& mode);
+        virtual void onDrawPixmap(const Gfx::PointF& to,
+                                  const PixmapSurface& pixmap, 
+                                  const Gfx::RectF& rect,
+                                  const Gfx::CompositionMode& mode) override;;
 
     protected:
         virtual const Gfx::PaintInfo& onGetPaintInfo() const override;

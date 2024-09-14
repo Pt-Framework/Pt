@@ -37,30 +37,43 @@ namespace Pt {
 
 namespace Hmi {
 
-class PaintData;
-class Painter;
 class PixmapSurface;
 
 /** @brief Paint target for painters.
 */
 class PT_HMI_API PaintSurface : public Gfx::PaintSurface
 {
-    friend class Painter;
-    friend class PaintRegion;
-
     public:
         virtual ~PaintSurface()
         {}
 
-        virtual PaintData* paintContext() = 0;
+        void drawPixmap(const Gfx::PointF& to, 
+                        const PixmapSurface& pixmap,
+                        const Gfx::CompositionMode& mode)
+        {
+            return onDrawPixmap(to, pixmap, mode);
+        }
 
+        void drawPixmap(const Gfx::PointF& to,
+                        const PixmapSurface& pixmap, 
+                        const Gfx::RectF& rect,
+                        const Gfx::CompositionMode& mode)
+        {
+            return onDrawPixmap(to, pixmap, rect, mode);
+        }
+    
     protected:
         PaintSurface()
         {}
 
-        PaintData* begin(Painter& painter);
+        virtual void onDrawPixmap(const Gfx::PointF& to, 
+                                  const PixmapSurface& pixmap,
+                                  const Gfx::CompositionMode& mode) = 0;
 
-        virtual PaintData* onBeginPaint(Gfx::Painter& painter) = 0;
+        virtual void onDrawPixmap(const Gfx::PointF& to,
+                                  const PixmapSurface& pixmap, 
+                                  const Gfx::RectF& rect,
+                                  const Gfx::CompositionMode& mode) = 0;
 };
 
 } // namespace
