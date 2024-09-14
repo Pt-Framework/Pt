@@ -251,7 +251,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     HDC windowContext = BeginPaint(_hwnd, &ps);
 
 #ifdef PT_HMI_WIN32_RASTER
-    const Pt::Gfx::Image& image = surface().impl()->imageSurface().image();
+    const Pt::Gfx::Image& image = surface().impl()->image();
     
     const size_t depth = image.view().pixelStride() * 8;
     const Pt::uint8_t* data = image.data();

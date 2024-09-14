@@ -40,6 +40,7 @@
 
 #else
 
+#include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
@@ -63,7 +64,7 @@ class PixmapSurface;
 class PixmapSurfaceImpl 
 {
     public:
-        explicit PixmapSurfaceImpl(PixmapSurface& surface);
+        explicit PixmapSurfaceImpl();
 
         void clear(const Gfx::Color& c)
         { }
@@ -73,9 +74,9 @@ class PixmapSurfaceImpl
             _image.reset(image);
         }
 
-        void resize(const Gfx::SizeF& size)
+        const Gfx::Image& image() const
         {
-            _image.resize(size);
+            return _image.image();
         }
 
         const Gfx::SizeF& pixmapSize() const
@@ -83,9 +84,9 @@ class PixmapSurfaceImpl
             return _image.size();
         }
 
-        const Gfx::Scaling& surfaceScaling() const
+        void resize(const Gfx::SizeF& size)
         {
-            return _image.scaling();
+            _image.resize(size);
         }
 
         void setScaleFactor(double scaleFactor)
@@ -93,14 +94,14 @@ class PixmapSurfaceImpl
             _image.setScaleFactor(scaleFactor);
         }
 
-        const Gfx::SizeF& pixmapLogicalSize() const
+        const Gfx::PaintInfo& info() const
         {
-            return _image.logicalSize();
+            return _image.info();
         }
 
-        const Gfx::ImageFormat& format() const
+        Gfx::Canvas* getCanvas()
         {
-            return _image.format();
+            return _image.canvas();
         }
 
         const Gfx::Canvas* getCanvas() const
@@ -121,11 +122,6 @@ class PixmapSurfaceImpl
                         const PixmapSurface& surface, 
                         const Gfx::RectF& rect,
                         const Gfx::CompositionMode& mode);
-
-        const Gfx::ImageSurface& imageSurface() const
-        {
-            return _image;
-        }
 
         static const std::string& defaultFont()
         {
@@ -155,10 +151,11 @@ class PixmapSurfaceImpl
 
 class PaintContext;
 
-class PixmapSurfaceImpl : public Gfx::Canvas
+class PixmapSurfaceImpl : public Gfx::PaintInfo
+                        , public Gfx::Canvas
 {
     public:
-        PixmapSurfaceImpl(PixmapSurface& surface);
+        PixmapSurfaceImpl();
 
         virtual ~PixmapSurfaceImpl();
         
@@ -172,11 +169,10 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         
         void setScaleFactor(double scaleFactor);
 
-        const Gfx::Scaling& surfaceScaling() const;
-
-        const Gfx::ImageFormat& format() const;
-        
-        const Gfx::SizeF& pixmapLogicalSize() const;
+        Canvas* getCanvas()
+        { 
+            return this;
+        }
 
         const Canvas* getCanvas() const
         { 
@@ -184,8 +180,13 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         }
            
     protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const override;
+
+        virtual const Gfx::SizeF& onGetSize() const override;
+
         virtual const Gfx::Scaling& onGetScaling() const override;
 
+    protected:
         virtual bool onGetPaint(Gfx::PaintContext* context) override;
 
         virtual Gfx::PaintContext* onGetPaint() override;
@@ -302,9 +303,9 @@ class PixmapSurfaceImpl : public Gfx::Canvas
         static std::string getSystemFont();
 
     private:
-        Gfx::SizeF     _logicalSize;
         Gfx::SizeF     _physicalSize;
-        Gfx::Scaling   _scaling;
+        Gfx::SizeF     _infoSize;
+        Gfx::Scaling   _infoScaling;
         LONG           _width;
         LONG           _height;
         HDC            _dc;

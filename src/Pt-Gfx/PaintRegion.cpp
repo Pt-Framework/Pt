@@ -35,20 +35,110 @@ namespace Pt {
 
 namespace Gfx {
 
-PaintRegion::PaintRegion()
+///////////////////////////////////////////////////////////////////////
+// PaintRegionInfo
+///////////////////////////////////////////////////////////////////////
+
+PaintRegionInfo::PaintRegionInfo()
 : _surface(0)
 , _hasArea(false)
 {
 }
 
 
+PaintRegionInfo::~PaintRegionInfo()
+{
+}
+
+
+void PaintRegionInfo::reset()
+{
+    _surface = 0;
+    _hasArea = false;
+}
+
+
+void PaintRegionInfo::reset(PaintSurface& surface, const Gfx::RectF* rect)
+{
+    _surface = &surface;
+
+    if(rect)
+    {
+        _area = *rect;
+        _hasArea = true;
+    }
+    else
+    {
+        _area.clear();
+        _hasArea = false;
+    }
+}
+
+
+const Gfx::PointF& PaintRegionInfo::position() const
+{
+    return _area.topLeft();
+}
+
+
+void PaintRegionInfo::setPosition(const Gfx::PointF& pos)
+{
+    _area.setOrigin(pos);
+    _hasArea = true;
+}
+
+
+const Gfx::SizeF& PaintRegionInfo::size() const
+{
+    return _area.size();
+}
+
+
+void PaintRegionInfo::setSize(const Gfx::SizeF& size)
+{
+    _area.setSize(size);
+    _hasArea = true;
+}
+
+
+const RectF* PaintRegionInfo::area() const
+{
+    return _hasArea ? &_area : 0;
+}
+
+
+const Gfx::ImageFormat& PaintRegionInfo::onGetFormat() const
+{
+    return _surface ? _surface->info().format() : Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& PaintRegionInfo::onGetSize() const
+{
+    return _surface && _hasArea ? _surface->info().size() : _area.size();
+}
+
+
+const Scaling& PaintRegionInfo::onGetScaling() const
+{
+    return _surface ? _surface->info().scaling() : _scaling;
+}
+
+///////////////////////////////////////////////////////////////////////
+// PaintRegion
+///////////////////////////////////////////////////////////////////////
+
+PaintRegion::PaintRegion()
+: _surface(0)
+{
+}
+
+
 PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
 : _surface(0)
-, _hasArea(false)
 {           
+    _info.reset(surface);
     _surface = &surface;
-    _area = rect; 
-    _hasArea = true;
 }
 
 
@@ -61,9 +151,8 @@ PaintRegion::~PaintRegion()
 
 void PaintRegion::onDetachSurface(PaintSurface* region)
 {
+    _info.reset();
     _surface = 0;
-    _area.clear();
-    _hasArea = false;
 
     PaintSurface::onReset();
 }
@@ -74,9 +163,8 @@ void PaintRegion::attach(PaintSurface& surface)
     if(_surface)
         detach();
 
+    _info.reset(surface);
     _surface = &surface;
-    _area.clear();
-    _hasArea = false;
 
     surface.attachRegion(*this);
 }
@@ -87,9 +175,8 @@ void PaintRegion::attach(PaintSurface& surface, const Gfx::RectF& rect)
     if(_surface)
         detach();
 
+    _info.reset(surface, &rect);
     _surface = &surface;
-    _area = rect;
-    _hasArea = true;
 
     surface.attachRegion(*this);
 }
@@ -102,10 +189,8 @@ void PaintRegion::detach()
     if(_surface)
         _surface->detachRegion(*this);
 
+    _info.reset();
     _surface = 0;
-    
-    _area.clear();
-    _hasArea = false;
 }
 
 
@@ -117,7 +202,7 @@ PaintSurface* PaintRegion::surface() const
 
 const PointF& PaintRegion::position() const
 {
-    return _area.topLeft();
+    return _info.position();
 }
 
 
@@ -125,8 +210,7 @@ void PaintRegion::move(const Gfx::PointF& pos)
 {
     onReset();
     
-    _area.setOrigin(pos);
-    _hasArea = true;
+    _info.setPosition(pos);
 }
 
 
@@ -134,33 +218,13 @@ void PaintRegion::resize(const Gfx::SizeF& size)
 {
     onReset();
     
-    _area.setSize(size);
-    _hasArea = true;
+    _info.setSize(size);
 }
 
 
-const Canvas* PaintRegion::onGetCanvas() const
+const PaintInfo& PaintRegion::onGetPaintInfo() const
 {
-    return _surface ? _surface->canvas() : 0;
-}
-
-
-const Gfx::ImageFormat& PaintRegion::onGetFormat() const
-{
-    return _surface ? _surface->format()
-                    : Gfx::ImageFormat::argb32();
-}
-
-
-const Gfx::SizeF& PaintRegion::onGetLogicalSize() const
-{
-    return _surface && _hasArea ? _surface->logicalSize() : _area.size();
-}
-
-
-const Gfx::Scaling& PaintRegion::onGetScaling() const
-{
-    return _surface ? _surface->scaling() : _scaling;
+    return _info;
 }
 
 
@@ -173,13 +237,15 @@ PaintContext* PaintRegion::onGetPaint(PaintContext* context)
     if( ! paintContext )
         return paintContext;
 
-    if( ! _hasArea )
+
+    const RectF* area = _info.area();
+    if( ! area )
         return paintContext;
 
     RectF r = paintContext->region();
-    r.shift( _area.topLeft().x(),
-             _area.topLeft().y() );
-    r.setSize( _area.size() );
+    r.shift( area->topLeft().x(),
+             area->topLeft().y() );
+    r.setSize( area->size() );
 
     paintContext->setRegion(r);
     return paintContext;
@@ -196,7 +262,13 @@ void PaintRegion::onDraw(PaintContext& paint,
                          const Gfx::PointF& to) const
 {
     if(_surface)
-        _surface->draw(paint, to, _area);
+    {
+        const RectF* area = _info.area();
+        if(area)
+            _surface->draw(paint, to, *area);
+        else
+            _surface->draw(paint, to);
+    }
 }
 
 
@@ -205,8 +277,8 @@ void PaintRegion::onDraw(PaintContext& paint,
                          const Gfx::RectF& rect) const
 {
     Gfx::RectF r = rect;
-    r.shift( _area.topLeft().x(),
-             _area.topLeft().y() );
+    r.shift( _info.position().x(),
+             _info.position().y() );
     
     if(_surface)
         _surface->draw(paint, to, r);

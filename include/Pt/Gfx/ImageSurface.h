@@ -45,6 +45,8 @@ class Rasterizer;
 class ImageSurface;
 class ImageCanvas;
 
+/** @internal.
+*/
 class ImagePaint : public PaintContext
 {
     public:
@@ -96,36 +98,22 @@ class ImagePaint : public PaintContext
         RectF           _clip;
 };
 
-
+/** @internal.
+*/
 class ImageCanvas : public Gfx::Canvas
 {
   public:
-    ImageCanvas(PaintSurface& surface);
-
-    ImageCanvas(PaintSurface& surface, 
-                const Gfx::Size& size, std::size_t stride = 0);
+    ImageCanvas(const PaintInfo& info);
 
     virtual ~ImageCanvas();
 
     void reset(const Gfx::Image& image);
 
-    void reset(const Gfx::Size& size, std::size_t stride = 0);
+    void reset(const Gfx::SizeF& size, std::size_t stride = 0);
 
     const Gfx::Image& image() const;
 
-    void setScaleFactor(double scaleFactor);
-
-    const Gfx::SizeF& imageSize() const;
-
-    void resize(const Gfx::SizeF& size);
-
-    const Gfx::SizeF& imageLogicalSize() const;
-
-    const Gfx::ImageFormat& format() const;
-
   protected:
-    virtual const Gfx::Scaling& onGetScaling() const override;
-
     virtual bool onGetPaint(Gfx::PaintContext* context) override;
 
     virtual Gfx::PaintContext* onGetPaint() override;
@@ -205,9 +193,32 @@ class ImageCanvas : public Gfx::Canvas
   private:
     Rasterizer*   _rasterizer;
     ImagePaint*   _paint;
-    Scaling       _scaling;
-    SizeF         _size;
-    SizeF         _imageSize;
+};
+
+/** @internal.
+*/
+class ImagePaintInfo : public PaintInfo
+{
+    public:
+        ImagePaintInfo();
+
+        virtual ~ImagePaintInfo();
+
+        void setScaleFactor(double scaleFactor);
+
+        void setSize(const Gfx::SizeF& size);
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const;
+
+        virtual const Gfx::SizeF& onGetSize() const;
+
+        virtual const Scaling& onGetScaling() const;
+
+    private:
+        PaintSurface* _surface;
+        Gfx::Scaling  _scaling;
+        Gfx::SizeF    _size;
 };
 
 /** @brief Image drawing surface.
@@ -227,24 +238,20 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
 
     const Gfx::Image& image() const;
 
-    /** @brief Returns the size of the image in device pixel. 
+    /** @brief Returns the size in device pixels. 
     */
     const Gfx::SizeF& size() const;
 
+    /** @brief Resizes to a size in device pixels. 
+    */
     void resize(const Gfx::SizeF& size);
 
     void setScaleFactor(double scaleFactor);    
 
   protected:
-    virtual const Canvas* onGetCanvas() const override;
+    virtual const PaintInfo& onGetPaintInfo() const override;
 
     virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
-
-    virtual const Gfx::ImageFormat& onGetFormat() const override;
-
-    virtual const Gfx::SizeF& onGetLogicalSize() const override;
-
-    virtual const Scaling& onGetScaling() const override;
 
   public:
     static void setFontDir(const System::Path& path);
@@ -256,8 +263,8 @@ class PT_GFX_API ImageSurface : public Gfx::PaintSurface
     static std::vector<std::string> fontNames();
 
   private:
-    ImageCanvas*  _canvas;
-    Scaling       _scaling;
+    ImagePaintInfo _info;
+    ImageCanvas*   _canvas;
 };
 
 } // namespace

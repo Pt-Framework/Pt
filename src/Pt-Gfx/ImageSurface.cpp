@@ -104,24 +104,11 @@ void ImagePaint::onSetClip(const Gfx::RectF* clip)
 // ImageCanvas
 ///////////////////////////////////////////////////////////////////////
 
-ImageCanvas::ImageCanvas(PaintSurface& surface)
-: Canvas(surface)
+ImageCanvas::ImageCanvas(const PaintInfo& info)
+: Canvas(info)
 , _rasterizer(new Rasterizer)
 , _paint(0)
 {
-}
-
-
-ImageCanvas::ImageCanvas(PaintSurface& surface,
-                         const Gfx::Size& size, std::size_t stride)
-: Canvas(surface)
-, _rasterizer(new Rasterizer)
-, _paint(0)
-{
-    _rasterizer->reset(size, stride);
-
-    _imageSize = SizeF( size.width(), size.height() );
-    _size = _scaling.toLogical(_imageSize);  
 }
 
 
@@ -133,62 +120,20 @@ ImageCanvas::~ImageCanvas()
 
 void ImageCanvas::reset(const Gfx::Image& image)
 {
-    _rasterizer->reset(image);
-
-    _imageSize = SizeF( image.width(), image.height() );
-    _size = _scaling.toLogical(_imageSize);   
+    _rasterizer->reset(image);  
 }
 
 
-void ImageCanvas::reset(const Gfx::Size& size, std::size_t stride)
+void ImageCanvas::reset(const Gfx::SizeF& size, std::size_t stride)
 {
-    _rasterizer->reset(size, stride);
-
-    _imageSize = SizeF( size.width(), size.height() );
-    _size = _scaling.toLogical(_imageSize);   
+    Gfx::Size imageSize = round(size);
+    _rasterizer->reset(imageSize, stride);  
 }
 
 
 const Gfx::Image& ImageCanvas::image() const
 {
     return _rasterizer->image();
-}
-
-
-void ImageCanvas::setScaleFactor(double scaleFactor)
-{
-    _scaling.setScaleFactor(scaleFactor);
-}
-
-
-void ImageCanvas::resize(const Gfx::SizeF& size)
-{
-    Gfx::Size s = round(size);       
-    reset(s);
-}
-
-
-const Gfx::ImageFormat& ImageCanvas::format() const
-{
-    return ImageFormat::argb32();
-}
-
-
-const Gfx::SizeF& ImageCanvas::imageLogicalSize() const
-{
-    return _size;
-}
-
-
-const Gfx::SizeF& ImageCanvas::imageSize() const
-{
-    return _imageSize;
-}
-
-
-const Gfx::Scaling& ImageCanvas::onGetScaling() const
-{
-    return _scaling;
 }
 
 
@@ -271,7 +216,7 @@ void ImageCanvas::onClipChanged()
     }
     else
     {
-        RectF rect = _scaling.toPhysical(clip);
+        RectF rect = info().scaling().toPhysical(clip);
         _rasterizer->setClip(rect);
     }
 }
@@ -370,7 +315,7 @@ void ImageCanvas::onDrawImage(const PointF& to, const Image& image, const RectF&
 void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF, 
                                const Gfx::Canvas& canvas)
 {
-    Gfx::PointF to = _scaling.toPhysical(toF);
+    Gfx::PointF to = info().scaling().toPhysical(toF);
 
     const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(&canvas);
     if(imageCanvas)
@@ -381,13 +326,13 @@ void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF,
     }
 
     Pt::Gfx::Image image = canvas.toImage();
-    if( image.format() == format() )
+    if( image.format() == info().format() )
     {
         drawImage(to, image);
         return;
     }
 
-    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::Image dest( info().format(), image.size() );
     Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
     drawImage(to, dest);
 }
@@ -397,8 +342,8 @@ void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF,
                                const Gfx::Canvas& canvas,
                                const Gfx::RectF& rectF)
 {
-    Gfx::PointF to = _scaling.toPhysical(toF);
-    Gfx::RectF rect = _scaling.toPhysical(rectF);
+    Gfx::PointF to = info().scaling().toPhysical(toF);
+    Gfx::RectF rect = info().scaling().toPhysical(rectF);
 
     const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(&canvas);
     if(imageCanvas)
@@ -409,15 +354,58 @@ void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF,
     }
 
     Pt::Gfx::Image image = canvas.toImage();
-    if( image.format() == format() )
+    if( image.format() == info().format() )
     {
         drawImage(to, image, rect);
         return;
     }
 
-    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::Image dest( info().format(), image.size() );
     Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
     drawImage(to, dest, rect);
+}
+
+///////////////////////////////////////////////////////////////////////
+// ImagePaintInfo
+///////////////////////////////////////////////////////////////////////
+
+ImagePaintInfo::ImagePaintInfo()
+{
+}
+
+
+ImagePaintInfo::~ImagePaintInfo()
+{
+}
+
+
+void ImagePaintInfo::setScaleFactor(double scaleFactor)
+{
+    _scaling.setScaleFactor(scaleFactor);
+}
+
+
+void ImagePaintInfo::setSize(const Gfx::SizeF& size)
+{
+    _size = size;
+}
+
+
+const Gfx::ImageFormat& ImagePaintInfo::onGetFormat() const
+{
+    return Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& ImagePaintInfo::onGetSize() const
+{
+    return _size;
+}
+
+
+const Scaling& ImagePaintInfo::onGetScaling() const
+{
+    return _scaling;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -427,14 +415,18 @@ void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF,
 ImageSurface::ImageSurface()
 : _canvas(0)
 {
-    _canvas = new ImageCanvas(*this);
+    _canvas = new ImageCanvas(_info);
+    setCanvas(_canvas);
 }
 
 
 ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
 : _canvas(0)
 {
-    _canvas = new ImageCanvas(*this, size, stride);
+    _canvas = new ImageCanvas(_info);
+    setCanvas(_canvas);
+
+    reset(size, stride);
 }
 
 
@@ -444,70 +436,64 @@ ImageSurface::~ImageSurface()
 }
 
 
+void ImageSurface::reset(const Gfx::Image& image)
+{
+    Gfx::SizeF imageSize( image.width(), image.height() );
+
+    _canvas->reset(image);
+
+    const Gfx::SizeF& logicalSize = _info.scaling().toLogical(imageSize);
+    _info.setSize(logicalSize);
+}
+
+
+void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
+{
+    Gfx::SizeF imageSize( size.width(), size.height() );
+
+    _canvas->reset(imageSize, stride);
+
+    const Gfx::SizeF& logicalSize = _info.scaling().toLogical(imageSize);
+    _info.setSize(logicalSize);
+}
+
+
 const Gfx::Image& ImageSurface::image() const
 {
     return _canvas->image();
 }
 
 
-void ImageSurface::setScaleFactor(double scaleFactor)
-{
-    _scaling.setScaleFactor(scaleFactor);
-    _canvas->setScaleFactor(scaleFactor);
-}
-
-
 const Gfx::SizeF& ImageSurface::size() const
 {
-    return _canvas->imageSize();
+    return _info.size();
 }
 
 
 void ImageSurface::resize(const Gfx::SizeF& size)
 {
-    _canvas->resize(size);
+    _canvas->reset(size);
+
+    Gfx::SizeF logicalSize = _info.scaling().toLogical(size);
+    _info.setSize(logicalSize);
 }
 
 
-void ImageSurface::reset(const Gfx::Image& image)
+void ImageSurface::setScaleFactor(double scaleFactor)
 {
-    _canvas->reset(image);
+    _info.setScaleFactor(scaleFactor);
 }
 
 
-void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
+const PaintInfo& ImageSurface::onGetPaintInfo() const
 {
-    _canvas->reset(size, stride);
-}
-
-
-const Canvas* ImageSurface::onGetCanvas() const
-{
-    return _canvas;
+    return _info;
 }
 
 
 Gfx::PaintContext* ImageSurface::onGetPaint(Gfx::PaintContext* reuse) 
 {
     return _canvas->getPaint(reuse);
-}
-
-
-const ImageFormat& ImageSurface::onGetFormat() const
-{
-    return ImageFormat::argb32();
-}
-
-
-const Gfx::SizeF& ImageSurface::onGetLogicalSize() const
-{
-    return _canvas->imageLogicalSize();
-}
-
-
-const Scaling& ImageSurface::onGetScaling() const
-{
-    return _scaling;
 }
 
 

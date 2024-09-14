@@ -35,8 +35,8 @@ namespace Pt {
 
 namespace Gfx {
 
-Canvas::Canvas(PaintSurface& surface)
-: _surface(&surface)
+Canvas::Canvas(const PaintInfo& info)
+: _info(&info)
 , _paint(0)
 , _active(0)
 {
@@ -63,21 +63,9 @@ void Canvas::onDetachPaint(PaintContext& canvas)
 }
 
 
-const Gfx::ImageFormat& Canvas::format() const
+const PaintInfo& Canvas::info() const
 {
-    return _surface->format();
-}
-
-
-const Gfx::SizeF& Canvas::logicalSize() const
-{   
-    return _surface->logicalSize();
-}
-
-
-const Scaling& Canvas::scaling() const
-{
-    return onGetScaling();
+    return *_info;
 }
 
 
@@ -98,7 +86,7 @@ Gfx::PaintContext* Canvas::getPaint(Gfx::PaintContext* reuse)
 
     if(reuse)
     {
-        if( reuse->scaling() != scaling() )
+        if( reuse->scaling() != _info->scaling() )
             reuse = 0;
     }
 

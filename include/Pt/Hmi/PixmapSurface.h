@@ -63,15 +63,17 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
 
         bool empty() const;
 
-        /** @brief Returns the size of the pixmap in device pixel. 
+        /** @brief Returns the size in device pixels. 
         */
         const Gfx::SizeF& size() const;
 
+        /** @brief Resizes to a size in device pixels. 
+        */
         void resize(const Gfx::SizeF& size);
 
-        void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
-
         void setScaleFactor(double v);
+
+        void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
         void drawPixmap(const Gfx::PointF& to, 
                         const PixmapSurface& pixmap,
@@ -83,15 +85,9 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintSurface
                         const Gfx::CompositionMode& mode);
 
     protected:
-        virtual const Gfx::Canvas* onGetCanvas() const override;
+        virtual const Gfx::PaintInfo& onGetPaintInfo() const override;
 
         virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
-
-        virtual const Gfx::ImageFormat& onGetFormat() const override;
-
-        virtual const Gfx::SizeF& onGetLogicalSize() const override;
-
-        virtual const Gfx::Scaling& onGetScaling() const override;
 
     public:
         static void setFontDir(const System::Path& path);

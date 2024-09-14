@@ -50,6 +50,7 @@ namespace Gfx {
 class PaintSurface;
 class PaintContext;
 class Paint;
+class PaintInfo;
 class Line;
 class Polyline;
 class Path;
@@ -61,23 +62,17 @@ class PT_GFX_API Canvas
     friend class PaintContext;
 
     public:
-        explicit Canvas(PaintSurface& surface);
+        explicit Canvas(const PaintInfo& info);
 
         ~Canvas();
 
-        const Gfx::ImageFormat& format() const;
-
-        const Gfx::SizeF& logicalSize() const;
-
-        const Scaling& scaling() const;
+        const PaintInfo& info() const;
 
         Image toImage() const;
 
         Gfx::PaintContext* getPaint(Gfx::PaintContext* context);
 
     protected:
-        virtual const Scaling& onGetScaling() const = 0;
-
         virtual bool onGetPaint(PaintContext* context) = 0;
 
         virtual PaintContext* onGetPaint() = 0;
@@ -189,7 +184,7 @@ class PT_GFX_API Canvas
         void onDetachPaint(PaintContext& paint);
     
     private:
-        PaintSurface*              _surface;
+        const PaintInfo*           _info;
         PaintContext*              _paint;
 
         // TODO: multiple paint contexts attached, but one is active

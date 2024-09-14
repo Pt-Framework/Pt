@@ -155,10 +155,10 @@ Gfx::Image Window::getImage() const
     //if(canvas)
     //    return canvas->toImage();
 
-    Gfx::SizeF size = surface().logicalSize();
-    size = surface().scaling().toPhysical(size);
-
     Gfx::ImageSurface imageSurface;
+
+    const Gfx::PaintInfo& info = surface().info();
+    Gfx::SizeF size = info.scaling().toPhysical( info.size() );
     imageSurface.resize(size);
 
     Gfx::Painter painter(imageSurface);

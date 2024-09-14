@@ -121,6 +121,37 @@ void Paint::setFont(const Gfx::Font& font)
 }
 
 ///////////////////////////////////////////////////////////////////////
+// PaintInfo
+///////////////////////////////////////////////////////////////////////
+
+PaintInfo::PaintInfo()
+{
+}
+
+
+PaintInfo::~PaintInfo()
+{
+}
+
+
+const Gfx::ImageFormat& PaintInfo::format() const
+{
+    return onGetFormat();
+}
+
+
+const Gfx::SizeF& PaintInfo::size() const
+{
+    return onGetSize();
+}
+
+
+const Scaling& PaintInfo::scaling() const
+{
+    return onGetScaling();
+}
+
+///////////////////////////////////////////////////////////////////////
 // PaintContext
 ///////////////////////////////////////////////////////////////////////
 
@@ -149,7 +180,7 @@ void PaintContext::attachCanvas(Canvas& canvas)
     double unbounded = std::numeric_limits<double>::max();
     _region.setSize( SizeF(unbounded, unbounded) );
 
-    _scaling = canvas.scaling();
+    _scaling = canvas.info().scaling();
     _canvas = &canvas;
 }
 

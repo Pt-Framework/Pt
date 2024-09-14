@@ -38,6 +38,45 @@ namespace Pt {
 
 namespace Gfx {
 
+class PaintRegion;
+
+/** @internal
+*/
+class PaintRegionInfo : public PaintInfo
+{
+    public:
+        PaintRegionInfo();
+
+        virtual ~PaintRegionInfo();
+
+        void reset();
+
+        void reset(PaintSurface& surface, const Gfx::RectF* rect = 0);
+
+        const Gfx::PointF& position() const;
+
+        void setPosition(const Gfx::PointF& pos);
+
+        const Gfx::SizeF& size() const;
+
+        void setSize(const Gfx::SizeF& size);
+
+        const RectF* area() const;
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const;
+
+        virtual const Gfx::SizeF& onGetSize() const;
+
+        virtual const Scaling& onGetScaling() const;
+
+    private:
+        PaintSurface* _surface;
+        Gfx::Scaling  _scaling;
+        Gfx::RectF    _area;
+        bool          _hasArea;
+};
+
 /** @brief Drawing region on another surface.
 */
 class PT_GFX_API PaintRegion : public PaintSurface
@@ -66,15 +105,9 @@ class PT_GFX_API PaintRegion : public PaintSurface
         void resize(const Gfx::SizeF& size);
 
     protected:
-        virtual const Canvas* onGetCanvas() const override;
+        virtual const PaintInfo& onGetPaintInfo() const override;
 
         virtual PaintContext* onGetPaint(PaintContext* context) override;
-
-        virtual const Gfx::ImageFormat& onGetFormat() const override;
-
-        virtual const Gfx::SizeF& onGetLogicalSize() const override;
-
-        virtual const Gfx::Scaling& onGetScaling() const override;
 
         virtual void onReset() override;
 
@@ -90,10 +123,8 @@ class PT_GFX_API PaintRegion : public PaintSurface
         virtual void onDetachSurface(PaintSurface* region);
     
     private:
-        PaintSurface* _surface;
-        Gfx::Scaling  _scaling;
-        Gfx::RectF    _area;
-        bool          _hasArea;
+        PaintRegionInfo _info;
+        PaintSurface*   _surface;
 };
 
 } // namespace

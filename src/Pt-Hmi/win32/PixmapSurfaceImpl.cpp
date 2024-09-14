@@ -47,7 +47,7 @@ namespace Pt {
 
 namespace Hmi {
 
-PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
+PixmapSurfaceImpl::PixmapSurfaceImpl()
 { 
 }
 
@@ -178,9 +178,10 @@ namespace Pt {
 
 namespace Hmi {
 
-PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
-: Gfx::Canvas(surface)
-, _logicalSize(0, 0)
+PixmapSurfaceImpl::PixmapSurfaceImpl()
+: Gfx::PaintInfo()
+, Gfx::Canvas( static_cast<const PaintInfo&>(*this) )
+, _infoSize(0, 0)
 , _physicalSize(0, 0)
 , _width(0)
 , _height(0)
@@ -296,38 +297,33 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
     _width = width;
     _height = height;
 
-    _logicalSize = size;
+    _infoSize = size;
     _physicalSize.set(width, height);
 }
 
 
 void PixmapSurfaceImpl::setScaleFactor(double scaleFactor)
 {
-    _scaling.setScaleFactor(scaleFactor);
+    _infoScaling.setScaleFactor(scaleFactor);
 }
 
 
-const Gfx::Scaling& PixmapSurfaceImpl::surfaceScaling() const
-{
-    return _scaling;
-}
 
-
-const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+const Gfx::ImageFormat& PixmapSurfaceImpl::onGetFormat() const
 {
     return Gfx::ImageFormat::argb32();
 }
 
 
-const Gfx::SizeF& PixmapSurfaceImpl::pixmapLogicalSize() const
+const Gfx::SizeF& PixmapSurfaceImpl::onGetSize() const
 {
-    return _logicalSize;
+    return _infoSize;
 }
 
 
 const Gfx::Scaling& PixmapSurfaceImpl::onGetScaling() const
 {
-    return _scaling;
+    return _infoScaling;
 }
 
 
@@ -636,7 +632,7 @@ void PixmapSurfaceImpl::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::Siz
 
 Gfx::FontMetrics PixmapSurfaceImpl::onGetFontMetrics(const Pt::String& text) const
 {
-    double scaleFactor = scaling().scaleFactor();
+    double scaleFactor = info().scaling().scaleFactor();
 
     Gfx::Transform tform;
     tform.scale(scaleFactor, scaleFactor);
@@ -861,7 +857,7 @@ void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& to,
 
 void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
-    Gfx::PointF toR = _scaling.toPhysical( toF );
+    Gfx::PointF toR = info().scaling().toPhysical( toF );
     Gfx::Point to = Gfx::round(toR);
 
     switch (_compositionMode)
@@ -1022,8 +1018,8 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
 void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
                                    const PixmapSurfaceImpl& surface)
 {
-    Gfx::PointF to = _scaling.toPhysical(toF);
-    Gfx::Size size = Gfx::round( surface.pixmapSize() );
+    Gfx::PointF to = info().scaling().toPhysical(toF);
+    Gfx::Size size = Gfx::round( surface.size() );
 
     switch (_compositionMode)
     {
@@ -1055,8 +1051,8 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
                                    const PixmapSurfaceImpl& pm, 
                                    const Gfx::RectF& rectF)
 {
-    Gfx::PointF to = _scaling.toPhysical(toF);
-    Gfx::RectF& pmRect = _scaling.toPhysical(rectF);
+    Gfx::PointF to = info().scaling().toPhysical(toF);
+    Gfx::RectF& pmRect = info().scaling().toPhysical(rectF);
 
     const Gfx::Size size = Gfx::round(pmRect.size());
     const Gfx::Point from = Gfx::round(pmRect.topLeft());

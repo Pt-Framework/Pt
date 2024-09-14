@@ -90,17 +90,34 @@ void PaintSurface::onReset()
     }
 }
 
-//
-// TODO: virtual canvas() function instead of format() and non-virtual
-//       accessors in Canvas base class
-//
+
+const PaintInfo& PaintSurface::info() const
+{
+    return onGetPaintInfo();
+}
+
+
+const Scaling& PaintSurface::scaling() const
+{
+    return info().scaling();
+}
+
+
+const ImageFormat& PaintSurface::format() const
+{
+    return info().format();
+}
+
+
+Canvas* PaintSurface::canvas()
+{
+    return _canvas;
+}
+
 
 const Canvas* PaintSurface::canvas() const
 {
-    if(_canvas)
-        return _canvas;
-
-    return onGetCanvas();
+    return _canvas;
 }
 
 
@@ -110,22 +127,19 @@ void PaintSurface::setCanvas(Canvas* canvas)
 }
 
 
-const Gfx::ImageFormat& PaintSurface::format() const
+PaintContext* PaintSurface::getPaint(PaintContext* reuse)
 {
-    return onGetFormat();
+    if(_canvas)
+        return _canvas->getPaint(reuse);
+
+    return onGetPaint(reuse);   
 }
 
 
-const Gfx::SizeF& PaintSurface::logicalSize() const
+PaintContext* PaintSurface::onGetPaint(PaintContext* context)
 {
-    return onGetLogicalSize();
-}
-
-
-const Scaling& PaintSurface::scaling() const
-{
-    return onGetScaling();
-}
+    return 0;
+}   
 
 
 void PaintSurface::draw(PaintContext& paint, 
@@ -146,11 +160,10 @@ void PaintSurface::draw(PaintContext& paint,
 void PaintSurface::onDraw(PaintContext& paint, 
                           const Gfx::PointF& to) const
 {
-    const Canvas* content = onGetCanvas();
-    if( ! content )
+    if( ! _canvas )
         return;
 
-    paint.drawCanvas(to, *content);
+    paint.drawCanvas(to, *_canvas);
 }
 
 
@@ -158,27 +171,11 @@ void PaintSurface::onDraw(PaintContext& paint,
                           const Gfx::PointF& to, 
                           const Gfx::RectF& rect) const
 {
-    const Canvas* content = onGetCanvas();
-    if( ! content )
+    if( ! _canvas )
         return;
 
-    paint.drawCanvas(to, *content, rect);
+    paint.drawCanvas(to, *_canvas, rect);
 }
-
-
-PaintContext* PaintSurface::getPaint(PaintContext* reuse)
-{
-    if( ! _canvas )
-        return onGetPaint(reuse);
-
-    return _canvas->getPaint(reuse);
-}
-
-
-PaintContext* PaintSurface::onGetPaint(PaintContext* context)
-{
-    return 0;
-}   
 
 
 void PaintSurface::attachPainter(Painter& painter)

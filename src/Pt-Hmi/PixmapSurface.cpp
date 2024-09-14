@@ -39,7 +39,9 @@ namespace Hmi {
 PixmapSurface::PixmapSurface()
 : _impl(0)
 {
-    _impl = new PixmapSurfaceImpl(*this);
+    _impl = new PixmapSurfaceImpl();
+
+    setCanvas( _impl->getCanvas() );
 }
 
 
@@ -57,7 +59,7 @@ void PixmapSurface::set(const Gfx::Image& image)
 
 bool PixmapSurface::empty() const
 {
-    return _impl->pixmapLogicalSize().isNull();
+    return _impl->pixmapSize().isNull();
 }
 
 
@@ -73,18 +75,15 @@ void PixmapSurface::resize(const Gfx::SizeF& size)
 }
 
 
-void PixmapSurface::clear(const Gfx::Color& c)
+void PixmapSurface::setScaleFactor(double scaling)
 {
-    _impl->clear(c);
+    _impl->setScaleFactor(scaling);
 }
 
 
-void PixmapSurface::setScaleFactor(double scaling)
+void PixmapSurface::clear(const Gfx::Color& c)
 {
-    if(_impl->surfaceScaling().scaleFactor() == scaling)
-        return;
-
-    _impl->setScaleFactor(scaling);
+    _impl->clear(c);
 }
 
 
@@ -105,33 +104,15 @@ void PixmapSurface::drawPixmap(const Gfx::PointF& to,
 }
 
 
-const Gfx::Canvas* PixmapSurface::onGetCanvas() const
+const Gfx::PaintInfo& PixmapSurface::onGetPaintInfo() const
 {
-    return _impl->getCanvas();
+    return _impl->info();
 }
 
 
 Gfx::PaintContext* PixmapSurface::onGetPaint(Gfx::PaintContext* context) 
 {
     return _impl->getPaint(context);
-}
-
-
-const Gfx::ImageFormat& PixmapSurface::onGetFormat() const
-{
-    return _impl->format();
-}
-
-
-const Gfx::SizeF& PixmapSurface::onGetLogicalSize() const
-{
-    return _impl->pixmapLogicalSize();
-}
-
-
-const Gfx::Scaling& PixmapSurface::onGetScaling() const
-{
-    return _impl->surfaceScaling();
 }
 
 

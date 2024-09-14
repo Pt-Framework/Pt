@@ -120,14 +120,14 @@ void Painter::onDetachSurface(PaintSurface& surface)
 
 const Gfx::ImageFormat& Painter::format() const
 {
-    return _surface ? _surface->format() 
+    return _surface ? _surface->info().format() 
                     : ImageFormat::argb32();
 }
 
 
 const Scaling& Painter::scaling() const
 {
-    return _surface ? _surface->scaling() 
+    return _surface ? _surface->info().scaling() 
                     : _scaling;
 }
 

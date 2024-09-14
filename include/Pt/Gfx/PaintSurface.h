@@ -60,12 +60,13 @@ class PT_GFX_API PaintSurface
     public:
         virtual ~PaintSurface();
         
-        const Gfx::ImageFormat& format() const;
-
-        // TODO: Return a metrics object
-        const Gfx::SizeF& logicalSize() const;
+        const PaintInfo& info() const;
 
         const Scaling& scaling() const;
+
+        const ImageFormat& format() const;
+
+        Canvas* canvas();
 
         const Canvas* canvas() const;
 
@@ -77,20 +78,14 @@ class PT_GFX_API PaintSurface
         void draw(PaintContext& paint,
                   const Gfx::PointF& to, 
                   const Gfx::RectF& rect) const;
-    
+
     protected:
         void setCanvas(Canvas* canvas);
 
-    protected:
-        virtual const Canvas* onGetCanvas() const = 0;
-        
+    protected:      
+        virtual const PaintInfo& onGetPaintInfo() const = 0;
+
         virtual PaintContext* onGetPaint(PaintContext* context);
-
-        virtual const Gfx::ImageFormat& onGetFormat() const = 0;
-
-        virtual const Gfx::SizeF& onGetLogicalSize() const = 0;
-
-        virtual const Scaling& onGetScaling() const = 0;
 
         virtual void onReset();
 
@@ -113,9 +108,9 @@ class PT_GFX_API PaintSurface
         void detachPainter(Painter& painter);
 
     private:
-        Canvas*                   _canvas;
-        std::vector<PaintRegion*> _regions;
-        Painter*                  _painter;
+        Canvas*                    _canvas;
+        std::vector<PaintRegion*>  _regions;
+        Painter*                   _painter;
 };
 
 } // namespace

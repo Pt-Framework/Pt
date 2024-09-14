@@ -160,6 +160,29 @@ class PT_GFX_API Paint
         Gfx::Font            _font;
 };
 
+/** @brief Paint info.
+*/
+class PT_GFX_API PaintInfo
+{
+    public:
+        PaintInfo();
+
+        virtual ~PaintInfo();
+
+        const Gfx::ImageFormat& format() const;
+
+        const Gfx::SizeF& size() const;
+
+        const Scaling& scaling() const;
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const = 0;
+
+        virtual const Gfx::SizeF& onGetSize() const = 0;
+
+        virtual const Scaling& onGetScaling() const = 0;
+};
+
 /** @brief Paint context.
 */
 class PT_GFX_API PaintContext
