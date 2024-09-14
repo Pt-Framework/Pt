@@ -28,22 +28,18 @@
 */
 
 #include <Pt/Hmi/PaintRegion.h>
-#include <Pt/Hmi/PixmapSurface.h>
-#include <Pt/Hmi/Painter.h>
 
 namespace Pt {
 
 namespace Hmi {
 
 PaintRegion::PaintRegion()
-: _surface(0)
 {
 }
 
 
-PaintRegion::PaintRegion(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
-: _surface(&surface)
-, _area(rect)
+PaintRegion::PaintRegion(Hmi::PaintSurface& surface, const Gfx::RectF& rect)
+:  _region(surface, rect)
 {
 }
 
@@ -53,74 +49,59 @@ PaintRegion::~PaintRegion()
 }
 
 
-void PaintRegion::reset(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void PaintRegion::attach(Hmi::PaintSurface& surface, const Gfx::RectF& rect)
 {
-    if(_surface)
-        reset();
-
-    _surface = &surface;
-    _area = rect;
+    _region.attach(surface, rect);
 }
 
 
-void PaintRegion::reset()
+void PaintRegion::detach()
 {
-    onReset();
-
-    _surface = 0;
-    _area.clear(); 
+    _region.detach();
 }
 
 
-const Gfx::Canvas* PaintRegion::onGetCanvas() const
+Hmi::PaintSurface* PaintRegion::surface() const
 {
-    return _surface ? _surface->canvas() : 0;
+    Gfx::PaintSurface* s = _region.surface();
+    return static_cast<Hmi::PaintSurface*>(s);
 }
 
 
-const Gfx::ImageFormat& PaintRegion::onGetFormat() const
+const Gfx::PointF& PaintRegion::position() const
 {
-    return _surface ? _surface->format()
-                    : Gfx::ImageFormat::argb32();
+    return _region.position();
 }
 
 
-const Gfx::SizeF& PaintRegion::onGetSize() const
+void PaintRegion::move(const Gfx::PointF& pos)
 {
-    return _surface ? _surface->size() : _area.size();
+    _region.move(pos);
 }
 
 
-const Gfx::Scaling& PaintRegion::onGetScaling() const
+void PaintRegion::resize(const Gfx::SizeF& size)
 {
-    return _surface ? _surface->scaling() : _scaling;
+    _region.resize(size);
 }
 
 
-Gfx::PaintContext* PaintRegion::onBeginPaint(Gfx::PaintContext* context) 
+const Gfx::PaintInfo& PaintRegion::onGetPaintInfo() const
 {
-    if( ! _surface )
-        return 0;
+    return _region.info();
+}
 
-    Gfx::PaintContext* paintContext = _surface->beginPaint(context);
-    if( ! paintContext )
-        return paintContext;
 
-    Gfx::RectF r = paintContext->region();
-    r.shift( _area.topLeft().x(),
-             _area.topLeft().y() );
-    r.setSize( _area.size() );
-
-    paintContext->setRegion(r);
-    return paintContext;
+Gfx::PaintContext* PaintRegion::onGetPaint(Gfx::PaintContext* context)
+{
+    return _region.getPaint(context);
 }
 
 
 void PaintRegion::onDraw(Gfx::PaintContext& paint, 
                          const Gfx::PointF& to) const
 {
-    if(_surface)
-        _surface->draw(paint, to, _area);
+    _region.draw(paint, to);
 }
 
 
@@ -128,12 +109,34 @@ void PaintRegion::onDraw(Gfx::PaintContext& paint,
                          const Gfx::PointF& to, 
                          const Gfx::RectF& rect) const
 {
-    Gfx::RectF r = rect;
-    r.shift( _area.topLeft().x(),
-             _area.topLeft().y() );
-    
-    if(_surface)
-        _surface->draw(paint, to, r);
+    _region.draw(paint, to, rect);
+}
+
+
+void PaintRegion::onDrawPixmap(const Gfx::PointF& to, 
+                               const PixmapSurface& pixmap,
+                               const Gfx::CompositionMode& mode)
+{
+    Hmi::PaintSurface* s = surface();
+    if(s)
+    {
+        Gfx::PointF pos = to + _region.position();
+        s->drawPixmap(pos, pixmap, mode);
+    }
+}
+
+
+void PaintRegion::onDrawPixmap(const Gfx::PointF& to,
+                               const PixmapSurface& pixmap, 
+                               const Gfx::RectF& rect,
+                               const Gfx::CompositionMode& mode)
+{
+    Hmi::PaintSurface* s = surface();
+    if(s)
+    {
+        Gfx::PointF pos = to + _region.position();
+        s->drawPixmap(pos, pixmap, rect, mode);
+    }
 }
 
 } // namespace

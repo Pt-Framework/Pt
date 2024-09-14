@@ -87,20 +87,22 @@ void PixmapSurface::clear(const Gfx::Color& c)
 }
 
 
-void PixmapSurface::drawPixmap(const Gfx::PointF& to, 
-                               const PixmapSurface& pixmap,
-                               const Gfx::CompositionMode& mode)
+void PixmapSurface::onDrawPixmap(const Gfx::PointF& to, 
+                                 const PixmapSurface& pixmap,
+                                 const Gfx::CompositionMode& mode)
 {
-    //_impl->drawPixmap(to, pixmap, mode);
+    //Gfx::PointF to = info().scaling().toPhysical(toF);
+    _impl->drawPixmap(to, pixmap, mode);
 }
 
 
-void PixmapSurface::drawPixmap(const Gfx::PointF& to,
-                               const PixmapSurface& pixmap, 
-                               const Gfx::RectF& rect,
-                               const Gfx::CompositionMode& mode)
+void PixmapSurface::onDrawPixmap(const Gfx::PointF& to,
+                                 const PixmapSurface& pixmap, 
+                                 const Gfx::RectF& rect,
+                                 const Gfx::CompositionMode& mode)
 {
-    //_impl->drawPixmap(to, pixmap, rect, mode);
+    //Gfx::PointF to = info().scaling().toPhysical(toF);
+    _impl->drawPixmap(to, pixmap, rect, mode);
 }
 
 
