@@ -28,13 +28,12 @@
 */
 
 #include "PixmapSurfaceImpl.h"
-#include <Pt/Hmi/PixmapSurface.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
+PixmapSurfaceImpl::PixmapSurfaceImpl()
 { 
 }
 
