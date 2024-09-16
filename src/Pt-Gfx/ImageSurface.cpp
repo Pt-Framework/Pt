@@ -340,29 +340,31 @@ void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF,
 
 void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF,
                                const Gfx::Canvas& canvas,
-                               const Gfx::RectF& rectF)
+                               const Gfx::RectF& canvasRect)
 {
     Gfx::PointF to = info().scaling().toPhysical(toF);
-    Gfx::RectF rect = info().scaling().toPhysical(rectF);
 
     const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(&canvas);
     if(imageCanvas)
     {
         const Gfx::Image& image = imageCanvas->image();
-        drawImage(to, image, rect);
+        Gfx::RectF imageRect = canvas.info().scaling().toPhysical(canvasRect);
+        drawImage(to, image, imageRect);
         return;
     }
 
     Pt::Gfx::Image image = canvas.toImage();
+    Gfx::RectF imageRect = canvas.info().scaling().toPhysical(canvasRect);
+
     if( image.format() == info().format() )
     {
-        drawImage(to, image, rect);
+        drawImage(to, image, imageRect);
         return;
     }
 
     Pt::Gfx::Image dest( info().format(), image.size() );
     Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest, rect);
+    drawImage(to, dest, imageRect);
 }
 
 ///////////////////////////////////////////////////////////////////////
