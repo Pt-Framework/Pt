@@ -49,7 +49,7 @@ class PixmapSurface;
 class PixmapSurfaceImpl 
 {
     public:
-        explicit PixmapSurfaceImpl(PixmapSurface& surface);
+        explicit PixmapSurfaceImpl();
 
         void clear(const Gfx::Color& c)
         { }
@@ -59,9 +59,9 @@ class PixmapSurfaceImpl
             _image.reset(image);
         }
 
-        void resize(const Gfx::SizeF& size)
+        const Gfx::Image& image() const
         {
-            _image.resize(size);
+            return _image.image();
         }
 
         const Gfx::SizeF& pixmapSize() const
@@ -69,9 +69,9 @@ class PixmapSurfaceImpl
             return _image.size();
         }
 
-        const Gfx::Scaling& surfaceScaling() const
+        void resize(const Gfx::SizeF& size)
         {
-            return _image.scaling();
+            _image.resize(size);
         }
 
         void setScaleFactor(double scaleFactor)
@@ -79,14 +79,14 @@ class PixmapSurfaceImpl
             _image.setScaleFactor(scaleFactor);
         }
 
-        const Gfx::SizeF& pixmapLogicalSize() const
+        const Gfx::PaintInfo& info() const
         {
-            return _image.logicalSize();
+            return _image.info();
         }
 
-        const Gfx::ImageFormat& format() const
+        Gfx::Canvas* getCanvas()
         {
-            return _image.format();
+            return _image.canvas();
         }
 
         const Gfx::Canvas* getCanvas() const
@@ -107,11 +107,6 @@ class PixmapSurfaceImpl
                         const PixmapSurface& surface, 
                         const Gfx::RectF& rect,
                         const Gfx::CompositionMode& mode);
-
-        const Gfx::ImageSurface& imageSurface() const
-        {
-            return _image;
-        }
 
         static const std::string& defaultFont()
         {

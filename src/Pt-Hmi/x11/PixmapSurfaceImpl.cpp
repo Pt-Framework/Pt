@@ -60,7 +60,7 @@ const Gfx::ImageFormat& getScreenFormat()
 }
 
 
-PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
+PixmapSurfaceImpl::PixmapSurfaceImpl()
 { 
 }
 
