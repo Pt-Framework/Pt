@@ -115,7 +115,7 @@ const Gfx::ImageFormat& PaintRegionInfo::onGetFormat() const
 
 const Gfx::SizeF& PaintRegionInfo::onGetSize() const
 {
-    return _surface && _hasArea ? _surface->info().size() : _area.size();
+    return _surface && ! _hasArea ? _surface->info().size() : _area.size();
 }
 
 
