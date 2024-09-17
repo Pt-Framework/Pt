@@ -49,7 +49,12 @@ class PixmapSurface;
 class PixmapSurfaceImpl 
 {
     public:
-        explicit PixmapSurfaceImpl();
+        PixmapSurfaceImpl();
+
+        void reset(const Gfx::Size& size, std::size_t stride)
+        {
+            _image.reset(size, stride);
+        }
 
         void clear(const Gfx::Color& c)
         { }
