@@ -346,7 +346,7 @@ void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
 const Gfx::Image& ScreenImpl::image() const
 {
-    return _surface.impl()->imageSurface().image();
+    return _surface.impl()->image();
 }
 
 
