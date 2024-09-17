@@ -3,6 +3,9 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Algorithm.h>
 
+#include <Pt/Gfx/PngWriter.h>
+#include <fstream>
+
 namespace Pt {
 
 namespace Hmi {
@@ -269,6 +272,10 @@ void ChildW::onShowDialog()
     _buttonBar.addItem(_closeButton, DockingLayout::Bottom);
 
     _dialogButton.setText("Hallo");
+
+    //std::ofstream ofs("child-window.png", std::ios::binary);
+    //Gfx::PngWriter pw(ofs);
+    //pw.write( _childWindow2.getImage() );
 }
 
 

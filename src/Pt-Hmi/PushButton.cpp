@@ -494,7 +494,7 @@ void PushButton::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _picture.empty() )
     {
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-        painter.drawSurface(_iconPos, _picture);
+        painter.drawLayer(_iconPos, _picture);
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
     }
 

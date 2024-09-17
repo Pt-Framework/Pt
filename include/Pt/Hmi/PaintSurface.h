@@ -41,7 +41,7 @@ class PixmapSurface;
 
 /** @brief Paint target for painters.
 */
-class PT_HMI_API PaintSurface : public Gfx::PaintSurface
+class PT_HMI_API PaintSurface : public Gfx::PaintLayer
 {
     public:
         virtual ~PaintSurface()

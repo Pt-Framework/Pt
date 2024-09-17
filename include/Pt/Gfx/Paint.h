@@ -54,6 +54,7 @@ class Canvas;
 class Painter;
 class Scaling;
 class PaintSurface;
+class PaintLayer;
 
 class Line;
 class Polyline;
@@ -188,6 +189,7 @@ class PT_GFX_API PaintInfo
 class PT_GFX_API PaintContext
 {
     friend class Canvas;
+    friend class PaintLayer;
 
     public:
         virtual ~PaintContext();
@@ -250,19 +252,12 @@ class PT_GFX_API PaintContext
                        const Gfx::Image& image, 
                        const Gfx::RectF& imgRect);
 
-        void drawSurface(const Gfx::PointF& to, 
-                         const Gfx::PaintSurface& surface);
+        void drawLayer(const Gfx::PointF& to, 
+                       const Gfx::PaintLayer& layer);
 
-        void drawSurface(const Gfx::PointF& to,
-                         const Gfx::PaintSurface& surface,
-                         const Gfx::RectF& rect);
-
-        void drawCanvas(const Gfx::PointF& to, 
-                        const Gfx::Canvas& canvas);
-
-        void drawCanvas(const Gfx::PointF& to,
-                        const Gfx::Canvas& canvas,
-                        const Gfx::RectF& rect);
+        void drawLayer(const Gfx::PointF& to,
+                       const Gfx::PaintLayer& layer,
+                       const Gfx::RectF& rect);
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
@@ -276,6 +271,14 @@ class PT_GFX_API PaintContext
         virtual void onSetClip(const Gfx::RectF* clip) = 0;
 
         virtual void onReleasePaint() {}
+
+    protected:
+        void onDrawLayer(const Gfx::PointF& to, 
+                         const Gfx::PaintLayer& layer);
+
+        void onDrawLayer(const Gfx::PointF& to,
+                         const Gfx::PaintLayer& layer,
+                         const Gfx::RectF& rect);
 
     protected:
         PaintContext();

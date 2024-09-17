@@ -354,7 +354,7 @@ void ListBoxItem::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& paint
 
         Gfx::PointF picturePos(pictureX + pictureXOff, 
                                pictureY + pictureYOff);
-        painter.drawSurface(picturePos, _picture);
+        painter.drawLayer(picturePos, _picture);
         
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
     }

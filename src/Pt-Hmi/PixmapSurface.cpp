@@ -40,8 +40,6 @@ PixmapSurface::PixmapSurface()
 : _impl(0)
 {
     _impl = new PixmapSurfaceImpl();
-
-    setCanvas( _impl->getCanvas() );
 }
 
 
@@ -103,6 +101,12 @@ void PixmapSurface::onDrawPixmap(const Gfx::PointF& to,
 {
     //Gfx::PointF to = info().scaling().toPhysical(toF);
     _impl->drawPixmap(to, pixmap, rect, mode);
+}
+
+
+Gfx::Image PixmapSurface::onGetImage() const
+{
+    return _impl->image();
 }
 
 

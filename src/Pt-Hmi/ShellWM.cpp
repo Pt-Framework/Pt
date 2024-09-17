@@ -436,7 +436,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::RectF surfaceRect( surfacePos, frameRect.size() );
 
         Gfx::Painter painter( surface() );
-        painter.drawSurface(frameRect.topLeft(), frame->surface(), surfaceRect);
+        painter.drawLayer(frameRect.topLeft(), frame->surface(), surfaceRect);
 
         //surface().drawPixmap(frameRect.topLeft(), frame->surface(), 
         //                     surfaceRect, Gfx::CompositionMode::SourceCopy);

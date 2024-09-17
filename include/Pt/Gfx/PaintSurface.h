@@ -47,7 +47,7 @@ class Painter;
 class PaintContext;
 class PaintRegion;
 
-/** @brief Paint target for painters.
+/** @brief Paint surface.
 */
 class PT_GFX_API PaintSurface
 {
@@ -66,18 +66,11 @@ class PT_GFX_API PaintSurface
 
         const ImageFormat& format() const;
 
+        PaintContext* getPaint(PaintContext* context);
+
         Canvas* canvas();
 
         const Canvas* canvas() const;
-
-        PaintContext* getPaint(PaintContext* context);
-
-        void draw(PaintContext& paint,
-                  const Gfx::PointF& to) const;
-        
-        void draw(PaintContext& paint,
-                  const Gfx::PointF& to, 
-                  const Gfx::RectF& rect) const;
 
     protected:
         void setCanvas(Canvas* canvas);
@@ -88,14 +81,6 @@ class PT_GFX_API PaintSurface
         virtual PaintContext* onGetPaint(PaintContext* context);
 
         virtual void onReset();
-
-    protected:
-        virtual void onDraw(PaintContext& paint,
-                            const Gfx::PointF& to) const;
-        
-        virtual void onDraw(PaintContext& paint,
-                            const Gfx::PointF& to, 
-                            const Gfx::RectF& rect) const;
 
     private:
         void attachRegion(PaintRegion& region);
@@ -111,6 +96,46 @@ class PT_GFX_API PaintSurface
         Canvas*                    _canvas;
         std::vector<PaintRegion*>  _regions;
         Painter*                   _painter;
+};
+
+/** @brief Paint layer surface.
+*/
+class PT_GFX_API PaintLayer : public PaintSurface
+{
+    public:
+        virtual ~PaintLayer()
+        {}
+
+        Image toImage() const
+        {
+            return onGetImage();
+        }
+
+        void draw(PaintContext& paint,
+                  const Gfx::PointF& to) const
+        {
+            onDraw(paint, to);
+        }
+        
+        void draw(PaintContext& paint,
+                  const Gfx::PointF& to, 
+                  const Gfx::RectF& rect) const
+        {
+            onDraw(paint, to, rect);
+        }
+
+    protected:
+        PaintLayer()
+        { }
+
+        virtual Image onGetImage() const = 0;
+
+        virtual void onDraw(PaintContext& paint,
+                            const Gfx::PointF& to) const;
+        
+        virtual void onDraw(PaintContext& paint,
+                            const Gfx::PointF& to, 
+                            const Gfx::RectF& rect) const;
 };
 
 } // namespace

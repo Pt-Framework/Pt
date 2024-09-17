@@ -151,15 +151,19 @@ const WindowFrame* Window::frame() const
 
 Gfx::Image Window::getImage() const
 {
+    const Gfx::Scaling& scaling = surface().info().scaling();
+    Gfx::SizeF imageSize = scaling.toPhysical( size() );
     Gfx::ImageSurface imageSurface;
-
-    const Gfx::PaintInfo& info = surface().info();
-    Gfx::SizeF size = info.scaling().toPhysical( info.size() );
-    imageSurface.resize(size);
+    imageSurface.resize(imageSize);
 
     Gfx::Painter painter(imageSurface);
-    painter.drawSurface( Gfx::PointF(0, 0), surface() );
 
+    //painter.drawLayer( Gfx::PointF(0, 0), surface() );
+
+    Gfx::PointF framePos = toParent( Gfx::PointF(0, 0) );
+    Gfx::RectF frameRect( framePos, size() );
+    painter.drawLayer( Gfx::PointF(0, 0), _frame->surface(), frameRect );
+    
     return imageSurface.image();
 }
 

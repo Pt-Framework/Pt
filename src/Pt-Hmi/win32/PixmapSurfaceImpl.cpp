@@ -308,7 +308,6 @@ void PixmapSurfaceImpl::setScaleFactor(double scaleFactor)
 }
 
 
-
 const Gfx::ImageFormat& PixmapSurfaceImpl::onGetFormat() const
 {
     return Gfx::ImageFormat::argb32();
@@ -821,7 +820,7 @@ void PixmapSurfaceImpl::onDrawText(const Gfx::PointF& to,
 }
 
 
-Gfx::Image PixmapSurfaceImpl::onGetImage() const
+Gfx::Image PixmapSurfaceImpl::image() const
 {
     BITMAPINFO bitmapInfo;
     ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
@@ -953,50 +952,32 @@ void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& toF, const Gfx::Image& im
 }
 
 
-void PixmapSurfaceImpl::onDrawCanvas(const Gfx::PointF& to, 
-                                     const Gfx::Canvas& canvas)
+void PixmapSurfaceImpl::onDrawLayer(const Gfx::PointF& to, 
+                                    const Gfx::PaintLayer& layer)
 {
-    const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(&canvas);
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&layer);
     if(pixmap)
     {
-        drawPixmap(to, *pixmap);
+        drawPixmap(to, *pixmap->impl());
         return;
     }
 
-    Pt::Gfx::Image image = canvas.toImage();
-    if( image.format() == format() )
-    {
-        drawImage(to, image);
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest);
+    Canvas::onDrawLayer(to, layer);
 }
 
 
-void PixmapSurfaceImpl::onDrawCanvas(const Gfx::PointF& to,
-                                     const Gfx::Canvas& canvas,
-                                     const Gfx::RectF& rect)
+void PixmapSurfaceImpl::onDrawLayer(const Gfx::PointF& to,
+                                    const Gfx::PaintLayer& layer,
+                                    const Gfx::RectF& rect)
 {
-    const PixmapSurfaceImpl* pixmap = dynamic_cast<const PixmapSurfaceImpl*>(&canvas);
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&layer);
     if(pixmap)
     {
-        drawPixmap(to, *pixmap, rect);
+        drawPixmap(to, *pixmap->impl(), rect);
         return;
     }
 
-    Pt::Gfx::Image image = canvas.toImage();
-    if( image.format() == format() )
-    {
-        drawImage(to, image, rect);
-        return;
-    }
-
-    Pt::Gfx::Image dest( format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest, rect);
+    Canvas::onDrawLayer(to, layer, rect);
 }
 
 

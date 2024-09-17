@@ -144,42 +144,6 @@ PaintContext* PaintSurface::onGetPaint(PaintContext* context)
 }   
 
 
-void PaintSurface::draw(PaintContext& paint, 
-                        const Gfx::PointF& to) const
-{
-    onDraw(paint, to);
-}
-
-
-void PaintSurface::draw(PaintContext& paint, 
-                        const Gfx::PointF& to, 
-                        const Gfx::RectF& rect) const
-{
-    onDraw(paint, to, rect);
-}
-
-
-void PaintSurface::onDraw(PaintContext& paint, 
-                          const Gfx::PointF& to) const
-{
-    if( ! _canvas )
-        return;
-
-    paint.drawCanvas(to, *_canvas);
-}
-
-
-void PaintSurface::onDraw(PaintContext& paint, 
-                          const Gfx::PointF& to, 
-                          const Gfx::RectF& rect) const
-{
-    if( ! _canvas )
-        return;
-
-    paint.drawCanvas(to, *_canvas, rect);
-}
-
-
 void PaintSurface::attachPainter(Painter& painter)
 {
     if(_painter)
@@ -196,6 +160,24 @@ void PaintSurface::detachPainter(Painter& painter)
 {
     if(_painter)
         _painter = 0;
+}
+
+///////////////////////////////////////////////////////////////////////
+// PaintLayer
+///////////////////////////////////////////////////////////////////////
+
+void PaintLayer::onDraw(PaintContext& paint, 
+                        const Gfx::PointF& to) const
+{
+    paint.onDrawLayer(to, *this);
+}
+
+
+void PaintLayer::onDraw(PaintContext& paint, 
+                        const Gfx::PointF& to, 
+                        const Gfx::RectF& rect) const
+{
+    paint.onDrawLayer(to, *this, rect);
 }
 
 } // namespace

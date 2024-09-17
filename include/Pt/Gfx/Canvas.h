@@ -47,6 +47,7 @@ namespace Pt {
 
 namespace Gfx {
 
+class PaintLayer;
 class PaintSurface;
 class PaintContext;
 class Paint;
@@ -60,6 +61,7 @@ class Path;
 class PT_GFX_API Canvas
 {
     friend class PaintContext;
+    friend class PaintLayer;
 
     public:
         explicit Canvas(const PaintInfo& info);
@@ -67,8 +69,6 @@ class PT_GFX_API Canvas
         ~Canvas();
 
         const PaintInfo& info() const;
-
-        Image toImage() const;
 
         Gfx::PaintContext* getPaint(Gfx::PaintContext* context);
 
@@ -108,12 +108,12 @@ class PT_GFX_API Canvas
                        const Gfx::Image& image, 
                        const Gfx::RectF& imgRect);
 
-        void drawCanvas(const Gfx::PointF& to, 
-                        const Gfx::Canvas& canvas);
+        void drawLayer(const Gfx::PointF& to, 
+                       const Gfx::PaintLayer& layer);
 
-        void drawCanvas(const Gfx::PointF& to,
-                        const Gfx::Canvas& canvas,
-                        const Gfx::RectF& rect);
+        void drawLayer(const Gfx::PointF& to,
+                       const Gfx::PaintLayer& layer,
+                       const Gfx::RectF& rect);
     
     protected:
         virtual void onCompositionModeChanged() = 0;
@@ -164,8 +164,6 @@ class PT_GFX_API Canvas
                                 const Transform* transform = 0) = 0;
 
     protected:
-        virtual Gfx::Image onGetImage() const = 0;
-
         virtual void onDrawImage(const Gfx::PointF& to, 
                                  const Gfx::Image& image) = 0;
 
@@ -173,12 +171,12 @@ class PT_GFX_API Canvas
                                  const Gfx::Image& image, 
                                  const Gfx::RectF& imgRect) = 0;
 
-        virtual void onDrawCanvas(const Gfx::PointF& to, 
-                                   const Gfx::Canvas& canvas) = 0;
+        virtual void onDrawLayer(const Gfx::PointF& to, 
+                                 const Gfx::PaintLayer& layer) = 0;
 
-        virtual void onDrawCanvas(const Gfx::PointF& to,
-                                   const Gfx::Canvas& canvas,
-                                   const Gfx::RectF& rect) = 0;
+        virtual void onDrawLayer(const Gfx::PointF& to,
+                                 const Gfx::PaintLayer& layer,
+                                 const Gfx::RectF& rect) = 0;
 
     private:
         void onDetachPaint(PaintContext& paint);

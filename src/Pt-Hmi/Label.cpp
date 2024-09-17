@@ -545,7 +545,7 @@ void Label::onPaint(Gfx::PaintSurface& surface,
     else
     {
         painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        painter.drawSurface(_iconPos, _picture);
+        painter.drawLayer(_iconPos, _picture);
         painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     }
 }

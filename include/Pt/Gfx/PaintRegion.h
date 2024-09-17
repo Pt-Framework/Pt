@@ -100,6 +100,8 @@ class PT_GFX_API PaintRegion : public PaintSurface
 
         const PointF& position() const;
 
+        const RectF* area() const;
+
         void move(const Gfx::PointF& pos);
 
         void resize(const Gfx::SizeF& size);
@@ -112,12 +114,12 @@ class PT_GFX_API PaintRegion : public PaintSurface
         virtual void onReset() override;
 
     protected:
-        virtual void onDraw(PaintContext& paint,
-                            const Gfx::PointF& to) const override;
-        
-        virtual void onDraw(PaintContext& paint,
-                            const Gfx::PointF& to, 
-                            const Gfx::RectF& rect) const override;
+        //virtual void onDraw(PaintContext& paint,
+        //                    const Gfx::PointF& to) const override;
+        //
+        //virtual void onDraw(PaintContext& paint,
+        //                    const Gfx::PointF& to, 
+        //                    const Gfx::RectF& rect) const override;
 
     private:
         virtual void onDetachSurface(PaintSurface* region);

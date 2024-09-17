@@ -41,7 +41,7 @@ class PixmapSurface;
 
 /** @brief Drawing region on another surface.
 */
-class PT_HMI_API PaintRegion : public PaintSurface
+class PT_HMI_API PaintRegion : public Hmi::PaintSurface
 {
     public:
         PaintRegion();
@@ -69,11 +69,11 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
     protected:
         virtual void onDraw(Gfx::PaintContext& paint,
-                            const Gfx::PointF& to) const;
+                            const Gfx::PointF& to) const override;
         
         virtual void onDraw(Gfx::PaintContext& paint,
                             const Gfx::PointF& to, 
-                            const Gfx::RectF& rect) const;
+                            const Gfx::RectF& rect) const override;
 
     protected:
         virtual void onDrawPixmap(const Gfx::PointF& to, 
@@ -86,7 +86,7 @@ class PT_HMI_API PaintRegion : public PaintSurface
                                   const Gfx::CompositionMode& mode) override;
 
     private:
-        Gfx::PaintRegion   _region;
+        Gfx::PaintRegion _region;
 };
 
 } // namespace

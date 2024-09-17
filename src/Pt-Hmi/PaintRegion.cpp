@@ -101,7 +101,15 @@ Gfx::PaintContext* PaintRegion::onGetPaint(Gfx::PaintContext* context)
 void PaintRegion::onDraw(Gfx::PaintContext& paint, 
                          const Gfx::PointF& to) const
 {
-    _region.draw(paint, to);
+    Hmi::PaintSurface* layer = surface();
+    if(layer)
+    {
+        const Gfx::RectF* area = _region.area();
+        if(area)
+            layer->draw(paint, to, *area);
+        else
+            layer->draw(paint, to);
+    }
 }
 
 
@@ -109,7 +117,14 @@ void PaintRegion::onDraw(Gfx::PaintContext& paint,
                          const Gfx::PointF& to, 
                          const Gfx::RectF& rect) const
 {
-    _region.draw(paint, to, rect);
+    Gfx::RectF r = rect;
+
+    const Gfx::PointF& pos = position();
+    r.shift( pos.x(), pos.y() );
+    
+    Hmi::PaintSurface* layer = surface();
+    if(layer)
+        layer->draw(paint, to, r);
 }
 
 

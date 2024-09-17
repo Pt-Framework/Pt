@@ -361,20 +361,20 @@ void Painter::drawImage(const Gfx::PointF& to,
 }
 
 
-void Painter::drawSurface(const Gfx::PointF& toF, 
-                          const PaintSurface& surface)
+void Painter::drawLayer(const Gfx::PointF& to, 
+                        const PaintLayer& layer)
 {
     if(_paintContext)
-        _paintContext->drawSurface(toF, surface);
+        _paintContext->drawLayer(to, layer);
 }
 
 
-void Painter::drawSurface(const Gfx::PointF& toF, 
-                          const PaintSurface& surface, 
-                          const Gfx::RectF& surfaceRect)
+void Painter::drawLayer(const Gfx::PointF& to, 
+                        const PaintLayer& layer, 
+                        const Gfx::RectF& layerRect)
 {
     if(_paintContext)
-        _paintContext->drawSurface(toF, surface, surfaceRect);
+        _paintContext->drawLayer(to, layer, layerRect);
 }
 
 } // namespace

@@ -41,7 +41,7 @@ void MenuSubItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& 
 
     Pt::Gfx::PointF iconPos(iconX, iconY);
     painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-    painter.drawSurface(iconPos, _picture);
+    painter.drawLayer(iconPos, _picture);
     painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
 
     

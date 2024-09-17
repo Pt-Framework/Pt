@@ -487,39 +487,39 @@ void PaintContext::drawImage(const Gfx::PointF& to,
 }
 
 
-void PaintContext::drawSurface(const Gfx::PointF& to, 
-                               const Gfx::PaintSurface& surface)
+void PaintContext::drawLayer(const Gfx::PointF& to, 
+                             const Gfx::PaintLayer& layer)
 {
-    surface.draw(*this, to);
+    layer.draw(*this, to);
 }
 
 
-void PaintContext::drawSurface(const Gfx::PointF& to,
-                               const Gfx::PaintSurface& surface,
+void PaintContext::drawLayer(const Gfx::PointF& to,
+                             const Gfx::PaintLayer& layer,
+                             const Gfx::RectF& rect)
+{
+    layer.draw(*this, to, rect);
+}
+
+
+void PaintContext::onDrawLayer(const Gfx::PointF& to, 
+                               const Gfx::PaintLayer& layer)
+{
+    Pt::Gfx::PointF p = to + origin();
+
+    if(_active)
+        _active->drawLayer(p, layer);
+}
+
+
+void PaintContext::onDrawLayer(const Gfx::PointF& to,
+                               const Gfx::PaintLayer& layer,
                                const Gfx::RectF& rect)
 {
-    surface.draw(*this, to, rect);
-}
-
-
-void PaintContext::drawCanvas(const Gfx::PointF& to, 
-                              const Gfx::Canvas& canvas)
-{
     Pt::Gfx::PointF p = to + origin();
 
     if(_active)
-        _active->drawCanvas(p, canvas);
-}
-
-
-void PaintContext::drawCanvas(const Gfx::PointF& to,
-                              const Gfx::Canvas& canvas,
-                              const Gfx::RectF& rect)
-{
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_active)
-        _active->drawCanvas(p, canvas, rect);
+        _active->drawLayer(p, layer, rect);
 }
 
 } // namespace

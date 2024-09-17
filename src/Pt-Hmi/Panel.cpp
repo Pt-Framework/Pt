@@ -297,7 +297,7 @@ void Panel::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter)
     }
 
     painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-    painter.drawSurface(imagePosition, _picture);
+    painter.drawLayer(imagePosition, _picture);
     painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
 }
 

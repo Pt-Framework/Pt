@@ -69,12 +69,6 @@ const PaintInfo& Canvas::info() const
 }
 
 
-Image Canvas::toImage() const
-{
-    return onGetImage();
-}
-
-
 Gfx::PaintContext* Canvas::getPaint(Gfx::PaintContext* reuse)
 {
     if(_paint)
@@ -175,18 +169,56 @@ void Canvas::drawImage(const Gfx::PointF& to,
 }
 
 
-void Canvas::drawCanvas(const Gfx::PointF& to, 
-                        const Gfx::Canvas& canvas)
+void Canvas::drawLayer(const Gfx::PointF& to, 
+                       const Gfx::PaintLayer& layer)
 {
-    onDrawCanvas(to, canvas);
+    onDrawLayer(to, layer);
 }
 
 
-void Canvas::drawCanvas(const Gfx::PointF& to,
-                        const Gfx::Canvas& canvas,
-                        const Gfx::RectF& rect)
+void Canvas::drawLayer(const Gfx::PointF& to,
+                       const Gfx::PaintLayer& layer,
+                       const Gfx::RectF& rect)
 {
-    onDrawCanvas(to, canvas, rect);
+    onDrawLayer(to, layer, rect);
+}
+
+
+void Canvas::onDrawLayer(const Gfx::PointF& to, 
+                         const Gfx::PaintLayer& layer)
+{
+    Pt::Gfx::Image image = layer.toImage();
+    
+    if( image.format() == info().format() )
+    {
+        drawImage(to, image);
+        return;
+    }
+
+    Pt::Gfx::Image dest( info().format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    drawImage(to, dest);
+}
+
+
+void Canvas::onDrawLayer(const Gfx::PointF& to, 
+                         const Gfx::PaintLayer& layer,
+                         const Gfx::RectF& layerRect)
+{
+    Pt::Gfx::Image image = layer.toImage();
+
+    const Scaling& scaling = layer.info().scaling();
+    Gfx::RectF imageRect = scaling.toPhysical(layerRect);
+
+    if( image.format() == info().format() )
+    {
+        drawImage(to, image, imageRect);
+        return;
+    }
+
+    Pt::Gfx::Image dest( info().format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    drawImage(to, dest, imageRect);
 }
 
 } // namespace

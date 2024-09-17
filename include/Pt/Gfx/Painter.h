@@ -201,11 +201,14 @@ class PT_GFX_API Painter
         */
         void drawImage(const PointF& to, const Image& im, const RectF& rect);
 
-        void drawSurface(const Gfx::PointF& toF, 
-                         const PaintSurface& surface);
+        /** @brief Draws a layer.
+        */
+        void drawLayer(const Gfx::PointF& to, const PaintLayer& layer);
 
-        void drawSurface(const Gfx::PointF& toF, 
-                         const PaintSurface& pm, const Gfx::RectF& pmRect);
+        /** @brief Draws a part of a layer.
+        */
+        void drawLayer(const Gfx::PointF& to, const PaintLayer& layer, 
+                       const Gfx::RectF& layerRect);
 
     private:
         void onDetachSurface(PaintSurface& surface);

@@ -206,6 +206,12 @@ const PointF& PaintRegion::position() const
 }
 
 
+const RectF* PaintRegion::area() const
+{
+    return _info.area();
+}
+
+
 void PaintRegion::move(const Gfx::PointF& pos)
 {
     onReset();
@@ -258,32 +264,32 @@ void PaintRegion::onReset()
 }
 
 
-void PaintRegion::onDraw(PaintContext& paint, 
-                         const Gfx::PointF& to) const
-{
-    if(_surface)
-    {
-        const RectF* area = _info.area();
-        if(area)
-            _surface->draw(paint, to, *area);
-        else
-            _surface->draw(paint, to);
-    }
-}
-
-
-void PaintRegion::onDraw(PaintContext& paint, 
-                         const Gfx::PointF& to, 
-                         const Gfx::RectF& rect) const
-{
-    Gfx::RectF r = rect;
-
-    const PointF& pos = position();
-    r.shift( pos.x(), pos.y() );
-    
-    if(_surface)
-        _surface->draw(paint, to, r);
-}
+//void PaintRegion::onDraw(PaintContext& paint, 
+//                         const Gfx::PointF& to) const
+//{
+//    if(_surface)
+//    {
+//        const RectF* area = _info.area();
+//        if(area)
+//            _surface->draw(paint, to, *area);
+//        else
+//            _surface->draw(paint, to);
+//    }
+//}
+//
+//
+//void PaintRegion::onDraw(PaintContext& paint, 
+//                         const Gfx::PointF& to, 
+//                         const Gfx::RectF& rect) const
+//{
+//    Gfx::RectF r = rect;
+//
+//    const PointF& pos = position();
+//    r.shift( pos.x(), pos.y() );
+//    
+//    if(_surface)
+//        _surface->draw(paint, to, r);
+//}
 
 } // namespace
 

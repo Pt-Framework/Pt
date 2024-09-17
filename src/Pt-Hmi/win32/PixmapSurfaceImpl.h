@@ -64,7 +64,12 @@ class PixmapSurface;
 class PixmapSurfaceImpl 
 {
     public:
-        explicit PixmapSurfaceImpl();
+        PixmapSurfaceImpl();
+
+        void reset(const Gfx::Size& size, std::size_t stride)
+        {
+            _image.reset(size, stride);
+        }
 
         void clear(const Gfx::Color& c)
         { }
@@ -163,6 +168,8 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
 
         void set(const Gfx::Image& image);
 
+        Gfx::Image image() const;
+
         const Gfx::SizeF& pixmapSize() const;
 
         void resize(const Gfx::SizeF& size);
@@ -247,21 +254,19 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
                                 const Gfx::Transform* trans) override;
 
     protected:
-        virtual Gfx::Image onGetImage() const override;
-
         virtual void onDrawImage(const Gfx::PointF& to, 
                                  const Gfx::Image& image) override;
 
         virtual void onDrawImage(const Gfx::PointF& to, 
                                  const Gfx::Image& image, 
                                  const Gfx::RectF& rect) override;
+        
+        virtual void onDrawLayer(const Gfx::PointF& to, 
+                                 const Gfx::PaintLayer& layer) override;
 
-        virtual void onDrawCanvas(const Gfx::PointF& to, 
-                                  const Gfx::Canvas& surface) override;
-
-        virtual void onDrawCanvas(const Gfx::PointF& to, 
-                                  const Gfx::Canvas& canvas, 
-                                  const Gfx::RectF& pmRect) override;
+        virtual void onDrawLayer(const Gfx::PointF& to,
+                                 const Gfx::PaintLayer& layer,
+                                 const Gfx::RectF& rect) override;
 
     public:
         void drawPixmap(const Gfx::PointF& toF, 

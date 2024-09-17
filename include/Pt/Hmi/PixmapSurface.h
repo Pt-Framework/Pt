@@ -78,17 +78,20 @@ class PT_HMI_API PixmapSurface : public Hmi::PaintSurface
     protected:
         virtual void onDrawPixmap(const Gfx::PointF& to, 
                                   const PixmapSurface& pixmap,
-                                  const Gfx::CompositionMode& mode) override;;
+                                  const Gfx::CompositionMode& mode) override;
 
         virtual void onDrawPixmap(const Gfx::PointF& to,
                                   const PixmapSurface& pixmap, 
                                   const Gfx::RectF& rect,
-                                  const Gfx::CompositionMode& mode) override;;
+                                  const Gfx::CompositionMode& mode) override;
 
     protected:
         virtual const Gfx::PaintInfo& onGetPaintInfo() const override;
 
         virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
+
+   protected:
+        virtual Gfx::Image onGetImage() const override;
 
     public:
         static void setFontDir(const System::Path& path);

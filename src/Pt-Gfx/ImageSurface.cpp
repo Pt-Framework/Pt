@@ -294,77 +294,50 @@ void ImageCanvas::onDrawText(const PointF& to, const Pt::String& text,
 }
 
 
-Gfx::Image ImageCanvas::onGetImage() const
+void ImageCanvas::onDrawImage(const PointF& toF, const Image& image)
 {
-    return image();
+    Gfx::PointF to = info().scaling().toPhysical(toF);
+    _rasterizer->drawImage(to, image);
 }
 
 
-void ImageCanvas::onDrawImage(const PointF& to, const Image& image)
+void ImageCanvas::onDrawImage(const PointF& toF, const Image& image, 
+                              const RectF& imageRect)
 {
-    _rasterizer->drawImage( to, image);
-}
-
-
-void ImageCanvas::onDrawImage(const PointF& to, const Image& image, const RectF& imageRect)
-{
+    Gfx::PointF to = info().scaling().toPhysical(toF);
     _rasterizer->drawImage(to, image, imageRect);
 }
 
 
-void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF, 
-                               const Gfx::Canvas& canvas)
+void ImageCanvas::onDrawLayer(const Gfx::PointF& to, 
+                              const Gfx::PaintLayer& layer)
 {
-    Gfx::PointF to = info().scaling().toPhysical(toF);
-
-    const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(&canvas);
-    if(imageCanvas)
+    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&layer);
+    if(imageSurface)
     {
-        const Gfx::Image& image = imageCanvas->image();
+        const Gfx::Image& image = imageSurface->image();
         drawImage(to, image);
         return;
     }
 
-    Pt::Gfx::Image image = canvas.toImage();
-    if( image.format() == info().format() )
-    {
-        drawImage(to, image);
-        return;
-    }
-
-    Pt::Gfx::Image dest( info().format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest);
+    Canvas::onDrawLayer(to, layer);
 }
 
 
-void ImageCanvas::onDrawCanvas(const Gfx::PointF& toF,
-                               const Gfx::Canvas& canvas,
-                               const Gfx::RectF& canvasRect)
+void ImageCanvas::onDrawLayer(const Gfx::PointF& to, 
+                              const Gfx::PaintLayer& layer,
+                              const Gfx::RectF& layerRect)
 {
-    Gfx::PointF to = info().scaling().toPhysical(toF);
-
-    const ImageCanvas* imageCanvas = dynamic_cast<const ImageCanvas*>(&canvas);
-    if(imageCanvas)
+    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&layer);
+    if(imageSurface)
     {
-        const Gfx::Image& image = imageCanvas->image();
-        Gfx::RectF imageRect = canvas.info().scaling().toPhysical(canvasRect);
+        const Gfx::Image& image = imageSurface->image();
+        Gfx::RectF imageRect = imageSurface->info().scaling().toPhysical(layerRect);
         drawImage(to, image, imageRect);
         return;
     }
 
-    Pt::Gfx::Image image = canvas.toImage();
-    Gfx::RectF imageRect = canvas.info().scaling().toPhysical(canvasRect);
-
-    if( image.format() == info().format() )
-    {
-        drawImage(to, image, imageRect);
-        return;
-    }
-
-    Pt::Gfx::Image dest( info().format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest, imageRect);
+    Canvas::onDrawLayer(to, layer, layerRect);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -496,6 +469,12 @@ const PaintInfo& ImageSurface::onGetPaintInfo() const
 Gfx::PaintContext* ImageSurface::onGetPaint(Gfx::PaintContext* reuse) 
 {
     return _canvas->getPaint(reuse);
+}
+
+
+Gfx::Image ImageSurface::onGetImage() const
+{
+    return _canvas->image();
 }
 
 
