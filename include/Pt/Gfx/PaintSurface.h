@@ -54,9 +54,6 @@ class PT_GFX_API PaintSurface
     friend class Painter;
     friend class PaintRegion;
 
-    protected:
-        PaintSurface();
-
     public:
         virtual ~PaintSurface();
         
@@ -73,6 +70,8 @@ class PT_GFX_API PaintSurface
         const Canvas* canvas() const;
 
     protected:
+        PaintSurface();
+
         void setCanvas(Canvas* canvas);
 
     protected:      
@@ -103,30 +102,19 @@ class PT_GFX_API PaintSurface
 class PT_GFX_API PaintLayer : public PaintSurface
 {
     public:
-        virtual ~PaintLayer()
-        {}
+        virtual ~PaintLayer();
 
-        Image toImage() const
-        {
-            return onGetImage();
-        }
+        Image toImage() const;
 
         void draw(PaintContext& paint,
-                  const Gfx::PointF& to) const
-        {
-            onDraw(paint, to);
-        }
+                  const Gfx::PointF& to) const;
         
         void draw(PaintContext& paint,
                   const Gfx::PointF& to, 
-                  const Gfx::RectF& rect) const
-        {
-            onDraw(paint, to, rect);
-        }
+                  const Gfx::RectF& rect) const;
 
     protected:
-        PaintLayer()
-        { }
+        PaintLayer();
 
         virtual Image onGetImage() const = 0;
 

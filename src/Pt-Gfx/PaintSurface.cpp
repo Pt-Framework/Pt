@@ -166,6 +166,37 @@ void PaintSurface::detachPainter(Painter& painter)
 // PaintLayer
 ///////////////////////////////////////////////////////////////////////
 
+PaintLayer::PaintLayer()
+{
+}
+
+
+PaintLayer::~PaintLayer()
+{
+}
+
+
+Image PaintLayer::toImage() const
+{
+    return onGetImage();
+}
+
+
+void PaintLayer::draw(PaintContext& paint,
+                      const Gfx::PointF& to) const
+{
+    onDraw(paint, to);
+}
+     
+        
+void PaintLayer::draw(PaintContext& paint,
+                      const Gfx::PointF& to, 
+                      const Gfx::RectF& rect) const
+{
+    onDraw(paint, to, rect);
+}
+
+
 void PaintLayer::onDraw(PaintContext& paint, 
                         const Gfx::PointF& to) const
 {

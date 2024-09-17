@@ -273,15 +273,14 @@ class PT_GFX_API PaintContext
         virtual void onReleasePaint() {}
 
     protected:
+        PaintContext();
+
         void onDrawLayer(const Gfx::PointF& to, 
                          const Gfx::PaintLayer& layer);
 
         void onDrawLayer(const Gfx::PointF& to,
                          const Gfx::PaintLayer& layer,
                          const Gfx::RectF& rect);
-
-    protected:
-        PaintContext();
 
     private:
         void attachCanvas(Canvas& canvas);

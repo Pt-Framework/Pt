@@ -64,8 +64,6 @@ class PT_GFX_API Canvas
     friend class PaintLayer;
 
     public:
-        explicit Canvas(const PaintInfo& info);
-
         ~Canvas();
 
         const PaintInfo& info() const;
@@ -80,6 +78,8 @@ class PT_GFX_API Canvas
         virtual void onReleasePaint() = 0;
 
     protected:
+        explicit Canvas(const PaintInfo& info);
+
         void drawLine(const PointF& from, const PointF& to);
 
         void drawPolyline(const Gfx::Polyline& line);
