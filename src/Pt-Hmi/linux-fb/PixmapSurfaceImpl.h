@@ -123,6 +123,7 @@ class PixmapSurfaceImpl
     
     private:
         Gfx::ImageSurface _image;
+};
 
 } // namespace
 
