@@ -119,7 +119,7 @@ class PT_GFX_API Paint
 
         /** @brief Returns the clipping rect.
         */
-        const RectF& clip() const;
+        const RectF* clip() const;
 
         /** @brief Sets the clipping rect.
         */
@@ -156,6 +156,7 @@ class PT_GFX_API Paint
     private:
         Gfx::CompositionMode _compositionMode;
         Gfx::RectF           _clip;
+        bool                 _hasClip;
         Gfx::Pen             _pen;
         Gfx::Brush           _brush;
         Gfx::Font            _font;
@@ -293,6 +294,7 @@ class PT_GFX_API PaintContext
         RectF          _region;
         Gfx::Scaling   _scaling;
         RectF          _clip;
+        bool           _hasClip;
 };
 
 /** @brief Polyline.

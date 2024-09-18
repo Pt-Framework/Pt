@@ -44,6 +44,7 @@ namespace Gfx {
 ///////////////////////////////////////////////////////////////////////
 
 Paint::Paint()
+: _hasClip(false)
 {
 }
 
@@ -65,22 +66,23 @@ void Paint::setCompositionMode(const Gfx::CompositionMode& mode)
 }
 
 
-const RectF& Paint::clip() const
+const RectF* Paint::clip() const
 {
-    return _clip;
+    return _hasClip ? &_clip : 0;
 }
 
 
 void Paint::setClip(const Gfx::RectF& clip)
 {
     _clip = clip;
+    _hasClip = true;
 }
 
 
 void Paint::resetClip()
 {
-    // TODO: RECT-NULL
     _clip = Gfx::RectF();
+    _hasClip = false;
 }
 
 
@@ -158,6 +160,7 @@ const Scaling& PaintInfo::scaling() const
 PaintContext::PaintContext()
 : _canvas(0)
 , _active(0)
+, _hasClip(false)
 {
 }
 
@@ -231,7 +234,7 @@ void PaintContext::beginPaint()
         _canvas->onBrushChanged();
         _canvas->onFontChanged();
 
-        if( _clip.isNull() )
+        if( ! _hasClip )
         {
             onSetClip(0);
         }
@@ -339,6 +342,7 @@ void PaintContext::setClip(const RectF& rect)
     }
 
     _clip = rect;
+    _hasClip = true;
 }
 
 
@@ -351,6 +355,7 @@ void PaintContext::resetClip()
     }
 
     _clip.clear();
+    _hasClip = false;
 }
 
 

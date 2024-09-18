@@ -113,9 +113,9 @@ class PT_GFX_API Painter
         */
         void setFont(const Font& font);
 
-        /** @brief Returns the clipping rect.
+        /** @brief Returns the clipping rect or null if none.
         */
-        const RectF& clip() const;
+        const RectF* clip() const;
 
         /** @brief Sets the clipping rect.
         */

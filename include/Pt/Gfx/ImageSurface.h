@@ -74,9 +74,9 @@ class ImagePaint : public PaintContext
             return _font;
         }
 
-        const RectF& clip() const
+        const RectF* clip() const
         {
-            return _clip;
+            return _hasClip ? &_clip : 0;
         }
 
     protected:
@@ -96,6 +96,7 @@ class ImagePaint : public PaintContext
         Brush           _brush;
         Font            _font;
         RectF           _clip;
+        bool            _hasClip;
 };
 
 /** @internal.

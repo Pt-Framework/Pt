@@ -52,6 +52,7 @@ namespace Gfx {
 
 ImagePaint::ImagePaint()
 : PaintContext()
+, _hasClip(false)
 {
 }
 
@@ -94,6 +95,8 @@ void ImagePaint::onSetFont(const Gfx::Font& font)
 
 void ImagePaint::onSetClip(const Gfx::RectF* clip)
 {
+    _hasClip = clip != 0;
+
     if(clip)
         _clip = *clip;
     else
@@ -209,14 +212,14 @@ void ImageCanvas::onClipChanged()
     if( ! _paint )
         return;
 
-    const RectF& clip = _paint->clip();
-    if( clip.isNull() )
+    const RectF* clip = _paint->clip();
+    if( ! clip )
     {
         _rasterizer->resetClip();
     }
     else
     {
-        RectF rect = info().scaling().toPhysical(clip);
+        RectF rect = info().scaling().toPhysical(*clip);
         _rasterizer->setClip(rect);
     }
 }

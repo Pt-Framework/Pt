@@ -85,11 +85,11 @@ void Painter::begin(PaintSurface& surface)
             _paintContext->setBrush( _paint.brush() );
             _paintContext->setFont( _paint.font() );
 
-            const Gfx::RectF& clip = _paint.clip();
-            if( clip.isNull() )
+            const Gfx::RectF* clip = _paint.clip();
+            if( ! clip )
                 _paintContext->resetClip();
             else
-                _paintContext->setClip(clip);
+                _paintContext->setClip(*clip);
         }
     }
 
@@ -198,7 +198,7 @@ void Painter::setFont(const Gfx::Font& font)
 }
 
 
-const RectF& Painter::clip() const
+const RectF* Painter::clip() const
 {
     return _paint.clip();
 }
