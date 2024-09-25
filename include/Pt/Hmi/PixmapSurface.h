@@ -30,7 +30,6 @@
 #define Pt_Hmi_PixmapSurface_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/PaintSurface.h>
 
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -38,8 +37,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
-//#include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Image.h>
 
 #include <Pt/System/Path.h>
@@ -52,7 +50,7 @@ class PixmapSurfaceImpl;
 
 /** @brief Back buffer drawing surface.
 */
-class PT_HMI_API PixmapSurface : public Hmi::PaintSurface
+class PT_HMI_API PixmapSurface : public Gfx::PaintLayer
 {
     public:
         PixmapSurface();
@@ -75,15 +73,15 @@ class PT_HMI_API PixmapSurface : public Hmi::PaintSurface
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
-    protected:
-        virtual void onDrawPixmap(const Gfx::PointF& to, 
-                                  const PixmapSurface& pixmap,
-                                  const Gfx::CompositionMode& mode) override;
+    //protected:
+    //    virtual void onDrawPixmap(const Gfx::PointF& to, 
+    //                              const PixmapSurface& pixmap,
+    //                              const Gfx::CompositionMode& mode) override;
 
-        virtual void onDrawPixmap(const Gfx::PointF& to,
-                                  const PixmapSurface& pixmap, 
-                                  const Gfx::RectF& rect,
-                                  const Gfx::CompositionMode& mode) override;
+    //    virtual void onDrawPixmap(const Gfx::PointF& to,
+    //                              const PixmapSurface& pixmap, 
+    //                              const Gfx::RectF& rect,
+    //                              const Gfx::CompositionMode& mode) override;
 
     protected:
         virtual const Gfx::PaintInfo& onGetPaintInfo() const override;
@@ -92,6 +90,13 @@ class PT_HMI_API PixmapSurface : public Hmi::PaintSurface
 
    protected:
         virtual Gfx::Image onGetImage() const override;
+
+        virtual void onDraw(Gfx::PaintContext& paint,
+                            const Gfx::PointF& to) const;
+        
+        virtual void onDraw(Gfx::PaintContext& paint,
+                            const Gfx::PointF& to, 
+                            const Gfx::RectF& rect) const;
 
     public:
         static void setFontDir(const System::Path& path);

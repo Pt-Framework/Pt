@@ -104,19 +104,23 @@ class PixmapSurfaceImpl
             return _image.info();
         }
 
-        Gfx::Canvas* getCanvas()
-        {
-            return _image.canvas();
-        }
-
-        const Gfx::Canvas* getCanvas() const
-        {
-            return _image.canvas();
-        }
-
         Gfx::PaintContext* getPaint(Gfx::PaintContext* context)
         {
             return _image.getPaint(context);
+        }
+
+        void draw(Gfx::PaintContext& paint, 
+                  const Gfx::PointF& to) const
+        {
+            _image.draw(paint, to);
+        }
+
+
+        void draw(Gfx::PaintContext& paint, 
+                  const Gfx::PointF& to, 
+                  const Gfx::RectF& rect) const
+        {
+            _image.draw(paint, to, rect);
         }
 
         void drawPixmap(const Gfx::PointF& toF, 

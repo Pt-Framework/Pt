@@ -87,7 +87,7 @@ WindowImpl::~WindowImpl()
 
 void WindowImpl::onInit(Window& w)
 {
-    Gfx::PaintSurface& surface = this->surface();
+    Gfx::PaintSurface& surface = pixmap();
     Gfx::PointF surfacePos(0, 0);
     w.setSurface(&surface, surfacePos);
 
@@ -251,7 +251,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     HDC windowContext = BeginPaint(_hwnd, &ps);
 
 #ifdef PT_HMI_WIN32_RASTER
-    const Pt::Gfx::Image& image = surface().impl()->image();
+    const Pt::Gfx::Image& image = pixmap().impl()->image();
     
     const size_t depth = image.view().pixelStride() * 8;
     const Pt::uint8_t* data = image.data();
@@ -290,7 +290,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     DeleteDC(bitmapDC);
     DeleteObject(bitmap);
 #elif PT_HMI_WIN32_GDI
-    HDC bitmapContext = surface().impl()->deviceContext();
+    HDC bitmapContext = pixmap().impl()->deviceContext();
 
     BitBlt(windowContext, updateRect.x(), updateRect.y(), 
            updateRect.width(), updateRect.height(), 

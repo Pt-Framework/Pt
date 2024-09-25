@@ -85,23 +85,23 @@ void PixmapSurface::clear(const Gfx::Color& c)
 }
 
 
-void PixmapSurface::onDrawPixmap(const Gfx::PointF& to, 
-                                 const PixmapSurface& pixmap,
-                                 const Gfx::CompositionMode& mode)
-{
-    //Gfx::PointF to = info().scaling().toPhysical(toF);
-    _impl->drawPixmap(to, pixmap, mode);
-}
+//void PixmapSurface::onDrawPixmap(const Gfx::PointF& to, 
+//                                 const PixmapSurface& pixmap,
+//                                 const Gfx::CompositionMode& mode)
+//{
+//    //Gfx::PointF to = info().scaling().toPhysical(toF);
+//    _impl->drawPixmap(to, pixmap, mode);
+//}
 
 
-void PixmapSurface::onDrawPixmap(const Gfx::PointF& to,
-                                 const PixmapSurface& pixmap, 
-                                 const Gfx::RectF& rect,
-                                 const Gfx::CompositionMode& mode)
-{
-    //Gfx::PointF to = info().scaling().toPhysical(toF);
-    _impl->drawPixmap(to, pixmap, rect, mode);
-}
+//void PixmapSurface::onDrawPixmap(const Gfx::PointF& to,
+//                                 const PixmapSurface& pixmap, 
+//                                 const Gfx::RectF& rect,
+//                                 const Gfx::CompositionMode& mode)
+//{
+//    //Gfx::PointF to = info().scaling().toPhysical(toF);
+//    _impl->drawPixmap(to, pixmap, rect, mode);
+//}
 
 
 Gfx::Image PixmapSurface::onGetImage() const
@@ -119,6 +119,29 @@ const Gfx::PaintInfo& PixmapSurface::onGetPaintInfo() const
 Gfx::PaintContext* PixmapSurface::onGetPaint(Gfx::PaintContext* context) 
 {
     return _impl->getPaint(context);
+}
+
+
+void PixmapSurface::onDraw(Gfx::PaintContext& paint, 
+                           const Gfx::PointF& to) const
+{
+#ifdef PT_HMI_WIN32_RASTER
+    _impl->draw(paint, to);
+#else
+    PaintLayer::onDraw(paint, to);
+#endif
+}
+
+
+void PixmapSurface::onDraw(Gfx::PaintContext& paint, 
+                           const Gfx::PointF& to, 
+                           const Gfx::RectF& rect) const
+{
+#ifdef PT_HMI_WIN32_RASTER
+    _impl->draw(paint, to, rect);
+#else
+    PaintLayer::onDraw(paint, to, rect);
+#endif
 }
 
 

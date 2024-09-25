@@ -215,7 +215,6 @@ class ImagePaintInfo : public PaintInfo
         virtual const Scaling& onGetScaling() const;
 
     private:
-        PaintSurface* _surface;
         Gfx::Scaling  _scaling;
         Gfx::SizeF    _size;
 };

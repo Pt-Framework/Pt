@@ -61,13 +61,13 @@ const Window& WindowFrame::window() const
 }
 
 
-PixmapSurface& WindowFrame::surface()
+PixmapSurface& WindowFrame::pixmap()
 {
     return _surface;
 }
 
 
-const PixmapSurface& WindowFrame::surface() const
+const PixmapSurface& WindowFrame::pixmap() const
 {
     return _surface;
 }

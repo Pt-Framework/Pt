@@ -58,9 +58,9 @@ class WindowFrame : public Visual
 
         const Window& window() const;
 
-        PixmapSurface& surface();
+        PixmapSurface& pixmap();
 
-        const PixmapSurface& surface() const;
+        const PixmapSurface& pixmap() const;
 
     protected:
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);

@@ -162,7 +162,7 @@ Gfx::Image Window::getImage() const
 
     Gfx::PointF framePos = toParent( Gfx::PointF(0, 0) );
     Gfx::RectF frameRect( framePos, size() );
-    painter.drawLayer( Gfx::PointF(0, 0), _frame->surface(), frameRect );
+    painter.drawLayer( Gfx::PointF(0, 0), _frame->pixmap(), frameRect );
     
     return imageSurface.image();
 }

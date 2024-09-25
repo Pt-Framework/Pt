@@ -438,7 +438,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
         if(_parent)
         {
             Gfx::Painter painter( _parent->surface() );
-            painter.drawLayer(frameRect.topLeft(), frame->surface(), surfaceRect);
+            painter.drawLayer(frameRect.topLeft(), frame->pixmap(), surfaceRect);
         }
         //surface().drawPixmap(frameRect.topLeft(), frame->surface(), 
         //                     surfaceRect, Gfx::CompositionMode::SourceCopy);
