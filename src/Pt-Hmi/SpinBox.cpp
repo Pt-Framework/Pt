@@ -190,7 +190,7 @@ void SpinBox::setEditable(bool e)
 {
     _isEditable = e;
     setFocusPolicy(_isEditable ? Widget::AcceptFocus : Widget::NoFocus);
-    update();
+    repaint();
 }
 
 
@@ -240,7 +240,7 @@ void SpinBox::setValue(int n)
     Pt::String str = toText(_value);
     _editor.setText(str);
 
-    update();
+    repaint();
     relayout();
 
     _valueEdited.send(_value);
@@ -322,7 +322,7 @@ void SpinBox::onStep(int n)
     Pt::String str = toText(_value);
     _editor.setText(str);
     
-    update();
+    repaint();
     relayout();
 
     _valueEdited.send(_value);
@@ -351,7 +351,7 @@ void SpinBox::setTextAdjustment(Adjustment a)
 {
     _editor.setAdjustment(a);
     
-    update();
+    repaint();
     relayout();
 }
 
@@ -366,7 +366,7 @@ void SpinBox::setCursorPosition(std::size_t n)
 {
     _editor.setCursorPosition(n);
     
-    update();
+    repaint();
     relayout();
 }
 
@@ -522,7 +522,7 @@ void SpinBox::setRenderer(SpinBoxRenderer* renderer)
     _downButton.setRenderer(renderer);
 
     invalidate();
-    update();
+    repaint();
     relayout();
 }
 
@@ -658,19 +658,19 @@ bool SpinBox::onKeyEvent(const KeyEvent& ev)
     {
         _editor.left();
         
-        update();
+        repaint();
         relayout();
     }
     else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
     {
         _editor.right();
         
-        update();
+        repaint();
         relayout();
     }
     else if( ev.key().code() == Pt::Hmi::Key::Return )
     {
-        update();
+        repaint();
         relayout();
         
         if( isAccepted() )
@@ -692,7 +692,7 @@ bool SpinBox::onKeyEvent(const KeyEvent& ev)
             _isTextChanged = true;
             _editor.del();
             
-            update();
+            repaint();
             relayout();
             
             _valueEdited.send(_value);
@@ -714,7 +714,7 @@ bool SpinBox::onKeyEvent(const KeyEvent& ev)
             _isTextChanged = true;
             _editor.backspace();
             
-            update();
+            repaint();
             relayout();
             
             _valueEdited.send(_value);
@@ -735,7 +735,7 @@ bool SpinBox::onKeyEvent(const KeyEvent& ev)
                 _isTextChanged = true;
                 _editor.insert(ch);
 
-                update();
+                repaint();
                 relayout();
 
                 _valueEdited.send(_value);
@@ -761,7 +761,7 @@ bool SpinBox::onMouseEvent(const MouseEvent& ev)
 
         std::size_t n = _line.xToCursor( _painter, ev.x() );
         _editor.setCursorPosition(n);
-        update();
+        repaint();
             
         Application::instance().inputMethod().begin(*this);
     }
@@ -784,7 +784,7 @@ bool SpinBox::onTouchEvent(const TouchEvent& ev)
 
         std::size_t n = _line.xToCursor( _painter, ev.x() );
         _editor.setCursorPosition(n);
-        update();
+        repaint();
 
         Application::instance().inputMethod().begin(*this);
     }
@@ -804,7 +804,7 @@ void SpinBox::onFocusEvent(const FocusEvent& ev)
             Pt::String str = toText(_value);
             _editor.setText(str);
     
-            update();
+            repaint();
             relayout();
 
             _isTextChanged = false;

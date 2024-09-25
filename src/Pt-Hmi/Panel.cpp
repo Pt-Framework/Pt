@@ -103,14 +103,14 @@ void Panel::setBackground(const Gfx::Brush& b)
     _background.reset( new Gfx::Brush(b) );
     _hasBackground = true;
     
-    update();
+    repaint();
 }
 
 
 void Panel::setBackground(bool b)
 {
     _hasBackground = b;
-    update();
+    repaint();
 }
 
 
@@ -129,14 +129,14 @@ void Panel::setContour(const Gfx::Pen& pen)
     _contour.reset( new Gfx::Pen(pen) );
     _hasFrame = true;
 
-    update();
+    repaint();
 }
 
 
 void Panel::setFrame(bool b)
 {
     _hasFrame = b;
-    update();
+    repaint();
 }
 
 

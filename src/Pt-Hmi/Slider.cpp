@@ -111,7 +111,7 @@ const Gfx::Brush& Slider::background() const
 void Slider::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
-    update();
+    repaint();
 }
 
 
@@ -125,7 +125,7 @@ const Gfx::Color& Slider::foreground() const
 void Slider::setForeground(const Gfx::Color& b)
 {
     _foreground.reset( new Gfx::Color(b) );
-    update();
+    repaint();
 }
 
 
@@ -139,7 +139,7 @@ const Gfx::Pen& Slider::contour() const
 void Slider::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
-    update();
+    repaint();
 }
 
 

@@ -201,14 +201,6 @@ class PT_HMI_API Visual : public Responder
         */
         virtual void repaint();
 
-        // deprecated
-        void update()
-        { repaint( bounds() ); }
-
-        // deprecated
-        void update(const Gfx::RectF& rect)
-        { repaint(rect); }
-
     public:  
         /** @brief Returns the current scale factor.
         */

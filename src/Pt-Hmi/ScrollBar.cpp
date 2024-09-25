@@ -122,7 +122,7 @@ void ScrollBar::setPosition(double pos)
     
     _handleRect.set(pt, size);
 
-    update();
+    repaint();
 }
 
 

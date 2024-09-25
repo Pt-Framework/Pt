@@ -62,7 +62,7 @@ void LineEdit::setEditable(bool e)
 {
     _isEditable = e;
     setFocusPolicy(_isEditable ? Widget::AcceptFocus : Widget::NoFocus);
-    update();
+    repaint();
 }
 
 
@@ -481,7 +481,7 @@ bool LineEdit::onMouseEvent(const MouseEvent& mev)
 
         std::size_t n = _line.xToCursor( _painter, mev.x() );
         _editor.setCursorPosition(n);
-        update();
+        repaint();
 
         Application::instance().inputMethod().begin(*this);
     }
@@ -507,7 +507,7 @@ bool LineEdit::onTouchEvent(const TouchEvent& tev)
 
         std::size_t n = _line.xToCursor( _painter, tev.x() );
         _editor.setCursorPosition(n);
-        update();
+        repaint();
 
         Application::instance().inputMethod().begin(*this);
     }

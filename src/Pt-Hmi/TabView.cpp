@@ -121,7 +121,7 @@ void TabBar::setText(std::size_t n, const Pt::String& title)
     _tabs.at(n).setText(title);
 
     relayout();
-    update();
+    repaint();
 }
 
 

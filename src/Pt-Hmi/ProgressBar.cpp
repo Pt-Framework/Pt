@@ -126,7 +126,7 @@ const Gfx::Brush& ProgressBar::background() const
 void ProgressBar::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
-    update();
+    repaint();
 }
 
 const Gfx::Color& ProgressBar::foreground() const
@@ -139,7 +139,7 @@ const Gfx::Color& ProgressBar::foreground() const
 void ProgressBar::setForeground(const Gfx::Color& b)
 {
     _foreground.reset( new Gfx::Color(b) );
-    update();
+    repaint();
 }
 
 
@@ -153,7 +153,7 @@ const Gfx::Pen& ProgressBar::contour() const
 void ProgressBar::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
-    update();
+    repaint();
 }
 
 
