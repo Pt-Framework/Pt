@@ -57,11 +57,11 @@ class ShellWM : public WindowManager
 
         void setParent(Shell* shell);
 
-        Gfx::PaintSurface& surface();
+        //Gfx::PaintSurface& surface();
 
-        const Gfx::PaintSurface& surface() const;
+        //const Gfx::PaintSurface& surface() const;
 
-        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+        //void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
         bool processMouseEvent(const MouseEvent& ev);
 
@@ -188,7 +188,7 @@ class ShellWM : public WindowManager
     private:
         Shell*                       _parent;
 
-        Gfx::PaintRegion             _surface;
+        //Gfx::PaintRegion             _surface;
 
         std::vector<Window*>         _windowList;
 

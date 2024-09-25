@@ -59,18 +59,18 @@ class PT_GFX_API PaintSurface
         
         const PaintInfo& info() const;
 
-        const Scaling& scaling() const;
+        //const Scaling& scaling() const;
 
         const ImageFormat& format() const;
 
         PaintContext* getPaint(PaintContext* context);
 
+    protected:
+        PaintSurface();
+
         Canvas* canvas();
 
         const Canvas* canvas() const;
-
-    protected:
-        PaintSurface();
 
         void setCanvas(Canvas* canvas);
 

@@ -32,7 +32,6 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/PaintRegion.h>
 
 namespace Pt {
 

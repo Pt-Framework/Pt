@@ -86,7 +86,7 @@ void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
 
     _surface.setScaleFactor( ev.scaleFactor() );
 
-    Gfx::SizeF pixmapSize = _surface.scaling().toPhysical( size() );
+    Gfx::SizeF pixmapSize = scaling().toPhysical( size() );
     _surface.resize(pixmapSize);
     
     Base::onRescaleEvent(ev);
@@ -103,7 +103,7 @@ void WindowFrame::onResizeEvent(const ResizeEvent& ev)
 {
     Visual::onResizeEvent(ev);
 
-    Gfx::SizeF pixmapSize = _surface.scaling().toPhysical( ev.size() );
+    Gfx::SizeF pixmapSize = scaling().toPhysical( ev.size() );
     _surface.resize(pixmapSize);
 }
 

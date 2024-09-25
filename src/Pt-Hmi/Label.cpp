@@ -232,7 +232,7 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
     double w = 0;
     double h = 0;
 
-    const Gfx::Scaling& scaling = surface().scaling();
+    const Gfx::Scaling& scaling = this->scaling();
 
     if( _icon.empty() )
     {
@@ -324,7 +324,7 @@ void Label::layoutText()
 
 void Label::layoutImage()
 {
-    Gfx::SizeF pictureSize = surface().scaling().toLogical( _picture.size() );
+    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
 
     switch( _alignment )
     {
@@ -488,7 +488,7 @@ void Label::onInvalidate()
     {
         _iconInvalid = false;
 
-        Gfx::SizeF scaledSize = surface().scaling().toPhysical(_iconSize);
+        Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _picture.set(iconImage);
 

@@ -246,7 +246,7 @@ Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
-    Gfx::SizeF pictureSize = surface().scaling().toLogical( _picture.size() );
+    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
@@ -283,7 +283,7 @@ void ListBoxItem::onInvalidate()
     }
     else
     {
-        const Gfx::SizeF scaledSize = surface().scaling().toPhysical(_iconSize);
+        const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _picture.set(iconImage);
     }

@@ -29,10 +29,9 @@
 #ifndef PT_HMI_SHELL_WINDOWFRAME_H
 #define PT_HMI_SHELL_WINDOWFRAME_H
 
-#include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/PaintRegion.h>
 #include <Pt/Hmi/WindowFrame.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>

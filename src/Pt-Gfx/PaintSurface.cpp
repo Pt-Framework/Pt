@@ -95,14 +95,17 @@ void PaintSurface::onReset()
 
 const PaintInfo& PaintSurface::info() const
 {
+    if(_canvas)
+        return _canvas->info();
+
     return onGetPaintInfo();
 }
 
 
-const Scaling& PaintSurface::scaling() const
-{
-    return info().scaling();
-}
+//const Scaling& PaintSurface::scaling() const
+//{
+//    return info().scaling();
+//}
 
 
 const ImageFormat& PaintSurface::format() const

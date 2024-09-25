@@ -189,7 +189,6 @@ Visual::Visual()
 , _parent(0)
 , _nextResponder(0)
 , _invalidates(0)
-, _scaleFactor(1.0)
 , _enabledState(true)
 , _isVisible(false)
 , _minimumSize(0, 0)
@@ -480,7 +479,13 @@ void Visual::onPaintEvent(const PaintEvent& ev)
 
 double Visual::scaleFactor() const
 {
-    return _scaleFactor;
+    return _scaling.scaleFactor();
+}
+
+
+const Gfx::Scaling& Visual::scaling() const
+{
+    return _scaling;
 }
 
 
@@ -498,7 +503,7 @@ void Visual::onRescaleEvent(const RescaleEvent& ev)
 
 void Visual::onRescale(double scaling)
 {
-    _scaleFactor = scaling;
+    _scaling.setScaleFactor(scaling);
 }
 
 //
@@ -877,12 +882,61 @@ bool Visual::onKeyEvent(const KeyEvent& ev)
 // View
 ///////////////////////////////////////////////////////////////////////
 
-View::View()
+const Gfx::ImageFormat& ViewInfo::onGetFormat() const
+{              
+    return _surface ? _surface->info().format() 
+                    : Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& ViewInfo::onGetSize() const
 {
+    return _view->size();
+}
+
+
+const Gfx::Scaling& ViewInfo::onGetScaling() const
+{              
+    return _view->scaling();
+}
+
+
+View::View()
+: _info(0)
+{
+    _info = new ViewInfo(*this);
 }
 
 
 View::~View()
+{
+    delete _info;
+}
+
+
+Gfx::PaintSurface& View::surface()
+{
+    return *this;
+}
+
+
+const Gfx::PaintSurface& View::surface() const
+{
+    return *this;
+}
+
+
+void View::setSurface(Gfx::PaintSurface* surface, 
+                      const Gfx::PointF& pos)
+{
+    _info->setSurface(surface, pos);
+
+    onSetSurface(surface, pos);
+}
+
+
+void View::onSetSurface(Gfx::PaintSurface* surface, 
+                        const Gfx::PointF& pos)
 {
 }
 
@@ -898,6 +952,188 @@ Gfx::PointF View::fromWidget(const Widget& widget,
                              const Gfx::PointF& pos) const
 { 
     return onFromWidget(widget, pos);
+}
+
+
+//
+// TODO: maintain a list of child widgets in onAttach() and onDetach(). 
+//       This way View::onSetSurface() can setup client surfaces.
+//
+
+void View::onAttach(Widget& widget)
+{
+}
+
+
+void View::onDetach(Widget& widget)
+{
+}
+
+
+void View::onInit(Widget& widget)
+{
+    Gfx::PaintSurface* surface = _info->surface();
+    Gfx::PointF surfacePos = _info->position() + widget.position();
+
+    widget.setSurface(surface, surfacePos);
+}
+
+
+void View::onRelease(Widget& widget)
+{
+    widget.setSurface(0);
+}
+
+
+Gfx::PointF View::onToWidget(const Widget& widget, 
+                             const Gfx::PointF& pos) const
+{
+    return pos - widget.position();
+}
+
+
+Gfx::PointF View::onFromWidget(const Widget& widget, 
+                               const Gfx::PointF& pos) const
+{
+    return pos + widget.position();
+}
+
+
+void View::onPaintEvent(const PaintEvent& ev)
+{    
+    //static int nnn = 0;
+    //std::clog << "PAINT EVENT: " << typeid(*this).name() << " " << ++nnn << std::endl;
+
+    Base::onPaintEvent(ev);
+
+    onPaint( *this, ev.rect() );
+}
+
+
+void View::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
+{
+}
+
+
+void View::onRepaintRequest(Widget& widget, const Gfx::RectF& rect) 
+{
+}
+
+
+void View::onRelayoutRequest(Widget& widget)
+{
+}
+
+
+void View::onEnableRequest(Widget& widget, bool isEnable)
+{
+}
+
+
+void View::onActivateRequest(Widget& w, bool active)
+{
+}
+
+
+void View::onShowRequest(Widget& widget, bool isShown)
+{
+}
+
+
+void View::onRaiseRequest(Widget& widget)
+{
+}
+
+
+void View::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
+{
+    //
+    // align to physical pixel grid
+    //
+    Gfx::PointF aligedPos = scaling().align(pos);
+
+    //
+    // update client surface
+    //
+    Gfx::PaintSurface* surface = _info->surface();
+    Gfx::PointF surfacePos = _info->position() + aligedPos;
+
+    widget.setSurface(surface, surfacePos);
+
+    //
+    // send move event
+    //
+    MoveEvent mev(widget, aligedPos);
+    Application::instance().commitEvent(mev);
+}
+
+
+void View::onMoveEvent(const MoveEvent& ev)
+{
+    if( position() == ev.position() )
+        return;
+
+    Gfx::PointF delta = ev.position() - position();
+    
+    Gfx::RectF updateRect( size() );
+    updateRect.unify( Gfx::RectF(delta, size()) );
+    repaint(updateRect);
+
+    Base::onMoveEvent(ev);
+}
+
+
+void View::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
+{
+    Gfx::SizeF alignedSize = scaling().align(size);
+
+    //_info.resize( ev.size() );
+
+    ResizeEvent rev(widget, alignedSize);
+    Application::instance().commitEvent(rev);
+}
+
+
+void View::onResizeEvent(const ResizeEvent& ev)
+{
+    if( size() == ev.size() )
+        return;
+
+    //std::clog << "RESIZE: " << name() << ev.size().width() << std::endl;
+
+    Gfx::RectF updateRect( size() );
+    updateRect.unify( Gfx::RectF( ev.size() ) );
+    repaint(updateRect);
+
+    Base::onResizeEvent(ev);
+}
+
+
+const Gfx::PaintInfo& View::onGetPaintInfo() const
+{
+    return *_info;
+}
+
+
+Gfx::PaintContext* View::onGetPaint(Gfx::PaintContext* context) 
+{
+    Gfx::PaintSurface* surface = _info->surface();
+
+    Gfx::PaintContext* paintContext = surface ? surface->getPaint(context)
+                                              : 0;
+    if( paintContext )
+    {
+        Gfx::RectF r = paintContext->region();
+
+        r.shift( _info->position().x(),
+                 _info->position().y() );
+    
+        r.setSize( this->size() );
+
+        paintContext->setRegion(r);
+    }
+
+    return paintContext;
 }
 
 } // namespace

@@ -73,11 +73,11 @@ class PT_HMI_API Form : public View
         void setContent(Widget* widget);       
 
 
-        Gfx::PaintSurface& surface();
+        //Gfx::PaintSurface& surface();
 
-        const Gfx::PaintSurface& surface() const;
+        //const Gfx::PaintSurface& surface() const;
 
-        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+        //void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
     public:
         Widget* focusWidget();
@@ -117,6 +117,8 @@ class PT_HMI_API Form : public View
     // View
     //
     protected:
+        virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+
         virtual void onAttach(Widget& widget);
 
         virtual void onDetach(Widget& widget);
@@ -266,7 +268,7 @@ class PT_HMI_API Form : public View
 
 
     private:
-        Gfx::PaintRegion             _surface;
+        //Gfx::PaintRegion             _surface;
         Widget*                      _mainWidget;
                                      
         int                          _layouts;

@@ -50,7 +50,6 @@
 #include <Pt/Hmi/FocusEvent.h>
 
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/PaintRegion.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
@@ -91,11 +90,11 @@ class PT_HMI_API Widget : public View
         const std::vector<Widget*>& widgets() const;
 
     public:
-        Gfx::PaintSurface& surface();
+        //Gfx::PaintSurface& surface();
 
-        const Gfx::PaintSurface& surface() const;
+        //const Gfx::PaintSurface& surface() const;
 
-        void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+        //void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
     private:
         void setForm(Form* form);
@@ -163,7 +162,7 @@ class PT_HMI_API Widget : public View
         virtual void onPaintEvent(const PaintEvent& ev);
         
         virtual void onPaint(Gfx::PaintSurface& surface, 
-                             const Gfx::RectF& rect);
+                             const Gfx::RectF& rect) override;
 
     //
     // layouting
@@ -364,7 +363,7 @@ class PT_HMI_API Widget : public View
         virtual const std::vector<Char> onGetMnemonics();
 
     private:
-        Gfx::PaintRegion             _surface;
+        //Gfx::PaintRegion             _surface;
 
         View*                        _parent;
         std::vector<Widget*>         _children;

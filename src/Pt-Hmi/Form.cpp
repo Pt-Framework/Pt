@@ -87,29 +87,39 @@ void Form::setContent(Widget* widget)
 }
 
 
-Gfx::PaintSurface& Form::surface()
+//Gfx::PaintSurface& Form::surface()
+//{
+//    //return _surface;
+//    return *this;
+//}
+//
+//
+//const Gfx::PaintSurface& Form::surface() const
+//{
+//    //return _surface;
+//    return *this;
+//}
+
+
+//void Form::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+//{
+//    ViewSurface::resetSurface(surface, pos);
+//
+//    //if( ! surface )
+//    //{
+//    //    _surface.detach();
+//    //}
+//    //else
+//    //{
+//    //    Gfx::RectF surfaceRect( pos, size() );
+//    //    _surface.attach(*surface, surfaceRect);
+//    //}
+//}
+
+
+void Form::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
-    return _surface;
-}
-
-
-const Gfx::PaintSurface& Form::surface() const
-{
-    return _surface;
-}
-
-
-void Form::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
-{
-    if( ! surface )
-    {
-        _surface.detach();
-    }
-    else
-    {
-        Gfx::RectF surfaceRect( pos, size() );
-        _surface.attach(*surface, surfaceRect);
-    }
+    Base::onSetSurface(surface, pos);
 
     if(_mainWidget)
         _mainWidget->setSurface(surface, pos);
@@ -367,6 +377,8 @@ void Form::onRemoveElement(Widget& widget)
 
 void Form::onAttach(Widget& widget)
 {
+    Base::onAttach(widget);
+
     _mainWidget = &widget;
     
     relayout();
@@ -375,26 +387,31 @@ void Form::onAttach(Widget& widget)
 
 void Form::onDetach(Widget& widget)
 {
-  if(_active == &widget)
-      _active = 0;
+    Base::onDetach(widget);
 
-    if(_mainWidget == &widget)
-        _mainWidget = 0;
+    if(_active == &widget)
+        _active = 0;
 
-    relayout();
+      if(_mainWidget == &widget)
+          _mainWidget = 0;
+
+      relayout();
 }
 
 
 void Form::onInit(Widget& widget)
 {
-    Gfx::PaintSurface* surface = _surface.surface();
-    Gfx::PointF surfacePos = _surface.position() + widget.position();
+    Base::onInit(widget);
 
-    widget.setSurface(surface, surfacePos);
+    //Gfx::PaintSurface* surface = _surface.surface();
+    //Gfx::PointF surfacePos = _surface.position() + widget.position();
+    //widget.setSurface(surface, surfacePos);
+    
     widget.setNextResponder(this);
     widget.setForm(this);
 
     double scaling = scaleFactor();
+    
     RescaleEvent ev(widget, scaling);
     widget.processEvent(ev);
 }
@@ -402,8 +419,10 @@ void Form::onInit(Widget& widget)
 
 void Form::onRelease(Widget& widget)
 {
+    Base::onRelease(widget);
+
     widget.setForm(0);
-    widget.setSurface( 0, widget.position() );
+    //widget.setSurface( 0, widget.position() );
     widget.setNextResponder(0);
 }
 
@@ -422,6 +441,7 @@ Gfx::PointF Form::onFromWidget(const Widget& widget, const Gfx::PointF& pos) con
 
 void Form::onRaiseRequest(Widget& widget)
 {
+    Base::onRaiseRequest(widget);
 }
 
 //
@@ -504,6 +524,8 @@ void Form::onPaintEvent(const PaintEvent& ev)
 
 void Form::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
 {
+    Base::onRepaintRequest(w, rect);
+
     Gfx::PointF widgetPos = onFromWidget( w, rect.topLeft() );
     Gfx::RectF widgetRect( widgetPos, rect.size() );
 
@@ -513,6 +535,8 @@ void Form::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
 
 void Form::onRelayoutRequest(Widget& widget)
 {
+    Base::onRelayoutRequest(widget);
+
     relayout();
 }
 
@@ -574,6 +598,8 @@ void Form::onEnable(bool e)
 
 void Form::onEnableRequest(Widget& widget, bool enable)
 {
+    Base::onEnableRequest(widget, enable);
+
     if( ! isEnabled() )
       enable = false;
 
@@ -587,6 +613,8 @@ void Form::onEnableRequest(Widget& widget, bool enable)
 
 void Form::onActivateRequest(Widget& widget, bool active)
 {
+    Base::onActivateRequest(widget, active);
+
     if(active)
         _active = &widget;
 
@@ -616,9 +644,11 @@ void Form::onShow(bool visible)
 }
 
 
-void Form::onShowRequest(Widget& widget, bool isShown)
+void Form::onShowRequest(Widget& widget, bool visible)
 {
-    ShowEvent sev(widget, isShown);
+    Base::onShowRequest(widget, visible);
+
+    ShowEvent sev(widget, visible);
     widget.processEvent(sev);
 }
 
@@ -628,16 +658,7 @@ void Form::onShowRequest(Widget& widget, bool isShown)
 
 void Form::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
 {
-    //
-    // align to physical pixel grid
-    //
-    Gfx::PointF aligedPos = _surface.scaling().align(pos);
-
-    //
-    // send move event
-    //
-    MoveEvent mev(widget, aligedPos);
-    Application::instance().commitEvent(mev);
+    Base::onMoveRequest(widget, pos);
 }
 
 
@@ -649,19 +670,13 @@ void Form::onProcessMoveEvent(const MoveEvent& ev)
 
 void Form::onMoveEvent(const MoveEvent& ev)
 {
-    if( position() == ev.position() )
-        return;
-
     Base::onMoveEvent(ev);
 }
 
 
 void Form::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
 {
-    Gfx::SizeF alignedSize = _surface.scaling().align(size);
-
-    ResizeEvent rev(widget, alignedSize);
-    Application::instance().commitEvent(rev);
+    Base::onResizeRequest(widget, size);
 }
 
 
@@ -676,7 +691,7 @@ void Form::onResizeEvent(const ResizeEvent& ev)
     if( size() == ev.size() )
         return;
 
-    _surface.resize( ev.size() );
+    //_surface.resize( ev.size() );
 
     Base::onResizeEvent(ev);
 

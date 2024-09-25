@@ -151,7 +151,7 @@ void WindowImpl::setType(WindowType type)
 
 Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
-    const Gfx::Scaling& scaling = surface().scaling();
+    const Gfx::Scaling& scaling = this->scaling();
     
     Gfx::PointF physicalPos = scaling.toPhysical(pos);
   
@@ -168,7 +168,7 @@ Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 
 Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
 {
-    const Gfx::Scaling& scaling = surface().scaling();
+    const Gfx::Scaling& scaling = this->scaling();
 
     Gfx::PointF physicalPos = scaling.toPhysical(pos);
 
@@ -407,7 +407,7 @@ void WindowImpl::onEnableEvent(const EnableEvent& ev)
 
 void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
-    const Gfx::Scaling& scaling = w.surface().scaling();
+    const Gfx::Scaling& scaling = w.scaling();
 
     Gfx::PointF aligedPos = scaling.align(pos);
 
@@ -532,7 +532,7 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     //
     // align to physical pixel grid
     //
-    Gfx::SizeF alignedSize = surface().scaling().align(s);
+    Gfx::SizeF alignedSize = scaling().align(s);
 
     //
     // maximum width and height
@@ -549,7 +549,7 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     if( alignedSize.height() < w.minimumSize().height() )
         alignedSize.setHeight( w.minimumSize().height() );
 
-    const Gfx::SizeF size = w.surface().scaling().toPhysical(alignedSize);
+    const Gfx::SizeF size = w.scaling().toPhysical(alignedSize);
 
     RECT clientRect;
     SetRect(&clientRect, 0, 0, lround(size.width()) - 1, 

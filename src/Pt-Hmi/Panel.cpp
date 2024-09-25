@@ -161,7 +161,7 @@ void Panel::onInvalidate()
 
     if (!_icon.empty())
     {
-        const Gfx::SizeF scaledSize = surface().scaling().toPhysical(_iconSize);
+        const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
         _picture.set(iconImage);
     }
@@ -246,7 +246,7 @@ void Panel::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter)
     if(  _picture.empty() )
         return;
 
-    const Gfx::Scaling& scaling = surface.scaling();
+    const Gfx::Scaling& scaling = surface.info().scaling();
 
     double rightX = size().width() - scaling.toLogical( _picture.size().width() );
     double bottomY = size().height() - scaling.toLogical( _picture.size().height() );

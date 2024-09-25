@@ -122,7 +122,7 @@ void Shell::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
     Base::onSetSurface(surface, pos);
 
-    _wm.setSurface( surface, pos );
+    //_wm.setSurface( surface, pos );
 }
 
 

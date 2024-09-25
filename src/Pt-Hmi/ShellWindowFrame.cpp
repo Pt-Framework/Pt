@@ -600,7 +600,7 @@ const Gfx::RectF& ShellWindowFrame::frameRect() const
 
 void ShellWindowFrame::setFrame(double bw, double th)
 {
-    const Gfx::Scaling& scaling = surface().scaling();
+    const Gfx::Scaling& scaling = this->scaling();
 
     _borderWidth = scaling.align(bw);
     _titleHeight = scaling.align(th);
@@ -905,7 +905,7 @@ void ShellWindowFrame::onRequestResize(const Gfx::SizeF& size)
 
 void ShellWindowFrame::onResize(Window& w, const Gfx::SizeF& s)
 {
-    Gfx::SizeF alignedSize = surface().scaling().align(s);
+    Gfx::SizeF alignedSize = scaling().align(s);
 
     if( alignedSize.width() > w.maximumSize().width() )
         alignedSize.setWidth( w.maximumSize().width() );
@@ -1446,7 +1446,7 @@ void ShellWindowFrame::onPaintEvent(const PaintEvent& ev)
     Gfx::Painter painter( surface() );
     painter.setClip(rect);
 
-    const Gfx::Scaling& scaling = surface().scaling();
+    const Gfx::Scaling& scaling = this->scaling();
 
     Gfx::Color color = _window->isActive() ? _wm->activeColor()
                                            : _wm->inactiveColor();

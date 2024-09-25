@@ -33,7 +33,6 @@
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/PaintRegion.h>
 
 namespace Pt {
 

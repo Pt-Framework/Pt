@@ -70,30 +70,30 @@ void ShellWM::setParent(Shell* shell)
 }
 
 
-Gfx::PaintSurface& ShellWM::surface()
-{
-    return _surface;
-}
-
-
-const Gfx::PaintSurface& ShellWM::surface() const
-{
-    return _surface;
-}
-
-
-void ShellWM::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
-{
-    if( ! surface )
-    {
-        _surface.detach();
-    }
-    else
-    {
-        Gfx::RectF surfaceRect( pos, size() );
-        _surface.attach(*surface, surfaceRect);
-    }
-}
+//Gfx::PaintSurface& ShellWM::surface()
+//{
+//    return _surface;
+//}
+//
+//
+//const Gfx::PaintSurface& ShellWM::surface() const
+//{
+//    return _surface;
+//}
+//
+//
+//void ShellWM::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+//{
+//    if( ! surface )
+//    {
+//        _surface.detach();
+//    }
+//    else
+//    {
+//        Gfx::RectF surfaceRect( pos, size() );
+//        _surface.attach(*surface, surfaceRect);
+//    }
+//}
 
 
 void ShellWM::onProcessEvent(const Pt::Event& ev)
@@ -435,9 +435,11 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::PointF surfacePos = frameRect.topLeft() - frame->position();
         Gfx::RectF surfaceRect( surfacePos, frameRect.size() );
 
-        Gfx::Painter painter( surface() );
-        painter.drawLayer(frameRect.topLeft(), frame->surface(), surfaceRect);
-
+        if(_parent)
+        {
+            Gfx::Painter painter( _parent->surface() );
+            painter.drawLayer(frameRect.topLeft(), frame->surface(), surfaceRect);
+        }
         //surface().drawPixmap(frameRect.topLeft(), frame->surface(), 
         //                     surfaceRect, Gfx::CompositionMode::SourceCopy);
     }
@@ -461,7 +463,8 @@ void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
 
 void ShellWM::onMove(ShellWindowFrame& frame, const Gfx::PointF& pos)
 {
-    Gfx::PointF aligedPos = _surface.scaling().align(pos);
+    Gfx::PointF aligedPos = _parent ? _parent->scaling().align(pos)
+                                    : pos;
 
     MoveEvent mev(frame, aligedPos);
     Application::instance().commitEvent(mev);

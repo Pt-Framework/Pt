@@ -284,8 +284,10 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     painter.fontMetrics(text);
     painter.drawText( Pt::Gfx::PointF(10, 15), text);
 
+    Gfx::FontMetrics fm = painter.fontMetrics(text);
+
     painter.setPen( Gfx::Color::fromRgb8(255, 0, 0, 150) );
-    painter.drawLine(Pt::Gfx::PointF(10, 15), Pt::Gfx::PointF(50, 15));
+    painter.drawLine(Pt::Gfx::PointF(10, 15), Pt::Gfx::PointF(10 + fm.width(), 15));
     //return;
 
 #ifdef DEMO_WITH_SKIA
@@ -361,12 +363,12 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     return;
 #endif
 
-    //Gfx::Painter imagePainter(imageSurface);
     Gfx::Painter imagePainter;
     Gfx::ImageSurface imageSurface(Gfx::Size(600, 600));
-    //Gfx::Painter imagePainter2(imageSurface);
-    //imagePainter2.begin(imageSurface);
     imagePainter.begin(imageSurface);
+
+    Gfx::Painter imagePainter2(imageSurface);
+    imagePainter2.begin(imageSurface);
 
     //
     //imagePainter.setAntiAliasing(true);
@@ -425,6 +427,9 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 
     Gfx::Pen pen1( Gfx::Color::fromRgb8(255, 200, 100), 1);
     imagePainter.setPen(pen1);
+
+    imagePainter.begin(imageSurface);
+
     imagePainter.drawLine( Pt::Gfx::PointF(300, 300),
                            Pt::Gfx::PointF(450, 300) );
     imagePainter.drawLine( Pt::Gfx::PointF(500, 300),
@@ -573,6 +578,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 
 #endif
 
+    //painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
     painter.drawImage( Gfx::PointF(10, 30), imageSurface.image() );
 }
 

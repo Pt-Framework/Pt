@@ -214,6 +214,8 @@ class PT_HMI_API Visual : public Responder
         */
         double scaleFactor() const;
 
+        const Gfx::Scaling& scaling() const;
+
     public:
         /** @brief Indicates whether the visual is visible.
         */
@@ -433,7 +435,7 @@ class PT_HMI_API Visual : public Responder
 
         int                   _invalidates;
 
-        double                _scaleFactor;
+        Gfx::Scaling          _scaling;
 
         bool                  _enabledState;
         bool                  _isVisible;
@@ -456,8 +458,50 @@ class PT_HMI_API Visual : public Responder
 ///////////////////////////////////////////////////////////////////////
 
 class Widget;
+class View;
+
+class ViewInfo : public Gfx::PaintInfo
+{
+    public:
+        explicit ViewInfo(View& view)
+        : _view(&view)
+        , _surface(0)
+        {
+        }
+
+        Gfx::PaintSurface* surface()
+        {
+            return _surface;
+        }
+
+        const Gfx::PointF& position() const
+        {
+            return _position;
+        } 
+
+        void setSurface(Gfx::PaintSurface* surface, 
+                        const Gfx::PointF& pos)
+        {
+            _surface = surface;
+            _position = pos;
+        }
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const;
+
+        virtual const Gfx::SizeF& onGetSize() const;
+
+        virtual const Gfx::Scaling& onGetScaling() const;
+
+    private:
+        View*                _view;
+        Gfx::PaintSurface*   _surface;
+        Gfx::PointF          _position;
+};
+
 
 class PT_HMI_API View : public Visual
+                      , private Gfx::PaintSurface
 {
     friend class Widget;
 
@@ -483,37 +527,72 @@ class PT_HMI_API View : public Visual
         Gfx::PointF fromWidget(const Widget& widget,
                                const Gfx::PointF& pos) const;
 
+        Gfx::PaintSurface& surface();
+
+        const Gfx::PaintSurface& surface() const;
+
+        void setSurface(Gfx::PaintSurface* surface, 
+                        const Gfx::PointF& pos = Gfx::PointF() );
+
     protected:
-        virtual void onAttach(Widget& widget) = 0;
+        virtual void onSetSurface(Gfx::PaintSurface* surface, 
+                                  const Gfx::PointF& pos);
+
+        virtual void onPaint(Gfx::PaintSurface& surface, 
+                             const Gfx::RectF& rect);
+    
+    protected:
+        virtual void onAttach(Widget& widget);
         
-        virtual void onDetach(Widget& widget) = 0;
+        virtual void onDetach(Widget& widget);
 
-        virtual void onInit(Widget& widget) = 0;
+        virtual void onInit(Widget& widget);
 
-        virtual void onRelease(Widget& widget) = 0;
+        virtual void onRelease(Widget& widget);
 
         virtual Gfx::PointF onToWidget(const Widget& widget, 
-                                       const Gfx::PointF& pos) const = 0;
+                                       const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
-                                         const Gfx::PointF& pos) const = 0;
+                                         const Gfx::PointF& pos) const;
 
     protected:
-        virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect) = 0;
+        virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);
 
-        virtual void onRelayoutRequest(Widget& widget) = 0;
+        virtual void onRelayoutRequest(Widget& widget);
 
-        virtual void onEnableRequest(Widget& widget, bool isEnable) = 0;
+        virtual void onEnableRequest(Widget& widget, bool isEnable);
 
-        virtual void onActivateRequest(Widget& w, bool active) = 0;
+        virtual void onActivateRequest(Widget& w, bool active);
 
-        virtual void onShowRequest(Widget& widget, bool isShown) = 0;
+        virtual void onShowRequest(Widget& widget, bool isShown);
 
-        virtual void onMoveRequest(Widget& widget, const Gfx::PointF& pos) = 0;
+        virtual void onMoveRequest(Widget& widget, const Gfx::PointF& pos);
 
-        virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size) = 0;
+        virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size);
 
-        virtual void onRaiseRequest(Widget& widget) = 0;
+        virtual void onRaiseRequest(Widget& widget);
+
+    //
+    // Visual
+    //
+    protected:
+        virtual void onPaintEvent(const PaintEvent& ev) override;
+
+        virtual void onMoveEvent(const MoveEvent& ev) override;
+
+        virtual void onResizeEvent(const ResizeEvent& ev) override;
+
+    //
+    // PaintSurface
+    //
+    protected:
+        virtual const Gfx::PaintInfo& onGetPaintInfo() const override;
+
+        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
+
+    private:
+        ViewInfo* _info;
 };
 
 } // namespace
