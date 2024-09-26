@@ -104,6 +104,19 @@ void PixmapSurface::clear(const Gfx::Color& c)
 //}
 
 
+Gfx::PointF PixmapSurface::onGetLayerPosition() const 
+{
+    return Gfx::PointF();
+}
+
+
+const Gfx::PaintSurface* PixmapSurface::onGetLayerSurface() const
+{
+    const Gfx::PaintSurface* surface = _impl->surface();
+    return surface ? surface : this;
+}
+
+
 Gfx::Image PixmapSurface::onGetImage() const
 {
     return _impl->image();
@@ -119,29 +132,6 @@ const Gfx::PaintInfo& PixmapSurface::onGetPaintInfo() const
 Gfx::PaintContext* PixmapSurface::onGetPaint(Gfx::PaintContext* context) 
 {
     return _impl->getPaint(context);
-}
-
-
-void PixmapSurface::onDraw(Gfx::PaintContext& paint, 
-                           const Gfx::PointF& to) const
-{
-#ifdef PT_HMI_WIN32_RASTER
-    _impl->draw(paint, to);
-#else
-    PaintLayer::onDraw(paint, to);
-#endif
-}
-
-
-void PixmapSurface::onDraw(Gfx::PaintContext& paint, 
-                           const Gfx::PointF& to, 
-                           const Gfx::RectF& rect) const
-{
-#ifdef PT_HMI_WIN32_RASTER
-    _impl->draw(paint, to, rect);
-#else
-    PaintLayer::onDraw(paint, to, rect);
-#endif
 }
 
 

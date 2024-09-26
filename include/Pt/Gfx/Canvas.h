@@ -106,14 +106,14 @@ class PT_GFX_API Canvas
 
         void drawImage(const Gfx::PointF& to, 
                        const Gfx::Image& image, 
-                       const Gfx::RectF& imgRect);
-
-        void drawLayer(const Gfx::PointF& to, 
-                       const Gfx::PaintLayer& layer);
-
-        void drawLayer(const Gfx::PointF& to,
-                       const Gfx::PaintLayer& layer,
                        const Gfx::RectF& rect);
+
+        bool drawSurface(const Gfx::PointF& to, 
+                         const Gfx::PaintSurface& surface);
+
+        bool drawSurface(const Gfx::PointF& to,
+                         const Gfx::PaintSurface& surface,
+                         const Gfx::RectF& rect);
     
     protected:
         virtual void onCompositionModeChanged() = 0;
@@ -171,12 +171,12 @@ class PT_GFX_API Canvas
                                  const Gfx::Image& image, 
                                  const Gfx::RectF& imgRect) = 0;
 
-        virtual void onDrawLayer(const Gfx::PointF& to, 
-                                 const Gfx::PaintLayer& layer) = 0;
+        virtual bool onDrawSurface(const Gfx::PointF& to, 
+                                   const Gfx::PaintSurface& surface) = 0;
 
-        virtual void onDrawLayer(const Gfx::PointF& to,
-                                 const Gfx::PaintLayer& layer,
-                                 const Gfx::RectF& rect) = 0;
+        virtual bool onDrawSurface(const Gfx::PointF& to,
+                                   const Gfx::PaintSurface& surface,
+                                   const Gfx::RectF& rect) = 0;
 
     private:
         void onDetachPaint(PaintContext& paint);

@@ -312,35 +312,35 @@ void ImageCanvas::onDrawImage(const PointF& toF, const Image& image,
 }
 
 
-void ImageCanvas::onDrawLayer(const Gfx::PointF& to, 
-                              const Gfx::PaintLayer& layer)
+bool ImageCanvas::onDrawSurface(const Gfx::PointF& to, 
+                                const Gfx::PaintSurface& surface)
 {
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&layer);
+    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
     if(imageSurface)
     {
         const Gfx::Image& image = imageSurface->image();
         drawImage(to, image);
-        return;
+        return true;
     }
 
-    Canvas::onDrawLayer(to, layer);
+    return false;
 }
 
 
-void ImageCanvas::onDrawLayer(const Gfx::PointF& to, 
-                              const Gfx::PaintLayer& layer,
-                              const Gfx::RectF& layerRect)
+bool ImageCanvas::onDrawSurface(const Gfx::PointF& to,
+                                const Gfx::PaintSurface& surface,
+                                const Gfx::RectF& rect)
 {
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&layer);
+    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
     if(imageSurface)
     {
         const Gfx::Image& image = imageSurface->image();
-        Gfx::RectF imageRect = imageSurface->info().scaling().toPhysical(layerRect);
+        Gfx::RectF imageRect = imageSurface->info().scaling().toPhysical(rect);
         drawImage(to, image, imageRect);
-        return;
+        return true;
     }
 
-    Canvas::onDrawLayer(to, layer, layerRect);
+    return false;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -472,6 +472,18 @@ const PaintInfo& ImageSurface::onGetPaintInfo() const
 Gfx::PaintContext* ImageSurface::onGetPaint(Gfx::PaintContext* reuse) 
 {
     return _canvas->getPaint(reuse);
+}
+
+
+Gfx::PointF ImageSurface::onGetLayerPosition() const 
+{
+    return Gfx::PointF();
+}
+
+
+const Gfx::PaintSurface* ImageSurface::onGetLayerSurface() const
+{
+    return this;
 }
 
 

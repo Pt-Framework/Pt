@@ -79,6 +79,11 @@ class PixmapSurfaceImpl
             _image.reset(image);
         }
 
+        const Gfx::PaintSurface* surface() const
+        {
+            return &_image;
+        }
+
         const Gfx::Image& image() const
         {
             return _image.image();
@@ -108,29 +113,6 @@ class PixmapSurfaceImpl
         {
             return _image.getPaint(context);
         }
-
-        void draw(Gfx::PaintContext& paint, 
-                  const Gfx::PointF& to) const
-        {
-            _image.draw(paint, to);
-        }
-
-
-        void draw(Gfx::PaintContext& paint, 
-                  const Gfx::PointF& to, 
-                  const Gfx::RectF& rect) const
-        {
-            _image.draw(paint, to, rect);
-        }
-
-        void drawPixmap(const Gfx::PointF& toF, 
-                        const PixmapSurface& surface,
-                        const Gfx::CompositionMode& mode);
-
-        void drawPixmap(const Gfx::PointF& toF, 
-                        const PixmapSurface& surface, 
-                        const Gfx::RectF& rect,
-                        const Gfx::CompositionMode& mode);
 
         static const std::string& defaultFont()
         {
@@ -179,17 +161,12 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
         void resize(const Gfx::SizeF& size);
         
         void setScaleFactor(double scaleFactor);
-
-        Canvas* getCanvas()
-        { 
-            return this;
-        }
-
-        const Canvas* getCanvas() const
-        { 
-            return this;
-        }
            
+        const Gfx::PaintSurface* surface() const
+        {
+            return 0;
+        }
+
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const override;
 
@@ -264,13 +241,13 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
         virtual void onDrawImage(const Gfx::PointF& to, 
                                  const Gfx::Image& image, 
                                  const Gfx::RectF& rect) override;
-        
-        virtual void onDrawLayer(const Gfx::PointF& to, 
-                                 const Gfx::PaintLayer& layer) override;
 
-        virtual void onDrawLayer(const Gfx::PointF& to,
-                                 const Gfx::PaintLayer& layer,
-                                 const Gfx::RectF& rect) override;
+        virtual bool onDrawSurface(const Gfx::PointF& to, 
+                                   const Gfx::PaintSurface& surface) override;
+
+        virtual bool onDrawSurface(const Gfx::PointF& to,
+                                   const Gfx::PaintSurface& surface,
+                                   const Gfx::RectF& rect) override;
 
     public:
         void drawPixmap(const Gfx::PointF& toF, 

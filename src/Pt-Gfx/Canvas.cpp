@@ -157,7 +157,15 @@ void Canvas::drawText(const PointF& to, const Pt::String& text,
 void Canvas::drawImage(const Gfx::PointF& to, 
                        const Gfx::Image& image)
 {
-    onDrawImage(to, image);
+    if( image.format() == info().format() )
+    {
+        onDrawImage(to, image);
+        return;
+    }
+
+    Pt::Gfx::Image dest( info().format(), image.size() );
+    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+    onDrawImage(to, dest);
 }
 
 
@@ -165,60 +173,30 @@ void Canvas::drawImage(const Gfx::PointF& to,
                        const Gfx::Image& image, 
                        const Gfx::RectF& rect)
 {
-    onDrawImage(to, image, rect);
-}
-
-
-void Canvas::drawLayer(const Gfx::PointF& to, 
-                       const Gfx::PaintLayer& layer)
-{
-    onDrawLayer(to, layer);
-}
-
-
-void Canvas::drawLayer(const Gfx::PointF& to,
-                       const Gfx::PaintLayer& layer,
-                       const Gfx::RectF& rect)
-{
-    onDrawLayer(to, layer, rect);
-}
-
-
-void Canvas::onDrawLayer(const Gfx::PointF& to, 
-                         const Gfx::PaintLayer& layer)
-{
-    Pt::Gfx::Image image = layer.toImage();
-    
     if( image.format() == info().format() )
     {
-        drawImage(to, image);
+        onDrawImage(to, image, rect);
         return;
     }
 
     Pt::Gfx::Image dest( info().format(), image.size() );
     Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest);
+    drawImage(to, dest, rect);
 }
 
 
-void Canvas::onDrawLayer(const Gfx::PointF& to, 
-                         const Gfx::PaintLayer& layer,
-                         const Gfx::RectF& layerRect)
+bool Canvas::drawSurface(const Gfx::PointF& to, 
+                         const Gfx::PaintSurface& surface)
 {
-    Pt::Gfx::Image image = layer.toImage();
+    return onDrawSurface(to, surface);
+}
 
-    const Scaling& scaling = layer.info().scaling();
-    Gfx::RectF imageRect = scaling.toPhysical(layerRect);
 
-    if( image.format() == info().format() )
-    {
-        drawImage(to, image, imageRect);
-        return;
-    }
-
-    Pt::Gfx::Image dest( info().format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    drawImage(to, dest, imageRect);
+bool Canvas::drawSurface(const Gfx::PointF& to,
+                         const Gfx::PaintSurface& surface,
+                         const Gfx::RectF& rect)
+{
+    return onDrawSurface(to, surface, rect);
 }
 
 } // namespace

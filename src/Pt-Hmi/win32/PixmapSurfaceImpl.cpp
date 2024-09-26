@@ -51,21 +51,6 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 { 
 }
 
-
-void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
-                                   const PixmapSurface& surface,
-                                   const Gfx::CompositionMode& mode)
-{
-}
-
-
-void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
-                                   const PixmapSurface& pm, 
-                                   const Gfx::RectF& rectF,
-                                   const Gfx::CompositionMode& mode)
-{
-}
-
 } // namespace
 
 } // namespace
@@ -952,32 +937,32 @@ void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& toF, const Gfx::Image& im
 }
 
 
-void PixmapSurfaceImpl::onDrawLayer(const Gfx::PointF& to, 
-                                    const Gfx::PaintLayer& layer)
+bool PixmapSurfaceImpl::onDrawSurface(const Gfx::PointF& to, 
+                                      const Gfx::PaintSurface& surface)
 {
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&layer);
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
     if(pixmap)
     {
         drawPixmap(to, *pixmap->impl());
-        return;
+        return true;
     }
 
-    Canvas::onDrawLayer(to, layer);
+    return false;
 }
 
 
-void PixmapSurfaceImpl::onDrawLayer(const Gfx::PointF& to,
-                                    const Gfx::PaintLayer& layer,
-                                    const Gfx::RectF& rect)
+bool PixmapSurfaceImpl::onDrawSurface(const Gfx::PointF& to,
+                                      const Gfx::PaintSurface& surface,
+                                      const Gfx::RectF& rect)
 {
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&layer);
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
     if(pixmap)
     {
         drawPixmap(to, *pixmap->impl(), rect);
-        return;
+        return true;
     }
 
-    Canvas::onDrawLayer(to, layer, rect);
+    return false;
 }
 
 

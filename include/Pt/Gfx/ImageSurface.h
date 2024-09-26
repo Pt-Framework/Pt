@@ -182,12 +182,12 @@ class ImageCanvas : public Gfx::Canvas
                              const Gfx::Image& image, 
                              const Gfx::RectF& imgRect) override;
 
-    virtual void onDrawLayer(const Gfx::PointF& toF, 
-                             const Gfx::PaintLayer& layer) override;
+    virtual bool onDrawSurface(const Gfx::PointF& to, 
+                               const Gfx::PaintSurface& surface) override;
 
-    virtual void onDrawLayer(const Gfx::PointF& toF, 
-                             const Gfx::PaintLayer& layer,
-                             const Gfx::RectF& layerRect) override;
+    virtual bool onDrawSurface(const Gfx::PointF& to,
+                               const Gfx::PaintSurface& surface,
+                               const Gfx::RectF& rect) override;
 
   private:
     Rasterizer*   _rasterizer;
@@ -252,6 +252,10 @@ class PT_GFX_API ImageSurface : public Gfx::PaintLayer
     virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
    protected:
+    virtual Gfx::PointF onGetLayerPosition() const override;
+
+    virtual const Gfx::PaintSurface* onGetLayerSurface() const override;
+
     virtual Gfx::Image onGetImage() const override;
 
   public:

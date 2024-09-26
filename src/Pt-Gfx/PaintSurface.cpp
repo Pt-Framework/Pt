@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/Canvas.h>
+#include <Pt/Gfx/Algorithm.h>
 
 #include <algorithm>
 
@@ -185,33 +186,20 @@ Image PaintLayer::toImage() const
 }
 
 
-void PaintLayer::draw(PaintContext& paint,
-                      const Gfx::PointF& to) const
-{
-    onDraw(paint, to);
-}
-     
-        
-void PaintLayer::draw(PaintContext& paint,
-                      const Gfx::PointF& to, 
-                      const Gfx::RectF& rect) const
-{
-    onDraw(paint, to, rect);
-}
-
-
 void PaintLayer::onDraw(PaintContext& paint, 
-                        const Gfx::PointF& to) const
+                        const Gfx::PointF& to,
+                        const Gfx::RectF* rect) const
 {
-    paint.onDrawLayer(to, *this);
-}
+    Pt::Gfx::Image image = toImage();
 
+    if( ! rect )
+    {
+        paint.drawImage(to, image);
+        return;
+    }
 
-void PaintLayer::onDraw(PaintContext& paint, 
-                        const Gfx::PointF& to, 
-                        const Gfx::RectF& rect) const
-{
-    paint.onDrawLayer(to, *this, rect);
+    Gfx::RectF imageRect = info().scaling().toPhysical(*rect);
+    paint.drawImage(to, image, imageRect);
 }
 
 } // namespace

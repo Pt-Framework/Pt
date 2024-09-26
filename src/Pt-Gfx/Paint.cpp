@@ -492,10 +492,47 @@ void PaintContext::drawImage(const Gfx::PointF& to,
 }
 
 
+bool PaintContext::drawSurface(const Gfx::PointF& to, 
+                               const Gfx::PaintSurface& surface)
+{
+    Pt::Gfx::PointF p = to + origin();
+
+    if(_active)
+    {
+        return _active->drawSurface(p, surface);
+    }
+
+    return true;
+}
+
+
+bool PaintContext::drawSurface(const Gfx::PointF& to,
+                               const Gfx::PaintSurface& surface,
+                               const Gfx::RectF& rect)
+{
+    Pt::Gfx::PointF p = to + origin();
+
+    if(_active)
+    {
+        return _active->drawSurface(p, surface, rect);
+    }
+
+    return true;
+}
+
+
 void PaintContext::drawLayer(const Gfx::PointF& to, 
                              const Gfx::PaintLayer& layer)
 {
-    layer.draw(*this, to);
+    const PaintSurface* surface = layer.onGetLayerSurface();
+    if(surface)
+    {
+        PointF pos = layer.onGetLayerPosition();
+        if( drawSurface(to, *surface) )
+            return;
+    }
+
+    layer.onDraw(*this, to);
 }
 
 
@@ -503,28 +540,15 @@ void PaintContext::drawLayer(const Gfx::PointF& to,
                              const Gfx::PaintLayer& layer,
                              const Gfx::RectF& rect)
 {
-    layer.draw(*this, to, rect);
-}
+    const PaintSurface* surface = layer.onGetLayerSurface();
+    if(surface)
+    {
+        PointF pos = layer.onGetLayerPosition();
+        if( drawSurface(to, *surface, rect) )
+            return;
+    }
 
-
-void PaintContext::onDrawLayer(const Gfx::PointF& to, 
-                               const Gfx::PaintLayer& layer)
-{
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_active)
-        _active->drawLayer(p, layer);
-}
-
-
-void PaintContext::onDrawLayer(const Gfx::PointF& to,
-                               const Gfx::PaintLayer& layer,
-                               const Gfx::RectF& rect)
-{
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_active)
-        _active->drawLayer(p, layer, rect);
+    layer.onDraw(*this, to, &rect);
 }
 
 } // namespace

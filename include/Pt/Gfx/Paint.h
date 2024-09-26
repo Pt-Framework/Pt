@@ -260,6 +260,13 @@ class PT_GFX_API PaintContext
                        const Gfx::PaintLayer& layer,
                        const Gfx::RectF& rect);
 
+        bool drawSurface(const Gfx::PointF& to, 
+                         const Gfx::PaintSurface& surface);
+
+        bool drawSurface(const Gfx::PointF& to,
+                         const Gfx::PaintSurface& surface,
+                         const Gfx::RectF& rect);
+
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
 
@@ -275,13 +282,6 @@ class PT_GFX_API PaintContext
 
     protected:
         PaintContext();
-
-        void onDrawLayer(const Gfx::PointF& to, 
-                         const Gfx::PaintLayer& layer);
-
-        void onDrawLayer(const Gfx::PointF& to,
-                         const Gfx::PaintLayer& layer,
-                         const Gfx::RectF& rect);
 
     private:
         void attachCanvas(Canvas& canvas);

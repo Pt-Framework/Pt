@@ -97,33 +97,35 @@ class PT_GFX_API PaintSurface
         Painter*                   _painter;
 };
 
+//
+// TODO: create compatible layer from surface
+//
+
 /** @brief Paint layer surface.
 */
 class PT_GFX_API PaintLayer : public PaintSurface
 {
+    friend class PaintContext;
+
+    protected:
+        PaintLayer();
+
     public:
         virtual ~PaintLayer();
 
         Image toImage() const;
 
-        void draw(PaintContext& paint,
-                  const Gfx::PointF& to) const;
-        
-        void draw(PaintContext& paint,
-                  const Gfx::PointF& to, 
-                  const Gfx::RectF& rect) const;
-
     protected:
-        PaintLayer();
+        // onPut
+        virtual void onDraw(PaintContext& paint, 
+                            const Gfx::PointF& to,
+                            const Gfx::RectF* rect = 0) const;
+
+        virtual Gfx::PointF onGetLayerPosition() const = 0;
+
+        virtual const Gfx::PaintSurface* onGetLayerSurface() const = 0;
 
         virtual Image onGetImage() const = 0;
-
-        virtual void onDraw(PaintContext& paint,
-                            const Gfx::PointF& to) const;
-        
-        virtual void onDraw(PaintContext& paint,
-                            const Gfx::PointF& to, 
-                            const Gfx::RectF& rect) const;
 };
 
 } // namespace
