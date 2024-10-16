@@ -64,7 +64,7 @@ class PixmapSurface;
 class PixmapSurfaceImpl 
 {
     public:
-        PixmapSurfaceImpl();
+        PixmapSurfaceImpl(PixmapSurface& surface);
 
         void reset(const Gfx::Size& size, std::size_t stride)
         {
@@ -79,7 +79,7 @@ class PixmapSurfaceImpl
             _image.reset(image);
         }
 
-        const Gfx::PaintSurface* surface() const
+        const Gfx::PaintSurface* layerSurface() const
         {
             return &_image;
         }
@@ -104,7 +104,7 @@ class PixmapSurfaceImpl
             _image.setScaleFactor(scaleFactor);
         }
 
-        const Gfx::PaintInfo& info() const
+        const Gfx::PaintInfo& getInfo() const
         {
             return _image.info();
         }
@@ -146,7 +146,7 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
                         , public Gfx::Canvas
 {
     public:
-        PixmapSurfaceImpl();
+        PixmapSurfaceImpl(PixmapSurface& surface);
 
         virtual ~PixmapSurfaceImpl();
         
@@ -162,9 +162,14 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
         
         void setScaleFactor(double scaleFactor);
            
-        const Gfx::PaintSurface* surface() const
+        const PixmapSurface* layerSurface() const
         {
-            return 0;
+            return &_surface;
+        }
+
+        const Gfx::PaintInfo& getInfo() const
+        {
+            return *this;
         }
 
     protected:
@@ -289,6 +294,8 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
         static std::string getSystemFont();
 
     private:
+        PixmapSurface&            _surface;
+
         Gfx::SizeF     _physicalSize;
         Gfx::SizeF     _infoSize;
         Gfx::Scaling   _infoScaling;

@@ -47,7 +47,7 @@ namespace Pt {
 
 namespace Hmi {
 
-PixmapSurfaceImpl::PixmapSurfaceImpl()
+PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
 { 
 }
 
@@ -163,9 +163,10 @@ namespace Pt {
 
 namespace Hmi {
 
-PixmapSurfaceImpl::PixmapSurfaceImpl()
+PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
 : Gfx::PaintInfo()
-, Gfx::Canvas( static_cast<const PaintInfo&>(*this) )
+, Gfx::Canvas(surface)
+, _surface(surface)
 , _infoSize(0, 0)
 , _physicalSize(0, 0)
 , _width(0)

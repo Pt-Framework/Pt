@@ -72,10 +72,12 @@ class PT_GFX_API Painter
 
         void finish();
 
-        /** @brief Returns the painters native image format.
+        /** @brief Returns the image format.
         */
         const ImageFormat& format() const;
 
+        /** @brief Returns the paint scaling.
+        */
         const Scaling& scaling() const;
 
     public:

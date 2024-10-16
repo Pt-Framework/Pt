@@ -192,6 +192,9 @@ class PT_GFX_API PaintContext
     friend class Canvas;
     friend class PaintLayer;
 
+    protected:
+        PaintContext();
+
     public:
         virtual ~PaintContext();
 
@@ -279,9 +282,6 @@ class PT_GFX_API PaintContext
         virtual void onSetClip(const Gfx::RectF* clip) = 0;
 
         virtual void onReleasePaint() {}
-
-    protected:
-        PaintContext();
 
     private:
         void attachCanvas(Canvas& canvas);

@@ -42,8 +42,7 @@ namespace Pt {
 namespace Gfx {
 
 PaintSurface::PaintSurface()
-: _canvas(0)
-, _painter(0)
+: _painter(0)
 {
 }
 
@@ -96,56 +95,14 @@ void PaintSurface::onReset()
 
 const PaintInfo& PaintSurface::info() const
 {
-    if(_canvas)
-        return _canvas->info();
-
     return onGetPaintInfo();
-}
-
-
-//const Scaling& PaintSurface::scaling() const
-//{
-//    return info().scaling();
-//}
-
-
-const ImageFormat& PaintSurface::format() const
-{
-    return info().format();
-}
-
-
-Canvas* PaintSurface::canvas()
-{
-    return _canvas;
-}
-
-
-const Canvas* PaintSurface::canvas() const
-{
-    return _canvas;
-}
-
-
-void PaintSurface::setCanvas(Canvas* canvas)
-{
-    _canvas = canvas;
 }
 
 
 PaintContext* PaintSurface::getPaint(PaintContext* reuse)
 {
-    if(_canvas)
-        return _canvas->getPaint(reuse);
-
     return onGetPaint(reuse);   
 }
-
-
-PaintContext* PaintSurface::onGetPaint(PaintContext* context)
-{
-    return 0;
-}   
 
 
 void PaintSurface::attachPainter(Painter& painter)

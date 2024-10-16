@@ -39,7 +39,7 @@ namespace Hmi {
 PixmapSurface::PixmapSurface()
 : _impl(0)
 {
-    _impl = new PixmapSurfaceImpl();
+    _impl = new PixmapSurfaceImpl(*this);
 }
 
 
@@ -112,8 +112,7 @@ Gfx::PointF PixmapSurface::onGetLayerPosition() const
 
 const Gfx::PaintSurface* PixmapSurface::onGetLayerSurface() const
 {
-    const Gfx::PaintSurface* surface = _impl->surface();
-    return surface ? surface : this;
+    return _impl->layerSurface();
 }
 
 
@@ -125,7 +124,7 @@ Gfx::Image PixmapSurface::onGetImage() const
 
 const Gfx::PaintInfo& PixmapSurface::onGetPaintInfo() const
 {
-    return _impl->info();
+    return _impl->getInfo();
 }
 
 

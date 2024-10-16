@@ -61,7 +61,9 @@ class Path;
 class PT_GFX_API Canvas
 {
     friend class PaintContext;
-    friend class PaintLayer;
+
+    protected:
+        explicit Canvas(const PaintSurface& surface);
 
     public:
         ~Canvas();
@@ -78,8 +80,6 @@ class PT_GFX_API Canvas
         virtual void onReleasePaint() = 0;
 
     protected:
-        explicit Canvas(const PaintInfo& info);
-
         void drawLine(const PointF& from, const PointF& to);
 
         void drawPolyline(const Gfx::Polyline& line);
@@ -182,7 +182,7 @@ class PT_GFX_API Canvas
         void onDetachPaint(PaintContext& paint);
     
     private:
-        const PaintInfo*           _info;
+        const PaintSurface&        _surface;
         PaintContext*              _paint;
 
         // TODO: multiple paint contexts attached, but one is active

@@ -104,7 +104,7 @@ class ImagePaint : public PaintContext
 class ImageCanvas : public Gfx::Canvas
 {
   public:
-    ImageCanvas(const PaintInfo& info);
+    ImageCanvas(const PaintSurface& surface);
 
     virtual ~ImageCanvas();
 

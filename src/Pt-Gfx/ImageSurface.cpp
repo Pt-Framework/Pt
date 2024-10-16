@@ -107,8 +107,8 @@ void ImagePaint::onSetClip(const Gfx::RectF* clip)
 // ImageCanvas
 ///////////////////////////////////////////////////////////////////////
 
-ImageCanvas::ImageCanvas(const PaintInfo& info)
-: Canvas(info)
+ImageCanvas::ImageCanvas(const PaintSurface& surface)
+: Canvas(surface)
 , _rasterizer(new Rasterizer)
 , _paint(0)
 {
@@ -393,16 +393,14 @@ const Scaling& ImagePaintInfo::onGetScaling() const
 ImageSurface::ImageSurface()
 : _canvas(0)
 {
-    _canvas = new ImageCanvas(_info);
-    setCanvas(_canvas);
+    _canvas = new ImageCanvas(*this);
 }
 
 
 ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
 : _canvas(0)
 {
-    _canvas = new ImageCanvas(_info);
-    setCanvas(_canvas);
+    _canvas = new ImageCanvas(*this);
 
     reset(size, stride);
 }
