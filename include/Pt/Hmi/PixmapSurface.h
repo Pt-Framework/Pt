@@ -73,6 +73,8 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintLayer
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
+        Gfx::Image toImage() const;
+
     //protected:
     //    virtual void onDrawPixmap(const Gfx::PointF& to, 
     //                              const PixmapSurface& pixmap,
@@ -89,11 +91,11 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintLayer
         virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
    protected:
-        virtual Gfx::PointF onGetLayerPosition() const override;
-
-        virtual const Gfx::PaintSurface* onGetLayerSurface() const override;
-
-        virtual Gfx::Image onGetImage() const override;
+        
+               
+        virtual void onDraw(Gfx::PaintSurface& surface, 
+                            const Gfx::PointF& to,
+                            const Gfx::RectF* rect) const override;
 
     public:
         static void setFontDir(const System::Path& path);

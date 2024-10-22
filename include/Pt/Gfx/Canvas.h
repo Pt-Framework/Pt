@@ -61,12 +61,17 @@ class Path;
 class PT_GFX_API Canvas
 {
     friend class PaintContext;
+    friend class PaintLayer;
 
     protected:
-        explicit Canvas(const PaintSurface& surface);
+        explicit Canvas(PaintSurface& surface);
 
     public:
         ~Canvas();
+
+        PaintSurface& surface();
+
+        const PaintSurface& surface() const;
 
         const PaintInfo& info() const;
 
@@ -111,9 +116,13 @@ class PT_GFX_API Canvas
         bool drawSurface(const Gfx::PointF& to, 
                          const Gfx::PaintSurface& surface);
 
-        bool drawSurface(const Gfx::PointF& to,
+        bool drawSurface(const Gfx::PointF& to, 
                          const Gfx::PaintSurface& surface,
                          const Gfx::RectF& rect);
+
+        bool drawLayer(const Gfx::PointF& to,
+                       const Gfx::PaintLayer& layer,
+                       const Gfx::RectF* rect = 0);
     
     protected:
         virtual void onCompositionModeChanged() = 0;
@@ -178,11 +187,15 @@ class PT_GFX_API Canvas
                                    const Gfx::PaintSurface& surface,
                                    const Gfx::RectF& rect) = 0;
 
+        virtual bool onDrawLayer(const Gfx::PointF& to,
+                                 const Gfx::PaintLayer& surface,
+                                 const Gfx::RectF* rect) = 0;
+
     private:
         void onDetachPaint(PaintContext& paint);
     
     private:
-        const PaintSurface&        _surface;
+        PaintSurface&              _surface;
         PaintContext*              _paint;
 
         // TODO: multiple paint contexts attached, but one is active

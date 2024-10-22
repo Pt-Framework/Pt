@@ -107,7 +107,7 @@ void ImagePaint::onSetClip(const Gfx::RectF* clip)
 // ImageCanvas
 ///////////////////////////////////////////////////////////////////////
 
-ImageCanvas::ImageCanvas(const PaintSurface& surface)
+ImageCanvas::ImageCanvas(PaintSurface& surface)
 : Canvas(surface)
 , _rasterizer(new Rasterizer)
 , _paint(0)
@@ -163,6 +163,7 @@ Gfx::PaintContext* ImageCanvas::onGetPaint()
 void ImageCanvas::onReleasePaint()
 {
     //_rasterizer->finish();
+    _rasterizer->resetClip();
     _paint = 0;
 }
 
@@ -343,6 +344,36 @@ bool ImageCanvas::onDrawSurface(const Gfx::PointF& to,
     return false;
 }
 
+
+bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
+                              const Gfx::PaintLayer& layer,
+                              const Gfx::RectF* rect)
+{
+    const PaintSurface* layerSurface = layer.surface();
+    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(layerSurface);
+
+    //const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&layer);
+    
+    if(imageSurface)
+    {
+        const Gfx::Image& image = imageSurface->image();
+        
+        if(rect)
+        {
+            Gfx::RectF imageRect = info().scaling().toPhysical(*rect);
+            drawImage(to, image, imageRect);
+        }
+        else
+        {
+            drawImage(to, image);
+        }
+        
+        return true;
+    }
+
+    return false;
+}
+
 ///////////////////////////////////////////////////////////////////////
 // ImagePaintInfo
 ///////////////////////////////////////////////////////////////////////
@@ -394,6 +425,8 @@ ImageSurface::ImageSurface()
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this);
+
+    setSurface(this);
 }
 
 
@@ -401,6 +434,8 @@ ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this);
+
+    setSurface(this);
 
     reset(size, stride);
 }
@@ -473,21 +508,22 @@ Gfx::PaintContext* ImageSurface::onGetPaint(Gfx::PaintContext* reuse)
 }
 
 
-Gfx::PointF ImageSurface::onGetLayerPosition() const 
+void ImageSurface::onDraw(PaintSurface& surface, 
+                          const Gfx::PointF& to,
+                          const Gfx::RectF* rect) const
 {
-    return Gfx::PointF();
-}
-
-
-const Gfx::PaintSurface* ImageSurface::onGetLayerSurface() const
-{
-    return this;
-}
-
-
-Gfx::Image ImageSurface::onGetImage() const
-{
-    return _canvas->image();
+    Gfx::Painter painter(surface);
+    
+    const Gfx::Image& image = this->image();
+    if(rect)
+    {
+        Gfx::RectF imageRect = _info.scaling().toPhysical(*rect);
+        painter.drawImage(to, image, imageRect);
+    }
+    else
+    {
+        painter.drawImage(to, image);
+    }
 }
 
 

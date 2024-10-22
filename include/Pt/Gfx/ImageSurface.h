@@ -104,7 +104,7 @@ class ImagePaint : public PaintContext
 class ImageCanvas : public Gfx::Canvas
 {
   public:
-    ImageCanvas(const PaintSurface& surface);
+    ImageCanvas(PaintSurface& surface);
 
     virtual ~ImageCanvas();
 
@@ -172,7 +172,7 @@ class ImageCanvas : public Gfx::Canvas
 
     virtual void onDrawText(const Gfx::PointF& to, 
                             const Pt::String& text, 
-                            const Gfx::Transform* trans)override;
+                            const Gfx::Transform* trans) override;
 
   protected:
     virtual void onDrawImage(const Gfx::PointF& to, 
@@ -188,6 +188,10 @@ class ImageCanvas : public Gfx::Canvas
     virtual bool onDrawSurface(const Gfx::PointF& to,
                                const Gfx::PaintSurface& surface,
                                const Gfx::RectF& rect) override;
+
+    virtual bool onDrawLayer(const Gfx::PointF& to,
+                             const Gfx::PaintLayer& layer,
+                             const Gfx::RectF* rect) override;
 
   private:
     Rasterizer*   _rasterizer;
@@ -244,7 +248,7 @@ class PT_GFX_API ImageSurface : public Gfx::PaintLayer
     */
     void resize(const Gfx::SizeF& size);
 
-    void setScaleFactor(double scaleFactor);    
+    void setScaleFactor(double scaleFactor);
 
   protected:
     virtual const PaintInfo& onGetPaintInfo() const override;
@@ -252,11 +256,9 @@ class PT_GFX_API ImageSurface : public Gfx::PaintLayer
     virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
    protected:
-    virtual Gfx::PointF onGetLayerPosition() const override;
-
-    virtual const Gfx::PaintSurface* onGetLayerSurface() const override;
-
-    virtual Gfx::Image onGetImage() const override;
+    virtual void onDraw(PaintSurface& surface, 
+                        const Gfx::PointF& to,
+                        const Gfx::RectF* rect) const override;
 
   public:
     static void setFontDir(const System::Path& path);

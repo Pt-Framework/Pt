@@ -136,27 +136,23 @@ PaintLayer::~PaintLayer()
 {
 }
 
-
-Image PaintLayer::toImage() const
+const PaintSurface* PaintLayer::surface() const
 {
-    return onGetImage();
+    return _surface;
 }
 
 
-void PaintLayer::onDraw(PaintContext& paint, 
-                        const Gfx::PointF& to,
-                        const Gfx::RectF* rect) const
+void PaintLayer::setSurface(PaintSurface* surface)
 {
-    Pt::Gfx::Image image = toImage();
+    _surface = surface;
+}
 
-    if( ! rect )
-    {
-        paint.drawImage(to, image);
-        return;
-    }
 
-    Gfx::RectF imageRect = info().scaling().toPhysical(*rect);
-    paint.drawImage(to, image, imageRect);
+void PaintLayer::draw(PaintSurface& surface, 
+                      const Gfx::PointF& to,
+                      const Gfx::RectF* rect) const
+{
+    onDraw(surface, to, rect);
 }
 
 } // namespace

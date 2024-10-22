@@ -365,16 +365,42 @@ void Painter::drawLayer(const Gfx::PointF& to,
                         const PaintLayer& layer)
 {
     if(_paintContext)
-        _paintContext->drawLayer(to, layer);
+    {
+        bool isCompatible = _paintContext->drawLayer(to, layer);
+        if( ! isCompatible )
+        {
+            PaintSurface* surface = _surface;
+            finish();
+
+            // TODO: clipping and composition-mode
+
+            layer.draw(*surface, to);
+
+            begin(*surface);
+        }
+    }
 }
 
 
 void Painter::drawLayer(const Gfx::PointF& to, 
                         const PaintLayer& layer, 
-                        const Gfx::RectF& layerRect)
+                        const Gfx::RectF& rect)
 {
     if(_paintContext)
-        _paintContext->drawLayer(to, layer, layerRect);
+    {
+        bool isCompatible = _paintContext->drawLayer(to, layer, &rect);
+        if( ! isCompatible )
+        {
+            PaintSurface* surface = _surface;
+            finish();
+            
+            // TODO: clipping and composition-mode
+
+            layer.draw(*surface, to, &rect);
+            
+            begin(*surface);
+        }
+    }
 }
 
 } // namespace

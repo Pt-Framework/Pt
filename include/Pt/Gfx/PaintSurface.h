@@ -46,6 +46,7 @@ class Canvas;
 class Painter;
 class PaintContext;
 class PaintRegion;
+class PaintLayer;
 
 /** @brief Paint surface.
 */
@@ -86,35 +87,32 @@ class PT_GFX_API PaintSurface
         Painter*                   _painter;
 };
 
-//
-// TODO: create compatible layer from surface
-//
-
 /** @brief Paint layer surface.
 */
 class PT_GFX_API PaintLayer : public PaintSurface
 {
-    friend class PaintContext;
-
     protected:
         PaintLayer();
 
     public:
         virtual ~PaintLayer();
 
-        Image toImage() const;
+        const PaintSurface* surface() const;
+
+        void draw(PaintSurface& surface, 
+                  const Gfx::PointF& to,
+                  const Gfx::RectF* rect = 0) const;
 
     protected:
-        // onPut
-        virtual void onDraw(PaintContext& paint, 
+        virtual void onDraw(PaintSurface& surface, 
                             const Gfx::PointF& to,
-                            const Gfx::RectF* rect = 0) const;
+                            const Gfx::RectF* rect = 0) const = 0;
 
-        virtual Gfx::PointF onGetLayerPosition() const = 0;
+    protected:
+        void setSurface(PaintSurface* surface);
 
-        virtual const Gfx::PaintSurface* onGetLayerSurface() const = 0;
-
-        virtual Image onGetImage() const = 0;
+    private:
+        PaintSurface* _surface;
 };
 
 } // namespace

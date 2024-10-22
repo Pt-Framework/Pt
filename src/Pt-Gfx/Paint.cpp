@@ -521,34 +521,17 @@ bool PaintContext::drawSurface(const Gfx::PointF& to,
 }
 
 
-void PaintContext::drawLayer(const Gfx::PointF& to, 
-                             const Gfx::PaintLayer& layer)
-{
-    const PaintSurface* surface = layer.onGetLayerSurface();
-    if(surface)
-    {
-        PointF pos = layer.onGetLayerPosition();
-        if( drawSurface(to, *surface) )
-            return;
-    }
-
-    layer.onDraw(*this, to);
-}
-
-
-void PaintContext::drawLayer(const Gfx::PointF& to,
+bool PaintContext::drawLayer(const Gfx::PointF& to,
                              const Gfx::PaintLayer& layer,
-                             const Gfx::RectF& rect)
+                             const Gfx::RectF* rect)
 {
-    const PaintSurface* surface = layer.onGetLayerSurface();
-    if(surface)
+    if(_active)
     {
-        PointF pos = layer.onGetLayerPosition();
-        if( drawSurface(to, *surface, rect) )
-            return;
+        Pt::Gfx::PointF p = to + origin();
+        return _active->drawLayer(p, layer, rect);
     }
 
-    layer.onDraw(*this, to, &rect);
+    return true;
 }
 
 } // namespace

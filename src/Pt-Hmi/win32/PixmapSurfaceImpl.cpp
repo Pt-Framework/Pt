@@ -51,6 +51,14 @@ PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
 { 
 }
 
+
+void PixmapSurfaceImpl::draw(Gfx::PaintSurface& surface, 
+                             const Gfx::PointF& to,
+                             const Gfx::RectF* rect) const
+{
+    _image.draw(surface, to, rect);
+}
+
 } // namespace
 
 } // namespace
@@ -291,6 +299,47 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 void PixmapSurfaceImpl::setScaleFactor(double scaleFactor)
 {
     _infoScaling.setScaleFactor(scaleFactor);
+}
+
+
+bool PixmapSurfaceImpl::onDrawLayer(const Gfx::PointF& to,
+                                    const Gfx::PaintLayer& layer,
+                                    const Gfx::RectF* rect)
+{
+    const Gfx::PaintSurface* layerSurface = layer.surface();
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(layerSurface);
+
+    //const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&layer);
+    if(pixmap)
+    {
+        if(rect)
+            drawPixmap(to, *pixmap->impl(), *rect);
+        else
+            drawPixmap(to, *pixmap->impl());
+        
+        return true;
+    }
+
+    return false;
+}
+
+
+void PixmapSurfaceImpl::draw(Gfx::PaintSurface& surface,
+                             const Gfx::PointF& to,
+                             const Gfx::RectF* rect) const
+{
+    Gfx::Image pixmapImage = toImage();
+
+    Gfx::Painter painter(surface);
+    if(rect)
+    {
+        Gfx::RectF imageRect = scaling().toPhysical(*rect);
+        painter.drawImage(to, pixmapImage, imageRect);
+    }
+    else
+    {
+        painter.drawImage(to, pixmapImage);
+    }
 }
 
 
@@ -806,7 +855,7 @@ void PixmapSurfaceImpl::onDrawText(const Gfx::PointF& to,
 }
 
 
-Gfx::Image PixmapSurfaceImpl::image() const
+Gfx::Image PixmapSurfaceImpl::toImage() const
 {
     BITMAPINFO bitmapInfo;
     ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));

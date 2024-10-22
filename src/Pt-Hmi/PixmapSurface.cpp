@@ -40,6 +40,8 @@ PixmapSurface::PixmapSurface()
 : _impl(0)
 {
     _impl = new PixmapSurfaceImpl(*this);
+
+    setSurface( _impl->surface() );
 }
 
 
@@ -85,6 +87,11 @@ void PixmapSurface::clear(const Gfx::Color& c)
 }
 
 
+Gfx::Image PixmapSurface::toImage() const
+{
+    return _impl->toImage();
+}
+
 //void PixmapSurface::onDrawPixmap(const Gfx::PointF& to, 
 //                                 const PixmapSurface& pixmap,
 //                                 const Gfx::CompositionMode& mode)
@@ -104,24 +111,6 @@ void PixmapSurface::clear(const Gfx::Color& c)
 //}
 
 
-Gfx::PointF PixmapSurface::onGetLayerPosition() const 
-{
-    return Gfx::PointF();
-}
-
-
-const Gfx::PaintSurface* PixmapSurface::onGetLayerSurface() const
-{
-    return _impl->layerSurface();
-}
-
-
-Gfx::Image PixmapSurface::onGetImage() const
-{
-    return _impl->image();
-}
-
-
 const Gfx::PaintInfo& PixmapSurface::onGetPaintInfo() const
 {
     return _impl->getInfo();
@@ -131,6 +120,14 @@ const Gfx::PaintInfo& PixmapSurface::onGetPaintInfo() const
 Gfx::PaintContext* PixmapSurface::onGetPaint(Gfx::PaintContext* context) 
 {
     return _impl->getPaint(context);
+}
+
+
+void PixmapSurface::onDraw(Gfx::PaintSurface& surface, 
+                           const Gfx::PointF& to,
+                           const Gfx::RectF* rect) const
+{
+    _impl->draw(surface, to, rect);
 }
 
 

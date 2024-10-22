@@ -256,19 +256,16 @@ class PT_GFX_API PaintContext
                        const Gfx::Image& image, 
                        const Gfx::RectF& imgRect);
 
-        void drawLayer(const Gfx::PointF& to, 
-                       const Gfx::PaintLayer& layer);
-
-        void drawLayer(const Gfx::PointF& to,
-                       const Gfx::PaintLayer& layer,
-                       const Gfx::RectF& rect);
-
         bool drawSurface(const Gfx::PointF& to, 
                          const Gfx::PaintSurface& surface);
 
         bool drawSurface(const Gfx::PointF& to,
                          const Gfx::PaintSurface& surface,
                          const Gfx::RectF& rect);
+
+        bool drawLayer(const Gfx::PointF& to,
+                       const Gfx::PaintLayer& layer,
+                       const Gfx::RectF* rect = 0);
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;

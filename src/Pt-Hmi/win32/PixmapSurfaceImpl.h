@@ -79,12 +79,7 @@ class PixmapSurfaceImpl
             _image.reset(image);
         }
 
-        const Gfx::PaintSurface* layerSurface() const
-        {
-            return &_image;
-        }
-
-        const Gfx::Image& image() const
+        const Gfx::Image& toImage() const
         {
             return _image.image();
         }
@@ -104,6 +99,11 @@ class PixmapSurfaceImpl
             _image.setScaleFactor(scaleFactor);
         }
 
+        Gfx::PaintSurface* surface()
+        {
+            return &_image;
+        }
+
         const Gfx::PaintInfo& getInfo() const
         {
             return _image.info();
@@ -113,6 +113,10 @@ class PixmapSurfaceImpl
         {
             return _image.getPaint(context);
         }
+
+        void draw(Gfx::PaintSurface& surface, 
+                  const Gfx::PointF& to,
+                  const Gfx::RectF* rect) const;
 
         static const std::string& defaultFont()
         {
@@ -154,7 +158,7 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
 
         void set(const Gfx::Image& image);
 
-        Gfx::Image image() const;
+        Gfx::Image toImage() const;
 
         const Gfx::SizeF& pixmapSize() const;
 
@@ -162,10 +166,14 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
         
         void setScaleFactor(double scaleFactor);
            
-        const PixmapSurface* layerSurface() const
+        PixmapSurface* surface()
         {
             return &_surface;
         }
+
+        void draw(Gfx::PaintSurface& surface, 
+                  const Gfx::PointF& to,
+                  const Gfx::RectF* rect) const;
 
         const Gfx::PaintInfo& getInfo() const
         {
@@ -253,6 +261,10 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
         virtual bool onDrawSurface(const Gfx::PointF& to,
                                    const Gfx::PaintSurface& surface,
                                    const Gfx::RectF& rect) override;
+
+        virtual bool onDrawLayer(const Gfx::PointF& to, 
+                                 const Gfx::PaintLayer& layer,
+                                 const Gfx::RectF* rect) override;
 
     public:
         void drawPixmap(const Gfx::PointF& toF, 

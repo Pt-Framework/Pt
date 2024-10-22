@@ -35,7 +35,7 @@ namespace Pt {
 
 namespace Gfx {
 
-Canvas::Canvas(const PaintSurface& surface)
+Canvas::Canvas(PaintSurface& surface)
 : _surface(surface)
 , _paint(0)
 , _active(0)
@@ -60,6 +60,18 @@ void Canvas::onDetachPaint(PaintContext& canvas)
         onReleasePaint();
         _paint = 0;
     }
+}
+
+
+PaintSurface& Canvas::surface()
+{
+    return _surface;
+}
+
+
+const PaintSurface& Canvas::surface() const
+{
+    return _surface;
 }
 
 
@@ -197,6 +209,14 @@ bool Canvas::drawSurface(const Gfx::PointF& to,
                          const Gfx::RectF& rect)
 {
     return onDrawSurface(to, surface, rect);
+}
+
+
+bool Canvas::drawLayer(const Gfx::PointF& to,
+                       const Gfx::PaintLayer& layer,
+                       const Gfx::RectF* rect)
+{
+    return onDrawLayer(to, layer, rect);
 }
 
 } // namespace
