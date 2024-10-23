@@ -59,13 +59,13 @@ void PixmapSurface::set(const Gfx::Image& image)
 
 bool PixmapSurface::empty() const
 {
-    return _impl->pixmapSize().isNull();
+    return _impl->size().isNull();
 }
 
 
 const Gfx::SizeF& PixmapSurface::size() const
 {
-    return _impl->pixmapSize();
+    return _impl->size();
 }
 
 
@@ -113,7 +113,7 @@ Gfx::Image PixmapSurface::toImage() const
 
 const Gfx::PaintInfo& PixmapSurface::onGetPaintInfo() const
 {
-    return _impl->getInfo();
+    return _impl->info();
 }
 
 

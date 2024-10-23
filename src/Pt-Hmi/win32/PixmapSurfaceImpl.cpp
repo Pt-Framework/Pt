@@ -165,17 +165,45 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
     return brush;
 }
 
+void toPreMulAlpha(const Pt::Gfx::Image& image, 
+                   std::vector<Pt::uint8_t>& bitmapData)
+{
+    size_t _width = image.width();
+    size_t _height = image.height();
+
+    for (std::size_t y = 0; y < image.height(); ++y)
+    {
+        for (std::size_t x = 0; x < image.width(); ++x)
+        {
+            Pt::Gfx::ConstPixel pixel(image.view(), x, y);
+            Pt::Gfx::Color color = image.format().getColor(pixel);
+
+            const Pt::uint8_t r = color.red() / 257;
+            const Pt::uint8_t g = color.green() / 257;
+            const Pt::uint8_t b = color.blue() / 257;
+            const Pt::uint8_t a = color.alpha() / 257;
+
+            bitmapData.push_back((Pt::uint8_t) (a * b / 255));
+            bitmapData.push_back((Pt::uint8_t) (a * g / 255));
+            bitmapData.push_back((Pt::uint8_t) (a * r / 255));
+            bitmapData.push_back((Pt::uint8_t) (a));
+        }
+    }
+}
+
 } // namespace
 
 namespace Pt {
 
 namespace Hmi {
 
-PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
-: Gfx::PaintInfo()
-, Gfx::Canvas(surface)
+///////////////////////////////////////////////////////////////////////
+// PixmapCanvas
+///////////////////////////////////////////////////////////////////////
+
+PixmapCanvas::PixmapCanvas(PixmapSurface& surface)
+: Gfx::Canvas(surface)
 , _surface(surface)
-, _infoSize(0, 0)
 , _physicalSize(0, 0)
 , _width(0)
 , _height(0)
@@ -204,7 +232,7 @@ PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
 }
 
 
-PixmapSurfaceImpl::~PixmapSurfaceImpl()
+PixmapCanvas::~PixmapCanvas()
 {
     SelectObject(_dc, _oldBitmap);
 
@@ -213,12 +241,7 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 }
 
 
-void PixmapSurfaceImpl::clear(const Gfx::Color& c)
-{
-}
-
-
-void PixmapSurfaceImpl::set(const Gfx::Image& image)
+void PixmapCanvas::set(const Gfx::Image& image)
 {
     size_t width = image.width();
     size_t height = image.height();
@@ -267,13 +290,44 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
 }
 
 
-const Gfx::SizeF& PixmapSurfaceImpl::pixmapSize() const
+Gfx::Image PixmapCanvas::toImage() const
+{
+    BITMAPINFO bitmapInfo;
+    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+    bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bitmapInfo.bmiHeader.biWidth = _width;
+    bitmapInfo.bmiHeader.biHeight = -(ssize_t)_height;  // top-down image
+    bitmapInfo.bmiHeader.biPlanes = 1;                         // always 1
+    bitmapInfo.bmiHeader.biBitCount = 32;                      // bits per pixel
+    bitmapInfo.bmiHeader.biCompression = BI_RGB;               // uncompressed RGB
+    bitmapInfo.bmiHeader.biSizeImage = 0;                      // automatic
+    bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
+    bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
+
+    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), Gfx::Size(_width, _height) );
+    Pt::uint8_t* data = image.data();
+
+    int ret = GetDIBits(_dc, _bitmap, 0, _height, data, 
+                        &bitmapInfo, DIB_RGB_COLORS);
+
+    return image;
+}
+
+
+const Gfx::SizeF& PixmapCanvas::size() const
 {
     return _physicalSize;
 }
 
 
-void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
+const Gfx::SizeF& PixmapCanvas::logicalSize() const
+{
+    return _logicalSize;
+}
+
+
+void PixmapCanvas::resize(const Gfx::SizeF& size)
 {
     LONG width = lround( size.width() );
     LONG height = lround( size.height() );
@@ -291,77 +345,13 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
     _width = width;
     _height = height;
 
-    _infoSize = size;
     _physicalSize.set(width, height);
+
+    _logicalSize = info().scaling().toLogical(_physicalSize);
 }
 
 
-void PixmapSurfaceImpl::setScaleFactor(double scaleFactor)
-{
-    _infoScaling.setScaleFactor(scaleFactor);
-}
-
-
-bool PixmapSurfaceImpl::onDrawLayer(const Gfx::PointF& to,
-                                    const Gfx::PaintLayer& layer,
-                                    const Gfx::RectF* rect)
-{
-    const Gfx::PaintSurface* layerSurface = layer.surface();
-    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(layerSurface);
-
-    //const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&layer);
-    if(pixmap)
-    {
-        if(rect)
-            drawPixmap(to, *pixmap->impl(), *rect);
-        else
-            drawPixmap(to, *pixmap->impl());
-        
-        return true;
-    }
-
-    return false;
-}
-
-
-void PixmapSurfaceImpl::draw(Gfx::PaintSurface& surface,
-                             const Gfx::PointF& to,
-                             const Gfx::RectF* rect) const
-{
-    Gfx::Image pixmapImage = toImage();
-
-    Gfx::Painter painter(surface);
-    if(rect)
-    {
-        Gfx::RectF imageRect = scaling().toPhysical(*rect);
-        painter.drawImage(to, pixmapImage, imageRect);
-    }
-    else
-    {
-        painter.drawImage(to, pixmapImage);
-    }
-}
-
-
-const Gfx::ImageFormat& PixmapSurfaceImpl::onGetFormat() const
-{
-    return Gfx::ImageFormat::argb32();
-}
-
-
-const Gfx::SizeF& PixmapSurfaceImpl::onGetSize() const
-{
-    return _infoSize;
-}
-
-
-const Gfx::Scaling& PixmapSurfaceImpl::onGetScaling() const
-{
-    return _infoScaling;
-}
-
-
-bool PixmapSurfaceImpl::onGetPaint(Gfx::PaintContext* context)
+bool PixmapCanvas::onGetPaint(Gfx::PaintContext* context)
 {
     PaintContext* paintContext = dynamic_cast<PaintContext*>(context);
     if( ! paintContext )
@@ -378,7 +368,7 @@ bool PixmapSurfaceImpl::onGetPaint(Gfx::PaintContext* context)
 }
 
 
-Gfx::PaintContext* PixmapSurfaceImpl::onGetPaint()
+Gfx::PaintContext* PixmapCanvas::onGetPaint()
 {
     PaintContext* paintContext  = new PaintContext();
 
@@ -387,7 +377,7 @@ Gfx::PaintContext* PixmapSurfaceImpl::onGetPaint()
 }
 
 
-void PixmapSurfaceImpl::onReleasePaint()
+void PixmapCanvas::onReleasePaint()
 {
     SelectObject(_dc, _oldPen);
     SelectObject(_dc, _oldBrush);
@@ -398,7 +388,16 @@ void PixmapSurfaceImpl::onReleasePaint()
 }
 
 
-void PixmapSurfaceImpl::onPenChanged()
+void PixmapCanvas::onCompositionModeChanged()
+{
+    if( ! _paintContext )
+        return;
+
+    _compositionMode = _paintContext->compositionMode();
+}
+
+
+void PixmapCanvas::onPenChanged()
 {
     if( ! _paintContext )
         return;
@@ -417,7 +416,7 @@ void PixmapSurfaceImpl::onPenChanged()
 }
 
 
-void PixmapSurfaceImpl::onBrushChanged()
+void PixmapCanvas::onBrushChanged()
 {
     if( ! _paintContext )
         return;
@@ -442,7 +441,7 @@ void PixmapSurfaceImpl::onBrushChanged()
 }
 
 
-void PixmapSurfaceImpl::onFontChanged()
+void PixmapCanvas::onFontChanged()
 {
     if( ! _paintContext )
         return;
@@ -455,16 +454,7 @@ void PixmapSurfaceImpl::onFontChanged()
 }
 
 
-void PixmapSurfaceImpl::onCompositionModeChanged()
-{
-    if( ! _paintContext )
-        return;
-
-    _compositionMode = _paintContext->compositionMode();
-}
-
-
-void PixmapSurfaceImpl::onClipChanged()
+void PixmapCanvas::onClipChanged()
 {
     if( ! _paintContext )
         return;
@@ -477,7 +467,7 @@ void PixmapSurfaceImpl::onClipChanged()
 }
 
 
-void PixmapSurfaceImpl::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
+void PixmapCanvas::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
 {
     POINT points[2];
     
@@ -491,7 +481,7 @@ void PixmapSurfaceImpl::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
 }
 
 
-void PixmapSurfaceImpl::onDrawPolyline(const Gfx::Polyline& line)
+void PixmapCanvas::onDrawPolyline(const Gfx::Polyline& line)
 {
     std::size_t n = line.size();
 
@@ -509,7 +499,7 @@ void PixmapSurfaceImpl::onDrawPolyline(const Gfx::Polyline& line)
 }
 
 
-void PixmapSurfaceImpl::onFillPolygon(const Gfx::Polyline& line)
+void PixmapCanvas::onFillPolygon(const Gfx::Polyline& line)
 {
     std::size_t n = line.size();
 
@@ -573,7 +563,7 @@ void PixmapSurfaceImpl::onFillPolygon(const Gfx::Polyline& line)
 }
 
 
-void PixmapSurfaceImpl::onDrawRect(const Gfx::RectF& r)
+void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
 {
     HBRUSH originalBrush = (HBRUSH) SelectObject(_dc, GetStockObject(NULL_BRUSH));
 
@@ -586,7 +576,7 @@ void PixmapSurfaceImpl::onDrawRect(const Gfx::RectF& r)
 }
 
 
-void PixmapSurfaceImpl::onFillRect(const Gfx::RectF& r)
+void PixmapCanvas::onFillRect(const Gfx::RectF& r)
 {
     RECT rectangle;
     rectangle.left   =  lround( r.left() );
@@ -613,7 +603,8 @@ void PixmapSurfaceImpl::onFillRect(const Gfx::RectF& r)
     FillRect(_dc, &rectangle, currentBrush);
 }
 
-void PixmapSurfaceImpl::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+
+void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     HBRUSH originalBrush = (HBRUSH)SelectObject(_dc, GetStockObject(NULL_BRUSH));
 
@@ -626,7 +617,7 @@ void PixmapSurfaceImpl::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::Siz
 }
 
 
-void PixmapSurfaceImpl::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     POINT brushOrigin = {0};
     HGDIOBJ oldBrush = 0;
@@ -664,7 +655,7 @@ void PixmapSurfaceImpl::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::Siz
 
 #ifndef PT_HMI_GDIPLUS
 
-Gfx::FontMetrics PixmapSurfaceImpl::onGetFontMetrics(const Pt::String& text) const
+Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
 {
     double scaleFactor = info().scaling().scaleFactor();
 
@@ -713,7 +704,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::onGetFontMetrics(const Pt::String& text) con
 
 #else
 
-Gfx::FontMetrics PixmapSurfaceImpl::onGetFontMetrics(const Pt::String& text) const
+Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
 {
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
@@ -767,7 +758,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::onGetFontMetrics(const Pt::String& text) con
 
 #endif
 
-void PixmapSurfaceImpl::onDrawText(const Gfx::PointF& to, 
+void PixmapCanvas::onDrawText(const Gfx::PointF& to, 
                                    const Pt::String& text, 
                                    const Gfx::Transform* transform)
 {
@@ -855,41 +846,16 @@ void PixmapSurfaceImpl::onDrawText(const Gfx::PointF& to,
 }
 
 
-Gfx::Image PixmapSurfaceImpl::toImage() const
-{
-    BITMAPINFO bitmapInfo;
-    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-    bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bitmapInfo.bmiHeader.biWidth = _width;
-    bitmapInfo.bmiHeader.biHeight = -(ssize_t)_height;  // top-down image
-    bitmapInfo.bmiHeader.biPlanes = 1;                         // always 1
-    bitmapInfo.bmiHeader.biBitCount = 32;                      // bits per pixel
-    bitmapInfo.bmiHeader.biCompression = BI_RGB;               // uncompressed RGB
-    bitmapInfo.bmiHeader.biSizeImage = 0;                      // automatic
-    bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
-    bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
-
-    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), Gfx::Size(_width, _height) );
-    Pt::uint8_t* data = image.data();
-
-    int ret = GetDIBits(_dc, _bitmap, 0, _height, data, 
-                        &bitmapInfo, DIB_RGB_COLORS);
-
-    return image;
-}
-
-
-void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& to, 
-                                  const Gfx::Image& image, 
-                                  const Gfx::RectF& imgRect)
+void PixmapCanvas::onDrawImage(const Gfx::PointF& to, 
+                               const Gfx::Image& image, 
+                               const Gfx::RectF& imgRect)
 {
     // TODO
     throw std::runtime_error("not implemented");
 }
 
 
-void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& toF, const Gfx::Image& image)
+void PixmapCanvas::onDrawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
     Gfx::PointF toR = info().scaling().toPhysical( toF );
     Gfx::Point to = Gfx::round(toR);
@@ -987,8 +953,8 @@ void PixmapSurfaceImpl::onDrawImage(const Gfx::PointF& toF, const Gfx::Image& im
 }
 
 
-bool PixmapSurfaceImpl::onDrawSurface(const Gfx::PointF& to, 
-                                      const Gfx::PaintSurface& surface)
+bool PixmapCanvas::onDrawSurface(const Gfx::PointF& to, 
+                                 const Gfx::PaintSurface& surface)
 {
     const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
     if(pixmap)
@@ -1001,9 +967,9 @@ bool PixmapSurfaceImpl::onDrawSurface(const Gfx::PointF& to,
 }
 
 
-bool PixmapSurfaceImpl::onDrawSurface(const Gfx::PointF& to,
-                                      const Gfx::PaintSurface& surface,
-                                      const Gfx::RectF& rect)
+bool PixmapCanvas::onDrawSurface(const Gfx::PointF& to,
+                                 const Gfx::PaintSurface& surface,
+                                 const Gfx::RectF& rect)
 {
     const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(&surface);
     if(pixmap)
@@ -1016,33 +982,28 @@ bool PixmapSurfaceImpl::onDrawSurface(const Gfx::PointF& to,
 }
 
 
-void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& to, 
-                                   const PixmapSurface& pixmap,
-                                   const Gfx::CompositionMode& mode)
+bool PixmapCanvas::onDrawLayer(const Gfx::PointF& to,
+                               const Gfx::PaintLayer& layer,
+                               const Gfx::RectF* rect)
 {
-    Gfx::CompositionMode restore = _compositionMode;
-    _compositionMode = mode;
+    const Gfx::PaintSurface* layerSurface = layer.surface();
+    const PixmapSurface* pixmap = dynamic_cast<const PixmapSurface*>(layerSurface);
+    if(pixmap)
+    {
+        if(rect)
+            drawPixmap(to, *pixmap->impl(), *rect);
+        else
+            drawPixmap(to, *pixmap->impl());
+        
+        return true;
+    }
 
-    drawPixmap(to, *pixmap.impl());
-    _compositionMode = restore;
+    return false;
 }
 
 
-void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& to, 
-                                   const PixmapSurface& pixmap, 
-                                   const Gfx::RectF& rect,
-                                   const Gfx::CompositionMode& mode)
-{
-    Gfx::CompositionMode restore = _compositionMode;
-    _compositionMode = mode;
-
-    drawPixmap(to, *pixmap.impl(), rect);
-    _compositionMode = restore;
-}
-
-
-void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
-                                   const PixmapSurfaceImpl& pixmap)
+void PixmapCanvas::drawPixmap(const Gfx::PointF& toF, 
+                              const PixmapSurfaceImpl& pixmap)
 {
     Gfx::PointF to = info().scaling().toPhysical(toF);
     Gfx::Size size = Gfx::round( pixmap.size() );
@@ -1073,9 +1034,9 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
 }
 
 
-void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF, 
-                                   const PixmapSurfaceImpl& pixmap, 
-                                   const Gfx::RectF& pixmapRect)
+void PixmapCanvas::drawPixmap(const Gfx::PointF& toF, 
+                              const PixmapSurfaceImpl& pixmap, 
+                              const Gfx::RectF& pixmapRect)
 {
     Gfx::PointF to = info().scaling().toPhysical(toF);
     
@@ -1110,34 +1071,33 @@ void PixmapSurfaceImpl::drawPixmap(const Gfx::PointF& toF,
 }
 
 
-void PixmapSurfaceImpl::toPreMulAlpha(const Pt::Gfx::Image& image, 
-                                      std::vector<Pt::uint8_t>& bitmapData)
+void PixmapCanvas::drawPixmap(const Gfx::PointF& to, 
+                              const PixmapSurface& pixmap,
+                              const Gfx::CompositionMode& mode)
 {
-    size_t _width = image.width();
-    size_t _height = image.height();
+    Gfx::CompositionMode restore = _compositionMode;
+    _compositionMode = mode;
 
-    for (std::size_t y = 0; y < image.height(); ++y)
-    {
-        for (std::size_t x = 0; x < image.width(); ++x)
-        {
-            Gfx::ConstPixel pixel(image.view(), x, y);
-            Gfx::Color color = image.format().getColor(pixel);
-
-            const Pt::uint8_t r = color.red() / 257;
-            const Pt::uint8_t g = color.green() / 257;
-            const Pt::uint8_t b = color.blue() / 257;
-            const Pt::uint8_t a = color.alpha() / 257;
-
-            bitmapData.push_back((Pt::uint8_t) (a * b / 255));
-            bitmapData.push_back((Pt::uint8_t) (a * g / 255));
-            bitmapData.push_back((Pt::uint8_t) (a * r / 255));
-            bitmapData.push_back((Pt::uint8_t) (a));
-        }
-    }
+    drawPixmap(to, *pixmap.impl());
+    _compositionMode = restore;
 }
 
 
-void PixmapSurfaceImpl::bitBlit( const Gfx::Point& to, size_t width, size_t height, HBITMAP bitmap, DWORD op )
+void PixmapCanvas::drawPixmap(const Gfx::PointF& to, 
+                              const PixmapSurface& pixmap, 
+                              const Gfx::RectF& rect,
+                              const Gfx::CompositionMode& mode)
+{
+    Gfx::CompositionMode restore = _compositionMode;
+    _compositionMode = mode;
+
+    drawPixmap(to, *pixmap.impl(), rect);
+    _compositionMode = restore;
+}
+
+
+void PixmapCanvas::bitBlit(const Gfx::Point& to, HBITMAP bitmap, 
+                           size_t width, size_t height, DWORD op)
 {
     HDC bitmapDC = CreateCompatibleDC(NULL);
     SelectObject(bitmapDC, bitmap);
@@ -1145,6 +1105,119 @@ void PixmapSurfaceImpl::bitBlit( const Gfx::Point& to, size_t width, size_t heig
     BitBlt(_dc,  to.x(), to.y(), width, height, bitmapDC, 0, 0, op);
 
     DeleteDC(bitmapDC);
+}
+
+
+HDC PixmapCanvas::deviceContext() const
+{
+    return _dc;
+}
+
+///////////////////////////////////////////////////////////////////////
+// PixmapSurfaceImpl
+///////////////////////////////////////////////////////////////////////
+
+PixmapSurfaceImpl::PixmapSurfaceImpl(PixmapSurface& surface)
+: Gfx::PaintInfo()
+, _surface(surface)
+, _canvas(surface)
+, _infoSize(0, 0)
+{
+}
+
+
+PixmapSurfaceImpl::~PixmapSurfaceImpl()
+{
+}
+
+
+void PixmapSurfaceImpl::clear(const Gfx::Color& c)
+{
+}
+
+
+void PixmapSurfaceImpl::set(const Gfx::Image& image)
+{
+    _canvas.set(image);
+}
+
+
+Gfx::Image PixmapSurfaceImpl::toImage() const
+{
+    return _canvas.toImage();
+}
+
+
+const Gfx::SizeF& PixmapSurfaceImpl::size() const
+{
+    return _canvas.size();
+}
+
+
+void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
+{
+    _canvas.resize(size);
+}
+
+
+void PixmapSurfaceImpl::setScaleFactor(double scaleFactor)
+{
+    _infoScaling.setScaleFactor(scaleFactor);
+}
+
+
+const Gfx::PaintInfo& PixmapSurfaceImpl::info() const
+{
+    return *this;
+}
+
+
+Gfx::PaintContext* PixmapSurfaceImpl::getPaint(Gfx::PaintContext* context)
+{
+    return _canvas.getPaint(context);
+}
+
+
+void PixmapSurfaceImpl::draw(Gfx::PaintSurface& surface,
+                             const Gfx::PointF& to,
+                             const Gfx::RectF* rect) const
+{
+    Gfx::Image pixmapImage = toImage();
+
+    Gfx::Painter painter(surface);
+    if(rect)
+    {
+        Gfx::RectF imageRect = scaling().toPhysical(*rect);
+        painter.drawImage(to, pixmapImage, imageRect);
+    }
+    else
+    {
+        painter.drawImage(to, pixmapImage);
+    }
+}
+
+
+HDC PixmapSurfaceImpl::deviceContext() const
+{
+    return _canvas.deviceContext();
+}
+
+
+const Gfx::ImageFormat& PixmapSurfaceImpl::onGetFormat() const
+{
+    return Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& PixmapSurfaceImpl::onGetSize() const
+{
+    return _canvas.logicalSize();
+}
+
+
+const Gfx::Scaling& PixmapSurfaceImpl::onGetScaling() const
+{
+    return _infoScaling;
 }
 
 
@@ -1157,28 +1230,6 @@ const std::string& PixmapSurfaceImpl::defaultFont()
 void PixmapSurfaceImpl::setDefaultFont(const std::string& f)
 {
     getDefaultFont() = f;
-}
-
-
-std::string& PixmapSurfaceImpl::getDefaultFont()
-{
-    static std::string _defaultFont; // = getSystemFont();
-    return _defaultFont;
-}
-
-
-std::string PixmapSurfaceImpl::getSystemFont()
-{
-    HDC dc = GetDC(NULL);
-
-    // TODO: returns a font named "System", which is useless... 
-
-    std::vector<TCHAR> buffer(32);
-    GetTextFace(dc, buffer.size(), &buffer[0]);
-
-    ReleaseDC(NULL, dc);
-
-    return Pt::win32::toMultiByte(&buffer[0]);
 }
 
 
@@ -1210,9 +1261,25 @@ void PixmapSurfaceImpl::setFontDir(const System::Path& path)
 }
 
 
-HDC PixmapSurfaceImpl::deviceContext() const
+std::string& PixmapSurfaceImpl::getDefaultFont()
 {
-    return _dc;
+    static std::string _defaultFont; // = getSystemFont();
+    return _defaultFont;
+}
+
+
+std::string PixmapSurfaceImpl::getSystemFont()
+{
+    HDC dc = GetDC(NULL);
+
+    // TODO: returns a font named "System", which is useless... 
+
+    std::vector<TCHAR> buffer(32);
+    GetTextFace(dc, buffer.size(), &buffer[0]);
+
+    ReleaseDC(NULL, dc);
+
+    return Pt::win32::toMultiByte(&buffer[0]);
 }
 
 } // namespace
