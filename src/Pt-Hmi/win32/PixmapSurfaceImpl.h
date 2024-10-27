@@ -147,6 +147,7 @@ class PixmapSurfaceImpl
 class PaintContext;
 class PixmapSurfaceImpl;
 
+
 class PixmapCanvas : public Gfx::Canvas
 {
     public:
@@ -292,18 +293,19 @@ class PixmapCanvas : public Gfx::Canvas
         Gfx::CompositionMode      _compositionMode;
 };
 
+
 class PixmapSurfaceImpl : public Gfx::PaintInfo
 {
     public:
         PixmapSurfaceImpl(PixmapSurface& surface);
 
         virtual ~PixmapSurfaceImpl();
-        
-        void clear(const Gfx::Color& c);
 
         void set(const Gfx::Image& image);
 
         Gfx::Image toImage() const;
+        
+        void clear(const Gfx::Color& c);
 
         const Gfx::SizeF& size() const;
 

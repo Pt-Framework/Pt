@@ -1131,11 +1131,6 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 }
 
 
-void PixmapSurfaceImpl::clear(const Gfx::Color& c)
-{
-}
-
-
 void PixmapSurfaceImpl::set(const Gfx::Image& image)
 {
     _canvas.set(image);
@@ -1145,6 +1140,11 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
 Gfx::Image PixmapSurfaceImpl::toImage() const
 {
     return _canvas.toImage();
+}
+
+
+void PixmapSurfaceImpl::clear(const Gfx::Color& c)
+{
 }
 
 

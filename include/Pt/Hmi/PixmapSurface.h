@@ -59,7 +59,11 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintLayer
 
         void set(const Gfx::Image& image);
 
+        Gfx::Image toImage() const;
+
         bool empty() const;
+
+        void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
         /** @brief Returns the size in device pixels. 
         */
@@ -70,10 +74,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintLayer
         void resize(const Gfx::SizeF& size);
 
         void setScaleFactor(double v);
-
-        void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
-
-        Gfx::Image toImage() const;
 
     //protected:
     //    virtual void onDrawPixmap(const Gfx::PointF& to, 
@@ -91,8 +91,6 @@ class PT_HMI_API PixmapSurface : public Gfx::PaintLayer
         virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
    protected:
-        
-               
         virtual void onDraw(Gfx::PaintSurface& surface, 
                             const Gfx::PointF& to,
                             const Gfx::RectF* rect) const override;
