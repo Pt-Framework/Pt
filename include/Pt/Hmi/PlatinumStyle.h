@@ -88,7 +88,7 @@ class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
         virtual void onPrepareIcon(const PushButton& button,
                                    const StyleOptions& options,
                                    const Gfx::Image& icon,
-                                   PixmapSurface& picture) const;
+                                   Pixmap& picture) const;
 
         virtual void onRenderBackground(const PushButton& button,
                                         const StyleOptions& options,
@@ -281,7 +281,7 @@ class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
         virtual void onPrepareItem(const MenuItem& m, 
                                    const StyleOptions& options,
                                    const Gfx::Image& icon,
-                                   PixmapSurface& picture,
+                                   Pixmap& picture,
                                    Gfx::Brush& brush,
                                    Gfx::Pen& contour,
                                    Gfx::Font& font,

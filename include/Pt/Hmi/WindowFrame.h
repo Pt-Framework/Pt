@@ -58,9 +58,11 @@ class WindowFrame : public Visual
 
         const Window& window() const;
 
-        PixmapSurface& pixmap();
+        Pixmap& pixmap();
 
-        const PixmapSurface& pixmap() const;
+        const Pixmap& pixmap() const;
+
+        void getImage(Gfx::Image& image);
 
     protected:
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
@@ -126,7 +128,7 @@ class WindowFrame : public Visual
     private:
         WindowManager& _wm;
         Window&        _window;
-        PixmapSurface  _surface;
+        PixmapSurface  _pixmap;
 };
 
 } // namespace

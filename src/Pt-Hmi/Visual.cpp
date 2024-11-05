@@ -954,7 +954,6 @@ Gfx::PointF View::fromWidget(const Widget& widget,
     return onFromWidget(widget, pos);
 }
 
-
 //
 // TODO: maintain a list of child widgets in onAttach() and onDetach(). 
 //       This way View::onSetSurface() can setup client surfaces.

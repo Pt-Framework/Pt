@@ -250,19 +250,9 @@ class PT_GFX_API PaintContext
 
     public:
         void drawImage(const Gfx::PointF& to, 
-                       const Gfx::Image& image);
-
-        void drawImage(const Gfx::PointF& to, 
                        const Gfx::Image& image, 
-                       const Gfx::RectF& imgRect);
-
-        bool drawSurface(const Gfx::PointF& to, 
-                         const Gfx::PaintSurface& surface);
-
-        bool drawSurface(const Gfx::PointF& to,
-                         const Gfx::PaintSurface& surface,
-                         const Gfx::RectF& rect);
-
+                       const Gfx::RectF* rect = 0);
+        
         bool drawLayer(const Gfx::PointF& to,
                        const Gfx::PaintLayer& layer,
                        const Gfx::RectF* rect = 0);

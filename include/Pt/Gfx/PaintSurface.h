@@ -87,9 +87,9 @@ class PT_GFX_API PaintSurface
         Painter*                   _painter;
 };
 
-/** @brief Paint layer surface.
+/** @brief Paint layer.
 */
-class PT_GFX_API PaintLayer : public PaintSurface
+class PT_GFX_API PaintLayer
 {
     protected:
         PaintLayer();
@@ -97,14 +97,18 @@ class PT_GFX_API PaintLayer : public PaintSurface
     public:
         virtual ~PaintLayer();
 
+        PaintSurface* surface();
+
         const PaintSurface* surface() const;
 
-        void draw(PaintSurface& surface, 
+        void draw(PaintSurface& surface,
+                  const Paint& paint,
                   const Gfx::PointF& to,
                   const Gfx::RectF* rect = 0) const;
 
     protected:
-        virtual void onDraw(PaintSurface& surface, 
+        virtual void onDraw(PaintSurface& surface,
+                            const Paint& paint,
                             const Gfx::PointF& to,
                             const Gfx::RectF* rect = 0) const = 0;
 

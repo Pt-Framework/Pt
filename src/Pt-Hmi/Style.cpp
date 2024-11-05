@@ -165,7 +165,7 @@ void ButtonRenderer::prepare(const PushButton& button,
 void ButtonRenderer::prepareIcon(const PushButton& button,
                                  const StyleOptions& options,
                                  const Gfx::Image& icon,
-                                 PixmapSurface& picture) const
+                                 Pixmap& picture) const
 {
     onPrepareIcon(button, options, icon, picture); 
 }
@@ -429,7 +429,7 @@ void MenuRenderer::prepare(const Menu& m,
 void MenuRenderer::prepareItem(const MenuItem& m, 
                                const StyleOptions& options,
                                const Gfx::Image& icon,
-                               PixmapSurface& picture,
+                               Pixmap& picture,
                                Gfx::Brush& brush,
                                Gfx::Pen& contour,
                                Gfx::Font& font,

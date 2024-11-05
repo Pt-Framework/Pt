@@ -36,122 +36,93 @@ namespace Pt {
 
 namespace Hmi {
 
-PixmapSurface::PixmapSurface()
+Pixmap::Pixmap()
 : _impl(0)
 {
-    _impl = new PixmapSurfaceImpl(*this);
+    _impl = new PixmapImpl();
 
     setSurface( _impl->surface() );
 }
 
 
-PixmapSurface::~PixmapSurface()
+Pixmap::~Pixmap()
 {
     delete _impl;
 }
 
 
-void PixmapSurface::set(const Gfx::Image& image)
+void Pixmap::set(const Gfx::Image& image)
 {
     _impl->set(image);
 }
 
 
-bool PixmapSurface::empty() const
+bool Pixmap::empty() const
 {
     return _impl->size().isNull();
 }
 
 
-const Gfx::SizeF& PixmapSurface::size() const
+const Gfx::SizeF& Pixmap::size() const
 {
     return _impl->size();
 }
 
 
-void PixmapSurface::resize(const Gfx::SizeF& size)
+void Pixmap::resize(const Gfx::SizeF& size)
 {
     _impl->resize(size);
 }
 
 
-void PixmapSurface::setScaleFactor(double scaling)
+void Pixmap::setScaleFactor(double scaling)
 {
     _impl->setScaleFactor(scaling);
 }
 
 
-void PixmapSurface::clear(const Gfx::Color& c)
+void Pixmap::clear(const Gfx::Color& c)
 {
     _impl->clear(c);
 }
 
 
-Gfx::Image PixmapSurface::toImage() const
+Gfx::Image Pixmap::toImage() const
 {
     return _impl->toImage();
 }
 
-//void PixmapSurface::onDrawPixmap(const Gfx::PointF& to, 
-//                                 const PixmapSurface& pixmap,
-//                                 const Gfx::CompositionMode& mode)
-//{
-//    //Gfx::PointF to = info().scaling().toPhysical(toF);
-//    _impl->drawPixmap(to, pixmap, mode);
-//}
 
-
-//void PixmapSurface::onDrawPixmap(const Gfx::PointF& to,
-//                                 const PixmapSurface& pixmap, 
-//                                 const Gfx::RectF& rect,
-//                                 const Gfx::CompositionMode& mode)
-//{
-//    //Gfx::PointF to = info().scaling().toPhysical(toF);
-//    _impl->drawPixmap(to, pixmap, rect, mode);
-//}
-
-
-const Gfx::PaintInfo& PixmapSurface::onGetPaintInfo() const
-{
-    return _impl->info();
-}
-
-
-Gfx::PaintContext* PixmapSurface::onGetPaint(Gfx::PaintContext* context) 
-{
-    return _impl->getPaint(context);
-}
-
-
-void PixmapSurface::onDraw(Gfx::PaintSurface& surface, 
+void Pixmap::onDraw(Gfx::PaintSurface& surface, 
+                           const Gfx::Paint& paint,
                            const Gfx::PointF& to,
                            const Gfx::RectF* rect) const
 {
-    _impl->draw(surface, to, rect);
+    _impl->draw(surface, paint, to, rect);
 }
 
 
-void PixmapSurface::setFontDir(const System::Path& path)
+void Pixmap::setFontDir(const System::Path& path)
 {
-    PixmapSurfaceImpl::setFontDir(path);
+    PixmapImpl::setFontDir(path);
 }
 
 
-std::string PixmapSurface::defaultFont()
+std::string Pixmap::defaultFont()
 {
-    return PixmapSurfaceImpl::defaultFont();
+    return PixmapImpl::defaultFont();
 }
 
 
-void PixmapSurface::setDefaultFont(const std::string& name)
+void Pixmap::setDefaultFont(const std::string& name)
 {
-    PixmapSurfaceImpl::setDefaultFont(name);
+    PixmapImpl::setDefaultFont(name);
 }
 
 
-std::vector<std::string> PixmapSurface::fontNames()
+std::vector<std::string> Pixmap::fontNames()
 {
-    return PixmapSurfaceImpl::fontNames();
+    return PixmapImpl::fontNames();
 }
 
 } // namespace

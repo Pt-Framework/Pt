@@ -457,9 +457,9 @@ ShellWindowFrame::~ShellWindowFrame()
 
 void ShellWindowFrame::onInit(Window& w)
 {
-    Gfx::PaintSurface& surface = pixmap();
+    Gfx::PaintSurface* surface = pixmap().surface();
     Gfx::PointF surfacePos = _clientBounds.topLeft();
-    w.setSurface(&surface, surfacePos);
+    w.setSurface(surface, surfacePos);
 
     w.setNextResponder(this);
 
@@ -608,9 +608,9 @@ void ShellWindowFrame::setFrame(double bw, double th)
     Gfx::PointF clientBoundsPos(_borderWidth, _borderWidth + _titleHeight);
     _clientBounds.setOrigin(clientBoundsPos);
 
-    Gfx::PaintSurface& surface = pixmap();
+    Gfx::PaintSurface* surface = pixmap().surface();
     Gfx::PointF surfacePos = _clientBounds.topLeft();
-    _window->setSurface(&surface, surfacePos);
+    _window->setSurface(surface, surfacePos);
 }
 
 
@@ -1633,7 +1633,7 @@ void ShellWindowFrame::onPaintEvent(const PaintEvent& ev)
         if( buttonUpdateRect.isNull() )
             continue;
 
-        button->paint(pixmap(), buttonUpdateRect);
+        button->paint(*pixmap().surface(), buttonUpdateRect);
     }
 }
 

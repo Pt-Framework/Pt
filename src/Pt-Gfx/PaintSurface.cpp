@@ -136,6 +136,13 @@ PaintLayer::~PaintLayer()
 {
 }
 
+
+PaintSurface* PaintLayer::surface()
+{
+    return _surface;
+}
+
+
 const PaintSurface* PaintLayer::surface() const
 {
     return _surface;
@@ -149,10 +156,11 @@ void PaintLayer::setSurface(PaintSurface* surface)
 
 
 void PaintLayer::draw(PaintSurface& surface, 
+                      const Paint& paint,
                       const Gfx::PointF& to,
                       const Gfx::RectF* rect) const
 {
-    onDraw(surface, to, rect);
+    onDraw(surface, paint, to, rect);
 }
 
 } // namespace

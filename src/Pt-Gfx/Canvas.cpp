@@ -167,23 +167,8 @@ void Canvas::drawText(const PointF& to, const Pt::String& text,
 
 
 void Canvas::drawImage(const Gfx::PointF& to, 
-                       const Gfx::Image& image)
-{
-    if( image.format() == info().format() )
-    {
-        onDrawImage(to, image);
-        return;
-    }
-
-    Pt::Gfx::Image dest( info().format(), image.size() );
-    Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-    onDrawImage(to, dest);
-}
-
-
-void Canvas::drawImage(const Gfx::PointF& to, 
                        const Gfx::Image& image, 
-                       const Gfx::RectF& rect)
+                       const Gfx::RectF* rect)
 {
     if( image.format() == info().format() )
     {
@@ -194,21 +179,6 @@ void Canvas::drawImage(const Gfx::PointF& to,
     Pt::Gfx::Image dest( info().format(), image.size() );
     Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
     drawImage(to, dest, rect);
-}
-
-
-bool Canvas::drawSurface(const Gfx::PointF& to, 
-                         const Gfx::PaintSurface& surface)
-{
-    return onDrawSurface(to, surface);
-}
-
-
-bool Canvas::drawSurface(const Gfx::PointF& to,
-                         const Gfx::PaintSurface& surface,
-                         const Gfx::RectF& rect)
-{
-    return onDrawSurface(to, surface, rect);
 }
 
 

@@ -144,7 +144,7 @@ HFONT getFont(const Pt::Gfx::Font& font)
 
     if( font.name().empty() )
     {
-        const std::string& fontName = Pt::Hmi::PixmapSurfaceImpl::defaultFont();
+        const std::string& fontName = Pt::Hmi::PixmapImpl::defaultFont();
         memcpy(lf.lfFaceName, fontName.c_str(), std::min<size_t>( LF_FACESIZE, fontName.size() + 1) );
     }
     else

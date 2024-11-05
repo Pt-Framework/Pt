@@ -87,9 +87,9 @@ WindowImpl::~WindowImpl()
 
 void WindowImpl::onInit(Window& w)
 {
-    Gfx::PaintSurface& surface = pixmap();
+    Gfx::PaintSurface* surface = pixmap().surface();
     Gfx::PointF surfacePos(0, 0);
-    w.setSurface(&surface, surfacePos);
+    w.setSurface(surface, surfacePos);
 
     w.setNextResponder(this);
 

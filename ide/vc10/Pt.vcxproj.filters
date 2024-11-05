@@ -1668,6 +1668,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\win32\PaintContext.h">
       <Filter>Pt-Hmi\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Pixmap.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

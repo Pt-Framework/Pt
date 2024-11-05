@@ -468,20 +468,8 @@ void PaintContext::drawText(const PointF& to, const Pt::String& text,
 
 
 void PaintContext::drawImage(const Gfx::PointF& to, 
-                             const Gfx::Image& image)
-{
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_active)
-    {
-        _active->drawImage(p, image);
-    }
-}
-
-
-void PaintContext::drawImage(const Gfx::PointF& to, 
                           const Gfx::Image& image, 
-                          const Gfx::RectF& rect)
+                          const Gfx::RectF* rect)
 {
     Pt::Gfx::PointF p = to + origin();
 
@@ -489,35 +477,6 @@ void PaintContext::drawImage(const Gfx::PointF& to,
     {
         _active->drawImage(p, image, rect);
     }
-}
-
-
-bool PaintContext::drawSurface(const Gfx::PointF& to, 
-                               const Gfx::PaintSurface& surface)
-{
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_active)
-    {
-        return _active->drawSurface(p, surface);
-    }
-
-    return true;
-}
-
-
-bool PaintContext::drawSurface(const Gfx::PointF& to,
-                               const Gfx::PaintSurface& surface,
-                               const Gfx::RectF& rect)
-{
-    Pt::Gfx::PointF p = to + origin();
-
-    if(_active)
-    {
-        return _active->drawSurface(p, surface, rect);
-    }
-
-    return true;
 }
 
 

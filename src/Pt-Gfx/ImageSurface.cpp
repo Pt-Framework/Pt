@@ -298,50 +298,15 @@ void ImageCanvas::onDrawText(const PointF& to, const Pt::String& text,
 }
 
 
-void ImageCanvas::onDrawImage(const PointF& toF, const Image& image)
-{
-    Gfx::PointF to = info().scaling().toPhysical(toF);
-    _rasterizer->drawImage(to, image);
-}
-
-
 void ImageCanvas::onDrawImage(const PointF& toF, const Image& image, 
-                              const RectF& imageRect)
+                              const RectF* imageRect)
 {
     Gfx::PointF to = info().scaling().toPhysical(toF);
-    _rasterizer->drawImage(to, image, imageRect);
-}
-
-
-bool ImageCanvas::onDrawSurface(const Gfx::PointF& to, 
-                                const Gfx::PaintSurface& surface)
-{
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
-    if(imageSurface)
-    {
-        const Gfx::Image& image = imageSurface->image();
-        drawImage(to, image);
-        return true;
-    }
-
-    return false;
-}
-
-
-bool ImageCanvas::onDrawSurface(const Gfx::PointF& to,
-                                const Gfx::PaintSurface& surface,
-                                const Gfx::RectF& rect)
-{
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&surface);
-    if(imageSurface)
-    {
-        const Gfx::Image& image = imageSurface->image();
-        Gfx::RectF imageRect = imageSurface->info().scaling().toPhysical(rect);
-        drawImage(to, image, imageRect);
-        return true;
-    }
-
-    return false;
+    
+    if(imageRect)
+        _rasterizer->drawImage(to, image, *imageRect);
+    else
+        _rasterizer->drawImage(to, image);
 }
 
 
@@ -351,9 +316,6 @@ bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
 {
     const PaintSurface* layerSurface = layer.surface();
     const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(layerSurface);
-
-    //const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(&layer);
-    
     if(imageSurface)
     {
         const Gfx::Image& image = imageSurface->image();
@@ -361,7 +323,7 @@ bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
         if(rect)
         {
             Gfx::RectF imageRect = info().scaling().toPhysical(*rect);
-            drawImage(to, image, imageRect);
+            drawImage(to, image, &imageRect);
         }
         else
         {
@@ -425,8 +387,6 @@ ImageSurface::ImageSurface()
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this);
-
-    setSurface(this);
 }
 
 
@@ -434,8 +394,6 @@ ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this);
-
-    setSurface(this);
 
     reset(size, stride);
 }
@@ -508,25 +466,6 @@ Gfx::PaintContext* ImageSurface::onGetPaint(Gfx::PaintContext* reuse)
 }
 
 
-void ImageSurface::onDraw(PaintSurface& surface, 
-                          const Gfx::PointF& to,
-                          const Gfx::RectF* rect) const
-{
-    Gfx::Painter painter(surface);
-    
-    const Gfx::Image& image = this->image();
-    if(rect)
-    {
-        Gfx::RectF imageRect = _info.scaling().toPhysical(*rect);
-        painter.drawImage(to, image, imageRect);
-    }
-    else
-    {
-        painter.drawImage(to, image);
-    }
-}
-
-
 void ImageSurface::setFontDir(const Pt::System::Path& path)
 {
     Rasterizer::setFontDir(path);
@@ -548,6 +487,84 @@ void ImageSurface::setDefaultFont(const std::string& f)
 std::vector<std::string> ImageSurface::fontNames()
 {
     return Rasterizer::fontNames();
+}
+
+///////////////////////////////////////////////////////////////////////
+// ImageLayer
+///////////////////////////////////////////////////////////////////////
+
+ImageLayer::ImageLayer()
+{
+    setSurface(&_surface);
+}
+
+
+ImageLayer::ImageLayer(const Gfx::Size& size, std::size_t stride)
+: _surface(size, stride)
+{
+    setSurface(&_surface);
+}
+
+
+ImageLayer::~ImageLayer()
+{
+}
+
+
+void ImageLayer::reset(const Gfx::Image& image)
+{
+    _surface.reset(image);
+}
+
+
+void ImageLayer::reset(const Gfx::Size& size, std::size_t stride)
+{
+    _surface.reset(size, stride);
+}
+
+
+const Gfx::Image& ImageLayer::image() const
+{
+    return _surface.image();
+}
+
+
+const Gfx::SizeF& ImageLayer::size() const
+{
+    return _surface.size();
+}
+
+
+void ImageLayer::resize(const Gfx::SizeF& size)
+{
+    _surface.resize(size);
+}
+
+
+void ImageLayer::setScaleFactor(double scaleFactor)
+{
+    _surface.setScaleFactor(scaleFactor);
+}
+
+
+void ImageLayer::onDraw(PaintSurface& surface,
+                        const Paint& paint, 
+                        const Gfx::PointF& to,
+                        const Gfx::RectF* rect) const
+{
+    Gfx::Painter painter(surface);
+    painter.setCompositionMode( paint.compositionMode() );
+    
+    const Gfx::Image& image = this->image();
+    if(rect)
+    {
+        Gfx::RectF imageRect = _surface.info().scaling().toPhysical(*rect);
+        painter.drawImage(to, image, imageRect);
+    }
+    else
+    {
+        painter.drawImage(to, image);
+    }
 }
 
 } // namespace

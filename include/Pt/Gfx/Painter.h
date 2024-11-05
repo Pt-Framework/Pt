@@ -53,6 +53,7 @@ namespace Gfx {
 
 class Scaling;
 class PaintSurface;
+class PaintLayer;
 
 /** @brief 2D painter interface.
 */
@@ -63,12 +64,16 @@ class PT_GFX_API Painter
     public:
         Painter();
 
-        Painter(PaintSurface& surface);
+        explicit Painter(PaintSurface& surface);
+
+        explicit Painter(PaintLayer& layer);
 
         //! @brief Destructor.
         virtual ~Painter();
 
         void begin(PaintSurface& surface);
+
+        void begin(PaintLayer& layer);
 
         void finish();
 

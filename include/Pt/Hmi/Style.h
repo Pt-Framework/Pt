@@ -50,7 +50,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class PixmapSurface;
+class Pixmap;
 class StyleOptions;
 class Panel;
 class Label;
@@ -238,7 +238,7 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
         void prepareIcon(const PushButton& button,
                          const StyleOptions& options,
                          const Gfx::Image& icon,
-                         PixmapSurface& picture) const;
+                         Pixmap& picture) const;
 
         void renderBackground(const PushButton& button,
                               const StyleOptions& options,
@@ -268,7 +268,7 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
         virtual void onPrepareIcon(const PushButton& button,
                                    const StyleOptions& options,
                                    const Gfx::Image& icon,
-                                   PixmapSurface& picture) const = 0;
+                                   Pixmap& picture) const = 0;
 
         virtual void onRenderBackground(const PushButton& button,
                                         const StyleOptions& options,
@@ -532,7 +532,7 @@ class PT_HMI_API MenuRenderer : public Style::Facet
         void prepareItem(const MenuItem& m, 
                          const StyleOptions& options,
                          const Gfx::Image& icon,
-                         PixmapSurface& picture,
+                         Pixmap& picture,
                          Gfx::Brush& brush,
                          Gfx::Pen& contour,
                          Gfx::Font& font,
@@ -566,7 +566,7 @@ class PT_HMI_API MenuRenderer : public Style::Facet
         virtual void onPrepareItem(const MenuItem& m, 
                                    const StyleOptions& options,
                                    const Gfx::Image& icon,
-                                   PixmapSurface& picture,
+                                   Pixmap& picture,
                                    Gfx::Brush& brush,
                                    Gfx::Pen& contour,
                                    Gfx::Font& font,

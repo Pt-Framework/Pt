@@ -29,6 +29,8 @@
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowStateEvent.h>
+#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -61,15 +63,34 @@ const Window& WindowFrame::window() const
 }
 
 
-PixmapSurface& WindowFrame::pixmap()
+Pixmap& WindowFrame::pixmap()
 {
-    return _surface;
+    return _pixmap;
 }
 
 
-const PixmapSurface& WindowFrame::pixmap() const
+const Pixmap& WindowFrame::pixmap() const
 {
-    return _surface;
+    return _pixmap;
+}
+
+
+void WindowFrame::getImage(Gfx::Image& image)
+{
+    const Gfx::Scaling& scaling = _pixmap.surface()->info().scaling();
+    
+    Gfx::ImageSurface imageSurface;
+
+    Gfx::SizeF imageSize = scaling.toPhysical( _window.size() );
+    imageSurface.resize(imageSize);
+
+    Gfx::PointF framePos = onFromWindow( _window, Gfx::PointF(0, 0) );
+    Gfx::RectF frameRect( framePos, _window.size() );
+
+    Gfx::Painter painter(imageSurface);
+    painter.drawLayer(Gfx::PointF(0, 0), _pixmap, frameRect);
+    
+    image = imageSurface.image();
 }
 
 
@@ -84,10 +105,10 @@ void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
     // TODO: the reported scale factor divided by the application
     //       scale factor is the window specific one
 
-    _surface.setScaleFactor( ev.scaleFactor() );
+    _pixmap.setScaleFactor( ev.scaleFactor() );
 
     Gfx::SizeF pixmapSize = scaling().toPhysical( size() );
-    _surface.resize(pixmapSize);
+    _pixmap.resize(pixmapSize);
     
     Base::onRescaleEvent(ev);
 }
@@ -104,7 +125,7 @@ void WindowFrame::onResizeEvent(const ResizeEvent& ev)
     Visual::onResizeEvent(ev);
 
     Gfx::SizeF pixmapSize = scaling().toPhysical( ev.size() );
-    _surface.resize(pixmapSize);
+    _pixmap.resize(pixmapSize);
 }
 
 

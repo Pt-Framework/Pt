@@ -107,18 +107,8 @@ class PT_GFX_API Canvas
 
     protected:
         void drawImage(const Gfx::PointF& to, 
-                       const Gfx::Image& image);
-
-        void drawImage(const Gfx::PointF& to, 
                        const Gfx::Image& image, 
-                       const Gfx::RectF& rect);
-
-        bool drawSurface(const Gfx::PointF& to, 
-                         const Gfx::PaintSurface& surface);
-
-        bool drawSurface(const Gfx::PointF& to, 
-                         const Gfx::PaintSurface& surface,
-                         const Gfx::RectF& rect);
+                       const Gfx::RectF* rect = 0);
 
         bool drawLayer(const Gfx::PointF& to,
                        const Gfx::PaintLayer& layer,
@@ -174,22 +164,19 @@ class PT_GFX_API Canvas
 
     protected:
         virtual void onDrawImage(const Gfx::PointF& to, 
-                                 const Gfx::Image& image) = 0;
-
-        virtual void onDrawImage(const Gfx::PointF& to, 
                                  const Gfx::Image& image, 
-                                 const Gfx::RectF& imgRect) = 0;
-
-        virtual bool onDrawSurface(const Gfx::PointF& to, 
-                                   const Gfx::PaintSurface& surface) = 0;
-
-        virtual bool onDrawSurface(const Gfx::PointF& to,
-                                   const Gfx::PaintSurface& surface,
-                                   const Gfx::RectF& rect) = 0;
+                                 const Gfx::RectF* imgRect) = 0;
 
         virtual bool onDrawLayer(const Gfx::PointF& to,
                                  const Gfx::PaintLayer& surface,
                                  const Gfx::RectF* rect) = 0;
+
+        //virtual bool onDrawSurface(const Gfx::PointF& to, 
+        //                           const Gfx::PaintSurface& surface) = 0;
+
+        //virtual bool onDrawSurface(const Gfx::PointF& to,
+        //                           const Gfx::PaintSurface& surface,
+        //                           const Gfx::RectF& rect) = 0;
 
     private:
         void onDetachPaint(PaintContext& paint);

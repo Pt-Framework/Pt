@@ -110,6 +110,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PaintRegion.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Pixmap.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PlatinumStyle.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Popup.h" />

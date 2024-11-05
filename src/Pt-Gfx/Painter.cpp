@@ -51,6 +51,15 @@ Painter::Painter(PaintSurface& surface)
 }
 
 
+Painter::Painter(PaintLayer& layer)
+: _surface(0)
+, _paintContext(0)
+
+{
+    begin(layer);
+}
+
+
 Painter::~Painter()
 {
     if( _surface )
@@ -65,6 +74,9 @@ Painter::~Painter()
 
 void Painter::begin(PaintSurface& surface)
 {
+    if(_surface == &surface)
+        return;
+
     finish();
 
     surface.attachPainter(*this);
@@ -95,6 +107,14 @@ void Painter::begin(PaintSurface& surface)
 
     if(_paintContext)
         _paintContext->beginPaint();
+}
+
+
+void Painter::begin(PaintLayer& layer)
+{
+    PaintSurface* surface = layer.surface();
+    if(surface)
+        begin(*surface);
 }
 
 
@@ -357,7 +377,7 @@ void Painter::drawImage(const Gfx::PointF& to,
                         const Gfx::RectF& imageRect)
 {
     if(_paintContext)
-        _paintContext->drawImage(to, image, imageRect);
+        _paintContext->drawImage(to, image, &imageRect);
 }
 
 
@@ -370,12 +390,7 @@ void Painter::drawLayer(const Gfx::PointF& to,
         if( ! isCompatible )
         {
             PaintSurface* surface = _surface;
-            finish();
-
-            // TODO: clipping and composition-mode
-
-            layer.draw(*surface, to);
-
+            layer.draw(*surface, _paint, to);
             begin(*surface);
         }
     }
@@ -392,12 +407,7 @@ void Painter::drawLayer(const Gfx::PointF& to,
         if( ! isCompatible )
         {
             PaintSurface* surface = _surface;
-            finish();
-            
-            // TODO: clipping and composition-mode
-
-            layer.draw(*surface, to, &rect);
-            
+            layer.draw(*surface, _paint, to, &rect);
             begin(*surface);
         }
     }

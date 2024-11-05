@@ -176,18 +176,8 @@ class ImageCanvas : public Gfx::Canvas
 
   protected:
     virtual void onDrawImage(const Gfx::PointF& to, 
-                             const Gfx::Image& image) override;
-
-    virtual void onDrawImage(const Gfx::PointF& to, 
                              const Gfx::Image& image, 
-                             const Gfx::RectF& imgRect) override;
-
-    virtual bool onDrawSurface(const Gfx::PointF& to, 
-                               const Gfx::PaintSurface& surface) override;
-
-    virtual bool onDrawSurface(const Gfx::PointF& to,
-                               const Gfx::PaintSurface& surface,
-                               const Gfx::RectF& rect) override;
+                             const Gfx::RectF* imgRect) override;
 
     virtual bool onDrawLayer(const Gfx::PointF& to,
                              const Gfx::PaintLayer& layer,
@@ -225,7 +215,7 @@ class ImagePaintInfo : public PaintInfo
 
 /** @brief Image drawing surface.
 */
-class PT_GFX_API ImageSurface : public Gfx::PaintLayer
+class PT_GFX_API ImageSurface : public PaintSurface
 {
   public:
     ImageSurface();
@@ -255,11 +245,6 @@ class PT_GFX_API ImageSurface : public Gfx::PaintLayer
 
     virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
-   protected:
-    virtual void onDraw(PaintSurface& surface, 
-                        const Gfx::PointF& to,
-                        const Gfx::RectF* rect) const override;
-
   public:
     static void setFontDir(const System::Path& path);
 
@@ -272,6 +257,42 @@ class PT_GFX_API ImageSurface : public Gfx::PaintLayer
   private:
     ImagePaintInfo _info;
     ImageCanvas*   _canvas;
+};
+
+/** @brief Image drawing layer.
+*/
+class PT_GFX_API ImageLayer : public PaintLayer
+{
+    public:
+        ImageLayer();
+
+        ImageLayer(const Gfx::Size& size, std::size_t stride = 0);
+
+        virtual ~ImageLayer();
+
+        void reset(const Gfx::Image& image);
+
+        void reset(const Gfx::Size& size, std::size_t stride = 0);
+
+        const Gfx::Image& image() const;
+
+        /** @brief Returns the size in physical device pixels. 
+        */
+        const Gfx::SizeF& size() const;
+
+        /** @brief Resizes to a size in physical device pixels. 
+        */
+        void resize(const Gfx::SizeF& size);
+
+        void setScaleFactor(double scaleFactor);
+
+    protected:
+        virtual void onDraw(PaintSurface& surface,
+                            const Paint& paint,
+                            const Gfx::PointF& to,
+                            const Gfx::RectF* rect) const override;
+    private:
+        ImageSurface _surface;
 };
 
 } // namespace

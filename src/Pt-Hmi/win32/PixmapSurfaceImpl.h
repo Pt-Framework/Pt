@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_PixmalSurfaceImpl_h
-#define Pt_Hmi_PixmalSurfaceImpl_h
+#ifndef Pt_Hmi_PixmapImpl_h
+#define Pt_Hmi_PixmapImpl_h
 
 #include <Pt/Hmi/Api.h>
 
@@ -40,7 +40,7 @@
 
 #else
 
-#include <Pt/Gfx/Paint.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
@@ -57,22 +57,20 @@ namespace Pt {
 
 namespace Hmi {
 
-class PixmapSurface;
+class Pixmap;
 
 #ifdef PT_HMI_WIN32_RASTER
 
-class PixmapSurfaceImpl 
+class PixmapImpl 
 {
     public:
-        PixmapSurfaceImpl(PixmapSurface& surface);
+        PixmapImpl()
+        { }
 
         void reset(const Gfx::Size& size, std::size_t stride)
         {
             _image.reset(size, stride);
         }
-
-        void clear(const Gfx::Color& c)
-        { }
 
         void set(const Gfx::Image& image)
         {
@@ -83,6 +81,9 @@ class PixmapSurfaceImpl
         {
             return _image.image();
         }
+
+        void clear(const Gfx::Color& c)
+        { }
 
         const Gfx::SizeF& size() const
         {
@@ -101,22 +102,16 @@ class PixmapSurfaceImpl
 
         Gfx::PaintSurface* surface()
         {
-            return &_image;
-        }
-
-        const Gfx::PaintInfo& info() const
-        {
-            return _image.info();
-        }
-
-        Gfx::PaintContext* getPaint(Gfx::PaintContext* context)
-        {
-            return _image.getPaint(context);
+            return _image.surface();
         }
 
         void draw(Gfx::PaintSurface& surface, 
+                  const Gfx::Paint& paint,
                   const Gfx::PointF& to,
-                  const Gfx::RectF* rect) const;
+                  const Gfx::RectF* rect) const
+        {
+            _image.draw(surface, paint, to, rect);
+        }
 
         static const std::string& defaultFont()
         {
@@ -139,19 +134,19 @@ class PixmapSurfaceImpl
         }
     
     private:
-        Gfx::ImageSurface _image;
+        Gfx::ImageLayer _image;
 };
 
 #else // PT_HMI_WIN32_RASTER
 
 class PaintContext;
-class PixmapSurfaceImpl;
+class PixmapImpl;
 
 
 class PixmapCanvas : public Gfx::Canvas
 {
     public:
-        PixmapCanvas(PixmapSurface& surface);
+        PixmapCanvas(Gfx::PaintSurface& surface);
 
         ~PixmapCanvas();
 
@@ -229,46 +224,19 @@ class PixmapCanvas : public Gfx::Canvas
 
     protected:
         virtual void onDrawImage(const Gfx::PointF& to, 
-                                 const Gfx::Image& image) override;
-
-        virtual void onDrawImage(const Gfx::PointF& to, 
                                  const Gfx::Image& image, 
-                                 const Gfx::RectF& rect) override;
-
-        virtual bool onDrawSurface(const Gfx::PointF& to, 
-                                   const Gfx::PaintSurface& surface) override;
-
-        virtual bool onDrawSurface(const Gfx::PointF& to,
-                                   const Gfx::PaintSurface& surface,
-                                   const Gfx::RectF& rect) override;
+                                 const Gfx::RectF* rect) override;
 
         virtual bool onDrawLayer(const Gfx::PointF& to, 
                                  const Gfx::PaintLayer& layer,
                                  const Gfx::RectF* rect) override;
 
     private:
-        void drawPixmap(const Gfx::PointF& toF, 
-                        const PixmapSurfaceImpl& surface);
-
-        void drawPixmap(const Gfx::PointF& toF, 
-                        const PixmapSurfaceImpl& surface, 
-                        const Gfx::RectF& rect);
-
-        void drawPixmap(const Gfx::PointF& toF, 
-                        const PixmapSurface& surface,
-                        const Gfx::CompositionMode& mode);
-
-        void drawPixmap(const Gfx::PointF& toF, 
-                        const PixmapSurface& surface, 
-                        const Gfx::RectF& rect,
-                        const Gfx::CompositionMode& mode);
-
-        void bitBlit(const Gfx::Point& to, HBITMAP bitmap, 
-                     size_t width, size_t height, DWORD op);
+        void onDrawPixmap(const Gfx::PointF& toF, 
+                          const PixmapImpl& surface,
+                          const Gfx::RectF* rect = 0);
 
     private:
-        PixmapSurface& _surface;
-
         Gfx::SizeF     _physicalSize;
         Gfx::SizeF     _logicalSize;
 
@@ -294,12 +262,13 @@ class PixmapCanvas : public Gfx::Canvas
 };
 
 
-class PixmapSurfaceImpl : public Gfx::PaintInfo
+class PixmapImpl : public Gfx::PaintSurface
+                 , public Gfx::PaintInfo
 {
     public:
-        PixmapSurfaceImpl(PixmapSurface& surface);
+        PixmapImpl();
 
-        virtual ~PixmapSurfaceImpl();
+        virtual ~PixmapImpl();
 
         void set(const Gfx::Image& image);
 
@@ -313,20 +282,22 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
         
         void setScaleFactor(double scaleFactor);
            
-        PixmapSurface* surface()
+        Gfx::PaintSurface* surface()
         {
-            return &_surface;
+            return this;
         }
 
-        const Gfx::PaintInfo& info() const;
-
-        Gfx::PaintContext* getPaint(Gfx::PaintContext* context);
-
         void draw(Gfx::PaintSurface& surface, 
+                  const Gfx::Paint& paint,
                   const Gfx::PointF& to,
                   const Gfx::RectF* rect) const;
 
         HDC deviceContext() const;
+
+    protected:
+        virtual const Gfx::PaintInfo& onGetPaintInfo() const override;
+
+        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const override;
@@ -350,11 +321,8 @@ class PixmapSurfaceImpl : public Gfx::PaintInfo
         static std::string getSystemFont();
 
     private:
-        PixmapSurface&            _surface;
-        PixmapCanvas              _canvas;
-
-        Gfx::SizeF     _infoSize;
-        Gfx::Scaling   _infoScaling;
+        PixmapCanvas*  _canvas;
+        Gfx::Scaling   _scaling;
 };
 
 #endif // PT_HMI_WIN32_RASTER
