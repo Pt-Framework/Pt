@@ -41,7 +41,6 @@
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
-#include <Pt/Gfx/Canvas.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
 #include <cstddef>

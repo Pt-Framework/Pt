@@ -63,24 +63,6 @@ void Canvas::onDetachPaint(PaintContext& canvas)
 }
 
 
-PaintSurface& Canvas::surface()
-{
-    return _surface;
-}
-
-
-const PaintSurface& Canvas::surface() const
-{
-    return _surface;
-}
-
-
-const PaintInfo& Canvas::info() const
-{
-    return _surface.info();
-}
-
-
 Gfx::PaintContext* Canvas::getPaint(Gfx::PaintContext* reuse)
 {
     if(_paint)
@@ -92,7 +74,7 @@ Gfx::PaintContext* Canvas::getPaint(Gfx::PaintContext* reuse)
 
     if(reuse)
     {
-        if( reuse->scaling() != info().scaling() )
+        if( reuse->scaling() != scaling() )
             reuse = 0;
     }
 
@@ -170,13 +152,13 @@ void Canvas::drawImage(const Gfx::PointF& to,
                        const Gfx::Image& image, 
                        const Gfx::RectF* rect)
 {
-    if( image.format() == info().format() )
+    if( image.format() == format() )
     {
         onDrawImage(to, image, rect);
         return;
     }
 
-    Pt::Gfx::Image dest( info().format(), image.size() );
+    Pt::Gfx::Image dest( format(), image.size() );
     Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
     drawImage(to, dest, rect);
 }

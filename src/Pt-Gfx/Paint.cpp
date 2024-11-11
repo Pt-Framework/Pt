@@ -183,7 +183,7 @@ void PaintContext::attachCanvas(Canvas& canvas)
     double unbounded = std::numeric_limits<double>::max();
     _region.setSize( SizeF(unbounded, unbounded) );
 
-    _scaling = canvas.info().scaling();
+    _scaling = canvas.scaling();
     _canvas = &canvas;
 }
 

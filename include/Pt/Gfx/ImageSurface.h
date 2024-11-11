@@ -101,7 +101,7 @@ class ImagePaint : public PaintContext
 
 /** @internal.
 */
-class ImageCanvas : public Gfx::Canvas
+class ImageCanvas : public Canvas
 {
   public:
     ImageCanvas(PaintSurface& surface);
@@ -113,6 +113,17 @@ class ImageCanvas : public Gfx::Canvas
     void reset(const Gfx::SizeF& size, std::size_t stride = 0);
 
     const Gfx::Image& image() const;
+
+    void setScaleFactor(double scaleFactor);
+
+    const SizeF& physicalSize() const;
+
+protected:
+    virtual const Gfx::ImageFormat& onGetFormat() const;
+
+    virtual const Gfx::SizeF& onGetSize() const;
+
+    virtual const Scaling& onGetScaling() const;
 
   protected:
     virtual bool onGetPaint(Gfx::PaintContext* context) override;
@@ -186,31 +197,10 @@ class ImageCanvas : public Gfx::Canvas
   private:
     Rasterizer*   _rasterizer;
     ImagePaint*   _paint;
-};
 
-/** @internal.
-*/
-class ImagePaintInfo : public PaintInfo
-{
-    public:
-        ImagePaintInfo();
-
-        virtual ~ImagePaintInfo();
-
-        void setScaleFactor(double scaleFactor);
-
-        void setSize(const Gfx::SizeF& size);
-
-    protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const;
-
-        virtual const Gfx::SizeF& onGetSize() const;
-
-        virtual const Scaling& onGetScaling() const;
-
-    private:
-        Gfx::Scaling  _scaling;
-        Gfx::SizeF    _size;
+    Gfx::SizeF     _physicalSize;
+    Gfx::SizeF     _logicalSize;
+    Gfx::Scaling   _scaling;
 };
 
 /** @brief Image drawing surface.
@@ -230,11 +220,11 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     const Gfx::Image& image() const;
 
-    /** @brief Returns the size in device pixels. 
+    /** @brief Returns the size in physical device pixels. 
     */
     const Gfx::SizeF& size() const;
 
-    /** @brief Resizes to a size in device pixels. 
+    /** @brief Resizes to a size in physical device pixels. 
     */
     void resize(const Gfx::SizeF& size);
 
@@ -255,7 +245,6 @@ class PT_GFX_API ImageSurface : public PaintSurface
     static std::vector<std::string> fontNames();
 
   private:
-    ImagePaintInfo _info;
     ImageCanvas*   _canvas;
 };
 

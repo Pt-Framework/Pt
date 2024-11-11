@@ -40,6 +40,7 @@
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Paint.h>
 
 #include <vector>
 
@@ -58,7 +59,7 @@ class Path;
 
 /** @brief Paint canvas.
 */
-class PT_GFX_API Canvas
+class PT_GFX_API Canvas : public PaintInfo
 {
     friend class PaintContext;
     friend class PaintLayer;
@@ -68,12 +69,6 @@ class PT_GFX_API Canvas
 
     public:
         ~Canvas();
-
-        PaintSurface& surface();
-
-        const PaintSurface& surface() const;
-
-        const PaintInfo& info() const;
 
         Gfx::PaintContext* getPaint(Gfx::PaintContext* context);
 

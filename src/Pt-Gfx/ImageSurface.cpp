@@ -124,6 +124,9 @@ ImageCanvas::~ImageCanvas()
 void ImageCanvas::reset(const Gfx::Image& image)
 {
     _rasterizer->reset(image);  
+
+    _physicalSize = Gfx::SizeF( image.width(), image.height() );
+    _logicalSize = _scaling.toLogical(_physicalSize);
 }
 
 
@@ -131,12 +134,49 @@ void ImageCanvas::reset(const Gfx::SizeF& size, std::size_t stride)
 {
     Gfx::Size imageSize = round(size);
     _rasterizer->reset(imageSize, stride);  
+
+    _physicalSize = Gfx::SizeF( imageSize.width(), imageSize.height() );
+    _logicalSize = _scaling.toLogical(_physicalSize);
 }
 
 
 const Gfx::Image& ImageCanvas::image() const
 {
     return _rasterizer->image();
+}
+
+
+void ImageCanvas::setScaleFactor(double scaleFactor)
+{
+    _scaling.setScaleFactor(scaleFactor);
+
+    const Gfx::Image& image = _rasterizer->image();
+    _physicalSize = Gfx::SizeF( image.width(), image.height() );
+    _logicalSize = _scaling.toLogical(_physicalSize);
+}
+
+
+const SizeF& ImageCanvas::physicalSize() const
+{
+    return _physicalSize;
+}
+
+
+const Gfx::ImageFormat& ImageCanvas::onGetFormat() const
+{
+    return Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& ImageCanvas::onGetSize() const
+{
+    return _logicalSize;
+}
+
+
+const Scaling& ImageCanvas::onGetScaling() const
+{
+    return _scaling;
 }
 
 
@@ -220,7 +260,7 @@ void ImageCanvas::onClipChanged()
     }
     else
     {
-        RectF rect = info().scaling().toPhysical(*clip);
+        RectF rect = scaling().toPhysical(*clip);
         _rasterizer->setClip(rect);
     }
 }
@@ -301,7 +341,7 @@ void ImageCanvas::onDrawText(const PointF& to, const Pt::String& text,
 void ImageCanvas::onDrawImage(const PointF& toF, const Image& image, 
                               const RectF* imageRect)
 {
-    Gfx::PointF to = info().scaling().toPhysical(toF);
+    Gfx::PointF to = scaling().toPhysical(toF);
     
     if(imageRect)
         _rasterizer->drawImage(to, image, *imageRect);
@@ -322,7 +362,7 @@ bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
         
         if(rect)
         {
-            Gfx::RectF imageRect = info().scaling().toPhysical(*rect);
+            Gfx::RectF imageRect = scaling().toPhysical(*rect);
             drawImage(to, image, &imageRect);
         }
         else
@@ -334,49 +374,6 @@ bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
     }
 
     return false;
-}
-
-///////////////////////////////////////////////////////////////////////
-// ImagePaintInfo
-///////////////////////////////////////////////////////////////////////
-
-ImagePaintInfo::ImagePaintInfo()
-{
-}
-
-
-ImagePaintInfo::~ImagePaintInfo()
-{
-}
-
-
-void ImagePaintInfo::setScaleFactor(double scaleFactor)
-{
-    _scaling.setScaleFactor(scaleFactor);
-}
-
-
-void ImagePaintInfo::setSize(const Gfx::SizeF& size)
-{
-    _size = size;
-}
-
-
-const Gfx::ImageFormat& ImagePaintInfo::onGetFormat() const
-{
-    return Gfx::ImageFormat::argb32();
-}
-
-
-const Gfx::SizeF& ImagePaintInfo::onGetSize() const
-{
-    return _size;
-}
-
-
-const Scaling& ImagePaintInfo::onGetScaling() const
-{
-    return _scaling;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -407,23 +404,14 @@ ImageSurface::~ImageSurface()
 
 void ImageSurface::reset(const Gfx::Image& image)
 {
-    Gfx::SizeF imageSize( image.width(), image.height() );
-
     _canvas->reset(image);
-
-    const Gfx::SizeF& logicalSize = _info.scaling().toLogical(imageSize);
-    _info.setSize(logicalSize);
 }
 
 
 void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
 {
     Gfx::SizeF imageSize( size.width(), size.height() );
-
     _canvas->reset(imageSize, stride);
-
-    const Gfx::SizeF& logicalSize = _info.scaling().toLogical(imageSize);
-    _info.setSize(logicalSize);
 }
 
 
@@ -435,28 +423,25 @@ const Gfx::Image& ImageSurface::image() const
 
 const Gfx::SizeF& ImageSurface::size() const
 {
-    return _info.size();
+    return _canvas->physicalSize();
 }
 
 
 void ImageSurface::resize(const Gfx::SizeF& size)
 {
     _canvas->reset(size);
-
-    Gfx::SizeF logicalSize = _info.scaling().toLogical(size);
-    _info.setSize(logicalSize);
 }
 
 
 void ImageSurface::setScaleFactor(double scaleFactor)
 {
-    _info.setScaleFactor(scaleFactor);
+    _canvas->setScaleFactor(scaleFactor);
 }
 
 
 const PaintInfo& ImageSurface::onGetPaintInfo() const
 {
-    return _info;
+    return *_canvas;
 }
 
 

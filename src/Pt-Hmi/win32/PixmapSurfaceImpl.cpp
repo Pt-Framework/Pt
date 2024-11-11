@@ -295,7 +295,7 @@ Gfx::Image PixmapCanvas::toImage() const
 }
 
 
-const Gfx::SizeF& PixmapCanvas::size() const
+const Gfx::SizeF& PixmapCanvas::physicalSize() const
 {
     return _physicalSize;
 }
@@ -327,7 +327,32 @@ void PixmapCanvas::resize(const Gfx::SizeF& size)
 
     _physicalSize.set(width, height);
 
-    _logicalSize = info().scaling().toLogical(_physicalSize);
+    _logicalSize = scaling().toLogical(_physicalSize);
+}
+
+
+void PixmapCanvas::setScaleFactor(double scaleFactor)
+{
+    _scaling.setScaleFactor(scaleFactor);
+    _logicalSize = _scaling.toLogical(_physicalSize);
+}
+
+
+const Gfx::ImageFormat& PixmapCanvas::onGetFormat() const
+{
+    return Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& PixmapCanvas::onGetSize() const
+{
+    return _logicalSize;
+}
+
+
+const Gfx::Scaling& PixmapCanvas::onGetScaling() const
+{
+    return _scaling;
 }
 
 
@@ -631,7 +656,7 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
 Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
 {
-    double scaleFactor = info().scaling().scaleFactor();
+    double scaleFactor = scaling().scaleFactor();
 
     Gfx::Transform tform;
     tform.scale(scaleFactor, scaleFactor);
@@ -824,7 +849,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
-    Gfx::PointF toP = info().scaling().toPhysical(toF);
+    Gfx::PointF toP = scaling().toPhysical(toF);
     Gfx::Point to = Gfx::round(toP);
 
     Gfx::Size size = rect ? Gfx::round( rect->size() ) : image.size();
@@ -944,7 +969,7 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toF,
                                 const PixmapImpl& pixmap,
                                 const Gfx::RectF* rect)
 {
-    Gfx::PointF to = info().scaling().toPhysical(toF);
+    Gfx::PointF to = scaling().toPhysical(toF);
 
     const Gfx::Scaling& scaling = pixmap.info().scaling();
     
@@ -991,8 +1016,7 @@ HDC PixmapCanvas::deviceContext() const
 ///////////////////////////////////////////////////////////////////////
 
 PixmapImpl::PixmapImpl()
-: Gfx::PaintInfo()
-, _canvas(0)
+: _canvas(0)
 {
     _canvas = new PixmapCanvas(*this);
 }
@@ -1023,7 +1047,7 @@ void PixmapImpl::clear(const Gfx::Color& c)
 
 const Gfx::SizeF& PixmapImpl::size() const
 {
-    return _canvas->size();
+    return _canvas->physicalSize();
 }
 
 
@@ -1035,13 +1059,13 @@ void PixmapImpl::resize(const Gfx::SizeF& size)
 
 void PixmapImpl::setScaleFactor(double scaleFactor)
 {
-    _scaling.setScaleFactor(scaleFactor);
+    _canvas->setScaleFactor(scaleFactor);
 }
 
 
 const Gfx::PaintInfo& PixmapImpl::onGetPaintInfo() const
 {
-    return *this;
+    return *_canvas;
 }
 
 
@@ -1062,7 +1086,7 @@ void PixmapImpl::draw(Gfx::PaintSurface& surface,
     Gfx::Image pixmapImage = toImage();
     if(rect)
     {
-        Gfx::RectF imageRect = scaling().toPhysical(*rect);
+        Gfx::RectF imageRect = _canvas->scaling().toPhysical(*rect);
         painter.drawImage(to, pixmapImage, imageRect);
     }
     else
@@ -1076,25 +1100,6 @@ HDC PixmapImpl::deviceContext() const
 {
     return _canvas->deviceContext();
 }
-
-
-const Gfx::ImageFormat& PixmapImpl::onGetFormat() const
-{
-    return Gfx::ImageFormat::argb32();
-}
-
-
-const Gfx::SizeF& PixmapImpl::onGetSize() const
-{
-    return _canvas->logicalSize();
-}
-
-
-const Gfx::Scaling& PixmapImpl::onGetScaling() const
-{
-    return _scaling;
-}
-
 
 const std::string& PixmapImpl::defaultFont()
 {

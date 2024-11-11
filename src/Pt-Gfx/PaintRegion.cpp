@@ -243,7 +243,6 @@ PaintContext* PaintRegion::onGetPaint(PaintContext* context)
     if( ! paintContext )
         return paintContext;
 
-
     const RectF* area = _info.area();
     if( ! area )
         return paintContext;

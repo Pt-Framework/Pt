@@ -142,7 +142,6 @@ class PixmapImpl
 class PaintContext;
 class PixmapImpl;
 
-
 class PixmapCanvas : public Gfx::Canvas
 {
     public:
@@ -150,17 +149,26 @@ class PixmapCanvas : public Gfx::Canvas
 
         ~PixmapCanvas();
 
+        HDC deviceContext() const;
+
         void set(const Gfx::Image& image);
         
         Gfx::Image toImage() const;
 
-        const Gfx::SizeF& size() const;
+        const Gfx::SizeF& physicalSize() const;
 
         const Gfx::SizeF& logicalSize() const;
 
         void resize(const Gfx::SizeF& size);
 
-        HDC deviceContext() const;
+        void setScaleFactor(double scaleFactor);
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const override;
+
+        virtual const Gfx::SizeF& onGetSize() const override;
+
+        virtual const Gfx::Scaling& onGetScaling() const override;
 
     protected:
         virtual bool onGetPaint(Gfx::PaintContext* context) override;
@@ -239,6 +247,7 @@ class PixmapCanvas : public Gfx::Canvas
     private:
         Gfx::SizeF     _physicalSize;
         Gfx::SizeF     _logicalSize;
+        Gfx::Scaling   _scaling;
 
         LONG           _width;
         LONG           _height;
@@ -263,7 +272,6 @@ class PixmapCanvas : public Gfx::Canvas
 
 
 class PixmapImpl : public Gfx::PaintSurface
-                 , public Gfx::PaintInfo
 {
     public:
         PixmapImpl();
@@ -299,13 +307,6 @@ class PixmapImpl : public Gfx::PaintSurface
 
         virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
-    protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const override;
-
-        virtual const Gfx::SizeF& onGetSize() const override;
-
-        virtual const Gfx::Scaling& onGetScaling() const override;
-
     public:
         static const std::string& defaultFont();
 
@@ -322,7 +323,6 @@ class PixmapImpl : public Gfx::PaintSurface
 
     private:
         PixmapCanvas*  _canvas;
-        Gfx::Scaling   _scaling;
 };
 
 #endif // PT_HMI_WIN32_RASTER
