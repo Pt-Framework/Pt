@@ -1101,6 +1101,7 @@ HDC PixmapImpl::deviceContext() const
     return _canvas->deviceContext();
 }
 
+
 const std::string& PixmapImpl::defaultFont()
 {
     return getDefaultFont();
