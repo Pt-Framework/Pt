@@ -30,13 +30,6 @@
 #include "PixmapSurfaceImpl.h"
 #include "win32.h"
 
-#include <Pt/Hmi/PixmapSurface.h>
-#include <Pt/Gfx/Algorithm.h>
-
-using std::max;
-using std::min;
-#include <Gdiplus.h>
-
 namespace {
 
 DWORD getPenStyle(const Pt::Gfx::Pen& pen)

@@ -356,7 +356,7 @@ const Gfx::Scaling& PixmapCanvas::onGetScaling() const
 }
 
 
-bool PixmapCanvas::onGetPaint(Gfx::PaintContext* context)
+bool PixmapCanvas::onSetPaint(Gfx::PaintContext* context)
 {
     PaintContext* paintContext = dynamic_cast<PaintContext*>(context);
     if( ! paintContext )
@@ -367,7 +367,7 @@ bool PixmapCanvas::onGetPaint(Gfx::PaintContext* context)
 }
 
 
-Gfx::PaintContext* PixmapCanvas::onGetPaint()
+Gfx::PaintContext* PixmapCanvas::onCreatePaint()
 {
     PaintContext* paintContext  = new PaintContext();
 
@@ -971,7 +971,11 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toF,
 {
     Gfx::PointF to = scaling().toPhysical(toF);
 
-    const Gfx::Scaling& scaling = pixmap.info().scaling();
+    const Gfx::CanvasBase* canvas = pixmap.canvas();
+    if( ! canvas )
+        return;
+
+    const Gfx::Scaling& scaling = canvas->scaling();
     
     Gfx::Size size = rect ? Gfx::round( scaling.toPhysical(*rect).size() ) 
                           : Gfx::round( pixmap.size() );
@@ -1019,6 +1023,7 @@ PixmapImpl::PixmapImpl()
 : _canvas(0)
 {
     _canvas = new PixmapCanvas(*this);
+    setCanvas(_canvas);
 }
 
 
@@ -1060,18 +1065,6 @@ void PixmapImpl::resize(const Gfx::SizeF& size)
 void PixmapImpl::setScaleFactor(double scaleFactor)
 {
     _canvas->setScaleFactor(scaleFactor);
-}
-
-
-const Gfx::PaintInfo& PixmapImpl::onGetPaintInfo() const
-{
-    return *_canvas;
-}
-
-
-Gfx::PaintContext* PixmapImpl::onGetPaint(Gfx::PaintContext* context)
-{
-    return _canvas->getPaint(context);
 }
 
 

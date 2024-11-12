@@ -140,15 +140,27 @@ void Painter::onDetachSurface(PaintSurface& surface)
 
 const Gfx::ImageFormat& Painter::format() const
 {
-    return _surface ? _surface->info().format() 
-                    : ImageFormat::argb32();
+    if(_surface)
+    {
+        const CanvasBase* canvas = _surface->canvas();
+        if(canvas)
+            return canvas->format();
+    }
+
+    return ImageFormat::argb32();
 }
 
 
 const Scaling& Painter::scaling() const
 {
-    return _surface ? _surface->info().scaling() 
-                    : _scaling;
+    if(_surface)
+    {
+        const CanvasBase* canvas = _surface->canvas();
+        if(canvas)
+            return canvas->scaling();
+    }
+
+    return _scaling;
 }
 
 

@@ -35,6 +35,47 @@ namespace Pt {
 
 namespace Gfx {
 
+///////////////////////////////////////////////////////////////////////
+// CanvasBase
+///////////////////////////////////////////////////////////////////////
+
+CanvasBase::CanvasBase()
+{
+}
+
+
+CanvasBase::~CanvasBase()
+{
+}
+
+
+const Gfx::ImageFormat& CanvasBase::format() const
+{
+    return onGetFormat();
+}
+
+
+const Gfx::SizeF& CanvasBase::size() const
+{
+    return onGetSize();
+}
+
+
+const Scaling& CanvasBase::scaling() const
+{
+    return onGetScaling();
+}
+
+
+Gfx::PaintContext* CanvasBase::getPaint(Gfx::PaintContext* context)
+{
+    return onGetPaint(context);
+}
+
+///////////////////////////////////////////////////////////////////////
+// Canvas
+///////////////////////////////////////////////////////////////////////
+
 Canvas::Canvas(PaintSurface& surface)
 : _surface(surface)
 , _paint(0)
@@ -63,7 +104,7 @@ void Canvas::onDetachPaint(PaintContext& canvas)
 }
 
 
-Gfx::PaintContext* Canvas::getPaint(Gfx::PaintContext* reuse)
+Gfx::PaintContext* Canvas::onGetPaint(Gfx::PaintContext* reuse)
 {
     if(_paint)
     {
@@ -80,13 +121,13 @@ Gfx::PaintContext* Canvas::getPaint(Gfx::PaintContext* reuse)
 
     if(reuse)
     {
-        bool isReused = onGetPaint(reuse);
+        bool isReused = onSetPaint(reuse);
         if(isReused)
             _paint = reuse;
     }
 
     if( ! _paint )
-        _paint = onGetPaint();
+        _paint = onCreatePaint();
     
     _paint->attachCanvas(*this);
     return _paint;

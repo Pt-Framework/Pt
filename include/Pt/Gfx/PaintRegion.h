@@ -42,7 +42,7 @@ class PaintRegion;
 
 /** @internal
 */
-class PaintRegionInfo : public PaintInfo
+class PaintRegionInfo : public CanvasBase
 {
     public:
         PaintRegionInfo();
@@ -69,6 +69,8 @@ class PaintRegionInfo : public PaintInfo
         virtual const Gfx::SizeF& onGetSize() const;
 
         virtual const Scaling& onGetScaling() const;
+
+        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context);
 
     private:
         PaintSurface* _surface;
@@ -107,10 +109,6 @@ class PT_GFX_API PaintRegion : public PaintSurface
         void resize(const Gfx::SizeF& size);
 
     protected:
-        virtual const PaintInfo& onGetPaintInfo() const override;
-
-        virtual PaintContext* onGetPaint(PaintContext* context) override;
-
         virtual void onReset() override;
 
     protected:

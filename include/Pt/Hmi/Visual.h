@@ -452,10 +452,10 @@ class PT_HMI_API Visual : public Responder
 class Widget;
 class View;
 
-class ViewInfo : public Gfx::PaintInfo
+class ViewCanvas : public Gfx::CanvasBase
 {
     public:
-        explicit ViewInfo(View& view)
+        explicit ViewCanvas(View& view)
         : _view(&view)
         , _surface(0)
         {
@@ -484,6 +484,8 @@ class ViewInfo : public Gfx::PaintInfo
         virtual const Gfx::SizeF& onGetSize() const;
 
         virtual const Gfx::Scaling& onGetScaling() const;
+
+        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context);
 
     private:
         View*                _view;
@@ -575,16 +577,8 @@ class PT_HMI_API View : public Visual
 
         virtual void onResizeEvent(const ResizeEvent& ev) override;
 
-    //
-    // PaintSurface
-    //
-    protected:
-        virtual const Gfx::PaintInfo& onGetPaintInfo() const override;
-
-        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
-
     private:
-        ViewInfo* _info;
+        ViewCanvas* _canvas;
 };
 
 } // namespace

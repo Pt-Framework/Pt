@@ -32,7 +32,8 @@
 
 #include <Pt/Hmi/Api.h>
 
-//#define PT_HMI_WIN32_RASTER 1
+#define PT_HMI_WIN32_RASTER 1
+//#define PT_HMI_GDIPLUS 1
 
 #ifdef PT_HMI_WIN32_RASTER
 
@@ -171,9 +172,9 @@ class PixmapCanvas : public Gfx::Canvas
         virtual const Gfx::Scaling& onGetScaling() const override;
 
     protected:
-        virtual bool onGetPaint(Gfx::PaintContext* context) override;
+        virtual bool onSetPaint(Gfx::PaintContext* context) override;
 
-        virtual Gfx::PaintContext* onGetPaint() override;
+        virtual Gfx::PaintContext* onCreatePaint() override;
 
         virtual void onReleasePaint() override;
 
@@ -301,11 +302,6 @@ class PixmapImpl : public Gfx::PaintSurface
                   const Gfx::RectF* rect) const;
 
         HDC deviceContext() const;
-
-    protected:
-        virtual const Gfx::PaintInfo& onGetPaintInfo() const override;
-
-        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
     public:
         static const std::string& defaultFont();

@@ -35,26 +35,15 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
-#include <algorithm>
-#include <cctype>
 
-using std::max;
-using std::min;
 #include <Windows.h>
-#include <Gdiplus.h>
-
-//#define PT_HMI_GDIPLUS 1
 
 namespace Pt {
 
 namespace Hmi {
-
-class PixmapSurfaceImpl;
 
 #ifndef PT_HMI_WIN32_RASTER
 

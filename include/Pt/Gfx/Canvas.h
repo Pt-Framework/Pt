@@ -51,18 +51,41 @@ namespace Gfx {
 class PaintLayer;
 class PaintSurface;
 class PaintContext;
-class Paint;
-class PaintInfo;
-class Line;
 class Polyline;
 class Path;
 
+/** @brief Paint info.
+*/
+class PT_GFX_API CanvasBase
+{
+    public:
+        CanvasBase();
+
+        virtual ~CanvasBase();
+
+        const Gfx::ImageFormat& format() const;
+
+        const Gfx::SizeF& size() const;
+
+        const Scaling& scaling() const;
+
+        Gfx::PaintContext* getPaint(Gfx::PaintContext* context);
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const = 0;
+
+        virtual const Gfx::SizeF& onGetSize() const = 0;
+
+        virtual const Scaling& onGetScaling() const = 0;
+
+        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) = 0;
+};
+
 /** @brief Paint canvas.
 */
-class PT_GFX_API Canvas : public PaintInfo
+class PT_GFX_API Canvas : public CanvasBase
 {
     friend class PaintContext;
-    friend class PaintLayer;
 
     protected:
         explicit Canvas(PaintSurface& surface);
@@ -70,12 +93,12 @@ class PT_GFX_API Canvas : public PaintInfo
     public:
         ~Canvas();
 
-        Gfx::PaintContext* getPaint(Gfx::PaintContext* context);
-
     protected:
-        virtual bool onGetPaint(PaintContext* context) = 0;
+        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context);
 
-        virtual PaintContext* onGetPaint() = 0;
+        virtual bool onSetPaint(PaintContext* context) = 0;
+
+        virtual PaintContext* onCreatePaint() = 0;
 
         virtual void onReleasePaint() = 0;
 
@@ -165,13 +188,6 @@ class PT_GFX_API Canvas : public PaintInfo
         virtual bool onDrawLayer(const Gfx::PointF& to,
                                  const Gfx::PaintLayer& surface,
                                  const Gfx::RectF* rect) = 0;
-
-        //virtual bool onDrawSurface(const Gfx::PointF& to, 
-        //                           const Gfx::PaintSurface& surface) = 0;
-
-        //virtual bool onDrawSurface(const Gfx::PointF& to,
-        //                           const Gfx::PaintSurface& surface,
-        //                           const Gfx::RectF& rect) = 0;
 
     private:
         void onDetachPaint(PaintContext& paint);

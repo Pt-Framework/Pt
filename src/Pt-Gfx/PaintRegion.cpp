@@ -109,19 +109,45 @@ const RectF* PaintRegionInfo::area() const
 
 const Gfx::ImageFormat& PaintRegionInfo::onGetFormat() const
 {
-    return _surface ? _surface->info().format() : Gfx::ImageFormat::argb32();
+    return _surface && _surface->canvas() ? _surface->canvas()->format() 
+                                          : Gfx::ImageFormat::argb32();
 }
 
 
 const Gfx::SizeF& PaintRegionInfo::onGetSize() const
 {
-    return _surface && ! _hasArea ? _surface->info().size() : _area.size();
+    return _surface && _surface->canvas() && ! _hasArea ? _surface->canvas()->size() 
+                                                        : _area.size();
 }
 
 
 const Scaling& PaintRegionInfo::onGetScaling() const
 {
-    return _surface ? _surface->info().scaling() : _scaling;
+    return _surface && _surface->canvas() ? _surface->canvas()->scaling() 
+                                          : _scaling;
+}
+
+
+PaintContext* PaintRegionInfo::onGetPaint(PaintContext* context) 
+{
+    if( ! _surface )
+        return 0;
+
+    PaintContext* paintContext = _surface->getPaint(context);
+    if( ! paintContext )
+        return paintContext;
+
+    const RectF* area = this->area();
+    if( ! area )
+        return paintContext;
+
+    RectF r = paintContext->region();
+    r.shift( area->topLeft().x(),
+             area->topLeft().y() );
+    r.setSize( area->size() );
+
+    paintContext->setRegion(r);
+    return paintContext;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -131,6 +157,7 @@ const Scaling& PaintRegionInfo::onGetScaling() const
 PaintRegion::PaintRegion()
 : _surface(0)
 {
+    setCanvas(&_info);
 }
 
 
@@ -139,6 +166,8 @@ PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
 {           
     _info.reset(surface);
     _surface = &surface;
+
+    setCanvas(&_info);
 }
 
 
@@ -225,35 +254,6 @@ void PaintRegion::resize(const Gfx::SizeF& size)
     onReset();
     
     _info.setSize(size);
-}
-
-
-const PaintInfo& PaintRegion::onGetPaintInfo() const
-{
-    return _info;
-}
-
-
-PaintContext* PaintRegion::onGetPaint(PaintContext* context) 
-{
-    if( ! _surface )
-        return 0;
-
-    PaintContext* paintContext = _surface->getPaint(context);
-    if( ! paintContext )
-        return paintContext;
-
-    const RectF* area = _info.area();
-    if( ! area )
-        return paintContext;
-
-    RectF r = paintContext->region();
-    r.shift( area->topLeft().x(),
-             area->topLeft().y() );
-    r.setSize( area->size() );
-
-    paintContext->setRegion(r);
-    return paintContext;
 }
 
 

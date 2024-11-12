@@ -54,8 +54,7 @@ class Painter;
 class Scaling;
 class PaintSurface;
 class PaintLayer;
-
-class Line;
+class PaintContext;
 class Polyline;
 
 /** @todo TODO:
@@ -163,26 +162,30 @@ class PT_GFX_API Paint
 
 /** @brief Paint info.
 */
-class PT_GFX_API PaintInfo
-{
-    public:
-        PaintInfo();
-
-        virtual ~PaintInfo();
-
-        const Gfx::ImageFormat& format() const;
-
-        const Gfx::SizeF& size() const;
-
-        const Scaling& scaling() const;
-
-    protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const = 0;
-
-        virtual const Gfx::SizeF& onGetSize() const = 0;
-
-        virtual const Scaling& onGetScaling() const = 0;
-};
+//class PT_GFX_API PaintInfo
+//{
+//    public:
+//        PaintInfo();
+//
+//        virtual ~PaintInfo();
+//
+//        const Gfx::ImageFormat& format() const;
+//
+//        const Gfx::SizeF& size() const;
+//
+//        const Scaling& scaling() const;
+//
+//        Gfx::PaintContext* getPaint(Gfx::PaintContext* context);
+//
+//    protected:
+//        virtual const Gfx::ImageFormat& onGetFormat() const = 0;
+//
+//        virtual const Gfx::SizeF& onGetSize() const = 0;
+//
+//        virtual const Scaling& onGetScaling() const = 0;
+//
+//        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) = 0;
+//};
 
 /** @brief Paint context.
 */

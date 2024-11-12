@@ -180,7 +180,7 @@ const Scaling& ImageCanvas::onGetScaling() const
 }
 
 
-bool ImageCanvas::onGetPaint(Gfx::PaintContext* context)
+bool ImageCanvas::onSetPaint(Gfx::PaintContext* context)
 {
     ImagePaint* paintContext = dynamic_cast<ImagePaint*>(context);
     if( ! paintContext )
@@ -191,7 +191,7 @@ bool ImageCanvas::onGetPaint(Gfx::PaintContext* context)
 }
 
 
-Gfx::PaintContext* ImageCanvas::onGetPaint()
+Gfx::PaintContext* ImageCanvas::onCreatePaint()
 {
     ImagePaint* paintContext = new ImagePaint();
     
@@ -384,6 +384,7 @@ ImageSurface::ImageSurface()
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this);
+    setCanvas(_canvas);
 }
 
 
@@ -391,6 +392,7 @@ ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this);
+    setCanvas(_canvas);
 
     reset(size, stride);
 }
@@ -436,18 +438,6 @@ void ImageSurface::resize(const Gfx::SizeF& size)
 void ImageSurface::setScaleFactor(double scaleFactor)
 {
     _canvas->setScaleFactor(scaleFactor);
-}
-
-
-const PaintInfo& ImageSurface::onGetPaintInfo() const
-{
-    return *_canvas;
-}
-
-
-Gfx::PaintContext* ImageSurface::onGetPaint(Gfx::PaintContext* reuse) 
-{
-    return _canvas->getPaint(reuse);
 }
 
 
@@ -540,10 +530,14 @@ void ImageLayer::onDraw(PaintSurface& surface,
     Gfx::Painter painter(surface);
     painter.setCompositionMode( paint.compositionMode() );
     
+    const CanvasBase* canvas = _surface.canvas();
+    if( ! canvas )
+        return;
+
     const Gfx::Image& image = this->image();
     if(rect)
     {
-        Gfx::RectF imageRect = _surface.info().scaling().toPhysical(*rect);
+        Gfx::RectF imageRect = canvas->scaling().toPhysical(*rect);
         painter.drawImage(to, image, imageRect);
     }
     else

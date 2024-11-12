@@ -35,6 +35,7 @@
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Paint.h>
+#include <Pt/Gfx/Canvas.h>
 
 #include <vector>
 
@@ -42,11 +43,9 @@ namespace Pt {
 
 namespace Gfx {
 
-class Canvas;
 class Painter;
 class PaintContext;
 class PaintRegion;
-class PaintLayer;
 
 /** @brief Paint surface.
 */
@@ -58,19 +57,17 @@ class PT_GFX_API PaintSurface
     protected:
         PaintSurface();
 
+        void setCanvas(CanvasBase* canvas);
+
     public:
         virtual ~PaintSurface();
         
-        const PaintInfo& info() const;
+        const CanvasBase* canvas() const;
 
         PaintContext* getPaint(PaintContext* context);
 
     protected:      
-        virtual const PaintInfo& onGetPaintInfo() const = 0;
-
-        virtual PaintContext* onGetPaint(PaintContext* context) = 0;
-
-        virtual void onReset();
+        virtual void onReset();      
 
     private:
         void attachRegion(PaintRegion& region);
@@ -83,6 +80,7 @@ class PT_GFX_API PaintSurface
         void detachPainter(Painter& painter);
 
     private:
+        CanvasBase*                _canvas;
         std::vector<PaintRegion*>  _regions;
         Painter*                   _painter;
 };
@@ -93,6 +91,8 @@ class PT_GFX_API PaintLayer
 {
     protected:
         PaintLayer();
+
+        void setSurface(PaintSurface* surface);
 
     public:
         virtual ~PaintLayer();
@@ -111,9 +111,6 @@ class PT_GFX_API PaintLayer
                             const Paint& paint,
                             const Gfx::PointF& to,
                             const Gfx::RectF* rect = 0) const = 0;
-
-    protected:
-        void setSurface(PaintSurface* surface);
 
     private:
         PaintSurface* _surface;

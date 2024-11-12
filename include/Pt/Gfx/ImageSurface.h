@@ -126,9 +126,9 @@ protected:
     virtual const Scaling& onGetScaling() const;
 
   protected:
-    virtual bool onGetPaint(Gfx::PaintContext* context) override;
+    virtual bool onSetPaint(Gfx::PaintContext* context) override;
 
-    virtual Gfx::PaintContext* onGetPaint() override;
+    virtual Gfx::PaintContext* onCreatePaint() override;
 
     virtual void onReleasePaint() override;
   
@@ -229,11 +229,6 @@ class PT_GFX_API ImageSurface : public PaintSurface
     void resize(const Gfx::SizeF& size);
 
     void setScaleFactor(double scaleFactor);
-
-  protected:
-    virtual const PaintInfo& onGetPaintInfo() const override;
-
-    virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context) override;
 
   public:
     static void setFontDir(const System::Path& path);

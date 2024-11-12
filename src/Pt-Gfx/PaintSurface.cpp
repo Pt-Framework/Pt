@@ -42,8 +42,15 @@ namespace Pt {
 namespace Gfx {
 
 PaintSurface::PaintSurface()
-: _painter(0)
+: _canvas(0)
+, _painter(0)
 {
+}
+
+
+void PaintSurface::setCanvas(CanvasBase* canvas)
+{
+    _canvas = canvas;
 }
 
 
@@ -93,15 +100,18 @@ void PaintSurface::onReset()
 }
 
 
-const PaintInfo& PaintSurface::info() const
+const CanvasBase* PaintSurface::canvas() const
 {
-    return onGetPaintInfo();
+    return _canvas;
 }
 
 
 PaintContext* PaintSurface::getPaint(PaintContext* reuse)
 {
-    return onGetPaint(reuse);   
+    if(_canvas)
+        return _canvas->getPaint(reuse);
+
+    return 0;   
 }
 
 

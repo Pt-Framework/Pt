@@ -246,7 +246,7 @@ void Panel::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter)
     if(  _picture.empty() )
         return;
 
-    const Gfx::Scaling& scaling = surface.info().scaling();
+    const Gfx::Scaling& scaling = this->scaling();
 
     double rightX = size().width() - scaling.toLogical( _picture.size().width() );
     double bottomY = size().height() - scaling.toLogical( _picture.size().height() );

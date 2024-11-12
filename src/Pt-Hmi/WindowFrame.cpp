@@ -77,11 +77,9 @@ const Pixmap& WindowFrame::pixmap() const
 
 void WindowFrame::getImage(Gfx::Image& image)
 {
-    const Gfx::Scaling& scaling = _pixmap.surface()->info().scaling();
-    
     Gfx::ImageSurface imageSurface;
 
-    Gfx::SizeF imageSize = scaling.toPhysical( _window.size() );
+    Gfx::SizeF imageSize = scaling().toPhysical( _window.size() );
     imageSurface.resize(imageSize);
 
     Gfx::PointF framePos = onFromWindow( _window, Gfx::PointF(0, 0) );
