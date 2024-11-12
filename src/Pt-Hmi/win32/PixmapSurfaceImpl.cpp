@@ -998,7 +998,7 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toF,
 
             HDC pixmapDC = pixmap.deviceContext();
 
-            AlphaBlend(_dc, to.x(), to.y(), size.width(), size.height(),
+            AlphaBlend(_dc, lround(to.x()), lround(to.y()), size.width(), size.height(),
                        pixmapDC, from.x(), from.y(), size.width(), size.height(), bf);
         }
         break;
