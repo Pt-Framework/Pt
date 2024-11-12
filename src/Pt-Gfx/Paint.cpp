@@ -123,43 +123,6 @@ void Paint::setFont(const Gfx::Font& font)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// PaintInfo
-///////////////////////////////////////////////////////////////////////
-
-//PaintInfo::PaintInfo()
-//{
-//}
-//
-//
-//PaintInfo::~PaintInfo()
-//{
-//}
-//
-//
-//const Gfx::ImageFormat& PaintInfo::format() const
-//{
-//    return onGetFormat();
-//}
-//
-//
-//const Gfx::SizeF& PaintInfo::size() const
-//{
-//    return onGetSize();
-//}
-//
-//
-//const Scaling& PaintInfo::scaling() const
-//{
-//    return onGetScaling();
-//}
-//
-//
-//Gfx::PaintContext* PaintInfo::getPaint(Gfx::PaintContext* context)
-//{
-//    return onGetPaint(context);
-//}
-
-///////////////////////////////////////////////////////////////////////
 // PaintContext
 ///////////////////////////////////////////////////////////////////////
 
