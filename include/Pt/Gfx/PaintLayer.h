@@ -1,6 +1,5 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -27,70 +26,53 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/Canvas.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Paint.h> // PaintContext
+#ifndef Pt_Gfx_PaintLayer_h
+#define Pt_Gfx_PaintLayer_h
+
+#include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Paint.h>
+
+#include <vector>
 
 namespace Pt {
 
 namespace Gfx {
 
-PaintSurface::PaintSurface()
-: _canvas(0)
-, _painter(0)
+class PaintSurface;
+
+/** @brief Paint layer.
+*/
+class PT_GFX_API PaintLayer
 {
-}
+    protected:
+        PaintLayer();
 
+        void setSurface(PaintSurface* surface);
 
-void PaintSurface::setCanvas(CanvasBase* canvas)
-{
-    _canvas = canvas;
-}
+    public:
+        virtual ~PaintLayer();
 
+        PaintSurface* surface();
 
-PaintSurface::~PaintSurface()
-{
-    if(_painter)
-    {
-        _painter->onDetachSurface(*this);
-    }
-}
+        const PaintSurface* surface() const;
 
+        void draw(PaintSurface& surface,
+                  const Paint& paint,
+                  const Gfx::PointF& to,
+                  const Gfx::RectF* rect = 0) const;
 
-const CanvasBase* PaintSurface::canvas() const
-{
-    return _canvas;
-}
+    protected:
+        virtual void onDraw(PaintSurface& surface,
+                            const Paint& paint,
+                            const Gfx::PointF& to,
+                            const Gfx::RectF* rect = 0) const = 0;
 
-
-PaintContext* PaintSurface::getPaint(PaintContext* reuse)
-{
-    if(_canvas)
-        return _canvas->getPaint(reuse);
-
-    return 0;   
-}
-
-
-void PaintSurface::attachPainter(Painter& painter)
-{
-    if(_painter)
-    {
-        _painter->onDetachSurface(*this);
-        _painter = 0;
-    }
-
-    _painter = &painter;
-}
-
-
-void PaintSurface::detachPainter(Painter& painter)
-{
-    if(_painter)
-        _painter = 0;
-}
+    private:
+        PaintSurface* _surface;
+};
 
 } // namespace
 
 } // namespace
+
+#endif

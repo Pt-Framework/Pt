@@ -27,68 +27,47 @@
   MA 02110-1301 USA
 */
 
+#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/Canvas.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Paint.h> // PaintContext
 
 namespace Pt {
 
 namespace Gfx {
 
-PaintSurface::PaintSurface()
-: _canvas(0)
-, _painter(0)
+PaintLayer::PaintLayer()
 {
 }
 
 
-void PaintSurface::setCanvas(CanvasBase* canvas)
+PaintLayer::~PaintLayer()
 {
-    _canvas = canvas;
 }
 
 
-PaintSurface::~PaintSurface()
+PaintSurface* PaintLayer::surface()
 {
-    if(_painter)
-    {
-        _painter->onDetachSurface(*this);
-    }
+    return _surface;
 }
 
 
-const CanvasBase* PaintSurface::canvas() const
+const PaintSurface* PaintLayer::surface() const
 {
-    return _canvas;
+    return _surface;
 }
 
 
-PaintContext* PaintSurface::getPaint(PaintContext* reuse)
+void PaintLayer::setSurface(PaintSurface* surface)
 {
-    if(_canvas)
-        return _canvas->getPaint(reuse);
-
-    return 0;   
+    _surface = surface;
 }
 
 
-void PaintSurface::attachPainter(Painter& painter)
+void PaintLayer::draw(PaintSurface& surface, 
+                      const Paint& paint,
+                      const Gfx::PointF& to,
+                      const Gfx::RectF* rect) const
 {
-    if(_painter)
-    {
-        _painter->onDetachSurface(*this);
-        _painter = 0;
-    }
-
-    _painter = &painter;
-}
-
-
-void PaintSurface::detachPainter(Painter& painter)
-{
-    if(_painter)
-        _painter = 0;
+    onDraw(surface, paint, to, rect);
 }
 
 } // namespace

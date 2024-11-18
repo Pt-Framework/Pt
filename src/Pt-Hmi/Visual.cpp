@@ -909,10 +909,8 @@ const Gfx::Scaling& ViewCanvas::onGetScaling() const
 
 Gfx::PaintContext* ViewCanvas::onGetPaint(Gfx::PaintContext* context) 
 {
-    Gfx::PaintSurface* surface = _surface;
-
-    Gfx::PaintContext* paintContext = surface ? surface->getPaint(context)
-                                              : 0;
+    Gfx::PaintContext* paintContext = _surface ? _surface->getPaint(context)
+                                                : 0;
     if( paintContext )
     {
         Gfx::RectF r = paintContext->region();

@@ -1659,6 +1659,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PixmapImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\PaintLayer.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -3043,6 +3046,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\PaintLayer.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -33,7 +33,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/System/Path.h>
 

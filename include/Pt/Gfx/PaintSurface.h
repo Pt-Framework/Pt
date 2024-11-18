@@ -31,20 +31,14 @@
 #define Pt_Gfx_PaintSurface_h
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Scaling.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Paint.h>
-#include <Pt/Gfx/Canvas.h>
-
-#include <vector>
 
 namespace Pt {
 
 namespace Gfx {
 
-class Painter;
+class CanvasBase;
 class PaintContext;
+class Painter;
 
 /** @brief Paint surface.
 */
@@ -72,37 +66,6 @@ class PT_GFX_API PaintSurface
     private:
         CanvasBase*                _canvas;
         Painter*                   _painter;
-};
-
-/** @brief Paint layer.
-*/
-class PT_GFX_API PaintLayer
-{
-    protected:
-        PaintLayer();
-
-        void setSurface(PaintSurface* surface);
-
-    public:
-        virtual ~PaintLayer();
-
-        PaintSurface* surface();
-
-        const PaintSurface* surface() const;
-
-        void draw(PaintSurface& surface,
-                  const Paint& paint,
-                  const Gfx::PointF& to,
-                  const Gfx::RectF* rect = 0) const;
-
-    protected:
-        virtual void onDraw(PaintSurface& surface,
-                            const Paint& paint,
-                            const Gfx::PointF& to,
-                            const Gfx::RectF* rect = 0) const = 0;
-
-    private:
-        PaintSurface* _surface;
 };
 
 } // namespace

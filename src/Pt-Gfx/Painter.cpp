@@ -29,6 +29,7 @@
 
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Canvas.h>
 
 namespace Pt {

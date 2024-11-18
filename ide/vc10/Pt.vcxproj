@@ -50,6 +50,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Paint.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\PaintLayer.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Path.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
@@ -581,6 +582,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\JpegReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Paint.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Painter.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\PaintLayer.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Path.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
