@@ -255,7 +255,6 @@ class PT_HMI_API Form : public View
         void moveFocus(Iter begin, Iter end);
 
     protected:
-
         const std::map<Key, Widget*>& shortcuts() const
         {
             return _shortcuts;
@@ -266,9 +265,7 @@ class PT_HMI_API Form : public View
             return _mnemonics;
         }
 
-
     private:
-        //Gfx::PaintRegion             _surface;
         Widget*                      _mainWidget;
                                      
         int                          _layouts;

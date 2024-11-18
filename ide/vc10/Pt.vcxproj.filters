@@ -1464,9 +1464,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageSurface.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\PaintRegion.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\raster\ClipPolygon.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
@@ -1623,13 +1620,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\MenuSubItem.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintRegion.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Json\JsonFormatter.h">
@@ -2957,9 +2948,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\ImageSurface.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\PaintRegion.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\raster\ClipPolygon.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
@@ -3032,13 +3020,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\MenuSubItem.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PaintRegion.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Json\JsonFormatter.cpp">

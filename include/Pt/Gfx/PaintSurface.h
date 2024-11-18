@@ -45,14 +45,12 @@ namespace Gfx {
 
 class Painter;
 class PaintContext;
-class PaintRegion;
 
 /** @brief Paint surface.
 */
 class PT_GFX_API PaintSurface
 {
     friend class Painter;
-    friend class PaintRegion;
 
     protected:
         PaintSurface();
@@ -66,14 +64,6 @@ class PT_GFX_API PaintSurface
 
         PaintContext* getPaint(PaintContext* context);
 
-    protected:      
-        virtual void onReset();      
-
-    private:
-        void attachRegion(PaintRegion& region);
-        
-        void detachRegion(PaintRegion& region);
-
     private:
         void attachPainter(Painter& painter);
 
@@ -81,7 +71,6 @@ class PT_GFX_API PaintSurface
 
     private:
         CanvasBase*                _canvas;
-        std::vector<PaintRegion*>  _regions;
         Painter*                   _painter;
 };
 

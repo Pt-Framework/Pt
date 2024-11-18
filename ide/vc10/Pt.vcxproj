@@ -50,7 +50,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Paint.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\PaintRegion.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Path.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
@@ -107,8 +106,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintRegion.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Pixmap.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h" />
@@ -585,7 +582,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\JpegReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Paint.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Painter.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\PaintRegion.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Path.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
@@ -681,8 +677,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\MenuMenuItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuSubItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\PaintRegion.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PlatinumStyle.cpp" />

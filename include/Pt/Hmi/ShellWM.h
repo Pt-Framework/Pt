@@ -188,8 +188,6 @@ class ShellWM : public WindowManager
     private:
         Shell*                       _parent;
 
-        //Gfx::PaintRegion             _surface;
-
         std::vector<Window*>         _windowList;
 
         Window*                      _activeWindow;

@@ -28,14 +28,9 @@
 */
 
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/PaintRegion.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Paint.h>
-#include <Pt/Gfx/Canvas.h>
-#include <Pt/Gfx/Algorithm.h>
-
-#include <algorithm>
 
 namespace Pt {
 
@@ -59,43 +54,6 @@ PaintSurface::~PaintSurface()
     if(_painter)
     {
         _painter->onDetachSurface(*this);
-    }
-
-    typedef std::vector<PaintRegion*>::iterator RegionIterator;
-    for( RegionIterator it = _regions.begin(); it != _regions.end(); ++it )
-    {
-        (*it)->onDetachSurface(this);
-    } 
-}
-
-
-void PaintSurface::attachRegion(PaintRegion& region)
-{
-    _regions.push_back(&region);
-}
-
-
-void PaintSurface::detachRegion(PaintRegion& region)
-{
-    typedef std::vector<PaintRegion*>::iterator RegionIterator;
-
-    RegionIterator rit = std::find(_regions.begin(), _regions.end(), &region);
-    if( rit != _regions.end() )
-    {
-        _regions.erase(rit);
-    }
-}
-
-
-void PaintSurface::onReset()
-{
-    if(_painter)
-        _painter->finish();
-
-    typedef std::vector<PaintRegion*>::iterator RegionIterator;
-    for( RegionIterator it = _regions.begin(); it != _regions.end(); ++it )
-    {
-        (*it)->onReset();
     }
 }
 

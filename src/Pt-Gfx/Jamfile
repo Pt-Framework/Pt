@@ -116,7 +116,6 @@ SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        Paint.cpp
                        Painter.cpp
                        PaintSurface.cpp
-                       PaintRegion.cpp
                        Path.cpp
                        Pen.cpp
                        PngReader.cpp

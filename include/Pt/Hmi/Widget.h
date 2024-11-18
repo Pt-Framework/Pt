@@ -363,8 +363,6 @@ class PT_HMI_API Widget : public View
         virtual const std::vector<Char> onGetMnemonics();
 
     private:
-        //Gfx::PaintRegion             _surface;
-
         View*                        _parent;
         std::vector<Widget*>         _children;
 
