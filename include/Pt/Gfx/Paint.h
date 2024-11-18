@@ -1,5 +1,4 @@
-/* Copyright (C) 2006-2024 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2015-2024 Marc Boris Duerner
+/* Copyright (C) 2015-2024 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -31,31 +30,15 @@
 #define PT_GFX_PAINT_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Scaling.h>
-#include <Pt/Gfx/Transform.h>
-#include <Pt/Gfx/Path.h>
-#include <Pt/String.h>
-#include <Pt/Types.h>
-#include <cstddef>
+#include <Pt/Gfx/Font.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-class Canvas;
-class Painter;
-class Scaling;
-class PaintSurface;
-class PaintLayer;
-class PaintContext;
-class Polyline;
 
 /** @todo TODO:
 
@@ -158,135 +141,6 @@ class PT_GFX_API Paint
         Gfx::Pen             _pen;
         Gfx::Brush           _brush;
         Gfx::Font            _font;
-};
-
-/** @brief Paint context.
-*/
-class PT_GFX_API PaintContext
-{
-    friend class Canvas;
-    friend class PaintLayer;
-
-    protected:
-        PaintContext();
-
-    public:
-        virtual ~PaintContext();
-
-        const PointF& origin() const;
-
-        const RectF& region() const;
-
-        void setRegion(const RectF& r);
-
-        const Scaling& scaling() const;
-
-        void beginPaint();
-
-        void finishPaint();
-
-        bool isActive() const;
-
-        void reset();
-
-    public:
-        void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        void setPen(const Pen& pen);
-
-        void setBrush(const Brush& brush);
-
-        void setFont(const Gfx::Font& font);
-
-        void setClip(const RectF& clip);
-
-        void resetClip();
-
-    public:
-        void drawLine(const PointF& from, const PointF& to);
-
-        void drawPolyline(const Gfx::PointF* ps, const size_t n);
-
-        void fillPolygon(const Gfx::PointF* ps, const size_t n);
-
-        void drawRect(const Gfx::RectF& rectangle);
-
-        void fillRect(const Gfx::RectF& rectangle);
-
-        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-    public:
-        FontMetrics fontMetrics(const Pt::String& text) const;
-
-        void drawText(const PointF& to, const Pt::String& text, 
-                      const Transform* t = 0);
-
-    public:
-        void drawImage(const Gfx::PointF& to, 
-                       const Gfx::Image& image, 
-                       const Gfx::RectF* rect = 0);
-        
-        bool drawLayer(const Gfx::PointF& to,
-                       const Gfx::PaintLayer& layer,
-                       const Gfx::RectF* rect = 0);
-
-    protected:
-        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
-
-        virtual void onSetPen(const Pen& pen) = 0;
-
-        virtual void onSetBrush(const Brush& pen) = 0;
-
-        virtual void onSetFont(const Gfx::Font& font) = 0;
-
-        virtual void onSetClip(const Gfx::RectF* clip) = 0;
-
-        virtual void onReleasePaint() {}
-
-    private:
-        void attachCanvas(Canvas& canvas);
-
-        void detachCanvas(Canvas& canvas);
-
-    private:
-        Canvas*        _canvas;
-        Canvas*        _active;
-        RectF          _region;
-        Gfx::Scaling   _scaling;
-        RectF          _clip;
-        bool           _hasClip;
-};
-
-/** @brief Polyline.
-*/
-class Polyline
-{
-    public:
-        Polyline(PaintContext& paint,
-                 const Gfx::PointF* points, 
-                 std::size_t n)
-        : _paint(paint)
-        , _points(points)
-        , _n(n)
-        { }
-
-        Gfx::PointF at(std::size_t n) const
-        {
-            Gfx::PointF p = _points[n] + _paint.origin();
-            return _paint.scaling().toPhysical(p);
-        }
-
-        std::size_t size() const
-        {
-            return _n;
-        }
-
-    private:
-        PaintContext&      _paint;
-        const Gfx::PointF* _points;
-        std::size_t        _n;
 };
 
 } // namespace

@@ -43,15 +43,17 @@
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Paint.h>
+
 #include <Pt/String.h>
 #include <Pt/Types.h>
+
 #include <cstddef>
 
 namespace Pt {
 
 namespace Gfx {
 
-class Scaling;
+class PaintContext;
 class PaintSurface;
 class PaintLayer;
 

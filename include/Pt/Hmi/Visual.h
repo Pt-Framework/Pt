@@ -34,14 +34,15 @@
 #include <Pt/Hmi/Spacing.h>
 #include <Pt/Hmi/SizePolicy.h>
 #include <Pt/Hmi/Cursor.h>
+
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+
 #include <Pt/String.h>
-#include <Pt/Event.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <Pt/Types.h>

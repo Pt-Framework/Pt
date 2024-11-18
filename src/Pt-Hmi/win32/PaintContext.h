@@ -30,12 +30,13 @@
 #define PT_HMI_WIN32_PAINTCONTEXT_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Gfx/Paint.h> // PaintContext
+
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/CompositionMode.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/PaintContext.h>
 
 #include <Windows.h>
 

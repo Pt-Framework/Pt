@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/Canvas.h>
+#include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Rect.h>

@@ -27,7 +27,7 @@
 */
 
 #include <Pt/Gfx/Canvas.h>
-#include <Pt/Gfx/Paint.h>
+#include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Algorithm.h>
 

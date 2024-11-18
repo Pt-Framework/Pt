@@ -36,6 +36,7 @@
 #include <Pt/Hmi/EnterEvent.h>
 #include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Gfx/PaintContext.h>
 
 namespace Pt {
 
