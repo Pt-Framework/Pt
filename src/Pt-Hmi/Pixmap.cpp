@@ -27,10 +27,8 @@
   MA 02110-1301 USA
 */
 
-#include "PixmapSurfaceImpl.h"
-
-#include <Pt/Hmi/PixmapSurface.h>
-#include <Pt/Gfx/Algorithm.h>
+#include "PixmapImpl.h"
+#include <Pt/Hmi/Pixmap.h>
 
 namespace Pt {
 

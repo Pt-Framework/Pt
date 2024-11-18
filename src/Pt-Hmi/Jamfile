@@ -68,7 +68,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        MenuMenuItem.cpp
                        MenuSubItem.cpp
                        Panel.cpp
-                       PixmapSurface.cpp
+                       Pixmap.cpp
                        PlatinumStyle.cpp
                        Popup.cpp
                        ProgressBar.cpp

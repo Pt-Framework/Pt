@@ -27,7 +27,7 @@
   MA 02110-1301 USA
 */
 
-#include "PixmapSurfaceImpl.h"
+#include "PixmapImpl.h"
 
 namespace Pt {
 

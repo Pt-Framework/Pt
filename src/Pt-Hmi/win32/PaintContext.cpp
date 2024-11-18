@@ -27,7 +27,7 @@
 */
 
 #include "PaintContext.h"
-#include "PixmapSurfaceImpl.h"
+#include "PixmapImpl.h"
 #include "win32.h"
 
 namespace {

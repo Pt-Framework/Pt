@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_cocoa_PixmapSurfaceImpl_h
-#define Pt_Hmi_cocoa_PixmapSurfaceImpl_h
+#ifndef Pt_Hmi_cocoa_PixmapImpl_h
+#define Pt_Hmi_cocoa_PixmapImpl_h
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Size.h>

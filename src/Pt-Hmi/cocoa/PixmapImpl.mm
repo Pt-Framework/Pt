@@ -27,10 +27,10 @@
   MA 02110-1301 USA
 */
 
-#include "PixmapSurfaceImpl.h"
+#include "PixmapImpl.h"
 #include "PaintData.h"
 
-#include <Pt/Hmi/PixmapSurface.h>
+#include <Pt/Hmi/Pixmap.h>
 #include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Utf8Codec.h>
 

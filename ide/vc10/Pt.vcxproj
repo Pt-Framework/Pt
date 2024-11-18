@@ -104,7 +104,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\MenuSubItem.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Pixmap.h" />
@@ -383,7 +382,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\KeyMap.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintData.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PixmapImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowView.h" />
@@ -429,13 +428,13 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\ShellWindowFrame.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\KeyMap.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\PaintContext.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\win32\PixmapImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\win32.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\WindowImpl.h" />
@@ -445,7 +444,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\KeyHandler.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\PixmapImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\WindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h" />
@@ -533,7 +532,7 @@
     <None Include="..\..\src\Pt-Gfx\tests\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm" />
-    <None Include="..\..\src\Pt-Hmi\cocoa\PixmapSurfaceImpl.mm" />
+    <None Include="..\..\src\Pt-Hmi\cocoa\PixmapImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\ScreenImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\WindowView.mm" />
@@ -665,7 +664,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ListBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Menu.cpp" />
@@ -676,9 +675,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\MenuItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuMenuItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuSubItem.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Pixmap.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PlatinumStyle.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Popup.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ProgressBar.cpp" />
@@ -702,7 +700,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\PaintContext.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\win32\PixmapSurfaceImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\win32\PixmapImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\WindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />
@@ -715,7 +713,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\KeyHandler.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\PixmapSurfaceImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\PixmapImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd.cpp" />

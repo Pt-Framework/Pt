@@ -29,7 +29,7 @@
 
 #include "WindowImpl.h"
 #include "ScreenImpl.h"
-#include "PixmapSurfaceImpl.h"
+#include "PixmapImpl.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>

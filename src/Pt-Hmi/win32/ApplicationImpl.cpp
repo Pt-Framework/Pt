@@ -30,7 +30,7 @@
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
 #include "WindowImpl.h"
-#include "PixmapSurfaceImpl.h"
+#include "PixmapImpl.h"
 #include "KeyMap.h"
 
 #include <Pt/Hmi/Application.h>

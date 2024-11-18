@@ -28,7 +28,7 @@
 */
 
 #include "win32.h"
-#include "PixmapSurfaceImpl.h"
+#include "PixmapImpl.h"
 #include "PaintContext.h"
 
 #include <Pt/Hmi/Application.h>
