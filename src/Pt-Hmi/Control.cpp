@@ -55,59 +55,12 @@ bool Control::isHighlighted() const
 }
 
 
-void Control::setStyleOptions(const StyleOptions& o)
-{
-    onSetStyleOptions(o);
-    invalidate();
-}
-
-
-void Control::onSetStyleOptions(const StyleOptions& o)
-{
-}
-
-
-void Control::onInvalidate()
-{
-    Widget::onInvalidate();
-}
-
-
 void Control::onLayout(const Gfx::RectF& rect)
 {
      Widget::onLayout(rect);
 
      // TODO: repaint only if required in derived class
      repaint();
-}
-
-
-//void Control::onPaintEvent(const PaintEvent& ev)
-//{
-//    Widget::onPaintEvent(ev); 
-//    
-//    onPaint( surface(), ev.rect() );   
-//}
-
-
-void Control::onMoveEvent(const MoveEvent& ev)
-{
-    Widget::onMoveEvent(ev);
-}
-
-
-void Control::onResizeEvent(const ResizeEvent& ev)
-{
-    Widget::onResizeEvent(ev);
-}
-
-
-void Control::onFocusEvent(const FocusEvent& ev)
-{
-    Widget::onFocusEvent(ev);
-
-    // TODO: move to derived classes
-    invalidate();
 }
 
 

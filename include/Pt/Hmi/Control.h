@@ -30,7 +30,6 @@
 #define Pt_Hmi_Control_H
 
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/Style.h>
 #include <Pt/Gfx/PaintSurface.h>
 
 namespace Pt {
@@ -46,28 +45,9 @@ class PT_HMI_API Control : public Widget
 
         // TODO: find better name
         bool isHighlighted() const;
-
-        void setStyleOptions(const StyleOptions& o);
-
-    protected:
-        virtual void onSetStyleOptions(const StyleOptions& o);
         
     protected:
-        virtual void onInvalidate();
-
         virtual void onLayout(const Gfx::RectF& rect);
-
-        //virtual void onPaint(Gfx::PaintSurface& surface, 
-        //                     const Gfx::RectF& updateRect) = 0;
-
-    protected:
-        //virtual void onPaintEvent(const PaintEvent& ev);
-
-        virtual void onMoveEvent(const MoveEvent& ev);
-
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
-        virtual void onFocusEvent(const FocusEvent& ev);
 
         virtual bool onEnterEvent( const EnterEvent& ev );
 

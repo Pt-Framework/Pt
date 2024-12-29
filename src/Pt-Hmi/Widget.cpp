@@ -320,13 +320,15 @@ bool Widget::hasFocus() const
 
 void Widget::focus()
 {
-    if(_form)
+    if(_form && focusPolicy() != Widget::NoFocus)
         _form->onSetFocus(*this);
 }
 
 
 void Widget::onProcessFocusEvent(const FocusEvent& ev)
 {
+    //std::clog << "FOCUS: " << typeid(*this).name() 
+    //          << " " << ev.isFocused() << std::endl;
     onFocusEvent(ev);
 }
 
@@ -340,6 +342,8 @@ void Widget::onFocusEvent(const FocusEvent& ev)
 
     // onFocusGained
     // onFocusLost
+
+    invalidate();
 }
 
 

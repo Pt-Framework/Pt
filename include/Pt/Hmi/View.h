@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/Style.h>
 
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Canvas.h>
@@ -43,57 +44,9 @@ namespace Pt {
 
 namespace Hmi {
 
-///////////////////////////////////////////////////////////////////////
-// ViewCanvas
-///////////////////////////////////////////////////////////////////////
-
 class Widget;
 class View;
-
-class ViewCanvas : public Gfx::CanvasBase
-{
-    public:
-        explicit ViewCanvas(View& view)
-        : _view(&view)
-        , _surface(0)
-        {
-        }
-
-        Gfx::PaintSurface* surface()
-        {
-            return _surface;
-        }
-
-        const Gfx::PointF& position() const
-        {
-            return _position;
-        } 
-
-        void setSurface(Gfx::PaintSurface* surface, 
-                        const Gfx::PointF& pos)
-        {
-            _surface = surface;
-            _position = pos;
-        }
-
-    protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const;
-
-        virtual const Gfx::SizeF& onGetSize() const;
-
-        virtual const Gfx::Scaling& onGetScaling() const;
-
-        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context);
-
-    private:
-        View*                _view;
-        Gfx::PaintSurface*   _surface;
-        Gfx::PointF          _position;
-};
-
-///////////////////////////////////////////////////////////////////////
-// View
-///////////////////////////////////////////////////////////////////////
+class ViewCanvas;
 
 class PT_HMI_API View : public Visual
                       , private Gfx::PaintSurface
@@ -121,6 +74,8 @@ class PT_HMI_API View : public Visual
 
         Gfx::PointF fromWidget(const Widget& widget,
                                const Gfx::PointF& pos) const;
+
+        void setStyleOptions(const StyleOptions& o);
 
         Gfx::PaintSurface& surface();
 
@@ -150,6 +105,8 @@ class PT_HMI_API View : public Visual
 
         virtual Gfx::PointF onFromWidget(const Widget& widget, 
                                          const Gfx::PointF& pos) const;
+
+        virtual void onSetStyleOptions(const StyleOptions& o);
 
     protected:
         virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);

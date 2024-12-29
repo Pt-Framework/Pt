@@ -41,47 +41,79 @@ namespace Hmi {
 // ViewCanvas
 ///////////////////////////////////////////////////////////////////////
 
-const Gfx::ImageFormat& ViewCanvas::onGetFormat() const
+class ViewCanvas : public Gfx::CanvasBase
 {
-    if (_surface)
-    {
-        const CanvasBase* canvas = _surface->canvas();
-        if (canvas)
-            return canvas->format();
-    }
+    public:
+        explicit ViewCanvas(View& view)
+        : _view(&view)
+        , _surface(0)
+        {
+        }
 
-    return Gfx::ImageFormat::argb32();
-}
+        Gfx::PaintSurface* surface()
+        {
+            return _surface;
+        }
+
+        const Gfx::PointF& position() const
+        {
+            return _position;
+        } 
+
+        void setSurface(Gfx::PaintSurface* surface, 
+                        const Gfx::PointF& pos)
+        {
+            _surface = surface;
+            _position = pos;
+        }
+
+    protected:
+        virtual const Gfx::ImageFormat& ViewCanvas::onGetFormat() const
+        {
+            if (_surface)
+            {
+                const CanvasBase* canvas = _surface->canvas();
+                if (canvas)
+                    return canvas->format();
+            }
+
+            return Gfx::ImageFormat::argb32();
+        }
+
+        virtual const Gfx::SizeF& ViewCanvas::onGetSize() const
+        {
+            return _view->size();
+        }
 
 
-const Gfx::SizeF& ViewCanvas::onGetSize() const
-{
-    return _view->size();
-}
+        virtual const Gfx::Scaling& ViewCanvas::onGetScaling() const
+        {
+            return _view->scaling();
+        }
 
 
-const Gfx::Scaling& ViewCanvas::onGetScaling() const
-{
-    return _view->scaling();
-}
+        virtual Gfx::PaintContext* ViewCanvas::onGetPaint(Gfx::PaintContext* context)
+        {
+            Gfx::PaintContext* paintContext = _surface ? _surface->getPaint(context)
+                                                       : 0;
+            if (paintContext)
+            {
+                Gfx::RectF r = paintContext->region();
 
+                r.shift(position().x(), position().y());
+                r.setSize(this->size());
 
-Gfx::PaintContext* ViewCanvas::onGetPaint(Gfx::PaintContext* context)
-{
-    Gfx::PaintContext* paintContext = _surface ? _surface->getPaint(context)
-                                               : 0;
-    if (paintContext)
-    {
-        Gfx::RectF r = paintContext->region();
+                paintContext->setRegion(r);
+            }
 
-        r.shift(position().x(), position().y());
-        r.setSize(this->size());
+            return paintContext;
+        }
 
-        paintContext->setRegion(r);
-    }
-
-    return paintContext;
-}
+    private:
+        View*                _view;
+        Gfx::PaintSurface*   _surface;
+        Gfx::PointF          _position;
+};
 
 ///////////////////////////////////////////////////////////////////////
 // View
@@ -139,6 +171,18 @@ Gfx::PointF View::fromWidget(const Widget& widget,
                              const Gfx::PointF& pos) const
 { 
     return onFromWidget(widget, pos);
+}
+
+
+void View::setStyleOptions(const StyleOptions& o)
+{
+    onSetStyleOptions(o);
+    invalidate();
+}
+
+
+void View::onSetStyleOptions(const StyleOptions& o)
+{
 }
 
 //
