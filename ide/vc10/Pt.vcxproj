@@ -134,6 +134,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\TabView.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TextBlock.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\View.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Visual.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
@@ -700,6 +701,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\TableLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\TabView.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\TextBlock.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\View.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.cpp" />

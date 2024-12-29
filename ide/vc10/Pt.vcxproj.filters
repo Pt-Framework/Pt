@@ -1665,6 +1665,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\PaintContext.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\View.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -3055,6 +3058,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\PaintContext.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\View.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

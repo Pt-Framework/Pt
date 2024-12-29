@@ -88,6 +88,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        TableLayout.cpp
                        TabView.cpp
                        TextBlock.cpp
+                       View.cpp
                        Visual.cpp
                        Widget.cpp
                        WindowBase.cpp

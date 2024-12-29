@@ -30,7 +30,7 @@
 #ifndef PT_HMI_WIDGET_H
 #define PT_HMI_WIDGET_H
 
-#include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/View.h>
 #include <Pt/Hmi/SizePolicy.h>
 #include <Pt/Hmi/Spacing.h>
 
