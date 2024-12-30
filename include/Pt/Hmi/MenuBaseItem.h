@@ -70,6 +70,11 @@ class PT_HMI_API MenuBaseItem : public Pt::Hmi::Control
             return _hasSeparator;
         }
 
+        bool isHighlighted() const
+        {
+            return _isHighlighted;
+        }
+
         Pt::Signal<MenuBaseItem&>& triggered();
 
 
@@ -119,7 +124,6 @@ class PT_HMI_API MenuBaseItem : public Pt::Hmi::Control
 
         virtual bool onLeaveEvent(const Pt::Hmi::LeaveEvent& ev);
 
-
     protected:
         Pt::Signal<MenuBaseItem&> _triggered;
         double            _iconWidth;
@@ -138,7 +142,8 @@ class PT_HMI_API MenuBaseItem : public Pt::Hmi::Control
         Pt::Gfx::Pen          _pen;
         Pt::Gfx::Pen          _textPen;
         Pt::Gfx::Font         _font;
-        bool            _hasSeparator;
+        bool                  _hasSeparator;
+        bool                  _isHighlighted;
 };
 
 }}

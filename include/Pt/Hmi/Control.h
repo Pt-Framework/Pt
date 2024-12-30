@@ -42,19 +42,6 @@ class PT_HMI_API Control : public Widget
         Control();
 
         virtual ~Control();
-
-        // TODO: find better name
-        bool isHighlighted() const;
-        
-    protected:
-        virtual void onLayout(const Gfx::RectF& rect);
-
-        virtual bool onEnterEvent( const EnterEvent& ev );
-
-        virtual bool onLeaveEvent(const LeaveEvent& ev );
-
-    private:
-        bool              _isHighlighted;
 }; 
 
 } // namespace

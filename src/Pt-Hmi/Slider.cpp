@@ -39,6 +39,7 @@ Slider::Slider()
 : _position(50)
 , _min(0)
 , _max(100)
+, _isHighlighted(false)
 , _hasRenderer(false)
 {
 }
@@ -92,6 +93,12 @@ void Slider::setRange(int min, int max)
     _max = max;
 
     invalidate();
+}
+
+
+bool Slider::isHighlighted() const
+{
+    return _isHighlighted;
 }
 
 
@@ -302,6 +309,28 @@ bool Slider::onTouchEvent(const TouchEvent& ev)
         setPosition(_min + offset);
     }
 
+    return true;
+}
+
+
+bool Slider::onEnterEvent(const EnterEvent& ev)
+{
+    Base::onEnterEvent(ev);
+
+    _isHighlighted = true;
+    
+    invalidate();
+    return true;
+}
+
+
+bool Slider::onLeaveEvent(const LeaveEvent& ev)
+{
+    Base::onLeaveEvent(ev);
+
+    _isHighlighted = false;
+
+    invalidate();
     return true;
 }
 

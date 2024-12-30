@@ -136,6 +136,8 @@ class PT_HMI_API SpinBox : public Control
 
         void setAccepted(bool a);
 
+        bool isHighlighted() const;
+
         Pt::Signal<int>& valueEdited();
 
         Pt::Signal<const Pt::String&>& returnPressed();
@@ -205,6 +207,10 @@ class PT_HMI_API SpinBox : public Control
 
         virtual bool onTouchEvent(const TouchEvent& ev);
 
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
         virtual void onFocusEvent(const FocusEvent& ev);
 
     private:
@@ -217,6 +223,7 @@ class PT_HMI_API SpinBox : public Control
         bool                          _isEditable;
         bool                          _isAccepted;
         bool                          _isTextChanged;
+        bool                          _isHighlighted;
         int                           _value;
         int                           _minimum;
         int                           _maximum;

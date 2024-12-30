@@ -39,6 +39,7 @@ MenuBaseItem::MenuBaseItem()
 : _iconWidth(0)
 , _text("(empty)")
 , _hasSeparator(false)
+, _isHighlighted(false)
 {
     setFocusPolicy(Widget::AcceptFocus);
     setPadding(Pt::Hmi::Spacing(8, 8));
@@ -259,7 +260,7 @@ void MenuBaseItem::onInvalidate()
 
     _picture.set(_icon);
 
-    if (isHighlighted())
+    if(_isHighlighted)
         _brush = options.highlightColor();
 }
 
@@ -300,8 +301,7 @@ void MenuBaseItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF&
 
 
     // background
-    bool highlight = this->isHighlighted();
-    if (highlight)
+    if(_isHighlighted)
     {
         painter.setBrush(_brush);
         painter.fillRect(rect);
@@ -397,15 +397,25 @@ bool MenuBaseItem::onTouchEvent(const Pt::Hmi::TouchEvent& ev)
 }
 
 
-bool MenuBaseItem::onEnterEvent(const Pt::Hmi::EnterEvent& ev)
+bool MenuBaseItem::onEnterEvent( const EnterEvent& ev)
 {
-    return Base::onEnterEvent(ev);
+    Base::onEnterEvent(ev);
+
+    _isHighlighted = true;
+    
+    invalidate();
+    return true;
 }
 
 
-bool MenuBaseItem::onLeaveEvent(const Pt::Hmi::LeaveEvent& ev)
+bool MenuBaseItem::onLeaveEvent(const LeaveEvent& ev)
 {
-    return Base::onLeaveEvent(ev);
+    Base::onLeaveEvent(ev);
+
+    _isHighlighted = false;
+
+    invalidate();
+    return true;
 }
 
 }}

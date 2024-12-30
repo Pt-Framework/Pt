@@ -50,22 +50,24 @@ class PT_HMI_API Slider : public Control
 
         int position() const;
 
-				void setPosition(int pos);
+        void setPosition(int pos);
 
-				int minimum() const;
+        int minimum() const;
 
         int maximum() const;
 
         void setRange(int min, int max);
 
-				Signal<int>& positionChanged();
+        bool isHighlighted() const;
+
+        Signal<int>& positionChanged();
 
     public:
         const Gfx::Brush& background() const;
 
         void setBackground(const Gfx::Brush& b);
 
-				const Gfx::Color& foreground() const;
+        const Gfx::Color& foreground() const;
 
         void setForeground(const Gfx::Color& b);
 
@@ -101,18 +103,23 @@ class PT_HMI_API Slider : public Control
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
+
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
         
     private:
         Gfx::PointF textPosition() const;
 
     private:
-				Signal<int>	_positionChanged;
-				int					_position;
-				int					_min;
-				int					_max;
+        Signal<int>  _positionChanged;
+        int          _position;
+        int          _min;
+        int          _max;
+        bool        _isHighlighted;
 
         AutoPtr<Gfx::Brush>       _background;
-				AutoPtr<Gfx::Color>       _foreground;
+        AutoPtr<Gfx::Color>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         AutoPtr<std::string>      _fontName;
@@ -120,11 +127,11 @@ class PT_HMI_API Slider : public Control
         AutoPtr<std::string> _fontStyle;
         
         FacetPtr<SliderRenderer>  _renderer;
-        bool										  _hasRenderer;
+        bool                      _hasRenderer;
 
-				Gfx::Brush	_backgroundBrush;
-				Gfx::Brush	_foregroundBrush;
-				Gfx::Pen    _contourPen;
+        Gfx::Brush  _backgroundBrush;
+        Gfx::Brush  _foregroundBrush;
+        Gfx::Pen    _contourPen;
         Gfx::Pen    _textPen;
         Gfx::Font   _font;
 };

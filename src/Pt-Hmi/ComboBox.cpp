@@ -40,6 +40,7 @@ ComboBox::ComboBox()
 , _isEditable(true)
 , _isAccepted(true)
 , _isTextChanged(false)
+, _isHighlighted(false)
 , _hasRenderer(false)
 {
     setFocusPolicy(Widget::AcceptFocus);
@@ -196,6 +197,12 @@ void ComboBox::hidePopup()
     //Application::instance().releasePopup(_popup);
     
     _popup.show(false);
+}
+
+
+bool ComboBox::isHighlighted() const
+{
+    return _isHighlighted;
 }
 
 
@@ -620,6 +627,28 @@ bool ComboBox::onTouchEvent(const TouchEvent& ev)
         Application::instance().inputMethod().begin(*this);
     }
 
+    return true;
+}
+
+
+bool ComboBox::onEnterEvent(const EnterEvent& ev)
+{
+    Base::onEnterEvent(ev);
+
+    _isHighlighted = true;
+    
+    invalidate();
+    return true;
+}
+
+
+bool ComboBox::onLeaveEvent(const LeaveEvent& ev)
+{
+    Base::onLeaveEvent(ev);
+
+    _isHighlighted = false;
+
+    invalidate();
     return true;
 }
 

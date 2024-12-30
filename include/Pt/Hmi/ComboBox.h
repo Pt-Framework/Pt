@@ -77,6 +77,8 @@ class PT_HMI_API ComboBox : public Control
 
         void hidePopup();
 
+        bool isHighlighted() const;
+
         /** @brief Text has changed programmatically.
         */
         Pt::Signal<const Pt::String&>& textChanged();
@@ -141,6 +143,10 @@ class PT_HMI_API ComboBox : public Control
 
         virtual bool onTouchEvent(const TouchEvent& ev);
 
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
         virtual void onFocusEvent(const FocusEvent& ev);
 
     private:
@@ -164,6 +170,7 @@ class PT_HMI_API ComboBox : public Control
         bool          _isEditable;
         bool          _isAccepted;
         bool          _isTextChanged;
+        bool         _isHighlighted;
         
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Brush>       _foreground;

@@ -155,6 +155,7 @@ SpinBox::SpinBox()
 : _isEditable(true)
 , _isAccepted(true)
 , _isTextChanged(false)
+, _isHighlighted(false)
 , _value(0)
 , _minimum(-20000)
 , _maximum(10000)
@@ -389,6 +390,12 @@ void SpinBox::setAccepted(bool a)
     {
         setFocusPolicy(Widget::AcceptFocus);
     }
+}
+
+
+bool SpinBox::isHighlighted() const
+{
+    return _isHighlighted;
 }
 
 
@@ -789,6 +796,28 @@ bool SpinBox::onTouchEvent(const TouchEvent& ev)
         Application::instance().inputMethod().begin(*this);
     }
 
+    return true;
+}
+
+
+bool SpinBox::onEnterEvent(const EnterEvent& ev)
+{
+    Base::onEnterEvent(ev);
+
+    _isHighlighted = true;
+    
+    invalidate();
+    return true;
+}
+
+
+bool SpinBox::onLeaveEvent(const LeaveEvent& ev)
+{
+    Base::onLeaveEvent(ev);
+
+    _isHighlighted = false;
+
+    invalidate();
     return true;
 }
 

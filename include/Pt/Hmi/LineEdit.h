@@ -89,6 +89,8 @@ class PT_HMI_API LineEdit : public Control
 
         void setAccepted(bool a);
 
+        bool isHighlighted() const;
+
         Pt::Signal<const Pt::String&>& textEdited();
 
         Pt::Signal<const Pt::String&>& returnPressed();
@@ -130,6 +132,10 @@ class PT_HMI_API LineEdit : public Control
         virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
         virtual bool onKeyEvent(const KeyEvent& ev);
 
         virtual bool onMouseEvent(const MouseEvent& ev);
@@ -151,6 +157,7 @@ class PT_HMI_API LineEdit : public Control
         bool                          _isEditable;
         bool                          _isAccepted;
         bool                          _isTextChanged;
+        bool                          _isHighlighted;
         EchoMode                      _echoMode;
         double                        _spacing;
 

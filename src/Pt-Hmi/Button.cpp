@@ -38,6 +38,7 @@ namespace Hmi {
 
 Button::Button()
 : _onClickBegin(false)
+, _isHighlighted(false)
 {
     setFocusPolicy(Widget::AcceptFocus);
 }
@@ -58,6 +59,12 @@ void Button::setText(const Pt::String& text)
 {
     _text = Widget::setMnemonic(text);
     relayout();
+}
+
+
+bool Button::isHighlighted() const
+{
+    return _isHighlighted;
 }
 
 
@@ -120,13 +127,23 @@ void Button::onShortcut(const Key& key)
 
 bool Button::onEnterEvent(const EnterEvent& ev)
 {
-    return Base::onEnterEvent(ev);
+    Base::onEnterEvent(ev);
+
+    _isHighlighted = true;
+    
+    invalidate();
+    return true;
 }
 
 
 bool Button::onLeaveEvent(const LeaveEvent& ev)
 {
-    return Base::onLeaveEvent(ev);
+    Base::onLeaveEvent(ev);
+
+    _isHighlighted = false;
+
+    invalidate();
+    return true;
 }
 
 

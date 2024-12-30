@@ -50,6 +50,8 @@ class PT_HMI_API Button : public Control
 
         void setText(const Pt::String& t);
 
+        bool isHighlighted() const;
+
         void click();
 
         Signal<>& clicked();
@@ -83,9 +85,9 @@ class PT_HMI_API Button : public Control
 
     private:
         Signal<>   _clicked;
-        bool       _isPressed;
         bool       _onClickBegin;
         Pt::String _text;
+        bool       _isHighlighted;
 };
 
 } // namespace

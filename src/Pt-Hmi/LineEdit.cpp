@@ -39,6 +39,7 @@ LineEdit::LineEdit()
 : _isEditable(true)
 , _isAccepted(true)
 , _isTextChanged(false)
+, _isHighlighted(false)
 , _echoMode(Normal)
 , _spacing(0)
 , _hasRenderer(false)
@@ -165,6 +166,12 @@ void LineEdit::setAccepted(bool a)
     {
         setFocusPolicy(Widget::AcceptFocus);
     }
+}
+
+
+bool LineEdit::isHighlighted() const
+{
+    return _isHighlighted;
 }
 
 
@@ -511,6 +518,28 @@ bool LineEdit::onTouchEvent(const TouchEvent& tev)
 
         Application::instance().inputMethod().begin(*this);
     }
+    return true;
+}
+
+
+bool LineEdit::onEnterEvent(const EnterEvent& ev)
+{
+    Base::onEnterEvent(ev);
+
+    _isHighlighted = true;
+    
+    invalidate();
+    return true;
+}
+
+
+bool LineEdit::onLeaveEvent(const LeaveEvent& ev)
+{
+    Base::onLeaveEvent(ev);
+
+    _isHighlighted = false;
+
+    invalidate();
     return true;
 }
 

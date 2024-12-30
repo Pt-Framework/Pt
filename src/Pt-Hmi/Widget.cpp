@@ -743,6 +743,9 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
 void Widget::onLayoutEvent(const LayoutEvent& ev)
 {
     onLayout( ev.rect() );
+
+     // TODO: repaint only if required in derived class
+     repaint();
 }
 
 

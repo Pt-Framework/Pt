@@ -39,50 +39,12 @@ namespace Pt {
 namespace Hmi {
 
 Control::Control()
-: _isHighlighted(false)
 {
 }
 
 
 Control::~Control()
 {
-}
-
-
-bool Control::isHighlighted() const
-{
-    return _isHighlighted;
-}
-
-
-void Control::onLayout(const Gfx::RectF& rect)
-{
-     Widget::onLayout(rect);
-
-     // TODO: repaint only if required in derived class
-     repaint();
-}
-
-
-bool Control::onEnterEvent( const EnterEvent& ev)
-{
-    Widget::onEnterEvent(ev);
-
-    _isHighlighted = true;
-    
-    invalidate();
-    return true;
-}
-
-
-bool Control::onLeaveEvent(const LeaveEvent& ev)
-{
-    Widget::onLeaveEvent(ev);
-
-    _isHighlighted = false;
-
-    invalidate();
-    return true;
 }
 
 } // namespace
