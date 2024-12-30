@@ -73,6 +73,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        Popup.cpp
                        ProgressBar.cpp
                        PushButton.cpp
+                       Responder.cpp
                        Screen.cpp 
                        ScrollBar.cpp
                        ScrollView.cpp

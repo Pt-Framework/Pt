@@ -1,0 +1,178 @@
+/* Copyright (C) 2015-2024 Marc Boris Duerner
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
+
+#include <Pt/Hmi/Responder.h>
+#include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
+#include <Pt/Hmi/ScrollEvent.h>
+#include <Pt/Hmi/EnterEvent.h>
+#include <Pt/Hmi/LeaveEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
+
+namespace Pt {
+
+namespace Hmi {
+
+Responder::Responder()
+{ 
+}
+
+
+Responder::~Responder()
+{
+}
+
+
+bool Responder::mouseEvent(const MouseEvent& ev)
+{
+    Gfx::PointF localPos = onFromGlobal( ev.position() );
+
+    MouseEvent localEv(ev);
+    localEv.setPosition(localPos);
+
+    bool consumed = onMouseEvent(localEv);
+    if(consumed)
+        return true;
+
+    Responder* next = onNextResponder();
+    if(next)
+        return next->mouseEvent(ev);
+
+    return false;
+}
+
+
+bool Responder::onMouseEvent(const MouseEvent& ev)
+{
+    if( ev.isPress() )
+        return onMousePress(ev);
+            
+    if( ev.isRelease() )
+        return onMouseRelease(ev);
+             
+      return onMouseMove(ev);
+}
+
+
+void Responder::touchEvent(const TouchEvent& ev)
+{
+    Gfx::PointF localPos = onFromGlobal( ev.position() );
+
+    TouchEvent localEv(ev);
+    localEv.setPosition(localPos);
+
+    bool consumed = onTouchEvent(localEv);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->touchEvent(ev);
+}
+
+
+bool Responder::onTouchEvent(const TouchEvent& ev)
+{
+    return false;
+}
+
+
+void Responder::scrollEvent(const ScrollEvent& ev)
+{
+    bool consumed = onScrollEvent(ev);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->scrollEvent(ev);
+}
+
+
+bool Responder::onScrollEvent(const ScrollEvent& ev)
+{ 
+    return false; 
+}
+
+
+void Responder::enterEvent(const EnterEvent& ev)
+{
+    bool consumed = onEnterEvent(ev);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->enterEvent(ev);
+}
+
+
+bool Responder::onEnterEvent(const EnterEvent& ev)
+{ 
+    return false; 
+}
+
+
+void Responder::leaveEvent(const LeaveEvent& ev)
+{
+    bool consumed = onLeaveEvent(ev);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->leaveEvent(ev);
+}
+
+
+bool Responder::onLeaveEvent(const LeaveEvent& ev)
+{ 
+    return false; 
+}
+
+
+void Responder::keyEvent(const KeyEvent& ev)
+{
+    bool consumed = onKeyEvent(ev);
+    if(consumed)
+        return;
+
+    Responder* next = onNextResponder();
+    if(next)
+        next->keyEvent(ev);
+}
+
+
+bool Responder::onKeyEvent(const KeyEvent& ev)
+{ 
+    return false; 
+}
+
+} // namespace
+
+} // namespace

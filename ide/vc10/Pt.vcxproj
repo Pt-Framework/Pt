@@ -115,6 +115,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ProgressBar.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PushButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Responder.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollBar.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollEvent.h" />
@@ -686,6 +687,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Popup.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ProgressBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PushButton.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Responder.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Screen.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollLayout.cpp" />
