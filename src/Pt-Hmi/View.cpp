@@ -85,12 +85,10 @@ class ViewCanvas : public Gfx::CanvasBase
             return _view->size();
         }
 
-
         virtual const Gfx::Scaling& ViewCanvas::onGetScaling() const
         {
             return _view->scaling();
         }
-
 
         virtual Gfx::PaintContext* ViewCanvas::onGetPaint(Gfx::PaintContext* context)
         {
