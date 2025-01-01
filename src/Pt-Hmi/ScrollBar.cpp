@@ -224,7 +224,7 @@ void ScrollBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
 bool ScrollBar::onMouseEvent(const MouseEvent& ev)
 {
-    Control::onMouseEvent(ev);
+    Base::onMouseEvent(ev);
 
     if( ev.isPress(MouseEvent::Left) )
     {
@@ -256,7 +256,7 @@ bool ScrollBar::onMouseEvent(const MouseEvent& ev)
 
 bool ScrollBar::onTouchEvent(const TouchEvent& tev)
 {
-    Control::onTouchEvent(tev);
+    Base::onTouchEvent(tev);
 
     if( tev.isPress() )
     {
@@ -292,7 +292,7 @@ bool ScrollBar::onTouchEvent(const TouchEvent& tev)
 
 void ScrollBar::onResizeEvent(const ResizeEvent& ev)
 {
-    Control::onResizeEvent(ev);
+    Base::onResizeEvent(ev);
 
     updateScroll();
 }

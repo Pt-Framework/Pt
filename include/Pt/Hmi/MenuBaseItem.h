@@ -33,14 +33,14 @@
 #include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/PixmapSurface.h>
 
-
 namespace Pt {
+
 namespace Hmi {
 
-class PT_HMI_API MenuBaseItem : public Pt::Hmi::Control
+class PT_HMI_API MenuBaseItem : public Widget
 {
     public:
-        typedef Control Base;
+        typedef Widget Base;
 
     public:
 

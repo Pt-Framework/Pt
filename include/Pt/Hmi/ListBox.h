@@ -175,9 +175,9 @@ class ListBoxLayout : public FlowLayout
 };
 
 
-class PT_HMI_API ListBox : public Control
+class PT_HMI_API ListBox : public Widget
 {
-    typedef Control Base;
+    typedef Widget Base;
 
     public:
         ListBox();

@@ -40,10 +40,10 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API LineEdit : public Control
+class PT_HMI_API LineEdit : public Widget
 {
     public:
-        typedef Control Base;
+        typedef Widget Base;
 
         enum EchoMode
         {

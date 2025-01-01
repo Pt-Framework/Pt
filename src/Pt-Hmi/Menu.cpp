@@ -253,7 +253,7 @@ void Menu::onRenderBackground(const Pt::Hmi::StyleOptions& options,
 
     // icon strip on the left side
 
-    Pt::ssize_t iconWidth = this->iconWidth();
+    double iconWidth = this->iconWidth();
 
     if (iconWidth > 0)
     {

@@ -42,9 +42,9 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Panel : public Control
+class PT_HMI_API Panel : public Widget
 {
-    typedef Control Base;
+    typedef Widget Base;
 
     public:
         Panel();

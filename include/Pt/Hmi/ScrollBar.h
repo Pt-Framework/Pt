@@ -38,9 +38,9 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API ScrollBar : public Control
+class PT_HMI_API ScrollBar : public Widget
 {
-    typedef Control Base;
+    typedef Widget Base;
 
     public:
         enum Orientation

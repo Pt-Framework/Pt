@@ -36,10 +36,10 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Button : public Control
+class PT_HMI_API Button : public Widget
 {
     public:
-        typedef Control Base;
+        typedef Widget Base;
 
     public:
         Button();

@@ -39,14 +39,17 @@
 #include <vector>
 
 namespace Pt {
+
 namespace Hmi {
 
 class Menu;
 class MenuBar;
 
-
-class PT_HMI_API MenuBar : public Pt::Hmi::Control, protected MenuBase
+class PT_HMI_API MenuBar : public Widget
+                         , protected MenuBase
 { 
+    typedef Widget Base;
+
     public:
         MenuBar();
     
@@ -63,7 +66,6 @@ class PT_HMI_API MenuBar : public Pt::Hmi::Control, protected MenuBase
         const Pt::Gfx::Pen& contour() const;
 
         void setContour(const Pt::Gfx::Pen& p);
-
 
     protected:
 

@@ -38,10 +38,10 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Slider : public Control
+class PT_HMI_API Slider : public Widget
 {
     public:
-        typedef Control Base;
+        typedef Widget Base;
 
     public:
         Slider();

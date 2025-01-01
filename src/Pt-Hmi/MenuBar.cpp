@@ -40,7 +40,7 @@ MenuBar::MenuBar()
 : _layout(Pt::Hmi::FlowLayout::Left)
 , _currentItem(0)
 {
-    Control::add(_layout);
+    Base::add(_layout);
 }
 
 MenuBar::~MenuBar()
@@ -195,7 +195,7 @@ void MenuBar::onItemClicked(MenuBaseItem& item)
 
 void MenuBar::onInvalidate()
 {
-    Pt::Hmi::Control::onInvalidate();
+    Base::onInvalidate();
 
     const Pt::Hmi::StyleOptions& options = Pt::Hmi::Application::instance().styleOptions();
     const Pt::Hmi::Style& style = Pt::Hmi::Application::instance().style();
@@ -221,7 +221,7 @@ Pt::Gfx::SizeF MenuBar::onMeasure(const Pt::Hmi::SizePolicy& policy)
 
 void MenuBar::onLayout(const Pt::Gfx::RectF& rect)
 {
-    Pt::Hmi::Control::onLayout(rect);
+    Base::onLayout(rect);
     
 
     Pt::Gfx::PointF pos(padding().left() + _layout.margin().left(), 
@@ -241,7 +241,7 @@ void MenuBar::onLayout(const Pt::Gfx::RectF& rect)
 
 void MenuBar::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& rect)
 {
-    Pt::Hmi::Control::onPaint(surface, rect);
+    Base::onPaint(surface, rect);
 
     const Pt::Hmi::StyleOptions& options = Pt::Hmi::Application::instance().styleOptions();
 
@@ -261,7 +261,7 @@ void MenuBar::onProcessMouseEvent(const Pt::Hmi::MouseEvent& ev)
     if(menu)
     {
         if(menu == this)
-            Pt::Hmi::Control::onProcessMouseEvent(ev);
+            Base::onProcessMouseEvent(ev);
         else
             menu->processEvent(ev);
         
@@ -283,7 +283,7 @@ bool MenuBar::onMouseEvent(const Pt::Hmi::MouseEvent& ev)
         _currentItem->closeMenu();
     }
 
-    return Pt::Hmi::Control::onMouseEvent(ev);
+    return Base::onMouseEvent(ev);
 }
 
 
@@ -294,7 +294,7 @@ bool MenuBar::onTouchEvent(const Pt::Hmi::TouchEvent& ev)
         _currentItem->closeMenu();
     }
 
-    return Pt::Hmi::Control::onTouchEvent(ev);
+    return Base::onTouchEvent(ev);
 }
 
 }}

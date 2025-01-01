@@ -77,10 +77,10 @@ class TabItem
 
 /** @brief Tab bar for all tabbed widgets.
 */
-class PT_HMI_API TabBar : public Control
+class PT_HMI_API TabBar : public Widget
 {
     public:
-        typedef Control Base;
+        typedef Widget Base;
 
     public:
         TabBar();
@@ -138,10 +138,10 @@ class PT_HMI_API TabBar : public Control
 
 /** @brief Tabbed view for widgets.
 */
-class PT_HMI_API TabView : public Control
+class PT_HMI_API TabView : public Widget
 {
     public:
-        typedef Control Base;
+        typedef Widget Base;
 
     public:
         TabView();
