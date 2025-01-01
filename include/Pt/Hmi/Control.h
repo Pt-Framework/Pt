@@ -36,13 +36,13 @@ namespace Pt {
 
 namespace Hmi {
 
-//class PT_HMI_API Control : public Widget
-//{
-//     public:
-//        Control();
-//
-//        virtual ~Control();
-//}; 
+class PT_HMI_API Control : public Widget
+{
+     public:
+        Control();
+
+        virtual ~Control();
+}; 
 
 } // namespace
 

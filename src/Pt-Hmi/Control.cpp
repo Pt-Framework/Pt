@@ -32,14 +32,14 @@ namespace Pt {
 
 namespace Hmi {
 
-//Control::Control()
-//{
-//}
-//
-//
-//Control::~Control()
-//{
-//}
+Control::Control()
+{
+}
+
+
+Control::~Control()
+{
+}
 
 } // namespace
 
