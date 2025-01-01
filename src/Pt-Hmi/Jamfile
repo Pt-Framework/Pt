@@ -46,7 +46,6 @@ SharedLibrary Pt-Hmi : Application.cpp
                        Button.cpp
                        CheckBox.cpp
                        ComboBox.cpp
-                       Control.cpp
                        Cursor.cpp
                        DockingLayout.cpp
                        FlowLayout.cpp

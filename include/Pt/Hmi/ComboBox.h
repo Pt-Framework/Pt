@@ -29,7 +29,7 @@
 #ifndef Pt_Hmi_ComboBox_H
 #define Pt_Hmi_ComboBox_H
 
-#include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Popup.h>
 #include <Pt/Hmi/ListBox.h>
 #include <Pt/Hmi/LineEditor.h>

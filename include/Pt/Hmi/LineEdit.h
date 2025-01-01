@@ -30,7 +30,7 @@
 #ifndef PT_HMI_LINEEDIT_H
 #define PT_HMI_LINEEDIT_H
 
-#include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/LineEditor.h>
 #include <Pt/Hmi/Adjustment.h>
 #include <Pt/SmartPtr.h>

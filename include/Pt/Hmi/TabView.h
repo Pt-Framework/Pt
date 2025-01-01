@@ -29,7 +29,7 @@
 #ifndef Pt_Hmi_TabView_H
 #define Pt_Hmi_TabView_H
 
-#include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/StackLayout.h>
 #include <Pt/Hmi/DockingLayout.h>
 #include <Pt/SmartPtr.h>

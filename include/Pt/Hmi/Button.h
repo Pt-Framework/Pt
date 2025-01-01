@@ -30,7 +30,7 @@
 #ifndef Pt_Hmi_Button_H
 #define Pt_Hmi_Button_H
 
-#include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Widget.h>
 
 namespace Pt {
 

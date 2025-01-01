@@ -29,7 +29,7 @@
 #ifndef Pt_Hmi_ListBox_H
 #define Pt_Hmi_ListBox_H
 
-#include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/FlowLayout.h>

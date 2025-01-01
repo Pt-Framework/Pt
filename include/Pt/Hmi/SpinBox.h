@@ -29,7 +29,7 @@
 #ifndef PT_HMI_SPINBOX_H
 #define PT_HMI_SPINBOX_H
 
-#include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/LineEditor.h>
