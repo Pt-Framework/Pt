@@ -45,7 +45,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageSurface.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter2.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Paint.h" />
@@ -360,8 +359,6 @@
     <ClInclude Include="..\..\include\Pt\ZBuffer.h" />
     <ClInclude Include="..\..\include\Pt\ZStream.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Fixed.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\Polygonizer.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer2.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\raster\ClipPolygon.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\raster\DejaVuSans.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\raster\DejaVuSansBold.h" />
@@ -581,7 +578,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Image.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImageFormat.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImageSurface.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter2.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\JpegReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Paint.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PaintContext.cpp" />
@@ -592,14 +588,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PngWriter.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Polygonizer.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Arc.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Bezier.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Ellipse.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Line.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Polygon.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Rectangle.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\raster\ClipPolygon.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\raster\DrawText.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\raster\FreeType.cpp" />

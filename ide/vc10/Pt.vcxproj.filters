@@ -1389,19 +1389,10 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Path.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter2.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\SpinBox.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer2.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Fixed.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\Polygonizer.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ScreenImpl.h">
@@ -2864,9 +2855,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Path.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter2.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\SpinBox.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -2878,30 +2866,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\Atomicity.gcc.builtin.cpp">
       <Filter>Pt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Line.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Rectangle.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Ellipse.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Polygon.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Arc.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer2_Bezier.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Polygonizer.cpp">
-      <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ScreenImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
