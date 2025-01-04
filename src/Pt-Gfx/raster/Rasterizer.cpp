@@ -3863,9 +3863,7 @@ void Rasterizer::setClip(const RectF& clip)
 
 void Rasterizer::resetClip()
 {
-    _clip = Rect();
-    _clip.setWidth( _image.width() );
-    _clip.setHeight( _image.height() );
+    _clip = Rect( _image.width(),_image.height() );
 }
 
 } // namespace
