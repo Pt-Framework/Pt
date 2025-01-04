@@ -285,7 +285,7 @@ Gfx::Image PixmapCanvas::toImage() const
     bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
     bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
 
-    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), Gfx::Size(_width, _height) );
+    Pt::Gfx::Image image(Pt::Gfx::ImageFormat::argb32(), _width, _height);
     Pt::uint8_t* data = image.data();
 
     int ret = GetDIBits(_dc, _bitmap, 0, _height, data, 
@@ -852,7 +852,8 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
     Gfx::PointF toP = scaling().toPhysical(toF);
     Gfx::Point to = Gfx::round(toP);
 
-    Gfx::Size size = rect ? Gfx::round( rect->size() ) : image.size();
+    Gfx::Size size = rect ? Gfx::round( rect->size() ) 
+                          : Gfx::Size( image.width(), image.height() );
     Gfx::Point from = rect ? Gfx::round( rect->topLeft() ) : Gfx::Point();
 
     switch (_compositionMode)

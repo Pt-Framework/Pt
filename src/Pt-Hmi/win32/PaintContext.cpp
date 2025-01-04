@@ -388,13 +388,15 @@ void PaintContext::onSetClip(const Gfx::RectF* rectF)
     if( ! rectF )
         return;
                                                        
-    Gfx::Rect rect = round( scaling().toPhysical(*rectF) );
+    Gfx::RectF rectP = scaling().toPhysical(*rectF);
+               
+    long x = Pt::lround( rectP.x() );
+    long y = Pt::lround( rectP.y() );
+    long width = Pt::lround( rectP.width() );
+    long height = Pt::lround( rectP.height() );
                             
     // CreateRectRgn only includes the interior of the rect
-    _clipRect = CreateRectRgn( rect.x(), 
-                               rect.y(), 
-                               rect.bottomRight().x(), 
-                               rect.bottomRight().y() );
+    _clipRect = CreateRectRgn(x , y, x + width, y + height);
 }
 
 #endif
