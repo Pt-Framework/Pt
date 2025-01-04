@@ -40,10 +40,11 @@ Rgb16Format::Rgb16Format()
 }
 
 
-std::size_t Rgb16Format::onImageSize(const Size& size, Pt::ssize_t padding) const
+std::size_t Rgb16Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
+                                     std::size_t padding) const
 {
-    std::size_t l = (size.width() * 2) + padding;
-    std::size_t n = l * size.height();
+    std::size_t l = (width * 2) + padding;
+    std::size_t n = l * height;
     return n;
 }
 
@@ -188,25 +189,26 @@ void Rgb16Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
 }
 
 
-void Rgb16Format::onCopy(ImageView& to, const Point& toPoint,
-                          const ImageView& from, const Rect& fromRect,
-                          CompositionMode mode) const
+void Rgb16Format::onCopy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                         const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                         Pt::ssize_t width, Pt::ssize_t height, 
+                         CompositionMode mode) const
 {
     Pt::ssize_t pixelSize = 2;
 
     // TODO: equals to toInfo.pitch()
     Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
-    Pt::ssize_t fromStride = (fromRect.width() * pixelSize) + from.padding();
+    Pt::ssize_t fromStride = (from.width() * pixelSize) + from.padding();
 
-    Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize);
-    Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize);
+    Pt::ssize_t toBegin = (toY * toStride) + (toX * pixelSize);
+    Pt::ssize_t fromBegin = (fromY * fromStride) + (fromX * pixelSize);
 
     Pt::uint8_t* toLine = to.data() + toBegin;
     const Pt::uint8_t* fromLine = from.data() + fromBegin;
 
-    Pt::ssize_t n = fromRect.width() * pixelSize;
+    Pt::ssize_t n = width * pixelSize;
 
-    for(Pt::ssize_t y = 0; y < fromRect.height(); ++y)
+    for(Pt::ssize_t y = 0; y < height; ++y)
     {
         memcpy(toLine, toLine, n);
 

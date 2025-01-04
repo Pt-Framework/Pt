@@ -52,11 +52,11 @@ class PT_GFX_API Image
 
         explicit Image(const ImageFormat& format);
 
-        Image(const ImageFormat& format, const Size& size,
-              size_t padding = 0);
+        Image(const ImageFormat& format, 
+              Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
 
         Image(const ImageFormat& format, Pt::uint8_t* buffer,
-              const Size& size, size_t padding = 0);
+              Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
 
         Image(const Image& image);
 
@@ -65,10 +65,12 @@ class PT_GFX_API Image
         const Image& operator=(const Image& image);
 
         void reset(const ImageFormat& format,
-                   const Size& size, Pt::ssize_t padding = 0);
+                   Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0);
 
         void reset(const ImageFormat& format, Pt::uint8_t* data,
-                   const Size& size, Pt::ssize_t padding = 0);
+                   Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0);
 
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return PixelIterator(view(), x, y); }
@@ -107,13 +109,6 @@ class PT_GFX_API Image
         const ImageFormat& format() const
         {
             return _view.format();
-        }
-
-        /** @brief Returns the size of the image.
-        */
-        const Size& size() const
-        {
-            return _view.size();
         }
 
         Pt::ssize_t width() const

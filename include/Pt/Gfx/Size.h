@@ -54,6 +54,12 @@ class BasicSize {
         : _w(w), _h(h)
         {}
 
+        void clear()
+        {
+          _w = T();
+          _h = T();
+        }
+
         void set(T w, T h)
         {
             _w = w;

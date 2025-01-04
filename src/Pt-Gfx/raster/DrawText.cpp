@@ -28,10 +28,7 @@
 */
 
 #include "DrawText.h"
-#include <Pt/Gfx/Font.h>
-#include <Pt/String.h>
-#include <algorithm>
-#include <cmath>
+#include "FreeType.h"
 
 namespace Pt {
 
@@ -40,8 +37,10 @@ namespace Gfx {
 DrawText::DrawText()
 : _faceId(0)
 , _fontSize(10)
-// TODO: handle _clip.isNull() like no clipping
-, _clip( Point(0, 0), Size(999999, 999999) )
+, _clipX(0)
+, _clipY(0)
+, _clipWidth(999999)
+, _clipHeight(999999)
 {
   _faceId = FreeType::instance().defaultFace();
 }
@@ -76,21 +75,25 @@ FontMetrics DrawText::fontMetrics(const String& text)
 
 
 void DrawText::draw(Image& image, const Color& color,
-                    const Point& pos, const String& text,
+                    Pt::ssize_t x, Pt::ssize_t y, const String& text,
                     const CompositionMode& mode)
 {
-    return FreeType::instance().draw(image, color, pos, text,_clip, mode,
-                                     _transform, _faceId, _fontSize);
+    return FreeType::instance().draw(image, color, 
+                                     x, y, text, 
+                                     _clipX, _clipY, _clipWidth, _clipHeight,
+                                     mode, _transform, _faceId, _fontSize);
 }
 
 
 void DrawText::draw(Image& image, const Color& color,
-                    const Point& pos, const String& text,
+                    Pt::ssize_t x, Pt::ssize_t y, const String& text,
                     const CompositionMode& mode, const Transform& trans)
 {
 
-    return FreeType::instance().draw(image, color, pos, text, _clip, mode,
-        trans, _faceId, _fontSize);
+    return FreeType::instance().draw(image, color, 
+                                     x, y, text, 
+                                     _clipX, _clipY, _clipWidth, _clipHeight, 
+                                     mode, trans, _faceId, _fontSize);
 }
 
 } //namespace

@@ -43,10 +43,11 @@ Argb32Format::Argb32Format()
 }
 
 
-std::size_t Argb32Format::onImageSize(const Size& size, Pt::ssize_t padding) const
+std::size_t Argb32Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
+                                      std::size_t padding) const
 {
-    std::size_t l = (size.width() * 4) + padding;
-    std::size_t n = l * size.height();
+    std::size_t l = (width * 4) + padding;
+    std::size_t n = l * height;
     return n;
 }
 
@@ -157,8 +158,9 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
 }
 
 
-void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
-                          const ImageView& from, const Rect& fromRect,
+void Argb32Format::onCopy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                          const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                          Pt::ssize_t width, Pt::ssize_t height, 
                           CompositionMode mode) const
 {
     Pt::ssize_t pixelSize = 4;
@@ -167,8 +169,8 @@ void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
     Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
     Pt::ssize_t fromStride = (from.width() * pixelSize) + from.padding();
 
-    Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize);
-    Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize);
+    Pt::ssize_t toBegin = (toY * toStride) + (toX * pixelSize);
+    Pt::ssize_t fromBegin = (fromY * fromStride) + (fromX * pixelSize);
 
     Pt::uint8_t* toLine = to.data() + toBegin;
     const Pt::uint8_t* fromLine = from.data() + fromBegin;
@@ -178,9 +180,9 @@ void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
         default:
         case CompositionMode::SourceCopy:
         {
-            Pt::ssize_t n = fromRect.width() * pixelSize;
+            Pt::ssize_t n = width * pixelSize;
 
-            for(Pt::ssize_t y = 0; y < fromRect.height(); ++y)
+            for(Pt::ssize_t y = 0; y < height; ++y)
             {
                 memcpy(toLine, fromLine, n);
 
@@ -193,12 +195,12 @@ void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
 
         case CompositionMode::SourceOver:
         {
-            for(int y = 0; y < fromRect.height(); ++y)
+            for(int y = 0; y < height; ++y)
             {
                 Pt::uint8_t* to = toLine;
                 const Pt::uint8_t* from = fromLine;
 
-                for(int x = 0; x < fromRect.width() ; ++x )
+                for(int x = 0; x < width ; ++x )
                 {
                     Argb32Model::sourceOver(to, from);
                     to += 4;

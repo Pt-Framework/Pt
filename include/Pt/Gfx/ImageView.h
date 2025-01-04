@@ -30,7 +30,6 @@
 #define PT_GFX_IMAGEVIEW_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/CompositionMode.h>
@@ -310,7 +309,8 @@ class ImageView
         ImageView()
         : _format( &ImageFormat::argb32() )
         , _data(0)
-        , _size(0, 0)
+        , _width(0)
+        , _height(0)
         , _padding(0)
         , _stride(0)
         { }
@@ -318,32 +318,35 @@ class ImageView
         explicit ImageView(const ImageFormat& format)
         : _format(&format)
         , _data(0)
-        , _size()
+        , _width(0)
+        , _height(0)
         , _padding(0)
         , _stride(0)
         { }
 
         ImageView(const ImageFormat& format, Pt::uint8_t* data,
-                  const Size& size, Pt::ssize_t padding)
+                  Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
         : _format(&format)
         , _data(data)
-        , _size(size)
+        , _width(width)
+        , _height(height)
         , _padding(padding)
         {
-            _stride = (_size.width() * _format->pixelStride()) + _padding;
+            _stride = (_width * _format->pixelStride()) + _padding;
         }
 
         virtual ~ImageView()
         {}
 
         void reset(const ImageFormat& format, Pt::uint8_t* data,
-                  const Size& size, Pt::ssize_t padding)
+                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
         {
             _format = &format;
             _data = data;
-            _size = size;
+            _width = width,
+            _height = height;
             _padding = padding;
-            _stride = (_size.width() * _format->pixelStride()) + _padding;
+            _stride = (_width * _format->pixelStride()) + _padding;
         }
 
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
@@ -367,17 +370,14 @@ class ImageView
         const ImageFormat& format() const
         { return *_format; }
 
-        const Size& size() const
-        { return _size; }
-
         Pt::ssize_t width() const
-        { return _size.width(); }
+        { return _width; }
 
         Pt::ssize_t height() const
-        { return _size.height(); }
+        { return _height; }
 
         bool empty() const
-        { return _size.width() == 0 || _size.height() == 0; }
+        { return _width == 0 || _height == 0; }
 
         Pt::uint8_t* data()
         { return _data; }
@@ -397,7 +397,8 @@ class ImageView
         void clear()
         {
             _data = 0;
-            _size.set(0, 0);
+            _width = 0;
+            _height = 0;
             _padding = 0;
             _stride = 0;
         }
@@ -406,7 +407,8 @@ class ImageView
         const ImageFormat* _format;
 
         Pt::uint8_t* _data;
-        Size         _size;
+        Pt::ssize_t  _width;
+        Pt::ssize_t  _height;
         Pt::ssize_t  _padding;
         Pt::ssize_t  _stride;
 };

@@ -39,7 +39,6 @@ namespace Pt {
 
 namespace Gfx {
 
-
 /** @brief %Point with X ynd X coordinates.
 */
 template<typename T>
@@ -64,20 +63,26 @@ class BasicPoint
         : _x(pt._x), _y(pt._y)
         { }
 
-        //! @brief Set the X and Y components of the BasicPoint
-        void set(T x_, T y_)
+        void clear()
         {
-            _x = x_;
-            _y = y_;
+          _x = T();
+          _y = T();
+        }
+
+        //! @brief Set the X and Y components of the BasicPoint
+        void set(T xpos, T ypos)
+        {
+            _x = xpos;
+            _y = ypos;
         }
 
         //! @brief Set the X component of the BasicPoint
-        void setX(T x_)
-        {_x = x_; }
+        void setX(T xpos)
+        { _x = xpos; }
 
         //! @brief Set the Y component of the BasicPoint
-        void setY(T y_)
-        {_y = y_; }
+        void setY(T ypos)
+        { _y = ypos; }
 
         //! @brief Return the X component of the BasicPoint
         T x() const
@@ -97,20 +102,20 @@ class BasicPoint
         //! @brief Decrement the X component of the BasicPoint by the given value
         const BasicPoint& subX(T x)
         {
-          _x -=  x;
+          _x -= x;
           return *this;
         }
         //! @brief Increment the Y component of the BasicPoint by the given value
         const BasicPoint& addY(T y)
         {
-          _y +=  y;
+          _y += y;
           return *this;
         }
 
         //! @brief Decrement the Y component of the BasicPoint by the given value
         const BasicPoint& subY(T y)
         {
-          _y -=  y;
+          _y -= y;
           return *this;
         }
 

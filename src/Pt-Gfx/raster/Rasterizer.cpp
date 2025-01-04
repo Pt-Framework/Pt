@@ -34,6 +34,7 @@
 #include "LineFace.h"
 #include "EdgeTable.h"
 #include "DrawText.h"
+#include "FreeType.h"
 
 #include "Rasterizer.h"
 #include <Pt/Gfx/Image.h>
@@ -163,7 +164,7 @@ const ImageFormat& Rasterizer::format() const
 void Rasterizer::setPen( const Pen& pen )
 {
     _pen = pen;
-    _penBuffer.reset(_image.format(), Size(64, 1));
+    _penBuffer.reset(_image.format(), 64, 1);
     Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
 
     _penPixel.reset(_penBuffer.view(), 0, 0);
@@ -178,7 +179,7 @@ void Rasterizer::setBrush( const Brush& brush )
     switch( brush.fillStyle() )
     {
         case Brush::Solid:
-            _brushBuffer.reset( _image.format(), Size(64, 1) );
+            _brushBuffer.reset( _image.format(), 64, 1);
             Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
 
             _brushImage = &_brushBuffer;
@@ -187,8 +188,10 @@ void Rasterizer::setBrush( const Brush& brush )
         case Brush::Texture:
             if( brush.texture().format() != _image.format() )
             {
-                _brushBuffer.reset( _image.format(), brush.texture().size() );
-                Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
+                _brushBuffer.reset( _image.format(), 
+                                    brush.texture().width(), brush.texture().height() );
+                Gfx::copy( brush.texture().begin(), brush.texture().end(), 
+                           _brushBuffer.begin() );
 
                 _brushImage = &_brushBuffer;
             }
@@ -218,7 +221,7 @@ void Rasterizer::drawLine(const PointF& from, const  PointF& to)
     points[1].set(Pt::lround(to.x() - 0.5),
         Pt::lround(to.y() - 0.5));
 
-    const ClipRect currentClip = updateClip();
+    const Rect currentClip = updateClip();
     stroke(points, 2, currentClip);
 }
 
@@ -227,7 +230,7 @@ void Rasterizer::drawText(const PointF& toF, const String& text)
 {
     Point to(round(toF));
 
-    const ClipRect currentClip = updateClip();
+    const Rect currentClip = updateClip();
     strokeText(to, text, currentClip);
 }
 
@@ -236,7 +239,7 @@ void Rasterizer::drawText(const PointF& toF, const Pt::String& text, const Trans
 {
     Point to(round(toF));
 
-    const ClipRect currentClip = updateClip();
+    const Rect currentClip = updateClip();
     strokeText(to, text, trans, currentClip);
 }
 
@@ -244,9 +247,9 @@ void Rasterizer::drawText(const PointF& toF, const Pt::String& text, const Trans
 void Rasterizer::drawRect(const RectF& r)
 {
     RectF rect(r.left() - 0.5,
-        r.right() - 0.5,
-        r.top() - 0.5,
-        r.bottom() - 0.5);
+               r.right() - 0.5,
+               r.top() - 0.5,
+               r.bottom() - 0.5);
 
     Point points[5] = { round(rect.topLeft()),
                         round(rect.topRight()),
@@ -255,7 +258,7 @@ void Rasterizer::drawRect(const RectF& r)
                         round(rect.topLeft()),
     };
 
-    const ClipRect currentClip = updateClip();
+    const Rect currentClip = updateClip();
     stroke(points, 5, currentClip);
 }
 
@@ -263,11 +266,11 @@ void Rasterizer::drawRect(const RectF& r)
 void Rasterizer::fillRect(const RectF& r)
 {
     Rect rect(Pt::lround(r.left()),
-        Pt::lround(r.right()),
-        Pt::lround(r.top()),
-        Pt::lround(r.bottom()));
+              Pt::lround(r.right()),
+              Pt::lround(r.top()),
+              Pt::lround(r.bottom()));
 
-    const ClipRect currentClip = updateClip();
+    const Rect currentClip = updateClip();
     fillRect(rect, currentClip);
 }
 
@@ -275,12 +278,12 @@ void Rasterizer::fillRect(const RectF& r)
 void Rasterizer::drawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
     Point topLeft(Pt::lround(topLeftF.x() - 0.5),
-        Pt::lround(topLeftF.y() - 0.5));
+                  Pt::lround(topLeftF.y() - 0.5));
 
     Size size(lround(sizeF.width() - 0.5),
-        lround(sizeF.height() - 0.5));
+              lround(sizeF.height() - 0.5));
 
-    const ClipRect currentClip = updateClip();
+    const Rect currentClip = updateClip();
     strokeEllipse(topLeft, size, currentClip);
 }
 
@@ -290,7 +293,7 @@ void Rasterizer::fillEllipse(const PointF& topLeftF, const SizeF& sizeF)
     Point topLeft = round(topLeftF);
     Size size = round(sizeF);
 
-    const ClipRect currentClip = updateClip();
+    const Rect currentClip = updateClip();
     fillEllipse(topLeft, size, currentClip);
 }
 
@@ -307,7 +310,7 @@ void Rasterizer::drawPolyline(const PointF* ps, const size_t n)
         points[i] = p;
     }
 
-    const ClipRect currentClip = updateClip();
+    const Rect currentClip = updateClip();
     stroke(&points[0], points.size(), currentClip);
 }
 
@@ -324,20 +327,20 @@ void Rasterizer::fillPolygon(const PointF* ps, const size_t n)
         points[i] = p;
     }
 
-    const ClipRect currentClip = updateClip();
+    const Rect currentClip = updateClip();
     fill(&points[0], points.size(), currentClip);
 }
 
 
 void Rasterizer::drawImage(const PointF& to, const Image& img)
 {
-    image(round(to), img);
+    putImage(round(to), img);
 }
 
 
 void Rasterizer::drawImage(const PointF& to, const Image& img, const RectF& imageRect)
 {
-    image(round(to), img, round(imageRect));
+    putImage(round(to), img, round(imageRect));
 }
 
 
@@ -398,7 +401,8 @@ std::vector<std::string> Rasterizer::fontNames()
     return FreeType::instance().fontNames();
 }
 
-void Rasterizer::strokeEllipse( const Point& topLeft, const Size& size, const ClipRect& currentClip)
+void Rasterizer::strokeEllipse(const Point& topLeft, const Size& size, 
+                               const Rect& currentClip)
 {
     if( size.width() <= 1 || size.height() <= 1 )
         return;
@@ -475,7 +479,7 @@ void Rasterizer::strokeEllipse( const Point& topLeft, const Size& size, const Cl
 
 
 void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
-                                       int dashOn, int dashOff, const ClipRect& currentClip)
+                                       int dashOn, int dashOff, const Rect& currentClip)
 {
     int	      x1, y1, x2, y2;
     int	      dashNum;					// Absolute number of dash, starts with 0
@@ -645,7 +649,7 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt,
 
 
 void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
-                               bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const ClipRect& currentClip)
+                               bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const Rect& currentClip)
 {
   int		            dashNum, dashIndex, dashRemain;
     double	            L, l;
@@ -1044,7 +1048,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
 }
 
 
-void Rasterizer::drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const ClipRect& currentClip)
+void Rasterizer::drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const Rect& currentClip)
 {
     double	 l, L, r;
     double	 xa, ya;
@@ -1259,7 +1263,7 @@ void Rasterizer::drawSegment( Point from, Point to, bool projectLeft, bool proje
 }
 
 
-void Rasterizer::drawWideSolidPolyline( const  Point* pPts, int npt, const ClipRect& currentClip)
+void Rasterizer::drawWideSolidPolyline( const  Point* pPts, int npt, const Rect& currentClip)
 {
   int		   x1, y1, x2, y2;
     bool	   projectLeft, projectRight;
@@ -1418,7 +1422,7 @@ void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex,
 }
 
 
-void Rasterizer::stroke(const Point* points,  size_t n, const ClipRect& currentClip)
+void Rasterizer::stroke(const Point* points,  size_t n, const Rect& currentClip)
 {
   switch( _pen.style() )
   {
@@ -1448,7 +1452,7 @@ void Rasterizer::stroke(const Point* points,  size_t n, const ClipRect& currentC
 
 
 void Rasterizer::drawThinDashPolyline(const Point* points,  int pointCount,
-                                      int dashOn, int dashOff, const ClipRect& currentClip)
+                                      int dashOn, int dashOff, const Rect& currentClip)
 {
     const Point* ppt = points;
     int xstart, ystart;
@@ -1556,7 +1560,7 @@ void Rasterizer::drawThinDashPolyline(const Point* points,  int pointCount,
 // Endpoint semantics are used.
 void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const int *pDash, int numInDashList, int *pdashOffset, 
                                            bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1,
-                                           int e, int e1, int e2, int len, const ClipRect& currentClip)
+                                           int e, int e1, int e2, int len, const Rect& currentClip)
 {
     std::vector<Point>  ptInit_bg;
     Point *pptLast_fg,  *pptLast_bg = 0;
@@ -1830,7 +1834,7 @@ void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const
     *pdashOffset = (int)(pDash[dashIndex]) - dashRemaining;
 }
 
-void Rasterizer::drawThinSolidPolyline( const Point* points,  int pointCount, const ClipRect& currentClip)
+void Rasterizer::drawThinSolidPolyline( const Point* points,  int pointCount, const Rect& currentClip)
 {
     const Point *ppt;
 
@@ -1947,7 +1951,7 @@ void Rasterizer::drawThinSolidPolyline( const Point* points,  int pointCount, co
 }
 
 void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1,
-                                       int e, int e1, int e2, int len, const ClipRect& currentClip)
+                                       int e, int e1, int e2, int len, const Rect& currentClip)
 {
     if (len == 0)
         return;
@@ -2036,7 +2040,7 @@ void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1,
 }
 
 
-void Rasterizer::stroke( const Point& pixel, const ClipRect& currentClip)
+void Rasterizer::stroke( const Point& pixel, const Rect& currentClip)
 {
   stroke( (int) pixel.x(),(int) pixel.y(), currentClip );
 }
@@ -2084,7 +2088,7 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 }
 
 
-void Rasterizer::clipSpan( int& xpos, int& ypos, int& length, const ClipRect& clip)
+void Rasterizer::clipSpan( int& xpos, int& ypos, int& length, const Rect& clip)
 {
 
   if( ypos < clip.y() )
@@ -2189,17 +2193,19 @@ void Rasterizer::fillSolid(const Point& pos, int length)
 }
 
 
-void Rasterizer::strokeText( const Point& to, const Pt::String& text, const ClipRect& currentClip)
+void Rasterizer::strokeText(const Point& to, const Pt::String& text, 
+                            const Rect& clip)
 {
-    _text->setClip(currentClip);
-    _text->draw( _image, _pen.color(), to, text, _compositionMode );
+    _text->setClip( clip.x(), clip.y(), clip.width(), clip.height() );
+    _text->draw( _image, _pen.color(), to.x(), to.y(), text, _compositionMode );
 }
 
 
-void Rasterizer::strokeText(const Point& to, const Pt::String& text, const Transform& trans, const ClipRect& currentClip)
+void Rasterizer::strokeText(const Point& to, const Pt::String& text, 
+                            const Transform& trans, const Rect& clip)
 {
-    _text->setClip(currentClip);
-    _text->draw(_image, _pen.color(), to, text, _compositionMode, trans);
+    _text->setClip( clip.x(), clip.y(), clip.width(), clip.height() );
+    _text->draw(_image, _pen.color(), to.x(), to.y(), text, _compositionMode, trans);
 }
 
 
@@ -2436,7 +2442,7 @@ int Rasterizer::buildLineEdge( double x0, double y0, double k, int dx, int dy, i
 }
 
 
-void Rasterizer::fillSpans(int x, int y,  int w,  int h, const ClipRect& currentClip)
+void Rasterizer::fillSpans(int x, int y,  int w,  int h, const Rect& currentClip)
 {
     int ypos = std::max( 0, y );
     int yend = 0;
@@ -2449,7 +2455,7 @@ void Rasterizer::fillSpans(int x, int y,  int w,  int h, const ClipRect& current
 }
 
 
-void Rasterizer::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const ClipRect& currentClip)
+void Rasterizer::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const Rect& currentClip)
 {
     int left_x		= 0;
     int left_e		= 0;
@@ -2567,7 +2573,7 @@ void Rasterizer::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *edg
 
 
 
-void Rasterizer::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const ClipRect& currentClip)
+void Rasterizer::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const Rect& currentClip)
 {
     std::vector<Point>    points;
     std::vector<int>   widths;
@@ -3004,7 +3010,7 @@ int Rasterizer::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftE
 /* Paint all types of line join: round/miter/bevel/triangular.  Called by
    both miWideLine() and miWideDash().  Left and right line faces are
    supplied, each with its own value of k.  They may be modified. */
-void Rasterizer::lineJoin(  LineFace *pLeft, LineFace *pRight, const ClipRect& currentClip)
+void Rasterizer::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& currentClip)
 {
     double	            mx = 0.0, my = 0.0;
     int		            denom = 0;
@@ -3226,7 +3232,7 @@ void Rasterizer::lineJoin(  LineFace *pLeft, LineFace *pRight, const ClipRect& c
 
 /* Paint a projecting rectangular cap on a line face.  Called only by
    miWideDash (with isInt = true); not by miWideLine. */
-void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isInt, const ClipRect& currentClip)
+void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isInt, const Rect& currentClip)
 {
     int		    xorgi = 0, yorgi = 0;
     int	       	lw;
@@ -3410,12 +3416,12 @@ void Rasterizer::updateGradientBrush(int width, int height)
     switch( _brush.gradient() )
     {
         case Pt::Gfx::Brush::Horizontal:
-          _brushBuffer.reset(_image.format(), Size(width, 1));
+          _brushBuffer.reset(_image.format(), width, 1);
           height = 1;
           break;
 
         case Pt::Gfx::Brush::Vertical:
-          _brushBuffer.reset(_image.format(), Size(1, height));
+          _brushBuffer.reset(_image.format(), 1, height);
           width = 1;
           std::swap(gradientStart, gradientStop);
           break;
@@ -3449,7 +3455,7 @@ void Rasterizer::updateGradientBrush(int width, int height)
 }
 
 
-void Rasterizer::fillRect(const Rect& rectIn, const ClipRect& currentClip)
+void Rasterizer::fillRect(const Rect& rectIn, const Rect& currentClip)
 {
     Rect rect = currentClip.intersect( rectIn );
 
@@ -3471,7 +3477,7 @@ void Rasterizer::fillRect(const Rect& rectIn, const ClipRect& currentClip)
 }
 
 
-void Rasterizer::fill( const Point* pts, size_t pointCount, const ClipRect& currentClip)
+void Rasterizer::fill(const Point* pts, size_t pointCount, const Rect& currentClip)
 {
     EdgeSet           globalEdgeTable;
     ActiveEdgeTable   activeEdgeTable;
@@ -3657,7 +3663,7 @@ void Rasterizer::outputSpan( const Point& topLeft, int x, int y, int width )
 }
 
 
-void Rasterizer::fillEllipse( const Point& topLeftIn, const Size& size, const ClipRect& currentClip)
+void Rasterizer::fillEllipse( const Point& topLeftIn, const Size& size, const Rect& currentClip)
 {
     const Point topLeft( (int) topLeftIn.x(), (int) topLeftIn.y() );
 
@@ -3747,17 +3753,20 @@ void Rasterizer::fillEllipse( const Point& topLeftIn, const Size& size, const Cl
 }
 
 
-void Rasterizer::image( const Point& to, const Image& img)
+void Rasterizer::putImage( const Point& to, const Image& img)
 {
-    Rect imageRect( Point(0,0), img.size());
-    image( to, img, imageRect);
+    Rect imageRect;
+    imageRect.setWidth( img.width() );
+    imageRect.setHeight( img.height() );
+
+    putImage(to, img, imageRect);
 }
 
 
-//void Rasterizer::image(const Point& to, const Image& from, const Rect& fromRect)
+//void Rasterizer::putImage(const Point& to, const Image& from, const Rect& fromRect)
 //{
 //  // clip fromRect to fit into the clip/image rect
-//  const ClipRect currentClip = updateClip();
+//  const Rect currentClip = updateClip();
 //
 //  Point d = currentClip.topLeft() - to;
 //  Point fromPos = fromRect.topLeft() + d;
@@ -3775,17 +3784,17 @@ void Rasterizer::image( const Point& to, const Image& img)
 //}
 
 
-void Rasterizer::image(const Point& to, const Image& from, const Rect& rect)
+void Rasterizer::putImage(const Point& to, const Image& image, const Rect& imageRect)
 {
-  ClipRect currentClip = updateClip();
+  Rect currentClip = updateClip();
  
   // clip against source boundaries
-  Rect fromRect = Rect( from.size() );
-  fromRect = fromRect.intersect(rect);
+  Rect fromRect( image.width(), image.height() );
+  fromRect = fromRect.intersect(imageRect);
 
   // update target position if rect got smaller
   Point toPos = to;
-  toPos += fromRect.topLeft() - rect.topLeft();
+  toPos += fromRect.topLeft() - imageRect.topLeft();
 
   // clip against target boundaries
   Rect toRect = Rect( toPos, fromRect.size() );
@@ -3799,11 +3808,13 @@ void Rasterizer::image(const Point& to, const Image& from, const Rect& rect)
   // update source size if rect got smaller
   fromRect.setSize( toRect.size() );
 
-  _image.format().copy(_image.view(), toRect.topLeft(), from.view(), fromRect, _compositionMode);
+  _image.format().copy(_image.view(), toRect.x(), toRect.y(),
+                       image.view(), fromRect.x(), fromRect.y(), 
+                       fromRect.width(), fromRect.height(), _compositionMode);
 }
 
 
-void Rasterizer::stroke(int x, int y, const ClipRect& clip)
+void Rasterizer::stroke(int x, int y, const Rect& clip)
 {
     if( x < clip.x() || x >= clip.right() ||
         y < clip.y() || y >= clip.bottom())
@@ -3814,7 +3825,7 @@ void Rasterizer::stroke(int x, int y, const ClipRect& clip)
 }
 
 
-void Rasterizer::stroke(int xpos, int ypos, int length, const ClipRect& currentClip)
+void Rasterizer::stroke(int xpos, int ypos, int length, const Rect& currentClip)
 {
     clipSpan(xpos, ypos, length, currentClip);
 
@@ -3835,13 +3846,13 @@ void Rasterizer::stroke(int xpos, int ypos, int length, const ClipRect& currentC
 }
 
 
-FontMetrics Rasterizer::fontMetrics( const String& text ) const
+FontMetrics Rasterizer::fontMetrics(const String& text) const
 {
     return _text->fontMetrics( text );
 }
 
 
-void Rasterizer::setClip( const RectF& clip )
+void Rasterizer::setClip(const RectF& clip)
 {
     if( clip.isNull() ) // crashes otherwise
         _clip = Rect( Point(0, 0), Size(1, 1) );
@@ -3852,7 +3863,9 @@ void Rasterizer::setClip( const RectF& clip )
 
 void Rasterizer::resetClip()
 {
-    _clip = Rect( Gfx::Point(0,0), _image.size() );
+    _clip = Rect();
+    _clip.setWidth( _image.width() );
+    _clip.setHeight( _image.height() );
 }
 
 } // namespace

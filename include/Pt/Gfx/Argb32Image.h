@@ -49,10 +49,11 @@ class Argb32Model
         class Pixel;
         class ConstPixel;
 
-        static std::size_t imageSize(const Size& size, Pt::ssize_t padding)
+        static std::size_t imageSize(std::size_t width, std::size_t height,
+                                     std::size_t padding)
         {
-            std::size_t l = (size.width() * 4) + padding;
-            std::size_t n = l * size.height();
+            std::size_t l = (width * 4) + padding;
+            std::size_t n = l * height;
             return n;
         }
 

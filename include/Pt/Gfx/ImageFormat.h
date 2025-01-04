@@ -32,8 +32,6 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/CompositionMode.h>
 
 namespace Pt {
@@ -158,14 +156,18 @@ class ImageFormat
 
         /** @brief Copies an area of pixels.
         */
-        PT_GFX_API void copy(ImageView& to, const Point& toPoint,
-                  const ImageView& from, const Rect& fromRect,
-                  CompositionMode mode) const;
+        PT_GFX_API void copy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                             const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                             Pt::ssize_t width, Pt::ssize_t height, 
+                             CompositionMode mode) const;
 
         /** @brief Returns the size in bytes for a given image size.
         */
-        std::size_t imageSize(const Size& size, Pt::ssize_t padding) const
-        { return onImageSize(size, padding); }
+        std::size_t imageSize(Pt::ssize_t width, Pt::ssize_t height,
+                              std::size_t padding) const
+        { 
+            return onImageSize(width, height, padding); 
+        }
 
     protected:
         virtual void onSetPixel(Pixel& to, const Pixel& from,
@@ -205,11 +207,13 @@ class ImageFormat
         virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length,
                             CompositionMode mode) const = 0;
 
-        virtual void onCopy(ImageView& to, const Point& toPos,
-                            const ImageView& from, const Rect& fromRect,
+        virtual void onCopy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                            const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                            Pt::ssize_t width, Pt::ssize_t height, 
                             CompositionMode mode) const = 0;
 
-        virtual std::size_t onImageSize(const Size& size, Pt::ssize_t padding) const = 0;
+        virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
+                                        std::size_t padding) const = 0;
 
     private:
         std::size_t _pixelStride;

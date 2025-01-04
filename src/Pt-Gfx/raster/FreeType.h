@@ -36,7 +36,6 @@
 
 #include <Pt/Types.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
 #include <Pt/Singleton.h>
 
@@ -88,20 +87,26 @@ class FreeType : public Pt::Singleton<FreeType>
 
         FTC_FaceID findFaceId(const Font& font);
 
+        // TODO: use ImageView instead of clip
+
         void draw(Image& image, const Color& color,                   
-                  const Point& pos, const String& text, 
-                  const Rect& clip, const CompositionMode& mode,
-                  const Transform& transform, FTC_FaceID faceId, 
-                  std::size_t fontSize);
+                  Pt::ssize_t x, Pt::ssize_t y, const String& text, 
+                  Pt::ssize_t clipX, Pt::ssize_t clipY, 
+                  Pt::ssize_t clipWidth, Pt::ssize_t clipHeight,
+                  const CompositionMode& mode, const Transform& transform, 
+                  FTC_FaceID faceId, std::size_t fontSize);
 
     protected:
         FreeType();
 
         FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
+        // TODO: use ImageView instead of clip
+
         void drawGlyph(Image& image, const Color& color, int xpos, int ypos,
-                       int bmPitch, int height, int width,
-                       const unsigned char* buffer, const Rect& clip, 
+                       int bmPitch, int height, int width, const unsigned char* buffer, 
+                       Pt::ssize_t clipX, Pt::ssize_t clipY, 
+                       Pt::ssize_t clipWidth, Pt::ssize_t clipHeight,
                        const CompositionMode& mode);
 
     private:

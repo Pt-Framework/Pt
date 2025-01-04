@@ -47,10 +47,11 @@ class Yuv12Model
         class Pixel;
         class ConstPixel;
 
-        static std::size_t imageSize(const Size& size, Pt::ssize_t padding)
+        static std::size_t imageSize(std::size_t width, std::size_t height,
+                                     std::size_t padding)
         {
-            Pt::ssize_t stride = size.width() + padding;
-            Pt::ssize_t planeSize = stride * size.height();
+            Pt::ssize_t stride = width + padding;
+            Pt::ssize_t planeSize = stride * height;
 
             return planeSize + planeSize / 2;
         }
@@ -91,22 +92,24 @@ class Yuv12Model
         }
 
         template <typename T>
-        static Pt::ssize_t init(T* data, Pt::ssize_t stride, const Size& size,
+        static Pt::ssize_t init(T* data, Pt::ssize_t stride, 
+                                Pt::ssize_t width, Pt::ssize_t height,
                                 Pt::ssize_t xpos, Pt::ssize_t ypos,
                                 T*& y, T*& u, T*& v)
         {
             Pt::ssize_t yOffset = stride * ypos + xpos;
             y = data + yOffset;
 
-            return init(data, stride, size, xpos, ypos, u, v);
+            return init(data, stride, width, height, xpos, ypos, u, v);
         }
 
         template <typename T>
-        static Pt::ssize_t init(T* data, Pt::ssize_t stride, const Size& size,
+        static Pt::ssize_t init(T* data, Pt::ssize_t stride, 
+                                Pt::ssize_t width, Pt::ssize_t height,
                                 Pt::ssize_t xpos, Pt::ssize_t ypos,
                                 T*& u, T*& v)
         {
-            Pt::ssize_t planeSize = stride * size.height();
+            Pt::ssize_t planeSize = stride * height;
 
             Pt::ssize_t subStride = stride / 2;
             Pt::ssize_t subPlaneSize = planeSize / 4;
@@ -157,14 +160,14 @@ class Yuv12Model
 
         template <typename T>
         static void advance(T*& y, T*& u, T*& v, Pt::ssize_t n,
-                            Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                            T* data, Pt::ssize_t stride, const Size& size)
+                            Pt::ssize_t& xpos, Pt::ssize_t& ypos, T* data, 
+                            Pt::ssize_t stride, Pt::ssize_t width, Pt::ssize_t height)
         {
             Pt::ssize_t off = xpos + n;
-            ypos += off / size.width();
-            xpos  = off % size.width();
+            ypos += off / width;
+            xpos  = off % width;
 
-            init(data, stride, size,xpos, ypos, y, u, v);
+            init(data, stride, width, height, xpos, ypos, y, u, v);
         }
 };
 
@@ -201,7 +204,9 @@ class Yuv12Model::ConstPixel
             _xpos = xpos;
             _ypos = ypos;
 
-            _subStride = Yuv12Model::init(view.data(), view.stride(), view.size(), xpos,  ypos, _y, _u, _v);
+            _subStride = Yuv12Model::init(view.data(), view.stride(), 
+                                          view.width(), view.height(), 
+                                          xpos,  ypos, _y, _u, _v);
         }
 
         void reset(const ConstPixel& p)
@@ -225,8 +230,8 @@ class Yuv12Model::ConstPixel
 
         void advance( Pt::ssize_t n )
         {
-            Yuv12Model::advance(_y, _u, _v, n, _xpos, _ypos,
-                               _view->data(), _view->stride(),_view->size());
+            Yuv12Model::advance(_y, _u, _v, n, _xpos, _ypos, _view->data(), 
+                                _view->stride(),_view->width(), _view->height());
         }
 
         Color toColor() const
@@ -276,7 +281,9 @@ class Yuv12Model::Pixel
         , _u(0)
         , _v(0)
         {
-            _subStride = Yuv12Model::init(view.data(), view.stride(), view.size(), xpos,  ypos, _y, _u, _v);
+            _subStride = Yuv12Model::init(view.data(), view.stride(), 
+                                          view.width(), view.height(),
+                                          xpos,  ypos, _y, _u, _v);
         }
 
         Pixel(const Pixel& p)
@@ -313,7 +320,9 @@ class Yuv12Model::Pixel
             _xpos = xpos;
             _ypos = ypos;
 
-            _subStride = Yuv12Model::init(view.data(), view.stride(), view.size(), xpos,  ypos, _u, _v);
+            _subStride = Yuv12Model::init(view.data(), view.stride(), 
+                                          view.width(), view.height(),
+                                          xpos,  ypos, _u, _v);
         }
 
         void reset(const Pixel& p)
@@ -337,8 +346,8 @@ class Yuv12Model::Pixel
 
         void advance( Pt::ssize_t n )
         {
-            Yuv12Model::advance(_y, _u, _v, n, _xpos, _ypos,
-                               _view->data(), _view->stride(),_view->size());
+            Yuv12Model::advance(_y, _u, _v, n, _xpos, _ypos, _view->data(), 
+                                _view->stride(), _view->width(), _view->height());
         }
 
         void assign(const Color& color, CompositionMode)

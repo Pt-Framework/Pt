@@ -38,20 +38,16 @@
 #include FT_GLYPH_H
 #include FT_CACHE_H
 
-#include "FreeType.h"
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Transform.h>
-#include <Pt/String.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <cassert>
+#include <Pt/String.h>
 
-namespace Pt{
+namespace Pt {
 
-namespace Gfx{
+namespace Gfx {
 
 /** @brief Draw text on an image
 
@@ -77,9 +73,13 @@ class DrawText
         */
         void setFont(const Font& font);
 
-        void setClip(const Rect& clip)
+        void setClip(Pt::ssize_t clipX, Pt::ssize_t clipY, 
+                     Pt::ssize_t clipWidth, Pt::ssize_t clipHeight)
         {
-            _clip = clip;
+            _clipX = clipX;
+            _clipY = clipY;
+            _clipWidth = clipWidth;
+            _clipHeight = clipHeight;
         }
 
         /** @brief Calculate font metrics for text
@@ -104,25 +104,26 @@ class DrawText
             @param mode The composition mode of the text
         */
         void draw(Image& image, const Color& color, 
-                  const Point& pos, const String& text, 
+                  Pt::ssize_t x, Pt::ssize_t y, const String& text, 
                   const CompositionMode& mode);
 
         void draw(Image& image, const Color& color,
-            const Point& pos, const String& text,
-            const CompositionMode& mode, const Transform& trans);
-
-    private:
-        void drawGlyph(Image& image, const Color& color, int xpos, int ypos,
-                       int bmPitch, int height, int width, const unsigned char* buffer);
+                  Pt::ssize_t x, Pt::ssize_t y, const String& text,
+                  const CompositionMode& mode, const Transform& trans);
 
   private:
         FTC_FaceID       _faceId;
         std::size_t      _fontSize;
         FTC_ImageTypeRec _imageType;
         Transform        _transform;
-        Rect             _clip;
+        Pt::ssize_t      _clipX;
+        Pt::ssize_t      _clipY;
+        Pt::ssize_t      _clipWidth;
+        Pt::ssize_t      _clipHeight;
 };
 
-}} //namespace
+} //namespace
+
+} //namespace
 
 #endif

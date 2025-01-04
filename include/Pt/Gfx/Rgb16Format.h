@@ -80,11 +80,14 @@ class PT_GFX_API Rgb16Format : public ImageFormat
 
         virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length,
                             CompositionMode mode) const;
-        virtual void onCopy(ImageView& to, const Point& toPos,
-                            const ImageView& from, const Rect& fromRect,
+        
+        virtual void onCopy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                            const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                            Pt::ssize_t width, Pt::ssize_t height, 
                             CompositionMode mode) const;
 
-        virtual std::size_t onImageSize(const Size& size, Pt::ssize_t padding) const;
+        virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
+                                        std::size_t padding) const;
 };
 
 } // namespace

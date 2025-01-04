@@ -199,7 +199,7 @@ void Canvas::drawImage(const Gfx::PointF& to,
         return;
     }
 
-    Pt::Gfx::Image dest( format(), image.size() );
+    Pt::Gfx::Image dest( format(), image.width(), image.height() );
     Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
     drawImage(to, dest, rect);
 }

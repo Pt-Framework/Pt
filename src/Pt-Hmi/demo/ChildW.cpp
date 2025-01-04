@@ -117,7 +117,7 @@ ChildW::ChildW(const std::string& title)
 
     //Toggle button
     Pt::Hmi::Key key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I);
-    Pt::Gfx::Image toggleImage(Pt::Gfx::ImageFormat::argb32(), Pt::Gfx::Size(10,10));
+    Pt::Gfx::Image toggleImage(Pt::Gfx::ImageFormat::argb32(), 10, 10);
     Gfx::fill(toggleImage.begin(), toggleImage.end(), Gfx::Color());
     
     _toggleButton.setName("toggle");

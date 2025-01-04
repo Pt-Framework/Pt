@@ -497,7 +497,7 @@ void BrushData::setTexture(const Image& texture,
     else // The texture has offset
     {
         // Prepare the destination texture
-        _texture->reset( texture.size() );
+        _texture->reset( texture.width(), texture.height() );
 
         Painter painter(*_texture);
         painter.setCompositionMode(CompositionMode::SourceCopy);

@@ -31,6 +31,7 @@
 #define PT_GFX_BRUSH_H
 
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/SmartPtr.h>
 

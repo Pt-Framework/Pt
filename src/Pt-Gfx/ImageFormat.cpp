@@ -38,13 +38,14 @@ namespace Pt {
 
 namespace Gfx {
 
-void ImageFormat::copy(ImageView& to, const Point& toPos,
-                       const ImageView& from, const Rect& fromRect,
+void ImageFormat::copy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                       const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                       Pt::ssize_t width, Pt::ssize_t height, 
                        CompositionMode mode) const
 {
-    bool outside = toPos.x() < 0 || toPos.y() < 0 ||
-                   toPos.x() + fromRect.width() > to.width() ||
-                   toPos.y() + fromRect.height() > to.height();
+    bool outside = toX < 0 || toY < 0 ||
+                   toX + width > to.width() ||
+                   toY + height > to.height();
 
     assert( ! outside );
 
@@ -65,7 +66,7 @@ void ImageFormat::copy(ImageView& to, const Point& toPos,
     
     //onCopy(to, toClip, from, fromClip, mode);
 
-    onCopy(to, toPos, from, fromRect, mode);
+    onCopy(to, toX, toY, from, fromX, fromY, width, height, mode);
 }
 
 

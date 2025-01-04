@@ -44,18 +44,19 @@ Image::Image(const ImageFormat& format)
 }
 
 
-Image::Image(const ImageFormat& format, const Size& size, size_t padding)
-: _buffer( format.imageSize(size, padding) )
+Image::Image(const ImageFormat& format, 
+             Pt::ssize_t width, Pt::ssize_t height, size_t padding)
+: _buffer( format.imageSize(width, height, padding) )
 {
     Pt::uint8_t* data = _buffer.empty() ? 0 : &_buffer[0];
 
-    _view.reset(format, data, size, padding);
+    _view.reset(format, data, width, height, padding);
 }
 
 
 Image::Image(const ImageFormat& format, Pt::uint8_t* buffer,
-             const Gfx::Size& size, size_t padding)
-: _view(format, buffer, size, padding)
+             Pt::ssize_t width, Pt::ssize_t height, size_t padding)
+: _view(format, buffer, width, height, padding)
 {
 }
 
@@ -73,42 +74,44 @@ Image::~Image()
 
 const Image& Image::operator=(const Image& image)
 {
-    Pt::ssize_t n = image.format().imageSize(image.size(), image.padding());
+    const ImageFormat& f = image.format();
+    Pt::ssize_t n = f.imageSize( image.width(), image.height(), 
+                                 image.padding() );    
     _buffer.resize(n);
 
-    if( n != 0)
+    Pt::uint8_t* data = 0;
+
+    if(n != 0)
     {
       const Pt::uint8_t* imageData = image.data();
       std::memcpy(&_buffer[0], imageData, n);
-      Pt::uint8_t* data = _buffer.empty() ? 0 : &_buffer[0];
-      _view.reset(image.format(), data, image.size(), image.view().padding());
+      data = _buffer.empty() ? 0 : &_buffer[0];
     }
-    else
-    {
-      _view.reset(image.format(), 0, image.size(), image.view().padding());
-    }
+
+    _view.reset(image.format(), data, 
+                image.width(), image.height(), image.padding());
 
     return *this;
 }
 
 
 void Image::reset(const ImageFormat& f,
-                  const Gfx::Size& size, Pt::ssize_t padding)
+                  Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
 {
-    Pt::ssize_t n = f.imageSize(size, padding);
+    Pt::ssize_t n = f.imageSize(width, height, padding);
     _buffer.resize(n);
 
     Pt::uint8_t* data = _buffer.empty() ? 0
                                         : &_buffer[0];
 
-    _view.reset(f, data, size, padding);
+    _view.reset(f, data, width, height, padding);
 }
 
 
 void Image::reset(const ImageFormat& format, Pt::uint8_t* data,
-                  const Gfx::Size& size, Pt::ssize_t padding)
+                  Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
 {
-    _view.reset(format, data, size, padding);
+    _view.reset(format, data, width, height, padding);
     _buffer.clear();
 }
 

@@ -291,9 +291,8 @@ class PngReaderImpl
             png_uint_32 channels = _channels;
 
             // resize target image
-            Pt::Gfx::Size imageSize(_width, _height);
-            if( imageSize != _image->size() )
-                _image->reset(Pt::Gfx::ImageFormat::argb32(), imageSize );
+            if( _image->width() != _width || _image->height() != _height )
+                _image->reset( Pt::Gfx::ImageFormat::argb32(), _width, _height );
 
             // TODO: png_progressive_combine_row(png_ptr, old_row, data);
     

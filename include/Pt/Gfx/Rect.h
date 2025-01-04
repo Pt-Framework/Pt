@@ -59,16 +59,22 @@ class BasicRect
         , _s(s)
         {
         }
-
+        
+        BasicRect(const T& width, const T& height)
+        : _p()
+        , _s(width, height)
+        {
+        }
+        
         BasicRect(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
         : _p(p1)
         , _s( p2.x() - p1.x(), p2.y() - p1.y())
         {
         }
 
-        BasicRect(const T left, const T right, const T top, const T bottom)
+        BasicRect(const T& left, const T& right, const T& top, const T& bottom)
         {
-            set( left, right, top, bottom );
+            set(left, right, top, bottom);
         }
 
         BasicRect(const BasicRect<T>& val)
@@ -84,8 +90,8 @@ class BasicRect
 
         void clear()
         {
-            _p.set(0, 0);
-            _s.set(0, 0);
+            _p.clear();
+            _s.clear();
         }
 
         void set(const BasicPoint<T>& p, const BasicSize<T>& s)
@@ -96,12 +102,18 @@ class BasicRect
 
         void set(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
         {
-            this->setOrigin( p1 );
-            this->setWidth(p2.x() - p1.x() );
-            this->setHeight(p2.y() - p1.y());
+            this->setOrigin(p1);
+            this->setWidth( p2.x() - p1.x() );
+            this->setHeight( p2.y() - p1.y() );
         }
 
-        void set(const T left, const T right, const T top, const T bottom)
+        void set(const T& width, const T& height)
+        {
+            _p.clear();
+            _s.set(width, height);
+        }
+
+        void set(const T& left, const T& right, const T& top, const T& bottom)
         {
             _p = BasicPoint<T>( left, top );
             _s = BasicSize<T>(  right - left , bottom - top );
@@ -233,9 +245,9 @@ class BasicRect
                 return;
             }
 
-            const T l     = std::min( this->left(), rect.left() );
-            const T t     = std::min( this->top(), rect.top() );
-            const T r     = std::max( this->right(), rect.right() );
+            const T l  = std::min( this->left(), rect.left() );
+            const T t  = std::min( this->top(), rect.top() );
+            const T r  = std::max( this->right(), rect.right() );
             const T b  = std::max( this->bottom(), rect.bottom() );
 
             set(l, r, t, b);
@@ -243,13 +255,13 @@ class BasicRect
 
         BasicRect<T> intersect(const BasicRect<T>& rect) const
         {
-            const T l     = std::max( this->left(), rect.left() );
-            const T t     = std::max( this->top(), rect.top() );
-            const T r     = std::min( this->right(), rect.right() );
+            const T l  = std::max( this->left(), rect.left() );
+            const T t  = std::max( this->top(), rect.top() );
+            const T r  = std::min( this->right(), rect.right() );
             const T b  = std::min( this->bottom(), rect.bottom() );
 
             return r >= l && b >= t ? BasicRect<T>(l, r, t, b)
-                          : BasicRect<T>();
+                                    : BasicRect<T>();
         }
 
         bool contains(const BasicPoint<T>& p) const
@@ -265,18 +277,14 @@ class BasicRect
         BasicSize<T>  _s;
 };
 
-
 typedef BasicRect<Pt::ssize_t> Rect;
 typedef BasicRect<double> RectF;
-//typedef BasicRect<float> RectF;
 
-
-inline Rect round(const RectF& r)
-{
-  return Rect( round(r.topLeft()),
-               round(r.size()) );
-}
-
+//inline Rect roundRect(const RectF& r)
+//{
+//  return Rect( round(r.topLeft()),
+//               round(r.size()) );
+//}
 
 }  // namespace
 

@@ -114,6 +114,9 @@ class ImageCanvas : public Canvas
 
     void reset(const Gfx::SizeF& size, std::size_t stride = 0);
 
+    void reset(Pt::ssize_t width, Pt::ssize_t height, 
+               std::size_t stride = 0);
+
     const Gfx::Image& image() const;
 
     void setScaleFactor(double scaleFactor);
@@ -220,6 +223,9 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     void reset(const Gfx::Size& size, std::size_t stride = 0);
 
+    void reset(Pt::ssize_t width, Pt::ssize_t height, 
+               std::size_t stride = 0);
+
     const Gfx::Image& image() const;
 
     /** @brief Returns the size in physical device pixels. 
@@ -259,6 +265,9 @@ class PT_GFX_API ImageLayer : public PaintLayer
         void reset(const Gfx::Image& image);
 
         void reset(const Gfx::Size& size, std::size_t stride = 0);
+
+        void reset(Pt::ssize_t width, Pt::ssize_t height, 
+                   std::size_t stride = 0);
 
         const Gfx::Image& image() const;
 

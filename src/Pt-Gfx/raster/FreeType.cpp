@@ -334,16 +334,17 @@ FontMetrics FreeType::fontMetrics(const String& text,
 }
 
 
-void FreeType::draw(Image& image, const Color& color,
-                    const Point& p, const String& text,
-                    const Rect& clip, const CompositionMode& mode,
-                    const Transform& t, FTC_FaceID faceId,
-                    std::size_t fontSize)
+void FreeType::draw(Image& image, const Color& color,                   
+                    Pt::ssize_t x, Pt::ssize_t y, const String& text, 
+                    Pt::ssize_t clipX, Pt::ssize_t clipY, 
+                    Pt::ssize_t clipWidth, Pt::ssize_t clipHeight,
+                    const CompositionMode& mode, const Transform& t, 
+                    FTC_FaceID faceId, std::size_t fontSize)
 {
     // LOCK
 
     // apply translation here, FT uses a 2x2 matrix for the other transformations
-    PointF translatedPos( p.x(), p.y() );
+    PointF translatedPos( x, y );
     translatedPos.addX( t.dx() );
     translatedPos.addY( t.dy() );
     
@@ -477,7 +478,8 @@ void FreeType::draw(Image& image, const Color& color,
             //     bbox.yMax <= 0 || bbox.yMin >= my_target_height )
             //    continue;
 
-            drawGlyph(image, color, left, top, pitch, height, width, buffer, clip, mode);
+            drawGlyph(image, color, left, top, pitch, height, width, buffer, 
+                      clipX, clipY, clipWidth, clipHeight, mode);
         }
 
         glyphPos.x  += incX;
@@ -497,12 +499,13 @@ void FreeType::draw(Image& image, const Color& color,
 
 
 void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
-                         int bmPitch, int height, int width,
-                         const unsigned char* buffer, const Rect& clip,
+                         int bmPitch, int height, int width, const unsigned char* buffer, 
+                         Pt::ssize_t clipX, Pt::ssize_t clipY, 
+                         Pt::ssize_t clipWidth, Pt::ssize_t clipHeight,
                          const CompositionMode& mode)
 {
-    const int clipRight  = clip.x() + clip.width();
-    const int clipBottom = clip.y() + clip.height();
+    const int clipRight  = clipX + clipWidth;
+    const int clipBottom = clipY + clipHeight;
     Pt::ssize_t yOffset  = 0;
     Pt::ssize_t dsy      = 0;
     Pt::ssize_t dsx      = 0;
@@ -514,18 +517,18 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
 
     int ofsx = 0;
 
-    if( xpos < clip.x() )
+    if( xpos < clipX )
     {
-        ofsx = clip.x() - xpos;
-        xpos =  clip.x();
+        ofsx = clipX - xpos;
+        xpos =  clipX;
     }
 
     int ofsy = 0;
 
-    if( ypos < clip.y() )
+    if( ypos < clipY )
     {
-        ofsy = clip.y() - ypos;
-        ypos = clip.y();
+        ofsy = clipY - ypos;
+        ypos = clipY;
     }
 
     dsy = ypos;
@@ -536,7 +539,7 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
     {
         yOffset = y * bmPitch;
 
-        if( dsy < clip.y())
+        if( dsy < clipY )
             continue;
 
         if( dsy >= y2 )
@@ -546,7 +549,7 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
 
         for( Pt::int32_t x = ofsx; x < width; ++x, ++dsx )
         {            
-            if( dsx < clip.x())
+            if( dsx < clipX)
                 continue;
 
             if( dsx >= x2 )

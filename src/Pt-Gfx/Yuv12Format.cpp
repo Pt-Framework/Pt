@@ -41,9 +41,10 @@ Yuv12Format::Yuv12Format()
 }
 
 
-std::size_t Yuv12Format::onImageSize(const Size& size, Pt::ssize_t padding) const
+std::size_t Yuv12Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
+                                     std::size_t padding) const
 {
-    return Yuv12Model::imageSize(size, padding);
+    return Yuv12Model::imageSize(width, height, padding);
 }
 
 
@@ -74,7 +75,8 @@ void Yuv12Format::onSetPixel(Pixel& p, const Color& c,
     Pt::uint8_t* u;
     Pt::uint8_t* v;
 
-    Yuv12Model::init(p.view().data(), p.view().stride(), p.view().size(),
+    Yuv12Model::init(p.view().data(), p.view().stride(), 
+                     p.view().width(), p.view().height(),
                      p.x(), p.y(), y, u, v);
 
     Yuv12Model::fromColor(*y, *u, *v, c);
@@ -131,7 +133,8 @@ Color Yuv12Format::onGetColor(const Pixel& p) const
 
    const Pt::uint8_t* data = p.view().data();
 
-    Yuv12Model::init(data, p.view().stride(), p.view().size(),
+    Yuv12Model::init(data, p.view().stride(), 
+                     p.view().width(), p.view().height(),
                      p.x(), p.y(), y, u, v);
 
     return Yuv12Model::toColor(*y, *u, *v);
@@ -146,7 +149,8 @@ Color Yuv12Format::onGetColor(const ConstPixel& p) const
 
    const Pt::uint8_t* data = p.view().data();
 
-    Yuv12Model::init(data, p.view().stride(), p.view().size(),
+    Yuv12Model::init(data, p.view().stride(), 
+                     p.view().width(), p.view().height(),
                      p.x(), p.y(), y, u, v);
 
     return Yuv12Model::toColor(*y, *u, *v);
@@ -165,8 +169,9 @@ void Yuv12Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
 }
 
 
-void Yuv12Format::onCopy(ImageView& to, const Point& toPoint,
-                         const ImageView& from, const Rect& fromRect,
+void Yuv12Format::onCopy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                         const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                         Pt::ssize_t width, Pt::ssize_t height, 
                          CompositionMode mode) const
 {
 }

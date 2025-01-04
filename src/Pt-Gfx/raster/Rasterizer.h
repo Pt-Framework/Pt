@@ -49,41 +49,8 @@ class ActiveEdgeTable;
 
 class Rasterizer
 {
-  protected:
-    class ClipRect : public Rect
-    {
-      public:
-        ClipRect( const Rect& r = Rect() )
-        : Rect(r)
-        , _bottom(0)
-        , _right(0)
-        {
-            _right = x() + width();
-            _bottom = y() + height();
-        }
-
-        ClipRect& operator=(const ClipRect& r)
-        {
-            Rect::operator=(r);
-            _right = x() + width();
-            _bottom = y() + height();
-            return *this;
-        }
-        
-        int bottom() const
-        {
-            return _bottom;
-        }
-
-        int right() const
-        {
-            return _right;
-        }
-
-      private:
-        int _bottom;
-        int _right;
-    };
+  public:
+    typedef BasicRect<int> Rect;
 
   public:
     Rasterizer();
@@ -105,13 +72,19 @@ class Rasterizer
           return;
         }
 
-        _image.reset( format(), image.size() );
+        _image.reset( format(), image.width(), image.height() );
         Pt::Gfx::copy( image.begin(), image.end(), _image.begin() );
     }
 
     void reset(const Gfx::Size& size, std::size_t stride)
     {
-        _image.reset( _image.format(), size, stride );
+        _image.reset( _image.format(), size.width(), size.height(), stride );
+    }
+
+    void reset(Pt::ssize_t width, Pt::ssize_t height, 
+               std::size_t stride)
+    {
+        _image.reset( _image.format(), width, height, stride );
     }
 
     void setClip(const RectF& clip);
@@ -175,27 +148,25 @@ class Rasterizer
       static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
   private:
-    void image( const Point& to, const Image& image);
+    void putImage( const Point& to, const Image& image);
 
-    void image(const Point& toIn,
-               const Image& image,
-               const Rect& imageRect);
+    void putImage(const Point& to, const Image& image, const Rect& imageRect);
 
-    void fillRect(const Rect& r, const ClipRect& currentClip);
+    void fillRect(const Rect& r, const Rect& currentClip);
 
-    void stroke( const Point* points, size_t pointCount, const ClipRect& currentClip);
+    void stroke(const Point* points, size_t pointCount, const Rect& currentClip);
 
-    void stroke( const Point& pixel, const ClipRect& currentClip);
+    void stroke(const Point& pixel, const Rect& currentClip);
 
-    void fill( const Point* points, size_t pointCount, const ClipRect& currentClip);
+    void fill(const Point* points, size_t pointCount, const Rect& currentClip);
 
-    void strokeText( const Point& to, const Pt::String& text, const ClipRect& currentClip);
+    void strokeText(const Point& to, const Pt::String& text, const Rect& currentClip);
 
-    void strokeText(const Point& to, const Pt::String& text, const Transform& trans, const ClipRect& currentClip);
+    void strokeText(const Point& to, const Pt::String& text, const Transform& trans, const Rect& currentClip);
 
-    void strokeEllipse( const Point& topLeft, const Size& size, const ClipRect& currentClip);
+    void strokeEllipse( const Point& topLeft, const Size& size, const Rect& currentClip);
 
-    void fillEllipse( const Point& topLeft, const Size& size, const ClipRect& currentClip);
+    void fillEllipse( const Point& topLeft, const Size& size, const Rect& currentClip);
 
   //Output algo.
   protected:
@@ -209,11 +180,13 @@ class Rasterizer
     //                           Pt::Gfx::Color gradientStart,
     //                           Pt::Gfx::Color gradientStop, 
     //                           Pt::Gfx::Brush::GradientDirection style);
-    void clipSpan( int& x, int& y, int& length, const ClipRect& currentClip);
+    void clipSpan( int& x, int& y, int& length, const Rect& currentClip);
 
-    ClipRect updateClip() const
+    Rect updateClip() const
     {
-        const Rect imageRect( _image.size() );
+        Rect imageRect;
+        imageRect.setWidth( _image.width() );
+        imageRect.setHeight( _image.height() );
         return _clip.intersect(imageRect);
     }
     
@@ -222,55 +195,82 @@ class Rasterizer
   //Thin polyline algo.
   protected:
     enum { xAxis, yAxis };
-    void drawThinSolidPolyline( const Point* points, int pointCount, const ClipRect& currentClip);
+    void drawThinSolidPolyline( const Point* points, int pointCount, const Rect& currentClip);
     void drawThinDashPolyline( const Point* points, int pointCount,
-                               int dashOn, int dashOff, const ClipRect& currentClip);
+                               int dashOn, int dashOff, const Rect& currentClip);
     void stepDash( int dist, int* pDashNum, int* pDashIndex, const int* pDash, int numInDashList, int *pDashOffset );
 
     void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, 
                                    bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, 
-                                   int e, int e1, int e2, int len, const ClipRect& currentClip);
+                                   int e, int e1, int e2, int len, const Rect& currentClip);
 
     void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, 
-                                int e, int e1, int e2, int len, const ClipRect& currentClip);
+                                int e, int e1, int e2, int len, const Rect& currentClip);
 
   //Wide polyline base algo.
   protected:
     int polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );
     int buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
-    void fillSpans(int x, int y,  int w,  int h, const ClipRect& currentClip);
-    void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const ClipRect& currentClip);
-    void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const ClipRect& currentClip);
+    void fillSpans(int x, int y,  int w,  int h, const Rect& currentClip);
+    void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const Rect& currentClip);
+    void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const Rect& currentClip);
     void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );
     int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );
     int lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths);
     int lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
     int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );
-    void lineJoin(LineFace *pLeft, LineFace *pRight, const ClipRect& currentClip);
-    void lineProjectingCap(const LineFace *face, bool isLeft, bool isInt, const ClipRect& currentClip);
+    void lineJoin(LineFace *pLeft, LineFace *pRight, const Rect& currentClip);
+    void lineProjectingCap(const LineFace *face, bool isLeft, bool isInt, const Rect& currentClip);
     void clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft );
 
   //Wide solid polyline algo.
   protected:
-    void drawWideSolidPolyline( const Point* points, int pointCount, const ClipRect& currentClip);
-    void drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const ClipRect& currentClip);
+    void drawWideSolidPolyline( const Point* points, int pointCount, const Rect& currentClip);
+    void drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const Rect& currentClip);
 
   //Wide dashed polyline algo.
   protected:
     enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
 
     void drawWideDashPolyline( const Point* points, int pointCount,
-                               int dashOn, int dashOff, const ClipRect& currentClip );
+                               int dashOn, int dashOff, const Rect& currentClip );
 
     void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
-                      bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const ClipRect& currentClip);
+                      bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const Rect& currentClip);
 
   private:
-    void stroke(int x, int y, const ClipRect& currentClip);
+    void stroke(int x, int y, const Rect& currentClip);
 
-    void stroke(int xpos, int ypos, int length, const ClipRect& currentClip);
+    void stroke(int xpos, int ypos, int length, const Rect& currentClip);
 
     void updateGradientBrush(int width, int height);
+
+    Rect round(const RectF& r)
+    {
+      BasicPoint<int> pos( lround(r.x()),
+                           lround(r.y()) );
+      
+      BasicSize<int> size( lround(r.width()),
+                           lround(r.height()) );
+      
+      return Rect(pos, size);
+    }
+    
+    Point round(const PointF& p)
+    {
+      BasicPoint<int> pos( lround(p.x()),
+                           lround(p.y()) );
+           
+      return pos;
+    }
+
+    Size round(const SizeF& s)
+    {
+      BasicSize<int> size( lround(s.width()),
+                           lround(s.height()) );
+      
+      return size;
+    }
 
   private:
     Image           _image;

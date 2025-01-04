@@ -234,7 +234,7 @@ class BasicImage
 
     public:
         BasicImage(const Size& size, Pt::ssize_t padding = 0)
-        : _buffer( Model::imageSize(size, padding) )
+        : _buffer( Model::imageSize(size.width(), size.height(), padding) )
         , _view(_buffer.empty() ? 0 : &_buffer[0], size, padding)
         { }
 

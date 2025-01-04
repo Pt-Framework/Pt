@@ -140,6 +140,16 @@ void ImageCanvas::reset(const Gfx::SizeF& size, std::size_t stride)
 }
 
 
+void ImageCanvas::reset(Pt::ssize_t width, Pt::ssize_t height, 
+                        std::size_t stride)
+{
+    _rasterizer->reset(width, height, stride);  
+
+    _physicalSize = Gfx::SizeF(width, height);
+    _logicalSize = _scaling.toLogical(_physicalSize);
+}
+
+
 const Gfx::Image& ImageCanvas::image() const
 {
     return _rasterizer->image();
@@ -417,6 +427,13 @@ void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
 }
 
 
+void ImageSurface::reset(Pt::ssize_t width, Pt::ssize_t height, 
+                         std::size_t stride)
+{
+    _canvas->reset(width, height, stride);
+}
+
+
 const Gfx::Image& ImageSurface::image() const
 {
     return _canvas->image();
@@ -495,6 +512,13 @@ void ImageLayer::reset(const Gfx::Image& image)
 void ImageLayer::reset(const Gfx::Size& size, std::size_t stride)
 {
     _surface.reset(size, stride);
+}
+
+
+void ImageLayer::reset(Pt::ssize_t width, Pt::ssize_t height, 
+                       std::size_t stride)
+{
+    _surface.reset(width, height, stride);
 }
 
 
