@@ -1,0 +1,239 @@
+##############################################################################
+# Configuration rules
+##############################################################################
+
+rule TryBuild
+{
+    local _cc = $(1) ;
+    local _src = $(2) ;
+    local _cflags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+    local _out = a.out ;
+    local _cmd ;
+
+    if $(4)
+    {
+        _cmd = $(_cc) $(LINKFLAGS) -o $(_out) $(_cflags) -I$(STDHDRS) -L$(5) $(_src) $(4) ;
+    }
+    else
+    {
+        _cmd = $(_cc) -c -o $(_out) $(_cflags) -I$(STDHDRS) $(_src) ;
+    }
+
+    local _r = [ TryCommand $(_cmd) ] ;
+
+    TryCommand $(RM) $(_out) ;
+    return $(_r) ;
+}
+
+
+rule TryBuildCc
+{
+    local _cflags = $(CCFLAGS) $(2) ;
+    return [ TryBuild $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+
+rule TryBuildC++
+{
+    local _cflags = $(C++FLAGS) $(2) ;
+    return [ TryBuild $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+
+rule CheckCc
+{
+    TOOLSET_ROOT ?= "" ;
+    AS           ?= $(TOOLSET_ROOT)as ;
+    CC           ?= $(TOOLSET_ROOT)emcc ;
+    RANLIB       ?= $(TOOLSET_ROOT)emranlib ;
+    AR           ?= $(TOOLSET_ROOT)ar ru ;
+    LINK         ?= $(CC) ;
+
+    Configure AS ;
+    Configure AR ;
+    Configure CC ;
+    Configure LINK ;
+    Configure RANLIB ;
+
+    #CLANGFLAGS = -MMD -MP -MF ;
+    #CLANGFLAGS += -target wasm32 -nostdinc -D__EMSCRIPTEN__ -D_LIBCPP_ABI_VERSION=2 -fno-builtin ;
+    
+    #CCFLAGS += $(CLANGFLAGS) ;
+    #CCFLAGS += -Ofast -std=c99 ;
+
+    if $(WITH_DEBUG)
+    {
+        CCFLAGS += -DDEBUG -D_DEBUG -g ;
+    }
+    else
+    {
+        CCFLAGS += -DNDEBUG ;
+    }
+
+    if $(WITH_OPTIM)
+    {
+        OPTIM ?= -O2 ;
+        #LINKFLAGS  += -strip-all -gc-sections ;
+    }
+    else 
+    {
+        OPTIM ?= -O0 ;
+    }
+    
+    #LINKFLAGS += -no-entry -allow-undefined -import-memory ;
+    #LINKFLAGS += -export=__wasm_call_ctors -export=malloc -export=free -export=main ;
+    
+    WARN ?= -Wall ;
+
+    Configure CCFLAGS ;
+    Configure WARN ;
+    Configure OPTIM ;
+    Configure LINKFLAGS ;
+
+
+    #STDHDRS += -isystem$(SYSTEM_ROOT)/include/libcxx ;
+    #STDHDRS += -isystem$(SYSTEM_ROOT)/include/compat ;
+    #STDHDRS += -isystem$(SYSTEM_ROOT)/include ;
+    #STDHDRS += -isystem$(SYSTEM_ROOT)/include/libc ;
+    #STDHDRS += -isystem$(SYSTEM_ROOT)/lib/libc/musl/arch/emscripten ;
+}
+
+
+rule CheckC++
+{
+    ConfigureCc ;
+
+    TOOLSET_ROOT ?= "" ;
+
+    C++ ?= $(TOOLSET_ROOT)em++ ;
+    Configure C++ ;
+
+    LINK++ = $(C++) ;
+    Configure LINK++ ;
+
+    #CLANGFLAGS = -MMD -MP -MF ;
+    #CLANGFLAGS += -target wasm32 -nostdinc -D__EMSCRIPTEN__ -D_LIBCPP_ABI_VERSION=2 -fno-builtin ;
+    
+    #C++FLAGS += $(CLANGFLAGS) ;
+    #C++FLAGS += -Ofast -std=c++11 -fno-rtti -Wno-writable-strings -Wno-unknown-pragmas ;
+
+    if $(WITH_DEBUG)
+    {
+        C++FLAGS += -DDEBUG -g ;
+    }
+    else
+    {
+        C++FLAGS += -DNDEBUG ;
+    }
+
+    Configure C++FLAGS ;
+}
+
+##############################################################################
+# Build rules
+##############################################################################
+
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule Main-LinkSharedLibraries
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+rule SharedLibrary-Build
+{
+    SharedLibraryFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
+
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) $(DLL_LINKFLAGS) ;
+
+    if $(INSTALL_PATH) # macosx feature
+    {
+        LINKFLAGS on $(_target) += -install_name $(_target:D=$(INSTALL_PATH)) ;
+    }
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
+}
+
+
+rule SharedLibrary-LinkSharedLibraries
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _deps = $(PRELIB)$(>)$(SUFDLL) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_deps) ;
+        SHLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+
+        # Add all shared libraries required by this shared library in a
+        # variable called RPATHLIBS so that their paths can be added as
+        # rpath-link option to the linker command later
+        if $(RPATH_LINKFLAGS)
+        {
+            for local _d in $(_deps)
+            {
+                local _found = false ;
+    
+                for _r in $(RPATHLIBS)
+                {
+                    if $(_r) = $(_d)
+                    {
+                        _found = true ;
+                    }
+                }
+    
+                # only add if not added previously
+                if $(_found) = false
+                {
+                    RPATHLIBS += $(_d)  ;
+                }
+            }
+        }
+    }
+}
+
+##############################################################################
+# Build actions
+##############################################################################
+
+actions Link bind NEEDLIBS SHLIBS RPATHLIBS
+{
+  $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS)$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP) 
+}
+

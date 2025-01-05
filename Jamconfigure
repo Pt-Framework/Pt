@@ -71,7 +71,7 @@ if $(TARGET_OS:L) = winrt
 if ! $(PT_SYSTEM)
 {
     WITH_WIN32 = [ CheckBuildC++ "#include <windows.h>"
-                                 "int main() { return 0; }" ] ;
+                                 "int main() { OSVERSIONINFO osvi; return 0; }" ] ;
 
     if $(WITH_WIN32)
     {
