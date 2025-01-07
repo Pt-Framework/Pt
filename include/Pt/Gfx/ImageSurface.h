@@ -47,7 +47,7 @@ namespace Pt {
 
 namespace Gfx {
 
-class RasterCanvas;
+class ImageCanvas;
 
 /** @brief Image drawing surface.
 */
@@ -82,7 +82,7 @@ class PT_GFX_API ImageSurface : public PaintSurface
     static std::vector<std::string> fontNames();
 
   private:
-    RasterCanvas* _canvas;
+    ImageCanvas* _canvas;
 };
 
 /** @brief Image drawing layer.

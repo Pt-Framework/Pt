@@ -368,10 +368,10 @@
     <ClInclude Include="..\..\src\Pt-Gfx\raster\Edge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\raster\EdgeTable.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\raster\FreeType.h" />
+    <ClInclude Include="..\..\src\Pt-Gfx\raster\ImageCanvas.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\raster\LineEdge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\raster\LineFace.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\raster\LineSlope.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\raster\RasterCanvas.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\raster\RasterContext.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\skia\DrawText.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\skia\FreeType.h" />
@@ -592,7 +592,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\raster\ClipPolygon.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\raster\DrawText.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\raster\FreeType.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\raster\RasterCanvas.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\raster\ImageCanvas.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\raster\RasterContext.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb16Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb32Format.cpp" />

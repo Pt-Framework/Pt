@@ -1662,7 +1662,7 @@
     <ClInclude Include="..\..\src\Pt-Gfx\raster\RasterContext.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\raster\RasterCanvas.h">
+    <ClInclude Include="..\..\src\Pt-Gfx\raster\ImageCanvas.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
   </ItemGroup>
@@ -3035,7 +3035,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\raster\RasterContext.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\raster\RasterCanvas.cpp">
+    <ClCompile Include="..\..\src\Pt-Gfx\raster\ImageCanvas.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
   </ItemGroup>

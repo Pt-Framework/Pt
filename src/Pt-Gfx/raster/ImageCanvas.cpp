@@ -28,7 +28,7 @@
   02110-1301 USA
 */
 
-#include "RasterCanvas.h"
+#include "ImageCanvas.h"
 #include "ClipPolygon.h"
 #include "LineSlope.h"
 #include "LineEdge.h"
@@ -79,7 +79,7 @@ class EllipseSpan
 };
 
 
-inline void addPoint(int xx, int yy, Pt::Gfx::RasterCanvas::Point** ppt, int** pwidth, 
+inline void addPoint(int xx, int yy, Pt::Gfx::ImageCanvas::Point** ppt, int** pwidth, 
                      int& numSpans, int& ycurr, bool& firstspan, int signdy)
 {
   if( !firstspan && yy == ycurr )
@@ -143,10 +143,10 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// RasterCanvas
+// ImageCanvas
 ///////////////////////////////////////////////////////////////////////
 
-RasterCanvas::RasterCanvas(PaintSurface& surface)
+ImageCanvas::ImageCanvas(PaintSurface& surface)
 : Canvas(surface)
 , _image( ImageFormat::argb32() )
 , _paint(0)
@@ -157,19 +157,19 @@ RasterCanvas::RasterCanvas(PaintSurface& surface)
 }
 
 
-RasterCanvas::~RasterCanvas()
+ImageCanvas::~ImageCanvas()
 {
     delete _text;
 }
 
 
-const Image& RasterCanvas::image() const
+const Image& ImageCanvas::image() const
 {
     return _image;
 }
 
 
-void RasterCanvas::reset(const Gfx::Image& image)
+void ImageCanvas::reset(const Gfx::Image& image)
 {
     if( image.format() != _image.format() )
     {
@@ -187,7 +187,7 @@ void RasterCanvas::reset(const Gfx::Image& image)
 }
 
 
-void RasterCanvas::reset(Pt::ssize_t width, Pt::ssize_t height, 
+void ImageCanvas::reset(Pt::ssize_t width, Pt::ssize_t height, 
                        std::size_t stride)
 {
     _image.reset( _image.format(), width, height, stride );
@@ -197,7 +197,7 @@ void RasterCanvas::reset(Pt::ssize_t width, Pt::ssize_t height,
 }
 
 
-void RasterCanvas::setScaleFactor(double scaleFactor)
+void ImageCanvas::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);
 
@@ -207,37 +207,37 @@ void RasterCanvas::setScaleFactor(double scaleFactor)
 }
 
 
-const Size& RasterCanvas::physicalSize() const
+const Size& ImageCanvas::physicalSize() const
 {
     return _physicalSize;
 }
 
 
-const SizeF& RasterCanvas::logicalSize() const
+const SizeF& ImageCanvas::logicalSize() const
 {
     return _logicalSize;
 }
 
 
-const Gfx::ImageFormat& RasterCanvas::onGetFormat() const
+const Gfx::ImageFormat& ImageCanvas::onGetFormat() const
 {
     return Gfx::ImageFormat::argb32();
 }
 
 
-const Gfx::SizeF& RasterCanvas::onGetSize() const
+const Gfx::SizeF& ImageCanvas::onGetSize() const
 {
     return _logicalSize;
 }
 
 
-const Scaling& RasterCanvas::onGetScaling() const
+const Scaling& ImageCanvas::onGetScaling() const
 {
     return _scaling;
 }
 
 
-bool RasterCanvas::onSetPaint(Gfx::PaintContext* context)
+bool ImageCanvas::onSetPaint(Gfx::PaintContext* context)
 {
     RasterContext* paintContext = dynamic_cast<RasterContext*>(context);
     if( ! paintContext )
@@ -248,7 +248,7 @@ bool RasterCanvas::onSetPaint(Gfx::PaintContext* context)
 }
 
 
-Gfx::PaintContext* RasterCanvas::onCreatePaint()
+Gfx::PaintContext* ImageCanvas::onCreatePaint()
 {
     RasterContext* paintContext = new RasterContext();
     
@@ -257,7 +257,7 @@ Gfx::PaintContext* RasterCanvas::onCreatePaint()
 }
 
 
-void RasterCanvas::onReleasePaint()
+void ImageCanvas::onReleasePaint()
 {
     _paint = 0;
 
@@ -265,7 +265,7 @@ void RasterCanvas::onReleasePaint()
 }
 
 
-void RasterCanvas::onCompositionModeChanged()
+void ImageCanvas::onCompositionModeChanged()
 {
     if( ! _paint )
         return;
@@ -275,7 +275,7 @@ void RasterCanvas::onCompositionModeChanged()
 }
 
 
-void RasterCanvas::onPenChanged()
+void ImageCanvas::onPenChanged()
 {
     if( ! _paint )
         return;
@@ -292,7 +292,7 @@ void RasterCanvas::onPenChanged()
 }
 
 
-void RasterCanvas::onBrushChanged()
+void ImageCanvas::onBrushChanged()
 {
     if( ! _paint )
         return;
@@ -337,7 +337,7 @@ void RasterCanvas::onBrushChanged()
 }
 
 
-void RasterCanvas::onFontChanged()
+void ImageCanvas::onFontChanged()
 {
     if( ! _paint )
         return;
@@ -349,7 +349,7 @@ void RasterCanvas::onFontChanged()
 }
 
 
-void RasterCanvas::onClipChanged()
+void ImageCanvas::onClipChanged()
 {
     if( ! _paint )
         return;
@@ -371,7 +371,7 @@ void RasterCanvas::onClipChanged()
 }
 
 
-void RasterCanvas::onDrawLine(const PointF& from, const  PointF& to)
+void ImageCanvas::onDrawLine(const PointF& from, const  PointF& to)
 {
     Point points[2];
 
@@ -386,7 +386,7 @@ void RasterCanvas::onDrawLine(const PointF& from, const  PointF& to)
 }
 
 
-void RasterCanvas::onDrawPolyline(const Gfx::Polyline& line)
+void ImageCanvas::onDrawPolyline(const Gfx::Polyline& line)
 {
     std::size_t n = line.size();
     std::vector<Point> points(n);
@@ -404,7 +404,7 @@ void RasterCanvas::onDrawPolyline(const Gfx::Polyline& line)
 }
 
 
-void RasterCanvas::onFillPolygon(const Gfx::Polyline& line)
+void ImageCanvas::onFillPolygon(const Gfx::Polyline& line)
 {
     std::size_t n = line.size();
     std::vector<Point> points(n);
@@ -422,7 +422,7 @@ void RasterCanvas::onFillPolygon(const Gfx::Polyline& line)
 }
 
 
-void RasterCanvas::onDrawRect(const RectF& r)
+void ImageCanvas::onDrawRect(const RectF& r)
 {
     RectF rect(r.left() - 0.5,
                r.right() - 0.5,
@@ -441,7 +441,7 @@ void RasterCanvas::onDrawRect(const RectF& r)
 }
 
 
-void RasterCanvas::onFillRect(const RectF& r)
+void ImageCanvas::onFillRect(const RectF& r)
 {
     Rect rect(Pt::lround(r.left()),
               Pt::lround(r.right()),
@@ -453,7 +453,7 @@ void RasterCanvas::onFillRect(const RectF& r)
 }
 
 
-void RasterCanvas::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
+void ImageCanvas::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
     Point topLeft(Pt::lround(topLeftF.x() - 0.5),
                   Pt::lround(topLeftF.y() - 0.5));
@@ -466,7 +466,7 @@ void RasterCanvas::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-void RasterCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
+void ImageCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
     Point topLeft = round(topLeftF);
     Size size = round(sizeF);
@@ -476,13 +476,13 @@ void RasterCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-FontMetrics RasterCanvas::onGetFontMetrics(const String& text) const
+FontMetrics ImageCanvas::onGetFontMetrics(const String& text) const
 {
     return _text->fontMetrics(text);
 }
 
 
-void RasterCanvas::onDrawText(const PointF& toF, const Pt::String& text, 
+void ImageCanvas::onDrawText(const PointF& toF, const Pt::String& text, 
                               const Transform* xform)
 {
     Point to( round(toF) );
@@ -497,7 +497,7 @@ void RasterCanvas::onDrawText(const PointF& toF, const Pt::String& text,
 }
 
 
-void RasterCanvas::onDrawImage(const PointF& toF, const Image& image, 
+void ImageCanvas::onDrawImage(const PointF& toF, const Image& image, 
                                const RectF* imageRect)
 {
     Gfx::PointF toP = scaling().toPhysical(toF);
@@ -510,7 +510,7 @@ void RasterCanvas::onDrawImage(const PointF& toF, const Image& image,
 }
 
 
-bool RasterCanvas::onDrawLayer(const Gfx::PointF& to,
+bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
                                const Gfx::PaintLayer& layer,
                                const Gfx::RectF* rect)
 {
@@ -537,31 +537,31 @@ bool RasterCanvas::onDrawLayer(const Gfx::PointF& to,
 }
 
 
-void RasterCanvas::setFontDir(const Pt::System::Path& path)
+void ImageCanvas::setFontDir(const Pt::System::Path& path)
 {
     FreeType::instance().setFontDir(path);
 }
 
 
-const std::string& RasterCanvas::defaultFont()
+const std::string& ImageCanvas::defaultFont()
 {
     return  FreeType::instance().defaultFont();
 }
 
 
-void RasterCanvas::setDefaultFont(const std::string& f)
+void ImageCanvas::setDefaultFont(const std::string& f)
 {
     FreeType::instance().setDefaultFont(f);
 }
 
 
-std::vector<std::string> RasterCanvas::fontNames()
+std::vector<std::string> ImageCanvas::fontNames()
 {
     return FreeType::instance().fontNames();
 }
 
 
-void RasterCanvas::strokeEllipse(const Point& topLeft, const Size& size, 
+void ImageCanvas::strokeEllipse(const Point& topLeft, const Size& size, 
                                const Rect& currentClip)
 {
     if( size.width() <= 1 || size.height() <= 1 )
@@ -638,7 +638,7 @@ void RasterCanvas::strokeEllipse(const Point& topLeft, const Size& size,
 }
 
 
-void RasterCanvas::drawWideDashPolyline( const Point* pPts, int npt,
+void ImageCanvas::drawWideDashPolyline( const Point* pPts, int npt,
                                        int dashOn, int dashOff, const Rect& currentClip)
 {
     int	      x1, y1, x2, y2;
@@ -808,7 +808,7 @@ void RasterCanvas::drawWideDashPolyline( const Point* pPts, int npt,
 }
 
 
-void RasterCanvas::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
+void ImageCanvas::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
                                bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const Rect& currentClip)
 {
   int		            dashNum, dashIndex, dashRemain;
@@ -1208,7 +1208,7 @@ void RasterCanvas::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset
 }
 
 
-void RasterCanvas::drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const Rect& currentClip)
+void ImageCanvas::drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const Rect& currentClip)
 {
     double	 l, L, r;
     double	 xa, ya;
@@ -1423,7 +1423,7 @@ void RasterCanvas::drawSegment( Point from, Point to, bool projectLeft, bool pro
 }
 
 
-void RasterCanvas::drawWideSolidPolyline( const  Point* pPts, int npt, const Rect& currentClip)
+void ImageCanvas::drawWideSolidPolyline( const  Point* pPts, int npt, const Rect& currentClip)
 {
   int		   x1, y1, x2, y2;
     bool	   projectLeft, projectRight;
@@ -1529,7 +1529,7 @@ void RasterCanvas::drawWideSolidPolyline( const  Point* pPts, int npt, const Rec
 }
 
 
-void RasterCanvas::stepDash( int dist, int* pDashNum, int* pDashIndex, 
+void ImageCanvas::stepDash( int dist, int* pDashNum, int* pDashIndex, 
                            const int* pDash, int numInDashList, int *pDashOffset )
 {
     int	dashNum, dashIndex, dashOffset;
@@ -1582,7 +1582,7 @@ void RasterCanvas::stepDash( int dist, int* pDashNum, int* pDashIndex,
 }
 
 
-void RasterCanvas::stroke(const Point* points,  size_t n, const Rect& currentClip)
+void ImageCanvas::stroke(const Point* points,  size_t n, const Rect& currentClip)
 {
   switch( _pen.style() )
   {
@@ -1611,7 +1611,7 @@ void RasterCanvas::stroke(const Point* points,  size_t n, const Rect& currentCli
 }
 
 
-void RasterCanvas::drawThinDashPolyline(const Point* points,  int pointCount,
+void ImageCanvas::drawThinDashPolyline(const Point* points,  int pointCount,
                                       int dashOn, int dashOff, const Rect& currentClip)
 {
     const Point* ppt = points;
@@ -1718,7 +1718,7 @@ void RasterCanvas::drawThinDashPolyline(const Point* points,  int pointCount,
 
 // Internal: draw dashed Bresenham line segment. Called by miZeroDash().
 // Endpoint semantics are used.
-void RasterCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const int *pDash, int numInDashList, int *pdashOffset, 
+void ImageCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const int *pDash, int numInDashList, int *pdashOffset, 
                                            bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1,
                                            int e, int e1, int e2, int len, const Rect& currentClip)
 {
@@ -1994,7 +1994,7 @@ void RasterCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, con
     *pdashOffset = (int)(pDash[dashIndex]) - dashRemaining;
 }
 
-void RasterCanvas::drawThinSolidPolyline( const Point* points,  int pointCount, const Rect& currentClip)
+void ImageCanvas::drawThinSolidPolyline( const Point* points,  int pointCount, const Rect& currentClip)
 {
     const Point *ppt;
 
@@ -2110,7 +2110,7 @@ void RasterCanvas::drawThinSolidPolyline( const Point* points,  int pointCount, 
 */
 }
 
-void RasterCanvas::bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1,
+void ImageCanvas::bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1,
                                        int e, int e1, int e2, int len, const Rect& currentClip)
 {
     if (len == 0)
@@ -2200,14 +2200,14 @@ void RasterCanvas::bresenhamLineSegment( int signdx, int signdy, int axis, int x
 }
 
 
-void RasterCanvas::stroke( const Point& pixel, const Rect& currentClip)
+void ImageCanvas::stroke( const Point& pixel, const Rect& currentClip)
 {
   stroke( (int) pixel.x(),(int) pixel.y(), currentClip );
 }
 
 
 
-void RasterCanvas::fillTexture(const Point& origin, const Point& pos,  int length )
+void ImageCanvas::fillTexture(const Point& origin, const Point& pos,  int length )
 {
     const Image& texture = *_brushImage;
     int xpos = pos.x();
@@ -2242,7 +2242,7 @@ void RasterCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
 }
 
 
-void RasterCanvas::clipSpan( int& xpos, int& ypos, int& length, const Rect& clip)
+void ImageCanvas::clipSpan( int& xpos, int& ypos, int& length, const Rect& clip)
 {
 
   if( ypos < clip.y() )
@@ -2274,7 +2274,7 @@ void RasterCanvas::clipSpan( int& xpos, int& ypos, int& length, const Rect& clip
 }
 
 
-//void RasterCanvas::createGradientTexture(Image& texture, int width, int height,
+//void ImageCanvas::createGradientTexture(Image& texture, int width, int height,
 //                                       Pt::Gfx::Color gradientStart, 
 //                                       Pt::Gfx::Color gradientStop, 
 //                                       Pt::Gfx::Brush::GradientDirection style)
@@ -2310,18 +2310,18 @@ void RasterCanvas::clipSpan( int& xpos, int& ypos, int& length, const Rect& clip
 //    }
 //}
 
-void RasterCanvas::fillVerticalGradient( const Point& origin, const Point& pos,  int length )
+void ImageCanvas::fillVerticalGradient( const Point& origin, const Point& pos,  int length )
 {
     fillTexture(origin, pos, length);
 }
 
-void RasterCanvas::fillHorizontalGradient( const Point& origin, const Point& pos,  int length )
+void ImageCanvas::fillHorizontalGradient( const Point& origin, const Point& pos,  int length )
 {
     fillTexture(origin, pos, length);
 }
 
 
-void RasterCanvas::fillSolid(const Point& pos, int length)
+void ImageCanvas::fillSolid(const Point& pos, int length)
 {
     int xpos = pos.x();
     int ypos = pos.y();
@@ -2347,7 +2347,7 @@ void RasterCanvas::fillSolid(const Point& pos, int length)
 }
 
 
-void RasterCanvas::fill(const Point& origin, const Point& pos, int length)
+void ImageCanvas::fill(const Point& origin, const Point& pos, int length)
 {
   switch( _brush.fillStyle() )
   {
@@ -2370,7 +2370,7 @@ void RasterCanvas::fill(const Point& origin, const Point& pos, int length)
 }
 
 
-void RasterCanvas::clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft )
+void ImageCanvas::clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft )
 {
   if (ybase != edgey)
       return;
@@ -2398,7 +2398,7 @@ void RasterCanvas::clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  Lin
 }
 
 
-int RasterCanvas::polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h)
+int ImageCanvas::polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h)
 {
     int	    top, bottom;
     double  miny, maxy;
@@ -2517,7 +2517,7 @@ int RasterCanvas::polyBuildPoly( const Point *vertices, const LineSlope *slopes,
 }
 
 
-int RasterCanvas::buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge )
+int ImageCanvas::buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge )
 {
     int x, y, e;
     int xady;
@@ -2580,7 +2580,7 @@ int RasterCanvas::buildLineEdge( double x0, double y0, double k, int dx, int dy,
 }
 
 
-void RasterCanvas::fillSpans(int x, int y,  int w,  int h, const Rect& currentClip)
+void ImageCanvas::fillSpans(int x, int y,  int w,  int h, const Rect& currentClip)
 {
     int ypos = std::max( 0, y );
     int yend = 0;
@@ -2593,7 +2593,7 @@ void RasterCanvas::fillSpans(int x, int y,  int w,  int h, const Rect& currentCl
 }
 
 
-void RasterCanvas::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const Rect& currentClip)
+void ImageCanvas::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const Rect& currentClip)
 {
     int left_x		= 0;
     int left_e		= 0;
@@ -2688,7 +2688,7 @@ void RasterCanvas::fillLine(int y,  int overall_height, LineEdge *left, LineEdge
 
 /* From two line faces, construct clipping edges that will be used by
    miLineArcD when drawing a pie wedge.  The line faces may be modified. */
-void RasterCanvas::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2)
+void ImageCanvas::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2)
 {
     int	denom;
 
@@ -2711,7 +2711,7 @@ void RasterCanvas::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *e
 
 
 
-void RasterCanvas::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const Rect& currentClip)
+void ImageCanvas::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const Rect& currentClip)
 {
     std::vector<Point>    points;
     std::vector<int>   widths;
@@ -2782,7 +2782,7 @@ void RasterCanvas::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg
 }
 
 
-int RasterCanvas::lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths )
+int ImageCanvas::lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths )
 {
     Point *tpts, *bpts;
     int* twids, *bwids;
@@ -2854,7 +2854,7 @@ int RasterCanvas::lineArcI( int xorg, int yorg, std::vector<Point>& points, std:
    round joins, respectively (it respectively yields a half-disk or a pie
    wedge).  Floating point coordinates are used.  Returns number of spans
    in the Spans.  The clipping edges may be modified. */
-int RasterCanvas::lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
+int ImageCanvas::lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
 {
     Point *pts;
     int *wids;
@@ -3040,7 +3040,7 @@ int RasterCanvas::lineArcD( double xorg, double yorg, std::vector<Point>& points
 
 /* From a line face, construct a clipping edge that will be used by
    miLineArcD when drawing a half-disk.  */
-int RasterCanvas::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge )
+int ImageCanvas::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge )
 {
     int	    y;
     int 	dx, dy;
@@ -3093,7 +3093,7 @@ int RasterCanvas::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge
 }
 
 /* helper function called by the preceding */
-int RasterCanvas::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge )
+int ImageCanvas::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge )
 {
     int	    y;
     int	    dx, dy;
@@ -3148,7 +3148,7 @@ int RasterCanvas::roundJoinFace( const LineFace *face, LineEdge *edge, bool *lef
 /* Paint all types of line join: round/miter/bevel/triangular.  Called by
    both miWideLine() and miWideDash().  Left and right line faces are
    supplied, each with its own value of k.  They may be modified. */
-void RasterCanvas::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& currentClip)
+void ImageCanvas::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& currentClip)
 {
     double	            mx = 0.0, my = 0.0;
     int		            denom = 0;
@@ -3370,7 +3370,7 @@ void RasterCanvas::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& cur
 
 /* Paint a projecting rectangular cap on a line face.  Called only by
    miWideDash (with isInt = true); not by miWideLine. */
-void RasterCanvas::lineProjectingCap( const LineFace *face, bool isLeft, bool isInt, const Rect& currentClip)
+void ImageCanvas::lineProjectingCap( const LineFace *face, bool isLeft, bool isInt, const Rect& currentClip)
 {
     int		    xorgi = 0, yorgi = 0;
     int	       	lw;
@@ -3546,7 +3546,7 @@ void RasterCanvas::lineProjectingCap( const LineFace *face, bool isLeft, bool is
 }
 
 
-void RasterCanvas::updateGradientBrush(int width, int height)
+void ImageCanvas::updateGradientBrush(int width, int height)
 {
     Color gradientStart = _brush.color();
     Color gradientStop = _brush.gradientColor();
@@ -3593,7 +3593,7 @@ void RasterCanvas::updateGradientBrush(int width, int height)
 }
 
 
-void RasterCanvas::fillRect(const Rect& rectIn, const Rect& currentClip)
+void ImageCanvas::fillRect(const Rect& rectIn, const Rect& currentClip)
 {
     Rect rect = currentClip.intersect( rectIn );
 
@@ -3615,7 +3615,7 @@ void RasterCanvas::fillRect(const Rect& rectIn, const Rect& currentClip)
 }
 
 
-void RasterCanvas::fill(const Point* pts, size_t pointCount, const Rect& currentClip)
+void ImageCanvas::fill(const Point* pts, size_t pointCount, const Rect& currentClip)
 {
     EdgeSet           globalEdgeTable;
     ActiveEdgeTable   activeEdgeTable;
@@ -3768,7 +3768,7 @@ void RasterCanvas::fill(const Point* pts, size_t pointCount, const Rect& current
 }
 
 
-void RasterCanvas::outputEdges(const ActiveEdgeTable& edges, const Point&  origin, int scanLine)
+void ImageCanvas::outputEdges(const ActiveEdgeTable& edges, const Point&  origin, int scanLine)
 {
     // fill every even span, starting at even (even-odd-rule)
     for( size_t i = 1; i < edges.size(); i += 2 )
@@ -3782,7 +3782,7 @@ void RasterCanvas::outputEdges(const ActiveEdgeTable& edges, const Point&  origi
 }
 
 
-void RasterCanvas::outputSpan( const Point& topLeft, int x, int y, int width )
+void ImageCanvas::outputSpan( const Point& topLeft, int x, int y, int width )
 {
     const int imageWidth = static_cast<int>( _image.width() );
     const int imageHeight = static_cast<int>( _image.height() );
@@ -3801,7 +3801,7 @@ void RasterCanvas::outputSpan( const Point& topLeft, int x, int y, int width )
 }
 
 
-void RasterCanvas::fillEllipse( const Point& topLeftIn, const Size& size, const Rect& currentClip)
+void ImageCanvas::fillEllipse( const Point& topLeftIn, const Size& size, const Rect& currentClip)
 {
     const Point topLeft( (int) topLeftIn.x(), (int) topLeftIn.y() );
 
@@ -3891,7 +3891,7 @@ void RasterCanvas::fillEllipse( const Point& topLeftIn, const Size& size, const 
 }
 
 
-void RasterCanvas::putImage( const Point& to, const Image& img)
+void ImageCanvas::putImage( const Point& to, const Image& img)
 {
     Rect imageRect;
     imageRect.setWidth( img.width() );
@@ -3901,7 +3901,7 @@ void RasterCanvas::putImage( const Point& to, const Image& img)
 }
 
 
-//void RasterCanvas::putImage(const Point& to, const Image& from, const Rect& fromRect)
+//void ImageCanvas::putImage(const Point& to, const Image& from, const Rect& fromRect)
 //{
 //  // clip fromRect to fit into the clip/image rect
 //  const Rect currentClip = updateClip();
@@ -3922,7 +3922,7 @@ void RasterCanvas::putImage( const Point& to, const Image& img)
 //}
 
 
-void RasterCanvas::putImage(const Point& to, const Image& image, const Rect& imageRect)
+void ImageCanvas::putImage(const Point& to, const Image& image, const Rect& imageRect)
 {
   Rect currentClip = updateClip();
  
@@ -3952,7 +3952,7 @@ void RasterCanvas::putImage(const Point& to, const Image& image, const Rect& ima
 }
 
 
-void RasterCanvas::stroke(int x, int y, const Rect& clip)
+void ImageCanvas::stroke(int x, int y, const Rect& clip)
 {
     if( x < clip.x() || x >= clip.right() ||
         y < clip.y() || y >= clip.bottom())
@@ -3963,7 +3963,7 @@ void RasterCanvas::stroke(int x, int y, const Rect& clip)
 }
 
 
-void RasterCanvas::stroke(int xpos, int ypos, int length, const Rect& currentClip)
+void ImageCanvas::stroke(int xpos, int ypos, int length, const Rect& currentClip)
 {
     clipSpan(xpos, ypos, length, currentClip);
 
