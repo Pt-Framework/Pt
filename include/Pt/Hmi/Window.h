@@ -89,7 +89,7 @@ class PT_HMI_API Window : public Form
         const WindowFrame* frame() const; 
 
     public:
-        Gfx::Image getImage() const;
+        void getImage(Gfx::ImageSurface& imageSurface) const;
 
     public:
         bool isAutoSize() const;

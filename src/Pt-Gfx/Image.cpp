@@ -95,8 +95,8 @@ const Image& Image::operator=(const Image& image)
 }
 
 
-void Image::reset(const ImageFormat& f,
-                  Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
+void Image::reset(const ImageFormat& f, Pt::ssize_t width, Pt::ssize_t height, 
+                  Pt::ssize_t padding)
 {
     Pt::ssize_t n = f.imageSize(width, height, padding);
     _buffer.resize(n);

@@ -62,7 +62,7 @@ class WindowFrame : public Visual
 
         const Pixmap& pixmap() const;
 
-        void getImage(Gfx::Image& image);
+        void getImage(Gfx::ImageSurface& image);
 
     protected:
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);

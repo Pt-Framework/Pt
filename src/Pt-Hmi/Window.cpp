@@ -149,29 +149,10 @@ const WindowFrame* Window::frame() const
 }
 
 
-Gfx::Image Window::getImage() const
+void Window::getImage(Gfx::ImageSurface& imageSurface) const
 {
-    //const Gfx::Scaling& scaling = surface().info().scaling();
-    //Gfx::SizeF imageSize = scaling.toPhysical( size() );
-    //Gfx::ImageSurface imageSurface;
-    //imageSurface.resize(imageSize);
-
-    //Gfx::Painter painter(imageSurface);
-
-    ////painter.drawLayer( Gfx::PointF(0, 0), surface() );
-
-    //Gfx::PointF framePos = toParent( Gfx::PointF(0, 0) );
-    //Gfx::RectF frameRect( framePos, size() );
-    //painter.drawLayer( Gfx::PointF(0, 0), _frame->pixmap(), frameRect );
-    //
-    //return imageSurface.image();
-
-    Gfx::Image image;
-
     if(_frame)
-        _frame->getImage(image);
-
-    return image;
+        _frame->getImage(imageSurface);
 }
 
 
