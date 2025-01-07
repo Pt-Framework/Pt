@@ -68,7 +68,7 @@ class ViewCanvas : public Gfx::CanvasBase
         }
 
     protected:
-        virtual const Gfx::ImageFormat& ViewCanvas::onGetFormat() const
+        virtual const Gfx::ImageFormat& onGetFormat() const
         {
             if (_surface)
             {
@@ -80,17 +80,17 @@ class ViewCanvas : public Gfx::CanvasBase
             return Gfx::ImageFormat::argb32();
         }
 
-        virtual const Gfx::SizeF& ViewCanvas::onGetSize() const
+        virtual const Gfx::SizeF& onGetSize() const
         {
             return _view->size();
         }
 
-        virtual const Gfx::Scaling& ViewCanvas::onGetScaling() const
+        virtual const Gfx::Scaling& onGetScaling() const
         {
             return _view->scaling();
         }
 
-        virtual Gfx::PaintContext* ViewCanvas::onGetPaint(Gfx::PaintContext* context)
+        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context)
         {
             Gfx::PaintContext* paintContext = _surface ? _surface->getPaint(context)
                                                        : 0;

@@ -50,7 +50,9 @@ class ActiveEdgeTable;
 class Rasterizer
 {
   public:
-    typedef BasicRect<int> Rect;
+    typedef BasicPoint<Pt::ssize_t> Point;
+    typedef BasicSize<Pt::ssize_t> Size;
+    typedef BasicRect<Pt::ssize_t> Rect;
 
   public:
     Rasterizer();
@@ -247,27 +249,27 @@ class Rasterizer
 
     Rect round(const RectF& r)
     {
-      BasicPoint<int> pos( lround(r.x()),
-                           lround(r.y()) );
+      Point pos( lround(r.x()),
+                 lround(r.y()) );
       
-      BasicSize<int> size( lround(r.width()),
-                           lround(r.height()) );
+      Size size( lround(r.width()),
+                 lround(r.height()) );
       
       return Rect(pos, size);
     }
     
     Point round(const PointF& p)
     {
-      BasicPoint<int> pos( lround(p.x()),
-                           lround(p.y()) );
+      Point pos( lround(p.x()),
+                 lround(p.y()) );
            
       return pos;
     }
 
     Size round(const SizeF& s)
     {
-      BasicSize<int> size( lround(s.width()),
-                           lround(s.height()) );
+      Size size( lround(s.width()),
+                 lround(s.height()) );
       
       return size;
     }

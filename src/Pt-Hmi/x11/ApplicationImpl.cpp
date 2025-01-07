@@ -30,10 +30,10 @@
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
 #include "WindowImpl.h"
-#include "PixmapSurfaceImpl.h"
+#include "PixmapImpl.h"
 #include "KeyHandler.h"
 
-#ifndef _AIX
+#ifdef PT_HMI_X11_CORE
 #include <X11/Xft/Xft.h>
 #endif
 
@@ -113,12 +113,12 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
 void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 {
-    PixmapSurfaceImpl::setFontDir(dir);
+    PixmapImpl::setFontDir(dir);
 }
 
 void ApplicationImpl::setDefaultFont(const std::string& fname)
 {
-    PixmapSurfaceImpl::setDefaultFont(fname);
+    PixmapImpl::setDefaultFont(fname);
 }
 
 
@@ -319,7 +319,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
 
 #ifdef PT_HMI_X11_RASTER
     WindowImpl* windowImpl = static_cast<WindowImpl*>( window.frame() );
-    const Gfx::Image& image = windowImpl->surface().impl()->imageSurface().image();
+    const Gfx::Image& image = windowImpl->pixmap().impl()->toImage();
     char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
 
     //std::clog << "  EXPOSE " << window.title() << " "
@@ -565,7 +565,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         //                          << window.title() << " " 
         //                          << width << "x" << height << std::endl;
         Gfx::SizeF to(width, height);
-        to = window.surface().scaling().toLogical(to);
+        to = window.scaling().toLogical(to);
     
         ResizeEvent rev(*window.frame(), to);
         Application::instance().processEvent(rev);
@@ -574,7 +574,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         window.repaint(updateRect);
     }
 
-    Gfx::PointF currentPos = window.surface().scaling().toPhysical( window.position() );
+    Gfx::PointF currentPos = window.scaling().toPhysical( window.position() );
 
     if( x != currentPos.x() || y != currentPos.y() )
     {
@@ -583,7 +583,7 @@ void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
         //                        << window.title() << " " 
         //                        << x << "," << y << std::endl;
         Gfx::PointF to(x, y);
-        to = window.surface().scaling().toLogical(to);
+        to = window.scaling().toLogical(to);
 
         MoveEvent ev(*window.frame(), to);
         Application::instance().processEvent(ev);

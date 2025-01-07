@@ -44,32 +44,33 @@ namespace Pt {
 
 namespace Hmi {
 
-class PixmapSurface;
+class Pixmap;
 
-class PixmapSurfaceImpl 
+class PixmapImpl 
 {
     public:
-        PixmapSurfaceImpl();
+        PixmapImpl()
+        { }
 
         void reset(const Gfx::Size& size, std::size_t stride)
         {
             _image.reset(size, stride);
         }
 
-        void clear(const Gfx::Color& c)
-        { }
-
         void set(const Gfx::Image& image)
         {
             _image.reset(image);
         }
 
-        const Gfx::Image& image() const
+        const Gfx::Image& toImage() const
         {
             return _image.image();
         }
 
-        const Gfx::SizeF& pixmapSize() const
+        void clear(const Gfx::Color& c)
+        { }
+
+        const Gfx::SizeF& size() const
         {
             return _image.size();
         }
@@ -84,34 +85,18 @@ class PixmapSurfaceImpl
             _image.setScaleFactor(scaleFactor);
         }
 
-        const Gfx::PaintInfo& info() const
+        Gfx::PaintSurface* surface()
         {
-            return _image.info();
+            return _image.surface();
         }
 
-        Gfx::Canvas* getCanvas()
+        void draw(Gfx::PaintSurface& surface, 
+                  const Gfx::Paint& paint,
+                  const Gfx::PointF& to,
+                  const Gfx::RectF* rect) const
         {
-            return _image.canvas();
+            _image.draw(surface, paint, to, rect);
         }
-
-        const Gfx::Canvas* getCanvas() const
-        {
-            return _image.canvas();
-        }
-
-        Gfx::PaintContext* getPaint(Gfx::PaintContext* context)
-        {
-            return _image.getPaint(context);
-        }
-
-        void drawPixmap(const Gfx::PointF& toF, 
-                        const PixmapSurface& surface,
-                        const Gfx::CompositionMode& mode);
-
-        void drawPixmap(const Gfx::PointF& toF, 
-                        const PixmapSurface& surface, 
-                        const Gfx::RectF& rect,
-                        const Gfx::CompositionMode& mode);
 
         static const std::string& defaultFont()
         {
@@ -134,7 +119,7 @@ class PixmapSurfaceImpl
         }
     
     private:
-        Gfx::ImageSurface _image;
+        Gfx::ImageLayer _image;
 };
 
 } // namespace

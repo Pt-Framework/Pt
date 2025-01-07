@@ -28,8 +28,8 @@
 
 #include "WindowImpl.h"
 #include "ApplicationImpl.h"
+#include "PixmapImpl.h"
 #include "ScreenImpl.h"
-#include "PixmapSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
@@ -160,9 +160,9 @@ void WindowImpl::destroy()
 
 void WindowImpl::onInit(Window& w)
 {
-    Gfx::PaintSurface& surface = this->surface();
+    Gfx::PaintSurface* surface = pixmap().surface();
     Gfx::PointF surfacePos(0, 0);
-    w.setSurface(&surface, surfacePos);
+    w.setSurface(surface, surfacePos);
 
     w.setNextResponder(this);
 
@@ -202,7 +202,7 @@ void WindowImpl::setType(WindowType type)
 
 Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
-    Gfx::PointF physicalPos = surface().scaling().toPhysical(pos);
+    Gfx::PointF physicalPos = scaling().toPhysical(pos);
 
     ::Window root = DefaultRootWindow(_display);
     int windowX = lround( physicalPos.x() );
@@ -215,14 +215,14 @@ Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
                           windowX, windowY, &screenX, &screenY, &child);
 
     Gfx::PointF screenPos(screenX, screenY);
-    Gfx::PointF logicalPos = surface().scaling().toLogical(screenPos);
+    Gfx::PointF logicalPos = scaling().toLogical(screenPos);
     return logicalPos;
 }
 
 
 Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
 {
-    Gfx::PointF physicalPos = surface().scaling().toPhysical(pos);
+    Gfx::PointF physicalPos = scaling().toPhysical(pos);
 
     ::Window root = DefaultRootWindow(_display);
     int screenX = lround( physicalPos.x() );
@@ -235,7 +235,7 @@ Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
                           screenX, screenY, &windowX, &windowY, &child);
 
     Gfx::PointF clientPos(windowX, windowY);
-    Gfx::PointF logicalPos = surface().scaling().toLogical(clientPos);
+    Gfx::PointF logicalPos = scaling().toLogical(clientPos);
     return logicalPos;
 }
 
@@ -268,7 +268,11 @@ Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
 
 void WindowImpl::paint(const Gfx::RectF& rectF)
 {
-    Gfx::Rect rect = Gfx::round(rectF);
+    Gfx::Rect rect(Pt::lround(rectF.left()),
+                   Pt::lround(rectF.right()),
+                   Pt::lround(rectF.top()),
+                   Pt::lround(rectF.bottom()));
+    
     if( rect.isNull() )
       return;
 
@@ -520,9 +524,9 @@ void WindowImpl::onEnableEvent(const EnableEvent& ev)
 
 void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
-    Gfx::PointF aligedPos = w.surface().scaling().align(pos);
+    Gfx::PointF aligedPos = w.scaling().align(pos);
 
-    Gfx::PointF p = w.surface().scaling().toPhysical(aligedPos);
+    Gfx::PointF p = w.scaling().toPhysical(aligedPos);
 
     //std::clog  << "XMoveWindow: " << pos.x() << ", " << pos.y() << std::endl;
     XMoveWindow(_display, _window, p.x(), p.y());
@@ -567,7 +571,7 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
     //std::clog  << "XResizeWindow: " << s.width() << "x" << s.height() << std::endl;
 
-    Gfx::SizeF alignedSize = surface().scaling().align(s);
+    Gfx::SizeF alignedSize = scaling().align(s);
 
     //
     // maximum width and height
@@ -584,7 +588,7 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     if( alignedSize.height() < w.minimumSize().height() )
         alignedSize.setHeight( w.minimumSize().height() );
 
-    Gfx::SizeF psize = w.surface().scaling().toPhysical(alignedSize);
+    Gfx::SizeF psize = w.scaling().toPhysical(alignedSize);
     Gfx::Size size = round(psize);
 
     XResizeWindow( _display, _window, size.width(), size.height() );
