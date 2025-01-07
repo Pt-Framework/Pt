@@ -43,63 +43,10 @@ namespace Pt {
 
 namespace Gfx {
 
+class RasterContext;
 class Rasterizer;
 class ImageSurface;
 class ImageCanvas;
-
-/** @internal.
-*/
-class ImageContext : public PaintContext
-{
-    public:
-        ImageContext();
-
-        ~ImageContext();
-
-        const CompositionMode& compositionMode() const
-        {
-            return _compositionMode;
-        }
-
-        const Pen& pen() const
-        {
-            return _pen;
-        }
-
-        const Brush& brush() const
-        {
-            return _brush;
-        }
-
-        const Font& font() const
-        {
-            return _font;
-        }
-
-        const RectF* clip() const
-        {
-            return _hasClip ? &_clip : 0;
-        }
-
-    protected:
-        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
-
-        virtual void onSetPen(const Gfx::Pen& pen) override;
-
-        virtual void onSetBrush(const Gfx::Brush& brush) override;
-
-        virtual void onSetFont(const Gfx::Font& font) override;
-
-        virtual void onSetClip(const Gfx::RectF* clip) override;
-   
-    private:
-        CompositionMode _compositionMode;
-        Pen             _pen;
-        Brush           _brush;
-        Font            _font;
-        RectF           _clip;
-        bool            _hasClip;
-};
 
 /** @internal.
 */
@@ -201,7 +148,7 @@ protected:
 
   private:
     Rasterizer*    _rasterizer;
-    ImageContext*  _paint;
+    RasterContext* _paint;
 
     Gfx::SizeF     _physicalSize;
     Gfx::SizeF     _logicalSize;

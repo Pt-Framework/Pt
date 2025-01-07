@@ -47,63 +47,6 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// ImageContext
-///////////////////////////////////////////////////////////////////////
-
-ImageContext::ImageContext()
-: PaintContext()
-, _hasClip(false)
-{
-}
-
-
-ImageContext::~ImageContext()
-{
-}
-
-
-void ImageContext::onSetCompositionMode(const Gfx::CompositionMode& mode) 
-{
-    _compositionMode = mode;
-}
-
-
-void ImageContext::onSetPen(const Gfx::Pen& pen)
-{
-    double scaleFactor = scaling().scaleFactor();
-
-    // keep pen size when downscaling
-    size_t penSize = scaleFactor < 1.0 ? pen.size() 
-                                       : static_cast<size_t>( pen.size() * scaleFactor );
-
-    _pen = pen;
-    _pen.setSize(penSize);
-}
-
-
-void ImageContext::onSetBrush(const Gfx::Brush& brush)
-{
-    _brush = brush;
-}
-
-
-void ImageContext::onSetFont(const Gfx::Font& font)
-{
-    _font = font;
-}
-
-
-void ImageContext::onSetClip(const Gfx::RectF* clip)
-{
-    _hasClip = clip != 0;
-
-    if(clip)
-        _clip = *clip;
-    else
-        _clip.clear();
-}
-
-///////////////////////////////////////////////////////////////////////
 // ImageCanvas
 ///////////////////////////////////////////////////////////////////////
 
@@ -192,7 +135,7 @@ const Scaling& ImageCanvas::onGetScaling() const
 
 bool ImageCanvas::onSetPaint(Gfx::PaintContext* context)
 {
-    ImageContext* paintContext = dynamic_cast<ImageContext*>(context);
+    RasterContext* paintContext = dynamic_cast<RasterContext*>(context);
     if( ! paintContext )
         return false;
 
@@ -203,7 +146,7 @@ bool ImageCanvas::onSetPaint(Gfx::PaintContext* context)
 
 Gfx::PaintContext* ImageCanvas::onCreatePaint()
 {
-    ImageContext* paintContext = new ImageContext();
+    RasterContext* paintContext = new RasterContext();
     
     _paint = paintContext;
     return paintContext;
