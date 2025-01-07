@@ -32,11 +32,11 @@
 
 #include "RasterContext.h"
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Algorithm.h>
-#include <Pt/String.h>
+#include <Pt/Gfx/Canvas.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/System/Path.h>
+#include <Pt/String.h>
+#include <Pt/Math.h>
 
 namespace Pt {
 
@@ -46,10 +46,9 @@ class LineSlope;
 class LineEdge;
 class LineFace;
 class DrawText;
-class Image;
 class ActiveEdgeTable;
 
-class Rasterizer
+class Rasterizer : public Canvas
 {
   public:
     typedef ImageView::Point Point;
@@ -57,88 +56,98 @@ class Rasterizer
     typedef ImageView::Rect Rect;
 
   public:
-    Rasterizer();
+    Rasterizer(PaintSurface& surface);
 
     ~Rasterizer();
 
-    const Image& image() const
-    {
-        return _image;
-    }
+    const Image& image() const;
 
-    const ImageFormat& format() const;
-
-    void reset(const Gfx::Image& image)
-    {
-        if( image.format() == _image.format() )
-        {
-          _image = image;
-          return;
-        }
-
-        _image.reset( format(), image.width(), image.height() );
-        Pt::Gfx::copy( image.begin(), image.end(), _image.begin() );
-    }
-
-    void reset(const Gfx::Size& size, std::size_t stride)
-    {
-        _image.reset( _image.format(), size.width(), size.height(), stride );
-    }
+    void reset(const Gfx::Image& image);
 
     void reset(Pt::ssize_t width, Pt::ssize_t height, 
-               std::size_t stride)
-    {
-        _image.reset( _image.format(), width, height, stride );
-    }
+               std::size_t stride);
 
-    void setClip(const RectF& clip);
+    void setScaleFactor(double scaleFactor);
 
-    void resetClip();
+    const Size& physicalSize() const;
 
-    void setCompositionMode(const CompositionMode& mode)
-    {
-        _compositionMode = mode;
-    }
+    const SizeF& logicalSize() const;
 
-    void setPen(const Pen& pen);
+  protected:
+    virtual const Gfx::ImageFormat& onGetFormat() const;
 
-    void setBrush(const Brush& brush);
+    virtual const Gfx::SizeF& onGetSize() const;
 
-    void setFont(const Font& font);
+    virtual const Scaling& onGetScaling() const;
 
-    FontMetrics fontMetrics(const String& text) const;
+  protected:
+    virtual bool onSetPaint(Gfx::PaintContext* context) override;
 
-    void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+    virtual Gfx::PaintContext* onCreatePaint() override;
 
-    void drawText(const Gfx::PointF& to, const Pt::String& Text);
+    virtual void onReleasePaint() override;
 
-    void drawText(const Gfx::PointF& to, const Pt::String& Text, const Gfx::Transform& trans);
+  protected:
+    virtual void onCompositionModeChanged() override;
 
-    void drawRect(const Gfx::RectF& rectangle);
+    virtual void onPenChanged() override;
 
-    void fillRect(const Gfx::RectF& rectangle);
+    virtual void onBrushChanged() override;
 
-    void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+    virtual void onFontChanged() override;
 
-    void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+    virtual void onClipChanged() override;
 
-    void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+  protected:
+    virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
 
-    void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+    virtual void onDrawPolyline(const Gfx::Polyline& line) override;
 
-    void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+    virtual void onFillPolygon(const Gfx::Polyline& line) override;
 
-    void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
+    virtual void onDrawRect(const Gfx::RectF& rectangle) override;
 
-    void drawPath(const Gfx::Path& path, float smoothness);
+    virtual void onFillRect(const Gfx::RectF& rectangle) override;
 
-    void fillPath(const Path& path, float smoothness);
+    virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
+                               const Gfx::SizeF& size) override;
 
-    void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+    virtual void onFillEllipse(const Gfx::PointF& topLeft, 
+                               const Gfx::SizeF& size) override;
 
-    void fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+    virtual void onDrawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                           float degBegin, float degEnd) override
+    {}
 
-    void fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+    virtual void onFillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                             float degBegin, float degEnd) override
+    {}
+
+    virtual void onFillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                           float degBegin, float degEnd) override
+    {}
+
+    virtual void onDrawPath(const Gfx::Path& path, float smoothness) override
+    {}
+
+    virtual void onFillPath(const Gfx::Path& path, float smoothness) override
+    {}
+
+  protected:
+    virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
+
+    virtual void onDrawText(const Gfx::PointF& to, 
+                            const Pt::String& text, 
+                            const Gfx::Transform* trans) override;
+
+  protected:
+    virtual void onDrawImage(const Gfx::PointF& to, 
+                             const Gfx::Image& image, 
+                             const Gfx::RectF* imgRect) override;
+
+    virtual bool onDrawLayer(const Gfx::PointF& to,
+                             const Gfx::PaintLayer& layer,
+                             const Gfx::RectF* rect) override;
 
   public:
       static void setFontDir(const System::Path& path);
@@ -148,8 +157,6 @@ class Rasterizer
       static void setDefaultFont(const std::string& name);
 
       static std::vector<std::string> fontNames();
-
-      static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
   private:
     void putImage( const Point& to, const Image& image);
@@ -168,18 +175,24 @@ class Rasterizer
 
     void fillEllipse( const Point& topLeft, const Size& size, const Rect& currentClip);
 
-  //Output algo.
   protected:
     void outputSpan( const Point& topLeft, int x, int y, int width );
+    
     void fill( const Point& origin, const Point& pos, int length );
+    
     void fillSolid( const Point& pos,  int length );
+    
     void fillVerticalGradient( const Point& origin, const Point& pos,  int length );
+    
     void fillHorizontalGradient( const Point& origin, const Point& pos,  int length );
+    
     void fillTexture( const Point& origin, const Point& pos,  int length );
+    
     //void createGradientTexture(Image& img, int width, int height,
     //                           Pt::Gfx::Color gradientStart,
     //                           Pt::Gfx::Color gradientStop, 
     //                           Pt::Gfx::Brush::GradientDirection style);
+    
     void clipSpan( int& x, int& y, int& length, const Rect& currentClip);
 
     Rect updateClip() const
@@ -192,12 +205,15 @@ class Rasterizer
     
     void outputEdges(const ActiveEdgeTable& edges, const Point&  origin, int scalLine);
 
-  //Thin polyline algo.
+  // Thin polyline
   protected:
     enum { xAxis, yAxis };
+    
     void drawThinSolidPolyline( const Point* points, int pointCount, const Rect& currentClip);
+    
     void drawThinDashPolyline( const Point* points, int pointCount,
                                int dashOn, int dashOff, const Rect& currentClip);
+    
     void stepDash( int dist, int* pDashNum, int* pDashIndex, const int* pDash, int numInDashList, int *pDashOffset );
 
     void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, 
@@ -207,28 +223,41 @@ class Rasterizer
     void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, 
                                 int e, int e1, int e2, int len, const Rect& currentClip);
 
-  //Wide polyline base algo.
+  // Wide polyline base
   protected:
     int polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );
+    
     int buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
+    
     void fillSpans(int x, int y,  int w,  int h, const Rect& currentClip);
+    
     void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const Rect& currentClip);
+    
     void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const Rect& currentClip);
+    
     void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );
+    
     int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );
+    
     int lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths);
+    
     int lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
+    
     int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );
+    
     void lineJoin(LineFace *pLeft, LineFace *pRight, const Rect& currentClip);
+    
     void lineProjectingCap(const LineFace *face, bool isLeft, bool isInt, const Rect& currentClip);
+    
     void clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft );
 
-  //Wide solid polyline algo.
+  // Wide solid polyline
   protected:
     void drawWideSolidPolyline( const Point* points, int pointCount, const Rect& currentClip);
+    
     void drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const Rect& currentClip);
 
-  //Wide dashed polyline algo.
+  // Wide dashed polyline
   protected:
     enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
 
@@ -273,7 +302,13 @@ class Rasterizer
     }
 
   private:
-    Image           _image;
+    Image          _image;
+    RasterContext* _paint;
+
+    Gfx::Size      _physicalSize;
+    Gfx::SizeF     _logicalSize;
+    Gfx::Scaling   _scaling;
+
     DrawText*       _text;
     Rect            _clip;
     Font            _font;

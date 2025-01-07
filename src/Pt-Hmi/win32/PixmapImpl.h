@@ -32,7 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 
-#define PT_HMI_WIN32_RASTER 1
+//#define PT_HMI_WIN32_RASTER 1
 //#define PT_HMI_GDIPLUS 1
 
 #ifdef PT_HMI_WIN32_RASTER
@@ -68,14 +68,10 @@ class PixmapImpl
         PixmapImpl()
         { }
 
-        void reset(const Gfx::Size& size, std::size_t stride)
-        {
-            _image.reset(size, stride);
-        }
-
         void set(const Gfx::Image& image)
         {
             _image.reset(image);
+            _size = Gfx::SizeF( image.width(), image.height() );
         }
 
         const Gfx::Image& toImage() const
@@ -88,12 +84,15 @@ class PixmapImpl
 
         const Gfx::SizeF& size() const
         {
-            return _image.size();
+            return _size;
         }
 
         void resize(const Gfx::SizeF& size)
         {
-            _image.resize(size);
+            Pt::ssize_t width = Pt::lround( size.width() );
+            Pt::ssize_t height = Pt::lround( size.height() );
+            _image.reset(width, height);
+            _size = Gfx::SizeF(width, height);
         }
 
         void setScaleFactor(double scaleFactor)
@@ -136,6 +135,7 @@ class PixmapImpl
     
     private:
         Gfx::ImageLayer _image;
+        Gfx::SizeF      _size;
 };
 
 #else // PT_HMI_WIN32_RASTER

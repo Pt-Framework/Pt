@@ -32,302 +32,10 @@
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/Algorithm.h>
-#include <Pt/System/Clock.h>
-#include <Pt/String.h>
-#include <Pt/Math.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-///////////////////////////////////////////////////////////////////////
-// ImageCanvas
-///////////////////////////////////////////////////////////////////////
-
-ImageCanvas::ImageCanvas(PaintSurface& surface)
-: Canvas(surface)
-, _rasterizer(new Rasterizer)
-, _paint(0)
-{
-}
-
-
-ImageCanvas::~ImageCanvas()
-{
-    delete _rasterizer;
-}
-
-
-void ImageCanvas::reset(const Gfx::Image& image)
-{
-    _rasterizer->reset(image);  
-
-    _physicalSize = Gfx::SizeF( image.width(), image.height() );
-    _logicalSize = _scaling.toLogical(_physicalSize);
-}
-
-
-void ImageCanvas::reset(const Gfx::SizeF& size, std::size_t stride)
-{
-    Gfx::Size imageSize = round(size);
-    _rasterizer->reset(imageSize, stride);  
-
-    _physicalSize = Gfx::SizeF( imageSize.width(), imageSize.height() );
-    _logicalSize = _scaling.toLogical(_physicalSize);
-}
-
-
-void ImageCanvas::reset(Pt::ssize_t width, Pt::ssize_t height, 
-                        std::size_t stride)
-{
-    _rasterizer->reset(width, height, stride);  
-
-    _physicalSize = Gfx::SizeF(width, height);
-    _logicalSize = _scaling.toLogical(_physicalSize);
-}
-
-
-const Gfx::Image& ImageCanvas::image() const
-{
-    return _rasterizer->image();
-}
-
-
-void ImageCanvas::setScaleFactor(double scaleFactor)
-{
-    _scaling.setScaleFactor(scaleFactor);
-
-    const Gfx::Image& image = _rasterizer->image();
-    _physicalSize = Gfx::SizeF( image.width(), image.height() );
-    _logicalSize = _scaling.toLogical(_physicalSize);
-}
-
-
-const SizeF& ImageCanvas::physicalSize() const
-{
-    return _physicalSize;
-}
-
-
-const Gfx::ImageFormat& ImageCanvas::onGetFormat() const
-{
-    return Gfx::ImageFormat::argb32();
-}
-
-
-const Gfx::SizeF& ImageCanvas::onGetSize() const
-{
-    return _logicalSize;
-}
-
-
-const Scaling& ImageCanvas::onGetScaling() const
-{
-    return _scaling;
-}
-
-
-bool ImageCanvas::onSetPaint(Gfx::PaintContext* context)
-{
-    RasterContext* paintContext = dynamic_cast<RasterContext*>(context);
-    if( ! paintContext )
-        return false;
-
-    _paint = paintContext;
-    return true;
-}
-
-
-Gfx::PaintContext* ImageCanvas::onCreatePaint()
-{
-    RasterContext* paintContext = new RasterContext();
-    
-    _paint = paintContext;
-    return paintContext;
-}
-
-
-void ImageCanvas::onReleasePaint()
-{
-    //_rasterizer->finish();
-    _rasterizer->resetClip();
-    _paint = 0;
-}
-
-
-void ImageCanvas::onCompositionModeChanged()
-{
-    if( ! _paint )
-        return;
-
-    const Gfx::CompositionMode& mode = _paint->compositionMode();
-    _rasterizer->setCompositionMode(mode);
-}
-
-
-void ImageCanvas::onPenChanged()
-{
-    if( ! _paint )
-        return;
-
-    const Pen& p = _paint->pen();
-    _rasterizer->setPen(p);
-}
-
-
-void ImageCanvas::onBrushChanged()
-{
-    if( ! _paint )
-        return;
-
-    const Brush& b = _paint->brush();
-    _rasterizer->setBrush(b);
-}
-
-
-void ImageCanvas::onFontChanged()
-{
-    if( ! _paint )
-        return;
-
-    const Font& f = _paint->font();
-    _rasterizer->setFont(f);
-}
-
-
-void ImageCanvas::onClipChanged()
-{
-    if( ! _paint )
-        return;
-
-    const RectF* clip = _paint->clip();
-    if( ! clip )
-    {
-        _rasterizer->resetClip();
-    }
-    else
-    {
-        RectF rect = scaling().toPhysical(*clip);
-        _rasterizer->setClip(rect);
-    }
-}
-
-
-void ImageCanvas::onDrawLine(const PointF& from, const  PointF& to)
-{
-    _rasterizer->drawLine(from, to);
-}
-
-
-void ImageCanvas::onDrawPolyline(const Gfx::Polyline& line)
-{
-    std::size_t n = line.size();
-
-    std::vector<Gfx::PointF> ps;
-
-    for(size_t i = 0; i < n; ++i)
-        ps.push_back( line.at(i) );
-
-    _rasterizer->drawPolyline(&ps[0], n);
-}
-
-
-void ImageCanvas::onFillPolygon(const Gfx::Polyline& line)
-{
-    std::size_t n = line.size();
-
-    std::vector<Gfx::PointF> ps;
-
-    for (size_t i = 0; i < n; ++i)
-        ps.push_back( line.at(i) );
-
-    _rasterizer->fillPolygon(&ps[0], n);
-}
-
-
-void ImageCanvas::onDrawRect(const RectF& r)
-{
-    _rasterizer->drawRect(r);
-}
-
-
-void ImageCanvas::onFillRect(const RectF& r)
-{
-    _rasterizer->fillRect(r);
-}
-
-
-void ImageCanvas::onDrawEllipse(const PointF& topLeft, const SizeF& size)
-{
-    _rasterizer->drawEllipse(topLeft, size);
-}
-
-
-void ImageCanvas::onFillEllipse(const PointF& topLeft, const SizeF& size)
-{
-    _rasterizer->fillEllipse(topLeft, size);
-}
-
-
-FontMetrics ImageCanvas::onGetFontMetrics(const String& text) const
-{
-	return _rasterizer->fontMetrics(text);
-}
-
-
-void ImageCanvas::onDrawText(const PointF& to, const Pt::String& text, 
-                            const Transform* xform)
-{
-    if(xform)
-        _rasterizer->drawText(to, text, *xform);
-    else
-        _rasterizer->drawText(to, text);
-}
-
-
-void ImageCanvas::onDrawImage(const PointF& toF, const Image& image, 
-                              const RectF* imageRect)
-{
-    Gfx::PointF to = scaling().toPhysical(toF);
-    
-    if(imageRect)
-        _rasterizer->drawImage(to, image, *imageRect);
-    else
-        _rasterizer->drawImage(to, image);
-}
-
-
-bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
-                              const Gfx::PaintLayer& layer,
-                              const Gfx::RectF* rect)
-{
-    const PaintSurface* layerSurface = layer.surface();
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(layerSurface);
-    if(imageSurface)
-    {
-        const Gfx::Image& image = imageSurface->image();
-        
-        if(rect)
-        {
-            Gfx::RectF imageRect = scaling().toPhysical(*rect);
-            drawImage(to, image, &imageRect);
-        }
-        else
-        {
-            drawImage(to, image);
-        }
-        
-        return true;
-    }
-
-    return false;
-}
 
 ///////////////////////////////////////////////////////////////////////
 // ImageSurface
@@ -336,18 +44,19 @@ bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
 ImageSurface::ImageSurface()
 : _canvas(0)
 {
-    _canvas = new ImageCanvas(*this);
+    _canvas = new Rasterizer(*this);
     setCanvas(_canvas);
 }
 
 
-ImageSurface::ImageSurface(const Gfx::Size& size, std::size_t stride)
+ImageSurface::ImageSurface(Pt::ssize_t width, Pt::ssize_t height, 
+                           std::size_t stride)
 : _canvas(0)
 {
-    _canvas = new ImageCanvas(*this);
+    _canvas = new Rasterizer(*this);
     setCanvas(_canvas);
 
-    reset(size, stride);
+    reset(width, height, stride);
 }
 
 
@@ -360,13 +69,6 @@ ImageSurface::~ImageSurface()
 void ImageSurface::reset(const Gfx::Image& image)
 {
     _canvas->reset(image);
-}
-
-
-void ImageSurface::reset(const Gfx::Size& size, std::size_t stride)
-{
-    Gfx::SizeF imageSize( size.width(), size.height() );
-    _canvas->reset(imageSize, stride);
 }
 
 
@@ -383,15 +85,9 @@ const Gfx::Image& ImageSurface::image() const
 }
 
 
-const Gfx::SizeF& ImageSurface::size() const
+const Gfx::Size& ImageSurface::size() const
 {
     return _canvas->physicalSize();
-}
-
-
-void ImageSurface::resize(const Gfx::SizeF& size)
-{
-    _canvas->reset(size);
 }
 
 
@@ -434,8 +130,9 @@ ImageLayer::ImageLayer()
 }
 
 
-ImageLayer::ImageLayer(const Gfx::Size& size, std::size_t stride)
-: _surface(size, stride)
+ImageLayer::ImageLayer(Pt::ssize_t width, Pt::ssize_t height, 
+                       std::size_t stride)
+: _surface(width, height, stride)
 {
     setSurface(&_surface);
 }
@@ -452,12 +149,6 @@ void ImageLayer::reset(const Gfx::Image& image)
 }
 
 
-void ImageLayer::reset(const Gfx::Size& size, std::size_t stride)
-{
-    _surface.reset(size, stride);
-}
-
-
 void ImageLayer::reset(Pt::ssize_t width, Pt::ssize_t height, 
                        std::size_t stride)
 {
@@ -471,15 +162,9 @@ const Gfx::Image& ImageLayer::image() const
 }
 
 
-const Gfx::SizeF& ImageLayer::size() const
+const Gfx::Size& ImageLayer::size() const
 {
     return _surface.size();
-}
-
-
-void ImageLayer::resize(const Gfx::SizeF& size)
-{
-    _surface.resize(size);
 }
 
 

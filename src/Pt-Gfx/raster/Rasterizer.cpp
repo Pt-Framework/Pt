@@ -28,6 +28,7 @@
   02110-1301 USA
 */
 
+#include "Rasterizer.h"
 #include "ClipPolygon.h"
 #include "LineSlope.h"
 #include "LineEdge.h"
@@ -36,8 +37,9 @@
 #include "DrawText.h"
 #include "FreeType.h"
 
-#include "Rasterizer.h"
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Math.h>
 #include <algorithm>
@@ -57,12 +59,6 @@ void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
     to[3] = (unsigned char)((alphaSrc * from[3] + alphaInv * to[3]) >> 8);
 }
 
-}
-
-namespace Pt {
-
-namespace Gfx {
-
 class EllipseSpan
 {
   public:
@@ -80,11 +76,11 @@ class EllipseSpan
       int len1;
       int x2;
       int len2;
-
 };
 
 
-inline void addPoint(int xx, int yy, Point** ppt,  int** pwidth, int& numSpans, int& ycurr, bool& firstspan, int signdy)
+inline void addPoint(int xx, int yy, Pt::Gfx::Rasterizer::Point** ppt, int** pwidth, 
+                     int& numSpans, int& ycurr, bool& firstspan, int signdy)
 {
   if( !firstspan && yy == ycurr )
   {
@@ -140,8 +136,20 @@ inline int stepAround( int v, int incr, int max )
   return (((v) + (incr) < 0) ? (max - 1) : ((v) + (incr) == max) ? 0 : ((v) + (incr)));
 }
 
-Rasterizer::Rasterizer()
-: _image( ImageFormat::argb32() )
+} // namespace
+
+namespace Pt {
+
+namespace Gfx {
+
+///////////////////////////////////////////////////////////////////////
+// Rasterizer
+///////////////////////////////////////////////////////////////////////
+
+Rasterizer::Rasterizer(PaintSurface& surface)
+: Canvas(surface)
+, _image( ImageFormat::argb32() )
+, _paint(0)
 , _text( new DrawText() )
 , _compositionMode(CompositionMode::SourceCopy)
 {
@@ -155,15 +163,126 @@ Rasterizer::~Rasterizer()
 }
 
 
-const ImageFormat& Rasterizer::format() const
+const Image& Rasterizer::image() const
 {
-  return _image.format();
+    return _image;
 }
 
 
-void Rasterizer::setPen( const Pen& pen )
+void Rasterizer::reset(const Gfx::Image& image)
 {
+    if( image.format() != _image.format() )
+    {
+        _image.reset( format(), image.width(), image.height() );
+        Pt::Gfx::copy( image.begin(), image.end(), _image.begin() );
+    }
+    else
+    {
+        _image = image;
+    }
+
+    _physicalSize.set( image.width(), image.height() );
+    _logicalSize = _scaling.toLogical( Gfx::SizeF( image.width(), 
+                                                   image.height() ) );
+}
+
+
+void Rasterizer::reset(Pt::ssize_t width, Pt::ssize_t height, 
+                       std::size_t stride)
+{
+    _image.reset( _image.format(), width, height, stride );
+
+    _physicalSize.set(width, height);
+    _logicalSize = _scaling.toLogical( Gfx::SizeF(width, height) );
+}
+
+
+void Rasterizer::setScaleFactor(double scaleFactor)
+{
+    _scaling.setScaleFactor(scaleFactor);
+
+    _physicalSize.set( _image.width(), _image.height() );
+    _logicalSize = _scaling.toLogical( Gfx::SizeF( _image.width(), 
+                                                   _image.height() ) );
+}
+
+
+const Size& Rasterizer::physicalSize() const
+{
+    return _physicalSize;
+}
+
+
+const SizeF& Rasterizer::logicalSize() const
+{
+    return _logicalSize;
+}
+
+
+const Gfx::ImageFormat& Rasterizer::onGetFormat() const
+{
+    return Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& Rasterizer::onGetSize() const
+{
+    return _logicalSize;
+}
+
+
+const Scaling& Rasterizer::onGetScaling() const
+{
+    return _scaling;
+}
+
+
+bool Rasterizer::onSetPaint(Gfx::PaintContext* context)
+{
+    RasterContext* paintContext = dynamic_cast<RasterContext*>(context);
+    if( ! paintContext )
+        return false;
+
+    _paint = paintContext;
+    return true;
+}
+
+
+Gfx::PaintContext* Rasterizer::onCreatePaint()
+{
+    RasterContext* paintContext = new RasterContext();
+    
+    _paint = paintContext;
+    return paintContext;
+}
+
+
+void Rasterizer::onReleasePaint()
+{
+    _paint = 0;
+
+    _clip = Rect( _image.width(), _image.height() );
+}
+
+
+void Rasterizer::onCompositionModeChanged()
+{
+    if( ! _paint )
+        return;
+
+    const Gfx::CompositionMode& mode = _paint->compositionMode();
+    _compositionMode = mode;
+}
+
+
+void Rasterizer::onPenChanged()
+{
+    if( ! _paint )
+        return;
+
+    const Pen& pen = _paint->pen();
     _pen = pen;
+    
     _penBuffer.reset(_image.format(), 64, 1);
     Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
 
@@ -173,8 +292,13 @@ void Rasterizer::setPen( const Pen& pen )
 }
 
 
-void Rasterizer::setBrush( const Brush& brush )
+void Rasterizer::onBrushChanged()
 {
+    if( ! _paint )
+        return;
+
+    const Brush& brush = _paint->brush();
+    
     _brush = brush;
     _isGradient = false;
 
@@ -213,44 +337,92 @@ void Rasterizer::setBrush( const Brush& brush )
 }
 
 
-void Rasterizer::drawLine(const PointF& from, const  PointF& to)
+void Rasterizer::onFontChanged()
+{
+    if( ! _paint )
+        return;
+
+    const Font& font = _paint->font();
+
+    _font = font;
+    _text->setFont(_font);
+}
+
+
+void Rasterizer::onClipChanged()
+{
+    if( ! _paint )
+        return;
+
+    const RectF* clip = _paint->clip();
+    if( ! clip )
+    {
+        _clip = Rect( _image.width(),_image.height() );
+    }
+    else
+    {
+        RectF rect = scaling().toPhysical(*clip);
+        
+        if( rect.isNull() ) // crashes otherwise
+            _clip = Rect( Point(0, 0), Size(1, 1) );
+        else
+            _clip = round(rect);
+    }
+}
+
+
+void Rasterizer::onDrawLine(const PointF& from, const  PointF& to)
 {
     Point points[2];
 
     points[0].set(Pt::lround(from.x() - 0.5),
-        Pt::lround(from.y() - 0.5));
+                  Pt::lround(from.y() - 0.5));
 
     points[1].set(Pt::lround(to.x() - 0.5),
-        Pt::lround(to.y() - 0.5));
+                  Pt::lround(to.y() - 0.5));
 
     const Rect currentClip = updateClip();
     stroke(points, 2, currentClip);
 }
 
 
-void Rasterizer::drawText(const PointF& toF, const String& text)
+void Rasterizer::onDrawPolyline(const Gfx::Polyline& line)
 {
-    Point to( round(toF) );
+    std::size_t n = line.size();
+    std::vector<Point> points(n);
 
-    Rect clip = updateClip();
+    for(size_t i = 0; i < n; ++i)
+    {
+        Gfx::PointF p = line.at(i);
 
-    _text->setClip(clip);
-    _text->draw( _image, to.x(), to.y(), text, _compositionMode );
+        points[i] = Point( Pt::lround(p.x() - 0.4999),
+                           Pt::lround(p.y() - 0.4999) );
+    }
+
+    const Rect currentClip = updateClip();
+    stroke(&points[0], points.size(), currentClip);
 }
 
 
-void Rasterizer::drawText(const PointF& toF, const Pt::String& text, const Transform& trans)
+void Rasterizer::onFillPolygon(const Gfx::Polyline& line)
 {
-    Point to( round(toF) );
+    std::size_t n = line.size();
+    std::vector<Point> points(n);
 
-    Rect clip = updateClip();
+    for (size_t i = 0; i < n; ++i)
+    {
+        Gfx::PointF p = line.at(i);
 
-    _text->setClip(clip);
-    _text->draw(_image, to.x(), to.y(), text, _compositionMode, trans);
+        points[i] = Point( Pt::lround(p.x() - 0.4999),
+                           Pt::lround(p.y() - 0.4999) );
+    }
+
+    const Rect currentClip = updateClip();
+    fill(&points[0], points.size(), currentClip);
 }
 
 
-void Rasterizer::drawRect(const RectF& r)
+void Rasterizer::onDrawRect(const RectF& r)
 {
     RectF rect(r.left() - 0.5,
                r.right() - 0.5,
@@ -269,7 +441,7 @@ void Rasterizer::drawRect(const RectF& r)
 }
 
 
-void Rasterizer::fillRect(const RectF& r)
+void Rasterizer::onFillRect(const RectF& r)
 {
     Rect rect(Pt::lround(r.left()),
               Pt::lround(r.right()),
@@ -281,7 +453,7 @@ void Rasterizer::fillRect(const RectF& r)
 }
 
 
-void Rasterizer::drawEllipse(const PointF& topLeftF, const SizeF& sizeF)
+void Rasterizer::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
     Point topLeft(Pt::lround(topLeftF.x() - 0.5),
                   Pt::lround(topLeftF.y() - 0.5));
@@ -294,7 +466,7 @@ void Rasterizer::drawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-void Rasterizer::fillEllipse(const PointF& topLeftF, const SizeF& sizeF)
+void Rasterizer::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
     Point topLeft = round(topLeftF);
     Size size = round(sizeF);
@@ -304,83 +476,64 @@ void Rasterizer::fillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-void Rasterizer::drawPolyline(const PointF* ps, const size_t n)
+FontMetrics Rasterizer::onGetFontMetrics(const String& text) const
 {
-    std::vector<Point> points(n);
+    return _text->fontMetrics(text);
+}
 
-    for (size_t i = 0; i < n; ++i)
+
+void Rasterizer::onDrawText(const PointF& toF, const Pt::String& text, 
+                            const Transform* xform)
+{
+    Point to( round(toF) );
+
+    Rect clip = updateClip();
+    _text->setClip(clip);
+
+    if(xform)
+        _text->draw(_image, to.x(), to.y(), text, _compositionMode, *xform);
+    else
+        _text->draw( _image, to.x(), to.y(), text, _compositionMode );
+}
+
+
+void Rasterizer::onDrawImage(const PointF& toF, const Image& image, 
+                              const RectF* imageRect)
+{
+    Gfx::PointF toP = scaling().toPhysical(toF);
+    Point to = round(toP);
+
+    if(imageRect)
+        putImage(to, image, round(*imageRect));
+    else
+        putImage(to, image);
+}
+
+
+bool Rasterizer::onDrawLayer(const Gfx::PointF& to,
+                              const Gfx::PaintLayer& layer,
+                              const Gfx::RectF* rect)
+{
+    const PaintSurface* layerSurface = layer.surface();
+    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(layerSurface);
+    if(imageSurface)
     {
-        Point p(Pt::lround(ps[i].x() - 0.4999),
-            Pt::lround(ps[i].y() - 0.4999));
-
-        points[i] = p;
+        const Gfx::Image& image = imageSurface->image();
+        
+        if(rect)
+        {
+            Gfx::RectF imageRect = scaling().toPhysical(*rect);
+            drawImage(to, image, &imageRect);
+        }
+        else
+        {
+            drawImage(to, image);
+        }
+        
+        return true;
     }
 
-    const Rect currentClip = updateClip();
-    stroke(&points[0], points.size(), currentClip);
-}
-
-
-void Rasterizer::fillPolygon(const PointF* ps, const size_t n)
-{
-    std::vector<Point> points(n);
-
-    for (size_t i = 0; i < n; ++i)
-    {
-        Point p(Pt::lround(ps[i].x() - 0.4999),
-            Pt::lround(ps[i].y() - 0.4999));
-
-        points[i] = p;
-    }
-
-    const Rect currentClip = updateClip();
-    fill(&points[0], points.size(), currentClip);
-}
-
-
-void Rasterizer::drawImage(const PointF& to, const Image& img)
-{
-    putImage(round(to), img);
-}
-
-
-void Rasterizer::drawImage(const PointF& to, const Image& img, const RectF& imageRect)
-{
-    putImage(round(to), img, round(imageRect));
-}
-
-
-void Rasterizer::drawPath(const Gfx::Path& path, float smoothness)
-{
-}
-
-
-void Rasterizer::fillPath(const Path& path, float smoothness)
-{
-}
-
-
-void Rasterizer::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void Rasterizer::fillChord(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-void Rasterizer::fillPie(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-}
-
-
-FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
-{
-  DrawText textRender;
-  textRender.setFont(font);
-
-  return textRender.fontMetrics(text);
+    return false;
 }
 
 
@@ -406,6 +559,7 @@ std::vector<std::string> Rasterizer::fontNames()
 {
     return FreeType::instance().fontNames();
 }
+
 
 void Rasterizer::strokeEllipse(const Point& topLeft, const Size& size, 
                                const Rect& currentClip)
@@ -2051,12 +2205,6 @@ void Rasterizer::stroke( const Point& pixel, const Rect& currentClip)
   stroke( (int) pixel.x(),(int) pixel.y(), currentClip );
 }
 
-
-void Rasterizer::setFont(const Font& font)
-{
-  _font = font;
-  _text->setFont(_font);
-}
 
 
 void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length )
@@ -3835,26 +3983,6 @@ void Rasterizer::stroke(int xpos, int ypos, int length, const Rect& currentClip)
     }
 }
 
-
-FontMetrics Rasterizer::fontMetrics(const String& text) const
-{
-    return _text->fontMetrics( text );
-}
-
-
-void Rasterizer::setClip(const RectF& clip)
-{
-    if( clip.isNull() ) // crashes otherwise
-        _clip = Rect( Point(0, 0), Size(1, 1) );
-    else
-        _clip = round(clip);
-}
-
-
-void Rasterizer::resetClip()
-{
-    _clip = Rect( _image.width(),_image.height() );
-}
 
 } // namespace
 

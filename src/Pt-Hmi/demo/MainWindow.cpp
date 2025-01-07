@@ -364,7 +364,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 #endif
 
     Gfx::Painter imagePainter;
-    Gfx::ImageSurface imageSurface(Gfx::Size(600, 600));
+    Gfx::ImageSurface imageSurface(600, 600);
     imagePainter.begin(imageSurface);
 
     Gfx::Painter imagePainter2(imageSurface);
