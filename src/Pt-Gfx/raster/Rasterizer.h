@@ -52,9 +52,9 @@ class ActiveEdgeTable;
 class Rasterizer
 {
   public:
-    typedef BasicPoint<Pt::ssize_t> Point;
-    typedef BasicSize<Pt::ssize_t> Size;
-    typedef BasicRect<Pt::ssize_t> Rect;
+    typedef ImageView::Point Point;
+    typedef ImageView::Size Size;
+    typedef ImageView::Rect Rect;
 
   public:
     Rasterizer();

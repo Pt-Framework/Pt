@@ -31,6 +31,9 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Types.h>
@@ -208,6 +211,10 @@ class ImageView
     public:
         typedef Gfx::Pixel Pixel;
         typedef Gfx::ConstPixel ConstPixel;
+
+        typedef BasicPoint<Pt::ssize_t> Point;
+        typedef BasicSize<Pt::ssize_t> Size;
+        typedef BasicRect<Pt::ssize_t> Rect;
 
         class PixelIterator
         {
