@@ -89,11 +89,11 @@ class FreeType : public Pt::Singleton<FreeType>
 
         // TODO: use ImageView instead of clip
 
-        void draw(Image& image, const Color& color,                   
-                  Pt::ssize_t x, Pt::ssize_t y, const String& text, 
+        void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
+                  const String& text, const Color& color,
                   Pt::ssize_t clipX, Pt::ssize_t clipY, 
                   Pt::ssize_t clipWidth, Pt::ssize_t clipHeight,
-                  const CompositionMode& mode, const Transform& transform, 
+                  const CompositionMode& mode, const Transform& tf, 
                   FTC_FaceID faceId, std::size_t fontSize);
 
     protected:

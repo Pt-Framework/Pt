@@ -30,6 +30,8 @@
 #ifndef PT_GFX_RASTERIZER_H
 #define PT_GFX_RASTERIZER_H
 
+#include "RasterContext.h"
+
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Algorithm.h>
@@ -98,9 +100,9 @@ class Rasterizer
         _compositionMode = mode;
     }
 
-    void setPen( const Pen& pen );
+    void setPen(const Pen& pen);
 
-    void setBrush( const Brush& brush );
+    void setBrush(const Brush& brush);
 
     void setFont(const Font& font);
 
@@ -161,10 +163,6 @@ class Rasterizer
     void stroke(const Point& pixel, const Rect& currentClip);
 
     void fill(const Point* points, size_t pointCount, const Rect& currentClip);
-
-    void strokeText(const Point& to, const Pt::String& text, const Rect& currentClip);
-
-    void strokeText(const Point& to, const Pt::String& text, const Transform& trans, const Rect& currentClip);
 
     void strokeEllipse( const Point& topLeft, const Size& size, const Rect& currentClip);
 

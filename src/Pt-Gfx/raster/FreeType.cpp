@@ -334,27 +334,27 @@ FontMetrics FreeType::fontMetrics(const String& text,
 }
 
 
-void FreeType::draw(Image& image, const Color& color,                   
-                    Pt::ssize_t x, Pt::ssize_t y, const String& text, 
+void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
+                    const String& text, const Color& color,
                     Pt::ssize_t clipX, Pt::ssize_t clipY, 
                     Pt::ssize_t clipWidth, Pt::ssize_t clipHeight,
-                    const CompositionMode& mode, const Transform& t, 
+                    const CompositionMode& mode, const Transform& tf, 
                     FTC_FaceID faceId, std::size_t fontSize)
 {
     // LOCK
 
     // apply translation here, FT uses a 2x2 matrix for the other transformations
     PointF translatedPos( x, y );
-    translatedPos.addX( t.dx() );
-    translatedPos.addY( t.dy() );
+    translatedPos.addX( tf.dx() );
+    translatedPos.addY( tf.dy() );
     
     Point pos = round(translatedPos);
 
     FT_Matrix matrix;
-    matrix.xx = t.m11() * 0x10000L;
-    matrix.xy = t.m12() * 0x10000L;
-    matrix.yx = t.m21() * 0x10000L;
-    matrix.yy = t.m22() * 0x10000L;
+    matrix.xx = tf.m11() * 0x10000L;
+    matrix.xy = tf.m12() * 0x10000L;
+    matrix.yx = tf.m21() * 0x10000L;
+    matrix.yy = tf.m22() * 0x10000L;
 
     FT_Face face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
@@ -409,7 +409,7 @@ void FreeType::draw(Image& image, const Color& color,
         int            width = 0;
         unsigned char* buffer = 0;
 
-        if( t.isIdentity() )
+        if( tf.isIdentity() )
         {
             FTC_Node node = 0;
             FTC_SBit glyphBitmap = 0;

@@ -1662,6 +1662,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Responder.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\raster\RasterContext.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -3031,6 +3034,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Responder.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\raster\RasterContext.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -47,28 +47,28 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// ImageSurface
+// ImageContext
 ///////////////////////////////////////////////////////////////////////
 
-ImagePaint::ImagePaint()
+ImageContext::ImageContext()
 : PaintContext()
 , _hasClip(false)
 {
 }
 
 
-ImagePaint::~ImagePaint()
+ImageContext::~ImageContext()
 {
 }
 
 
-void ImagePaint::onSetCompositionMode(const Gfx::CompositionMode& mode) 
+void ImageContext::onSetCompositionMode(const Gfx::CompositionMode& mode) 
 {
     _compositionMode = mode;
 }
 
 
-void ImagePaint::onSetPen(const Gfx::Pen& pen)
+void ImageContext::onSetPen(const Gfx::Pen& pen)
 {
     double scaleFactor = scaling().scaleFactor();
 
@@ -81,19 +81,19 @@ void ImagePaint::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void ImagePaint::onSetBrush(const Gfx::Brush& brush)
+void ImageContext::onSetBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
 }
 
 
-void ImagePaint::onSetFont(const Gfx::Font& font)
+void ImageContext::onSetFont(const Gfx::Font& font)
 {
     _font = font;
 }
 
 
-void ImagePaint::onSetClip(const Gfx::RectF* clip)
+void ImageContext::onSetClip(const Gfx::RectF* clip)
 {
     _hasClip = clip != 0;
 
@@ -192,7 +192,7 @@ const Scaling& ImageCanvas::onGetScaling() const
 
 bool ImageCanvas::onSetPaint(Gfx::PaintContext* context)
 {
-    ImagePaint* paintContext = dynamic_cast<ImagePaint*>(context);
+    ImageContext* paintContext = dynamic_cast<ImageContext*>(context);
     if( ! paintContext )
         return false;
 
@@ -203,7 +203,7 @@ bool ImageCanvas::onSetPaint(Gfx::PaintContext* context)
 
 Gfx::PaintContext* ImageCanvas::onCreatePaint()
 {
-    ImagePaint* paintContext = new ImagePaint();
+    ImageContext* paintContext = new ImageContext();
     
     _paint = paintContext;
     return paintContext;

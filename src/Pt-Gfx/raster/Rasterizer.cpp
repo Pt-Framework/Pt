@@ -168,6 +168,8 @@ void Rasterizer::setPen( const Pen& pen )
     Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
 
     _penPixel.reset(_penBuffer.view(), 0, 0);
+
+    _text->setPen(pen);
 }
 
 
@@ -228,19 +230,23 @@ void Rasterizer::drawLine(const PointF& from, const  PointF& to)
 
 void Rasterizer::drawText(const PointF& toF, const String& text)
 {
-    Point to(round(toF));
+    Point to( round(toF) );
 
-    const Rect currentClip = updateClip();
-    strokeText(to, text, currentClip);
+    Rect clip = updateClip();
+
+    _text->setClip( clip.x(), clip.y(), clip.width(), clip.height() );
+    _text->draw( _image, to.x(), to.y(), text, _compositionMode );
 }
 
 
 void Rasterizer::drawText(const PointF& toF, const Pt::String& text, const Transform& trans)
 {
-    Point to(round(toF));
+    Point to( round(toF) );
 
-    const Rect currentClip = updateClip();
-    strokeText(to, text, trans, currentClip);
+    Rect clip = updateClip();
+
+    _text->setClip( clip.x(), clip.y(), clip.width(), clip.height() );
+    _text->draw(_image, to.x(), to.y(), text, _compositionMode, trans);
 }
 
 
@@ -2190,22 +2196,6 @@ void Rasterizer::fillSolid(const Point& pos, int length)
         length -= n;
         xpos   += n;
     }
-}
-
-
-void Rasterizer::strokeText(const Point& to, const Pt::String& text, 
-                            const Rect& clip)
-{
-    _text->setClip( clip.x(), clip.y(), clip.width(), clip.height() );
-    _text->draw( _image, _pen.color(), to.x(), to.y(), text, _compositionMode );
-}
-
-
-void Rasterizer::strokeText(const Point& to, const Pt::String& text, 
-                            const Transform& trans, const Rect& clip)
-{
-    _text->setClip( clip.x(), clip.y(), clip.width(), clip.height() );
-    _text->draw(_image, _pen.color(), to.x(), to.y(), text, _compositionMode, trans);
 }
 
 

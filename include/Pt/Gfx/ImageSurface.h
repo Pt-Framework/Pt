@@ -49,12 +49,12 @@ class ImageCanvas;
 
 /** @internal.
 */
-class ImagePaint : public PaintContext
+class ImageContext : public PaintContext
 {
     public:
-        ImagePaint();
+        ImageContext();
 
-        ~ImagePaint();
+        ~ImageContext();
 
         const CompositionMode& compositionMode() const
         {
@@ -200,8 +200,8 @@ protected:
                              const Gfx::RectF* rect) override;
 
   private:
-    Rasterizer*   _rasterizer;
-    ImagePaint*   _paint;
+    Rasterizer*    _rasterizer;
+    ImageContext*  _paint;
 
     Gfx::SizeF     _physicalSize;
     Gfx::SizeF     _logicalSize;

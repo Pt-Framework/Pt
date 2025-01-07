@@ -47,7 +47,13 @@ DrawText::DrawText()
 
 
 DrawText::~DrawText()
+{ 
+}
+
+
+void DrawText::setPen(const Pen& pen)
 {
+    _textColor = pen.color();
 }
 
 
@@ -66,7 +72,17 @@ void DrawText::setFont(const Font& font)
 
     _transform.reset();
 }
- 
+
+
+void DrawText::setClip(Pt::ssize_t clipX, Pt::ssize_t clipY, 
+                       Pt::ssize_t clipWidth, Pt::ssize_t clipHeight)
+{
+    _clipX = clipX;
+    _clipY = clipY;
+    _clipWidth = clipWidth;
+    _clipHeight = clipHeight;
+}
+
 
 FontMetrics DrawText::fontMetrics(const String& text)
 {
@@ -74,24 +90,20 @@ FontMetrics DrawText::fontMetrics(const String& text)
 }
 
 
-void DrawText::draw(Image& image, const Color& color,
-                    Pt::ssize_t x, Pt::ssize_t y, const String& text,
-                    const CompositionMode& mode)
+void DrawText::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
+                    const String& text, const CompositionMode& mode)
 {
-    return FreeType::instance().draw(image, color, 
-                                     x, y, text, 
+    return FreeType::instance().draw(image, x, y, text, _textColor,
                                      _clipX, _clipY, _clipWidth, _clipHeight,
                                      mode, _transform, _faceId, _fontSize);
 }
 
 
-void DrawText::draw(Image& image, const Color& color,
-                    Pt::ssize_t x, Pt::ssize_t y, const String& text,
-                    const CompositionMode& mode, const Transform& trans)
+void DrawText::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
+                    const String& text, const CompositionMode& mode, 
+                    const Transform& trans)
 {
-
-    return FreeType::instance().draw(image, color, 
-                                     x, y, text, 
+    return FreeType::instance().draw(image, x, y, text, _textColor,
                                      _clipX, _clipY, _clipWidth, _clipHeight, 
                                      mode, trans, _faceId, _fontSize);
 }

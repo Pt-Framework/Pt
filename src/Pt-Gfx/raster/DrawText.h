@@ -41,6 +41,7 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/String.h>
@@ -67,20 +68,18 @@ class DrawText
         */
         ~DrawText();
 
-        /** @brief Sets the text font
+        /** @brief Sets the text color.
+        */
+        void setPen(const Pen& pen);
 
-            @param font The text font
+        /** @brief Sets the text font.
         */
         void setFont(const Font& font);
 
+        /** @brief Sets the clip.
+        */
         void setClip(Pt::ssize_t clipX, Pt::ssize_t clipY, 
-                     Pt::ssize_t clipWidth, Pt::ssize_t clipHeight)
-        {
-            _clipX = clipX;
-            _clipY = clipY;
-            _clipWidth = clipWidth;
-            _clipHeight = clipHeight;
-        }
+                     Pt::ssize_t clipWidth, Pt::ssize_t clipHeight);
 
         /** @brief Calculate font metrics for text
 
@@ -103,19 +102,19 @@ class DrawText
             @param text The text to draw
             @param mode The composition mode of the text
         */
-        void draw(Image& image, const Color& color, 
-                  Pt::ssize_t x, Pt::ssize_t y, const String& text, 
-                  const CompositionMode& mode);
+        void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
+                  const String& text, const CompositionMode& mode);
 
-        void draw(Image& image, const Color& color,
-                  Pt::ssize_t x, Pt::ssize_t y, const String& text,
-                  const CompositionMode& mode, const Transform& trans);
+        void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
+                  const String& text, const CompositionMode& mode, 
+                  const Transform& trans);
 
   private:
         FTC_FaceID       _faceId;
         std::size_t      _fontSize;
         FTC_ImageTypeRec _imageType;
         Transform        _transform;
+        Color            _textColor;
         Pt::ssize_t      _clipX;
         Pt::ssize_t      _clipY;
         Pt::ssize_t      _clipWidth;
