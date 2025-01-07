@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_RASTERIZER_H
-#define PT_GFX_RASTERIZER_H
+#ifndef PT_GFX_RASTER_CANVAS_H
+#define PT_GFX_RASTER_CANVAS_H
 
 #include "RasterContext.h"
 
@@ -48,7 +48,7 @@ class LineFace;
 class DrawText;
 class ActiveEdgeTable;
 
-class Rasterizer : public Canvas
+class RasterCanvas : public Canvas
 {
   public:
     typedef ImageView::Point Point;
@@ -56,9 +56,9 @@ class Rasterizer : public Canvas
     typedef ImageView::Rect Rect;
 
   public:
-    Rasterizer(PaintSurface& surface);
+    RasterCanvas(PaintSurface& surface);
 
-    ~Rasterizer();
+    ~RasterCanvas();
 
     const Image& image() const;
 

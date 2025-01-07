@@ -27,7 +27,7 @@
   02110-1301 USA
 */
 
-#include "Rasterizer.h"
+#include "RasterCanvas.h"
 
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Painter.h>
@@ -44,7 +44,7 @@ namespace Gfx {
 ImageSurface::ImageSurface()
 : _canvas(0)
 {
-    _canvas = new Rasterizer(*this);
+    _canvas = new RasterCanvas(*this);
     setCanvas(_canvas);
 }
 
@@ -53,7 +53,7 @@ ImageSurface::ImageSurface(Pt::ssize_t width, Pt::ssize_t height,
                            std::size_t stride)
 : _canvas(0)
 {
-    _canvas = new Rasterizer(*this);
+    _canvas = new RasterCanvas(*this);
     setCanvas(_canvas);
 
     reset(width, height, stride);
@@ -99,25 +99,25 @@ void ImageSurface::setScaleFactor(double scaleFactor)
 
 void ImageSurface::setFontDir(const Pt::System::Path& path)
 {
-    Rasterizer::setFontDir(path);
+    RasterCanvas::setFontDir(path);
 }
 
 
 const std::string& ImageSurface::defaultFont()
 {
-    return Rasterizer::defaultFont();
+    return RasterCanvas::defaultFont();
 }
 
 
 void ImageSurface::setDefaultFont(const std::string& f)
 {
-    Rasterizer::setDefaultFont(f);
+    RasterCanvas::setDefaultFont(f);
 }
 
 
 std::vector<std::string> ImageSurface::fontNames()
 {
-    return Rasterizer::fontNames();
+    return RasterCanvas::fontNames();
 }
 
 ///////////////////////////////////////////////////////////////////////

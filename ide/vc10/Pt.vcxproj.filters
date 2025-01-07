@@ -1482,9 +1482,6 @@
     <ClInclude Include="..\..\src\Pt-Gfx\raster\LineSlope.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\raster\Rasterizer.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\skia\Rasterizer.h">
       <Filter>Pt-Gfx\skia</Filter>
     </ClInclude>
@@ -1663,6 +1660,9 @@
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\raster\RasterContext.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\raster\RasterCanvas.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2924,9 +2924,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\raster\FreeType.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\raster\Rasterizer.cpp">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\skia\Rasterizer.cpp">
       <Filter>Pt-Gfx\skia</Filter>
     </ClCompile>
@@ -3036,6 +3033,9 @@
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\raster\RasterContext.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\raster\RasterCanvas.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
   </ItemGroup>
