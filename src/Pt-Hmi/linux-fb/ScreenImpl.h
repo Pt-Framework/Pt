@@ -170,7 +170,7 @@ class ScreenImpl : public Form
 
     private:
         FrameBuffer&                 _frameBuffer;
-        PixmapSurface                _surface;
+        Pixmap                       _pixmap;
 
         Screen*                      _parent;
         Shell                        _shell;

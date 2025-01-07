@@ -32,7 +32,7 @@
 #include "FrameBuffer.h"
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
-#include "PixmapSurfaceImpl.h"
+#include "PixmapImpl.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Cursor.h>
@@ -60,16 +60,20 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _cursorPos(0, 0)
 , _drawCursor(false)
 {
-    _surface.impl()->reset( _frameBuffer.size(), 
-                            _frameBuffer.strideSize() );
+    _pixmap.impl()->reset( _frameBuffer.size(), 
+                           _frameBuffer.strideSize() );
+                             
+    Gfx::PaintSurface* surface = _pixmap.surface();
+    if(surface)
+    {
+      Gfx::Painter painter(*surface);
 
-    Gfx::Painter painter(_surface);
+      Gfx::RectF rect( Gfx::PointF(0, 0), _pixmap.size() );
+      painter.setBrush( Gfx::Color(0, 0, 0) );
+      painter.fillRect(rect);
+    }
 
-    Gfx::RectF rect( Gfx::PointF(0, 0), _surface.size() );
-    painter.setBrush( Gfx::Color(0, 0, 0) );
-    painter.fillRect(rect);
-
-    Form::setSurface(&_surface, Gfx::PointF(0, 0) );
+    Form::setSurface(surface, Gfx::PointF(0, 0) );
 
     setContent(&_shell);
 
@@ -277,7 +281,7 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     Gfx::SizeF size( fs.width(), fs.height() );
     size /= scaleFactor();
 
-    _surface.setScaleFactor( scaleFactor() );
+    _pixmap.setScaleFactor( scaleFactor() );
 
     if(_parent)
         _parent->onResize(*this, size);
@@ -306,8 +310,8 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     //
     // update the screen including the cursor
     //
-    Pt::Gfx::RectF urect = _surface.scaling().toPhysical(screenRect);
-    updateScreen( Gfx::round(urect) );
+    Pt::Gfx::RectF urect = scaling().toPhysical(screenRect);
+    updateScreen( Gfx::roundRect(urect) );
 }
 
 
@@ -316,7 +320,10 @@ void ScreenImpl::onPaintEvent(const PaintEvent& ev)
     Base::onPaintEvent(ev);
 
     const Gfx::RectF& rect = ev.rect();
-    onPaint(_surface, rect);
+
+    Gfx::PaintSurface* surface = _pixmap.surface();
+    if(surface)
+        onPaint(*surface, rect);
 }
 
 
@@ -337,7 +344,7 @@ void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     //
     // repaint the update area
     //
-    Gfx::Painter painter(_surface);
+    Gfx::Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     painter.setBrush( Pt::Gfx::Color(0, 0, 0) );
     painter.fillRect(rect);
@@ -346,7 +353,7 @@ void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
 const Gfx::Image& ScreenImpl::image() const
 {
-    return _surface.impl()->image();
+    return _pixmap.impl()->toImage();
 }
 
 
@@ -376,7 +383,8 @@ void ScreenImpl::drawCursor(const Pt::Gfx::PointF& pos)
 
        // TODO: is this enough to clear the cursor area in the back buffer?
        _frameBuffer.output( image().data(), 
-                            Gfx::Rect(_cursorPos, _cursorBackground.size()) );
+                            Gfx::Rect(_cursorPos, Gfx::Size(_cursorBackground.width(),
+                                                            _cursorBackground.height() ) ) );
     }
 
     //
@@ -413,7 +421,7 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
         _cursorBackground.height() != static_cast<int>( cursor.height() ) )
     {
         Gfx::Size size( cursor.width(), cursor.height() );
-        _cursorBackground.reset(_frameBuffer.format(), size);
+        _cursorBackground.reset(_frameBuffer.format(), size.width(), size.height() );
     }
 
     // keep the of background of the cursor area
@@ -436,13 +444,12 @@ void ScreenImpl::grabImage(const Pt::uint8_t* buffer,
                            Gfx::Image& image)
 {
     const size_t pixelSizeInByte = _frameBuffer.pixelSize();
-    const Gfx::Size& imageSize = image.size();
-    const Pt::ssize_t yMax = std::min<Pt::ssize_t>(pos.y() + imageSize.height(), _frameBuffer.height() );
+    const Pt::ssize_t yMax = std::min<Pt::ssize_t>(pos.y() + image.height(), _frameBuffer.height() );
 
     int fbWidth = static_cast<int>( _frameBuffer.width() );
 
-    size_t widthInPixel = ( pos.x() + imageSize.width() ) < fbWidth ? imageSize.width()
-                                                                    : fbWidth - pos.x();
+    size_t widthInPixel = ( pos.x() + image.width() ) < fbWidth ? image.width()
+                                                                : fbWidth - pos.x();
     const size_t widthInByte = widthInPixel * pixelSizeInByte;
 
     for(Pt::ssize_t y = pos.y(); y < yMax; ++y)
