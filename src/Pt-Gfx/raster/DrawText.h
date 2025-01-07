@@ -44,6 +44,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
 
 namespace Pt {
@@ -59,6 +60,11 @@ namespace Gfx {
  */
 class DrawText
 {
+  public:
+    typedef BasicPoint<Pt::ssize_t> Point;
+    typedef BasicSize<Pt::ssize_t> Size;
+    typedef BasicRect<Pt::ssize_t> Rect;
+
     public:
         /** @brief Default constructor
         */
@@ -78,8 +84,7 @@ class DrawText
 
         /** @brief Sets the clip.
         */
-        void setClip(Pt::ssize_t clipX, Pt::ssize_t clipY, 
-                     Pt::ssize_t clipWidth, Pt::ssize_t clipHeight);
+        void setClip(const Rect& clip);
 
         /** @brief Calculate font metrics for text
 
@@ -115,10 +120,7 @@ class DrawText
         FTC_ImageTypeRec _imageType;
         Transform        _transform;
         Color            _textColor;
-        Pt::ssize_t      _clipX;
-        Pt::ssize_t      _clipY;
-        Pt::ssize_t      _clipWidth;
-        Pt::ssize_t      _clipHeight;
+        Rect             _clip;
 };
 
 } //namespace

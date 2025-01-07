@@ -36,6 +36,7 @@
 
 #include <Pt/Types.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
 #include <Pt/Singleton.h>
 
@@ -58,6 +59,11 @@ class Transform;
 class FreeType : public Pt::Singleton<FreeType>
 {
     friend class Pt::Singleton<FreeType>;
+
+  public:
+    typedef BasicPoint<Pt::ssize_t> Point;
+    typedef BasicSize<Pt::ssize_t> Size;
+    typedef BasicRect<Pt::ssize_t> Rect;
 
     public:
         struct Init
@@ -90,9 +96,7 @@ class FreeType : public Pt::Singleton<FreeType>
         // TODO: use ImageView instead of clip
 
         void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
-                  const String& text, const Color& color,
-                  Pt::ssize_t clipX, Pt::ssize_t clipY, 
-                  Pt::ssize_t clipWidth, Pt::ssize_t clipHeight,
+                  const String& text, const Color& color, const Rect& clip,
                   const CompositionMode& mode, const Transform& tf, 
                   FTC_FaceID faceId, std::size_t fontSize);
 
@@ -103,11 +107,9 @@ class FreeType : public Pt::Singleton<FreeType>
 
         // TODO: use ImageView instead of clip
 
-        void drawGlyph(Image& image, const Color& color, int xpos, int ypos,
+        void drawGlyph(Image& image, int xpos, int ypos, const Color& color, 
                        int bmPitch, int height, int width, const unsigned char* buffer, 
-                       Pt::ssize_t clipX, Pt::ssize_t clipY, 
-                       Pt::ssize_t clipWidth, Pt::ssize_t clipHeight,
-                       const CompositionMode& mode);
+                       const Rect& clip, const CompositionMode& mode);
 
     private:
         typedef std::set<System::Path*> Files;

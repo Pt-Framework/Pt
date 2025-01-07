@@ -234,7 +234,7 @@ void Rasterizer::drawText(const PointF& toF, const String& text)
 
     Rect clip = updateClip();
 
-    _text->setClip( clip.x(), clip.y(), clip.width(), clip.height() );
+    _text->setClip(clip);
     _text->draw( _image, to.x(), to.y(), text, _compositionMode );
 }
 
@@ -245,7 +245,7 @@ void Rasterizer::drawText(const PointF& toF, const Pt::String& text, const Trans
 
     Rect clip = updateClip();
 
-    _text->setClip( clip.x(), clip.y(), clip.width(), clip.height() );
+    _text->setClip(clip);
     _text->draw(_image, to.x(), to.y(), text, _compositionMode, trans);
 }
 

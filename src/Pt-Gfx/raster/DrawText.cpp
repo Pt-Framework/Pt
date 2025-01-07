@@ -37,10 +37,7 @@ namespace Gfx {
 DrawText::DrawText()
 : _faceId(0)
 , _fontSize(10)
-, _clipX(0)
-, _clipY(0)
-, _clipWidth(999999)
-, _clipHeight(999999)
+, _clip( Point(0, 0), Size(999999, 999999) )
 {
   _faceId = FreeType::instance().defaultFace();
 }
@@ -74,13 +71,9 @@ void DrawText::setFont(const Font& font)
 }
 
 
-void DrawText::setClip(Pt::ssize_t clipX, Pt::ssize_t clipY, 
-                       Pt::ssize_t clipWidth, Pt::ssize_t clipHeight)
+void DrawText::setClip(const Rect& clip)
 {
-    _clipX = clipX;
-    _clipY = clipY;
-    _clipWidth = clipWidth;
-    _clipHeight = clipHeight;
+    _clip = clip;
 }
 
 
@@ -93,8 +86,7 @@ FontMetrics DrawText::fontMetrics(const String& text)
 void DrawText::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
                     const String& text, const CompositionMode& mode)
 {
-    return FreeType::instance().draw(image, x, y, text, _textColor,
-                                     _clipX, _clipY, _clipWidth, _clipHeight,
+    return FreeType::instance().draw(image, x, y, text, _textColor, _clip, 
                                      mode, _transform, _faceId, _fontSize);
 }
 
@@ -103,8 +95,7 @@ void DrawText::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y,
                     const String& text, const CompositionMode& mode, 
                     const Transform& trans)
 {
-    return FreeType::instance().draw(image, x, y, text, _textColor,
-                                     _clipX, _clipY, _clipWidth, _clipHeight, 
+    return FreeType::instance().draw(image, x, y, text, _textColor, _clip, 
                                      mode, trans, _faceId, _fontSize);
 }
 
