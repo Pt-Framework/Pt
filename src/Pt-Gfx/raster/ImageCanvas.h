@@ -48,6 +48,8 @@ class LineFace;
 class DrawText;
 class ActiveEdgeTable;
 
+/* TODO: Reuse paint attributes in RasterContext
+*/
 class ImageCanvas : public Canvas
 {
   public:
