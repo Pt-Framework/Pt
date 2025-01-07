@@ -153,13 +153,13 @@ Time timeFromString(const std::string& s)
     if( s.size() < 11 || s.at(2) != ':' || s.at(5) != ':' || s.at(8) != '.')
         throw ConversionError("invalid time");
 
-	const char* d = s.data();
-	hour = getNumber2(d);
-	min = getNumber2(d + 3);
-	sec = getNumber2(d + 6);
-	msec = getNumber3(d + 9);
+    const char* d = s.data();
+    hour = getNumber2(d);
+    min = getNumber2(d + 3);
+    sec = getNumber2(d + 6);
+    msec = getNumber3(d + 9);
 
-	return Time(hour, min, sec, msec);
+    return Time(hour, min, sec, msec);
 }
 
 } // namespace Pt

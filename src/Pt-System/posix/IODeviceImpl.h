@@ -32,7 +32,7 @@ namespace Pt {
 
 namespace System {
 
-    class IOHandle;
+    struct IOHandle;
 
     class IODeviceImpl
     {

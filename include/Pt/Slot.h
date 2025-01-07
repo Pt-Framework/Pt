@@ -91,7 +91,7 @@ class BindAdaptorBase
             delete _slot;
             _slot = s;
             
-            _a = b.a;
+            _a = b._a;
             return *this;
         }
         

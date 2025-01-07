@@ -387,14 +387,16 @@ class PT_API basic_string<Pt::Char>
 {
     public:
         typedef Pt::Char value_type;
+        typedef Pt::Char& reference;
+        typedef const Pt::Char& const_reference;
+        typedef Pt::Char* pointer;
+        typedef const Pt::Char* const_pointer;
+
         typedef std::size_t size_type;
-        typedef char_traits< Pt::Char > traits_type;
+        typedef char_traits<Pt::Char> traits_type;
         typedef std::allocator<Pt::Char> allocator_type;
         typedef allocator_type::difference_type difference_type;
-        typedef allocator_type::reference reference;
-        typedef allocator_type::const_reference const_reference;
-        typedef allocator_type::pointer pointer;
-        typedef allocator_type::const_pointer const_pointer;
+
         typedef value_type* iterator;
         typedef const value_type* const_iterator;
 

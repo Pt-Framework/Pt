@@ -27,14 +27,26 @@ Load base.jam ;
 # Configure Step
 ##########################################################################
 
+if "switch" in $(ARGV)
+{
+    JAM_SWITCH = true ;
+}
+
 if configure in $(ARGV)
+{
+    JAM_CONFIGURE = true ;
+}
+
+if $(JAM_SWITCH) || $(JAM_CONFIGURE)
 {
     Load configure.jam ;
 
     ConfigureClean ;
 
-    # load existing valid configuration
-    ConfigureLoad $(CONFIG) ;
+    if $(JAM_SWITCH)
+    {
+        ConfigureSwitch $(CONFIG) ;
+    }
 
     EchoOption JAMBASE : "Using Jambase" : $(JAMBASE) ;
     EchoOption OS : "Build Host OS" : $(OS:L) ;

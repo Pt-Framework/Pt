@@ -41,8 +41,15 @@
 /** @internal @todo This is useful, move this to Pt/Iterator.h
 */
 template<typename T>
-class nullterm_array_iterator : public std::iterator<std::input_iterator_tag, T>
+class nullterm_array_iterator
 {
+    public:
+      typedef std::input_iterator_tag iterator_category;
+      typedef std::ptrdiff_t      difference_type;
+      typedef T                   value_type;
+      typedef T*                  pointer;
+      typedef T&                  reference;
+
     public:
         nullterm_array_iterator()
         : _ptr(0)

@@ -53,7 +53,7 @@ rule ConfigureLog
     }
 }
 
-rule ConfigureLoad
+rule ConfigureSwitch
 {
     local _config = $(1) ;
 

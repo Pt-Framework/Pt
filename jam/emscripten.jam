@@ -9,7 +9,8 @@ rule TryBuild
     local _cflags = $(3) ;
     local _l = $(4) ;
     local _L = $(5) ;
-    local _out = a.out ;
+    local _out = a.js ;
+    local _out2 = a.wasm ;
     local _cmd ;
 
     if $(4)
@@ -23,7 +24,8 @@ rule TryBuild
 
     local _r = [ TryCommand $(_cmd) ] ;
 
-    TryCommand $(RM) $(_out) ;
+    TryCommand $(RM) $(_out) $(_out2) ;
+
     return $(_r) ;
 }
 
@@ -45,10 +47,11 @@ rule TryBuildC++
 rule CheckCc
 {
     TOOLSET_ROOT ?= "" ;
-    AS           ?= $(TOOLSET_ROOT)as ;
+    
+    AS           ?= "" ;
     CC           ?= $(TOOLSET_ROOT)emcc ;
     RANLIB       ?= $(TOOLSET_ROOT)emranlib ;
-    AR           ?= $(TOOLSET_ROOT)ar ru ;
+    AR           ?= $(TOOLSET_ROOT)emar ru ;
     LINK         ?= $(CC) ;
 
     Configure AS ;
@@ -57,11 +60,7 @@ rule CheckCc
     Configure LINK ;
     Configure RANLIB ;
 
-    #CLANGFLAGS = -MMD -MP -MF ;
-    #CLANGFLAGS += -target wasm32 -nostdinc -D__EMSCRIPTEN__ -D_LIBCPP_ABI_VERSION=2 -fno-builtin ;
-    
-    #CCFLAGS += $(CLANGFLAGS) ;
-    #CCFLAGS += -Ofast -std=c99 ;
+    DLL_LINKFLAGS = -shared ;
 
     if $(WITH_DEBUG)
     {
@@ -75,29 +74,18 @@ rule CheckCc
     if $(WITH_OPTIM)
     {
         OPTIM ?= -O2 ;
-        #LINKFLAGS  += -strip-all -gc-sections ;
     }
     else 
     {
         OPTIM ?= -O0 ;
     }
     
-    #LINKFLAGS += -no-entry -allow-undefined -import-memory ;
-    #LINKFLAGS += -export=__wasm_call_ctors -export=malloc -export=free -export=main ;
-    
     WARN ?= -Wall ;
 
     Configure CCFLAGS ;
     Configure WARN ;
     Configure OPTIM ;
-    Configure LINKFLAGS ;
-
-
-    #STDHDRS += -isystem$(SYSTEM_ROOT)/include/libcxx ;
-    #STDHDRS += -isystem$(SYSTEM_ROOT)/include/compat ;
-    #STDHDRS += -isystem$(SYSTEM_ROOT)/include ;
-    #STDHDRS += -isystem$(SYSTEM_ROOT)/include/libc ;
-    #STDHDRS += -isystem$(SYSTEM_ROOT)/lib/libc/musl/arch/emscripten ;
+    Configure DLL_LINKFLAGS ;
 }
 
 
@@ -113,11 +101,8 @@ rule CheckC++
     LINK++ = $(C++) ;
     Configure LINK++ ;
 
-    #CLANGFLAGS = -MMD -MP -MF ;
-    #CLANGFLAGS += -target wasm32 -nostdinc -D__EMSCRIPTEN__ -D_LIBCPP_ABI_VERSION=2 -fno-builtin ;
-    
-    #C++FLAGS += $(CLANGFLAGS) ;
-    #C++FLAGS += -Ofast -std=c++11 -fno-rtti -Wno-writable-strings -Wno-unknown-pragmas ;
+    C++FLAGS += -fexceptions ;
+    C++LINKFLAGS += -fexceptions ;
 
     if $(WITH_DEBUG)
     {
@@ -129,6 +114,7 @@ rule CheckC++
     }
 
     Configure C++FLAGS ;
+    Configure C++LINKFLAGS ;
 }
 
 ##############################################################################
@@ -141,6 +127,28 @@ rule FDefines
 
 rule FIncludes
 { return -I$(<) ; }
+
+
+rule Main-Build
+{
+    MainFromObjects $(<) : $(>) ;
+
+    local _target = $(<:S=$(SUFEXE)) ;
+    
+    Clean clean : $(_target:S=.js) ;
+    Clean clean : $(_target:S=.wasm) ;
+}
+
+
+rule Main-MakeLocate
+{
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    _MakeLocate $(_target) : $(>) ;
+    
+    MakeLocate $(_target:S=.js) : $(>) ;
+    MakeLocate $(_target:S=.wasm) : $(>) ;
+}
 
 
 rule Main-LinkSharedLibraries
@@ -171,17 +179,14 @@ rule SharedLibrary-Build
 
     LINKFLAGS on $(_target) += $(LINKFLAGS) $(DLL_LINKFLAGS) ;
 
-    if $(INSTALL_PATH) # macosx feature
-    {
-        LINKFLAGS on $(_target) += -install_name $(_target:D=$(INSTALL_PATH)) ;
-    }
-
     switch $(>:S)
     {
-        case .C :   LINK on $(_target) = $(C++) ;
-        case .cc :  LINK on $(_target) = $(C++) ;
-        case .cpp : LINK on $(_target) = $(C++) ;
-        case * :    LINK on $(_target) = $(CC) ;
+        case .C :   LINK on $(_target) = $(LINK++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cc :  LINK on $(_target) = $(LINK++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cpp : LINK on $(_target) = $(LINK++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
     }
 }
 
