@@ -65,6 +65,8 @@ class PT_GFX_API CanvasBase
 
         const Gfx::ImageFormat& format() const;
 
+        /** @brief Returns the logical size of the canvas.
+        */
         const Gfx::SizeF& size() const;
 
         const Scaling& scaling() const;

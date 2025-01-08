@@ -212,6 +212,7 @@ class ImageView
         typedef Gfx::Pixel Pixel;
         typedef Gfx::ConstPixel ConstPixel;
 
+        typedef Pt::ssize_t Scalar;
         typedef BasicPoint<Pt::ssize_t> Point;
         typedef BasicSize<Pt::ssize_t> Size;
         typedef BasicRect<Pt::ssize_t> Rect;
