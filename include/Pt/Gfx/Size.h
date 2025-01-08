@@ -217,15 +217,12 @@ class BasicSize {
 
 typedef BasicSize<Pt::ssize_t> Size;
 typedef BasicSize<double> SizeF;
-//typedef BasicSize<float> SizeF;
 
-
-inline Size round(const SizeF& r)
-{
-  return Size( lround(r.width()),
-               lround(r.height()) );
-}
-
+//inline Size round(const SizeF& r)
+//{
+//  return Size( lround(r.width()),
+//               lround(r.height()) );
+//}
 
 } //namespace
 

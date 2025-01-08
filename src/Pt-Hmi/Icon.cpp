@@ -29,6 +29,7 @@
 #include <Pt/Hmi/Icon.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/PngReader.h>
+#include <Pt/Math.h>
 
 #include <map>
 #include <algorithm>
@@ -93,7 +94,8 @@ class DefaultIconProvider : public IconProvider
 
         virtual const Gfx::Image& getImage(const Gfx::SizeF& sizeF)
         {
-            const Gfx::Size size = round(sizeF);
+            Gfx::Size size = Gfx::Size( lround(sizeF.width()), 
+                                        lround(sizeF.height()) );
 
             std::map<Gfx::SizeF, Entry>::iterator match;
             match = _images.begin();

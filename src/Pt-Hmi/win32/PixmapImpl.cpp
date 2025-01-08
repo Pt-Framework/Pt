@@ -852,8 +852,10 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
     Gfx::PointF toP = scaling().toPhysical(toF);
     Gfx::Point to = Gfx::round(toP);
 
-    Gfx::Size size = rect ? Gfx::round( rect->size() ) 
+    Gfx::Size size = rect ? Gfx::Size( lround(rect->width()), 
+                                       lround(rect->height()) ) 
                           : Gfx::Size( image.width(), image.height() );
+    
     Gfx::Point from = rect ? Gfx::round( rect->topLeft() ) : Gfx::Point();
 
     switch (_compositionMode)
@@ -976,20 +978,30 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toF,
     if( ! canvas )
         return;
 
-    const Gfx::Scaling& scaling = canvas->scaling();
-    
-    Gfx::Size size = rect ? Gfx::round( scaling.toPhysical(*rect).size() ) 
-                          : Gfx::round( pixmap.size() );
-   
-    Gfx::Point from = rect ? Gfx::round( scaling.toPhysical(*rect).topLeft() ) 
-                           : Gfx::Point();
+    int fromX = 0;
+    int fromY = 0;
+    int width = lround( pixmap.size().width() );
+    int height = lround( pixmap.size().height() );
+
+    if(rect)
+    {
+        const Gfx::Scaling& scaling = canvas->scaling();
+        Gfx::RectF rectP = scaling.toPhysical(*rect);
+        Gfx::SizeF sizeP = rectP.size();
+        Gfx::PointF fromP = rectP.topLeft();
+        
+        fromX = lround( fromP.x() );
+        fromY = lround( fromP.y()) ;
+        width = lround( sizeP.width() );
+        height = lround( sizeP.height() );
+    }
 
     switch (_compositionMode)
     {
         case Gfx::CompositionMode::SourceCopy:
         {
-            BitBlt(_dc, lround(to.x()), lround(to.y()), size.width(), size.height(),
-                   pixmap.deviceContext(), from.x(), from.y(), SRCCOPY);
+            BitBlt(_dc, lround(to.x()), lround(to.y()), width, height,
+                   pixmap.deviceContext(), fromX, fromY, SRCCOPY);
         }
         break;
 
@@ -1003,8 +1015,8 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toF,
 
             HDC pixmapDC = pixmap.deviceContext();
 
-            AlphaBlend(_dc, lround(to.x()), lround(to.y()), size.width(), size.height(),
-                       pixmapDC, from.x(), from.y(), size.width(), size.height(), bf);
+            AlphaBlend(_dc, lround(to.x()), lround(to.y()), width, height,
+                       pixmapDC, fromX, fromY, width, height, bf);
         }
         break;
     }

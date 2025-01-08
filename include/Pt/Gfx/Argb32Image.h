@@ -40,7 +40,6 @@ namespace Pt {
 
 namespace Gfx {
 
-
 /** @brief ARGB-32 image model.
 */
 class Argb32Model

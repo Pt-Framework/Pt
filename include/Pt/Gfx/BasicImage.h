@@ -31,7 +31,9 @@
 #define PT_GFX_BASICIMAGE_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Types.h>
 #include <vector>
 
@@ -46,6 +48,10 @@ class BasicView
         typedef ModelT                      Model;
         typedef typename ModelT::Pixel      Pixel;
         typedef typename ModelT::ConstPixel ConstPixel;
+
+        typedef BasicPoint<Pt::ssize_t> Point;
+        typedef BasicSize<Pt::ssize_t>  Size;
+        typedef BasicRect<Pt::ssize_t>  Rect;
 
         class PixelIterator
         {
@@ -224,13 +230,17 @@ template <typename ModelT, typename ViewT = BasicView<ModelT> >
 class BasicImage
 {
     public:
-        typedef ModelT                              Model;
-        typedef typename ModelT::Pixel              Pixel;
-        typedef typename ModelT::ConstPixel         ConstPixel;
+        typedef ModelT                      Model;
+        typedef typename ModelT::Pixel      Pixel;
+        typedef typename ModelT::ConstPixel ConstPixel;
 
-        typedef ViewT                               View;
-        typedef typename View::PixelIterator        PixelIterator;
-        typedef typename View::ConstPixelIterator   ConstPixelIterator;
+        typedef ViewT                             View;
+        typedef typename View::PixelIterator      PixelIterator;
+        typedef typename View::ConstPixelIterator ConstPixelIterator;
+
+        typedef typename View::Point Point;
+        typedef typename View::Size  Size;
+        typedef typename View::Rect  Rect;
 
     public:
         BasicImage(const Size& size, Pt::ssize_t padding = 0)

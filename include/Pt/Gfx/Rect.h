@@ -280,11 +280,11 @@ class BasicRect
 typedef BasicRect<Pt::ssize_t> Rect;
 typedef BasicRect<double> RectF;
 
-inline Rect roundRect(const RectF& r)
-{
-  return Rect( round(r.topLeft()),
-               round(r.size()) );
-}
+//inline Rect roundRect(const RectF& r)
+//{
+//  return Rect( round(r.topLeft()),
+//               round(r.size()) );
+//}
 
 }  // namespace
 

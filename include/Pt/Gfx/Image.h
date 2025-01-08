@@ -42,10 +42,14 @@ namespace Gfx {
 class PT_GFX_API Image
 {
     public:
-        typedef ImageView::Pixel Pixel;
-        typedef ImageView::ConstPixel ConstPixel;
-        typedef ImageView::PixelIterator PixelIterator;
+        typedef ImageView::Pixel              Pixel;
+        typedef ImageView::ConstPixel         ConstPixel;
+        typedef ImageView::PixelIterator      PixelIterator;
         typedef ImageView::ConstPixelIterator ConstPixelIterator;
+
+        typedef ImageView::Point Point;
+        typedef ImageView::Size  Size;
+        typedef ImageView::Rect  Rect;
 
     public:
         Image();

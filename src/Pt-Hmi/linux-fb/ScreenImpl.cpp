@@ -42,6 +42,7 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/System/Clock.h>
 #include <Pt/System/Logger.h>
+#include <Pt/Math.h>
 
 #include <algorithm>
 #include <cmath>
@@ -296,9 +297,9 @@ void ScreenImpl::onRescale(double scaling)
 
 void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
-    const Gfx::RectF& screenRect = ev.rect();
+    const Gfx::RectF& updateRectF = ev.rect();
 
-    if( screenRect.isNull() )
+    if( updateRectF.isNull() )
         return;
 
     Base::onProcessPaintEvent(ev);
@@ -310,8 +311,13 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     //
     // update the screen including the cursor
     //
-    Pt::Gfx::RectF urect = scaling().toPhysical(screenRect);
-    updateScreen( Gfx::roundRect(urect) );
+    Pt::Gfx::RectF updateRectP = scaling().toPhysical(updateRectF);
+    
+    Gfx::Image::Rect updateRect( Gfx::Image::Point( lround(updateRectP.x()), 
+                                                    lround(updateRectP.y()) ),
+                                 Gfx::Image::Size( lround(updateRectP.width()),
+                                                   lround(updateRectP.height()) ) );
+    updateScreen(updateRect);
 }
 
 
