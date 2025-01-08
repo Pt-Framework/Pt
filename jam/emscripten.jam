@@ -47,11 +47,16 @@ rule TryBuildC++
 rule CheckCc
 {
     TOOLSET_ROOT ?= "" ;
-    
+
+    if $(TOOLSET_ROOT) && $(OS:L) = nt
+    {
+      TOOLSET_ROOT = $(TOOLSET_ROOT:J=" ") ;
+    }
+
     AS           ?= "" ;
-    CC           ?= $(TOOLSET_ROOT)emcc ;
-    RANLIB       ?= $(TOOLSET_ROOT)emranlib ;
-    AR           ?= $(TOOLSET_ROOT)emar ru ;
+    CC           ?= \"$(TOOLSET_ROOT)emcc\" ;
+    RANLIB       ?= \"$(TOOLSET_ROOT)emranlib\" ;
+    AR           ?= \"$(TOOLSET_ROOT)emar ru\" ;
     LINK         ?= $(CC) ;
 
     Configure AS ;
@@ -95,7 +100,7 @@ rule CheckC++
 
     TOOLSET_ROOT ?= "" ;
 
-    C++ ?= $(TOOLSET_ROOT)em++ ;
+    C++ ?= \"$(TOOLSET_ROOT)em++\" ;
     Configure C++ ;
 
     LINK++ = $(C++) ;
