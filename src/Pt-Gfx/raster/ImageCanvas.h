@@ -314,7 +314,6 @@ class ImageCanvas : public Canvas
 
     DrawText*       _text;
     Rect            _clip;
-    Font            _font;
 
     Brush           _brush;
     Image           _brushBuffer;

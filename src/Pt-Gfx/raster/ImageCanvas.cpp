@@ -153,7 +153,6 @@ ImageCanvas::ImageCanvas(PaintSurface& surface)
 , _text( new DrawText() )
 , _compositionMode(CompositionMode::SourceCopy)
 {
-    _text->setFont(_font);
 }
 
 
@@ -343,9 +342,7 @@ void ImageCanvas::onFontChanged()
         return;
 
     const Font& font = _paint->font();
-
-    _font = font;
-    _text->setFont(_font);
+    _text->setFont(font);
 }
 
 
