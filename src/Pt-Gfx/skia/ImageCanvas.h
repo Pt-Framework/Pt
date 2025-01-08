@@ -164,56 +164,7 @@ class ImageCanvas : public Canvas
     static std::vector<std::string> fontNames();
 
     private:
-        static SkPoint toSkia(const Gfx::PointF& p)
-        {
-            SkPoint sp;
-
-            sp.fX = p.x();
-            sp.fY = p.y();
-            return sp;
-        }
-
-        static SkRect toSkia(const Gfx::RectF& r)
-        {
-            SkRect sr;
-
-            sr.fLeft = r.left();
-            sr.fRight = r.right();
-            sr.fTop = r.top();
-            sr.fBottom = r.bottom();
-
-            return sr;
-        }
-  
-        static SkRect toSkia(const Gfx::PointF& p, const Gfx::SizeF& s)
-        {
-            SkRect sr;
-
-            sr.fLeft = p.x();
-            sr.fRight = p.x() + s.width();
-            sr.fTop = p.y();
-            sr.fBottom = p.y() + s.height();
-
-            return sr;
-        }
-
         static SkPath toSkia(const Gfx::Path& p);
-
-        static bool equals(const Gfx::PointF& p1, const Gfx::PointF& p2)
-        {
-            double dt = std::abs(p1.x() - p2.x());
-
-            if (dt > 0.1)
-                return false;
-
-
-            dt = std::abs(p1.y() - p2.y());
-
-            if (dt > 0.1)
-                return false;
-
-            return true;
-        }
   
   private:
       void init(Image& image);

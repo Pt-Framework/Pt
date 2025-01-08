@@ -190,7 +190,6 @@ void ImageCanvas::onReleasePaint()
 }
 
 
-
 void ImageCanvas::onCompositionModeChanged()
 {
     if( ! _paint )
@@ -247,10 +246,14 @@ void ImageCanvas::onClipChanged()
 void ImageCanvas::updateClip() const
 {
     RectF imageRect( _image.width(),_image.height() );
-    RectF currentClip = _clip.intersect(imageRect);
+    RectF clip = _clip.intersect(imageRect);
 
     if(_canvas)
-        _canvas->clipRect(toSkia(currentClip), SkClipOp::kMax_EnumValue);
+    {
+        SkRect skClip = SkRect::MakeLTRB( clip.left(), clip.top(), 
+                                          clip.right(), clip.bottom() );
+        _canvas->clipRect(skClip, SkClipOp::kMax_EnumValue);
+    }
 }
 
 
@@ -284,7 +287,10 @@ void ImageCanvas::onDrawPolyline(const Gfx::Polyline& line)
         path.lineTo( SkPoint::Make(p.x(), p.y()) );
     }
 
-    bool isClosed = equals( p0, line.at(n - 1) );
+    Gfx::PointF last = line.at(n - 1);
+
+    bool isClosed = std::abs( p0.x() - last.x() ) < 0.1 &&
+                    std::abs( p0.y() - last.y() ) < 0.1;
     if(isClosed)
         path.close();
 
@@ -365,7 +371,6 @@ void ImageCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
     updateClip();
     _canvas->drawOval( sr, _paint->brush() );
 }
-
 
 
 FontMetrics ImageCanvas::onGetFontMetrics(const String& text) const
@@ -481,24 +486,24 @@ bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
 
 void ImageCanvas::onDrawPath(const Gfx::Path& path, float smoothness) 
 {
-    //if (!_canvas)
-    //    return;
+    if( ! _canvas )
+        return;
 
-    //updateClip();
+    updateClip();
 
-    //SkPath skPath = toSkia(path);
-    //_canvas->drawPath( skPath, _paintData->pen() );
+    SkPath skPath = toSkia(path);
+    _canvas->drawPath( skPath, _paint->skPen() );
 }
 
 
 void ImageCanvas::onFillPath(const Gfx::Path& path, float smoothness) 
 {
-    //if (!_canvas)
-    //    return;
+    if( ! _canvas )
+        return;
 
-    //updateClip();
-    //SkPath skPath = toSkia(path);
-    //_canvas->drawPath( skPath, _paintData->brush() );
+    updateClip();
+    SkPath skPath = toSkia(path);
+    _canvas->drawPath( skPath, _paint->brush() );
 }
 
 
@@ -532,7 +537,7 @@ SkPath ImageCanvas::toSkia(const Gfx::Path& p)
 
     std::size_t s = p.size();
 
-    for (std::size_t n = 0; n < s; n++)
+    for(std::size_t n = 0; n < s; n++)
     {
         const Gfx::Element& e = p.at(n);
 
