@@ -45,9 +45,8 @@ SubDirC++Flags [ FDefines SK_DISABLE_EFFECT_DESERIALIZATION ] ;
 #######################################################################
 
 SKIA_C_SOURCES = sk_paint.cpp 
-                         sk_surface.cpp 
-                 sk_effects.cpp
-                         ;
+                 sk_surface.cpp 
+                 sk_effects.cpp ;
 
 SKIA_SOURCES += $(SKIA_C_SOURCES:D=c) ;
 
@@ -252,8 +251,7 @@ SKIA_CORE_SOURCES = SkAAClip.cpp
                     SkWriter32.cpp
                     SkXfermode.cpp
                     SkXfermodeInterpretation.cpp
-                    SkYUVPlanesCache.cpp
-                              ;
+                    SkYUVPlanesCache.cpp ;
 
 SKIA_SOURCES += $(SKIA_CORE_SOURCES:D=core) ;
 

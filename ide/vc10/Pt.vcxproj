@@ -375,9 +375,9 @@
     <ClInclude Include="..\..\src\Pt-Gfx\raster\RasterContext.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\skia\DrawText.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\skia\FreeType.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\skia\PaintData.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\skia\Rasterizer.h" />
+    <ClInclude Include="..\..\src\Pt-Gfx\skia\ImageCanvas.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\skia\SkiaBlitter.h" />
+    <ClInclude Include="..\..\src\Pt-Gfx\skia\SkiaContext.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Span.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\ArrowCursor.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
@@ -528,7 +528,6 @@
     <None Include="..\..\include\Pt\String.tpp" />
     <None Include="..\..\jam.bat" />
     <None Include="..\..\Jambase" />
-    <None Include="..\..\Jamconfigure" />
     <None Include="..\..\Jamfile" />
     <None Include="..\..\src\Pt-Gfx\Jamfile" />
     <None Include="..\..\src\Pt-Gfx\tests\Jamfile" />
@@ -598,8 +597,9 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb32Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\skia\DrawText.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\skia\FreeType.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\skia\Rasterizer.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\skia\ImageCanvas.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\skia\SkiaBlitter.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\skia\SkiaContext.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Argb32Test.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\BlockscaleTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest.cpp" />

@@ -357,7 +357,7 @@ void ImageCanvas::onClipChanged()
     const RectF* clip = _paint->clip();
     if( ! clip )
     {
-        _clip = Rect( _image.width(),_image.height() );
+        _clip = Rect( _image.width(), _image.height() );
     }
     else
     {

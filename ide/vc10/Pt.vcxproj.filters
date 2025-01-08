@@ -1482,12 +1482,6 @@
     <ClInclude Include="..\..\src\Pt-Gfx\raster\LineSlope.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\skia\Rasterizer.h">
-      <Filter>Pt-Gfx\skia</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\skia\PaintData.h">
-      <Filter>Pt-Gfx\skia</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\skia\DrawText.h">
       <Filter>Pt-Gfx\skia</Filter>
     </ClInclude>
@@ -1665,6 +1659,12 @@
     <ClInclude Include="..\..\src\Pt-Gfx\raster\ImageCanvas.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\skia\ImageCanvas.h">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\skia\SkiaContext.h">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1708,7 +1708,6 @@
     </None>
     <None Include="..\..\jam.bat" />
     <None Include="..\..\Jambase" />
-    <None Include="..\..\Jamconfigure" />
     <None Include="..\..\src\Pt-Unit\Jamfile">
       <Filter>Pt-Unit</Filter>
     </None>
@@ -2924,9 +2923,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\raster\FreeType.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\skia\Rasterizer.cpp">
-      <Filter>Pt-Gfx\skia</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\skia\DrawText.cpp">
       <Filter>Pt-Gfx\skia</Filter>
     </ClCompile>
@@ -3037,6 +3033,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\raster\ImageCanvas.cpp">
       <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\skia\ImageCanvas.cpp">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\skia\SkiaContext.cpp">
+      <Filter>Pt-Gfx\skia</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

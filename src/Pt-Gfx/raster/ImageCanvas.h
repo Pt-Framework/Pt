@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_IMAGE_CANVAS_H
-#define PT_GFX_IMAGE_CANVAS_H
+#ifndef PT_GFX_RASTER_IMAGE_CANVAS_H
+#define PT_GFX_RASTER_IMAGE_CANVAS_H
 
 #include "RasterContext.h"
 
@@ -45,8 +45,9 @@ namespace Gfx {
 class LineSlope;
 class LineEdge;
 class LineFace;
-class DrawText;
 class ActiveEdgeTable;
+
+class DrawText;
 
 /* TODO: Reuse paint attributes in RasterContext
 */
