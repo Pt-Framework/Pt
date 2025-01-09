@@ -50,7 +50,7 @@ class BasicSize {
     public:
         /** @brief Construct with width and height.
         */
-        BasicSize(T w = 0, T h = 0)
+        explicit BasicSize(T w = 0, T h = 0)
         : _w(w), _h(h)
         {}
 
@@ -214,15 +214,7 @@ class BasicSize {
         T _h;
 };
 
-
-typedef BasicSize<Pt::ssize_t> Size;
 typedef BasicSize<double> SizeF;
-
-//inline Size round(const SizeF& r)
-//{
-//  return Size( lround(r.width()),
-//               lround(r.height()) );
-//}
 
 } //namespace
 

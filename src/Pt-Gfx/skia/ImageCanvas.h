@@ -62,6 +62,11 @@ class DrawText;
 class ImageCanvas : public Canvas
 {
   public:
+    typedef ImageView::Point Point;
+    typedef ImageView::Size Size;
+    typedef ImageView::Rect Rect;
+
+  public:
     ImageCanvas(PaintSurface& surface);
 
     ~ImageCanvas();
@@ -70,12 +75,11 @@ class ImageCanvas : public Canvas
 
     void reset(const Gfx::Image& image);
 
-    void reset(Pt::ssize_t width, Pt::ssize_t height, 
-               std::size_t stride);
+    void reset(const Gfx::SizeF& size, std::size_t stride);
 
     void setScaleFactor(double scaleFactor);
 
-    const Size& physicalSize() const;
+    const SizeF& physicalSize() const;
 
     const SizeF& logicalSize() const;
 
@@ -175,7 +179,7 @@ class ImageCanvas : public Canvas
     Image            _image;
     SkiaContext*     _paint;
 
-    Gfx::Size        _physicalSize;
+    Gfx::SizeF       _physicalSize;
     Gfx::SizeF       _logicalSize;
     Gfx::Scaling     _scaling;
 

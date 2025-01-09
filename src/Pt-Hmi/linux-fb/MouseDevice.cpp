@@ -45,6 +45,8 @@ namespace Hmi {
 MouseDevice::MouseDevice(const char* deviceName)
 : _ioh(*this)
 , _loop(0)
+, _screenWidth(0)
+, _screenHeight(0)
 , _shift(false)
 , _control(false)
 , _alt(false)
@@ -72,6 +74,8 @@ MouseDevice::MouseDevice(const char* deviceName)
 MouseDevice::MouseDevice()
 : _ioh(*this)
 , _loop(0)
+, _screenWidth(0)
+, _screenHeight(0)
 , _shift(false)
 , _control(false)
 , _alt(false)
@@ -212,14 +216,14 @@ void MouseDevice::onRelative(const input_event& ev)
     if( _mouseEvent.x() < 0 )
         _mouseEvent.setX( 0);
 
-    if( _mouseEvent.x() >= _screenSize.width() )
-        _mouseEvent.setX( _screenSize.width() - 1 );
+    if( _mouseEvent.x() >= _screenWidth )
+        _mouseEvent.setX( _screenWidth - 1 );
 
     if( _mouseEvent.y() < 0 )
         _mouseEvent.setY( 0);
 
-    if( _mouseEvent.y() >= _screenSize.height() )
-        _mouseEvent.setY( _screenSize.height() - 1 );
+    if( _mouseEvent.y() >= _screenHeight )
+        _mouseEvent.setY( _screenHeight - 1 );
 
     _eventReady.send(_mouseEvent);
 }
@@ -232,21 +236,21 @@ void MouseDevice::onAbsolute(const input_event& ev)
     _mouseEvent.setMove();
 
     if(ev.code == ABS_X)
-        _mouseEvent.setX( static_cast<double>(ev.value) * _screenSize.width() / _mouseResWidth);
+        _mouseEvent.setX( static_cast<double>(ev.value) * _screenWidth / _mouseResWidth);
     else if(ev.code == ABS_Y)
-        _mouseEvent.setY( static_cast<double>(ev.value) * _screenSize.height() / _mouseResHeigh );    
+        _mouseEvent.setY( static_cast<double>(ev.value) * _screenHeight / _mouseResHeigh );    
 
     if( _mouseEvent.x() < 0 )
         _mouseEvent.setX( 0);
 
-    if( _mouseEvent.x() >= _screenSize.width() )
-        _mouseEvent.setX( _screenSize.width() - 1 );
+    if( _mouseEvent.x() >= _screenWidth )
+        _mouseEvent.setX( _screenWidth - 1 );
 
     if( _mouseEvent.y() < 0 )
         _mouseEvent.setY( 0);
 
-    if( _mouseEvent.y() >= _screenSize.height() )
-        _mouseEvent.setY( _screenSize.height() - 1 );
+    if( _mouseEvent.y() >= _screenHeight )
+        _mouseEvent.setY( _screenHeight - 1 );
 
     _eventReady.send(_mouseEvent);
 }

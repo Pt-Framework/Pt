@@ -47,6 +47,11 @@ namespace Hmi {
 
 class FrameBuffer
 {
+  public:
+    typedef Gfx::ImageView::Point Point;
+    typedef Gfx::ImageView::Size Size;
+    typedef Gfx::ImageView::Rect Rect;
+
     public:
         enum Rotation
         {
@@ -75,9 +80,9 @@ class FrameBuffer
 
         size_t height() const;
 
-        Gfx::Size size() const 
+        Size size() const 
         {
-            return Gfx::Size( width(), height() );
+            return Size( width(), height() );
         }
 
         size_t depth() const

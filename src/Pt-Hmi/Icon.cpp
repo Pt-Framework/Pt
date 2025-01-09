@@ -94,8 +94,8 @@ class DefaultIconProvider : public IconProvider
 
         virtual const Gfx::Image& getImage(const Gfx::SizeF& sizeF)
         {
-            Gfx::Size size = Gfx::Size( lround(sizeF.width()), 
-                                        lround(sizeF.height()) );
+            long width = lround(sizeF.width());
+            long height = lround(sizeF.height());
 
             std::map<Gfx::SizeF, Entry>::iterator match;
             match = _images.begin();
@@ -109,8 +109,8 @@ class DefaultIconProvider : public IconProvider
                 const Gfx::SizeF& matchSize = match->first;
                 double matchArea = matchSize.width() * matchSize.height();
                 
-                if( imageSize.width() <= size.width() &&
-                    imageSize.height() <= size.height() && 
+                if( imageSize.width() <= width &&
+                    imageSize.height() <= height && 
                     imageArea > matchArea)
                 {
                     match = it;

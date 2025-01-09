@@ -45,15 +45,14 @@ class PixmapImpl
         PixmapImpl()
         { }
 
-        void reset(const Gfx::Size& size, std::size_t stride)
+        void reset(const Gfx::SizeF& size, std::size_t stride)
         {
-            _image.reset(size.width(), size.height(), stride);
+            _image.reset(size, stride);
         }
 
         void set(const Gfx::Image& image)
         {
             _image.reset(image);
-            _size = Gfx::SizeF( image.width(), image.height() );
         }
 
         const Gfx::Image& toImage() const
@@ -66,15 +65,12 @@ class PixmapImpl
 
         const Gfx::SizeF& size() const
         {
-            return _size;
+            return _image.size();
         }
 
         void resize(const Gfx::SizeF& size)
         {
-            Pt::ssize_t width = Pt::lround( size.width() );
-            Pt::ssize_t height = Pt::lround( size.height() );
-            _image.reset(width, height);
-            _size = Gfx::SizeF(width, height);
+            _image.reset(size);
         }
 
         void setScaleFactor(double scaleFactor)
@@ -117,7 +113,6 @@ class PixmapImpl
     
     private:
         Gfx::ImageLayer _image;
-        Gfx::SizeF      _size;
 };
 
 } // namespace

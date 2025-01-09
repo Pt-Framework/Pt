@@ -74,7 +74,7 @@ ApplicationImpl::ApplicationImpl()
     try
     {
         _mouseDevice = new MouseDevice(mouse.c_str());
-        _mouseDevice->setScreenLimit(_frameBuffer.size());
+        _mouseDevice->setScreenLimit(_frameBuffer.width(), _frameBuffer.height());
         _mouseDevice->setActive(*this);
         _mouseDevice->begin();
         _mouseDevice->eventReady() += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
@@ -123,7 +123,7 @@ void ApplicationImpl::openInputDevice(const std::string& deviceName)
     try
     {
         InputDevice* device = new InputDevice(deviceName.c_str());
-        device->setScreenLimit(_frameBuffer.size());
+        device->setScreenLimit( _frameBuffer.width(), _frameBuffer.height() );
         device->setActive(*this);
         device->begin();
         device->eventReady() += Pt::slot(*this, &ApplicationImpl::onKeyEvent);

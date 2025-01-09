@@ -56,19 +56,19 @@ class PT_GFX_API ImageSurface : public PaintSurface
   public:
     ImageSurface();
 
-    ImageSurface(Pt::ssize_t width, Pt::ssize_t height, 
-                 std::size_t stride = 0);
+    ImageSurface(const Gfx::SizeF& size, std::size_t stride = 0);
 
     virtual ~ImageSurface();
 
     void reset(const Gfx::Image& image);
 
-    void reset(Pt::ssize_t width, Pt::ssize_t height, 
-               std::size_t stride = 0);
+    void reset(const Gfx::SizeF&, std::size_t stride = 0);
 
     const Gfx::Image& image() const;
 
-    const Gfx::Size& size() const;
+    /** @brief Returns the physical size.
+    */
+    const Gfx::SizeF& size() const;
 
     void setScaleFactor(double scaleFactor);
 
@@ -92,19 +92,19 @@ class PT_GFX_API ImageLayer : public PaintLayer
     public:
         ImageLayer();
 
-        ImageLayer(Pt::ssize_t width, Pt::ssize_t height, 
-                   std::size_t stride = 0);
+        ImageLayer(const Gfx::SizeF& size, std::size_t stride = 0);
 
         virtual ~ImageLayer();
 
         void reset(const Gfx::Image& image);
 
-        void reset(Pt::ssize_t width, Pt::ssize_t height, 
-                   std::size_t stride = 0);
+        void reset(const Gfx::SizeF& size, std::size_t stride = 0);
 
         const Gfx::Image& image() const;
 
-        const Gfx::Size& size() const;
+        /** @brief Returns the physical size.
+        */
+        const Gfx::SizeF& size() const;
 
         void setScaleFactor(double scaleFactor);
 

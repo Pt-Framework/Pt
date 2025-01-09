@@ -44,6 +44,8 @@ namespace Hmi {
 InputDevice::InputDevice(const char* deviceName)
 : _ioh(*this)
 , _loop(0)
+, _screenWidth(0)
+, _screenHeight(0)
 , _shift(false)
 , _control(false)
 , _alt(false)
@@ -63,6 +65,8 @@ InputDevice::InputDevice(const char* deviceName)
 InputDevice::InputDevice()
 : _ioh(*this)
 , _loop(0)
+, _screenWidth(0)
+, _screenHeight(0)
 , _shift(false)
 , _control(false)
 , _alt(false)
@@ -210,14 +214,14 @@ void InputDevice::onRelative(const input_event& ev)
     if( _mouseEvent.x() < 0 )
         _mouseEvent.setX( 0);
 
-    if( _mouseEvent.x() >= _screenSize.width() )
-        _mouseEvent.setX( _screenSize.width() - 1 );
+    if( _mouseEvent.x() >= _screenWidth )
+        _mouseEvent.setX( _screenWidth - 1 );
 
     if( _mouseEvent.y() < 0 )
         _mouseEvent.setY( 0);
 
-    if( _mouseEvent.y() >= _screenSize.height() )
-        _mouseEvent.setY( _screenSize.height() - 1 );
+    if( _mouseEvent.y() >= _screenHeight )
+        _mouseEvent.setY( _screenHeight - 1 );
 
     _eventReady.send(_mouseEvent);
 }

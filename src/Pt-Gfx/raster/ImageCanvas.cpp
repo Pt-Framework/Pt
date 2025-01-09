@@ -186,9 +186,11 @@ void ImageCanvas::reset(const Gfx::Image& image)
 }
 
 
-void ImageCanvas::reset(Pt::ssize_t width, Pt::ssize_t height, 
-                       std::size_t stride)
+void ImageCanvas::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
+    long width = lround( sizeF.width() );
+    long height = lround( sizeF.height() );
+
     _image.reset( _image.format(), width, height, stride );
 
     _physicalSize.set(width, height);
@@ -206,7 +208,7 @@ void ImageCanvas::setScaleFactor(double scaleFactor)
 }
 
 
-const Size& ImageCanvas::physicalSize() const
+const SizeF& ImageCanvas::physicalSize() const
 {
     return _physicalSize;
 }

@@ -49,14 +49,13 @@ ImageSurface::ImageSurface()
 }
 
 
-ImageSurface::ImageSurface(Pt::ssize_t width, Pt::ssize_t height, 
-                           std::size_t stride)
+ImageSurface::ImageSurface(const Gfx::SizeF& size, std::size_t stride)
 : _canvas(0)
 {
     _canvas = new ImageCanvas(*this);
     setCanvas(_canvas);
 
-    reset(width, height, stride);
+    reset(size, stride);
 }
 
 
@@ -72,10 +71,9 @@ void ImageSurface::reset(const Gfx::Image& image)
 }
 
 
-void ImageSurface::reset(Pt::ssize_t width, Pt::ssize_t height, 
-                         std::size_t stride)
+void ImageSurface::reset(const Gfx::SizeF& size, std::size_t stride)
 {
-    _canvas->reset(width, height, stride);
+    _canvas->reset(size, stride);
 }
 
 
@@ -85,7 +83,7 @@ const Gfx::Image& ImageSurface::image() const
 }
 
 
-const Gfx::Size& ImageSurface::size() const
+const Gfx::SizeF& ImageSurface::size() const
 {
     return _canvas->physicalSize();
 }
@@ -130,9 +128,8 @@ ImageLayer::ImageLayer()
 }
 
 
-ImageLayer::ImageLayer(Pt::ssize_t width, Pt::ssize_t height, 
-                       std::size_t stride)
-: _surface(width, height, stride)
+ImageLayer::ImageLayer(const Gfx::SizeF& size, std::size_t stride)
+: _surface(size, stride)
 {
     setSurface(&_surface);
 }
@@ -149,10 +146,9 @@ void ImageLayer::reset(const Gfx::Image& image)
 }
 
 
-void ImageLayer::reset(Pt::ssize_t width, Pt::ssize_t height, 
-                       std::size_t stride)
+void ImageLayer::reset(const Gfx::SizeF& size, std::size_t stride)
 {
-    _surface.reset(width, height, stride);
+    _surface.reset(size, stride);
 }
 
 
@@ -162,7 +158,7 @@ const Gfx::Image& ImageLayer::image() const
 }
 
 
-const Gfx::Size& ImageLayer::size() const
+const Gfx::SizeF& ImageLayer::size() const
 {
     return _surface.size();
 }

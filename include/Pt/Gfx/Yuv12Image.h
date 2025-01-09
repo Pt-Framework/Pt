@@ -130,12 +130,12 @@ class Yuv12Model
         template <typename T>
         static void advance(T*& y, T*& u, T*& v,
                             Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                            T* data, Pt::ssize_t stride, const Size& size,
+                            T* data, Pt::ssize_t stride, Pt::ssize_t width, Pt::ssize_t height,
                             Pt::ssize_t padding, Pt::ssize_t subStride)
         {
             ++y;
 
-            if( ++xpos >= size.width() )
+            if( ++xpos >= width )
             {
                 ++u;
                 ++v;
@@ -225,13 +225,14 @@ class Yuv12Model::ConstPixel
         {
             Yuv12Model::advance(_y, _u, _v, _xpos, _ypos,
                                 _view->data(), _view->stride(),
-                                _view->size(), _view->padding(), _subStride);
+                                _view->width(), _view->height(),
+                                _view->padding(), _subStride);
         }
 
         void advance( Pt::ssize_t n )
         {
             Yuv12Model::advance(_y, _u, _v, n, _xpos, _ypos, _view->data(), 
-                                _view->stride(),_view->width(), _view->height());
+                                _view->stride(), _view->width(), _view->height());
         }
 
         Color toColor() const
@@ -341,7 +342,8 @@ class Yuv12Model::Pixel
         {
             Yuv12Model::advance(_y, _u, _v, _xpos, _ypos,
                                 _view->data(), _view->stride(),
-                                _view->size(), _view->padding(), _subStride);
+                                _view->width(), _view->height(), 
+                                _view->padding(), _subStride);
         }
 
         void advance( Pt::ssize_t n )

@@ -64,9 +64,10 @@ class MouseDevice : public System::Selectable
 
         void begin();
 
-        void setScreenLimit(const Pt::Gfx::Size& size)
+        void setScreenLimit(std::size_t width, std::size_t height)
         {
-            _screenSize = size;
+            _screenWidth = width;
+            _screenHeight = height;
         }
 
         Pt::Signal<const Pt::Event&>& eventReady()
@@ -93,7 +94,8 @@ class MouseDevice : public System::Selectable
     private:
         Pt::System::IOHandle _ioh;
         Pt::System::EventLoop* _loop;
-        Pt::Gfx::Size _screenSize;
+        std::size_t _screenWidth;
+        std::size_t _screenHeight;
         bool _shift;
         bool _control;
         bool _alt;

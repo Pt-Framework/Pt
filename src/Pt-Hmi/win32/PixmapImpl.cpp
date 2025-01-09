@@ -849,14 +849,20 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
-    Gfx::PointF toP = scaling().toPhysical(toF);
-    Gfx::Point to = Gfx::round(toP);
+    Gfx::PointF to = scaling().toPhysical(toF);
 
-    Gfx::Size size = rect ? Gfx::Size( lround(rect->width()), 
-                                       lround(rect->height()) ) 
-                          : Gfx::Size( image.width(), image.height() );
-    
-    Gfx::Point from = rect ? Gfx::round( rect->topLeft() ) : Gfx::Point();
+    int fromX = 0;
+    int fromY = 0;
+    int width = image.width();
+    int height = image.height();
+
+    if(rect)
+    {
+        fromX = lround( rect->x() );
+        fromY = lround( rect->y()) ;
+        width = lround( rect->width() );
+        height = lround( rect->height() );
+    }
 
     switch (_compositionMode)
     {
@@ -892,8 +898,8 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
             HDC bitmapDC = CreateCompatibleDC(NULL);
             SelectObject(bitmapDC, bitmap);
 
-            BitBlt(_dc, to.x(), to.y(), size.width(), size.height(),
-                   bitmapDC, from.x(), from.y(), SRCCOPY);
+            BitBlt(_dc, lround(to.x()), lround(to.y()), width, height,
+                   bitmapDC, fromX, fromY, SRCCOPY);
 
             DeleteDC(bitmapDC);
             DeleteObject(bitmap);
@@ -941,8 +947,8 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
             bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
             bf.AlphaFormat = AC_SRC_ALPHA;
 
-            AlphaBlend(_dc, to.x(), to.y(), size.width(), size.height(), 
-                       bitmapDC, from.x(), from.y(), size.width(), size.height(), bf);
+            AlphaBlend(_dc, lround(to.x()), lround(to.y()), width, height, 
+                       bitmapDC, fromX, fromY, width, height, bf);
 
             DeleteObject(bitmap);
             DeleteDC(bitmapDC);
@@ -987,13 +993,11 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toF,
     {
         const Gfx::Scaling& scaling = canvas->scaling();
         Gfx::RectF rectP = scaling.toPhysical(*rect);
-        Gfx::SizeF sizeP = rectP.size();
-        Gfx::PointF fromP = rectP.topLeft();
         
-        fromX = lround( fromP.x() );
-        fromY = lround( fromP.y()) ;
-        width = lround( sizeP.width() );
-        height = lround( sizeP.height() );
+        fromX = lround( rectP.x() );
+        fromY = lround( rectP.y()) ;
+        width = lround( rectP.width() );
+        height = lround( rectP.height() );
     }
 
     switch (_compositionMode)
