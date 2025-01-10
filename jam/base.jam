@@ -197,7 +197,9 @@ rule EchoOption
 }
 
 #
-# Echo TARGET is [ GetOption --target ] ;
+# Gets an option from ARGV.
+#
+# Echo "TARGET:" [ GetOption --target ] ;
 #
 rule GetOption
 {
