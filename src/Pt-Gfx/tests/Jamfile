@@ -10,7 +10,8 @@ if $(PNG_INCLUDES)
 Main Pt-Gfx-test : Pt-Gfx-test.cpp
                    BlockScaleTest.cpp
                    Argb32Test.cpp
-                   Yuv12Test.cpp ;
+                   Yuv12Test.cpp 
+                   ;
 
 LinkSharedLibraries Pt-Gfx-test : Pt Pt-Gfx Pt-System Pt-Unit ;
 MakeLocate Pt-Gfx-test : $(PT_OUTPUT_TARGET) ;
@@ -20,7 +21,9 @@ Main ImagePainterTest : ImagePainterTest.cpp ;
 LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-System ;
 MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
-# Aloysius' personal tester flag
+#######################################################################
+# raster2 backend tests
+#######################################################################
 #WITH_EXPERIMENTAL_GFX = yes ;
 
 if $(WITH_EXPERIMENTAL_GFX)
@@ -45,36 +48,38 @@ if $(WITH_EXPERIMENTAL_GFX)
 
     SubDirC++Flags [ FDefines WITH_EXPERIMENTAL_GFX ] ;
     SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
+
+    Main ImagePainterTest2 : ImagePainterTest2.cpp ;
+    LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
+    MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
+
+    if $(WITH_EXPERIMENTAL_GFX)
+    {
+        LinkFlags ImagePainterTest2 : -lSDL2 -lX11 ;
+    }
+
+    if $(WITH_BUILTIN_LIBPNG)
+    {
+        LinkLibraries ImagePainterTest2 : png ;
+    }
+    else
+    {
+        LinkFlags ImagePainterTest2 : $(PNG_LINKFLAGS) ;
+        LinkLibs ImagePainterTest2 : $(PNG_LINKLIBS) ;
+    }
+
+    if $(WITH_BUILTIN_ZLIB)
+    {
+        LinkLibraries ImagePainterTest2 : $(ZLIB) ;
+    }
+    else
+    {
+        LinkFlags ImagePainterTest2 : $(ZLIB_LINKFLAGS) ;
+        LinkLibs ImagePainterTest2 : $(ZLIB_LINKLIBS) ;
+    }
+
+    # pkg-config --cflags sdl2
+    # pkg-config --libs sdl2
 }
 
-Main ImagePainterTest2 : ImagePainterTest2.cpp ;
-LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
-MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
 
-if $(WITH_EXPERIMENTAL_GFX)
-{
-    LinkFlags ImagePainterTest2 : -lSDL2 -lX11 ;
-}
-
-if $(WITH_BUILTIN_LIBPNG)
-{
-    LinkLibraries ImagePainterTest2 : png ;
-}
-else
-{
-    LinkFlags ImagePainterTest2 : $(PNG_LINKFLAGS) ;
-    LinkLibs ImagePainterTest2 : $(PNG_LINKLIBS) ;
-}
-
-if $(WITH_BUILTIN_ZLIB)
-{
-    LinkLibraries ImagePainterTest2 : $(ZLIB) ;
-}
-else
-{
-    LinkFlags ImagePainterTest2 : $(ZLIB_LINKFLAGS) ;
-    LinkLibs ImagePainterTest2 : $(ZLIB_LINKLIBS) ;
-}
-
-# pkg-config --cflags sdl2
-# pkg-config --libs sdl2

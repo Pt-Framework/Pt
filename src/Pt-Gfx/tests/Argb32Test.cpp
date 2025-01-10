@@ -63,7 +63,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
 
-            Argb32Image image( data, Size(2, 2) );
+            Argb32Image image( data, Argb32Image::Size(2, 2) );
             Argb32Image::PixelIterator pixel = image.pixel(1, 1);
             
             Pt::uint8_t a = pixel->alpha();
@@ -83,7 +83,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
 
-            Argb32Image image( data, Size(2, 2) );
+            Argb32Image image( data, Argb32Image::Size(2, 2) );
 
             Argb32Image::PixelIterator it = image.begin();
             Argb32Image::PixelIterator end = image.end();
@@ -105,7 +105,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
 
-            Argb32Image image( data, Size(1, 1) );
+            Argb32Image image( data, Argb32Image::Size(1, 1) );
             Argb32Image::PixelIterator pixel = image.pixel(0, 0);
 
             Pt::Gfx::Color c = pixel->toColor();
@@ -121,7 +121,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 10; ++n)
             {
                 Argb32Format format;
-                Image image( format, Size(1000, 1000) );
+                Image image( format, 1000, 1000 );
                 Image::PixelIterator it = image.begin();
                 Image::PixelIterator end = image.end();
             
@@ -147,7 +147,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             for(int n = 0; n < 20; ++n)
             {
-                Argb32Image image( Size(1000, 1000) );
+                Argb32Image image( Argb32Image::Size(1000, 1000) );
                 Argb32Image::PixelIterator it = image.begin();
                 Argb32Image::PixelIterator end = image.end();
             

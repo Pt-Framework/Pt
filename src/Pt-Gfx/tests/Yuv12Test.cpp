@@ -70,7 +70,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
         {
             using namespace Pt::Gfx;
 
-            Yuv12Image image( yuv12Data, Size(4, 4) );
+            Yuv12Image image( yuv12Data, Yuv12Image::Size(4, 4) );
 
             Yuv12Image::PixelIterator pixel = image.pixel(1, 3);
             
@@ -97,7 +97,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
         {
             using namespace Pt::Gfx;
 
-            Yuv12Image image( yuv12Data, Size(4, 4) );
+            Yuv12Image image( yuv12Data, Yuv12Image::Size(4, 4) );
 
             Yuv12Image::PixelIterator it = image.begin();
             Yuv12Image::PixelIterator end = image.end();
@@ -120,7 +120,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
 
             Pt::uint8_t yuv12[] = { 100, 100, 100 };
 
-            Yuv12Image image( yuv12, Size(1, 1) );
+            Yuv12Image image( yuv12, Yuv12Image::Size(1, 1) );
             Yuv12Image::PixelIterator pixel = image.pixel(0, 0);
 
             Pt::Gfx::Color c = pixel->toColor();
@@ -138,7 +138,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 10; ++n)
             {
                 Yuv12Format format;
-                Image image( format, Size(1000, 1000) );
+                Image image(format, 1000, 1000);
                 Image::PixelIterator it = image.begin();
                 Image::PixelIterator end = image.end();
             
@@ -162,7 +162,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             
             for(int n = 0; n < 10; ++n)
             {
-                Yuv12Image image( Size(1000, 1000) );
+                Yuv12Image image(Yuv12Image::Size(1000, 1000) );
                 Yuv12Image::PixelIterator it = image.begin();
                 Yuv12Image::PixelIterator end = image.end();
             

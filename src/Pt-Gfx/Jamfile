@@ -127,4 +127,4 @@ else
     LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
 }
 
-#SubInclude PT_TOP src Pt-Gfx tests ;
+SubInclude PT_TOP src Pt-Gfx tests ;

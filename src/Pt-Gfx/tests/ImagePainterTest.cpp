@@ -10,15 +10,13 @@
 
 using namespace Pt::Gfx;
 
-void Paint()
+void PaintBenchmark()
 {
     try
     {
         for(int n = 0; n < 10 ; ++n)
         {
-
-            Image image( ImageFormat::argb32(), Size(1280, 800) );
-            ImageSurface surface(image);
+            ImageSurface surface;
 
             Pt::System::Clock clock;
             clock.start();
@@ -48,12 +46,11 @@ void Paint()
 
             std::clog << "drawing: " << clock.stop().toUSecs() << std::endl;
 
-
             std::vector<Pt::uint32_t> frameBuffer(1280 * 800);
             clock.start();
 
             for(int n = 0; n < 10; ++n)
-                std::memcpy( &frameBuffer[0], image.data(), frameBuffer.size() );
+                std::memcpy( &frameBuffer[0], surface.image().data(), frameBuffer.size() );
 
             std::clog << "copy: " << clock.stop().toUSecs() << std::endl;
             std::clog << std::endl;
@@ -71,8 +68,8 @@ void BlockScale()
     {
         for(int n = 0; n < 10 ; ++n)
         {
-            Pt::Gfx::Image image(ImageFormat::argb32(), Pt::Gfx::Size(1000, 1000) );
-            Pt::Gfx::Image image2(ImageFormat::argb32(), Pt::Gfx::Size(900, 900) );
+            Pt::Gfx::Image image(ImageFormat::argb32(), 1000, 1000 );
+            Pt::Gfx::Image image2(ImageFormat::argb32(), 900, 900 );
 
             Pt::System::Clock clock;
             clock.start();
@@ -131,7 +128,7 @@ int main(int argc, char* args[])
 
     std::clog << std::endl;
 
-    Paint();
+    PaintBenchmark();
 
     return 0;
 }

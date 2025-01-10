@@ -2,16 +2,16 @@
 # Platform specific prefixes and suffixes
 ##############################################################################
 
-PRELIB = lib ;
-SUFLIB = .a ;
-SUFDLL = .so ;
-SUFEXE = ".html" ;
-SUFDBG = "" ;
-SUFOBJ = .o ;
+PRELIB ?= lib ;
+SUFLIB ?= .a ;
+SUFDLL ?= .so ;
+SUFEXE ?= ".html" ;
+SUFDBG ?= "" ;
+SUFOBJ ?= .o ;
 
 ##############################################################################
 # Default toolkit
 ##############################################################################
 
-TARGET_OSPLAT ?= wasm ;
+TARGET_OSPLAT ?= wasm32 ;
 TOOLSET ?= emscripten ;

@@ -47,14 +47,16 @@ class BlockScaleTest : public Pt::Unit::TestSuite
     protected:
         void ScaleUp()
         {
-            Pt::Gfx::Size fromSize(10, 10);
-            std::vector<Pt::uint32_t> from(fromSize.width() * fromSize.height(), 1);
+            std::size_t fromWidth = 10;
+            std::size_t fromHeight = 10;
+            std::vector<Pt::uint32_t> from(fromWidth * fromHeight, 1);
             
-            Pt::Gfx::Size toSize(20, 40);
-            std::vector<Pt::uint32_t> to(toSize.width() * toSize.height(), 0);
+            std::size_t toWidth = 20;
+            std::size_t toHeight = 40;
+            std::vector<Pt::uint32_t> to(toWidth * toHeight, 0);
 
-            Pt::Gfx::blockScale(from.begin(), fromSize.width(), fromSize.height(), 
-                                to.begin(), toSize.width(), toSize.height());
+            Pt::Gfx::blockScale(from.begin(), fromWidth, fromHeight, 
+                                to.begin(), toWidth, toHeight);
 
             PT_UNIT_ASSERT(to.front() == from.front());
             PT_UNIT_ASSERT(to.back() == from.back());
@@ -62,23 +64,18 @@ class BlockScaleTest : public Pt::Unit::TestSuite
 
         void ScaleDown()
         {
-            Pt::Gfx::Image from( Pt::Gfx::ImageFormat::argb32(), 
-                                 Pt::Gfx::Size(100, 100) );
+            Pt::Gfx::Image from( Pt::Gfx::ImageFormat::argb32(), 100, 100 );
 
-            std::memset(from.data(), 123, from.size().width() * 
-                                          from.size().height() *
+            std::memset(from.data(), 123, from.width() * from.height() *
                                           from.format().pixelStride());
 
-            Pt::Gfx::Image to( Pt::Gfx::ImageFormat::argb32(), 
-                               Pt::Gfx::Size(20, 40) );
+            Pt::Gfx::Image to( Pt::Gfx::ImageFormat::argb32(), 20, 40 );
 
             Pt::Gfx::blockScale(from.begin(), from.width(), from.height(), 
                                 to.begin(), to.width(), to.height());
 
-            PT_UNIT_ASSERT(0 == std::memcmp(to.data(), 
-                                            from.data(), 
-                                            to.size().width() * 
-                                            to.size().height() *
+            PT_UNIT_ASSERT(0 == std::memcmp(to.data(), from.data(), 
+                                            to.width() * to.height() *
                                             to.format().pixelStride()));
         }
 };
