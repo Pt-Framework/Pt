@@ -148,7 +148,7 @@ SPACE        ?= " " ;
 OSFULL = $(OS)$(OSVER)$(OSPLAT) $(OS)$(OSPLAT) $(OS)$(OSVER) $(OS) ;
 
 #
-# EchoVar OS : "Host Operating system" [ : $(OS:L) ] ;
+# EchoOption OS : "Host Operating system" [ : $(OS:L) ] ;
 #
 rule EchoOption
 {
@@ -194,6 +194,27 @@ rule EchoOption
     {
         Echo $(_optname) $(_line) ;
     }
+}
+
+#
+# Echo TARGET is [ GetOption --target ] ;
+#
+rule GetOption
+{
+  local name = $(1)"=" ;
+  local value ;
+
+  for local arg in $(ARGV)
+  {
+    local regex = "^"$(name)"(.*)" ;
+    local match = [ MATCH $(regex) : $(arg) ] ;
+    if $(match)
+    {
+      value += $(match) ;
+    }
+  }
+
+  return $(value) ;
 }
 
 #
