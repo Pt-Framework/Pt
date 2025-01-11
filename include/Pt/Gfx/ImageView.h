@@ -212,9 +212,10 @@ class ImageView
         typedef Gfx::Pixel Pixel;
         typedef Gfx::ConstPixel ConstPixel;
 
-        typedef BasicPoint<Pt::ssize_t> Point;
-        typedef BasicSize<Pt::ssize_t> Size;
-        typedef BasicRect<Pt::ssize_t> Rect;
+        typedef Pt::ssize_t       pos_t;
+        typedef BasicPoint<pos_t> Point;
+        typedef BasicSize<pos_t>  Size;
+        typedef BasicRect<pos_t>  Rect;
 
         class PixelIterator
         {
@@ -549,7 +550,6 @@ inline std::size_t ConstPixel::pixelStride() const
 {
     return _view->pixelStride();
 }
-
 
 } // namespace
 

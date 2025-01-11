@@ -346,7 +346,9 @@ void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y,
     translatedPos.addX( tf.dx() );
     translatedPos.addY( tf.dy() );
     
-    Point pos = round(translatedPos);
+    int xpos = lround( translatedPos.x() );
+    int ypos = lround( translatedPos.y()) ;
+
 
     FT_Matrix matrix;
     matrix.xx = tf.m11() * 0x10000L;
@@ -379,8 +381,8 @@ void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y,
     }
 
     FT_Vector glyphPos;
-    glyphPos.x = (int) pos.x() << 16;
-    glyphPos.y = (int) pos.y() << 16;
+    glyphPos.x = xpos << 16;
+    glyphPos.y = ypos << 16;
 
     FT_UInt previousIndex = 0;
     

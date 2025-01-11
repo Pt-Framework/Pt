@@ -222,7 +222,7 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
     {
       case Rotate0:
       {
-        const Gfx::Rect clipArea = areaIn.intersect(Gfx::Rect(Gfx::Point(0, 0), size()));
+        const Gfx::Rect clipArea = areaIn.intersect(Gfx::Rect(Point(0, 0), size()));
         const int clipRight  = clipArea.x() + clipArea.width();
         const int clipBottom = clipArea.y() + clipArea.height();
         const int widthInByte = clipArea.width()*_pixelSize;
@@ -238,7 +238,7 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
 
       case Rotate90:
       {
-        const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));
+        const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Point(0,0), size()));
         const int clipRight = clipArea.x() + clipArea.width();
         const int clipBottom = clipArea.y() + clipArea.height();
         const Pt::ssize_t height = _screenInfo.yres - 1; 

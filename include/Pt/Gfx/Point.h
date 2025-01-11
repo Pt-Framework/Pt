@@ -245,18 +245,7 @@ class BasicPoint
         T _y;
 };
 
-
-typedef BasicPoint<Pt::ssize_t> Point;
 typedef BasicPoint<double> PointF;
-//typedef BasicPoint<float> PointF;
-
-
-inline Point round(const PointF& r)
-{
-  return Point( lround(r.x()),
-                lround(r.y()) );
-}
-
 
 } // namespace
 

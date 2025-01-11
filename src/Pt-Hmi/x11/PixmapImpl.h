@@ -52,11 +52,6 @@ class PixmapImpl
         PixmapImpl()
         { }
 
-        void reset(const Gfx::Size& size, std::size_t stride)
-        {
-            _image.reset(size, stride);
-        }
-
         void set(const Gfx::Image& image)
         {
             _image.reset(image);
@@ -77,7 +72,7 @@ class PixmapImpl
 
         void resize(const Gfx::SizeF& size)
         {
-            _image.resize(size);
+            _image.reset(size);
         }
 
         void setScaleFactor(double scaleFactor)

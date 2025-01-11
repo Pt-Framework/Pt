@@ -168,11 +168,11 @@ class ScreenImpl : public Form
 
         void drawCursor(Pt::uint8_t* buffer);
         
-        void grabImage(const Pt::uint8_t* buffer, const Gfx::Point& pos,
+        void grabImage(const Pt::uint8_t* buffer, const Point& pos,
                        Gfx::Image& image);
  
         void bitBlit(const Pt::uint8_t* from, size_t width, size_t height, 
-                     const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op);
+                     const Point& pos, Pt::uint8_t* buffer, BlitOp op);
 
     private:
         FrameBuffer&                 _frameBuffer;
@@ -183,7 +183,7 @@ class ScreenImpl : public Form
         
         double                       _dpi;       
         Gfx::Image                   _cursorBackground;
-        Gfx::Point                   _cursorPos;
+        Point                        _cursorPos;
         bool                         _drawCursor;
 };
 

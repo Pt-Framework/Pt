@@ -536,7 +536,6 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     //
     onDetectScroll( visual, screenPos, ev.isPress(), ev.isPressed() );
 
-    static bool bbb = false;
     //
     // close popups 
     //

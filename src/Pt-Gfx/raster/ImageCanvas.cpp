@@ -3634,7 +3634,7 @@ void ImageCanvas::fill(const Point* pts, size_t pointCount, const Rect& currentC
 
     for(size_t n = 0; n < points.size(); ++n)
     {
-        const Gfx::Point& p = points[n];
+        const Point& p = points[n];
         origin.setX( std::min( origin.x(), p.x() ) );
         origin.setY( std::min( origin.y(), p.y() ) );
 
@@ -3796,7 +3796,7 @@ void ImageCanvas::outputSpan( const Point& topLeft, int x, int y, int width )
     int       xpos = std::max( 0, x );
 
     if( xend > xpos )
-        fill( topLeft,Gfx::Point(xpos, y), xend-xpos );
+        fill( topLeft, Point(xpos, y), xend-xpos );
 }
 
 

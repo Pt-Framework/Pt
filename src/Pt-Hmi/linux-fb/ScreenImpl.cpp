@@ -400,8 +400,8 @@ void ScreenImpl::drawCursor(const Pt::Gfx::PointF& pos)
     //
     const Cursor& cursor = Application::instance().impl()->cursor();
 
-    _cursorPos = Gfx::Point( pos.x() - cursor.xHotspot(),
-                             pos.y() - cursor.yHotspot() );
+    _cursorPos = Point( pos.x() - cursor.xHotspot(),
+                        pos.y() - cursor.yHotspot() );
 
     PT_LOG_DEBUG("cursor hotspot position: " << _cursorPos.x() << "," << _cursorPos.y());
 
@@ -447,7 +447,7 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 
 
 void ScreenImpl::grabImage(const Pt::uint8_t* buffer, 
-                           const Gfx::Point& pos, 
+                           const Point& pos, 
                            Gfx::Image& image)
 {
     const size_t pixelSizeInByte = _frameBuffer.pixelSize();
@@ -474,7 +474,7 @@ void ScreenImpl::grabImage(const Pt::uint8_t* buffer,
 
 
 void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h,
-                          const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op )
+                          const Point& pos, Pt::uint8_t* buffer, BlitOp op )
 {
     static const size_t planePixelSize = 4;
     const size_t bufferPixelSize = _frameBuffer.pixelSize();

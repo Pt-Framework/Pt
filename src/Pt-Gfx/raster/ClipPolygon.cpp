@@ -98,7 +98,8 @@ void ClipPolygon::clipEdge( const std::vector<Point>& in, std::vector<Point>& ou
 }
 
 
-Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& edge0, const Point& edge1 )
+ClipPolygon::Point ClipPolygon::intersect(const Point& from, const Point& to, 
+                                          const Point& edge0, const Point& edge1)
 {
     Point p;
 
