@@ -102,7 +102,7 @@ class FrameBuffer
 
         size_t strideSize() const;
 
-        void output( const Pt::uint8_t* frame, const Gfx::Rect& area );
+        void output( const Pt::uint8_t* frame, const Rect& area );
 
     private:
       inline char* pixelFB(size_t w, size_t h)

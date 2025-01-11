@@ -315,10 +315,10 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     //
     Pt::Gfx::RectF updateRectP = scaling().toPhysical(updateRectF);
     
-    Gfx::Image::Rect updateRect( Gfx::Image::Point( lround(updateRectP.x()), 
-                                                    lround(updateRectP.y()) ),
-                                 Gfx::Image::Size( lround(updateRectP.width()),
-                                                   lround(updateRectP.height()) ) );
+    Rect updateRect( Gfx::Image::Point( lround(updateRectP.x()), 
+                                        lround(updateRectP.y()) ),
+                     Gfx::Image::Size( lround(updateRectP.width()),
+                                       lround(updateRectP.height()) ) );
     updateScreen(updateRect);
 }
 
@@ -365,7 +365,7 @@ const Gfx::Image& ScreenImpl::image() const
 }
 
 
-void ScreenImpl::updateScreen(const Gfx::Rect& r)
+void ScreenImpl::updateScreen(const Rect& r)
 {
     if(_drawCursor)
         drawCursor( const_cast<uint8_t*>( image().data() ) );
@@ -405,8 +405,8 @@ void ScreenImpl::drawCursor(const Pt::Gfx::PointF& pos)
 
     PT_LOG_DEBUG("cursor hotspot position: " << _cursorPos.x() << "," << _cursorPos.y());
 
-    Gfx::Rect cursorArea = Rect( _cursorPos, Size(cursor.width(), 
-                                                  cursor.height()) );
+    Rect cursorArea = Rect( _cursorPos, Size(cursor.width(), 
+                                             cursor.height()) );
 
     //
     // update the screen including the new cursor image

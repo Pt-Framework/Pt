@@ -164,7 +164,7 @@ class ScreenImpl : public Form
 
         const Gfx::Image& image() const;
         
-        void updateScreen(const Pt::Gfx::Rect& area);
+        void updateScreen(const Rect& area);
 
         void drawCursor(Pt::uint8_t* buffer);
         
