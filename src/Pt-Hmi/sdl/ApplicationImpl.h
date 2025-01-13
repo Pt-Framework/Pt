@@ -29,8 +29,10 @@
 #ifndef Pt_Hmi_ApplicationImpl_h
 #define Pt_Hmi_ApplicationImpl_h
 
+#include "posix/Selector.h"
+
 #include <Pt/Hmi/Visual.h>
-#include <Pt/System/MainLoop.h>
+#include <Pt/System/EventLoop.h>
 #include <Pt/DateTime.h>
 #include <Pt/Timespan.h>
 
@@ -38,7 +40,71 @@ namespace Pt {
 
 namespace Hmi {
 
-class ApplicationImpl : public Pt::System::MainLoop
+class Selector : public System::Selector
+{
+    public:
+        Selector()
+        {
+        }
+
+        virtual ~Selector()
+        {
+        }
+
+        virtual void cancel(System::IOHandle& h)
+        {
+        }
+
+        // used by IONotifier
+        virtual void beginWait(System::IOHandle* h, int flags)
+        {
+        }
+
+        // used by IONotifier
+        virtual int endWait(System::IOHandle* h)
+        {
+            return 0;
+        }
+
+        virtual void beginRead(System::IOHandle* h)
+        {
+        }
+
+        virtual void endRead(System::IOHandle* h)
+        {
+        }
+
+        virtual void beginWrite(System::IOHandle* h)
+        {
+        }
+
+        virtual void endWrite(System::IOHandle* h)
+        {
+        }
+
+        virtual bool isReadable(System::IOHandle* h)
+        {
+            return false;
+        }
+
+        virtual bool isWritable(System::IOHandle* h)
+        {
+            return false;
+        }
+
+        virtual bool isError(System::IOHandle* h)
+        {
+            return false;
+        }
+
+        // used by IONotifier
+        virtual bool isReady(System::IOHandle* h)
+        {
+            return false;
+        }
+};
+
+class ApplicationImpl : public Pt::System::EventLoop
 {
     public:
         ApplicationImpl();
@@ -59,20 +125,38 @@ class ApplicationImpl : public Pt::System::MainLoop
     
         void nextEvent();
 
+        virtual System::Selector& selector()
+        { 
+          return _selector; 
+        }
+
+    protected:
+        virtual void onAttachSelectable(System::Selectable&);
+
+        virtual void onDetachSelectable(System::Selectable&);
+
+        virtual void onCancel(System::Selectable& s);
+
+        virtual void onReady(System::Selectable& s);
+
+        virtual void onRun();
+
+        virtual void onExit();
+
+        virtual void onCommitEvent(const Pt::Event& event);
+
+        virtual void onQueueEvent(const Pt::Event& event);
+
+        virtual void onWake();
+
+        virtual void onProcessEvents();
+
+        virtual void onAttachTimer(System::Timer& timer);
+
+        virtual void onDetachTimer(System::Timer& timer);
+
     private:
-        void onMouseEvent(const MouseEvent& ev);
-
-        void onScrollEvent(const ScrollEvent& ev);
-
-        void onTouchEvent(const TouchEvent& ev);
-
-        void onKeyEvent(const KeyEvent& ev);
-
-        void showConsole(bool s);
-
-        void openInputDevice(const std::string& device);
-
-    private:
+        Selector     _selector;
         Pt::DateTime _lastActivityTime;
 };
 

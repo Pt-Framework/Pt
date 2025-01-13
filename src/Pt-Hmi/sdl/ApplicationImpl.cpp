@@ -42,11 +42,13 @@ namespace Hmi {
 ApplicationImpl::ApplicationImpl()
 : _lastActivityTime( Pt::System::Clock::getSystemTime() )
 {
+    std::cout << "ApplicationImpl()" << std::endl;
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
+    std::cout << "~ApplicationImpl()" << std::endl;
 } 
 
 
@@ -90,6 +92,67 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 void ApplicationImpl::nextEvent()
 {
     //MainLoop::waitNext();
+}
+
+
+void ApplicationImpl::onAttachSelectable(System::Selectable&)
+{
+}
+
+
+void ApplicationImpl::onDetachSelectable(System::Selectable&)
+{
+}
+
+
+void ApplicationImpl::onCancel(System::Selectable& s)
+{
+}
+
+
+void ApplicationImpl::onReady(System::Selectable& s)
+{
+}
+
+
+void ApplicationImpl::onRun()
+{
+    std::cout << "ApplicationImpl::onRun" << std::endl;
+}
+
+
+void ApplicationImpl::onExit()
+{
+}
+
+
+void ApplicationImpl::onCommitEvent(const Pt::Event& ev)
+{
+}
+
+
+void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
+{
+}
+
+
+void ApplicationImpl::onWake()
+{
+}
+
+
+void ApplicationImpl::onProcessEvents()
+{
+}
+
+
+void ApplicationImpl::onAttachTimer(System::Timer& timer)
+{
+}
+
+
+void ApplicationImpl::onDetachTimer(System::Timer& timer)
+{
 }
 
 } // namespace

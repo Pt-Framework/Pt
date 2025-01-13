@@ -73,10 +73,12 @@ rule CheckCc
     if $(WITH_DEBUG)
     {
         CCFLAGS += -DDEBUG -D_DEBUG -g ;
+        LINKFLAGS ?= "-sSTACK_SIZE=5MB" "-sSTACK_OVERFLOW_CHECK" ;
     }
     else
     {
         CCFLAGS += -DNDEBUG ;
+        LINKFLAGS ?= "-sSTACK_SIZE=5MB" ;
     }
 
     if $(WITH_OPTIM)
@@ -93,6 +95,7 @@ rule CheckCc
     Configure CCFLAGS ;
     Configure WARN ;
     Configure OPTIM ;
+    Configure LINKFLAGS ;
     Configure DLL_LINKFLAGS ;
     Configure MAIN_LINKFLAGS ;
 }
