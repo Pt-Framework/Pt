@@ -432,6 +432,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MouseDevice.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\sdl\ApplicationImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\sdl\PixmapImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\sdl\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\ShellWindowFrame.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\win32\KeyMap.h" />
@@ -682,6 +685,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\sdl\ApplicationImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\sdl\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Shell.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ShellWindowFrame.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ShellWM.cpp" />

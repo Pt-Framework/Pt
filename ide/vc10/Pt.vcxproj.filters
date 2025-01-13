@@ -139,6 +139,9 @@
     <Filter Include="Pt-Hmi\win32">
       <UniqueIdentifier>{947e0ceb-dc3d-4f25-b8ff-f29aad8e7be3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\sdl">
+      <UniqueIdentifier>{f86c5660-2948-44f6-9890-9359672dbe99}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1665,6 +1668,15 @@
     <ClInclude Include="..\..\src\Pt-Gfx\skia\SkiaContext.h">
       <Filter>Pt-Gfx\skia</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\sdl\ApplicationImpl.h">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\sdl\PixmapImpl.h">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\sdl\ScreenImpl.h">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -3039,6 +3051,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\skia\SkiaContext.cpp">
       <Filter>Pt-Gfx\skia</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\sdl\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\sdl\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\sdl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

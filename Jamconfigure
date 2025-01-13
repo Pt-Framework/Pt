@@ -1155,6 +1155,10 @@ else if --with-win32-raster in $(ARGV)
 {
     GUI ?= win32 ;
 }
+else if --with-sdl-raster in $(ARGV)
+{
+    GUI ?= sdl ;
+}
 
 if ! $(GUI) || $(GUI:L) = "win32"
 {
@@ -1225,6 +1229,11 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
     {
         PT_HMI_IMPL = linux-fb ;
     }
+}
+
+if $(GUI:L) = "sdl"
+{
+    PT_HMI_IMPL = sdl ;
 }
 
 if ! $(GUI) || $(GUI:L) = "x11"

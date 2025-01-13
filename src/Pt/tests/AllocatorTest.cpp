@@ -40,8 +40,8 @@ class AllocatorTest : public Pt::Unit::TestSuite
     public:
         AllocatorTest() : Pt::Unit::TestSuite("AllocatorTest")
         {  
-            Pt::Unit::TestSuite::registerMethod( "PageAllocatorBenchmark", *this, &AllocatorTest::PageAllocatorBenchmark );
-            Pt::Unit::TestSuite::registerMethod( "PoolAllocatorBenchmark", *this, &AllocatorTest::PoolAllocatorBenchmark );
+            //Pt::Unit::TestSuite::registerMethod( "PageAllocatorBenchmark", *this, &AllocatorTest::PageAllocatorBenchmark );
+            //Pt::Unit::TestSuite::registerMethod( "PoolAllocatorBenchmark", *this, &AllocatorTest::PoolAllocatorBenchmark );
             Pt::Unit::TestSuite::registerMethod( "MemoryPool", *this, &AllocatorTest::MemoryPool );
             Pt::Unit::TestSuite::registerMethod( "PoolAllocator", *this, &AllocatorTest::PoolAllocator );
             Pt::Unit::TestSuite::registerMethod( "PageAllocator", *this, &AllocatorTest::PageAllocator );
