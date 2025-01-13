@@ -531,6 +531,7 @@
     <None Include="..\..\include\Pt\String.tpp" />
     <None Include="..\..\jam.bat" />
     <None Include="..\..\Jambase" />
+    <None Include="..\..\Jamconfigure" />
     <None Include="..\..\Jamfile" />
     <None Include="..\..\src\Pt-Gfx\Jamfile" />
     <None Include="..\..\src\Pt-Gfx\tests\Jamfile" />

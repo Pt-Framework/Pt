@@ -1820,6 +1820,7 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\PixmapImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
+    <None Include="..\..\Jamconfigure" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt\Atomicity.cpp">
