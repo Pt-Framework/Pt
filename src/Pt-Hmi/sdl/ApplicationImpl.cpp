@@ -28,10 +28,14 @@
 
 #include "ApplicationImpl.h"
 
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 #include <Pt/DateTime.h>
+
+#include <SDL.h>
+#include <emscripten.h>
 
 PT_LOG_DEFINE("Pt.Hmi.Application")
 
@@ -43,12 +47,19 @@ ApplicationImpl::ApplicationImpl()
 : _lastActivityTime( Pt::System::Clock::getSystemTime() )
 {
     std::cout << "ApplicationImpl()" << std::endl;
+    SDL_Init(SDL_INIT_VIDEO);
+    
+    //double width, height;
+    //emscripten_get_element_css_size(renderSetup.HtmlElement.AsCStr(), &width, &height);
+    //emscripten_set_canvas_size(int(width), int(height));
+    //emscripten_set_resize_callback(nullptr, nullptr, false, emscWindowSizeChanged); 
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
     std::cout << "~ApplicationImpl()" << std::endl;
+    SDL_Quit();
 } 
 
 
@@ -115,24 +126,45 @@ void ApplicationImpl::onReady(System::Selectable& s)
 }
 
 
+void ApplicationImpl::mainLoop(void* arg)
+{
+  SDL_Event event;
+  int n = SDL_PollEvent(&event);
+  if(n > 0)
+  {
+      std::cout << "SDL Event" << std::endl;
+  }
+  
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(arg);
+    app->onProcessEvents();
+}
+
+
 void ApplicationImpl::onRun()
 {
     std::cout << "ApplicationImpl::onRun" << std::endl;
+
+    emscripten_set_main_loop_arg(&ApplicationImpl::mainLoop, this, 0, true);
 }
 
 
 void ApplicationImpl::onExit()
 {
+    _eventQueue.exit();
+    wake();
 }
 
 
 void ApplicationImpl::onCommitEvent(const Pt::Event& ev)
 {
+    _eventQueue.pushEvent(ev); 
+    wake();
 }
 
 
 void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
 {
+    _eventQueue.pushEvent(ev); 
 }
 
 
@@ -143,6 +175,7 @@ void ApplicationImpl::onWake()
 
 void ApplicationImpl::onProcessEvents()
 {
+    _eventQueue.processEvents( this->eventReceived() );
 }
 
 

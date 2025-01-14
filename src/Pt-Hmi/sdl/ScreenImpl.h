@@ -35,6 +35,8 @@
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
 
+#include <SDL.h>
+
 namespace Pt {
 
 namespace Hmi {
@@ -142,10 +144,12 @@ class ScreenImpl : public Form
         void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        Pixmap                       _pixmap;
+        Pixmap       _pixmap;
 
-        Screen*                      _parent;
-        Shell                        _shell;
+        Screen*      _parent;
+        Shell        _shell;
+
+        SDL_Window*   _screen;
 };
 
 } // namespace

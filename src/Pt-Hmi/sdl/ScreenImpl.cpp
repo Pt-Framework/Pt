@@ -50,12 +50,16 @@ namespace Pt {
 
 namespace Hmi {
 
-const unsigned screenWidth = 640;
-const unsigned screenHeight = 480;
+const unsigned screenWidth = 800;
+const unsigned screenHeight = 600;
 
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _parent(0)
+, _screen(0)
 {
+    _screen = SDL_CreateWindow("Screen", 0, 0,
+                               screenWidth, screenHeight, 0);
+
     Gfx::SizeF size(screenWidth, screenHeight);
     _pixmap.resize(size);
                              
@@ -291,12 +295,35 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 
     Base::onProcessPaintEvent(ev);
 
+    std::cout << "PAINT EVENT" << std::endl;
+
     //Pt::Gfx::RectF updateRectP = scaling().toPhysical(updateRectF);
     //
     //Rect updateRect( Gfx::Image::Point( lround(updateRectP.x()), 
     //                                    lround(updateRectP.y()) ),
     //                 Gfx::Image::Size( lround(updateRectP.width()),
     //                                   lround(updateRectP.height()) ) );
+
+    const Gfx::Image& image = _pixmap.impl()->toImage();
+
+    SDL_Surface* rgbSurface = SDL_CreateRGBSurfaceWithFormatFrom( (void*) image.data(), 
+                                                                  image.width(), image.height(), 
+                                                                  32, image.width() * 4,
+                                                                  SDL_PIXELFORMAT_RGB888 );
+
+    SDL_Surface* surface = SDL_GetWindowSurface(_screen);
+
+    if( SDL_MUSTLOCK(surface) ) 
+        SDL_LockSurface(surface);
+
+    int r = SDL_BlitSurface(rgbSurface, NULL, surface, NULL);
+
+    if( SDL_MUSTLOCK(surface) ) 
+        SDL_UnlockSurface(surface);
+
+    SDL_UpdateWindowSurface(_screen);
+
+    SDL_FreeSurface(rgbSurface);
 }
 
 

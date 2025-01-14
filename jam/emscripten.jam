@@ -68,17 +68,17 @@ rule CheckCc
     MAIN_LINKFLAGS = -s MAIN_MODULE=1 ;
     DLL_LINKFLAGS = -s SIDE_MODULE=1 ;
 
-    CCFLAGS += -fPIC ;
+    CCFLAGS += -fPIC -sUSE_SDL=2 ;
 
     if $(WITH_DEBUG)
     {
         CCFLAGS += -DDEBUG -D_DEBUG -g ;
-        LINKFLAGS ?= "-sSTACK_SIZE=5MB" "-sSTACK_OVERFLOW_CHECK" ;
+        LINKFLAGS ?= "-sSTACK_SIZE=5MB" "-sSTACK_OVERFLOW_CHECK" -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
     }
     else
     {
         CCFLAGS += -DNDEBUG ;
-        LINKFLAGS ?= "-sSTACK_SIZE=5MB" ;
+        LINKFLAGS ?= "-sSTACK_SIZE=5MB" -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
     }
 
     if $(WITH_OPTIM)
@@ -116,7 +116,7 @@ rule CheckC++
     C++FLAGS += -fexceptions ;
     C++LINKFLAGS += -fexceptions ;
 
-    C++FLAGS += -fPIC ;
+    C++FLAGS += -fPIC -sUSE_SDL=2 ;
 
     if $(WITH_DEBUG)
     {

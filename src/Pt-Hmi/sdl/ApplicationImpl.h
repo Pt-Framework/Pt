@@ -156,8 +156,12 @@ class ApplicationImpl : public Pt::System::EventLoop
         virtual void onDetachTimer(System::Timer& timer);
 
     private:
-        Selector     _selector;
-        Pt::DateTime _lastActivityTime;
+        static void mainLoop(void* arg);
+
+    private:
+        Selector           _selector;
+        System::EventQueue _eventQueue;
+        Pt::DateTime       _lastActivityTime;
 };
 
 } // namespace
