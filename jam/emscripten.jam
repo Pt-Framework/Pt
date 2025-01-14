@@ -46,17 +46,27 @@ rule TryBuildC++
 
 rule CheckCc
 {
-    TOOLSET_ROOT ?= "" ;
+    if $(EMSDK)
+    {
+        TOOLSET_ROOT ?= $(EMSDK)\\upstream\\emscripten\\ ;
+        EMSDK_PYROOT ?= [ GLOB $(EMSDK)\\python : * ] ;
+    }
 
     if $(TOOLSET_ROOT) && $(OS:L) = nt
     {
       TOOLSET_ROOT = $(TOOLSET_ROOT:J=" ") ;
     }
+    
+    if $(EMSDK_PYROOT) && $(OS:L) = nt
+    {
+      EMSDK_PYROOT = $(EMSDK_PYROOT:J=" ") ;
+      EMSDK_SET_PATH = "set PATH=$(EMSDK_PYROOT);%PATH% & " ;
+    }
 
     AS           ?= "" ;
-    CC           ?= \"$(TOOLSET_ROOT)emcc\" ;
-    RANLIB       ?= \"$(TOOLSET_ROOT)emranlib\" ;
-    AR           ?= \"$(TOOLSET_ROOT)emar\" ru ;
+    CC           ?= $(EMSDK_SET_PATH)\"$(TOOLSET_ROOT)emcc\" ;
+    RANLIB       ?= $(EMSDK_SET_PATH)\"$(TOOLSET_ROOT)emranlib\" ;
+    AR           ?= $(EMSDK_SET_PATH)\"$(TOOLSET_ROOT)emar\" ru ;
     LINK         ?= $(CC) ;
 
     Configure AS ;
@@ -105,9 +115,7 @@ rule CheckC++
 {
     ConfigureCc ;
 
-    TOOLSET_ROOT ?= "" ;
-
-    C++ ?= \"$(TOOLSET_ROOT)em++\" ;
+    C++ ?= $(EMSDK_SET_PATH)\"$(TOOLSET_ROOT)em++\" ;
     Configure C++ ;
 
     LINK++ = $(C++) ;

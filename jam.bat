@@ -19,5 +19,8 @@ if not exist %JAMDIR%\jam.exe (
 )
 
 call %JAMDIR%\jam.exe %*
-goto :eof
+
+if ERRORLEVEL 1 (
+  exit /b 1
+)
 
