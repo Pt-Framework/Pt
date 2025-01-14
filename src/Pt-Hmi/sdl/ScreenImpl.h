@@ -150,6 +150,7 @@ class ScreenImpl : public Form
         Shell        _shell;
 
         SDL_Window*   _screen;
+        SDL_Surface*  _imageSurface;
 };
 
 } // namespace

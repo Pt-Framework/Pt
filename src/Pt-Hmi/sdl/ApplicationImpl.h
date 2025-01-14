@@ -32,6 +32,7 @@
 #include "posix/Selector.h"
 
 #include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/MouseEvent.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/DateTime.h>
 #include <Pt/Timespan.h>
@@ -162,6 +163,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         Selector           _selector;
         System::EventQueue _eventQueue;
         Pt::DateTime       _lastActivityTime;
+        
 };
 
 } // namespace

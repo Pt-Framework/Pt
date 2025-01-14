@@ -44,14 +44,16 @@
 #include <cmath>
 #include <cstring>
 
+#include <emscripten.h>
+
 PT_LOG_DEFINE("Pt.Hmi.Screen")
 
 namespace Pt {
 
 namespace Hmi {
 
-const unsigned screenWidth = 800;
-const unsigned screenHeight = 600;
+const unsigned screenWidth = 1024;
+const unsigned screenHeight = 720;
 
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _parent(0)
@@ -69,19 +71,28 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
       Gfx::Painter painter(*surface);
 
       Gfx::RectF rect( Gfx::PointF(0, 0), _pixmap.size() );
-      painter.setBrush( Gfx::Color(0, 0, 0) );
+      painter.setBrush( Gfx::Color::fromRgb8(40, 50, 80) );
       painter.fillRect(rect);
     }
 
-    Form::setSurface(surface, Gfx::PointF(0, 0) );
-
+    setSurface(surface, Gfx::PointF(0, 0) );
     setContent(&_shell);
+
+    const Gfx::Image& image = _pixmap.impl()->toImage();
+
+    _imageSurface = SDL_CreateRGBSurfaceWithFormatFrom( (void*) image.data(), 
+                                                         image.width(), image.height(), 
+                                                         32, image.width() * 4,
+                                                         SDL_PIXELFORMAT_RGB888 );
 }
 
 
 ScreenImpl::~ScreenImpl()
 {
     Form::setSurface(0, Gfx::PointF(0, 0) );
+
+    SDL_FreeSurface(_imageSurface);
+    SDL_DestroyWindow(_screen);
 }
 
 
@@ -293,9 +304,9 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     if( updateRectF.isNull() )
         return;
 
-    Base::onProcessPaintEvent(ev);
+    double then = emscripten_get_now();
 
-    std::cout << "PAINT EVENT" << std::endl;
+    Base::onProcessPaintEvent(ev);
 
     //Pt::Gfx::RectF updateRectP = scaling().toPhysical(updateRectF);
     //
@@ -304,26 +315,25 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     //                 Gfx::Image::Size( lround(updateRectP.width()),
     //                                   lround(updateRectP.height()) ) );
 
-    const Gfx::Image& image = _pixmap.impl()->toImage();
+    double now = emscripten_get_now();
+    std::cout << "paint time: " << now - then << std::endl;
 
-    SDL_Surface* rgbSurface = SDL_CreateRGBSurfaceWithFormatFrom( (void*) image.data(), 
-                                                                  image.width(), image.height(), 
-                                                                  32, image.width() * 4,
-                                                                  SDL_PIXELFORMAT_RGB888 );
+    then = emscripten_get_now();
 
     SDL_Surface* surface = SDL_GetWindowSurface(_screen);
 
     if( SDL_MUSTLOCK(surface) ) 
         SDL_LockSurface(surface);
 
-    int r = SDL_BlitSurface(rgbSurface, NULL, surface, NULL);
+    int r = SDL_BlitSurface(_imageSurface, NULL, surface, NULL);
 
     if( SDL_MUSTLOCK(surface) ) 
         SDL_UnlockSurface(surface);
 
     SDL_UpdateWindowSurface(_screen);
 
-    SDL_FreeSurface(rgbSurface);
+    now = emscripten_get_now();
+    std::cout << "blit time: " << now - then << std::endl;
 }
 
 
@@ -343,7 +353,7 @@ void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     Gfx::Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-    painter.setBrush( Pt::Gfx::Color(0, 0, 0) );
+    painter.setBrush( Gfx::Color::fromRgb8(40, 50, 80) );
     painter.fillRect(rect);
 }
 

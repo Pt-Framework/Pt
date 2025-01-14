@@ -46,11 +46,12 @@ namespace Hmi {
 ApplicationImpl::ApplicationImpl()
 : _lastActivityTime( Pt::System::Clock::getSystemTime() )
 {
-    std::cout << "ApplicationImpl()" << std::endl;
     SDL_Init(SDL_INIT_VIDEO);
-    
-    //double width, height;
-    //emscripten_get_element_css_size(renderSetup.HtmlElement.AsCStr(), &width, &height);
+
+/*    int width, height, fs;
+    emscripten_get_canvas_size(&width, &height, &fs);
+    std::cout << width << " " << height<< std::endl;   */        
+
     //emscripten_set_canvas_size(int(width), int(height));
     //emscripten_set_resize_callback(nullptr, nullptr, false, emscWindowSizeChanged); 
 }
@@ -58,7 +59,6 @@ ApplicationImpl::ApplicationImpl()
 
 ApplicationImpl::~ApplicationImpl()
 {
-    std::cout << "~ApplicationImpl()" << std::endl;
     SDL_Quit();
 } 
 
@@ -128,22 +128,58 @@ void ApplicationImpl::onReady(System::Selectable& s)
 
 void ApplicationImpl::mainLoop(void* arg)
 {
-  SDL_Event event;
-  int n = SDL_PollEvent(&event);
-  if(n > 0)
-  {
-      std::cout << "SDL Event" << std::endl;
-  }
-  
+    Screen& screen = Application::instance().screen();
     ApplicationImpl* app = static_cast<ApplicationImpl*>(arg);
+
+    static MouseEvent _mev;
+
+    SDL_Event ev;
+    while( SDL_PollEvent(&ev) > 0 )
+    {
+        if(ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEBUTTONDOWN)
+        {
+          SDL_MouseButtonEvent* mev = reinterpret_cast<SDL_MouseButtonEvent*>(&ev);
+
+          double scaling = Application::instance().scaleFactor();
+
+          Gfx::PointF pos(mev->x, mev->y);
+          pos = pos / scaling;
+
+          _mev.setVisual(&screen);
+          _mev.setPosition(pos);
+          
+          if( ev.type == SDL_MOUSEBUTTONDOWN )
+            _mev.setPress(MouseEvent::Left);
+          else
+            _mev.setRelease(MouseEvent::Left);
+
+          app->commitEvent(_mev);
+        }
+
+        if(ev.type == SDL_MOUSEMOTION)
+        {
+          SDL_MouseMotionEvent* mev = reinterpret_cast<SDL_MouseMotionEvent*>(&ev);
+          
+          double scaling = Application::instance().scaleFactor();
+
+          Gfx::PointF pos(mev->x, mev->y);
+          pos = pos / scaling;
+
+          _mev.setVisual(&screen);
+          _mev.setPosition(pos);
+          _mev.setMove();
+
+          app->commitEvent(_mev);
+        }
+
+    }
+  
     app->onProcessEvents();
 }
 
 
 void ApplicationImpl::onRun()
 {
-    std::cout << "ApplicationImpl::onRun" << std::endl;
-
     emscripten_set_main_loop_arg(&ApplicationImpl::mainLoop, this, 0, true);
 }
 
