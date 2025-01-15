@@ -49,7 +49,7 @@ rule CheckCc
     if $(EMSDK)
     {
         TOOLSET_ROOT ?= $(EMSDK)\\upstream\\emscripten\\ ;
-        EMSDK_PYROOT ?= [ GLOB $(EMSDK)\\python : * ] ;
+        EMSDK_PYTHON_PATH ?= [ GLOB $(EMSDK)\\python : * ] ;
     }
 
     if $(TOOLSET_ROOT) && $(OS:L) = nt
@@ -57,11 +57,15 @@ rule CheckCc
       TOOLSET_ROOT = $(TOOLSET_ROOT:J=" ") ;
     }
     
-    if $(EMSDK_PYROOT) && $(OS:L) = nt
+    if $(EMSDK_PYTHON_PATH) && $(OS:L) = nt
     {
-      EMSDK_PYROOT = $(EMSDK_PYROOT:J=" ") ;
-      EMSDK_SET_PATH = "set PATH=$(EMSDK_PYROOT);%PATH% & " ;
+      EMSDK_PYTHON_PATH = $(EMSDK_PYTHON_PATH:J=" ") ;
+      EMSDK_SET_PATH = "set PATH=$(EMSDK_PYTHON_PATH);%PATH% & " ;
     }
+
+    EchoOption EMSDK : "Emscripten SDK" : $(EMSDK) ;
+    EchoOption TOOLSET_ROOT : "Emscripten toolset root" : $(TOOLSET_ROOT) ;
+    EchoOption EMSDK_PYTHON_PATH : "Emscripten Python Path" : $(EMSDK_PYTHON_PATH) ;
 
     AS           ?= "" ;
     CC           ?= $(EMSDK_SET_PATH)\"$(TOOLSET_ROOT)emcc\" ;
@@ -83,12 +87,12 @@ rule CheckCc
     if $(WITH_DEBUG)
     {
         CCFLAGS += -DDEBUG -D_DEBUG -g ;
-        LINKFLAGS ?= "-sSTACK_SIZE=5MB" "-sSTACK_OVERFLOW_CHECK" -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
+        LINKFLAGS ?= "-sSTACK_SIZE=6MB" "-sSTACK_OVERFLOW_CHECK" -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
     }
     else
     {
         CCFLAGS += -DNDEBUG ;
-        LINKFLAGS ?= "-sSTACK_SIZE=5MB" -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
+        LINKFLAGS ?= "-sSTACK_SIZE=6MB" -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
     }
 
     if $(WITH_OPTIM)
