@@ -27,8 +27,10 @@
 */
 
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
 
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
@@ -47,13 +49,6 @@ ApplicationImpl::ApplicationImpl()
 : _lastActivityTime( Pt::System::Clock::getSystemTime() )
 {
     SDL_Init(SDL_INIT_VIDEO);
-
-/*    int width, height, fs;
-    emscripten_get_canvas_size(&width, &height, &fs);
-    std::cout << width << " " << height<< std::endl;   */        
-
-    //emscripten_set_canvas_size(int(width), int(height));
-    //emscripten_set_resize_callback(nullptr, nullptr, false, emscWindowSizeChanged); 
 }
 
 
@@ -65,7 +60,6 @@ ApplicationImpl::~ApplicationImpl()
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
 {
-
 }
 
 
@@ -128,53 +122,8 @@ void ApplicationImpl::onReady(System::Selectable& s)
 
 void ApplicationImpl::mainLoop(void* arg)
 {
-    Screen& screen = Application::instance().screen();
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(arg);
-
-    static MouseEvent _mev;
-
-    SDL_Event ev;
-    while( SDL_PollEvent(&ev) > 0 )
-    {
-        if(ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEBUTTONDOWN)
-        {
-          SDL_MouseButtonEvent* mev = reinterpret_cast<SDL_MouseButtonEvent*>(&ev);
-
-          double scaling = Application::instance().scaleFactor();
-
-          Gfx::PointF pos(mev->x, mev->y);
-          pos = pos / scaling;
-
-          _mev.setVisual(&screen);
-          _mev.setPosition(pos);
-          
-          if( ev.type == SDL_MOUSEBUTTONDOWN )
-            _mev.setPress(MouseEvent::Left);
-          else
-            _mev.setRelease(MouseEvent::Left);
-
-          app->commitEvent(_mev);
-        }
-
-        if(ev.type == SDL_MOUSEMOTION)
-        {
-          SDL_MouseMotionEvent* mev = reinterpret_cast<SDL_MouseMotionEvent*>(&ev);
-          
-          double scaling = Application::instance().scaleFactor();
-
-          Gfx::PointF pos(mev->x, mev->y);
-          pos = pos / scaling;
-
-          _mev.setVisual(&screen);
-          _mev.setPosition(pos);
-          _mev.setMove();
-
-          app->commitEvent(_mev);
-        }
-
-    }
-  
-    app->onProcessEvents();
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(arg); 
+    app->processEvents();
 }
 
 
@@ -211,6 +160,62 @@ void ApplicationImpl::onWake()
 
 void ApplicationImpl::onProcessEvents()
 {
+    Screen& screen = Application::instance().screen();
+
+    SDL_Event ev;
+    while( SDL_PollEvent(&ev) > 0 )
+    {
+        if(ev.type == SDL_WINDOWEVENT)
+        {
+            if(ev.window.event == SDL_WINDOWEVENT_RESIZED ||
+               ev.window.event == SDL_WINDOWEVENT_SIZE_CHANGED )
+            {
+                Gfx::SizeF to(ev.window.data1, ev.window.data2);
+                to /= screen.scaleFactor();
+
+                ResizeEvent rev(screen, to);
+                Application::instance().processEvent(rev);
+
+                Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
+                screen.repaint(updateRect);
+            }
+        }
+        else if(ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEBUTTONDOWN)
+        {
+          SDL_MouseButtonEvent* mev = reinterpret_cast<SDL_MouseButtonEvent*>(&ev);
+
+          double scaling = Application::instance().scaleFactor();
+
+          Gfx::PointF pos(mev->x, mev->y);
+          pos = pos / scaling;
+
+          _mev.setVisual(&screen);
+          _mev.setPosition(pos);
+          
+          if( ev.type == SDL_MOUSEBUTTONDOWN )
+            _mev.setPress(MouseEvent::Left);
+          else
+            _mev.setRelease(MouseEvent::Left);
+
+          Application::instance().processEvent(_mev);
+        }
+        else if(ev.type == SDL_MOUSEMOTION)
+        {
+          SDL_MouseMotionEvent* mev = reinterpret_cast<SDL_MouseMotionEvent*>(&ev);
+          
+          double scaling = Application::instance().scaleFactor();
+
+          Gfx::PointF pos(mev->x, mev->y);
+          pos = pos / scaling;
+
+          _mev.setVisual(&screen);
+          _mev.setPosition(pos);
+          _mev.setMove();
+
+          Application::instance().processEvent(_mev);
+        }
+    }
+
     _eventQueue.processEvents( this->eventReceived() );
 }
 

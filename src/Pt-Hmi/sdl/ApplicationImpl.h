@@ -163,6 +163,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         Selector           _selector;
         System::EventQueue _eventQueue;
         Pt::DateTime       _lastActivityTime;
+        MouseEvent         _mev;
         
 };
 

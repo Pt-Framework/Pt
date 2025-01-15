@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Form.h>
 #include <Pt/Hmi/Shell.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Pixmap.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
 
@@ -42,7 +43,6 @@ namespace Pt {
 namespace Hmi {
 
 class ApplicationImpl;
-class FrameBuffer;
 class Cursor;
 class Screen;
 
@@ -100,6 +100,8 @@ class ScreenImpl : public Form
 
         virtual void onProcessEvent(const Event& ev);
 
+        virtual void onRequestResize(const Gfx::SizeF& s);
+
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
     //
@@ -111,6 +113,8 @@ class ScreenImpl : public Form
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescale(double scaling);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
 
     //
     // enable
@@ -144,10 +148,10 @@ class ScreenImpl : public Form
         void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        Pixmap       _pixmap;
-
         Screen*      _parent;
         Shell        _shell;
+
+        Pixmap       _pixmap;
 
         SDL_Window*   _screen;
         SDL_Surface*  _imageSurface;

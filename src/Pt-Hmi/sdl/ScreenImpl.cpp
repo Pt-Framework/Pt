@@ -36,54 +36,66 @@
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/System/Clock.h>
 #include <Pt/System/Logger.h>
-#include <Pt/Math.h>
-
-#include <algorithm>
-#include <cmath>
-#include <cstring>
 
 #include <emscripten.h>
+#include <emscripten/html5.h>
 
 PT_LOG_DEFINE("Pt.Hmi.Screen")
+
+namespace {
+
+EM_BOOL onCanvasResized(int eventType, const void *reserved, void *obj)
+{
+	  double width, height;
+	  emscripten_get_element_css_size("canvas", &width, &height);
+    std::clog << "emscripten resize: " << width << " " << height << std::endl;
+
+    //emscripten_set_canvas_size( int(width), int(height) );
+
+    return true;
+}
+
+} // namespace
 
 namespace Pt {
 
 namespace Hmi {
 
-const unsigned screenWidth = 1024;
-const unsigned screenHeight = 720;
-
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _parent(0)
 , _screen(0)
 {
-    _screen = SDL_CreateWindow("Screen", 0, 0,
-                               screenWidth, screenHeight, 0);
+    EmscriptenFullscreenStrategy strategy;
+		strategy.scaleMode = EMSCRIPTEN_FULLSCREEN_SCALE_DEFAULT;
+    strategy.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_NONE;
+		strategy.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
+		strategy.canvasResizedCallback = 0; // onCanvasResized;
+		strategy.canvasResizedCallbackUserData = this; 
+		
+    //emscripten_set_resize_callback(0, 0, false, emscWindowSizeChanged)
 
-    Gfx::SizeF size(screenWidth, screenHeight);
+    emscripten_enter_soft_fullscreen("canvas", &strategy);
+
+	  double width, height;
+	  emscripten_get_element_css_size("canvas", &width, &height);
+
+    Gfx::SizeF size(width, height);
     _pixmap.resize(size);
                              
-    Gfx::PaintSurface* surface = _pixmap.surface();
-    if(surface)
-    {
-      Gfx::Painter painter(*surface);
-
-      Gfx::RectF rect( Gfx::PointF(0, 0), _pixmap.size() );
-      painter.setBrush( Gfx::Color::fromRgb8(40, 50, 80) );
-      painter.fillRect(rect);
-    }
-
-    setSurface(surface, Gfx::PointF(0, 0) );
-    setContent(&_shell);
-
     const Gfx::Image& image = _pixmap.impl()->toImage();
 
     _imageSurface = SDL_CreateRGBSurfaceWithFormatFrom( (void*) image.data(), 
                                                          image.width(), image.height(), 
                                                          32, image.width() * 4,
                                                          SDL_PIXELFORMAT_RGB888 );
+
+    _screen = SDL_CreateWindow("Screen", 0, 0, width, height, 
+                               SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
+
+    Gfx::PaintSurface* surface = _pixmap.surface();
+    setSurface(surface, Gfx::PointF(0, 0) );
+    setContent(&_shell);
 }
 
 
@@ -102,8 +114,7 @@ void ScreenImpl::setParent(Screen* screen)
 
     if(_parent)
     {
-        Gfx::SizeF size(screenWidth, screenHeight);
-
+        Gfx::SizeF size = _pixmap.size();
         size /= scaleFactor();
 
         _parent->onResize(*this, size);
@@ -137,6 +148,10 @@ WindowManager& ScreenImpl::windowManager()
     return _shell.windowManager();
 }
 
+
+void ScreenImpl::setCapture(Visual* capture)
+{
+}
 
 ///////////////////////////////////////////////////////////////////////
 // Visual
@@ -179,33 +194,25 @@ void ScreenImpl::onProcessEvent(const Event& ev)
 }
 
 
+void ScreenImpl::onRequestResize(const Gfx::SizeF& s)
+{
+    if(_parent)
+        _parent->onResize(*this, s);
+}
+
+
 void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->repaint(rect);
 }
 
-
-void ScreenImpl::setCapture(Visual* capture)
-{
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Implementation
 ///////////////////////////////////////////////////////////////////////
 
-//bool ScreenImpl::isEnabled() const
-//{
-//    return _enabledState;
-//}
-
-
 void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
 {
-    //bool isEnabled = ev.enabled();
-    //if( ! _enabled )
-    //  isEnabled = false;
-
     Base::onProcessEnableEvent(ev);
 }
 
@@ -280,8 +287,7 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 {
     Base::onRescaleEvent(ev);
 
-    Gfx::SizeF size(screenWidth, screenHeight);
-    
+    Gfx::SizeF size = _pixmap.size();
     size /= scaleFactor();
 
     _pixmap.setScaleFactor( scaleFactor() );
@@ -297,14 +303,34 @@ void ScreenImpl::onRescale(double scaling)
 }
 
 
+void ScreenImpl::onResizeEvent(const ResizeEvent& ev)
+{
+    if( size() == ev.size() )
+        return;
+
+    Base::onResizeEvent(ev);
+
+    Gfx::SizeF size = scaling().toPhysical( ev.size() );
+    _pixmap.resize(size);
+    
+    const Gfx::Image& image = _pixmap.impl()->toImage();
+
+    SDL_FreeSurface(_imageSurface);
+    _imageSurface = 0; 
+
+    _imageSurface = SDL_CreateRGBSurfaceWithFormatFrom( (void*) image.data(), 
+                                                         image.width(), image.height(), 
+                                                         32, image.width() * 4,
+                                                         SDL_PIXELFORMAT_RGB888 );
+}
+
+
 void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& updateRectF = ev.rect();
 
     if( updateRectF.isNull() )
         return;
-
-    double then = emscripten_get_now();
 
     Base::onProcessPaintEvent(ev);
 
@@ -315,25 +341,19 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     //                 Gfx::Image::Size( lround(updateRectP.width()),
     //                                   lround(updateRectP.height()) ) );
 
-    double now = emscripten_get_now();
-    std::cout << "paint time: " << now - then << std::endl;
-
-    then = emscripten_get_now();
-
     SDL_Surface* surface = SDL_GetWindowSurface(_screen);
 
     if( SDL_MUSTLOCK(surface) ) 
         SDL_LockSurface(surface);
 
     int r = SDL_BlitSurface(_imageSurface, NULL, surface, NULL);
+    if(r < 0)
+        std::clog << "SDL_BlitSurface failed: " << r << std::endl;
 
     if( SDL_MUSTLOCK(surface) ) 
         SDL_UnlockSurface(surface);
 
     SDL_UpdateWindowSurface(_screen);
-
-    now = emscripten_get_now();
-    std::cout << "blit time: " << now - then << std::endl;
 }
 
 
