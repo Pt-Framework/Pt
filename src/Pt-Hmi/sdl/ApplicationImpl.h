@@ -166,7 +166,6 @@ class ApplicationImpl : public Pt::System::EventLoop
         Pt::DateTime       _lastActivityTime;
         MouseEvent         _mev;
         KeyEvent           _keyEvent;
-        
 };
 
 } // namespace
