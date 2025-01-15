@@ -1677,6 +1677,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\sdl\ScreenImpl.h">
       <Filter>Pt-Hmi\sdl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\sdl\Keycodes.h">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

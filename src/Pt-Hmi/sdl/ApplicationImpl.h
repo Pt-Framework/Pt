@@ -33,6 +33,7 @@
 
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/DateTime.h>
 #include <Pt/Timespan.h>
@@ -164,6 +165,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         System::EventQueue _eventQueue;
         Pt::DateTime       _lastActivityTime;
         MouseEvent         _mev;
+        KeyEvent           _keyEvent;
         
 };
 

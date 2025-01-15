@@ -28,6 +28,7 @@
 
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
+#include "Keycodes.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/ResizeEvent.h>
@@ -182,30 +183,35 @@ void ApplicationImpl::onProcessEvents()
         }
         else if(ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEBUTTONDOWN)
         {
-          SDL_MouseButtonEvent* mev = reinterpret_cast<SDL_MouseButtonEvent*>(&ev);
-
+          _lastActivityTime = Pt::System::Clock::getSystemTime();
+          
           double scaling = Application::instance().scaleFactor();
 
-          Gfx::PointF pos(mev->x, mev->y);
+          Gfx::PointF pos(ev.button.x, ev.button.y);
           pos = pos / scaling;
 
           _mev.setVisual(&screen);
           _mev.setPosition(pos);
           
+          int buttonIdx = ev.button.button;
+          MouseEvent::Button button = buttonIdx == 1 ? MouseEvent::Left :
+                                      buttonIdx == 3 ? MouseEvent::Right :
+                                      MouseEvent::Middle;
+          
           if( ev.type == SDL_MOUSEBUTTONDOWN )
-            _mev.setPress(MouseEvent::Left);
+            _mev.setPress(button);
           else
-            _mev.setRelease(MouseEvent::Left);
+            _mev.setRelease(button);
 
           Application::instance().processEvent(_mev);
         }
         else if(ev.type == SDL_MOUSEMOTION)
         {
-          SDL_MouseMotionEvent* mev = reinterpret_cast<SDL_MouseMotionEvent*>(&ev);
+          _lastActivityTime = Pt::System::Clock::getSystemTime();
           
           double scaling = Application::instance().scaleFactor();
 
-          Gfx::PointF pos(mev->x, mev->y);
+          Gfx::PointF pos(ev.motion.x, ev.motion.y);
           pos = pos / scaling;
 
           _mev.setVisual(&screen);
@@ -213,6 +219,50 @@ void ApplicationImpl::onProcessEvents()
           _mev.setMove();
 
           Application::instance().processEvent(_mev);
+        }
+        else if(ev.type == SDL_KEYUP  || ev.type == SDL_KEYDOWN )
+        {
+          _lastActivityTime = Pt::System::Clock::getSystemTime();
+
+          Pt::uint32_t keyCode = toKeycode(ev.key.keysym.sym);
+          Pt::Char ch;
+          
+          Key::Modifiers modifiers;
+
+          if(ev.key.keysym.mod & KMOD_LSHIFT)
+              modifiers.add(Key::Shift);
+          
+          if(ev.key.keysym.mod & KMOD_RSHIFT)
+              modifiers.add(Key::Shift);
+
+          if(ev.key.keysym.mod & KMOD_LCTRL )
+              modifiers.add(Key::Control);
+
+          if(ev.key.keysym.mod & KMOD_RCTRL )
+              modifiers.add(Key::Control);
+
+          if(ev.key.keysym.mod & KMOD_LALT  )
+              modifiers.add(Key::Alt);
+
+          if(ev.key.keysym.mod & KMOD_RALT  )
+              modifiers.add(Key::Alt);
+
+          if(ev.key.keysym.mod & KMOD_LGUI )
+              modifiers.add(Key::Meta);
+
+          if(ev.key.keysym.mod & KMOD_RGUI )
+              modifiers.add(Key::Meta);
+
+          Key key(modifiers, keyCode);
+
+          if( ev.type == SDL_KEYDOWN )
+              _keyEvent.setPress(key, ch);
+          else
+              _keyEvent.setRelease(key, ch);
+
+          Application::instance().processEvent(_keyEvent);
+
+          
         }
     }
 
