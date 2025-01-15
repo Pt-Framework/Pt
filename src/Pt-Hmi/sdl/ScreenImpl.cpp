@@ -68,11 +68,14 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 {
     EmscriptenFullscreenStrategy strategy;
 		strategy.scaleMode = EMSCRIPTEN_FULLSCREEN_SCALE_DEFAULT;
-    strategy.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_NONE;
+    strategy.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_STDDEF;
 		strategy.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
 		strategy.canvasResizedCallback = 0; // onCanvasResized;
 		strategy.canvasResizedCallbackUserData = this; 
 		
+    //strategy.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_HIDEF;
+    // emscripten_get_device_pixel_ratio()
+    
     //emscripten_set_resize_callback(0, 0, false, emscWindowSizeChanged)
 
     emscripten_enter_soft_fullscreen("canvas", &strategy);
