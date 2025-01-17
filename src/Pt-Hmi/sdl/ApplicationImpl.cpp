@@ -124,6 +124,8 @@ void ApplicationImpl::onReady(System::Selectable& s)
 
 void ApplicationImpl::mainLoop(void* arg)
 {
+    std::clog << emscripten_get_now() << std::endl;
+    
     ApplicationImpl* app = static_cast<ApplicationImpl*>(arg); 
     app->processEvents();
 }
@@ -139,6 +141,9 @@ void ApplicationImpl::onExit()
 {
     _eventQueue.exit();
     wake();
+
+    std::clog << "emscripten_cancel_main_loop" << std::endl;
+    emscripten_cancel_main_loop();
 }
 
 
