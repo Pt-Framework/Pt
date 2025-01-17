@@ -48,8 +48,8 @@ rule CheckCc
 {
     if $(EMSDK)
     {
-        TOOLSET_ROOT ?= $(EMSDK)\\upstream\\emscripten\\ ;
-        EMSDK_PYTHON_PATH ?= [ GLOB $(EMSDK)\\python : * ] ;
+        TOOLSET_ROOT ?= [ FDirName $(EMSDK) upstream emscripten ] ;
+        EMSDK_PYTHON_PATH ?= [ GLOB [ FDirName $(EMSDK) python ]  : * ] ;
     }
 
     if $(TOOLSET_ROOT) && $(OS:L) = nt
@@ -60,7 +60,7 @@ rule CheckCc
     if $(EMSDK_PYTHON_PATH) && $(OS:L) = nt
     {
       EMSDK_PYTHON_PATH = $(EMSDK_PYTHON_PATH:J=" ") ;
-      EMSDK_SET_PATH = "set PATH=$(EMSDK_PYTHON_PATH);%PATH% & " ;
+      EMSDK_SET_PATH = set PATH=$(EMSDK_PYTHON_PATH);%PATH% \& ;
     }
 
     EchoOption EMSDK : "Emscripten SDK" : $(EMSDK) ;
@@ -68,9 +68,9 @@ rule CheckCc
     EchoOption EMSDK_PYTHON_PATH : "Emscripten Python Path" : $(EMSDK_PYTHON_PATH) ;
 
     AS           ?= "" ;
-    CC           ?= $(EMSDK_SET_PATH)\"$(TOOLSET_ROOT)emcc\" ;
-    RANLIB       ?= $(EMSDK_SET_PATH)\"$(TOOLSET_ROOT)emranlib\" ;
-    AR           ?= $(EMSDK_SET_PATH)\"$(TOOLSET_ROOT)emar\" ru ;
+    CC           ?= $(EMSDK_SET_PATH) [ FDirName \"$(TOOLSET_ROOT) emcc\" ] ;
+    RANLIB       ?= $(EMSDK_SET_PATH) [ FDirName \"$(TOOLSET_ROOT) emranlib\" ] ;
+    AR           ?= $(EMSDK_SET_PATH) [ FDirName \"$(TOOLSET_ROOT) emar\" ] ru ;
     LINK         ?= $(CC) ;
 
     Configure AS ;
@@ -119,7 +119,7 @@ rule CheckC++
 {
     ConfigureCc ;
 
-    C++ ?= $(EMSDK_SET_PATH)\"$(TOOLSET_ROOT)em++\" ;
+    C++ ?= $(EMSDK_SET_PATH) [ FDirName \"$(TOOLSET_ROOT) em++\" ] ;
     Configure C++ ;
 
     LINK++ = $(C++) ;
