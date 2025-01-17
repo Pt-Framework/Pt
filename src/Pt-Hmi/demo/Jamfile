@@ -22,6 +22,11 @@ if $(WITH_BUILTIN_SKIA)
 
 MakeLocate Pt-Hmi-Demo : $(PT_OUTPUT_TARGET) ;
 
+if $(TARGET_OS) = wasm
+{
+  LinkFlags Pt-Hmi-Demo : --preload-file etc/icons@/ ;
+}
+
 #HMI_PAINTER_DEMO_SOURCES = PainterDemo.cpp ;
 
 #Main Pt-Hmi-PainterDemo : $(HMI_PAINTER_DEMO_SOURCES) ;
