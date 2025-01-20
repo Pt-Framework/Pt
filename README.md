@@ -1,38 +1,6 @@
 
 # Platinum C++ Framework
 
-
-About
-Features
-Documentation
-Download
-Community
-Latest Download
-Platinum 1.0.2
-Topics
-Signals and Delegates
-Enhance your APIs with convenient callbacks and notifications
-Secure Communication
-Secure communication using SSL/TLS
-XML-RPC Services and Clients
-XML based remote procedure calls for distributed applications
-Extend Programs with Plugins
-Extend the functionality of your programs with plugins
-Building with Jam
-Build your own portable programs with the jam build tool
-Unit Testing
-Unit testing is an important tool to ensure application reliability
-Advanced Logging
-A logging mechanism applicalble to high-performance applications
-
-Resources
-Subversion Repository
-Mailing List
-License
-Frequently Askes Questions
-
-About Platinum
-
 Platinum (Pt) is a comprehensive C++ framework, which allows developers to
 write high-performance applications for many platforms with only one codebase.
 It provides a large amount of features and is still very easy to use. It
