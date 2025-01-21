@@ -124,8 +124,6 @@ void ApplicationImpl::onReady(System::Selectable& s)
 
 void ApplicationImpl::mainLoop(void* arg)
 {
-    std::clog << emscripten_get_now() << std::endl;
-    
     ApplicationImpl* app = static_cast<ApplicationImpl*>(arg); 
     app->processEvents();
 }

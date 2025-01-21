@@ -51,7 +51,8 @@ EM_BOOL onCanvasResized(int eventType, const void *reserved, void *obj)
 	  emscripten_get_element_css_size("canvas", &width, &height);
     std::clog << "emscripten resize: " << width << " " << height << std::endl;
 
-    //emscripten_set_canvas_size( int(width), int(height) );
+    std::clog << "pixel ratio: " << emscripten_get_device_pixel_ratio() << std::endl;
+    emscripten_set_canvas_size( int(width), int(height) );
 
     return true;
 }
@@ -70,11 +71,12 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 		strategy.scaleMode = EMSCRIPTEN_FULLSCREEN_SCALE_DEFAULT;
     strategy.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_STDDEF;
 		strategy.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
-		strategy.canvasResizedCallback = 0; // onCanvasResized;
+		strategy.canvasResizedCallback = onCanvasResized;
 		strategy.canvasResizedCallbackUserData = this; 
 		
     //strategy.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_HIDEF;
-    // emscripten_get_device_pixel_ratio()
+
+    //std::clog << "pixel ratio: " << emscripten_get_device_pixel_ratio() << std::endl;
     
     //emscripten_set_resize_callback(0, 0, false, emscWindowSizeChanged)
 
@@ -82,6 +84,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
 	  double width, height;
 	  emscripten_get_element_css_size("canvas", &width, &height);
+    //std::clog << "size: " << width << " x " << height << std::endl;
 
     Gfx::SizeF size(width, height);
     _pixmap.resize(size);
