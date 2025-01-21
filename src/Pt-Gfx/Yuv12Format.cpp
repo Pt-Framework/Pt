@@ -61,6 +61,26 @@ void Yuv12Format::onSetPixel(Pixel& to, const Pixel& from,
 void Yuv12Format::onSetPixel(Pixel& to, const ConstPixel& from,
                              CompositionMode mode) const
 {
+    Pt::uint8_t* y;
+    Pt::uint8_t* u;
+    Pt::uint8_t* v;
+
+    Yuv12Model::init(to.view().data(), to.view().stride(), 
+                     to.view().width(), to.view().height(),
+                     to.x(), to.y(), y, u, v);
+
+    const Pt::uint8_t* cy;
+    const Pt::uint8_t* cu;
+    const Pt::uint8_t* cv;
+
+    Yuv12Model::init(from.view().data(), from.view().stride(), 
+                     from.view().width(), from.view().height(),
+                     from.x(), from.y(), cy, cu, cv);
+
+    *y = *cy;
+    *u = *cu;
+    *v = *cv;
+
     //Yuv12Model::Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
     //Yuv12Model::ConstPixel fromYuv( from.view(), from.base(), from.x(), from.y() );
 
