@@ -44,19 +44,37 @@ namespace Gfx {
 
 class ImageView;
 
+/** @brief Index to a pixel in an image.
+*/
+class PixelIndex
+{
+    public:
+        PixelIndex(ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
+        : _view(&view)
+        , _x(x)
+        , _y(y)
+        { }
+    
+        const ImageView& view() const
+        { return *_view; }
+
+        Pt::ssize_t x() const
+        { return _x; }
+
+        Pt::ssize_t y() const
+        { return _y; }
+
+    private:
+        const ImageView* _view;
+        Pt::ssize_t      _x;
+        Pt::ssize_t      _y;
+};
+
 /** @brief Pixel in an image.
 */
 class Pixel
 {
     public:
-        Pixel()
-        : _view(0)
-        , _base(0)
-        , _x(0)
-        , _y(0)
-        {  
-        }
-
         Pixel(ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Pixel(const Pixel& p)
@@ -100,6 +118,8 @@ class Pixel
 
         void assign(const Color& color, CompositionMode mode);
 
+        void assign2(const Color& color, CompositionMode mode);
+
         void assign(const Pixel& p, CompositionMode mode)
         {
             assign(p.toColor(), mode);
@@ -109,7 +129,7 @@ class Pixel
 
         Color toColor() const;
 
-        ImageView& view() const
+        const ImageView& view() const
         { return *_view; }
 
         Pt::ssize_t x() const
@@ -133,10 +153,10 @@ class Pixel
         std::size_t pixelStride() const;
 
     private:
-        ImageView* _view;
-        Pt::uint8_t* _base;
-        Pt::ssize_t _x;
-        Pt::ssize_t _y;
+        const ImageView* _view;
+        Pt::uint8_t*     _base;
+        Pt::ssize_t      _x;
+        Pt::ssize_t      _y;
 };
 
 /** @brief Const pixel in an image.
@@ -144,14 +164,6 @@ class Pixel
 class ConstPixel
 {
     public:
-        ConstPixel()
-        : _view(0)
-        , _base(0)
-        , _x(0)
-        , _y(0)
-        {
-        }
-
         ConstPixel(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
 
         ConstPixel(const ConstPixel& p)
@@ -462,10 +474,19 @@ inline void Pixel::advance()
 inline void Pixel::advance(Pt::ssize_t n)
 {
     Pt::ssize_t off = _x + n;
-    _y += off / _view->width();
-    _x  = off % _view->width();
 
-    _base = _view->data() + _view->stride() * _y + _x * _view->pixelStride();
+    std::size_t dy = off / _view->width();
+    std::size_t dx = off % _view->width() - _x;
+
+    _x += dx;
+    _y += dy;
+    _base += dy * _view->stride() + dx * _view->pixelStride();
+}
+
+
+inline void Pixel::assign2(const Color& color, CompositionMode mode)
+{
+    //_view->format().setPixel2(*_view, _base, _x, _y, color, mode);
 }
 
 
@@ -533,10 +554,13 @@ inline void ConstPixel::advance()
 inline void ConstPixel::advance(Pt::ssize_t n)
 {
     Pt::ssize_t off = _x + n;
-    _y += off / _view->width();
-    _x += off % _view->width();
 
-    _base = _view->data() + _view->stride() * _y + _x * _view->pixelStride();
+    std::size_t dy = off / _view->width();
+    std::size_t dx = off % _view->width() - _x;
+
+    _x += dx;
+    _y += dy;
+    _base += dy * _view->stride() + dx * _view->pixelStride();
 }
 
 

@@ -151,6 +151,8 @@ ImageCanvas::ImageCanvas(PaintSurface& surface)
 , _image( ImageFormat::argb32() )
 , _paint(0)
 , _text( new DrawText() )
+, _brushPixel(_brushBuffer.view(), 0, 0)
+, _penPixel(_penBuffer.view(), 0, 0)
 , _compositionMode(CompositionMode::SourceCopy)
 {
 }
@@ -3959,6 +3961,8 @@ void ImageCanvas::stroke(int x, int y, const Rect& clip)
 
     Pixel pixel(_image.view(), x, y);
     _image.format().setPixel(pixel, _penPixel, _compositionMode);
+
+    //_image.format().setPixels(pixel, _penPixel, 1, _compositionMode);
 }
 
 

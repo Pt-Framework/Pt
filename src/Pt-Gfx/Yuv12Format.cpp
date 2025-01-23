@@ -65,7 +65,10 @@ void Yuv12Format::onSetPixel(Pixel& to, const ConstPixel& from,
     Pt::uint8_t* u;
     Pt::uint8_t* v;
 
-    Yuv12Model::init(to.view().data(), to.view().stride(), 
+    Pt::uint8_t* data = to.base();
+    data += to.base() - to.view().data();
+
+    Yuv12Model::init(data, to.view().stride(), 
                      to.view().width(), to.view().height(),
                      to.x(), to.y(), y, u, v);
 
@@ -95,7 +98,10 @@ void Yuv12Format::onSetPixel(Pixel& p, const Color& c,
     Pt::uint8_t* u;
     Pt::uint8_t* v;
 
-    Yuv12Model::init(p.view().data(), p.view().stride(), 
+    Pt::uint8_t* data = p.base();
+    data += p.base() - p.view().data();
+
+    Yuv12Model::init(data, p.view().stride(), 
                      p.view().width(), p.view().height(),
                      p.x(), p.y(), y, u, v);
 

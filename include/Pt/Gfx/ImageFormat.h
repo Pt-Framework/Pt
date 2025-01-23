@@ -40,6 +40,7 @@ namespace Gfx {
 
 class Pixel;
 class ConstPixel;
+class PixelIndex;
 class ImageView;
 
 /** @brief %Image format.
@@ -175,6 +176,25 @@ class ImageFormat
 
         virtual void onSetPixel(Pixel& to, const ConstPixel& from,
                                 CompositionMode mode) const = 0;
+
+
+
+        //virtual void onSetPixels(const PixelIndex& to, Pt::uint8_t* base, 
+        //                         const Color& c, std::size_t n, 
+        //                         CompositionMode  mode) const 
+        //                         {}
+
+        //virtual void onCopySpan(PixelIndex& to, Pt::uint8_t* toBase, 
+        //                        const PixelIndex& from, const Pt::uint8_t* fromBase,
+        //                        std::size_t n, CompositionMode mode) const
+        //                        {}
+
+        //virtual void onCopyArea(PixelIndex& to, Pt::uint8_t* toBase, 
+        //                        const PixelIndex& from, const Pt::uint8_t* fromBase,
+        //                        std::size_t w, std::size_t h, CompositionMode mode) const
+        //                        {}
+
+
 
         virtual void onSetPixel(Pixel& pixel, const Color& c,
                                 CompositionMode  mode) const = 0;
