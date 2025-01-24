@@ -32,7 +32,6 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/BasicImage.h>
-#include <vector>
 
 namespace Pt {
 
