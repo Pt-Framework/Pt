@@ -56,6 +56,25 @@ class BasicImage
         typedef typename View::Rect  Rect;
 
     public:
+
+        //
+        // TODO: Constructors: copy Model into View and View into Image
+        //
+        
+        /*
+          BasicImage(const View& view)
+          : _view(view)
+          { }
+
+          ArgbImage()
+          : BasicImage( BasicView<ArgbModel>() )
+          { }
+
+          Image(const ImageFormat& format)
+          : BasicImage( BasicView<ImageModel>( ImageModel(format) ) )
+          { }
+        */
+
         BasicImage()
         : _view()
         { }
