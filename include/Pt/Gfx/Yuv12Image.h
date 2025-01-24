@@ -421,15 +421,23 @@ class Yuv12Image : public BasicImage<Yuv12Model>
     public:
         /** @brief Constructor.
         */
-        Yuv12Image(const Size& size, size_t padding = 0)
-        : BasicImage(size, padding)
-        { }
+        Yuv12Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
+        : BasicImage()
+        { 
+            init(_model, width, height, padding);
+        }
 
         /** @brief Construct from external buffer.
         */
-        Yuv12Image(Pt::uint8_t* data, const Size& size, size_t padding = 0)
-        : BasicImage(data, size, padding)
-        { }
+        Yuv12Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   size_t padding = 0)
+        : BasicImage()
+        { 
+            init(_model, data, width, height, padding);
+        }
+
+    private:
+        Yuv12Model _model;
 };
 
 } // namespace

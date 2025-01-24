@@ -150,8 +150,6 @@ class Pixel
         bool operator==(const Pixel& p) const
         { return _base == p._base; }
 
-        std::size_t pixelStride() const;
-
     private:
         const ImageView* _view;
         Pt::uint8_t*     _base;
@@ -206,8 +204,6 @@ class ConstPixel
 
         bool operator==(const ConstPixel& p) const
         { return _base == p._base; }
-
-        std::size_t pixelStride() const;
 
     private:
         const ImageView*   _view;
@@ -270,9 +266,6 @@ class ImageView
                     return *this;
                 }
 
-                std::size_t pixelStride() const
-                { return _pixel.pixelStride(); }
-
             private:
                 Pixel _pixel;
         };
@@ -317,9 +310,6 @@ class ImageView
                     _pixel.advance(n);
                     return *this;
                 }
-
-                std::size_t pixelStride() const
-                { return _pixel.pixelStride(); }
 
             private:
                 ConstPixel _pixel;
@@ -443,7 +433,7 @@ inline Pixel::Pixel(ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
 , _x(x)
 , _y(y)
 {
-    _base = view.data() + view.stride() * y + x * view.pixelStride();
+    _base = view.data() + view.stride() * y + x * view.format().pixelStride();
 }
 
 
@@ -453,7 +443,7 @@ inline void Pixel::reset(ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
     _x = x;
     _y = y;
 
-    _base = view.data() + view.stride() * _y + _x * view.pixelStride();
+    _base = view.data() + view.stride() * _y + _x * view.format().pixelStride();
 }
 
 
@@ -467,7 +457,7 @@ inline void Pixel::advance()
         _base += _view->padding();
     }
 
-    _base += _view->pixelStride();
+    _base += _view->format().pixelStride();
 }
 
 
@@ -480,7 +470,7 @@ inline void Pixel::advance(Pt::ssize_t n)
 
     _x += dx;
     _y += dy;
-    _base += dy * _view->stride() + dx * _view->pixelStride();
+    _base += dy * _view->stride() + dx * _view->format().pixelStride();
 }
 
 
@@ -507,13 +497,6 @@ inline Color Pixel::toColor() const
     return _view->format().getColor(*this);
 }
 
-
-inline std::size_t Pixel::pixelStride() const
-{
-    return _view->pixelStride();
-}
-
-
 /////////////////////////////////////////////////////////////////////////////
 // ConstPixel Implementation
 /////////////////////////////////////////////////////////////////////////////
@@ -523,7 +506,7 @@ inline ConstPixel::ConstPixel(const ImageView& view, Pt::ssize_t x, Pt::ssize_t 
 , _x(x)
 , _y(y)
 {
-    _base = view.data() + view.stride() * y + x * view.pixelStride();
+    _base = view.data() + view.stride() * y + x * view.format().pixelStride();
 }
 
 
@@ -533,7 +516,7 @@ inline void ConstPixel::reset(const ImageView& view, Pt::ssize_t x, Pt::ssize_t 
     _x = x;
     _y = y;
 
-    _base = view.data() + view.stride() * _y + _x * view.pixelStride();
+    _base = view.data() + view.stride() * _y + _x * view.format().pixelStride();
 }
 
 
@@ -547,7 +530,7 @@ inline void ConstPixel::advance()
         _base += _view->padding();
     }
 
-    _base += _view->pixelStride();
+    _base += _view->format().pixelStride();
 }
 
 
@@ -560,19 +543,13 @@ inline void ConstPixel::advance(Pt::ssize_t n)
 
     _x += dx;
     _y += dy;
-    _base += dy * _view->stride() + dx * _view->pixelStride();
+    _base += dy * _view->stride() + dx * _view->format().pixelStride();
 }
 
 
 inline Color ConstPixel::toColor() const
 {
     return _view->format().getColor(*this);
-}
-
-
-inline std::size_t ConstPixel::pixelStride() const
-{
-    return _view->pixelStride();
 }
 
 } // namespace

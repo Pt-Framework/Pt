@@ -487,6 +487,24 @@ class Argb32Model::Pixel
         Pt::uint8_t*            _p;
 };
 
+/** @brief ARGB-32 image view.
+*/
+class Argb32View : public BasicView<Argb32Model>
+{
+    public:
+        /** @brief Constructor.
+        */
+        Argb32View(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0)
+        : BasicView()
+        { 
+            init(_model, data, width, height, padding);
+        }
+
+    private:
+        Argb32Model _model;
+};
+
 
 /** @brief ARGB-32 image.
 */
@@ -495,20 +513,27 @@ class Argb32Image : public BasicImage<Argb32Model>
     public:
         /** @brief Constructor.
         */
-        Argb32Image(const Size& size, size_t padding = 0)
-        : BasicImage(size, padding)
-        { }
+        Argb32Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
+        : BasicImage()
+        { 
+            init(_model, width, height, padding);
+        }
 
         /** @brief Construct from external buffer.
         */
-        Argb32Image(Pt::uint8_t* data, const Size& size, size_t padding = 0)
-        : BasicImage(data, size, padding)
-        { }
+        Argb32Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                    size_t padding = 0)
+        : BasicImage()
+        { 
+            init(_model, data, width, height, padding);
+        }
+
+    private:
+        Argb32Model _model;
 };
 
-
-} // namespace
 } // namespace
 
+} // namespace
 
 #endif
