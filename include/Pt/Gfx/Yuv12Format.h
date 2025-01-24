@@ -79,8 +79,8 @@ class PT_GFX_API Yuv12Format : public ImageFormat
         virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length,
                             CompositionMode mode) const;
 
-        virtual void onCopy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                            const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+        virtual void onCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                            const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
                             Pt::ssize_t width, Pt::ssize_t height, 
                             CompositionMode mode) const;
 

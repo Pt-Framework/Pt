@@ -189,8 +189,8 @@ void Rgb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
 }
 
 
-void Rgb32Format::onCopy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                         const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+void Rgb32Format::onCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                         const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
                          Pt::ssize_t width, Pt::ssize_t height, 
                          CompositionMode mode) const
 {

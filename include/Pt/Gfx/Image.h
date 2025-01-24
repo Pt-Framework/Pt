@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/BasicImage.h>
 #include <vector>
 
 namespace Pt {
@@ -39,18 +40,8 @@ namespace Gfx {
 
 /** @brief Generic image.
 */
-class PT_GFX_API Image
+class PT_GFX_API Image : public BasicImage<ImageFormat>
 {
-    public:
-        typedef ImageView::Pixel              Pixel;
-        typedef ImageView::ConstPixel         ConstPixel;
-        typedef ImageView::PixelIterator      PixelIterator;
-        typedef ImageView::ConstPixelIterator ConstPixelIterator;
-
-        typedef ImageView::Point Point;
-        typedef ImageView::Size  Size;
-        typedef ImageView::Rect  Rect;
-
     public:
         Image();
 
@@ -76,84 +67,12 @@ class PT_GFX_API Image
                    Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0);
 
-        PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return PixelIterator(view(), x, y); }
-
-        PixelIterator begin()
-        { return PixelIterator(view(), 0, 0); }
-
-        PixelIterator end()
-        { return PixelIterator(view(), 0, height()); }
-
-        ConstPixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
-        { return ConstPixelIterator(view(), x, y); }
-
-        ConstPixelIterator begin() const
-        { return ConstPixelIterator(view(), 0, 0); }
-
-        ConstPixelIterator end() const
-        { return ConstPixelIterator(view(), 0, height()); }
-
-        /** @brief Returns a view on the image data.
-        */
-        const ImageView& view() const
-        {
-            return _view;
-        }
-
-        /** @brief Returns a view on the image data.
-        */
-        ImageView& view()
-        {
-            return _view;
-        }
-
         /** @brief Returns the format of the image.
         */
         const ImageFormat& format() const
         {
-            return _view.format();
+            return *view().model();
         }
-
-        Pt::ssize_t width() const
-        {
-            return _view.width();
-        }
-
-        Pt::ssize_t height() const
-        {
-            return _view.height();
-        }
-
-        Pt::ssize_t padding() const
-        {
-            return _view.padding();
-        }
-
-        Pt::uint8_t* data()
-        {
-            return _view.data();
-        }
-
-        const Pt::uint8_t* data() const
-        {
-            return _view.data();
-        }
-
-        bool empty() const
-        {
-            return _view.empty();
-        }
-
-        void clear()
-        {
-            _buffer.clear();
-            _view.clear();
-        }
-
-    private:
-        std::vector<Pt::uint8_t> _buffer;
-        ImageView                _view;
 };
 
 } // namespace

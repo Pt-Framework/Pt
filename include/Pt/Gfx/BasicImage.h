@@ -152,10 +152,18 @@ class BasicView
         , _height(0)
         , _padding(0)
         , _stride(0)
-        {
-        }
+        { }
 
-        BasicView(ModelT& model, Pt::uint8_t* data, 
+        BasicView(const ModelT& model)
+        : _model(&model)
+        , _data(0)
+        , _width(0)
+        , _height(0)
+        , _padding(0)
+        , _stride(0)
+        { }
+
+        BasicView(const ModelT& model, Pt::uint8_t* data, 
                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         : _model(&model)
         , _data(data)
@@ -168,9 +176,9 @@ class BasicView
         }
 
         virtual ~BasicView()
-        {}
+        { }
 
-        void init(ModelT& model, Pt::uint8_t* data, 
+        void init(const ModelT& model, Pt::uint8_t* data, 
                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
             _model = &model;
@@ -179,6 +187,15 @@ class BasicView
             _height = height;
             _padding = padding;
             _stride = _width * model.pixelStride() + _padding;
+        }
+
+        void clear()
+        {
+            _data = 0;
+            _width = 0;
+            _height = 0;
+            _padding = 0;
+            _stride = 0;
         }
 
         /** @brief Returns an iterator to the pixel at the given position.
@@ -204,12 +221,12 @@ class BasicView
         /** @brief Returns a const iterator to the first pixel.
         */
         ConstPixelIterator begin() const
-        { return PixelIterator(*this, 0, 0); }
+        { return ConstPixelIterator(*this, 0, 0); }
 
         /** @brief Returns a const iterator to the end of the pixels.
         */
         ConstPixelIterator end() const
-        { return PixelIterator(*this, 0, height()); }
+        { return ConstPixelIterator(*this, 0, height()); }
 
         Pt::ssize_t width() const
         { return _width; }
@@ -218,7 +235,7 @@ class BasicView
         { return _height; }
 
         bool empty() const
-        { return _size.width() == 0 || _size.height() == 0; }
+        { return _width == 0 || _height == 0; }
 
         Pt::uint8_t* data()
         { return _data; }
@@ -235,7 +252,7 @@ class BasicView
         std::size_t pixelStride() const
         { return _model ? _model->pixelStride() : 0; }
 
-        const ModelT* model()
+        const ModelT* model() const
         { return _model; }
 
     private:
@@ -303,11 +320,6 @@ class BasicImage
         ConstPixelIterator end() const
         { return _view.end(); }
 
-        /** @brief Returns the size of the image.
-        */
-        const Size& size() const
-        { return _view.size(); }
-
         Pt::ssize_t width() const
         { return _view.width(); }
 
@@ -326,12 +338,21 @@ class BasicImage
         bool empty() const
         { return _view.empty(); }
 
+        void clear()
+        {
+            _buffer.clear();
+            _view.clear();
+        }
+
+        View& view()
+        { return _view; }
+
         const View& view() const
         { return _view; }
 
     protected:
-        void init(ModelT& model, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0)
+        void init(const ModelT& model, Pt::ssize_t width, Pt::ssize_t height, 
+                  Pt::ssize_t padding = 0)
         { 
             _buffer.resize( model.imageSize(width, height, padding) );
             
@@ -339,8 +360,8 @@ class BasicImage
                         width, height, padding );
         }
 
-        void init(ModelT& model, Pt::uint8_t* data, 
-                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
+        void init(const ModelT& model, Pt::uint8_t* data, 
+                  Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
            _view.init(model, data, width, height, padding);
         }

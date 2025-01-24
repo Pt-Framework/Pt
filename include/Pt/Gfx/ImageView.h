@@ -34,6 +34,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/BasicImage.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Types.h>
@@ -42,20 +43,18 @@ namespace Pt {
 
 namespace Gfx {
 
-class ImageView;
-
 /** @brief Index to a pixel in an image.
 */
 class PixelIndex
 {
     public:
-        PixelIndex(ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
+        PixelIndex(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _view(&view)
         , _x(x)
         , _y(y)
         { }
     
-        const ImageView& view() const
+        const BasicView<ImageFormat>& view() const
         { return *_view; }
 
         Pt::ssize_t x() const
@@ -65,7 +64,7 @@ class PixelIndex
         { return _y; }
 
     private:
-        const ImageView* _view;
+        const BasicView<ImageFormat>* _view;
         Pt::ssize_t      _x;
         Pt::ssize_t      _y;
 };
@@ -75,7 +74,7 @@ class PixelIndex
 class Pixel
 {
     public:
-        Pixel(ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
+        Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Pixel(const Pixel& p)
         : _view(p._view)
@@ -102,7 +101,7 @@ class Pixel
             return *this;
         }
 
-        void reset(ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Pixel& p)
         {
@@ -118,16 +117,13 @@ class Pixel
 
         void assign(const Color& color, CompositionMode mode);
 
-        void assign(const Pixel& p, CompositionMode mode)
-        {
-            assign(p.toColor(), mode);
-        }
+        void assign(const Pixel& p, CompositionMode mode);
 
         void assign(const ConstPixel& p, CompositionMode mode);
 
         Color toColor() const;
 
-        const ImageView& view() const
+        const BasicView<ImageFormat>& view() const
         { return *_view; }
 
         Pt::ssize_t x() const
@@ -149,7 +145,7 @@ class Pixel
         { return _base == p._base; }
 
     private:
-        const ImageView* _view;
+        const BasicView<ImageFormat>* _view;
         Pt::uint8_t*     _base;
         Pt::ssize_t      _x;
         Pt::ssize_t      _y;
@@ -160,7 +156,7 @@ class Pixel
 class ConstPixel
 {
     public:
-        ConstPixel(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
+        ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         ConstPixel(const ConstPixel& p)
         : _view(p._view)
@@ -169,7 +165,7 @@ class ConstPixel
         , _y(p._y)
         {  }
 
-        void reset(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const ConstPixel& p)
         {
@@ -185,7 +181,7 @@ class ConstPixel
 
         Color toColor() const;
 
-        const ImageView& view() const
+        const BasicView<ImageFormat>& view() const
         { return *_view; }
 
         Pt::ssize_t x() const
@@ -204,7 +200,7 @@ class ConstPixel
         { return _base == p._base; }
 
     private:
-        const ImageView*   _view;
+        const BasicView<ImageFormat>*   _view;
         const Pt::uint8_t* _base;
         Pt::ssize_t        _x;
         Pt::ssize_t        _y;
@@ -212,236 +208,55 @@ class ConstPixel
 
 /** @brief View on image data.
 */
-class ImageView
+class ImageView : public BasicView<ImageFormat>
 {
     public:
-        typedef Gfx::Pixel Pixel;
-        typedef Gfx::ConstPixel ConstPixel;
-
-        typedef Pt::ssize_t       pos_t;
-        typedef BasicPoint<pos_t> Point;
-        typedef BasicSize<pos_t>  Size;
-        typedef BasicRect<pos_t>  Rect;
-
-        class PixelIterator
-        {
-            public:
-                PixelIterator(ImageView& image, Pt::ssize_t x, Pt::ssize_t y)
-                : _pixel(image, x, y)
-                {}
-
-                PixelIterator(const PixelIterator& it)
-                : _pixel(it._pixel)
-                {}
-
-                PixelIterator& operator=(const PixelIterator& it)
-                {
-                    _pixel.reset(it._pixel);
-                    return *this;
-                }
-
-                bool operator!=(const PixelIterator& it) const
-                { return _pixel != it._pixel; }
-
-                bool operator==(const PixelIterator& it) const
-                { return _pixel == it._pixel; }
-
-                Pixel& operator*()
-                { return _pixel; }
-
-                Pixel* operator->()
-                { return &_pixel; }
-
-                PixelIterator& operator++()
-                {
-                    _pixel.advance();
-                    return *this;
-                }
-
-                PixelIterator& operator+=(Pt::ssize_t n)
-                {
-                    _pixel.advance(n);
-                    return *this;
-                }
-
-            private:
-                Pixel _pixel;
-        };
-
-        class ConstPixelIterator
-        {
-            public:
-                ConstPixelIterator(const ImageView& image, Pt::ssize_t x, Pt::ssize_t y)
-                : _pixel(image, x, y)
-                {}
-
-                ConstPixelIterator(const ConstPixelIterator& it)
-                : _pixel(it._pixel)
-                {}
-
-                ConstPixelIterator& operator=(const ConstPixelIterator& it)
-                {
-                    _pixel.reset(it._pixel);
-                    return *this;
-                }
-
-                bool operator!=(const ConstPixelIterator& it) const
-                { return _pixel != it._pixel; }
-
-                bool operator==(const ConstPixelIterator& it) const
-                { return _pixel == it._pixel; }
-
-                const ConstPixel& operator*()
-                { return _pixel; }
-
-                const ConstPixel* operator->() const
-                { return &_pixel; }
-
-                ConstPixelIterator& operator++()
-                {
-                    _pixel.advance();
-                    return *this;
-                }
-
-                ConstPixelIterator& operator+=(Pt::ssize_t n)
-                {
-                    _pixel.advance(n);
-                    return *this;
-                }
-
-            private:
-                ConstPixel _pixel;
-        };
-
-    public:
         ImageView()
-        : _format( &ImageFormat::argb32() )
-        , _data(0)
-        , _width(0)
-        , _height(0)
-        , _padding(0)
-        , _stride(0)
+        : BasicView( ImageFormat::argb32() )
         { }
 
         explicit ImageView(const ImageFormat& format)
-        : _format(&format)
-        , _data(0)
-        , _width(0)
-        , _height(0)
-        , _padding(0)
-        , _stride(0)
+        : BasicView(format)
         { }
 
         ImageView(const ImageFormat& format, Pt::uint8_t* data,
                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
-        : _format(&format)
-        , _data(data)
-        , _width(width)
-        , _height(height)
-        , _padding(padding)
-        {
-            _stride = (_width * _format->pixelStride()) + _padding;
-        }
+        : BasicView(format, data, width, height, padding)
+        { }
 
         virtual ~ImageView()
-        {}
+        { }
 
         void reset(const ImageFormat& format, Pt::uint8_t* data,
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
         {
-            _format = &format;
-            _data = data;
-            _width = width,
-            _height = height;
-            _padding = padding;
-            _stride = (_width * _format->pixelStride()) + _padding;
+            init(format, data, width, height, padding);
         }
-
-        PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return PixelIterator(*this, x, y); }
-
-        PixelIterator begin()
-        { return PixelIterator(*this, 0, 0); }
-
-        PixelIterator end()
-        { return PixelIterator(*this, 0, height()); }
-
-        ConstPixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
-        { return ConstPixelIterator(*this, x, y); }
-
-        ConstPixelIterator begin() const
-        { return ConstPixelIterator(*this, 0, 0); }
-
-        ConstPixelIterator end() const
-        { return ConstPixelIterator(*this, 0, height()); }
 
         const ImageFormat& format() const
-        { return *_format; }
-
-        Pt::ssize_t width() const
-        { return _width; }
-
-        Pt::ssize_t height() const
-        { return _height; }
-
-        bool empty() const
-        { return _width == 0 || _height == 0; }
-
-        Pt::uint8_t* data()
-        { return _data; }
-
-        const Pt::uint8_t* data() const
-        { return _data; }
-
-        std::size_t pixelStride() const
-        { return _format->pixelStride(); }
-
-        Pt::ssize_t stride() const
-        { return _stride; }
-
-        Pt::ssize_t padding() const
-        { return _padding; }
-
-        void clear()
-        {
-            _data = 0;
-            _width = 0;
-            _height = 0;
-            _padding = 0;
-            _stride = 0;
-        }
-
-    private:
-        const ImageFormat* _format;
-
-        Pt::uint8_t* _data;
-        Pt::ssize_t  _width;
-        Pt::ssize_t  _height;
-        Pt::ssize_t  _padding;
-        Pt::ssize_t  _stride;
+        { return *model(); }
 };
-
 
 /////////////////////////////////////////////////////////////////////////////
 // Pixel Implementation
 /////////////////////////////////////////////////////////////////////////////
 
-inline Pixel::Pixel(ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
+inline Pixel::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _x(x)
 , _y(y)
 {
-    _base = view.data() + view.stride() * y + x * view.format().pixelStride();
+    _base = view.data() + view.stride() * y + x * view.pixelStride();
 }
 
 
-inline void Pixel::reset(ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
+inline void Pixel::reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _x = x;
     _y = y;
 
-    _base = view.data() + view.stride() * _y + _x * view.format().pixelStride();
+    _base = view.data() + view.stride() * _y + _x * view.pixelStride();
 }
 
 
@@ -455,7 +270,7 @@ inline void Pixel::advance()
         _base += _view->padding();
     }
 
-    _base += _view->format().pixelStride();
+    _base += _view->pixelStride();
 }
 
 
@@ -468,13 +283,19 @@ inline void Pixel::advance(Pt::ssize_t n)
 
     _x += dx;
     _y += dy;
-    _base += dy * _view->stride() + dx * _view->format().pixelStride();
+    _base += dy * _view->stride() + dx * _view->pixelStride();
 }
 
 
 inline void Pixel::assign(const Color& color, CompositionMode mode)
 {
-    _view->format().setPixel(*this, color, mode);
+    _view->model()->setPixel(*this, color, mode);
+}
+
+
+inline void Pixel::assign(const Pixel& p, CompositionMode mode)
+{
+    assign(p.toColor(), mode);
 }
 
 
@@ -486,29 +307,29 @@ inline void Pixel::assign(const ConstPixel& p, CompositionMode mode)
 
 inline Color Pixel::toColor() const
 {
-    return _view->format().getColor(*this);
+    return _view->model()->getColor(*this);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // ConstPixel Implementation
 /////////////////////////////////////////////////////////////////////////////
 
-inline ConstPixel::ConstPixel(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
+inline ConstPixel::ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _x(x)
 , _y(y)
 {
-    _base = view.data() + view.stride() * y + x * view.format().pixelStride();
+    _base = view.data() + view.stride() * y + x * view.pixelStride();
 }
 
 
-inline void ConstPixel::reset(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
+inline void ConstPixel::reset(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _x = x;
     _y = y;
 
-    _base = view.data() + view.stride() * _y + _x * view.format().pixelStride();
+    _base = view.data() + view.stride() * _y + _x * view.pixelStride();
 }
 
 
@@ -522,7 +343,7 @@ inline void ConstPixel::advance()
         _base += _view->padding();
     }
 
-    _base += _view->format().pixelStride();
+    _base += _view->pixelStride();
 }
 
 
@@ -535,13 +356,13 @@ inline void ConstPixel::advance(Pt::ssize_t n)
 
     _x += dx;
     _y += dy;
-    _base += dy * _view->stride() + dx * _view->format().pixelStride();
+    _base += dy * _view->stride() + dx * _view->pixelStride();
 }
 
 
 inline Color ConstPixel::toColor() const
 {
-    return _view->format().getColor(*this);
+    return _view->model()->getColor(*this);
 }
 
 } // namespace

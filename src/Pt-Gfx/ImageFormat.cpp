@@ -38,8 +38,8 @@ namespace Pt {
 
 namespace Gfx {
 
-void ImageFormat::copy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                       const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+void ImageFormat::copy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                       const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
                        Pt::ssize_t width, Pt::ssize_t height, 
                        CompositionMode mode) const
 {

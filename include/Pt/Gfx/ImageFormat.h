@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/CompositionMode.h>
+#include <Pt/Gfx/BasicImage.h>
 
 namespace Pt {
 
@@ -47,6 +48,11 @@ class ImageView;
 */
 class ImageFormat
 {
+    public:
+        typedef BasicView<ImageFormat> View;
+        typedef Pixel Pixel;
+        typedef ConstPixel ConstPixel;
+
     public:
         ImageFormat(size_t pixelStride)
         : _pixelStride(pixelStride)
@@ -157,8 +163,8 @@ class ImageFormat
 
         /** @brief Copies an area of pixels.
         */
-        PT_GFX_API void copy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                             const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+        PT_GFX_API void copy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                             const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
                              Pt::ssize_t width, Pt::ssize_t height, 
                              CompositionMode mode) const;
 
@@ -227,8 +233,8 @@ class ImageFormat
         virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length,
                             CompositionMode mode) const = 0;
 
-        virtual void onCopy(ImageView& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                            const ImageView& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+        virtual void onCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                            const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
                             Pt::ssize_t width, Pt::ssize_t height, 
                             CompositionMode mode) const = 0;
 
