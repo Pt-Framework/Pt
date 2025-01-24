@@ -79,9 +79,14 @@ class Argb32Model
             return Color(a, r, g, b);
         }
 
-        static void fromColor(Pt::uint8_t* p, const Color& c)
+        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from)
         {
-            Pt::uint32_t* pixel = reinterpret_cast<Pt::uint32_t*>(p);
+            *((Pt::uint32_t*) to) = *((const Pt::uint32_t*) from);
+        }
+
+        static void sourceCopy(Pt::uint8_t* to, const Color& c)
+        {
+            Pt::uint32_t* pixel = reinterpret_cast<Pt::uint32_t*>(to);
 
             *pixel = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
                      ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
@@ -112,13 +117,12 @@ class Argb32Model
             to[3] = (Pt::uint8_t) ( (alphaSrc *  alpha              + alphaInv * to[3]) >> 8 );
         }
 
-        static void assign(Pt::uint8_t* to, const Color& c,
-                           CompositionMode mode)
+        static void assign(Pt::uint8_t* to, const Color& c, CompositionMode mode)
         {
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy:
-                    Argb32Model::fromColor(to, c);
+                    Argb32Model::sourceCopy(to, c);
                     break;
 
                 case CompositionMode::SourceOver:
@@ -127,13 +131,12 @@ class Argb32Model
             }
         }
 
-        static void assign(Pt::uint8_t* to, const Pt::uint8_t* from,
-                           CompositionMode mode)
+        static void assign(Pt::uint8_t* to, const Pt::uint8_t* from, CompositionMode mode)
         {
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy:
-                    *((Pt::uint32_t*) to) = *((const Pt::uint32_t*) from);
+                    Argb32Model::sourceCopy(to, from);
                     break;
 
                 case CompositionMode::SourceOver:

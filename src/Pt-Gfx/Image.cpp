@@ -34,32 +34,42 @@ namespace Pt {
 namespace Gfx {
 
 Image::Image()
+: BasicImage()
+, _model( ImageFormat::argb32() )
 {
-    reset(ImageFormat::argb32(), 0, 0, 0);
+    BasicImage::reset(_model, 0, 0, 0);
 }
 
 
 Image::Image(const ImageFormat& format)
+: BasicImage()
+, _model(format)
 {
-    reset(format, 0, 0, 0);
+    BasicImage::reset(_model, 0, 0, 0);
 }
 
 
 Image::Image(const ImageFormat& format, 
              Pt::ssize_t width, Pt::ssize_t height, size_t padding)
+: BasicImage()
+, _model(format)
 {
-    reset(format, width, height, padding);
+    BasicImage::reset(_model, width, height, padding);
 }
 
 
 Image::Image(const ImageFormat& format, Pt::uint8_t* data,
              Pt::ssize_t width, Pt::ssize_t height, size_t padding)
+: BasicImage()
+, _model(format)
 {
-    reset(format, data, width, height, padding);
+    BasicImage::reset(_model, data, width, height, padding);
 }
 
 
 Image::Image(const Image& image)
+: BasicImage()
+, _model( image.format() )
 {
     *this = image;
 }
@@ -70,10 +80,28 @@ Image::~Image()
 }
 
 
+void Image::reset(const ImageFormat& format, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding)
+{
+    _model = ImageModel(format);
+    BasicImage::reset(_model, width, height, padding);
+}
+
+
+void Image::reset(const ImageFormat& format, Pt::uint8_t* data, 
+                  Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
+{
+    _model = ImageModel(format);
+    BasicImage::reset(_model, data, width, height, padding);
+}
+
+
 const Image& Image::operator=(const Image& image)
 {
     const ImageFormat& format = image.format();
-    BasicImage::reset( format, image.width(), image.height() , image.padding() );
+    _model = ImageModel(format);
+
+    BasicImage::reset( _model, image.width(), image.height() , image.padding() );
     
     Pt::ssize_t n = format.imageSize( image.width(), image.height(), image.padding() );  
     if(n != 0)

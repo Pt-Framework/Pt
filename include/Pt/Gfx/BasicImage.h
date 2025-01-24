@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BASICIMAGE_H
-#define PT_GFX_BASICIMAGE_H
+#ifndef PT_GFX_BASIC_IMAGE_H
+#define PT_GFX_BASIC_IMAGE_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
@@ -46,7 +46,7 @@ class BasicImage
         typedef typename ModelT::Pixel      Pixel;
         typedef typename ModelT::ConstPixel ConstPixel;
 
-        typedef typename BasicView<Model>         View;
+        typedef BasicView<ModelT>        View;
         typedef typename View::PixelIterator      PixelIterator;
         typedef typename View::ConstPixelIterator ConstPixelIterator;
 

@@ -1686,6 +1686,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageModel.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

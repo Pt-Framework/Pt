@@ -32,7 +32,6 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/CompositionMode.h>
-#include <Pt/Gfx/BasicImage.h>
 
 namespace Pt {
 
@@ -41,16 +40,19 @@ namespace Gfx {
 class Pixel;
 class ConstPixel;
 class PixelIndex;
-class ImageView;
+class ImageModel;
+
+template <typename M>
+class BasicView;
 
 /** @brief %Image format.
 */
 class ImageFormat
 {
     public:
-        typedef BasicView<ImageFormat> View;
-        typedef Pixel Pixel;
-        typedef ConstPixel ConstPixel;
+        typedef BasicView<ImageModel> View;
+        typedef Pt::Gfx::Pixel Pixel;
+        typedef Pt::Gfx::ConstPixel ConstPixel;
 
     public:
         ImageFormat(size_t pixelStride)
@@ -83,7 +85,7 @@ class ImageFormat
 
         PT_GFX_API static const ImageFormat& argb32();
 
-        PT_GFX_API static const ImageFormat& best()
+        PT_GFX_API static const ImageFormat& instance()
         {
             return argb32();
         }
