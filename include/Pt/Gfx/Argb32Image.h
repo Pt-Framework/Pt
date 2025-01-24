@@ -498,7 +498,7 @@ class Argb32View : public BasicView<Argb32Model>
                    Pt::ssize_t padding = 0)
         : BasicView()
         { 
-            init(_model, data, width, height, padding);
+            reset(_model, data, width, height, padding);
         }
 
     private:
@@ -516,7 +516,7 @@ class Argb32Image : public BasicImage<Argb32Model>
         Argb32Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
         : BasicImage()
         { 
-            init(_model, width, height, padding);
+            reset(_model, width, height, padding);
         }
 
         /** @brief Construct from external buffer.
@@ -525,7 +525,7 @@ class Argb32Image : public BasicImage<Argb32Model>
                     size_t padding = 0)
         : BasicImage()
         { 
-            init(_model, data, width, height, padding);
+            reset(_model, data, width, height, padding);
         }
 
     private:

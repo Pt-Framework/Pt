@@ -227,12 +227,6 @@ class ImageView : public BasicView<ImageFormat>
         virtual ~ImageView()
         { }
 
-        void reset(const ImageFormat& format, Pt::uint8_t* data,
-                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
-        {
-            init(format, data, width, height, padding);
-        }
-
         const ImageFormat& format() const
         { return *model(); }
 };

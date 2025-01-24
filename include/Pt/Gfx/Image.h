@@ -58,14 +58,6 @@ class PT_GFX_API Image : public BasicImage<ImageFormat>
 
         const Image& operator=(const Image& image);
 
-        void reset(const ImageFormat& format,
-                   Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0);
-
-        void reset(const ImageFormat& format, Pt::uint8_t* data,
-                   Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0);
-
         /** @brief Returns the format of the image.
         */
         const ImageFormat& format() const

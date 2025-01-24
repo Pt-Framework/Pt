@@ -1,5 +1,4 @@
 /* Copyright (C) 2015 Marc Boris Duerner
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,8 +22,8 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #ifndef PT_GFX_BASICIMAGE_H
@@ -152,7 +151,9 @@ class BasicView
         , _height(0)
         , _padding(0)
         , _stride(0)
-        { }
+        {
+            //_model = ModelT::best() 
+        }
 
         BasicView(const ModelT& model)
         : _model(&model)
@@ -178,8 +179,8 @@ class BasicView
         virtual ~BasicView()
         { }
 
-        void init(const ModelT& model, Pt::uint8_t* data, 
-                  Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
+        void reset(const ModelT& model, Pt::uint8_t* data, 
+                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
             _model = &model;
             _data = data;
@@ -278,6 +279,7 @@ class BasicImage
         typedef typename View::PixelIterator      PixelIterator;
         typedef typename View::ConstPixelIterator ConstPixelIterator;
 
+        typedef typename View::pos_t pos_t;
         typedef typename View::Point Point;
         typedef typename View::Size  Size;
         typedef typename View::Rect  Rect;
@@ -290,35 +292,20 @@ class BasicImage
         virtual ~BasicImage()
         {}
 
-        /** @brief Returns an iterator to the pixel at the given position.
-        */
-        PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return _view.pixel(x, y); }
+        void reset(const ModelT& model, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0)
+        { 
+            _buffer.resize( model.imageSize(width, height, padding) );
+            
+            _view.reset( model, _buffer.empty() ? 0 : &_buffer[0], 
+                         width, height, padding );
+        }
 
-        /** @brief Returns an iterator to the first pixel.
-        */
-        PixelIterator begin()
-        { return _view.begin(); }
-
-        /** @brief Returns an iterator to the end of the pixels.
-        */
-        PixelIterator end()
-        { return _view.end(); }
-
-        /** @brief Returns a const iterator to the pixel at the given position.
-        */
-        ConstPixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
-        { return _view.pixel(x, y); }
-
-        /** @brief Returns a const iterator to the first pixel.
-        */
-        ConstPixelIterator begin() const
-        { return _view.begin(); }
-
-        /** @brief Returns a const iterator to the end of the pixels.
-        */
-        ConstPixelIterator end() const
-        { return _view.end(); }
+        void reset(const ModelT& model, Pt::uint8_t* data, 
+                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
+        {
+           _view.reset(model, data, width, height, padding);
+        }
 
         Pt::ssize_t width() const
         { return _view.width(); }
@@ -350,21 +337,35 @@ class BasicImage
         const View& view() const
         { return _view; }
 
-    protected:
-        void init(const ModelT& model, Pt::ssize_t width, Pt::ssize_t height, 
-                  Pt::ssize_t padding = 0)
-        { 
-            _buffer.resize( model.imageSize(width, height, padding) );
-            
-            _view.init( model, _buffer.empty() ? 0 : &_buffer[0], 
-                        width, height, padding );
-        }
+        /** @brief Returns an iterator to the pixel at the given position.
+        */
+        PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
+        { return _view.pixel(x, y); }
 
-        void init(const ModelT& model, Pt::uint8_t* data, 
-                  Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
-        {
-           _view.init(model, data, width, height, padding);
-        }
+        /** @brief Returns an iterator to the first pixel.
+        */
+        PixelIterator begin()
+        { return _view.begin(); }
+
+        /** @brief Returns an iterator to the end of the pixels.
+        */
+        PixelIterator end()
+        { return _view.end(); }
+
+        /** @brief Returns a const iterator to the pixel at the given position.
+        */
+        ConstPixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
+        { return _view.pixel(x, y); }
+
+        /** @brief Returns a const iterator to the first pixel.
+        */
+        ConstPixelIterator begin() const
+        { return _view.begin(); }
+
+        /** @brief Returns a const iterator to the end of the pixels.
+        */
+        ConstPixelIterator end() const
+        { return _view.end(); }
 
     private:
         std::vector<Pt::uint8_t> _buffer;
