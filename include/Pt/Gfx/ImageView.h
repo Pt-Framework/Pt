@@ -118,8 +118,6 @@ class Pixel
 
         void assign(const Color& color, CompositionMode mode);
 
-        void assign2(const Color& color, CompositionMode mode);
-
         void assign(const Pixel& p, CompositionMode mode)
         {
             assign(p.toColor(), mode);
@@ -471,12 +469,6 @@ inline void Pixel::advance(Pt::ssize_t n)
     _x += dx;
     _y += dy;
     _base += dy * _view->stride() + dx * _view->format().pixelStride();
-}
-
-
-inline void Pixel::assign2(const Color& color, CompositionMode mode)
-{
-    //_view->format().setPixel2(*_view, _base, _x, _y, color, mode);
 }
 
 

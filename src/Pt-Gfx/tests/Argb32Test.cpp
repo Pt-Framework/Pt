@@ -49,12 +49,12 @@ class Argb32Test : public Pt::Unit::TestSuite
         Argb32Test()
         : Pt::Unit::TestSuite("Argb32Test")
         {
-            //registerMethod("Pixel",*this, &Argb32Test::Pixel);
-            //registerMethod("Iterator",*this, &Argb32Test::Iterator);
-            //registerMethod("Color",*this, &Argb32Test::Color);
+            registerMethod("Pixel",*this, &Argb32Test::Pixel);
+            registerMethod("Iterator",*this, &Argb32Test::Iterator);
+            registerMethod("Color",*this, &Argb32Test::Color);
 
-            registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::Benchmark);
-            registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
+            //registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::Benchmark);
+            //registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
         }
 
         void Pixel()
