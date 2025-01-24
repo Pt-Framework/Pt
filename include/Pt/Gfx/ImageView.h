@@ -34,7 +34,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/BasicImage.h>
+#include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Types.h>

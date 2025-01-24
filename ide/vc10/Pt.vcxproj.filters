@@ -1680,6 +1680,12 @@
     <ClInclude Include="..\..\src\Pt-Hmi\sdl\Keycodes.h">
       <Filter>Pt-Hmi\sdl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

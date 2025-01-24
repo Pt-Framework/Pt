@@ -35,6 +35,8 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BlockScale.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Brush.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Canvas.h" />
