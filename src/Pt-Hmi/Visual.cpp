@@ -35,7 +35,7 @@
 #include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
-#include <Pt/Hmi/ResizeEvent.h>v
+#include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/InvalidateEvent.h>
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/LayoutEvent.h>
