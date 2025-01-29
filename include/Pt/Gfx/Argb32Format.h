@@ -42,50 +42,65 @@ class PT_GFX_API Argb32Format : public ImageFormat
         Argb32Format();
 
     protected:
-        virtual void onSetPixel(Pixel& to, const Pixel& from,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixel(Pixel& pixel, const Color& c,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixel(Pixel& to, const Pixel& from,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
-
-        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
-
-        virtual void onSetPixel(Pixel& pixel, const Color& c,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
-
-        virtual void onSetPixels(Pixel& to, const Pixel& from, size_t length,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixels(Pixel& to, const ConstPixel& from, size_t length,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixels(Pixel& pixel, const Color& c, size_t length,
-                                CompositionMode  mode) const;
+        virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
+                                        std::size_t padding) const;
 
         virtual Color onGetColor(const Pixel& pixel) const;
 
-        virtual Color onGetColor(const ConstPixel& pixel) const;
+        virtual Color onGetColor(ConstPixel pixel) const;
 
-        virtual void onCopy(Pixel& dst, const Pixel& src, size_t length,
-                            CompositionMode mode) const;
+        virtual Color onGetColor(const View& view, const Pt::uint8_t* base, 
+                                 Pt::ssize_t x, Pt::ssize_t y) const;
 
-        virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length,
-                            CompositionMode mode) const;
 
-        virtual void onCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                            const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                            Pt::ssize_t width, Pt::ssize_t height, 
-                            CompositionMode mode) const;
+        virtual void onSourceCopy(Pixel& to, const ConstPixel& pixel) const;
 
-        virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
-                                        std::size_t padding) const;
+        virtual void onSourceOver(Pixel& to, const ConstPixel& pixel) const;
+
+
+
+        virtual void onSourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY, 
+                                  const Color& c) const;
+
+
+
+        virtual void onSourceCopy(Pixel& pixel, const Color& c) const;
+
+        virtual void onSourceOver(Pixel& pixel, const Color& c) const;
+
+
+        virtual void onSourceCopy(Pixel& pixel, std::size_t n, const Color& c) const;
+
+        virtual void onSourceOver(Pixel& pixel, std::size_t n, const Color& c) const;
+
+
+        virtual void onSourceCopy(Pixel& to, std::size_t n, const ConstPixel& pixel) const;
+
+        virtual void onSourceOver(Pixel& to, std::size_t n, const ConstPixel& pixel) const;
+
+
+        virtual void onSourceCopy(Pixel& to, const ConstPixel& p, size_t length) const;
+
+        virtual void onSourceOver(Pixel& to, const ConstPixel& p, size_t length) const;
+
+
+        virtual void onSourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                                  const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                                  Pt::ssize_t width, Pt::ssize_t height) const;
+
+        virtual void onSourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                                  const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                                  Pt::ssize_t width, Pt::ssize_t height) const;
+
+    protected:
+        virtual void onSetPixel(Pixel& to, const Pixel& from,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
+
+        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
+
+        virtual void onSetPixel(Pixel& pixel, const Color& c,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
 };
 
 } // namespace

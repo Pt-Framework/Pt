@@ -38,15 +38,15 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename ModelT>
+template <typename FormatT>
 class BasicImage
 {
     public:
-        typedef ModelT                      Model;
-        typedef typename ModelT::Pixel      Pixel;
-        typedef typename ModelT::ConstPixel ConstPixel;
+        typedef FormatT                     Format;
+        typedef typename Format::Pixel      Pixel;
+        typedef typename Format::ConstPixel ConstPixel;
 
-        typedef BasicView<ModelT>        View;
+        typedef BasicView<Format>                 View;
         typedef typename View::PixelIterator      PixelIterator;
         typedef typename View::ConstPixelIterator ConstPixelIterator;
 
@@ -82,19 +82,19 @@ class BasicImage
         virtual ~BasicImage()
         {}
 
-        void reset(const ModelT& model, Pt::ssize_t width, Pt::ssize_t height, 
+        void reset(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
         { 
-            _buffer.resize( model.imageSize(width, height, padding) );
+            _buffer.resize( format.imageSize(width, height, padding) );
             
-            _view.reset( model, _buffer.empty() ? 0 : &_buffer[0], 
+            _view.reset( format, _buffer.empty() ? 0 : &_buffer[0], 
                          width, height, padding );
         }
 
-        void reset(const ModelT& model, Pt::uint8_t* data, 
+        void reset(const Format& format, Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
-           _view.reset(model, data, width, height, padding);
+           _view.reset(format, data, width, height, padding);
         }
 
         Pt::ssize_t width() const

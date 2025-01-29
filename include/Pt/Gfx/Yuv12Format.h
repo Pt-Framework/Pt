@@ -42,6 +42,11 @@ class PT_GFX_API Yuv12Format : public ImageFormat
         Yuv12Format();
 
     protected:
+        virtual void onSourceCopy(Pixel& pixel, const Color& c) const;
+
+        virtual void onSourceOver(Pixel& pixel, const Color& c) const;
+
+    protected:
         virtual void onSetPixel(Pixel& to, const Pixel& from,
                                 CompositionMode mode) const;
 

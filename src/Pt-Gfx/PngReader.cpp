@@ -308,7 +308,7 @@ class PngReaderImpl
                     unsigned char blue = data[n++];
 
                     Pt::Gfx::Color color(65535, red*257, green*257, blue*257);
-                    _image->format().setPixel(pixel, color, CompositionMode::SourceCopy);
+                    _image->view().assign(pixel, color, CompositionMode::SourceCopy);
                 }
 
                 if( bitdepth == 8 && channels == 4)
@@ -319,7 +319,7 @@ class PngReaderImpl
                     unsigned char alpha = data[n++];
             
                     Pt::Gfx::Color color(alpha*257, red*257, green*257, blue*257);
-                    _image->format().setPixel(pixel, color, CompositionMode::SourceCopy);
+                    _image->view().assign(pixel, color, CompositionMode::SourceCopy);
 			    }
 		    }
         }

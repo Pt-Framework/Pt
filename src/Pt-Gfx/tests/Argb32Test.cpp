@@ -53,8 +53,8 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("Iterator",*this, &Argb32Test::Iterator);
             registerMethod("Color",*this, &Argb32Test::Color);
 
-            //registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::Benchmark);
-            //registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
+            registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::Benchmark);
+            registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
         }
 
         void Pixel()
@@ -108,7 +108,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             Argb32Image image(data, 1, 1);
             Argb32Image::PixelIterator pixel = image.pixel(0, 0);
 
-            Pt::Gfx::Color c = pixel->toColor();
+            Pt::Gfx::Color c = pixel->getColor();
             pixel->assign(c, CompositionMode::SourceCopy);
 
             PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
@@ -117,8 +117,10 @@ class Argb32Test : public Pt::Unit::TestSuite
         void Benchmark()
         {
             using namespace Pt::Gfx;
+           
+            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 5; ++n)
+            for(int n = 0; n < 100; ++n)
             {
                 Argb32Format format;
                 Image image( format, 1000, 1000 );
@@ -127,52 +129,68 @@ class Argb32Test : public Pt::Unit::TestSuite
             
                 Pt::Gfx::Color color(100, 100, 100);
             
+                Image::Pixel pixel = *image.begin();
+                Image::ConstPixel cpixel(pixel);
+
                 Pt::System::Clock clock;
                 clock.start();
             
                 for( ; it != end; ++it)
                 {
-                    Pt::Gfx::Color c = it->toColor();
+                    Pt::Gfx::Color c = it->getColor();
                     c.setRed(99);
-                    (*it).assign(c, CompositionMode::SourceCopy);
+                    
+                    //(*it) = c;
+                    (*it) = cpixel;
                 }
 
-                std::clog << "pixel: " << clock.stop().toUSecs() << std::endl;
+                Pt::uint64_t time = clock.stop().toUSecs();
+                if(time < best)
+                    best = time;
             }
+
+            std::clog << "GENERIC: " << best << std::endl;
         }
 
         void BenchmarkRaw()
         {
             using namespace Pt::Gfx;
 
-            for(int n = 0; n < 5; ++n)
-            {
-                //Argb32Image image( Argb32Image::Size(1000, 1000) );
-                //Argb32Image::PixelIterator it = image.begin();
-                //Argb32Image::PixelIterator end = image.end();
+            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
+            for(int n = 0; n < 100; ++n)
+            {
                 Argb32Format format;
                 Image image( format, 1000, 1000 );
 
-                Argb32Model argbModel;
-                BasicView<Argb32Model> argbView(argbModel, image.data(), image.width(), image.height() );
+                Argb32 argb32;
+                BasicView<Argb32> argbView(argb32, image.data(), image.width(), image.height() );
                 Argb32Image::PixelIterator it = argbView.begin();
                 Argb32Image::PixelIterator end = argbView.end();
             
                 Pt::Gfx::Color color(100, 100, 100);
             
+                Argb32::Pixel pixel = *argbView.begin();
+                Argb32::ConstPixel cpixel(pixel);
+
                 Pt::System::Clock clock;
                 clock.start();
             
                 for( ; it != end; ++it)
                 {
-                    Pt::Gfx::Color c = it->toColor();
+                    Pt::Gfx::Color c = it->getColor();
                     c.setRed(99);
-                    (*it) = c;
+                    
+                    //(*it) = c;
+                    (*it) = cpixel;
                 }
 
-                std::clog << "direct: " << clock.stop().toUSecs() << std::endl;
+                Pt::uint64_t time = clock.stop().toUSecs();
+                if(time < best)
+                    best = time;
             }
+
+            std::clog << "ARGB32: " << best << std::endl;
         }
 };
 

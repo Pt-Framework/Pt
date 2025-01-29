@@ -48,6 +48,16 @@ std::size_t Yuv12Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
 }
 
 
+void Yuv12Format::onSourceCopy(Pixel& pixel, const Color& c) const
+{
+}
+
+
+void Yuv12Format::onSourceOver(Pixel& pixel, const Color& c) const
+{
+}
+
+
 void Yuv12Format::onSetPixel(Pixel& to, const Pixel& from,
                              CompositionMode mode) const
 {

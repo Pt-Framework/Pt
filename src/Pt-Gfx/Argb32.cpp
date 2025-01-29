@@ -1,4 +1,5 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+/* Copyright (C) 2015-2017 Marc Boris Duerner
+   Copyright (C) 2016-2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -22,46 +23,16 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA 02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+  02110-1301 USA
 */
 
-#include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/ImageView.h>
-#include <Pt/Gfx/Argb32Format.h>
-#include <Pt/Gfx/Rgb32Format.h>
-#include <Pt/Gfx/Rgb16Format.h>
-#include <cassert>
+#include "Argb32SIMDOps.h"
+#include <Pt/Gfx/Argb32.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-const ImageFormat& ImageFormat::rgb16()
-{
-	static const Rgb16Format f;
-	return f;
-}
-
-
-const ImageFormat& ImageFormat::rgb32()
-{
-	static const Rgb32Format f;
-	return f;
-}
-
-
-const ImageFormat& ImageFormat::argb32()
-{
-	static const Argb32Format f;
-	return f;
-}
-
-
-const ImageFormat& ImageFormat::instance()
-{
-    return argb32();
-}
 
 } // namespace
 

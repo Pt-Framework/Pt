@@ -39,7 +39,7 @@ namespace Gfx {
 
 /** @brief Generic image.
 */
-class PT_GFX_API Image : public BasicImage<ImageModel>
+class PT_GFX_API Image : public BasicImage<ImageFormat>
 {
     public:
         Image();
@@ -68,11 +68,8 @@ class PT_GFX_API Image : public BasicImage<ImageModel>
         */
         const ImageFormat& format() const
         {
-            return view().model()->format();
+            return *view().format();
         }
-    
-    private:
-        ImageModel _model;
 };
 
 } // namespace

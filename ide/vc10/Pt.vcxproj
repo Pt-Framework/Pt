@@ -33,6 +33,7 @@
     <ClInclude Include="..\..\include\Pt\Function.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Algorithm.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h" />
@@ -576,6 +577,7 @@
     <None Include="..\..\src\Pt\tests\Jamfile" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Pt-Gfx\Argb32.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Argb32Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Argb32Image.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Brush.cpp" />

@@ -30,7 +30,6 @@
 #define PT_GFX_IMAGE_VIEW_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageModel.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/BasicView.h>
 #include <Pt/Types.h>
@@ -41,35 +40,26 @@ namespace Gfx {
 
 /** @brief View on image data.
 */
-class ImageView : public BasicView<ImageModel>
+class ImageView : public BasicView<ImageFormat>
 {
     public:
         ImageView()
-        : BasicView()
-        , _model( ImageFormat::argb32() )
+        : BasicView( ImageFormat::argb32() )
         { }
 
         explicit ImageView(const ImageFormat& format)
-        : BasicView()
-        , _model(format)
+        : BasicView(format)
         { }
 
         ImageView(const ImageFormat& format, Pt::uint8_t* data,
                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
         : BasicView()
-        , _model(format)
         { 
-            reset(_model, data, width, height, padding);
+            reset(format, data, width, height, padding);
         }
 
         virtual ~ImageView()
         { }
-
-        const ImageFormat& format() const
-        { return _model.format(); }
-
-    private:
-        ImageModel _model;
 };
 
 } // namespace

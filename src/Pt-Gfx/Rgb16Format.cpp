@@ -49,6 +49,16 @@ std::size_t Rgb16Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
 }
 
 
+void Rgb16Format::onSourceCopy(Pixel& pixel, const Color& c) const
+{
+}
+
+
+void Rgb16Format::onSourceOver(Pixel& pixel, const Color& c) const
+{
+}
+
+
 void Rgb16Format::onSetPixel(Pixel& to, const Pixel& from,
                              CompositionMode mode) const
 {

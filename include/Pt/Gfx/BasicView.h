@@ -33,19 +33,239 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-template <typename ModelT>
+template <typename FormatT>
+class BasicView;
+
+template <typename TraitsT>
+class BasicPixel;
+
+template <typename TraitsT>
+class BasicConstPixel;
+
+
+template <typename TraitsT>
+class BasicPixel
+{
+    public:
+        typedef TraitsT Traits;
+
+        typedef typename Traits::Format Format;
+        typedef typename Traits::View   View;
+        typedef typename Traits::Index  Index;
+        
+        typedef BasicConstPixel<Traits> ConstPixel;
+
+    public:
+        BasicPixel(View& view, Pt::ssize_t x, Pt::ssize_t y)
+        : _view(&view)
+        , _index(view, x, y)
+        {
+        }
+        
+        BasicPixel(const BasicPixel& p)
+        : _view(p._view)
+        , _index(p._index)
+        {  }
+
+        BasicPixel& operator=(const BasicPixel& p)
+        {
+            assign(p, CompositionMode::SourceCopy);
+            return *this;
+        }
+
+        BasicPixel& operator=(const ConstPixel& p)
+        {
+            assign(p, CompositionMode::SourceCopy);
+            return *this;
+        }
+
+        BasicPixel& operator=(const Color& color)
+        {
+            assign(color, CompositionMode::SourceCopy);
+            return *this;
+        }
+
+        void reset(View& view, Pt::ssize_t x, Pt::ssize_t y)
+        {
+            _view = &view;
+            _index = Index(view, x, y);
+        }
+
+        void reset(const BasicPixel& p)
+        {
+             _view = p._view;
+             _index = p._index;
+        }
+
+        Color getColor() const
+        {
+            return Traits::getColor(_view, _index);
+        }
+
+        void advance()
+        {
+            Traits::advance(_view, _index);
+        }
+
+        void advance( Pt::ssize_t n )
+        {
+            Traits::advance(_view, _index, n);
+        }
+
+        void assign(const Color& c, CompositionMode mode)
+        {
+            switch(mode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    Traits::sourceCopy(_view, _index, c);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    Traits::sourceOver(_view, _index, c);
+                    break;
+            }
+        }
+
+        void assign(const BasicPixel& p, CompositionMode mode)
+        {
+            assign(ConstPixel(p), mode);
+        }
+
+        void assign(const ConstPixel& p, CompositionMode mode)
+        {
+            const bool isCompatible = _view->format() == *p.view().format();
+            if( ! isCompatible )
+            {
+                assign(p.getColor(), mode);
+                return;
+            }
+
+            switch(mode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    Traits::sourceCopy(_view, _index, p);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    Traits::sourceOver(_view, _index, p);
+                    break;
+            }
+        }
+
+        const View& view() const
+        { return *_view; }
+
+        View& view()
+        { return *_view; }
+
+
+        bool operator!=(const BasicPixel& p) const
+        { return Traits::equals(_index, p._index); }
+
+        bool operator==(const BasicPixel& p) const
+        { return ! Traits::equals(_index, p._index); }
+
+    private:
+        View*  _view;
+        Index  _index;
+};
+
+
+template <typename TraitsT>
+class BasicConstPixel
+{
+    public:
+        typedef TraitsT Traits;
+
+        typedef typename Traits::Format      Format;
+        typedef typename Traits::View        View;
+        typedef typename Traits::ConstIndex  Index;
+        
+        typedef BasicPixel<Traits> Pixel;
+
+    public:
+        BasicConstPixel(const View& view, Pt::ssize_t x, Pt::ssize_t y)
+        : _view(&view)
+        , _index(view, x, y)
+        {
+        }
+        
+        BasicConstPixel(const BasicConstPixel& p)
+        : _view(p._view)
+        , _index(p._index)
+        {  }
+
+        BasicConstPixel(const Pixel& p)
+        : _view(p._view)
+        , _index(p._index)
+        {  }
+
+        void reset(const View& view, Pt::ssize_t x, Pt::ssize_t y)
+        {
+            _view = &view;
+            _index = Index(view, x, y);
+        }
+
+        void reset(const BasicConstPixel& p)
+        {
+             _view = p._view;
+             _index = p._index;
+        }
+
+        void reset(const Pixel& p)
+        {
+             _view = p._view;
+             _index = Index(p._index);
+        }
+
+        Color getColor() const
+        {
+            return Traits::getColor(_view, _index);
+        }
+
+        void advance()
+        {
+            Traits::advance(_view, _index);
+        }
+
+        void advance( Pt::ssize_t n )
+        {
+            Traits::advance(_view, _index, n);
+        }
+
+
+        const View& view() const
+        { return *_view; }
+
+
+        bool operator!=(const BasicConstPixel& p) const
+        { return Traits::equals(_index, p._index); }
+
+        bool operator==(const BasicConstPixel& p) const
+        { return ! Traits::equals(_index, p._index); }
+
+    private:
+        const View*  _view;
+        Index        _index;
+};
+
+
+template <typename FormatT>
 class BasicView
 {
     public:
-        typedef ModelT                      Model;
-        typedef typename ModelT::Pixel      Pixel;
-        typedef typename ModelT::ConstPixel ConstPixel;
+        typedef FormatT                      Format;
+        typedef typename FormatT::Pixel      Pixel;
+        typedef typename FormatT::ConstPixel ConstPixel;
 
         typedef Pt::ssize_t       pos_t;
         typedef BasicPoint<pos_t> Point;
@@ -144,18 +364,18 @@ class BasicView
 
     public:
         BasicView()
-        : _model(0)
+        : _format(0)
         , _data(0)
         , _width(0)
         , _height(0)
         , _padding(0)
         , _stride(0)
         {
-            //_model = ModelT::best() 
+            //_format = FormatT::instance() 
         }
 
-        BasicView(const ModelT& model)
-        : _model(&model)
+        BasicView(const Format& format)
+        : _format(&format)
         , _data(0)
         , _width(0)
         , _height(0)
@@ -163,30 +383,30 @@ class BasicView
         , _stride(0)
         { }
 
-        BasicView(const ModelT& model, Pt::uint8_t* data, 
+        BasicView(const Format& format, Pt::uint8_t* data, 
                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
-        : _model(&model)
+        : _format(&format)
         , _data(data)
         , _width(width)
         , _height(height)
         , _padding(padding)
         , _stride(0)
         {
-            _stride = (_width * model.pixelStride()) + _padding;
+            _stride = (_width * format.pixelStride()) + _padding;
         }
 
         virtual ~BasicView()
         { }
 
-        void reset(const ModelT& model, Pt::uint8_t* data, 
+        void reset(const Format& format, Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
-            _model = &model;
+            _format = &format;
             _data = data;
             _width = width,
             _height = height;
             _padding = padding;
-            _stride = _width * model.pixelStride() + _padding;
+            _stride = _width * format.pixelStride() + _padding;
         }
 
         void clear()
@@ -250,13 +470,142 @@ class BasicView
         { return _padding; }
 
         std::size_t pixelStride() const
-        { return _model ? _model->pixelStride() : 0; }
+        { return _format ? _format->pixelStride() : 0; }
 
-        const ModelT* model() const
-        { return _model; }
+        const Format* format() const
+        { return _format; }
+
+        void assign(Pixel& to, const Color& c, CompositionMode mode)
+        {
+            switch(mode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    _format->sourceCopy(to, c);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    _format->sourceOver(to, c);
+                    break;
+            }
+        }
+
+        void assign(Pixel& to, const Pixel& p, CompositionMode mode)
+        {
+            assign(to, ConstPixel(p), mode);
+        }
+
+        void assign(Pixel& to, const ConstPixel& p, CompositionMode mode)
+        {
+            const bool isCompatible = *to.view().format() == *p.view().format();
+            if( ! isCompatible )
+            {
+                assign(to, p.getColor(), mode);
+                return;
+            }
+
+            switch(mode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    _format->sourceCopy(to, p);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    _format->sourceOver(to, p);
+                    break;
+            }
+        }
+
+        void fill(Pixel& to, std::size_t n, const Color& c, CompositionMode mode)
+        {
+            switch(mode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    _format->sourceCopy(to, n, c);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    _format->sourceOver(to, n, c);
+                    break;
+            }
+        }
+
+        void fill(Pixel& to, std::size_t n, const Pixel& p, CompositionMode mode)
+        {
+            fill(to, n, ConstPixel(p), mode);
+        }
+
+        void fill(Pixel& to, std::size_t n, const ConstPixel& p, CompositionMode mode)
+        {
+            const bool isCompatible = *to.view().format() == *p.view().format();
+            if( ! isCompatible )
+            {
+                fill(to, n, p.getColor(), mode);
+                return;
+            }
+
+            switch(mode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    _format->sourceCopy(to, n, p);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    _format->sourceOver(to, n, p);
+                    break;
+            }
+        }
+
+        void copy(Pixel& to, const ConstPixel& p, std::size_t n, CompositionMode mode)
+        {
+            const bool isCompatible = *to.view().format() == *p.view().format();
+            if( ! isCompatible )
+                return;
+
+            switch(mode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    _format->sourceCopy(to, p, n);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    _format->sourceOver(to, p, n);
+                    break;
+            }
+        }
+
+        void copy(Pt::ssize_t toX, Pt::ssize_t toY,
+                  const BasicView& from, Pt::ssize_t fromX, Pt::ssize_t fromY, 
+                  Pt::ssize_t width, Pt::ssize_t height, CompositionMode mode)
+        {
+            const bool isCompatible = *this->format() == *from.format();
+            if( ! isCompatible )
+                return;
+
+            switch(mode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    _format->sourceCopy(*this, toX, toY,
+                                        from, fromX, fromY,
+                                        width, height);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    _format->sourceOver(*this, toX, toY,
+                                        from, fromX, fromY,
+                                        width, height);
+                    break;
+            }
+        }
 
     private:
-        const ModelT* _model;
+        // TODO: make sure _forrmat is never NULL or handle it
+        const Format* _format;
         
         Pt::uint8_t*  _data;
         Pt::ssize_t   _width;

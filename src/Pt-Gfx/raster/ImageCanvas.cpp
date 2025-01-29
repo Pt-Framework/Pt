@@ -2233,7 +2233,7 @@ void ImageCanvas::fillTexture(const Point& origin, const Point& pos,  int length
             ConstPixel sourcePixel(texture.view(),  textureXPos, textureYPos);
             Pixel destPixel(_image.view(), xpos, ypos);
 
-            _image.format().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );
+            _image.view().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );
         }
 
         // Remaining unfilled pixels of the span
@@ -2339,7 +2339,7 @@ void ImageCanvas::fillSolid(const Point& pos, int length)
         if( n )
         {
             Pixel destPixel(_image.view(), xpos,ypos);
-           _image.format().copy(destPixel, _brushPixel, n, _compositionMode);
+           _image.view().copy(destPixel, _brushPixel, n, _compositionMode);
         }
 
         length -= n;
@@ -3947,9 +3947,13 @@ void ImageCanvas::putImage(const Point& to, const Image& image, const Rect& imag
   // update source size if rect got smaller
   fromRect.setSize( toRect.size() );
 
-  _image.format().copy(_image.view(), toRect.x(), toRect.y(),
-                       image.view(), fromRect.x(), fromRect.y(), 
-                       fromRect.width(), fromRect.height(), _compositionMode);
+  _image.view().copy(toRect.x(), toRect.y(),
+                     image.view(), fromRect.x(), fromRect.y(), 
+                     fromRect.width(), fromRect.height(), _compositionMode);
+
+  //_image.format().copy(_image.view(), toRect.x(), toRect.y(),
+  //                     image.view(), fromRect.x(), fromRect.y(), 
+  //                     fromRect.width(), fromRect.height(), _compositionMode);
 }
 
 
@@ -3960,7 +3964,7 @@ void ImageCanvas::stroke(int x, int y, const Rect& clip)
         return;
 
     Pixel pixel(_image.view(), x, y);
-    _image.format().setPixel(pixel, _penPixel, _compositionMode);
+    _image.view().assign(pixel, _penPixel, _compositionMode);
 
     //_image.format().setPixels(pixel, _penPixel, 1, _compositionMode);
 }
@@ -3978,7 +3982,7 @@ void ImageCanvas::stroke(int xpos, int ypos, int length, const Rect& currentClip
         if( n )
         {
              Pixel destPixel( _image.view(), xpos, ypos);
-            _image.format().copy(destPixel, _penPixel, n, _compositionMode);
+            _image.view().copy(destPixel, _penPixel, n, _compositionMode);
         }
 
         length -= n;

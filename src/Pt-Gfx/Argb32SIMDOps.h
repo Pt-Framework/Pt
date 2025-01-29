@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace Gfx {
 
-namespace Argb32 {
+namespace Argb32Ops {
 
 
 #if defined(PT_GFX_USE_AVX2)

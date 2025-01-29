@@ -96,12 +96,12 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 			    else
 				    color.setAlpha(65535);
 
-			    image.format().setPixel(pixel, color, Gfx::CompositionMode::SourceCopy);
+			    image.view().assign(pixel, color, Gfx::CompositionMode::SourceCopy);
 		  }
 	}
 
   Gfx::Pixel pixel(image.view(), cursor.xHotspot(), cursor.yHotspot());
-	image.format().setPixel( pixel, Gfx::Color(0,65535,0), Gfx::CompositionMode::SourceCopy );
+	image.view().assign( pixel, Gfx::Color(0,65535,0), Gfx::CompositionMode::SourceCopy );
   
   fromImage(image, cursor);
 }

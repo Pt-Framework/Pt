@@ -1689,6 +1689,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageModel.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -3070,6 +3073,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\sdl\ScreenImpl.cpp">
       <Filter>Pt-Hmi\sdl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Argb32.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

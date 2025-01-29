@@ -52,6 +52,7 @@ PT_GFX_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Gfx $(PT_GFX_IMPL:L) ] ;
 PT_GFX_IMPL_SOURCES += [ GLOB $(PT_GFX_IMPL_SUBDIR) : *.cpp  ] ;
 
 SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
+                       Argb32.cpp
                        Argb32Format.cpp
                        Argb32Image.cpp
                        Brush.cpp

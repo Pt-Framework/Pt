@@ -44,6 +44,11 @@ class PT_GFX_API Rgb32Format : public ImageFormat
         Rgb32Format();
 
     protected:
+        virtual void onSourceCopy(Pixel& pixel, const Color& c) const;
+
+        virtual void onSourceOver(Pixel& pixel, const Color& c) const;
+
+    protected:
         virtual void onSetPixel(Pixel& to, const Pixel& from,
                                 CompositionMode mode) const;
 
