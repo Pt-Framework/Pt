@@ -43,35 +43,35 @@ namespace Gfx {
 template <typename FormatT>
 class BasicView;
 
-template <typename TraitsT>
+template <typename TraitsT, typename PixelBaseT>
 class BasicPixel;
 
-template <typename TraitsT>
+template <typename TraitsT, typename PixelBaseT>
 class BasicConstPixel;
 
 
-template <typename TraitsT>
-class BasicPixel
+template <typename FormatT, typename PixelBaseT>
+class BasicPixel : public PixelBaseT
 {
     public:
-        typedef TraitsT Traits;
+        typedef PixelBaseT PixelBase;
 
-        typedef typename Traits::Format Format;
-        typedef typename Traits::View   View;
-        typedef typename Traits::Index  Index;
-        
-        typedef BasicConstPixel<Traits> ConstPixel;
+        typedef FormatT Format;
+        typedef typename Format::View View;
+
+        typedef typename Format::ConstPixel        ConstBase;
+        typedef BasicConstPixel<Format, ConstBase> ConstPixel;
 
     public:
         BasicPixel(View& view, Pt::ssize_t x, Pt::ssize_t y)
-        : _view(&view)
-        , _index(view, x, y)
+        : PixelBase(view, x, y)
+        , _view(&view)
         {
         }
         
         BasicPixel(const BasicPixel& p)
-        : _view(p._view)
-        , _index(p._index)
+        : PixelBase(p)
+        , _view(p._view)
         {  }
 
         BasicPixel& operator=(const BasicPixel& p)
@@ -95,28 +95,28 @@ class BasicPixel
         void reset(View& view, Pt::ssize_t x, Pt::ssize_t y)
         {
             _view = &view;
-            _index = Index(view, x, y);
+            PixelBase::operator=( PixelBase(view, x, y) );
         }
 
         void reset(const BasicPixel& p)
         {
              _view = p._view;
-             _index = p._index;
+             PixelBase::operator=(p);
         }
 
         Color getColor() const
         {
-            return Traits::getColor(_view, _index);
+            return format().getColor(*_view, *this);
         }
 
         void advance()
         {
-            Traits::advance(_view, _index);
+            format().advance(*_view, *this);
         }
 
         void advance( Pt::ssize_t n )
         {
-            Traits::advance(_view, _index, n);
+            format().advance(*_view, *this, n);
         }
 
         void assign(const Color& c, CompositionMode mode)
@@ -125,11 +125,11 @@ class BasicPixel
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    Traits::sourceCopy(_view, _index, c);
+                    format().sourceCopy(*_view, *this, c);
                     break;
 
                 case CompositionMode::SourceOver:
-                    Traits::sourceOver(_view, _index, c);
+                    format().sourceOver(*_view, *this, c);
                     break;
             }
         }
@@ -141,7 +141,7 @@ class BasicPixel
 
         void assign(const ConstPixel& p, CompositionMode mode)
         {
-            const bool isCompatible = _view->format() == *p.view().format();
+            const bool isCompatible = *_view->format() == *p.view().format();
             if( ! isCompatible )
             {
                 assign(p.getColor(), mode);
@@ -152,14 +152,15 @@ class BasicPixel
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    Traits::sourceCopy(_view, _index, p);
+                    format().sourceCopy(*_view, *this, p.view(), p);
                     break;
 
                 case CompositionMode::SourceOver:
-                    Traits::sourceOver(_view, _index, p);
+                    format().sourceOver(*_view, *this, p.view(), p);
                     break;
             }
         }
+
 
         const View& view() const
         { return *_view; }
@@ -168,109 +169,178 @@ class BasicPixel
         { return *_view; }
 
 
+        const Format& format() const
+        { return *_view->format(); }
+
+
         bool operator!=(const BasicPixel& p) const
-        { return Traits::equals(_index, p._index); }
+        { return ! format().equals(*this, p); }
 
         bool operator==(const BasicPixel& p) const
-        { return ! Traits::equals(_index, p._index); }
+        { return format().equals(*this, p); }
 
     private:
         View*  _view;
-        Index  _index;
 };
 
 
-template <typename TraitsT>
-class BasicConstPixel
+template <typename FormatT, typename PixelBaseT>
+class BasicConstPixel : public PixelBaseT
 {
     public:
-        typedef TraitsT Traits;
+        typedef PixelBaseT PixelBase;
 
-        typedef typename Traits::Format      Format;
-        typedef typename Traits::View        View;
-        typedef typename Traits::ConstIndex  Index;
+        typedef FormatT Format;
+        typedef typename Format::View View;
         
-        typedef BasicPixel<Traits> Pixel;
+        typedef typename Format::Pixel          MutableBase;
+        typedef BasicPixel<Format, MutableBase> Pixel;
 
     public:
         BasicConstPixel(const View& view, Pt::ssize_t x, Pt::ssize_t y)
-        : _view(&view)
-        , _index(view, x, y)
+        : PixelBase(view, x, y)
+        , _view(&view)
         {
         }
         
         BasicConstPixel(const BasicConstPixel& p)
-        : _view(p._view)
-        , _index(p._index)
+        : PixelBase(p)
+        , _view(p._view)
         {  }
 
         BasicConstPixel(const Pixel& p)
-        : _view(p._view)
-        , _index(p._index)
+        : PixelBase(p)
+        , _view( &p.view() )
         {  }
 
         void reset(const View& view, Pt::ssize_t x, Pt::ssize_t y)
         {
             _view = &view;
-            _index = Index(view, x, y);
+            PixelBase::operator=( PixelBase(view, x, y) );
         }
 
         void reset(const BasicConstPixel& p)
         {
              _view = p._view;
-             _index = p._index;
+             PixelBase::operator=(p);
         }
 
         void reset(const Pixel& p)
         {
              _view = p._view;
-             _index = Index(p._index);
+             PixelBase::operator=(p);
         }
 
         Color getColor() const
         {
-            return Traits::getColor(_view, _index);
+            return format().getColor(*_view, *this);
         }
 
         void advance()
         {
-            Traits::advance(_view, _index);
+            format().advance(*_view, *this);
         }
 
         void advance( Pt::ssize_t n )
         {
-            Traits::advance(_view, _index, n);
+            format().advance(*_view, *this, n);
         }
 
 
         const View& view() const
         { return *_view; }
 
+        const Format& format() const
+        { return *_view->format(); }
+
 
         bool operator!=(const BasicConstPixel& p) const
-        { return Traits::equals(_index, p._index); }
+        { return ! format().equals(*this, p); }
 
         bool operator==(const BasicConstPixel& p) const
-        { return ! Traits::equals(_index, p._index); }
+        { return format().equals(*this, p._idex); }
 
     private:
         const View*  _view;
-        Index        _index;
 };
 
 
-template <typename FormatT>
-class BasicView
+class ViewBase
 {
     public:
-        typedef FormatT                      Format;
-        typedef typename FormatT::Pixel      Pixel;
-        typedef typename FormatT::ConstPixel ConstPixel;
-
         typedef Pt::ssize_t       pos_t;
         typedef BasicPoint<pos_t> Point;
         typedef BasicSize<pos_t>  Size;
         typedef BasicRect<pos_t>  Rect;
+
+    public:
+        ViewBase()
+        : _data(0)
+        , _width(0)
+        , _height(0)
+        , _pixelStride(0)
+        , _padding(0)
+        , _stride(0)
+        {
+        }
+
+        ViewBase(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                 Pt::ssize_t pixelStride, Pt::ssize_t padding = 0)
+        : _data(data)
+        , _width(width)
+        , _height(height)
+        , _pixelStride(pixelStride)
+        , _padding(padding)
+        , _stride(0)
+        {
+            _stride = (_width * pixelStride) + _padding;
+        }
+
+        Pt::ssize_t width() const
+        { return _width; }
+
+        Pt::ssize_t height() const
+        { return _height; }
+
+        bool empty() const
+        { return _width == 0 || _height == 0; }
+
+        Pt::uint8_t* data()
+        { return _data; }
+
+        const Pt::uint8_t* data() const
+        { return _data; }
+
+        Pt::ssize_t stride() const
+        { return _stride; }
+
+        Pt::ssize_t padding() const
+        { return _padding; }
+
+        std::size_t pixelStride() const
+        { return _pixelStride; }
+
+    private:      
+        Pt::uint8_t*  _data;
+        Pt::ssize_t   _width;
+        Pt::ssize_t   _height;
+        Pt::ssize_t   _pixelStride;
+        Pt::ssize_t   _padding;
+        Pt::ssize_t   _stride;
+};
+
+
+template <typename FormatT>
+class BasicView : public ViewBase
+{
+    public:
+        typedef FormatT Format;
+        
+        typedef typename Format::Pixel      PixelBase;
+        typedef typename Format::ConstPixel ConstPixelBase;
+
+        typedef BasicPixel<Format, PixelBase>           Pixel;
+        typedef BasicConstPixel<Format, ConstPixelBase> ConstPixel;
 
         class PixelIterator
         {
@@ -364,35 +434,22 @@ class BasicView
 
     public:
         BasicView()
-        : _format(0)
-        , _data(0)
-        , _width(0)
-        , _height(0)
-        , _padding(0)
-        , _stride(0)
+        : ViewBase()
+        , _format(0)
         {
             //_format = FormatT::instance() 
         }
 
         BasicView(const Format& format)
-        : _format(&format)
-        , _data(0)
-        , _width(0)
-        , _height(0)
-        , _padding(0)
-        , _stride(0)
+        : ViewBase()
+        , _format(&format)
         { }
 
         BasicView(const Format& format, Pt::uint8_t* data, 
                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
-        : _format(&format)
-        , _data(data)
-        , _width(width)
-        , _height(height)
-        , _padding(padding)
-        , _stride(0)
+        : ViewBase(data, width, height, format.pixelStride(), padding)
+        , _format(&format)
         {
-            _stride = (_width * format.pixelStride()) + _padding;
         }
 
         virtual ~BasicView()
@@ -402,20 +459,15 @@ class BasicView
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
             _format = &format;
-            _data = data;
-            _width = width,
-            _height = height;
-            _padding = padding;
-            _stride = _width * format.pixelStride() + _padding;
+
+            ViewBase& base = *this;
+            base = ViewBase(data, width, height, format.pixelStride(), padding);
         }
 
         void clear()
         {
-            _data = 0;
-            _width = 0;
-            _height = 0;
-            _padding = 0;
-            _stride = 0;
+            ViewBase& base = *this;
+            base = ViewBase();
         }
 
         /** @brief Returns an iterator to the pixel at the given position.
@@ -448,74 +500,8 @@ class BasicView
         ConstPixelIterator end() const
         { return ConstPixelIterator(*this, 0, height()); }
 
-        Pt::ssize_t width() const
-        { return _width; }
-
-        Pt::ssize_t height() const
-        { return _height; }
-
-        bool empty() const
-        { return _width == 0 || _height == 0; }
-
-        Pt::uint8_t* data()
-        { return _data; }
-
-        const Pt::uint8_t* data() const
-        { return _data; }
-
-        Pt::ssize_t stride() const
-        { return _stride; }
-
-        Pt::ssize_t padding() const
-        { return _padding; }
-
-        std::size_t pixelStride() const
-        { return _format ? _format->pixelStride() : 0; }
-
         const Format* format() const
         { return _format; }
-
-        void assign(Pixel& to, const Color& c, CompositionMode mode)
-        {
-            switch(mode) 
-            {
-                default:
-                case CompositionMode::SourceCopy:
-                    _format->sourceCopy(to, c);
-                    break;
-
-                case CompositionMode::SourceOver:
-                    _format->sourceOver(to, c);
-                    break;
-            }
-        }
-
-        void assign(Pixel& to, const Pixel& p, CompositionMode mode)
-        {
-            assign(to, ConstPixel(p), mode);
-        }
-
-        void assign(Pixel& to, const ConstPixel& p, CompositionMode mode)
-        {
-            const bool isCompatible = *to.view().format() == *p.view().format();
-            if( ! isCompatible )
-            {
-                assign(to, p.getColor(), mode);
-                return;
-            }
-
-            switch(mode) 
-            {
-                default:
-                case CompositionMode::SourceCopy:
-                    _format->sourceCopy(to, p);
-                    break;
-
-                case CompositionMode::SourceOver:
-                    _format->sourceOver(to, p);
-                    break;
-            }
-        }
 
         void fill(Pixel& to, std::size_t n, const Color& c, CompositionMode mode)
         {
@@ -569,11 +555,11 @@ class BasicView
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    _format->sourceCopy(to, p, n);
+                    _format->sourceCopy(to.view(), to, p.view(), p, n);
                     break;
 
                 case CompositionMode::SourceOver:
-                    _format->sourceOver(to, p, n);
+                    _format->sourceOver(to.view(), to, p.view(), p, n);
                     break;
             }
         }
@@ -606,12 +592,6 @@ class BasicView
     private:
         // TODO: make sure _forrmat is never NULL or handle it
         const Format* _format;
-        
-        Pt::uint8_t*  _data;
-        Pt::ssize_t   _width;
-        Pt::ssize_t   _height;
-        Pt::ssize_t   _padding;
-        Pt::ssize_t   _stride;
 };
 
 } // namespace

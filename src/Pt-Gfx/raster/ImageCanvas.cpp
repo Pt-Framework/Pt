@@ -3964,7 +3964,7 @@ void ImageCanvas::stroke(int x, int y, const Rect& clip)
         return;
 
     Pixel pixel(_image.view(), x, y);
-    _image.view().assign(pixel, _penPixel, _compositionMode);
+    pixel.assign(_penPixel, _compositionMode);
 
     //_image.format().setPixels(pixel, _penPixel, 1, _compositionMode);
 }

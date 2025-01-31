@@ -23,8 +23,8 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #ifndef PT_GFX_RGB16FORMAT_H
@@ -44,55 +44,59 @@ class PT_GFX_API Rgb16Format : public ImageFormat
         Rgb16Format();
 
     protected:
-        virtual void onSourceCopy(Pixel& pixel, const Color& c) const;
-
-        virtual void onSourceOver(Pixel& pixel, const Color& c) const;
-
-    protected:
-        virtual void onSetPixel(Pixel& to, const Pixel& from,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixel(Pixel& pixel, const Color& c,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixel(Pixel& to, const Pixel& from,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
-
-        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
-
-        virtual void onSetPixel(Pixel& pixel, const Color& c,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
-
-        virtual void onSetPixels(Pixel& to, const Pixel& from, size_t length,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixels(Pixel& to, const ConstPixel& from, size_t length,
-                                CompositionMode mode) const;
-
-        virtual void onSetPixels(Pixel& pixel, const Color& c, size_t length,
-                                CompositionMode  mode) const;
-
-        virtual Color onGetColor(const Pixel& pixel) const;
-
-        virtual Color onGetColor(const ConstPixel& pixel) const;
-
-        virtual void onCopy(Pixel& dst, const Pixel& src, size_t length,
-                            CompositionMode mode) const;
-
-        virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length,
-                            CompositionMode mode) const;
-        
-        virtual void onCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                            const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                            Pt::ssize_t width, Pt::ssize_t height, 
-                            CompositionMode mode) const;
-
         virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                         std::size_t padding) const;
+
+    protected:
+        virtual Color onGetColor(const View& view, const Pt::uint8_t* base, 
+                                 Pt::ssize_t x, Pt::ssize_t y) const;
+
+    protected:
+        virtual void onSourceCopy(View& view, PixelBase& to, const Color& c) const;
+        
+        virtual void onSourceOver(View& view, PixelBase& to, const Color& c) const;
+
+
+        virtual void onSourceCopy(View& to, PixelBase& pos,
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y) const;
+
+        virtual void onSourceOver(View& to, PixelBase& pos,
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y) const;
+
+    protected:
+        virtual void onSourceCopy(View& view, PixelBase& to, 
+                                  std::size_t n, const Color& c) const;
+
+        virtual void onSourceOver(View& view, PixelBase& to, 
+                                  std::size_t n, const Color& c) const;
+
+
+        virtual void onSourceCopy(View& view, PixelBase& to, std::size_t n, 
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y) const;
+
+        virtual void onSourceOver(View& view, PixelBase& to, std::size_t n, 
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y) const;
+
+    protected:
+        virtual void onSourceCopy(View& view, PixelBase& to, 
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const;
+
+        virtual void onSourceOver(View& view, PixelBase& to, 
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const;
+
+        virtual void onSourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                                  const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                                  Pt::ssize_t width, Pt::ssize_t height) const;
+
+        virtual void onSourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                                  const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                                  Pt::ssize_t width, Pt::ssize_t height) const;
 };
 
 } // namespace

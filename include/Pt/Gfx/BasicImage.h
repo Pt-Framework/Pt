@@ -42,18 +42,18 @@ template <typename FormatT>
 class BasicImage
 {
     public:
-        typedef FormatT                     Format;
-        typedef typename Format::Pixel      Pixel;
-        typedef typename Format::ConstPixel ConstPixel;
+        typedef FormatT Format;
 
-        typedef BasicView<Format>                 View;
-        typedef typename View::PixelIterator      PixelIterator;
-        typedef typename View::ConstPixelIterator ConstPixelIterator;
+        typedef BasicView<FormatT>                 View;
+        typedef typename View::Pixel               Pixel;
+        typedef typename View::ConstPixel          ConstPixel;
+        typedef typename View::PixelIterator       PixelIterator;
+        typedef typename View::ConstPixelIterator  ConstPixelIterator;
 
-        typedef typename View::pos_t pos_t;
-        typedef typename View::Point Point;
-        typedef typename View::Size  Size;
-        typedef typename View::Rect  Rect;
+        typedef typename View::pos_t  pos_t;
+        typedef typename View::Point  Point;
+        typedef typename View::Size   Size;
+        typedef typename View::Rect   Rect;
 
     public:
 

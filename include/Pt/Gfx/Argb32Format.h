@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Color.h>
 
 namespace Pt {
 
@@ -45,44 +46,48 @@ class PT_GFX_API Argb32Format : public ImageFormat
         virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                         std::size_t padding) const;
 
-        virtual Color onGetColor(const Pixel& pixel) const;
-
-        virtual Color onGetColor(ConstPixel pixel) const;
-
+    protected:
         virtual Color onGetColor(const View& view, const Pt::uint8_t* base, 
                                  Pt::ssize_t x, Pt::ssize_t y) const;
 
-
-        virtual void onSourceCopy(Pixel& to, const ConstPixel& pixel) const;
-
-        virtual void onSourceOver(Pixel& to, const ConstPixel& pixel) const;
-
-
-
-        virtual void onSourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY, 
-                                  const Color& c) const;
+    protected:
+        virtual void onSourceCopy(View& view, PixelBase& to, const Color& c) const;
+        
+        virtual void onSourceOver(View& view, PixelBase& to, const Color& c) const;
 
 
+        virtual void onSourceCopy(View& to, PixelBase& pos,
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y) const;
 
-        virtual void onSourceCopy(Pixel& pixel, const Color& c) const;
+        virtual void onSourceOver(View& to, PixelBase& pos,
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y) const;
 
-        virtual void onSourceOver(Pixel& pixel, const Color& c) const;
+    protected:
+        virtual void onSourceCopy(View& view, PixelBase& to, 
+                                  std::size_t n, const Color& c) const;
 
-
-        virtual void onSourceCopy(Pixel& pixel, std::size_t n, const Color& c) const;
-
-        virtual void onSourceOver(Pixel& pixel, std::size_t n, const Color& c) const;
-
-
-        virtual void onSourceCopy(Pixel& to, std::size_t n, const ConstPixel& pixel) const;
-
-        virtual void onSourceOver(Pixel& to, std::size_t n, const ConstPixel& pixel) const;
+        virtual void onSourceOver(View& view, PixelBase& to, 
+                                  std::size_t n, const Color& c) const;
 
 
-        virtual void onSourceCopy(Pixel& to, const ConstPixel& p, size_t length) const;
+        virtual void onSourceCopy(View& view, PixelBase& to, std::size_t n, 
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y) const;
 
-        virtual void onSourceOver(Pixel& to, const ConstPixel& p, size_t length) const;
+        virtual void onSourceOver(View& view, PixelBase& to, std::size_t n, 
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y) const;
 
+    protected:
+        virtual void onSourceCopy(View& view, PixelBase& to, 
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const;
+
+        virtual void onSourceOver(View& view, PixelBase& to, 
+                                  const View& from, const Pt::uint8_t* base,
+                                  Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const;
 
         virtual void onSourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
                                   const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
@@ -91,16 +96,6 @@ class PT_GFX_API Argb32Format : public ImageFormat
         virtual void onSourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
                                   const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
                                   Pt::ssize_t width, Pt::ssize_t height) const;
-
-    protected:
-        virtual void onSetPixel(Pixel& to, const Pixel& from,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
-
-        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
-
-        virtual void onSetPixel(Pixel& pixel, const Color& c,
-                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
 };
 
 } // namespace

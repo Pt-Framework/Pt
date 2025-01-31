@@ -40,70 +40,272 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename FormatT>
-class BasicView;
+class Argb32;
+
+/** @brief Pixel reference.
+*/
+class Argb32Pixel
+{
+    friend class Argb32;
+
+    public:
+        typedef BasicView<Argb32> View;
+
+    public:
+        Argb32Pixel(View& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        Argb32Pixel(const Argb32Pixel& p)
+        : _base(p._base)
+        , _x(p._x)
+        , _y(p._y)
+        {  }
+
+        Pt::ssize_t x() const
+        { return _x; }
+
+        Pt::ssize_t y() const
+        { return _y; }
+
+        Pt::uint8_t* base()
+        { return _base; }
+
+        const Pt::uint8_t* base() const
+        { return _base; }
+
+        Pt::uint8_t alpha() const
+        {
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            return *val >> 24;
+        }
+
+        Pt::uint8_t red() const
+        {
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            return (*val & 0x00FF0000) >> 16;
+        }
+
+        Pt::uint8_t green() const
+        {
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            return (*val & 0x0000FF00) >> 8;
+        }
+
+        Pt::uint8_t blue() const
+        {
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            return *val & 0x000000FF;
+        }
+
+        void setAlpha(Pt::uint8_t a)
+        {
+            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_base);
+            *val = (*val & 0x00FFFFFF) | (uint32_t(a) << 24);
+        }
+
+        void setRed(Pt::uint8_t r)
+        {
+            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_base);
+            *val = (*val & 0xFF00FFFF) | (uint32_t(r) << 16);
+        }
+
+        void setGreen(Pt::uint8_t g)
+        {
+            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_base);
+            *val = (*val & 0xFFFF00FF) | (uint32_t(g) << 8);
+        }
+
+        void setBlue(Pt::uint8_t b)
+        {
+            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_base);
+            *val = (*val & 0xFFFFFF00) | uint32_t(b);
+        }
+
+    private:
+        Pt::uint8_t*  _base;
+        Pt::ssize_t   _x;
+        Pt::ssize_t   _y;
+};
+
+/** @brief Pixel const reference.
+*/
+class ConstArgb32Pixel
+{
+    friend class Argb32;
+
+    public:
+        typedef BasicView<Argb32> View;
+
+    public:
+        ConstArgb32Pixel(const View& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        ConstArgb32Pixel(const ConstArgb32Pixel& p)
+        : _base(p._base)
+        , _x(p._x)
+        , _y(p._y)
+        {  }
+
+        ConstArgb32Pixel(const Argb32Pixel& p)
+        : _base(p.base())
+        , _x(p.x())
+        , _y(p.y())
+        {  }
+
+        Pt::ssize_t x() const
+        { return _x; }
+
+        Pt::ssize_t y() const
+        { return _y; }
+
+        const Pt::uint8_t* base() const
+        { return _base; }
+
+        Pt::uint8_t alpha() const
+        {
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            return *val >> 24;
+        }
+
+        Pt::uint8_t red() const
+        {
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            return (*val & 0x00FF0000) >> 16;
+        }
+
+        Pt::uint8_t green() const
+        {
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            return (*val & 0x0000FF00) >> 8;
+        }
+
+        Pt::uint8_t blue() const
+        {
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            return *val & 0x000000FF;
+        }
+
+    private:
+        const Pt::uint8_t* _base;
+        Pt::ssize_t        _x;
+        Pt::ssize_t        _y;
+};
 
 /** @brief ARGB-32 image format.
 */
 class Argb32
 {
     public:
-        typedef BasicView<Argb32> View;
+        typedef BasicView<Argb32>  View;
+        
+        typedef Argb32Pixel         Pixel;
+        typedef ConstArgb32Pixel    ConstPixel;
+
+        //class Pixel : public BasicPixel<Argb32>
+        //{
+        //    public:
+        //        Pixel(View& view, Pt::ssize_t x, Pt::ssize_t y)
+        //        : BasicPixel(view, x, y)
+        //        {
+        //        }
+        //
+        //        Pixel(const Pixel& p)
+        //        : BasicPixel(p)
+        //        {  }
+
+        //        Pixel& operator=(const Pixel& p)
+        //        {
+        //            assign(p, CompositionMode::SourceCopy);
+        //            return *this;
+        //        }
+
+        //        Pixel& operator=(const ConstPixel& p)
+        //        {
+        //            assign(p, CompositionMode::SourceCopy);
+        //            return *this;
+        //        }
+
+        //        Pt::uint8_t alpha() const
+        //        {
+        //            return data().alpha();
+        //        }
+
+        //        Pt::uint8_t red() const
+        //        {
+        //            return data().red();
+        //        }
+
+        //        Pt::uint8_t green() const
+        //        {
+        //            return data().green();
+        //        }
+
+        //        Pt::uint8_t blue() const
+        //        {
+        //            return data().blue();
+        //        }
+
+        //        void setAlpha(Pt::uint8_t a)
+        //        {
+        //            data().setAlpha(a);
+        //        }
+
+        //        void setRed(Pt::uint8_t r)
+        //        {
+        //            data().setRed(r);
+        //        }
+
+        //        void setGreen(Pt::uint8_t g)
+        //        {
+        //            data().setGreen(g);
+        //        }
+
+        //        void setBlue(Pt::uint8_t b)
+        //        {
+        //            data().setBlue(b);
+        //        }
+        //};
+
+        //class ConstPixel : public BasicConstPixel<Argb32>
+        //{
+        //    public:
+        //        ConstPixel(const View& view, Pt::ssize_t x, Pt::ssize_t y)
+        //        : BasicConstPixel(view, x, y)
+        //        {
+        //        }
+        //
+        //        ConstPixel(const ConstPixel& p)
+        //        : BasicConstPixel(p)
+        //        {  }
+
+        //        ConstPixel(const Pixel& p)
+        //        : BasicConstPixel(p)
+        //        {  }
+
+        //        Pt::uint8_t alpha() const
+        //        {
+        //            return data().alpha();
+        //        }
+
+        //        Pt::uint8_t red() const
+        //        {
+        //            return data().red();
+        //        }
+
+        //        Pt::uint8_t green() const
+        //        {
+        //            return data().green();
+        //        }
+
+        //        Pt::uint8_t blue() const
+        //        {
+        //            return data().blue();
+        //        }
+        //};
 
     public:
-        class Pixel;
-        class ConstPixel;
-
-        Pt::ssize_t pixelStride() const
+        static Pt::ssize_t pixelStride()
         {
             return 4;
         }
-
-        // planes(), planeStride()
-
-        static std::size_t imageSize(std::size_t width, std::size_t height,
-                                     std::size_t padding);
-
-        Color getColor(const ConstPixel& pixel) const;
-        
-        Color getColor(const Pixel& pixel) const;
-
-        
-        void sourceCopy(Pixel& to, const Color& c) const;
-
-        void sourceOver(Pixel& to, const Color& c) const;
-
-
-        void sourceCopy(View& to, Pt::ssize_t x, Pt::ssize_t y, const Color& c) const;
-
-        
-        void sourceCopy(Pixel& to, const ConstPixel& p) const;
-
-        void sourceOver(Pixel& to, const ConstPixel& p) const;
-
-
-        void sourceCopy(Pixel& to, std::size_t n, const Color& c) const;
-
-        void sourceOver(Pixel& to, std::size_t n, const Color& c) const;
-
-        
-        void sourceCopy(Pixel& to, std::size_t n, const ConstPixel& p) const;
-
-        void sourceOver(Pixel& to, std::size_t n, const ConstPixel& p) const;
-
-
-        static void sourceCopy(Pixel& to, const ConstPixel& p, std::size_t n);
-
-        static void sourceOver(Pixel& to, const ConstPixel& p, std::size_t n);
-
-        
-        static void sourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                               const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                               Pt::ssize_t width, Pt::ssize_t height);
-
-        static void sourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                               const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                               Pt::ssize_t width, Pt::ssize_t height);
 
         bool operator==(const Argb32& a) const
         {
@@ -113,6 +315,143 @@ class Argb32
         bool operator!=(const Argb32& a) const
         {
             return false;
+        }
+
+        // planes(), planeStride()
+    
+    public:
+        static std::size_t imageSize(std::size_t width, std::size_t height,
+                                     std::size_t padding)
+        {
+            std::size_t l = (width * 4) + padding;
+            std::size_t n = l * height;
+            return n;
+        }
+        
+        template <typename P>
+        void advance(const View& view, P& p) const
+        {
+            if( ++p._x >= view.width() )
+            {
+                p._x = 0;
+                ++p._y;
+
+                p._base += view.padding();
+            }
+
+            p._base += view.pixelStride();
+        }
+        
+        template <typename P>
+        void advance(const View& view, P& p, Pt::ssize_t n) const
+        {
+            Pt::ssize_t off = p._x + n;
+
+            std::size_t dy = off / view.width();
+            std::size_t dx = off % view.width() - p._x;
+
+            p._x += dx;
+            p._y += dy;
+            p._base += dy * view.stride() + dx * view.pixelStride();
+        }
+        
+        template <typename P>
+        bool equals(const P& p1, const P& p2) const
+        {
+            return p1._base == p2._base;
+        }
+
+    public:
+        /** @brief Get pixel color.
+        */
+        template <typename P>
+        Color getColor(const View& view, const P& p) const
+        {
+            return Argb32::getColor( p.base() );
+        }
+
+        /** @brief Assign pixels.
+        */
+        template <typename P>
+        void sourceCopy(View& view, Argb32Pixel& to, 
+                        const View& from, const P& p) const
+        {
+            Argb32::sourceCopy( to.base(), p.base() );
+        }
+        
+        template <typename P>
+        void sourceOver(View& view, Argb32Pixel& to, 
+                        const View& from, const P& p) const
+        {
+            Argb32::sourceOver(to.base(), p.base());
+        }
+        
+        /** @brief Assign pixels.
+        */
+        void sourceCopy(View& view, Argb32Pixel& to, const Color& c) const
+        {
+            Argb32::sourceCopy(to.base(), c);
+        }
+        
+        void sourceOver(View& view, Argb32Pixel& to, const Color& c) const
+        {
+            Argb32::sourceOver(to.base(), c);
+        }
+ 
+        /** @brief Fill pixels.
+        */
+        void sourceCopy(View& view, Pixel& to, std::size_t n, const Color& c) const
+        {
+            Argb32::sourceCopy(to.base(), n, c);
+        }
+
+        void sourceOver(View& view, Pixel& to, std::size_t n, const Color& c) const
+        {
+            Argb32::sourceOver(to.base(), n, c);
+        }
+    
+        /** @brief Fill pixels.
+        */
+        void sourceCopy(View& view, Pixel& to, std::size_t n, 
+                        const View& from, const ConstPixel& p) const
+        {
+            Argb32::sourceCopy(to.base(), n, p.base());
+        }
+
+
+        void sourceOver(View& view, Pixel& to, std::size_t n, 
+                        const View& from, const ConstPixel& p) const
+        {
+            Argb32::sourceOver(to.base(), n, p.base());
+        }
+
+        /** @brief Copy pixels.
+        */
+        void sourceCopy(View& view, Pixel& to, 
+                        const View& from, const ConstPixel& p, std::size_t n) const
+        { 
+            Argb32::sourceCopy(to.base(), p.base(), n);
+        }
+
+        void sourceOver(View& view, Pixel& to, 
+                        const View& from, const ConstPixel& p, std::size_t n) const
+        { 
+            Argb32::sourceOver(to.base(), p.base(), n);
+        }
+
+        void sourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                        const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                        Pt::ssize_t width, Pt::ssize_t height)
+        {
+            Argb32::sourceCopy(to, toX, toY, from, fromX, fromY, width, height);
+        }
+
+
+        void sourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                        const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                        Pt::ssize_t width, Pt::ssize_t height)
+        {
+            Argb32::sourceOver(to, toX, toY, from, fromX, fromY, width, height);
         }
 
     public:
@@ -131,6 +470,10 @@ class Argb32
 
         static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length);
 
+        static void sourceCopy(ViewBase& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                               const ViewBase& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                               Pt::ssize_t width, Pt::ssize_t height);
+
         //
         // SourceOver
         //
@@ -144,555 +487,76 @@ class Argb32
 
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length);
 
-    public:
-        static void assign(Pt::uint8_t* to, const Color& c,
-                           CompositionMode mode, Pt::uint8_t blendingAlpha)
-        {
-            switch(mode) {
-                default:
-                case CompositionMode::SourceCopy: 
-                {
-                    const Pt::uint32_t blendAlphaSrc = blendingAlpha;
-                    const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
-                    to[0] = (blendAlphaSrc * (c.blue () >> 8) + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * (c.green() >> 8) + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * (c.red  () >> 8) + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc * (c.alpha() >> 8) + blendAlphaInv * to[3]) >> 8;
-                    break;
-                }
+        static void sourceOver(ViewBase& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                               const ViewBase& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                               Pt::ssize_t width, Pt::ssize_t height);
 
-                case CompositionMode::SourceOver:
-                {
-                    const Pt::uint32_t colorAlpha    = c.alpha() >> 8;
-                    const Pt::uint32_t blendAlphaSrc = colorAlpha * blendingAlpha / 255;
-                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-                    to[0] = (blendAlphaSrc * (c.blue () >> 8) + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * (c.green() >> 8) + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * (c.red  () >> 8) + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc *  colorAlpha      + blendAlphaInv * to[3]) >> 8;
-                    break;
-                }
-            }
+    public:
+        static void blendSourceCopy(Pt::uint8_t* to, const Color& c, Pt::uint8_t alpha)
+        {
+            const Pt::uint32_t blendAlphaSrc = alpha;
+            const Pt::uint32_t blendAlphaInv = 255 - alpha;
+            to[0] = (blendAlphaSrc * (c.blue () >> 8) + blendAlphaInv * to[0]) >> 8;
+            to[1] = (blendAlphaSrc * (c.green() >> 8) + blendAlphaInv * to[1]) >> 8;
+            to[2] = (blendAlphaSrc * (c.red  () >> 8) + blendAlphaInv * to[2]) >> 8;
+            to[3] = (blendAlphaSrc * (c.alpha() >> 8) + blendAlphaInv * to[3]) >> 8;
+        }
+        
+        static void blendSourceOver(Pt::uint8_t* to, const Color& c, Pt::uint8_t alpha)
+        {
+            const Pt::uint32_t colorAlpha    = c.alpha() >> 8;
+            const Pt::uint32_t blendAlphaSrc = colorAlpha * alpha / 255;
+            const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+            to[0] = (blendAlphaSrc * (c.blue () >> 8) + blendAlphaInv * to[0]) >> 8;
+            to[1] = (blendAlphaSrc * (c.green() >> 8) + blendAlphaInv * to[1]) >> 8;
+            to[2] = (blendAlphaSrc * (c.red  () >> 8) + blendAlphaInv * to[2]) >> 8;
+            to[3] = (blendAlphaSrc *  colorAlpha      + blendAlphaInv * to[3]) >> 8;
         }
 
-        static void assign(Pt::uint8_t* to, const Pt::uint8_t* from,
-                           CompositionMode mode, Pt::uint8_t blendingAlpha)
+        static void blendSourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, Pt::uint8_t alpha)
         {
-            switch(mode) {
-                default:
-                case CompositionMode::SourceCopy: 
-                {
-                    const Pt::uint32_t blendAlphaSrc = blendingAlpha;
-                    const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
-                    to[0] = (blendAlphaSrc * from[0] + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * from[1] + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * from[2] + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc * from[3] + blendAlphaInv * to[3]) >> 8;
-                    break;
-                }
+            const Pt::uint32_t blendAlphaSrc = alpha;
+            const Pt::uint32_t blendAlphaInv = 255 - alpha;
+            to[0] = (blendAlphaSrc * from[0] + blendAlphaInv * to[0]) >> 8;
+            to[1] = (blendAlphaSrc * from[1] + blendAlphaInv * to[1]) >> 8;
+            to[2] = (blendAlphaSrc * from[2] + blendAlphaInv * to[2]) >> 8;
+            to[3] = (blendAlphaSrc * from[3] + blendAlphaInv * to[3]) >> 8;
+        }
 
-                case CompositionMode::SourceOver:
-                {
-                    const Pt::uint32_t colorAlpha    = from[3];
-                    const Pt::uint32_t blendAlphaSrc = colorAlpha * blendingAlpha / 255;
-                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-                    to[0] = (blendAlphaSrc * from[0]    + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * from[1]    + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * from[2]    + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc * colorAlpha + blendAlphaInv * to[3]) >> 8;
-                    break;
-                }
-            }
+        static void blendSourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, Pt::uint8_t alpha)
+        {
+            const Pt::uint32_t colorAlpha    = from[3];
+            const Pt::uint32_t blendAlphaSrc = colorAlpha * alpha / 255;
+            const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+            to[0] = (blendAlphaSrc * from[0]    + blendAlphaInv * to[0]) >> 8;
+            to[1] = (blendAlphaSrc * from[1]    + blendAlphaInv * to[1]) >> 8;
+            to[2] = (blendAlphaSrc * from[2]    + blendAlphaInv * to[2]) >> 8;
+            to[3] = (blendAlphaSrc * colorAlpha + blendAlphaInv * to[3]) >> 8;
         }
 };
 
+//
+// Argb32Pixel
+//
 
-/** @brief Const pixel in a ARGB-32 Image.
-*/
-class Argb32::ConstPixel
+inline Argb32Pixel::Argb32Pixel(View& view, Pt::ssize_t x, Pt::ssize_t y)
+: _base(0)
+, _x(x)
+, _y(y)
 {
-    friend class Pixel;
-
-    public:
-        ConstPixel(const BasicView<Argb32>& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
-        : _view(0)
-        , _xpos(0)
-        , _ypos(0)
-        , _p(0)
-        {
-            reset(view, xpos, ypos);
-        }
-
-        ConstPixel(const ConstPixel& p)
-        : _view(p._view)
-        , _xpos(p._xpos)
-        , _ypos(p._ypos)
-        , _p(p._p)
-        { }
-
-        ConstPixel(const Pixel& p);
-
-        void reset(const BasicView<Argb32>& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
-        {
-            _view = &view;
-            _xpos = xpos;
-            _ypos = ypos;
-
-            Pt::ssize_t off = view.stride() * ypos + (xpos * 4);
-            _p = view.data() + off;
-        }
-
-        void reset(const ConstPixel& p)
-        {
-            _view = p._view;
-            _xpos = p._xpos;
-            _ypos = p._ypos;
-
-            _p = p._p;
-        }
-
-        const BasicView<Argb32>& view() const
-        { return *_view; }
-
-        void advance()
-        {
-            if( ++_xpos >= _view->width() )
-            {
-                _xpos = 0;
-                ++_ypos;
-
-                _p += _view->padding();
-            }
-
-            _p += 4;
-        }
-
-        void advance( Pt::ssize_t n )
-        {
-            Pt::ssize_t off = _xpos + n;
-            _ypos += off / _view->width();
-            _xpos  = off % _view->width();
-
-            _p = _view->data() + _view->stride() * _ypos + _xpos * 4;
-        }
-
-        Color getColor() const
-        {
-            return _view->format()->getColor(_p);
-        }
-
-        Pt::uint8_t alpha() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
-            return *val >> 24;
-        }
-
-        Pt::uint8_t red() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
-            return (*val & 0x00FF0000) >> 16;
-        }
-
-        Pt::uint8_t green() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
-            return (*val & 0x0000FF00) >> 8;
-        }
-
-        Pt::uint8_t blue() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
-            return *val & 0x000000FF;
-        }
-
-        bool operator!=(const ConstPixel& p) const
-        {
-            return _p != p._p;
-        }
-
-        bool operator==(const ConstPixel& p) const
-        {
-            return _p == p._p;
-        }
-
-        Pt::ssize_t x() const
-        { return _xpos; }
-
-        Pt::ssize_t y() const
-        { return _ypos; }
-
-        const Pt::uint8_t* data() const
-        {
-            return _p;
-        }
-
-    private:
-        ConstPixel& operator=(const ConstPixel&);
-
-    private:
-        const BasicView<Argb32>* _view;
-        Pt::ssize_t              _xpos;
-        Pt::ssize_t              _ypos;
-        const Pt::uint8_t*       _p;
-};
-
-
-/** @brief Const pixel in a ARGB-32 Image.
-*/
-class Argb32::Pixel
-{
-    friend class ConstPixel;
-
-    public:
-        Pixel(BasicView<Argb32>& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
-        : _view(0)
-        , _xpos(0)
-        , _ypos(0)
-        , _p(0)
-        {
-            reset(view, xpos, ypos);
-        }
-
-        Pixel(const Pixel& p)
-        : _view(p._view)
-        , _xpos(p._xpos)
-        , _ypos(p._ypos)
-        , _p(p._p)
-        { }
-
-        Pixel& operator=(const Pixel& p)
-        {
-            assign(p, CompositionMode::SourceCopy);
-            return *this;
-        }
-
-        Pixel& operator=(const ConstPixel& p)
-        {
-            assign(p, CompositionMode::SourceCopy);
-            return *this;
-        }
-
-        Pixel& operator=(const Color& color)
-        {
-            assign(color, CompositionMode::SourceCopy);
-            return *this;
-        }
-
-        void reset(BasicView<Argb32>& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
-        {
-            _view = &view;
-            _xpos = xpos;
-            _ypos = ypos;
-
-            Pt::ssize_t off = view.stride() * ypos + (xpos * 4);
-            _p = view.data() + off;
-        }
-
-        void reset(const Pixel& p)
-        {
-            _view = p._view;
-            _xpos = p._xpos;
-            _ypos = p._ypos;
-
-            _p = p._p;
-        }
-
-        void advance()
-        {
-            if( ++_xpos >= _view->width() )
-            {
-                _xpos = 0;
-                ++_ypos;
-
-                _p += _view->padding();
-            }
-
-            _p += 4;
-        }
-
-        void advance( Pt::ssize_t n )
-        {
-            Pt::ssize_t off = _xpos + n;
-            _ypos += off / _view->width();
-            _xpos  = off % _view->width();
-
-            _p = _view->data() + _view->stride() * _ypos + _xpos * 4;
-        }
-
-        void assign(const Color& c, CompositionMode mode)
-        {
-            _view->assign(*this, c, mode);
-        }
-
-        void assign(const Pixel& p, CompositionMode mode)
-        {
-            _view->assign(*this, p, mode);
-        }
-
-        void assign(const ConstPixel& p, CompositionMode mode)
-        {
-            _view->assign(*this, p, mode);
-        }
-
-        Color getColor() const
-        {
-            return _view->format()->getColor(_p);
-        }
-
-        const BasicView<Argb32>& view() const
-        { return *_view; }
-
-        BasicView<Argb32>& view()
-        { return *_view; }
-
-
-        Pt::uint8_t alpha() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
-            return *val >> 24;
-        }
-
-        Pt::uint8_t red() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
-            return (*val & 0x00FF0000) >> 16;
-        }
-
-        Pt::uint8_t green() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
-            return (*val & 0x0000FF00) >> 8;
-        }
-
-        Pt::uint8_t blue() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
-            return *val & 0x000000FF;
-        }
-
-        void setAlpha(Pt::uint8_t a)
-        {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
-            *val = (*val & 0x00FFFFFF) | (uint32_t(a) << 24);
-        }
-
-        void setRed(Pt::uint8_t r)
-        {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
-            *val = (*val & 0xFF00FFFF) | (uint32_t(r) << 16);
-        }
-
-        void setGreen(Pt::uint8_t g)
-        {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
-            *val = (*val & 0xFFFF00FF) | (uint32_t(g) << 8);
-        }
-
-        void setBlue(Pt::uint8_t b)
-        {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
-            *val = (*val & 0xFFFFFF00) | uint32_t(b);
-        }
-
-        bool operator!=(const Pixel& p) const
-        { return _p != p._p; }
-
-        bool operator==(const Pixel& p) const
-        { return _p == p._p; }
-
-        Pt::ssize_t x() const
-        { return _xpos; }
-
-        Pt::ssize_t y() const
-        { return _ypos; }
-
-        Pt::uint8_t* data()
-        {
-            return _p;
-        }
-
-        const Pt::uint8_t* data() const
-        {
-            return _p;
-        }
-
-    private:
-        BasicView<Argb32>* _view;
-        Pt::ssize_t        _xpos;
-        Pt::ssize_t        _ypos;
-        Pt::uint8_t*       _p;
-};
-
-///////////////////////////////////////////////////////////////////////
-// ConstPixel
-///////////////////////////////////////////////////////////////////////
-
-inline Argb32::ConstPixel::ConstPixel(const Pixel& p)
-: _view(p._view)
-, _xpos(p._xpos)
-, _ypos(p._ypos)
-, _p(p._p)
-{ 
+    _base = view.data() + view.stride() * y + x * view.pixelStride();
 }
 
-///////////////////////////////////////////////////////////////////////
-// Argb32
-///////////////////////////////////////////////////////////////////////
+//
+// ConstArgb32Pixel
+//
 
-inline std::size_t Argb32::imageSize(std::size_t width, std::size_t height,
-                                     std::size_t padding)
+inline ConstArgb32Pixel::ConstArgb32Pixel(const View& view, Pt::ssize_t x, Pt::ssize_t y)
+: _base(0)
+, _x(x)
+, _y(y)
 {
-    std::size_t l = (width * 4) + padding;
-    std::size_t n = l * height;
-    return n;
-}
-
-
-inline Color Argb32::getColor(const Pixel& pixel) const
-{ 
-    return getColor( ConstPixel(pixel) ); 
-}
-
-
-inline Color Argb32::getColor(const ConstPixel& pixel) const
-{ 
-    return getColor( pixel.data() ); 
-}
-
-
-
-inline void Argb32::sourceCopy(View& to, Pt::ssize_t x, Pt::ssize_t y, const Color& c) const
-{
-    Pt::uint8_t* base = to.data() + ( y * to.stride() ) + x * 4;
-    sourceCopy(base, c);
-}
-
-
-
-
-inline void Argb32::sourceCopy(Pixel& to, const Color& c) const
-{
-    sourceCopy(to.data(), c);
-}
-
-
-inline void Argb32::sourceOver(Pixel& to, const Color& c) const
-{
-    sourceOver(to.data(), c);
-}
-
-
-inline void Argb32::sourceCopy(Pixel& to, const ConstPixel& p) const
-{
-    Argb32::sourceCopy(to.data(), p.data());
-}
-
-
-inline void Argb32::sourceOver(Pixel& to, const ConstPixel& p) const
-{
-    Argb32::sourceOver(to.data(), p.data());
-}
-
-
-inline void Argb32::sourceCopy(Pixel& to, std::size_t n, const Color& c) const
-{
-    sourceCopy(to.data(), n, c);
-}
-
-
-inline void Argb32::sourceOver(Pixel& to, std::size_t n, const Color& c) const
-{
-    sourceOver(to.data(), n, c);
-}
-
-
-inline void Argb32::sourceCopy(Pixel& to, std::size_t n, const ConstPixel& p) const
-{
-    Argb32::sourceCopy(to.data(), n, p.data());
-}
-
-
-inline void Argb32::sourceOver(Pixel& to, std::size_t n, const ConstPixel& p) const
-{
-    Argb32::sourceOver(to.data(), n, p.data());
-}
-
-
-inline void Argb32::sourceCopy(Pixel& to, const ConstPixel& p, std::size_t n)
-{
-    Argb32::sourceCopy(to.data(), p.data(), n);
-}
-
-
-inline void Argb32::sourceOver(Pixel& to, const ConstPixel& p, std::size_t n)
-{
-    Argb32::sourceOver(to.data(), p.data(), n);
-}
-
-
-inline void Argb32::sourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                               const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                               Pt::ssize_t width, Pt::ssize_t height)
-{
-    // TODO: make ARGB-32 specific version
-
-    Pt::ssize_t pixelSize = 4;
-
-    // TODO: equals to toInfo.pitch()
-    Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
-    Pt::ssize_t fromStride = (from.width() * pixelSize) + from.padding();
-
-    Pt::ssize_t toBegin = (toY * toStride) + (toX * pixelSize);
-    Pt::ssize_t fromBegin = (fromY * fromStride) + (fromX * pixelSize);
-
-    Pt::uint8_t* toLine = to.data() + toBegin;
-    const Pt::uint8_t* fromLine = from.data() + fromBegin;
-
-    Pt::ssize_t n = width * pixelSize;
-
-    for(Pt::ssize_t y = 0; y < height; ++y)
-    {
-        memcpy(toLine, fromLine, n);
-
-        toLine += toStride;
-        fromLine += fromStride;
-    }
-}
-
-
-inline void Argb32::sourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                               const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                               Pt::ssize_t width, Pt::ssize_t height)
-{
-    // TODO: make ARGB-32 specific version
-
-    Pt::ssize_t pixelSize = 4;
-
-    // TODO: equals to toInfo.pitch()
-    Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
-    Pt::ssize_t fromStride = (from.width() * pixelSize) + from.padding();
-
-    Pt::ssize_t toBegin = (toY * toStride) + (toX * pixelSize);
-    Pt::ssize_t fromBegin = (fromY * fromStride) + (fromX * pixelSize);
-
-    Pt::uint8_t* toLine = to.data() + toBegin;
-    const Pt::uint8_t* fromLine = from.data() + fromBegin;
-
-    for(int y = 0; y < height; ++y)
-    {
-        Pt::uint8_t* to = toLine;
-        const Pt::uint8_t* from = fromLine;
-
-        for(int x = 0; x < width ; ++x )
-        {
-            Argb32::sourceOver(to, from);
-            to += 4;
-            from += 4;
-        }
-
-        toLine += toStride;
-        fromLine += fromStride;
-    }
+    _base = view.data() + view.stride() * y + x * view.pixelStride();
 }
 
 //
@@ -731,9 +595,9 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, const Color& c)
     Pt::uint32_t* pixel = reinterpret_cast<Pt::uint32_t*>(to);
 
     *pixel = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
-              ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
-                Pt::uint32_t(c.green() & 0xFF00)         |
-              ( Pt::uint32_t(c.blue ()         ) >>  8 );
+             ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
+               Pt::uint32_t(c.green() & 0xFF00)         |
+             ( Pt::uint32_t(c.blue ()         ) >>  8 );
 }
 
 
@@ -766,6 +630,29 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, size_t length, const Pt::uint8_t
 inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length)
 {
     memcpy(to, from, length * 4);
+}
+
+
+inline void Argb32::sourceCopy(ViewBase& toView, Pt::ssize_t toX, Pt::ssize_t toY,
+                               const ViewBase& fromView, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                               Pt::ssize_t width, Pt::ssize_t height)
+{
+    Pt::ssize_t bytesPerPixel = Argb32::pixelStride();
+    Pt::ssize_t n = width * bytesPerPixel;
+
+    Pt::uint8_t* to = toView.data() + (toY * toView.stride()) 
+                                    + (toX * bytesPerPixel);
+    
+    const Pt::uint8_t* from = fromView.data() + (fromY * fromView.stride()) 
+                                              + (fromX * bytesPerPixel);
+
+    for(Pt::ssize_t y = 0; y < height; ++y)
+    {
+        memcpy(to, from, n);
+
+        to += toView.stride();
+        from += fromView.stride();
+    }
 }
 
 //
@@ -864,6 +751,35 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, size_t 
     }
 }
 
+
+inline void Argb32::sourceOver(ViewBase& toView, Pt::ssize_t toX, Pt::ssize_t toY,
+                               const ViewBase& fromView, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                               Pt::ssize_t width, Pt::ssize_t height)
+{
+    Pt::ssize_t bytesPerPixel = Argb32::pixelStride();
+
+    Pt::uint8_t* to = toView.data() + (toY * toView.stride()) 
+                                    + (toX * bytesPerPixel);
+    
+    const Pt::uint8_t* from = fromView.data() + (fromY * fromView.stride()) 
+                                              + (fromX * bytesPerPixel);
+
+    for(int y = 0; y < height; ++y)
+    {
+        Pt::uint8_t* toLine = to;
+        const Pt::uint8_t* fromLine = from;
+    
+        for(int x = 0; x < width ; ++x)
+        {
+            Argb32::sourceOver(toLine, fromLine);
+            toLine += 4;
+            fromLine += 4;
+        }
+
+        to += toView.stride();
+        from += fromView.stride();
+    }
+}
 } // namespace
 
 } // namespace

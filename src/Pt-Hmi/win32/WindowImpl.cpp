@@ -504,7 +504,7 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
           const size_t index = offsetLine + (x*planes);
 
           Gfx::ConstPixel pixel(icon.view(), x, y);
-          Gfx::Color color = icon.format().getColor(pixel);
+          Gfx::Color color = pixel.getColor();
                 
           bitmapBuffer[index]     = static_cast<unsigned char>(color.blue());    
           bitmapBuffer[index + 1] = static_cast<unsigned char>(color.green());

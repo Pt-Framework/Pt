@@ -157,7 +157,7 @@ void toPreMulAlpha(const Pt::Gfx::Image& image,
         for (std::size_t x = 0; x < image.width(); ++x)
         {
             Pt::Gfx::ConstPixel pixel(image.view(), x, y);
-            Pt::Gfx::Color color = image.format().getColor(pixel);
+            Pt::Gfx::Color color = pixel.getColor();
 
             const Pt::uint8_t r = color.red() / 257;
             const Pt::uint8_t g = color.green() / 257;

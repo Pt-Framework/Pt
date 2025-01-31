@@ -22,6 +22,11 @@ if --nlog in $(ARGV)
 # configure basic C compiler
 ConfigureCc ;
 
+if $(TOOLSET) = gcc
+{
+    C++FLAGS += -std=c++11 ;
+}
+
 # configure basic C++ compiler
 ConfigureC++ ;
 

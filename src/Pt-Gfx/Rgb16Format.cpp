@@ -23,12 +23,14 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #include <Pt/Gfx/Rgb16Format.h>
 #include <Pt/Gfx/ImageView.h>
+#include <cstring>
+#include <cassert>
 
  namespace Pt {
 
@@ -48,182 +50,177 @@ std::size_t Rgb16Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
     return n;
 }
 
+//
+// Get pixel color
+//
 
-void Rgb16Format::onSourceCopy(Pixel& pixel, const Color& c) const
+Color Rgb16Format::onGetColor(const View& view, const Pt::uint8_t* base, 
+                              Pt::ssize_t x, Pt::ssize_t y) const
 {
+    const Pt::uint16_t* p = (const Pt::uint16_t*) base;
+
+    const uint16_t tr = (*p & 0xF800) >> 11;
+    const uint16_t tg = (*p & 0x07E0) >> 5;
+    const uint16_t tb = *p & 0x001F;
+
+    uint16_t a = 0xFFFF;
+    uint16_t r = ((tr + !!tr) << 11) - !!tr;
+    uint16_t g = ((tg + !!tg) << 10) - !!tg;
+    uint16_t b = ((tb + !!tb) << 11) - !!tb;
+
+    return Color(a, r, g, b);
 }
 
+//
+// Assign pixel
+//
 
-void Rgb16Format::onSourceOver(Pixel& pixel, const Color& c) const
-{
-}
-
-
-void Rgb16Format::onSetPixel(Pixel& to, const Pixel& from,
-                             CompositionMode mode) const
-{
-    Pt::uint8_t* dst = to.base();
-    const Pt::uint8_t* src = from.base();
-
-    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)src);
-}
-
-
-void Rgb16Format::onSetPixel(Pixel& to, const ConstPixel& from,
-                             CompositionMode mode) const
-{
-    Pt::uint8_t* dst = to.base();
-    const Pt::uint8_t* src = from.base();
-
-    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)src);
-}
-
-
-void Rgb16Format::onSetPixel(Pixel& pixel, const Color& c,
-                             CompositionMode mode) const
+void Rgb16Format::onSourceCopy(View& view, PixelBase& to, const Color& c) const
 {
     Pt::uint32_t val =   uint32_t(c.red() & 0xF800) |
                        ( uint32_t(c.green() & 0xFC00) >> 5 ) |
                        ( uint32_t(c.blue () ) >> 11 );
 
-    Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>( pixel.base() );
+    Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>( to.base() );
     *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)val);
 }
 
 
-void Rgb16Format::onSetPixel(Pixel& to, const Pixel& from,
-                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+void Rgb16Format::onSourceOver(View& view, PixelBase& to, const Color& c) const
+{
+    Pt::uint32_t val =   uint32_t(c.red() & 0xF800) |
+                       ( uint32_t(c.green() & 0xFC00) >> 5 ) |
+                       ( uint32_t(c.blue () ) >> 11 );
+
+    Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>( to.base() );
+    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)val);
+}
+
+
+void Rgb16Format::onSourceCopy(View& to, PixelBase& pos,
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y) const
+{
+    Pt::uint8_t* dst = pos.base();
+    const Pt::uint8_t* src = base;
+
+    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)src);
+}
+
+
+void Rgb16Format::onSourceOver(View& to, PixelBase& pos,
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y) const
+{
+    Pt::uint8_t* dst = pos.base();
+    const Pt::uint8_t* src = base;
+
+    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)src);
+}
+
+//
+// Fill pixels
+//
+
+void Rgb16Format::onSourceCopy(View& view, PixelBase& to, 
+                                std::size_t n, const Color& c) const
 {
     // ### !!! TODO !!! ###
 }
 
 
-void Rgb16Format::onSetPixel(Pixel& to, const ConstPixel& from,
-                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+void Rgb16Format::onSourceOver(View& view, PixelBase& to, 
+                                std::size_t n, const Color& c) const
 {
     // ### !!! TODO !!! ###
 }
 
 
-void Rgb16Format::onSetPixel(Pixel& pixel, const Color& c,
-                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+void Rgb16Format::onSourceCopy(View& view, PixelBase& to, std::size_t n, 
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y) const
 {
     // ### !!! TODO !!! ###
 }
 
 
-void Rgb16Format::onSetPixels(Pixel& to, const Pixel& from, size_t length,
-                              CompositionMode mode) const
+void Rgb16Format::onSourceOver(View& view, PixelBase& to, std::size_t n, 
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y) const
 {
     // ### !!! TODO !!! ###
 }
 
+//
+// Copy pixels
+//
 
-void Rgb16Format::onSetPixels(Pixel& to, const ConstPixel& from, size_t length,
-                              CompositionMode mode) const
+void Rgb16Format::onSourceCopy(View& view, PixelBase& to, 
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const
 {
-    // ### !!! TODO !!! ###
+    std::memcpy(to.base(), base, n * 2);
 }
 
 
-void Rgb16Format::onSetPixels(Pixel& pixel, const Color& c, size_t length,
-                              CompositionMode mode) const
+void Rgb16Format::onSourceOver(View& view, PixelBase& to, 
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const
 {
-    // ### !!! TODO !!! ###
+    std::memcpy(to.base(), base, n * 2);
 }
 
 
-Color Rgb16Format::onGetColor(const Pixel& pixel) const
+void Rgb16Format::onSourceCopy(View& toView, Pt::ssize_t toX, Pt::ssize_t toY,
+                               const View& fromView, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                               Pt::ssize_t width, Pt::ssize_t height) const
 {
-    const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
+    assert( toX >= 0 && toY >= 0 &&
+            toX + width <= toView.width() &&
+            toY + height<= toView.height() );
 
-    const uint16_t tr = (*p & 0xF800) >> 11;
-    const uint16_t tg = (*p & 0x07E0) >> 5;
-    const uint16_t tb = *p & 0x001F;
+    Pt::ssize_t bytesPerPixel = 2;
+    Pt::ssize_t n = width * bytesPerPixel;
 
-    uint16_t a = 0xFFFF;
-    uint16_t r = ((tr + !!tr) << 11) - !!tr;
-    uint16_t g = ((tg + !!tg) << 10) - !!tg;
-    uint16_t b = ((tb + !!tb) << 11) - !!tb;
-
-    return Color(a, r, g, b);
-}
-
-
-Color Rgb16Format::onGetColor(const ConstPixel& pixel) const
-{
-    const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
-
-    const uint16_t tr = (*p & 0xF800) >> 11;
-    const uint16_t tg = (*p & 0x07E0) >> 5;
-    const uint16_t tb = *p & 0x001F;
-
-    uint16_t a = 0xFFFF;
-    uint16_t r = ((tr + !!tr) << 11) - !!tr;
-    uint16_t g = ((tg + !!tg) << 10) - !!tg;
-    uint16_t b = ((tb + !!tb) << 11) - !!tb;
-
-    return Color(a, r, g, b);
-}
-
-
-void Rgb16Format::onCopy(Pixel& to, const Pixel& from, size_t length,
-                          CompositionMode mode) const
-{
-    Pt::uint8_t* dst = to.base();
-    const Pt::uint8_t* src = from.base();
-
-    switch(mode)
-    {
-        default:
-        case CompositionMode::SourceCopy:
-            memcpy(dst, src, length * 2);
-            break;
-    }
-}
-
-
-void Rgb16Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
-                          CompositionMode mode) const
-{
-    Pt::uint8_t* dst = to.base();
-    const Pt::uint8_t* src = from.base();
-
-    switch(mode)
-    {
-        default:
-        case CompositionMode::SourceCopy:
-            memcpy(dst, src, length * 2);
-            break;
-    }
-}
-
-
-void Rgb16Format::onCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                         const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                         Pt::ssize_t width, Pt::ssize_t height, 
-                         CompositionMode mode) const
-{
-    Pt::ssize_t pixelSize = 2;
-
-    // TODO: equals to toInfo.pitch()
-    Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
-    Pt::ssize_t fromStride = (from.width() * pixelSize) + from.padding();
-
-    Pt::ssize_t toBegin = (toY * toStride) + (toX * pixelSize);
-    Pt::ssize_t fromBegin = (fromY * fromStride) + (fromX * pixelSize);
-
-    Pt::uint8_t* toLine = to.data() + toBegin;
-    const Pt::uint8_t* fromLine = from.data() + fromBegin;
-
-    Pt::ssize_t n = width * pixelSize;
+    Pt::uint8_t* to = toView.data() + (toY * toView.stride()) 
+                                    + (toX * bytesPerPixel);
+    
+    const Pt::uint8_t* from = fromView.data() + (fromY * fromView.stride()) 
+                                              + (fromX * bytesPerPixel);
 
     for(Pt::ssize_t y = 0; y < height; ++y)
     {
-        memcpy(toLine, toLine, n);
+        memcpy(to, from, n);
 
-        toLine += toStride;
-        fromLine += fromStride;
+        to += toView.stride();
+        from += fromView.stride();
+    }
+}
+
+
+void Rgb16Format::onSourceOver(View& toView, Pt::ssize_t toX, Pt::ssize_t toY,
+                               const View& fromView, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                               Pt::ssize_t width, Pt::ssize_t height) const
+{
+    assert( toX >= 0 && toY >= 0 &&
+            toX + width <= toView.width() &&
+            toY + height<= toView.height() );
+
+    Pt::ssize_t bytesPerPixel = 2;
+    Pt::ssize_t n = width * bytesPerPixel;
+
+    Pt::uint8_t* to = toView.data() + (toY * toView.stride()) 
+                                    + (toX * bytesPerPixel);
+    
+    const Pt::uint8_t* from = fromView.data() + (fromY * fromView.stride()) 
+                                              + (fromX * bytesPerPixel);
+
+    for(Pt::ssize_t y = 0; y < height; ++y)
+    {
+        memcpy(to, from, n);
+
+        to += toView.stride();
+        from += fromView.stride();
     }
 }
 

@@ -565,17 +565,17 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const Color& color,
                     if(value != 255)
                     {
                         pixelColor.setAlpha(value * 257);
-                        image.view().assign(pixel, pixelColor, CompositionMode::SourceOver);
+                        pixel.assign(pixelColor, CompositionMode::SourceOver);
                     }
                     else
                     {
-                        image.view().assign(pixel, color, CompositionMode::SourceCopy);
+                        pixel.assign(color, CompositionMode::SourceCopy);
                     }
                     break;
 
                 case CompositionMode::SourceOver:
                     pixelColor.setAlpha(color.alpha() * value / 255);
-                    image.view().assign(pixel, pixelColor, CompositionMode::SourceOver);
+                    pixel.assign(pixelColor, CompositionMode::SourceOver);
                     break;
             }
         }

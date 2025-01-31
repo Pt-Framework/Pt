@@ -76,7 +76,7 @@ SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        Rgb32Format.cpp
                        Rgb16Format.cpp
                        Transform.cpp
-                       Yuv12Format.cpp
+                       #Yuv12Format.cpp
                        ;
 
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;

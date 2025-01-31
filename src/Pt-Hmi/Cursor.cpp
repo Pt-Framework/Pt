@@ -89,19 +89,19 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 		  for( size_t x = 0;  x < image.width(); ++x )
 		  {
           Gfx::Pixel pixel( image.view(), x, y);
-          Gfx::Color color = image.format().getColor(pixel);
+          Gfx::Color color = pixel.getColor();
 				
 			    if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
 				    color.setAlpha(0);
 			    else
 				    color.setAlpha(65535);
 
-			    image.view().assign(pixel, color, Gfx::CompositionMode::SourceCopy);
+			    pixel.assign(color, Gfx::CompositionMode::SourceCopy);
 		  }
 	}
 
   Gfx::Pixel pixel(image.view(), cursor.xHotspot(), cursor.yHotspot());
-	image.view().assign( pixel, Gfx::Color(0,65535,0), Gfx::CompositionMode::SourceCopy );
+	pixel.assign(Gfx::Color(0,65535,0), Gfx::CompositionMode::SourceCopy );
   
   fromImage(image, cursor);
 }
@@ -240,7 +240,7 @@ void Cursor::fromImage( const Gfx::Image& image, Cursor& cursor)
 		for( size_t x = 0; x < cursor._width; ++x )
 		{
       Gfx::ConstPixel pixel(image.view(), x, y);      
-      Gfx::Color color = image.format().getColor(pixel);
+      Gfx::Color color = pixel.getColor();
 
 			if( color.alpha() == 0 )
 			{//Transparent

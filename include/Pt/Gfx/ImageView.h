@@ -38,6 +38,12 @@ namespace Pt {
 
 namespace Gfx {
 
+typedef BasicPixel<ImageFormat, 
+                   ImageFormat::Pixel> Pixel;
+
+typedef BasicConstPixel<ImageFormat, 
+                        ImageFormat::ConstPixel> ConstPixel;
+
 /** @brief View on image data.
 */
 class ImageView : public BasicView<ImageFormat>
