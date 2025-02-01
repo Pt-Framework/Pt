@@ -61,8 +61,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             registerMethod("Iterator", *this, &Yuv12Test::Iterator);
             registerMethod("Color", *this, &Yuv12Test::Color);
 
-            //registerMethod("BenchmarkPixel", *this, &Yuv12Test::Benchmark);
-            //registerMethod("BenchmarkDirectYUV", *this, &Yuv12Test::BenchmarkRaw);
+            registerMethod("BenchmarkA_Generic", *this, &Yuv12Test::Benchmark);
+            registerMethod("BenchmarkB_Direct", *this, &Yuv12Test::BenchmarkRaw);
         }
 
     protected:
@@ -123,7 +123,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             Yuv12Image image(yuv12, 1, 1);
             Yuv12Image::PixelIterator pixel = image.pixel(0, 0);
 
-            Pt::Gfx::Color c = pixel->toColor();
+            Pt::Gfx::Color c = pixel->getColor();
             pixel->assign(c, CompositionMode::SourceCopy);
 
             PT_UNIT_ASSERT(yuv12[0] > 99 && yuv12[0] < 101);
@@ -134,6 +134,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
         void Benchmark()
         {
             using namespace Pt::Gfx;
+
+            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
             for(int n = 0; n < 10; ++n)
             {
@@ -152,14 +154,20 @@ class Yuv12Test : public Pt::Unit::TestSuite
                     (*it) = color;
                 }
 
-                std::clog << "pixel: " << clock.stop().toUSecs() << std::endl;
+                Pt::uint64_t time = clock.stop().toUSecs();
+                if(time < best)
+                    best = time;
             }
+
+            std::clog << "GENERIC: " << best << std::endl;
         }
 
         void BenchmarkRaw()
         {
             using namespace Pt::Gfx;
             
+            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
+
             for(int n = 0; n < 10; ++n)
             {
                 Yuv12Image image(1000, 1000);
@@ -176,8 +184,12 @@ class Yuv12Test : public Pt::Unit::TestSuite
                     (*it) = color;
                 }
 
-                std::clog << "yv12 direct: " << clock.stop().toUSecs() << std::endl;
+                Pt::uint64_t time = clock.stop().toUSecs();
+                if(time < best)
+                    best = time;
             }
+
+            std::clog << "Yv12: " << best << std::endl;
         }
 };
 

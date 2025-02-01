@@ -53,7 +53,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("Iterator",*this, &Argb32Test::Iterator);
             registerMethod("Color",*this, &Argb32Test::Color);
 
-            registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::Benchmark);
+            registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
             registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
         }
 
@@ -120,7 +120,7 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 100; ++n)
+            for(int n = 0; n < 10; ++n)
             {
                 Argb32Format format;
                 Image image( format, 1000, 1000 );
@@ -158,7 +158,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 100; ++n)
+            for(int n = 0; n < 10; ++n)
             {
                 Argb32Format format;
                 Image image( format, 1000, 1000 );

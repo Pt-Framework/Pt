@@ -23,8 +23,8 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #include <Pt/Gfx/Yuv12Format.h>
@@ -44,171 +44,147 @@ Yuv12Format::Yuv12Format()
 std::size_t Yuv12Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                      std::size_t padding) const
 {
-    return Yuv12Model::imageSize(width, height, padding);
+    return Yuv12::imageSize(width, height, padding);
 }
 
+//
+// Get pixel color
+//
 
-void Yuv12Format::onSourceCopy(Pixel& pixel, const Color& c) const
+Color Yuv12Format::onGetColor(const View& view, const Pt::uint8_t* base, 
+                              Pt::ssize_t xpos, Pt::ssize_t ypos) const
 {
+    const Pt::uint8_t* y;
+    const Pt::uint8_t* u;
+    const Pt::uint8_t* v;
+
+    const Pt::uint8_t* data = view.data();
+
+    Yuv12::init(data, view.stride(), view.width(), view.height(),
+                xpos, ypos, y, u, v);
+
+    return Yuv12::getColor(*y, *u, *v);
 }
 
+//
+// Assign pixel
+//
 
-void Yuv12Format::onSourceOver(Pixel& pixel, const Color& c) const
-{
-}
-
-
-void Yuv12Format::onSetPixel(Pixel& to, const Pixel& from,
-                             CompositionMode mode) const
-{
-    //Yuv12Model::Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
-    //Yuv12Model::ConstPixel fromYuv( from.view(), from.base(), from.x(), from.y() );
-
-    //toYuv.assign(fromYuv, mode);
-}
-
-
-void Yuv12Format::onSetPixel(Pixel& to, const ConstPixel& from,
-                             CompositionMode mode) const
+void Yuv12Format::onSourceCopy(View& view, PixelBase& to, const Color& c) const
 {
     Pt::uint8_t* y;
     Pt::uint8_t* u;
     Pt::uint8_t* v;
 
-    Pt::uint8_t* data = to.base();
-    data += to.base() - to.view().data();
+    Pt::uint8_t* data = view.data();
 
-    Yuv12Model::init(data, to.view().stride(), 
-                     to.view().width(), to.view().height(),
-                     to.x(), to.y(), y, u, v);
+    Yuv12::init(data, view.stride(), view.width(), view.height(),
+                to.x(), to.y(), y, u, v);
+
+    Yuv12::fromColor(y, u, v, c);
+}
+
+    
+void Yuv12Format::onSourceOver(View& view, PixelBase& to, const Color& c) const
+{
+    onSourceCopy(view, to, c);
+}
+
+
+void Yuv12Format::onSourceCopy(View& view, PixelBase& pos,
+                               const View& from, const Pt::uint8_t* base,
+                               Pt::ssize_t xpos, Pt::ssize_t ypos) const
+{
+    Pt::uint8_t* y;
+    Pt::uint8_t* u;
+    Pt::uint8_t* v;
+
+    Pt::uint8_t* data = view.data();
+
+    Yuv12::init(data, view.stride(), view.width(), view.height(),
+                pos.x(), pos.y(), y, u, v);
 
     const Pt::uint8_t* cy;
     const Pt::uint8_t* cu;
     const Pt::uint8_t* cv;
 
-    Yuv12Model::init(from.view().data(), from.view().stride(), 
-                     from.view().width(), from.view().height(),
-                     from.x(), from.y(), cy, cu, cv);
+    Yuv12::init(from.data(), from.stride(), from.width(), from.height(),
+                xpos, ypos, cy, cu, cv);
 
     *y = *cy;
     *u = *cu;
     *v = *cv;
-
-    //Yuv12Model::Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
-    //Yuv12Model::ConstPixel fromYuv( from.view(), from.base(), from.x(), from.y() );
-
-    //toYuv.assign(fromYuv, mode);
 }
 
 
-void Yuv12Format::onSetPixel(Pixel& p, const Color& c,
-                             CompositionMode mode) const
+ void Yuv12Format::onSourceOver(View& to, PixelBase& pos,
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y) const
 {
-    Pt::uint8_t* y;
-    Pt::uint8_t* u;
-    Pt::uint8_t* v;
-
-    Pt::uint8_t* data = p.base();
-    data += p.base() - p.view().data();
-
-    Yuv12Model::init(data, p.view().stride(), 
-                     p.view().width(), p.view().height(),
-                     p.x(), p.y(), y, u, v);
-
-    Yuv12Model::fromColor(*y, *u, *v, c);
+    onSourceCopy(to, pos, from, base, x ,y);
 }
 
+//
+// Fill pixels
+//
 
-void Yuv12Format::onSetPixel(Pixel& to, const Pixel& from,
-                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+void Yuv12Format::onSourceCopy(View& view, PixelBase& to, 
+                                std::size_t n, const Color& c) const
 {
-    // ### !!! TODO !!! ###
+
 }
 
 
-void Yuv12Format::onSetPixel(Pixel& to, const ConstPixel& from,
-                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+void Yuv12Format::onSourceOver(View& view, PixelBase& to, 
+                                std::size_t n, const Color& c) const
 {
-    // ### !!! TODO !!! ###
+
 }
 
 
-void Yuv12Format::onSetPixel(Pixel& pixel, const Color& c,
-                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+void Yuv12Format::onSourceCopy(View& view, PixelBase& to, std::size_t n, 
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y) const
 {
-    // ### !!! TODO !!! ###
+
 }
 
 
-void Yuv12Format::onSetPixels(Pixel& to, const Pixel& from, size_t length,
-                              CompositionMode mode) const
+void Yuv12Format::onSourceOver(View& view, PixelBase& to, std::size_t n, 
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y) const
 {
-    // ### !!! TODO !!! ###
+
 }
 
+//
+// Copy pixels
+//
 
-void Yuv12Format::onSetPixels(Pixel& to, const ConstPixel& from, size_t length,
-                              CompositionMode mode) const
-{
-    // ### !!! TODO !!! ###
-}
-
-
-void Yuv12Format::onSetPixels(Pixel& pixel, const Color& c, size_t length,
-                              CompositionMode mode) const
-{
-    // ### !!! TODO !!! ###
-}
-
-
-Color Yuv12Format::onGetColor(const Pixel& p) const
-{
-    const Pt::uint8_t* y;
-    const Pt::uint8_t* u;
-    const Pt::uint8_t* v;
-
-   const Pt::uint8_t* data = p.view().data();
-
-    Yuv12Model::init(data, p.view().stride(), 
-                     p.view().width(), p.view().height(),
-                     p.x(), p.y(), y, u, v);
-
-    return Yuv12Model::toColor(*y, *u, *v);
-}
-
-
-Color Yuv12Format::onGetColor(const ConstPixel& p) const
-{
-    const Pt::uint8_t* y;
-    const Pt::uint8_t* u;
-    const Pt::uint8_t* v;
-
-   const Pt::uint8_t* data = p.view().data();
-
-    Yuv12Model::init(data, p.view().stride(), 
-                     p.view().width(), p.view().height(),
-                     p.x(), p.y(), y, u, v);
-
-    return Yuv12Model::toColor(*y, *u, *v);
-}
-
-
-void Yuv12Format::onCopy(Pixel& to, const Pixel& from, size_t length,
-                         CompositionMode mode) const
+void Yuv12Format::onSourceCopy(View& view, PixelBase& to, 
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const
 {
 }
 
 
-void Yuv12Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
-                         CompositionMode mode) const
+void Yuv12Format::onSourceOver(View& view, PixelBase& to, 
+                                const View& from, const Pt::uint8_t* base,
+                                Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const
 {
 }
 
 
-void Yuv12Format::onCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                         const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                         Pt::ssize_t width, Pt::ssize_t height, 
-                         CompositionMode mode) const
+void Yuv12Format::onSourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                                const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                                Pt::ssize_t width, Pt::ssize_t height) const
+{
+}
+
+
+void Yuv12Format::onSourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+                                const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+                                Pt::ssize_t width, Pt::ssize_t height) const
 {
 }
 

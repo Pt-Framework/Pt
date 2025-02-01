@@ -10,7 +10,7 @@ if $(PNG_INCLUDES)
 Main Pt-Gfx-test : Pt-Gfx-test.cpp
                    BlockScaleTest.cpp
                    Argb32Test.cpp
-                   #Yuv12Test.cpp 
+                   Yuv12Test.cpp 
                    ;
 
 LinkSharedLibraries Pt-Gfx-test : Pt Pt-Gfx Pt-System Pt-Unit ;

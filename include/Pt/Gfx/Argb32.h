@@ -23,8 +23,8 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #ifndef PT_GFX_ARGB32_H
@@ -32,7 +32,6 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/BasicView.h>
 #include <Pt/Types.h>
 
@@ -42,7 +41,7 @@ namespace Gfx {
 
 class Argb32;
 
-/** @brief Pixel reference.
+/** @brief ARGB-32 pixel reference.
 */
 class Argb32Pixel
 {
@@ -126,9 +125,9 @@ class Argb32Pixel
         Pt::ssize_t   _y;
 };
 
-/** @brief Pixel const reference.
+/** @brief ARGB-32 const pixel reference.
 */
-class ConstArgb32Pixel
+class Argb32ConstPixel
 {
     friend class Argb32;
 
@@ -136,15 +135,15 @@ class ConstArgb32Pixel
         typedef BasicView<Argb32> View;
 
     public:
-        ConstArgb32Pixel(const View& view, Pt::ssize_t x, Pt::ssize_t y);
+        Argb32ConstPixel(const View& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        ConstArgb32Pixel(const ConstArgb32Pixel& p)
+        Argb32ConstPixel(const Argb32ConstPixel& p)
         : _base(p._base)
         , _x(p._x)
         , _y(p._y)
         {  }
 
-        ConstArgb32Pixel(const Argb32Pixel& p)
+        Argb32ConstPixel(const Argb32Pixel& p)
         : _base(p.base())
         , _x(p.x())
         , _y(p.y())
@@ -197,109 +196,7 @@ class Argb32
         typedef BasicView<Argb32>  View;
         
         typedef Argb32Pixel         Pixel;
-        typedef ConstArgb32Pixel    ConstPixel;
-
-        //class Pixel : public BasicPixel<Argb32>
-        //{
-        //    public:
-        //        Pixel(View& view, Pt::ssize_t x, Pt::ssize_t y)
-        //        : BasicPixel(view, x, y)
-        //        {
-        //        }
-        //
-        //        Pixel(const Pixel& p)
-        //        : BasicPixel(p)
-        //        {  }
-
-        //        Pixel& operator=(const Pixel& p)
-        //        {
-        //            assign(p, CompositionMode::SourceCopy);
-        //            return *this;
-        //        }
-
-        //        Pixel& operator=(const ConstPixel& p)
-        //        {
-        //            assign(p, CompositionMode::SourceCopy);
-        //            return *this;
-        //        }
-
-        //        Pt::uint8_t alpha() const
-        //        {
-        //            return data().alpha();
-        //        }
-
-        //        Pt::uint8_t red() const
-        //        {
-        //            return data().red();
-        //        }
-
-        //        Pt::uint8_t green() const
-        //        {
-        //            return data().green();
-        //        }
-
-        //        Pt::uint8_t blue() const
-        //        {
-        //            return data().blue();
-        //        }
-
-        //        void setAlpha(Pt::uint8_t a)
-        //        {
-        //            data().setAlpha(a);
-        //        }
-
-        //        void setRed(Pt::uint8_t r)
-        //        {
-        //            data().setRed(r);
-        //        }
-
-        //        void setGreen(Pt::uint8_t g)
-        //        {
-        //            data().setGreen(g);
-        //        }
-
-        //        void setBlue(Pt::uint8_t b)
-        //        {
-        //            data().setBlue(b);
-        //        }
-        //};
-
-        //class ConstPixel : public BasicConstPixel<Argb32>
-        //{
-        //    public:
-        //        ConstPixel(const View& view, Pt::ssize_t x, Pt::ssize_t y)
-        //        : BasicConstPixel(view, x, y)
-        //        {
-        //        }
-        //
-        //        ConstPixel(const ConstPixel& p)
-        //        : BasicConstPixel(p)
-        //        {  }
-
-        //        ConstPixel(const Pixel& p)
-        //        : BasicConstPixel(p)
-        //        {  }
-
-        //        Pt::uint8_t alpha() const
-        //        {
-        //            return data().alpha();
-        //        }
-
-        //        Pt::uint8_t red() const
-        //        {
-        //            return data().red();
-        //        }
-
-        //        Pt::uint8_t green() const
-        //        {
-        //            return data().green();
-        //        }
-
-        //        Pt::uint8_t blue() const
-        //        {
-        //            return data().blue();
-        //        }
-        //};
+        typedef Argb32ConstPixel    ConstPixel;
 
     public:
         static Pt::ssize_t pixelStride()
@@ -307,19 +204,6 @@ class Argb32
             return 4;
         }
 
-        bool operator==(const Argb32& a) const
-        {
-            return true;
-        }
-
-        bool operator!=(const Argb32& a) const
-        {
-            return false;
-        }
-
-        // planes(), planeStride()
-    
-    public:
         static std::size_t imageSize(std::size_t width, std::size_t height,
                                      std::size_t padding)
         {
@@ -327,7 +211,20 @@ class Argb32
             std::size_t n = l * height;
             return n;
         }
-        
+
+        bool operator==(const Argb32& ) const
+        {
+            return true;
+        }
+
+        bool operator!=(const Argb32& ) const
+        {
+            return false;
+        }
+
+        // planes(), planeStride()
+    
+    public:
         template <typename P>
         void advance(const View& view, P& p) const
         {
@@ -373,14 +270,14 @@ class Argb32
         /** @brief Assign pixels.
         */
         template <typename P>
-        void sourceCopy(View& view, Argb32Pixel& to, 
+        void sourceCopy(View& view, Pixel& to, 
                         const View& from, const P& p) const
         {
             Argb32::sourceCopy( to.base(), p.base() );
         }
         
         template <typename P>
-        void sourceOver(View& view, Argb32Pixel& to, 
+        void sourceOver(View& view, Pixel& to, 
                         const View& from, const P& p) const
         {
             Argb32::sourceOver(to.base(), p.base());
@@ -388,12 +285,12 @@ class Argb32
         
         /** @brief Assign pixels.
         */
-        void sourceCopy(View& view, Argb32Pixel& to, const Color& c) const
+        void sourceCopy(View& view, Pixel& to, const Color& c) const
         {
             Argb32::sourceCopy(to.base(), c);
         }
         
-        void sourceOver(View& view, Argb32Pixel& to, const Color& c) const
+        void sourceOver(View& view, Pixel& to, const Color& c) const
         {
             Argb32::sourceOver(to.base(), c);
         }
@@ -535,9 +432,9 @@ class Argb32
         }
 };
 
-//
+///////////////////////////////////////////////////////////////////////
 // Argb32Pixel
-//
+///////////////////////////////////////////////////////////////////////
 
 inline Argb32Pixel::Argb32Pixel(View& view, Pt::ssize_t x, Pt::ssize_t y)
 : _base(0)
@@ -547,11 +444,11 @@ inline Argb32Pixel::Argb32Pixel(View& view, Pt::ssize_t x, Pt::ssize_t y)
     _base = view.data() + view.stride() * y + x * view.pixelStride();
 }
 
-//
-// ConstArgb32Pixel
-//
+///////////////////////////////////////////////////////////////////////
+// Argb32ConstPixel
+///////////////////////////////////////////////////////////////////////
 
-inline ConstArgb32Pixel::ConstArgb32Pixel(const View& view, Pt::ssize_t x, Pt::ssize_t y)
+inline Argb32ConstPixel::Argb32ConstPixel(const View& view, Pt::ssize_t x, Pt::ssize_t y)
 : _base(0)
 , _x(x)
 , _y(y)
@@ -559,9 +456,9 @@ inline ConstArgb32Pixel::ConstArgb32Pixel(const View& view, Pt::ssize_t x, Pt::s
     _base = view.data() + view.stride() * y + x * view.pixelStride();
 }
 
-//
-// Implementation
-//
+///////////////////////////////////////////////////////////////////////
+// Argb32
+///////////////////////////////////////////////////////////////////////
 
 inline Color Argb32::getColor(const Pt::uint8_t* p)
 {

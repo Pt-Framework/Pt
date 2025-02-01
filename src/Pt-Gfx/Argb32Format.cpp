@@ -163,9 +163,6 @@ void Argb32Format::onSourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
             toX + width <= to.width() &&
             toY + height<= to.height() );
 
-    Pt::ssize_t toStride = to.stride();
-    Pt::ssize_t fromStride = from.stride();
-
     Argb32::sourceOver(to, toX, toY, from, fromX, fromY, width, height);
 }
 
