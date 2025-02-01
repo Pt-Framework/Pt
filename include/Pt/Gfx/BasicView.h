@@ -174,10 +174,16 @@ class BasicPixel : public PixelBaseT
 
 
         bool operator!=(const BasicPixel& p) const
-        { return ! format().equals(*this, p); }
+        { return ! PixelBase::operator==(p); }
+
+        bool operator!=(const ConstPixel& p) const
+        { return ! PixelBase::operator==(p); }
 
         bool operator==(const BasicPixel& p) const
-        { return format().equals(*this, p); }
+        { return PixelBase::operator==(p); }
+
+        bool operator==(const ConstPixel& p) const
+        { return PixelBase::operator==(p); }
 
     private:
         View*  _view;
@@ -254,11 +260,17 @@ class BasicConstPixel : public PixelBaseT
         { return *_view->format(); }
 
 
+        bool operator!=(const Pixel& p) const
+        { return ! PixelBase::operator==(p); }
+
         bool operator!=(const BasicConstPixel& p) const
-        { return ! format().equals(*this, p); }
+        { return ! PixelBase::operator==(p); }
+
+        bool operator==(const Pixel& p) const
+        { return PixelBase::operator==(p); }
 
         bool operator==(const BasicConstPixel& p) const
-        { return format().equals(*this, p._idex); }
+        { return PixelBase::operator==(p); }
 
     private:
         const View*  _view;
@@ -342,8 +354,12 @@ class BasicView : public ViewBase
         typedef BasicPixel<Format, PixelBase>           Pixel;
         typedef BasicConstPixel<Format, ConstPixelBase> ConstPixel;
 
+        class ConstPixelIterator;
+
         class PixelIterator
         {
+            friend class ConstPixelIterator;
+
             public:
                 PixelIterator(BasicView& view, Pt::ssize_t x, Pt::ssize_t y)
                 : _pixel(view, x, y)
@@ -362,7 +378,13 @@ class BasicView : public ViewBase
                 bool operator!=(const PixelIterator& it) const
                 { return _pixel != it._pixel; }
 
+                bool operator!=(const ConstPixelIterator& it) const
+                { return _pixel != it._pixel; }
+
                 bool operator==(const PixelIterator& it) const
+                { return _pixel == it._pixel; }
+
+                bool operator==(const ConstPixelIterator& it) const
                 { return _pixel == it._pixel; }
 
                 Pixel& operator*()
@@ -389,6 +411,8 @@ class BasicView : public ViewBase
 
         class ConstPixelIterator
         {
+            friend class PixelIterator;
+
             public:
                 ConstPixelIterator(const BasicView& view, Pt::ssize_t x, Pt::ssize_t y)
                 : _pixel(view, x, y)
@@ -407,7 +431,13 @@ class BasicView : public ViewBase
                 bool operator!=(const ConstPixelIterator& it) const
                 { return _pixel != it._pixel; }
 
+                bool operator!=(const PixelIterator& it) const
+                { return _pixel != it._pixel; }
+
                 bool operator==(const ConstPixelIterator& it) const
+                { return _pixel == it._pixel; }
+
+                bool operator==(const PixelIterator& it) const
                 { return _pixel == it._pixel; }
 
                 const ConstPixel& operator*() const

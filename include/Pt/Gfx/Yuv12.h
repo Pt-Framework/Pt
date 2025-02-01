@@ -46,22 +46,14 @@ class Yuv12ConstPixel;
 */
 class Yuv12Pixel
 {
+    friend class Yuv12;
     friend class Yuv12ConstPixel;
 
     public:
         typedef BasicView<Yuv12> View;
 
     public:
-        Yuv12Pixel(View& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
-        : _xpos(0)
-        , _ypos(0)
-        , _subStride(0)
-        , _y(0)
-        , _u(0)
-        , _v(0)
-        {
-            reset(view, xpos, ypos);
-        }
+        Yuv12Pixel(View& view, Pt::ssize_t xpos, Pt::ssize_t ypos);
 
         Yuv12Pixel(const Yuv12Pixel& p)
         : _xpos(p._xpos)
@@ -87,12 +79,6 @@ class Yuv12Pixel
         Pt::ssize_t ypos() const
         { return _ypos; }
 
-        void reset(View& view, Pt::ssize_t xpos, Pt::ssize_t ypos);
-
-        void advance(View& view);
-
-        void advance(View& view, Pt::ssize_t n);
-
         Pt::uint8_t y() const
         { return *_y; }
 
@@ -111,11 +97,9 @@ class Yuv12Pixel
         void setV(Pt::uint8_t v) const
         { *_v = v; }
 
-        bool operator!=(const Yuv12Pixel& p) const
-        { return _y != p._y; }
+        bool operator==(const Yuv12Pixel& p) const;
 
-        bool operator==(const Yuv12Pixel& p) const
-        { return _y == p._y; }
+        bool operator==(const Yuv12ConstPixel& p) const;
 
     private:
         Pt::ssize_t  _xpos;
@@ -130,22 +114,14 @@ class Yuv12Pixel
 */
 class Yuv12ConstPixel
 {
+    friend class Yuv12;
     friend class Yuv12Pixel;
 
     public:
         typedef BasicView<Yuv12> View;
 
     public:
-        Yuv12ConstPixel(const View& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
-        : _xpos(0)
-        , _ypos(0)
-        , _subStride(0)
-        , _y(0)
-        , _u(0)
-        , _v(0)
-        {
-            reset(view, xpos, ypos);
-        }
+        Yuv12ConstPixel(const View& view, Pt::ssize_t xpos, Pt::ssize_t ypos);
 
         Yuv12ConstPixel(const Yuv12ConstPixel& p)
         : _xpos(p._xpos)
@@ -156,7 +132,7 @@ class Yuv12ConstPixel
         , _v(p._v)
         { }
 
-        Yuv12ConstPixel(const Yuv12Pixel& p)
+        explicit Yuv12ConstPixel(const Yuv12Pixel& p)
         : _xpos(p._xpos)
         , _ypos(p._ypos)
         , _subStride(p._subStride)
@@ -171,12 +147,6 @@ class Yuv12ConstPixel
         Pt::ssize_t ypos() const
         { return _ypos; }
 
-        void reset(const View& view, Pt::ssize_t xpos, Pt::ssize_t ypos);
-
-        void advance(const View& view);
-
-        void advance(const View& view, Pt::ssize_t n);
-
         Pt::uint8_t y() const
         { return *_y; }
 
@@ -186,10 +156,10 @@ class Yuv12ConstPixel
         Pt::uint8_t v() const
         { return *_v; }
 
-        bool operator!=(const Yuv12ConstPixel& p) const
-        { return _y != p._y; }
-
         bool operator==(const Yuv12ConstPixel& p) const
+        { return _y == p._y; }
+
+        bool operator==(const Yuv12Pixel& p) const
         { return _y == p._y; }
 
     private:
@@ -240,28 +210,29 @@ class Yuv12
     public:
         void advance(View& view, Pixel& p) const
         {
-            p.advance(view);
+            Yuv12::advance(p._y, p._u, p._v, p._xpos, p._ypos,
+                           view.width(), view.padding(), p._subStride);
+
         }
 
         void advance(const View& view, ConstPixel& p) const
         {
-            p.advance(view);
+            Yuv12::advance(p._y, p._u, p._v, p._xpos, p._ypos,
+                           view.width(), view.padding(), p._subStride);
         }
 
-        template <typename P>
-        void advance(const View& view, P& p, Pt::ssize_t n) const
+        void advance(View& view, Pixel& p, Pt::ssize_t n) const
         {
-            p.advance(view, n);
+            Yuv12::advance(p._y, p._u, p._v, n, p._xpos, p._ypos, 
+                           view.data(), view.stride(), 
+                           view.width(), view.height());
         }
 
-        bool equals(const Pixel& p1, const Pixel& p2) const
+        void advance(const View& view, ConstPixel& p, Pt::ssize_t n) const
         {
-            return p1 == p2;
-        }
-        
-        bool equals(const ConstPixel& p1, const ConstPixel& p2) const
-        {
-            return p1 == p2;
+            Yuv12::advance(p._y, p._u, p._v, n, p._xpos, p._ypos, 
+                           view.data(), view.stride(), 
+                           view.width(), view.height());
         }
 
     public:
@@ -433,10 +404,10 @@ class Yuv12
         }
 
         template <typename T>
-        static void advance(T*& y, T*& u, T*& v,
+        static void advance(T*& y, T*& u, T*& v, 
                             Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                            T* data, Pt::ssize_t stride, Pt::ssize_t width, Pt::ssize_t height,
-                            Pt::ssize_t padding, Pt::ssize_t subStride)
+                            Pt::ssize_t width, Pt::ssize_t padding,
+                            Pt::ssize_t subStride)
         {
             ++y;
 
@@ -480,60 +451,47 @@ class Yuv12
 // Yuv12Pixel
 ///////////////////////////////////////////////////////////////////////
 
-inline void Yuv12Pixel::reset(View& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+inline Yuv12Pixel::Yuv12Pixel(View& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+: _xpos(xpos)
+, _ypos(ypos)
+, _subStride(0)
+, _y(0)
+, _u(0)
+, _v(0)
 {
-    _xpos = xpos;
-    _ypos = ypos;
-
     _subStride = Yuv12::init(view.data(), view.stride(), 
-                              view.width(), view.height(),
-                              xpos,  ypos, _y, _u, _v);
+                             view.width(), view.height(),
+                             xpos,  ypos, _y, _u, _v);
 }
 
 
-inline void Yuv12Pixel::advance(View& view)
-{
-    Yuv12::advance(_y, _u, _v, _xpos, _ypos,
-                    view.data(), view.stride(),
-                    view.width(), view.height(), 
-                    view.padding(), _subStride);
+inline bool Yuv12Pixel::operator==(const Yuv12Pixel& p) const
+{ 
+    return _y == p._y; 
 }
 
 
-inline void Yuv12Pixel::advance(View& view, Pt::ssize_t n)
-{
-    Yuv12::advance(_y, _u, _v, n, _xpos, _ypos, view.data(), 
-                    view.stride(), view.width(), view.height());
+inline bool Yuv12Pixel::operator==(const Yuv12ConstPixel& p) const
+{ 
+    return _y == p._y; 
 }
 
 ///////////////////////////////////////////////////////////////////////
 // Yuv12ConstPixel
 ///////////////////////////////////////////////////////////////////////
 
-inline void Yuv12ConstPixel::reset(const View& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+inline Yuv12ConstPixel::Yuv12ConstPixel(const View& view, 
+                                        Pt::ssize_t xpos, Pt::ssize_t ypos)
+: _xpos(xpos)
+, _ypos(ypos)
+, _subStride(0)
+, _y(0)
+, _u(0)
+, _v(0)
 {
-    _xpos = xpos;
-    _ypos = ypos;
-
     _subStride = Yuv12::init(view.data(), view.stride(), 
-                              view.width(), view.height(), 
-                              xpos,  ypos, _y, _u, _v);
-}
-
-
-inline void Yuv12ConstPixel::advance(const View& view)
-{
-    Yuv12::advance(_y, _u, _v, _xpos, _ypos,
-                    view.data(), view.stride(),
-                    view.width(), view.height(),
-                    view.padding(), _subStride);
-}
-
-
-inline void Yuv12ConstPixel::advance(const View& view, Pt::ssize_t n)
-{
-    Yuv12::advance(_y, _u, _v, n, _xpos, _ypos, view.data(), 
-                    view.stride(), view.width(), view.height());
+                             view.width(), view.height(), 
+                             xpos,  ypos, _y, _u, _v);
 }
 
 } // namespace

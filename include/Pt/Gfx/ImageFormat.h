@@ -39,12 +39,15 @@ namespace Pt {
 namespace Gfx {
 
 class ImageFormat;
+class PixelBase;
+class ConstPixelBase;
 
 /** @brief Pixel reference.
 */
 class PixelBase
 {
     friend class ImageFormat;
+    friend class ConstPixelBase;
 
     public:
         typedef BasicView<ImageFormat> View;
@@ -70,6 +73,14 @@ class PixelBase
         const Pt::uint8_t* base() const
         { return _base; }
 
+        bool operator!=(const PixelBase& p) const;
+
+        bool operator!=(const ConstPixelBase& p) const;
+
+        bool operator==(const PixelBase& p) const;
+
+        bool operator==(const ConstPixelBase& p) const;
+
     private:
         Pt::uint8_t*  _base;
         Pt::ssize_t   _x;
@@ -81,6 +92,7 @@ class PixelBase
 class ConstPixelBase
 {
     friend class ImageFormat;
+    friend class PixelBase;
 
     public:
         typedef BasicView<ImageFormat> View;
@@ -108,6 +120,14 @@ class ConstPixelBase
 
         const Pt::uint8_t* base() const
         { return _base; }
+
+        bool operator!=(const PixelBase& p) const;
+
+        bool operator!=(const ConstPixelBase& p) const;
+
+        bool operator==(const PixelBase& p) const;
+
+        bool operator==(const ConstPixelBase& p) const;
 
     private:
         const Pt::uint8_t* _base;
@@ -216,16 +236,6 @@ class ImageFormat
             p._x += dx;
             p._y += dy;
             p._base += dy * view.stride() + dx * view.pixelStride();
-        }
-
-        bool equals(const PixelBase& p1, const PixelBase& p2) const
-        {
-            return p1._base == p2._base;
-        }
-
-        bool equals(const ConstPixelBase& p1, const ConstPixelBase& p2) const
-        {
-            return p1._base == p2._base;
         }
 
     public:
@@ -395,6 +405,9 @@ class ImageFormat
         std::size_t _pixelStride;
 };
 
+///////////////////////////////////////////////////////////////////////
+// PixelBase
+///////////////////////////////////////////////////////////////////////
 
 inline PixelBase::PixelBase(View& view, Pt::ssize_t x, Pt::ssize_t y)
 : _base(0)
@@ -405,12 +418,63 @@ inline PixelBase::PixelBase(View& view, Pt::ssize_t x, Pt::ssize_t y)
 }
 
 
+inline bool PixelBase::operator!=(const PixelBase& p) const
+{ 
+    return _base != p._base; 
+}
+
+
+inline bool PixelBase::operator!=(const ConstPixelBase& p) const
+{ 
+    return _base != p._base; 
+}
+
+
+inline bool PixelBase::operator==(const PixelBase& p) const
+{ 
+    return _base == p._base; 
+}
+
+
+inline bool PixelBase::operator==(const ConstPixelBase& p) const
+{ 
+    return _base == p._base; 
+}
+
+///////////////////////////////////////////////////////////////////////
+// ConstPixelBase
+///////////////////////////////////////////////////////////////////////
+
 inline ConstPixelBase::ConstPixelBase(const View& view, Pt::ssize_t x, Pt::ssize_t y)
 : _base(0)
 , _x(x)
 , _y(y)
 {
     _base = view.data() + view.stride() * y + x * view.pixelStride();
+}
+
+
+inline bool ConstPixelBase::operator!=(const PixelBase& p) const
+{ 
+    return _base != p._base; 
+}
+
+
+inline bool ConstPixelBase::operator!=(const ConstPixelBase& p) const
+{ 
+    return _base != p._base; 
+}
+
+
+inline bool ConstPixelBase::operator==(const PixelBase& p) const
+{ 
+    return _base == p._base; 
+}
+
+
+inline bool ConstPixelBase::operator==(const ConstPixelBase& p) const
+{ 
+    return _base == p._base; 
 }
 
 } // namespace

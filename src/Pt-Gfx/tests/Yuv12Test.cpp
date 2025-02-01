@@ -100,7 +100,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             Yuv12Image image(yuv12Data, 4, 4);
 
             Yuv12Image::PixelIterator it = image.begin();
-            Yuv12Image::PixelIterator end = image.end();
+            Yuv12Image::ConstPixelIterator end = static_cast<const Yuv12Image&>(image).end();
 
             Pt::uint32_t u = 0;
             Pt::uint32_t v = 0;

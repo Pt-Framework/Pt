@@ -40,12 +40,15 @@ namespace Pt {
 namespace Gfx {
 
 class Argb32;
+class Argb32Pixel;
+class Argb32ConstPixel;
 
 /** @brief ARGB-32 pixel reference.
 */
 class Argb32Pixel
 {
     friend class Argb32;
+    friend class Argb32ConstPixel;
 
     public:
         typedef BasicView<Argb32> View;
@@ -119,6 +122,10 @@ class Argb32Pixel
             *val = (*val & 0xFFFFFF00) | uint32_t(b);
         }
 
+        bool operator==(const Argb32Pixel& p) const;
+
+        bool operator==(const Argb32ConstPixel& p) const;
+
     private:
         Pt::uint8_t*  _base;
         Pt::ssize_t   _x;
@@ -130,7 +137,8 @@ class Argb32Pixel
 class Argb32ConstPixel
 {
     friend class Argb32;
-
+    friend class Argb32Pixel;
+    
     public:
         typedef BasicView<Argb32> View;
 
@@ -181,6 +189,12 @@ class Argb32ConstPixel
             const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
             return *val & 0x000000FF;
         }
+
+        bool operator==(const Argb32Pixel& p) const
+        { return _base == p._base; }
+
+        bool operator==(const Argb32ConstPixel& p) const
+        { return _base == p._base; }
 
     private:
         const Pt::uint8_t* _base;
@@ -250,12 +264,6 @@ class Argb32
             p._x += dx;
             p._y += dy;
             p._base += dy * view.stride() + dx * view.pixelStride();
-        }
-        
-        template <typename P>
-        bool equals(const P& p1, const P& p2) const
-        {
-            return p1._base == p2._base;
         }
 
     public:
@@ -442,6 +450,18 @@ inline Argb32Pixel::Argb32Pixel(View& view, Pt::ssize_t x, Pt::ssize_t y)
 , _y(y)
 {
     _base = view.data() + view.stride() * y + x * view.pixelStride();
+}
+
+
+inline bool Argb32Pixel::operator==(const Argb32Pixel& p) const
+{ 
+    return _base == p._base; 
+}
+
+
+inline bool Argb32Pixel::operator==(const Argb32ConstPixel& p) const
+{ 
+    return _base == p._base; 
 }
 
 ///////////////////////////////////////////////////////////////////////
