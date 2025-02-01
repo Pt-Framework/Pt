@@ -67,6 +67,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Scaling.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Transform.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h" />
