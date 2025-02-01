@@ -40,8 +40,11 @@ namespace Gfx {
 class PT_GFX_API Argb32Format : public ImageFormat
 {
     public:
-        Argb32Format();
-
+        /*constexpr*/ Argb32Format()
+        : ImageFormat(4)
+        {
+        }
+    
     protected:
         virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                         std::size_t padding) const;

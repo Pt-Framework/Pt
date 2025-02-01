@@ -59,9 +59,8 @@ class ImageView : public BasicView<ImageFormat>
 
         ImageView(const ImageFormat& format, Pt::uint8_t* data,
                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
-        : BasicView()
+        : BasicView(format, data, width, height, padding)
         { 
-            reset(format, data, width, height, padding);
         }
 
         virtual ~ImageView()

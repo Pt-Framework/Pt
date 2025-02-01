@@ -36,12 +36,6 @@ namespace Pt {
 
 namespace Gfx {
 
-Argb32Format::Argb32Format()
-: ImageFormat(4)
-{
-}
-
-
 std::size_t Argb32Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                       std::size_t padding) const
 {

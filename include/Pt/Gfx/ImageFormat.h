@@ -135,6 +135,7 @@ class ConstPixelBase
         Pt::ssize_t        _y;
 };
 
+
 /** @brief %Image format.
 */
 class ImageFormat
@@ -146,8 +147,6 @@ class ImageFormat
 
         PT_GFX_API static const ImageFormat& argb32();
 
-        PT_GFX_API static const ImageFormat& instance();
-
     public:
         typedef PixelBase        Pixel;
         typedef ConstPixelBase   ConstPixel;
@@ -155,12 +154,12 @@ class ImageFormat
         typedef BasicView<ImageFormat>       View;
 
     public:
-        explicit ImageFormat(size_t pixelStride)
+        explicit /*constexpr*/ ImageFormat(size_t pixelStride)
         : _pixelStride(pixelStride)
         { }
 
-        virtual ~ImageFormat()
-        { }
+        virtual ~ImageFormat() 
+        {}
 
         /** @brief Returns the distance between two pixel base pointers in bytes.
         */
@@ -402,7 +401,7 @@ class ImageFormat
                                   const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
                                   Pt::ssize_t width, Pt::ssize_t height) const = 0;
     private:
-        std::size_t _pixelStride;
+        const std::size_t _pixelStride;
 };
 
 ///////////////////////////////////////////////////////////////////////

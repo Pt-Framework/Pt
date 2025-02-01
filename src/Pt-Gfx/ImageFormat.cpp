@@ -37,30 +37,26 @@ namespace Pt {
 
 namespace Gfx {
 
+static const Argb32Format _rgb16;
+static const Argb32Format _rgb32;
+static const Argb32Format _argb32;
+
+
 const ImageFormat& ImageFormat::rgb16()
 {
-	static const Rgb16Format f;
-	return f;
+	return _rgb16;
 }
 
 
 const ImageFormat& ImageFormat::rgb32()
 {
-	static const Rgb32Format f;
-	return f;
+	return _rgb32;
 }
 
 
-const ImageFormat& ImageFormat::argb32()
+const ImageFormat& ImageFormat::argb32() 
 {
-	static const Argb32Format f;
-	return f;
-}
-
-
-const ImageFormat& ImageFormat::instance()
-{
-    return argb32();
+	return _argb32;
 }
 
 } // namespace

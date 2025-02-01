@@ -163,15 +163,14 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Argb32Format format;
                 Image image( format, 1000, 1000 );
 
-                Argb32 argb32;
-                BasicView<Argb32> argbView(argb32, image.data(), image.width(), image.height() );
-                BasicView<Argb32>::PixelIterator it = argbView.begin();
-                BasicView<Argb32>::PixelIterator end = argbView.end();
+                Argb32View argbView( image.data(), image.width(), image.height() );
+                Argb32View::PixelIterator it = argbView.begin();
+                Argb32View::PixelIterator end = argbView.end();
             
                 Pt::Gfx::Color color(100, 100, 100);
             
-                BasicView<Argb32>::Pixel pixel = *argbView.begin();
-                BasicView<Argb32>::ConstPixel cpixel(pixel);
+                Argb32View::Pixel pixel = *argbView.begin();
+                Argb32View::ConstPixel cpixel(pixel);
 
                 Pt::System::Clock clock;
                 clock.start();

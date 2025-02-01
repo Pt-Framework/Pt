@@ -141,7 +141,7 @@ class BasicPixel : public PixelBaseT
 
         void assign(const ConstPixel& p, CompositionMode mode)
         {
-            const bool isCompatible = *_view->format() == *p.view().format();
+            const bool isCompatible = _view->format() == p.view().format();
             if( ! isCompatible )
             {
                 assign(p.getColor(), mode);
@@ -170,7 +170,7 @@ class BasicPixel : public PixelBaseT
 
 
         const Format& format() const
-        { return *_view->format(); }
+        { return _view->format(); }
 
 
         bool operator!=(const BasicPixel& p) const
@@ -257,7 +257,7 @@ class BasicConstPixel : public PixelBaseT
         { return *_view; }
 
         const Format& format() const
-        { return *_view->format(); }
+        { return _view->format(); }
 
 
         bool operator!=(const Pixel& p) const
@@ -463,14 +463,7 @@ class BasicView : public ViewBase
         };
 
     public:
-        BasicView()
-        : ViewBase()
-        , _format(0)
-        {
-            //_format = FormatT::instance() 
-        }
-
-        BasicView(const Format& format)
+        explicit BasicView(const Format& format)
         : ViewBase()
         , _format(&format)
         { }
@@ -530,8 +523,8 @@ class BasicView : public ViewBase
         ConstPixelIterator end() const
         { return ConstPixelIterator(*this, 0, height()); }
 
-        const Format* format() const
-        { return _format; }
+        const Format& format() const
+        { return *_format; }
 
         void fill(Pixel& to, std::size_t n, const Color& c, CompositionMode mode)
         {
@@ -577,7 +570,7 @@ class BasicView : public ViewBase
 
         void copy(Pixel& to, const ConstPixel& p, std::size_t n, CompositionMode mode)
         {
-            const bool isCompatible = *to.view().format() == *p.view().format();
+            const bool isCompatible = to.view().format() == p.view().format();
             if( ! isCompatible )
                 return;
 
@@ -598,7 +591,7 @@ class BasicView : public ViewBase
                   const BasicView& from, Pt::ssize_t fromX, Pt::ssize_t fromY, 
                   Pt::ssize_t width, Pt::ssize_t height, CompositionMode mode)
         {
-            const bool isCompatible = *this->format() == *from.format();
+            const bool isCompatible = this->format() == from.format();
             if( ! isCompatible )
                 return;
 

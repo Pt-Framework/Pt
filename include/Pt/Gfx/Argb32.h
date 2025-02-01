@@ -213,6 +213,8 @@ class Argb32
         typedef Argb32ConstPixel    ConstPixel;
 
     public:
+        static const Argb32& instance();
+
         static Pt::ssize_t pixelStride()
         {
             return 4;
@@ -479,6 +481,13 @@ inline Argb32ConstPixel::Argb32ConstPixel(const View& view, Pt::ssize_t x, Pt::s
 ///////////////////////////////////////////////////////////////////////
 // Argb32
 ///////////////////////////////////////////////////////////////////////
+
+inline const Argb32& Argb32::instance()
+{
+    static const Argb32 argb32;
+    return argb32;
+}
+
 
 inline Color Argb32::getColor(const Pt::uint8_t* p)
 {

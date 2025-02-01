@@ -48,42 +48,46 @@ class Argb32View : public BasicView<Argb32>
     public:
         /** @brief Constructor.
         */
-        Argb32View(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0)
-        : BasicView()
+        Argb32View()
+        : BasicView( Argb32::instance() )
         { 
-            reset(_format, data, width, height, padding);
         }
 
-    private:
-        Argb32 _format;
+        /** @brief Constructor.
+        */
+        Argb32View(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0)
+        : BasicView( Argb32::instance(), data, width, height, padding )
+        { 
+        }
 };
-
 
 /** @brief ARGB-32 image.
 */
-class Argb32Image : public BasicImage<Argb32>
+class Argb32Image : public BasicImage<Argb32, Argb32View>
 {
     public:
         /** @brief Constructor.
         */
-        Argb32Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
-        : BasicImage()
+        Argb32Image()
+        : BasicImage( Argb32View() )
         { 
-            reset(_format, width, height, padding);
+        }
+
+        /** @brief Constructor.
+        */
+        Argb32Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
+        : BasicImage( Argb32View(), width, height, padding)
+        { 
         }
 
         /** @brief Construct from external buffer.
         */
         Argb32Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                     size_t padding = 0)
-        : BasicImage()
+        : BasicImage( Argb32View(data, width, height, padding ) )
         { 
-            reset(_format, data, width, height, padding);
         }
-
-    private:
-        Argb32 _format;
 };
 
 } // namespace

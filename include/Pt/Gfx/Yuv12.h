@@ -181,6 +181,12 @@ class Yuv12
         typedef Yuv12Pixel       Pixel;
         typedef Yuv12ConstPixel ConstPixel;
 
+        static const Yuv12& instance()
+        {
+            static const Yuv12 _format;
+            return  _format;
+        }
+
         static Pt::ssize_t pixelStride()
         {
             return 1;

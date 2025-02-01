@@ -38,34 +38,50 @@ namespace Pt {
 
 namespace Gfx {
 
+/** @brief YV-12 image view.
+*/
+class Yuv12View : public BasicView<Yuv12>
+{
+    public:
+        /** @brief Constructor.
+        */
+        Yuv12View()
+        : BasicView( Yuv12::instance() )
+        { 
+        }
+
+        /** @brief Constructor.
+        */
+        Yuv12View(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0)
+        : BasicView( Yuv12::instance(), data, width, height, padding )
+        { 
+        }
+};
+
 /** @brief YV-12 image.
 
     If the Y plane has pad bytes after each row, then the U and V planes have
     half as many pad bytes after their rows. In other words, two U/V rows
     (including padding) is exactly as long as one Y row (including padding).
 */
-class Yuv12Image : public BasicImage<Yuv12>
+class Yuv12Image : public BasicImage<Yuv12, Yuv12View>
 {
     public:
         /** @brief Constructor.
         */
         Yuv12Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
-        : BasicImage()
+        : BasicImage( Yuv12View(), width, height, padding )
         { 
-            reset(_format, width, height, padding);
         }
 
         /** @brief Construct from external buffer.
         */
         Yuv12Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                    size_t padding = 0)
-        : BasicImage()
+        : BasicImage( Yuv12View(data, width, height, padding) )
         { 
-            reset(_format, data, width, height, padding);
         }
-
-    private:
-        Yuv12 _format;
 };
 
 } // namespace

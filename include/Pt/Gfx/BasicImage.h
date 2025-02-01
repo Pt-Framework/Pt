@@ -38,13 +38,14 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename FormatT>
+template <typename FormatT, 
+          typename ViewT = BasicView<FormatT> >
 class BasicImage
 {
     public:
         typedef FormatT Format;
-
-        typedef BasicView<FormatT>                 View;
+        typedef ViewT   View;
+        
         typedef typename View::Pixel               Pixel;
         typedef typename View::ConstPixel          ConstPixel;
         typedef typename View::PixelIterator       PixelIterator;
@@ -56,28 +57,19 @@ class BasicImage
         typedef typename View::Rect   Rect;
 
     public:
-
-        //
-        // TODO: Constructors: copy Model into View and View into Image
-        //
-        
-        /*
-          BasicImage(const View& view)
-          : _view(view)
-          { }
-
-          ArgbImage()
-          : BasicImage( BasicView<ArgbModel>() )
-          { }
-
-          Image(const ImageFormat& format)
-          : BasicImage( BasicView<ImageModel>( ImageModel(format) ) )
-          { }
-        */
-
-        BasicImage()
-        : _view()
+        explicit BasicImage(View view)
+        : _view(view)
         { }
+
+        BasicImage(View view, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0)
+        : _view(view)
+        { 
+            _buffer.resize( view.format().imageSize(width, height, padding) );
+            
+            _view.reset( view.format(), _buffer.empty() ? 0 : &_buffer[0], 
+                         width, height, padding );
+        }
 
         virtual ~BasicImage()
         {}
@@ -126,6 +118,13 @@ class BasicImage
 
         const View& view() const
         { return _view; }
+
+        /** @brief Returns the format of the image.
+        */
+        const Format& format() const
+        {
+            return view().format();
+        }
 
         /** @brief Returns an iterator to the pixel at the given position.
         */
