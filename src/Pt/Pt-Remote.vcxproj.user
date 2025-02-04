@@ -3,5 +3,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Remote|x64'">
     <MIMode>lldb</MIMode>
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
+    <RemoteDebuggerCommand>./build/debug/Pt-test</RemoteDebuggerCommand>
+    <RemoteGDBPath>/usr/local/bin/lldb-mi</RemoteGDBPath>
+    <RemoteDebuggingMode>gdb</RemoteDebuggingMode>
   </PropertyGroup>
 </Project>
