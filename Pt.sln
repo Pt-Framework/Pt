@@ -9,16 +9,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Remote", "src\Pt\Pt-Remo
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Local|x64 = Local|x64
-		Remote|x64 = Remote|x64
+		Jam Build|local = Jam Build|local
+		Jam Build|remote = Jam Build|remote
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Local|x64.ActiveCfg = Local|x64
-		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Local|x64.Build.0 = Local|x64
-		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Remote|x64.ActiveCfg = Local|x64
-		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Local|x64.ActiveCfg = Remote|x64
-		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Remote|x64.ActiveCfg = Remote|x64
-		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Remote|x64.Build.0 = Remote|x64
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Build|local.ActiveCfg = Jam Build|x64
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Build|local.Build.0 = Jam Build|x64
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Build|remote.ActiveCfg = Jam Build|x64
+		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Jam Build|local.ActiveCfg = Jam Build|x64
+		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Jam Build|remote.ActiveCfg = Jam Build|x64
+		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Jam Build|remote.Build.0 = Jam Build|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
