@@ -1,0 +1,3084 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Pt">
+      <UniqueIdentifier>{7d0d096d-2492-4fcf-8b90-a86406c40074}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt\tests">
+      <UniqueIdentifier>{2d764e8c-0e2f-4104-b09c-9c793ff4b102}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Gfx">
+      <UniqueIdentifier>{3f4a7865-0278-4070-bc59-57771bcf538b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Gfx\tests">
+      <UniqueIdentifier>{235d92b1-af45-41b4-8deb-e3012aaf6dc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Gfx\raster">
+      <UniqueIdentifier>{f59cb7b4-fdc0-47e0-850b-8f65c153e54f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Gfx\skia">
+      <UniqueIdentifier>{d593516d-5e63-4194-ba59-05a677938cc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi">
+      <UniqueIdentifier>{1d0f8f42-bbd4-43d6-826c-06ef0da842d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\cocoa">
+      <UniqueIdentifier>{e25a0f96-dc59-4edf-b6a7-71f91166404b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\winrt">
+      <UniqueIdentifier>{d284499d-c798-4df7-b0e7-7a0e8584ea8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\x11">
+      <UniqueIdentifier>{da2c7f81-4dbf-447d-8b5d-e6c62e50c263}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\linux-fb">
+      <UniqueIdentifier>{a6f59917-eecf-46f5-a6c5-adc449a75486}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\demo">
+      <UniqueIdentifier>{2c4649d0-b55c-45cf-b4d7-89188b0b4c4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\egl-gbm">
+      <UniqueIdentifier>{5d0da099-7a55-4302-9b8a-2e03d44e983c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Events">
+      <UniqueIdentifier>{1be2aefd-ad5e-47b0-9b4f-0f79ad44f8fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\egl-test">
+      <UniqueIdentifier>{100dba23-dea7-4d4b-bb73-a59096d032b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\gdiplus">
+      <UniqueIdentifier>{fa7a60b6-ff04-496c-aae1-0c013e19e0e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\win32">
+      <UniqueIdentifier>{1f38ed7c-0e52-44da-a518-463984fdbf91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\sdl">
+      <UniqueIdentifier>{a781cb00-f47f-40a6-80c6-865bb6762f8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Http">
+      <UniqueIdentifier>{43a01dfb-fc2d-4160-921f-6b4c93abff3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Http\tests">
+      <UniqueIdentifier>{1c65b64d-f11f-4720-ab04-85098ea37cc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Json">
+      <UniqueIdentifier>{191ee35b-f3d0-4468-8ec3-52d7e2bfbb79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Json\tests">
+      <UniqueIdentifier>{f0d8b056-926f-4a74-870c-c450b55f41b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Mfc">
+      <UniqueIdentifier>{fc5f5290-0b13-40aa-8520-cab2f7a2881a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Mfc\demo">
+      <UniqueIdentifier>{af01063d-643e-4ae5-9efd-36f8b2814343}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Net">
+      <UniqueIdentifier>{92fc7e48-aad0-4083-8a1d-2b4906fbd2ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Net\tests">
+      <UniqueIdentifier>{b2bd0416-00bc-4518-94e0-0b297ff664d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Net\win32">
+      <UniqueIdentifier>{1bea65d3-5353-441c-b21d-0a7a2443b7fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Qt">
+      <UniqueIdentifier>{5b9e49f5-58eb-4e68-88a0-5d567298ee13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Qt\win32">
+      <UniqueIdentifier>{f3f8d63e-2242-43f0-98dc-eb85655eb385}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Qt\demo">
+      <UniqueIdentifier>{408fd0ae-5a31-4909-bc88-93a75b009968}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Reflex">
+      <UniqueIdentifier>{91476634-c946-4746-8316-6aa5b7705263}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Reflex\tests">
+      <UniqueIdentifier>{c61c81ae-34b9-4f78-9ac5-a89a1c3eab7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Remoting">
+      <UniqueIdentifier>{ced9deeb-938e-4869-91fd-a3c7a29cb917}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Soap">
+      <UniqueIdentifier>{959cd4dd-c27a-4e10-9595-ea692eccace9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Ssl">
+      <UniqueIdentifier>{ac5d833a-a5cb-457e-9d73-0d0cab8e9e96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Ssl\tests">
+      <UniqueIdentifier>{f37f0a36-2e1c-433d-8d74-8b16a1779182}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Ssl\openssl">
+      <UniqueIdentifier>{25ba7d66-9b75-496d-a3f4-e5c44902c289}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Ssl\applessl">
+      <UniqueIdentifier>{24e88b0a-bb16-48b0-9062-e40df6e8c0c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Ssl\nossl">
+      <UniqueIdentifier>{46c31736-a101-4bc4-a899-ba209e5b6527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-System">
+      <UniqueIdentifier>{1b014e4a-39b0-41f7-ac77-f01fbddb83f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-System\win32">
+      <UniqueIdentifier>{842f4972-573c-4633-90dc-7eacb22f4794}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-System\tests">
+      <UniqueIdentifier>{cc853abe-676b-4ca0-b1c8-d7ffc4842edb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Unit">
+      <UniqueIdentifier>{1ede3150-e44a-459b-8555-7b5253d139cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Xml">
+      <UniqueIdentifier>{ee1fb30c-0a87-4ade-a36d-b68bb421d34e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Xml\tests">
+      <UniqueIdentifier>{9c27e16b-69dc-4e38-a97a-7fce555d400c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-XmlRpc">
+      <UniqueIdentifier>{4b25f097-61cd-475b-ab2b-9de2ca1d6529}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-XmlRpc\tests">
+      <UniqueIdentifier>{8f4c58f3-d778-4dbf-b61c-c7720d810cd6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Atomicity.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.cw.x86.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.gcc.arm.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.gcc.avr32.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.gcc.builtin.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.gcc.mips.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.gcc.ppc.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.gcc.sparc.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.gcc.x86.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.gcc.x86_64.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.generic.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.pthread.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.sun.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Atomicity.windows.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Connectable.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Connection.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="ConversionError.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Date.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="DateTime.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Deserializer.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Facets.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="IOError.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Latin1Codec.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="PageAllocator.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="PoolAllocator.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Regex.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="regexp.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="SerializationContext.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="SerializationError.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="SerializationInfo.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Serializer.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsReader.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsWriter.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Signal.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="String.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="StringStream.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="TextBuffer.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="TextStream.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Time.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="UnicodeTable.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Utf16Codec.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Utf32Codec.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Utf8.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="Utf8Codec.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBuffer.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\AllocatorTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\AnyTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\AtomicTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\ByteorderTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\CharTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\ConversionTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\DateTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\DateTimeTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\DelegateTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\ExceptionTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\NonCopyableTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Pt-test.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\RegExpTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\SerializationTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\SettingsTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\SignalTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\SingletonTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\SmartPtrTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\StringStreamTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\StringTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TextStreamTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TimespanTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TimeTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TypesTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TypeTraitsTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Utf8Test.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\WindowsCodecTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\ZBufferTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Argb32.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Argb32Format.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Argb32Image.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Brush.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Canvas.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Color.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Font.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\FontMetrics.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Image.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\ImageFormat.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\ImageSurface.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\JpegReader.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Paint.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\PaintContext.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Painter.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\PaintLayer.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\PaintSurface.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Path.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Pen.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\PngReader.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\PngWriter.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Rgb16Format.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Rgb32Format.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Transform.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Yuv12Format.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\Argb32Test.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\BlockscaleTest.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\ImagePainterTest.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\ImagePainterTest2.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\Pt-Gfx-test.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\Yuv12Test.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\raster\ClipPolygon.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\raster\DrawText.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\raster\FreeType.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\raster\ImageCanvas.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\raster\RasterContext.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\skia\DrawText.cpp">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\skia\FreeType.cpp">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\skia\ImageCanvas.cpp">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\skia\SkiaBlitter.cpp">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\skia\SkiaContext.cpp">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Application.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Button.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\CheckBox.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\ComboBox.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Control.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Cursor.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\DockingLayout.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\FlowLayout.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Form.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\GridLayout.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Icon.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\InputMethod.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Label.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Layout.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\LineEdit.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\LineEditor.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\ListBox.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Menu.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\MenuBar.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\MenuBarItem.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\MenuBase.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\MenuBaseItem.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\MenuItem.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\MenuMenuItem.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\MenuSubItem.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Panel.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Pixmap.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\PlatinumStyle.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Popup.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\ProgressBar.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\PushButton.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Responder.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Screen.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\ScrollBar.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\ScrollLayout.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\ScrollView.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Shell.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\ShellWindowFrame.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\ShellWM.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Slider.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\SpinBox.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\StackLayout.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Style.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\StyleOptions.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\TableLayout.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\TabView.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\TextBlock.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\View.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Visual.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Widget.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Window.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\WindowBase.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\WindowFrame.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\WindowManager.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\winrt\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\winrt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\winrt\CursorImpl.cpp">
+      <Filter>Pt-Hmi\winrt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp">
+      <Filter>Pt-Hmi\winrt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\x11\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\x11\CursorImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\x11\KeyHandler.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\x11\PixmapImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\x11\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\x11\WindowImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\x11\X11Fd.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\linux-fb\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\linux-fb\FrameBuffer.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\linux-fb\InputDevice.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\linux-fb\MainWindowImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\linux-fb\MouseDevice.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\linux-fb\PixmapImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\linux-fb\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\demo\ChildW.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\demo\Dialog1.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\demo\Dialog2.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\demo\Main.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\demo\MainWindow.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\demo\PainterDemo.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\Display.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\InputDevice.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\MainWindowImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\Matrix.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\PainterImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\PaintSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\Rectangle.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\ShaderProgram.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\Shape.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-gbm\Texture.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-test\Display.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-test\main.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-test\Matrix.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-test\RenderScreen.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-test\ShaderProgram.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-test\Shape.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-test\SolidRect.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-test\Texture.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\egl-test\TextureRect.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\gdiplus\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\gdiplus\MainWindowImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\gdiplus\PixmapSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\gdiplus\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\win32\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\win32\PaintContext.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\win32\PixmapImpl.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\win32\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\win32\WindowImpl.cpp">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\sdl\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\sdl\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Authenticator.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Authorizer.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Client.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\ClientImpl.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Connection.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\HttpBuffer.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\HttpError.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\IOStream.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Message.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Parser.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Reply.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Request.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Responder.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Server.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\ServerImpl.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Service.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Servlet.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\tests\ParserTest.cpp">
+      <Filter>Pt-Http\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\tests\Pt-Http-test.cpp">
+      <Filter>Pt-Http\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\tests\ServerTest.cpp">
+      <Filter>Pt-Http\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Json\Document.cpp">
+      <Filter>Pt-Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Json\DocumentReader.cpp">
+      <Filter>Pt-Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Json\JsonError.cpp">
+      <Filter>Pt-Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Json\JsonFormatter.cpp">
+      <Filter>Pt-Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Json\JsonReader.cpp">
+      <Filter>Pt-Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Json\JsonWriter.cpp">
+      <Filter>Pt-Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Json\tests\Pt-Json-test.cpp">
+      <Filter>Pt-Json\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mfc\Application.cpp">
+      <Filter>Pt-Mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mfc\MainLoop.cpp">
+      <Filter>Pt-Mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mfc\demo\MfcApplication.cpp">
+      <Filter>Pt-Mfc\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mfc\demo\mfcdemo.cpp">
+      <Filter>Pt-Mfc\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\AddressInUse.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\Endpoint.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\TcpServer.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\TcpSocket.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\UdpSocket.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\tests\Pt-Net-test.cpp">
+      <Filter>Pt-Net\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\tests\TcpSocketTest.cpp">
+      <Filter>Pt-Net\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\tests\UdpSocketTest.cpp">
+      <Filter>Pt-Net\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\posix\AddrInfo.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\posix\EndpointImpl.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\win32\TcpServerImpl.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\win32\TcpSocketImpl.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Net\win32\UdpSocketImpl.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Qt\Application.cpp">
+      <Filter>Pt-Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Qt\MainLoop.cpp">
+      <Filter>Pt-Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Qt\win32\ApplicationImpl.cpp">
+      <Filter>Pt-Qt\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Qt\win32\MainLoopImpl.cpp">
+      <Filter>Pt-Qt\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Qt\demo\qdemo.cpp">
+      <Filter>Pt-Qt\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Reflex\GenericType.cpp">
+      <Filter>Pt-Reflex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Reflex\Type.cpp">
+      <Filter>Pt-Reflex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Reflex\TypeManager.cpp">
+      <Filter>Pt-Reflex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Reflex\tests\ReflectableTest.cpp">
+      <Filter>Pt-Reflex\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Remoting\Client.cpp">
+      <Filter>Pt-Remoting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Remoting\Fault.cpp">
+      <Filter>Pt-Remoting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Remoting\RemoteProcedure.cpp">
+      <Filter>Pt-Remoting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Remoting\Responder.cpp">
+      <Filter>Pt-Remoting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Remoting\ServiceDefinition.cpp">
+      <Filter>Pt-Remoting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Soap\Client.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Soap\Fault.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Soap\Formatter.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Soap\HttpClient.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Soap\HttpResponder.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Soap\HttpService.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Soap\Responder.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Soap\ServiceDeclaration.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Soap\ServiceDefinition.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\Certificate.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\CertificateStore.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\Context.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\SslError.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\StreamBuffer.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\tests\CertificateStoreTest.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\tests\ContextTest.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\tests\Pt-Ssl-test.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\tests\SslClientDemo.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\tests\StreamBufferTest.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\openssl\CertificateStoreImpl.cpp">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\openssl\Connection.cpp">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\openssl\ContextImpl.cpp">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\applessl\CertificateStoreImpl.cpp">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\applessl\Connection.cpp">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\applessl\ContextImpl.cpp">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\nossl\CertificateStoreImpl.cpp">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\nossl\Connection.cpp">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Ssl\nossl\ContextImpl.cpp">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Application.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Clock.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Condition.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\ConsoleChannel.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Directory.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\EventLoop.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\EventSink.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\EventSource.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\FileChannel.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\FileDevice.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\FileInfo.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\IOBuffer.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\IODevice.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\IOError.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\IONotifier.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Library.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Logger.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\LogManager.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\LogTarget.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\MainLoop.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Mutex.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Path.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Pipe.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Process.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Selectable.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Semaphore.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\SerialChannel.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\SerialDevice.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\SystemError.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Thread.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Timer.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Uri.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\ApplicationImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\ClockImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\ConditionImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\DirectoryImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\FileDeviceImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\IODeviceImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\IONotifierImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\LibraryImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\MainLoopImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\MutexImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\PipeImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\ProcessImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\Selector.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\SemaphoreImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\SerialDeviceImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\win32\ThreadImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\ApplicationTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\DirectoryTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\EventLoopTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\LoggerTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\PathTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\PipeTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\ProcessTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\ProcessTestChild.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\Pt-System-test.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\SerialDeviceTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\ThreadTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\TimerTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\tests\UriTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\Application.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\Assertion.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\RegisterTest.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\Reporter.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\Test.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\TestCase.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\TestContext.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\TestProtocol.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\TestSuite.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\TextProtocol.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Unit\TextProtocolTest.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\AttributeListModel.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\AttributeModel.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\ContentModel.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\ContentParticle.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\DocType.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\DocTypeDefinition.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\DocTypeValidator.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\ElementModel.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\Entity.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\InputSource.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\NamespaceContext.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\StartElement.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\XmlError.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\XmlFormatter.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\XmlReader.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\XmlSerializationContext.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\XmlWriter.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\tests\Pt-Xml-test.cpp">
+      <Filter>Pt-Xml\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\tests\XmlSerializerTest.cpp">
+      <Filter>Pt-Xml\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\tests\XmlTest.cpp">
+      <Filter>Pt-Xml\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Xml\tests\XmlWriterTest.cpp">
+      <Filter>Pt-Xml\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\Client.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\Fault.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\Formatter.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\HttpClient.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\HttpResponder.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\HttpService.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\Responder.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\tests\Pt-XmlRpc-test.cpp">
+      <Filter>Pt-XmlRpc\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\tests\RpcBenchClient.cpp">
+      <Filter>Pt-XmlRpc\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-XmlRpc\tests\RpcBenchServer.cpp">
+      <Filter>Pt-XmlRpc\tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\Pt\Allocator.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Any.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Api.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Arg.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Atomicity.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Base64Codec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Byteorder.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Callable.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Composer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Connectable.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Connection.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\ConstMethod.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\ConversionError.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Convert.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Date.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\DateTime.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Decomposer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Delegate.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Deserializer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Event.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Facets.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\FixupInfo.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Formatter.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Function.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Invokable.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\IOError.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\IOStream.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Latin1Codec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\LiteralPtr.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Locale.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Main.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Math.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Method.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\NonCopyable.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Pack.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\PackPop.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\PageAllocator.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\PoolAllocator.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\RefCounted.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Regex.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SerializationContext.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SerializationError.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SerializationInfo.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SerializationSurrogate.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Serializer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Settings.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Signal.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Singleton.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Slot.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SmartPtr.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SourceInfo.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\StreamBuffer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\String.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\StringStream.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TextBuffer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TextCodec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TextStream.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Time.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Timespan.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TypeInfo.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Types.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TypeTraits.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Utf16Codec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Utf32Codec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Utf8.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Utf8Codec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Void.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\WinVer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\ZBuffer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\ZStream.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="regexp.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsReader.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsWriter.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="Unicode.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Algorithm.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Api.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Argb32Format.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BlockScale.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Brush.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Canvas.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Color.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\CompositionMode.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Font.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageModel.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageSurface.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageView.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Paint.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\PaintContext.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Painter.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\PaintLayer.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\PaintSurface.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Path.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Pen.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\PngWriter.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Point.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rect.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb16Format.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Scaling.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Size.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Transform.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\Fixed.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\Span.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\ClipPolygon.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\DejaVuSans.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\DejaVuSansBold.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\DejaVuSansBoldItalic.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\DejaVuSansItalic.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\DrawText.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\Edge.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\EdgeTable.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\FreeType.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\ImageCanvas.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\LineEdge.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\LineFace.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\LineSlope.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\RasterContext.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\skia\DrawText.h">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\skia\FreeType.h">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\skia\ImageCanvas.h">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\skia\SkiaBlitter.h">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\skia\SkiaContext.h">
+      <Filter>Pt-Gfx\skia</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Adjustment.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Alignment.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Api.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Application.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Button.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\CheckBox.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ComboBox.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Control.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\DockingLayout.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\FlowLayout.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Form.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\GridLayout.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Icon.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\InputMethod.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Key.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Label.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Layout.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LineEdit.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LineEditor.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ListBox.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Menu.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuBar.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuBarItem.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuBase.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuBaseItem.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuItem.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuMenuItem.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuSubItem.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Panel.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Pixmap.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PlatinumStyle.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Popup.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ProgressBar.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PushButton.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Responder.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Screen.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollBar.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollLayout.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollView.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Shell.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ShellWM.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\SizePolicy.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Slider.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\SpinBox.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\StackLayout.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Style.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\StyleOptions.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\TableLayout.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\TabView.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\TextBlock.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\View.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Visual.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Widget.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Window.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowBase.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowFrame.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowType.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\ArrowCursor.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\ShellWindowFrame.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\cocoa\ApplicationImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\cocoa\CursorImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\cocoa\KeyMap.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\cocoa\PaintData.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\cocoa\PixmapImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\cocoa\ScreenImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\cocoa\WindowImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\cocoa\WindowView.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\winrt\ApplicationImpl.h">
+      <Filter>Pt-Hmi\winrt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\winrt\CursorImpl.h">
+      <Filter>Pt-Hmi\winrt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\winrt\GfxOutputDeviceImpl.h">
+      <Filter>Pt-Hmi\winrt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\x11\ApplicationImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\x11\CursorImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\x11\KeyHandler.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\x11\PixmapImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\x11\ScreenImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\x11\WindowImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\x11\X11Fd.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\linux-fb\ApplicationImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\linux-fb\FrameBuffer.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\linux-fb\InputDevice.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\linux-fb\MainWindowImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\linux-fb\MouseDevice.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\linux-fb\PixmapImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\linux-fb\ScreenImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\demo\AtesionIcon.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\demo\ChildW.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\demo\DemoImage.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\demo\Dialog1.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\demo\Dialog2.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\demo\MainWindow.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\ApplicationImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\Display.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\InputDevice.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\MainWindowImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\Matrix.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\PainterImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\PaintSurfaceImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\Rectangle.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\ScreenImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\ShaderProgram.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\Shaders.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\Shape.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\Texture.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-gbm\Vector.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\EnableEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\InvalidateEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LayoutEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ShowEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowStateEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\Display.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\Matrix.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\RenderScreen.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\ShaderProgram.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\Shaders.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\Shape.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\SolidRect.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\Texture.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\TextureRect.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\egl-test\Vector.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\gdiplus\ApplicationImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\gdiplus\KeyMap.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\gdiplus\MainWindowImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\gdiplus\PaintData.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\gdiplus\PixmapSurfaceImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\gdiplus\ScreenImpl.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\gdiplus\win32.h">
+      <Filter>Pt-Hmi\gdiplus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\win32\ApplicationImpl.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\win32\KeyMap.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\win32\PaintContext.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\win32\PixmapImpl.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\win32\ScreenImpl.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\win32\win32.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\win32\WindowImpl.h">
+      <Filter>Pt-Hmi\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\sdl\ApplicationImpl.h">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\sdl\Keycodes.h">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\sdl\PixmapImpl.h">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Hmi\sdl\ScreenImpl.h">
+      <Filter>Pt-Hmi\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Api.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Authenticator.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Authorizer.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Client.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Credentials.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\HttpError.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\IOStream.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Message.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Reply.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Request.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Responder.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Server.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Service.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Servlet.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Http\ClientImpl.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Http\Connection.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Http\HttpBuffer.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Http\Parser.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Http\ServerImpl.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Api.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Boolean.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Document.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\DocumentReader.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\EndArray.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\EndDocument.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\EndObject.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Float.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Integer.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\JsonError.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\JsonFormatter.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\JsonReader.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\JsonWriter.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Member.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Node.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\Null.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\StartArray.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\StartObject.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Json\String.h">
+      <Filter>Pt-Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mfc\Api.h">
+      <Filter>Pt-Mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mfc\Application.h">
+      <Filter>Pt-Mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mfc\MainLoop.h">
+      <Filter>Pt-Mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Mfc\demo\MfcApplication.h">
+      <Filter>Pt-Mfc\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Mfc\demo\Resource.h">
+      <Filter>Pt-Mfc\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\AddressInUse.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\Api.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\Endpoint.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\TcpServer.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\TcpSocket.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\UdpSocket.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Net\posix\AddrInfo.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Net\posix\EndpointImpl.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Net\win32\TcpServerImpl.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Net\win32\TcpSocketImpl.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Net\win32\UdpSocketImpl.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Qt\Api.h">
+      <Filter>Pt-Qt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Qt\Application.h">
+      <Filter>Pt-Qt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Qt\MainLoop.h">
+      <Filter>Pt-Qt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Qt\win32\ApplicationImpl.h">
+      <Filter>Pt-Qt\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Qt\win32\MainLoopImpl.h">
+      <Filter>Pt-Qt\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\Api.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\Argument.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\ArgumentTraits.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\ConstructorInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\ConstructorProxy.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\FunctionInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\FunctionProxy.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\GenericType.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\MethodInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\MethodProxy.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\PropertyInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\PropertyProxy.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\Type.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\TypeManager.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\TypeSpecifier.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\ActiveProcedure.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\Api.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\BasicProcedure.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\Client.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\Fault.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\RemoteProcedure.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\Responder.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\ServiceDefinition.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\ServiceProcedure.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\Api.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\Client.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\Fault.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\Formatter.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\HttpClient.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\HttpResponder.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\HttpService.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\Responder.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\ServiceDeclaration.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\ServiceDefinition.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\Api.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\CertificateStore.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\Context.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\IOStream.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\SslError.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\StreamBuffer.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\tests\Pkcs12Data.h">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\openssl\CertificateImpl.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\openssl\CertificateStoreImpl.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\openssl\Connection.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\openssl\ContextImpl.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\openssl\OpenSsl.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\applessl\CertificateImpl.h">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\applessl\CertificateStoreImpl.h">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\applessl\Connection.h">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\applessl\ContextImpl.h">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\nossl\CertificateImpl.h">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\nossl\CertificateStoreImpl.h">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\nossl\Connection.h">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Ssl\nossl\ContextImpl.h">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Api.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Application.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Clock.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Condition.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Directory.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\EventLoop.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\EventSink.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\EventSource.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\FileDevice.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\FileInfo.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IOBuffer.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IODevice.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IOError.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IONotifier.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IOStream.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Library.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\LogChannel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Logger.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\LogLevel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\LogRecord.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\LogTarget.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\MainLoop.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Mutex.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Path.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Pipe.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Plugin.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Process.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Queue.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Selectable.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Semaphore.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\SerialDevice.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\SystemError.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Thread.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Timer.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Uri.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\ConsoleChannel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\FileChannel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\LogManager.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\SelectableList.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\SerialChannel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\ApplicationImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\ClockImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\ConditionImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\DirectoryImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\FileDeviceImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\FileInfoImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\IODeviceImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\IONotifierImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\LibraryImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\MainLoopImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\MutexImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\PathImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\PipeImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\ProcessImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\Selector.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\SemaphoreImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\SerialDeviceImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\ThreadImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-System\win32\win32.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Api.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Application.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Assertion.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\RegisterTest.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Reporter.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Test.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestCase.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestContext.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestFixture.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestMain.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestMethod.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestProtocol.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestSuite.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TextProtocol.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Api.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\ByteorderMark.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Characters.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Comment.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\DocType.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\DocTypeDefinition.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\DocTypeValidator.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\EndDocument.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\EndElement.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Entity.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\InputSource.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Namespace.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Node.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Notation.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\ProcessingInstruction.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\QName.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\StartDocument.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\StartElement.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlDeclaration.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlDeserializer.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlError.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlFormatter.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlReader.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlResolver.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlSerializationContext.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlSerializer.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlWriter.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Xml\AttributeListModel.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Xml\AttributeModel.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Xml\ContentModel.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Xml\ContentParticle.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Xml\ElementModel.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Xml\InputStack.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Xml\NamespaceContext.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Xml\QNameStack.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Api.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Client.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Fault.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Formatter.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\HttpClient.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\HttpService.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Responder.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-XmlRpc\HttpResponder.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\Pt\Callable.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\ConstMethod.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Delegate.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Function.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Invokable.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Method.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Signal.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\String.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="Jamfile">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="tests\Jamfile">
+      <Filter>Pt\tests</Filter>
+    </None>
+    <None Include="..\Pt-Gfx\Jamfile">
+      <Filter>Pt-Gfx</Filter>
+    </None>
+    <None Include="..\Pt-Gfx\tests\Jamfile">
+      <Filter>Pt-Gfx\tests</Filter>
+    </None>
+    <None Include="..\Pt-Hmi\Jamfile">
+      <Filter>Pt-Hmi</Filter>
+    </None>
+    <None Include="..\Pt-Hmi\cocoa\ApplicationImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\Pt-Hmi\cocoa\CursorImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\Pt-Hmi\cocoa\PixmapImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\Pt-Hmi\cocoa\ScreenImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\Pt-Hmi\cocoa\WindowImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\Pt-Hmi\cocoa\WindowView.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\Pt-Hmi\demo\Jamfile">
+      <Filter>Pt-Hmi\demo</Filter>
+    </None>
+    <None Include="..\Pt-Http\Jamfile">
+      <Filter>Pt-Http</Filter>
+    </None>
+    <None Include="..\Pt-Http\tests\Jamfile">
+      <Filter>Pt-Http\tests</Filter>
+    </None>
+    <None Include="..\Pt-Json\Jamfile">
+      <Filter>Pt-Json</Filter>
+    </None>
+    <None Include="..\Pt-Json\tests\Jamfile">
+      <Filter>Pt-Json\tests</Filter>
+    </None>
+    <None Include="..\Pt-Mfc\Jamfile">
+      <Filter>Pt-Mfc</Filter>
+    </None>
+    <None Include="..\Pt-Mfc\demo\Jamfile">
+      <Filter>Pt-Mfc\demo</Filter>
+    </None>
+    <None Include="..\Pt-Net\Jamfile">
+      <Filter>Pt-Net</Filter>
+    </None>
+    <None Include="..\Pt-Net\tests\Jamfile">
+      <Filter>Pt-Net\tests</Filter>
+    </None>
+    <None Include="..\Pt-Net\tests\Makefile.am">
+      <Filter>Pt-Net\tests</Filter>
+    </None>
+    <None Include="..\Pt-Qt\Jamfile">
+      <Filter>Pt-Qt</Filter>
+    </None>
+    <None Include="..\Pt-Qt\demo\Jamfile">
+      <Filter>Pt-Qt\demo</Filter>
+    </None>
+    <None Include="..\Pt-Reflex\Jamfile">
+      <Filter>Pt-Reflex</Filter>
+    </None>
+    <None Include="..\Pt-Reflex\Makefile.am">
+      <Filter>Pt-Reflex</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Remoting\RemoteProcedure.tpp">
+      <Filter>Pt-Remoting</Filter>
+    </None>
+    <None Include="..\Pt-Remoting\Jamfile">
+      <Filter>Pt-Remoting</Filter>
+    </None>
+    <None Include="..\Pt-Soap\Jamfile">
+      <Filter>Pt-Soap</Filter>
+    </None>
+    <None Include="..\Pt-Ssl\Jamfile">
+      <Filter>Pt-Ssl</Filter>
+    </None>
+    <None Include="..\Pt-Ssl\tests\Jamfile">
+      <Filter>Pt-Ssl\tests</Filter>
+    </None>
+    <None Include="..\Pt-System\Jamfile">
+      <Filter>Pt-System</Filter>
+    </None>
+    <None Include="..\Pt-System\tests\Jamfile">
+      <Filter>Pt-System\tests</Filter>
+    </None>
+    <None Include="..\Pt-System\tests\Makefile.am">
+      <Filter>Pt-System\tests</Filter>
+    </None>
+    <None Include="..\Pt-Unit\Jamfile">
+      <Filter>Pt-Unit</Filter>
+    </None>
+    <None Include="..\Pt-Xml\Jamfile">
+      <Filter>Pt-Xml</Filter>
+    </None>
+    <None Include="..\Pt-Xml\tests\Jamfile">
+      <Filter>Pt-Xml\tests</Filter>
+    </None>
+    <None Include="..\Pt-XmlRpc\Jamfile">
+      <Filter>Pt-XmlRpc</Filter>
+    </None>
+    <None Include="..\Pt-XmlRpc\tests\Jamfile">
+      <Filter>Pt-XmlRpc\tests</Filter>
+    </None>
+    <None Include="..\..\jam.bat" />
+    <None Include="..\..\Jambase" />
+    <None Include="..\..\Jamconfigure" />
+    <None Include="..\..\Jamfile" />
+  </ItemGroup>
+</Project>

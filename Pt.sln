@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35506.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt", "src\Pt\Pt.vcxproj", "{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Remote", "src\Pt\Pt-Remote.vcxproj", "{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Local|x64 = Local|x64
+		Remote|x64 = Remote|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Local|x64.ActiveCfg = Local|x64
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Local|x64.Build.0 = Local|x64
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Remote|x64.ActiveCfg = Local|x64
+		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Local|x64.ActiveCfg = Remote|x64
+		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Remote|x64.ActiveCfg = Remote|x64
+		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Remote|x64.Build.0 = Remote|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
