@@ -30,6 +30,11 @@ Load base.jam ;
 if "switch" in $(ARGV)
 {
     JAM_SWITCH = true ;
+
+    if ! $(CONFIG)
+    {
+        Exit "No configuration to switch. Use -sCONFIG" ;
+    }
 }
 
 if configure in $(ARGV)
