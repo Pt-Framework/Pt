@@ -1655,9 +1655,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\ImageModel.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\ImageSurface.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
