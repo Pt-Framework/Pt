@@ -526,8 +526,11 @@ class BasicView : public ViewBase
         const Format& format() const
         { return *_format; }
 
-        void fill(Pixel& to, std::size_t n, const Color& c, CompositionMode mode)
+        void fill(pos_t x, pos_t y, std::size_t n, 
+                  const Color& c, CompositionMode mode)
         {
+            Pixel to(*this, x, y);
+            
             switch(mode) 
             {
                 default:
@@ -568,7 +571,8 @@ class BasicView : public ViewBase
             }
         }
 
-        void copy(Pixel& to, const ConstPixel& p, std::size_t n, CompositionMode mode)
+        void copy(Pixel& to, const ConstPixel& p, 
+                  std::size_t n, CompositionMode mode)
         {
             const bool isCompatible = to.view().format() == p.view().format();
             if( ! isCompatible )
@@ -583,6 +587,30 @@ class BasicView : public ViewBase
 
                 case CompositionMode::SourceOver:
                     _format->sourceOver(to.view(), to, p.view(), p, n);
+                    break;
+            }
+        }
+
+        void copy(pos_t x, pos_t y, 
+                  const BasicView& from, pos_t fromX, pos_t fromY, 
+                  Pt::ssize_t n, CompositionMode mode)
+        {
+            const bool isCompatible = format() == from.format();
+            if( ! isCompatible )
+                return;
+
+            PixelBase to(*this, x, y);
+            ConstPixelBase p(*this, x, y);
+            
+            switch(mode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    _format->sourceCopy(*this, to, from, p, n);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    _format->sourceOver(*this, to, from, p, n);
                     break;
             }
         }
@@ -613,7 +641,6 @@ class BasicView : public ViewBase
         }
 
     private:
-        // TODO: make sure _forrmat is never NULL or handle it
         const Format* _format;
 };
 

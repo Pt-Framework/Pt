@@ -2233,7 +2233,7 @@ void ImageCanvas::fillTexture(const Point& origin, const Point& pos,  int length
             ConstPixel sourcePixel(texture.view(),  textureXPos, textureYPos);
             Pixel destPixel(_image.view(), xpos, ypos);
 
-            _image.view().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );
+            _image.view().copy( destPixel, sourcePixel, fillLength, _compositionMode);
         }
 
         // Remaining unfilled pixels of the span
