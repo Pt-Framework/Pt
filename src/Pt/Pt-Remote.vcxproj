@@ -43,6 +43,7 @@
     <LocalRemoteCopySources>false</LocalRemoteCopySources>
     <OutDir>$(ProjectDir)build\</OutDir>
     <IntDir>$(ProjectDir)build\</IntDir>
+    <RemoteDeployDir>$(RemoteRootDir)</RemoteDeployDir>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
