@@ -268,12 +268,13 @@ Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
 
 void WindowImpl::paint(const Gfx::RectF& rectF)
 {
-    Gfx::Rect rect(Pt::lround(rectF.left()),
-                   Pt::lround(rectF.right()),
-                   Pt::lround(rectF.top()),
-                   Pt::lround(rectF.bottom()));
+    int x = Pt::lround(rectF.left());
+    int y = Pt::lround(rectF.top());
+
+    unsigned int width = Pt::lround(rectF.right()) - x;
+    unsigned int height = Pt::lround(rectF.bottom()) - y;
     
-    if( rect.isNull() )
+    if( width == 0 || height == 0 )
       return;
 
     //std::clog << "XClearArea " << title() << " "
@@ -290,10 +291,7 @@ void WindowImpl::paint(const Gfx::RectF& rectF)
     //Application::instance().impl()->processEvent( (XEvent&)ev);
 
     XClearArea(_display, _window,
-               static_cast<int>( rect.x() ),
-               static_cast<int>( rect.y() ),
-               static_cast<int>( rect.width() ),
-               static_cast<int>( rect.height() ),
+               x, y, width, height,
                True);
 
     //XFlush(_display);
@@ -589,9 +587,11 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
         alignedSize.setHeight( w.minimumSize().height() );
 
     Gfx::SizeF psize = w.scaling().toPhysical(alignedSize);
-    Gfx::Size size = round(psize);
 
-    XResizeWindow( _display, _window, size.width(), size.height() );
+    unsigned int width = Pt::lround(psize.width());
+    unsigned int height = Pt::lround(psize.height());
+
+    XResizeWindow( _display, _window, width, height );
 
     //XFlush(_display);
 
