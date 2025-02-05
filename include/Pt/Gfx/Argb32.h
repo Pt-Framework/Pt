@@ -346,20 +346,20 @@ class Argb32
             Argb32::sourceOver(to.base(), p.base(), n);
         }
 
-        void sourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                        const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                        Pt::ssize_t width, Pt::ssize_t height)
-        {
-            Argb32::sourceCopy(to, toX, toY, from, fromX, fromY, width, height);
-        }
+        //void sourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+        //                const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+        //                Pt::ssize_t width, Pt::ssize_t height)
+        //{
+        //    Argb32::sourceCopy(to, toX, toY, from, fromX, fromY, width, height);
+        //}
 
 
-        void sourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                        const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-                        Pt::ssize_t width, Pt::ssize_t height)
-        {
-            Argb32::sourceOver(to, toX, toY, from, fromX, fromY, width, height);
-        }
+        //void sourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
+        //                const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+        //                Pt::ssize_t width, Pt::ssize_t height)
+        //{
+        //    Argb32::sourceOver(to, toX, toY, from, fromX, fromY, width, height);
+        //}
 
     public:
         static Color getColor(const Pt::uint8_t* p);
