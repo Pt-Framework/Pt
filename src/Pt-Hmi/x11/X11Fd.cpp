@@ -46,7 +46,10 @@ X11Fd::X11Fd(Display* display)
 , _ioh(*this)
 , _loop(0)
 {
-     XAddConnectionWatch(_display, &onConnectionChanged, 0);
+    if( ! _display)
+        throw Pt::System::AccessFailed("invalid X11 display");
+     
+    XAddConnectionWatch(_display, &onConnectionChanged, 0);
 
     _ioh.fd = XConnectionNumber(_display);
     if( _ioh.fd < 0 )
