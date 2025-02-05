@@ -21,29 +21,32 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ConfigurationType>Makefile</ConfigurationType>
-    <RemoteRootDir>~/Pt</RemoteRootDir>
-    <RemoteProjectRelDir />
+    <RemoteRootDir>~</RemoteRootDir>
+    <RemoteProjectRelDir>Pt3</RemoteProjectRelDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
-  <ImportGroup Label="Shared" />
+  <ImportGroup Label="Shared">
+    <Import Project="Pt-sources.vcxitems" Label="Shared" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'">
-    <RemoteBuildCommandLine>./jam.sh -q</RemoteBuildCommandLine>
-    <RemoteReBuildCommandLine>./jam.sh -qa</RemoteReBuildCommandLine>
-    <RemoteCleanCommandLine>./jam.sh -q clean</RemoteCleanCommandLine>
+    <RemoteBuildCommandLine> cd  $(RemoteRootDir)/$(RemoteProjectRelDir) &amp;&amp; ./jam.sh -q</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine> cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -qa</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine> cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -q clean</RemoteCleanCommandLine>
     <BuildCommandLine>
     </BuildCommandLine>
     <ReBuildCommandLine>
     </ReBuildCommandLine>
     <CleanCommandLine>
     </CleanCommandLine>
-    <SourcesToCopyRemotelyOverride />
-    <LocalRemoteCopySources>false</LocalRemoteCopySources>
+    <SourcesToCopyRemotelyOverride>@(SourcesToCopyRemotely)</SourcesToCopyRemotelyOverride>
+    <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <OutDir>$(ProjectDir)build\</OutDir>
     <IntDir>$(ProjectDir)build\</IntDir>
-    <RemoteDeployDir>$(RemoteRootDir)</RemoteDeployDir>
+    <RemoteDeployDir>$(RemoteRootDir)$(RemoteProjectRelDir)</RemoteDeployDir>
+    <NMakeIncludeSearchPath>$(SolutionDir)include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
