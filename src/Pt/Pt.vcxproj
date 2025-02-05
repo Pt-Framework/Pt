@@ -5,24 +5,44 @@
       <Configuration>Jam Build</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Jam Remote Build|x64">
+      <Configuration>Jam Remote Build</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup Label="Globals">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'" Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <ProjectGuid>{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'" Label="Globals">
+    <ProjectGuid>{fcad63cd-b82e-4db5-b03d-2c24b4fcbfb5}</ProjectGuid>
+    <Keyword>Linux</Keyword>
+    <RootNamespace>Pt</RootNamespace>
+    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
+    <ApplicationType>Linux</ApplicationType>
+    <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
+    <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
+    <LinuxProjectType>{FC1A4D80-50E9-41DA-9192-61C0DBAA00D2}</LinuxProjectType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'" Label="Configuration">
     <PlatformToolset>v143</PlatformToolset>
     <ConfigurationType>Makefile</ConfigurationType>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <ConfigurationType>Makefile</ConfigurationType>
+    <RemoteRootDir>~</RemoteRootDir>
+    <RemoteProjectRelDir>$(ProjectName)-Remote2</RemoteProjectRelDir>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared">
     <Import Project="Pt-sources.vcxitems" Label="Shared" />
   </ImportGroup>
+  <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'">
     <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j4 -sPT_TOP=$(SolutionDir)</NMakeBuildCommandLine>
@@ -33,7 +53,27 @@
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;PT_API_EXPORT;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(SolutionDir)include;$(SolutionDir)src\Pt-System\win32\;$(SolutionDir)src\Pt-Gfx\raster</NMakeIncludeSearchPath>
   </PropertyGroup>
-  <ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'">
+    <RemoteBuildCommandLine>cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -q</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine>cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -qa</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine>cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -q clean</RemoteCleanCommandLine>
+    <BuildCommandLine>
+    </BuildCommandLine>
+    <ReBuildCommandLine>
+    </ReBuildCommandLine>
+    <CleanCommandLine>
+    </CleanCommandLine>
+    <SourcesToCopyRemotelyOverride>@(SourcesToCopyRemotely)</SourcesToCopyRemotelyOverride>
+    <LocalRemoteCopySources>true</LocalRemoteCopySources>
+    <OutDir>$(ProjectDir)build\</OutDir>
+    <IntDir>$(ProjectDir)build\</IntDir>
+    <NMakeIncludeSearchPath>$(SolutionDir)include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <RemoteDeployDir>$(RemoteRootDir)/$(ProjectName)-Remote2</RemoteDeployDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'">
+    <RemotePreBuildEvent>
+      <Command>chmod +x $(RemoteDeployDir)/jam.sh</Command>
+    </RemotePreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

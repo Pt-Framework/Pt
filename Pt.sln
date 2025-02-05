@@ -5,22 +5,20 @@ VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt", "src\Pt\Pt.vcxproj", "{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Remote", "src\Pt\Pt-Remote.vcxproj", "{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-sources", "src\Pt\Pt-sources.vcxitems", "{48AF7ADB-C7F5-4694-AE86-9552BD49149A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Jam Build|local = Jam Build|local
-		Jam Build|remote = Jam Build|remote
+		Jam Build|Jam = Jam Build|Jam
+		Jam Remote Build|Jam = Jam Remote Build|Jam
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Build|local.ActiveCfg = Jam Build|x64
-		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Build|local.Build.0 = Jam Build|x64
-		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Build|remote.ActiveCfg = Jam Build|x64
-		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Jam Build|local.ActiveCfg = Jam Build|x64
-		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Jam Build|remote.ActiveCfg = Jam Build|x64
-		{FCAD63CD-B82E-4DB5-B03D-2C24B4FCBFB5}.Jam Build|remote.Build.0 = Jam Build|x64
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Build|Jam.ActiveCfg = Jam Build|x64
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Build|Jam.Build.0 = Jam Build|x64
+
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Remote Build|Jam.ActiveCfg = Jam Remote Build|x64
+		{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}.Jam Remote Build|Jam.Build.0 = Jam Remote Build|x64
+
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -28,6 +26,5 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\Pt\Pt-sources.vcxitems*{48af7adb-c7f5-4694-ae86-9552bd49149a}*SharedItemsImports = 9
 		src\Pt\Pt-sources.vcxitems*{73ad6414-3e34-46e4-8ce3-fa8c48a8bcac}*SharedItemsImports = 4
-		src\Pt\Pt-sources.vcxitems*{fcad63cd-b82e-4db5-b03d-2c24b4fcbfb5}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal
