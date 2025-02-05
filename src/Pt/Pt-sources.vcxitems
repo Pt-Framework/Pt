@@ -1792,6 +1792,12 @@
     <None Include="$(MSBuildThisFileDirectory)..\Pt-Remoting\Jamfile" />
     <None Include="$(MSBuildThisFileDirectory)..\Pt-Soap\Jamfile" />
     <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\Jamfile" />
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\ca-with-password.p12" />
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\client-with-password.p12" />
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\openssl.cnf" />
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\openssl_multi.cnf" />
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\server-with-password.p12" />
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\server_chain-with-password.p12" />
     <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\Jamfile" />
     <None Include="$(MSBuildThisFileDirectory)..\Pt-System\Jamfile" />
     <None Include="$(MSBuildThisFileDirectory)..\Pt-System\tests\Jamfile" />
@@ -1806,6 +1812,8 @@
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)..\..\jam\src\modules\readme.txt" />
     <Text Include="$(MSBuildThisFileDirectory)..\libpng\libpng-manual.txt" />
+    <Text Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\methods.txt" />
+    <Text Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="$(MSBuildThisFileDirectory)..\libjpeg\testimg.bmp" />

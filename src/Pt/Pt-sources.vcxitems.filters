@@ -259,6 +259,9 @@
     <Filter Include="freetype\src\cff">
       <UniqueIdentifier>{8dc098a9-1636-4033-807f-163cdcee777f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Ssl\tests\cert">
+      <UniqueIdentifier>{7db3a358-f287-463b-8c4c-8bd118665bd8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)Atomicity.cpp">
@@ -5603,6 +5606,24 @@
     <None Include="$(MSBuildThisFileDirectory)..\freetype\src\Jamfile">
       <Filter>freetype\src</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\ca-with-password.p12">
+      <Filter>Pt-Ssl\tests\cert</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\client-with-password.p12">
+      <Filter>Pt-Ssl\tests\cert</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\openssl.cnf">
+      <Filter>Pt-Ssl\tests\cert</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\openssl_multi.cnf">
+      <Filter>Pt-Ssl\tests\cert</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\server_chain-with-password.p12">
+      <Filter>Pt-Ssl\tests\cert</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\server-with-password.p12">
+      <Filter>Pt-Ssl\tests\cert</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)..\..\jam\src\modules\readme.txt">
@@ -5610,6 +5631,12 @@
     </Text>
     <Text Include="$(MSBuildThisFileDirectory)..\libpng\libpng-manual.txt">
       <Filter>libpng</Filter>
+    </Text>
+    <Text Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\methods.txt">
+      <Filter>Pt-Ssl\tests\cert</Filter>
+    </Text>
+    <Text Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\cert\readme.txt">
+      <Filter>Pt-Ssl\tests\cert</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
