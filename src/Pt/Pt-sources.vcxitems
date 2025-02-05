@@ -1613,6 +1613,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\openssl\Connection.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\openssl\ContextImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\openssl\OpenSsl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\PemData.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\Pkcs12Data.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-System\ConsoleChannel.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-System\FileChannel.h" />

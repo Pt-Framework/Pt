@@ -5237,6 +5237,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\WaitCursor.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\PemData.h">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Callable.tpp">
