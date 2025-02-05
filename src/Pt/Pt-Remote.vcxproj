@@ -18,12 +18,13 @@
     <ProjectName>Pt-Remote</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ConfigurationType>Makefile</ConfigurationType>
     <RemoteRootDir>~</RemoteRootDir>
-    <RemoteProjectRelDir>Pt3</RemoteProjectRelDir>
   </PropertyGroup>
+
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared">
@@ -31,10 +32,11 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'">
-    <RemoteBuildCommandLine> cd  $(RemoteRootDir)/$(RemoteProjectRelDir) &amp;&amp; ./jam.sh -q</RemoteBuildCommandLine>
-    <RemoteReBuildCommandLine> cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -qa</RemoteReBuildCommandLine>
-    <RemoteCleanCommandLine> cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -q clean</RemoteCleanCommandLine>
+    <RemoteBuildCommandLine>cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -q</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine>cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -qa</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine>cd  $(RemoteDeployDir) &amp;&amp; ./jam.sh -q clean</RemoteCleanCommandLine>
     <BuildCommandLine>
     </BuildCommandLine>
     <ReBuildCommandLine>
@@ -45,10 +47,15 @@
     <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <OutDir>$(ProjectDir)build\</OutDir>
     <IntDir>$(ProjectDir)build\</IntDir>
-    <RemoteDeployDir>$(RemoteRootDir)$(RemoteProjectRelDir)</RemoteDeployDir>
     <NMakeIncludeSearchPath>$(SolutionDir)include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
-  <ItemDefinitionGroup />
+
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'">
+    <RemotePreBuildEvent>
+      <Command>chmod +x $(RemoteDeployDir)/jam.sh</Command>
+    </RemotePreBuildEvent>
+  </ItemDefinitionGroup>
+
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
