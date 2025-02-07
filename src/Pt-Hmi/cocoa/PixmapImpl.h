@@ -1,5 +1,4 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,19 +26,12 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_cocoa_PixmapImpl_h
-#define Pt_Hmi_cocoa_PixmapImpl_h
+#ifndef PT_HMI_COCOA_PIXMAP_IMPL_H
+#define PT_HMI_COCOA_PIXMAP_IMPL_H
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Transform.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/Canvas.h>
+
 #include <Pt/Gfx/Path.h>
 #include <Pt/System/Path.h>
 
@@ -61,18 +53,170 @@ namespace Pt {
 
 namespace Hmi {
 
-class PaintData;
-class PixmapSurface;
-
-class PixmapSurfaceImpl
+class PixmapCanvas : public Gfx::Canvas
 {
     public:
-        PixmapSurfaceImpl();            
+        PixmapCanvas(Gfx::PaintSurface& surface);            
 
-        virtual ~PixmapSurfaceImpl();
+        virtual ~PixmapCanvas();
 
+        CGContextRef context() const
+        { return _context; }
+
+        void set(const Gfx::Image& image);
+        
+        Gfx::Image toImage() const;
+
+        const Gfx::SizeF& physicalSize() const;
+
+        const Gfx::SizeF& logicalSize() const;
+
+        void resize(const Gfx::SizeF& size);
+
+        void setScaleFactor(double scaleFactor);
+    
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const override;
+
+        virtual const Gfx::SizeF& onGetSize() const override;
+
+        virtual const Gfx::Scaling& onGetScaling() const override;
+
+    protected:
+        virtual bool onSetPaint(Gfx::PaintContext* context) override;
+
+        virtual Gfx::PaintContext* onCreatePaint() override;
+
+        virtual void onReleasePaint() override;
+
+    protected:
+        virtual void onCompositionModeChanged() override;
+
+        virtual void onPenChanged() override;
+
+        virtual void onBrushChanged() override;
+
+        virtual void onFontChanged() override;
+
+        virtual void onClipChanged() override;
+
+    protected:
+        virtual void onDrawLine(const Gfx::PointF& from, 
+                                const Gfx::PointF& to) override;
+
+        virtual void onDrawPolyline(const Gfx::Polyline& line) override;
+
+        virtual void onFillPolygon(const Gfx::Polyline& line) override;
+
+        virtual void onDrawRect(const Gfx::RectF& rect) override;
+
+        virtual void onFillRect(const Gfx::RectF& rect) override;
+
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) override;
+
+        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
+                                   const Gfx::SizeF& size) override;
+        
+        virtual void onDrawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                               float degBegin, float degEnd) override
+        {}
+
+        virtual void onFillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                                 float degBegin, float degEnd) override
+        {}
+
+        virtual void onFillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
+                               float degBegin, float degEnd) override
+        {}
+
+        virtual void onDrawPath(const Gfx::Path& path, float smoothness) override
+        {}
+
+        virtual void onFillPath(const Gfx::Path& path, float smoothness) override
+        {}
+
+    protected:
+        virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
+
+        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
+                                const Gfx::Transform* trans) override;
+
+    protected:
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image, 
+                                 const Gfx::RectF* rect) override;
+
+        virtual bool onDrawLayer(const Gfx::PointF& to, 
+                                 const Gfx::PaintLayer& layer,
+                                 const Gfx::RectF* rect) override;
+
+    private:
+        void create();
+    
+        void destroy();
+
+        void beginClip();
+
+        void endClip();
+
+        Pt::Gfx::PointF transform(const Pt::Gfx::PointF& p);
+};
+
+
+class PixmapImpl : public Gfx::PaintSurface
+{
+    public:
+        PixmapImpl();
+
+        virtual ~PixmapImpl();
+
+        void set(const Gfx::Image& image);
+
+        Gfx::Image toImage() const;
+        
         void clear(const Gfx::Color& c);
 
+        const Gfx::SizeF& size() const;
+
+        void resize(const Gfx::SizeF& size);
+        
+        void setScaleFactor(double scaleFactor);
+           
+        Gfx::PaintSurface* surface()
+        {
+            return this;
+        }
+
+        void draw(Gfx::PaintSurface& surface, 
+                  const Gfx::Paint& paint,
+                  const Gfx::PointF& to,
+                  const Gfx::RectF* rect) const;
+
+        CGContextRef context() const;
+
+    public:
+        static const std::string& defaultFont();
+
+        static void setDefaultFont(const std::string& name);
+
+        static std::vector<std::string> fontNames();
+
+        static void setFontDir(const System::Path& path);
+
+    private: 
+        static std::string& getDefaultFont();
+
+        static std::string getSystemFont();
+
+    private:
+        PixmapCanvas*  _canvas;
+};
+
+
+class PixmapSurfaceImpl 
+{
+    public:
         const Gfx::SizeF& size() const;
 
         void resize(const Pt::Gfx::SizeF& size);

@@ -28,18 +28,20 @@
 */
 
 #include "PixmapImpl.h"
-#include "PaintData.h"
 
-#include <Pt/Hmi/Pixmap.h>
-#include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Utf8Codec.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-PixmapSurfaceImpl::PixmapSurfaceImpl()
-: _size(10, 10)
+///////////////////////////////////////////////////////////////////////
+// PixmapCanvas
+///////////////////////////////////////////////////////////////////////
+
+PixmapCanvas::PixmapCanvas(Gfx::PaintSurface& surface)
+: Gfx::Canvas(surface)
+, _size(10, 10)
 , _painter(0)
 , _context(0)
 , _clipRect(CGRectNull)
@@ -48,18 +50,17 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 }
 
 
-PixmapSurfaceImpl::~PixmapSurfaceImpl()
+PixmapCanvas::~PixmapCanvas()
 {
     destroy();
 }
 
 
-void PixmapSurfaceImpl::create()
+void PixmapCanvas::create()
 {
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
-    _context = CGBitmapContextCreate(0, 
-                                     _size.width(), _size.height(), 
+    _context = CGBitmapContextCreate(0, _size.width(), _size.height(),
                                      8, 0, colorSpace, 
                                      kCGImageAlphaPremultipliedLast);
 
@@ -70,7 +71,7 @@ void PixmapSurfaceImpl::create()
 }
 
 
-void PixmapSurfaceImpl::destroy()
+void PixmapCanvas::destroy()
 {
     if(_context)
         CGContextRelease(_context);
@@ -79,112 +80,129 @@ void PixmapSurfaceImpl::destroy()
 }
 
 
-void PixmapSurfaceImpl::clear(const Gfx::Color& c)
+Gfx::Image PixmapCanvas::toImage() const
 {
+  return Gfx::Image();
 }
 
 
-const Gfx::SizeF& PixmapSurfaceImpl::size() const
+void PixmapCanvas::set(const Gfx::Image& image)
 {
-    return _size;
+    size_t width = image.width();
+    size_t height = image.height();
+
+    Gfx::SizeF size(width, height);
+
+    resize(size);
+
+    Gfx::PointF origin(0, 0);
+    drawImage(origin, image);
+}
+
+
+const Gfx::SizeF& PixmapCanvas::physicalSize() const
+{
+    return _physicalSize;
+}
+
+
+const Gfx::SizeF& PixmapCanvas::logicalSize() const
+{
+    return _logicalSize;
 }
 
 
 void PixmapSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
 {
-	_size = size;
+    size_t width = lround( size.width() );
+    size_t height = lround( size.height() );
+
+    _size = size;
     
-    if(_size.width() ==  0)
-        _size.setWidth(10);
+    if(width ==  0)
+        width = 10;
     
-    if(_size.height() ==  0)
-        _size.setHeight(10);
+    if(height ==  0)
+        height = 10;
     
+    _width = width;
+    _height = height;
+    
+    _physicalSize.set(width, height);
+    _logicalSize = scaling().toLogical(_physicalSize);
+
     destroy();
     create();
 }
 
 
-void PixmapSurfaceImpl::begin(Gfx::Painter& painter)
+void PixmapCanvas::setScaleFactor(double scaleFactor)
 {
-    _painter = &painter;
-
-    Gfx::PaintData* paintData = painter.paintData();
-    
-    _paintData = dynamic_cast<PaintData*>(paintData);
-    if ( ! _paintData )
-    {     
-        _paintData = new PaintData();
-        painter.setPaintData(_paintData);
-    }
+    _scaling.setScaleFactor(scaleFactor);
+    _logicalSize = _scaling.toLogical(_physicalSize);
 }
 
 
-void PixmapSurfaceImpl::finish()
-{
-    _paintData = 0;
-    _painter = 0;
-}
-
-
-const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+const Gfx::ImageFormat& PixmapCanvas::onGetFormat() const
 {
     return Gfx::ImageFormat::argb32();
 }
 
 
-void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
+const Gfx::SizeF& PixmapCanvas::onGetSize() const
 {
-    _clipRect = CGRectMake( clipRect.x(), 
-                            _size.height() - clipRect.y() - clipRect.height(), 
-                            clipRect.width(), 
-                            clipRect.height() );
+    return _logicalSize;
 }
 
 
-void PixmapSurfaceImpl::resetClip()
+const Gfx::Scaling& PixmapCanvas::onGetScaling() const
 {
-    _clipRect = CGRectNull;
+    return _scaling;
 }
 
 
-void PixmapSurfaceImpl::beginClip()
+bool PixmapCanvas::onSetPaint(Gfx::PaintContext* context)
 {
-    //return;
-    //CGContextResetClip(_context);
-
-    CGContextSaveGState(_context);
-
-    if( ! CGRectIsNull(_clipRect) )
-    {
-        CGContextClipToRect(_context, _clipRect);
-
-        //CGContextBeginPath(_context);
-        //CGContextAddRect(_context, _clipRect);
-        //CGContextClip(_context);
-    }
-
-    //CGRect boundingRect = CGContextGetClipBoundingBox(_context);
-
-    //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
-    //CGContextFillRect (_context, rect);
+    PaintContext* paintContext = dynamic_cast<PaintContext*>(context);
+    if( ! paintContext )
+        return false;
+    
+    _paintContext = paintContext;
+    return true;
 }
 
 
-void PixmapSurfaceImpl::endClip()
+Gfx::PaintContext* PixmapCanvas::onCreatePaint()
 {
-    //return;
-    CGContextRestoreGState(_context);
+    PaintContext* paintContext  = new PaintContext();
+
+    _paintContext = paintContext;
+    return paintContext;
 }
 
 
-void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
+void PixmapCanvas::onReleasePaint()
 {
+    _paintContext = 0;
 }
 
 
-void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
+void PixmapCanvas::onCompositionModeChanged()
 {
+    if( ! _paintContext )
+        return;
+
+    _compositionMode = _paintContext->compositionMode();
+}
+
+
+void PixmapCanvas::onPenChanged()
+{
+    if( ! _paintContext )
+        return;
+
+    const Pen& pen = _paintContext->pen();
+
     CGContextSetRGBStrokeColor(_context, 
                                pen.color().red() / 65535.0,
                                pen.color().green() / 65535.0,
@@ -269,8 +287,11 @@ void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 }
 
 
-void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
+void PixmapCanvas::onBrushChanged()
 {
+    if( ! _paintContext )
+        return;
+
     switch( brush.fillStyle() )
     {
         default:
@@ -289,31 +310,224 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 }
 
 
-void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
+void PixmapCanvas::onFontChanged()
 {
-    _paintData->setFont(font);
-}
-
-
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
-{
-    if( ! _paintData )
-        return Gfx::FontMetrics();
-
-    CTFontRef font = _paintData->ctFont();
-    return _paintData->fontMetrics(font, text);
-}
-
-
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, 
-                                 const Pt::String& text,
-                                 const Gfx::Transform& trans)
-{
-    if( ! _paintData || ! _painter )
+    if( ! _paintContext )
         return;
 
-    CTFontRef font = _paintData->ctFont();
-    const Gfx::Pen& pen = _painter->pen();
+    //_paintData->setFont(font);
+    //_paintContext->ctFont();
+}
+
+
+void PixmapCanvas::onClipChanged()
+{
+    if( ! _paintContext )
+        return;
+    
+    const Gfx::RectF* clipRect = _paintContext->clipRect();
+    if( ! clipRect )
+    {
+        _clipRect = CGRectNull;
+    }
+    else 
+    {
+        _clipRect = CGRectMake( clipRect.x(), 
+                                _size.height() - clipRect.y() - clipRect.height(), 
+                                clipRect.width(), 
+                                clipRect.height() );
+    }
+}
+
+void PixmapCanvas::beginClip()
+{
+    //return;
+    //CGContextResetClip(_context);
+
+    CGContextSaveGState(_context);
+
+    if( ! CGRectIsNull(_clipRect) )
+    {
+        CGContextClipToRect(_context, _clipRect);
+
+        //CGContextBeginPath(_context);
+        //CGContextAddRect(_context, _clipRect);
+        //CGContextClip(_context);
+    }
+
+    //CGRect boundingRect = CGContextGetClipBoundingBox(_context);
+
+    //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
+    //CGContextFillRect (_context, rect);
+}
+
+
+void PixmapCanvas::endClip()
+{
+    //return;
+    CGContextRestoreGState(_context);
+}
+
+
+Pt::Gfx::PointF PixmapCanvas::transform(const Pt::Gfx::PointF& p)
+{
+    return Pt::Gfx::PointF( p.x(), _size.height() - p.y() );
+}
+
+
+void PixmapCanvas::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
+{
+    Gfx::PointF from = transform(p0);
+    Gfx::PointF to = transform(p1);
+    
+    //std::clog << "drawLine: " << from.x() << ", " << from.y()
+    //          << " -> " << to.x() << ", " << to.y() << std::endl;
+
+    beginClip();
+    CGContextMoveToPoint(_context, from.x(), from.y());
+    CGContextAddLineToPoint(_context, to.x(), to.y());
+    CGContextStrokePath(_context);
+    endClip();
+}
+
+
+void PixmapCanvas::onDrawPolyline(const Gfx::Polyline& line)
+{
+    std::size_t n = line.size();
+    if (n < 2)
+        return;
+    
+    beginClip();
+
+    Gfx::PointF first = line.at(0);
+    first = transform(first);
+    CGContextMoveToPoint(_context, points[0].x(), points[0].y());
+
+    for(unsigned i = 1; i < n; i++)
+    {
+        Gfx::PointF p = line.at(i);
+        p = transform(p);
+        CGContextAddLineToPoint(_context, p.x(), p.y());
+    }
+
+    CGContextStrokePath(_context);
+
+    endClip();
+}
+
+
+void PixmapCanvas::onFillPolygon(const Gfx::Polyline& line)
+{
+    std::size_t n = line.size();
+    if (n < 2)
+        return;
+    
+    beginClip();
+
+    Gfx::PointF first = line.at(0);
+    first = transform(first);
+    CGContextMoveToPoint(_context, points[0].x(), points[0].y());
+
+    for(unsigned i = 1; i < n; i++)
+    {
+        Gfx::PointF p = line.at(i);
+        p = transform(p);
+        CGContextAddLineToPoint(_context, p.x(), p.y());
+    }
+    
+    CGContextFillPath(_context);
+    
+    endClip();
+}
+
+
+void PixmapCanvas::onDrawRect(const Gfx::RectF& rect)
+{
+    CGFloat y = _height - rect.y() - rect.height();
+    CGRect cgRect = CGRectMake( rect.x(), y, rect.width(), rect.height() );
+    
+    beginClip();
+    CGContextStrokeRect(_context, cgRect);
+    endClip();
+}
+
+
+void PixmapCanvas::onFillRect(const Gfx::RectF& rect)
+{
+    CGFloat y = _height - rect.y() - rect.height();
+    CGRect cgRect = CGRectMake( rect.x(), y, rect.width(), rect.height() );
+
+    beginClip();
+    CGContextFillRect(_context, cgRect);
+    endClip();
+
+    //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
+    //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
+
+}
+
+void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    CGFloat y = _height - topLeft.y() - size.height();
+    CGRect rect = CGRectMake( topLeft.x(), y, size.width(), size.height() );
+    
+    beginClip();
+    CGContextAddEllipseInRect(_context, rect);
+    CGContextStrokePath(_context);
+    endClip();
+}
+
+
+void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    CGFloat y = _height - topLeft.y() - size.height();
+    CGRect rect = CGRectMake( topLeft.x(), y, size.width(), size.height() );
+    
+    beginClip();
+    CGContextAddEllipseInRect(_context, rect);
+    CGContextFillPath(_context);
+    endClip();
+
+    // double y = _size.height() - topLeft.y() - size.height();
+
+    // double scaleX = size.width() / size.height();
+    // double centerX = (topLeft.x() + size.width() / 2.0) / scaleX;
+    // double centerY = y + size.height() / 2;
+    // double radius = size.height() / 2.0;
+
+    // CGMutablePathRef path = CGPathCreateMutable();
+    // CGAffineTransform transform = CGAffineTransformMakeScale(scaleX, 1);
+    
+    // CGPathAddArc(path, &transform,
+    //              centerX, centerY, radius, 
+    //              0, 2 * 3.1415927, false);
+   
+    // CGContextBeginPath(_context);
+    // CGContextAddPath(_context, path);
+    // CGContextFillPath(_context);
+    // CGPathRelease(path);
+}
+
+
+Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
+{
+    if( ! _paintContext )
+        return Gfx::FontMetrics();
+
+    CTFontRef font = _paintContext->ctFont();
+    return _paintContext->fontMetrics(font, text);
+}
+
+
+void PixmapCanvas::onDrawText(const Gfx::PointF& to, 
+                                   const Pt::String& text, 
+                                   const Gfx::Transform* trans)
+{
+    if( ! _paintContext )
+        return;
+
+    CTFontRef font = _paintContext->ctFont();
+    const Gfx::Pen& pen = _paintContext->pen();
 
     CGColorRef textColor = CGColorCreateGenericRGB(pen.color().red() / 65535.0,
                                                    pen.color().green() / 65535.0,
@@ -354,18 +568,22 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     
     beginClip();
 
-    Gfx::Transform tt = trans;    
-    tt.translate(to.x(), _size.height() - to.y());   
+    if(trans)
+    {
+        Gfx::Transform tt = *trans;    
+        tt.translate(to.x(), _size.height() - to.y());   
 
-    CGAffineTransform tf;
-    tf.a = tt.m11();
-    tf.b = tt.m21();
-    tf.c = tt.m12();
-    tf.d = tt.m22();
-    tf.tx = tt.dx();
-    tf.ty = tt.dy();
+        CGAffineTransform tf;
+        tf.a = tt.m11();
+        tf.b = tt.m21();
+        tf.c = tt.m12();
+        tf.d = tt.m22();
+        tf.tx = tt.dx();
+        tf.ty = tt.dy();
 
-    CGContextConcatCTM(_context, tf);
+        CGContextConcatCTM(_context, tf);
+    }
+
     CGContextSetTextPosition(_context, 0, 0);
     CTLineDraw(line, _context);
     
@@ -380,139 +598,9 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     // ALTERNATIVE: CTRunDraw
 }
 
-
-void PixmapSurfaceImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
-{
-    Gfx::PointF from = transform(f);
-    Gfx::PointF to = transform(t);
-    
-    //std::clog << "drawLine: " << from.x() << ", " << from.y()
-    //          << " -> " << to.x() << ", " << to.y() << std::endl;
-
-    beginClip();
-    CGContextMoveToPoint(_context, from.x(), from.y());
-    CGContextAddLineToPoint(_context, to.x(), to.y());
-    CGContextStrokePath(_context);
-    endClip();
-}
-
-
-void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
-{
-    CGRect cgRect = CGRectMake(rect.x(), 
-                               _size.height() - rect.y() - rect.height(), 
-                               rect.width(), 
-                               rect.height());
-    
-    beginClip();
-    CGContextStrokeRect(_context, cgRect);
-    endClip();
-}
-
-
-void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
-{
-    CGRect cgRect = CGRectMake(rect.x(), 
-                               _size.height() - rect.y() - rect.height(), 
-                               rect.width(), 
-                               rect.height());
-
-    beginClip();
-    CGContextFillRect(_context, cgRect);
-    endClip();
-
-    //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
-    //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
-}
-
-
-Pt::Gfx::PointF PixmapSurfaceImpl::transform(const Pt::Gfx::PointF& p)
-{
-    return Pt::Gfx::PointF( p.x(), _size.height() - p.y() );
-}
-
-
-void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
-{
-    CGRect rect = CGRectMake(topLeft.x(), 
-                             _size.height() - topLeft.y() - size.height(), 
-                             size.width(), 
-                             size.height());
-    
-    beginClip();
-    CGContextAddEllipseInRect(_context, rect);
-    CGContextStrokePath(_context);
-    endClip();
-}
-
-
-void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
-{
-    CGRect rect = CGRectMake(topLeft.x(), 
-                             _size.height() - topLeft.y() - size.height(), 
-                             size.width(), 
-                             size.height());
-    
-    beginClip();
-    CGContextAddEllipseInRect(_context, rect);
-    CGContextFillPath(_context);
-    endClip();
-
-    // double y = _size.height() - topLeft.y() - size.height();
-
-    // double scaleX = size.width() / size.height();
-    // double centerX = (topLeft.x() + size.width() / 2.0) / scaleX;
-    // double centerY = y + size.height() / 2;
-    // double radius = size.height() / 2.0;
-
-    // CGMutablePathRef path = CGPathCreateMutable();
-    // CGAffineTransform transform = CGAffineTransformMakeScale(scaleX, 1);
-    
-    // CGPathAddArc(path, &transform,
-    //              centerX, centerY, radius, 
-    //              0, 2 * 3.1415927, false);
-   
-    // CGContextBeginPath(_context);
-    // CGContextAddPath(_context, path);
-    // CGContextFillPath(_context);
-    // CGPathRelease(path);
-}
-
-
-void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* p, size_t pointCount)
-{
-    std::vector<Gfx::PointF> points(pointCount);
-    
-    for( size_t i = 0; i < pointCount; ++i)
-        points[i] = transform(p[i]);
-    
-    beginClip();
-    CGContextMoveToPoint(_context, points[0].x(), points[0].y());
-    
-    for( size_t i = 1; i < pointCount; ++i)
-        CGContextAddLineToPoint(_context, points[i].x(), points[i].y());
-    
-    CGContextStrokePath(_context);
-    endClip();
-}
-
-
-void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* p, size_t pointCount)
-{
-    std::vector<Gfx::PointF> points(pointCount);
-    
-    for( size_t i = 0; i < pointCount; ++i)
-        points[i] = transform(p[i]);
-    
-    beginClip();
-    CGContextMoveToPoint(_context, points[0].x(), points[0].y());
-    
-    for( size_t i = 1; i < pointCount; ++i)
-        CGContextAddLineToPoint(_context, points[i].x(), points[i].y());
-    
-    CGContextFillPath(_context);
-    endClip();
-}
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& pm)
@@ -623,8 +711,93 @@ void PixmapSurfaceImpl::set(const Gfx::Image& image)
     drawImage(origin, image);
 }
 
+///////////////////////////////////////////////////////////////////////
+// PixmapCanvas
+///////////////////////////////////////////////////////////////////////
 
-const std::string& PixmapSurfaceImpl::defaultFont()
+
+
+///////////////////////////////////////////////////////////////////////
+// PixmapImpl
+///////////////////////////////////////////////////////////////////////
+
+PixmapImpl::PixmapImpl()
+: _canvas(0)
+{
+    _canvas = new PixmapCanvas(*this);
+    setCanvas(_canvas);
+}
+
+
+PixmapImpl::~PixmapImpl()
+{
+    delete _canvas;
+}
+
+
+void PixmapImpl::set(const Gfx::Image& image)
+{
+    _canvas->set(image);
+}
+
+
+Gfx::Image PixmapImpl::toImage() const
+{
+    return _canvas->toImage();
+}
+
+
+void PixmapImpl::clear(const Gfx::Color& c)
+{
+}
+
+
+const Gfx::SizeF& PixmapImpl::size() const
+{
+    return _canvas->physicalSize();
+}
+
+
+void PixmapImpl::resize(const Gfx::SizeF& size)
+{
+    _canvas->resize(size);
+}
+
+
+void PixmapImpl::setScaleFactor(double scaleFactor)
+{
+    _canvas->setScaleFactor(scaleFactor);
+}
+
+
+void PixmapImpl::draw(Gfx::PaintSurface& surface,
+                      const Gfx::Paint& paint,
+                      const Gfx::PointF& to,
+                      const Gfx::RectF* rect) const
+{
+    Gfx::Painter painter(surface);
+    painter.setCompositionMode( paint.compositionMode() );
+    
+    Gfx::Image pixmapImage = toImage();
+    if(rect)
+    {
+        Gfx::RectF imageRect = _canvas->scaling().toPhysical(*rect);
+        painter.drawImage(to, pixmapImage, imageRect);
+    }
+    else
+    {
+        painter.drawImage(to, pixmapImage);
+    }
+}
+
+
+CGContextRef PixmapImpl::context() const
+{
+    return _canvas->deviceContext();
+}
+
+
+const std::string& PixmapImpl::defaultFont()
 {
     return getDefaultFont();
 }
@@ -633,24 +806,6 @@ const std::string& PixmapSurfaceImpl::defaultFont()
 void PixmapSurfaceImpl::setDefaultFont(const std::string& f)
 {
     getDefaultFont() = f;
-}
-
-
-std::string& PixmapSurfaceImpl::getDefaultFont()
-{ 
-    #if PT_IOS
-        //"Helvetica"
-        //"Times New Roman"
-        //"Courier New"
-        static std::string _defaultFont = "Helvetica";
-    #else
-        //"Lucida Grande"
-        //"Times New Roman"
-        //"Monaco"
-        static std::string _defaultFont = "Helvetica";
-    #endif
-            
-    return _defaultFont; 
 }
 
 
@@ -676,6 +831,24 @@ std::vector<std::string> PixmapSurfaceImpl::fontNames()
 
 void PixmapSurfaceImpl::setFontDir(const System::Path& path)
 {
+}
+
+
+std::string& PixmapSurfaceImpl::getDefaultFont()
+{ 
+    #if PT_IOS
+        //"Helvetica"
+        //"Times New Roman"
+        //"Courier New"
+        static std::string _defaultFont = "Helvetica";
+    #else
+        //"Lucida Grande"
+        //"Times New Roman"
+        //"Monaco"
+        static std::string _defaultFont = "Helvetica";
+    #endif
+            
+    return _defaultFont; 
 }
 
 } // namespace
