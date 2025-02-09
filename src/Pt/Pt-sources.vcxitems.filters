@@ -3347,9 +3347,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\KeyMap.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\PaintData.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\PixmapImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
@@ -5242,6 +5239,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\tests\PemData.h">
       <Filter>Pt-Ssl\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\PaintContext.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

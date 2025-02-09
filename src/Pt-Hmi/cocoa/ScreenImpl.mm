@@ -137,12 +137,6 @@ Gfx::PointF ScreenImpl::fromFrame(const WindowImpl& frame,
 // Visual
 ///////////////////////////////////////////////////////////////////////
 
-Visual* ScreenImpl::onGetParent() const
-{
-    return _parent;
-}
-
-
 Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
     double scaling = scaleFactor();
@@ -187,7 +181,7 @@ void ScreenImpl::onProcessEvent(const Event& ev)
 }
 
 
-void ScreenImpl::onRepaintRequest(const Gfx::RectF& rect)
+void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->repaint(rect);
@@ -412,7 +406,7 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         Window* window = *wit;
-        WindowFrame* frame = window->impl();
+        WindowFrame* frame = window->frame();
         
         RescaleEvent ev(*frame, scaling);
         frame->processEvent(ev);
@@ -459,7 +453,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         Window* window = *it;
-        WindowImpl* frame = static_cast<WindowImpl*>( window->impl() );
+        WindowImpl* frame = static_cast<WindowImpl*>( window->frame() );
 
         Gfx::PointF winPos = toFrame( *frame, screenRect.topLeft() );
         Gfx::RectF winRect( winPos, screenRect.size() );
@@ -467,8 +461,8 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );
 
         // send (native) paint event to window
-        winRect = Gfx::RectF( winRect.topLeft() * _scaling, 
-                              winRect.size() * _scaling);
+        winRect = Gfx::RectF( winRect.topLeft() * window->scaleFactor(), 
+                              winRect.size() * window->scaleFactor());
 
         frame->paint(winRect);
     }
@@ -496,7 +490,7 @@ void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
     for( size_t i = 0; i < _windows.size(); ++i)
     {
         Window* w = _windows[i];
-        WindowImpl* frame = static_cast<WindowImpl*>( w->impl() );
+        WindowImpl* frame = static_cast<WindowImpl*>( w->frame() );
 
         frame->onEnable(*w, ev.enabled() );
     }

@@ -28,7 +28,10 @@
 */
 
 #include "PixmapImpl.h"
+#include "PaintContext.h"
 
+#include <Pt/Hmi/Pixmap.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Utf8Codec.h>
 
 namespace Pt {
@@ -63,7 +66,7 @@ void PixmapCanvas::create()
 {
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
-    _context = CGBitmapContextCreate(0, _size.width(), _size.height(),
+    _context = CGBitmapContextCreate(0, _width, _height,
                                      8, 0, colorSpace, 
                                      kCGImageAlphaPremultipliedLast);
 
@@ -115,14 +118,12 @@ const Gfx::SizeF& PixmapCanvas::logicalSize() const
 }
 
 
-void PixmapSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
+void PixmapCanvas::resize(const Pt::Gfx::SizeF& size)
 {
     size_t width = lround( size.width() );
     size_t height = lround( size.height() );
-
-    _size = size;
     
-    if(width ==  0)
+    if(width == 0)
         width = 10;
     
     if(height ==  0)
@@ -204,7 +205,7 @@ void PixmapCanvas::onPenChanged()
     if( ! _paintContext )
         return;
 
-    const Pen& pen = _paintContext->pen();
+    const Gfx::Pen& pen = _paintContext->pen();
 
     CGContextSetRGBStrokeColor(_context, 
                                pen.color().red() / 65535.0,
@@ -295,6 +296,8 @@ void PixmapCanvas::onBrushChanged()
     if( ! _paintContext )
         return;
 
+    const Gfx::Brush& brush = _paintContext->brush();
+
     switch( brush.fillStyle() )
     {
         default:
@@ -318,8 +321,7 @@ void PixmapCanvas::onFontChanged()
     if( ! _paintContext )
         return;
 
-    //_paintData->setFont(font);
-    //_paintContext->ctFont();
+    //_paintContext->font();
 }
 
 
@@ -335,10 +337,10 @@ void PixmapCanvas::onClipChanged()
     }
     else 
     {
-        _clipRect = CGRectMake( clipRect.x(), 
-                                _size.height() - clipRect.y() - clipRect.height(), 
-                                clipRect.width(), 
-                                clipRect.height() );
+        _clipRect = CGRectMake( clipRect->x(), 
+                                _height - clipRect->y() - clipRect->height(), 
+                                clipRect->width(), 
+                                clipRect->height() );
     }
 }
 
@@ -374,7 +376,7 @@ void PixmapCanvas::endClip()
 
 Pt::Gfx::PointF PixmapCanvas::transform(const Pt::Gfx::PointF& p)
 {
-    return Pt::Gfx::PointF( p.x(), _size.height() - p.y() );
+    return Pt::Gfx::PointF( p.x(), _height - p.y() );
 }
 
 
@@ -404,7 +406,7 @@ void PixmapCanvas::onDrawPolyline(const Gfx::Polyline& line)
 
     Gfx::PointF first = line.at(0);
     first = transform(first);
-    CGContextMoveToPoint(_context, points[0].x(), points[0].y());
+    CGContextMoveToPoint(_context, first.x(), first.y());
 
     for(unsigned i = 1; i < n; i++)
     {
@@ -429,7 +431,7 @@ void PixmapCanvas::onFillPolygon(const Gfx::Polyline& line)
 
     Gfx::PointF first = line.at(0);
     first = transform(first);
-    CGContextMoveToPoint(_context, points[0].x(), points[0].y());
+    CGContextMoveToPoint(_context, first.x(), first.y());
 
     for(unsigned i = 1; i < n; i++)
     {
@@ -517,7 +519,7 @@ Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
     if( ! _paintContext )
         return Gfx::FontMetrics();
 
-    CTFontRef font = _paintContext->ctFont();
+    CTFontRef font = _paintContext->font();
     return _paintContext->fontMetrics(font, text);
 }
 
@@ -529,7 +531,7 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     if( ! _paintContext )
         return;
 
-    CTFontRef font = _paintContext->ctFont();
+    CTFontRef font = _paintContext->font();
     const Gfx::Pen& pen = _paintContext->pen();
 
     CGColorRef textColor = CGColorCreateGenericRGB(pen.color().red() / 65535.0,
@@ -574,7 +576,7 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     if(trans)
     {
         Gfx::Transform tt = *trans;    
-        tt.translate(to.x(), _size.height() - to.y());   
+        tt.translate( to.x(), _height - to.y() );   
 
         CGAffineTransform tf;
         tf.a = tt.m11();
@@ -601,7 +603,7 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     // ALTERNATIVE: CTRunDraw
 }
 
-void PixmapCanvas::onDrawImage(const Gfx::PointF& toF, 
+void PixmapCanvas::onDrawImage(const Gfx::PointF& to, 
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
@@ -623,7 +625,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
                                         NULL, false, kCGRenderingIntentDefault);
 
     CGRect contextRect = CGRectMake( to.x(), 
-                                     _size.height() - to.y() - image.height(), 
+                                     _height - to.y() - image.height(), 
                                      image.width(), 
                                      image.height() );
 
@@ -657,7 +659,7 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& to,
                                 const PixmapImpl& pixmap,
                                 const Gfx::RectF* rect)
 {
-    CGImageRef image = CGBitmapContextCreateImage( pixmap->context() );
+    CGImageRef image = CGBitmapContextCreateImage( pixmap.context() );
 
     if(rect)
     {
@@ -669,9 +671,9 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& to,
         CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
 
         CGRect destRect = CGRectMake(to.x(), 
-                                     _size.height() - to.y() - rect->height(), 
-                                     rect->.width(), 
-                                     rect->size().height());
+                                     _height - to.y() - rect->height(), 
+                                     rect->width(), 
+                                     rect->height());
         beginClip();
         CGContextDrawImage(_context, destRect, subImage);
         endClip();
@@ -680,10 +682,10 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& to,
     }
     else
     {
-        CGRect rect = CGRectMake(to.x(), 
-                                 _height - to.y() - pixmap.size().height(), 
-                                 pixmap.size().width(), 
-                                 pixmap.size().height());
+        CGRect destRect = CGRectMake(to.x(), 
+                                     _height - to.y() - pixmap.size().height(), 
+                                     pixmap.size().width(), 
+                                     pixmap.size().height());
         beginClip();
         CGContextDrawImage(_context, destRect, image);
         endClip();
@@ -768,7 +770,7 @@ void PixmapImpl::draw(Gfx::PaintSurface& surface,
 
 CGContextRef PixmapImpl::context() const
 {
-    return _canvas->deviceContext();
+    return _canvas->context();
 }
 
 
@@ -778,13 +780,13 @@ const std::string& PixmapImpl::defaultFont()
 }
 
 
-void PixmapSurfaceImpl::setDefaultFont(const std::string& f)
+void PixmapImpl::setDefaultFont(const std::string& f)
 {
     getDefaultFont() = f;
 }
 
 
-std::vector<std::string> PixmapSurfaceImpl::fontNames()
+std::vector<std::string> PixmapImpl::fontNames()
 {
     std::vector<std::string> fonts;
 
@@ -804,12 +806,12 @@ std::vector<std::string> PixmapSurfaceImpl::fontNames()
 }
 
 
-void PixmapSurfaceImpl::setFontDir(const System::Path& path)
+void PixmapImpl::setFontDir(const System::Path& path)
 {
 }
 
 
-std::string& PixmapSurfaceImpl::getDefaultFont()
+std::string& PixmapImpl::getDefaultFont()
 { 
     #if PT_IOS
         //"Helvetica"

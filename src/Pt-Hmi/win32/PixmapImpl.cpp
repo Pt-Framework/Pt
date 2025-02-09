@@ -32,7 +32,7 @@
 #include "PaintContext.h"
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/PixmapSurface.h>
+#include <Pt/Hmi/Pixmap.h>
 #include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Algorithm.h>

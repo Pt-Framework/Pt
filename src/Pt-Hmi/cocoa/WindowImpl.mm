@@ -23,15 +23,16 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
-#include "ApplicationImpl.h"
-#include "ScreenImpl.h"
 #include "WindowImpl.h"
+#include "ScreenImpl.h"
+#include "PixmapImpl.h"
+#include "ApplicationImpl.h"
 #include "WindowView.h"
-#include "PixmapSurfaceImpl.h"
+
 #include "KeyMap.h"
 
 #include <Pt/Hmi/Application.h>
@@ -112,9 +113,9 @@ WindowImpl::~WindowImpl()
 
 void WindowImpl::onInit(Window& w)
 {
-    Gfx::PaintSurface& surface = this->surface();
+    Gfx::PaintSurface* surface = pixmap().surface();
     Gfx::PointF surfacePos(0, 0);
-    w.setSurface(&surface, surfacePos);
+    w.setSurface(surface, surfacePos);
 
     w.setNextResponder(this);
 
@@ -334,8 +335,8 @@ void WindowImpl::onProcessShowEvent(const ShowEvent& ev)
 {
     Base::onProcessShowEvent(ev);
 
-    ShowEvent rev( _window, ev.visible() );
-    _window.processEvent(rev);
+    ShowEvent rev( _client, ev.visible() );
+    _client.processEvent(rev);
 }
 
 
@@ -439,7 +440,7 @@ void WindowImpl::onEnableEvent(const EnableEvent& ev)
 //}
 
 
-void WindowImpl::onMove(Window& w, const Gfx::PointF& to)
+void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
     //std::clog << "MOVE: " << p.x() << "," 
     //                      << p.y() << std::endl;
@@ -449,8 +450,8 @@ void WindowImpl::onMove(Window& w, const Gfx::PointF& to)
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
 
-    CGFloat y = screenHeight - p.y() / scaling - windowHeight;
-    NSPoint origin = NSMakePoint(p.x() / scaling, y);
+    CGFloat y = screenHeight - pos.y() / scaling - windowHeight;
+    NSPoint origin = NSMakePoint(pos.x() / scaling, y);
 
     [_window setFrameOrigin:origin];
 }
@@ -586,13 +587,13 @@ void WindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
-                                                const Gfx::SizeF& maxSize)
+void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF, 
+                                            const Gfx::SizeF& maxSizeF)
 {
-    NSSize minSize = NSMakeSize( minSize.width(), minSize.height() );
+    NSSize minSize = NSMakeSize( minSizeF.width(), minSizeF.height() );
     [_window setMinSize:minSize];
 
-    NSSize maxSize = NSMakeSize( maxSize.width(), maxSize.height() );
+    NSSize maxSize = NSMakeSize( maxSizeF.width(), maxSizeF.height() );
     [_window setMaxSize:maxSize];
 }
 
@@ -639,7 +640,7 @@ void WindowImpl::onPaint(const NSRect& rect)
 
     Gfx::RectF paintRect(pos, size);
 
-    WindowFrame* frame = window.frame();
+    WindowFrame* frame = window->frame();
     PaintEvent pev(*frame, paintRect);
     frame->processEvent(pev);
 
@@ -647,7 +648,7 @@ void WindowImpl::onPaint(const NSRect& rect)
     CGContextRef windowContext = [graphicsContext CGContext];
 
     WindowImpl* windowImpl = static_cast<WindowImpl*>( window->frame() );
-    Pt::Hmi::PixmapSurfaceImpl* pixmap = windowImpl->surface().pixmapImpl();
+    Pt::Hmi::PixmapImpl* pixmap = windowImpl->pixmap().impl();
     CGContextRef pixmapContext = pixmap->context();
     
     CGImageRef image = CGBitmapContextCreateImage(pixmapContext);
@@ -782,7 +783,7 @@ void WindowImpl::onClosing()
     WindowFrame* frame = this;
 
     CloseEvent ev(*frame);
-    commitEvent(ev);
+    Pt::Hmi::Application::instance().commitEvent(ev);
 }
 
 

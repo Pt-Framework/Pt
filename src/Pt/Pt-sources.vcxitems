@@ -1513,7 +1513,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\ApplicationImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\CursorImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\KeyMap.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\PaintData.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\PaintContext.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\PixmapImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\ScreenImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Hmi\cocoa\WindowImpl.h" />

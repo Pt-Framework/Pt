@@ -60,6 +60,8 @@ class ScrollEvent;
 
 class ScreenImpl : public WindowManager
 {
+    typedef WindowManager Base;
+
     friend class WindowImpl;
 
     public:

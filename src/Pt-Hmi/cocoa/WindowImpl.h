@@ -22,8 +22,8 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #ifndef PT_HMI_WINDOW_IMPL_H
@@ -37,7 +37,6 @@
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/WindowFrame.h>
-#include <Pt/Connectable.h>
 
 #ifdef __OBJC__
     #import <AppKit/NSWindow.h>
@@ -63,7 +62,6 @@ namespace Hmi {
 class ScreenImpl;
 
 class WindowImpl : public WindowFrame
-                 , public Pt::Connectable
 {
     typedef WindowFrame Base;
 
@@ -83,28 +81,6 @@ class WindowImpl : public WindowFrame
 
         void paint(const Gfx::RectF& rect);
 
-        //void show(bool v);
-    
-        //void activate();
-
-        //void enable(bool e);  
-       
-        //void move(const Gfx::PointF& pos);
-
-        //void resize(const Gfx::SizeF& size);
-
-        //void setAbove(bool isTop);
-
-        //void setIcon(const Gfx::Image& p);
-
-        //void setTitle(const std::string& text);
-
-        //void setState(const WindowState& s);
-
-        //void setMinimumSize(const Gfx::SizeF& s);
-    
-        //void setMaximumSize(const Gfx::SizeF& s);
-
     public:
         NSView* view()
         { 
@@ -114,6 +90,7 @@ class WindowImpl : public WindowFrame
         NSWindow* window()
         {
             return _window;
+        }
 
     public:
         void onPaint(const NSRect& rect);

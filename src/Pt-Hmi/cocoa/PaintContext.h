@@ -27,18 +27,20 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_PaintData_h
-#define Pt_Hmi_PaintData_h
+#ifndef PT_HMI_COCOA_PAINTCONTEXT_H
+#define PT_HMI_COCOA_PAINTCONTEXT_H
 
-#include "PixmapSurfaceImpl.h"
+#include "PixmapImpl.h"
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PaintContext.h>
+
 #include <Pt/String.h>
 #include <Pt/Utf8Codec.h>
 
@@ -48,41 +50,63 @@ namespace Pt {
 
 namespace Hmi {
 
-class PaintData : public Gfx::PaintData
+class PaintContext : public Gfx::PaintContext
 {
     public:
-        PaintData()
+        PaintContext()
         : _font(nil)
+        , _hasClip(false)
         { 
         }
 
-        ~PaintData()
+        ~PaintContext()
         {
           if(_font)
             CFRelease(_font);
         }
 
-        void setPen(const Gfx::Pen& pen)
+        const Gfx::CompositionMode& compositionMode() const
         {
+            return _compositionMode;
         }
 
-        void setBrush(const Gfx::Brush& brush)
+        const Gfx::Pen& pen() const
         {
+            return _pen;
         }
 
-        void setClip(const Gfx::RectF& rectF)
+        const Gfx::Brush& brush() const
         {
+            return _brush;
         }
 
-        void resetClip()
+        CTFontRef font() const
         {
+            return _font;
         }
 
-        void setCompositionMode(const Gfx::CompositionMode& mode)
+        const Gfx::RectF* clipRect() const
         {
+            return _hasClip ? &_clip : 0;
         }
 
-        void setFont(const Gfx::Font& font)
+    protected:
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override
+        {
+            _compositionMode = mode;
+        }
+
+        virtual void onSetPen(const Gfx::Pen& pen) override
+        {
+            _pen = pen;
+        }
+
+        virtual void onSetBrush(const Gfx::Brush& brush) override
+        {
+            _brush = brush;
+        }
+
+        virtual void onSetFont(const Gfx::Font& font) override
         {
             CTFontRef f = createCTFont(font);
 
@@ -92,11 +116,22 @@ class PaintData : public Gfx::PaintData
             _font = f;
         }
 
-        CTFontRef ctFont() const
+        virtual void onSetClip(const Gfx::RectF* clip) override
         {
-            return _font;
+          _hasClip = clip != 0;
+          if(clip)
+              _clip = *clip;
         }
-        
+
+    private:
+        Gfx::CompositionMode      _compositionMode;
+        Gfx::Pen                  _pen;
+        Gfx::Brush                _brush;
+        CTFontRef                 _font;
+        Gfx::RectF                _clip;
+        bool                      _hasClip;
+
+    public:
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
                                             const Pt::String& text)
         {   
@@ -162,7 +197,7 @@ class PaintData : public Gfx::PaintData
             //std::clog << "font: " << font.name() 
             //          << "size: " << font.size() << std::endl;
 
-            const char* fontName = font.name().empty() ? PixmapSurfaceImpl::defaultFont().c_str()
+            const char* fontName = font.name().empty() ? PixmapImpl::defaultFont().c_str()
                                                        : font.name().c_str();
 
             const char* fontStyle = font.style().c_str();
@@ -223,9 +258,6 @@ class PaintData : public Gfx::PaintData
             
             //return f;
         }
-
-    private:
-        CTFontRef _font;
 };
 
 } // namespace

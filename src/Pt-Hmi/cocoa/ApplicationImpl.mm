@@ -28,7 +28,7 @@
 */
 
 #import "ApplicationImpl.h"
-#import "PixmapSurfaceImpl.h"
+#import "PixmapImpl.h"
 #import "WindowImpl.h"
 
 #import <AppKit/NSApplication.h>
@@ -185,7 +185,7 @@ ApplicationImpl::~ApplicationImpl()
 
 void ApplicationImpl::setDefaultFont(const std::string& fontName)
 {
-    PixmapSurfaceImpl::setDefaultFont(fontName);
+    PixmapImpl::setDefaultFont(fontName);
 }
 
 
