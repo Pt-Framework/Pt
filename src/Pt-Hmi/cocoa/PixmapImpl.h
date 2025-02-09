@@ -161,6 +161,21 @@ class PixmapCanvas : public Gfx::Canvas
         void endClip();
 
         Pt::Gfx::PointF transform(const Pt::Gfx::PointF& p);
+
+    private:
+        Gfx::SizeF     _physicalSize;
+        Gfx::SizeF     _logicalSize;
+        Gfx::Scaling   _scaling;
+
+        size_t         _width;
+        size_t         _height;
+
+        CGContextRef   _context;
+        PaintContext*  _paintContext;
+
+        Gfx::CompositionMode _compositionMode;
+        CGRect               _clipRect;
+
 };
 
 
@@ -211,109 +226,6 @@ class PixmapImpl : public Gfx::PaintSurface
 
     private:
         PixmapCanvas*  _canvas;
-};
-
-
-class PixmapSurfaceImpl 
-{
-    public:
-        const Gfx::SizeF& size() const;
-
-        void resize(const Pt::Gfx::SizeF& size);
-
-        void begin(Gfx::Painter& painter);  
-        
-        void finish();
-
-        const Gfx::ImageFormat& format() const;
-
-        void setScaleFactor(double scaling)
-        {
-        }
-
-        void setClip(const Gfx::RectF& clip);
-
-        void resetClip();
-
-        void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        void setPen(const Gfx::Pen& pen);
-
-        void setBrush(const Gfx::Brush& brush);
-
-        void setFont(const Gfx::Font& font);
-
-        Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        void drawText(const Gfx::PointF& to, const Pt::String& text, 
-                      const Gfx::Transform& trans);
-
-        void drawRect(const Gfx::RectF& rect);
-
-        void fillRect(const Gfx::RectF& rect);
-
-        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        void drawPolyline(const Gfx::PointF* points, size_t pointCount);
-
-        void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        void drawPath(const Gfx::Path& path, float smoothness)
-        {}
-
-        void fillPath(const Gfx::Path& path, float smoothness)
-        {}
-
-        void drawSurface(const Gfx::PointF& to, const PixmapSurface& surface);
-
-        void drawSurface(const Gfx::PointF& to, 
-                         const PixmapSurface& pm,
-                         const Gfx::RectF& pmRect);
-
-        void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        void drawImage(const Gfx::PointF& to, 
-                       const Gfx::Image& image, 
-                       const Gfx::RectF& imgRect);
-
-        Pt::Gfx::PointF transform(const Pt::Gfx::PointF& p);
-
-        Gfx::Image toImage() const;
-
-        void set(const Gfx::Image& image);
-
-        static const std::string& defaultFont();
-
-        static void setDefaultFont(const std::string& name);
-
-        static std::string& getDefaultFont();
-
-        static std::vector<std::string> fontNames();
-
-        static void setFontDir(const System::Path& path);
-
-        CGContextRef context() const
-        { return _context; }
-
-    private:
-        void create();
-    
-        void destroy();
-
-        void beginClip();
-
-        void endClip();
-    
-    private:
-        Gfx::SizeF     _size;
-        PaintData*     _paintData;
-        Gfx::Painter*  _painter;
-        CGContextRef   _context;
-        CGRect         _clipRect;
 };
 
 } // namespace

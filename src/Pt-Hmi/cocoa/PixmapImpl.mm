@@ -41,9 +41,12 @@ namespace Hmi {
 
 PixmapCanvas::PixmapCanvas(Gfx::PaintSurface& surface)
 : Gfx::Canvas(surface)
-, _size(10, 10)
-, _painter(0)
+, _physicalSize(0, 0)
+, _width(0)
+, _height(0)
 , _context(0)
+, _paintContext(0)
+, _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _clipRect(CGRectNull)
 {
     create();
@@ -598,73 +601,19 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     // ALTERNATIVE: CTRunDraw
 }
 
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& pm)
-{
-    //std::clog << "drawSurface: " <<  pm.pixmapImpl()->context()
-    //          << " to: " << _context << std::endl;
-    
-    CGImageRef image =  CGBitmapContextCreateImage( pm.pixmapImpl()->context() );
-    
-    CGRect rect = CGRectMake(to.x(), 
-                             _size.height() - to.y() - pm.size().height(), 
-                             pm.size().width(), 
-                             pm.size().height());
-    
-    //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
-    //CGContextFillRect(_context, rect);
-    //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
-
-    beginClip();
-    CGContextDrawImage(_context, rect, image);
-    endClip();
-
-    CGImageRelease(image);
-}
-
-
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
-                                    const PixmapSurface& pm,
-                                    const Gfx::RectF& pmRect)
-{
-    CGImageRef image =  CGBitmapContextCreateImage( pm.pixmapImpl()->context() );
-
-    CGRect subRect = CGRectMake(pmRect.left(), 
-                                pmRect.top(), 
-                                pmRect.size().width(), 
-                                pmRect.size().height());
-
-    CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
-
-    CGRect rect = CGRectMake(to.x(), 
-                             _size.height() - to.y() - pmRect.size().height(), 
-                             pmRect.size().width(), 
-                             pmRect.size().height());
-    
-    beginClip();
-    CGContextDrawImage(_context, rect, subImage);
-    endClip();
-
-    CGImageRelease(image);
-}
-
-
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
+void PixmapCanvas::onDrawImage(const Gfx::PointF& toF, 
+                               const Gfx::Image& image,
+                               const Gfx::RectF* rect)
 {
     if( image.empty() )
         return;
 
     const Pt::uint8_t* data = image.data();
-    std::size_t dataSize = image.format().imageSize( image.size(), image.padding() );
+    std::size_t dataSize = image.format().imageSize( image.width(), 
+                                                     image.height(), 
+                                                     image.padding() );
 
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, 
-                                                              data, 
-                                                              dataSize, 
-                                                              NULL);
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Little|kCGImageAlphaFirst;
     
@@ -688,34 +637,60 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image
 }
 
 
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, 
-                                  const Gfx::Image& image, 
-                                  const Gfx::RectF& imgRect)
+bool PixmapCanvas::onDrawLayer(const Gfx::PointF& to,
+                               const Gfx::PaintLayer& layer,
+                               const Gfx::RectF* rect)
 {
-    //TODO
+    const Gfx::PaintSurface* layerSurface = layer.surface();
+    const PixmapImpl* pixmap = dynamic_cast<const PixmapImpl*>(layerSurface);
+    if(pixmap)
+    {
+        onDrawPixmap(to, *pixmap, rect);
+        return true;
+    }
+
+    return false;
 }
 
 
-Gfx::Image PixmapSurfaceImpl::toImage() const
+void PixmapCanvas::onDrawPixmap(const Gfx::PointF& to, 
+                                const PixmapImpl& pixmap,
+                                const Gfx::RectF* rect)
 {
-  return Gfx::Image();
+    CGImageRef image = CGBitmapContextCreateImage( pixmap->context() );
+
+    if(rect)
+    {
+        CGRect subRect = CGRectMake(rect->left(), 
+                                    rect->top(), 
+                                    rect->size().width(), 
+                                    rect->size().height());
+
+        CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
+
+        CGRect destRect = CGRectMake(to.x(), 
+                                     _size.height() - to.y() - rect->height(), 
+                                     rect->.width(), 
+                                     rect->size().height());
+        beginClip();
+        CGContextDrawImage(_context, destRect, subImage);
+        endClip();
+
+        CGImageRelease(subImage);
+    }
+    else
+    {
+        CGRect rect = CGRectMake(to.x(), 
+                                 _height - to.y() - pixmap.size().height(), 
+                                 pixmap.size().width(), 
+                                 pixmap.size().height());
+        beginClip();
+        CGContextDrawImage(_context, destRect, image);
+        endClip();
+    }
+
+    CGImageRelease(image);
 }
-
-
-void PixmapSurfaceImpl::set(const Gfx::Image& image)
-{
-    resize( Gfx::SizeF( image.size().width(), 
-                        image.size().height() ) );
-
-    Gfx::PointF origin(0, 0);
-    drawImage(origin, image);
-}
-
-///////////////////////////////////////////////////////////////////////
-// PixmapCanvas
-///////////////////////////////////////////////////////////////////////
-
-
 
 ///////////////////////////////////////////////////////////////////////
 // PixmapImpl
