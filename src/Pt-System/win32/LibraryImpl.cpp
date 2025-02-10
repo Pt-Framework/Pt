@@ -28,6 +28,7 @@
 #include "win32.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/Path.h"
+#include <sstream>
 
 namespace Pt {
 
@@ -46,7 +47,13 @@ void LibraryImpl::open(const Path& path)
 
     if(_handle == 0)
     {
-        throw AccessFailed( path.toString().narrow() ); // TODO: convert to UTF-8
+        DWORD err = GetLastError();
+
+        std::stringstream ss;
+
+        ss << path.toString().narrow() << " (" << err<<")"<<std::endl; // TODO: convert to UTF-8
+
+        throw AccessFailed( ss.str() ); 
     }
 }
 

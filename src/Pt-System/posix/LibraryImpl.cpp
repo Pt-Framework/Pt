@@ -50,7 +50,7 @@ void LibraryImpl::open(const Path& path)
     {
         std::stringstream ss;
         ss << path.impl()->c_str() << " (" << ::dlerror() << ")" << std::endl;
-        throw AccessFailed(path.impl()->c_str());
+        throw AccessFailed(ss.str());
     }
 }
 
