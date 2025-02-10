@@ -620,11 +620,6 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF,
 
 void WindowImpl::onViewPaint(const NSRect& rect)
 {
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-
     //std::clog << "ON PAINT: " << rect.size.width << "x" 
     //                          << rect.size.height << std::endl;
 
@@ -632,8 +627,8 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     NSRect contentRect = [_window contentRectForFrameRect:frameRect];
     CGFloat contentHeight = contentRect.size.height;
 
-    double x = contentHeight - (rect.origin.x + rect.size.height);
-    double y = rect.origin.y;
+    double x = rect.origin.x;
+    double y = contentHeight - (rect.origin.y + rect.size.height);
     Pt::Gfx::PointF pos(x, y);
 
     double width = rect.size.width;
@@ -645,18 +640,13 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     size = size / scaling;
 
     Gfx::RectF paintRect(pos, size);
-
-    WindowFrame* frame = window->frame();
-    PaintEvent pev(*frame, paintRect);
-    frame->processEvent(pev);
+    PaintEvent pev(*this, paintRect);
+    processEvent(pev);
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
 
-    WindowImpl* windowImpl = static_cast<WindowImpl*>( window->frame() );
-    Pt::Hmi::PixmapImpl* pixmap = windowImpl->pixmap().impl();
-    CGContextRef pixmapContext = pixmap->context();
-    
+    CGContextRef pixmapContext = pixmap().impl()->context();
     CGImageRef image = CGBitmapContextCreateImage(pixmapContext);
     CGFloat imageHeight = CGImageGetHeight(image);
 
