@@ -111,6 +111,7 @@ WindowImpl::~WindowImpl()
     _view = nil;
 }
 
+
 void WindowImpl::onInit(Window& w)
 {
     Gfx::PaintSurface* surface = pixmap().surface();
@@ -164,25 +165,6 @@ void WindowImpl::setType(WindowType type)
     //     [_window setTitleVisibility: NSWindowTitleVisible];
     //     [_window setOpaque:YES];
     // }
-}
-
-
-void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
-{
-    double scaling = ev.scaleFactor();
-    scaling *= [_window backingScaleFactor];
-
-    RescaleEvent rev(*this, scaling);
-    Base::onProcessRescaleEvent(rev);
-
-    RescaleEvent rev2(_client, scaling);
-    _client.processEvent(rev2);
-}
-
-
-void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
-{
-    Base::onRescaleEvent(ev);
 }
 
 
@@ -254,6 +236,9 @@ void WindowImpl::paint(const Gfx::RectF& rect)
 {
     Gfx::RectF r( rect.topLeft(), rect.size() );
 
+    //std::clog << "PAINT RECT: " << rect.x() << "," << rect.y() <<
+    //                   " " << rect.width() << "x" << rect.height() << std::endl;
+
     NSRect frameRect = [_window frame];
     NSRect contentRect = [_window contentRectForFrameRect:frameRect];
     CGFloat contentHeight = contentRect.size.height;
@@ -274,8 +259,8 @@ void WindowImpl::paint(const Gfx::RectF& rect)
 void WindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
 {
     Gfx::PointF screenPos = toScreen( rect.topLeft() );
-    
     Gfx::RectF screenRect( screenPos, rect.size() );
+    
     _wm.repaint(screenRect);
 }
 
@@ -292,6 +277,25 @@ void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 void WindowImpl::onPaintEvent(const PaintEvent& ev)
 {
     Base::onPaintEvent(ev);
+}
+
+
+void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
+{
+    double scaling = ev.scaleFactor();
+    //scaling *= [_window backingScaleFactor];
+
+    RescaleEvent rev(*this, scaling);
+    Base::onProcessRescaleEvent(rev);
+
+    RescaleEvent wev(_client, scaling);
+    _client.processEvent(wev);
+}
+
+
+void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
 }
 
 
@@ -319,6 +323,7 @@ void WindowImpl::onShow(Window& w, bool visible)
 
     if(visible)
     {
+        [_view setHidden:YES];
         [_view setHidden:NO];
         [_window orderFrontRegardless];
         //[_window makeKeyAndOrderFront:nil];
@@ -326,6 +331,7 @@ void WindowImpl::onShow(Window& w, bool visible)
     else
     {
         [_window orderOut:_window];
+        [_view setHidden:NO];
         [_view setHidden:YES];
     }
 }
@@ -612,7 +618,7 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF,
 //}
 
 
-void WindowImpl::onPaint(const NSRect& rect)
+void WindowImpl::onViewPaint(const NSRect& rect)
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
@@ -672,7 +678,7 @@ void WindowImpl::onPaint(const NSRect& rect)
 }
 
 
-void WindowImpl::onActivate(bool isActive)
+void WindowImpl::onViewActivate(bool isActive)
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
@@ -684,7 +690,7 @@ void WindowImpl::onActivate(bool isActive)
 }
 
 
-void WindowImpl::onShow(bool v)
+void WindowImpl::onViewShow(bool v)
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
@@ -696,7 +702,7 @@ void WindowImpl::onShow(bool v)
 }
 
 
-void WindowImpl::onMove()
+void WindowImpl::onViewMove()
 {
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
@@ -721,7 +727,7 @@ void WindowImpl::onMove()
 }
 
 
-void WindowImpl::onResize(const NSSize& viewSize)
+void WindowImpl::onViewResize(const NSSize& viewSize)
 {   
     //std::clog << "RESIZE: " << viewSize.width << "x" 
     //                        << viewSize.height << std::endl;
@@ -768,7 +774,14 @@ void WindowImpl::onResize(const NSSize& viewSize)
 }
 
 
-void WindowImpl::onClosing()
+void WindowImpl::onViewDidRescale()
+{
+    CGFloat scale = [ _window backingScaleFactor ];
+    std::clog << "BACKING SCALE FACTOR: " << scale << std::endl;
+}
+
+
+void WindowImpl::onViewClosing()
 {
     //ScreenImpl* screen = Application::instance().screen().impl();
     //Window* window = screen->findWindow(_window);
@@ -813,7 +826,7 @@ void WindowImpl::onCloseEvent(const CloseEvent& ev)
 }
 
 
-void WindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
+void WindowImpl::onViewKeyDown(unsigned vkey, Pt::Char ch)
 {
     //std::clog << "KEY DOWN: " << vkey << std::endl;
 
@@ -839,7 +852,7 @@ void WindowImpl::onKeyDown(unsigned vkey, Pt::Char ch)
 }
 
 
-void WindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
+void WindowImpl::onViewKeyUp(unsigned vkey, Pt::Char ch)
 {
     //std::clog << "KEY UP: " << vkey << std::endl;
 
@@ -865,7 +878,7 @@ void WindowImpl::onKeyUp(unsigned vkey, Pt::Char ch)
 }
 
 
-void WindowImpl::onKeyModifier(unsigned int mask)
+void WindowImpl::onViewKeyModifier(unsigned int mask)
 {
     //std::clog << "KEY MODIFIER: " << mask << std::endl;
 
@@ -929,7 +942,7 @@ void WindowImpl::onKeyModifier(unsigned int mask)
 }
 
 
-void WindowImpl::onLMouseDown(double x, double y)
+void WindowImpl::onViewLMouseDown(double x, double y)
 {
     //std::clog << "MOUSE PRESS: " << x << ", " << y << std::endl;
 
@@ -954,7 +967,7 @@ void WindowImpl::onLMouseDown(double x, double y)
 }
 
 
-void WindowImpl::onLMouseUp(double x, double y)
+void WindowImpl::onViewLMouseUp(double x, double y)
 {
     //std::clog << "MOUSE RELEASE: " << x << ", " << y << std::endl;
 
@@ -979,7 +992,7 @@ void WindowImpl::onLMouseUp(double x, double y)
 }
 
 
-void WindowImpl::onMouseMove(double x, double y)
+void WindowImpl::onViewMouseMove(double x, double y)
 {
     //std::clog << "MOUSE MOVE: " << x << ", " << y << std::endl;
 

@@ -72,7 +72,6 @@ class WindowImpl : public WindowFrame
 
         virtual ~WindowImpl();
 
-        
         void setType(WindowType type);
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
@@ -92,30 +91,31 @@ class WindowImpl : public WindowFrame
             return _window;
         }
 
-    public:
-        void onPaint(const NSRect& rect);
+        void onViewPaint(const NSRect& rect);
 
-        void onActivate(bool isActive);
+        void onViewActivate(bool isActive);
 
-        void onShow(bool v);
+        void onViewShow(bool v);
 
-        void onMove();
+        void onViewMove();
 
-        void onResize(const NSSize& frameSize);
+        void onViewResize(const NSSize& frameSize);
 
-        void onClosing();
+        void onViewDidRescale();
 
-        void onKeyDown(unsigned key, Pt::Char ch);
+        void onViewClosing();
 
-        void onKeyUp(unsigned key, Pt::Char ch);
+        void onViewKeyDown(unsigned key, Pt::Char ch);
 
-        void onKeyModifier(unsigned int mask);
+        void onViewKeyUp(unsigned key, Pt::Char ch);
 
-        void onLMouseDown(double x, double y);
+        void onViewKeyModifier(unsigned int mask);
 
-        void onLMouseUp(double x, double y);
+        void onViewLMouseDown(double x, double y);
 
-        void onMouseMove(double x, double y);
+        void onViewLMouseUp(double x, double y);
+
+        void onViewMouseMove(double x, double y);
 
     protected:
         virtual void onInit(Window& w);

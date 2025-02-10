@@ -72,8 +72,8 @@ void PixmapCanvas::create()
 
     CGColorSpaceRelease(colorSpace);
 
-    //std::clog << "PIXMAP: " << _context << " " << _size.width() << "x" 
-    //                        << _size.height() << std::endl;
+    //std::clog << "PIXMAP: " << _context << " " << _width << "x" 
+    //                        << _height << std::endl;
 }
 
 
@@ -470,6 +470,7 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& rect)
     //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
 
 }
+
 
 void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {

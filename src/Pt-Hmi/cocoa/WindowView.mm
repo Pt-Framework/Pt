@@ -99,7 +99,7 @@
 
     Pt::Char ch(u16Char);
     
-    _windowImpl->onKeyDown(keyCode, ch);
+    _windowImpl->onViewKeyDown(keyCode, ch);
 }
 
 
@@ -125,20 +125,20 @@
 
     Pt::Char ch(u16Char);
     
-    _windowImpl->onKeyUp(keyCode, ch);
+    _windowImpl->onViewKeyUp(keyCode, ch);
 }
 
 
 - (void) flagsChanged: (NSEvent*) ev
 {
     unsigned int mod = [ev modifierFlags];
-    _windowImpl->onKeyModifier(mod);
+    _windowImpl->onViewKeyModifier(mod);
 }
 
 
 - (void) drawRect: (NSRect) rect
 {
-    _windowImpl->onPaint(rect);
+    _windowImpl->onViewPaint(rect);
 }
 
 
@@ -159,7 +159,7 @@
     
     [super setFrameSize:frameSize];
     
-    _windowImpl->onResize(frameSize);
+    _windowImpl->onViewResize(frameSize);
 }
 
 
@@ -173,7 +173,7 @@
     // _windowImpl->onLMouseDown(point.x, point.y);
 
     NSPoint mp = [ev locationInWindow];
-    _windowImpl->onLMouseDown(mp.x, mp.y);
+    _windowImpl->onViewLMouseDown(mp.x, mp.y);
 }
 
 
@@ -181,7 +181,7 @@
 {
     //std::clog << "MOUSE UP" << std::endl;
     NSPoint mp = [ev locationInWindow];
-    _windowImpl->onLMouseUp(mp.x, mp.y);
+    _windowImpl->onViewLMouseUp(mp.x, mp.y);
 }
 
 
@@ -189,7 +189,7 @@
 {
     //std::clog << "MOUSE DRAGGED" << std::endl;
     NSPoint mp = [ev locationInWindow];
-    _windowImpl->onMouseMove(mp.x, mp.y);
+    _windowImpl->onViewMouseMove(mp.x, mp.y);
 }
 
 
@@ -198,21 +198,21 @@
     // static int nnn = 0;
     // std::clog << "MOUSE MOVED " << nnn++ << std::endl;
     NSPoint mp = [ev locationInWindow];
-    _windowImpl->onMouseMove(mp.x, mp.y);
+    _windowImpl->onViewMouseMove(mp.x, mp.y);
 }
 
 
 - (void) viewDidUnhide;
 {
     //std::clog << "VIEW UNHIDE" << std::endl;
-    _windowImpl->onShow(true);
+    _windowImpl->onViewShow(true);
 }
 
 
 - (void) viewDidHide;
 {
     //std::clog << "VIEW HIDE" << std::endl;
-    _windowImpl->onShow(false);
+    _windowImpl->onViewShow(false);
 }
 
 
@@ -225,7 +225,7 @@
 
 - (void) windowDidMove: (NSNotification*) notification
 {
-    _windowImpl->onMove();
+    _windowImpl->onViewMove();
 }
 
 
@@ -251,14 +251,14 @@
 - (void) windowDidBecomeKey:(NSNotification*) notification
 {
     //std::clog << "WINDOW BECAME KEY" << std::endl;
-    _windowImpl->onActivate(true);
+    _windowImpl->onViewActivate(true);
 }
 
 
 - (void) windowDidResignKey:(NSNotification*) notification
 {
     //std::clog << "WINDOW RESIGNED KEY" << std::endl;
-    _windowImpl->onActivate(false);
+    _windowImpl->onViewActivate(false);
 }
 
 
@@ -277,15 +277,14 @@
 - (BOOL) windowShouldClose: (id) sender 
 {
     //std::clog << "WINDOW SHOULD CLOSE" << std::endl;
-    _windowImpl->onClosing();
+    _windowImpl->onViewClosing();
     return FALSE;
 }
 
 
 - (void) windowDidChangeBackingProperties: (NSNotification*) notification
 {
-    CGFloat scale = [ _windowImpl->window() backingScaleFactor ];
-    std::clog << "BACKING SCALE FACTOR: " << scale << std::endl;
+    _windowImpl->onViewDidRescale();
 }
 
 @end
