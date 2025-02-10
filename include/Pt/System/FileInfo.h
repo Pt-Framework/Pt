@@ -186,7 +186,7 @@ class PT_SYSTEM_API FileInfo
         //! @brief Removes a file or directory.
         static void remove(const Path& path);
 
-        //! @brief Removes all content in a directory.
+        //! @brief Removes a directory and its contents.
         static void removeAll(const Pt::System::Path& path);
 
         //! @brief Moves a file or directory.
