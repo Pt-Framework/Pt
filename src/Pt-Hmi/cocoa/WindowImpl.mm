@@ -670,6 +670,10 @@ void WindowImpl::onViewPaint(const NSRect& rect)
 
 void WindowImpl::onViewActivate(bool isActive)
 {
+    //
+    // TODO: remove all findWindow() -> this is the frame already
+    //
+
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
     if( ! window )
@@ -682,6 +686,10 @@ void WindowImpl::onViewActivate(bool isActive)
 
 void WindowImpl::onViewShow(bool v)
 {
+    //
+    // TODO: remove all findWindow() -> this is the frame already
+    //
+
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
     if( ! window )
@@ -694,6 +702,10 @@ void WindowImpl::onViewShow(bool v)
 
 void WindowImpl::onViewMove()
 {
+    //
+    // TODO: remove all findWindow() -> this is the frame already
+    //
+
     ScreenImpl* screen = Application::instance().screen().impl();
     Window* window = screen->findWindow(_window);
     if( ! window )
