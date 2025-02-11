@@ -1863,7 +1863,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'">
     <RemoteBuildCommandLine>cd  $(RemoteRootDir)/$(RemoteProjectRelDir); ./jam.sh -q -j4</RemoteBuildCommandLine>
     <RemoteReBuildCommandLine>cd  $(RemoteRootDir)/$(RemoteProjectRelDir); ./jam.sh -qa -j4</RemoteReBuildCommandLine>
-    <RemoteCleanCommandLine>cd  $(RemoteRootDir)/$(RemoteProjectRelDir); ./jam.sh clean</RemoteCleanCommandLine>
+    <RemoteCleanCommandLine>cd  $(RemoteRootDir)/$(RemoteProjectRelDir); chmod +x ./jam.sh; ./jam.sh clean</RemoteCleanCommandLine>
     <BuildCommandLine>
     </BuildCommandLine>
     <ReBuildCommandLine>
