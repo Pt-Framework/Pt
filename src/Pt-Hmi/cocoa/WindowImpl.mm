@@ -670,74 +670,45 @@ void WindowImpl::onViewPaint(const NSRect& rect)
 
 void WindowImpl::onViewActivate(bool isActive)
 {
-    //
-    // TODO: remove all findWindow() -> this is the frame already
-    //
+    //std::clog << "activate: " << _client.title() << " " << isActive << std::endl;
 
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-
-    ActivateEvent ev(*window->frame(), isActive);
+    ActivateEvent ev(*this, isActive);
     Application::instance().commitEvent(ev);
 }
 
 
 void WindowImpl::onViewShow(bool v)
 {
-    //
-    // TODO: remove all findWindow() -> this is the frame already
-    //
+    //std::clog << "show: " << _client.title() << " " << v << std::endl;
 
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-
-    ShowEvent sev(*window->frame(), v);
+    ShowEvent sev(*this, v);
     Application::instance().commitEvent(sev);
 }
 
 
-void WindowImpl::onViewMove()
+void WindowImpl::onViewMove(const NSPoint& viewPos)
 {
-    //
-    // TODO: remove all findWindow() -> this is the frame already
-    //
-
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
-    NSPoint origin = [_window frame].origin;
 
-    double x = origin.x;
-    double y = screenHeight - origin.y - windowHeight;
-    //std::clog << "ON MOVE: " << x << "," << origin.y << std::endl;
+    double x = viewPos.x;
+    double y = screenHeight - viewPos.y - windowHeight;
 
     Pt::Gfx::PointF pos(x, y);
 
     double scaling = Application::instance().scaleFactor();
     pos = pos / scaling;
 
-    MoveEvent ev(*window->frame(), pos);
+    //std::clog << "move: " << _client.title() << " " << pos.x() << ", " << pos.y() << std::endl;
+
+    MoveEvent ev(*this, pos);
     Application::instance().processEvent(ev);
 }
 
 
 void WindowImpl::onViewResize(const NSSize& viewSize)
 {   
-    //std::clog << "RESIZE: " << viewSize.width << "x" 
-    //                        << viewSize.height << std::endl;
-
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
+    //std::clog << "resize: " << _client.title() << " " << viewSize.width << "x" << viewSize.height << std::endl;
 
     Window::State wstate = WindowState::Normal;
 
@@ -750,9 +721,9 @@ void WindowImpl::onViewResize(const NSSize& viewSize)
         wstate = WindowState::Minimized;
     }
 
-    if(window->state() != wstate)
+    if(_client.state() != wstate)
     {
-        WindowStateEvent wse( *window->frame(), wstate );
+        WindowStateEvent wse( *this, wstate );
         Application::instance().commitEvent(wse);
     }
 
@@ -762,17 +733,17 @@ void WindowImpl::onViewResize(const NSSize& viewSize)
     double scaling = Application::instance().scaleFactor();
     to = to / scaling;
 
-    ResizeEvent rev(*window->frame(), to);
+    ResizeEvent rev(*this, to);
     Application::instance().processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
-    window->repaint(updateRect);
+    _client.repaint(updateRect);
 
     // cocoa performs a paint/display right after a window resize, so we
     // need to process the window update now to avoid flicker
     // 
     // OR: override NSWwindow::setFrame to not perform a paint/display
-    //Application::instance().impl()->processEvents();
+    Application::instance().impl()->processEvents();
 }
 
 
@@ -785,19 +756,7 @@ void WindowImpl::onViewDidRescale()
 
 void WindowImpl::onViewClosing()
 {
-    //ScreenImpl* screen = Application::instance().screen().impl();
-    //Window* window = screen->findWindow(_window);
-    //if( ! window )
-    //    return;
-    //
-    //window->close();
-
-    //CloseEvent closeEvent(*window);
-    //window->processEvent(closeEvent);
-
-    WindowFrame* frame = this;
-
-    CloseEvent ev(*frame);
+    CloseEvent ev(*this);
     Pt::Hmi::Application::instance().commitEvent(ev);
 }
 
@@ -832,10 +791,7 @@ void WindowImpl::onViewKeyDown(unsigned vkey, Pt::Char ch)
 {
     //std::clog << "KEY DOWN: " << vkey << std::endl;
 
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
+
     
     Pt::uint32_t keyCode = Key::NoKey;
     if(vkey < keyMapSize)
@@ -848,7 +804,7 @@ void WindowImpl::onViewKeyDown(unsigned vkey, Pt::Char ch)
 
     Key key(_keyModifiers, keyCode);
     _keyEvent.setPress(key, ch);
-    _keyEvent.setVisual(window);
+    _keyEvent.setVisual(&_client);
 
     Application::instance().processEvent(_keyEvent);
 }
@@ -858,11 +814,6 @@ void WindowImpl::onViewKeyUp(unsigned vkey, Pt::Char ch)
 {
     //std::clog << "KEY UP: " << vkey << std::endl;
 
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-    
     Pt::uint32_t keyCode = Key::NoKey;
     if(vkey < keyMapSize)
     {
@@ -874,7 +825,7 @@ void WindowImpl::onViewKeyUp(unsigned vkey, Pt::Char ch)
 
     Key key(_keyModifiers, keyCode);
     _keyEvent.setRelease(key, ch);
-    _keyEvent.setVisual(window);
+    _keyEvent.setVisual(&_client);
 
     Application::instance().processEvent(_keyEvent);
 }
@@ -909,11 +860,6 @@ void WindowImpl::onViewKeyModifier(unsigned int mask)
     //
     // send key event for modifier keys
     //
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-
     Pt::uint32_t keyCode = Key::NoKey;
     if(wasShift != shift)
         keyCode = Key::ShiftKey;
@@ -933,7 +879,7 @@ void WindowImpl::onViewKeyModifier(unsigned int mask)
                       ( ! wasMeta    && meta);
 
     Key key(_keyModifiers, keyCode);
-    _keyEvent.setVisual(window);
+    _keyEvent.setVisual(&_client);
 
     if(wasPressed)
         _keyEvent.setRelease( key, Pt::Char() );
@@ -948,22 +894,15 @@ void WindowImpl::onViewLMouseDown(double x, double y)
 {
     //std::clog << "MOUSE PRESS: " << x << ", " << y << std::endl;
 
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
     y = height - y;
 
-    double scaling = Application::instance().scaleFactor();
-
-    Pt::Gfx::PointF pos(x / scaling, 
-                        y / scaling);
+    Pt::Gfx::PointF pos(x, y);
+    pos /= _client.scaleFactor();
 
     _mouseEvent.setPress(MouseEvent::Left);
-    _mouseEvent.setPosition( window->toGlobal(pos) );
-    _mouseEvent.setVisual(window);
+    _mouseEvent.setPosition( _client.toGlobal(pos) );
+    _mouseEvent.setVisual(&_client);
 
     Application::instance().processEvent(_mouseEvent);
 }
@@ -973,22 +912,15 @@ void WindowImpl::onViewLMouseUp(double x, double y)
 {
     //std::clog << "MOUSE RELEASE: " << x << ", " << y << std::endl;
 
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-    
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
     y = height - y;
 
-    double scaling = Application::instance().scaleFactor();
-
-    Pt::Gfx::PointF pos(x / scaling, 
-                        y / scaling);
+    Pt::Gfx::PointF pos(x, y);
+    pos /= _client.scaleFactor();
 
     _mouseEvent.setRelease(MouseEvent::Left);
-    _mouseEvent.setPosition( window->toGlobal(pos) );
-    _mouseEvent.setVisual(window);
+    _mouseEvent.setPosition( _client.toGlobal(pos) );
+    _mouseEvent.setVisual(&_client);
 
     Application::instance().processEvent(_mouseEvent);
 }
@@ -998,22 +930,15 @@ void WindowImpl::onViewMouseMove(double x, double y)
 {
     //std::clog << "MOUSE MOVE: " << x << ", " << y << std::endl;
 
-    ScreenImpl* screen = Application::instance().screen().impl();
-    Window* window = screen->findWindow(_window);
-    if( ! window )
-        return;
-    
     CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
     y = height - y;
 
-    double scaling = Application::instance().scaleFactor();
-
-    Pt::Gfx::PointF pos(x / scaling, 
-                        y / scaling);
+    Pt::Gfx::PointF pos(x, y);
+    pos /= _client.scaleFactor();
 
     _mouseEvent.setMove();
-    _mouseEvent.setPosition( window->toGlobal(pos) );
-    _mouseEvent.setVisual(window);
+    _mouseEvent.setPosition( _client.toGlobal(pos) );
+    _mouseEvent.setVisual(&_client);
 
     Application::instance().processEvent(_mouseEvent);
 }

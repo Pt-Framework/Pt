@@ -97,7 +97,7 @@ class WindowImpl : public WindowFrame
 
         void onViewShow(bool v);
 
-        void onViewMove();
+        void onViewMove(const NSPoint& viewPos);
 
         void onViewResize(const NSSize& frameSize);
 

@@ -159,7 +159,7 @@
     
     [super setFrameSize:frameSize];
     
-    _windowImpl->onViewResize(frameSize);
+    //_windowImpl->onViewResize(frameSize);
 }
 
 
@@ -225,7 +225,13 @@
 
 - (void) windowDidMove: (NSNotification*) notification
 {
-    _windowImpl->onViewMove();
+    NSWindow *window = [notification object];
+    NSPoint origin = [window frame].origin;
+
+    //std::clog << "WINDOW MOVE : " << origin.x << ", "
+    //                              << origin.y << std::endl;
+
+    _windowImpl->onViewMove(origin);
 }
 
 
@@ -243,8 +249,16 @@
 
 - (void) windowDidResize: (NSNotification*) notification
 {
-    //std::clog << "WINDOW RESIZE : " << frameSize.width << "x"
-    //                                << frameSize.height << std::endl;
+    NSWindow *window = [notification object];
+
+    NSRect frame = [window frame];
+	  NSRect rect = [window contentRectForFrameRect: frame];
+
+
+    _windowImpl->onViewResize(rect.size);
+    
+    //std::clog << "WINDOW RESIZE : " << rect.size.width << "x"
+    //                                << rect.size.height << std::endl;
 }
 
 

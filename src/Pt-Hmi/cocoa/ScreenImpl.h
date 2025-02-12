@@ -84,8 +84,6 @@ class ScreenImpl : public WindowManager
 
         void setCapture(Visual* capture);
 
-        Window* findWindow(NSWindow* wnd);
-
     protected:
         Gfx::PointF toFrame(const WindowImpl& w, 
                             const Gfx::PointF& pos) const;
@@ -195,6 +193,9 @@ class ScreenImpl : public WindowManager
         void onProcessScrollEvent(const ScrollEvent& ev);
 
         void onProcessKeyEvent(const KeyEvent& ev);
+
+    private:
+        Window* findWindow(NSWindow* wnd);
 
     private:
         Screen*                      _parent;
