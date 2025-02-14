@@ -1125,36 +1125,59 @@ class DefaultFacets
 {
     public:
         DefaultFacets()
+        : _ctype(1)
+        , _npunct(1)
+        , _nget(1)
+        , _nput(1)
         {
             ctype();
             numpunct();
             num_get();
             num_put();
+
+            std::locale loc( std::locale(), &_ctype );
+            loc = std::locale( loc, &_npunct );
+            loc = std::locale( loc, &_nget );
+            loc = std::locale( loc, &_nput );
+            std::locale::global(loc);
         }
 
-      static const std::ctype<Pt::Char>& ctype()
-      {
-          static const std::ctype<Pt::Char> ctype;
-          return ctype;
-      }
+        ~DefaultFacets()
+        {
+            std::locale::global( std::locale(std::locale::classic(), 
+                                             std::locale(), std::locale::all) );
+            assert( ! std::has_facet< Pt::ctype_default<Pt::Char> >( std::locale() ) );
+        }
 
-      static const std::numpunct<Pt::Char>& numpunct()
-      {
-          static const std::numpunct<Pt::Char> npunct;
-          return npunct;
-      }
+        static const std::ctype<Pt::Char>& ctype()
+        {
+            static const std::ctype<Pt::Char> ctype;
+            return ctype;
+        }
 
-      static const std::num_get<Pt::Char>& num_get()
-      {
-          static const std::num_get<Pt::Char> nget;
-          return nget;
-      }
+        static const std::numpunct<Pt::Char>& numpunct()
+        {
+            static const std::numpunct<Pt::Char> npunct;
+            return npunct;
+        }
 
-      static const std::num_put<Pt::Char>& num_put()
-      {
-          static const std::num_put<Pt::Char> nput;
-          return nput;
-      }
+        static const std::num_get<Pt::Char>& num_get()
+        {
+            static const std::num_get<Pt::Char> nget;
+            return nget;
+        }
+
+        static const std::num_put<Pt::Char>& num_put()
+        {
+            static const std::num_put<Pt::Char> nput;
+            return nput;
+        }
+
+    private:
+        std::ctype<Pt::Char>    _ctype;
+        std::numpunct<Pt::Char> _npunct;
+        std::num_get<Pt::Char>  _nget;
+        std::num_put<Pt::Char>  _nput;
 };
 
 static const DefaultFacets defaultFacets;
