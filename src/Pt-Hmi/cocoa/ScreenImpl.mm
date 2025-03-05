@@ -397,9 +397,9 @@ void ScreenImpl::setCapture(Visual* capture)
 
 void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    double scaling = ev.scaleFactor() * _screenScaling;
+    double scaling = ev.scaleFactor();
 
-    RescaleEvent rev(*this, scaling);
+    RescaleEvent rev(*this, scaling * _screenScaling);
     Base::onProcessRescaleEvent(rev);
 
     std::vector<Window*>::iterator wit;
