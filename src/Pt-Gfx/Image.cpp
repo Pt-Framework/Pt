@@ -34,33 +34,33 @@ namespace Pt {
 namespace Gfx {
 
 Image::Image()
-: BasicImage( ImageView() )
+: BasicImage()
 {
 }
 
 
 Image::Image(const ImageFormat& format)
-: BasicImage( ImageView(format), 0, 0 )
+: BasicImage(format, 0, 0)
 {
 }
 
 
 Image::Image(const ImageFormat& format, 
              Pt::ssize_t width, Pt::ssize_t height, size_t padding)
-: BasicImage( ImageView(format), width, height, padding )
+: BasicImage(format, width, height, padding)
 {
 }
 
 
 Image::Image(const ImageFormat& format, Pt::uint8_t* data,
              Pt::ssize_t width, Pt::ssize_t height, size_t padding)
-: BasicImage( ImageView(format, data, width, height, padding) )
+: BasicImage(format, data, width, height, padding)
 {
 }
 
 
 Image::Image(const Image& image)
-: BasicImage( ImageView() )
+: BasicImage()
 {
     *this = image;
 }

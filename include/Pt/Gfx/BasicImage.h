@@ -38,14 +38,14 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename FormatT, 
-          typename ViewT = BasicView<FormatT> >
+template <typename ViewT>
 class BasicImage
 {
     public:
-        typedef FormatT Format;
-        typedef ViewT   View;
+        typedef ViewT View;
         
+        typedef typename View::Format              Format;
+
         typedef typename View::Pixel               Pixel;
         typedef typename View::ConstPixel          ConstPixel;
         typedef typename View::PixelIterator       PixelIterator;
@@ -57,22 +57,61 @@ class BasicImage
         typedef typename View::Rect   Rect;
 
     public:
-        explicit BasicImage(View view)
-        : _view(view)
+        BasicImage()
+        : _view()
         { }
 
-        BasicImage(View view, Pt::ssize_t width, Pt::ssize_t height, 
+        BasicImage(Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
-        : _view(view)
+        : _view()
         { 
-            _buffer.resize( view.format().imageSize(width, height, padding) );
+            _buffer.resize( _view.format().imageSize(width, height, padding) );
             
-            _view.reset( view.format(), _buffer.empty() ? 0 : &_buffer[0], 
+            _view.reset( _buffer.empty() ? 0 : &_buffer[0], 
                          width, height, padding );
+        }
+
+        BasicImage(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0)
+        : _view()
+        {           
+            _view.reset(data, width, height, padding);
+        }
+
+        BasicImage(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0)
+        : _view(format)
+        { 
+            _buffer.resize( _view.format().imageSize(width, height, padding) );
+            
+            _view.reset( _buffer.empty() ? 0 : &_buffer[0], 
+                         width, height, padding );
+        }
+
+        BasicImage(const Format& format, Pt::uint8_t* data, 
+                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
+        : _view(format)
+        {            
+            _view.reset(data, width, height, padding);
         }
 
         virtual ~BasicImage()
         {}
+
+        void reset(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
+        { 
+            _buffer.resize( format().imageSize(width, height, padding) );
+            
+            _view.reset( _buffer.empty() ? 0 : &_buffer[0], 
+                         width, height, padding );
+        }
+
+        void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0)
+        {
+            _buffer.clear();
+           _view.reset(data, width, height, padding);
+        }
 
         void reset(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
@@ -86,6 +125,7 @@ class BasicImage
         void reset(const Format& format, Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
+            _buffer.clear();
            _view.reset(format, data, width, height, padding);
         }
 

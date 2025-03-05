@@ -39,7 +39,7 @@ namespace Gfx {
 
 /** @brief Generic image.
 */
-class PT_GFX_API Image : public BasicImage<ImageFormat, ImageView>
+class PT_GFX_API Image : public BasicImage<ImageView>
 {
     public:
         Image();

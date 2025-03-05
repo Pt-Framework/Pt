@@ -487,6 +487,13 @@ class BasicView : public ViewBase
             base = ViewBase(data, width, height, format.pixelStride(), padding);
         }
 
+        void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
+                   Pt::ssize_t padding = 0)
+        {
+            ViewBase& base = *this;
+            base = ViewBase(data, width, height, _format->pixelStride(), padding);
+        }
+
         void clear()
         {
             ViewBase& base = *this;

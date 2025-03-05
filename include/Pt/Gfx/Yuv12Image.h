@@ -65,13 +65,13 @@ class Yuv12View : public BasicView<Yuv12>
     half as many pad bytes after their rows. In other words, two U/V rows
     (including padding) is exactly as long as one Y row (including padding).
 */
-class Yuv12Image : public BasicImage<Yuv12, Yuv12View>
+class Yuv12Image : public BasicImage<Yuv12View>
 {
     public:
         /** @brief Constructor.
         */
         Yuv12Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
-        : BasicImage( Yuv12View(), width, height, padding )
+        : BasicImage(width, height, padding)
         { 
         }
 
@@ -79,7 +79,7 @@ class Yuv12Image : public BasicImage<Yuv12, Yuv12View>
         */
         Yuv12Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                    size_t padding = 0)
-        : BasicImage( Yuv12View(data, width, height, padding) )
+        : BasicImage(data, width, height, padding)
         { 
         }
 };
