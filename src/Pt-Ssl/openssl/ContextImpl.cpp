@@ -60,6 +60,26 @@ void pt_locking_callback_impl(int mode, int type, const char* file,  int line)
     }
 }
 
+/*
+Startup:
+
+    SSL_library_init();
+    SSL_load_error_strings();
+    FIPS_mode_set(1);
+    CRYPTO_set_id_callback(<fn>);
+    CRYPTO_set_locking_callback(<fn>);
+
+Shutdown:
+
+    FIPS_mode_set(0);
+    CRYPTO_set_locking_callback(NULL);
+    CRYPTO_set_id_callback(NULL);
+    ENGINE_cleanup();
+    CONF_modules_unload();
+    ERR_free_strings();
+    EVP_cleanup();
+    CRYPTO_cleanup_all_ex_data();
+*/
 
 void SSLInitImpl()
 {
