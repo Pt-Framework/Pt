@@ -1858,6 +1858,10 @@
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(SolutionDir)Pt.props" />
+  </ImportGroup>
+
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
@@ -1870,7 +1874,7 @@
     <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j4 -sPT_TOP=$(SolutionDir)</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;PT_API_EXPORT;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>$(SolutionDir)include;$(SolutionDir)src\Pt-System\win32\;$(SolutionDir)src\Pt-Gfx\raster</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(PT_INCLUDE_SEARCH_PATH)</NMakeIncludeSearchPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'">
@@ -1887,7 +1891,7 @@
     <LocalRemoteCopySources>true</LocalRemoteCopySources>
     <OutDir>$(ProjectDir)build\</OutDir>
     <IntDir>$(ProjectDir)build\</IntDir>
-    <NMakeIncludeSearchPath>$(SolutionDir)include;$(SolutionDir)src\Pt-Hmi\cocoa;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(PT_INCLUDE_SEARCH_PATH)</NMakeIncludeSearchPath>
     <RemoteDeployDir>$(RemoteRootDir)/$(ProjectName)-Remote</RemoteDeployDir>
   </PropertyGroup>
 
