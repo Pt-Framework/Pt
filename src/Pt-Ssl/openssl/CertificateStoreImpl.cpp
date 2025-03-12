@@ -102,6 +102,10 @@ void CertificateStoreImpl::loadPkcs12(const char* data, std::size_t len, const c
 
     if( ! status )
     {
+        char buf[255];
+        ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
+        PT_LOG_WARN("invalid PKCS12: " << buf);
+
         throw InvalidCertificate("invalid PKCS12 content");
     }
 
