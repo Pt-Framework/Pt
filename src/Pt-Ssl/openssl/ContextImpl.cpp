@@ -60,26 +60,6 @@ void pt_locking_callback_impl(int mode, int type, const char* file,  int line)
     }
 }
 
-/*
-Startup:
-
-    SSL_library_init();
-    SSL_load_error_strings();
-    FIPS_mode_set(1);
-    CRYPTO_set_id_callback(<fn>);
-    CRYPTO_set_locking_callback(<fn>);
-
-Shutdown:
-
-    FIPS_mode_set(0);
-    CRYPTO_set_locking_callback(NULL);
-    CRYPTO_set_id_callback(NULL);
-    ENGINE_cleanup();
-    CONF_modules_unload();
-    ERR_free_strings();
-    EVP_cleanup();
-    CRYPTO_cleanup_all_ex_data();
-*/
 
 void SSLInitImpl()
 {
@@ -87,18 +67,17 @@ void SSLInitImpl()
     {
         PT_LOG_INFO("OpenSSL library initialization");
 
+        // TODO: for OpenSSL >= 1.1 use OPENSSL_init_ssl() and OPENSSL_init_crypto()
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         SSL_library_init();
+
         SSL_load_error_strings();
         ERR_load_crypto_strings();
 
-        // TODO: for OpenSSL >= 1.1 use OPENSSL_init_ssl() and OPENSSL_init_crypto()
-
-        int numLocks = CRYPTO_num_locks();
-        sslmtx = new Pt::System::Mutex[numLocks];
+        //FIPS_mode_set(1);
 
         // enable multi-thread support after library initialisation for OpenSSL < 1.1
-        CRYPTO_set_locking_callback(pt_locking_callback_impl);
-
         // If the application does not register a thread id callback, then
         // the system's default thread identifying API is used on windows
         // and on all other platforms it uses the address of errno.
@@ -106,30 +85,13 @@ void SSLInitImpl()
         //CRYPTO_set_id_callback((unsigned long (*)())pthreads_thread_id);
         //CRYPTO_THREADID_set_callback(threadId);
 
-        //OpenSSL_add_all_algorithms();
-        EVP_add_cipher(EVP_des_ede3_cfb());
-        EVP_add_cipher(EVP_des_ede3_cfb1());
-        EVP_add_cipher(EVP_des_ede3_cfb8());
-        EVP_add_cipher(EVP_des_ede3_ofb());
+        int numLocks = CRYPTO_num_locks();
+        sslmtx = new Pt::System::Mutex[numLocks];
 
-        EVP_add_cipher(EVP_aes_128_ecb());
-        EVP_add_cipher(EVP_aes_128_cbc());
-        EVP_add_cipher(EVP_aes_128_cfb());
-        EVP_add_cipher(EVP_aes_128_cfb1());
-        EVP_add_cipher(EVP_aes_128_cfb8());
-        EVP_add_cipher(EVP_aes_128_ofb());
-        EVP_add_cipher(EVP_aes_192_ecb());
-        EVP_add_cipher(EVP_aes_192_cbc());
-        EVP_add_cipher(EVP_aes_192_cfb());
-        EVP_add_cipher(EVP_aes_192_cfb1());
-        EVP_add_cipher(EVP_aes_192_cfb8());
-        EVP_add_cipher(EVP_aes_192_ofb());
-        EVP_add_cipher(EVP_aes_256_ecb());
-        EVP_add_cipher(EVP_aes_256_cbc());
-        EVP_add_cipher(EVP_aes_256_cfb());
-        EVP_add_cipher(EVP_aes_256_cfb1());
-        EVP_add_cipher(EVP_aes_256_cfb8());
-        EVP_add_cipher(EVP_aes_256_ofb());
+        CRYPTO_set_locking_callback(pt_locking_callback_impl);
+#else
+        OPENSSL_init_ssl(0, NULL);
+#endif
     }
 }
 
@@ -140,32 +102,30 @@ void SSLExitImpl()
     {
         PT_LOG_INFO("OpenSSL library shutdown");
 
+        // TODO: for OpenSSL >= 1.1 use OPENSSL_cleanup()
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+        //FIPS_mode_set(0);
+
         // disable multi-thread support for OpenSSL < 1.1
         CRYPTO_set_locking_callback(NULL);
         //CRYPTO_set_id_callback(NULL);
         //CRYPTO_THREADID_set_callback(NULL);
 
-        // TODO: for OpenSSL >= 1.1 use OPENSSL_cleanup()
+        delete [] sslmtx;
+        sslmtx = 0;
 
-        //FIPS_mode_set(0);
         //ENGINE_cleanup();
         //CONF_modules_unload(1);
 
-        // unload error and crypto strings
         ERR_free_strings();
-
-        // remove all ciphers
         EVP_cleanup();
-
-        // clean up crypto
         CRYPTO_cleanup_all_ex_data();
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
         ERR_remove_thread_state(NULL);
+#else
+        OPENSSL_cleanup();
 #endif
-
-        delete [] sslmtx;
-        sslmtx = 0;
     }
 }
 
