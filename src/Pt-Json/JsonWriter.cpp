@@ -352,7 +352,10 @@ class JsonWriterImpl
                 *_tos << Pt::Char(',') << Pt::Char(' ');
 
             const Pt::Char* keyword = value ? JSON_TRUE : JSON_FALSE;
-            _tos->write(keyword, sizeof(JSON_TRUE)/sizeof(Pt::Char));
+
+            const size_t size = value ? (sizeof(JSON_TRUE) / sizeof(Pt::Char)) : (sizeof(JSON_FALSE) / sizeof(Pt::Char));
+
+            _tos->write(keyword, size);
 
             _state = OnScalar;
         }
