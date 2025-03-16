@@ -70,9 +70,7 @@ void Settings::load(Pt::Formatter& formatter)
     composer.begin(si);
     
     formatter.beginParse(composer);
-    
-    while( ! formatter.parseSome() )
-        ;
+    formatter.parse();
 }
 
 
@@ -92,12 +90,13 @@ void Settings::save(std::basic_ostream<Pt::Char>& os) const
 void Settings::save(Pt::Formatter& formatter) const
 {
     const SerializationInfo& si = *this;
-    
-    SerializationInfo::ConstIterator it;
-    for(it = si.begin(); it != si.end(); ++it)
-    {
-        it->format(formatter);
-    }
+    si.format(formatter);
+
+    //SerializationInfo::ConstIterator it;
+    //for(it = si.begin(); it != si.end(); ++it)
+    //{
+    //    it->format(formatter);
+    //}
 }
 
 } // namespace Pt
