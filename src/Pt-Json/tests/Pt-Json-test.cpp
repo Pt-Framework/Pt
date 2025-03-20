@@ -392,7 +392,7 @@ void JsonReaderTest::Settings()
     SerDemo serObj;
     std::string str;
 
-    {//Serialize
+    {//Json-Serialize
         std::stringstream       ss;
         Pt::TextOStream         os(ss, new Pt::Utf8Codec());
         Pt::Json::JsonWriter    writer(os);
@@ -410,7 +410,7 @@ void JsonReaderTest::Settings()
     SerDemo desObj;
     desObj.clear();
 
-    {//Deserialize
+    {//Json-Deserialize
         std::stringstream       ss(str);
         Pt::TextIStream         is(ss, new Pt::Utf8Codec());
         Pt::Json::JsonReader    reader(is);
@@ -418,6 +418,33 @@ void JsonReaderTest::Settings()
 
         Pt::Settings settings;
         settings.load(formatter);
+        settings.root().get(desObj);
+    }
+
+    PT_UNIT_ASSERT(desObj == serObj);
+
+
+    {//Config-Serialize
+        std::stringstream       ss;
+        Pt::TextOStream         os(ss, new Pt::Utf8Codec());
+
+        Pt::Settings settings;
+        settings.root().set(serObj);
+        settings.save(os);
+
+        os.flush();
+        ss.flush();
+        str = ss.str();
+    }
+    
+    desObj.clear();
+
+    {//Config-Deserialize
+        std::stringstream       ss(str);
+        Pt::TextIStream         is(ss, new Pt::Utf8Codec());
+
+        Pt::Settings settings;
+        settings.load(is);
         settings.root().get(desObj);
     }
 
