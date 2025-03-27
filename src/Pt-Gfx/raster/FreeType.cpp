@@ -336,25 +336,21 @@ FontMetrics FreeType::fontMetrics(const String& text,
 
 void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
                     const String& text, const Color& color, const Rect& clip,
-                    const CompositionMode& mode, const Transform& tf, 
-                    FTC_FaceID faceId, std::size_t fontSize)
+                    const CompositionMode& mode, FTC_FaceID faceId, 
+                    std::size_t fontSize, const Transform* tf)
 {
     // LOCK
 
     // apply translation here, FT uses a 2x2 matrix for the other transformations
-    PointF translatedPos( x, y );
-    translatedPos.addX( tf.dx() );
-    translatedPos.addY( tf.dy() );
-    
+    PointF translatedPos(x, y);
+    if(tf)
+    {
+        translatedPos.addX( tf->dx() );
+        translatedPos.addY( tf->dy() );
+    }
+
     int xpos = lround( translatedPos.x() );
-    int ypos = lround( translatedPos.y()) ;
-
-
-    FT_Matrix matrix;
-    matrix.xx = tf.m11() * 0x10000L;
-    matrix.xy = tf.m12() * 0x10000L;
-    matrix.yx = tf.m21() * 0x10000L;
-    matrix.yy = tf.m22() * 0x10000L;
+    int ypos = lround( translatedPos.y() ) ;
 
     FT_Face face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
@@ -409,7 +405,7 @@ void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y,
         int            width = 0;
         unsigned char* buffer = 0;
 
-        if( tf.isIdentity() )
+        if( ! tf )
         {
             FTC_Node node = 0;
             FTC_SBit glyphBitmap = 0;
@@ -440,6 +436,13 @@ void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y,
         {
             FTC_Node node = 0;
             FT_Glyph glyph = 0;
+
+            FT_Matrix matrix;
+            matrix.xx = tf->m11() * 0x10000L;
+            matrix.xy = tf->m12() * 0x10000L;
+            matrix.yx = tf->m21() * 0x10000L;
+            matrix.yy = tf->m22() * 0x10000L;
+
             FT_Error err = FTC_ImageCache_Lookup(_imageCache, &imageType, glyphIndex, &glyph, &node);
             err += FT_Glyph_Copy(glyph, &glyphCopy);
             

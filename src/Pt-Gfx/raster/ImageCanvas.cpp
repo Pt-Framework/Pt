@@ -491,10 +491,7 @@ void ImageCanvas::onDrawText(const PointF& toF, const Pt::String& text,
     Rect clip = updateClip();
     _text->setClip(clip);
 
-    if(xform)
-        _text->draw(_image, to.x(), to.y(), text, _compositionMode, *xform);
-    else
-        _text->draw( _image, to.x(), to.y(), text, _compositionMode );
+    _text->draw(_image, to.x(), to.y(), text, _compositionMode, xform);
 }
 
 

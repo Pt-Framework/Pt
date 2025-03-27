@@ -108,11 +108,8 @@ class DrawText
             @param mode The composition mode of the text
         */
         void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
-                  const String& text, const CompositionMode& mode);
-
-        void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
                   const String& text, const CompositionMode& mode, 
-                  const Transform& trans);
+                  const Transform* trans);
 
   private:
         FTC_FaceID       _faceId;

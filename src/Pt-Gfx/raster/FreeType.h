@@ -97,8 +97,8 @@ class FreeType : public Pt::Singleton<FreeType>
 
         void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
                   const String& text, const Color& color, const Rect& clip,
-                  const CompositionMode& mode, const Transform& tf, 
-                  FTC_FaceID faceId, std::size_t fontSize);
+                  const CompositionMode& mode, FTC_FaceID faceId, 
+                  std::size_t fontSize, const Transform* tf);
 
     protected:
         FreeType();
