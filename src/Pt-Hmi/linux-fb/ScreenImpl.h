@@ -54,9 +54,10 @@ class ScreenImpl : public Form
 
   public:
     // take typedefs from FramBuffer
-    typedef Gfx::ImageView::Point Point;
-    typedef Gfx::ImageView::Size Size;
-    typedef Gfx::ImageView::Rect Rect;
+    typedef Gfx::Image::pos_t      pos_t;
+    typedef Gfx::BasicPoint<pos_t> PointI;
+    typedef Gfx::BasicSize<pos_t>  SizeI;
+    typedef Gfx::BasicRect<pos_t>  RectI;
 
     public:
         ScreenImpl(ApplicationImpl& app);
@@ -164,15 +165,15 @@ class ScreenImpl : public Form
 
         const Gfx::Image& image() const;
         
-        void updateScreen(const Rect& area);
+        void updateScreen(const RectI& area);
 
         void drawCursor(Pt::uint8_t* buffer);
         
-        void grabImage(const Pt::uint8_t* buffer, const Point& pos,
+        void grabImage(const Pt::uint8_t* buffer, const PointI& pos,
                        Gfx::Image& image);
  
         void bitBlit(const Pt::uint8_t* from, size_t width, size_t height, 
-                     const Point& pos, Pt::uint8_t* buffer, BlitOp op);
+                     const PointI& pos, Pt::uint8_t* buffer, BlitOp op);
 
     private:
         FrameBuffer&                 _frameBuffer;
@@ -183,7 +184,7 @@ class ScreenImpl : public Form
         
         double                       _dpi;       
         Gfx::Image                   _cursorBackground;
-        Point                        _cursorPos;
+        PointI                       _cursorPos;
         bool                         _drawCursor;
 };
 

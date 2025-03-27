@@ -280,10 +280,8 @@ class BasicConstPixel : public PixelBaseT
 class ViewBase
 {
     public:
-        typedef Pt::ssize_t       pos_t;
-        typedef BasicPoint<pos_t> Point;
-        typedef BasicSize<pos_t>  Size;
-        typedef BasicRect<pos_t>  Rect;
+        typedef Pt::ssize_t pos_t;
+        typedef Pt::ssize_t length_t;
 
     public:
         ViewBase()

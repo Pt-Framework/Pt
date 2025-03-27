@@ -33,7 +33,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/Image.h>
 
 #include <vector>
 
@@ -50,9 +50,10 @@ namespace Gfx {
 class PT_GFX_API ClipPolygon
 {
   public:
-    typedef ImageView::Point Point;
-    typedef ImageView::Size Size;
-    typedef ImageView::Rect Rect;
+    typedef Gfx::Image::pos_t      pos_t;
+    typedef Gfx::BasicPoint<pos_t> Point;
+    typedef Gfx::BasicSize<pos_t>  Size;
+    typedef Gfx::BasicRect<pos_t>  Rect;
 
     public:
         /** @brief Default constructor

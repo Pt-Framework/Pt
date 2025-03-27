@@ -54,9 +54,10 @@ class DrawText;
 class ImageCanvas : public Canvas
 {
   public:
-    typedef ImageView::Point Point;
-    typedef ImageView::Size Size;
-    typedef ImageView::Rect Rect;
+    typedef Image::pos_t       pos_t;
+    typedef BasicPoint<pos_t>  Point;
+    typedef BasicSize<pos_t>   Size;
+    typedef BasicRect<pos_t>   Rect;
 
   public:
     ImageCanvas(PaintSurface& surface);

@@ -48,9 +48,10 @@ namespace Hmi {
 class FrameBuffer
 {
   public:
-    typedef Gfx::ImageView::Point Point;
-    typedef Gfx::ImageView::Size Size;
-    typedef Gfx::ImageView::Rect Rect;
+    typedef Gfx::Image::pos_t      pos_t;
+    typedef Gfx::BasicPoint<pos_t> Point;
+    typedef Gfx::BasicSize<pos_t>  Size;
+    typedef Gfx::BasicRect<pos_t>  Rect;
 
     public:
         enum Rotation

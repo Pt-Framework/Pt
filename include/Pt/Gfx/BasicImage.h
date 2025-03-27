@@ -44,17 +44,14 @@ class BasicImage
     public:
         typedef ViewT View;
         
+        typedef typename View::pos_t               pos_t;
+        typedef typename View::length_t            length_t;
         typedef typename View::Format              Format;
 
         typedef typename View::Pixel               Pixel;
         typedef typename View::ConstPixel          ConstPixel;
         typedef typename View::PixelIterator       PixelIterator;
         typedef typename View::ConstPixelIterator  ConstPixelIterator;
-
-        typedef typename View::pos_t  pos_t;
-        typedef typename View::Point  Point;
-        typedef typename View::Size   Size;
-        typedef typename View::Rect   Rect;
 
     public:
         BasicImage()

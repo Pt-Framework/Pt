@@ -61,9 +61,10 @@ namespace Gfx {
 class DrawText
 {
   public:
-    typedef ImageView::Point Point;
-    typedef ImageView::Size Size;
-    typedef ImageView::Rect Rect;
+    typedef Gfx::Image::pos_t      pos_t;
+    typedef Gfx::BasicPoint<pos_t> Point;
+    typedef Gfx::BasicSize<pos_t>  Size;
+    typedef Gfx::BasicRect<pos_t>  Rect;
 
     public:
         /** @brief Default constructor
