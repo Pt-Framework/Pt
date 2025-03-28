@@ -535,6 +535,10 @@ class PT_API Settings : private SerializationInfo
         /** @brief Returns true if settings are empty.
         */
         bool isEmpty() const;
+        
+        /** @brief Sets the name of the settings root.
+        */
+        void setName(const char* name);
 
         /** @brief Begin of entries.
         */

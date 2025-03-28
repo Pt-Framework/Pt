@@ -55,6 +55,12 @@ bool Settings::isEmpty() const
 }
 
 
+void Settings::setName(const char* name)
+{
+    SerializationInfo::setName(name);
+}
+
+
 void Settings::load(std::basic_istream<Pt::Char>& is)
 {
     SettingsReader reader(is);
@@ -77,7 +83,7 @@ void Settings::load(Pt::Formatter& formatter)
 void Settings::save(std::basic_ostream<Pt::Char>& os) const
 {
     SettingsFormatter formatter(os);
-
+    
     const SerializationInfo& si = *this;
     SerializationInfo::ConstIterator it;
     for(it = si.begin(); it != si.end(); ++it)
