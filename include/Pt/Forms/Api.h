@@ -30,7 +30,11 @@
 #define PT_FORMS_API_H
 
 #include <Pt/Api.h>
- 
+
+#define PT_FORMS_VERSION_MAJOR 1
+#define PT_FORMS_VERSION_MINOR 3
+#define PT_FORMS_VERSION_REVISION 1
+
 #if defined(PT_FORMS_API_EXPORT)
 #    define PT_FORMS_API PT_EXPORT
 #  else

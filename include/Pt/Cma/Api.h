@@ -28,6 +28,10 @@
 
 #include <Pt/Api.h>
 
+#define PT_CMA_VERSION_MAJOR 1
+#define PT_CMA_VERSION_MINOR 3
+#define PT_CMA_VERSION_REVISION 1
+
 #if defined(PT_CMA_API_EXPORT)
 #    define PT_CMA_API PT_EXPORT
 #  else

@@ -61,7 +61,7 @@
 
 #define PT_VERSION_MAJOR 1
 #define PT_VERSION_MINOR 3
-#define PT_VERSION_REVISION 0
+#define PT_VERSION_REVISION 1
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
     #define PT_EXPORT __declspec(dllexport)

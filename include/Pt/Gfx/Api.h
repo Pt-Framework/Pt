@@ -31,6 +31,10 @@
 
 #include <Pt/Api.h>
 
+#define PT_GFX_VERSION_MAJOR 1
+#define PT_GFX_VERSION_MINOR 3
+#define PT_GFX_VERSION_REVISION 1
+
 #if defined(PT_GFX_API_EXPORT)
 #  define PT_GFX_API PT_EXPORT
 #else

@@ -32,7 +32,7 @@
 
 #define PT_QT_VERSION_MAJOR 1
 #define PT_QT_VERSION_MINOR 3
-#define PT_QT_VERSION_REVISION 0
+#define PT_QT_VERSION_REVISION 1
  
 #if defined(PT_QT_API_EXPORT)
 #    define PT_QT_API PT_EXPORT
