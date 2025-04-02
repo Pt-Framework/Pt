@@ -46,6 +46,7 @@ namespace Hmi {
 
 class ActivateEvent;
 class CloseEvent;
+class Control;
 class EnableEvent;
 class EnterEvent;
 class FocusEvent;
@@ -64,11 +65,8 @@ class ScrollEvent;
 class ShowEvent;
 class TouchEvent;
 class Visual;
-class Control;
 class Window;
 class WindowStateEvent;
-
-typedef Control Widget;
 
 } // namespace
 
