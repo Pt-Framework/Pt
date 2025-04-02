@@ -30,7 +30,7 @@
 #ifndef Pt_Hmi_Label_H
 #define Pt_Hmi_Label_H
 
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Alignment.h>
 #include <Pt/Hmi/Adjustment.h>
 #include <Pt/Hmi/TextBlock.h>

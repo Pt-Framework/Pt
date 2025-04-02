@@ -30,7 +30,7 @@
 #include <Pt/Hmi/InputMethod.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/FlowLayout.h>
 #include <Pt/Hmi/PushButton.h>
 #include <iostream>

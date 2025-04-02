@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/View.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Application.h>
 
 #include <Pt/Gfx/PaintContext.h>

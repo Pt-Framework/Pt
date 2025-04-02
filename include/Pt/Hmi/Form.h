@@ -31,7 +31,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Visual.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>

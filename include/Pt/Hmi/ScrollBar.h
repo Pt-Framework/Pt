@@ -31,7 +31,7 @@
 #define Pt_Hmi_SCROLLBAR_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/SmartPtr.h>
 
 namespace Pt {

@@ -33,7 +33,7 @@
 #include "KeyMap.h"
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/CloseEvent.h>

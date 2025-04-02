@@ -32,7 +32,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/MenuMenuItem.h>
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/FlowLayout.h>
 #include <Pt/SmartPtr.h>
 #include <vector>

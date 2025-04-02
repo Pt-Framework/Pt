@@ -30,7 +30,7 @@
 #define PT_HMI_MENUITEMBASE_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/PixmapSurface.h>
 
 namespace Pt {

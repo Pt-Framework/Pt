@@ -33,7 +33,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Popup.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Hmi/ScrollEvent.h>

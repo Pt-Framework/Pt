@@ -27,7 +27,7 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Form.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/String.h>

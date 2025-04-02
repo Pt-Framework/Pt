@@ -30,7 +30,7 @@
 #ifndef Pt_Hmi_Panel_H
 #define Pt_Hmi_Panel_H
 
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Alignment.h>
 #include <Pt/Hmi/Icon.h>
 #include <Pt/Hmi/PixmapSurface.h>

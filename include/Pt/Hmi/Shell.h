@@ -30,7 +30,7 @@
 #define PT_HMI_SHELL_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/ShellWM.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>

@@ -32,7 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Spacing.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 

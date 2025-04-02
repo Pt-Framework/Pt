@@ -46,6 +46,7 @@ SharedLibrary Pt-Hmi : Application.cpp
                        Button.cpp
                        CheckBox.cpp
                        ComboBox.cpp
+                       Control.cpp
                        Cursor.cpp
                        DockingLayout.cpp
                        FlowLayout.cpp
@@ -90,7 +91,6 @@ SharedLibrary Pt-Hmi : Application.cpp
                        TextBlock.cpp
                        View.cpp
                        Visual.cpp
-                       Widget.cpp
                        WindowBase.cpp
                        Window.cpp
                        WindowFrame.cpp

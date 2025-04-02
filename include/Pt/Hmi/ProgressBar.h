@@ -30,7 +30,7 @@
 #ifndef Pt_Hmi_ProgressBar_H
 #define Pt_Hmi_ProgressBar_H
 
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Signal.h>
 

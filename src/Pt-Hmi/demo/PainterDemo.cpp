@@ -13,7 +13,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/TabView.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Gfx/Painter.h>
 //#include <Pt/Gfx/ImagePainter2.h>

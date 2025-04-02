@@ -1863,9 +1863,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Visual.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Widget.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -2930,6 +2927,9 @@
     </ClInclude>
     <ClInclude Include="..\Pt-XmlRpc\HttpResponder.h">
       <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Control.h">
+      <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -4832,9 +4832,6 @@
     <ClCompile Include="..\Pt-Hmi\Visual.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Widget.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Hmi\Window.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -5623,6 +5620,9 @@
     </ClCompile>
     <ClCompile Include="..\Pt-XmlRpc\tests\RpcBenchServer.cpp">
       <Filter>Pt-XmlRpc\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Hmi\Control.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -41,7 +41,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/MouseEvent.h>
 
 #include <Pt/Gfx/Point.h>

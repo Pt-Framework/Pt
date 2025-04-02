@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-
     <ProjectConfiguration Include="Jam Build|x64">
       <Configuration>Jam Build</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-
     <ProjectConfiguration Include="Jam Remote Build|x64">
       <Configuration>Jam Remote Build</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-
   </ItemGroup>
-
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h" />
     <ClInclude Include="..\..\include\Pt\Any.h" />
@@ -113,6 +109,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\CheckBox.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ComboBox.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Control.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DockingLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\EnableEvent.h" />
@@ -174,7 +171,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\View.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Visual.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBase.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowFrame.h" />
@@ -1428,6 +1424,7 @@
     <ClCompile Include="..\Pt-Hmi\Button.cpp" />
     <ClCompile Include="..\Pt-Hmi\CheckBox.cpp" />
     <ClCompile Include="..\Pt-Hmi\ComboBox.cpp" />
+    <ClCompile Include="..\Pt-Hmi\Control.cpp" />
     <ClCompile Include="..\Pt-Hmi\Cursor.cpp" />
     <ClCompile Include="..\Pt-Hmi\demo\ChildW.cpp" />
     <ClCompile Include="..\Pt-Hmi\demo\Dialog1.cpp" />
@@ -1506,7 +1503,6 @@
     <ClCompile Include="..\Pt-Hmi\TextBlock.cpp" />
     <ClCompile Include="..\Pt-Hmi\View.cpp" />
     <ClCompile Include="..\Pt-Hmi\Visual.cpp" />
-    <ClCompile Include="..\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\Pt-Hmi\win32\ApplicationImpl.cpp" />
     <ClCompile Include="..\Pt-Hmi\win32\PaintContext.cpp" />
     <ClCompile Include="..\Pt-Hmi\win32\PixmapImpl.cpp" />
@@ -1823,14 +1819,12 @@
     <Image Include="..\libjpeg\testorig.jpg" />
     <Image Include="..\libjpeg\testprog.jpg" />
   </ItemGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'" Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <ProjectGuid>{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}</ProjectGuid>
     <Keyword>MakeFileProj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'" Label="Globals">
     <ProjectGuid>{fcad63cd-b82e-4db5-b03d-2c24b4fcbfb5}</ProjectGuid>
     <Keyword>Linux</Keyword>
@@ -1841,32 +1835,25 @@
     <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
     <LinuxProjectType>{FC1A4D80-50E9-41DA-9192-61C0DBAA00D2}</LinuxProjectType>
   </PropertyGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'" Label="Configuration">
     <PlatformToolset>v143</PlatformToolset>
     <ConfigurationType>Makefile</ConfigurationType>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ConfigurationType>Makefile</ConfigurationType>
     <RemoteRootDir>~</RemoteRootDir>
     <RemoteProjectRelDir>$(ProjectName)-Remote</RemoteProjectRelDir>
   </PropertyGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-
   <ImportGroup Label="PropertySheets">
     <Import Project="$(SolutionDir)Pt.props" />
   </ImportGroup>
-
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'">
     <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j4 -sPT_TOP=$(SolutionDir)</NMakeBuildCommandLine>
     <OutDir>$(SolutionDir)build</OutDir>
@@ -1876,7 +1863,6 @@
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;PT_API_EXPORT;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(PT_INCLUDE_SEARCH_PATH)</NMakeIncludeSearchPath>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'">
     <RemoteBuildCommandLine>cd  $(RemoteRootDir)/$(RemoteProjectRelDir); ./jam.sh -q -j4</RemoteBuildCommandLine>
     <RemoteReBuildCommandLine>cd  $(RemoteRootDir)/$(RemoteProjectRelDir); ./jam.sh -qa -j4</RemoteReBuildCommandLine>
@@ -1894,16 +1880,12 @@
     <NMakeIncludeSearchPath>$(PT_INCLUDE_SEARCH_PATH)</NMakeIncludeSearchPath>
     <RemoteDeployDir>$(RemoteRootDir)/$(ProjectName)-Remote</RemoteDeployDir>
   </PropertyGroup>
-
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'">
     <RemotePreBuildEvent>
       <Command>chmod +x $(RemoteRootDir)/$(RemoteProjectRelDir)/jam.sh</Command>
     </RemotePreBuildEvent>
   </ItemDefinitionGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-
 </Project>
