@@ -43,7 +43,7 @@ ComboBox::ComboBox()
 , _isHighlighted(false)
 , _hasRenderer(false)
 {
-    setFocusPolicy(Widget::AcceptFocus);
+    setFocusPolicy(Control::AcceptFocus);
 
     _popup.setContent(&_items);
 
@@ -98,11 +98,11 @@ void ComboBox::setAccepted(bool a)
     
     if( ! a )
     {
-        setFocusPolicy(Widget::KeepFocus);
+        setFocusPolicy(Control::KeepFocus);
     }
     else
     {
-        setFocusPolicy(Widget::AcceptFocus);
+        setFocusPolicy(Control::AcceptFocus);
     }
 }
 

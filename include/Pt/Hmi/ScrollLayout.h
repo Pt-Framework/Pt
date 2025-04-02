@@ -65,9 +65,9 @@ class PT_HMI_API ScrollLayout : public Layout
 
         Pt::Signal<double>& scrolledY();
 
-        void addItem(Widget& w);
+        void addItem(Control& control);
 
-        void removeItem(Widget& w);
+        void removeItem(Control& control);
 
         void setContentMode(SizePolicy::Mode hmode, SizePolicy::Mode vmode);
 

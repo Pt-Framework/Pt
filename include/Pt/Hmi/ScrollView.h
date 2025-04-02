@@ -39,9 +39,9 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API ScrollView : public Widget
+class PT_HMI_API ScrollView : public Control
 {
-    typedef Widget Base;
+    typedef Control Base;
 
     public:
         ScrollView();
@@ -50,7 +50,7 @@ class PT_HMI_API ScrollView : public Widget
 
         void setScrollBars(bool hasScrollBars);
 
-        void setContent(Widget& w);
+        void setContent(Control& control);
 
         void setContentMode(SizePolicy::Mode horizontal, 
                             SizePolicy::Mode vertical);
@@ -83,7 +83,7 @@ class PT_HMI_API ScrollView : public Widget
     private:
         ScrollLayout _scrollLayout;
         bool         _hasScrollBars;
-        Widget*      _widget;
+        Control*      _control;
         ScrollBar    _scrollBarX; 
         ScrollBar    _scrollBarY;
 };

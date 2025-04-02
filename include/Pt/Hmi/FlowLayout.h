@@ -66,9 +66,9 @@ class PT_HMI_API FlowLayout : public Layout
 
         void setReverse(bool b);
 
-        void addItem(Widget& w);
+        void addItem(Control& control);
 
-        void removeItem(Widget& w);
+        void removeItem(Control& control);
 
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);

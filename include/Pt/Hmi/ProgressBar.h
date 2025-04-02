@@ -38,10 +38,10 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API ProgressBar : public Widget
+class PT_HMI_API ProgressBar : public Control
 {
     public:
-        typedef Widget Base;
+        typedef Control Base;
 
     public:
         ProgressBar();

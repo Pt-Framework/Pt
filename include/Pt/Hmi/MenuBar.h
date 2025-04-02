@@ -45,10 +45,10 @@ namespace Hmi {
 class Menu;
 class MenuBar;
 
-class PT_HMI_API MenuBar : public Widget
+class PT_HMI_API MenuBar : public Control
                          , protected MenuBase
 { 
-    typedef Widget Base;
+    typedef Control Base;
 
     public:
         MenuBar();

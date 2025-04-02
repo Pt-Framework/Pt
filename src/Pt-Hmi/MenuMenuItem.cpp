@@ -88,7 +88,7 @@ const std::vector<Key> MenuMenuItem::onGetShortcuts()
     if(_menu == 0)
         return sck;
 
-    std::map<Key, Widget*>::const_iterator  it = _menu->shortcuts().begin();
+    std::map<Key, Control*>::const_iterator  it = _menu->shortcuts().begin();
 
     for( ;it != _menu->shortcuts().end(); ++it)
         sck.push_back(it->first);
@@ -103,7 +103,7 @@ const std::vector<Pt::Char> MenuMenuItem::onGetMnemonics()
     if (_menu == 0)
         return mns;
 
-    std::map<Pt::Char, Widget*>::const_iterator  it = _menu->mnemonics().begin();
+    std::map<Pt::Char, Control*>::const_iterator  it = _menu->mnemonics().begin();
 
     for (; it != _menu->mnemonics().end(); ++it)
         mns.push_back(it->first);
@@ -124,7 +124,7 @@ void MenuMenuItem::onMnemonic(Pt::Char m)
         }
     }
 
-    std::map<Pt::Char, Widget*>::const_iterator  it = _menu->mnemonics().begin();
+    std::map<Pt::Char, Control*>::const_iterator  it = _menu->mnemonics().begin();
 
     for (; it != _menu->mnemonics().end(); ++it)
     {
@@ -149,7 +149,7 @@ void MenuMenuItem::onShortcut(const Key& key)
         }
     }
 
-    std::map<Key, Widget*>::const_iterator  it = _menu->shortcuts().begin();
+    std::map<Key, Control*>::const_iterator  it = _menu->shortcuts().begin();
 
     for (; it != _menu->shortcuts().end(); ++it)
     {

@@ -55,16 +55,16 @@ class PT_HMI_API TableLayout : public Layout
         
         virtual ~TableLayout();
 
-        void addItem(Widget& w, std::size_t row, std::size_t column);
+        void addItem(Control& control, std::size_t row, std::size_t column);
 
-        void removeItem(Widget& w);
+        void removeItem(Control& control);
 
         void setColumn(std::size_t col, SizeMode mode, double size = 0);
 
         void setRow(std::size_t row, SizeMode mode, double size = 0);
 
     protected:
-        virtual void onRemoveWidget(Widget& w);
+        virtual void onRemoveControl(Control& control);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
@@ -101,7 +101,7 @@ class PT_HMI_API TableLayout : public Layout
         std::vector<SizeInfo> _columnSizes;
         std::vector<SizeInfo> _rowSizes;
 
-        typedef std::vector<Widget*> Row;
+        typedef std::vector<Control*> Row;
         std::vector<Row> _rows;
 };
 

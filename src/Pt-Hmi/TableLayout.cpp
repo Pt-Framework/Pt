@@ -44,9 +44,9 @@ TableLayout::~TableLayout()
 }
 
 
-void TableLayout::addItem(Widget& w, std::size_t row, std::size_t col)
+void TableLayout::addItem(Control& control, std::size_t row, std::size_t col)
 {
-    if(w.parent() == this)
+    if(control.parent() == this)
         return;
 
     std::size_t rows = row + 1;
@@ -73,18 +73,18 @@ void TableLayout::addItem(Widget& w, std::size_t row, std::size_t col)
             it->resize(cols);
     }
 
-    add(w);
-    _rows.at(row).at(col) = &w;
+    add(control);
+    _rows.at(row).at(col) = &control;
 }
 
 
-void TableLayout::removeItem(Widget& w)
+void TableLayout::removeItem(Control& control)
 {
-    remove(w);
+    remove(control);
 }
 
 
-void TableLayout::onRemoveWidget(Widget& w)
+void TableLayout::onRemoveControl(Control& control)
 {
     std::vector<Row>::iterator rit;
     for(rit = _rows.begin(); rit != _rows.end(); ++rit)
@@ -92,11 +92,11 @@ void TableLayout::onRemoveWidget(Widget& w)
         Row::iterator it;
         for(it = rit->begin(); it != rit->end(); ++it)
         {
-            Widget* item = (*it);
-            if(item == &w)
+            Control* item = (*it);
+            if(item == &control)
             {
                 *it = 0;
-                remove(w);
+                remove(control);
                 break;
             }
         }
@@ -143,7 +143,7 @@ Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
         {
             SizeInfo& columnPolicy = _columnSizes.at(col);
 
-            Widget* item = _rows.at(row).at(col);
+            Control* item = _rows.at(row).at(col);
             if( ! item )
                 continue;
 
@@ -208,7 +208,7 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
 
             for(std::size_t col = 0; col != columns; ++col)
             {
-                Widget* item = _rows.at(row).at(col);
+                Control* item = _rows.at(row).at(col);
                 if( ! item )
                     continue;
 
@@ -246,7 +246,7 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
 
             for(std::size_t row = 0; row < _rows.size(); ++row)
             {
-                Widget* item = _rows.at(row).at(col);
+                Control* item = _rows.at(row).at(col);
                 if( ! item )
                     continue;
 
@@ -289,7 +289,7 @@ void TableLayout::onLayout(const Gfx::RectF& rect)
             double columnSize = columnPolicy.mode() == TableLayout::Fill ? columnFillSize
                                                                          : columnPolicy.size();
 
-            Widget* item = _rows.at(row).at(col);
+            Control* item = _rows.at(row).at(col);
 
             if( item && item->isVisible() )
             {

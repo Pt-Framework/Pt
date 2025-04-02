@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_HMI_VIEWL_H
-#define PT_HMI_VIEWL_H
+#ifndef PT_HMI_VIEW_H
+#define PT_HMI_VIEW_H
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Visual.h>
@@ -44,14 +44,14 @@ namespace Pt {
 
 namespace Hmi {
 
-class Widget;
+class Control;
 class View;
 class ViewCanvas;
 
 class PT_HMI_API View : public Visual
                       , private Gfx::PaintSurface
 {
-    friend class Widget;
+    friend class Control;
 
     typedef Visual Base;
 
@@ -69,13 +69,13 @@ class PT_HMI_API View : public Visual
     public:
         virtual ~View();
 
-        Gfx::PointF toWidget(const Widget& widget, 
-                             const Gfx::PointF& pos) const;
+        Gfx::PointF toControl(const Control& control, 
+                              const Gfx::PointF& pos) const;
 
-        Gfx::PointF fromWidget(const Widget& widget,
-                               const Gfx::PointF& pos) const;
+        Gfx::PointF fromControl(const Control& control,
+                                const Gfx::PointF& pos) const;
 
-        void setStyleOptions(const StyleOptions& o);
+        void setStyleOptions(const StyleOptions& opts);
 
         Gfx::PaintSurface& surface();
 
@@ -92,38 +92,38 @@ class PT_HMI_API View : public Visual
                              const Gfx::RectF& rect);
     
     protected:
-        virtual void onAttach(Widget& widget);
+        virtual void onAttach(Control& control);
         
-        virtual void onDetach(Widget& widget);
+        virtual void onDetach(Control& control);
 
-        virtual void onInit(Widget& widget);
+        virtual void onInit(Control& control);
 
-        virtual void onRelease(Widget& widget);
+        virtual void onRelease(Control& control);
 
-        virtual Gfx::PointF onToWidget(const Widget& widget, 
-                                       const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onToControl(const Control& control, 
+                                        const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromWidget(const Widget& widget, 
-                                         const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onFromControl(const Control& control, 
+                                          const Gfx::PointF& pos) const;
 
         virtual void onSetStyleOptions(const StyleOptions& o);
 
     protected:
-        virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);
+        virtual void onRepaintRequest(Control& control, const Gfx::RectF& rect);
 
-        virtual void onRelayoutRequest(Widget& widget);
+        virtual void onRelayoutRequest(Control& control);
 
-        virtual void onEnableRequest(Widget& widget, bool isEnable);
+        virtual void onEnableRequest(Control& control, bool isEnable);
 
-        virtual void onActivateRequest(Widget& w, bool active);
+        virtual void onActivateRequest(Control& control, bool active);
 
-        virtual void onShowRequest(Widget& widget, bool isShown);
+        virtual void onShowRequest(Control& control, bool isShown);
 
-        virtual void onMoveRequest(Widget& widget, const Gfx::PointF& pos);
+        virtual void onMoveRequest(Control& control, const Gfx::PointF& pos);
 
-        virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size);
+        virtual void onResizeRequest(Control& control, const Gfx::SizeF& size);
 
-        virtual void onRaiseRequest(Widget& widget);
+        virtual void onRaiseRequest(Control& control);
 
     //
     // Visual

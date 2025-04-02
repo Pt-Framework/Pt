@@ -33,7 +33,7 @@
 
 namespace {
 
-bool lowerFocusIndex(Pt::Hmi::Widget* a, Pt::Hmi::Widget* b)
+bool lowerFocusIndex(Pt::Hmi::Control* a, Pt::Hmi::Control* b)
 {
     return a->focusIndex() < b->focusIndex();
 }
@@ -45,10 +45,10 @@ namespace Pt {
 namespace Hmi {
 
 Form::Form()
-: _mainWidget(0)
+: _mainControl(0)
 , _layouts(0)
 , _active(0)
-, _focusWidget(0)
+, _focusControl(0)
 {
     eventReceived() += Pt::slot(*this, &Form::onProcessLayoutEvent);
 }
@@ -56,33 +56,33 @@ Form::Form()
 
 Form::~Form()
 {
-    if(_mainWidget)
-        _mainWidget->unparent();
+    if(_mainControl)
+        _mainControl->unparent();
 }
 
 
-Widget* Form::content() 
+Control* Form::content() 
 {
-    return _mainWidget;
+    return _mainControl;
 }
 
 
-const Widget* Form::content()  const 
+const Control* Form::content()  const 
 {
-    return _mainWidget;
+    return _mainControl;
 }
 
 
-void Form::setContent(Widget* widget)
+void Form::setContent(Control* control)
 {
-    if(_mainWidget)
+    if(_mainControl)
     {
-        _mainWidget->unparent();
+        _mainControl->unparent();
     }
 
-    if(widget)
+    if(control)
     {
-        widget->setParent(*this);
+        control->setParent(*this);
     }
 }
 
@@ -121,8 +121,8 @@ void Form::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
     Base::onSetSurface(surface, pos);
 
-    if(_mainWidget)
-        _mainWidget->setSurface(surface, pos);
+    if(_mainControl)
+        _mainControl->setSurface(surface, pos);
 }
 
 
@@ -152,7 +152,7 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 
     //std::clog << "RELAYOUT EVENT" << std::endl;
 
-    if(_mainWidget)
+    if(_mainControl)
     {
         //
         // 1. Pass
@@ -166,7 +166,7 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
         LayoutEvent lev(*this, rect);
         onLayoutEvent(lev);
 
-        LayoutEvent lev2(*_mainWidget, rect);
+        LayoutEvent lev2(*_mainControl, rect);
         Application::instance().commitEvent(lev2);
     }
 }
@@ -177,28 +177,28 @@ Gfx::SizeF Form::onMeasure()
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize( size() );
     
-    return _mainWidget ? _mainWidget->measure(policy)
+    return _mainControl ? _mainControl->measure(policy)
                        : policy.size();
 }
 
 
 void Form::onLayoutEvent(const LayoutEvent& ev)
 {   
-    if( _mainWidget )
+    if( _mainControl )
     {
-        Gfx::PointF widgetPos(0, 0);
-        Gfx::SizeF widgetSize = size();      
-        //std::clog << "Form::onLayout " << _mainWidget->name() << " " << widgetSize.height() << std::endl;
+        Gfx::PointF controlPos(0, 0);
+        Gfx::SizeF controlSize = size();      
+        //std::clog << "Form::onLayout " << _mainControl->name() << " " << controlSize.height() << std::endl;
         
-        _mainWidget->move(widgetPos);
-        _mainWidget->resize(widgetSize);
+        _mainControl->move(controlPos);
+        _mainControl->resize(controlSize);
     }
 }
 
 
-Widget* Form::focusWidget()
+Control* Form::focusControl()
 {
-    return _focusWidget;
+    return _focusControl;
 }
 
 
@@ -217,7 +217,7 @@ void Form::focusNext()
 template <typename Iter>
 void Form::moveFocus(Iter begin, Iter end)
 {
-    Iter current = std::find(begin, end, _focusWidget);
+    Iter current = std::find(begin, end, _focusControl);
     Iter it = current;
     
     if( it != end )
@@ -230,11 +230,11 @@ void Form::moveFocus(Iter begin, Iter end)
         if( it == end )
             it = begin;
 
-        Widget* w = *it;
+        Control* control = *it;
         
-        if( w->focusPolicy() != Widget::NoFocus )
+        if( control->focusPolicy() != Control::NoFocus )
         {
-            onSetFocus(*w);
+            onSetFocus(*control);
             return;
         }
 
@@ -243,131 +243,131 @@ void Form::moveFocus(Iter begin, Iter end)
 }
 
 
-void Form::onSetFocusPolicy(Widget& w, FocusPolicy policy)
+void Form::onSetFocusPolicy(Control& control, FocusPolicy policy)
 {
-    if( _focusWidget == &w && policy == View::NoFocus )
+    if( _focusControl == &control && policy == View::NoFocus )
     {
-        FocusEvent fev(*_focusWidget, false);
-        _focusWidget->processEvent(fev);
-        _focusWidget = 0;
+        FocusEvent fev(*_focusControl, false);
+        _focusControl->processEvent(fev);
+        _focusControl = 0;
     }
 }
 
 
-void Form::onSetFocusIndex(Widget& w, unsigned index)
+void Form::onSetFocusIndex(Control& control, unsigned index)
 {
     std::sort(_focusList.begin(), _focusList.end(), &lowerFocusIndex);
 }
 
 
-void Form::onSetFocus(Widget& widget)
+void Form::onSetFocus(Control& control)
 {
-    if( _focusWidget == &widget )
+    if( _focusControl == &control )
         return;
 
-    if(_focusWidget)
+    if(_focusControl)
     {
-        if(_focusWidget->focusPolicy() == Widget::KeepFocus)
+        if(_focusControl->focusPolicy() == Control::KeepFocus)
             return;
     }
 
-    if(_focusWidget)
+    if(_focusControl)
     {
         Window* imeWindow = Application::instance().inputMethod().activeWindow();
         if(imeWindow)
         {
-          if( ! _focusWidget->isDescendantOf(*imeWindow) )
+          if( ! _focusControl->isDescendantOf(*imeWindow) )
               Application::instance().inputMethod().finish();
         }
 
-        FocusEvent fev(*_focusWidget, false);
-        _focusWidget->processEvent(fev);
+        FocusEvent fev(*_focusControl, false);
+        _focusControl->processEvent(fev);
     }
     
-    _focusWidget = &widget;
+    _focusControl = &control;
 
-    if(_focusWidget)
+    if(_focusControl)
     {
-        FocusEvent fev(*_focusWidget, true);
-        _focusWidget->processEvent(fev);
+        FocusEvent fev(*_focusControl, true);
+        _focusControl->processEvent(fev);
     }
 }
 
 
-void Form::onSetShortcut(Widget& w, const std::vector<Key>& keys)
+void Form::onSetShortcut(Control& control, const std::vector<Key>& keys)
 {
-    std::map<Key, Widget*>::iterator it = _shortcuts.begin();
+    std::map<Key, Control*>::iterator it = _shortcuts.begin();
 
     while( it != _shortcuts.end() )
     {
-        if(it->second == &w)
+        if(it->second == &control)
             _shortcuts.erase(it++);
         else
             ++it;
     }
 
     for(size_t i = 0; i < keys.size();++i)
-        _shortcuts[keys[i]] = &w;
+        _shortcuts[keys[i]] = &control;
 }
 
 
-void Form::onSetMnemonic(Widget& w, const std::vector<Char>& chs)
+void Form::onSetMnemonic(Control& control, const std::vector<Char>& chs)
 {
-    std::map<Char, Widget*>::iterator it = _mnemonics.begin();
+    std::map<Char, Control*>::iterator it = _mnemonics.begin();
 
     while( it != _mnemonics.end() )
     {
-        if(it->second == &w)
+        if(it->second == &control)
             _mnemonics.erase(it++);
         else
             ++it;
     }
 
     for( size_t i = 0; i < chs.size(); ++i)
-        _mnemonics[chs[i]] = &w;
+        _mnemonics[chs[i]] = &control;
 }
 
 
-void Form::onAddElement(Widget& widget)
+void Form::onAddElement(Control& control)
 {
     //
     // focus handling
     //
     if( _focusList.empty() )
-        widget.setFocusIndex(0);
+        control.setFocusIndex(0);
     else
-        widget.setFocusIndex( _focusList.back()->focusIndex() + 1);
+        control.setFocusIndex( _focusList.back()->focusIndex() + 1);
 
-    _focusList.push_back(&widget);
+    _focusList.push_back(&control);
 
-    onSetShortcut( widget, widget.onGetShortcuts() );
-    onSetMnemonic( widget, widget.onGetMnemonics() );
+    onSetShortcut( control, control.onGetShortcuts() );
+    onSetMnemonic( control, control.onGetMnemonics() );
 }
 
 
-void Form::onRemoveElement(Widget& widget)
+void Form::onRemoveElement(Control& control)
 {
-    if(_active == &widget)
+    if(_active == &control)
         _active = 0;
 
     //
     // focus handling
     //
-    if( _focusWidget == &widget )
+    if( _focusControl == &control )
     {
-        FocusEvent fev(*_focusWidget, false);
-        _focusWidget->processEvent(fev);
-        _focusWidget = 0;
+        FocusEvent fev(*_focusControl, false);
+        _focusControl->processEvent(fev);
+        _focusControl = 0;
     }
 
-    std::vector<Widget*>::iterator it;
-    it = std::find(_focusList.begin(), _focusList.end(), &widget);
+    std::vector<Control*>::iterator it;
+    it = std::find(_focusList.begin(), _focusList.end(), &control);
 
     if( it != _focusList.end() )
         _focusList.erase(it);
 
-    onSetShortcut(widget, std::vector<Pt::Hmi::Key>());
-    onSetMnemonic(widget, std::vector<Pt::Char>());
+    onSetShortcut(control, std::vector<Pt::Hmi::Key>());
+    onSetMnemonic(control, std::vector<Pt::Char>());
 }
 
 
@@ -375,73 +375,73 @@ void Form::onRemoveElement(Widget& widget)
 // View
 //
 
-void Form::onAttach(Widget& widget)
+void Form::onAttach(Control& control)
 {
-    Base::onAttach(widget);
+    Base::onAttach(control);
 
-    _mainWidget = &widget;
+    _mainControl = &control;
     
     relayout();
 }
 
 
-void Form::onDetach(Widget& widget)
+void Form::onDetach(Control& control)
 {
-    Base::onDetach(widget);
+    Base::onDetach(control);
 
-    if(_active == &widget)
+    if(_active == &control)
         _active = 0;
 
-      if(_mainWidget == &widget)
-          _mainWidget = 0;
+      if(_mainControl == &control)
+          _mainControl = 0;
 
       relayout();
 }
 
 
-void Form::onInit(Widget& widget)
+void Form::onInit(Control& control)
 {
-    Base::onInit(widget);
+    Base::onInit(control);
 
     //Gfx::PaintSurface* surface = _surface.surface();
-    //Gfx::PointF surfacePos = _surface.position() + widget.position();
-    //widget.setSurface(surface, surfacePos);
+    //Gfx::PointF surfacePos = _surface.position() + control.position();
+    //control.setSurface(surface, surfacePos);
     
-    widget.setNextResponder(this);
-    widget.setForm(this);
+    control.setNextResponder(this);
+    control.setForm(this);
 
     double scaling = scaleFactor();
     
-    RescaleEvent ev(widget, scaling);
-    widget.processEvent(ev);
+    RescaleEvent ev(control, scaling);
+    control.processEvent(ev);
 }
 
 
-void Form::onRelease(Widget& widget)
+void Form::onRelease(Control& control)
 {
-    Base::onRelease(widget);
+    Base::onRelease(control);
 
-    widget.setForm(0);
-    //widget.setSurface( 0, widget.position() );
-    widget.setNextResponder(0);
+    control.setForm(0);
+    //control.setSurface( 0, control.position() );
+    control.setNextResponder(0);
 }
 
 
-Gfx::PointF Form::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
+Gfx::PointF Form::onToControl(const Control& control, const Gfx::PointF& pos) const
 {
-    return pos - widget.position();   
+    return pos - control.position();   
 }
 
 
-Gfx::PointF Form::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
+Gfx::PointF Form::onFromControl(const Control& control, const Gfx::PointF& pos) const
 {
-    return pos + widget.position();
+    return pos + control.position();
 }
 
 
-void Form::onRaiseRequest(Widget& widget)
+void Form::onRaiseRequest(Control& control)
 {
-    Base::onRaiseRequest(widget);
+    Base::onRaiseRequest(control);
 }
 
 //
@@ -453,10 +453,10 @@ Visual* Form::onHitTest(const Gfx::PointF& p)
     if( ! bounds().contains(p) )
         return 0;
 
-    if(_mainWidget)
+    if(_mainControl)
     {
-        Gfx::PointF pos = toWidget(*_mainWidget, p);
-        Visual* hit = _mainWidget->hitTest(pos);
+        Gfx::PointF pos = toControl(*_mainControl, p);
+        Visual* hit = _mainControl->hitTest(pos);
         if(hit)
             return hit;
     }
@@ -499,19 +499,19 @@ void Form::onProcessPaintEvent(const PaintEvent& ev)
     Base::onProcessPaintEvent(ev);
 
     //
-    // paint main widget
+    // paint main control
     //
-    if(_mainWidget)
+    if(_mainControl)
     {
-        Gfx::RectF updateRect = _mainWidget->geometry().intersect(rect);
+        Gfx::RectF updateRect = _mainControl->geometry().intersect(rect);
         if( updateRect.isNull() )
             return;
 
-        Gfx::PointF updatePos = onToWidget( *_mainWidget, updateRect.topLeft() );
+        Gfx::PointF updatePos = onToControl( *_mainControl, updateRect.topLeft() );
         updateRect.setOrigin(updatePos);
 
-        PaintEvent pev( *_mainWidget, updateRect );
-        _mainWidget->processEvent(pev);
+        PaintEvent pev( *_mainControl, updateRect );
+        _mainControl->processEvent(pev);
     }
 }
 
@@ -522,20 +522,20 @@ void Form::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Form::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
+void Form::onRepaintRequest(Control& control, const Gfx::RectF& rect)
 {
-    Base::onRepaintRequest(w, rect);
+    Base::onRepaintRequest(control, rect);
 
-    Gfx::PointF widgetPos = onFromWidget( w, rect.topLeft() );
-    Gfx::RectF widgetRect( widgetPos, rect.size() );
+    Gfx::PointF controlPos = onFromControl( control, rect.topLeft() );
+    Gfx::RectF controlRect( controlPos, rect.size() );
 
-    repaint(widgetRect);
+    repaint(controlRect);
 }
 
 
-void Form::onRelayoutRequest(Widget& widget)
+void Form::onRelayoutRequest(Control& control)
 {
-    Base::onRelayoutRequest(widget);
+    Base::onRelayoutRequest(control);
 
     relayout();
 }
@@ -548,11 +548,11 @@ void Form::onProcessRescaleEvent(const RescaleEvent& ev)
 {   
     Base::onProcessRescaleEvent(ev);
 
-    if(_mainWidget)
+    if(_mainControl)
     {
         double scaling = ev.scaleFactor();
-        RescaleEvent ev(*_mainWidget, scaling);
-        _mainWidget->processEvent(ev);
+        RescaleEvent ev(*_mainControl, scaling);
+        _mainControl->processEvent(ev);
     }
 }  
 
@@ -576,10 +576,10 @@ void Form::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
 
-    if(_mainWidget)
+    if(_mainControl)
     {
-        EnableEvent eev( *_mainWidget, ev.enabled() );
-        _mainWidget->processEvent(eev);
+        EnableEvent eev( *_mainControl, ev.enabled() );
+        _mainControl->processEvent(eev);
     }
 }
 
@@ -596,29 +596,29 @@ void Form::onEnable(bool e)
 }
 
 
-void Form::onEnableRequest(Widget& widget, bool enable)
+void Form::onEnableRequest(Control& control, bool enable)
 {
-    Base::onEnableRequest(widget, enable);
+    Base::onEnableRequest(control, enable);
 
     if( ! isEnabled() )
       enable = false;
 
-    EnableEvent eev(widget, enable);
-    widget.processEvent(eev);
+    EnableEvent eev(control, enable);
+    control.processEvent(eev);
 }
 
 //
 // activation
 //
 
-void Form::onActivateRequest(Widget& widget, bool active)
+void Form::onActivateRequest(Control& control, bool active)
 {
-    Base::onActivateRequest(widget, active);
+    Base::onActivateRequest(control, active);
 
     if(active)
-        _active = &widget;
+        _active = &control;
 
-    if( ! active && _active == &widget )
+    if( ! active && _active == &control )
         _active = 0;
 }
 
@@ -644,21 +644,21 @@ void Form::onShow(bool visible)
 }
 
 
-void Form::onShowRequest(Widget& widget, bool visible)
+void Form::onShowRequest(Control& control, bool visible)
 {
-    Base::onShowRequest(widget, visible);
+    Base::onShowRequest(control, visible);
 
-    ShowEvent sev(widget, visible);
-    widget.processEvent(sev);
+    ShowEvent sev(control, visible);
+    control.processEvent(sev);
 }
 
 //
 // geometry
 //
 
-void Form::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
+void Form::onMoveRequest(Control& control, const Gfx::PointF& pos)
 {
-    Base::onMoveRequest(widget, pos);
+    Base::onMoveRequest(control, pos);
 }
 
 
@@ -674,9 +674,9 @@ void Form::onMoveEvent(const MoveEvent& ev)
 }
 
 
-void Form::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
+void Form::onResizeRequest(Control& control, const Gfx::SizeF& size)
 {
-    Base::onResizeRequest(widget, size);
+    Base::onResizeRequest(control, size);
 }
 
 
@@ -718,11 +718,11 @@ void Form::onProcessMouseEvent(const MouseEvent& ev)
 
     Gfx::PointF pos = fromGlobal( ev.position() );
 
-    if(_mainWidget && 
-       _mainWidget->geometry().contains(pos) && 
-       _mainWidget->acceptsInput() )
+    if(_mainControl && 
+       _mainControl->geometry().contains(pos) && 
+       _mainControl->acceptsInput() )
     {
-        _mainWidget->processEvent(ev);
+        _mainControl->processEvent(ev);
         return;
     }
 
@@ -743,11 +743,11 @@ void Form::onProcessTouchEvent(const TouchEvent& ev)
 
     Gfx::PointF pos = fromGlobal( ev.position() );
 
-    if(_mainWidget && 
-       _mainWidget->geometry().contains(pos) && 
-       _mainWidget->acceptsInput() )
+    if(_mainControl && 
+       _mainControl->geometry().contains(pos) && 
+       _mainControl->acceptsInput() )
     {
-        _mainWidget->processEvent(ev);
+        _mainControl->processEvent(ev);
         return;
     }
 
@@ -780,9 +780,9 @@ void Form::onProcessScrollEvent(const ScrollEvent& ev)
         return;
     }
 
-    if(_focusWidget)
+    if(_focusControl)
     {
-        _focusWidget->scrollEvent(ev);
+        _focusControl->scrollEvent(ev);
         return;
     }
 
@@ -838,7 +838,7 @@ void Form::onProcessKeyEvent(const KeyEvent& ev)
     //
     if( ev.isPress() )
     {
-        std::map<Key, Widget*>::iterator s = _shortcuts.find( ev.key() );
+        std::map<Key, Control*>::iterator s = _shortcuts.find( ev.key() );
         if( s != _shortcuts.end() )
         {
             s->second->processShortcut(s->first);
@@ -851,7 +851,7 @@ void Form::onProcessKeyEvent(const KeyEvent& ev)
     //
     if( ev.isPress() && ev.key().modifiers() == Key::Alt )
     {
-        std::map<Char, Widget*>::iterator m = _mnemonics.find( ev.unicode() );
+        std::map<Char, Control*>::iterator m = _mnemonics.find( ev.unicode() );
         if( m != _mnemonics.end() )
         {
             m->second->processMnemonic(m->first);
@@ -864,7 +864,7 @@ void Form::onProcessKeyEvent(const KeyEvent& ev)
     //
     if( ev.key().code() == Key::Tab && ev.isPress() )
     {
-        bool keepFocus = _focusWidget && _focusWidget->focusPolicy() == KeepFocus;
+        bool keepFocus = _focusControl && _focusControl->focusPolicy() == KeepFocus;
         if( ! keepFocus )
         {
             if( ev.key().modifiers() == Key::Shift )
@@ -879,9 +879,9 @@ void Form::onProcessKeyEvent(const KeyEvent& ev)
     //
     // pass event to responder chain
     //
-    if( _focusWidget )
+    if( _focusControl )
     {       
-        _focusWidget->processEvent(ev);
+        _focusControl->processEvent(ev);
     }
     else
     {

@@ -96,10 +96,10 @@ class PT_HMI_API SpinBoxButton : public Button
 };
 
 
-class PT_HMI_API SpinBox : public Widget
+class PT_HMI_API SpinBox : public Control
 {
     public:
-        typedef Widget Base;
+        typedef Control Base;
 
     public:
         SpinBox();

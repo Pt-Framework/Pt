@@ -46,15 +46,15 @@ FlowLayout::~FlowLayout()
 }
 
 
-void FlowLayout::addItem(Widget& w)
+void FlowLayout::addItem(Control& control)
 {
-    add(w);
+    add(control);
 }
 
 
-void FlowLayout::removeItem(Widget& w)
+void FlowLayout::removeItem(Control& control)
 {
-    remove(w);
+    remove(control);
 }
 
 
@@ -70,6 +70,7 @@ void FlowLayout::setCenter(bool b)
 {
     _center = b;
 }
+
 
 void FlowLayout::setReverse(bool b)
 {
@@ -133,14 +134,14 @@ void FlowLayout::onLayout(const Gfx::RectF& rect)
 
 Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
 {
-    std::vector<Widget*>::const_iterator it = widgets().begin();
-    std::vector<Widget*>::const_iterator end = widgets().end();
+    std::vector<Control*>::const_iterator it = controls().begin();
+    std::vector<Control*>::const_iterator end = controls().end();
 
     Gfx::SizeF contentSize;
 
     for( ; it != end; ++it)
     {
-        Widget* item = *it;
+        Control* item = *it;
         
         if( ! item->isVisible() )
             continue;  
@@ -171,14 +172,14 @@ Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
 
 Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
 {
-    std::vector<Widget*>::const_iterator it = widgets().begin();
-    std::vector<Widget*>::const_iterator end = widgets().end();
+    std::vector<Control*>::const_iterator it = controls().begin();
+    std::vector<Control*>::const_iterator end = controls().end();
 
     Gfx::SizeF contentSize;
 
     for( ; it != end; ++it)
     {
-        Widget* item = *it; 
+        Control* item = *it; 
 
         if( ! item->isVisible() )
             continue; 
@@ -215,10 +216,10 @@ void FlowLayout::onLayoutLeft(const Gfx::RectF& rect, bool center)
     {
         double itemsWidth = 0;
 
-        std::vector<Pt::Hmi::Widget*>::const_iterator it;
-        for(it = widgets().begin(); it != widgets().end(); ++it)
+        std::vector<Pt::Hmi::Control*>::const_iterator it;
+        for(it = controls().begin(); it != controls().end(); ++it)
         {
-          Widget* item = *it;
+          Control* item = *it;
           itemsWidth += item->preferredSize().width();
           itemsWidth += item->margin().leftRight();
         }
@@ -228,12 +229,12 @@ void FlowLayout::onLayoutLeft(const Gfx::RectF& rect, bool center)
 
     if (!_reverse)
     {
-        std::vector<Widget*>::const_iterator it = widgets().begin();
-        std::vector<Widget*>::const_iterator end = widgets().end();
+        std::vector<Control*>::const_iterator it = controls().begin();
+        std::vector<Control*>::const_iterator end = controls().end();
 
         for (; it != end; ++it)
         {
-            Widget* item = *it;
+            Control* item = *it;
 
             if (!item->isVisible())
                 continue;
@@ -259,12 +260,12 @@ void FlowLayout::onLayoutLeft(const Gfx::RectF& rect, bool center)
     }
     else
     {
-        std::vector<Widget*>::const_reverse_iterator it = widgets().rbegin();
-        std::vector<Widget*>::const_reverse_iterator end = widgets().rend();
+        std::vector<Control*>::const_reverse_iterator it = controls().rbegin();
+        std::vector<Control*>::const_reverse_iterator end = controls().rend();
 
         for (; it != end; ++it)
         {
-            Widget* item = *it;
+            Control* item = *it;
 
             if (!item->isVisible())
                 continue;
@@ -299,10 +300,10 @@ void FlowLayout::onLayoutRight(const Gfx::RectF& rect, bool center)
     {
         double itemsWidth = 0;
 
-        std::vector<Pt::Hmi::Widget*>::const_iterator it;
-        for(it = widgets().begin(); it != widgets().end(); ++it)
+        std::vector<Pt::Hmi::Control*>::const_iterator it;
+        for(it = controls().begin(); it != controls().end(); ++it)
         {
-          Widget* item = *it;
+          Control* item = *it;
           itemsWidth += item->preferredSize().width();
           itemsWidth += item->margin().leftRight();
         }
@@ -312,12 +313,12 @@ void FlowLayout::onLayoutRight(const Gfx::RectF& rect, bool center)
 
     if (!_reverse)
     {
-        std::vector<Widget*>::const_iterator it = widgets().begin();
-        std::vector<Widget*>::const_iterator end = widgets().end();
+        std::vector<Control*>::const_iterator it = controls().begin();
+        std::vector<Control*>::const_iterator end = controls().end();
 
         for (; it != end; ++it)
         {
-            Widget* item = *it;
+            Control* item = *it;
 
             if (!item->isVisible())
                 continue;
@@ -345,12 +346,12 @@ void FlowLayout::onLayoutRight(const Gfx::RectF& rect, bool center)
     }
     else
     {
-        std::vector<Widget*>::const_reverse_iterator it = widgets().rbegin();
-        std::vector<Widget*>::const_reverse_iterator end = widgets().rend();
+        std::vector<Control*>::const_reverse_iterator it = controls().rbegin();
+        std::vector<Control*>::const_reverse_iterator end = controls().rend();
 
         for (; it != end; ++it)
         {
-            Widget* item = *it;
+            Control* item = *it;
 
             if (!item->isVisible())
                 continue;
@@ -387,10 +388,10 @@ void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)
     {
         double itemsHeight = 0;
 
-        std::vector<Pt::Hmi::Widget*>::const_iterator it;
-        for(it = widgets().begin(); it != widgets().end(); ++it)
+        std::vector<Pt::Hmi::Control*>::const_iterator it;
+        for(it = controls().begin(); it != controls().end(); ++it)
         {
-          Widget* item = *it;
+          Control* item = *it;
           itemsHeight += item->preferredSize().height();
           itemsHeight += item->margin().topBottom();
         }
@@ -400,12 +401,12 @@ void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)
 
     if (!_reverse)
     {
-        std::vector<Widget*>::const_iterator it = widgets().begin();
-        std::vector<Widget*>::const_iterator end = widgets().end();
+        std::vector<Control*>::const_iterator it = controls().begin();
+        std::vector<Control*>::const_iterator end = controls().end();
 
         for (; it != end; ++it)
         {
-            Widget* item = *it;
+            Control* item = *it;
 
             if (!item->isVisible())
                 continue;
@@ -431,12 +432,12 @@ void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)
     }
     else
     {
-        std::vector<Widget*>::const_reverse_iterator it = widgets().rbegin();
-        std::vector<Widget*>::const_reverse_iterator end = widgets().rend();
+        std::vector<Control*>::const_reverse_iterator it = controls().rbegin();
+        std::vector<Control*>::const_reverse_iterator end = controls().rend();
 
         for (; it != end; ++it)
         {
-            Widget* item = *it;
+            Control* item = *it;
 
             if (!item->isVisible())
                 continue;
@@ -471,10 +472,10 @@ void FlowLayout::onLayoutBottom(const Gfx::RectF& rect, bool center)
     {
         double itemsHeight = 0;
 
-        std::vector<Pt::Hmi::Widget*>::const_iterator it;
-        for(it = widgets().begin(); it != widgets().end(); ++it)
+        std::vector<Pt::Hmi::Control*>::const_iterator it;
+        for(it = controls().begin(); it != controls().end(); ++it)
         {
-          Widget* item = *it;
+          Control* item = *it;
           itemsHeight += item->preferredSize().height();
           itemsHeight += item->margin().topBottom();
         }
@@ -484,12 +485,12 @@ void FlowLayout::onLayoutBottom(const Gfx::RectF& rect, bool center)
 
     if (!_reverse)
     {
-        std::vector<Widget*>::const_iterator it = widgets().begin();
-        std::vector<Widget*>::const_iterator end = widgets().end();
+        std::vector<Control*>::const_iterator it = controls().begin();
+        std::vector<Control*>::const_iterator end = controls().end();
 
         for (; it != end; ++it)
         {
-            Widget* item = *it;
+            Control* item = *it;
 
             if (!item->isVisible())
                 continue;
@@ -517,12 +518,12 @@ void FlowLayout::onLayoutBottom(const Gfx::RectF& rect, bool center)
     }
     else
     {
-        std::vector<Widget*>::const_reverse_iterator it = widgets().rbegin();
-        std::vector<Widget*>::const_reverse_iterator end = widgets().rend();
+        std::vector<Control*>::const_reverse_iterator it = controls().rbegin();
+        std::vector<Control*>::const_reverse_iterator end = controls().rend();
 
         for (; it != end; ++it)
         {
-            Widget* item = *it;
+            Control* item = *it;
 
             if (!item->isVisible())
                 continue;

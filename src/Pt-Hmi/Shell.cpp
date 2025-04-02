@@ -54,7 +54,7 @@ Shell::Shell()
 {
     _wm.setParent(this);
 
-    setFocusPolicy(Widget::AcceptFocus);
+    setFocusPolicy(Control::AcceptFocus);
 }
 
 
@@ -87,35 +87,35 @@ WindowManager& Shell::windowManager()
 }
 
 
-Widget* Shell::content() 
+Control* Shell::content() 
 {
     return _content;
 }
 
 
-const Widget* Shell::content()  const 
+const Control* Shell::content()  const 
 {
     return _content;
 }
 
 
-void Shell::setContent(Widget* widget)
+void Shell::setContent(Control* control)
 {
     if(_content)
     {
         _content->unparent();
     }
 
-    _content = widget;
+    _content = control;
 
-    if(widget)
+    if(control)
     {
-        widget->setParent(*this);
+        control->setParent(*this);
     }
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Widget
+// Control
 ///////////////////////////////////////////////////////////////////////
 
 void Shell::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
@@ -126,11 +126,11 @@ void Shell::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 }
 
 
-void Shell::onRemoveWidget(Widget& w)
+void Shell::onRemoveControl(Control& control)
 {
-    Widget::onRemoveWidget(w);
+    Control::onRemoveControl(control);
 
-    if(&w == _content)
+    if(&control == _content)
         _content = 0;
 }
 
@@ -149,11 +149,11 @@ Visual* Shell::onHitTest(const Gfx::PointF& p)
     if(hit)
         return hit;
 
-    return Widget::onHitTest(p);
+    return Control::onHitTest(p);
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Widget
+// Control
 ///////////////////////////////////////////////////////////////////////
 
 Gfx::SizeF Shell::onMeasure(const SizePolicy& policy)
@@ -167,7 +167,7 @@ Gfx::SizeF Shell::onMeasure(const SizePolicy& policy)
 
 void Shell::onLayout(const Gfx::RectF& rect)
 {
-    Widget::onLayout(rect);
+    Control::onLayout(rect);
 
     if(_content)
     {
@@ -192,7 +192,7 @@ void Shell::onLayout(const Gfx::RectF& rect)
 
 void Shell::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
-    Widget::onPaint(surface, rect);
+    Control::onPaint(surface, rect);
 }
 
 
@@ -208,7 +208,7 @@ void Shell::onProcessRescaleEvent(const RescaleEvent& ev)
 
 void Shell::onProcessPaintEvent(const PaintEvent& ev)
 {
-    Widget::onProcessPaintEvent(ev);
+    Control::onProcessPaintEvent(ev);
 
     const Gfx::RectF& rect = ev.rect();
 
@@ -219,7 +219,7 @@ void Shell::onProcessPaintEvent(const PaintEvent& ev)
 
 void Shell::onProcessResizeEvent(const ResizeEvent& ev)
 {
-    Widget::onProcessResizeEvent(ev);
+    Control::onProcessResizeEvent(ev);
 
     ResizeEvent rev(_wm, ev.size());
     _wm.processEvent(rev);
@@ -228,7 +228,7 @@ void Shell::onProcessResizeEvent(const ResizeEvent& ev)
 
 void Shell::onProcessEnableEvent(const EnableEvent& ev)
 {
-    Widget::onProcessEnableEvent(ev);
+    Control::onProcessEnableEvent(ev);
 
     EnableEvent eev(_wm, ev.enabled());
     _wm.processEvent(eev);
@@ -244,7 +244,7 @@ void Shell::onProcessMouseEvent(const MouseEvent& ev)
     if(consumed)
         return;
 
-    Widget::onProcessMouseEvent(ev);
+    Control::onProcessMouseEvent(ev);
 }
 
 
@@ -254,19 +254,19 @@ void Shell::onProcessTouchEvent(const TouchEvent& ev)
     if(consumed)
         return;
 
-    Widget::onProcessTouchEvent(ev);
+    Control::onProcessTouchEvent(ev);
 }
 
 
 void Shell::onProcessEnterEvent(const EnterEvent& ev)
 {
-    Widget::onProcessEnterEvent(ev);
+    Control::onProcessEnterEvent(ev);
 }
 
 
 void Shell::onProcessLeaveEvent(const LeaveEvent& ev)
 {
-    Widget::onProcessLeaveEvent(ev);
+    Control::onProcessLeaveEvent(ev);
 }
 
 
@@ -281,7 +281,7 @@ void Shell::onProcessScrollEvent(const ScrollEvent& ev)
         return;
     }
 
-    Widget::onProcessScrollEvent(ev);
+    Control::onProcessScrollEvent(ev);
 }
 
 
@@ -296,7 +296,7 @@ void Shell::onProcessKeyEvent(const KeyEvent& ev)
         return;
     }
 
-    Widget::onProcessKeyEvent(ev);
+    Control::onProcessKeyEvent(ev);
 }
 
 ///////////////////////////////////////////////////////////////////////

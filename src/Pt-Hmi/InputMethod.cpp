@@ -69,9 +69,9 @@ Window* InputMethod::activeWindow()
 }
 
 
-void InputMethod::begin(Widget& w)
+void InputMethod::begin(Control& control)
 {
-    _receiver = w.vid();
+    _receiver = control.vid();
 
     if(_isVisible)
         return;

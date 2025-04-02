@@ -158,17 +158,17 @@ void View::onSetSurface(Gfx::PaintSurface* surface,
 }
 
 
-Gfx::PointF View::toWidget(const Widget& widget, 
+Gfx::PointF View::toControl(const Control& control, 
                            const Gfx::PointF& pos) const
 { 
-    return onToWidget(widget, pos); 
+    return onToControl(control, pos); 
 }
 
 
-Gfx::PointF View::fromWidget(const Widget& widget,
+Gfx::PointF View::fromControl(const Control& control,
                              const Gfx::PointF& pos) const
 { 
-    return onFromWidget(widget, pos);
+    return onFromControl(control, pos);
 }
 
 
@@ -184,46 +184,46 @@ void View::onSetStyleOptions(const StyleOptions& o)
 }
 
 //
-// TODO: maintain a list of child widgets in onAttach() and onDetach(). 
+// TODO: maintain a list of child controls in onAttach() and onDetach(). 
 //       This way View::onSetSurface() can setup client surfaces.
 //
 
-void View::onAttach(Widget& widget)
+void View::onAttach(Control& control)
 {
 }
 
 
-void View::onDetach(Widget& widget)
+void View::onDetach(Control& control)
 {
 }
 
 
-void View::onInit(Widget& widget)
+void View::onInit(Control& control)
 {
     Gfx::PaintSurface* surface = _canvas->surface();
-    Gfx::PointF surfacePos = _canvas->position() + widget.position();
+    Gfx::PointF surfacePos = _canvas->position() + control.position();
 
-    widget.setSurface(surface, surfacePos);
+    control.setSurface(surface, surfacePos);
 }
 
 
-void View::onRelease(Widget& widget)
+void View::onRelease(Control& control)
 {
-    widget.setSurface(0);
+    control.setSurface(0);
 }
 
 
-Gfx::PointF View::onToWidget(const Widget& widget, 
+Gfx::PointF View::onToControl(const Control& control, 
                              const Gfx::PointF& pos) const
 {
-    return pos - widget.position();
+    return pos - control.position();
 }
 
 
-Gfx::PointF View::onFromWidget(const Widget& widget, 
+Gfx::PointF View::onFromControl(const Control& control, 
                                const Gfx::PointF& pos) const
 {
-    return pos + widget.position();
+    return pos + control.position();
 }
 
 
@@ -243,37 +243,37 @@ void View::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
 }
 
 
-void View::onRepaintRequest(Widget& widget, const Gfx::RectF& rect) 
+void View::onRepaintRequest(Control& control, const Gfx::RectF& rect) 
 {
 }
 
 
-void View::onRelayoutRequest(Widget& widget)
+void View::onRelayoutRequest(Control& control)
 {
 }
 
 
-void View::onEnableRequest(Widget& widget, bool isEnable)
+void View::onEnableRequest(Control& control, bool isEnable)
 {
 }
 
 
-void View::onActivateRequest(Widget& w, bool active)
+void View::onActivateRequest(Control& control, bool active)
 {
 }
 
 
-void View::onShowRequest(Widget& widget, bool isShown)
+void View::onShowRequest(Control& control, bool isShown)
 {
 }
 
 
-void View::onRaiseRequest(Widget& widget)
+void View::onRaiseRequest(Control& control)
 {
 }
 
 
-void View::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
+void View::onMoveRequest(Control& control, const Gfx::PointF& pos)
 {
     //
     // align to physical pixel grid
@@ -286,12 +286,12 @@ void View::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
     Gfx::PaintSurface* surface = _canvas->surface();
     Gfx::PointF surfacePos = _canvas->position() + aligedPos;
 
-    widget.setSurface(surface, surfacePos);
+    control.setSurface(surface, surfacePos);
 
     //
     // send move event
     //
-    MoveEvent mev(widget, aligedPos);
+    MoveEvent mev(control, aligedPos);
     Application::instance().commitEvent(mev);
 }
 
@@ -311,13 +311,13 @@ void View::onMoveEvent(const MoveEvent& ev)
 }
 
 
-void View::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
+void View::onResizeRequest(Control& control, const Gfx::SizeF& size)
 {
     Gfx::SizeF alignedSize = scaling().align(size);
 
     //_info.resize( ev.size() );
 
-    ResizeEvent rev(widget, alignedSize);
+    ResizeEvent rev(control, alignedSize);
     Application::instance().commitEvent(rev);
 }
 

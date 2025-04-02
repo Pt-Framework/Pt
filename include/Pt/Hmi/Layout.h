@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Layout : public Widget
+class PT_HMI_API Layout : public Control
 {
     public:
         Layout();

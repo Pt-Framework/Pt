@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Hmi {
 
-Widget::Widget()
+Control::Control()
 : _parent(0)
 , _form(0)
 , _isCapture(false)
@@ -53,12 +53,12 @@ Widget::Widget()
 , _actionKey(Key::Space)
 , _mnemonic(0)
 {
-    eventReceived() += Pt::slot(*this, &Widget::onProcessLayoutEvent);
-    eventReceived() += Pt::slot(*this, &Widget::onProcessFocusEvent);
+    eventReceived() += Pt::slot(*this, &Control::onProcessLayoutEvent);
+    eventReceived() += Pt::slot(*this, &Control::onProcessFocusEvent);
 }
 
 
-Widget::~Widget()
+Control::~Control()
 {
     while( ! _children.empty() )
         remove( *_children.back() );
@@ -67,7 +67,7 @@ Widget::~Widget()
 }
 
 
-void Widget::setParent(View& parent)
+void Control::setParent(View& parent)
 {
     if(_parent == &parent)
         return;
@@ -89,7 +89,7 @@ void Widget::setParent(View& parent)
 }
 
 
-void Widget::unparent()
+void Control::unparent()
 {
     if( ! _parent )
         return;
@@ -102,63 +102,63 @@ void Widget::unparent()
 }
 
 
-void Widget::onAttach(Widget& widget)
+void Control::onAttach(Control& control)
 {
-    Base::onAttach(widget);
+    Base::onAttach(control);
 
-    _children.push_back(&widget);
+    _children.push_back(&control);
 
-    onAddWidget(widget);
+    onAddControl(control);
 }
 
 
-void Widget::onDetach(Widget& widget)
+void Control::onDetach(Control& control)
 {
-    Base::onDetach(widget);
+    Base::onDetach(control);
 
-    std::vector<Widget*>::iterator it;
-    it = std::find(_children.begin(), _children.end(), &widget);
+    std::vector<Control*>::iterator it;
+    it = std::find(_children.begin(), _children.end(), &control);
     if( it != _children.end() )
         _children.erase(it);
 
-    onRemoveWidget(widget);
+    onRemoveControl(control);
 }
 
 
-void Widget::onInit(Widget& widget)
+void Control::onInit(Control& control)
 {
-    Base::onInit(widget);
+    Base::onInit(control);
 
     //Gfx::PaintSurface* surface = _surface.surface();
-    //Gfx::PointF surfacePos = _surface.position() + widget.position();
-    //widget.setSurface(surface, surfacePos);
+    //Gfx::PointF surfacePos = _surface.position() + control.position();
+    //control.setSurface(surface, surfacePos);
     
-    widget.setNextResponder(this);
-    widget.setForm(_form);
+    control.setNextResponder(this);
+    control.setForm(_form);
 
     double scaling = scaleFactor();
     
-    RescaleEvent ev(widget, scaling);
-    widget.processEvent(ev);
+    RescaleEvent ev(control, scaling);
+    control.processEvent(ev);
     //Application::instance().loop().commitEvent(ev);
 
     relayout();
 }
 
 
-void Widget::onRelease(Widget& widget)
+void Control::onRelease(Control& control)
 {
-    Base::onRelease(widget);
+    Base::onRelease(control);
 
-    widget.setForm(0);
-    //widget.setSurface( 0, widget.position() );
-    widget.setNextResponder(0);
+    control.setForm(0);
+    //control.setSurface( 0, control.position() );
+    control.setNextResponder(0);
 
     relayout();
 }
 
 
-void Widget::setForm(Form* form)
+void Control::setForm(Form* form)
 {
     if(_form)
         _form->onRemoveElement(*this);
@@ -170,58 +170,58 @@ void Widget::setForm(Form* form)
 
     _form = form;
 
-    std::vector<Widget*>::iterator it;
+    std::vector<Control*>::iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
     {
-        Widget* widget = *it;
-        widget->setForm(form);
+        Control* control = *it;
+        control->setForm(form);
     }
 }
 
 
-void Widget::add(Widget& w)
+void Control::add(Control& control)
 {
-    w.setParent(*this);
+    control.setParent(*this);
 }
 
 
-void Widget::remove(Widget& w)
+void Control::remove(Control& control)
 {
-    w.unparent();
+    control.unparent();
 }
 
 
-void Widget::onAddWidget(Widget& w)
-{
-}
-
-
-void Widget::onRemoveWidget(Widget& w)
+void Control::onAddControl(Control& control)
 {
 }
 
 
-const std::vector<Widget*>& Widget::widgets() const
+void Control::onRemoveControl(Control& control)
+{
+}
+
+
+const std::vector<Control*>& Control::controls() const
 {
     return _children;
 }
 
 
-//Gfx::PaintSurface& Widget::surface()
+//Gfx::PaintSurface& Control::surface()
 //{
 //    //return _surface;
 //    return *this;
 //}
 //
 //
-//const Gfx::PaintSurface& Widget::surface() const
+//const Gfx::PaintSurface& Control::surface() const
 //{
 //    //return _surface;
 //    return *this;
 //}
 
 
-//void Widget::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+//void Control::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 //{
 //    ViewSurface::resetSurface(surface, pos);
 //
@@ -239,56 +239,56 @@ const std::vector<Widget*>& Widget::widgets() const
 //}
 
 
-void Widget::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+void Control::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
     Base::onSetSurface(surface, pos);
 
-    std::vector<Widget*>::iterator it;
+    std::vector<Control*>::iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
     {
-        Widget* widget = *it;
+        Control* control = *it;
 
-        Gfx::PointF surfacePos = pos + widget->position();
-        widget->setSurface(surface, surfacePos);
+        Gfx::PointF surfacePos = pos + control->position();
+        control->setSurface(surface, surfacePos);
     }
 }
 
 
-Gfx::PointF Widget::onToWidget(const Widget& widget, const Gfx::PointF& pos) const
+Gfx::PointF Control::onToControl(const Control& control, const Gfx::PointF& pos) const
 {
-    //const Visual* parentView = widget.parent();
+    //const Visual* parentView = control.parent();
 
     //if( parentView == this || ! parentView )
-        return pos - widget.position();
+        return pos - control.position();
 
-    //return pos - parentView->onToWidget(widget, pos);    
+    //return pos - parentView->onToControl(control, pos);    
 }
 
 
-Gfx::PointF Widget::onFromWidget(const Widget& widget, const Gfx::PointF& pos) const
+Gfx::PointF Control::onFromControl(const Control& control, const Gfx::PointF& pos) const
 {
-    //const View* parentView = widget.parent();
+    //const View* parentView = control.parent();
 
     //if( parentView == this || ! parentView )
-        return pos + widget.position();
+        return pos + control.position();
 
-//    return pos + parentView->onFromWidget(widget, pos);
+//    return pos + parentView->onFromControl(control, pos);
 }
 
 
-const Gfx::RectF Widget::geometry() const
+const Gfx::RectF Control::geometry() const
 {
     return Gfx::RectF( position(), size() );
 }
 
 
-Widget::FocusPolicy Widget::focusPolicy() const
+Control::FocusPolicy Control::focusPolicy() const
 {
     return _focusPolicy;
 }
 
 
-void Widget::setFocusPolicy(FocusPolicy policy)
+void Control::setFocusPolicy(FocusPolicy policy)
 {
     _focusPolicy = policy;
 
@@ -297,13 +297,13 @@ void Widget::setFocusPolicy(FocusPolicy policy)
 }
 
 
-size_t Widget::focusIndex() const
+size_t Control::focusIndex() const
 {
     return _focusIndex;
 }
 
 
-void Widget::setFocusIndex(size_t index)
+void Control::setFocusIndex(size_t index)
 {
     _focusIndex = index;
     
@@ -312,20 +312,20 @@ void Widget::setFocusIndex(size_t index)
 }
 
 
-bool Widget::hasFocus() const
+bool Control::hasFocus() const
 {
     return _hasFocus;
 }
 
 
-void Widget::focus()
+void Control::focus()
 {
-    if(_form && focusPolicy() != Widget::NoFocus)
+    if(_form && focusPolicy() != Control::NoFocus)
         _form->onSetFocus(*this);
 }
 
 
-void Widget::onProcessFocusEvent(const FocusEvent& ev)
+void Control::onProcessFocusEvent(const FocusEvent& ev)
 {
     //std::clog << "FOCUS: " << typeid(*this).name() 
     //          << " " << ev.isFocused() << std::endl;
@@ -333,7 +333,7 @@ void Widget::onProcessFocusEvent(const FocusEvent& ev)
 }
 
 
-void Widget::onFocusEvent(const FocusEvent& ev)
+void Control::onFocusEvent(const FocusEvent& ev)
 {
     //if( _hasFocus && ! ev.isFocused() )
     //    Application::instance().inputMethod().finish();
@@ -347,24 +347,24 @@ void Widget::onFocusEvent(const FocusEvent& ev)
 }
 
 
-Key Widget::actionKey() const
+Key Control::actionKey() const
 {
     return _actionKey;
 }
 
 
-void Widget::setActionKey(const Key& ak)
+void Control::setActionKey(const Key& ak)
 {
     _actionKey = ak;
 }
 
 
-void Widget::onActionKey(const KeyEvent& kev)
+void Control::onActionKey(const KeyEvent& kev)
 {
 }
 
 
-const Key* Widget::shortcut() const
+const Key* Control::shortcut() const
 {
     if(_shortcutKey.code() == Key::NoKey)
         return 0;
@@ -373,7 +373,7 @@ const Key* Widget::shortcut() const
 }
 
 
-void Widget::setShortcut(const Key* key)
+void Control::setShortcut(const Key* key)
 {
     if( ! key )
         _shortcutKey.set(Key::NoKey);
@@ -385,13 +385,13 @@ void Widget::setShortcut(const Key* key)
 }
 
 
-void Widget::processShortcut(const Key& key)
+void Control::processShortcut(const Key& key)
 {
     onShortcut(key);
 }
 
 
-const std::vector<Key> Widget::onGetShortcuts()
+const std::vector<Key> Control::onGetShortcuts()
 {
     std::vector<Key> shc;
 
@@ -403,7 +403,7 @@ const std::vector<Key> Widget::onGetShortcuts()
     return shc;
 }
 
-const std::vector<Pt::Char> Widget::onGetMnemonics()
+const std::vector<Pt::Char> Control::onGetMnemonics()
 {
     std::vector<Pt::Char> mcs;
 
@@ -415,18 +415,18 @@ const std::vector<Pt::Char> Widget::onGetMnemonics()
 }
 
 
-void Widget::onShortcut(const Key& key)
+void Control::onShortcut(const Key& key)
 {
 }
 
 
-const Pt::Char* Widget::mnemonic() const
+const Pt::Char* Control::mnemonic() const
 {
     return _mnemonic != 0 ? &_mnemonic : 0;
 }
 
 
-void Widget::setMnemonic(const Char& ch)
+void Control::setMnemonic(const Char& ch)
 {
     _mnemonic = ch;
     if(_form)
@@ -434,7 +434,7 @@ void Widget::setMnemonic(const Char& ch)
 }
 
 
-String Widget::setMnemonic(const String& text)
+String Control::setMnemonic(const String& text)
 {
     String str;
     Char mnemonic = 0;
@@ -468,34 +468,34 @@ String Widget::setMnemonic(const String& text)
 }
 
 
-void Widget::setMnemonicWidget(Widget* w)
+void Control::setMnemonicControl(Control* control)
 {
     _mnemonicEntered.disconnect();
 
-    if(w)
-        _mnemonicEntered += Pt::slot(*w, &Widget::onMnemonic);
+    if(control)
+        _mnemonicEntered += Pt::slot(*control, &Control::onMnemonic);
 }
 
 
-void Widget::processMnemonic(Pt::Char m)
+void Control::processMnemonic(Pt::Char m)
 {
     onMnemonic(m);
 }
 
 
-void Widget::onMnemonic(Pt::Char m)
+void Control::onMnemonic(Pt::Char m)
 {
     _mnemonicEntered.send(m);
 }
 
 
-void Widget::onInvalidateEvent(const InvalidateEvent& ev)
+void Control::onInvalidateEvent(const InvalidateEvent& ev)
 {
     Base::onInvalidateEvent(ev);
 }
 
 
-void Widget::onInvalidate()
+void Control::onInvalidate()
 {
     Base::onInvalidate();
 
@@ -504,25 +504,25 @@ void Widget::onInvalidate()
 }
 
 
-void Widget::onRequestRepaint(const Gfx::RectF& rect)
+void Control::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->onRepaintRequest(*this, rect);
 }
 
 
-void Widget::onRepaintRequest(Widget& w, const Gfx::RectF& rect)
+void Control::onRepaintRequest(Control& control, const Gfx::RectF& rect)
 {
-    Base::onRepaintRequest(w, rect);
+    Base::onRepaintRequest(control, rect);
 
-    Gfx::PointF widgetPos = fromWidget( w, rect.topLeft() );
-    Gfx::RectF widgetRect( widgetPos, rect.size() );
+    Gfx::PointF controlPos = fromControl( control, rect.topLeft() );
+    Gfx::RectF controlRect( controlPos, rect.size() );
 
-    repaint(widgetRect);
+    repaint(controlRect);
 }
 
 
-void Widget::onProcessPaintEvent(const PaintEvent& ev)
+void Control::onProcessPaintEvent(const PaintEvent& ev)
 {    
     const Gfx::RectF& r = ev.rect();
     if( r.isNull() )
@@ -534,29 +534,29 @@ void Widget::onProcessPaintEvent(const PaintEvent& ev)
     Base::onProcessPaintEvent(ev);
 
     //
-    // paint child widgets
+    // paint child controls
     //
-    std::vector<Widget*>::const_iterator it;
+    std::vector<Control*>::const_iterator it;
     for(it = _children.begin() ; it != _children.end(); ++it)
     {
-        Widget* w = (*it);
+        Control* control = (*it);
 
-        // clip widget update rect
-        Gfx::RectF updateRect = w->geometry().intersect(r);
+        // clip control update rect
+        Gfx::RectF updateRect = control->geometry().intersect(r);
         if( updateRect.isNull() )
             continue;
 
-        // paint widget rect
-        Gfx::PointF updatePos = toWidget( *w , updateRect.topLeft() );
+        // paint control rect
+        Gfx::PointF updatePos = toControl( *control , updateRect.topLeft() );
         updateRect.setOrigin(updatePos);
 
-        PaintEvent pev( *w, updateRect );
-        w->processEvent(pev);
+        PaintEvent pev( *control, updateRect );
+        control->processEvent(pev);
     }
 }
 
 
-void Widget::onPaintEvent(const PaintEvent& ev)
+void Control::onPaintEvent(const PaintEvent& ev)
 {    
     //static int nnn = 0;
     //std::clog << "PAINT EVENT: " << typeid(*this).name() << " " << ++nnn << std::endl;
@@ -567,20 +567,20 @@ void Widget::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Widget::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
+void Control::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
 {
 }
 
 
-void Widget::onRelayoutRequest(Widget& w)
+void Control::onRelayoutRequest(Control& control)
 {
-    Base::onRelayoutRequest(w);
+    Base::onRelayoutRequest(control);
 
     relayout();
 }
 
 
-void Widget::relayout()
+void Control::relayout()
 {
     _isMeasureInvalid = true;
     _isLayoutInvalid = true;
@@ -590,13 +590,13 @@ void Widget::relayout()
 }
 
 
-const SizePolicy& Widget::sizePolicy() const
+const SizePolicy& Control::sizePolicy() const
 {
     return _sizePolicy;
 }
 
 
-void Widget::setSizePolicy(const SizePolicy& policy)
+void Control::setSizePolicy(const SizePolicy& policy)
 {
     //Gfx::SizeF alignedSize = _surface.scaling().align( policy.size() );
     Gfx::SizeF alignedSize = scaling().align( policy.size() );
@@ -608,13 +608,13 @@ void Widget::setSizePolicy(const SizePolicy& policy)
 }
 
 
-Gfx::SizeF Widget::preferredSize() const
+Gfx::SizeF Control::preferredSize() const
 {
     return _preferredSize;
 }
 
 
-Gfx::SizeF Widget::measure(const SizePolicy& policy)
+Gfx::SizeF Control::measure(const SizePolicy& policy)
 {
     SizePolicy contentPolicy = _sizePolicy;
 
@@ -660,7 +660,7 @@ Gfx::SizeF Widget::measure(const SizePolicy& policy)
 
         bool isFixed = contentPolicy.vertical() == SizePolicy::Fixed &&
                        contentPolicy.horizontal() == SizePolicy::Fixed &&
-                       widgets().empty();
+                       controls().empty();
 
         _preferredSize = isFixed ? contentPolicy.size()
                                  : onMeasure(contentPolicy);
@@ -693,13 +693,13 @@ Gfx::SizeF Widget::measure(const SizePolicy& policy)
 }
 
 
-Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Control::onMeasure(const SizePolicy& policy)
 {
    return Gfx::SizeF(0, 0);
 }
 
 
-void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
+void Control::onProcessLayoutEvent(const LayoutEvent& ev)
 {
     if( ! _isLayoutInvalid )
         return;
@@ -726,12 +726,12 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
     //
     // layout content marked invalid
     //
-    std::vector<Widget*>::const_iterator it;
+    std::vector<Control*>::const_iterator it;
     for(it = _children.begin() ; it != _children.end(); ++it)
     {
-        Widget* widget = (*it);
+        Control* control = (*it);
 
-        LayoutEvent ev( *widget, widget->geometry() );
+        LayoutEvent ev( *control, control->geometry() );
         Application::instance().commitEvent(ev);
     }
 
@@ -740,7 +740,7 @@ void Widget::onProcessLayoutEvent(const LayoutEvent& ev)
 
 
 // TODO: onLayoutEvent
-void Widget::onLayoutEvent(const LayoutEvent& ev)
+void Control::onLayoutEvent(const LayoutEvent& ev)
 {
     onLayout( ev.rect() );
 
@@ -749,7 +749,7 @@ void Widget::onLayoutEvent(const LayoutEvent& ev)
 }
 
 
-void Widget::onLayout(const Gfx::RectF& rect)
+void Control::onLayout(const Gfx::RectF& rect)
 {
     //
     // TODO: no need to pass rect
@@ -757,7 +757,7 @@ void Widget::onLayout(const Gfx::RectF& rect)
 }
 
 
-void Widget::onProcessRescaleEvent(const RescaleEvent& ev)
+void Control::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);
 
@@ -765,20 +765,20 @@ void Widget::onProcessRescaleEvent(const RescaleEvent& ev)
 
     for (size_t i = 0; i < _children.size(); ++i)
     {
-        Widget* widget = _children[i];
-        RescaleEvent ev(*widget, scaling);
-        widget->processEvent(ev);
+        Control* control = _children[i];
+        RescaleEvent ev(*control, scaling);
+        control->processEvent(ev);
     }
 }
 
 
-void Widget::onRescaleEvent(const RescaleEvent& ev)
+void Control::onRescaleEvent(const RescaleEvent& ev)
 {
     Base::onRescaleEvent(ev);
 }
 
 
-void Widget::onRescale(double scaleFactor)
+void Control::onRescale(double scaleFactor)
 {
     Base::onRescale(scaleFactor);
 
@@ -804,7 +804,7 @@ void Widget::onRescale(double scaleFactor)
 }
 
 
-void Widget::onRequestMove(const Gfx::PointF& pos)
+void Control::onRequestMove(const Gfx::PointF& pos)
 {
     _requestedPosition = pos;
 
@@ -813,25 +813,25 @@ void Widget::onRequestMove(const Gfx::PointF& pos)
 }
 
 
-void Widget::onMoveRequest(Widget& widget, const Gfx::PointF& pos)
+void Control::onMoveRequest(Control& control, const Gfx::PointF& pos)
 {
-    Base::onMoveRequest(widget, pos);
+    Base::onMoveRequest(control, pos);
 }
 
 
-void Widget::onProcessMoveEvent(const MoveEvent& ev)
+void Control::onProcessMoveEvent(const MoveEvent& ev)
 {
     Base::onProcessMoveEvent(ev);
 }
 
 
-void Widget::onMoveEvent(const MoveEvent& ev)
+void Control::onMoveEvent(const MoveEvent& ev)
 {
     Base::onMoveEvent(ev);
 }
 
 
-void Widget::onSetSizeLimits(const Gfx::SizeF& minSize,
+void Control::onSetSizeLimits(const Gfx::SizeF& minSize,
                              const Gfx::SizeF& maxSize)
 {
     Base::onSetSizeLimits(minSize, maxSize);
@@ -839,7 +839,7 @@ void Widget::onSetSizeLimits(const Gfx::SizeF& minSize,
 }
 
 
-void Widget::onRequestResize(const Gfx::SizeF& size)
+void Control::onRequestResize(const Gfx::SizeF& size)
 {   
     _requestedSize = size;
 
@@ -865,19 +865,19 @@ void Widget::onRequestResize(const Gfx::SizeF& size)
 }
 
 
-void Widget::onResizeRequest(Widget& widget, const Gfx::SizeF& size)
+void Control::onResizeRequest(Control& control, const Gfx::SizeF& size)
 {
-    Base::onResizeRequest(widget, size);
+    Base::onResizeRequest(control, size);
 }
 
 
-void Widget::onProcessResizeEvent(const ResizeEvent& ev)
+void Control::onProcessResizeEvent(const ResizeEvent& ev)
 {
     Base::onProcessResizeEvent(ev);
 }
 
 
-void Widget::onResizeEvent(const ResizeEvent& ev)
+void Control::onResizeEvent(const ResizeEvent& ev)
 {
     if( size() == ev.size() )
         return;
@@ -900,7 +900,7 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-bool Widget::acceptsInput() const
+bool Control::acceptsInput() const
 {    
     if( ! isEnabled() )
         return false;
@@ -912,7 +912,7 @@ bool Widget::acceptsInput() const
 }
 
 
-void Widget::onRequestShow(bool isShown)
+void Control::onRequestShow(bool isShown)
 {
     _show = isShown;
 
@@ -921,13 +921,13 @@ void Widget::onRequestShow(bool isShown)
 }
 
 
-void Widget::onProcessShowEvent(const ShowEvent& ev)
+void Control::onProcessShowEvent(const ShowEvent& ev)
 {
     Base::onProcessShowEvent(ev);
 }
 
 
-void Widget::onShowEvent(const ShowEvent& ev)
+void Control::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
 
@@ -936,22 +936,22 @@ void Widget::onShowEvent(const ShowEvent& ev)
 }
 
 
-void Widget::onShow(bool isShown)
+void Control::onShow(bool isShown)
 {
     Base::onShow(isShown);
 }
 
 
-void Widget::onShowRequest(Widget& widget, bool visible)
+void Control::onShowRequest(Control& control, bool visible)
 {
-    Base::onShowRequest(widget, visible);
+    Base::onShowRequest(control, visible);
 
-    ShowEvent sev(widget, visible);
-    widget.processEvent(sev);
+    ShowEvent sev(control, visible);
+    control.processEvent(sev);
 }
 
 
-void Widget::onRequestEnable(bool isEnable)
+void Control::onRequestEnable(bool isEnable)
 {
     _enabled = isEnable;
 
@@ -960,7 +960,7 @@ void Widget::onRequestEnable(bool isEnable)
 }
 
 
-void Widget::onProcessEnableEvent(const EnableEvent& ev)
+void Control::onProcessEnableEvent(const EnableEvent& ev)
 {
     bool isEnabled = ev.enabled();
     if( ! _enabled )
@@ -971,15 +971,15 @@ void Widget::onProcessEnableEvent(const EnableEvent& ev)
 
     for( size_t i = 0; i < _children.size(); ++i)
     {
-        Widget* w = _children[i];
+        Control* control = _children[i];
         
-        EnableEvent widgetEvent(*w, isEnabled);
-        w->processEvent(widgetEvent);
+        EnableEvent controlEvent(*control, isEnabled);
+        control->processEvent(controlEvent);
     }
 }
 
 
-void Widget::onEnableEvent(const EnableEvent& ev)
+void Control::onEnableEvent(const EnableEvent& ev)
 {
     Base::onEnableEvent(ev);
 
@@ -988,70 +988,70 @@ void Widget::onEnableEvent(const EnableEvent& ev)
 }
 
 
-void Widget::onEnable(bool e)
+void Control::onEnable(bool e)
 {
     Base::onEnable(e);
 }
 
 
-void Widget::onEnableRequest(Widget& widget, bool enable)
+void Control::onEnableRequest(Control& control, bool enable)
 {
-    Base::onEnableRequest(widget, enable);
+    Base::onEnableRequest(control, enable);
 
     if( ! isEnabled() )
       enable = false;
 
-    EnableEvent eev(widget, enable);
-    widget.processEvent(eev);
+    EnableEvent eev(control, enable);
+    control.processEvent(eev);
 }
 
 
-void Widget::onRequestActivate(bool active)
+void Control::onRequestActivate(bool active)
 {
     if(_parent)
         _parent->onActivateRequest(*this, active);
 }
 
 
-void Widget::onActivateRequest(Widget& w, bool active)
+void Control::onActivateRequest(Control& control, bool active)
 {
-    Base::onActivateRequest(w, active);
+    Base::onActivateRequest(control, active);
 
     if(_parent)
         _parent->onActivateRequest(*this, active);
 }
 
 
-void Widget::raise()
+void Control::raise()
 {
     if(_parent)
         _parent->onRaiseRequest(*this);
 }
 
 
-void Widget::onRaiseRequest(Widget& w)
+void Control::onRaiseRequest(Control& control)
 {
-    Base::onRaiseRequest(w);
+    Base::onRaiseRequest(control);
 
-    std::vector<Widget*>::iterator it = std::find(_children.begin(), 
-                                                  _children.end(), &w);
+    std::vector<Control*>::iterator it = std::find(_children.begin(), 
+                                                  _children.end(), &control);
     if( it == _children.end() )
         return;
 
     _children.erase(it);
-    _children.push_back(&w);
+    _children.push_back(&control);
 
-    w.repaint( w.bounds() );
+    control.repaint( control.bounds() );
 }
 
 
-const Spacing& Widget::margin() const
+const Spacing& Control::margin() const
 {
     return _margin;
 }
 
 
-void Widget::setMargin(const Spacing& s)
+void Control::setMargin(const Spacing& s)
 {
     //const Gfx::Scaling& scaling = _surface.scaling();
     const Gfx::Scaling& scaling = this->scaling();
@@ -1065,25 +1065,25 @@ void Widget::setMargin(const Spacing& s)
 }
 
 
-void Widget::setMargin(double n)
+void Control::setMargin(double n)
 {
     setMargin( Spacing(n) );
 }
 
 
-void Widget::setMargin(double horiz, double vertical)
+void Control::setMargin(double horiz, double vertical)
 {
     setMargin( Spacing(horiz, vertical) );
 }
 
 
-const Spacing& Widget::padding() const
+const Spacing& Control::padding() const
 {
     return _padding;
 }
 
 
-void Widget::setPadding( const Spacing& p )
+void Control::setPadding( const Spacing& p )
 {
     //const Gfx::Scaling& scaling = _surface.scaling();
     const Gfx::Scaling& scaling = this->scaling();
@@ -1097,13 +1097,13 @@ void Widget::setPadding( const Spacing& p )
 }
 
 
-void Widget::setPadding(double n)
+void Control::setPadding(double n)
 {
     setPadding( Spacing(n) );
 }
 
 
-void Widget::setPadding(double horiz, double vertical)
+void Control::setPadding(double horiz, double vertical)
 {
     setPadding( Spacing(horiz, vertical) );
 }
@@ -1112,17 +1112,17 @@ void Widget::setPadding(double horiz, double vertical)
 // Visual
 //
 
-Visual* Widget::onHitTest(const Gfx::PointF& p)
+Visual* Control::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )
         return 0;
 
-    std::vector<Widget*>::reverse_iterator it;
+    std::vector<Control*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
     {
-        Widget* w = *it;
-        Gfx::PointF pos = toWidget(*w, p);
-        Visual* hit = w->hitTest(pos);
+        Control* control = *it;
+        Gfx::PointF pos = toControl(*control, p);
+        Visual* hit = control->hitTest(pos);
         if(hit)
             return hit;
     }
@@ -1131,31 +1131,31 @@ Visual* Widget::onHitTest(const Gfx::PointF& p)
 }
 
 
-Gfx::PointF Widget::onToParent(const Gfx::PointF& pos) const
+Gfx::PointF Control::onToParent(const Gfx::PointF& pos) const
 {
     if( ! _parent )
         return pos;
 
-    return _parent->onFromWidget(*this, pos);
+    return _parent->onFromControl(*this, pos);
 }
 
 
-Gfx::PointF Widget::onFromParent(const Gfx::PointF& pos) const
+Gfx::PointF Control::onFromParent(const Gfx::PointF& pos) const
 {
     if( ! _parent )
         return pos;
 
-    return _parent->onToWidget(*this, pos);
+    return _parent->onToControl(*this, pos);
 }
 
 
-void Widget::onProcessEvent(const Pt::Event& ev)
+void Control::onProcessEvent(const Pt::Event& ev)
 {
     Base::onProcessEvent(ev);
 }
 
 
-void Widget::onProcessMouseEvent(const MouseEvent& ev)
+void Control::onProcessMouseEvent(const MouseEvent& ev)
 {
     if( ! acceptsInput() )
         return;
@@ -1177,15 +1177,15 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
     // 
     Gfx::PointF pos = fromGlobal( ev.position() );
 
-    std::vector<Widget*>::reverse_iterator it;
+    std::vector<Control*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
     {
-        Widget* widget = *it;
+        Control* control = *it;
 
-        if( widget->geometry().contains(pos) && 
-            widget->acceptsInput() )
+        if( control->geometry().contains(pos) && 
+            control->acceptsInput() )
         {
-            widget->processEvent(ev);
+            control->processEvent(ev);
             return;
         }
     }
@@ -1203,7 +1203,7 @@ void Widget::onProcessMouseEvent(const MouseEvent& ev)
 }
 
 
-bool Widget::onMouseEvent(const MouseEvent& ev)
+bool Control::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
@@ -1216,7 +1216,7 @@ bool Widget::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void Widget::onProcessTouchEvent(const TouchEvent& ev)
+void Control::onProcessTouchEvent(const TouchEvent& ev)
 {
     if( ! acceptsInput() )
         return;
@@ -1238,15 +1238,15 @@ void Widget::onProcessTouchEvent(const TouchEvent& ev)
     // 
     Gfx::PointF pos = fromGlobal( ev.position() );
 
-    std::vector<Widget*>::reverse_iterator it;
+    std::vector<Control*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
     {
-        Widget* widget = *it;
+        Control* control = *it;
 
-        if( widget->geometry().contains(pos) && 
-            widget->acceptsInput() )
+        if( control->geometry().contains(pos) && 
+            control->acceptsInput() )
         {
-            widget->processEvent(ev);
+            control->processEvent(ev);
             return;
         }
     }
@@ -1264,7 +1264,7 @@ void Widget::onProcessTouchEvent(const TouchEvent& ev)
 }
 
 
-bool Widget::onTouchEvent(const TouchEvent& ev)
+bool Control::onTouchEvent(const TouchEvent& ev)
 {
     Base::onTouchEvent(ev);
 
@@ -1277,7 +1277,7 @@ bool Widget::onTouchEvent(const TouchEvent& ev)
 }
 
 
-void Widget::onProcessScrollEvent(const ScrollEvent& ev)
+void Control::onProcessScrollEvent(const ScrollEvent& ev)
 {
     if( ! acceptsInput() )
         return;
@@ -1286,19 +1286,19 @@ void Widget::onProcessScrollEvent(const ScrollEvent& ev)
 }
 
 
-bool Widget::onScrollEvent(const ScrollEvent& ev)
+bool Control::onScrollEvent(const ScrollEvent& ev)
 {
     return Base::onScrollEvent(ev);
 }
 
 
-void Widget::onProcessEnterEvent(const EnterEvent& ev)
+void Control::onProcessEnterEvent(const EnterEvent& ev)
 {
     Base::onProcessEnterEvent(ev);
 }
 
 
-bool Widget::onEnterEvent( const EnterEvent& ev)
+bool Control::onEnterEvent( const EnterEvent& ev)
 {
 
 
@@ -1306,19 +1306,19 @@ bool Widget::onEnterEvent( const EnterEvent& ev)
 }
 
 
-void Widget::onProcessLeaveEvent(const LeaveEvent& ev)
+void Control::onProcessLeaveEvent(const LeaveEvent& ev)
 {
     Base::onProcessLeaveEvent(ev);
 }
 
 
-bool Widget::onLeaveEvent(const LeaveEvent& ev)
+bool Control::onLeaveEvent(const LeaveEvent& ev)
 {
     return Base::onLeaveEvent(ev);
 }
 
 
-void Widget::onProcessKeyEvent(const KeyEvent& ev)
+void Control::onProcessKeyEvent(const KeyEvent& ev)
 {
     if( ! acceptsInput() )
         return;
@@ -1327,7 +1327,7 @@ void Widget::onProcessKeyEvent(const KeyEvent& ev)
 }
 
 
-bool Widget::onKeyEvent(const KeyEvent& ev)
+bool Control::onKeyEvent(const KeyEvent& ev)
 {
     if( ev.key() == actionKey() && hasFocus() )
     {

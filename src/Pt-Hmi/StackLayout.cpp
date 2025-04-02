@@ -43,68 +43,68 @@ StackLayout::~StackLayout()
 }
 
 
-void StackLayout::addItem(Widget& w)
+void StackLayout::addItem(Control& control)
 {
-    _widgets.push_back(&w);
+    _controls.push_back(&control);
 
-    w.show(false);
-    add(w);
+    control.show(false);
+    add(control);
 }
 
 
-void StackLayout::removeItem(Widget& w)
+void StackLayout::removeItem(Control& control)
 {
-    remove(w);
+    remove(control);
 }
 
 
-void StackLayout::onRemoveWidget(Widget& w)
+void StackLayout::onRemoveControl(Control& control)
 {
-    Widget::onRemoveWidget(w);
+    Control::onRemoveControl(control);
 
-    std::vector<Widget*>::iterator it = std::find(_widgets.begin(), 
-                                                  _widgets.end(), &w);
-    if( it == _widgets.end() )
+    std::vector<Control*>::iterator it = std::find(_controls.begin(), 
+                                                  _controls.end(), &control);
+    if( it == _controls.end() )
         return;
 
-    std::size_t n = std::distance(_widgets.begin(), it);
+    std::size_t n = std::distance(_controls.begin(), it);
     if(_current == n)
     {
         _current = NoIndex;
     }
 
-    _widgets.erase(it);
-    _widgetRemoved.send(n);
+    _controls.erase(it);
+    _controlRemoved.send(n);
 }
 
 
 bool StackLayout::empty() const
 {
-    return _widgets.empty();
+    return _controls.empty();
 }
 
 
 std::size_t StackLayout::size() const
 {
-    return _widgets.size();
+    return _controls.size();
 }
 
 
-Widget* StackLayout::widgetAt(std::size_t n) const
+Control* StackLayout::controlAt(std::size_t n) const
 {
-    if( n >= _widgets.size() )
+    if( n >= _controls.size() )
         return 0;
 
-    return _widgets.at(n);
+    return _controls.at(n);
 }
 
 
-std::size_t StackLayout::indexOf(Widget& w) const
+std::size_t StackLayout::indexOf(Control& control) const
 {
-    std::vector<Widget*>::const_iterator it;
-    it = std::find(_widgets.begin(), _widgets.end(), &w);
+    std::vector<Control*>::const_iterator it;
+    it = std::find(_controls.begin(), _controls.end(), &control);
 
-    return it != _widgets.end() ? std::distance(_widgets.begin(), it)
+    return it != _controls.end() ? std::distance(_controls.begin(), it)
                                 : NoIndex;
 }
 
@@ -117,14 +117,14 @@ std::size_t StackLayout::current() const
 
 void StackLayout::setCurrent(std::size_t n)
 {
-    if( n >= _widgets.size() )
+    if( n >= _controls.size() )
         return;
 
     if(_current != NoIndex)
-        _widgets.at(_current)->show(false);
+        _controls.at(_current)->show(false);
 
     _current = n;
-    _widgets.at(_current)->show(true);
+    _controls.at(_current)->show(true);
 
     _currentChanged.send(n);
 }
@@ -136,10 +136,10 @@ Gfx::SizeF StackLayout::onMeasure(const SizePolicy& policy)
 
     Gfx::SizeF s;
 
-    std::vector<Widget*>::iterator it;
-    for(it = _widgets.begin(); it != _widgets.end(); ++it)
+    std::vector<Control*>::iterator it;
+    for(it = _controls.begin(); it != _controls.end(); ++it)
     {
-        Widget* item = *it;
+        Control* item = *it;
         item->measure(policy);
         Gfx::SizeF preferredSize = item->preferredSize();
 
@@ -157,22 +157,22 @@ void StackLayout::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    Widget* widget = widgetAt(_current);
+    Control* control = controlAt(_current);
 
-    if(widget)
+    if(control)
     {
-        Gfx::PointF pos(padding().left() + widget->margin().left(), 
-                        padding().top()  + widget->margin().top());
+        Gfx::PointF pos(padding().left() + control->margin().left(), 
+                        padding().top()  + control->margin().top());
         
-        double hspace = padding().leftRight() + widget->margin().leftRight();
-        double vspace = padding().topBottom() + widget->margin().topBottom();
+        double hspace = padding().leftRight() + control->margin().leftRight();
+        double vspace = padding().topBottom() + control->margin().topBottom();
 
         Gfx::SizeF size;
         size.setWidth( rect.width() - hspace );
         size.setHeight( rect.height() - vspace );
 
-        widget->move(pos);
-        widget->resize(size);
+        control->move(pos);
+        control->resize(size);
     }
 }
 

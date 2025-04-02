@@ -40,9 +40,9 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API ComboBox : public Widget
+class PT_HMI_API ComboBox : public Control
 {
-    typedef Widget Base;
+    typedef Control Base;
 
 	public:
         ComboBox();

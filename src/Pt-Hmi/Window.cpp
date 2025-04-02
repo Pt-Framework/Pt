@@ -243,7 +243,7 @@ Gfx::SizeF Window::setAutoSize(const SizePolicy& policy)
 
     relayout();
 
-    Widget* mainWidget = content();
+    Control* mainWidget = content();
     return mainWidget ? mainWidget->measure(_sizePolicy)
                       : _sizePolicy.size();
 }
@@ -253,7 +253,7 @@ Gfx::SizeF Window::onMeasure()
 {
     if(_autoSize)
     {
-        Widget* mainWidget = content();
+        Control* mainWidget = content();
         return mainWidget ? mainWidget->measure(_sizePolicy)
                           : _sizePolicy.size();
     }
@@ -266,7 +266,7 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
 {
     if(_autoSize)
     {
-        Widget* mainWidget = content();
+        Control* mainWidget = content();
         if(mainWidget)
             resize( mainWidget->preferredSize() );
     }

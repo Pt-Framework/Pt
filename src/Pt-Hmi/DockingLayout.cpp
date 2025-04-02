@@ -45,35 +45,35 @@ DockingLayout::~DockingLayout()
 }
 
 
-void DockingLayout::addItem(Widget& w, DockMode d)
+void DockingLayout::addItem(Control& control, DockMode d)
 {
-    _docking[&w] = d;
-    add(w);
+    _docking[&control] = d;
+    add(control);
 }
 
 
-void DockingLayout::removeItem(Widget& w)
+void DockingLayout::removeItem(Control& control)
 {
-  remove(w);
+  remove(control);
 }
 
 
-void DockingLayout::setDockingStyle(Widget& w, DockMode d)
+void DockingLayout::setDockingStyle(Control& control, DockMode d)
 {
-    std::map<Widget*, DockMode>::iterator it = _docking.find(&w);
+    std::map<Control*, DockMode>::iterator it = _docking.find(&control);
     if( it != _docking.end() )
         it->second = d;
 }
 
 
-void DockingLayout::onAddWidget(Widget& w)
+void DockingLayout::onAddControl(Control& control)
 {
 }
 
 
-void DockingLayout::onRemoveWidget(Widget& w)
+void DockingLayout::onRemoveControl(Control& control)
 {
-    std::map<Widget*, DockMode>::iterator it = _docking.find(&w);
+    std::map<Control*, DockMode>::iterator it = _docking.find(&control);
 
     if( it != _docking.end() )
         _docking.erase(it);
@@ -86,19 +86,19 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
     fillSize.subWidth( padding().leftRight() );
     fillSize.subHeight( padding().topBottom() );
 
-    Widget* fillWidget = 0;
+    Control* fillWidget = 0;
     bool hasDockedLeftRight = false;
     bool hasDockedTopBottom = false;
 
-    std::vector<Widget*>::const_iterator it;
-    std::vector<Widget*>::const_iterator end = widgets().end();
+    std::vector<Control*>::const_iterator it;
+    std::vector<Control*>::const_iterator end = controls().end();
 
-    for(it = widgets().begin(); it != end; ++it)
+    for(it = controls().begin(); it != end; ++it)
     {
         if( ! (*it)->isVisible() )
             continue;
 
-        std::map<Widget*, DockMode>::iterator docking = _docking.find(*it);
+        std::map<Control*, DockMode>::iterator docking = _docking.find(*it);
         if( docking == _docking.end() )
             continue;
 
@@ -162,15 +162,15 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
         contentSize.addHeight(itemHeight);
     }
 
-    std::vector<Widget*>::const_reverse_iterator rit;
-    std::vector<Widget*>::const_reverse_iterator rend = widgets().rend();
+    std::vector<Control*>::const_reverse_iterator rit;
+    std::vector<Control*>::const_reverse_iterator rend = controls().rend();
 
-    for(rit = widgets().rbegin(); rit != rend; ++rit)
+    for(rit = controls().rbegin(); rit != rend; ++rit)
     {
         if( ! (*rit)->isVisible() )
             continue;
 
-        std::map<Widget*, DockMode>::iterator docking = _docking.find(*rit);
+        std::map<Control*, DockMode>::iterator docking = _docking.find(*rit);
         if( docking == _docking.end() )
             continue;
 
@@ -214,8 +214,8 @@ void DockingLayout::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    std::vector<Widget*>::const_iterator it = this->widgets().begin();
-    std::vector<Widget*>::const_iterator end = this->widgets().end();
+    std::vector<Control*>::const_iterator it = this->controls().begin();
+    std::vector<Control*>::const_iterator end = this->controls().end();
 
     double posLeft   = padding().left();
     double posTop    = padding().top();
@@ -228,7 +228,7 @@ void DockingLayout::onLayout(const Gfx::RectF& rect)
         if( ! (*it)->isVisible() )
             continue;
 
-        std::map<Widget*, DockMode>::iterator docking = _docking.find(*it);
+        std::map<Control*, DockMode>::iterator docking = _docking.find(*it);
         if( docking == _docking.end() )
             continue;
 
@@ -331,9 +331,9 @@ void DockingLayout::onLayout(const Gfx::RectF& rect)
     Gfx::SizeF fillSize(posRight - posLeft,
                         posBottom - posTop);
 
-    for(it = widgets().begin(); it != end; ++it)
+    for(it = controls().begin(); it != end; ++it)
     {
-        std::map<Widget*, DockMode>::iterator docking = _docking.find(*it);
+        std::map<Control*, DockMode>::iterator docking = _docking.find(*it);
         if( docking == _docking.end() )
             continue;
 

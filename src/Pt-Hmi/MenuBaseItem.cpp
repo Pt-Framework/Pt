@@ -41,7 +41,7 @@ MenuBaseItem::MenuBaseItem()
 , _hasSeparator(false)
 , _isHighlighted(false)
 {
-    setFocusPolicy(Widget::AcceptFocus);
+    setFocusPolicy(Control::AcceptFocus);
     setPadding(Pt::Hmi::Spacing(8, 8));
     setMargin(0);
 }

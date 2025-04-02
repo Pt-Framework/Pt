@@ -40,7 +40,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class Widget;
 class Window;
 class PushButton;
 class FlowLayout;
@@ -59,7 +58,7 @@ class PT_HMI_API InputMethod
 
         Window* activeWindow();
 
-        void begin(Widget& widget);
+        void begin(Control& control);
 
         void finish();
 

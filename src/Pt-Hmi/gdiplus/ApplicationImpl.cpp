@@ -253,7 +253,7 @@ void ApplicationImpl::releasePointer(Window& grabber)
 }
 
 
-void ApplicationImpl::grabPointer(Widget& grabber)
+void ApplicationImpl::grabPointer(Control& grabber)
 {
     Window* w = grabber.window();
     if( ! w )
@@ -263,7 +263,7 @@ void ApplicationImpl::grabPointer(Widget& grabber)
 }
 
 
-void ApplicationImpl::releasePointer(Widget& grabber)
+void ApplicationImpl::releasePointer(Control& grabber)
 {
     ReleaseCapture();
 }

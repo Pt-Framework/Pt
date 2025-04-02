@@ -75,12 +75,12 @@ class TabItem
         bool       _isPressed;
 };
 
-/** @brief Tab bar for all tabbed widgets.
+/** @brief Tab bar for all tabbed controls.
 */
-class PT_HMI_API TabBar : public Widget
+class PT_HMI_API TabBar : public Control
 {
     public:
-        typedef Widget Base;
+        typedef Control Base;
 
     public:
         TabBar();
@@ -136,12 +136,12 @@ class PT_HMI_API TabBar : public Widget
         Gfx::Font   _font;
 };
 
-/** @brief Tabbed view for widgets.
+/** @brief Tabbed view for controls.
 */
-class PT_HMI_API TabView : public Widget
+class PT_HMI_API TabView : public Control
 {
     public:
-        typedef Widget Base;
+        typedef Control Base;
 
     public:
         TabView();
@@ -152,7 +152,7 @@ class PT_HMI_API TabView : public Widget
 
         std::size_t size() const;
 
-        void addTab(Widget& w, const Pt::String& title);
+        void addTab(Control& control, const Pt::String& title);
 
         void removeTab(std::size_t n);
 

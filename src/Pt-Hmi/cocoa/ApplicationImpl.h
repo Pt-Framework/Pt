@@ -48,7 +48,7 @@ namespace Pt {
 namespace Hmi {
 	
 class Cursor;
-class Widget;
+class Control;
 class Window;
 class KeyEvent;
 class MouseEvent;

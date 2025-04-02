@@ -44,7 +44,7 @@ LineEdit::LineEdit()
 , _spacing(0)
 , _hasRenderer(false)
 {
-    setFocusPolicy(Widget::AcceptFocus);
+    setFocusPolicy(Control::AcceptFocus);
 }
 
 
@@ -62,7 +62,7 @@ bool LineEdit::isEditable() const
 void LineEdit::setEditable(bool e)
 {
     _isEditable = e;
-    setFocusPolicy(_isEditable ? Widget::AcceptFocus : Widget::NoFocus);
+    setFocusPolicy(_isEditable ? Control::AcceptFocus : Control::NoFocus);
     repaint();
 }
 
@@ -160,11 +160,11 @@ void LineEdit::setAccepted(bool a)
     
     if( ! a )
     {
-        setFocusPolicy(Widget::KeepFocus);
+        setFocusPolicy(Control::KeepFocus);
     }
     else
     {
-        setFocusPolicy(Widget::AcceptFocus);
+        setFocusPolicy(Control::AcceptFocus);
     }
 }
 

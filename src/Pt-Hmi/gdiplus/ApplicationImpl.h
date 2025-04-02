@@ -47,7 +47,7 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
-class Widget;
+class Control;
 class Visual;
 
 class Selector : public System::Selector
@@ -89,9 +89,9 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void releasePointer(Window& grabber);
 
-        void grabPointer(Widget& grabber);
+        void grabPointer(Control& grabber);
 
-        void releasePointer(Widget& grabber);
+        void releasePointer(Control& grabber);
 
         void sendKeyEvent(const KeyEvent& ev);
 

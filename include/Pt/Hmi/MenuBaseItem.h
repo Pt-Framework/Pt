@@ -37,10 +37,10 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API MenuBaseItem : public Widget
+class PT_HMI_API MenuBaseItem : public Control
 {
     public:
-        typedef Widget Base;
+        typedef Control Base;
 
     public:
 

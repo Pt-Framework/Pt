@@ -162,9 +162,9 @@ class ListBoxLayout : public FlowLayout
         Pt::Signal<ListBoxItem&>& selected();
 
     protected:
-        virtual void onAddWidget(Widget& w);
+        virtual void onAddControl(Control& control);
         
-        virtual void onRemoveWidget(Widget& w);
+        virtual void onRemoveControl(Control& control);
 
     private:
         void onItemSelected(ListBoxItem& item);
@@ -175,9 +175,9 @@ class ListBoxLayout : public FlowLayout
 };
 
 
-class PT_HMI_API ListBox : public Widget
+class PT_HMI_API ListBox : public Control
 {
-    typedef Widget Base;
+    typedef Control Base;
 
     public:
         ListBox();

@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_HMI_WIDGET_H
-#define PT_HMI_WIDGET_H
+#ifndef PT_HMI_CONTROL_H
+#define PT_HMI_CONTROL_H
 
 #include <Pt/Hmi/View.h>
 #include <Pt/Hmi/SizePolicy.h>
@@ -65,16 +65,16 @@ namespace Hmi {
 class Form;
 class Key;
 
-class PT_HMI_API Widget : public View
+class PT_HMI_API Control : public View
 {
     typedef View Base;
 
     friend class Form;
 
     public:
-        Widget();
+        Control();
 
-        virtual ~Widget();
+        virtual ~Control();
 
     public:
         void setParent(View& parent);
@@ -82,12 +82,12 @@ class PT_HMI_API Widget : public View
         void unparent();
 
         // implement add method in derived class
-        void add(Widget& widget);
+        void add(Control& control);
 
         // implement remove method in derived class
-        void remove(Widget& widget);
+        void remove(Control& control);
 
-        const std::vector<Widget*>& widgets() const;
+        const std::vector<Control*>& controls() const;
 
     public:
         //Gfx::PaintSurface& surface();
@@ -132,7 +132,7 @@ class PT_HMI_API Widget : public View
 
         String setMnemonic(const String& text);
 
-        void setMnemonicWidget(Widget* w);
+        void setMnemonicControl(Control* control);
 
         void processShortcut(const Key& key);
 
@@ -221,9 +221,9 @@ class PT_HMI_API Widget : public View
     protected:
         virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
-        virtual void onAddWidget(Widget& w);
+        virtual void onAddControl(Control& control);
 
-        virtual void onRemoveWidget(Widget& w);
+        virtual void onRemoveControl(Control& control);
 
 
         virtual void onActionKey(const KeyEvent& kev);
@@ -327,36 +327,36 @@ class PT_HMI_API Widget : public View
     // View
     //
     protected:
-        virtual Gfx::PointF onToWidget(const Widget& widget, 
-                                       const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onToControl(const Control& control, 
+                                       const Gfx::PointF& pos) const override;
 
-        virtual Gfx::PointF onFromWidget(const Widget& widget, 
-                                         const Gfx::PointF& pos) const;
+        virtual Gfx::PointF onFromControl(const Control& control, 
+                                         const Gfx::PointF& pos) const override;
 
-        virtual void onAttach(Widget& widget);
+        virtual void onAttach(Control& control);
 
-        virtual void onDetach(Widget& widget);
+        virtual void onDetach(Control& control);
 
-        virtual void onInit(Widget& widget);
+        virtual void onInit(Control& control);
 
-        virtual void onRelease(Widget& widget);
+        virtual void onRelease(Control& control);
 
     protected:
-        virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);
+        virtual void onRepaintRequest(Control& control, const Gfx::RectF& rect);
 
-        virtual void onRelayoutRequest(Widget& widget);
+        virtual void onRelayoutRequest(Control& control);
 
-        virtual void onEnableRequest(Widget& widget, bool isEnable);
+        virtual void onEnableRequest(Control& control, bool isEnable);
 
-        virtual void onActivateRequest(Widget& w, bool active);
+        virtual void onActivateRequest(Control& control, bool active);
 
-        virtual void onShowRequest(Widget& widget, bool isShown);
+        virtual void onShowRequest(Control& control, bool isShown);
 
-        virtual void onMoveRequest(Widget& widget, const Gfx::PointF& pos);
+        virtual void onMoveRequest(Control& control, const Gfx::PointF& pos);
 
-        virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size);
+        virtual void onResizeRequest(Control& control, const Gfx::SizeF& size);
 
-        virtual void onRaiseRequest(Widget& w);
+        virtual void onRaiseRequest(Control& control);
 
         virtual const std::vector<Key> onGetShortcuts();
 
@@ -364,7 +364,7 @@ class PT_HMI_API Widget : public View
 
     private:
         View*                        _parent;
-        std::vector<Widget*>         _children;
+        std::vector<Control*>        _children;
 
         Form*                        _form;
 
@@ -400,5 +400,4 @@ class PT_HMI_API Widget : public View
 
 } // namespace
 
-#endif // PT_HMI_WIDGET_H
-
+#endif // include guard

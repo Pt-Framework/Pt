@@ -58,24 +58,24 @@ class PT_HMI_API DockingLayout : public Layout
 
         virtual ~DockingLayout();
 
-        void addItem(Widget& w, DockMode ds);
+        void addItem(Control& control, DockMode ds);
 
-        void removeItem(Widget& w);
+        void removeItem(Control& control);
 
-        void setDockingStyle(Widget& w, DockMode ds);
+        void setDockingStyle(Control& control, DockMode ds);
 
     protected:
-        virtual void onAddWidget(Widget& w);
+        virtual void onAddControl(Control& control);
 
-        virtual void onRemoveWidget(Widget& w);
+        virtual void onRemoveControl(Control& control);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
 
     private:
-        std::map<Widget*, DockMode> _docking;
-        DockMode                    _defaultDocking;
+        std::map<Control*, DockMode> _docking;
+        DockMode                     _defaultDocking;
 };
 
 } // namespace

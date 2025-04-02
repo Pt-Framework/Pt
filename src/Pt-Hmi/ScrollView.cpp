@@ -37,7 +37,7 @@ namespace Hmi {
 
 ScrollView::ScrollView()
 : _hasScrollBars(true)
-, _widget(0)
+, _control(0)
 , _scrollBarX(ScrollBar::Horizontal)
 , _scrollBarY(ScrollBar::Vertical)
 {
@@ -74,13 +74,13 @@ void ScrollView::setScrollBars(bool hasScrollBars)
 }
 
 
-void ScrollView::setContent(Widget& widget)
+void ScrollView::setContent(Control& control)
 {
-    if(_widget)
-        _scrollLayout.removeItem(*_widget);
+    if(_control)
+        _scrollLayout.removeItem(*_control);
 
-    _scrollLayout.addItem(widget);
-    _widget = &widget;
+    _scrollLayout.addItem(control);
+    _control = &control;
 }
 
 

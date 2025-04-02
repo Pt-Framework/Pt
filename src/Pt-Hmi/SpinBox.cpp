@@ -164,7 +164,7 @@ SpinBox::SpinBox()
 , _spacing(0)
 , _hasRenderer(false)
 {
-    setFocusPolicy(Widget::AcceptFocus);
+    setFocusPolicy(Control::AcceptFocus);
     
     _editor.setText("0");
 
@@ -190,7 +190,7 @@ bool SpinBox::isEditable() const
 void SpinBox::setEditable(bool e)
 {
     _isEditable = e;
-    setFocusPolicy(_isEditable ? Widget::AcceptFocus : Widget::NoFocus);
+    setFocusPolicy(_isEditable ? Control::AcceptFocus : Control::NoFocus);
     repaint();
 }
 
@@ -384,11 +384,11 @@ void SpinBox::setAccepted(bool a)
     
     if( ! a )
     {
-        setFocusPolicy(Widget::KeepFocus);
+        setFocusPolicy(Control::KeepFocus);
     }
     else
     {
-        setFocusPolicy(Widget::AcceptFocus);
+        setFocusPolicy(Control::AcceptFocus);
     }
 }
 

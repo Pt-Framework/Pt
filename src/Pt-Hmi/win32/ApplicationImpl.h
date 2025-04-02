@@ -47,7 +47,6 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
-class Widget;
 class Visual;
 
 class Selector : public System::Selector

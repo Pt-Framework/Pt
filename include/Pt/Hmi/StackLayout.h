@@ -48,39 +48,39 @@ class PT_HMI_API StackLayout : public Layout
 
         virtual ~StackLayout();
 
-        void addItem(Widget& w);
+        void addItem(Control& control);
 
-        void removeItem(Widget& w);
+        void removeItem(Control& control);
 
         bool empty() const;
 
         std::size_t size() const;
 
-        Widget* widgetAt(std::size_t n) const;
+        Control* controlAt(std::size_t n) const;
 
-        std::size_t indexOf(Widget& w) const;
+        std::size_t indexOf(Control& control) const;
 
         std::size_t current() const;
 
         void setCurrent(std::size_t n);
 
-        Pt::Signal<std::size_t>& widgetRemoved()
-        { return _widgetRemoved; }
+        Pt::Signal<std::size_t>& controlRemoved()
+        { return _controlRemoved; }
 
         Pt::Signal<std::size_t>& currentChanged()
         { return _currentChanged; }
 
     protected:
-        virtual void onRemoveWidget(Widget& w);
+        virtual void onRemoveControl(Control& control);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
 
     private:
-        Pt::Signal<std::size_t> _widgetRemoved;
+        Pt::Signal<std::size_t> _controlRemoved;
         Pt::Signal<std::size_t> _currentChanged;
-        std::vector<Widget*>    _widgets;
+        std::vector<Control*>    _controls;
         std::size_t             _current;
 };
 

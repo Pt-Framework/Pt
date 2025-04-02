@@ -272,7 +272,7 @@ TabView::TabView()
 : _hasRenderer(false)
 {
     _tabBar.currentChanged() += Pt::slot(_stack, &StackLayout::setCurrent);
-    _stack.widgetRemoved() += Pt::slot(_tabBar, &TabBar::removeTab);
+    _stack.controlRemoved() += Pt::slot(_tabBar, &TabBar::removeTab);
 
     _layout.addItem(_tabBar, DockingLayout::Top);
     _layout.addItem(_stack, DockingLayout::Fill);
@@ -298,10 +298,10 @@ std::size_t TabView::size() const
 }
 
 
-void TabView::addTab(Widget& w, const Pt::String& title)
+void TabView::addTab(Control& control, const Pt::String& title)
 {
     _tabBar.addTab(title);
-    _stack.addItem(w);
+    _stack.addItem(control);
 }
 
 
@@ -309,11 +309,11 @@ void TabView::removeTab(std::size_t n)
 {
     _tabBar.removeTab(n);
 
-    Widget* widget = _stack.widgetAt(n);
-    if( ! widget )
+    Control* control = _stack.controlAt(n);
+    if( ! control )
         return;
 
-    _stack.removeItem(*widget);
+    _stack.removeItem(*control);
 }
 
 

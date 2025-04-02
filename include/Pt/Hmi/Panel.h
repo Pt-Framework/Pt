@@ -42,9 +42,9 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Panel : public Widget
+class PT_HMI_API Panel : public Control
 {
-    typedef Widget Base;
+    typedef Control Base;
 
     public:
         Panel();
@@ -53,9 +53,9 @@ class PT_HMI_API Panel : public Widget
 
         void setIcon(const Icon& icon, const Gfx::SizeF& iconSize, Alignment align = Alignment::Center);
 
-        Widget* content() const;
+        Control* content() const;
 
-        void setContent(Widget* widget);
+        void setContent(Control* control);
 
     public:
         const Gfx::Brush* background() const;
@@ -73,7 +73,7 @@ class PT_HMI_API Panel : public Widget
         void setRenderer(PanelRenderer* renderer);
 
     protected:
-        virtual void onRemoveWidget(Widget& w);
+        virtual void onRemoveControl(Control& control);
 
         virtual void onInvalidate();
 
@@ -86,7 +86,7 @@ class PT_HMI_API Panel : public Widget
         virtual void onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter);
 
     private:
-        Widget*                  _content;
+        Control*                 _content;
 
         FacetPtr<PanelRenderer> _renderer;
         bool                    _hasRenderer;

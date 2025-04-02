@@ -61,29 +61,29 @@ void Panel::setIcon(const Icon& icon, const Gfx::SizeF& iconSize, Alignment alig
 }
 
 
-Widget* Panel::content() const
+Control* Panel::content() const
 {
   return _content;
 }
 
 
-void Panel::setContent(Widget* widget)
+void Panel::setContent(Control* control)
 {
     if(_content)
         remove(*_content);
 
-    _content = widget;
+    _content = control;
 
-    if (widget)
-        add(*widget);
+    if (control)
+        add(*control);
 }
 
 
-void Panel::onRemoveWidget(Widget& w)
+void Panel::onRemoveControl(Control& control)
 {
-    Widget::onRemoveWidget(w);
+    Control::onRemoveControl(control);
 
-    if(&w == _content)
+    if(&control == _content)
         _content = 0;
 }
 

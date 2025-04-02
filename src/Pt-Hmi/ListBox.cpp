@@ -391,14 +391,14 @@ Pt::Signal<ListBoxItem&>& ListBoxLayout::selected()
 }
 
 
-void ListBoxLayout::onAddWidget(Widget& w)
+void ListBoxLayout::onAddControl(Control& control)
 {
 }
 
 
-void ListBoxLayout::onRemoveWidget(Widget& w)
+void ListBoxLayout::onRemoveControl(Control& control)
 {
-    ListBoxItem& item = static_cast<ListBoxItem&>(w);
+    ListBoxItem& item = static_cast<ListBoxItem&>(control);
 
     _selectedItems.erase( std::remove(_selectedItems.begin(), 
                                       _selectedItems.end(), 

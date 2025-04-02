@@ -58,7 +58,7 @@ namespace Hmi {
 
 class PT_HMI_API Form : public View
 {
-    friend class Widget;
+    friend class Control;
 
     typedef View Base;
 
@@ -66,11 +66,11 @@ class PT_HMI_API Form : public View
         virtual ~Form();
 
     public:
-        Widget* content();
+        Control* content();
 
-        const Widget* content()  const;
+        const Control* content()  const;
 
-        void setContent(Widget* widget);       
+        void setContent(Control* control);       
 
 
         //Gfx::PaintSurface& surface();
@@ -80,7 +80,7 @@ class PT_HMI_API Form : public View
         //void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
     public:
-        Widget* focusWidget();
+        Control* focusControl();
 
         void focusNext();
 
@@ -99,19 +99,19 @@ class PT_HMI_API Form : public View
         virtual void onLayoutEvent(const LayoutEvent& ev);
 
     protected:
-        virtual void onAddElement(Widget& widget);
+        virtual void onAddElement(Control& control);
 
-        virtual void onRemoveElement(Widget& widget);
+        virtual void onRemoveElement(Control& control);
 
-        virtual void onSetFocusPolicy(Widget& w, FocusPolicy policy);
+        virtual void onSetFocusPolicy(Control& control, FocusPolicy policy);
 
-        virtual void onSetFocusIndex(Widget& w, unsigned index);
+        virtual void onSetFocusIndex(Control& control, unsigned index);
 
-        virtual void onSetFocus(Widget& w);
+        virtual void onSetFocus(Control& control);
 
-        virtual void onSetShortcut(Widget& w, const std::vector<Key>& keys);
+        virtual void onSetShortcut(Control& control, const std::vector<Key>& keys);
 
-        virtual void onSetMnemonic(Widget& w, const std::vector<Char>& chs);
+        virtual void onSetMnemonic(Control& control, const std::vector<Char>& chs);
     
     //
     // View
@@ -119,36 +119,36 @@ class PT_HMI_API Form : public View
     protected:
         virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
-        virtual void onAttach(Widget& widget);
+        virtual void onAttach(Control& control);
 
-        virtual void onDetach(Widget& widget);
+        virtual void onDetach(Control& control);
 
-        virtual void onInit(Widget& widget);
+        virtual void onInit(Control& control);
 
-        virtual void onRelease(Widget& widget);
+        virtual void onRelease(Control& control);
 
-        virtual Gfx::PointF onToWidget(const Widget& widget, 
+        virtual Gfx::PointF onToControl(const Control& control, 
                                         const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromWidget(const Widget& widget, 
+        virtual Gfx::PointF onFromControl(const Control& control, 
                                           const Gfx::PointF& pos) const;
 
     protected:
-        virtual void onRepaintRequest(Widget& widget, const Gfx::RectF& rect);
+        virtual void onRepaintRequest(Control& control, const Gfx::RectF& rect);
 
-        virtual void onRelayoutRequest(Widget& widget);
+        virtual void onRelayoutRequest(Control& control);
 
-        virtual void onEnableRequest(Widget& widget, bool isEnable);
+        virtual void onEnableRequest(Control& control, bool isEnable);
 
-        virtual void onActivateRequest(Widget& w, bool active);
+        virtual void onActivateRequest(Control& control, bool active);
 
-        virtual void onShowRequest(Widget& widget, bool isShown);
+        virtual void onShowRequest(Control& control, bool isShown);
 
-        virtual void onMoveRequest(Widget& widget, const Gfx::PointF& pos);
+        virtual void onMoveRequest(Control& control, const Gfx::PointF& pos);
 
-        virtual void onResizeRequest(Widget& widget, const Gfx::SizeF& size);
+        virtual void onResizeRequest(Control& control, const Gfx::SizeF& size);
 
-        virtual void onRaiseRequest(Widget& widget);
+        virtual void onRaiseRequest(Control& control);
 
     //
     // Visual
@@ -255,27 +255,27 @@ class PT_HMI_API Form : public View
         void moveFocus(Iter begin, Iter end);
 
     protected:
-        const std::map<Key, Widget*>& shortcuts() const
+        const std::map<Key, Control*>& shortcuts() const
         {
             return _shortcuts;
         }
 
-        const std::map<Pt::Char, Widget*>& mnemonics() const
+        const std::map<Pt::Char, Control*>& mnemonics() const
         {
             return _mnemonics;
         }
 
     private:
-        Widget*                      _mainWidget;
+        Control*                      _mainControl;
                                      
         int                          _layouts;
 
-        Widget*                      _active;
+        Control*                      _active;
 
-        std::vector<Widget*>         _focusList;
-        Widget*                      _focusWidget;        
-        std::map<Key, Widget*>       _shortcuts;
-        std::map<Pt::Char, Widget*>  _mnemonics;
+        std::vector<Control*>         _focusList;
+        Control*                      _focusControl;        
+        std::map<Key, Control*>       _shortcuts;
+        std::map<Pt::Char, Control*>  _mnemonics;
 
 };
 
@@ -283,4 +283,4 @@ class PT_HMI_API Form : public View
 
 } // namespace
 
-#endif
+#endif // include guard

@@ -40,7 +40,7 @@ Button::Button()
 : _onClickBegin(false)
 , _isHighlighted(false)
 {
-    setFocusPolicy(Widget::AcceptFocus);
+    setFocusPolicy(Control::AcceptFocus);
 }
 
   
@@ -57,7 +57,7 @@ const Pt::String& Button::text() const
 
 void Button::setText(const Pt::String& text)
 {
-    _text = Widget::setMnemonic(text);
+    _text = Control::setMnemonic(text);
     relayout();
 }
 

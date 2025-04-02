@@ -40,11 +40,11 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Shell : public Widget
+class PT_HMI_API Shell : public Control
 {
     friend class ShellWM;
 
-    typedef Widget Base;
+    typedef Control Base;
 
     public:
         Shell();
@@ -61,11 +61,11 @@ class PT_HMI_API Shell : public Widget
         WindowManager& windowManager();
 
     public:
-        Widget* content();
+        Control* content();
 
-        const Widget* content()  const;
+        const Control* content()  const;
 
-        void setContent(Widget* widget);
+        void setContent(Control* control);
 
     //
     // Visual
@@ -74,12 +74,12 @@ class PT_HMI_API Shell : public Widget
        Visual* onHitTest(const Gfx::PointF& p);
 
     //
-    // Widget
+    // Control
     //
     protected:
         virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
-        virtual void onRemoveWidget(Widget& w);
+        virtual void onRemoveControl(Control& control);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
@@ -119,7 +119,7 @@ class PT_HMI_API Shell : public Widget
 
     private:
         ShellWM                      _wm;
-        Widget*                      _content;
+        Control*                      _content;
         Visual*                      _pointer;
 };
 

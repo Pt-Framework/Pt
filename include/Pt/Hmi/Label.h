@@ -43,10 +43,10 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Label : public Widget
+class PT_HMI_API Label : public Control
 {
     public:
-        typedef Widget Base;
+        typedef Control Base;
 
     public:
         Label();

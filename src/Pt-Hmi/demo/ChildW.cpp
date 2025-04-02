@@ -111,7 +111,7 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setAlignment(Alignment::Bottom);
     _textLabel.setPadding(10);
     _textLabel.setBackground( Gfx::Color::fromRgb8(240, 220, 70) );
-    _textLabel.setMnemonicWidget(&_toggleButton);
+    _textLabel.setMnemonicControl(&_toggleButton);
     _textLabel.setCursor( &Hmi::Cursor::waitCursor() ); 
     _textLabel.setContour(Gfx::Color::fromRgb8(200, 190, 60));
 

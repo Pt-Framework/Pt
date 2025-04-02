@@ -64,9 +64,11 @@ class ScrollEvent;
 class ShowEvent;
 class TouchEvent;
 class Visual;
-class Widget;
+class Control;
 class Window;
 class WindowStateEvent;
+
+typedef Control Widget;
 
 } // namespace
 
