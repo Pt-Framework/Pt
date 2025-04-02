@@ -1,0 +1,43 @@
+SubDir PT_TOP src Pt-Forms demo  ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/skia/include/core ;
+SubDirHdrs $(PT_TOP)/src/skia/include/config ;
+SubDirHdrs $(PT_TOP)/src/skia/include/gpu ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Forms-Demo ;
+
+FORMS_DEMO_SOURCES = Main.cpp
+				             MainWindow.cpp
+				             Dialog1.cpp
+				             Dialog2.cpp
+				             ChildW.cpp
+				             ;
+
+Main Pt-Forms-Demo : $(FORMS_DEMO_SOURCES) ;
+LinkSharedLibraries Pt-Forms-Demo : Pt Pt-System Pt-Gfx Pt-Net Pt-Forms ;
+
+if $(WITH_BUILTIN_SKIA)
+{
+	LinkLibraries Pt-Forms-Demo : skia ;
+}
+
+MakeLocate Pt-Forms-Demo : $(PT_OUTPUT_TARGET) ;
+
+if $(TARGET_OS) = wasm
+{
+  LinkFlags Pt-Forms-Demo : --preload-file etc/icons@/ ;
+}
+
+#FORMS_PAINTER_DEMO_SOURCES = PainterDemo.cpp ;
+
+#Main Pt-Forms-PainterDemo : $(FORMS_PAINTER_DEMO_SOURCES) ;
+#LinkSharedLibraries Pt-Forms-PainterDemo : Pt Pt-System Pt-Gfx Pt-Forms ;
+#MakeLocate Pt-Forms-PainterDemo : $(PT_OUTPUT_TARGET) ;
+
+PT_DEMO_ICONS_DIR = [ FDirName etc icons ] ;
+PT_DEMO_ICONS = [ GLOB $(PT_DEMO_ICONS_DIR) : *.png  ] ;
+
+for local f in $(PT_DEMO_ICONS)
+{
+    File $(f:BS) : $(f) ;
+    MakeLocate $(f:BS)  : [ FDirName $(PT_OUTPUT_TARGET) ] ;
+}

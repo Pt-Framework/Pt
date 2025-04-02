@@ -134,11 +134,11 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Qt ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir PT_TOP include Pt Hmi ;
-PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Hmi ] ;
+SubDir PT_TOP include Pt Forms ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Forms ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
-InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Hmi ] : $(PT_INSTALL_INCLUDES:BS) ;
+InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Forms ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 #############################################################################
 # Pt Build Targets
@@ -198,10 +198,10 @@ if $(PT_SYSTEM)
     SubInclude PT_TOP src Pt-Ssl ;
     SubInclude PT_TOP src Pt-Gfx ;
 
-	if $(WITH_EGL_TEST)
-	{
-		SubInclude PT_TOP src Pt-Hmi egl-test ;
-	}
+	  if $(WITH_EGL_TEST)
+	  {
+		  SubInclude PT_TOP src Pt-Forms egl-test ;
+	  }
 
     #if $(GUI)
     #{
@@ -225,7 +225,7 @@ if $(PT_SYSTEM)
 
     if $(GUI)
     {
-        SubInclude PT_TOP src Pt-Hmi ;
+        SubInclude PT_TOP src Pt-Forms ;
     }
 }
 

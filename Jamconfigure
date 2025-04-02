@@ -1182,11 +1182,11 @@ if ! $(GUI) || $(GUI:L) = "win32"
     {
         if --with-win32-raster in $(ARGV)
         {
-            PT_HMI_IMPL = win32-raster ;
+            PT_FORMS_IMPL = win32-raster ;
         }
         else
         {
-            PT_HMI_IMPL = win32-gdi ;
+            PT_FORMS_IMPL = win32-gdi ;
         }
     }
 }
@@ -1212,7 +1212,7 @@ if ! $(GUI) || $(GUI):L = "cocoa"
     
     if $(GUI)
     {
-        PT_HMI_IMPL = cocoa ;
+        PT_FORMS_IMPL = cocoa ;
     }
 }
 
@@ -1232,13 +1232,13 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
     
     if $(GUI)
     {
-        PT_HMI_IMPL = linux-fb ;
+        PT_FORMS_IMPL = linux-fb ;
     }
 }
 
 if $(GUI:L) = "sdl"
 {
-    PT_HMI_IMPL = sdl ;
+    PT_FORMS_IMPL = sdl ;
 }
 
 if ! $(GUI) || $(GUI:L) = "x11"
@@ -1263,11 +1263,11 @@ if ! $(GUI) || $(GUI:L) = "x11"
     {
         if --with-x11-core in $(ARGV)
         {
-            PT_HMI_IMPL = x11-core ;
+            PT_FORMS_IMPL = x11-core ;
         }
         else
         {
-            PT_HMI_IMPL = x11-raster ;
+            PT_FORMS_IMPL = x11-raster ;
         }
     }
 }
@@ -1275,14 +1275,14 @@ if ! $(GUI) || $(GUI:L) = "x11"
 if $(GUI:L) = "photon"
 {
     GUI     ?= photon ;
-    PT_HMI_IMPL = photon ;
+    PT_FORMS_IMPL = photon ;
     GUILIBS = -lphrender -lph ;
 }
 
 if $(GUI:L) = "symbian-eikon"
 {
     GUI = symbian-eikon ;
-    PT_HMI_IMPL = symbian-eikon ;
+    PT_FORMS_IMPL = symbian-eikon ;
 
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
@@ -1302,7 +1302,7 @@ if $(GUI:L) = "symbian-eikon"
 if --with-egl-gbm in $(ARGV)
 {
     GUI = egl-gbm ;
-    PT_HMI_IMPL = egl-gbm ;
+    PT_FORMS_IMPL = egl-gbm ;
 
     WITH_EGL_TEST = 1 ;
     Configure WITH_EGL_TEST ;
@@ -1342,8 +1342,8 @@ EchoOption GUI : "UI platform" : $(GUI:E="none") ;
 
 if $(GUI)
 {
-    Configure PT_HMI_IMPL ;
-    EchoOption PT_HMI_IMPL : "UI implementation" ;
+    Configure PT_FORMS_IMPL ;
+    EchoOption PT_FORMS_IMPL : "UI implementation" ;
 
     Configure GUILIBS ;
     EchoOption GUILIBS : "UI platform linklibs" ;

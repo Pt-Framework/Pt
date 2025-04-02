@@ -1,0 +1,113 @@
+SubDir PT_TOP src Pt-Forms ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-System ;
+SubDirHdrs $(PT_TOP)/src/Pt-Forms/$(GUI) ;
+SubDirC++Flags [ FDefines PT_FORMS_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Forms ;
+
+if $(PT_FORMS_IMPL) = x11-core
+{
+    SubDirC++Flags [ FDefines PT_FORMS_X11_CORE ] ;
+}
+
+if $(PT_FORMS_IMPL) = x11-raster
+{
+    SubDirC++Flags [ FDefines PT_FORMS_X11_RASTER ] ;
+}
+
+if $(PT_FORMS_IMPL) = win32-gdi
+{
+    SubDirC++Flags [ FDefines PT_FORMS_WIN32_GDI ] ;
+}
+
+if $(PT_FORMS_IMPL) = win32-raster
+{
+    SubDirC++Flags [ FDefines PT_FORMS_WIN32_RASTER ] ;
+}
+
+if $(GUI_INCLUDES)
+{
+    SubDirHdrs $(GUI_INCLUDES) ;
+}
+
+if $(GUI:L) = x11
+{
+    SubDirHdrs $(FREETYPE_INCLUDES) ;
+    SubDirHdrs $(X11_INCLUDES) ;
+    SubDirHdrs $(XFT_INCLUDES) ;
+}
+
+PT_FORMS_SUBDIR = [ FDirName $(PT_TOP) src Pt-Forms $(GUI:L) ] ;
+
+PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.cpp  ] ;
+PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.mm  ] ;
+
+SharedLibrary Pt-Forms : Application.cpp
+                         Button.cpp
+                         CheckBox.cpp
+                         ComboBox.cpp
+                         Control.cpp
+                         Cursor.cpp
+                         DockingLayout.cpp
+                         FlowLayout.cpp
+                         Form.cpp
+                         GridLayout.cpp
+                         Icon.cpp
+                         InputMethod.cpp
+                         Layout.cpp
+                         LineEdit.cpp
+                         LineEditor.cpp
+                         ListBox.cpp
+                         Label.cpp
+                         Menu.cpp
+                         MenuBar.cpp
+                         MenuItem.cpp
+                         MenuBarItem.cpp
+                         MenuBase.cpp
+                         MenuBaseItem.cpp
+                         MenuMenuItem.cpp
+                         MenuSubItem.cpp
+                         Panel.cpp
+                         Pixmap.cpp
+                         PlatinumStyle.cpp
+                         Popup.cpp
+                         ProgressBar.cpp
+                         PushButton.cpp
+                         Responder.cpp
+                         Screen.cpp 
+                         ScrollBar.cpp
+                         ScrollView.cpp
+                         ScrollLayout.cpp
+                         Shell.cpp
+                         ShellWM.cpp
+                         ShellWindowFrame.cpp
+                         Slider.cpp
+                         SpinBox.cpp
+                         StackLayout.cpp
+                         Style.cpp
+                         StyleOptions.cpp
+                         TableLayout.cpp
+                         TabView.cpp
+                         TextBlock.cpp
+                         View.cpp
+                         Visual.cpp
+                         WindowBase.cpp
+                         Window.cpp
+                         WindowFrame.cpp
+                         WindowManager.cpp
+                         $(PT_FORMS_IMPL_SOURCES) ;
+
+LinkSharedLibraries Pt-Forms : Pt Pt-System Pt-Gfx Pt-Reflex ;
+LinkLibs Pt-Forms : $(GUILIBS) ;
+MakeLocate Pt-Forms : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Forms : $(PT_INSTALL_LIBDIR) ;
+
+if $(GUI:L) = egl-gbm
+{
+  PT_EGL_TEST_DIR = [ FDirName $(PT_TOP) src Pt-Forms egl-test ] ;
+  Main egl-test : [ GLOB $(PT_EGL_TEST_DIR) : *.cpp  ] ;
+  LinkLibs egl-test : $(GUILIBS) ;
+  MakeLocate egl-test : $(PT_OUTPUT_TARGET) ;
+}
+
+SubInclude PT_TOP src Pt-Forms demo ;

@@ -1,9 +1,9 @@
 // Use the buillt-in FreeType engine and libpng included with Pt:
-//     ./jam.sh configure --with-experimental-gfx --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng
+//     ./jam.sh configure --with-experimental-gfx --with-forms -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng
 //
 //
 // Enable debugging information for use with Valgrind:
-//     ./jam.sh configure --with-experimental-gfx --with-hmi -sGUI=linux-fb -sOPTIM=-g --with-freetype --with-libpng
+//     ./jam.sh configure --with-experimental-gfx --with-froms -sGUI=linux-fb -sOPTIM=-g --with-freetype --with-libpng
 //
 // Generate Valgrind suppression list:
 //     valgrind --leak-check=full --show-leak-kinds=all --gen-suppressions=yes --demangle=no --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
@@ -30,7 +30,7 @@
 //
 
 
-// ./jam.sh configure --optimize --with-experimental-gfx --with-hmi -sGUI=xorg
+// ./jam.sh configure --optimize --with-experimental-gfx --with-forms -sGUI=xorg
 //#define WITH_EXPERIMENTAL_GFX
 
 #include <Pt/Gfx/Argb32Image.h>

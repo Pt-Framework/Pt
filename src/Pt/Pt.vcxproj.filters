@@ -130,40 +130,40 @@
     <Filter Include="Pt-Gfx\skia">
       <UniqueIdentifier>{43179c50-8e1a-4a5a-9252-896127589485}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi">
+    <Filter Include="Pt-Forms">
       <UniqueIdentifier>{651ade61-b855-4fd6-ad7c-639c6c8d80e9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\cocoa">
+    <Filter Include="Pt-Forms\cocoa">
       <UniqueIdentifier>{36941d33-3e4b-4633-8cd5-98c43dcafde5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\winrt">
+    <Filter Include="Pt-Forms\winrt">
       <UniqueIdentifier>{c847b2fe-d585-45e6-b01c-e78bba57be2c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\x11">
+    <Filter Include="Pt-Forms\x11">
       <UniqueIdentifier>{a13fe857-cfa3-460c-a7cf-2be216417aae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\linux-fb">
+    <Filter Include="Pt-Forms\linux-fb">
       <UniqueIdentifier>{e307ea3a-0fb7-440c-b428-729f34adc24c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\demo">
+    <Filter Include="Pt-Forms\demo">
       <UniqueIdentifier>{a671ee7a-b3c8-4a1b-91a0-ff01ecaa6b90}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\egl-gbm">
+    <Filter Include="Pt-Forms\egl-gbm">
       <UniqueIdentifier>{2cf44f88-5fa7-4298-8220-2eee4dc4b1ec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Events">
+    <Filter Include="Pt-Forms\Events">
       <UniqueIdentifier>{fce78a73-3874-4da3-9687-1fef15f5a3f4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\egl-test">
+    <Filter Include="Pt-Forms\egl-test">
       <UniqueIdentifier>{8e99da40-cf75-4986-8cea-761a5d784780}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\gdiplus">
+    <Filter Include="Pt-Forms\gdiplus">
       <UniqueIdentifier>{c234da96-682b-43ed-a984-7e0797e06784}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\win32">
+    <Filter Include="Pt-Forms\win32">
       <UniqueIdentifier>{e4bd9624-9814-4452-99e6-744f7fdd7c2e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\sdl">
+    <Filter Include="Pt-Forms\sdl">
       <UniqueIdentifier>{59c2026c-88b5-473e-8e9e-e3501a8b0499}</UniqueIdentifier>
     </Filter>
     <Filter Include="Pt-Http">
@@ -1701,452 +1701,452 @@
     <ClInclude Include="..\Pt-Gfx\skia\SkiaContext.h">
       <Filter>Pt-Gfx\skia</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Adjustment.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Adjustment.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Alignment.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Alignment.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Api.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Api.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Application.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Application.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Button.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Button.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\CheckBox.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\CheckBox.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ComboBox.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ComboBox.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Cursor.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\DockingLayout.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\DockingLayout.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\FlowLayout.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\FlowLayout.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Form.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Form.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\GridLayout.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\GridLayout.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Icon.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Icon.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\InputMethod.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\InputMethod.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Key.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Key.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Label.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Label.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Layout.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Layout.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\LineEdit.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\LineEdit.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\LineEditor.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\LineEditor.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ListBox.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ListBox.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Menu.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Menu.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\MenuBar.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\MenuBar.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\MenuBarItem.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\MenuBarItem.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\MenuBase.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\MenuBase.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\MenuBaseItem.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\MenuBaseItem.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\MenuItem.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\MenuItem.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\MenuMenuItem.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\MenuMenuItem.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\MenuSubItem.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\MenuSubItem.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Panel.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Panel.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Pixmap.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Pixmap.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\PixmapSurface.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PlatinumStyle.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\PlatinumStyle.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Popup.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Popup.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ProgressBar.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ProgressBar.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PushButton.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\PushButton.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Responder.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Responder.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Screen.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Screen.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ScrollBar.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ScrollBar.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ScrollLayout.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ScrollLayout.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ScrollView.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ScrollView.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Shell.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Shell.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ShellWM.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ShellWM.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\SizePolicy.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\SizePolicy.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Slider.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Slider.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Spacing.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\SpinBox.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\SpinBox.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\StackLayout.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\StackLayout.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Style.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Style.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\StyleOptions.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\StyleOptions.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\TableLayout.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\TableLayout.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\TabView.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\TabView.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\TextBlock.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\TextBlock.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\View.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\View.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Visual.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Visual.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Window.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Window.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowBase.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\WindowBase.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowFrame.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\WindowFrame.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\WindowManager.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowType.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\WindowType.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\ArrowCursor.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\Pt-Forms\ArrowCursor.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\MoveCursor.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\Pt-Forms\MoveCursor.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\ShellWindowFrame.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\Pt-Forms\ShellWindowFrame.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\SizeNESWCursor.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\Pt-Forms\SizeNESWCursor.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\SizeNSCursor.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\Pt-Forms\SizeNSCursor.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\SizeNWSECursor.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\Pt-Forms\SizeNWSECursor.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\SizeWECursor.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\Pt-Forms\SizeWECursor.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\WaitCursor.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\Pt-Forms\WaitCursor.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\cocoa\ApplicationImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <ClInclude Include="..\Pt-Forms\cocoa\ApplicationImpl.h">
+      <Filter>Pt-Forms\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\cocoa\CursorImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <ClInclude Include="..\Pt-Forms\cocoa\CursorImpl.h">
+      <Filter>Pt-Forms\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\cocoa\KeyMap.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <ClInclude Include="..\Pt-Forms\cocoa\KeyMap.h">
+      <Filter>Pt-Forms\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\cocoa\PaintContext.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <ClInclude Include="..\Pt-Forms\cocoa\PaintContext.h">
+      <Filter>Pt-Forms\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\cocoa\PixmapImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <ClInclude Include="..\Pt-Forms\cocoa\PixmapImpl.h">
+      <Filter>Pt-Forms\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\cocoa\ScreenImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <ClInclude Include="..\Pt-Forms\cocoa\ScreenImpl.h">
+      <Filter>Pt-Forms\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\cocoa\WindowImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <ClInclude Include="..\Pt-Forms\cocoa\WindowImpl.h">
+      <Filter>Pt-Forms\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\cocoa\WindowView.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <ClInclude Include="..\Pt-Forms\cocoa\WindowView.h">
+      <Filter>Pt-Forms\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\winrt\ApplicationImpl.h">
-      <Filter>Pt-Hmi\winrt</Filter>
+    <ClInclude Include="..\Pt-Forms\winrt\ApplicationImpl.h">
+      <Filter>Pt-Forms\winrt</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\winrt\CursorImpl.h">
-      <Filter>Pt-Hmi\winrt</Filter>
+    <ClInclude Include="..\Pt-Forms\winrt\CursorImpl.h">
+      <Filter>Pt-Forms\winrt</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\winrt\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Hmi\winrt</Filter>
+    <ClInclude Include="..\Pt-Forms\winrt\GfxOutputDeviceImpl.h">
+      <Filter>Pt-Forms\winrt</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\x11\ApplicationImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClInclude Include="..\Pt-Forms\x11\ApplicationImpl.h">
+      <Filter>Pt-Forms\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\x11\CursorImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClInclude Include="..\Pt-Forms\x11\CursorImpl.h">
+      <Filter>Pt-Forms\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\x11\KeyHandler.h">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClInclude Include="..\Pt-Forms\x11\KeyHandler.h">
+      <Filter>Pt-Forms\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\x11\PixmapImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClInclude Include="..\Pt-Forms\x11\PixmapImpl.h">
+      <Filter>Pt-Forms\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\x11\ScreenImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClInclude Include="..\Pt-Forms\x11\ScreenImpl.h">
+      <Filter>Pt-Forms\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\x11\WindowImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClInclude Include="..\Pt-Forms\x11\WindowImpl.h">
+      <Filter>Pt-Forms\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\x11\X11Fd.h">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClInclude Include="..\Pt-Forms\x11\X11Fd.h">
+      <Filter>Pt-Forms\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\linux-fb\ApplicationImpl.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClInclude Include="..\Pt-Forms\linux-fb\ApplicationImpl.h">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\linux-fb\FrameBuffer.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClInclude Include="..\Pt-Forms\linux-fb\FrameBuffer.h">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\linux-fb\InputDevice.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClInclude Include="..\Pt-Forms\linux-fb\InputDevice.h">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\linux-fb\MainWindowImpl.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClInclude Include="..\Pt-Forms\linux-fb\MainWindowImpl.h">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\linux-fb\MouseDevice.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClInclude Include="..\Pt-Forms\linux-fb\MouseDevice.h">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\linux-fb\PixmapImpl.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClInclude Include="..\Pt-Forms\linux-fb\PixmapImpl.h">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\linux-fb\ScreenImpl.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClInclude Include="..\Pt-Forms\linux-fb\ScreenImpl.h">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\demo\AtesionIcon.h">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClInclude Include="..\Pt-Forms\demo\AtesionIcon.h">
+      <Filter>Pt-Forms\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\demo\ChildW.h">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClInclude Include="..\Pt-Forms\demo\ChildW.h">
+      <Filter>Pt-Forms\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\demo\DemoImage.h">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClInclude Include="..\Pt-Forms\demo\DemoImage.h">
+      <Filter>Pt-Forms\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\demo\Dialog1.h">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClInclude Include="..\Pt-Forms\demo\Dialog1.h">
+      <Filter>Pt-Forms\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\demo\Dialog2.h">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClInclude Include="..\Pt-Forms\demo\Dialog2.h">
+      <Filter>Pt-Forms\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\demo\MainWindow.h">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClInclude Include="..\Pt-Forms\demo\MainWindow.h">
+      <Filter>Pt-Forms\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-gbm\ApplicationImpl.h">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-gbm\ApplicationImpl.h">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-gbm\InputDevice.h">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-gbm\InputDevice.h">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-gbm\MainWindowImpl.h">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-gbm\MainWindowImpl.h">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-gbm\PainterImpl.h">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-gbm\PainterImpl.h">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-gbm\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-gbm\PaintSurfaceImpl.h">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-gbm\ScreenImpl.h">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-gbm\ScreenImpl.h">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ActivateEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\CloseEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\EnableEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\EnableEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\EnterEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\FocusEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\InvalidateEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\InvalidateEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\KeyEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\LayoutEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\LayoutEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\LeaveEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\MouseEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\MoveEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\PaintEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ResizeEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ScrollEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ScrollEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ShowEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\ShowEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\TouchEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowStateEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\WindowStateEvent.h">
+      <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\Display.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\Display.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\Matrix.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\Matrix.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\RenderScreen.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\RenderScreen.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\ShaderProgram.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\ShaderProgram.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\Shaders.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\Shaders.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\Shape.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\Shape.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\SolidRect.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\SolidRect.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\Texture.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\Texture.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\TextureRect.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\TextureRect.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\egl-test\Vector.h">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClInclude Include="..\Pt-Forms\egl-test\Vector.h">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\gdiplus\ApplicationImpl.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClInclude Include="..\Pt-Forms\gdiplus\ApplicationImpl.h">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\gdiplus\KeyMap.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClInclude Include="..\Pt-Forms\gdiplus\KeyMap.h">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\gdiplus\MainWindowImpl.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClInclude Include="..\Pt-Forms\gdiplus\MainWindowImpl.h">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\gdiplus\PaintData.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClInclude Include="..\Pt-Forms\gdiplus\PaintData.h">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\gdiplus\PixmapSurfaceImpl.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClInclude Include="..\Pt-Forms\gdiplus\PixmapSurfaceImpl.h">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\gdiplus\ScreenImpl.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClInclude Include="..\Pt-Forms\gdiplus\ScreenImpl.h">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\gdiplus\win32.h">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClInclude Include="..\Pt-Forms\gdiplus\win32.h">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\win32\ApplicationImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClInclude Include="..\Pt-Forms\win32\ApplicationImpl.h">
+      <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\win32\KeyMap.h">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClInclude Include="..\Pt-Forms\win32\KeyMap.h">
+      <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\win32\PaintContext.h">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClInclude Include="..\Pt-Forms\win32\PaintContext.h">
+      <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\win32\PixmapImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClInclude Include="..\Pt-Forms\win32\PixmapImpl.h">
+      <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\win32\ScreenImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClInclude Include="..\Pt-Forms\win32\ScreenImpl.h">
+      <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\win32\win32.h">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClInclude Include="..\Pt-Forms\win32\win32.h">
+      <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\win32\WindowImpl.h">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClInclude Include="..\Pt-Forms\win32\WindowImpl.h">
+      <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\sdl\ApplicationImpl.h">
-      <Filter>Pt-Hmi\sdl</Filter>
+    <ClInclude Include="..\Pt-Forms\sdl\ApplicationImpl.h">
+      <Filter>Pt-Forms\sdl</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\sdl\Keycodes.h">
-      <Filter>Pt-Hmi\sdl</Filter>
+    <ClInclude Include="..\Pt-Forms\sdl\Keycodes.h">
+      <Filter>Pt-Forms\sdl</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\sdl\PixmapImpl.h">
-      <Filter>Pt-Hmi\sdl</Filter>
+    <ClInclude Include="..\Pt-Forms\sdl\PixmapImpl.h">
+      <Filter>Pt-Forms\sdl</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Hmi\sdl\ScreenImpl.h">
-      <Filter>Pt-Hmi\sdl</Filter>
+    <ClInclude Include="..\Pt-Forms\sdl\ScreenImpl.h">
+      <Filter>Pt-Forms\sdl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\Api.h">
       <Filter>Pt-Http</Filter>
@@ -2928,8 +2928,8 @@
     <ClInclude Include="..\Pt-XmlRpc\HttpResponder.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Control.h">
-      <Filter>Pt-Hmi</Filter>
+    <ClInclude Include="..\..\include\Pt\Forms\Control.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -3191,29 +3191,29 @@
     <None Include="..\Pt-Gfx\tests\Jamfile">
       <Filter>Pt-Gfx\tests</Filter>
     </None>
-    <None Include="..\Pt-Hmi\Jamfile">
-      <Filter>Pt-Hmi</Filter>
+    <None Include="..\Pt-Forms\Jamfile">
+      <Filter>Pt-Forms</Filter>
     </None>
-    <None Include="..\Pt-Hmi\cocoa\ApplicationImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <None Include="..\Pt-Forms\cocoa\ApplicationImpl.mm">
+      <Filter>Pt-Forms\cocoa</Filter>
     </None>
-    <None Include="..\Pt-Hmi\cocoa\CursorImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <None Include="..\Pt-Forms\cocoa\CursorImpl.mm">
+      <Filter>Pt-Forms\cocoa</Filter>
     </None>
-    <None Include="..\Pt-Hmi\cocoa\PixmapImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <None Include="..\Pt-Forms\cocoa\PixmapImpl.mm">
+      <Filter>Pt-Forms\cocoa</Filter>
     </None>
-    <None Include="..\Pt-Hmi\cocoa\ScreenImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <None Include="..\Pt-Forms\cocoa\ScreenImpl.mm">
+      <Filter>Pt-Forms\cocoa</Filter>
     </None>
-    <None Include="..\Pt-Hmi\cocoa\WindowImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <None Include="..\Pt-Forms\cocoa\WindowImpl.mm">
+      <Filter>Pt-Forms\cocoa</Filter>
     </None>
-    <None Include="..\Pt-Hmi\cocoa\WindowView.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
+    <None Include="..\Pt-Forms\cocoa\WindowView.mm">
+      <Filter>Pt-Forms\cocoa</Filter>
     </None>
-    <None Include="..\Pt-Hmi\demo\Jamfile">
-      <Filter>Pt-Hmi\demo</Filter>
+    <None Include="..\Pt-Forms\demo\Jamfile">
+      <Filter>Pt-Forms\demo</Filter>
     </None>
     <None Include="..\Pt-Http\Jamfile">
       <Filter>Pt-Http</Filter>
@@ -4688,308 +4688,308 @@
     <ClCompile Include="..\Pt-Gfx\skia\SkiaContext.cpp">
       <Filter>Pt-Gfx\skia</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Application.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Application.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Button.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Button.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\CheckBox.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\CheckBox.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\ComboBox.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\ComboBox.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Cursor.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Cursor.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\DockingLayout.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\DockingLayout.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\FlowLayout.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\FlowLayout.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Form.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Form.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\GridLayout.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\GridLayout.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Icon.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Icon.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\InputMethod.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\InputMethod.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Label.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Label.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Layout.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Layout.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\LineEdit.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\LineEdit.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\LineEditor.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\LineEditor.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\ListBox.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\ListBox.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Menu.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Menu.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\MenuBar.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\MenuBar.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\MenuBarItem.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\MenuBarItem.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\MenuBase.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\MenuBase.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\MenuBaseItem.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\MenuBaseItem.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\MenuItem.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\MenuItem.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\MenuMenuItem.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\MenuMenuItem.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\MenuSubItem.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\MenuSubItem.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Panel.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Panel.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Pixmap.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Pixmap.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\PlatinumStyle.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\PlatinumStyle.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Popup.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Popup.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\ProgressBar.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\ProgressBar.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\PushButton.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\PushButton.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Responder.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Responder.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Screen.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Screen.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\ScrollBar.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\ScrollBar.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\ScrollLayout.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\ScrollLayout.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\ScrollView.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\ScrollView.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Shell.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Shell.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\ShellWindowFrame.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\ShellWindowFrame.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\ShellWM.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\ShellWM.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Slider.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Slider.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\SpinBox.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\SpinBox.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\StackLayout.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\StackLayout.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Style.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Style.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\StyleOptions.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\StyleOptions.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\TableLayout.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\TableLayout.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\TabView.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\TabView.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\TextBlock.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\TextBlock.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\View.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\View.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Visual.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Visual.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Window.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Window.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\WindowBase.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\WindowBase.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\WindowFrame.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\WindowFrame.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\WindowManager.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\WindowManager.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\winrt\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\winrt</Filter>
+    <ClCompile Include="..\Pt-Forms\winrt\ApplicationImpl.cpp">
+      <Filter>Pt-Forms\winrt</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\winrt\CursorImpl.cpp">
-      <Filter>Pt-Hmi\winrt</Filter>
+    <ClCompile Include="..\Pt-Forms\winrt\CursorImpl.cpp">
+      <Filter>Pt-Forms\winrt</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp">
-      <Filter>Pt-Hmi\winrt</Filter>
+    <ClCompile Include="..\Pt-Forms\winrt\GfxOutputDeviceImpl.cpp">
+      <Filter>Pt-Forms\winrt</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\x11\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClCompile Include="..\Pt-Forms\x11\ApplicationImpl.cpp">
+      <Filter>Pt-Forms\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\x11\CursorImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClCompile Include="..\Pt-Forms\x11\CursorImpl.cpp">
+      <Filter>Pt-Forms\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\x11\KeyHandler.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClCompile Include="..\Pt-Forms\x11\KeyHandler.cpp">
+      <Filter>Pt-Forms\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\x11\PixmapImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClCompile Include="..\Pt-Forms\x11\PixmapImpl.cpp">
+      <Filter>Pt-Forms\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\x11\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClCompile Include="..\Pt-Forms\x11\ScreenImpl.cpp">
+      <Filter>Pt-Forms\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\x11\WindowImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClCompile Include="..\Pt-Forms\x11\WindowImpl.cpp">
+      <Filter>Pt-Forms\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\x11\X11Fd.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
+    <ClCompile Include="..\Pt-Forms\x11\X11Fd.cpp">
+      <Filter>Pt-Forms\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\linux-fb\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClCompile Include="..\Pt-Forms\linux-fb\ApplicationImpl.cpp">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\linux-fb\FrameBuffer.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClCompile Include="..\Pt-Forms\linux-fb\FrameBuffer.cpp">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\linux-fb\InputDevice.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClCompile Include="..\Pt-Forms\linux-fb\InputDevice.cpp">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\linux-fb\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClCompile Include="..\Pt-Forms\linux-fb\MainWindowImpl.cpp">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\linux-fb\MouseDevice.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClCompile Include="..\Pt-Forms\linux-fb\MouseDevice.cpp">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\linux-fb\PixmapImpl.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClCompile Include="..\Pt-Forms\linux-fb\PixmapImpl.cpp">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\linux-fb\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
+    <ClCompile Include="..\Pt-Forms\linux-fb\ScreenImpl.cpp">
+      <Filter>Pt-Forms\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\demo\ChildW.cpp">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClCompile Include="..\Pt-Forms\demo\ChildW.cpp">
+      <Filter>Pt-Forms\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\demo\Dialog1.cpp">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClCompile Include="..\Pt-Forms\demo\Dialog1.cpp">
+      <Filter>Pt-Forms\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\demo\Dialog2.cpp">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClCompile Include="..\Pt-Forms\demo\Dialog2.cpp">
+      <Filter>Pt-Forms\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\demo\Main.cpp">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClCompile Include="..\Pt-Forms\demo\Main.cpp">
+      <Filter>Pt-Forms\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\demo\MainWindow.cpp">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClCompile Include="..\Pt-Forms\demo\MainWindow.cpp">
+      <Filter>Pt-Forms\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\demo\PainterDemo.cpp">
-      <Filter>Pt-Hmi\demo</Filter>
+    <ClCompile Include="..\Pt-Forms\demo\PainterDemo.cpp">
+      <Filter>Pt-Forms\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-gbm\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-gbm\ApplicationImpl.cpp">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-gbm\InputDevice.cpp">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-gbm\InputDevice.cpp">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-gbm\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-gbm\MainWindowImpl.cpp">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-gbm\PainterImpl.cpp">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-gbm\PainterImpl.cpp">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-gbm\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-gbm\PaintSurfaceImpl.cpp">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-gbm\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\egl-gbm</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-gbm\ScreenImpl.cpp">
+      <Filter>Pt-Forms\egl-gbm</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-test\Display.cpp">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-test\Display.cpp">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-test\main.cpp">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-test\main.cpp">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-test\Matrix.cpp">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-test\Matrix.cpp">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-test\RenderScreen.cpp">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-test\RenderScreen.cpp">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-test\ShaderProgram.cpp">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-test\ShaderProgram.cpp">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-test\Shape.cpp">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-test\Shape.cpp">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-test\SolidRect.cpp">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-test\SolidRect.cpp">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-test\Texture.cpp">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-test\Texture.cpp">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\egl-test\TextureRect.cpp">
-      <Filter>Pt-Hmi\egl-test</Filter>
+    <ClCompile Include="..\Pt-Forms\egl-test\TextureRect.cpp">
+      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\gdiplus\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClCompile Include="..\Pt-Forms\gdiplus\ApplicationImpl.cpp">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\gdiplus\MainWindowImpl.cpp">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClCompile Include="..\Pt-Forms\gdiplus\MainWindowImpl.cpp">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\gdiplus\PixmapSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClCompile Include="..\Pt-Forms\gdiplus\PixmapSurfaceImpl.cpp">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\gdiplus\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\gdiplus</Filter>
+    <ClCompile Include="..\Pt-Forms\gdiplus\ScreenImpl.cpp">
+      <Filter>Pt-Forms\gdiplus</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\win32\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClCompile Include="..\Pt-Forms\win32\ApplicationImpl.cpp">
+      <Filter>Pt-Forms\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\win32\PaintContext.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClCompile Include="..\Pt-Forms\win32\PaintContext.cpp">
+      <Filter>Pt-Forms\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\win32\PixmapImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClCompile Include="..\Pt-Forms\win32\PixmapImpl.cpp">
+      <Filter>Pt-Forms\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\win32\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClCompile Include="..\Pt-Forms\win32\ScreenImpl.cpp">
+      <Filter>Pt-Forms\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\win32\WindowImpl.cpp">
-      <Filter>Pt-Hmi\win32</Filter>
+    <ClCompile Include="..\Pt-Forms\win32\WindowImpl.cpp">
+      <Filter>Pt-Forms\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\sdl\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\sdl</Filter>
+    <ClCompile Include="..\Pt-Forms\sdl\ApplicationImpl.cpp">
+      <Filter>Pt-Forms\sdl</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\sdl\ScreenImpl.cpp">
-      <Filter>Pt-Hmi\sdl</Filter>
+    <ClCompile Include="..\Pt-Forms\sdl\ScreenImpl.cpp">
+      <Filter>Pt-Forms\sdl</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Http\Authenticator.cpp">
       <Filter>Pt-Http</Filter>
@@ -5621,8 +5621,8 @@
     <ClCompile Include="..\Pt-XmlRpc\tests\RpcBenchServer.cpp">
       <Filter>Pt-XmlRpc\tests</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Hmi\Control.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\Pt-Forms\Control.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
