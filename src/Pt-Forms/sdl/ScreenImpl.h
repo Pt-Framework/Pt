@@ -74,7 +74,7 @@ class ScreenImpl : public Form
         WindowManager& windowManager();
 
         
-        void setCapture(Visual* capture);
+        void setCapture(Widget* capture);
 
     //
     // Responder
@@ -89,10 +89,10 @@ class ScreenImpl : public Form
         virtual bool onKeyEvent(const KeyEvent& ev);
 
     //
-    // Visual
+    // Widget
     //
     protected:
-        virtual Visual* onHitTest(const Gfx::PointF& pos);
+        virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 

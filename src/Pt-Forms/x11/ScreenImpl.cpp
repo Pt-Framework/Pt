@@ -114,10 +114,10 @@ Gfx::PointF ScreenImpl::fromFrame(const WindowImpl& frame,
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Visual
+// Widget
 ///////////////////////////////////////////////////////////////////////
 
-Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
+Widget* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
     // TODO: stacking order, visibility...
     //       XQueryPointer
@@ -130,7 +130,7 @@ Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
 
         Gfx::PointF pos = toFrame(*frame, p);
 
-        Visual* hit = win->hitTest(pos);
+        Widget* hit = win->hitTest(pos);
         if(hit)
             return hit;
     }
@@ -309,7 +309,7 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //}
 
 
-void ScreenImpl::setCapture(Visual* capture)
+void ScreenImpl::setCapture(Widget* capture)
 {
     //std::clog << "RELEASE POINTER " << std::endl;
     Display* display = Application::instance().impl()->display();
@@ -459,7 +459,7 @@ void ScreenImpl::onEnable(bool e)
 
 void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    ev.widget()->processEvent(ev);
 }
 
 
@@ -472,7 +472,7 @@ bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
 
 void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    ev.widget()->processEvent(ev);
 }
 
 
@@ -485,7 +485,7 @@ bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
 
 void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    ev.widget()->processEvent(ev);
 }
 
 
@@ -498,9 +498,9 @@ bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
 
 void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        ev.visual()->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        ev.widget()->processEvent(ev);
 
     // TODO: dispatch to active Window handle
 }

@@ -31,7 +31,7 @@
 
 #include "posix/Selector.h"
 
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Forms/MouseEvent.h>
 #include <Pt/Forms/KeyEvent.h>
 #include <Pt/System/EventLoop.h>

@@ -106,7 +106,7 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
 
         virtual void onCancel();
 
-        virtual Pt::Forms::Visual* onFindMenu(const Pt::Gfx::PointF& screenPos);
+        virtual Pt::Forms::Widget* onFindMenu(const Pt::Gfx::PointF& screenPos);
 
     protected:
         void onProcessMouseEvent(const Pt::Forms::MouseEvent& ev);

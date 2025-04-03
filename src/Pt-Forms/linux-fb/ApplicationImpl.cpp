@@ -204,7 +204,7 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
     Gfx::PointF pos = ev.position() / scaling;
     
     MouseEvent mev = ev;
-    mev.setVisual(&screen);
+    mev.setWidget(&screen);
     mev.setPosition(pos);
 
     Application::instance().processEvent(mev);
@@ -218,7 +218,7 @@ void ApplicationImpl::onScrollEvent(const ScrollEvent& ev)
     Screen& screen = Application::instance().screen();
 
     ScrollEvent sev = ev;
-    sev.setVisual(&screen);
+    sev.setWidget(&screen);
 
     Application::instance().processEvent(sev);
 }
@@ -235,7 +235,7 @@ void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
     pos /= scaling;
     
     TouchEvent tev = ev;
-    tev.setVisual(&screen);
+    tev.setWidget(&screen);
     tev.setPosition(pos);
 
     Application::instance().processEvent(tev);
@@ -250,7 +250,7 @@ void ApplicationImpl::onKeyEvent(const KeyEvent& ev)
     Screen& screen = Application::instance().screen();
 
     KeyEvent kev = ev;
-    kev.setVisual(&screen);
+    kev.setWidget(&screen);
     Application::instance().processEvent(kev);
 }
 

@@ -49,13 +49,13 @@ Popup::~Popup()
 }
 
 
-Visual* Popup::anchor()
+Widget* Popup::anchor()
 {
     return _anchor;
 }
 
 
-void Popup::setAnchor(Visual* anchor)
+void Popup::setAnchor(Widget* anchor)
 {
     if(_anchor)
         removePeer(*_anchor);
@@ -68,18 +68,18 @@ void Popup::setAnchor(Visual* anchor)
 }
 
 
-void Popup::onAttachPeer(Visual& peer)
+void Popup::onAttachPeer(Widget& peer)
 {
-    Visual::onAttachPeer(peer);
+    Widget::onAttachPeer(peer);
 }
 
 
-void Popup::onDetachPeer(Visual& peer)
+void Popup::onDetachPeer(Widget& peer)
 {
     if(_anchor == & peer)
         _anchor = 0;
 
-    Visual::onDetachPeer(peer);
+    Widget::onDetachPeer(peer);
 }
 
 
@@ -101,7 +101,7 @@ void Popup::onProcessMouseEvent(const MouseEvent& ev)
 {
     if(_anchor)
     {
-        Visual* hit = Application::instance().screen().hitTest( ev.position() );
+        Widget* hit = Application::instance().screen().hitTest( ev.position() );
         if(hit)
         {
             if( hit == _anchor || hit->isDescendantOf(*_anchor) )
@@ -120,7 +120,7 @@ void Popup::onProcessTouchEvent(const TouchEvent& ev)
 {
     if(_anchor)
     {
-        Visual* hit = Application::instance().screen().hitTest( ev.position() );        
+        Widget* hit = Application::instance().screen().hitTest( ev.position() );        
         if(hit)
         {
             if( hit == _anchor || hit->isDescendantOf(*_anchor) )

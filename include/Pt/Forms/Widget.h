@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_VISUAL_H
-#define PT_FORMS_VISUAL_H
+#ifndef PT_FORMS_WIDGET_H
+#define PT_FORMS_WIDGET_H
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Responder.h>
@@ -57,18 +57,18 @@ class LeaveEvent;
 class KeyEvent;
 
 
-class PT_FORMS_API Visual : public Responder
-                        , public Pt::Connectable
+class PT_FORMS_API Widget : public Responder
+                          , public Pt::Connectable
 {
     protected:
-        Visual();
+        Widget();
 
     public:
-        virtual ~Visual();
+        virtual ~Widget();
         
         /** @brief Returns the ID.
         */
-        Pt::uint64_t vid() const;
+        Pt::uint64_t id() const;
 
         /** @brief Returns the name.
         */
@@ -85,23 +85,23 @@ class PT_FORMS_API Visual : public Responder
     public:
         /** @brief Returns the parent.
         */
-        Visual* parent();
+        Widget* parent();
 
         /** @brief Returns the parent.
         */
-        const Visual* parent() const;
+        const Widget* parent() const;
 
         /** @brief Returns true if an descendant of @top.
         */
-        bool isDescendantOf(const Visual& top) const;
+        bool isDescendantOf(const Widget& top) const;
 
         /** @brief Returns true if an ancestor of @child.
         */
-        bool isAncestorOf(const Visual& child) const;
+        bool isAncestorOf(const Widget& child) const;
 
         /** @brief Returns the descendant hit at a position.
         */
-        Visual* hitTest(const Gfx::PointF& pos);
+        Widget* hitTest(const Gfx::PointF& pos);
 
         /** @brief Converts to parent coordinate.
         */
@@ -122,11 +122,11 @@ class PT_FORMS_API Visual : public Responder
     public:
         /** @brief Adds a peer.
         */
-        void addPeer(Visual& peer);
+        void addPeer(Widget& peer);
 
         /** @brief Removes a peer.
         */
-        void removePeer(Visual& peer);
+        void removePeer(Widget& peer);
 
     public:
         /** @brief Invalidates the state.
@@ -150,20 +150,20 @@ class PT_FORMS_API Visual : public Responder
         const Gfx::Scaling& scaling() const;
 
     public:
-        /** @brief Indicates whether the visual is visible.
+        /** @brief Indicates whether the widget is visible.
         */
         bool isVisible() const;
         
-        /** @brief Shows the visual.
+        /** @brief Shows the widget.
         */
         virtual void show(bool b = true);
 
     public:
-        /** @brief Indicates whether the visual is enabled.
+        /** @brief Indicates whether the widget is enabled.
         */
         bool isEnabled() const;
 
-        /** @brief Enables the visual.
+        /** @brief Enables the widget.
         */
         virtual void enable(bool isEnable = true);
 
@@ -175,7 +175,7 @@ class PT_FORMS_API Visual : public Responder
         */
         const Gfx::PointF& position() const;
 
-        /** @brief Moves the visual to a position.
+        /** @brief Moves the widget to a position.
         */
         virtual void move(const Gfx::PointF& pos);
 
@@ -210,7 +210,7 @@ class PT_FORMS_API Visual : public Responder
         void setMaximumHeight(double h);
 
 
-        /** @brief Resizes the visual to a new size.
+        /** @brief Resizes the widget to a new size.
         */
         virtual void resize(const Gfx::SizeF& s);
 
@@ -234,9 +234,9 @@ class PT_FORMS_API Visual : public Responder
         Pt::Signal<const Pt::Event&>& eventReceived();
 
     protected:
-        virtual void onSetParent(Visual* visual);
+        virtual void onSetParent(Widget* parent);
 
-        virtual Visual* onHitTest(const Gfx::PointF& pos);
+        virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const = 0;
 
@@ -247,9 +247,9 @@ class PT_FORMS_API Visual : public Responder
         virtual Gfx::PointF onFromGlobal(const Gfx::PointF& pos) const;
 
     protected:
-        virtual void onAttachPeer(Visual& peer);
+        virtual void onAttachPeer(Widget& peer);
 
-        virtual void onDetachPeer(Visual& peer);
+        virtual void onDetachPeer(Widget& peer);
 
     protected:
         // onRepaint
@@ -358,11 +358,11 @@ class PT_FORMS_API Visual : public Responder
     private:
         Pt::Signal<const Pt::Event&> _dispatcher;
 
-        Pt::uint64_t          _vid;
+        Pt::uint64_t          _id;
         std::string           _name;
 
-        Visual*               _parent;
-        std::vector<Visual*>  _peers;
+        Widget*               _parent;
+        std::vector<Widget*>  _peers;
 
         Responder*            _nextResponder;
 
@@ -381,7 +381,7 @@ class PT_FORMS_API Visual : public Responder
         Gfx::SizeF            _maximumSize;
 
         bool                  _hasCursor;
-        Forms::Cursor           _cursor;
+        Forms::Cursor         _cursor;
 
         void*                 _r1;
 };

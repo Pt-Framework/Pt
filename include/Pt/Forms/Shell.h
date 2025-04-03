@@ -68,10 +68,10 @@ class PT_FORMS_API Shell : public Control
         void setContent(Control* control);
 
     //
-    // Visual
+    // Widget
     //
     protected:
-       Visual* onHitTest(const Gfx::PointF& p);
+       Widget* onHitTest(const Gfx::PointF& p);
 
     //
     // Control
@@ -120,7 +120,7 @@ class PT_FORMS_API Shell : public Control
     private:
         ShellWM                      _wm;
         Control*                      _content;
-        Visual*                      _pointer;
+        Widget*                      _pointer;
 };
 
 } // namespace

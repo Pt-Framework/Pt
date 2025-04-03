@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_WINDOWMANAGER_H
 #define PT_FORMS_WINDOWMANAGER_H
 
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Gfx/Size.h>
 
@@ -40,7 +40,7 @@ namespace Forms {
 class Window;
 class WindowFrame;
 
-class WindowManager : public Visual
+class WindowManager : public Widget
 {
     friend class Window;
 

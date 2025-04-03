@@ -79,7 +79,7 @@ class ScreenImpl : public WindowManager
         WindowManager& windowManager();
 
 
-        void setCapture(Visual* capture);
+        void setCapture(Widget* capture);
 
     protected:
         Gfx::PointF toFrame(const WindowImpl& w, 
@@ -101,10 +101,10 @@ class ScreenImpl : public WindowManager
         virtual bool onKeyEvent(const KeyEvent& ev);
 
     //
-    // Visual
+    // Widget
     //
     protected:
-        virtual Visual* onHitTest(const Gfx::PointF& pos);
+        virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 

@@ -53,7 +53,7 @@ class Popup;
 
 class PT_FORMS_API Application : public Pt::System::Application
 {
-    friend class Visual;
+    friend class Widget;
     friend class Popup;
     friend class Screen;
 
@@ -100,7 +100,7 @@ class PT_FORMS_API Application : public Pt::System::Application
 
         Pt::uint64_t makeId();
 
-        Visual* findVisual(Pt::uint64_t id);
+        Widget* findWidget(Pt::uint64_t id);
 
         // TODO: this might be the same as loop().waitNext()
         void nextEvent();
@@ -121,12 +121,12 @@ class PT_FORMS_API Application : public Pt::System::Application
         */
         void sendMouseEvent(const MouseEvent& ev);
 
-        Visual* capture() const;
+        Widget* capture() const;
 
     protected:
-        void onSetPointer(Visual& v, bool isPointer);
+        void onSetPointer(Widget& widget, bool isPointer);
 
-        void onRequestCapture(Visual& target, bool capture);
+        void onRequestCapture(Widget& target, bool capture);
 
         void onShowPopup(Popup& w, bool transient);
 
@@ -137,9 +137,9 @@ class PT_FORMS_API Application : public Pt::System::Application
         void onClosePopups(const Gfx::PointF& screenPos);
 
     private:
-        void registerVisual(Visual& visual);
+        void registerWidget(Widget& widget);
 
-        void unregisterVisual(Visual& visual);
+        void unregisterWidget(Widget& widget);
 
     private:
         void onDispatchMouseEvent(const MouseEvent& ev);
@@ -152,7 +152,7 @@ class PT_FORMS_API Application : public Pt::System::Application
         void onProcessTouchEvent(const TouchEvent& ev);
 
 
-        void onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
+        void onDetectScroll(Widget* widget, const Gfx::PointF& screenPos,
                             bool isPress, bool isPressed);
 
 
@@ -236,13 +236,13 @@ class PT_FORMS_API Application : public Pt::System::Application
         void onProcessWindowStateEvent(const WindowStateEvent& ev);
 
     private:
-        typedef std::map<Pt::uint64_t, Visual*> VisualMap;
+        typedef std::map<Pt::uint64_t, Widget*> WidgetMap;
 
         ApplicationImpl*             _impl;
         Pt::Signal<const Pt::Event&> _eventReceived;
         Screen*                      _mainScreen;
         Pt::uint64_t                 _lastId;
-        VisualMap                    _visuals;
+        WidgetMap                    _widgets;
 
         Style                        _style;
         StyleOptions                 _styleOptions;
@@ -251,7 +251,7 @@ class PT_FORMS_API Application : public Pt::System::Application
         InputMethod*                 _inputMethod;
         
         std::list<Popup*>            _popups;
-        std::list<Visual*>           _capture;
+        std::list<Widget*>           _capture;
                                      
         Gfx::PointF                  _scrollFrom;
         bool                         _onScroll;

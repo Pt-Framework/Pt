@@ -84,15 +84,15 @@ WindowManager& Screen::windowManager()
 }
 
 
-Visual* Screen::underPointer()
+Widget* Screen::underPointer()
 {
     return _pointer;
 }
 
 
-void Screen::setPointer(Visual* visual)
+void Screen::setPointer(Widget* widget)
 {
-    if( _pointer == visual )
+    if( _pointer == widget )
         return;
 
     if(_pointer)
@@ -102,28 +102,28 @@ void Screen::setPointer(Visual* visual)
         _pointer->processEvent(ev);
     }
 
-    _pointer = visual;
+    _pointer = widget;
 
     if(_pointer)
     {
-        //std::clog << "POINTER ENTER: " << typeid(*visual).name() << std::endl;
+        //std::clog << "POINTER ENTER: " << typeid(*widget).name() << std::endl;
         EnterEvent ev( *_pointer );
         _pointer->processEvent(ev);
     }
 }
 
 
-void Screen::setPointer(Visual& visual, bool isPointer)
+void Screen::setPointer(Widget& widget, bool isPointer)
 {
     if( ! isPointer )
     {
-        if( _pointer == &visual )
+        if( _pointer == &widget )
             setPointer(0);
     }
 
     if(isPointer)
     {
-        setPointer(&visual);
+        setPointer(&widget);
     }
 }
 
@@ -161,15 +161,15 @@ void Screen::onShow(ScreenImpl& s, bool isShow)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Visual
+// Widget
 ///////////////////////////////////////////////////////////////////////
 
-Visual* Screen::onHitTest(const Gfx::PointF& p)
+Widget* Screen::onHitTest(const Gfx::PointF& p)
 {
     // TODO: convert to WM coordinates
     Gfx::PointF pos = p;
     
-    Visual* hit = _impl->hitTest(pos);
+    Widget* hit = _impl->hitTest(pos);
     if(hit)
         return hit;
 

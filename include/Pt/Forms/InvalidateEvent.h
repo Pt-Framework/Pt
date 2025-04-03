@@ -31,7 +31,7 @@
 #define Pt_Forms_InvalidateEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
@@ -42,9 +42,9 @@ namespace Forms {
 class PT_FORMS_API InvalidateEvent : public Pt::BasicEvent<InvalidateEvent>
 {
     public:
-        explicit InvalidateEvent(Visual& v)
-        : _vid( v.vid() )
-        , _visual(&v)
+        explicit InvalidateEvent(Widget& widget)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         {
         }
 
@@ -52,19 +52,19 @@ class PT_FORMS_API InvalidateEvent : public Pt::BasicEvent<InvalidateEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
 };
 
 } // namespace

@@ -32,7 +32,7 @@
 #define Pt_Forms_ScrollEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
@@ -51,32 +51,32 @@ class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
         };
 
         ScrollEvent()
-        : _vid(0)
-        , _visual(0)
+        : _widgetId_(0)
+        , _widget(0)
         , _wheel(Vertical)
         , _delta(0)
         { }
 
-        explicit ScrollEvent(Visual& v)
-        : _vid( v.vid() )
-        , _visual(&v)
+        explicit ScrollEvent(Widget& widget)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _wheel(Vertical)
         , _delta(0)
         { }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
-        void setVisual(Visual* v)
+        void setWidget(Widget* widget)
         {
-            _visual = v;
+            _widget = widget;
         }
 
         Pt::uint32_t wheel() const
@@ -96,8 +96,8 @@ class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
         }
 
     private:
-        Pt::uint64_t  _vid;
-        Visual*       _visual;
+        Pt::uint64_t  _widgetId_;
+        Widget*       _widget;
         Pt::uint32_t  _wheel;
         double        _delta;
 };

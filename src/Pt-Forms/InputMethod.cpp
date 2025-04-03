@@ -71,7 +71,7 @@ Window* InputMethod::activeWindow()
 
 void InputMethod::begin(Control& control)
 {
-    _receiver = control.vid();
+    _receiver = control.id();
 
     if(_isVisible)
         return;
@@ -93,13 +93,13 @@ void InputMethod::finish()
 }
 
 
-Visual* InputMethod::receiver() const
+Widget* InputMethod::receiver() const
 {
     if(_receiver == 0)
         return 0;
 
-    Visual* visual = Application::instance().findVisual(_receiver);
-    return visual;
+    Widget* widget = Application::instance().findWidget(_receiver);
+    return widget;
 }
 
 
@@ -108,11 +108,11 @@ void InputMethod::sendEvent(const KeyEvent& ev)
     if(_receiver == 0)
         return;
 
-    Visual* visual = Application::instance().findVisual(_receiver);
-    if(visual)
+    Widget* widget = Application::instance().findWidget(_receiver);
+    if(widget)
     {
         _keyEvent = ev;
-        _keyEvent.setVisual(visual);
+        _keyEvent.setWidget(widget);
          Application::instance().loop().commitEvent(_keyEvent);
     }
 }

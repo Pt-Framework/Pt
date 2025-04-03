@@ -44,14 +44,14 @@ class PT_FORMS_API Popup : public Window
 		
         virtual ~Popup();
 
-        Visual* anchor();
+        Widget* anchor();
 
-        void setAnchor(Visual* anchor = 0);
+        void setAnchor(Widget* anchor = 0);
 
     protected:
-        virtual void onAttachPeer(Visual& peer);
+        virtual void onAttachPeer(Widget& peer);
 
-        virtual void onDetachPeer(Visual& peer);
+        virtual void onDetachPeer(Widget& peer);
 
     protected:
         virtual void onShowEvent(const ShowEvent& ev);
@@ -63,7 +63,7 @@ class PT_FORMS_API Popup : public Window
         virtual void onProcessTouchEvent(const TouchEvent& ev);
 
     private:
-        Visual* _anchor;
+        Widget* _anchor;
 };
 
 } // namespace

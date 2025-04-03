@@ -34,7 +34,7 @@
 #include "MouseDevice.h"
 #include "FrameBuffer.h"
 
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/DateTime.h>

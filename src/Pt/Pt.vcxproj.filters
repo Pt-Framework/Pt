@@ -1860,9 +1860,6 @@
     <ClInclude Include="..\..\include\Pt\Forms\View.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Visual.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\Window.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
@@ -2929,6 +2926,9 @@
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\Control.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Widget.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
   </ItemGroup>
@@ -4829,9 +4829,6 @@
     <ClCompile Include="..\Pt-Forms\View.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Forms\Visual.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Forms\Window.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
@@ -5622,6 +5619,9 @@
       <Filter>Pt-XmlRpc\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\Control.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\Widget.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
   </ItemGroup>

@@ -135,17 +135,17 @@ void Shell::onRemoveControl(Control& control)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Visual
+// Widget
 ///////////////////////////////////////////////////////////////////////
 
-Visual* Shell::onHitTest(const Gfx::PointF& p)
+Widget* Shell::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )
         return 0;
 
     // TODO: convert to WM coordinates
 
-    Visual* hit = _wm.hitTest(p);
+    Widget* hit = _wm.hitTest(p);
     if(hit)
         return hit;
 

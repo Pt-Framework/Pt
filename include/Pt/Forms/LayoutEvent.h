@@ -30,7 +30,7 @@
 #define Pt_Forms_LayoutEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Forms/SizePolicy.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Types.h>
@@ -43,10 +43,10 @@ namespace Forms {
 class PT_FORMS_API RescaleEvent : public Pt::BasicEvent<RescaleEvent>
 {
     public:
-        explicit RescaleEvent(Visual& visual,
+        explicit RescaleEvent(Widget& widget,
                               double scaleFactor = 1.0)
-        : _vid( visual.vid() )
-        , _visual(&visual)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _scaleFactor(scaleFactor)
         {
         }
@@ -55,14 +55,14 @@ class PT_FORMS_API RescaleEvent : public Pt::BasicEvent<RescaleEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         double scaleFactor() const
@@ -71,8 +71,8 @@ class PT_FORMS_API RescaleEvent : public Pt::BasicEvent<RescaleEvent>
         }
 
       private:
-          Pt::uint64_t _vid;
-          Visual*      _visual;
+          Pt::uint64_t _widgetId_;
+          Widget*      _widget;
           double       _scaleFactor;
 };
 
@@ -80,13 +80,13 @@ class PT_FORMS_API RescaleEvent : public Pt::BasicEvent<RescaleEvent>
 class PT_FORMS_API MeasureEvent : public Pt::BasicEvent<MeasureEvent>
 {
     public:
-        MeasureEvent(Pt::uint64_t vid)
-        : _vid(vid)
+        MeasureEvent(Pt::uint64_t widgetId)
+        : _widgetId(widgetId)
         {
         }
 
-        MeasureEvent(Pt::uint64_t vid, const SizePolicy& policy)
-        : _vid(vid)
+        MeasureEvent(Pt::uint64_t widgetId, const SizePolicy& policy)
+        : _widgetId(widgetId)
         , _sizePolicy(policy)
         {
         }
@@ -95,9 +95,9 @@ class PT_FORMS_API MeasureEvent : public Pt::BasicEvent<MeasureEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId;
         }
 
         const SizePolicy& sizePolicy() const
@@ -111,7 +111,7 @@ class PT_FORMS_API MeasureEvent : public Pt::BasicEvent<MeasureEvent>
         }
 
     private:
-        Pt::uint64_t _vid;
+        Pt::uint64_t _widgetId;
         SizePolicy   _sizePolicy;
 };
 
@@ -119,15 +119,15 @@ class PT_FORMS_API MeasureEvent : public Pt::BasicEvent<MeasureEvent>
 class PT_FORMS_API LayoutEvent : public Pt::BasicEvent<LayoutEvent>
 {
     public:
-        LayoutEvent(Visual& v)
-        : _vid( v.vid() )
-        , _visual(&v)
+        LayoutEvent(Widget& widget)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         {
         }
 
-        LayoutEvent(Visual& v, const Gfx::RectF& rect)
-        : _vid( v.vid() )
-        , _visual(&v)
+        LayoutEvent(Widget& widget, const Gfx::RectF& rect)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _rect(rect)
         {
         }
@@ -136,14 +136,14 @@ class PT_FORMS_API LayoutEvent : public Pt::BasicEvent<LayoutEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         const Gfx::RectF& rect() const
@@ -157,8 +157,8 @@ class PT_FORMS_API LayoutEvent : public Pt::BasicEvent<LayoutEvent>
         }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
         Gfx::RectF   _rect;
 };
 

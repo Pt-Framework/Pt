@@ -445,10 +445,10 @@ void Form::onRaiseRequest(Control& control)
 }
 
 //
-// Visual
+// Widget
 //
 
-Visual* Form::onHitTest(const Gfx::PointF& p)
+Widget* Form::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )
         return 0;
@@ -456,7 +456,7 @@ Visual* Form::onHitTest(const Gfx::PointF& p)
     if(_mainControl)
     {
         Gfx::PointF pos = toControl(*_mainControl, p);
-        Visual* hit = _mainControl->hitTest(pos);
+        Widget* hit = _mainControl->hitTest(pos);
         if(hit)
             return hit;
     }
@@ -804,7 +804,7 @@ void Form::onProcessEnterEvent(const EnterEvent& ev)
 
 bool Form::onEnterEvent(const EnterEvent& ev)
 {
-    //std::clog << "ENTER Form: " << name() << " " << vid() << std::endl;
+    //std::clog << "ENTER Form: " << name() << " " << id() << std::endl;
     return Base::onEnterEvent(ev);
 }
 
@@ -817,7 +817,7 @@ void Form::onProcessLeaveEvent(const LeaveEvent& ev)
 
 bool Form::onLeaveEvent(const LeaveEvent& ev )
 {
-    //std::clog << "LEAVE Form: " << name()  << " " << vid() << std::endl;
+    //std::clog << "LEAVE Form: " << name()  << " " << id() << std::endl;
     return Base::onLeaveEvent(ev);
 }
 

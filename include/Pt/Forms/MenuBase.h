@@ -30,7 +30,7 @@
 #define PT_FORMS_MENUBASE_H
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 
 namespace Pt {
 namespace Forms {
@@ -50,7 +50,7 @@ class PT_FORMS_API MenuBase
             onCancel();
         }
 
-        Pt::Forms::Visual* findMenu(const Pt::Gfx::PointF& screenPos)
+        Pt::Forms::Widget* findMenu(const Pt::Gfx::PointF& screenPos)
         {
             return onFindMenu(screenPos);
         }
@@ -102,7 +102,7 @@ class PT_FORMS_API MenuBase
 
         virtual void onCancel() = 0;
 
-        virtual Pt::Forms::Visual* onFindMenu(const Pt::Gfx::PointF& screenPos) = 0;
+        virtual Pt::Forms::Widget* onFindMenu(const Pt::Gfx::PointF& screenPos) = 0;
 
     private:
         MenuBaseItem* _parentItem;

@@ -256,7 +256,7 @@ void Control::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 
 Gfx::PointF Control::onToControl(const Control& control, const Gfx::PointF& pos) const
 {
-    //const Visual* parentView = control.parent();
+    //const Widget* parentView = control.parent();
 
     //if( parentView == this || ! parentView )
         return pos - control.position();
@@ -1109,10 +1109,10 @@ void Control::setPadding(double horiz, double vertical)
 }
 
 //
-// Visual
+// Widget
 //
 
-Visual* Control::onHitTest(const Gfx::PointF& p)
+Widget* Control::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )
         return 0;
@@ -1122,7 +1122,7 @@ Visual* Control::onHitTest(const Gfx::PointF& p)
     {
         Control* control = *it;
         Gfx::PointF pos = toControl(*control, p);
-        Visual* hit = control->hitTest(pos);
+        Widget* hit = control->hitTest(pos);
         if(hit)
             return hit;
     }

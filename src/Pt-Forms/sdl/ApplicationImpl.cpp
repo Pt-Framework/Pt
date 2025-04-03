@@ -212,7 +212,7 @@ void ApplicationImpl::onProcessEvents()
             Gfx::PointF pos(ev.button.x, ev.button.y);
             pos = pos / scaling;
 
-            _mev.setVisual(&screen);
+            _mev.setWidget(&screen);
             _mev.setPosition(pos);
           
             int buttonIdx = ev.button.button;
@@ -236,7 +236,7 @@ void ApplicationImpl::onProcessEvents()
             Gfx::PointF pos(ev.motion.x, ev.motion.y);
             pos = pos / scaling;
 
-            _mev.setVisual(&screen);
+            _mev.setWidget(&screen);
             _mev.setPosition(pos);
             _mev.setMove();
 
@@ -282,7 +282,7 @@ void ApplicationImpl::onProcessEvents()
             else
                 _keyEvent.setRelease(key, ch);
 
-            _keyEvent.setVisual(&screen);
+            _keyEvent.setWidget(&screen);
 
             Application::instance().processEvent(_keyEvent);
         }

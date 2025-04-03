@@ -69,7 +69,7 @@ class PT_FORMS_API MenuBar : public Control
 
     protected:
 
-        virtual Pt::Forms::Visual* onFindMenu(const Pt::Gfx::PointF& screenPos);
+        virtual Pt::Forms::Widget* onFindMenu(const Pt::Gfx::PointF& screenPos);
 
         virtual void onAddMenu(MenuMenuItem& item);
 

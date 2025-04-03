@@ -274,7 +274,7 @@ void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
         return;
 
     KeyEvent kev = ev;
-    kev.setVisual(window);
+    kev.setWidget(window);
     commitEvent(kev);
 }
 
@@ -295,7 +295,7 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 
     MouseEvent mev = ev;
     mev.setPosition(pos);
-    mev.setVisual(w);
+    mev.setWidget(w);
     
     //if( ! _pointerInWindow )
     //{
@@ -722,7 +722,7 @@ void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
     else
         _keyEvent.setRelease(key, wc); 
 
-    _keyEvent.setVisual(&w);
+    _keyEvent.setWidget(&w);
     //commitEvent(_keyEvent);
 
     Application::instance().processEvent(_keyEvent);
@@ -771,7 +771,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     pos /= w.scaleFactor();
     
     _mouseEvent.setPosition( w.toGlobal(pos) );
-    _mouseEvent.setVisual(&w);
+    _mouseEvent.setWidget(&w);
 
     WindowImpl* impl = static_cast<WindowImpl*>( w.frame() );
 

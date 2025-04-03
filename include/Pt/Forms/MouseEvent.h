@@ -32,7 +32,7 @@
 #define Pt_Forms_MouseEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Event.h>
 
@@ -121,37 +121,37 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
         };
 
         explicit MouseEvent()
-        : _vid(0)
-        , _visual(0)
+        : _widgetId_(0)
+        , _widget(0)
         , _pos(0, 0)
         , _action(Move)
         , _buttonState(0)
         , _button(0)
         { }
 
-        explicit MouseEvent(Visual& v)
-        : _vid( v.vid() )
-        , _visual(&v)
+        explicit MouseEvent(Widget& widget)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _pos(0, 0)
         , _action(Move)
         , _buttonState(0)
         , _button(0)
         { }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
-        void setVisual(Visual* v)
+        void setWidget(Widget* widget)
         {
-            _visual = v;
-            _vid = v ? v->vid() : 0;
+            _widget = widget;
+            _widgetId_ = widget ? widget->id() : 0;
         }
         
         const Gfx::PointF& position() const
@@ -246,8 +246,8 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
         }
 
     private:
-        Pt::uint64_t  _vid;
-        Visual*       _visual;
+        Pt::uint64_t  _widgetId_;
+        Widget*       _widget;
         Gfx::PointF   _pos;
         Action        _action;
         Pt::uint32_t  _buttonState;

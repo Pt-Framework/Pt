@@ -275,15 +275,15 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Visual
+// Widget
 ///////////////////////////////////////////////////////////////////////
 
-Visual* Window::onHitTest(const Gfx::PointF& p)
+Widget* Window::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) || ! isVisible() )
         return 0;
 
-    Visual* hit = Form::onHitTest(p);
+    Widget* hit = Form::onHitTest(p);
     if(hit)
         return hit;
 
@@ -548,7 +548,7 @@ void Window::showModal()
 
         w->enable(true);
 
-        if( activeWindow && activeWindow->vid() == w->vid() )
+        if( activeWindow && activeWindow->id() == w->id() )
             activeWindow->activate();
     }
 }
@@ -776,7 +776,7 @@ bool Window::onKeyEvent(const KeyEvent& ev)
 
 bool Window::onEnterEvent(const EnterEvent& ev)
 {
-    //std::clog << "ENTER: " << _title << " " << vid() << std::endl;
+    //std::clog << "ENTER: " << _title << " " << id() << std::endl;
     Application::instance().setCursor( &Cursor::defaultCursor() );
     return Base::onEnterEvent(ev);
 }
@@ -784,7 +784,7 @@ bool Window::onEnterEvent(const EnterEvent& ev)
 
 bool Window::onLeaveEvent(const LeaveEvent& ev )
 {
-    //std::clog << "LEAVE: " << _title << " " << vid() << std::endl;
+    //std::clog << "LEAVE: " << _title << " " << id() << std::endl;
     return Base::onLeaveEvent(ev);
 }
 

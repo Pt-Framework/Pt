@@ -30,7 +30,7 @@
 #define Pt_Forms_EnterEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
@@ -41,9 +41,9 @@ namespace Forms {
 class EnterEvent : public Pt::BasicEvent<EnterEvent>
 {
     public:
-        EnterEvent(Visual& v)
-        : _vid( v.vid() )
-        , _visual(&v)
+        EnterEvent(Widget& widget)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _reserved0(0)
         , _reserved1(0)
         {
@@ -53,14 +53,14 @@ class EnterEvent : public Pt::BasicEvent<EnterEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         void* r0()
@@ -70,8 +70,8 @@ class EnterEvent : public Pt::BasicEvent<EnterEvent>
         { return _reserved1; }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
         void*        _reserved0;
         Pt::uint64_t _reserved1;
 };

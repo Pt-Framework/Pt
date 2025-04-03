@@ -48,7 +48,7 @@ namespace Forms {
 
 class Window;
 class Control;
-class Visual;
+class Widget;
 
 class Selector : public System::Selector
 {

@@ -280,7 +280,7 @@ void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
         return;
 
     KeyEvent kev = ev;
-    kev.setId( window->vid() );
+    kev.setId( window->id() );
     commitEvent(kev);
 }
 
@@ -301,7 +301,7 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 
     MouseEvent mev = ev;
     mev.setPosition(pos);
-    mev.setId( w->vid() );
+    mev.setId( w->id() );
     
     if( ! _pointerInWindow )
     {
@@ -512,7 +512,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
         {
             int delta = GET_WHEEL_DELTA_WPARAM(wparam);
 
-            ScrollEvent sev( w->vid() );
+            ScrollEvent sev( w->id() );
             sev.set(ScrollEvent::Vertical, (delta/WHEEL_DELTA)*20);
 
             commitEvent(sev);
@@ -630,7 +630,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, UINT msg,
 
 void ApplicationImpl::onShow(Window& w,  bool v)
 {
-    ShowEvent sev(w.vid(), v);
+    ShowEvent sev(w.id(), v);
     commitEvent( sev );
 
     w.invalidate();
@@ -639,13 +639,13 @@ void ApplicationImpl::onShow(Window& w,  bool v)
 
 bool ApplicationImpl::onClose(Window& w)
 {  
-    Pt::uint64_t id =  w.vid();
+    Pt::uint64_t id =  w.id();
 
     CloseEvent ev(id);
     w.processEvent(ev);
 
-    const Visual* v = Application::instance().findVisual(id);
-    if( ! v )
+    const Widget* widget = Application::instance().findWidget(id);
+    if( ! widget )
         return true;
         
     bool isClosed = ! w.isClosed();
@@ -655,14 +655,14 @@ bool ApplicationImpl::onClose(Window& w)
 
 void ApplicationImpl::onActivate(Window& w, bool a)
 {
-    ActivateEvent aev( w.vid(), a );
+    ActivateEvent aev( w.id(), a );
     commitEvent(aev);
 }
 
 
 void ApplicationImpl::onEnable(Window& w, bool e)
 {
-    EnableEvent eev( w.vid(), e );
+    EnableEvent eev( w.id(), e );
     commitEvent( eev );
 
     w.invalidate();
@@ -720,7 +720,7 @@ void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
     else
         _keyEvent.setRelease(key, wc); 
 
-    _keyEvent.setId( w.vid() );
+    _keyEvent.setId( w.id() );
     commitEvent(_keyEvent);
 }
 
@@ -767,7 +767,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
                                 yPos / scaling));
     
     _mouseEvent.setPosition(pos);
-    _mouseEvent.setId( w.vid() );
+    _mouseEvent.setId( w.id() );
     
     if( ! _pointerInWindow )
     {
@@ -794,7 +794,7 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
     Gfx::PointF pos(x, y);
     pos = w.toLogical(pos);
 
-    MoveEvent ev(w.vid(), pos);
+    MoveEvent ev(w.id(), pos);
     commitEvent( ev );
 }
 
@@ -827,7 +827,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
     if(w.state() != wstate)
     {
-        WindowStateEvent wse(w.vid(), wstate);
+        WindowStateEvent wse(w.id(), wstate);
         commitEvent(wse);
     }
 
@@ -837,7 +837,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     Gfx::SizeF to(width, height);
     to = w.toLogical(to);
 
-    ResizeEvent rev(w.vid(), to);
+    ResizeEvent rev(w.id(), to);
     w.processEvent(rev);
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
@@ -854,7 +854,7 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
 
     const Gfx::RectF r(updateRect.left, updateRect.right, updateRect.top, updateRect.bottom);
 
-    PaintEvent ev(w.vid(), r);
+    PaintEvent ev(w.id(), r);
     w.processEvent(ev);
 
     PAINTSTRUCT ps;

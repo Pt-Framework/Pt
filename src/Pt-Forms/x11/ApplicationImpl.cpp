@@ -142,7 +142,7 @@ void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
     // revert_to_return    Returns the current focus state (RevertToParent, RevertToPointerRoot, or RevertToNone).
 
     // KeyEvent kev = ev;
-    // kev.setId( window->vid() );
+    // kev.setId( window->id() );
     // commitEvent(kev);
 }
 
@@ -158,7 +158,7 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 
     MouseEvent mev = ev;
     mev.setPosition(pos);
-    mev.setVisual(w);
+    mev.setWidget(w);
 
     // TODO dispatch synthetic mouse event
 }
@@ -378,7 +378,7 @@ void ApplicationImpl::onMotionNotify(Window& window, XEvent& xev)
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
 
     _mouseEvent.setPosition( window.toGlobal(pos) );
-    _mouseEvent.setVisual(&window);
+    _mouseEvent.setWidget(&window);
     _mouseEvent.setMove();
 
     //std::clog << "MOVE: " << x << ", " << y << std::endl;
@@ -417,7 +417,7 @@ void ApplicationImpl::onButtonPress(Window& window, XEvent& xev)
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition( window.toGlobal(pos) );
     _mouseEvent.setPress(button);
-    _mouseEvent.setVisual(&window);
+    _mouseEvent.setWidget(&window);
 
     //std::clog << "PRESS: " << x << ", " << y << std::endl;
 
@@ -473,7 +473,7 @@ void ApplicationImpl::onButtonRelease(Window& window, XEvent& xev)
     Pt::Gfx::PointF pos(x/scaling, y/scaling);
     _mouseEvent.setPosition( window.toGlobal(pos) );
     _mouseEvent.setRelease(button);
-    _mouseEvent.setVisual(&window);
+    _mouseEvent.setWidget(&window);
 
     //std::clog << "RELEASE: " << x << ", " << y << std::endl;
 
@@ -522,7 +522,7 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
     else
         _keyEvent.setRelease(key, ch);
 
-    _keyEvent.setVisual(&window);
+    _keyEvent.setWidget(&window);
     
     Application::instance().processEvent(_keyEvent);
 }

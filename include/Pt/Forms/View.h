@@ -31,7 +31,7 @@
 #define PT_FORMS_VIEW_H
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Forms/Style.h>
 
 #include <Pt/Gfx/PaintSurface.h>
@@ -48,12 +48,12 @@ class Control;
 class View;
 class ViewCanvas;
 
-class PT_FORMS_API View : public Visual
+class PT_FORMS_API View : public Widget
                       , private Gfx::PaintSurface
 {
     friend class Control;
 
-    typedef Visual Base;
+    typedef Widget Base;
 
     public:
         enum FocusPolicy
@@ -126,7 +126,7 @@ class PT_FORMS_API View : public Visual
         virtual void onRaiseRequest(Control& control);
 
     //
-    // Visual
+    // Widget
     //
     protected:
         virtual void onPaintEvent(const PaintEvent& ev) override;

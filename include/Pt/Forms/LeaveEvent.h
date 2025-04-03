@@ -30,7 +30,7 @@
 #define Pt_Forms_LeaveEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
@@ -41,9 +41,9 @@ namespace Forms {
 class PT_FORMS_API LeaveEvent : public Pt::BasicEvent<LeaveEvent>
 {
     public:
-        LeaveEvent(Visual& v)
-        : _vid( v.vid() )
-        , _visual(&v)
+        LeaveEvent(Widget& widget)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _reserved0(0)
         , _reserved1(0)
         {
@@ -53,14 +53,14 @@ class PT_FORMS_API LeaveEvent : public Pt::BasicEvent<LeaveEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         void* r0()
@@ -70,8 +70,8 @@ class PT_FORMS_API LeaveEvent : public Pt::BasicEvent<LeaveEvent>
         { return _reserved1; }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
         void*        _reserved0;
         Pt::uint64_t _reserved1;
 };

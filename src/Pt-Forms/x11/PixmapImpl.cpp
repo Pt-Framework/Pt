@@ -431,10 +431,10 @@ void PixmapSurfaceImpl::create(const Pt::Gfx::SizeF& size)
                               width, height, depth);
 
 #ifndef _AIX
-    ::Visual* visual = Application::instance().impl()->visual();
+    ::Widget* widget = Application::instance().impl()->widget();
     unsigned int screen = XDefaultScreen(display);
     Colormap colorMap = XDefaultColormap(display, screen);
-    _xftDraw = XftDrawCreate(display, _drawable, visual, colorMap);
+    _xftDraw = XftDrawCreate(display, _drawable, widget, colorMap);
 #endif  
 
     XSync(display, False);
@@ -820,11 +820,11 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF,
         return; 
 
     Display* display = Application::instance().impl()->display();
-    ::Visual* visual = Application::instance().impl()->visual();
+    ::Widget* widget = Application::instance().impl()->widget();
     int depth = Application::instance().impl()->depth();
 
     //std::clog << "XCreateImage" << std::endl;
-    XImage* ximage = XCreateImage(display, visual, depth, ZPixmap, 0, 
+    XImage* ximage = XCreateImage(display, widget, depth, ZPixmap, 0, 
                                   (char*)image.data(), 
                                   image.width(), image.height(), 
                                   32, 0);

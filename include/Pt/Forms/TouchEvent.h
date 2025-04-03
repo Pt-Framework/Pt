@@ -32,7 +32,7 @@
 #define Pt_Forms_TouchEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Event.h>
 
@@ -52,17 +52,17 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
 
     public:
         explicit TouchEvent()
-        : _vid(0)
-        , _visual()
+        : _widgetId(0)
+        , _widget()
         , _pos(0, 0)
         , _action(Move)
         , _trackingId(0)
         , _pressure(1.0)
         { }
 
-        TouchEvent(Visual& v)
-        : _vid( v.vid() )
-        , _visual(&v)
+        TouchEvent(Widget& widget)
+        : _widgetId( widget.id() )
+        , _widget(&widget)
         , _pos(0, 0)
         , _action(Move)
         , _trackingId(0)
@@ -77,25 +77,25 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             _pressure = 1.0;
         }
         
-        void setId(Pt::uint64_t vid)
+        void setId(Pt::uint64_t widgetId)
         {
-            _vid = vid;
+            _widgetId = widgetId;
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
-        void setVisual(Visual* v)
+        void setWidget(Widget* widget)
         {
-            _visual = v;
-            _vid = v ? v->vid() : 0;
+            _widget = widget;
+            _widgetId = widget ? widget->id() : 0;
         }
 
         const Gfx::PointF& position() const
@@ -190,8 +190,8 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         }
 
     private:
-        Pt::uint64_t  _vid;
-        Visual*       _visual;
+        Pt::uint64_t  _widgetId;
+        Widget*       _widget;
         Gfx::PointF   _pos;
         Action        _action;
         Pt::uint32_t  _trackingId;

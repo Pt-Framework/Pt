@@ -127,7 +127,7 @@ Gfx::PointF ScreenImpl::fromFrame(const WindowImpl& frame,
 }
 
 
-void ScreenImpl::setCapture(Visual* capture)
+void ScreenImpl::setCapture(Widget* capture)
 {
     if( ! capture )
     {
@@ -152,10 +152,10 @@ void ScreenImpl::setCapture(Visual* capture)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Visual
+// Widget
 ///////////////////////////////////////////////////////////////////////
 
-Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
+Widget* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
     POINT pnt;
     pnt.x = p.x() * scaleFactor();
@@ -346,11 +346,11 @@ void ScreenImpl::onEnable(bool e)
 
 void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 {
-    Visual* visual = ev.visual();
+    Widget* widget = ev.widget();
 
-    if( visual && visual != this && visual != _parent )
+    if( widget && widget != this && widget != _parent )
     {
-        visual->processEvent(ev);
+        widget->processEvent(ev);
         return;
     }
 
@@ -395,7 +395,7 @@ bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
 
 void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    ev.widget()->processEvent(ev);
 }
 
 
@@ -408,7 +408,7 @@ bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
 
 void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    ev.widget()->processEvent(ev);
 }
 
 
@@ -421,10 +421,10 @@ bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
 
 void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual && visual != this && visual != _parent)
+    Widget* widget = ev.widget();
+    if(widget && widget != this && widget != _parent)
     {
-        visual->processEvent(ev);
+        widget->processEvent(ev);
         return;
     }
 

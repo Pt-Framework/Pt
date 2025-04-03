@@ -31,7 +31,7 @@
 #define Pt_Forms_MoveEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
@@ -43,9 +43,9 @@ namespace Forms {
 class MoveEvent : public Pt::BasicEvent<MoveEvent>
 {
     public:    
-        MoveEvent(Visual& v, const Gfx::PointF& pos)
-        : _vid( v.vid() )
-        , _visual(&v)
+        MoveEvent(Widget& widget, const Gfx::PointF& pos)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _position(pos)
         {
         }
@@ -54,14 +54,14 @@ class MoveEvent : public Pt::BasicEvent<MoveEvent>
         {
         }
         
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         const Gfx::PointF& position() const
@@ -75,8 +75,8 @@ class MoveEvent : public Pt::BasicEvent<MoveEvent>
         }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
         Gfx::PointF _position;
 };
 

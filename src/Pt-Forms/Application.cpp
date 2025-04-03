@@ -284,26 +284,26 @@ Pt::uint64_t Application::makeId()
 }
 
 
-Visual* Application::findVisual(Pt::uint64_t id)
+Widget* Application::findWidget(Pt::uint64_t id)
 {
-    VisualMap::iterator it =_visuals.find(id);
-    return it != _visuals.end() ? it->second : 0; 
+    WidgetMap::iterator it =_widgets.find(id);
+    return it != _widgets.end() ? it->second : 0; 
 }
 
 
-void Application::registerVisual(Visual& visual)
+void Application::registerWidget(Widget& widget)
 {
-    VisualMap::const_iterator it = _visuals.find( visual.vid() );
-    assert( it == _visuals.end() );
+    WidgetMap::const_iterator it = _widgets.find( widget.id() );
+    assert( it == _widgets.end() );
 
-    VisualMap::value_type elem(visual.vid(), &visual);
-    _visuals.insert(elem);
+    WidgetMap::value_type elem(widget.id(), &widget);
+    _widgets.insert(elem);
 }
 
 
-void Application::unregisterVisual(Visual& visual)
+void Application::unregisterWidget(Widget& widget)
 {
-   _visuals.erase( visual.vid() );
+   _widgets.erase( widget.id() );
 }
 
 
@@ -333,9 +333,9 @@ Pt::Signal<const Pt::Event&>&  Application::eventReceived()
 
 void Application::invalidate()
 {
-    VisualMap::iterator it = _visuals.begin();
+    WidgetMap::iterator it = _widgets.begin();
   
-    for( ; it != _visuals.end(); ++it)
+    for( ; it != _widgets.end(); ++it)
     {
         it->second->invalidate();
     }
@@ -354,13 +354,13 @@ void Application::sendMouseEvent(const MouseEvent& ev)
 }
 
 
-void Application::onSetPointer(Visual& v, bool isPointer)
+void Application::onSetPointer(Widget& widget, bool isPointer)
 {
-    _mainScreen->setPointer(v, isPointer);
+    _mainScreen->setPointer(widget, isPointer);
 }
 
 
-Visual* Application::capture() const
+Widget* Application::capture() const
 {
     if( ! _capture.empty() )
         return _capture.back();
@@ -372,9 +372,9 @@ Visual* Application::capture() const
 }
 
 
-void Application::onRequestCapture(Visual& target, bool isCapture)
+void Application::onRequestCapture(Widget& target, bool isCapture)
 {
-    std::list<Visual*>::iterator it = std::find(_capture.begin(), 
+    std::list<Widget*>::iterator it = std::find(_capture.begin(), 
                                                 _capture.end(), &target);
     
     if( it != _capture.end() )
@@ -388,7 +388,7 @@ void Application::onRequestCapture(Visual& target, bool isCapture)
     //else
     //    std::clog << "RELEASE CAPTURE " << typeid(target).name() << std::endl;
 
-    Visual* capture = this->capture();
+    Widget* capture = this->capture();
     _mainScreen->impl()->setCapture(capture);
 }
 
@@ -408,14 +408,14 @@ void Application::onShowPopup(Popup& w, bool transient)
     // else
     //     std::clog << "RELEASE POPUP " << typeid(w).name() << std::endl;
 
-    Visual* capture = this->capture();
+    Widget* capture = this->capture();
     _mainScreen->impl()->setCapture(capture);
 }
 
 
 bool Application::isAnchoredTo(Popup& p, Window& top) const
 {
-  Visual* anchor = p.anchor();
+  Widget* anchor = p.anchor();
   if( ! anchor )
       return false;
 
@@ -445,7 +445,7 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
 {
     Popup* popupHit = 0;
 
-    Visual* hit = _mainScreen->hitTest(screenPos);
+    Widget* hit = _mainScreen->hitTest(screenPos);
     if(hit)
     {
         std::list<Popup*>::iterator pit = _popups.begin();
@@ -458,7 +458,7 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
                 popupHit = popup;
 
             // popup anchor or its content was hit
-            Visual* anchor = popup->anchor();
+            Widget* anchor = popup->anchor();
             if(anchor)
             {
                 if(anchor == hit || anchor->isAncestorOf(*hit) )
@@ -516,8 +516,8 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
 void Application::onDispatchMouseEvent(const MouseEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessMouseEvent(ev);
@@ -528,13 +528,13 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
 {
     //std::clog << "APP MOUSE: " << ev.position().x() << ", " << ev.position().y() << std::endl;
 
-    Visual* visual = ev.visual();
+    Widget* widget = ev.widget();
     Gfx::PointF screenPos = ev.position();
 
     //
     // Detect scroll gestures
     //
-    onDetectScroll( visual, screenPos, ev.isPress(), ev.isPressed() );
+    onDetectScroll( widget, screenPos, ev.isPress(), ev.isPressed() );
 
     //
     // close popups 
@@ -544,7 +544,7 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
         onClosePopups( ev.position() );
     }
 
-    Visual* capture = this->capture();
+    Widget* capture = this->capture();
 
     //
     // IME window
@@ -552,7 +552,7 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
-        Visual* hit = _mainScreen->hitTest(screenPos);
+        Widget* hit = _mainScreen->hitTest(screenPos);
         if(hit)
         {
             if( ime == hit || ime->isAncestorOf(*hit) )
@@ -565,7 +565,7 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
                 else
                 {
                     MouseEvent mev = ev;
-                    mev.setVisual(ime);
+                    mev.setWidget(ime);
                     _mainScreen->processEvent(mev);
                 }
 
@@ -579,8 +579,8 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     //
     if( ev.isPress(MouseEvent::Left) )
     {
-        Visual* hit = _mainScreen->hitTest(screenPos);
-        Visual* receiver = inputMethod().receiver();
+        Widget* hit = _mainScreen->hitTest(screenPos);
+        Widget* receiver = inputMethod().receiver();
         if(hit && receiver)
         {
             bool keepOpen = receiver == hit ||
@@ -607,8 +607,8 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
 void Application::onDispatchTouchEvent(const TouchEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessTouchEvent(ev);
@@ -619,13 +619,13 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
 {
     //std::clog << "APP TOUCH: " << ev.position().x() << ", " << ev.position().y() << std::endl;
 
-    Visual* visual = ev.visual();
+    Widget* widget = ev.widget();
     Gfx::PointF screenPos = ev.position();
 
     //
     // Detect scroll gestures
     //
-    onDetectScroll( visual, screenPos, ev.isPress(), ev.isPressed() );
+    onDetectScroll( widget, screenPos, ev.isPress(), ev.isPressed() );
 
     //
     // close popups 
@@ -635,7 +635,7 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
         onClosePopups( ev.position() );
     }
 
-    Visual* capture = this->capture();
+    Widget* capture = this->capture();
 
     //
     // IME window
@@ -643,7 +643,7 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
-        Visual* hit = _mainScreen->hitTest(screenPos);
+        Widget* hit = _mainScreen->hitTest(screenPos);
         if(hit)
         {
             if( ime == hit || ime->isAncestorOf(*hit) )
@@ -656,7 +656,7 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
                 else
                 {
                     TouchEvent tev = ev;
-                    tev.setVisual(ime);
+                    tev.setWidget(ime);
                     _mainScreen->processEvent(tev);
                 }
 
@@ -670,8 +670,8 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
     //
     if( ev.isPress() )
     {
-        Visual* hit = _mainScreen->hitTest(screenPos);
-        Visual* receiver = inputMethod().receiver();
+        Widget* hit = _mainScreen->hitTest(screenPos);
+        Widget* receiver = inputMethod().receiver();
         if(hit && receiver)
         {
             bool keepOpen = receiver == hit ||
@@ -695,12 +695,12 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
 }
 
 
-void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
+void Application::onDetectScroll(Widget* widget, const Gfx::PointF& screenPos,
                                  bool isPress, bool isPressed)
 {
     const double threshold = 8;
     
-    // TODO: start scroll only if within visual
+    // TODO: start scroll only if within widget
 
     if(isPress)
     {
@@ -723,7 +723,7 @@ void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
             deltaY = screenPos.y() - _scrollFrom.y();
             //std::clog << "SCROLL STARTED: " << deltaY << std::endl;
             
-            ScrollEvent sev(*visual);
+            ScrollEvent sev(*widget);
             sev.set(ScrollEvent::Vertical, deltaY);
             processEvent(sev);
 
@@ -732,7 +732,7 @@ void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
         else if(_onScroll)
         {
             //std::clog << "SCROLLING: " << deltaY << std::endl;
-            ScrollEvent sev(*visual);
+            ScrollEvent sev(*widget);
             sev.set(ScrollEvent::Vertical, deltaY);
             processEvent(sev);
 
@@ -753,8 +753,8 @@ void Application::onDetectScroll(Visual* visual, const Gfx::PointF& screenPos,
 void Application::onDispatchScrollEvent(const ScrollEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessScrollEvent(ev);
@@ -770,8 +770,8 @@ void Application::onProcessScrollEvent(const ScrollEvent& ev)
 void Application::onDispatchEnterEvent(const EnterEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessEnterEvent(ev);
@@ -780,16 +780,16 @@ void Application::onDispatchEnterEvent(const EnterEvent& ev)
 
 void Application::onProcessEnterEvent(const EnterEvent& ev)
 {
-    Visual* visual = ev.visual();
-    visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    widget->processEvent(ev);
 }
 
 
 void Application::onDispatchLeaveEvent(const LeaveEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessLeaveEvent(ev);
@@ -798,16 +798,16 @@ void Application::onDispatchLeaveEvent(const LeaveEvent& ev)
 
 void Application::onProcessLeaveEvent(const LeaveEvent& ev)
 {
-    Visual* visual = ev.visual();
-    visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    widget->processEvent(ev);
 }
 
 
 void Application::onDispatchKeyEvent(const KeyEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessKeyEvent(ev);
@@ -816,10 +816,10 @@ void Application::onDispatchKeyEvent(const KeyEvent& ev)
 
 void Application::onProcessKeyEvent(const KeyEvent& ev)
 {
-    Visual* visual = ev.visual();
+    Widget* widget = ev.widget();
 
-    if(visual)
-        visual->processEvent(ev);
+    if(widget)
+        widget->processEvent(ev);
     else
         _mainScreen->processEvent(ev);
 }
@@ -828,8 +828,8 @@ void Application::onProcessKeyEvent(const KeyEvent& ev)
 void Application::onDispatchInvalidateEvent(const InvalidateEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessInvalidateEvent(ev);
@@ -838,17 +838,17 @@ void Application::onDispatchInvalidateEvent(const InvalidateEvent& ev)
 
 void Application::onProcessInvalidateEvent(const InvalidateEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchLayoutEvent(const LayoutEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessLayoutEvent(ev);
@@ -857,17 +857,17 @@ void Application::onDispatchLayoutEvent(const LayoutEvent& ev)
 
 void Application::onProcessLayoutEvent(const LayoutEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchRescaleEvent(const RescaleEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessRescaleEvent(ev);
@@ -876,17 +876,17 @@ void Application::onDispatchRescaleEvent(const RescaleEvent& ev)
 
 void Application::onProcessRescaleEvent(const RescaleEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchPaintEvent(const PaintEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     //onProcessPaintEvent(ev);
@@ -896,17 +896,17 @@ void Application::onDispatchPaintEvent(const PaintEvent& ev)
 
 void Application::onProcessPaintEvent(const PaintEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchMoveEvent(const MoveEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     processEvent(ev);
@@ -915,17 +915,17 @@ void Application::onDispatchMoveEvent(const MoveEvent& ev)
 
 void Application::onProcessMoveEvent(const MoveEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchResizeEvent(const ResizeEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     processEvent(ev);
@@ -934,17 +934,17 @@ void Application::onDispatchResizeEvent(const ResizeEvent& ev)
 
 void Application::onProcessResizeEvent(const ResizeEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchActivateEvent(const ActivateEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     processEvent(ev);
@@ -953,17 +953,17 @@ void Application::onDispatchActivateEvent(const ActivateEvent& ev)
 
 void Application::onProcessActivateEvent(const ActivateEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchEnableEvent(const EnableEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessEnableEvent(ev);
@@ -972,17 +972,17 @@ void Application::onDispatchEnableEvent(const EnableEvent& ev)
 
 void Application::onProcessEnableEvent(const EnableEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchShowEvent(const ShowEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessShowEvent(ev);
@@ -991,17 +991,17 @@ void Application::onDispatchShowEvent(const ShowEvent& ev)
 
 void Application::onProcessShowEvent(const ShowEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchCloseEvent(const CloseEvent& ev )
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessCloseEvent(ev);
@@ -1010,17 +1010,17 @@ void Application::onDispatchCloseEvent(const CloseEvent& ev )
 
 void Application::onProcessCloseEvent(const CloseEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchFocusEvent(const FocusEvent& ev)
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessFocusEvent(ev);
@@ -1029,17 +1029,17 @@ void Application::onDispatchFocusEvent(const FocusEvent& ev)
 
 void Application::onProcessFocusEvent(const FocusEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 
 void Application::onDispatchWindowStateEvent(const WindowStateEvent& ev )
 {
     // make sure receiver still exists
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-    if( it == _visuals.end() )
+    WidgetMap::iterator it = _widgets.find( ev.widgetId() );
+    if( it == _widgets.end() )
         return;
 
     onProcessWindowStateEvent(ev);
@@ -1048,9 +1048,9 @@ void Application::onDispatchWindowStateEvent(const WindowStateEvent& ev )
 
 void Application::onProcessWindowStateEvent(const WindowStateEvent& ev )
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        visual->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 }
 
 } // namespace

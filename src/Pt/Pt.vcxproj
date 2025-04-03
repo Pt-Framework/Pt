@@ -61,6 +61,7 @@
     <ClInclude Include="..\..\include\Pt\Facets.h" />
     <ClInclude Include="..\..\include\Pt\FixupInfo.h" />
     <ClInclude Include="..\..\include\Pt\Formatter.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Function.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Algorithm.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
@@ -170,7 +171,6 @@
     <ClInclude Include="..\..\include\Pt\Forms\TextBlock.h" />
     <ClInclude Include="..\..\include\Pt\Forms\TouchEvent.h" />
     <ClInclude Include="..\..\include\Pt\Forms\View.h" />
-    <ClInclude Include="..\..\include\Pt\Forms\Visual.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Window.h" />
     <ClInclude Include="..\..\include\Pt\Forms\WindowBase.h" />
     <ClInclude Include="..\..\include\Pt\Forms\WindowFrame.h" />
@@ -1379,6 +1379,7 @@
     <ClCompile Include="..\Pt-Db\Statement.cpp" />
     <ClCompile Include="..\Pt-Db\ValueImpl.cpp" />
     <ClCompile Include="..\Pt-Db\ValueImplTest.cpp" />
+    <ClCompile Include="..\Pt-Forms\Widget.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Format.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Image.cpp" />
@@ -1502,7 +1503,6 @@
     <ClCompile Include="..\Pt-Forms\TabView.cpp" />
     <ClCompile Include="..\Pt-Forms\TextBlock.cpp" />
     <ClCompile Include="..\Pt-Forms\View.cpp" />
-    <ClCompile Include="..\Pt-Forms\Visual.cpp" />
     <ClCompile Include="..\Pt-Forms\win32\ApplicationImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\win32\PaintContext.cpp" />
     <ClCompile Include="..\Pt-Forms\win32\PixmapImpl.cpp" />

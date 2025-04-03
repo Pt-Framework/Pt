@@ -26,7 +26,7 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/MouseEvent.h>
 #include <Pt/Forms/TouchEvent.h>
@@ -46,8 +46,8 @@ namespace Pt {
 
 namespace Forms {
 
-Visual::Visual()
-: _vid( Application::instance().makeId()  )
+Widget::Widget()
+: _id( Application::instance().makeId()  )
 , _parent(0)
 , _nextResponder(0)
 , _invalidates(0)
@@ -59,25 +59,25 @@ Visual::Visual()
 , _cursor()
 , _r1(0)
 { 
-    Application::instance().registerVisual(*this);
+    Application::instance().registerWidget(*this);
 
-    _dispatcher += Pt::slot(*this, &Visual::onProcessInvalidateEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessPaintEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessRescaleEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessMoveEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessResizeEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessEnableEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessShowEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessMouseEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessTouchEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessScrollEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessEnterEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessLeaveEvent);
-    _dispatcher += Pt::slot(*this, &Visual::onProcessKeyEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessInvalidateEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessPaintEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessRescaleEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessMoveEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessResizeEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessEnableEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessShowEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessMouseEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessTouchEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessScrollEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessEnterEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessLeaveEvent);
+    _dispatcher += Pt::slot(*this, &Widget::onProcessKeyEvent);
 }
 
 
-Visual::~Visual()
+Widget::~Widget()
 {
     setCapture(false);
     
@@ -88,26 +88,26 @@ Visual::~Visual()
         removePeer( *_peers.back() );
     }
 
-    Application::instance().unregisterVisual(*this);
+    Application::instance().unregisterWidget(*this);
 }
 
 //
 // global identifier
 // 
 
-Pt::uint64_t Visual::vid() const
+Pt::uint64_t Widget::id() const
 {
-    return _vid;
+    return _id;
 }
 
 
-const std::string& Visual::name() const
+const std::string& Widget::name() const
 {
     return _name;
 }
         
 
-void Visual::setName(const std::string& n)
+void Widget::setName(const std::string& n)
 {
     _name = n;
 }
@@ -116,82 +116,82 @@ void Visual::setName(const std::string& n)
 // hierachy management
 // 
 
-Visual* Visual::parent()
+Widget* Widget::parent()
 {
     return _parent;
 }
 
 
-const Visual* Visual::parent() const
+const Widget* Widget::parent() const
 {
     return _parent;
 }
 
 
-void Visual::onSetParent(Visual* visual)
+void Widget::onSetParent(Widget* parent)
 {
-    _parent = visual;
+    _parent = parent;
 }
 
 
-bool Visual::isDescendantOf(const Visual& v) const
+bool Widget::isDescendantOf(const Widget& widget) const
 {
-    const Visual* parent = this->parent();
+    const Widget* parent = this->parent();
     if( ! parent )
         return false;
 
-    if( parent == &v )
+    if( parent == &widget )
         return true;
 
-    return parent->isDescendantOf(v);
+    return parent->isDescendantOf(widget);
 }
 
 
-bool Visual::isAncestorOf(const Visual& v) const
+bool Widget::isAncestorOf(const Widget& widget) const
 {
-    return v.isDescendantOf(*this);
+    return widget.isDescendantOf(*this);
 }
 
 
-Visual* Visual::hitTest(const Gfx::PointF& pos)
+Widget* Widget::hitTest(const Gfx::PointF& pos)
 {
     return onHitTest(pos);
 }
 
 
-Visual* Visual::onHitTest(const Gfx::PointF& pos)
+Widget* Widget::onHitTest(const Gfx::PointF& pos)
 {
     return 0;
 }
 
 
-Gfx::PointF Visual::toParent(const Gfx::PointF& pos) const
+Gfx::PointF Widget::toParent(const Gfx::PointF& pos) const
 {
     return onToParent(pos);
 }
 
 
-Gfx::PointF Visual::fromParent(const Gfx::PointF& pos) const
+Gfx::PointF Widget::fromParent(const Gfx::PointF& pos) const
 {
     return onFromParent(pos);
 }
 
 
-Gfx::PointF Visual::toGlobal(const Gfx::PointF& pos) const
+Gfx::PointF Widget::toGlobal(const Gfx::PointF& pos) const
 {
     return onToGlobal(pos); 
 }
         
 
-Gfx::PointF Visual::fromGlobal(const Gfx::PointF& pos) const
+Gfx::PointF Widget::fromGlobal(const Gfx::PointF& pos) const
 {
     return onFromGlobal(pos);
 }
 
 
-Gfx::PointF Visual::onToGlobal(const Gfx::PointF& pos) const
+Gfx::PointF Widget::onToGlobal(const Gfx::PointF& pos) const
 {
-    const Visual* parent = this->parent();
+    const Widget* parent = this->parent();
     if( ! parent )
         return pos;
 
@@ -200,9 +200,9 @@ Gfx::PointF Visual::onToGlobal(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF Visual::onFromGlobal(const Gfx::PointF& pos) const
+Gfx::PointF Widget::onFromGlobal(const Gfx::PointF& pos) const
 {
-    const Visual* parent = this->parent();
+    const Widget* parent = this->parent();
     if( ! parent )
         return pos;
 
@@ -214,29 +214,29 @@ Gfx::PointF Visual::onFromGlobal(const Gfx::PointF& pos) const
 // peer relationship
 // 
 
-void Visual::addPeer(Visual& peer)
+void Widget::addPeer(Widget& peer)
 {
     peer.onAttachPeer(*this);
     onAttachPeer(peer);
 }
 
 
-void Visual::removePeer(Visual& peer)
+void Widget::removePeer(Widget& peer)
 {
     peer.onDetachPeer(*this);
     onDetachPeer(peer);
 }
 
 
-void Visual::onAttachPeer(Visual& peer)
+void Widget::onAttachPeer(Widget& peer)
 {
     _peers.push_back(&peer);
 }
 
 
-void Visual::onDetachPeer(Visual& peer)
+void Widget::onDetachPeer(Widget& peer)
 {
-    std::vector<Visual*>::iterator it;
+    std::vector<Widget*>::iterator it;
     it = std::find( _peers.begin(), _peers.end(), &peer );
     
     if( it != _peers.end() )
@@ -247,20 +247,20 @@ void Visual::onDetachPeer(Visual& peer)
 // event processing
 //
 
-void Visual::processEvent(const Pt::Event& ev)
+void Widget::processEvent(const Pt::Event& ev)
 {
     onProcessEvent(ev);
 }
 
 
-void Visual::onProcessEvent(const Pt::Event& ev)
+void Widget::onProcessEvent(const Pt::Event& ev)
 {
     //std::clog << typeid(ev).name() << std::endl;
     _dispatcher.send(ev);
 }
 
 
-Pt::Signal<const Pt::Event&>& Visual::eventReceived()
+Pt::Signal<const Pt::Event&>& Widget::eventReceived()
 {
     return _dispatcher;
 }
@@ -269,7 +269,7 @@ Pt::Signal<const Pt::Event&>& Visual::eventReceived()
 // invalidation
 //
 
-void Visual::invalidate()
+void Widget::invalidate()
 {
     ++_invalidates;
 
@@ -279,7 +279,7 @@ void Visual::invalidate()
 
 
 // TODO: invalidate() should lead to an update event
-void Visual::onProcessInvalidateEvent(const InvalidateEvent& ev)
+void Widget::onProcessInvalidateEvent(const InvalidateEvent& ev)
 {
     --_invalidates;
 
@@ -291,13 +291,13 @@ void Visual::onProcessInvalidateEvent(const InvalidateEvent& ev)
 
 
 // TODO: remove and only use onInvalidateEvent
-void Visual::onInvalidateEvent(const InvalidateEvent& ev)
+void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 {
     onInvalidate();
 }
 
     
-void Visual::onInvalidate()
+void Widget::onInvalidate()
 {
 }
 
@@ -305,24 +305,24 @@ void Visual::onInvalidate()
 // painting
 //
 
-void Visual::repaint(const Gfx::RectF& rect)
+void Widget::repaint(const Gfx::RectF& rect)
 {
     onRequestRepaint(rect);
 }
 
 
-void Visual::repaint()
+void Widget::repaint()
 {
     repaint( bounds() );
 }
 
 
-void Visual::onRequestRepaint(const Gfx::RectF& rect)
+void Widget::onRequestRepaint(const Gfx::RectF& rect)
 {
 }
 
 
-void Visual::onProcessPaintEvent(const PaintEvent& ev)
+void Widget::onProcessPaintEvent(const PaintEvent& ev)
 {
     if( ev.rect().isNull() )
         return;
@@ -331,7 +331,7 @@ void Visual::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
-void Visual::onPaintEvent(const PaintEvent& ev)
+void Widget::onPaintEvent(const PaintEvent& ev)
 {
 }
 
@@ -339,31 +339,31 @@ void Visual::onPaintEvent(const PaintEvent& ev)
 // scaling
 //
 
-double Visual::scaleFactor() const
+double Widget::scaleFactor() const
 {
     return _scaling.scaleFactor();
 }
 
 
-const Gfx::Scaling& Visual::scaling() const
+const Gfx::Scaling& Widget::scaling() const
 {
     return _scaling;
 }
 
 
-void Visual::onProcessRescaleEvent(const RescaleEvent& ev)
+void Widget::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     onRescaleEvent(ev);
 }
 
 
-void Visual::onRescaleEvent(const RescaleEvent& ev)
+void Widget::onRescaleEvent(const RescaleEvent& ev)
 {
     onRescale( ev.scaleFactor() );
 }
 
 
-void Visual::onRescale(double scaling)
+void Widget::onRescale(double scaling)
 {
     _scaling.setScaleFactor(scaling);
 }
@@ -372,24 +372,24 @@ void Visual::onRescale(double scaling)
 // visibility
 //
 
-bool Visual::isVisible() const
+bool Widget::isVisible() const
 {
     return _isVisible;
 }
 
 
-void Visual::show(bool isShow)
+void Widget::show(bool isShow)
 {
     onRequestShow(isShow);
 }
 
 
-void Visual::onRequestShow(bool e)
+void Widget::onRequestShow(bool e)
 {
 }
 
 
-void Visual::onProcessShowEvent(const ShowEvent& ev)
+void Widget::onProcessShowEvent(const ShowEvent& ev)
 {
     if( _isVisible == ev.visible() )
         return;
@@ -398,14 +398,14 @@ void Visual::onProcessShowEvent(const ShowEvent& ev)
 }
 
 
-void Visual::onShowEvent(const ShowEvent& ev)
+void Widget::onShowEvent(const ShowEvent& ev)
 {
     onShow( ev.visible() );
 }
 
 
 // TODO: remove and only use onShowEvent
-void Visual::onShow(bool isShown)
+void Widget::onShow(bool isShown)
 {
     _isVisible = isShown;
 }
@@ -414,30 +414,30 @@ void Visual::onShow(bool isShown)
 // enabling
 //
 
-bool Visual::isEnabled() const
+bool Widget::isEnabled() const
 {
     return _enabledState;
 }
 
 
-void Visual::enable(bool isEnable)
+void Widget::enable(bool isEnable)
 {
     onRequestEnable(isEnable);
 }
 
 
-void Visual::onRequestEnable(bool e)
+void Widget::onRequestEnable(bool e)
 {
 }
 
 
-void Visual::onProcessEnableEvent(const EnableEvent& ev)
+void Widget::onProcessEnableEvent(const EnableEvent& ev)
 {
     onEnableEvent(ev);
 }
 
 
-void Visual::onEnableEvent(const EnableEvent& ev)
+void Widget::onEnableEvent(const EnableEvent& ev)
 {    
     _enabledState = ev.enabled(); 
 
@@ -445,7 +445,7 @@ void Visual::onEnableEvent(const EnableEvent& ev)
 }
 
 
-void Visual::onEnable(bool isEnable)
+void Widget::onEnable(bool isEnable)
 {
 }
 
@@ -453,13 +453,13 @@ void Visual::onEnable(bool isEnable)
 // activation
 //
 
-void Visual::activate(bool active)
+void Widget::activate(bool active)
 {
     onRequestActivate(active);
 }
 
 
-void Visual::onRequestActivate(bool active)
+void Widget::onRequestActivate(bool active)
 {
 }
 
@@ -467,54 +467,54 @@ void Visual::onRequestActivate(bool active)
 // geometry
 //
 
-const Gfx::PointF& Visual::position() const
+const Gfx::PointF& Widget::position() const
 {
     return _pos;
 }
 
 
-void Visual::move(const Gfx::PointF& pos)
+void Widget::move(const Gfx::PointF& pos)
 {
     onRequestMove(pos);
 }
 
 
-void Visual::onRequestMove(const Gfx::PointF& pos)
+void Widget::onRequestMove(const Gfx::PointF& pos)
 {
 }
 
 
-void Visual::onProcessMoveEvent(const MoveEvent& ev)
+void Widget::onProcessMoveEvent(const MoveEvent& ev)
 {
     onMoveEvent(ev);
 }
 
 
-void Visual::onMoveEvent(const MoveEvent& ev)
+void Widget::onMoveEvent(const MoveEvent& ev)
 {
     _pos = ev.position();
 }
 
 
-const Gfx::SizeF& Visual::size() const
+const Gfx::SizeF& Widget::size() const
 {
     return _size;
 }
 
 
-const Gfx::RectF& Visual::bounds() const
+const Gfx::RectF& Widget::bounds() const
 {
     return _bounds;
 }
 
 
-const Gfx::SizeF& Visual::minimumSize() const
+const Gfx::SizeF& Widget::minimumSize() const
 {
     return _minimumSize;
 }
 
 
-void Visual::setMinimumSize(const Gfx::SizeF& s)
+void Widget::setMinimumSize(const Gfx::SizeF& s)
 {
     _minimumSize = s;
 
@@ -522,31 +522,31 @@ void Visual::setMinimumSize(const Gfx::SizeF& s)
 }
 
 
-void Visual::setMinimumSize(double w, double h)
+void Widget::setMinimumSize(double w, double h)
 {
     setMinimumSize( Gfx::SizeF(w, h) );
 }
 
 
-void Visual::setMinimumWidth(double w)
+void Widget::setMinimumWidth(double w)
 {
     setMinimumSize( w, _minimumSize.height() );
 }
 
 
-void Visual::setMinimumHeight(double h)
+void Widget::setMinimumHeight(double h)
 {
     setMinimumSize( _minimumSize.width(), h );
 }
 
 
-const Gfx::SizeF& Visual::maximumSize() const
+const Gfx::SizeF& Widget::maximumSize() const
 {
     return _maximumSize;
 }
 
 
-void Visual::setMaximumSize(const Gfx::SizeF& s)
+void Widget::setMaximumSize(const Gfx::SizeF& s)
 {
     _maximumSize = s;
 
@@ -554,48 +554,48 @@ void Visual::setMaximumSize(const Gfx::SizeF& s)
 }
 
 
-void Visual::setMaximumSize(double w, double h)
+void Widget::setMaximumSize(double w, double h)
 {
     setMaximumSize( Gfx::SizeF(w, h) );
 }
 
 
-void Visual::setMaximumWidth(double w)
+void Widget::setMaximumWidth(double w)
 {
     setMaximumSize( w, _maximumSize.height() );
 }
 
 
-void Visual::setMaximumHeight(double h)
+void Widget::setMaximumHeight(double h)
 {
     setMaximumSize( _maximumSize.width(), h );
 }
 
 
-void Visual::onSetSizeLimits(const Gfx::SizeF& minSize, 
+void Widget::onSetSizeLimits(const Gfx::SizeF& minSize, 
                              const Gfx::SizeF& maxSize)
 {
 }
 
 
-void Visual::resize(const Gfx::SizeF& s)
+void Widget::resize(const Gfx::SizeF& s)
 {
     onRequestResize(s);
 }
 
 
-void Visual::onRequestResize(const Gfx::SizeF& s)
+void Widget::onRequestResize(const Gfx::SizeF& s)
 {
 }
 
 
-void Visual::onProcessResizeEvent(const ResizeEvent& ev)
+void Widget::onProcessResizeEvent(const ResizeEvent& ev)
 {
     onResizeEvent(ev);
 }
 
 
-void Visual::onResizeEvent(const ResizeEvent& ev)
+void Widget::onResizeEvent(const ResizeEvent& ev)
 {
     _size = ev.size();
     _bounds.setSize( ev.size() );
@@ -605,13 +605,13 @@ void Visual::onResizeEvent(const ResizeEvent& ev)
 // input capture
 //
 
-void Visual::setCapture(bool capture)
+void Widget::setCapture(bool capture)
 {
     onRequestCapture(capture);
 }
 
 
-void Visual::onRequestCapture(bool capture)
+void Widget::onRequestCapture(bool capture)
 {
     Application::instance().onRequestCapture(*this, capture);
 }
@@ -620,7 +620,7 @@ void Visual::onRequestCapture(bool capture)
 // cursor
 //
 
-const Cursor* Visual::cursor() const
+const Cursor* Widget::cursor() const
 {
     if( ! _hasCursor )
         return &Cursor::defaultCursor();
@@ -629,7 +629,7 @@ const Cursor* Visual::cursor() const
 }
 
 
-void Visual::setCursor(const Cursor* csr)
+void Widget::setCursor(const Cursor* csr)
 {
     if( ! csr )
         _cursor.clear();
@@ -638,7 +638,7 @@ void Visual::setCursor(const Cursor* csr)
 
     _hasCursor = csr != 0;
 
-    Visual* underPointer = Application::instance().screen().underPointer();
+    Widget* underPointer = Application::instance().screen().underPointer();
     if(underPointer == this)
         Application::instance().setCursor( cursor() );
 }
@@ -647,19 +647,19 @@ void Visual::setCursor(const Cursor* csr)
 // input processing
 //
 
-void Visual::setNextResponder(Responder* r)
+void Widget::setNextResponder(Responder* r)
 {
     _nextResponder = r;
 }
 
 
-Responder* Visual::onNextResponder()
+Responder* Widget::onNextResponder()
 {
     return _nextResponder;
 }
 
 
-void Visual::onProcessMouseEvent(const MouseEvent& ev)
+void Widget::onProcessMouseEvent(const MouseEvent& ev)
 {
     Application::instance().onSetPointer(*this, true);
 
@@ -667,13 +667,13 @@ void Visual::onProcessMouseEvent(const MouseEvent& ev)
 }
 
 
-bool Visual::onMouseEvent(const MouseEvent& ev)
+bool Widget::onMouseEvent(const MouseEvent& ev)
 {
     return false;
 }
 
 
-void Visual::onProcessTouchEvent(const TouchEvent& ev)
+void Widget::onProcessTouchEvent(const TouchEvent& ev)
 {
     Application::instance().onSetPointer( *this, ev.isPressed() );
 
@@ -681,61 +681,61 @@ void Visual::onProcessTouchEvent(const TouchEvent& ev)
 }
 
 
-bool Visual::onTouchEvent(const TouchEvent& ev)
+bool Widget::onTouchEvent(const TouchEvent& ev)
 {
     return false;
 }
 
 
-void Visual::onProcessScrollEvent(const ScrollEvent& ev)
+void Widget::onProcessScrollEvent(const ScrollEvent& ev)
 {
     scrollEvent(ev);
 }
 
 
-bool Visual::onScrollEvent(const ScrollEvent& ev)
+bool Widget::onScrollEvent(const ScrollEvent& ev)
 {
     return false;
 }
 
 
-void Visual::onProcessEnterEvent(const EnterEvent& ev)
+void Widget::onProcessEnterEvent(const EnterEvent& ev)
 {
     enterEvent(ev);
 }
 
 
-bool Visual::onEnterEvent( const EnterEvent& ev)
+bool Widget::onEnterEvent( const EnterEvent& ev)
 {
-    //std::clog << "ENTER: " << typeid(*this).name() << " " << vid() << std::endl;
+    //std::clog << "ENTER: " << typeid(*this).name() << " " << id() << std::endl;
     Application::instance().setCursor( cursor() );
 
     return true;
 }
 
 
-void Visual::onProcessLeaveEvent(const LeaveEvent& ev)
+void Widget::onProcessLeaveEvent(const LeaveEvent& ev)
 {
     leaveEvent(ev);
 }
 
 
-bool Visual::onLeaveEvent(const LeaveEvent& ev)
+bool Widget::onLeaveEvent(const LeaveEvent& ev)
 {
-    //std::clog << "LEAVE: " << typeid(*this).name() << " " << vid() << std::endl;
+    //std::clog << "LEAVE: " << typeid(*this).name() << " " << id() << std::endl;
     Application::instance().setCursor( &Cursor::defaultCursor() );
 
     return true;
 }
 
 
-void Visual::onProcessKeyEvent(const KeyEvent& ev)
+void Widget::onProcessKeyEvent(const KeyEvent& ev)
 {
     keyEvent(ev);
 }
 
 
-bool Visual::onKeyEvent(const KeyEvent& ev)
+bool Widget::onKeyEvent(const KeyEvent& ev)
 {
     return false;
 }

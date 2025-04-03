@@ -30,7 +30,7 @@
 #define Pt_Forms_KeyEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Forms/Key.h>
 #include <Pt/Event.h>
 #include <Pt/String.h>
@@ -50,33 +50,33 @@ class PT_FORMS_API KeyEvent : public Pt::BasicEvent<KeyEvent>
 
     public:	
         KeyEvent()
-        : _vid(0)
-        , _visual(0)
+        : _widgetId_(0)
+        , _widget(0)
         , _action(Release)
 	      {
 	      }
 
-	      explicit KeyEvent(Visual& v)
-        : _vid( v.vid() )
-        , _visual(&v)
+	      explicit KeyEvent(Widget& widget)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _action(Release)
 	      {
 	      }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
         
-        void setVisual(Visual* v)
+        void setWidget(Widget* widget)
         {
-            _visual = v;
-            _vid = v ? v->vid() : 0;
+            _widget = widget;
+            _widgetId_ = widget ? widget->id() : 0;
         }
         
         const Key& key() const
@@ -114,8 +114,8 @@ class PT_FORMS_API KeyEvent : public Pt::BasicEvent<KeyEvent>
         }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
         Action       _action;
         Key          _key;
         Pt::Char     _unicode;        

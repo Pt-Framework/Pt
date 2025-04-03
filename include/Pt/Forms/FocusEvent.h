@@ -30,7 +30,7 @@
 #define Pt_Forms_FocusEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
@@ -41,9 +41,9 @@ namespace Forms {
 class FocusEvent : public Pt::BasicEvent<FocusEvent>
 {
     public:
-        FocusEvent(Visual& v, bool focus)
-        : _vid( v.vid() )
-        , _visual(&v)
+        FocusEvent(Widget& widget, bool focus)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _isFocused(focus)
         {
         }
@@ -52,14 +52,14 @@ class FocusEvent : public Pt::BasicEvent<FocusEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         bool isFocused() const
@@ -68,8 +68,8 @@ class FocusEvent : public Pt::BasicEvent<FocusEvent>
         }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
         bool         _isFocused;
 };
 

@@ -62,7 +62,7 @@ class PT_FORMS_API InputMethod
 
         void finish();
 
-        Visual* receiver() const;
+        Widget* receiver() const;
 
         void sendEvent(const KeyEvent& ev);
 

@@ -138,15 +138,15 @@ WindowManager& ScreenImpl::windowManager()
 //}
 
 ///////////////////////////////////////////////////////////////////////
-// Visual
+// Widget
 ///////////////////////////////////////////////////////////////////////
 
-Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
+Widget* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )
         return 0;
 
-    Visual* hit = Form::onHitTest(p);
+    Widget* hit = Form::onHitTest(p);
     if(hit)
         return hit;
 
@@ -185,7 +185,7 @@ void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
 }
 
 
-void ScreenImpl::setCapture(Visual* capture)
+void ScreenImpl::setCapture(Widget* capture)
 {
 }
 

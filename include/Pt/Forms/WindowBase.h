@@ -30,7 +30,7 @@
 #ifndef PT_FORMS_WINDOWBASE_H
 #define PT_FORMS_WINDOWBASE_H
 
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 

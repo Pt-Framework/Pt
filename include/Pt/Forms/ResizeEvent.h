@@ -31,7 +31,7 @@
 #define Pt_Forms_ResizeEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
@@ -43,9 +43,9 @@ namespace Forms {
 class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 {
     public:
-        ResizeEvent(Visual& v, const Gfx::SizeF& size)
-        : _vid( v.vid() )
-        , _visual(&v)
+        ResizeEvent(Widget& widget, const Gfx::SizeF& size)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _size(size)
         {
         }
@@ -54,14 +54,14 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
         {
         }
         
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         const Gfx::SizeF& size() const
@@ -75,8 +75,8 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
         }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
         Gfx::SizeF   _size;
 };
 

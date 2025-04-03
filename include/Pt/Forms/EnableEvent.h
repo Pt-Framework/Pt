@@ -30,7 +30,7 @@
 #define Pt_Forms_EnableEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 
@@ -41,16 +41,16 @@ namespace Forms {
 class PT_FORMS_API EnableEvent : public Pt::BasicEvent<EnableEvent>
 {
     public:
-        EnableEvent(Visual& v, bool enabled)
-        : _vid( v.vid() )
-        , _visual(&v)
+        EnableEvent(Widget& widget, bool enabled)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _enabled(enabled)
         {
         }
 
         EnableEvent()
-        : _vid(0)
-        , _visual(0)
+        : _widgetId_(0)
+        , _widget(0)
         , _enabled(false)
         {
         }
@@ -59,14 +59,14 @@ class PT_FORMS_API EnableEvent : public Pt::BasicEvent<EnableEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         bool  enabled( ) const
@@ -75,8 +75,8 @@ class PT_FORMS_API EnableEvent : public Pt::BasicEvent<EnableEvent>
         }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
         bool         _enabled;
 };
 

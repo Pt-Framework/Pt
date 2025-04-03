@@ -68,7 +68,7 @@ class ResizeEvent;
 class ScrollEvent;
 class ShowEvent;
 class TouchEvent;
-class Visual;
+class Widget;
 class Window;
 class WindowStateEvent;
 

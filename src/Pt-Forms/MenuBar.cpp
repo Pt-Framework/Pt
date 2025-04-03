@@ -111,7 +111,7 @@ void MenuBar::onRemoveMenu(MenuMenuItem& item)
     item.menu()->setAnchor(0);
 }
 
-Pt::Forms::Visual* MenuBar::onFindMenu(const Pt::Gfx::PointF& screenPos)
+Pt::Forms::Widget* MenuBar::onFindMenu(const Pt::Gfx::PointF& screenPos)
 { 
     if( ! isVisible() )
         return 0;
@@ -257,7 +257,7 @@ void MenuBar::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& rect
 void MenuBar::onProcessMouseEvent(const Pt::Forms::MouseEvent& ev)
 {
     const Pt::Gfx::PointF& screenPos = ev.position();
-    Visual* menu = findMenu(screenPos);
+    Widget* menu = findMenu(screenPos);
     if(menu)
     {
         if(menu == this)

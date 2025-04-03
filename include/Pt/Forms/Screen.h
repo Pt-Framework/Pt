@@ -31,7 +31,7 @@
 #define Pt_Forms_Screen_H
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Signal.h>
@@ -51,11 +51,11 @@ class RescaleEvent;
 
 /** @brief Screen of a display.
 */
-class PT_FORMS_API Screen : public Visual
+class PT_FORMS_API Screen : public Widget
 {
     friend class ScreenImpl;
 
-    typedef Visual Base;
+    typedef Widget Base;
 
     public:
         Screen(ApplicationImpl& app);
@@ -72,11 +72,11 @@ class PT_FORMS_API Screen : public Visual
         WindowManager& windowManager();
        
         
-        Visual* underPointer();
+        Widget* underPointer();
 
-        void setPointer(Visual* visual);
+        void setPointer(Widget* widget);
 
-        void setPointer(Visual& visual, bool isPointer);
+        void setPointer(Widget& widget, bool isPointer);
 
     public:
         ScreenImpl* impl();
@@ -91,10 +91,10 @@ class PT_FORMS_API Screen : public Visual
         virtual void onShow(ScreenImpl& s, bool isShow);
 
     //
-    // Visual
+    // Widget
     //
     protected:
-        virtual Visual* onHitTest(const Gfx::PointF& pos);
+        virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
@@ -152,7 +152,7 @@ class PT_FORMS_API Screen : public Visual
         ScreenImpl*         _impl;
         Gfx::RectF          _updateRect;
         int                 _updates;
-        Visual*             _pointer;
+        Widget*             _pointer;
         Pt::System::Clock   _clock;
 };
 

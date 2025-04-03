@@ -31,7 +31,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/WindowManager.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -140,14 +140,14 @@ class ShellWM : public WindowManager
         virtual void onClose(ShellWindowFrame& w);
 
     //
-    // Visual
+    // Widget
     //
     protected:
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
-        virtual Visual* onHitTest(const Gfx::PointF& p);
+        virtual Widget* onHitTest(const Gfx::PointF& p);
 
         
         virtual void onRequestRepaint(const Gfx::RectF& rect);

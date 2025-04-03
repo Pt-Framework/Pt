@@ -135,7 +135,7 @@ Gfx::PointF ShellWM::fromFrame(const ShellWindowFrame& w,
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Visual
+// Widget
 ///////////////////////////////////////////////////////////////////////
 
 Gfx::PointF ShellWM::onToParent(const Gfx::PointF& pos) const
@@ -150,7 +150,7 @@ Gfx::PointF ShellWM::onFromParent(const Gfx::PointF& pos) const
 }
 
 
-Visual* ShellWM::onHitTest(const Gfx::PointF& p)
+Widget* ShellWM::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )
         return 0;
@@ -165,7 +165,7 @@ Visual* ShellWM::onHitTest(const Gfx::PointF& p)
             continue;
 
         Gfx::PointF pos = toFrame(*frame, p);
-        Visual* hit = frame->hitTest(pos);
+        Widget* hit = frame->hitTest(pos);
         if(hit)
             return hit;
     }
@@ -176,7 +176,7 @@ Visual* ShellWM::onHitTest(const Gfx::PointF& p)
 
 void ShellWM::onRequestCapture(bool capture)
 {
-    Visual::onRequestCapture(capture);
+    Widget::onRequestCapture(capture);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -407,7 +407,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
     if( rect.isNull() )
         return;
 
-    Visual::onProcessPaintEvent(ev);
+    Widget::onProcessPaintEvent(ev);
 
     //std::clog << "SHELL: " << ev.rect().width() << "x" << ev.rect().height() << std::endl;
 
@@ -529,7 +529,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
 
         Gfx::PointF p = toFrame(*frame, pos);
         
-        Visual* hit = frame->hitTest(p);
+        Widget* hit = frame->hitTest(p);
         if(hit)
         {
             hitFrame = frame;
@@ -585,7 +585,7 @@ bool ShellWM::processTouchEvent(const TouchEvent& ev)
         ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->frame() );
 
         Gfx::PointF p = toFrame(*frame, pos);
-        Visual* hit = frame->hitTest(p);
+        Widget* hit = frame->hitTest(p);
         if(hit)
         {
             hitFrame = frame;
@@ -668,7 +668,7 @@ void ShellWM::onProcessKeyEvent(const KeyEvent& ev)
     if(_activeWindow)
     {
         KeyEvent kev = ev;
-        kev.setVisual(_activeWindow);
+        kev.setWidget(_activeWindow);
         _activeWindow->processEvent(ev);
         return;
     }

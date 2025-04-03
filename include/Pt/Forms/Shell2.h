@@ -93,11 +93,11 @@ class PT_FORMS_API Shell : public Widget
 
         void onActivate(ShellWM& wm, bool active);
 
-        void onEnter(ShellWM& wm, Visual& v);
+        void onEnter(ShellWM& wm, Widget& widget);
 
-        bool onIsDescendantOf(const ShellWM& w, Visual& top) const;
+        bool onIsDescendantOf(const ShellWM& w, Widget& top) const;
 
-        void onSetCapture(ShellWM& w, Visual& target, bool capture);
+        void onSetCapture(ShellWM& w, Widget& target, bool capture);
 
     //
     // Implementation

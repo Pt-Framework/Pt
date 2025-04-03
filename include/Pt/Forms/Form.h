@@ -30,7 +30,7 @@
 #define PT_FORMS_FORM_H
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Forms/Control.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -41,11 +41,11 @@ namespace Pt {
 namespace Forms {
 
 ///////////////////////////////////////////////////////////////////////
-// TODO: move base functionality to Visual API
+// TODO: move base functionality to Widget API
 //
 //       where to align
 //       when is invalidate, relayout, repaint called
-//       some onXYZRequested handlers in Visual
+//       some onXYZRequested handlers in Widget
 //       
 ///////////////////////////////////////////////////////////////////////
 
@@ -151,10 +151,10 @@ class PT_FORMS_API Form : public View
         virtual void onRaiseRequest(Control& control);
 
     //
-    // Visual
+    // Widget
     //
     protected:
-        virtual Visual* onHitTest(const Gfx::PointF& pos);
+        virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual void onRequestCapture(bool capture);
 

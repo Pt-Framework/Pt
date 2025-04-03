@@ -30,7 +30,7 @@
 #define PT_FORMS_WINDOWFRAME_H
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Forms/WindowType.h>
 #include <Pt/Forms/PixmapSurface.h>
 
@@ -43,9 +43,9 @@ class Window;
 
 /** @internal @brief Window implementation base class.
 */
-class WindowFrame : public Visual
+class WindowFrame : public Widget
 {
-    typedef Visual Base;
+    typedef Widget Base;
 
     friend class Window;
 

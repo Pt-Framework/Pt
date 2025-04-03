@@ -31,7 +31,7 @@
 #define Pt_Forms_WindowStateEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
@@ -43,9 +43,9 @@ namespace Forms {
 class PT_FORMS_API WindowStateEvent : public Pt::BasicEvent<WindowStateEvent>
 {
     public:
-        WindowStateEvent(Visual& v, Window::State state)
-        : _vid( v.vid() )
-        , _visual(&v)
+        WindowStateEvent(Widget& widget, Window::State state)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _state(state)
         {
         }
@@ -54,14 +54,14 @@ class PT_FORMS_API WindowStateEvent : public Pt::BasicEvent<WindowStateEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         Window::State state() const
@@ -75,8 +75,8 @@ class PT_FORMS_API WindowStateEvent : public Pt::BasicEvent<WindowStateEvent>
         }
 
     private:
-        Pt::uint64_t   _vid;
-        Visual*        _visual;
+        Pt::uint64_t   _widgetId_;
+        Widget*        _widget;
         Window::State  _state;
 };
 

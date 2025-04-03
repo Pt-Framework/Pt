@@ -203,19 +203,19 @@ void Shell::onActivate(ShellWM& wm, bool active)
 }
 
 
-void Shell::onEnter(ShellWM& wm, Visual& v)
+void Shell::onEnter(ShellWM& wm, Widget& widget)
 {
-    Widget::onEnter(*this, v);
+    Widget::onEnter(*this, widget);
 }
 
 
-void Shell::onSetCapture(ShellWM& w, Visual& target, bool capture)
+void Shell::onSetCapture(ShellWM& w, Widget& target, bool capture)
 {
     Widget::onSetCapture(*this, target, capture);
 }
 
 
-bool Shell::onIsDescendantOf(const ShellWM& w, Visual& top) const
+bool Shell::onIsDescendantOf(const ShellWM& w, Widget& top) const
 {    
     if(this == &top)
         return true;

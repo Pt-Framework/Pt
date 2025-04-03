@@ -148,10 +148,10 @@ class PT_FORMS_API Window : public Form
         virtual void onLayoutEvent(const LayoutEvent& ev);
 
     //
-    // Visual
+    // Widget
     //
     protected:
-        Visual* onHitTest(const Gfx::PointF& p);
+        Widget* onHitTest(const Gfx::PointF& p);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 

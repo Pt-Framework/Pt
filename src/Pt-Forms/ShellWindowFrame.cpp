@@ -707,7 +707,7 @@ Gfx::PointF ShellWindowFrame::onFromWindow(const Window& w,
 }
 
 
-Visual* ShellWindowFrame::onHitTest(const Gfx::PointF& pos)
+Widget* ShellWindowFrame::onHitTest(const Gfx::PointF& pos)
 {
     if( ! bounds().contains(pos) || ! isVisible() )
         return 0;
@@ -715,7 +715,7 @@ Visual* ShellWindowFrame::onHitTest(const Gfx::PointF& pos)
     if(_window)
     {
         Gfx::PointF p = onToWindow(*_window, pos);
-        Visual* hit = _window->hitTest(p);
+        Widget* hit = _window->hitTest(p);
         if(hit)
             return hit;
     }
@@ -1021,7 +1021,7 @@ void ShellWindowFrame::onProcessMouseEvent(const MouseEvent& ev)
         _isCapture = true;
     }
         
-    Visual::onProcessMouseEvent(ev);
+    Widget::onProcessMouseEvent(ev);
 }
 
 
@@ -1036,7 +1036,7 @@ void ShellWindowFrame::onProcessTouchEvent(const TouchEvent& tev)
         return;
     }
         
-    Visual::onProcessTouchEvent(tev);
+    Widget::onProcessTouchEvent(tev);
 }
 
 

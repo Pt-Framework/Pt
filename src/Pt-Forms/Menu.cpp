@@ -108,7 +108,7 @@ void Menu::onItemTriggered(MenuBaseItem& item)
     }
 }
 
-Pt::Forms::Visual* Menu::onFindMenu(const Pt::Gfx::PointF& screenPos)
+Pt::Forms::Widget* Menu::onFindMenu(const Pt::Gfx::PointF& screenPos)
 {
     if( ! isVisible() )
         return 0;
@@ -279,7 +279,7 @@ void Menu::onRenderBackground(const Pt::Forms::StyleOptions& options,
 void Menu::onProcessMouseEvent(const Pt::Forms::MouseEvent& ev)
 {
     const Pt::Gfx::PointF& screenPos = ev.position();
-    Visual* menu = onFindMenu(screenPos);
+    Widget* menu = onFindMenu(screenPos);
 
     if(menu)
     {

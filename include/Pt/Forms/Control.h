@@ -233,10 +233,10 @@ class PT_FORMS_API Control : public View
         virtual void onMnemonic(Pt::Char m);
 
     //
-    // Visual
+    // Widget
     //
     protected:
-        virtual Visual* onHitTest(const Gfx::PointF& p);
+        virtual Widget* onHitTest(const Gfx::PointF& p);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 

@@ -116,7 +116,7 @@ void WindowFrame::onProcessResizeEvent(const ResizeEvent& ev)
 
 void WindowFrame::onResizeEvent(const ResizeEvent& ev)
 {
-    Visual::onResizeEvent(ev);
+    Widget::onResizeEvent(ev);
 
     Gfx::SizeF pixmapSize = scaling().toPhysical( ev.size() );
     _pixmap.resize(pixmapSize);

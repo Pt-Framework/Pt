@@ -227,7 +227,7 @@ class ShellWindowFrame : public WindowFrame
         virtual void onClose(Window& w);
 
     protected:
-        virtual Visual* onHitTest(const Gfx::PointF& pos);
+        virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
         

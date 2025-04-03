@@ -31,7 +31,7 @@
 #define Pt_Forms_PaintEvent_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/Visual.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
@@ -43,9 +43,9 @@ namespace Forms {
 class PT_FORMS_API PaintEvent : public Pt::BasicEvent<PaintEvent>
 {
     public:    
-        PaintEvent(Visual& visual, const Gfx::RectF& rect)
-        : _vid( visual.vid() )
-        , _visual(&visual)
+        PaintEvent(Widget& widget, const Gfx::RectF& rect)
+        : _widgetId_( widget.id() )
+        , _widget(&widget)
         , _rect( rect )
         {
         }
@@ -54,14 +54,14 @@ class PT_FORMS_API PaintEvent : public Pt::BasicEvent<PaintEvent>
         {
         }
 
-        Pt::uint64_t vid() const
+        Pt::uint64_t widgetId() const
         {
-            return _vid;
+            return _widgetId_;
         }
 
-        Visual* visual() const
+        Widget* widget() const
         {
-            return _visual;
+            return _widget;
         }
 
         const Gfx::RectF& rect() const
@@ -75,8 +75,8 @@ class PT_FORMS_API PaintEvent : public Pt::BasicEvent<PaintEvent>
         }
 
     private:
-        Pt::uint64_t _vid;
-        Visual*      _visual;
+        Pt::uint64_t _widgetId_;
+        Widget*      _widget;
         Gfx::RectF   _rect;
 };
 
