@@ -250,6 +250,10 @@ void Acceptor::onRequest(MessageProgress progress)
                     PT_LOG_DEBUG("reading discarded request");
                     _request.beginReceive();
                 }
+                else
+                {
+                    _request.clear();
+                }
             }
             else
             {
