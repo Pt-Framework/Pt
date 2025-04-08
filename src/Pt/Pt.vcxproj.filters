@@ -1821,12 +1821,6 @@
     <ClInclude Include="..\..\include\Pt\Forms\ScrollView.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Shell.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\ShellWM.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\SizePolicy.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
@@ -1879,9 +1873,6 @@
       <Filter>Pt-Forms</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Forms\MoveCursor.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\ShellWindowFrame.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Forms\SizeNESWCursor.h">
@@ -2929,6 +2920,15 @@
       <Filter>Pt-Forms</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\Widget.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\WorkspaceFrame.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Workspace.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\WorkspaceManager.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
   </ItemGroup>
@@ -4793,15 +4793,6 @@
     <ClCompile Include="..\Pt-Forms\ScrollView.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Forms\Shell.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\ShellWindowFrame.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\ShellWM.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Forms\Slider.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
@@ -5622,6 +5613,15 @@
       <Filter>Pt-Forms</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\Widget.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\Workspace.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\WorkspaceFrame.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\WorkspaceManager.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
   </ItemGroup>

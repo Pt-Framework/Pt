@@ -78,9 +78,6 @@ SharedLibrary Pt-Forms : Application.cpp
                          ScrollBar.cpp
                          ScrollView.cpp
                          ScrollLayout.cpp
-                         Shell.cpp
-                         ShellWM.cpp
-                         ShellWindowFrame.cpp
                          Slider.cpp
                          SpinBox.cpp
                          StackLayout.cpp
@@ -91,10 +88,12 @@ SharedLibrary Pt-Forms : Application.cpp
                          TextBlock.cpp
                          View.cpp
                          Widget.cpp
-                         WindowBase.cpp
                          Window.cpp
                          WindowFrame.cpp
                          WindowManager.cpp
+                         Workspace.cpp
+                         WorkspaceFrame.cpp
+                         WorkspaceManager.cpp
                          $(PT_FORMS_IMPL_SOURCES) ;
 
 LinkSharedLibraries Pt-Forms : Pt Pt-System Pt-Gfx Pt-Reflex ;

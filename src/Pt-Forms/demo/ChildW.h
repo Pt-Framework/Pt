@@ -3,7 +3,7 @@
 
 #include "Dialog1.h"
 #include <Pt/Forms/Window.h>
-#include <Pt/Forms/Shell.h>
+#include <Pt/Forms/Workspace.h>
 #include <Pt/Forms/PushButton.h>
 #include <Pt/Forms/CheckBox.h>
 #include <Pt/Forms/ComboBox.h>
@@ -62,7 +62,7 @@ class ChildW : public Forms::Window
         DockingLayout _mainLayout;
         MenuBar _menuBar;
 
-        Shell _shell;
+        Workspace _workspace;
 
         Menu     _fileMenu;
         MenuBarItem _fileMenuItem;

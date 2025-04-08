@@ -77,7 +77,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
     Form::setSurface(surface, Gfx::PointF(0, 0) );
 
-    setContent(&_shell);
+    setContent(&_workspace);
 
     updateScreen( RectI(PointI(0, 0), _frameBuffer.size()) );
 }
@@ -110,25 +110,25 @@ void ScreenImpl::setParent(Screen* screen)
 
 void ScreenImpl::addWindow(Window& w)
 {
-    _shell.addWindow(w); 
+    _workspace.addWindow(w); 
 }
 
 
 void ScreenImpl::removeWindow(Window& w)
 { 
-    _shell.removeWindow(w); 
+    _workspace.removeWindow(w); 
 }
 
 
 const std::vector<Window*>& ScreenImpl::windows() const
 {
-    return _shell.windows();
+    return _workspace.windows();
 }
 
 
 WindowManager& ScreenImpl::windowManager()
 {
-    return _shell.windowManager();
+    return _workspace.windowManager();
 }
 
 

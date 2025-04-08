@@ -1,10 +1,10 @@
-/* Copyright (C) 2022 Marc Boris Duerner 
-  
+/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,20 +14,20 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_SHELL_WM_H
-#define PT_FORMS_SHELL_WM_H
+#ifndef PT_FORMS_WORKSPACE_MANAGER_H
+#define PT_FORMS_WORKSPACE_MANAGER_H
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/WindowManager.h>
@@ -40,22 +40,22 @@ namespace Pt {
 
 namespace Forms {
 
-class ShellWindowFrame;
+class WorkspaceFrame;
 
-class Shell;
+class Workspace;
 
-class ShellWM : public WindowManager
+class WorkspaceManager : public WindowManager
 {
     typedef WindowManager Base;
 
-    friend class ShellWindowFrame;
+    friend class WorkspaceFrame;
 
     public:
-        ShellWM();
+        WorkspaceManager();
 
-        virtual ~ShellWM();
+        virtual ~WorkspaceManager();
 
-        void setParent(Shell* shell);
+        void setParent(Workspace* workspace);
 
         //Gfx::PaintSurface& surface();
 
@@ -115,29 +115,29 @@ class ShellWM : public WindowManager
         virtual void onRelease(WindowFrame& w);
 
     protected:
-        Gfx::PointF toFrame(const ShellWindowFrame& w, 
+        Gfx::PointF toFrame(const WorkspaceFrame& w, 
                             const Gfx::PointF& pos) const;
 
-        Gfx::PointF fromFrame(const ShellWindowFrame& w, 
+        Gfx::PointF fromFrame(const WorkspaceFrame& w, 
                               const Gfx::PointF& pos) const;
 
-        virtual void onSetAbove(ShellWindowFrame& w, bool above);
+        virtual void onSetAbove(WorkspaceFrame& w, bool above);
 
-        virtual void onSetSizeLimits(ShellWindowFrame& w, 
+        virtual void onSetSizeLimits(WorkspaceFrame& w, 
                                      const Gfx::SizeF& minSize, 
                                      const Gfx::SizeF& maxSize);
 
-        virtual void onShow(ShellWindowFrame& w, bool visible);
+        virtual void onShow(WorkspaceFrame& w, bool visible);
 
-        virtual void onActivate(ShellWindowFrame& w, bool active); 
+        virtual void onActivate(WorkspaceFrame& w, bool active); 
 
-        virtual void onEnable(ShellWindowFrame& w, bool enable);
+        virtual void onEnable(WorkspaceFrame& w, bool enable);
 
-        virtual void onMove(ShellWindowFrame& w, const Gfx::PointF& to);
+        virtual void onMove(WorkspaceFrame& w, const Gfx::PointF& to);
 
-        virtual void onResize(ShellWindowFrame& w, const Gfx::SizeF& to);
+        virtual void onResize(WorkspaceFrame& w, const Gfx::SizeF& to);
 
-        virtual void onClose(ShellWindowFrame& w);
+        virtual void onClose(WorkspaceFrame& w);
 
     //
     // Widget
@@ -186,7 +186,7 @@ class ShellWM : public WindowManager
         virtual void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        Shell*                       _parent;
+        Workspace*                       _parent;
 
         std::vector<Window*>         _windowList;
 

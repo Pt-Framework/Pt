@@ -1,10 +1,10 @@
-/* Copyright (C) 2022 Marc Boris Duerner 
-  
+/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,22 +14,22 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
 */
 
-#include "ShellWindowFrame.h"
+#include "WorkspaceFrame.h"
 
-#include <Pt/Forms/ShellWM.h>
-#include <Pt/Forms/Shell.h>
+#include <Pt/Forms/WorkspaceManager.h>
+#include <Pt/Forms/Workspace.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/WindowStateEvent.h>
@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Forms {
 
-ShellWM::ShellWM()
+WorkspaceManager::WorkspaceManager()
 : _parent(0)
 , _activeWindow(0)
 , _topMostWindow(0)
@@ -53,7 +53,7 @@ ShellWM::ShellWM()
 }
 
 
-ShellWM::~ShellWM()
+WorkspaceManager::~WorkspaceManager()
 {
     while( ! _windowList.empty() )
     {
@@ -62,27 +62,27 @@ ShellWM::~ShellWM()
 }
 
 
-void ShellWM::setParent(Shell* shell)
+void WorkspaceManager::setParent(Workspace* workspace)
 {
-    _parent = shell;
+    _parent = workspace;
 
     onSetParent(_parent);
 }
 
 
-//Gfx::PaintSurface& ShellWM::surface()
+//Gfx::PaintSurface& WorkspaceManager::surface()
 //{
 //    return _surface;
 //}
 //
 //
-//const Gfx::PaintSurface& ShellWM::surface() const
+//const Gfx::PaintSurface& WorkspaceManager::surface() const
 //{
 //    return _surface;
 //}
 //
 //
-//void ShellWM::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+//void WorkspaceManager::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 //{
 //    if( ! surface )
 //    {
@@ -96,39 +96,39 @@ void ShellWM::setParent(Shell* shell)
 //}
 
 
-void ShellWM::onProcessEvent(const Pt::Event& ev)
+void WorkspaceManager::onProcessEvent(const Pt::Event& ev)
 {
     WindowManager::onProcessEvent(ev);
 }
 
 
-Window* ShellWM::activeWindow()
+Window* WorkspaceManager::activeWindow()
 {
     return _activeWindow;
 }
 
 
-void ShellWM::onRequestActivate(bool active)
+void WorkspaceManager::onRequestActivate(bool active)
 {
     if(_parent)
         _parent->onActivate(*this, active);
 }
 
 
-const std::vector<Window*>& ShellWM::windows() const
+const std::vector<Window*>& WorkspaceManager::windows() const
 {
     return _windowList;
 }
 
 
-Gfx::PointF ShellWM::toFrame(const ShellWindowFrame& w, 
+Gfx::PointF WorkspaceManager::toFrame(const WorkspaceFrame& w, 
                              const Gfx::PointF& pos) const
 {
     return pos - w.position();
 }
 
 
-Gfx::PointF ShellWM::fromFrame(const ShellWindowFrame& w, 
+Gfx::PointF WorkspaceManager::fromFrame(const WorkspaceFrame& w, 
                                const Gfx::PointF& pos) const
 {
     return pos + w.position();
@@ -138,19 +138,19 @@ Gfx::PointF ShellWM::fromFrame(const ShellWindowFrame& w,
 // Widget
 ///////////////////////////////////////////////////////////////////////
 
-Gfx::PointF ShellWM::onToParent(const Gfx::PointF& pos) const
+Gfx::PointF WorkspaceManager::onToParent(const Gfx::PointF& pos) const
 {
     return pos + position();
 }
 
 
-Gfx::PointF ShellWM::onFromParent(const Gfx::PointF& pos) const
+Gfx::PointF WorkspaceManager::onFromParent(const Gfx::PointF& pos) const
 {
     return pos - position();
 }
 
 
-Widget* ShellWM::onHitTest(const Gfx::PointF& p)
+Widget* WorkspaceManager::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )
         return 0;
@@ -159,7 +159,7 @@ Widget* ShellWM::onHitTest(const Gfx::PointF& p)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->frame() );
+        WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
 
         if( ! window->isVisible() )
             continue;
@@ -174,7 +174,7 @@ Widget* ShellWM::onHitTest(const Gfx::PointF& p)
 }
 
 
-void ShellWM::onRequestCapture(bool capture)
+void WorkspaceManager::onRequestCapture(bool capture)
 {
     Widget::onRequestCapture(capture);
 }
@@ -183,9 +183,9 @@ void ShellWM::onRequestCapture(bool capture)
 // WindowManager
 ///////////////////////////////////////////////////////////////////////
 
-WindowFrame* ShellWM::onAttach(Window& w)
+WindowFrame* WorkspaceManager::onAttach(Window& w)
 {
-    ShellWindowFrame* frame = new ShellWindowFrame(*this, w);
+    WorkspaceFrame* frame = new WorkspaceFrame(*this, w);
     frame->setNextResponder(this);
 
     if(_topMostWindow)
@@ -197,7 +197,7 @@ WindowFrame* ShellWM::onAttach(Window& w)
 }
 
 
-void ShellWM::onDetach(WindowFrame& frame)
+void WorkspaceManager::onDetach(WindowFrame& frame)
 {
     frame.setNextResponder(0);
 
@@ -223,7 +223,7 @@ void ShellWM::onDetach(WindowFrame& frame)
 }
 
 
-void ShellWM::onInit(WindowFrame& frame)
+void WorkspaceManager::onInit(WindowFrame& frame)
 {
     double scaling = scaleFactor();
     
@@ -232,7 +232,7 @@ void ShellWM::onInit(WindowFrame& frame)
 }
 
 
-void ShellWM::onRelease(WindowFrame& frame)
+void WorkspaceManager::onRelease(WindowFrame& frame)
 {
     if( frame.isVisible() )
     {
@@ -242,14 +242,14 @@ void ShellWM::onRelease(WindowFrame& frame)
 }
 
 
-void ShellWM::onShow(ShellWindowFrame& frame, bool visible)
+void WorkspaceManager::onShow(WorkspaceFrame& frame, bool visible)
 {
     ShowEvent windowEvent( frame, visible );
     Application::instance().loop().commitEvent(windowEvent);
 }
 
 
-void ShellWM::onActivate(ShellWindowFrame& frame, bool active)
+void WorkspaceManager::onActivate(WorkspaceFrame& frame, bool active)
 {
     Window& w = frame.window();
 
@@ -293,7 +293,7 @@ void ShellWM::onActivate(ShellWindowFrame& frame, bool active)
 }
 
 
-void ShellWM::onEnable(ShellWindowFrame& frame, bool enable)
+void WorkspaceManager::onEnable(WorkspaceFrame& frame, bool enable)
 {
     if( ! isEnabled() )
       enable = false;
@@ -303,7 +303,7 @@ void ShellWM::onEnable(ShellWindowFrame& frame, bool enable)
 }
 
 
-void ShellWM::onSetAbove(ShellWindowFrame& frame, bool above)
+void WorkspaceManager::onSetAbove(WorkspaceFrame& frame, bool above)
 {
     Window& w = frame.window();
 
@@ -329,39 +329,39 @@ void ShellWM::onSetAbove(ShellWindowFrame& frame, bool above)
 }
 
 
-//void ShellWM::onSetTitle(Window& w, const std::string& text)
+//void WorkspaceManager::onSetTitle(Window& w, const std::string& text)
 //{
 //    w.frame())->setTitle(text);
 //}
 
 
-//void ShellWM::onSetIcon(Window& w, const Gfx::Image& icon)
+//void WorkspaceManager::onSetIcon(Window& w, const Gfx::Image& icon)
 //{
 //    w.frame())->setIcon(icon);
 //}
 
 
-//void ShellWM::onSetState(Window& w, const WindowState& state)
+//void WorkspaceManager::onSetState(Window& w, const WindowState& state)
 //{
 //    w.frame())->setState(state);
 //}
 
 
-void ShellWM::onSetSizeLimits(ShellWindowFrame& w, 
+void WorkspaceManager::onSetSizeLimits(WorkspaceFrame& w, 
                               const Gfx::SizeF& minSize, 
                               const Gfx::SizeF& maxSize)
 {
 }
 
 
-//void ShellWM::onClosing(Window& w)
+//void WorkspaceManager::onClosing(Window& w)
 //{         
 //    CloseEvent ev(w);
 //    Application::instance().loop().commitEvent(ev);
 //}
 
 
-void ShellWM::onClose(ShellWindowFrame& wf)
+void WorkspaceManager::onClose(WorkspaceFrame& wf)
 {
     CloseEvent ev(wf);
     Application::instance().loop().commitEvent(ev);
@@ -371,7 +371,7 @@ void ShellWM::onClose(ShellWindowFrame& wf)
 // Implementation
 ///////////////////////////////////////////////////////////////////////
 
-void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
+void WorkspaceManager::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);
 
@@ -394,14 +394,14 @@ void ShellWM::onProcessRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void ShellWM::onRequestRepaint(const Gfx::RectF& rect)
+void WorkspaceManager::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->onRepaint(*this, rect);
 }
 
 
-void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
+void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& rect = ev.rect();
     if( rect.isNull() )
@@ -418,7 +418,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
     for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
     {
         Window* window = *wit;
-        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->frame() );
+        WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
 
         if( ! window->isVisible() )
             continue;
@@ -454,7 +454,7 @@ void ShellWM::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
-void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
+void WorkspaceManager::onProcessEnableEvent(const EnableEvent& ev)
 {
     Base::onProcessEnableEvent(ev);
 
@@ -469,7 +469,7 @@ void ShellWM::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
-void ShellWM::onMove(ShellWindowFrame& frame, const Gfx::PointF& pos)
+void WorkspaceManager::onMove(WorkspaceFrame& frame, const Gfx::PointF& pos)
 {
     Gfx::PointF aligedPos = _parent ? _parent->scaling().align(pos)
                                     : pos;
@@ -479,20 +479,20 @@ void ShellWM::onMove(ShellWindowFrame& frame, const Gfx::PointF& pos)
 }
 
 
-void ShellWM::onResize(ShellWindowFrame& frame, const Gfx::SizeF& to)
+void WorkspaceManager::onResize(WorkspaceFrame& frame, const Gfx::SizeF& to)
 {
     ResizeEvent rev(frame, to);
     Application::instance().commitEvent(rev);
 }
 
 
-void ShellWM::onProcessResizeEvent(const ResizeEvent& ev)
+void WorkspaceManager::onProcessResizeEvent(const ResizeEvent& ev)
 {
     Base::onProcessResizeEvent(ev);
 }
 
 
-void ShellWM::onResizeEvent(const ResizeEvent& ev)
+void WorkspaceManager::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
 
@@ -509,7 +509,7 @@ void ShellWM::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-bool ShellWM::processMouseEvent(const MouseEvent& ev)
+bool WorkspaceManager::processMouseEvent(const MouseEvent& ev)
 {
     //if( ! acceptsInput() )
     //    return;
@@ -525,7 +525,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->frame() );
+        WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
 
         Gfx::PointF p = toFrame(*frame, pos);
         
@@ -566,7 +566,7 @@ bool ShellWM::processMouseEvent(const MouseEvent& ev)
 }
 
 
-bool ShellWM::processTouchEvent(const TouchEvent& ev)
+bool WorkspaceManager::processTouchEvent(const TouchEvent& ev)
 {
     //if( ! acceptsInput() )
     //    return;
@@ -582,7 +582,7 @@ bool ShellWM::processTouchEvent(const TouchEvent& ev)
     for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
     {
         Window* window = *rit;
-        ShellWindowFrame* frame = static_cast<ShellWindowFrame*>( window->frame() );
+        WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
 
         Gfx::PointF p = toFrame(*frame, pos);
         Widget* hit = frame->hitTest(p);
@@ -622,31 +622,31 @@ bool ShellWM::processTouchEvent(const TouchEvent& ev)
 }
 
 
-void ShellWM::onProcessMouseEvent(const MouseEvent& ev)
+void WorkspaceManager::onProcessMouseEvent(const MouseEvent& ev)
 {
     processMouseEvent(ev);
 }
 
 
-void ShellWM::onProcessTouchEvent(const TouchEvent& ev)
+void WorkspaceManager::onProcessTouchEvent(const TouchEvent& ev)
 {
     processTouchEvent(ev);
 }
 
 
-void ShellWM::onProcessEnterEvent(const EnterEvent& ev)
+void WorkspaceManager::onProcessEnterEvent(const EnterEvent& ev)
 {
     Base::onProcessEnterEvent(ev);
 }
 
 
-void ShellWM::onProcessLeaveEvent(const LeaveEvent& ev)
+void WorkspaceManager::onProcessLeaveEvent(const LeaveEvent& ev)
 {
     Base::onProcessLeaveEvent(ev);
 }
 
 
-void ShellWM::onProcessScrollEvent(const ScrollEvent& ev)
+void WorkspaceManager::onProcessScrollEvent(const ScrollEvent& ev)
 {
     //if( ! acceptsInput() )
     //    return;
@@ -659,7 +659,7 @@ void ShellWM::onProcessScrollEvent(const ScrollEvent& ev)
 }
 
 
-void ShellWM::onProcessKeyEvent(const KeyEvent& ev)
+void WorkspaceManager::onProcessKeyEvent(const KeyEvent& ev)
 {
     //if( ! acceptsInput() )
     //    return;

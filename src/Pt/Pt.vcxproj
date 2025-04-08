@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
-<ItemGroup Label="ProjectConfigurations">
-
+  <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Jam Build|x64">
       <Configuration>Jam Build</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-
     <ProjectConfiguration Include="Jam Remote Build|x64">
       <Configuration>Jam Remote Build</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-
   </ItemGroup>
-
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h" />
     <ClInclude Include="..\..\include\Pt\Any.h" />
@@ -67,6 +62,8 @@
     <ClInclude Include="..\..\include\Pt\FixupInfo.h" />
     <ClInclude Include="..\..\include\Pt\Formatter.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Widget.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\Workspace.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\WorkspaceManager.h" />
     <ClInclude Include="..\..\include\Pt\Function.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Algorithm.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
@@ -161,8 +158,6 @@
     <ClInclude Include="..\..\include\Pt\Forms\ScrollEvent.h" />
     <ClInclude Include="..\..\include\Pt\Forms\ScrollLayout.h" />
     <ClInclude Include="..\..\include\Pt\Forms\ScrollView.h" />
-    <ClInclude Include="..\..\include\Pt\Forms\Shell.h" />
-    <ClInclude Include="..\..\include\Pt\Forms\ShellWM.h" />
     <ClInclude Include="..\..\include\Pt\Forms\ShowEvent.h" />
     <ClInclude Include="..\..\include\Pt\Forms\SizePolicy.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Slider.h" />
@@ -716,6 +711,7 @@
     <ClInclude Include="..\Pt-Db\sqlite\StmtRow.h" />
     <ClInclude Include="..\Pt-Db\sqlite\StmtValue.h" />
     <ClInclude Include="..\Pt-Db\ValueImpl.h" />
+    <ClInclude Include="..\Pt-Forms\WorkspaceFrame.h" />
     <ClInclude Include="..\Pt-Gfx\Argb32SIMDOps.h" />
     <ClInclude Include="..\Pt-Gfx\Fixed.h" />
     <ClInclude Include="..\Pt-Gfx\raster\ClipPolygon.h" />
@@ -789,7 +785,6 @@
     <ClInclude Include="..\Pt-Forms\sdl\Keycodes.h" />
     <ClInclude Include="..\Pt-Forms\sdl\PixmapImpl.h" />
     <ClInclude Include="..\Pt-Forms\sdl\ScreenImpl.h" />
-    <ClInclude Include="..\Pt-Forms\ShellWindowFrame.h" />
     <ClInclude Include="..\Pt-Forms\SizeNESWCursor.h" />
     <ClInclude Include="..\Pt-Forms\SizeNSCursor.h" />
     <ClInclude Include="..\Pt-Forms\SizeNWSECursor.h" />
@@ -1385,6 +1380,9 @@
     <ClCompile Include="..\Pt-Db\ValueImpl.cpp" />
     <ClCompile Include="..\Pt-Db\ValueImplTest.cpp" />
     <ClCompile Include="..\Pt-Forms\Widget.cpp" />
+    <ClCompile Include="..\Pt-Forms\Workspace.cpp" />
+    <ClCompile Include="..\Pt-Forms\WorkspaceFrame.cpp" />
+    <ClCompile Include="..\Pt-Forms\WorkspaceManager.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Format.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Image.cpp" />
@@ -1496,9 +1494,6 @@
     <ClCompile Include="..\Pt-Forms\ScrollView.cpp" />
     <ClCompile Include="..\Pt-Forms\sdl\ApplicationImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\sdl\ScreenImpl.cpp" />
-    <ClCompile Include="..\Pt-Forms\Shell.cpp" />
-    <ClCompile Include="..\Pt-Forms\ShellWindowFrame.cpp" />
-    <ClCompile Include="..\Pt-Forms\ShellWM.cpp" />
     <ClCompile Include="..\Pt-Forms\Slider.cpp" />
     <ClCompile Include="..\Pt-Forms\SpinBox.cpp" />
     <ClCompile Include="..\Pt-Forms\StackLayout.cpp" />
@@ -1824,14 +1819,12 @@
     <Image Include="..\libjpeg\testorig.jpg" />
     <Image Include="..\libjpeg\testprog.jpg" />
   </ItemGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'" Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <ProjectGuid>{73AD6414-3E34-46E4-8CE3-FA8C48A8BCAC}</ProjectGuid>
     <Keyword>MakeFileProj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'" Label="Globals">
     <ProjectGuid>{fcad63cd-b82e-4db5-b03d-2c24b4fcbfb5}</ProjectGuid>
     <Keyword>Linux</Keyword>
@@ -1842,33 +1835,25 @@
     <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
     <LinuxProjectType>{FC1A4D80-50E9-41DA-9192-61C0DBAA00D2}</LinuxProjectType>
   </PropertyGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'" Label="Configuration">
     <PlatformToolset>v143</PlatformToolset>
     <ConfigurationType>Makefile</ConfigurationType>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ConfigurationType>Makefile</ConfigurationType>
     <RemoteRootDir>~</RemoteRootDir>
     <RemoteProjectRelDir>$(ProjectName)-Remote</RemoteProjectRelDir>
   </PropertyGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-
   <ImportGroup Label="PropertySheets">
     <Import Project="$(SolutionDir)Pt.props" />
   </ImportGroup>
-
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
-
   <PropertyGroup Label="UserMacros" />
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'">
     <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j4 -sPT_TOP=$(SolutionDir)</NMakeBuildCommandLine>
     <OutDir>$(SolutionDir)build</OutDir>
@@ -1878,7 +1863,6 @@
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;PT_API_EXPORT;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(PT_INCLUDE_SEARCH_PATH)</NMakeIncludeSearchPath>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'">
     <RemoteBuildCommandLine>cd  $(RemoteRootDir)/$(RemoteProjectRelDir); ./jam.sh -q -j4</RemoteBuildCommandLine>
     <RemoteReBuildCommandLine>cd  $(RemoteRootDir)/$(RemoteProjectRelDir); ./jam.sh -qa -j4</RemoteReBuildCommandLine>
@@ -1896,16 +1880,12 @@
     <NMakeIncludeSearchPath>$(PT_INCLUDE_SEARCH_PATH)</NMakeIncludeSearchPath>
     <RemoteDeployDir>$(RemoteRootDir)/$(ProjectName)-Remote</RemoteDeployDir>
   </PropertyGroup>
-
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Jam Remote Build|x64'">
     <RemotePreBuildEvent>
       <Command>chmod +x $(RemoteRootDir)/$(RemoteProjectRelDir)/jam.sh</Command>
     </RemotePreBuildEvent>
   </ItemDefinitionGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-
 </Project>

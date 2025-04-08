@@ -30,7 +30,7 @@
 #define Pt_Forms_ScreenImpl_H
 
 #include <Pt/Forms/Form.h>
-#include <Pt/Forms/Shell.h>
+#include <Pt/Forms/Workspace.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Color.h>
@@ -149,7 +149,7 @@ class ScreenImpl : public Form
 
     private:
         Screen*      _parent;
-        Shell        _shell;
+        Workspace        _workspace;
 
         Pixmap       _pixmap;
 

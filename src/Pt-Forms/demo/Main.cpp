@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include <Pt/Forms/Application.h>
-#include <Pt/Forms/Shell.h>
+#include <Pt/Forms/Workspace.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/System/Logger.h>
 #include <Pt/Main.h>
@@ -36,12 +36,12 @@ int main(int argc, char* args[])
         button.setPadding(10);
         button.clicked() += Pt::slot(app, &Pt::Forms::Application::exit);
 
-        Pt::Forms::Shell shell;
-        shell.addWindow(w1);
+        Pt::Forms::Workspace workspace;
+        workspace.addWindow(w1);
 
         Pt::Forms::DockingLayout layout;
         layout.addItem(button, Pt::Forms::DockingLayout::Top);
-        layout.addItem(shell, Pt::Forms::DockingLayout::Fill);
+        layout.addItem(workspace, Pt::Forms::DockingLayout::Fill);
 
         Pt::Forms::Window main;
         main.setContent(&layout);

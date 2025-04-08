@@ -60,7 +60,7 @@ MainWindow::MainWindow()
 , _scrollContainer(Forms::FlowLayout::Top)
 , _scrollContainer2(Forms::FlowLayout::Top)
 {
-    setContent(&_shell);
+    setContent(&_workspace);
     
     Pt::Gfx::Image im;
 
@@ -81,7 +81,7 @@ MainWindow::MainWindow()
 
     //_child2.setTopMost(true);
     _child2.resize( Gfx::SizeF(550, 600) );
-    //_shell.addWindow( _child2 );
+    //_workspace.addWindow( _child2 );
 
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(10, 10) );
@@ -155,7 +155,7 @@ MainWindow::MainWindow()
     _child2.setContent(&_scrollView);
     //_child2.show(true);  // SHOW DEMO WINDOW 2
 
-    _shell.addWindow( _child1 );
+    _workspace.addWindow( _child1 );
 
     _tabLabel1.setText("Tab Label 1");
     _tabLabel1.setAlignment(Alignment::Center);

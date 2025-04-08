@@ -1,10 +1,10 @@
 /* Copyright (C) 2015 Marc Boris Duerner
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,20 +14,20 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_SHELL_WINDOWFRAME_H
-#define PT_FORMS_SHELL_WINDOWFRAME_H
+#ifndef PT_FORMS_WORKSPACE_FRAME_H
+#define PT_FORMS_WORKSPACE_FRAME_H
 
 #include <Pt/Forms/WindowFrame.h>
 #include <Pt/Forms/Cursor.h>
@@ -43,8 +43,8 @@ namespace Pt {
 namespace Forms {
 
 class Window;
-class ShellWM;
-class ShellWindowFrame;
+class WorkspaceManager;
+class WorkspaceFrame;
 class Application;
 class MouseEvent;
 class KeyEvent;
@@ -61,10 +61,10 @@ class WindowButton
 
         virtual ~WindowButton();
 
-        ShellWindowFrame* parent()
+        WorkspaceFrame* parent()
         { return _frame; }
 
-        void setParent(ShellWindowFrame& frame)
+        void setParent(WorkspaceFrame& frame)
         { _frame  = &frame; }
 
         const Gfx::RectF&  geometry() const
@@ -97,7 +97,7 @@ class WindowButton
 
     private:
         Signal<>           _clicked;
-        ShellWindowFrame*  _frame;
+        WorkspaceFrame*  _frame;
         Gfx::RectF         _geometry;
         Gfx::Color         _color;
         bool               _isPressed;
@@ -147,7 +147,7 @@ class MenuButton : public WindowButton
 };
 
 
-class ShellWindowFrame : public WindowFrame
+class WorkspaceFrame : public WindowFrame
 {
     typedef WindowFrame Base;
 
@@ -167,9 +167,9 @@ class ShellWindowFrame : public WindowFrame
     };
 
     public:
-        ShellWindowFrame(ShellWM& wm, Window& window);
+        WorkspaceFrame(WorkspaceManager& wm, Window& window);
 
-        virtual ~ShellWindowFrame();
+        virtual ~WorkspaceFrame();
 
         //virtual Gfx::PointF clientPos() const;
 
@@ -332,7 +332,7 @@ class ShellWindowFrame : public WindowFrame
         void setCurrentFrameItem(FrameItem item);
 
     private:
-        ShellWM*       _wm;
+        WorkspaceManager*       _wm;
         Window*        _window;
         double         _borderWidth;
         double         _titleHeight;

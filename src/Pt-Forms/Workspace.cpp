@@ -1,11 +1,10 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2015 Marc Boris Duerner
-  
+/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,19 +14,19 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
 */
 
-#include <Pt/Forms/Shell.h>
+#include <Pt/Forms/Workspace.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/MouseEvent.h>
 #include <Pt/Forms/KeyEvent.h>
@@ -45,10 +44,10 @@ namespace Pt {
 namespace Forms {
 
 ///////////////////////////////////////////////////////////////////////
-// Shell
+// Workspace
 ///////////////////////////////////////////////////////////////////////
 
-Shell::Shell()
+Workspace::Workspace()
 : _content(0)
 , _pointer(0)
 {
@@ -58,48 +57,48 @@ Shell::Shell()
 }
 
 
-Shell::~Shell()
+Workspace::~Workspace()
 {
 }
 
 
-void Shell::addWindow(Window& w)
+void Workspace::addWindow(Window& w)
 {
     w.setParent(_wm);
 }
 
 
-void Shell::removeWindow(Window& w)
+void Workspace::removeWindow(Window& w)
 {
     w.unparent();
 }
 
 
-const std::vector<Window*>& Shell::windows() const
+const std::vector<Window*>& Workspace::windows() const
 {
     return _wm.windows();
 }
 
 
-WindowManager& Shell::windowManager()
+WindowManager& Workspace::windowManager()
 {
     return _wm;
 }
 
 
-Control* Shell::content() 
+Control* Workspace::content() 
 {
     return _content;
 }
 
 
-const Control* Shell::content()  const 
+const Control* Workspace::content()  const 
 {
     return _content;
 }
 
 
-void Shell::setContent(Control* control)
+void Workspace::setContent(Control* control)
 {
     if(_content)
     {
@@ -118,7 +117,7 @@ void Shell::setContent(Control* control)
 // Control
 ///////////////////////////////////////////////////////////////////////
 
-void Shell::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+void Workspace::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 {
     Base::onSetSurface(surface, pos);
 
@@ -126,7 +125,7 @@ void Shell::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 }
 
 
-void Shell::onRemoveControl(Control& control)
+void Workspace::onRemoveControl(Control& control)
 {
     Control::onRemoveControl(control);
 
@@ -138,7 +137,7 @@ void Shell::onRemoveControl(Control& control)
 // Widget
 ///////////////////////////////////////////////////////////////////////
 
-Widget* Shell::onHitTest(const Gfx::PointF& p)
+Widget* Workspace::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )
         return 0;
@@ -156,7 +155,7 @@ Widget* Shell::onHitTest(const Gfx::PointF& p)
 // Control
 ///////////////////////////////////////////////////////////////////////
 
-Gfx::SizeF Shell::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Workspace::onMeasure(const SizePolicy& policy)
 {
     if(_content)
         return _content->measure(policy);
@@ -165,7 +164,7 @@ Gfx::SizeF Shell::onMeasure(const SizePolicy& policy)
 }
 
 
-void Shell::onLayout(const Gfx::RectF& rect)
+void Workspace::onLayout(const Gfx::RectF& rect)
 {
     Control::onLayout(rect);
 
@@ -185,18 +184,18 @@ void Shell::onLayout(const Gfx::RectF& rect)
         _content->resize(size);
     }
     
-    //_shell.move( rect.topLeft() );
-    //_shell.resize( rect.size() );
+    //_workspace.move( rect.topLeft() );
+    //_workspace.resize( rect.size() );
 }
 
 
-void Shell::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void Workspace::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 {
     Control::onPaint(surface, rect);
 }
 
 
-void Shell::onProcessRescaleEvent(const RescaleEvent& ev)
+void Workspace::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);
 
@@ -206,7 +205,7 @@ void Shell::onProcessRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void Shell::onProcessPaintEvent(const PaintEvent& ev)
+void Workspace::onProcessPaintEvent(const PaintEvent& ev)
 {
     Control::onProcessPaintEvent(ev);
 
@@ -217,7 +216,7 @@ void Shell::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
-void Shell::onProcessResizeEvent(const ResizeEvent& ev)
+void Workspace::onProcessResizeEvent(const ResizeEvent& ev)
 {
     Control::onProcessResizeEvent(ev);
 
@@ -226,7 +225,7 @@ void Shell::onProcessResizeEvent(const ResizeEvent& ev)
 }
 
 
-void Shell::onProcessEnableEvent(const EnableEvent& ev)
+void Workspace::onProcessEnableEvent(const EnableEvent& ev)
 {
     Control::onProcessEnableEvent(ev);
 
@@ -235,7 +234,7 @@ void Shell::onProcessEnableEvent(const EnableEvent& ev)
 }
 
 
-void Shell::onProcessMouseEvent(const MouseEvent& ev)
+void Workspace::onProcessMouseEvent(const MouseEvent& ev)
 {
     if( ! acceptsInput() )
         return;
@@ -248,7 +247,7 @@ void Shell::onProcessMouseEvent(const MouseEvent& ev)
 }
 
 
-void Shell::onProcessTouchEvent(const TouchEvent& ev)
+void Workspace::onProcessTouchEvent(const TouchEvent& ev)
 {
     bool consumed = _wm.processTouchEvent(ev);
     if(consumed)
@@ -258,19 +257,19 @@ void Shell::onProcessTouchEvent(const TouchEvent& ev)
 }
 
 
-void Shell::onProcessEnterEvent(const EnterEvent& ev)
+void Workspace::onProcessEnterEvent(const EnterEvent& ev)
 {
     Control::onProcessEnterEvent(ev);
 }
 
 
-void Shell::onProcessLeaveEvent(const LeaveEvent& ev)
+void Workspace::onProcessLeaveEvent(const LeaveEvent& ev)
 {
     Control::onProcessLeaveEvent(ev);
 }
 
 
-void Shell::onProcessScrollEvent(const ScrollEvent& ev)
+void Workspace::onProcessScrollEvent(const ScrollEvent& ev)
 {
     if( ! acceptsInput() )
         return;
@@ -285,7 +284,7 @@ void Shell::onProcessScrollEvent(const ScrollEvent& ev)
 }
 
 
-void Shell::onProcessKeyEvent(const KeyEvent& ev)
+void Workspace::onProcessKeyEvent(const KeyEvent& ev)
 {
     if( ! acceptsInput() )
         return;
@@ -303,13 +302,13 @@ void Shell::onProcessKeyEvent(const KeyEvent& ev)
 // WindowManager
 ///////////////////////////////////////////////////////////////////////
 
-void Shell::onRepaint(WindowManager& wm, const Gfx::RectF& rect)
+void Workspace::onRepaint(WindowManager& wm, const Gfx::RectF& rect)
 {
     repaint(rect);
 }
 
 
-void Shell::onActivate(WindowManager& wm, bool active)
+void Workspace::onActivate(WindowManager& wm, bool active)
 {
     activate(active);
 }

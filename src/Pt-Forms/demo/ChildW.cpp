@@ -84,9 +84,9 @@ ChildW::ChildW(const std::string& title)
 
     _mainLayout.addItem(_menuBar, DockingLayout::Top);
 
-    _shell.setContent(&_mainLayout);
+    _workspace.setContent(&_mainLayout);
 
-    setContent(&_shell);
+    setContent(&_workspace);
     
     setTitle(title);
     
@@ -228,7 +228,7 @@ ChildW::ChildW(const std::string& title)
     _childWindow2.resize( Gfx::SizeF(250, 500) );
     _childWindow2.setTitle("Child of " + title);
     _childWindow2.setContent(&_childView);
-    _shell.addWindow( _childWindow2 );
+    _workspace.addWindow( _childWindow2 );
 
     _childWindow2.show(true); // Child A/B
 }

@@ -35,7 +35,7 @@
 #include <Pt/Forms/MenuSubItem.h>
 #include <Pt/Forms/ScrollView.h>
 #include <Pt/Forms/TabView.h>
-#include <Pt/Forms/Shell.h>
+#include <Pt/Forms/Workspace.h>
 #include "ChildW.h"
 
 namespace Pt {
@@ -79,7 +79,7 @@ class MainWindow : public Pt::Forms::Window
         MenuItem _zoomItem2;
         MenuItem _zoomItem3;
             
-        Shell _shell;
+        Workspace _workspace;
 
         ChildW _child1;
         Window _child2;

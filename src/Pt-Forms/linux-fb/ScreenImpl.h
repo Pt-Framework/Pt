@@ -34,7 +34,7 @@
 #include "FrameBuffer.h"
 
 #include <Pt/Forms/Form.h>
-#include <Pt/Forms/Shell.h>
+#include <Pt/Forms/Workspace.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
@@ -180,7 +180,7 @@ class ScreenImpl : public Form
         Pixmap                       _pixmap;
 
         Screen*                      _parent;
-        Shell                        _shell;
+        Workspace                        _workspace;
         
         double                       _dpi;       
         Gfx::Image                   _cursorBackground;
