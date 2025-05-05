@@ -28,7 +28,7 @@
 
 #import "WindowView.h"
 
-#include <Pt/Hmi/Application.h>
+#include <Pt/Forms/Application.h>
 
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
@@ -39,7 +39,7 @@
 
 @implementation WindowView
 
-- (WindowView*) initWithImpl: (Pt::Hmi::WindowImpl*) window
+- (WindowView*) initWithImpl: (Pt::Forms::WindowImpl*) window
 {
     self = [super init];
     _windowImpl = window;

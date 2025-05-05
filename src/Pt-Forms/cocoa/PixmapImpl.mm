@@ -30,13 +30,13 @@
 #include "PixmapImpl.h"
 #include "PaintContext.h"
 
-#include <Pt/Hmi/Pixmap.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Utf8Codec.h>
 
 namespace Pt {
 
-namespace Hmi {
+namespace Forms {
 
 ///////////////////////////////////////////////////////////////////////
 // PixmapCanvas

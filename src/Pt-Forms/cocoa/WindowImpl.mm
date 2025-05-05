@@ -35,16 +35,16 @@
 
 #include "KeyMap.h"
 
-#include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Screen.h>
-#include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/WindowManager.h>
-#include <Pt/Hmi/WindowStateEvent.h>
-#include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Forms/Application.h>
+#include <Pt/Forms/Screen.h>
+#include <Pt/Forms/Window.h>
+#include <Pt/Forms/WindowManager.h>
+#include <Pt/Forms/WindowStateEvent.h>
+#include <Pt/Forms/PaintEvent.h>
 
 namespace Pt {
 
-namespace Hmi {
+namespace Forms {
 
 WindowImpl::WindowImpl(ScreenImpl& wm,  Window& w)
 : WindowFrame(wm, w)
@@ -283,6 +283,8 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
+
+    //std::clog << "RESCALE EVENT: " << [_window backingScaleFactor] << std::endl;
     //scaling *= [_window backingScaleFactor];
 
     RescaleEvent rev(*this, scaling);
@@ -757,7 +759,7 @@ void WindowImpl::onViewDidRescale()
 void WindowImpl::onViewClosing()
 {
     CloseEvent ev(*this);
-    Pt::Hmi::Application::instance().commitEvent(ev);
+    Pt::Forms::Application::instance().commitEvent(ev);
 }
 
 
@@ -804,7 +806,7 @@ void WindowImpl::onViewKeyDown(unsigned vkey, Pt::Char ch)
 
     Key key(_keyModifiers, keyCode);
     _keyEvent.setPress(key, ch);
-    _keyEvent.setVisual(&_client);
+    _keyEvent.setWidget(&_client);
 
     Application::instance().processEvent(_keyEvent);
 }
@@ -825,7 +827,7 @@ void WindowImpl::onViewKeyUp(unsigned vkey, Pt::Char ch)
 
     Key key(_keyModifiers, keyCode);
     _keyEvent.setRelease(key, ch);
-    _keyEvent.setVisual(&_client);
+    _keyEvent.setWidget(&_client);
 
     Application::instance().processEvent(_keyEvent);
 }
@@ -879,7 +881,7 @@ void WindowImpl::onViewKeyModifier(unsigned int mask)
                       ( ! wasMeta    && meta);
 
     Key key(_keyModifiers, keyCode);
-    _keyEvent.setVisual(&_client);
+    _keyEvent.setWidget(&_client);
 
     if(wasPressed)
         _keyEvent.setRelease( key, Pt::Char() );
@@ -902,7 +904,7 @@ void WindowImpl::onViewLMouseDown(double x, double y)
 
     _mouseEvent.setPress(MouseEvent::Left);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
-    _mouseEvent.setVisual(&_client);
+    _mouseEvent.setWidget(&_client);
 
     Application::instance().processEvent(_mouseEvent);
 }
@@ -920,7 +922,7 @@ void WindowImpl::onViewLMouseUp(double x, double y)
 
     _mouseEvent.setRelease(MouseEvent::Left);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
-    _mouseEvent.setVisual(&_client);
+    _mouseEvent.setWidget(&_client);
 
     Application::instance().processEvent(_mouseEvent);
 }
@@ -938,7 +940,7 @@ void WindowImpl::onViewMouseMove(double x, double y)
 
     _mouseEvent.setMove();
     _mouseEvent.setPosition( _client.toGlobal(pos) );
-    _mouseEvent.setVisual(&_client);
+    _mouseEvent.setWidget(&_client);
 
     Application::instance().processEvent(_mouseEvent);
 }

@@ -172,7 +172,6 @@
     <ClInclude Include="..\..\include\Pt\Forms\TouchEvent.h" />
     <ClInclude Include="..\..\include\Pt\Forms\View.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Window.h" />
-    <ClInclude Include="..\..\include\Pt\Forms\WindowBase.h" />
     <ClInclude Include="..\..\include\Pt\Forms\WindowFrame.h" />
     <ClInclude Include="..\..\include\Pt\Forms\WindowManager.h" />
     <ClInclude Include="..\..\include\Pt\Forms\WindowStateEvent.h" />
@@ -1509,7 +1508,6 @@
     <ClCompile Include="..\Pt-Forms\win32\ScreenImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\win32\WindowImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\Window.cpp" />
-    <ClCompile Include="..\Pt-Forms\WindowBase.cpp" />
     <ClCompile Include="..\Pt-Forms\WindowFrame.cpp" />
     <ClCompile Include="..\Pt-Forms\WindowManager.cpp" />
     <ClCompile Include="..\Pt-Forms\winrt\ApplicationImpl.cpp" />

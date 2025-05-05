@@ -30,13 +30,13 @@
 #include "ApplicationImpl.h"
 #include "WindowImpl.h"
 
-#include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Forms/Window.h>
+#include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintEvent.h>
 
 namespace Pt {
 
-namespace Hmi {
+namespace Forms {
 
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _parent(0)
@@ -134,10 +134,10 @@ Gfx::PointF ScreenImpl::fromFrame(const WindowImpl& frame,
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Visual
+// Widget
 ///////////////////////////////////////////////////////////////////////
 
-Visual* ScreenImpl::onHitTest(const Gfx::PointF& p)
+Widget* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
     double scaling = scaleFactor();
 
@@ -342,12 +342,13 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //}
 
 
-void ScreenImpl::setCapture(Visual* capture)
+void ScreenImpl::setCapture(Widget* capture)
 {
     if(_captureMonitor)
     {
         //std::clog << "RELEASE CAPTURE NSWINDOW: " << _captureMonitor << std::endl;
-        [NSEvent removeMonitor: (id)_captureMonitor];
+        
+        [NSEvent removeMonitor:_captureMonitor];
         _captureMonitor = 0;
     }
 
@@ -511,7 +512,7 @@ void ScreenImpl::onEnable(bool e)
 
 void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    ev.widget()->processEvent(ev);
 }
 
 
@@ -524,7 +525,7 @@ bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
 
 void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    ev.widget()->processEvent(ev);
 }
 
 
@@ -537,7 +538,7 @@ bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
 
 void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
 {
-    ev.visual()->processEvent(ev);
+    ev.widget()->processEvent(ev);
 }
 
 
@@ -550,9 +551,9 @@ bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
 
 void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 {
-    Visual* visual = ev.visual();
-    if(visual)
-        ev.visual()->processEvent(ev);
+    Widget* widget = ev.widget();
+    if(widget)
+        widget->processEvent(ev);
 
     // TODO: dispatch to active window
 }

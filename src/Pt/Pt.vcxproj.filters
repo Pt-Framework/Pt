@@ -1857,9 +1857,6 @@
     <ClInclude Include="..\..\include\Pt\Forms\Window.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\WindowBase.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\WindowFrame.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
@@ -4821,9 +4818,6 @@
       <Filter>Pt-Forms</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\Window.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\WindowBase.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\WindowFrame.cpp">

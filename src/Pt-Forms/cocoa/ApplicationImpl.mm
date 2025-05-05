@@ -91,7 +91,7 @@
 
 namespace Pt {
 
-namespace Hmi {
+namespace Forms {
 
 void MainLoopImplOnWake(void* p)
 {

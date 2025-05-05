@@ -39,11 +39,14 @@
 #include <Pt/Signal.h>
 
 #ifdef __OBJC__
+    #import <AppKit/NSEvent.h>
     #import <AppKit/NSWindow.h>
     #import <AppKit/NSApplication.h>
 #else
     struct NSPoint;
     struct NSWindow;
+
+    #include <objc/objc-runtime.h> 
 #endif
 
 namespace Pt {
@@ -201,7 +204,7 @@ class ScreenImpl : public WindowManager
         Screen*                      _parent;
         std::vector<Window*>         _windows;
 
-        void*                        _captureMonitor;
+        ::id                         _captureMonitor;
 
         double                       _screenScaling;
 };
