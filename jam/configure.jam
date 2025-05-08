@@ -67,6 +67,10 @@ rule ConfigureSwitch
             TryCommand $(CP) $(JAMRULES).$(_config) Jamrules ;
             Exit "Using " $(JAMRULES).$(_config) : 0 ;
         }
+        else
+        {
+            Exit "No such configuration." ;
+        }
     }
 }
 
