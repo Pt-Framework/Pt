@@ -66,6 +66,8 @@ class PixmapCanvas : public Gfx::Canvas
         CGContextRef context() const
         { return _context; }
 
+        CGImageRef getCGImage() const;
+
         void set(const Gfx::Image& image);
         
         Gfx::Image toImage() const;
@@ -178,8 +180,12 @@ class PixmapCanvas : public Gfx::Canvas
         size_t         _width;
         size_t         _height;
 
-        CGContextRef   _context;
-        PaintContext*  _paintContext;
+        CGColorSpaceRef     _colorSpace;
+        CGContextRef        _context;
+        mutable CGImageRef _image;
+        mutable bool       _imageModified;
+
+        PaintContext*   _paintContext;
 
         Gfx::CompositionMode _compositionMode;
         CGRect               _clipRect;
@@ -217,6 +223,8 @@ class PixmapImpl : public Gfx::PaintSurface
                   const Gfx::RectF* rect) const;
 
         CGContextRef context() const;
+
+        CGImageRef getCGImage() const;
 
     public:
         static const std::string& defaultFont();

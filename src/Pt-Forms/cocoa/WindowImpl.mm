@@ -42,6 +42,8 @@
 #include <Pt/Forms/WindowStateEvent.h>
 #include <Pt/Forms/PaintEvent.h>
 
+#include <Pt/System/Clock.h>
+
 namespace Pt {
 
 namespace Forms {
@@ -284,8 +286,9 @@ void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
 
-    //std::clog << "RESCALE EVENT: " << [_window backingScaleFactor] << std::endl;
-    //scaling *= [_window backingScaleFactor];
+    std::clog << "RESCALE EVENT: " << [_window backingScaleFactor] << std::endl;
+    std::clog << "APP SCALLING: " << Application::instance().scaleFactor() << std::endl;
+    scaling *= [_window backingScaleFactor];
 
     RescaleEvent rev(*this, scaling);
     Base::onProcessRescaleEvent(rev);
@@ -450,17 +453,20 @@ void WindowImpl::onEnableEvent(const EnableEvent& ev)
 
 void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
-    //std::clog << "MOVE: " << p.x() << "," 
-    //                      << p.y() << std::endl;
+    //std::clog << "MOVE: " << pos.x() << "," 
+    //                      << pos.y() << std::endl;
 
-    double scaling = scaleFactor();
+    //double scaling = scaleFactor();
 
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
 
-    CGFloat y = screenHeight - pos.y() / scaling - windowHeight;
-    NSPoint origin = NSMakePoint(pos.x() / scaling, y);
+    std::clog << "TODO: WindowImpl.mm 462: get height of parent screen" << screenHeight << std::endl;
 
+    CGFloat y = screenHeight - pos.y() /* / scaling */ - windowHeight;
+    NSPoint origin = NSMakePoint(pos.x() /* / scaling*/, y);
+
+    //std::clog << "ORIGIN: " << origin.x << "," << origin.y << std::endl;
     [_window setFrameOrigin:origin];
 }
 
@@ -479,15 +485,15 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
     //std::clog << "RESIZE: " << size.width() << "," 
     //                        << size.height() << std::endl;
 
-    double scaling = scaleFactor();
+    //double scaling = scaleFactor();
 
     NSRect frameRect = [_window frame];
     NSRect contentRect = [_window contentRectForFrameRect:frameRect];
 
-    contentRect.origin.y += contentRect.size.height - size.height() / scaling;
+    contentRect.origin.y += contentRect.size.height - size.height();// / scaling;
     
-    contentRect.size.width = size.width() / scaling;
-    contentRect.size.height = size.height() / scaling;
+    contentRect.size.width = size.width();// / scaling;
+    contentRect.size.height = size.height();// / scaling;
 
     frameRect = [_window frameRectForContentRect:contentRect];
     [_window setFrame:frameRect display:NO animate:NO];
@@ -625,48 +631,43 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     //std::clog << "ON PAINT: " << rect.size.width << "x" 
     //                          << rect.size.height << std::endl;
 
-    NSRect frameRect = [_window frame];
-    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
-    CGFloat contentHeight = contentRect.size.height;
+    NSRect frame = [_window frame];
+    NSRect content = [_window contentRectForFrameRect:frame];
 
     double x = rect.origin.x;
-    double y = contentHeight - (rect.origin.y + rect.size.height);
+    double y = content.size.height - (rect.origin.y + rect.size.height);
     Pt::Gfx::PointF pos(x, y);
 
     double width = rect.size.width;
     double height = rect.size.height;
     Gfx::SizeF size(width, height);
 
-    double scaling = scaleFactor();
-    pos = pos / scaling;
-    size = size / scaling;
-
+    //System::Clock c1;
+    //c1.start();
+    
     Gfx::RectF paintRect(pos, size);
     PaintEvent pev(*this, paintRect);
     processEvent(pev);
 
-    NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
-    CGContextRef windowContext = [graphicsContext CGContext];
+    //std::clog << "Paint time: " << c1.stop().toUSecs() / 1000.0 << " msecs" << std::endl;
 
-    CGContextRef pixmapContext = pixmap().impl()->context();
-    CGImageRef image = CGBitmapContextCreateImage(pixmapContext);
-    CGFloat imageHeight = CGImageGetHeight(image);
+    CGImageRef image = pixmap().impl()->getCGImage();
 
-    CGFloat subImageX = rect.origin.x * scaling;
-    CGFloat subImageY = rect.origin.y * scaling;
-    CGFloat subImageWidth = rect.size.width * scaling;
-    CGFloat subImageHeight = rect.size.height * scaling;
-    
-    CGRect subRect = CGRectMake(subImageX,
-                                imageHeight - subImageY - subImageHeight,
-                                subImageWidth, 
-                                subImageHeight);
+    CGFloat subImageX = rect.origin.x * scaleFactor();
+    CGFloat subImageY = rect.origin.y * scaleFactor();
+    CGFloat subImageWidth = rect.size.width * scaleFactor();
+    CGFloat subImageHeight = rect.size.height * scaleFactor();
+
+    CGRect subRect = CGRectMake(subImageX, subImageY,
+                                subImageWidth, subImageHeight);
     
     CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
 
+    NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
+    CGContextRef windowContext = [graphicsContext CGContext];
     CGContextDrawImage(windowContext, rect, subImage);
-
-    CGImageRelease(image);
+    
+    CGImageRelease(subImage);
 }
 
 
@@ -900,7 +901,7 @@ void WindowImpl::onViewLMouseDown(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    pos /= _client.scaleFactor();
+    //pos /= _client.scaleFactor();
 
     _mouseEvent.setPress(MouseEvent::Left);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -918,7 +919,7 @@ void WindowImpl::onViewLMouseUp(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    pos /= _client.scaleFactor();
+    //pos /= _client.scaleFactor();
 
     _mouseEvent.setRelease(MouseEvent::Left);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -936,7 +937,7 @@ void WindowImpl::onViewMouseMove(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    pos /= _client.scaleFactor();
+    //pos /= _client.scaleFactor();
 
     _mouseEvent.setMove();
     _mouseEvent.setPosition( _client.toGlobal(pos) );

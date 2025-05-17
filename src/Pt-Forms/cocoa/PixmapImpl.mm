@@ -47,7 +47,10 @@ PixmapCanvas::PixmapCanvas(Gfx::PaintSurface& surface)
 , _physicalSize(0, 0)
 , _width(0)
 , _height(0)
+, _colorSpace(0)
 , _context(0)
+, _image(0)
+, _imageModified(false)
 , _paintContext(0)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 , _clipRect(CGRectNull)
@@ -64,25 +67,49 @@ PixmapCanvas::~PixmapCanvas()
 
 void PixmapCanvas::create()
 {
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    _colorSpace = CGColorSpaceCreateDeviceRGB();
     
     _context = CGBitmapContextCreate(0, _width, _height,
-                                     8, 0, colorSpace, 
+                                     8, 0, _colorSpace, 
                                      kCGImageAlphaPremultipliedLast);
 
-    CGColorSpaceRelease(colorSpace);
-
-    //std::clog << "PIXMAP: " << _context << " " << _width << "x" 
+    _imageModified = true;
+    
+    //std::clog << "PIXMAP: " << this << " " << _width << "x" 
     //                        << _height << std::endl;
 }
 
 
 void PixmapCanvas::destroy()
 {
+    if(_image)
+        CGImageRelease(_image);
+
     if(_context)
         CGContextRelease(_context);
     
+    if(_colorSpace)
+        CGColorSpaceRelease(_colorSpace);
+
+    _image = 0;
     _context = 0;
+    _colorSpace = 0;
+}
+
+
+CGImageRef PixmapCanvas::getCGImage() const
+{
+    //return CGBitmapContextCreateImage(_context);
+    if(_imageModified)
+    {
+        if(_image)
+            CGImageRelease(_image);
+
+        _image = CGBitmapContextCreateImage(_context);
+        _imageModified = false;
+    }
+
+    return _image;
 }
 
 
@@ -337,10 +364,12 @@ void PixmapCanvas::onClipChanged()
     }
     else 
     {
-        _clipRect = CGRectMake( clipRect->x(), 
-                                _height - clipRect->y() - clipRect->height(), 
-                                clipRect->width(), 
-                                clipRect->height() );
+        Gfx::RectF rect = scaling().toPhysical(*clipRect);
+
+        _clipRect = CGRectMake( rect.x(), 
+                                _height - rect.y() - rect.height(), 
+                                rect.width(), 
+                                rect.height() );
     }
 }
 
@@ -393,6 +422,8 @@ void PixmapCanvas::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
     CGContextAddLineToPoint(_context, to.x(), to.y());
     CGContextStrokePath(_context);
     endClip();
+
+    _imageModified = true;
 }
 
 
@@ -406,18 +437,25 @@ void PixmapCanvas::onDrawPolyline(const Gfx::Polyline& line)
 
     Gfx::PointF first = line.at(0);
     first = transform(first);
+    //std::clog << "DRAW POLY: " << first.x() << "," << first.y() << "  ";
+
     CGContextMoveToPoint(_context, first.x(), first.y());
 
     for(unsigned i = 1; i < n; i++)
     {
         Gfx::PointF p = line.at(i);
         p = transform(p);
+        //std::clog << p.x() << "," << p.y() << "  ";
+
         CGContextAddLineToPoint(_context, p.x(), p.y());
     }
 
+    //std::clog << std::endl;
     CGContextStrokePath(_context);
 
     endClip();
+
+    _imageModified = true;
 }
 
 
@@ -431,18 +469,25 @@ void PixmapCanvas::onFillPolygon(const Gfx::Polyline& line)
 
     Gfx::PointF first = line.at(0);
     first = transform(first);
+    //std::clog << "FILL POLY: " << first.x() << "," << first.y() << "  ";
+
     CGContextMoveToPoint(_context, first.x(), first.y());
 
     for(unsigned i = 1; i < n; i++)
     {
         Gfx::PointF p = line.at(i);
         p = transform(p);
+        //std::clog << p.x() << "," << p.y() << "  ";
+
         CGContextAddLineToPoint(_context, p.x(), p.y());
     }
     
+    //std::clog << std::endl;
     CGContextFillPath(_context);
-    
+
     endClip();
+
+    _imageModified = true;
 }
 
 
@@ -454,11 +499,16 @@ void PixmapCanvas::onDrawRect(const Gfx::RectF& rect)
     beginClip();
     CGContextStrokeRect(_context, cgRect);
     endClip();
+
+    _imageModified = true;
 }
 
 
 void PixmapCanvas::onFillRect(const Gfx::RectF& rect)
 {
+    //std::clog << "CANVAS FILL RECT: " << rect.x() << "," << rect.y() << " " 
+    //          << rect.width() << "x" << rect.height() << std::endl;
+
     CGFloat y = _height - rect.y() - rect.height();
     CGRect cgRect = CGRectMake( rect.x(), y, rect.width(), rect.height() );
 
@@ -469,6 +519,7 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& rect)
     //CGContextSetRGBFillColor (_context, 1, 0, 1, 1);
     //CGContextFillRect (_context, CGRectMake(0, 0, 100, 100));
 
+    _imageModified = true;
 }
 
 
@@ -481,6 +532,8 @@ void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
     CGContextAddEllipseInRect(_context, rect);
     CGContextStrokePath(_context);
     endClip();
+
+    _imageModified = true;
 }
 
 
@@ -512,6 +565,8 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
     // CGContextAddPath(_context, path);
     // CGContextFillPath(_context);
     // CGPathRelease(path);
+
+    _imageModified = true;
 }
 
 
@@ -602,6 +657,8 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     CFRelease(textColor);
 
     // ALTERNATIVE: CTRunDraw
+
+    _imageModified = true;
 }
 
 void PixmapCanvas::onDrawImage(const Gfx::PointF& to, 
@@ -610,6 +667,9 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
 {
     if( image.empty() )
         return;
+
+    //std::clog << "onDrawImage: " << this << " "
+    //          << to.x() << "," << to.y() << std::endl;
 
     const Pt::uint8_t* data = image.data();
     std::size_t dataSize = image.format().imageSize( image.width(), 
@@ -637,6 +697,8 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
     CFRelease(imageRef);
     CFRelease(colorSpace);
     CFRelease(provider);
+
+    _imageModified = true;
 }
 
 
@@ -656,25 +718,33 @@ bool PixmapCanvas::onDrawLayer(const Gfx::PointF& to,
 }
 
 
-void PixmapCanvas::onDrawPixmap(const Gfx::PointF& to, 
+void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toL, 
                                 const PixmapImpl& pixmap,
-                                const Gfx::RectF* rect)
+                                const Gfx::RectF* rectL)
 {
-    CGImageRef image = CGBitmapContextCreateImage( pixmap.context() );
+    Gfx::PointF to = _scaling.toPhysical(toL);
+    CGImageRef image = pixmap.getCGImage();
 
-    if(rect)
+    if(rectL)
     {
-        CGRect subRect = CGRectMake(rect->left(), 
-                                    rect->top(), 
-                                    rect->size().width(), 
-                                    rect->size().height());
+        Gfx::RectF rect = _scaling.toPhysical(*rectL);
+
+        //std::clog << "onDrawPixmap: " << this << " "
+        //          << to.x() << "," << to.y() << " "
+        //          << rect.x() << "," << rect.y() << " "
+        //          << rect.width() << "x" << rect.height() << std::endl;
+
+        CGRect subRect = CGRectMake(rect.left(), 
+                                    rect.top(), 
+                                    rect.size().width(), 
+                                    rect.size().height());
 
         CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
 
         CGRect destRect = CGRectMake(to.x(), 
-                                     _height - to.y() - rect->height(), 
-                                     rect->width(), 
-                                     rect->height());
+                                     _height - to.y() - rect.height(), 
+                                     rect.width(), 
+                                     rect.height());
         beginClip();
         CGContextDrawImage(_context, destRect, subImage);
         endClip();
@@ -683,16 +753,20 @@ void PixmapCanvas::onDrawPixmap(const Gfx::PointF& to,
     }
     else
     {
+        //std::clog << "onDrawPixmap: " << this << " " << to.x() << "," << to.y() << " FULL" << std::endl;
+
         CGRect destRect = CGRectMake(to.x(), 
                                      _height - to.y() - pixmap.size().height(), 
                                      pixmap.size().width(), 
                                      pixmap.size().height());
+
+        //std::clog << "dest: " << this << " " << destRect.origin.x << ", " << destRect.origin.y << std::endl;
         beginClip();
         CGContextDrawImage(_context, destRect, image);
         endClip();
     }
 
-    CGImageRelease(image);
+    _imageModified = true;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -710,6 +784,12 @@ PixmapImpl::PixmapImpl()
 PixmapImpl::~PixmapImpl()
 {
     delete _canvas;
+}
+
+
+CGImageRef PixmapImpl::getCGImage() const
+{
+    return _canvas->getCGImage();
 }
 
 

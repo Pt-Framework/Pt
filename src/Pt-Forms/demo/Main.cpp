@@ -34,20 +34,21 @@ int main(int argc, char* args[])
         Pt::Forms::PushButton button;
         button.setText("Quit");
         button.setPadding(10);
+        button.setMargin(10);
         button.clicked() += Pt::slot(app, &Pt::Forms::Application::exit);
 
         Pt::Forms::Workspace workspace;
         workspace.addWindow(w1);
 
         Pt::Forms::DockingLayout layout;
-        layout.addItem(button, Pt::Forms::DockingLayout::Top);
+        layout.addItem(button, Pt::Forms::DockingLayout::Bottom);
         layout.addItem(workspace, Pt::Forms::DockingLayout::Fill);
 
         Pt::Forms::Window main;
         main.setContent(&layout);
         main.setTitle("Main Window");
         main.resize( Pt::Gfx::SizeF(500, 500) );
-        main.move( Pt::Gfx::PointF(100, 50) );
+        main.move( Pt::Gfx::PointF(100, 100) );
         main.show();
         main.activate();
 #endif        
