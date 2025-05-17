@@ -642,9 +642,8 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     double height = rect.size.height;
     Gfx::SizeF size(width, height);
 
-    //System::Clock c1;
-    //c1.start();
-    
+    //System::Clock c1; c1.start();
+ 
     Gfx::RectF paintRect(pos, size);
     PaintEvent pev(*this, paintRect);
     processEvent(pev);
