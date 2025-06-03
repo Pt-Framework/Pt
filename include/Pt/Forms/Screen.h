@@ -90,6 +90,9 @@ class PT_FORMS_API Screen : public Widget
 
         virtual void onShow(ScreenImpl& s, bool isShow);
 
+        // TODO: name clash with Widget base class
+        using Base::onShow;
+
     //
     // Widget
     //

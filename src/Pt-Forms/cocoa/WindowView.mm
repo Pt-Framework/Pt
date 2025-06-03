@@ -33,6 +33,7 @@
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
 #import <AppKit/NSTrackingArea.h>
+#import <AppKit/NSAnimationContext.h>
 
 #include <CoreGraphics/CoreGraphics.h>
 
@@ -40,10 +41,24 @@
 @implementation WindowView
 
 - (WindowView*) initWithImpl: (Pt::Forms::WindowImpl*) window
+                frame: (NSRect) frame
 {
-    self = [super init];
     _windowImpl = window;
-    
+    _invalidRect = frame;
+
+    self = [super initWithFrame: frame];
+    [self setWantsLayer:NO];
+    [self setAutoresizingMask: NSViewWidthSizable|NSViewHeightSizable];
+
+    // TODO: move this to a separate class WindowController also implemnting 
+    //       WindowDelegate
+    [_windowImpl->window() setDelegate: self];
+
+    [_windowImpl->window() addObserver:self
+                            forKeyPath:@"visible"
+                               options:NSKeyValueObservingOptionNew
+                               context:nil];
+
     int opts = (NSTrackingActiveAlways | 
                 NSTrackingInVisibleRect | 
                 NSTrackingMouseEnteredAndExited | 
@@ -54,8 +69,37 @@
                                                    owner:self 
                                                    userInfo:nil];
     [self addTrackingArea:area];
-    
+
     return self;
+}
+
+
+- (void) dealloc 
+{
+    [_windowImpl->window() removeObserver:self 
+                               forKeyPath:@"visible"];
+
+    [super dealloc];
+}
+
+
+- (void) observeValueForKeyPath:(NSString*) keyPath
+                       ofObject:(id) object
+                         change:(NSDictionary*) change
+                        context:(void *) context 
+{
+    if ([keyPath isEqualToString:@"visible"] && object == _windowImpl->window()) 
+    {
+        BOOL isVisible = [change[NSKeyValueChangeNewKey] boolValue];
+        if( ! isVisible )
+        {
+            _windowImpl->onViewShow(false);
+        } 
+        else 
+        {
+            _windowImpl->onViewShow(true);
+        }
+    }
 }
 
 
@@ -74,6 +118,25 @@
 - (BOOL) resignFirstResponder 
 {
     return TRUE;
+}
+
+
+- (void) setNeedsDisplay: (BOOL) needsDisplay
+{
+    //_invalidRect = NSMakeRect(0.0, 0.0 ,1000.0 ,1000.0);
+    //std::clog << "setNeedsDisplay" << std::endl;
+    NSRect rect = [self bounds];
+    _invalidRect = NSUnionRect(_invalidRect, rect);
+
+    [super setNeedsDisplay: needsDisplay];
+}
+
+
+- (void) setNeedsDisplayInRect: (NSRect) rect
+{
+    _invalidRect = NSUnionRect(_invalidRect, rect);
+
+    [super setNeedsDisplayInRect: rect];
 }
 
 
@@ -138,11 +201,20 @@
 
 - (void) drawRect: (NSRect) rect
 {
-    _windowImpl->onViewPaint(rect);
+    //std::clog << "drawRect BEGIN" << std::endl;
+    //std::clog << "_invalidRect: " << _invalidRect.size.width << "x" 
+    //                              << _invalidRect.size.height << std::endl;
+
+    //_windowImpl->onViewPaint(_invalidRect);
+    _windowImpl->onViewPaint(_invalidRect);
+    _invalidRect = NSMakeRect(0.0, 0.0, 0.0, 0.0);
+    //std::clog << "drawRect END" << std::endl;
+
+    [ super drawRect:rect ];
 }
 
 
-- (void)setFrameOrigin: (NSPoint) origin
+- (void) setFrameOrigin: (NSPoint) origin
 {
     //std::clog << "FRAME ORIGIN: " << origin.x << "," 
     //                              << origin.y << std::endl;
@@ -188,6 +260,7 @@
 - (void) mouseDragged: (NSEvent*) ev
 {
     //std::clog << "MOUSE DRAGGED" << std::endl;
+
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onViewMouseMove(mp.x, mp.y);
 }
@@ -195,31 +268,43 @@
 
 - (void) mouseMoved: (NSEvent *) ev
 {
-    // static int nnn = 0;
-    // std::clog << "MOUSE MOVED " << nnn++ << std::endl;
+    //std::clog << "MOUSE MOVED " << _windowImpl << std::endl;
+
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onViewMouseMove(mp.x, mp.y);
 }
 
 
+- (void) rightMouseDown:(NSEvent *) ev 
+{
+    NSPoint mp = [ev locationInWindow];
+    _windowImpl->onViewRMouseDown(mp.x, mp.y);
+}
+
+
+- (void) rightMouseUp:(NSEvent *) ev 
+{
+    NSPoint mp = [ev locationInWindow];
+    _windowImpl->onViewRMouseUp(mp.x, mp.y);
+}
+
+
 - (void) viewDidUnhide;
 {
-    //std::clog << "VIEW UNHIDE" << std::endl;
-    _windowImpl->onViewShow(true);
+    //std::clog << "viewDidUnhide" << std::endl;
 }
 
 
 - (void) viewDidHide;
 {
-    //std::clog << "VIEW HIDE" << std::endl;
-    _windowImpl->onViewShow(false);
+    //std::clog << "viewDidHide" << std::endl;
 }
 
 
 - (void) windowDidExpose: (NSNotification*) notification
 {
     // only called for windows with nonretained backing store
-    std::clog << "EXPOSE" << std::endl;
+    std::clog << "TODO: never recieved windowDidExpose before..." << std::endl;
 }
 
 
@@ -228,22 +313,9 @@
     NSWindow *window = [notification object];
     NSPoint origin = [window frame].origin;
 
-    //std::clog << "WINDOW MOVE : " << origin.x << ", "
-    //                              << origin.y << std::endl;
-
+    //std::clog << "windowDidMove BEGIN" << std::endl;
     _windowImpl->onViewMove(origin);
-}
-
-
-- (NSSize) windowWillResize: (NSWindow*) sender 
-                     toSize: (NSSize) frameSize
-
-
-{
-    //std::clog << "WINDOW RESIZE : " << frameSize.width << "x"
-    //                                << frameSize.height << std::endl;
-    
-    return frameSize;
+    //std::clog << "windowDidMove END" << std::endl;
 }
 
 
@@ -254,11 +326,9 @@
     NSRect frame = [window frame];
 	  NSRect rect = [window contentRectForFrameRect: frame];
 
-
+    //std::clog << "windowDidResize BEGIN" << std::endl;
     _windowImpl->onViewResize(rect.size);
-    
-    //std::clog << "WINDOW RESIZE : " << rect.size.width << "x"
-    //                                << rect.size.height << std::endl;
+    //std::clog << "windowDidResize END" << std::endl;
 }
 
 

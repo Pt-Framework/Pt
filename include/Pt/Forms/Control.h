@@ -162,7 +162,7 @@ class PT_FORMS_API Control : public View
         virtual void onPaintEvent(const PaintEvent& ev);
         
         virtual void onPaint(Gfx::PaintSurface& surface, 
-                             const Gfx::RectF& rect) override;
+                             const Gfx::RectF& rect);
 
     //
     // layouting
@@ -328,10 +328,10 @@ class PT_FORMS_API Control : public View
     //
     protected:
         virtual Gfx::PointF onToControl(const Control& control, 
-                                       const Gfx::PointF& pos) const override;
+                                       const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromControl(const Control& control, 
-                                         const Gfx::PointF& pos) const override;
+                                         const Gfx::PointF& pos) const;
 
         virtual void onAttach(Control& control);
 

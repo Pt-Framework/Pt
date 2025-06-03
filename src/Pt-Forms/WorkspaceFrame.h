@@ -353,6 +353,8 @@ class WorkspaceFrame : public WindowFrame
         bool           _isTopResizing;
         bool           _isBottomResizing;
 
+        bool           _needsRepaint;
+
         FrameItem      _currentFrameItem;
 
         std::vector<WindowButton*> _buttons;

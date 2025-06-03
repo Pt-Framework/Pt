@@ -455,11 +455,19 @@ void ContextImpl::setIdentity(const Certificate& cert)
 
     if( ! SSL_CTX_use_certificate(_ctx, _x509) )
     {
+        char buf[255];
+        ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
+        PT_LOG_WARN("invalid certificate: " << buf);
+        
         throw InvalidCertificate("invalid certificate");
     }
 
     if( ! SSL_CTX_use_PrivateKey( _ctx, _pkey ) )
     {
+        char buf[255];
+        ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
+        PT_LOG_WARN("invalid private key: " << buf);
+        
         throw InvalidCertificate("invalid certificate");
     }
     
@@ -481,6 +489,10 @@ void ContextImpl::addCertificate(const Certificate& certificate)
 
     if( ! SSL_CTX_add_extra_chain_cert(_ctx, extraX509) )
     {
+        char buf[255];
+        ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
+        PT_LOG_WARN("invalid extra certificate: " << buf);
+        
         throw InvalidCertificate("invalid extra certificate");
     }
 
@@ -507,6 +519,10 @@ void ContextImpl::addCACertificate(const Certificate& trustedCert)
 
     if( ! X509_STORE_add_cert(store, x509) )
     {
+        char buf[255];
+        ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
+        PT_LOG_WARN("invalid CA certificate: " << buf);
+        
         throw InvalidCertificate("invalid CA certificate");
     }
     

@@ -54,7 +54,9 @@ class PaintContext : public Gfx::PaintContext
 {
     public:
         PaintContext()
-        : _font(nil)
+        : _font(0)
+        , _fontAttributes(0)
+        , _textColor(0)
         , _hasClip(false)
         { 
         }
@@ -63,6 +65,12 @@ class PaintContext : public Gfx::PaintContext
         {
           if(_font)
             CFRelease(_font);
+
+          if(_textColor)
+            CFRelease(_textColor);
+
+          if(_fontAttributes)
+            CFRelease(_fontAttributes);
         }
 
         const Gfx::CompositionMode& compositionMode() const
@@ -85,6 +93,11 @@ class PaintContext : public Gfx::PaintContext
             return _font;
         }
 
+        CFMutableDictionaryRef fontAttributes() const
+        {
+            return _fontAttributes;
+        }
+
         const Gfx::RectF* clipRect() const
         {
             return _hasClip ? &_clip : 0;
@@ -99,6 +112,20 @@ class PaintContext : public Gfx::PaintContext
         virtual void onSetPen(const Gfx::Pen& pen) override
         {
             _pen = pen;
+
+            if(_fontAttributes)
+            {
+                CGColorRef textColor = CGColorCreateGenericRGB(_pen.color().red() / 65535.0,
+                                                               _pen.color().green() / 65535.0,
+                                                               _pen.color().blue() / 65535.0,
+                                                               _pen.color().alpha() / 65535.0);
+                if(_textColor)
+                  CFRelease(_textColor);
+
+                _textColor = textColor;
+
+                CFDictionarySetValue(_fontAttributes, kCTForegroundColorAttributeName, _textColor);
+            }
         }
 
         virtual void onSetBrush(const Gfx::Brush& brush) override
@@ -108,19 +135,79 @@ class PaintContext : public Gfx::PaintContext
 
         virtual void onSetFont(const Gfx::Font& font) override
         {
-            CTFontRef f = createCTFont(font);
+            if( ! _fontAttributes )
+            {
+                _fontAttributes = CFDictionaryCreateMutable(kCFAllocatorDefault, 2, 
+                                                            &kCFTypeDictionaryKeyCallBacks, 
+                                                            &kCFTypeDictionaryValueCallBacks);
+                if( ! _fontAttributes )
+                    return;
+            }
+
+            if( ! _textColor )
+            {
+                _textColor = CGColorCreateGenericRGB(_pen.color().red() / 65535.0,
+                                                     _pen.color().green() / 65535.0,
+                                                     _pen.color().blue() / 65535.0,
+                                                     _pen.color().alpha() / 65535.0);
+                if( ! _textColor )
+                    return;
+
+                CFDictionarySetValue(_fontAttributes, kCTForegroundColorAttributeName, _textColor);
+            }
+
+            CFMutableDictionaryRef descAttributes = 
+                CFDictionaryCreateMutable(kCFAllocatorDefault, 3, 
+                                          &kCFTypeDictionaryKeyCallBacks, 
+                                          &kCFTypeDictionaryValueCallBacks);
+            if( ! descAttributes )
+                return;
+
+            const std::string& fontName = font.name().empty() ? PixmapImpl::defaultFont().c_str()
+                                                              : font.name().c_str();
+            CFStringRef name = CFStringCreateWithCStringNoCopy(0, fontName.c_str(), 
+                                                               kCFStringEncodingUTF8,
+                                                               kCFAllocatorNull);
+            CFDictionarySetValue(descAttributes, kCTFontFamilyNameAttribute, name);
+            CFRelease(name);
+
+            // CoreText uses 96 points per inch, but the typographic convention
+            // is 72 dots per inch, so scale the size by 96.0 / 72.0
+            float fontSize = static_cast<int>( font.size() * (96.0 / 72.0) );
+            CFNumberRef size = CFNumberCreate(kCFAllocatorDefault, kCFNumberFloatType, &fontSize);
+            CFDictionarySetValue(descAttributes, kCTFontSizeAttribute, size);
+            CFRelease(size);
+
+            CFStringRef style = CFStringCreateWithCStringNoCopy(0, font.style().c_str(), 
+                                                                kCFStringEncodingUTF8,
+                                                                kCFAllocatorNull);
+            CFDictionarySetValue(descAttributes, kCTFontStyleNameAttribute, style);
+            CFRelease(style);
+
+            CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(descAttributes);
+            CFRelease(descAttributes);
+
+            if( ! descriptor )
+                return;
+
+            CTFontRef fontRef = CTFontCreateWithFontDescriptor(descriptor, 0, 0);
+            CFRelease(descriptor);
+
+            if( ! fontRef )
+                return;
 
             if(_font)
-              CFRelease(_font);
+                CFRelease(_font);
 
-            _font = f;
+            _font = fontRef;
+            CFDictionarySetValue(_fontAttributes, kCTFontAttributeName, _font);
         }
 
         virtual void onSetClip(const Gfx::RectF* clip) override
         {
-          _hasClip = clip != 0;
-          if(clip)
-              _clip = *clip;
+            _hasClip = clip != 0;
+            if(clip)
+                _clip = *clip;
         }
 
     private:
@@ -128,136 +215,10 @@ class PaintContext : public Gfx::PaintContext
         Gfx::Pen                  _pen;
         Gfx::Brush                _brush;
         CTFontRef                 _font;
+        CFMutableDictionaryRef    _fontAttributes;
+        CGColorRef                _textColor;
         Gfx::RectF                _clip;
         bool                      _hasClip;
-
-    public:
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
-                                            const Pt::String& text)
-        {   
-            CTFontRef f = createCTFont(font);
-            Gfx::FontMetrics fm = fontMetrics(f, text);
-            CFRelease(f);
-
-            return fm;
-        }
-        
-        static Gfx::FontMetrics fontMetrics(CTFontRef font, 
-                                            const Pt::String& text)
-        {   
-            CFTypeRef keys[] = { kCTFontAttributeName };
-            CFTypeRef values[] = { font };
-            CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, 
-                                                            keys, values, 1, 
-                                                            &kCFTypeDictionaryKeyCallBacks, 
-                                                            &kCFTypeDictionaryValueCallBacks);
-
-            std::string utf8String = Utf8Codec::encode(text);
-            const UInt8* stringData = reinterpret_cast<const UInt8*>( utf8String.c_str() );
-            CFStringRef string = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
-                                                               stringData, 
-                                                               utf8String.length(), 
-                                                               kCFStringEncodingUTF8, 
-                                                               false, 
-                                                               kCFAllocatorNull);
-
-            CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, 
-                                                                              string, 
-                                                                              attributes);
-
-            CTLineRef line = CTLineCreateWithAttributedString(attributedString);
-            
-            double width = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
-            
-            CGFloat ascent = CTFontGetAscent(font);
-            CGFloat descent = CTFontGetDescent(font);
-            CGFloat leading = CTFontGetLeading(font);
-            CGFloat capHeight = CTFontGetCapHeight(font);
-
-            //std::clog << text.narrow() << " " << ascent << " " << descent 
-            //                           << " " << capHeight << " " << leading 
-            //                           << " " << width << std::endl;
-            
-            CFRelease(line);
-            CFRelease(attributedString);
-            CFRelease(string);
-            CFRelease(attributes);
-
-            Gfx::FontMetrics fm;
-            fm.setAscent(ascent);
-            fm.setDescent(descent);
-            fm.setCapHeight(capHeight);
-            fm.setLeading(leading);
-            fm.setWidth(width);
-            return fm;
-        }
-
-        static CTFontRef createCTFont(const Gfx::Font& font)
-        {
-            //std::clog << "font: " << font.name() 
-            //          << "size: " << font.size() << std::endl;
-
-            const char* fontName = font.name().empty() ? PixmapImpl::defaultFont().c_str()
-                                                       : font.name().c_str();
-
-            const char* fontStyle = font.style().c_str();
-
-            // CoreText uses 96 points per inch, but the typographic convention
-            // is 72 dots per inch, so scale by 96.0 / 72.0
-            CGFloat fontSize = static_cast<int>( font.size() * (96.0 / 72.0) );
-        
-            NSDictionary* fontAttributes = 
-            @{
-                (NSString *)kCTFontFamilyNameAttribute : [NSString stringWithUTF8String:fontName],
-                (NSString *)kCTFontStyleNameAttribute : [NSString stringWithUTF8String:fontStyle],
-                (NSString *)kCTFontSizeAttribute : [NSNumber numberWithFloat:fontSize]
-            };
-
-            CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontAttributes);
-
-            CGAffineTransform matrix = CGAffineTransformIdentity;
-            CTFontRef f = CTFontCreateWithFontDescriptor(descriptor, 0, &matrix);
-            CFRelease(descriptor);
-
-            return f;
-
-            // const UInt8* stringData = 0;
-            // std::size_t stringSize = 0;
-
-            // if( font.name().empty() )
-            // {
-            //     const std::string& defaultFont = PixmapSurfaceImpl::getDefaultFont();
-            //     stringData = reinterpret_cast<const UInt8*>( defaultFont.c_str() );
-            //     stringSize = defaultFont.size();
-            // }
-            // else
-            // {
-            //   stringData = reinterpret_cast<const UInt8*>( font.name().c_str() );
-            //   stringSize = font.name().size();
-            // }
-
-            // // CoreText uses 96 points per inch, but the typographic convention
-            // // is 72 dots per inch, so scale by 96.0 / 72.0
-            // CGFloat fontSize = static_cast<int>( font.size() * (96.0 / 72.0) );
-
-            // CFStringRef fontName = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
-            //                                                      stringData, 
-            //                                                      stringSize, 
-            //                                                      kCFStringEncodingUTF8, 
-            //                                                      false, 
-            //                                                      kCFAllocatorNull);
-
-            // CGAffineTransform matrix = CGAffineTransformIdentity;
-            // CTFontRef f = CTFontCreateWithName(fontName, fontSize, &matrix);
-            // CFRelease(fontName);
-
-            // CFStringRef fn = CTFontCopyPostScriptName(f);
-            // printf("%s\n", CFStringGetCStringPtr(fn, kCFStringEncodingUTF8));
-            
-            // TODO: use CTFontCreateCopyWithSymbolicTraits for bold and italic
-            
-            //return f;
-        }
 };
 
 } // namespace

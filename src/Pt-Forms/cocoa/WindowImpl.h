@@ -38,6 +38,8 @@
 #include <Pt/Forms/ActivateEvent.h>
 #include <Pt/Forms/WindowFrame.h>
 
+#include <CoreGraphics/CGGeometry.h>
+
 #ifdef __OBJC__
     #import <AppKit/NSWindow.h>
     #import <AppKit/NSGraphicsContext.h>
@@ -71,6 +73,8 @@ class WindowImpl : public WindowFrame
         WindowImpl(ScreenImpl& wm,  Window& w);
 
         virtual ~WindowImpl();
+
+        WindowType type() const;
 
         void setType(WindowType type);
 
@@ -116,6 +120,10 @@ class WindowImpl : public WindowFrame
         void onViewLMouseUp(double x, double y);
 
         void onViewMouseMove(double x, double y);
+
+        void onViewRMouseDown(double x, double y);
+
+        void onViewRMouseUp(double x, double y);
 
     protected:
         virtual void onInit(Window& w);
@@ -204,7 +212,6 @@ class WindowImpl : public WindowFrame
         NSWindow*                _window;
         NSView*                  _view;
         int                      _windowStyle;
-        int                      _level;
 
         unsigned                 _keyFlags;
         Key::Modifiers           _keyModifiers;

@@ -44,6 +44,63 @@
 
 #include <Pt/System/Clock.h>
 
+@interface PtWindow : NSWindow
+{
+    Pt::Forms::WindowImpl* _windowImpl;
+    NSWindowStyleMask      _style;
+}
+
+- (PtWindow*) initWithImpl: (Pt::Forms::WindowImpl*) window 
+                     frame: (NSRect) frame
+                 styleMask: (NSWindowStyleMask) style;
+
+- (BOOL) canBecomeKeyWindow;
+
+- (BOOL) canBecomeMainWindow;
+
+@end
+
+
+@implementation PtWindow
+
+- (PtWindow*) initWithImpl: (Pt::Forms::WindowImpl*) window
+                     frame: (NSRect) frame
+                 styleMask: (NSWindowStyleMask) style 
+
+{
+    _windowImpl = window;
+    _style = style;
+
+    self = [super initWithContentRect: frame 
+                            styleMask: _style 
+                              backing: NSBackingStoreBuffered 
+                                defer: NO];
+    return self;
+}
+
+- (BOOL) canBecomeKeyWindow
+{
+    if(_windowImpl->type() == Pt::Forms::WindowType::Popup)
+    {
+       return NO;
+    }
+
+    return YES;
+}
+
+- (BOOL) canBecomeMainWindow
+{
+    if(_windowImpl->type() == Pt::Forms::WindowType::Popup)
+    {
+       return NO;
+    }
+
+    return YES;
+}
+
+@end
+
+
 namespace Pt {
 
 namespace Forms {
@@ -55,14 +112,9 @@ WindowImpl::WindowImpl(ScreenImpl& wm,  Window& w)
 , _window(nil)
 , _view(nil)
 , _windowStyle(0)
-, _level(0)
 , _keyFlags(0)
 {
-    WindowView* view = [[WindowView alloc] initWithImpl: this];
-    _view = view;
-
-    Gfx::PointF at(0, 0);
-    Gfx::SizeF size(100, 50);
+    NSRect noGeometry = NSMakeRect(0, 0, 1, 1);
 
     switch( w.type() )
     {
@@ -79,21 +131,45 @@ WindowImpl::WindowImpl(ScreenImpl& wm,  Window& w)
             break;
     }
 
-    NSRect windowRect = NSMakeRect( at.x(), at.y(), 
-                                    size.width(),  size.height() );
+    _window = [[PtWindow alloc] initWithImpl: this 
+                                frame: noGeometry 
+                                styleMask: _windowStyle];
 
-    _window = [[NSWindow alloc] initWithContentRect: windowRect 
-                                          styleMask: _windowStyle 
-                                            backing: NSBackingStoreBuffered 
-                                              defer: NO];
-    
+    if( w.type() == WindowType::Popup )
+    {
+        //[_window setLevel: NSPopUpMenuWindowLevel];
+        [_window setLevel: NSNormalWindowLevel];
+    }
+    else
+    {
+        [_window setLevel: NSNormalWindowLevel];
+    }
+
+	  NSWindowController * windowController = [[NSWindowController alloc] initWithWindow:_window]; 
+	  [windowController autorelease]; 
+
     [_window setReleasedWhenClosed: NO];
     //[_window setAcceptsMouseMovedEvents:YES];
-    [_window setInitialFirstResponder: view];
-    [_window setContentView: view];    
-    [_window setDelegate: view];
 
-    _level = [_window level];
+    NSView* contentView = [_window contentView];
+    NSRect contentBounds = [contentView bounds];
+
+    WindowView* view = [[WindowView alloc] initWithImpl: this 
+                                           frame: contentBounds];
+    _view = view;
+
+    //[_window setContentView: view];
+    [contentView addSubview: _view];
+
+    //_view.translatesAutoresizingMaskIntoConstraints = NO;
+    //[NSLayoutConstraint activateConstraints:@[
+    //    [_view.topAnchor constraintEqualToAnchor:[contentView topAnchor]],
+    //    [_view.bottomAnchor constraintEqualToAnchor:[contentView bottomAnchor]],
+    //    [_view.leadingAnchor constraintEqualToAnchor:[contentView leadingAnchor]],
+    //    [_view.trailingAnchor constraintEqualToAnchor:[contentView trailingAnchor]]
+    //]];
+
+    //[_window setInitialFirstResponder: view];
 
     Base::onSetParent(&wm);
 }
@@ -136,8 +212,20 @@ void WindowImpl::onRelease(Window& w)
 }
 
 
+WindowType WindowImpl::type() const
+{
+    return _client.type();
+}
+
+
 void WindowImpl::setType(WindowType type)
 {
+    //std::clog << "WindowImpl::setType: " << type << std::endl;
+
+    //
+    // TODO: possibly need to remove the view when switching to/from popup
+    //
+
     switch(type)
     {
         case WindowType::Popup:
@@ -154,19 +242,6 @@ void WindowImpl::setType(WindowType type)
     }
 
     [_window setStyleMask:_windowStyle];
-    
-    // if(type == WindowType::Popup)
-    // {
-    //     [_window setTitlebarAppearsTransparent: YES];
-    //     [_window setTitleVisibility: NSWindowTitleHidden];
-    //     [_window setOpaque:NO];
-    // }
-    // else
-    // {
-    //     [_window setTitlebarAppearsTransparent: NO];
-    //     [_window setTitleVisibility: NSWindowTitleVisible];
-    //     [_window setOpaque:YES];
-    // }
 }
 
 
@@ -286,8 +361,8 @@ void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
 
-    std::clog << "RESCALE EVENT: " << [_window backingScaleFactor] << std::endl;
-    std::clog << "APP SCALLING: " << Application::instance().scaleFactor() << std::endl;
+    //std::clog << "RESCALE EVENT: " << [_window backingScaleFactor] << std::endl;
+    //std::clog << "APP SCALING: " << Application::instance().scaleFactor() << std::endl;
     scaling *= [_window backingScaleFactor];
 
     RescaleEvent rev(*this, scaling);
@@ -304,40 +379,25 @@ void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
-//void WindowImpl::show(bool visible)
-//{
-//    //std::clog << "SHOW: " << visible << std::endl;
-//
-//    if(visible)
-//    {
-//        [_view setHidden:NO];
-//        [_window orderFrontRegardless];
-//        //[_window makeKeyAndOrderFront:nil];
-//    }
-//    else
-//    {
-//        [_window orderOut:_window];
-//        [_view setHidden:YES];
-//    }
-//}
-
-
 void WindowImpl::onShow(Window& w, bool visible)
 {
-    //std::clog << "SHOW: " << visible << std::endl;
+    //std::clog << "SHOW: " << _client.title() << " " << visible << std::endl;
 
     if(visible)
     {
-        [_view setHidden:YES];
-        [_view setHidden:NO];
-        [_window orderFrontRegardless];
-        //[_window makeKeyAndOrderFront:nil];
+        if( w.type() == WindowType::Popup )
+        {
+            [_window orderFront:nil];
+        }
+        else
+        {
+            //[_window makeMainWindow];
+            [_window orderFront:nil];
+        }
     }
     else
     {
-        [_window orderOut:_window];
-        [_view setHidden:NO];
-        [_view setHidden:YES];
+        [_window orderOut:nil];
     }
 }
 
@@ -357,22 +417,19 @@ void WindowImpl::onShowEvent(const ShowEvent& ev)
 }
 
 
-//void WindowImpl::activate()
-//{
-//    //std::clog << "ACTIVATE: " << std::endl;
-//
-//    [_window makeWindow];
-//    [_window makeKeyWindow];
-//}
-
-
 void WindowImpl::onActivate(Window& w, bool active)
 {
     if( ! active )
         return;
 
-    //std::clog << "ACTIVATE: " << std::endl;
+    if( w.type() == WindowType::Popup )
+    {
+        //std::clog << "ACTIVATE: key" << std::endl;
+        [_window makeKeyWindow];
+        return;
+    }
 
+    //std::clog << "ACTIVATE: main and key" << std::endl;
     [_window makeMainWindow];
     [_window makeKeyWindow];
 }
@@ -414,60 +471,22 @@ void WindowImpl::onEnableEvent(const EnableEvent& ev)
 }
 
 
-//void WindowImpl::move(const Gfx::PointF& p)
-//{
-//    //std::clog << "MOVE: " << p.x() << "," 
-//    //                      << p.y() << std::endl;
-//
-//    double scaling = scaleFactor();
-//
-//    CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
-//    CGFloat windowHeight = [_window frame].size.height;
-//
-//    CGFloat y = screenHeight - p.y() / scaling - windowHeight;
-//    NSPoint origin = NSMakePoint(p.x() / scaling, y);
-//
-//    [_window setFrameOrigin:origin];
-//}
-//
-//
-//void WindowImpl::resize(const Gfx::SizeF& size)
-//{
-//    //std::clog << "RESIZE: " << size.width() << "," 
-//    //                        << size.height() << std::endl;
-//
-//    double scaling = scaleFactor();
-//
-//    NSRect frameRect = [_window frame];
-//    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
-//
-//    contentRect.origin.y += contentRect.size.height - size.height() / scaling;
-//    
-//    contentRect.size.width = size.width() / scaling;
-//    contentRect.size.height = size.height() / scaling;
-//
-//    frameRect = [_window frameRectForContentRect:contentRect];
-//    [_window setFrame:frameRect display:NO animate:NO];
-//}
-
-
 void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
-    //std::clog << "MOVE: " << pos.x() << "," 
-    //                      << pos.y() << std::endl;
-
-    //double scaling = scaleFactor();
+    //std::clog << "MOVE: " << pos.x() << "," << pos.y() << std::endl;
 
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
+    //std::clog << "TODO: WindowImpl.mm 462: get height of parent screen " << screenHeight << std::endl;
 
-    std::clog << "TODO: WindowImpl.mm 462: get height of parent screen" << screenHeight << std::endl;
+    NSPoint origin;
+    origin.x = pos.x();
+    origin.y = screenHeight - pos.y() - windowHeight;
+    //std::clog << "MOVED ORIGIN: " << _frame.origin.x << "x" << _frame.origin.y << std::endl;
 
-    CGFloat y = screenHeight - pos.y() /* / scaling */ - windowHeight;
-    NSPoint origin = NSMakePoint(pos.x() /* / scaling*/, y);
-
-    //std::clog << "ORIGIN: " << origin.x << "," << origin.y << std::endl;
     [_window setFrameOrigin:origin];
+
+    //std::clog << " MOVE END " << std::endl;
 }
 
 
@@ -482,21 +501,27 @@ void WindowImpl::onProcessMoveEvent(const MoveEvent& ev)
 
 void WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
 {
-    //std::clog << "RESIZE: " << size.width() << "," 
-    //                        << size.height() << std::endl;
+    //static int nnn = 0;
+    //std::clog << ++nnn << " RESIZE: " << size.width() << ", "  << size.height() << std::endl;
 
-    //double scaling = scaleFactor();
-
+    //std::clog << "RESIZE FRAME: " << _frame.origin.x << "," << _frame.origin.y
+    //                              << _frame.size.width << "," << _frame.size.height << std::endl;
     NSRect frameRect = [_window frame];
-    NSRect contentRect = [_window contentRectForFrameRect:frameRect];
+    NSRect content = [_window contentRectForFrameRect:frameRect];
 
-    contentRect.origin.y += contentRect.size.height - size.height();// / scaling;
+    //std::clog << "CURRENT FRAME: " << frameRect.origin.x << "," << frameRect.origin.y << " "
+    //                               << frameRect.size.width << "," << frameRect.size.height << std::endl;
     
-    contentRect.size.width = size.width();// / scaling;
-    contentRect.size.height = size.height();// / scaling;
+    frameRect.origin.y += content.size.height - size.height();
+    frameRect.size.width += size.width() - content.size.width;
+    frameRect.size.height += size.height() - content.size.height;
+    
+    //std::clog << "RESIZED FRAME: " << frameRect.origin.x << "," << frameRect.origin.y << " "
+    //                               << frameRect.size.width << "," << frameRect.size.height << std::endl;
 
-    frameRect = [_window frameRectForContentRect:contentRect];
-    [_window setFrame:frameRect display:NO animate:NO];
+    [_window setFrame:frameRect display:NO];
+
+    //std::clog << ++nnn << " RESIZE END " << std::endl;
 }
 
 
@@ -511,14 +536,7 @@ void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 
 void WindowImpl::onSetAbove(Window& w, bool above)
 {
-    if(above)
-    {
-        [_window setLevel: NSFloatingWindowLevel];
-    }
-    else
-    {
-        [_window setLevel: NSNormalWindowLevel];
-    }
+    [_window orderFront:nil];
 }
 
 
@@ -535,42 +553,31 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 }
 
 
-//void WindowImpl::setState(const WindowState& s)
-//{
-//    switch(s)
-//    {
-//        case WindowState::Normal:
-//            if( [_window isMiniaturized] )
-//                [_window deminiaturize: nil];
-//            
-//            if( [_window isZoomed] )
-//                [_window zoom: nil];
-//            
-//            break;
-//
-//        case WindowState::Maximized:
-//            if( ! [_window isZoomed] )
-//                [_window zoom: nil];
-//            break;
-//
-//        case WindowState::Minimized:
-//            if( ! [_window isMiniaturized] )
-//                [_window miniaturize: nil];
-//            break;
-//    }
-//}
-
-
 void WindowImpl::onSetState(Window& w, const WindowState& s)
 {
+    //
+    // TODO: Borderless windows are always considered to be zoomed, so
+    //       the logic below does not work. Instead we could set the
+    //       frame to the visibleFrame of the screen.
+    //
+    if(_client.type() == WindowType::Popup)
+    {
+        //std::clog << "TODO: WindowImpl::onSetStatePopup handle popups. " << std::endl;
+        return;
+    }
+
     switch(s)
     {
         case WindowState::Normal:
             if( [_window isMiniaturized] )
+            {
                 [_window deminiaturize: nil];
+            }
             
             if( [_window isZoomed] )
+            {
                 [_window zoom: nil];
+            }
             
             break;
 
@@ -604,6 +611,9 @@ void WindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF, 
                                             const Gfx::SizeF& maxSizeF)
 {
+    //std::clog << "onSetSizeLimits: " << minSizeF.width() << "x" << minSizeF.height()
+    //                          << " " << maxSizeF.width() << "x" << maxSizeF.height() << std::endl;
+
     NSSize minSize = NSMakeSize( minSizeF.width(), minSizeF.height() );
     [_window setMinSize:minSize];
 
@@ -628,45 +638,44 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF,
 
 void WindowImpl::onViewPaint(const NSRect& rect)
 {
-    //std::clog << "ON PAINT: " << rect.size.width << "x" 
-    //                          << rect.size.height << std::endl;
+    //std::clog << "ON PAINT: " << rect.origin.x << "," << rect.origin.y
+    //                 << " " << rect.size.width << "x" << rect.size.height << std::endl;
 
     NSRect frame = [_window frame];
     NSRect content = [_window contentRectForFrameRect:frame];
 
+    // paint rect with origin at top left
     double x = rect.origin.x;
     double y = content.size.height - (rect.origin.y + rect.size.height);
-    Pt::Gfx::PointF pos(x, y);
-
     double width = rect.size.width;
     double height = rect.size.height;
-    Gfx::SizeF size(width, height);
 
     //System::Clock c1; c1.start();
- 
+
+    Pt::Gfx::PointF pos(x, y);
+    Gfx::SizeF size(width, height);
     Gfx::RectF paintRect(pos, size);
     PaintEvent pev(*this, paintRect);
     processEvent(pev);
 
-    //std::clog << "Paint time: " << c1.stop().toUSecs() / 1000.0 << " msecs" << std::endl;
+    //std::clog << "Paint time: " << c1.stop().toUSecs() / 1000.0 << " msecs\n";
+
+    //System::Clock c2; c2.start();
+
+    double s = scaleFactor();
+    CGRect sourceRect = CGRectMake(x * s, y * s, width * s, height * s);
 
     CGImageRef image = pixmap().impl()->getCGImage();
-
-    CGFloat subImageX = rect.origin.x * scaleFactor();
-    CGFloat subImageY = rect.origin.y * scaleFactor();
-    CGFloat subImageWidth = rect.size.width * scaleFactor();
-    CGFloat subImageHeight = rect.size.height * scaleFactor();
-
-    CGRect subRect = CGRectMake(subImageX, subImageY,
-                                subImageWidth, subImageHeight);
-    
-    CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
+    CGImageRef sourceImage = CGImageCreateWithImageInRect(image, sourceRect);
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
-    CGContextDrawImage(windowContext, rect, subImage);
+    CGContextDrawImage(windowContext, rect, sourceImage);
+    //CGContextDrawImage(windowContext, NSMakeRect(0, 0, content.size.width, content.size.height), image);
     
-    CGImageRelease(subImage);
+    CGImageRelease(sourceImage);
+
+    //std::clog << "Blit time: " << c2.stop().toUSecs() / 1000.0 << " msecs (TODO: optimize blit area)\n";
 }
 
 
@@ -698,10 +707,10 @@ void WindowImpl::onViewMove(const NSPoint& viewPos)
 
     Pt::Gfx::PointF pos(x, y);
 
-    double scaling = Application::instance().scaleFactor();
-    pos = pos / scaling;
+    //double scaling = Application::instance().scaleFactor();
+    //pos = pos / scaling;
 
-    //std::clog << "move: " << _client.title() << " " << pos.x() << ", " << pos.y() << std::endl;
+    //std::clog << "onViewMove: " << _client.title() << " " << pos.x() << ", " << pos.y() << std::endl;
 
     MoveEvent ev(*this, pos);
     Application::instance().processEvent(ev);
@@ -710,7 +719,7 @@ void WindowImpl::onViewMove(const NSPoint& viewPos)
 
 void WindowImpl::onViewResize(const NSSize& viewSize)
 {   
-    //std::clog << "resize: " << _client.title() << " " << viewSize.width << "x" << viewSize.height << std::endl;
+    //std::clog << "onViewResize: " << _client.title() << " " << viewSize.width << "x" << viewSize.height << std::endl;
 
     Window::State wstate = WindowState::Normal;
 
@@ -732,8 +741,8 @@ void WindowImpl::onViewResize(const NSSize& viewSize)
     Gfx::SizeF to(viewSize.width, 
                   viewSize.height);
 
-    double scaling = Application::instance().scaleFactor();
-    to = to / scaling;
+    //double scaling = Application::instance().scaleFactor();
+    //to = to / scaling;
 
     ResizeEvent rev(*this, to);
     Application::instance().processEvent(rev);
@@ -793,8 +802,6 @@ void WindowImpl::onViewKeyDown(unsigned vkey, Pt::Char ch)
 {
     //std::clog << "KEY DOWN: " << vkey << std::endl;
 
-
-    
     Pt::uint32_t keyCode = Key::NoKey;
     if(vkey < keyMapSize)
     {
@@ -939,6 +946,42 @@ void WindowImpl::onViewMouseMove(double x, double y)
     //pos /= _client.scaleFactor();
 
     _mouseEvent.setMove();
+    _mouseEvent.setPosition( _client.toGlobal(pos) );
+    _mouseEvent.setWidget(&_client);
+
+    Application::instance().processEvent(_mouseEvent);
+}
+
+
+void WindowImpl::onViewRMouseDown(double x, double y)
+{
+    //std::clog << "MOUSE PRESS: " << x << ", " << y << std::endl;
+
+    CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
+    y = height - y;
+
+    Pt::Gfx::PointF pos(x, y);
+    //pos /= _client.scaleFactor();
+
+    _mouseEvent.setPress(MouseEvent::Right);
+    _mouseEvent.setPosition( _client.toGlobal(pos) );
+    _mouseEvent.setWidget(&_client);
+
+    Application::instance().processEvent(_mouseEvent);
+}
+
+
+void WindowImpl::onViewRMouseUp(double x, double y)
+{
+    //std::clog << "MOUSE RELEASE: " << x << ", " << y << std::endl;
+
+    CGFloat height = [_window contentRectForFrameRect:[_window frame]].size.height;
+    y = height - y;
+
+    Pt::Gfx::PointF pos(x, y);
+    //pos /= _client.scaleFactor();
+
+    _mouseEvent.setRelease(MouseEvent::Right);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
     _mouseEvent.setWidget(&_client);
 

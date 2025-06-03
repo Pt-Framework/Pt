@@ -206,12 +206,12 @@ void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocketOptions& opts)
     {
         if( _isBound )
         {
-            if(it->ai_family != _servaddr.ss_family);
+            if(it->ai_family != _servaddr.ss_family)
                 continue;
         }
         else if( _isConnected )
         {
-            if(it->ai_family != _sendaddr.ss_family);
+            if(it->ai_family != _sendaddr.ss_family)
                 this->close();
         }
 

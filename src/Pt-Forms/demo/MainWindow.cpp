@@ -73,7 +73,7 @@ MainWindow::MainWindow()
     Pt::Gfx::PngReader reader(ss, im);
     
     setTitle("Main 1");
-    move( Gfx::PointF(100, 30) );
+    move( Gfx::PointF(100, 100) );
     resize( Gfx::SizeF(800, 700) );
 
     im = reader.get();    
@@ -271,7 +271,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //}
     
     Window::onPaintEvent(ev);
-    //return;   
+    return;   
     
     const Gfx::RectF& rect = ev.rect();
  
@@ -370,6 +370,8 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     Gfx::Painter imagePainter2(imageSurface);
     imagePainter2.begin(imageSurface);
 
+    imagePainter2.setBrush(Gfx::Color(65535, 0, 0, 0));
+    imagePainter2.fillRect( Gfx::RectF(Gfx::SizeF(600, 600)) );
     //
     //imagePainter.setAntiAliasing(true);
     //imagePainter.setAntiAliasing(false);
@@ -566,7 +568,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     imagePainter.setBrush(Gfx::Color(32767, 0, 65535, 0));
     imagePainter.fillChord(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 180, 270);
 
-    imagePainter.setPen(Gfx::Color(32767, 65535, 0, 0));
+    imagePainter.setPen(Gfx::Color(32767, 65535, 40000, 20000));
     imagePainter.drawEllipse(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100));
 
     //fprintf(stderr, "AAAAA\n");

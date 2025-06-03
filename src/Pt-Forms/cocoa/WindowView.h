@@ -35,15 +35,23 @@
 @interface WindowView : NSView<NSWindowDelegate>
 {
     Pt::Forms::WindowImpl* _windowImpl;
+    NSRect _invalidRect;
 }
     
-- (WindowView*) initWithImpl: (Pt::Forms::WindowImpl*) window ;
+- (WindowView*) initWithImpl: (Pt::Forms::WindowImpl*) window 
+                frame: (NSRect) frame;
+
+- (void) dealloc;
 
 - (BOOL) acceptsFirstResponder;
 
 - (BOOL) acceptsFirstMouse: (NSEvent *) ev;
 
 - (BOOL) resignFirstResponder;
+
+- (void) setNeedsDisplay: (BOOL) b;
+
+- (void) setNeedsDisplayInRect: (NSRect) rect;
 
 - (void) drawRect: (NSRect) rect;
 
@@ -59,6 +67,10 @@
 
 - (void) mouseMoved: (NSEvent*) ev;
 
+- (void) rightMouseDown:(NSEvent *) ev;
+
+- (void) rightMouseUp:(NSEvent *) ev;
+
 - (void) keyDown: (NSEvent*) ev;
 
 - (void) keyUp: (NSEvent*) ev;
@@ -72,9 +84,6 @@
 - (void) windowDidExpose: (NSNotification*) notification;
 
 - (void) windowDidMove: (NSNotification*) notification;
-
-- (NSSize) windowWillResize: (NSWindow*) sender 
-                     toSize: (NSSize) frameSize;
 
 - (void) windowDidResize: (NSNotification*) notification;
 

@@ -409,8 +409,6 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
 
     Widget::onProcessPaintEvent(ev);
 
-    //std::clog << "SHELL: " << ev.rect().width() << "x" << ev.rect().height() << std::endl;
-
     //
     // paint child windows
     //

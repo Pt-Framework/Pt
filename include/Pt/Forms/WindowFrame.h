@@ -125,6 +125,11 @@ class WindowFrame : public Widget
 
         virtual void onClose(Window& w) = 0;
 
+        // TODO: name clash with Widget base class
+        using Base::onSetSizeLimits;
+        using Base::onShow;
+        using Base::onEnable;
+
     private:
         WindowManager& _wm;
         Window&        _window;

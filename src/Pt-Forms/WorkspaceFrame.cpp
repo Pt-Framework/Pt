@@ -416,6 +416,7 @@ WorkspaceFrame::WorkspaceFrame(WorkspaceManager& workspace, Window& window)
 , _isRightResizing(false)
 , _isTopResizing(false)
 , _isBottomResizing(false)
+, _needsRepaint(false)
 , _currentFrameItem(OnNone)
 {
     Base::onSetParent(&workspace);
@@ -839,6 +840,8 @@ void WorkspaceFrame::onRequestMove(const Gfx::PointF& pos)
     clientPos.addX(_borderWidth);
     clientPos.addY(_borderWidth + _titleHeight);
     _clientRect.setOrigin(clientPos);
+
+    _wm->onMove(*this, pos);
 }
 
 
@@ -872,7 +875,10 @@ void WorkspaceFrame::onMoveEvent(const MoveEvent& ev)
     Gfx::RectF updateRect = _frameBounds;
     updateRect.unify( Gfx::RectF(delta, _frameBounds.size()) );
 
-    repaint(updateRect);
+    //repaint(updateRect);
+    
+    updateRect.shift(position().x(), position().y());
+    _wm->repaint(updateRect);
 
     _frameRect.setOrigin( ev.position() );
 
@@ -1330,8 +1336,9 @@ bool WorkspaceFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress
         if(_isMoving && ! isPress)
         {
             Gfx::PointF to = _frameRect.topLeft() + pos - _lastPointer;
-            _window->move(to);
-            //move(to);
+            //_window->move(to);
+            
+            move(to);
         }
 
         return _isMoving;
@@ -1404,6 +1411,8 @@ bool WorkspaceFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPre
 
 void WorkspaceFrame::onRepaint(Window& w, const Gfx::RectF& rect)
 {
+    _needsRepaint = true;
+
     Gfx::PointF windowPos = onFromWindow( *_window, rect.topLeft() );
     Gfx::RectF windowRect( windowPos, rect.size() );
 
@@ -1413,6 +1422,8 @@ void WorkspaceFrame::onRepaint(Window& w, const Gfx::RectF& rect)
 
 void WorkspaceFrame::onRequestRepaint(const Gfx::RectF& rect)
 {
+    _needsRepaint = true;
+
     Gfx::PointF updatePos = rect.topLeft() + position();
     Gfx::RectF updateRect( updatePos, rect.size() );
     
@@ -1422,6 +1433,11 @@ void WorkspaceFrame::onRequestRepaint(const Gfx::RectF& rect)
 
 void WorkspaceFrame::onProcessPaintEvent(const PaintEvent& ev)
 {
+    if( ! _needsRepaint )
+        return;
+
+    _needsRepaint = false;
+
     const Gfx::RectF& rect = ev.rect();
     
     Gfx::PointF winPos = onToWindow( *_window, rect.topLeft() );

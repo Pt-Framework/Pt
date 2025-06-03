@@ -268,7 +268,10 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     {
         Control* mainWidget = content();
         if(mainWidget)
-            resize( mainWidget->preferredSize() );
+        {
+            Gfx::SizeF preferredSize = mainWidget->preferredSize();
+            resize( preferredSize);
+        }
     }
 
     Base::onLayoutEvent(ev);
@@ -432,8 +435,11 @@ void Window::onProcessMoveEvent(const MoveEvent& ev)
 
 
 void Window::onMoveEvent(const MoveEvent& ev)
-{    
-    Base::onMoveEvent(ev);
+{
+    // NOTE: we skip View and pass on to Widget, because we need to avoid
+    //       triggering a repaint of the window. Moving should only cause 
+    //       the WindowFrame to blit its surface to the WindowManager.
+    Widget::onMoveEvent(ev);
 }
 
 
@@ -476,7 +482,7 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 ///////////////////////////////////////////////////////////////////////
 
 void Window::onRequestShow(bool b)
-{   
+{
     _show = b;
 
     if( ! _frame )

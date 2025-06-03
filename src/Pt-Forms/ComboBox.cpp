@@ -195,7 +195,7 @@ void ComboBox::hidePopup()
 {
     //setCapture(false);   
     //Application::instance().releasePopup(_popup);
-    
+
     _popup.show(false);
 }
 

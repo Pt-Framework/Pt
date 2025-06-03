@@ -73,6 +73,10 @@ void PixmapCanvas::create()
                                      8, 0, _colorSpace, 
                                      kCGImageAlphaPremultipliedLast);
 
+    //CGContextSetShouldAntialias(_context, false);
+    //CGContextSetBlendMode(_context, kCGBlendModeNormal);
+    //CGContextSetBlendMode(_context, kCGBlendModeCopy)
+
     _imageModified = true;
     
     //std::clog << "PIXMAP: " << this << " " << _width << "x" 
@@ -576,100 +580,116 @@ Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
         return Gfx::FontMetrics();
 
     CTFontRef font = _paintContext->font();
-    return _paintContext->fontMetrics(font, text);
+    CFDictionaryRef fontAttributes = _paintContext->fontAttributes();
+
+    CFStringRef string = CFStringCreateWithBytesNoCopy(0, (const UInt8*) text.c_str(), 
+                                                       text.length() * 4, 
+                                                       kCFStringEncodingUTF32LE, 
+                                                       false, kCFAllocatorNull);
+    if( ! string )
+        return Gfx::FontMetrics();
+
+    CFMutableAttributedStringRef attributedString = 
+        CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
+
+    CFIndex length = CFAttributedStringGetLength(attributedString);
+    CFAttributedStringReplaceString(attributedString, CFRangeMake(0, length), string);
+    CFRelease(string);
+
+    length = CFAttributedStringGetLength(attributedString);
+    CFAttributedStringSetAttributes(attributedString, CFRangeMake(0, length), 
+                                    fontAttributes, false);
+
+    CTLineRef line = CTLineCreateWithAttributedString(attributedString);
+    CFRelease(attributedString);
+
+    double width = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
+    CGFloat ascent = CTFontGetAscent(font);
+    CGFloat descent = CTFontGetDescent(font);
+    CGFloat leading = CTFontGetLeading(font);
+    CGFloat capHeight = CTFontGetCapHeight(font);
+    CFRelease(line);
+
+    Gfx::FontMetrics fm;
+    fm.setAscent(ascent);
+    fm.setDescent(descent);
+    fm.setCapHeight(capHeight);
+    fm.setLeading(leading);
+    fm.setWidth(width);
+    return fm;
 }
 
 
 void PixmapCanvas::onDrawText(const Gfx::PointF& to, 
-                                   const Pt::String& text, 
-                                   const Gfx::Transform* trans)
+                              const Pt::String& text, 
+                              const Gfx::Transform* transform)
 {
     if( ! _paintContext )
         return;
 
-    CTFontRef font = _paintContext->font();
-    const Gfx::Pen& pen = _paintContext->pen();
+    //std::clog << "DRAW TEXT: " << text.narrow() << std::endl;
 
-    CGColorRef textColor = CGColorCreateGenericRGB(pen.color().red() / 65535.0,
-                                                   pen.color().green() / 65535.0,
-                                                   pen.color().blue() / 65535.0,
-                                                   pen.color().alpha() / 65535.0);
+    CFMutableDictionaryRef fontAttributes = _paintContext->fontAttributes();
 
-    CFTypeRef keys[] = { kCTFontAttributeName, kCTForegroundColorAttributeName };
-    CFTypeRef values[] = { font, textColor };
-    CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, 
-                                                    keys, values, 2, 
-                                                    &kCFTypeDictionaryKeyCallBacks, 
-                                                    &kCFTypeDictionaryValueCallBacks);
+    CFStringRef string = CFStringCreateWithBytesNoCopy(NULL, (const UInt8*) text.c_str(), 
+                                                       text.length() * 4, 
+                                                       kCFStringEncodingUTF32LE, 
+                                                       false, kCFAllocatorNull);
+    if( ! string )
+        return;
 
-    std::string utf8String = Utf8Codec::encode(text);
-    const UInt8* stringData = reinterpret_cast<const UInt8*>( utf8String.c_str() );
-    CFStringRef string = CFStringCreateWithBytesNoCopy(kCFAllocatorDefault, 
-                                                       stringData, 
-                                                       utf8String.length(), 
-                                                       kCFStringEncodingUTF8, 
-                                                       false, 
-                                                       kCFAllocatorNull);
+    CFMutableAttributedStringRef attributedString = 
+        CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
 
-    // OPTIMIZE: build attributed string on setFont and replace string in drawText
-    // CFAttributedStringCreateMutable
-    // CFAttributedStringReplaceString
-    // CFAttributedStringSetAttribute
-    CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, 
-                                                                      string, attributes);
-
-    CTLineRef line = CTLineCreateWithAttributedString(attributedString);
-
-    // either flip the coordinate system for iOS, or...
-    //CGContextTranslateCTM(_context, 0, _size.height());
-    //CGContextScaleCTM(_context, 1.0, -1.0);
-
-    // flip the text coordinate system for iOS
-    //CGContextSetTextMatrix(_context, CGAffineTransformMakeScale(1.0, -1.0));
+    CFIndex length = CFAttributedStringGetLength(attributedString);
+    CFAttributedStringReplaceString(attributedString, CFRangeMake(0, length), string);
+    CFRelease(string);
     
+    length = CFAttributedStringGetLength(attributedString);
+    CFAttributedStringSetAttributes(attributedString, CFRangeMake(0, length), 
+                                    fontAttributes, false);
+
     beginClip();
 
-    if(trans)
-    {
-        Gfx::Transform tt = *trans;    
-        tt.translate( to.x(), _height - to.y() );   
+    //CGContextSetTextMatrix( _context, CGAffineTransformMake( 1.0, 0.0, 0.0,
+    //                                                        -1.0, 0.0, 0.0) );
+    //CGContextTranslateCTM(_context, 0, _height);
+    //CGContextScaleCTM(_context, 1.0, -1.0);
 
-        CGAffineTransform tf;
-        tf.a = tt.m11();
-        tf.b = tt.m21();
-        tf.c = tt.m12();
-        tf.d = tt.m22();
-        tf.tx = tt.dx();
-        tf.ty = tt.dy();
+    Gfx::Transform xform = transform ? *transform : Gfx::Transform();
+    xform.translate( to.x(), _height - to.y() );
 
-        CGContextConcatCTM(_context, tf);
-    }
-
+    CGAffineTransform tf = CGAffineTransformMake( xform.m11(), xform.m21(), 
+                                                  xform.m12(), xform.m22(),
+                                                  xform.dx(),  xform.dy());
+    CGContextConcatCTM(_context, tf);
     CGContextSetTextPosition(_context, 0, 0);
-    CTLineDraw(line, _context);
-    
-    endClip();
 
-    CFRelease(line);
+    CTLineRef line = CTLineCreateWithAttributedString(attributedString);
     CFRelease(attributedString);
-    CFRelease(string);
-    CFRelease(attributes);
-    CFRelease(textColor);
+
+    CTLineDraw(line, _context);
+    CFRelease(line);
+
+    endClip();
 
     // ALTERNATIVE: CTRunDraw
 
     _imageModified = true;
 }
 
-void PixmapCanvas::onDrawImage(const Gfx::PointF& to, 
+void PixmapCanvas::onDrawImage(const Gfx::PointF& toL, 
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
     if( image.empty() )
         return;
 
+    Gfx::PointF to = _scaling.toPhysical(toL);
+
     //std::clog << "onDrawImage: " << this << " "
-    //          << to.x() << "," << to.y() << std::endl;
+    //          << to.x() << "," << to.y() << " "
+    //          << image.width() << "," << image.height() << std::endl;
 
     const Pt::uint8_t* data = image.data();
     std::size_t dataSize = image.format().imageSize( image.width(), 
@@ -678,7 +698,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
 
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Little|kCGImageAlphaFirst;
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host|kCGImageAlphaFirst;
     
     CGImageRef imageRef = CGImageCreate(image.width(), image.height(), 
                                         8, 32, 4 * image.width(), 

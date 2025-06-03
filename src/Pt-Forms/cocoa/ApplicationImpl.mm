@@ -67,21 +67,25 @@
 
 - (void) sendEvent: (NSEvent*) event
 {
-    // static int nnn = 0;
+     //static int nnn = 0;
 
-    // switch( [event type] ) 
-    // {
-    //     case NSEventTypeLeftMouseDown:
-    //         std::clog << "### MOUSE DOWN " << nnn++ << std::endl;
-    //         break;
+     //switch( [event type] ) 
+     //{
+     //    case NSEventTypeLeftMouseDown:
+     //        std::clog << "### MOUSE DOWN " << nnn++ << std::endl;
+     //        break;
 
-    //     case NSEventTypeMouseMoved:
-    //         std::clog << "# MOUSE MOVE " << nnn++ << std::endl;
-    //         break;
+     //    case NSEventTypeMouseMoved:
+     //        std::clog << "# MOUSE MOVE " << nnn++ << std::endl;
+     //        break;
 
-    //     default:
-    //         break;
-    // }
+     //    case NSEventTypeKeyDown:
+     //         std::clog << "EVENT KEY DOWN" << std::endl;
+     //         break;
+
+     //    default:
+     //        break;
+     //}
 
     [super sendEvent: event];
 }
@@ -152,16 +156,31 @@ ApplicationImpl::ApplicationImpl()
 
     // local monitors will only capture events on the window frame
 
-    // [NSEvent addGlobalMonitorForEventsMatchingMask: NSEventMaskAny
-    //          handler:^ void (NSEvent* event) 
-    //          {
-    //             NSEventType eventType = [event type];
-    //             if (eventType == NSEventTypeLeftMouseDown ||
-    //                 eventType == NSEventTypeRightMouseDown)
-    //                 std::clog << "EVENT MOUSE DOWN" << std::endl;
-                
-    //             return;
-    //         }];
+     //id monId = [NSEvent addGlobalMonitorForEventsMatchingMask: NSEventMaskAny
+     //         handler:^ void (NSEvent* event) 
+     //         {
+     //           std::clog << "EVENT" << std::endl;
+
+     //            NSEventType eventType = [event type];
+     //            if (eventType == NSEventTypeLeftMouseDown ||
+     //                eventType == NSEventTypeRightMouseDown)
+     //                std::clog << "EVENT MOUSE DOWN" << std::endl;
+     //           
+     //            if (eventType == NSEventTypeKeyDown)
+     //                std::clog << "EVENT KEY DOWN" << std::endl;
+
+     //            return;
+     //        }];
+
+     //[NSEvent addLocalMonitorForEventsMatchingMask: NSEventMaskAny
+     //         handler:^ NSEvent* (NSEvent* event) 
+     //         {
+     //            NSEventType eventType = [event type];
+     //            if (eventType == NSEventTypeKeyDown)
+     //                std::clog << "EVENT Key DOWN" << std::endl;
+     //           
+     //            return event;
+     //        }];
 }
 
 
@@ -299,7 +318,7 @@ void ApplicationImpl::onRun()
 {
     // NOTE: instead of a master timer we could also iterate using
     //         NSApp runUntil().
-
+    [NSApp activateIgnoringOtherApps:YES];
     [NSApp run];
 }
 
@@ -334,21 +353,21 @@ void ApplicationImpl::onWake()
 void ApplicationImpl::onProcessEvents()
 { 
     NSEvent* event = nil;
-    
+
     //
     // process cocoa events
     //
-    do {
-        
-    event = [NSApp nextEventMatchingMask: NSEventMaskAny
-                               untilDate: nil
-                                  inMode: NSDefaultRunLoopMode
-                                 dequeue: YES];
-     } while (event != 0);
-             
-    [NSApp sendEvent:event];
-    
-    
+    do 
+    {
+        event = [NSApp nextEventMatchingMask: NSEventMaskAny
+                                              untilDate: nil
+                                              inMode: NSDefaultRunLoopMode
+                                              dequeue: YES];
+        if(event)
+            [NSApp sendEvent:event];
+     } 
+     while (event != 0);
+
     //
     // process available selectables
     //
