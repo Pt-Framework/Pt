@@ -477,9 +477,207 @@ void ImageCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-FontMetrics ImageCanvas::onGetFontMetrics(const String& text) const
+void ImageCanvas::onDrawPath(const Gfx::Path& path, float smoothness)
 {
-    return _text->fontMetrics(text);
+  std::vector<Polygon> polygons;
+  path.toPolygons(polygons);
+
+  for(const Polygon& poly : polygons)
+  {
+    const std::vector<PointF>& points = poly.points();
+
+    if(_paint)
+        _paint->drawPolyline( &points[0], points.size() );
+  }
+}
+
+
+void ImageCanvas::onFillPath(const Gfx::Path& path, float smoothness)
+{
+  std::vector<Polygon> polygons;
+  path.toPolygons(polygons);
+
+  const Rect currentClip = updateClip();
+  fillPolygons(polygons, currentClip);
+  
+  //for(const Polygon& poly : polygons)
+  //{
+  //  const std::vector<PointF>& points = poly.points();
+
+  //  if(_paint)
+  //      _paint->fillPolygon( &points[0], points.size() );
+  //}
+}
+
+
+void ImageCanvas::fillPolygons(std::vector<Polygon> polygons, const Rect& currentClip)
+{
+    EdgeSet           globalEdgeTable;
+    ActiveEdgeTable   activeEdgeTable;
+    EdgeSet::iterator currentPos;
+    
+    // find unclipped origin coordinates
+    Point origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
+
+    // might as well create a new table here...
+    globalEdgeTable.clear();
+
+    for(const Polygon& poly : polygons)
+    {
+        std::size_t n = poly.size();
+        std::vector<Point> points(n);
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            const Gfx::PointF& p = poly.at(i);
+
+            points[i] = Point( Pt::lround(p.x() - 0.4999),
+                               Pt::lround(p.y() - 0.4999) );
+        }
+
+        ClipPolygon clipper;
+        clipper(points, currentClip);
+
+        int leftPos = std::numeric_limits<int>::max();
+        int topPos = std::numeric_limits<int>::max();
+        int rightPos = 0;
+        int bottomPos = 0;
+
+        for(size_t n = 0; n < points.size(); ++n)
+        {
+            const Point& p = points[n];
+            origin.setX( std::min( origin.x(), p.x() ) );
+            origin.setY( std::min( origin.y(), p.y() ) );
+
+            if( ! _isGradient )
+              continue;
+
+            if( p.y() < topPos)
+                topPos = p.y();
+
+            if( p.y() > bottomPos)
+                bottomPos = p.y();
+
+            if( p.x() < leftPos)
+                leftPos = p.x();
+
+            if( p.x() > rightPos)
+                rightPos = p.x();
+        }
+
+        if( points.empty() )
+            continue;
+
+        if( points.back() != points.front() )
+            points.push_back( points[0] );
+
+        if( _isGradient )
+            updateGradientBrush(rightPos - leftPos, bottomPos - topPos);
+
+        // Fill the global edge table. Two points yield an edge.
+        Edge   edge;
+        Point* bottom = 0;
+        Point* top = 0;
+
+        for( size_t i = 1; i < points.size(); ++i )
+        {
+            // Find out which point is above and which is below
+            if ( points[i-1].y() > points[i].y() )
+            {
+                bottom = &( points[i-1] );
+                top = &( points[i] );
+            }
+            else
+            {
+                bottom = &(points[i]);
+                top = &(points[i-1]);
+            }
+
+            // Omit horizontal edges, add others to global edge table. The GET
+            // is sorted by primarily by the edges ymin and secondarily by
+            // the x value of the edge
+
+            if( top->y() != bottom->y())
+            {
+                const int dy   = (int)bottom->y() - (int)top->y();
+                const int dx   = (int)bottom->x() - (int)top->x();
+
+                edge.ymax = (int)bottom->y();
+                edge.ymin = (int)top->y();
+                edge.x    = (int)top->x();
+
+                // Bresenham stuff...
+                if (dx < 0)
+                {
+                    edge.m = dx / dy;
+                    edge.m1 = edge.m - 1;
+                    edge.incr1 = -2 * dx + 2 * dy * edge.m1;
+                    edge.incr2 = -2 * dx + 2 * dy * edge.m;
+                    edge.d = 2 * edge.m * dy - 2 * dx - 2 * dy;
+                }
+                else
+                {
+                    edge.m = dx / dy;
+                    edge.m1 = edge.m + 1;
+                    edge.incr1 = 2 * dx - 2 * dy * edge.m1;
+                    edge.incr2 = 2 * dx - 2 * dy * edge.m;
+                    edge.d = -2 * edge.m * dy + 2 * dx;
+                }
+
+                globalEdgeTable.insert( edge );
+            }
+        }
+    }
+
+    // if all polygon points are on one line the GET will be empty
+    if( globalEdgeTable.empty() )
+        return;
+
+    // Start at ymin of the first entry in the GET.
+    int scanLine = globalEdgeTable.begin()->ymin;
+
+    // move active edges to AET for current scanline. Keep iterator where
+    // we stopped for later use.
+    EdgeSet::iterator it = globalEdgeTable.begin();
+
+    for( ; it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
+        activeEdgeTable.addEdge( *it );
+
+    ///ActiveEdgeTable last;
+
+    do
+    {
+        ///last = activeEdgeTable;
+
+        // fill every even span, starting at even (even-odd-rule)
+        outputEdges(activeEdgeTable, origin, scanLine);
+
+        // now we are done with the current active edges and can update
+        // them for the next scanline.
+        scanLine++;
+
+        activeEdgeTable.update(scanLine);
+
+        // move active edges to AET for current scanline
+        for( ; it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
+        {
+            activeEdgeTable.addEdge(*it);
+        }
+
+        // Need to resort the AET, because of update and new edges
+        activeEdgeTable.sort();
+    }
+    while( ! activeEdgeTable.empty() );
+
+    //last.update();
+
+    //outputEdges(last, origin, scanLine);
+}
+
+
+TextMetrics ImageCanvas::onGetTextMetrics(const String& text) const
+{
+    return _text->textMetrics(text);
 }
 
 
@@ -3653,12 +3851,11 @@ void ImageCanvas::fill(const Point* pts, size_t pointCount, const Rect& currentC
             rightPos = p.x();
     }
 
-
-    if( points.end() != points.begin() )
-        points.push_back( points[0] );
-
-    if( points.empty())
+    if( points.empty() )
         return;
+
+    if( points.back() != points.front() )
+        points.push_back( points[0] );
 
     if( _isGradient )
         updateGradientBrush(rightPos - leftPos, bottomPos - topPos);

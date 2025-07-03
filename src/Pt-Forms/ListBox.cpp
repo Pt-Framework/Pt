@@ -242,7 +242,7 @@ Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
     Gfx::Painter _painter( surface() );
     _painter.setFont(_font);
 
-    Gfx::FontMetrics fm = _painter.fontMetrics(_text);
+    Gfx::TextMetrics fm = _painter.textMetrics(_text);
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
@@ -320,7 +320,7 @@ void ListBoxItem::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& paint
     // layout icon and text
     //
 
-    Gfx::FontMetrics fm = painter.fontMetrics( _text );
+    Gfx::TextMetrics fm = painter.textMetrics( _text );
 
     double pictureX = 0;
     double pictureY = 0;

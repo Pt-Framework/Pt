@@ -355,7 +355,7 @@ void PlatinumCheckBoxRenderer::onRenderText(const CheckBox& cb,
                                             const Gfx::RectF& rect,
                                             const String& text,
                                             const Gfx::PointF& textPos,
-                                            const Gfx::FontMetrics& textMetric,
+                                            const Gfx::TextMetrics& textMetric,
                                             const Gfx::Font& font, 
                                             const Gfx::Pen& textPen,
                                             const Gfx::RectF& mnemonic) const 
@@ -1422,7 +1422,7 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(Gfx::PaintSurface& surface,
     std::vector<TabItem>::const_iterator it;
     for(it = tabs.begin(); it != tabs.end(); ++it)
     {
-        Gfx::FontMetrics fm = _painter.fontMetrics( it->text() );
+        Gfx::TextMetrics fm = _painter.textMetrics( it->text() );
         s.addWidth( fm.width() + spacing.leftRight() );
     }
 
@@ -1445,7 +1445,7 @@ void PlatinumTabViewRenderer::onLayoutTabs(Gfx::PaintSurface& surface,
     std::vector<TabItem>::iterator it;
     for(it = tabs.begin(); it != tabs.end(); ++it)
     {
-        Gfx::FontMetrics fm = _painter.fontMetrics( it->text() );
+        Gfx::TextMetrics fm = _painter.textMetrics( it->text() );
 
         double tabWidth = fm.width() + spacing.leftRight();
         
@@ -1494,7 +1494,7 @@ void PlatinumTabViewRenderer::onRenderTabs(const std::vector<TabItem>& tabs,
 
         painter.setFont(font);
 
-        Gfx::FontMetrics fm = painter.fontMetrics( it->text() );
+        Gfx::TextMetrics fm = painter.textMetrics( it->text() );
         
         double textX = it->geometry().left() + spacing.left();
         double textY = it->geometry().height() / 2 + fm.ascent() / 2;

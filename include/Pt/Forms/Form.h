@@ -79,6 +79,9 @@ class PT_FORMS_API Form : public View
 
         //void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
+    protected:
+        void relayout();
+
     public:
         Control* focusControl();
 
@@ -88,8 +91,6 @@ class PT_FORMS_API Form : public View
 
     protected:
         Form();
-
-        void relayout();
 
     protected:
         virtual Gfx::SizeF onMeasure();

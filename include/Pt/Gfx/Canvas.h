@@ -34,7 +34,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Scaling.h>
@@ -119,8 +119,12 @@ class PT_GFX_API Canvas : public CanvasBase
 
         void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
+        void drawPath(const Path& path);
+
+        void fillPath(const Path& path);
+
     protected:
-        FontMetrics fontMetrics(const Pt::String& text) const;
+        TextMetrics textMetrics(const Pt::String& text) const;
 
         void drawText(const PointF& to, const Pt::String& text, 
                       const Transform* t = 0);
@@ -176,7 +180,7 @@ class PT_GFX_API Canvas : public CanvasBase
         virtual void onFillPath(const Gfx::Path& path, float smoothness) = 0;
 
     protected:
-        virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const = 0;
+        virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const = 0;
 
         virtual void onDrawText(const PointF& to, 
                                 const Pt::String& text,

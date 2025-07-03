@@ -77,9 +77,9 @@ void DrawText::setClip(const Rect& clip)
 }
 
 
-FontMetrics DrawText::fontMetrics(const String& text)
+TextMetrics DrawText::textMetrics(const String& text)
 {
-    return FreeType::instance().fontMetrics(text, _faceId, _fontSize);
+    return FreeType::instance().textMetrics(text, _faceId, _fontSize);
 }
 
 

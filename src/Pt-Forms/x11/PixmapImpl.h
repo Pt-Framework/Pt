@@ -129,7 +129,7 @@ class PixmapImpl
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Point.h>
@@ -219,7 +219,7 @@ class PixmapSurfaceImpl
 
         void setFont(const Gfx::Font& font);
 
-        Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+        Gfx::TextMetrics textMetrics(const Pt::String& text) const;
 
         void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 

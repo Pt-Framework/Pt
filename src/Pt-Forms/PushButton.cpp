@@ -294,7 +294,7 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
     Gfx::Painter _painter( surface() );
     _painter.setFont(_font);
 
-    _textMetrics = _painter.fontMetrics( text() );
+    _textMetrics = _painter.textMetrics( text() );
 
     double spacing = _picture.empty() || text().empty() ? 0 : _textMetrics.height() * 0.5;
 
@@ -485,7 +485,7 @@ void PushButton::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     }
 
     painter.setFont(_font);
-    //Gfx::FontMetrics fm = painter.fontMetrics( text() );
+    //Gfx::TextMetrics fm = painter.textMetrics( text() );
 
     //
     // button icon
@@ -510,10 +510,10 @@ void PushButton::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
         if(n != String::npos)
         {
             Pt::String mnemonicText(text(), 0, n);
-            Gfx::FontMetrics fmLeft = painter.fontMetrics(mnemonicText);
+            Gfx::TextMetrics fmLeft = painter.textMetrics(mnemonicText);
 
             mnemonicText = *m;
-            Gfx::FontMetrics fmChar = painter.fontMetrics(mnemonicText);
+            Gfx::TextMetrics fmChar = painter.textMetrics(mnemonicText);
 
             mnemonicRect.set( Gfx::PointF(_textPos.x() + fmLeft.width(), 
                                           _textPos.y() - fmChar.ascent()),

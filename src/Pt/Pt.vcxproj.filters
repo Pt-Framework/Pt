@@ -2928,6 +2928,9 @@
     <ClInclude Include="..\..\include\Pt\Forms\WorkspaceManager.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\TextMetrics.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">
@@ -4583,9 +4586,6 @@
     <ClCompile Include="..\Pt-Gfx\Font.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\FontMetrics.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Image.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
@@ -5617,6 +5617,9 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\WorkspaceManager.cpp">
       <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\TextMetrics.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -271,7 +271,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //}
     
     Window::onPaintEvent(ev);
-    return;   
+    //return;   
     
     const Gfx::RectF& rect = ev.rect();
  
@@ -281,13 +281,39 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     Pt::String text = "MgWjOy";
 
     painter.setFont( Pt::Gfx::Font("", 10) );
-    painter.fontMetrics(text);
+    painter.textMetrics(text);
     painter.drawText( Pt::Gfx::PointF(10, 15), text);
 
-    Gfx::FontMetrics fm = painter.fontMetrics(text);
+    Gfx::TextMetrics fm = painter.textMetrics(text);
 
     painter.setPen( Gfx::Color::fromRgb8(255, 0, 0, 150) );
     painter.drawLine(Pt::Gfx::PointF(10, 15), Pt::Gfx::PointF(10 + fm.width(), 15));
+
+    //
+    // Path
+    //
+    painter.setPen( Pt::Gfx::Pen(Gfx::Color(10000, 0, 10000), 2) );
+    painter.setBrush(Gfx::Color(65535, 0, 0));
+
+    Pt::Gfx::Path pathW;
+    pathW.moveTo( Pt::Gfx::PointF(10, size().height() - 210) );
+    pathW.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
+
+    pathW.moveTo( Pt::Gfx::PointF(40, size().height() - 180) );
+    pathW.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
+
+    painter.fillPath(pathW);
+    painter.drawPath(pathW);
+
+    Pt::Gfx::PointF star2[6];
+    star2[0] = Pt::Gfx::PointF(100+320, 20);
+    star2[1] = Pt::Gfx::PointF(100+500, 200);
+    star2[2] = Pt::Gfx::PointF(100+400, 20);
+    star2[3] = Pt::Gfx::PointF(100+320, 200);
+    star2[4] = Pt::Gfx::PointF(100+500, 20);
+    star2[5] = Pt::Gfx::PointF(100+320, 20);
+    //painter.fillPolygon(star2, 6);
+    //painter.drawPolyline(star2, 6);
     //return;
 
 #ifdef DEMO_WITH_SKIA
@@ -519,29 +545,43 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //
     // Gradient filled path
     //
-
     Gfx::ColorStops stops;
     stops.add(0, Gfx::Color::fromRgb8(255, 0, 0));
     stops.add(1.0, Gfx::Color::fromRgb8(0, 255, 0));
 
-    //Gfx::Brush brush = Gfx::Brush::linearGradient(0.0, 0.5, 1.0, 0.5, stops) );
-    Gfx::Brush brush = Gfx::Brush::radialGradient(0.25, 0.25, 0, 0.5f, 0.5f, 0.5, stops);
-    imagePainter.setBrush(brush);
-
-    Pt::Gfx::Transform trans;
-    trans.rotateDeg(-45);
+    //Gfx::Brush brush = Gfx::Brush::linearGradient(0.0, 0.5, 1.0, 0.5, stops);
+    //Gfx::Brush brush = Gfx::Brush::radialGradient(0.25, 0.25, 0, 0.5f, 0.5f, 0.5, stops);
+    //imagePainter.setBrush(brush);
+    imagePainter.setBrush(Gfx::Color(65535, 0, 0));
 
     Pt::Gfx::Path path;
     path.moveTo( Pt::Gfx::PointF(20, 20) );
-    path.addRoundedRect(Pt::Gfx::SizeF(200, 200), 10);
+    path.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
+    
+    path.moveTo( Pt::Gfx::PointF(50, 50) );
+    path.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
 
     imagePainter.fillPath(path);
     imagePainter.drawPath(path);
 
-    
+
+    Pt::Gfx::PointF star[6];
+    star[0] = Pt::Gfx::PointF(20, 20);
+    star[1] = Pt::Gfx::PointF(200, 200);
+    star[2] = Pt::Gfx::PointF(100, 20);
+    star[3] = Pt::Gfx::PointF(20, 200);
+    star[4] = Pt::Gfx::PointF(200, 20);
+    star[5] = Pt::Gfx::PointF(20, 20);
+    //imagePainter.fillPolygon(star, 6);
+    //imagePainter.drawPolyline(star, 6);
+
+
+
     imagePainter.setFont( Pt::Gfx::Font("", 24) );
     Pt::String str = "Hello World";
 
+    Pt::Gfx::Transform trans;
+    trans.rotateDeg(-45);
     imagePainter.drawText(Pt::Gfx::PointF(20, 260), str, trans);
 
     Pt::Gfx::PointF triangle[4];
@@ -550,7 +590,9 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     triangle[2] = Pt::Gfx::PointF(505, 505);
     triangle[3] = Pt::Gfx::PointF(500, 500);
 
-    // Ellipse et. all. and comparisons
+    //
+    // Ellipse, circle, pie and chord
+    //
     //imagePainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
     //imagePainter.setAntiAliasing(false);
 
@@ -594,7 +636,8 @@ bool MainWindow::onMouseEvent(const MouseEvent& ev)
         Gfx::PointF menuPos = this->toGlobal( ev.position() );
 
         SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
-        _menu.setAutoSize(policy);
+        //_menu.setAutoSize(policy);
+        _menu.resizeToFit(policy);
 
         _menu.move(menuPos);
         _menu.setAbove(true);

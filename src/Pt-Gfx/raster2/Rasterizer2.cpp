@@ -672,17 +672,17 @@ void Rasterizer2::drawText(const Point& to, const Pt::String& text,
 }
 
 
-FontMetrics Rasterizer2::fontMetrics(const String& text) const
+TextMetrics Rasterizer2::textMetrics(const String& text) const
 {
-    return FreeType::instance().fontMetrics(text, _faceId, _fontSize);
+    return FreeType::instance().textMetrics(text, _faceId, _fontSize);
 }
 
 
-FontMetrics Rasterizer2::fontMetrics(const Font& font, const Pt::String& text)
+TextMetrics Rasterizer2::textMetrics(const Font& font, const Pt::String& text)
 {
     FTC_FaceID faceId = FreeType::instance().findFaceId(font);
 
-    return FreeType::instance().fontMetrics(text, faceId, font.size());
+    return FreeType::instance().textMetrics(text, faceId, font.size());
 }
 
 

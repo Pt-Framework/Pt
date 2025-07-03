@@ -110,11 +110,11 @@ const Pt::String& TextLine::text() const
 //    _text = text;
 //    _font = font;
 //
-//    _textMetrics = PixmapSurface::fontMetrics(_font, _text);
+//    _textMetrics = PixmapSurface::textMetrics(_font, _text);
 //}
 
 
-void TextLine::setText(const Pt::String& text, const Gfx::FontMetrics& tm)
+void TextLine::setText(const Pt::String& text, const Gfx::TextMetrics& tm)
 {
     _text = text;
     _textMetrics = tm;
@@ -127,7 +127,7 @@ double TextLine::cursorToX(const Gfx::Painter& painter, std::size_t cursorPositi
     if( cursorPosition <= _text.size() && ! _text.empty() )
         left = _text.substr(0, cursorPosition);
 
-    Gfx::FontMetrics fmLeft = painter.fontMetrics(left);
+    Gfx::TextMetrics fmLeft = painter.textMetrics(left);
 
     return fmLeft.width();
 }
@@ -143,7 +143,7 @@ std::size_t TextLine::xToCursor(const Gfx::Painter& painter, double x) const
     std::size_t textX = x - _position.x();
 
     // estimate cursor position
-    Gfx::FontMetrics fm = painter.fontMetrics(str);
+    Gfx::TextMetrics fm = painter.textMetrics(str);
     std::size_t widthPerChar = fm.width() / str.size();
 
     if(widthPerChar == 0)
@@ -155,7 +155,7 @@ std::size_t TextLine::xToCursor(const Gfx::Painter& painter, double x) const
         pos = str.size() - 1;
 
     Pt::String left = str.substr(0, pos + 1);
-    fm = painter.fontMetrics(left);
+    fm = painter.textMetrics(left);
 
     if( textX < fm.width() )
     {
@@ -163,7 +163,7 @@ std::size_t TextLine::xToCursor(const Gfx::Painter& painter, double x) const
         for( ; pos > 0; --pos)
         {
             left = str.substr(0, pos);
-            fm = painter.fontMetrics(left);
+            fm = painter.textMetrics(left);
 
             if( textX >= fm.width() )
                 break;
@@ -175,7 +175,7 @@ std::size_t TextLine::xToCursor(const Gfx::Painter& painter, double x) const
         for(++pos ; pos < str.size(); ++pos)
         {
             left = str.substr(0, pos + 1);
-            fm = painter.fontMetrics(left);
+            fm = painter.textMetrics(left);
 
             if( textX < fm.width() )
                 break;
@@ -331,7 +331,7 @@ void TextBlock::layout(const Gfx::Painter& painter, const Pt::String& text)
     std::size_t wordEnd = 0;
     std::size_t prevWordEnd = 0;
     Pt::String segment;
-    Gfx::FontMetrics lineMetrics;
+    Gfx::TextMetrics lineMetrics;
 
     Words::iterator it;
     for(it = words.begin(); it != words.end(); ++it)
@@ -342,7 +342,7 @@ void TextBlock::layout(const Gfx::Painter& painter, const Pt::String& text)
 
         segment.append(&text[prevWordEnd], wordEnd - prevWordEnd);
 
-        Gfx::FontMetrics fm = painter.fontMetrics(segment);
+        Gfx::TextMetrics fm = painter.textMetrics(segment);
         double segmentWidth = fm.width();
 
         if(segmentWidth <= _maxWidth || lineLength == 0)
@@ -364,7 +364,7 @@ void TextBlock::layout(const Gfx::Painter& painter, const Pt::String& text)
 
         lineBegin = wordBegin;
         lineLength = wordEnd - wordBegin;
-        lineMetrics = painter.fontMetrics(segment);
+        lineMetrics = painter.textMetrics(segment);
     }
 
     // add the whitespace after the last word
@@ -377,7 +377,7 @@ void TextBlock::layout(const Gfx::Painter& painter, const Pt::String& text)
 
 
 void TextBlock::addLine(const Pt::String& line,
-                        const Gfx::FontMetrics& tm)
+                        const Gfx::TextMetrics& tm)
 {
     double lineWidth = tm.width();
     double lineHeight = tm.height();

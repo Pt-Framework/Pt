@@ -216,7 +216,7 @@ void LineEditor::layout(Gfx::Painter& painter, TextLine& line)
 
 void LineEditor::layout(Gfx::Painter& painter, const Pt::String& text, TextLine& line)
 {
-    Gfx::FontMetrics fm = painter.fontMetrics(text);
+    Gfx::TextMetrics fm = painter.textMetrics(text);
     line.setText(text, fm);
 
     double lineX = 0;

@@ -49,7 +49,7 @@ void MenuSubItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& 
     painter.setFont(_font);
     painter.setPen(_textPen);
 
-    Pt::Gfx::FontMetrics fm = painter.fontMetrics(_text);
+    Pt::Gfx::TextMetrics fm = painter.textMetrics(_text);
     double textX = padding().left() + _iconWidth;
     double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
@@ -63,7 +63,7 @@ void MenuSubItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& 
     if(sk)
     {
         Pt::String skText = shortcutText(*sk);
-        Pt::Gfx::FontMetrics skm = painter.fontMetrics(skText);
+        Pt::Gfx::TextMetrics skm = painter.textMetrics(skText);
 
         double skX = size().width() - skm.width() - padding().right();
         double skY = (size().height() - skm.height()) / 2;

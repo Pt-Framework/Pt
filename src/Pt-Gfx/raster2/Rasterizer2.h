@@ -40,7 +40,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 
 // Coordinate limit
 #define MAXIMUM_COORD   32767
@@ -128,9 +128,9 @@ class Rasterizer2
 
         void drawText(const Point& to, const Pt::String& text, const Transform& t);
 
-        FontMetrics fontMetrics( const String& text ) const;
+        TextMetrics textMetrics( const String& text ) const;
 
-        static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
+        static TextMetrics textMetrics( const Font& font, const Pt::String& text );
 
         void drawLine(const PointF& from, const PointF& to);
 

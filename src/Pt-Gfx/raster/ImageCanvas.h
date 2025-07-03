@@ -130,14 +130,12 @@ class ImageCanvas : public Canvas
                            float degBegin, float degEnd) override
     {}
 
-    virtual void onDrawPath(const Gfx::Path& path, float smoothness) override
-    {}
+    virtual void onDrawPath(const Gfx::Path& path, float smoothness) override;
 
-    virtual void onFillPath(const Gfx::Path& path, float smoothness) override
-    {}
+    virtual void onFillPath(const Gfx::Path& path, float smoothness) override;
 
   protected:
-    virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
+    virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
     virtual void onDrawText(const Gfx::PointF& to, 
                             const Pt::String& text, 
@@ -174,6 +172,8 @@ class ImageCanvas : public Canvas
 
     void fill(const Point* points, size_t pointCount, const Rect& currentClip);
 
+    void fillPolygons(std::vector<Polygon> polygons, const Rect& currentClip);
+
     void strokeEllipse( const Point& topLeft, const Size& size, const Rect& currentClip);
 
     void fillEllipse( const Point& topLeft, const Size& size, const Rect& currentClip);
@@ -182,7 +182,7 @@ class ImageCanvas : public Canvas
     void outputSpan( const Point& topLeft, int x, int y, int width );
     
     void fill( const Point& origin, const Point& pos, int length );
-    
+
     void fillSolid( const Point& pos,  int length );
     
     void fillVerticalGradient( const Point& origin, const Point& pos,  int length );

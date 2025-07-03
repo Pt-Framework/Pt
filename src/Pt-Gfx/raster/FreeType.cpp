@@ -33,7 +33,7 @@
 #include "DejaVuSansItalic.h"
 #include "DejaVuSansBoldItalic.h"
 
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/System/Directory.h>
@@ -239,7 +239,7 @@ FT_Error FreeType::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 }
 
 
-FontMetrics FreeType::fontMetrics(const String& text,
+TextMetrics FreeType::textMetrics(const String& text,
                                   FTC_FaceID faceId,
                                   std::size_t fontSize)
 {
@@ -248,7 +248,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
     FT_Face face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
     if(ferr)
-        return FontMetrics();
+        return TextMetrics();
 
     // calculate total font height
     double fontHeight = (face->height / double(face->ascender)) * fontSize;
@@ -322,7 +322,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
     double cap = emh - des;
     double exl = lih - (asc + des);
 
-    Gfx::FontMetrics fm;
+    Gfx::TextMetrics fm;
     fm.setAscent(asc);
     fm.setDescent(des);
     fm.setCapHeight(cap);

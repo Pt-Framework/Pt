@@ -36,7 +36,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Scaling.h>
@@ -193,7 +193,7 @@ class PT_GFX_API Painter
     public:
         /** @brief Measures the metrics of a text block.
         */
-        FontMetrics fontMetrics(const Pt::String& text) const;
+        TextMetrics textMetrics(const Pt::String& text) const;
 
         /** @brief Draws a text block.
         */

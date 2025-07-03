@@ -319,12 +319,26 @@ void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& siz
 }
 
 
-FontMetrics PaintContext::fontMetrics(const Pt::String& text) const
+void PaintContext::drawPath(const Gfx::Path& path)
 {
     if(_active)
-        return _active->fontMetrics(text);
+        _active->drawPath(path);
+}
 
-    return FontMetrics();
+
+void PaintContext::fillPath(const Path& path)
+{
+    if(_active)
+        _active->fillPath(path);
+}
+
+
+TextMetrics PaintContext::textMetrics(const Pt::String& text) const
+{
+    if(_active)
+        return _active->textMetrics(text);
+
+    return TextMetrics();
 }
 
 
@@ -346,8 +360,8 @@ void PaintContext::drawText(const PointF& to, const Pt::String& text,
 
 
 void PaintContext::drawImage(const Gfx::PointF& to, 
-                          const Gfx::Image& image, 
-                          const Gfx::RectF* rect)
+                             const Gfx::Image& image, 
+                             const Gfx::RectF* rect)
 {
     Pt::Gfx::PointF p = to + origin();
 

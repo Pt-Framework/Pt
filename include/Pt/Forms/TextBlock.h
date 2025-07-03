@@ -32,7 +32,7 @@
 #include <Pt/Forms/Adjustment.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/String.h>
@@ -69,7 +69,7 @@ class PT_FORMS_API TextLine
 
         //void setText(const Pt::String& text, const Gfx::Font& font);
 
-        void setText(const Pt::String& text, const Gfx::FontMetrics& tm);
+        void setText(const Pt::String& text, const Gfx::TextMetrics& tm);
 
         double cursorToX(const Gfx::Painter& painter, std::size_t n) const;
 
@@ -78,7 +78,7 @@ class PT_FORMS_API TextLine
     private:
         Gfx::PointF      _position;
         Pt::String       _text;
-        Gfx::FontMetrics _textMetrics;
+        Gfx::TextMetrics _textMetrics;
 };
 
 class PT_FORMS_API TextBlock
@@ -131,7 +131,7 @@ class PT_FORMS_API TextBlock
         void layout(const Gfx::Painter& painter, const Pt::String& text);
 
     private:
-        void addLine(const Pt::String& line, const Gfx::FontMetrics& tm);
+        void addLine(const Pt::String& line, const Gfx::TextMetrics & tm);
 
         double align(double v) const
         {

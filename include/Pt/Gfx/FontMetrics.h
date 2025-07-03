@@ -1,6 +1,4 @@
-/* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2006-2015 Marc Boris Duerner
-   Copyright (C) 2010 Aloysius Indrayanto
+/* Copyright (C) 2015-2024 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,96 +22,21 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
 */
+
 
 #ifndef PT_GFX_FONTMETRICS_H
 #define PT_GFX_FONTMETRICS_H
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Types.h>
-#include <cstddef>
+#include <Pt/Gfx/TextMetrics.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-class PT_GFX_API FontMetrics
-{
-    public:
-        typedef double ValueType;
-
-    public:
-        FontMetrics();
-
-        ValueType ascent() const
-        {
-            return _ascent;
-        }
-
-        void setAscent(ValueType n)
-        {
-            _ascent = n;
-        }
-
-        ValueType descent() const
-        {
-            return _descent;
-        }
-
-        void setDescent(ValueType n)
-        {
-            _descent = n;
-        }
-
-        ValueType capHeight() const
-        {
-            return _capHeight;
-        }
-
-        void setCapHeight(ValueType n)
-        {
-            _capHeight = n;
-        }
-
-        ValueType leading() const
-        {
-            return _leading;
-        }
-
-        void setLeading(ValueType n)
-        {
-            _leading = n;
-        }
-
-        ValueType height() const
-        {
-            return _ascent + _descent;
-        }
-
-        ValueType lineHeight() const
-        {
-            return _ascent + _descent + _leading;
-        }
-
-        ValueType width() const
-        {
-            return _width;
-        }
-
-        void setWidth(ValueType n)
-        {
-            _width = n;
-        }
-
-    private:
-        ValueType _ascent;
-        ValueType _descent;
-        ValueType _capHeight;
-        ValueType _leading;
-        ValueType _width;
-};
+typedef TextMetrics FontMetrics;
 
 } // namespace
 

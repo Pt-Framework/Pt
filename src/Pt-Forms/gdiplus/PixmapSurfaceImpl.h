@@ -82,7 +82,7 @@ class PixmapSurfaceImpl
 
         void setFont(const Gfx::Font& font);
 
-        Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+        Gfx::TextMetrics textMetrics(const Pt::String& text) const;
 
         void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
@@ -132,7 +132,7 @@ class PixmapSurfaceImpl
 
         static void setFontDir(const System::Path& path);
 
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+        static Gfx::TextMetrics textMetrics(const Gfx::Font& font, const Pt::String& text);
 
         HDC deviceContext() const;
 

@@ -35,7 +35,7 @@
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/Size.h>
 
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Point.h>
@@ -143,7 +143,7 @@ class ImageCanvas : public Canvas
     virtual void onFillPath(const Gfx::Path& path, float smoothness) override;
 
   protected:
-    virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
+    virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
     virtual void onDrawText(const Gfx::PointF& to, 
                             const Pt::String& text, 

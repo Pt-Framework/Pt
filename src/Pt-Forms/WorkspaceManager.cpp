@@ -503,6 +503,31 @@ void WorkspaceManager::onResizeEvent(const ResizeEvent& ev)
         {
             window->setState(WindowState::Maximized);
         }
+
+        // TODO: review auto-center
+        if( window->isAutoCenter() )
+        {
+            //bool hasScreen = isDescendantOf( Application::instance().screen() );
+            //std::clog << "WM HAS SCREEN: " << hasScreen << std::endl;
+
+            // TODO: defer auto-center until attached to screen
+            //if( ! hasScreen )
+            //  continue;
+
+            //std::clog << "WM CENTER: " << window->title() << std::endl;
+            Pt::Gfx::SizeF windowSize = window->size();
+            //std::clog << "window size: " << windowSize.width() << "x" << windowSize.height() << std::endl;
+
+            Pt::Gfx::SizeF wmSize = ev.size();
+            //std::clog << "screen size: " << wmSize.width() << "x" << wmSize.height() << std::endl;
+
+            double x = (wmSize.width() - windowSize.width()) / 2.0;
+            double y = (wmSize.height() - windowSize.height()) / 2.0;
+            //std::clog << "CENTER: " << x << "," << y << std::endl;
+    
+            //window->setAutoCenter(false);
+            window->move( Pt::Gfx::PointF(x, y) );
+        }
     }
 }
 

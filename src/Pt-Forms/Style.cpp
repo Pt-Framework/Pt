@@ -242,7 +242,7 @@ void CheckBoxRenderer::renderText(const CheckBox& cb,
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
-                                  const Gfx::FontMetrics& textMetric,
+                                  const Gfx::TextMetrics& textMetric,
                                   const Gfx::Font& font, 
                                   const Gfx::Pen& textPen,
                                   const Gfx::RectF& mnemonic) const

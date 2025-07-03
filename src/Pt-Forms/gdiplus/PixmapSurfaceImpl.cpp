@@ -235,7 +235,7 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 }
 
 
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
+Gfx::TextMetrics PixmapSurfaceImpl::textMetrics(const Pt::String& text) const
 {
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
@@ -272,7 +272,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
     const double scaling = 96.0 / dpix;
 
-    Gfx::FontMetrics fm;
+    Gfx::TextMetrics fm;
     fm.setAscent(asc * scaling);
     fm.setDescent(des * scaling);
     fm.setCapHeight(cap * scaling);
@@ -753,9 +753,9 @@ void PixmapSurfaceImpl::setFontDir(const System::Path& path)
 }
 
 
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
+Gfx::TextMetrics PixmapSurfaceImpl::textMetrics(const Gfx::Font& font, const Pt::String& text)
 {
-    return PaintData::fontMetrics(font, text);
+    return PaintData::textMetrics(font, text);
 }
 
 

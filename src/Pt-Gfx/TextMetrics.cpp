@@ -28,13 +28,13 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-FontMetrics::FontMetrics()
+TextMetrics::TextMetrics()
 : _ascent( 0)
 , _descent(0)
 , _capHeight(0)

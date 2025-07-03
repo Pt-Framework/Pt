@@ -214,6 +214,7 @@ WindowFrame* ScreenImpl::onAttach(Window& w)
 
 void ScreenImpl::onDetach(WindowFrame& frame)
 {
+    static_cast<WindowImpl*>(&frame)->setScreen(0);
     frame.setNextResponder(0);
 
     Window& w = frame.window();
@@ -226,6 +227,8 @@ void ScreenImpl::onDetach(WindowFrame& frame)
 
 void ScreenImpl::onInit(WindowFrame& frame)
 {
+    static_cast<WindowImpl*>(&frame)->setScreen(_parent);
+
     double windowScaling = scaleFactor() / _screenScaling;
 
     RescaleEvent ev( frame, windowScaling );

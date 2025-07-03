@@ -652,25 +652,139 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
     }
 }
 
+
+void PixmapCanvas::setPath(const Gfx::Path& path)
+{
+    double sf = _scaling.scaleFactor();
+
+    BeginPath(_dc);
+
+    for(std::size_t n = 0; n < path.size(); ++n)
+    {
+        const Gfx::Element& e = path.at(n);
+
+        switch( e.type )
+        {
+            default:
+                break;
+
+            case Gfx::Element::IT_Close:
+                CloseFigure(_dc);
+                break;
+
+            case Gfx::Element::IT_MoveTo:
+            {
+                long x = lround( e.pxy.at(0) * sf - 0.4999 );
+                long y = lround( e.pxy.at(1) * sf - 0.4999 );
+                MoveToEx(_dc, x, y, NULL);
+                break;
+            }
+
+            case Gfx::Element::IT_LineTo:
+            {
+                long x = lround( e.pxy.at(0) * sf - 0.4999 );
+                long y = lround( e.pxy.at(1) * sf - 0.4999 );
+                LineTo(_dc, x, y);
+                break;
+            }
+
+            case Gfx::Element::IT_QuadBezierTo:
+            {
+                POINT p0;
+                GetCurrentPositionEx(_dc, &p0);
+
+                POINT p1;
+                p1.x = Pt::lround(e.pxy.at(0) * sf - 0.4999);
+                p1.y = Pt::lround(e.pxy.at(1) * sf - 0.4999);
+                
+                POINT p2;
+                p2.x = Pt::lround(e.pxy.at(2) * sf - 0.4999);
+                p2.y = Pt::lround(e.pxy.at(3) * sf - 0.4999);
+
+                POINT cubicPoints[3];
+
+                // control 1: P0 + (2/3) * (P1 - P0)
+                cubicPoints[0].x = p0.x + (2 * (p1.x - p0.x)) / 3;
+                cubicPoints[0].y = p0.y + (2 * (p1.y - p0.y)) / 3;
+
+                // control2 2: P2 + (2/3) * (P1 - P2)
+                cubicPoints[1].x = p2.x + (2 * (p1.x - p2.x)) / 3;
+                cubicPoints[1].y = p2.y + (2 * (p1.y - p2.y)) / 3;
+
+                // end point
+                cubicPoints[2] = p2;
+                
+                PolyBezierTo(_dc, cubicPoints, 3);
+                break;
+            }
+            
+            case Gfx::Element::IT_CubicBezierTo:
+            {
+                POINT points[3];
+                points[0].x = Pt::lround(e.pxy.at(0) * sf - 0.4999);
+                points[0].y = Pt::lround(e.pxy.at(1) * sf - 0.4999);
+                points[1].x = Pt::lround(e.pxy.at(2) * sf - 0.4999);
+                points[1].y = Pt::lround(e.pxy.at(3) * sf - 0.4999);
+                points[2].x = Pt::lround(e.pxy.at(4) * sf - 0.4999);
+                points[2].y = Pt::lround(e.pxy.at(5) * sf - 0.4999);
+                
+                PolyBezierTo(_dc, points, 3);
+                break;
+            }
+           
+
+            //case Element::IT_GenNBezierTo:
+            //    bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
+            //    curX = ins.pxy[ins.pxy.size() - 2];
+            //    curY = ins.pxy[ins.pxy.size() - 1];
+            //    break;
+        }
+    }
+
+    EndPath(_dc);
+}
+
+
+void PixmapCanvas::onDrawPath(const Gfx::Path& path, float)
+{
+    setPath(path);
+    StrokePath(_dc);
+
+    //TODO: StrokeAndFillPath
+}
+
+
+void PixmapCanvas::onFillPath(const Gfx::Path& path, float)
+{
+    setPath(path);
+    FillPath(_dc);
+}
+
+
 #ifndef PT_FORMS_GDIPLUS
 
-Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
+Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
-    double scaleFactor = scaling().scaleFactor();
+    //
+    // TODO: no transformation necessary, because the logical
+    //       size is returned and GetText* does not use the
+    //       world transform.
+    //
+    //double scaleFactor = scaling().scaleFactor();
 
-    Gfx::Transform tform;
-    tform.scale(scaleFactor, scaleFactor);
+    //Gfx::Transform tform;
+    //tform.scale(scaleFactor, scaleFactor);
 
-    XFORM xform = { static_cast<FLOAT>( tform.m11() ), 
-                    static_cast<FLOAT>( tform.m12() ),
-                    static_cast<FLOAT>( tform.m21() ), 
-                    static_cast<FLOAT>( tform.m22() ),
-                    static_cast<FLOAT>( tform.dx() ),  
-                    static_cast<FLOAT>( tform.dy() ) };
+    //XFORM xform = { static_cast<FLOAT>( tform.m11() ), 
+    //                static_cast<FLOAT>( tform.m12() ),
+    //                static_cast<FLOAT>( tform.m21() ), 
+    //                static_cast<FLOAT>( tform.m22() ),
+    //                static_cast<FLOAT>( tform.dx() ),  
+    //                static_cast<FLOAT>( tform.dy() ) };
 
-    XFORM oldXForm = { 1, 0, 0, 1, 0 , 0 };
-    GetWorldTransform(_dc, &oldXForm);
-    SetWorldTransform(_dc, &xform);
+    //XFORM oldXForm = { 1, 0, 0, 1, 0 , 0 };
+    //GetWorldTransform(_dc, &oldXForm);
+    //SetWorldTransform(_dc, &xform);
 
     TEXTMETRIC tm;
     GetTextMetrics(_dc, &tm);
@@ -681,7 +795,7 @@ Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
     SIZE textSize;
     GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
 
-    SetWorldTransform(_dc, &oldXForm);
+    //SetWorldTransform(_dc, &oldXForm);
 
     long asc = tm.tmAscent;
     long des = tm.tmDescent;
@@ -690,7 +804,7 @@ Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
     long exl = tm.tmExternalLeading;
     long lh = asc + des + exl;
 
-    Gfx::FontMetrics fm;
+    Gfx::TextMetrics fm;
     fm.setAscent(asc);
     fm.setDescent(des);
     fm.setCapHeight(cap);
@@ -703,7 +817,7 @@ Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
 
 #else
 
-Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
+Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
@@ -746,12 +860,12 @@ Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
     int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
     double pixelRatio = 96.0 / dpix;
 
-    Gfx::FontMetrics fm;
-    fm.setAscent(asc * pixelRatio);
-    fm.setDescent(des * pixelRatio);
-    fm.setCapHeight(cap * pixelRatio);
-    fm.setLeading(exl * pixelRatio);
-    fm.setWidth(textRect.Width * pixelRatio);
+    Gfx::TextMetrics tm;
+    tm.setAscent(asc * pixelRatio);
+    tm.setDescent(des * pixelRatio);
+    tm.setCapHeight(cap * pixelRatio);
+    tm.setLeading(exl * pixelRatio);
+    tm.setWidth(textRect.Width * pixelRatio);
     return fm;
 }
 

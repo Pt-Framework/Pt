@@ -37,7 +37,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
 
@@ -111,8 +111,12 @@ class PT_GFX_API PaintContext
 
         void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
+        void drawPath(const Path& path);
+
+        void fillPath(const Path& path);
+
     public:
-        FontMetrics fontMetrics(const Pt::String& text) const;
+        TextMetrics textMetrics(const Pt::String& text) const;
 
         void drawText(const PointF& to, const Pt::String& text, 
                       const Transform* t = 0);

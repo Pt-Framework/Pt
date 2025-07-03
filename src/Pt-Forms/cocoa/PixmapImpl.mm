@@ -244,7 +244,8 @@ void PixmapCanvas::onPenChanged()
                                pen.color().blue() / 65535.0,
                                pen.color().alpha() / 65535.0);
     
-    CGContextSetLineWidth( _context, pen.size() );
+    double scaleFactor = scaling().scaleFactor();
+    CGContextSetLineWidth( _context, pen.size() * scaleFactor );
     
     switch( pen.capStyle() )
     {
@@ -571,6 +572,92 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
     // CGPathRelease(path);
 
     _imageModified = true;
+}
+
+
+void PixmapCanvas::setPath(const Gfx::Path& path)
+{
+    double sf = _scaling.scaleFactor();
+
+    CGContextBeginPath(_context);
+
+    for(std::size_t n = 0; n < path.size(); ++n)
+    {
+        const Gfx::Element& e = path.at(n);
+
+        switch( e.type )
+        {
+            default:
+                break;
+
+            case Gfx::Element::IT_Close:
+                CGContextClosePath(_context);
+                break;
+
+            case Gfx::Element::IT_MoveTo:
+            {
+                CGFloat x = e.pxy.at(0) * sf;
+                CGFloat y = _height - e.pxy.at(1) * sf;
+                CGContextMoveToPoint(_context, x, y);
+                break;
+            }
+
+            case Gfx::Element::IT_LineTo:
+            {
+                CGFloat x = e.pxy.at(0) * sf;
+                CGFloat y = _height - e.pxy.at(1) * sf;
+                CGContextAddLineToPoint(_context, x, y);
+                break;
+            }
+
+            case Gfx::Element::IT_QuadBezierTo:
+            {
+                CGFloat cx = e.pxy.at(0) * sf;
+                CGFloat cy = _height - e.pxy.at(1) * sf;
+
+                CGFloat x = e.pxy.at(2) * sf;
+                CGFloat y = _height - e.pxy.at(3) * sf;
+
+                CGContextAddQuadCurveToPoint(_context, cx, cy, x, y);
+                break;
+            }
+
+            case Gfx::Element::IT_CubicBezierTo:
+            {
+                CGFloat c1x = e.pxy.at(0) * sf;
+                CGFloat c1y = _height - e.pxy.at(1) * sf;
+
+                CGFloat c2x = e.pxy.at(2) * sf;
+                CGFloat c2y = _height - e.pxy.at(3) * sf;
+
+                CGFloat x = e.pxy.at(4) * sf;
+                CGFloat y = _height - e.pxy.at(5) * sf;
+
+                CGContextAddCurveToPoint(_context, c1x, c1y, c2x, c2y, x, y);
+                break;
+            }
+            
+            //case Element::IT_GenNBezierTo:
+            //    bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
+            //    curX = ins.pxy[ins.pxy.size() - 2];
+            //    curY = ins.pxy[ins.pxy.size() - 1];
+            //    break;
+        }
+    }
+}
+
+
+void PixmapCanvas::onDrawPath(const Gfx::Path& path, float)
+{
+    setPath(path);
+    CGContextStrokePath(_context);
+}
+
+
+void PixmapCanvas::onFillPath(const Gfx::Path& path, float)
+{
+    setPath(path);
+    CGContextFillPath(_context);
 }
 
 

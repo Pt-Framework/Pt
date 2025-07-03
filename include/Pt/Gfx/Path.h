@@ -277,7 +277,6 @@ class PT_GFX_API Path
         PointF        _position;
 };
 
-
 } // namespace
 
 } // namespace

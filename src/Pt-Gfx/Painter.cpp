@@ -346,20 +346,24 @@ void Painter::fillChord(const PointF& topLeft, const SizeF& size, float degBegin
 
 void Painter::drawPath(const Gfx::Path& path, float smoothness)
 {
+    if(_paintContext)
+        _paintContext->drawPath(path);
 }
 
 
 void Painter::fillPath(const Path& path, float smoothness)
 {
+    if(_paintContext)
+        _paintContext->fillPath(path);
 }
 
 
-Gfx::FontMetrics Painter::fontMetrics(const Pt::String& text) const
+Gfx::TextMetrics Painter::textMetrics(const Pt::String& text) const
 {
     if(_paintContext)
-        return _paintContext->fontMetrics(text);
+        return _paintContext->textMetrics(text);
 
-    return Gfx::FontMetrics();
+    return Gfx::TextMetrics();
 }
 
 

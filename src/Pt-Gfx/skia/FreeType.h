@@ -52,7 +52,7 @@ namespace Gfx {
 
 class Color;
 class Image;
-class FontMetrics;
+class TextMetrics;
 class CompositionMode;
 class Transform;
 
@@ -84,7 +84,7 @@ class FreeType : public Pt::Singleton<FreeType>
 
         void setFontDir(const System::Path& path);
 
-        FontMetrics fontMetrics(const String& text,
+        TextMetrics textMetrics(const String& text,
                                 FTC_FaceID faceId, 
                                 std::size_t fontSize);
 

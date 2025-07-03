@@ -176,15 +176,15 @@ void ImagePainter2::drawText(const PointF& toF, const Pt::String& text,
 
 
 
-FontMetrics ImagePainter2::fontMetrics(const String& text) const
+TextMetrics ImagePainter2::textMetrics(const String& text) const
 {
-    return _rasterizer->fontMetrics( text );
+    return _rasterizer->textMetrics( text );
 }
 
 
-FontMetrics ImagePainter2::fontMetrics(const Font& font, const Pt::String& text)
+TextMetrics ImagePainter2::textMetrics(const Font& font, const Pt::String& text)
 {
-    return Rasterizer2::fontMetrics(font, text);
+    return Rasterizer2::textMetrics(font, text);
 }
 
 

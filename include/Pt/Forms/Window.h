@@ -64,6 +64,8 @@ class PaintEvent;
 */
 class PT_FORMS_API Window : public Form
 {
+    friend class WindowManager;
+
     public:
         typedef Form Base;
         typedef WindowType Type;
@@ -95,6 +97,13 @@ class PT_FORMS_API Window : public Form
         bool isAutoSize() const;
 
         Gfx::SizeF setAutoSize(const SizePolicy& policy);
+
+        Gfx::SizeF resizeToFit(const SizePolicy& policy);
+
+
+        bool isAutoCenter() const;
+
+        void setAutoCenter(bool isCenter = true);
 
 
         Type type() const;
@@ -302,6 +311,7 @@ class PT_FORMS_API Window : public Form
 
         SizePolicy                   _sizePolicy;
         bool                         _autoSize;
+        bool                         _autoCenter;
 
         Type                         _type;
         std::string                  _title;

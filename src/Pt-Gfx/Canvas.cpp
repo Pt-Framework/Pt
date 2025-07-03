@@ -176,9 +176,21 @@ void Canvas::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 }
 
 
-FontMetrics Canvas::fontMetrics(const Pt::String& text) const
+void Canvas::drawPath(const Gfx::Path& path)
 {
-    return onGetFontMetrics(text);
+    onDrawPath(path, 1.0f);
+}
+
+
+void Canvas::fillPath(const Gfx::Path& path)
+{
+    onFillPath(path, 1.0f);
+}
+
+
+TextMetrics Canvas::textMetrics(const Pt::String& text) const
+{
+    return onGetTextMetrics(text);
 }
 
 

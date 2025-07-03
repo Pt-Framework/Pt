@@ -49,6 +49,7 @@ Window::Window(WindowManager* parent, WindowType type)
 , _requestedPosition(0, 0)
 , _requestedSize(80, 80)
 , _autoSize(false)
+, _autoCenter(false)
 , _type(type)
 , _state(WindowState::Normal)
 , _isAbove(false)
@@ -91,7 +92,15 @@ void Window::setParent(WindowManager& wm)
 
     if(_state == WindowState::Normal)
     {
-        _frame->onMove(*this, _requestedPosition);
+        // TODO: review auto-center
+        if(_autoCenter)
+        {
+            setAutoCenter();
+        }
+        else
+        {
+            _frame->onMove(*this, _requestedPosition);
+        }
 
         if( ! isAutoSize() )
             _frame->onResize(*this, _requestedSize);
@@ -102,7 +111,7 @@ void Window::setParent(WindowManager& wm)
 
     _frame->onEnable(*this, _enabled);
     _frame->onShow(*this, _show);
-    
+
     onSetParent(_frame);
 }
 
@@ -224,6 +233,63 @@ void Window::setBackground(const Gfx::Brush& b)
 // layouting
 ///////////////////////////////////////////////////////////////////////
 
+bool Window::isAutoCenter() const
+{
+    return _autoCenter;
+}
+
+
+void Window::setAutoCenter(bool isCenter)
+{    
+    //std::clog << "WINDOW CENTER: " << title() << std::endl;
+
+    if(_wm && isCenter)
+    {
+        //bool hasScreen = isDescendantOf( Application::instance().screen() );
+        //if( ! hasScreen )
+        //  return;
+
+        // TODO: defer auto-center until onSetScreen
+        
+        Pt::Gfx::SizeF size = _requestedSize;
+        //std::clog << "window size: " << size.width() << "x" << size.height() << std::endl;
+
+        Pt::Gfx::SizeF wmSize = _wm->size();
+        //std::clog << "screen size: " << wmSize.width() << "x" << wmSize.height() << std::endl;
+
+        double x = (wmSize.width() - size.width()) / 2.0;
+        double y = (wmSize.height() - size.height()) / 2.0;
+        //std::clog << "CENTER: " << x << "," << y << std::endl;
+    
+        move( Pt::Gfx::PointF(x, y) );
+    }
+
+    // NOTE: possibly call frame->onAutoCenter -> WindowManager-onAutoCenter
+
+    _autoCenter = isCenter;
+}
+
+
+Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
+{
+    _sizePolicy = policy;
+
+    Control* mainWidget = content();
+    if( ! mainWidget )
+        return Gfx::SizeF();
+
+    if( ! _frame )
+    {
+        Screen& screen = Application::instance().screen();
+        screen.addWindow(*this);
+    }
+
+    Gfx::SizeF preferredSize = mainWidget->measure(_sizePolicy);
+    resize(preferredSize);
+    return preferredSize;
+}
+
+
 bool Window::isAutoSize() const
 {
     return _autoSize;
@@ -264,6 +330,8 @@ Gfx::SizeF Window::onMeasure()
 
 void Window::onLayoutEvent(const LayoutEvent& ev)
 {
+    //std::clog << "onLayoutEvent: " << title() << std::endl;
+
     if(_autoSize)
     {
         Control* mainWidget = content();
@@ -395,6 +463,8 @@ void Window::onRescaleEvent(const RescaleEvent& ev)
 
 void Window::onRescale(double scaling)
 {   
+    //std::clog << "onRescale: " << title() << std::endl;
+
     Base::onRescale(scaling);
 
     //
@@ -409,6 +479,27 @@ void Window::onRescale(double scaling)
             resize(_requestedSize);
         }
     }
+
+    //if(_wm && _autoCenter)
+    //{
+    //    bool hasScreen = isDescendantOf( Application::instance().screen() );
+    //    if( ! hasScreen )
+    //      return;
+
+    //    // TODO: defer auto-center until onSetScreen
+    //    
+    //    Pt::Gfx::SizeF size = _requestedSize;
+    //    std::clog << "window size: " << size.width() << "x" << size.height() << std::endl;
+
+    //    Pt::Gfx::SizeF wmSize = _wm->size();
+    //    std::clog << "screen size: " << wmSize.width() << "x" << wmSize.height() << std::endl;
+
+    //    double x = (wmSize.width() - size.width()) / 2.0;
+    //    double y = (wmSize.height() - size.height()) / 2.0;
+    //    std::clog << "CENTER: " << x << "," << y << std::endl;
+    //
+    //    move( Pt::Gfx::PointF(x, y) );
+    //}
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -436,6 +527,9 @@ void Window::onProcessMoveEvent(const MoveEvent& ev)
 
 void Window::onMoveEvent(const MoveEvent& ev)
 {
+    //std::clog << "onMoveEvent: " << title() << " " 
+    //          << ev.position().x() << "x" << ev.position().y() << std::endl;
+
     // NOTE: we skip View and pass on to Widget, because we need to avoid
     //       triggering a repaint of the window. Moving should only cause 
     //       the WindowFrame to blit its surface to the WindowManager.
@@ -474,6 +568,8 @@ void Window::onProcessResizeEvent(const ResizeEvent& ev)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
+    //std::clog << "onResizeEvent: " << title() << " " 
+    //          << ev.size().width() << "x" << ev.size().height() << std::endl;
     Base::onResizeEvent(ev);
 }
 

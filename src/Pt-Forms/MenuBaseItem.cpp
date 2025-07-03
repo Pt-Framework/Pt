@@ -270,7 +270,7 @@ Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Forms::SizePolicy& policy)
     Pt::Gfx::Painter _painter(surface());
     _painter.setFont(_font);
 
-    Pt::Gfx::FontMetrics fm = _painter.fontMetrics(_text);
+    Pt::Gfx::TextMetrics fm = _painter.textMetrics(_text);
 
     double contentHeight = std::max<Pt::ssize_t>(fm.height(), _icon.height());
     double contentWidth = fm.width() + scaling().toLogical(_picture.size().width());
@@ -280,7 +280,7 @@ Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Forms::SizePolicy& policy)
     {
         Pt::String text = shortcutText(*sk);
         contentWidth += fm.height() * 2.5; // spacing towards shortcut text
-        contentWidth += _painter.fontMetrics(text).width();
+        contentWidth += _painter.textMetrics(text).width();
     }
 
 //    if (_hasSubMenu)
@@ -322,7 +322,7 @@ void MenuBaseItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF&
     painter.setFont(_font);
     painter.setPen(_textPen);
 
-    Pt::Gfx::FontMetrics fm = painter.fontMetrics(_text);
+    Pt::Gfx::TextMetrics fm = painter.textMetrics(_text);
     double textX = padding().left() + _iconWidth;
     double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
@@ -345,7 +345,7 @@ void MenuBaseItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF&
     if (sk)
     {
         Pt::String skText = shortcutText(*sk);
-        Pt::Gfx::FontMetrics skm = painter.fontMetrics(skText);
+        Pt::Gfx::TextMetrics skm = painter.textMetrics(skText);
 
         double skX = size().width() - skm.width() - padding().right();
         double skY = (size().height() - skm.height()) / 2;

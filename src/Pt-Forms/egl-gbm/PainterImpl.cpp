@@ -112,15 +112,15 @@ const Gfx::Font& PainterImpl::font() const
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
+Gfx::TextMetrics PainterImpl::textMetrics(const Pt::String& text) const
 {
-    return _surface->fontMetrics(text);
+    return _surface->textMetrics(text);
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
+Gfx::TextMetrics PainterImpl::textMetrics(const Gfx::Font& font, const Pt::String& text)
 {   
-    return Gfx::ImagePainter::fontMetrics(font, text);
+    return Gfx::ImagePainter::textMetrics(font, text);
 }
 
 

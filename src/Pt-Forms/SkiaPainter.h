@@ -76,7 +76,7 @@ namespace Forms {
 
         virtual const Gfx::Font& font() const;
 
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+        virtual Gfx::TextMetrics textMetrics(const Pt::String& text) const;
 
         virtual void drawLine(const Gfx::PointF& from, const  Gfx::PointF& to);
 
@@ -113,7 +113,7 @@ namespace Forms {
 
         static std::vector<std::string> fontNames();
 
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+        static Gfx::TextMetrics textMetrics(const Gfx::Font& font, const Pt::String& text);
 
         static SkColor toSkia(const Gfx::Color& c)
         {

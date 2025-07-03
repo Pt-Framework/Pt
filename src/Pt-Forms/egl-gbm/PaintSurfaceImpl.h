@@ -56,7 +56,7 @@ class PaintSurfaceImpl
 
         virtual void setFont(const Gfx::Font& font) = 0;
 
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const = 0;
+        virtual Gfx::TextMetrics textMetrics(const Pt::String& text) const = 0;
     
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to) = 0;
 
@@ -86,7 +86,7 @@ class PaintSurfaceImpl
 
         static std::list<std::string> fontFamilyNames(); 
 
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+        static Gfx::TextMetrics textMetrics(const Gfx::Font& font, const Pt::String& text);
 
     protected:
         PaintSurfaceImpl();
@@ -110,7 +110,7 @@ class PaintRegionImpl : public PaintSurfaceImpl
 
         virtual void setFont(const Gfx::Font& font);
 
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+        virtual Gfx::TextMetrics textMetrics(const Pt::String& text) const;
 
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
@@ -173,7 +173,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         virtual void setFont(const Gfx::Font& font);
 
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+        virtual Gfx::TextMetrics textMetrics(const Pt::String& text) const;
 
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 

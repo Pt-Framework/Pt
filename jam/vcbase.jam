@@ -341,7 +341,7 @@ rule Library-Build
     Clean clean : $(_target:S=.pdb) ;
     Clean clean : $(_target:S=.idb) ;
     
-    local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+    local _objects = [ FGristFiles $(>:GBS=$(SUFOBJ)) ] ; # FIX was only S
     PDB on $(_objects:GBS) = $(_target:S=.pdb) ;
 
     Depends $(_objects) : first ;
@@ -375,7 +375,7 @@ rule Main-Build
     Clean clean : $(_target:S=.winmd) ;
     Clean clean : $(_target:S=.exe.manifest) ;
     
-    local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+    local _objects = [ FGristFiles $(>:GBS=$(SUFOBJ)) ] ; # FIX was only S
     PDB on $(_objects:GBS) = $(_target:S=.pdb) ;
     
     # embed manifest into exe
@@ -430,7 +430,7 @@ rule SharedLibrary-Build
 
     # Add grist to file names
     local _sources = [ FGristFiles $(>) ] ;
-    local _objects = $(_sources:S=$(SUFOBJ)) ;
+    local _objects = $(_sources:GBS=$(SUFOBJ)) ; # FIX was only S
     
     # Add library name decorations <name><.dll/.so>
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
@@ -448,7 +448,7 @@ rule SharedLibrary-Build
     
     PDB on $(_objects:GBS) = $(_target:S=.pdb) ;
     
-    Depends $(_sources) : first ;
+    Depends $(_objects) : first ;
     Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
     
     # embed manifest into dll

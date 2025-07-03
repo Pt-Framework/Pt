@@ -375,9 +375,9 @@ void ImageCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-FontMetrics ImageCanvas::onGetFontMetrics(const String& text) const
+TextMetrics ImageCanvas::onGetTextMetrics(const String& text) const
 {
-    return _text->fontMetrics(text);
+    return _text->textMetrics(text);
 }
 
 

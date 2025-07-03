@@ -83,6 +83,9 @@ class WindowManager : public Widget
         //}
 
     protected:
+        //virtual WindowFrame* onSetScreen(Screen* screen) = 0;
+
+    protected:
         virtual WindowFrame* onAttach(Window& w) = 0;
 
         virtual void onDetach(WindowFrame& w) = 0;
@@ -94,9 +97,9 @@ class WindowManager : public Widget
     private:
       Pt::Signal<Window&> _surfaceChanged;
 
-      std::vector<Pt::Forms::Window*> _windows;
-      Pt::Signal<Window&>           _windowAdded;
-      Pt::Signal<Window&>           _windowRemoved;
+      //std::vector<Pt::Forms::Window*> _windows;
+      //Pt::Signal<Window&>           _windowAdded;
+      //Pt::Signal<Window&>           _windowRemoved;
 };
 
 } // namespace

@@ -39,7 +39,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/NonCopyable.h>
 
@@ -318,7 +318,7 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
                         const Gfx::RectF& rect,
                         const String& text,
                         const Gfx::PointF& textPos,
-                        const Gfx::FontMetrics& textMetric,
+                        const Gfx::TextMetrics& textMetric,
                         const Gfx::Font& font, 
                         const Gfx::Pen& textPen,
                         const Gfx::RectF& mnemonic) const;
@@ -346,7 +346,7 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
-                                  const Gfx::FontMetrics& textMetric,
+                                  const Gfx::TextMetrics& textMetric,
                                   const Gfx::Font& font, 
                                   const Gfx::Pen& textPen,
                                   const Gfx::RectF& mnemonic) const = 0;

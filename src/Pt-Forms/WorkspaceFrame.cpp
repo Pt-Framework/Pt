@@ -1583,12 +1583,12 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
 
     const Gfx::Font& font = Application::instance().styleOptions().font();
     painter.setFont(font);
-    Gfx::FontMetrics fm = painter.fontMetrics(title);
+    Gfx::TextMetrics tm = painter.textMetrics(title);
 
-    double textOffset = (_borderWidth + _titleHeight - fm.height()) / 2.0;
+    double textOffset = (_borderWidth + _titleHeight - tm.height()) / 2.0;
 
     Gfx::PointF textPos(pos.x() + _borderWidth + _titleHeight,
-                        pos.y() + textOffset + fm.ascent() );
+                        pos.y() + textOffset + tm.ascent() );
 
     Gfx::Color textColor = _window->isActive() ? _wm->textColor()
                                                : _wm->inactiveTextColor();
@@ -1615,7 +1615,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     double lineOffset = scaling.align(2.0);
     double gripHeight = (8 * lineSize) + (3 * lineOffset);
     
-    double gripLeft = textPos.x() + fm.width() + _borderWidth;
+    double gripLeft = textPos.x() + tm.width() + _borderWidth;
     double gripRight = pos.x() + size().width() - _borderWidth - 3 * _titleHeight;
     double gripOffset = (_titleHeight + _borderWidth - gripHeight) / 2.0;
     

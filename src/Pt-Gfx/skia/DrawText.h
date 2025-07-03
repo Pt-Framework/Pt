@@ -43,7 +43,7 @@
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
 
@@ -91,7 +91,7 @@ class DrawText
             @param font The text font
             @param text The text to calculate
         */
-        FontMetrics fontMetrics(const String& text);
+        TextMetrics textMetrics(const String& text);
 
         /** @brief Draw text on the image
 

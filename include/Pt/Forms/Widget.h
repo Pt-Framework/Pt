@@ -49,6 +49,7 @@ namespace Pt {
 
 namespace Forms {
 
+class Screen;
 class MouseEvent;
 class TouchEvent;
 class ScrollEvent;
@@ -234,7 +235,12 @@ class PT_FORMS_API Widget : public Responder
         Pt::Signal<const Pt::Event&>& eventReceived();
 
     protected:
+        void setScreen(Screen* screen);
+
+    protected:
         virtual void onSetParent(Widget* parent);
+
+        virtual void onSetScreen(Screen* screen);
 
         virtual Widget* onHitTest(const Gfx::PointF& pos);
 
@@ -361,6 +367,7 @@ class PT_FORMS_API Widget : public Responder
         Pt::uint64_t          _id;
         std::string           _name;
 
+        Screen*               _screen;
         Widget*               _parent;
         std::vector<Widget*>  _peers;
 

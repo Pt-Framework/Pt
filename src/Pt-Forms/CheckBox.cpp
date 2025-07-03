@@ -189,18 +189,18 @@ void CheckBox::onCanceled()
 
 Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
 {
-    //Gfx::FontMetrics fm = PixmapSurface::fontMetrics( _font, text() );
+    //Gfx::TextMetrics tm = PixmapSurface::textMetrics( _font, text() );
 
     Gfx::Painter painter( surface() );
     painter.setFont(_font);
-    Gfx::FontMetrics fm = painter.fontMetrics( text() );
+    Gfx::TextMetrics tm = painter.textMetrics( text() );
 
     double space = std::min<double>(_boxSize.width() / 2, _font.size() / 2);
     double boxWidth = _boxSize.width();
     double boxHeight = _boxSize.height();
 
-    double itemsWidth = space + boxWidth + space + fm.width();
-    double itemsHeight = std::max<double>(fm.lineHeight(), boxHeight);
+    double itemsWidth = space + boxWidth + space + tm.width();
+    double itemsHeight = std::max<double>(tm.lineHeight(), boxHeight);
 
     return Gfx::SizeF( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );
@@ -251,7 +251,7 @@ void CheckBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
                           boxRect, _brush, _pen);
 
     painter.setFont(_font);
-    Gfx::FontMetrics tm = painter.fontMetrics( text() );
+    Gfx::TextMetrics tm = painter.textMetrics( text() );
 
     double textX = space + _boxSize.width() + space;
     //double textY = size().height() / 2.0 - tm.height() / 2.0 + tm.ascent();
@@ -271,10 +271,10 @@ void CheckBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
         if(n != String::npos)
         {
             Pt::String mnemonicText(text(), 0, n);
-            Gfx::FontMetrics fmLeft = painter.fontMetrics(mnemonicText);
+            Gfx::TextMetrics fmLeft = painter.textMetrics(mnemonicText);
 
             mnemonicText = *m;
-            Gfx::FontMetrics fmChar = painter.fontMetrics(mnemonicText);
+            Gfx::TextMetrics fmChar = painter.textMetrics(mnemonicText);
 
             mnemonicRect.set( Gfx::PointF(textPos.x() + fmLeft.width(), 
                                           textPos.y() - fmChar.ascent()),

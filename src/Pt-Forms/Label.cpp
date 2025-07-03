@@ -31,7 +31,7 @@
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 
 namespace Pt {
 

@@ -36,7 +36,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
@@ -239,7 +239,7 @@ class PaintData : public Gfx::PaintData
             return _fontFamily;
         }
 
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, 
+        static Gfx::TextMetrics textMetrics(const Gfx::Font& font, 
                                             const Pt::String& text)
         {   
             std::wstring wtext;
@@ -288,7 +288,7 @@ class PaintData : public Gfx::PaintData
             ReleaseDC(NULL, dc);
             delete gdiFont;
 
-            Gfx::FontMetrics fm;
+            Gfx::TextMetrics fm;
             fm.setAscent(asc * scaling);
             fm.setDescent(des * scaling);
             fm.setCapHeight(cap * scaling);

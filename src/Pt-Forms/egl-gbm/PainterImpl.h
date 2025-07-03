@@ -34,7 +34,7 @@
 #include <Pt/Forms/PaintSurface.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/ImagePainter.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 
 namespace Pt {
 
@@ -82,9 +82,9 @@ class PainterImpl
 
         const Gfx::Font& font() const;        
 
-        Gfx::FontMetrics fontMetrics(const Pt::String& Text) const;
+        Gfx::TextMetrics textMetrics(const Pt::String& Text) const;
 
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+        static Gfx::TextMetrics textMetrics(const Gfx::Font& font, const Pt::String& text);
 
         std::list<std::string> fontFamilyNames();        
 

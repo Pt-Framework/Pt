@@ -97,8 +97,9 @@ void Menu::onItemTriggered(MenuBaseItem& item)
         menu->move(menuPos);
 
         Pt::Forms::SizePolicy policy(Pt::Forms::SizePolicy::Preferred, Pt::Forms::SizePolicy::Preferred);
-        menu->setAutoSize(policy);
-
+        //menu->setAutoSize(policy);
+        menu->resizeToFit(policy);
+        
         menu->setAbove(true);
         menu->show();
     }

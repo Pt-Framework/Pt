@@ -214,14 +214,12 @@ class PixmapCanvas : public Gfx::Canvas
                                float degBegin, float degEnd) override
         {}
 
-        virtual void onDrawPath(const Gfx::Path& path, float smoothness) override
-        {}
+        virtual void onDrawPath(const Gfx::Path& path, float smoothness) override;
 
-        virtual void onFillPath(const Gfx::Path& path, float smoothness) override
-        {}
+        virtual void onFillPath(const Gfx::Path& path, float smoothness) override;
 
     protected:
-        virtual Gfx::FontMetrics onGetFontMetrics(const Pt::String& text) const override;
+        virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
         virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
                                 const Gfx::Transform* trans) override;
@@ -239,6 +237,9 @@ class PixmapCanvas : public Gfx::Canvas
         void onDrawPixmap(const Gfx::PointF& toF, 
                           const PixmapImpl& surface,
                           const Gfx::RectF* rect = 0);
+
+    private:
+        void setPath(const Gfx::Path& path);
 
     private:
         Gfx::SizeF     _physicalSize;

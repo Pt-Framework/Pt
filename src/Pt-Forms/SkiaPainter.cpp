@@ -235,9 +235,9 @@ const Gfx::Font& SkiaPainter::font() const
 }
 
 
-Gfx::FontMetrics SkiaPainter::fontMetrics(const Pt::String& text) const
+Gfx::TextMetrics SkiaPainter::textMetrics(const Pt::String& text) const
 {
-    return _imgPainter.fontMetrics(text);
+    return _imgPainter.textMetrics(text);
 }
 
 
@@ -427,9 +427,9 @@ std::vector<std::string> SkiaPainter::fontNames()
 }
 
 
-Gfx::FontMetrics SkiaPainter::fontMetrics(const Gfx::Font& font, const Pt::String& text)
+Gfx::TextMetrics SkiaPainter::textMetrics(const Gfx::Font& font, const Pt::String& text)
 {
-    return Gfx::ImagePainter::fontMetrics(font, text);
+    return Gfx::ImagePainter::textMetrics(font, text);
 }
 
 }}

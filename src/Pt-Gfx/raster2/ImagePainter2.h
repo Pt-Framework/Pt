@@ -73,7 +73,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual const Font& font() const;
 
-        virtual FontMetrics fontMetrics(const Pt::String& text) const;
+        virtual TextMetrics textMetrics(const Pt::String& text) const;
 
         virtual void drawLine(const PointF& from, const PointF& to);
 
@@ -138,7 +138,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void fillPath(const Path& path, float smoothness = 1.0f);
 
     public:
-        static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
+        static TextMetrics textMetrics(const Font& font, const Pt::String& text);
 
         static void setFontDir(const System::Path& path);
 

@@ -59,7 +59,6 @@ SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        Canvas.cpp
                        Color.cpp
                        Font.cpp
-                       FontMetrics.cpp
                        Image.cpp
                        ImageFormat.cpp
                        ImageSurface.cpp
@@ -75,6 +74,7 @@ SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        PngWriter.cpp
                        Rgb32Format.cpp
                        Rgb16Format.cpp
+                       TextMetrics.cpp
                        Transform.cpp
                        Yuv12Format.cpp
                        ;

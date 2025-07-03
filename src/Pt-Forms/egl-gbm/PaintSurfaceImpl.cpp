@@ -104,9 +104,9 @@ void PaintRegionImpl::setFont(const Gfx::Font& font)
 }
 
 
-Gfx::FontMetrics PaintRegionImpl::fontMetrics(const Pt::String& text) const
+Gfx::TextMetrics PaintRegionImpl::textMetrics(const Pt::String& text) const
 {
-    return _surface->impl()->fontMetrics(text);
+    return _surface->impl()->textMetrics(text);
 }
 
 
@@ -264,9 +264,9 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 }
 
 
-Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
+Gfx::TextMetrics PixmapSurfaceImpl::textMetrics(const Pt::String& text) const
 {
-    return _painter.fontMetrics(text);
+    return _painter.textMetrics(text);
 }
 
 

@@ -99,6 +99,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Scaling.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\TextMetrics.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Transform.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h" />
@@ -1389,7 +1390,6 @@
     <ClCompile Include="..\Pt-Gfx\Canvas.cpp" />
     <ClCompile Include="..\Pt-Gfx\Color.cpp" />
     <ClCompile Include="..\Pt-Gfx\Font.cpp" />
-    <ClCompile Include="..\Pt-Gfx\FontMetrics.cpp" />
     <ClCompile Include="..\Pt-Gfx\Image.cpp" />
     <ClCompile Include="..\Pt-Gfx\ImageFormat.cpp" />
     <ClCompile Include="..\Pt-Gfx\ImageSurface.cpp" />
@@ -1421,6 +1421,7 @@
     <ClCompile Include="..\Pt-Gfx\tests\ImagePainterTest2.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\Pt-Gfx-test.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\Yuv12Test.cpp" />
+    <ClCompile Include="..\Pt-Gfx\TextMetrics.cpp" />
     <ClCompile Include="..\Pt-Gfx\Transform.cpp" />
     <ClCompile Include="..\Pt-Gfx\Yuv12Format.cpp" />
     <ClCompile Include="..\Pt-Forms\Application.cpp" />

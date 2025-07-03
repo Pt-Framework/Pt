@@ -48,6 +48,7 @@ namespace Forms {
 
 Widget::Widget()
 : _id( Application::instance().makeId()  )
+, _screen(0)
 , _parent(0)
 , _nextResponder(0)
 , _invalidates(0)
@@ -131,6 +132,17 @@ const Widget* Widget::parent() const
 void Widget::onSetParent(Widget* parent)
 {
     _parent = parent;
+}
+
+
+void Widget::setScreen(Screen* screen)
+{
+    onSetScreen(screen);
+}
+
+
+void Widget::onSetScreen(Screen* screen)
+{
 }
 
 
