@@ -71,7 +71,9 @@ class PT_FORMS_API Workspace : public Control
     // Widget
     //
     protected:
-       Widget* onHitTest(const Gfx::PointF& p);
+        virtual void onSetScreen(Screen* screen);
+      
+        virtual Widget* onHitTest(const Gfx::PointF& p);
 
     //
     // Control
@@ -118,9 +120,9 @@ class PT_FORMS_API Workspace : public Control
         virtual void onActivate(WindowManager& wm, bool active);
 
     private:
-        WorkspaceManager                      _wm;
-        Control*                      _content;
-        Widget*                      _pointer;
+        WorkspaceManager  _wm;
+        Control*          _content;
+        Widget*           _pointer;
 };
 
 } // namespace

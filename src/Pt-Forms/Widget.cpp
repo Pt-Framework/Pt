@@ -135,6 +135,12 @@ void Widget::onSetParent(Widget* parent)
 }
 
 
+Screen* Widget::screen()
+{
+    return _screen;
+}
+
+
 void Widget::setScreen(Screen* screen)
 {
     onSetScreen(screen);
@@ -143,6 +149,7 @@ void Widget::setScreen(Screen* screen)
 
 void Widget::onSetScreen(Screen* screen)
 {
+    _screen = screen;
 }
 
 

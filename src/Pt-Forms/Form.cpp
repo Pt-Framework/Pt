@@ -375,12 +375,25 @@ void Form::onRemoveElement(Control& control)
 // View
 //
 
+void Form::onSetScreen(Screen* screen)
+{
+    Base::onSetScreen(screen);
+
+    if(_mainControl)
+        _mainControl->setScreen(screen);
+}
+
+
 void Form::onAttach(Control& control)
 {
     Base::onAttach(control);
 
     _mainControl = &control;
     
+    // TODO: attach to screen in Control?
+    if(_mainControl)
+        _mainControl->setScreen( screen() );
+
     relayout();
 }
 
@@ -392,10 +405,14 @@ void Form::onDetach(Control& control)
     if(_active == &control)
         _active = 0;
 
-      if(_mainControl == &control)
-          _mainControl = 0;
+    // TODO: detach from screen in Control?
+    if(_mainControl)
+        _mainControl->setScreen(0);
 
-      relayout();
+    if(_mainControl == &control)
+        _mainControl = 0;
+
+    relayout();
 }
 
 

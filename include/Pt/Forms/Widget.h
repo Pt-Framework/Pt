@@ -234,6 +234,9 @@ class PT_FORMS_API Widget : public Responder
         */
         Pt::Signal<const Pt::Event&>& eventReceived();
 
+    public:
+        Screen* screen();
+
     protected:
         void setScreen(Screen* screen);
 

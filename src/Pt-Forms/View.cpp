@@ -227,6 +227,12 @@ Gfx::PointF View::onFromControl(const Control& control,
 }
 
 
+void View::onSetScreen(Screen* screen)
+{
+    Base::onSetScreen(screen);
+}
+
+
 void View::onPaintEvent(const PaintEvent& ev)
 {    
     //static int nnn = 0;

@@ -104,6 +104,9 @@ class WindowImpl : public WindowFrame
         virtual void onClose(Window& w);
 
     protected:
+        virtual void onSetScreen(Screen* screen);
+
+        
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
         
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;

@@ -65,6 +65,8 @@ class WindowFrame : public Widget
         void getImage(Gfx::ImageSurface& image);
 
     protected:
+        virtual void onSetScreen(Screen* screen);
+
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescaleEvent(const RescaleEvent& ev);

@@ -199,6 +199,9 @@ WindowFrame* WorkspaceManager::onAttach(Window& w)
 
 void WorkspaceManager::onDetach(WindowFrame& frame)
 {
+    // TODO: detach from screen in WindowImpl?
+    static_cast<WorkspaceFrame*>(&frame)->setScreen(0);
+
     frame.setNextResponder(0);
 
     Window& w = frame.window();
@@ -225,6 +228,12 @@ void WorkspaceManager::onDetach(WindowFrame& frame)
 
 void WorkspaceManager::onInit(WindowFrame& frame)
 {
+    Screen* screen = this->screen();
+    if( screen )
+    {
+        // TODO: attach to screen in WindowImpl?
+        static_cast<WorkspaceFrame*>(&frame)->setScreen(screen);
+    }
     double scaling = scaleFactor();
     
     RescaleEvent ev(frame, scaling);
@@ -238,6 +247,20 @@ void WorkspaceManager::onRelease(WindowFrame& frame)
     {
         Gfx::RectF frameRect( frame.position(), frame.size() );
         repaint(frameRect);
+    }
+}
+
+
+void WorkspaceManager::onSetScreen(Screen* screen)
+{
+    Base::onSetScreen(screen);
+
+    std::vector<Window*>::iterator wit;
+    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
+    {
+        Window* window = *wit;
+        WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
+        frame->setScreen(screen);
     }
 }
 
@@ -505,15 +528,8 @@ void WorkspaceManager::onResizeEvent(const ResizeEvent& ev)
         }
 
         // TODO: review auto-center
-        if( window->isAutoCenter() )
+        if( window->isAutoCenter() && screen() )
         {
-            //bool hasScreen = isDescendantOf( Application::instance().screen() );
-            //std::clog << "WM HAS SCREEN: " << hasScreen << std::endl;
-
-            // TODO: defer auto-center until attached to screen
-            //if( ! hasScreen )
-            //  continue;
-
             //std::clog << "WM CENTER: " << window->title() << std::endl;
             Pt::Gfx::SizeF windowSize = window->size();
             //std::clog << "window size: " << windowSize.width() << "x" << windowSize.height() << std::endl;

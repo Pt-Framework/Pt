@@ -45,6 +45,12 @@ WindowManager::~WindowManager()
 {
 }
 
+
+void WindowManager::onSetScreen(Screen* screen)
+{
+    Base::onSetScreen(screen);
+}
+
 } // namespace
 
 } // namespace

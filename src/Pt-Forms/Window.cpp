@@ -134,6 +134,14 @@ void Window::unparent()
 }
 
 
+void Window::onSetScreen(Screen* screen)
+{
+    //std::clog << "SET SCREEN: " << title() << " " << screen << std::endl;
+
+    Base::onSetScreen(screen);
+}
+
+
 WindowManager* Window::windowManager()
 {
     return _wm;
@@ -243,14 +251,11 @@ void Window::setAutoCenter(bool isCenter)
 {    
     //std::clog << "WINDOW CENTER: " << title() << std::endl;
 
-    if(_wm && isCenter)
-    {
-        //bool hasScreen = isDescendantOf( Application::instance().screen() );
-        //if( ! hasScreen )
-        //  return;
+    if( ! isCenter )
+        _autoCenter = false;
 
-        // TODO: defer auto-center until onSetScreen
-        
+    if( isCenter && _wm && screen() )
+    {
         Pt::Gfx::SizeF size = _requestedSize;
         //std::clog << "window size: " << size.width() << "x" << size.height() << std::endl;
 
@@ -262,10 +267,12 @@ void Window::setAutoCenter(bool isCenter)
         //std::clog << "CENTER: " << x << "," << y << std::endl;
     
         move( Pt::Gfx::PointF(x, y) );
+        return;
     }
 
     // NOTE: possibly call frame->onAutoCenter -> WindowManager-onAutoCenter
 
+    // defer auto-center
     _autoCenter = isCenter;
 }
 

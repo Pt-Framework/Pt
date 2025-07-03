@@ -137,6 +137,14 @@ void Workspace::onRemoveControl(Control& control)
 // Widget
 ///////////////////////////////////////////////////////////////////////
 
+void Workspace::onSetScreen(Screen* screen)
+{
+    Base::onSetScreen(screen);
+
+    _wm.setScreen(screen);
+}
+
+
 Widget* Workspace::onHitTest(const Gfx::PointF& p)
 {
     if( ! bounds().contains(p) )

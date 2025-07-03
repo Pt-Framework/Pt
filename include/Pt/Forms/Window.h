@@ -65,6 +65,7 @@ class PaintEvent;
 class PT_FORMS_API Window : public Form
 {
     friend class WindowManager;
+    friend class WindowFrame;
 
     public:
         typedef Form Base;
@@ -160,7 +161,9 @@ class PT_FORMS_API Window : public Form
     // Widget
     //
     protected:
-        Widget* onHitTest(const Gfx::PointF& p);
+        virtual void onSetScreen(Screen* screen);
+
+        virtual Widget* onHitTest(const Gfx::PointF& p);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 

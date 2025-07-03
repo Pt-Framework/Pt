@@ -107,6 +107,12 @@ void WindowImpl::onRelease(Window& w)
 }
 
 
+void WindowImpl::onSetScreen(Screen* screen)
+{
+    Base::onSetScreen(screen);
+}
+
+
 void WindowImpl::setType(WindowType type)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);

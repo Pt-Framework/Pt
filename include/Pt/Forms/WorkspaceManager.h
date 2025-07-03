@@ -48,6 +48,7 @@ class WorkspaceManager : public WindowManager
 {
     typedef WindowManager Base;
 
+    friend class Workspace;
     friend class WorkspaceFrame;
 
     public:
@@ -143,6 +144,8 @@ class WorkspaceManager : public WindowManager
     // Widget
     //
     protected:
+        virtual void onSetScreen(Screen* screen);
+
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;

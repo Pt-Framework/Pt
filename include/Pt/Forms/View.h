@@ -129,6 +129,8 @@ class PT_FORMS_API View : public Widget
     // Widget
     //
     protected:
+        virtual void onSetScreen(Screen* screen);
+
         virtual void onPaintEvent(const PaintEvent& ev) override;
 
         virtual void onMoveEvent(const MoveEvent& ev) override;

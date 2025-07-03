@@ -478,6 +478,12 @@ void WorkspaceFrame::onRelease(Window& w)
 }
 
 
+void WorkspaceFrame::onSetScreen(Screen* screen)
+{
+    Base::onSetScreen(screen);
+}
+
+
 void WorkspaceFrame::onSetTitle(Window& w, const std::string& text)
 {
     repaint();

@@ -151,6 +151,8 @@ class WorkspaceFrame : public WindowFrame
 {
     typedef WindowFrame Base;
 
+    friend class WorkspaceManager;
+
     enum FrameItem
     {
         OnNone,
@@ -227,6 +229,8 @@ class WorkspaceFrame : public WindowFrame
         virtual void onClose(Window& w);
 
     protected:
+        virtual void onSetScreen(Screen* screen);
+
         virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;

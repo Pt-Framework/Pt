@@ -155,6 +155,8 @@ class PT_FORMS_API Form : public View
     // Widget
     //
     protected:
+        virtual void onSetScreen(Screen* screen);
+
         virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual void onRequestCapture(bool capture);

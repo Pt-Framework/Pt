@@ -102,6 +102,19 @@ void Control::unparent()
 }
 
 
+void Control::onSetScreen(Screen* screen)
+{
+    Base::onSetScreen(screen);
+
+    std::vector<Control*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Control* control = *it;
+        control->setScreen(screen);
+    }
+}
+
+
 void Control::onAttach(Control& control)
 {
     Base::onAttach(control);
@@ -133,6 +146,12 @@ void Control::onInit(Control& control)
     //Gfx::PointF surfacePos = _surface.position() + control.position();
     //control.setSurface(surface, surfacePos);
     
+    Screen* screen = this->screen();
+    if( screen )
+    {
+        control.setScreen(screen);
+    }
+
     control.setNextResponder(this);
     control.setForm(_form);
 
@@ -152,6 +171,8 @@ void Control::onRelease(Control& control)
 
     control.setForm(0);
     //control.setSurface( 0, control.position() );
+    
+    control.setScreen(0);
     control.setNextResponder(0);
 
     relayout();

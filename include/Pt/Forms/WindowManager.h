@@ -45,6 +45,9 @@ class WindowManager : public Widget
     friend class Window;
 
     public:
+        typedef Widget Base;
+
+    public:
         WindowManager();
 
         virtual ~WindowManager();
@@ -83,7 +86,7 @@ class WindowManager : public Widget
         //}
 
     protected:
-        //virtual WindowFrame* onSetScreen(Screen* screen) = 0;
+        virtual void onSetScreen(Screen* screen);
 
     protected:
         virtual WindowFrame* onAttach(Window& w) = 0;

@@ -88,6 +88,14 @@ void WindowFrame::getImage(Gfx::ImageSurface& imageSurface)
 }
 
 
+void WindowFrame::onSetScreen(Screen* screen)
+{
+    Base::onSetScreen(screen);
+    
+    _window.setScreen(screen);
+}
+
+
 void WindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);

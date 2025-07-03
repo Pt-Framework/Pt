@@ -85,6 +85,9 @@ void ScreenImpl::setParent(Screen* screen)
         _parent->onShow(*this, true);
     }
 
+    // NOTE: screen not set in child windows because this method is called
+    //       from the Screen constructor
+
     onSetParent(_parent);
 }
 
@@ -157,7 +160,7 @@ void ScreenImpl::setCapture(Widget* capture)
 
 Widget* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
-    POINT pnt;
+    POINT pnt = {0};
     pnt.x = p.x() * scaleFactor();
     pnt.y = p.y() * scaleFactor();
 
@@ -214,7 +217,9 @@ WindowFrame* ScreenImpl::onAttach(Window& w)
 
 void ScreenImpl::onDetach(WindowFrame& frame)
 {
+    // TODO: detach from screen in WindowImpl?
     static_cast<WindowImpl*>(&frame)->setScreen(0);
+    
     frame.setNextResponder(0);
 
     Window& w = frame.window();
@@ -227,6 +232,7 @@ void ScreenImpl::onDetach(WindowFrame& frame)
 
 void ScreenImpl::onInit(WindowFrame& frame)
 {
+    // TODO: attach to screen in WindowImpl?
     static_cast<WindowImpl*>(&frame)->setScreen(_parent);
 
     double windowScaling = scaleFactor() / _screenScaling;
@@ -357,7 +363,7 @@ void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
         return;
     }
 
-    POINT screenPos;
+    POINT screenPos = {0};
     screenPos.x = ev.position().x() * scaleFactor();
     screenPos.y = ev.position().y() * scaleFactor();
 

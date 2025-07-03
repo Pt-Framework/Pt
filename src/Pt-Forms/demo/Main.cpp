@@ -19,7 +19,7 @@ int main(int argc, char* args[])
 
 #define OLDAPP 1
 
-#ifdef OLDAPP
+#ifndef OLDAPP
         Pt::Forms::Demo::MainWindow window;
         window.setTitle("Pt Forms Demo");
         window.show();
