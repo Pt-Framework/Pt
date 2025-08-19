@@ -236,7 +236,9 @@ class PT_FORMS_API Control : public View
     // Widget
     //
     protected:
-        virtual void onSetScreen(Screen* screen);
+        virtual void onConnect(Screen& screen);
+
+        virtual void onDisconnect();
 
         
         virtual Widget* onHitTest(const Gfx::PointF& p);

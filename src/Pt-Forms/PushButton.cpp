@@ -45,6 +45,7 @@ PushButton::PushButton()
 , _direction(Left)
 , _hasRenderer(false)
 {
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 }
 
 
@@ -291,6 +292,8 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 
 Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
+    const Gfx::Scaling& scal = this->scaling();
+
     Gfx::Painter _painter( surface() );
     _painter.setFont(_font);
 

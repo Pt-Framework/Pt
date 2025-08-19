@@ -73,8 +73,8 @@ MainWindow::MainWindow()
     Pt::Gfx::PngReader reader(ss, im);
     
     setTitle("Main 1");
-    move( Gfx::PointF(100, 100) );
-    resize( Gfx::SizeF(800, 700) );
+    move( Gfx::PointF(80, 80) );
+    resize( Gfx::SizeF(900, 850) );
 
     im = reader.get();    
     setIcon(im);
@@ -293,7 +293,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     // Path
     //
     painter.setPen( Pt::Gfx::Pen(Gfx::Color(10000, 0, 10000), 2) );
-    painter.setBrush(Gfx::Color(65535, 0, 0));
+    painter.setBrush(Gfx::Color(65535, 65535, 0, 0));
 
     Pt::Gfx::Path pathW;
     pathW.moveTo( Pt::Gfx::PointF(10, size().height() - 210) );
@@ -302,8 +302,12 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     pathW.moveTo( Pt::Gfx::PointF(40, size().height() - 180) );
     pathW.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
 
-    painter.fillPath(pathW);
-    painter.drawPath(pathW);
+    painter.setPath(pathW);
+    painter.fillPath();
+    painter.drawPath();
+
+    //painter.fillPath(pathW);
+    //painter.drawPath(pathW);
 
     Pt::Gfx::PointF star2[6];
     star2[0] = Pt::Gfx::PointF(100+320, 20);
@@ -549,6 +553,8 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     stops.add(0, Gfx::Color::fromRgb8(255, 0, 0));
     stops.add(1.0, Gfx::Color::fromRgb8(0, 255, 0));
 
+    //Gfx::Brush brush = Gfx::Brush::horizontalGradient(stops);
+    Gfx::Brush brush = Gfx::Brush::verticalGradient(stops);
     //Gfx::Brush brush = Gfx::Brush::linearGradient(0.0, 0.5, 1.0, 0.5, stops);
     //Gfx::Brush brush = Gfx::Brush::radialGradient(0.25, 0.25, 0, 0.5f, 0.5f, 0.5, stops);
     //imagePainter.setBrush(brush);
@@ -561,9 +567,12 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     path.moveTo( Pt::Gfx::PointF(50, 50) );
     path.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
 
-    imagePainter.fillPath(path);
-    imagePainter.drawPath(path);
+    //imagePainter.fillPath(path);
+    //imagePainter.drawPath(path);
 
+    imagePainter.setPath(path);
+    imagePainter.fillPath();
+    imagePainter.drawPath();
 
     Pt::Gfx::PointF star[6];
     star[0] = Pt::Gfx::PointF(20, 20);
@@ -574,8 +583,6 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     star[5] = Pt::Gfx::PointF(20, 20);
     //imagePainter.fillPolygon(star, 6);
     //imagePainter.drawPolyline(star, 6);
-
-
 
     imagePainter.setFont( Pt::Gfx::Font("", 24) );
     Pt::String str = "Hello World";
@@ -634,11 +641,8 @@ bool MainWindow::onMouseEvent(const MouseEvent& ev)
     if( ev.isRelease(MouseEvent::Right) )
     {
         Gfx::PointF menuPos = this->toGlobal( ev.position() );
-
-        SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
-        //_menu.setAutoSize(policy);
-        _menu.resizeToFit(policy);
-
+        
+        _menu.autoSize();
         _menu.move(menuPos);
         _menu.setAbove(true);
         _menu.show();

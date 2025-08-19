@@ -93,10 +93,13 @@ void WindowImpl::onInit(Window& w)
 
     w.setNextResponder(this);
 
-    double scaling = scaleFactor();
+    if( screen() )
+    {
+        double scaling = scaleFactor();
     
-    RescaleEvent ev(w, scaling);
-    w.processEvent(ev);
+        RescaleEvent ev(w, scaling);
+        w.processEvent(ev);
+    }
 }
 
 
@@ -107,9 +110,15 @@ void WindowImpl::onRelease(Window& w)
 }
 
 
-void WindowImpl::onSetScreen(Screen* screen)
+void WindowImpl::onConnect(Screen& screen)
 {
-    Base::onSetScreen(screen);
+    Base::onConnect(screen);
+}
+
+
+void WindowImpl::onDisconnect()
+{
+    Base::onDisconnect();
 }
 
 
@@ -252,6 +261,10 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     Gfx::RectF updateRect = ev.rect();
     updateRect = Gfx::RectF( updateRect.topLeft() * scaleFactor(), 
                              updateRect.size() * scaleFactor() );
+
+    //std::clog << "ON PAINT: " << _window.title() << " " 
+    //                          << ev.rect().x() << "," << ev.rect().y()
+    //                          << " " << ev.rect().width() << "x" << ev.rect().height() << std::endl;
 
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(_hwnd, &ps);
@@ -533,7 +546,13 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
 }
 
 
-void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
+void WindowImpl::onAutoCenter(Window& w, const Gfx::SizeF* size) 
+{
+    _wm.onAutoCenter(*this, size);
+}
+
+
+Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
     //
     // align to physical pixel grid
@@ -565,11 +584,15 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
     AdjustWindowRectEx(&clientRect, style, FALSE, exStyle);
-    
+
     LONG clientWidth  = clientRect.right  - clientRect.left + 1;
     LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
+
+    //std::clog << "SetWindowPos " << clientWidth << "x" << clientHeight << std::endl;
     SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, 
                  SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
+
+    return alignedSize;
 }
 
 

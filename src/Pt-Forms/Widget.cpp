@@ -135,21 +135,33 @@ void Widget::onSetParent(Widget* parent)
 }
 
 
+bool Widget::isConnected() const
+{
+    return _screen != 0;
+}
+
+
 Screen* Widget::screen()
 {
     return _screen;
 }
 
 
-void Widget::setScreen(Screen* screen)
+const Screen* Widget::screen() const
 {
-    onSetScreen(screen);
+    return _screen;
 }
 
 
-void Widget::onSetScreen(Screen* screen)
+void Widget::onConnect(Screen& screen)
 {
-    _screen = screen;
+    _screen = &screen;
+}
+
+
+void Widget::onDisconnect()
+{
+    _screen = 0;
 }
 
 
@@ -297,9 +309,11 @@ void Widget::invalidate()
 }
 
 
-// TODO: invalidate() should lead to an update event
 void Widget::onProcessInvalidateEvent(const InvalidateEvent& ev)
 {
+    if(_invalidates == 0)
+      return;
+
     --_invalidates;
 
     if(_invalidates > 0)
@@ -318,6 +332,11 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
     
 void Widget::onInvalidate()
 {
+    //static int nnn = 0;
+    //std::clog << ++nnn << " invalidate " << name() << this << std::endl;
+
+    // ignore pending events after direct invalidate
+    _invalidates = 0;
 }
 
 //

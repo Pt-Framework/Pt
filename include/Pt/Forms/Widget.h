@@ -84,6 +84,18 @@ class PT_FORMS_API Widget : public Responder
         void setNextResponder(Responder* r);
 
     public:
+        /** @brief Returns true if connected to a screen.
+        */
+        bool isConnected() const;
+
+        /** @brief Returns the connected screen.
+        */
+        Screen* screen();
+        
+        /** @brief Returns the connected screen.
+        */
+        const Screen* screen() const;
+        
         /** @brief Returns the parent.
         */
         Widget* parent();
@@ -234,16 +246,12 @@ class PT_FORMS_API Widget : public Responder
         */
         Pt::Signal<const Pt::Event&>& eventReceived();
 
-    public:
-        Screen* screen();
-
-    protected:
-        void setScreen(Screen* screen);
-
     protected:
         virtual void onSetParent(Widget* parent);
 
-        virtual void onSetScreen(Screen* screen);
+        virtual void onConnect(Screen& screen);
+
+        virtual void onDisconnect();
 
         virtual Widget* onHitTest(const Gfx::PointF& pos);
 

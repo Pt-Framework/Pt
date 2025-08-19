@@ -35,6 +35,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Path.h>
 
 namespace Pt {
 
@@ -134,6 +135,14 @@ class PT_GFX_API Paint
         */
         void setFont(const Font& font);
 
+        /** @brief Returns the current path.
+        */
+        const Gfx::Path& path() const;
+
+        /** @brief Sets the current path.
+        */
+        void setPath(const Path& path);
+
     private:
         Gfx::CompositionMode _compositionMode;
         Gfx::RectF           _clip;
@@ -141,6 +150,7 @@ class PT_GFX_API Paint
         Gfx::Pen             _pen;
         Gfx::Brush           _brush;
         Gfx::Font            _font;
+        Gfx::Path            _path;
 };
 
 } // namespace

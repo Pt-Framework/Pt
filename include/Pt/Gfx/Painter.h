@@ -44,6 +44,8 @@
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Paint.h>
 
+#include <Pt/Gfx/FontMetrics.h>
+
 #include <Pt/String.h>
 #include <Pt/Types.h>
 
@@ -136,6 +138,14 @@ class PT_GFX_API Painter
         */
         void resetClip();
 
+        /** @brief Returns the current path.
+        */
+        const Gfx::Path& path() const;
+
+        /** @brief Sets the current path.
+        */
+        void setPath(const Path& path);
+
     public:
         /** @brief Draws a line between two points.
         */
@@ -184,16 +194,29 @@ class PT_GFX_API Painter
 
         /** @brief Draws a path.
         */
-        void drawPath(const Path& path, float smoothness = 1.0f);
+        void drawPath(const Path& path);
         
         /** @brief Fills a path.
         */
-        void fillPath(const Path& path, float smoothness = 1.0f);
+        void fillPath(const Path& path);
+
+        /** @brief Draws the current path.
+        */
+        void drawPath();
+        
+        /** @brief Fills the current path.
+        */
+        void fillPath();
 
     public:
         /** @brief Measures the metrics of a text block.
         */
         TextMetrics textMetrics(const Pt::String& text) const;
+
+        FontMetrics fontMetrics(const Pt::String& text) const
+        {
+            return textMetrics(text);
+        }
 
         /** @brief Draws a text block.
         */

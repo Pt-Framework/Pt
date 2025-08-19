@@ -62,6 +62,9 @@ class PT_FORMS_API Form : public View
 
     typedef View Base;
 
+    protected:
+        Form();
+
     public:
         virtual ~Form();
 
@@ -79,25 +82,36 @@ class PT_FORMS_API Form : public View
 
         //void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
-    protected:
+    //
+    // layouting
+    //
+    public:
+        Gfx::SizeF measure(const SizePolicy& policy);
+
         void relayout();
 
+    protected:
+        virtual void onRequestRelayout();
+
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
+
+        virtual Gfx::SizeF onProcessMeasure();
+
+        virtual void onProcessLayout(const Gfx::RectF& rect);
+        
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
+    //
+    // focus handling
+    // 
     public:
         Control* focusControl();
 
         void focusNext();
 
         void focusPrev();
-
-    protected:
-        Form();
-
-    protected:
-        virtual Gfx::SizeF onMeasure();
-
-        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
-        
-        virtual void onLayoutEvent(const LayoutEvent& ev);
 
     protected:
         virtual void onAddElement(Control& control);
@@ -155,11 +169,17 @@ class PT_FORMS_API Form : public View
     // Widget
     //
     protected:
-        virtual void onSetScreen(Screen* screen);
+        virtual void onConnect(Screen& screen);
 
+        virtual void onDisconnect();
+
+        
         virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual void onRequestCapture(bool capture);
+
+        virtual void onRequestResize(const Gfx::SizeF& s);
+
 
     protected:
         virtual void onProcessEvent(const Pt::Event& ev);
@@ -256,7 +276,7 @@ class PT_FORMS_API Form : public View
     private:
         template <typename Iter>
         void moveFocus(Iter begin, Iter end);
-
+        
     protected:
         const std::map<Key, Control*>& shortcuts() const
         {
@@ -271,7 +291,7 @@ class PT_FORMS_API Form : public View
     private:
         Control*                      _mainControl;
                                      
-        int                          _layouts;
+        int                           _layouts;
 
         Control*                      _active;
 

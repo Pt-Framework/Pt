@@ -98,6 +98,7 @@ void Painter::begin(PaintSurface& surface)
             _paintContext->setPen( _paint.pen() );
             _paintContext->setBrush( _paint.brush() );
             _paintContext->setFont( _paint.font() );
+            _paintContext->setPath( _paint.path() );
 
             const Gfx::RectF* clip = _paint.clip();
             if( ! clip )
@@ -261,6 +262,21 @@ void Painter::resetClip()
 }
 
 
+const Gfx::Path& Painter::path() const
+{
+    return _paint.path();
+}
+
+
+void Painter::setPath(const Path& path)
+{
+    _paint.setPath(path);
+
+    if(_paintContext)
+        _paintContext->setPath(path);
+}
+
+
 void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     if( _paint.pen().size() == 0 )
@@ -344,17 +360,32 @@ void Painter::fillChord(const PointF& topLeft, const SizeF& size, float degBegin
 }
 
 
-void Painter::drawPath(const Gfx::Path& path, float smoothness)
+void Painter::drawPath(const Gfx::Path& path)
 {
     if(_paintContext)
         _paintContext->drawPath(path);
 }
 
 
-void Painter::fillPath(const Path& path, float smoothness)
+
+void Painter::fillPath(const Path& path)
 {
     if(_paintContext)
         _paintContext->fillPath(path);
+}
+
+
+void Painter::drawPath()
+{
+    if(_paintContext)
+        _paintContext->drawPath();
+}
+
+
+void Painter::fillPath()
+{
+    if(_paintContext)
+        _paintContext->fillPath();
 }
 
 

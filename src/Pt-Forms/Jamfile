@@ -44,6 +44,7 @@ PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.mm  ] ;
 
 SharedLibrary Pt-Forms : Application.cpp
                          Button.cpp
+                         CanvasLayout.cpp
                          CheckBox.cpp
                          ComboBox.cpp
                          Control.cpp

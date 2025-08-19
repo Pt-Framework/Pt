@@ -36,6 +36,9 @@ if $(TARGET_OS) = wasm
 PT_DEMO_ICONS_DIR = [ FDirName etc icons ] ;
 PT_DEMO_ICONS = [ GLOB $(PT_DEMO_ICONS_DIR) : *.png  ] ;
 
+PT_DEMO_IMAGES_DIR = [ FDirName etc images ] ;
+PT_DEMO_ICONS += [ GLOB $(PT_DEMO_IMAGES_DIR) : platinum.png  ] ;
+
 for local f in $(PT_DEMO_ICONS)
 {
     File $(f:BS) : $(f) ;

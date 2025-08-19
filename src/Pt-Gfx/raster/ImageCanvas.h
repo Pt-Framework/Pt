@@ -101,6 +101,8 @@ class ImageCanvas : public Canvas
 
     virtual void onClipChanged() override;
 
+    virtual void onPathChanged() override;
+
   protected:
     virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
 
@@ -133,6 +135,10 @@ class ImageCanvas : public Canvas
     virtual void onDrawPath(const Gfx::Path& path, float smoothness) override;
 
     virtual void onFillPath(const Gfx::Path& path, float smoothness) override;
+
+    virtual void onDrawPath();
+
+    virtual void onFillPath();
 
   protected:
     virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
@@ -172,7 +178,9 @@ class ImageCanvas : public Canvas
 
     void fill(const Point* points, size_t pointCount, const Rect& currentClip);
 
-    void fillPolygons(std::vector<Polygon> polygons, const Rect& currentClip);
+    void strokePolygons(const std::vector<Polygon>& polygons, const Rect& currentClip);
+
+    void fillPolygons(const std::vector<Polygon>& polygons, const Rect& currentClip);
 
     void strokeEllipse( const Point& topLeft, const Size& size, const Rect& currentClip);
 

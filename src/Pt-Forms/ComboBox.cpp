@@ -176,8 +176,7 @@ void ComboBox::showPopup()
     policy.setWidth( size().width() );
     policy.setHeight(0);
     
-    //_popup.setAutoSize(policy);
-    _popup.resizeToFit(policy);
+    _popup.autoSize(policy);
 
     Gfx::PointF popupPos(0, size().height() );
     popupPos = this->toGlobal(popupPos);
@@ -185,7 +184,7 @@ void ComboBox::showPopup()
 
     _popup.setAbove(true);
     _popup.setAnchor(this);
-    
+    _popup.setName("ComboPopup");
     _popup.show();
     
     //Application::instance().setPopup(_popup);

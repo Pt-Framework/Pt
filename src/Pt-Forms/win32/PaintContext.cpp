@@ -399,7 +399,19 @@ void PaintContext::onSetClip(const Gfx::RectF* rectF)
     _clipRect = CreateRectRgn(x , y, x + width, y + height);
 }
 
-#endif
+
+const Gfx::Path& PaintContext::path()  const
+{
+    return _path;
+}
+
+
+void PaintContext::onSetPath(const Gfx::Path& path)
+{
+    _path = path;
+}
+
+#endif // PT_FORMS_WIN32_RASTER
 
 } // namespace
 

@@ -103,7 +103,17 @@ class PaintContext : public Gfx::PaintContext
             return _hasClip ? &_clip : 0;
         }
 
+        const Gfx::Path& path() const
+        {
+            return _path;
+        }
+
     protected:
+        virtual void onSetPath(const Gfx::Path& path) override
+        {
+            _path = path;
+        }
+
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override
         {
             _compositionMode = mode;
@@ -219,6 +229,7 @@ class PaintContext : public Gfx::PaintContext
         CGColorRef                _textColor;
         Gfx::RectF                _clip;
         bool                      _hasClip;
+        Gfx::Path                 _path;
 };
 
 } // namespace

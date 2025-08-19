@@ -108,7 +108,18 @@ const Gfx::Font& Paint::font() const
 void Paint::setFont(const Gfx::Font& font)
 {
     _font = font;
+}
 
+
+const Gfx::Path& Paint::path() const
+{
+    return _path;
+}
+
+
+void Paint::setPath(const Gfx::Path& path)
+{
+    _path = path;
 }
 
 } // namespace

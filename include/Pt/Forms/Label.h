@@ -100,12 +100,16 @@ class PT_FORMS_API Label : public Control
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     protected:
+        virtual void onConnect(Screen& screen);
+
         virtual void onInvalidate();
 
         virtual void onPaint(Gfx::PaintSurface& surface, 
                              const Gfx::RectF& rect);
 
     private:
+        Pixmap& getIconPixmap();
+
         Adjustment adjustment() const;
 
         void layoutText();
@@ -138,7 +142,7 @@ class PT_FORMS_API Label : public Control
         Gfx::Pen       _textPen;
         Gfx::Pen       _pen;
         Gfx::Font      _font;
-        PixmapSurface  _picture;
+        Pixmap         _pixmap;
 };
 
 } // namespace

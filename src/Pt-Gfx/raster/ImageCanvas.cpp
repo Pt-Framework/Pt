@@ -482,13 +482,8 @@ void ImageCanvas::onDrawPath(const Gfx::Path& path, float smoothness)
   std::vector<Polygon> polygons;
   path.toPolygons(polygons);
 
-  for(const Polygon& poly : polygons)
-  {
-    const std::vector<PointF>& points = poly.points();
-
-    if(_paint)
-        _paint->drawPolyline( &points[0], points.size() );
-  }
+  Rect currentClip = updateClip();
+  strokePolygons(polygons, currentClip);
 }
 
 
@@ -499,18 +494,62 @@ void ImageCanvas::onFillPath(const Gfx::Path& path, float smoothness)
 
   const Rect currentClip = updateClip();
   fillPolygons(polygons, currentClip);
-  
-  //for(const Polygon& poly : polygons)
-  //{
-  //  const std::vector<PointF>& points = poly.points();
-
-  //  if(_paint)
-  //      _paint->fillPolygon( &points[0], points.size() );
-  //}
 }
 
 
-void ImageCanvas::fillPolygons(std::vector<Polygon> polygons, const Rect& currentClip)
+void ImageCanvas::onPathChanged()
+{
+}
+
+
+void ImageCanvas::onDrawPath()
+{
+    if( ! _paint )
+        return;
+
+    const std::vector<Polygon>& polygons = _paint->flatPath();
+    
+    Rect currentClip = updateClip();
+    strokePolygons(polygons, currentClip);
+}
+
+
+void ImageCanvas::onFillPath()
+{
+    if( ! _paint )
+        return;
+  
+    const std::vector<Polygon>& polygons = _paint->flatPath();
+
+    Rect currentClip = updateClip();
+    fillPolygons(polygons, currentClip);
+}
+
+
+void ImageCanvas::strokePolygons(const std::vector<Polygon>& polygons, const Rect& currentClip)
+{
+    if( ! _paint )
+        return;
+
+    for(const Polygon& poly : polygons)
+    {
+      std::size_t n = poly.size();
+      std::vector<Point> points(n);
+
+      for(size_t i = 0; i < n; ++i)
+      {
+          Gfx::PointF p = scaling().toPhysical( _paint->origin() + poly.at(i) );
+
+          points[i] = Point( Pt::lround(p.x() - 0.4999),
+                             Pt::lround(p.y() - 0.4999) );
+      }
+
+      stroke(&points[0], points.size(), currentClip);
+    }
+}
+
+
+void ImageCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect& currentClip)
 {
     EdgeSet           globalEdgeTable;
     ActiveEdgeTable   activeEdgeTable;
@@ -522,6 +561,11 @@ void ImageCanvas::fillPolygons(std::vector<Polygon> polygons, const Rect& curren
     // might as well create a new table here...
     globalEdgeTable.clear();
 
+    int leftPosG = std::numeric_limits<int>::max();
+    int topPosG = std::numeric_limits<int>::max();
+    int rightPosG = 0;
+    int bottomPosG = 0;
+
     for(const Polygon& poly : polygons)
     {
         std::size_t n = poly.size();
@@ -529,7 +573,7 @@ void ImageCanvas::fillPolygons(std::vector<Polygon> polygons, const Rect& curren
 
         for (size_t i = 0; i < n; ++i)
         {
-            const Gfx::PointF& p = poly.at(i);
+            Gfx::PointF p = scaling().toPhysical( _paint->origin() + poly.at(i) );
 
             points[i] = Point( Pt::lround(p.x() - 0.4999),
                                Pt::lround(p.y() - 0.4999) );
@@ -537,11 +581,6 @@ void ImageCanvas::fillPolygons(std::vector<Polygon> polygons, const Rect& curren
 
         ClipPolygon clipper;
         clipper(points, currentClip);
-
-        int leftPos = std::numeric_limits<int>::max();
-        int topPos = std::numeric_limits<int>::max();
-        int rightPos = 0;
-        int bottomPos = 0;
 
         for(size_t n = 0; n < points.size(); ++n)
         {
@@ -552,17 +591,17 @@ void ImageCanvas::fillPolygons(std::vector<Polygon> polygons, const Rect& curren
             if( ! _isGradient )
               continue;
 
-            if( p.y() < topPos)
-                topPos = p.y();
+            if( p.y() < topPosG)
+                topPosG = p.y();
 
-            if( p.y() > bottomPos)
-                bottomPos = p.y();
+            if( p.y() > bottomPosG)
+                bottomPosG = p.y();
 
-            if( p.x() < leftPos)
-                leftPos = p.x();
+            if( p.x() < leftPosG)
+                leftPosG = p.x();
 
-            if( p.x() > rightPos)
-                rightPos = p.x();
+            if( p.x() > rightPosG)
+                rightPosG = p.x();
         }
 
         if( points.empty() )
@@ -570,9 +609,6 @@ void ImageCanvas::fillPolygons(std::vector<Polygon> polygons, const Rect& curren
 
         if( points.back() != points.front() )
             points.push_back( points[0] );
-
-        if( _isGradient )
-            updateGradientBrush(rightPos - leftPos, bottomPos - topPos);
 
         // Fill the global edge table. Two points yield an edge.
         Edge   edge;
@@ -628,6 +664,9 @@ void ImageCanvas::fillPolygons(std::vector<Polygon> polygons, const Rect& curren
             }
         }
     }
+
+    if( _isGradient )
+        updateGradientBrush(rightPosG - leftPosG, bottomPosG - topPosG);
 
     // if all polygon points are on one line the GET will be empty
     if( globalEdgeTable.empty() )
@@ -2470,42 +2509,6 @@ void ImageCanvas::clipSpan( int& xpos, int& ypos, int& length, const Rect& clip)
 }
 
 
-//void ImageCanvas::createGradientTexture(Image& texture, int width, int height,
-//                                       Pt::Gfx::Color gradientStart, 
-//                                       Pt::Gfx::Color gradientStop, 
-//                                       Pt::Gfx::Brush::GradientDirection style)
-//{
-//    if( style == Pt::Gfx::Brush::Horizontal )
-//      texture.reset( _image.format(), Size(width, 1));
-//    else
-//      texture.reset( _image.format(), Size(1, height));
-//
-//    int length = texture.width() + texture.height() - 1;
-//
-//    Pt::uint8_t* pixel = texture.data();
-//
-//    for(int n = 0; n < length; ++n)
-//    {
-//        float f1 = (length - n) / float(length);
-//        float f2 = n / float(length);
-//
-//        float r1 = gradientStart.red() * f1;
-//        float r2 = gradientStop.red() * f2;
-//
-//        float g1 = gradientStart.green() * f1;
-//        float g2 = gradientStop.green() * f2;
-//
-//        float b1 = gradientStart.blue() * f1;
-//        float b2 = gradientStop.blue() * f2;
-//
-//        pixel[0] = 255;
-//        pixel[1] = (r1 + r2) / 257;
-//        pixel[2] = (g1 + g2) / 257;
-//        pixel[3] = (b1 + b2) / 257;
-//        pixel += 4;
-//    }
-//}
-
 void ImageCanvas::fillVerticalGradient( const Point& origin, const Point& pos,  int length )
 {
     fillTexture(origin, pos, length);
@@ -3759,6 +3762,10 @@ void ImageCanvas::updateGradientBrush(int width, int height)
           width = 1;
           std::swap(gradientStart, gradientStop);
           break;
+
+        case Pt::Gfx::Brush::Linear:
+        case Pt::Gfx::Brush::Radial:
+          return;
     }
 
     int length = width + height - 1;

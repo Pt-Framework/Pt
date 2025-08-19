@@ -75,6 +75,8 @@ class PT_GFX_API PaintContext
 
         const Scaling& scaling() const;
 
+        Gfx::PointF toLocal(double x, double y);
+
         void beginPaint();
 
         void finishPaint();
@@ -96,6 +98,8 @@ class PT_GFX_API PaintContext
 
         void resetClip();
 
+        void setPath(const Path& path);
+
     public:
         void drawLine(const PointF& from, const PointF& to);
 
@@ -114,6 +118,10 @@ class PT_GFX_API PaintContext
         void drawPath(const Path& path);
 
         void fillPath(const Path& path);
+
+        void drawPath();
+
+        void fillPath();
 
     public:
         TextMetrics textMetrics(const Pt::String& text) const;
@@ -140,6 +148,8 @@ class PT_GFX_API PaintContext
         virtual void onSetFont(const Gfx::Font& font) = 0;
 
         virtual void onSetClip(const Gfx::RectF* clip) = 0;
+
+        virtual void onSetPath(const Path& path) = 0;
 
         virtual void onReleasePaint() {}
 

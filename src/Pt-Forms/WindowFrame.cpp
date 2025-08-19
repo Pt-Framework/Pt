@@ -88,11 +88,19 @@ void WindowFrame::getImage(Gfx::ImageSurface& imageSurface)
 }
 
 
-void WindowFrame::onSetScreen(Screen* screen)
+void WindowFrame::onConnect(Screen& screen)
 {
-    Base::onSetScreen(screen);
+    Base::onConnect(screen);
     
-    _window.setScreen(screen);
+    _window.onConnect(screen);
+}
+
+
+void WindowFrame::onDisconnect()
+{
+    Base::onDisconnect();
+    
+    _window.onDisconnect();
 }
 
 
@@ -104,6 +112,8 @@ void WindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
 
 void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
 {
+    Base::onRescaleEvent(ev);
+  
     // TODO: the reported scale factor divided by the application
     //       scale factor is the window specific one
 
@@ -111,8 +121,6 @@ void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
 
     Gfx::SizeF pixmapSize = scaling().toPhysical( size() );
     _pixmap.resize(pixmapSize);
-    
-    Base::onRescaleEvent(ev);
 }
 
 

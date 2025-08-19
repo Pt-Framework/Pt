@@ -166,10 +166,13 @@ void WindowImpl::onInit(Window& w)
 
     w.setNextResponder(this);
 
-    double scaling = scaleFactor();
+    if( screen() )
+    {
+        double scaling = scaleFactor();
     
-    RescaleEvent ev(w, scaling);
-    w.processEvent(ev);
+        RescaleEvent ev(w, scaling);
+        w.processEvent(ev);
+    }
 }
 
 
@@ -177,6 +180,18 @@ void WindowImpl::onRelease(Window& w)
 {
     w.setNextResponder(0);
     w.setSurface( 0, Gfx::PointF() );
+}
+
+
+void WindowImpl::onConnect(Screen& screen)
+{
+    Base::onConnect(screen);
+}
+
+
+void WindowImpl::onDisconnect()
+{
+    Base::onDisconnect();
 }
 
 
@@ -528,7 +543,7 @@ void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 
     //std::clog  << "XMoveWindow: " << pos.x() << ", " << pos.y() << std::endl;
     XMoveWindow(_display, _window, p.x(), p.y());
-    //XFlush(_display);
+    XFlush(_display);
 
     //while( XPending(_display) > 0 )
     //{
@@ -565,7 +580,7 @@ void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
-void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
+Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
     //std::clog  << "XResizeWindow: " << s.width() << "x" << s.height() << std::endl;
 
@@ -591,7 +606,41 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     unsigned int width = Pt::lround(psize.width());
     unsigned int height = Pt::lround(psize.height());
 
+    //XFlush(_display);
+    //XSync(_display, False);
+
+    //while( XPending(_display) > 0 )
+    //{
+    //    XEvent xev;
+    //    XNextEvent(_display, &xev);
+
+    //    std::clog  << "XResizeWindow: event pending: " << xev.xany.type << std::endl;
+    //    Application::instance().impl()->processEvent(xev);
+    //}
+
     XResizeWindow( _display, _window, width, height );
+    XFlush(_display);
+
+    //::Window root_return;
+    //int x_return, y_return;
+    //unsigned int width_return, height_return;
+    //unsigned int border_width_return;
+    //unsigned int depth_return;
+
+    //XGetGeometry(_display, _window, &root_return, &x_return, &y_return, &width_return, 
+    //                                &height_return, &border_width_return, &depth_return);
+
+    //std::clog  << "XResizeWindow: DONE1: " << width_return << " " 
+    //                                      << height_return << std::endl;
+
+    //XFlush(_display);
+    //XSync(_display, False);
+    //
+
+
+
+    //XGetGeometry(_display, _window, &root_return, &x_return, &y_return, &width_return, 
+    //                                &height_return, &border_width_return, &depth_return);
 
     //XFlush(_display);
 
@@ -603,8 +652,29 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     //    XEvent xev;
     //    XNextEvent(_display, &xev);
 
+    //    std::clog  << "XResizeWindow: event pending: " << xev.xany.type << std::endl;
     //    Application::instance().impl()->processEvent(xev);
     //}
+
+    //std::clog  << "XResizeWindow: DONE2: " << width_return << " " 
+    //                                      << height_return << std::endl;
+
+    //XSync(_display, False);
+    //XWindowAttributes attrs;
+    //XGetWindowAttributes(_display, _window, &attrs);
+    //
+    //std::clog  << "XGetWindowAttributes: " << attrs.width << " " 
+    //                                      << attrs.height << std::endl;
+
+    /* NOTE: to check if the size was actually changed and not rejected:
+        
+        Sync(_display, False);
+        XWindowAttributes attrs;
+        XGetWindowAttributes(_display, _window, &attrs);
+        bool hasChanged = attrs.width == width && attrs.height == height;
+    */
+
+    return alignedSize;
 }
 
 
@@ -811,6 +881,12 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
     hints.max_height = lround( maxSize.height() );
 
     XSetWMNormalHints(_display, _window, &hints);
+}
+
+
+void WindowImpl::onAutoCenter(Window& w, const Gfx::SizeF* size) 
+{
+    _wm.onAutoCenter(*this, size);
 }
 
 

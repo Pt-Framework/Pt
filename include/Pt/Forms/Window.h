@@ -95,18 +95,14 @@ class PT_FORMS_API Window : public Form
         void getImage(Gfx::ImageSurface& imageSurface) const;
 
     public:
-        bool isAutoSize() const;
-
-        Gfx::SizeF setAutoSize(const SizePolicy& policy);
-
-        Gfx::SizeF resizeToFit(const SizePolicy& policy);
+        void autoCenter();
 
 
-        bool isAutoCenter() const;
+        void autoSize(const SizePolicy& policy);
 
-        void setAutoCenter(bool isCenter = true);
+        void autoSize();
 
-
+    public:
         Type type() const;
 
         
@@ -141,6 +137,8 @@ class PT_FORMS_API Window : public Form
 
         void close();
 
+        Signal<>& closed();
+
 
         bool acceptsInput() const;
 
@@ -153,22 +151,30 @@ class PT_FORMS_API Window : public Form
     // Form
     //
     protected:
-        virtual Gfx::SizeF onMeasure();
+        virtual Gfx::SizeF onProcessMeasure();
 
-        virtual void onLayoutEvent(const LayoutEvent& ev);
+        virtual void onProcessLayout(const Gfx::RectF& rect);
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
 
     //
     // Widget
     //
     protected:
-        virtual void onSetScreen(Screen* screen);
+        virtual void onConnect(Screen& screen);
 
+        virtual void onDisconnect();
+
+        
         virtual Widget* onHitTest(const Gfx::PointF& p);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
+        
         virtual void onProcessEvent(const Pt::Event& ev);
 
         virtual void onRequestRepaint(const Gfx::RectF& rect);
@@ -299,6 +305,12 @@ class PT_FORMS_API Window : public Form
         virtual bool onEnterEvent(const EnterEvent& ev);
 
         virtual bool onLeaveEvent(const LeaveEvent& ev);
+    
+    //
+    // Implementation
+    //
+    private:
+        bool isAutoSizeActive(const Gfx::SizeF& s);
 
     private:
         WindowFrame*                 _frame;
@@ -307,13 +319,16 @@ class PT_FORMS_API Window : public Form
         bool                         _show; 
         bool                         _isActive;
         bool                         _enabled; 
-        bool                         _isClosed; 
+        bool                         _isClosed;
+
+        Pt::Signal<>                 _closed;
 
         Gfx::PointF                  _requestedPosition;
         Gfx::SizeF                   _requestedSize;
 
-        SizePolicy                   _sizePolicy;
+        SizePolicy                   _autoSizePolicy;
         bool                         _autoSize;
+        Gfx::SizeF                   _lastAutoSize;
         bool                         _autoCenter;
 
         Type                         _type;

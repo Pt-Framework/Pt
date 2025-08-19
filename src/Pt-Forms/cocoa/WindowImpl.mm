@@ -198,10 +198,13 @@ void WindowImpl::onInit(Window& w)
 
     w.setNextResponder(this);
 
-    double scaling = scaleFactor();
+    if( screen() )
+    {
+        double scaling = scaleFactor();
     
-    RescaleEvent ev(w, scaling);
-    w.processEvent(ev);
+        RescaleEvent ev(w, scaling);
+        w.processEvent(ev);
+    }
 }
 
 
@@ -209,6 +212,18 @@ void WindowImpl::onRelease(Window& w)
 {
     w.setNextResponder(0);
     w.setSurface( 0, Gfx::PointF() );
+}
+
+
+void WindowImpl::onConnect(Screen& screen)
+{
+    Base::onConnect(screen);
+}
+
+
+void WindowImpl::onDisconnect()
+{
+    Base::onDisconnect();
 }
 
 
@@ -499,7 +514,7 @@ void WindowImpl::onProcessMoveEvent(const MoveEvent& ev)
 }
 
 
-void WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
+Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
 {
     //static int nnn = 0;
     //std::clog << ++nnn << " RESIZE: " << size.width() << ", "  << size.height() << std::endl;
@@ -522,6 +537,8 @@ void WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
     [_window setFrame:frameRect display:NO];
 
     //std::clog << ++nnn << " RESIZE END " << std::endl;
+
+    return size;
 }
 
 
@@ -622,6 +639,12 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF,
 }
 
 
+void WindowImpl::onAutoCenter(Window& w, const Gfx::SizeF* size) 
+{
+    _wm.onAutoCenter(*this, size);
+}
+
+
 //void WindowImpl::grabPointer()
 //{
 //    // pointer is always tracked, even if its outside the window
@@ -638,8 +661,9 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF,
 
 void WindowImpl::onViewPaint(const NSRect& rect)
 {
-    //std::clog << "ON PAINT: " << rect.origin.x << "," << rect.origin.y
-    //                 << " " << rect.size.width << "x" << rect.size.height << std::endl;
+    //std::clog << "ON PAINT: " << _client.title() << " " 
+    //                          << rect.origin.x << "," << rect.origin.y
+    //                          << " " << rect.size.width << "x" << rect.size.height << std::endl;
 
     NSRect frame = [_window frame];
     NSRect content = [_window contentRectForFrameRect:frame];

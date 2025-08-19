@@ -50,14 +50,15 @@ WorkspaceManager::WorkspaceManager()
 , _textColor( Gfx::Color::fromRgb8(255, 255, 255) )
 , _inactiveTextColor( Gfx::Color::fromRgb8(50, 50, 50) )
 {
+    eventReceived() += Pt::slot(*this, &WorkspaceManager::onProcessLayoutEvent);
 }
 
 
 WorkspaceManager::~WorkspaceManager()
 {
-    while( ! _windowList.empty() )
+    while( ! _windows.empty() )
     {
-        _windowList.front()->unparent();
+        _windows.front()->unparent();
     }
 }
 
@@ -117,7 +118,7 @@ void WorkspaceManager::onRequestActivate(bool active)
 
 const std::vector<Window*>& WorkspaceManager::windows() const
 {
-    return _windowList;
+    return _windowStack;
 }
 
 
@@ -156,7 +157,7 @@ Widget* WorkspaceManager::onHitTest(const Gfx::PointF& p)
         return 0;
 
     std::vector<Window*>::const_reverse_iterator rit;
-    for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
+    for(rit = _windowStack.rbegin() ; rit != _windowStack.rend(); ++rit )
     {
         Window* window = *rit;
         WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
@@ -189,9 +190,11 @@ WindowFrame* WorkspaceManager::onAttach(Window& w)
     frame->setNextResponder(this);
 
     if(_topMostWindow)
-        _windowList.insert( --_windowList.end(), &w );
+        _windowStack.insert( --_windowStack.end(), &w );
     else
-        _windowList.push_back(&w);
+        _windowStack.push_back(&w);
+
+    _windows.push_back(&w);
 
     return frame;
 }
@@ -199,15 +202,12 @@ WindowFrame* WorkspaceManager::onAttach(Window& w)
 
 void WorkspaceManager::onDetach(WindowFrame& frame)
 {
-    // TODO: detach from screen in WindowImpl?
-    static_cast<WorkspaceFrame*>(&frame)->setScreen(0);
-
     frame.setNextResponder(0);
 
     Window& w = frame.window();
 
     std::vector<Window*>::iterator wit;
-    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
+    for(wit = _windowStack.begin(); wit != _windowStack.end(); ++wit)
     {
         Window* window = *wit;
 
@@ -219,25 +219,28 @@ void WorkspaceManager::onDetach(WindowFrame& frame)
             if(_topMostWindow && _topMostWindow == &w)
                 _topMostWindow = 0;
 
-            _windowList.erase(wit);
+            _windowStack.erase(wit);
             break;
         }
     }
+
+    _windows.erase( std::find(_windows.begin(), _windows.end(), &w), 
+                    _windows.end() );
+
+    _autoCenter.erase( &frame.window() );
 }
 
 
 void WorkspaceManager::onInit(WindowFrame& frame)
 {
-    Screen* screen = this->screen();
-    if( screen )
+    if( isConnected() )
     {
-        // TODO: attach to screen in WindowImpl?
-        static_cast<WorkspaceFrame*>(&frame)->setScreen(screen);
+        double scaling = scaleFactor();
+        RescaleEvent ev(frame, scaling);
+        frame.processEvent(ev);
     }
-    double scaling = scaleFactor();
-    
-    RescaleEvent ev(frame, scaling);
-    frame.processEvent(ev);
+
+    Base::onInit(frame);
 }
 
 
@@ -248,19 +251,35 @@ void WorkspaceManager::onRelease(WindowFrame& frame)
         Gfx::RectF frameRect( frame.position(), frame.size() );
         repaint(frameRect);
     }
+
+    Base::onRelease(frame);
 }
 
 
-void WorkspaceManager::onSetScreen(Screen* screen)
+void WorkspaceManager::onConnect(Screen& screen)
 {
-    Base::onSetScreen(screen);
+    Base::onConnect(screen);
 
     std::vector<Window*>::iterator wit;
-    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         Window* window = *wit;
         WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
-        frame->setScreen(screen);
+        frame->onConnect(screen);
+    }
+}
+
+
+void WorkspaceManager::onDisconnect()
+{
+    Base::onDisconnect();
+
+    std::vector<Window*>::iterator wit;
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
+    {
+        Window* window = *wit;
+        WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
+        frame->onDisconnect();
     }
 }
 
@@ -288,17 +307,17 @@ void WorkspaceManager::onActivate(WorkspaceFrame& frame, bool active)
         // raise to top of window stack
         //
         std::vector<Window*>::iterator it =
-            std::find(_windowList.begin(), _windowList.end(), &w);
+            std::find(_windowStack.begin(), _windowStack.end(), &w);
 
-        _windowList.erase(it);
+        _windowStack.erase(it);
 
         if(_topMostWindow && _topMostWindow != &w)
         {
-            _windowList.insert(--_windowList.end(), &w);
+            _windowStack.insert(--_windowStack.end(), &w);
         }
         else
         {
-            _windowList.push_back(&w);
+            _windowStack.push_back(&w);
         }
 
         _activeWindow = &w;
@@ -336,12 +355,12 @@ void WorkspaceManager::onSetAbove(WorkspaceFrame& frame, bool above)
             _topMostWindow->setAbove(false);
 
         // move top most to the back
-        std::vector<Window*>::iterator it = std::find(_windowList.begin(), 
-                                                      _windowList.end(), &w);
-        if( it != _windowList.end() )
-            _windowList.erase(it);
+        std::vector<Window*>::iterator it = std::find(_windowStack.begin(), 
+                                                      _windowStack.end(), &w);
+        if( it != _windowStack.end() )
+            _windowStack.erase(it);
         
-        _windowList.push_back(&w);
+        _windowStack.push_back(&w);
 
         _topMostWindow = &w;
     }
@@ -390,9 +409,86 @@ void WorkspaceManager::onClose(WorkspaceFrame& wf)
     Application::instance().loop().commitEvent(ev);
 }
 
+
+void WorkspaceManager::onAutoCenter(WindowFrame& w, const Gfx::SizeF* size)
+{
+    if( ! size )
+    {
+        _autoCenter.erase( &w.window() );
+        return;
+    }
+    
+    Pt::Gfx::SizeF windowSize = *size;
+    Pt::Gfx::SizeF wmSize = this->size();
+
+    double x = (wmSize.width() - windowSize.width()) / 2.0;
+    double y = (wmSize.height() - windowSize.height()) / 2.0;
+    //std::clog << "auto-center BEGIN: " << w.window().name() << " " << x << "," << y << std::endl;
+    //std::clog << "window size: " << windowSize.width() << "x" << windowSize.height() << std::endl;
+    //std::clog << "wm size: " << wmSize.width() << "x" << wmSize.height() << std::endl;
+
+    _autoCenter[ &w.window() ] = Gfx::RectF( Gfx::PointF(x, y), *size );
+    w.window().move( Pt::Gfx::PointF(x, y) );
+
+    relayout();
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Implementation
 ///////////////////////////////////////////////////////////////////////
+
+void WorkspaceManager::onRequestRelayout()
+{
+    if(_parent)
+        _parent->onRelayoutRequest(*this);
+}
+
+
+void WorkspaceManager::onProcessLayoutEvent(const LayoutEvent& ev)
+{
+    //
+    // align to physical pixel grid
+    //
+    Gfx::RectF geometry( position(), size() );
+    Gfx::RectF rect = scaling().align(geometry);
+
+    //
+    // layout position and size of contents 
+    //
+    LayoutEvent lev(*this);
+    lev.setRect(rect);
+    onLayoutEvent(lev);
+}
+
+
+void WorkspaceManager::onLayoutEvent(const LayoutEvent& ev)
+{
+    onLayout( ev.rect() );
+}
+
+
+void WorkspaceManager::onLayout(const Gfx::RectF& rect)
+{
+    std::map<Window*, Gfx::RectF>::iterator wit;
+    for(wit = _autoCenter.begin(); wit != _autoCenter.end(); ++wit)
+    {
+        Window* window = wit->first;
+            
+        Pt::Gfx::SizeF windowSize = wit->first->size();
+        Pt::Gfx::SizeF wmSize = this->size();
+
+        double x = (wmSize.width() - windowSize.width()) / 2.0;
+        double y = (wmSize.height() - windowSize.height()) / 2.0;
+        
+        //std::clog << "auto-center: " << window->name() << " " << x << "," << y << std::endl;
+        //std::clog << "window size: " << windowSize.width() << "x" << windowSize.height() << std::endl;
+        //std::clog << "wm size: " << wmSize.width() << "x" << wmSize.height() << std::endl;
+        
+        _autoCenter[ window ].setOrigin( Pt::Gfx::PointF(x, y) );
+        window->move( Pt::Gfx::PointF(x, y) );
+    }
+}
+
 
 void WorkspaceManager::onProcessRescaleEvent(const RescaleEvent& ev)
 {
@@ -401,7 +497,7 @@ void WorkspaceManager::onProcessRescaleEvent(const RescaleEvent& ev)
     double scaling = ev.scaleFactor();
 
     std::vector<Window*>::iterator wit;
-    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
+    for(wit = _windowStack.begin(); wit != _windowStack.end(); ++wit)
     {
         Window* window = *wit;
         WindowFrame* frame = window->frame();
@@ -436,7 +532,7 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
     // paint child windows
     //
     std::vector<Window*>::iterator wit;
-    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
+    for(wit = _windowStack.begin(); wit != _windowStack.end(); ++wit)
     {
         Window* window = *wit;
         WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
@@ -446,6 +542,8 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
 
         Gfx::RectF frameRect( frame->position(), frame->size() );
         frameRect = rect.intersect(frameRect);
+
+        // TODO: skip/continue if no intersection
 
         Gfx::PointF winPos = toFrame( *frame, frameRect.topLeft() );
         Gfx::RectF winRect( winPos, rect.size() );
@@ -480,7 +578,7 @@ void WorkspaceManager::onProcessEnableEvent(const EnableEvent& ev)
     Base::onProcessEnableEvent(ev);
 
     std::vector<Window*>::iterator wit;
-    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
+    for(wit = _windowStack.begin(); wit != _windowStack.end(); ++wit)
     {
         Window* window = *wit;
 
@@ -492,6 +590,21 @@ void WorkspaceManager::onProcessEnableEvent(const EnableEvent& ev)
 
 void WorkspaceManager::onMove(WorkspaceFrame& frame, const Gfx::PointF& pos)
 {
+    //std::clog << "MOVE: " << frame.window().title() << " " 
+    //          << pos.x() << ", " << pos.y() << std::endl;
+
+    std::map<Window*, Gfx::RectF>::iterator wit = _autoCenter.find( &frame.window() );
+    if( wit != _autoCenter.end() )
+    {
+        if( pos != wit->second.topLeft() )
+        {
+            //std::clog << "auto-center move END: " << wit->first->title() << " " 
+            //                                      << pos.x() << "," << pos.y()<< std::endl;
+
+            _autoCenter.erase(wit);
+        }
+    }
+
     Gfx::PointF aligedPos = _parent ? _parent->scaling().align(pos)
                                     : pos;
 
@@ -502,6 +615,22 @@ void WorkspaceManager::onMove(WorkspaceFrame& frame, const Gfx::PointF& pos)
 
 void WorkspaceManager::onResize(WorkspaceFrame& frame, const Gfx::SizeF& to)
 {
+    //std::clog << "WM resize: " << frame.window().title() << " " 
+    //          << to.width() << "x" << to.width() << std::endl;
+
+    std::map<Window*, Gfx::RectF>::iterator wit = _autoCenter.find( &frame.window() );
+    if( wit != _autoCenter.end() )
+    {
+        if( to != wit->second.size() )
+        {
+            //std::clog << "auto-center resize END: " << wit->first->title() << " " 
+            //                                        << to.width() << "x" << to.width()<< std::endl;
+            //std::clog << "expected size: " << wit->second.size().width() << "x" 
+            //                               << wit->second.size().height() << std::endl;
+            _autoCenter.erase(wit);
+        }
+    }
+
     ResizeEvent rev(frame, to);
     Application::instance().commitEvent(rev);
 }
@@ -515,34 +644,18 @@ void WorkspaceManager::onProcessResizeEvent(const ResizeEvent& ev)
 
 void WorkspaceManager::onResizeEvent(const ResizeEvent& ev)
 {
+    //std::clog << "WM RESIZE EVENT: " << ev.size().width() << "x" << ev.size().height() << std::endl;
+
     Base::onResizeEvent(ev);
 
     std::vector<Window*>::iterator wit;
-    for(wit = _windowList.begin(); wit != _windowList.end(); ++wit)
+    for(wit = _windowStack.begin(); wit != _windowStack.end(); ++wit)
     {
         Window* window = *wit;
 
         if(window->state() == WindowState::Maximized)
         {
             window->setState(WindowState::Maximized);
-        }
-
-        // TODO: review auto-center
-        if( window->isAutoCenter() && screen() )
-        {
-            //std::clog << "WM CENTER: " << window->title() << std::endl;
-            Pt::Gfx::SizeF windowSize = window->size();
-            //std::clog << "window size: " << windowSize.width() << "x" << windowSize.height() << std::endl;
-
-            Pt::Gfx::SizeF wmSize = ev.size();
-            //std::clog << "screen size: " << wmSize.width() << "x" << wmSize.height() << std::endl;
-
-            double x = (wmSize.width() - windowSize.width()) / 2.0;
-            double y = (wmSize.height() - windowSize.height()) / 2.0;
-            //std::clog << "CENTER: " << x << "," << y << std::endl;
-    
-            //window->setAutoCenter(false);
-            window->move( Pt::Gfx::PointF(x, y) );
         }
     }
 }
@@ -561,7 +674,7 @@ bool WorkspaceManager::processMouseEvent(const MouseEvent& ev)
     WindowFrame* hitFrame = 0;
 
     std::vector<Window*>::const_reverse_iterator rit;
-    for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
+    for(rit = _windowStack.rbegin() ; rit != _windowStack.rend(); ++rit )
     {
         Window* window = *rit;
         WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );
@@ -618,7 +731,7 @@ bool WorkspaceManager::processTouchEvent(const TouchEvent& ev)
     WindowFrame* hitFrame = 0;
 
     std::vector<Window*>::const_reverse_iterator rit;
-    for(rit = _windowList.rbegin() ; rit != _windowList.rend(); ++rit )
+    for(rit = _windowStack.rbegin() ; rit != _windowStack.rend(); ++rit )
     {
         Window* window = *rit;
         WorkspaceFrame* frame = static_cast<WorkspaceFrame*>( window->frame() );

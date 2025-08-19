@@ -85,9 +85,6 @@ void ScreenImpl::setParent(Screen* screen)
         _parent->onShow(*this, true);
     }
 
-    // NOTE: screen not set in child windows because this method is called
-    //       from the Screen constructor
-
     onSetParent(_parent);
 }
 
@@ -154,6 +151,29 @@ void ScreenImpl::setCapture(Widget* capture)
     }
 }
 
+//
+// TODO: onAutoCenter in WindowManager
+//
+void ScreenImpl::onAutoCenter(WindowFrame& w, const Gfx::SizeF* size)
+{
+    if( ! size )
+    {
+        return;
+    }
+    
+    Pt::Gfx::SizeF windowSize = *size;
+    Pt::Gfx::SizeF screenSize = this->size();
+
+    double x = (screenSize.width() - windowSize.width()) / 2.0;
+    double y = (screenSize.height() - windowSize.height()) / 2.0;
+    
+    //std::clog << "auto-center BEGIN: " << w.window().title() << " " << x << "," << y << std::endl;
+    //std::clog << "window size: " << windowSize.width() << "x" << windowSize.height() << std::endl;
+    //std::clog << "screen size: " << screenSize.width() << "x" << screenSize.height() << std::endl;
+
+    w.window().move( Pt::Gfx::PointF(x, y) );
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Widget
 ///////////////////////////////////////////////////////////////////////
@@ -217,9 +237,6 @@ WindowFrame* ScreenImpl::onAttach(Window& w)
 
 void ScreenImpl::onDetach(WindowFrame& frame)
 {
-    // TODO: detach from screen in WindowImpl?
-    static_cast<WindowImpl*>(&frame)->setScreen(0);
-    
     frame.setNextResponder(0);
 
     Window& w = frame.window();
@@ -232,18 +249,17 @@ void ScreenImpl::onDetach(WindowFrame& frame)
 
 void ScreenImpl::onInit(WindowFrame& frame)
 {
-    // TODO: attach to screen in WindowImpl?
-    static_cast<WindowImpl*>(&frame)->setScreen(_parent);
-
     double windowScaling = scaleFactor() / _screenScaling;
-
     RescaleEvent ev( frame, windowScaling );
     frame.processEvent(ev);
+
+    Base::onInit(frame); // window::onConnect
 }
 
 
-void ScreenImpl::onRelease(WindowFrame& w)
+void ScreenImpl::onRelease(WindowFrame& frame)
 {
+    Base::onRelease(frame);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -303,6 +319,9 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::RectF winRect( winPos, screenRect.size() );
 
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );
+
+        if(winRect.size().width() < 0.1 || winRect.height() < 0.1)
+            continue;
 
         // send (native) paint event to window
         winRect = Gfx::RectF( winRect.topLeft() * window->scaleFactor(), 

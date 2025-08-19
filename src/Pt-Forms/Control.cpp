@@ -67,28 +67,6 @@ Control::~Control()
 }
 
 
-void Control::setParent(View& parent)
-{
-    if(_parent == &parent)
-        return;
-
-    unparent();
-
-    parent.onAttach(*this);
-    _parent = &parent;
-
-    _parent->onInit(*this);
-    _parent->onEnableRequest(*this, _enabled);
-    _parent->onShowRequest(*this, _show);
-    _parent->onMoveRequest(*this, _requestedPosition);
-    _parent->onResizeRequest(*this, _requestedSize);
-
-    invalidate();
-
-    onSetParent(_parent);
-}
-
-
 void Control::unparent()
 {
     if( ! _parent )
@@ -102,15 +80,55 @@ void Control::unparent()
 }
 
 
-void Control::onSetScreen(Screen* screen)
+void Control::setParent(View& parent)
 {
-    Base::onSetScreen(screen);
+    if(_parent == &parent)
+        return;
+
+    unparent();
+
+    parent.onAttach(*this);
+    _parent = &parent;
+    
+    onSetParent(_parent);
+
+    _parent->onInit(*this);
+}
+
+
+void Control::onConnect(Screen& screen)
+{
+    Base::onConnect(screen);
+
+    onInvalidate();
+
+    _parent->onEnableRequest(*this, _enabled);
+    _parent->onShowRequest(*this, _show);
+
+    // move and resize when layouted
+    //_parent->onMoveRequest(*this, _requestedPosition);
+    //_parent->onResizeRequest(*this, _requestedSize);
+
+    //invalidate();
 
     std::vector<Control*>::iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
     {
         Control* control = *it;
-        control->setScreen(screen);
+        control->onConnect(screen);
+    }
+}
+
+
+void Control::onDisconnect()
+{
+    Base::onDisconnect();
+
+    std::vector<Control*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Control* control = *it;
+        control->onDisconnect();
     }
 }
 
@@ -145,22 +163,23 @@ void Control::onInit(Control& control)
     //Gfx::PaintSurface* surface = _surface.surface();
     //Gfx::PointF surfacePos = _surface.position() + control.position();
     //control.setSurface(surface, surfacePos);
-    
+
     Screen* screen = this->screen();
-    if( screen )
-    {
-        control.setScreen(screen);
-    }
+    if(screen)
+        control.onConnect(*screen);
 
     control.setNextResponder(this);
     control.setForm(_form);
 
     double scaling = scaleFactor();
     
-    RescaleEvent ev(control, scaling);
-    control.processEvent(ev);
-    //Application::instance().loop().commitEvent(ev);
-
+    if( screen )
+    {
+        RescaleEvent ev(control, scaling);
+        control.processEvent(ev);
+        //Application::instance().loop().commitEvent(ev);
+    }
+    
     relayout();
 }
 
@@ -171,9 +190,11 @@ void Control::onRelease(Control& control)
 
     control.setForm(0);
     //control.setSurface( 0, control.position() );
-    
-    control.setScreen(0);
     control.setNextResponder(0);
+
+    Screen* screen = this->screen();
+    if(screen)
+        control.onDisconnect();
 
     relayout();
 }
@@ -760,7 +781,6 @@ void Control::onProcessLayoutEvent(const LayoutEvent& ev)
 }
 
 
-// TODO: onLayoutEvent
 void Control::onLayoutEvent(const LayoutEvent& ev)
 {
     onLayout( ev.rect() );
@@ -772,9 +792,6 @@ void Control::onLayoutEvent(const LayoutEvent& ev)
 
 void Control::onLayout(const Gfx::RectF& rect)
 {
-    //
-    // TODO: no need to pass rect
-    //
 }
 
 
@@ -1002,10 +1019,14 @@ void Control::onProcessEnableEvent(const EnableEvent& ev)
 
 void Control::onEnableEvent(const EnableEvent& ev)
 {
+    bool enabled = isEnabled();
+
     Base::onEnableEvent(ev);
 
-    // TODO: move to derived classes
-    invalidate();
+    // TODO: move invalidate to derived classes
+
+    if( ev.enabled() != enabled )
+        invalidate();
 }
 
 

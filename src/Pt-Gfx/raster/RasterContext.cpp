@@ -86,6 +86,24 @@ void RasterContext::onSetClip(const Gfx::RectF* clip)
         _clip.clear();
 }
 
+
+const std::vector<Polygon>& RasterContext::flatPath()
+{
+    if( _flatPath.empty() )
+    {
+        _path.toPolygons(_flatPath);
+    }
+
+    return _flatPath;
+}
+
+
+void RasterContext::onSetPath(const Gfx::Path& path)
+{
+    _flatPath.clear();
+    _path = path;
+}
+
 } // namespace
 
 } // namespace

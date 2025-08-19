@@ -208,6 +208,8 @@ void ApplicationImpl::onProcessXEvent(XEvent& ev)
     if( ! w )
         return;
 
+    //std::clog << "onProcessXEvent: " << ev.xany.type << std::endl;
+
     switch( ev.xany.type )
     {
         case ClientMessage:

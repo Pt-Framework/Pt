@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Forms/WindowManager.h>
+#include <Pt/Forms/WindowFrame.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/ResizeEvent.h>
@@ -46,9 +47,46 @@ WindowManager::~WindowManager()
 }
 
 
-void WindowManager::onSetScreen(Screen* screen)
+void WindowManager::relayout()
 {
-    Base::onSetScreen(screen);
+    onRequestRelayout();
+}
+
+
+void WindowManager::onRequestRelayout()
+{
+}
+
+
+void WindowManager::onConnect(Screen& screen)
+{
+    Base::onConnect(screen);
+}
+
+
+void WindowManager::onDisconnect()
+{
+    Base::onDisconnect();
+}
+
+
+void WindowManager::onInit(WindowFrame& w)
+{
+    Screen* screen = this->screen();
+    if(screen)
+    {
+        w.onConnect(*screen);
+    }
+}
+
+
+void WindowManager::onRelease(WindowFrame& w)
+{
+    Screen* screen = this->screen();
+    if(screen)
+    {
+        w.onDisconnect();
+    }
 }
 
 } // namespace

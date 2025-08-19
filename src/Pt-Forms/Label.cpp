@@ -43,11 +43,18 @@ Label::Label()
 , _hasRenderer(false)
 , _styleInvalid(true)
 {
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 }
 
 
 Label::~Label()
 {
+}
+
+
+void Label::onConnect(Screen& screen)
+{
+    Base::onConnect(screen);
 }
 
 
@@ -77,7 +84,7 @@ void Label::setText(const Pt::String& text)
     _icon.clear();
     _iconSize.set(0, 0);
     
-    _picture.set( Pt::Gfx::Image() );
+    _pixmap.set( Pt::Gfx::Image() );
 
     relayout();
 }
@@ -87,9 +94,27 @@ void Label::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
 {
     _icon = icon;
     _iconSize = iconSize;
-    
     _iconInvalid = true;
+
+    // ICON-UPDATE
     invalidate();
+    ////relayout();
+}
+
+
+Pixmap& Label::getIconPixmap()
+{
+    // ICON-UPDATE
+    //if(_iconInvalid)
+    //{
+    //    Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
+    //    const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
+    //    _pixmap.set(iconImage);
+
+    //    _iconInvalid = false;
+    //}
+
+    return _pixmap;
 }
 
 
@@ -227,7 +252,7 @@ Adjustment Label::adjustment() const
 
 Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 {
-    //std::clog << _text.narrow() << " measure " << this << std::endl;
+    //std::clog << "label measure " << _text.narrow() << std::endl;
 
     double w = 0;
     double h = 0;
@@ -257,8 +282,10 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
         h = scaling.align(h);
     }
     else
-    {
-        Gfx::SizeF pictureSize = scaling.toLogical( _picture.size() );
+    {       
+        Pixmap& picture = getIconPixmap();
+
+        Gfx::SizeF pictureSize = scaling.toLogical( picture.size() );
 
         w = static_cast<double>( pictureSize.width() );
         h = static_cast<double>( pictureSize.height() );
@@ -324,7 +351,8 @@ void Label::layoutText()
 
 void Label::layoutImage()
 {
-    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
+    Pixmap& picture = getIconPixmap();
+    Gfx::SizeF pictureSize = scaling().toLogical( picture.size() );
 
     switch( _alignment )
     {
@@ -436,7 +464,9 @@ void Label::onRescaleEvent(const RescaleEvent& ev)
     if( ! _icon.empty() )
     {
         _iconInvalid = true;
-        invalidate();
+        relayout();
+        
+        ////invalidate();
     }
 }
 
@@ -484,13 +514,14 @@ void Label::onInvalidate()
         needsRelayout = true;
     }
 
+    // ICON-UPDATE
     if(_iconInvalid)
     {
         _iconInvalid = false;
 
         Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-        _picture.set(iconImage);
+        _pixmap.set(iconImage);
 
         needsRelayout = true;
     }
@@ -545,9 +576,23 @@ void Label::onPaint(Gfx::PaintSurface& surface,
     else
     {
         painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        painter.drawLayer(_iconPos, _picture);
+        Pixmap& picture = getIconPixmap();
+        painter.drawLayer(_iconPos, picture);
         painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     }
+
+    //if(pen)
+    //{
+    //    Gfx::Path path;
+    //    path.moveTo( Gfx::PointF(0, 0) );
+    //    path.lineTo( Gfx::PointF(size().width(), size().height() - 1) );
+    //    path.lineTo( Gfx::PointF(0, size().height() - 1) );
+    //    path.lineTo( Gfx::PointF(0, 0) );
+    //    path.close();
+    //    painter.setPath(path);
+    //    painter.fillPath(path);
+    //    painter.drawPath(path);
+    //}
 }
 
 } // namespace

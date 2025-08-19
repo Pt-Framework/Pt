@@ -227,9 +227,15 @@ Gfx::PointF View::onFromControl(const Control& control,
 }
 
 
-void View::onSetScreen(Screen* screen)
+void View::onConnect(Screen& screen)
 {
-    Base::onSetScreen(screen);
+    Base::onConnect(screen);
+}
+
+
+void View::onDisconnect()
+{
+    Base::onDisconnect();
 }
 
 

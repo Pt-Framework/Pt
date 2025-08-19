@@ -69,53 +69,6 @@ Window::~Window()
 }
 
 
-void Window::setParent(WindowManager& wm)
-{
-    if(_wm == &wm)
-        return;
-
-    unparent();
-
-    _isClosed = false;
-
-    _wm = &wm;
-    _frame = wm.onAttach(*this);
-    wm.onInit(*_frame);
-
-    _frame->onInit(*this);
-
-    _frame->onSetSizeLimits(*this, minimumSize(), maximumSize());
-    _frame->onSetState(*this, _state);
-    _frame->onSetTitle(*this, _title);
-    _frame->onSetIcon(*this, _icon);
-    _frame->onSetAbove(*this, _isAbove);
-
-    if(_state == WindowState::Normal)
-    {
-        // TODO: review auto-center
-        if(_autoCenter)
-        {
-            setAutoCenter();
-        }
-        else
-        {
-            _frame->onMove(*this, _requestedPosition);
-        }
-
-        if( ! isAutoSize() )
-            _frame->onResize(*this, _requestedSize);
-    }
-    
-    // TODO: do not activate popups
-    _frame->onActivate(*this, _isActive);
-
-    _frame->onEnable(*this, _enabled);
-    _frame->onShow(*this, _show);
-
-    onSetParent(_frame);
-}
-
-
 void Window::unparent()
 {
     if( ! _frame )
@@ -134,11 +87,76 @@ void Window::unparent()
 }
 
 
-void Window::onSetScreen(Screen* screen)
+void Window::setParent(WindowManager& wm)
 {
-    //std::clog << "SET SCREEN: " << title() << " " << screen << std::endl;
+    if(_wm == &wm)
+        return;
 
-    Base::onSetScreen(screen);
+    unparent();
+
+    _isClosed = false;
+
+    _frame = wm.onAttach(*this);
+    _wm = &wm;
+
+    onSetParent(_frame);
+    
+    _frame->onInit(*this);
+    _wm->onInit(*_frame);
+}
+
+
+void Window::onConnect(Screen& screen)
+{
+    //std::clog << "\nCONNECT: " << title() << std::endl;
+
+    Base::onConnect(screen);
+
+    _frame->onSetSizeLimits(*this, minimumSize(), maximumSize());
+    _frame->onSetState(*this, _state);
+    _frame->onSetTitle(*this, _title);
+    _frame->onSetIcon(*this, _icon);
+    _frame->onSetAbove(*this, _isAbove);
+
+    if(_state == WindowState::Normal)
+    {
+        if(_autoSize)
+        {
+            _lastAutoSize = measure(_autoSizePolicy);
+
+            //std::clog << "\nauto-size CONNECT: " << title() << " " 
+            //                                     << _lastAutoSize.width() << "x" 
+            //                                     << _lastAutoSize.height() << std::endl;
+            resize(_lastAutoSize);
+        }
+        else
+        {
+            _requestedSize = _frame->onResize(*this, _requestedSize);
+        }
+
+        if(_autoCenter)
+        {
+            _autoCenter = false;
+            _frame->onAutoCenter(*this, &_requestedSize);
+        }
+        else
+        {
+            _frame->onMove(*this, _requestedPosition);
+        }
+    }
+    
+    // TODO: do not activate popups
+    _frame->onActivate(*this, _isActive);
+    _frame->onEnable(*this, _enabled);
+    _frame->onShow(*this, _show);
+}
+
+
+void Window::onDisconnect()
+{
+    //std::clog << "DISCONNECT: " << title() << std::endl;
+
+    Base::onDisconnect();
 }
 
 
@@ -241,115 +259,95 @@ void Window::setBackground(const Gfx::Brush& b)
 // layouting
 ///////////////////////////////////////////////////////////////////////
 
-bool Window::isAutoCenter() const
+void Window::autoCenter()
 {
-    return _autoCenter;
-}
-
-
-void Window::setAutoCenter(bool isCenter)
-{    
-    //std::clog << "WINDOW CENTER: " << title() << std::endl;
-
-    if( ! isCenter )
-        _autoCenter = false;
-
-    if( isCenter && _wm && screen() )
+    if( ! isConnected() )
     {
-        Pt::Gfx::SizeF size = _requestedSize;
-        //std::clog << "window size: " << size.width() << "x" << size.height() << std::endl;
-
-        Pt::Gfx::SizeF wmSize = _wm->size();
-        //std::clog << "screen size: " << wmSize.width() << "x" << wmSize.height() << std::endl;
-
-        double x = (wmSize.width() - size.width()) / 2.0;
-        double y = (wmSize.height() - size.height()) / 2.0;
-        //std::clog << "CENTER: " << x << "," << y << std::endl;
-    
-        move( Pt::Gfx::PointF(x, y) );
+        _autoCenter = true;
         return;
     }
 
-    // NOTE: possibly call frame->onAutoCenter -> WindowManager-onAutoCenter
-
-    // defer auto-center
-    _autoCenter = isCenter;
+    // TODO: onAutoCenter only needs a bool flag for enabled/disabled
+    if(_frame)
+        _frame->onAutoCenter(*this, &_requestedSize);  
 }
 
 
-Gfx::SizeF Window::resizeToFit(const SizePolicy& policy)
-{
-    _sizePolicy = policy;
-
-    Control* mainWidget = content();
-    if( ! mainWidget )
-        return Gfx::SizeF();
-
-    if( ! _frame )
-    {
-        Screen& screen = Application::instance().screen();
-        screen.addWindow(*this);
-    }
-
-    Gfx::SizeF preferredSize = mainWidget->measure(_sizePolicy);
-    resize(preferredSize);
-    return preferredSize;
-}
-
-
-bool Window::isAutoSize() const
-{
-    return _autoSize;
-}
-
-
-Gfx::SizeF Window::setAutoSize(const SizePolicy& policy)
+void Window::autoSize(const SizePolicy& policy)
 {   
-    _sizePolicy = policy;
+    _autoSizePolicy = policy;
     _autoSize = true;
 
-    if( ! _frame )
+    if( ! isConnected() )
     {
-        Screen& screen = Application::instance().screen();
-        screen.addWindow(*this);
+        return;
     }
 
-    relayout();
-
-    Control* mainWidget = content();
-    return mainWidget ? mainWidget->measure(_sizePolicy)
-                      : _sizePolicy.size();
+    _lastAutoSize = measure(_autoSizePolicy);
+    
+    //std::clog << "\nauto-size BEGIN: " << title() << " " 
+    //                                   << _lastAutoSize.width() << "x" 
+    //                                   << _lastAutoSize.height() << std::endl;
+    resize(_lastAutoSize);
 }
 
 
-Gfx::SizeF Window::onMeasure()
-{
-    if(_autoSize)
-    {
-        Control* mainWidget = content();
-        return mainWidget ? mainWidget->measure(_sizePolicy)
-                          : _sizePolicy.size();
-    }
-
-    return Form::onMeasure();
+void Window::autoSize()
+{   
+    SizePolicy policy(SizePolicy::Preferred,
+                      SizePolicy::Preferred);
+    autoSize(policy);
 }
 
 
-void Window::onLayoutEvent(const LayoutEvent& ev)
+Gfx::SizeF Window::onProcessMeasure()
 {
-    //std::clog << "onLayoutEvent: " << title() << std::endl;
-
     if(_autoSize)
     {
-        Control* mainWidget = content();
-        if(mainWidget)
+        _lastAutoSize = measure(_autoSizePolicy);
+
+        //std::clog << "measure auto-size: " << title() << " " 
+        //          << _lastAutoSize.width() << "x"  << _lastAutoSize.height() << std::endl;
+    }
+
+    return Base::onProcessMeasure();
+}
+
+
+void Window::onProcessLayout(const Gfx::RectF& rect)
+{
+    if(_autoSize)
+    {
+        //std::clog << "layout auto-size: " << title() << " " 
+        //          << _lastAutoSize.width() << "x" << _lastAutoSize.height() << std::endl;
+        
+        if( _lastAutoSize != size() )
         {
-            Gfx::SizeF preferredSize = mainWidget->preferredSize();
-            resize( preferredSize);
+            resize(_lastAutoSize);
         }
     }
 
-    Base::onLayoutEvent(ev);
+    Base::onProcessLayout(rect);
+}
+
+
+Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
+{
+    Gfx::SizeF size = Base::onMeasure(policy);
+    
+    //std::clog << "measure: " << title() << " " 
+    //          << size.width() << "x" << size.height() << std::endl;
+    
+    return size;
+}
+
+
+void Window::onLayout(const Gfx::RectF& rect)
+{
+    //std::clog << "layout: " << title() << " " 
+    //          << rect.width() << "x" << rect.height() << std::endl;
+
+    Base::onLayout(rect);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -470,43 +468,23 @@ void Window::onRescaleEvent(const RescaleEvent& ev)
 
 void Window::onRescale(double scaling)
 {   
-    //std::clog << "onRescale: " << title() << std::endl;
+    //std::clog << "WINDOW onRescale: " << title() << " " << scaling << std::endl;
 
     Base::onRescale(scaling);
 
     //
     // realign geometry
     //
-    bool isInitialized = parent() != 0;
-    if(isInitialized)
+    if(_state == WindowState::Normal)
     {
-        if(_state == WindowState::Normal)
-        {
+        // TODO: handle _autoSize and _autoCenter
+
+        if( ! _autoCenter )
             move(_requestedPosition);
+            
+        if( ! _autoSize )
             resize(_requestedSize);
-        }
     }
-
-    //if(_wm && _autoCenter)
-    //{
-    //    bool hasScreen = isDescendantOf( Application::instance().screen() );
-    //    if( ! hasScreen )
-    //      return;
-
-    //    // TODO: defer auto-center until onSetScreen
-    //    
-    //    Pt::Gfx::SizeF size = _requestedSize;
-    //    std::clog << "window size: " << size.width() << "x" << size.height() << std::endl;
-
-    //    Pt::Gfx::SizeF wmSize = _wm->size();
-    //    std::clog << "screen size: " << wmSize.width() << "x" << wmSize.height() << std::endl;
-
-    //    double x = (wmSize.width() - size.width()) / 2.0;
-    //    double y = (wmSize.height() - size.height()) / 2.0;
-    //    std::clog << "CENTER: " << x << "," << y << std::endl;
-    //
-    //    move( Pt::Gfx::PointF(x, y) );
-    //}
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -515,11 +493,17 @@ void Window::onRescale(double scaling)
 
 void Window::onRequestMove(const Gfx::PointF& pos)
 {
+    //std::clog << "MOVE: " << title() << " " << pos.x() << ", " << pos.y() << std::endl;
+
+    // undo auto-center if window is not connected, but manually moved 
+    // after being set to auto-center 
+    _autoCenter = false;
+
     _requestedPosition = pos;
 
     setState(WindowState::Normal);
 
-    if(_frame)
+    if( _frame && isConnected() )
     {
         _frame->onMove(*this, _requestedPosition);
     }
@@ -554,16 +538,41 @@ void Window::onSetSizeLimits(const Gfx::SizeF& minSize,
 }
 
 
+bool Window::isAutoSizeActive(const Gfx::SizeF& s)
+{
+    //Gfx::SizeF alignedSize = scaling().align(_lastAutoSize);
+
+    if( std::abs(_lastAutoSize.width() - s.width()) > 1.0 || 
+        std::abs(_lastAutoSize.height() - s.height()) > 1.0)
+    {
+        //std::clog << "auto-size END: " << name() << " " 
+        //          << s.width() << "x" << s.height() << std::endl;
+
+        return false;
+    }
+
+    return true;
+}
+
+
 void Window::onRequestResize(const Gfx::SizeF& s)
 {
+    //std::clog << "\nRESIZE REQUESTED: " << title() << " " 
+    //          << s.width() << "x" << s.height() << std::endl;
+
     _requestedSize = s;
 
     setState(WindowState::Normal);
     
-    if(_frame)
+    if( _frame && isConnected() )
     {
-        _frame->onResize(*this, _requestedSize);
+        _requestedSize = _frame->onResize(*this, _requestedSize);
+
+        if(_autoSize)
+            _autoSize = isAutoSizeActive(_requestedSize);
     }
+
+    Base::onRequestResize(_requestedSize);
 }
 
 
@@ -575,9 +584,18 @@ void Window::onProcessResizeEvent(const ResizeEvent& ev)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {
-    //std::clog << "onResizeEvent: " << title() << " " 
+    //std::clog << "\nRESIZE: " << title() << " " 
     //          << ev.size().width() << "x" << ev.size().height() << std::endl;
+    
+    if(_autoSize)
+    {
+        if(_autoSize)
+            _autoSize = isAutoSizeActive( ev.size() );
+    }
+
     Base::onResizeEvent(ev);
+
+    _requestedSize = ev.size();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -592,11 +610,11 @@ void Window::onRequestShow(bool b)
     {
         Screen& screen = Application::instance().screen();
         screen.addWindow(*this);
+        return;
     }
-    
-    invalidate();
 
-    _frame->onShow(*this, b);
+    if(_frame)
+        _frame->onShow(*this, b);
 }
 
 
@@ -609,6 +627,7 @@ void Window::onProcessShowEvent(const ShowEvent& ev)
 void Window::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
+    invalidate();
 }
 
 
@@ -745,7 +764,7 @@ void Window::setState(const WindowState& s)
 {
     _state = s;
 
-    if(_frame)
+    if( _frame && isConnected() )
         _frame->onSetState(*this, _state);
 }
 
@@ -778,6 +797,12 @@ void Window::close()
 }
 
 
+Signal<>& Window::closed()
+{
+    return _closed;
+}
+
+
 void Window::onProcessCloseEvent(const CloseEvent& ev)
 {
     onCloseEvent(ev);
@@ -793,6 +818,7 @@ void Window::onCloseEvent(const CloseEvent& ev)
     unparent();
     
     _isClosed = true;
+    _closed.send();
 }
 
 ///////////////////////////////////////////////////////////////////////

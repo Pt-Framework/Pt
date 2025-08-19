@@ -2931,6 +2931,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\TextMetrics.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\CanvasLayout.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">
@@ -5620,6 +5623,9 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\TextMetrics.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\CanvasLayout.cpp">
+      <Filter>Pt-Forms</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

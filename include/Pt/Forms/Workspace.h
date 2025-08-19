@@ -71,9 +71,14 @@ class PT_FORMS_API Workspace : public Control
     // Widget
     //
     protected:
-        virtual void onSetScreen(Screen* screen);
+        virtual void onConnect(Screen& screen);
+
+        virtual void onDisconnect();
       
+        
         virtual Widget* onHitTest(const Gfx::PointF& p);
+
+        virtual void onRequestResize(const Gfx::SizeF& s);
 
     //
     // Control
@@ -90,6 +95,8 @@ class PT_FORMS_API Workspace : public Control
         virtual void onPaint(Gfx::PaintSurface&, const Gfx::RectF&);
 
     protected:
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
+
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
@@ -115,6 +122,8 @@ class PT_FORMS_API Workspace : public Control
     // WindowManager
     //
     protected:
+        void onRelayoutRequest(WorkspaceManager& wm);
+
         virtual void onRepaint(WindowManager& wm, const Gfx::RectF& rect);
 
         virtual void onActivate(WindowManager& wm, bool active);
@@ -123,6 +132,7 @@ class PT_FORMS_API Workspace : public Control
         WorkspaceManager  _wm;
         Control*          _content;
         Widget*           _pointer;
+        Gfx::SizeF        _requestedSize;
 };
 
 } // namespace

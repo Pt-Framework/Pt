@@ -464,10 +464,13 @@ void WorkspaceFrame::onInit(Window& w)
 
     w.setNextResponder(this);
 
-    double scaling = scaleFactor();
+    if( screen() )
+    {
+        double scaling = scaleFactor();
     
-    RescaleEvent ev(w, scaling);
-    w.processEvent(ev);
+        RescaleEvent ev(w, scaling);
+        w.processEvent(ev);
+    }
 }
 
 
@@ -478,9 +481,15 @@ void WorkspaceFrame::onRelease(Window& w)
 }
 
 
-void WorkspaceFrame::onSetScreen(Screen* screen)
+void WorkspaceFrame::onConnect(Screen& screen)
 {
-    Base::onSetScreen(screen);
+    Base::onConnect(screen);
+}
+
+
+void WorkspaceFrame::onDisconnect()
+{
+    Base::onDisconnect();
 }
 
 
@@ -562,6 +571,25 @@ void WorkspaceFrame::onSetSizeLimits(Window& w,
                                        const Gfx::SizeF& maxSize)
 {
     _wm->onSetSizeLimits(*this, minSize, maxSize);
+}
+
+
+void WorkspaceFrame::onAutoCenter(Window& w, const Gfx::SizeF* size)
+{
+    if( ! size )
+    {
+        _wm->onAutoCenter(*this, size);
+        return;
+    }
+
+    Gfx::SizeF alignedSize = scaling().align(*size);
+
+    Gfx::SizeF frameSize = alignedSize;
+    frameSize.addWidth(2 * _borderWidth);
+    frameSize.addHeight(2 * _borderWidth);
+    frameSize.addHeight(_titleHeight);
+
+    _wm->onAutoCenter(*this, &frameSize);
 }
 
 
@@ -915,7 +943,7 @@ void WorkspaceFrame::onRequestResize(const Gfx::SizeF& size)
 }
 
 
-void WorkspaceFrame::onResize(Window& w, const Gfx::SizeF& s)
+Gfx::SizeF WorkspaceFrame::onResize(Window& w, const Gfx::SizeF& s)
 {
     Gfx::SizeF alignedSize = scaling().align(s);
 
@@ -943,6 +971,8 @@ void WorkspaceFrame::onResize(Window& w, const Gfx::SizeF& s)
     _frameBounds.setSize(frameSize);
 
     _wm->onResize(*this, frameSize);
+
+    return alignedSize;
 }
 
 

@@ -49,6 +49,7 @@ Screen::Screen(ApplicationImpl& app)
 , _updates(0)
 , _pointer(0)
 {
+    _impl->onConnect(*this);
     _impl->setParent(this);
     _impl->setNextResponder(this);
 }

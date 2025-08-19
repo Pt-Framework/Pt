@@ -91,6 +91,14 @@ ScreenImpl::~ScreenImpl()
 
 void ScreenImpl::setParent(Screen* screen)
 {
+    //
+    // TODO: Should we call onConnect after the _parent ist set and before
+    //       onshow and onResize are performed?
+    //       1. establish pointer to parent
+    //       2. connect to screen
+    //       3. call onShow/onResize on screen
+    //
+    
     _parent = screen;
 
     if(_parent)

@@ -188,6 +188,18 @@ void Canvas::fillPath(const Gfx::Path& path)
 }
 
 
+void Canvas::drawPath()
+{
+    onDrawPath();
+}
+
+
+void Canvas::fillPath()
+{
+    onFillPath();
+}
+
+
 TextMetrics Canvas::textMetrics(const Pt::String& text) const
 {
     return onGetTextMetrics(text);

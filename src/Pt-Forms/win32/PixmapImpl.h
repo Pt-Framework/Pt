@@ -184,6 +184,8 @@ class PixmapCanvas : public Gfx::Canvas
 
         virtual void onClipChanged() override;
 
+        virtual void onPathChanged() override;
+
     protected:
         virtual void onDrawLine(const Gfx::PointF& from, 
                                 const Gfx::PointF& to) override;
@@ -218,6 +220,10 @@ class PixmapCanvas : public Gfx::Canvas
 
         virtual void onFillPath(const Gfx::Path& path, float smoothness) override;
 
+        virtual void onDrawPath() override;
+
+        virtual void onFillPath() override;
+
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
@@ -239,7 +245,9 @@ class PixmapCanvas : public Gfx::Canvas
                           const Gfx::RectF* rect = 0);
 
     private:
-        void setPath(const Gfx::Path& path);
+        void buildPath(const Gfx::Path& path);
+
+       POINT toLocal(double x, double y);
 
     private:
         Gfx::SizeF     _physicalSize;
@@ -259,6 +267,8 @@ class PixmapCanvas : public Gfx::Canvas
         PaintContext*             _paintContext;
 
         Gfx::Color                _penColor;
+
+        bool                      _hasPath;
 
         bool                      _gradientBrush;
         Gfx::Brush::GradientStyle _gradient;

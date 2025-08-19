@@ -52,6 +52,8 @@ class ScreenImpl : public Form
 {
     typedef Form Base;
 
+    friend class Screen;
+
   public:
     // take typedefs from FramBuffer
     typedef Gfx::Image::pos_t      pos_t;

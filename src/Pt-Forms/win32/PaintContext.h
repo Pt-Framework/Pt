@@ -73,6 +73,8 @@ class PaintContext : public Gfx::PaintContext
 
         HRGN clipRect() const;
 
+        const Gfx::Path& path() const;
+
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
 
@@ -83,6 +85,8 @@ class PaintContext : public Gfx::PaintContext
         virtual void onSetFont(const Gfx::Font& font) override;
 
         virtual void onSetClip(const Gfx::RectF* clip) override;
+
+        virtual void onSetPath(const Gfx::Path& path) override;
 
     private:
         Gfx::Scaling              _scaling;
@@ -96,6 +100,7 @@ class PaintContext : public Gfx::PaintContext
         Gfx::Color                _gradientStop;
         HRGN                      _clipRect;
         HFONT                     _font;
+        Gfx::Path                 _path;
 };
 
 #endif

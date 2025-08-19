@@ -36,6 +36,9 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 
+#include <vector>
+#include <map>
+
 namespace Pt {
 
 namespace Forms {
@@ -102,10 +105,23 @@ class WorkspaceManager : public WindowManager
         {
             return _inactiveTextColor;
         }
+    
+    //
+    // layouting
+    //
+    protected:      
+        virtual void onProcessLayoutEvent(const LayoutEvent& ev);
+
+        virtual void onLayoutEvent(const LayoutEvent& ev);
+
+        virtual void onLayout(const Gfx::RectF& rect);
 
     //
     // WindowManager
     //
+    protected:
+        virtual void onRequestRelayout();
+
     protected:
         virtual WindowFrame* onAttach(Window& w);
 
@@ -128,6 +144,8 @@ class WorkspaceManager : public WindowManager
                                      const Gfx::SizeF& minSize, 
                                      const Gfx::SizeF& maxSize);
 
+        virtual void onAutoCenter(WindowFrame& w, const Gfx::SizeF* size);
+
         virtual void onShow(WorkspaceFrame& w, bool visible);
 
         virtual void onActivate(WorkspaceFrame& w, bool active); 
@@ -144,8 +162,11 @@ class WorkspaceManager : public WindowManager
     // Widget
     //
     protected:
-        virtual void onSetScreen(Screen* screen);
+        virtual void onConnect(Screen& screen);
 
+        virtual void onDisconnect();
+
+        
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
@@ -159,13 +180,9 @@ class WorkspaceManager : public WindowManager
         
         virtual void onRequestCapture(bool capture);
 
-        
+    protected:
         virtual void onProcessEvent(const Pt::Event& ev);
 
-    //
-    // Implementation
-    //
-    protected:
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
         virtual void onProcessPaintEvent(const PaintEvent& ev);
@@ -189,12 +206,14 @@ class WorkspaceManager : public WindowManager
         virtual void onProcessKeyEvent(const KeyEvent& ev);
 
     private:
-        Workspace*                       _parent;
+        Workspace*                     _parent;
 
-        std::vector<Window*>         _windowList;
+        std::vector<Window*>           _windows;
+        std::vector<Window*>           _windowStack;
 
-        Window*                      _activeWindow;
-        Window*                      _topMostWindow;
+        Window*                        _activeWindow;
+        Window*                        _topMostWindow;
+        std::map<Window*, Gfx::RectF>  _autoCenter;
 
         double                       _borderWidth;
         double                       _titleHeight;

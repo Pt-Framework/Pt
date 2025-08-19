@@ -72,6 +72,8 @@ class RasterContext : public PaintContext
             return _hasClip ? &_clip : 0;
         }
 
+        const std::vector<Polygon>& flatPath();
+
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
 
@@ -82,14 +84,18 @@ class RasterContext : public PaintContext
         virtual void onSetFont(const Gfx::Font& font) override;
 
         virtual void onSetClip(const Gfx::RectF* clip) override;
+
+        virtual void onSetPath(const Gfx::Path& path) override;
    
     private:
-        CompositionMode _compositionMode;
-        Pen             _pen;
-        Brush           _brush;
-        Font            _font;
-        RectF           _clip;
-        bool            _hasClip;
+        CompositionMode      _compositionMode;
+        Pen                  _pen;
+        Brush                _brush;
+        Font                 _font;
+        RectF                _clip;
+        bool                 _hasClip;
+        Gfx::Path            _path;
+        std::vector<Polygon> _flatPath;
 };
 
 } //namespace

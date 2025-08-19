@@ -85,6 +85,14 @@ const PointF& PaintContext::origin() const
 }
 
 
+Gfx::PointF PaintContext::toLocal(double x, double y)
+{
+    Gfx::PointF p = origin() + Gfx::PointF(x, y);
+    p = scaling().toPhysical(p);
+    return p;
+}
+
+
 const RectF& PaintContext::region() const
 {
     return _region;
@@ -101,6 +109,7 @@ const Scaling& PaintContext::scaling() const
 {
     return _scaling;
 }
+
 
 
 void PaintContext::beginPaint()
@@ -237,6 +246,17 @@ void PaintContext::resetClip()
 }
 
 
+void PaintContext::setPath(const Path& path)
+{
+    onSetPath(path);
+
+    if(_active)
+    {
+        _active->onPathChanged();
+    }
+}
+
+
 void PaintContext::drawLine(const PointF& from, const PointF& to)
 {   
     if( ! _active )
@@ -330,6 +350,19 @@ void PaintContext::fillPath(const Path& path)
 {
     if(_active)
         _active->fillPath(path);
+}
+
+
+void PaintContext::drawPath()
+{
+    if(_active)
+        _active->drawPath();
+}
+
+void PaintContext::fillPath()
+{
+    if(_active)
+        _active->fillPath();
 }
 
 

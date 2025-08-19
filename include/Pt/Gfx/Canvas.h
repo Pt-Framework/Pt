@@ -123,6 +123,10 @@ class PT_GFX_API Canvas : public CanvasBase
 
         void fillPath(const Path& path);
 
+        void drawPath();
+
+        void fillPath();
+
     protected:
         TextMetrics textMetrics(const Pt::String& text) const;
 
@@ -148,6 +152,8 @@ class PT_GFX_API Canvas : public CanvasBase
         virtual void onFontChanged() = 0;
 
         virtual void onClipChanged() = 0;
+
+        virtual void onPathChanged() = 0;
 
     protected:
         virtual void onDrawLine(const PointF& from, const PointF& to) = 0;
@@ -178,6 +184,10 @@ class PT_GFX_API Canvas : public CanvasBase
         virtual void onDrawPath(const Gfx::Path& path, float smoothness) = 0;
 
         virtual void onFillPath(const Gfx::Path& path, float smoothness) = 0;
+
+        virtual void onDrawPath() = 0;
+
+        virtual void onFillPath() = 0;
 
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const = 0;

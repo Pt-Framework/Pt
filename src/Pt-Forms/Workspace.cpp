@@ -137,11 +137,19 @@ void Workspace::onRemoveControl(Control& control)
 // Widget
 ///////////////////////////////////////////////////////////////////////
 
-void Workspace::onSetScreen(Screen* screen)
+void Workspace::onConnect(Screen& screen)
 {
-    Base::onSetScreen(screen);
+    Base::onConnect(screen);
 
-    _wm.setScreen(screen);
+    _wm.onConnect(screen);
+}
+
+
+void Workspace::onDisconnect()
+{
+    Base::onDisconnect();
+
+    _wm.onDisconnect();
 }
 
 
@@ -163,6 +171,12 @@ Widget* Workspace::onHitTest(const Gfx::PointF& p)
 // Control
 ///////////////////////////////////////////////////////////////////////
 
+void Workspace::onRelayoutRequest(WorkspaceManager& wm)
+{
+    relayout();
+}
+
+
 Gfx::SizeF Workspace::onMeasure(const SizePolicy& policy)
 {
     if(_content)
@@ -172,8 +186,20 @@ Gfx::SizeF Workspace::onMeasure(const SizePolicy& policy)
 }
 
 
+void Workspace::onProcessLayoutEvent(const LayoutEvent& ev)
+{
+    //std::clog << "WORKSPACE PROCESS LAYOUT: " << ev.rect().width() << "x" << ev.rect().height() << std::endl;
+
+    Base::onProcessLayoutEvent(ev);
+
+    _wm.processEvent(ev);
+}
+
+
 void Workspace::onLayout(const Gfx::RectF& rect)
 {
+    //std::clog << "WORKSPACE LAYOUT: " << rect.width() << "x" << rect.height() << std::endl;
+
     Control::onLayout(rect);
 
     if(_content)
@@ -191,9 +217,6 @@ void Workspace::onLayout(const Gfx::RectF& rect)
         _content->move(pos);
         _content->resize(size);
     }
-    
-    //_workspace.move( rect.topLeft() );
-    //_workspace.resize( rect.size() );
 }
 
 
@@ -224,8 +247,17 @@ void Workspace::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
+void Workspace::onRequestResize(const Gfx::SizeF& s)
+{
+    Base::onRequestResize(s);
+    _requestedSize = s;
+}
+
+
 void Workspace::onProcessResizeEvent(const ResizeEvent& ev)
 {
+    //std::clog << "WORKSPACE RESIZE EVENT: " << ev.size().width() << "x" << ev.size().height() << std::endl;
+
     Control::onProcessResizeEvent(ev);
 
     ResizeEvent rev(_wm, ev.size());

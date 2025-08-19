@@ -62,12 +62,12 @@ void ScreenImpl::setParent(Screen* screen)
     if(_parent)
     {
         // TODO:
-        //NSScreen* mainScreen = [NSScreen mainScreen];
-        //NSRect screenRect = [mainScreen visibleFrame];
+        NSScreen* mainScreen = [NSScreen mainScreen];
+        NSRect screenRect = [mainScreen visibleFrame];
+        //std::clog << "screen size: " << screenRect.size.width << "x" 
+        //                             << screenRect.size.height << std::endl;
 
-        //Gfx::SizeF size(screenRect.width, screenRect.height);
-        Gfx::SizeF size(640, 480);
-
+        Gfx::SizeF size(screenRect.size.width, screenRect.size.height);
         size /= scaleFactor();
 
         _parent->onResize(*this, size);
@@ -131,6 +131,27 @@ Gfx::PointF ScreenImpl::fromFrame(const WindowImpl& frame,
                                   const Gfx::PointF& pos) const
 {
     return frame.toScreen(pos);
+}
+
+
+void ScreenImpl::onAutoCenter(WindowFrame& w, const Gfx::SizeF* size)
+{
+    if( ! size )
+    {
+        return;
+    }
+
+    Pt::Gfx::SizeF windowSize = *size;
+    Pt::Gfx::SizeF screenSize = this->size();
+
+    double x = (screenSize.width() - windowSize.width()) / 2.0;
+    double y = (screenSize.height() - windowSize.height()) / 2.0;
+    
+    //std::clog << "auto-center BEGIN: " << w.window().title() << " " << x << "," << y << std::endl;
+    //std::clog << "window size: " << windowSize.width() << "x" << windowSize.height() << std::endl;
+    //std::clog << "screen size: " << screenSize.width() << "x" << screenSize.height() << std::endl;
+
+    w.WindowFrame::window().move( Pt::Gfx::PointF(x, y) );
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -204,9 +225,6 @@ WindowFrame* ScreenImpl::onAttach(Window& w)
 
 void ScreenImpl::onDetach(WindowFrame& frame)
 {
-    // TODO: detach from screen in WindowImpl?
-    static_cast<WindowImpl*>(&frame)->setScreen(0);
-
     frame.setNextResponder(0);
 
     Window& w = frame.window();
@@ -219,18 +237,17 @@ void ScreenImpl::onDetach(WindowFrame& frame)
 
 void ScreenImpl::onInit(WindowFrame& frame)
 {
-    // TODO: attach to screen in WindowImpl?
-    static_cast<WindowImpl*>(&frame)->setScreen(_parent);
-
     RescaleEvent ev( frame, scaleFactor() );
     frame.processEvent(ev);
+
+    Base::onInit(frame);
 }
 
 
 void ScreenImpl::onRelease(WindowFrame& frame)
 {
+    Base::onRelease(frame);
 }
-
 
 //void ScreenImpl::onShow(Window& w, bool visible)
 //{
@@ -426,12 +443,11 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     Base::onRescaleEvent(ev);
 
     // TODO:
-    //NSScreen* mainScreen = [NSScreen mainScreen];
-    //NSRect screenRect = [mainScreen visibleFrame];
+    NSScreen* mainScreen = [NSScreen mainScreen];
+    NSRect screenRect = [mainScreen visibleFrame];
+    //std::clog << "screen size: " << screenRect.size.width << "x" << screenRect.size.height << std::endl;
 
-    //Gfx::SizeF size(screenRect.width, screenRect.height);
-    Gfx::SizeF size(640, 480);
-
+    Gfx::SizeF size(screenRect.size.width, screenRect.size.height);
     size /= scaleFactor();
 
     _parent->onResize(*this, size);
@@ -466,6 +482,9 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::RectF winRect( winPos, screenRect.size() );
 
         winRect = winRect.intersect( Gfx::RectF( window->size() ) );
+
+        if(winRect.size().width() < 0.1 || winRect.height() < 0.1)
+            continue;
 
         // send (native) paint event to window
         winRect = Gfx::RectF( winRect.topLeft() /* * window->scaleFactor()*/, 

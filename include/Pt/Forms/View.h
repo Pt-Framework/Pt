@@ -49,7 +49,7 @@ class View;
 class ViewCanvas;
 
 class PT_FORMS_API View : public Widget
-                      , private Gfx::PaintSurface
+                        , private Gfx::PaintSurface
 {
     friend class Control;
 
@@ -129,8 +129,11 @@ class PT_FORMS_API View : public Widget
     // Widget
     //
     protected:
-        virtual void onSetScreen(Screen* screen);
+        virtual void onConnect(Screen& screen);
 
+        virtual void onDisconnect();
+
+        
         virtual void onPaintEvent(const PaintEvent& ev) override;
 
         virtual void onMoveEvent(const MoveEvent& ev) override;

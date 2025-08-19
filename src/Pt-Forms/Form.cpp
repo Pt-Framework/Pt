@@ -83,6 +83,9 @@ void Form::setContent(Control* control)
     if(control)
     {
         control->setParent(*this);
+        
+        // TODO: handle multiple calls of control.setParent(form)
+        _mainControl = control;
     }
 }
 
@@ -126,7 +129,22 @@ void Form::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
 }
 
 
+void Form::onRequestResize(const Gfx::SizeF& s)
+{
+    Base::onRequestResize(s);
+}
+
+
 void Form::relayout()
+{
+    if( ! isConnected() )
+        return;
+
+    onRequestRelayout();
+}
+
+
+void Form::onRequestRelayout()
 {
     _layouts++;
 
@@ -146,49 +164,69 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 
     if(_layouts > 0)
     {
-        //std::clog << "RELAYOUT EVENT " << " deferred" << std::endl;
+        //std::clog << "RELAYOUT " <<  name()  << " deferred" << std::endl;
         return;
     }
 
-    //std::clog << "RELAYOUT EVENT" << std::endl;
+    //std::clog << "\nRELAYOUT " << name() << std::endl;
 
-    if(_mainControl)
+    if( ! _mainControl )
     {
-        //
-        // 1. Pass
-        //  
-        onMeasure();
-
-        //
-        // 2. Pass layout position and size of contents
-        //
-        Gfx::RectF rect( size() );
-        LayoutEvent lev(*this, rect);
-        onLayoutEvent(lev);
-
-        LayoutEvent lev2(*_mainControl, rect);
-        Application::instance().commitEvent(lev2);
+        return;
     }
+
+    //
+    // 1. Pass: measure preferred size of contents
+    //  
+    Gfx::SizeF size = onProcessMeasure();
+
+    //
+    // 2. Pass: layout position and size of contents
+    //
+    Gfx::RectF rect( position(), size );
+    onProcessLayout(rect);
 }
 
 
-Gfx::SizeF Form::onMeasure()
+Gfx::SizeF Form::onProcessMeasure()
 {
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize( size() );
-    
-    return _mainControl ? _mainControl->measure(policy)
-                       : policy.size();
+
+    return measure(policy);
 }
 
 
-void Form::onLayoutEvent(const LayoutEvent& ev)
-{   
+void Form::onProcessLayout(const Gfx::RectF& rect)
+{
+    onLayout(rect);
+
+    LayoutEvent lev(*_mainControl, bounds());
+    Application::instance().commitEvent(lev);
+}
+
+
+Gfx::SizeF Form::measure(const SizePolicy& policy)
+{
+    return onMeasure(policy);
+}
+
+
+Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
+{
+    Gfx::SizeF size = _mainControl ? _mainControl->measure(policy)
+                                   : policy.size();
+    return size;
+}
+
+
+void Form::onLayout(const Gfx::RectF& rect)
+{
     if( _mainControl )
     {
         Gfx::PointF controlPos(0, 0);
-        Gfx::SizeF controlSize = size();      
-        //std::clog << "Form::onLayout " << _mainControl->name() << " " << controlSize.height() << std::endl;
+        Gfx::SizeF controlSize = rect.size();      
+
         
         _mainControl->move(controlPos);
         _mainControl->resize(controlSize);
@@ -370,29 +408,33 @@ void Form::onRemoveElement(Control& control)
     onSetMnemonic(control, std::vector<Pt::Char>());
 }
 
-
 //
 // View
 //
 
-void Form::onSetScreen(Screen* screen)
+void Form::onConnect(Screen& screen)
 {
-    Base::onSetScreen(screen);
+    Base::onConnect(screen);
+
+    onInvalidate();
 
     if(_mainControl)
-        _mainControl->setScreen(screen);
+        _mainControl->onConnect(screen);
+}
+
+
+void Form::onDisconnect()
+{
+    Base::onDisconnect();
+
+    if(_mainControl)
+        _mainControl->onDisconnect();
 }
 
 
 void Form::onAttach(Control& control)
 {
     Base::onAttach(control);
-
-    _mainControl = &control;
-    
-    // TODO: attach to screen in Control?
-    if(_mainControl)
-        _mainControl->setScreen( screen() );
 
     relayout();
 }
@@ -404,10 +446,6 @@ void Form::onDetach(Control& control)
 
     if(_active == &control)
         _active = 0;
-
-    // TODO: detach from screen in Control?
-    if(_mainControl)
-        _mainControl->setScreen(0);
 
     if(_mainControl == &control)
         _mainControl = 0;
@@ -423,14 +461,21 @@ void Form::onInit(Control& control)
     //Gfx::PaintSurface* surface = _surface.surface();
     //Gfx::PointF surfacePos = _surface.position() + control.position();
     //control.setSurface(surface, surfacePos);
-    
+
+    Screen* screen = this->screen();
+    if(screen)
+        control.onConnect(*screen);
+
     control.setNextResponder(this);
     control.setForm(this);
 
-    double scaling = scaleFactor();
+    if( screen )
+    {
+        double scaling = scaleFactor();
     
-    RescaleEvent ev(control, scaling);
-    control.processEvent(ev);
+        RescaleEvent ev(control, scaling);
+        control.processEvent(ev);
+    }
 }
 
 
@@ -441,6 +486,10 @@ void Form::onRelease(Control& control)
     control.setForm(0);
     //control.setSurface( 0, control.position() );
     control.setNextResponder(0);
+
+    Screen* screen = this->screen();
+    if(screen)
+        control.onDisconnect();
 }
 
 

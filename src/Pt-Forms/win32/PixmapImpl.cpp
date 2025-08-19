@@ -189,6 +189,7 @@ PixmapCanvas::PixmapCanvas(Gfx::PaintSurface& surface)
 , _height(0)
 , _dc(0)
 , _paintContext(0)
+, _hasPath(false)
 , _gradientBrush(false)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
 {
@@ -382,6 +383,7 @@ void PixmapCanvas::onReleasePaint()
     SelectObject(_dc, _oldBrush);
     SelectObject(_dc, _oldFont);
     SelectClipRgn(_dc, NULL);
+    AbortPath(_dc);
 
     _paintContext = 0;
 }
@@ -653,9 +655,22 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-void PixmapCanvas::setPath(const Gfx::Path& path)
+POINT PixmapCanvas::toLocal(double x, double y)
 {
-    double sf = _scaling.scaleFactor();
+    Gfx::PointF p = _paintContext->toLocal(x, y);
+
+    POINT pp;
+    pp.x = Pt::lround(p.x() - 0.4999);
+    pp.y = Pt::lround(p.y() - 0.4999);
+
+    return pp;
+}
+
+
+void PixmapCanvas::buildPath(const Gfx::Path& path)
+{
+    if( ! _paintContext )
+        return;
 
     BeginPath(_dc);
 
@@ -674,17 +689,15 @@ void PixmapCanvas::setPath(const Gfx::Path& path)
 
             case Gfx::Element::IT_MoveTo:
             {
-                long x = lround( e.pxy.at(0) * sf - 0.4999 );
-                long y = lround( e.pxy.at(1) * sf - 0.4999 );
-                MoveToEx(_dc, x, y, NULL);
+                POINT p = toLocal( e.pxy.at(0), e.pxy.at(1) );
+                MoveToEx(_dc, p.x, p.y, NULL);
                 break;
             }
 
             case Gfx::Element::IT_LineTo:
             {
-                long x = lround( e.pxy.at(0) * sf - 0.4999 );
-                long y = lround( e.pxy.at(1) * sf - 0.4999 );
-                LineTo(_dc, x, y);
+                POINT p = toLocal( e.pxy.at(0), e.pxy.at(1) );
+                LineTo(_dc, p.x, p.y);
                 break;
             }
 
@@ -693,13 +706,8 @@ void PixmapCanvas::setPath(const Gfx::Path& path)
                 POINT p0;
                 GetCurrentPositionEx(_dc, &p0);
 
-                POINT p1;
-                p1.x = Pt::lround(e.pxy.at(0) * sf - 0.4999);
-                p1.y = Pt::lround(e.pxy.at(1) * sf - 0.4999);
-                
-                POINT p2;
-                p2.x = Pt::lround(e.pxy.at(2) * sf - 0.4999);
-                p2.y = Pt::lround(e.pxy.at(3) * sf - 0.4999);
+                POINT p1 = toLocal( e.pxy.at(0), e.pxy.at(1) );;
+                POINT p2 = toLocal( e.pxy.at(2), e.pxy.at(3) );;
 
                 POINT cubicPoints[3];
 
@@ -721,17 +729,14 @@ void PixmapCanvas::setPath(const Gfx::Path& path)
             case Gfx::Element::IT_CubicBezierTo:
             {
                 POINT points[3];
-                points[0].x = Pt::lround(e.pxy.at(0) * sf - 0.4999);
-                points[0].y = Pt::lround(e.pxy.at(1) * sf - 0.4999);
-                points[1].x = Pt::lround(e.pxy.at(2) * sf - 0.4999);
-                points[1].y = Pt::lround(e.pxy.at(3) * sf - 0.4999);
-                points[2].x = Pt::lround(e.pxy.at(4) * sf - 0.4999);
-                points[2].y = Pt::lround(e.pxy.at(5) * sf - 0.4999);
+
+                points[0] = toLocal( e.pxy.at(0), e.pxy.at(1) );
+                points[1] = toLocal( e.pxy.at(2), e.pxy.at(3) );
+                points[2] = toLocal( e.pxy.at(4), e.pxy.at(5) );
                 
                 PolyBezierTo(_dc, points, 3);
                 break;
             }
-           
 
             //case Element::IT_GenNBezierTo:
             //    bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
@@ -747,44 +752,74 @@ void PixmapCanvas::setPath(const Gfx::Path& path)
 
 void PixmapCanvas::onDrawPath(const Gfx::Path& path, float)
 {
-    setPath(path);
+    buildPath(path);
     StrokePath(_dc);
-
-    //TODO: StrokeAndFillPath
 }
 
 
 void PixmapCanvas::onFillPath(const Gfx::Path& path, float)
 {
-    setPath(path);
+    buildPath(path);
     FillPath(_dc);
 }
 
+
+void PixmapCanvas::onPathChanged()
+{
+    AbortPath(_dc);
+    _hasPath = false;
+}
+
+
+void PixmapCanvas::onDrawPath()
+{
+    if( ! _paintContext )
+        return;
+
+    const Gfx::Path& path = _paintContext->path();
+    buildPath(path);
+    
+    StrokePath(_dc);
+}
+
+
+void PixmapCanvas::onFillPath()
+{
+    if( ! _paintContext )
+        return;
+
+    const Gfx::Path& path = _paintContext->path();
+    buildPath(path);
+
+    FillPath(_dc);
+}
 
 #ifndef PT_FORMS_GDIPLUS
 
 Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
     //
-    // TODO: no transformation necessary, because the logical
-    //       size is returned and GetText* does not use the
-    //       world transform.
+    // NOTE: transformation is neccessary because GDI scales the text
+    //       by the given scale factor to measure it and then scales
+    //       the actual size back because GetTextExtentPoint32 should
+    //       return logical coordinates. Without a XFORM the logical
+    //       size is inaccurate and often too short.
     //
-    //double scaleFactor = scaling().scaleFactor();
+    double scaleFactor = scaling().scaleFactor();
+    int mmmm = GetMapMode(_dc);
+    Gfx::Transform tform;
+    tform.scale(scaleFactor, scaleFactor);
 
-    //Gfx::Transform tform;
-    //tform.scale(scaleFactor, scaleFactor);
+    XFORM xform = { static_cast<FLOAT>( tform.m11() ), 
+                    static_cast<FLOAT>( tform.m12() ),
+                    static_cast<FLOAT>( tform.m21() ), 
+                    static_cast<FLOAT>( tform.m22() ),
+                    static_cast<FLOAT>( tform.dx() ),  
+                    static_cast<FLOAT>( tform.dy() ) };
 
-    //XFORM xform = { static_cast<FLOAT>( tform.m11() ), 
-    //                static_cast<FLOAT>( tform.m12() ),
-    //                static_cast<FLOAT>( tform.m21() ), 
-    //                static_cast<FLOAT>( tform.m22() ),
-    //                static_cast<FLOAT>( tform.dx() ),  
-    //                static_cast<FLOAT>( tform.dy() ) };
-
-    //XFORM oldXForm = { 1, 0, 0, 1, 0 , 0 };
-    //GetWorldTransform(_dc, &oldXForm);
-    //SetWorldTransform(_dc, &xform);
+    XFORM oldXForm = { 1, 0, 0, 1, 0 , 0 };
+    GetWorldTransform(_dc, &oldXForm);
+    SetWorldTransform(_dc, &xform);
 
     TEXTMETRIC tm;
     GetTextMetrics(_dc, &tm);
@@ -795,7 +830,7 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
     SIZE textSize;
     GetTextExtentPoint32W(_dc, wtext.c_str(), wtext.size(), &textSize);
 
-    //SetWorldTransform(_dc, &oldXForm);
+    SetWorldTransform(_dc, &oldXForm);
 
     long asc = tm.tmAscent;
     long des = tm.tmDescent;

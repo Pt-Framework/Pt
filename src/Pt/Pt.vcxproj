@@ -61,6 +61,7 @@
     <ClInclude Include="..\..\include\Pt\Facets.h" />
     <ClInclude Include="..\..\include\Pt\FixupInfo.h" />
     <ClInclude Include="..\..\include\Pt\Formatter.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\CanvasLayout.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Workspace.h" />
     <ClInclude Include="..\..\include\Pt\Forms\WorkspaceManager.h" />
@@ -1379,6 +1380,7 @@
     <ClCompile Include="..\Pt-Db\Statement.cpp" />
     <ClCompile Include="..\Pt-Db\ValueImpl.cpp" />
     <ClCompile Include="..\Pt-Db\ValueImplTest.cpp" />
+    <ClCompile Include="..\Pt-Forms\CanvasLayout.cpp" />
     <ClCompile Include="..\Pt-Forms\Widget.cpp" />
     <ClCompile Include="..\Pt-Forms\Workspace.cpp" />
     <ClCompile Include="..\Pt-Forms\WorkspaceFrame.cpp" />

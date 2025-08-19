@@ -59,6 +59,7 @@ class ScreenImpl : public WindowManager
 {
     typedef WindowManager Base;
 
+    friend class Screen;
     friend class WindowImpl;
 
     public:
@@ -87,6 +88,8 @@ class ScreenImpl : public WindowManager
 
         Gfx::PointF fromFrame(const WindowImpl& w, 
                               const Gfx::PointF& pos) const;
+
+        void onAutoCenter(WindowFrame& w, const Gfx::SizeF* size);
 
     //
     // Responder

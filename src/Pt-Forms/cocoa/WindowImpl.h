@@ -147,6 +147,8 @@ class WindowImpl : public WindowFrame
         virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
                                                 const Gfx::SizeF& maxSize);
 
+        virtual void onAutoCenter(Window& w, const Gfx::SizeF* size);
+
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
 
         virtual void onShow(Window& w, bool visible);
@@ -157,11 +159,15 @@ class WindowImpl : public WindowFrame
 
         virtual void onMove(Window& w, const Gfx::PointF& to);
 
-        virtual void onResize(Window& w, const Gfx::SizeF& s);
+        virtual Gfx::SizeF onResize(Window& w, const Gfx::SizeF& s);
 
         virtual void onClose(Window& w);
 
     protected:
+        virtual void onConnect(Screen& screen);
+
+        virtual void onDisconnect();
+
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
         
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;

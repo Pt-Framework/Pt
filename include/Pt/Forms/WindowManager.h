@@ -52,6 +52,8 @@ class WindowManager : public Widget
 
         virtual ~WindowManager();
 
+        void relayout();
+
         Pt::Signal<Window&>& surfaceChanged()
         {
           return _surfaceChanged;
@@ -86,7 +88,12 @@ class WindowManager : public Widget
         //}
 
     protected:
-        virtual void onSetScreen(Screen* screen);
+        virtual void onConnect(Screen& screen);
+
+        virtual void onDisconnect();
+
+        
+        virtual void onRequestRelayout();
 
     protected:
         virtual WindowFrame* onAttach(Window& w) = 0;
@@ -96,6 +103,8 @@ class WindowManager : public Widget
         virtual void onInit(WindowFrame& w) = 0;
 
         virtual void onRelease(WindowFrame& w) = 0;
+
+        //virtual void onAutoCenter(WindowFrame& w, bool enable) = 0;
 
     private:
       Pt::Signal<Window&> _surfaceChanged;

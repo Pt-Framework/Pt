@@ -647,6 +647,11 @@ void PixmapCanvas::setPath(const Gfx::Path& path)
 }
 
 
+void PixmapCanvas::onPathChanged()
+{
+}
+
+
 void PixmapCanvas::onDrawPath(const Gfx::Path& path, float)
 {
     setPath(path);
@@ -661,10 +666,34 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path, float)
 }
 
 
-Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
+void PixmapCanvas::onDrawPath()
 {
     if( ! _paintContext )
-        return Gfx::FontMetrics();
+        return;
+
+    const Gfx::Path& path = _paintContext->path();
+    setPath(path);
+
+    CGContextStrokePath(_context);
+}
+
+
+void PixmapCanvas::onFillPath()
+{
+    if( ! _paintContext )
+        return;
+
+    const Gfx::Path& path = _paintContext->path();
+    setPath(path);
+
+    CGContextFillPath(_context);
+}
+
+
+Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
+{
+    if( ! _paintContext )
+        return Gfx::TextMetrics();
 
     CTFontRef font = _paintContext->font();
     CFDictionaryRef fontAttributes = _paintContext->fontAttributes();
@@ -674,7 +703,7 @@ Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
                                                        kCFStringEncodingUTF32LE, 
                                                        false, kCFAllocatorNull);
     if( ! string )
-        return Gfx::FontMetrics();
+        return Gfx::TextMetrics();
 
     CFMutableAttributedStringRef attributedString = 
         CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
@@ -697,7 +726,7 @@ Gfx::FontMetrics PixmapCanvas::onGetFontMetrics(const Pt::String& text) const
     CGFloat capHeight = CTFontGetCapHeight(font);
     CFRelease(line);
 
-    Gfx::FontMetrics fm;
+    Gfx::TextMetrics fm;
     fm.setAscent(ascent);
     fm.setDescent(descent);
     fm.setCapHeight(capHeight);

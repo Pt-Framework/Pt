@@ -48,6 +48,7 @@ class WindowFrame : public Widget
     typedef Widget Base;
 
     friend class Window;
+    friend class WindowManager;
 
     public:
         WindowFrame(WindowManager& wm, Window& window);
@@ -65,8 +66,11 @@ class WindowFrame : public Widget
         void getImage(Gfx::ImageSurface& image);
 
     protected:
-        virtual void onSetScreen(Screen* screen);
+        virtual void onConnect(Screen& screen);
 
+        virtual void onDisconnect();
+
+        
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescaleEvent(const RescaleEvent& ev);
@@ -113,6 +117,8 @@ class WindowFrame : public Widget
         virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
                                                 const Gfx::SizeF& maxSize) = 0;
 
+        virtual void onAutoCenter(Window& w, const Gfx::SizeF* size) = 0;
+
         virtual void onRepaint(Window& w, const Gfx::RectF& rect) = 0;
 
         virtual void onShow(Window& w, bool visible) = 0;
@@ -123,7 +129,7 @@ class WindowFrame : public Widget
 
         virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
 
-        virtual void onResize(Window& w, const Gfx::SizeF& s) = 0;
+        virtual Gfx::SizeF onResize(Window& w, const Gfx::SizeF& s) = 0;
 
         virtual void onClose(Window& w) = 0;
 
