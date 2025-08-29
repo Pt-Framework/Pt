@@ -406,22 +406,31 @@ void PixmapCanvas::onCompositionModeChanged()
 }
 
 
-void PixmapCanvas::onPenChanged()
+void PixmapCanvas::updatePen(HPEN hpen, DWORD penColor)
 {
-    if( ! _paintContext )
-        return;
-
-    HPEN hpen = _paintContext->pen();
     if(hpen)
         SelectObject(_dc, hpen);
 
-    _penColor = _paintContext->penColor();
-
-    DWORD penColor = RGB( _penColor.red()  / 257, 
-                          _penColor.green() / 257, 
-                          _penColor.blue()  / 257 );
-
     SetTextColor(_dc, penColor);
+}
+
+
+void PixmapCanvas::onPenChanged()
+{
+    //if( ! _paintContext )
+    //    return;
+
+    //HPEN hpen = _paintContext->pen();
+    //if(hpen)
+    //    SelectObject(_dc, hpen);
+
+    //_penColor = _paintContext->penColor();
+
+    //DWORD penColor = RGB( _penColor.red()  / 257, 
+    //                      _penColor.green() / 257, 
+    //                      _penColor.blue()  / 257 );
+
+    //SetTextColor(_dc, penColor);
 }
 
 

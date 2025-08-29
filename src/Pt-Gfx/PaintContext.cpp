@@ -56,8 +56,10 @@ PaintContext::~PaintContext()
 
 void PaintContext::attachCanvas(Canvas& canvas)
 {
-    resetPaint();
+    finishPaint();
     
+    _region.clear();
+
     const double unbounded = std::numeric_limits<double>::max();
     _region.setSize( SizeF(unbounded, unbounded) );
 
@@ -77,9 +79,6 @@ void PaintContext::detachCanvas(Canvas& canvas)
 
     if(_canvas)
     {
-        if(_active)
-            onFinishPaint();
-        
         onResetPaint();
         _canvas = 0;
         _active = 0;
@@ -146,18 +145,11 @@ void PaintContext::beginPaint(const Gfx::Paint& paint)
         
         _active = _canvas;
         onBeginPaint(paint);
+
+        onApplyPen( paint.pen() );
     }
 }
 
-
-void PaintContext::finishPaint()
-{
-    if(_active)
-    {
-        onFinishPaint();
-        _active = 0;
-    }
-}
 
 
 bool PaintContext::isActive() const
@@ -166,16 +158,8 @@ bool PaintContext::isActive() const
 }
 
 
-void PaintContext::resetPaint()
+void PaintContext::finishPaint()
 {
-    finishPaint();
-
-    _region.clear();
-    
-    Gfx::Transform tx;
-    tx.scale( _scaling.scaleFactor(), _scaling.scaleFactor() );
-    _tx = tx;
-
     if(_canvas)
     {
         _canvas->onDetachPaint(*this);
@@ -204,6 +188,8 @@ void PaintContext::setPen(const Pen& pen)
 
     if(_active)
     {
+        onApplyPen(pen);
+        
         _active->onPenChanged();
     }
 }

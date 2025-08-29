@@ -235,11 +235,6 @@ class PaintContext : public Gfx::PaintContext
             //std::clog << "\nonBeginPaint" << std::endl;
         }
 
-        virtual void onFinishPaint() override
-        {
-            //std::clog << "\onFinishPaint" << std::endl;
-        }
-        
         virtual void onResetPaint() override
         {
             //std::clog << "onResetPaint" << std::endl;

@@ -159,6 +159,8 @@ class PixmapCanvas : public Gfx::Canvas
 
         void setScaleFactor(double scaleFactor);
 
+        void updatePen(HPEN pen, DWORD penColor);
+
         void drawPathImpl(const Gfx::Path& path);
 
         void fillPathImpl(const Gfx::Path& path);

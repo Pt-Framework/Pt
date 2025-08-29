@@ -198,26 +198,18 @@ void PaintContext::setPixmap(PixmapCanvas& pixmap)
 
 void PaintContext::onBeginPaint(const Gfx::Paint& paint)
 {
-    // TODO: create new pen when scaling changes
-
-    // TODO: pass Paint to begiPaint() for initialisation
-
     double scaleFactor = scaling().scaleFactor();
 
     size_t penSize = paint.pen().size();
     
     // keep pen size when downscaling
-    _penSize = scaleFactor < 1.0 ? penSize
-                                 : static_cast<size_t>( penSize * scaleFactor );
+    penSize = scaleFactor < 1.0 ? penSize
+                                : static_cast<size_t>( penSize * scaleFactor );
 
-    
+    if(_penSize != penSize)
+        onSetPen( paint.pen() );
+
     //std::clog << "onBeginPaint " << this << std::endl;
-}
-
-
-void PaintContext::onFinishPaint() 
-{
-    //std::clog << "onFinishPaint " << this << std::endl;
 }
 
 
@@ -268,6 +260,7 @@ void PaintContext::onSetPen(const Gfx::Pen& pen)
         _pen = 0;
     }
 
+    _penSize = penSize;
     _penColor = pen.color();
 
     DWORD penStyle = getPenStyle(pen);
@@ -285,6 +278,19 @@ void PaintContext::onSetPen(const Gfx::Pen& pen)
 
     _pen = ExtCreatePen(penStyle, penSize, &brush, 0, NULL);
 #endif
+}
+
+
+void PaintContext::onApplyPen(const Gfx::Pen& pen)
+{
+    if(_pixmapCanvas)
+    {
+        DWORD penColor = RGB( _penColor.red()  / 257, 
+                              _penColor.green() / 257, 
+                              _penColor.blue()  / 257 );
+        
+        _pixmapCanvas->updatePen(_pen, penColor);
+    }
 }
 
 

@@ -64,14 +64,7 @@ Painter::Painter(PaintLayer& layer)
 
 Painter::~Painter()
 {
-    if( _surface )
-    {
-        _surface->detachPainter(*this);
-        _surface = 0;
-    }
-
-    if(_paintContext)
-        _paintContext->resetPaint();
+    finish();
     
     delete _paintContext;
 }
@@ -127,7 +120,7 @@ void Painter::begin(PaintLayer& layer)
 void Painter::finish()
 {
     if(_paintContext)
-        _paintContext->resetPaint();
+        _paintContext->finishPaint();
 
     if( _surface )
     {

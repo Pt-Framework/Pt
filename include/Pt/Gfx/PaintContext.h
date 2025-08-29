@@ -84,9 +84,6 @@ class PT_GFX_API PaintContext
 
         bool isActive() const;
 
-        // reset and finishPaint are the same -> only resetPaint needed
-        void resetPaint();
-
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
 
@@ -139,14 +136,14 @@ class PT_GFX_API PaintContext
 
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) {};
-
-        virtual void onFinishPaint() {};
-        
+       
         virtual void onResetPaint() {};
 
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
 
         virtual void onSetPen(const Pen& pen) = 0;
+
+        virtual void onApplyPen(const Gfx::Pen& pen) {};
 
         virtual void onSetBrush(const Brush& pen) = 0;
 
