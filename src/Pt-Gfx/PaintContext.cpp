@@ -56,12 +56,17 @@ PaintContext::~PaintContext()
 
 void PaintContext::attachCanvas(Canvas& canvas)
 {
-    reset();
+    resetPaint();
     
-    double unbounded = std::numeric_limits<double>::max();
+    const double unbounded = std::numeric_limits<double>::max();
     _region.setSize( SizeF(unbounded, unbounded) );
 
     _scaling = canvas.scaling();
+
+    Gfx::Transform tx;
+    tx.scale( _scaling.scaleFactor(), _scaling.scaleFactor() );
+    _tx = tx;
+
     _canvas = &canvas;
 }
 
@@ -72,7 +77,10 @@ void PaintContext::detachCanvas(Canvas& canvas)
 
     if(_canvas)
     {
-        onReleasePaint();
+        if(_active)
+            onFinishPaint();
+        
+        onResetPaint();
         _canvas = 0;
         _active = 0;
     }
@@ -85,14 +93,6 @@ const PointF& PaintContext::origin() const
 }
 
 
-Gfx::PointF PaintContext::toLocal(double x, double y)
-{
-    Gfx::PointF p = origin() + Gfx::PointF(x, y);
-    p = scaling().toPhysical(p);
-    return p;
-}
-
-
 const RectF& PaintContext::region() const
 {
     return _region;
@@ -101,7 +101,12 @@ const RectF& PaintContext::region() const
 
 void PaintContext::setRegion(const RectF& r)
 {
+    Gfx::Transform tx;
+    tx.translate( r.x(), r.y() );
+    tx.scale( _scaling.scaleFactor(), _scaling.scaleFactor() );
+    
     _region = r;
+    _tx = tx;
 }
 
 
@@ -111,8 +116,13 @@ const Scaling& PaintContext::scaling() const
 }
 
 
+const Gfx::Transform& PaintContext::transform() const
+{
+    return _tx;
+}
 
-void PaintContext::beginPaint()
+
+void PaintContext::beginPaint(const Gfx::Paint& paint)
 {
     if(_canvas)
     {
@@ -133,9 +143,9 @@ void PaintContext::beginPaint()
         }
 
         _canvas->onClipChanged();
-
-        // _canvas->beginPaint(*this);
+        
         _active = _canvas;
+        onBeginPaint(paint);
     }
 }
 
@@ -144,7 +154,7 @@ void PaintContext::finishPaint()
 {
     if(_active)
     {
-        // _canvas->finishPaint(*this);
+        onFinishPaint();
         _active = 0;
     }
 }
@@ -156,17 +166,21 @@ bool PaintContext::isActive() const
 }
 
 
-void PaintContext::reset()
+void PaintContext::resetPaint()
 {
     finishPaint();
 
     _region.clear();
+    
+    Gfx::Transform tx;
+    tx.scale( _scaling.scaleFactor(), _scaling.scaleFactor() );
+    _tx = tx;
 
     if(_canvas)
     {
         _canvas->onDetachPaint(*this);
 
-        onReleasePaint();
+        onResetPaint();
         _canvas = 0;
         _active = 0;
     }
@@ -243,17 +257,6 @@ void PaintContext::resetClip()
 
     _clip.clear();
     _hasClip = false;
-}
-
-
-void PaintContext::setPath(const Path& path)
-{
-    onSetPath(path);
-
-    if(_active)
-    {
-        _active->onPathChanged();
-    }
 }
 
 
@@ -339,30 +342,20 @@ void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& siz
 }
 
 
-void PaintContext::drawPath(const Gfx::Path& path)
+void PaintContext::setPath(const Path& path)
 {
-    if(_active)
-        _active->drawPath(path);
-}
-
-
-void PaintContext::fillPath(const Path& path)
-{
-    if(_active)
-        _active->fillPath(path);
+    onSetPath(path);
 }
 
 
 void PaintContext::drawPath()
 {
-    if(_active)
-        _active->drawPath();
+    onDrawPath();
 }
 
 void PaintContext::fillPath()
 {
-    if(_active)
-        _active->fillPath();
+    onFillPath();
 }
 
 

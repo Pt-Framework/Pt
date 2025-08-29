@@ -96,12 +96,16 @@ class PT_GFX_API Canvas : public CanvasBase
         ~Canvas();
 
     protected:
+        // onBeginPaint
         virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context);
 
+        // onSetContext
         virtual bool onSetPaint(PaintContext* context) = 0;
 
+        // onCreateContext
         virtual PaintContext* onCreatePaint() = 0;
 
+        // onReleaseContext
         virtual void onReleasePaint() = 0;
 
     protected:
@@ -118,14 +122,6 @@ class PT_GFX_API Canvas : public CanvasBase
         void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
         void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        void drawPath(const Path& path);
-
-        void fillPath(const Path& path);
-
-        void drawPath();
-
-        void fillPath();
 
     protected:
         TextMetrics textMetrics(const Pt::String& text) const;
@@ -153,8 +149,6 @@ class PT_GFX_API Canvas : public CanvasBase
 
         virtual void onClipChanged() = 0;
 
-        virtual void onPathChanged() = 0;
-
     protected:
         virtual void onDrawLine(const PointF& from, const PointF& to) = 0;
 
@@ -180,14 +174,6 @@ class PT_GFX_API Canvas : public CanvasBase
 
         virtual void onFillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
                                float degBegin, float degEnd) = 0;
-
-        virtual void onDrawPath(const Gfx::Path& path, float smoothness) = 0;
-
-        virtual void onFillPath(const Gfx::Path& path, float smoothness) = 0;
-
-        virtual void onDrawPath() = 0;
-
-        virtual void onFillPath() = 0;
 
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const = 0;

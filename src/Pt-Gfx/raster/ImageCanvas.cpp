@@ -246,6 +246,8 @@ bool ImageCanvas::onSetPaint(Gfx::PaintContext* context)
     if( ! paintContext )
         return false;
 
+    paintContext->setImage(*this);
+    
     _paint = paintContext;
     return true;
 }
@@ -254,6 +256,7 @@ bool ImageCanvas::onSetPaint(Gfx::PaintContext* context)
 Gfx::PaintContext* ImageCanvas::onCreatePaint()
 {
     RasterContext* paintContext = new RasterContext();
+    paintContext->setImage(*this);
     
     _paint = paintContext;
     return paintContext;
@@ -477,50 +480,15 @@ void ImageCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-void ImageCanvas::onDrawPath(const Gfx::Path& path, float smoothness)
+void ImageCanvas::drawPath(const std::vector<Polygon>& polygons)
 {
-  std::vector<Polygon> polygons;
-  path.toPolygons(polygons);
-
-  Rect currentClip = updateClip();
-  strokePolygons(polygons, currentClip);
-}
-
-
-void ImageCanvas::onFillPath(const Gfx::Path& path, float smoothness)
-{
-  std::vector<Polygon> polygons;
-  path.toPolygons(polygons);
-
-  const Rect currentClip = updateClip();
-  fillPolygons(polygons, currentClip);
-}
-
-
-void ImageCanvas::onPathChanged()
-{
-}
-
-
-void ImageCanvas::onDrawPath()
-{
-    if( ! _paint )
-        return;
-
-    const std::vector<Polygon>& polygons = _paint->flatPath();
-    
     Rect currentClip = updateClip();
     strokePolygons(polygons, currentClip);
 }
 
 
-void ImageCanvas::onFillPath()
+void ImageCanvas::fillPath(const std::vector<Polygon>& polygons)
 {
-    if( ! _paint )
-        return;
-  
-    const std::vector<Polygon>& polygons = _paint->flatPath();
-
     Rect currentClip = updateClip();
     fillPolygons(polygons, currentClip);
 }
@@ -538,7 +506,9 @@ void ImageCanvas::strokePolygons(const std::vector<Polygon>& polygons, const Rec
 
       for(size_t i = 0; i < n; ++i)
       {
-          Gfx::PointF p = scaling().toPhysical( _paint->origin() + poly.at(i) );
+          //Gfx::PointF pComp = scaling().toPhysical( _paint->origin() + poly.at(i) );
+          Gfx::PointF p = _paint->transform() * poly.at(i);
+          //Gfx::PointF p = poly.at(i);
 
           points[i] = Point( Pt::lround(p.x() - 0.4999),
                              Pt::lround(p.y() - 0.4999) );
@@ -573,7 +543,9 @@ void ImageCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect&
 
         for (size_t i = 0; i < n; ++i)
         {
-            Gfx::PointF p = scaling().toPhysical( _paint->origin() + poly.at(i) );
+            //Gfx::PointF pComp = scaling().toPhysical( _paint->origin() + poly.at(i) );
+            Gfx::PointF p = _paint->transform() * poly.at(i);
+            //Gfx::PointF p = poly.at(i);
 
             points[i] = Point( Pt::lround(p.x() - 0.4999),
                                Pt::lround(p.y() - 0.4999) );

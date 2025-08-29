@@ -54,10 +54,12 @@ class PaintContext : public Gfx::PaintContext
 {
     public:
         PaintContext()
-        : _font(0)
+        : _pixmapCanvas(0)
+        , _font(0)
         , _fontAttributes(0)
         , _textColor(0)
         , _hasClip(false)
+        , _cgPath(0)
         { 
         }
 
@@ -71,6 +73,14 @@ class PaintContext : public Gfx::PaintContext
 
           if(_fontAttributes)
             CFRelease(_fontAttributes);
+
+          if(_cgPath)
+            CGPathRelease(_cgPath);
+        }
+
+        void setPixmap(PixmapCanvas& pixmap)
+        {
+            _pixmapCanvas = &pixmap;
         }
 
         const Gfx::CompositionMode& compositionMode() const
@@ -108,10 +118,9 @@ class PaintContext : public Gfx::PaintContext
             return _path;
         }
 
-    protected:
-        virtual void onSetPath(const Gfx::Path& path) override
+        CGMutablePathRef cgpath()
         {
-            _path = path;
+            return _cgPath;
         }
 
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override
@@ -220,7 +229,114 @@ class PaintContext : public Gfx::PaintContext
                 _clip = *clip;
         }
 
+    protected:
+        virtual void onBeginPaint(const Gfx::Paint& paint) override
+        {
+            //std::clog << "\nonBeginPaint" << std::endl;
+        }
+
+        virtual void onFinishPaint() override
+        {
+            //std::clog << "\onFinishPaint" << std::endl;
+        }
+        
+        virtual void onResetPaint() override
+        {
+            //std::clog << "onResetPaint" << std::endl;
+
+            if(_pixmapCanvas)
+                _pixmapCanvas = 0;
+        }
+
+    protected:
+        virtual void onSetPath(const Gfx::Path& path) override
+        {
+            _path = path;
+
+            if(_cgPath)
+                CGPathRelease(_cgPath);
+
+            _cgPath = CGPathCreateMutable();
+
+            for(std::size_t n = 0; n < path.size(); ++n)
+            {
+                const Gfx::Element& e = path.at(n);
+
+                switch( e.type )
+                {
+                    default:
+                        break;
+
+                    case Gfx::Element::IT_Close:
+                        CGPathCloseSubpath(_cgPath);
+                        break;
+
+                    case Gfx::Element::IT_MoveTo:
+                    {
+                        CGFloat x = e.pxy.at(0);
+                        CGFloat y = e.pxy.at(1);
+                        CGPathMoveToPoint(_cgPath, NULL, x, y);
+                        break;
+                    }
+
+                    case Gfx::Element::IT_LineTo:
+                    {
+                        CGFloat x = e.pxy.at(0);
+                        CGFloat y = e.pxy.at(1);
+                        CGPathAddLineToPoint(_cgPath, NULL, x, y);
+                        break;
+                    }
+
+                    case Gfx::Element::IT_QuadBezierTo:
+                    {
+                        CGFloat cx = e.pxy.at(0);
+                        CGFloat cy = e.pxy.at(1);
+
+                        CGFloat x = e.pxy.at(2);
+                        CGFloat y = e.pxy.at(3);
+
+                        CGPathAddQuadCurveToPoint(_cgPath, NULL, cx, cy, x, y);
+                        break;
+                    }
+
+                    case Gfx::Element::IT_CubicBezierTo:
+                    {
+                        CGFloat c1x = e.pxy.at(0);
+                        CGFloat c1y = e.pxy.at(1);
+
+                        CGFloat c2x = e.pxy.at(2);
+                        CGFloat c2y = e.pxy.at(3);
+
+                        CGFloat x = e.pxy.at(4);
+                        CGFloat y = e.pxy.at(5);
+
+                        CGPathAddCurveToPoint(_cgPath, NULL, c1x, c1y, c2x, c2y, x, y);
+                        break;
+                    }
+            
+                    //case Element::IT_GenNBezierTo:
+                    //    bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
+                    //    curX = ins.pxy[ins.pxy.size() - 2];
+                    //    curY = ins.pxy[ins.pxy.size() - 1];
+                    //    break;
+                }
+            }
+        }
+
+        virtual void onDrawPath() override
+        {
+            if(_pixmapCanvas)
+                _pixmapCanvas->drawPath(_cgPath);
+        }
+
+        virtual void onFillPath() override
+        {
+            if(_pixmapCanvas)
+                _pixmapCanvas->fillPath(_cgPath);
+        }
+
     private:
+        PixmapCanvas*             _pixmapCanvas;
         Gfx::CompositionMode      _compositionMode;
         Gfx::Pen                  _pen;
         Gfx::Brush                _brush;
@@ -230,6 +346,7 @@ class PaintContext : public Gfx::PaintContext
         Gfx::RectF                _clip;
         bool                      _hasClip;
         Gfx::Path                 _path;
+        CGMutablePathRef          _cgPath;
 };
 
 } // namespace

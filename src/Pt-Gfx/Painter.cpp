@@ -70,6 +70,9 @@ Painter::~Painter()
         _surface = 0;
     }
 
+    if(_paintContext)
+        _paintContext->resetPaint();
+    
     delete _paintContext;
 }
 
@@ -109,7 +112,7 @@ void Painter::begin(PaintSurface& surface)
     }
 
     if(_paintContext)
-        _paintContext->beginPaint();
+        _paintContext->beginPaint(_paint);
 }
 
 
@@ -124,7 +127,7 @@ void Painter::begin(PaintLayer& layer)
 void Painter::finish()
 {
     if(_paintContext)
-        _paintContext->reset();
+        _paintContext->resetPaint();
 
     if( _surface )
     {
@@ -262,21 +265,6 @@ void Painter::resetClip()
 }
 
 
-const Gfx::Path& Painter::path() const
-{
-    return _paint.path();
-}
-
-
-void Painter::setPath(const Path& path)
-{
-    _paint.setPath(path);
-
-    if(_paintContext)
-        _paintContext->setPath(path);
-}
-
-
 void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     if( _paint.pen().size() == 0 )
@@ -360,18 +348,18 @@ void Painter::fillChord(const PointF& topLeft, const SizeF& size, float degBegin
 }
 
 
-void Painter::drawPath(const Gfx::Path& path)
+const Gfx::Path& Painter::path() const
 {
-    if(_paintContext)
-        _paintContext->drawPath(path);
+    return _paint.path();
 }
 
 
-
-void Painter::fillPath(const Path& path)
+void Painter::setPath(const Path& path)
 {
+    _paint.setPath(path);
+
     if(_paintContext)
-        _paintContext->fillPath(path);
+        _paintContext->setPath(path);
 }
 
 

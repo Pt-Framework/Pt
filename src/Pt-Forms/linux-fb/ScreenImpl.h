@@ -182,7 +182,7 @@ class ScreenImpl : public Form
         Pixmap                       _pixmap;
 
         Screen*                      _parent;
-        Workspace                        _workspace;
+        Workspace                    _workspace;
         
         double                       _dpi;       
         Gfx::Image                   _cursorBackground;

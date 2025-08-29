@@ -359,6 +359,7 @@ void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
     //
     // repaint the update area
+    // TODO: unless full screen window covers the whole screen
     //
     Gfx::Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);

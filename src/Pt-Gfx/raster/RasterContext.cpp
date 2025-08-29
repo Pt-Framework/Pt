@@ -28,6 +28,7 @@
 */
 
 #include "RasterContext.h"
+#include "ImageCanvas.h"
 
 namespace Pt {
 
@@ -36,12 +37,31 @@ namespace Gfx {
 RasterContext::RasterContext()
 : PaintContext()
 , _hasClip(false)
+, _imageCanvas(0)
 {
 }
 
 
 RasterContext::~RasterContext()
 {
+}
+
+
+void RasterContext::setImage(ImageCanvas& imageCanvas)
+{
+    _imageCanvas = &imageCanvas;
+}
+
+
+void RasterContext::onBeginPaint(const Gfx::Paint& paint)
+{
+}
+
+
+void RasterContext::onResetPaint()
+{
+    if(_imageCanvas)
+        _imageCanvas = 0;
 }
 
 
@@ -102,6 +122,24 @@ void RasterContext::onSetPath(const Gfx::Path& path)
 {
     _flatPath.clear();
     _path = path;
+}
+
+
+void RasterContext::onDrawPath()
+{
+    const std::vector<Polygon>& polygons = flatPath();
+
+    if(_imageCanvas)
+        _imageCanvas->drawPath(polygons);
+}
+
+
+void RasterContext::onFillPath()
+{
+    const std::vector<Polygon>& polygons = flatPath();
+
+    if(_imageCanvas)
+        _imageCanvas->fillPath(polygons);
 }
 
 } // namespace

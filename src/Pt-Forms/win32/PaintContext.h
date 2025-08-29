@@ -46,12 +46,16 @@ namespace Forms {
 
 #ifndef PT_FORMS_WIN32_RASTER
 
+class PixmapCanvas;
+
 class PaintContext : public Gfx::PaintContext
 {
     public:
         PaintContext();
 
         ~PaintContext();
+
+        void setPixmap(PixmapCanvas& pixmap);
 
         const Gfx::CompositionMode& compositionMode() const;
 
@@ -73,9 +77,13 @@ class PaintContext : public Gfx::PaintContext
 
         HRGN clipRect() const;
 
-        const Gfx::Path& path() const;
-
     protected:
+        virtual void onBeginPaint(const Gfx::Paint& paint) override;
+
+        virtual void onFinishPaint() override;
+
+        virtual void onResetPaint() override;
+
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
 
         virtual void onSetPen(const Gfx::Pen& pen) override;
@@ -86,12 +94,23 @@ class PaintContext : public Gfx::PaintContext
 
         virtual void onSetClip(const Gfx::RectF* clip) override;
 
+    protected:
         virtual void onSetPath(const Gfx::Path& path) override;
 
+        virtual void onDrawPath() override;
+
+        virtual void onFillPath() override;
+
     private:
-        Gfx::Scaling              _scaling;
+        POINT toContext(double x, double y);
+
+        void buildPath(HDC dc, const Gfx::Path& path);
+
+    private:
+        PixmapCanvas*             _pixmapCanvas;
         Gfx::CompositionMode      _compositionMode;
         HPEN                      _pen;
+        DWORD                     _penSize;
         Gfx::Color                _penColor;
         HBRUSH                    _brush;
         bool                      _gradientBrush;

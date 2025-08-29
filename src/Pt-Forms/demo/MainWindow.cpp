@@ -266,7 +266,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //p.begin(pm);
     //p.begin(pm2);
 
-    //Gfx::ImageSurface image( Gfx::Size(320, 240) );
+    //Gfx::ImageSurface image( Gfx::SizeF(320, 240) );
     //p.begin(image);
     //}
     
@@ -630,6 +630,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 #endif
 
     //painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
+    
     painter.drawImage( Gfx::PointF(10, 30), imageSurface.image() );
 }
 

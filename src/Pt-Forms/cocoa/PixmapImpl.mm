@@ -202,6 +202,8 @@ bool PixmapCanvas::onSetPaint(Gfx::PaintContext* context)
     if( ! paintContext )
         return false;
     
+    paintContext->setPixmap(*this);
+
     _paintContext = paintContext;
     return true;
 }
@@ -210,6 +212,7 @@ bool PixmapCanvas::onSetPaint(Gfx::PaintContext* context)
 Gfx::PaintContext* PixmapCanvas::onCreatePaint()
 {
     PaintContext* paintContext  = new PaintContext();
+    paintContext->setPixmap(*this);
 
     _paintContext = paintContext;
     return paintContext;
@@ -377,6 +380,7 @@ void PixmapCanvas::onClipChanged()
                                 rect.height() );
     }
 }
+
 
 void PixmapCanvas::beginClip()
 {
@@ -575,118 +579,45 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-void PixmapCanvas::setPath(const Gfx::Path& path)
+void PixmapCanvas::drawPath(CGMutablePathRef path)
 {
-    double sf = _scaling.scaleFactor();
+    beginClip();
 
-    CGContextBeginPath(_context);
+    CGAffineTransform axisTransform = CGAffineTransformMakeTranslation(0.0, _height);
+    axisTransform = CGAffineTransformScale(axisTransform, 1.0, -1.0);
+    CGContextConcatCTM(_context, axisTransform);
 
-    for(std::size_t n = 0; n < path.size(); ++n)
-    {
-        const Gfx::Element& e = path.at(n);
+    const Gfx::Transform& tx = _paintContext->transform();
+    CGAffineTransform transform = CGAffineTransformMake( tx.m11(), tx.m12(),
+                                                         tx.m21(), tx.m22(),
+                                                         tx.dx(),  tx.dy() );
+    CGContextConcatCTM(_context, transform);
 
-        switch( e.type )
-        {
-            default:
-                break;
-
-            case Gfx::Element::IT_Close:
-                CGContextClosePath(_context);
-                break;
-
-            case Gfx::Element::IT_MoveTo:
-            {
-                CGFloat x = e.pxy.at(0) * sf;
-                CGFloat y = _height - e.pxy.at(1) * sf;
-                CGContextMoveToPoint(_context, x, y);
-                break;
-            }
-
-            case Gfx::Element::IT_LineTo:
-            {
-                CGFloat x = e.pxy.at(0) * sf;
-                CGFloat y = _height - e.pxy.at(1) * sf;
-                CGContextAddLineToPoint(_context, x, y);
-                break;
-            }
-
-            case Gfx::Element::IT_QuadBezierTo:
-            {
-                CGFloat cx = e.pxy.at(0) * sf;
-                CGFloat cy = _height - e.pxy.at(1) * sf;
-
-                CGFloat x = e.pxy.at(2) * sf;
-                CGFloat y = _height - e.pxy.at(3) * sf;
-
-                CGContextAddQuadCurveToPoint(_context, cx, cy, x, y);
-                break;
-            }
-
-            case Gfx::Element::IT_CubicBezierTo:
-            {
-                CGFloat c1x = e.pxy.at(0) * sf;
-                CGFloat c1y = _height - e.pxy.at(1) * sf;
-
-                CGFloat c2x = e.pxy.at(2) * sf;
-                CGFloat c2y = _height - e.pxy.at(3) * sf;
-
-                CGFloat x = e.pxy.at(4) * sf;
-                CGFloat y = _height - e.pxy.at(5) * sf;
-
-                CGContextAddCurveToPoint(_context, c1x, c1y, c2x, c2y, x, y);
-                break;
-            }
-            
-            //case Element::IT_GenNBezierTo:
-            //    bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
-            //    curX = ins.pxy[ins.pxy.size() - 2];
-            //    curY = ins.pxy[ins.pxy.size() - 1];
-            //    break;
-        }
-    }
-}
-
-
-void PixmapCanvas::onPathChanged()
-{
-}
-
-
-void PixmapCanvas::onDrawPath(const Gfx::Path& path, float)
-{
-    setPath(path);
+    CGContextAddPath(_context, path);
     CGContextStrokePath(_context);
+
+    endClip();
 }
 
 
-void PixmapCanvas::onFillPath(const Gfx::Path& path, float)
+void PixmapCanvas::fillPath(CGMutablePathRef path)
 {
-    setPath(path);
+    beginClip();
+
+    CGAffineTransform axisTransform = CGAffineTransformMakeTranslation(0.0, _height);
+    axisTransform = CGAffineTransformScale(axisTransform, 1.0, -1.0);
+    CGContextConcatCTM(_context, axisTransform);
+
+    const Gfx::Transform& tx = _paintContext->transform();
+    CGAffineTransform transform = CGAffineTransformMake( tx.m11(), tx.m12(),
+                                                         tx.m21(), tx.m22(),
+                                                         tx.dx(),  tx.dy() );
+    CGContextConcatCTM(_context, transform);
+
+    CGContextAddPath(_context, path);
     CGContextFillPath(_context);
-}
 
-
-void PixmapCanvas::onDrawPath()
-{
-    if( ! _paintContext )
-        return;
-
-    const Gfx::Path& path = _paintContext->path();
-    setPath(path);
-
-    CGContextStrokePath(_context);
-}
-
-
-void PixmapCanvas::onFillPath()
-{
-    if( ! _paintContext )
-        return;
-
-    const Gfx::Path& path = _paintContext->path();
-    setPath(path);
-
-    CGContextFillPath(_context);
+    endClip();
 }
 
 

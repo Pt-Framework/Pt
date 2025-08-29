@@ -159,18 +159,23 @@ namespace Forms {
 
 PaintContext::PaintContext()
 : Gfx::PaintContext()
+, _pixmapCanvas(0)
 , _pen(0)
+, _penSize(1)
 , _penColor()
 , _brush(0)
 , _gradientBrush(false)
 , _clipRect(0)
 , _font(0)
 {
+    //std::clog << "PaintContext " << this << std::endl;
 }
 
 
 PaintContext::~PaintContext()
 {
+    //std::clog << "~PaintContext " << this << std::endl;
+
     if(_pen)
         DeleteObject(_pen);
 
@@ -182,6 +187,46 @@ PaintContext::~PaintContext()
 
     if(_clipRect)
         DeleteObject(_clipRect);
+}
+
+
+void PaintContext::setPixmap(PixmapCanvas& pixmap)
+{
+    _pixmapCanvas = &pixmap;
+}
+
+
+void PaintContext::onBeginPaint(const Gfx::Paint& paint)
+{
+    // TODO: create new pen when scaling changes
+
+    // TODO: pass Paint to begiPaint() for initialisation
+
+    double scaleFactor = scaling().scaleFactor();
+
+    size_t penSize = paint.pen().size();
+    
+    // keep pen size when downscaling
+    _penSize = scaleFactor < 1.0 ? penSize
+                                 : static_cast<size_t>( penSize * scaleFactor );
+
+    
+    //std::clog << "onBeginPaint " << this << std::endl;
+}
+
+
+void PaintContext::onFinishPaint() 
+{
+    //std::clog << "onFinishPaint " << this << std::endl;
+}
+
+
+void PaintContext::onResetPaint()
+{
+    //std::clog << "onResetPaint " << this << std::endl;
+
+    if(_pixmapCanvas)
+        _pixmapCanvas = 0;
 }
 
 
@@ -400,15 +445,123 @@ void PaintContext::onSetClip(const Gfx::RectF* rectF)
 }
 
 
-const Gfx::Path& PaintContext::path()  const
-{
-    return _path;
-}
-
-
 void PaintContext::onSetPath(const Gfx::Path& path)
 {
     _path = path;
+}
+
+
+POINT PaintContext::toContext(double x, double y)
+{
+    Gfx::PointF p = transform() * Gfx::PointF(x, y);
+
+    POINT pp;
+    pp.x = Pt::lround(p.x() - 0.4999);
+    pp.y = Pt::lround(p.y() - 0.4999);
+
+    return pp;
+}
+
+
+void PaintContext::buildPath(HDC dc, const Gfx::Path& path)
+{
+    BeginPath(dc);
+
+    for(std::size_t n = 0; n < path.size(); ++n)
+    {
+        const Gfx::Element& e = path.at(n);
+
+        switch( e.type )
+        {
+            default:
+                break;
+
+            case Gfx::Element::IT_Close:
+                CloseFigure(dc);
+                break;
+
+            case Gfx::Element::IT_MoveTo:
+            {
+                POINT p = toContext( e.pxy.at(0), e.pxy.at(1) );
+                MoveToEx(dc, p.x, p.y, NULL);
+                break;
+            }
+
+            case Gfx::Element::IT_LineTo:
+            {
+                POINT p = toContext( e.pxy.at(0), e.pxy.at(1) );
+                LineTo(dc, p.x, p.y);
+                break;
+            }
+
+            case Gfx::Element::IT_QuadBezierTo:
+            {
+                POINT p0;
+                GetCurrentPositionEx(dc, &p0);
+
+                POINT p1 = toContext( e.pxy.at(0), e.pxy.at(1) );
+                POINT p2 = toContext( e.pxy.at(2), e.pxy.at(3) );
+
+                POINT cubicPoints[3];
+
+                // control 1: P0 + (2/3) * (P1 - P0)
+                cubicPoints[0].x = p0.x + (2 * (p1.x - p0.x)) / 3;
+                cubicPoints[0].y = p0.y + (2 * (p1.y - p0.y)) / 3;
+
+                // control2 2: P2 + (2/3) * (P1 - P2)
+                cubicPoints[1].x = p2.x + (2 * (p1.x - p2.x)) / 3;
+                cubicPoints[1].y = p2.y + (2 * (p1.y - p2.y)) / 3;
+
+                // end point
+                cubicPoints[2] = p2;
+                
+                PolyBezierTo(dc, cubicPoints, 3);
+                break;
+            }
+            
+            case Gfx::Element::IT_CubicBezierTo:
+            {
+                POINT points[3];
+
+                points[0] = toContext( e.pxy.at(0), e.pxy.at(1) );
+                points[1] = toContext( e.pxy.at(2), e.pxy.at(3) );
+                points[2] = toContext( e.pxy.at(4), e.pxy.at(5) );
+                
+                PolyBezierTo(dc, points, 3);
+                break;
+            }
+
+            //case Element::IT_GenNBezierTo:
+            //    bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
+            //    curX = ins.pxy[ins.pxy.size() - 2];
+            //    curY = ins.pxy[ins.pxy.size() - 1];
+            //    break;
+        }
+    }
+
+    EndPath(dc);
+}
+
+
+void PaintContext::onDrawPath()
+{
+    if(_pixmapCanvas)
+    {
+        HDC dc = _pixmapCanvas->deviceContext();
+        buildPath(dc, _path);
+        StrokePath(dc);
+    }
+}
+
+
+void PaintContext::onFillPath()
+{
+    if(_pixmapCanvas)
+    {
+        HDC dc = _pixmapCanvas->deviceContext();
+        buildPath(dc, _path);
+        FillPath(dc);
+    }
 }
 
 #endif // PT_FORMS_WIN32_RASTER

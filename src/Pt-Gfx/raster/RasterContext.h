@@ -40,12 +40,16 @@ namespace Pt {
 
 namespace Gfx {
 
+class ImageCanvas;
+
 class RasterContext : public PaintContext
 {
     public:
         RasterContext();
 
         ~RasterContext();
+
+        void setImage(ImageCanvas& imageCanvas);
 
         const CompositionMode& compositionMode() const
         {
@@ -86,6 +90,15 @@ class RasterContext : public PaintContext
         virtual void onSetClip(const Gfx::RectF* clip) override;
 
         virtual void onSetPath(const Gfx::Path& path) override;
+
+        virtual void onBeginPaint(const Gfx::Paint& paint) override;
+
+        virtual void onResetPaint() override;
+
+    protected:
+        virtual void onDrawPath() override;
+
+        virtual void onFillPath() override;
    
     private:
         CompositionMode      _compositionMode;
@@ -96,6 +109,7 @@ class RasterContext : public PaintContext
         bool                 _hasClip;
         Gfx::Path            _path;
         std::vector<Polygon> _flatPath;
+        ImageCanvas*         _imageCanvas;
 };
 
 } //namespace

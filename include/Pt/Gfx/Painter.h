@@ -138,14 +138,6 @@ class PT_GFX_API Painter
         */
         void resetClip();
 
-        /** @brief Returns the current path.
-        */
-        const Gfx::Path& path() const;
-
-        /** @brief Sets the current path.
-        */
-        void setPath(const Path& path);
-
     public:
         /** @brief Draws a line between two points.
         */
@@ -192,13 +184,14 @@ class PT_GFX_API Painter
         void fillPie(const PointF& topLeft, const SizeF& size,
                      float degBegin, float degEnd);
 
-        /** @brief Draws a path.
+    public:
+        /** @brief Returns the current path.
         */
-        void drawPath(const Path& path);
-        
-        /** @brief Fills a path.
+        const Gfx::Path& path() const;
+
+        /** @brief Sets the current path.
         */
-        void fillPath(const Path& path);
+        void setPath(const Path& path);
 
         /** @brief Draws the current path.
         */

@@ -360,9 +360,12 @@ const Gfx::Scaling& PixmapCanvas::onGetScaling() const
 bool PixmapCanvas::onSetPaint(Gfx::PaintContext* context)
 {
     PaintContext* paintContext = dynamic_cast<PaintContext*>(context);
-    if( ! paintContext )
+    if( ! paintContext ) 
         return false;
     
+    paintContext->setPixmap(*this);
+
+    //std::clog << "\nPixmapCanvas - onSetPaint " << this << std::endl;
     _paintContext = paintContext;
     return true;
 }
@@ -371,6 +374,9 @@ bool PixmapCanvas::onSetPaint(Gfx::PaintContext* context)
 Gfx::PaintContext* PixmapCanvas::onCreatePaint()
 {
     PaintContext* paintContext  = new PaintContext();
+    paintContext->setPixmap(*this);
+
+    //std::clog << "\nPixmapCanvas - onCreatePaint " << this << std::endl;
 
     _paintContext = paintContext;
     return paintContext;
@@ -379,6 +385,8 @@ Gfx::PaintContext* PixmapCanvas::onCreatePaint()
 
 void PixmapCanvas::onReleasePaint()
 {
+    //std::clog << "PixmapCanvas - onReleasePaint " << this << std::endl;
+
     SelectObject(_dc, _oldPen);
     SelectObject(_dc, _oldBrush);
     SelectObject(_dc, _oldFont);
@@ -652,146 +660,6 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
         SetBrushOrgEx(_dc, brushOrigin.x, brushOrigin.y, NULL);
     }
-}
-
-
-POINT PixmapCanvas::toLocal(double x, double y)
-{
-    Gfx::PointF p = _paintContext->toLocal(x, y);
-
-    POINT pp;
-    pp.x = Pt::lround(p.x() - 0.4999);
-    pp.y = Pt::lround(p.y() - 0.4999);
-
-    return pp;
-}
-
-
-void PixmapCanvas::buildPath(const Gfx::Path& path)
-{
-    if( ! _paintContext )
-        return;
-
-    BeginPath(_dc);
-
-    for(std::size_t n = 0; n < path.size(); ++n)
-    {
-        const Gfx::Element& e = path.at(n);
-
-        switch( e.type )
-        {
-            default:
-                break;
-
-            case Gfx::Element::IT_Close:
-                CloseFigure(_dc);
-                break;
-
-            case Gfx::Element::IT_MoveTo:
-            {
-                POINT p = toLocal( e.pxy.at(0), e.pxy.at(1) );
-                MoveToEx(_dc, p.x, p.y, NULL);
-                break;
-            }
-
-            case Gfx::Element::IT_LineTo:
-            {
-                POINT p = toLocal( e.pxy.at(0), e.pxy.at(1) );
-                LineTo(_dc, p.x, p.y);
-                break;
-            }
-
-            case Gfx::Element::IT_QuadBezierTo:
-            {
-                POINT p0;
-                GetCurrentPositionEx(_dc, &p0);
-
-                POINT p1 = toLocal( e.pxy.at(0), e.pxy.at(1) );;
-                POINT p2 = toLocal( e.pxy.at(2), e.pxy.at(3) );;
-
-                POINT cubicPoints[3];
-
-                // control 1: P0 + (2/3) * (P1 - P0)
-                cubicPoints[0].x = p0.x + (2 * (p1.x - p0.x)) / 3;
-                cubicPoints[0].y = p0.y + (2 * (p1.y - p0.y)) / 3;
-
-                // control2 2: P2 + (2/3) * (P1 - P2)
-                cubicPoints[1].x = p2.x + (2 * (p1.x - p2.x)) / 3;
-                cubicPoints[1].y = p2.y + (2 * (p1.y - p2.y)) / 3;
-
-                // end point
-                cubicPoints[2] = p2;
-                
-                PolyBezierTo(_dc, cubicPoints, 3);
-                break;
-            }
-            
-            case Gfx::Element::IT_CubicBezierTo:
-            {
-                POINT points[3];
-
-                points[0] = toLocal( e.pxy.at(0), e.pxy.at(1) );
-                points[1] = toLocal( e.pxy.at(2), e.pxy.at(3) );
-                points[2] = toLocal( e.pxy.at(4), e.pxy.at(5) );
-                
-                PolyBezierTo(_dc, points, 3);
-                break;
-            }
-
-            //case Element::IT_GenNBezierTo:
-            //    bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
-            //    curX = ins.pxy[ins.pxy.size() - 2];
-            //    curY = ins.pxy[ins.pxy.size() - 1];
-            //    break;
-        }
-    }
-
-    EndPath(_dc);
-}
-
-
-void PixmapCanvas::onDrawPath(const Gfx::Path& path, float)
-{
-    buildPath(path);
-    StrokePath(_dc);
-}
-
-
-void PixmapCanvas::onFillPath(const Gfx::Path& path, float)
-{
-    buildPath(path);
-    FillPath(_dc);
-}
-
-
-void PixmapCanvas::onPathChanged()
-{
-    AbortPath(_dc);
-    _hasPath = false;
-}
-
-
-void PixmapCanvas::onDrawPath()
-{
-    if( ! _paintContext )
-        return;
-
-    const Gfx::Path& path = _paintContext->path();
-    buildPath(path);
-    
-    StrokePath(_dc);
-}
-
-
-void PixmapCanvas::onFillPath()
-{
-    if( ! _paintContext )
-        return;
-
-    const Gfx::Path& path = _paintContext->path();
-    buildPath(path);
-
-    FillPath(_dc);
 }
 
 #ifndef PT_FORMS_GDIPLUS

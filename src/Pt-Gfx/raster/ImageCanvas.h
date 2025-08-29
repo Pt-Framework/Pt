@@ -76,6 +76,10 @@ class ImageCanvas : public Canvas
 
     const SizeF& logicalSize() const;
 
+    void drawPath(const std::vector<Polygon>& polygons);
+
+    void fillPath(const std::vector<Polygon>& polygons);
+
   protected:
     virtual const Gfx::ImageFormat& onGetFormat() const;
 
@@ -100,8 +104,6 @@ class ImageCanvas : public Canvas
     virtual void onFontChanged() override;
 
     virtual void onClipChanged() override;
-
-    virtual void onPathChanged() override;
 
   protected:
     virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
@@ -131,14 +133,6 @@ class ImageCanvas : public Canvas
     virtual void onFillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
                            float degBegin, float degEnd) override
     {}
-
-    virtual void onDrawPath(const Gfx::Path& path, float smoothness) override;
-
-    virtual void onFillPath(const Gfx::Path& path, float smoothness) override;
-
-    virtual void onDrawPath();
-
-    virtual void onFillPath();
 
   protected:
     virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;

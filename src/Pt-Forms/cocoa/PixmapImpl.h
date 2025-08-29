@@ -79,6 +79,10 @@ class PixmapCanvas : public Gfx::Canvas
         void resize(const Gfx::SizeF& size);
 
         void setScaleFactor(double scaleFactor);
+
+        void drawPath(CGMutablePathRef path);
+
+        void fillPath(CGMutablePathRef path);
     
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const override;
@@ -104,8 +108,6 @@ class PixmapCanvas : public Gfx::Canvas
         virtual void onFontChanged() override;
 
         virtual void onClipChanged() override;
-
-        virtual void onPathChanged() override;
 
     protected:
         virtual void onDrawLine(const Gfx::PointF& from, 
@@ -137,14 +139,6 @@ class PixmapCanvas : public Gfx::Canvas
                                float degBegin, float degEnd) override
         {}
 
-        virtual void onDrawPath(const Gfx::Path& path, float smoothness) override;
-
-        virtual void onFillPath(const Gfx::Path& path, float smoothness) override;
-
-        virtual void onDrawPath() override;
-
-        virtual void onFillPath() override;
-
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
@@ -173,8 +167,6 @@ class PixmapCanvas : public Gfx::Canvas
         void beginClip();
 
         void endClip();
-
-        void setPath(const Gfx::Path& path);
 
         Pt::Gfx::PointF transform(const Pt::Gfx::PointF& p);
 

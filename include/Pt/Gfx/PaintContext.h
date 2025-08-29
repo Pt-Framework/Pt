@@ -50,6 +50,7 @@ namespace Pt {
 
 namespace Gfx {
 
+class Paint;
 class Canvas;
 class Polyline;
 class PaintLayer;
@@ -75,15 +76,16 @@ class PT_GFX_API PaintContext
 
         const Scaling& scaling() const;
 
-        Gfx::PointF toLocal(double x, double y);
+        const Gfx::Transform& transform() const;
 
-        void beginPaint();
+        void beginPaint(const Gfx::Paint& paint);
 
         void finishPaint();
 
         bool isActive() const;
 
-        void reset();
+        // reset and finishPaint are the same -> only resetPaint needed
+        void resetPaint();
 
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
@@ -97,8 +99,6 @@ class PT_GFX_API PaintContext
         void setClip(const RectF& clip);
 
         void resetClip();
-
-        void setPath(const Path& path);
 
     public:
         void drawLine(const PointF& from, const PointF& to);
@@ -115,9 +115,8 @@ class PT_GFX_API PaintContext
 
         void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        void drawPath(const Path& path);
-
-        void fillPath(const Path& path);
+    public:
+        void setPath(const Path& path);
 
         void drawPath();
 
@@ -139,6 +138,12 @@ class PT_GFX_API PaintContext
                        const Gfx::RectF* rect = 0);
 
     protected:
+        virtual void onBeginPaint(const Gfx::Paint& paint) {};
+
+        virtual void onFinishPaint() {};
+        
+        virtual void onResetPaint() {};
+
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
 
         virtual void onSetPen(const Pen& pen) = 0;
@@ -151,7 +156,10 @@ class PT_GFX_API PaintContext
 
         virtual void onSetPath(const Path& path) = 0;
 
-        virtual void onReleasePaint() {}
+    protected:
+        virtual void onDrawPath() = 0;
+
+        virtual void onFillPath() = 0;
 
     private:
         void attachCanvas(Canvas& canvas);
@@ -165,6 +173,7 @@ class PT_GFX_API PaintContext
         Gfx::Scaling   _scaling;
         RectF          _clip;
         bool           _hasClip;
+        Transform      _tx;
 };
 
 /** @brief Polyline.
