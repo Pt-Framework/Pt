@@ -195,6 +195,9 @@
     <ClInclude Include="..\..\include\Pt\Invokable.h" />
     <ClInclude Include="..\..\include\Pt\IOError.h" />
     <ClInclude Include="..\..\include\Pt\IOStream.h" />
+    <ClInclude Include="..\..\include\Pt\JsonRpc\Api.h" />
+    <ClInclude Include="..\..\include\Pt\JsonRpc\Fault.h" />
+    <ClInclude Include="..\..\include\Pt\JsonRpc\Responder.h" />
     <ClInclude Include="..\..\include\Pt\Json\Api.h" />
     <ClInclude Include="..\..\include\Pt\Json\Boolean.h" />
     <ClInclude Include="..\..\include\Pt\Json\Document.h" />
@@ -1005,6 +1008,7 @@
     <None Include="..\Pt-Forms\Jamfile" />
     <None Include="..\Pt-Http\Jamfile" />
     <None Include="..\Pt-Http\tests\Jamfile" />
+    <None Include="..\Pt-JsonRpc\Jamfile" />
     <None Include="..\Pt-Json\Jamfile" />
     <None Include="..\Pt-Json\tests\Jamfile" />
     <None Include="..\Pt-Mfc\demo\Jamfile" />
@@ -1543,6 +1547,8 @@
     <ClCompile Include="..\Pt-Http\tests\ParserTest.cpp" />
     <ClCompile Include="..\Pt-Http\tests\Pt-Http-test.cpp" />
     <ClCompile Include="..\Pt-Http\tests\ServerTest.cpp" />
+    <ClCompile Include="..\Pt-JsonRpc\Fault.cpp" />
+    <ClCompile Include="..\Pt-JsonRpc\Responder.cpp" />
     <ClCompile Include="..\Pt-Json\Document.cpp" />
     <ClCompile Include="..\Pt-Json\DocumentReader.cpp" />
     <ClCompile Include="..\Pt-Json\JsonError.cpp" />

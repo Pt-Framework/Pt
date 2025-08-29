@@ -262,6 +262,9 @@
     <Filter Include="Pt-XmlRpc\tests">
       <UniqueIdentifier>{8b7ceba7-3b12-4cb8-9464-1772a4804060}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-JsonRpc">
+      <UniqueIdentifier>{1e10ea02-e77e-4330-a9c0-05a38e934b8c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\freetype\include\ft2build.h">
@@ -2934,6 +2937,15 @@
     <ClInclude Include="..\..\include\Pt\Forms\CanvasLayout.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\JsonRpc\Api.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\JsonRpc\Fault.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\JsonRpc\Responder.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">
@@ -3315,6 +3327,9 @@
     <None Include="..\..\jam\Jambase" />
     <None Include="..\..\Jamconfigure" />
     <None Include="..\..\Jamfile" />
+    <None Include="..\Pt-JsonRpc\Jamfile">
+      <Filter>Pt-JsonRpc</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\freetype\src\autofit\afangles.c">
@@ -5626,6 +5641,12 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\CanvasLayout.cpp">
       <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-JsonRpc\Fault.cpp">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-JsonRpc\Responder.cpp">
+      <Filter>Pt-JsonRpc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -193,6 +193,7 @@ if $(PT_SYSTEM)
     SubInclude PT_TOP src Pt-Db ;
     SubInclude PT_TOP src Pt-Http ;
     SubInclude PT_TOP src Pt-Remoting ;
+    SubInclude PT_TOP src Pt-JsonRpc ;
     SubInclude PT_TOP src Pt-XmlRpc ;
     SubInclude PT_TOP src Pt-Soap ;
     SubInclude PT_TOP src Pt-Ssl ;

@@ -1,0 +1,62 @@
+/* Copyright (C) 2020 Marc Boris Duerner
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
+#ifndef PT_JSONRPC_API_H
+#define PT_JSONRPC_API_H
+
+#include <Pt/Api.h>
+
+#define PT_JSONRPC_VERSION_MAJOR 1
+#define PT_JSONRPC_VERSION_MINOR 3
+#define PT_JSONRPC_VERSION_REVISION 1
+
+#if defined(PT_JSONRPC_API_EXPORT)
+#    define PT_JSONRPC_API PT_EXPORT
+#  else
+#    define PT_JSONRPC_API PT_IMPORT
+#  endif
+
+namespace Pt {
+
+/** @namespace Pt::JsonRpc
+    @brief JSON-RPC 2.0 services and clients.
+
+    The JSON-RPC module (Pt::JsonRpc) of the %Pt framework provides a client API to
+    call remote procedures and a server API to implement remote procedures.
+    Blocking and non-blocking APIs exist in either case. The JSON-RPC module builds
+    on top of the HTTP module (Pt::Http) and uses the HTTP client and server 
+    implementation thereof. Custom data-types can be used in JSON-RPC procedures
+    if they are serializable using %Pt's serialization API.
+*/
+namespace JsonRpc {
+
+} // namespace
+
+} // namespace
+
+#endif // include guard
